@@ -2,11 +2,10 @@
 
 """
 logger 类: 按级别分文件打印日志,
-不依赖任何第三方库
+不依赖第三方库
 """
 
 import logging
-import json
 import os
 from logging.handlers import TimedRotatingFileHandler
 
@@ -23,7 +22,6 @@ SUFFIX = '%Y%m%d%H.log'
 
 # Highest built-in level is 50, so make CUSTOMER as 60
 logging.addLevelName(60, 'CUSTOMER')
-
 LOG_LEVELS = {
     'DEBUG':    logging.DEBUG,
     'INFO':     logging.INFO,
@@ -99,42 +97,6 @@ class Logger(object):
     def error(self, message):
         self.__logger.error(message, exc_info=1)
 
-    def record(self, handler=None, log_params=None):
-        if log_params is None or not isinstance(log_params, dict):
-            return
-
-        if handler:
-            self.__logger.log(
-                logging.getLevelName('CUSTOMER'), json.dumps(
-                    self.__class__.info_header(handler, log_params),
-                    ensure_ascii=False), exc_info=True)
-        else:
-            self.__logger.info(
-                json.dumps(json.JSONEncoder().encode(log_params),
-                           ensure_ascii=False), exc_info=True)
-
-    @staticmethod
-    def info_header(handler, log_params):
-        request = handler.request
-        req_params = request.arguments
-
-        if req_params and req_params.get('password', 0) != 0:
-            req_params['password'] = 'xxxxxx'
-
-        log_info_common = {
-            'useragent': request.headers.get('User-Agent'),
-            'referer': request.headers.get('Referer'),
-            'remote_ip': (
-                request.headers.get('Remoteip') or
-                request.headers.get('X-Forwarded-For') or
-                request.remote_ip
-            ),
-            'req_type': request.method,
-            'req_uri': request.uri,
-            'session_id': handler.get_secure_cookie('session_id'),
-        }
-
-        log_info_common.update(req_params)
-        log_params.update(log_info_common)
-
-        return json.JSONEncoder().encode(log_params)
+    def record(self, message):
+        self.__logger.log(
+            logging.getLevelName("CUSTOMER"), message, exc_info=1)

@@ -1,5 +1,5 @@
 # coding=utf-8
 
 routes = [
-    (r"/?(.*)", "handler.test.IndexHandler")
+    (r"/wechat", "handler.weixin.WeixinHandler")
 ]
