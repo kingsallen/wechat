@@ -4,6 +4,7 @@ from handler.base import BaseHandler
 
 import hashlib
 
+
 class WeixinHandler(BaseHandler):
 
     def get(self, *args, **kwargs):

@@ -1,12 +1,10 @@
 # coding=utf-8
 
-try:
-    import ujson as json
-except ImportError:
-    import json
+import ujson
 
 import tornado.web
 from tornado.util import ObjectDict
+
 from utils.jsonutil import JSONEncoder
 from utils.session import Session
 
@@ -52,9 +50,20 @@ class BaseHandler(tornado.web.RequestHandler):
         try:
             if("application/json" in headers.get("Content-Type", "") and
                self.request.body != ""):
-                self.json_args = json.loads(self.request.body)
+                self.json_args = ujson.loads(self.request.body)
         except Exception as e:
             self.logger.error(e)
+
+    def on_finish(self):
+        info = ObjectDict(
+            handler=__name__ + '.' + self.__class__.__name__,
+            module=self.__class__.__module__.split(".")[1],
+            status_code=self.get_status()
+        )
+        info.update(self.log_info)
+
+        self.logger.record(
+            ujson.dumps(self._get_info_header(info), ensure_ascii=0))
 
     def guarantee(self, fields_mapping, *args):
         self.params = {}
@@ -132,17 +141,6 @@ class BaseHandler(tornado.web.RequestHandler):
             return protocol + static_domain + "/" + path
 
     # priviate methods
-    def _send_log(self, ):
-        info = ObjectDict(
-            handler=__name__ + '.' + self.__class__.__name__,
-            module=self.__class__.__module__.split(".")[1],
-            status_code=self.get_status()
-        )
-        info.update(self.log_info)
-
-        self.logger.record(
-            json.dumps(self._get_info_header(info), ensure_ascii=0))
-
     def _get_info_header(self, log_params):
         request = self.request
         req_params = request.arguments

@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # coding=utf-8
 
-import tornado
 import tornado.httpserver
 import tornado.web
 import tornado.ioloop
@@ -15,6 +14,7 @@ from utils.log import Logger
 
 define("port", default=8000, help="run on the given port", type=int)
 define("logpath", default="logs/", help="log path")
+
 tornado.options.parse_command_line()
 
 logger = Logger(logpath=options.logpath)
