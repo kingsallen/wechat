@@ -1,5 +1,7 @@
 ### Project Specific ##
-/logs/
+logs/
+template/
+setting.py
 
 ### PyCharm ###
 /.idea
@@ -105,3 +107,15 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+# Logfile
+*.log
+
+# Mac os generated
+.DS_Store
+
+# Cert files
+cert/*
+
+# Gradle
+.gradle/

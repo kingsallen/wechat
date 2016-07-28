@@ -1,0 +1,146 @@
+# coding=utf-8
+
+from tornado.util import ObjectDict
+from tornado import gen
+from handler.base import BaseHandler
+from utils.common.decorator import handle_response_error
+
+class LandingHandler(BaseHandler):
+
+    '''
+    企业搜索页
+    '''
+
+    @handle_response_error
+    @gen.coroutine
+    def get(self):
+
+        signature = str(self.get_argument("wechat_signature", ""))
+        did = str(self.get_argument("did", ""))
+
+        print(did)
+
+        if did:
+            # 存在子公司，则取子公司信息
+            company_id = did
+        elif signature:
+            conds = {'signature': signature}
+            wechat = yield self.wechat_ps.get_wechat(conds)
+            company_id = wechat.get("company_id")
+        else:
+            self.write_error(404)
+
+        company_res = yield self.company_ps.get_company(conds = {'id': company_id}, need_conf=True, fields=[])
+        search_seq = yield self._get_landing_item(company_res)
+
+        company = ObjectDict({
+            "logo": self.static_url(company_res.get("logo")),
+            "name": company_res.get("name"),
+            "image": company_res.get("conf_search_img"),
+            "search_seq" : search_seq
+        })
+
+        self.send_json({
+                "msg": self.constant.RESPONSE_SUCCESS,
+                "data": {
+                    "company": company
+                }
+            })
+
+    @gen.coroutine
+    def _get_landing_item(self, company):
+
+        '''
+        根据HR设置获得搜索页页面栏目排序
+        :param search_seq:
+        :return:
+        '''
+
+        res = []
+        company_id = company.get("id")
+        for item in company.get("conf_search_seq"):
+            # 工作地点
+            index = int(item.get("index"))
+            if index == self.plat_constant.landing_index_city:
+                city = {}
+                city['name'] = self.plat_constant.landing.get(index).get("chpe")
+                city['values'] = yield self.position_ps.get_positions_cities_list(company_id)
+                res.append(city)
+
+            # 薪资范围
+            elif index == self.plat_constant.landing_index_salary:
+                salary = {}
+                salary['name'] = self.plat_constant.landing.get(index).get("chpe")
+                salary['values'] = self.plat_constant.salary
+                res.append(salary)
+
+            # 职位职能
+            elif index == self.plat_constant.landing_index_occupation:
+                occupation = {}
+                occupation['name'] = self.plat_constant.landing.get(index).get("chpe")
+                occupation['values'] = yield self.position_ps.get_positions_occupations_list(company_id)
+                res.append(occupation)
+
+            # 所属部门
+            elif index == self.plat_constant.landing_index_department:
+                department = {}
+                department['name'] = self.plat_constant.landing.get(index).get("chpe")
+                department['values'] = yield self.position_ps.get_positions_departments_list(company_id)
+                res.append(department)
+
+            # 招聘类型
+            elif index == self.plat_constant.landing_index_candidate:
+                candidate_source = {}
+                candidate_source['name'] = self.plat_constant.landing.get(index).get("chpe")
+                candidate_source['values'] = self.constant.candidate_source
+                res.append(candidate_source)
+
+            # 工作性质
+            elif index == self.plat_constant.landing_index_employment:
+                employment_type = {}
+                employment_type['name'] = self.plat_constant.landing.get(index).get("chpe")
+                employment_type['values'] = self.constant.employment_type
+                res.append(employment_type)
+
+            # 学历要求
+            elif index == self.plat_constant.landing_index_degree:
+                degree = {}
+                degree['name'] = self.plat_constant.landing.get(index).get("chpe")
+                degree['values'] = self.constant.degree
+                res.append(degree)
+
+            # 子公司名称
+            if index == self.plat_constant.landing_index_child_company:
+                conds = {
+                    "parent_id": company_id,
+                    "disable": self.constant.STATUS_INUSE
+                }
+                fields = ["id", "abbreviation"]
+                child_company_res = yield self.company_ps.get_companys_list(conds, fields)
+
+                # 添加母公司信息
+                child_company_values = [{
+                    "id": company_id,
+                    "abbreviation": company.get("abbreviation")
+                }]
+
+                child_company = {}
+                child_company['values'] = child_company_values + list(child_company_res)
+                child_company['name'] = self.plat_constant.landing.get(index).get("chpe")
+                res.append(child_company)
+
+            # 企业自定义字段
+            elif index == self.plat_constant.landing_index_custom:
+                conds = {
+                    "company_id": company_id,
+                    "status": self.constant.STATUS_INUSE
+                }
+                fields = ['name']
+
+                custom = {}
+                custom['name'] = company.get("conf_job_custom_title")
+                custom['values'] = yield self.custom_ps.get_customs_list(conds, fields)
+                res.append(custom)
+
+        raise gen.Return(res)
+
