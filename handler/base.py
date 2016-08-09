@@ -11,8 +11,21 @@ import conf.platform as plat_constant
 import conf.qx as qx_constant
 import conf.help as help_constant
 
+class Singleton(type):
+
+    def __init__(cls, name, bases, dict):
+        super(Singleton, cls).__init__(name, bases, dict)
+        cls._instance = None
+
+    def __call__(cls, *args, **kw):
+        if cls._instance is None:
+            cls._instance = super(Singleton, cls).__call__(*args, **kw)
+        return cls._instance
+
 
 class BaseHandler(web.RequestHandler):
+
+    __metaclass__ = Singleton
 
     # Initialization and properties
     def __init__(self, application, request, **kwargs):
@@ -33,7 +46,7 @@ class BaseHandler(web.RequestHandler):
                                  'WechatPageService')()
         self.position_ps = getattr(importlib.import_module('service.page.{0}.{1}'.format('job', 'position')),
                                    'PositionPageService')()
-        self.custom_ps = getattr(importlib.import_module('service.page.{0}.{1}'.format('job', 'job_custom')),
+        self.job_custom_ps = getattr(importlib.import_module('service.page.{0}.{1}'.format('job', 'job_custom')),
                                    'JobCustomPageService')()
 
     @property

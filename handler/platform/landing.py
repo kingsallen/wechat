@@ -18,8 +18,6 @@ class LandingHandler(BaseHandler):
         signature = str(self.get_argument("wechat_signature", ""))
         did = str(self.get_argument("did", ""))
 
-        print(did)
-
         if did:
             # 存在子公司，则取子公司信息
             company_id = did
@@ -61,56 +59,63 @@ class LandingHandler(BaseHandler):
         for item in company.get("conf_search_seq"):
             # 工作地点
             index = int(item.get("index"))
-            if index == self.plat_constant.landing_index_city:
+            if index == self.plat_constant.LANDING_INDEX_CITY:
                 city = {}
-                city['name'] = self.plat_constant.landing.get(index).get("chpe")
+                city['name'] = self.plat_constant.LANDING.get(index).get("chpe")
                 city['values'] = yield self.position_ps.get_positions_cities_list(company_id)
+                city['key'] = "city"
                 res.append(city)
 
             # 薪资范围
-            elif index == self.plat_constant.landing_index_salary:
+            elif index == self.plat_constant.LANDING_INDEX_SALARY:
                 salary = {}
-                salary['name'] = self.plat_constant.landing.get(index).get("chpe")
-                salary['values'] = self.plat_constant.salary
+                salary['name'] = self.plat_constant.LANDING.get(index).get("chpe")
+                salary['values'] = [{"value": k, "text": v.get("name")} for k, v in sorted(self.plat_constant.SALARY.items())]
+                salary['key'] = "salary"
                 res.append(salary)
 
             # 职位职能
-            elif index == self.plat_constant.landing_index_occupation:
+            elif index == self.plat_constant.LANDING_INDEX_OCCUPATION:
                 occupation = {}
-                occupation['name'] = self.plat_constant.landing.get(index).get("chpe")
+                occupation['name'] = self.plat_constant.LANDING.get(index).get("chpe")
                 occupation['values'] = yield self.position_ps.get_positions_occupations_list(company_id)
+                occupation['key'] = "occupation"
                 res.append(occupation)
 
             # 所属部门
-            elif index == self.plat_constant.landing_index_department:
+            elif index == self.plat_constant.LANDING_INDEX_DEPARTMENT:
                 department = {}
-                department['name'] = self.plat_constant.landing.get(index).get("chpe")
+                department['name'] = self.plat_constant.LANDING.get(index).get("chpe")
                 department['values'] = yield self.position_ps.get_positions_departments_list(company_id)
+                department['key'] = "department"
                 res.append(department)
 
             # 招聘类型
-            elif index == self.plat_constant.landing_index_candidate:
+            elif index == self.plat_constant.LANDING_INDEX_CANDIDATE:
                 candidate_source = {}
-                candidate_source['name'] = self.plat_constant.landing.get(index).get("chpe")
-                candidate_source['values'] = self.constant.candidate_source
+                candidate_source['name'] = self.plat_constant.LANDING.get(index).get("chpe")
+                candidate_source['values'] = [{"value": k, "text": v} for k, v in sorted(self.constant.CANDIDATE_SOURCE.items())]
+                candidate_source['key'] = "candidate_source"
                 res.append(candidate_source)
 
             # 工作性质
-            elif index == self.plat_constant.landing_index_employment:
+            elif index == self.plat_constant.LANDING_INDEX_EMPLOYMENT:
                 employment_type = {}
-                employment_type['name'] = self.plat_constant.landing.get(index).get("chpe")
-                employment_type['values'] = self.constant.employment_type
+                employment_type['name'] = self.plat_constant.LANDING.get(index).get("chpe")
+                employment_type['values'] = [{"value": k, "text": v} for k, v in sorted(self.constant.EMPLOYMENT_TYPE.items())]
+                employment_type['key'] = "employment_type"
                 res.append(employment_type)
 
             # 学历要求
-            elif index == self.plat_constant.landing_index_degree:
+            elif index == self.plat_constant.LANDING_INDEX_DEGREE:
                 degree = {}
-                degree['name'] = self.plat_constant.landing.get(index).get("chpe")
-                degree['values'] = self.constant.degree
+                degree['name'] = self.plat_constant.LANDING.get(index).get("chpe")
+                degree['values'] = [{"value": k, "text": v} for k, v in sorted(self.constant.DEGREE.items())]
+                degree['key'] = "education"
                 res.append(degree)
 
             # 子公司名称
-            if index == self.plat_constant.landing_index_child_company:
+            if index == self.plat_constant.LANGDING_INDEX_CHILD_COMPANY:
                 conds = {
                     "parent_id": company_id,
                     "disable": self.constant.STATUS_INUSE
@@ -126,11 +131,12 @@ class LandingHandler(BaseHandler):
 
                 child_company = {}
                 child_company['values'] = child_company_values + list(child_company_res)
-                child_company['name'] = self.plat_constant.landing.get(index).get("chpe")
+                child_company['name'] = self.plat_constant.LANDING.get(index).get("chpe")
+                child_company['key'] = "child_company"
                 res.append(child_company)
 
-            # 企业自定义字段
-            elif index == self.plat_constant.landing_index_custom:
+            # 企业自定义字段，并且配置了企业自定义字段标题
+            elif index == self.plat_constant.LANDING_INDEX_CUSTOM and company.get("conf_job_custom_title"):
                 conds = {
                     "company_id": company_id,
                     "status": self.constant.STATUS_INUSE
@@ -139,8 +145,8 @@ class LandingHandler(BaseHandler):
 
                 custom = {}
                 custom['name'] = company.get("conf_job_custom_title")
-                custom['values'] = yield self.custom_ps.get_customs_list(conds, fields)
+                custom['values'] = yield self.job_custom_ps.get_customs_list(conds, fields)
+                custom['key'] = "custom"
                 res.append(custom)
 
         raise gen.Return(res)
-

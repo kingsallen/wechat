@@ -32,13 +32,13 @@ class CompanyPageService(PageService):
 
             # 搜索页页面栏目排序
             search_seq = []
-            # search_seq_tmp = re.split(u"#", company_conf_res.get("search_seq") or self.plat_constant.landing_seq)
-            search_seq_tmp = re.split(u"#", self.plat_constant.landing_seq)
+            # search_seq_tmp = re.split(u"#", company_conf_res.get("search_seq") or self.plat_constant.LANDING_SEQ)
+            search_seq_tmp = re.split(u"#", self.plat_constant.LANDING_SEQ)
             for item in search_seq_tmp:
                 # 若存在自定义字段值，则更新标题
-                landing = self.plat_constant.landing.get(int(item))
+                landing = self.plat_constant.LANDING.get(int(item))
                 landing["index"] = item
-                if company_conf_res.get("job_custom_title") and item == self.plat_constant.landing_index_custom:
+                if company_conf_res.get("job_custom_title") and item == self.plat_constant.LANDING_INDEX_CUSTOM:
                     landing["name"] = company_conf_res.get("job_custom_title")
                 search_seq.append(landing)
 

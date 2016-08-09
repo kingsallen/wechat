@@ -35,20 +35,20 @@ class PositionPageService(PageService):
             'company_id': int(position_res.get('company_id', 0)),
             'department': position_res.get('department', ''),
             # 'status': position_res.get('status', 0),
-            'candidate_source': self.constant.candidate_source.get(str(position_res.get('candidate_source', 0))),
-            'employment_type': self.constant.employment_type.get(str(position_res.get('employment_type', 0))),
+            'candidate_source': self.constant.CANDIDATE_SOURCE.get(str(position_res.get('candidate_source', 0))),
+            'employment_type': self.constant.EMPLOYMENT_TYPE.get(str(position_res.get('employment_type', 0))),
             'update_time': update_time,
             # 'stop_date': position_res.get('stop_date', ''),
             "salary": salary,
             "city": position_res.get('city', ''),
             "occupation": position_res.get('occupation', ''),
             "experience": position_res.get('experience', '')
-                          + (self.constant.experience_unit if position_res.get('experience', '') else '')
-                          + (self.constant.position_above if position_res.get('experience_above', 0) else ''),
+                          + (self.constant.EXPERIENCE_UNIT if position_res.get('experience', '') else '')
+                          + (self.constant.POSITION_ABOVE if position_res.get('experience_above', 0) else ''),
             "language": position_res.get('language', ''),
             "count": int(position_res.get('count', 0)),
-            "degree": self.constant.degree.get(str(position_res.get('degree', 0)))
-                      + self.constant.position_above if position_res.get('degree_above', 0) else '',
+            "degree": self.constant.DEGREE.get(str(position_res.get('degree', 0)))
+                      + self.constant.POSITION_ABOVE if position_res.get('degree_above', 0) else '',
             "management": position_res.get('management', ''),
             "accountabilities": position_res.get('accountabilities', ''),
             "requirement": position_res.get('requirement', ''),

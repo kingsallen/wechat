@@ -7,19 +7,19 @@ constant配置常量规范：
 2.系统常量定义在顶部，业务常量定义在底部。
 3.使用分割线区分系统、业务常量
 4.常量配置添加注释
-'''
 
-# COOKIE_SESSION_KEY = u"session_id"
-# COOKIE_HMAC_KEY = u"verification"
-# SESSION_INDEX_ERROR = u"session index error"
+常量使用大写字母，字符串需要时标注为unicode编码
+例如 SUCCESS = u"成功"
+
+'''
 
 # ++++++++++系统常量++++++++++
 
 ## 返回错误
 
 ### status_code默认错误返回
-RESPONSE_SUCCESS = "SUCCESS"
-RESPONSE_FAILED = "FAILED"
+RESPONSE_SUCCESS = u"success"
+RESPONSE_FAILED = u"failed"
 
 ## 入库字段类型
 TYPE_INT = 1
@@ -48,41 +48,34 @@ STATUS_UNUSE = 0
 
 # ++++++++++业务常量+++++++++++
 
-## 职位相关
+## 职位相关，主要涉及到职位，职位列表，搜索页
 ### 招聘类型
-
-candidate_source = {
-    "0": "社招",
-    "1": "校招",
+CANDIDATE_SOURCE = {
+    "0": u"社招",
+    "1": u"校招",
 }
 
 ### 工作性质
-employment_type = {
-    "0": "全职",
-    "1": "兼职",
-    "2": "合同工",
-    "3": "实习生",
+EMPLOYMENT_TYPE = {
+    "0": u"全职",
+    "1": u"兼职",
+    "2": u"合同工",
+    "3": u"实习",
 }
 
 ### 学历
-degree = {
-    "1": "大专",
-    "2": "本科",
-    "3": "硕士",
-    "4": "MBA",
-    "5": "博士",
-    "6": "中专",
-    "7": "高中",
-    "8": "博士后",
-    "9": "初中"
+DEGREE = {
+    "1": u"大专",
+    "2": u"本科",
+    "3": u"硕士",
+    "4": u"MBA",
+    "5": u"博士",
+    "6": u"中专",
+    "7": u"高中",
+    "8": u"博士后",
+    "9": u"初中"
 }
 
 ### 及以上 工作经验、学历中使用
-position_above = "及以上"
-experience_unit = "年"
-
-### 招聘类型
-candidate_source = {
-    "0": "社招",
-    "1": "校招",
-}
+POSITION_ABOVE = u"及以上"
+EXPERIENCE_UNIT = u"年"
