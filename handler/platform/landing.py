@@ -39,7 +39,7 @@ class LandingHandler(BaseHandler):
         })
 
         self.render("refer/neo_weixin/position/company_search.html",
-                    dict(company=company))
+                    company=company)
 
     @gen.coroutine
     def _get_landing_item(self, company):
