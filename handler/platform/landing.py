@@ -14,7 +14,6 @@ class LandingHandler(BaseHandler):
     @handle_response_error
     @gen.coroutine
     def get(self):
-
         signature = str(self.get_argument("wechat_signature", ""))
         did = str(self.get_argument("did", ""))
 
@@ -27,6 +26,7 @@ class LandingHandler(BaseHandler):
             company_id = wechat.get("company_id")
         else:
             self.write_error(404)
+            return
 
         company_res = yield self.company_ps.get_company(conds = {'id': company_id}, need_conf=True, fields=[])
         search_seq = yield self._get_landing_item(company_res)
