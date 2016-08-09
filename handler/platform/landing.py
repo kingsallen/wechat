@@ -38,12 +38,8 @@ class LandingHandler(BaseHandler):
             "search_seq" : search_seq
         })
 
-        self.send_json({
-                "msg": self.constant.RESPONSE_SUCCESS,
-                "data": {
-                    "company": company
-                }
-            })
+        self.render("refer/neo_weixin/position/company_search.html",
+                    dict(company=company))
 
     @gen.coroutine
     def _get_landing_item(self, company):
