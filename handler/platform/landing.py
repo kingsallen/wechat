@@ -29,13 +29,12 @@ class LandingHandler(BaseHandler):
             self.write_error(404)
             return
 
-        company_res = yield self.company_ps.get_company(conds = {'id': company_id}, need_conf=True, fields=[])
-        search_seq = yield self._get_landing_item(company_res)
+        search_seq = yield self._get_landing_item(self.current_user.company, company_id)
 
         company = ObjectDict({
-            "logo": self.static_url(company_res.get("logo")),
-            "name": company_res.get("name"),
-            "image": company_res.get("conf_search_img"),
+            "logo": self.static_url(self.current_user.company.get("logo")),
+            "name": self.current_user.company.get("name"),
+            "image": self.current_user.company.get("conf_search_img"),
             "search_seq" : search_seq
         })
 
@@ -50,7 +49,7 @@ class LandingHandler(BaseHandler):
             })
 
     @gen.coroutine
-    def _get_landing_item(self, company):
+    def _get_landing_item(self, company, company_id):
 
         '''
         根据HR设置获得搜索页页面栏目排序
@@ -59,7 +58,6 @@ class LandingHandler(BaseHandler):
         '''
 
         res = []
-        company_id = company.get("id")
         for item in company.get("conf_search_seq"):
             # 工作地点
             index = int(item.get("index"))
