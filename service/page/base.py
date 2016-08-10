@@ -54,6 +54,8 @@ class PageService:
                                           'HrCompanyConfDataService')()
         self.hr_wx_wechat_ds = getattr(importlib.import_module('service.data.{0}.{1}'.format('hr', 'hr_wx_wechat')),
                                        'HrWxWechatDataService')()
+        self.config_sys_theme_ds = getattr(importlib.import_module('service.data.{0}.{1}'.format('config', 'config_sys_theme')),
+                                       'ConfigSysThemeDataService')()
         self.job_position_ds = getattr(importlib.import_module('service.data.{0}.{1}'.format('job', 'job_position')),
                                        'JobPositionDataService')()
         self.job_custom_ds = getattr(importlib.import_module('service.data.{0}.{1}'.format('job', 'job_custom')),

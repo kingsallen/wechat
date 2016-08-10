@@ -11,6 +11,7 @@ import conf.platform as plat_constant
 import conf.qx as qx_constant
 import conf.help as help_constant
 
+
 class Singleton(type):
 
     def __init__(cls, name, bases, dict):
@@ -56,10 +57,10 @@ class BaseHandler(web.RequestHandler):
     @property
     def settings(self):
         return self.application.settings
-
-    @property
-    def redis(self):
-        return self.application.redis_cli
+    #
+    # @property
+    # def redis(self):
+    #     return self.application.redis_cli
 
     @property
     def constant(self):
@@ -109,6 +110,66 @@ class BaseHandler(web.RequestHandler):
         return self.params
 
     @gen.coroutine
+    def _get_current_wechat(self):
+
+        '''
+        # TODO 获得企业微信信息
+        :return:
+        '''
+
+        wechat_signature = str(self.get_argument("wechat_signature", ""))
+        conds = ObjectDict({
+            'signature': wechat_signature
+        })
+        wechat = yield self.wechat_ps.get_wechat(conds=conds)
+
+        raise gen.Return(wechat)
+
+    @gen.coroutine
+    def _get_current_company(self, company_id):
+
+        '''
+        # TODO 获得企业母公司信息
+        :param company_id:
+        :return:
+        '''
+        conds = ObjectDict({
+            'id': company_id
+        })
+        company = yield self.company_ps.get_company(conds=conds, need_conf=True)
+        theme = yield self.wechat_ps.get_wechat_theme({'id': company.get("conf_theme_id"), "disable": 0})
+        if theme:
+            company.update({
+                "theme": [theme.get("background_color"),
+                             theme.get("title_color"),
+                             theme.get("button_color"),
+                             theme.get("other_color")]
+            })
+
+        raise gen.Return(company)
+
+    @gen.coroutine
+    def get_current_user(self):
+
+        '''
+        # TODO 暂时添加，保证企业号搜索页可以访问
+        :return:
+        '''
+        user = ObjectDict({
+            "company": {},
+            "wechat": {}
+        })
+        wechat = yield self._get_current_wechat()
+        if not wechat:
+            self.write_error(404)
+            raise gen.Return(user)
+        company = yield self._get_current_company(wechat.get("company_id"))
+        user.wechat = wechat
+        user.company = company
+
+        raise gen.Return(user)
+
+    @gen.coroutine
     def get(self):
 
         '''
@@ -155,21 +216,24 @@ class BaseHandler(web.RequestHandler):
 
     def write_error(self, status_code, **kwargs):
 
-        if status_code == 403:
-            self.render('error/404.html',
-                        status_code=status_code,
-                        message="",
-                        title=status_code)
-        elif status_code == 404:
-            self.render('error/404.html',
-                        status_code=status_code,
-                        message="",
-                        title=status_code)
-        else:
-            self.render('error/500.html',
-                        status_code=status_code,
-                        message="",
-                        title=status_code)
+        # TODO 暂时添加错误页面
+        self.render("common/info.html", status_code=status_code, css="warning", info="error")
+
+        # if status_code == 403:
+        #     self.render('error/404.html',
+        #                 status_code=status_code,
+        #                 message="",
+        #                 title=status_code)
+        # elif status_code == 404:
+        #     self.render('error/404.html',
+        #                 status_code=status_code,
+        #                 message="",
+        #                 title=status_code)
+        # else:
+        #     self.render('error/500.html',
+        #                 status_code=status_code,
+        #                 message="",
+        #                 title=status_code)
 
     def render(self, template_name, status_code=200, **kwargs):
         self.log_info = {"res_type": "html"}
@@ -193,7 +257,6 @@ class BaseHandler(web.RequestHandler):
             static_domain = self.settings["static_domain"]
             return protocol + static_domain + "/" + path
 
-    # priviate methods
     def _get_info_header(self, log_params):
         request = self.request
         req_params = request.arguments
@@ -212,8 +275,8 @@ class BaseHandler(web.RequestHandler):
             ),
             req_type=request.method,
             req_uri=request.uri,
-            req_params=req_params
-            # session_id=self.get_secure_cookie('session_id'),
+            req_params=req_params,
+            session_id=self.get_secure_cookie('session_id'),
         )
 
         log_params.update(log_info_common)

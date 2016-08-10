@@ -3,7 +3,7 @@
 from tornado.util import ObjectDict
 from tornado import gen
 from handler.base import BaseHandler
-from utils.common.decorator import handle_response_error
+from utils.common.decorator import handle_response_error, url_valid
 
 class LandingHandler(BaseHandler):
 
@@ -11,6 +11,7 @@ class LandingHandler(BaseHandler):
     企业搜索页
     '''
 
+    @url_valid
     @handle_response_error
     @gen.coroutine
     def get(self):
@@ -38,6 +39,9 @@ class LandingHandler(BaseHandler):
             "search_seq" : search_seq
         })
 
+        # self.render("refer/neo_weixin/position/company_search.html", company=company)
+
+        self.logger.debug("current_user: %s" % self.current_user)
         self.send_json({
                 "msg": self.constant.RESPONSE_SUCCESS,
                 "data": {

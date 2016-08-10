@@ -22,3 +22,16 @@ class WechatPageService(PageService):
         wechat = yield self.hr_wx_wechat_ds.get_wechat(conds, fields)
 
         raise gen.Return(wechat)
+
+    @gen.coroutine
+    def get_wechat_theme(self, conds, fields=[]):
+
+        '''
+        获得公众号主题色信息
+        :param conds:
+        :param fields:
+        :return:
+        '''
+
+        theme = yield self.config_sys_theme_ds.get_theme(conds, fields)
+        raise gen.Return(theme)

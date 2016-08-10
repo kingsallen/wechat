@@ -52,6 +52,9 @@ class DataService:
         self.hr_wx_wechat_dao = getattr(importlib.import_module('dao.{0}.{1}'.format('hr', 'hr_wx_wechat')),
                                         'HrWxWechatDao')()
 
+        self.config_sys_theme_dao = getattr(importlib.import_module('dao.{0}.{1}'.format('config', 'config_sys_theme')),
+                                        'ConfigSysThemeDao')()
+
         self.job_position_dao = getattr(importlib.import_module('dao.{0}.{1}'.format('job', 'job_position')),
                                         'JobPositionDao')()
         self.job_custom_dao = getattr(importlib.import_module('dao.{0}.{1}'.format('job', 'job_custom')),

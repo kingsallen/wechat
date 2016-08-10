@@ -9,6 +9,11 @@ setting配置常量规范：
 '''
 
 import os
+from tornado.options import define
+
+define("port", default=8000, help="run on the given port", type=int)
+define("logpath", default="logs/", help="log path")
+# define("env", default="platform", help="wechat product")
 
 settings = dict()
 settings['xsrf_cookies'] = True
