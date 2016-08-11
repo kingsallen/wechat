@@ -30,7 +30,7 @@ import tornadis
 from setting import settings
 from route import routes
 from utils.common.log import Logger
-from utils.common.session import Session
+# from utils.common.session import Session
 
 tornado.options.parse_command_line()
 logger = Logger(logpath=options.logpath)
@@ -45,7 +45,7 @@ class Application(tornado.web.Application):
 
         self.logger = logger
 
-        self.redis_cli = Session()
+        # self.redis_cli = Session()
 
         # # 异步redis客户端
         # self.redis_cli = tornadis.ClientPool(

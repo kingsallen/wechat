@@ -20,13 +20,13 @@ class Session(object):
         :return:
         '''
 
-        if not Session.pool:
-            tornadis.Client()
-            Session.pool = tornadis.ClientPool(
-            dict(port=settings['redis_port'],
-                 host=settings['redis_host'],
-                 connect_timeout=settings['connect_timeout'])
-        )
+        # if not Session.pool:
+        #     tornadis.Client()
+        #     Session.pool = tornadis.ClientPool(
+        #     dict(port=settings['redis_port'],
+        #          host=settings['redis_host'],
+        #          connect_timeout=settings['connect_timeout'])
+        # )
 
     @tornado.gen.coroutine
     def put(self, path, bytes, ttl):
