@@ -217,7 +217,7 @@ class BaseHandler(web.RequestHandler):
     def write_error(self, status_code, **kwargs):
 
         # TODO 暂时添加错误页面
-        self.render("common/info.html", status_code=status_code, css="warning", info="error")
+        self.render("refer/common/info.html", status_code=status_code, css="warning", info="error")
 
         # if status_code == 403:
         #     self.render('error/404.html',
