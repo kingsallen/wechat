@@ -38,15 +38,7 @@ class LandingHandler(BaseHandler):
             "search_seq" : search_seq
         })
 
-        # self.render("refer/neo_weixin/position/company_search.html", company=company)
-
-        self.logger.debug("current_user: %s" % self.current_user)
-        self.send_json({
-                "msg": self.constant.RESPONSE_SUCCESS,
-                "data": {
-                    "company": company
-                }
-            })
+        self.render("refer/neo_weixin/position/company_search.html", company=company)
 
     @gen.coroutine
     def _get_landing_item(self, company, company_id):
