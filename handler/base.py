@@ -258,12 +258,8 @@ class BaseHandler(web.RequestHandler):
         return
 
     def static_url(self, path, include_host=None, protocol="//", **kwargs):
-        if self.settings["debug"]:
-            return super(BaseHandler, self).static_url(
-                path, include_host, **kwargs)
-        else:
-            static_domain = self.settings["static_domain"]
-            return protocol + static_domain + "/" + path
+        static_domain = self.settings["static_domain"]
+        return protocol + static_domain + "/" + path
 
     def _get_info_header(self, log_params):
         request = self.request
