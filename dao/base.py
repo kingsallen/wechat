@@ -106,10 +106,12 @@ class BaseDao(DB):
         conds, params = self.getConds(conds, conds_params)
         if not conds:
             self.logger.error("Error:[get_list_by_conds][conds error], conds:{0}".format(conds))
-            raise gen.Return([])
+            raise gen.Return(list())
         sql = self.select(self.table, conds, fields, options, appends, index)
         cursor = yield self.query(sql, params)
         response = cursor.fetchall()
+        if not isinstance(response, list):
+            response = list()
         raise gen.Return(response)
 
     @gen.coroutine
@@ -152,7 +154,7 @@ class BaseDao(DB):
         fields = self.checkFieldType(fields, self.fields_map)
         if not fields:
             self.logger.error("Error:[insert_record][fields error], fields:{0}".format(fields))
-            raise gen.Return("")
+            raise gen.Return(None)
         sql, params = self.insert(self.table, fields, options)
         cursor = yield self.query(sql, params)
         insert_id = cursor.lastrowid
@@ -202,7 +204,7 @@ class BaseDao(DB):
         conds, params = self.getConds(conds)
         if not conds:
             self.logger.error("Error:[delete_by_conds][conds error], conds:{0}".format(conds))
-            raise gen.Return("")
+            raise gen.Return(None)
         sql = self.delete(self.table, conds)
         cursor = yield self.query(sql, params)
         response = cursor.fetchone()
@@ -223,7 +225,7 @@ class BaseDao(DB):
         conds, params = self.getConds(conds)
         if not conds:
             self.logger.error("Error:[get_cnt_by_conds][conds error], conds:{0}".format(conds))
-            raise gen.Return("")
+            raise gen.Return(None)
         sql = self.select_cnt(self.table, conds, fields, appends, index)
         cursor = yield self.query(sql, params)
         response = cursor.fetchone()

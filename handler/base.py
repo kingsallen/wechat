@@ -148,7 +148,7 @@ class BaseHandler(web.RequestHandler):
         else:
             # TODO 暂时做初始化
             company.update({
-                "theme": []
+                "theme": None
             })
 
         raise gen.Return(company)
@@ -161,22 +161,15 @@ class BaseHandler(web.RequestHandler):
         :return:
         '''
         user = ObjectDict(
-            company=ObjectDict(theme=[]),
+            company=ObjectDict(theme=None),
             wechat=ObjectDict()
         )
-
         wechat = yield self._get_current_wechat()
         if not wechat:
-            self.write_error(404)
             raise gen.Return(user)
         company = yield self._get_current_company(wechat.get("company_id"))
         user.wechat = wechat
         user.company = company
-
-        self.logger.debug("type user: %s" % type(user))
-        self.logger.debug("type wechat: %s" % type(user.wechat))
-        self.logger.debug("type company: %s" % type(user.company))
-        self.logger.debug("jjjjj: %s" % user.company)
 
         raise gen.Return(user)
 
@@ -227,12 +220,12 @@ class BaseHandler(web.RequestHandler):
 
     def write_error(self, status_code, **kwargs):
 
-        self.logger.debug("status_code: %s" % status_code)
+        # TODO 暂时添加错误页面
+        self.render("refer/common/info.html", status_code=status_code, css="warning", info="Ta在地球上消失了")
 
         return
 
-        # TODO 暂时添加错误页面
-        # self.render("refer/common/info.html", status_code=status_code, css="warning", info="error")
+
 
         # if status_code == 403:
         #     self.render('error/404.html',
