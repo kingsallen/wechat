@@ -38,8 +38,6 @@ class LandingHandler(BaseHandler):
             "search_seq" : search_seq
         })
 
-        print company
-
         self.render("refer/neo_weixin/position/company_search.html", company=company)
 
     @gen.coroutine
