@@ -6,6 +6,7 @@ Model基类，封装对数据库的访问，对传入参数的处理
 '''
 
 from tornado import gen
+from tornado.util import ObjectDict
 
 from utils.common.db import DB
 from utils.tool.date_tool import curr_now
@@ -105,7 +106,7 @@ class BaseDao(DB):
         conds, params = self.getConds(conds, conds_params)
         if not conds:
             self.logger.error("Error:[get_list_by_conds][conds error], conds:{0}".format(conds))
-            raise gen.Return("")
+            raise gen.Return([])
         sql = self.select(self.table, conds, fields, options, appends, index)
         cursor = yield self.query(sql, params)
         response = cursor.fetchall()
@@ -127,11 +128,13 @@ class BaseDao(DB):
         conds, params = self.getConds(conds)
         if not conds:
             self.logger.error("Error:[get_record_by_conds][conds error], conds:{0}".format(conds))
-            raise gen.Return("")
+            raise gen.Return(ObjectDict())
         sql = self.select(self.table, conds, fields, options, appends, index)
         cursor = yield self.query(sql, params)
         response = cursor.fetchone()
-        raise gen.Return(response)
+        if not isinstance(response, dict):
+            response = ObjectDict()
+        raise gen.Return(ObjectDict(response))
 
     @gen.coroutine
     def insert_record(self, fields, options=[]):
@@ -170,11 +173,11 @@ class BaseDao(DB):
         fields = self.checkFieldType(fields, self.fields_map)
         if not fields:
             self.logger.error("Error:[update_by_conds][fields error], fields:{0}".format(fields))
-            raise gen.Return("")
+            raise gen.Return(False)
         conds, conds_params = self.getConds(conds)
         if not conds:
             self.logger.error("Error:[update_by_conds][conds error], conds:{0}".format(conds))
-            raise gen.Return("")
+            raise gen.Return(False)
         sql, params = self.update(self.table, conds, fields, options, appends)
         params_update = []
         params_update.extend(params)

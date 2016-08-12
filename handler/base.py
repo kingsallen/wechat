@@ -145,6 +145,11 @@ class BaseHandler(web.RequestHandler):
                              theme.get("button_color"),
                              theme.get("other_color")]
             })
+        else:
+            # TODO 暂时做初始化
+            company.update({
+                "theme": []
+            })
 
         raise gen.Return(company)
 
@@ -155,10 +160,11 @@ class BaseHandler(web.RequestHandler):
         # TODO 暂时添加，保证企业号搜索页可以访问
         :return:
         '''
-        user = ObjectDict({
-            "company": {},
-            "wechat": {}
-        })
+        user = ObjectDict(
+            company=ObjectDict(theme=[]),
+            wechat=ObjectDict()
+        )
+
         wechat = yield self._get_current_wechat()
         if not wechat:
             self.write_error(404)
@@ -216,8 +222,12 @@ class BaseHandler(web.RequestHandler):
 
     def write_error(self, status_code, **kwargs):
 
+        self.logger.debug("status_code: %s" % status_code)
+
+        return
+
         # TODO 暂时添加错误页面
-        self.render("refer/common/info.html", status_code=status_code, css="warning", info="error")
+        # self.render("refer/common/info.html", status_code=status_code, css="warning", info="error")
 
         # if status_code == 403:
         #     self.render('error/404.html',

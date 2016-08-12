@@ -18,7 +18,7 @@ define("logpath", default="logs/", help="log path")
 settings = dict()
 settings['xsrf_cookies'] = True
 settings['cookie_secret'] = "EAB1D2AB05EEF04D35BA5FDF789DD6A3"
-settings['debug'] = False
+settings['debug'] = True
 settings['log_level'] = "DEBUG"
 settings['static_domain'] = "static-t.dqprism.com"
 
@@ -29,7 +29,7 @@ settings['static_upload_path'] = os.path.join(settings['static_path'], "upload")
 
 # 数据库配置 dqv4
 settings['mysql_host'] = "db-t.dqprism.com"
-settings['mysql_port'] = 3306
+settings['mysql_port'] = 3307
 settings['mysql_database'] = "dqv4"
 settings['mysql_user'] = "daqi"
 settings['mysql_password'] = "5F51692091B4031640E18E7C27430E071BC878C8"

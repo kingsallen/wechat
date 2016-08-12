@@ -38,6 +38,8 @@ class LandingHandler(BaseHandler):
             "search_seq" : search_seq
         })
 
+        self.logger.debug("curent:%s" % self.current_user)
+
         self.render("refer/neo_weixin/position/company_search.html", company=company)
 
     @gen.coroutine
