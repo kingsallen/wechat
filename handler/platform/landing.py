@@ -32,11 +32,13 @@ class LandingHandler(BaseHandler):
         search_seq = yield self._get_landing_item(self.current_user.company, company_id)
 
         company = ObjectDict({
-            "logo": self.static_url(self.current_user.company.get("logo")),
+            "logo": self.current_user.company.get("logo"),
             "name": self.current_user.company.get("name"),
             "image": self.current_user.company.get("conf_search_img"),
             "search_seq" : search_seq
         })
+
+        print company
 
         self.render("refer/neo_weixin/position/company_search.html", company=company)
 
