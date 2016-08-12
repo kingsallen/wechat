@@ -3,6 +3,7 @@
 import functools
 
 from tornado import gen
+from tornado.util import ObjectDict
 
 import conf.common as constant
 
@@ -42,10 +43,10 @@ def url_valid(func):
         try:
             if not getattr(self, "_current_user", None):
                 self._current_user = yield self.get_current_user()
+                self._current_user = ObjectDict(self._current_user)
             yield func(self, *args, **kwargs)
 
         except Exception, e:
             self.logger.error(e)
-            self.write_error(500)
             return
     return wrapper

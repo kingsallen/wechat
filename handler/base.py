@@ -173,6 +173,11 @@ class BaseHandler(web.RequestHandler):
         user.wechat = wechat
         user.company = company
 
+        self.logger.debug("type user: %s" % type(user))
+        self.logger.debug("type wechat: %s" % type(user.wechat))
+        self.logger.debug("type company: %s" % type(user.company))
+        self.logger.debug("jjjjj: %s" % user.company)
+
         raise gen.Return(user)
 
     @gen.coroutine

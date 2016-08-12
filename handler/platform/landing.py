@@ -39,8 +39,15 @@ class LandingHandler(BaseHandler):
         })
 
         self.logger.debug("curent:%s" % self.current_user)
+        self.logger.debug("curent type:%s" % type(self.current_user))
+        self.logger.debug("curent company type:%s" % type(self.current_user.company))
+        self.logger.debug("curent theme:%s" % type(self.current_user.company.theme))
 
-        self.render("refer/neo_weixin/position/company_search.html", company=company)
+        self.send_json({
+            "company": company
+        })
+
+        # self.render("refer/neo_weixin/position/company_search.html", company=company)
 
     @gen.coroutine
     def _get_landing_item(self, company, company_id):
