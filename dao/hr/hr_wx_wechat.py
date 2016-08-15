@@ -2,12 +2,12 @@
 
 # Copyright 2016 MoSeeker
 
-'''
+"""
 :author 潘煜昕（panyuxin@moseeker.com）
 :date 2016.07.26
 :table hr_wx_wechat
 
-'''
+"""
 
 from dao.base import BaseDao
 

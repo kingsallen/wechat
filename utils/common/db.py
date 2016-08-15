@@ -2,11 +2,11 @@
 
 # Copyright 2016 MoSeeker
 
-'''
+"""
 
 说明:
 DB公共处理类
-'''
+"""
 import ujson
 
 from tornado_mysql import pools, cursors
@@ -35,7 +35,7 @@ class DB(object):
 
     def getConds(self, conds, conds_params=[]):
 
-        '''
+        """
         对传入的SQL限制条件数组或字符串，转换成MYSQL可识别的形式
         :param conds: 字符串或者数组格式的SQL限制条件, 格式示例：
         dict{
@@ -46,7 +46,7 @@ class DB(object):
         或者"field in (1, 2)"
         :param conds_params: 字符串形式的conds对应的params值，防SQL注入
         :return: 返回转化后的SQL限制条件（数组）和params值 可以防止SQL注入，不符合条件的返回None
-        '''
+        """
 
         if conds is None or not (isinstance(conds, dict) or isinstance(conds, str)):
             self.logger.error("Error:[getConds][conds type error], conds:{0}, type:{1}".format(conds, type(conds)))
@@ -88,12 +88,12 @@ class DB(object):
 
     def checkFieldType(self, fields={}, maps={}):
 
-        '''
+        """
         对插入或者更新的字段进行类型检查和转换，类型映射中没有的默认为字符串
         :param fields: 待插入或者更新的字段数组
         :param maps: dao中定义的返回结果类型映射表
         :return: 成功返回类型转换后的数组，未转换或输入错误做str处理
-        '''
+        """
 
         if fields is None or not isinstance(fields, dict):
             self.logger.error("Error:[checkFieldType][fields type error], fields:{0}, type:{1}".format(fields, type(fields)))
@@ -136,7 +136,7 @@ class DB(object):
 
     def select(self, table, conds=[], fields=[], options=[], appends=[], index=''):
 
-        '''
+        """
         Select查询
         :param table: 表名
         :param conds: 限制条件
@@ -145,7 +145,7 @@ class DB(object):
         :param appends: SQL后置选项
         :param index: 支持mysql的USE/IGNORE/FORCE Index的语法，指定索引名称
         :return: 返回拼装SQL, params 可以防止SQL注入
-        '''
+        """
 
         sql = "SELECT "
         # SQL前置条件
@@ -176,13 +176,13 @@ class DB(object):
 
     def insert(self, table, fields, options=[]):
 
-        '''
+        """
         Insert插入
         :param table: 数据表
         :param fields: 需要插入的字段dict
         :param options: INSERT插入选项，支持"LOW_PRIORITY","DELAYED", "HIGH_PRIORITY", "IGNORE"
         :return: 返回拼装SQL, params值
-        '''
+        """
 
         sql = "INSERT "
         # SQL前置条件
@@ -204,7 +204,7 @@ class DB(object):
 
     def update(self, table, conds, fields, options=[], appends=[]):
 
-        '''
+        """
         Update更新，根据限制条件更新对应的数据库记录
         :param table: 数据表
         :param conds: 限制条件，数据或者字符串形式即可
@@ -212,7 +212,7 @@ class DB(object):
         :param options: SQL前置选项
         :param appends: SQL后置条件
         :return: 拼装的SQL
-        '''
+        """
 
         sql = "UPDATE "
         # SQL前置条件
@@ -243,12 +243,12 @@ class DB(object):
 
     def delete(self, table, conds):
 
-        '''
+        """
         Delete删除，根据限制条件删除对应的数据库记录
         :param table: 数据表
         :param conds: 限制条件，数据或者字符串形式即可
         :return: 拼装的SQL
-        '''
+        """
 
         sql = "DELETE FROM {0}".format(table)
 
@@ -261,7 +261,7 @@ class DB(object):
 
     def select_cnt(self, table, conds=[], fields=[], appends=[], index=''):
 
-        '''
+        """
         Select查询记录数
         :param table: 表名
         :param conds: 限制条件
@@ -270,7 +270,7 @@ class DB(object):
         :param appends: SQL后置选项
         :param index: 支持mysql的USE/IGNORE/FORCE Index的语法，指定索引名称
         :return: 返回拼装SQL
-        '''
+        """
 
         sql = "SELECT "
         # 查询字段

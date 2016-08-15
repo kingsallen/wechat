@@ -12,7 +12,7 @@ class CompanyPageService(PageService):
     @gen.coroutine
     def get_company(self, conds, need_conf=False, fields=[]):
 
-        '''
+        """
         获得公司信息
         :param conds:
         :param fields: 示例:
@@ -20,7 +20,7 @@ class CompanyPageService(PageService):
             "id": company_id
         }
         :return:
-        '''
+        """
 
         # 公司主表
         company = yield self.hr_company_ds.get_company(conds, fields)
@@ -63,14 +63,14 @@ class CompanyPageService(PageService):
     @gen.coroutine
     def get_companys_list(self, conds, fields, options=[], appends=[]):
 
-        '''
+        """
         获得公司列表
         :param conds:
         :param fields:
         :param options:
         :param appends:
         :return:
-        '''
+        """
 
         positions_list = yield self.hr_company_ds.get_companys_list(conds, fields, options, appends)
         raise gen.Return(positions_list)

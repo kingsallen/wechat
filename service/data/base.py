@@ -2,7 +2,7 @@
 
 # Copyright 2016 MoSeeker
 
-'''
+"""
 :author 潘煜昕（panyuxin@moseeker.com）
 :date 2016.07.26
 
@@ -11,7 +11,7 @@ dataservice的父类
 负责与DAO交互，实现原子性的操作。一个DAO对应一个dataservice，不能被handler调用，只能被pageservice调用，可被多个pageservice调用
 dataservice之间不能相互调用
 可以根据表名创建dataservice
-'''
+"""
 
 import importlib
 

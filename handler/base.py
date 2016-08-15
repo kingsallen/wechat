@@ -99,10 +99,10 @@ class BaseHandler(web.RequestHandler):
     @gen.coroutine
     def _get_current_wechat(self):
 
-        '''
+        """
         # TODO 获得企业微信信息
         :return:
-        '''
+        """
 
         wechat_signature = str(self.get_argument("wechat_signature", ""))
         conds = ObjectDict({
@@ -115,11 +115,11 @@ class BaseHandler(web.RequestHandler):
     @gen.coroutine
     def _get_current_company(self, company_id):
 
-        '''
+        """
         # TODO 获得企业母公司信息
         :param company_id:
         :return:
-        '''
+        """
         conds = ObjectDict({
             'id': company_id
         })
@@ -143,10 +143,10 @@ class BaseHandler(web.RequestHandler):
     @gen.coroutine
     def get_current_user(self):
 
-        '''
+        """
         # TODO 暂时添加，保证企业号搜索页可以访问
         :return:
-        '''
+        """
         user = ObjectDict(
             company=ObjectDict(theme=None),
             wechat=ObjectDict()
@@ -163,34 +163,34 @@ class BaseHandler(web.RequestHandler):
     @gen.coroutine
     def get(self):
 
-        '''
+        """
         GET请求父类
         :return:
-        '''
+        """
 
     @gen.coroutine
     def post(self):
 
-        '''
+        """
         POST请求父类
         :return:
-        '''
+        """
 
     @gen.coroutine
     def put(self):
 
-        '''
+        """
         PUT请求父类，用户update类请求
         :return:
-        '''
+        """
 
     @gen.coroutine
     def delete(self):
 
-        '''
+        """
         DELETE请求父类
         :return:
-        '''
+        """
 
     def on_finish(self):
         info = ObjectDict(

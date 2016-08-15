@@ -2,9 +2,9 @@
 
 # Copyright 2016 MoSeeker
 
-'''
+"""
 时间工具类
-'''
+"""
 
 from datetime import datetime
 

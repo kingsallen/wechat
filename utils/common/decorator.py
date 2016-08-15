@@ -32,11 +32,11 @@ def handle_response_error(method):
 
 def url_valid(func):
 
-    '''
+    """
     # TODO 功能待调整
     :param func:
     :return:
-    '''
+    """
 
     @functools.wraps(func)
     @gen.coroutine

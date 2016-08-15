@@ -2,9 +2,9 @@
 
 # Copyright 2016 MoSeeker
 
-'''
+"""
 redis session 工具类
-'''
+"""
 import tornado
 import tornadis
 
@@ -17,10 +17,10 @@ class Session(object):
 
     def __init__(self):
 
-        '''
+        """
         Initialize the tornadis
         :return:
-        '''
+        """
 
         # if not Session.pool:
         #     tornadis.Client()
@@ -33,13 +33,13 @@ class Session(object):
     @tornado.gen.coroutine
     def put(self, path, bytes, ttl):
 
-        '''
+        """
         set a value
         :param path:
         :param bytes:
         :param ttl:
         :return:
-        '''
+        """
 
         with (yield Session.pool.connected_client()) as client:
             if ttl:
@@ -50,11 +50,11 @@ class Session(object):
     @tornado.gen.coroutine
     def exists(self, path):
 
-        '''
+        """
         judge if the key exists
         :param path:
         :return:
-        '''
+        """
 
         with (yield Session.pool.connected_client()) as client:
             exists = yield client.call('EXISTS', path)
@@ -63,22 +63,22 @@ class Session(object):
     @tornado.gen.coroutine
     def remove(self, path):
 
-        '''
+        """
         del a key
         :param path:
         :return:
-        '''
+        """
         with (yield Session.pool.connected_client()) as client:
             yield client.call('DEL', path)
 
     @tornado.gen.coroutine
     def get(self, path):
 
-        '''
+        """
         get a key
         :param path:
         :return:
-        '''
+        """
         with (yield Session.pool.connected_client()) as client:
             buffer = yield client.call('GET', path)
             raise tornado.gen.Return(buffer)

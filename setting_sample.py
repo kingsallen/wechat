@@ -2,13 +2,13 @@
 
 # Copyright 2016 MoSeeker
 
-'''
+"""
 说明:
 setting配置常量规范：
 1.常量适用于整个系统，偏系统设置，如数据库配置、服务器路径等
 2.常量不涉及具体业务逻辑（业务逻辑常量配置在constant.py中）
 3.尽量考虑复用性
-'''
+"""
 
 import os
 from tornado.options import define

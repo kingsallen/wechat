@@ -9,9 +9,9 @@ from utils.common.decorator import handle_response_error, url_valid
 
 class LandingHandler(BaseHandler):
 
-    '''
+    """
     企业搜索页
-    '''
+    """
 
     @url_valid
     @handle_response_error
@@ -45,11 +45,11 @@ class LandingHandler(BaseHandler):
     @gen.coroutine
     def _get_landing_item(self, company, company_id):
 
-        '''
+        """
         根据HR设置获得搜索页页面栏目排序
         :param search_seq:
         :return:
-        '''
+        """
 
         res = []
         for item in company.get("conf_search_seq"):

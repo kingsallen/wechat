@@ -4,12 +4,12 @@
 
 def gen_salary(salary_top, salary_bottom):
 
-    '''
+    """
     月薪
     :param salary_top:
     :param salary_bottom:
     :return:
-    '''
+    """
 
     salary_res = "-"
     if not salary_top and not salary_bottom:

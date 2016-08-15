@@ -2,7 +2,7 @@
 
 # Copyright 2016 MoSeeker
 
-'''
+"""
 系统应用入口 app.py
 
 说明
@@ -21,7 +21,7 @@ shell commond::
 点我访问 `Moseeker`_.
 
 .. _moseeker: http://localhost:8000
-'''
+"""
 
 import tornado.httpserver
 import tornado.web

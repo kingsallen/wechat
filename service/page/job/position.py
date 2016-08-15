@@ -63,14 +63,14 @@ class PositionPageService(PageService):
     @gen.coroutine
     def get_positions_list(self, conds, fields, options=[], appends=[]):
 
-        '''
+        """
         获得职位列表
         :param conds:
         :param fields:
         :param options:
         :param appends:
         :return:
-        '''
+        """
 
         positions_list = yield self.job_position_ds.get_positions_list(conds, fields, options, appends)
         raise gen.Return(positions_list)
@@ -78,11 +78,11 @@ class PositionPageService(PageService):
     @gen.coroutine
     def get_positions_cities_list(self, company_id):
 
-        '''
+        """
         获得公司发布的职位中所有城市列表
         :param company_id:
         :return:
-        '''
+        """
 
         conds = {
             "company_id": company_id
@@ -104,11 +104,11 @@ class PositionPageService(PageService):
     @gen.coroutine
     def get_positions_occupations_list(self, company_id):
 
-        '''
+        """
         获得公司发布的职位中所有职能列表
         :param company_id:
         :return:
-        '''
+        """
 
         conds = {
             "company_id": company_id
@@ -128,11 +128,11 @@ class PositionPageService(PageService):
     @gen.coroutine
     def get_positions_departments_list(self, company_id):
 
-        '''
+        """
         获得公司发布的职位中所有部门列表
         :param company_id:
         :return:
-        '''
+        """
 
         conds = {
             "company_id": company_id

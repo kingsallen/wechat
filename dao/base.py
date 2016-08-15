@@ -2,10 +2,10 @@
 
 # Copyright 2016 MoSeeker
 
-'''
+"""
 说明:
 Model基类，封装对数据库的访问，对传入参数的处理
-'''
+"""
 
 from tornado import gen
 from tornado.util import ObjectDict
@@ -34,10 +34,10 @@ class BaseDao(DB):
 
     def __init__(self):
 
-        '''
+        """
         配置数据库连接，使用tornado-mysql异步连接池
         :return:
-        '''
+        """
 
         super(BaseDao,self).__init__()
         self.fields_map = {}
@@ -49,14 +49,14 @@ class BaseDao(DB):
     @gen.coroutine
     def analytics_query(self, sql, params):
 
-        '''
+        """
 
         使用输入的SQL语句进行查询
         使用连接池的方式执行sql，可返回rows、lastrowid等
         临时方案：提供mycat对analytics的支持
         :param sql SQl语句
         :return: cursor游标
-        '''
+        """
         self.logger.warn("[warning][{0}][start][time: {1}][sql: {2}]".format(self.__class__.__module__, curr_now(), sql))
         cursor = yield self.analytics_pool.execute(sql, params)
         raise gen.Return(cursor)
@@ -64,13 +64,13 @@ class BaseDao(DB):
     @gen.coroutine
     def query(self, sql, params):
 
-        '''
+        """
 
         使用输入的SQL语句进行查询
         使用连接池的方式执行sql，可返回rows、lastrowid等
         :param sql SQl语句
         :return: cursor游标
-        '''
+        """
         self.logger.warn("[warning][{0}][start][time: {1}][sql: {2}]".format(self.__class__.__module__, curr_now(), sql))
         cursor = yield self.pool.execute(sql, params)
         raise gen.Return(cursor)
@@ -79,7 +79,7 @@ class BaseDao(DB):
     @gen.coroutine
     def get_list_by_conds(self, conds, fields, options=[], appends=[], index='', conds_params=[]):
 
-        '''
+        """
         Select查询，根据限制条件获取结果数组
         :param conds: 限制条件，数组或字符串形式，示例:
         dict{
@@ -103,7 +103,7 @@ class BaseDao(DB):
         "USE INDEX (index1, index2)"
         :param conds_params: 字符串形式的conds对应的params值，防SQL注入
         :return: 返回查询结果列表数组
-        '''
+        """
 
         conds, params = self.getConds(conds, conds_params)
         if not conds:
@@ -119,7 +119,7 @@ class BaseDao(DB):
     @gen.coroutine
     def get_record_by_conds(self, conds, fields, options=[], appends=[], index=''):
 
-        '''
+        """
         Select单条查询，根据限制条件获得结果的单条记录
         :param conds: 限制条件，数组或字符串形式，示例见@link get_list_by_conds()
         :param fields: 需要查询的字段名数组，需要与mysql字段对应
@@ -127,7 +127,7 @@ class BaseDao(DB):
         :param appends: SQL后置选项
         :param index: 强制索引时，指定的索引名称
         :return: 返回查询的结果单条记录
-        '''
+        """
 
         conds, params = self.getConds(conds)
         if not conds:
@@ -143,7 +143,7 @@ class BaseDao(DB):
     @gen.coroutine
     def insert_record(self, fields, options=[]):
 
-        '''
+        """
         Insert插入，只支持单行插入
         :param fields: 需要插入的字段dict，示例:
         dict{
@@ -151,7 +151,7 @@ class BaseDao(DB):
         }
         :param options: INSERT插入选项，支持"LOW_PRIORITY","DELAYED", "HIGH_PRIORITY", "IGNORE"
         :return: 返回插入后的自增ID
-        '''
+        """
 
         fields = self.checkFieldType(fields, self.fields_map)
         if not fields:
@@ -165,14 +165,14 @@ class BaseDao(DB):
     @gen.coroutine
     def update_by_conds(self, conds, fields, options=[], appends=[]):
 
-        '''
+        """
         Update更新，根据限制条件更新对应的数据库记录
         :param conds: 限制条件，数组或字符串形式，示例见@link get_list_by_conds()
         :param fields: 需要更新的字段键值对，dict形式
         :param options: SQL前置选项
         :param appends: SQL后置条件
         :return:
-        '''
+        """
 
         fields = self.checkFieldType(fields, self.fields_map)
         if not fields:
@@ -197,11 +197,11 @@ class BaseDao(DB):
     @gen.coroutine
     def delete_by_conds(self, conds):
 
-        '''
+        """
         Delete删除，根据限制条件删除对应的数据库记录
         :param conds: 限制条件，数组或字符串形式，示例见@link get_list_by_conds()
         :return:
-        '''
+        """
 
         conds, params = self.getConds(conds)
         if not conds:
@@ -215,14 +215,14 @@ class BaseDao(DB):
     @gen.coroutine
     def get_cnt_by_conds(self, conds, fields, appends=[], index=''):
 
-        '''
+        """
         Select查询记录数
         :param conds: 限制条件，数组或字符串形式，示例见@link get_list_by_conds()
         :param fields: 查询字段
         :param appends: SQL后置选项
         :param index: 支持mysql的USE/IGNORE/FORCE Index的语法，指定索引名称
         :return:
-        '''
+        """
 
         conds, params = self.getConds(conds)
         if not conds:
@@ -236,10 +236,10 @@ class BaseDao(DB):
     @gen.coroutine
     def start_transaction(self):
 
-        '''
+        """
         开始一个事务，待完善
         :return:
-        '''
+        """
 
         transaction = self.pool.begin()
         raise gen.Return(transaction)
