@@ -1,5 +1,7 @@
 # coding=utf-8
 
+# Copyright 2016 MoSeeker
+
 """
 logger 类: 按级别分文件打印日志,
 不依赖第三方库

@@ -1,5 +1,7 @@
 # coding=utf-8
 
+# Copyright 2016 MoSeeker
+
 from tornado.util import ObjectDict
 from tornado import gen
 from handler.base import BaseHandler

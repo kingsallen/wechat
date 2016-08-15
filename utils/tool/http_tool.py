@@ -1,4 +1,6 @@
-# -*- coding: utf-8 -*-
+# coding=utf-8
+
+# Copyright 2016 MoSeeker
 
 """
 api 调用工具类，

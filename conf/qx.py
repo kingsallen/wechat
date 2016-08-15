@@ -1,5 +1,7 @@
 # coding=utf-8
 
+# Copyright 2016 MoSeeker
+
 '''
 只适合聚合号使用的常量配置
 

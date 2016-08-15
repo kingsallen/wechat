@@ -1,5 +1,7 @@
 # coding=utf-8
 
+# Copyright 2016 MoSeeker
+
 from tornado import gen
 from service.data.base import DataService
 

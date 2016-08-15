@@ -1,5 +1,7 @@
 # coding=utf-8
 
+# Copyright 2016 MoSeeker
+
 '''
 说明:
 Model基类，封装对数据库的访问，对传入参数的处理

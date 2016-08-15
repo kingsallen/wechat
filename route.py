@@ -1,5 +1,7 @@
 # coding=utf-8
 
+# Copyright 2016 MoSeeker
+
 '''
 说明:
 route不需要添加v2，web网页没有维护旧版本的概念

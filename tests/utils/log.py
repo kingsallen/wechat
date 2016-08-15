@@ -1,5 +1,7 @@
 # coding=utf-8
 
+# Copyright 2016 MoSeeker
+
 import unittest
 import shutil
 from utils.common.log import Logger

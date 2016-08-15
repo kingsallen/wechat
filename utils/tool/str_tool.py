@@ -1,5 +1,7 @@
 # coding=utf-8
 
+# Copyright 2016 MoSeeker
+
 def gen_salary(salary_top, salary_bottom):
 
     '''

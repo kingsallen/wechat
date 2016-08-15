@@ -1,5 +1,7 @@
 # coding=utf-8
 
+# Copyright 2016 MoSeeker
+
 from handler.base import BaseHandler
 
 import hashlib
