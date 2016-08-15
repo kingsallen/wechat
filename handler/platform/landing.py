@@ -111,7 +111,7 @@ class LandingHandler(BaseHandler):
                 res.append(degree)
 
             # 子公司名称
-            if index == self.plat_constant.LANGDING_INDEX_CHILD_COMPANY:
+            elif index == self.plat_constant.LANGDING_INDEX_CHILD_COMPANY:
                 conds = {
                     "parent_id": company_id,
                     "disable": self.constant.STATUS_INUSE
