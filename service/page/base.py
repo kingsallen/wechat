@@ -16,7 +16,7 @@ pageservice之间可以相互调用，但不建议
 import importlib
 
 from utils.common.log import Logger
-from setting import settings
+from settings import settings
 import conf.common as constant
 import conf.platform as plat_constant
 import conf.qx as qx_constant

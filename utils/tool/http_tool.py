@@ -7,94 +7,89 @@ api 调用工具类，
 调用时使用 infra=True/False 来选择使用 das 还是基础服务的 api
 """
 
-import ujson
-import requests
-
 import tornado.httpclient
+import ujson
 from tornado import gen
 from tornado.httputil import url_concat, HTTPHeaders
 
 import settings
 
 
-def http_get(route, jdata, infra=False):
-    """
-    适合V2的接口返回，如果数据正确，直接返回data数据，业务方不需要再解析response结构
-    """
-    response = requests.get(
-        "{0}/{1}".format(settings.infra if infra else settings.das, route),
-        params=jdata).json()
-
-    if response and response.get('status') == 0:
-        return response.get('data')
-    else:
-        return response
-
-
-def http_post(route, jdata, infra=False):
-    """
-    适合V2的接口返回，如果数据正确，直接返回data数据，业务方不需要再解析response结构
-    """
-    response = requests.post(
-        "{0}/{1}".format(settings.infra if infra else settings.das, route),
-        data=jdata).json()
-
-    if response and response.get('status') == 0:
-        return response.get('data')
-    else:
-        return response
+@gen.coroutine
+def http_get(route, jdata, timeout=10, infra=False):
+    ret = yield _async_http_get(route, jdata, timeout, infra, method='GET')
+    raise gen.Return(ret)
 
 
 @gen.coroutine
-def async_http_get(route, jdata, timeout=8, infra=False):
+def http_delete(route, jdata, timeout=10, infra=False):
+    ret = yield _async_http_get(route, jdata, timeout, infra, method='DELETE')
+    raise gen.Return(ret)
+
+
+@gen.coroutine
+def http_post(route, jdata, timeout=10, infra=False):
+    ret = yield _async_http_post(route, jdata, timeout, infra, method='POST')
+    raise gen.Return(ret)
+
+
+@gen.coroutine
+def http_put(route, jdata, timeout=10, infra=False):
+    ret = yield _async_http_post(route, jdata, timeout, infra, method='PUT')
+    raise gen.Return(ret)
+
+
+@gen.coroutine
+def http_patch(route, jdata, timeout=10, infra=False):
+    ret = yield _async_http_post(route, jdata, timeout, infra, method='PATCH')
+    raise gen.Return(ret)
+
+
+# PRIVATE
+@gen.coroutine
+def _async_http_get(route, jdata, timeout=10, infra=False, method='GET'):
     """
-    适合V2的接口返回，如果数据正确，直接返回data数据，业务方不需要再解析response结构
+    如果数据正确，直接返回 data 数据，业务方不需要再解析 response 结构
+    可用 HTTP 动词为 GET 和 DELETE
     """
+    if method.lower() not in "get delete":
+        raise ValueError("method is not in GET and DELETE")
+
     url = url_concat("{0}/{1}".format(
         settings.infra if infra else settings.das, route), jdata)
-
     http_client = tornado.httpclient.AsyncHTTPClient()
-
     response = yield http_client.fetch(
-        url, request_timeout=timeout,
+        url, request_timeout=timeout, method=method.upper(),
         headers=HTTPHeaders({"Content-Type": "application/json"}))
-
-    body = ujson.loads(response.body)
+    body = ujson.decode(response.body)
     content_type = response.headers.get('Content-Type', '')
-
     if body.get('status') == 0 and "application/json" in content_type:
         raise gen.Return(body.get('data'))
     raise gen.Return(body)
 
 
 @gen.coroutine
-def async_http_post_v2(route, jdata, timeout=8, infra=False,
-                       method='POST'):
+def _async_http_post(route, jdata, timeout=10, infra=False, method='POST'):
     """
-    适合V2的接口返回，如果数据正确，直接返回data数据，业务方不需要再解析response结构
-    method 默认为 POST, 但是也可以用其他的 HTTP 方法
-    不要使用 GET, 以及其它非 HTTP 动词
+    如果数据正确，直接返回data数据，业务方不需要再解析response结构
+    可用 HTTP 动词为 POST, PATCH 和 PUT
     """
-    if method.lower() not in "post put delete patch":
-        raise ValueError("{method} is not a valid HTTP verb".format(
-            method.lower()))
+    if method.lower() not in "post put patch":
+        raise ValueError("method is not in POST, PUT and PATCH")
 
     http_client = tornado.httpclient.AsyncHTTPClient()
-
     url = "{0}/{1}".format(settings.infra if infra else settings.das,
                            route)
 
     response = yield http_client.fetch(
         url,
         method=method.upper(),
-        body=ujson.dumps(jdata),
+        body=ujson.encode(jdata),
         request_timeout=timeout,
         headers=HTTPHeaders({"Content-Type": "application/json"})
     )
-
-    body = ujson.loads(response.body)
+    body = ujson.decode(response.body)
     content_type = response.headers.get('Content-Type', '')
-
     if body.get('status', 1) == 0 and "application/json" in content_type:
         raise gen.Return(body.get('data'))
     raise gen.Return(body)

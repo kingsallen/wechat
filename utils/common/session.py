@@ -8,7 +8,7 @@ redis session 工具类
 import tornado
 import tornadis
 
-from setting import settings
+from settings import settings
 
 
 class Session(object):

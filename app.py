@@ -30,13 +30,14 @@ import tornado.options
 from tornado.options import options
 import tornadis
 
-from setting import settings
+from settings import settings
 from route import routes
 from utils.common.log import Logger
 # from utils.common.session import Session
 
 tornado.options.parse_command_line()
 logger = Logger(logpath=options.logpath)
+
 
 class Application(tornado.web.Application):
 
@@ -56,6 +57,7 @@ class Application(tornado.web.Application):
         #          host=settings['redis_host'],
         #          connect_timeout=settings['connect_timeout'])
         # )
+
 
 def main():
 
