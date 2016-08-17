@@ -40,7 +40,7 @@ class LandingHandler(BaseHandler):
             "search_seq" : search_seq
         })
 
-        self.render("refer/neo_weixin/position/company_search.html", company=company)
+        self.render("refer/neo_weixin/position/company_search.html", company=company, current_did=company_id)
 
     @gen.coroutine
     def _get_landing_item(self, company, company_id):
