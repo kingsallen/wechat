@@ -20,13 +20,10 @@ class LandingHandler(BaseHandler):
         signature = str(self.get_argument("wechat_signature", ""))
         did = str(self.get_argument("did", ""))
 
-        print signature
-
         if did:
             # 存在子公司，则取子公司信息
             company_id = did
         elif signature:
-            print 11
             conds = {'signature': signature}
             wechat = yield self.wechat_ps.get_wechat(conds)
             company_id = wechat.get("company_id")
