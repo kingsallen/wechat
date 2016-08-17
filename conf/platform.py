@@ -42,13 +42,13 @@ LANDING = {
 
 #### 薪资范围搜索项
 SALARY = {
-    "0" : {"name": u"4k及以下", "salary_bottom": 0, "salary_top": 4},
+    "0" : {"name": u"4k及以下", "salary_bottom": 1, "salary_top": 4},
     "1" : {"name": u"4k-6k", "salary_bottom": 4, "salary_top": 6},
     "2" : {"name": u"6k-8k", "salary_bottom": 6, "salary_top": 8},
     "3" : {"name": u"8k-10k", "salary_bottom": 8, "salary_top": 10},
     "4" : {"name": u"10k-15k", "salary_bottom": 10, "salary_top": 15},
     "5" : {"name": u"15k-25k", "salary_bottom": 15, "salary_top": 25},
-    "6" : {"name": u"25k及以上", "salary_bottom": 25},
+    "6" : {"name": u"25k及以上", "salary_bottom": 25, "salary_top": 999},
 }
 
 ### 学历搜索项
