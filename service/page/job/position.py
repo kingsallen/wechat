@@ -4,7 +4,6 @@
 
 import re
 from tornado import gen
-from tornado.util import ObjectDict
 from service.page.base import PageService
 from utils.tool.date_tool import jd_update_date
 from utils.tool.str_tool import gen_salary
@@ -74,77 +73,3 @@ class PositionPageService(PageService):
 
         positions_list = yield self.job_position_ds.get_positions_list(conds, fields, options, appends)
         raise gen.Return(positions_list)
-
-    @gen.coroutine
-    def get_positions_cities_list(self, company_id):
-
-        """
-        获得公司发布的职位中所有城市列表
-        :param company_id:
-        :return:
-        """
-
-        conds = {
-            "company_id": company_id
-        }
-
-        fields = ["city"]
-
-        positions_list = yield self.job_position_ds.get_positions_list(conds, fields)
-        cities = []
-        for item in positions_list:
-            cities_tmp = re.split(u'，', item.get("city"))
-            for city in cities_tmp:
-                if not city:
-                    continue
-                cities.append(city)
-        cities_list = list(set(cities))
-        raise gen.Return(cities_list)
-
-    @gen.coroutine
-    def get_positions_occupations_list(self, company_id):
-
-        """
-        获得公司发布的职位中所有职能列表
-        :param company_id:
-        :return:
-        """
-
-        conds = {
-            "company_id": company_id
-        }
-
-        fields = ["occupation"]
-
-        positions_list = yield self.job_position_ds.get_positions_list(conds, fields)
-        occupations = []
-        for item in positions_list:
-            if not item.get("occupation"):
-                continue
-            occupations.append(item.get("occupation"))
-        occupations_list = list(set(occupations))
-        raise gen.Return(occupations_list)
-
-    @gen.coroutine
-    def get_positions_departments_list(self, company_id):
-
-        """
-        获得公司发布的职位中所有部门列表
-        :param company_id:
-        :return:
-        """
-
-        conds = {
-            "company_id": company_id
-        }
-
-        fields = ["department"]
-
-        positions_list = yield self.job_position_ds.get_positions_list(conds, fields)
-        departments = []
-        for item in positions_list:
-            if not item.get("department"):
-                continue
-            departments.append(item.get("department"))
-        departments_list = list(set(departments))
-        raise gen.Return(departments_list)

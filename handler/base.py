@@ -36,6 +36,8 @@ class BaseHandler(web.RequestHandler):
                                    'PositionPageService')()
         self.job_custom_ps = getattr(importlib.import_module('service.page.{0}.{1}'.format('job', 'job_custom')),
                                    'JobCustomPageService')()
+        self.landing_ps = getattr(importlib.import_module('service.page.{0}.{1}'.format('job', 'landing')),
+                                   'LandingPageService')()
 
     @property
     def logger(self):
