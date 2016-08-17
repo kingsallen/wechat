@@ -20,10 +20,13 @@ class LandingHandler(BaseHandler):
         signature = str(self.get_argument("wechat_signature", ""))
         did = str(self.get_argument("did", ""))
 
+        print signature
+
         if did:
             # 存在子公司，则取子公司信息
             company_id = did
         elif signature:
+            print 11
             conds = {'signature': signature}
             wechat = yield self.wechat_ps.get_wechat(conds)
             company_id = wechat.get("company_id")
@@ -52,7 +55,7 @@ class LandingHandler(BaseHandler):
         """
 
         res = []
-        for item in company.get("conf_search_seq"):
+        for item in company.get("conf_search_seq", []):
             # 工作地点
             index = int(item.get("index"))
             if index == self.plat_constant.LANDING_INDEX_CITY:
@@ -106,8 +109,8 @@ class LandingHandler(BaseHandler):
             elif index == self.plat_constant.LANDING_INDEX_DEGREE:
                 degree = {}
                 degree['name'] = self.plat_constant.LANDING.get(index).get("chpe")
-                degree['values'] = [{"value": k, "text": v} for k, v in sorted(self.constant.DEGREE.items())]
-                degree['key'] = "education"
+                degree['values'] = [{"value": k, "text": v} for k, v in sorted(self.plat_constant.DEGREE.items())]
+                degree['key'] = "degree"
                 res.append(degree)
 
             # 子公司名称
@@ -128,7 +131,7 @@ class LandingHandler(BaseHandler):
                 child_company = {}
                 child_company['values'] = child_company_values + list(child_company_res)
                 child_company['name'] = self.plat_constant.LANDING.get(index).get("chpe")
-                child_company['key'] = "child_company"
+                child_company['key'] = "did"
                 res.append(child_company)
 
             # 企业自定义字段，并且配置了企业自定义字段标题
