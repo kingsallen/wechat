@@ -20,10 +20,7 @@ class LandingHandler(BaseHandler):
         signature = str(self.get_argument("wechat_signature", ""))
         did = str(self.get_argument("did", ""))
 
-        if did:
-            # 存在子公司，则取子公司信息
-            company_id = did
-        elif signature:
+        if signature:
             conds = {'signature': signature}
             wechat = yield self.wechat_ps.get_wechat(conds)
             company_id = wechat.get("company_id")
@@ -40,4 +37,4 @@ class LandingHandler(BaseHandler):
             "search_seq" : search_seq
         })
 
-        self.render("refer/neo_weixin/position/company_search.html", company=company, current_did=company_id)
+        self.render("refer/neo_weixin/position/company_search.html", company=company, current_did=did)
