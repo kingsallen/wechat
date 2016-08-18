@@ -3,27 +3,32 @@
 # Copyright 2016 MoSeeker
 
 """
-logger 类: 按级别分文件打印日志,
-不依赖第三方库
+DQLogger
+
+merge tornado gen_log
+do not merge tornado app_log & access_log
 """
 
 import logging
 import os
 from logging.handlers import TimedRotatingFileHandler
 
+from tornado.log import gen_log
 
 # --------------------------------------------------------------------------
 #  Configurations
 # --------------------------------------------------------------------------
 
 LOGGER_NAME = 'DQLogger'
+
 FORMATER = logging.Formatter(
-    u'%(asctime)s\t%(pathname)s:%(lineno)s\t%(levelname)s\t%(message)s'
-)
+    u'%(asctime)s\t%(pathname)s:%(lineno)s\t%(levelname)s\t%(message)s')
+
 SUFFIX = '%Y%m%d%H.log'
 
 # Highest built-in level is 50, so make CUSTOMER as 60
 logging.addLevelName(60, 'CUSTOMER')
+
 LOG_LEVELS = {
     'DEBUG':    logging.DEBUG,
     'INFO':     logging.INFO,
@@ -35,6 +40,7 @@ LOG_LEVELS = {
 # --------------------------------------------------------------------------
 #  Logger class and functions
 # --------------------------------------------------------------------------
+
 
 class ExactLogLevelFilter(logging.Filter):
     """
@@ -52,6 +58,7 @@ class Logger(object):
     def __init__(self, logpath='/tmp/', log_backcount=0,
                  log_filesize=10 * 1024 * 1024):
         self.__logger = logging.getLogger(LOGGER_NAME)
+        self.__tornado_gen_log = gen_log
         self.__logger.setLevel(logging.DEBUG)  # set debug as base level
 
         self._handlers = dict()
@@ -85,6 +92,7 @@ class Logger(object):
                 ExactLogLevelFilter(LOG_LEVELS[level]))
 
             self.__logger.addHandler(self._handlers[level])
+            self.__tornado_gen_log.addHandler(self._handlers[level])
 
     def debug(self, message):
         self.__logger.debug(message, exc_info=0)

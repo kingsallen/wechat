@@ -52,3 +52,5 @@ settings['store_options'] = {
     'redis_port': 6379,
     'redis_pass': ''
 }
+
+settings['blocking_log_threshold'] = 0.5

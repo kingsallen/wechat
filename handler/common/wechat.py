@@ -13,8 +13,8 @@ class WechatHandler(BaseHandler):
 
     @handle_response_error
     @gen.coroutine
+    
     def get(self):
-
         self.send_json({
                 "msg": self.constant.RESPONSE_SUCCESS,
                 "data": {

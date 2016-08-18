@@ -7,6 +7,7 @@ from tornado import gen
 from handler.base import BaseHandler
 from utils.common.decorator import handle_response_error, url_valid
 
+
 class LandingHandler(BaseHandler):
 
     """
