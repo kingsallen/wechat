@@ -18,7 +18,7 @@ class LandingHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         signature = str(self.get_argument("wechat_signature", ""))
-        did = str(self.get_argument("did", ""))
+        did = int(self.get_argument("did", 0))
 
         if signature:
             conds = {'signature': signature}
