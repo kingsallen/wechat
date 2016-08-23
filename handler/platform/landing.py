@@ -32,7 +32,7 @@ class LandingHandler(BaseHandler):
 
         company = ObjectDict({
             "logo": self.current_user.company.get("logo"),
-            "name": self.current_user.company.get("name"),
+            "name": self.current_user.company.get("abbreviation"),
             "image": self.current_user.company.get("conf_search_img"),
             "search_seq" : search_seq
         })
