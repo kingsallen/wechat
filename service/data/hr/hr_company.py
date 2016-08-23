@@ -3,10 +3,11 @@
 # Copyright 2016 MoSeeker
 
 from tornado import gen
-from service.data.base import DataService
+from service.data.base import *
 
 class HrCompanyDataService(DataService):
 
+    @cache(ttl=60)
     @gen.coroutine
     def get_company(self, conds, fields=[]):
 
@@ -21,6 +22,7 @@ class HrCompanyDataService(DataService):
         response = yield self.hr_company_dao.get_record_by_conds(conds, fields)
         raise gen.Return(response)
 
+    @cache(ttl=60)
     @gen.coroutine
     def get_companys_list(self, conds, fields, options=[], appends=[], index='', params=[]):
 

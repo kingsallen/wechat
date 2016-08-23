@@ -3,10 +3,11 @@
 # Copyright 2016 MoSeeker
 
 from tornado import gen
-from service.data.base import DataService
+from service.data.base import *
 
 class JobPositionDataService(DataService):
 
+    @cache(ttl=60)
     @gen.coroutine
     def get_position(self, conds, fields=[]):
 
@@ -21,6 +22,7 @@ class JobPositionDataService(DataService):
         response = yield self.job_position_dao.get_record_by_conds(conds, fields)
         raise gen.Return(response)
 
+    @cache(ttl=60)
     @gen.coroutine
     def get_positions_list(self, conds, fields, options=[], appends=[], index='', params=[]):
 

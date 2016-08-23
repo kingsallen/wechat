@@ -3,10 +3,11 @@
 # Copyright 2016 MoSeeker
 
 from tornado import gen
-from service.data.base import DataService
+from service.data.base import *
 
 class HrWxWechatDataService(DataService):
 
+    @cache(ttl=600)
     @gen.coroutine
     def get_wechat(self, conds, fields=[]):
 

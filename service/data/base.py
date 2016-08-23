@@ -20,7 +20,7 @@ import conf.common as constant
 import conf.platform as plat_constant
 import conf.qx as qx_constant
 import conf.help as help_constant
-
+from cache import cache
 
 class Singleton(type):
 

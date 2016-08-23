@@ -3,10 +3,11 @@
 # Copyright 2016 MoSeeker
 
 from tornado import gen
-from service.data.base import DataService
+from service.data.base import *
 
 class HrCompanyConfDataService(DataService):
 
+    @cache(ttl=60)
     @gen.coroutine
     def get_company_conf(self, conds, fields=[]):
 
