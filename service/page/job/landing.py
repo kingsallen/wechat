@@ -8,6 +8,7 @@
 
 import re
 from tornado import gen
+from pypinyin import lazy_pinyin
 from service.page.base import PageService
 
 class LandingPageService(PageService):
@@ -136,20 +137,25 @@ class LandingPageService(PageService):
         fields = ["city", "occupation", "department"]
 
         positions_list = yield self.job_position_ds.get_positions_list(conds, fields)
-        cities = []
+        cities = {}
         occupations = []
         departments = []
         for item in positions_list:
-            cities_tmp = re.split(u'，', item.get("city"))
+            cities_tmp = re.split(u'，|,', item.get("city"))
             for city in cities_tmp:
-                if city and not city in cities:
-                    cities.append(city)
+                if not city:
+                    continue
+                cities[city] = lazy_pinyin(city)[0].upper()
 
             if item.get("occupation") and not item.get("occupation") in occupations:
                 occupations.append(item.get("occupation"))
 
             if item.get("department") and not item.get("department") in departments:
                 departments.append(item.get("department"))
+
+        # 根据拼音首字母排序
+        cities = sorted(cities.items(), key = lambda x:x[1])
+        cities = [city[0] for city in cities]
 
         res = {
             "cities": cities,

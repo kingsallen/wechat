@@ -38,7 +38,7 @@ settings['mysql_password'] = "5F51692091B4031640E18E7C27430E071BC878C8"
 
 # 数据库配置 analytics
 settings['mysql_analytics_host'] = "db-t.dqprism.com"
-settings['mysql_analytics_port'] = 3306
+settings['mysql_analytics_port'] = 3307
 settings['mysql_analytics_database'] = "analytics"
 settings['mysql_analytics_user'] = "daqi"
 settings['mysql_analytics_password'] = "5F51692091B4031640E18E7C27430E071BC878C8"
