@@ -146,6 +146,7 @@ class LandingPageService(PageService):
             for city in cities_tmp:
                 if not city:
                     continue
+                self.logger.debug("pinyin: %s" % pinyin(city, style=pypinyin.FIRST_LETTER))
                 cities[city] = pinyin(city, style=pypinyin.FIRST_LETTER)[0].upper()
 
             if item.get("occupation") and not item.get("occupation") in occupations:

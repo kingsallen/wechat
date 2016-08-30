@@ -22,7 +22,6 @@ import conf.platform as plat_constant
 import conf.qx as qx_constant
 import conf.help as help_constant
 
-
 class Singleton(type):
 
     def __init__(cls, name, bases, dict):
@@ -44,7 +43,7 @@ class PageService:
         初始化dataservice
         :return:
         """
-        self.logger = Logger
+        self.logger = Logger()
         self.settings = settings
         self.constant = constant
         self.plat_constant = plat_constant

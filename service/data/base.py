@@ -39,7 +39,7 @@ class DataService:
 
     def __init__(self):
 
-        self.logger = Logger
+        self.logger = Logger()
         self.constant = constant
         self.plat_constant = plat_constant
         self.qx_constant = qx_constant
