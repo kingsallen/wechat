@@ -141,11 +141,10 @@ class LandingPageService(PageService):
         occupations = []
         departments = []
         for item in positions_list:
-            cities_tmp = re.split(u'，', item.get("city"))
+            cities_tmp = re.split(u'，|,', item.get("city"))
             for city in cities_tmp:
                 if not city:
                     continue
-                self.logger.debug("pinyin: %s" % lazy_pinyin(city))
                 cities[city] = lazy_pinyin(city)[0].upper()
 
             if item.get("occupation") and not item.get("occupation") in occupations:
@@ -155,10 +154,8 @@ class LandingPageService(PageService):
                 departments.append(item.get("department"))
 
         # 根据拼音首字母排序
-        self.logger.debug("cities: %s" % cities)
         cities = sorted(cities.items(), key = lambda x:x[1])
         cities = [city[0] for city in cities]
-        self.logger.debug("cities: %s" % cities)
 
         res = {
             "cities": cities,
