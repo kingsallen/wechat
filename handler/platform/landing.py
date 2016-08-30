@@ -37,8 +37,4 @@ class LandingHandler(BaseHandler):
             "search_seq" : search_seq
         })
 
-        self.send_json({
-            "company": company
-        })
-
-        # self.render("refer/neo_weixin/position/company_search.html", company=company, current_did=did)
+        self.render("refer/neo_weixin/position/company_search.html", company=company, current_did=did)
