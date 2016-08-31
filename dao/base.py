@@ -57,7 +57,7 @@ class BaseDao(DB):
         :param sql SQl语句
         :return: cursor游标
         """
-        self.logger.warn("[warning][{0}][start][time: {1}][sql: {2}]".format(self.__class__.__module__, curr_now(), sql))
+        # self.logger.warn("[warning][{0}][start][time: {1}][sql: {2}]".format(self.__class__.__module__, curr_now(), sql))
         cursor = yield self.analytics_pool.execute(sql, params)
         raise gen.Return(cursor)
 
@@ -71,7 +71,7 @@ class BaseDao(DB):
         :param sql SQl语句
         :return: cursor游标
         """
-        self.logger.warn("[warning][{0}][start][time: {1}][sql: {2}]".format(self.__class__.__module__, curr_now(), sql))
+        # self.logger.warn("[warning][{0}][start][time: {1}][sql: {2}]".format(self.__class__.__module__, curr_now(), sql))
         cursor = yield self.pool.execute(sql, params)
         raise gen.Return(cursor)
 

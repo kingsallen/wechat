@@ -8,7 +8,7 @@ from service.page.base import PageService
 class JobCustomPageService(PageService):
 
     @gen.coroutine
-    def get_customs_list(self, conds, fields, options=[], appends=[]):
+    def get_custom(self, conds, fields):
 
         """
         获得职位自定义字段
@@ -19,6 +19,5 @@ class JobCustomPageService(PageService):
         :return:
         """
 
-        customs_list_res = yield self.job_custom_ds.get_customs_list(conds, fields, options, appends)
-        customs_list = [item.get("name") for item in customs_list_res]
-        raise gen.Return(customs_list)
+        custom = yield self.job_custom_ds.get_custom(conds, fields)
+        raise gen.Return(custom)
