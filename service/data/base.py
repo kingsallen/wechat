@@ -20,18 +20,10 @@ import conf.common as constant
 import conf.platform as plat_constant
 import conf.qx as qx_constant
 import conf.help as help_constant
+
 from cache import cache
+from utils.common.singleton import Singleton
 
-class Singleton(type):
-
-    def __init__(cls, name, bases, dict):
-        super(Singleton, cls).__init__(name, bases, dict)
-        cls._instance = None
-
-    def __call__(cls, *args, **kw):
-        if cls._instance is None:
-            cls._instance = super(Singleton, cls).__call__(*args, **kw)
-        return cls._instance
 
 class DataService:
 

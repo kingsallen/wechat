@@ -10,23 +10,13 @@ Model基类，封装对数据库的访问，对传入参数的处理
 from tornado import gen
 from tornado.util import ObjectDict
 
-from utils.common.db import DB
-from utils.tool.date_tool import curr_now
 import conf.common as constant
 import conf.platform as plat_constant
 import conf.qx as qx_constant
+from utils.common.db import DB
+from utils.common.singleton import Singleton
+from utils.tool.date_tool import curr_now
 
-
-class Singleton(type):
-
-    def __init__(cls, name, bases, dict):
-        super(Singleton, cls).__init__(name, bases, dict)
-        cls._instance = None
-
-    def __call__(cls, *args, **kw):
-        if cls._instance is None:
-            cls._instance = super(Singleton, cls).__call__(*args, **kw)
-        return cls._instance
 
 class BaseDao(DB):
 
@@ -35,7 +25,6 @@ class BaseDao(DB):
     def __init__(self):
 
         """
-        配置数据库连接，使用tornado-mysql异步连接池
         :return:
         """
 
@@ -47,21 +36,6 @@ class BaseDao(DB):
         self.qx_constant = qx_constant
 
     @gen.coroutine
-    def analytics_query(self, sql, params):
-
-        """
-
-        使用输入的SQL语句进行查询
-        使用连接池的方式执行sql，可返回rows、lastrowid等
-        临时方案：提供mycat对analytics的支持
-        :param sql SQl语句
-        :return: cursor游标
-        """
-        # self.logger.warn("[warning][{0}][start][time: {1}][sql: {2}]".format(self.__class__.__module__, curr_now(), sql))
-        cursor = yield self.analytics_pool.execute(sql, params)
-        raise gen.Return(cursor)
-
-    @gen.coroutine
     def query(self, sql, params):
 
         """
@@ -71,7 +45,7 @@ class BaseDao(DB):
         :param sql SQl语句
         :return: cursor游标
         """
-        # self.logger.warn("[warning][{0}][start][time: {1}][sql: {2}]".format(self.__class__.__module__, curr_now(), sql))
+        self.logger.warn("[warning][{0}][start][time: {1}][sql: {2}]".format(self.__class__.__module__, curr_now(), sql))
         cursor = yield self.pool.execute(sql, params)
         raise gen.Return(cursor)
 

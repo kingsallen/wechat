@@ -16,22 +16,12 @@ pageservice之间可以相互调用，但不建议
 import importlib
 
 from utils.common.log import Logger
-from settings import settings
+from setting import settings
 import conf.common as constant
 import conf.platform as plat_constant
 import conf.qx as qx_constant
 import conf.help as help_constant
-
-class Singleton(type):
-
-    def __init__(cls, name, bases, dict):
-        super(Singleton, cls).__init__(name, bases, dict)
-        cls._instance = None
-
-    def __call__(cls, *args, **kw):
-        if cls._instance is None:
-            cls._instance = super(Singleton, cls).__call__(*args, **kw)
-        return cls._instance
+from utils.common.singleton import Singleton
 
 class PageService:
 

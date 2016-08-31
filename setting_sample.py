@@ -15,7 +15,7 @@ from tornado.options import define
 
 define("port", default=8000, help="run on the given port", type=int)
 define("logpath", default="logs/", help="log path")
-# define("env", default="platform", help="wechat product")
+define("env", default="platform", help="wechat product")
 
 settings = dict()
 settings['xsrf_cookies'] = True
@@ -29,19 +29,13 @@ settings['template_path'] = os.path.join(settings['root_path'], "template")
 settings['static_path'] = os.path.join(settings['root_path'], "static")
 settings['static_upload_path'] = os.path.join(settings['static_path'], "upload")
 
-# 数据库配置 dqv4
+# 数据库配置
 settings['mysql_host'] = "db-t.dqprism.com"
 settings['mysql_port'] = 3307
-settings['mysql_database'] = "dqv4"
+settings['mysql_database_dqv4'] = "dqv4"
+settings['mysql_database_analytics'] = "analytics"
 settings['mysql_user'] = "daqi"
 settings['mysql_password'] = "5F51692091B4031640E18E7C27430E071BC878C8"
-
-# 数据库配置 analytics
-settings['mysql_analytics_host'] = "db-t.dqprism.com"
-settings['mysql_analytics_port'] = 3307
-settings['mysql_analytics_database'] = "analytics"
-settings['mysql_analytics_user'] = "daqi"
-settings['mysql_analytics_password'] = "5F51692091B4031640E18E7C27430E071BC878C8"
 
 # session配置
 settings['session'] = True
@@ -50,7 +44,9 @@ settings['session_timeout'] = 2592000
 settings['store_options'] = {
     'redis_host': '127.0.0.1',
     'redis_port': 6379,
-    'redis_pass': ''
+    'redis_pass': '',
+    'max_connections': 500
 }
 
+# tornado log配置
 settings['blocking_log_threshold'] = 0.5

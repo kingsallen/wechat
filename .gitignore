@@ -1,7 +1,7 @@
 ### Project Specific ##
 logs/
 template/
-settings.py
+setting.py
 
 ### PyCharm ###
 /.idea

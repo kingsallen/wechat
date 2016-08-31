@@ -28,12 +28,10 @@ import tornado.web
 import tornado.ioloop
 import tornado.options
 from tornado.options import options
-import tornadis
 
-from settings import settings
+from setting import settings
 from route import routes
 from utils.common.log import Logger
-# from utils.common.session import Session
 
 tornado.options.parse_command_line()
 logger = Logger(logpath=options.logpath)
@@ -48,16 +46,6 @@ class Application(tornado.web.Application):
         self.settings = settings
 
         self.logger = logger
-
-        # self.redis_cli = Session()
-
-        # # 异步redis客户端
-        # self.redis_cli = tornadis.ClientPool(
-        #     dict(port=settings['redis_port'],
-        #          host=settings['redis_host'],
-        #          connect_timeout=settings['connect_timeout'])
-        # )
-
 
 def main():
 

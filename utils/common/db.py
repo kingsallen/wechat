@@ -9,9 +9,9 @@ DB公共处理类
 """
 import ujson
 
-from tornado_mysql import pools, cursors
+from tornado_mysql import pools, cursors, connect
 
-from settings import settings
+from setting import settings
 from utils.common.log import Logger
 from utils.tool.date_tool import is_time_valid
 import conf.common as constant
@@ -25,12 +25,13 @@ class DB(object):
                  port=settings['mysql_port'],
                  user=settings['mysql_user'],
                  passwd=settings['mysql_password'],
-                 db=settings['mysql_database'],
+                 db=settings['mysql_database_dqv4'],
                  cursorclass=cursors.DictCursor,
                  charset='utf8mb4'),
             max_idle_connections=1,
             max_recycle_sec=3
         )
+
         self.logger = Logger()
 
     def getConds(self, conds, conds_params=[]):
@@ -47,7 +48,6 @@ class DB(object):
         :param conds_params: 字符串形式的conds对应的params值，防SQL注入
         :return: 返回转化后的SQL限制条件（数组）和params值 可以防止SQL注入，不符合条件的返回None
         """
-
         if conds is None or not (isinstance(conds, dict) or isinstance(conds, str)):
             self.logger.error("Error:[getConds][conds type error], conds:{0}, type:{1}".format(conds, type(conds)))
             return False, ()
