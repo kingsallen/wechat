@@ -2,6 +2,10 @@
 
 # Copyright 2016 MoSeeker
 
+import os
+import glob
+import re
+
 import ujson
 import importlib
 import time
@@ -13,31 +17,30 @@ import conf.platform as plat_constant
 import conf.qx as qx_constant
 import conf.help as help_constant
 
-class BaseHandler(web.RequestHandler):
+# 动态创建类,加载全局pageservice方法
+obDict = {}
+d = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)) + "/service/page/**/*.py"
+for module in filter(lambda x: not x.endswith("init__.py"), glob.glob(d)):
+    p = module.split("/")[-2]
+    m = module.split("/")[-1].split(".")[0]
+    m_list = [item.title() for item in re.split(u"_", m)]
+    pmPS = "".join(m_list) + "PageService"
+    pmObj = m + "_ps"
+    obDict.update({
+        pmObj: getattr(importlib.import_module('service.page.{0}.{1}'.format(p, m)), pmPS)()
+    })
 
-    # Initialization and properties
+_base = type("_base", (web.RequestHandler,), obDict)
+
+
+class BaseHandler(_base):
+
     def __init__(self, application, request, **kwargs):
         super(BaseHandler, self).__init__(application, request, **kwargs)
         self.json_args = None
         self.params = None
         self._log_info = None
         self.start_time = time.time()
-
-        # if self.settings.get("session"):
-        #     self.session = Session(self.application.session_manager, self, 1)
-        #     self.session.save()
-        # pageservice实例化
-
-        self.company_ps = getattr(importlib.import_module('service.page.{0}.{1}'.format('hr', 'company')),
-                                  'CompanyPageService')()
-        self.wechat_ps = getattr(importlib.import_module('service.page.{0}.{1}'.format('hr', 'wechat')),
-                                 'WechatPageService')()
-        self.position_ps = getattr(importlib.import_module('service.page.{0}.{1}'.format('job', 'position')),
-                                   'PositionPageService')()
-        self.job_custom_ps = getattr(importlib.import_module('service.page.{0}.{1}'.format('job', 'job_custom')),
-                                   'JobCustomPageService')()
-        self.landing_ps = getattr(importlib.import_module('service.page.{0}.{1}'.format('job', 'landing')),
-                                   'LandingPageService')()
 
     @property
     def logger(self):
@@ -46,10 +49,10 @@ class BaseHandler(web.RequestHandler):
     @property
     def settings(self):
         return self.application.settings
-    #
-    # @property
-    # def redis(self):
-    #     return self.application.redis_cli
+
+    @property
+    def env(self):
+        return self.application.env
 
     @property
     def constant(self):
@@ -62,6 +65,10 @@ class BaseHandler(web.RequestHandler):
     @property
     def qx_constant(self):
         return qx_constant
+
+    @property
+    def help_constant(self):
+        return help_constant
 
     @property
     def log_info(self):

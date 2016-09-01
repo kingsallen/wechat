@@ -3,6 +3,7 @@
 import datetime
 import decimal
 import json
+from tornado.util import ObjectDict
 
 class JSONEncoder(json.JSONEncoder):
 
@@ -20,7 +21,9 @@ class JSONEncoder(json.JSONEncoder):
 
 def json_dumps(p_dict):
 
-    if not isinstance(p_dict, dict):
-        raise ValueError("p_dict is not a dict instance.")
+    if not (isinstance(p_dict, dict)
+            or isinstance(p_dict, list)
+            or isinstance(p_dict, ObjectDict)):
+        raise ValueError("p_dict is not a required instance.")
 
     return JSONEncoder().encode(p_dict)

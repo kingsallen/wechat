@@ -13,7 +13,9 @@ pageservice之间可以相互调用，但不建议
 可以根据业务类型创建pageservice
 """
 
+import re
 import importlib
+import glob
 
 from utils.common.log import Logger
 from setting import settings
@@ -38,17 +40,14 @@ class PageService:
         self.constant = constant
         self.plat_constant = plat_constant
         self.qx_constant = qx_constant
+        self.help_constant = help_constant
 
-        self.hr_company_ds = getattr(importlib.import_module('service.data.{0}.{1}'.format('hr', 'hr_company')),
-                                     'HrCompanyDataService')()
-        self.hr_company_conf_ds = getattr(importlib.import_module('service.data.{0}.{1}'.format('hr', 'hr_company_conf')),
-                                          'HrCompanyConfDataService')()
-        self.hr_wx_wechat_ds = getattr(importlib.import_module('service.data.{0}.{1}'.format('hr', 'hr_wx_wechat')),
-                                       'HrWxWechatDataService')()
-        self.config_sys_theme_ds = getattr(importlib.import_module('service.data.{0}.{1}'.format('config', 'config_sys_theme')),
-                                       'ConfigSysThemeDataService')()
-        self.job_position_ds = getattr(importlib.import_module('service.data.{0}.{1}'.format('job', 'job_position')),
-                                       'JobPositionDataService')()
-        self.job_custom_ds = getattr(importlib.import_module('service.data.{0}.{1}'.format('job', 'job_custom')),
-                                       'JobCustomDataService')()
+        d = settings['root_path'] + "/service/data/**/*.py"
+        for module in filter(lambda x: not x.endswith("init__.py"), glob.glob(d)):
+            p = module.split("/")[-2]
+            m = module.split("/")[-1].split(".")[0]
+            m_list = [item.title() for item in re.split(u"_", m)]
+            pmDS = "".join(m_list) + "DataService"
+            pmObj = m + "_ds"
 
+            setattr(self, pmObj, getattr(importlib.import_module('service.data.{0}.{1}'.format(p, m)), pmDS)())

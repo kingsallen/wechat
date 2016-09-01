@@ -17,9 +17,14 @@ constant配置常量规范：
 
 ## 返回错误
 
-### status_code默认错误返回
+## status_code默认错误返回
 RESPONSE_SUCCESS = u"success"
 RESPONSE_FAILED = u"failed"
+
+## 环境
+ENV_PLATFORM = u"platform"
+ENV_QX = u"qx"
+ENV_HELP = u"help"
 
 ## 入库字段类型
 TYPE_INT = 1

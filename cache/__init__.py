@@ -1,4 +1,11 @@
-# -*- coding: utf-8 -*-
+# coding=utf-8
+
+# Copyright 2016 MoSeeker
+
+"""
+:author 赵中华（zhaozhonghua@moseeker.com）
+:date 2016.08.30
+"""
 
 import hashlib
 import redis
@@ -42,7 +49,12 @@ class BaseCache(object):
     def get(self, key, default=None):
         key = self.key_name(key)
         value = self._get(key, default)
-        return ObjectDict(value) if value else default
+        if isinstance(value, ObjectDict) or isinstance(value, dict):
+            return ObjectDict(value)
+        elif isinstance(value, list):
+            return [ObjectDict(item) for item in value]
+        else:
+            return default
 
     def set(self, key, value, ttl=None):
         key = self.key_name(key)
