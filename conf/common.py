@@ -22,6 +22,7 @@ RESPONSE_SUCCESS = u"success"
 RESPONSE_FAILED = u"failed"
 
 ## 环境
+ENV = u"new_wechat"
 ENV_PLATFORM = u"platform"
 ENV_QX = u"qx"
 ENV_HELP = u"help"

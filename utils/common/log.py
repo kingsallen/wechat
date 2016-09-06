@@ -14,6 +14,7 @@ import os
 from logging.handlers import TimedRotatingFileHandler
 
 from tornado.log import gen_log
+from utils.common.alarm import Alarm
 
 # --------------------------------------------------------------------------
 #  Configurations
@@ -105,6 +106,7 @@ class Logger(object):
 
     def error(self, message):
         self.__logger.error(message, exc_info=1)
+        Alarm.biu(message)
 
     def record(self, message):
         self.__logger.log(

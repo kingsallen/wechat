@@ -30,8 +30,12 @@ import tornado.options
 from tornado.options import options
 
 from setting import settings
-import conf.common as const
-from route import platform_routes, qx_routes, help_routes, common_routes
+import conf.common as constant
+import conf.platform as plat_constant
+import conf.qx as qx_constant
+import conf.help as help_constant
+
+from route import platform_routes, qx_routes, help_routes
 from utils.common.log import Logger
 
 tornado.options.parse_command_line()
@@ -43,9 +47,9 @@ class Application(tornado.web.Application):
     def __init__(self):
 
         # 选择加载的 routes
-        if options.env == const.ENV_PLATFORM:
+        if options.env == constant.ENV_PLATFORM:
             tornado.web.Application.__init__(self, platform_routes, **settings)
-        elif options.env == const.ENV_QX:
+        elif options.env == constant.ENV_QX:
             tornado.web.Application.__init__(self, qx_routes, **settings)
         else:
             tornado.web.Application.__init__(self, help_routes, **settings)
@@ -53,6 +57,10 @@ class Application(tornado.web.Application):
         self.settings = settings
         self.logger = logger
         self.env = options.env
+        self.constant = constant
+        self.plat_constant = plat_constant
+        self.qx_constant = qx_constant
+        self.help_constant = help_constant
 
 def main():
 

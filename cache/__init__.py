@@ -18,6 +18,7 @@ from tornado.util import ObjectDict
 from tornado.locks import Semaphore
 
 from setting import settings
+import conf.common as constant
 
 sem = Semaphore(1)
 
@@ -29,13 +30,13 @@ class BaseCache(object):
             cls._instance = orig.__new__(cls, *args, **kwargs)
         return cls._instance
 
-    def __init__(self, redis=None, prefix='neoweixinrefer', methods=('get', 'set', 'delete', 'exists')):
+    def __init__(self, redis=None, methods=('get', 'set', 'delete', 'exists')):
 
         for method_name in methods:
             assert hasattr(redis, method_name)
 
         self.__redis = redis
-        self.prefix = prefix
+        self.prefix = constant.ENV
 
     def key_name(self, key):
         return '{0}:{1}'.format(self.prefix, key)

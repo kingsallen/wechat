@@ -11,11 +11,7 @@ import importlib
 import time
 from tornado import gen, web
 from tornado.util import ObjectDict
-
-import conf.common as constant
-import conf.platform as plat_constant
-import conf.qx as qx_constant
-import conf.help as help_constant
+from urlparse import urljoin
 
 # 动态创建类,加载全局pageservice方法
 obDict = {}
@@ -56,19 +52,19 @@ class BaseHandler(_base):
 
     @property
     def constant(self):
-        return constant
+        return self.application.constant
 
     @property
     def plat_constant(self):
-        return plat_constant
+        return self.application.plat_constant
 
     @property
     def qx_constant(self):
-        return qx_constant
+        return self.application.qx_constant
 
     @property
     def help_constant(self):
-        return help_constant
+        return self.application.help_constant
 
     @property
     def log_info(self):
@@ -81,7 +77,6 @@ class BaseHandler(_base):
         if dict(value):
             self._log_info = dict(value)
 
-    # Public API
     def prepare(self):
         self.json_args = None
         headers = self.request.headers
@@ -216,28 +211,31 @@ class BaseHandler(_base):
 
     def write_error(self, status_code, **kwargs):
 
-        # TODO 暂时添加错误页面
-        self.render("refer/common/info.html", status_code=status_code, css="warning", info="Ta在地球上消失了")
+        '''
+        错误页
+        :param status_code: http_status
+        :param kwargs:
+        :return:
 
-        return
+        usage：
+            403（用户未被授权请求） Forbidden: Request failed because user does not have authorization to access a specific resource
+            404（资源不存在）Resource not found
+            500（服务器错误） Internal Server Error: Something went wrong on the server, check status site and/or report the issue
+        '''
 
-
-
-        # if status_code == 403:
-        #     self.render('error/404.html',
-        #                 status_code=status_code,
-        #                 message="",
-        #                 title=status_code)
-        # elif status_code == 404:
-        #     self.render('error/404.html',
-        #                 status_code=status_code,
-        #                 message="",
-        #                 title=status_code)
-        # else:
-        #     self.render('error/500.html',
-        #                 status_code=status_code,
-        #                 message="",
-        #                 title=status_code)
+        if status_code == 403:
+            self.render('refer/common/info.html',
+                        status_code=status_code,
+                        css="warning",
+                        info="用户未被授权请求")
+        elif status_code == 404:
+            self.render('common/systemmessage.html',
+                        status_code=status_code,
+                        message="Ta在地球上消失了")
+        else:
+            self.render('common/systemmessage.html',
+                        status_code=status_code,
+                        message="正在努力维护服务器中")
 
     def render(self, template_name, status_code=200, **kwargs):
         self.log_info = {"res_type": "html"}
@@ -253,9 +251,26 @@ class BaseHandler(_base):
         self.write(chunk)
         return
 
-    def static_url(self, path, include_host=None, protocol="//", **kwargs):
-        static_domain = self.settings["static_domain"]
-        return protocol + static_domain + "/" + path
+    def static_url(self, path, include_host=None, **kwargs):
+        """
+        可通过该方法来拼接静态 url
+        :param path:
+        :param include_host:
+        :param kwargs:
+        :return:
+        """
+
+        if not path:
+            return None
+
+        if not path.startswith("http"):
+            if "mid_path" in kwargs:
+                path = os.path.join(kwargs['mid_path'], path)
+            path = urljoin(self.settings['static_domain'], path)
+        if not path.startswith("http") and include_host is not None:
+            path = include_host + ":" + path
+
+        return path
 
     def _get_info_header(self, log_params):
         request = self.request
