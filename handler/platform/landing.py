@@ -26,7 +26,7 @@ class LandingHandler(BaseHandler):
             "candidate_source": self.get_argument("candidate_source", ''),
             "employment_type": self.get_argument("employment_type", ''),
             "degree": self.get_argument("degree", ''),
-            "did": self.get_argument("did", ''),
+            "did": int(self.get_argument("did")) if self.get_argument("did") else 0,
             "custom": self.get_argument("custom", '')
         })
 
