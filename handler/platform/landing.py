@@ -18,7 +18,17 @@ class LandingHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         signature = str(self.get_argument("wechat_signature", ""))
-        did = int(self.get_argument("did", 0))
+        selected = ObjectDict({
+            "city": self.get_argument("city", ''),
+            "salary": self.get_argument("salary", ''),
+            "occupation": self.get_argument("occupation", ''),
+            "department": self.get_argument("department", ''),
+            "candidate_source": self.get_argument("candidate_source", ''),
+            "employment_type": self.get_argument("employment_type", ''),
+            "degree": self.get_argument("degree", ''),
+            "did": self.get_argument("did", ''),
+            "custom": self.get_argument("custom", '')
+        })
 
         if signature:
             conds = {'signature': signature}
@@ -28,7 +38,7 @@ class LandingHandler(BaseHandler):
             self.write_error(404)
             return
 
-        search_seq = yield self.landing_ps.get_landing_item(self.current_user.company, company_id)
+        search_seq = yield self.landing_ps.get_landing_item(self.current_user.company, company_id, selected)
 
         company = ObjectDict({
             "logo": self.current_user.company.get("logo"),
@@ -37,4 +47,4 @@ class LandingHandler(BaseHandler):
             "search_seq" : search_seq
         })
 
-        self.render("refer/neo_weixin/position/company_search.html", company=company, current_did=did)
+        self.render("refer/neo_weixin/position/company_search.html", company=company)
