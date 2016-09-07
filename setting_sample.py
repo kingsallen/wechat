@@ -22,7 +22,7 @@ settings['xsrf_cookies'] = True
 settings['cookie_secret'] = "EAB1D2AB05EEF04D35BA5FDF789DD6A3"
 settings['debug'] = True
 settings['log_level'] = "DEBUG"
-settings['static_domain'] = "static-t.dqprism.com"
+settings['static_domain'] = "static1.dqprism.com"
 
 settings['root_path'] = os.path.join(os.path.dirname(__file__), "")
 settings['template_path'] = os.path.join(settings['root_path'], "template")
@@ -30,7 +30,7 @@ settings['static_path'] = os.path.join(settings['root_path'], "static")
 settings['static_upload_path'] = os.path.join(settings['static_path'], "upload")
 
 # 数据库配置
-settings['mysql_host'] = "db-t.dqprism.com"
+settings['mysql_host'] = "db1.dqprism.com"
 settings['mysql_port'] = 3307
 settings['mysql_database_dqv4'] = "dqv4"
 settings['mysql_user'] = "daqi"
@@ -49,3 +49,6 @@ settings['store_options'] = {
 
 # tornado log配置
 settings['blocking_log_threshold'] = 0.5
+
+# 基础服务
+settings['infra'] = "http://api1.dqprism.com"
