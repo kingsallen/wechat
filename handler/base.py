@@ -281,6 +281,7 @@ class BaseHandler(_base):
 
         log_info_common = ObjectDict(
             elapsed_time="%.4f" % (time.time() - self.start_time),
+            product=self.env,
             useragent=request.headers.get('User-Agent'),
             referer=request.headers.get('Referer'),
             remote_ip=(

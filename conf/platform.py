@@ -24,7 +24,7 @@ LANDING_INDEX_DEPARTMENT = 4
 LANDING_INDEX_CANDIDATE = 5 # 招聘类型
 LANDING_INDEX_EMPLOYMENT = 6 # 工作性质
 LANDING_INDEX_DEGREE = 7
-LANGDING_INDEX_CHILD_COMPANY = 8
+LANDING_INDEX_CHILD_COMPANY = 8
 LANDING_INDEX_CUSTOM = 9
 
 #### 栏目设置
@@ -36,7 +36,7 @@ LANDING = {
     LANDING_INDEX_CANDIDATE : {"name": u"招聘类型", "chpe": u"类型"},
     LANDING_INDEX_EMPLOYMENT : {"name": u"工作性质", "chpe": u"性质"},
     LANDING_INDEX_DEGREE : {"name": u"学历要求", "chpe": u"学历"},
-    LANGDING_INDEX_CHILD_COMPANY : {"name": u"子公司名称", "chpe": u"公司"},
+    LANDING_INDEX_CHILD_COMPANY : {"name": u"子公司名称", "chpe": u"公司"},
     LANDING_INDEX_CUSTOM : {"name": u"企业自定义字段", "chpe": u"自定义"},
 }
 

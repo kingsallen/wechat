@@ -14,11 +14,13 @@ from service.page.base import PageService
 class LandingPageService(PageService):
 
     @gen.coroutine
-    def get_landing_item(self, company, company_id):
+    def get_landing_item(self, company, company_id, selected):
 
         """
         根据HR设置获得搜索页页面栏目排序
-        :param search_seq:
+        :param company:
+        :param company_id:
+        :param selected
         :return:
         """
 
@@ -33,6 +35,7 @@ class LandingPageService(PageService):
                 city['name'] = self.plat_constant.LANDING.get(index).get("chpe")
                 city['values'] = result.get("cities")
                 city['key'] = "city"
+                city['selected'] = selected.get("city")
                 res.append(city)
 
             # 薪资范围
@@ -41,6 +44,7 @@ class LandingPageService(PageService):
                 salary['name'] = self.plat_constant.LANDING.get(index).get("chpe")
                 salary['values'] = [{"value": k, "text": v.get("name")} for k, v in sorted(self.plat_constant.SALARY.items())]
                 salary['key'] = "salary"
+                salary['selected'] = selected.get("salary")
                 res.append(salary)
 
             # 职位职能
@@ -49,6 +53,7 @@ class LandingPageService(PageService):
                 occupation['name'] = self.plat_constant.LANDING.get(index).get("chpe")
                 occupation['values'] = result.get("occupations")
                 occupation['key'] = "occupation"
+                occupation['selected'] = selected.get("occupation")
                 res.append(occupation)
 
             # 所属部门
@@ -57,6 +62,7 @@ class LandingPageService(PageService):
                 department['name'] = self.plat_constant.LANDING.get(index).get("chpe")
                 department['values'] = result.get("departments")
                 department['key'] = "department"
+                department['selected'] = selected.get("department")
                 res.append(department)
 
             # 招聘类型
@@ -65,6 +71,7 @@ class LandingPageService(PageService):
                 candidate_source['name'] = self.plat_constant.LANDING.get(index).get("chpe")
                 candidate_source['values'] = [{"value": k, "text": v} for k, v in sorted(self.constant.CANDIDATE_SOURCE.items())]
                 candidate_source['key'] = "candidate_source"
+                candidate_source['selected'] = selected.get("candidate_source")
                 res.append(candidate_source)
 
             # 工作性质
@@ -73,6 +80,7 @@ class LandingPageService(PageService):
                 employment_type['name'] = self.plat_constant.LANDING.get(index).get("chpe")
                 employment_type['values'] = [{"value": k, "text": v} for k, v in sorted(self.constant.EMPLOYMENT_TYPE.items())]
                 employment_type['key'] = "employment_type"
+                employment_type['selected'] = selected.get("employment_type")
                 res.append(employment_type)
 
             # 学历要求
@@ -81,10 +89,11 @@ class LandingPageService(PageService):
                 degree['name'] = self.plat_constant.LANDING.get(index).get("chpe")
                 degree['values'] = [{"value": k, "text": v} for k, v in sorted(self.plat_constant.DEGREE.items())]
                 degree['key'] = "degree"
+                degree['selected'] = selected.get("degree")
                 res.append(degree)
 
             # 子公司名称
-            elif index == self.plat_constant.LANGDING_INDEX_CHILD_COMPANY:
+            elif index == self.plat_constant.LANDING_INDEX_CHILD_COMPANY:
                 conds = {
                     "parent_id": company_id,
                     "disable": self.constant.STATUS_INUSE
@@ -102,6 +111,7 @@ class LandingPageService(PageService):
                 child_company['values'] = child_company_values + list(child_company_res)
                 child_company['name'] = self.plat_constant.LANDING.get(index).get("chpe")
                 child_company['key'] = "did"
+                child_company['selected'] = selected.get("did")
                 res.append(child_company)
 
             # 企业自定义字段，并且配置了企业自定义字段标题
@@ -116,6 +126,7 @@ class LandingPageService(PageService):
                 custom['name'] = company.get("conf_job_custom_title")
                 custom['values'] = yield self.get_customs_list(conds, fields)
                 custom['key'] = "custom"
+                custom['selected'] = selected.get("custom")
                 res.append(custom)
 
         raise gen.Return(res)
