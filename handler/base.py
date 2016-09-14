@@ -275,6 +275,7 @@ class BaseHandler(_base):
     def _get_info_header(self, log_params):
         request = self.request
         req_params = request.arguments
+        type_wechat, type_mobile = self.depend_wechat()
 
         if req_params and req_params.get('password', 0) != 0:
             req_params['password'] = 'xxxxxx'
@@ -282,6 +283,8 @@ class BaseHandler(_base):
         log_info_common = ObjectDict(
             elapsed_time="%.4f" % (time.time() - self.start_time),
             product=self.env,
+            type_wechat=type_wechat,
+            type_mobile=type_mobile,
             useragent=request.headers.get('User-Agent'),
             referer=request.headers.get('Referer'),
             remote_ip=(
@@ -297,3 +300,26 @@ class BaseHandler(_base):
 
         log_params.update(log_info_common)
         return ujson.encode(log_params)
+
+    def depend_wechat(self):
+
+        """
+        判断用户UA是否为微信客户端
+        :return:
+        """
+        wechat = self.constant.CLIENT_NON_WECHAT
+        mobile = self.constant.CLIENT_TYPE_UNKNOWN
+
+        try:
+            useragent = self.request.headers.get('User-Agent')
+            if "MicroMessenger" in useragent:
+                if "iPhone" in useragent:
+                    mobile = self.constant.CLIENT_TYPE_IOS
+                elif "Android" in useragent:
+                    mobile = self.constant.CLIENT_TYPE_ANDROID
+                wechat = self.constant.CLIENT_WECHAT
+
+        except Exception:
+            pass
+
+        return wechat, mobile

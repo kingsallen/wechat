@@ -161,8 +161,12 @@ class LandingPageService(PageService):
             if item.get("occupation") and not item.get("occupation") in occupations:
                 occupations.append(item.get("occupation"))
 
-            if item.get("department") and not item.get("department") in departments:
-                departments.append(item.get("department"))
+            if item.get("department"):
+                departments_tmp = re.split(u'，|,', item.get("department"))
+                for department in departments_tmp:
+                    if not department or item.get("department") in departments:
+                        continue
+                    departments.append(department)
 
         # 根据拼音首字母排序
         cities = sorted(cities.items(), key = lambda x:x[1])

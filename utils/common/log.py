@@ -106,6 +106,7 @@ class Logger(object):
 
     def error(self, message):
         self.__logger.error(message, exc_info=1)
+        # error 日志通过实时报警通知
         Alarm.biu(message)
 
     def record(self, message):

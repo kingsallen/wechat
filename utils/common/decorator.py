@@ -10,7 +10,7 @@ from tornado.util import ObjectDict
 import conf.common as constant
 
 
-def handle_response_error(method):
+def handle_response(method):
 
     @functools.wraps(method)
     @gen.coroutine
@@ -30,10 +30,10 @@ def handle_response_error(method):
 
     return wrapper
 
-def url_valid(func):
+def handle_env(func):
 
     """
-    # TODO 功能待调整
+    # 装置环境,包括 wechat, qxuser, wxuser, company, recom, employee
     :param func:
     :return:
     """

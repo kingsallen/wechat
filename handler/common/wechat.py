@@ -6,14 +6,14 @@ from handler.base import BaseHandler
 
 import hashlib
 from tornado import gen
-from utils.common.decorator import handle_response_error
+from utils.common.decorator import handle_response
 
 
 class WechatHandler(BaseHandler):
 
-    @handle_response_error
+    @handle_response
     @gen.coroutine
-    
+
     def get(self):
         self.send_json({
                 "msg": self.constant.RESPONSE_SUCCESS,

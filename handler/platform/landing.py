@@ -5,7 +5,7 @@
 from tornado.util import ObjectDict
 from tornado import gen
 from handler.base import BaseHandler
-from utils.common.decorator import handle_response_error, url_valid
+from utils.common.decorator import handle_response, url_valid
 
 
 class LandingHandler(BaseHandler):
@@ -14,8 +14,7 @@ class LandingHandler(BaseHandler):
     企业搜索页
     """
 
-    @url_valid
-    @handle_response_error
+    @handle_response
     @gen.coroutine
     def get(self):
         signature = str(self.get_argument("wechat_signature", ""))

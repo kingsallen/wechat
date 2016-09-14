@@ -9,7 +9,7 @@ DB公共处理类
 """
 import ujson
 
-from tornado_mysql import pools, cursors, connect
+from tornado_mysql import pools, cursors
 
 from setting import settings
 from utils.common.log import Logger

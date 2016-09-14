@@ -24,10 +24,6 @@ class BaseDao(DB):
 
     def __init__(self):
 
-        """
-        :return:
-        """
-
         super(BaseDao,self).__init__()
         self.fields_map = {}
         self.table = ''
