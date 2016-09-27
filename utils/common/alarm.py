@@ -6,6 +6,7 @@
 # @DES     : 第三方报警系统,已添加 salckman
 
 # Copyright 2016 MoSeeker
+from tornado import gen
 
 import json
 from utils.tool.http_tool import http_post
@@ -20,6 +21,7 @@ class Alarm(object):
     def __init__(self, webhook_url):
         self._webhook_url = webhook_url
 
+    @gen.coroutine
     def biu(self, text, **kwargs):
         """
         slackman 报警
@@ -37,7 +39,7 @@ class Alarm(object):
                 'icon_emoji': kwargs.get('emoji')
             })
 
-            http_post(route=self._webhook_url, jdata=payload)
+            yield http_post(route=self._webhook_url, jdata=payload)
 
         return
 

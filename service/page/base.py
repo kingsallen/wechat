@@ -17,12 +17,12 @@ import re
 import importlib
 import glob
 
-from utils.common.log import Logger
 from setting import settings
 import conf.common as constant
 import conf.platform as plat_constant
 import conf.qx as qx_constant
 import conf.help as help_constant
+from utils.common.log import Logger
 from utils.common.singleton import Singleton
 
 class PageService:

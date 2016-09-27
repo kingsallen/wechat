@@ -15,20 +15,20 @@ from tornado.httputil import url_concat, HTTPHeaders
 from setting import settings
 
 
-def http_get(route, jdata, timeout=5):
-
-    """尽量使用异步http请求,不得已才用
-    """
-
-    res = requests.get(route, params=jdata, timeout=timeout).json()
-    return res
-
-def http_post(route, jdata, timeout=5):
-
-    """尽量使用异步http请求,不得已才用
-    """
-    res = requests.post(route, data=jdata, timeout=timeout).json()
-    return res
+# def sync_http_get(route, jdata, timeout=5):
+#
+#     """尽量使用异步http请求,不得已才用
+#     """
+#
+#     res = requests.get(route, params=jdata, timeout=timeout).json()
+#     return res
+#
+# def sync_http_post(route, jdata, timeout=5):
+#
+#     """尽量使用异步http请求,不得已才用
+#     """
+#     res = requests.post(route, data=jdata, timeout=timeout).json()
+#     return res
 
 @gen.coroutine
 def http_get(route, jdata, timeout=5, infra=False):
