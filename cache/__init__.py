@@ -12,13 +12,14 @@ import redis
 import json
 
 from functools import wraps
-from utils.tool.json_tool import json_dumps
 from tornado import gen
 from tornado.util import ObjectDict
 from tornado.locks import Semaphore
 
 from setting import settings
+from utils.tool.json_tool import json_dumps
 import conf.common as constant
+from utils.common.log import Logger
 
 sem = Semaphore(1)
 
@@ -37,6 +38,7 @@ class BaseCache(object):
 
         self.__redis = redis
         self.prefix = "wechat" # 待调整
+        self.logger = Logger()
 
     def key_name(self, key):
         return '{0}_{1}'.format(self.prefix, key)
@@ -81,10 +83,14 @@ class BaseCache(object):
         return self.__redis.exists(key)
 
     def lpushx(self, key, value):
+        self.logger.debug(key)
         if value is None:
             return
 
         key = self.key_name(key)
+        self.logger.debug(key)
+        self.logger.debug(value)
+
         self.__redis.lpushx(key, value)
 
 
