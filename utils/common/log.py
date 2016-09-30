@@ -100,21 +100,21 @@ class Logger(object):
 
     def debug(self, message):
         self.__logger.debug(message, exc_info=0)
-        self.redis_log.lpushx("debug", message)
+        self.redis_log.lpush("debug", message)
 
     def info(self, message):
         self.__logger.info(message, exc_info=0)
-        self.redis_log.lpushx("info", message)
+        self.redis_log.lpush("info", message)
 
     def warn(self, message):
         self.__logger.warn(message, exc_info=0)
-        self.redis_log.lpushx("warn", message)
+        self.redis_log.lpush("warn", message)
 
     def error(self, message):
-        self.__logger.error(message, exc_info=1)
-        self.redis_log.lpushx("error", message)
+        self.__logger.error(message, exc_info=0)
+        self.redis_log.lpush("error", message)
 
     def record(self, message):
         self.__logger.log(
             logging.getLevelName("CUSTOMER"), message, exc_info=0)
-        self.redis_log.lpushx("record", message)
+        self.redis_log.lpush("record", message)
