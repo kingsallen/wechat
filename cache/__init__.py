@@ -19,6 +19,7 @@ from tornado.locks import Semaphore
 from setting import settings
 from utils.tool.json_tool import json_dumps
 import conf.common as constant
+import logging
 
 sem = Semaphore(1)
 
@@ -85,7 +86,12 @@ class BaseCache(object):
             return
 
         key = self.key_name(key)
-        self.__redis.lpush(key, value)
+        logging.debug(key)
+        logging.debug(value)
+        logging.debug("456")
+        res = self.__redis.lpush(key, value)
+        logging.debug("123")
+        logging.debug(res)
 
 pool = redis.ConnectionPool(host= settings["store_options"]["redis_host"],
                             port= settings["store_options"]["redis_port"],
