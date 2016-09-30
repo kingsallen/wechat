@@ -2,6 +2,7 @@
 
 # Copyright 2016 MoSeeker
 
+import socket
 import ujson
 import importlib
 import time
@@ -261,6 +262,7 @@ class BaseHandler(web.RequestHandler):
             elapsed_time="%.4f" % (time.time() - self.start_time),
             useragent=request.headers.get('User-Agent'),
             referer=request.headers.get('Referer'),
+            hostname=socket.gethostname(),
             remote_ip=(
                 request.headers.get('Remoteip') or
                 request.headers.get('X-Forwarded-For') or
@@ -273,4 +275,5 @@ class BaseHandler(web.RequestHandler):
         )
 
         log_params.update(log_info_common)
-        return ujson.encode(log_params)
+        return log_params
+        # return ujson.encode(log_params)

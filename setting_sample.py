@@ -36,15 +36,7 @@ settings['mysql_database'] = "dqv4"
 settings['mysql_user'] = "daqi"
 settings['mysql_password'] = "5F51692091B4031640E18E7C27430E071BC878C8"
 
-# 数据库配置 analytics
-settings['mysql_analytics_host'] = "db-t.dqprism.com"
-settings['mysql_analytics_port'] = 3307
-settings['mysql_analytics_database'] = "analytics"
-settings['mysql_analytics_user'] = "daqi"
-settings['mysql_analytics_password'] = "5F51692091B4031640E18E7C27430E071BC878C8"
-
 # session配置
-settings['session'] = True
 settings['session_secret'] = "FILUCyiulhrweuflhwesoihqwurihfbaskjdhquwvrlqkwjfv"
 settings['session_timeout'] = 2592000
 settings['store_options'] = {
@@ -52,3 +44,15 @@ settings['store_options'] = {
     'redis_port': 6379,
     'redis_pass': ''
 }
+
+# elk配置
+settings['elk'] = {
+    'redis_host': 'logredis-t.dqprism.com',
+    'redis_port': 6388,
+}
+
+# tornado log配置
+settings['blocking_log_threshold'] = 0.5
+
+# 基础服务
+settings['infra'] = "http://api1.dqprism.com"
