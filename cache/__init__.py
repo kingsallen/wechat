@@ -19,6 +19,7 @@ from tornado.locks import Semaphore
 from setting import settings
 from utils.tool.json_tool import json_dumps
 import conf.common as constant
+import logging
 
 sem = Semaphore(1)
 
@@ -81,10 +82,13 @@ class BaseCache(object):
         return self.__redis.exists(key)
 
     def lpushx(self, key, value):
+        logging.debug(key)
         if value is None:
             return
 
         key = self.key_name(key)
+        logging.debug(key)
+        logging.debug(value)
         self.__redis.lpushx(key, value)
 
 
