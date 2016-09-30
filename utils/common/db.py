@@ -8,7 +8,7 @@
 DB公共处理类
 """
 import ujson
-
+import os
 from tornado_mysql import pools, cursors
 
 from setting import settings
@@ -32,6 +32,8 @@ class DB(object):
             max_recycle_sec=3
         )
         self.logger = Logger()
+        self.logger.debug("DB: init")
+        self.logger.debug("pid: %s" % os.getpid())
 
     def getConds(self, conds, conds_params=[]):
 

@@ -25,25 +25,30 @@ sem = Semaphore(1)
 
 class BaseCache(object):
 
+    pool = redis.ConnectionPool(host=settings["store_options"]["redis_host"],
+                                port=settings["store_options"]["redis_port"],
+                                max_connections=settings["store_options"]["max_connections"])
+
+    redis = redis.StrictRedis(connection_pool=pool)
+
     def __new__(cls, *args, **kwargs):
         if not hasattr(cls, '_instance'):
             orig = super(BaseCache, cls)
             cls._instance = orig.__new__(cls, *args, **kwargs)
         return cls._instance
 
-    def __init__(self, redis=None, methods=('get', 'set', 'delete', 'exists')):
+    def __init__(self, methods=('get', 'set', 'delete', 'exists')):
 
         for method_name in methods:
-            assert hasattr(redis, method_name)
+            assert hasattr(self, method_name)
 
-        self.__redis = redis
         self.prefix = "wechat" # 待调整
 
     def key_name(self, key):
         return '{0}_{1}'.format(self.prefix, key)
 
     def _get(self, key, default=None):
-        value = self.__redis.get(key)
+        value = self.redis.get(key)
         if value is None:
             return default
         return json.loads(value)
@@ -61,7 +66,7 @@ class BaseCache(object):
     def set(self, key, value, ttl=None):
         key = self.key_name(key)
         value = json_dumps(value)
-        self.__redis.set(key, value, ex=ttl)
+        self.redis.set(key, value, ex=ttl)
 
     def update(self, key, value, ttl=None):
         if value is None:
@@ -75,11 +80,11 @@ class BaseCache(object):
 
     def delete(self, key):
         key = self.key_name(key)
-        self.__redis.delete(key)
+        self.redis.delete(key)
 
     def exists(self, key):
         key = self.key_name(key)
-        return self.__redis.exists(key)
+        return self.redis.exists(key)
 
     def lpush(self, key, value):
         if value is None:
@@ -89,18 +94,13 @@ class BaseCache(object):
         logging.debug(key)
         logging.debug(value)
         logging.debug("456")
-        res = self.__redis.lpush(key, value)
+        res = self.redis.lpush(key, value)
         logging.debug("123")
         logging.debug(res)
 
-pool = redis.ConnectionPool(host= settings["store_options"]["redis_host"],
-                            port= settings["store_options"]["redis_port"],
-                            max_connections= settings["store_options"]["max_connections"])
 
-redis = redis.StrictRedis(connection_pool=pool)
 
-base_cache = BaseCache(redis=redis)
-
+base_cache = BaseCache()
 def cache(prefix=None, key=None, ttl=60, hash=True, lock=True, separator="_"):
     """
     cache装饰器

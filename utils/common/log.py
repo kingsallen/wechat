@@ -6,12 +6,11 @@
 logger 类: 按级别分文件打印日志,
 不依赖第三方库
 """
-import redis
 import logging
 import os
 from setting import settings
 from logging.handlers import TimedRotatingFileHandler
-from cache import BaseCache
+from utils.common.redis_cluster import BaseRedisCluster
 
 
 # --------------------------------------------------------------------------
@@ -48,16 +47,7 @@ class ExactLogLevelFilter(logging.Filter):
     def filter(self, log_record):
         return log_record.levelno == self.__level
 
-class RedisLog(BaseCache):
-
-    def __init__(self, redis):
-        super(RedisLog, self).__init__(redis)
-
-pool = redis.ConnectionPool(host=settings["elk"]["redis_host"],
-                            port=settings["elk"]["redis_port"])
-
-redis = redis.StrictRedis(connection_pool=pool)
-
+redis_cluster = BaseRedisCluster()
 class Logger(object):
 
     def __init__(self, logpath='/tmp/', log_backcount=0,
@@ -78,7 +68,7 @@ class Logger(object):
         }
 
         self._create_handlers()
-        self.redis_log = RedisLog(redis=redis)
+        self.redis_cluster = redis_cluster
 
     def _create_handlers(self):
         log_levels = self.log_path.keys()
@@ -100,22 +90,21 @@ class Logger(object):
 
     def debug(self, message):
         self.__logger.debug(message, exc_info=0)
-        self.redis_log.lpush("debug", message)
+        self.redis_cluster.lpush("debug", message)
 
     def info(self, message):
         self.__logger.info(message, exc_info=0)
-        self.redis_log.lpush("info", message)
+        self.redis_cluster.lpush("info", message)
 
     def warn(self, message):
         self.__logger.warn(message, exc_info=0)
-        self.redis_log.lpush("warn", message)
+        self.redis_cluster.lpush("warn", message)
 
     def error(self, message):
         self.__logger.error(message, exc_info=0)
-        self.redis_log.lpush("error", message)
+        self.redis_cluster.lpush("error", message)
 
     def record(self, message):
         self.__logger.log(
             logging.getLevelName("CUSTOMER"), message, exc_info=0)
-        self.redis_log.lpush("customer", message)
-        self.redis_log.set("hello", {"a": 12345})
+        self.redis_cluster.lpush("customer", message)

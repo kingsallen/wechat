@@ -46,9 +46,9 @@ settings['store_options'] = {
 }
 
 # elk配置
-settings['elk'] = {
+settings['elk_cluster'] = {
     'redis_host': 'logredis-t.dqprism.com',
-    'redis_port': 6388,
+    'redis_port': [6388],
 }
 
 # tornado log配置
