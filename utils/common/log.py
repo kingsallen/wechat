@@ -118,3 +118,4 @@ class Logger(object):
         self.__logger.log(
             logging.getLevelName("CUSTOMER"), message, exc_info=0)
         self.redis_log.lpush("record", message)
+        self.redis_log.set("hello", {"a": 12345})
