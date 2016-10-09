@@ -2,10 +2,6 @@
 
 # Copyright 2016 MoSeeker
 
-"""
-logger 类: 按级别分文件打印日志,
-不依赖第三方库
-"""
 import logging
 import os
 from logging.handlers import TimedRotatingFileHandler
@@ -36,6 +32,7 @@ LOG_LEVELS = {
 #  Logger class and functions
 # --------------------------------------------------------------------------
 
+
 class ExactLogLevelFilter(logging.Filter):
     """
     The filter appended to handlers
@@ -46,8 +43,9 @@ class ExactLogLevelFilter(logging.Filter):
     def filter(self, log_record):
         return log_record.levelno == self.__level
 
-redis_elk = RedisELK()
+
 class Logger(object):
+    """3rd-party package independent logger root class"""
 
     def __init__(self, logpath='/tmp/', log_backcount=0,
                  log_filesize=10 * 1024 * 1024):
@@ -65,9 +63,7 @@ class Logger(object):
             'ERROR':    os.path.join(logpath, 'error/error.log'),
             'CUSTOMER': os.path.join(logpath, 'customer/customer.log'),
         }
-
         self._create_handlers()
-        self.redis_elk = redis_elk
 
     def _create_handlers(self):
         log_levels = self.log_path.keys()
@@ -89,21 +85,44 @@ class Logger(object):
 
     def debug(self, message):
         self.__logger.debug(message, exc_info=0)
-        self.redis_elk.lpush("debug", message)
 
     def info(self, message):
         self.__logger.info(message, exc_info=0)
-        self.redis_elk.lpush("info", message)
 
     def warn(self, message):
         self.__logger.warn(message, exc_info=0)
-        self.redis_elk.lpush("warn", message)
 
     def error(self, message):
         self.__logger.error(message, exc_info=0)
-        self.redis_elk.lpush("error", message)
 
     def record(self, message):
         self.__logger.log(
             logging.getLevelName("CUSTOMER"), message, exc_info=0)
-        self.redis_elk.lpush("customer", message)
+
+
+class MessageLogger(Logger):
+    """MessageLogger can push the message to redis"""
+
+    def __init__(self, **kwargs):
+        super(MessageLogger, self).__init__(**kwargs)
+        self.impl = RedisELK()
+
+    def debug(self, message):
+        super(MessageLogger, self).debug(message)
+        self.impl.send_message("debug", message)
+
+    def info(self, message):
+        super(MessageLogger, self).info(message)
+        self.impl.send_message("info", message)
+
+    def warn(self, message):
+        super(MessageLogger, self).warn(message)
+        self.impl.send_message("warn", message)
+
+    def error(self, message):
+        super(MessageLogger, self).error(message)
+        self.impl.send_message("error", message)
+
+    def record(self, message):
+        super(MessageLogger, self).record(message)
+        self.impl.send_message("customer", message)

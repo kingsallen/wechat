@@ -31,23 +31,21 @@ from tornado.options import options
 
 from setting import settings
 from route import routes
-from utils.common.log import Logger
+from utils.common.log import MessageLogger
 
 tornado.options.parse_command_line()
-logger = Logger(logpath=options.logpath)
+logger = MessageLogger(logpath=options.logpath)
+
 
 class Application(tornado.web.Application):
 
     def __init__(self):
-
         tornado.web.Application.__init__(self, routes, **settings)
-
         self.settings = settings
-
         self.logger = logger
 
-def main():
 
+def main():
     application = Application()
     try:
         logger.info('Wechat server starting, on port : {0}'.format(options.port))

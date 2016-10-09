@@ -4,9 +4,7 @@
 
 from cache import BaseCache
 
-class UserCache(BaseCache):
 
+class UserCache(BaseCache):
     def __init__(self, redis):
         super(UserCache, self).__init__(redis)
-
-
