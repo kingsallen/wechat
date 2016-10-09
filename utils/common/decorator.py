@@ -2,11 +2,14 @@
 
 # Copyright 2016 MoSeeker
 
+import hashlib
 import functools
 
 from tornado import gen
 from tornado.util import ObjectDict
+from tornado.locks import Semaphore
 
+from utils.common.cache import BaseRedis
 import conf.common as constant
 
 
@@ -30,7 +33,75 @@ def handle_response(method):
 
     return wrapper
 
-def handle_env(func):
+base_cache = BaseRedis()
+sem = Semaphore(1)
+def cache(prefix=None, key=None, ttl=60, hash=True, lock=True, separator="_"):
+    """
+    cache装饰器
+
+    :param prefix: 指定prefix
+    :param key: 指定key
+    :param timeout: ttl (s)
+    :param hash: 是否需要hash
+    :param lock: -
+    :return:
+    """
+    key_ = key
+    ttl_ = ttl
+    hash_ = hash
+    lock_ = lock
+    prefix_ = prefix
+    separator_ = separator
+
+    def cache_inner(func):
+
+        key, ttl, hash, lock, prefix, separator = key_, ttl_, hash_, lock_, prefix_, separator_
+
+        prefix = prefix if prefix else "{0}:{1}".format(func.__module__.split(".")[-1], func.__name__)
+
+        @functools.wraps(func)
+        @gen.coroutine
+        def func_wrapper(*args, **kwargs):
+
+            if lock:
+                yield sem.acquire()
+
+            try:
+                if not key:
+
+                    redis_key = None
+
+                    if args and len(args) > 1:
+                        redis_key = separator.join([str(_) for _ in list(args[1].values())])
+
+                    if kwargs:
+                        spliter = separator if redis_key else ""
+                        redis_key = redis_key + spliter + separator.join([str(_) for _ in list(kwargs.values())])
+                else:
+                     redis_key = key
+
+                if hash:
+                    redis_key = hashlib.md5(redis_key.encode("utf-8")).hexdigest()
+
+                redis_key = "{prefix}{separator}{redis_key}".format(prefix=prefix, separator=separator, redis_key=redis_key)
+
+                if base_cache.exists(redis_key):
+                    cache_data = base_cache.get(redis_key)
+                else:
+                    cache_data = yield func(*args, **kwargs)
+                    base_cache.set(redis_key, cache_data, ttl)
+
+                raise gen.Return(cache_data)
+
+            finally:
+                if lock:
+                    sem.release()
+
+        return func_wrapper
+
+    return cache_inner
+
+def url_valid(func):
 
     """
     # 装置环境,包括 wechat, qxuser, wxuser, company, recom, employee

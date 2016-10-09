@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from cache import cache
+from utils.common.decorator import cache
+
 from tornado import gen
 from tornado.util import ObjectDict
 from tornado.testing import AsyncTestCase, gen_test, main

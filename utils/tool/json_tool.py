@@ -1,5 +1,7 @@
 # coding: utf-8
 
+# Copyright 2016 MoSeeker
+
 import datetime
 import decimal
 import json

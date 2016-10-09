@@ -8,7 +8,7 @@
 DB公共处理类
 """
 import ujson
-
+import os
 from tornado_mysql import pools, cursors
 
 from setting import settings

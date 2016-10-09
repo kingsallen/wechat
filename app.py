@@ -36,16 +36,15 @@ import conf.qx as qx_constant
 import conf.help as help_constant
 
 from route import platform_routes, qx_routes, help_routes
-from utils.common.log import Logger
+from utils.common.log import MessageLogger
 
 tornado.options.parse_command_line()
-logger = Logger(logpath=options.logpath)
+logger = MessageLogger(logpath=options.logpath)
 
 
 class Application(tornado.web.Application):
 
     def __init__(self):
-
         # 选择加载的 routes
         if options.env == constant.ENV_PLATFORM:
             tornado.web.Application.__init__(self, platform_routes, **settings)
@@ -63,7 +62,6 @@ class Application(tornado.web.Application):
         self.help_constant = help_constant
 
 def main():
-
     application = Application()
     try:
         logger.info('Wechat server starting, on port : {0}'.format(options.port))

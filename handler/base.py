@@ -6,6 +6,7 @@ import os
 import glob
 import re
 
+import socket
 import ujson
 import importlib
 import time
@@ -287,6 +288,7 @@ class BaseHandler(_base):
             type_mobile=type_mobile,
             useragent=request.headers.get('User-Agent'),
             referer=request.headers.get('Referer'),
+            hostname=socket.gethostname(),
             remote_ip=(
                 request.headers.get('Remoteip') or
                 request.headers.get('X-Forwarded-For') or
@@ -299,7 +301,7 @@ class BaseHandler(_base):
         )
 
         log_params.update(log_info_common)
-        return ujson.encode(log_params)
+        return log_params
 
     def depend_wechat(self):
 

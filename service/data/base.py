@@ -23,7 +23,7 @@ import conf.platform as plat_constant
 import conf.qx as qx_constant
 import conf.help as help_constant
 from setting import settings
-from cache import cache
+from utils.common.decorator import cache
 
 from utils.common.singleton import Singleton
 
