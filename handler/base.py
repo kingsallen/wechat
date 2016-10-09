@@ -272,4 +272,3 @@ class BaseHandler(web.RequestHandler):
 
         log_params.update(log_info_common)
         return log_params
-        # return ujson.encode(log_params)
