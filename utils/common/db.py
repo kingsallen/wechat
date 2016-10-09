@@ -32,8 +32,6 @@ class DB(object):
             max_recycle_sec=3
         )
         self.logger = Logger()
-        self.logger.debug("DB: init")
-        self.logger.debug("pid: %s" % os.getpid())
 
     def getConds(self, conds, conds_params=[]):
 

@@ -8,9 +8,8 @@ logger 类: 按级别分文件打印日志,
 """
 import logging
 import os
-from setting import settings
 from logging.handlers import TimedRotatingFileHandler
-from utils.common.redis_cluster import BaseRedisCluster
+from utils.common.elk import RedisELK
 
 
 # --------------------------------------------------------------------------
@@ -47,7 +46,7 @@ class ExactLogLevelFilter(logging.Filter):
     def filter(self, log_record):
         return log_record.levelno == self.__level
 
-redis_cluster = BaseRedisCluster()
+redis_elk = RedisELK()
 class Logger(object):
 
     def __init__(self, logpath='/tmp/', log_backcount=0,
@@ -68,7 +67,7 @@ class Logger(object):
         }
 
         self._create_handlers()
-        self.redis_cluster = redis_cluster
+        self.redis_elk = redis_elk
 
     def _create_handlers(self):
         log_levels = self.log_path.keys()
@@ -90,21 +89,21 @@ class Logger(object):
 
     def debug(self, message):
         self.__logger.debug(message, exc_info=0)
-        self.redis_cluster.lpush("debug", message)
+        self.redis_elk.lpush("debug", message)
 
     def info(self, message):
         self.__logger.info(message, exc_info=0)
-        self.redis_cluster.lpush("info", message)
+        self.redis_elk.lpush("info", message)
 
     def warn(self, message):
         self.__logger.warn(message, exc_info=0)
-        self.redis_cluster.lpush("warn", message)
+        self.redis_elk.lpush("warn", message)
 
     def error(self, message):
         self.__logger.error(message, exc_info=0)
-        self.redis_cluster.lpush("error", message)
+        self.redis_elk.lpush("error", message)
 
     def record(self, message):
         self.__logger.log(
             logging.getLevelName("CUSTOMER"), message, exc_info=0)
-        self.redis_cluster.lpush("customer", message)
+        self.redis_elk.lpush("customer", message)

@@ -47,10 +47,4 @@ class LandingHandler(BaseHandler):
             "search_seq" : search_seq
         })
 
-        self.logger.debug("this is debug")
-        self.logger.info("this is info")
-        self.logger.error("this is error")
-        self.logger.record("this is record")
-        self.logger.warn("this is warning")
-
         self.render("refer/neo_weixin/position/company_search.html", company=company)

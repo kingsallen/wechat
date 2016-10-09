@@ -15,12 +15,6 @@ class WechatHandler(BaseHandler):
     @gen.coroutine
     def get(self):
 
-        self.logger.debug("this is debug")
-        self.logger.info("this is info")
-        self.logger.error("this is error")
-        self.logger.record("this is record")
-        self.logger.warn("this is warning")
-
         self.send_json({
                 "msg": self.constant.RESPONSE_SUCCESS,
                 "data": {

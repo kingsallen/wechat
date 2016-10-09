@@ -47,10 +47,6 @@ class BaseHandler(web.RequestHandler):
     @property
     def settings(self):
         return self.application.settings
-    #
-    # @property
-    # def redis(self):
-    #     return self.application.redis_cli
 
     @property
     def constant(self):

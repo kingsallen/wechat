@@ -9,7 +9,7 @@ from tornado import gen
 from tornado.util import ObjectDict
 from tornado.locks import Semaphore
 
-from utils.common.redis import BaseRedis
+from utils.common.cache import BaseRedis
 import conf.common as constant
 
 

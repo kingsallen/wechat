@@ -9,13 +9,11 @@
 
 import redis
 import json
-import os
 
 from tornado.util import ObjectDict
 
 from setting import settings
 from utils.tool.json_tool import json_dumps
-import logging
 
 class BaseRedis(object):
 
@@ -36,7 +34,6 @@ class BaseRedis(object):
             assert hasattr(self, method_name)
 
         self.prefix = "wechat" # 待调整
-        logging.debug("pid: %s" % os.getpid())
 
     def key_name(self, key):
         return '{0}_{1}'.format(self.prefix, key)
@@ -85,9 +82,4 @@ class BaseRedis(object):
             return
 
         key = self.key_name(key)
-        logging.debug(key)
-        logging.debug(value)
-        logging.debug("456")
-        res = self.redis.lpush(key, value)
-        logging.debug("123")
-        logging.debug(res)
+        self.redis.lpush(key, value)
