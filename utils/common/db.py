@@ -25,7 +25,7 @@ class DB(object):
                  port=settings['mysql_port'],
                  user=settings['mysql_user'],
                  passwd=settings['mysql_password'],
-                 db=settings['mysql_database_dqv4'],
+                 db=settings['mysql_database'],
                  cursorclass=cursors.DictCursor,
                  charset='utf8mb4'),
             max_idle_connections=1,

@@ -37,3 +37,5 @@ class WechatPageService(PageService):
 
         theme = yield self.config_sys_theme_ds.get_theme(conds, fields)
         raise gen.Return(theme)
+
+

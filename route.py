@@ -29,7 +29,10 @@ platform_routes = [
      "handler.platform.companyrelation.CompanyFollowHandler"),
 
     (r"/mobile/company/visitreq",
-     "handler.platform.companyrelation.CompanyVisitReqHandler")
+     "handler.platform.companyrelation.CompanyVisitReqHandler"),
+
+    (r"/mobile/test",
+     "tests.dao.user.TestCompanyVisitReqHandler"),
 ]
 platform_routes.extend(common_routes)
 
