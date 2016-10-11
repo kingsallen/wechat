@@ -31,6 +31,8 @@ platform_routes = [
     (r"/mobile/company/visitreq",
      "handler.platform.companyrelation.CompanyVisitReqHandler"),
 
+    (r"/mobile/company/[0-9]*", "handler.platform.companyrelation.CompanyHandler")
+
     (r"/mobile/test",
      "tests.dao.user.TestCompanyVisitReqHandler"),
 ]

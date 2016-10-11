@@ -48,3 +48,11 @@ class DataService:
             pmObj = m + "_dao"
 
             setattr(self, pmObj, getattr(importlib.import_module('dao.{0}.{1}'.format(p, m)), pmDao)())
+
+    def _condition_isvalid(self, conds, method_name):
+        if conds is None or not (isinstance(conds, dict) or isinstance(conds, str)):
+            self.logger.warn("Warning:[{2}][invalid parameters], Detail:[conds: {0}, "
+                        "type: {1}]".format(conds, type(conds), method_name))
+            return False
+        return True
+
