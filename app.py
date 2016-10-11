@@ -37,9 +37,11 @@ import conf.help as help_constant
 
 from route import platform_routes, qx_routes, help_routes
 from utils.common.log import MessageLogger
+from utils.common.cache import BaseRedis
 
 tornado.options.parse_command_line()
 logger = MessageLogger(logpath=options.logpath)
+redis = BaseRedis()
 
 
 class Application(tornado.web.Application):
@@ -60,6 +62,8 @@ class Application(tornado.web.Application):
         self.plat_constant = plat_constant
         self.qx_constant = qx_constant
         self.help_constant = help_constant
+        self.redis = redis
+
 
 def main():
     application = Application()

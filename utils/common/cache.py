@@ -15,11 +15,13 @@ from tornado.util import ObjectDict
 from setting import settings
 from utils.tool.json_tool import json_dumps
 
+
 class BaseRedis(object):
 
-    _pool = redis.ConnectionPool(host=settings["store_options"]["redis_host"],
-                                port=settings["store_options"]["redis_port"],
-                                max_connections=settings["store_options"]["max_connections"])
+    _pool = redis.ConnectionPool(
+        host=settings["store_options"]["redis_host"],
+        port=settings["store_options"]["redis_port"],
+        max_connections=settings["store_options"]["max_connections"])
 
     _redis = redis.StrictRedis(connection_pool=_pool)
 

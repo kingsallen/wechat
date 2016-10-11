@@ -1,6 +1,6 @@
 # coding=utf-8
 
-'''
+"""
 说明:
 constant配置常量规范：
 1.常量涉及通用业务逻辑定义，即同时适用于聚合号和企业号
@@ -11,23 +11,26 @@ constant配置常量规范：
 常量使用大写字母，字符串需要时标注为unicode编码
 例如 SUCCESS = u"成功"
 
-'''
+"""
 
 # ++++++++++系统常量++++++++++
+# Weixin API url
+WX_OAUTH_GET_ACCESS_TOKEN = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=%s&secret=%s&code=%s&grant_type=authorization_code"
+WX_THIRD_OAUTH_GET_ACCESS_TOKEN = "https://api.weixin.qq.com/sns/oauth2/component/access_token?appid=%s&code=%s&grant_type=authorization_code&component_appid=%s&component_access_token=%s"
+WX_OAUTH_GET_USERINFO = "https://api.weixin.qq.com/sns/userinfo?access_token=%s&openid=%s&lang=zh_CN"
+# 返回错误
 
-## 返回错误
-
-## status_code默认错误返回
+# status_code默认错误返回
 RESPONSE_SUCCESS = u"success"
 RESPONSE_FAILED = u"failed"
 
-## 环境
+# 环境
 ENV = u"new_wechat"
 ENV_PLATFORM = u"platform"
 ENV_QX = u"qx"
 ENV_HELP = u"help"
 
-## 微信客户端类型
+# 微信客户端类型
 CLIENT_WECHAT = 1
 CLIENT_NON_WECHAT = 2
 CLIENT_TYPE_IOS = 100
@@ -35,7 +38,7 @@ CLIENT_TYPE_ANDROID = 101
 CLIENT_TYPE_WIN = 102
 CLIENT_TYPE_UNKNOWN = 103
 
-## 入库字段类型
+# 入库字段类型
 TYPE_INT = 1
 TYPE_JSON = 2
 TYPE_FLOAT = 3
@@ -43,7 +46,7 @@ TYPE_TIMESTAMP = 4
 TYPE_STRING = 5  # 会过滤xss
 TYPE_STRING_ORIGIN = 6  # 不过滤xss
 
-## 日期、时间规范
+# 日期、时间规范
 TIME_FORMAT = u"%Y-%m-%d %H:%M:%S"
 TIME_FORMAT_PURE = u"%Y%m%d%H%M%S"
 TIME_FORMAT_DATEONLY = u"%Y-%m-%d"
@@ -56,20 +59,27 @@ JD_TIME_FORMAT_TODAY = u"今天 {:0>2}:{:0>2}"
 JD_TIME_FORMAT_YESTERDAY = u"昨天 {:0>2}:{:0>2}"
 JD_TIME_FORMAT_THIS_YEAR = u"{:0>2}-{:0>2}"
 
-## 数据库规范化常量
+# 数据库规范化常量
 STATUS_INUSE = 1
 STATUS_UNUSE = 0
 
 # ++++++++++业务常量+++++++++++
+# Cookie name
+COOKIE_SESSIONID = u"FY823UTGIPUSDFP8Q*ZKP$GTYXIVQWQFUGS"
 
-## 职位相关，主要涉及到职位，职位列表，搜索页
-### 招聘类型
+# Cache 相关常量
+VIEWER_TYPE_NEW = 1
+VIEWER_TYPE_OLD = 0
+
+
+# 职位相关，主要涉及到职位，职位列表，搜索页
+# 招聘类型
 CANDIDATE_SOURCE = {
     "0": u"社招",
     "1": u"校招",
 }
 
-### 工作性质
+# 工作性质
 EMPLOYMENT_TYPE = {
     "0": u"全职",
     "1": u"兼职",
@@ -77,7 +87,7 @@ EMPLOYMENT_TYPE = {
     "3": u"实习",
 }
 
-### 学历
+# 学历
 DEGREE = {
     "1": u"大专",
     "2": u"本科",
@@ -90,6 +100,6 @@ DEGREE = {
     "9": u"初中"
 }
 
-### 及以上 工作经验、学历中使用
+# 及以上 工作经验、学历中使用
 POSITION_ABOVE = u"及以上"
 EXPERIENCE_UNIT = u"年"

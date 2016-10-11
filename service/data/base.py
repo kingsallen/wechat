@@ -27,6 +27,7 @@ from utils.common.decorator import cache
 
 from utils.common.singleton import Singleton
 
+
 class DataService:
 
     __metaclass__ = Singleton
@@ -55,4 +56,9 @@ class DataService:
                         "type: {1}]".format(conds, type(conds), method_name))
             return False
         return True
+
+    @staticmethod
+    def is_invalid_conds(conds=None):
+        return (conds is None or
+                not (isinstance(conds, dict) or isinstance(conds, str)))
 

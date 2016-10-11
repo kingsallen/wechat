@@ -11,6 +11,7 @@
 
 from dao.base import BaseDao
 
+
 class JobPositionDao(BaseDao):
 
     def __init__(self):
@@ -83,4 +84,3 @@ class JobPositionDao(BaseDao):
             # "child_company_id": self.constant.TYPE_STRING, # hr_child_company.id
             # "language_required": self.constant.TYPE_INT, # 语言要求，1:是 0:否
         }
-

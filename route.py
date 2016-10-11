@@ -17,7 +17,6 @@ help_routes: 继承自common_routes, 供help单独使用
 common_routes = [
     # wechat
     (r"/wechat", "handler.common.wechat.WechatHandler"),
-
 ]
 
 # 企业号的单独 routes

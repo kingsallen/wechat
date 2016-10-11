@@ -101,6 +101,7 @@ def cache(prefix=None, key=None, ttl=60, hash=True, lock=True, separator="_"):
 
     return cache_inner
 
+
 def url_valid(func):
 
     """

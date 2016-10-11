@@ -6,7 +6,7 @@
 api 调用工具类，
 调用时使用 infra=True/False 来基础服务的 api,还是其他的 api
 """
-import requests
+
 import tornado.httpclient
 import ujson
 from tornado import gen
@@ -14,21 +14,6 @@ from tornado.httputil import url_concat, HTTPHeaders
 
 from setting import settings
 
-
-# def sync_http_get(route, jdata, timeout=5):
-#
-#     """尽量使用异步http请求,不得已才用
-#     """
-#
-#     res = requests.get(route, params=jdata, timeout=timeout).json()
-#     return res
-#
-# def sync_http_post(route, jdata, timeout=5):
-#
-#     """尽量使用异步http请求,不得已才用
-#     """
-#     res = requests.post(route, data=jdata, timeout=timeout).json()
-#     return res
 
 @gen.coroutine
 def http_get(route, jdata, timeout=5, infra=False):
