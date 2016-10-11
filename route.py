@@ -17,19 +17,11 @@ help_routes: 继承自common_routes, 供help单独使用
 common_routes = [
     # wechat
     (r"/wechat", "handler.common.wechat.WechatHandler"),
-
 ]
 
 # 企业号的单独 routes
 platform_routes = [
-    (r"/mobile/start",
-     "handler.platform.landing.LandingHandler"),
-
-    (r"/mobile/company/follow",
-     "handler.platform.companyrelation.CompanyFollowHandler"),
-
-    (r"/mobile/company/visitreq",
-     "handler.platform.companyrelation.CompanyVisitReqHandler")
+    (r"/mobile/start", "handler.platform.landing.LandingHandler")
 ]
 platform_routes.extend(common_routes)
 

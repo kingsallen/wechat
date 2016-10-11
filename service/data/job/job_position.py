@@ -5,6 +5,7 @@
 from tornado import gen
 from service.data.base import *
 
+
 class JobPositionDataService(DataService):
 
     @cache(ttl=60)

@@ -27,6 +27,7 @@ from utils.common.decorator import cache
 
 from utils.common.singleton import Singleton
 
+
 class DataService:
 
     __metaclass__ = Singleton
@@ -48,3 +49,8 @@ class DataService:
             pmObj = m + "_dao"
 
             setattr(self, pmObj, getattr(importlib.import_module('dao.{0}.{1}'.format(p, m)), pmDao)())
+
+    @staticmethod
+    def is_invalid_conds(conds=None):
+        return (conds is None or
+                not (isinstance(conds, dict) or isinstance(conds, str)))

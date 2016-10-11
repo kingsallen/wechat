@@ -25,8 +25,8 @@ import conf.help as help_constant
 from utils.common.log import Logger
 from utils.common.singleton import Singleton
 
-class PageService:
 
+class PageService:
     __metaclass__ = Singleton
 
     def __init__(self):
