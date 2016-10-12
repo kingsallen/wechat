@@ -1,12 +1,20 @@
-# coding=utf-8
-
+# -*- coding=utf-8 -*-
 # Copyright 2016 MoSeeker
+
+"""
+:author 马超（machao@moseeker.com）
+:date 2016.10.11
+
+"""
 
 import json
 from utils.common.cache import BaseRedis
 
 
 class UserCompanyFollowsCache(BaseRedis):
+    '''
+    Develop Status: To be tested.
+    '''
 
     def __init__(self, redis):
         super(UserCompanyFollowsCache, self).__init__(redis)

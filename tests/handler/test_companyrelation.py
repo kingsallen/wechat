@@ -3,6 +3,9 @@
 import requests, json
 
 url = 'http://localhost:8000/mobile/company/follow'
+
+url_visit = 'http://localhost:8000/mobile/company/visitreq'
+
 header = {'content-type': 'application/json'}
 
 
@@ -13,9 +16,15 @@ def post_fun(url, data):
     return re
 
 
-data = {'company_id': 111, 'user_id': 222, '_xsrf':'EAB1D2AB05EEF04D35BA5FDF789DD6A3'}
-# data = {}
+data = {'company_id': 111, 'user_id': 444, 'status': 1,
+        '_xsrf':'EAB1D2AB05EEF04D35BA5FDF789DD6A3'}
 
-re = post_fun(url, data)
+# re = post_fun(url_visit, data)
+#
+
+
+get_url = 'http://localhost:8000/mobile/company/111'
+
+re = requests.get(get_url)
 
 print json.loads(re.text)

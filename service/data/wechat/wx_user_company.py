@@ -1,6 +1,11 @@
-# coding=utf-8
-
+# -*- coding=utf-8 -*-
 # Copyright 2016 MoSeeker
+
+"""
+:author 马超（machao@moseeker.com）
+:date 2016.10.12
+
+"""
 
 from tornado import gen
 from service.data.base import *
@@ -14,8 +19,8 @@ class WxUserCompanyDataService(DataService):
             raise gen.Return(False)
         if not fields:
             fields = self.user_company_follows_dao.fields_map.keys()
-        response = yield self.user_company_follows_dao.get_record_by_conds(conds, fields)
-        print response
+        response = yield self.user_company_follows_dao.get_record_by_conds(
+                            conds, fields)
         raise gen.Return(response)
 
     @gen.coroutine
@@ -52,7 +57,7 @@ class WxUserCompanyDataService(DataService):
     def get_fllw_cmpy(self, user_id, company_id=None):
         conds = {'user_id': [user_id, '='], 'company_id': [company_id, '=']} \
                 if company_id is not None else {'user_id': [user_id, '=']}
-        company = self._get_foll_cmpy(conds)
+        company = yield self._get_foll_cmpy(conds, ['id', 'company_id'])
 
         raise gen.Return(company)
 
@@ -60,7 +65,7 @@ class WxUserCompanyDataService(DataService):
     def get_visit_cmpy(self, user_id, company_id=None):
         conds = {'user_id': [user_id, '='], 'company_id': [company_id, '=']} \
             if company_id is not None else {'user_id': [user_id, '=']}
-        company = self._get_visit_cmpy(conds)
+        company = yield self._get_visit_cmpy(conds, ['id', 'company_id'])
 
         raise gen.Return(company)
 
@@ -69,8 +74,8 @@ class WxUserCompanyDataService(DataService):
     @gen.coroutine
     def set_cmpy_fllw(self, user_id, company_id, status, source):
         conds = {'user_id': [user_id, '='], 'company_id': [company_id, '=']}
-        company = self._get_foll_cmpy(conds,
-                        fields=['id', 'user_id', 'company_id'])
+        company = yield self._get_foll_cmpy(conds,
+                            fields=['id', 'user_id', 'company_id'])
         if company:
             try:
                 self.user_company_follows_dao.update_by_conds(conds,
@@ -119,7 +124,3 @@ class WxUserCompanyDataService(DataService):
                 raise gen.Return(False)
 
         raise gen.Return(True)
-
-
-
-

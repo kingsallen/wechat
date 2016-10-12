@@ -30,11 +30,12 @@ platform_routes = [
     (r"/mobile/company/visitreq",
      "handler.platform.companyrelation.CompanyVisitReqHandler"),
 
-    (r"/mobile/company/?[0-9]*",
+    (r"/mobile/company/([0-9]*)",
      "handler.platform.companyrelation.CompanyHandler"),
 
-    (r"/mobile/test",
-     "tests.dao.user.TestCompanyVisitReqHandler"),
+    # Testing url, delete when releasing
+    # (r"/mobile/test",
+    #  "tests.dao.user.TestCompanyVisitReqHandler"),
 ]
 platform_routes.extend(common_routes)
 

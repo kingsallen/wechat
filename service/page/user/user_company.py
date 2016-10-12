@@ -7,7 +7,6 @@
 
 """
 
-import re
 from tornado.util import ObjectDict
 from tornado import gen
 from service.page.base import PageService
@@ -18,27 +17,19 @@ class UserCompanyPageService(PageService):
 
     @gen.coroutine
     def get_company_follows(self, conds, fields=[]):
-        fans = yield self.wx_user_company_ds.get_user(conds)
+        fields = ['id', 'company_id', 'user_id']
+        fans = yield self.wx_user_company_ds.get_user(conds, fields)
         raise gen.Return(fans)
-
-
-    @gen.coroutine
-    def get_following_companys(self, conds, fields=[]):
-        # conds = {'user': [user_id, '=']}
-        # fields = ['company_id', 'status']
-        company_ids = yield self.wx_user_company_ds.get_foll_cmpy(
-                            conds, fields)
-        raise gen.Return(company_ids)
-
-    @gen.coroutine
-    def get_visit_req_companys(self, conds, fields=[]):
-        # conds = {'user': [user_id, '=']}
-        company_ids = yield self.wx_user_company_ds.get_visit_cmpy(
-                            conds, fields)
-        raise gen.Return(company_ids)
 
     @gen.coroutine
     def get_companay_data(self, param):
+        '''
+
+        Develop Status: To be modify with real data.
+
+        :param param: dict include target user company ids.
+        :return: dict data to render template
+        '''
         user_id, company_id = param.get('user_id'), param.get('company_id')
         response = ObjectDict({'status': 1, 'message': 'failure'})
         company = ObjectDict({

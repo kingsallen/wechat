@@ -7,12 +7,9 @@
 
 """
 
-import json
-from tornado.util import ObjectDict
 from tornado import gen
+from tornado.util import ObjectDict
 from handler.base import BaseHandler
-from utils.tool.json_tool import json_dumps
-from utils.common.decorator import handle_response
 
 
 class CompanyVisitReqHandler(BaseHandler):
@@ -31,7 +28,7 @@ class CompanyVisitReqHandler(BaseHandler):
                 if resp:
                     response.status, response.message = 0, 'success'
 
-        self.write(json.dumps(response))
+        self.send_json(response)
         return
 
 
@@ -48,21 +45,18 @@ class CompanyFollowHandler(BaseHandler):
             if resp:
                 response.status, response.message = 0, 'success'
 
-        self.write(json.dumps(response))
+        self.send_json(response)
         return
 
 
 class CompanyHandler(BaseHandler):
 
     @gen.coroutine
-    def get(self):
-        if not self.json_args or 'company_id' not in self.json_args.keys() \
-          or 'user_id' in self.json_args.keys():
-            self.write(ObjectDict({'status': 1, 'message': 'failure'}))
-        else:
-            response = yield self.user_company_ps.get_companay_data(
-                                self.json_args)
+    def get(self, company_id):
+        param = ObjectDict({'user_id': 222, 'company_id': company_id})
+        response = yield self.user_company_ps.get_companay_data(param)
 
+        self.send_json(response, additional_dump=True)
         return
 
 
