@@ -69,8 +69,6 @@ class WxUserCompanyDataService(DataService):
 
         raise gen.Return(company)
 
-
-
     @gen.coroutine
     def set_cmpy_fllw(self, user_id, company_id, status, source):
         conds = {'user_id': [user_id, '='], 'company_id': [company_id, '=']}

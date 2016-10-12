@@ -23,15 +23,14 @@ class UserCompanyPageService(PageService):
 
     @gen.coroutine
     def get_companay_data(self, param):
-        '''
-
+        """
         Develop Status: To be modify with real data.
 
         :param param: dict include target user company ids.
         :return: dict data to render template
-        '''
+        """
         user_id, company_id = param.get('user_id'), param.get('company_id')
-        response = ObjectDict({'status': 1, 'message': 'failure'})
+        response = ObjectDict({'status': 0, 'message': 'sucdess'})
         company = ObjectDict({
             'name': '仟寻招聘',
             'description': 'help people find job'
@@ -44,8 +43,8 @@ class UserCompanyPageService(PageService):
         data = ObjectDict({'company': company})
         data.templates_total = 4
         data.relation = ObjectDict({
-            'follow': 1 if follow_company else 0,
-            'want_visit': 1 if visit_company else 0
+            'follow': 'o' if follow_company else 'x',
+            'want_visit': 'o' if visit_company else 'x'
         })
         data.templates = [
             ObjectDict({'type': 1, 'titile': 'template 1', 'data': data1}),

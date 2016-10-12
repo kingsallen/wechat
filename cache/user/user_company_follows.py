@@ -12,10 +12,9 @@ from utils.common.cache import BaseRedis
 
 
 class UserCompanyFollowsCache(BaseRedis):
-    '''
+    """
     Develop Status: To be tested.
-    '''
-
+    """
     def __init__(self, redis):
         super(UserCompanyFollowsCache, self).__init__(redis)
         self.company_fans_hash = '{0}_company_fans'.format(self._PREFIX)
