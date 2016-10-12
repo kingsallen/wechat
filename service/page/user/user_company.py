@@ -1,11 +1,18 @@
-# coding=utf-8
-
+# -*- coding=utf-8 -*-
 # Copyright 2016 MoSeeker
+
+"""
+:author 马超（machao@moseeker.com）
+:date 2016.10.11
+
+"""
 
 import re
 from tornado.util import ObjectDict
 from tornado import gen
 from service.page.base import PageService
+from tests.dev_data.user_company_data import data1, data2, data3, data4
+
 
 class UserCompanyPageService(PageService):
 
@@ -16,11 +23,69 @@ class UserCompanyPageService(PageService):
 
 
     @gen.coroutine
-    def get_following_companies(self, user_id):
-        conds = {'user', [user_id, '=']}
-        companies = yield self.wx_user_company_ds.get_foll_cmpy_id_list(
-                            conds, fields=['company_id'])
-        raise gen.Return(companies)
+    def get_following_companys(self, conds, fields=[]):
+        # conds = {'user': [user_id, '=']}
+        # fields = ['company_id', 'status']
+        company_ids = yield self.wx_user_company_ds.get_foll_cmpy(
+                            conds, fields)
+        raise gen.Return(company_ids)
+
+    @gen.coroutine
+    def get_visit_req_companys(self, conds, fields=[]):
+        # conds = {'user': [user_id, '=']}
+        company_ids = yield self.wx_user_company_ds.get_visit_cmpy(
+                            conds, fields)
+        raise gen.Return(company_ids)
+
+    @gen.coroutine
+    def get_companay_data(self, param):
+        user_id, company_id = param.get('user_id'), param.get('company_id')
+        response = ObjectDict({'status': 1, 'message': 'failure'})
+        company = ObjectDict({
+            'name': '仟寻招聘',
+            'description': 'help people find job'
+        })
+        follow_company = yield self.wx_user_company_ds.get_fllw_cmpy(
+                                user_id, company_id)
+        visit_company = yield self.wx_user_company_ds.get_visit_cmpy(
+                                user_id, company_id)
+
+        data = ObjectDict({'company': company})
+        data.templates_total = 4
+        data.relation = ObjectDict({
+            'follow': 1 if follow_company else 0,
+            'want_visit': 1 if visit_company else 0
+        })
+        data.templates = [
+            ObjectDict({'type': 1, 'titile': 'template 1', 'data': data1}),
+            ObjectDict({'type': 2, 'titile': 'template 2', 'data': data2}),
+            ObjectDict({'type': 3, 'titile': 'template 3', 'data': data3}),
+            ObjectDict({'type': 4, 'titile': 'template 4', 'data': data4}),
+        ]
+        response.data = data
+
+        raise gen.Return(response)
+
+    @gen.coroutine
+    def set_company_follow(self, param):
+        response = yield self.wx_user_company_ds.set_cmpy_fllw(
+                            user_id=param.get('user_id'),
+                            company_id=param.get('company_id'),
+                            status=param.get('status'),
+                            source=param.get('source', 0))
+
+        raise gen.Return(response)
+
+    @gen.coroutine
+    def set_visit_company(self, param):
+        response = yield self.wx_user_company_ds.set_visit_cmpy(
+                                user_id=param.get('user_id'),
+                                company_id=param.get('company_id'),
+                                status=param.get('status'),
+                                source=param.get('source', 0))
+
+        raise gen.Return(response)
+
 
 
 

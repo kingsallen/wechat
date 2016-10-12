@@ -81,13 +81,13 @@ class BaseHandler(_base):
 
     @property
     def log_info(self):
-        if self._log_info and isinstance(dict, self._log_info):
+        if self._log_info and isinstance(self._log_info, dict):
             return self._log_info
         return None
 
     @log_info.setter
     def log_info(self, value):
-        assert isinstance(dict, value)
+        assert isinstance(value,dict )
         self._log_info = dict(value)
 
     def _get_params(self):

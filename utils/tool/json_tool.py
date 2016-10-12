@@ -7,6 +7,7 @@ import decimal
 import json
 from tornado.util import ObjectDict
 
+
 class JSONEncoder(json.JSONEncoder):
 
     """
@@ -20,6 +21,7 @@ class JSONEncoder(json.JSONEncoder):
         if isinstance(o, datetime.date):
             return str(o)
         return json.JSONEncoder.default(self, o)
+
 
 def json_dumps(p_dict):
 
