@@ -10,6 +10,9 @@ import socket
 import ujson
 import importlib
 import time
+
+import tornado.escape
+
 from hashlib import sha1
 from tornado import gen, web
 from tornado.util import ObjectDict
@@ -446,13 +449,33 @@ class BaseHandler(_base):
         super(BaseHandler, self).render(template_name, **kwargs)
         return
 
-    def send_json(self, chunk, status_code=200):
-        self.log_info = {"res_type": "json"}
-        chunk = ujson.encode(chunk)
-        self.set_header("Content-Type", "application/json; charset=UTF-8")
-        self.set_status(status_code)
-        self.write(chunk)
-        return
+    # def send_json(self, chunk, status_code=200):
+    #     self.log_info = {"res_type": "json"}
+    #     chunk = ujson.encode(chunk)
+    #     self.set_header("Content-Type", "application/json; charset=UTF-8")
+    #     self.set_status(status_code)
+    #     self.write(chunk)
+    #     return
+
+    def send_json(self, json_dict, code=200, use_encoder=True,
+                  additional_dump=False):
+        """
+        传递 JSON 到前端
+        :param json_dict: dict 格式的 JSON 内容
+        :param code: HTTP code
+        :param use_encoder: 是否使用 Tornado 的 json_encode 方法做字符串 escape
+        :param additional_dump:
+         当前端是 vue.js 渲染的时候 additional_dump 需要设置为 True,
+         由 vue.js 将 JSON 字符串 load 成 JS 对象
+        """
+        json_string = ""
+        if use_encoder:
+            json_string = tornado.escape.json_encode(json_dict)
+        self.set_header("Content-Type", "application/json; charset=utf-8")
+        self.set_status(code)
+        if additional_dump:
+            json_string = ujson.dumps(json_string)
+        self.write(json_string)
 
     def static_url(self, path, include_host=None, **kwargs):
         """
