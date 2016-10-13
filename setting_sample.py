@@ -23,6 +23,10 @@ settings['cookie_secret'] = "EAB1D2AB05EEF04D35BA5FDF789DD6A3"
 settings['debug'] = True
 settings['log_level'] = "DEBUG"
 settings['static_domain'] = "static1.dqprism.com"
+# 和前端工程师远程调试时可以开启此项,并配置remote_debug_ip选项
+settings['remote_debug'] = False
+# 远程/本地 前端build服务器地址
+settings['remote_debug_ip'] = 'http://0.0.0.0:3003'
 
 settings['root_path'] = os.path.join(os.path.dirname(__file__), "")
 settings['template_path'] = os.path.join(settings['root_path'], "template")

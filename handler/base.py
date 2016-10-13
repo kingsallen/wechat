@@ -12,6 +12,7 @@ import importlib
 import time
 
 import tornado.escape
+import tornado.httpclient
 
 from hashlib import sha1
 from tornado import gen, web
@@ -444,8 +445,20 @@ class BaseHandler(_base):
                         message="正在努力维护服务器中")
 
     def render(self, template_name, status_code=200, **kwargs):
+
         self.log_info = {"res_type": "html"}
         self.set_status(status_code)
+
+        # remote debug mode
+        if self.settings.get('remote_debug', False) is True:
+            template_string = super(BaseHandler, self).render_string(template_name, **kwargs)
+            post_url = urljoin(self.settings.get('remote_debug_ip'), template_name)
+            http_client = tornado.httpclient.HTTPClient()
+            r = http_client.fetch(post_url, method="POST", body=template)
+            self.write(r.body)
+            self.finish()
+            return
+
         super(BaseHandler, self).render(template_name, **kwargs)
         return
 
