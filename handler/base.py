@@ -41,6 +41,14 @@ for module in filter(lambda x: not x.endswith("init__.py"), glob.glob(d)):
 _base = type("_base", (web.RequestHandler,), obDict)
 
 
+# 与基础服务交互时用来标记请求来源
+APP_ID = ObjectDict({
+    constant.ENV_QX: '5',
+    constant.ENV_PLATFORM: '6',
+    constant.ENV_HELP: '7'
+})
+
+
 class BaseHandler(_base):
 
     def __init__(self, application, request, **kwargs):
@@ -49,6 +57,7 @@ class BaseHandler(_base):
         self.params = self._get_params()
         self._log_info = None
         self.start_time = time.time()
+        self.app_id = APP_ID.get(options.env)
 
     @property
     def logger(self):

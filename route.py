@@ -24,14 +24,17 @@ platform_routes = [
     (r"/mobile/start",
      "handler.platform.landing.LandingHandler"),
 
-    (r"/mobile/company/follow",
-     "handler.platform.companyrelation.CompanyFollowHandler"),
-
-    (r"/mobile/company/visitreq",
-     "handler.platform.companyrelation.CompanyVisitReqHandler"),
-
     (r"/mobile/company/([0-9]*)",
      "handler.platform.companyrelation.CompanyHandler"),
+
+    (r"/api/mobile/company/visitreq",
+     "handler.platform.companyrelation.CompanyVisitReqHandler"),
+
+    (r"/api/mobile/company/follow",
+     "handler.platform.companyrelation.CompanyFollowHandler"),
+
+    (r"/api/mobile/cellphone",
+     "handler.platform.cellphone.CellphoneBindHandler"),
 
     # Testing url, delete when releasing
     # (r"/mobile/test",

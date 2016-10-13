@@ -17,31 +17,36 @@ from setting import settings
 
 @gen.coroutine
 def http_get(route, jdata, timeout=5, infra=False):
-    ret = yield _async_http_get(route, jdata, timeout, infra, method='GET')
+    ret = yield _async_http_get(route, jdata,
+                                timeout=timeout, infra=infra, method='GET')
     raise gen.Return(ret)
 
 
 @gen.coroutine
 def http_delete(route, jdata, timeout=5, infra=False):
-    ret = yield _async_http_get(route, jdata, timeout, infra, method='DELETE')
+    ret = yield _async_http_get(route, jdata,
+                                timeout=timeout, infra=infra, method='DELETE')
     raise gen.Return(ret)
 
 
 @gen.coroutine
 def http_post(route, jdata, timeout=5, infra=False):
-    ret = yield _async_http_post(route, jdata, timeout, infra, method='POST')
+    ret = yield _async_http_post(route, jdata,
+                                 timeout=timeout, infra=infra, method='POST')
     raise gen.Return(ret)
 
 
 @gen.coroutine
 def http_put(route, jdata, timeout=5, infra=False):
-    ret = yield _async_http_post(route, jdata, timeout, infra, method='PUT')
+    ret = yield _async_http_post(route, jdata,
+                                 timeout=timeout, infra=infra, method='PUT')
     raise gen.Return(ret)
 
 
 @gen.coroutine
 def http_patch(route, jdata, timeout=5, infra=False):
-    ret = yield _async_http_post(route, jdata, timeout, infra, method='PATCH')
+    ret = yield _async_http_post(route, jdata,
+                                 timeout=timeout, infra=infra, method='PATCH')
     raise gen.Return(ret)
 
 
@@ -78,7 +83,6 @@ def _async_http_post(route, jdata, api=None, timeout=5, infra=False, method='POS
 
     http_client = tornado.httpclient.AsyncHTTPClient()
     url = "{0}/{1}".format(settings.infra if infra else api, route)
-
     response = yield http_client.fetch(
         url,
         method=method.upper(),
