@@ -23,6 +23,9 @@ import conf.common as constant
 from service.data.session.session import JsApi, Wechat, Employee, Recom, SysUser, SessionBundle
 from utils.common.wexinasyncapi import WeixinAsyncApi
 from setting import settings
+from utils.wechat.oauth import get_oauth_code
+
+from utils.tool.url_tool import make_url
 
 # 动态加载所有 PageService
 obDict = {}
@@ -50,6 +53,7 @@ class BaseHandler(_base):
         self.params = self._get_params()
         self._log_info = None
         self.start_time = time.time()
+        self.in_wechat, self.client_type = self._depend_wechat()
 
     @property
     def logger(self):
@@ -105,14 +109,71 @@ class BaseHandler(_base):
         return params
 
     def prepare(self):
+        self._make_json_args()
+        self._prepare_weixin_auth()
+
+    def _prepare_weixin_auth(self):
+        """
+        所有url访问的前处理
+        1. 向仟寻授权，创建仟寻号下微信用户
+        2. 向企业号静默授权，创建企业号下微信用户
+        3. 绑定sysuser和user_wx_user关系
+        """
+        if self.request.method.lower() == "get" and self.in_wechat:
+
+            # 手动获取 m 值，再在 make_url 中显式赋值，因为 make_url 会删除 m 字段
+            method = self.params.get("m", None)
+            query = dict(host=self.request.host,
+                         protocol=self.request.protocol,
+                         escape=["code"])
+            if method:
+                query.update(m=method)
+
+            redirect_url = make_url(self.request.uri.split("?")[0],
+                                    self.params, **query)
+
+            # 向聚合号授权并登录
+            # 若没有 user_user,则创建 user_user 帐号
+            if not self.current_user.qxuser.get("id"):
+                # 跳转到仟寻公众号地址，获得code
+                redirect_url = make_url(
+                    constant.QX_HOST + constant.WXOAUTH_URL, redirect_url)
+                qx_wechat = yield self.wechat_ps.get_wechat(
+                    conds={"id": settings["qx_wechat_id"]})
+                self.wechat_oauth_ps.get_oauth_code(
+                    self, redirect_url, qx_wechat, oauth_type="userinfo")
+
+            # 向企业号静默授权，并创建企业微信用户
+            elif not self.current_user.wxuser.get("id") and \
+                self.current_user.wechat.type == constant.WECHAT_TYPE_SERVICE:
+                wechat = self.current_user.wechat
+                self.wechat_oauth_ps.get_oauth_code(
+                    self, redirect_url, wechat, oauth_type="base")
+
+            # 绑定企业微信用户和 sysuser
+            if (not self.current_user.wxuser.get("sysuser_id") or
+                not self.current_user.qxuser.get("sysuser_id")) and \
+                    self.current_user.sysuser.get("id"):
+
+                user_user_id = self.current_user.sysuser.get("id")
+
+                # 将 user_user.id 与qxuser、wxuser 绑定
+                yield self.user_ps.binding_user(
+                    self, user_user_id, self.current_user.wxuser,
+                    self.current_user.qxuser)
+
+    def _prepare_json_args(self):
         self.json_args = None
         headers = self.request.headers
         try:
-            if("application/json" in headers.get("Content-Type", "") and
-               self.request.body):
+            if ("application/json" in headers.get("Content-Type", "") and
+                    self.request.body):
                 self.json_args = ujson.loads(self.request.body)
         except Exception as e:
             self.logger.error(e)
+
+
+
 
     # TODO: 暂时注释，因为此项目不是 hr，并不是所有的交互都是 JSON API
     # def guarantee(self, fields_mapping, *args):
@@ -454,7 +515,7 @@ class BaseHandler(_base):
             template_string = super(BaseHandler, self).render_string(template_name, **kwargs)
             post_url = urljoin(self.settings.get('remote_debug_ip'), template_name)
             http_client = tornado.httpclient.HTTPClient()
-            r = http_client.fetch(post_url, method="POST", body=template)
+            r = http_client.fetch(post_url, method="POST", body=template_string)
             self.write(r.body)
             self.finish()
             return
@@ -514,7 +575,6 @@ class BaseHandler(_base):
     def _get_info_header(self, log_params):
         request = self.request
         req_params = request.arguments
-        type_wechat, type_mobile = self.depend_wechat()
 
         if req_params and req_params.get('password', 0) != 0:
             req_params['password'] = 'xxxxxx'
@@ -522,8 +582,8 @@ class BaseHandler(_base):
         log_info_common = ObjectDict(
             elapsed_time="%.4f" % (time.time() - self.start_time),
             product=self.env,
-            type_wechat=type_wechat,
-            type_mobile=type_mobile,
+            type_wechat=self.in_wechat,
+            type_mobile=self.client_type,
             useragent=request.headers.get('User-Agent'),
             referer=request.headers.get('Referer'),
             hostname=socket.gethostname(),
@@ -541,7 +601,7 @@ class BaseHandler(_base):
         log_params.update(log_info_common)
         return log_params
 
-    def depend_wechat(self):
+    def _depend_wechat(self):
         """
         判断用户UA是否为微信客户端
         :return:

@@ -10,15 +10,26 @@ constant配置常量规范：
 
 常量使用大写字母，字符串需要时标注为unicode编码
 例如 SUCCESS = u"成功"
-
 """
 
 # ++++++++++系统常量++++++++++
+
+QX_HOST = "qx.moseeker.com"
+# URL consts
+WXOAUTH_URL = "/wxoauth"
+
 # Weixin API url
+WX_OAUTH_GET_CODE = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=snsapi_%s&state=%s#wechat_redirect"
+WX_THIRD_OAUTH_GET_CODE = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=snsapi_%s&state=%s&component_appid=%s#wechat_redirect"
 WX_OAUTH_GET_ACCESS_TOKEN = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=%s&secret=%s&code=%s&grant_type=authorization_code"
 WX_THIRD_OAUTH_GET_ACCESS_TOKEN = "https://api.weixin.qq.com/sns/oauth2/component/access_token?appid=%s&code=%s&grant_type=authorization_code&component_appid=%s&component_access_token=%s"
 WX_OAUTH_GET_USERINFO = "https://api.weixin.qq.com/sns/userinfo?access_token=%s&openid=%s&lang=zh_CN"
-# 返回错误
+
+# Wechat Account Type
+WECHAT_TYPE_SUBSCRIPTION = 0
+WECHAT_TYPE_UNCONFIRM_SUBSCRIPTION = 2
+WECHAT_TYPE_SERVICE = 1
+WECHAT_TYPE_UNCONFIRM_SERVICE = 3
 
 # status_code默认错误返回
 RESPONSE_SUCCESS = u"success"

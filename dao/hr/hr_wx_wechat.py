@@ -11,6 +11,7 @@
 
 from dao.base import BaseDao
 
+
 class HrWxWechatDao(BaseDao):
 
     def __init__(self):
@@ -26,7 +27,7 @@ class HrWxWechatDao(BaseDao):
             # "username": self.constant.TYPE_STRING, # 用户名
             # "password": self.constant.TYPE_STRING, # 密码
             # "token": self.constant.TYPE_STRING, # 开发者token
-            # "appid": self.constant.TYPE_STRING, # 开发者appid
+            "appid": self.constant.TYPE_STRING, # 开发者appid
             # "secret": self.constant.TYPE_STRING, # 开发者secret
             # "welcome": self.constant.TYPE_INT, # welcome message
             # "default": self.constant.TYPE_INT, # default message
