@@ -53,8 +53,7 @@ APP_ID = ObjectDict({
     constant.ENV_HELP: '7'
 })
 
-
-class BaseHandler(web.RedirectHandler):
+class BaseHandler(_base):
 
     def __init__(self, application, request, **kwargs):
         super(BaseHandler, self).__init__(application, request, **kwargs)
@@ -64,8 +63,6 @@ class BaseHandler(web.RedirectHandler):
         self.start_time = time.time()
         self.app_id = APP_ID.get(options.env)
         self.in_wechat, self.client_type = self._depend_wechat()
-
-
 
     @property
     def logger(self):
@@ -243,7 +240,7 @@ class BaseHandler(web.RedirectHandler):
     # We can set the current_user in prepare() by asynchronous operations
     def prepare(self):
 
-        self._make_json_args()
+        self._prepare_json_args()
 
         need_oauth = False
 

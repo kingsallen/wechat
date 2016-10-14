@@ -37,8 +37,8 @@ platform_routes = [
      "handler.platform.cellphone.CellphoneBindHandler"),
 
     # Testing url, delete when releasing
-    # (r"/mobile/test",
-    #  "tests.dao.user.TestCompanyVisitReqHandler"),
+    (r"/mobile/test",
+     "tests.dao.user.TestCompanyVisitReqHandler"),
 ]
 platform_routes.extend(common_routes)
 

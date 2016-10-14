@@ -13,8 +13,8 @@ from dao.base import BaseDao
 
 class UserCompanyFollowsDao(BaseDao):
 
-    def __init__(self):
-        super(UserCompanyFollowsDao, self).__init__()
+    def __init__(self, logger):
+        super(UserCompanyFollowsDao, self).__init__(logger)
         self.table = 'user_company_follows'
         self.fields_map = {
             "id": self.constant.TYPE_INT,

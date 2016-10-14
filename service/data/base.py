@@ -25,7 +25,7 @@ from setting import settings
 from utils.common.decorator import cache
 from app import logger
 from utils.common.singleton import Singleton
-
+import pprint
 
 class DataService:
 
@@ -47,7 +47,6 @@ class DataService:
             klass = getattr(
                 importlib.import_module('dao.{0}.{1}'.format(p, m)), pm_dao)
             instance = klass(self.logger)
-
             setattr(self, pm_obj, instance)
 
     def _condition_isvalid(self, conds, method_name):
