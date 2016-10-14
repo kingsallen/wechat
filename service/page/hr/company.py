@@ -7,10 +7,11 @@ from tornado.util import ObjectDict
 from tornado import gen
 from service.page.base import PageService
 
+
 class CompanyPageService(PageService):
 
     def __init__(self, logger):
-        super().__init__(logger)
+        super(CompanyPageService, self).__init__(logger)
 
     @gen.coroutine
     def get_company(self, conds, need_conf=False, fields=[]):

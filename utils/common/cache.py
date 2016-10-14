@@ -78,3 +78,6 @@ class BaseRedis(object):
     def exists(self, key):
         key = self.key_name(key)
         return self._redis.exists(key)
+
+
+

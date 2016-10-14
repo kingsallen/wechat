@@ -6,6 +6,11 @@ setting.py
 ### PyCharm ###
 /.idea
 
+### Eclipse ###
+*.project
+*.pydevproject
+*.settings/
+
 ## File-based project format:
 *.iws
 

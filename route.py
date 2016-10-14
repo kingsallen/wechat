@@ -21,7 +21,24 @@ common_routes = [
 
 # 企业号的单独 routes
 platform_routes = [
-    (r"/mobile/start", "handler.platform.landing.LandingHandler")
+    (r"/mobile/start",
+     "handler.platform.landing.LandingHandler"),
+
+    (r"/mobile/company/([0-9]*)",
+     "handler.platform.companyrelation.CompanyHandler"),
+
+    (r"/api/company/visitreq",
+     "handler.platform.companyrelation.CompanyVisitReqHandler"),
+
+    (r"/api/company/follow",
+     "handler.platform.companyrelation.CompanyFollowHandler"),
+
+    (r"/api/cellphone",
+     "handler.platform.cellphone.CellphoneBindHandler"),
+
+    # Testing url, delete when releasing
+    (r"/mobile/test",
+     "tests.dao.user.TestCompanyVisitReqHandler"),
 ]
 platform_routes.extend(common_routes)
 

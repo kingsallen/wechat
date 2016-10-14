@@ -75,7 +75,6 @@ class BaseDao(DB):
         :param conds_params: 字符串形式的conds对应的params值，防SQL注入
         :return: 返回查询结果列表数组
         """
-
         conds, params = self.getConds(conds, conds_params)
         if not conds:
             self.logger.error("Error:[get_list_by_conds][conds error], conds:{0}".format(conds))

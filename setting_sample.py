@@ -11,13 +11,14 @@ setting配置常量规范：
 """
 
 import os
+from tornado.util import ObjectDict
 from tornado.options import define
 
 define("port", default=8000, help="run on the given port", type=int)
 define("logpath", default="logs/", help="log path")
 define("env", default="platform", help="wechat product")
 
-settings = dict()
+settings = ObjectDict()
 settings['xsrf_cookies'] = True
 settings['cookie_secret'] = "EAB1D2AB05EEF04D35BA5FDF789DD6A3"
 settings['debug'] = True

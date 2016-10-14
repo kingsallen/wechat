@@ -15,22 +15,23 @@ dataservice之间不能相互调用
 
 import re
 import glob
-
+import importlib
 import conf.common as constant
 import conf.platform as plat_constant
 import conf.qx as qx_constant
 import conf.help as help_constant
-from setting import settings
-import importlib
-from utils.common.singleton import Singleton
 
+from setting import settings
+from utils.common.decorator import cache
+from app import logger
+from utils.common.singleton import Singleton
+import pprint
 
 class DataService:
 
     __metaclass__ = Singleton
 
     def __init__(self, logger):
-
         self.logger = logger
         self.constant = constant
         self.plat_constant = plat_constant
@@ -46,8 +47,14 @@ class DataService:
             klass = getattr(
                 importlib.import_module('dao.{0}.{1}'.format(p, m)), pm_dao)
             instance = klass(self.logger)
-
             setattr(self, pm_obj, instance)
+
+    def _condition_isvalid(self, conds, method_name):
+        if conds is None or not (isinstance(conds, dict) or isinstance(conds, str)):
+            self.logger.warn("Warning:[{2}][invalid parameters], Detail:[conds: {0}, "
+                        "type: {1}]".format(conds, type(conds), method_name))
+            return False
+        return True
 
     @staticmethod
     def is_invalid_conds(conds=None):

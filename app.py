@@ -81,4 +81,5 @@ def main():
         logger.info('Wechat server closing on port: {0}'.format(options.port))
 
 if __name__ == "__main__":
+
     main()
