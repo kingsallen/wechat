@@ -5,6 +5,9 @@ from service.page.base import PageService
 
 class UserPageService(PageService):
 
+    def __init__(self, logger):
+        super().__init__(logger)
+
     @gen.coroutine
     def binding_user(self, handler, user_id, wxuser, qxuser):
         # for qxuser:

@@ -11,10 +11,11 @@
 
 from dao.base import BaseDao
 
+
 class JobCustomDao(BaseDao):
 
-    def __init__(self):
-        super(JobCustomDao, self).__init__()
+    def __init__(self, logger):
+        super(JobCustomDao, self).__init__(logger)
         self.table = "job_custom"
         self.fields_map = {
             "id": self.constant.TYPE_INT,

@@ -10,6 +10,9 @@ import conf.common as constant
 
 class WechatOauthPageService(PageService):
 
+    def __init__(self, logger):
+        super().__init__(logger)
+
     @staticmethod
     def get_oauth_code(handler, redirect_url=None, target_wechat=None,
                        oauth_type=None):

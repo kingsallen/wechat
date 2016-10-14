@@ -3,14 +3,15 @@
 # Copyright 2016 MoSeeker
 
 from tornado import gen
-from service.data.base import *
+from service.data.base import DataService
+from utils.common.decorator import cache
 
 
 class UserUserDataService(DataService):
 
     @cache(ttl=60)
     @gen.coroutine
-    def get_user(self, conds, fields=[]):
+    def get_user(self, conds, fields=None):
 
         if conds is None or not (isinstance(conds, dict) or isinstance(conds, str)):
             self.logger.warn("Warning:[get_user][invalid parameters], Detail:[conds: {0}, "

@@ -7,7 +7,7 @@
 
 # Copyright 2016 MoSeeker
 
-import urllib
+from urllib.parse import quote
 
 
 def make_url(path, params=None, host="", protocol="http", escape=None,
@@ -35,7 +35,7 @@ def make_url(path, params=None, host="", protocol="http", escape=None,
         if k in escape:
             continue
 
-        if not (isinstance(k, basestring) and isinstance(v, basestring)):
+        if not (isinstance(k, str) and isinstance(v, str)):
             continue
 
         if v == '':
@@ -44,11 +44,11 @@ def make_url(path, params=None, host="", protocol="http", escape=None,
         if k.startswith("_") and k not in kwargs:
             continue
 
-        k = urllib.quote(str(k))
+        k = quote(str(k))
         if k in ["wechat_signature"]:
             kv = k + "=" + str(v)
         else:
-            kv = k + "=" + urllib.quote(str(v) if str(v) else "")
+            kv = k + "=" + quote(str(v) if str(v) else "")
 
         url_params.append(kv)
 

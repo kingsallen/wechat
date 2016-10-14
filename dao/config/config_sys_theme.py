@@ -11,10 +11,11 @@
 
 from dao.base import BaseDao
 
+
 class ConfigSysThemeDao(BaseDao):
 
-    def __init__(self):
-        super(ConfigSysThemeDao, self).__init__()
+    def __init__(self, logger):
+        super(ConfigSysThemeDao, self).__init__(logger)
         self.table = "config_sys_theme"
         self.fields_map = {
             "id": self.constant.TYPE_INT,

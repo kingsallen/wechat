@@ -4,8 +4,8 @@ from dao.base import BaseDao
 
 
 class UserWxUserDao(BaseDao):
-    def __init__(self):
-        super(UserWxUserDao, self).__init__()
+    def __init__(self, logger):
+        super(UserWxUserDao, self).__init__(logger)
         self.table = "user_wx_user"
         self.fields_map = {
             "id": self.constant.TYPE_INT,

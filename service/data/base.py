@@ -14,17 +14,14 @@ dataservice之间不能相互调用
 """
 
 import re
-import importlib
 import glob
 
-from utils.common.log import Logger
 import conf.common as constant
 import conf.platform as plat_constant
 import conf.qx as qx_constant
 import conf.help as help_constant
 from setting import settings
-from utils.common.decorator import cache
-
+import importlib
 from utils.common.singleton import Singleton
 
 
@@ -32,25 +29,32 @@ class DataService:
 
     __metaclass__ = Singleton
 
-    def __init__(self):
+    def __init__(self, logger):
 
-        self.logger = Logger()
+        self.logger = logger
         self.constant = constant
         self.plat_constant = plat_constant
         self.qx_constant = qx_constant
         self.help_constant = help_constant
 
-        d = settings['root_path'] + "dao/**/*.py"
-        for module in filter(lambda x: not x.endswith("init__.py"), glob.glob(d)):
+        for module in self.search_path():
             p = module.split("/")[-2]
             m = module.split("/")[-1].split(".")[0]
-            m_list = [item.title() for item in re.split(u"_", m)]
-            pmDao = "".join(m_list) + "Dao"
-            pmObj = m + "_dao"
+            m_list = [item.title() for item in re.split("_", m)]
+            pm_dao = "".join(m_list) + "Dao"
+            pm_obj = m + "_dao"
+            klass = getattr(
+                importlib.import_module('dao.{0}.{1}'.format(p, m)), pm_dao)
+            instance = klass(self.logger)
 
-            setattr(self, pmObj, getattr(importlib.import_module('dao.{0}.{1}'.format(p, m)), pmDao)())
+            setattr(self, pm_obj, instance)
 
     @staticmethod
     def is_invalid_conds(conds=None):
         return (conds is None or
                 not (isinstance(conds, dict) or isinstance(conds, str)))
+
+    @staticmethod
+    def search_path():
+        d = settings['root_path'] + "dao/**/*.py"
+        return filter(lambda x: not x.endswith("init__.py"), glob.glob(d))

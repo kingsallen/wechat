@@ -8,7 +8,11 @@ from service.page.base import PageService
 from utils.tool.date_tool import jd_update_date
 from utils.tool.str_tool import gen_salary
 
+
 class PositionPageService(PageService):
+
+    def __init__(self, logger):
+        super().__init__(logger)
 
     @gen.coroutine
     def get_position(self, conds, fields=[]):

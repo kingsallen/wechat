@@ -14,8 +14,8 @@ from dao.base import BaseDao
 
 class HrWxWechatDao(BaseDao):
 
-    def __init__(self):
-        super(HrWxWechatDao, self).__init__()
+    def __init__(self, logger):
+        super(HrWxWechatDao, self).__init__(logger)
         self.table = "hr_wx_wechat"
         self.fields_map = {
             "id": self.constant.TYPE_INT,

@@ -22,14 +22,15 @@ class BaseDao(DB):
 
     __metaclass__ = Singleton
 
-    def __init__(self):
+    def __init__(self, logger):
 
-        super(BaseDao,self).__init__()
+        super(BaseDao, self).__init__()
         self.fields_map = {}
         self.table = ''
         self.constant = constant
         self.plat_constant = plat_constant
         self.qx_constant = qx_constant
+        self.logger = logger
 
     @gen.coroutine
     def query(self, sql, params):
