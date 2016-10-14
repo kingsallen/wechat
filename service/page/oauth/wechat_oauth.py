@@ -2,7 +2,8 @@
 
 from tornado import gen
 from service.page.base import PageService
-from urllib2 import quote, urlopen
+from urllib.parse import quote
+from urllib.request import urlopen
 from setting import settings
 import conf.common as constant
 

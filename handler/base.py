@@ -17,7 +17,7 @@ import tornado.httpclient
 from hashlib import sha1
 from tornado import gen, web
 from tornado.util import ObjectDict
-from urlparse import urljoin
+from urllib.parse import urljoin
 from tornado.options import options
 import conf.common as constant
 from service.data.session.session import JsApi, Wechat, Employee, Recom, SysUser, SessionBundle
@@ -107,10 +107,6 @@ class BaseHandler(_base):
             if isinstance(params[key], list) and len(params[key]):
                 params[key] = params[key][0]
         return params
-
-    def prepare(self):
-        self._make_json_args()
-        self._prepare_weixin_auth()
 
     def _prepare_weixin_auth(self):
         """
@@ -230,24 +226,30 @@ class BaseHandler(_base):
 
         raise gen.Return(company)
 
-    @gen.coroutine
-    def get_current_user(self, oauth=True):
-        session = ObjectDict()
+    # Get_current_user may not be a coroutine
+    # So don't use it
+    # We can set the current_user in prepare() by asynchronous operations
+    def prepare(self):
+        self._make_json_args()
+        self._prepare_weixin_auth()
 
-        # session_id
-        if self.get_secure_cookie(constant.COOKIE_SESSIONID):
-            session_id = self.get_secure_cookie(constant.COOKIE_SESSIONID)
-            if self.redis.exists(session_id):
-                session = yield self.get_current_session(session_id=session_id)
-                raise gen.Return(session)
-
-        wechat = yield self._get_current_wechat()
-        if not wechat:
-            raise gen.Return(session)
-        session_id = self._create_new_session_id(wechat_id=wechat.id)
-        session = yield self.create_current_session(session_id=session_id, wechat=wechat, oauth=oauth)
-        self.set_secure_cookie(constant.COOKIE_SESSIONID, session_id)
-        raise gen.Return(session)
+    # def get_current_user(self, oauth=True):
+    #     session = ObjectDict()
+    #
+    #     # session_id
+    #     if self.get_secure_cookie(constant.COOKIE_SESSIONID):
+    #         session_id = self.get_secure_cookie(constant.COOKIE_SESSIONID)
+    #         if self.redis.exists(session_id):
+    #             session = yield self.get_current_session(session_id=session_id)
+    #             raise gen.Return(session)
+    #
+    #     wechat = yield self._get_current_wechat()
+    #     if not wechat:
+    #         raise gen.Return(session)
+    #     session_id = self._create_new_session_id(wechat_id=wechat.id)
+    #     session = yield self.create_current_session(session_id=session_id, wechat=wechat, oauth=oauth)
+    #     self.set_secure_cookie(constant.COOKIE_SESSIONID, session_id)
+    #     raise gen.Return(session)
 
     def _create_new_session_id(self, wechat_id):
         while True:

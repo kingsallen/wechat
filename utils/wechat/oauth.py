@@ -1,6 +1,7 @@
 # coding=utf-8
 
-from urllib2 import quote, urlopen
+from urllib.parse import quote
+from urllib.request import urlopen
 import ujson
 from setting import settings
 import conf.common as constant
