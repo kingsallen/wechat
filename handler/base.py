@@ -227,55 +227,48 @@ class BaseHandler(MetaBaseHandler):
     @gen.coroutine
     def prepare(self):
         self._prepare_json_args()
-        #
-        # need_oauth = False
-        #
-        # # 1. 获取 cookie
-        # session_id = self.get_secure_cookie(constant.COOKIE_SESSIONID)
-        #
-        # # 2. 有 cookie
-        # if session_id:
-        #     # 2. 查询 session 信息：
-        #     # 根据 <session_id>_<企业号 wechat_signature> 来查询
-        #     key = session_id + "_" + self.params.wechat_signature
-        #     value = self.redis.get(key)
-        #     if value:
-        #         # 如果有 value， 返回该 value 作为 self.current_user
-        #         self.current_user = ujson.loads(value)
-        #     else:
-        #         # 如果没有 value：
-        #         # 根据 <session_id>_"QX" 来查询
-        #         key = session_id + "_QX"
-        #         value = self.redis.get(key)
-        #         if value:
-        #             user_id = ujson.loads(value).user.id
-        #             session_qx, session_ent = yield self._refresh_session(user_id)
-        #             if self.env == constant.ENV_PLATFORM:
-        #                 self.current_user = session_ent
-        #             elif self.env == constant.ENV_QX:
-        #                 self.current_user = session_qx
-        #             self.set_secure_cookie(constant.COOKIE_SESSIONID, session_id)
-        #         else:
-        #             need_oauth = True
-        #
-        # if not need_oauth:
-        #     return
-        #
-        # if
 
-#         self._prepare_json_args()
-#
-#         need_oauth = False
-#
-#         session_id = self.get_secure_cookie(constant.COOKIE_SESSIONID)
-#
-#         if session_id:
-#             session_key = session_id + "_" + settings['qx_wechat_id']
-#             value = self.redis.get(session_key)
-#             if value:
-#                 self.current_user = ujson.loads(value)
-#             else:
-#                 session_key = session_id + "_"
+        need_oauth = False
+
+        # 1. 获取 cookie
+        session_id = self.get_secure_cookie(constant.COOKIE_SESSIONID)
+
+        # 2. 有 cookie
+        if session_id:
+            # 2. 查询 session 信息：
+            # 根据 <session_id>_<企业号 wechat_signature> 来查询
+            key = session_id + "_" + self.params.wechat_signature
+            value = self.redis.get(key)
+            if value:
+                # 如果有 value， 返回该 value 作为 self.current_user
+                self.current_user = ujson.loads(value)
+            else:
+                # 如果没有 value：
+                # 根据 <session_id>_"QX" 来查询
+                key = session_id + "_QX"
+                value = self.redis.get(key)
+                if value:
+                    user_id = ujson.loads(value).user.id
+                    session_qx, session_ent = yield self._refresh_session(user_id)
+                    if self.env == constant.ENV_PLATFORM:
+                        self.current_user = session_ent
+                    elif self.env == constant.ENV_QX:
+                        self.current_user = session_qx
+                    self.set_secure_cookie(constant.COOKIE_SESSIONID, session_id)
+                else:
+                    need_oauth = True
+        else:
+            session_id = self._create_new_session_id()
+            self.set_secure_cookie(constant.COOKIE_SESSIONID, session_id)
+            need_oauth = True
+
+        if not need_oauth:
+            return
+
+
+
+
+
 #
 #         # 1. 获取 cookie
 #
@@ -318,14 +311,14 @@ class BaseHandler(MetaBaseHandler):
     #     self.set_secure_cookie(constant.COOKIE_SESSIONID, session_id)
     #     raise gen.Return(session)
 
-    def _create_new_session_id(self, wechat_id):
+    def _create_new_session_id(self):
         while True:
-            session_id = sha1('%s%s' % (os.urandom(16), time.time())).hexdigest() + "_" + wechat_id
+            session_id = sha1('%s%s' % (os.urandom(16), time.time())).hexdigest()
             record = yield self.redis.exists(session_id)
             if record:
                 continue
             else:
-                raise gen.Return(session_id)
+                return session_id
 
     @gen.coroutine
     def get_current_session(self, session_id):

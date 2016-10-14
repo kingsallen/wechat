@@ -8,7 +8,8 @@
 
 说明:
 pageservice的父类
-负责与handler交互，不能直接与DAO交互。一个pageservice能调用多个dataservice，pageservice只能被handler调用
+负责与handler交互，不能直接与DAO交互。
+一个pageservice能调用多个dataservice，pageservice只能被handler调用
 pageservice之间可以相互调用，但不建议
 可以根据业务类型创建pageservice
 """
@@ -50,7 +51,8 @@ class PageService:
             pm_obj = m + "_ds"
 
             klass = getattr(
-                importlib.import_module('service.data.{0}.{1}'.format(p, m)), pm_ds)
+                importlib.import_module('service.data.{0}.{1}'.format(p, m)),
+                pm_ds)
             instance = klass(self.logger)
 
             setattr(self, pm_obj, instance)

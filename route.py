@@ -16,13 +16,8 @@ help_routes: 继承自common_routes, 供help单独使用
 # 微信端公共的 routes
 common_routes = [
     # wechat
-    (r"/wechat", "handler.common.wechat.WechatHandler"),
-]
-
-# 企业号的单独 routes
-platform_routes = [
-    (r"/mobile/start",
-     "handler.platform.landing.LandingHandler"),
+    (r"/wechat",
+     "handler.common.wechat.WechatHandler"),
 
     (r"/mobile/company/([0-9]*)",
      "handler.platform.companyrelation.CompanyHandler"),
@@ -38,7 +33,13 @@ platform_routes = [
 
     # Testing url, delete when releasing
     (r"/mobile/test",
-     "tests.dao.user.TestCompanyVisitReqHandler"),
+     "tests.dao.user.TestCompanyVisitReqHandler")
+]
+
+# 企业号的单独 routes
+platform_routes = [
+    (r"/mobile/start",
+     "handler.platform.landing.LandingHandler")
 ]
 platform_routes.extend(common_routes)
 
