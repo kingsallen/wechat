@@ -46,8 +46,7 @@ class PageService:
         for module in filter(lambda x: not x.endswith("init__.py"), glob.glob(d)):
             p = module.split("/")[-2]
             m = module.split("/")[-1].split(".")[0]
-            m_list = [item.title() for item in re.split(u"_", m)]
+            m_list = [item.title() for item in re.split("_", m)]
             pmDS = "".join(m_list) + "DataService"
             pmObj = m + "_ds"
-
             setattr(self, pmObj, getattr(importlib.import_module('service.data.{0}.{1}'.format(p, m)), pmDS)())

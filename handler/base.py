@@ -17,6 +17,7 @@ import tornado.httpclient
 from hashlib import sha1
 from tornado import gen, web
 from tornado.util import ObjectDict
+# from tor
 from urllib.parse import urljoin
 from tornado.options import options
 import conf.common as constant
@@ -34,14 +35,13 @@ d = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)) + \
 for module in filter(lambda x: not x.endswith("init__.py"), glob.glob(d)):
     p = module.split("/")[-2]
     m = module.split("/")[-1].split(".")[0]
-    m_list = [item.title() for item in re.split(u"_", m)]
+    m_list = [item.title() for item in re.split("_", m)]
     pmPS = "".join(m_list) + "PageService"
     pmObj = m + "_ps"
     obDict.update({
         pmObj: getattr(importlib.import_module(
             'service.page.{0}.{1}'.format(p, m)), pmPS)()
     })
-
 _base = type("_base", (web.RequestHandler,), obDict)
 
 

@@ -24,6 +24,7 @@ import conf.qx as qx_constant
 import conf.help as help_constant
 from setting import settings
 from utils.common.decorator import cache
+from app import logger
 
 from utils.common.singleton import Singleton
 
@@ -34,7 +35,8 @@ class DataService:
 
     def __init__(self):
 
-        self.logger = Logger()
+        # self.logger = Logger()
+        self.logger = logger
         self.constant = constant
         self.plat_constant = plat_constant
         self.qx_constant = qx_constant

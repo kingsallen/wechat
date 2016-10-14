@@ -15,7 +15,7 @@ from utils.common.log import Logger
 from utils.tool.date_tool import is_time_valid
 import conf.common as constant
 
-
+from app import logger
 class DB(object):
 
     def __init__(self):
@@ -31,7 +31,7 @@ class DB(object):
             max_recycle_sec=3
         )
 
-        self.logger = Logger()
+        self.logger = logger
 
     def getConds(self, conds, conds_params=[]):
 
