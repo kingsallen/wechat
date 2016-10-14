@@ -2,31 +2,29 @@
 
 # Copyright 2016 MoSeeker
 
-import os
 import glob
-import re
-
-import socket
-import ujson
 import importlib
+import os
+import re
+import socket
 import time
+import ujson
+from hashlib import sha1
+from urllib.parse import urljoin
 
 import tornado.escape
 import tornado.httpclient
-
-from hashlib import sha1
 from tornado import gen, web
-from tornado.util import ObjectDict
-from urllib.parse import urljoin
 from tornado.options import options
-import conf.common as constant
-from service.data.session.session import JsApi, Wechat, Employee, Recom, SysUser, SessionBundle
-from utils.common.wexinasyncapi import WeixinAsyncApi
-from setting import settings
-from utils.wechat.oauth import get_oauth_code
+from tornado.util import ObjectDict
 
-from utils.tool.url_tool import make_url
+import conf.common as constant
 from app import logger
+from service.data.session.session import JsApi, Wechat, Employee, Recom, SysUser, SessionBundle
+from setting import settings
+from utils.common.decorator import check_signature
+from utils.common.wexinasyncapi import WeixinAsyncApi
+from utils.tool.url_tool import make_url
 
 # 动态加载所有 PageService
 obDict = {}
@@ -43,10 +41,10 @@ for module in filter(lambda x: not x.endswith("init__.py"), glob.glob(d)):
             'service.page.{0}.{1}'.format(p, m)), pmPS)(logger)
     })
 
-_base = type("_base", (web.RequestHandler,), obDict)
+MataBaseHandler = type("MataBaseHandler", (web.RequestHandler,), obDict)
 
 
-class BaseHandler(web.RedirectHandler):
+class BaseHandler(MataBaseHandler):
 
     def __init__(self, application, request, **kwargs):
         super(BaseHandler, self).__init__(application, request, **kwargs)
@@ -229,28 +227,38 @@ class BaseHandler(web.RedirectHandler):
 
         raise gen.Return(company)
 
-    # Get_current_user may not be a coroutine
+    # get_current_user may not be a coroutine
     # So don't use it
     # We can set the current_user in prepare() by asynchronous operations
+    @check_signature
+    @gen.coroutine
     def prepare(self):
 
         self._make_json_args()
 
         need_oauth = False
 
+        # 1. 获取 cookie
         session_id = self.get_secure_cookie(constant.COOKIE_SESSIONID)
 
+        # 2. 有 cookie
         if session_id:
-            session_key = session_id + "_" + settings['qx_wechat_id']
-            value = self.redis.get(session_key)
+            key = session_id + "_QX"
+            value = self.redis.get(key)
             if value:
                 self.current_user = ujson.loads(value)
             else:
-                session_key = session_id + "_"
+                key = session_id + "_" + self.params.wechat_signature
+                value = self.redis.get(key)
+                if value:
+                    user_id = ujson.loads(value).user.id
+                    qx_session = yield self._build_session_qx
+                    yield self._build_session_custom_company
 
-        # 1. 获取 cookie
 
-        # 有 cookie
+
+
+        #
         # 2. 查询 session 信息：
             # 2.1 根据 cookie_<企业号wechat_id> 来查询
                 # 如果有 value， 返回该 value 作为 self.current_user
@@ -518,9 +526,8 @@ class BaseHandler(web.RedirectHandler):
             ujson.dumps(self._get_info_header(info), ensure_ascii=0))
 
     def write_error(self, status_code, **kwargs):
+        """错误页
 
-        """
-        错误页
         :param status_code: http_status
         :param kwargs:
         :return:
@@ -532,18 +539,15 @@ class BaseHandler(web.RedirectHandler):
         """
 
         if status_code == 403:
-            self.render('refer/common/info.html',
-                        status_code=status_code,
-                        css="warning",
-                        info="用户未被授权请求")
+            self.render('refer/common/info.html', status_code=status_code,
+                        css="warning", info="用户未被授权请求")
         elif status_code == 404:
-            self.render('common/systemmessage.html',
-                        status_code=status_code,
+            self.render('common/systemmessage.html', status_code=status_code,
                         message="Ta在地球上消失了")
         else:
-            self.render('common/systemmessage.html',
-                        status_code=status_code,
+            self.render('common/systemmessage.html', status_code=status_code,
                         message="正在努力维护服务器中")
+
 
     def render(self, template_name, status_code=200, **kwargs):
 
