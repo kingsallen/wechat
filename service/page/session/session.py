@@ -12,6 +12,9 @@ from service.page.base import PageService
 
 class SessionPageService(PageService):
 
+    def __init__(self, logger):
+        super().__init__(logger)
+
     @gen.coroutine
     def create_or_update_wxuser(self, userinfo, wechat_id):
         # 1. 按照userinfo.openid 和 wechat_id 尝试获取 wxuser

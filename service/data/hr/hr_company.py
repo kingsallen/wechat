@@ -3,7 +3,8 @@
 # Copyright 2016 MoSeeker
 
 from tornado import gen
-from service.data.base import *
+from service.data.base import DataService
+from utils.common.decorator import cache
 
 class HrCompanyDataService(DataService):
 

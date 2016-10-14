@@ -13,6 +13,9 @@ from service.page.base import PageService
 
 class LandingPageService(PageService):
 
+    def __init__(self, logger):
+        super().__init__(logger)
+
     @gen.coroutine
     def get_landing_item(self, company, company_id, selected):
 

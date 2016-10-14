@@ -5,7 +5,11 @@
 from tornado import gen
 from service.page.base import PageService
 
+
 class JobCustomPageService(PageService):
+
+    def __init__(self, logger):
+        super().__init__(logger)
 
     @gen.coroutine
     def get_custom(self, conds, fields):

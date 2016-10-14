@@ -27,6 +27,7 @@ from setting import settings
 from utils.wechat.oauth import get_oauth_code
 
 from utils.tool.url_tool import make_url
+from app import logger
 
 # 动态加载所有 PageService
 obDict = {}
@@ -40,7 +41,7 @@ for module in filter(lambda x: not x.endswith("init__.py"), glob.glob(d)):
     pmObj = m + "_ps"
     obDict.update({
         pmObj: getattr(importlib.import_module(
-            'service.page.{0}.{1}'.format(p, m)), pmPS)()
+            'service.page.{0}.{1}'.format(p, m)), pmPS)(logger)
     })
 _base = type("_base", (web.RequestHandler,), obDict)
 
@@ -53,7 +54,7 @@ APP_ID = ObjectDict({
 })
 
 
-class BaseHandler(_base):
+class BaseHandler(web.RedirectHandler):
 
     def __init__(self, application, request, **kwargs):
         super(BaseHandler, self).__init__(application, request, **kwargs)
@@ -63,6 +64,8 @@ class BaseHandler(_base):
         self.start_time = time.time()
         self.app_id = APP_ID.get(options.env)
         self.in_wechat, self.client_type = self._depend_wechat()
+
+
 
     @property
     def logger(self):
@@ -239,8 +242,43 @@ class BaseHandler(_base):
     # So don't use it
     # We can set the current_user in prepare() by asynchronous operations
     def prepare(self):
+
         self._make_json_args()
-        self._prepare_weixin_auth()
+
+        need_oauth = False
+
+        session_id = self.get_secure_cookie(constant.COOKIE_SESSIONID)
+
+        if session_id:
+            session_key = session_id + "_" + settings['qx_wechat_id']
+            value = self.redis.get(session_key)
+            if value:
+                self.current_user = ujson.loads(value)
+            else:
+                session_key = session_id + "_"
+
+        # 1. 获取 cookie
+
+        # 有 cookie
+        # 2. 查询 session 信息：
+            # 2.1 根据 cookie_<企业号wechat_id> 来查询
+                # 如果有 value， 返回该 value 作为 self.current_user
+                # 如果没有 value：
+        #          2.2 根据 cookie_<聚合号wechat_id> 来查询
+                    # 如果有，
+                    # 拿到 unionid，
+                    # 构建 session：
+                    #    a. 构建企业号 session，redis保存 2 h
+                    #    b. 构建聚合号session， redis 永久保存
+                    #    c. 再次刷新用户 cookie，永久
+                    # 如果没有：
+                        # 当做没有 cookie 处理
+        # 没有 cookie：
+            # 对 QX 授权
+
+
+
+        # 无 cookie
 
     # def get_current_user(self, oauth=True):
     #     session = ObjectDict()

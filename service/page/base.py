@@ -22,20 +22,19 @@ import conf.common as constant
 import conf.platform as plat_constant
 import conf.qx as qx_constant
 import conf.help as help_constant
-from utils.common.log import Logger
 from utils.common.singleton import Singleton
 
 
 class PageService:
     __metaclass__ = Singleton
 
-    def __init__(self):
+    def __init__(self, logger):
 
         """
         初始化dataservice
         :return:
         """
-        self.logger = Logger()
+        self.logger = logger
         self.settings = settings
         self.constant = constant
         self.plat_constant = plat_constant
@@ -46,7 +45,12 @@ class PageService:
         for module in filter(lambda x: not x.endswith("init__.py"), glob.glob(d)):
             p = module.split("/")[-2]
             m = module.split("/")[-1].split(".")[0]
-            m_list = [item.title() for item in re.split("_", m)]
-            pmDS = "".join(m_list) + "DataService"
-            pmObj = m + "_ds"
-            setattr(self, pmObj, getattr(importlib.import_module('service.data.{0}.{1}'.format(p, m)), pmDS)())
+            m_list = [item.title() for item in re.split(u"_", m)]
+            pm_ds = "".join(m_list) + "DataService"
+            pm_obj = m + "_ds"
+
+            klass = getattr(
+                importlib.import_module('service.data.{0}.{1}'.format(p, m)), pm_ds)
+            instance = klass(self.logger)
+
+            setattr(self, pm_obj, instance)

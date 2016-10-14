@@ -7,6 +7,9 @@ from service.page.base import PageService
 
 class WechatPageService(PageService):
 
+    def __init__(self, logger):
+        super().__init__(logger)
+
     @gen.coroutine
     def get_wechat(self, conds, fields=[]):
 
@@ -37,5 +40,3 @@ class WechatPageService(PageService):
 
         theme = yield self.config_sys_theme_ds.get_theme(conds, fields)
         raise gen.Return(theme)
-
-

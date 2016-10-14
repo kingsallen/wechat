@@ -1,7 +1,7 @@
 # coding=utf-8
 
 import ujson
-from service.data.base import cache
+from utils.common.decorator import cache
 import tornado.gen as gen
 from tornado.util import ObjectDict
 from abc import ABCMeta, abstractmethod
@@ -11,7 +11,8 @@ from app import logger
 
 
 class SessionDataService(object):
-    pass
+    def __init__(self, *args, **kwargs):
+        pass
 
 
 class IDBFetchable(object):
