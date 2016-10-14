@@ -27,13 +27,13 @@ platform_routes = [
     (r"/mobile/company/([0-9]*)",
      "handler.platform.companyrelation.CompanyHandler"),
 
-    (r"/api/mobile/company/visitreq",
+    (r"/api/company/visitreq",
      "handler.platform.companyrelation.CompanyVisitReqHandler"),
 
-    (r"/api/mobile/company/follow",
+    (r"/api/company/follow",
      "handler.platform.companyrelation.CompanyFollowHandler"),
 
-    (r"/api/mobile/cellphone",
+    (r"/api/cellphone",
      "handler.platform.cellphone.CellphoneBindHandler"),
 
     # Testing url, delete when releasing

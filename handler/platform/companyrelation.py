@@ -17,9 +17,14 @@ class CompanyVisitReqHandler(BaseHandler):
     @gen.coroutine
     def post(self):
         response = ObjectDict({'status': 1, 'message': 'failure'})
-        if self.json_args and 'company_id' in self.json_args.keys() \
-            and 'user_id' in self.json_args.keys() \
-            and 'status' in self.json_args.keys():
+        print(self.json_args)
+        if self.json_args and 'status' in self.json_args.keys():
+
+            # Debug with front page.
+            # To be confirmed: company_id, user_id
+            self.json_args['company_id'] = 456
+            self.json_args['user_id'] = 323
+
             if int(self.json_args.get('status')) == 0:
                 response.message = 'ignore'
             else:
@@ -37,9 +42,13 @@ class CompanyFollowHandler(BaseHandler):
     @gen.coroutine
     def post(self):
         response = ObjectDict({'status': 1, 'message': 'failure'})
-        if self.json_args and 'company_id' in self.json_args.keys() \
-            and 'user_id' in self.json_args.keys() \
-            and 'status' in self.json_args.keys():
+        if self.json_args and 'status' in self.json_args.keys():
+
+            # Debug with front page.
+            # To be confirmed: company_id, user_id
+            self.json_args['company_id'] = 456
+            self.json_args['user_id'] = 323
+
             resp = yield self.user_company_ps.set_company_follow(
                                 self.json_args)
             if resp:
@@ -56,8 +65,11 @@ class CompanyHandler(BaseHandler):
         param = ObjectDict({'user_id': 222, 'company_id': company_id})
         response = yield self.user_company_ps.get_companay_data(param)
 
-        self.send_json(response, additional_dump=True)
+        # Debug with front page.
+        # To be confirmed: company_id, user_id
+        wechat = ObjectDict({'signature': 'alex-testing'})
+        current_user = ObjectDict({'wechat': wechat})
+
+        # self.send_json(response, additional_dump=True)
+        self.render('company/profile.html', current_user=current_user)
         return
-
-
-

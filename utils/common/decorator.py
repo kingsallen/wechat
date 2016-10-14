@@ -8,19 +8,19 @@ import functools
 from tornado import gen
 from tornado.util import ObjectDict
 from tornado.locks import Semaphore
+from tornado.web import MissingArgumentError
 
 from utils.common.cache import BaseRedis
 import conf.common as constant
 
 
-def handle_response(method):
-
-    @functools.wraps(method)
+def handle_response(func):
+    @functools.wraps(func)
     @gen.coroutine
     def wrapper(self, *args, **kwargs):
 
         try:
-            yield method(self, *args, **kwargs)
+            yield func(self, *args, **kwargs)
         except Exception as e:
             self.logger.error(e)
             if self.request.headers.get("Accept", "").startswith("application/json"):
@@ -30,7 +30,6 @@ def handle_response(method):
             else:
                 self.write_error(500)
                 return
-
     return wrapper
 
 base_cache = BaseRedis()
@@ -102,8 +101,26 @@ def cache(prefix=None, key=None, ttl=60, hash=True, lock=True, separator="_"):
     return cache_inner
 
 
-def url_valid(func):
+def check_signature(func):
+    """如果当前环境是企业号但是url query 没有 wechat_signature, 返回 404
 
+    此装饰器用来装饰 tornado.web.RequestHandler 异步方法，
+    如：prepare
+    """
+    @functools.wraps(func)
+    def wrapper(self, *args, **kwargs):
+        if self.env == constant.ENV_PLATFORM:
+            key = "wechat_signature"
+            try:
+                self.get_query_argument(key, strip=True)
+            except MissingArgumentError:
+                self.write_error(status_code=404)
+            else:
+                yield func(self, *args, **kwargs)
+    return wrapper
+
+
+def url_valid(func):
     """
     # 装置环境,包括 wechat, qxuser, wxuser, company, recom, employee
     :param func:
