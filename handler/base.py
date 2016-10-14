@@ -25,6 +25,7 @@ from setting import settings
 from utils.common.decorator import check_signature
 from utils.common.wexinasyncapi import WeixinAsyncApi
 from utils.tool.url_tool import make_url
+from utils.tool.json_tool import encode_json_dumps
 
 # 动态加载所有 PageService
 obDict = {}
@@ -53,8 +54,6 @@ class BaseHandler(MataBaseHandler):
         self._log_info = None
         self.start_time = time.time()
         self.in_wechat, self.client_type = self._depend_wechat()
-
-
 
     @property
     def logger(self):
@@ -169,23 +168,6 @@ class BaseHandler(MataBaseHandler):
         except Exception as e:
             self.logger.error(e)
 
-
-
-
-    # TODO: 暂时注释，因为此项目不是 hr，并不是所有的交互都是 JSON API
-    # def guarantee(self, fields_mapping, *args):
-    #     self.params = {}
-    #     for arg in args:
-    #         try:
-    #             self.params[arg] = self.json_args[arg]
-    #             self.json_args.pop(arg)
-    #         except KeyError:
-    #             ret_field = fields_mapping.get(arg, arg)
-    #             raise AttributeError(u"{0}不能为空".format(ret_field))
-    #         self.params.update(self.json_args)
-    #
-    #     return self.params
-
     @gen.coroutine
     def _get_current_wechat(self):
         """
@@ -233,51 +215,43 @@ class BaseHandler(MataBaseHandler):
     @check_signature
     @gen.coroutine
     def prepare(self):
-
-        self._make_json_args()
-
-        need_oauth = False
-
-        # 1. 获取 cookie
-        session_id = self.get_secure_cookie(constant.COOKIE_SESSIONID)
-
-        # 2. 有 cookie
-        if session_id:
-            key = session_id + "_QX"
-            value = self.redis.get(key)
-            if value:
-                self.current_user = ujson.loads(value)
-            else:
-                key = session_id + "_" + self.params.wechat_signature
-                value = self.redis.get(key)
-                if value:
-                    user_id = ujson.loads(value).user.id
-                    qx_session = yield self._build_session_qx
-                    yield self._build_session_custom_company
-
-
-
-
+        self._prepare_json_args()
         #
-        # 2. 查询 session 信息：
-            # 2.1 根据 cookie_<企业号wechat_id> 来查询
-                # 如果有 value， 返回该 value 作为 self.current_user
-                # 如果没有 value：
-        #          2.2 根据 cookie_<聚合号wechat_id> 来查询
-                    # 如果有，
-                    # 拿到 unionid，
-                    # 构建 session：
-                    #    a. 构建企业号 session，redis保存 2 h
-                    #    b. 构建聚合号session， redis 永久保存
-                    #    c. 再次刷新用户 cookie，永久
-                    # 如果没有：
-                        # 当做没有 cookie 处理
-        # 没有 cookie：
-            # 对 QX 授权
+        # need_oauth = False
+        #
+        # # 1. 获取 cookie
+        # session_id = self.get_secure_cookie(constant.COOKIE_SESSIONID)
+        #
+        # # 2. 有 cookie
+        # if session_id:
+        #     # 2. 查询 session 信息：
+        #     # 根据 <session_id>_<企业号 wechat_signature> 来查询
+        #     key = session_id + "_" + self.params.wechat_signature
+        #     value = self.redis.get(key)
+        #     if value:
+        #         # 如果有 value， 返回该 value 作为 self.current_user
+        #         self.current_user = ujson.loads(value)
+        #     else:
+        #         # 如果没有 value：
+        #         # 根据 <session_id>_"QX" 来查询
+        #         key = session_id + "_QX"
+        #         value = self.redis.get(key)
+        #         if value:
+        #             user_id = ujson.loads(value).user.id
+        #             session_qx, session_ent = yield self._refresh_session(user_id)
+        #             if self.env == constant.ENV_PLATFORM:
+        #                 self.current_user = session_ent
+        #             elif self.env == constant.ENV_QX:
+        #                 self.current_user = session_qx
+        #             self.set_secure_cookie(constant.COOKIE_SESSIONID, session_id)
+        #         else:
+        #             need_oauth = True
+        #
+        # if not need_oauth:
+        #     return
+        #
+        # if
 
-
-
-        # 无 cookie
 
     # def get_current_user(self, oauth=True):
     #     session = ObjectDict()
@@ -567,14 +541,6 @@ class BaseHandler(MataBaseHandler):
         super(BaseHandler, self).render(template_name, **kwargs)
         return
 
-    # def send_json(self, chunk, status_code=200):
-    #     self.log_info = {"res_type": "json"}
-    #     chunk = ujson.encode(chunk)
-    #     self.set_header("Content-Type", "application/json; charset=UTF-8")
-    #     self.set_status(status_code)
-    #     self.write(chunk)
-    #     return
-
     def send_json(self, json_dict, code=200, use_encoder=True,
                   additional_dump=False):
         """
@@ -594,6 +560,18 @@ class BaseHandler(MataBaseHandler):
         if additional_dump:
             json_string = ujson.dumps(json_string)
         self.write(json_string)
+
+
+    def _make_render_json(self, data, status=0, message="", ):
+
+        assert isinstance(status, int) and isinstance(message, str)
+        render_json = ObjectDict()
+
+        render_json.status = status
+        render_json.message = message
+        render_json.data = data
+
+        return encode_json_dumps(render_json)
 
     def static_url(self, path, include_host=None, **kwargs):
         """

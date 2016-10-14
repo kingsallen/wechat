@@ -14,7 +14,6 @@ from utils.common.cache import BaseRedis
 import conf.common as constant
 
 
-
 def handle_response(func):
     @functools.wraps(func)
     @gen.coroutine
@@ -110,13 +109,14 @@ def check_signature(func):
     """
     @functools.wraps(func)
     def wrapper(self, *args, **kwargs):
-        key = "wechat_signature"
-        try:
-            self.get_query_argument(key, strip=True)
-        except MissingArgumentError:
-            self.write_error(status_code=404)
-        else:
-            yield func(self, *args, **kwargs)
+        if self.env == constant.ENV_PLATFORM:
+            key = "wechat_signature"
+            try:
+                self.get_query_argument(key, strip=True)
+            except MissingArgumentError:
+                self.write_error(status_code=404)
+            else:
+                yield func(self, *args, **kwargs)
     return wrapper
 
 
