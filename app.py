@@ -68,16 +68,17 @@ class Application(tornado.web.Application):
 def main():
     application = Application()
     try:
-        logger.info('Wechat server starting, on port : {0}'.format(options.port))
+        logger.info('Wechat server starting on port: {0}'.format(options.port))
         http_server = tornado.httpserver.HTTPServer(application, xheaders=True)
         http_server.listen(options.port)
 
-        tornado.ioloop.IOLoop.instance().set_blocking_log_threshold(settings['blocking_log_threshold'])
+        tornado.ioloop.IOLoop.instance().set_blocking_log_threshold(
+            settings['blocking_log_threshold'])
         tornado.ioloop.IOLoop.instance().start()
     except Exception as e:
         logger.error(e)
     finally:
-        logger.info('Wechat server closing, on port : {0}'.format(options.port))
+        logger.info('Wechat server closing on port: {0}'.format(options.port))
 
 if __name__ == "__main__":
     main()

@@ -120,7 +120,7 @@ def url_valid(func):
                 self._current_user = ObjectDict(self._current_user)
             yield func(self, *args, **kwargs)
 
-        except Exception, e:
+        except Exception as e:
             self.logger.error(e)
             return
     return wrapper

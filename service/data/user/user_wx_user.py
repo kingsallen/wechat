@@ -38,6 +38,18 @@ class UserWxUserDataService(DataService):
         response = yield self.user_wx_user_dao.get_record_by_conds(conds, fields)
         raise gen.Return(response)
 
+    @cache(ttl=60)
+    @gen.coroutine
+    def get_wxuser(self, conds=None, fields=None):
+        if not conds or not fields:
+            self.logger.warn(u"Warning:[get_wxuser][invalid parameters], Detail:[conds: {0}, fields: {1}]".format(conds, fields))
+            raise gen.Return(None)
+
+        fields = fields or self.user_wx_user_dao.fields_map.keys()
+
+        response = yield self.user_wx_user_dao.get_record_by_conds(conds, fields)
+        raise gen.Return(response)
+
     @gen.coroutine
     def create_wxuser(self, userinfo=None, wechat_id=None):
         if not userinfo or not wechat_id:
@@ -87,3 +99,15 @@ class UserWxUserDataService(DataService):
 
         ret = yield self.get_wxuser(id=wxuser_id)
         raise gen.Return(ret)
+
+    @gen.coroutine
+    def update_wxuser(self, conds=None, fields=None):
+        if not conds or not fields:
+            self.logger.warn(u"Warning:[update_wxuser][invalid parameters], Detail:[conds: {0}, fields: {1}]".format(
+                conds, fields))
+            raise gen.Return(None)
+
+        yield self.user_wx_user_dao.update_by_conds(
+            conds=conds,
+            fields=fields)
+        return

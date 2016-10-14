@@ -41,7 +41,7 @@ class RedisELK(IMessageSendable):
             for method_name in methods:
                 assert hasattr(self, method_name)
         except Exception as e:
-            print e
+            print(e)
 
     def key_name(self, key):
         return '{0}_{1}'.format(self._KEY_PREFIX, key)
