@@ -42,10 +42,10 @@ for module in filter(lambda x: not x.endswith("init__.py"), glob.glob(d)):
             'service.page.{0}.{1}'.format(p, m)), pmPS)(logger)
     })
 
-MataBaseHandler = type("MataBaseHandler", (web.RequestHandler,), obDict)
+MetaBaseHandler = type("MetaBaseHandler", (web.RequestHandler,), obDict)
 
 
-class BaseHandler(MataBaseHandler):
+class BaseHandler(MetaBaseHandler):
 
     def __init__(self, application, request, **kwargs):
         super(BaseHandler, self).__init__(application, request, **kwargs)
@@ -522,15 +522,13 @@ class BaseHandler(MataBaseHandler):
             self.render('common/systemmessage.html', status_code=status_code,
                         message="正在努力维护服务器中")
 
-
     def render(self, template_name, status_code=200, **kwargs):
-
         self.log_info = {"res_type": "html"}
         self.set_status(status_code)
 
         # remote debug mode
         if self.settings.get('remote_debug', False) is True:
-            template_string = super(BaseHandler, self).render_string(template_name, **kwargs)
+            template_string = super().render_string(template_name, **kwargs)
             post_url = urljoin(self.settings.get('remote_debug_ip'), template_name)
             http_client = tornado.httpclient.HTTPClient()
             r = http_client.fetch(post_url, method="POST", body=template_string)
@@ -538,7 +536,7 @@ class BaseHandler(MataBaseHandler):
             self.finish()
             return
 
-        super(BaseHandler, self).render(template_name, **kwargs)
+        super().render(template_name, **kwargs)
         return
 
     def send_json(self, json_dict, code=200, use_encoder=True,
@@ -624,23 +622,17 @@ class BaseHandler(MataBaseHandler):
         return log_params
 
     def _depend_wechat(self):
-        """
-        判断用户UA是否为微信客户端
-        :return:
+        """判断用户UA是否为微信客户端
         """
         wechat = self.constant.CLIENT_NON_WECHAT
         mobile = self.constant.CLIENT_TYPE_UNKNOWN
 
-        try:
-            useragent = self.request.headers.get('User-Agent')
-            if "MicroMessenger" in useragent:
-                if "iPhone" in useragent:
-                    mobile = self.constant.CLIENT_TYPE_IOS
-                elif "Android" in useragent:
-                    mobile = self.constant.CLIENT_TYPE_ANDROID
-                wechat = self.constant.CLIENT_WECHAT
-
-        except Exception:
-            pass
+        useragent = self.request.headers.get('User-Agent')
+        if "MicroMessenger" in useragent:
+            if "iPhone" in useragent:
+                mobile = self.constant.CLIENT_TYPE_IOS
+            elif "Android" in useragent:
+                mobile = self.constant.CLIENT_TYPE_ANDROID
+            wechat = self.constant.CLIENT_WECHAT
 
         return wechat, mobile
