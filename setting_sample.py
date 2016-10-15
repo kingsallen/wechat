@@ -11,7 +11,7 @@ setting配置常量规范：
 """
 
 import os
-from tornado.util import ObjectDict
+from util.common import ObjectDict
 from tornado.options import define
 
 define("port", default=8000, help="run on the given port", type=int)

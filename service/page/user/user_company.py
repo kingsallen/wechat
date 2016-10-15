@@ -7,7 +7,7 @@
 
 """
 
-from tornado.util import ObjectDict
+from util.common import ObjectDict
 from tornado import gen
 from service.page.base import PageService
 from tests.dev_data.user_company_data import data1, data2, data3, data4

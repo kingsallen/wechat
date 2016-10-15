@@ -6,7 +6,7 @@ from handler.base import BaseHandler
 
 import hashlib
 from tornado import gen
-from utils.common.decorator import handle_response
+from util.common.decorator import handle_response
 
 
 class WechatHandler(BaseHandler):

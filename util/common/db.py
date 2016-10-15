@@ -3,19 +3,19 @@
 # Copyright 2016 MoSeeker
 
 """
-
-说明:
-DB公共处理类
+DB 公共处理类
 """
+
 import ujson
+
 from tornado_mysql import pools, cursors
 
-from setting import settings
-from utils.common.log import Logger
-from utils.tool.date_tool import is_time_valid
 import conf.common as constant
-
 from app import logger
+from setting import settings
+from util.tool.date_tool import is_time_valid
+
+
 class DB(object):
 
     def __init__(self):

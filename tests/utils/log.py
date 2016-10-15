@@ -4,7 +4,7 @@
 
 import unittest
 import shutil
-from utils.common.log import Logger
+from util.common.log import Logger
 
 TEST_LOGS = "/tmp/test_logs/"
 

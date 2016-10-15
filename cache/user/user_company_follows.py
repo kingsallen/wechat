@@ -8,7 +8,7 @@
 """
 
 import json
-from utils.common.cache import BaseRedis
+from util.common.cache import BaseRedis
 
 
 class UserCompanyFollowsCache(BaseRedis):

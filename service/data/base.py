@@ -22,9 +22,9 @@ import conf.qx as qx_constant
 import conf.help as help_constant
 
 from setting import settings
-from utils.common.decorator import cache
+from util.common.decorator import cache
 from app import logger
-from utils.common.singleton import Singleton
+from util.common.singleton import Singleton
 import pprint
 
 class DataService:

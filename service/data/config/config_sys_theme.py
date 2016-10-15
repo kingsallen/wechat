@@ -3,7 +3,7 @@
 # Copyright 2016 MoSeeker
 
 from tornado import gen
-from utils.common.decorator import cache
+from util.common.decorator import cache
 from service.data.base import DataService
 
 

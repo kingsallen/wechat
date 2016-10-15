@@ -6,10 +6,7 @@ import urllib.parse
 
 import tornado.gen as gen
 import tornado.httpclient
-from tornado.util import ObjectDict
-
-import conf.common as constant
-from setting import settings
+from util.common import ObjectDict
 
 
 class WeChatOauthError(Exception):
@@ -24,13 +21,14 @@ class WeChatOauth2Service(object):
     """
     async_http = tornado.httpclient.AsyncHTTPClient()
 
-    def __init__(self, handler, wechat, redirect_url, scope, state=0):
-        self._wechat = wechat,
+    def __init__(self, handler, redirect_url):
         self._redirect_url = redirect_url
-        self._scope = scope,
-        self._state = state
         self._handler = handler
-        # cached access_token
+
+        self.wechat = handler._wechat
+        self.status = 0
+
+        # 缓存 access_token
         self._access_token = None
 
     # PUBLIC API
@@ -64,16 +62,15 @@ class WeChatOauth2Service(object):
             raise gen.Return(userinfo)
 
     # PROTECTED METHODS
-    @staticmethod
-    def _get_oauth_type(is_base):
+    def _get_oauth_type(self, is_base):
         """获取 oauth_type"""
         if is_base:
-            return "snsapi_base"
+            return self._handler.wx_constant.SCOPE_BASE
         else:
-            return "snsapi_userinfo"
+            return self._handler.wx_constant.SCOPE_USERINFO
 
     def _get_oauth_code(self, is_base):
-        if self._wechat.third_oauth:
+        if self.wechat.third_oauth:
             oauth_url = self._get_code_url_3rd_party(is_base)
         else:
             oauth_url = self._get_code_url(is_base)
@@ -83,36 +80,35 @@ class WeChatOauth2Service(object):
     def _get_code_url(self, is_base=1):
         """非第三方获取 code 的 url"""
 
-        return constant.WX_OAUTH_GET_CODE % (
-            self._wechat.appid,
+        return self._handler.wx_cosntant.WX_OAUTH_GET_CODE % (
+            self.wechat.appid,
             urllib.parse.quote(self._redirect_url),
-            self._scope,
             self._get_oauth_type(is_base),
-            self._state)
+            self.status)
 
     def _get_code_url_3rd_party(self, is_base=1):
         """第三方获取 code 的 url"""
 
-        return constant.WX_THIRD_OAUTH_GET_CODE % (
-            self._wechat.appid,
+        return self._handler.wx_constant.WX_THIRD_OAUTH_GET_CODE % (
+            self.wechat.appid,
             urllib.parse.quote(self._redirect_url),
-            self._scope,
             self._get_oauth_type(is_base),
-            self._state,
-            settings['component_app_id'])
+            self.status,
+            self._handler.settings['component_app_id'])
 
     def _get_access_token_url(self, code):
         """生成获取 access_token 的 url"""
-        if self._wechat.third_oauth:
-            url = (constant.WX_THIRD_OAUTH_GET_ACCESS_TOKEN % (
-                self._wechat.appid,
-                code,
-                settings["component_app_id"],
-                settings["component_access_token"]))
+        if self.wechat.third_oauth:
+            url = (
+                self._handler.wx_constant.WX_THIRD_OAUTH_GET_ACCESS_TOKEN % (
+                    self.wechat.appid,
+                    code,
+                    self._handler.settings["component_app_id"],
+                    self._handler.settings["component_access_token"]))
         else:
-            url = (constant.WX_OAUTH_GET_ACCESS_TOKEN % (
-                self._wechat.appid,
-                self._wechat.secret,
+            url = (self._handler.wx_constant.WX_OAUTH_GET_ACCESS_TOKEN % (
+                self.wechat.appid,
+                self.wechat.secret,
                 code))
         return url
 
@@ -162,7 +158,8 @@ class WeChatOauth2Service(object):
         {"errcode":40003,"errmsg":" invalid openid"}
         """
         response = yield self.async_http.fetch(
-            constant.WX_OAUTH_GET_USERINFO % (self._access_token, openid))
+            self._handler.wx_constant.WX_OAUTH_GET_USERINFO % (
+                self._access_token, openid))
 
         ret = ObjectDict(ujson.loads(response.body))
         raise gen.Return(ret)

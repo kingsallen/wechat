@@ -6,7 +6,8 @@ import ujson
 import hashlib
 
 import redis
-from tornado.util import ObjectDict
+
+from util.common import ObjectDict
 
 import conf.common
 

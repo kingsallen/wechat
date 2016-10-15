@@ -5,10 +5,9 @@
 import logging
 import os
 from logging.handlers import TimedRotatingFileHandler
-from utils.common.elk import RedisELK
+from util.common.elk import RedisELK
 
 from tornado.log import gen_log
-from utils.common.alarm import Alarm
 
 # --------------------------------------------------------------------------
 #  Configurations

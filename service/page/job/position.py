@@ -5,8 +5,8 @@
 import re
 from tornado import gen
 from service.page.base import PageService
-from utils.tool.date_tool import jd_update_date
-from utils.tool.str_tool import gen_salary
+from util.tool.date_tool import jd_update_date
+from util.tool.str_tool import gen_salary
 
 
 class PositionPageService(PageService):

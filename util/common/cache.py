@@ -7,13 +7,13 @@
 
 # Copyright 2016 MoSeeker
 
-import redis
 import json
 
-from tornado.util import ObjectDict
+import redis
 
 from setting import settings
-from utils.tool.json_tool import json_dumps
+from util.common import ObjectDict
+from util.tool.json_tool import json_dumps
 
 
 class BaseRedis(object):

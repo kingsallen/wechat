@@ -2,6 +2,7 @@
 
 # Copyright 2016 MoSeeker
 
+
 class Singleton(type):
 
     def __init__(cls, name, bases, dict):

@@ -14,19 +14,6 @@ constant配置常量规范：
 
 # ++++++++++系统常量++++++++++
 
-QX_HOST = "qx.moseeker.com"
-# URL consts
-WXOAUTH_URL = "/wxoauth"
-
-# Weixin API url
-WX_OAUTH_GET_CODE = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=%s#wechat_redirect"
-WX_THIRD_OAUTH_GET_CODE = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=%s&component_appid=%s#wechat_redirect"
-
-WX_OAUTH_GET_ACCESS_TOKEN = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=%s&secret=%s&code=%s&grant_type=authorization_code"
-WX_THIRD_OAUTH_GET_ACCESS_TOKEN = "https://api.weixin.qq.com/sns/oauth2/component/access_token?appid=%s&code=%s&grant_type=authorization_code&component_appid=%s&component_access_token=%s"
-
-WX_OAUTH_GET_USERINFO = "https://api.weixin.qq.com/sns/userinfo?access_token=%s&openid=%s&lang=zh_CN"
-
 # Wechat Account Type
 WECHAT_TYPE_SUBSCRIPTION = 0
 WECHAT_TYPE_UNCONFIRM_SUBSCRIPTION = 2
@@ -78,7 +65,7 @@ STATUS_UNUSE = 0
 
 # ++++++++++业务常量+++++++++++
 # Cookie name
-COOKIE_SESSIONID = "FY823UTGIPUSDFP8Q*ZKP$GTYXIVQWQFUGS"
+COOKIE_SESSIONID = "5E884898DA28047151D0E56F8DC6292773603D0D6AABBDD62A11EF721D1542D8"
 
 # Cache 相关常量
 VIEWER_TYPE_NEW = 1
