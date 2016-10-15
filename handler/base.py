@@ -15,20 +15,13 @@ from urllib.parse import urljoin
 import tornado.escape
 import tornado.httpclient
 from tornado import gen, web
-from tornado.util import ObjectDict
+from util.common import ObjectDict
 
-from urllib.parse import urljoin
-from tornado.options import options
-from tornado.util import ObjectDict
-
-import conf.common as constant
 from app import logger
-from service.data.session.session import JsApi, Wechat, Employee, Recom, SysUser, SessionBundle
-from setting import settings
-from utils.common.decorator import check_signature
-from utils.common.wexinasyncapi import WeixinAsyncApi
-from utils.tool.url_tool import make_url
-from utils.tool.json_tool import encode_json_dumps
+from util.session.session import JsApi, Wechat, WxUser, Recom, Employee, SysUser
+from oauth.wechat import WeChatOauth2Service, WeChatOauthError
+from util.common.decorator import check_signature
+from util.tool.json_tool import encode_json_dumps
 
 # 动态加载所有 PageService
 obDict = {}
@@ -47,25 +40,50 @@ for module in filter(lambda x: not x.endswith("init__.py"), glob.glob(d)):
 
 MetaBaseHandler = type("MetaBaseHandler", (web.RequestHandler,), obDict)
 
-# 与基础服务交互时用来标记请求来源
-APP_ID = ObjectDict({
-    constant.ENV_QX: '5',
-    constant.ENV_PLATFORM: '6',
-    constant.ENV_HELP: '7'
-})
+
+class NoSignatureError(Exception):
+    pass
 
 
 class BaseHandler(MetaBaseHandler):
+    """
+    Handler 基类
+
+    不要使用（创建）get_current_user()
+    get_current_user() 不能为异步方法，而 parpare() 可以
+    self.current_user 将在 prepare() 中以 self.current_user = XXX 的形式创建
+
+    Refer to:
+    http://www.tornadoweb.org/en/stable/web.html#other
+    """
 
     def __init__(self, application, request, **kwargs):
-        super(BaseHandler, self).__init__(application, request, **kwargs)
-        self.json_args = None
+        super().__init__(application, request, **kwargs)
+
+        # 全部 arguments
         self.params = self._get_params()
-        self._log_info = None
-        self.start_time = time.time()
-        self.app_id = APP_ID.get(options.env)
+        # api 使用， json arguments
+        self.json_args = self._get_json_args()
+
+        # 记录初始化的时间
+        self._start_time = time.time()
+
+        # 保存是否在微信环境， 微信客户端类型
         self.in_wechat, self.client_type = self._depend_wechat()
 
+        # 日志信息
+        self._log_info = None
+
+        # 构建 session 过程中会缓存一份当前公众号信息
+        self._wechat = None
+        self._qx_wechat = None
+        self._unionid = None
+        self._wxuser = None
+
+        # 处理 oauth 的 service
+        self._oauth_service = WeChatOauth2Service(self, self.fullurl)
+
+    # PROPERTIES
     @property
     def logger(self):
         return self.application.logger
@@ -77,6 +95,28 @@ class BaseHandler(MetaBaseHandler):
     @property
     def env(self):
         return self.application.env
+
+    @property
+    def is_platform(self):
+        return self.env == self.constant.ENV_PLATFORM
+
+    @property
+    def is_qx(self):
+        return self.env == self.constant.ENV_QX
+
+    @property
+    def is_help(self):
+        return self.env == self.constant.ENV_HELP
+
+    @property
+    def app_id(self):
+        """appid for infra"""
+        bundle = {
+            self.constant.ENV_QX:       '5',
+            self.constant.ENV_PLATFORM: '6',
+            self.constant.ENV_HELP:     '7'
+        }
+        return bundle[self.env]
 
     @property
     def constant(self):
@@ -95,23 +135,104 @@ class BaseHandler(MetaBaseHandler):
         return self.application.help_constant
 
     @property
+    def wx_constant(self):
+        return self.application.wx_constant
+
+    @property
     def redis(self):
         return self.application.redis
 
     @property
     def log_info(self):
-        if self._log_info and isinstance(self._log_info, dict):
-            return self._log_info
-        return None
+        return self._log_info
+
+    @property
+    def fullurl(self):
+        return (self.request.protocol + "://" +
+                self.request.host + self.request.uri)
 
     @log_info.setter
     def log_info(self, value):
-        assert isinstance(value,dict )
         self._log_info = dict(value)
 
-    def _get_params(self):
+    # PUBLIC API
+    @check_signature
+    @gen.coroutine
+    def prepare(self):
+        # 构建 session 之前先缓存一份 wechat
+        self._wechat = yield self._get_current_wechat()
+        self._qx_wechat = yield self._get_qx_wechat()
+
+        # 如果有 code，说明刚刚从微信 oauth 回来
+        code = self.params.get("code")
+        state = self.params.get("state")
+
+        if code:  #用户同意授权
+            if state == 'O':  #来自 qx 的授权, 获得 userinfo
+                userinfo = yield self._get_user_info(code)
+                yield self._handle_user_info(userinfo)
+            else:  #来自企业号的静默授权
+                self._unionid = state
+                openid = yield self._get_user_openid(code)
+                self._wxuser = yield self._handle_ent_openid(openid, self._unionid)
+        if state and not code:  #用户拒绝授权
+            pass
+
+        # 构造并拼装 session
+        yield self._fetch_session()
+
+
+        # 内存优化
+        self._wechat = None
+        self._qx_wechat = None
+        self._unionid = None
+        self._wxuser = None
+
+    # PROTECTED
+    @gen.coroutine
+    def _handle_user_info(self, userinfo):
         """
-        To get all GET or POST arguments from http request
+        根据 unionid 创建 user_user 如果存在则不创建， 返回 user_id
+        创建 聚合号 wxuser，绑定刚刚创建的 user_id
+        静默授权企业号, status 为 unionid
+
+        userinfo 结构：
+        ObjectDict(
+        "openid":" OPENID",
+        "nickname": NICKNAME,
+        "sex":"1",
+        "province":"PROVINCE"
+        "city":"CITY",
+        "country":"COUNTRY",
+        "headimgurl":    "http://wx.qlogo.cn/mmopen/g3MonUZtNHkdmzicIlibx",
+        "privilege":[
+                        "PRIVILEGE1"
+                        "PRIVILEGE2"
+                    ],
+        "unionid": "o6_bmasdasdsad6_2sgVt7hMZOPfL"
+        )
+        """
+        unionid = userinfo.unionid
+        user_id = yield self.user_ps.create_user_user(userinfo)
+        yield self.user_ps.create_user_wx_user_by_userinfo(user_id, userinfo)
+        if self.is_platform:
+            self._oauth_service.wechat = self._wechat
+            self._oauth_service.status = unionid
+        self._oauth_service.get_oauth_code_base()
+
+    @gen.coroutine
+    def _handle_ent_openid(self, openid, unionid):
+        """根据企业号 openid 和 unionid 创建企业号微信用户"""
+        wxuser = None
+        user = self.user_ps.get_user_by_union_id(unionid)
+        unionid = user.unionid
+        if self.is_platform:
+            wxuser = yield self.user_ps.create_user_wx_user_ent(
+                openid, unionid, self._wechat.id)
+        raise gen.Return(wxuser)
+
+    def _get_params(self):
+        """To get all GET or POST arguments from http request
         """
         params = ObjectDict(self.request.arguments, default="")
         for key in dict(params):
@@ -119,88 +240,48 @@ class BaseHandler(MetaBaseHandler):
                 params[key] = params[key][0]
         return params
 
-    def _prepare_weixin_auth(self):
-        """
-        所有url访问的前处理
-        1. 向仟寻授权，创建仟寻号下微信用户
-        2. 向企业号静默授权，创建企业号下微信用户
-        3. 绑定sysuser和user_wx_user关系
-        """
-        if self.request.method.lower() == "get" and self.in_wechat:
+    def _get_json_args(self):
+        json_args = {}
 
-            # 手动获取 m 值，再在 make_url 中显式赋值，因为 make_url 会删除 m 字段
-            method = self.params.get("m", None)
-            query = dict(host=self.request.host,
-                         protocol=self.request.protocol,
-                         escape=["code"])
-            if method:
-                query.update(m=method)
+        content_type = self.request.headers.get("Content-Type")
+        if content_type and "application/json" in content_type and self.request.body:
+            json_args = ujson.loads(self.request.body)
 
-            redirect_url = make_url(self.request.uri.split("?")[0],
-                                    self.params, **query)
-
-            # 向聚合号授权并登录
-            # 若没有 user_user,则创建 user_user 帐号
-            if not self.current_user.qxuser.get("id"):
-                # 跳转到仟寻公众号地址，获得code
-                redirect_url = make_url(
-                    constant.QX_HOST + constant.WXOAUTH_URL, redirect_url)
-                qx_wechat = yield self.wechat_ps.get_wechat(
-                    conds={"id": settings["qx_wechat_id"]})
-                self.wechat_oauth_ps.get_oauth_code(
-                    self, redirect_url, qx_wechat, oauth_type="userinfo")
-
-            # 向企业号静默授权，并创建企业微信用户
-            elif not self.current_user.wxuser.get("id") and \
-                self.current_user.wechat.type == constant.WECHAT_TYPE_SERVICE:
-                wechat = self.current_user.wechat
-                self.wechat_oauth_ps.get_oauth_code(
-                    self, redirect_url, wechat, oauth_type="base")
-
-            # 绑定企业微信用户和 sysuser
-            if (not self.current_user.wxuser.get("sysuser_id") or
-                not self.current_user.qxuser.get("sysuser_id")) and \
-                    self.current_user.sysuser.get("id"):
-
-                user_user_id = self.current_user.sysuser.get("id")
-
-                # 将 user_user.id 与qxuser、wxuser 绑定
-                yield self.user_ps.binding_user(
-                    self, user_user_id, self.current_user.wxuser,
-                    self.current_user.qxuser)
-
-    def _prepare_json_args(self):
-        self.json_args = None
-        headers = self.request.headers
-        try:
-            if ("application/json" in headers.get("Content-Type", "") and
-                    self.request.body):
-                self.json_args = ujson.loads(self.request.body)
-        except Exception as e:
-            self.logger.error(e)
+        return ObjectDict(json_args)
 
     @gen.coroutine
-    def _get_current_wechat(self):
-        """
-        # TODO 获得企业微信信息
-        :return:
-        """
-        wechat_signature = str(self.params.get("wechat_signature", ""))
-        conds = ObjectDict({'signature': wechat_signature})
-        wechat = yield self.wechat_ps.get_wechat(conds=conds)
+    def _get_current_wechat(self, qx=False):
+        if qx:
+            signature = self.settings['qx_signature']
+        else:
+            if self.is_platform:
+                signature = self.params['wechat_signature']
+            elif self.is_qx:
+                signature = self.settings['qx_signature']
+            elif self.is_help:
+                signature = self.settings['helper_signature']
+            else:
+                self.logger.error("wechat_signature missing")
+                raise NoSignatureError()
+
+        wechat = Wechat(signature=signature)
+        wechat.fetch_from_db()
+        wechat.jsapi = JsApi(
+            jsapi_ticket=wechat.jsapi_ticket, url=self.fullurl)
+
+        raise gen.Return(wechat)
+
+    @gen.coroutine
+    def _get_qx_wechat(self):
+        wechat = yield self._get_current_wechat(qx=True)
         raise gen.Return(wechat)
 
     @gen.coroutine
     def _get_current_company(self, company_id):
-
         """
-        # TODO 获得企业母公司信息
-        :param company_id:
-        :return:
+        # 获得企业母公司信息
         """
-        conds = ObjectDict({
-            'id': company_id
-        })
+        conds = {'id': company_id}
         company = yield self.company_ps.get_company(conds=conds, need_conf=True)
         theme = yield self.wechat_ps.get_wechat_theme({'id': company.get("conf_theme_id"), "disable": 0})
         if theme:
@@ -213,317 +294,156 @@ class BaseHandler(MetaBaseHandler):
                 ]
             })
         else:
-            # TODO 暂时做初始化
-            company.update({
-                "theme": None
-            })
+            company.update({"theme": None})
 
         raise gen.Return(company)
 
-    # get_current_user may not be a coroutine
-    # So don't use it
-    # We can set the current_user in prepare() by asynchronous operations
-    # @check_signature
     @gen.coroutine
-    def prepare(self):
-        self._prepare_json_args()
+    def _get_user_info(self, code):
+        self._oauth_service.wechat = self._qx_wechat
+        try:
+            userinfo = yield self._oauth_service.get_userinfo_by_code(code)
+            raise gen.Return(userinfo)
+        except WeChatOauthError as e:
+            self.logger.error(e)
 
+    @gen.coroutine
+    def _get_user_openid(self, code):
+        self._oauth_service.wechat = self._wechat
+        try:
+            openid, _ = yield self._oauth_service.get_openid_unionid_by_code(code)
+            raise gen.Return(openid)
+        except WeChatOauthError as e:
+            self.logger.error(e)
+
+    @gen.coroutine
+    def _fetch_session(self):
+        """尝试获取 session 并创建 current_user，如果获取失败走 oauth 流程"""
         need_oauth = False
+        ok = False
 
-        # 1. 获取 cookie
-        session_id = self.get_secure_cookie(constant.COOKIE_SESSIONID)
+        session_id = self.get_secure_cookie(self.constant.COOKIE_SESSIONID)
 
-        # 2. 有 cookie
         if session_id:
-            # 2. 查询 session 信息：
-            # 根据 <session_id>_<企业号 wechat_signature> 来查询
-            key = session_id + "_" + self.params.wechat_signature
-            value = self.redis.get(key)
-            if value:
-                # 如果有 value， 返回该 value 作为 self.current_user
-                self.current_user = ujson.loads(value)
-            else:
-                # 如果没有 value：
-                # 根据 <session_id>_"QX" 来查询
-                key = session_id + "_QX"
-                value = self.redis.get(key)
-                if value:
-                    user_id = ujson.loads(value).user.id
-                    session_qx, session_ent = yield self._refresh_session(user_id)
-                    if self.env == constant.ENV_PLATFORM:
-                        self.current_user = session_ent
-                    elif self.env == constant.ENV_QX:
-                        self.current_user = session_qx
-                    self.set_secure_cookie(constant.COOKIE_SESSIONID, session_id)
-                else:
-                    need_oauth = True
+            if self.is_platform:
+                ok = self._get_session_from_ent(session_id)
+                if not ok:
+                    ok = yield self._get_session_from_qx(session_id)
+
+            if self.is_qx:
+                ok = yield self._get_session_from_qx(session_id)
+
+            if self.is_help:
+                pass
+
+            need_oauth = not ok
+
         else:
-            session_id = self._create_new_session_id()
-            self.set_secure_cookie(constant.COOKIE_SESSIONID, session_id)
             need_oauth = True
 
-        if not need_oauth:
-            return
+        if need_oauth:
+            if self._unionid and self._wxuser:
+                yield self._build_session()
+            else:
+                self._oauth_service.wechat = self._qx_wechat
+                self._oauth_service.get_oauth_code_userinfo()
 
+    @gen.coroutine
+    def _build_session(self):
+        session = ObjectDict()
+        session.wechat = self._wechat
+        session.wxuser = self._wxuser
 
+        qxuser = WxUser(unionid=self._unionid, wechat_id=self.settings['qx_wechat_id'])
+        session.qxuser = yield qxuser.fetch_from_db()
 
+        session.company = yield self._get_current_company(self._wechat.id)
 
+        user = SysUser(id=qxuser.sysuser_id)
+        session.sysuser = yield user.fetch_from_db()
 
-#
-#         # 1. 获取 cookie
-#
-#         # 有 cookie
-#         # 2. 查询 session 信息：
-#             # 2.1 根据 cookie_<企业号wechat_id> 来查询
-#                 # 如果有 value， 返回该 value 作为 self.current_user
-#                 # 如果没有 value：
-#         #          2.2 根据 cookie_<聚合号wechat_id> 来查询
-#                     # 如果有，
-#                     # 拿到 unionid，
-#                     # 构建 session：
-#                     #    a. 构建企业号 session，redis保存 2 h
-#                     #    b. 构建聚合号session， redis 永久保存
-#                     #    c. 再次刷新用户 cookie，永久
-#                     # 如果没有：
-#                         # 当做没有 cookie 处理
-#         # 没有 cookie：
-#             # 对 QX 授权
-#
-#
-#
-#         # 无 cookie
+        session_id = self._make_new_session_id()
+        self.set_secure_cookie(self.constant.COOKIE_SESSIONID, session_id)
+        self.redis.set(
+            session_id + "_" + self._wechat.id, ujson.dumps(session),
+            60 * 60 * 2)
 
-#     # def get_current_user(self, oauth=True):
-#     #     session = ObjectDict()
-#     #
-    #     # session_id
-    #     if self.get_secure_cookie(constant.COOKIE_SESSIONID):
-    #         session_id = self.get_secure_cookie(constant.COOKIE_SESSIONID)
-    #         if self.redis.exists(session_id):
-    #             session = yield self.get_current_session(session_id=session_id)
-    #             raise gen.Return(session)
-    #
-    #     wechat = yield self._get_current_wechat()
-    #     if not wechat:
-    #         raise gen.Return(session)
-    #     session_id = self._create_new_session_id(wechat_id=wechat.id)
-    #     session = yield self.create_current_session(session_id=session_id, wechat=wechat, oauth=oauth)
-    #     self.set_secure_cookie(constant.COOKIE_SESSIONID, session_id)
-    #     raise gen.Return(session)
+        if self.is_platform:
+            employee = Employee(
+                wxuser_id=session.wxuser.id, company_id=session.company.id)
+            employee.fetch_from_db()
+            if employee:
+                session.employee = employee
 
-    def _create_new_session_id(self):
+        if 'recom' in self.params:
+            recom = Recom(openid=self.params.openid)
+            recom.fetch_from_db()
+            session.recom = recom
+
+        self.current_user = session
+
+    def _get_session_from_ent(self, session_id):
+        """尝试获取 session"""
+        if not self.is_platform:
+            return False
+
+        key = session_id + "_" + self._wechat.id
+        value = self.redis.get(key)
+        if value:
+            # 如果有 value， 返回该 value 作为 self.current_user
+            self.current_user = ujson.loads(value)
+            return True
+        return False
+
+    @gen.coroutine
+    def _get_session_from_qx(self, session_id):
+        """尝试获取聚合号 session"""
+        key = session_id + "_" + self.settings['qx_wechat_id']
+        value = self.redis.get(key)
+        if value:
+            user_id = ujson.loads(value).user.id
+            session_qx, session_ent = yield self._refresh_session(user_id)
+            if self.is_platform:
+                self.current_user = session_ent
+            elif self.is_qx:
+                self.current_user = session_qx
+
+            raise gen.Return(True)
+        raise gen.Return(False)
+
+    def _make_new_session_id(self):
+        """创建新的 session_id
+
+        redis 中 session 的 key 的格式为 session_id_<wechat_id>
+        创建的 session_id 保证唯一
+        session_id 目前本身不做持久化，仅仅保存在 redis 中
+        后续是否需要做持久化待讨论
+        :return: session_id
+        """
         while True:
-            session_id = sha1('%s%s' % (os.urandom(16), time.time())).hexdigest()
-            record = yield self.redis.exists(session_id)
+            _t = time.time()
+            _r = os.urandom(16)
+            session_id = sha1(_t + _r).hexdigest()
+            record = self.redis.exists(session_id + "_*")
             if record:
                 continue
             else:
                 return session_id
 
     @gen.coroutine
-    def get_current_session(self, session_id):
-        session = yield self.session_ps.get_session_by_session_id(session_id)
-        raise gen.Return(session)
-
-    @gen.coroutine
-    def create_current_session(self, session_id=None, wechat=None, oauth=True):
-        # qxuser
-        qxuser = yield self._get_current_moseeker_wxuser(oauth=oauth)
-        # wxuser
-        wxuser = yield self._get_current_wxuser(wechat=wechat, qxuser=qxuser, oauth=oauth)
-        # user
-        user = yield self._get_current_user_user(user_id=wxuser.sysuser_id)
-        # company
-        company = yield self._get_current_company(company_id=wechat.company_id)
-        # employee
-        employee = yield self._get_current_employee(wxuser_id=wxuser.id, company_id=company.id)
-        # recom
-        if "recom" in self.params:
-            recom = yield self._get_current_recom(openid=self.params.recom)
-        else:
-            recom = None
-
-        session = SessionBundle(session_id=session_id)
-        session.load_data(wxuser=wxuser,
-                          qxuser=qxuser,
-                          employee=employee,
-                          sysuser=user,
-                          recom=recom,
-                          company=company,
-                          wechat=wechat)
-        self.redis.set(session._session_id, session, ttl=60*60*2)
-        raise gen.Return(session)
-
-    @gen.coroutine
-    def _get_current_user_user(self, user_id=None):
-        user = SysUser(id=user_id)
-        user.fetch_from_db()
-        raise gen.Return(user)
-
-    @gen.coroutine
-    def _get_current_recom(self, openid=None):
-        recom = Recom(openid=openid)
-        recom.fetch_from_db()
-        raise gen.Return(recom)
-
-    @gen.coroutine
-    def _get_current_employee(self, wxuser_id=None, company_id=None):
-        if options.env == constant.ENV_QX:
-            raise gen.Return(None)
-
-        employee = Employee(wxuser_id=wxuser_id, company_id=company_id)
-
-        employee.fetch_from_db()
-        raise gen.Return(employee)
-
-    @gen.coroutine
-    def _get_current_wechat(self, is_qx=False):
-        # 如果当前环境是 QX， 使用另一方法获取
-        if options.env == constant.ENV_QX or is_qx:
-            signature = settings["qx_signature"]
-        else:
-            signature = self.params.get("wechat_signature", None)
-            if not signature:
-                self.logger.error("wechat_signature does not exist!")
-                return
-
-        wechat = Wechat(signature=signature)
-        wechat.fetch_from_db()
-
-        jsapi = JsApi(
-            jsapi_ticket=wechat.jsapi_ticket,
-            url=self.request.protocol + '://' +
-                self.request.host + self.request.uri)
-
-        wechat.jsapi = jsapi
-        raise gen.Return(wechat)
-
-    @gen.coroutine
-    def _get_current_moseeker_wechat(self):
-        ret = yield self._get_current_wechat(is_qx=True)
-        raise gen.Return(ret)
-
-    @gen.coroutine
-    def _get_current_moseeker_wxuser(self, oauth):
-        """
-        通过用户授权创建仟寻公众号用户
-        :param oauth 是否需要微信授权
-        :return:
-        """
-        # linkedin 也有授权，当是linkedin的code时候，直接返回''
-        response = {}
-        if not oauth:
-            raise gen.Return(response)
-
-        # code不存在，直接返回一个‘’
-        if not self.params.code:
-            raise gen.Return(response)
-
-        wechat = yield self._get_current_moseeker_wechat()
-        httpclient = WeixinAsyncApi(access_token=wechat.access_token,
-                                    appid=wechat.appid,
-                                    appsecret=wechat.secret)
-        response = yield httpclient.get_userinfo_by_code(self.params.code, wechat)
-
-        self.params.pop("code", None)
-
-        response = ObjectDict(ujson.loads(response.body), default="")
-        # 创建仟寻公众号下微信用户，创建sysuser用户，登录，并将仟寻用户信息写入session
-        if response.get("unionid"):
-            yield self.user_wx_user_ds.create_user(self, response, wechat.id)
-        else:
-            raise gen.Return(response)
-
-        raise gen.Return(response)
-
-    @gen.coroutine
-    def _get_current_wxuser(self, wechat, qxuser, oauth):
-        """
-        :param wechat:
-        :param oauth: 不需要授权微信
-        :return:
-        """
-
-        # linkedin 也有授权，当是 linkedin 的 code 时候，直接返回 ''
-        if not oauth:
-            raise gen.Return('')
-
-        # code不存在，直接返回一个‘’
-        if not self.params.code:
-            raise gen.Return('')
-
-        # 第三方平台授权oauth
-        component_access_token = None
-        # 1：第三方授权 0：第三方未授权
-        if wechat.third_oauth == 1:
-            component_access_token = self.redis.get('component_access_token')
-            if component_access_token:
-                component_access_token = ujson.loads(component_access_token).get('component_access_token')
-
-        httpclient = WeixinAsyncApi(
-            appid=wechat.appid,
-            appsecret=wechat.secret,
-            component_access_token=component_access_token)
-        response = yield httpclient.get_openid_by_code(
-            self.params.code, wechat)
-
-        self.params.pop("code", None)
-
-        response = ObjectDict(ujson.loads(response.body), default="")
-
-        # 由于企业静默授权，只能获取openid。所以用户其他信息，由仟寻公众号下基础信息补充
-        result = ObjectDict({
-            "openid":     response.openid,
-            "nickname":   qxuser.get("nickname"),
-            "sex":        qxuser.get("sex", 0),
-            "city":       qxuser.get("city"),
-            "country":    qxuser.get("country"),
-            "province":   qxuser.get("province"),
-            "language":   qxuser.get("language"),
-            "headimgurl": qxuser.get("headimgurl"),
-            "unionid":    qxuser.get("unionid")
-        })
-
-        if response.openid:
-            # 创建及更新，保证最新的oauth取到的用户信息都能存储上
-            yield self.session_ps.create_or_update_wxuser(self, result, wechat.id)
-        else:
-            raise gen.Return("")
-
-        raise gen.Return(result.openid)
-
-    @gen.coroutine
     def get(self):
-
-        """
-        GET请求父类
-        :return:
-        """
+        pass
 
     @gen.coroutine
     def post(self):
-        """
-        POST请求父类
-        :return:
-        """
         pass
 
     @gen.coroutine
     def put(self):
-
-        """
-        PUT请求父类，用户update类请求
-        :return:
-        """
         pass
 
     @gen.coroutine
     def delete(self):
-
-        """
-        DELETE请求父类
-        :return:
-        """
         pass
 
     def on_finish(self):
@@ -563,32 +483,30 @@ class BaseHandler(MetaBaseHandler):
                         message="正在努力维护服务器中")
 
     def render(self, template_name, status_code=200, **kwargs):
+        """render 页面"""
         self.log_info = {"res_type": "html"}
         self.set_status(status_code)
 
-        # remote debug mode
+        # 前后端联调使用
         if self.settings.get('remote_debug', False) is True:
-            template_string = super().render_string(template_name, **kwargs)
-            post_url = urljoin(self.settings.get('remote_debug_ip'), template_name)
+            template_string = self.render_string(template_name, **kwargs)
+            post_url = urljoin(self.settings.get('remote_debug_ip'),
+                               template_name)
             http_client = tornado.httpclient.HTTPClient()
-            r = http_client.fetch(post_url, method="POST", body=template_string)
+            r = http_client.fetch(post_url, method="POST",
+                                  body=template_string)
             self.write(r.body)
             self.finish()
             return
 
-        super().render(template_name, **kwargs)
+        self.render(template_name, **kwargs)
         return
 
     def send_json(self, json_dict, code=200, use_encoder=True,
                   additional_dump=False):
-        """
-        传递 JSON 到前端
-        :param json_dict: dict 格式的 JSON 内容
-        :param code: HTTP code
-        :param use_encoder: 是否使用 Tornado 的 json_encode 方法做字符串 escape
-        :param additional_dump:
-         当前端是 vue.js 渲染的时候 additional_dump 需要设置为 True,
-         由 vue.js 将 JSON 字符串 load 成 JS 对象
+        """传递 JSON 到前端
+
+        Used for API
         """
         json_string = ""
         if use_encoder:
@@ -599,38 +517,19 @@ class BaseHandler(MetaBaseHandler):
             json_string = ujson.dumps(json_string)
         self.write(json_string)
 
+    @staticmethod
+    def _make_render_json(data, status=0, message="", ):
+        """制造 render_json 用于渲染模板
 
-    def _make_render_json(self, data, status=0, message="", ):
-
-        assert isinstance(status, int) and isinstance(message, str)
-        render_json = ObjectDict()
-
-        render_json.status = status
-        render_json.message = message
-        render_json.data = data
-
+        由调用者负责传入数据的格式，此处不做检查
+        Used for Render
+        """
+        render_json = {
+            "status": status,
+            "message": message,
+            "data": data
+        }
         return encode_json_dumps(render_json)
-
-    def static_url(self, path, include_host=None, **kwargs):
-        """
-        可通过该方法来拼接静态 url
-        :param path:
-        :param include_host:
-        :param kwargs:
-        :return:
-        """
-
-        if not path:
-            return None
-
-        if not path.startswith("http"):
-            if "mid_path" in kwargs:
-                path = os.path.join(kwargs['mid_path'], path)
-            path = urljoin(self.settings['static_domain'], path)
-        if not path.startswith("http") and include_host is not None:
-            path = include_host + ":" + path
-
-        return path
 
     def _get_info_header(self, log_params):
         request = self.request
@@ -640,7 +539,7 @@ class BaseHandler(MetaBaseHandler):
             req_params['password'] = 'xxxxxx'
 
         log_info_common = ObjectDict(
-            elapsed_time="%.4f" % (time.time() - self.start_time),
+            elapsed_time="%.4f" % (time.time() - self._start_time),
             product=self.env,
             type_wechat=self.in_wechat,
             type_mobile=self.client_type,

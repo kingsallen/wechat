@@ -2,10 +2,10 @@
 
 # Copyright 2016 MoSeeker
 
-from tornado.util import ObjectDict
+from util.common import ObjectDict
 from tornado import gen
 from handler.base import BaseHandler
-from utils.common.decorator import handle_response
+from util.common.decorator import handle_response
 
 
 class LandingHandler(BaseHandler):

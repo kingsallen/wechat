@@ -1,13 +1,15 @@
 # coding=utf-8
 
 import ujson
-from utils.common.decorator import cache
-import tornado.gen as gen
-from tornado.util import ObjectDict
 from abc import ABCMeta, abstractmethod
-from utils.common.sign import Sign
-from utils.tool.http_tool import http_get
+
+import tornado.gen as gen
+
 from app import logger
+from util.common import ObjectDict
+from util.common.decorator import cache
+from util.common.sign import Sign
+from util.tool.http_tool import http_get
 
 
 class SessionDataService(object):
@@ -30,13 +32,13 @@ class IDBFetchable(object):
     def set_from_dict(self, d):
         if not d:
             return self
-        for k, v in d.iteritems():
+        for k, v in d.items():
             setattr(self, k, v)
         self.exist = True
         return self
 
     def to_dict(self, *args):
-        return {k: v for k, v in self.__dict__.iteritems()
+        return {k: v for k, v in self.__dict__.items()
                 if k not in ["LOG", "_db", "kwargs"] + list(args)}
 
     def get(self, item, default=None):

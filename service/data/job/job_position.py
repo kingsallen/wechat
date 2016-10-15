@@ -4,7 +4,7 @@
 
 from tornado import gen
 from service.data.base import DataService
-from utils.common.decorator import cache
+from util.common.decorator import cache
 
 class JobPositionDataService(DataService):
 

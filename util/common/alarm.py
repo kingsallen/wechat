@@ -9,7 +9,7 @@
 from tornado import gen
 
 import json
-from utils.tool.http_tool import http_post
+from util.tool.http_tool import http_post
 from setting import settings
 
 # Moseeker Slack team webhook settings url:

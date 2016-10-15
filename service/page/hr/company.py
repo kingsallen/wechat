@@ -3,7 +3,7 @@
 # Copyright 2016 MoSeeker
 
 import re
-from tornado.util import ObjectDict
+from util.common import ObjectDict
 from tornado import gen
 from service.page.base import PageService
 

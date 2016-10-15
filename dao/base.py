@@ -8,14 +8,14 @@ Model基类，封装对数据库的访问，对传入参数的处理
 """
 
 from tornado import gen
-from tornado.util import ObjectDict
+from util.common import ObjectDict
 
 import conf.common as constant
 import conf.platform as plat_constant
 import conf.qx as qx_constant
-from utils.common.db import DB
-from utils.common.singleton import Singleton
-from utils.tool.date_tool import curr_now
+from util.common.db import DB
+from util.common.singleton import Singleton
+from util.tool.date_tool import curr_now
 
 
 class BaseDao(DB):

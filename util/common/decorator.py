@@ -2,16 +2,16 @@
 
 # Copyright 2016 MoSeeker
 
-import hashlib
 import functools
+import hashlib
 
 from tornado import gen
-from tornado.util import ObjectDict
 from tornado.locks import Semaphore
 from tornado.web import MissingArgumentError
 
-from utils.common.cache import BaseRedis
 import conf.common as constant
+from util.common import ObjectDict
+from util.common.cache import BaseRedis
 
 
 def handle_response(func):
@@ -109,7 +109,7 @@ def check_signature(func):
     """
     @functools.wraps(func)
     def wrapper(self, *args, **kwargs):
-        if self.env == constant.ENV_PLATFORM:
+        if self.is_platform:
             key = "wechat_signature"
             try:
                 self.get_query_argument(key, strip=True)

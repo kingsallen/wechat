@@ -2,7 +2,7 @@
 
 # Copyright 2016 MoSeeker
 
-from utils.common.cache import BaseRedis
+from util.common.cache import BaseRedis
 
 
 class UserCache(BaseRedis):

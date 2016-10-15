@@ -7,9 +7,11 @@
 
 # Copyright 2016 MoSeeker
 
-import redis
-from setting import settings
 from abc import ABCMeta, abstractmethod
+
+import redis
+
+from setting import settings
 
 
 class IMessageSendable(object):

@@ -27,4 +27,4 @@ get_url = 'http://localhost:8000/mobile/company/111'
 
 re = requests.get(get_url)
 
-print json.loads(re.text)
+print(json.loads(re.text))

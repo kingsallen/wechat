@@ -8,9 +8,9 @@
 """
 
 from tornado import gen
-from tornado.util import ObjectDict
+from util.common import ObjectDict
 from handler.base import BaseHandler
-from utils.tool.http_tool import http_post
+from util.tool.http_tool import http_post
 
 
 class CellphoneBindHandler(BaseHandler):
