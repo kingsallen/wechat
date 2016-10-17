@@ -9,23 +9,6 @@ from util.common.decorator import cache
 
 class UserWxUserDataService(DataService):
 
-    @cache(ttl=60)
-    @gen.coroutine
-    def get_wxuser(self, openid=None, wechat_id=None):
-        if not openid or not wechat_id:
-            self.logger.warn(u"Warning:[get_wxuser][invalid parameters], Detail:[openid: {0}, wechat_id: {1}]".format(openid, wechat_id))
-            raise gen.Return(None)
-
-        conds = {
-            "openid": [str(openid), "="],
-            "wechat_id": [str(wechat_id), "="]
-        }
-        fields = self.user_wx_user_dao.fields_map.keys()
-
-        response = yield self.user_wx_user_dao.get_record_by_conds(conds, fields)
-        raise gen.Return(response)
-
-    @cache(ttl=60)
     @gen.coroutine
     def get_wxuser(self, id=None):
         if not id:

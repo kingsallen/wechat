@@ -19,7 +19,7 @@ from app import logger
 from oauth.wechat import WeChatOauth2Service, WeChatOauthError
 from util.common import ObjectDict
 from util.common.decorator import check_signature
-from util.session.session import JsApi, Wechat, WxUser, Recom, Employee, SysUser
+
 from util.tool.json_tool import encode_json_dumps
 from util.tool.str_tool import to_str
 
@@ -167,16 +167,17 @@ class BaseHandler(MetaBaseHandler):
         code = self.params.get("code")
         state = self.params.get("state")
 
-        if code:  #用户同意授权
+        if code:  # 用户同意授权
             if state == 'O':  #来自 qx 的授权, 获得 userinfo
                 userinfo = yield self._get_user_info(code)
                 yield self._handle_user_info(userinfo)
-            else:  #来自企业号的静默授权
+            else:  # 来自企业号的静默授权
                 self._unionid = state
                 openid = yield self._get_user_openid(code)
                 self._wxuser = yield self._handle_ent_openid(openid, self._unionid)
-        if state and not code:  #用户拒绝授权
-            #TODO 拒绝授权用户，是否让其继续操作。or return
+
+        if state and not code:  # 用户拒绝授权
+            # TODO 拒绝授权用户，是否让其继续操作。or return
             pass
 
         # 构造并拼装 session
@@ -267,9 +268,9 @@ class BaseHandler(MetaBaseHandler):
                 self.logger.error("wechat_signature missing")
                 raise NoSignatureError()
 
-        wechat = yield Wechat(signature=signature).fetch_from_db()
-        wechat.jsapi = JsApi(
-            jsapi_ticket=wechat.jsapi_ticket, url=self.fullurl)
+        wechat = yield self.session_ps.get_wechat_by_signature(signature)
+        # wechat.jsapi = JsApi(
+        #     jsapi_ticket=wechat.jsapi_ticket, url=self.fullurl)
 
         raise gen.Return(wechat)
 
@@ -356,32 +357,28 @@ class BaseHandler(MetaBaseHandler):
         session.wechat = self._wechat
         session.wxuser = self._wxuser
 
-        qxuser = WxUser(unionid=self._unionid, wechat_id=self.settings['qx_wechat_id'])
-        session.qxuser = yield qxuser.fetch_from_db()
-
+        session.qxuser = yield self.session_ps.get_wxuser(
+            unionid=self._unionid, wechat_id=self.settings['qx_wechat_id'])
         session.company = yield self._get_current_company(self._wechat.id)
-
-        user = SysUser(id=qxuser.sysuser_id)
-        session.sysuser = yield user.fetch_from_db()
+        session.sysuser = yield self.session_ps.get_user_user(
+            session.qxuser.sysuser_id)
 
         session_id = self._make_new_session_id()
         self.set_secure_cookie(self.constant.COOKIE_SESSIONID, session_id)
-        # TODO REDIS KEY  常量配置
         self.redis.set(
-            self.constant.SESSION_USER.format(session_id, self._wechat.id), ujson.dumps(session),
+            self.constant.SESSION_USER.format(session_id, self._wechat.id),
+            ujson.dumps(session),
             60 * 60 * 2)
 
         if self.is_platform:
-            employee = Employee(
+            employee = yield self.session_ps.get_employee(
                 wxuser_id=session.wxuser.id, company_id=session.company.id)
-            employee.fetch_from_db()
             if employee:
                 session.employee = employee
 
-        if 'recom' in self.params:
-            recom = Recom(openid=self.params.openid)
-            recom.fetch_from_db()
-            session.recom = recom
+        if self.params:
+            session.recom = yield self.session_ps.get_wxuser(
+                self.params.recom, session.company.id)
 
         self.current_user = session
 
@@ -390,9 +387,7 @@ class BaseHandler(MetaBaseHandler):
         if not self.is_platform:
             return False
 
-        # TODO REDIS KEY 常量配置
         key = self.constant.SESSION_USER.format(session_id, self._wechat.id)
-        # key = session_id + "_" + self._wechat.id
         value = self.redis.get(key)
         if value:
             # 如果有 value， 返回该 value 作为 self.current_user
@@ -403,9 +398,8 @@ class BaseHandler(MetaBaseHandler):
     @gen.coroutine
     def _get_session_from_qx(self, session_id):
         """尝试获取聚合号 session"""
-        # TODO REDIS KEY 常量配置
+
         key = self.constant.SESSION_USER.format(session_id, self.settings['qx_wechat_id'])
-        # key = session_id + "_" + self.settings['qx_wechat_id']
         value = self.redis.get(key)
         if value:
             user_id = ujson.loads(value).user.id

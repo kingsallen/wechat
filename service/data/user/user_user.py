@@ -13,10 +13,9 @@ class UserUserDataService(DataService):
     @gen.coroutine
     def get_user(self, conds, fields=None):
 
-        if conds is None or not (isinstance(conds, dict) or isinstance(conds, str)):
-            self.logger.warn("Warning:[get_user][invalid parameters], Detail:[conds: {0}, "
-                        "type: {1}]".format(conds, type(conds)))
-            raise gen.Return(False)
+        if not self._valid_conds(conds):
+            self.logger.warn("Warning:[get_user][invalid parameters], Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
+            raise gen.Return(None)
 
         if not fields:
             fields = self.user_user_dao.fields_map.keys()
