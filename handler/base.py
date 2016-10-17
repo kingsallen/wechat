@@ -487,7 +487,7 @@ class BaseHandler(MetaBaseHandler):
         # else:
         #     self.render('common/systemmessage.html', status_code=status_code,
         #                 message="正在努力维护服务器中")
-        self.write_error(status_code)
+        self.write(status_code)
 
     def render(self, template_name, status_code=200, **kwargs):
         """render 页面"""

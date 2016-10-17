@@ -80,7 +80,7 @@ def cache(prefix=None, key=None, ttl=60, hash=True, lock=True, separator=":"):
                         spliter = separator if redis_key else ""
                         redis_key = redis_key + spliter + separator.join([str(_) for _ in list(kwargs.values())])
                 else:
-                     redis_key = key
+                    redis_key = key
 
                 if hash:
                     redis_key = hashlib.md5(redis_key.encode("utf-8")).hexdigest()
@@ -91,7 +91,8 @@ def cache(prefix=None, key=None, ttl=60, hash=True, lock=True, separator=":"):
                     cache_data = base_cache.get(redis_key)
                 else:
                     cache_data = yield func(*args, **kwargs)
-                    base_cache.set(redis_key, cache_data, ttl)
+                    if cache_data is not None:
+                        base_cache.set(redis_key, cache_data, ttl)
 
                 raise gen.Return(cache_data)
 
