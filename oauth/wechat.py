@@ -25,7 +25,7 @@ class WeChatOauth2Service(object):
         self._handler = handler
 
         self.wechat = handler.wechat
-        self.status = 0
+        self.state = 0
 
         # 缓存 access_token
         self._access_token = None
@@ -53,7 +53,7 @@ class WeChatOauth2Service(object):
 
     @gen.coroutine
     def get_userinfo_by_code(self, code):
-        openid, _ = self.get_openid_unionid_by_code(code)
+        openid, _ = yield self.get_openid_unionid_by_code(code)
         userinfo = yield self._get_userinfo_by_openid(openid)
         if 'errorcode' in userinfo:
             raise WeChatOauthError(userinfo.errmsg)
@@ -83,7 +83,7 @@ class WeChatOauth2Service(object):
             self.wechat.appid,
             urllib.parse.quote(self._redirect_url),
             self._get_oauth_type(is_base),
-            self.status)
+            self.state)
 
     def _get_code_url_3rd_party(self, is_base=1):
         """第三方获取 code 的 url"""
@@ -92,7 +92,7 @@ class WeChatOauth2Service(object):
             self.wechat.appid,
             urllib.parse.quote(self._redirect_url),
             self._get_oauth_type(is_base),
-            self.status,
+            self.state,
             self._handler.settings['component_app_id'])
 
     def _get_access_token_url(self, code):

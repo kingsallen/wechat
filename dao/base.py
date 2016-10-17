@@ -179,8 +179,12 @@ class BaseDao(DB):
             raise gen.Return(None)
         sql = self.delete(self.table, conds)
         cursor = yield self.query(sql, params)
-        response = cursor.fetchone()
-        raise gen.Return(response)
+        cursor.fetchone()
+        rows_count = cursor.rowcount
+        if rows_count:
+            raise gen.Return(True)
+        else:
+            raise gen.Return(False)
 
     @gen.coroutine
     def get_cnt_by_conds(self, conds, fields, appends=[], index=''):

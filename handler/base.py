@@ -176,6 +176,7 @@ class BaseHandler(MetaBaseHandler):
                 openid = yield self._get_user_openid(code)
                 self._wxuser = yield self._handle_ent_openid(openid, self._unionid)
         if state and not code:  #用户拒绝授权
+            #TODO 拒绝授权用户，是否让其继续操作。or return
             pass
 
         # 构造并拼装 session
@@ -194,7 +195,7 @@ class BaseHandler(MetaBaseHandler):
         """
         根据 unionid 创建 user_user 如果存在则不创建， 返回 user_id
         创建 聚合号 wxuser，绑定刚刚创建的 user_id
-        静默授权企业号, status 为 unionid
+        静默授权企业号, state 为 unionid
 
         userinfo 结构：
         ObjectDict(
@@ -213,12 +214,18 @@ class BaseHandler(MetaBaseHandler):
         )
         """
         unionid = userinfo.unionid
+        # TODO create_user_user create_user_wx_user_by_userinfo
         user_id = yield self.user_ps.create_user_user(userinfo)
         yield self.user_ps.create_user_wx_user_by_userinfo(user_id, userinfo)
         if self.is_platform:
             self._oauth_service.wechat = self._wechat
-            self._oauth_service.status = unionid
-        self._oauth_service.get_oauth_code_base()
+            self._oauth_service.state = unionid
+
+            # TODO 静默授权？
+            self._oauth_service.get_oauth_code_base()
+
+        # TODO 删了？
+        # self._oauth_service.get_oauth_code_base()
 
     @gen.coroutine
     def _handle_ent_openid(self, openid, unionid):
@@ -227,6 +234,7 @@ class BaseHandler(MetaBaseHandler):
         user = self.user_ps.get_user_by_union_id(unionid)
         unionid = user.unionid
         if self.is_platform:
+            # TODO create_user_wx_user_ent
             wxuser = yield self.user_ps.create_user_wx_user_ent(
                 openid, unionid, self._wechat.id)
         raise gen.Return(wxuser)
@@ -255,7 +263,7 @@ class BaseHandler(MetaBaseHandler):
             signature = self.settings['qx_signature']
         else:
             if self.is_platform:
-                signature = self.params['wechat_signature']
+                signature = self.params['signature']
             elif self.is_qx:
                 signature = self.settings['qx_signature']
             elif self.is_help:
@@ -330,10 +338,10 @@ class BaseHandler(MetaBaseHandler):
                 if not ok:
                     ok = yield self._get_session_from_qx(session_id)
 
-            if self.is_qx:
+            elif self.is_qx:
                 ok = yield self._get_session_from_qx(session_id)
 
-            if self.is_help:
+            elif self.is_help:
                 pass
 
             need_oauth = not ok
@@ -364,8 +372,9 @@ class BaseHandler(MetaBaseHandler):
 
         session_id = self._make_new_session_id()
         self.set_secure_cookie(self.constant.COOKIE_SESSIONID, session_id)
+        # TODO REDIS KEY  常量配置
         self.redis.set(
-            session_id + "_" + self._wechat.id, ujson.dumps(session),
+            self.constant.SESSION_USER.format(session_id, self._wechat.id), ujson.dumps(session),
             60 * 60 * 2)
 
         if self.is_platform:
@@ -387,7 +396,9 @@ class BaseHandler(MetaBaseHandler):
         if not self.is_platform:
             return False
 
-        key = session_id + "_" + self._wechat.id
+        # TODO REDIS KEY 常量配置
+        key = self.constant.SESSION_USER.format(session_id, self._wechat.id)
+        # key = session_id + "_" + self._wechat.id
         value = self.redis.get(key)
         if value:
             # 如果有 value， 返回该 value 作为 self.current_user
@@ -398,10 +409,13 @@ class BaseHandler(MetaBaseHandler):
     @gen.coroutine
     def _get_session_from_qx(self, session_id):
         """尝试获取聚合号 session"""
-        key = session_id + "_" + self.settings['qx_wechat_id']
+        # TODO REDIS KEY 常量配置
+        key = self.constant.SESSION_USER.format(session_id, self.settings['qx_wechat_id'])
+        # key = session_id + "_" + self.settings['qx_wechat_id']
         value = self.redis.get(key)
         if value:
             user_id = ujson.loads(value).user.id
+            # TODO _refresh_session，或者是_build_session？
             session_qx, session_ent = yield self._refresh_session(user_id)
             if self.is_platform:
                 self.current_user = session_ent
