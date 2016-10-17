@@ -18,7 +18,7 @@ class HrCompanyConfDataService(DataService):
             raise gen.Return(False)
 
         if not fields:
-            fields = self.hr_company_conf_dao.fields_map.keys()
+            fields = list(self.hr_company_conf_dao.fields_map.keys())
 
         response = yield self.hr_company_conf_dao.get_record_by_conds(conds, fields)
         raise gen.Return(response)

@@ -28,7 +28,7 @@ class UserWxUserDataService(DataService):
             self.logger.warn(u"Warning:[get_wxuser][invalid parameters], Detail:[conds: {0}, fields: {1}]".format(conds, fields))
             raise gen.Return(None)
 
-        fields = fields or self.user_wx_user_dao.fields_map.keys()
+        fields = fields or list(self.user_wx_user_dao.fields_map.keys())
 
         response = yield self.user_wx_user_dao.get_record_by_conds(conds, fields)
         raise gen.Return(response)
@@ -66,7 +66,7 @@ class UserWxUserDataService(DataService):
             raise gen.Return(None)
 
         yield self.user_wx_user_dao.update_by_conds(
-            conds={"id": [wxuser_id, "="]},
+            conds={"id": wxuser_id},
             fields=dict(
                 openid=userinfo.openid,
                 nickname=userinfo.nickname,

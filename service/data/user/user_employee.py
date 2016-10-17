@@ -18,7 +18,7 @@ class UserEmployeeDataService(DataService):
             raise gen.Return(None)
 
         if not fields:
-            fields = self.user_employee_dao.fields_map.keys()
+            fields = list(self.user_employee_dao.fields_map.keys())
 
         response = yield self.user_employee_dao.get_record_by_conds(conds, fields)
         raise gen.Return(response)

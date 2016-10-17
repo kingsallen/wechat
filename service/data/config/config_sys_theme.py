@@ -19,7 +19,7 @@ class ConfigSysThemeDataService(DataService):
             raise gen.Return(False)
 
         if not fields:
-            fields = self.config_sys_theme_dao.fields_map.keys()
+            fields = list(self.config_sys_theme_dao.fields_map.keys())
 
         response = yield self.config_sys_theme_dao.get_record_by_conds(conds, fields)
         raise gen.Return(response)

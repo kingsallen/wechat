@@ -18,7 +18,7 @@ class HrWxWechatDataService(DataService):
             raise gen.Return(None)
 
         if not fields:
-            fields = self.hr_wx_wechat_dao.fields_map.keys()
+            fields = list(self.hr_wx_wechat_dao.fields_map.keys())
 
         response = yield self.hr_wx_wechat_dao.get_record_by_conds(
             conds, fields)

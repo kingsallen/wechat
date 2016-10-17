@@ -155,7 +155,7 @@ class DB(object):
             sql += ", ".join(fields)
         else:
             self.logger.error("Error:[select][fields error], fields:{0}, type:{1}, "
-                           "length{2}".format(fields, type(fields), len(fields)))
+                           "length:{2}".format(fields, type(fields), len(fields)))
             return False
 
         sql += " FROM {0}".format(table)
@@ -280,7 +280,7 @@ class DB(object):
             sql += sql_tmp
         else:
             self.logger.error("Error:[select_cnt][fields error], fields:{0}, type:{1}, "
-                           "length{2}".format(fields, type(fields), len(fields)))
+                           "length:{2}".format(fields, type(fields), len(fields)))
             return False
 
         sql += " FROM {0}".format(table)

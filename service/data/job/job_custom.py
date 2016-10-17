@@ -19,7 +19,7 @@ class JobCustomDataService(DataService):
             raise gen.Return(False)
 
         if not fields:
-            fields = self.job_custom_dao.fields_map.keys()
+            fields = list(self.job_custom_dao.fields_map.keys())
 
         response = yield self.job_custom_dao.get_record_by_conds(conds, fields)
         raise gen.Return(response)
@@ -33,7 +33,7 @@ class JobCustomDataService(DataService):
             raise gen.Return(False)
 
         if not fields:
-            fields = self.job_custom_dao.fields_map.keys()
+            fields = list(self.job_custom_dao.fields_map.keys())
 
         response = yield self.job_custom_dao.get_list_by_conds(conds, fields, options, appends, index, params)
         raise gen.Return(response)

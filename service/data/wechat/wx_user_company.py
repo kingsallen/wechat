@@ -18,17 +18,17 @@ class WxUserCompanyDataService(DataService):
         if not self._condition_isvalid(conds, 'get_user'):
             raise gen.Return(False)
         if not fields:
-            fields = self.user_company_follows_dao.fields_map.keys()
+            fields = list(self.user_company_follows_dao.fields_map.keys())
         response = yield self.user_company_follows_dao.get_record_by_conds(
                             conds, fields)
         raise gen.Return(response)
 
     @gen.coroutine
     def _get_foll_cmpy(self, conds, fields=[]):
-        if not self._condition_isvalid(conds, 'get_foll_cmpy'):
+        if not self._valid_conds(conds, 'get_foll_cmpy'):
             raise gen.Return(None)
         if not fields:
-            fields = self.hr_wx_wechat_dao.fields_map.keys()
+            fields = list(self.hr_wx_wechat_dao.fields_map.keys())
         try:
             response = yield self.user_company_follows_dao.get_list_by_conds(
                                     conds, fields)
@@ -43,7 +43,7 @@ class WxUserCompanyDataService(DataService):
         if not self._condition_isvalid(conds, 'get_visit_cmpy'):
             raise gen.Return(None)
         if not fields:
-            fields = self.hr_wx_wechat_dao.fields_map.keys()
+            fields = list(self.hr_wx_wechat_dao.fields_map.keys())
         try:
             response = yield self.user_company_visit_req_dao.get_list_by_conds(
                                     conds, fields)
