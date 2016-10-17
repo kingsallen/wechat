@@ -478,15 +478,16 @@ class BaseHandler(MetaBaseHandler):
         500（服务器错误）      Internal Server Error: Something went wrong on the server, check status site and/or report the issue
         """
 
-        if status_code == 403:
-            self.render('refer/common/info.html', status_code=status_code,
-                        css="warning", info="用户未被授权请求")
-        elif status_code == 404:
-            self.render('common/systemmessage.html', status_code=status_code,
-                        message="Ta在地球上消失了")
-        else:
-            self.render('common/systemmessage.html', status_code=status_code,
-                        message="正在努力维护服务器中")
+        # if status_code == 403:
+        #     self.render('refer/common/info.html', status_code=status_code,
+        #                 css="warning", info="用户未被授权请求")
+        # elif status_code == 404:
+        #     self.render('common/systemmessage.html', status_code=status_code,
+        #                 message="Ta在地球上消失了")
+        # else:
+        #     self.render('common/systemmessage.html', status_code=status_code,
+        #                 message="正在努力维护服务器中")
+        self.write_error(status_code)
 
     def render(self, template_name, status_code=200, **kwargs):
         """render 页面"""

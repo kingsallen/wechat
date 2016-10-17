@@ -8,6 +8,7 @@ import tornado.gen as gen
 import tornado.httpclient
 from util.common import ObjectDict
 
+
 class WeChatOauthError(Exception):
     pass
 
@@ -24,7 +25,7 @@ class WeChatOauth2Service(object):
         self._redirect_url = redirect_url
         self._handler = handler
 
-        self.wechat = handler.wechat
+        self.wechat = handler._wechat
         self.state = 0
 
         # 缓存 access_token
