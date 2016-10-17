@@ -47,7 +47,7 @@ class IDBFetchable(object):
 
     def __repr__(self, *args):
         d = self.to_dict(*args)
-        return ujson.dumps(d, encoding='utf-8', ensure_ascii=False)
+        return ujson.dumps(d, ensure_ascii=False)
 
     @staticmethod
     def valid_conds(conds):
@@ -79,8 +79,8 @@ class Wechat(IDBFetchable):
         raise gen.Return(res)
 
     @gen.coroutine
-    def get_wechat_by_signature(self):
-        ret = yield self.get_wechat(conds={"signature", [self.signature, "="]})
+    def get_wechat_by_signature(self, signature):
+        ret = yield self.get_wechat(conds={"signature": [signature, "="]})
         raise gen.Return(ret)
 
     @cache(ttl=60)
@@ -216,29 +216,3 @@ class SysUser(IDBFetchable):
         user_setting = ObjectDict(user_setting)
         user.user_setting = user_setting
         raise gen.Return(user)
-
-
-class SessionBundle(ObjectDict):
-    def __init__(self, session_id):
-        self._session_id = session_id
-        self.wxuser = None
-        self.qxuser = None
-        self.employee = None
-        self.sysuser = None
-        self.recom = None
-        self.company = None
-        self.wechat = None
-        self.loaded = False
-
-    def load_data(self, wxuser, qxuser, employee, sysuser, recom, company, wechat):
-        self.wxuser = wxuser
-        self.qxuser = qxuser
-        self.employee = employee
-        self.sysuser = sysuser
-        self.recom = recom
-        self.company = company
-        self.wechat = wechat
-        self.loaded = True
-
-    def __nonzero__(self):
-        return self.loaded

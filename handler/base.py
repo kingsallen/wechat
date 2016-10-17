@@ -15,13 +15,13 @@ from urllib.parse import urljoin
 import tornado.escape
 import tornado.httpclient
 from tornado import gen, web
-from util.common import ObjectDict
-
 from app import logger
-from util.session.session import JsApi, Wechat, WxUser, Recom, Employee, SysUser
 from oauth.wechat import WeChatOauth2Service, WeChatOauthError
+from util.common import ObjectDict
 from util.common.decorator import check_signature
+from util.session.session import JsApi, Wechat, WxUser, Recom, Employee, SysUser
 from util.tool.json_tool import encode_json_dumps
+from util.tool.str_tool import to_str
 
 # 动态加载所有 PageService
 obDict = {}
@@ -182,7 +182,6 @@ class BaseHandler(MetaBaseHandler):
         # 构造并拼装 session
         yield self._fetch_session()
 
-
         # 内存优化
         self._wechat = None
         self._qx_wechat = None
@@ -213,14 +212,14 @@ class BaseHandler(MetaBaseHandler):
         "unionid": "o6_bmasdasdsad6_2sgVt7hMZOPfL"
         )
         """
+
         unionid = userinfo.unionid
         # TODO create_user_user create_user_wx_user_by_userinfo
         user_id = yield self.user_ps.create_user_user(userinfo)
         yield self.user_ps.create_user_wx_user_by_userinfo(user_id, userinfo)
         if self.is_platform:
             self._oauth_service.wechat = self._wechat
-            self._oauth_service.state = unionid
-
+            self._oauth_service.status = unionid
             # TODO 静默授权？
             self._oauth_service.get_oauth_code_base()
 
@@ -242,10 +241,10 @@ class BaseHandler(MetaBaseHandler):
     def _get_params(self):
         """To get all GET or POST arguments from http request
         """
-        params = ObjectDict(self.request.arguments, default="")
-        for key in dict(params):
-            if isinstance(params[key], list) and len(params[key]):
-                params[key] = params[key][0]
+        params = ObjectDict(self.request.arguments)
+        for key in params:
+            if isinstance(params[key], list) and params[key]:
+                params[to_str(key)] = to_str(params[key][0])
         return params
 
     def _get_json_args(self):
@@ -263,7 +262,7 @@ class BaseHandler(MetaBaseHandler):
             signature = self.settings['qx_signature']
         else:
             if self.is_platform:
-                signature = self.params['signature']
+                signature = self.params['wechat_signature']
             elif self.is_qx:
                 signature = self.settings['qx_signature']
             elif self.is_help:
@@ -272,8 +271,7 @@ class BaseHandler(MetaBaseHandler):
                 self.logger.error("wechat_signature missing")
                 raise NoSignatureError()
 
-        wechat = Wechat(signature=signature)
-        wechat.fetch_from_db()
+        wechat = yield Wechat(signature=signature).fetch_from_db()
         wechat.jsapi = JsApi(
             jsapi_ticket=wechat.jsapi_ticket, url=self.fullurl)
 
@@ -337,7 +335,6 @@ class BaseHandler(MetaBaseHandler):
                 ok = self._get_session_from_ent(session_id)
                 if not ok:
                     ok = yield self._get_session_from_qx(session_id)
-
             elif self.is_qx:
                 ok = yield self._get_session_from_qx(session_id)
 
@@ -475,15 +472,12 @@ class BaseHandler(MetaBaseHandler):
 
     def write_error(self, status_code, **kwargs):
         """错误页
-
         :param status_code: http_status
-        :param kwargs:
-        :return:
 
         usage：
-            403（用户未被授权请求） Forbidden: Request failed because user does not have authorization to access a specific resource
-            404（资源不存在）Resource not found
-            500（服务器错误） Internal Server Error: Something went wrong on the server, check status site and/or report the issue
+        403（用户未被授权请求） Forbidden: Request failed because user does not have authorization to access a specific resource
+        404（资源不存在）      Resource not found
+        500（服务器错误）      Internal Server Error: Something went wrong on the server, check status site and/or report the issue
         """
 
         if status_code == 403:

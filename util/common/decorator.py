@@ -34,15 +34,18 @@ def handle_response(func):
 
 base_cache = BaseRedis()
 sem = Semaphore(1)
-def cache(prefix=None, key=None, ttl=60, hash=True, lock=True, separator="_"):
+
+
+def cache(prefix=None, key=None, ttl=60, hash=True, lock=True, separator=":"):
     """
     cache装饰器
 
     :param prefix: 指定prefix
     :param key: 指定key
-    :param timeout: ttl (s)
+    :param ttl: ttl (s)
     :param hash: 是否需要hash
     :param lock: -
+    :param separator: key 分隔符
     :return:
     """
     key_ = key
@@ -107,6 +110,7 @@ def check_signature(func):
     此装饰器用来装饰 tornado.web.RequestHandler 异步方法，
     如：prepare
     """
+    @gen.coroutine
     @functools.wraps(func)
     def wrapper(self, *args, **kwargs):
         if self.is_platform:

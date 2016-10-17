@@ -25,8 +25,7 @@ class JSONEncoder(json.JSONEncoder):
 
 
 def json_dumps(p_dict):
-    if not (isinstance(p_dict, dict) or isinstance(p_dict, list)
-            or isinstance(p_dict, ObjectDict)):
+    if not (isinstance(p_dict, dict) or isinstance(p_dict, list)):
         raise ValueError("p_dict is not a required instance.")
     return JSONEncoder().encode(p_dict)
 
