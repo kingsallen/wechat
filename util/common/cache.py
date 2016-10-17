@@ -14,6 +14,7 @@ import redis
 from setting import settings
 from util.common import ObjectDict
 from util.tool.json_tool import json_dumps
+from util.tool.str_tool import to_str
 
 
 class BaseRedis(object):
@@ -41,7 +42,7 @@ class BaseRedis(object):
         return '{0}_{1}'.format(self._PREFIX, key)
 
     def _get(self, key, default=None):
-        value = self._redis.get(key)
+        value = to_str(self._redis.get(key))
         if value is None:
             return default
         return json.loads(value)
@@ -78,6 +79,3 @@ class BaseRedis(object):
     def exists(self, key):
         key = self.key_name(key)
         return self._redis.exists(key)
-
-
-

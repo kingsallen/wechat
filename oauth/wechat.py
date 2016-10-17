@@ -3,10 +3,13 @@
 
 import ujson
 import urllib.parse
+import re
 
 import tornado.gen as gen
 import tornado.httpclient
+
 from util.common import ObjectDict
+from setting import settings
 
 
 class WeChatOauthError(Exception):
@@ -39,6 +42,10 @@ class WeChatOauth2Service(object):
     def get_oauth_code_userinfo(self):
         """正常授权获取 code"""
         self._get_oauth_code(is_base=0)
+
+    @property
+    def handling_qx(self):
+        return self.wechat.id == settings['qx_wechat_id']
 
     @gen.coroutine
     def get_openid_unionid_by_code(self, code):
@@ -79,8 +86,9 @@ class WeChatOauth2Service(object):
 
     def _get_code_url(self, is_base=1):
         """非第三方获取 code 的 url"""
+        self.__adjust_url(is_base)
 
-        return self._handler.wx_cosntant.WX_OAUTH_GET_CODE % (
+        return self._handler.wx_constant.WX_OAUTH_GET_CODE % (
             self.wechat.appid,
             urllib.parse.quote(self._redirect_url),
             self._get_oauth_type(is_base),
@@ -88,6 +96,7 @@ class WeChatOauth2Service(object):
 
     def _get_code_url_3rd_party(self, is_base=1):
         """第三方获取 code 的 url"""
+        self.__adjust_url(is_base)
 
         return self._handler.wx_constant.WX_THIRD_OAUTH_GET_CODE % (
             self.wechat.appid,
@@ -163,3 +172,15 @@ class WeChatOauth2Service(object):
 
         ret = ObjectDict(ujson.loads(response.body))
         raise gen.Return(ret)
+
+    def __adjust_url(self, is_base):
+        """必要时调整 redirect_uri 的二级域名"""
+        if (not is_base and self.handling_qx and
+                self.__is_platform_url(self._redirect_url)):
+            self._redirect_url = self._redirect_url.replace('platform', 'qx', 1)
+
+    @staticmethod
+    def __is_platform_url(string):
+        """判断是否是 platform 的 url"""
+        regex = r"^http(s)?:\/\/platform"
+        return re.match(regex, string)

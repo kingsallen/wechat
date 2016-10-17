@@ -168,7 +168,7 @@ class BaseHandler(MetaBaseHandler):
         state = self.params.get("state")
 
         if code:  # 用户同意授权
-            if state == 'O':  #来自 qx 的授权, 获得 userinfo
+            if state == 'O':  # 来自 qx 的授权, 获得 userinfo
                 userinfo = yield self._get_user_info(code)
                 yield self._handle_user_info(userinfo)
             else:  # 来自企业号的静默授权
@@ -177,7 +177,7 @@ class BaseHandler(MetaBaseHandler):
                 self._wxuser = yield self._handle_ent_openid(openid, self._unionid)
 
         if state and not code:  # 用户拒绝授权
-            # TODO 拒绝授权用户，是否让其继续操作。or return
+            # TODO 拒绝授权用户，是否让其继续操作? or return
             pass
 
         # 构造并拼装 session
@@ -286,7 +286,8 @@ class BaseHandler(MetaBaseHandler):
         """
         conds = {'id': company_id}
         company = yield self.company_ps.get_company(conds=conds, need_conf=True)
-        theme = yield self.wechat_ps.get_wechat_theme({'id': company.get("conf_theme_id"), "disable": 0})
+        theme = yield self.wechat_ps.get_wechat_theme(
+            {'id': company.get("conf_theme_id"), "disable": 0})
         if theme:
             company.update({
                 "theme": [
