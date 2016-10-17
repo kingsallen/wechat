@@ -38,8 +38,7 @@ class IDBFetchable(object):
         return self
 
     def to_dict(self, *args):
-        return {k: v for k, v in self.__dict__.items()
-                if k not in ["LOG", "_db", "kwargs"] + list(args)}
+        return {k: v for k, v in self.__dict__.items() if k not in list(args)}
 
     def get(self, item, default=None):
         res = getattr(self, item)
@@ -80,7 +79,7 @@ class Wechat(IDBFetchable):
 
     @gen.coroutine
     def get_wechat_by_signature(self, signature):
-        ret = yield self.get_wechat(conds={"signature": [signature, "="]})
+        ret = yield self.get_wechat(conds={"signature": signature})
         raise gen.Return(ret)
 
     @cache(ttl=60)
@@ -112,8 +111,9 @@ class WxUser(IDBFetchable):
         if not self.unionid or not self.wechat_id:
             gen.Return(None)
         res = yield self.get_wxuser(conds={
-            "wechat_id", [self.wechat_id, "="],
-            "unionid", [self.unionid, "="]})
+            "wechat_id": self.wechat_id,
+            "unionid": self.unionid
+        })
         self.exist = True
         raise gen.Return(res)
 
@@ -140,13 +140,14 @@ class Employee(IDBFetchable):
     def fetch_from_db(self):
         if not self.wxuser_id or not self.company_id:
             gen.Return(None)
-        res = yield self.get_employee(conds={
-            "wxuser_id", [self.wxuser_id, "="],
-            "company_id", [self.company_id, "="],
-            "disable", ["0", "="],
-            "activation", ["0", "="],
-            "status", ["0", "="]
-        })
+        res = yield self.get_employee(
+            conds={
+                "wxuser_id": self.wxuser_id,
+                "company_id": self.company_id,
+                "disable": "0",
+                "activation": "0",
+                "status": "0"
+            })
         self.exist = True
         raise gen.Return(res)
 
@@ -173,9 +174,7 @@ class Recom(IDBFetchable):
         if not self.openid:
             gen.Return(None)
 
-        res = yield self.get_recom(conds={
-            "openid", [self.openid, "="],
-        })
+        res = yield self.get_recom(conds={"openid": self.openid})
         self.exist = True
         raise gen.Return(res)
 
