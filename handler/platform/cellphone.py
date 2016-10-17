@@ -8,9 +8,7 @@
 """
 
 from tornado import gen
-from util.common import ObjectDict
 from handler.base import BaseHandler
-from util.tool.http_tool import http_post
 
 
 class CellphoneBindHandler(BaseHandler):
@@ -21,47 +19,22 @@ class CellphoneBindHandler(BaseHandler):
 
     @gen.coroutine
     def get(self):
-        route = 'user/sendCode'
-        mobile_numb = self.params.get('mobile', None)
-        if mobile_numb:
-            req = ObjectDict({
-                'mobile': self.params.get('mobile'),
-                'type': 4,
-                'appid': self.app_id
-            })
-            try:
-                response = yield http_post(route, req, infra=True)
-                self.send_json(response)
-            except Exception as error:
-                self.logger(error)
-                self.send_json({'status': 1,
-                                'message': 'Basic service server busy.'})
-        else:
-            self.send_json({'status': 1,
-                            'message': 'Request with wrong param'})
+
+        response = yield self.cellphone_ps.send_valid_code(
+            mobile_numb=self.params.get('mobile', None),
+            app_id=self.app_id
+        )
+        self.send_json(response)
 
         return
 
     @gen.coroutine
     def post(self):
-        route = 'user/verifyCode'
-        if self.json_args and 'mobile' in self.json_args.keys() and \
-                'code' in self.json_args.keys():
-            req = ObjectDict({
-                'mobile': self.json_args.get('mobile'),
-                'code': self.json_args.get('code'),
-                'type': 4,
-                'appid': self.app_id
-            })
-            try:
-                response = yield http_post(route, req, infra=True)
-                self.send_json(response)
-            except Exception as error:
-                self.logger(error)
-                self.send_json({'status': 1,
-                                'message': 'Basic service server busy.'})
-        else:
-            self.send_json({'status': 1,
-                            'message': 'Request with wrong param.'})
+
+        response = yield self.cellphone_ps.bind_mobile(
+            json_args=self.json_args,
+            app_id=self.app_id
+        )
+        self.send_json(response)
 
         return
