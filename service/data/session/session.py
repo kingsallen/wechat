@@ -10,11 +10,11 @@ from util.common import ObjectDict
 from util.common.decorator import cache
 from util.common.sign import Sign
 from util.tool.http_tool import http_get
+from service.data.base import DataService
 
 
-class SessionDataService(object):
-    def __init__(self, *args, **kwargs):
-        pass
+class SessionDataService(DataService):
+    pass
 
 
 class IDBFetchable(object):
@@ -50,7 +50,10 @@ class IDBFetchable(object):
 
     @staticmethod
     def valid_conds(conds):
-        return not conds or not (isinstance(conds, dict) or isinstance(conds, str))
+        ret = False
+        if not conds:
+            return ret
+        return isinstance(conds, dict) or isinstance(conds, str)
 
     def __nonzero__(self):
         return self.exist
@@ -62,7 +65,7 @@ class JsApi(object):
         self.__dict__.update(self.sign.sign(url=url))
 
 
-class Wechat(IDBFetchable):
+class Wechat(IDBFetchable, SessionDataService):
     """current_user.wechat"""
     def __init__(self, **kwargs):
         super(Wechat, self).__init__(**kwargs)
@@ -96,7 +99,7 @@ class Wechat(IDBFetchable):
         raise gen.Return(res)
 
 
-class WxUser(IDBFetchable):
+class WxUser(IDBFetchable, SessionDataService):
     """Work for both current_user.wxuser and current_user.qxuser
     """
     def __init__(self, **kwargs):
@@ -131,7 +134,7 @@ class WxUser(IDBFetchable):
         raise gen.Return(res)
 
 
-class Employee(IDBFetchable):
+class Employee(IDBFetchable, SessionDataService):
     def __init__(self, **kwargs):
         self.wxuser_id = kwargs.get("wxuser_id", "")
         self.company_id = kwargs.get("company_id", "")
@@ -165,7 +168,7 @@ class Employee(IDBFetchable):
         raise gen.Return(res)
 
 
-class Recom(IDBFetchable):
+class Recom(IDBFetchable, SessionDataService):
     def __init__(self, **kwargs):
         self.openid = kwargs.get("recom_id", None)
 
@@ -192,7 +195,7 @@ class Recom(IDBFetchable):
         raise gen.Return(res)
 
 
-class SysUser(IDBFetchable):
+class SysUser(IDBFetchable, SessionDataService):
     def __init__(self, **kwargs):
         self.id = kwargs.get("id", None)
 
