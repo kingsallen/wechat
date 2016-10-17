@@ -219,12 +219,8 @@ class BaseHandler(MetaBaseHandler):
         yield self.user_ps.create_user_wx_user_by_userinfo(user_id, userinfo)
         if self.is_platform:
             self._oauth_service.wechat = self._wechat
-            self._oauth_service.status = unionid
-            # TODO 静默授权？
+            self._oauth_service.state = unionid
             self._oauth_service.get_oauth_code_base()
-
-        # TODO 删了？
-        # self._oauth_service.get_oauth_code_base()
 
     @gen.coroutine
     def _handle_ent_openid(self, openid, unionid):
@@ -339,6 +335,7 @@ class BaseHandler(MetaBaseHandler):
                 ok = yield self._get_session_from_qx(session_id)
 
             elif self.is_help:
+                # TODO
                 pass
 
             need_oauth = not ok
@@ -433,6 +430,7 @@ class BaseHandler(MetaBaseHandler):
         """
         while True:
             _t = time.time()
+            # TODO uuid？
             _r = os.urandom(16)
             session_id = sha1(_t + _r).hexdigest()
             record = self.redis.exists(session_id + "_*")
