@@ -2,6 +2,7 @@
 
 # Copyright 2016 MoSeeker
 
+
 def gen_salary(salary_top, salary_bottom):
     """
     月薪
@@ -49,7 +50,8 @@ def decrypt_unionid(p):
     return ret
 
 if __name__ == "__main__":
-    e = encrypt_unionid("o6_bmasdasdsad6_2sgVt7hMZOPfL")
+    str1 = "o6_bmasdasdsad6_2sgVt7hMZOPfL"
+    e = encrypt_unionid(str1)
     print(e)
     d = decrypt_unionid(e)
     print(d)

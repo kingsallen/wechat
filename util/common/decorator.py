@@ -71,7 +71,7 @@ def cache(prefix=None, key=None, ttl=60, hash=True, lock=True, separator=":"):
             try:
                 if not key:
 
-                    redis_key = None
+                    redis_key = ""
 
                     if args and len(args) > 1:
                         redis_key = separator.join([str(_) for _ in list(args[1].values())])
@@ -123,25 +123,3 @@ def check_signature(func):
                 yield func(self, *args, **kwargs)
     return wrapper
 
-
-# def url_valid(func):
-#     """
-#     # 装置环境,包括 wechat, qxuser, wxuser, company, recom, employee
-#     :param func:
-#     :return:
-#     """
-#
-#     @functools.wraps(func)
-#     @gen.coroutine
-#     def wrapper(self, *args, **kwargs):
-#
-#         try:
-#             if not getattr(self, "_current_user", None):
-#                 self._current_user = yield self.get_current_user()
-#                 self._current_user = ObjectDict(self._current_user)
-#             yield func(self, *args, **kwargs)
-#
-#         except Exception as e:
-#             self.logger.error(e)
-#             return
-#     return wrapper
