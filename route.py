@@ -7,9 +7,9 @@ route不需要添加v2，web网页没有维护旧版本的概念
 api接口的route都加上api，非api的route会被统计为PV、UV
 
 common_routes: 公共的 routes,共产品线共享
-platform_routes: 继承自common_routes, 供platform单独使用
-qx_routes: 继承自common_routes, 供qx单独使用
-help_routes: 继承自common_routes, 供help单独使用
+platform_routes: 继承自common_routes, 供platform单独使用，一般 handler 在 platform 中，则 route 可在此编辑
+qx_routes: 继承自common_routes, 供qx单独使用，一般 handler 在 qx 中，则 route 可在此编辑
+help_routes: 继承自common_routes, 供help单独使用，一般 handler 在 help 中，则 route 可在此编辑
 
 """
 

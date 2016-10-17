@@ -8,6 +8,7 @@
 # Copyright 2016 MoSeeker
 from tornado import gen
 
+import socket
 import json
 from util.tool.http_tool import http_post
 from setting import settings
@@ -31,6 +32,7 @@ class Alarm(object):
         """
         # debug 环境不报警
         assert text
+        text = "[{0}]: {1}".format(socket.gethostname(), text)
         if not settings['debug']:
             payload = json.dumps({
                 'text': text,
