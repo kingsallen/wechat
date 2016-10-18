@@ -180,11 +180,11 @@ class WeChatOauth2Service(object):
             next_url = quote(self._redirect_url)
             up = urlparse(self._redirect_url)
             netloc = up.netloc.replace(const.ENV_PLATFORM, const.ENV_QX, 1)
-            self._redirect_url = "{}&next_url={}".format(up.scheme + "://" + netloc + wx_const.WX_OAUTH_QX_PATH + "?", next_url)
+            self._redirect_url = "{}?next_url={}".format(up.scheme + "://" + netloc + wx_const.WX_OAUTH_QX_PATH, next_url)
 
     @staticmethod
     def __is_platform_url(string):
         """判断是否是 platform 的 url"""
-        regex = r"^http(s)?:\/\/platform"
+        regex = r'^http(s)?:\/\/platform'
         return re.match(regex, string)
 
