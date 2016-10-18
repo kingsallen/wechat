@@ -13,19 +13,17 @@ dataservice之间不能相互调用
 可以根据表名创建dataservice
 """
 
-import re
 import glob
 import importlib
+import re
+
 import conf.common as constant
+import conf.help as help_constant
 import conf.platform as plat_constant
 import conf.qx as qx_constant
-import conf.help as help_constant
-
 from setting import settings
-from util.common.decorator import cache
-from app import logger
 from util.common.singleton import Singleton
-import pprint
+
 
 class DataService:
 
@@ -38,7 +36,7 @@ class DataService:
         self.qx_constant = qx_constant
         self.help_constant = help_constant
 
-        for module in self.search_path():
+        for module in self._search_path():
             p = module.split("/")[-2]
             m = module.split("/")[-1].split(".")[0]
             m_list = [item.title() for item in re.split("_", m)]
@@ -49,19 +47,14 @@ class DataService:
             instance = klass(self.logger)
             setattr(self, pm_obj, instance)
 
-    def _condition_isvalid(self, conds, method_name):
-        if conds is None or not (isinstance(conds, dict) or isinstance(conds, str)):
-            self.logger.warn("Warning:[{2}][invalid parameters], Detail:[conds: {0}, "
-                        "type: {1}]".format(conds, type(conds), method_name))
-            return False
-        return True
+    @staticmethod
+    def _valid_conds(conds):
+        ret = False
+        if not conds:
+            return ret
+        return isinstance(conds, dict) or isinstance(conds, str)
 
     @staticmethod
-    def is_invalid_conds(conds=None):
-        return (conds is None or
-                not (isinstance(conds, dict) or isinstance(conds, str)))
-
-    @staticmethod
-    def search_path():
+    def _search_path():
         d = settings['root_path'] + "dao/**/*.py"
         return filter(lambda x: not x.endswith("init__.py"), glob.glob(d))

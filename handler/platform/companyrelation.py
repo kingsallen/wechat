@@ -70,6 +70,6 @@ class CompanyHandler(BaseHandler):
         wechat = ObjectDict({'signature': 'alex-testing'})
         current_user = ObjectDict({'wechat': wechat})
 
-        # self.send_json(response, additional_dump=True)
-        self.render('company/profile.html', current_user=current_user)
+        self.send_json(response, additional_dump=True)
+        # self.render('company/profile.html', current_user=current_user)
         return

@@ -2,13 +2,9 @@
 
 # Copyright 2016 MoSeeker
 
+
 def gen_salary(salary_top, salary_bottom):
-    """
-    月薪
-    :param salary_top:
-    :param salary_bottom:
-    :return:
-    """
+    """月薪"""
     if not salary_top and not salary_bottom:
         salary_res = "面议"
     elif salary_top and salary_bottom and salary_top == 999:
@@ -18,7 +14,9 @@ def gen_salary(salary_top, salary_bottom):
 
     return salary_res
 
+
 def to_str(bytes_or_str):
+    """to Python 3 str type"""
     if isinstance(bytes_or_str, bytes):
         value = bytes_or_str.decode('utf-8')
     else:
@@ -27,6 +25,7 @@ def to_str(bytes_or_str):
 
 
 def to_bytes(bytes_or_str):
+    """to Python 3 bytes type"""
     if isinstance(bytes_or_str, str):
         value = bytes_or_str.encode('utf-8')
     else:
@@ -34,22 +33,9 @@ def to_bytes(bytes_or_str):
     return value  # Instance of bytes
 
 
-def encrypt_unionid(p):
-    ret = ""
-    for c in p:
-        ret += str(ord(c))+'m'
-    return ret
+def to_hex(string):
+    return "".join("{:02x}".format(ord(c)) for c in string)
 
 
-def decrypt_unionid(p):
-    ret = ""
-    for i in p.split("m"):
-        if i:
-            ret += chr(int(i))
-    return ret
-
-if __name__ == "__main__":
-    e = encrypt_unionid("o6_bmasdasdsad6_2sgVt7hMZOPfL")
-    print(e)
-    d = decrypt_unionid(e)
-    print(d)
+def from_hex(hex_string):
+    return to_str(bytes.fromhex(hex_string))

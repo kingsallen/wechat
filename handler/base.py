@@ -20,9 +20,8 @@ from app import logger
 from oauth.wechat import WeChatOauth2Service, WeChatOauthError
 from util.common import ObjectDict
 from util.common.decorator import check_signature
-from util.session.session import JsApi, Wechat, WxUser, Recom, Employee, SysUser
 from util.tool.json_tool import encode_json_dumps
-from util.tool.str_tool import to_str
+from util.tool.str_tool import to_str, to_hex, from_hex
 from util.tool.date_tool import curr_now
 
 # 动态加载所有 PageService
@@ -83,7 +82,8 @@ class BaseHandler(MetaBaseHandler):
         self._wxuser = None
 
         # 处理 oauth 的 service
-        self._oauth_service = WeChatOauth2Service(self, self.fullurl)
+        self._oauth_service = WeChatOauth2Service(
+            self, self.fullurl, self.component_access_token)
 
     # PROPERTIES
     @property
@@ -153,6 +153,11 @@ class BaseHandler(MetaBaseHandler):
         return (self.request.protocol + "://" +
                 self.request.host + self.request.uri)
 
+    @property
+    def component_access_token(self):
+        return self.redis.get("component_access_token", prefix=False)[
+            "component_access_token"]
+
     @log_info.setter
     def log_info(self, value):
         self._log_info = dict(value)
@@ -169,16 +174,24 @@ class BaseHandler(MetaBaseHandler):
         code = self.params.get("code")
         state = self.params.get("state")
 
-        if code:  #用户同意授权
-            if state == 'O':  #来自 qx 的授权, 获得 userinfo
+        self.logger.debug("**1** code:{}, state:{}".format(code, state))
+        # 用户同意授权
+        if code:
+            # 来自 qx 的授权, 获得 userinfo
+            if state == '0':
+                self.logger.debug("**2** 来自 qx 的授权, 获得 userinfo")
                 userinfo = yield self._get_user_info(code)
                 yield self._handle_user_info(userinfo)
-            else:  #来自企业号的静默授权
-                self._unionid = state
+
+            # 来自企业号的静默授权
+            else:
+                self.logger.debug("**3** 来自企业号的静默授权")
+                self._unionid = from_hex(state)
                 openid = yield self._get_user_openid(code)
                 self._wxuser = yield self._handle_ent_openid(openid, self._unionid)
-        if state and not code:  #用户拒绝授权
-            #TODO 拒绝授权用户，是否让其继续操作。or return
+
+        if state and not code:  # 用户拒绝授权
+            # TODO 拒绝授权用户，是否让其继续操作? or return
             pass
 
         # 构造并拼装 session
@@ -216,19 +229,30 @@ class BaseHandler(MetaBaseHandler):
         """
 
         unionid = userinfo.unionid
-        # TODO create_user_user create_user_wx_user_by_userinfo
-        user_id = yield self.user_ps.create_user_user(userinfo)
-        yield self.user_ps.create_user_wx_user_by_userinfo(user_id, userinfo)
+        if self.is_platform:
+            source = self.constant.WECHAT_REGISTER_SOURCE_PLATFORM
+        else:
+            source = self.constant.WECHAT_REGISTER_SOURCE_QX
+
+        # 创建 user_user 记录
+        user_id = yield self.user_ps.create_user_user(
+            userinfo,
+            wechat_id=self._wechat.id,
+            remote_ip=self.request.remote_ip,
+            source=source)
+
+        yield self.user_ps.create_qx_wxuser_by_userinfo(user_id, userinfo)
+
         if self.is_platform:
             self._oauth_service.wechat = self._wechat
-            self._oauth_service.state = unionid
+            self._oauth_service.state = to_hex(unionid)
             self._oauth_service.get_oauth_code_base()
 
     @gen.coroutine
     def _handle_ent_openid(self, openid, unionid):
         """根据企业号 openid 和 unionid 创建企业号微信用户"""
         wxuser = None
-        user = self.user_ps.get_user_by_union_id(unionid)
+        user = self.session_ps.get_user_by_union_id(unionid)
         unionid = user.unionid
         if self.is_platform:
             # TODO create_user_wx_user_ent
@@ -269,9 +293,9 @@ class BaseHandler(MetaBaseHandler):
                 self.logger.error("wechat_signature missing")
                 raise NoSignatureError()
 
-        wechat = yield Wechat(signature=signature).fetch_from_db()
-        wechat.jsapi = JsApi(
-            jsapi_ticket=wechat.jsapi_ticket, url=self.fullurl)
+        wechat = yield self.session_ps.get_wechat_by_signature(signature)
+        # wechat.jsapi = JsApi(
+        #     jsapi_ticket=wechat.jsapi_ticket, url=self.fullurl)
 
         raise gen.Return(wechat)
 
@@ -287,7 +311,8 @@ class BaseHandler(MetaBaseHandler):
         """
         conds = {'id': company_id}
         company = yield self.company_ps.get_company(conds=conds, need_conf=True)
-        theme = yield self.wechat_ps.get_wechat_theme({'id': company.get("conf_theme_id"), "disable": 0})
+        theme = yield self.wechat_ps.get_wechat_theme(
+            {'id': company.get("conf_theme_id"), "disable": 0})
         if theme:
             company.update({
                 "theme": [
@@ -358,32 +383,28 @@ class BaseHandler(MetaBaseHandler):
         session.wechat = self._wechat
         session.wxuser = self._wxuser
 
-        qxuser = WxUser(unionid=self._unionid, wechat_id=self.settings['qx_wechat_id'])
-        session.qxuser = yield qxuser.fetch_from_db()
-
+        session.qxuser = yield self.session_ps.get_wxuser(
+            unionid=self._unionid, wechat_id=self.settings['qx_wechat_id'])
         session.company = yield self._get_current_company(self._wechat.id)
-
-        user = SysUser(id=qxuser.sysuser_id)
-        session.sysuser = yield user.fetch_from_db()
+        session.sysuser = yield self.session_ps.get_user_user(
+            session.qxuser.sysuser_id)
 
         session_id = self._make_new_session_id()
         self.set_secure_cookie(self.constant.COOKIE_SESSIONID, session_id)
-        # TODO REDIS KEY  常量配置
         self.redis.set(
-            self.constant.SESSION_USER.format(session_id, self._wechat.id), ujson.dumps(session),
+            self.constant.SESSION_USER.format(session_id, self._wechat.id),
+            ujson.dumps(session),
             60 * 60 * 2)
 
         if self.is_platform:
-            employee = Employee(
+            employee = yield self.session_ps.get_employee(
                 wxuser_id=session.wxuser.id, company_id=session.company.id)
-            employee.fetch_from_db()
             if employee:
                 session.employee = employee
 
-        if 'recom' in self.params:
-            recom = Recom(openid=self.params.openid)
-            recom.fetch_from_db()
-            session.recom = recom
+        if self.params:
+            session.recom = yield self.session_ps.get_wxuser(
+                self.params.recom, session.company.id)
 
         self.current_user = session
 
@@ -392,9 +413,7 @@ class BaseHandler(MetaBaseHandler):
         if not self.is_platform:
             return False
 
-        # TODO REDIS KEY 常量配置
         key = self.constant.SESSION_USER.format(session_id, self._wechat.id)
-        # key = session_id + "_" + self._wechat.id
         value = self.redis.get(key)
         if value:
             # 如果有 value， 返回该 value 作为 self.current_user
@@ -405,9 +424,8 @@ class BaseHandler(MetaBaseHandler):
     @gen.coroutine
     def _get_session_from_qx(self, session_id):
         """尝试获取聚合号 session"""
-        # TODO REDIS KEY 常量配置
+
         key = self.constant.SESSION_USER.format(session_id, self.settings['qx_wechat_id'])
-        # key = session_id + "_" + self.settings['qx_wechat_id']
         value = self.redis.get(key)
         if value:
             user_id = ujson.loads(value).user.id
@@ -479,15 +497,16 @@ class BaseHandler(MetaBaseHandler):
         500（服务器错误）      Internal Server Error: Something went wrong on the server, check status site and/or report the issue
         """
 
-        if status_code == 403:
-            self.render('refer/common/info.html', status_code=status_code,
-                        css="warning", info="用户未被授权请求")
-        elif status_code == 404:
-            self.render('common/systemmessage.html', status_code=status_code,
-                        message="Ta在地球上消失了")
-        else:
-            self.render('common/systemmessage.html', status_code=status_code,
-                        message="正在努力维护服务器中")
+        # if status_code == 403:
+        #     self.render('refer/common/info.html', status_code=status_code,
+        #                 css="warning", info="用户未被授权请求")
+        # elif status_code == 404:
+        #     self.render('common/systemmessage.html', status_code=status_code,
+        #                 message="Ta在地球上消失了")
+        # else:
+        #     self.render('common/systemmessage.html', status_code=status_code,
+        #                 message="正在努力维护服务器中")
+        self.write(status_code)
 
     def render(self, template_name, status_code=200, **kwargs):
         """render 页面"""

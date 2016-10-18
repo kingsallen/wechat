@@ -14,6 +14,7 @@ import redis
 from setting import settings
 from util.common import ObjectDict
 from util.tool.json_tool import json_dumps
+from util.tool.str_tool import to_str
 
 
 class BaseRedis(object):
@@ -37,19 +38,21 @@ class BaseRedis(object):
         for method_name in methods:
             assert hasattr(self, method_name)
 
-    def key_name(self, key):
+    def key_name(self, key, prefix=True):
+        if not prefix:
+            return key
         return '{0}_{1}'.format(self._PREFIX, key)
 
     def _get(self, key, default=None):
-        value = self._redis.get(key)
+        value = to_str(self._redis.get(key))
         if value is None:
             return default
         return json.loads(value)
 
-    def get(self, key, default=None):
-        key = self.key_name(key)
+    def get(self, key, default=None, prefix=True):
+        key = self.key_name(key, prefix)
         value = self._get(key, default)
-        if isinstance(value, ObjectDict) or isinstance(value, dict):
+        if isinstance(value, dict):
             return ObjectDict(value)
         elif isinstance(value, list):
             return [ObjectDict(item) for item in value]
@@ -78,6 +81,3 @@ class BaseRedis(object):
     def exists(self, key):
         key = self.key_name(key)
         return self._redis.exists(key)
-
-
-
