@@ -174,16 +174,17 @@ class BaseHandler(MetaBaseHandler):
         state = self.params.get("state")
 
         self.logger.debug("**1** code:{}, state:{}".format(code, state))
-        if code:  # 用户同意授权
-            if state == 'O':  # 来自 qx 的授权, 获得 userinfo
+        # 用户同意授权
+        if code:
+            # 来自 qx 的授权, 获得 userinfo
+            if state == '0':
                 self.logger.debug("**2** 来自 qx 的授权, 获得 userinfo")
                 userinfo = yield self._get_user_info(code)
-                self.logger.debug("userinfo:{}".format(userinfo))
-
                 yield self._handle_user_info(userinfo)
-            else:  # 来自企业号的静默授权
-                self.logger.debug(
-                    "**3** # 来自企业号的静默授权")
+
+            # 来自企业号的静默授权
+            else:
+                self.logger.debug("**3** 来自企业号的静默授权")
                 self._unionid = from_hex(state)
                 openid = yield self._get_user_openid(code)
                 self._wxuser = yield self._handle_ent_openid(openid, self._unionid)
@@ -227,9 +228,20 @@ class BaseHandler(MetaBaseHandler):
         """
 
         unionid = userinfo.unionid
-        # TODO create_user_user create_user_wx_user_by_userinfo
-        user_id = yield self.user_ps.create_user_user(userinfo)
-        yield self.user_ps.create_user_wx_user_by_userinfo(user_id, userinfo)
+        if self.is_platform:
+            source = self.constant.WECHAT_REGISTER_SOURCE_PLATFORM
+        else:
+            source = self.constant.WECHAT_REGISTER_SOURCE_QX
+
+        # 创建 user_user 记录
+        user_id = yield self.user_ps.create_user_user(
+            userinfo,
+            wechat_id=self._wechat.id,
+            remote_ip=self.request.remote_ip,
+            source=source)
+
+        yield self.user_ps.create_qx_wxuser_by_userinfo(user_id, userinfo)
+
         if self.is_platform:
             self._oauth_service.wechat = self._wechat
             self._oauth_service.state = to_hex(unionid)

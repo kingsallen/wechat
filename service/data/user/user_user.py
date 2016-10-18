@@ -23,3 +23,9 @@ class UserUserDataService(DataService):
         response = yield self.user_user_dao.get_record_by_conds(conds, fields)
         raise gen.Return(response)
 
+    @gen.coroutine
+    def create_user(self, fields, options=None):
+        options = options or []
+
+        response = yield self.user_user_dao.insert_record(fields, options)
+        raise gen.Return(response)
