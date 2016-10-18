@@ -199,7 +199,7 @@ class DB(object):
         sql = sql[:-2]
         sql += ")"
 
-        return sql, fields.values()
+        return sql, list(fields.values())
 
     def update(self, table, conds, fields, options=[], appends=[]):
 

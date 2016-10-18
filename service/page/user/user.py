@@ -56,13 +56,18 @@ class UserPageService(PageService):
                 "source": source,
                 "nickname": userinfo.nickname,
                 "name": "",
-                "headimg": userinfo.headimg,
+                "headimg": userinfo.headimgurl,
+            })
+
+            assert user_id
+            yield self.user_settings_ds.create_user_settings({
+                "user_id": user_id
             })
 
         raise gen.Return(user_id)
 
     @gen.coroutine
-    def create_qx_wxuser_by_userinfo(self, userinfo, user_id, wechat_id):
+    def create_qx_wxuser_by_userinfo(self, userinfo, user_id):
 
         qx_wechat_id = settings['qx_wechat_id']
         openid = userinfo.openid
@@ -76,7 +81,7 @@ class UserPageService(PageService):
             # 更新
             yield self.user_wx_user_ds.update_wxuser(
                 conds={"id": qx_wxuser.id},
-                fields= {
+                fields={
                     "openid":     userinfo.openid,
                     "nickname":   userinfo.nickname,
                     "sex":        userinfo.sex or 0,
@@ -91,6 +96,7 @@ class UserPageService(PageService):
         else:
             yield self.user_wx_user_ds.create_wxuser({
                 "is_subscribe": 0,
+                "sysuser_id": user_id,
                 "openid": userinfo.openid,
                 "nickname": userinfo.nickname,
                 "sex": userinfo.sex or 0,
@@ -100,7 +106,7 @@ class UserPageService(PageService):
                 "language": userinfo.language,
                 "headimgurl": userinfo.headimgurl,
                 "subscribe_time": curr_now(),
-                "wechat_id": wechat_id,
+                "wechat_id": qx_wechat_id,
                 "group_id": 0,
                 "unionid": userinfo.unionid if userinfo.unionid else "",
                 "source": const.WXUSER_OAUTH
