@@ -15,6 +15,7 @@ from util.common.cache import BaseRedis
 
 
 def handle_response(func):
+
     @functools.wraps(func)
     @gen.coroutine
     def wrapper(self, *args, **kwargs):
@@ -32,10 +33,9 @@ def handle_response(func):
                 return
     return wrapper
 
+
 base_cache = BaseRedis()
 sem = Semaphore(1)
-
-
 def cache(prefix=None, key=None, ttl=60, hash=True, lock=True, separator=":"):
     """
     cache装饰器

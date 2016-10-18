@@ -55,16 +55,16 @@ class LogTestCase(unittest.TestCase):
             self.assertTrue("ERROR" in text)
             self.assertTrue("test error" in text)
 
-    def test_customer(self):
+    def test_stats(self):
         shutil.rmtree(TEST_LOGS)
 
         logger = Logger(TEST_LOGS)
 
-        logger.record("test customer")
-        with open(TEST_LOGS + "customer/customer.log") as log:
+        logger.stats("test stats")
+        with open(TEST_LOGS + "stats/stats.log") as log:
             text = log.readline()
-            self.assertTrue("CUSTOMER" in text)
-            self.assertTrue("test customer" in text)
+            self.assertTrue("STATS" in text)
+            self.assertTrue("test stats" in text)
 
 if __name__ == "__main__":
     unittest.TestLoader().loadTestsFromTestCase(LogTestCase).run()

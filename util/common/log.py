@@ -21,14 +21,14 @@ FORMATER = logging.Formatter(
 SUFFIX = '%Y%m%d%H.log'
 
 # Highest built-in level is 50, so make CUSTOMER as 60
-logging.addLevelName(60, 'CUSTOMER')
+logging.addLevelName(60, 'STATS')
 
 LOG_LEVELS = {
     'DEBUG':    logging.DEBUG,
     'INFO':     logging.INFO,
     'WARN':     logging.WARN,
     'ERROR':    logging.ERROR,
-    'CUSTOMER': logging.getLevelName('CUSTOMER')
+    'STATS':    logging.getLevelName('STATS')
 }
 
 # --------------------------------------------------------------------------
@@ -64,7 +64,7 @@ class Logger(object):
             'INFO':     os.path.join(logpath, 'info/info.log'),
             'WARN':     os.path.join(logpath, 'warn/warn.log'),
             'ERROR':    os.path.join(logpath, 'error/error.log'),
-            'CUSTOMER': os.path.join(logpath, 'customer/customer.log'),
+            'STATS':    os.path.join(logpath, 'stats/stats.log'),
         }
         self._create_handlers()
 
@@ -99,9 +99,9 @@ class Logger(object):
     def error(self, message):
         self.__logger.error(message, exc_info=0)
 
-    def record(self, message):
+    def stats(self, message):
         self.__logger.log(
-            logging.getLevelName("CUSTOMER"), message, exc_info=0)
+            logging.getLevelName("STATS"), message, exc_info=0)
 
 
 class MessageLogger(Logger):
@@ -127,6 +127,6 @@ class MessageLogger(Logger):
         super(MessageLogger, self).error(message)
         self.impl.send_message("error", message)
 
-    def record(self, message):
-        super(MessageLogger, self).record(message)
-        self.impl.send_message("customer", message)
+    def stats(self, message):
+        super(MessageLogger, self).stats(message)
+        self.impl.send_message("stats", message)

@@ -15,6 +15,7 @@ from urllib.parse import urljoin
 import tornado.escape
 import tornado.httpclient
 from tornado import gen, web
+
 from app import logger
 from oauth.wechat import WeChatOauth2Service, WeChatOauthError
 from util.common import ObjectDict
@@ -22,6 +23,7 @@ from util.common.decorator import check_signature
 from util.session.session import JsApi, Wechat, WxUser, Recom, Employee, SysUser
 from util.tool.json_tool import encode_json_dumps
 from util.tool.str_tool import to_str
+from util.tool.date_tool import curr_now
 
 # 动态加载所有 PageService
 obDict = {}
@@ -459,13 +461,12 @@ class BaseHandler(MetaBaseHandler):
         info = ObjectDict(
             handler=__name__ + '.' + self.__class__.__name__,
             module=self.__class__.__module__.split(".")[1],
-            status_code=self.get_status()
         )
 
         if self.log_info:
             info.update(self.log_info)
 
-        self.logger.record(
+        self.logger.stats(
             ujson.dumps(self._get_info_header(info), ensure_ascii=0))
 
     def write_error(self, status_code, **kwargs):
@@ -518,6 +519,7 @@ class BaseHandler(MetaBaseHandler):
         if use_encoder:
             json_string = tornado.escape.json_encode(json_dict)
         self.set_header("Content-Type", "application/json; charset=utf-8")
+        self.log_info = {"res_type": "json"}
         self.set_status(code)
         if additional_dump:
             json_string = ujson.dumps(json_string)
@@ -541,26 +543,35 @@ class BaseHandler(MetaBaseHandler):
         request = self.request
         req_params = request.arguments
 
-        if req_params and req_params.get('password', 0) != 0:
-            req_params['password'] = 'xxxxxx'
+        customs = ObjectDict(
+            type_wechat = self.in_wechat,
+            type_mobile = self.client_type,
+            recom_id='',
+            qxuser_id='',
+            wxuser_id='',
+            wechat_id='',
+        )
 
         log_info_common = ObjectDict(
-            elapsed_time="%.4f" % (time.time() - self._start_time),
-            product=self.env,
-            type_wechat=self.in_wechat,
-            type_mobile=self.client_type,
+            req_time=curr_now(),
+            hostname=socket.gethostname(),
+            appid=self.app_id,
+            http_code=self.get_status(),
+            status_code='TODO',
+            opt_time="%.2f" % ((time.time() - self._start_time) * 1000),
             useragent=request.headers.get('User-Agent'),
             referer=request.headers.get('Referer'),
-            hostname=socket.gethostname(),
             remote_ip=(
                 request.headers.get('Remoteip') or
                 request.headers.get('X-Forwarded-For') or
                 request.remote_ip
             ),
+            cookie=self.cookies,
             req_type=request.method,
             req_uri=request.uri,
             req_params=req_params,
-            session_id=self.get_secure_cookie('session_id'),
+            customs=customs,
+            session_id=self.get_secure_cookie(self.constant.COOKIE_SESSIONID)
         )
 
         log_params.update(log_info_common)
