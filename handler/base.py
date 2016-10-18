@@ -21,7 +21,7 @@ from util.common import ObjectDict
 from util.common.decorator import check_signature
 
 from util.tool.json_tool import encode_json_dumps
-from util.tool.str_tool import to_str
+from util.tool.str_tool import to_str, to_hex, from_hex
 
 # 动态加载所有 PageService
 obDict = {}
@@ -154,7 +154,8 @@ class BaseHandler(MetaBaseHandler):
 
     @property
     def component_access_token(self):
-        return self.redis.get("component_access_token")["component_access_token"]
+        return self.redis.get("component_access_token", prefix=False)[
+            "component_access_token"]
 
     @log_info.setter
     def log_info(self, value):
@@ -172,12 +173,18 @@ class BaseHandler(MetaBaseHandler):
         code = self.params.get("code")
         state = self.params.get("state")
 
+        self.logger.debug("**1** code:{}, state:{}".format(code, state))
         if code:  # 用户同意授权
             if state == 'O':  # 来自 qx 的授权, 获得 userinfo
+                self.logger.debug("**2** 来自 qx 的授权, 获得 userinfo")
                 userinfo = yield self._get_user_info(code)
+                self.logger.debug("userinfo:{}".format(userinfo))
+
                 yield self._handle_user_info(userinfo)
             else:  # 来自企业号的静默授权
-                self._unionid = state
+                self.logger.debug(
+                    "**3** # 来自企业号的静默授权")
+                self._unionid = from_hex(state)
                 openid = yield self._get_user_openid(code)
                 self._wxuser = yield self._handle_ent_openid(openid, self._unionid)
 
@@ -225,14 +232,14 @@ class BaseHandler(MetaBaseHandler):
         yield self.user_ps.create_user_wx_user_by_userinfo(user_id, userinfo)
         if self.is_platform:
             self._oauth_service.wechat = self._wechat
-            self._oauth_service.state = unionid
+            self._oauth_service.state = to_hex(unionid)
             self._oauth_service.get_oauth_code_base()
 
     @gen.coroutine
     def _handle_ent_openid(self, openid, unionid):
         """根据企业号 openid 和 unionid 创建企业号微信用户"""
         wxuser = None
-        user = self.user_ps.get_user_by_union_id(unionid)
+        user = self.session_ps.get_user_by_union_id(unionid)
         unionid = user.unionid
         if self.is_platform:
             # TODO create_user_wx_user_ent

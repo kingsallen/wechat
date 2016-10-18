@@ -38,7 +38,9 @@ class BaseRedis(object):
         for method_name in methods:
             assert hasattr(self, method_name)
 
-    def key_name(self, key):
+    def key_name(self, key, prefix=True):
+        if not prefix:
+            return key
         return '{0}_{1}'.format(self._PREFIX, key)
 
     def _get(self, key, default=None):
@@ -47,10 +49,10 @@ class BaseRedis(object):
             return default
         return json.loads(value)
 
-    def get(self, key, default=None):
-        key = self.key_name(key)
+    def get(self, key, default=None, prefix=True):
+        key = self.key_name(key, prefix)
         value = self._get(key, default)
-        if isinstance(value, ObjectDict) or isinstance(value, dict):
+        if isinstance(value, dict):
             return ObjectDict(value)
         elif isinstance(value, list):
             return [ObjectDict(item) for item in value]
