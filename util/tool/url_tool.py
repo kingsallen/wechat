@@ -7,7 +7,7 @@
 
 # Copyright 2016 MoSeeker
 
-from urllib.parse import quote
+from urllib.parse import urlparse, parse_qs, urlencode, quote
 
 
 def make_url(path, params=None, host="", protocol="http", escape=None,
@@ -16,18 +16,15 @@ def make_url(path, params=None, host="", protocol="http", escape=None,
     if "?" in path:
         raise ValueError("Path should not contain '?'")
 
-    if not params:
-        params = {}
+    params = params or {}
+    escape = escape or []
+
     if not isinstance(params, dict):
         raise TypeError("Params is not a dict")
-
-    if not isinstance(escape, list):
-        escape = []
 
     d = params.copy()
     # m 参数不传递
     d.pop('m', None)
-
     d.update(kwargs)
 
     url_params = []
@@ -54,3 +51,17 @@ def make_url(path, params=None, host="", protocol="http", escape=None,
 
     return (((protocol + "://" + host) if host else "") +
             path + "?" + ("&".join(url_params)))
+
+
+def url_subtract_query(url, query_key_list):
+    """削减 url 的 query 中指定的键值"""
+    p = urlparse(url)
+    qurey = p.query
+    parsed_query = parse_qs(qurey)
+    for l in query_key_list:
+        parsed_query.pop(l, None)
+    nquery = urlencode(parsed_query, doseq=True)
+    return "{scheme}://{netloc}{path}?{query}".format(
+        scheme=p[0], netloc=p[1], path=p[2], query=nquery)
+
+

@@ -10,7 +10,7 @@ import socket
 import time
 import ujson
 from hashlib import sha1
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse, parse_qs
 
 import tornado.escape
 import tornado.httpclient
@@ -20,10 +20,10 @@ from app import logger
 from oauth.wechat import WeChatOauth2Service, WeChatOauthError
 from util.common import ObjectDict
 from util.common.decorator import check_signature
-from util.tool.json_tool import encode_json_dumps
-from util.tool.str_tool import to_str, to_hex, from_hex
 from util.tool.date_tool import curr_now
-from util.tool.url_tool import make_url
+from util.tool.json_tool import encode_json_dumps, json_dumps
+from util.tool.str_tool import to_str, to_hex, from_hex
+from util.tool.url_tool import make_url, url_subtract_query
 
 # 动态加载所有 PageService
 obDict = {}
@@ -151,8 +151,11 @@ class BaseHandler(MetaBaseHandler):
 
     @property
     def fullurl(self):
-        return (self.request.protocol + "://" +
-                self.request.host + self.request.uri)
+        u = "{scheme}://{host}{uri}".format(
+            scheme=self.request.protocol,
+            host=self.request.host,
+            uri=self.request.uri)
+        return url_subtract_query(u, ['code', 'state'])
 
     @property
     def component_access_token(self):
@@ -183,6 +186,8 @@ class BaseHandler(MetaBaseHandler):
                 self.logger.debug("**2** 来自 qx 的授权, 获得 userinfo")
                 userinfo = yield self._get_user_info(code)
                 yield self._handle_user_info(userinfo)
+                if self.finished:
+                    return
 
             # 来自企业号的静默授权
             else:
@@ -538,15 +543,11 @@ class BaseHandler(MetaBaseHandler):
         self.render(template_name, render_json)
         return
 
-    def send_json(self, data, status_code=0, message='success', http_code=200, additional_dump=False):
+    def send_json(self, data, status_code=0, message='success', http_code=200):
         """传递 JSON 到前端
-
         Used for API
         """
-        # json_string = ""
-        # if use_encoder:
-        #     json_string = tornado.escape.json_encode(json_dict)
-        render_json = encode_json_dumps({
+        render_json = json_dumps({
             "status": status_code,
             "message": message,
             "data": data
@@ -554,24 +555,7 @@ class BaseHandler(MetaBaseHandler):
         self.set_header("Content-Type", "application/json; charset=utf-8")
         self.log_info = {"res_type": "json", "status_code": status_code}
         self.set_status(http_code)
-        # TODO additional_dump作用？
-        # if additional_dump:
-        #     json_string = ujson.dumps(json_string)
         self.write(render_json)
-
-    # @staticmethod
-    # def _make_render_json(data, status=0, message="", ):
-    #     """制造 render_json 用于渲染模板
-    #
-    #     由调用者负责传入数据的格式，此处不做检查
-    #     Used for Render
-    #     """
-    #     render_json = {
-    #         "status": status,
-    #         "message": message,
-    #         "data": data
-    #     }
-    #     return encode_json_dumps(render_json)
 
     def _get_info_header(self, log_params):
         request = self.request
