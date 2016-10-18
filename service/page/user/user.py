@@ -64,11 +64,10 @@ class UserPageService(PageService):
                 "user_id": user_id
             })
 
-
         raise gen.Return(user_id)
 
     @gen.coroutine
-    def create_qx_wxuser_by_userinfo(self, userinfo, user_id, wechat_id):
+    def create_qx_wxuser_by_userinfo(self, userinfo, user_id):
 
         qx_wechat_id = settings['qx_wechat_id']
         openid = userinfo.openid
@@ -107,7 +106,7 @@ class UserPageService(PageService):
                 "language": userinfo.language,
                 "headimgurl": userinfo.headimgurl,
                 "subscribe_time": curr_now(),
-                "wechat_id": wechat_id,
+                "wechat_id": qx_wechat_id,
                 "group_id": 0,
                 "unionid": userinfo.unionid if userinfo.unionid else "",
                 "source": const.WXUSER_OAUTH

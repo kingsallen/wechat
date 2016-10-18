@@ -241,7 +241,7 @@ class BaseHandler(MetaBaseHandler):
             remote_ip=self.request.remote_ip,
             source=source)
 
-        yield self.user_ps.create_qx_wxuser_by_userinfo(userinfo, user_id, self._wechat.id)
+        yield self.user_ps.create_qx_wxuser_by_userinfo(userinfo, user_id)
 
         if self.is_platform:
             self._oauth_service.wechat = self._wechat
