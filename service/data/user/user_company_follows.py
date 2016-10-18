@@ -28,7 +28,7 @@ class UserCompanyFollowsDataService(DataService):
         if not self._valid_conds(conds):
             raise gen.Return(None)
         if not fields:
-            fields = self.hr_wx_wechat_dao.fields_map.keys()
+            fields = self.user_company_follows_dao.fields_map.keys()
         try:
             response = yield self.user_company_follows_dao.get_list_by_conds(
                                     conds, fields)

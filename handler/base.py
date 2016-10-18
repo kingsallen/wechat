@@ -487,7 +487,7 @@ class BaseHandler(MetaBaseHandler):
         self.logger.stats(
             ujson.dumps(self._get_info_header(info), ensure_ascii=0))
 
-    def write_error(self, status_code, **kwargs):
+    def write_error(self, http_code, **kwargs):
         """错误页
         :param status_code: http_status
 
@@ -506,16 +506,22 @@ class BaseHandler(MetaBaseHandler):
         # else:
         #     self.render('common/systemmessage.html', status_code=status_code,
         #                 message="正在努力维护服务器中")
-        self.write(status_code)
+        self.write(http_code)
 
-    def render(self, template_name, status_code=200, **kwargs):
+    def render(self, template_name, data, status_code=0, message='success', http_code=200):
         """render 页面"""
-        self.log_info = {"res_type": "html"}
-        self.set_status(status_code)
+        self.log_info = {"res_type": "html", "status_code": status_code}
+        self.set_status(http_code)
+
+        render_json = encode_json_dumps({
+            "status": status_code,
+            "message": message,
+            "data": data
+        })
 
         # 前后端联调使用
         if self.settings.get('remote_debug', False) is True:
-            template_string = self.render_string(template_name, **kwargs)
+            template_string = self.render_string(template_name, render_json)
             post_url = urljoin(self.settings.get('remote_debug_ip'),
                                template_name)
             http_client = tornado.httpclient.HTTPClient()
@@ -525,38 +531,43 @@ class BaseHandler(MetaBaseHandler):
             self.finish()
             return
 
-        self.render(template_name, **kwargs)
+        self.render(template_name, render_json)
         return
 
-    def send_json(self, json_dict, code=200, use_encoder=True,
-                  additional_dump=False):
+    def send_json(self, data, status_code=0, message='success', http_code=200, additional_dump=False):
         """传递 JSON 到前端
 
         Used for API
         """
-        json_string = ""
-        if use_encoder:
-            json_string = tornado.escape.json_encode(json_dict)
-        self.set_header("Content-Type", "application/json; charset=utf-8")
-        self.log_info = {"res_type": "json"}
-        self.set_status(code)
-        if additional_dump:
-            json_string = ujson.dumps(json_string)
-        self.write(json_string)
-
-    @staticmethod
-    def _make_render_json(data, status=0, message="", ):
-        """制造 render_json 用于渲染模板
-
-        由调用者负责传入数据的格式，此处不做检查
-        Used for Render
-        """
-        render_json = {
-            "status": status,
+        # json_string = ""
+        # if use_encoder:
+        #     json_string = tornado.escape.json_encode(json_dict)
+        render_json = encode_json_dumps({
+            "status": status_code,
             "message": message,
             "data": data
-        }
-        return encode_json_dumps(render_json)
+        })
+        self.set_header("Content-Type", "application/json; charset=utf-8")
+        self.log_info = {"res_type": "json", "status_code": status_code}
+        self.set_status(http_code)
+        # TODO additional_dump作用？
+        # if additional_dump:
+        #     json_string = ujson.dumps(json_string)
+        self.write(render_json)
+
+    # @staticmethod
+    # def _make_render_json(data, status=0, message="", ):
+    #     """制造 render_json 用于渲染模板
+    #
+    #     由调用者负责传入数据的格式，此处不做检查
+    #     Used for Render
+    #     """
+    #     render_json = {
+    #         "status": status,
+    #         "message": message,
+    #         "data": data
+    #     }
+    #     return encode_json_dumps(render_json)
 
     def _get_info_header(self, log_params):
         request = self.request

@@ -47,4 +47,5 @@ class LandingHandler(BaseHandler):
             "search_seq" : search_seq
         })
 
-        self.render("refer/neo_weixin/position/company_search.html", company=company)
+        self.render("refer/neo_weixin/position/company_search.html", data=company)
+        # self.render("refer/neo_weixin/position/company_search.html", company=company)
