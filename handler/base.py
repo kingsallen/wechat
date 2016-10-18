@@ -247,7 +247,8 @@ class BaseHandler(MetaBaseHandler):
         if self.is_platform:
             self._oauth_service.wechat = self._wechat
             self._oauth_service.state = to_hex(unionid)
-            self._oauth_service.get_oauth_code_base()
+            url = self._oauth_service.get_oauth_code_base_url()
+            self.redirect(url)
 
     @gen.coroutine
     def _handle_ent_openid(self, openid, unionid):
@@ -374,7 +375,8 @@ class BaseHandler(MetaBaseHandler):
                 yield self._build_session()
             else:
                 self._oauth_service.wechat = self._qx_wechat
-                self._oauth_service.get_oauth_code_userinfo()
+                url = self._oauth_service.get_oauth_code_userinfo_url()
+                self.redirect(url)
             return
         else:
             self._redirect_to_login()

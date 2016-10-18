@@ -40,13 +40,13 @@ class WeChatOauth2Service(object):
         self._access_token = None
 
     # PUBLIC API
-    def get_oauth_code_base(self):
+    def get_oauth_code_base_url(self):
         """静默授权获取 code"""
-        self._get_oauth_code(is_base=1)
+        return self._get_oauth_code_url(is_base=1)
 
-    def get_oauth_code_userinfo(self):
+    def get_oauth_code_userinfo_url(self):
         """正常授权获取 code"""
-        self._get_oauth_code(is_base=0)
+        return self._get_oauth_code_url(is_base=0)
 
     @property
     def handling_qx(self):
@@ -82,13 +82,13 @@ class WeChatOauth2Service(object):
         else:
             return wx_const.SCOPE_USERINFO
 
-    def _get_oauth_code(self, is_base):
+    def _get_oauth_code_url(self, is_base):
         if self.wechat.third_oauth:
             oauth_url = self._get_code_url_3rd_party(is_base)
         else:
             oauth_url = self._get_code_url(is_base)
         self._handler.logger.debug("oauth_url: {0}".format(oauth_url))
-        self._handler.redirect(oauth_url)
+        return oauth_url
 
     def _get_code_url(self, is_base=1):
         """非第三方获取 code 的 url"""
