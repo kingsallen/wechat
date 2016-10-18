@@ -60,7 +60,7 @@ class UserPageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def get_wxuser(self, openid, wechat_id):
+    def get_wxuser_openid_wechat_id(self, openid, wechat_id):
         ret = yield self.user_wx_user_ds.get_wxuser({
             "wechat_id": wechat_id,
             "openid":    openid
@@ -68,7 +68,7 @@ class UserPageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def get_wxuser(self, unionid, wechat_id):
+    def get_wxuser_unionid_wechat_id(self, unionid, wechat_id):
         ret = yield self.user_wx_user_ds.get_wxuser({
             "wechat_id": wechat_id,
             "unionid":    unionid
@@ -76,7 +76,7 @@ class UserPageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def get_wxuser(self, wxuser_id):
+    def get_wxuser_id(self, wxuser_id):
         ret = yield self.user_wx_user_ds.get_wxuser({
             "id": wxuser_id
         })
@@ -84,10 +84,10 @@ class UserPageService(PageService):
 
     @gen.coroutine
     def create_user_wx_user_ent(self, openid, unionid, wechat_id):
-        wxuser_id = 0
-        wxuser = yield self.get_wxuser(openid=openid, wechat_id=wechat_id)
-        qx_wxuser = yield self.get_wxuser(unionid=unionid, wechat_id=settings[
-            'qx_wechat_id'])
+        wxuser = yield self.get_wxuser_openid_wechat_id(
+            openid=openid, wechat_id=wechat_id)
+        qx_wxuser = yield self.get_wxuser_unionid_wechat_id(
+            unionid=unionid, wechat_id=settings['qx_wechat_id'])
 
         if wxuser:
             wxuser_id = wxuser.id
@@ -111,7 +111,7 @@ class UserPageService(PageService):
                     "group_id":       0,
                     "unionid":        qx_wxuser.unionid,
                     "source":         const.WXUSER_OAUTH_UPDATE
-            })
+                })
 
         else:
             wxuser_id = yield self.user_wx_user_ds.create_wxuser({
@@ -132,7 +132,7 @@ class UserPageService(PageService):
                 "source":         const.WXUSER_OAUTH
             })
 
-        wxuser = yield self.get_wxuser(wxuser_id=wxuser_id)
+        wxuser = yield self.get_wxuser_id(wxuser_id=wxuser_id)
         raise gen.Return(wxuser)
 
     @gen.coroutine
@@ -141,7 +141,8 @@ class UserPageService(PageService):
         qx_wechat_id = settings['qx_wechat_id']
         openid = userinfo.openid
 
-        qx_wxuser = yield self.get_wxuser(openid=openid, wechat_id=qx_wechat_id)
+        qx_wxuser = yield self.get_wxuser_openid_wechat_id(
+            openid=openid, wechat_id=qx_wechat_id)
 
         if qx_wxuser and qx_wxuser.sysuser_id == user_id:
             yield self.user_wx_user_ds.update_wxuser(
