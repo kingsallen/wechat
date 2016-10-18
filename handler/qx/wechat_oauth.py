@@ -4,7 +4,7 @@ import re
 import tornado.web
 
 
-class WxoauthHandler(tornado.web.RequestHandler):
+class WxOauthHandler(tornado.web.RequestHandler):
     def get(self):
         """接受仟寻公众号的授权，并回调到再次跳转的url
         """
