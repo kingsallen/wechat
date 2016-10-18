@@ -18,7 +18,7 @@ class UserCompanyPageService(PageService):
     @gen.coroutine
     def get_company_follows(self, conds, fields=[]):
         fields = ['id', 'company_id', 'user_id']
-        fans = yield self.wx_user_company_ds.get_user(conds, fields)
+        fans = yield self.user_company_follows_ds.get_user(conds, fields)
         raise gen.Return(fans)
 
     @gen.coroutine
@@ -35,9 +35,9 @@ class UserCompanyPageService(PageService):
             'name': '仟寻招聘',
             'description': 'help people find job'
         })
-        follow_company = yield self.wx_user_company_ds.get_fllw_cmpy(
+        follow_company = yield self.user_company_follows_ds.get_fllw_cmpy(
                                 user_id, company_id)
-        visit_company = yield self.wx_user_company_ds.get_visit_cmpy(
+        visit_company = yield self.user_company_visit_req_ds.get_visit_cmpy(
                                 user_id, company_id)
 
         data = ObjectDict({'company': company})
@@ -58,7 +58,7 @@ class UserCompanyPageService(PageService):
 
     @gen.coroutine
     def set_company_follow(self, param):
-        response = yield self.wx_user_company_ds.set_cmpy_fllw(
+        response = yield self.user_company_follows_ds.set_cmpy_fllw(
                             user_id=param.get('user_id'),
                             company_id=param.get('company_id'),
                             status=param.get('status'),
@@ -68,7 +68,7 @@ class UserCompanyPageService(PageService):
 
     @gen.coroutine
     def set_visit_company(self, param):
-        response = yield self.wx_user_company_ds.set_visit_cmpy(
+        response = yield self.user_company_visit_req_ds.set_visit_cmpy(
                                 user_id=param.get('user_id'),
                                 company_id=param.get('company_id'),
                                 status=param.get('status'),
