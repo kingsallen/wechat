@@ -9,6 +9,8 @@ WX_OAUTH_GET_USERINFO = "https://api.weixin.qq.com/sns/userinfo?access_token=%s&
 
 WX_OAUTH_QX_PATH = "/wxoauth2"
 
+WX_OAUTH_DEFAULT_STATE = '0'
+
 SCOPE_BASE = "snsapi_base"
 SCOPE_USERINFO = "snsapi_userinfo"
 

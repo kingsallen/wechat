@@ -23,6 +23,7 @@ from util.common.decorator import check_signature
 from util.tool.json_tool import encode_json_dumps
 from util.tool.str_tool import to_str, to_hex, from_hex
 from util.tool.date_tool import curr_now
+from util.tool.url_tool import make_url
 
 # 动态加载所有 PageService
 obDict = {}
@@ -178,7 +179,7 @@ class BaseHandler(MetaBaseHandler):
         # 用户同意授权
         if code:
             # 来自 qx 的授权, 获得 userinfo
-            if state == '0':
+            if state == self.wx_constant.WX_OAUTH_DEFAULT_STATE:
                 self.logger.debug("**2** 来自 qx 的授权, 获得 userinfo")
                 userinfo = yield self._get_user_info(code)
                 yield self._handle_user_info(userinfo)
@@ -234,13 +235,13 @@ class BaseHandler(MetaBaseHandler):
         else:
             source = self.constant.WECHAT_REGISTER_SOURCE_QX
 
-        # 创建 user_user 记录
+        # 创建 user_user
         user_id = yield self.user_ps.create_user_user(
             userinfo,
             wechat_id=self._wechat.id,
             remote_ip=self.request.remote_ip,
             source=source)
-
+        # 创建 qx 的 user_wx_user
         yield self.user_ps.create_qx_wxuser_by_userinfo(userinfo, user_id)
 
         if self.is_platform:
@@ -252,10 +253,7 @@ class BaseHandler(MetaBaseHandler):
     def _handle_ent_openid(self, openid, unionid):
         """根据企业号 openid 和 unionid 创建企业号微信用户"""
         wxuser = None
-        user = self.session_ps.get_user_by_union_id(unionid)
-        unionid = user.unionid
         if self.is_platform:
-            # TODO create_user_wx_user_ent
             wxuser = yield self.user_ps.create_user_wx_user_ent(
                 openid, unionid, self._wechat.id)
         raise gen.Return(wxuser)
@@ -348,10 +346,11 @@ class BaseHandler(MetaBaseHandler):
     @gen.coroutine
     def _fetch_session(self):
         """尝试获取 session 并创建 current_user，如果获取失败走 oauth 流程"""
+
         need_oauth = False
         ok = False
 
-        session_id = self.get_secure_cookie(self.constant.COOKIE_SESSIONID)
+        session_id = to_str(self.get_secure_cookie(self.constant.COOKIE_SESSIONID))
 
         if session_id:
             if self.is_platform:
@@ -370,12 +369,15 @@ class BaseHandler(MetaBaseHandler):
         else:
             need_oauth = True
 
-        if need_oauth:
+        if self.in_wechat and need_oauth:
             if self._unionid and self._wxuser:
                 yield self._build_session()
             else:
                 self._oauth_service.wechat = self._qx_wechat
                 self._oauth_service.get_oauth_code_userinfo()
+            return
+        else:
+            self._redirect_to_login()
 
     @gen.coroutine
     def _build_session(self):
@@ -622,3 +624,7 @@ class BaseHandler(MetaBaseHandler):
             wechat = self.constant.CLIENT_WECHAT
 
         return wechat, mobile
+
+    def _redirect_to_login(self):
+        self.redirect(make_url("/login", self.params))
+        return

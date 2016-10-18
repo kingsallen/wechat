@@ -15,20 +15,6 @@ class UserPageService(PageService):
         super().__init__(logger)
 
     @gen.coroutine
-    def binding_user(self, handler, user_id, wxuser, qxuser):
-        # for qxuser:
-        if user_id != wxuser.sysuser_id:
-            yield self.user_wx_user_ds.update_wxuser(
-                conds={"id": [wxuser.id, "="]},
-                fields={"sysuser_id": user_id}
-            )
-        if user_id != qxuser.sysuser_id:
-            yield self.user_user_ds.update_wxuser(
-                conds={"id": [wxuser.id, "="]},
-                fields={"sysuser_id": user_id}
-            )
-
-    @gen.coroutine
     def create_user_user(self, userinfo, wechat_id, remote_ip, source):
 
         # 查询 这个 unionid 是不是已经存在
@@ -67,18 +53,97 @@ class UserPageService(PageService):
         raise gen.Return(user_id)
 
     @gen.coroutine
+    def get_user_user(self, unionid=None):
+        ret = self.user_user_ds.get_user({
+            "unionid": unionid
+        })
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def get_wxuser(self, openid, wechat_id):
+        ret = yield self.user_wx_user_ds.get_wxuser({
+            "wechat_id": wechat_id,
+            "openid":    openid
+        })
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def get_wxuser(self, unionid, wechat_id):
+        ret = yield self.user_wx_user_ds.get_wxuser({
+            "wechat_id": wechat_id,
+            "unionid":    unionid
+        })
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def get_wxuser(self, wxuser_id):
+        ret = yield self.user_wx_user_ds.get_wxuser({
+            "id": wxuser_id
+        })
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def create_user_wx_user_ent(self, openid, unionid, wechat_id):
+        wxuser_id = 0
+        wxuser = yield self.get_wxuser(openid=openid, wechat_id=wechat_id)
+        qx_wxuser = yield self.get_wxuser(unionid=unionid, wechat_id=settings[
+            'qx_wechat_id'])
+
+        if wxuser:
+            wxuser_id = wxuser.id
+            yield self.user_wx_user_ds.update_wxuser(
+                conds={
+                    "id": wxuser.id
+                },
+                fields={
+                    "is_subscribe":   0,
+                    "sysuser_id":     qx_wxuser.sysuser_id,
+                    "openid":         openid,
+                    "nickname":       qx_wxuser.nickname,
+                    "sex":            qx_wxuser.sex or 0,
+                    "city":           qx_wxuser.city,
+                    "country":        qx_wxuser.country,
+                    "province":       qx_wxuser.province,
+                    "language":       qx_wxuser.language,
+                    "headimgurl":     qx_wxuser.headimgurl,
+                    "subscribe_time": curr_now(),
+                    "wechat_id":      wechat_id,
+                    "group_id":       0,
+                    "unionid":        qx_wxuser.unionid,
+                    "source":         const.WXUSER_OAUTH_UPDATE
+            })
+
+        else:
+            wxuser_id = yield self.user_wx_user_ds.create_wxuser({
+                "is_subscribe":   0,
+                "sysuser_id":     qx_wxuser.sysuser_id,
+                "openid":         openid,
+                "nickname":       qx_wxuser.nickname,
+                "sex":            qx_wxuser.sex or 0,
+                "city":           qx_wxuser.city,
+                "country":        qx_wxuser.country,
+                "province":       qx_wxuser.province,
+                "language":       qx_wxuser.language,
+                "headimgurl":     qx_wxuser.headimgurl,
+                "subscribe_time": curr_now(),
+                "wechat_id":      wechat_id,
+                "group_id":       0,
+                "unionid":        qx_wxuser.unionid,
+                "source":         const.WXUSER_OAUTH
+            })
+
+        wxuser = yield self.get_wxuser(wxuser_id=wxuser_id)
+        raise gen.Return(wxuser)
+
+    @gen.coroutine
     def create_qx_wxuser_by_userinfo(self, userinfo, user_id):
 
         qx_wechat_id = settings['qx_wechat_id']
         openid = userinfo.openid
 
-        qx_wxuser = yield self.user_wx_user_ds.get_wxuser({
-            "wechat_id": qx_wechat_id,
-            "openid": openid
-        })
+        qx_wxuser = yield self.get_wxuser(openid=openid, wechat_id=qx_wechat_id)
 
         if qx_wxuser and qx_wxuser.sysuser_id == user_id:
-            # 更新
             yield self.user_wx_user_ds.update_wxuser(
                 conds={"id": qx_wxuser.id},
                 fields={
