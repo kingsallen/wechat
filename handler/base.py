@@ -81,7 +81,8 @@ class BaseHandler(MetaBaseHandler):
         self._wxuser = None
 
         # 处理 oauth 的 service
-        self._oauth_service = WeChatOauth2Service(self, self.fullurl)
+        self._oauth_service = WeChatOauth2Service(
+            self, self.fullurl, self.component_access_token)
 
     # PROPERTIES
     @property
@@ -150,6 +151,12 @@ class BaseHandler(MetaBaseHandler):
     def fullurl(self):
         return (self.request.protocol + "://" +
                 self.request.host + self.request.uri)
+
+    @property
+    def component_access_token(self):
+        ret = ujson.loads(self.redis.get("component_access_toke")).get(
+            "component_access_toke", "")
+        return ret
 
     @log_info.setter
     def log_info(self, value):

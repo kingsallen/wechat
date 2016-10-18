@@ -26,12 +26,13 @@ class WeChatOauth2Service(object):
     """
     async_http = tornado.httpclient.AsyncHTTPClient()
 
-    def __init__(self, handler, redirect_url):
+    def __init__(self, handler, redirect_url, component_access_token):
         self._redirect_url = redirect_url
         self._handler = handler
 
         self.wechat = handler._wechat
         self.state = 0
+        self._component_access_token = component_access_token
 
         # 缓存 access_token
         self._access_token = None
@@ -115,7 +116,7 @@ class WeChatOauth2Service(object):
                     self.wechat.appid,
                     code,
                     self._handler.settings["component_app_id"],
-                    self._handler.settings["component_access_token"]))
+                    self._component_access_token))
         else:
             url = (wx_const.WX_OAUTH_GET_ACCESS_TOKEN % (
                     self.wechat.appid,
