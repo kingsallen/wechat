@@ -154,8 +154,8 @@ class BaseHandler(MetaBaseHandler):
 
     @property
     def component_access_token(self):
-        ret = ujson.loads(self.redis.get("component_access_toke")).get(
-            "component_access_toke", "")
+        ret = ujson.loads(self.redis.get("component_access_token"))[
+            "component_access_token"]
         return ret
 
     @log_info.setter

@@ -32,6 +32,8 @@ class WeChatOauth2Service(object):
 
         self.wechat = handler._wechat
         self.state = 0
+
+        # 第三方的 component_access_token
         self._component_access_token = component_access_token
 
         # 缓存 access_token
