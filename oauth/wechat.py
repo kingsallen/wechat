@@ -55,7 +55,7 @@ class WeChatOauth2Service(object):
     @gen.coroutine
     def get_openid_unionid_by_code(self, code):
         access_token_info = yield self._get_access_token_by_code(code)
-        if 'errorcode' in access_token_info:
+        if access_token_info.errcode:
             raise WeChatOauthError(access_token_info.errmsg)
         else:
             openid = access_token_info.get('open_id')
@@ -68,7 +68,7 @@ class WeChatOauth2Service(object):
     def get_userinfo_by_code(self, code):
         openid, _ = yield self.get_openid_unionid_by_code(code)
         userinfo = yield self._get_userinfo_by_openid(openid)
-        if 'errorcode' in userinfo:
+        if userinfo.errcode:
             raise WeChatOauthError(userinfo.errmsg)
         else:
             raise gen.Return(userinfo)
@@ -83,10 +83,10 @@ class WeChatOauth2Service(object):
             return wx_const.SCOPE_USERINFO
 
     def _get_oauth_code_url(self, is_base):
-        if self.wechat.third_oauth:
-            oauth_url = self._get_code_url_3rd_party(is_base)
-        else:
-            oauth_url = self._get_code_url(is_base)
+        # if self.wechat.third_oauth:
+        #     oauth_url = self._get_code_url_3rd_party(is_base)
+        # else:
+        oauth_url = self._get_code_url(is_base)
         self._handler.logger.debug("oauth_url: {0}".format(oauth_url))
         return oauth_url
 
@@ -113,17 +113,18 @@ class WeChatOauth2Service(object):
 
     def _get_access_token_url(self, code):
         """生成获取 access_token 的 url"""
-        if self.wechat.third_oauth:
-            url = (wx_const.WX_THIRD_OAUTH_GET_ACCESS_TOKEN % (
-                    self.wechat.appid,
-                    code,
-                    self._handler.settings["component_app_id"],
-                    self._component_access_token))
-        else:
-            url = (wx_const.WX_OAUTH_GET_ACCESS_TOKEN % (
-                    self.wechat.appid,
-                    self.wechat.secret,
-                    code))
+        # if self.wechat.third_oauth:
+        #     url = (wx_const.WX_THIRD_OAUTH_GET_ACCESS_TOKEN % (
+        #             self.wechat.appid,
+        #             code,
+        #             self._handler.settings["component_app_id"],
+        #             self._component_access_token))
+        # else:
+        url = (wx_const.WX_OAUTH_GET_ACCESS_TOKEN % (
+                self.wechat.appid,
+                self.wechat.secret,
+                code))
+        self._handler.logger.debug("get_access_token_url: {0}".format(url))
         return url
 
     @gen.coroutine

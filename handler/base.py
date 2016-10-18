@@ -264,6 +264,7 @@ class BaseHandler(MetaBaseHandler):
                 openid, unionid, self._wechat.id)
         raise gen.Return(wxuser)
 
+    # noinspection PyTypeChecker
     def _get_params(self):
         """To get all GET or POST arguments from http request
         """
