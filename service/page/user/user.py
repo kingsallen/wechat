@@ -56,8 +56,14 @@ class UserPageService(PageService):
                 "source": source,
                 "nickname": userinfo.nickname,
                 "name": "",
-                "headimg": userinfo.headimg,
+                "headimg": userinfo.headimgurl,
             })
+
+            assert user_id
+            yield self.user_settings_ds.create_user_settings({
+                "user_id": user_id
+            })
+
 
         raise gen.Return(user_id)
 
@@ -76,7 +82,7 @@ class UserPageService(PageService):
             # 更新
             yield self.user_wx_user_ds.update_wxuser(
                 conds={"id": qx_wxuser.id},
-                fields= {
+                fields={
                     "openid":     userinfo.openid,
                     "nickname":   userinfo.nickname,
                     "sex":        userinfo.sex or 0,
@@ -91,6 +97,7 @@ class UserPageService(PageService):
         else:
             yield self.user_wx_user_ds.create_wxuser({
                 "is_subscribe": 0,
+                "sysuser_id": user_id,
                 "openid": userinfo.openid,
                 "nickname": userinfo.nickname,
                 "sex": userinfo.sex or 0,

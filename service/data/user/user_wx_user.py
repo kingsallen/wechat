@@ -24,7 +24,7 @@ class UserWxUserDataService(DataService):
     @cache(ttl=60)
     @gen.coroutine
     def get_wxuser(self, conds=None, fields=None):
-        if not conds or not fields:
+        if not self._valid_conds(conds):
             self.logger.warn(u"Warning:[get_wxuser][invalid parameters], Detail:[conds: {0}, fields: {1}]".format(conds, fields))
             raise gen.Return(None)
 
