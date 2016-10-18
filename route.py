@@ -36,7 +36,7 @@ platform_routes.extend(common_routes)
 
 # 聚合号的单独 routes
 qx_routes = [
-    (r"/mobile/start", "handler.qx.landing.LandingHandler")
+    (r"/wxoauth", "handler.qx.wechat_oauth.WxOauthHandler")
 ]
 qx_routes.extend(common_routes)
 

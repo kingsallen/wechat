@@ -3,7 +3,7 @@
 
 import re
 import ujson
-import urllib.parse
+from urllib.parse import urlparse, quote
 
 import tornado.gen as gen
 import tornado.httpclient
@@ -93,7 +93,7 @@ class WeChatOauth2Service(object):
 
         return wx_const.WX_OAUTH_GET_CODE % (
             self.wechat.appid,
-            urllib.parse.quote(self._redirect_url),
+            quote(self._redirect_url),
             self._get_oauth_type(is_base),
             self.state)
 
@@ -103,7 +103,7 @@ class WeChatOauth2Service(object):
 
         return wx_const.WX_THIRD_OAUTH_GET_CODE % (
             self.wechat.appid,
-            urllib.parse.quote(self._redirect_url),
+            quote(self._redirect_url),
             self._get_oauth_type(is_base),
             self.state,
             self._handler.settings['component_app_id'])
@@ -177,10 +177,14 @@ class WeChatOauth2Service(object):
     def __adjust_url(self, is_base):
         """必要时调整 redirect_uri 的二级域名"""
         if not is_base and self.handling_qx and self.__is_platform_url(self._redirect_url):
-                self._redirect_url = self._redirect_url.replace(const.ENV_PLATFORM, const.ENV_QX, 1)
+            next_url = quote(self._redirect_url)
+            up = urlparse(self._redirect_url)
+            netloc = up.netloc.replace(const.ENV_PLATFORM, const.ENV_QX, 1)
+            self._redirect_url = "{}&next_url={}".format(up.scheme + "://" + netloc + wx_const.WX_OAUTH_QX_PATH + "?", next_url)
 
     @staticmethod
     def __is_platform_url(string):
         """判断是否是 platform 的 url"""
         regex = r"^http(s)?:\/\/platform"
         return re.match(regex, string)
+
