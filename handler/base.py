@@ -186,7 +186,7 @@ class BaseHandler(MetaBaseHandler):
                 self.logger.debug("**2** 来自 qx 的授权, 获得 userinfo")
                 userinfo = yield self._get_user_info(code)
                 yield self._handle_user_info(userinfo)
-                if self.finished:
+                if self._finished:
                     return
 
             # 来自企业号的静默授权
@@ -393,10 +393,10 @@ class BaseHandler(MetaBaseHandler):
         session.wechat = self._wechat
         session.wxuser = self._wxuser
 
-        session.qxuser = yield self.session_ps.get_wxuser(
+        session.qxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
             unionid=self._unionid, wechat_id=self.settings['qx_wechat_id'])
         session.company = yield self._get_current_company(self._wechat.id)
-        session.sysuser = yield self.session_ps.get_user_user(
+        session.sysuser = yield self.user_ps.get_user_user_id(
             session.qxuser.sysuser_id)
 
         session_id = self._make_new_session_id()
@@ -412,11 +412,12 @@ class BaseHandler(MetaBaseHandler):
             if employee:
                 session.employee = employee
 
-        if self.params:
-            session.recom = yield self.session_ps.get_wxuser(
-                self.params.recom, session.company.id)
+        if self.params.recom:
+            session.recom = yield self.user_ps.get_wxuser_openid_wechat_id(
+                openid=self.params.recom, wechat_id=session.wechat.id)
 
         self.current_user = session
+        self.logger.debug("current_user: {}".format(self.current_user))
 
     def _get_session_from_ent(self, session_id):
         """尝试获取 session"""

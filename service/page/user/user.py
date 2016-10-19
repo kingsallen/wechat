@@ -53,9 +53,16 @@ class UserPageService(PageService):
         raise gen.Return(user_id)
 
     @gen.coroutine
-    def get_user_user(self, unionid=None):
+    def get_user_user_unionid(self, unionid):
         ret = self.user_user_ds.get_user({
             "unionid": unionid
+        })
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def get_user_user_id(self, user_id):
+        ret = self.user_user_ds.get_user({
+            "id": user_id
         })
         raise gen.Return(ret)
 
