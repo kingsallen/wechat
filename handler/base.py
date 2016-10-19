@@ -11,7 +11,7 @@ import time
 import ujson
 import uuid
 from hashlib import sha1
-from urllib.parse import urljoin, urlparse, parse_qs
+from urllib.parse import urljoin
 
 import tornado.escape
 import tornado.httpclient
@@ -394,68 +394,99 @@ class BaseHandler(MetaBaseHandler):
 
     @gen.coroutine
     def _build_session(self):
+
+        session = ObjectDict()
+        session.wechat = self._wechat
+        session.wxuser = self._wxuser
+
+        session.qxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
+            unionid=self._unionid, wechat_id=self.settings['qx_wechat_id'])
+
+        session.sysuser = yield self.user_ps.get_user_user_id(
+            session.qxuser.sysuser_id)
+
+        session_id = self._make_new_session_id()
+        self.set_secure_cookie(self.constant.COOKIE_SESSIONID, session_id)
+
+        # 保存企业号 session， 包含 wechat, wxuser, qxuser, sysuser
+        key_ent = self.constant.SESSION_USER.format(session_id, self._wechat.id)
+        self.redis.set(key_ent, session, 60 * 60 * 2)
+        self.logger.debug("refresh ent session redis key: {}".format(key_ent))
+
+        # 保存聚合号 session， 只包含 qxuser
+        key_qx = self.constant.SESSION_USER.format(session_id, self.settings['qx_wechat_id'])
+        self.redis.set(key_qx, ObjectDict(qxuser=session.qxuser))
+        self.logger.debug("refresh qx session redis key: {}".format(key_ent))
+
         if self.is_platform:
-            session = ObjectDict()
-            session.wechat = self._wechat
-            session.wxuser = self._wxuser
-
-            session.qxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
-                unionid=self._unionid, wechat_id=self.settings['qx_wechat_id'])
+            # 拼装 company, employee
             session.company = yield self._get_current_company(self._wechat.id)
-            session.sysuser = yield self.user_ps.get_user_user_id(
-                session.qxuser.sysuser_id)
-
-            session_id = self._make_new_session_id()
-            self.set_secure_cookie(self.constant.COOKIE_SESSIONID, session_id)
-
-            key = self.constant.SESSION_USER.format(session_id, self._wechat.id)
-            self.logger.debug("refresh redis key: {}".format(key))
-            self.redis.set(key, session, 60 * 60 * 2)
-
             employee = yield self.session_ps.get_employee(
                 wxuser_id=session.wxuser.id, company_id=session.company.id)
             if employee:
                 session.employee = employee
 
-            if self.params.recom:
-                session.recom = yield self.user_ps.get_wxuser_openid_wechat_id(
-                    openid=self.params.recom, wechat_id=self.wechat.id)
-
-        elif self.isqx:
-            session = ObjectDict()
-            session.wechat = self._qx_wechat
-            # TODO
+        # 拼装 recom
+        if self.params.recom:
+            session.recom = yield self.user_ps.get_wxuser_openid_wechat_id(
+                openid=self.params.recom, wechat_id=self._wechat.id)
 
         self.current_user = session
         self.logger.debug("current_user: {}".format(self.current_user))
 
     @gen.coroutine
-    def _build_session_from_qx_session(self, qx_session):
-        """从 qx session 获取 session"""
-        session = ObjectDict(qx_session)
+    def _build_session_by_unionid(self, unionid):
+        """从 unionid 获取 session"""
 
-        session.company = yield self._get_current_company(
-            self._wechat.company_id)
-        session.wxuser = self._wxuser
+        session = ObjectDict()
+        session.wechat = self._wechat
+
+        if self._wxuser:
+            session.wxuser = self._wxuser
+        else:
+            session.wxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
+                unionid=unionid, wechat_id=self._wechat.id)
+
+        session.qxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
+            unionid=unionid, wechat_id=self.settings['qx_wechat_id'])
+
+        session.sysuser = yield self.user_ps.get_user_user_id(
+            session.qxuser.sysuser_id)
+
+        session_id = self.get_secure_cookie(self.constant.COOKIE_SESSIONID)
+
+        # 保存企业号 session， 包含 wechat, wxuser, qxuser, sysuser
+        key_ent = self.constant.SESSION_USER.format(session_id, session.wechat.id)
+        self.redis.set(key_ent, session, 60 * 60 * 2)
+        self.logger.debug("refresh ent session redis key: {}".format(key_ent))
+
+        # 保存聚合号 session， 只包含 qxuser
+        key_qx = self.constant.SESSION_USER.format(session_id, self.settings['qx_wechat_id'])
+        self.redis.set(key_qx, ObjectDict(qxuser=session.qxuser))
+        self.logger.debug("refresh qx session redis key: {}".format(key_ent))
 
         if self.is_platform:
+            # 拼装 company, employee
+            session.company = yield self._get_current_company(self._wechat.id)
             employee = yield self.session_ps.get_employee(
                 wxuser_id=session.wxuser.id, company_id=session.company.id)
             if employee:
                 session.employee = employee
 
+        # 拼装 recom
         if self.params.recom:
             session.recom = yield self.user_ps.get_wxuser_openid_wechat_id(
-                openid=self.params.recom, wechat_id=session.wechat.id)
+                openid=self.params.recom, wechat_id=self._wechat.id)
 
-        raise gen.Return(session)
+        self.current_user = session
+        self.logger.debug("current_user: {}".format(self.current_user))
 
     @gen.coroutine
     def _get_session_from_ent(self, session_id):
         """尝试获取企业号 session"""
 
         key = self.constant.SESSION_USER.format(session_id, self._wechat.id)
-        value = self.redis.get(key, prefix=False)
+        value = self.redis.get(key)
         if value:
             # 如果有 value， 返回该 value 作为 self.current_user
             self.current_user = ujson.loads(value)
@@ -468,15 +499,11 @@ class BaseHandler(MetaBaseHandler):
 
         key = self.constant.SESSION_USER.format(session_id, self.settings['qx_wechat_id'])
 
-        value = self.redis.get(key, prefix=False)
+        value = self.redis.get(key)
         if value:
             session_qx = ujson.loads(value)
-
-            session = session_qx
-            if self.is_platform:
-                session = yield self._build_session_from_qx_session(session)
-
-            self.current_user = session
+            qxuser = ObjectDict(session_qx.get('qxuser'))
+            yield self._build_session_by_unionid(qxuser.unionid)
             raise gen.Return(True)
         raise gen.Return(False)
 
@@ -569,6 +596,8 @@ class BaseHandler(MetaBaseHandler):
         # else:
         #     self.render('common/systemmessage.html', status_code=status_code,
         #                 message="正在努力维护服务器中")
+
+        # for debug
         self.write(http_code)
 
     def render_page(self, template_name, data, status_code=0,

@@ -26,7 +26,7 @@ class BaseRedis(object):
 
     _redis = redis.StrictRedis(connection_pool=_pool)
 
-    _PREFIX = "wechat"  # 待调整
+    _PREFIX = "WECHAT"
 
     def __new__(cls, *args, **kwargs):
         if not hasattr(cls, '_instance'):

@@ -7,6 +7,11 @@ import tornado.web
 
 
 class WxOauthHandler(tornado.web.RequestHandler):
+
+    def initialize(self, **kwargs):
+        # 日志需要，由 route 定义
+        self.event = kwargs.get("event")
+
     def get(self):
         """接受仟寻公众号的授权，并回调到再次跳转的url
         """
