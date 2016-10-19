@@ -164,9 +164,8 @@ class BaseHandler(MetaBaseHandler):
 
     @property
     def component_access_token(self):
-        return None
-        # return self.redis.get("component_access_token", prefix=False)[
-        #     "component_access_token"]
+        return self.redis.get("component_access_token", prefix=False)[
+            "component_access_token"]
 
     @log_info.setter
     def log_info(self, value):
