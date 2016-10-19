@@ -164,8 +164,8 @@ class BaseHandler(MetaBaseHandler):
 
     @property
     def component_access_token(self):
-        return self.redis.get("component_access_token", prefix=False)[
-            "component_access_token"]
+        return self.redis.get("component_access_token", prefix=False).get(
+            "component_access_token", None)
 
     @log_info.setter
     def log_info(self, value):
@@ -383,17 +383,14 @@ class BaseHandler(MetaBaseHandler):
         else:
             need_oauth = True
 
-        if need_oauth:
-            if self.in_wechat:
-                if self._unionid and self._wxuser:
-                    yield self._build_session()
-                else:
-                    self._oauth_service.wechat = self._qx_wechat
-                    url = self._oauth_service.get_oauth_code_userinfo_url()
-                    self.redirect(url)
-                    return
+        if need_oauth and self.in_wechat:
+            if self._unionid and self._wxuser:
+                yield self._build_session()
             else:
-                self._redirect_to_login()
+                self._oauth_service.wechat = self._qx_wechat
+                url = self._oauth_service.get_oauth_code_userinfo_url()
+                self.redirect(url)
+                return
 
     @gen.coroutine
     def _build_session(self):
@@ -620,13 +617,18 @@ class BaseHandler(MetaBaseHandler):
         req_params = request.arguments
 
         customs = ObjectDict(
-            type_wechat = self.in_wechat,
-            type_mobile = self.client_type,
-            recom_id=self.current_user.get("recom", {}).get("id", 0),
-            qxuser_id=self.current_user.get("qxuser", {}).get("id", 0),
-            wxuser_id=self.current_user.get("wxuser", {}).get("id", 0),
-            wechat_id=self.current_user.get("wechat", {}).get("id", 0),
-        )
+            type_wechat=self.in_wechat,
+            type_mobile=self.client_type)
+
+        if self.current_user:
+            customs.update(
+                recom_id=self.current_user.get("recom", {}).get("id", 0),
+                qxuser_id=self.current_user.get("qxuser", {}).get("id", 0),
+                wxuser_id=self.current_user.get("wxuser", {}).get("id", 0),
+                wechat_id=self.current_user.get("wechat", {}).get("id", 0))
+            user_id = self.current_user.get("sysuser", {}).get("id", 0)
+        else:
+            user_id = 0
 
         log_info_common = ObjectDict(
             req_time=curr_now(),
@@ -643,7 +645,7 @@ class BaseHandler(MetaBaseHandler):
             ),
             event="{}_{}".format(self.event, request.method),
             cookie=self.cookies,
-            user_id=self.current_user.get("sysuser", {}).get("id", 0),
+            user_id=user_id,
             req_type=request.method,
             req_uri=request.uri,
             req_params=req_params,
