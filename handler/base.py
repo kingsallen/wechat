@@ -180,26 +180,29 @@ class BaseHandler(MetaBaseHandler):
         state = self.params.get("state")
 
         self.logger.debug("**1** code:{}, state:{}".format(code, state))
+
         # 用户同意授权
-        if code:
-            # 来自 qx 的授权, 获得 userinfo
-            if state == self.wx_constant.WX_OAUTH_DEFAULT_STATE:
-                self.logger.debug("**2** 来自 qx 的授权, 获得 userinfo")
-                userinfo = yield self._get_user_info(code)
-                yield self._handle_user_info(userinfo)
-                if self._finished:
-                    return
+        if self.in_wechat:
+            if code:
+                # 来自 qx 的授权, 获得 userinfo
+                if state == self.wx_constant.WX_OAUTH_DEFAULT_STATE:
+                    self.logger.debug("**2** 来自 qx 的授权, 获得 userinfo")
+                    userinfo = yield self._get_user_info(code)
+                    yield self._handle_user_info(userinfo)
+                    if self._finished:
+                        return
 
-            # 来自企业号的静默授权
-            else:
-                self.logger.debug("**3** 来自企业号的静默授权")
-                self._unionid = from_hex(state)
-                openid = yield self._get_user_openid(code)
-                self._wxuser = yield self._handle_ent_openid(openid, self._unionid)
+                # 来自企业号的静默授权
+                else:
+                    self.logger.debug("**3** 来自企业号的静默授权")
+                    self._unionid = from_hex(state)
+                    openid = yield self._get_user_openid(code)
+                    self._wxuser = yield self._handle_ent_openid(
+                        openid, self._unionid)
 
-        if state and not code:  # 用户拒绝授权
-            # TODO 拒绝授权用户，是否让其继续操作? or return
-            pass
+            if state and not code:  # 用户拒绝授权
+                # TODO 拒绝授权用户，是否让其继续操作? or return
+                pass
 
         # 构造并拼装 session
         yield self._fetch_session()
@@ -354,7 +357,6 @@ class BaseHandler(MetaBaseHandler):
     @gen.coroutine
     def _fetch_session(self):
         """尝试获取 session 并创建 current_user，如果获取失败走 oauth 流程"""
-
         need_oauth = False
         ok = False
 
@@ -362,14 +364,14 @@ class BaseHandler(MetaBaseHandler):
 
         if session_id:
             if self.is_platform:
-                ok = self._get_session_from_ent(session_id)
+                ok = yield self._get_session_from_ent(session_id)
                 if not ok:
                     ok = yield self._get_session_from_qx(session_id)
             elif self.is_qx:
                 ok = yield self._get_session_from_qx(session_id)
 
             elif self.is_help:
-                # TODO
+                # TODO 需讨论
                 pass
 
             need_oauth = not ok
@@ -377,34 +379,63 @@ class BaseHandler(MetaBaseHandler):
         else:
             need_oauth = True
 
-        if self.in_wechat and need_oauth:
-            if self._unionid and self._wxuser:
-                yield self._build_session()
+        if need_oauth:
+            if self.in_wechat:
+                if self._unionid and self._wxuser:
+                    yield self._build_session()
+                else:
+                    self._oauth_service.wechat = self._qx_wechat
+                    url = self._oauth_service.get_oauth_code_userinfo_url()
+                    self.redirect(url)
+                    return
             else:
-                self._oauth_service.wechat = self._qx_wechat
-                url = self._oauth_service.get_oauth_code_userinfo_url()
-                self.redirect(url)
-            return
-        else:
-            self._redirect_to_login()
+                self._redirect_to_login()
 
     @gen.coroutine
     def _build_session(self):
-        session = ObjectDict()
-        session.wechat = self._wechat
+        if self.is_platform:
+            session = ObjectDict()
+            session.wechat = self._wechat
+            session.wxuser = self._wxuser
+
+            session.qxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
+                unionid=self._unionid, wechat_id=self.settings['qx_wechat_id'])
+            session.company = yield self._get_current_company(self._wechat.id)
+            session.sysuser = yield self.user_ps.get_user_user_id(
+                session.qxuser.sysuser_id)
+
+            session_id = self._make_new_session_id()
+            self.set_secure_cookie(self.constant.COOKIE_SESSIONID, session_id)
+
+            self.redis.set(
+                self.constant.SESSION_USER.format(session_id, self._wechat.id),
+                session, 60 * 60 * 2)
+
+            employee = yield self.session_ps.get_employee(
+                wxuser_id=session.wxuser.id, company_id=session.company.id)
+            if employee:
+                session.employee = employee
+
+            if self.params.recom:
+                session.recom = yield self.user_ps.get_wxuser_openid_wechat_id(
+                    openid=self.params.recom, wechat_id=self.wechat.id)
+
+        elif self.isqx:
+            session = ObjectDict()
+            session.wechat = self._qx_wechat
+            # TODO
+
+        self.current_user = session
+        self.logger.debug("current_user: {}".format(self.current_user))
+
+    @gen.coroutine
+    def _build_session_from_qx_session(self, qx_session):
+        """从 qx session 获取 session"""
+        session = ObjectDict(qx_session)
+
+        session.company = yield self._get_current_company(
+            self._wechat.company_id)
         session.wxuser = self._wxuser
-
-        session.qxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
-            unionid=self._unionid, wechat_id=self.settings['qx_wechat_id'])
-        session.company = yield self._get_current_company(self._wechat.id)
-        session.sysuser = yield self.user_ps.get_user_user_id(
-            session.qxuser.sysuser_id)
-
-        session_id = self._make_new_session_id()
-        self.set_secure_cookie(self.constant.COOKIE_SESSIONID, session_id)
-        self.redis.set(
-            self.constant.SESSION_USER.format(session_id, self._wechat.id),
-            session, 60 * 60 * 2)
 
         if self.is_platform:
             employee = yield self.session_ps.get_employee(
@@ -416,16 +447,14 @@ class BaseHandler(MetaBaseHandler):
             session.recom = yield self.user_ps.get_wxuser_openid_wechat_id(
                 openid=self.params.recom, wechat_id=session.wechat.id)
 
-        self.current_user = session
-        self.logger.debug("current_user: {}".format(self.current_user))
+        raise gen.Return(session)
 
+    @gen.coroutine
     def _get_session_from_ent(self, session_id):
-        """尝试获取 session"""
-        if not self.is_platform:
-            return False
+        """尝试获取企业号 session"""
 
         key = self.constant.SESSION_USER.format(session_id, self._wechat.id)
-        value = self.redis.get(key)
+        value = self.redis.get(key, prefix=False)
         if value:
             # 如果有 value， 返回该 value 作为 self.current_user
             self.current_user = ujson.loads(value)
@@ -437,16 +466,16 @@ class BaseHandler(MetaBaseHandler):
         """尝试获取聚合号 session"""
 
         key = self.constant.SESSION_USER.format(session_id, self.settings['qx_wechat_id'])
-        value = self.redis.get(key)
-        if value:
-            user_id = ujson.loads(value).user.id
-            # TODO _refresh_session，或者是_build_session？
-            session_qx, session_ent = yield self._refresh_session(user_id)
-            if self.is_platform:
-                self.current_user = session_ent
-            elif self.is_qx:
-                self.current_user = session_qx
 
+        value = self.redis.get(key, prefix=False)
+        if value:
+            session_qx = ujson.loads(value)
+
+            session = session_qx
+            if self.is_platform:
+                session = yield self._build_session_from_qx_session(session)
+
+            self.current_user = session
             raise gen.Return(True)
         raise gen.Return(False)
 
@@ -516,8 +545,7 @@ class BaseHandler(MetaBaseHandler):
         #                 message="正在努力维护服务器中")
         self.write(http_code)
 
-    def render(self, template_name, data,
-                    status_code=0, message='success', http_code=200):
+    def render(self, template_name, data, status_code=0, message='success', http_code=200):
         """render 页面"""
         self.log_info = {"res_type": "html", "status_code": status_code}
         self.set_status(http_code)
@@ -557,6 +585,18 @@ class BaseHandler(MetaBaseHandler):
         self.log_info = {"res_type": "json", "status_code": status_code}
         self.set_status(http_code)
         self.write(render_json)
+
+    def get_template_namespace(self):
+        namespace = super().get_template_namespace()
+        add_namespace = dict(
+            params=self.params,
+            current_user=self.current_user,
+            make_url=make_url,
+            aes=self.aes,
+            settings=self.settings
+        )
+        namespace.update(add_namespace)
+        return namespace
 
     def _get_info_header(self, log_params):
         request = self.request
