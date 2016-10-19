@@ -8,13 +8,15 @@ from util.common.decorator import cache
 
 
 class UserUserDataService(DataService):
-
     @cache(ttl=60)
     @gen.coroutine
     def get_user(self, conds, fields=None):
 
         if not self._valid_conds(conds):
-            self.logger.warn("Warning:[get_user][invalid parameters], Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
+            self.logger.warn(
+                "Warning:[get_user][invalid parameters], Detail:[conds: {0}, "
+                "type: {1}]".format(
+                    conds, type(conds)))
             raise gen.Return(None)
 
         if not fields:

@@ -12,6 +12,7 @@ import conf.common as const
 import conf.wechat as wx_const
 from setting import settings
 from util.common import ObjectDict
+from util.common.sign import Sign
 
 
 class WeChatOauthError(Exception):
@@ -192,3 +193,8 @@ class WeChatOauth2Service(object):
         regex = r'^http(s)?:\/\/platform'
         return re.match(regex, string)
 
+
+class JsApi(object):
+    def __init__(self, jsapi_ticket, url):
+        self.sign = Sign(jsapi_ticket=jsapi_ticket)
+        self.__dict__.update(self.sign.sign(url=url))

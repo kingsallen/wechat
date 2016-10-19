@@ -18,7 +18,7 @@ import tornado.httpclient
 from tornado import gen, web
 
 from app import logger
-from oauth.wechat import WeChatOauth2Service, WeChatOauthError
+from oauth.wechat import WeChatOauth2Service, WeChatOauthError, JsApi
 from util.common import ObjectDict
 from util.common.decorator import check_signature
 from util.tool.date_tool import curr_now
@@ -49,13 +49,11 @@ class NoSignatureError(Exception):
 
 
 class BaseHandler(MetaBaseHandler):
-    """
-    Handler 基类
+    """Handler 基类
 
     不要使用（创建）get_current_user()
     get_current_user() 不能为异步方法，而 parpare() 可以
     self.current_user 将在 prepare() 中以 self.current_user = XXX 的形式创建
-
     Refer to:
     http://www.tornadoweb.org/en/stable/web.html#other
     """
@@ -66,27 +64,23 @@ class BaseHandler(MetaBaseHandler):
 
     def __init__(self, application, request, **kwargs):
         super().__init__(application, request, **kwargs)
-
+        # 日志相关
+        self.event = None
         # 全部 arguments
         self.params = self._get_params()
         # api 使用， json arguments
         self.json_args = self._get_json_args()
-
         # 记录初始化的时间
         self._start_time = time.time()
-
         # 保存是否在微信环境， 微信客户端类型
         self.in_wechat, self.client_type = self._depend_wechat()
-
         # 日志信息
         self._log_info = None
-
         # 构建 session 过程中会缓存一份当前公众号信息
         self._wechat = None
         self._qx_wechat = None
         self._unionid = None
         self._wxuser = None
-
         # 处理 oauth 的 service
         self._oauth_service = WeChatOauth2Service(
             self, self.fullurl, self.component_access_token)
@@ -183,14 +177,14 @@ class BaseHandler(MetaBaseHandler):
         code = self.params.get("code")
         state = self.params.get("state")
 
-        self.logger.debug("**1** code:{}, state:{}".format(code, state))
+        self.logger.debug("code:{}, state:{}".format(code, state))
 
         # 用户同意授权
         if self.in_wechat:
             if code:
                 # 来自 qx 的授权, 获得 userinfo
                 if state == self.wx_constant.WX_OAUTH_DEFAULT_STATE:
-                    self.logger.debug("**2** 来自 qx 的授权, 获得 userinfo")
+                    self.logger.debug("来自 qx 的授权, 获得 userinfo")
                     userinfo = yield self._get_user_info(code)
                     yield self._handle_user_info(userinfo)
                     if self._finished:
@@ -198,7 +192,7 @@ class BaseHandler(MetaBaseHandler):
 
                 # 来自企业号的静默授权
                 else:
-                    self.logger.debug("**3** 来自企业号的静默授权")
+                    self.logger.debug("来自企业号的静默授权")
                     self._unionid = from_hex(state)
                     openid = yield self._get_user_openid(code)
                     self._wxuser = yield self._handle_ent_openid(
@@ -283,12 +277,12 @@ class BaseHandler(MetaBaseHandler):
         return params
 
     def _get_json_args(self):
+        """获取 api 调用的 json dict"""
         json_args = {}
-
         content_type = self.request.headers.get("Content-Type")
-        if content_type and "application/json" in content_type and self.request.body:
+        if content_type and "application/json" in content_type and \
+            self.request.body:
             json_args = ujson.loads(self.request.body)
-
         return ObjectDict(json_args)
 
     @gen.coroutine
@@ -307,8 +301,11 @@ class BaseHandler(MetaBaseHandler):
                 raise NoSignatureError()
 
         wechat = yield self.session_ps.get_wechat_by_signature(signature)
-        # wechat.jsapi = JsApi(
-        #     jsapi_ticket=wechat.jsapi_ticket, url=self.fullurl)
+
+        # 拼装 JsApi
+        wechat.jsapi = JsApi(
+            jsapi_ticket=wechat.jsapi_ticket,
+            url=self.request.protocol+'://'+self.request.host+self.request.uri)
 
         raise gen.Return(wechat)
 
@@ -394,6 +391,7 @@ class BaseHandler(MetaBaseHandler):
 
     @gen.coroutine
     def _build_session(self):
+        """构建 session"""
 
         session = ObjectDict()
         session.wechat = self._wechat
@@ -408,35 +406,19 @@ class BaseHandler(MetaBaseHandler):
         session_id = self._make_new_session_id()
         self.set_secure_cookie(self.constant.COOKIE_SESSIONID, session_id)
 
-        # 保存企业号 session， 包含 wechat, wxuser, qxuser, sysuser
-        key_ent = self.constant.SESSION_USER.format(session_id, self._wechat.id)
-        self.redis.set(key_ent, session, 60 * 60 * 2)
-        self.logger.debug("refresh ent session redis key: {}".format(key_ent))
-
-        # 保存聚合号 session， 只包含 qxuser
-        key_qx = self.constant.SESSION_USER.format(session_id, self.settings['qx_wechat_id'])
-        self.redis.set(key_qx, ObjectDict(qxuser=session.qxuser))
-        self.logger.debug("refresh qx session redis key: {}".format(key_ent))
+        self._save_sessions(session_id, session)
 
         if self.is_platform:
-            # 拼装 company, employee
-            session.company = yield self._get_current_company(self._wechat.id)
-            employee = yield self.session_ps.get_employee(
-                wxuser_id=session.wxuser.id, company_id=session.company.id)
-            if employee:
-                session.employee = employee
-
-        # 拼装 recom
+            yield self._add_company_info_to_session(session)
         if self.params.recom:
-            session.recom = yield self.user_ps.get_wxuser_openid_wechat_id(
-                openid=self.params.recom, wechat_id=self._wechat.id)
+            yield self._add_recom_to_session(session)
 
         self.current_user = session
         self.logger.debug("current_user: {}".format(self.current_user))
 
     @gen.coroutine
     def _build_session_by_unionid(self, unionid):
-        """从 unionid 获取 session"""
+        """从 unionid 构建 session"""
 
         session = ObjectDict()
         session.wechat = self._wechat
@@ -454,32 +436,46 @@ class BaseHandler(MetaBaseHandler):
             session.qxuser.sysuser_id)
 
         session_id = self.get_secure_cookie(self.constant.COOKIE_SESSIONID)
+        self._save_sessions(session_id, session)
 
-        # 保存企业号 session， 包含 wechat, wxuser, qxuser, sysuser
+        if self.is_platform:
+            yield self._add_company_info_to_session(session)
+        if self.params.recom:
+            yield self._add_recom_to_session(session)
+
+        self.current_user = session
+        self.logger.debug("current_user: {}".format(self.current_user))
+
+    def _save_sessions(self, session_id, session):
+        """
+        1. 保存企业号 session， 包含 wechat, wxuser, qxuser, sysuser
+        2. 保存聚合号 session， 只包含 qxuser
+        """
+
         key_ent = self.constant.SESSION_USER.format(session_id, session.wechat.id)
         self.redis.set(key_ent, session, 60 * 60 * 2)
         self.logger.debug("refresh ent session redis key: {}".format(key_ent))
 
-        # 保存聚合号 session， 只包含 qxuser
         key_qx = self.constant.SESSION_USER.format(session_id, self.settings['qx_wechat_id'])
         self.redis.set(key_qx, ObjectDict(qxuser=session.qxuser))
-        self.logger.debug("refresh qx session redis key: {}".format(key_ent))
+        self.logger.debug("refresh qx session redis key: {}".format(key_qx))
 
-        if self.is_platform:
-            # 拼装 company, employee
-            session.company = yield self._get_current_company(self._wechat.id)
-            employee = yield self.session_ps.get_employee(
-                wxuser_id=session.wxuser.id, company_id=session.company.id)
-            if employee:
-                session.employee = employee
+    @gen.coroutine
+    def _add_company_info_to_session(self, session):
+        """拼装 session 中的 company, employee"""
 
-        # 拼装 recom
-        if self.params.recom:
-            session.recom = yield self.user_ps.get_wxuser_openid_wechat_id(
-                openid=self.params.recom, wechat_id=self._wechat.id)
+        session.company = yield self._get_current_company(self._wechat.id)
+        employee = yield self.session_ps.get_employee(
+            wxuser_id=session.wxuser.id, company_id=session.company.id)
+        if employee:
+            session.employee = employee
 
-        self.current_user = session
-        self.logger.debug("current_user: {}".format(self.current_user))
+    @gen.coroutine
+    def _add_recom_to_session(self, session):
+        """拼装 session 中的 recom"""
+
+        session.recom = yield self.user_ps.get_wxuser_openid_wechat_id(
+            openid=self.params.recom, wechat_id=self._wechat.id)
 
     @gen.coroutine
     def _get_session_from_ent(self, session_id):
@@ -553,19 +549,19 @@ class BaseHandler(MetaBaseHandler):
         return namespace
 
     def static_url(self, path, include_host=None, **kwargs):
+        """获取 static_url"""
         if not path:
             return None
-
         if not path.startswith("http"):
             if "mid_path" in kwargs:
                 path = os.path.join(kwargs['mid_path'], path)
             path = urljoin(self.settings['static_domain'], path)
         if not path.startswith("http") and include_host is not None:
             path = include_host + ":" + path
-
         return path
 
     def on_finish(self):
+        """on_finish 时处理传输日志"""
         info = ObjectDict(
             handler=__name__ + '.' + self.__class__.__name__,
             module=self.__class__.__module__.split(".")[1],
@@ -579,9 +575,6 @@ class BaseHandler(MetaBaseHandler):
 
     def write_error(self, http_code, **kwargs):
         """错误页
-        :param status_code: http_status
-
-        usage：
         403（用户未被授权请求） Forbidden: Request failed because user does not have authorization to access a specific resource
         404（资源不存在）      Resource not found
         500（服务器错误）      Internal Server Error: Something went wrong on the server, check status site and/or report the issue
@@ -597,7 +590,7 @@ class BaseHandler(MetaBaseHandler):
         #     self.render('common/systemmessage.html', status_code=status_code,
         #                 message="正在努力维护服务器中")
 
-        # for debug
+        # TODO only for debug
         self.write(http_code)
 
     def render_page(self, template_name, data, status_code=0,
@@ -628,8 +621,7 @@ class BaseHandler(MetaBaseHandler):
         return
 
     def send_json(self, data, status_code=0, message='success', http_code=200):
-        """传递 JSON 到前端
-        Used for API
+        """传递 JSON 到前端 Used for API
         """
         render_json = json_dumps({
             "status": status_code,
@@ -642,6 +634,7 @@ class BaseHandler(MetaBaseHandler):
         self.write(render_json)
 
     def _get_info_header(self, log_params):
+        """构建日志内容"""
         request = self.request
         req_params = request.arguments
 
@@ -686,8 +679,7 @@ class BaseHandler(MetaBaseHandler):
         return log_params
 
     def _depend_wechat(self):
-        """判断用户UA是否为微信客户端
-        """
+        """判断用户UA是否为微信客户端"""
         wechat = self.constant.CLIENT_NON_WECHAT
         mobile = self.constant.CLIENT_TYPE_UNKNOWN
 
@@ -700,7 +692,3 @@ class BaseHandler(MetaBaseHandler):
             wechat = self.constant.CLIENT_WECHAT
 
         return wechat, mobile
-
-    def _redirect_to_login(self):
-        self.redirect(make_url("/m/login", self.params))
-        return
