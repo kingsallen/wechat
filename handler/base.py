@@ -407,9 +407,9 @@ class BaseHandler(MetaBaseHandler):
             session_id = self._make_new_session_id()
             self.set_secure_cookie(self.constant.COOKIE_SESSIONID, session_id)
 
-            self.redis.set(
-                self.constant.SESSION_USER.format(session_id, self._wechat.id),
-                session, 60 * 60 * 2)
+            key = self.constant.SESSION_USER.format(session_id, self._wechat.id)
+            self.logger.debug("refresh redis key: {}".format(key))
+            self.redis.set(key, session, 60 * 60 * 2)
 
             employee = yield self.session_ps.get_employee(
                 wxuser_id=session.wxuser.id, company_id=session.company.id)
@@ -496,6 +496,7 @@ class BaseHandler(MetaBaseHandler):
             else:
                 return session_id
 
+    # tornado hooks
     @gen.coroutine
     def get(self):
         pass
@@ -511,6 +512,30 @@ class BaseHandler(MetaBaseHandler):
     @gen.coroutine
     def delete(self):
         pass
+
+    def get_template_namespace(self):
+        namespace = super().get_template_namespace()
+        add_namespace = dict(
+            params=self.params,
+            current_user=self.current_user,
+            make_url=make_url,
+            settings=self.settings
+        )
+        namespace.update(add_namespace)
+        return namespace
+
+    def static_url(self, path, include_host=None, **kwargs):
+        if not path:
+            return None
+
+        if not path.startswith("http"):
+            if "mid_path" in kwargs:
+                path = os.path.join(kwargs['mid_path'], path)
+            path = urljoin(self.settings['static_domain'], path)
+        if not path.startswith("http") and include_host is not None:
+            path = include_host + ":" + path
+
+        return path
 
     def on_finish(self):
         info = ObjectDict(
@@ -545,7 +570,8 @@ class BaseHandler(MetaBaseHandler):
         #                 message="正在努力维护服务器中")
         self.write(http_code)
 
-    def render(self, template_name, data, status_code=0, message='success', http_code=200):
+    def render_page(self, template_name, data, status_code=0,
+                    message='success', http_code=200):
         """render 页面"""
         self.log_info = {"res_type": "html", "status_code": status_code}
         self.set_status(http_code)
@@ -568,8 +594,7 @@ class BaseHandler(MetaBaseHandler):
             self.finish()
             return
 
-        super(tornado.web.RequestHandler, BaseHandler).render(
-            template_name, render_json=render_json)
+        self.render(template_name, render_json=render_json)
         return
 
     def send_json(self, data, status_code=0, message='success', http_code=200):
@@ -585,18 +610,6 @@ class BaseHandler(MetaBaseHandler):
         self.log_info = {"res_type": "json", "status_code": status_code}
         self.set_status(http_code)
         self.write(render_json)
-
-    def get_template_namespace(self):
-        namespace = super().get_template_namespace()
-        add_namespace = dict(
-            params=self.params,
-            current_user=self.current_user,
-            make_url=make_url,
-            aes=self.aes,
-            settings=self.settings
-        )
-        namespace.update(add_namespace)
-        return namespace
 
     def _get_info_header(self, log_params):
         request = self.request
