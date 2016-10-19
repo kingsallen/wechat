@@ -60,6 +60,10 @@ class BaseHandler(MetaBaseHandler):
     http://www.tornadoweb.org/en/stable/web.html#other
     """
 
+    def initialize(self, **kwargs):
+        # 日志需要，由 route 定义
+        self.event = kwargs.get("event")
+
     def __init__(self, application, request, **kwargs):
         super().__init__(application, request, **kwargs)
 
@@ -160,8 +164,9 @@ class BaseHandler(MetaBaseHandler):
 
     @property
     def component_access_token(self):
-        return self.redis.get("component_access_token", prefix=False)[
-            "component_access_token"]
+        return None
+        # return self.redis.get("component_access_token", prefix=False)[
+        #     "component_access_token"]
 
     @log_info.setter
     def log_info(self, value):
@@ -584,6 +589,7 @@ class BaseHandler(MetaBaseHandler):
                 request.headers.get('X-Forwarded-For') or
                 request.remote_ip
             ),
+            event="{}_{}".format(self.event, request.method),
             cookie=self.cookies,
             user_id=self.current_user.get("sysuser", {}).get("id", 0),
             req_type=request.method,

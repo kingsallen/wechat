@@ -25,9 +25,7 @@ def handle_response(func):
         except Exception as e:
             self.logger.error(e)
             if self.request.headers.get("Accept", "").startswith("application/json"):
-                self.send_json({
-                    "msg": constant.RESPONSE_FAILED,
-                }, status_code=416)
+                self.send_json(self, data={}, status_code=416, message=constant.RESPONSE_FAILED)
             else:
                 self.write_error(500)
                 return

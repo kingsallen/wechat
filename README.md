@@ -11,10 +11,11 @@ http://wiki.moseeker.com/python-code-comments.md
     |----...
     |
     |--conf    常量配置
-    |----common    系统公用常量
-    |----help    仟寻招聘助手常量
-    |----platform    企业号常量
-    |----qx    聚合号常量
+    |----common.py    系统公用常量
+    |----help.py    仟寻招聘助手常量
+    |----platform.py    企业号常量
+    |----qx.py    聚合号常量
+    |----wechat.py   wechat 常量
     |
     |--dao   模型，针对单个表结构申明字段和类型，按DB分文件夹
     |----hr    hrdb相关数据表结构
@@ -30,6 +31,9 @@ http://wiki.moseeker.com/python-code-comments.md
     |----base.py    请求方法父类，封装公共类
     |
     |--logs    请求日志
+    |
+    |--oauth   wechat 相关
+    |----wechat.py  wechat oauth2.0实现
     |
     |--service    服务类，主要处理业务逻辑
     |----data    dataservice,主要与dao进行交互，提供原子性的方法，按DB分包
@@ -48,7 +52,7 @@ http://wiki.moseeker.com/python-code-comments.md
     |
     |--tests  单元测试
     |
-    |--utils    工具类
+    |--util    工具类
     |----common 公共方法类
     |----tool   工具类
     |
@@ -64,7 +68,10 @@ http://wiki.moseeker.com/python-code-comments.md
 ## 调用关系
 
     调用关系：只能向下调用、不能跨级调用、不能向上调用
-    handler    路由请求处理；调用pageservice；建议一个 handler 对应一个 pageservice，不能调用 dataservice、dao；handler之间不能相互调用
+    handler    路由请求处理；调用pageservice；
+                建议一个 handler 对应一个 pageservice，不能调用 dataservice、dao；
+                handler之间不能相互调用；
+                handler 对应具体功能，遵守 restful 风格
     |||
     pageservice    业务逻辑服务类，主要业务逻辑处理；调用多个dataservice，不能调用handler；pageservice之间不能相互调用
     |||

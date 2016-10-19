@@ -59,6 +59,7 @@ class Application(tornado.web.Application):
         self.settings = settings
         self.logger = logger
         self.env = options.env
+
         self.constant = constant
         self.plat_constant = plat_constant
         self.qx_constant = qx_constant
