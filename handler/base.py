@@ -9,6 +9,7 @@ import re
 import socket
 import time
 import ujson
+import uuid
 from hashlib import sha1
 from urllib.parse import urljoin, urlparse, parse_qs
 
@@ -311,22 +312,22 @@ class BaseHandler(MetaBaseHandler):
 
     @gen.coroutine
     def _get_current_company(self, company_id):
-        """
-        # 获得企业母公司信息
+        """获得企业母公司信息
         """
         conds = {'id': company_id}
         company = yield self.company_ps.get_company(conds=conds, need_conf=True)
-        theme = yield self.wechat_ps.get_wechat_theme(
-            {'id': company.get("conf_theme_id"), "disable": 0})
-        if theme:
-            company.update({
-                "theme": [
-                    theme.get("background_color"),
-                    theme.get("title_color"),
-                    theme.get("button_color"),
-                    theme.get("other_color")
-                ]
-            })
+        if company.conf_theme_id:
+            theme = yield self.wechat_ps.get_wechat_theme(
+                {'id': company.conf_theme_id, "disable": 0})
+            if theme:
+                company.update({
+                    "theme": [
+                        theme.background_color,
+                        theme.title_color,
+                        theme.button_color,
+                        theme.other_color
+                    ]
+                })
         else:
             company.update({"theme": None})
 
@@ -460,10 +461,7 @@ class BaseHandler(MetaBaseHandler):
         :return: session_id
         """
         while True:
-            _t = time.time()
-            # TODO uuid？
-            _r = os.urandom(16)
-            session_id = sha1(_t + _r).hexdigest()
+            session_id = sha1(uuid.uuid4().bytes).hexdigest()
             record = self.redis.exists(session_id + "_*")
             if record:
                 continue
