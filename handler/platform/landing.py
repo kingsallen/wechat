@@ -48,4 +48,4 @@ class LandingHandler(BaseHandler):
         })
 
         self.render("refer/neo_weixin/position/company_search.html",
-                    data=company, use_render_json=True)
+                    data=company)

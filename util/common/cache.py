@@ -59,8 +59,8 @@ class BaseRedis(object):
         else:
             return default
 
-    def set(self, key, value, ttl=None):
-        key = self.key_name(key)
+    def set(self, key, value, ttl=None, prefix=True):
+        key = self.key_name(key, prefix)
         value = json_dumps(value)
         self._redis.set(key, value, ex=ttl)
 
