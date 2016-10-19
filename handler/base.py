@@ -516,34 +516,32 @@ class BaseHandler(MetaBaseHandler):
         #                 message="正在努力维护服务器中")
         self.write(http_code)
 
-    def render(self, template_name, data, status_code=0, message='success', http_code=200, use_render_json=True):
+    def render(self, template_name, data,
+                    status_code=0, message='success', http_code=200):
         """render 页面"""
         self.log_info = {"res_type": "html", "status_code": status_code}
         self.set_status(http_code)
 
-        if use_render_json:
-            render_json = encode_json_dumps({
-                "status": status_code,
-                "message": message,
-                "data": data
-            })
+        render_json = encode_json_dumps({
+            "status": status_code,
+            "message": message,
+            "data": data
+        })
 
-            # 前后端联调使用
-            if self.settings.get('remote_debug', False) is True:
-                template_string = self.render_string(template_name, render_json)
-                post_url = urljoin(self.settings.get('remote_debug_ip'),
-                                   template_name)
-                http_client = tornado.httpclient.HTTPClient()
-                r = http_client.fetch(post_url, method="POST",
-                                      body=template_string)
-                self.write(r.body)
-                self.finish()
-                return
+        # 前后端联调使用
+        if self.settings.get('remote_debug', False) is True:
+            template_string = self.render_string(template_name, render_json)
+            post_url = urljoin(self.settings.get('remote_debug_ip'),
+                               template_name)
+            http_client = tornado.httpclient.HTTPClient()
+            r = http_client.fetch(post_url, method="POST",
+                                  body=template_string)
+            self.write(r.body)
+            self.finish()
+            return
 
-        else:
-            render_json = data
-
-        self.render(template_name, render_json)
+        super(tornado.web.RequestHandler, BaseHandler).render(
+            template_name, render_json=render_json)
         return
 
     def send_json(self, data, status_code=0, message='success', http_code=200):
