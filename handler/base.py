@@ -9,6 +9,7 @@ import re
 import socket
 import time
 import ujson
+import uuid
 from hashlib import sha1
 from urllib.parse import urljoin, urlparse, parse_qs
 
@@ -311,22 +312,22 @@ class BaseHandler(MetaBaseHandler):
 
     @gen.coroutine
     def _get_current_company(self, company_id):
-        """
-        # 获得企业母公司信息
+        """获得企业母公司信息
         """
         conds = {'id': company_id}
         company = yield self.company_ps.get_company(conds=conds, need_conf=True)
-        theme = yield self.wechat_ps.get_wechat_theme(
-            {'id': company.get("conf_theme_id"), "disable": 0})
-        if theme:
-            company.update({
-                "theme": [
-                    theme.get("background_color"),
-                    theme.get("title_color"),
-                    theme.get("button_color"),
-                    theme.get("other_color")
-                ]
-            })
+        if company.conf_theme_id:
+            theme = yield self.wechat_ps.get_wechat_theme(
+                {'id': company.conf_theme_id, "disable": 0})
+            if theme:
+                company.update({
+                    "theme": [
+                        theme.background_color,
+                        theme.title_color,
+                        theme.button_color,
+                        theme.other_color
+                    ]
+                })
         else:
             company.update({"theme": None})
 
@@ -403,8 +404,7 @@ class BaseHandler(MetaBaseHandler):
         self.set_secure_cookie(self.constant.COOKIE_SESSIONID, session_id)
         self.redis.set(
             self.constant.SESSION_USER.format(session_id, self._wechat.id),
-            ujson.dumps(session),
-            60 * 60 * 2)
+            session, 60 * 60 * 2)
 
         if self.is_platform:
             employee = yield self.session_ps.get_employee(
@@ -460,10 +460,7 @@ class BaseHandler(MetaBaseHandler):
         :return: session_id
         """
         while True:
-            _t = time.time()
-            # TODO uuid？
-            _r = os.urandom(16)
-            session_id = sha1(_t + _r).hexdigest()
+            session_id = sha1(uuid.uuid4().bytes).hexdigest()
             record = self.redis.exists(session_id + "_*")
             if record:
                 continue
@@ -519,28 +516,32 @@ class BaseHandler(MetaBaseHandler):
         #                 message="正在努力维护服务器中")
         self.write(http_code)
 
-    def render(self, template_name, data, status_code=0, message='success', http_code=200):
+    def render(self, template_name, data, status_code=0, message='success', http_code=200, use_render_json=True):
         """render 页面"""
         self.log_info = {"res_type": "html", "status_code": status_code}
         self.set_status(http_code)
 
-        render_json = encode_json_dumps({
-            "status": status_code,
-            "message": message,
-            "data": data
-        })
+        if use_render_json:
+            render_json = encode_json_dumps({
+                "status": status_code,
+                "message": message,
+                "data": data
+            })
 
-        # 前后端联调使用
-        if self.settings.get('remote_debug', False) is True:
-            template_string = self.render_string(template_name, render_json)
-            post_url = urljoin(self.settings.get('remote_debug_ip'),
-                               template_name)
-            http_client = tornado.httpclient.HTTPClient()
-            r = http_client.fetch(post_url, method="POST",
-                                  body=template_string)
-            self.write(r.body)
-            self.finish()
-            return
+            # 前后端联调使用
+            if self.settings.get('remote_debug', False) is True:
+                template_string = self.render_string(template_name, render_json)
+                post_url = urljoin(self.settings.get('remote_debug_ip'),
+                                   template_name)
+                http_client = tornado.httpclient.HTTPClient()
+                r = http_client.fetch(post_url, method="POST",
+                                      body=template_string)
+                self.write(r.body)
+                self.finish()
+                return
+
+        else:
+            render_json = data
 
         self.render(template_name, render_json)
         return
