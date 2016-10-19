@@ -565,10 +565,10 @@ class BaseHandler(MetaBaseHandler):
         customs = ObjectDict(
             type_wechat = self.in_wechat,
             type_mobile = self.client_type,
-            recom_id='',
-            qxuser_id='',
-            wxuser_id='',
-            wechat_id='',
+            recom_id=self.current_user.get("recom", {}).get("id", 0),
+            qxuser_id=self.current_user.get("qxuser", {}).get("id", 0),
+            wxuser_id=self.current_user.get("wxuser", {}).get("id", 0),
+            wechat_id=self.current_user.get("wechat", {}).get("id", 0),
         )
 
         log_info_common = ObjectDict(
@@ -576,7 +576,6 @@ class BaseHandler(MetaBaseHandler):
             hostname=socket.gethostname(),
             appid=self.app_id,
             http_code=self.get_status(),
-            status_code='TODO',
             opt_time="%.2f" % ((time.time() - self._start_time) * 1000),
             useragent=request.headers.get('User-Agent'),
             referer=request.headers.get('Referer'),
@@ -586,6 +585,7 @@ class BaseHandler(MetaBaseHandler):
                 request.remote_ip
             ),
             cookie=self.cookies,
+            user_id=self.current_user.get("sysuser", {}).get("id", 0),
             req_type=request.method,
             req_uri=request.uri,
             req_params=req_params,
