@@ -58,8 +58,8 @@ class WeChatOauth2Service(object):
         if access_token_info.errcode:
             raise WeChatOauthError(access_token_info.errmsg)
         else:
-            openid = access_token_info.get('open_id')
-            unionid = access_token_info.get('union_id')
+            openid = access_token_info.get('openid')
+            unionid = access_token_info.get('unionid')
             # 缓存 access_token
             self._access_token = access_token_info.get('access_token')
         raise gen.Return((openid, unionid))
