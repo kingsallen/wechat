@@ -7,7 +7,7 @@ WX_OAUTH_GET_ACCESS_TOKEN = "https://api.weixin.qq.com/sns/oauth2/access_token?a
 WX_THIRD_OAUTH_GET_ACCESS_TOKEN = "https://api.weixin.qq.com/sns/oauth2/component/access_token?appid=%s&code=%s&grant_type=authorization_code&component_appid=%s&component_access_token=%s"
 WX_OAUTH_GET_USERINFO = "https://api.weixin.qq.com/sns/userinfo?access_token=%s&openid=%s&lang=zh_CN"
 
-WX_OAUTH_QX_PATH = "/wxoauth2"
+WX_OAUTH_QX_PATH = "/m/wxoauth2"
 
 WX_OAUTH_DEFAULT_STATE = '0'
 

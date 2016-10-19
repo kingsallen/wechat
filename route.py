@@ -16,28 +16,28 @@ help_routes: 继承自common_routes, 供help单独使用，一般 handler 在 he
 # 微信端公共的 routes
 common_routes = [
     # wechat
-    (r"/wechat", "handler.common.wechat.WechatHandler"),
-    (r"/login", "handler.common.login.LoginHandler"),
+    (r"/m/wechat",                       "handler.common.wechat.WechatHandler"),
+    (r"/m/login",                        "handler.common.login.LoginHandler"),
 
     # Testing url, delete when releasing
-    (r"/mobile/test", "tests.dao.user.TestCompanyVisitReqHandler")
+    (r"/m/test",                         "tests.dao.user.TestCompanyVisitReqHandler")
 ]
 
 # 企业号的单独 routes
 platform_routes = [
-    (r"/mobile/start", "handler.platform.landing.LandingHandler"),
-    (r"/mobile/company/([0-9]*)", "handler.platform.companyrelation.CompanyHandler"),
+    (r"/m/start",                        "handler.platform.landing.LandingHandler"),
+    (r"/m/company/([0-9]*)",             "handler.platform.companyrelation.CompanyHandler"),
 
-    (r"/api/company/visitreq", "handler.platform.companyrelation.CompanyVisitReqHandler"),
-    (r"/api/company/follow", "handler.platform.companyrelation.CompanyFollowHandler"),
-    (r"/api/cellphone", "handler.platform.cellphone.CellphoneBindHandler"),
+    (r"/m/api/company/visitreq",         "handler.platform.companyrelation.CompanyVisitReqHandler"),
+    (r"/m/api/company/follow",           "handler.platform.companyrelation.CompanyFollowHandler"),
+    (r"/m/api/cellphone",                "handler.platform.cellphone.CellphoneBindHandler"),
 ]
 platform_routes.extend(common_routes)
 
 
 # 聚合号的单独 routes
 qx_routes = [
-    (r"/wxoauth2", "handler.qx.wechat_oauth.WxOauthHandler")
+    (r"/m/wxoauth2",                     "handler.qx.wechat_oauth.WxOauthHandler")
 ]
 qx_routes.extend(common_routes)
 

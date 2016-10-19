@@ -44,8 +44,7 @@ class LandingHandler(BaseHandler):
             "logo": self.current_user.company.get("logo"),
             "name": self.current_user.company.get("abbreviation"),
             "image": self.current_user.company.get("conf_search_img"),
-            "search_seq" : search_seq
+            "search_seq": search_seq
         })
 
         self.render("refer/neo_weixin/position/company_search.html", data=company)
-        # self.render("refer/neo_weixin/position/company_search.html", company=company)

@@ -614,5 +614,5 @@ class BaseHandler(MetaBaseHandler):
         return wechat, mobile
 
     def _redirect_to_login(self):
-        self.redirect(make_url("/login", self.params))
+        self.redirect(make_url("/m/login", self.params))
         return
