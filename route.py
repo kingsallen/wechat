@@ -11,6 +11,9 @@ platform_routes: 继承自common_routes, 供platform单独使用，一般 handle
 qx_routes: 继承自common_routes, 供qx单独使用，一般 handler 在 qx 中，则 route 可在此编辑
 help_routes: 继承自common_routes, 供help单独使用，一般 handler 在 help 中，则 route 可在此编辑
 
+!!! 注意
+!!! route 都以/m/，nginx 会判断，并将所有该路由都会调用新微信，非/m/开头，会调用老微信 !!!
+
 """
 
 # 微信端公共的 routes
