@@ -253,10 +253,7 @@ class BaseHandler(MetaBaseHandler):
         "city":"CITY",
         "country":"COUNTRY",
         "headimgurl":    "http://wx.qlogo.cn/mmopen/g3MonUZtNHkdmzicIlibx",
-        "privilege":[
-                        "PRIVILEGE1"
-                        "PRIVILEGE2"
-                    ],
+        "privilege":["PRIVILEGE1", "PRIVILEGE2"],
         "unionid": "o6_bmasdasdsad6_2sgVt7hMZOPfL"
         )
         """

@@ -30,3 +30,4 @@ re = requests.get(url, params={'mobile': '18855101775'})
 print(json.loads(re.text))
 
 # send {'message': '短信发送异常!', 'data': '{}', 'status': 80001} <class 'dict'>
+# AttributeError: 'CellphoneBindHandler' object has no attribute 'client_type'

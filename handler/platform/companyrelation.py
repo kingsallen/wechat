@@ -17,9 +17,7 @@ class CompanyVisitReqHandler(BaseHandler):
     @gen.coroutine
     def post(self):
         response = ObjectDict({'status': 1, 'message': 'failure'})
-        print(self.json_args)
         if self.json_args and 'status' in self.json_args.keys():
-
             # Debug with front page.
             # To be confirmed: company_id, user_id
             self.json_args['company_id'] = 456
