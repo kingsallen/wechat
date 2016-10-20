@@ -9,7 +9,6 @@ import re
 import socket
 import time
 import ujson
-import uuid
 from hashlib import sha1
 from urllib.parse import urljoin
 
@@ -211,6 +210,9 @@ class BaseHandler(MetaBaseHandler):
         self._unionid = None
         self._wxuser = None
 
+        self.logger.debug("current_user: {}".format(self.current_user))
+        self.logger.debug("params: {}".format(self.params))
+
     # PROTECTED
     @gen.coroutine
     def _handle_user_info(self, userinfo):
@@ -301,11 +303,6 @@ class BaseHandler(MetaBaseHandler):
                 raise NoSignatureError()
 
         wechat = yield self.session_ps.get_wechat_by_signature(signature)
-
-        # 拼装 JsApi
-        wechat.jsapi = JsApi(
-            jsapi_ticket=wechat.jsapi_ticket,
-            url=self.request.protocol+'://'+self.request.host+self.request.uri)
 
         raise gen.Return(wechat)
 
@@ -408,13 +405,13 @@ class BaseHandler(MetaBaseHandler):
 
         self._save_sessions(session_id, session)
 
+        self._add_jsapi_to_wechat(session.wechat)
         if self.is_platform:
             yield self._add_company_info_to_session(session)
         if self.params.recom:
             yield self._add_recom_to_session(session)
 
         self.current_user = session
-        self.logger.debug("current_user: {}".format(self.current_user))
 
     @gen.coroutine
     def _build_session_by_unionid(self, unionid):
@@ -438,13 +435,13 @@ class BaseHandler(MetaBaseHandler):
         session_id = self.get_secure_cookie(self.constant.COOKIE_SESSIONID)
         self._save_sessions(session_id, session)
 
+        self._add_jsapi_to_wechat(session.wechat)
         if self.is_platform:
             yield self._add_company_info_to_session(session)
         if self.params.recom:
             yield self._add_recom_to_session(session)
 
         self.current_user = session
-        self.logger.debug("current_user: {}".format(self.current_user))
 
     def _save_sessions(self, session_id, session):
         """
@@ -452,7 +449,7 @@ class BaseHandler(MetaBaseHandler):
         2. 保存聚合号 session， 只包含 qxuser
         """
 
-        key_ent = self.constant.SESSION_USER.format(session_id, session.wechat.id)
+        key_ent = self.constant.SESSION_USER.format(session_id, self._wechat.id)
         self.redis.set(key_ent, session, 60 * 60 * 2)
         self.logger.debug("refresh ent session redis key: {}".format(key_ent))
 
@@ -464,7 +461,7 @@ class BaseHandler(MetaBaseHandler):
     def _add_company_info_to_session(self, session):
         """拼装 session 中的 company, employee"""
 
-        session.company = yield self._get_current_company(self._wechat.id)
+        session.company = yield self._get_current_company(session.wechat.company_id)
         employee = yield self.session_ps.get_employee(
             wxuser_id=session.wxuser.id, company_id=session.company.id)
         if employee:
@@ -477,6 +474,12 @@ class BaseHandler(MetaBaseHandler):
         session.recom = yield self.user_ps.get_wxuser_openid_wechat_id(
             openid=self.params.recom, wechat_id=self._wechat.id)
 
+    def _add_jsapi_to_wechat(self, wechat):
+        """拼装 jsapi"""
+        wechat.jsapi = JsApi(
+            jsapi_ticket=wechat.jsapi_ticket,
+            url=self.request.protocol + '://' + self.request.host + self.request.uri)
+
     @gen.coroutine
     def _get_session_from_ent(self, session_id):
         """尝试获取企业号 session"""
@@ -485,7 +488,10 @@ class BaseHandler(MetaBaseHandler):
         value = self.redis.get(key)
         if value:
             # 如果有 value， 返回该 value 作为 self.current_user
-            self.current_user = ObjectDict(value)
+            session = ObjectDict(value)
+            self._add_company_info_to_session(session)
+            self.current_user = session
+
             return True
         return False
 
@@ -513,7 +519,7 @@ class BaseHandler(MetaBaseHandler):
         :return: session_id
         """
         while True:
-            session_id = sha1(uuid.uuid4().bytes).hexdigest()
+            session_id = sha1(os.urandom(24)).hexdigest()
             record = self.redis.exists(session_id + "_*")
             if record:
                 continue
