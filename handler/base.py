@@ -489,7 +489,7 @@ class BaseHandler(MetaBaseHandler):
         if value:
             # 如果有 value， 返回该 value 作为 self.current_user
             session = ObjectDict(value)
-            self._add_company_info_to_session(session)
+            yield self._add_company_info_to_session(session)
             self.current_user = session
 
             return True
