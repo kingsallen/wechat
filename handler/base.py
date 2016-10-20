@@ -25,6 +25,8 @@ from util.tool.json_tool import encode_json_dumps, json_dumps
 from util.tool.str_tool import to_str, to_hex, from_hex
 from util.tool.url_tool import make_url, url_subtract_query
 
+import conf.message as msg_const
+
 # 动态加载所有 PageService
 obDict = {}
 d = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)) + \
@@ -643,20 +645,19 @@ class BaseHandler(MetaBaseHandler):
         500（服务器错误）      Internal Server Error: Something went wrong on the server, check status site and/or report the issue
         """
 
-        if status_code == 403:
-            self.render_page('system/info.html', code=status_code,
-                        css="warning", message="用户未被授权请求")
-        elif status_code == 404:
-            self.render_page('system/info.html', code=status_code,
-                        message="Ta在地球上消失了")
+        if http_code == 403:
+            self.render_page(
+                'system/info.html',
+                data=ObjectDict(code=http_code, css="warning", message=msg_const.NOT_AUTHORIZED))
+
+        elif http_code == 404:
+            self.render_page(
+                'system/info.html', data=ObjectDict(code=http_code, message=msg_const.NO_DATA))
         else:
-            self.render_page('system/info.html', code=status_code,
-                        message="正在努力维护服务器中")
+            self.render_page(
+                'system/info.html', data=ObjectDict(code=http_code, message=msg_const.UNKNOWN_DEFAULT))
 
-
-        self.write(http_code)
-
-    def render_page(self, template_ndame, data, status_code=0,
+    def render_page(self, template_name, data, status_code=0,
                     message='success', http_code=200):
         """render 页面"""
         self.log_info = {"res_type": "html", "status_code": status_code}
