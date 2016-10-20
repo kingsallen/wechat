@@ -38,7 +38,6 @@ class LoginHandler(BaseHandler):
                 register_url=_register_url
             )
         )
-
         self.render_page("/system/login.html", data=data)
 
     @gen.coroutine
@@ -60,5 +59,4 @@ class LoginHandler(BaseHandler):
             self.send_json(
                 status_code=const.API_FAILURE,
                 message=msg_const.LOGIN_FAILURE,
-                data = {})
-        return
+                data={})
