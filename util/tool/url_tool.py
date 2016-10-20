@@ -16,15 +16,19 @@ def make_url(path, params=None, host="", protocol="http", escape=None,
     if "?" in path:
         raise ValueError("Path should not contain '?'")
 
-    params = params or {}
-    escape = escape or []
-
     if not isinstance(params, dict):
         raise TypeError("Params is not a dict")
 
+    params = params or {}
+
+    escape_default = ['m', 'state', 'code']
+    escape = escape or []
+    escape = set(escape_default + escape)
+
     d = params.copy()
-    # m 参数不传递
-    d.pop('m', None)
+
+    for e in escape:
+        d.pop(e, None)
     d.update(kwargs)
 
     url_params = []

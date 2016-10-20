@@ -8,7 +8,7 @@ constant配置常量规范：
 3.使用分割线区分系统、业务常量
 4.常量配置添加注释
 
-常量使用大写字母，字符串需要时标注为unicode编码
+常量使用大写字母
 例如 SUCCESS = "成功"
 """
 
@@ -26,9 +26,12 @@ WECHAT_REGISTER_SOURCE_PLATFORM = 2
 WXUSER_OAUTH_UPDATE = 7
 WXUSER_OAUTH = 4
 
-# status_code默认错误返回
-RESPONSE_SUCCESS = "success"
-RESPONSE_FAILED = "failed"
+# status_code
+RESPONSE_SUCCESS = "SUCCESS"
+RESPONSE_FAILURE = "FAILURE"
+# api_status_code
+API_SUCCESS = 0
+API_FAILURE = 1
 
 # 环境
 ENV = "new_wechat"

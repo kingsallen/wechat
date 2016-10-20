@@ -2,6 +2,7 @@
 
 import tornado.gen as gen
 import conf.common as const
+from util.tool.http_tool import http_post
 
 from util.common import ObjectDict
 from service.page.base import PageService
@@ -10,8 +11,30 @@ from setting import settings
 
 
 class UserPageService(PageService):
+
+    _USER_LOGIN_PATH = "/user/login"
+
     def __init__(self, logger):
         super().__init__(logger)
+
+    @gen.coroutine
+    def login_by_mobile_pwd(self, mobile, password):
+        """调用基础服务接口登录
+
+        返回：
+        {
+            user_id:
+            unionid:
+            mobile:
+            last_login_time,
+            name:
+            headimg:
+        }
+        """
+        ret = yield http_post(
+            route=self._USER_LOGIN_PATH,
+            jdata=dict(mobile=str(mobile), password=str(password)))
+        raise gen.Return(ret)
 
     @gen.coroutine
     def create_user_user(self, userinfo, wechat_id, remote_ip, source):

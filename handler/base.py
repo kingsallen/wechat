@@ -9,7 +9,6 @@ import re
 import socket
 import time
 import ujson
-import uuid
 from hashlib import sha1
 from urllib.parse import urljoin
 
@@ -73,7 +72,7 @@ class BaseHandler(MetaBaseHandler):
         # 记录初始化的时间
         self._start_time = time.time()
         # 保存是否在微信环境， 微信客户端类型
-        self.in_wechat, self.client_type = self._depend_wechat()
+        self._in_wechat, self._client_type = self._depend_wechat()
         # 日志信息
         self._log_info = None
         # 构建 session 过程中会缓存一份当前公众号信息
@@ -109,6 +108,20 @@ class BaseHandler(MetaBaseHandler):
     @property
     def is_help(self):
         return self.env == self.constant.ENV_HELP
+
+    @property
+    def in_wechat(self):
+        return self._in_wechat == self.constant.CLIENT_WECHAT
+
+    @property
+    def in_wechat_ios(self):
+        return self.in_wechat and self._client_type == \
+                                  self.constant.CLIENT_TYPE_IOS
+
+    @property
+    def in_wechat_android(self):
+        return self.in_wechat and self._client_type == \
+                                  self.constant.CLIENT_TYPE_ANDROID
 
     @property
     def app_id(self):
@@ -211,6 +224,9 @@ class BaseHandler(MetaBaseHandler):
     #     self._unionid = None
     #     self._wxuser = None
 
+        self.logger.debug("current_user: {}".format(self.current_user))
+        self.logger.debug("params: {}".format(self.params))
+
     # PROTECTED
     @gen.coroutine
     def _handle_user_info(self, userinfo):
@@ -285,6 +301,39 @@ class BaseHandler(MetaBaseHandler):
             json_args = ujson.loads(self.request.body)
         return ObjectDict(json_args)
 
+    def guarantee(self, *args):
+        """对输入参数做检查
+
+        注意: 请不要在guarantee 后直接使用 json_args 因为在执行
+        guarantee 的过程中, json_args 会陆续pop 出元素.
+        相对的应该使用params
+
+        usage code view::
+            try:
+                self.guarantee("mobile", "name", "password")
+            except AttributeError:
+                return
+
+            mobile = self.params["mobile"]
+        """
+        self.params = {}
+
+        c_arg = None
+        try:
+            for arg in args:
+                c_arg = arg
+                self.params[arg] = self.json_args[arg]
+                self.json_args.pop(arg)
+        except KeyError as e:
+            self.send_json(data={}, status_code=1,
+                           message="{}不能为空".format(c_arg), http_code=400)
+            self.finish()
+            self.LOG.error(str(e) + " 缺失")
+            raise AttributeError(str(e) + " 缺失")
+
+        self.params.update(self.json_args)
+        return self.params  # also return value
+
     @gen.coroutine
     def _get_current_wechat(self, qx=False):
         if qx:
@@ -301,11 +350,6 @@ class BaseHandler(MetaBaseHandler):
                 raise NoSignatureError()
 
         wechat = yield self.session_ps.get_wechat_by_signature(signature)
-
-        # 拼装 JsApi
-        wechat.jsapi = JsApi(
-            jsapi_ticket=wechat.jsapi_ticket,
-            url=self.request.protocol+'://'+self.request.host+self.request.uri)
 
         raise gen.Return(wechat)
 
@@ -408,13 +452,13 @@ class BaseHandler(MetaBaseHandler):
 
         self._save_sessions(session_id, session)
 
+        self._add_jsapi_to_wechat(session.wechat)
         if self.is_platform:
             yield self._add_company_info_to_session(session)
         if self.params.recom:
             yield self._add_recom_to_session(session)
 
         self.current_user = session
-        self.logger.debug("current_user: {}".format(self.current_user))
 
     @gen.coroutine
     def _build_session_by_unionid(self, unionid):
@@ -438,13 +482,13 @@ class BaseHandler(MetaBaseHandler):
         session_id = self.get_secure_cookie(self.constant.COOKIE_SESSIONID)
         self._save_sessions(session_id, session)
 
+        self._add_jsapi_to_wechat(session.wechat)
         if self.is_platform:
             yield self._add_company_info_to_session(session)
         if self.params.recom:
             yield self._add_recom_to_session(session)
 
         self.current_user = session
-        self.logger.debug("current_user: {}".format(self.current_user))
 
     def _save_sessions(self, session_id, session):
         """
@@ -452,7 +496,7 @@ class BaseHandler(MetaBaseHandler):
         2. 保存聚合号 session， 只包含 qxuser
         """
 
-        key_ent = self.constant.SESSION_USER.format(session_id, session.wechat.id)
+        key_ent = self.constant.SESSION_USER.format(session_id, self._wechat.id)
         self.redis.set(key_ent, session, 60 * 60 * 2)
         self.logger.debug("refresh ent session redis key: {}".format(key_ent))
 
@@ -464,7 +508,7 @@ class BaseHandler(MetaBaseHandler):
     def _add_company_info_to_session(self, session):
         """拼装 session 中的 company, employee"""
 
-        session.company = yield self._get_current_company(self._wechat.id)
+        session.company = yield self._get_current_company(session.wechat.company_id)
         employee = yield self.session_ps.get_employee(
             wxuser_id=session.wxuser.id, company_id=session.company.id)
         if employee:
@@ -477,6 +521,12 @@ class BaseHandler(MetaBaseHandler):
         session.recom = yield self.user_ps.get_wxuser_openid_wechat_id(
             openid=self.params.recom, wechat_id=self._wechat.id)
 
+    def _add_jsapi_to_wechat(self, wechat):
+        """拼装 jsapi"""
+        wechat.jsapi = JsApi(
+            jsapi_ticket=wechat.jsapi_ticket,
+            url=self.request.protocol + '://' + self.request.host + self.request.uri)
+
     @gen.coroutine
     def _get_session_from_ent(self, session_id):
         """尝试获取企业号 session"""
@@ -485,7 +535,10 @@ class BaseHandler(MetaBaseHandler):
         value = self.redis.get(key)
         if value:
             # 如果有 value， 返回该 value 作为 self.current_user
-            self.current_user = ObjectDict(value)
+            session = ObjectDict(value)
+            yield self._add_company_info_to_session(session)
+            self.current_user = session
+
             return True
         return False
 
@@ -513,7 +566,7 @@ class BaseHandler(MetaBaseHandler):
         :return: session_id
         """
         while True:
-            session_id = sha1(uuid.uuid4().bytes).hexdigest()
+            session_id = sha1(os.urandom(24)).hexdigest()
             record = self.redis.exists(session_id + "_*")
             if record:
                 continue
