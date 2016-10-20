@@ -33,8 +33,13 @@ class CellphoneBindHandler(BaseHandler):
     @gen.coroutine
     def post(self):
 
+        try:
+            self.guarantee('mobile', 'code')
+        except:
+            return
+
         response = yield self.cellphone_ps.bind_mobile(
-            json_args=self.json_args,
+            data=self.params,
             app_id=self.app_id
         )
         self.send_json(response)

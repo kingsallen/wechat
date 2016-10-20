@@ -11,6 +11,7 @@ from tornado import gen
 from util.common import ObjectDict
 from service.page.base import PageService
 from util.tool.http_tool import http_post
+import conf.message as mes_const
 
 
 class CellphonePageService(PageService):
@@ -29,48 +30,32 @@ class CellphonePageService(PageService):
                 'appid': app_id
             })
             try:
-                response = yield http_post(route, req, infra=True)
+                response = yield http_post(route, req)
             except Exception as error:
                 self.logger.warn(error)
                 raise gen.Return(ObjectDict({
-                    'status': 1,
-                    'message': 'Connect basic service server failure.'
-                }))
-            print('send', response, type(response))
-            raise gen.Return(ObjectDict({
-                'status': 0,
-                'message': response,
-            }))
+                    'status': 1, 'message': mes_const.BASIC_SERVER_BUSY}))
+            raise gen.Return(ObjectDict(response))
         else:
             raise gen.Return(ObjectDict({
-                'status': 1,
-                'message': 'Request with wrong param'
-            }))
+                'status': 1, 'message': mes_const.REQUEST_PARAM_ERROR}))
 
     @gen.coroutine
-    def bind_mobile(self, json_args, app_id):
+    def bind_mobile(self, data, app_id):
         route = 'user/verifyCode'
-        if json_args and 'mobile' in json_args.keys() and \
-                'code' in json_args.keys():
-            req = ObjectDict({
-                'mobile': json_args.get('mobile'),
-                'code': json_args.get('code'),
-                'type': 4,
-                'appid': app_id
-            })
-            try:
-                response = yield http_post(route, req, infra=True)
-            except Exception as error:
-                self.logger.warn(error)
-                raise gen.Return(ObjectDict({
-                    'status': 1,
-                    'message': 'Connect basic service server failure.'
-                }))
-            raise gen.Return(ObjectDict({
-                'status': 0,
-                'message': response,
-            }))
-        else:
+
+        req = ObjectDict({
+            'mobile': data.mobile,
+            'code': data.code,
+            'type': 4,
+            'appid': app_id
+        })
+        try:
+            response = yield http_post(route, req)
+        except Exception as error:
+            self.logger.warn(error)
             raise gen.Return(ObjectDict({
                 'status': 1,
-                'message': 'Request with wrong param.'}))
+                'message': mes_const.BASIC_SERVER_BUSY
+            }))
+        raise gen.Return(response)
