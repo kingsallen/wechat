@@ -38,7 +38,6 @@ class LoginHandler(BaseHandler):
                 register_url=_register_url
             )
         )
-
         self.render_page("/system/login.html", data=data)
 
     @gen.coroutine
@@ -49,16 +48,17 @@ class LoginHandler(BaseHandler):
         except AttributeError:
             return
 
-        userinfo = yield self.user_ps.login_by_mobile_pwd(
+        res = yield self.user_ps.login_by_mobile_pwd(
             self.params.username, self.params.password)
-        userinfo = ObjectDict(userinfo)
+        if res.status == const.API_SUCCESS:
+            userinfo = ObjectDict(res.data)
 
-        if userinfo.unionid:
-            self._build_session_by_unionid(userinfo.unionid)
-            self.redirect(self.params.next_url)
-        else:
-            self.send_json(
-                status_code=const.API_FAILURE,
-                message=msg_const.LOGIN_FAILURE,
-                data = {})
-        return
+            if userinfo.unionid:
+                self._build_session_by_unionid(userinfo.unionid)
+                self.redirect(self.params.next_url)
+                return
+
+        self.send_json(
+            status_code=const.API_FAILURE,
+            message=msg_const.LOGIN_FAILURE,
+            data={})

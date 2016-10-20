@@ -11,6 +11,7 @@ import ujson
 from tornado import gen
 from tornado.httputil import url_concat, HTTPHeaders
 
+from util.common import ObjectDict
 from setting import settings
 
 
@@ -46,9 +47,7 @@ def http_patch(route, jdata, timeout=5):
 
 @gen.coroutine
 def _async_http_get(route, jdata, timeout=5, method='GET'):
-    """如果数据正确，直接返回 data 数据，业务方不需要再解析 response 结构
-    可用 HTTP 动词为 GET 和 DELETE
-    """
+    """可用 HTTP 动词为 GET 和 DELETE"""
     if method.lower() not in "get delete":
         raise ValueError("method is not in GET and DELETE")
 
@@ -57,18 +56,13 @@ def _async_http_get(route, jdata, timeout=5, method='GET'):
     response = yield http_client.fetch(
         url, request_timeout=timeout, method=method.upper(),
         headers=HTTPHeaders({"Content-Type": "application/json"}))
-    body = ujson.decode(response.body)
-    content_type = response.headers.get('Content-Type', '')
-    if body.get('status') == 0 and "application/json" in content_type:
-        raise gen.Return(body.get('data'))
-    raise gen.Return(body)
+
+    raise gen.Return(ObjectDict(ujson.decode(response.body)))
 
 
 @gen.coroutine
 def _async_http_post(route, jdata, timeout=5, method='POST'):
-    """如果数据正确，直接返回data数据，业务方不需要再解析response结构
-    可用 HTTP 动词为 POST, PATCH 和 PUT
-    """
+    """可用 HTTP 动词为 POST, PATCH 和 PUT"""
     if method.lower() not in "post put patch":
         raise ValueError("method is not in POST, PUT and PATCH")
 
@@ -81,8 +75,4 @@ def _async_http_post(route, jdata, timeout=5, method='POST'):
         request_timeout=timeout,
         headers=HTTPHeaders({"Content-Type": "application/json"})
     )
-    body = ujson.decode(response.body)
-    content_type = response.headers.get('Content-Type', '')
-    if body.get('status', 0) == 0 and "application/json" in content_type:
-        raise gen.Return(body.get('data'))
-    raise gen.Return(body)
+    raise gen.Return(ObjectDict(ujson.decode(response.body)))

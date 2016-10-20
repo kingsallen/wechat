@@ -27,7 +27,8 @@ help_routes: 继承自common_routes, 供help单独使用，一般 handler 在 he
 common_routes = [
     # wechat
     (r"/m/wechat",                       "handler.common.wechat.WechatHandler",                       {"event": "wechat_wechat"}),
-    (r"/m/login",                        "handler.common.login.LoginHandler",                         {"event": "login_login"}),
+
+    (r"/m/account/login",                "handler.common.login.LoginHandler",                         {"event": "login_login"}),
 
     # Testing url, delete when releasing
     (r"/m/test",                         "tests.dao.user.TestCompanyVisitReqHandler",                 {"event": "test_test"})

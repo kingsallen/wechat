@@ -25,6 +25,8 @@ from util.tool.json_tool import encode_json_dumps, json_dumps
 from util.tool.str_tool import to_str, to_hex, from_hex
 from util.tool.url_tool import make_url, url_subtract_query
 
+import conf.message as msg_const
+
 # 动态加载所有 PageService
 obDict = {}
 d = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)) + \
@@ -163,66 +165,73 @@ class BaseHandler(MetaBaseHandler):
 
     @property
     def fullurl(self):
+        """获取当前 url， 默认删除 query 中的 code 和 state。
+
+        和 oauth 有关的 参数会影响 prepare 方法
+        """
         u = "{scheme}://{host}{uri}".format(
             scheme=self.request.protocol,
             host=self.request.host,
             uri=self.request.uri)
         return url_subtract_query(u, ['code', 'state'])
 
-    # @property
-    # def component_access_token(self):
-    #     return self.redis.get("component_access_token", prefix=False).get(
-    #         "component_access_token", None)
+    @property
+    def component_access_token(self):
+        """第三方平台 component_access_token"""
+        return self.redis.get("component_access_token", prefix=False).get(
+            "component_access_token", None)
 
     @log_info.setter
     def log_info(self, value):
         self._log_info = dict(value)
 
     # PUBLIC API
-    # @check_signature
-    # @gen.coroutine
-    # def prepare(self):
-    #     # 构建 session 之前先缓存一份 wechat
-    #     self._wechat = yield self._get_current_wechat()
-    #     self._qx_wechat = yield self._get_qx_wechat()
-    #
-    #     # 如果有 code，说明刚刚从微信 oauth 回来
-    #     code = self.params.get("code")
-    #     state = self.params.get("state")
-    #
-    #     self.logger.debug("code:{}, state:{}".format(code, state))
-    #
-    #     # 用户同意授权
-    #     if self.in_wechat:
-    #         if code:
-    #             # 来自 qx 的授权, 获得 userinfo
-    #             if state == self.wx_constant.WX_OAUTH_DEFAULT_STATE:
-    #                 self.logger.debug("来自 qx 的授权, 获得 userinfo")
-    #                 userinfo = yield self._get_user_info(code)
-    #                 yield self._handle_user_info(userinfo)
-    #                 if self._finished:
-    #                     return
-    #
-    #             # 来自企业号的静默授权
-    #             else:
-    #                 self.logger.debug("来自企业号的静默授权")
-    #                 self._unionid = from_hex(state)
-    #                 openid = yield self._get_user_openid(code)
-    #                 self._wxuser = yield self._handle_ent_openid(
-    #                     openid, self._unionid)
-    #
-    #         if state and not code:  # 用户拒绝授权
-    #             # TODO 拒绝授权用户，是否让其继续操作? or return
-    #             pass
-    #
-    #     # 构造并拼装 session
-    #     yield self._fetch_session()
-    #
-    #     # 内存优化
-    #     self._wechat = None
-    #     self._qx_wechat = None
-    #     self._unionid = None
-    #     self._wxuser = None
+    @check_signature
+    @gen.coroutine
+    def prepare(self):
+        """用于生成 current_user"""
+
+        # 构建 session 之前先缓存一份 wechat
+        self._wechat = yield self._get_current_wechat()
+        self._qx_wechat = yield self._get_qx_wechat()
+
+        # 如果有 code，说明刚刚从微信 oauth 回来
+        code = self.params.get("code")
+        state = self.params.get("state")
+
+        self.logger.debug("code:{}, state:{}".format(code, state))
+
+        # 用户同意授权
+        if self.in_wechat:
+            if code:
+                # 来自 qx 的授权, 获得 userinfo
+                if state == self.wx_constant.WX_OAUTH_DEFAULT_STATE:
+                    self.logger.debug("来自 qx 的授权, 获得 userinfo")
+                    userinfo = yield self._get_user_info(code)
+                    yield self._handle_user_info(userinfo)
+                    if self._finished:
+                        return
+
+                # 来自企业号的静默授权
+                else:
+                    self.logger.debug("来自企业号的静默授权")
+                    self._unionid = from_hex(state)
+                    openid = yield self._get_user_openid(code)
+                    self._wxuser = yield self._handle_ent_openid(
+                        openid, self._unionid)
+
+            if state and not code:  # 用户拒绝授权
+                # TODO 拒绝授权用户，是否让其继续操作? or return
+                pass
+
+        # 构造并拼装 session
+        yield self._fetch_session()
+
+        # 内存优化
+        self._wechat = None
+        self._qx_wechat = None
+        self._unionid = None
+        self._wxuser = None
 
         self.logger.debug("current_user: {}".format(self.current_user))
         self.logger.debug("params: {}".format(self.params))
@@ -302,7 +311,7 @@ class BaseHandler(MetaBaseHandler):
         return ObjectDict(json_args)
 
     def guarantee(self, *args):
-        """对输入参数做检查
+        """对 API 调用输入做参数检查
 
         注意: 请不要在guarantee 后直接使用 json_args 因为在执行
         guarantee 的过程中, json_args 会陆续pop 出元素.
@@ -316,7 +325,7 @@ class BaseHandler(MetaBaseHandler):
 
             mobile = self.params["mobile"]
         """
-        self.params = {}
+        self.params = ObjectDict()
 
         c_arg = None
         try:
@@ -332,7 +341,6 @@ class BaseHandler(MetaBaseHandler):
             raise AttributeError(str(e) + " 缺失")
 
         self.params.update(self.json_args)
-        return self.params  # also return value
 
     @gen.coroutine
     def _get_current_wechat(self, qx=False):
@@ -360,8 +368,8 @@ class BaseHandler(MetaBaseHandler):
 
     @gen.coroutine
     def _get_current_company(self, company_id):
-        """获得企业母公司信息
-        """
+        """获得企业母公司信息"""
+
         conds = {'id': company_id}
         company = yield self.company_ps.get_company(conds=conds, need_conf=True)
         if company.conf_theme_id:
@@ -480,6 +488,10 @@ class BaseHandler(MetaBaseHandler):
             session.qxuser.sysuser_id)
 
         session_id = self.get_secure_cookie(self.constant.COOKIE_SESSIONID)
+        # 当使用手机浏览器访问的时候可能没有 session_id
+        # 那么就创建它
+        if not session_id:
+            session_id = self._make_new_session_id()
         self._save_sessions(session_id, session)
 
         self._add_jsapi_to_wechat(session.wechat)
@@ -525,7 +537,7 @@ class BaseHandler(MetaBaseHandler):
         """拼装 jsapi"""
         wechat.jsapi = JsApi(
             jsapi_ticket=wechat.jsapi_ticket,
-            url=self.request.protocol + '://' + self.request.host + self.request.uri)
+            url=self.request.protocol+'://'+self.request.host+self.request.uri)
 
     @gen.coroutine
     def _get_session_from_ent(self, session_id):
@@ -633,18 +645,17 @@ class BaseHandler(MetaBaseHandler):
         500（服务器错误）      Internal Server Error: Something went wrong on the server, check status site and/or report the issue
         """
 
-        # if status_code == 403:
-        #     self.render('refer/common/info.html', status_code=status_code,
-        #                 css="warning", info="用户未被授权请求")
-        # elif status_code == 404:
-        #     self.render('common/systemmessage.html', status_code=status_code,
-        #                 message="Ta在地球上消失了")
-        # else:
-        #     self.render('common/systemmessage.html', status_code=status_code,
-        #                 message="正在努力维护服务器中")
+        if http_code == 403:
+            self.render_page(
+                'system/info.html',
+                data=ObjectDict(code=http_code, css="warning", message=msg_const.NOT_AUTHORIZED))
 
-        # TODO only for debug
-        self.write(http_code)
+        elif http_code == 404:
+            self.render_page(
+                'system/info.html', data=ObjectDict(code=http_code, message=msg_const.NO_DATA))
+        else:
+            self.render_page(
+                'system/info.html', data=ObjectDict(code=http_code, message=msg_const.UNKNOWN_DEFAULT))
 
     def render_page(self, template_name, data, status_code=0,
                     message='success', http_code=200):
@@ -674,8 +685,7 @@ class BaseHandler(MetaBaseHandler):
         return
 
     def send_json(self, data, status_code=0, message='success', http_code=200):
-        """传递 JSON 到前端 Used for API
-        """
+        """传递 JSON 到前端 Used for API"""
         render_json = json_dumps({
             "status": status_code,
             "message": message,
