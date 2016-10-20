@@ -301,6 +301,39 @@ class BaseHandler(MetaBaseHandler):
             json_args = ujson.loads(self.request.body)
         return ObjectDict(json_args)
 
+    def guarantee(self, *args):
+        """对输入参数做检查
+
+        注意: 请不要在guarantee 后直接使用 json_args 因为在执行
+        guarantee 的过程中, json_args 会陆续pop 出元素.
+        相对的应该使用params
+
+        usage code view::
+            try:
+                self.guarantee("mobile", "name", "password")
+            except AttributeError:
+                return
+
+            mobile = self.params["mobile"]
+        """
+        self.params = {}
+
+        c_arg = None
+        try:
+            for arg in args:
+                c_arg = arg
+                self.params[arg] = self.json_args[arg]
+                self.json_args.pop(arg)
+        except KeyError as e:
+            self.send_json(data={}, status_code=1,
+                           message="{}不能为空".format(c_arg), http_code=400)
+            self.finish()
+            self.LOG.error(str(e) + " 缺失")
+            raise AttributeError(str(e) + " 缺失")
+
+        self.params.update(self.json_args)
+        return self.params  # also return value
+
     @gen.coroutine
     def _get_current_wechat(self, qx=False):
         if qx:

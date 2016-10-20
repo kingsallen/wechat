@@ -3,8 +3,7 @@
 # Copyright 2016 MoSeeker
 
 """
-api 调用工具类，
-调用时使用 infra=True/False 来基础服务的 api,还是其他的 api
+基础服务 api 调用工具类，
 """
 
 import tornado.httpclient
@@ -16,51 +15,44 @@ from setting import settings
 
 
 @gen.coroutine
-def http_get(route, jdata, timeout=5, infra=False):
-    ret = yield _async_http_get(route, jdata,
-                                timeout=timeout, infra=infra, method='GET')
+def http_get(route, jdata, timeout=5):
+    ret = yield _async_http_get(route, jdata, timeout=timeout, method='GET')
     raise gen.Return(ret)
 
 
 @gen.coroutine
-def http_delete(route, jdata, timeout=5, infra=False):
-    ret = yield _async_http_get(route, jdata,
-                                timeout=timeout, infra=infra, method='DELETE')
+def http_delete(route, jdata, timeout=5):
+    ret = yield _async_http_get(route, jdata, timeout=timeout, method='DELETE')
     raise gen.Return(ret)
 
 
 @gen.coroutine
-def http_post(route, jdata, timeout=5, infra=False):
-    ret = yield _async_http_post(route, jdata,
-                                 timeout=timeout, infra=infra, method='POST')
+def http_post(route, jdata, timeout=5):
+    ret = yield _async_http_post(route, jdata, timeout=timeout, method='POST')
     raise gen.Return(ret)
 
 
 @gen.coroutine
-def http_put(route, jdata, timeout=5, infra=False):
-    ret = yield _async_http_post(route, jdata,
-                                 timeout=timeout, infra=infra, method='PUT')
+def http_put(route, jdata, timeout=5):
+    ret = yield _async_http_post(route, jdata, timeout=timeout, method='PUT')
     raise gen.Return(ret)
 
 
 @gen.coroutine
-def http_patch(route, jdata, timeout=5, infra=False):
-    ret = yield _async_http_post(route, jdata,
-                                 timeout=timeout, infra=infra, method='PATCH')
+def http_patch(route, jdata, timeout=5):
+    ret = yield _async_http_post(route, jdata, timeout=timeout, method='PATCH')
     raise gen.Return(ret)
 
 
 @gen.coroutine
-def _async_http_get(route, jdata, api=None, timeout=5, infra=False, method='GET'):
-    """
-    如果数据正确，直接返回 data 数据，业务方不需要再解析 response 结构
+def _async_http_get(route, jdata, timeout=5, method='GET'):
+    """如果数据正确，直接返回 data 数据，业务方不需要再解析 response 结构
     可用 HTTP 动词为 GET 和 DELETE
     """
     if method.lower() not in "get delete":
         raise ValueError("method is not in GET and DELETE")
 
-    url = url_concat("{0}/{1}".format(
-        settings.infra if infra else api, route), jdata)
+    url = url_concat("{0}/{1}".format(settings.infra, route), jdata)
     http_client = tornado.httpclient.AsyncHTTPClient()
     response = yield http_client.fetch(
         url, request_timeout=timeout, method=method.upper(),
@@ -73,16 +65,15 @@ def _async_http_get(route, jdata, api=None, timeout=5, infra=False, method='GET'
 
 
 @gen.coroutine
-def _async_http_post(route, jdata, api=None, timeout=5, infra=False, method='POST'):
-    """
-    如果数据正确，直接返回data数据，业务方不需要再解析response结构
+def _async_http_post(route, jdata, timeout=5, method='POST'):
+    """如果数据正确，直接返回data数据，业务方不需要再解析response结构
     可用 HTTP 动词为 POST, PATCH 和 PUT
     """
     if method.lower() not in "post put patch":
         raise ValueError("method is not in POST, PUT and PATCH")
 
     http_client = tornado.httpclient.AsyncHTTPClient()
-    url = "{0}/{1}".format(settings.infra if infra else api, route)
+    url = "{0}/{1}".format(settings.infra, route)
     response = yield http_client.fetch(
         url,
         method=method.upper(),
