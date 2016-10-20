@@ -82,8 +82,8 @@ class BaseHandler(MetaBaseHandler):
         self._unionid = None
         self._wxuser = None
         # 处理 oauth 的 service
-        self._oauth_service = WeChatOauth2Service(
-            self, self.fullurl, self.component_access_token)
+        # self._oauth_service = WeChatOauth2Service(
+        #     self, self.fullurl, self.component_access_token)
 
     # PROPERTIES
     @property
@@ -156,60 +156,60 @@ class BaseHandler(MetaBaseHandler):
             uri=self.request.uri)
         return url_subtract_query(u, ['code', 'state'])
 
-    @property
-    def component_access_token(self):
-        return self.redis.get("component_access_token", prefix=False).get(
-            "component_access_token", None)
+    # @property
+    # def component_access_token(self):
+    #     return self.redis.get("component_access_token", prefix=False).get(
+    #         "component_access_token", None)
 
     @log_info.setter
     def log_info(self, value):
         self._log_info = dict(value)
 
     # PUBLIC API
-    @check_signature
-    @gen.coroutine
-    def prepare(self):
-        # 构建 session 之前先缓存一份 wechat
-        self._wechat = yield self._get_current_wechat()
-        self._qx_wechat = yield self._get_qx_wechat()
-
-        # 如果有 code，说明刚刚从微信 oauth 回来
-        code = self.params.get("code")
-        state = self.params.get("state")
-
-        self.logger.debug("code:{}, state:{}".format(code, state))
-
-        # 用户同意授权
-        if self.in_wechat:
-            if code:
-                # 来自 qx 的授权, 获得 userinfo
-                if state == self.wx_constant.WX_OAUTH_DEFAULT_STATE:
-                    self.logger.debug("来自 qx 的授权, 获得 userinfo")
-                    userinfo = yield self._get_user_info(code)
-                    yield self._handle_user_info(userinfo)
-                    if self._finished:
-                        return
-
-                # 来自企业号的静默授权
-                else:
-                    self.logger.debug("来自企业号的静默授权")
-                    self._unionid = from_hex(state)
-                    openid = yield self._get_user_openid(code)
-                    self._wxuser = yield self._handle_ent_openid(
-                        openid, self._unionid)
-
-            if state and not code:  # 用户拒绝授权
-                # TODO 拒绝授权用户，是否让其继续操作? or return
-                pass
-
-        # 构造并拼装 session
-        yield self._fetch_session()
-
-        # 内存优化
-        self._wechat = None
-        self._qx_wechat = None
-        self._unionid = None
-        self._wxuser = None
+    # @check_signature
+    # @gen.coroutine
+    # def prepare(self):
+    #     # 构建 session 之前先缓存一份 wechat
+    #     self._wechat = yield self._get_current_wechat()
+    #     self._qx_wechat = yield self._get_qx_wechat()
+    #
+    #     # 如果有 code，说明刚刚从微信 oauth 回来
+    #     code = self.params.get("code")
+    #     state = self.params.get("state")
+    #
+    #     self.logger.debug("code:{}, state:{}".format(code, state))
+    #
+    #     # 用户同意授权
+    #     if self.in_wechat:
+    #         if code:
+    #             # 来自 qx 的授权, 获得 userinfo
+    #             if state == self.wx_constant.WX_OAUTH_DEFAULT_STATE:
+    #                 self.logger.debug("来自 qx 的授权, 获得 userinfo")
+    #                 userinfo = yield self._get_user_info(code)
+    #                 yield self._handle_user_info(userinfo)
+    #                 if self._finished:
+    #                     return
+    #
+    #             # 来自企业号的静默授权
+    #             else:
+    #                 self.logger.debug("来自企业号的静默授权")
+    #                 self._unionid = from_hex(state)
+    #                 openid = yield self._get_user_openid(code)
+    #                 self._wxuser = yield self._handle_ent_openid(
+    #                     openid, self._unionid)
+    #
+    #         if state and not code:  # 用户拒绝授权
+    #             # TODO 拒绝授权用户，是否让其继续操作? or return
+    #             pass
+    #
+    #     # 构造并拼装 session
+    #     yield self._fetch_session()
+    #
+    #     # 内存优化
+    #     self._wechat = None
+    #     self._qx_wechat = None
+    #     self._unionid = None
+    #     self._wxuser = None
 
     # PROTECTED
     @gen.coroutine

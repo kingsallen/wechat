@@ -1,11 +1,11 @@
 # coding=utf-8
 
 import tornado.gen as gen
-
-from service.page.base import PageService
-from util.tool.date_tool import curr_now
 import conf.common as const
 
+from util.common import ObjectDict
+from service.page.base import PageService
+from util.tool.date_tool import curr_now
 from setting import settings
 
 
@@ -183,3 +183,20 @@ class UserPageService(PageService):
                 "unionid":        userinfo.unionid if userinfo.unionid else "",
                 "source":         const.WXUSER_OAUTH
             })
+
+    @gen.coroutine
+    def update_user_user(self, sysuser_id, data):
+        if data and 'name' in data and 'company' in data and \
+                'position' in data:
+            response = yield self.user_user_ds.update_user(
+                conds={'id': sysuser_id},
+                fields={
+                    'name': data.name,
+                    'company': data.company,
+                    'position': data.position
+            })
+            raise gen.Return(response)
+        else:
+            raise gen.Return(ObjectDict({
+                'status': 1, 'message': 'failure--params'
+            }))

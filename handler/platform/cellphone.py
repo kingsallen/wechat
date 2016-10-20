@@ -24,7 +24,9 @@ class CellphoneBindHandler(BaseHandler):
             mobile_numb=self.params.get('mobile', None),
             app_id=self.app_id
         )
-        self.send_json(response)
+        print('get-response', response)
+        self.send_json(data=None, status_code=response.status,
+                       message=response.message)
 
         return
 

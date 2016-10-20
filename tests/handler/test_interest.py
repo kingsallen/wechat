@@ -19,12 +19,12 @@ data = {'company_id': 111, 'user_id': 444, 'status': 1,
 # re = post_fun(url_visit, data)
 #
 
-url = 'http://localhost:8000/m/api/cellphone'
-m = {'mobile': '18855101775', 'code': 9948}
+url = 'http://localhost:8000/m/interest'
+m = {'name': '马超', 'company': '仟寻招聘', 'position': 'Python开发'}
 
-re = requests.get(url, params={'mobile': '13122920190'})
+# re = requests.get(url)
 
-# re = post_fun(url, m)
+re = post_fun(url, m)
 
 print(json.loads(re.text))
 

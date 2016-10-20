@@ -3,8 +3,10 @@
 # Copyright 2016 MoSeeker
 
 from tornado import gen
+
 from service.data.base import DataService
 from util.common.decorator import cache
+from util.common import ObjectDict
 
 
 class UserUserDataService(DataService):
@@ -31,3 +33,25 @@ class UserUserDataService(DataService):
 
         response = yield self.user_user_dao.insert_record(fields, options)
         raise gen.Return(response)
+
+    @gen.coroutine
+    def update_user(self, conds, fields):
+        try:
+            response = yield self.user_user_dao.update_by_conds(
+                conds=conds, fields=fields
+            )
+        except Exception as error:
+            self.logger.warn(error)
+            raise gen.Return(ObjectDict({'status': 1,
+                                         'message': 'failure--except'}))
+
+        raise gen.Return(ObjectDict({
+            'status': 0 if response else 1,
+            'message': 'success' if response else 'failure--update'
+        }))
+
+
+
+
+
+

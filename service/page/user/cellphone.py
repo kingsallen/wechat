@@ -30,14 +30,22 @@ class CellphonePageService(PageService):
             })
             try:
                 response = yield http_post(route, req, infra=True)
-                raise gen.Return(response)
             except Exception as error:
-                self.logger(error)
-                raise gen.Return({'status': 1,
-                                  'message': 'Basic service server busy.'})
+                self.logger.warn(error)
+                raise gen.Return(ObjectDict({
+                    'status': 1,
+                    'message': 'Connect basic service server failure.'
+                }))
+            print('send', response, type(response))
+            raise gen.Return(ObjectDict({
+                'status': 0,
+                'message': response,
+            }))
         else:
-            raise gen.Return({'status': 1,
-                              'message': 'Request with wrong param'})
+            raise gen.Return(ObjectDict({
+                'status': 1,
+                'message': 'Request with wrong param'
+            }))
 
     @gen.coroutine
     def bind_mobile(self, json_args, app_id):
@@ -52,11 +60,17 @@ class CellphonePageService(PageService):
             })
             try:
                 response = yield http_post(route, req, infra=True)
-                raise gen.Return(response)
             except Exception as error:
-                self.logger(error)
-                raise gen.Return({'status': 1,
-                                  'message': 'Basic service server busy.'})
+                self.logger.warn(error)
+                raise gen.Return(ObjectDict({
+                    'status': 1,
+                    'message': 'Connect basic service server failure.'
+                }))
+            raise gen.Return(ObjectDict({
+                'status': 0,
+                'message': response,
+            }))
         else:
-            raise gen.Return({'status': 1,
-                              'message': 'Request with wrong param.'})
+            raise gen.Return(ObjectDict({
+                'status': 1,
+                'message': 'Request with wrong param.'}))
