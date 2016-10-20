@@ -485,7 +485,7 @@ class BaseHandler(MetaBaseHandler):
         value = self.redis.get(key)
         if value:
             # 如果有 value， 返回该 value 作为 self.current_user
-            self.current_user = ujson.loads(value)
+            self.current_user = ObjectDict(value)
             return True
         return False
 
@@ -497,7 +497,7 @@ class BaseHandler(MetaBaseHandler):
 
         value = self.redis.get(key)
         if value:
-            session_qx = ujson.loads(value)
+            session_qx = value
             qxuser = ObjectDict(session_qx.get('qxuser'))
             yield self._build_session_by_unionid(qxuser.unionid)
             raise gen.Return(True)
