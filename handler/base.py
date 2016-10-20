@@ -72,7 +72,7 @@ class BaseHandler(MetaBaseHandler):
         # 记录初始化的时间
         self._start_time = time.time()
         # 保存是否在微信环境， 微信客户端类型
-        self.in_wechat, self.client_type = self._depend_wechat()
+        self._in_wechat, self._client_type = self._depend_wechat()
         # 日志信息
         self._log_info = None
         # 构建 session 过程中会缓存一份当前公众号信息
@@ -108,6 +108,20 @@ class BaseHandler(MetaBaseHandler):
     @property
     def is_help(self):
         return self.env == self.constant.ENV_HELP
+
+    @property
+    def in_wechat(self):
+        return self._in_wechat == self.constant.CLIENT_WECHAT
+
+    @property
+    def in_wechat_ios(self):
+        return self.in_wechat and self._client_type == \
+                                  self.constant.CLIENT_TYPE_IOS
+
+    @property
+    def in_wechat_android(self):
+        return self.in_wechat and self._client_type == \
+                                  self.constant.CLIENT_TYPE_ANDROID
 
     @property
     def app_id(self):
