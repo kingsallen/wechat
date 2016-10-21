@@ -671,7 +671,7 @@ class BaseHandler(MetaBaseHandler):
 
         # 前后端联调使用
         if self.settings.get('remote_debug', False) is True:
-            template_string = self.render_string(template_name, render_json)
+            template_string = self.render_string(template_name, render_json=render_json)
             post_url = urljoin(self.settings.get('remote_debug_ip'),
                                template_name)
             http_client = tornado.httpclient.HTTPClient()
