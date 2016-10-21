@@ -6,7 +6,7 @@
 :date 2016.10.11
 
 """
-
+import re
 from tornado import gen
 from util.common import ObjectDict
 from handler.base import BaseHandler
@@ -31,7 +31,8 @@ class CompanyVisitReqHandler(BaseHandler):
                 if resp:
                     response.status, response.message = 0, 'success'
 
-        self.send_json(response)
+        self.send_json(data=None, status_code=response.status,
+                        message=response.message)
         return
 
 
@@ -52,7 +53,8 @@ class CompanyFollowHandler(BaseHandler):
             if resp:
                 response.status, response.message = 0, 'success'
 
-        self.send_json(response)
+        self.send_json(data=None, status_code=response.status,
+                       message=response.message)
         return
 
 
@@ -60,8 +62,10 @@ class CompanyHandler(BaseHandler):
 
     @gen.coroutine
     def get(self, company_id):
+        team_flag = True if re.match('^/m/company/team', self.request.uri) \
+                    else False
         param = ObjectDict({'user_id': 222, 'company_id': company_id})
-        response = yield self.user_company_ps.get_companay_data(param)
+        response = yield self.user_company_ps.get_companay_data(param, team_flag)
 
         # Debug with front page.
         # To be confirmed: company_id, user_id
@@ -70,5 +74,6 @@ class CompanyHandler(BaseHandler):
 
         # self.send_json(response, additional_dump=True)
         data = {'current_user':current_user}
-        self.render_page('company/profile.html', data=None)
+        self.render_page('company/profile.html', data=response.data)
+        # self.render_page('company/profile.html', current_user=current_user)
         return

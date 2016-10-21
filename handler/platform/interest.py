@@ -21,9 +21,9 @@ class InterestHandler(BaseHandler):
         sysuser = yield self.user_ps.get_user_user_id(
                     self.current_user.sysuser.id)
         if sysuser and str(sysuser.mobile) == sysuser.username:
-            status_code, message = 'o', mes_const.CELLPHONE_BIND
+            status_code, message = self.constant.YES, mes_const.CELLPHONE_BIND
         else:
-            status_code, message = 'x', mes_const.CELLPHONE_UNBIND
+            status_code, message = self.constant.NO, mes_const.CELLPHONE_UNBIND
 
         self.send_json(data=None, status_code=status_code, message=message)
         return

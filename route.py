@@ -37,7 +37,7 @@ common_routes = [
 # 企业号的单独 routes
 platform_routes = [
     (r"/m/start",                        "handler.platform.landing.LandingHandler",                   {"event": "start_landing"}),
-    (r"/m/company/([0-9]*)",             "handler.platform.companyrelation.CompanyHandler",           {"event": "company_info"}),
+    (r"/m/company/(team)?",             "handler.platform.companyrelation.CompanyHandler",           {"event": "company_info"}),
     (r"/m/interest",                     "handler.platform.interest.InterestHandler",                {"event": "interest"}),
 
     (r"/m/api/company/visitreq",         "handler.platform.companyrelation.CompanyVisitReqHandler",   {"event": "company_visitreq"}),

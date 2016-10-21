@@ -33,7 +33,7 @@ class UserCompanyFollowsDataService(DataService):
             response = yield self.user_company_follows_dao.get_list_by_conds(
                                     conds, fields)
         except Exception as error:
-            self.logger(error)
+            self.logger.warn(error)
             raise gen.Return(None)
 
         raise gen.Return(response)

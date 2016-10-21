@@ -117,3 +117,8 @@ DEGREE = {
 # 及以上 工作经验、学历中使用
 POSITION_ABOVE = "及以上"
 EXPERIENCE_UNIT = "年"
+
+
+# 检测状态
+YES = 1
+NO = 0
