@@ -39,18 +39,19 @@ class UserCompanyPageService(PageService):
             'icon': '',
             'banner': '',
         })
-        follow_company = yield self.user_company_follows_ds.get_fllw_cmpy(
-                                user_id, company_id)
-        visit_company = yield self.user_company_visit_req_ds.get_visit_cmpy(
-                                user_id, company_id)
+        conds = {'user_id': [user_id, '='],
+                       'company_id': [company_id, '=']}
+
+        fllw_cmpy = yield self.user_company_follows_ds.get_fllw_cmpy(
+                        conds=conds, fields=['id', 'company_id'])
+        vst_cmpy = yield self.user_company_visit_req_ds.get_visit_cmpy(
+                        conds=conds, fields=['id', 'company_id'])
 
         data = ObjectDict({'header': header})
         data.templates_total = 4
         data.relation = ObjectDict({
-            'follow': self.constant.YES if follow_company \
-                        else self.constant.NO,
-            'want_visit': self.constant.YES if visit_company \
-                        else self.constant.NO
+            'follow': self.constant.YES if fllw_cmpy else self.constant.NO,
+            'want_visit': self.constant.YES if vst_cmpy else self.constant.NO
         })
         data.templates = [
             ObjectDict({'type': 1, 'sub_type': 'full', 'title': 'template 1',
@@ -74,24 +75,56 @@ class UserCompanyPageService(PageService):
 
     @gen.coroutine
     def set_company_follow(self, param):
-        response = yield self.user_company_follows_ds.set_cmpy_fllw(
-                            user_id=param.get('user_id'),
-                            company_id=param.get('company_id'),
-                            status=param.get('status'),
-                            source=param.get('source', 0))
+        response = ObjectDict({})
+        user_id, company_id = param.get('user_id'), param.get('company_id'),
+        status, source = param.get('status'), param.get('source', 0)
+
+        conds = {'user_id': [user_id, '='], 'company_id': [company_id, '=']}
+        company = yield self.user_company_follows_ds.get_fllw_cmpy(
+            conds=conds, fields=['id', 'user_id', 'company_id'])
+
+        if company:
+            result = yield self.user_company_follows_ds.update_vst_cmpy(
+                conds=conds,
+                fields={'status': status, 'source': source})
+        else:
+            result = yield self.user_company_follows_ds.create_vst_cmpy(
+                fields={'user_id': user_id, 'company_id': company_id,
+                        'status': status, 'source': source})
+
+        if result:
+            response.status, response.message = 0, 'success'
+        else:
+            response.status, response.message = 1, 'failure'
 
         raise gen.Return(response)
 
     @gen.coroutine
     def set_visit_company(self, param):
-        response = yield self.user_company_visit_req_ds.set_visit_cmpy(
-                                user_id=param.get('user_id'),
-                                company_id=param.get('company_id'),
-                                status=param.get('status'),
-                                source=param.get('source', 0))
+        response = ObjectDict({})
+        user_id, company_id = param.get('user_id'), param.get('company_id'),
+        status, source = param.get('status'), param.get('source', 0)
+
+        if int(status) == 0:
+            response.status, response.message = 1, 'ignore'
+            raise gen.Return(response)
+
+        conds = {'user_id': [user_id, '='], 'company_id': [company_id, '=']}
+        company = yield self.user_company_visit_req_ds.get_visit_cmpy(
+                            conds, fields=['id', 'user_id', 'company_id'])
+
+        if company:
+            result = yield self.user_company_visit_req_ds.update_visit_cmpy(
+                            conds=conds,
+                            fields={'status': status, 'source': source})
+        else:
+            result = yield self.user_company_visit_req_ds.create_visit_cmpy(
+                fields={'user_id': user_id, 'company_id': company_id,
+                        'status': status, 'source': source})
+
+        if result:
+            response.status, response.message = 0, 'success'
+        else:
+            response.status, response.message = 1, 'failure'
 
         raise gen.Return(response)
-
-
-
-

@@ -15,6 +15,9 @@ class UserCompanyFollowsDataService(DataService):
 
     @gen.coroutine
     def get_user(self, conds, fields=[]):
+        """
+        Testing code and delete when release
+        """
         if not self._valid_conds(conds):
             raise gen.Return(False)
         if not fields:
@@ -24,7 +27,7 @@ class UserCompanyFollowsDataService(DataService):
         raise gen.Return(response)
 
     @gen.coroutine
-    def _get_foll_cmpy(self, conds, fields=[]):
+    def get_fllw_cmpy(self, conds, fields=[]):
         if not self._valid_conds(conds):
             raise gen.Return(None)
         if not fields:
@@ -39,36 +42,22 @@ class UserCompanyFollowsDataService(DataService):
         raise gen.Return(response)
 
     @gen.coroutine
-    def get_fllw_cmpy(self, user_id, company_id=None):
-        conds = {'user_id': [user_id, '='], 'company_id': [company_id, '=']} \
-                if company_id is not None else {'user_id': [user_id, '=']}
-        company = yield self._get_foll_cmpy(conds, ['id', 'company_id'])
+    def update_vst_cmpy(self, conds, fields):
+        try:
+            response = self.user_company_follows_dao.update_by_conds(
+                            conds, fields)
+        except Exception as error:
+            self.logger(error)
+            raise gen.Return(False)
 
-        raise gen.Return(company)
+        raise gen.Return(response)
 
     @gen.coroutine
-    def set_cmpy_fllw(self, user_id, company_id, status, source):
-        conds = {'user_id': [user_id, '='], 'company_id': [company_id, '=']}
-        company = yield self._get_foll_cmpy(conds,
-                            fields=['id', 'user_id', 'company_id'])
-        if company:
-            try:
-                self.user_company_follows_dao.update_by_conds(conds,
-                        fields={'status': str(status), 'source': str(source)})
-            except Exception as error:
-                self.logger(error)
-                raise gen.Return(False)
+    def create_vst_cmpy(self, fields):
+        try:
+            response = self.user_company_follows_dao.insert_record(fields)
+        except Exception as error:
+            self.logger(error)
+            raise gen.Return(False)
 
-        else:
-            try:
-                self.user_company_follows_dao.insert_record({
-                    'user_id': user_id,
-                    'company_id': company_id,
-                    'status': status,
-                    'source': source
-                })
-            except Exception as error:
-                self.logger(error)
-                raise gen.Return(False)
-
-        raise gen.Return(True)
+        raise gen.Return(response)

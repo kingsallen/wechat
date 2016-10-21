@@ -17,20 +17,16 @@ class CompanyVisitReqHandler(BaseHandler):
 
     @gen.coroutine
     def post(self):
-        response = ObjectDict({'status': 1, 'message': 'failure'})
-        if self.json_args and 'status' in self.json_args.keys():
-            # Debug with front page.
-            # To be confirmed: company_id, user_id
-            self.json_args['company_id'] = 456
-            self.json_args['user_id'] = 323
+        try:
+            self.guarantee('status')
+        except:
+            return
 
-            if int(self.json_args.get('status')) == 0:
-                response.message = 'ignore'
-            else:
-                resp = yield self.user_company_ps.set_visit_company(
-                                    self.json_args)
-                if resp:
-                    response.status, response.message = 0, 'success'
+        self.params.company_id = 456
+        self.params.user_id = 323
+
+        response = yield self.user_company_ps.set_visit_company(
+                                    self.params)
 
         self._send_json(data=None, status_code=response.status,
                         message=response.message)
@@ -41,18 +37,16 @@ class CompanyFollowHandler(BaseHandler):
 
     @gen.coroutine
     def post(self):
-        response = ObjectDict({'status': 1, 'message': 'failure'})
-        if self.json_args and 'status' in self.json_args.keys():
+        try:
+            self.guarantee('status')
+        except:
+            return
 
-            # Debug with front page.
-            # To be confirmed: company_id, user_id
-            self.json_args['company_id'] = 456
-            self.json_args['user_id'] = 323
+        self.params.company_id = 456
+        self.params.user_id = 323
 
-            resp = yield self.user_company_ps.set_company_follow(
-                                self.json_args)
-            if resp:
-                response.status, response.message = 0, 'success'
+        response = yield self.user_company_ps.set_company_follow(
+                            self.params)
 
         self._send_json(data=None, status_code=response.status,
                        message=response.message)
@@ -88,7 +82,7 @@ class CompanySurveyHandler(BaseHandler):
         self.guarantee('selected', 'other')
 
         _company_id = self.current_user.company.id
-        _sysuser_id = self.current.sysuser.id
+        _sysuser_id = self.current_user.sysuser.id
         _selected = ujson.dumps(self.params.selected)
         _other = self.params.other
 

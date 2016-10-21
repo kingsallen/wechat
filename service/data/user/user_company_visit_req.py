@@ -14,7 +14,7 @@ from service.data.base import *
 class UserCompanyVisitReqDataService(DataService):
 
     @gen.coroutine
-    def _get_visit_cmpy(self, conds, fields=[]):
+    def get_visit_cmpy(self, conds, fields=[]):
         if not self._valid_conds(conds):
             raise gen.Return(None)
         if not fields:
@@ -29,36 +29,22 @@ class UserCompanyVisitReqDataService(DataService):
         raise gen.Return(response)
 
     @gen.coroutine
-    def get_visit_cmpy(self, user_id, company_id=None):
-        conds = {'user_id': [user_id, '='], 'company_id': [company_id, '=']} \
-            if company_id is not None else {'user_id': [user_id, '=']}
-        company = yield self._get_visit_cmpy(conds, ['id', 'company_id'])
+    def update_visit_cmpy(self, conds, fields):
+        try:
+            response = self.user_company_visit_req_dao.update_by_conds(
+                            conds, fields)
+        except Exception as error:
+            self.logger(error)
+            raise gen.Return(False)
 
-        raise gen.Return(company)
+        raise gen.Return(response)
 
     @gen.coroutine
-    def set_visit_cmpy(self, user_id, company_id, status, source):
-        conds = {'user_id': [user_id, '='], 'company_id': [company_id, '=']}
-        company = yield self._get_visit_cmpy(conds,
-                                fields=['id', 'user_id', 'company_id'])
-        if company:
-            try:
-                self.user_company_visit_req_dao.update_by_conds(conds,
-                        fields={'status': str(status), 'source': str(source)})
+    def create_visit_cmpy(self, fields):
+        try:
+            response = yield self.user_company_visit_req_dao.insert_record(fields)
+        except Exception as error:
+            self.logger(error)
+            raise gen.Return(False)
 
-            except Exception as error:
-                self.logger(error)
-                raise gen.Return(False)
-        else:
-            try:
-                self.user_company_visit_req_dao.insert_record({
-                    'user_id': user_id,
-                    'company_id': company_id,
-                    'status': status,
-                    'source': source
-                })
-            except Exception as error:
-                self.logger(error)
-                raise gen.Return(False)
-
-        raise gen.Return(True)
+        raise gen.Return(response)
