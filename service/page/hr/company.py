@@ -78,3 +78,10 @@ class CompanyPageService(PageService):
 
         positions_list = yield self.hr_company_ds.get_companys_list(conds, fields, options, appends)
         raise gen.Return(positions_list)
+
+    @gen.coroutine
+    def save_survey(self, fields, options=None, appends=None):
+        """保存公司 survey， 在公司 profile 主页保存"""
+        lastrowid = yield self.campaign_company_survey_ds.create_survey(fields)
+        raise gen.Return(lastrowid)
+
