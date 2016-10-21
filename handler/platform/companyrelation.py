@@ -32,7 +32,7 @@ class CompanyVisitReqHandler(BaseHandler):
                 if resp:
                     response.status, response.message = 0, 'success'
 
-        self.send_json(data=None, status_code=response.status,
+        self._send_json(data=None, status_code=response.status,
                         message=response.message)
         return
 
@@ -54,7 +54,7 @@ class CompanyFollowHandler(BaseHandler):
             if resp:
                 response.status, response.message = 0, 'success'
 
-        self.send_json(data=None, status_code=response.status,
+        self._send_json(data=None, status_code=response.status,
                        message=response.message)
         return
 

@@ -25,7 +25,7 @@ class InterestHandler(BaseHandler):
         else:
             status_code, message = self.constant.NO, mes_const.CELLPHONE_UNBIND
 
-        self.send_json(data=None, status_code=status_code, message=message)
+        self._send_json(data=None, status_code=status_code, message=message)
         return
 
     @gen.coroutine
@@ -41,6 +41,6 @@ class InterestHandler(BaseHandler):
             sysuser_id=self.current_user.sysuser.id,
             data=self.params
         )
-        self.send_json(data=None, status_code=response.status,
+        self._send_json(data=None, status_code=response.status,
                        message=response.message)
         return
