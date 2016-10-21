@@ -702,8 +702,8 @@ class BaseHandler(MetaBaseHandler):
         req_params = request.arguments
 
         customs = ObjectDict(
-            type_wechat=self.in_wechat,
-            type_mobile=self.client_type)
+            type_wechat=self._in_wechat,
+            type_mobile=self._client_type)
 
         if self.current_user:
             customs.update(
