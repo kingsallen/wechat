@@ -303,12 +303,16 @@ class BaseHandler(MetaBaseHandler):
 
     def _get_json_args(self):
         """获取 api 调用的 json dict"""
+
         json_args = {}
-        content_type = self.request.headers.get("Content-Type")
-        if content_type and "application/json" in content_type and \
-            self.request.body:
-            json_args = ujson.loads(self.request.body)
-        return ObjectDict(json_args)
+        headers = self.request.headers
+        body = to_str(self.request.body)
+
+        if (headers.get('Content-Type') and
+            'application/json' in headers.get('Content-Type') and body):
+            json_args = ujson.loads(body)
+
+        return json_args
 
     def guarantee(self, *args):
         """对 API 调用输入做参数检查
@@ -325,6 +329,7 @@ class BaseHandler(MetaBaseHandler):
 
             mobile = self.params["mobile"]
         """
+
         self.params = ObjectDict()
 
         c_arg = None
@@ -334,8 +339,8 @@ class BaseHandler(MetaBaseHandler):
                 self.params[arg] = self.json_args[arg]
                 self.json_args.pop(arg)
         except KeyError as e:
-            self.send_json(data={}, status_code=1,
-                           message="{}不能为空".format(c_arg), http_code=400)
+            self.send_json_error(message="{}不能为空".format(c_arg),
+                                 http_code=400)
             self.finish()
             self.LOG.error(str(e) + " 缺失")
             raise AttributeError(str(e) + " 缺失")
@@ -684,8 +689,10 @@ class BaseHandler(MetaBaseHandler):
         self.render(template_name, render_json=render_json)
         return
 
-    def send_json(self, data, status_code=0, message='success', http_code=200):
+    def _send_json(self, data, status_code, message, http_code):
         """传递 JSON 到前端 Used for API"""
+        data = data or ""
+
         render_json = json_dumps({
             "status": status_code,
             "message": message,
@@ -695,6 +702,16 @@ class BaseHandler(MetaBaseHandler):
         self.log_info = {"res_type": "json", "status_code": status_code}
         self.set_status(http_code)
         self.write(render_json)
+
+    def send_json_success(self, data=None, message="success", http_code=200):
+        """API 成功返回的便捷方法"""
+        self._send_json(data, status_code=0, message=message,
+                       http_code=http_code)
+
+    def send_json_error(self, data=None, message="failure", http_code=500):
+        """API 错误返回的便捷方法"""
+        self._send_json(data=data, status_code=1, message=message,
+                       http_code=http_code)
 
     def _get_info_header(self, log_params):
         """构建日志内容"""

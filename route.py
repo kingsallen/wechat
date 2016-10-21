@@ -40,6 +40,7 @@ platform_routes = [
     (r"/m/company/([0-9]*)",             "handler.platform.companyrelation.CompanyHandler",           {"event": "company_info"}),
 
     (r"/m/api/company/visitreq",         "handler.platform.companyrelation.CompanyVisitReqHandler",   {"event": "company_visitreq"}),
+    (r"/m/api/company/survey",           "handler.platform.companyrelation.CompanySurveyHandler",     {"event": "company_survey"}),
     (r"/m/api/company/follow",           "handler.platform.companyrelation.CompanyFollowHandler",     {"event": "company_follow"}),
     (r"/m/api/cellphone",                "handler.platform.cellphone.CellphoneBindHandler",           {"event": "cellphone_bind"}),
 ]

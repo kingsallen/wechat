@@ -10,6 +10,7 @@
 from tornado import gen
 from util.common import ObjectDict
 from handler.base import BaseHandler
+import ujson
 
 
 class CompanyVisitReqHandler(BaseHandler):
@@ -73,3 +74,28 @@ class CompanyHandler(BaseHandler):
         self.send_json(response, additional_dump=True)
         # self.render('company/profile.html', current_user=current_user)
         return
+
+
+class CompanySurveyHandler(BaseHandler):
+
+    @gen.coroutine
+    def post(self):
+        """处理用户填写公司 survey 的 post api 请求"""
+        self.guarantee('selected', 'other')
+
+        _company_id = self.current_user.company.id
+        _sysuser_id = self.current.sysuser.id
+        _selected = ujson.dumps(self.params.selected)
+        _other = self.params.other
+
+        inserted_id = yield self.company_ps.save_survey({
+            "company_id": _company_id,
+            "sysuser_id": _sysuser_id,
+            "selected": _selected,
+            "other": _other
+        })
+
+        if inserted_id and int(inserted_id):
+            self.send_json_success()
+        else:
+            self.send_json_error()
