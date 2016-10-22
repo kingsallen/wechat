@@ -82,9 +82,9 @@ class BaseHandler(MetaBaseHandler):
         self._qx_wechat = None
         self._unionid = None
         self._wxuser = None
-        # 处理 oauth 的 service
-        # self._oauth_service = WeChatOauth2Service(
-        #     self, self.fullurl, self.component_access_token)
+
+        # 处理 oauth 的 service, 会在使用时初始化
+        self._oauth_service = None
 
     # PROPERTIES
     @property
@@ -194,6 +194,10 @@ class BaseHandler(MetaBaseHandler):
         # 构建 session 之前先缓存一份 wechat
         self._wechat = yield self._get_current_wechat()
         self._qx_wechat = yield self._get_qx_wechat()
+
+        # 初始化 oauth service
+        self._oauth_service = WeChatOauth2Service(
+            self._wechat, self.fullurl, self.component_access_token)
 
         # 如果有 code，说明刚刚从微信 oauth 回来
         code = self.params.get("code")
@@ -404,7 +408,8 @@ class BaseHandler(MetaBaseHandler):
     def _get_user_openid(self, code):
         self._oauth_service.wechat = self._wechat
         try:
-            openid, _ = yield self._oauth_service.get_openid_unionid_by_code(code)
+            openid, _ = yield self._oauth_service.get_openid_unionid_by_code(
+                code)
             raise gen.Return(openid)
         except WeChatOauthError as e:
             self.logger.error(e)
