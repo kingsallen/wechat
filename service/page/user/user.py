@@ -125,7 +125,8 @@ class UserPageService(PageService):
                     "id": wxuser.id
                 },
                 fields={
-                    "is_subscribe":   0,
+                    # "is_subscribe":   0, 如果是 update_wxuser, 则不能更新为0
+                    "is_subscribe":   wxuser.is_subscribe or 0,
                     "sysuser_id":     qx_wxuser.sysuser_id,
                     "openid":         openid,
                     "nickname":       qx_wxuser.nickname,
@@ -135,9 +136,9 @@ class UserPageService(PageService):
                     "province":       qx_wxuser.province,
                     "language":       qx_wxuser.language,
                     "headimgurl":     qx_wxuser.headimgurl,
-                    "subscribe_time": curr_now(),
+                    # "subscribe_time": curr_now(), 如果是 update_wxuser，则不需要更新 # TODO
                     "wechat_id":      wechat_id,
-                    "group_id":       0,
+                    # "group_id":       0, 无用字段，可不用处理 #TODO
                     "unionid":        qx_wxuser.unionid,
                     "source":         const.WXUSER_OAUTH_UPDATE
                 })
@@ -154,9 +155,9 @@ class UserPageService(PageService):
                 "province":       qx_wxuser.province,
                 "language":       qx_wxuser.language,
                 "headimgurl":     qx_wxuser.headimgurl,
-                "subscribe_time": curr_now(),
+                # "subscribe_time": curr_now(),  只是网页授权，不是关注，可不更新该字段 # TODO
                 "wechat_id":      wechat_id,
-                "group_id":       0,
+                # "group_id":       0,  无用字段，可不用处理 #TODO
                 "unionid":        qx_wxuser.unionid,
                 "source":         const.WXUSER_OAUTH
             })
@@ -200,9 +201,9 @@ class UserPageService(PageService):
                 "province":       userinfo.province,
                 "language":       userinfo.language,
                 "headimgurl":     userinfo.headimgurl,
-                "subscribe_time": curr_now(),
+                # "subscribe_time": curr_now(),  只是网页授权，没有关注，可不更新该字段
                 "wechat_id":      qx_wechat_id,
-                "group_id":       0,
+                # "group_id":       0,  无用字段，可不更新 #TODO
                 "unionid":        userinfo.unionid if userinfo.unionid else "",
                 "source":         const.WXUSER_OAUTH
             })

@@ -1,5 +1,12 @@
 # coding=utf-8
 
+# status_message
+RESPONSE_SUCCESS = "SUCCESS"
+RESPONSE_FAILURE = "FAILURE"
+# status_code
+SUCCESS = 0
+FAILURE = 1
+
 LOGIN_FAILURE = "登录失败"
 
 BASIC_SERVER_DISCONNECTION = "基础服务器连接不上"

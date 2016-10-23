@@ -31,10 +31,6 @@ from tornado.options import options
 
 from setting import settings
 import conf.common as constant
-import conf.platform as plat_constant
-import conf.qx as qx_constant
-import conf.help as help_constant
-import conf.wechat as wx_constant
 
 from route import platform_routes, qx_routes, help_routes
 from util.common.log import MessageLogger
@@ -59,14 +55,7 @@ class Application(tornado.web.Application):
         self.settings = settings
         self.logger = logger
         self.env = options.env
-
-        self.constant = constant
-        self.plat_constant = plat_constant
-        self.qx_constant = qx_constant
-        self.help_constant = help_constant
-        self.wx_constant = wx_constant
         self.redis = redis
-
 
 def main():
     application = Application()

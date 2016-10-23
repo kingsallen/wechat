@@ -10,6 +10,7 @@ import tornado.httpclient
 
 import conf.common as const
 import conf.wechat as wx_const
+import conf.path as path
 
 from util.common import ObjectDict
 from util.common.sign import Sign
@@ -192,7 +193,7 @@ class WeChatOauth2Service(object):
             up = urlparse(self._redirect_url)
             netloc = up.netloc.replace(const.ENV_PLATFORM, const.ENV_QX, 1)
             self._redirect_url = "{}?next_url={}".format(
-                up.scheme + "://" + netloc + wx_const.WX_OAUTH_QX_PATH,
+                up.scheme + "://" + netloc + path.WX_OAUTH_QX_PATH,
                 next_url)
 
     @staticmethod

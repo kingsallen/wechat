@@ -18,7 +18,7 @@ help_routes: 继承自common_routes, 供help单独使用，一般 handler 在 he
 例如 (
     r"/m/wechat",     路由
     "handler.common.wechat.WechatHandler",    handler
-    {"event": "wechat_wechat"}   event事件，必须，log 需要
+    {"event": "wechat_wechat"}   event事件，必须，log 需要。可由页面_功能组成，例如 company_info
 )
 
 """
@@ -37,8 +37,8 @@ common_routes = [
 # 企业号的单独 routes
 platform_routes = [
     (r"/m/start",                        "handler.platform.landing.LandingHandler",                   {"event": "start_landing"}),
-    (r"/m/company/(team)?",             "handler.platform.companyrelation.CompanyHandler",           {"event": "company_info"}),
-    (r"/m/interest",                     "handler.platform.interest.InterestHandler",                {"event": "interest"}),
+    (r"/m/company/(team)?",              "handler.platform.companyrelation.CompanyHandler",           {"event": "company_info"}),
+    (r"/m/interest",                     "handler.platform.interest.InterestHandler",                 {"event": "company_interest"}),
 
     (r"/m/api/company/visitreq",         "handler.platform.companyrelation.CompanyVisitReqHandler",   {"event": "company_visitreq"}),
     (r"/m/api/company/survey",           "handler.platform.companyrelation.CompanySurveyHandler",     {"event": "company_survey"}),

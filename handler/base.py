@@ -26,6 +26,8 @@ from util.tool.str_tool import to_str, to_hex, from_hex
 from util.tool.url_tool import make_url, url_subtract_query
 
 import conf.message as msg_const
+import conf.common as constant
+import conf.wechat as wx_constant
 
 # 动态加载所有 PageService
 obDict = {}
@@ -61,6 +63,7 @@ class BaseHandler(MetaBaseHandler):
 
     def initialize(self, **kwargs):
         # 日志需要，由 route 定义
+        print (kwargs.get("event"))
         self.event = kwargs.get("event")
 
     def __init__(self, application, request, **kwargs):
@@ -101,59 +104,32 @@ class BaseHandler(MetaBaseHandler):
 
     @property
     def is_platform(self):
-        return self.env == self.constant.ENV_PLATFORM
+        return self.env == constant.ENV_PLATFORM
 
     @property
     def is_qx(self):
-        return self.env == self.constant.ENV_QX
+        return self.env == constant.ENV_QX
 
     @property
     def is_help(self):
-        return self.env == self.constant.ENV_HELP
+        return self.env == constant.ENV_HELP
 
     @property
     def in_wechat(self):
-        return self._in_wechat == self.constant.CLIENT_WECHAT
+        return self._in_wechat == constant.CLIENT_WECHAT
 
     @property
     def in_wechat_ios(self):
-        return self.in_wechat and self._client_type == \
-                                  self.constant.CLIENT_TYPE_IOS
+        return self.in_wechat and self._client_type == constant.CLIENT_TYPE_IOS
 
     @property
     def in_wechat_android(self):
-        return self.in_wechat and self._client_type == \
-                                  self.constant.CLIENT_TYPE_ANDROID
+        return self.in_wechat and self._client_type == constant.CLIENT_TYPE_ANDROID
 
     @property
     def app_id(self):
         """appid for infra"""
-        bundle = {
-            self.constant.ENV_QX:       '5',
-            self.constant.ENV_PLATFORM: '6',
-            self.constant.ENV_HELP:     '7'
-        }
-        return bundle[self.env]
-
-    @property
-    def constant(self):
-        return self.application.constant
-
-    @property
-    def plat_constant(self):
-        return self.application.plat_constant
-
-    @property
-    def qx_constant(self):
-        return self.application.qx_constant
-
-    @property
-    def help_constant(self):
-        return self.application.help_constant
-
-    @property
-    def wx_constant(self):
-        return self.application.wx_constant
+        return constant.APPID[self.env]
 
     @property
     def redis(self):
@@ -209,7 +185,7 @@ class BaseHandler(MetaBaseHandler):
         if self.in_wechat:
             if code:
                 # 来自 qx 的授权, 获得 userinfo
-                if state == self.wx_constant.WX_OAUTH_DEFAULT_STATE:
+                if state == wx_constant.WX_OAUTH_DEFAULT_STATE:
                     self.logger.debug("来自 qx 的授权, 获得 userinfo")
                     userinfo = yield self._get_user_info(code)
                     yield self._handle_user_info(userinfo)
@@ -264,9 +240,9 @@ class BaseHandler(MetaBaseHandler):
 
         unionid = userinfo.unionid
         if self.is_platform:
-            source = self.constant.WECHAT_REGISTER_SOURCE_PLATFORM
+            source = constant.WECHAT_REGISTER_SOURCE_PLATFORM
         else:
-            source = self.constant.WECHAT_REGISTER_SOURCE_QX
+            source = constant.WECHAT_REGISTER_SOURCE_QX
 
         # 创建 user_user
         user_id = yield self.user_ps.create_user_user(
@@ -341,7 +317,7 @@ class BaseHandler(MetaBaseHandler):
                 self.json_args.pop(arg)
         except KeyError as e:
             self.send_json_error(message="{}不能为空".format(c_arg),
-                                 http_code=400)
+                                 http_code=416)
             self.finish()
             self.LOG.error(str(e) + " 缺失")
             raise AttributeError(str(e) + " 缺失")
@@ -420,7 +396,7 @@ class BaseHandler(MetaBaseHandler):
         need_oauth = False
         ok = False
 
-        session_id = to_str(self.get_secure_cookie(self.constant.COOKIE_SESSIONID))
+        session_id = to_str(self.get_secure_cookie(constant.COOKIE_SESSIONID))
 
         if session_id:
             if self.is_platform:
@@ -463,7 +439,7 @@ class BaseHandler(MetaBaseHandler):
             session.qxuser.sysuser_id)
 
         session_id = self._make_new_session_id()
-        self.set_secure_cookie(self.constant.COOKIE_SESSIONID, session_id)
+        self.set_secure_cookie(constant.COOKIE_SESSIONID, session_id)
 
         self._save_sessions(session_id, session)
 
@@ -494,7 +470,7 @@ class BaseHandler(MetaBaseHandler):
         session.sysuser = yield self.user_ps.get_user_user_id(
             session.qxuser.sysuser_id)
 
-        session_id = self.get_secure_cookie(self.constant.COOKIE_SESSIONID)
+        session_id = self.get_secure_cookie(constant.COOKIE_SESSIONID)
         # 当使用手机浏览器访问的时候可能没有 session_id
         # 那么就创建它
         if not session_id:
@@ -515,11 +491,11 @@ class BaseHandler(MetaBaseHandler):
         2. 保存聚合号 session， 只包含 qxuser
         """
 
-        key_ent = self.constant.SESSION_USER.format(session_id, self._wechat.id)
+        key_ent = constant.SESSION_USER.format(session_id, self._wechat.id)
         self.redis.set(key_ent, session, 60 * 60 * 2)
         self.logger.debug("refresh ent session redis key: {}".format(key_ent))
 
-        key_qx = self.constant.SESSION_USER.format(session_id, self.settings['qx_wechat_id'])
+        key_qx = constant.SESSION_USER.format(session_id, self.settings['qx_wechat_id'])
         self.redis.set(key_qx, ObjectDict(qxuser=session.qxuser))
         self.logger.debug("refresh qx session redis key: {}".format(key_qx))
 
@@ -550,7 +526,7 @@ class BaseHandler(MetaBaseHandler):
     def _get_session_from_ent(self, session_id):
         """尝试获取企业号 session"""
 
-        key = self.constant.SESSION_USER.format(session_id, self._wechat.id)
+        key = constant.SESSION_USER.format(session_id, self._wechat.id)
         value = self.redis.get(key)
         if value:
             # 如果有 value， 返回该 value 作为 self.current_user
@@ -565,7 +541,7 @@ class BaseHandler(MetaBaseHandler):
     def _get_session_from_qx(self, session_id):
         """尝试获取聚合号 session"""
 
-        key = self.constant.SESSION_USER.format(session_id, self.settings['qx_wechat_id'])
+        key = constant.SESSION_USER.format(session_id, self.settings['qx_wechat_id'])
 
         value = self.redis.get(key)
         if value:
@@ -656,7 +632,6 @@ class BaseHandler(MetaBaseHandler):
             self.render_page(
                 'system/info.html',
                 data=ObjectDict(code=http_code, css="warning", message=msg_const.NOT_AUTHORIZED))
-
         elif http_code == 404:
             self.render_page(
                 'system/info.html', data=ObjectDict(code=http_code, message=msg_const.NO_DATA))
@@ -664,8 +639,8 @@ class BaseHandler(MetaBaseHandler):
             self.render_page(
                 'system/info.html', data=ObjectDict(code=http_code, message=msg_const.UNKNOWN_DEFAULT))
 
-    def render_page(self, template_name, data, status_code=0,
-                    message='success', http_code=200):
+    def render_page(self, template_name, data, status_code=msg_const.SUCCESS,
+                    message=msg_const.RESPONSE_SUCCESS, http_code=200):
         """render 页面"""
         self.log_info = {"res_type": "html", "status_code": status_code}
         self.set_status(http_code)
@@ -705,14 +680,14 @@ class BaseHandler(MetaBaseHandler):
         self.set_status(http_code)
         self.write(render_json)
 
-    def send_json_success(self, data=None, message="success", http_code=200):
+    def send_json_success(self, data=None, message=msg_const.RESPONSE_SUCCESS, http_code=200):
         """API 成功返回的便捷方法"""
-        self._send_json(data, status_code=0, message=message,
+        self._send_json(data, status_code=msg_const.SUCCESS, message=message,
                        http_code=http_code)
 
-    def send_json_error(self, data=None, message="failure", http_code=500):
+    def send_json_error(self, data=None, message=msg_const.RESPONSE_FAILURE, http_code=416):
         """API 错误返回的便捷方法"""
-        self._send_json(data=data, status_code=1, message=message,
+        self._send_json(data=data, status_code=msg_const.FAILURE, message=message,
                        http_code=http_code)
 
     def _get_info_header(self, log_params):
@@ -754,7 +729,7 @@ class BaseHandler(MetaBaseHandler):
             req_uri=request.uri,
             req_params=req_params,
             customs=customs,
-            session_id=self.get_secure_cookie(self.constant.COOKIE_SESSIONID)
+            session_id=self.get_secure_cookie(constant.COOKIE_SESSIONID)
         )
 
         log_params.update(log_info_common)
@@ -762,15 +737,15 @@ class BaseHandler(MetaBaseHandler):
 
     def _depend_wechat(self):
         """判断用户UA是否为微信客户端"""
-        wechat = self.constant.CLIENT_NON_WECHAT
-        mobile = self.constant.CLIENT_TYPE_UNKNOWN
+        wechat = constant.CLIENT_NON_WECHAT
+        mobile = constant.CLIENT_TYPE_UNKNOWN
 
         useragent = self.request.headers.get('User-Agent')
         if "MicroMessenger" in useragent:
             if "iPhone" in useragent:
-                mobile = self.constant.CLIENT_TYPE_IOS
+                mobile = constant.CLIENT_TYPE_IOS
             elif "Android" in useragent:
-                mobile = self.constant.CLIENT_TYPE_ANDROID
-            wechat = self.constant.CLIENT_WECHAT
+                mobile = constant.CLIENT_TYPE_ANDROID
+            wechat = constant.CLIENT_WECHAT
 
         return wechat, mobile

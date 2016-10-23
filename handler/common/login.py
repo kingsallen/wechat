@@ -50,7 +50,7 @@ class LoginHandler(BaseHandler):
 
         res = yield self.user_ps.login_by_mobile_pwd(
             self.params.username, self.params.password)
-        if res.status == const.API_SUCCESS:
+        if res.status == msg_const.SUCCESS:
             userinfo = ObjectDict(res.data)
 
             if userinfo.unionid:
@@ -59,6 +59,6 @@ class LoginHandler(BaseHandler):
                 return
 
         self.send_json(
-            status_code=const.API_FAILURE,
+            status_code=msg_const.FAILURE,
             message=msg_const.LOGIN_FAILURE,
             data={})

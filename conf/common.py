@@ -26,18 +26,18 @@ WECHAT_REGISTER_SOURCE_PLATFORM = 2
 WXUSER_OAUTH_UPDATE = 7
 WXUSER_OAUTH = 4
 
-# status_code
-RESPONSE_SUCCESS = "SUCCESS"
-RESPONSE_FAILURE = "FAILURE"
-# api_status_code
-API_SUCCESS = 0
-API_FAILURE = 1
-
 # 环境
 ENV = "new_wechat"
 ENV_PLATFORM = "platform"
 ENV_QX = "qx"
 ENV_HELP = "help"
+
+"""appid for infra"""
+APPID = {
+    ENV_QX:       "5",
+    ENV_PLATFORM: "6",
+    ENV_HELP:     "7"
+}
 
 # 微信客户端类型
 CLIENT_WECHAT = 1

@@ -19,8 +19,8 @@ SLACKMAN_WEBHOOK_URL="https://hooks.slack.com/services/T0T2KCH2A/B0TUGEK60/x1eZT
 
 
 class Alarm(object):
-    def __init__(self, webhook_url):
-        self._webhook_url = webhook_url
+    def __init__(self):
+        self._webhook_url = SLACKMAN_WEBHOOK_URL
 
     @gen.coroutine
     def biu(self, text, **kwargs):
@@ -33,21 +33,22 @@ class Alarm(object):
         # debug 环境不报警
         assert text
         text = "[{0}]: {1}".format(socket.gethostname(), text)
-        if not settings['debug']:
-            payload = json.dumps({
-                'text': text,
-                'username': kwargs.get('botname'),
-                'channel': kwargs.get('channel'),
-                'icon_emoji': kwargs.get('emoji')
-            })
+        payload = {
+            'text': text,
+            'username': kwargs.get('botname') or "NEW-WECHAT",
+            'channel': kwargs.get('channel') or "#script-alert", # wechat-error
+            'icon_emoji': kwargs.get('emoji')
+        }
 
-            yield http_post(route=self._webhook_url, jdata=payload)
+        # TODO 待调试
+
+        yield http_post(route=self._webhook_url, jdata=payload)
 
         return
 
-Alarm = Alarm(SLACKMAN_WEBHOOK_URL)
-
 if __name__ == '__main__':
-    Alarm.biu('biu',
-                 botname="脚小布",
-                 channel="#wechat-error")
+    try:
+        alarm = Alarm()
+        alarm.biu('biu')
+    except Exception as e:
+        print (e)

@@ -7,6 +7,7 @@ from handler.base import BaseHandler
 import hashlib
 from tornado import gen
 from util.common.decorator import handle_response
+from util.common.alarm import Alarm
 
 
 class WechatHandler(BaseHandler):
@@ -14,6 +15,8 @@ class WechatHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def get(self):
+
+        yield Alarm().biu("test")
         self.send_json(
                 data={
                     "a": 'hello world!'
