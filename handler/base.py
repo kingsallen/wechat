@@ -653,7 +653,8 @@ class BaseHandler(MetaBaseHandler):
 
         # 前后端联调使用
         if self.settings.get('remote_debug', False) is True:
-            template_string = self.render_string(template_name, render_json=render_json)
+            template_string = self.render_string(template_name,
+                                                 render_json=render_json)
             post_url = urljoin(self.settings.get('remote_debug_ip'),
                                template_name)
             http_client = tornado.httpclient.HTTPClient()
@@ -682,13 +683,17 @@ class BaseHandler(MetaBaseHandler):
 
     def send_json_success(self, data=None, message=msg_const.RESPONSE_SUCCESS, http_code=200):
         """API 成功返回的便捷方法"""
-        self._send_json(data, status_code=msg_const.SUCCESS, message=message,
-                       http_code=http_code)
+        self._send_json(data=data,
+                        status_code=msg_const.SUCCESS,
+                        message=message,
+                        http_code=http_code)
 
     def send_json_error(self, data=None, message=msg_const.RESPONSE_FAILURE, http_code=416):
         """API 错误返回的便捷方法"""
-        self._send_json(data=data, status_code=msg_const.FAILURE, message=message,
-                       http_code=http_code)
+        self._send_json(data=data,
+                        status_code=msg_const.FAILURE,
+                        message=message,
+                        http_code=http_code)
 
     def _get_info_header(self, log_params):
         """构建日志内容"""

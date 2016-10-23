@@ -7,15 +7,23 @@
 
 # Copyright 2016 MoSeeker
 
-from urllib.parse import urlparse, parse_qs, urlencode, quote
+from urllib.parse import urlparse, parse_qs, urlencode
 
 
 def make_url(path, params=None, host="", protocol="http", escape=None,
              **kwargs):
+    """
+    生成 url 的 helper 方法， 一般在 handler 调用
+    :param path: url path
+    :param params: url query
+    :param host: hostname
+    :param protocol: http/https
+    :param escape: url query 黑名单
+    :param kwargs: 额外手动添加的 url query
+    :return: string of url
+    """
 
-    # TODO
-    # 需要过滤 xsrf
-    # 对于 v 为中文的，是否需要进行 urlencode
+    params = params or {}
 
     if "?" in path:
         raise ValueError("Path should not contain '?'")
@@ -23,53 +31,35 @@ def make_url(path, params=None, host="", protocol="http", escape=None,
     if not isinstance(params, dict):
         raise TypeError("Params is not a dict")
 
-    params = params or {}
-
+    # 默认 query 黑名单：
+    # m, state, code 不传递
     escape_default = ['m', 'state', 'code']
-    escape = escape or []
-    escape = set(escape_default + escape)
+    escape = set((escape or []) + escape_default)
 
-    d = params.copy()
+    pairs = {k: v for k, v in params.copy().items() if k not in escape}
 
-    for e in escape:
-        d.pop(e, None)
-    d.update(kwargs)
+    def _is_valid(k, v):
+        """helper for filtering url query"""
+        return (v and isinstance(k, str) and isinstance(v, str) and
+                not (k.startswith("_") and k not in kwargs))
 
-    url_params = []
-    for k, v in d.items():
-        if k in escape:
-            continue
+    query = [(k, v) for k, v in pairs.items() if _is_valid(k, v)]
 
-        if not (isinstance(k, str) and isinstance(v, str)):
-            continue
+    ret = (((protocol + "://" + host) if host else "") + path + "?" +
+           urlencode(query))
 
-        if v == '':
-            continue
-
-        if k.startswith("_") and k not in kwargs:
-            continue
-
-        k = quote(str(k))
-        if k in ["wechat_signature"]:
-            kv = k + "=" + str(v)
-        else:
-            kv = k + "=" + quote(str(v) if str(v) else "")
-
-        url_params.append(kv)
-
-    return (((protocol + "://" + host) if host else "") +
-            path + "?" + ("&".join(url_params)))
+    return ret[:-1] if ret[-1] == '?' else ret
 
 
 def url_subtract_query(url, query_key_list):
     """削减 url 的 query 中指定的键值"""
     p = urlparse(url)
-    qurey = p.query
-    parsed_query = parse_qs(qurey)
+    query = p.query
+    parsed_query = parse_qs(query)
     for l in query_key_list:
         parsed_query.pop(l, None)
     nquery = urlencode(parsed_query, doseq=True)
-    return "{scheme}://{netloc}{path}?{query}".format(
+    ret = "{scheme}://{netloc}{path}?{query}".format(
         scheme=p[0], netloc=p[1], path=p[2], query=nquery)
 
-
+    return ret[:-1] if ret[-1] == '?' else ret
