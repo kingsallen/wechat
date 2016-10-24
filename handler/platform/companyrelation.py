@@ -83,7 +83,7 @@ class CompanySurveyHandler(BaseHandler):
 
         _company_id = self.current_user.company.id
         _sysuser_id = self.current_user.sysuser.id
-        _selected = ujson.dumps(self.params.selected)
+        _selected = ujson.dumps(self.params.selected, ensure_ascii=False)
         _other = self.params.other
 
         inserted_id = yield self.company_ps.save_survey({
