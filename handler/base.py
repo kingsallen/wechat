@@ -210,7 +210,6 @@ class BaseHandler(MetaBaseHandler):
         self._wxuser = None
 
         self.logger.debug("current_user: {}".format(self.current_user))
-        self.logger.debug("params: {}".format(self.params))
 
     # PROTECTED
     @gen.coroutine
@@ -233,6 +232,7 @@ class BaseHandler(MetaBaseHandler):
         "unionid": "o6_bmasdasdsad6_2sgVt7hMZOPfL"
         )
         """
+        self.logger.debug("userinfo: {}".format(userinfo))
 
         unionid = userinfo.unionid
         if self.is_platform:
@@ -472,7 +472,7 @@ class BaseHandler(MetaBaseHandler):
 
         session.sysuser = yield self.user_ps.get_user_user_id(
             session.qxuser.sysuser_id)
-        
+
         self._add_jsapi_to_wechat(session.wechat)
         if self.is_platform:
             yield self._add_company_info_to_session(session)
