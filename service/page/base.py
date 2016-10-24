@@ -46,7 +46,7 @@ class PageService:
         for module in filter(lambda x: not x.endswith("init__.py"), glob.glob(d)):
             p = module.split("/")[-2]
             m = module.split("/")[-1].split(".")[0]
-            m_list = [item.title() for item in re.split(u"_", m)]
+            m_list = [item.title() for item in re.split("_", m)]
             pm_ds = "".join(m_list) + "DataService"
             pm_obj = m + "_ds"
 

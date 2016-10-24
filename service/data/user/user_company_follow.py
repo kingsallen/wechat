@@ -11,7 +11,7 @@ from tornado import gen
 from service.data.base import *
 
 
-class UserCompanyFollowsDataService(DataService):
+class UserCompanyFollowDataService(DataService):
 
     @gen.coroutine
     def get_user(self, conds, fields=[]):
