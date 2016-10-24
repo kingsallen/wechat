@@ -32,8 +32,8 @@ class WeChatOauth2Service(object):
     async_http = tornado.httpclient.AsyncHTTPClient()
 
     def __init__(self, wechat, redirect_url, component_access_token):
-        self._redirect_url = redirect_url
-        self._wechat = wechat
+        self.redirect_url = redirect_url
+        self.wechat = wechat
         self.state = 0
 
         # 第三方的 component_access_token
@@ -53,7 +53,7 @@ class WeChatOauth2Service(object):
 
     @property
     def handling_qx(self):
-        return self._wechat.id == settings['qx_wechat_id']
+        return self.wechat.id == settings['qx_wechat_id']
 
     @gen.coroutine
     def get_openid_unionid_by_code(self, code):
@@ -98,8 +98,8 @@ class WeChatOauth2Service(object):
         self.__adjust_url(is_base)
 
         return wx_const.WX_OAUTH_GET_CODE % (
-            self._wechat.appid,
-            quote(self._redirect_url),
+            self.wechat.appid,
+            quote(self.redirect_url),
             self._get_oauth_type(is_base),
             self.state)
 
@@ -109,8 +109,8 @@ class WeChatOauth2Service(object):
         self.__adjust_url(is_base)
 
         return wx_const.WX_THIRD_OAUTH_GET_CODE % (
-            self._wechat.appid,
-            quote(self._redirect_url),
+            self.wechat.appid,
+            quote(self.redirect_url),
             self._get_oauth_type(is_base),
             self.state,
             settings['component_app_id'])
@@ -121,14 +121,14 @@ class WeChatOauth2Service(object):
         # TODO: 是否需要使用第三方接口来调用 access_token?
         # if self.wechat.third_oauth:
         #     url = (wx_const.WX_THIRD_OAUTH_GET_ACCESS_TOKEN % (
-        #             self._wechat.appid,
+        #             self.wechat.appid,
         #             code,
         #             settings["component_app_id"],
         #             self._component_access_token))
         # else:
         url = (wx_const.WX_OAUTH_GET_ACCESS_TOKEN % (
-                self._wechat.appid,
-                self._wechat.secret,
+                self.wechat.appid,
+                self.wechat.secret,
                 code))
         logger.debug("get_access_token_url: {0}".format(url))
         return url
@@ -188,11 +188,11 @@ class WeChatOauth2Service(object):
         """必要时调整 redirect_uri 的二级域名"""
 
         if not is_base and self.handling_qx and self.__is_platform_url(
-                self._redirect_url):
-            next_url = quote(self._redirect_url)
-            up = urlparse(self._redirect_url)
+                self.redirect_url):
+            next_url = quote(self.redirect_url)
+            up = urlparse(self.redirect_url)
             netloc = up.netloc.replace(const.ENV_PLATFORM, const.ENV_QX, 1)
-            self._redirect_url = "{}?next_url={}".format(
+            self.redirect_url = "{}?next_url={}".format(
                 up.scheme + "://" + netloc + path.WX_OAUTH_QX_PATH,
                 next_url)
 
