@@ -42,7 +42,7 @@ class UserCompanyFollowsDataService(DataService):
         raise gen.Return(response)
 
     @gen.coroutine
-    def update_vst_cmpy(self, conds, fields):
+    def update_fllw_cmpy(self, conds, fields):
         try:
             response = self.user_company_follows_dao.update_by_conds(
                             conds, fields)
@@ -53,7 +53,7 @@ class UserCompanyFollowsDataService(DataService):
         raise gen.Return(response)
 
     @gen.coroutine
-    def create_vst_cmpy(self, fields):
+    def create_fllw_cmpy(self, fields):
         try:
             response = self.user_company_follows_dao.insert_record(fields)
         except Exception as error:
