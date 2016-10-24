@@ -7,11 +7,13 @@
 
 # Copyright 2016 MoSeeker
 
-from abc import ABCMeta, abstractmethod
-
 import redis
 
+from abc import ABCMeta, abstractmethod
+from tornado.options import options
+
 from setting import settings
+import conf.common as constant
 
 
 class IMessageSendable(object):
@@ -30,7 +32,8 @@ class RedisELK(IMessageSendable):
 
     redis = redis.StrictRedis(connection_pool=pool)
 
-    _KEY_PREFIX = "wechat"  # 待调整
+    _KEY_PREFIX = "log"  # elk只能接受小写的 key
+    _APPID = constant.APPID[options.env]
 
     def __new__(cls, *args):
         if not hasattr(cls, '_instance'):
@@ -46,7 +49,7 @@ class RedisELK(IMessageSendable):
             print(e)
 
     def key_name(self, key):
-        return '{0}_{1}'.format(self._KEY_PREFIX, key)
+        return '{0}_{1}_{2}'.format(self._KEY_PREFIX, self._APPID, key)
 
     def send_message(self, key, value):
         if value and key:

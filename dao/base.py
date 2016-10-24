@@ -39,8 +39,8 @@ class BaseDao(DB):
         :param params SQL 语句的 params 插值
         :return: cursor游标
         """
-        self.logger.warn("[warning][{0}][start][time: {1}][sql: {2}]".format(
-            self.__class__.__module__, curr_now(), sql))
+        self.logger.warn("[warning][{0}][start][time: {1}][sql: {2}][params: {3}]".format(
+            self.__class__.__module__, curr_now(), sql, params))
         cursor = yield self.pool.execute(sql, params)
         raise gen.Return(cursor)
 

@@ -9,7 +9,7 @@ from tornado import gen
 from tornado.locks import Semaphore
 from tornado.web import MissingArgumentError
 
-import conf.common as constant
+import conf.message as meg_const
 from util.common import ObjectDict
 from util.common.cache import BaseRedis
 
@@ -26,8 +26,8 @@ def handle_response(func):
             self.logger.error(e)
             if self.request.headers.get("Accept", "").startswith("application/json"):
                 self.send_json(self, data={}, http_code=416,
-                               status_code=constant.API_SUCCESS,
-                               message=constant.RESPONSE_FAILURE)
+                               status_code=meg_const.SUCCESS,
+                               message=meg_const.RESPONSE_FAILURE)
             else:
                 self.write_error(500)
                 return

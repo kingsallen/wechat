@@ -13,6 +13,10 @@ from urllib.parse import urlparse, parse_qs, urlencode, quote
 def make_url(path, params=None, host="", protocol="http", escape=None,
              **kwargs):
 
+    # TODO
+    # 需要过滤 xsrf
+    # 对于 v 为中文的，是否需要进行 urlencode
+
     if "?" in path:
         raise ValueError("Path should not contain '?'")
 
