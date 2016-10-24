@@ -185,7 +185,7 @@ class BaseHandler(MetaBaseHandler):
                     self.logger.debug("来自 qx 的授权, 获得 userinfo")
                     userinfo = yield self._get_user_info(code)
                     yield self._handle_user_info(userinfo)
-                    if self._finished:
+                    if self.request.connection.stream.closed():
                         return
 
                 # 来自企业号的静默授权
