@@ -558,7 +558,7 @@ class BaseHandler(MetaBaseHandler):
         """
         while True:
             session_id = constant.SESSION_ID.format(
-                sha1(sysuser_id).hexdigest(),
+                sha1(bytes(sysuser_id)).hexdigest(),
                 sha1(os.urandom(24)).hexdigest())
             record = self.redis.exists(session_id + "_*")
             if record:
