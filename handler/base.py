@@ -431,13 +431,13 @@ class BaseHandler(MetaBaseHandler):
         session.qxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
             unionid=self._unionid, wechat_id=self.settings['qx_wechat_id'])
 
-        session.sysuser = yield self.user_ps.get_user_user_id(
-            session.qxuser.sysuser_id)
-
-        session_id = self._make_new_session_id()
+        session_id = self._make_new_session_id(session.qxuser.sysuser_id)
         self.set_secure_cookie(constant.COOKIE_SESSIONID, session_id)
 
         self._save_sessions(session_id, session)
+
+        session.sysuser = yield self.user_ps.get_user_user_id(
+            session.qxuser.sysuser_id)
 
         self._add_jsapi_to_wechat(session.wechat)
         if self.is_platform:
@@ -463,16 +463,16 @@ class BaseHandler(MetaBaseHandler):
         session.qxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
             unionid=unionid, wechat_id=self.settings['qx_wechat_id'])
 
-        session.sysuser = yield self.user_ps.get_user_user_id(
-            session.qxuser.sysuser_id)
-
         session_id = self.get_secure_cookie(constant.COOKIE_SESSIONID)
         # 当使用手机浏览器访问的时候可能没有 session_id
         # 那么就创建它
         if not session_id:
-            session_id = self._make_new_session_id()
+            session_id = self._make_new_session_id(session.qxuser.sysuser_id)
         self._save_sessions(session_id, session)
 
+        session.sysuser = yield self.user_ps.get_user_user_id(
+            session.qxuser.sysuser_id)
+        
         self._add_jsapi_to_wechat(session.wechat)
         if self.is_platform:
             yield self._add_company_info_to_session(session)
@@ -547,7 +547,7 @@ class BaseHandler(MetaBaseHandler):
             raise gen.Return(True)
         raise gen.Return(False)
 
-    def _make_new_session_id(self):
+    def _make_new_session_id(self, sysuser_id):
         """创建新的 session_id
 
         redis 中 session 的 key 的格式为 session_id_<wechat_id>
@@ -557,7 +557,9 @@ class BaseHandler(MetaBaseHandler):
         :return: session_id
         """
         while True:
-            session_id = sha1(os.urandom(24)).hexdigest()
+            session_id = constant.SESSION_ID.format(
+                sha1(sysuser_id).hexdigest(),
+                sha1(os.urandom(24)).hexdigest())
             record = self.redis.exists(session_id + "_*")
             if record:
                 continue
