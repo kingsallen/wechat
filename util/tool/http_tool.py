@@ -30,8 +30,6 @@ def http_delete(route, jdata, timeout=5):
 @gen.coroutine
 def http_post(route, jdata, timeout=5):
     ret = yield _async_http_post(route, jdata, timeout=timeout, method='POST')
-    print (jdata)
-    print (ret)
     raise gen.Return(ret)
 
 

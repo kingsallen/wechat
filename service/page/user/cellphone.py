@@ -19,18 +19,34 @@ class CellphonePageService(PageService):
     Referenced Document: https://wiki.moseeker.com/user_account_api.md
                          Point 32, 33
     """
+    _ROUTE = ObjectDict({
+        'valid': 'user/sendCode',
+        'verify': 'user/verifyCode'
+    })
+
+    _OPT_TYPE = ObjectDict({
+        'code_login': 1,
+        'forget_password': 2,
+        'modify_info': 3,
+        'change_mobile': 4
+    })
 
     @gen.coroutine
     def send_valid_code(self, mobile_numb, app_id):
-        route = 'user/sendCode'
+        """
+        Request basic service send valid code to target mobile
+        :param mobile_numb: target mobile number
+        :param app_id: request source(platform, qx...)
+        :return:
+        """
         if mobile_numb:
             req = ObjectDict({
                 'mobile': mobile_numb,
-                'type': 4,
+                'type': self._OPT_TYPE.change_mobile,
                 'appid': app_id
             })
             try:
-                response = yield http_post(route, req)
+                response = yield http_post(self._ROUTE.valid, req)
             except Exception as error:
                 self.logger.warn(error)
                 raise gen.Return(ObjectDict({
@@ -41,17 +57,21 @@ class CellphonePageService(PageService):
                 'status': 1, 'message': mes_const.REQUEST_PARAM_ERROR}))
 
     @gen.coroutine
-    def bind_mobile(self, data, app_id):
-        route = 'user/verifyCode'
-
+    def bind_mobile(self, params, app_id):
+        """
+        Send code submitted by user to basic service.
+        :param params: dict include user mobile number and valid code
+        :param app_id: request source(platform, qx...)
+        :return:
+        """
         req = ObjectDict({
-            'mobile': data.mobile,
-            'code': data.code,
-            'type': 4,
+            'mobile': params.mobile,
+            'code': params.code,
+            'type': self._OPT_TYPE.change_mobile,
             'appid': app_id
         })
         try:
-            response = yield http_post(route, req)
+            response = yield http_post(self._ROUTE.verify, req)
         except Exception as error:
             self.logger.warn(error)
             raise gen.Return(ObjectDict({

@@ -14,6 +14,10 @@ class UserPageService(PageService):
 
     _USER_LOGIN_PATH = "/user/login"
 
+    _ROUTE = ObjectDict({
+        'bind_wx_mobile': 'user/wxbindmobile'
+    })
+
     def __init__(self, logger):
         super().__init__(logger)
 
@@ -218,4 +222,27 @@ class UserPageService(PageService):
                 'position': data.position
         })
         raise gen.Return(response)
+
+    @gen.coroutine
+    def bind_wx_mobile(self, params, app_id):
+        """
+        通过基础服务对手机号和微信号进行绑定
+        reference: https://wiki.moseeker.com/user_account_api.md
+        point: 1
+        :param params: 基本信息
+        :param app_id: 请求来源
+        :return: 绑定的user_id
+        """
+        req = ObjectDict({
+            'appid': app_id,
+            'unionid': params.unionid,
+            'mobile': params.mobile,
+        })
+        try:
+            user_id = yield http_post(self._ROUTE.bind_wx_mobile, req)
+        except Exception as error:
+            self.logger.warn(error)
+            user_id = None
+
+        raise gen.Return(user_id)
 
