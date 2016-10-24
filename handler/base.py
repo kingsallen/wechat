@@ -626,14 +626,14 @@ class BaseHandler(MetaBaseHandler):
 
         if http_code == 403:
             self.render_page(
-                'system/info.html',
+                '/system/info.html',
                 data=ObjectDict(code=http_code, css="warning", message=msg_const.NOT_AUTHORIZED))
         elif http_code == 404:
             self.render_page(
-                'system/info.html', data=ObjectDict(code=http_code, message=msg_const.NO_DATA))
+                '/system/info.html', data=ObjectDict(code=http_code, message=msg_const.NO_DATA))
         else:
             self.render_page(
-                'system/info.html', data=ObjectDict(code=http_code, message=msg_const.UNKNOWN_DEFAULT))
+                '/system/info.html', data=ObjectDict(code=http_code, message=msg_const.UNKNOWN_DEFAULT))
 
     def render_page(self, template_name, data, status_code=msg_const.SUCCESS,
                     message=msg_const.RESPONSE_SUCCESS, http_code=200):
