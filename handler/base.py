@@ -436,8 +436,7 @@ class BaseHandler(MetaBaseHandler):
 
         self._save_sessions(session_id, session)
 
-        session.sysuser = yield self.user_ps.get_user_user_id(
-            session.qxuser.sysuser_id)
+        yield self._add_sysuser_to_session(session)
 
         self._add_jsapi_to_wechat(session.wechat)
         if self.is_platform:
@@ -470,8 +469,7 @@ class BaseHandler(MetaBaseHandler):
             session_id = self._make_new_session_id(session.qxuser.sysuser_id)
         self._save_sessions(session_id, session)
 
-        session.sysuser = yield self.user_ps.get_user_user_id(
-            session.qxuser.sysuser_id)
+        yield self._add_sysuser_to_session(session)
 
         self._add_jsapi_to_wechat(session.wechat)
         if self.is_platform:
@@ -512,6 +510,13 @@ class BaseHandler(MetaBaseHandler):
         session.recom = yield self.user_ps.get_wxuser_openid_wechat_id(
             openid=self.params.recom, wechat_id=self._wechat.id)
 
+    @gen.coroutine
+    def _add_sysuser_to_session(self, session):
+        """拼装 session 中的 sysuser"""
+
+        session.sysuser = yield self.user_ps.get_user_user_id(
+            session.qxuser.sysuser_id)
+
     def _add_jsapi_to_wechat(self, wechat):
         """拼装 jsapi"""
         wechat.jsapi = JsApi(
@@ -528,6 +533,7 @@ class BaseHandler(MetaBaseHandler):
             # 如果有 value， 返回该 value 作为 self.current_user
             session = ObjectDict(value)
             yield self._add_company_info_to_session(session)
+            yield self._add_sysuser_to_session(session)
             self.current_user = session
 
             return True
