@@ -4,7 +4,7 @@
 """
 :author 马超（machao@moseeker.com）
 :date 2016.10.09
-:table user_company_follows
+:table user_company_follow
 
 """
 

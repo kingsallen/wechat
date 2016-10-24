@@ -21,8 +21,8 @@ class UserCompanyFollowDataService(DataService):
         if not self._valid_conds(conds):
             raise gen.Return(False)
         if not fields:
-            fields = self.user_company_follows_dao.fields_map.keys()
-        response = yield self.user_company_follows_dao.get_record_by_conds(
+            fields = self.user_company_follow_dao.fields_map.keys()
+        response = yield self.user_company_follow_dao.get_record_by_conds(
                             conds, fields)
         raise gen.Return(response)
 
@@ -31,9 +31,9 @@ class UserCompanyFollowDataService(DataService):
         if not self._valid_conds(conds):
             raise gen.Return(None)
         if not fields:
-            fields = self.user_company_follows_dao.fields_map.keys()
+            fields = self.user_company_follow_dao.fields_map.keys()
         try:
-            response = yield self.user_company_follows_dao.get_list_by_conds(
+            response = yield self.user_company_follow_dao.get_list_by_conds(
                                     conds, fields)
         except Exception as error:
             self.logger.warn(error)
@@ -44,7 +44,7 @@ class UserCompanyFollowDataService(DataService):
     @gen.coroutine
     def update_fllw_cmpy(self, conds, fields):
         try:
-            response = self.user_company_follows_dao.update_by_conds(
+            response = self.user_company_follow_dao.update_by_conds(
                             conds, fields)
         except Exception as error:
             self.logger(error)
@@ -55,7 +55,7 @@ class UserCompanyFollowDataService(DataService):
     @gen.coroutine
     def create_fllw_cmpy(self, fields):
         try:
-            response = self.user_company_follows_dao.insert_record(fields)
+            response = self.user_company_follow_dao.insert_record(fields)
         except Exception as error:
             self.logger(error)
             raise gen.Return(False)
