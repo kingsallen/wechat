@@ -11,11 +11,11 @@
 from dao.base import BaseDao
 
 
-class UserCompanyFollowsDao(BaseDao):
+class UserCompanyFollowDao(BaseDao):
 
     def __init__(self, logger):
-        super(UserCompanyFollowsDao, self).__init__(logger)
-        self.table = 'user_company_follows'
+        super(UserCompanyFollowDao, self).__init__(logger)
+        self.table = 'user_company_follow'
         self.fields_map = {
             "id": self.constant.TYPE_INT,
             "company_id": self.constant.TYPE_INT,

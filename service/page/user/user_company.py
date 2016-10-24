@@ -19,7 +19,7 @@ class UserCompanyPageService(PageService):
     @gen.coroutine
     def get_company_follows(self, conds, fields=[]):
         fields = ['id', 'company_id', 'user_id']
-        fans = yield self.user_company_follows_ds.get_user(conds, fields)
+        fans = yield self.user_company_follow_ds.get_user(conds, fields)
         raise gen.Return(fans)
 
     @gen.coroutine
@@ -42,7 +42,7 @@ class UserCompanyPageService(PageService):
         conds = {'user_id': [user_id, '='],
                        'company_id': [company_id, '=']}
 
-        fllw_cmpy = yield self.user_company_follows_ds.get_fllw_cmpy(
+        fllw_cmpy = yield self.user_company_follow_ds.get_fllw_cmpy(
                         conds=conds, fields=['id', 'company_id'])
         vst_cmpy = yield self.user_company_visit_req_ds.get_visit_cmpy(
                         conds=conds, fields=['id', 'company_id'])
@@ -85,15 +85,15 @@ class UserCompanyPageService(PageService):
         status, source = param.get('status'), param.get('source', 0)
 
         conds = {'user_id': [user_id, '='], 'company_id': [company_id, '=']}
-        company = yield self.user_company_follows_ds.get_fllw_cmpy(
+        company = yield self.user_company_follow_ds.get_fllw_cmpy(
             conds=conds, fields=['id', 'user_id', 'company_id'])
 
         if company:
-            result = yield self.user_company_follows_ds.update_fllw_cmpy(
+            result = yield self.user_company_follow_ds.update_fllw_cmpy(
                 conds=conds,
                 fields={'status': status, 'source': source})
         else:
-            result = yield self.user_company_follows_ds.create_fllw_cmpy(
+            result = yield self.user_company_follow_ds.create_fllw_cmpy(
                 fields={'user_id': user_id, 'company_id': company_id,
                         'status': status, 'source': source})
 

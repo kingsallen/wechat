@@ -1,7 +1,7 @@
 # -*- coding=utf-8 -*-
 
 import json
-from dao.user.user_company_follows import UserCompanyFollowsDao
+from dao.user.user_company_follow import UserCompanyFollowsDao
 from dao.user.user_company_visit_req import UserCompanyVisitReqDao
 from util.common import ObjectDict
 from tornado import gen
