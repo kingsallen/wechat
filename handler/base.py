@@ -145,7 +145,7 @@ class BaseHandler(MetaBaseHandler):
 
         和 oauth 有关的 参数会影响 prepare 方法
         """
-        return url_subtract_query(self.request.full_url, ['code', 'state'])
+        return url_subtract_query(self.request.full_url(), ['code', 'state'])
 
     @property
     def component_access_token(self):
