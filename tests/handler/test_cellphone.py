@@ -20,12 +20,12 @@ data = {'company_id': 111, 'user_id': 444, 'status': 1,
 #
 
 url = 'http://localhost:8000/m/api/cellphone'
-m = {'mobile': '18855101775', 'code': 9948}
+m = {'mobile': '18855101775', 'code': 9459}
 
 # re = requests.get(url, params={'mobile': '13122920190'})
-re = requests.get(url, params={'mobile': '18855101775'})
+# re = requests.get(url, params={'mobile': '18855101775'})
 
-# re = post_fun(url, m)
+re = post_fun(url, m)
 
 print(json.loads(re.text))
 

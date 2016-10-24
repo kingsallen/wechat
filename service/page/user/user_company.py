@@ -75,6 +75,11 @@ class UserCompanyPageService(PageService):
 
     @gen.coroutine
     def set_company_follow(self, param):
+        """
+        Store follow company.
+        :param param: dict include target user company ids.
+        :return:
+        """
         response = ObjectDict({})
         user_id, company_id = param.get('user_id'), param.get('company_id'),
         status, source = param.get('status'), param.get('source', 0)
@@ -101,6 +106,11 @@ class UserCompanyPageService(PageService):
 
     @gen.coroutine
     def set_visit_company(self, param):
+        """
+        Store visiting company.
+        :param param: dict include target user company ids.
+        :return:
+        """
         response = ObjectDict({})
         user_id, company_id = param.get('user_id'), param.get('company_id'),
         status, source = param.get('status'), param.get('source', 0)
