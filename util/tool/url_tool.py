@@ -31,19 +31,19 @@ def make_url(path, params=None, host="", protocol="http", escape=None,
     if not isinstance(params, dict):
         raise TypeError("Params is not a dict")
 
-    # 默认 query 黑名单：
-    # m, state, code 不传递
-    escape_default = ['m', 'state', 'code']
-    escape = set((escape or []) + escape_default)
+    params.update(kwargs)
 
-    pairs = {k: v for k, v in params.copy().items() if k not in escape}
+    # 默认 query 黑名单：m, state, code, _xsrf 不传递
+    _ESCAPE_DEFAULT = ['m', 'state', 'code', '_xsrf']
 
-    def _is_valid(k, v):
-        """helper for filtering url query"""
-        return (v and isinstance(k, str) and isinstance(v, str) and
-                not (k.startswith("_") and k not in kwargs))
+    escape = set((escape or []) + _ESCAPE_DEFAULT)
 
-    query = [(k, v) for k, v in pairs.items() if _is_valid(k, v)]
+    pairs = {k: v for k, v in params.items() if k not in escape}
+
+    def valid(k, v):
+        return v and isinstance(k, str) and isinstance(v, str)
+
+    query = [(k, v) for k, v in pairs.items() if valid(k, v)]
 
     ret = (((protocol + "://" + host) if host else "") + path + "?" +
            urlencode(query))
@@ -51,15 +51,15 @@ def make_url(path, params=None, host="", protocol="http", escape=None,
     return ret[:-1] if ret[-1] == '?' else ret
 
 
-def url_subtract_query(url, query_key_list):
+def url_subtract_query(url, exclude):
     """削减 url 的 query 中指定的键值"""
     p = urlparse(url)
     query = p.query
-    parsed_query = parse_qs(query)
-    for l in query_key_list:
-        parsed_query.pop(l, None)
-    nquery = urlencode(parsed_query, doseq=True)
+    parsed_query = {k: v for k, v in parse_qs(query).items()
+                    if k not in exclude}
+
     ret = "{scheme}://{netloc}{path}?{query}".format(
-        scheme=p[0], netloc=p[1], path=p[2], query=nquery)
+        scheme=p[0], netloc=p[1], path=p[2],
+        query=urlencode(parsed_query, doseq=True))
 
     return ret[:-1] if ret[-1] == '?' else ret

@@ -145,11 +145,7 @@ class BaseHandler(MetaBaseHandler):
 
         和 oauth 有关的 参数会影响 prepare 方法
         """
-        u = "{scheme}://{host}{uri}".format(
-            scheme=self.request.protocol,
-            host=self.request.host,
-            uri=self.request.uri)
-        return url_subtract_query(u, ['code', 'state'])
+        return url_subtract_query(self.request.full_url, ['code', 'state'])
 
     @property
     def component_access_token(self):
@@ -520,7 +516,7 @@ class BaseHandler(MetaBaseHandler):
         """拼装 jsapi"""
         wechat.jsapi = JsApi(
             jsapi_ticket=wechat.jsapi_ticket,
-            url=self.request.protocol+'://'+self.request.host+self.request.uri)
+            url=self.request.full_url)
 
     @gen.coroutine
     def _get_session_from_ent(self, session_id):
