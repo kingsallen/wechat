@@ -22,8 +22,8 @@ class CompanyVisitReqHandler(BaseHandler):
         except:
             return
 
-        self.params.company_id = 456
-        self.params.user_id = 323
+        self.params.company_id = self.current_user.company.id
+        self.params.user_id = self.current_user.sysuser.id
 
         response = yield self.user_company_ps.set_visit_company(
                                     self.params)

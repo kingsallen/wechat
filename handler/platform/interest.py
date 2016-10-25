@@ -12,21 +12,7 @@ from handler.base import BaseHandler
 import conf.message as mes_const
 
 
-class InterestHandler(BaseHandler):
-
-    @gen.coroutine
-    def get(self):
-        # Debug temporary param
-        # sysuser = yield self.user_ps.get_user_user_id(393881)
-        sysuser = yield self.user_ps.get_user_user_id(
-                    self.current_user.sysuser.id)
-        if sysuser and str(sysuser.mobile) == sysuser.username:
-            status_code, message = self.constant.YES, mes_const.CELLPHONE_BIND
-        else:
-            status_code, message = self.constant.NO, mes_const.CELLPHONE_UNBIND
-
-        self._send_json(data=None, status_code=status_code, message=message)
-        return
+class UserCurrentInfoHandler(BaseHandler):
 
     @gen.coroutine
     def post(self):
@@ -35,12 +21,9 @@ class InterestHandler(BaseHandler):
         except:
             return
 
-        response = yield self.user_ps.update_user_user(
-            # Debug temporary param
-            # sysuser_id=393888,
+        yield self.user_ps.update_user_user(
             sysuser_id=self.current_user.sysuser.id,
             data=self.params
         )
-        self._send_json(data=None, status_code=response.status,
-                       message=response.message)
-        return
+
+        self.send_json_success()

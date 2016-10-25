@@ -31,6 +31,8 @@ common_routes = [
     (r"/m/position/(0-9)+",              "handler.common.position.PositionHandler",                   {"event": "position_info"}),
     (r"/m/app/.*",                       "handler.common.app.IndexHandler",                           {"event": "app_index"}),
     (r"/m/api/imunreadcount",            "handler.common.im.UnreadCountHandler",                      {"event": "im_unreadcount"}),
+    (r"/m/api/mobilebinded",             "handler.common.user.UserMobileBindedHandler",               {"event": "user_usermobilebinded"}),
+
     # Testing url, delete when releasing
     (r"/m/test",                         "tests.dao.user.TestCompanyVisitReqHandler",                 {"event": "test_test"})
 ]
@@ -39,7 +41,7 @@ common_routes = [
 platform_routes = [
     (r"/m/start",                        "handler.platform.landing.LandingHandler",                   {"event": "start_landing"}),
     (r"/m/company(/team)?",              "handler.platform.companyrelation.CompanyHandler",           {"event": "company_info"}),
-    (r"/m/interest",                     "handler.platform.interest.InterestHandler",                 {"event": "company_interest"}),
+    (r"/m/api/user/currnt_info",         "handler.platform.interest.UserCurrentInfoHandler",          {"event": "user_currentinfo"}),
     (r"/m/api/company/visitreq",         "handler.platform.companyrelation.CompanyVisitReqHandler",   {"event": "company_visitreq"}),
     (r"/m/api/company/survey",           "handler.platform.companyrelation.CompanySurveyHandler",     {"event": "company_survey"}),
     (r"/m/api/company/follow",           "handler.platform.companyrelation.CompanyFollowHandler",     {"event": "company_follow"}),
