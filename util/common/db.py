@@ -14,6 +14,7 @@ import conf.common as constant
 from app import logger
 from setting import settings
 from util.tool.date_tool import is_time_valid
+from util.common import ObjectDict
 
 
 class DB(object):
@@ -27,8 +28,8 @@ class DB(object):
                  db=settings['mysql_database'],
                  cursorclass=cursors.DictCursor,
                  charset='utf8mb4'),
-            max_idle_connections=1,
-            max_recycle_sec=3
+            max_idle_connections=16,
+            max_recycle_sec=120
         )
 
         self.logger = logger
@@ -60,12 +61,12 @@ class DB(object):
             for key, value in conds.items():
                 if isinstance(value, list):
                     if len(value) == 2:
-                        frag = "{0} {1} %s".format(key, value[1])
+                        frag = "`{0}` {1} %s".format(key, value[1])
                         conds_res.append(frag)
                         params.append(value[0])
                     elif len(value) == 4:
-                        frag_fir = "{0} {1} %s".format(key, value[1])
-                        frag_sec = "{0} {1} %s".format(key, value[3])
+                        frag_fir = "`{0}` {1} %s".format(key, value[1])
+                        frag_sec = "`{0}` {1} %s".format(key, value[3])
                         conds_res.append(frag_fir)
                         conds_res.append(frag_sec)
                         params.append(value[0])
@@ -75,7 +76,7 @@ class DB(object):
                                        "length:{1}".format(value, len(value)))
                         return False, ()
                 elif isinstance(value, str) or isinstance(value, int):
-                    frag = "{0} = %s".format(key)
+                    frag = "`{0}` = %s".format(key)
                     conds_res.append(frag)
                     params.append(value)
                 else:
@@ -85,7 +86,7 @@ class DB(object):
 
         return conds_res, params
 
-    def checkFieldType(self, fields={}, maps={}):
+    def checkFieldType(self, fields=None, maps=None):
 
         """
         对插入或者更新的字段进行类型检查和转换，类型映射中没有的默认为字符串
@@ -99,7 +100,7 @@ class DB(object):
             return False
 
         if maps is None or not isinstance(maps, dict):
-            self.logger.error("Error:[checkFieldType][types type error], types:{0}, type:{1}".format(maps, type(maps)))
+            self.logger.error("Error:[checkFieldType][maps type error], types:{0}, type:{1}".format(maps, type(maps)))
             return False
 
         for key, value in maps.items():
@@ -133,6 +134,35 @@ class DB(object):
 
         return fields
 
+    def optResType(self, response=None, maps=None):
+
+        """
+        处理返回结果，字段类型符合 map 的定义
+        :param  response: 返回的数据
+        :param maps: dao中定义的返回结果类型映射表
+        :return: 成功返回类型转换后的数组
+        """
+
+        if response is None or not isinstance(response, dict):
+            return ObjectDict()
+
+        if maps is None or not isinstance(maps, dict):
+            self.logger.error("Error:[optResType][maps type error], types:{0}, type:{1}".format(maps, type(maps)))
+            return False
+
+        for key, value in maps.items():
+            if response.get(key, 0):
+                if value == constant.TYPE_INT:
+                    response[key] = int(response[key])
+                elif value == constant.TYPE_FLOAT:
+                    response[key] = float(response[key])
+                elif value == constant.TYPE_TIMESTAMP:
+                    response[key] = response[key]
+                else:
+                    response[key] = str(response[key])
+
+        return response
+
     def select(self, table, conds=[], fields=[], options=[], appends=[], index=''):
 
         """
@@ -151,14 +181,15 @@ class DB(object):
         if isinstance(options, list) and len(options) > 0:
             sql += " ".join(options)
         # 查询字段
+        sql += "`"
         if isinstance(fields, list) and len(fields) > 0:
-            sql += ", ".join(fields)
+            sql += "`, `".join(fields)
         else:
             self.logger.error("Error:[select][fields error], fields:{0}, type:{1}, "
                            "length:{2}".format(fields, type(fields), len(fields)))
             return False
 
-        sql += " FROM {0}".format(table)
+        sql += "` FROM {0}".format(table)
         # 限制条件
         if isinstance(conds, list) and len(conds) > 0:
             sql += " WHERE "
@@ -187,11 +218,11 @@ class DB(object):
         # SQL前置条件
         if isinstance(options, list) and len(options) > 0:
             sql += ' '.join(options)
-        sql += " INTO {0}(".format(table)
+        sql += " INTO {0}(`".format(table)
 
         if isinstance(fields, dict):
-            sql += ", ".join(fields.keys())
-        sql += ") VALUES ("
+            sql += "`, `".join(fields.keys())
+        sql += "`) VALUES ("
 
         if isinstance(fields, dict):
             for item in fields.values():
@@ -223,7 +254,7 @@ class DB(object):
         params = []
         if isinstance(fields, dict):
             for key, value in fields.items():
-                sql += "{0} = %s, ".format(key)
+                sql += "`{0}` = %s, ".format(key)
                 params.append(value)
         else:
             self.logger.error("Error:[update][fields error], fields:{0}, type:{1}".format(fields, type(fields)))
@@ -276,7 +307,7 @@ class DB(object):
         if isinstance(fields, list) and len(fields) > 0:
             sql_tmp = ''
             for field in fields:
-                sql_tmp += "COUNT({}), ".format(field)
+                sql_tmp += "COUNT(`{}`), ".format(field)
             sql += sql_tmp
         else:
             self.logger.error("Error:[select_cnt][fields error], fields:{0}, type:{1}, "

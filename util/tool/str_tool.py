@@ -2,6 +2,8 @@
 
 # Copyright 2016 MoSeeker
 
+import re
+
 
 def gen_salary(salary_top, salary_bottom):
     """月薪"""
@@ -39,3 +41,21 @@ def to_hex(string):
 
 def from_hex(hex_string):
     return to_str(bytes.fromhex(hex_string))
+
+
+def split(input_s, delimiter=None):
+    """分割字符串成字符串数组
+    """
+    if not delimiter:
+        delimiter = ['\r\n', '\n']
+
+    if isinstance(delimiter, list):
+        pattern = "|".join(delimiter)
+    else:
+        pattern = delimiter
+
+    try:
+        ret = [line.strip() for line in re.split(pattern, input_s)]
+    except Exception:
+        ret = [input_s]
+    return ret

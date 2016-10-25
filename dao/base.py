@@ -89,6 +89,9 @@ class BaseDao(DB):
         response = cursor.fetchall()
         if not isinstance(response, list):
             response = list()
+        else:
+            for item in response:
+                self.optResType(item, self.fields_map)
         raise gen.Return(response)
 
     @gen.coroutine
@@ -119,6 +122,10 @@ class BaseDao(DB):
         response = cursor.fetchone()
         if not isinstance(response, dict):
             response = ObjectDict()
+        else:
+            response = self.optResType(response, self.fields_map)
+
+        self.logger.debug("response: %s" % response)
         raise gen.Return(ObjectDict(response))
 
     @gen.coroutine

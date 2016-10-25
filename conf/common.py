@@ -85,6 +85,15 @@ COOKIE_SESSIONID = "5E884898DA28047151D0E56F8DC6292773603D0D6AABBDD62A11EF721D15
 VIEWER_TYPE_NEW = 1
 VIEWER_TYPE_OLD = 0
 
+# 通用状态的布尔值
+YES = 1
+NO = 0
+
+# 我感兴趣状态常量
+FAV_YES = 0
+FAV_NO = 1
+FAV_INTEREST = 2
+
 
 # 职位相关，主要涉及到职位，职位列表，搜索页
 # 招聘类型
@@ -118,7 +127,7 @@ DEGREE = {
 POSITION_ABOVE = "及以上"
 EXPERIENCE_UNIT = "年"
 
-
-# 检测状态
-YES = 1
-NO = 0
+# 默认图标
+SYSUSER_HEADIMG = "weixin/images/hr-avatar-default.png"
+HR_HEADIMG = "weixin/images/default-HR.png"
+COMPANY_HEADIMG = "common/images/default-company-logo.jpg"
