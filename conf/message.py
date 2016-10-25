@@ -24,3 +24,5 @@ NO_DATA = "Ta在地球上消失了"
 UNKNOWN_DEFAULT = "正在努力维护服务器中"
 
 SHARE_DES_DEFAULT = "点击即可快速申请！"
+
+RED_PACKET_TYPE_VALUE_ERROR = "红包配置类型错误!"

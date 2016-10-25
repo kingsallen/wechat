@@ -2,7 +2,6 @@
 
 # Copyright 2016 MoSeeker
 
-import re
 from tornado import gen
 from service.page.base import PageService
 from util.tool.date_tool import jd_update_date

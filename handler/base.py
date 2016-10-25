@@ -592,12 +592,10 @@ class BaseHandler(MetaBaseHandler):
 
     def get_template_namespace(self):
         namespace = super().get_template_namespace()
-        add_namespace = dict(
+        add_namespace = ObjectDict(
             params=self.params,
             current_user=self.current_user,
-            make_url=make_url,
-            settings=self.settings
-        )
+            settings=self.settings)
         namespace.update(add_namespace)
         return namespace
 
