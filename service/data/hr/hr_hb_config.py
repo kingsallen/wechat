@@ -24,3 +24,27 @@ class HrHbConfigDataService(DataService):
             conds, fields)
 
         raise gen.Return(response)
+
+    @cache(ttl=60)
+    @gen.coroutine
+    def get_hr_hb_config_list(self, conds, fields, options=None,
+                              appends=None, index='', params=None):
+        fields = fields or []
+        options = options or []
+        appends = appends or []
+        params = params or []
+
+        if self._valid_conds(conds):
+            self.logger.warn(
+                "Warning:[get_hr_hb_position_binding_list][invalid "
+                "parameters], "
+                "Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
+            raise gen.Return(None)
+
+        if not fields:
+            fields = list(self.hr_hb_config_dao.fields_map.keys())
+
+        response = yield self.hr_hb_config_dao.get_list_by_conds(
+            conds, fields, options, appends, index, params)
+
+        raise gen.Return(response)

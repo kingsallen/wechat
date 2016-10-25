@@ -59,3 +59,20 @@ def split(input_s, delimiter=None):
     except Exception:
         ret = [input_s]
     return ret
+
+
+def trunc(s, limit, coding="UTF-8", postfix="..."):
+    """trancate a long string with postfix"""
+    unicode_s = s.decode(coding) if type(s) == bytes else s
+    nums = (len(u.encode(coding)) for u in unicode_s)
+    sum, i = 0, 0
+    use_postfix = ""
+    for i, n in enumerate(nums):
+        if sum + n > limit:
+            use_postfix = postfix
+            break
+        else:
+            sum += n
+    return unicode_s[:i] + use_postfix
+
+
