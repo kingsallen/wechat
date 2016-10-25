@@ -42,8 +42,8 @@ class CompanyFollowHandler(BaseHandler):
         except:
             return
 
-        self.params.company_id = 456
-        self.params.user_id = 323
+        self.params.company_id = self.current_user.company.id
+        self.params.user_id = self.current_user.sysuser.id
 
         response = yield self.user_company_ps.set_company_follow(
                             self.params)
@@ -59,7 +59,10 @@ class CompanyHandler(BaseHandler):
     def get(self, company_id):
         team_flag = True if re.match('^/m/company/team', self.request.uri) \
                     else False
-        param = ObjectDict({'user_id': 222, 'company_id': company_id})
+        param = ObjectDict({
+            'user_id': self.current_user.sysuser.id,
+            'company_id': self.current_user.company.id
+        })
         response = yield self.user_company_ps.get_companay_data(param, team_flag)
 
         # Debug with front page.
