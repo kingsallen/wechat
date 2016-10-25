@@ -352,10 +352,10 @@ class BaseHandler(MetaBaseHandler):
         company = yield self.company_ps.get_company(conds=conds, need_conf=True)
         if company.conf_theme_id:
             theme = yield self.wechat_ps.get_wechat_theme(
-                {'id': company.conf_theme_id, "disable": 0})
+                {'id': company.conf_theme_id, 'disable': 0})
             if theme:
                 company.update({
-                    "theme": [
+                    'theme': [
                         theme.background_color,
                         theme.title_color,
                         theme.button_color,
@@ -363,7 +363,7 @@ class BaseHandler(MetaBaseHandler):
                     ]
                 })
         else:
-            company.update({"theme": None})
+            company.update({'theme': None})
 
         raise gen.Return(company)
 
@@ -432,6 +432,7 @@ class BaseHandler(MetaBaseHandler):
             unionid=self._unionid, wechat_id=self.settings['qx_wechat_id'])
 
         session_id = self._make_new_session_id(session.qxuser.sysuser_id)
+        logger.debug("session_id: %s" % session_id)
         self.set_secure_cookie(constant.COOKIE_SESSIONID, session_id)
 
         self._save_sessions(session_id, session)
@@ -462,7 +463,7 @@ class BaseHandler(MetaBaseHandler):
         session.qxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
             unionid=unionid, wechat_id=self.settings['qx_wechat_id'])
 
-        session_id = self.get_secure_cookie(constant.COOKIE_SESSIONID)
+        session_id = to_str(self.get_secure_cookie(constant.COOKIE_SESSIONID))
         # 当使用手机浏览器访问的时候可能没有 session_id
         # 那么就创建它
         if not session_id:
@@ -738,8 +739,10 @@ class BaseHandler(MetaBaseHandler):
             req_uri=request.uri,
             req_params=req_params,
             customs=customs,
-            session_id=self.get_secure_cookie(constant.COOKIE_SESSIONID)
+            session_id=to_str(self.get_secure_cookie(constant.COOKIE_SESSIONID))
         )
+
+        self.logger.debug("log_info_common: %s" % log_info_common)
 
         log_params.update(log_info_common)
         return log_params

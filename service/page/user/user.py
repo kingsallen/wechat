@@ -12,12 +12,6 @@ from setting import settings
 
 class UserPageService(PageService):
 
-    _USER_LOGIN_PATH = "/user/login"
-
-    _ROUTE = ObjectDict({
-        'bind_wx_mobile': 'user/wxbindmobile'
-    })
-
     def __init__(self, logger):
         super().__init__(logger)
 
@@ -36,7 +30,7 @@ class UserPageService(PageService):
         }
         """
         ret = yield http_post(
-            route=self._USER_LOGIN_PATH,
+            route=self.path.USER_LOGIN_PATH,
             jdata=dict(mobile=str(mobile), password=str(password)))
         raise gen.Return(ret)
 
@@ -129,7 +123,6 @@ class UserPageService(PageService):
                     "id": wxuser.id
                 },
                 fields={
-                    # "is_subscribe":   0, 如果是 update_wxuser, 则不能更新为0
                     "is_subscribe":   wxuser.is_subscribe or 0,
                     "sysuser_id":     qx_wxuser.sysuser_id,
                     "openid":         openid,
@@ -140,9 +133,7 @@ class UserPageService(PageService):
                     "province":       qx_wxuser.province,
                     "language":       qx_wxuser.language,
                     "headimgurl":     qx_wxuser.headimgurl,
-                    # "subscribe_time": curr_now(), 如果是 update_wxuser，则不需要更新 # TODO
                     "wechat_id":      wechat_id,
-                    # "group_id":       0, 无用字段，可不用处理 #TODO
                     "unionid":        qx_wxuser.unionid,
                     "source":         const.WXUSER_OAUTH_UPDATE
                 })
@@ -159,9 +150,7 @@ class UserPageService(PageService):
                 "province":       qx_wxuser.province,
                 "language":       qx_wxuser.language,
                 "headimgurl":     qx_wxuser.headimgurl,
-                # "subscribe_time": curr_now(),  只是网页授权，不是关注，可不更新该字段 # TODO
                 "wechat_id":      wechat_id,
-                # "group_id":       0,  无用字段，可不用处理 #TODO
                 "unionid":        qx_wxuser.unionid,
                 "source":         const.WXUSER_OAUTH
             })
@@ -205,9 +194,7 @@ class UserPageService(PageService):
                 "province":       userinfo.province,
                 "language":       userinfo.language,
                 "headimgurl":     userinfo.headimgurl,
-                # "subscribe_time": curr_now(),  只是网页授权，没有关注，可不更新该字段
                 "wechat_id":      qx_wechat_id,
-                # "group_id":       0,  无用字段，可不更新 #TODO
                 "unionid":        userinfo.unionid if userinfo.unionid else "",
                 "source":         const.WXUSER_OAUTH
             })
@@ -239,7 +226,7 @@ class UserPageService(PageService):
             'mobile': params.mobile,
         })
         try:
-            user_id = yield http_post(self._ROUTE.bind_wx_mobile, req)
+            user_id = yield http_post(self.path.USER_BIND_WX_MOBILE, req)
         except Exception as error:
             self.logger.warn(error)
             user_id = None

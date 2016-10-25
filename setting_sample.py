@@ -64,6 +64,8 @@ settings['blocking_log_threshold'] = 0.5
 settings['infra'] = "http://api1.dqprism.com"
 
 # 公众号 signatures
+settings['qx_wechat_id'] = 1
+
 settings['qx_signature'] = "ZWFkYmZmNjNmYjc3Yjk1YWFlYzg5MWMyNTllOWExNTFkZTE2MzYyMA=="
 settings['platform_qianxun_signature'] = "YWNkNmIyYWExOGViOTRkODMyMzk5N2MxM2NkZDZlOTUxNmRjYzJiYQ=="
 settings['helper_signature'] = "NGZiMThkZWMwMmVkMjU4OGRlMWY3Nzk1N2FiZWExMWUxODI4ODJiZQ=="

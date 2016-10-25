@@ -119,17 +119,18 @@ class WeChatOauth2Service(object):
         """生成获取 access_token 的 url"""
 
         # TODO: 是否需要使用第三方接口来调用 access_token?
-        # if self.wechat.third_oauth:
-        #     url = (wx_const.WX_THIRD_OAUTH_GET_ACCESS_TOKEN % (
-        #             self.wechat.appid,
-        #             code,
-        #             settings["component_app_id"],
-        #             self._component_access_token))
-        # else:
-        url = (wx_const.WX_OAUTH_GET_ACCESS_TOKEN % (
-                self.wechat.appid,
-                self.wechat.secret,
-                code))
+        logger.debug("_get_access_token_url wechat: {0}".format(self.wechat))
+        if self.wechat.third_oauth:
+            url = (wx_const.WX_THIRD_OAUTH_GET_ACCESS_TOKEN % (
+                    self.wechat.appid,
+                    code,
+                    settings["component_app_id"],
+                    self._component_access_token))
+        else:
+            url = (wx_const.WX_OAUTH_GET_ACCESS_TOKEN % (
+                    self.wechat.appid,
+                    self.wechat.secret,
+                    code))
         logger.debug("get_access_token_url: {0}".format(url))
         return url
 
