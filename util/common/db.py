@@ -85,7 +85,7 @@ class DB(object):
 
         return conds_res, params
 
-    def checkFieldType(self, fields={}, maps={}):
+    def checkFieldType(self, fields=None, maps=None):
 
         """
         对插入或者更新的字段进行类型检查和转换，类型映射中没有的默认为字符串
