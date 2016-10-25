@@ -20,7 +20,7 @@ class ConfigSysThemeDao(BaseDao):
         self.fields_map = {
             "id": self.constant.TYPE_INT,
             "background_color": self.constant.TYPE_STRING, # 背景色
-            "title_color": self.constant.TYPE_INT, # 标题
+            "title_color": self.constant.TYPE_STRING, # 标题
             "button_color": self.constant.TYPE_STRING, # 按钮
             "other_color": self.constant.TYPE_STRING, # other
             "free": self.constant.TYPE_INT, # 是否免费 0：免费 1：收费，只能在大岂后台操作收费主题

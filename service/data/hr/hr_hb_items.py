@@ -6,7 +6,7 @@ from service.data.base import DataService
 from util.common.decorator import cache
 
 
-class HrHbConfigDataService(DataService):
+class HrHbItemsDataService(DataService):
 
     @cache(ttl=60)
     @gen.coroutine

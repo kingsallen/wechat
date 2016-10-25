@@ -10,7 +10,7 @@ from service.page.base import PageService
 import conf.message as msg
 
 
-class RedPacketPageService(PageService):
+class RedpacketPageService(PageService):
 
     def __init__(self, logger):
         super().__init__(logger)
@@ -65,6 +65,7 @@ class RedPacketPageService(PageService):
             "position_id": position.id,
             "trigger_way": trigger_way
         })
+
 
 
 
