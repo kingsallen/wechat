@@ -52,27 +52,31 @@ class RedPacketPageService(PageService):
             "tips":           int(tips)
         })
 
-    # @gen.coroutine
-    # def __get_hb_config_by_position(self, position, share_click=False,
-    #                                 share_apply=False):
-    #     """获取红包配置"""
-    #     if not share_click and not share_apply:
-    #         raise ValueError(msg.RED_PACKET_TYPE_VALUE_ERROR)
-    #
-    #     trigger_way = 1 if share_click else 2
-    #
-    #
-    #
-    #     sql = """
-    #          select hc.*
-    #          from hr_hb_config hc
-    #          join hr_hb_position_binding hpb
-    #          on hpb.hb_config_id = hc.id
-    #          where hpb.position_id = {0} and hc.status = 3 and hc.company_id
-    #          = {1} and hpb.trigger_way = {2}
-    #          """.format(position.id, position.company_id, trigger_way)
-    #
-    #     return db.get(sql)
+    @gen.coroutine
+    def __get_hb_config_by_position(self, position, share_click=False,
+                                    share_apply=False):
+        """获取红包配置"""
+        if not share_click and not share_apply:
+            raise ValueError(msg.RED_PACKET_TYPE_VALUE_ERROR)
+
+        trigger_way = 1 if share_click else 2
+
+        binding_list = yield self.hr_hb_position_binding_ds.get_hr_hb_position_binding_list(conds={
+            "position_id": position.id,
+            "trigger_way": trigger_way
+        })
+
+
+
+        sql = """
+             select hc.*
+             from hr_hb_config hc
+             join hr_hb_position_binding hpb
+             on hpb.hb_config_id = hc.id
+             where hpb.position_id = {0} and hc.status = 3 and hc.company_id
+             = {1} and hpb.trigger_way = {2}
+             """.format(position.id, position.company_id, trigger_way)
+
 
     # @gen.coroutine
     # def handle_red_packet_position_related(self, current_user, position,
