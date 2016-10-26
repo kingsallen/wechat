@@ -38,7 +38,7 @@ class CellphoneBindHandler(BaseHandler):
             return
 
         response = yield self.cellphone_ps.bind_mobile(
-            data=self.params,
+            params=self.params,
             app_id=self.app_id
         )
         self._send_json(data=None, status_code=response.status,

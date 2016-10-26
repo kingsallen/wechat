@@ -41,7 +41,7 @@ common_routes = [
 platform_routes = [
     (r"/m/start",                        "handler.platform.landing.LandingHandler",                   {"event": "start_landing"}),
     (r"/m/company(/team)?",              "handler.platform.companyrelation.CompanyHandler",           {"event": "company_info"}),
-    (r"/m/api/user/current_info",         "handler.platform.interest.UserCurrentInfoHandler",          {"event": "user_currentinfo"}),
+    (r"/m/api/user/currentinfo",         "handler.platform.interest.UserCurrentInfoHandler",          {"event": "user_currentinfo"}),
     (r"/m/api/company/visitreq",         "handler.platform.companyrelation.CompanyVisitReqHandler",   {"event": "company_visitreq"}),
     (r"/m/api/company/survey",           "handler.platform.companyrelation.CompanySurveyHandler",     {"event": "company_survey"}),
     (r"/m/api/company/follow",           "handler.platform.companyrelation.CompanyFollowHandler",     {"event": "company_follow"}),
