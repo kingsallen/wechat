@@ -85,27 +85,27 @@ class PositionHandler(BaseHandler):
     def get(self, position_id):
         """显示 JD 页
         """
-        # position_info = yield self.position_ps.get_position({'id': position_id})
-        #
-        # if position_info and position_info.id:
-        #
-        #     # 是否收藏
-        #     star = yield self.position_ps.is_position_stared_by(
-        #         position_id, self.current_user.sysuser.id)
-        #
-        #     # 是否申请
-        #     is_applied = yield self.application_ps.is_applied(
-        #         position_id, self.current_user.sysuser.id)
-        #
-        #     # 构建转发信息
-        #     self._make_share_info(position_info)
-        #
-        #
-        # else:
-        #     self.logger.warn("POSITION_NOT_EXIST")
-        #     nexturl = make_url(path.POSITION_PATH, self.params)
-        #     self.render("common/position_deleted.html", next_url=nexturl)
-        #     return
+        position_info = yield self.position_ps.get_position({'id': position_id})
+
+        if position_info and position_info.id:
+
+            # 是否收藏
+            star = yield self.position_ps.is_position_stared_by(
+                position_id, self.current_user.sysuser.id)
+
+            # 是否申请
+            is_applied = yield self.application_ps.is_applied(
+                position_id, self.current_user.sysuser.id)
+
+            # 构建转发信息
+            self._make_share_info(position_info)
+
+
+        else:
+            self.logger.warn("POSITION_NOT_EXIST")
+            nexturl = make_url(path.POSITION_PATH, self.params)
+            self.render("common/position_deleted.html", next_url=nexturl)
+            return
 
             # TODO panda JD 页 实现
             # # IM聊天未读消息

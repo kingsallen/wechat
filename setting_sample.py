@@ -71,5 +71,5 @@ settings['platform_qianxun_signature'] = "YWNkNmIyYWExOGViOTRkODMyMzk5N2MxM2NkZD
 settings['helper_signature'] = "NGZiMThkZWMwMmVkMjU4OGRlMWY3Nzk1N2FiZWExMWUxODI4ODJiZQ=="
 
 # 微信第三方平台信息
-settings['component_app_id'] = 'wx98aa120730a78275'
-settings['component_access_token'] = 'c37f1cd03cb111e5a2be00163e004a1f'
+settings['component_app_id'] = 'wx5024b0daabd7bb23'
+settings['component_access_token'] = 'dad5d29cdaeb4d1d6309ab82effb27b6'

@@ -39,7 +39,7 @@ class BaseDao(DB):
         :param params SQL 语句的 params 插值
         :return: cursor游标
         """
-        self.logger.warn("[warning][{0}][start][time: {1}][sql: {2}][params: {3}]".format(
+        self.logger.debug("[debug][{0}][start][time: {1}][sql: {2}][params: {3}]".format(
             self.__class__.__module__, curr_now(), sql, params))
         cursor = yield self.pool.execute(sql, params)
         raise gen.Return(cursor)
@@ -92,6 +92,8 @@ class BaseDao(DB):
         else:
             for item in response:
                 self.optResType(item, self.fields_map)
+
+        self.logger.debug("[debug][{0}][response: {1}]".format(self.__class__.__module__, response))
         raise gen.Return(response)
 
     @gen.coroutine
@@ -125,7 +127,7 @@ class BaseDao(DB):
         else:
             response = self.optResType(response, self.fields_map)
 
-        self.logger.debug("response: %s" % response)
+        self.logger.debug("[debug][{0}][response: {1}]".format(self.__class__.__module__, response))
         raise gen.Return(ObjectDict(response))
 
     @gen.coroutine
