@@ -9,6 +9,7 @@
 
 from tornado import gen
 from service.data.base import *
+from util.common import ObjectDict
 
 
 class UserCompanyVisitReqDataService(DataService):
@@ -16,7 +17,7 @@ class UserCompanyVisitReqDataService(DataService):
     @gen.coroutine
     def get_visit_cmpy(self, conds, fields=[]):
         if not self._valid_conds(conds):
-            raise gen.Return(None)
+            raise gen.Return(ObjectDict())
         if not fields:
             fields = self.user_company_visit_req_dao.fields_map.keys()
         try:
@@ -24,7 +25,7 @@ class UserCompanyVisitReqDataService(DataService):
                 conds, fields)
         except Exception as error:
             self.logger(error)
-            raise gen.Return(None)
+            raise gen.Return(ObjectDict())
 
         raise gen.Return(response)
 
@@ -45,6 +46,6 @@ class UserCompanyVisitReqDataService(DataService):
             response = yield self.user_company_visit_req_dao.insert_record(fields)
         except Exception as error:
             self.logger(error)
-            raise gen.Return(False)
+            raise gen.Return(None)
 
         raise gen.Return(response)

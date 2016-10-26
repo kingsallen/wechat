@@ -4,6 +4,7 @@
 from tornado import gen
 from service.data.base import DataService
 from util.common.decorator import cache
+from util.common import ObjectDict
 
 
 class HrHbConfigDataService(DataService):
@@ -15,7 +16,7 @@ class HrHbConfigDataService(DataService):
 
         if self._valid_conds(conds):
             self.logger.warn("Warning:[get_hr_hb_config][invalid parameters], Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
-            raise gen.Return(False)
+            raise gen.Return(ObjectDict)
 
         if not fields:
             fields = list(self.hr_hb_config_dao.fields_map.keys())
@@ -39,7 +40,7 @@ class HrHbConfigDataService(DataService):
                 "Warning:[get_hr_hb_position_binding_list][invalid "
                 "parameters], "
                 "Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
-            raise gen.Return(None)
+            raise gen.Return(list())
 
         if not fields:
             fields = list(self.hr_hb_config_dao.fields_map.keys())

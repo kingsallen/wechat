@@ -4,10 +4,12 @@
 
 from tornado import gen
 
+import conf.message as mes_const
+
 from service.data.base import DataService
 from util.common.decorator import cache
 from util.common import ObjectDict
-import conf.message as mes_const
+from util.common import ObjectDict
 
 class UserUserDataService(DataService):
     @cache(ttl=60)
@@ -19,7 +21,7 @@ class UserUserDataService(DataService):
                 "Warning:[get_user][invalid parameters], Detail:[conds: {0}, "
                 "type: {1}]".format(
                     conds, type(conds)))
-            raise gen.Return(None)
+            raise gen.Return(ObjectDict())
 
         if not fields:
             fields = list(self.user_user_dao.fields_map.keys())

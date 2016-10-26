@@ -172,7 +172,7 @@ class BaseHandler(MetaBaseHandler):
         code = self.params.get("code")
         state = self.params.get("state")
 
-        self.logger.debug("code:{}, state:{}".format(code, state))
+        self.logger.debug("code:{}, state:{}, request_url:{} ".format(code, state, self.request.uri))
 
         # 用户同意授权
         if self.in_wechat:

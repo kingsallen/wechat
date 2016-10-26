@@ -9,6 +9,7 @@
 
 from tornado import gen
 from service.data.base import *
+from util.common import ObjectDict
 
 
 class UserCompanyFollowDataService(DataService):
@@ -19,7 +20,7 @@ class UserCompanyFollowDataService(DataService):
         Testing code and delete when release
         """
         if not self._valid_conds(conds):
-            raise gen.Return(False)
+            raise gen.Return(ObjectDict())
         if not fields:
             fields = self.user_company_follow_dao.fields_map.keys()
         response = yield self.user_company_follow_dao.get_record_by_conds(
@@ -29,7 +30,7 @@ class UserCompanyFollowDataService(DataService):
     @gen.coroutine
     def get_fllw_cmpy(self, conds, fields=[]):
         if not self._valid_conds(conds):
-            raise gen.Return(None)
+            raise gen.Return(ObjectDict())
         if not fields:
             fields = self.user_company_follow_dao.fields_map.keys()
         try:
@@ -37,7 +38,7 @@ class UserCompanyFollowDataService(DataService):
                                     conds, fields)
         except Exception as error:
             self.logger.warn(error)
-            raise gen.Return(None)
+            raise gen.Return(ObjectDict())
 
         raise gen.Return(response)
 
@@ -58,6 +59,6 @@ class UserCompanyFollowDataService(DataService):
             response = self.user_company_follow_dao.insert_record(fields)
         except Exception as error:
             self.logger(error)
-            raise gen.Return(False)
+            raise gen.Return(None)
 
         raise gen.Return(response)

@@ -4,6 +4,7 @@
 from tornado import gen
 from service.data.base import DataService
 from util.common.decorator import cache
+from util.common import ObjectDict
 
 
 class UserFavPositionDataService(DataService):
@@ -14,7 +15,7 @@ class UserFavPositionDataService(DataService):
 
         if not self._valid_conds(conds):
             self.logger.warn("Warning:[get_user_fav_position][invalid parameters], Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
-            raise gen.Return(None)
+            raise gen.Return(ObjectDict())
 
         if not fields:
             fields = list(self.user_fav_position_dao.fields_map.keys())
