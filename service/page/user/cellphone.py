@@ -57,7 +57,7 @@ class CellphonePageService(PageService):
                 'status': 1, 'message': mes_const.REQUEST_PARAM_ERROR}))
 
     @gen.coroutine
-    def bind_mobile(self, params, app_id):
+    def bind_mobile(self, params, app_id, sysuser_id):
         """
         Send code submitted by user to basic service.
         :param params: dict include user mobile number and valid code
@@ -78,4 +78,14 @@ class CellphonePageService(PageService):
                 'status': 1,
                 'message': mes_const.BASIC_SERVER_BUSY
             }))
+        if int(response.status) == 0:
+            conds = {'id': sysuser_id}
+            result = yield self.user_user_ds.update_user(
+                conds=conds,
+                fields={
+                    'mobile': params.mobile,
+                    'username': str(params.mobile)
+            })
+            response.status, response.message = result.status, result.message
+
         raise gen.Return(response)

@@ -51,7 +51,7 @@ def _async_http_get(route, jdata, timeout=5, method='GET'):
     if method.lower() not in "get delete":
         raise ValueError("method is not in GET and DELETE")
 
-    url = url_concat("{0}/{1}".format(settings.infra, route), jdata)
+    url = url_concat("{0}/{1}".format(settings['infra'], route), jdata)
     http_client = tornado.httpclient.AsyncHTTPClient()
     response = yield http_client.fetch(
         url, request_timeout=timeout, method=method.upper(),
@@ -67,7 +67,7 @@ def _async_http_post(route, jdata, timeout=5, method='POST'):
         raise ValueError("method is not in POST, PUT and PATCH")
 
     http_client = tornado.httpclient.AsyncHTTPClient()
-    url = "{0}/{1}".format(settings.infra, route)
+    url = "{0}/{1}".format(settings['infra'], route)
     response = yield http_client.fetch(
         url,
         method=method.upper(),
