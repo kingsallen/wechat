@@ -61,15 +61,12 @@ class BaseHandler(MetaBaseHandler):
     http://www.tornadoweb.org/en/stable/web.html#other
     """
 
-    def initialize(self, **kwargs):
+    def initialize(self, event):
         # 日志需要，由 route 定义
-        print (kwargs.get("event"))
-        self.event = kwargs.get("event")
+        self._event = event
 
     def __init__(self, application, request, **kwargs):
         super().__init__(application, request, **kwargs)
-        # 日志相关
-        self.event = None
         # 全部 arguments
         self.params = self._get_params()
         # api 使用， json arguments
@@ -730,7 +727,7 @@ class BaseHandler(MetaBaseHandler):
                 request.headers.get('X-Forwarded-For') or
                 request.remote_ip
             ),
-            event="{}_{}".format(self.event, request.method),
+            event="{}_{}".format(self._event, request.method),
             cookie=self.cookies,
             user_id=user_id,
             req_type=request.method,
