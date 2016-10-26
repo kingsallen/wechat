@@ -13,73 +13,6 @@ from util.common import ObjectDict
 
 class PositionHandler(BaseHandler):
 
-    def _make_recom(self):
-        """用于微信分享和职位推荐时，传出的 recom 参数"""
-        if self.current_user.wxuser.openid:
-            ret = self.current_user.wxuser.openid
-        elif self.current_user.recom.openid:
-            ret = self.current_user.recom.openid
-        else:
-            ret = self.params.wid
-        return ret
-
-    def _make_share_info(self, position_info):
-        """构建 share 内容"""
-
-        title = position_info.title
-        if position_info.share_title:
-            title = str(position_info.share_title).format(
-                company=position_info.abbreviation,
-                position=position_info.title)
-
-        if position_info.share_description:
-            description = position_info.share_description
-        else:
-            description = msg.SHARE_DES_DEFAULT
-
-        link = make_url(path.POSITION_PATH, self.params,
-                        host=self.request.host,
-                        protocol=self.request.protocol,
-                        m="info", recom=self._make_recom(),
-                        escape=["wid", "tjtoken", "tj", "occupation"])
-
-        self.params.share = ObjectDict({
-            "cover":       self.static_url(position_info.logo),
-            "title":       title,
-            "description": description,
-            "link":        link
-        })
-
-    @gen.coroutine
-    def _make_hr_info(self, publisher):
-        """根据职位 publisher 返回 hr 的相关信息 tuple"""
-        hr_account, hr_wx_user = yield self.position_ps.get_hr_info(publisher)
-        raise gen.Return((hr_account, hr_wx_user))
-
-    @gen.coroutine
-    def _make_endorse_info(self, position):
-        """构建 JD 页左下角背书信息"""
-        hr_account, hr_wx_user = yield self._make_hr_info(position.publisher)
-        hrheadimgurl = (
-            hr_account.headimgurl or hr_wx_user.headimgurl or
-            self.current_user.company.logo or const.HR_HEADIMG
-        )
-
-        hr_name = hr_account.name or hr_wx_user.nickname or ''
-        company_name = position.abbreviation or position.company_name or ''
-
-        is_hr = self.current_user.qxuser.unionid == hr_wx_user.unionid
-
-        endorse_info = {
-            "is_hr":              is_hr,
-            "endorse_src":        hrheadimgurl,
-            "endorse_name":       hr_name,
-            "endorse_company":    company_name,
-            "endorse_department": position.department
-        }
-
-        raise gen.Return(endorse_info)
-
     @check_signature
     @gen.coroutine
     def get(self, position_id):
@@ -256,3 +189,74 @@ class PositionHandler(BaseHandler):
             # if position.get("visitnum", 0) == 4 and position.get("source",
             #                                                      -1) == 0:
             #     self.send_publish_template(position)
+
+
+    def _make_recom(self):
+        """用于微信分享和职位推荐时，传出的 recom 参数"""
+        if self.current_user.wxuser.openid:
+            ret = self.current_user.wxuser.openid
+        elif self.current_user.recom.openid:
+            ret = self.current_user.recom.openid
+        else:
+            ret = self.params.wid
+        return ret
+
+
+    def _make_share_info(self, position_info):
+        """构建 share 内容"""
+
+        title = position_info.title
+        if position_info.share_title:
+            title = str(position_info.share_title).format(
+                company=position_info.abbreviation,
+                position=position_info.title)
+
+        if position_info.share_description:
+            description = position_info.share_description
+        else:
+            description = msg.SHARE_DES_DEFAULT
+
+        link = make_url(path.POSITION_PATH, self.params,
+                        host=self.request.host,
+                        protocol=self.request.protocol,
+                        m="info", recom=self._make_recom(),
+                        escape=["wid", "tjtoken", "tj", "occupation"])
+
+        self.params.share = ObjectDict({
+            "cover": self.static_url(position_info.logo),
+            "title": title,
+            "description": description,
+            "link": link
+        })
+
+
+    @gen.coroutine
+    def _make_hr_info(self, publisher):
+        """根据职位 publisher 返回 hr 的相关信息 tuple"""
+        hr_account, hr_wx_user = yield self.position_ps.get_hr_info(publisher)
+        raise gen.Return((hr_account, hr_wx_user))
+
+
+    @gen.coroutine
+    def _make_endorse_info(self, position):
+        """构建 JD 页左下角背书信息"""
+        hr_account, hr_wx_user = yield self._make_hr_info(position.publisher)
+        hrheadimgurl = (
+            hr_account.headimgurl or hr_wx_user.headimgurl or
+            self.current_user.company.logo or const.HR_HEADIMG
+        )
+
+        hr_name = hr_account.name or hr_wx_user.nickname or ''
+        company_name = position.abbreviation or position.company_name or ''
+
+        is_hr = self.current_user.qxuser.unionid == hr_wx_user.unionid
+
+        endorse_info = {
+            "is_hr": is_hr,
+            "endorse_src": hrheadimgurl,
+            "endorse_name": hr_name,
+            "endorse_company": company_name,
+            "endorse_department": position.department
+        }
+
+        raise gen.Return(endorse_info)

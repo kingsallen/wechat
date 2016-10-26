@@ -148,7 +148,7 @@ class DB(object):
 
         if maps is None or not isinstance(maps, dict):
             self.logger.error("Error:[optResType][maps type error], types:{0}, type:{1}".format(maps, type(maps)))
-            return False
+            return ObjectDict()
 
         for key, value in maps.items():
             if response.get(key, 0):
@@ -161,7 +161,7 @@ class DB(object):
                 else:
                     response[key] = str(response[key])
 
-        return response
+        return ObjectDict(response)
 
     def select(self, table, conds=[], fields=[], options=[], appends=[], index=''):
 

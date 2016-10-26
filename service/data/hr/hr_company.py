@@ -5,6 +5,7 @@
 from tornado import gen
 from service.data.base import DataService
 from util.common.decorator import cache
+from util.common import ObjectDict
 
 class HrCompanyDataService(DataService):
 
@@ -15,7 +16,7 @@ class HrCompanyDataService(DataService):
         if conds is None or not (isinstance(conds, dict) or isinstance(conds, str)):
             self.logger.warn("Warning:[get_company][invalid parameters], Detail:[conds: {0}, "
                         "type: {1}]".format(conds, type(conds)))
-            raise gen.Return(False)
+            raise gen.Return(ObjectDict())
 
         if not fields:
             fields = list(self.hr_company_dao.fields_map.keys())
@@ -30,7 +31,7 @@ class HrCompanyDataService(DataService):
         if conds is None or not (isinstance(conds, dict) or isinstance(conds, str)):
             self.logger.warn("Warning:[get_companys_list][invalid parameters], Detail:[conds: {0}, "
                         "type: {1}]".format(conds, type(conds)))
-            raise gen.Return(False)
+            raise gen.Return(list())
 
         if not fields:
             fields = list(self.hr_company_dao.fields_map.keys())

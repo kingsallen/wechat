@@ -128,7 +128,7 @@ class BaseDao(DB):
             response = self.optResType(response, self.fields_map)
 
         self.logger.debug("[debug][{0}][response: {1}]".format(self.__class__.__module__, response))
-        raise gen.Return(ObjectDict(response))
+        raise gen.Return(response)
 
     @gen.coroutine
     def insert_record(self, fields, options=None):
@@ -206,7 +206,7 @@ class BaseDao(DB):
             self.logger.error(
                 "Error:[delete_by_conds][conds error], conds:{0}".format(
                     conds))
-            raise gen.Return(None)
+            raise gen.Return(False)
         sql = self.delete(self.table, conds)
         cursor = yield self.query(sql, params)
         cursor.fetchone()
