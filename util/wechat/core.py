@@ -6,6 +6,7 @@ import conf.common as const
 import conf.wechat as wx
 from setting import settings
 from util.common import ObjectDict
+from util.common.singleton import Singleton
 from util.tool.date_tool import curr_now
 from util.tool.http_tool import http_post
 
@@ -27,7 +28,10 @@ class WechatNoTemplateError(WechatException):
 
 class WechatTemplateMessager(object):
 
+    __metaclass__ = Singleton
+
     def __init__(self):
+        super(WechatTemplateMessager, self).__init__()
         self.logger = logger
         self.hr_wx_wechat_ds = HrWxWechatDataService(logger)
         self.hr_wx_template_message_ds = HrWxTemplateMessageDataService(logger)
@@ -36,8 +40,7 @@ class WechatTemplateMessager(object):
 
     @gen.coroutine
     def send_template(self, wechat_id, openid, sys_template_id, link,
-                      json_data,
-                      qx_retry=False):
+                      json_data, qx_retry=False):
         """发送消息模板到用户
 
         :param wechat_id: 企业号 wechat_id
@@ -53,8 +56,7 @@ class WechatTemplateMessager(object):
         template = yield self._get_template(wechat_id, sys_template_id)
 
         # 获取 wechat
-        wechat = yield self.hr_wx_wechat_ds.get_wechat(
-            {"id": wechat_id})
+        wechat = yield self.hr_wx_wechat_ds.get_wechat({"id": wechat_id})
 
         # 发送以及记录结果
         ok = yield self._send_and_log(wechat, openid, template, link,
