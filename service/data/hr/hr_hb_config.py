@@ -14,7 +14,7 @@ class HrHbConfigDataService(DataService):
     def get_hr_hb_config(self, conds, fields=None):
         fields = fields or []
 
-        if self._valid_conds(conds):
+        if not self._valid_conds(conds):
             self.logger.warn("Warning:[get_hr_hb_config][invalid parameters], Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
             raise gen.Return(ObjectDict())
 
@@ -35,7 +35,7 @@ class HrHbConfigDataService(DataService):
         appends = appends or []
         params = params or []
 
-        if self._valid_conds(conds):
+        if not self._valid_conds(conds):
             self.logger.warn(
                 "Warning:[get_hr_hb_position_binding_list][invalid "
                 "parameters], "

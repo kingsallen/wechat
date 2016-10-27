@@ -14,7 +14,7 @@ class HrHbScratchCardDataService(DataService):
     def get_scratch_card(self, conds, fields=None):
         fields = fields or []
 
-        if self._valid_conds(conds):
+        if not self._valid_conds(conds):
             self.logger.warn(
                 "Warning:[get_hr_scratch_card][invalid parameters], Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
             raise gen.Return(ObjectDict())

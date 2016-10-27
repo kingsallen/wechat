@@ -15,7 +15,7 @@ class HrHbItemsDataService(DataService):
                      index=None):
         fields = fields or []
 
-        if self._valid_conds(conds):
+        if not self._valid_conds(conds):
             self.logger.warn("Warning:[get_hb_items][invalid parameters], Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
             raise gen.Return(ObjectDict())
 
@@ -36,7 +36,7 @@ class HrHbItemsDataService(DataService):
         appends = appends or []
         params = params or []
 
-        if self._valid_conds(conds):
+        if not self._valid_conds(conds):
             self.logger.warn("Warning:[get_hb_items_list][invalid parameters], Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
             raise gen.Return(list())
 

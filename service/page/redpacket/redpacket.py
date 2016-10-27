@@ -93,7 +93,7 @@ class RedpacketPageService(PageService):
         }, fields=['hb_config_id'])
         binding_list = [b.hb_config_id for b in binding_res]
 
-        config = [b for b in config_list if b.id in  binding_list]
+        config = [b for b in config_list if b.id in binding_list]
         assert len(config) == 1
         raise gen.Return(config[0])
 
