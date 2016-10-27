@@ -16,7 +16,6 @@ class WechatHandler(BaseHandler):
     @gen.coroutine
     def get(self):
 
-        yield Alarm().biu("test")
         self.send_json(
                 data={
                     "a": 'hello world!'

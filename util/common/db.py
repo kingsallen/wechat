@@ -41,7 +41,7 @@ class DB(object):
         :param conds: 字符串或者数组格式的SQL限制条件, 格式示例：
         dict{
             'field': value,
-            'field': [value, '=|>|<'],
+            'field': [value, '=|>|<|!='],
             'field': [value, '<', value, '>'],
         }
         或者"field in (1, 2)"

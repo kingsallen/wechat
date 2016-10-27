@@ -4,10 +4,13 @@
 
 from tornado import gen
 from service.page.base import PageService
+import conf.common as const
+import conf.path as path
+from util.common import ObjectDict
+from util.tool.http_tool import http_get
+from util.tool.url_tool import make_url
 from util.tool.date_tool import jd_update_date
 from util.tool.str_tool import gen_salary, split
-import conf.common as const
-from util.common import ObjectDict
 
 
 class PositionPageService(PageService):
@@ -130,15 +133,34 @@ class PositionPageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def get_company_info(self, publisher, company_id):
-        """获得职位所属公司信息
+    def get_real_company_id(self, publisher, company_id):
+        """获得职位所属公司id
         1.首先根据 hr_company_account 获得 hr 帐号与公司之间的关系，获得company_id
         2.如果1取不到，则直接取职位中的 company_id"""
 
         hr_company_account = yield self.hr_company_account_ds.get_company_account(conds={"account_id": publisher})
         real_company_id = hr_company_account.company_id or company_id
 
-        ret = yield self.hr_company_ds.get_company(conds={"id": real_company_id})
+        raise gen.Return(real_company_id)
 
-        raise gen.Return(ret)
+    @gen.coroutine
+    def get_recommend_positions(self, position_id):
+        """获得 JD 页推荐职位
+        reference: https://wiki.moseeker.com/position-api.md#recommended
+
+        :param position_id: 职位 id
+        """
+
+        req = ObjectDict({
+            'pid': position_id,
+        })
+        try:
+            response = list()
+            ret = yield http_get(self.path.POSITION_RECOMMEND, req)
+            if ret.status == 0:
+                response = ret.data
+        except Exception as error:
+            self.logger.warn(error)
+
+        raise gen.Return(response)
 

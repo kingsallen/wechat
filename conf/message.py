@@ -17,12 +17,13 @@ CELLPHONE_UNBIND = "用户未绑定手机号"
 
 DATABASE_ERROR = "数据库操作失败"
 
-REQUEST_PARAM_ERROR = "请求中参数错误"
+REQUEST_PARAM_ERROR = "请求参数错误"
 
 NOT_AUTHORIZED = "用户未被授权请求"
 NO_DATA = "Ta在地球上消失了"
 UNKNOWN_DEFAULT = "正在努力维护服务器中"
 
+POSITION_FORWARD_MESSAGE = "点击右上角\n将职位推送给朋友,\n或者直接分享到朋友圈吧!"
 SHARE_DES_DEFAULT = "点击即可快速申请！"
 
 RED_PACKET_TYPE_VALUE_ERROR = "红包配置类型错误!"

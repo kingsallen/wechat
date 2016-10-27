@@ -7,7 +7,12 @@ POSITION_PATH = "/m/position/{}"
 RED_PACKET_CARD = "/mobile/redpack"
 
 # 基础服务 alphadog path
+## 用户服务
 USER_LOGIN_PATH = "user/login"
 USER_BIND_WX_MOBILE = 'user/wxbindmobile'
 
+## 申请服务
 APPLICATION_APPLY_COUNT = "application/count/check"
+
+## 职位服务
+POSITION_RECOMMEND = "positions/recommended"

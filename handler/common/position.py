@@ -3,13 +3,15 @@
 from tornado import gen
 
 from handler.base import BaseHandler
-from util.common.decorator import check_signature
-from util.tool.url_tool import make_url
+
 import conf.common as const
 import conf.path as path
 import conf.message as msg
-from util.common import ObjectDict
 
+from util.common import ObjectDict
+from util.common.decorator import check_signature
+from util.tool.url_tool import make_url
+from util.tool.str_tool import gen_salary
 
 class PositionHandler(BaseHandler):
 
@@ -30,75 +32,48 @@ class PositionHandler(BaseHandler):
             # 是否收藏
             star = yield self.position_ps.is_position_stared_by(
                 position_id, self.current_user.sysuser.id)
-            self.params._star = star
 
             # 是否申请
             application = yield self.application_ps.get_application(
                 position_id, self.current_user.sysuser.id)
-            self.params._submitted = bool(application)
-            self.params.app_id = application.id
 
             # 获得职位所属公司信息
-            company_info = yield self.position_ps.get_company_info(position_info.publisher, position_info.company_id)
+            real_company_id = yield self.position_ps.get_real_company_id(position_info.publisher, position_info.company_id)
+            company_info = yield self.company_ps.get_company(conds={"id": real_company_id}, need_conf=True)
 
             # 构建转发信息
             self._make_share_info(position_info, company_info)
 
             # HR头像及底部转发文案
-            self._make_endorse_info(position_info, company_info)
+            endorse = self._make_endorse_info(position_info, company_info)
 
             # 是否超出投递上限。每月每家公司一个人只能申请3次
-            is_allowed_apply_count = yield self.application_ps.is_allowed_apply_position(
+            can_apply = yield self.application_ps.is_allowed_apply_position(
                 self.current_user.sysuser.id, company_info.id)
-            self.params._can_apply = is_allowed_apply_count
 
+            # 诺华定制。本次不实现
 
+            # 相似职位推荐
+            recomment_positions_res = yield self.position_ps.get_recommend_positions(position_id)
+
+            position = ObjectDict({
+                "header": self._make_json_header(position_info, company_info, star, application, endorse, can_apply),
+                "module_job_description": self._make_json_job_description(position_info),
+                "module_job_require": self._make_json_job_require(position_info),
+                "module_job_need": self._make_json_job_need(position_info),
+                "module_feature": self._make_json_job_feature(position_info),
+                "module_company_info": self._make_json_job_company_info(company_info),
+                "module_position_recommend": self._make_recommend_positions(recomment_positions_res),
+            })
+
+            self.render_page("", data=position)
 
         else:
             self.write_error(404)
             return
 
             # TODO panda JD 页 实现
-            # # IM聊天未读消息
-            # unread_num = 1
-            # if self.current_user.wxuser.sysuser_id and position.publisher:
-            #     wx_hr_chat_room_info = {
-            #         "sysuser_id": self.current_user.wxuser.sysuser_id,
-            #         "account_id": position.publisher}
-            #     wx_hr_chat_room = yield WxHrChatListService().get_chat_room(
-            #         wx_hr_chat_room_info)
-            #     if wx_hr_chat_room and wx_hr_chat_room.get("id"):
-            #         unread_recodes = {
-            #             "chatlist_id": wx_hr_chat_room.get("id"),
-            #             "speaker":     0
-            #         }
-            #         unread_num = yield WxHrChatService(
             #
-            #         ).get_unread_recodes_num(
-            #             unread_recodes)
-            #         unread_num = int(unread_num)
-            #
-            #
-            # # 获取推荐朋友浮层文案
-            # res = pos_ser.get_forward_custom_message(
-            #     self.current_user.company.id)
-            # forward_message = res.get("forward_message",
-            #                           "") or msg.DEFAULT_FORWARD_MESSAGE
-            #
-            # # 定制插入
-            # custom_service = CustomService(self.db)
-            # # 1. 诺华定制
-            # suppress_apply = custom_service.get_suppress_apply(position)
-            # self.LOG.debug("suppress_apply:{}".format(suppress_apply))
-            # # 2. 开启代理投递
-            # delegate_drop = custom_service.get_delegate_drop(self)
-            #
-            # # 计算相关职位, 调用基础服务接口
-            # related_positions = yield pos_ser.get_position_recommend(
-            #     param={"pid": position.get("id")}
-            # )
-            #
-            # related_positions = []
             #
             # self.render("neo_weixin/position/position_info.html",
             #             position=position,
@@ -243,7 +218,7 @@ class PositionHandler(BaseHandler):
                         escape=["keywords, cities, candidate_source, employment_type, salary, "
                                 "department, occupations, custom, degree, page_from, page_size"])
 
-        self.params._share = ObjectDict({
+        self.params.share = ObjectDict({
             "cover": self.static_url(company_info.logo),
             "title": title,
             "description": description,
@@ -272,10 +247,109 @@ class PositionHandler(BaseHandler):
 
         is_hr = self.current_user.qxuser.unionid == hr_wx_user.unionid
 
-        self.params_endorse_info = ObjectDict({
+        endorse = ObjectDict({
+            "publisher": position_info.publisher,
             "is_hr": is_hr,
-            "endorse_src": self.static_url(hrheadimgurl),
-            "endorse_name": hr_name,
-            "endorse_company": company_name,
-            "endorse_department": position_info.department
+            "avatar": self.static_url(hrheadimgurl),
+            "name": hr_name,
+            "company": company_name,
+            "department": position_info.department
         })
+
+        raise gen.Return(endorse)
+
+    @gen.coroutine
+    def _make_recommend_positions(self, positions):
+        """处理相似职位推荐"""
+
+        data = []
+        for item in positions:
+            pos = ObjectDict()
+            pos.title = item.get("job_title")
+            pos.location = item.get("job_city", "")
+            pos.salary = gen_salary(item.get("salary_top"), item.get("salary_bottom"))
+            pos.link = make_url(path.POSITION_PATH.format(item.get("pid")), self.params,
+                                escape=["keywords, cities, candidate_source, employment_type, salary, "
+                                        "department, occupations, custom, degree, page_from, page_size"])
+            data.append(pos)
+            if len(data) > 2:
+                break
+
+        res = ObjectDict({
+            "title": "相关职位推荐",
+            "data": data
+        })
+
+        raise gen.Return(res)
+
+    @gen.coroutine
+    def _make_json_header(self, position_info, company_info, star, application, endorse, can_apply):
+        """构造头部 header 信息"""
+        data = ObjectDict({
+            "id": position_info.id,
+            "title": position_info.title,
+            "disable": True if position_info.status == 0 else False,
+            "location": position_info.city,
+            "update_time": position_info.update_time,
+            "star": star,
+            "icon_url": self.static_url(company_info.logo),
+            "submitted": bool(application),
+            "appid": application.id,
+            "endorse": endorse,
+            "can_apply": can_apply,
+            "forword_message": company_info.conf_forward_message or const.POSITION_FORWARD_MESSAGE
+        })
+
+        raise gen.Return(data)
+
+    @gen.coroutine
+    def _make_json_job_description(self, position_info):
+        """构造职位描述"""
+        data = ObjectDict({
+            "data": position_info.accountabilities,
+        })
+
+        raise gen.Return(data)
+
+    @gen.coroutine
+    def _make_json_job_require(self, position_info):
+        """构造职位要求"""
+        require = []
+        if position_info.degree:
+            require.append("学历 {}".format(position_info.degree))
+        if position_info.experience:
+            require.append("工作经验 {}".format(position_info.experience))
+        data = ObjectDict({
+            "data":  require
+        })
+
+        raise gen.Return(data)
+
+    @gen.coroutine
+    def _make_json_job_need(self, position_info):
+        """构造职位描述"""
+        data = ObjectDict({
+            "data": position_info.requirement,
+        })
+
+        raise gen.Return(data)
+
+    @gen.coroutine
+    def _make_json_job_feature(self, position_info):
+        """构造职位描述"""
+        data = ObjectDict({
+            "data": position_info.feature,
+        })
+
+        raise gen.Return(data)
+
+    @gen.coroutine
+    def _make_json_job_company_info(self, company_info):
+        """构造职位描述"""
+        data = ObjectDict({
+            "icon_url": company_info.logo,
+            "name": company_info.name or company_info.abbreviation,
+            "descripthon": company_info.introduction,
+        })
+
+        raise gen.Return(data)

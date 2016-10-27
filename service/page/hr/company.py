@@ -14,7 +14,7 @@ class CompanyPageService(PageService):
         super(CompanyPageService, self).__init__(logger)
 
     @gen.coroutine
-    def get_company(self, conds, need_conf=False, fields=[]):
+    def get_company(self, conds, need_conf=None, fields=None):
 
         """
         获得公司信息
@@ -25,6 +25,9 @@ class CompanyPageService(PageService):
         }
         :return:
         """
+
+        fields = fields or []
+        need_conf = need_conf or False
 
         # 公司主表
         company = yield self.hr_company_ds.get_company(conds, fields)
@@ -65,7 +68,7 @@ class CompanyPageService(PageService):
         raise gen.Return(company)
 
     @gen.coroutine
-    def get_companys_list(self, conds, fields, options=[], appends=[]):
+    def get_companys_list(self, conds, fields, options=None, appends=None):
 
         """
         获得公司列表
@@ -76,12 +79,18 @@ class CompanyPageService(PageService):
         :return:
         """
 
+        options = options or []
+        appends = appends or []
+
         positions_list = yield self.hr_company_ds.get_companys_list(conds, fields, options, appends)
         raise gen.Return(positions_list)
 
     @gen.coroutine
     def save_survey(self, fields, options=None, appends=None):
         """保存公司 survey， 在公司 profile 主页保存"""
+        options = options or []
+        appends = appends or []
+
         lastrowid = yield self.campaign_company_survey_ds.create_survey(fields)
         raise gen.Return(lastrowid)
 
