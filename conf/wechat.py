@@ -173,3 +173,6 @@ ERRORS = {
     9001035: "设备申请参数不合法",
     9001036: "查询起始值begin不合法"
 }
+
+API_SEND_TEMPLATE_MESSAGE = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=%s"
+API_PAY_HONGBAO = "https://api.mch.weixin.qq.com/mmpaymkttransfers/sendredpack"

@@ -7,6 +7,8 @@
 
 """
 
+import conf.common as const
+
 from tornado import gen
 from handler.base import BaseHandler
 
@@ -42,7 +44,22 @@ class CellphoneBindHandler(BaseHandler):
             app_id=self.app_id,
             sysuser_id=self.current_user.sysuser.id
         )
-        self._send_json(data=None, status_code=response.status,
+
+        if response.status != 0:
+            self._send_json(data=None, status_code=response.status,
                        message=response.message)
+
+        new_user_id = self.cellphone_ps.wx_pc_combine(
+            mobile=self.params.mobile,
+            unionid=self.current_user.sysuser.unionid,
+            app_id=self.app_id
+        )
+
+        if new_user_id and new_user_id != self.current_user.sysuser.id:
+            self.clear_cookie(name=const.SESSION_ID)
+        elif new_user_id is None:
+            self.send_json_error()
+
+        self.send_json_success()
 
         return

@@ -63,6 +63,8 @@ settings['blocking_log_threshold'] = 0.5
 # 基础服务
 settings['infra'] = "http://api1.dqprism.com"
 
+settings['qx_host'] = 'qx1.dqprism.com'
+
 # 公众号 signatures
 settings['qx_wechat_id'] = 1
 

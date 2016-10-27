@@ -47,3 +47,22 @@ class HrHbItemsDataService(DataService):
             conds, fields, options, appends, index, params)
 
         raise gen.Return(response)
+
+    @gen.coroutine
+    def update_hb_items(self, conds=None, fields=None):
+        if not conds or not fields:
+            self.logger.warn(
+                "Warning:[update_hb_items][invalid parameters], Detail:[conds: {0}, fields: {1}]".format(
+                    conds, fields))
+            raise gen.Return(None)
+
+        ret = yield self.hr_hb_items_dao.update_by_conds(conds=conds, fields=fields)
+
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def create_hb_items(self, fields, options=None):
+        options = options or []
+
+        response = yield self.hr_hb_items_dao.insert_record(fields, options)
+        raise gen.Return(response)

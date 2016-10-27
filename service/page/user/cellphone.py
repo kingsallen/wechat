@@ -21,7 +21,8 @@ class CellphonePageService(PageService):
     """
     _ROUTE = ObjectDict({
         'valid': 'user/sendCode',
-        'verify': 'user/verifyCode'
+        'verify': 'user/verifyCode',
+        'combine': 'user/wxbindmobile'
     })
 
     _OPT_TYPE = ObjectDict({
@@ -89,3 +90,32 @@ class CellphonePageService(PageService):
             response.status, response.message = result.status, result.message
 
         raise gen.Return(response)
+
+
+    @gen.coroutine
+    def wx_pc_combine(self, mobile, unionid, app_id):
+        req = ObjectDict({
+            'mobile': mobile,
+            'unionid': unionid,
+            'appid': app_id
+        })
+        try:
+            result = yield http_post(self._ROUTE.combine, req)
+            self.logger.debug('Combine wx and pc uer as: {}'.format(result))
+        except Exception as error:
+            self.logger.warn(error)
+            raise gen.Return(None)
+
+            user_id = int(result) if result.isdigit() else None
+
+        raise gen.Return(int(user_id))
+
+
+
+
+
+
+
+
+
+

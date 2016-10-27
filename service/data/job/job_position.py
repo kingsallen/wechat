@@ -7,6 +7,7 @@ from service.data.base import DataService
 from util.common.decorator import cache
 from util.common import ObjectDict
 
+
 class JobPositionDataService(DataService):
 
     @cache(ttl=60)
@@ -38,3 +39,17 @@ class JobPositionDataService(DataService):
 
         response = yield self.job_position_dao.get_list_by_conds(conds, fields, options, appends, index, params)
         raise gen.Return(response)
+
+    @gen.coroutine
+    def update_position(self, conds=None, fields=None):
+        if not conds or not fields:
+            self.logger.warn(
+                "Warning:[update_position][invalid parameters], Detail:[conds: {0}, fields: {1}]".format(
+                    conds, fields))
+            raise gen.Return(None)
+
+        ret = yield self.job_position_dao.update_by_conds(
+            conds=conds,
+            fields=fields)
+
+        raise gen.Return(ret)
