@@ -27,6 +27,8 @@ from util.wechat.template import \
     rp_transfer_apply_success_notice_tpl, \
     rp_transfer_click_success_notice_tpl
 
+from util.common import ObjectDict
+
 
 class RedpacketPageService(PageService):
 
@@ -980,9 +982,10 @@ class RedpacketPageService(PageService):
 
         filtered_binding_list = [b for b in binding_list if b.hb_config_id in config_id_list]
 
-        ret = 0
+        ret = ObjectDict()
         if filtered_binding_list:
-            ret = filtered_binding_list[0].hb_config_id
+            config_id = filtered_binding_list[0].hb_config_id
+            return [c for c in running_config_list if c.id == config_id][0]
 
         raise gen.Return(ret)
 
