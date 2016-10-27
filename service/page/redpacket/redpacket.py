@@ -949,3 +949,40 @@ class RedpacketPageService(PageService):
             "send_time":    args_dict.get('send_time', ''),
             "send_listid":  args_dict.get('send_listid', '')
         })
+
+    @gen.coroutine
+    def get_last_running_hongbao_config_by_position(self, position):
+        """
+        获取一个职位正在进行的红包活动
+        """
+        #
+        # return db.get("""
+        #         select hc.* from hr_hb_config hc
+        #         join hr_hb_position_binding hpb on hpb.hb_config_id = hc.id
+        #         where hpb.position_id = {0} and
+        #             hc.status = 3
+        #         order by hc.id desc limit 1
+        #         """.format(pid))
+
+        running_config_list = yield self.hr_hb_config_ds.get_hr_hb_config_list(
+            conds={
+                "company_id": position.company_id,
+                "status": 3
+            }
+        )
+
+        config_id_list = [c.id for c in running_config_list]
+
+        binding_list = yield self.hr_hb_position_binding_ds.get_hr_hb_position_binding_list(
+            conds={
+                "position_id": position.id
+            })
+
+        filtered_binding_list = [b for b in binding_list if b.hb_config_id in config_id_list]
+
+        ret = 0
+        if filtered_binding_list:
+            ret = filtered_binding_list[0].hb_config_id
+
+        raise gen.Return(ret)
+
