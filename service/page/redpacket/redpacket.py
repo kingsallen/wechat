@@ -19,7 +19,7 @@ import conf.wechat as wx
 from service.page.base import PageService
 from setting import settings
 from util.common.sharechain import is_1degree_of_employee, get_referral_employee_wxuser_id
-from util.tool.str_tool import set_literl, trunc, generate_nonce_str, to_bytes
+from util.tool.str_tool import set_literl, trunc, generate_nonce_str
 from util.tool.url_tool import make_url
 from util.wechat.template import \
     rp_binding_success_notice_tpl, \
@@ -832,7 +832,7 @@ class RedpacketPageService(PageService):
             self.logger.debug(u"[RP]发送红包结果 res: {}".format(res))
 
             # 记录红包发送结果
-            yield self.__insert_red_packet_sent_record(self.xml_to_dict(res))
+            yield self.__insert_red_packet_sent_record(self.__xml_to_dict(res))
 
             return "FAIL" not in res
 
@@ -917,13 +917,12 @@ class RedpacketPageService(PageService):
         return r.content
 
     @staticmethod
-    def xml_to_dict(xml_text):
+    def __xml_to_dict(xml_text):
         """
         将微信含有 CDATA 的返回 xml 转换成 dict
         :param xml_text:
         :return:
         """
-        xml_text = to_bytes(xml_text)
         doc = minidom.parseString(xml_text)
         ret = {}
         xml_root = doc.childNodes[0]
