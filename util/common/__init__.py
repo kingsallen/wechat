@@ -42,7 +42,8 @@ class ObjectDict(tornado.util.ObjectDict):
 class _Const(object):
     """常量集合类
     """
-    class ConstantError(TypeError): pass
+    class ConstantError(TypeError):
+        pass
 
     def __setattr__(self, name, value):
         if self.__dict__.has_key(name):

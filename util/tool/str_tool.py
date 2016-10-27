@@ -3,6 +3,8 @@
 # Copyright 2016 MoSeeker
 
 import re
+import random
+import string
 
 
 def gen_salary(salary_top, salary_bottom):
@@ -76,3 +78,22 @@ def trunc(s, limit, coding="UTF-8", postfix="..."):
     return unicode_s[:i] + use_postfix
 
 
+def set_literl(l):
+    """list 输出左右为小括号的字符串 (set 标准输出)"""
+    ret = None
+    if isinstance(l, list):
+        ret = "(%s)" % l.__repr__()[1:-1]
+    return ret
+
+
+def generate_nonce_str(length=32, upper=True):
+    """
+    根据微信支付接口需要生成随机字符串,不长于32位
+    :param length: 随机字符串长度,默认为32
+    :return: 生成的随机字符串
+    """
+    ret = ''.join(
+        random.sample(string.ascii_letters + string.digits, length))
+    if upper:
+        ret = ret.upper()
+    return ret

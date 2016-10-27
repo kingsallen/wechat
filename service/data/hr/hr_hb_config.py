@@ -49,3 +49,18 @@ class HrHbConfigDataService(DataService):
             conds, fields, options, appends, index, params)
 
         raise gen.Return(response)
+
+    @gen.coroutine
+    def update_hr_hb_config(self, conds=None, fields=None):
+        if not conds or not fields:
+            self.logger.warn(
+                "Warning:[update_hr_hb_config][invalid parameters], Detail:["
+                "conds: {0}, fields: {1}]".format(
+                    conds, fields))
+            raise gen.Return(None)
+
+        ret = yield self.hr_hb_config_dao.update_by_conds(
+            conds=conds,
+            fields=fields)
+
+        raise gen.Return(ret)

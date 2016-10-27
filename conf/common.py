@@ -1,5 +1,6 @@
 # coding=utf-8
 
+
 """
 说明:
 constant配置常量规范：
@@ -11,6 +12,7 @@ constant配置常量规范：
 常量使用大写字母
 例如 SUCCESS = "成功"
 """
+from util.common import ObjectDict
 
 # ++++++++++系统常量++++++++++
 
@@ -155,3 +157,40 @@ RED_PACKET_TYPE_EMPLOYEE_BINDING = 0
 RED_PACKET_TYPE_RECOM = 1
 RED_PACKET_TYPE_SHARE_CLICK = 2
 RED_PACKET_TYPE_SHARE_APPLY = 3
+
+# 职位的红包活动状态
+HB_STATUS_NONE = 0
+HB_STATUS_CLICK = 1
+HB_STATUS_APPLY = 2
+HB_STATUS_BOTH = 3
+
+#红包活动状态
+HB_CONFIG_FINISHED = 5
+
+# 发送消息模板的系统模板库常量
+TEMPLATES = ObjectDict()
+TEMPLATES.RP_EMPLOYEE_BINDING = 44
+TEMPLATES.RP_RECOM = 9
+TEMPLATES.RP_SHARE = 25
+
+WX_MESSAGE_TEMPLATE_SEND_TYPE_WEIXIN = 0
+WX_MESSAGE_TEMPLATE_SEND_TYPE_EMAIL = 1
+WX_MESSAGE_TEMPLATE_SEND_TYPE_SMS = 2
+
+SEND_RP_REQUEST_FORMAT = """
+<xml>
+<sign><![CDATA[{sign}]]></sign>
+<mch_billno><![CDATA[{mch_billno}]]></mch_billno>
+<mch_id><![CDATA[{mch_id}]]></mch_id>
+<wxappid><![CDATA[{wxappid}]]></wxappid>
+<send_name><![CDATA[{send_name}]]></send_name>
+<re_openid><![CDATA[{re_openid}]]></re_openid>
+<total_amount><![CDATA[{total_amount}]]></total_amount>
+<total_num><![CDATA[{total_num}]]></total_num>
+<wishing><![CDATA[{wishing}]]></wishing>
+<client_ip><![CDATA[{client_ip}]]></client_ip>
+<act_name><![CDATA[{act_name}]]></act_name>
+<remark><![CDATA[{remark}]]></remark>
+<nonce_str><![CDATA[{nonce_str}]]></nonce_str>
+</xml>
+"""

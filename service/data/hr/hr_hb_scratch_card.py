@@ -30,6 +30,6 @@ class HrHbScratchCardDataService(DataService):
     def create_scratch_card(self, fields, options=None):
         options = options or []
 
-        response = yield self.user_wx_user_dao.insert_record(fields, options)
+        response = yield self.hr_hb_scratch_card_dao.insert_record(fields, options)
         raise gen.Return(response)
 

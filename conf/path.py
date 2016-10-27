@@ -8,3 +8,6 @@ POSITION_PATH = "/m/position"
 # 基础服务 alphadog path
 USER_LOGIN_PATH = "user/login"
 USER_BIND_WX_MOBILE = 'user/wxbindmobile'
+
+
+RED_PACKET_CARD = "/mobile/redpack"

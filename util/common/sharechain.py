@@ -404,8 +404,9 @@
 #     else:
 #         return False
 #
-#
-# def get_referral_employee_wxuser_id(wxuser_id=None, position_id=None):
+# TODO
+def get_referral_employee_wxuser_id(wxuser_id=None, position_id=None):
+    pass
 #     """
 #     返回 wxuser_id 申请职位时,是否经过了员工内推.
 #     如果经过了员工内推,返回内推员工 user_wx_user id
@@ -460,7 +461,9 @@
 #         return 0
 #
 #
-# def is_1degree_of_employee(position_id, wxuser_id):
+# TODO
+def is_1degree_of_employee(position_id, wxuser_id):
+    pass
 #     """
 #     返回是否是员工一度
 #     仅限于新版红包调用
