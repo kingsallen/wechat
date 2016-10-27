@@ -12,9 +12,8 @@ class HrWxTemplateMessageDataService(DataService):
     @gen.coroutine
     def get_wx_template(self, conds, fields=None,options=None, appends=None,
                         index=None):
-        fields = fields or []
 
-        if self._valid_conds(conds):
+        if not self._valid_conds(conds):
             self.logger.warn("Warning:[get_wx_template][invalid parameters], Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
             raise gen.Return(False)
 

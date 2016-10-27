@@ -12,7 +12,7 @@ class JobApplicationDataService(DataService):
     @gen.coroutine
     def get_job_application(self, conds, fields=None):
 
-        if self._valid_conds(conds):
+        if not self._valid_conds(conds):
             self.logger.warn("Warning:[get_job_application][invalid parameters], Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
             raise gen.Return(ObjectDict())
 
