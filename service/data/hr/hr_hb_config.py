@@ -16,7 +16,7 @@ class HrHbConfigDataService(DataService):
 
         if self._valid_conds(conds):
             self.logger.warn("Warning:[get_hr_hb_config][invalid parameters], Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
-            raise gen.Return(ObjectDict)
+            raise gen.Return(ObjectDict())
 
         if not fields:
             fields = list(self.hr_hb_config_dao.fields_map.keys())

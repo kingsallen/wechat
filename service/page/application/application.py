@@ -2,6 +2,8 @@
 
 from tornado import gen
 from service.page.base import PageService
+from util.common import ObjectDict
+from util.tool.http_tool import http_post
 
 
 class ApplicationPageService(PageService):
@@ -10,11 +12,33 @@ class ApplicationPageService(PageService):
         super().__init__(logger)
 
     @gen.coroutine
-    def is_applied(self, position_id, user_id):
-        """返回用户是否申请了职位"""
+    def get_application(self, position_id, user_id):
+        """返回用户申请的职位"""
 
-        application = yield self.job_application_ds.get_application({
+        ret = yield self.job_application_ds.get_job_application(conds={
             "position_id": position_id,
             "applier_id": user_id
         })
-        raise gen.Return(bool(application))
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def is_allowed_apply_position(self, user_id, company_id):
+        """获取一个月内该用户再该用户的申请数量
+        返回该用户是否可申请该职位
+        reference:
+        :param user_id: 求职者 id
+        :param company_id: 公司 id
+        :return:
+        """
+
+        req = ObjectDict({
+            'user_id': user_id,
+            'company_id': company_id,
+        })
+        try:
+            ret = yield http_post(self.path.APPLICATION_APPLY_COUNT, req)
+        except Exception as error:
+            self.logger.warn(error)
+            ret = True
+
+        raise gen.Return(ret)

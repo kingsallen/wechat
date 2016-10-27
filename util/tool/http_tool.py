@@ -13,6 +13,8 @@ from tornado.httputil import url_concat, HTTPHeaders
 
 from util.common import ObjectDict
 from setting import settings
+import conf.common as constant
+from app import env
 
 
 @gen.coroutine
@@ -51,6 +53,9 @@ def _async_http_get(route, jdata, timeout=5, method='GET'):
     if method.lower() not in "get delete":
         raise ValueError("method is not in GET and DELETE")
 
+    # 指定 appid，必填
+    jdata.update({"appid": constant.APPID[env]})
+
     url = url_concat("{0}/{1}".format(settings['infra'], route), jdata)
     http_client = tornado.httpclient.AsyncHTTPClient()
     response = yield http_client.fetch(
@@ -65,6 +70,9 @@ def _async_http_post(route, jdata, timeout=5, method='POST'):
     """可用 HTTP 动词为 POST, PATCH 和 PUT"""
     if method.lower() not in "post put patch":
         raise ValueError("method is not in POST, PUT and PATCH")
+
+    # 指定 appid，必填
+    jdata.update({"appid": constant.APPID[env]})
 
     http_client = tornado.httpclient.AsyncHTTPClient()
     url = "{0}/{1}".format(settings['infra'], route)

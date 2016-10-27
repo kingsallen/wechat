@@ -10,6 +10,7 @@ import re
 from tornado import gen
 from pypinyin import lazy_pinyin
 from service.page.base import PageService
+from util.tool.str_tool import split
 
 class LandingPageService(PageService):
 
@@ -155,7 +156,7 @@ class LandingPageService(PageService):
         occupations = []
         departments = []
         for item in positions_list:
-            cities_tmp = re.split(u'，|,', item.get("city"))
+            cities_tmp = split(item.get("city"), ['，',','])
             for city in cities_tmp:
                 if not city:
                     continue
@@ -165,7 +166,7 @@ class LandingPageService(PageService):
                 occupations.append(item.get("occupation"))
 
             if item.get("department"):
-                departments_tmp = re.split(u'，|,', item.get("department"))
+                departments_tmp = split(item.get("department"), ['，', ','])
                 for department in departments_tmp:
                     if not department or item.get("department") in departments:
                         continue

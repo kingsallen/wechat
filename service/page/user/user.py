@@ -221,7 +221,6 @@ class UserPageService(PageService):
         :return: 绑定的user_id
         """
         req = ObjectDict({
-            'appid': app_id,
             'unionid': params.unionid,
             'mobile': params.mobile,
         })

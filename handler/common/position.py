@@ -17,27 +17,45 @@ class PositionHandler(BaseHandler):
     @gen.coroutine
     def get(self, position_id):
         """显示 JD 页
-        """
-        position_info = yield self.position_ps.get_position({'id': position_id})
+        1.判断是否收藏
+        2.判断是否申请
+        3.构建自定义转发链路
 
-        if position_info and position_info.id:
+
+        """
+        position_info = yield self.position_ps.get_position(position_id)
+
+        if position_info.id:
 
             # 是否收藏
             star = yield self.position_ps.is_position_stared_by(
                 position_id, self.current_user.sysuser.id)
+            self.params._star = star
 
             # 是否申请
-            is_applied = yield self.application_ps.is_applied(
+            application = yield self.application_ps.get_application(
                 position_id, self.current_user.sysuser.id)
+            self.params._submitted = bool(application)
+            self.params.app_id = application.id
+
+            # 获得职位所属公司信息
+            company_info = yield self.position_ps.get_company_info(position_info.publisher, position_info.company_id)
 
             # 构建转发信息
-            self._make_share_info(position_info)
+            self._make_share_info(position_info, company_info)
+
+            # HR头像及底部转发文案
+            self._make_endorse_info(position_info, company_info)
+
+            # 是否超出投递上限。每月每家公司一个人只能申请3次
+            is_allowed_apply_count = yield self.application_ps.is_allowed_apply_position(
+                self.current_user.sysuser.id, company_info.id)
+            self.params._can_apply = is_allowed_apply_count
+
 
 
         else:
-            self.logger.warn("POSITION_NOT_EXIST")
-            nexturl = make_url(path.POSITION_PATH, self.params)
-            self.render("common/position_deleted.html", next_url=nexturl)
+            self.write_error(404)
             return
 
             # TODO panda JD 页 实现
@@ -60,18 +78,6 @@ class PositionHandler(BaseHandler):
             #             unread_recodes)
             #         unread_num = int(unread_num)
             #
-            # # 投递限制每个月只能投递限定的次数
-            # # 避免访问超时引起空白页
-            # try:
-            #     cannot_apply = yield \
-            #         self.profile_service.get_application_count(
-            #         self.current_user.sysuser.id, position.company_id)
-            #     self.params._can_apply = 0 if cannot_apply else 1
-            # except Exception as e:
-            #     self.LOG.error(e)
-            #     self.params._can_apply = 1
-            #
-            # self.LOG.debug("_can_apply:{}".format(self.params._can_apply))
             #
             # # 获取推荐朋友浮层文案
             # res = pos_ser.get_forward_custom_message(
@@ -193,37 +199,52 @@ class PositionHandler(BaseHandler):
 
     def _make_recom(self):
         """用于微信分享和职位推荐时，传出的 recom 参数"""
-        if self.current_user.wxuser.openid:
-            ret = self.current_user.wxuser.openid
-        elif self.current_user.recom.openid:
-            ret = self.current_user.recom.openid
-        else:
-            ret = self.params.wid
-        return ret
 
+        return self.current_user.wxuser.openid
 
-    def _make_share_info(self, position_info):
+    def _make_share_info(self, position_info, company_info):
         """构建 share 内容"""
 
+        # 如果有红包，则取红包的分享文案
+        # rp_ser = red_packet_service.RedPacketService()
+        # rp_config = rp_ser.get_last_running_hongbao_config_by_position(
+        #     position)
+        # if rp_config:
+        #     self.params.share = mdict({
+        #         "cover": self.static_url(
+        #             rp_config.share_img, include_host="http"),
+        #         "title": position.title + " " + rp_config.share_title,
+        #         "description": rp_config.share_desc,
+        #         "link": url.make_url(
+        #             const.POSITION_URL,
+        #             self.params,
+        #             host=self.request.host,
+        #             protocol=self.request.protocol,
+        #             m="info",
+        #             recom=self.params._in_order_to_recom,
+        #             escape=["wid", "tjtoken", "tj", "occupation", "hb_c"])
+        #     })
+        #
+        # self.LOG.debug("share_test position_info 2: %s" % self.params)
+
         title = position_info.title
+        description = msg.SHARE_DES_DEFAULT
+
         if position_info.share_title:
             title = str(position_info.share_title).format(
-                company=position_info.abbreviation,
+                company=company_info.abbreviation,
                 position=position_info.title)
 
         if position_info.share_description:
             description = position_info.share_description
-        else:
-            description = msg.SHARE_DES_DEFAULT
 
-        link = make_url(path.POSITION_PATH, self.params,
-                        host=self.request.host,
-                        protocol=self.request.protocol,
-                        m="info", recom=self._make_recom(),
-                        escape=["wid", "tjtoken", "tj", "occupation"])
+        link = make_url(path.POSITION_PATH.format(position_info.id), self.params,
+                        recom=self._make_recom(),
+                        escape=["keywords, cities, candidate_source, employment_type, salary, "
+                                "department, occupations, custom, degree, page_from, page_size"])
 
-        self.params.share = ObjectDict({
-            "cover": self.static_url(position_info.logo),
+        self.params._share = ObjectDict({
+            "cover": self.static_url(company_info.logo),
             "title": title,
             "description": description,
             "link": link
@@ -238,25 +259,23 @@ class PositionHandler(BaseHandler):
 
 
     @gen.coroutine
-    def _make_endorse_info(self, position):
+    def _make_endorse_info(self, position_info, company_info):
         """构建 JD 页左下角背书信息"""
-        hr_account, hr_wx_user = yield self._make_hr_info(position.publisher)
+        hr_account, hr_wx_user = yield self._make_hr_info(position_info.publisher)
         hrheadimgurl = (
             hr_account.headimgurl or hr_wx_user.headimgurl or
-            self.current_user.company.logo or const.HR_HEADIMG
+            company_info.logo or const.HR_HEADIMG
         )
 
         hr_name = hr_account.name or hr_wx_user.nickname or ''
-        company_name = position.abbreviation or position.company_name or ''
+        company_name = company_info.abbreviation or company_info.company_name or ''
 
         is_hr = self.current_user.qxuser.unionid == hr_wx_user.unionid
 
-        endorse_info = {
+        self.params_endorse_info = ObjectDict({
             "is_hr": is_hr,
-            "endorse_src": hrheadimgurl,
+            "endorse_src": self.static_url(hrheadimgurl),
             "endorse_name": hr_name,
             "endorse_company": company_name,
-            "endorse_department": position.department
-        }
-
-        raise gen.Return(endorse_info)
+            "endorse_department": position_info.department
+        })

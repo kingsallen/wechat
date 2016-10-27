@@ -34,7 +34,7 @@ class DB(object):
 
         self.logger = logger
 
-    def getConds(self, conds, conds_params=[]):
+    def getConds(self, conds, conds_params=None):
 
         """
         对传入的SQL限制条件数组或字符串，转换成MYSQL可识别的形式
@@ -48,6 +48,8 @@ class DB(object):
         :param conds_params: 字符串形式的conds对应的params值，防SQL注入
         :return: 返回转化后的SQL限制条件（数组）和params值 可以防止SQL注入，不符合条件的返回None
         """
+        conds_params = conds_params or []
+
         if conds is None or not (isinstance(conds, dict) or isinstance(conds, str)):
             self.logger.error("Error:[getConds][conds type error], conds:{0}, type:{1}".format(conds, type(conds)))
             return False, ()
@@ -153,17 +155,17 @@ class DB(object):
         for key, value in maps.items():
             if response.get(key, 0):
                 if value == constant.TYPE_INT:
-                    response[key] = int(response[key])
+                    response[key] = int(response[key]) if response[key] else 0
                 elif value == constant.TYPE_FLOAT:
-                    response[key] = float(response[key])
+                    response[key] = float(response[key]) if response[key] else 0.0
                 elif value == constant.TYPE_TIMESTAMP:
                     response[key] = response[key]
                 else:
-                    response[key] = str(response[key])
+                    response[key] = str(response[key]) if response[key] else ''
 
         return ObjectDict(response)
 
-    def select(self, table, conds=[], fields=[], options=[], appends=[], index=''):
+    def select(self, table, conds=None, fields=None, options=None, appends=None, index=''):
 
         """
         Select查询
@@ -175,6 +177,11 @@ class DB(object):
         :param index: 支持mysql的USE/IGNORE/FORCE Index的语法，指定索引名称
         :return: 返回拼装SQL, params 可以防止SQL注入
         """
+
+        conds = conds or []
+        fields = fields or []
+        options = options or []
+        appends = appends or []
 
         sql = "SELECT "
         # SQL前置条件
@@ -204,7 +211,7 @@ class DB(object):
 
         return sql
 
-    def insert(self, table, fields, options=[]):
+    def insert(self, table, fields, options=None):
 
         """
         Insert插入
@@ -213,6 +220,8 @@ class DB(object):
         :param options: INSERT插入选项，支持"LOW_PRIORITY","DELAYED", "HIGH_PRIORITY", "IGNORE"
         :return: 返回拼装SQL, params值
         """
+
+        options = options or []
 
         sql = "INSERT "
         # SQL前置条件
@@ -232,7 +241,7 @@ class DB(object):
 
         return sql, list(fields.values())
 
-    def update(self, table, conds, fields, options=[], appends=[]):
+    def update(self, table, conds, fields, options=None, appends=None):
 
         """
         Update更新，根据限制条件更新对应的数据库记录
@@ -243,6 +252,9 @@ class DB(object):
         :param appends: SQL后置条件
         :return: 拼装的SQL
         """
+
+        options = options or []
+        appends = appends or []
 
         sql = "UPDATE "
         # SQL前置条件
@@ -289,7 +301,7 @@ class DB(object):
 
         return sql
 
-    def select_cnt(self, table, conds=[], fields=[], appends=[], index=''):
+    def select_cnt(self, table, conds=None, fields=None, appends=None, index=''):
 
         """
         Select查询记录数
@@ -301,6 +313,10 @@ class DB(object):
         :param index: 支持mysql的USE/IGNORE/FORCE Index的语法，指定索引名称
         :return: 返回拼装SQL
         """
+
+        conds = conds or []
+        fields = fields or []
+        appends = appends or []
 
         sql = "SELECT "
         # 查询字段

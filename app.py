@@ -39,6 +39,7 @@ from util.common.cache import BaseRedis
 tornado.options.parse_command_line()
 logger = MessageLogger(logpath=options.logpath)
 redis = BaseRedis()
+env = options.env
 
 
 class Application(tornado.web.Application):
@@ -54,7 +55,7 @@ class Application(tornado.web.Application):
 
         self.settings = settings
         self.logger = logger
-        self.env = options.env
+        self.env = env
         self.redis = redis
 
 def main():

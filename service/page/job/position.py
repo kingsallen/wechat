@@ -16,48 +16,48 @@ class PositionPageService(PageService):
         super().__init__(logger)
 
     @gen.coroutine
-    def get_position(self, conds, fields=None):
+    def get_position(self, position_id, fields=None):
 
         fields = fields or []
-
         position = ObjectDict()
-
+        conds = {'id': position_id}
         position_res = yield self.job_position_ds.get_position(conds, fields)
+        position_ext_res = yield self.job_position_ext_ds.get_position_ext(conds, fields)
         if not position_res:
             raise gen.Return(position)
 
-        update_time = jd_update_date(position_res.get('update_time', ''))
-
         # 前置处理
+        # 更新时间
+        update_time = jd_update_date(position_res.update_time)
         # 月薪
-        salary = gen_salary(
-            position_res.get("salary_top"), position_res.get("salary_bottom"))
+        salary = gen_salary(position_res.salary_top, position_res.salary_bottom)
 
         # 职位基础信息拼装
         position = ObjectDict({
-            'id': position_res.get('id', ''),
-            'title': position_res.get('title', ''),
-            'company_id': int(position_res.get('company_id', 0)),
-            'department': position_res.get('department', ''),
-            'candidate_source': self.constant.CANDIDATE_SOURCE.get(str(position_res.get('candidate_source', 0))),
-            'employment_type': self.constant.EMPLOYMENT_TYPE.get(str(position_res.get('employment_type', 0))),
+            'id': position_res.id,
+            'title': position_res.title,
+            'company_id': position_res.company_id,
+            'department': position_res.department,
+            'candidate_source': self.constant.CANDIDATE_SOURCE.get(str(position_res.candidate_source)),
+            'employment_type': self.constant.EMPLOYMENT_TYPE.get(str(position_res.employment_type)),
             'update_time': update_time,
             "salary": salary,
-            "city": position_res.get('city', ''),
-            "occupation": position_res.get('occupation', ''),
-            "experience": position_res.get('experience', '')
-                          + (self.constant.EXPERIENCE_UNIT if position_res.get('experience', '') else '')
-                          + (self.constant.POSITION_ABOVE if position_res.get('experience_above', 0) else ''),
-            "language": position_res.get('language', ''),
-            "count": int(position_res.get('count', 0)),
-            "degree": self.constant.DEGREE.get(str(position_res.get('degree', 0)))
-                      + self.constant.POSITION_ABOVE if position_res.get('degree_above', 0) else '',
-            "management": position_res.get('management', ''),
-            "accountabilities": position_res.get('accountabilities', ''),
-            "requirement": position_res.get('requirement', ''),
-            "feature": position_res.get('feature', ''),
-            "overdue": False if position_res.get('status', 0) == 0 else True,
-            "share_tpl_id": position_res.get('share_tpl_id', 0)
+            "city": position_res.city,
+            "occupation": position_res.occupation,
+            "experience": position_res.experience
+                          + (self.constant.EXPERIENCE_UNIT if position_res.experience else '')
+                          + (self.constant.POSITION_ABOVE if position_res.experience_above else ''),
+            "language": position_res.language,
+            "count": position_res.count,
+            "degree": self.constant.DEGREE.get(str(position_res.degree))
+                      + self.constant.POSITION_ABOVE if position_res.degree_above else '',
+            "management": position_res.management,
+            "accountabilities": position_res.accountabilities,
+            "requirement": position_res.requirement,
+            "feature": position_res.feature,
+            "status": position_res.status == 0,
+            "publisher": position_res.publisher,
+            "share_tpl_id": position_res.share_tpl_id,
         })
 
         # 后置处理：
@@ -76,6 +76,11 @@ class PositionPageService(PageService):
             share_conf = yield self.__get_share_conf(position_res.share_tpl_id)
             position.share_title = share_conf.title
             position.share_description = share_conf.share_description
+
+        # 职位自定义字段
+        if position_ext_res.job_custom_id:
+            job_custom_res = yield self.job_custom_ds.get_custom(conds={"id": position_ext_res.job_custom_id})
+            position.job_custom = job_custom_res.name
 
         raise gen.Return(position)
 
@@ -123,3 +128,17 @@ class PositionPageService(PageService):
             "id": conf_id
         })
         raise gen.Return(ret)
+
+    @gen.coroutine
+    def get_company_info(self, publisher, company_id):
+        """获得职位所属公司信息
+        1.首先根据 hr_company_account 获得 hr 帐号与公司之间的关系，获得company_id
+        2.如果1取不到，则直接取职位中的 company_id"""
+
+        hr_company_account = yield self.hr_company_account_ds.get_company_account(conds={"account_id": publisher})
+        real_company_id = hr_company_account.company_id or company_id
+
+        ret = yield self.hr_company_ds.get_company(conds={"id": real_company_id})
+
+        raise gen.Return(ret)
+
