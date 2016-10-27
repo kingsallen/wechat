@@ -530,8 +530,8 @@ class RedpacketPageService(PageService):
         # 因为有金额, 如果没有发送成功，就直接发送红包
         if result == const.NO:
             self.logger.debug("[RP]使用聚合号发送模版消息失败, 直接发红包")
-            rp_sent_ret = self.__send_red_packet(
-                handler, red_packet_config, recom_wechat.id,
+            rp_sent_ret = yield self.__send_red_packet(
+                red_packet_config, recom_wechat.id,
                 qx_openid, card.card.get("amount"))
 
             if rp_sent_ret:
@@ -541,10 +541,10 @@ class RedpacketPageService(PageService):
 
         # 不管用户是否点击拆开了红包
         # 记录当前用户 wxuser_id 和红包获得者 wxuser_id
-        self.__update_wxuser_id_into_hb_items(
+        yield self.__update_wxuser_id_into_hb_items(
             qx_openid, current_wxuser_id, rp_item.id)
 
-        return ret
+        raise gen.Return(result)
 
     @gen.coroutine
     def __send_zero_amount_card(self, recom_openid, recom_wechat_id, red_packet_config,
@@ -768,7 +768,7 @@ class RedpacketPageService(PageService):
         })
 
     @gen.coroutine
-    def send_red_packet(self, rp_config, wechat_id, openid, amount):
+    def __send_red_packet(self, rp_config, wechat_id, openid, amount):
         """
         直接发送红包到用户
         """
