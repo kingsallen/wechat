@@ -28,32 +28,33 @@ class PositionHandler(BaseHandler):
         position_info = yield self.position_ps.get_position(position_id)
 
         if position_info.id:
-
-            # 是否收藏
+            self.logger.debug("[JD]构建收藏信息")
             star = yield self.position_ps.is_position_stared_by(
                 position_id, self.current_user.sysuser.id)
 
-            # 是否申请
+            self.logger.debug("[JD]构建申请信息")
             application = yield self.application_ps.get_application(
                 position_id, self.current_user.sysuser.id)
 
-            # 获得职位所属公司信息
+            self.logger.debug("[JD]构建职位所属公司信息")
             real_company_id = yield self.company_ps.get_real_company_id(position_info.publisher, position_info.company_id)
             company_info = yield self.company_ps.get_company(conds={"id": real_company_id}, need_conf=True)
 
-            # 构建转发信息
+            self.logger.debug("[JD]构建转发信息")
             yield self._make_share_info(position_info, company_info)
 
-            # HR头像及底部转发文案
+            self.logger.debug("[JD]构建HR头像及底部转发文案")
             endorse = yield self._make_endorse_info(position_info, company_info)
 
             # 是否超出投递上限。每月每家公司一个人只能申请3次
+            self.logger.debug("[JD]处理投递上限")
             can_apply = yield self.application_ps.is_allowed_apply_position(
                 self.current_user.sysuser.id, company_info.id)
 
             # 诺华定制。本次不实现
 
             # 相似职位推荐
+            self.logger.debug("[JD]构建相似职位推荐")
             recomment_positions_res = yield self.position_ps.get_recommend_positions(position_id)
 
             header = yield self._make_json_header(position_info, company_info, star, application, endorse, can_apply)
@@ -86,25 +87,27 @@ class PositionHandler(BaseHandler):
 
             # 后置操作
             # 刷新链路
+            self.logger.debug("[JD]刷新链路")
             last_recom_wxuser_id = yield self._make_refresh_share_chain(position_info)
 
             # 发红包
             if self.is_platform:
+                self.logger.debug("[JD]红包行为")
                 yield self.redpacket_ps.handle_red_packet_position_related(self.current_user, position_info, is_click=True)
 
-            # 1.更新职位浏览量
-            # 2.加积分
-            # 3.发送消息模板
-            yield [
-                self.position_ps.update_position(conds={
-                "id": position_info.id
-            }, fields={
-                "visitnum": position_info.visitnum + 1,
-                "update_time": position_info.update_time_ori,
-            }),
-                self._make_add_reward_click(position_info, last_recom_wxuser_id),
-                self._make_send_publish_template(position_info)
-            ]
+            self.logger.debug("[JD]更新职位浏览量")
+            yield self.position_ps.update_position(conds={
+                    "id": position_info.id
+                }, fields={
+                    "visitnum": position_info.visitnum + 1,
+                    "update_time": position_info.update_time_ori,
+                })
+
+            self.logger.debug("[JD]转发积分操作")
+            yield self._make_add_reward_click(position_info, last_recom_wxuser_id)
+
+            self.logger.debug("[JD]发送消息模板")
+            yield self._make_send_publish_template(position_info)
 
         else:
             self.write_error(404)
