@@ -99,8 +99,10 @@ class RedpacketPageService(PageService):
         binding_list = [b.hb_config_id for b in binding_res]
 
         config = [b for b in config_list if b.id in binding_list]
-        assert len(config) == 1
-        raise gen.Return(config[0])
+        if config:
+            raise gen.Return(config[0])
+        else:
+            raise gen.Return(ObjectDict())
 
 
     def __need_to_send(self, current_user, position, is_click=False, is_apply=False):
@@ -155,13 +157,16 @@ class RedpacketPageService(PageService):
         assert is_click or is_apply
 
         try:
+            rp_config = yield self.__get_hb_config_by_position(
+                position, share_click=is_click, share_apply=is_apply)
+            if not rp_config:
+                self.logger.debug("[RP]无红包活动")
+                return
+
             # 如果 current_user.wxuser 本身就是员工, 不发送红包
             if current_user.employee:
                 self.logger.debug("[RP]当前用户是员工，不触发红包")
                 return
-
-            rp_config = yield self.__get_hb_config_by_position(
-                position, share_click=is_click, share_apply=is_apply)
 
             need_to_send_card = yield self.__need_to_send(
                 current_user, position, is_click=is_click, is_apply=is_apply)
