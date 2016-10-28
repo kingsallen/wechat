@@ -82,11 +82,14 @@ class RedpacketPageService(PageService):
         if not share_click and not share_apply:
             raise ValueError(msg.RED_PACKET_TYPE_VALUE_ERROR)
 
-        trigger_way = 1 if share_click else 2
+        if share_click:
+            trigger_way = const.HB_TRIGGER_WAY_CLICK
+        else:
+            trigger_way = const.HB_TRIGGER_WAY_APPLY
 
         config_list = yield self.hr_hb_config_ds.get_hr_hb_config_list({
             "company_id": position.company_id,
-            "status": 3
+            "status": const.HB_CONFIG_RUNNING
         })
 
         binding_res = yield self.hr_hb_position_binding_ds.get_hr_hb_position_binding_list({
@@ -148,7 +151,7 @@ class RedpacketPageService(PageService):
         self, current_user, position, is_click=False, is_apply=False):
         """转发类红包触发总入口
         """
-        self.logger.debug(u"[RP]in handle_red_packet_position_related")
+        self.logger.debug("[RP]in handle_red_packet_position_related")
         assert is_click or is_apply
 
         try:
@@ -412,7 +415,7 @@ class RedpacketPageService(PageService):
         })
         hb_throttle = company.hb_throttle
 
-        self.logger.debug(u"[RP]check_throttle_passed?:{}".format(
+        self.logger.debug("[RP]check_throttle_passed?:{}".format(
             float(current_amount_sum) + float(next_amount) <= float(hb_throttle)))
 
         raise gen.Return(float(current_amount_sum) + float(next_amount) <= float(hb_throttle))
@@ -550,7 +553,8 @@ class RedpacketPageService(PageService):
         raise gen.Return(result)
 
     @gen.coroutine
-    def __send_zero_amount_card(self, recom_openid, recom_wechat_id, red_packet_config,
+    def __send_zero_amount_card(
+        self, recom_openid, recom_wechat_id, red_packet_config,
         current_wxuser_id, **kwargs):
         """发送红包模版消息(始终是0元)
         """
@@ -588,7 +592,7 @@ class RedpacketPageService(PageService):
 
         # 放弃不发(因为本来就没有金额)
         if result == const.NO:
-            self.logger.debug(u"[RP]发送模版消息失败,放弃")
+            self.logger.debug("[RP]发送模版消息失败,放弃")
 
         # 将一个 0 元红包
         # 记录当前用户 wxuser_id 和红包获得者 wxuser_id
@@ -832,7 +836,7 @@ class RedpacketPageService(PageService):
             res = self.__upload_to_server(
                 rp_req_xml, cert_file_path, key_file_path)
 
-            self.logger.debug(u"[RP]发送红包结果 res: {}".format(res))
+            self.logger.debug("[RP]发送红包结果 res: {}".format(res))
 
             # 记录红包发送结果
             yield self.__insert_red_packet_sent_record(self.__xml_to_dict(res))
@@ -842,6 +846,12 @@ class RedpacketPageService(PageService):
         else:
             return False
 
+    @staticmethod
+    def __make_billno(self, mch_id):
+        """创建微信支付订单号"""
+        return (mch_id + datetime.now().strftime("%Y%m%d") +
+                str(uuid.uuid1().int)[:10])
+
     def __generate_red_packet_dict(self, qx_wechat_pay, openid, total_amount, **kwargs):
         """
         生成包含发送红包信息的 dict
@@ -849,19 +859,19 @@ class RedpacketPageService(PageService):
         red_packet_dict = {}
 
         red_packet_dict.update({
-            'nonce_str':            generate_nonce_str(),
-            'wxappid':              qx_wechat_pay['appid'],
-            'mch_id':               qx_wechat_pay ['mch_id'],
-            'act_name':             kwargs.get("act_name", '仟寻'),
-            'send_name':            kwargs.get("send_name", '仟寻'),
-            'wishing':              msg.RED_PACKET_WISHING,
-            'remark':               kwargs.get("remark", '仟寻红包活动'),
-            'mch_billno':           qx_wechat_pay['mch_id'] + datetime.now().strftime("%Y%m%d") + str(uuid.uuid1().int)[:10],
-            'total_amount':         total_amount,
-            'total_num':            kwargs.get("total_num", 1),
-            'client_ip':            socket.gethostbyname(kwargs.get("host", "qx.moseeker.com")),
-            're_openid':            openid,
-            'key':                  kwargs.get("apikey"),
+            'nonce_str':        generate_nonce_str(),
+            'wxappid':          qx_wechat_pay['appid'],
+            'mch_id':           qx_wechat_pay ['mch_id'],
+            'act_name':         kwargs.get("act_name", '仟寻'),
+            'send_name':        kwargs.get("send_name", '仟寻'),
+            'wishing':          msg.RED_PACKET_WISHING,
+            'remark':           kwargs.get("remark", '仟寻红包活动'),
+            'mch_billno':       self.__make_billno(qx_wechat_pay['mch_id']),
+            'total_amount':     total_amount,
+            'total_num':        kwargs.get("total_num", 1),
+            'client_ip':        socket.gethostbyname(kwargs.get("host", "qx.moseeker.com")),
+            're_openid':        openid,
+            'key':              kwargs.get("apikey"),
         })
 
         siganature = self.__generate_sign(red_packet_dict)
@@ -970,7 +980,7 @@ class RedpacketPageService(PageService):
         running_config_list = yield self.hr_hb_config_ds.get_hr_hb_config_list(
             conds={
                 "company_id": position.company_id,
-                "status": 3
+                "status": const.HB_CONFIG_RUNNING
             }
         )
 

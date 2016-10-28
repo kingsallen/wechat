@@ -57,6 +57,10 @@ class WeChatOauth2Service(object):
 
     @gen.coroutine
     def get_openid_unionid_by_code(self, code):
+        """根据 code 尝试获取 openid 和 unionoid
+        :param code: code
+        :return:
+        """
         access_token_info = yield self._get_access_token_by_code(code)
         if access_token_info.errcode:
             raise WeChatOauthError(access_token_info.errmsg)
@@ -69,6 +73,10 @@ class WeChatOauth2Service(object):
 
     @gen.coroutine
     def get_userinfo_by_code(self, code):
+        """根据 code 尝试获取 userinfo
+        :param code:
+        :return:
+        """
         openid, _ = yield self.get_openid_unionid_by_code(code)
         userinfo = yield self._get_userinfo_by_openid(openid)
         if userinfo.errcode:
@@ -79,13 +87,17 @@ class WeChatOauth2Service(object):
     # PROTECTED METHODS
     @staticmethod
     def _get_oauth_type(is_base):
-        """获取 oauth_type"""
+        """根据 is_base 生成 scope 字符串"""
         if is_base:
             return wx_const.SCOPE_BASE
         else:
             return wx_const.SCOPE_USERINFO
 
     def _get_oauth_code_url(self, is_base):
+        """生成获取 code 的 url
+
+        根据微信判断是否使用第三方
+        """
         if self.wechat.third_oauth:
             oauth_url = self._get_code_url_3rd_party(is_base)
         else:
@@ -105,7 +117,6 @@ class WeChatOauth2Service(object):
 
     def _get_code_url_3rd_party(self, is_base=1):
         """第三方获取 code 的 url"""
-
         self.__adjust_url(is_base)
 
         return wx_const.WX_THIRD_OAUTH_GET_CODE % (
@@ -183,7 +194,15 @@ class WeChatOauth2Service(object):
         raise gen.Return(ret)
 
     def __adjust_url(self, is_base):
-        """必要时调整 redirect_uri 的二级域名"""
+        """必要时调整 redirect_uri 的二级域名
+
+        '必要时'指： 1.静默授权
+                    2. wechat 实例变量是聚合号
+                    3. redirect_url 是 platform 开头
+
+        将 redirect_url 改为 qx 域名，并使用跳转 url，
+        将现有 redirect_url 填充 next_url 参数
+        """
 
         if not is_base and self.handling_qx and self.__is_platform_url(
                 self.redirect_url):
@@ -202,6 +221,7 @@ class WeChatOauth2Service(object):
 
 
 class JsApi(object):
+    """初始化 JsApi"""
     def __init__(self, jsapi_ticket, url):
         self.sign = Sign(jsapi_ticket=jsapi_ticket)
         self.__dict__.update(self.sign.sign(url=url))
