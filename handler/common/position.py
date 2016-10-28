@@ -14,6 +14,8 @@ from util.tool.url_tool import make_url
 from util.tool.str_tool import gen_salary
 from util.wechat.template import position_view_five
 
+from tests.dev_data.user_company_data import data1
+
 class PositionHandler(BaseHandler):
 
     @check_signature
@@ -60,6 +62,9 @@ class PositionHandler(BaseHandler):
                 "module_feature": self._make_json_job_feature(position_info),
                 "module_company_info": self._make_json_job_company_info(company_info),
                 "module_position_recommend": self._make_recommend_positions(recomment_positions_res),
+                "module_mate_day": self._make_mate_day(),
+                "module_team": self._make_team(),
+                "module_team_position": self._make_team_position(),
             })
             data = ObjectDict({
                 "position": position_data
@@ -324,3 +329,62 @@ class PositionHandler(BaseHandler):
 
             yield position_view_five(help_wechat.id, hr_wx_user.openid, link, position_info.title,
                                position_info.salary)
+
+    @gen.coroutine
+    def _make_team_position(self):
+        """团队职位，构造数据"""
+
+        res = ObjectDict({
+            "title": "我们团队还需要",
+            "data": [
+                {
+                    "title": '招设计师',
+                    "link": 'http://www.moseeker.com',
+                    "location": '上海, 北京, 广州',
+                    "salary": '12k - 15k',
+                },{
+                    "title": '招研发工程师',
+                    "link": ' http://www.moseeker.com',
+                    "location": '上海',
+                    "salary": '12k以上',
+                },{
+                    "title": '招产品经理',
+                    "link": ' http://www.moseeker.com',
+                    "location": '台湾',
+                    "salary": '面议',
+                }
+            ]
+        })
+
+        raise gen.Return(res)
+
+    @gen.coroutine
+    def _make_mate_day(self):
+        """同事的一天，构造数据"""
+
+        res = ObjectDict({
+            "title": "同事的一天",
+            "sub_type": "less",
+            "data": [
+                {
+                    "title": '臭美的同事',
+                    "longtext": '这是我同事的一天介绍blablabla',
+                    "media_url": '',
+                    "media_type": 'video',
+                }
+            ]
+        })
+
+        raise gen.Return(res)
+
+    @gen.coroutine
+    def _make_team(self):
+        """所属团队，构造数据"""
+
+        res = ObjectDict({
+            "title": "所属团队",
+            "sub_type": " full",
+            "data": data1,
+        })
+
+        raise gen.Return(res)
