@@ -680,6 +680,10 @@ class BaseHandler(MetaBaseHandler):
             "message": message,
             "data": data
         })
+
+        if status_code == msg_const.FAILURE and http_code == 200:
+            http_code = 416
+
         self.set_header("Content-Type", "application/json; charset=utf-8")
         self.log_info = {"res_type": "json", "status_code": status_code}
         self.set_status(http_code)
