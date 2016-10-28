@@ -319,7 +319,7 @@ class PositionHandler(BaseHandler):
     def _make_add_reward_click(self, position_info, last_recom_wxuser_id):
         """给员工加积分"""
 
-        if self.current_user.employee.id and last_recom_wxuser_id != self.current_user.wxuser.id:
+        if self.current_user.employee and last_recom_wxuser_id != self.current_user.wxuser.id:
             yield self.position_ps.add_reward_for_recom_click(self.current_user.employee,
                                                               self.current_user.company.id,
                                                               self.current_user.wxuser.id,

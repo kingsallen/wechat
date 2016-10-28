@@ -12,6 +12,8 @@ class UnreadCountHandler(BaseHandler):
     @gen.coroutine
     def get(self, publisher):
 
+        self.logger.debug("IM: %s" % publisher)
+
         if publisher:
             # JD页未读消息
             chat_num = yield self.im_ps.get_unread_chat_num(self.current_user.sysuser.id, publisher)
