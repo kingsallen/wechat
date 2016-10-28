@@ -54,9 +54,8 @@ class CompanyFollowHandler(BaseHandler):
 
 
 class CompanyHandler(BaseHandler):
-
     @gen.coroutine
-    def get(self, company_id):
+    def get(self):
         team_flag = True if re.match('^/m/company/team', self.request.uri) \
                     else False
         param = ObjectDict({
