@@ -133,5 +133,5 @@ def check_outside_wechat(func):
             self.finish()
             return
         else:
-            yield func(func, *args, **kwargs)
+            yield func(self, *args, **kwargs)
     return wrapper

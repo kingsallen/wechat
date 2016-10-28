@@ -54,9 +54,8 @@ class CompanyFollowHandler(BaseHandler):
 
 
 class CompanyHandler(BaseHandler):
-
     @gen.coroutine
-    def get(self, company_id):
+    def get(self):
         team_flag = True if re.match('^/m/company/team', self.request.uri) \
                     else False
         param = ObjectDict({
@@ -71,7 +70,7 @@ class CompanyHandler(BaseHandler):
         current_user = ObjectDict({'wechat': wechat})
 
         # self.send_json(response, additional_dump=True)
-        data = {'current_user':current_user}
+        data = {'current_user': current_user}
         self.render_page('company/profile.html', data=response.data)
         # self.render_page('company/profile.html', current_user=current_user)
         return
