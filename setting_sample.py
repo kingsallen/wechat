@@ -74,4 +74,4 @@ settings['helper_signature'] = "NGZiMThkZWMwMmVkMjU4OGRlMWY3Nzk1N2FiZWExMWUxODI4
 
 # 微信第三方平台信息
 settings['component_app_id'] = 'wx5024b0daabd7bb23'
-settings['component_access_token'] = 'dad5d29cdaeb4d1d6309ab82effb27b6'
+settings['component_app_secret'] = 'dad5d29cdaeb4d1d6309ab82effb27b6'

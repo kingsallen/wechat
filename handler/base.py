@@ -64,9 +64,6 @@ class BaseHandler(MetaBaseHandler):
     def initialize(self, event):
         # 日志需要，由 route 定义
         self._event = event
-
-    def __init__(self, application, request, **kwargs):
-        super().__init__(application, request, **kwargs)
         # 全部 arguments
         self.params = self._get_params()
         # api 使用， json arguments
@@ -82,7 +79,6 @@ class BaseHandler(MetaBaseHandler):
         self._qx_wechat = None
         self._unionid = None
         self._wxuser = None
-
         # 处理 oauth 的 service, 会在使用时初始化
         self._oauth_service = None
 

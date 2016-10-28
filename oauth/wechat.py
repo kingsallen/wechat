@@ -86,11 +86,11 @@ class WeChatOauth2Service(object):
             return wx_const.SCOPE_USERINFO
 
     def _get_oauth_code_url(self, is_base):
-        # if self.wechat.third_oauth:
-        #     oauth_url = self._get_code_url_3rd_party(is_base)
-        # else:
-        oauth_url = self._get_code_url(is_base)
-        logger.debug("oauth_url: {0}".format(oauth_url))
+        if self.wechat.third_oauth:
+            oauth_url = self._get_code_url_3rd_party(is_base)
+        else:
+            oauth_url = self._get_code_url(is_base)
+        logger.debug("get_code_url: {0}".format(oauth_url))
         return oauth_url
 
     def _get_code_url(self, is_base=1):
@@ -117,9 +117,6 @@ class WeChatOauth2Service(object):
 
     def _get_access_token_url(self, code):
         """生成获取 access_token 的 url"""
-
-        # TODO: 是否需要使用第三方接口来调用 access_token?
-        logger.debug("_get_access_token_url wechat: {0}".format(self.wechat))
         if self.wechat.third_oauth:
             url = (wx_const.WX_THIRD_OAUTH_GET_ACCESS_TOKEN % (
                     self.wechat.appid,
