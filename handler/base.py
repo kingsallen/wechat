@@ -170,8 +170,11 @@ class BaseHandler(MetaBaseHandler):
 
         self.logger.debug("code:{}, state:{}, request_url:{} ".format(code, state, self.request.uri))
 
-        # 用户同意授权
+        if not self.in_wechat:
+            self.write("请在微信内访问")
+
         if self.in_wechat:
+            # 用户同意授权
             if code:
                 # 来自 qx 的授权, 获得 userinfo
                 if state == wx_constant.WX_OAUTH_DEFAULT_STATE:
@@ -185,11 +188,16 @@ class BaseHandler(MetaBaseHandler):
                 else:
                     self.logger.debug("来自企业号的静默授权")
                     self._unionid = from_hex(state)
-                    openid = yield self._get_user_openid(code)
-                    self._wxuser = yield self._handle_ent_openid(
-                        openid, self._unionid)
+                    try:
+                        openid = yield self._get_user_openid(code)
+                        self._wxuser = yield self._handle_ent_openid(openid, self._unionid)
+                    except WeChatOauthError as e:
+                        # 获取 state 和 code 以后，如果用户再次刷新该页面，就会发生 invalid code 问题，
+                        # 搞过
+                        if 'invalid code' in str(e):
+                            pass
 
-            if state and not code:  # 用户拒绝授权
+            elif state:  # 用户拒绝授权
                 # TODO 拒绝授权用户，是否让其继续操作? or return
                 pass
 
