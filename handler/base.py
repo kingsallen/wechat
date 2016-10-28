@@ -446,6 +446,7 @@ class BaseHandler(MetaBaseHandler):
         yield self._add_sysuser_to_session(session)
 
         self._add_jsapi_to_wechat(session.wechat)
+
         if self.is_platform:
             yield self._add_company_info_to_session(session)
         if self.params.recom:
@@ -528,7 +529,7 @@ class BaseHandler(MetaBaseHandler):
         """拼装 jsapi"""
         wechat.jsapi = JsApi(
             jsapi_ticket=wechat.jsapi_ticket,
-            url=self.request.full_url)
+            url=self.request.full_url())
 
     @gen.coroutine
     def _get_session_from_ent(self, session_id):
@@ -541,6 +542,7 @@ class BaseHandler(MetaBaseHandler):
             session = ObjectDict(value)
             yield self._add_company_info_to_session(session)
             yield self._add_sysuser_to_session(session)
+            self._add_jsapi_to_wechat(session.wechat)
             self.current_user = session
 
             return True

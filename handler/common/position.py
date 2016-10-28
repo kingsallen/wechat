@@ -7,6 +7,7 @@ from handler.base import BaseHandler
 import conf.common as const
 import conf.path as path
 import conf.message as msg
+import conf.wechat as wx
 
 from util.common import ObjectDict
 from util.common.decorator import check_signature
@@ -15,6 +16,7 @@ from util.tool.str_tool import gen_salary
 from util.wechat.template import position_view_five
 
 from tests.dev_data.user_company_data import data1
+
 
 class PositionHandler(BaseHandler):
 
@@ -54,17 +56,29 @@ class PositionHandler(BaseHandler):
             # 相似职位推荐
             recomment_positions_res = yield self.position_ps.get_recommend_positions(position_id)
 
+
+            header = yield self._make_json_header(position_info, company_info, star, application, endorse, can_apply)
+            module_job_description = yield self._make_json_job_description(position_info)
+            module_job_require = yield self._make_json_job_require(position_info)
+            module_job_need = yield self._make_json_job_need(position_info)
+            module_feature = yield self._make_json_job_feature(position_info)
+            module_company_info = yield self._make_json_job_company_info(company_info)
+            module_position_recommend = yield self._make_recommend_positions(recomment_positions_res)
+            module_mate_day = yield self._make_mate_day()
+            module_team = yield self._make_team()
+            module_team_position = yield self._make_team_position()
+
             position_data = ObjectDict({
-                "header": self._make_json_header(position_info, company_info, star, application, endorse, can_apply),
-                "module_job_description": self._make_json_job_description(position_info),
-                "module_job_require": self._make_json_job_require(position_info),
-                "module_job_need": self._make_json_job_need(position_info),
-                "module_feature": self._make_json_job_feature(position_info),
-                "module_company_info": self._make_json_job_company_info(company_info),
-                "module_position_recommend": self._make_recommend_positions(recomment_positions_res),
-                "module_mate_day": self._make_mate_day(),
-                "module_team": self._make_team(),
-                "module_team_position": self._make_team_position(),
+                "header": header,
+                "module_job_description": module_job_description,
+                "module_job_require": module_job_require,
+                "module_job_need": module_job_need,
+                "module_feature": module_feature,
+                "module_company_info": module_company_info,
+                "module_position_recommend": module_position_recommend,
+                "module_mate_day": module_mate_day,
+                "module_team": module_team,
+                "module_team_position": module_team_position
             })
             data = ObjectDict({
                 "position": position_data
@@ -210,7 +224,7 @@ class PositionHandler(BaseHandler):
             "appid": application.id,
             "endorse": endorse,
             "can_apply": can_apply,
-            "forword_message": company_info.conf_forward_message or const.POSITION_FORWARD_MESSAGE
+            "forword_message": company_info.conf_forward_message or msg.POSITION_FORWARD_MESSAGE
         })
 
         raise gen.Return(data)
@@ -284,7 +298,7 @@ class PositionHandler(BaseHandler):
             params.viewer_id = 0
             params.viewer_ip = self.request.remote_ip
             params.source = 0 if self.is_platform else 1
-            params.click_from = const.CLICK_FROM.get(self.get_argument("from", ""), 0)
+            params.click_from = wx.CLICK_FROM.get(self.get_argument("from", ""), 0)
             yield self.sharechain_ps.create_share_record(params)
 
             # 需要实时算出链路数据
