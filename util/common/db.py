@@ -51,7 +51,8 @@ class DB(object):
         conds_params = conds_params or []
 
         if conds is None or not (isinstance(conds, dict) or isinstance(conds, str)):
-            self.logger.error("Error:[getConds][conds type error], conds:{0}, type:{1}".format(conds, type(conds)))
+            self.logger.error("Error:[getConds][conds type error], module:{0}, "
+                              "conds:{1}, type:{2}".format(self.__class__.__name__, conds, type(conds)))
             return False, ()
 
         conds_res = []
@@ -74,16 +75,16 @@ class DB(object):
                         params.append(value[0])
                         params.append(value[2])
                     else:
-                        self.logger.error("Error:[getConds][value length error], value:{0}, "
-                                       "length:{1}".format(value, len(value)))
+                        self.logger.error("Error:[getConds][value length error], module:{0}, value:{1}, "
+                                       "length:{2}".format(self.__class__.__name__, value, len(value)))
                         return False, ()
                 elif isinstance(value, str) or isinstance(value, int):
                     frag = "`{0}` = %s".format(key)
                     conds_res.append(frag)
                     params.append(value)
                 else:
-                    self.logger.error("Error:[getConds][value type error][only accept list/int/str], key: {0}, value:{1}, "
-                                "type:{2}".format(key, value, type(value)))
+                    self.logger.error("Error:[getConds][value type error][only accept list/int/str], "
+                                      "module: {0}, key: {1}, value:{2}, type:{3}".format(self.__class__.__name__, key, value, type(value)))
                     return False, ()
 
         return conds_res, params
@@ -98,38 +99,40 @@ class DB(object):
         """
 
         if fields is None or not isinstance(fields, dict):
-            self.logger.error("Error:[checkFieldType][fields type error], fields:{0}, type:{1}".format(fields, type(fields)))
+            self.logger.error("Error:[checkFieldType][fields type error], Module:{0}, "
+                              "fields:{1}, type:{2}".format(self.__class__.__name__, fields, type(fields)))
             return False
 
         if maps is None or not isinstance(maps, dict):
-            self.logger.error("Error:[checkFieldType][maps type error], types:{0}, type:{1}".format(maps, type(maps)))
+            self.logger.error("Error:[checkFieldType][maps type error], module:{0}, "
+                              "types:{1}, type:{2}".format(self.__class__.__name__, maps, type(maps)))
             return False
 
         for key, value in maps.items():
             if fields.get(key, 0):
                 if value == constant.TYPE_INT:
                     if not isinstance(fields[key], int):
-                        self.logger.error("Error:[checkFieldType][field type error], Detail:[key:{0} value:{0} "
-                                    "should by int]".format(key, fields[key]))
+                        self.logger.error("Error:[checkFieldType][field type error], Module:{0} Detail:[key:{1} value:{2} "
+                                    "should by int]".format(self.__class__.__name__, key, fields[key]))
                         return False
                     fields[key] = int(fields[key])
                 elif value == constant.TYPE_JSON:
                     if isinstance(fields[key], list):
                         fields[key] = ujson.encode(fields[key])
                     elif not isinstance(fields[key], str):
-                        self.logger.error("Error:[checkFieldType][field type error], Detail:[key:{0} value:{0} "
-                                    "should by json]".format(key, fields[key]))
+                        self.logger.error("Error:[checkFieldType][field type error], Module:{0}, Detail:[key:{1} value:{2} "
+                                    "should by json]".format(self.__class__.__name__, key, fields[key]))
                         return False
                 elif value == constant.TYPE_FLOAT:
                     if not isinstance(fields[key], float):
-                        self.logger.error("Error:[checkFieldType][field type error], Detail:[key:{0} value:{0} "
-                                    "should by float]".format(key, fields[key]))
+                        self.logger.error("Error:[checkFieldType][field type error], Module:{0} Detail:[key:{1} value:{2} "
+                                    "should by float]".format(self.__class__.__name__, key, fields[key]))
                         return False
                     fields[key] = float(fields[key])
                 elif value == constant.TYPE_TIMESTAMP:
                     if not is_time_valid(fields[key], constant.TIME_FORMAT):
-                        self.logger.error("Error:[checkFieldType][field type error], Detail:[key: {0} value:{1} format "
-                                    "should by {2}]".format(key, fields[key], constant.TIME_FORMAT))
+                        self.logger.error("Error:[checkFieldType][field type error], Module:{0} Detail:[key: {1} value:{2} format "
+                                    "should by {3}]".format(self.__class__.__name__, key, fields[key], constant.TIME_FORMAT))
                         return False
                 else:
                     fields[key] = str(fields[key])
@@ -149,7 +152,8 @@ class DB(object):
             return ObjectDict()
 
         if maps is None or not isinstance(maps, dict):
-            self.logger.error("Error:[optResType][maps type error], types:{0}, type:{1}".format(maps, type(maps)))
+            self.logger.error("Error:[optResType][maps type error], "
+                              "module:{0} types:{1}, type:{2}".format(self.__class__.__name__, maps, type(maps)))
             return ObjectDict()
 
         for key, value in maps.items():
@@ -192,8 +196,8 @@ class DB(object):
         if isinstance(fields, list) and len(fields) > 0:
             sql += "`, `".join(fields)
         else:
-            self.logger.error("Error:[select][fields error], fields:{0}, type:{1}, "
-                           "length:{2}".format(fields, type(fields), len(fields)))
+            self.logger.error("Error:[select][fields error], module:{0} fields:{1}, type:{2}, "
+                           "length:{3}".format(self.__class__.__name__, fields, type(fields), len(fields)))
             return False
 
         sql += "` FROM {0}".format(table)
@@ -269,7 +273,8 @@ class DB(object):
                 sql += "`{0}` = %s, ".format(key)
                 params.append(value)
         else:
-            self.logger.error("Error:[update][fields error], fields:{0}, type:{1}".format(fields, type(fields)))
+            self.logger.error("Error:[update][fields error], module:{0} "
+                              "fields:{1}, type:{2}".format(self.__class__.__name__, fields, type(fields)))
             return False
 
         sql = sql[:-2]
@@ -326,8 +331,8 @@ class DB(object):
                 sql_tmp += "COUNT(`{}`), ".format(field)
             sql += sql_tmp
         else:
-            self.logger.error("Error:[select_cnt][fields error], fields:{0}, type:{1}, "
-                           "length:{2}".format(fields, type(fields), len(fields)))
+            self.logger.error("Error:[select_cnt][fields error], module:{0} fields:{1}, type:{2}, "
+                           "length:{3}".format(self.__class__.__name__, fields, type(fields), len(fields)))
             return False
 
         sql += " FROM {0}".format(table)
@@ -369,8 +374,8 @@ class DB(object):
                 sql_tmp += " SUM(`{}`), ".format(field)
             sql += sql_tmp
         else:
-            self.logger.error("Error:[select_cnt][fields error], fields:{0}, type:{1}, "
-                           "length:{2}".format(fields, type(fields), len(fields)))
+            self.logger.error("Error:[select_cnt][fields error], module:{0} fields:{1}, type:{2}, "
+                           "length:{3}".format(self.__class__.__name__, fields, type(fields), len(fields)))
             return False
 
         sql += " FROM {0}".format(table)

@@ -80,6 +80,8 @@ class PositionHandler(BaseHandler):
                 "module_team_position": module_team_position
             })
 
+            self.logger.debug("position_data: %s" % position_data)
+
             self.render_page("position/info.html", data=position_data)
 
             # 后置操作
