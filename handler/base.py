@@ -190,12 +190,16 @@ class BaseHandler(MetaBaseHandler):
                     self._unionid = from_hex(state)
                     try:
                         openid = yield self._get_user_openid(code)
-                        self._wxuser = yield self._handle_ent_openid(openid, self._unionid)
                     except WeChatOauthError as e:
-                        # 获取 state 和 code 以后，如果用户再次刷新该页面，就会发生 invalid code 问题，
-                        # 搞过
+                        # 获取 state 和 code 以后，
+                        # 如果用户再次刷新该页面，就会发生 invalid code 问题，
+                        # 忽略
                         if 'invalid code' in str(e):
+                            self.lgger.debug("用户刷新授权跳转页，忽略 invalid code 错误")
                             pass
+                    else:
+                        self._wxuser = yield self._handle_ent_openid(
+                            openid, self._unionid)
 
             elif state:  # 用户拒绝授权
                 # TODO 拒绝授权用户，是否让其继续操作? or return
