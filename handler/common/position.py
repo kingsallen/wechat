@@ -140,6 +140,8 @@ class PositionHandler(BaseHandler):
 
         link = make_url(path.POSITION_PATH.format(position_info.id), self.params,
                         recom=self._make_recom(),
+                        host=self.request.host,
+                        protocol=self.request.protocol,
                         escape=["keywords, cities, candidate_source, employment_type, salary, "
                                 "department, occupations, custom, degree, page_from, page_size"])
 
