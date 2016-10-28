@@ -90,8 +90,7 @@ class BaseDao(DB):
         if not isinstance(response, list):
             response = list()
         else:
-            for item in response:
-                self.optResType(item, self.fields_map)
+            response = [self.optResType(item, self.fields_map) for item in response]
 
         self.logger.debug("[debug][{0}][response: {1}]".format(self.__class__.__module__, response))
         raise gen.Return(response)

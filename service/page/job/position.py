@@ -21,9 +21,14 @@ class PositionPageService(PageService):
 
         fields = fields or []
         position = ObjectDict()
-        conds = {'id': position_id}
-        position_res = yield self.job_position_ds.get_position(conds, fields)
-        position_ext_res = yield self.job_position_ext_ds.get_position_ext(conds, fields)
+        position_res = yield self.job_position_ds.get_position({
+            'id': position_id
+        }, fields)
+
+        position_ext_res = yield self.job_position_ext_ds.get_position_ext({
+            "pid": position_id
+        }, fields)
+
         if not position_res:
             raise gen.Return(position)
 
@@ -112,7 +117,7 @@ class PositionPageService(PageService):
 
         fav = yield self.user_fav_position_ds.get_user_fav_position({
             "position_id": position_id,
-            "user_id": user_id,
+            "sysuser_id": user_id,
             "favorite": const.FAV_YES
         })
         raise gen.Return(bool(fav))
@@ -123,9 +128,12 @@ class PositionPageService(PageService):
         hr_account = yield self.user_hr_account_ds.get_hr_account({
             "id": publisher
         })
-        hr_wx_user = yield self.user_wx_user_ds.get_wxuser({
-            "id": hr_account.wxuser_id
-        })
+        if hr_account.wxuser_id:
+            hr_wx_user = yield self.user_wx_user_ds.get_wxuser({
+                "id": hr_account.wxuser_id
+            })
+        else:
+            hr_wx_user = ObjectDict()
         raise gen.Return((hr_account, hr_wx_user))
 
     @gen.coroutine

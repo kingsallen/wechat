@@ -30,7 +30,7 @@ class HrHbPositionBindingDataService(DataService):
 
     @cache(ttl=60)
     @gen.coroutine
-    def get_hr_hb_position_binding_list(self, conds, fields, options=None,
+    def get_hr_hb_position_binding_list(self, conds, fields=None, options=None,
                                         appends=None, index='', params=None):
         fields = fields or []
         options = options or []
