@@ -8,6 +8,7 @@ from util.common import ObjectDict
 
 class UserWxUserDataService(DataService):
 
+    @cache(ttl=60)
     @gen.coroutine
     def get_wxuser(self, id=None):
         if not id:

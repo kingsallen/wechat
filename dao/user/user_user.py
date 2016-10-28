@@ -12,7 +12,7 @@ class UserUserDao(BaseDao):
             "username"        :self.constant.TYPE_STRING,
             "password"        :self.constant.TYPE_STRING,
             "is_disable"      :self.constant.TYPE_INT,
-            "rank"            :self.constant.TYPE_INT,
+            # "rank"            :self.constant.TYPE_INT,
             "register_time"   :self.constant.TYPE_TIMESTAMP,
             "register_ip"     :self.constant.TYPE_STRING,
             "last_login_time" :self.constant.TYPE_TIMESTAMP,

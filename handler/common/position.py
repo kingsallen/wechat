@@ -36,7 +36,7 @@ class PositionHandler(BaseHandler):
                 position_id, self.current_user.sysuser.id)
 
             # 获得职位所属公司信息
-            real_company_id = yield self.position_ps.get_real_company_id(position_info.publisher, position_info.company_id)
+            real_company_id = yield self.company_ps.get_real_company_id(position_info.publisher, position_info.company_id)
             company_info = yield self.company_ps.get_company(conds={"id": real_company_id}, need_conf=True)
 
             # 构建转发信息

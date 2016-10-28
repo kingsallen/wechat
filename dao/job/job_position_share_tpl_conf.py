@@ -9,12 +9,12 @@ class JobPositionShareTplConfDao(BaseDao):
         super(JobPositionShareTplConfDao, self).__init__(logger)
         self.table = "job_position_share_tpl_conf"
         self.fields_map = {
-            "id": self.constant.TYPE_INT,
-            "type": self.constant.TYPE_INT,
-            "name": self.constant.TYPE_STRING,
-            "title": self.constant.TYPE_STRING,
+            "id":          self.constant.TYPE_INT,
+            "type":        self.constant.TYPE_INT,
+            "name":        self.constant.TYPE_STRING,
+            "title":       self.constant.TYPE_STRING,
             "description": self.constant.TYPE_STRING,
-            "disable": self.constant.TYPE_INT,
-            "remark": self.constant.TYPE_STRING,
-            "priority": self.constant.TYPE_INT
+            "disable":     self.constant.TYPE_INT,
+            "remark":      self.constant.TYPE_STRING,
+            "priority":    self.constant.TYPE_INT
         }
