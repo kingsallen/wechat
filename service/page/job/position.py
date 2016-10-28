@@ -209,11 +209,8 @@ class PositionPageService(PageService):
     def send_candidate_view_position(self, params):
         """刷新候选人链路信息
         暂时调用 DAS，后续迁移到基础服务"""
-        # TODO
 
         try:
-            ret = yield async_das_get("candidate/glancePosition", params)
+            yield async_das_get("candidate/glancePosition", params)
         except Exception as error:
             self.logger.warn(error)
-
-        raise gen.Return(ret)

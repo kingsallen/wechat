@@ -80,11 +80,9 @@ class PositionHandler(BaseHandler):
                 "module_team": module_team,
                 "module_team_position": module_team_position
             })
-            data = ObjectDict({
-                "position": position_data
-            })
 
-            self.render_page("position/info.html", data=data)
+
+            self.render_page("position/info.html", data=position_data)
 
             # 后置操作
             # 刷新链路
@@ -288,7 +286,7 @@ class PositionHandler(BaseHandler):
         """构造刷新链路"""
 
         last_recom_id = 0
-        if self.current_user.recom.id:
+        if self.current_user.recom:
             params = ObjectDict()
             params.wechat_id = self.current_user.wechat.id
             params.recom_id = self.current_user.recom.id
