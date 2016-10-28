@@ -58,6 +58,7 @@ class PositionPageService(PageService):
             "degree": self.constant.DEGREE.get(str(position_res.degree))
                       + self.constant.POSITION_ABOVE if position_res.degree_above else '',
             "management": position_res.management,
+            "visitnum": position_res.visitnum,
             "accountabilities": position_res.accountabilities,
             "requirement": position_res.requirement,
             "feature": position_res.feature,

@@ -56,7 +56,6 @@ class PositionHandler(BaseHandler):
             # 相似职位推荐
             recomment_positions_res = yield self.position_ps.get_recommend_positions(position_id)
 
-
             header = yield self._make_json_header(position_info, company_info, star, application, endorse, can_apply)
             module_job_description = yield self._make_json_job_description(position_info)
             module_job_require = yield self._make_json_job_require(position_info)
@@ -80,7 +79,6 @@ class PositionHandler(BaseHandler):
                 "module_team": module_team,
                 "module_team_position": module_team_position
             })
-
 
             self.render_page("position/info.html", data=position_data)
 
