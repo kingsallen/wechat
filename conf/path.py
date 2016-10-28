@@ -6,6 +6,8 @@ WX_OAUTH_QX_PATH = "/m/wxoauth2"
 POSITION_PATH = "/m/position/{}"
 RED_PACKET_CARD = "/mobile/redpack"
 
+OLD_POSITION_PATH = "/mobile/position"
+
 # 基础服务 alphadog path
 ## 用户服务
 USER_LOGIN_PATH = "user/login"

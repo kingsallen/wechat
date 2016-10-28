@@ -85,18 +85,11 @@ class PositionHandler(BaseHandler):
                 yield self.redpacket_ps.handle_red_packet_position_related(self.current_user, position_info, is_click=True)
 
             # 发送消息模板
-
+            yield self._make_send_publish_template(position_info)
 
         else:
             self.write_error(404)
             return
-
-            ###### 发消息模板 TODO
-            # 如果该职位浏览量达到5次,给发布者发送模板消息
-            if position.get("visitnum", 0) == 4 and position.get("source",
-                                                                 -1) == 0:
-                self.send_publish_template(position)
-
 
     def _make_recom(self):
         """用于微信分享和职位推荐时，传出的 recom 参数"""
@@ -273,7 +266,6 @@ class PositionHandler(BaseHandler):
     def _make_refresh_share_chain(self, position_info):
         """构造刷新链路"""
 
-        res = False
         last_recom_id = 0
         if self.current_user.recom.id:
             params = ObjectDict()
@@ -294,14 +286,11 @@ class PositionHandler(BaseHandler):
                 if res:
                     last_recom_id = yield self.sharechain_ps.get_referral_employee_wxuser_id(self.current_user.wxuser.id, position_info.id)
 
-        # send_candidate_params = {
-        #     "wxuser_id": self.current_user.wxuser.id,
-        #     "position_id": position_info.id,
-        #     "from_employee": 1 if last_recom_id else 0,
-        # }
-        #
-        # send_candidate = wxuserService(self.db).send_candidate_view_position
-        # tornado.ioloop.IOLoop.instance().add_callback(send_candidate, send_candidate_params)
+        yield self.position_ps.send_candidate_view_position(params={
+            "wxuser_id": self.current_user.wxuser.id,
+            "position_id": position_info.id,
+            "from_employee": 1 if last_recom_id else 0,
+        })
 
         raise gen.Return(last_recom_id)
 
@@ -326,12 +315,12 @@ class PositionHandler(BaseHandler):
                 "signature": self.settings.helper_signature
             })
             hr_account, hr_wx_user = yield self._make_hr_info(position_info.publisher)
-            # # 如果企业有公众号，发企业链接，若无，发集合号链接
-            # if self.current_user.wechat:
-            #     link = make_url(path.POSITION_PATH.format(position_info.id),
-            #                     host=
-            #                     escape=["keywords, cities, candidate_source, employment_type, salary, "
-            #                             "department, occupations, custom, degree, page_from, page_size"])
-            #
-            # yield position_view_five(help_wechat.id, hr_wx_user.openid, link, position_info.title,
-            #                    position_info.salary)
+            # 如果企业有公众号，发企业链接，若无，发集合号链接
+            if self.current_user.wechat:
+                link = make_url(path.POSITION_PATH.format(position_info.id), host=self.settings.platform_host,
+                                wechat_signature=self.current_user.wechat.signature)
+            else:
+                link = make_url(path.OLD_POSITION_PATH, host=self.settings.qx_host, m="info", pid=position_info.id)
+
+            yield position_view_five(help_wechat.id, hr_wx_user.openid, link, position_info.title,
+                               position_info.salary)

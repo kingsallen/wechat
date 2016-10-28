@@ -6,7 +6,7 @@ from tornado import gen
 from service.page.base import PageService
 import conf.common as const
 from util.common import ObjectDict
-from util.tool.http_tool import http_get
+from util.tool.http_tool import http_get, async_das_get
 from util.tool.date_tool import jd_update_date
 from util.tool.str_tool import gen_salary, split
 
@@ -207,3 +207,16 @@ class PositionPageService(PageService):
                 }, fields={
                     "award":employee_sum,
                 })
+
+    @gen.coroutine
+    def send_candidate_view_position(self, params):
+        """刷新候选人链路信息
+        暂时调用 DAS，后续迁移到基础服务"""
+        # TODO
+
+        try:
+            ret = yield async_das_get("candidate/glancePosition", params)
+        except Exception as error:
+            self.logger.warn(error)
+
+        raise gen.Return(ret)
