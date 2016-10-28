@@ -73,24 +73,26 @@ class PositionHandler(BaseHandler):
             self.render_page("position/info.html", data=data)
 
             # 后置操作
-            # 更新职位浏览量
-            yield self.position_ps.update_position(conds={
-                "id": position_info.id
-            }, fields={
-                "visitnum": position_info.visitnum + 1,
-                "update_time": position_info.update_time,
-            })
-
             # 刷新链路
             last_recom_wxuser_id = yield self._make_refresh_share_chain(position_info)
-            # 加积分
-            yield self._make_add_reward_click(position_info, last_recom_wxuser_id)
+
             # 发红包
             if self.is_platform:
                 yield self.redpacket_ps.handle_red_packet_position_related(self.current_user, position_info, is_click=True)
 
-            # 发送消息模板
-            yield self._make_send_publish_template(position_info)
+            # 1.更新职位浏览量
+            # 2.加积分
+            # 3.发送消息模板
+            yield [
+                self.position_ps.update_position(conds={
+                "id": position_info.id
+            }, fields={
+                "visitnum": position_info.visitnum + 1,
+                "update_time": position_info.update_time,
+            }),
+                self._make_add_reward_click(position_info, last_recom_wxuser_id),
+                self._make_send_publish_template(position_info)
+            ]
 
         else:
             self.write_error(404)

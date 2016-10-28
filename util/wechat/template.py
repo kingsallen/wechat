@@ -8,7 +8,6 @@ import conf.common as const
 from datetime import datetime
 from util.wechat.core import messager
 
-
 def _make_json_data(first, remark=None, colors=None, **kwargs):
     """
     构造发送消息模板的内容 json
@@ -42,7 +41,6 @@ def _make_json_data(first, remark=None, colors=None, **kwargs):
     json_data = ujson.dumps(json_data, ensure_ascii=False)
     return json_data
 
-
 @gen.coroutine
 def rp_binding_success_notice_tpl(wechat_id, openid, link, company_name,
                         sys_template_id=const.TEMPLATES.RP_EMPLOYEE_BINDING):
@@ -62,7 +60,6 @@ def rp_binding_success_notice_tpl(wechat_id, openid, link, company_name,
 
     raise gen.Return(ret)
 
-
 @gen.coroutine
 def rp_recom_success_notice_tpl(wechat_id, openid, link, company_name,
     recomee_name, position_title, sys_template_id=const.TEMPLATES.RP_RECOM):
@@ -78,7 +75,6 @@ def rp_recom_success_notice_tpl(wechat_id, openid, link, company_name,
         wechat_id, openid, sys_template_id, link, json_data, qx_retry=True)
 
     raise gen.Return(ret)
-
 
 @gen.coroutine
 def rp_transfer_click_success_notice_tpl(wechat_id, openid, link, nickname,
@@ -98,7 +94,6 @@ def rp_transfer_click_success_notice_tpl(wechat_id, openid, link, nickname,
         wechat_id, openid, sys_template_id, link, json_data, qx_retry=True)
 
     raise gen.Return(ret)
-
 
 @gen.coroutine
 def rp_transfer_apply_success_notice_tpl(wechat_id, openid, link, nickname,
