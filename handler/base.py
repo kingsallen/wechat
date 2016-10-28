@@ -19,11 +19,11 @@ from tornado import gen, web
 from app import logger
 from oauth.wechat import WeChatOauth2Service, WeChatOauthError, JsApi
 from util.common import ObjectDict
-from util.common.decorator import check_signature
+from util.common.decorator import check_signature, check_outside_wechat
 from util.tool.date_tool import curr_now
 from util.tool.json_tool import encode_json_dumps, json_dumps
 from util.tool.str_tool import to_str, to_hex, from_hex
-from util.tool.url_tool import make_url, url_subtract_query
+from util.tool.url_tool import url_subtract_query
 
 import conf.message as msg_const
 import conf.common as constant
@@ -151,6 +151,7 @@ class BaseHandler(MetaBaseHandler):
         self._log_info = dict(value)
 
     # PUBLIC API
+    @check_outside_wechat
     @check_signature
     @gen.coroutine
     def prepare(self):
@@ -169,9 +170,6 @@ class BaseHandler(MetaBaseHandler):
         state = self.params.get("state")
 
         self.logger.debug("code:{}, state:{}, request_url:{} ".format(code, state, self.request.uri))
-
-        if not self.in_wechat:
-            self.write("请在微信内访问")
 
         if self.in_wechat:
             # 用户同意授权
