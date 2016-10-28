@@ -86,6 +86,19 @@ class CompanyPageService(PageService):
         raise gen.Return(positions_list)
 
     @gen.coroutine
+    def get_real_company_id(self, publisher, company_id):
+        """获得职位所属公司id
+        公司有母公司和子公司之分，
+        如果取母公司，则取 current_user.company，如果取职位对应的公司（可能是子公司，可能是母公司）则使用该方法
+        1.首先根据 hr_company_account 获得 hr 帐号与公司之间的关系，获得company_id
+        2.如果1取不到，则直接取职位中的 company_id"""
+
+        hr_company_account = yield self.hr_company_account_ds.get_company_account(conds={"account_id": publisher})
+        real_company_id = hr_company_account.company_id or company_id
+
+        raise gen.Return(real_company_id)
+
+    @gen.coroutine
     def save_survey(self, fields, options=None, appends=None):
         """保存公司 survey， 在公司 profile 主页保存"""
         options = options or []

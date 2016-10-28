@@ -17,18 +17,17 @@ class UserCompanyFollowDao(BaseDao):
         super(UserCompanyFollowDao, self).__init__(logger)
         self.table = 'user_company_follow'
         self.fields_map = {
-            "id": self.constant.TYPE_INT,
-            "company_id": self.constant.TYPE_INT,
-            "user_id": self.constant.TYPE_INT,
-
+            "id":             self.constant.TYPE_INT,
+            "company_id":     self.constant.TYPE_INT,
+            "user_id":        self.constant.TYPE_INT,
             # 是否关注 0：取消关注，1：关注'
-            "status": self.constant.TYPE_INT,
+            "status":         self.constant.TYPE_INT,
             # 关注操作来源 0: 未知，1：微信端，2：PC 端
-            "source": self.constant.TYPE_INT,
+            "source":         self.constant.TYPE_INT,
             # 关注时间
-            "create_time": self.constant.TYPE_TIMESTAMP,
+            "create_time":    self.constant.TYPE_TIMESTAMP,
             # 更新时间
-            "update_time": self.constant.TYPE_TIMESTAMP,
+            "update_time":    self.constant.TYPE_TIMESTAMP,
             # 取消关注时间
-            "unfollow_time": self.constant.TYPE_TIMESTAMP,
+            "unfollow_time":  self.constant.TYPE_TIMESTAMP,
         }

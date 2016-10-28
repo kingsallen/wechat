@@ -8,7 +8,7 @@ from util.common import ObjectDict
 
 class JobApplicationDataService(DataService):
 
-    @cache(ttl=60)
+    @cache(ttl=30)
     @gen.coroutine
     def get_job_application(self, conds, fields=None):
 

@@ -25,6 +25,7 @@ class JobCustomDataService(DataService):
         response = yield self.job_custom_dao.get_record_by_conds(conds, fields)
         raise gen.Return(response)
 
+    @cache(ttl=60)
     @gen.coroutine
     def get_customs_list(self, conds, fields, options=[], appends=[], index='', params=[]):
 

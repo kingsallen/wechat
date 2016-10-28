@@ -137,17 +137,6 @@ class PositionPageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def get_real_company_id(self, publisher, company_id):
-        """获得职位所属公司id
-        1.首先根据 hr_company_account 获得 hr 帐号与公司之间的关系，获得company_id
-        2.如果1取不到，则直接取职位中的 company_id"""
-
-        hr_company_account = yield self.hr_company_account_ds.get_company_account(conds={"account_id": publisher})
-        real_company_id = hr_company_account.company_id or company_id
-
-        raise gen.Return(real_company_id)
-
-    @gen.coroutine
     def get_recommend_positions(self, position_id):
         """获得 JD 页推荐职位
         reference: https://wiki.moseeker.com/position-api.md#recommended
