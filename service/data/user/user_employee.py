@@ -24,3 +24,17 @@ class UserEmployeeDataService(DataService):
         response = yield self.user_employee_dao.get_record_by_conds(conds, fields)
         raise gen.Return(response)
 
+    @gen.coroutine
+    def update_employee(self, conds, fields=None):
+
+        if not conds or not fields:
+            self.logger.warn(u"Warning:[update_employee][invalid parameters], Detail:[conds: {0}, "
+                             u"fields: {1}]".format(conds, fields))
+            raise gen.Return(False)
+
+        ret = yield self.user_employee_dao.update_by_conds(
+            conds=conds,
+            fields=fields)
+
+        raise gen.Return(ret)
+

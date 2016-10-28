@@ -343,3 +343,46 @@ class DB(object):
             sql += index
 
         return sql
+
+    def select_sum(self, table, conds=None, fields=None, appends=None, index=''):
+
+        """
+        Select查询记录列值总和
+        :param table: 表名
+        :param conds: 限制条件
+        :param fields: 查询字段
+        :param options: SQL前置条件
+        :param appends: SQL后置选项
+        :param index: 支持mysql的USE/IGNORE/FORCE Index的语法，指定索引名称
+        :return: 返回拼装SQL
+        """
+
+        conds = conds or []
+        fields = fields or []
+        appends = appends or []
+
+        sql = "SELECT "
+        # 查询字段
+        if isinstance(fields, list) and len(fields) > 0:
+            sql_tmp = ''
+            for field in fields:
+                sql_tmp += " SUM(`{}`), ".format(field)
+            sql += sql_tmp
+        else:
+            self.logger.error("Error:[select_cnt][fields error], fields:{0}, type:{1}, "
+                           "length:{2}".format(fields, type(fields), len(fields)))
+            return False
+
+        sql += " FROM {0}".format(table)
+        # 限制条件
+        if isinstance(conds, list) and len(conds) > 0:
+            sql += " WHERE "
+            sql += " and ".join(conds)
+        # SQL后置选项
+        if isinstance(appends, list) and len(appends) > 0:
+            sql += " ".join(appends)
+
+        if index:
+            sql += index
+
+        return sql

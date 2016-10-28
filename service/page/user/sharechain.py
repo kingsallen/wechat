@@ -43,6 +43,25 @@ class SharechainPageService(PageService):
             raise gen.Return(False)
 
     @gen.coroutine
+    def create_share_record(self, params):
+        """创建分享链路"""
+
+        record_id = yield self.candidate_recom_record_ds.create_share_record({
+            "wechat_id":        params.wechat_id,
+            "recom_id":         params.recom_id,
+            "position_id":      params.position_id,
+            "presentee_id":     params.presentee_id,
+            "sysuser_id":       params.sysuser_id,
+            "viewer_id":        params.viewer_id,
+            "viewer_ip":        params.viewer_ip,
+            "source":           params.source,
+            "click_from":       params.click_from,
+        })
+
+        assert record_id
+        raise gen.Return(record_id)
+
+    @gen.coroutine
     def _select_recom_record_real_time(self, position_id, wxuser_id):
         # 现在无论是否开启挖掘被动求职者，都要放到链路表中
         record = self.stats_recom_record_ds.get_stats_recom_record(

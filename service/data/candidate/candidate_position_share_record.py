@@ -9,6 +9,7 @@ from util.common import ObjectDict
 
 
 class CandidatePositionShareRecordDataService(DataService):
+
     @cache(ttl=60)
     @gen.coroutine
     def get_share_record(self, conds, fields=None, options=None, appends=None,
@@ -33,4 +34,11 @@ class CandidatePositionShareRecordDataService(DataService):
             .get_record_by_conds(
             conds, fields, options, appends,
             index)
+        raise gen.Return(response)
+
+    @gen.coroutine
+    def create_share_record(self, fields, options=None):
+        options = options or []
+
+        response = yield self.candidate_posiiton_share_record_dao.insert_record(fields, options)
         raise gen.Return(response)

@@ -12,6 +12,7 @@ from util.common import ObjectDict
 from util.common.decorator import check_signature
 from util.tool.url_tool import make_url
 from util.tool.str_tool import gen_salary
+from util.wechat.template import position_view_five
 
 class PositionHandler(BaseHandler):
 
@@ -37,10 +38,10 @@ class PositionHandler(BaseHandler):
             company_info = yield self.company_ps.get_company(conds={"id": real_company_id}, need_conf=True)
 
             # 构建转发信息
-            self._make_share_info(position_info, company_info)
+            yield self._make_share_info(position_info, company_info)
 
             # HR头像及底部转发文案
-            endorse = self._make_endorse_info(position_info, company_info)
+            endorse = yield self._make_endorse_info(position_info, company_info)
 
             # 是否超出投递上限。每月每家公司一个人只能申请3次
             can_apply = yield self.application_ps.is_allowed_apply_position(
@@ -67,94 +68,30 @@ class PositionHandler(BaseHandler):
             self.render_page("", data=data)
 
             # 后置操作
+            # 更新职位浏览量
+            yield self.position_ps.update_position(conds={
+                "id": position_info.id
+            }, fields={
+                "visitnum": position_info.visitnum + 1,
+                "update_time": position_info.update_time,
+            })
+
             # 刷新链路
+            last_recom_wxuser_id = yield self._make_refresh_share_chain(position_info)
+            # 加积分
+            yield self._make_add_reward_click(position_info, last_recom_wxuser_id)
+            # 发红包
+            if self.is_platform:
+                yield self.redpacket_ps.handle_red_packet_position_related(self.current_user, position_info, is_click=True)
+
+            # 发送消息模板
 
 
         else:
             self.write_error(404)
             return
 
-
-            # 记录推荐者推荐职位的查看记录
-            if self.current_user.recom:
-                share_params = mdict()
-                share_params.wechat_id = self.current_user.wechat.id
-                share_params.recom_id = self.current_user.recom.get("id", 0)
-                share_params.position_id = position.id
-                share_params.presentee_id = self.current_user.wxuser.get("id",
-                                                                         0)
-                share_params.sysuser_id = self.current_user.sysuser.get("id",
-                                                                        0)
-                share_params.viewer_id = self.current_user.viewer.idcode
-                share_params.viewer_ip = self.request.remote_ip
-                share_params.source = const.ONUSE if self.PROJECT == \
-                                                     const.PROJECT_PLATFORM \
-                    else const.UNUSED
-                # '来自, 0:未知, 朋友圈(timeline ) 1, 微信群(groupmessage) 2,
-                # 个人消息(singlemessage) 3'
-                click_from = {'timeline':      1, 'groupmessage': 2,
-                              'singlemessage': 3}
-                share_params.click_from = const.DICT_CLICK_FROM.get(
-                    self.get_argument("from", "unknow"), 0)
-                self.sysuserService.insert_sysuser_position_share_record(
-                    share_params)
-
-                # 需要实时算出链路数据
-                if position.status == 0:
-                    res = refresh_share_chain(self,
-                                              wxuser_id=self.current_user.wxuser.id,
-                                              position_id=position.id)
-                    self.LOG.debug("refresh_share_chain : {0}".format(res))
-
-            # 记录候选人
-            # 需要在刷新完候选人链路信息后调用
-            send_candidate_params = {
-                "wxuser_id":     self.current_user.wxuser.id,
-                "position_id":   self.params.pid,
-                "from_employee": 0
-            }
-            if self.current_user.recom:
-                last_employee_recom_id = get_referral_employee_wxuser_id(
-                    self, self.current_user.wxuser.id, position.id)
-                send_candidate_params.update({
-                    "from_employee": 1 if last_employee_recom_id else 0
-                })
-
-            send_candidate = wxuserService(
-                self.db).send_candidate_view_position
-            tornado.ioloop.IOLoop.instance().add_callback(send_candidate,
-                                                          send_candidate_params)
-
-            last_recom_wxuser_id = get_referral_employee_wxuser_id(self,
-                                                                   self.current_user.wxuser.id,
-                                                                   self.params.pid)
-            # 转发被点击加积分
-            self.LOG.debug("get_reward_be_click{0},{1}".format(
-                self.current_user.wxuser.id, last_recom_wxuser_id))
-
-            # 注意!
-            # self.current_user.employee 仅代表 current_user 是否是某个公司的员工
-            # 这并不意味着 current_user.employee 存在就代表这个 user 是当前公众号的员工
-            # 要判断当前用户是否是当前公众号的员工,
-            # 需要判断 1. employee 是否存在
-            #         2.验证 employee.company_id 和 当前公众号的 company_id
-
-            if ((not self.current_user.employee.exist or
-                         self.current_user.employee.company_id !=
-                         self.current_user.wechat.company_id) and
-                    last_recom_wxuser_id and self.current_user.wxuser.id and
-                        self.current_user.wxuser.id != last_recom_wxuser_id):
-                self.LOG.debug("Begin_add_reward_be_click")
-                employeeService(self.db).add_reward_for_recom_click(
-                    wxuser_id=self.current_user.wxuser.id,
-                    last_recom_wxuser_id=last_recom_wxuser_id,
-                    position_id=self.params.pid,
-                    company_id=self.current_user.company.id)
-
-            if self.PROJECT == const.PROJECT_PLATFORM:
-                yield rp_ser.handle_red_packet_position_related(self, position,
-                                                                is_click=True)
-
+            ###### 发消息模板 TODO
             # 如果该职位浏览量达到5次,给发布者发送模板消息
             if position.get("visitnum", 0) == 4 and position.get("source",
                                                                  -1) == 0:
@@ -166,6 +103,7 @@ class PositionHandler(BaseHandler):
 
         return self.current_user.wxuser.openid
 
+    @gen.coroutine
     def _make_share_info(self, position_info, company_info):
         """构建 share 内容"""
 
@@ -335,6 +273,8 @@ class PositionHandler(BaseHandler):
     def _make_refresh_share_chain(self, position_info):
         """构造刷新链路"""
 
+        res = False
+        last_recom_id = 0
         if self.current_user.recom.id:
             params = ObjectDict()
             params.wechat_id = self.current_user.wechat.id
@@ -344,21 +284,54 @@ class PositionHandler(BaseHandler):
             params.sysuser_id = self.current_user.sysuser.id
             params.viewer_id = 0
             params.viewer_ip = self.request.remote_ip
-            params.source = const.ONUSE if self.PROJECT == const.PROJECT_PLATFORM \
-                else const.UNUSED
-            # '来自, 0:未知, 朋友圈(timeline ) 1, 微信群(groupmessage) 2,
-            # 个人消息(singlemessage) 3'
-            click_from = {'timeline': 1, 'groupmessage': 2,
-                          'singlemessage': 3}
-            share_params.click_from = const.DICT_CLICK_FROM.get(
-                self.get_argument("from", "unknow"), 0)
-            self.sysuserService.insert_sysuser_position_share_record(
-                share_params)
+            params.source = 0 if self.is_platform else 1
+            params.click_from = const.CLICK_FROM.get(self.get_argument("from", ""), 0)
+            yield self.sharechain_ps.create_share_record(params)
 
             # 需要实时算出链路数据
-            if position.status == 0:
-                res = refresh_share_chain(self,
-                                          wxuser_id=self.current_user.wxuser.id,
-                                          position_id=position.id)
-                self.LOG.debug("refresh_share_chain : {0}".format(res))
+            if position_info.status == 0:
+                res = yield self.sharechain_ps.refresh_share_chain(self.current_user.wxuser.id, position_info.id)
+                if res:
+                    last_recom_id = yield self.sharechain_ps.get_referral_employee_wxuser_id(self.current_user.wxuser.id, position_info.id)
 
+        # send_candidate_params = {
+        #     "wxuser_id": self.current_user.wxuser.id,
+        #     "position_id": position_info.id,
+        #     "from_employee": 1 if last_recom_id else 0,
+        # }
+        #
+        # send_candidate = wxuserService(self.db).send_candidate_view_position
+        # tornado.ioloop.IOLoop.instance().add_callback(send_candidate, send_candidate_params)
+
+        raise gen.Return(last_recom_id)
+
+    @gen.coroutine
+    def _make_add_reward_click(self, position_info, last_recom_wxuser_id):
+        """给员工加积分"""
+
+        if self.current_user.employee.id and last_recom_wxuser_id != self.current_user.wxuser.id:
+            yield self.position_ps.add_reward_for_recom_click(self.current_user.employee,
+                                                              self.current_user.company.id,
+                                                              self.current_user.wxuser.id,
+                                                              position_info.id,
+                                                              last_recom_wxuser_id)
+
+    @gen.coroutine
+    def _make_send_publish_template(self, position_info):
+        """浏览量达到5次后，向 HR 发布模板消息
+        注：只向 HR 平台发布的职位发送模板消息，ATS 同步的职位不发送"""
+
+        if position_info.visitnum == 4 and position_info.source == 0:
+            help_wechat = yield self.wechat_ps.get_wechat(conds={
+                "signature": self.settings.helper_signature
+            })
+            hr_account, hr_wx_user = yield self._make_hr_info(position_info.publisher)
+            # # 如果企业有公众号，发企业链接，若无，发集合号链接
+            # if self.current_user.wechat:
+            #     link = make_url(path.POSITION_PATH.format(position_info.id),
+            #                     host=
+            #                     escape=["keywords, cities, candidate_source, employment_type, salary, "
+            #                             "department, occupations, custom, degree, page_from, page_size"])
+            #
+            # yield position_view_five(help_wechat.id, hr_wx_user.openid, link, position_info.title,
+            #                    position_info.salary)

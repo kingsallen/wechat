@@ -5,10 +5,8 @@
 from tornado import gen
 from service.page.base import PageService
 import conf.common as const
-import conf.path as path
 from util.common import ObjectDict
 from util.tool.http_tool import http_get
-from util.tool.url_tool import make_url
 from util.tool.date_tool import jd_update_date
 from util.tool.str_tool import gen_salary, split
 
@@ -60,6 +58,7 @@ class PositionPageService(PageService):
             "feature": position_res.feature,
             "status": position_res.status == 0,
             "publisher": position_res.publisher,
+            "source": position_res.source,
             "share_tpl_id": position_res.share_tpl_id,
         })
 
@@ -86,6 +85,11 @@ class PositionPageService(PageService):
             position.job_custom = job_custom_res.name
 
         raise gen.Return(position)
+
+    @gen.coroutine
+    def update_position(self, conds, fields):
+        response = yield self.job_position_ds.update_position(conds, fields)
+        raise gen.Return(response)
 
     @gen.coroutine
     def get_positions_list(self, conds, fields, options=[], appends=[]):
@@ -164,3 +168,42 @@ class PositionPageService(PageService):
 
         raise gen.Return(response)
 
+    @gen.coroutine
+    def add_reward_for_recom_click(self, employee, company_id, wxuser_id, position_id, last_recom_wxuser_id):
+        """转发被点击添加积分"""
+
+        points_conf = yield self.hr_points_conf_ds.get_points_conf(conds={
+            "company_id": company_id,
+            "template_id": const.RECRUIT_STATUS_RECOMCLICK_ID,
+        }, appends=["ORDER BY id DESC", "LIMIT 1"])
+
+        click_record = yield self.user_employee_points_record_ds.user_employee_points_record_dao(conds={
+            "berecom_wxuser_id": wxuser_id,
+            "position_id": position_id,
+            "config_id": points_conf.id
+        }, fields=["id"])
+
+        # 转发被点击添加积分，同一个职位，相同的人点击多次不加积分
+        if click_record < 1:
+            yield self.user_employee_points_record_ds.create_user_employee_points_record(fields={
+                "employee_id": employee.id,
+                "reason": points_conf.status_name,
+                "award": points_conf.reward,
+                "recom_wxuser_id": last_recom_wxuser_id,
+                "berecom_wxuser_id": wxuser_id,
+                "position_id": position_id,
+                "award_config_id": points_conf.id,
+            })
+
+            # 更新员工的积分
+            employee_sum = yield self.user_employee_points_record_ds.get_user_employee_points_record_sum(conds={
+                "employee_id": employee.id
+            }, fields=["award"])
+
+            if employee_sum:
+                yield self.user_employee_ds.update_employee(conds={
+                    "id": employee.id,
+                    "company_id": company_id,
+                }, fields={
+                    "award":employee_sum,
+                })

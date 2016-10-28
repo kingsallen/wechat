@@ -242,6 +242,32 @@ class BaseDao(DB):
         raise gen.Return(response)
 
     @gen.coroutine
+    def get_sum_by_conds(self, conds, fields, appends=None, index=None):
+        """Select查询记录列值总和
+
+        :param conds: 限制条件，数组或字符串形式，示例见@link get_list_by_conds()
+        :param fields: 查询字段
+        :param appends: SQL后置选项
+        :param index: 支持mysql的USE/IGNORE/FORCE Index的语法，指定索引名称
+        :return:
+        """
+
+        appends = appends or []
+        index = index or ''
+
+        conds, params = self.getConds(conds)
+        if not conds:
+            self.logger.error(
+                "Error:[get_cnt_by_conds][conds error], conds:{0}".format(
+                    conds))
+            raise gen.Return(None)
+        sql = self.select_sum(self.table, conds, fields, appends, index)
+        cursor = yield self.query(sql, params)
+        response = cursor.fetchone()
+        response = 0 if not response else response
+        raise gen.Return(response)
+
+    @gen.coroutine
     def start_transaction(self):
 
         """

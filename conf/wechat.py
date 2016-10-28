@@ -14,6 +14,14 @@ WX_OAUTH_DEFAULT_STATE = '0'
 SCOPE_BASE = "snsapi_base"
 SCOPE_USERINFO = "snsapi_userinfo"
 
+# 0:未知, 1:朋友圈(timeline ) 2:微信群(groupmessage) 3:个人消息(singlemessage)
+CLICK_FROM = {
+    '': 0,
+    'timeline': 1,
+    'groupmessage': 2,
+    'singlemessage': 3,
+}
+
 ERRORS = {
     -1:      "系统繁忙，此时请开发者稍候再试",
     0:       "请求成功",
