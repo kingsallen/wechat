@@ -28,8 +28,8 @@ class UserEmployeeDataService(DataService):
     def update_employee(self, conds, fields=None):
 
         if not conds or not fields:
-            self.logger.warn(u"Warning:[update_employee][invalid parameters], Detail:[conds: {0}, "
-                             u"fields: {1}]".format(conds, fields))
+            self.logger.warn("Warning:[update_employee][invalid parameters], Detail:[conds: {0}, "
+                             "fields: {1}]".format(conds, fields))
             raise gen.Return(False)
 
         ret = yield self.user_employee_dao.update_by_conds(

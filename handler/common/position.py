@@ -65,7 +65,7 @@ class PositionHandler(BaseHandler):
                 "position": position_data
             })
 
-            self.render_page("", data=data)
+            self.render_page("position/info.html", data=data)
 
             # 后置操作
             # 更新职位浏览量
