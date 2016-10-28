@@ -100,7 +100,7 @@ class PositionHandler(BaseHandler):
                 "id": position_info.id
             }, fields={
                 "visitnum": position_info.visitnum + 1,
-                "update_time": position_info.update_time,
+                "update_time": position_info.update_time_ori,
             }),
                 self._make_add_reward_click(position_info, last_recom_wxuser_id),
                 self._make_send_publish_template(position_info)
