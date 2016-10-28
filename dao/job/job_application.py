@@ -7,7 +7,7 @@ class JobApplicationDao(BaseDao):
 
     def __init__(self, logger):
         super(JobApplicationDao, self).__init__(logger)
-        self.table = "job_custom"
+        self.table = "job_application"
         self.fields_map = {
             "id":               self.constant.TYPE_INT,
             "wechat_id":        self.constant.TYPE_INT,
