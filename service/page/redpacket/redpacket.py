@@ -171,7 +171,7 @@ class RedpacketPageService(PageService):
 
                 self.logger.debug("[RP]当前点击者 wxuser_id:{},pid:{}".format(
                     current_user.wxuser.id, position.id))
-                last_employee_recom_id = get_referral_employee_wxuser_id(
+                last_employee_recom_id = yield get_referral_employee_wxuser_id(
                     current_user.wxuser.id, position.id)
                 self.logger.debug("[RP]转发链最近员工 wxuser_id:{}".format(
                     last_employee_recom_id))
@@ -373,7 +373,8 @@ class RedpacketPageService(PageService):
             if wxuser.employee_id:
                 gen.Return(is_employee)
             else:
-                gen.Return(is_1degree_of_employee(position.id, wxuser.id))
+                is_1degree = yield is_1degree_of_employee(position.id, wxuser.id)
+                gen.Return(is_1degree)
         else:
             raise ValueError(msg.RED_PACKET_CONFIG_TARGET_VALUE_ERROR)
 

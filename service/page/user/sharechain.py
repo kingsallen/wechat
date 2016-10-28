@@ -1,13 +1,10 @@
 # coding=utf-8
 
 import tornado.gen as gen
-import conf.common as const
-from util.tool.http_tool import http_post
 
-from util.common import ObjectDict
+import conf.common as const
 from service.page.base import PageService
 from util.tool.date_tool import curr_now
-from setting import settings
 
 
 class SharechainPageService(PageService):
@@ -117,6 +114,25 @@ class SharechainPageService(PageService):
             "status": const.OLD_YES
         })
         raise gen.Return(bool(employee))
+
+    @gen.coroutine
+    def _is_hr(self, position_id, recom_id):
+        # SQL_CHECK_EMPLOYEE_IS_HR = """
+        # SELECT ha.id FROM user_hr_account ha
+        # INNER JOIN job_position jp ON jp.company_id = ha.company_id
+        # WHERE jp.id = %s AND ha.wxuser_id = %s
+        # """
+        position = yield self.position_ds.get_position({
+            "id": position_id
+        })
+        company_id = position.company_id
+
+        record = yield self.user_hr_account_ds.get_hr_account({
+            "wxuser_id": recom_id,
+            "company_id": company_id
+        })
+
+        raise gen.Return(bool(record))
 
     @gen.coroutine
     def _no_existed_record(self, recom):
@@ -250,3 +266,108 @@ class SharechainPageService(PageService):
                         },
                         fields={"status": 0}
                     )
+
+    @gen.coroutine
+    def _get_latest_recom_record(self, position_id, wxuser_id, fixed_now):
+        # SQL_GET_LATEST_RECOM_RECORD = """
+        # SELECT position_id, presentee_id, depth, recom_id, click_time
+        # FROM recom_record
+        # WHERE position_id = %s
+        #   AND presentee_id = %s
+        #   AND click_time <= '%s'
+        # ORDER BY click_time DESC
+        # LIMIT 1
+        # """
+
+        record = yield self.stats_recom_record_dao.get_stats_recom_record(
+            conds={
+                "position_id": position_id,
+                "presentee_id": wxuser_id,
+                "click_time": [fixed_now, "<="]
+            },
+            appends=['ORDER BY click_time DESC']
+        )
+        raise gen.Return(record)
+
+    @gen.coroutine
+    def get_referral_employee_wxuser_id(self, wxuser_id=None, position_id=None):
+        """
+        返回 wxuser_id 申请职位时,是否经过了员工内推.
+        如果经过了员工内推,返回内推员工 user_wx_user id
+        :param wxuser_id: 申请人 user_wx_user id
+        :param position_id: 被申请职位 id
+        :return: 如果有内推员工,返回内推员工 user_wx_user id; 如果没有内推员工或参数不全
+        ,返回 0.
+        返回的内推员工 wxuser id 以这次申请点击时候的链路为准.
+        如果这个用户看了其他包含员工转发的链路, 但是没有从这条链路申请职位,
+            是不能正常获取到员工 wxuser id 的.
+        """
+
+        is_employee = yield self._is_valid_employee(position_id, wxuser_id)
+
+        if is_employee(position_id, wxuser_id):
+            raise gen.Return(0)
+
+        fixed_now = curr_now()
+
+        # 获取这条申请的 recom_record 条目
+        recom_record = yield self._get_latest_recom_record(position_id, wxuser_id, fixed_now)
+
+        # 如果是直接点入申请职位的, 不存在内推员工
+        if len(recom_record) == 0:
+            return 0
+
+        # 获取 recom_record 中的 recom_id
+        recom_id = recom_record["recom_id"]
+        click_time = recom_record["click_time"]
+
+        # 查找 “最初推荐人” 的 recom_record 的记录，如果这条记录的 depth 是 0，那么这条记录就是内推
+        recom_record_of_recom = yield self._get_latest_recom_record(
+                position_id, recom_id, click_time)
+
+        # 如果查不到最初联系人, 说明这条链路没有被截断过
+        # 并且 recom_id 这个人是自己点 JD 也访问的
+        if not recom_record_of_recom:
+            # 如果直接访问的人是认证员工,返回认证员工的 id
+            is_employee = yield self._is_valid_employee(position_id, recom_id)
+            is_hr = yield self._is_hr(position_id, recom_id)
+            if is_employee or is_hr:
+                raise gen.Return(recom_id)
+            else:
+                raise gen.Return(0)
+
+        # 如果可以查到最初联系人, 说明这个链路被截断过
+        # 那么在被截断的时候, 当时的 presentee_id 就是内推员工 id
+        if recom_record_of_recom["depth"] == 0 and recom_id != wxuser_id:
+            raise gen.Return(recom_id)
+        else:
+            raise gen.Return(0)
+
+    def is_1degree_of_employee(self, position_id, wxuser_id):
+        """
+        返回是否是员工一度
+        仅限于新版红包调用
+        :param position_id:
+        :param wxuser_id:
+        :return: bool
+        """
+        fixed_now = curr_now()
+
+        recom_record = yield self._get_latest_recom_record(position_id, wxuser_id, fixed_now)
+
+        if not recom_record or recom_record.depth != 1:
+            raise gen.Return(False)
+
+        recom_id = recom_record.recom_id
+        click_time = recom_record.click_time
+
+        recom_record_of_recom = yield self._get_latest_recom_record(position_id, recom_id, click_time)
+
+        if recom_record_of_recom and recom_record_of_recom.depth == 0:
+            raise gen.Return(True)
+
+        is_employee = yield self._is_valid_employee(position_id, recom_id)
+        if not recom_record_of_recom and is_employee:
+            raise gen.Return(True)
+
+        raise gen.Return(False)

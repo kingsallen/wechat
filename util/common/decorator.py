@@ -10,7 +10,6 @@ from tornado.locks import Semaphore
 from tornado.web import MissingArgumentError
 
 import conf.message as meg_const
-from util.common import ObjectDict
 from util.common.cache import BaseRedis
 
 
@@ -124,3 +123,15 @@ def check_signature(func):
                 yield func(self, *args, **kwargs)
     return wrapper
 
+#todo (yiliang) 临时封锁手机浏览器打开网页
+def check_outside_wechat(func):
+    @functools.wraps(func)
+    @gen.coroutine
+    def wrapper(self, *args, **kwargs):
+        if not self.in_wechat:
+            self.write("<span style='font-size: 24px'>请在微信中打开</span>")
+            self.finish()
+            return
+        else:
+            yield func(*args, **kwargs)
+    return wrapper

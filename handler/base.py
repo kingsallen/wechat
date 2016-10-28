@@ -19,11 +19,11 @@ from tornado import gen, web
 from app import logger
 from oauth.wechat import WeChatOauth2Service, WeChatOauthError, JsApi
 from util.common import ObjectDict
-from util.common.decorator import check_signature
+from util.common.decorator import check_signature, check_outside_wechat
 from util.tool.date_tool import curr_now
 from util.tool.json_tool import encode_json_dumps, json_dumps
 from util.tool.str_tool import to_str, to_hex, from_hex
-from util.tool.url_tool import make_url, url_subtract_query
+from util.tool.url_tool import url_subtract_query
 
 import conf.message as msg_const
 import conf.common as constant
@@ -64,9 +64,6 @@ class BaseHandler(MetaBaseHandler):
     def initialize(self, event):
         # 日志需要，由 route 定义
         self._event = event
-
-    def __init__(self, application, request, **kwargs):
-        super().__init__(application, request, **kwargs)
         # 全部 arguments
         self.params = self._get_params()
         # api 使用， json arguments
@@ -82,7 +79,6 @@ class BaseHandler(MetaBaseHandler):
         self._qx_wechat = None
         self._unionid = None
         self._wxuser = None
-
         # 处理 oauth 的 service, 会在使用时初始化
         self._oauth_service = None
 
@@ -155,6 +151,7 @@ class BaseHandler(MetaBaseHandler):
         self._log_info = dict(value)
 
     # PUBLIC API
+    @check_outside_wechat
     @check_signature
     @gen.coroutine
     def prepare(self):
@@ -174,8 +171,8 @@ class BaseHandler(MetaBaseHandler):
 
         self.logger.debug("code:{}, state:{}, request_url:{} ".format(code, state, self.request.uri))
 
-        # 用户同意授权
         if self.in_wechat:
+            # 用户同意授权
             if code:
                 # 来自 qx 的授权, 获得 userinfo
                 if state == wx_constant.WX_OAUTH_DEFAULT_STATE:
@@ -189,11 +186,20 @@ class BaseHandler(MetaBaseHandler):
                 else:
                     self.logger.debug("来自企业号的静默授权")
                     self._unionid = from_hex(state)
-                    openid = yield self._get_user_openid(code)
-                    self._wxuser = yield self._handle_ent_openid(
-                        openid, self._unionid)
+                    try:
+                        openid = yield self._get_user_openid(code)
+                    except WeChatOauthError as e:
+                        # 获取 state 和 code 以后，
+                        # 如果用户再次刷新该页面，就会发生 invalid code 问题，
+                        # 忽略
+                        if 'invalid code' in str(e):
+                            self.lgger.debug("用户刷新授权跳转页，忽略 invalid code 错误")
+                            pass
+                    else:
+                        self._wxuser = yield self._handle_ent_openid(
+                            openid, self._unionid)
 
-            if state and not code:  # 用户拒绝授权
+            elif state:  # 用户拒绝授权
                 # TODO 拒绝授权用户，是否让其继续操作? or return
                 pass
 
@@ -676,6 +682,10 @@ class BaseHandler(MetaBaseHandler):
             "message": message,
             "data": data
         })
+
+        if status_code == msg_const.FAILURE and http_code == 200:
+            http_code = 416
+
         self.set_header("Content-Type", "application/json; charset=utf-8")
         self.log_info = {"res_type": "json", "status_code": status_code}
         self.set_status(http_code)
