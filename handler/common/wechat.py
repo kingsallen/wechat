@@ -16,7 +16,7 @@ class WechatHandler(BaseHandler):
     @gen.coroutine
     def get(self):
 
-        self.send_json(
+        self.send_json_success(
                 data={
                     "a": 'hello world!'
                 }

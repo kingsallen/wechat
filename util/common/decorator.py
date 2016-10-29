@@ -24,9 +24,7 @@ def handle_response(func):
         except Exception as e:
             self.logger.error(e)
             if self.request.headers.get("Accept", "").startswith("application/json"):
-                self.send_json(self, data={}, http_code=416,
-                               status_code=meg_const.SUCCESS,
-                               message=meg_const.RESPONSE_FAILURE)
+                self.send_json_error()
             else:
                 self.write_error(500)
                 return

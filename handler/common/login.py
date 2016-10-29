@@ -58,7 +58,4 @@ class LoginHandler(BaseHandler):
                 self.redirect(self.params.next_url)
                 return
 
-        self.send_json(
-            status_code=msg_const.FAILURE,
-            message=msg_const.LOGIN_FAILURE,
-            data={})
+        self.send_json_error()

@@ -53,7 +53,7 @@ class ImPageService(PageService):
             "hraccount_id": hr_id
         })
 
-        append = "AND (hr_chat_time is null OR hr_chat_time < {})".format(chatroom.create_time)
+        append = " AND (`hr_chat_time` is null OR `hr_chat_time` < {})".format(chatroom.create_time)
         chat_num = yield self.hr_wx_hr_chat_ds.get_chats_num(
             conds={
                 "chatlist_id": chatroom.id,
