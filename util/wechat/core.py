@@ -157,7 +157,7 @@ class WechatTemplateMessager(object):
             wechat.access_token, openid, template.wx_template_id, link,
             json_data)
         yield self._save_sending_log(
-            wechat, openid, template.wx_template_id, link, json_data,
+            wechat, openid, template.sys_template_id, link, json_data,
             template.topcolor, res)
         raise gen.Return(ret)
 
