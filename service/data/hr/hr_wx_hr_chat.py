@@ -34,8 +34,9 @@ class HrWxHrChatDataService(DataService):
 
     @cache(ttl=60)
     @gen.coroutine
-    def get_chats(self, conds, fields, options=None, appends=None, index='', params=None):
+    def get_chats(self, conds, fields=None, options=None, appends=None, index='', params=None):
 
+        fields = fields or []
         options = options or []
         appends = appends or []
         params = params or []

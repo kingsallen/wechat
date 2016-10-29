@@ -16,10 +16,13 @@ class UnreadCountHandler(BaseHandler):
 
         if publisher:
             # JD页未读消息
+            self.logger.debug("single")
             chat_num = yield self.im_ps.get_unread_chat_num(self.current_user.sysuser.id, publisher)
             self.send_json_success(data=chat_num)
 
         else:
+            self.logger.debug("ALL")
+
             # 侧边栏我的消息未读消息数
             chat_num = yield self.im_ps.get_all_unread_chat_num(self.current_user.sysuser.id)
             self.send_json_success(data=chat_num)
