@@ -94,10 +94,12 @@ def async_das_get(route, jdata, timeout=5, method='GET'):
     """可用 HTTP 动词为 GET 和 DELETE
     临时接 DAS 使用，后续迁移到基础服务"""
 
+    logger.debug("[infra][async_das_get][jdata: {}] ".format(jdata))
     if method.lower() not in "get delete":
         raise ValueError("method is not in GET and DELETE")
 
     url = url_concat("{0}/{1}".format(settings['das'], route), jdata)
+    logger.debug("[infra][async_das_get][url: {}] ".format(url))
     http_client = tornado.httpclient.AsyncHTTPClient()
     response = yield http_client.fetch(
         url, request_timeout=timeout, method=method.upper())

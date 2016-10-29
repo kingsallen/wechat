@@ -310,11 +310,13 @@ class PositionHandler(BaseHandler):
                 if res:
                     last_recom_id = yield self.sharechain_ps.get_referral_employee_wxuser_id(self.current_user.wxuser.id, position_info.id)
 
-        yield self.position_ps.send_candidate_view_position(params={
+        res = yield self.position_ps.send_candidate_view_position(params={
             "wxuser_id": self.current_user.wxuser.id,
             "position_id": position_info.id,
             "from_employee": 1 if last_recom_id else 0,
         })
+
+        self.logger.debug("刷新链路： %s" % res)
 
         raise gen.Return(last_recom_id)
 

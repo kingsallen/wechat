@@ -290,7 +290,7 @@ class DB(object):
         # 限制条件
         if isinstance(conds, list) and len(conds) > 0:
             sql += " WHERE "
-            sql += " and ".join(conds)
+            sql += " AND ".join(conds)
         # SQL后置选项
         if isinstance(appends, list) and len(appends) > 0:
             sql += " ".join(appends)
@@ -311,7 +311,7 @@ class DB(object):
         # 限制条件
         if isinstance(conds, list) and len(conds) > 0:
             sql += " WHERE "
-            sql += " and ".join(conds)
+            sql += " AND ".join(conds)
 
         return sql
 
@@ -348,7 +348,7 @@ class DB(object):
         # 限制条件
         if isinstance(conds, list) and len(conds) > 0:
             sql += " WHERE "
-            sql += " and ".join(conds)
+            sql += " AND ".join(conds)
         # SQL后置选项
         if isinstance(appends, list) and len(appends) > 0:
             sql += " ".join(appends)
@@ -391,7 +391,7 @@ class DB(object):
         # 限制条件
         if isinstance(conds, list) and len(conds) > 0:
             sql += " WHERE "
-            sql += " and ".join(conds)
+            sql += " AND ".join(conds)
         # SQL后置选项
         if isinstance(appends, list) and len(appends) > 0:
             sql += " ".join(appends)
