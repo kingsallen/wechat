@@ -12,7 +12,7 @@ import conf.wechat as wx
 from util.common import ObjectDict
 from util.common.decorator import check_signature
 from util.tool.url_tool import make_url
-from util.tool.str_tool import gen_salary
+from util.tool.str_tool import gen_salary, add_item
 from util.wechat.template import position_view_five
 
 from tests.dev_data.user_company_data import data1
@@ -68,18 +68,17 @@ class PositionHandler(BaseHandler):
             module_team = yield self._make_team()
             module_team_position = yield self._make_team_position()
 
-            position_data = ObjectDict({
-                "header": header,
-                "module_job_description": module_job_description,
-                "module_job_require": module_job_require,
-                "module_job_need": module_job_need,
-                "module_feature": module_feature,
-                "module_company_info": module_company_info,
-                "module_position_recommend": module_position_recommend,
-                "module_mate_day": module_mate_day,
-                "module_team": module_team,
-                "module_team_position": module_team_position
-            })
+            position_data = ObjectDict()
+            add_item(position_data, "header", header)
+            add_item(position_data, "module_job_description", module_job_description)
+            add_item(position_data, "module_job_require", module_job_require)
+            add_item(position_data, "module_job_need", module_job_need)
+            add_item(position_data, "module_feature", module_feature)
+            add_item(position_data, "module_company_info", module_company_info)
+            add_item(position_data, "module_position_recommend", module_position_recommend)
+            add_item(position_data, "module_mate_day", module_mate_day)
+            add_item(position_data, "module_team", module_team)
+            add_item(position_data, "module_team_position", module_team_position)
 
             self.logger.debug("position_data: %s" % position_data)
 
@@ -205,10 +204,13 @@ class PositionHandler(BaseHandler):
             if len(data) > 2:
                 break
 
-        res = ObjectDict({
-            "title": "相关职位推荐",
-            "data": data
-        })
+        if len(data) == 0:
+            res = None
+        else:
+            res = ObjectDict({
+                "title": "相关职位推荐",
+                "data": data
+            })
 
         raise gen.Return(res)
 
@@ -235,9 +237,12 @@ class PositionHandler(BaseHandler):
     @gen.coroutine
     def _make_json_job_description(self, position_info):
         """构造职位描述"""
-        data = ObjectDict({
-            "data": position_info.accountabilities,
-        })
+        if not position_info.accountabilities:
+            data = None
+        else:
+            data = ObjectDict({
+                "data": position_info.accountabilities,
+            })
 
         raise gen.Return(data)
 
@@ -245,33 +250,49 @@ class PositionHandler(BaseHandler):
     def _make_json_job_require(self, position_info):
         """构造职位要求"""
         require = []
+
+        self.logger.debug("学历: %s" % position_info.degree)
+        self.logger.debug("工作经验: %s" % position_info.experience)
+        self.logger.debug("语言要求: %s" % position_info.language)
+
         if position_info.degree:
             require.append("学历 {}".format(position_info.degree))
         if position_info.experience:
             require.append("工作经验 {}".format(position_info.experience))
         if position_info.language:
             require.append("语言要求 {}".format(position_info.language))
-        data = ObjectDict({
-            "data":  require
-        })
+
+        if len(require) == 0:
+            data = None
+        else:
+            data = ObjectDict({
+                "data":  require
+            })
 
         raise gen.Return(data)
 
     @gen.coroutine
     def _make_json_job_need(self, position_info):
         """构造职位要求"""
-        data = ObjectDict({
-            "data": position_info.requirement,
-        })
+
+        if not position_info.requirement:
+            data = None
+        else:
+            data = ObjectDict({
+                "data": position_info.requirement,
+            })
 
         raise gen.Return(data)
 
     @gen.coroutine
     def _make_json_job_feature(self, position_info):
         """构造职位福利特色"""
-        data = ObjectDict({
-            "data": position_info.feature,
-        })
+        if not position_info.feature:
+            data = None
+        else:
+            data = ObjectDict({
+                "data": position_info.feature,
+            })
 
         raise gen.Return(data)
 

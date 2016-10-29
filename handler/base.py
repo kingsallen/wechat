@@ -689,6 +689,8 @@ class BaseHandler(MetaBaseHandler):
             "data": data
         })
 
+        self.logger.debug("_send_json: %s" % render_json)
+
         if status_code == msg_const.FAILURE and http_code == 200:
             http_code = 416
 

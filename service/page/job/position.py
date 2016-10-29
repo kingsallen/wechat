@@ -71,17 +71,18 @@ class PositionPageService(PageService):
 
         # 后置处理：
         # 福利特色 需要分割
-        if position.feature:
-            position_res.feature = split(position.feature, ["#"])
+
+        if position_res.feature:
+            position.feature = split(position_res.feature, ["#"])
 
         # 需要折行
-        if position.accountabilities:
-            position_res.accountabilities = split(position.accountabilities)
+        if position_res.accountabilities:
+            position.accountabilities = split(position_res.accountabilities)
         if position.requirement:
-            position_res.requirement = split(position.requirement)
+            position.requirement = split(position_res.requirement)
 
         # 自定义分享模板
-        if position.share_tpl_id:
+        if position_res.share_tpl_id:
             share_conf = yield self.__get_share_conf(position_res.share_tpl_id)
             position.share_title = share_conf.title
             position.share_description = share_conf.share_description

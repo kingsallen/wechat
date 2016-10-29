@@ -97,3 +97,19 @@ def generate_nonce_str(length=32, upper=True):
     if upper:
         ret = ret.upper()
     return ret
+
+def add_item(d, k, v=None, strict=True):
+    '''
+    :param d:  原始字典
+    :param k:  添加的key名称
+    :param v:  添加的value 名称
+    :param strict: 是否做判断(默认将value有值的情况才会添加)
+    :return: False: 原来有这个key, True: 原来没有这个Key
+    '''
+    if not isinstance(d, dict):
+        raise TypeError('can only operate dict.')
+    if strict is False:
+        return d.setdefault(k, v) == v
+    if strict is True and v:
+        return d.setdefault(k, v) == v
+    return None
