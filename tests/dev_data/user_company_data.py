@@ -10,7 +10,7 @@ data1 = [
     {
         'title': "我的团队",
         'longtext': "完美主义 BELLA。设计是一切的开始，我们非常注重细节和整体的把握。",
-        'media_url': 'http://v.qq.com/iframe/player.html?vid=b0338mt86yc&tiny=0&auto=0',
+        'media_url': '//v.qq.com/iframe/player.html?vid=b0338mt86yc&tiny=0&auto=0',
         'media_type': 'video',
         'member_list': [
             {
