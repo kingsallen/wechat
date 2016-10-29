@@ -20,7 +20,7 @@ class HrWxHrChatDao(BaseDao):
             "chatlist_id": self.constant.TYPE_INT,
             "content":     self.constant.TYPE_STRING,
             "pid":         self.constant.TYPE_INT,
-            "speaker":     self.constant.TYPE_INT,
-            "status":      self.constant.TYPE_INT,
+            "speaker":     self.constant.TYPE_INT,  # 0：求职者，1：HR
+            "status":      self.constant.TYPE_INT,  # 0：有效，1：无效
             "create_time": self.constant.TYPE_TIMESTAMP,
         }

@@ -53,17 +53,55 @@ class ImPageService(PageService):
             "hraccount_id": hr_id
         })
 
-        append = " AND (`hr_chat_time` is null OR `hr_chat_time` < '{}')".format(chatroom.create_time)
-        chat_num = yield self.hr_wx_hr_chat_ds.get_chats_num(
+        # 若无聊天，则默认显示1条未读消息
+        if not chatroom:
+            raise gen.Return(1)
+
+        # 查看 HR 的留言
+        chats = yield self.hr_wx_hr_chat_ds.get_chats(
             conds={
                 "chatlist_id": chatroom.id,
-                "speaker": 0,
+                "speaker": 1,
                 "status": 0,
-            },
-            fields=["id"],
-            appends=[append]
+            }
         )
+
+        chat_num = 0
+        if not chatroom.wx_chat_time:
+            chat_num = len(chats)
+        else:
+            for chat in chats:
+                if chatroom.wx_chat_time < chat.create_time:
+                    chat_num += 1
 
         raise gen.Return(chat_num)
 
+    @gen.coroutine
+    def get_all_unread_chat_num(self, user_id):
+
+        """返回求职者所有的未读消息数，供侧边栏我的消息未读消息提示"""
+
+        chatrooms = yield self.hr_wx_hr_chat_list_ds.get_chatroom_list(conds={
+            "sysuser_id": user_id
+        })
+
+        chat_num = 0
+        for chatroom in chatrooms:
+            # 查看 HR 的留言
+            chats = yield self.hr_wx_hr_chat_ds.get_chats(
+                conds={
+                    "chatlist_id": chatroom.id,
+                    "speaker": 1,
+                    "status": 0,
+                }
+            )
+
+            if not chatroom.wx_chat_time:
+                chat_num += len(chats)
+            else:
+                for chat in chats:
+                    if chatroom.wx_chat_time < chat.create_time:
+                        chat_num += 1
+
+        raise gen.Return(chat_num)
 
