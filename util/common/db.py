@@ -130,19 +130,7 @@ class DB(object):
                         return False
                     fields[key] = float(fields[key])
                 elif value == constant.TYPE_TIMESTAMP:
-                    # TODO (panda) 这里 fields[key] 本来就是 datetime 类型，而不是 str
-                    # TODO (panda) 看看是否还要保留 is_time_valid 方法
-
-                    self.logger.debug("aaaaaaaaaaaaaa: %s" % fields[key])
-                    self.logger.debug("aaaaaaaaaaaaaa type: %s" % type(fields[key]))
-                    self.logger.debug("aaaaaaaaaaaaaa format: %s" % constant.TIME_FORMAT)
-
                     fields[key] = fields[key].strftime(constant.TIME_FORMAT)
-
-                    # if not is_time_valid(fields[key], constant.TIME_FORMAT):
-                    #     self.logger.error("Error:[checkFieldType][field type error], Module:{0} Detail:[key: {1} value:{2} format "
-                    #                 "should by {3}]".format(self.__class__.__name__, key, fields[key], constant.TIME_FORMAT))
-                    #     return False
                 else:
                     fields[key] = str(fields[key])
 

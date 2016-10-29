@@ -251,10 +251,6 @@ class PositionHandler(BaseHandler):
         """构造职位要求"""
         require = []
 
-        self.logger.debug("学历: %s" % position_info.degree)
-        self.logger.debug("工作经验: %s" % position_info.experience)
-        self.logger.debug("语言要求: %s" % position_info.language)
-
         if position_info.degree:
             require.append("学历 {}".format(position_info.degree))
         if position_info.experience:
@@ -357,10 +353,13 @@ class PositionHandler(BaseHandler):
         """浏览量达到5次后，向 HR 发布模板消息
         注：只向 HR 平台发布的职位发送模板消息，ATS 同步的职位不发送"""
 
+        self.logger.debug("visitnum: %s" % position_info.visitnum)
         if position_info.visitnum == 4 and position_info.source == 0:
             help_wechat = yield self.wechat_ps.get_wechat(conds={
                 "signature": self.settings.helper_signature
             })
+            self.logger.debug("help_wechat: %s" % help_wechat)
+
             hr_account, hr_wx_user = yield self._make_hr_info(position_info.publisher)
             # 如果企业有公众号，发企业链接，若无，发集合号链接
             if self.current_user.wechat:
@@ -369,6 +368,7 @@ class PositionHandler(BaseHandler):
             else:
                 link = make_url(path.OLD_POSITION_PATH, host=self.settings.qx_host, m="info", pid=position_info.id)
 
+            self.logger.debug("link: %s" % link)
             yield position_view_five(help_wechat.id, hr_wx_user.openid, link, position_info.title,
                                position_info.salary)
 

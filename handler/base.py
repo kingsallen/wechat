@@ -689,8 +689,6 @@ class BaseHandler(MetaBaseHandler):
             "data": data
         })
 
-        self.logger.debug("_send_json: %s" % render_json)
-
         if status_code == msg_const.FAILURE and http_code == 200:
             http_code = 416
 
@@ -754,8 +752,6 @@ class BaseHandler(MetaBaseHandler):
             customs=customs,
             session_id=to_str(self.get_secure_cookie(constant.COOKIE_SESSIONID))
         )
-
-        self.logger.debug("log_info_common: %s" % log_info_common)
 
         log_params.update(log_info_common)
         return log_params
