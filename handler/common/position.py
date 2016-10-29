@@ -361,16 +361,18 @@ class PositionHandler(BaseHandler):
             self.logger.debug("help_wechat: %s" % help_wechat)
 
             hr_account, hr_wx_user = yield self._make_hr_info(position_info.publisher)
-            # 如果企业有公众号，发企业链接，若无，发集合号链接
-            if self.current_user.wechat:
-                link = make_url(path.POSITION_PATH.format(position_info.id), host=self.settings.platform_host,
-                                wechat_signature=self.current_user.wechat.signature)
-            else:
-                link = make_url(path.OLD_POSITION_PATH, host=self.settings.qx_host, m="info", pid=position_info.id)
 
-            self.logger.debug("link: %s" % link)
-            yield position_view_five(help_wechat.id, hr_wx_user.openid, link, position_info.title,
-                               position_info.salary)
+            if hr_wx_user.openid:
+                # 如果企业有公众号，发企业链接，若无，发集合号链接
+                if self.current_user.wechat:
+                    link = make_url(path.POSITION_PATH.format(position_info.id), host=self.settings.platform_host,
+                                    wechat_signature=self.current_user.wechat.signature)
+                else:
+                    link = make_url(path.OLD_POSITION_PATH, host=self.settings.qx_host, m="info", pid=position_info.id)
+
+                self.logger.debug("link: %s" % link)
+                yield position_view_five(help_wechat.id, hr_wx_user.openid, link, position_info.title,
+                                   position_info.salary)
 
     @gen.coroutine
     def _make_team_position(self):
