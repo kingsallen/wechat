@@ -10,7 +10,7 @@ import conf.wechat as wx
 from setting import settings
 from util.common import ObjectDict
 from util.common.singleton import Singleton
-from util.tool.date_tool import curr_now
+from util.tool.date_tool import curr_datetime_now
 
 from app import logger
 from service.data.hr.hr_wx_wechat import HrWxWechatDataService
@@ -131,7 +131,7 @@ class WechatTemplateMessager(object):
         """
         保存模板消息发送结果记录
         """
-        now = curr_now()
+        now = curr_datetime_now()
 
         yield self.log_wx_message_record_ds.create_wx_message_log_record(
             fields={
