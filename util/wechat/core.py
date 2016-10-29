@@ -106,7 +106,9 @@ class WechatTemplateMessager(object):
             body=ujson.encode(jdata),
         )
 
-        raise gen.Return((response.errcode == 0, response))
+        ret = ObjectDict(ujson.decode(response.body))
+
+        raise gen.Return((ret.errcode == 0, ret))
 
     @gen.coroutine
     def _get_template(self, wechat_id, sys_template_id) -> int:
