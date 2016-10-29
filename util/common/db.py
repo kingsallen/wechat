@@ -344,6 +344,7 @@ class DB(object):
                            "length:{3}".format(self.__class__.__name__, fields, type(fields), len(fields)))
             return False
 
+        sql = sql[:-2]
         sql += " FROM {0}".format(table)
         # 限制条件
         if isinstance(conds, list) and len(conds) > 0:
@@ -387,6 +388,7 @@ class DB(object):
                            "length:{3}".format(self.__class__.__name__, fields, type(fields), len(fields)))
             return False
 
+        sql = sql[:-2]
         sql += " FROM {0}".format(table)
         # 限制条件
         if isinstance(conds, list) and len(conds) > 0:
