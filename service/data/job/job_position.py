@@ -10,7 +10,6 @@ from util.common import ObjectDict
 
 class JobPositionDataService(DataService):
 
-    @cache(ttl=60)
     @gen.coroutine
     def get_position(self, conds, fields=[]):
 
