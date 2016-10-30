@@ -9,7 +9,6 @@ from tornado import gen
 from tornado.locks import Semaphore
 from tornado.web import MissingArgumentError
 
-import conf.message as meg_const
 from util.common.cache import BaseRedis
 
 
@@ -108,8 +107,8 @@ def check_signature(func):
     此装饰器用来装饰 tornado.web.RequestHandler 异步方法，
     如：prepare
     """
-    @gen.coroutine
     @functools.wraps(func)
+    @gen.coroutine
     def wrapper(self, *args, **kwargs):
         if self.is_platform:
             key = "wechat_signature"
