@@ -83,7 +83,7 @@ class UserCompanyPageService(PageService):
 
             ObjectDict({'type': 3, 'title': 'template 3', 'data': data3}),
 
-            ObjectDict({'type': 4, 'sub_type': 0, 'title': 'template 4',
+            ObjectDict({'type': 4, 'sub_type': 0, 'title': '公司大事件',
                         'data': data4_1}),
 
             ObjectDict({'type': 4, 'sub_type': 1, 'title': 'template 4',
