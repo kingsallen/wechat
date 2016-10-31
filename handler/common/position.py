@@ -80,6 +80,7 @@ class PositionHandler(BaseHandler):
             add_item(position_data, "module_team_position", module_team_position)
 
             self.logger.debug("position_data: %s" % position_data)
+            self.logger.debug("self.params: %s" % self.params)
 
             self.render_page("position/info.html", data=position_data)
 
