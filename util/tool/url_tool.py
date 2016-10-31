@@ -33,8 +33,8 @@ def make_url(path, params=None, host="", protocol="http", escape=None,
 
     params.update(kwargs)
 
-    # 默认 query 黑名单：m, state, code, _xsrf 不传递
-    _ESCAPE_DEFAULT = ['m', 'state', 'code', '_xsrf']
+    # 默认 query 黑名单：m, state, code, _xsrf , appid不传递
+    _ESCAPE_DEFAULT = ['m', 'state', 'code', '_xsrf', 'appid']
 
     escape = set((escape or []) + _ESCAPE_DEFAULT)
 
