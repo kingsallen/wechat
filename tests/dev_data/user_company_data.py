@@ -11,42 +11,42 @@ WORKING_ENV = [
     {
         'title': "EB, CS, BD办公区域",
         'longtext': "",
-        'media_url': 'http://7xs424.com1.z0.glb.clouddn.com/upload/company_profile/qx/e1.jpeg',
+        'media_url': 'https://cdn.moseeker.com/upload/company_profile/qx/e1.jpeg',
         'media_type': 'image',
         'member_list': []
     },
     {
         'title': "一楼大会议室",
         'longtext': "",
-        'media_url': 'http://7xs424.com1.z0.glb.clouddn.com/upload/company_profile/qx/meetingroom.jpeg',
+        'media_url': 'https://cdn.moseeker.com/upload/company_profile/qx/meetingroom.jpeg',
         'media_type': 'image',
         'member_list': []
     },
     {
         'title': "EB, CS, BD办公区域",
         'longtext': "",
-        'media_url': 'http://7xs424.com1.z0.glb.clouddn.com/upload/company_profile/qx/e2.jpeg',
+        'media_url': 'https://cdn.moseeker.com/upload/company_profile/qx/e2.jpeg',
         'media_type': 'image',
         'member_list': []
     },
     {
         'title': "数据、研发、技术团队办公区域",
         'longtext': "",
-        'media_url': 'http://7xs424.com1.z0.glb.clouddn.com/upload/company_profile/qx/t1.jpeg',
+        'media_url': 'https://cdn.moseeker.com/upload/company_profile/qx/t1.jpeg',
         'media_type': 'image',
         'member_list': []
     },
     {
         'title': "楼梯走廊装饰壁画",
         'longtext': "",
-        'media_url': 'http://7xs424.com1.z0.glb.clouddn.com/upload/company_profile/qx/stair.jpeg',
+        'media_url': 'https://cdn.moseeker.com/upload/company_profile/qx/stair.jpeg',
         'media_type': 'image',
         'member_list': []
     },
     {
         'title': "EB, CS, BD办公区域",
         'longtext': "",
-        'media_url': 'http://7xs424.com1.z0.glb.clouddn.com/upload/company_profile/qx/e3.jpeg',
+        'media_url': 'https://cdn.moseeker.com/upload/company_profile/qx/e3.jpeg',
         'media_type': 'image',
         'member_list': []
     }
