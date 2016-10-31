@@ -18,6 +18,8 @@ class CompanyVisitReqHandler(BaseHandler):
     @gen.coroutine
     def post(self):
         self.guarantee('status')
+        self.params.company_id = self.current_user.company.id
+        self.params.user_id = self.current_user.sysuser.id
         result = yield self.user_company_ps.set_visit_company(self.params)
 
         if not result:
