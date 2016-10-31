@@ -141,18 +141,24 @@ data2 = [
     }
 ]
 
+MEMBERS = [
+    {
+
+    }
+]
+
 data3 = [
     {
-        'title': '招设计师',
-        'link': 'string',
-        'location': '上海, 北京, 广州,',
-        'salary': '12k-15k'
+        'title':    '招设计师',
+        'link':     'http1://platform.moseeker.com/m/position/',
+        'location': '上海, 北京, 广州',
+        'salary':   '12k - 15k'
     },
     {
-        'title': '招设计师',
-        'link': 'string',
-        'location': '上海, 北京, 广州,',
-        'salary': '12k-15k'
+        'title':    '招设计师',
+        'link':     'string',
+        'location': '上海, 北京, 广州',
+        'salary':   '12k - 15k'
     }
 ]
 
