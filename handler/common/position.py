@@ -295,7 +295,7 @@ class PositionHandler(BaseHandler):
     def _make_json_job_company_info(self, company_info):
         """构造职位公司信息"""
         data = ObjectDict({
-            "icon_url": company_info.logo,
+            "icon_url": self.static_url(company_info.logo),
             "name": company_info.name or company_info.abbreviation,
             "descripthon": company_info.introduction,
         })
