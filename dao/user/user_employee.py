@@ -9,7 +9,7 @@ class UserEmployeeDao(BaseDao):
         self.table = "user_employee"
         self.fields_map = {
             "id":                 self.constant.TYPE_INT,
-            "employeeid":         self.constant.TYPE_INT,
+            "employeeid":         self.constant.TYPE_STRING,
             "company_id":         self.constant.TYPE_INT,
             "role_id":            self.constant.TYPE_INT,
             "wxuser_id":          self.constant.TYPE_INT,
