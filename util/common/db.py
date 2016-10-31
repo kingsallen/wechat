@@ -205,7 +205,7 @@ class DB(object):
 
         # SQL后置选项
         if isinstance(appends, list) and len(appends) > 0:
-            sql += " ".join(appends)
+            sql = sql + " " + " ".join(appends)
 
         if index:
             sql += index

@@ -443,10 +443,13 @@ class PositionStarHandler(BaseHandler):
 
         # 收藏操作
         if self.params.star:
-            yield self.user_ps.favorite_position(
+            ret = yield self.user_ps.favorite_position(
                 self.current_user, self.params.pid)
         else:
-            yield self.user_ps.unfavorite_position(
+            ret = yield self.user_ps.unfavorite_position(
                 self.current_user, self.params.pid)
 
-        self.send_json_success()
+        if ret:
+            self.send_json_success()
+        else:
+            self.send_json_error()
