@@ -10,7 +10,7 @@
 from util.common import ObjectDict
 from tornado import gen
 from service.page.base import PageService
-from tests.dev_data.user_company_data import WORKING_ENV, data2, data3,\
+from tests.dev_data.user_company_data import WORKING_ENV, TEAMS, data2, data3,\
                                              data4_1, data4_2, data50
 
 
@@ -34,12 +34,12 @@ class UserCompanyPageService(PageService):
         response = ObjectDict({'status': 0, 'message': 'sucdess'})
         header = ObjectDict({
             'type': 'team' if team_flag else 'company',
-            'name': '仟寻招聘',
-            'description': 'help people find job',
+            'name': '仟寻 MoSeeker',
+            'description': "你的职场向导",
             'icon': '',
-            'banner': '',
+            'banner': 'https://cdn.moseeker.com/upload/company_profile/qx/banner_qx.jpeg',
         })
-        conds = {'user_id': [user_id, '='], 'company_id': [company_id, '=']}
+        conds = {'user_id': user_id, 'company_id': company_id}
 
         fllw_cmpy = yield self.user_company_follow_ds.get_fllw_cmpy(
                         conds=conds, fields=['id', 'company_id'])
@@ -61,10 +61,13 @@ class UserCompanyPageService(PageService):
 
         raise gen.Return(response)
 
-    def _add_company_data(self, data):
+    @staticmethod
+    def _add_company_data(data):
         """构建公司主页的豆腐干们"""
         data.template_total = 4
+
         data.templates = [
+
             ObjectDict({
                 'type': 1,
                 'sub_type': 'less',
@@ -73,13 +76,23 @@ class UserCompanyPageService(PageService):
                 'more_link': 'more_link_test'
             }),
 
-            # ObjectDict({'type': 1, 'sub_type': 'middle', 'title': 'template 1',
-            #             'data': data1}),
-            #
-            # ObjectDict({'type': 1, 'sub_type': 'less', 'title': 'template 1',
-            #             'data': data1}),
-
             ObjectDict({'type': 2, 'title': 'template 2', 'data': data2}),
+
+            # ObjectDict({
+            #     'type':      1,
+            #     'sub_type':  'less',
+            #     'title':     '办公环境',
+            #     'data':      WORKING_ENV,
+            #     'more_link': 'more_link_test'
+            # }),
+
+            ObjectDict({
+                'type':      1,
+                'sub_type':  'less',
+                'title':     '我们的团队',
+                'data':      TEAMS,
+                'more_link': 'more_link_test'
+            }),
 
             ObjectDict({'type': 3, 'title': 'template 3', 'data': data3}),
 
@@ -95,7 +108,8 @@ class UserCompanyPageService(PageService):
 
         ]
 
-    def _add_team_data(self, data):
+    @staticmethod
+    def _add_team_data(data):
         """构建团队主页的豆腐干们"""
         data.template_total = 4
         data.templates = [
