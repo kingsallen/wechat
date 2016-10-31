@@ -298,7 +298,7 @@ class PositionHandler(BaseHandler):
         data = ObjectDict({
             "icon_url": self.static_url(company_info.logo),
             "name": company_info.name or company_info.abbreviation,
-            "descripthon": company_info.introduction,
+            "description": company_info.introduction,
         })
 
         raise gen.Return(data)
