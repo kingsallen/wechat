@@ -10,7 +10,7 @@ import conf.message as msg
 import conf.wechat as wx
 
 from util.common import ObjectDict
-from util.common.decorator import check_signature
+from util.common.decorator import handle_response
 from util.tool.url_tool import make_url
 from util.tool.str_tool import gen_salary, add_item
 from util.wechat.template import position_view_five
@@ -20,7 +20,6 @@ from tests.dev_data.user_company_data import data1
 
 class PositionHandler(BaseHandler):
 
-    @check_signature
     @gen.coroutine
     def get(self, position_id):
         """显示 JD 页
@@ -432,3 +431,21 @@ class PositionHandler(BaseHandler):
         })
 
         raise gen.Return(res)
+
+
+class PositionStarHandler(BaseHandler):
+    """处理收藏（加星）操作"""
+
+    @handle_response
+    def post(self):
+        self.guarantee('star', 'pid')
+
+        # 收藏操作
+        if self.params.star:
+            yield self.user_ps.favorite_position(
+                self.current_user, self.params.pid)
+        else:
+            yield self.user_ps.unfavorite_position(
+                self.current_user, self.params.pid)
+
+        self.send_json_success()
