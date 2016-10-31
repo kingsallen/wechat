@@ -22,14 +22,16 @@ class CellphoneBindHandler(BaseHandler):
     @gen.coroutine
     def get(self):
 
-        response = yield self.cellphone_ps.send_valid_code(
+        result = yield self.cellphone_ps.send_valid_code(
             mobile_numb=self.params.get('mobile', None),
             app_id=self.app_id
         )
-        self._send_json(data=None, status_code=response.status,
-                       message=response.message)
 
-        return
+        if not result:
+            self.send_json_error()
+            return
+        self.send_json_success()
+
 
     @gen.coroutine
     def post(self):
@@ -46,8 +48,8 @@ class CellphoneBindHandler(BaseHandler):
         )
 
         if response.status != 0:
-            self._send_json(data=None, status_code=response.status,
-                       message=response.message)
+            self.send_json_error(message=response.message)
+            return
 
         new_user_id = self.cellphone_ps.wx_pc_combine(
             mobile=self.params.mobile,
@@ -59,7 +61,6 @@ class CellphoneBindHandler(BaseHandler):
             self.clear_cookie(name=const.SESSION_ID)
         elif new_user_id is None:
             self.send_json_error()
+            return
 
         self.send_json_success()
-
-        return

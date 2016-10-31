@@ -39,8 +39,7 @@ class UserCompanyPageService(PageService):
             'icon': '',
             'banner': '',
         })
-        conds = {'user_id': [user_id, '='],
-                       'company_id': [company_id, '=']}
+        conds = {'user_id': [user_id, '='], 'company_id': [company_id, '=']}
 
         fllw_cmpy = yield self.user_company_follow_ds.get_fllw_cmpy(
                         conds=conds, fields=['id', 'company_id'])
@@ -80,7 +79,6 @@ class UserCompanyPageService(PageService):
         :param param: dict include target user company ids.
         :return:
         """
-        response = ObjectDict({})
         user_id, company_id = param.get('user_id'), param.get('company_id'),
         status, source = param.get('status'), param.get('source', 0)
 
@@ -89,20 +87,16 @@ class UserCompanyPageService(PageService):
             conds=conds, fields=['id', 'user_id', 'company_id'])
 
         if company:
-            result = yield self.user_company_follow_ds.update_fllw_cmpy(
+            response = yield self.user_company_follow_ds.update_fllw_cmpy(
                 conds=conds,
                 fields={'status': status, 'source': source})
         else:
-            result = yield self.user_company_follow_ds.create_fllw_cmpy(
+            response = yield self.user_company_follow_ds.create_fllw_cmpy(
                 fields={'user_id': user_id, 'company_id': company_id,
                         'status': status, 'source': source})
+        result = True if response else False
 
-        if result:
-            response.status, response.message = 0, 'success'
-        else:
-            response.status, response.message = 1, 'failure'
-
-        raise gen.Return(response)
+        raise gen.Return(result)
 
     @gen.coroutine
     def set_visit_company(self, param):
@@ -111,30 +105,26 @@ class UserCompanyPageService(PageService):
         :param param: dict include target user company ids.
         :return:
         """
-        response = ObjectDict({})
         user_id, company_id = param.get('user_id'), param.get('company_id'),
         status, source = param.get('status'), param.get('source', 0)
 
         if int(status) == 0:
-            response.status, response.message = 1, 'ignore'
-            raise gen.Return(response)
+            # response.status, response.message = 1, 'ignore'
+            raise gen.Return(False)
 
         conds = {'user_id': [user_id, '='], 'company_id': [company_id, '=']}
         company = yield self.user_company_visit_req_ds.get_visit_cmpy(
                             conds, fields=['id', 'user_id', 'company_id'])
 
         if company:
-            result = yield self.user_company_visit_req_ds.update_visit_cmpy(
+            response = yield self.user_company_visit_req_ds.update_visit_cmpy(
                             conds=conds,
                             fields={'status': status, 'source': source})
         else:
-            result = yield self.user_company_visit_req_ds.create_visit_cmpy(
+            response = yield self.user_company_visit_req_ds.create_visit_cmpy(
                 fields={'user_id': user_id, 'company_id': company_id,
                         'status': status, 'source': source})
 
-        if result:
-            response.status, response.message = 0, 'success'
-        else:
-            response.status, response.message = 1, 'failure'
+        result = True if response else False
 
-        raise gen.Return(response)
+        raise gen.Return(result)
