@@ -620,7 +620,7 @@ class BaseHandler(MetaBaseHandler):
                 path = os.path.join(kwargs['mid_path'], path)
             self.logger.debug("static_url path 2: %s" % path)
             self.logger.debug("static_url static_domain: %s" % self.settings['static_domain'])
-            path = urljoin(self.settings['static_domain'], path)
+            path = urllib.parse.urljoin(self.settings['static_domain'], path)
             self.logger.debug("static_url path 3: %s" % path)
 
         self.logger.debug("static_url path 4: %s" % path)
