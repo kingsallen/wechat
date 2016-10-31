@@ -437,6 +437,7 @@ class PositionStarHandler(BaseHandler):
     """处理收藏（加星）操作"""
 
     @handle_response
+    @gen.coroutine
     def post(self):
         self.guarantee('star', 'pid')
 
