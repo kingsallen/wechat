@@ -610,14 +610,22 @@ class BaseHandler(MetaBaseHandler):
 
     def static_url(self, path, include_host=None, **kwargs):
         """获取 static_url"""
+
+        self.logger.debug("static_url path 1: %s" % path)
+
         if not path:
             return None
         if not path.startswith("http"):
             if "mid_path" in kwargs:
                 path = os.path.join(kwargs['mid_path'], path)
             path = urljoin(self.settings['static_domain'], path)
+
+        self.logger.debug("static_url static_domain: %s" % self.settings['static_domain'])
+        self.logger.debug("static_url path 2: %s" % path)
         if not path.startswith("http") and include_host is not None:
             path = include_host + ":" + path
+
+        self.logger.debug("static_url path 3: %s" % path)
         return path
 
     def on_finish(self):
