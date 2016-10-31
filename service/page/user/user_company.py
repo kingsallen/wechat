@@ -10,7 +10,7 @@
 from util.common import ObjectDict
 from tornado import gen
 from service.page.base import PageService
-from tests.dev_data.user_company_data import data1, data2, data3,\
+from tests.dev_data.user_company_data import WORKING_ENV, data2, data3,\
                                              data4_1, data4_2, data50
 
 
@@ -39,39 +39,94 @@ class UserCompanyPageService(PageService):
             'icon': '',
             'banner': '',
         })
-        conds = {'user_id': [user_id, '='],
-                       'company_id': [company_id, '=']}
+        conds = {'user_id': [user_id, '='], 'company_id': [company_id, '=']}
 
         fllw_cmpy = yield self.user_company_follow_ds.get_fllw_cmpy(
                         conds=conds, fields=['id', 'company_id'])
         vst_cmpy = yield self.user_company_visit_req_ds.get_visit_cmpy(
                         conds=conds, fields=['id', 'company_id'])
-
         data = ObjectDict({'header': header})
-        data.templates_total = 4
+
         data.relation = ObjectDict({
-            'follow': self.constant.YES if fllw_cmpy else self.constant.NO,
+            'follow':     self.constant.YES if fllw_cmpy else self.constant.NO,
             'want_visit': self.constant.YES if vst_cmpy else self.constant.NO
         })
-        data.templates = [
-            ObjectDict({'type': 1, 'sub_type': 'full', 'title': 'template 1',
-                        'data': data1, 'more_link': 'more_link_test'}),
-            ObjectDict({'type': 1, 'sub_type': 'middle', 'title': 'template 1',
-                        'data': data1}),
-            ObjectDict({'type': 1, 'sub_type': 'less', 'title': 'template 1',
-                        'data': data1}),
-            ObjectDict({'type': 2, 'title': 'template 2', 'data': data2}),
-            ObjectDict({'type': 3, 'title': 'template 3', 'data': data3}),
-            ObjectDict({'type': 4, 'sub_type': 0, 'title': 'template 4',
-                        'data': data4_1}),
-            ObjectDict({'type': 4, 'sub_type': 1, 'title': 'template 4',
-                        'data': data4_2}),
-            ObjectDict({'type': 5, 'title': 'template 5', 'data': None}),
-            ObjectDict({'type': 50, 'title': 'template 50', 'data': data50}),
-        ]
+
+        if team_flag:
+            self._add_team_data(data)
+        else:
+            self._add_company_data(data)
+
         response.data = data
 
         raise gen.Return(response)
+
+    def _add_company_data(self, data):
+        """构建公司主页的豆腐干们"""
+        data.template_total = 4
+        data.templates = [
+            ObjectDict({
+                'type': 1,
+                'sub_type': 'less',
+                'title': '办公环境',
+                'data': WORKING_ENV,
+                'more_link': 'more_link_test'
+            }),
+
+            # ObjectDict({'type': 1, 'sub_type': 'middle', 'title': 'template 1',
+            #             'data': data1}),
+            #
+            # ObjectDict({'type': 1, 'sub_type': 'less', 'title': 'template 1',
+            #             'data': data1}),
+
+            ObjectDict({'type': 2, 'title': 'template 2', 'data': data2}),
+
+            ObjectDict({'type': 3, 'title': 'template 3', 'data': data3}),
+
+            ObjectDict({'type': 4, 'sub_type': 0, 'title': 'template 4',
+                        'data': data4_1}),
+
+            ObjectDict({'type': 4, 'sub_type': 1, 'title': 'template 4',
+                        'data': data4_2}),
+
+            ObjectDict({'type': 5, 'title': 'template 5', 'data': None}),
+
+            ObjectDict({'type': 50, 'title': 'template 50', 'data': data50}),
+
+        ]
+
+    def _add_team_data(self, data):
+        """构建团队主页的豆腐干们"""
+        data.template_total = 4
+        data.templates = [
+            # ObjectDict({
+            #     'type': 1,
+            #     'sub_type': 'full',
+            #     'title': 'template 1',
+            #     'data': data1,
+            #     'more_link': 'more_link_test'}),
+            #
+            # ObjectDict({'type': 1, 'sub_type': 'middle', 'title': 'template 1',
+            #             'data': data1}),
+            #
+            # ObjectDict({'type': 1, 'sub_type': 'less', 'title': 'template 1',
+            #             'data': data1}),
+
+            ObjectDict({'type': 2, 'title': 'template 2', 'data': data2}),
+
+            ObjectDict({'type': 3, 'title': 'template 3', 'data': data3}),
+
+            ObjectDict({'type': 4, 'sub_type': 0, 'title': 'template 4',
+                        'data': data4_1}),
+
+            ObjectDict({'type': 4, 'sub_type': 1, 'title': 'template 4',
+                        'data': data4_2}),
+
+            ObjectDict({'type': 5, 'title': 'template 5', 'data': None}),
+
+            ObjectDict({'type': 50, 'title': 'template 50', 'data': data50}),
+
+        ]
 
     @gen.coroutine
     def set_company_follow(self, param):
