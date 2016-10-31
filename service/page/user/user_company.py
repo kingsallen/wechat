@@ -95,15 +95,19 @@ class UserCompanyPageService(PageService):
             }),
 
 
-            ObjectDict({'type': 4, 'sub_type': 0, 'title': '公司大事件',
-                        'data': data4_1}),
+            ObjectDict({
+                'type': 4,
+                'sub_type': 0,
+                'title': '公司大事件',
+                'data': data4_1
+            }),
 
             ObjectDict({'type': 4, 'sub_type': 1, 'title': 'template 4',
                         'data': data4_2}),
 
             ObjectDict({'type': 5, 'title': 'template 5', 'data': None}),
 
-            ObjectDict({'type': 50, 'title': 'template 50', 'data': data50}),
+            ObjectDict({'type': 50, 'title': 'address', 'data': data50}),
 
         ]
 

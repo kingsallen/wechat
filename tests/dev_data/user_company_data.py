@@ -81,7 +81,7 @@ TEAMS = [
         'member_list': []
     },
     {
-        'title': "BD团队",
+        'title': "商务拓展团队",
         'longtext': "",
         'media_url': 'https://cdn.moseeker.com/upload/company_profile/qx/bd.jpeg',
         'media_type': 'image',
@@ -91,44 +91,18 @@ TEAMS = [
 
 data1 = [
     {
-        'title': "我的团队",
+        'title': "xsss",
         'longtext': "完美主义 BELLA。设计是一切的开始，我们非常注重细节和整体的把握。",
         'media_url': '//v.qq.com/iframe/player.html?vid=b0338mt86yc&tiny=0&auto=0',
         'media_type': 'video',
-        'member_list': [
-            {
-                'icon': 'http://o8g4x4uja.bkt.clouddn.com/xiaokai_avatar.png',
-                'name': '摇了也',
-                'title': '产品总监',
-                'description': '完美主义 BELLA。设计是一切的开始，我们非常注重细节和整体的把握，旨在给用户一种优雅旨在给用户高效的体验。',
-            },
-            {
-                'icon': 'http://o8g4x4uja.bkt.clouddn.com/xiaokai_avatar.png',
-                'name': '摇了也',
-                'title': '产品总监',
-                'description': '完美主义 BELLA。设计是一切的开始，我们非常注重细节和整体的把握，旨在给用户一种优雅旨在给用户高效的体验。',
-            },
-        ]
+        'member_list': []
     },
     {
         'title': "我的团队",
         'longtext': "完美主义 BELLA。设计是一切的开始，我们非常注重细节和整体的把握，旨在给用户一种优雅旨在给用户高效的体验。完美主义 BELLA。设计是一切的开始，我们非常注重细节和整体的把握。",
         'media_url': 'http://o8g4x4uja.bkt.clouddn.com/15008518202_c265dfa55f_h.jpg',
         'media_type': 'image',
-        'member_list': [
-            {
-                'icon': 'http://o8g4x4uja.bkt.clouddn.com/xiaokai_avatar.png',
-                'name': '摇了也',
-                'title': '产品总监',
-                'description': '完美主义 BELLA。设计是一切的开始，我们非常注重细节和整体的把握，旨在给用户一种优雅旨在给用户高效的体验。',
-            },
-            {
-                'icon': 'http://o8g4x4uja.bkt.clouddn.com/xiaokai_avatar.png',
-                'name': '摇了也',
-                'title': '产品总监',
-                'description': '完美主义 BELLA。设计是一切的开始，我们非常注重细节和整体的把握，旨在给用户一种优雅旨在给用户高效的体验。',
-            }
-        ]
+        'member_list': []
     }
 ]
 
@@ -143,7 +117,30 @@ data2 = [
 
 MEMBERS = [
     {
-
+        'title': "潘老师",
+        'longtext': "技术经理\n"
+                    "行胜于言，希望用技术的力量来提高用户的生活品质。",
+        'media_url': '//v.qq.com/x/page/e0340strm66.html',
+        'media_type': 'video',
+        'member_list': []
+    },
+    {
+        'title': "Melissa & Julie",
+        'longtext': "客户成功团队成员\n"
+                    "热衷于规划与整理，连出去旅游都能整出一个action plan。"
+                    "坚信流程上的well organized，可以使工作more efficient。",
+        'media_url': '//v.qq.com/x/page/u03404uht6u.html',
+        'media_type': 'video',
+        'member_list': []
+    },
+    {
+        'title': "Kayle",
+        'longtext': "大客户经理\n"
+                    "名字来源于北欧神话里的大天使长，本人狮子座阳光灿烂，"
+                    "喜欢和客户沟通成功合作那一刻的成就感，喜欢交朋友。",
+        'media_url': '//v.qq.com/x/page/h03408ryvbo.html',
+        'media_type': 'video',
+        'member_list': []
     }
 ]
 
