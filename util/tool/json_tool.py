@@ -35,3 +35,12 @@ def encode_json_dumps(p_dict):
         raise ValueError("p_dict is not a dict instance.")
     return json.dumps(tornado.escape.json_encode(p_dict), cls=JSONEncoder)
 
+
+if __name__ == '__main__':
+
+    print (json_dumps({
+        "status": 0,
+        "message": "success",
+        "data": 0
+    }))
+

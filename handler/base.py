@@ -681,7 +681,6 @@ class BaseHandler(MetaBaseHandler):
 
     def _send_json(self, data, status_code, message, http_code=200):
         """传递 JSON 到前端 Used for API"""
-        data = data or ""
 
         render_json = json_dumps({
             "status": status_code,
