@@ -32,7 +32,6 @@ class HrWxHrChatDataService(DataService):
         response = yield self.hr_wx_hr_chat_dao.get_record_by_conds(conds, fields)
         raise gen.Return(response)
 
-    @cache(ttl=60)
     @gen.coroutine
     def get_chats(self, conds, fields=None, options=None, appends=None, index='', params=None):
 
@@ -50,21 +49,4 @@ class HrWxHrChatDataService(DataService):
             fields = list(self.hr_wx_hr_chat_dao.fields_map.keys())
 
         response = yield self.hr_wx_hr_chat_dao.get_list_by_conds(conds, fields, options, appends, index, params)
-        raise gen.Return(response)
-
-    @cache(ttl=60)
-    @gen.coroutine
-    def get_chats_num(self, conds, fields, appends=None, index=''):
-
-        appends = appends or []
-
-        if conds is None or not (isinstance(conds, dict) or isinstance(conds, str)):
-            self.logger.warn("Warning:[get_chat_num][invalid parameters], Detail:[conds: {0}, "
-                        "type: {1}]".format(conds, type(conds)))
-            raise gen.Return(list())
-
-        if not fields:
-            fields = list(self.hr_wx_hr_chat_dao.fields_map.keys())
-
-        response = yield self.hr_wx_hr_chat_dao.get_cnt_by_conds(conds, fields, appends, index)
         raise gen.Return(response)

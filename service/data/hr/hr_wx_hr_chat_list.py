@@ -15,7 +15,6 @@ from util.common import ObjectDict
 
 class HrWxHrChatListDataService(DataService):
 
-    @cache(ttl=60)
     @gen.coroutine
     def get_chatroom(self, conds, fields=None):
 
@@ -32,7 +31,6 @@ class HrWxHrChatListDataService(DataService):
         response = yield self.hr_wx_hr_chat_list_dao.get_record_by_conds(conds, fields)
         raise gen.Return(response)
 
-    @cache(ttl=60)
     @gen.coroutine
     def get_chatroom_list(self, conds, fields=None, options=None, appends=None, index='', params=None):
 
