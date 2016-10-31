@@ -120,7 +120,7 @@ MEMBERS = [
         'title': "潘老师",
         'longtext': "技术经理\n"
                     "行胜于言，希望用技术的力量来提高用户的生活品质。",
-        'media_url': '//v.qq.com/x/page/e0340strm66.html',
+        'media_url': 'https://v.qq.com/x/page/e0340strm66.html',
         'media_type': 'video',
         'member_list': []
     },
@@ -129,7 +129,7 @@ MEMBERS = [
         'longtext': "客户成功团队成员\n"
                     "热衷于规划与整理，连出去旅游都能整出一个action plan。"
                     "坚信流程上的well organized，可以使工作more efficient。",
-        'media_url': '//v.qq.com/x/page/u03404uht6u.html',
+        'media_url': 'http://v.qq.com/x/page/u03404uht6u.html',
         'media_type': 'video',
         'member_list': []
     },
@@ -138,7 +138,7 @@ MEMBERS = [
         'longtext': "大客户经理\n"
                     "名字来源于北欧神话里的大天使长，本人狮子座阳光灿烂，"
                     "喜欢和客户沟通成功合作那一刻的成就感，喜欢交朋友。",
-        'media_url': '//v.qq.com/x/page/h03408ryvbo.html',
+        'media_url': 'http://v.qq.com/x/page/h03408ryvbo.html',
         'media_type': 'video',
         'member_list': []
     }
