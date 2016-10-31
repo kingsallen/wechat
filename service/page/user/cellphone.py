@@ -50,12 +50,11 @@ class CellphonePageService(PageService):
                 response = yield http_post(self._ROUTE.valid, req)
             except Exception as error:
                 self.logger.warn(error)
-                raise gen.Return(ObjectDict({
-                    'status': 1, 'message': mes_const.BASIC_SERVER_BUSY}))
-            raise gen.Return(ObjectDict(response))
+                raise gen.Return(False)
+            result = True if int(response.status) == 0 else False
+            raise gen.Return(result)
         else:
-            raise gen.Return(ObjectDict({
-                'status': 1, 'message': mes_const.REQUEST_PARAM_ERROR}))
+            raise gen.Return(False)
 
     @gen.coroutine
     def bind_mobile(self, params, app_id, sysuser_id):

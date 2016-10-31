@@ -17,40 +17,26 @@ class CompanyVisitReqHandler(BaseHandler):
 
     @gen.coroutine
     def post(self):
-        try:
-            self.guarantee('status')
-        except:
+        self.guarantee('status')
+        result = yield self.user_company_ps.set_visit_company(self.params)
+
+        if not result:
+            self.send_json_error()
             return
-
-        self.params.company_id = self.current_user.company.id
-        self.params.user_id = self.current_user.sysuser.id
-
-        response = yield self.user_company_ps.set_visit_company(
-                                    self.params)
-
-        self._send_json(data=None, status_code=response.status,
-                        message=response.message)
-        return
+        self.send_json_success()
 
 
 class CompanyFollowHandler(BaseHandler):
 
     @gen.coroutine
     def post(self):
-        try:
-            self.guarantee('status')
-        except:
+        self.guarantee('status')
+        result = yield self.user_company_ps.set_company_follow(self.params)
+
+        if not result:
+            self.send_json_error()
             return
-
-        self.params.company_id = self.current_user.company.id
-        self.params.user_id = self.current_user.sysuser.id
-
-        response = yield self.user_company_ps.set_company_follow(
-                            self.params)
-
-        self._send_json(data=None, status_code=response.status,
-                       message=response.message)
-        return
+        self.send_json_success()
 
 
 class CompanyHandler(BaseHandler):
@@ -64,15 +50,7 @@ class CompanyHandler(BaseHandler):
         })
         response = yield self.user_company_ps.get_companay_data(param, team_flag)
 
-        # Debug with front page.
-        # To be confirmed: company_id, user_id
-        wechat = ObjectDict({'signature': 'alex-testing'})
-        current_user = ObjectDict({'wechat': wechat})
-
-        # self.send_json(response, additional_dump=True)
-        data = {'current_user': current_user}
         self.render_page('company/profile.html', data=response.data)
-        # self.render_page('company/profile.html', current_user=current_user)
         return
 
 
