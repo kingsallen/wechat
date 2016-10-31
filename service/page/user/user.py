@@ -39,7 +39,8 @@ class UserPageService(PageService):
 
         # 查询 这个 unionid 是不是已经存在
         user_record = yield self.user_user_ds.get_user({
-            "unionid": userinfo.unionid
+            "unionid": userinfo.unionid,
+            "parentid": 0  # 保证查找正常的 user record
         })
 
         # 如果存在，返回 userid
