@@ -30,8 +30,9 @@ common_routes = [
     (r"/m/wechat",                         "handler.common.wechat.WechatHandler",                       {"event": "wechat_wechat"}),
     (r"/m/account/login",                  "handler.common.login.LoginHandler",                         {"event": "login_login"}),
     (r"/m/position/([0-9]+)",              "handler.common.position.PositionHandler",                   {"event": "position_info"}),
-    (r"/m/api/position/star",              "handler.common.position.PositionStarHandler",               {"event": "position_star"}),
     (r"/m/app/.*",                         "handler.common.app.IndexHandler",                           {"event": "app_index"}),
+
+    (r"/m/api/position/star",              "handler.common.position.PositionStarHandler",               {"event": "position_star"}),
     (r"/m/api/chat/unread[\/]*([0-9]+)*",  "handler.common.im.UnreadCountHandler",                      {"event": "chat_unread"}),
     (r"/m/api/mobilebinded",               "handler.common.user.UserMobileBindedHandler",               {"event": "user_usermobilebinded"}),
 
@@ -44,6 +45,7 @@ platform_routes = [
     (r"/m/start",                          "handler.platform.landing.LandingHandler",                   {"event": "start_landing"}),
     (r"/m/company",                        "handler.platform.companyrelation.CompanyHandler",           {"event": "company_info"}),
     (r"/m/company/team",                   "handler.platform.companyrelation.CompanyHandler",           {"event": "company_team_info"}),
+
     (r"/m/api/user/currentinfo",           "handler.platform.interest.UserCurrentInfoHandler",          {"event": "user_currentinfo"}),
     (r"/m/api/company/visitreq",           "handler.platform.companyrelation.CompanyVisitReqHandler",   {"event": "company_visitreq"}),
     (r"/m/api/company/survey",             "handler.platform.companyrelation.CompanySurveyHandler",     {"event": "company_survey"}),

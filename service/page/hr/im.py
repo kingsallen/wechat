@@ -90,6 +90,10 @@ class ImPageService(PageService):
                 chat_num += len(chats)
             else:
                 for chat in chats:
+                    self.logger.debug("chatroom.wx_chat_time: %s" % chatroom.wx_chat_time)
+                    self.logger.debug("chatroom.wx_chat_time: %s" % type(chatroom.wx_chat_time))
+                    self.logger.debug("chat.create_time: %s" % chat.create_time)
+                    self.logger.debug("chatroom.wx_chat_time: %s" % type(chat.create_time))
                     if chatroom.wx_chat_time < chat.create_time:
                         chat_num += 1
 
