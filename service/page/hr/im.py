@@ -47,8 +47,6 @@ class ImPageService(PageService):
         if not chatroom:
             raise gen.Return(1)
 
-        self.logger.debug("single chatroom %s" % chatroom)
-
         # 查看 HR 的留言
         chats = yield self.hr_wx_hr_chat_ds.get_chats(
             conds={
@@ -58,21 +56,11 @@ class ImPageService(PageService):
             }
         )
 
-        self.logger.debug("single chats %s" % chats)
-
         chat_num = 0
         if not chatroom.wx_chat_time:
             chat_num = len(chats)
         else:
             for chat in chats:
-
-                self.logger.debug("single chat %s" % chat)
-
-                self.logger.debug("single chatroom.wx_chat_time: %s" % chatroom.wx_chat_time)
-                self.logger.debug("single chatroom.wx_chat_time: %s" % type(chatroom.wx_chat_time))
-                self.logger.debug("single chat.create_time: %s" % chat.create_time)
-                self.logger.debug("single chat.create_time: %s" % type(chat.create_time))
-
                 if chatroom.wx_chat_time < chat.create_time:
                     chat_num += 1
 
@@ -98,20 +86,11 @@ class ImPageService(PageService):
                 }
             )
 
-            self.logger.debug("chatroom %s" % chatroom)
-
             if not chatroom.wx_chat_time:
                 chat_num += len(chats)
             else:
                 for chat in chats:
-                    self.logger.debug("chat %s" % chat)
-
-                    self.logger.debug("chatroom.wx_chat_time: %s" % chatroom.wx_chat_time)
-                    self.logger.debug("chatroom.wx_chat_time: %s" % type(chatroom.wx_chat_time))
-                    self.logger.debug("chat.create_time: %s" % chat.create_time)
-                    self.logger.debug("chat.create_time: %s" % type(chat.create_time))
                     if chatroom.wx_chat_time < chat.create_time:
                         chat_num += 1
 
         raise gen.Return(chat_num)
-
