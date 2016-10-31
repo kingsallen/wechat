@@ -37,7 +37,7 @@ settings['static_upload_path'] = os.path.join(settings['static_path'], "upload")
 # 数据库配置
 settings['mysql_host'] = "db1.dqprism.com"
 settings['mysql_port'] = 3307
-settings['mysql_database_dqv4'] = "dqv4"
+settings['mysql_database'] = "dqv4"
 settings['mysql_user'] = "daqi"
 settings['mysql_password'] = "5F51692091B4031640E18E7C27430E071BC878C8"
 

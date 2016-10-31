@@ -29,21 +29,21 @@ WORKING_ENV = [
         'media_type': 'image',
         'member_list': []
     },
-{
+    {
         'title': "数据、研发、技术团队办公区域",
         'longtext': "",
         'media_url': 'http://7xs424.com1.z0.glb.clouddn.com/upload/company_profile/qx/t1.jpeg',
         'media_type': 'image',
         'member_list': []
     },
-{
+    {
         'title': "楼梯走廊装饰壁画",
         'longtext': "",
         'media_url': 'http://7xs424.com1.z0.glb.clouddn.com/upload/company_profile/qx/stair.jpeg',
         'media_type': 'image',
         'member_list': []
     },
-{
+    {
         'title': "EB, CS, BD办公区域",
         'longtext': "",
         'media_url': 'http://7xs424.com1.z0.glb.clouddn.com/upload/company_profile/qx/e3.jpeg',
@@ -52,48 +52,48 @@ WORKING_ENV = [
     }
 ]
 
-# WORKING_ENV =  [
-#     {
-#         'title': "我的团队",
-#         'longtext': "完美主义 BELLA。设计是一切的开始，我们非常注重细节和整体的把握。",
-#         'media_url': '//v.qq.com/iframe/player.html?vid=b0338mt86yc&tiny=0&auto=0',
-#         'media_type': 'video',
-#         'member_list': [
-#             {
-#                 'icon': 'http://o8g4x4uja.bkt.clouddn.com/xiaokai_avatar.png',
-#                 'name': '摇了也',
-#                 'title': '产品总监',
-#                 'description': '完美主义 BELLA。设计是一切的开始，我们非常注重细节和整体的把握，旨在给用户一种优雅旨在给用户高效的体验。',
-#             },
-#             {
-#                 'icon': 'http://o8g4x4uja.bkt.clouddn.com/xiaokai_avatar.png',
-#                 'name': '摇了也',
-#                 'title': '产品总监',
-#                 'description': '完美主义 BELLA。设计是一切的开始，我们非常注重细节和整体的把握，旨在给用户一种优雅旨在给用户高效的体验。',
-#             },
-#         ]
-#     },
-#     {
-#         'title': "我的团队",
-#         'longtext': "完美主义 BELLA。设计是一切的开始，我们非常注重细节和整体的把握，旨在给用户一种优雅旨在给用户高效的体验。完美主义 BELLA。设计是一切的开始，我们非常注重细节和整体的把握。",
-#         'media_url': 'http://o8g4x4uja.bkt.clouddn.com/15008518202_c265dfa55f_h.jpg',
-#         'media_type': 'image',
-#         'member_list': [
-#             {
-#                 'icon': 'http://o8g4x4uja.bkt.clouddn.com/xiaokai_avatar.png',
-#                 'name': '摇了也',
-#                 'title': '产品总监',
-#                 'description': '完美主义 BELLA。设计是一切的开始，我们非常注重细节和整体的把握，旨在给用户一种优雅旨在给用户高效的体验。',
-#             },
-#             {
-#                 'icon': 'http://o8g4x4uja.bkt.clouddn.com/xiaokai_avatar.png',
-#                 'name': '摇了也',
-#                 'title': '产品总监',
-#                 'description': '完美主义 BELLA。设计是一切的开始，我们非常注重细节和整体的把握，旨在给用户一种优雅旨在给用户高效的体验。',
-#             }
-#         ]
-#     }
-# ]
+data1 = [
+    {
+        'title': "我的团队",
+        'longtext': "完美主义 BELLA。设计是一切的开始，我们非常注重细节和整体的把握。",
+        'media_url': '//v.qq.com/iframe/player.html?vid=b0338mt86yc&tiny=0&auto=0',
+        'media_type': 'video',
+        'member_list': [
+            {
+                'icon': 'http://o8g4x4uja.bkt.clouddn.com/xiaokai_avatar.png',
+                'name': '摇了也',
+                'title': '产品总监',
+                'description': '完美主义 BELLA。设计是一切的开始，我们非常注重细节和整体的把握，旨在给用户一种优雅旨在给用户高效的体验。',
+            },
+            {
+                'icon': 'http://o8g4x4uja.bkt.clouddn.com/xiaokai_avatar.png',
+                'name': '摇了也',
+                'title': '产品总监',
+                'description': '完美主义 BELLA。设计是一切的开始，我们非常注重细节和整体的把握，旨在给用户一种优雅旨在给用户高效的体验。',
+            },
+        ]
+    },
+    {
+        'title': "我的团队",
+        'longtext': "完美主义 BELLA。设计是一切的开始，我们非常注重细节和整体的把握，旨在给用户一种优雅旨在给用户高效的体验。完美主义 BELLA。设计是一切的开始，我们非常注重细节和整体的把握。",
+        'media_url': 'http://o8g4x4uja.bkt.clouddn.com/15008518202_c265dfa55f_h.jpg',
+        'media_type': 'image',
+        'member_list': [
+            {
+                'icon': 'http://o8g4x4uja.bkt.clouddn.com/xiaokai_avatar.png',
+                'name': '摇了也',
+                'title': '产品总监',
+                'description': '完美主义 BELLA。设计是一切的开始，我们非常注重细节和整体的把握，旨在给用户一种优雅旨在给用户高效的体验。',
+            },
+            {
+                'icon': 'http://o8g4x4uja.bkt.clouddn.com/xiaokai_avatar.png',
+                'name': '摇了也',
+                'title': '产品总监',
+                'description': '完美主义 BELLA。设计是一切的开始，我们非常注重细节和整体的把握，旨在给用户一种优雅旨在给用户高效的体验。',
+            }
+        ]
+    }
+]
 
 data2 = [
     {
