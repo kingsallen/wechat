@@ -10,7 +10,7 @@ import socket
 import time
 import ujson
 from hashlib import sha1
-from urllib.parse import urljoin
+import urllib.parse
 
 import tornado.escape
 import tornado.httpclient
@@ -677,7 +677,7 @@ class BaseHandler(MetaBaseHandler):
         if self.settings.get('remote_debug', False) is True:
             template_string = self.render_string(template_name,
                                                  render_json=render_json)
-            post_url = urljoin(self.settings.get('remote_debug_ip'),
+            post_url = urllib.parse.urljoin(self.settings.get('remote_debug_ip'),
                                template_name)
             http_client = tornado.httpclient.HTTPClient()
             r = http_client.fetch(post_url, method="POST",
