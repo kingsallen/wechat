@@ -35,16 +35,6 @@ class ImPageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def get_chatroom_list(self, conds, fields, options=None, appends=None):
-        """返回返回聊天室列表"""
-
-        options = options or []
-        appends = appends or []
-
-        ret = yield self.hr_wx_hr_chat_list_ds.get_chatroom_list(conds, fields, options, appends)
-        raise gen.Return(ret)
-
-    @gen.coroutine
     def get_unread_chat_num(self, user_id, hr_id):
 
         """返回JD 页，求职者与 HR 之间的未读消息数"""

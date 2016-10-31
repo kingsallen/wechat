@@ -34,8 +34,9 @@ class HrWxHrChatListDataService(DataService):
 
     @cache(ttl=60)
     @gen.coroutine
-    def get_chatroom_list(self, conds, fields, options=None, appends=None, index='', params=None):
+    def get_chatroom_list(self, conds, fields=None, options=None, appends=None, index='', params=None):
 
+        fields = fields or []
         options = options or []
         appends = appends or []
         params = params or []
