@@ -321,7 +321,7 @@ class BaseHandler(MetaBaseHandler):
             self.send_json_error(message="{}不能为空".format(c_arg),
                                  http_code=416)
             self.finish()
-            self.LOG.error(str(e) + " 缺失")
+            self.logger.error(str(e) + " 缺失")
             raise AttributeError(str(e) + " 缺失")
 
         self.params.update(self.json_args)

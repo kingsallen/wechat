@@ -10,7 +10,7 @@
 from util.common import ObjectDict
 from tornado import gen
 from service.page.base import PageService
-from tests.dev_data.user_company_data import WORKING_ENV, TEAMS, data2, data3,\
+from tests.dev_data.user_company_data import WORKING_ENV, TEAMS, MEMBERS, data2, data3,\
                                              data4_1, data4_2, data50
 
 
@@ -78,14 +78,6 @@ class UserCompanyPageService(PageService):
 
             ObjectDict({'type': 2, 'title': 'template 2', 'data': data2}),
 
-            # ObjectDict({
-            #     'type':      1,
-            #     'sub_type':  'less',
-            #     'title':     '办公环境',
-            #     'data':      WORKING_ENV,
-            #     'more_link': 'more_link_test'
-            # }),
-
             ObjectDict({
                 'type':      1,
                 'sub_type':  'less',
@@ -94,7 +86,14 @@ class UserCompanyPageService(PageService):
                 'more_link': 'more_link_test'
             }),
 
-            ObjectDict({'type': 3, 'title': 'template 3', 'data': data3}),
+            ObjectDict({
+                'type':      1,
+                'sub_type':  'less',
+                'title':     '在这里工作的人们',
+                'data':      MEMBERS,
+                'more_link': 'more_link_test'
+            }),
+
 
             ObjectDict({'type': 4, 'sub_type': 0, 'title': '公司大事件',
                         'data': data4_1}),
