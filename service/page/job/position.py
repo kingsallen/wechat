@@ -177,10 +177,10 @@ class PositionPageService(PageService):
             "template_id": const.RECRUIT_STATUS_RECOMCLICK_ID,
         }, appends=["ORDER BY id DESC", "LIMIT 1"])
 
-        click_record = yield self.user_employee_points_record_ds.get_user_employee_points_record(conds={
+        click_record = yield self.user_employee_points_record_ds.get_user_employee_points_record_cnt(conds={
             "berecom_wxuser_id": wxuser_id,
             "position_id": position_id,
-            "config_id": points_conf.id
+            "award_config_id": points_conf.id
         }, fields=["id"])
 
         # 转发被点击添加积分，同一个职位，相同的人点击多次不加积分
