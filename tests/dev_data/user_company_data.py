@@ -163,19 +163,19 @@ data4_1 = [
     {
         'title': '2015年',
         'description': '公司曾获得2014全球创业周Recruit创业大赛冠军以及由国内顶尖人力资源权威媒体《人力资本管理》颁发的2014-2015大中华区人力资源服务创新大奖，仟寻也入围由《互联网周刊》评选出的2015中国新互联网公司300强。',
-        'media_url': 'https://cdn.moseeker.com/upload/company_profile/qx/ds1.png',
+        'media_url': 'https://cdn.moseeker.com/upload/company_profile/qx/ds1.jpeg',
         'media_type': 'image',
     },
     {
         'title': '2016年9月14日',
         'description': '仟寻MoSeeker获选《红鲱鱼》(Red Herring)公布的“2016-红鲱鱼Red Herring亚洲100 强”(Red Herring‘s Top 100 In Asia)最具潜力创业公司。',
-        'media_url': 'https://cdn.moseeker.com/upload/company_profile/qx/ds2.png',
+        'media_url': 'https://cdn.moseeker.com/upload/company_profile/qx/ds2.jpeg',
         'media_type': 'image',
     },
     {
         'title': '2016年10月',
         'description': '仟寻移动招聘MoSeeker荣获2016上海创新创业大赛企业优胜奖。仟寻招聘跻身中国创新创业大赛8强，获得国赛优秀企业称号。',
-        'media_url': 'https://cdn.moseeker.com/upload/company_profile/qx/ds3.png',
+        'media_url': 'https://cdn.moseeker.com/upload/company_profile/qx/ds3.jpeg',
         'media_type': 'image',
     }
 ]
@@ -217,7 +217,7 @@ TEAM_RD = [{
                    '.jpeg',
     'media_type':  'image',
     'member_list': [
-        
+
     ]
 }]
 
