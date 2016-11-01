@@ -58,7 +58,7 @@ class CellphoneBindHandler(BaseHandler):
         )
 
         if new_user_id and new_user_id != self.current_user.sysuser.id:
-            self.clear_cookie(name=const.SESSION_ID)
+            self.clear_cookie(name=const.COOKIE_SESSIONID)
         elif new_user_id is None:
             self.send_json_error()
             return

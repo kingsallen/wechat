@@ -3,6 +3,7 @@
 # status_message
 RESPONSE_SUCCESS = "SUCCESS"
 RESPONSE_FAILURE = "FAILURE"
+
 # status_code
 SUCCESS = 0
 FAILURE = 1
