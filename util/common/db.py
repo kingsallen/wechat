@@ -7,7 +7,7 @@ DB 公共处理类
 """
 
 import ujson
-
+from datetime import datetime
 from tornado_mysql import pools, cursors
 
 import conf.common as constant
@@ -78,7 +78,7 @@ class DB(object):
                         self.logger.error("Error:[getConds][value length error], module:{0}, value:{1}, "
                                        "length:{2}".format(self.__class__.__name__, value, len(value)))
                         return False, ()
-                elif isinstance(value, str) or isinstance(value, int):
+                elif isinstance(value, str) or isinstance(value, int) or isinstance(value, datetime):
                     frag = "`{0}` = %s".format(key)
                     conds_res.append(frag)
                     params.append(value)
