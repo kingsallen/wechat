@@ -63,7 +63,7 @@ class PositionPageService(PageService):
             "accountabilities": position_res.accountabilities,
             "requirement": position_res.requirement,
             "feature": position_res.feature,
-            "status": position_res.status == 0,
+            "status": position_res.status,
             "publisher": position_res.publisher,
             "source": position_res.source,
             "share_tpl_id": position_res.share_tpl_id,
