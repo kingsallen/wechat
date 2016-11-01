@@ -62,7 +62,7 @@ settings['blocking_log_threshold'] = 0.5
 
 # 基础服务
 settings['infra'] = "http://api1.dqprism.com"
-settings['das'] = "http://das1.dqprism.com"
+settings['das'] = "http://das1.dqprism.com/das"
 
 # wechat host
 settings['qx_host'] = 'qx1.dqprism.com'
