@@ -193,7 +193,6 @@ class UserCompanyPageService(PageService):
         status, source = param.get('status'), param.get('source', 0)
 
         if int(status) == 0:
-            # response.status, response.message = 1, 'ignore'
             raise gen.Return(False)
 
         conds = {'user_id': [user_id, '='], 'company_id': [company_id, '=']}

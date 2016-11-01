@@ -68,6 +68,20 @@ class CompanyHandler(BaseHandler):
         return
 
 
+class CompanyTeamHandler(BaseHandler):
+
+    @gen.coroutine
+    def get(self, team_name):
+        template_name = None
+        result = yield self.team_ps.get_more_team_info(team_name)
+
+        self.write(result)
+        # self.render_page(template_name, data=result)
+
+
+
+
+
 class CompanySurveyHandler(BaseHandler):
 
     @gen.coroutine
