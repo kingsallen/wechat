@@ -16,7 +16,7 @@ def _make_json_data(first, remark=None, colors=None, **kwargs):
     :param kwargs: 只接受名为 keyword1 --- keyword5 的参数
     :return: json data
     """
-    default = {"default": "#FF0000"}
+    default = {"default": "#173177"}
     colors = dict(colors, **default) if isinstance(colors, dict) else default
 
     json_data = {
