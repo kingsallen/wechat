@@ -145,7 +145,7 @@ class SharechainPageService(PageService):
                 "presentee_id": recom.presentee_id,
                 "click_time": recom.create_time
             })
-        raise gen.Return(bool(record))
+        raise gen.Return(not bool(record))
 
     @gen.coroutine
     def _get_recom_history_record(self, position_id, recom_id, create_time):
@@ -176,8 +176,8 @@ class SharechainPageService(PageService):
         #   AND r.wxuser_id = %s
         # """
 
-        record = self.candidate_remark_ds.get_candidate_remark(
-            conds={"status": 2, "wxuser_id": recom.wxuser_id},
+        record = yield self.candidate_remark_ds.get_candidate_remark(
+            conds={"status": 2, "wxuser_id": recom.presentee_id},
             fields=['hraccount_id'],
             appends=["""AND hraccount_id IN ( SELECT e.id FROM user_employee e
             JOIN job_position p ON p.company_id = e.company_id
