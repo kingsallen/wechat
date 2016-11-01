@@ -26,8 +26,6 @@ class PositionHandler(BaseHandler):
         """
         position_info = yield self.position_ps.get_position(position_id)
 
-        self.logger.debug("position_info: %s" % position_info)
-
         if position_info.id:
             self.logger.debug("[JD]构建收藏信息")
             star = yield self.position_ps.is_position_stared_by(
