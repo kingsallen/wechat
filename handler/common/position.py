@@ -153,7 +153,6 @@ class PositionHandler(BaseHandler):
             "description": description,
             "link": link
         })
-        self.logger.debug("self.params.share:{}".format(self.params.share))
 
 
     @gen.coroutine

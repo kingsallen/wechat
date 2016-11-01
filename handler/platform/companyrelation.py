@@ -57,6 +57,13 @@ class CompanyHandler(BaseHandler):
         if team_flag:
             template_name = 'company/team.html'
 
+        self.params.share = ObjectDict({
+            "cover":       "cover",
+            "title":       "title",
+            "description": "des",
+            "link":        "www.google.com"
+        })
+
         self.render_page(template_name, data=response.data)
         return
 
