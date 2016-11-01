@@ -43,7 +43,7 @@ class SharechainPageService(PageService):
     def create_share_record(self, params):
         """创建分享链路"""
 
-        record_id = yield self.candidate_recom_record_ds.create_share_record({
+        record_id = yield self.candidate_position_share_record_ds.create_share_record({
             "wechat_id":        params.wechat_id,
             "recom_id":         params.recom_id,
             "position_id":      params.position_id,

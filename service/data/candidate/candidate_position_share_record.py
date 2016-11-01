@@ -1,6 +1,5 @@
 # coding=utf-8
 
-# Copyright 2016 MoSeeker
 
 from tornado import gen
 from service.data.base import DataService
@@ -28,9 +27,9 @@ class CandidatePositionShareRecordDataService(DataService):
 
         if not fields:
             fields = list(
-                self.candidate_posiiton_share_record_dao.fields_map.keys())
+                self.candidate_position_share_record_dao.fields_map.keys())
 
-        response = yield self.candidate_posiiton_share_record_dao\
+        response = yield self.candidate_position_share_record_dao\
             .get_record_by_conds(
             conds, fields, options, appends,
             index)
@@ -40,5 +39,5 @@ class CandidatePositionShareRecordDataService(DataService):
     def create_share_record(self, fields, options=None):
         options = options or []
 
-        response = yield self.candidate_posiiton_share_record_dao.insert_record(fields, options)
+        response = yield self.candidate_position_share_record_dao.insert_record(fields, options)
         raise gen.Return(response)
