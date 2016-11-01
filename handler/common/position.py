@@ -154,6 +154,7 @@ class PositionHandler(BaseHandler):
             "description": description,
             "link": link
         })
+        self.logger.debug("转发信息：{}".format(self.params.share))
 
 
     @gen.coroutine
