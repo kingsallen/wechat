@@ -18,9 +18,9 @@ class JSONEncoder(json.JSONEncoder):
         if isinstance(o, decimal.Decimal):
             return float(o)
         if isinstance(o, datetime.datetime):
-            return str(o)
+            return o.__str__()
         if isinstance(o, datetime.date):
-            return str(o)
+            return o.__str__()
         return json.JSONEncoder.default(self, o)
 
 
