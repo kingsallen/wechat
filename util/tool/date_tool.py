@@ -68,11 +68,7 @@ def jd_update_date(update_time):
 
             pass_day = datetime.now() - zero
 
-            if datetime.now().year != update_time.year:
-                update_date = constant.JD_TIME_FORMAT_FULL.format(
-                    update_time.year, update_time.month, update_time.day)
-
-            elif pass_day.days <= 0 and pass_day.seconds <= 3600:
+            if pass_day.days <= 0 and pass_day.seconds <= 3600:
                 # 刚刚（即一个小时内）
                 update_date = constant.JD_TIME_FORMAT_JUST_NOW
 
@@ -86,9 +82,9 @@ def jd_update_date(update_time):
                 update_date = constant.JD_TIME_FORMAT_YESTERDAY.format(
                     update_time.hour, update_time.minute)
             else:
-                # 11-23
-                update_date = constant.JD_TIME_FORMAT_THIS_YEAR.format(
-                    update_time.month, update_time.day)
+                # 2016-11-23
+                update_date = constant.JD_TIME_FORMAT_FULL.format(
+                    update_time.year, update_time.month, update_time.day)
     except Exception:
         pass
     finally:

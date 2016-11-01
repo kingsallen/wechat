@@ -68,7 +68,6 @@ JD_TIME_FORMAT_FULL = "{0}-{:0>2}-{:0>2}"
 JD_TIME_FORMAT_JUST_NOW = "刚刚"
 JD_TIME_FORMAT_TODAY = "今天 {:0>2}:{:0>2}"
 JD_TIME_FORMAT_YESTERDAY = "昨天 {:0>2}:{:0>2}"
-JD_TIME_FORMAT_THIS_YEAR = "{:0>2}-{:0>2}"
 
 # 数据库规范化常量
 STATUS_INUSE = 1
