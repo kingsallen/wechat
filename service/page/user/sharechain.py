@@ -86,14 +86,14 @@ class SharechainPageService(PageService):
     @gen.coroutine
     def _get_latest_share_record(self,wxuser_id, position_id):
         """获得最新的转发触发数据"""
-        ret = yield self.candidate_recom_record_ds.get_share_record(
+        ret = yield self.candidate_position_share_record_ds.get_share_record(
             conds={
                 "presentee_id": wxuser_id,
                 "position_id": position_id,
-                "recom_id": ["presente_id", "!="],
             },
             fields=['create_time', 'wechat_id', 'recom_id', 'position_id', 'presentee_id'],
-            appends=['ORDER BY create_time DESC']
+            appends=["AND `recom_id` != `presentee_id`",
+                     "ORDER BY create_time DESC"]
         )
         raise gen.Return(ret)
 
@@ -101,7 +101,7 @@ class SharechainPageService(PageService):
     def _is_valid_employee(self, position_id, wxuser_id):
         """返回 wxuser 是否是 position 所在企业的员工
         """
-        position = yield self.position_ds.get_position({
+        position = yield self.job_position_ds.get_position({
             "id": position_id
         })
         company_id = position.company_id
@@ -122,7 +122,7 @@ class SharechainPageService(PageService):
         # INNER JOIN job_position jp ON jp.company_id = ha.company_id
         # WHERE jp.id = %s AND ha.wxuser_id = %s
         # """
-        position = yield self.position_ds.get_position({
+        position = yield self.job_position_ds.get_position({
             "id": position_id
         })
         company_id = position.company_id
