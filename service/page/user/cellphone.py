@@ -8,10 +8,12 @@
 """
 
 from tornado import gen
-from util.common import ObjectDict
-from service.page.base import PageService
-from util.tool.http_tool import http_post
+
+import conf.common as const
 import conf.message as msg
+from service.page.base import PageService
+from util.common import ObjectDict
+from util.tool.http_tool import http_post
 
 
 class CellphonePageService(PageService):
@@ -33,28 +35,19 @@ class CellphonePageService(PageService):
     })
 
     @gen.coroutine
-    def send_valid_code(self, mobile_numb, app_id):
-        """
-        Request basic service send valid code to target mobile
-        :param mobile_numb: target mobile number
+    def send_valid_code(self, mobile, app_id):
+        """Request basic service send valid code to target mobile
+        :param mobile: target mobile number
         :param app_id: request source(platform, qx...)
         :return:
         """
-        if mobile_numb:
-            req = ObjectDict({
-                'mobile': mobile_numb,
-                'type':   self._OPT_TYPE.change_mobile,
-                'appid':  app_id
-            })
-            try:
-                response = yield http_post(self._ROUTE.valid, req)
-            except Exception as error:
-                self.logger.warn(error)
-                raise gen.Return(False)
-            result = True if int(response.status) == 0 else False
-            raise gen.Return(result)
-        else:
-            raise gen.Return(False)
+        req = ObjectDict({
+            'mobile': mobile,
+            'type':   self._OPT_TYPE.change_mobile,
+            'appid':  app_id
+        })
+        res = yield http_post(self._ROUTE.valid, req)
+        raise gen.Return(res)
 
     @gen.coroutine
     def bind_mobile(self, params, app_id, sysuser_id):
@@ -75,11 +68,11 @@ class CellphonePageService(PageService):
         except Exception as error:
             self.logger.warn(error)
             raise gen.Return(ObjectDict({
-                'status':  msg.FAILURE,
+                'status':  const.API_FAILURE,
                 'message': msg.BASIC_SERVER_BUSY
             }))
 
-        if int(response.status) == msg.SUCCESS:
+        if int(response.status) == const.API_SUCCESS:
             result = yield self.user_user_ds.update_user(
                 conds={
                     'id': sysuser_id
@@ -106,5 +99,5 @@ class CellphonePageService(PageService):
             self.logger.warn(error)
             raise gen.Return(None)
         else:
-            user_id = int(result) if result.isdigit() else msg.FAILURE
+            user_id = int(result) if result.isdigit() else const.API_FAILURE
             raise gen.Return(int(user_id))

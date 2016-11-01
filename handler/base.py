@@ -26,8 +26,8 @@ from util.tool.str_tool import to_str, to_hex, from_hex
 from util.tool.url_tool import url_subtract_query
 
 import conf.message as msg_const
-import conf.common as constant
-import conf.wechat as wx_constant
+import conf.common as const
+import conf.wechat as wx_const
 
 # 动态加载所有 PageService
 obDict = {}
@@ -97,32 +97,32 @@ class BaseHandler(MetaBaseHandler):
 
     @property
     def is_platform(self):
-        return self.env == constant.ENV_PLATFORM
+        return self.env == const.ENV_PLATFORM
 
     @property
     def is_qx(self):
-        return self.env == constant.ENV_QX
+        return self.env == const.ENV_QX
 
     @property
     def is_help(self):
-        return self.env == constant.ENV_HELP
+        return self.env == const.ENV_HELP
 
     @property
     def in_wechat(self):
-        return self._in_wechat == constant.CLIENT_WECHAT
+        return self._in_wechat == const.CLIENT_WECHAT
 
     @property
     def in_wechat_ios(self):
-        return self.in_wechat and self._client_type == constant.CLIENT_TYPE_IOS
+        return self.in_wechat and self._client_type == const.CLIENT_TYPE_IOS
 
     @property
     def in_wechat_android(self):
-        return self.in_wechat and self._client_type == constant.CLIENT_TYPE_ANDROID
+        return self.in_wechat and self._client_type == const.CLIENT_TYPE_ANDROID
 
     @property
     def app_id(self):
         """appid for infra"""
-        return constant.APPID[self.env]
+        return const.APPID[self.env]
 
     @property
     def redis(self):
@@ -178,7 +178,7 @@ class BaseHandler(MetaBaseHandler):
             # 用户同意授权
             if code:
                 # 来自 qx 的授权, 获得 userinfo
-                if state == wx_constant.WX_OAUTH_DEFAULT_STATE:
+                if state == wx_const.WX_OAUTH_DEFAULT_STATE:
                     self.logger.debug("来自 qx 的授权, 获得 userinfo")
                     userinfo = yield self._get_user_info(code)
                     yield self._handle_user_info(userinfo)
@@ -242,9 +242,9 @@ class BaseHandler(MetaBaseHandler):
 
         unionid = userinfo.unionid
         if self.is_platform:
-            source = constant.WECHAT_REGISTER_SOURCE_PLATFORM
+            source = const.WECHAT_REGISTER_SOURCE_PLATFORM
         else:
-            source = constant.WECHAT_REGISTER_SOURCE_QX
+            source = const.WECHAT_REGISTER_SOURCE_QX
 
         # 创建 user_user
         user_id = yield self.user_ps.create_user_user(
@@ -398,7 +398,7 @@ class BaseHandler(MetaBaseHandler):
         need_oauth = False
         ok = False
 
-        session_id = to_str(self.get_secure_cookie(constant.COOKIE_SESSIONID))
+        session_id = to_str(self.get_secure_cookie(const.COOKIE_SESSIONID))
 
         if session_id:
             if self.is_platform:
@@ -439,7 +439,7 @@ class BaseHandler(MetaBaseHandler):
 
         session_id = self._make_new_session_id(session.qxuser.sysuser_id)
         logger.debug("session_id: %s" % session_id)
-        self.set_secure_cookie(constant.COOKIE_SESSIONID, session_id)
+        self.set_secure_cookie(const.COOKIE_SESSIONID, session_id)
 
         self._save_sessions(session_id, session)
 
@@ -470,7 +470,7 @@ class BaseHandler(MetaBaseHandler):
         session.qxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
             unionid=unionid, wechat_id=self.settings['qx_wechat_id'])
 
-        session_id = to_str(self.get_secure_cookie(constant.COOKIE_SESSIONID))
+        session_id = to_str(self.get_secure_cookie(const.COOKIE_SESSIONID))
         # 当使用手机浏览器访问的时候可能没有 session_id
         # 那么就创建它
         if not session_id:
@@ -493,11 +493,11 @@ class BaseHandler(MetaBaseHandler):
         2. 保存聚合号 session， 只包含 qxuser
         """
 
-        key_ent = constant.SESSION_USER.format(session_id, self._wechat.id)
+        key_ent = const.SESSION_USER.format(session_id, self._wechat.id)
         self.redis.set(key_ent, session, 60 * 60 * 2)
         self.logger.debug("refresh ent session redis key: {}".format(key_ent))
 
-        key_qx = constant.SESSION_USER.format(session_id, self.settings['qx_wechat_id'])
+        key_qx = const.SESSION_USER.format(session_id, self.settings['qx_wechat_id'])
         self.redis.set(key_qx, ObjectDict(qxuser=session.qxuser))
         self.logger.debug("refresh qx session redis key: {}".format(key_qx))
 
@@ -535,7 +535,7 @@ class BaseHandler(MetaBaseHandler):
     def _get_session_from_ent(self, session_id):
         """尝试获取企业号 session"""
 
-        key = constant.SESSION_USER.format(session_id, self._wechat.id)
+        key = const.SESSION_USER.format(session_id, self._wechat.id)
         value = self.redis.get(key)
         if value:
             # 如果有 value， 返回该 value 作为 self.current_user
@@ -554,7 +554,7 @@ class BaseHandler(MetaBaseHandler):
     def _get_session_from_qx(self, session_id):
         """尝试获取聚合号 session"""
 
-        key = constant.SESSION_USER.format(session_id, self.settings['qx_wechat_id'])
+        key = const.SESSION_USER.format(session_id, self.settings['qx_wechat_id'])
 
         value = self.redis.get(key)
         if value:
@@ -574,7 +574,7 @@ class BaseHandler(MetaBaseHandler):
         :return: session_id
         """
         while True:
-            session_id = constant.SESSION_ID.format(
+            session_id = const.SESSION_ID.format(
                 sha1(bytes(sysuser_id)).hexdigest(),
                 sha1(os.urandom(24)).hexdigest())
             record = self.redis.exists(session_id + "_*")
@@ -654,7 +654,7 @@ class BaseHandler(MetaBaseHandler):
             self.render_page(
                 'system/info.html', data=ObjectDict(code=http_code, message=msg_const.UNKNOWN_DEFAULT))
 
-    def render_page(self, template_name, data, status_code=msg_const.SUCCESS,
+    def render_page(self, template_name, data, status_code=const.API_SUCCESS,
                     message=msg_const.RESPONSE_SUCCESS, http_code=200):
         """render 页面"""
         self.log_info = {"res_type": "html", "status_code": status_code}
@@ -691,7 +691,7 @@ class BaseHandler(MetaBaseHandler):
             "data": data
         })
 
-        if status_code == msg_const.FAILURE and http_code == 200:
+        if status_code == const.API_FAILURE and http_code == 200:
             http_code = 416
 
         self.set_header("Content-Type", "application/json; charset=utf-8")
@@ -702,14 +702,14 @@ class BaseHandler(MetaBaseHandler):
     def send_json_success(self, data=None, message=msg_const.RESPONSE_SUCCESS, http_code=200):
         """API 成功返回的便捷方法"""
         self._send_json(data=data,
-                        status_code=msg_const.SUCCESS,
+                        status_code=const.API_SUCCESS,
                         message=message,
                         http_code=http_code)
 
     def send_json_error(self, data=None, message=msg_const.RESPONSE_FAILURE, http_code=416):
         """API 错误返回的便捷方法"""
         self._send_json(data=data,
-                        status_code=msg_const.FAILURE,
+                        status_code=const.API_FAILURE,
                         message=message,
                         http_code=http_code)
 
@@ -752,7 +752,7 @@ class BaseHandler(MetaBaseHandler):
             req_uri=request.uri,
             req_params=req_params,
             customs=customs,
-            session_id=to_str(self.get_secure_cookie(constant.COOKIE_SESSIONID))
+            session_id=to_str(self.get_secure_cookie(const.COOKIE_SESSIONID))
         )
 
         log_params.update(log_info_common)
@@ -760,15 +760,15 @@ class BaseHandler(MetaBaseHandler):
 
     def _depend_wechat(self):
         """判断用户UA是否为微信客户端"""
-        wechat = constant.CLIENT_NON_WECHAT
-        mobile = constant.CLIENT_TYPE_UNKNOWN
+        wechat = const.CLIENT_NON_WECHAT
+        mobile = const.CLIENT_TYPE_UNKNOWN
 
         useragent = self.request.headers.get('User-Agent')
         if "MicroMessenger" in useragent:
             if "iPhone" in useragent:
-                mobile = constant.CLIENT_TYPE_IOS
+                mobile = const.CLIENT_TYPE_IOS
             elif "Android" in useragent:
-                mobile = constant.CLIENT_TYPE_ANDROID
-            wechat = constant.CLIENT_WECHAT
+                mobile = const.CLIENT_TYPE_ANDROID
+            wechat = const.CLIENT_WECHAT
 
         return wechat, mobile

@@ -11,31 +11,31 @@ import conf.common as const
 
 from tornado import gen
 from handler.base import BaseHandler
+import conf.message as msg
 
 
 class CellphoneBindHandler(BaseHandler):
-    """
+    """ 发送短信验证码的共通方法
     Referenced Document: https://wiki.moseeker.com/user_account_api.md
                          Point 32, 33
     """
 
     @gen.coroutine
     def get(self):
-
         result = yield self.cellphone_ps.send_valid_code(
-            mobile_numb=self.params.get('mobile', None),
-            app_id=self.app_id
+            self.params.get('mobile', None),
+            self.app_id
         )
-
-        if not result:
-            self.send_json_error()
-            return
-        self.send_json_success()
-
+        if result.status != const.API_SUCCESS:
+            self.send_json_error(message=result.message)
+        else:
+            self.send_json_success()
 
     @gen.coroutine
     def post(self):
-
+        """校验短信验证码
+        必要时合并账号并清空 cookie
+        """
         try:
             self.guarantee('mobile', 'code')
         except:
@@ -47,7 +47,7 @@ class CellphoneBindHandler(BaseHandler):
             sysuser_id=self.current_user.sysuser.id
         )
 
-        if response.status != 0:
+        if response.status != const.API_SUCCESS:
             self.send_json_error(message=response.message)
             return
 
