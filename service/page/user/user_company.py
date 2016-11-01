@@ -124,7 +124,7 @@ class UserCompanyPageService(PageService):
         data.templates = [
             ObjectDict({
                 'type':      1,
-                'sub_type':  'large',
+                'sub_type':  'full',
                 'title':     '研发团队',
                 'data':      TEAM_RD,
                 'more_link': ''
@@ -132,7 +132,7 @@ class UserCompanyPageService(PageService):
 
             ObjectDict({
                 'type':      1,
-                'sub_type':  'large',
+                'sub_type':  'full',
                 'title':     '客户成功团队',
                 'data':      TEAM_CS,
                 'more_link': ''
@@ -140,7 +140,7 @@ class UserCompanyPageService(PageService):
 
             ObjectDict({
                 'type':      1,
-                'sub_type':  'large',
+                'sub_type':  'full',
                 'title':     '商务拓展团队',
                 'data':      TEAM_BD,
                 'more_link': ''
@@ -148,12 +148,11 @@ class UserCompanyPageService(PageService):
 
             ObjectDict({
                 'type':      1,
-                'sub_type':  'large',
+                'sub_type':  'full',
                 'title':     '雇主品牌团队',
                 'data':      TEAM_EB,
                 'more_link': ''
             }),
-
         ]
         data.template_total = len(data.templates)
 
