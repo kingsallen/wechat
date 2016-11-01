@@ -138,7 +138,6 @@ class SharechainPageService(PageService):
     def _no_existed_record(self, recom):
         """检查原始链路数据中是否有该数据"""
 
-        self.logger("in _no_existed_record")
         record = yield self.stats_recom_record_ds.get_stats_recom_record(
             conds={
                 "position_id": recom.position_id,
@@ -198,14 +197,12 @@ class SharechainPageService(PageService):
         # 如果看的人是员工，记录为 level 0， recom_id 为自己，
         #   recom_id_2 为空， last_recom_id 为空
 
-        self.logger("in_save_recom")
         is_employee = yield self._is_valid_employee(recom.position_id, recom.presentee_id)
-        self.logger("is_employee: {}".format(is_employee))
+
         no_existed_record = yield self._no_existed_record(recom)
-        self.logger("no_existed_record: {}".format(no_existed_record))
 
         if is_employee and no_existed_record:
-            self.logger("当前看的人是员工，且没有插入过该条数据")
+            self.logger.debug("当前看的人是员工，且没有插入过该条数据")
             self.logger.debug(
                 "position_id:%s,recom_id:%s,presentee_id:%s" %
                 (recom.position_id, recom.presentee_id, recom.presentee_id))
@@ -219,10 +216,9 @@ class SharechainPageService(PageService):
                     "recom_id": recom.presentee_id,
                     "last_recom_id": 0
                 })
-            self.logger("插入数据完毕")
         # 如果看的人不是员工，
         else:
-            self.logger("当前看的人不是员工")
+            self.logger.debug("当前看的人不是员工")
             # 如果数据已经记录，则不会重复记录
             if no_existed_record:
                 last_node = yield self._get_recom_history_record(
