@@ -11,7 +11,6 @@ import conf.common as const
 
 from tornado import gen
 from handler.base import BaseHandler
-import conf.message as msg
 
 
 class CellphoneBindHandler(BaseHandler):
@@ -41,26 +40,39 @@ class CellphoneBindHandler(BaseHandler):
         except:
             return
 
+        # 验证手机号
         response = yield self.cellphone_ps.bind_mobile(
             params=self.params,
             app_id=self.app_id,
             sysuser_id=self.current_user.sysuser.id
         )
 
+        # 更新数据库
         if response.status != const.API_SUCCESS:
             self.send_json_error(message=response.message)
             return
+        else:
+            yield self.user_user_ds.update_user(
+                conds={
+                    'id': self.current_user.sysuser.id
+                },
+                fields={
+                    'mobile':   int(self.params.mobile),
+                    'username': self.params.mobile
+                })
 
-        new_user_id = self.cellphone_ps.wx_pc_combine(
+        # 检查是否需要合并 pc 账号
+        response = yield self.cellphone_ps.wx_pc_combine(
             mobile=self.params.mobile,
             unionid=self.current_user.sysuser.unionid,
             app_id=self.app_id
         )
 
-        if new_user_id and new_user_id != self.current_user.sysuser.id:
-            self.clear_cookie(name=const.COOKIE_SESSIONID)
-        elif new_user_id is None:
-            self.send_json_error()
+        if response.status != const.API_SUCCESS:
+            self.send_json_error(message=response.message)
             return
-
-        self.send_json_success()
+        else:
+            ret_user_id = response.data.id
+            if str(ret_user_id) != str(self.current_user.sysuser.id):
+                self.clear_cookie(name=const.COOKIE_SESSIONID)
+            self.send_json_success()

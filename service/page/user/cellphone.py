@@ -9,8 +9,6 @@
 
 from tornado import gen
 
-import conf.common as const
-import conf.message as msg
 from service.page.base import PageService
 from util.common import ObjectDict
 from util.tool.http_tool import http_post
@@ -63,41 +61,18 @@ class CellphonePageService(PageService):
             'type':   self._OPT_TYPE.change_mobile,
             'appid':  app_id
         })
-        try:
-            response = yield http_post(self._ROUTE.verify, req)
-        except Exception as error:
-            self.logger.warn(error)
-            raise gen.Return(ObjectDict({
-                'status':  const.API_FAILURE,
-                'message': msg.BASIC_SERVER_BUSY
-            }))
 
-        if int(response.status) == const.API_SUCCESS:
-            result = yield self.user_user_ds.update_user(
-                conds={
-                    'id': sysuser_id
-                },
-                fields={
-                    'mobile':   int(params.mobile),
-                    'username': params.mobile
-                })
-            response.status, response.message = result.status, result.message
-
+        response = yield http_post(self._ROUTE.verify, req)
         raise gen.Return(response)
 
     @gen.coroutine
     def wx_pc_combine(self, mobile, unionid, app_id):
+        """调用账号绑定接口"""
         req = ObjectDict({
             'mobile':  mobile,
             'unionid': unionid,
             'appid':   app_id
         })
-        try:
-            result = yield http_post(self._ROUTE.combine, req)
-            self.logger.debug('Combine wx and pc uer as: {}'.format(result))
-        except Exception as error:
-            self.logger.warn(error)
-            raise gen.Return(None)
-        else:
-            user_id = int(result) if result.isdigit() else const.API_FAILURE
-            raise gen.Return(int(user_id))
+
+        response = yield http_post(self._ROUTE.combine, req)
+        raise gen.Return(response)
