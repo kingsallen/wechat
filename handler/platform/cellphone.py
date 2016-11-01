@@ -41,10 +41,9 @@ class CellphoneBindHandler(BaseHandler):
             return
 
         # 验证手机号
-        response = yield self.cellphone_ps.bind_mobile(
+        response = yield self.cellphone_ps.verify_mobile(
             params=self.params,
-            app_id=self.app_id,
-            sysuser_id=self.current_user.sysuser.id
+            app_id=self.app_id
         )
 
         # 更新数据库
@@ -52,14 +51,8 @@ class CellphoneBindHandler(BaseHandler):
             self.send_json_error(message=response.message)
             return
         else:
-            yield self.user_user_ds.update_user(
-                conds={
-                    'id': self.current_user.sysuser.id
-                },
-                fields={
-                    'mobile':   int(self.params.mobile),
-                    'username': self.params.mobile
-                })
+            yield self.user_ps.bind_mobile(self.current_user.sysuser.id,
+                                           self.params.mobile)
 
         # 检查是否需要合并 pc 账号
         response = yield self.cellphone_ps.wx_pc_combine(

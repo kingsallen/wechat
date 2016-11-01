@@ -21,7 +21,7 @@ class UserCurrentInfoHandler(BaseHandler):
         except:
             return
 
-        yield self.user_ps.update_user_user(
+        yield self.user_ps.update_user_user_current_info(
             sysuser_id=self.current_user.sysuser.id,
             data=self.params
         )

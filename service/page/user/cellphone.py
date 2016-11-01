@@ -48,7 +48,7 @@ class CellphonePageService(PageService):
         raise gen.Return(res)
 
     @gen.coroutine
-    def bind_mobile(self, params, app_id, sysuser_id):
+    def verify_mobile(self, params, app_id):
         """
         Send code submitted by user to basic service.
         :param params: dict include user mobile number and valid code

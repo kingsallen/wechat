@@ -1,17 +1,15 @@
 # coding=utf-8
 
 import tornado.gen as gen
-import conf.common as const
-from util.tool.http_tool import http_post
 
-from util.common import ObjectDict
+import conf.common as const
 from service.page.base import PageService
-from util.tool.date_tool import curr_now
 from setting import settings
+from util.tool.date_tool import curr_now
+from util.tool.http_tool import http_post
 
 
 class UserPageService(PageService):
-
     def __init__(self, logger):
         super().__init__(logger)
 
@@ -36,10 +34,16 @@ class UserPageService(PageService):
 
     @gen.coroutine
     def create_user_user(self, userinfo, wechat_id, remote_ip, source):
-
+        """
+        根据微信授权得到的 userinfo 创建 user_user
+        :param userinfo:
+        :param wechat_id:
+        :param remote_ip:
+        :param source:
+        """
         # 查询 这个 unionid 是不是已经存在
         user_record = yield self.user_user_ds.get_user({
-            "unionid": userinfo.unionid,
+            "unionid":  userinfo.unionid,
             "parentid": 0  # 保证查找正常的 user record
         })
 
@@ -74,14 +78,8 @@ class UserPageService(PageService):
         raise gen.Return(user_id)
 
     @gen.coroutine
-    def get_user_user_unionid(self, unionid):
-        ret = yield self.user_user_ds.get_user({
-            "unionid": unionid
-        })
-        raise gen.Return(ret)
-
-    @gen.coroutine
     def get_user_user_id(self, user_id):
+        """根据 id 获取 user_user"""
         ret = yield self.user_user_ds.get_user({
             "id": user_id
         })
@@ -89,6 +87,7 @@ class UserPageService(PageService):
 
     @gen.coroutine
     def get_wxuser_openid_wechat_id(self, openid, wechat_id):
+        """根据 openid 和 wechat_id 获取 wxuser"""
         ret = yield self.user_wx_user_ds.get_wxuser({
             "wechat_id": wechat_id,
             "openid":    openid
@@ -97,6 +96,7 @@ class UserPageService(PageService):
 
     @gen.coroutine
     def get_wxuser_unionid_wechat_id(self, unionid, wechat_id):
+        """根据 unionid 和 wechat_id 获取 wxuser"""
         ret = yield self.user_wx_user_ds.get_wxuser({
             "wechat_id": wechat_id,
             "unionid":   unionid
@@ -105,6 +105,7 @@ class UserPageService(PageService):
 
     @gen.coroutine
     def get_wxuser_id(self, wxuser_id):
+        """根据 id 获取 wxuser """
         ret = yield self.user_wx_user_ds.get_wxuser({
             "id": wxuser_id
         })
@@ -112,6 +113,7 @@ class UserPageService(PageService):
 
     @gen.coroutine
     def create_user_wx_user_ent(self, openid, unionid, wechat_id):
+        """根据 unionid 创建 企业号微信用户信息"""
         wxuser = yield self.get_wxuser_unionid_wechat_id(
             unionid=unionid, wechat_id=wechat_id)
         qx_wxuser = yield self.get_wxuser_unionid_wechat_id(
@@ -124,36 +126,36 @@ class UserPageService(PageService):
                     "id": wxuser.id
                 },
                 fields={
-                    "is_subscribe":   wxuser.is_subscribe or 0,
-                    "sysuser_id":     qx_wxuser.sysuser_id,
-                    "openid":         openid,
-                    "nickname":       qx_wxuser.nickname,
-                    "sex":            qx_wxuser.sex or 0,
-                    "city":           qx_wxuser.city,
-                    "country":        qx_wxuser.country,
-                    "province":       qx_wxuser.province,
-                    "language":       qx_wxuser.language,
-                    "headimgurl":     qx_wxuser.headimgurl,
-                    "wechat_id":      wechat_id,
-                    "unionid":        qx_wxuser.unionid,
-                    "source":         const.WXUSER_OAUTH_UPDATE
+                    "is_subscribe": wxuser.is_subscribe or 0,
+                    "sysuser_id":   qx_wxuser.sysuser_id,
+                    "openid":       openid,
+                    "nickname":     qx_wxuser.nickname,
+                    "sex":          qx_wxuser.sex or 0,
+                    "city":         qx_wxuser.city,
+                    "country":      qx_wxuser.country,
+                    "province":     qx_wxuser.province,
+                    "language":     qx_wxuser.language,
+                    "headimgurl":   qx_wxuser.headimgurl,
+                    "wechat_id":    wechat_id,
+                    "unionid":      qx_wxuser.unionid,
+                    "source":       const.WXUSER_OAUTH_UPDATE
                 })
 
         else:
             wxuser_id = yield self.user_wx_user_ds.create_wxuser({
-                "is_subscribe":   0,
-                "sysuser_id":     qx_wxuser.sysuser_id,
-                "openid":         openid,
-                "nickname":       qx_wxuser.nickname,
-                "sex":            qx_wxuser.sex or 0,
-                "city":           qx_wxuser.city,
-                "country":        qx_wxuser.country,
-                "province":       qx_wxuser.province,
-                "language":       qx_wxuser.language,
-                "headimgurl":     qx_wxuser.headimgurl,
-                "wechat_id":      wechat_id,
-                "unionid":        qx_wxuser.unionid,
-                "source":         const.WXUSER_OAUTH
+                "is_subscribe": 0,
+                "sysuser_id":   qx_wxuser.sysuser_id,
+                "openid":       openid,
+                "nickname":     qx_wxuser.nickname,
+                "sex":          qx_wxuser.sex or 0,
+                "city":         qx_wxuser.city,
+                "country":      qx_wxuser.country,
+                "province":     qx_wxuser.province,
+                "language":     qx_wxuser.language,
+                "headimgurl":   qx_wxuser.headimgurl,
+                "wechat_id":    wechat_id,
+                "unionid":      qx_wxuser.unionid,
+                "source":       const.WXUSER_OAUTH
             })
 
         wxuser = yield self.get_wxuser_id(wxuser_id=wxuser_id)
@@ -161,7 +163,7 @@ class UserPageService(PageService):
 
     @gen.coroutine
     def create_qx_wxuser_by_userinfo(self, userinfo, user_id):
-
+        """从微信授权的 userinfo 创建 qx user"""
         qx_wechat_id = settings['qx_wechat_id']
         openid = userinfo.openid
 
@@ -185,53 +187,44 @@ class UserPageService(PageService):
                 })
         else:
             yield self.user_wx_user_ds.create_wxuser({
-                "is_subscribe":   0,
-                "sysuser_id":     user_id,
-                "openid":         userinfo.openid,
-                "nickname":       userinfo.nickname,
-                "sex":            userinfo.sex or 0,
-                "city":           userinfo.city,
-                "country":        userinfo.country,
-                "province":       userinfo.province,
-                "language":       userinfo.language,
-                "headimgurl":     userinfo.headimgurl,
-                "wechat_id":      qx_wechat_id,
-                "unionid":        userinfo.unionid if userinfo.unionid else "",
-                "source":         const.WXUSER_OAUTH
+                "is_subscribe": 0,
+                "sysuser_id":   user_id,
+                "openid":       userinfo.openid,
+                "nickname":     userinfo.nickname,
+                "sex":          userinfo.sex or 0,
+                "city":         userinfo.city,
+                "country":      userinfo.country,
+                "province":     userinfo.province,
+                "language":     userinfo.language,
+                "headimgurl":   userinfo.headimgurl,
+                "wechat_id":    qx_wechat_id,
+                "unionid":      userinfo.unionid if userinfo.unionid else "",
+                "source":       const.WXUSER_OAUTH
             })
 
     @gen.coroutine
-    def update_user_user(self, sysuser_id, data):
+    def update_user_user_current_info(self, sysuser_id, data):
+        """更新用户真实姓名，最近工作单位和最近职位"""
         response = yield self.user_user_ds.update_user(
             conds={'id': sysuser_id},
             fields={
-                'name': data.name,
-                'company': data.company,
+                'name':     data.name,
+                'company':  data.company,
                 'position': data.position
-        })
+            })
         raise gen.Return(response)
 
     @gen.coroutine
-    def bind_wx_mobile(self, params, app_id):
-        """
-        通过基础服务对手机号和微信号进行绑定
-        reference: https://wiki.moseeker.com/user_account_api.md
-        point: 1
-        :param params: 基本信息
-        :param app_id: 请求来源
-        :return: 绑定的user_id
-        """
-        req = ObjectDict({
-            'unionid': params.unionid,
-            'mobile': params.mobile,
-        })
-        try:
-            user_id = yield http_post(self.path.USER_BIND_WX_MOBILE, req)
-        except Exception as error:
-            self.logger.warn(error)
-            user_id = None
-
-        raise gen.Return(user_id)
+    def bind_mobile(self, user_id, mobile):
+        """用户手机号绑定操作，更新 username 为手机号"""
+        yield self.user_user_ds.update_user(
+            conds={
+                'id': user_id
+            },
+            fields={
+                'mobile':   int(mobile),
+                'username': str(mobile)
+            })
 
     @gen.coroutine
     def favorite_position(self, current_user, pid):
@@ -248,14 +241,16 @@ class UserPageService(PageService):
             fields = {
                 "position_id": pid,
                 "sysuser_id":  current_user.sysuser.id,
-                "favorite": const.FAV_YES,
-                "wxuser_id": current_user.wxuser.id
+                "favorite":    const.FAV_YES,
+                "wxuser_id":   current_user.wxuser.id
             }
             if current_user.recom:
                 fields.update({
                     "recom_id": current_user.recom.id
                 })
-            inserted_id = yield self.user_fav_position_ds.insert_user_fav_position(fields)
+            inserted_id = yield \
+                self.user_fav_position_ds.insert_user_fav_position(
+                    fields)
             raise gen.Return(bool(inserted_id))
 
         # 有数据时
@@ -266,7 +261,8 @@ class UserPageService(PageService):
             if position_fav.favorite == const.FAV_YES:
                 self.logger.warn(
                     "User already favorited the position. "
-                    "user_id: {}, pid: {}".format(current_user.sysuser.id, pid))
+                    "user_id: {}, pid: {}".format(current_user.sysuser.id,
+                                                  pid))
                 ret = True
             else:
                 # 变更 favorite 为 FAV_YES
@@ -292,7 +288,8 @@ class UserPageService(PageService):
         # 没有数据时, 不做任何操作
         if not position_fav:
             self.logger.warn(
-                "Cannot unfavorite the position because user hasn't favorited it. "
+                "Cannot unfavorite the position because user hasn't "
+                "favorited it. "
                 "user_id: {}, pid: {}".format(current_user.sysuser.id, pid))
             raise gen.Return(True)
 
