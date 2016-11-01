@@ -85,7 +85,19 @@ def jd_update_date(update_time):
                 # 2016-11-23
                 update_date = constant.JD_TIME_FORMAT_FULL.format(
                     update_time.year, update_time.month, update_time.day)
-    except Exception:
+    except Exception as e:
+        print (e)
         pass
     finally:
         return update_date
+
+
+if __name__ == '__main__':
+    from datetime import datetime
+
+    o = datetime.now()
+    print (o)
+
+    b = jd_update_date(o)
+
+    print (b)

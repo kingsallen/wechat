@@ -34,7 +34,10 @@ class PositionPageService(PageService):
 
         # 前置处理
         # 更新时间
+        self.logger.debug("uuuuuuuuuuuuuuuuuuu 1: %s" % position_res.update_time)
+        self.logger.debug("uuuuuuuuuuuuuuuuuuu 2: %s" % type(position_res.update_time))
         update_time = jd_update_date(position_res.update_time)
+        self.logger.debug("uuuuuuuuuuuuuuuuuuu 3: %s" % update_time)
         # 月薪
         salary = gen_salary(position_res.salary_top, position_res.salary_bottom)
 
