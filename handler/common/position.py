@@ -327,13 +327,11 @@ class PositionHandler(BaseHandler):
                 if res:
                     last_recom_id = yield self.sharechain_ps.get_referral_employee_wxuser_id(self.current_user.wxuser.id, position_info.id)
 
-        res = yield self.position_ps.send_candidate_view_position(params={
+        yield self.position_ps.send_candidate_view_position(params={
             "wxuser_id": self.current_user.wxuser.id,
             "position_id": position_info.id,
             "from_employee": 1 if last_recom_id else 0,
         })
-
-        self.logger.debug("刷新链路： %s" % res)
 
         raise gen.Return(last_recom_id)
 
@@ -353,7 +351,7 @@ class PositionHandler(BaseHandler):
         """浏览量达到5次后，向 HR 发布模板消息
         注：只向 HR 平台发布的职位发送模板消息，ATS 同步的职位不发送"""
 
-        self.logger.debug("visitnum: %s" % position_info.visitnum)
+        self.logger.debug("visitnum 浏览量: %s" % position_info.visitnum)
         if position_info.visitnum == 4 and position_info.source == 0:
             help_wechat = yield self.wechat_ps.get_wechat(conds={
                 "signature": self.settings.helper_signature
