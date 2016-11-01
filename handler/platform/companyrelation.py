@@ -52,7 +52,11 @@ class CompanyHandler(BaseHandler):
         })
         response = yield self.user_company_ps.get_companay_data(param, team_flag)
 
-        self.render_page('company/profile.html', data=response.data)
+        template_name = 'company/profile.html'
+        if team_flag:
+            template_name = 'company/team.html'
+
+        self.render_page(template_name, data=response.data)
         return
 
 
