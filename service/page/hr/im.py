@@ -76,6 +76,9 @@ class ImPageService(PageService):
         })
 
         chat_num = 0
+
+        self.logger.debug("chatrooms 侧边栏我的消息 全部: %s" % chatrooms)
+
         for chatroom in chatrooms:
             # 查看 HR 的留言
             chats = yield self.hr_wx_hr_chat_ds.get_chats(
@@ -86,11 +89,16 @@ class ImPageService(PageService):
                 }
             )
 
+            self.logger.debug("chatrooms 侧边栏我的消息: %s" % chatroom)
+
             if not chatroom.wx_chat_time:
                 chat_num += len(chats)
+                self.logger.debug("chatrooms 侧边栏我的消息 消息1: %s" % chat_num)
             else:
                 for chat in chats:
                     if chatroom.wx_chat_time < chat.create_time:
                         chat_num += 1
+
+                self.logger.debug("chatrooms 侧边栏我的消息 消息2: %s" % chat_num)
 
         raise gen.Return(chat_num)
