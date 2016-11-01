@@ -184,7 +184,7 @@ class PositionPageService(PageService):
         }, fields=["id"])
 
         # 转发被点击添加积分，同一个职位，相同的人点击多次不加积分
-        if click_record < 1:
+        if click_record.count_id < 1:
             yield self.user_employee_points_record_ds.create_user_employee_points_record(fields={
                 "employee_id": employee.id,
                 "reason": points_conf.status_name,
@@ -200,7 +200,7 @@ class PositionPageService(PageService):
                 "employee_id": employee.id
             }, fields=["award"])
 
-            if employee_sum:
+            if employee_sum.sum_award:
                 yield self.user_employee_ds.update_employee(conds={
                     "id": employee.id,
                     "company_id": company_id,

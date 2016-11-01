@@ -325,7 +325,7 @@ class DB(object):
         if isinstance(fields, list) and len(fields) > 0:
             sql_tmp = ''
             for field in fields:
-                sql_tmp += "COUNT(`{}`), ".format(field)
+                sql_tmp += "COUNT(`{}`) as count_{}, ".format(field, field)
             sql += sql_tmp
         else:
             self.logger.error("Error:[select_cnt][fields error], module:{0} fields:{1}, type:{2}, "
@@ -369,7 +369,7 @@ class DB(object):
         if isinstance(fields, list) and len(fields) > 0:
             sql_tmp = ''
             for field in fields:
-                sql_tmp += " SUM(`{}`), ".format(field)
+                sql_tmp += " SUM(`{}`) as sum_{}, ".format(field, field)
             sql += sql_tmp
         else:
             self.logger.error("Error:[select_cnt][fields error], module:{0} fields:{1}, type:{2}, "

@@ -153,6 +153,7 @@ class BaseDao(DB):
         sql, params = self.insert(self.table, fields, options)
         cursor = yield self.query(sql, params)
         insert_id = cursor.lastrowid
+        self.logger.debug("[debug][{0}][response: {1}]".format(self.__class__.__module__, insert_id))
         raise gen.Return(insert_id)
 
     @gen.coroutine
@@ -187,6 +188,7 @@ class BaseDao(DB):
         cursor = yield self.query(sql, params_update)
         cursor.fetchone()
         rows_count = cursor.rowcount
+        self.logger.debug("[debug][{0}][response: {1}]".format(self.__class__.__module__, rows_count))
         if rows_count:
             raise gen.Return(True)
         else:
@@ -210,6 +212,7 @@ class BaseDao(DB):
         cursor = yield self.query(sql, params)
         cursor.fetchone()
         rows_count = cursor.rowcount
+        self.logger.debug("[debug][{0}][response: {1}]".format(self.__class__.__module__, rows_count))
         if rows_count:
             raise gen.Return(True)
         else:
@@ -238,7 +241,8 @@ class BaseDao(DB):
         sql = self.select_cnt(self.table, conds, fields, appends, index)
         cursor = yield self.query(sql, params)
         response = cursor.fetchone()
-        raise gen.Return(response)
+        self.logger.debug("[debug][{0}][response: {1}]".format(self.__class__.__module__, response))
+        raise gen.Return(ObjectDict(response))
 
     @gen.coroutine
     def get_sum_by_conds(self, conds, fields, appends=None, index=None):
@@ -263,8 +267,8 @@ class BaseDao(DB):
         sql = self.select_sum(self.table, conds, fields, appends, index)
         cursor = yield self.query(sql, params)
         response = cursor.fetchone()
-        response = 0 if not response else response
-        raise gen.Return(response)
+        self.logger.debug("[debug][{0}][response: {1}]".format(self.__class__.__module__, response))
+        raise gen.Return(ObjectDict(response))
 
     @gen.coroutine
     def start_transaction(self):
