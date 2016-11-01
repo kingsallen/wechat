@@ -189,7 +189,7 @@ class PositionPageService(PageService):
                 "employee_id": employee.id,
                 "reason": points_conf.status_name,
                 "award": points_conf.reward,
-                "recom_wxuser_id": last_recom_wxuser_id,
+                "recom_wxuser": last_recom_wxuser_id,
                 "berecom_wxuser_id": wxuser_id,
                 "position_id": position_id,
                 "award_config_id": points_conf.id,
@@ -205,7 +205,7 @@ class PositionPageService(PageService):
                     "id": employee.id,
                     "company_id": company_id,
                 }, fields={
-                    "award":employee_sum,
+                    "award": employee_sum,
                 })
 
     @gen.coroutine
