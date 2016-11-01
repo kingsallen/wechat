@@ -128,7 +128,7 @@ class TeamPageService(PageService):
                     'member_list': [
                         {
                             "icon":        'https://cdn.moseeker.com/upload/company_profile'
-                                           '/qx/neo.jpeg',
+                                           '/qx/jianlong.jpeg',
                             "name":        'Jerome',
                             "title":       '开发工程师',
                             "description": '地球民 住过在加拿大，日本，中国。我是工程师，说得具体我整天按键。'
@@ -136,14 +136,14 @@ class TeamPageService(PageService):
                         },
                         {
                             "icon":        'https://cdn.moseeker.com/upload/company_profile'
-                                           '/qx/sheena.jpeg',
+                                           '/qx/yiliang.jpeg',
                             "name":        '亦亮',
                             "title":       '开发工程师',
                             "description": '手艺人，文科好的理科生',
                         },
                         {
                             "icon":        'https://cdn.moseeker.com/upload/company_profile'
-                                           '/qx/dd.jpeg',
+                                           '/qx/yixin.jpeg',
                             "name":        '煜昕',
                             "title":       '开发工程师',
                             "description": '行胜于言，希望用技术的力量来提高用户的生活品质。',
@@ -197,7 +197,7 @@ class TeamPageService(PageService):
                     'member_list': [
                         {
                             "icon":        'https://cdn.moseeker.com/upload/company_profile'
-                                           '/qx/neo.jpeg',
+                                           '/qx/feixia.jpeg',
                             "name":        '肖飞霞',
                             "title":       'CS',
                             "description": '人生三件大事，吃饭，睡觉，给客户出谋划策、答疑解难。三大希望，希望'
@@ -205,7 +205,7 @@ class TeamPageService(PageService):
                         },
                         {
                             "icon":        'https://cdn.moseeker.com/upload/company_profile'
-                                           '/qx/sheena.jpeg',
+                                           '/qx/Melissa.jpeg',
                             "name":        'Melissa',
                             "title":       'Head of Customer Success',
                             "description": '热衷于规划与整理，连出去旅游都能整出一个action plan。坚信流程上的'
@@ -213,7 +213,7 @@ class TeamPageService(PageService):
                         },
                         {
                             "icon":        'https://cdn.moseeker.com/upload/company_profile'
-                                           '/qx/dd.jpeg',
+                                           '/qx/Julie.jpeg',
                             "name":        'Julie',
                             "title":       'CS',
                             "description": '不要问我在干嘛，也许我正在con-call，也许我正在与excel、'
@@ -261,7 +261,7 @@ class TeamPageService(PageService):
                     'member_list': [
                         {
                             "icon":        'https://cdn.moseeker.com/upload/company_profile'
-                                           '/qx/neo.jpeg',
+                                           '/qx/Austin.jpeg',
                             "name":        'Austin',
                             "title":       '大客户经理',
                             "description": '非典型理科男，热爱挑战和摄影，希望变成一个有故事的有趣男子。'
@@ -270,7 +270,7 @@ class TeamPageService(PageService):
                         },
                         {
                             "icon":        'https://cdn.moseeker.com/upload/company_profile'
-                                           '/qx/sheena.jpeg',
+                                           '/qx/Kayle.jpeg',
                             "name":        'Kayle',
                             "title":       '大客户经理',
                             "description": '名字来源于北欧神话里的大天使长，本人狮子座阳光灿烂（呸），'
