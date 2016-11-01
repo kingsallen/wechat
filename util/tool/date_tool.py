@@ -73,25 +73,28 @@ def jd_update_date(update_time):
 
             if pass_day.days == 0 and pass_day.seconds <= 3600:
                 # 刚刚（即一个小时内）
-                update_date = constant.JD_TIME_FORMAT_JUST_NOW
                 logger.debug("update_date 2: %s" % update_date)
+                update_date = constant.JD_TIME_FORMAT_JUST_NOW
 
             elif pass_day.days == 0:
                 # 今天 12：00
+                logger.debug("update_date 3: %s" % update_date)
                 update_date = constant.JD_TIME_FORMAT_TODAY.format(
                     update_time.hour, update_time.minute)
-                logger.debug("update_date 3: %s" % update_date)
+
 
             elif pass_day.days == 1:
                 # 昨天 12：00
+                logger.debug("update_date 4: %s" % update_date)
                 update_date = constant.JD_TIME_FORMAT_YESTERDAY.format(
                     update_time.hour, update_time.minute)
-                logger.debug("update_date 4: %s" % update_date)
+
             else:
                 # 2016-11-23
+                logger.debug("update_date 5: %s" % update_date)
                 update_date = constant.JD_TIME_FORMAT_FULL.format(
                     update_time.year, update_time.month, update_time.day)
-                logger.debug("update_date 5: %s" % update_date)
+
     except Exception as e:
         logger.error(e)
         pass
