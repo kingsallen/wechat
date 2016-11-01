@@ -542,6 +542,8 @@ class BaseHandler(MetaBaseHandler):
             session = ObjectDict(value)
             yield self._add_company_info_to_session(session)
             yield self._add_sysuser_to_session(session)
+            if self.params.recom:
+                yield self._add_recom_to_session(session)
             self._add_jsapi_to_wechat(session.wechat)
             self.current_user = session
 
