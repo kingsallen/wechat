@@ -88,6 +88,7 @@ class PositionHandler(BaseHandler):
             # 刷新链路
             self.logger.debug("[JD]刷新链路")
             last_recom_wxuser_id = yield self._make_refresh_share_chain(position_info)
+            self.logger.debug("[JD]刷新链路 last_recom_wxuser_id: %s" % last_recom_wxuser_id)
 
             # 发红包
             if self.is_platform:
@@ -105,7 +106,7 @@ class PositionHandler(BaseHandler):
             self.logger.debug("[JD]转发积分操作")
             yield self._make_add_reward_click(position_info, last_recom_wxuser_id)
 
-            self.logger.debug("[JD]发送消息模板")
+            self.logger.debug("[JD]!!!!!!!发送消息模板!!!!!!!!!")
             yield self._make_send_publish_template(position_info)
 
         else:
@@ -339,12 +340,14 @@ class PositionHandler(BaseHandler):
     def _make_add_reward_click(self, position_info, last_recom_wxuser_id):
         """给员工加积分"""
 
+        self.logger.debug("给员工加积分，即将开始！")
         if self.current_user.employee and last_recom_wxuser_id != self.current_user.wxuser.id:
-            yield self.position_ps.add_reward_for_recom_click(self.current_user.employee,
+            res = yield self.position_ps.add_reward_for_recom_click(self.current_user.employee,
                                                               self.current_user.company.id,
                                                               self.current_user.wxuser.id,
                                                               position_info.id,
                                                               last_recom_wxuser_id)
+            self.logger.debug("给员工加积分： %s" % res)
 
     @gen.coroutine
     def _make_send_publish_template(self, position_info):
