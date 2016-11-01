@@ -82,7 +82,8 @@ TEAMS = [
     },
     {
         'title': "商务拓展团队",
-        'longtext': "",
+        'longtext': "我们团队主要工作是开发各行业的优秀企业，提供给客户在移动社交招聘、雇主品牌建设上的合作方案，从而解决企业招聘难题，提升雇主形象。"
+                    "团队成员基本都是狼性十足的小伙子们，业务团队既要有非常有狼性，又要非常重要的责任心和工作能力，去帮助客户搭建一对一的专业服务，我们团队的宗旨是：客户选择我们一定是最正确的选择。",
         'media_url': 'https://cdn.moseeker.com/upload/company_profile/qx/bd.jpeg',
         'media_type': 'image',
         'member_list': []
