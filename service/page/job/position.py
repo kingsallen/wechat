@@ -205,7 +205,7 @@ class PositionPageService(PageService):
                     "id": employee.id,
                     "company_id": company_id,
                 }, fields={
-                    "award": employee_sum,
+                    "award": employee_sum.sum_award,
                 })
 
     @gen.coroutine
