@@ -61,7 +61,7 @@ class SharechainPageService(PageService):
     @gen.coroutine
     def _select_recom_record_real_time(self, position_id, wxuser_id):
         # 现在无论是否开启挖掘被动求职者，都要放到链路表中
-        record = self.stats_recom_record_ds.get_stats_recom_record(
+        record = yield self.stats_recom_record_ds.get_stats_recom_record(
             conds={
                 "depth": [0, "!="],
                 "presentee_id": wxuser_id,
@@ -137,10 +137,11 @@ class SharechainPageService(PageService):
     @gen.coroutine
     def _no_existed_record(self, recom):
         """检查原始链路数据中是否有该数据"""
-        record = yield self.stats_recom_record_dao.get_stats_recom_record(
+        record = yield self.stats_recom_record_ds.get_stats_recom_record(
             conds={
                 "position_id": recom.position_id,
                 "presentee_id": recom.presentee_id,
+                # "click_time": str(recom.create_time)
                 "click_time": recom.create_time
             })
         raise gen.Return(bool(record))
@@ -279,7 +280,7 @@ class SharechainPageService(PageService):
         # LIMIT 1
         # """
 
-        record = yield self.stats_recom_record_dao.get_stats_recom_record(
+        record = yield self.stats_recom_record_ds.get_stats_recom_record(
             conds={
                 "position_id": position_id,
                 "presentee_id": wxuser_id,
