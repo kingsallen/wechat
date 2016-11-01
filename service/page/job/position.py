@@ -177,7 +177,7 @@ class PositionPageService(PageService):
             "template_id": const.RECRUIT_STATUS_RECOMCLICK_ID,
         }, appends=["ORDER BY id DESC", "LIMIT 1"])
 
-        click_record = yield self.user_employee_points_record_ds.user_employee_points_record_dao(conds={
+        click_record = yield self.user_employee_points_record_ds.get_user_employee_points_record(conds={
             "berecom_wxuser_id": wxuser_id,
             "position_id": position_id,
             "config_id": points_conf.id

@@ -29,12 +29,12 @@ class UserEmployeePointsRecordDataService(DataService):
         raise gen.Return(response)
 
     @gen.coroutine
-    def get_user_employee_points_record_num(self, conds, fields, appends=None, index=''):
+    def get_user_employee_points_record_cnt(self, conds, fields, appends=None, index=''):
 
         appends = appends or []
 
         if conds is None or not (isinstance(conds, dict) or isinstance(conds, str)):
-            self.logger.warn("Warning:[get_user_employee_points_record_num][invalid parameters], Detail:[conds: {0}, "
+            self.logger.warn("Warning:[get_user_employee_points_record_cnt][invalid parameters], Detail:[conds: {0}, "
                         "type: {1}]".format(conds, type(conds)))
             raise gen.Return(list())
 
