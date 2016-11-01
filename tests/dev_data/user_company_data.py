@@ -163,19 +163,19 @@ data4_1 = [
     {
         'title': '2015年',
         'description': '公司曾获得2014全球创业周Recruit创业大赛冠军以及由国内顶尖人力资源权威媒体《人力资本管理》颁发的2014-2015大中华区人力资源服务创新大奖，仟寻也入围由《互联网周刊》评选出的2015中国新互联网公司300强。',
-        'media_url': 'http://o8g4x4uja.bkt.clouddn.com/event_img.png',
+        'media_url': 'https://cdn.moseeker.com/upload/company_profile/qx/ds1.png',
         'media_type': 'image',
     },
     {
         'title': '2016年9月14日',
         'description': '仟寻MoSeeker获选《红鲱鱼》(Red Herring)公布的“2016-红鲱鱼Red Herring亚洲100 强”(Red Herring‘s Top 100 In Asia)最具潜力创业公司。',
-        'media_url': 'http://o8g4x4uja.bkt.clouddn.com/event_img.png',
+        'media_url': 'https://cdn.moseeker.com/upload/company_profile/qx/ds2.png',
         'media_type': 'image',
     },
     {
         'title': '2016年10月',
         'description': '仟寻移动招聘MoSeeker荣获2016上海创新创业大赛企业优胜奖。仟寻招聘跻身中国创新创业大赛8强，获得国赛优秀企业称号。',
-        'media_url': 'http://o8g4x4uja.bkt.clouddn.com/event_img.png',
+        'media_url': 'https://cdn.moseeker.com/upload/company_profile/qx/ds3.png',
         'media_type': 'image',
     }
 ]
@@ -206,3 +206,70 @@ data50 = [
         'lng': '121.432440',
     }
 ]
+
+TEAM_RD = [{
+    'title':       "研发团队",
+    'longtext':    "研发团队为仟寻招聘提供技术保证和动力引擎。我们根据产品需求，不断迭代发布新版本；"
+                   "我们设计开发算法，帮助雇主更快更精准的找到求职者，也帮助求职者找到更心仪的工作。"
+                   "我们通过挖掘大数据，分析候选人关系和行为。"
+                   "我们不断创新技术架构，提高服务稳定性，分享不同知识点，提高研发实力，助力打造一款更具竞争力的产品。",
+    'media_url':   'https://cdn.moseeker.com/upload/company_profile/qx/rd'
+                   '.jpeg',
+    'media_type':  'image',
+    'member_list': [
+        
+    ]
+}]
+
+TEAM_CS = [{
+    'title':       "客户成功团队",
+    'longtext':    "我们团队主要工作是提供运营策略给到我们的客户，并提供运营技术支持，是成单后客户的智慧库以及咨询师。团队成员简介："
+                   "我们团队都是年轻貌美的姑娘们。由于工作的内容需要细心的执行外，还要根据各客户的实际情况提供相应的策略，我们的团队成员都是智慧与貌美并重。",
+    'media_url':   'https://cdn.moseeker.com/upload/company_profile/qx/cs.png',
+    'media_type':  'image',
+    'member_list': [
+
+    ]
+}]
+
+TEAM_BD = [{
+    'title':       "雇主品牌团队",
+    'longtext':    "雇主品牌团队专注于提供企业雇主品牌的策略咨询及实施服务。"
+                   "帮助客户做好雇主品牌的“营销”，通过创意设计和技术实现来优化招聘沟通渠道的内容和目标人群的体验，"
+                   "从而高效传播企业核心价值并提升企业雇主品牌形象，助力企业吸引和保留目标优秀人才。",
+    'media_url':   'https://cdn.moseeker.com/upload/company_profile/qx/bd'
+                   '.jpeg',
+    'media_type':  'image',
+    'member_list': [
+        {
+            "icon":        'https://cdn.moseeker.com/upload/company_profile'
+                           '/qx/neo.jpeg',
+            "name":        'Neo',
+            "title":       '设计师',
+            "description": '乐观开朗正气十足的非典型设计师 喜欢奇怪小创意。',
+        },
+        {
+            "icon":        'https://cdn.moseeker.com/upload/company_profile'
+                           '/qx/sheena.jpeg',
+            "name":        'Sheena',
+            "title":       '客户主任',
+            "description": '客户的贴心小棉袄，同事的知心小姐妹。一门心思期待在雇主品牌领域能够为客户提供更杰出的服务！',
+        },
+        {
+            "icon":        'https://cdn.moseeker.com/upload/company_profile'
+                           '/qx/dd.jpeg',
+            "name":        '丹丹',
+            "title":       '文案',
+            "description": '略矮略胖，爱写爱吃爱拍爱跑，追星追热点。希望成为一个即使被蹂躏却还是一如既往爱着客户的文案，说的想哭！',
+        },
+    ]
+}]
+
+TEAM_EB = [{
+    'title':       "商务拓展团队",
+    'longtext':    "",
+    'media_url':   'https://cdn.moseeker.com/upload/company_profile/qx/bd'
+                   '.jpeg',
+    'media_type':  'image',
+    'member_list': []
+}]

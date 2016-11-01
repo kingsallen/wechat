@@ -10,7 +10,7 @@
 from util.common import ObjectDict
 from tornado import gen
 from service.page.base import PageService
-from tests.dev_data.user_company_data import WORKING_ENV, TEAMS, MEMBERS, data2, data3,\
+from tests.dev_data.user_company_data import WORKING_ENV, TEAMS, MEMBERS, data2, TEAM_EB, TEAM_BD,TEAM_CS,TEAM_RD, data3,\
                                              data4_1, data4_2, data50
 
 
@@ -32,13 +32,28 @@ class UserCompanyPageService(PageService):
         """
         user_id, company_id = param.get('user_id'), param.get('company_id')
         response = ObjectDict({'status': 0, 'message': 'sucdess'})
-        header = ObjectDict({
-            'type': 'team' if team_flag else 'company',
-            'name': '仟寻 MoSeeker',
-            'description': "你的职场向导",
-            'icon': '',
-            'banner': 'https://cdn.moseeker.com/upload/company_profile/qx/banner_qx.jpeg',
-        })
+
+        if not team_flag:
+            header = ObjectDict({
+                'type':        'company',
+                'name':        '仟寻 MoSeeker',
+                'description': "你的职场向导",
+                'icon':        '',
+                'banner':
+                    'https://cdn.moseeker.com/upload/company_profile/qx'
+                    '/banner_qx.jpeg',
+            })
+        else:
+            header = ObjectDict({
+                'type':        'team',
+                'name':        '我们的团队',
+                'description': "",
+                'icon':        '',
+                'banner':
+                    'https://cdn.moseeker.com/upload/company_profile/qx'
+                    '/banner_qx.jpeg',
+            })
+
         conds = {'user_id': user_id, 'company_id': company_id}
 
         fllw_cmpy = yield self.user_company_follow_ds.get_fllw_cmpy(
@@ -64,86 +79,83 @@ class UserCompanyPageService(PageService):
     @staticmethod
     def _add_company_data(data):
         """构建公司主页的豆腐干们"""
-        data.template_total = 4
 
         data.templates = [
-
             ObjectDict({
                 'type': 1,
                 'sub_type': 'less',
                 'title': '办公环境',
                 'data': WORKING_ENV,
-                'more_link': 'more_link_test'
+                'more_link': ''
             }),
-
             ObjectDict({'type': 2, 'title': 'template 2', 'data': data2}),
-
             ObjectDict({
                 'type':      1,
                 'sub_type':  'less',
                 'title':     '我们的团队',
                 'data':      TEAMS,
-                'more_link': 'more_link_test'
+                'more_link': ''
             }),
-
             ObjectDict({
                 'type':      1,
                 'sub_type':  'less',
                 'title':     '在这里工作的人们',
                 'data':      MEMBERS,
-                'more_link': 'more_link_test'
+                'more_link': ''
             }),
-
-
             ObjectDict({
                 'type': 4,
                 'sub_type': 0,
                 'title': '公司大事件',
                 'data': data4_1
             }),
-
-            ObjectDict({'type': 4, 'sub_type': 1, 'title': 'template 4',
-                        'data': data4_2}),
-
+            # 可能感兴趣的公司，暂时不做
+            # ObjectDict({'type': 4, 'sub_type': 1, 'title': '你可能感兴趣的公司',
+            #             'data': data4_2}),
             ObjectDict({'type': 5, 'title': 'template 5', 'data': None}),
-
             ObjectDict({'type': 50, 'title': 'address', 'data': data50}),
-
         ]
+        data.template_total = len(data.templates)
 
     @staticmethod
     def _add_team_data(data):
         """构建团队主页的豆腐干们"""
-        data.template_total = 4
+
         data.templates = [
-            # ObjectDict({
-            #     'type': 1,
-            #     'sub_type': 'full',
-            #     'title': 'template 1',
-            #     'data': data1,
-            #     'more_link': 'more_link_test'}),
-            #
-            # ObjectDict({'type': 1, 'sub_type': 'middle', 'title': 'template 1',
-            #             'data': data1}),
-            #
-            # ObjectDict({'type': 1, 'sub_type': 'less', 'title': 'template 1',
-            #             'data': data1}),
+            ObjectDict({
+                'type':      1,
+                'sub_type':  'large',
+                'title':     '研发团队',
+                'data':      TEAM_RD,
+                'more_link': ''
+            }),
 
-            ObjectDict({'type': 2, 'title': 'template 2', 'data': data2}),
+            ObjectDict({
+                'type':      1,
+                'sub_type':  'large',
+                'title':     '客户成功团队',
+                'data':      TEAM_CS,
+                'more_link': ''
+            }),
 
-            ObjectDict({'type': 3, 'title': 'template 3', 'data': data3}),
+            ObjectDict({
+                'type':      1,
+                'sub_type':  'large',
+                'title':     '商务拓展团队',
+                'data':      TEAM_BD,
+                'more_link': ''
+            }),
 
-            ObjectDict({'type': 4, 'sub_type': 0, 'title': 'template 4',
-                        'data': data4_1}),
-
-            ObjectDict({'type': 4, 'sub_type': 1, 'title': 'template 4',
-                        'data': data4_2}),
-
-            ObjectDict({'type': 5, 'title': 'template 5', 'data': None}),
-
-            ObjectDict({'type': 50, 'title': 'template 50', 'data': data50}),
+            ObjectDict({
+                'type':      1,
+                'sub_type':  'large',
+                'title':     '雇主品牌团队',
+                'data':      TEAM_EB,
+                'more_link': ''
+            }),
 
         ]
+        data.template_total = len(data.templates)
 
     @gen.coroutine
     def set_company_follow(self, param):
