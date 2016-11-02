@@ -263,7 +263,7 @@ TEAM_BD = [{
 }]
 
 TEAM_EB = [{
-    'title':       "商务拓展团队",
+    'title':       "雇主品牌团队",
     'longtext':    "",
     'media_url':   'https://cdn.moseeker.com/upload/company_profile/qx/'
                    'EBFULL.jpeg',
