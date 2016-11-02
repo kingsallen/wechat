@@ -111,6 +111,8 @@ class TeamPageService(PageService):
             }),
         ]
 
+        data.templates_total = len(data.templates)
+
         return data
 
     @staticmethod
@@ -200,6 +202,8 @@ class TeamPageService(PageService):
             }),
         ]
 
+        data.templates_total = len(data.templates)
+
         return data
 
     @staticmethod
@@ -282,6 +286,8 @@ class TeamPageService(PageService):
             }),
         ]
 
+        data.templates_total = len(data.templates)
+
         return data
 
     @staticmethod
@@ -353,5 +359,7 @@ class TeamPageService(PageService):
                 ],
             }),
         ]
+
+        data.templates_total = len(data.templates)
 
         return data
