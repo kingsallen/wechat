@@ -222,7 +222,7 @@ class PositionHandler(BaseHandler):
         data = ObjectDict({
             "id": position_info.id,
             "title": position_info.title,
-            "disable": False if position_info.status == 0 else True,
+            "status": position_info.status,
             "location": position_info.city,
             "update_time": position_info.update_time,
             "star": star,
