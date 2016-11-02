@@ -61,7 +61,7 @@ class CompanyHandler(BaseHandler):
 
         if team_flag:
             template_name = 'company/team.html'
-
+        # todo
         self.params.share = ObjectDict({
             "cover":       "cover",
             "title":       "title",
@@ -78,6 +78,13 @@ class CompanyTeamHandler(BaseHandler):
     @gen.coroutine
     def get(self, team_name):
         result = yield self.team_ps.get_more_team_info(team_name)
+        # todo
+        self.params.share = ObjectDict({
+            "cover":       "cover",
+            "title":       "title",
+            "description": "des",
+            "link":        "www.google.com"
+        })
 
         self.render_page(template_name='company/team.html', data=result)
         return
