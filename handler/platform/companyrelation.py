@@ -60,13 +60,21 @@ class CompanyHandler(BaseHandler):
         template_name = 'company/team.html' if team_flag \
                          else 'company/profile.html'
 
-        # todo
-        self.params.share = ObjectDict({
-            "cover":       "http://photocdn.sohu.com/20130622/Img379566069.jpg",
-            "title":       "title",
-            "description": "des",
-            "link":        "http://moseeker.com"
-        })
+        if team_flag:
+            self.params.share = ObjectDict({
+                "cover":       self.static_url(
+                    path=self.current_user.company.log),
+                "title":       self.current_user.company.abbr + "的团队",
+                "description": "",
+                "link":        self.fullurl
+            })
+        else:
+            self.params.share = ObjectDict({
+                "cover":       self.static_url(path=self.current_user.company.log),
+                "title":       self.current_user.company.abbr + ", 我发现了一个好公司！",
+                "description": "",
+                "link":        self.fullurl
+            })
 
         self.render_page(template_name, data=response.data)
         return
@@ -77,12 +85,12 @@ class CompanyTeamHandler(BaseHandler):
     @gen.coroutine
     def get(self, team_name):
         result = yield self.team_ps.get_more_team_info(team_name)
-        # todo
+
         self.params.share = ObjectDict({
-            "cover":       "http://photocdn.sohu.com/20130622/Img379566069.jpg",
-            "title":       "title",
-            "description": "des",
-            "link":        "http://moseeker.com"
+            "cover":       self.static_url(path=self.current_user.company.log),
+            "title":       team_name.upper() + "团队",
+            "description": "",
+            "link":        self.fullurl
         })
 
         self.render_page(template_name='company/team.html', data=result)
