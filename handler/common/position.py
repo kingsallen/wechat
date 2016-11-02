@@ -147,7 +147,7 @@ class PositionHandler(BaseHandler):
                         recom=self._make_recom(),
                         host=self.request.host,
                         protocol=self.request.protocol,
-                        escape=["keywords, cities, candidate_source, employment_type, salary, "
+                        escape=["pid, keywords, cities, candidate_source, employment_type, salary, "
                                 "department, occupations, custom, degree, page_from, page_size"])
 
         self.params.share = ObjectDict({
