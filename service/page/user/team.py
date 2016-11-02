@@ -294,7 +294,7 @@ class TeamPageService(PageService):
         data = ObjectDict({})
         data.header = ObjectDict({
             'type': 'team',
-            'name': '业务发展部',
+            'name': '商务拓展团队',
             'description': '我们团队主要工作是开发各行业的优秀企业，提供给客户在移动社交招聘、雇主品牌建设上的合作方案，'
                            '从而解决企业招聘难题，提升雇主形象。',
             'icon': '',
@@ -307,7 +307,7 @@ class TeamPageService(PageService):
                 'sub_type': 'full',
                 'title': '团队氛围',
                 'data': [{
-                    'title':       '客户成功团队',
+                    'title':       '商务拓展团队',
                     'longtext':    '我们团队主要工作是，提供运营策略给到我们的客户，并提供运营技术支持，'
                                    '是成单后客户的智慧库以及咨询师。',
                     'media_url':   'https://cdn.moseeker.com/upload/company_profile/qx/'
