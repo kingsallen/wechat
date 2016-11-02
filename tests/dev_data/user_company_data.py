@@ -235,12 +235,38 @@ TEAM_CS = [{
 }]
 
 TEAM_BD = [{
-    'title':       "雇主品牌团队",
-    'longtext':    "雇主品牌团队专注于提供企业雇主品牌的策略咨询及实施服务。"
-                   "帮助客户做好雇主品牌的“营销”，通过创意设计和技术实现来优化招聘沟通渠道的内容和目标人群的体验，"
-                   "从而高效传播企业核心价值并提升企业雇主品牌形象，助力企业吸引和保留目标优秀人才。",
+    'title':       "商务拓展团队",
+    'longtext':    "我们团队主要工作是开发各行业的优秀企业，提供给客户在移动社交招聘、"
+                   "雇主品牌建设上的合作方案，从而解决企业招聘难题，提升雇主形象。",
     'media_url':   'https://cdn.moseeker.com/upload/company_profile/qx/bd'
                    '.jpeg',
+    'media_type':  'image',
+    'member_list': [
+        {
+            "icon":        'https://cdn.moseeker.com/upload/company_profile'
+                           '/qx/Austin.jpeg',
+            "name":        'Austin',
+            "title":       '大客户经理',
+            "description": '非典型理科男，热爱挑战和摄影，希望变成一个有故事的有趣男子。'
+                           '喜欢亲自去看看不同行业的公司风格, '
+                           '最享受同时HOLD住HR轮番提问的时刻，欧耶~',
+        },
+        {
+            "icon":        'https://cdn.moseeker.com/upload/company_profile'
+                           '/qx/Kayle.jpeg',
+            "name":        'Kayle',
+            "title":       '大客户经理',
+            "description": '名字来源于北欧神话里的大天使长，本人狮子座阳光灿烂（呸），'
+                           '喜欢和客户沟通成功合作那一刻的成就感，喜欢交朋友。',
+        },
+    ]
+}]
+
+TEAM_EB = [{
+    'title':       "商务拓展团队",
+    'longtext':    "",
+    'media_url':   'https://cdn.moseeker.com/upload/company_profile/qx/'
+                   'EBFULL.jpeg',
     'media_type':  'image',
     'member_list': [
         {
@@ -265,13 +291,4 @@ TEAM_BD = [{
             "description": '略矮略胖，爱写爱吃爱拍爱跑，追星追热点。希望成为一个即使被蹂躏却还是一如既往爱着客户的文案，说的想哭！',
         },
     ]
-}]
-
-TEAM_EB = [{
-    'title':       "商务拓展团队",
-    'longtext':    "",
-    'media_url':   'https://cdn.moseeker.com/upload/company_profile/qx/bd'
-                   '.jpeg',
-    'media_type':  'image',
-    'member_list': []
 }]
