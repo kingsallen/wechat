@@ -660,24 +660,33 @@ class BaseHandler(MetaBaseHandler):
         self.log_info = {"res_type": "html", "status_code": status_code}
         self.set_status(http_code)
 
-        render_json = encode_json_dumps({
-            "status": status_code,
-            "message": message,
-            "data": data
-        })
+        try:
+            render_json = encode_json_dumps({
+                "status": status_code,
+                "message": message,
+                "data": data
+            })
+        except TypeError as e:
+            self.logger.error(e)
+            render_json = encode_json_dumps({
+                "status": const.API_FAILURE,
+                "message": msg_const.RESPONSE_FAILURE,
+                "data": None
+            })
 
-        # 前后端联调使用
-        if self.settings.get('remote_debug', False) is True:
-            template_string = self.render_string(template_name,
-                                                 render_json=render_json)
-            post_url = urllib.parse.urljoin(self.settings.get('remote_debug_ip'),
-                               template_name)
-            http_client = tornado.httpclient.HTTPClient()
-            r = http_client.fetch(post_url, method="POST",
-                                  body=template_string)
-            self.write(r.body)
-            self.finish()
-            return
+        else:
+            # 前后端联调使用
+            if self.settings.get('remote_debug', False) is True:
+                template_string = self.render_string(template_name,
+                                                     render_json=render_json)
+                post_url = urllib.parse.urljoin(self.settings.get('remote_debug_ip'),
+                                   template_name)
+                http_client = tornado.httpclient.HTTPClient()
+                r = http_client.fetch(post_url, method="POST",
+                                      body=template_string)
+                self.write(r.body)
+                self.finish()
+                return
 
         self.render(template_name, render_json=render_json)
         return

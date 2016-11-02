@@ -5,8 +5,7 @@
 import datetime
 import decimal
 import json
-from util.common import ObjectDict
-import tornado.escape
+import ujson  # for encode json first time
 
 
 class JSONEncoder(json.JSONEncoder):
@@ -33,7 +32,7 @@ def json_dumps(p_dict):
 def encode_json_dumps(p_dict):
     if not isinstance(p_dict, dict):
         raise ValueError("p_dict is not a dict instance.")
-    return json.dumps(tornado.escape.json_encode(p_dict), cls=JSONEncoder)
+    return json.dumps(ujson.dumps(p_dict), cls=JSONEncoder)
 
 
 if __name__ == '__main__':
