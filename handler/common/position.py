@@ -357,8 +357,7 @@ class PositionHandler(BaseHandler):
         注：只向 HR 平台发布的职位发送模板消息，ATS 同步的职位不发送"""
 
         self.logger.debug("visitnum 浏览量: %s" % position_info.visitnum)
-        # if position_info.visitnum == 4 and position_info.source == 0:
-        if position_info.visitnum:
+        if position_info.visitnum == 4 and position_info.source == 0:
             help_wechat = yield self.wechat_ps.get_wechat(conds={
                 "signature": self.settings.helper_signature
             })
