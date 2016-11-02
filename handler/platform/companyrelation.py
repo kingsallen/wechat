@@ -63,10 +63,10 @@ class CompanyHandler(BaseHandler):
             template_name = 'company/team.html'
         # todo
         self.params.share = ObjectDict({
-            "cover":       "cover",
+            "cover":       "http://photocdn.sohu.com/20130622/Img379566069.jpg",
             "title":       "title",
             "description": "des",
-            "link":        "www.google.com"
+            "link":        "http://moseeker.com"
         })
 
         self.render_page(template_name, data=response.data)
@@ -80,10 +80,10 @@ class CompanyTeamHandler(BaseHandler):
         result = yield self.team_ps.get_more_team_info(team_name)
         # todo
         self.params.share = ObjectDict({
-            "cover":       "cover",
+            "cover":       "http://photocdn.sohu.com/20130622/Img379566069.jpg",
             "title":       "title",
             "description": "des",
-            "link":        "www.google.com"
+            "link":        "http://moseeker.com"
         })
 
         self.render_page(template_name='company/team.html', data=result)
