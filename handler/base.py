@@ -23,7 +23,7 @@ from util.common.decorator import check_signature, check_outside_wechat
 from util.tool.date_tool import curr_now
 from util.tool.json_tool import encode_json_dumps, json_dumps
 from util.tool.str_tool import to_str, to_hex, from_hex
-from util.tool.url_tool import url_subtract_query
+from util.tool.url_tool import url_subtract_query, make_static_url
 
 import conf.message as msg_const
 import conf.common as const
@@ -614,16 +614,7 @@ class BaseHandler(MetaBaseHandler):
 
     def static_url(self, path, include_host=None, **kwargs):
         """获取 static_url"""
-
-        if not path:
-            return None
-        if not path.startswith("http"):
-            if "mid_path" in kwargs:
-                path = os.path.join(kwargs['mid_path'], path)
-            path = urllib.parse.urljoin(self.settings['static_domain'], path)
-        if not path.startswith("http") and include_host is not None:
-            path = include_host + ":" + path
-        return path
+        return make_static_url(path, include_host, **kwargs)
 
     def on_finish(self):
         """on_finish 时处理传输日志"""

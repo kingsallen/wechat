@@ -6,9 +6,11 @@
 # @DES     : url 拼接
 
 # Copyright 2016 MoSeeker
+import os
+import urllib
 
 from urllib.parse import urlparse, parse_qs, urlencode
-
+from setting import settings
 
 def make_url(path, params=None, host="", protocol="http", escape=None,
              **kwargs):
@@ -63,3 +65,15 @@ def url_subtract_query(url, exclude):
         query=urlencode(parsed_query, doseq=True))
 
     return ret[:-1] if ret[-1] == '?' else ret
+
+
+def make_static_url(path, include_host=None, **kwargs):
+    if not path:
+        return None
+    if not path.startswith("http"):
+        if "mid_path" in kwargs:
+            path = os.path.join(kwargs['mid_path'], path)
+        path = urllib.parse.urljoin(settings['static_domain'], path)
+    if not path.startswith("http") and include_host is not None:
+        path = include_host + ":" + path
+    return path

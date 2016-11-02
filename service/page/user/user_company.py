@@ -13,16 +13,10 @@ from service.page.base import PageService
 from tests.dev_data.user_company_data import WORKING_ENV, TEAMS, MEMBERS, \
     data2, TEAM_EB, TEAM_BD, TEAM_CS, TEAM_RD, data4_1, data50
 from util.common import ObjectDict
-from util.tool.url_tool import make_url
+from util.tool.url_tool import make_url, make_static_url
 
 
 class UserCompanyPageService(PageService):
-
-    @gen.coroutine
-    def get_company_follows(self, conds, fields=[]):
-        fields = ['id', 'company_id', 'user_id']
-        fans = yield self.user_company_follow_ds.get_user(conds, fields)
-        raise gen.Return(fans)
 
     @gen.coroutine
     def get_companay_data(self, handler_params, param, team_flag):
@@ -35,12 +29,16 @@ class UserCompanyPageService(PageService):
         user_id, company_id = param.get('user_id'), param.get('company_id')
         response = ObjectDict({'status': 0, 'message': 'sucdess'})
 
+        company = yield self.hr_company_ds.get_company(
+                            conds={'id': company_id})
+
         if not team_flag:
             header = ObjectDict({
                 'type':        'company',
-                'name':        '仟寻 MoSeeker',
+                # 'name':        '仟寻 MoSeeker ',
+                'name':        company.name,
                 'description': "你的职场向导",
-                'icon':        '',
+                'icon':        make_static_url(company.logo),
                 'banner':
                     'https://cdn.moseeker.com/upload/company_profile/qx'
                     '/banner_qx.jpeg',
@@ -50,7 +48,7 @@ class UserCompanyPageService(PageService):
                 'type':        'team',
                 'name':        '我们的团队',
                 'description': "",
-                'icon':        '',
+                'icon':        make_static_url(company.logo),
                 'banner':
                     'https://cdn.moseeker.com/upload/company_profile/qx'
                     '/banner_qx.jpeg',
