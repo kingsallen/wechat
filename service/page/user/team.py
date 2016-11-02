@@ -30,7 +30,7 @@ class TeamPageService(PageService):
         data.header = ObjectDict({
             'type':        'team',
             'name':        '雇主品牌团队',
-            'description': '专注于提供企业雇主品牌的策略咨询及实施服务。',
+            'description': '专注于提供企业雇主品牌的策略咨询及实施服务',
             'icon':        '',
             'banner':      'https://cdn.moseeker.com/upload/company_profile/qx'
                            '/banner_qx.jpeg',
