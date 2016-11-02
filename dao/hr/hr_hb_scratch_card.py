@@ -7,7 +7,7 @@ from dao.base import BaseDao
 class HrHbScratchCardDao(BaseDao):
     def __init__(self, logger):
         super(HrHbScratchCardDao, self).__init__(logger)
-        self.table = "hr_hb_position_binding"
+        self.table = "hr_hb_scratch_card"
         self.fields_map = {
             "id":             self.constant.TYPE_INT,
             "wechat_id":      self.constant.TYPE_INT,

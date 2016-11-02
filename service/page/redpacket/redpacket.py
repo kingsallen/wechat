@@ -19,7 +19,7 @@ import conf.wechat as wx
 from service.page.base import PageService
 from setting import settings
 from service.page.user.sharechain import SharechainPageService
-from util.tool.str_tool import set_literl, trunc, generate_nonce_str
+from util.tool.str_tool import set_literl, trunc, generate_nonce_str, to_bytes
 from util.tool.url_tool import make_url
 from util.wechat.template import \
     rp_binding_success_notice_tpl, \
@@ -47,7 +47,7 @@ class RedpacketPageService(PageService):
     def __make_card_no(self):
         """创建新的 scratch card no"""
         def make_new():
-            return sha1('%s%s' % (os.urandom(16), time.time())).hexdigest()
+            return sha1(to_bytes('%s%s' % (os.urandom(16), time.time()))).hexdigest()
         while True:
             cardno = make_new()
             ret = yield self.__get_card_by_cardno(cardno)
@@ -535,8 +535,8 @@ class RedpacketPageService(PageService):
             return
 
         card = yield self.__create_new_card(
-            recom_wechat_id, qx_openid, rp_item.id, rp_item.amount,
-            red_packet_config.id)
+            recom_wechat_id, qx_openid, red_packet_config.id,
+            rp_item.id, rp_item.amount)
 
         self.logger.debug("[RP]红包信封入库成功!")
         self.logger.debug("[RP]准备发送红包信封(有金额)!")
@@ -596,7 +596,7 @@ class RedpacketPageService(PageService):
                                             red_packet_config.id)
 
         self.logger.debug("[RP]红包信封入库成功!")
-        self.logger.self.logger.debug("[RP]准备发送红包信封(0元)!")
+        self.logger.debug("[RP]准备发送红包信封(0元)!")
 
         recom_wechat = yield self.hr_wx_wechat_ds.get_wechat({
             "id": recom_wechat_id
@@ -763,12 +763,7 @@ class RedpacketPageService(PageService):
         else:
             raise ValueError(msg.RED_PACKET_TYPE_VALUE_ERROR)
 
-        self.logger.debug(res)
-
-        status = (const.YES if res and res.get('errmsg') == 'ok'
-                  else const.NO)
-
-        raise gen.Return(status)
+        raise gen.Return(res)
 
     @gen.coroutine
     def __insert_0_amount_sent_history(self, hb_config_id, qx_openid,
