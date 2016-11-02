@@ -6,6 +6,7 @@ import logging
 import os
 from logging.handlers import TimedRotatingFileHandler
 from util.common.elk import RedisELK
+from util.common.alarm import Alarm
 
 from tornado.log import gen_log
 
@@ -126,6 +127,8 @@ class MessageLogger(Logger):
     def error(self, message):
         super(MessageLogger, self).error(message)
         self.impl.send_message("error", message)
+        # error 及时报警
+        Alarm.biu(message)
 
     def stats(self, message):
         super(MessageLogger, self).stats(message)
