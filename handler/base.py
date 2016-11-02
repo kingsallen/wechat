@@ -400,6 +400,8 @@ class BaseHandler(MetaBaseHandler):
 
         session_id = to_str(self.get_secure_cookie(const.COOKIE_SESSIONID))
 
+        self.logger.debug("_fetch_session session_id: %s" % session_id)
+
         if session_id:
             if self.is_platform:
                 ok = yield self._get_session_from_ent(session_id)
@@ -498,7 +500,7 @@ class BaseHandler(MetaBaseHandler):
         self.logger.debug("refresh ent session redis key: {}".format(key_ent))
 
         key_qx = const.SESSION_USER.format(session_id, self.settings['qx_wechat_id'])
-        self.redis.set(key_qx, ObjectDict(qxuser=session.qxuser))
+        self.redis.set(key_qx, ObjectDict(qxuser=session.qxuser), 60 * 60 * 24 * 30)
         self.logger.debug("refresh qx session redis key: {}".format(key_qx))
 
     @gen.coroutine
