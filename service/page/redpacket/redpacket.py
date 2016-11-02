@@ -104,7 +104,6 @@ class RedpacketPageService(PageService):
         else:
             raise gen.Return(ObjectDict())
 
-
     def __need_to_send(self, current_user, position, is_click=False, is_apply=False):
         """
         检查职位是否正在参与转发点击红包活动

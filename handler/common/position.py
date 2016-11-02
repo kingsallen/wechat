@@ -90,10 +90,11 @@ class PositionHandler(BaseHandler):
             last_recom_wxuser_id = yield self._make_refresh_share_chain(position_info)
             self.logger.debug("[JD]刷新链路 last_recom_wxuser_id: %s" % last_recom_wxuser_id)
 
-            # 发红包
-            if self.is_platform:
-                self.logger.debug("[JD]红包行为")
-                yield self.redpacket_ps.handle_red_packet_position_related(self.current_user, position_info, is_click=True)
+            # 红包处理
+            if self.is_platform and self.current_user.recom:
+                self.logger.debug("[JD]红包处理")
+                yield self.redpacket_ps.handle_red_packet_position_related(
+                    self.current_user, position_info, is_click=True)
 
             self.logger.debug("[JD]更新职位浏览量")
             yield self.position_ps.update_position(conds={
