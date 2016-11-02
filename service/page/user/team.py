@@ -40,15 +40,15 @@ class TeamPageService(PageService):
         data.templates = [
             ObjectDict({
                 'type': 1,
-                'sub_type': 'large',
+                'sub_type': 'full',
                 'title': '团队氛围',
                 'data': [{
                     'title':       '雇主品牌团队',
                     'longtext':    '雇主品牌团队专注于提供企业雇主品牌的策略咨询及实施服务。帮助客户做好雇主品牌'
                                    '的“营销”，通过创意设计和技术实现来优化招聘沟通渠道的内容和目标人群的体验，'
                                    '从而高效传播企业核心价值并提升企业雇主品牌形象，助力企业吸引和保留目标优秀人才。',
-                    'media_url':   'https://cdn.moseeker.com/upload/company_profile/qx/bd'
-                                   '.jpeg',
+                    'media_url':   'https://cdn.moseeker.com/upload/company_profile/qx/'
+                                   'EBFULL.jpeg',
                     'media_type':  'image',
                     'member_list': [
                         {
@@ -133,7 +133,7 @@ class TeamPageService(PageService):
         data.templates = [
             ObjectDict({
                 'type': 1,
-                'sub_type': 'large',
+                'sub_type': 'full',
                 'title': '团队氛围',
                 'data': [{
                     'title':       '研发团队',
@@ -141,8 +141,8 @@ class TeamPageService(PageService):
                                    '发算法，帮助雇主更快更精准的找到求职者，也帮助求职者找到更心仪的工作。我们通过挖掘大数据，'
                                    '分析候选人关系和行为。我们不断创新技术架构，提高服务稳定性，分享不同知识点，提高研发实力，'
                                    '助力打造一款更具竞争力的产品。',
-                    'media_url':   ''
-                                   '.jpeg',
+                    'media_url':   'https://cdn.moseeker.com/upload/company_profile/qx/'
+                                   'RDFULL.jpeg',
                     'media_type':  'image',
                     'member_list': [
                         {
@@ -228,8 +228,8 @@ class TeamPageService(PageService):
                     'title':       '客户成功团队',
                     'longtext':    '我们团队主要工作是，提供运营策略给到我们的客户，并提供运营技术支持，'
                                    '是成单后客户的智慧库以及咨询师。',
-                    'media_url':   ''
-                                   '.jpeg',
+                    'media_url':   'https://cdn.moseeker.com/upload/company_profile/qx/'
+                                   'CSFULL.png',
                     'media_type':  'image',
                     'member_list': [
                         {
@@ -306,14 +306,14 @@ class TeamPageService(PageService):
         data.templates = [
             ObjectDict({
                 'type': 1,
-                'sub_type': 'large',
+                'sub_type': 'full',
                 'title': '团队氛围',
                 'data': [{
                     'title':       '客户成功团队',
                     'longtext':    '我们团队主要工作是，提供运营策略给到我们的客户，并提供运营技术支持，'
                                    '是成单后客户的智慧库以及咨询师。',
-                    'media_url':   ''
-                                   '.jpeg',
+                    'media_url':   'https://cdn.moseeker.com/upload/company_profile/qx/'
+                                   'BDFULL.jpeg',
                     'media_type':  'image',
                     'member_list': [
                         {
