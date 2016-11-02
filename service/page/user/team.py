@@ -30,9 +30,7 @@ class TeamPageService(PageService):
         data.header = ObjectDict({
             'type':        'team',
             'name':        '雇主品牌团队',
-            'description': '雇主品牌团队专注于提供企业雇主品牌的策略咨询及实施服务。帮助客户做好雇主品牌的“营销”，通过创意'
-                           '设计和技术实现来优化招聘沟通渠道的内容和目标人群的体验，从而高效传播企业核心价值并提升企业雇主'
-                           '品牌形象，助力企业吸引和保留目标优秀人才',
+            'description': '专注于提供企业雇主品牌的策略咨询及实施服务。',
             'icon':        '',
             'banner':      'https://cdn.moseeker.com/upload/company_profile/qx'
                            '/banner_qx.jpeg',
@@ -43,8 +41,8 @@ class TeamPageService(PageService):
                 'sub_type': 'full',
                 'title': '团队介绍',
                 'data': [{
-                    'title':       '雇主品牌团队',
-                    'longtext':    '雇主品牌团队专注于提供企业雇主品牌的策略咨询及实施服务。帮助客户做好雇主品牌'
+                    'title':       '',
+                    'longtext':    '帮助客户做好雇主品牌'
                                    '的“营销”，通过创意设计和技术实现来优化招聘沟通渠道的内容和目标人群的体验，'
                                    '从而高效传播企业核心价值并提升企业雇主品牌形象，助力企业吸引和保留目标优秀人才。',
                     'media_url':   'https://cdn.moseeker.com/upload/company_profile/qx/'
@@ -111,7 +109,7 @@ class TeamPageService(PageService):
             }),
         ]
         data.templates_total = len(data.templates)
-        
+
         return data
 
     @staticmethod
@@ -120,10 +118,7 @@ class TeamPageService(PageService):
         data.header = ObjectDict({
             'type': 'team',
             'name': '研发团队',
-            'description': '研发团队为仟寻招聘提供技术保证和动力引擎。我们根据产品需求，不断迭代发布新版本；我们设计开发算法，'
-                           '帮助雇主更快更精准的找到求职者，也帮助求职者找到更心仪的工作。我们通过挖掘大数据，分析候选人关系和'
-                           '行为。我们不断创新技术架构，提高服务稳定性，分享不同知识点，提高研发实力，助力打造一款更具竞争力的'
-                           '产品。',
+            'description': '仟寻招聘的技术保证和动力引擎',
             'icon': '',
             'banner': 'https://cdn.moseeker.com/upload/company_profile/qx'
                       '/banner_qx.jpeg',
@@ -135,7 +130,7 @@ class TeamPageService(PageService):
                 'title': '团队介绍',
                 'data': [{
                     'title':       '研发团队',
-                    'longtext':    '研发团队为仟寻招聘提供技术保证和动力引擎。我们根据产品需求，不断迭代发布新版本；我们设计开'
+                    'longtext':    '我们根据产品需求，不断迭代发布新版本；我们设计开'
                                    '发算法，帮助雇主更快更精准的找到求职者，也帮助求职者找到更心仪的工作。我们通过挖掘大数据，'
                                    '分析候选人关系和行为。我们不断创新技术架构，提高服务稳定性，分享不同知识点，提高研发实力，'
                                    '助力打造一款更具竞争力的产品。',
@@ -211,8 +206,7 @@ class TeamPageService(PageService):
         data.header = ObjectDict({
             'type': 'team',
             'name': '客户成功团队',
-            'description': '我们团队主要工作是，提供运营策略给到我们的客户，并提供运营技术支持，'
-                           '是成单后客户的智慧库以及咨询师。',
+            'description': '客户的智慧库以及咨询师',
             'icon': '',
             'banner': 'https://cdn.moseeker.com/upload/company_profile/qx'
                       '/banner_qx.jpeg',
@@ -295,8 +289,7 @@ class TeamPageService(PageService):
         data.header = ObjectDict({
             'type': 'team',
             'name': '商务拓展团队',
-            'description': '我们团队主要工作是开发各行业的优秀企业，提供给客户在移动社交招聘、雇主品牌建设上的合作方案，'
-                           '从而解决企业招聘难题，提升雇主形象。',
+            'description': '开发优秀企业，提供合作方案，解决招聘难题，提升雇主形象',
             'icon': '',
             'banner': 'https://cdn.moseeker.com/upload/company_profile/qx'
                       '/banner_qx.jpeg',
@@ -308,8 +301,7 @@ class TeamPageService(PageService):
                 'title': '团队介绍',
                 'data': [{
                     'title':       '商务拓展团队',
-                    'longtext':    '我们团队主要工作是，提供运营策略给到我们的客户，并提供运营技术支持，'
-                                   '是成单后客户的智慧库以及咨询师。',
+                    'longtext':    '团队成员基本都是狼性十足的小伙子们，业务团队既要有非常有狼性，又要非常重要的责任心和工作能力，去帮助客户搭建一对一的专业服务，我们团队的宗旨是：客户选择我们一定是最正确的选择。',
                     'media_url':   'https://cdn.moseeker.com/upload/company_profile/qx/'
                                    'BDFULL.jpeg',
                     'media_type':  'image',
