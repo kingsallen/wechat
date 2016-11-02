@@ -71,9 +71,10 @@ class RedpacketPageService(PageService):
             "hb_config_id":   hb_config_id
         })
 
-        ret = yield self.hr_hb_scratch_card_ds.get_scratch_card({
+        ret = yield self.hr_hb_scratch_card_ds.get_scratch_card(conds={
             "cardno": cardno
         })
+
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -538,6 +539,7 @@ class RedpacketPageService(PageService):
             recom_wechat_id, qx_openid, red_packet_config.id,
             rp_item.id, rp_item.amount)
 
+        self.logger.debug("[RP]card:{}".format(card))
         self.logger.debug("[RP]红包信封入库成功!")
         self.logger.debug("[RP]准备发送红包信封(有金额)!")
 
@@ -556,7 +558,7 @@ class RedpacketPageService(PageService):
             self.logger.debug("[RP]使用聚合号发送模版消息失败, 直接发红包")
             rp_sent_ret = yield self.__send_red_packet(
                 red_packet_config, recom_wechat.id,
-                qx_openid, card.card.get("amount"))
+                qx_openid, card.amount)
 
             if rp_sent_ret:
                 self.logger.debug("[RP]直接发送红包成功!")
