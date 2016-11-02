@@ -147,8 +147,8 @@ class PositionHandler(BaseHandler):
                         recom=self._make_recom(),
                         host=self.request.host,
                         protocol=self.request.protocol,
-                        escape=["pid, keywords, cities, candidate_source, employment_type, salary, "
-                                "department, occupations, custom, degree, page_from, page_size"])
+                        escape=["pid", "keywords", "cities", "candidate_source", "employment_type", "salary",
+                                "department", "occupations", "custom", "degree", "page_from", "page_size"])
 
         self.params.share = ObjectDict({
             "cover": cover,
@@ -201,8 +201,8 @@ class PositionHandler(BaseHandler):
             pos.location = item.get("job_city", "")
             pos.salary = gen_salary(item.get("salary_top"), item.get("salary_bottom"))
             pos.link = make_url(path.POSITION_PATH.format(item.get("pid")), self.params,
-                                escape=["keywords, cities, candidate_source, employment_type, salary, "
-                                        "department, occupations, custom, degree, page_from, page_size"])
+                                escape=["pid", "keywords", "cities", "candidate_source", "employment_type", "salary",
+                                "department", "occupations", "custom", "degree", "page_from", "page_size"])
             data.append(pos)
             if len(data) > 2:
                 break
