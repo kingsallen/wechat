@@ -126,6 +126,7 @@ class PositionHandler(BaseHandler):
         # 如果有红包，则取红包的分享文案
         red_packet = yield self.redpacket_ps.get_last_running_hongbao_config_by_position(position_info)
 
+        self.logger.debug("自定义分享：%s" % red_packet)
         if red_packet:
             cover = self.static_url(red_packet.share_img)
             title = "{} {}".format(position_info.title, red_packet.share_title)
@@ -155,8 +156,7 @@ class PositionHandler(BaseHandler):
             "description": description,
             "link": link
         })
-        self.logger.debug("转发信息：{}".format(self.params.share))
-
+        self.logger.debug("自定义分享转发信息：{}".format(self.params.share))
 
     @gen.coroutine
     def _make_hr_info(self, publisher):
@@ -357,7 +357,8 @@ class PositionHandler(BaseHandler):
         注：只向 HR 平台发布的职位发送模板消息，ATS 同步的职位不发送"""
 
         self.logger.debug("visitnum 浏览量: %s" % position_info.visitnum)
-        if position_info.visitnum == 4 and position_info.source == 0:
+        # if position_info.visitnum == 4 and position_info.source == 0:
+        if position_info.visitnum:
             help_wechat = yield self.wechat_ps.get_wechat(conds={
                 "signature": self.settings.helper_signature
             })
