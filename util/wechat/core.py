@@ -100,7 +100,7 @@ class WechatTemplateMessager(object):
         jdata.template_id = template_id
         jdata.url = link
         jdata.topcolor = topcolor,
-        jdata.data = ujson.loads(json_data, strict=False)
+        jdata.data = ujson.loads(json_data)
 
         response = yield self.async_http.fetch(
             url,
