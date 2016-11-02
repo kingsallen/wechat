@@ -159,10 +159,6 @@ class WechatTemplateMessager(object):
             wechat.access_token, openid, template.wx_template_id, link, template.topcolor,
             json_data)
 
-        self.logger.debug("_send_and_log json_data: %s" % json_data)
-        self.logger.debug("_send_and_log ret: %s" % ret)
-        self.logger.debug("_send_and_log res: %s" % res)
-
         yield self._save_sending_log(
             wechat, openid, template.sys_template_id, link, json_data,
             template.topcolor, res)

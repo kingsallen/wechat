@@ -130,11 +130,6 @@ def position_view_five(wechat_id, openid, link, title,
         keyword4="{}年{}月{}日{:0>2}:{:0>2} ".format(d.year, d.month, d.day,
                                                      d.hour, d.minute))
 
-    #
-    # json_data = """{"first":{"value":"您好，您发布的职位已被浏览5次", "color":"#173177"},"keyword1":{"value":"已有5人次浏览该职位", "color":"#173177"},
-    #             "keyword2":{"value":"海运操作专员", "color":"#173177"},"keyword3":{"value":"面议", "color":"#173177"},
-    #             "keyword4":{"value":"11:25", "color":"#173177"},"remark":{"value":"", "color":"#173177"}}"""
-
     ret = yield messager.send_template(
         wechat_id, openid, sys_template_id, link, json_data, qx_retry=False)
 
