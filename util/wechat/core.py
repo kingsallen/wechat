@@ -83,13 +83,14 @@ class WechatTemplateMessager(object):
             raise gen.Return(const.NO)
 
     @gen.coroutine
-    def _send(self, access_token, openid, template_id, link, json_data):
+    def _send(self, access_token, openid, template_id, link, topcolor, json_data):
         """发送模板消息例子操作
 
         :param access_token: 公众号的 access_token
         :param openid: 对象的 openid
         :param template_id: 公众号下的 templateid
         :param link: 点击跳转 url
+        :param topcolor:
         :param json_data: 填充内容
         :return: (True/False, Response)
         """
@@ -98,12 +99,13 @@ class WechatTemplateMessager(object):
         jdata.touser = openid
         jdata.template_id = template_id
         jdata.url = link
-        jdata.data = json_data
+        jdata.topcolor = topcolor,
+        jdata.data = ujson.loads(json_data, strict=False)
 
         response = yield self.async_http.fetch(
             url,
             method="POST",
-            body=ujson.encode(jdata),
+            body=ujson.dumps(jdata),
         )
 
         ret = ObjectDict(ujson.decode(response.body))
@@ -154,7 +156,7 @@ class WechatTemplateMessager(object):
     def _send_and_log(self, wechat, openid, template, link, json_data):
         """发送消息模板， 记录发送log"""
         ret, res = yield self._send(
-            wechat.access_token, openid, template.wx_template_id, link,
+            wechat.access_token, openid, template.wx_template_id, link, template.topcolor,
             json_data)
 
         self.logger.debug("_send_and_log json_data: %s" % json_data)
