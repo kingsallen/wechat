@@ -121,7 +121,7 @@ class PositionPageService(PageService):
             "sysuser_id": user_id,
             "favorite": const.FAV_YES
         })
-        raise gen.Return(bool(fav))
+        raise gen.Return(const.YES if fav else const.NO)
 
     @gen.coroutine
     def get_hr_info(self, publisher):
