@@ -84,10 +84,26 @@ class TeamPageService(PageService):
                 'title': '成员采访',
                 'data': [
                     {
-                        'title': '潘老师',
-                        'longtext': '技术经理\n'
-                                    '行胜于言，希望用技术的力量来提高用户的生活品质。',
-                        'media_url': '//v.qq.com/iframe/player.html?vid=e0340strm66&tiny=0&auto=0',
+                        'title': 'Neo',
+                        'longtext': '设计师\n'
+                                    '乐观开朗正气十足的非典型设计师 喜欢奇怪小创意。',
+                        'media_url': '//v.qq.com/iframe/player.html?vid=x03406mbc69&tiny=0&auto=0',
+                        'media_type': 'video',
+                        'member_list': []
+                    },
+                    {
+                        'title': 'Sheena',
+                        'longtext': '客户主任\n'
+                                    '一门心思期待在雇主品牌领域能够为客户提供更杰出的服务！',
+                        'media_url': '//v.qq.com/iframe/player.html?vid=k03409eo8so&tiny=0&auto=0',
+                        'media_type': 'video',
+                        'member_list': []
+                    },
+                    {
+                        'title': '丹丹',
+                        'longtext': '文案\n'
+                                    '希望成为一个即使被蹂躏却还是一如既往爱着客户的文案，说的想哭！',
+                        'media_url': '//v.qq.com/iframe/player.html?vid=b0340sm18mt&tiny=0&auto=0',
                         'media_type': 'video',
                         'member_list': []
                     },
@@ -145,7 +161,7 @@ class TeamPageService(PageService):
                             "icon":        'https://cdn.moseeker.com/upload/company_profile'
                                            '/qx/yixin.jpeg',
                             "name":        '煜昕',
-                            "title":       '开发工程师',
+                            "title":       '技术经理',
                             "description": '行胜于言，希望用技术的力量来提高用户的生活品质。',
                         },
                     ]
@@ -157,7 +173,23 @@ class TeamPageService(PageService):
                 'title': '成员采访',
                 'data': [
                     {
-                        'title': '潘老师',
+                        'title': 'Jerome',
+                        'longtext': '开发工程师\n'
+                                    '地球民 住过在加拿大，日本，中国。我是工程师，说得具体我整天按键',
+                        'media_url': '//v.qq.com/iframe/player.html?vid=n03403gqycy&tiny=0&auto=0',
+                        'media_type': 'video',
+                        'member_list': []
+                    },
+                    {
+                        'title': '亦亮',
+                        'longtext': '开发工程师\n'
+                                    '手艺人，文科好的理科生',
+                        'media_url': '//v.qq.com/iframe/player.html?vid=a03400x38uu&tiny=0&auto=0',
+                        'media_type': 'video',
+                        'member_list': []
+                    },
+                    {
+                        'title': '煜昕',
                         'longtext': '技术经理\n'
                                     '行胜于言，希望用技术的力量来提高用户的生活品质。',
                         'media_url': '//v.qq.com/iframe/player.html?vid=e0340strm66&tiny=0&auto=0',
@@ -228,7 +260,25 @@ class TeamPageService(PageService):
                 'type': 1,
                 'sub_type': 'less',
                 'title': '成员采访',
-                'data': '',
+                'data': [
+                    {
+                        'title': '肖飞霞',
+                        'longtext': 'CS\n'
+                                    '希望所有的idea都被客户采纳，希望世界和平！',
+                        'media_url': '//v.qq.com/iframe/player.html?vid=p034057d7ix&tiny=0&auto=0',
+                        'media_type': 'video',
+                        'member_list': []
+                    },
+                    {
+                        'title': 'Melissa/Julie',
+                        'longtext': 'CS\n'
+                                    'well organized，可以使工作more efficient。\n'
+                                    '总而言之，你若安好，我便晴天',
+                        'media_url': '//v.qq.com/iframe/player.html?vid=u03404uht6u&tiny=0&auto=0',
+                        'media_type': 'video',
+                        'member_list': []
+                    },
+                ],
             }),
         ]
 
@@ -284,7 +334,22 @@ class TeamPageService(PageService):
                 'sub_type': 'less',
                 'title': '成员采访',
                 'data': [
-
+                    {
+                        'title': 'Austin',
+                        'longtext': '大客户经理\n'
+                                    '最享受同时HOLD住HR轮番提问的时刻，欧耶~',
+                        'media_url': '//v.qq.com/iframe/player.html?vid=z0340r5m00d&tiny=0&auto=0',
+                        'media_type': 'video',
+                        'member_list': []
+                    },
+                    {
+                        'title': 'Kayle',
+                        'longtext': '大客户经理\n'
+                                    '喜欢和客户沟通成功合作那一刻的成就感，喜欢交朋友。',
+                        'media_url': '//v.qq.com/iframe/player.html?vid=h03408ryvbo&tiny=0&autos=0',
+                        'media_type': 'video',
+                        'member_list': []
+                    },
                 ],
             }),
         ]
