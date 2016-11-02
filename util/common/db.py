@@ -13,7 +13,6 @@ from tornado_mysql import pools, cursors
 import conf.common as constant
 from app import logger
 from setting import settings
-from util.tool.date_tool import is_time_valid
 from util.common import ObjectDict
 
 

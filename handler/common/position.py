@@ -356,12 +356,10 @@ class PositionHandler(BaseHandler):
         """浏览量达到5次后，向 HR 发布模板消息
         注：只向 HR 平台发布的职位发送模板消息，ATS 同步的职位不发送"""
 
-        self.logger.debug("visitnum 浏览量: %s" % position_info.visitnum)
         if position_info.visitnum == 4 and position_info.source == 0:
             help_wechat = yield self.wechat_ps.get_wechat(conds={
                 "signature": self.settings.helper_signature
             })
-            self.logger.debug("help_wechat: %s" % help_wechat)
 
             hr_account, hr_wx_user = yield self._make_hr_info(position_info.publisher)
 
@@ -373,7 +371,6 @@ class PositionHandler(BaseHandler):
                 else:
                     link = make_url(path.OLD_POSITION_PATH, host=self.settings.qx_host, m="info", pid=position_info.id)
 
-                self.logger.debug("link: %s" % link)
                 yield position_view_five(help_wechat.id, hr_wx_user.openid, link, position_info.title,
                                    position_info.salary)
 
