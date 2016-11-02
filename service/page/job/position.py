@@ -40,33 +40,31 @@ class PositionPageService(PageService):
 
         # 职位基础信息拼装
         position = ObjectDict({
-            'id': position_res.id,
-            'title': position_res.title,
-            'company_id': position_res.company_id,
-            'department': position_res.department,
+            'id':               position_res.id,
+            'title':            position_res.title,
+            'company_id':       position_res.company_id,
+            'department':       position_res.department,
             'candidate_source': self.constant.CANDIDATE_SOURCE.get(str(position_res.candidate_source)),
-            'employment_type': self.constant.EMPLOYMENT_TYPE.get(str(position_res.employment_type)),
-            'update_time': update_time,
-            'update_time_ori': position_res.update_time, # 没有被处理过的原始的更新时间
-            "salary": salary,
-            "city": position_res.city,
-            "occupation": position_res.occupation,
-            "experience": position_res.experience
-                          + (self.constant.EXPERIENCE_UNIT if position_res.experience else '')
-                          + (self.constant.POSITION_ABOVE if position_res.experience_above else ''),
-            "language": position_res.language,
-            "count": position_res.count,
-            "degree": self.constant.DEGREE.get(str(position_res.degree))
-                      + self.constant.POSITION_ABOVE if position_res.degree_above else '',
-            "management": position_res.management,
-            "visitnum": position_res.visitnum,
+            'employment_type':  self.constant.EMPLOYMENT_TYPE.get(str(position_res.employment_type)),
+            'update_time':      update_time,
+            'update_time_ori':  position_res.update_time,  # 没有被处理过的原始的更新时间
+            "salary":           salary,
+            "city":             position_res.city,
+            "occupation":       position_res.occupation,
+            "experience":       position_res.experience + (self.constant.EXPERIENCE_UNIT if position_res.experience else '') + (self.constant.POSITION_ABOVE if position_res.experience_above else ''),
+            "language":         position_res.language,
+            "count":            position_res.count,
+            "degree":           self.constant.DEGREE.get(str(position_res.degree)) + self.constant.POSITION_ABOVE if position_res.degree_above else '',
+            "management":       position_res.management,
+            "visitnum":         position_res.visitnum,
             "accountabilities": position_res.accountabilities,
-            "requirement": position_res.requirement,
-            "feature": position_res.feature,
-            "status": position_res.status,
-            "publisher": position_res.publisher,
-            "source": position_res.source,
-            "share_tpl_id": position_res.share_tpl_id,
+            "requirement":      position_res.requirement,
+            "feature":          position_res.feature,
+            "status":           position_res.status,
+            "publisher":        position_res.publisher,
+            "source":           position_res.source,
+            "share_tpl_id":     position_res.share_tpl_id,
+            "hb_status":        position_res.hb_status
         })
 
         # 后置处理：

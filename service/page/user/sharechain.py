@@ -347,6 +347,7 @@ class SharechainPageService(PageService):
         else:
             raise gen.Return(0)
 
+    @gen.coroutine
     def is_1degree_of_employee(self, position_id, wxuser_id):
         """
         返回是否是员工一度

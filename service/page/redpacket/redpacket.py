@@ -18,7 +18,7 @@ import conf.path as path
 import conf.wechat as wx
 from service.page.base import PageService
 from setting import settings
-from util.common.sharechain import is_1degree_of_employee, get_referral_employee_wxuser_id
+from service.page.user.sharechain import SharechainPageService
 from util.tool.str_tool import set_literl, trunc, generate_nonce_str
 from util.tool.url_tool import make_url
 from util.wechat.template import \
@@ -112,16 +112,17 @@ class RedpacketPageService(PageService):
         :param is_apply: 红包活动类别: 转发申请红包活动
         :return: bool
         """
-        self.logger.debug("[RP]****************************************")
         # 转发点击和转发申请红包无法同时为 False
         assert is_click or is_apply
 
         # 校验当前职位是否是属于当前公众号的公司
         if current_user.wechat.company_id != position.company_id:
-            self.logger.debug("[RP] position not belong to the wechat.company_id, return False")
+            self.logger.debug(
+                "[RP] position not belong to the wechat.company_id, return False")
             return False
 
         check_hb_status_passed = False
+        self.logger.debug("[RP]position.hb_status:{}".format(position.hb_status))
         if is_click:
             check_hb_status_passed = (
                 position.hb_status == const.RP_POSITION_STATUS_CLICK or
@@ -144,12 +145,11 @@ class RedpacketPageService(PageService):
                    int(current_user.recom.id) != int(current_user.wxuser.id))
 
         self.logger.debug("[RP]need_to_send_red_packet_card: {}".format(ret))
-        self.logger.debug("[RP]****************************************")
         return ret
 
     @gen.coroutine
-    def handle_red_packet_position_related(
-        self, current_user, position, is_click=False, is_apply=False):
+    def handle_red_packet_position_related(self, current_user, position,
+                                           is_click=False, is_apply=False):
         """转发类红包触发总入口
         """
         self.logger.debug("[RP]in handle_red_packet_position_related")
@@ -167,7 +167,7 @@ class RedpacketPageService(PageService):
                 self.logger.debug("[RP]当前用户是员工，不触发红包")
                 return
 
-            need_to_send_card = yield self.__need_to_send(
+            need_to_send_card = self.__need_to_send(
                 current_user, position, is_click=is_click, is_apply=is_apply)
 
             if need_to_send_card and rp_config:
@@ -178,8 +178,12 @@ class RedpacketPageService(PageService):
 
                 self.logger.debug("[RP]当前点击者 wxuser_id:{},pid:{}".format(
                     current_user.wxuser.id, position.id))
-                last_employee_recom_id = yield get_referral_employee_wxuser_id(
+
+                sharechain_ps = SharechainPageService(self.logger)
+                last_employee_recom_id = yield sharechain_ps.get_referral_employee_wxuser_id(
                     current_user.wxuser.id, position.id)
+                sharechain_ps = None
+
                 self.logger.debug("[RP]转发链最近员工 wxuser_id:{}".format(
                     last_employee_recom_id))
 
@@ -380,7 +384,10 @@ class RedpacketPageService(PageService):
             if wxuser.employee_id:
                 gen.Return(is_employee)
             else:
-                is_1degree = yield is_1degree_of_employee(position.id, wxuser.id)
+                sharechain_ps = SharechainPageService(self.logger)
+                is_1degree = yield sharechain_ps.is_1degree_of_employee(position.id, wxuser.id)
+                sharechain_ps = None
+
                 gen.Return(is_1degree)
         else:
             raise ValueError(msg.RED_PACKET_CONFIG_TARGET_VALUE_ERROR)
