@@ -413,7 +413,7 @@ class PositionHandler(BaseHandler):
                 {
                     "title": '臭美的同事',
                     "longtext": '这是我同事的一天介绍blablabla',
-                    "media_url": '',
+                    "media_url": 'http://v.qq.com/iframe/player.html?vid=e0340strm66&tiny=0&auto=0',
                     "media_type": 'video',
                 }
             ]
