@@ -126,7 +126,7 @@ class UserCompanyPageService(PageService):
         data.templates = [
             ObjectDict({
                 'type':      1,
-                'sub_type':  'full',
+                'sub_type':  'middle',
                 'title':     '研发团队',
                 'data':      TEAM_RD,
                 'more_link': make_url('/m/company/team/rd', hander_params)
@@ -134,7 +134,7 @@ class UserCompanyPageService(PageService):
 
             ObjectDict({
                 'type':      1,
-                'sub_type':  'full',
+                'sub_type':  'middle',
                 'title':     '客户成功团队',
                 'data':      TEAM_CS,
                 'more_link': make_url('/m/company/team/cs', hander_params)
@@ -142,7 +142,7 @@ class UserCompanyPageService(PageService):
 
             ObjectDict({
                 'type':      1,
-                'sub_type':  'full',
+                'sub_type':  'middle',
                 'title':     '商务拓展团队',
                 'data':      TEAM_BD,
                 'more_link': make_url('/m/company/team/bd', hander_params)
@@ -150,7 +150,7 @@ class UserCompanyPageService(PageService):
 
             ObjectDict({
                 'type':      1,
-                'sub_type':  'full',
+                'sub_type':  'middle',
                 'title':     '雇主品牌团队',
                 'data':      TEAM_EB,
                 'more_link': make_url('/m/company/team/eb', hander_params)

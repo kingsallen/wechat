@@ -154,14 +154,14 @@ class TeamPageService(PageService):
                         {
                             "icon":        'https://cdn.moseeker.com/upload/company_profile'
                                            '/qx/yiliang.jpeg',
-                            "name":        '亦亮',
+                            "name":        '汤亦亮',
                             "title":       '开发工程师',
                             "description": '手艺人，文科好的理科生',
                         },
                         {
                             "icon":        'https://cdn.moseeker.com/upload/company_profile'
                                            '/qx/yixin.jpeg',
-                            "name":        '煜昕',
+                            "name":        '潘煜昕',
                             "title":       '技术经理',
                             "description": '行胜于言，希望用技术的力量来提高用户的生活品质。',
                         },
