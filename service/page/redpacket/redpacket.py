@@ -220,11 +220,10 @@ class RedpacketPageService(PageService):
 
     @gen.coroutine
     def handle_red_packet_card_sending(self, current_user, red_packet_config,
-                                       recom_wechat, position,
+                                       recom, recom_wechat, position,
                                        send_to_employee=False):
         """转发类红包发送消息模板
         """
-        recom = current_user.recom
         recom_sysuser_id = recom.sysuser_id
 
         self.logger.debug("[RP]recom_sysuser_id:{}".format(recom_sysuser_id))
@@ -258,6 +257,8 @@ class RedpacketPageService(PageService):
         non_employee_single_rp_passed = yield self.__non_employee_rp_check_passed(
                 red_packet_config.id, recom_wechat, recom.id,
                 recom_qx_wxuser.id)
+
+        self.logger.debug("[RP]non_employee_single_rp_passed: {}".format(non_employee_single_rp_passed))
         if not non_employee_single_rp_passed:
             self.logger.debug(
                 "[RP]非员工已经领取过红包, 此红包暂停发送: rp_config_id:{},recom_wxuser_id:{}, wxuser_id:{}"
@@ -267,7 +268,8 @@ class RedpacketPageService(PageService):
         # 红包发送对象是否符合配置要求
         matches = yield self.__recom_matches(red_packet_config, recom.openid,
                                              recom_wechat, position)
-
+        self.logger.debug("[RP]matches:{}".format(matches))
+        self.logger.debug("[RP]send_to_employee:{}".format(send_to_employee))
         if send_to_employee or matches:
             self.logger.debug("[RP]用户是发送红包对象,准备掷骰子")
 
@@ -347,7 +349,8 @@ class RedpacketPageService(PageService):
         employee = yield self.user_employee_ds.get_employee({
             "wxuser_id": wxuser_id,
             "activation": const.OLD_YES,
-            "disable": const.NO
+            "disable": const.NO,
+            "status": const.OLD_YES
         })
         if not employee:
             raise gen.Return(False)
@@ -379,10 +382,10 @@ class RedpacketPageService(PageService):
             raise gen.Return(False)
 
         if rp_config.target == const.RED_PACKET_CONFIG_TARGET_FANS:
-            raise gen.Return(wxuser and wxuser.is_subscribe)
+            raise gen.Return(wxuser.is_subscribe)
 
         elif rp_config.target == const.RED_PACKET_CONFIG_TARGET_EMPLOYEE:
-            raise gen.Return(wxuser.employee_id and is_employee)
+            raise gen.Return(is_employee)
 
         elif rp_config.target == const.RED_PACKET_CONFIG_TARGET_EMPLOYEE_1DEGREE:
             if wxuser.employee_id:
@@ -397,8 +400,7 @@ class RedpacketPageService(PageService):
             raise ValueError(msg.RED_PACKET_CONFIG_TARGET_VALUE_ERROR)
 
     @gen.coroutine
-    def __check_throttle_passed(self, red_packet_config, wxuser_id,
-                              position=None):
+    def __check_throttle_passed(self, red_packet_config, wxuser_id, position=None):
         """该用户目前拿到的红包的总金额加上下个红包金额是否超过该公司单次活动金额上限
         """
 
@@ -425,10 +427,10 @@ class RedpacketPageService(PageService):
             return True
 
         next_amount = next_red_packet.amount
-        company = yield self.hr_company_ds.get_company({
-            "id": red_packet_config.company_id
+        company_conf = yield self.hr_company_conf_ds.get_company_conf({
+            "company_id": red_packet_config.company_id
         })
-        hb_throttle = company.hb_throttle
+        hb_throttle = company_conf.hb_throttle
 
         self.logger.debug("[RP]check_throttle_passed?:{}".format(
             float(current_amount_sum) + float(next_amount) <= float(hb_throttle)))
@@ -457,16 +459,17 @@ class RedpacketPageService(PageService):
                 "hb_config_id": hb_config_id,
                 "position_id": position_id
             })
+
             next_item = yield self.hr_hb_items_ds.get_hb_items({
                 "binding_id": binding.id,
                 "wxuser_id": 0
-            }, appends=["order by index", "limit 1"])
+            }, appends=["order by `index`", "limit 1"])
 
         else:
             next_item = yield self.hr_hb_items_ds.get_hb_items({
                 "hb_config_id": hb_config_id,
                 "wxuser_id":  0
-            }, appends=["order by index", "limit 1"])
+            }, appends=["order by `index`", "limit 1"])
 
         raise gen.Return(next_item)
 
