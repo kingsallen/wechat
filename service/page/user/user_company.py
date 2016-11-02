@@ -7,11 +7,13 @@
 
 """
 
-from util.common import ObjectDict
 from tornado import gen
+
 from service.page.base import PageService
-from tests.dev_data.user_company_data import WORKING_ENV, TEAMS, MEMBERS, data2, TEAM_EB, TEAM_BD,TEAM_CS,TEAM_RD, data3,\
-                                             data4_1, data4_2, data50
+from tests.dev_data.user_company_data import WORKING_ENV, TEAMS, MEMBERS, \
+    data2, TEAM_EB, TEAM_BD, TEAM_CS, TEAM_RD, data4_1, data50
+from util.common import ObjectDict
+from util.tool.url_tool import make_url
 
 
 class UserCompanyPageService(PageService):
@@ -23,12 +25,12 @@ class UserCompanyPageService(PageService):
         raise gen.Return(fans)
 
     @gen.coroutine
-    def get_companay_data(self, param, team_flag):
-        """
-        Develop Status: To be modify with real data.
-
-        :param param: dict include target user company ids.
-        :return: dict data to render template
+    def get_companay_data(self, handler_params, param, team_flag):
+        """Develop Status: To be modify with real data.
+        :param handler_params:
+        :param param:
+        :param team_flag:
+        :return:
         """
         user_id, company_id = param.get('user_id'), param.get('company_id')
         response = ObjectDict({'status': 0, 'message': 'sucdess'})
@@ -68,16 +70,16 @@ class UserCompanyPageService(PageService):
         })
 
         if team_flag:
-            self._add_team_data(data)
+            self._add_team_data(handler_params, data)
         else:
-            self._add_company_data(data)
+            self._add_company_data(handler_params, data)
 
         response.data = data
 
         raise gen.Return(response)
 
     @staticmethod
-    def _add_company_data(data):
+    def _add_company_data(hander_params, data):
         """构建公司主页的豆腐干们"""
 
         data.templates = [
@@ -118,7 +120,7 @@ class UserCompanyPageService(PageService):
         data.template_total = len(data.templates)
 
     @staticmethod
-    def _add_team_data(data):
+    def _add_team_data(hander_params, data):
         """构建团队主页的豆腐干们"""
 
         data.templates = [
@@ -127,7 +129,7 @@ class UserCompanyPageService(PageService):
                 'sub_type':  'full',
                 'title':     '研发团队',
                 'data':      TEAM_RD,
-                'more_link': ''
+                'more_link': make_url('/m/teams/rd', hander_params)
             }),
 
             ObjectDict({
@@ -135,7 +137,7 @@ class UserCompanyPageService(PageService):
                 'sub_type':  'full',
                 'title':     '客户成功团队',
                 'data':      TEAM_CS,
-                'more_link': ''
+                'more_link': make_url('/m/teams/cs', hander_params)
             }),
 
             ObjectDict({
@@ -143,7 +145,7 @@ class UserCompanyPageService(PageService):
                 'sub_type':  'full',
                 'title':     '商务拓展团队',
                 'data':      TEAM_BD,
-                'more_link': ''
+                'more_link': make_url('/m/teams/bd', hander_params)
             }),
 
             ObjectDict({
@@ -151,7 +153,7 @@ class UserCompanyPageService(PageService):
                 'sub_type':  'full',
                 'title':     '雇主品牌团队',
                 'data':      TEAM_EB,
-                'more_link': ''
+                'more_link': make_url('/m/teams/eb', hander_params)
             }),
         ]
         data.template_total = len(data.templates)

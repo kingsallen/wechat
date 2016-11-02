@@ -52,7 +52,10 @@ class CompanyHandler(BaseHandler):
             'user_id': self.current_user.sysuser.id,
             'company_id': self.current_user.company.id
         })
-        response = yield self.user_company_ps.get_companay_data(param, team_flag)
+        response = yield self.user_company_ps.get_companay_data(
+            handler_params=self.params,
+            param=param,
+            team_flag=team_flag)
 
         template_name = 'company/profile.html'
 
