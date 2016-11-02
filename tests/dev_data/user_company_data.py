@@ -217,6 +217,28 @@ TEAM_RD = [{
     'media_url':   'https://cdn.moseeker.com/upload/company_profile/qx/rd.jpeg',
     'media_type':  'image',
     'member_list': [
+        {
+            "icon":        'https://cdn.moseeker.com/upload/company_profile'
+                           '/qx/jianlong.jpeg',
+            "name":        'Jerome',
+            "title":       '开发工程师',
+            "description": '地球民 住过在加拿大，日本，中国。我是工程师，说得具体我整天按键。'
+                           '下班后我和女儿玩过家家。',
+        },
+        {
+            "icon":        'https://cdn.moseeker.com/upload/company_profile'
+                           '/qx/yiliang.jpeg',
+            "name":        '汤亦亮',
+            "title":       '开发工程师',
+            "description": '手艺人，文科好的理科生',
+        },
+        {
+            "icon":        'https://cdn.moseeker.com/upload/company_profile'
+                           '/qx/yixin.jpeg',
+            "name":        '潘煜昕',
+            "title":       '技术经理',
+            "description": '行胜于言，希望用技术的力量来提高用户的生活品质。',
+        },
 
     ]
 }]
@@ -228,6 +250,32 @@ TEAM_CS = [{
     'media_url':   'https://cdn.moseeker.com/upload/company_profile/qx/cs.png',
     'media_type':  'image',
     'member_list': [
+        {
+            "icon":        'https://cdn.moseeker.com/upload/company_profile'
+                           '/qx/feixia.jpeg',
+            "name":        '肖飞霞',
+            "title":       'CS',
+            "description": '人生三件大事，吃饭，睡觉，给客户出谋划策、答疑解难。三大希望，希望'
+                           '有个不被打扰的假期，希望所有的idea都被客户采纳，希望世界和平！',
+        },
+        {
+            "icon":        'https://cdn.moseeker.com/upload/company_profile'
+                           '/qx/Melissa.jpeg',
+            "name":        'Melissa',
+            "title":       'Head of Customer Success',
+            "description": '热衷于规划与整理，连出去旅游都能整出一个action plan。坚信流程上的'
+                           'well organized，可以使工作more efficient。',
+        },
+        {
+            "icon":        'https://cdn.moseeker.com/upload/company_profile'
+                           '/qx/Julie.jpeg',
+            "name":        'Julie',
+            "title":       'CS',
+            "description": '不要问我在干嘛，也许我正在con-call，也许我正在与excel、'
+                           'ppt大战，也许我只是默默的站在程序员哥哥身边，你懂的。。。'
+                           '总而言之，你若安好，我便晴天，你若灿烂，喜大普奔！我的愿望是，'
+                           'Be nice ：）',
+        },
 
     ]
 }]

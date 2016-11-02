@@ -57,10 +57,9 @@ class CompanyHandler(BaseHandler):
             param=param,
             team_flag=team_flag)
 
-        template_name = 'company/profile.html'
+        template_name = 'company/team.html' if team_flag \
+                         else 'company/profile.html'
 
-        if team_flag:
-            template_name = 'company/team.html'
         # todo
         self.params.share = ObjectDict({
             "cover":       "http://photocdn.sohu.com/20130622/Img379566069.jpg",
