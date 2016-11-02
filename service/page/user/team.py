@@ -110,6 +110,7 @@ class TeamPageService(PageService):
                 ],
             }),
         ]
+        data.templates_total = len(data.templates)
 
         return data
 
