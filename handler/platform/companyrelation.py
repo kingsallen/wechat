@@ -63,14 +63,14 @@ class CompanyHandler(BaseHandler):
         company_name = self.current_user.company.abbreviation or self.current_user.company.name
         if team_flag:
             self.params.share = ObjectDict({
-                "cover":       self.static_url(self.current_user.company.logo),
+                "cover":       'https:' + self.static_url(self.current_user.company.logo),
                 "title":       company_name + "的团队",
                 "description": "",
                 "link":        self.fullurl
             })
         else:
             self.params.share = ObjectDict({
-                "cover":       self.static_url(self.current_user.company.logo),
+                "cover":       'https:' + self.static_url(self.current_user.company.logo),
                 "title":       company_name + ", 我发现了一个好公司！",
                 "description": "",
                 "link":        self.fullurl
@@ -87,7 +87,7 @@ class CompanyTeamHandler(BaseHandler):
         result = yield self.team_ps.get_more_team_info(team_name)
 
         self.params.share = ObjectDict({
-            "cover":       self.static_url(self.current_user.company.logo),
+            "cover":       'https:' + self.static_url(self.current_user.company.logo),
             "title":       team_name.upper() + "团队",
             "description": "",
             "link":        self.fullurl
