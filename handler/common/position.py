@@ -12,10 +12,10 @@ import conf.wechat as wx
 from util.common import ObjectDict
 from util.common.decorator import handle_response
 from util.tool.url_tool import make_url
-from util.tool.str_tool import gen_salary, add_item
+from util.tool.str_tool import gen_salary, add_item, split
 from util.wechat.template import position_view_five
 
-from tests.dev_data.user_company_data import data1
+from tests.dev_data.user_company_data import TEAM_BD, data3, MEMBERS
 
 
 class PositionHandler(BaseHandler):
@@ -97,12 +97,7 @@ class PositionHandler(BaseHandler):
                     self.current_user, position_info, is_click=True)
 
             self.logger.debug("[JD]更新职位浏览量")
-            yield self.position_ps.update_position(conds={
-                    "id": position_info.id
-                }, fields={
-                    "visitnum": position_info.visitnum + 1,
-                    "update_time": position_info.update_time_ori,
-                })
+            yield self._make_position_visitnum(position_info)
 
             self.logger.debug("[JD]转发积分操作")
             yield self._make_add_reward_click(position_info, last_recom_wxuser_id)
@@ -113,6 +108,16 @@ class PositionHandler(BaseHandler):
         else:
             self.write_error(404)
             return
+
+    @gen.coroutine
+    def _make_position_visitnum(self, position_info):
+        """更新职位浏览量"""
+        yield self.position_ps.update_position(conds={
+            "id": position_info.id
+        }, fields={
+            "visitnum": position_info.visitnum + 1,
+            "update_time": position_info.update_time_ori,
+        })
 
     def _make_recom(self):
         """用于微信分享和职位推荐时，传出的 recom 参数"""
@@ -130,7 +135,7 @@ class PositionHandler(BaseHandler):
         if red_packet:
             cover = self.static_url(red_packet.share_img)
             title = "{} {}".format(position_info.title, red_packet.share_title)
-            description = red_packet.share_desc
+            description = "".join(split(red_packet.share_desc))
         else:
             cover = self.static_url(company_info.logo)
             title = position_info.title
@@ -141,7 +146,7 @@ class PositionHandler(BaseHandler):
                     company=company_info.abbreviation,
                     position=position_info.title)
             if position_info.share_description:
-                description = position_info.share_description
+                description = "".join(split(position_info.share_description))
 
         link = make_url(path.POSITION_PATH.format(position_info.id), self.params,
                         recom=self._make_recom(),
@@ -380,24 +385,7 @@ class PositionHandler(BaseHandler):
 
         res = ObjectDict({
             "title": "我们团队还需要",
-            "data": [
-                {
-                    "title": '招设计师',
-                    "link": 'http://www.moseeker.com',
-                    "location": '上海, 北京, 广州',
-                    "salary": '12k - 15k',
-                },{
-                    "title": '招研发工程师',
-                    "link": ' http://www.moseeker.com',
-                    "location": '上海',
-                    "salary": '12k以上',
-                },{
-                    "title": '招产品经理',
-                    "link": ' http://www.moseeker.com',
-                    "location": '台湾',
-                    "salary": '面议',
-                }
-            ]
+            "data": data3
         })
 
         raise gen.Return(res)
@@ -409,14 +397,7 @@ class PositionHandler(BaseHandler):
         res = ObjectDict({
             "title": "同事的一天",
             "sub_type": "less",
-            "data": [
-                {
-                    "title": '臭美的同事',
-                    "longtext": '这是我同事的一天介绍blablabla',
-                    "media_url": 'http://v.qq.com/iframe/player.html?vid=e0340strm66&tiny=0&auto=0',
-                    "media_type": 'video',
-                }
-            ]
+            "data": MEMBERS,
         })
 
         raise gen.Return(res)
@@ -428,7 +409,7 @@ class PositionHandler(BaseHandler):
         res = ObjectDict({
             "title": "所属团队",
             "sub_type": " full",
-            "data": data1,
+            "data": TEAM_BD,
         })
 
         raise gen.Return(res)

@@ -148,15 +148,15 @@ MEMBERS = [
 data3 = [
     {
         'title':    '招设计师',
-        'link':     'http1://platform.moseeker.com/m/position/',
+        'link':     'https://www.moseeker.com',
         'location': '上海, 北京, 广州',
         'salary':   '12k - 15k'
     },
     {
         'title':    '招设计师',
-        'link':     'string',
-        'location': '上海, 北京, 广州',
-        'salary':   '12k - 15k'
+        'link':     'http://www.baidu.com',
+        'location': '上海',
+        'salary':   '12k以上'
     }
 ]
 
@@ -214,8 +214,7 @@ TEAM_RD = [{
                    "我们设计开发算法，帮助雇主更快更精准的找到求职者，也帮助求职者找到更心仪的工作。"
                    "我们通过挖掘大数据，分析候选人关系和行为。"
                    "我们不断创新技术架构，提高服务稳定性，分享不同知识点，提高研发实力，助力打造一款更具竞争力的产品。",
-    'media_url':   'https://cdn.moseeker.com/upload/company_profile/qx/rd'
-                   '.jpeg',
+    'media_url':   'https://cdn.moseeker.com/upload/company_profile/qx/rd.jpeg',
     'media_type':  'image',
     'member_list': [
 
@@ -237,13 +236,11 @@ TEAM_BD = [{
     'title':       "商务拓展团队",
     'longtext':    "我们团队主要工作是开发各行业的优秀企业，提供给客户在移动社交招聘、"
                    "雇主品牌建设上的合作方案，从而解决企业招聘难题，提升雇主形象。",
-    'media_url':   'https://cdn.moseeker.com/upload/company_profile/qx/bd'
-                   '.jpeg',
+    'media_url':   'https://cdn.moseeker.com/upload/company_profile/qx/bd.jpeg',
     'media_type':  'image',
     'member_list': [
         {
-            "icon":        'https://cdn.moseeker.com/upload/company_profile'
-                           '/qx/Austin.jpeg',
+            "icon":        'https://cdn.moseeker.com/upload/company_profile/qx/Austin.jpeg',
             "name":        'Austin',
             "title":       '大客户经理',
             "description": '非典型理科男，热爱挑战和摄影，希望变成一个有故事的有趣男子。'
@@ -251,8 +248,7 @@ TEAM_BD = [{
                            '最享受同时HOLD住HR轮番提问的时刻，欧耶~',
         },
         {
-            "icon":        'https://cdn.moseeker.com/upload/company_profile'
-                           '/qx/Kayle.jpeg',
+            "icon":        'https://cdn.moseeker.com/upload/company_profile/qx/Kayle.jpeg',
             "name":        'Kayle',
             "title":       '大客户经理',
             "description": '名字来源于北欧神话里的大天使长，本人狮子座阳光灿烂（呸），'
@@ -264,27 +260,23 @@ TEAM_BD = [{
 TEAM_EB = [{
     'title':       "雇主品牌团队",
     'longtext':    "",
-    'media_url':   'https://cdn.moseeker.com/upload/company_profile/qx/'
-                   'EBFULL.jpeg',
+    'media_url':   'https://cdn.moseeker.com/upload/company_profile/qx/EBFULL.jpeg',
     'media_type':  'image',
     'member_list': [
         {
-            "icon":        'https://cdn.moseeker.com/upload/company_profile'
-                           '/qx/neo.jpeg',
+            "icon":        'https://cdn.moseeker.com/upload/company_profile/qx/neo.jpeg',
             "name":        'Neo',
             "title":       '设计师',
             "description": '乐观开朗正气十足的非典型设计师 喜欢奇怪小创意。',
         },
         {
-            "icon":        'https://cdn.moseeker.com/upload/company_profile'
-                           '/qx/sheena.jpeg',
+            "icon":        'https://cdn.moseeker.com/upload/company_profile/qx/sheena.jpeg',
             "name":        'Sheena',
             "title":       '客户主任',
             "description": '客户的贴心小棉袄，同事的知心小姐妹。一门心思期待在雇主品牌领域能够为客户提供更杰出的服务！',
         },
         {
-            "icon":        'https://cdn.moseeker.com/upload/company_profile'
-                           '/qx/dd.jpeg',
+            "icon":        'https://cdn.moseeker.com/upload/company_profile/qx/dd.jpeg',
             "name":        '丹丹',
             "title":       '文案',
             "description": '略矮略胖，爱写爱吃爱拍爱跑，追星追热点。希望成为一个即使被蹂躏却还是一如既往爱着客户的文案，说的想哭！',
