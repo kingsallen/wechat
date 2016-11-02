@@ -194,6 +194,7 @@ class RedpacketPageService(PageService):
 
                 recom = current_user.recom
                 recom_wechat = current_user.wechat
+                self.logger.debug("[RP]recom_wechat: {}".format(recom_wechat))
 
                 ret = yield self.handle_red_packet_card_sending(
                     current_user, rp_config, recom,
@@ -236,7 +237,7 @@ class RedpacketPageService(PageService):
 
         recom_qx_wxuser = yield self.user_wx_user_ds.get_wxuser({
             "unionid": recom_unionid,
-            "wechat_id": settings['qx_wecaht_id']
+            "wechat_id": settings['qx_wechat_id']
         })
         self.logger.debug("[RP]recom_qx_wxuser:{}".format(recom_qx_wxuser))
 
@@ -253,6 +254,7 @@ class RedpacketPageService(PageService):
             raise gen.Return(None)
 
         # 非员工只能领取一个红包的检查, check 不通过暂停发红包
+        self.logger.debug("[RP]recom_wechat2:{}".format(recom_wechat))
         non_employee_single_rp_passed = yield self.__non_employee_rp_check_passed(
                 red_packet_config.id, recom_wechat, recom.id,
                 recom_qx_wxuser.id)
@@ -349,6 +351,8 @@ class RedpacketPageService(PageService):
         })
         if not employee:
             raise gen.Return(False)
+        self.logger.debug("[RP]employee.company_id: {}".format(employee.company_id))
+        self.logger.debug("[RP]wechat.company_id: {}".format(wechat.company_id))
         raise gen.Return(employee.company_id == wechat.company_id)
 
     @gen.coroutine
