@@ -41,7 +41,7 @@ class TeamPageService(PageService):
             ObjectDict({
                 'type': 1,
                 'sub_type': 'full',
-                'title': '团队氛围',
+                'title': '团队介绍',
                 'data': [{
                     'title':       '雇主品牌团队',
                     'longtext':    '雇主品牌团队专注于提供企业雇主品牌的策略咨询及实施服务。帮助客户做好雇主品牌'
@@ -132,7 +132,7 @@ class TeamPageService(PageService):
             ObjectDict({
                 'type': 1,
                 'sub_type': 'full',
-                'title': '团队氛围',
+                'title': '团队介绍',
                 'data': [{
                     'title':       '研发团队',
                     'longtext':    '研发团队为仟寻招聘提供技术保证和动力引擎。我们根据产品需求，不断迭代发布新版本；我们设计开'
@@ -221,7 +221,7 @@ class TeamPageService(PageService):
             ObjectDict({
                 'type': 1,
                 'sub_type': 'full',
-                'title': '团队氛围',
+                'title': '团队介绍',
                 'data': [{
                     'title':       '客户成功团队',
                     'longtext':    '我们团队主要工作是，提供运营策略给到我们的客户，并提供运营技术支持，'
@@ -305,7 +305,7 @@ class TeamPageService(PageService):
             ObjectDict({
                 'type': 1,
                 'sub_type': 'full',
-                'title': '团队氛围',
+                'title': '团队介绍',
                 'data': [{
                     'title':       '商务拓展团队',
                     'longtext':    '我们团队主要工作是，提供运营策略给到我们的客户，并提供运营技术支持，'
