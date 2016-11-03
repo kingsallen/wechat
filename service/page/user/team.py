@@ -156,7 +156,13 @@ class TeamPageService(PageService):
             ObjectDict({
                 'type':  3,
                 'title': "团队在招职位",
-                'data':  []
+                'data':  [{
+                        "title":    '文案',
+                        "link":
+                                    'https://platform.moseeker.com/m/position/131454?wechat_signature=NjYyM2M4ZDAzOTk5NThmNjlhMGI0OWM2ZTgwOTk1Njc2MTU0Y2ZhOQ==',
+                        "location": '上海',
+                        "salary":   '5k-8k'
+                    }]
             })
         ]
 
