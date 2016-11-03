@@ -154,7 +154,9 @@ class TeamPageService(PageService):
                 ],
             }),
         ]
-        data.templates_total = len(data.templates)
+
+        if data.relation.want_visit == 0:
+            data.templates.append(ObjectDict({'type': 5, 'title': '', 'data': None}))
 
         # 其他团队
         otherteam =  ObjectDict({
@@ -167,6 +169,8 @@ class TeamPageService(PageService):
         otherteam.data.append(self._OTHER_TEAM.bd)
         otherteam.data.append(self._OTHER_TEAM.rd)
         data.templates.append(otherteam)
+
+        data.templates_total = len(data.templates)
 
         raise gen.Return(data)
 
@@ -280,7 +284,8 @@ class TeamPageService(PageService):
             })
         ]
 
-        data.templates_total = len(data.templates)
+        if data.relation.want_visit == 0:
+            data.templates.append(ObjectDict({'type': 5, 'title': '', 'data': None}))
 
         otherteam = ObjectDict({
             'type':     4,
@@ -292,6 +297,8 @@ class TeamPageService(PageService):
         otherteam.data.append(self._OTHER_TEAM.bd)
         otherteam.data.append(self._OTHER_TEAM.eb)
         data.templates.append(otherteam)
+
+        data.templates_total = len(data.templates)
 
         raise gen.Return(data)
 
@@ -396,8 +403,8 @@ class TeamPageService(PageService):
                 ]
             }),
         ]
-
-        data.templates_total = len(data.templates)
+        if data.relation.want_visit == 0:
+            data.templates.append(ObjectDict({'type': 5, 'title': '', 'data': None}))
 
         otherteam = ObjectDict({
             'type':     4,
@@ -409,6 +416,8 @@ class TeamPageService(PageService):
         otherteam.data.append(self._OTHER_TEAM.bd)
         otherteam.data.append(self._OTHER_TEAM.eb)
         data.templates.append(otherteam)
+
+        data.templates_total = len(data.templates)
 
         raise gen.Return(data)
 
@@ -502,8 +511,8 @@ class TeamPageService(PageService):
                 ]
             })
         ]
-
-        data.templates_total = len(data.templates)
+        if data.relation.want_visit == 0:
+            data.templates.append(ObjectDict({'type': 5, 'title': '', 'data': None}))
 
         otherteam = ObjectDict({
             'type':     4,
@@ -515,5 +524,7 @@ class TeamPageService(PageService):
         otherteam.data.append(self._OTHER_TEAM.rd)
         otherteam.data.append(self._OTHER_TEAM.eb)
         data.templates.append(otherteam)
+
+        data.templates_total = len(data.templates)
 
         raise gen.Return(data)
