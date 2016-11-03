@@ -25,6 +25,7 @@ class TeamPageService(PageService):
         res = yield getattr(self, '_get_{}_info'.format(team_name))(params)
         raise gen.Return(res)
 
+    @gen.coroutine
     def _get_eb_info(self, params):
         data = ObjectDict({})
         user_id, company_id = params.get('user_id'), params.get('company_id')
@@ -117,8 +118,9 @@ class TeamPageService(PageService):
         ]
         data.templates_total = len(data.templates)
 
-        return data
+        raise gen.Return(data)
 
+    @gen.coroutine
     def _get_rd_info(self, params):
         data = ObjectDict({})
         user_id, company_id = params.get('user_id'), params.get('company_id')
@@ -230,8 +232,9 @@ class TeamPageService(PageService):
 
         data.templates_total = len(data.templates)
 
-        return data
+        raise gen.Return(data)
 
+    @gen.coroutine
     def _get_cs_info(self, params):
         data = ObjectDict({})
         user_id, company_id = params.get('user_id'), params.get('company_id')
@@ -335,8 +338,9 @@ class TeamPageService(PageService):
 
         data.templates_total = len(data.templates)
 
-        return data
+        raise gen.Return(data)
 
+    @gen.coroutine
     def _get_bd_info(self, params):
         data = ObjectDict({})
         user_id, company_id = params.get('user_id'), params.get('company_id')
@@ -429,4 +433,4 @@ class TeamPageService(PageService):
 
         data.templates_total = len(data.templates)
 
-        return data
+        raise gen.Return(data)
