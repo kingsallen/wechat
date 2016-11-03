@@ -364,11 +364,10 @@ class RedpacketPageService(PageService):
             "openid": openid,
             "wechat_id": wechat.id
         })
-
-        is_employee = yield self.__is_wxuser_employee_of_wechat(wxuser.id, wechat)
-
         if not wxuser:
             raise gen.Return(False)
+
+        is_employee = yield self.__is_wxuser_employee_of_wechat(wxuser.id, wechat)
 
         if rp_config.target == const.RED_PACKET_CONFIG_TARGET_FANS:
             raise gen.Return(wxuser.is_subscribe)
@@ -377,11 +376,12 @@ class RedpacketPageService(PageService):
             raise gen.Return(is_employee)
 
         elif rp_config.target == const.RED_PACKET_CONFIG_TARGET_EMPLOYEE_1DEGREE:
-            if wxuser.employee_id:
-                gen.Return(is_employee)
+            if is_employee:
+                gen.Return(True)
             else:
                 sharechain_ps = SharechainPageService(self.logger)
-                is_1degree = yield sharechain_ps.is_1degree_of_employee(position.id, wxuser.id)
+                is_1degree = yield sharechain_ps.is_1degree_of_employee(
+                    position.id, wxuser.id)
                 sharechain_ps = None
 
                 gen.Return(is_1degree)
