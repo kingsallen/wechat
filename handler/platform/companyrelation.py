@@ -91,8 +91,6 @@ class CompanyTeamHandler(BaseHandler):
         # icon 为空，出来统一赋值
         result.header.icon = self.static_url(self.current_user.company.logo)
 
-
-
         self.params.share = ObjectDict({
             "cover":       self.static_url(self.current_user.company.logo),
             "title":       team_name.upper() + "团队",
