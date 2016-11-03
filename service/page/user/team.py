@@ -56,23 +56,24 @@ class TeamPageService(PageService):
                                            '/qx/neo.jpeg',
                             "name":        'Neo',
                             "title":       '设计师',
-                            "description": '乐观开朗正气十足的非典型设计师 喜欢奇怪小创意。',
+                            "description": '我是一个乐观开朗、正气十足的非典型设计师，喜欢篮球，'
+                                           '喜欢美食，喜欢奇怪小创意。',
                         },
                         {
                             "icon":        'https://cdn.moseeker.com/upload/company_profile'
                                            '/qx/sheena.jpeg',
                             "name":        'Sheena',
                             "title":       '客户主任',
-                            "description": '客户的贴心小棉袄，同事的知心小姐妹。一门心思期待在雇主品牌领域能'
-                                           '够为客户提供更杰出的服务！',
+                            "description": '客户的贴心小棉袄，为客户提供最暖心的支持。同事的知心小姐妹，'
+                                           '为同事们排忧解难雪中送碳。',
                         },
                         {
                             "icon":        'https://cdn.moseeker.com/upload/company_profile'
                                            '/qx/dd.jpeg',
                             "name":        '丹丹',
                             "title":       '文案',
-                            "description": '略矮略胖，爱写爱吃爱拍爱跑，追星追热点。希望成为一个即使被蹂躏却还'
-                                           '是一如既往爱着客户的文案，说的想哭！',
+                            "description": '略矮略胖，爱写爱吃爱拍爱跑，追星追热点。是一个即使被甲方蹂躏'
+                                           '却还一直爱着甲方的文案。',
                         },
                     ]
                 }],
@@ -85,24 +86,21 @@ class TeamPageService(PageService):
                 'data': [
                     {
                         'title': 'Neo',
-                        'longtext': '设计师\n'
-                                    '乐观开朗正气十足的非典型设计师 喜欢奇怪小创意。',
+                        'longtext': '设计师\n',
                         'media_url': '//v.qq.com/iframe/player.html?vid=x03406mbc69&tiny=0&auto=0',
                         'media_type': 'video',
                         'member_list': []
                     },
                     {
                         'title': 'Sheena',
-                        'longtext': '客户主任\n'
-                                    '一门心思期待在雇主品牌领域能够为客户提供更杰出的服务！',
+                        'longtext': '客户主任\n',
                         'media_url': '//v.qq.com/iframe/player.html?vid=k03409eo8so&tiny=0&auto=0',
                         'media_type': 'video',
                         'member_list': []
                     },
                     {
                         'title': '丹丹',
-                        'longtext': '文案\n'
-                                    '希望成为一个即使被蹂躏却还是一如既往爱着客户的文案，说的想哭！',
+                        'longtext': '文案\n',
                         'media_url': '//v.qq.com/iframe/player.html?vid=b0340sm18mt&tiny=0&auto=0',
                         'media_type': 'video',
                         'member_list': []
@@ -111,7 +109,7 @@ class TeamPageService(PageService):
             }),
         ]
         data.templates_total = len(data.templates)
-        
+
         return data
 
     @staticmethod
@@ -148,22 +146,24 @@ class TeamPageService(PageService):
                                            '/qx/jianlong.jpeg',
                             "name":        'Jerome',
                             "title":       '开发工程师',
-                            "description": '地球民 住过在加拿大，日本，中国。我是工程师，说得具体我整天按键。'
-                                           '下班后我和女儿玩过家家。',
+                            "description": '地球人，住过加拿大、日本、中国。下班后我和女儿玩过家家。'
+                                           '身为一个外国人丝毫没有感受到文化差异。',
                         },
                         {
                             "icon":        'https://cdn.moseeker.com/upload/company_profile'
                                            '/qx/yiliang.jpeg',
                             "name":        '汤亦亮',
                             "title":       '开发工程师',
-                            "description": '手艺人，文科好的理科生',
+                            "description": '手手艺人，文科好的理科生。虽然经常和同事们“吵架”，但丝毫影响'
+                                           '不了大家的感情，只会让我们更热爱工作。',
                         },
                         {
                             "icon":        'https://cdn.moseeker.com/upload/company_profile'
                                            '/qx/yixin.jpeg',
                             "name":        '潘煜昕',
                             "title":       '技术经理',
-                            "description": '行胜于言，希望用技术的力量来提高用户的生活品质。',
+                            "description": '行胜于言，希望用技术的力量来提高用户的生活品质。与同事亲密无间，'
+                                           '希望打造一款更具竞争力的作品。',
                         },
                     ]
                 }],
@@ -175,24 +175,21 @@ class TeamPageService(PageService):
                 'data': [
                     {
                         'title': 'Jerome',
-                        'longtext': '开发工程师\n'
-                                    '地球民 住过在加拿大，日本，中国。我是工程师，说得具体我整天按键',
+                        'longtext': '开发工程师\n',
                         'media_url': '//v.qq.com/iframe/player.html?vid=n03403gqycy&tiny=0&auto=0',
                         'media_type': 'video',
                         'member_list': []
                     },
                     {
                         'title': '亦亮',
-                        'longtext': '开发工程师\n'
-                                    '手艺人，文科好的理科生',
+                        'longtext': '开发工程师\n',
                         'media_url': '//v.qq.com/iframe/player.html?vid=a03400x38uu&tiny=0&auto=0',
                         'media_type': 'video',
                         'member_list': []
                     },
                     {
                         'title': '煜昕',
-                        'longtext': '技术经理\n'
-                                    '行胜于言，希望用技术的力量来提高用户的生活品质。',
+                        'longtext': '技术经理\n',
                         'media_url': '//v.qq.com/iframe/player.html?vid=e0340strm66&tiny=0&auto=0',
                         'media_type': 'video',
                         'member_list': []
@@ -235,26 +232,24 @@ class TeamPageService(PageService):
                                            '/qx/feixia.jpeg',
                             "name":        '肖飞霞',
                             "title":       'CS',
-                            "description": '人生三件大事，吃饭，睡觉，给客户出谋划策、答疑解难。三大希望，希望'
-                                           '有个不被打扰的假期，希望所有的idea都被客户采纳，希望世界和平！',
+                            "description": '给客户出谋划策、答疑解难。希望有个不被打扰的假期，'
+                                           '希望所有的idea都被客户采纳，希望世界和平！',
                         },
                         {
                             "icon":        'https://cdn.moseeker.com/upload/company_profile'
                                            '/qx/Melissa.jpeg',
                             "name":        'Melissa',
-                            "title":       'Head of Customer Success',
-                            "description": '热衷于规划与整理，连出去旅游都能整出一个action plan。坚信流程上的'
-                                           'well organized，可以使工作more efficient。',
+                            "title":       'Head of CS',
+                            "description": '热衷于规划与整理，连出去旅游都能整出一个action plan。'
+                                           '坚信完美规划流程，可以使工作效率更高。',
                         },
                         {
                             "icon":        'https://cdn.moseeker.com/upload/company_profile'
                                            '/qx/Julie.jpeg',
                             "name":        'Julie',
                             "title":       'CS',
-                            "description": '不要问我在干嘛，也许我正在con-call，也许我正在与excel、'
-                                           'ppt大战，也许我只是默默的站在程序员哥哥身边，你懂的。。。'
-                                           '总而言之，你若安好，我便晴天，你若灿烂，喜大普奔！我的愿望是，'
-                                           'Be nice ：）',
+                            "description": '也许我正在on-call，也许我只是默默的站在程序猿身边。'
+                                           '你若安好，我便晴天，你若灿烂，喜大普奔！ ',
                         },
                     ]
                 }],
@@ -266,17 +261,14 @@ class TeamPageService(PageService):
                 'data': [
                     {
                         'title': '肖飞霞',
-                        'longtext': 'CS\n'
-                                    '希望所有的idea都被客户采纳，希望世界和平！',
+                        'longtext': 'CS\n',
                         'media_url': '//v.qq.com/iframe/player.html?vid=p034057d7ix&tiny=0&auto=0',
                         'media_type': 'video',
                         'member_list': []
                     },
                     {
                         'title': 'Melissa/Julie',
-                        'longtext': 'CS\n'
-                                    'well organized，可以使工作more efficient。\n'
-                                    '总而言之，你若安好，我便晴天',
+                        'longtext': 'CS\n',
                         'media_url': '//v.qq.com/iframe/player.html?vid=u03404uht6u&tiny=0&auto=0',
                         'media_type': 'video',
                         'member_list': []
@@ -320,16 +312,15 @@ class TeamPageService(PageService):
                             "name":        'Austin',
                             "title":       '大客户经理',
                             "description": '非典型理科男，热爱挑战和摄影，希望变成一个有故事的有趣男子。'
-                                           '喜欢亲自去看看不同行业的公司风格, '
-                                           '最享受同时HOLD住HR轮番提问的时刻，欧耶~',
+                                           '最享受同时HOLD住HR轮番提问的时刻。',
                         },
                         {
                             "icon":        'https://cdn.moseeker.com/upload/company_profile'
                                            '/qx/Kayle.jpeg',
                             "name":        'Kayle',
                             "title":       '大客户经理',
-                            "description": '名字来源于北欧神话里的大天使长，本人狮子座阳光灿烂（呸），'
-                                           '喜欢和客户沟通成功合作那一刻的成就感，喜欢交朋友。',
+                            "description": '名字来源于北欧神话。本人狮子座阳光灿烂，喜欢和客户沟通成功合'
+                                           '作那一刻的成就感，喜欢交朋友。',
                         },
                     ]
                 }],
@@ -341,16 +332,14 @@ class TeamPageService(PageService):
                 'data': [
                     {
                         'title': 'Austin',
-                        'longtext': '大客户经理\n'
-                                    '最享受同时HOLD住HR轮番提问的时刻，欧耶~',
+                        'longtext': '大客户经理\n',
                         'media_url': '//v.qq.com/iframe/player.html?vid=z0340r5m00d&tiny=0&auto=0',
                         'media_type': 'video',
                         'member_list': []
                     },
                     {
                         'title': 'Kayle',
-                        'longtext': '大客户经理\n'
-                                    '喜欢和客户沟通成功合作那一刻的成就感，喜欢交朋友。',
+                        'longtext': '大客户经理\n',
                         'media_url': '//v.qq.com/iframe/player.html?vid=h03408ryvbo&tiny=0&autos=0',
                         'media_type': 'video',
                         'member_list': []

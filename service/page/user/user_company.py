@@ -17,7 +17,7 @@ from util.tool.url_tool import make_url, make_static_url
 
 
 class UserCompanyPageService(PageService):
-    
+
     @gen.coroutine
     def get_companay_data(self, handler_params, param, team_flag):
         """Develop Status: To be modify with real data.
@@ -35,7 +35,6 @@ class UserCompanyPageService(PageService):
         if not team_flag:
             header = ObjectDict({
                 'type':        'company',
-                # 'name':        '仟寻 MoSeeker ',
                 'name':        company.name,
                 'description': "你的职场向导",
                 'icon':        make_static_url(company.logo),
