@@ -84,7 +84,9 @@ class CompanyTeamHandler(BaseHandler):
 
     @gen.coroutine
     def get(self, team_name):
-        result = yield self.team_ps.get_more_team_info(team_name)
+        result = yield self.team_ps.get_more_team_info(team_name, params=self.params)
+        # icon 为空，出来统一赋值
+        result.header.icon = 'https:' + self.static_url(self.current_user.company.logo)
 
         self.params.share = ObjectDict({
             "cover":       'https:' + self.static_url(self.current_user.company.logo),

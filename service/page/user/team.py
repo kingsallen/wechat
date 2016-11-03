@@ -15,18 +15,25 @@ from service.page.base import PageService
 class TeamPageService(PageService):
 
     @gen.coroutine
-    def get_more_team_info(self, team_name):
+    def get_more_team_info(self, team_name, params):
         """
         :param team_name: eb|rd|cs|bd
                           eb: enterprise branding; rd: research & development
                           cs: customer success;    bd: business development
         :return: team render data.
         """
-        raise gen.Return(getattr(self, '_get_{}_info'.format(team_name))())
+        raise gen.Return(getattr(self, '_get_{}_info'.format(team_name))(params))
 
-    @staticmethod
-    def _get_eb_info():
+    def _get_eb_info(self, params):
         data = ObjectDict({})
+        user_id, company_id = params.get('user_id'), params.get('company_id')
+        conds = {'user_id': user_id, 'company_id': company_id}
+        vst_cmpy = yield self.user_company_visit_req_ds.get_visit_cmpy(
+            conds=conds, fields=['id', 'company_id'])
+        data.relation = ObjectDict({
+            'want_visit': self.constant.YES if vst_cmpy else self.constant.NO
+        })
+
         data.header = ObjectDict({
             'type':        'team',
             'name':        '雇主品牌团队',
@@ -35,6 +42,7 @@ class TeamPageService(PageService):
             'banner':      'https://cdn.moseeker.com/upload/company_profile/qx'
                            '/banner_qx.jpeg',
         })
+
         data.templates = [
             ObjectDict({
                 'type': 1,
@@ -110,9 +118,15 @@ class TeamPageService(PageService):
 
         return data
 
-    @staticmethod
-    def _get_rd_info():
+    def _get_rd_info(self, params):
         data = ObjectDict({})
+        user_id, company_id = params.get('user_id'), params.get('company_id')
+        conds = {'user_id': user_id, 'company_id': company_id}
+        vst_cmpy = yield self.user_company_visit_req_ds.get_visit_cmpy(
+            conds=conds, fields=['id', 'company_id'])
+        data.relation = ObjectDict({
+            'want_visit': self.constant.YES if vst_cmpy else self.constant.NO
+        })
         data.header = ObjectDict({
             'type': 'team',
             'name': '研发团队',
@@ -191,15 +205,42 @@ class TeamPageService(PageService):
                     },
                 ],
             }),
+            ObjectDict({
+                'type':  3,
+                'title': "团队在招职位",
+                'data':  [
+                    {
+                        "title":    '高级Java软件工程师',
+                        "link":
+                                    'https://platform.moseeker.com/m/position/131459?wechat_signature=NjYyM2M4ZDAzOTk5NThmNjlhMGI0OWM2ZTgwOTk1Njc2MTU0Y2ZhOQ==',
+                        "location": '上海',
+                        "salary":   '15k-20k'
+                    },
+                    {
+                        "title":    'web前端开发工程师',
+                        "link":
+                                    'https://platform.moseeker.com/m/position/131457?wechat_signature=NjYyM2M4ZDAzOTk5NThmNjlhMGI0OWM2ZTgwOTk1Njc2MTU0Y2ZhOQ==',
+                        "location": '上海',
+                        "salary":   '10k-20k'
+                    }
+                ]
+            })
         ]
 
         data.templates_total = len(data.templates)
 
         return data
 
-    @staticmethod
-    def _get_cs_info():
+    def _get_cs_info(self, params):
         data = ObjectDict({})
+        user_id, company_id = params.get('user_id'), params.get('company_id')
+        conds = {'user_id': user_id, 'company_id': company_id}
+        vst_cmpy = yield self.user_company_visit_req_ds.get_visit_cmpy(
+            conds=conds, fields=['id', 'company_id'])
+        data.relation = ObjectDict({
+            'want_visit': self.constant.YES if vst_cmpy else self.constant.NO
+        })
+
         data.header = ObjectDict({
             'type': 'team',
             'name': '客户成功团队',
@@ -269,15 +310,42 @@ class TeamPageService(PageService):
                     },
                 ],
             }),
+            ObjectDict({
+                'type':  3,
+                'title': "团队在招职位",
+                'data':  [
+                    {
+                        "title":    '销售顾问',
+                        "link":
+                            'https://platform.moseeker.com/m/position/131455?wechat_signature=NjYyM2M4ZDAzOTk5NThmNjlhMGI0OWM2ZTgwOTk1Njc2MTU0Y2ZhOQ==',
+                        "location": '北京',
+                        "salary":   '5k-10k'
+                    },
+                    {
+                        "title":    '大客户代表',
+                        "link":
+                            'https://platform.moseeker.com/m/position/133864?wechat_signature=NjYyM2M4ZDAzOTk5NThmNjlhMGI0OWM2ZTgwOTk1Njc2MTU0Y2ZhOQ==',
+                        "location": '北京',
+                        "salary":   '5k-10k'
+                    }
+                ]
+            })
         ]
 
         data.templates_total = len(data.templates)
 
         return data
 
-    @staticmethod
-    def _get_bd_info():
+    def _get_bd_info(self, params):
         data = ObjectDict({})
+        user_id, company_id = params.get('user_id'), params.get('company_id')
+        conds = {'user_id': user_id, 'company_id': company_id}
+        vst_cmpy = yield self.user_company_visit_req_ds.get_visit_cmpy(
+            conds=conds, fields=['id', 'company_id'])
+        data.relation = ObjectDict({
+            'want_visit': self.constant.YES if vst_cmpy else self.constant.NO
+        })
+
         data.header = ObjectDict({
             'type': 'team',
             'name': '商务拓展团队',
@@ -338,6 +406,24 @@ class TeamPageService(PageService):
                     },
                 ],
             }),
+            ObjectDict({
+                'type': 3,
+                'title': "团队在招职位",
+                'data': [
+                    {
+                        "title":    '文案',
+                        "link":     'https://platform.moseeker.com/m/position/131454?wechat_signature=NjYyM2M4ZDAzOTk5NThmNjlhMGI0OWM2ZTgwOTk1Njc2MTU0Y2ZhOQ==',
+                        "location": '上海',
+                        "salary":   '5k-8k'
+                    },
+                    {
+                        "title":    '大客户开拓（KA）',
+                        "link":     'https://platform.moseeker.com/m/position/131453?wechat_signature=NjYyM2M4ZDAzOTk5NThmNjlhMGI0OWM2ZTgwOTk1Njc2MTU0Y2ZhOQ==',
+                        "location": '上海',
+                        "salary":   '5k-8k'
+                    }
+                ]
+            })
         ]
 
         data.templates_total = len(data.templates)
