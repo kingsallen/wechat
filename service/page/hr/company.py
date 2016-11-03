@@ -3,14 +3,18 @@
 # Copyright 2016 MoSeeker
 
 import re
-from tornado.util import ObjectDict
+from util.common import ObjectDict
 from tornado import gen
 from service.page.base import PageService
 
+
 class CompanyPageService(PageService):
 
+    def __init__(self, logger):
+        super(CompanyPageService, self).__init__(logger)
+
     @gen.coroutine
-    def get_company(self, conds, need_conf=False, fields=[]):
+    def get_company(self, conds, need_conf=None, fields=None):
 
         """
         获得公司信息
@@ -21,6 +25,9 @@ class CompanyPageService(PageService):
         }
         :return:
         """
+
+        fields = fields or []
+        need_conf = need_conf or False
 
         # 公司主表
         company = yield self.hr_company_ds.get_company(conds, fields)
@@ -34,7 +41,7 @@ class CompanyPageService(PageService):
 
             # 搜索页页面栏目排序
             search_seq = []
-            search_seq_tmp = re.split(u"#", company_conf_res.get("search_seq") or self.plat_constant.LANDING_SEQ)
+            search_seq_tmp = re.split("#", company_conf_res.get("search_seq") or self.plat_constant.LANDING_SEQ)
             for item in search_seq_tmp:
                 # 若存在自定义字段值，则更新标题
                 landing = self.plat_constant.LANDING.get(int(item))
@@ -61,7 +68,7 @@ class CompanyPageService(PageService):
         raise gen.Return(company)
 
     @gen.coroutine
-    def get_companys_list(self, conds, fields, options=[], appends=[]):
+    def get_companys_list(self, conds, fields, options=None, appends=None):
 
         """
         获得公司列表
@@ -72,5 +79,31 @@ class CompanyPageService(PageService):
         :return:
         """
 
+        options = options or []
+        appends = appends or []
+
         positions_list = yield self.hr_company_ds.get_companys_list(conds, fields, options, appends)
         raise gen.Return(positions_list)
+
+    @gen.coroutine
+    def get_real_company_id(self, publisher, company_id):
+        """获得职位所属公司id
+        公司有母公司和子公司之分，
+        如果取母公司，则取 current_user.company，如果取职位对应的公司（可能是子公司，可能是母公司）则使用该方法
+        1.首先根据 hr_company_account 获得 hr 帐号与公司之间的关系，获得company_id
+        2.如果1取不到，则直接取职位中的 company_id"""
+
+        hr_company_account = yield self.hr_company_account_ds.get_company_account(conds={"account_id": publisher})
+        real_company_id = hr_company_account.company_id or company_id
+
+        raise gen.Return(real_company_id)
+
+    @gen.coroutine
+    def save_survey(self, fields, options=None, appends=None):
+        """保存公司 survey， 在公司 profile 主页保存"""
+        options = options or []
+        appends = appends or []
+
+        lastrowid = yield self.campaign_company_survey_ds.create_survey(fields)
+        raise gen.Return(lastrowid)
+

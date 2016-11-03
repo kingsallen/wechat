@@ -8,57 +8,53 @@
 
 说明:
 pageservice的父类
-负责与handler交互，不能直接与DAO交互。一个pageservice能调用多个dataservice，pageservice只能被handler调用
+负责与handler交互，不能直接与DAO交互。
+一个pageservice能调用多个dataservice，pageservice只能被handler调用
 pageservice之间可以相互调用，但不建议
 可以根据业务类型创建pageservice
 """
 
+import re
 import importlib
+import glob
 
-from utils.common.log import Logger
 from setting import settings
 import conf.common as constant
 import conf.platform as plat_constant
 import conf.qx as qx_constant
 import conf.help as help_constant
+import conf.path as path
+from util.common.singleton import Singleton
 
-class Singleton(type):
-
-    def __init__(cls, name, bases, dict):
-        super(Singleton, cls).__init__(name, bases, dict)
-        cls._instance = None
-
-    def __call__(cls, *args, **kw):
-        if cls._instance is None:
-            cls._instance = super(Singleton, cls).__call__(*args, **kw)
-        return cls._instance
 
 class PageService:
-
     __metaclass__ = Singleton
 
-    def __init__(self):
+    def __init__(self, logger):
 
         """
         初始化dataservice
         :return:
         """
-        self.logger = Logger()
+        self.logger = logger
         self.settings = settings
         self.constant = constant
         self.plat_constant = plat_constant
         self.qx_constant = qx_constant
+        self.path = path
+        self.help_constant = help_constant
 
-        self.hr_company_ds = getattr(importlib.import_module('service.data.{0}.{1}'.format('hr', 'hr_company')),
-                                     'HrCompanyDataService')()
-        self.hr_company_conf_ds = getattr(importlib.import_module('service.data.{0}.{1}'.format('hr', 'hr_company_conf')),
-                                          'HrCompanyConfDataService')()
-        self.hr_wx_wechat_ds = getattr(importlib.import_module('service.data.{0}.{1}'.format('hr', 'hr_wx_wechat')),
-                                       'HrWxWechatDataService')()
-        self.config_sys_theme_ds = getattr(importlib.import_module('service.data.{0}.{1}'.format('config', 'config_sys_theme')),
-                                       'ConfigSysThemeDataService')()
-        self.job_position_ds = getattr(importlib.import_module('service.data.{0}.{1}'.format('job', 'job_position')),
-                                       'JobPositionDataService')()
-        self.job_custom_ds = getattr(importlib.import_module('service.data.{0}.{1}'.format('job', 'job_custom')),
-                                       'JobCustomDataService')()
+        d = settings['root_path'] + "/service/data/**/*.py"
+        for module in filter(lambda x: not x.endswith("init__.py"), glob.glob(d)):
+            p = module.split("/")[-2]
+            m = module.split("/")[-1].split(".")[0]
+            m_list = [item.title() for item in re.split("_", m)]
+            pm_ds = "".join(m_list) + "DataService"
+            pm_obj = m + "_ds"
 
+            klass = getattr(
+                importlib.import_module('service.data.{0}.{1}'.format(p, m)),
+                pm_ds)
+            instance = klass(self.logger)
+
+            setattr(self, pm_obj, instance)

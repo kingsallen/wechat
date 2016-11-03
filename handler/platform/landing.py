@@ -2,10 +2,11 @@
 
 # Copyright 2016 MoSeeker
 
-from tornado.util import ObjectDict
+from util.common import ObjectDict
 from tornado import gen
 from handler.base import BaseHandler
-from utils.common.decorator import handle_response_error, url_valid
+from util.common.decorator import handle_response
+
 
 class LandingHandler(BaseHandler):
 
@@ -13,8 +14,7 @@ class LandingHandler(BaseHandler):
     企业搜索页
     """
 
-    @url_valid
-    @handle_response_error
+    @handle_response
     @gen.coroutine
     def get(self):
         signature = str(self.get_argument("wechat_signature", ""))
@@ -44,7 +44,7 @@ class LandingHandler(BaseHandler):
             "logo": self.current_user.company.get("logo"),
             "name": self.current_user.company.get("abbreviation"),
             "image": self.current_user.company.get("conf_search_img"),
-            "search_seq" : search_seq
+            "search_seq": search_seq
         })
 
-        self.render("refer/neo_weixin/position/company_search.html", company=company)
+        self.render("company/search.html", company=company)

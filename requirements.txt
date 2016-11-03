@@ -1,5 +1,6 @@
-tornado==4.2.1
-ujson==1.34
+pypinyin==0.14.0
+redis==2.10.5
+requests==2.11.1
+tornado==4.4.2
 Tornado-MySQL==0.5.1
-tornadis==0.7.0
-pypinyin==0.12.1
+ujson==1.35

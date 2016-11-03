@@ -28,47 +28,51 @@ import tornado.web
 import tornado.ioloop
 import tornado.options
 from tornado.options import options
-import tornadis
 
 from setting import settings
-from route import routes
-from utils.common.log import Logger
-# from utils.common.session import Session
+import conf.common as constant
+
+from route import platform_routes, qx_routes, help_routes
+from util.common.log import MessageLogger
+from util.common.cache import BaseRedis
 
 tornado.options.parse_command_line()
-logger = Logger(logpath=options.logpath)
+logger = MessageLogger(logpath=options.logpath)
+redis = BaseRedis()
+env = options.env
+
 
 class Application(tornado.web.Application):
 
     def __init__(self):
-
-        tornado.web.Application.__init__(self, routes, **settings)
+        # 选择加载的 routes
+        if options.env == constant.ENV_PLATFORM:
+            tornado.web.Application.__init__(self, platform_routes, **settings)
+        elif options.env == constant.ENV_QX:
+            tornado.web.Application.__init__(self, qx_routes, **settings)
+        else:
+            tornado.web.Application.__init__(self, help_routes, **settings)
 
         self.settings = settings
-
         self.logger = logger
-
-        # self.redis_cli = Session()
-
-        # # 异步redis客户端
-        # self.redis_cli = tornadis.ClientPool(
-        #     dict(port=settings['redis_port'],
-        #          host=settings['redis_host'],
-        #          connect_timeout=settings['connect_timeout'])
-        # )
+        self.env = env
+        self.redis = redis
 
 def main():
-
     application = Application()
     try:
-        logger.info('Wechat server starting, on port : {0}'.format(options.port))
+        logger.info('Wechat server starting on port: {0}'.format(options.port))
         http_server = tornado.httpserver.HTTPServer(application, xheaders=True)
         http_server.listen(options.port)
+
+        tornado.ioloop.IOLoop.instance().set_blocking_log_threshold(
+            settings['blocking_log_threshold'])
         tornado.ioloop.IOLoop.instance().start()
     except Exception as e:
         logger.error(e)
     finally:
-        logger.info('Wechat server closing, on port : {0}'.format(options.port))
+        logger.info('Wechat server closing on port: {0}'.format(options.port))
 
 if __name__ == "__main__":
+
     main()

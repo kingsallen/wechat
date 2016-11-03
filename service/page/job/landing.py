@@ -10,8 +10,12 @@ import re
 from tornado import gen
 from pypinyin import lazy_pinyin
 from service.page.base import PageService
+from util.tool.str_tool import split
 
 class LandingPageService(PageService):
+
+    def __init__(self, logger):
+        super().__init__(logger)
 
     @gen.coroutine
     def get_landing_item(self, company, company_id, selected):
@@ -93,7 +97,7 @@ class LandingPageService(PageService):
                 res.append(degree)
 
             # 子公司名称
-            elif index == self.plat_constant.LANGDING_INDEX_CHILD_COMPANY:
+            elif index == self.plat_constant.LANDING_INDEX_CHILD_COMPANY:
                 conds = {
                     "parent_id": company_id,
                     "disable": self.constant.STATUS_INUSE
@@ -152,7 +156,7 @@ class LandingPageService(PageService):
         occupations = []
         departments = []
         for item in positions_list:
-            cities_tmp = re.split(u'，|,', item.get("city"))
+            cities_tmp = split(item.get("city"), ['，',','])
             for city in cities_tmp:
                 if not city:
                     continue
@@ -161,8 +165,12 @@ class LandingPageService(PageService):
             if item.get("occupation") and not item.get("occupation") in occupations:
                 occupations.append(item.get("occupation"))
 
-            if item.get("department") and not item.get("department") in departments:
-                departments.append(item.get("department"))
+            if item.get("department"):
+                departments_tmp = split(item.get("department"), ['，', ','])
+                for department in departments_tmp:
+                    if not department or item.get("department") in departments:
+                        continue
+                    departments.append(department)
 
         # 根据拼音首字母排序
         cities = sorted(cities.items(), key = lambda x:x[1])
