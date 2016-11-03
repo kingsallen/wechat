@@ -129,8 +129,7 @@ class DB(object):
                         return False
                     fields[key] = float(fields[key])
                 elif value == constant.TYPE_TIMESTAMP:
-                    if isinstance(fields[key], datetime):
-                        fields[key] = fields[key].strftime(constant.TIME_FORMAT)
+                   fields[key] = fields[key].strftime(constant.TIME_FORMAT)
                 else:
                     fields[key] = str(fields[key])
 

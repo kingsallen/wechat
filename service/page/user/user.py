@@ -1,11 +1,12 @@
 # coding=utf-8
 
+from datetime import datetime
+
 import tornado.gen as gen
 
 import conf.common as const
 from service.page.base import PageService
 from setting import settings
-from util.tool.date_tool import curr_now
 from util.tool.http_tool import http_post
 
 
@@ -55,12 +56,12 @@ class UserPageService(PageService):
             user_id = yield self.user_user_ds.create_user({
                 "username":         userinfo.unionid,
                 "password":         "",
-                "register_time":    curr_now(),
+                "register_time":    datetime.now(),
                 "register_ip":      remote_ip,
                 "mobile":           0,
                 "national_code_id": 1,
                 "wechat_id":        wechat_id,
-                "last_login_time":  curr_now(),
+                "last_login_time":  datetime.now(),
                 "last_login_ip":    remote_ip,
                 "login_count":      1,
                 "unionid":          userinfo.unionid,
