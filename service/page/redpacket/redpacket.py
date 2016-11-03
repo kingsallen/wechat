@@ -392,6 +392,8 @@ class RedpacketPageService(PageService):
     def __check_throttle_passed(self, red_packet_config, wxuser_id, position=None):
         """该用户目前拿到的红包的总金额加上下个红包金额是否超过该公司单次活动金额上限
         """
+        if not wxuser_id:
+            raise gen.Return(False)
 
         # 现在到手的红包总金额
         amount = yield self.__get_amount_sum_config_id_and_wxuser_id(
