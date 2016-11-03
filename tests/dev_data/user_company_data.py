@@ -55,28 +55,32 @@ WORKING_ENV = [
 TEAMS = [
     {
         'title': "客户成功团队",
-        'longtext': "客户的智慧库以及咨询师",
+        'longtext': "提供运营策略给到客户，并提供技术支持，是成单后客户的智慧库以及咨询师。"
+                    "需要细心的执行外，还要根据各客户实际情况提供相应的策略。",
         'media_url': 'https://cdn.moseeker.com/upload/company_profile/qx/cs.png',
         'media_type': 'image',
         'member_list': []
     },
     {
         'title': "研发团队",
-        'longtext': "仟寻招聘的技术保证和动力引擎",
+        'longtext': "提供技术保证和动力引擎。我们不断创新技术架构，提高服务稳定性，"
+                    "分享不同知识点，提高研发实力，助力打造一款更具竞争力的产品。",
         'media_url': 'https://cdn.moseeker.com/upload/company_profile/qx/rd.jpeg',
         'media_type': 'image',
         'member_list': []
     },
     {
         'title': "雇主品牌团队",
-        'longtext': "专注于提供企业雇主品牌的策略咨询及实施服务",
+        'longtext': "专注于提供企业雇主品牌的策略咨询及实施服务。通过创意设计和技术实现来"
+                    "优化招聘渠道和目标人群的体验，助力吸引和保留目标优秀人才。",
         'media_url': 'https://cdn.moseeker.com/upload/company_profile/qx/eb.jpeg',
         'media_type': 'image',
         'member_list': []
     },
     {
         'title': "商务拓展团队",
-        'longtext': "开发优秀企业，提供合作方案，解决招聘难题，提升雇主形象",
+        'longtext': "提供给客户在移动社交招聘、雇主品牌建设上的合作方案，解决企业招聘难题，"
+                    "提升雇主品牌形象。客户选择我们一定是最正确的选择。",
         'media_url': 'https://cdn.moseeker.com/upload/company_profile/qx/bd.jpeg',
         'media_type': 'image',
         'member_list': []
