@@ -42,8 +42,6 @@ settings['mysql_user'] = "daqi"
 settings['mysql_password'] = "5F51692091B4031640E18E7C27430E071BC878C8"
 
 # session配置
-settings['session_secret'] = "FILUCyiulhrweuflhwesoihqwurihfbaskjdhquwvrlqkwjfv"
-settings['session_timeout'] = 2592000
 settings['store_options'] = {
     'redis_host': '127.0.0.1',
     'redis_port': 6379,
