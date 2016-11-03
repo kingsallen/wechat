@@ -612,9 +612,9 @@ class BaseHandler(MetaBaseHandler):
         namespace.update(add_namespace)
         return namespace
 
-    def static_url(self, path, include_host='http'):
+    def static_url(self, path, protocol='https'):
         """获取 static_url"""
-        return make_static_url(path, include_host)
+        return make_static_url(path, protocol)
 
     def on_finish(self):
         """on_finish 时处理传输日志"""

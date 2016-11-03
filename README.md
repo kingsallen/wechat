@@ -13,6 +13,8 @@ http://wiki.moseeker.com/python-code-comments.md
     |--conf    常量配置
     |----common.py    系统公用常量
     |----help.py    仟寻招聘助手常量
+    |----message.py  消息文案常量
+    |----path.py url路径，包括 url，基础服务等
     |----platform.py    企业号常量
     |----qx.py    聚合号常量
     |----wechat.py   wechat 常量
@@ -55,9 +57,11 @@ http://wiki.moseeker.com/python-code-comments.md
     |--util    工具类
     |----common 公共方法类
     |----tool   工具类
+    |----...
     |
     |--.editorconfig
     |--.gitignore    git ignore
+    |--.python-version python 版本
     |--app.py    tornado启动类
     |--README.md    README
     |--requirements.txt    项目依赖库
