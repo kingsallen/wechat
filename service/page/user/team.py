@@ -22,7 +22,8 @@ class TeamPageService(PageService):
                           cs: customer success;    bd: business development
         :return: team render data.
         """
-        raise gen.Return(getattr(self, '_get_{}_info'.format(team_name))(params))
+        res = yield getattr(self, '_get_{}_info'.format(team_name))(params)
+        raise gen.Return(res)
 
     def _get_eb_info(self, params):
         data = ObjectDict({})
