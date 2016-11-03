@@ -237,7 +237,7 @@ class SharechainPageService(PageService):
                             "click_time":    recom.create_time,
                             "depth":         last_node.depth + 1,
                             "recom_id_2":    recom.recom_id if last_node.depth == 1 else last_node.recom_id_2,
-                            "recom_id":      recom.recom_id,
+                            "recom_id":      last_node.recom_id,
                             "last_recom_id": recom.recom_id
                         })
 
