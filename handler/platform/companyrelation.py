@@ -85,6 +85,8 @@ class CompanyTeamHandler(BaseHandler):
 
     @gen.coroutine
     def get(self, team_name):
+        self.params.company_id = self.current_user.company.id
+        self.params.user_id = self.current_user.sysuser.id
         result = yield self.team_ps.get_more_team_info(team_name, params=self.params)
         # icon 为空，出来统一赋值
         result.header.icon = self.static_url(self.current_user.company.logo)
