@@ -112,7 +112,7 @@ class UserCompanyPageService(PageService):
             # ObjectDict({'type': 4, 'sub_type': 1, 'title': '你可能感兴趣的公司',
             #             'data': data4_2}),
             ObjectDict({'type': 50, 'title': 'address', 'data': data50}),
-            ObjectDict({'type': 5, 'title': 'template 5', 'data': None}),
+            ObjectDict({'type': 5, 'title': '', 'data': None})
         ]
         data.template_total = len(data.templates)
 
