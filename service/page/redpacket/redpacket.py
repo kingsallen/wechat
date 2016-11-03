@@ -393,10 +393,6 @@ class RedpacketPageService(PageService):
         """该用户目前拿到的红包的总金额加上下个红包金额是否超过该公司单次活动金额上限
         """
 
-        # 依赖对仟寻授权
-        if wxuser_id is None:
-            return True
-
         # 现在到手的红包总金额
         amount = yield self.__get_amount_sum_config_id_and_wxuser_id(
             red_packet_config.id, wxuser_id)
