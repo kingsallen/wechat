@@ -14,6 +14,51 @@ from service.page.base import PageService
 
 class TeamPageService(PageService):
 
+    _OTHER_TEAM = ObjectDict(
+        cs={
+            "title": "客户成功团队",
+            "link":  "https://platform.moseeker.com/m/company/team/cs?wechat_signature=NjYyM2M4ZDAzOTk5NThmNjlhMGI0OWM2ZTgwOTk1Njc2MTU0Y2ZhOQ==",
+            "description": "专注于提供企业雇主品牌的策略咨询及实施服务",
+            "media_url": 'https://cdn.moseeker.com/upload/company_profile/qx/'
+                                   'CSFULL.png',
+            "media_type": "image"
+        },
+        bd={
+            "title":       "商务拓展团队",
+            "link": "https://platform.moseeker.com/m/company/team/bd"
+                    "?wechat_signature=NjYyM2M4ZDAzOTk5NThmNjlhMGI0OWM2ZTgwOTk1Njc2MTU0Y2ZhOQ==",
+            "description": "开发优秀企业，提供合作方案，解决招聘难题，提升雇主形象",
+            "media_url":   'https://cdn.moseeker.com/upload/company_profile/qx/'
+                                   'BDFULL.jpeg',
+            "media_type":  "image"
+        },
+        eb={
+            "title":       "雇主品牌团队",
+            "link": "https://platform.moseeker.com/m/company/team/eb"
+                    "?wechat_signature=NjYyM2M4ZDAzOTk5NThmNjlhMGI0OWM2ZTgwOTk1Njc2MTU0Y2ZhOQ==",
+            "description": "专注于提供企业雇主品牌的策略咨询及实施服务",
+            "media_url":   'https://cdn.moseeker.com/upload/company_profile/qx/'
+                                   'EBFULL.jpeg',
+            "media_type":  "image"
+        },
+        rd={
+            "title":       "研发团队",
+            "link": "https://platform.moseeker.com/m/company/team/rd"
+                    "?wechat_signature=NjYyM2M4ZDAzOTk5NThmNjlhMGI0OWM2ZTgwOTk1Njc2MTU0Y2ZhOQ==",
+            "description": "仟寻招聘的技术保证和动力引擎",
+            "media_url":   'https://cdn.moseeker.com/upload/company_profile/qx/'
+                                   'RDFULL.jpeg',
+            "media_type":  "image"
+        }
+    )
+
+    _OTHER_TEAM_FRAMEWORK = ObjectDict({
+        'type':     4,
+        'sub_type':  0,
+        'title':    '其他团队',
+        'data':     []
+    }),
+
     @gen.coroutine
     def get_more_team_info(self, team_name, params):
         """
@@ -117,6 +162,13 @@ class TeamPageService(PageService):
             }),
         ]
         data.templates_total = len(data.templates)
+
+        # 其他团队
+        otherteam = self._OTHER_TEAM_FRAMEWORK
+        otherteam.data.append(self._OTHER_TEAM.cs)
+        otherteam.data.append(self._OTHER_TEAM.bd)
+        otherteam.data.append(self._OTHER_TEAM.rd)
+        data.templates.append(otherteam)
 
         raise gen.Return(data)
 
@@ -232,6 +284,12 @@ class TeamPageService(PageService):
 
         data.templates_total = len(data.templates)
 
+        otherteam = self._OTHER_TEAM_FRAMEWORK
+        otherteam.data.append(self._OTHER_TEAM.cs)
+        otherteam.data.append(self._OTHER_TEAM.bd)
+        otherteam.data.append(self._OTHER_TEAM.eb)
+        data.templates.append(otherteam)
+
         raise gen.Return(data)
 
     @gen.coroutine
@@ -333,10 +391,16 @@ class TeamPageService(PageService):
                         "salary":   '5k-10k'
                     }
                 ]
-            })
+            }),
         ]
 
         data.templates_total = len(data.templates)
+
+        otherteam = self._OTHER_TEAM_FRAMEWORK
+        otherteam.data.append(self._OTHER_TEAM.rd)
+        otherteam.data.append(self._OTHER_TEAM.bd)
+        otherteam.data.append(self._OTHER_TEAM.eb)
+        data.templates.append(otherteam)
 
         raise gen.Return(data)
 
@@ -432,5 +496,11 @@ class TeamPageService(PageService):
         ]
 
         data.templates_total = len(data.templates)
+
+        otherteam = self._OTHER_TEAM_FRAMEWORK
+        otherteam.data.append(self._OTHER_TEAM.cs)
+        otherteam.data.append(self._OTHER_TEAM.rd)
+        otherteam.data.append(self._OTHER_TEAM.eb)
+        data.templates.append(otherteam)
 
         raise gen.Return(data)
