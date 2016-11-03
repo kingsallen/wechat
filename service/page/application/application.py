@@ -29,6 +29,12 @@ class ApplicationPageService(PageService):
         :param user_id: 求职者 id
         :param company_id: 公司 id
         :return:
+        {
+          'message': '提示信息',
+          'status': 0,
+          'data': true/false   # ture 表示命中限制，不能投递，false 表示可以投递
+        }
+
         """
 
         req = ObjectDict({

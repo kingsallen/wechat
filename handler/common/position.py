@@ -234,7 +234,7 @@ class PositionHandler(BaseHandler):
             "submitted": bool(application),
             "appid": application.id,
             "endorse": endorse,
-            "can_apply": can_apply,
+            "can_apply": not can_apply,
             "forword_message": company_info.conf_forward_message or msg.POSITION_FORWARD_MESSAGE
         })
 
