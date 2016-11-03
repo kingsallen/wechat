@@ -225,7 +225,7 @@ class TeamPageService(PageService):
                             "icon":        'https://cdn.moseeker.com/upload/company_profile'
                                            '/qx/feixia.jpeg',
                             "name":        '肖飞霞',
-                            "title":       'CS',
+                            "title":       '客户项目顾问',
                             "description": '给客户出谋划策、答疑解难。希望有个不被打扰的假期，'
                                            '希望所有的idea都被客户采纳，希望世界和平！',
                         },
@@ -233,7 +233,7 @@ class TeamPageService(PageService):
                             "icon":        'https://cdn.moseeker.com/upload/company_profile'
                                            '/qx/Melissa.jpeg',
                             "name":        'Melissa',
-                            "title":       'Head of CS',
+                            "title":       '客户成功团队经理',
                             "description": '热衷于规划与整理，连出去旅游都能整出一个action plan。'
                                            '坚信完美规划流程，可以使工作效率更高。',
                         },
@@ -241,7 +241,7 @@ class TeamPageService(PageService):
                             "icon":        'https://cdn.moseeker.com/upload/company_profile'
                                            '/qx/Julie.jpeg',
                             "name":        'Julie',
-                            "title":       'CS',
+                            "title":       '客户项目顾问',
                             "description": '也许我正在on-call，也许我只是默默的站在程序猿身边。'
                                            '你若安好，我便晴天，你若灿烂，喜大普奔！ ',
                         },
@@ -255,14 +255,14 @@ class TeamPageService(PageService):
                 'data': [
                     {
                         'title': '肖飞霞',
-                        'longtext': 'CS\n',
+                        'longtext': '客户项目顾问\n',
                         'media_url': '//v.qq.com/iframe/player.html?vid=p034057d7ix&tiny=0&auto=0',
                         'media_type': 'video',
                         'member_list': []
                     },
                     {
                         'title': 'Melissa/Julie',
-                        'longtext': 'CS\n',
+                        'longtext': '客户成功团队经理/项目顾问\n',
                         'media_url': '//v.qq.com/iframe/player.html?vid=u03404uht6u&tiny=0&auto=0',
                         'media_type': 'video',
                         'member_list': []

@@ -161,8 +161,8 @@ data3 = [
 data4_1 = [
     {
         'title': '2015年',
-        'description': '2014全球创业周Recruit创业大赛冠军。',
-        'media_url': 'https://cdn.moseeker.com/upload/company_profile/qx/ds1.jpeg',
+        'description': '获得由国内顶尖人力资源权威媒体《人力资本管理》颁发的2014-2015大中华区人力资源服务创新大奖',
+        'media_url': 'https://cdn.moseeker.com/upload/company_profile/qx/ds3.jpeg',
         'media_type': 'image',
     },
     {
@@ -174,7 +174,7 @@ data4_1 = [
     {
         'title': '2016年10月',
         'description': '仟寻招聘跻身中国创新创业大赛8强，获得国赛优秀企业称号。',
-        'media_url': 'https://cdn.moseeker.com/upload/company_profile/qx/ds3.jpeg',
+        'media_url': 'https://cdn.moseeker.com/upload/company_profile/qx/ds1.jpeg',
         'media_type': 'image',
     }
 ]
