@@ -11,6 +11,7 @@ import conf.common as const
 
 from tornado import gen
 from handler.base import BaseHandler
+import conf.message as msg
 
 
 class CellphoneBindHandler(BaseHandler):
@@ -47,6 +48,9 @@ class CellphoneBindHandler(BaseHandler):
         )
         if response.status != const.API_SUCCESS:
             self.send_json_error(message=response.message)
+            return
+        elif response.data == const.NO:
+            self.send_json_error(message=msg.CELLPHONE_INVALID_CODE)
             return
 
         # 检查是否需要合并 pc 账号

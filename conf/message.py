@@ -11,6 +11,7 @@ BASIC_SERVER_BUSY = "基础服务器忙碌"
 
 CELLPHONE_BIND = "用户已绑定手机号"
 CELLPHONE_UNBIND = "用户未绑定手机号"
+CELLPHONE_INVALID_CODE = "验证码不正确"
 
 DATABASE_ERROR = "数据库操作失败"
 
