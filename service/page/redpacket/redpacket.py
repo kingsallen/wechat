@@ -135,10 +135,7 @@ class RedpacketPageService(PageService):
         else:
             self.logger.debug("[RP]something goes wrong")
 
-        self.logger.debug("[RP]current_user.recom.openid:{}".format(current_user.recom.openid))
-        self.logger.debug("[RP]current_user.wxuser.id:{}".format(current_user.wxuser.id))
         self.logger.debug("[RP]check_hb_status_passed:{}".format(check_hb_status_passed))
-        self.logger.debug("[RP]current_user.recom.id:{}".format(current_user.recom.id))
 
         ret = bool(current_user.recom.openid and
                    current_user.wxuser.id and
@@ -153,7 +150,6 @@ class RedpacketPageService(PageService):
                                            is_click=False, is_apply=False):
         """转发类红包触发总入口
         """
-        self.logger.debug("[RP]in handle_red_packet_position_related")
         assert is_click or is_apply
 
         try:
@@ -195,12 +191,10 @@ class RedpacketPageService(PageService):
 
                 recom = current_user.recom
                 recom_wechat = current_user.wechat
-                self.logger.debug("[RP]recom_wechat: {}".format(recom_wechat))
 
                 ret = yield self.handle_red_packet_card_sending(
                     current_user, rp_config, recom,
                     recom_wechat, position)
-                self.logger.debug(ret)
 
                 if send_to_employee:
                     # 同时发红包给最近员工
@@ -210,7 +204,6 @@ class RedpacketPageService(PageService):
                     ret = yield self.handle_red_packet_card_sending(
                         current_user, rp_config, employee_wxuser,
                         recom_wechat, position, send_to_employee=True)
-                    self.logger.debug(ret)
 
                 if is_click:
                     self.logger.debug("[RP]转发点击红包结束")
@@ -254,7 +247,6 @@ class RedpacketPageService(PageService):
             raise gen.Return(None)
 
         # 非员工只能领取一个红包的检查, check 不通过暂停发红包
-        self.logger.debug("[RP]recom_wechat2:{}".format(recom_wechat))
         non_employee_single_rp_passed = yield self.__non_employee_rp_check_passed(
                 red_packet_config.id, recom_wechat, recom.id,
                 recom_qx_wxuser.id)
@@ -269,8 +261,6 @@ class RedpacketPageService(PageService):
         # 红包发送对象是否符合配置要求
         matches = yield self.__recom_matches(red_packet_config, recom.openid,
                                              recom_wechat, position)
-        self.logger.debug("[RP]matches:{}".format(matches))
-        self.logger.debug("[RP]send_to_employee:{}".format(send_to_employee))
         if send_to_employee or matches:
             self.logger.debug("[RP]用户是发送红包对象,准备掷骰子")
 
@@ -355,8 +345,6 @@ class RedpacketPageService(PageService):
         })
         if not employee:
             raise gen.Return(False)
-        self.logger.debug("[RP]employee.company_id: {}".format(employee.company_id))
-        self.logger.debug("[RP]wechat.company_id: {}".format(wechat.company_id))
         raise gen.Return(employee.company_id == wechat.company_id)
 
     @gen.coroutine
@@ -539,7 +527,6 @@ class RedpacketPageService(PageService):
             recom_wechat_id, qx_openid, red_packet_config.id,
             rp_item.id, rp_item.amount)
 
-        self.logger.debug("[RP]card:{}".format(card))
         self.logger.debug("[RP]红包信封入库成功!")
         self.logger.debug("[RP]准备发送红包信封(有金额)!")
 
@@ -716,9 +703,6 @@ class RedpacketPageService(PageService):
 
         card_url = make_url(path.RED_PACKET_CARD, {}, host=url_host, m="new",
                             cardno=card.cardno)
-
-        self.logger.debug("[RP]card_url:{}".format(card_url))
-        self.logger.debug("[RP]wechat:{}".format(wechat))
 
         wechat_id1 = wechat.get("id", None)
         wechat_id2 = wechat.get("wechat_id", None)
