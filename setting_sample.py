@@ -60,6 +60,13 @@ settings['elk_cluster'] = {
 # tornado log配置
 settings['blocking_log_threshold'] = 0.5
 
+# 微信支付
+settings['apikey'] = 'xxxx'
+settings['cert_file_path'] = "xxx/apiclient_cert.pem"
+settings['key_file_path'] = "xxx/apiclient_key.pem"
+settings['wechat_pay_appid'] = 'wx....'
+settings['wechat_pay_mchid'] = 'xxxx'
+
 # 基础服务
 settings['infra'] = "http://api1.dqprism.com"
 settings['das'] = "http://das1.dqprism.com/das"
