@@ -52,13 +52,6 @@ class TeamPageService(PageService):
         }
     )
 
-    _OTHER_TEAM_FRAMEWORK = ObjectDict({
-        'type':     4,
-        'sub_type':  0,
-        'title':    '其他团队',
-        'data':     []
-    })
-
     @gen.coroutine
     def get_more_team_info(self, team_name, params):
         """
@@ -164,7 +157,12 @@ class TeamPageService(PageService):
         data.templates_total = len(data.templates)
 
         # 其他团队
-        otherteam = self._OTHER_TEAM_FRAMEWORK
+        otherteam =  ObjectDict({
+            'type':     4,
+            'sub_type':  0,
+            'title':    '其他团队',
+            'data':     []
+        })
         otherteam.data.append(self._OTHER_TEAM.cs)
         otherteam.data.append(self._OTHER_TEAM.bd)
         otherteam.data.append(self._OTHER_TEAM.rd)
@@ -284,7 +282,12 @@ class TeamPageService(PageService):
 
         data.templates_total = len(data.templates)
 
-        otherteam = self._OTHER_TEAM_FRAMEWORK
+        otherteam = ObjectDict({
+            'type':     4,
+            'sub_type': 0,
+            'title':    '其他团队',
+            'data':     []
+        })
         otherteam.data.append(self._OTHER_TEAM.cs)
         otherteam.data.append(self._OTHER_TEAM.bd)
         otherteam.data.append(self._OTHER_TEAM.eb)
@@ -396,7 +399,12 @@ class TeamPageService(PageService):
 
         data.templates_total = len(data.templates)
 
-        otherteam = self._OTHER_TEAM_FRAMEWORK
+        otherteam = ObjectDict({
+            'type':     4,
+            'sub_type': 0,
+            'title':    '其他团队',
+            'data':     []
+        })
         otherteam.data.append(self._OTHER_TEAM.rd)
         otherteam.data.append(self._OTHER_TEAM.bd)
         otherteam.data.append(self._OTHER_TEAM.eb)
@@ -497,7 +505,12 @@ class TeamPageService(PageService):
 
         data.templates_total = len(data.templates)
 
-        otherteam = self._OTHER_TEAM_FRAMEWORK
+        otherteam = ObjectDict({
+            'type':     4,
+            'sub_type': 0,
+            'title':    '其他团队',
+            'data':     []
+        })
         otherteam.data.append(self._OTHER_TEAM.cs)
         otherteam.data.append(self._OTHER_TEAM.rd)
         otherteam.data.append(self._OTHER_TEAM.eb)
