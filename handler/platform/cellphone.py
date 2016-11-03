@@ -40,19 +40,14 @@ class CellphoneBindHandler(BaseHandler):
         except:
             return
 
-        # 验证手机号
+        # 验证验证码
         response = yield self.cellphone_ps.verify_mobile(
             params=self.params,
             app_id=self.app_id
         )
-
-        # 更新数据库
         if response.status != const.API_SUCCESS:
             self.send_json_error(message=response.message)
             return
-        else:
-            yield self.user_ps.bind_mobile(self.current_user.sysuser.id,
-                                           self.params.mobile)
 
         # 检查是否需要合并 pc 账号
         response = yield self.cellphone_ps.wx_pc_combine(
@@ -60,12 +55,15 @@ class CellphoneBindHandler(BaseHandler):
             unionid=self.current_user.sysuser.unionid,
             app_id=self.app_id
         )
-
         if response.status != const.API_SUCCESS:
             self.send_json_error(message=response.message)
             return
+
+        ret_user_id = response.data.id
+        if str(ret_user_id) != str(self.current_user.sysuser.id):
+            self.clear_cookie(name=const.COOKIE_SESSIONID)
+            self.send_json_success()
         else:
-            ret_user_id = response.data.id
-            if str(ret_user_id) != str(self.current_user.sysuser.id):
-                self.clear_cookie(name=const.COOKIE_SESSIONID)
+            yield self.user_ps.bind_mobile(self.current_user.sysuser.id,
+                                           self.params.mobile)
             self.send_json_success()
