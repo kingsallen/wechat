@@ -64,14 +64,14 @@ class CompanyHandler(BaseHandler):
         company_name = self.current_user.company.abbreviation or self.current_user.company.name
         if team_flag:
             self.params.share = ObjectDict({
-                "cover":       'https:' + self.static_url(self.current_user.company.logo),
+                "cover":       self.static_url(self.current_user.company.logo),
                 "title":       company_name + "的团队",
                 "description": "",
                 "link":        self.fullurl
             })
         else:
             self.params.share = ObjectDict({
-                "cover":       'https:' + self.static_url(self.current_user.company.logo),
+                "cover":       self.static_url(self.current_user.company.logo),
                 "title":       company_name + ", 我发现了一个好公司！",
                 "description": "",
                 "link":        self.fullurl
@@ -87,13 +87,13 @@ class CompanyTeamHandler(BaseHandler):
     def get(self, team_name):
         result = yield self.team_ps.get_more_team_info(team_name, params=self.params)
         # icon 为空，出来统一赋值
-        result.header.icon = 'https:' + self.static_url(self.current_user.company.logo)
+        result.header.icon = self.static_url(self.current_user.company.logo)
         # 蓝色模块，想要参观
         if result.relation.want_visit == const.NO:
             result.templates.append(ObjectDict({'type': 5, 'title': '', 'data': None}))
 
         self.params.share = ObjectDict({
-            "cover":       'https:' + self.static_url(self.current_user.company.logo),
+            "cover":       self.static_url(self.current_user.company.logo),
             "title":       team_name.upper() + "团队",
             "description": "",
             "link":        self.fullurl

@@ -67,13 +67,12 @@ def url_subtract_query(url, exclude):
     return ret[:-1] if ret[-1] == '?' else ret
 
 
-def make_static_url(path, include_host=None, **kwargs):
+def make_static_url(path, include_host='http'):
     if not path:
         return None
     if not path.startswith("http"):
-        if "mid_path" in kwargs:
-            path = os.path.join(kwargs['mid_path'], path)
         path = urllib.parse.urljoin(settings['static_domain'], path)
+
     if not path.startswith("http") and include_host is not None:
         path = include_host + ":" + path
     return path
