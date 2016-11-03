@@ -117,7 +117,8 @@ MEMBERS = [
     {
         'title': "潘老师",
         'longtext': "技术经理\n"
-                    "行胜于言，希望用技术的力量来提高用户的生活品质。",
+                    "行胜于言，希望用技术的力量来提高用户的生活品质。"
+                    "我们不断创新技术架构，助力打造一款更具竞争力的产品。",
         'media_url': '//v.qq.com/iframe/player.html?vid=e0340strm66&tiny=0&auto=0',
         'media_type': 'video',
         'member_list': []
@@ -160,19 +161,19 @@ data3 = [
 data4_1 = [
     {
         'title': '2015年',
-        'description': '获得2014全球创业周Recruit创业大赛冠军以及由国内顶尖人力资源权威媒体《人力资本管理》颁发的2014-2015大中华区人力资源服务创新大奖，以及由《互联网周刊》评选出的2015中国新互联网公司300强。',
+        'description': '2014全球创业周Recruit创业大赛冠军。',
         'media_url': 'https://cdn.moseeker.com/upload/company_profile/qx/ds1.jpeg',
         'media_type': 'image',
     },
     {
         'title': '2016年9月14日',
-        'description': '获选“2016-红鲱鱼Red Herring亚洲100 强”(Red Herring‘s Top 100 In Asia)最具潜力创业公司。',
+        'description': '获选“2016-红鲱鱼亚洲100 强”最具潜力创业公司。',
         'media_url': 'https://cdn.moseeker.com/upload/company_profile/qx/ds2.jpeg',
         'media_type': 'image',
     },
     {
         'title': '2016年10月',
-        'description': '荣获2016上海创新创业大赛企业优胜奖。仟寻招聘跻身中国创新创业大赛8强，获得国赛优秀企业称号。',
+        'description': '仟寻招聘跻身中国创新创业大赛8强，获得国赛优秀企业称号。',
         'media_url': 'https://cdn.moseeker.com/upload/company_profile/qx/ds3.jpeg',
         'media_type': 'image',
     }

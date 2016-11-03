@@ -141,7 +141,7 @@ class TeamPageService(PageService):
                                            '/qx/jianlong.jpeg',
                             "name":        'Jerome',
                             "title":       '开发工程师',
-                            "description": '地球人，住过加拿大、日本、中国。下班后我和女儿玩过家家。'
+                            "description": '住过加拿大、日本、中国。下班后我和女儿玩过家家。'
                                            '身为一个外国人丝毫没有感受到文化差异。',
                         },
                         {
@@ -149,15 +149,15 @@ class TeamPageService(PageService):
                                            '/qx/yiliang.jpeg',
                             "name":        '汤亦亮',
                             "title":       '开发工程师',
-                            "description": '手手艺人，文科好的理科生。虽然经常和同事们“吵架”，但丝毫影响'
-                                           '不了大家的感情，只会让我们更热爱工作。',
+                            "description": '手艺人，文科好的理科生。虽然经常和同事们“吵架”，但不影响'
+                                           '大家的感情，只会让我们更热爱工作。',
                         },
                         {
                             "icon":        'https://cdn.moseeker.com/upload/company_profile'
                                            '/qx/yixin.jpeg',
                             "name":        '潘煜昕',
                             "title":       '技术经理',
-                            "description": '行胜于言，希望用技术的力量来提高用户的生活品质。与同事亲密无间，'
+                            "description": '行胜于言，希望用技术的力量来提高用户的生活品质。'
                                            '希望打造一款更具竞争力的作品。',
                         },
                     ]
