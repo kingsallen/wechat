@@ -57,7 +57,7 @@ class TeamPageService(PageService):
         'sub_type':  0,
         'title':    '其他团队',
         'data':     []
-    }),
+    })
 
     @gen.coroutine
     def get_more_team_info(self, team_name, params):
