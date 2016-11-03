@@ -156,24 +156,7 @@ class TeamPageService(PageService):
             ObjectDict({
                 'type':  3,
                 'title': "团队在招职位",
-                'data':  [
-                    {
-                        "title":    '文案',
-                        "link":
-                            'https://platform.moseeker.com/m/position/131454'
-                            '?wechat_signature=NjYyM2M4ZDAzOTk5NThmNjlhMGI0OWM2ZTgwOTk1Njc2MTU0Y2ZhOQ==',
-                        "location": '上海',
-                        "salary":   '5k-8k'
-                    },
-                    {
-                        "title":    '大客户开拓（KA）',
-                        "link":
-                            'https://platform.moseeker.com/m/position/131453'
-                            '?wechat_signature=NjYyM2M4ZDAzOTk5NThmNjlhMGI0OWM2ZTgwOTk1Njc2MTU0Y2ZhOQ==',
-                        "location": '上海',
-                        "salary":   '5k-8k'
-                    }
-                ]
+                'data':  []
             })
         ]
 
@@ -403,6 +386,11 @@ class TeamPageService(PageService):
                         'member_list': []
                     },
                 ],
+            }),
+            ObjectDict({
+                'type': 3,
+                'title': "团队在招职位",
+                'data': []
             })
         ]
         if data.relation.want_visit == 0:

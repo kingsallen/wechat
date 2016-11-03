@@ -15,8 +15,6 @@ from util.tool.url_tool import make_url
 from util.tool.str_tool import gen_salary, add_item, split
 from util.wechat.template import position_view_five
 
-from tests.dev_data.user_company_data import TEAM_BD, data3, MEMBERS
-
 
 class PositionHandler(BaseHandler):
 
@@ -63,9 +61,9 @@ class PositionHandler(BaseHandler):
             module_feature = yield self._make_json_job_feature(position_info)
             module_company_info = yield self._make_json_job_company_info(company_info)
             module_position_recommend = yield self._make_recommend_positions(recomment_positions_res)
-            module_mate_day = yield self._make_mate_day()
-            module_team = yield self._make_team()
-            module_team_position = yield self._make_team_position()
+            module_mate_day = yield self._make_mate_day(position_info)
+            module_team = yield self._make_team(position_info)
+            module_team_position = yield self._make_team_position(position_info)
 
             position_data = ObjectDict()
             add_item(position_data, "header", header)
@@ -377,40 +375,69 @@ class PositionHandler(BaseHandler):
                                    position_info.salary)
 
     @gen.coroutine
-    def _make_team_position(self):
+    def _make_team_position(self, position_info):
         """团队职位，构造数据"""
 
-        res = ObjectDict({
-            "title": "我们团队还需要",
-            "data": data3
-        })
+        # 构造假数据
+        if not position_info.department:
+            res = None
+        else:
+            department = position_info.department.lower()
+            team = yield self.team_ps.get_more_team_info(department, params={
+                "user_id": 0,
+                "company_id": 0,
+            })
+
+            res = ObjectDict({
+                "title": "我们团队还需要",
+                "data": team.templates[3].data
+            })
 
         raise gen.Return(res)
 
     @gen.coroutine
-    def _make_mate_day(self):
+    def _make_mate_day(self, position_info):
         """同事的一天，构造数据"""
 
-        res = ObjectDict({
-            "title": "同事的一天",
-            "sub_type": "less",
-            "data": MEMBERS,
-        })
+        # 构造假数据
+        if not position_info.department:
+            res = None
+        else:
+            department = position_info.department.lower()
+            team = yield self.team_ps.get_more_team_info(department, params={
+                "user_id": 0,
+                "company_id": 0,
+            })
+
+            res = ObjectDict({
+                "title": "同事的一天",
+                "sub_type": "less",
+                "data": [team.templates[2].data[0]]
+            })
 
         raise gen.Return(res)
 
     @gen.coroutine
-    def _make_team(self):
+    def _make_team(self, position_info):
         """所属团队，构造数据"""
 
-        res = ObjectDict({
-            "title": "所属团队",
-            "sub_type": " full",
-            "data": TEAM_BD,
-        })
+        # 构造假数据
+        if not position_info.department:
+            res = None
+        else:
+            department = position_info.department.lower()
+            team = yield self.team_ps.get_more_team_info(department, params={
+                "user_id": 0,
+                "company_id": 0,
+            })
+
+            res = ObjectDict({
+                "title": "所属团队",
+                "sub_type": " full",
+                "data": team.templates[1].data,
+            })
 
         raise gen.Return(res)
-
 
 class PositionStarHandler(BaseHandler):
     """处理收藏（加星）操作"""
