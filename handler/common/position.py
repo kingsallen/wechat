@@ -390,7 +390,7 @@ class PositionHandler(BaseHandler):
 
             res = ObjectDict({
                 "title": "我们团队还需要",
-                "data": team.templates[3].data
+                "data": team.templates[2].data
             })
 
         raise gen.Return(res)
@@ -412,7 +412,7 @@ class PositionHandler(BaseHandler):
             res = ObjectDict({
                 "title": "同事的一天",
                 "sub_type": "less",
-                "data": [team.templates[2].data[0]]
+                "data": [team.templates[1].data[0]]
             })
 
         raise gen.Return(res)
@@ -434,7 +434,7 @@ class PositionHandler(BaseHandler):
             res = ObjectDict({
                 "title": "所属团队",
                 "sub_type": " full",
-                "data": team.templates[1].data,
+                "data": team.templates[0].data,
             })
 
         raise gen.Return(res)
