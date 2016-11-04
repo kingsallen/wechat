@@ -36,7 +36,7 @@ class UserCompanyPageService(PageService):
         if not team_flag:
             header = ObjectDict({
                 'type':        'company',
-                'name':        company.name,
+                'name':        company.abbreviation or company.name,
                 'description': "你的职场向导",
                 'icon':        make_static_url(company.logo),
                 'banner':

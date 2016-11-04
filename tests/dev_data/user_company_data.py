@@ -107,7 +107,7 @@ data1 = [
 data2 = [
     {
         'title': '王向导',
-        'description': '两年前，我成立了 MoSeeker。我的梦想是，将 MoSeeker 打造成全球顶尖的优秀企业，帮每个人找到喜欢的工作。我的梦想是，将 MoSeeker 打造成全球顶尖的优秀企业，帮每个人找到喜欢的工作。',
+        'description': '两年前，我成立了 MoSeeker。我的梦想是，将 MoSeeker 打造成全球顶尖的优秀企业，帮每个人找到喜欢的工作。',
         'media_url': 'http://o8g4x4uja.bkt.clouddn.com/We_Chat_1467010816.png',
         'media_type': 'image'
     }
