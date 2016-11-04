@@ -215,7 +215,7 @@ class TeamPageService(PageService):
                         {
                             "icon":        'https://cdn.moseeker.com/upload/company_profile'
                                            '/qx/jianlong.jpeg',
-                            "name":        'Jerome',
+                            "name":        'Jerome Beaulieu',
                             "title":       '开发工程师',
                             "description": '住过加拿大、日本、中国。下班后我和女儿玩过家家。'
                                            '身为一个外国人丝毫没有感受到文化差异。',
@@ -245,7 +245,7 @@ class TeamPageService(PageService):
                 'title': '成员采访',
                 'data': [
                     {
-                        'title': 'Jerome',
+                        'title': 'Jerome Beaulieu',
                         'longtext': '开发工程师\n',
                         'media_url': '//v.qq.com/iframe/player.html?vid=n03403gqycy&tiny=0&auto=0',
                         'media_type': 'video',

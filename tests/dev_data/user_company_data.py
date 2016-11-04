@@ -218,7 +218,7 @@ TEAM_RD = [{
         {
             "icon":        'https://cdn.moseeker.com/upload/company_profile'
                            '/qx/jianlong.jpeg',
-            "name":        'Jerome',
+            "name":        'Jerome Beaulieu',
             "title":       '开发工程师',
             "description": '地球民 住过在加拿大，日本，中国。我是工程师，说得具体我整天按键。'
                            '下班后我和女儿玩过家家。',
