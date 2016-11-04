@@ -1,21 +1,47 @@
 # -*- coding=utf-8 -*-
-# Copyright 2016 MoSeeker
-
-"""
-:author 马超（machao@moseeker.com）
-:date 2016.10.20
-
-"""
 
 from tornado import gen
+
+import conf.common as const
 from handler.base import BaseHandler
-import conf.message as mes_const
+from util.common import ObjectDict
 
 
 class UserCurrentInfoHandler(BaseHandler):
 
     @gen.coroutine
+    def get(self):
+        """返回用户填写的现在公司和现在职位接口
+
+        full 参数用以判断只要返回 bool 就好了还是需要详细的数据
+        """
+        try:
+            self.guarantee("full")
+        except:
+            return
+
+        full = const.YES if self.params.full else const.NO
+        result = yield self.userps.get_user_user_id(
+            self.current_user.sysuser.id)
+
+        if result:
+            if full:
+                self.send_json_success(data=ObjectDict(
+                    name=result.name,
+                    company=result.company,
+                    position=result.position
+                ))
+            else:
+                has_info = result.company or result.position
+                self.send_json_success(
+                    data=const.YES if has_info else const.NO)
+        else:
+            self.send_json_success(data=const.NO)
+
+    @gen.coroutine
     def post(self):
+        """更新用户现在公司和现在职位接口
+        """
         try:
             self.guarantee('name', 'company', 'position')
         except:

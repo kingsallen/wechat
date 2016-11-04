@@ -33,10 +33,7 @@ common_routes = [
     (r"/m/app/.*",                         "handler.common.app.IndexHandler",                           {"event": "app_index"}),
     (r"/m/api/position/star",              "handler.common.position.PositionStarHandler",               {"event": "position_star"}),
     (r"/m/api/chat/unread[\/]*([0-9]+)*",  "handler.common.im.UnreadCountHandler",                      {"event": "chat_unread"}),
-    (r"/m/api/mobilebinded",               "handler.common.user.UserMobileBindedHandler",               {"event": "user_usermobilebinded"}),
-
-    # Testing url, delete when releasing
-    (r"/m/test",                           "tests.dao.user.TestCompanyVisitReqHandler",                 {"event": "test_test"})
+    (r"/m/api/mobilebinded",               "handler.common.user.UserMobileBindedHandler",               {"event": "user_usermobilebinded"})
 ]
 
 # 企业号的单独 routes
