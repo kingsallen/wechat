@@ -15,12 +15,8 @@ class UserCurrentInfoHandler(BaseHandler):
 
         full 参数用以判断只要返回 bool 就好了还是需要详细的数据
         """
-        try:
-            self.guarantee("full")
-        except:
-            return
 
-        full = const.YES if self.params.full else const.NO
+        full = const.YES if int(self.params.full) else const.NO
         result = yield self.userps.get_user_user_id(
             self.current_user.sysuser.id)
 
