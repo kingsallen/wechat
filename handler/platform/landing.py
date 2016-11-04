@@ -41,9 +41,9 @@ class LandingHandler(BaseHandler):
         search_seq = yield self.landing_ps.get_landing_item(self.current_user.company, company_id, selected)
 
         company = ObjectDict({
-            "logo": self.current_user.company.get("logo"),
+            "logo": self.static_url(self.current_user.company.get("logo")),
             "name": self.current_user.company.get("abbreviation"),
-            "image": self.current_user.company.get("conf_search_img"),
+            "image": self.static_url(self.current_user.company.get("conf_search_img")),
             "search_seq": search_seq
         })
 
