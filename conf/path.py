@@ -18,3 +18,5 @@ APPLICATION_APPLY_COUNT = "application/count/check"
 
 ## 职位服务
 POSITION_RECOMMEND = "positions/recommended"
+
+COMPANY_TEAM = "/m/company/team"

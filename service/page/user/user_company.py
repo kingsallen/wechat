@@ -14,6 +14,7 @@ from tests.dev_data.user_company_data import WORKING_ENV, TEAMS, MEMBERS, \
     data2, TEAM_EB, TEAM_BD, TEAM_CS, TEAM_RD, data4_1, data50
 from util.common import ObjectDict
 from util.tool.url_tool import make_url, make_static_url
+import conf.path as path
 
 
 class UserCompanyPageService(PageService):
@@ -93,7 +94,7 @@ class UserCompanyPageService(PageService):
                 'sub_type':  'less',
                 'title':     '我们的团队',
                 'data':      TEAMS,
-                'more_link': ''
+                'more_link': make_url(path.COMPANY_TEAM, hander_params)
             }),
             ObjectDict({
                 'type':      1,
