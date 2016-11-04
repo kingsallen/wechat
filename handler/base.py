@@ -176,7 +176,8 @@ class BaseHandler(MetaBaseHandler):
 
         if self.in_wechat:
             # 用户同意授权
-            if code:
+            if code and self._verify_code(code):
+
                 # 来自 qx 的授权, 获得 userinfo
                 if state == wx_const.WX_OAUTH_DEFAULT_STATE:
                     self.logger.debug("来自 qx 的授权, 获得 userinfo")
@@ -189,18 +190,13 @@ class BaseHandler(MetaBaseHandler):
                 else:
                     self.logger.debug("来自企业号的静默授权")
                     self._unionid = from_hex(state)
-                    try:
-                        openid = yield self._get_user_openid(code)
-                    except WeChatOauthError as e:
-                        # 获取 state 和 code 以后，
-                        # 如果用户再次刷新该页面，就会发生 invalid code 问题，
-                        # 忽略
-                        if 'invalid code' in str(e):
-                            self.lgger.debug("用户刷新授权跳转页，忽略 invalid code 错误")
-                            pass
-                    else:
-                        self._wxuser = yield self._handle_ent_openid(
-                            openid, self._unionid)
+                    openid = yield self._get_user_openid(code)
+                    self._wxuser = yield self._handle_ent_openid(
+                        openid, self._unionid)
+
+                # 保存 code 进 cookie
+                self.set_secure_code(
+                    const.COOKIE_CODE, to_str(code), expires_days=1)
 
             elif state:  # 用户拒绝授权
                 # TODO 拒绝授权用户，是否让其继续操作? or return
@@ -325,6 +321,13 @@ class BaseHandler(MetaBaseHandler):
             raise AttributeError(str(e) + " 缺失")
 
         self.params.update(self.json_args)
+
+    def _verify_code(self, code):
+        """检查 code 是不是之前使用过的"""
+        old = self.get_secure_cookie(const.COOKIE_CODE)
+        if not old:
+            return True
+        return str(old) != str(code)
 
     @gen.coroutine
     def _get_current_wechat(self, qx=False):
