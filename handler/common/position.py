@@ -233,7 +233,8 @@ class PositionHandler(BaseHandler):
             "appid": application.id,
             "endorse": endorse,
             "can_apply": not can_apply,
-            "forword_message": company_info.conf_forward_message or msg.POSITION_FORWARD_MESSAGE
+            "forword_message": company_info.conf_forward_message or msg.POSITION_FORWARD_MESSAGE,
+            "team": position_info.department.lower() if position_info.department else ""
         })
 
         raise gen.Return(data)
@@ -438,6 +439,7 @@ class PositionHandler(BaseHandler):
             })
 
         raise gen.Return(res)
+
 
 class PositionStarHandler(BaseHandler):
     """处理收藏（加星）操作"""
