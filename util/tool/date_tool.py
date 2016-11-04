@@ -6,7 +6,7 @@
 时间工具类
 """
 
-from datetime import datetime
+from datetime import datetime, date
 
 import conf.common as constant
 
@@ -63,19 +63,32 @@ def jd_update_date(update_time):
     update_date = constant.JD_TIME_FORMAT_DEFAULT
     try:
         if update_time:
-            pass_day = datetime.now() - update_time
+            today = date.today()
+            datetime_today = datetime(today.year, today.month, today.day, 0,0,0,0)
+            datetime_now = datetime.now()
 
-            if pass_day.days == 0 and pass_day.seconds <= 3600:
+            delta = datetime_now - update_time
+            delta_to_today = datetime_now - datetime_today
+
+            if delta.days == 0 and delta.seconds <= 3600:
                 # 刚刚（即一个小时内）
                 update_date = constant.JD_TIME_FORMAT_JUST_NOW
-            elif pass_day.days == 0:
-                # 今天 12：00
-                update_date = constant.JD_TIME_FORMAT_TODAY.format(
-                    update_time.hour, update_time.minute)
-            elif pass_day.days == 1:
-                # 昨天 12：00
-                update_date = constant.JD_TIME_FORMAT_YESTERDAY.format(
-                    update_time.hour, update_time.minute)
+
+            elif delta.days == 0:
+                if delta.seconds < delta_to_today.seconds:
+                    # 今天 12：00
+                    update_date = constant.JD_TIME_FORMAT_TODAY.format(
+                        update_time.hour, update_time.minute)
+                else:
+                    # 昨天 12：00
+                    update_date = constant.JD_TIME_FORMAT_YESTERDAY.format(
+                        update_time.hour, update_time.minute)
+
+            elif delta.days == 1 and delta.seconds > delta_to_today.seconds:
+                    #todo 考虑 跨月的情况， 不行的话可以考虑用 dateutil 包
+                    # 昨天 12：00
+                    update_date = constant.JD_TIME_FORMAT_YESTERDAY.format(
+                        update_time.hour, update_time.minute)
             else:
                 # 2016-11-23
                 update_date = constant.JD_TIME_FORMAT_FULL.format(
