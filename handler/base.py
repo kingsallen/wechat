@@ -195,7 +195,7 @@ class BaseHandler(MetaBaseHandler):
                         openid, self._unionid)
 
                 # 保存 code 进 cookie
-                self.set_secure_code(
+                self.set_secure_cookie(
                     const.COOKIE_CODE, to_str(code), expires_days=1)
 
             elif state:  # 用户拒绝授权
