@@ -209,6 +209,16 @@ class BaseHandler(MetaBaseHandler):
         :return:
         """
 
+    def get_template_namespace(self):
+        namespace = super().get_template_namespace()
+        add_namespace = ObjectDict(
+            env="platform",
+            params=self.params,
+            current_user=self.current_user,
+            settings=self.settings)
+        namespace.update(add_namespace)
+        return namespace
+
     # def on_finish(self):
     #     info = ObjectDict(
     #         handler=__name__ + '.' + self.__class__.__name__,
