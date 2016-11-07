@@ -421,6 +421,10 @@ class BaseHandler(MetaBaseHandler):
 
             need_oauth = not ok
 
+        # 只有认证的服务号，才需要静默授权
+        elif self._wechat != wx_const.WECHAT_TYPE_SERVICE:
+            need_oauth = False
+
         else:
             need_oauth = True
 
