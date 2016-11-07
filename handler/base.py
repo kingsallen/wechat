@@ -449,6 +449,8 @@ class BaseHandler(MetaBaseHandler):
         self.logger.debug("_unionid: %s" % self._unionid)
         self.logger.debug("_wxuser: %s" % self._wxuser)
         self.logger.debug("_wxuser: %s" % type(self._wxuser))
+        self.logger.debug("jdjdjd: %s" % self._wechat.type != wx_const.WECHAT_TYPE_SERVICE)
+        self.logger.debug("232323: %s" % (self._unionid and self._wxuser))
 
         if need_oauth and self.in_wechat:
             self.logger.debug("123")
