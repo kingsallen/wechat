@@ -189,18 +189,18 @@ class BaseHandler(web.RequestHandler):
         :return:
         """
 
-    def on_finish(self):
-        info = ObjectDict(
-            handler=__name__ + '.' + self.__class__.__name__,
-            module=self.__class__.__module__.split(".")[1],
-            status_code=self.get_status()
-        )
-
-        if self.log_info:
-            info.update(self.log_info)
-
-        self.logger.record(
-            ujson.dumps(self._get_info_header(info), ensure_ascii=0))
+    # def on_finish(self):
+    #     info = ObjectDict(
+    #         handler=__name__ + '.' + self.__class__.__name__,
+    #         module=self.__class__.__module__.split(".")[1],
+    #         status_code=self.get_status()
+    #     )
+    #
+    #     if self.log_info:
+    #         info.update(self.log_info)
+    #
+    #     self.logger.record(
+    #         ujson.dumps(self._get_info_header(info), ensure_ascii=0))
 
     def write_error(self, status_code, **kwargs):
 
