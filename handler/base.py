@@ -190,12 +190,12 @@ class BaseHandler(MetaBaseHandler):
                 else:
                     self.logger.debug("来自企业号的静默授权")
                     self._unionid = from_hex(state)
-                    if self._wechat.type != wx_const.WECHAT_TYPE_SERVICE:
-                        self._wxuser = ObjectDict()
-                    else:
-                        openid = yield self._get_user_openid(code)
-                        self._wxuser = yield self._handle_ent_openid(
-                            openid, self._unionid)
+                    # if self._wechat.type != wx_const.WECHAT_TYPE_SERVICE:
+                    #     self._wxuser = ObjectDict()
+                    # else:
+                    openid = yield self._get_user_openid(code)
+                    self._wxuser = yield self._handle_ent_openid(
+                        openid, self._unionid)
 
                 # 保存 code 进 cookie
                 self.set_secure_cookie(
@@ -261,12 +261,13 @@ class BaseHandler(MetaBaseHandler):
 
         # 只有认证的服务号，才具有网页授权获取用户openid/用户基本信息的权限
         # referer: https://mp.weixin.qq.com/wiki/7/2d301d4b757dedc333b9a9854b457b47.html
-        if self.is_platform and self._wechat.type == wx_const.WECHAT_TYPE_SERVICE:
+        if self.is_platform:
         # if self.is_platform:
             self.logger.debug("888888888")
             self._oauth_service.wechat = self._wechat
             self._oauth_service.state = to_hex(unionid)
             url = self._oauth_service.get_oauth_code_base_url()
+            self.logger.debug("url: %s" % url)
             self.redirect(url)
 
     @gen.coroutine
@@ -449,6 +450,7 @@ class BaseHandler(MetaBaseHandler):
                 self.logger.debug("345")
                 self._oauth_service.wechat = self._qx_wechat
                 url = self._oauth_service.get_oauth_code_userinfo_url()
+                self.logger.debug("url: %s" % url)
                 self.redirect(url)
                 return
 
