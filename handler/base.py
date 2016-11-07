@@ -202,6 +202,8 @@ class BaseHandler(MetaBaseHandler):
                 # TODO 拒绝授权用户，是否让其继续操作? or return
                 pass
 
+        self.logger.debug("hehehehehhehehe")
+
         # 构造并拼装 session
         yield self._fetch_session()
 
@@ -251,9 +253,13 @@ class BaseHandler(MetaBaseHandler):
         # 创建 qx 的 user_wx_user
         yield self.user_ps.create_qx_wxuser_by_userinfo(userinfo, user_id)
 
+        self.logger.debug("77777777")
+        self.logger.debug("platform wechat: %s" % self._wechat)
+
         # 只有认证的服务号，才具有网页授权获取用户openid/用户基本信息的权限
         # referer: https://mp.weixin.qq.com/wiki/7/2d301d4b757dedc333b9a9854b457b47.html
         if self.is_platform and self._wechat.type == wx_const.WECHAT_TYPE_SERVICE:
+            self.logger.debug("888888888")
             self._oauth_service.wechat = self._wechat
             self._oauth_service.state = to_hex(unionid)
             url = self._oauth_service.get_oauth_code_base_url()
@@ -428,10 +434,15 @@ class BaseHandler(MetaBaseHandler):
         else:
             need_oauth = True
 
+        self.logger.debug("need_oauth: %s" % need_oauth)
+
         if need_oauth and self.in_wechat:
+            self.logger.debug("123")
             if self._unionid and self._wxuser:
+                self.logger.debug("234")
                 yield self._build_session()
             else:
+                self.logger.debug("345")
                 self._oauth_service.wechat = self._qx_wechat
                 url = self._oauth_service.get_oauth_code_userinfo_url()
                 self.redirect(url)
