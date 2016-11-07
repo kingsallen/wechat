@@ -447,7 +447,7 @@ class BaseHandler(MetaBaseHandler):
 
         if need_oauth and self.in_wechat:
             self.logger.debug("123")
-            if self._wechat == wx_const.WECHAT_TYPE_SERVICE or (self._unionid and self._wxuser):
+            if self._wechat != wx_const.WECHAT_TYPE_SERVICE or (self._unionid and self._wxuser):
                 self.logger.debug("234")
                 yield self._build_session()
             else:
