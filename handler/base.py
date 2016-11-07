@@ -190,12 +190,12 @@ class BaseHandler(MetaBaseHandler):
                 else:
                     self.logger.debug("来自企业号的静默授权")
                     self._unionid = from_hex(state)
-                    # if self._wechat.type != wx_const.WECHAT_TYPE_SERVICE:
-                    #     self._wxuser = ObjectDict()
-                    # else:
-                    openid = yield self._get_user_openid(code)
-                    self._wxuser = yield self._handle_ent_openid(
-                        openid, self._unionid)
+                    if self._wechat.type != wx_const.WECHAT_TYPE_SERVICE:
+                        self._wxuser = ObjectDict()
+                    else:
+                        openid = yield self._get_user_openid(code)
+                        self._wxuser = yield self._handle_ent_openid(
+                            openid, self._unionid)
 
                 # 保存 code 进 cookie
                 self.set_secure_cookie(
@@ -264,8 +264,10 @@ class BaseHandler(MetaBaseHandler):
         if self.is_platform:
             if self._wechat != wx_const.WECHAT_TYPE_SERVICE:
                 self.logger.debug("dkdkdkdkdkdkdk")
-                self.logger.debug("fullurl: %s" % self.fullurl)
-                self.redirect(self.fullurl)
+                fullurl = self.fullurl + "&state=" + to_hex(unionid)
+                self.logger.debug("fullurl: %s" % fullurl)
+
+                self.redirect(fullurl)
             else:
                 self.logger.debug("888888888")
                 self._oauth_service.wechat = self._wechat
@@ -447,7 +449,7 @@ class BaseHandler(MetaBaseHandler):
 
         if need_oauth and self.in_wechat:
             self.logger.debug("123")
-            if self._wechat != wx_const.WECHAT_TYPE_SERVICE or (self._unionid and self._wxuser):
+            if self._unionid and self._wxuser:
                 self.logger.debug("234")
                 yield self._build_session()
             else:
