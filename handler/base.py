@@ -262,13 +262,17 @@ class BaseHandler(MetaBaseHandler):
         # 只有认证的服务号，才具有网页授权获取用户openid/用户基本信息的权限
         # referer: https://mp.weixin.qq.com/wiki/7/2d301d4b757dedc333b9a9854b457b47.html
         if self.is_platform:
-        # if self.is_platform:
-            self.logger.debug("888888888")
-            self._oauth_service.wechat = self._wechat
-            self._oauth_service.state = to_hex(unionid)
-            url = self._oauth_service.get_oauth_code_base_url()
-            self.logger.debug("url: %s" % url)
-            self.redirect(url)
+            if self._wechat == wx_const.WECHAT_TYPE_SERVICE:
+                self.logger.debug("dkdkdkdkdkdkdk")
+                self.logger.debug("fullurl: %s" % self.fullurl)
+                self.redirect(self.fullurl)
+            else:
+                self.logger.debug("888888888")
+                self._oauth_service.wechat = self._wechat
+                self._oauth_service.state = to_hex(unionid)
+                url = self._oauth_service.get_oauth_code_base_url()
+                self.logger.debug("url: %s" % url)
+                self.redirect(url)
 
     @gen.coroutine
     def _handle_ent_openid(self, openid, unionid):
@@ -443,7 +447,7 @@ class BaseHandler(MetaBaseHandler):
 
         if need_oauth and self.in_wechat:
             self.logger.debug("123")
-            if self._unionid and self._wxuser:
+            if self._wechat == wx_const.WECHAT_TYPE_SERVICE or (self._unionid and self._wxuser):
                 self.logger.debug("234")
                 yield self._build_session()
             else:
