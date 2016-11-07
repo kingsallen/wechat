@@ -16,6 +16,7 @@ import conf.platform as plat_constant
 import conf.qx as qx_constant
 import conf.help as help_constant
 from util.tool.url_tool import make_static_url
+from util.tool.str_tool import to_str
 
 class BaseHandler(web.RequestHandler):
 
@@ -23,7 +24,7 @@ class BaseHandler(web.RequestHandler):
     def __init__(self, application, request, **kwargs):
         super(BaseHandler, self).__init__(application, request, **kwargs)
         self.json_args = None
-        self.params = None
+        self.params = self._get_params()
         self._log_info = None
         self.start_time = time.time()
 
@@ -79,6 +80,16 @@ class BaseHandler(web.RequestHandler):
                 self.json_args = ujson.loads(self.request.body)
         except Exception as e:
             self.logger.error(e)
+
+    # noinspection PyTypeChecker
+    def _get_params(self):
+        """To get all GET or POST arguments from http request
+        """
+        params = ObjectDict(self.request.arguments)
+        for key in params:
+            if isinstance(params[key], list) and params[key]:
+                params[to_str(key)] = to_str(params[key][0])
+        return params
 
     def guarantee(self, fields_mapping, *args):
         self.params = {}
