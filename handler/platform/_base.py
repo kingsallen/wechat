@@ -91,18 +91,18 @@ class BaseHandler(web.RequestHandler):
                 params[to_str(key)] = to_str(params[key][0])
         return params
 
-    def guarantee(self, fields_mapping, *args):
-        self.params = {}
-        for arg in args:
-            try:
-                self.params[arg] = self.json_args[arg]
-                self.json_args.pop(arg)
-            except KeyError:
-                ret_field = fields_mapping.get(arg, arg)
-                raise AttributeError(u"{0}不能为空".format(ret_field))
-            self.params.update(self.json_args)
-
-        return self.params
+    # def guarantee(self, fields_mapping, *args):
+    #     self.params = {}
+    #     for arg in args:
+    #         try:
+    #             self.params[arg] = self.json_args[arg]
+    #             self.json_args.pop(arg)
+    #         except KeyError:
+    #             ret_field = fields_mapping.get(arg, arg)
+    #             raise AttributeError(u"{0}不能为空".format(ret_field))
+    #         self.params.update(self.json_args)
+    #
+    #     return self.params
 
     @gen.coroutine
     def _get_current_wechat(self):
@@ -239,7 +239,7 @@ class BaseHandler(web.RequestHandler):
         #                 title=status_code)
 
     def render(self, template_name, status_code=200, **kwargs):
-        self.log_info = {"res_type": "html"}
+        # self.log_info = {"res_type": "html"}
         self.set_status(status_code)
         super(BaseHandler, self).render(template_name, **kwargs)
         return
@@ -256,27 +256,27 @@ class BaseHandler(web.RequestHandler):
         """获取 static_url"""
         return make_static_url(path, protocol)
 
-    def _get_info_header(self, log_params):
-        request = self.request
-        req_params = request.arguments
-
-        if req_params and req_params.get('password', 0) != 0:
-            req_params['password'] = 'xxxxxx'
-
-        log_info_common = ObjectDict(
-            elapsed_time="%.4f" % (time.time() - self.start_time),
-            useragent=request.headers.get('User-Agent'),
-            referer=request.headers.get('Referer'),
-            remote_ip=(
-                request.headers.get('Remoteip') or
-                request.headers.get('X-Forwarded-For') or
-                request.remote_ip
-            ),
-            req_type=request.method,
-            req_uri=request.uri,
-            req_params=req_params,
-            session_id=self.get_secure_cookie('session_id'),
-        )
-
-        log_params.update(log_info_common)
-        return ujson.encode(log_params)
+    # def _get_info_header(self, log_params):
+    #     request = self.request
+    #     req_params = request.arguments
+    #
+    #     if req_params and req_params.get('password', 0) != 0:
+    #         req_params['password'] = 'xxxxxx'
+    #
+    #     log_info_common = ObjectDict(
+    #         elapsed_time="%.4f" % (time.time() - self.start_time),
+    #         useragent=request.headers.get('User-Agent'),
+    #         referer=request.headers.get('Referer'),
+    #         remote_ip=(
+    #             request.headers.get('Remoteip') or
+    #             request.headers.get('X-Forwarded-For') or
+    #             request.remote_ip
+    #         ),
+    #         req_type=request.method,
+    #         req_uri=request.uri,
+    #         req_params=req_params,
+    #         session_id=self.get_secure_cookie('session_id'),
+    #     )
+    #
+    #     log_params.update(log_info_common)
+    #     return ujson.encode(log_params)
