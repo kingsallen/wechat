@@ -4,8 +4,11 @@
 
 # 临时饭饭
 
-import ujson
+import os
+import re
+import glob
 import importlib
+import ujson
 import time
 from tornado import gen, web
 from tornado.util import ObjectDict
@@ -18,7 +21,24 @@ import conf.help as help_constant
 from util.tool.url_tool import make_static_url
 from util.tool.str_tool import to_str
 
-class BaseHandler(web.RequestHandler):
+# 动态加载所有 PageService
+obDict = {}
+d = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)) + \
+    "/service/page/**/*.py"
+for module in filter(lambda x: not x.endswith("init__.py"), glob.glob(d)):
+    p = module.split("/")[-2]
+    m = module.split("/")[-1].split(".")[0]
+    m_list = [item.title() for item in re.split("_", m)]
+    pmPS = "".join(m_list) + "PageService"
+    pmObj = m + "_ps"
+    obDict.update({
+        pmObj: getattr(importlib.import_module(
+            'service.page.{0}.{1}'.format(p, m)), pmPS)(logger)
+    })
+
+MetaBaseHandler = type("MetaBaseHandler", (web.RequestHandler,), obDict)
+
+class BaseHandler(MetaBaseHandler):
 
     # Initialization and properties
     def __init__(self, application, request, **kwargs):
@@ -27,17 +47,6 @@ class BaseHandler(web.RequestHandler):
         self.params = self._get_params()
         self._log_info = None
         self.start_time = time.time()
-
-        self.company_ps = getattr(importlib.import_module('service.page.{0}.{1}'.format('hr', 'company')),
-                                  'CompanyPageService')(logger)
-        self.wechat_ps = getattr(importlib.import_module('service.page.{0}.{1}'.format('hr', 'wechat')),
-                                 'WechatPageService')(logger)
-        self.position_ps = getattr(importlib.import_module('service.page.{0}.{1}'.format('job', 'position')),
-                                   'PositionPageService')(logger)
-        self.job_custom_ps = getattr(importlib.import_module('service.page.{0}.{1}'.format('job', 'job_custom')),
-                                   'JobCustomPageService')(logger)
-        self.landing_ps = getattr(importlib.import_module('service.page.{0}.{1}'.format('job', 'landing')),
-                                   'LandingPageService')(logger)
 
     @property
     def logger(self):
