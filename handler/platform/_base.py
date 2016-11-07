@@ -9,6 +9,7 @@ import importlib
 import time
 from tornado import gen, web
 from tornado.util import ObjectDict
+from app import logger
 
 import conf.common as constant
 import conf.platform as plat_constant
@@ -27,15 +28,15 @@ class BaseHandler(web.RequestHandler):
         self.start_time = time.time()
 
         self.company_ps = getattr(importlib.import_module('service.page.{0}.{1}'.format('hr', 'company')),
-                                  'CompanyPageService')()
+                                  'CompanyPageService')(logger)
         self.wechat_ps = getattr(importlib.import_module('service.page.{0}.{1}'.format('hr', 'wechat')),
-                                 'WechatPageService')()
+                                 'WechatPageService')(logger)
         self.position_ps = getattr(importlib.import_module('service.page.{0}.{1}'.format('job', 'position')),
-                                   'PositionPageService')()
+                                   'PositionPageService')(logger)
         self.job_custom_ps = getattr(importlib.import_module('service.page.{0}.{1}'.format('job', 'job_custom')),
-                                   'JobCustomPageService')()
+                                   'JobCustomPageService')(logger)
         self.landing_ps = getattr(importlib.import_module('service.page.{0}.{1}'.format('job', 'landing')),
-                                   'LandingPageService')()
+                                   'LandingPageService')(logger)
 
     @property
     def logger(self):

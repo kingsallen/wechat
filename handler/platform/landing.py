@@ -14,7 +14,7 @@ class LandingHandler(BaseHandler):
     """
     企业搜索页
     """
-    
+
     def initialize(self, event):
         # 日志需要，由 route 定义
         self._event = event
