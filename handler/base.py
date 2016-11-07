@@ -262,7 +262,7 @@ class BaseHandler(MetaBaseHandler):
         # 只有认证的服务号，才具有网页授权获取用户openid/用户基本信息的权限
         # referer: https://mp.weixin.qq.com/wiki/7/2d301d4b757dedc333b9a9854b457b47.html
         if self.is_platform:
-            if self._wechat == wx_const.WECHAT_TYPE_SERVICE:
+            if self._wechat != wx_const.WECHAT_TYPE_SERVICE:
                 self.logger.debug("dkdkdkdkdkdkdk")
                 self.logger.debug("fullurl: %s" % self.fullurl)
                 self.redirect(self.fullurl)
