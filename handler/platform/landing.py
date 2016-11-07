@@ -4,8 +4,9 @@
 
 from util.common import ObjectDict
 from tornado import gen
-from handler.base import BaseHandler
-from util.common.decorator import handle_response
+# from handler.base import BaseHandler
+from util.common.decorator import handle_response, url_valid
+from handler.platform._base import BaseHandler
 
 
 class LandingHandler(BaseHandler):
@@ -14,6 +15,7 @@ class LandingHandler(BaseHandler):
     企业搜索页
     """
 
+    @url_valid
     @handle_response
     @gen.coroutine
     def get(self):

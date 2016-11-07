@@ -20,7 +20,7 @@ from app import logger
 from oauth.wechat import WeChatOauth2Service, WeChatOauthError, JsApi
 from util.common import ObjectDict
 from util.common.decorator import check_signature, check_outside_wechat
-from util.tool.date_tool import curr_now, curr_now_pure
+from util.tool.date_tool import curr_now
 from util.tool.json_tool import encode_json_dumps, json_dumps
 from util.tool.str_tool import to_str, to_hex, from_hex
 from util.tool.url_tool import url_subtract_query, make_static_url
@@ -190,12 +190,9 @@ class BaseHandler(MetaBaseHandler):
                 else:
                     self.logger.debug("来自企业号的静默授权")
                     self._unionid = from_hex(state)
-                    if self._wechat.type != wx_const.WECHAT_TYPE_SERVICE:
-                        self._wxuser = ObjectDict()
-                    else:
-                        openid = yield self._get_user_openid(code)
-                        self._wxuser = yield self._handle_ent_openid(
-                            openid, self._unionid)
+                    openid = yield self._get_user_openid(code)
+                    self._wxuser = yield self._handle_ent_openid(
+                        openid, self._unionid)
 
                 # 保存 code 进 cookie
                 self.set_secure_cookie(
@@ -204,8 +201,6 @@ class BaseHandler(MetaBaseHandler):
             elif state:  # 用户拒绝授权
                 # TODO 拒绝授权用户，是否让其继续操作? or return
                 pass
-
-        self.logger.debug("hehehehehhehehe")
 
         # 构造并拼装 session
         yield self._fetch_session()
@@ -256,24 +251,11 @@ class BaseHandler(MetaBaseHandler):
         # 创建 qx 的 user_wx_user
         yield self.user_ps.create_qx_wxuser_by_userinfo(userinfo, user_id)
 
-        self.logger.debug("77777777")
-        self.logger.debug("platform wechat: %s" % self._wechat)
-
-        # 只有认证的服务号，才具有网页授权获取用户openid/用户基本信息的权限
-        # referer: https://mp.weixin.qq.com/wiki/7/2d301d4b757dedc333b9a9854b457b47.html
         if self.is_platform:
-            if self._wechat.type != wx_const.WECHAT_TYPE_SERVICE:
-                self.logger.debug("dkdkdkdkdkdkdk")
-                fullurl = self.fullurl + "&state=" + to_hex(unionid) + "&code=" + curr_now_pure()
-                self.logger.debug("fullurl: %s" % fullurl)
-                self.redirect(fullurl)
-            else:
-                self.logger.debug("888888888")
-                self._oauth_service.wechat = self._wechat
-                self._oauth_service.state = to_hex(unionid)
-                url = self._oauth_service.get_oauth_code_base_url()
-                self.logger.debug("url: %s" % url)
-                self.redirect(url)
+            self._oauth_service.wechat = self._wechat
+            self._oauth_service.state = to_hex(unionid)
+            url = self._oauth_service.get_oauth_code_base_url()
+            self.redirect(url)
 
     @gen.coroutine
     def _handle_ent_openid(self, openid, unionid):
@@ -401,7 +383,7 @@ class BaseHandler(MetaBaseHandler):
             userinfo = yield self._oauth_service.get_userinfo_by_code(code)
             raise gen.Return(userinfo)
         except WeChatOauthError as e:
-            self.logger.error("_get_user_info: {}".format(e))
+            self.logger.error(e)
 
     @gen.coroutine
     def _get_user_openid(self, code):
@@ -411,7 +393,7 @@ class BaseHandler(MetaBaseHandler):
                 code)
             raise gen.Return(openid)
         except WeChatOauthError as e:
-            self.logger.error("_get_user_openid: {}".format(e))
+            self.logger.error(e)
 
     @gen.coroutine
     def _fetch_session(self):
@@ -437,31 +419,15 @@ class BaseHandler(MetaBaseHandler):
 
             need_oauth = not ok
 
-        # # 只有认证的服务号，才需要静默授权
-        # elif self._wechat != wx_const.WECHAT_TYPE_SERVICE:
-        #     need_oauth = False
-
         else:
             need_oauth = True
 
-        self.logger.debug("need_oauth: %s" % need_oauth)
-        self.logger.debug("tpye: %s" % self._wechat.type)
-        self.logger.debug("_unionid: %s" % self._unionid)
-        self.logger.debug("_wxuser: %s" % self._wxuser)
-        self.logger.debug("_wxuser: %s" % type(self._wxuser))
-        self.logger.debug("jdjdjd: %s" % self._wechat.type != wx_const.WECHAT_TYPE_SERVICE)
-        self.logger.debug("232323: %s" % (self._unionid and self._wxuser))
-
         if need_oauth and self.in_wechat:
-            self.logger.debug("123")
-            if self._wechat.type != wx_const.WECHAT_TYPE_SERVICE or (self._unionid and self._wxuser):
-                self.logger.debug("234")
+            if self._unionid and self._wxuser:
                 yield self._build_session()
             else:
-                self.logger.debug("345")
                 self._oauth_service.wechat = self._qx_wechat
                 url = self._oauth_service.get_oauth_code_userinfo_url()
-                self.logger.debug("url: %s" % url)
                 self.redirect(url)
                 return
 

@@ -10,6 +10,7 @@ from tornado.locks import Semaphore
 from tornado.web import MissingArgumentError
 
 from util.common.cache import BaseRedis
+from util.common import ObjectDict
 
 
 def handle_response(func):
@@ -131,4 +132,29 @@ def check_outside_wechat(func):
             return
         else:
             yield func(self, *args, **kwargs)
+    return wrapper
+
+
+# 临时方法
+def url_valid(func):
+
+    """
+    # TODO 功能待调整
+    :param func:
+    :return:
+    """
+
+    @functools.wraps(func)
+    @gen.coroutine
+    def wrapper(self, *args, **kwargs):
+
+        try:
+            if not getattr(self, "_current_user", None):
+                self._current_user = yield self.get_current_user()
+                self._current_user = ObjectDict(self._current_user)
+            yield func(self, *args, **kwargs)
+
+        except Exception as e:
+            self.logger.error(e)
+            return
     return wrapper
