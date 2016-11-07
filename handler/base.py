@@ -261,8 +261,8 @@ class BaseHandler(MetaBaseHandler):
 
         # 只有认证的服务号，才具有网页授权获取用户openid/用户基本信息的权限
         # referer: https://mp.weixin.qq.com/wiki/7/2d301d4b757dedc333b9a9854b457b47.html
-        # if self.is_platform and self._wechat.type == wx_const.WECHAT_TYPE_SERVICE:
-        if self.is_platform:
+        if self.is_platform and self._wechat.type == wx_const.WECHAT_TYPE_SERVICE:
+        # if self.is_platform:
             self.logger.debug("888888888")
             self._oauth_service.wechat = self._wechat
             self._oauth_service.state = to_hex(unionid)
