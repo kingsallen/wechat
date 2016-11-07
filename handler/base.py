@@ -383,7 +383,7 @@ class BaseHandler(MetaBaseHandler):
             userinfo = yield self._oauth_service.get_userinfo_by_code(code)
             raise gen.Return(userinfo)
         except WeChatOauthError as e:
-            self.logger.error(e)
+            self.logger.error("_get_user_info: {}".format(e))
 
     @gen.coroutine
     def _get_user_openid(self, code):
@@ -393,7 +393,7 @@ class BaseHandler(MetaBaseHandler):
                 code)
             raise gen.Return(openid)
         except WeChatOauthError as e:
-            self.logger.error(e)
+            self.logger.error("_get_user_openid: {}".format(e))
 
     @gen.coroutine
     def _fetch_session(self):

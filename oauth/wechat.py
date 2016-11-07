@@ -63,7 +63,7 @@ class WeChatOauth2Service(object):
         """
         access_token_info = yield self._get_access_token_by_code(code)
         if access_token_info.errcode:
-            raise WeChatOauthError(access_token_info.errmsg)
+            raise WeChatOauthError("get_openid_unionid_by_code: {}".format(access_token_info.errmsg))
         else:
             openid = access_token_info.get('openid')
             unionid = access_token_info.get('unionid')
@@ -80,7 +80,7 @@ class WeChatOauth2Service(object):
         openid, _ = yield self.get_openid_unionid_by_code(code)
         userinfo = yield self._get_userinfo_by_openid(openid)
         if userinfo.errcode:
-            raise WeChatOauthError(userinfo.errmsg)
+            raise WeChatOauthError("get_userinfo_by_code: {}".format(userinfo.errmsg))
         else:
             raise gen.Return(userinfo)
 
