@@ -4,6 +4,7 @@
 
 import functools
 import hashlib
+import traceback
 
 from tornado import gen
 from tornado.locks import Semaphore
@@ -23,6 +24,7 @@ def handle_response(func):
             yield func(self, *args, **kwargs)
         except Exception as e:
             self.logger.error(e)
+            self.logger.error(traceback.format_exc())
             if self.request.headers.get("Accept", "").startswith("application/json"):
                 self.send_json_error()
             else:
