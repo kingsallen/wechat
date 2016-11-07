@@ -262,11 +262,10 @@ class BaseHandler(MetaBaseHandler):
         # 只有认证的服务号，才具有网页授权获取用户openid/用户基本信息的权限
         # referer: https://mp.weixin.qq.com/wiki/7/2d301d4b757dedc333b9a9854b457b47.html
         if self.is_platform:
-            if self._wechat != wx_const.WECHAT_TYPE_SERVICE:
+            if self._wechat.type != wx_const.WECHAT_TYPE_SERVICE:
                 self.logger.debug("dkdkdkdkdkdkdk")
                 fullurl = self.fullurl + "&state=" + to_hex(unionid) + "&code=" + curr_now_pure()
                 self.logger.debug("fullurl: %s" % fullurl)
-
                 self.redirect(fullurl)
             else:
                 self.logger.debug("888888888")
@@ -446,6 +445,9 @@ class BaseHandler(MetaBaseHandler):
             need_oauth = True
 
         self.logger.debug("need_oauth: %s" % need_oauth)
+        self.logger.debug("tpye: %s" % self._wechat.type)
+        self.logger.debug("_unionid: %s" % self._unionid)
+        self.logger.debug("_wxuser: %s" % self._wxuser)
 
         if need_oauth and self.in_wechat:
             self.logger.debug("123")
