@@ -14,6 +14,12 @@ WX_OAUTH_DEFAULT_STATE = '0'
 SCOPE_BASE = "snsapi_base"
 SCOPE_USERINFO = "snsapi_userinfo"
 
+# wechat type
+WECHAT_TYPE_SUBSCRIPTION = 0
+WECHAT_TYPE_UNCONFIRM_SUBSCRIPTION = 2
+WECHAT_TYPE_SERVICE = 1
+WECHAT_TYPE_UNCONFIRM_SERVICE = 3
+
 # 0:未知, 1:朋友圈(timeline ) 2:微信群(groupmessage) 3:个人消息(singlemessage)
 CLICK_FROM = {
     '': 0,

@@ -251,7 +251,9 @@ class BaseHandler(MetaBaseHandler):
         # 创建 qx 的 user_wx_user
         yield self.user_ps.create_qx_wxuser_by_userinfo(userinfo, user_id)
 
-        if self.is_platform:
+        # 只有认证的服务号，才具有网页授权获取用户openid/用户基本信息的权限
+        # referer: https://mp.weixin.qq.com/wiki/7/2d301d4b757dedc333b9a9854b457b47.html
+        if self.is_platform and self._wechat.type == wx_const.WECHAT_TYPE_SERVICE:
             self._oauth_service.wechat = self._wechat
             self._oauth_service.state = to_hex(unionid)
             url = self._oauth_service.get_oauth_code_base_url()
