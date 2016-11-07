@@ -249,7 +249,7 @@ class BaseHandler(MetaBaseHandler):
 
     def render(self, template_name, status_code=200, **kwargs):
         # self.log_info = {"res_type": "html"}
-        self.set_status(status_code)
+        # self.set_status(status_code)
         super(BaseHandler, self).render(template_name, **kwargs)
         return
 
