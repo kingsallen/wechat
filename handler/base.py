@@ -20,7 +20,7 @@ from app import logger
 from oauth.wechat import WeChatOauth2Service, WeChatOauthError, JsApi
 from util.common import ObjectDict
 from util.common.decorator import check_signature, check_outside_wechat
-from util.tool.date_tool import curr_now
+from util.tool.date_tool import curr_now, curr_now_pure
 from util.tool.json_tool import encode_json_dumps, json_dumps
 from util.tool.str_tool import to_str, to_hex, from_hex
 from util.tool.url_tool import url_subtract_query, make_static_url
@@ -264,7 +264,7 @@ class BaseHandler(MetaBaseHandler):
         if self.is_platform:
             if self._wechat != wx_const.WECHAT_TYPE_SERVICE:
                 self.logger.debug("dkdkdkdkdkdkdk")
-                fullurl = self.fullurl + "&state=" + to_hex(unionid)
+                fullurl = self.fullurl + "&state=" + to_hex(unionid) + "&code=" + curr_now_pure()
                 self.logger.debug("fullurl: %s" % fullurl)
 
                 self.redirect(fullurl)
