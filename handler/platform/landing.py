@@ -55,6 +55,6 @@ class LandingHandler(BaseHandler):
 
         self.logger.debug("params: %s" % self.params)
 
-        self.send_json(company)
+        # self.send_json(company)
 
-        # self.render("company/search.html", company=company)
+        self.render("company/search.html", company=company)
