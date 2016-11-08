@@ -24,7 +24,7 @@ class UserCompanyVisitReqDataService(DataService):
             response = yield self.user_company_visit_req_dao.get_list_by_conds(
                 conds, fields)
         except Exception as error:
-            self.logger(error)
+            self.logger.warn(error)
             raise gen.Return(ObjectDict())
 
         raise gen.Return(response)
@@ -35,7 +35,7 @@ class UserCompanyVisitReqDataService(DataService):
             response = self.user_company_visit_req_dao.update_by_conds(
                             conds, fields)
         except Exception as error:
-            self.logger(error)
+            self.logger.warn(error)
             raise gen.Return(False)
 
         raise gen.Return(response)
@@ -45,7 +45,7 @@ class UserCompanyVisitReqDataService(DataService):
         try:
             response = yield self.user_company_visit_req_dao.insert_record(fields)
         except Exception as error:
-            self.logger(error)
+            self.logger.warn(error)
             raise gen.Return(None)
 
         raise gen.Return(response)
