@@ -6,7 +6,7 @@
 时间工具类
 """
 
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 
 import conf.common as constant
 
@@ -56,39 +56,30 @@ def is_time_valid(str_time, form):
 def jd_update_date(update_time):
     """
     JD以及列表页根据规则显示更新时间
-    :param update_time: timestamp类型
+    :param update_time: datetime类型
     :return:
     """
 
     update_date = constant.JD_TIME_FORMAT_DEFAULT
     try:
         if update_time:
-            today = date.today()
-            datetime_today = datetime(today.year, today.month, today.day, 0,0,0,0)
             datetime_now = datetime.now()
+            yesterday = datetime_now + timedelta(days=-1)
 
             delta = datetime_now - update_time
-            delta_to_today = datetime_now - datetime_today
 
-            if delta.days == 0 and delta.seconds <= 3600:
-                # 刚刚（即一个小时内）
-                update_date = constant.JD_TIME_FORMAT_JUST_NOW
-
-            elif delta.days == 0:
-                if delta.seconds < delta_to_today.seconds:
+            if datetime_now.date() == update_time.date():
+                if delta.seconds <= 3600:
+                    # 刚刚（即一个小时内）
+                    update_date = constant.JD_TIME_FORMAT_JUST_NOW
+                else:
                     # 今天 12：00
                     update_date = constant.JD_TIME_FORMAT_TODAY.format(
                         update_time.hour, update_time.minute)
-                else:
-                    # 昨天 12：00
-                    update_date = constant.JD_TIME_FORMAT_YESTERDAY.format(
-                        update_time.hour, update_time.minute)
-
-            elif delta.days == 1 and delta.seconds > delta_to_today.seconds:
-                    #todo 考虑 跨月的情况， 不行的话可以考虑用 dateutil 包
-                    # 昨天 12：00
-                    update_date = constant.JD_TIME_FORMAT_YESTERDAY.format(
-                        update_time.hour, update_time.minute)
+            elif yesterday.date() == update_time.date():
+                # 昨天 12：00
+                update_date = constant.JD_TIME_FORMAT_YESTERDAY.format(
+                    update_time.hour, update_time.minute)
             else:
                 # 2016-11-23
                 update_date = constant.JD_TIME_FORMAT_FULL.format(
@@ -98,3 +89,12 @@ def jd_update_date(update_time):
         pass
     finally:
         return update_date
+
+
+if __name__ == '__main__':
+
+    now = datetime(2016, 10, 7, 2,23,0,0)
+    a = jd_update_date(now)
+
+    print (a)
+
