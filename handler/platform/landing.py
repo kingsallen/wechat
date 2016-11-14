@@ -4,7 +4,7 @@
 
 from tornado import gen
 
-from handler._base import BaseHandler
+from handler.base import BaseHandler
 from util.common import ObjectDict
 from util.common.decorator import handle_response, url_valid
 
