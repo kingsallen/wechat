@@ -146,18 +146,15 @@ class PositionHandler(BaseHandler):
             if position_info.share_description:
                 description = "".join(split(position_info.share_description))
 
-        generate_link = functools.partial(
-            make_url,
-            path.POSITION_PATH.format(position_info.id),
+        link = make_url(path.POSITION_PATH.format(position_info.id),
             self.params,
             host=self.request.host,
             protocol=self.request.protocol,
+            recom=self._make_recom(),
             escape=["pid", "keywords", "cities", "candidate_source",
                     "employment_type", "salary", "department", "occupations",
                     "custom", "degree", "page_from", "page_size"]
         )
-
-        link = generate_link(recom=self._make_recom()) if self._authable() else generate_link()
 
         self.params.share = ObjectDict({
             "cover": cover,
