@@ -26,14 +26,19 @@ help_routes: 继承自common_routes, 供help单独使用，一般 handler 在 he
 # 微信端公共的 routes
 common_routes = [
     # wechat
-
     (r"/m/wechat",                         "handler.common.wechat.WechatHandler",                       {"event": "wechat_wechat"}),
+    # account
     (r"/m/account/login",                  "handler.common.login.LoginHandler",                         {"event": "login_login"}),
+    # position
     (r"/m/position/([0-9]+)",              "handler.common.position.PositionHandler",                   {"event": "position_info"}),
+    # app forward 给前端，展示纯前端渲染的 SPA
     (r"/m/app/.*",                         "handler.common.app.IndexHandler",                           {"event": "app_index"}),
+    # common api
     (r"/m/api/position/star",              "handler.common.position.PositionStarHandler",               {"event": "position_star"}),
     (r"/m/api/chat/unread[\/]*([0-9]+)*",  "handler.common.im.UnreadCountHandler",                      {"event": "chat_unread"}),
-    (r"/m/api/mobilebinded",               "handler.common.user.UserMobileBindedHandler",               {"event": "user_usermobilebinded"})
+    (r"/m/api/mobilebinded",               "handler.common.user.UserMobileBindedHandler",               {"event": "user_usermobilebinded"}),
+    (r"/m/api/cellphone",                  "handler.platform.cellphone.CellphoneBindHandler",           {"event": "cellphone_bind"}),
+    (r"/m/api/user/currentinfo",           "handler.platform.interest.UserCurrentInfoHandler",          {"event": "user_currentinfo"})
 ]
 
 # 企业号的单独 routes
@@ -42,11 +47,9 @@ platform_routes = [
     (r"/m/company",                        "handler.platform.companyrelation.CompanyHandler",           {"event": "company_info"}),
     (r"/m/company/team",                   "handler.platform.companyrelation.CompanyHandler",           {"event": "company_team_info"}),
     (r"/m/company/team/(eb|rd|cs|bd)",     "handler.platform.companyrelation.CompanyTeamHandler",       {"event": "company_team_info_more"}),
-    (r"/m/api/user/currentinfo",           "handler.platform.interest.UserCurrentInfoHandler",          {"event": "user_currentinfo"}),
     (r"/m/api/company/visitreq",           "handler.platform.companyrelation.CompanyVisitReqHandler",   {"event": "company_visitreq"}),
     (r"/m/api/company/survey",             "handler.platform.companyrelation.CompanySurveyHandler",     {"event": "company_survey"}),
-    (r"/m/api/company/follow",             "handler.platform.companyrelation.CompanyFollowHandler",     {"event": "company_follow"}),
-    (r"/m/api/cellphone",                  "handler.platform.cellphone.CellphoneBindHandler",           {"event": "cellphone_bind"}),
+    (r"/m/api/company/follow",             "handler.platform.companyrelation.CompanyFollowHandler",     {"event": "company_follow"})
 ]
 platform_routes.extend(common_routes)
 
