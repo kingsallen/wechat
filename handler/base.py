@@ -195,8 +195,7 @@ class BaseHandler(MetaBaseHandler):
                         openid, self._unionid)
 
                 # 保存 code 进 cookie
-                self.set_cookie(
-                    const.COOKIE_CODE, to_str(code), expires_days=1)
+                self.set_cookie(const.COOKIE_CODE, to_str(code), expires_days=1)
 
             elif state:  # 用户拒绝授权
                 # TODO 拒绝授权用户，是否让其继续操作? or return
@@ -340,7 +339,6 @@ class BaseHandler(MetaBaseHandler):
 
     def _verify_code(self, code):
         """检查 code 是不是之前使用过的"""
-        self.logger.debug("in _verify_code")
 
         old = self.get_cookie(const.COOKIE_CODE)
         self.logger.debug("old code: {}".format(old))
@@ -422,7 +420,7 @@ class BaseHandler(MetaBaseHandler):
         need_oauth = False
         ok = False
 
-        session_id = to_str(self.get_cookie(const.COOKIE_SESSIONID))
+        session_id = to_str(self.get_secure_cookie(const.COOKIE_SESSIONID))
 
         self.logger.debug("_fetch_session session_id: %s" % session_id)
 

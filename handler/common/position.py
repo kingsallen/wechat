@@ -1,6 +1,5 @@
 # coding=utf-8
 
-import functools
 from tornado import gen
 
 from handler.base import BaseHandler
