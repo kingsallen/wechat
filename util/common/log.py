@@ -3,6 +3,7 @@
 # Copyright 2016 MoSeeker
 
 import logging
+import traceback
 import os
 from logging.handlers import TimedRotatingFileHandler
 from util.common.elk import RedisELK
@@ -129,6 +130,7 @@ class MessageLogger(Logger):
         self.impl.send_message("error", message)
         # error 及时报警
         Alarm.biu(message)
+        Alarm.biu(traceback.format_exc())
 
     def stats(self, message):
         super(MessageLogger, self).stats(message)
