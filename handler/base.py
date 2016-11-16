@@ -195,8 +195,7 @@ class BaseHandler(MetaBaseHandler):
                         openid, self._unionid)
 
                 # 保存 code 进 cookie
-                self.set_secure_cookie(
-                    const.COOKIE_CODE, to_str(code), expires_days=1)
+                self.set_cookie(const.COOKIE_CODE, to_str(code), expires_days=1)
 
             elif state:  # 用户拒绝授权
                 # TODO 拒绝授权用户，是否让其继续操作? or return
@@ -248,14 +247,20 @@ class BaseHandler(MetaBaseHandler):
             wechat_id=self._wechat.id,
             remote_ip=self.request.remote_ip,
             source=source)
+
         # 创建 qx 的 user_wx_user
         yield self.user_ps.create_qx_wxuser_by_userinfo(userinfo, user_id)
 
-        if self.is_platform:
+        if self._authable():
+            # 该企业号是服务号
             self._oauth_service.wechat = self._wechat
             self._oauth_service.state = to_hex(unionid)
             url = self._oauth_service.get_oauth_code_base_url()
             self.redirect(url)
+        else:
+            # 该企业号是订阅号 则无法获得当前 wxuser 信息, 无需静默授权
+            self._unionid = unionid
+            self._wxuser = ObjectDict()
 
     @gen.coroutine
     def _handle_ent_openid(self, openid, unionid):
@@ -289,6 +294,17 @@ class BaseHandler(MetaBaseHandler):
 
         return json_args
 
+    def _authable(self):
+        """返回当前公众号是否可以 OAuth
+
+        服务号有网页 OAuth 权限
+        订阅号没有网页 OAuth 权限
+        https://mp.weixin.qq.com/wiki/7/2d301d4b757dedc333b9a9854b457b47.html
+        """
+        if self._wechat is None:
+            return False
+        return self._wechat.type is const.WECHAT_TYPE_SERVICE
+
     def guarantee(self, *args):
         """对 API 调用输入做参数检查
 
@@ -304,7 +320,6 @@ class BaseHandler(MetaBaseHandler):
 
             mobile = self.params["mobile"]
         """
-
         self.params = ObjectDict()
 
         c_arg = None
@@ -324,7 +339,11 @@ class BaseHandler(MetaBaseHandler):
 
     def _verify_code(self, code):
         """检查 code 是不是之前使用过的"""
-        old = self.get_secure_cookie(const.COOKIE_CODE)
+
+        old = self.get_cookie(const.COOKIE_CODE)
+        self.logger.debug("old code: {}".format(old))
+        self.logger.debug("new code: {}".format(code))
+
         if not old:
             return True
         return str(old) != str(code)
@@ -423,7 +442,11 @@ class BaseHandler(MetaBaseHandler):
             need_oauth = True
 
         if need_oauth and self.in_wechat:
-            if self._unionid and self._wxuser:
+            if (self._unionid and self._wxuser and self._authable() or
+                self._unionid and not self._authable()):
+                # 服务号，有 unionid， 且存在 wxuser，或者
+                # 订阅号，只需 unionid 存在
+                # 即可进入 _build_session 方法
                 yield self._build_session()
             else:
                 self._oauth_service.wechat = self._qx_wechat
@@ -508,13 +531,18 @@ class BaseHandler(MetaBaseHandler):
 
     @gen.coroutine
     def _add_company_info_to_session(self, session):
-        """拼装 session 中的 company, employee"""
+        """拼装 session 中的 company, employee
+
+        如果该企业号是订阅号，不添加 employee
+        """
 
         session.company = yield self._get_current_company(session.wechat.company_id)
-        employee = yield self.session_ps.get_employee(
-            wxuser_id=session.wxuser.id, company_id=session.company.id)
-        if employee:
-            session.employee = employee
+
+        if self._authable():
+            employee = yield self.session_ps.get_employee(
+                wxuser_id=session.wxuser.id, company_id=session.company.id)
+            if employee:
+                session.employee = employee
 
     @gen.coroutine
     def _add_recom_to_session(self, session):

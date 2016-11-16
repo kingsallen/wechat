@@ -145,12 +145,15 @@ class PositionHandler(BaseHandler):
             if position_info.share_description:
                 description = "".join(split(position_info.share_description))
 
-        link = make_url(path.POSITION_PATH.format(position_info.id), self.params,
-                        recom=self._make_recom(),
-                        host=self.request.host,
-                        protocol=self.request.protocol,
-                        escape=["pid", "keywords", "cities", "candidate_source", "employment_type", "salary",
-                                "department", "occupations", "custom", "degree", "page_from", "page_size"])
+        link = make_url(path.POSITION_PATH.format(position_info.id),
+            self.params,
+            host=self.request.host,
+            protocol=self.request.protocol,
+            recom=self._make_recom(),
+            escape=["pid", "keywords", "cities", "candidate_source",
+                    "employment_type", "salary", "department", "occupations",
+                    "custom", "degree", "page_from", "page_size"]
+        )
 
         self.params.share = ObjectDict({
             "cover": cover,

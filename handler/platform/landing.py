@@ -4,22 +4,16 @@
 
 from tornado import gen
 
-from handler._base import BaseHandler
+from handler.base import BaseHandler
 from util.common import ObjectDict
-from util.common.decorator import handle_response, url_valid
+from util.common.decorator import handle_response
 
 
 class LandingHandler(BaseHandler):
-
     """
     企业搜索页
     """
 
-    def initialize(self, event):
-        # 日志需要，由 route 定义
-        self._event = event
-
-    @url_valid
     @handle_response
     @gen.coroutine
     def get(self):

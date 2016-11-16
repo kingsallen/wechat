@@ -116,25 +116,6 @@ class SharechainPageService(PageService):
         raise gen.Return(bool(employee))
 
     @gen.coroutine
-    def _is_hr(self, position_id, recom_id):
-        # SQL_CHECK_EMPLOYEE_IS_HR = """
-        # SELECT ha.id FROM user_hr_account ha
-        # INNER JOIN job_position jp ON jp.company_id = ha.company_id
-        # WHERE jp.id = %s AND ha.wxuser_id = %s
-        # """
-        position = yield self.job_position_ds.get_position({
-            "id": position_id
-        })
-        company_id = position.company_id
-
-        record = yield self.user_hr_account_ds.get_hr_account({
-            "wxuser_id": recom_id,
-            "company_id": company_id
-        })
-
-        raise gen.Return(bool(record))
-
-    @gen.coroutine
     def _no_existed_record(self, recom):
         """检查原始链路数据中是否有该数据"""
 
@@ -317,7 +298,7 @@ class SharechainPageService(PageService):
 
         # 如果是直接点入申请职位的, 不存在内推员工
         if len(recom_record) == 0:
-            return 0
+            raise gen.Return(0)
 
         # 获取 recom_record 中的 recom_id
         recom_id = recom_record["recom_id"]
@@ -332,8 +313,7 @@ class SharechainPageService(PageService):
         if not recom_record_of_recom:
             # 如果直接访问的人是认证员工,返回认证员工的 id
             is_employee = yield self._is_valid_employee(position_id, recom_id)
-            is_hr = yield self._is_hr(position_id, recom_id)
-            if is_employee or is_hr:
+            if is_employee:
                 raise gen.Return(recom_id)
             else:
                 raise gen.Return(0)
