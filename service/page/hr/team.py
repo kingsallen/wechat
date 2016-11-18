@@ -3,12 +3,13 @@
 
 """
 :author 马超（machao@moseeker.com）
-:date 2016.11.1
+:date 2016.11.18
 
 """
 from util.common import ObjectDict
 from tornado import gen
 from service.page.base import PageService
+from util.tool import temp_date_tool
 # from tests.dev_data.user_company_data import WORKING_ENV, TEAMS
 
 
@@ -51,6 +52,34 @@ class TeamPageService(PageService):
             "media_type":  "image"
         }
     )
+
+    @gen.coroutine
+    def get_sub_company(self, sub_company_id):
+        sub_company = yield self.hr_company_dao.get_company(
+            conds={'id': sub_company_id})
+
+        raise gen.Return(sub_company)
+
+    @gen.coroutine
+    def get_team_index(self, company, hander_params):
+        data = ObjectDict(templates=[])
+
+        data.header = temp_date_tool.make_header(company, team_flag=True)
+
+        teams = self.hr_team_ds.get_team_list(conds={'company_id': company.id})
+        for team in teams:
+            team_members = yield self.hr_team_member_ds.get_team_members(
+                                conds={'team_id': team.id})
+            data.templates.append(temp_date_tool.make_team_index_template(
+                                hander_params, team, team_members))
+
+        data.template_total = len(data.templates)
+
+        raise gen.Return(data)
+
+
+    # @gen.corotine
+
 
     @gen.coroutine
     def get_more_team_info(self, team_name, params):

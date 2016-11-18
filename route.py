@@ -40,7 +40,7 @@ common_routes = [
 platform_routes = [
     (r"/m/start",                          "handler.platform.landing.LandingHandler",                   {"event": "start_landing"}),
     (r"/m/company",                        "handler.platform.companyrelation.CompanyHandler",           {"event": "company_info"}),
-    (r"/m/company/team",                   "handler.platform.companyrelation.CompanyHandler",           {"event": "company_team_info"}),
+    (r"/m/company/team",                   "handler.platform.companyrelation.CompanyTeamIndexHandler",           {"event": "company_team_info"}),
     (r"/m/company/team/(eb|rd|cs|bd)",     "handler.platform.companyrelation.CompanyTeamHandler",       {"event": "company_team_info_more"}),
     (r"/m/api/user/currentinfo",           "handler.platform.interest.UserCurrentInfoHandler",          {"event": "user_currentinfo"}),
     (r"/m/api/company/visitreq",           "handler.platform.companyrelation.CompanyVisitReqHandler",   {"event": "company_visitreq"}),

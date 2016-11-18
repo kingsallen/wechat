@@ -1,0 +1,27 @@
+# -*- coding=utf-8 -*-
+# Copyright 2016 MoSeeker
+
+"""
+:author 马超（machao@moseeker.com）
+:date 2016.11.18
+:table hr_team
+
+"""
+
+from dao.base import BaseDao
+
+class HrTeamDao(BaseDao):
+
+    def __init__(self, logger):
+        super(HrTeamDao, self).__init__(logger)
+        self.table = "hr_team"
+        self.fields_map = {
+            "id":             self.constant.TYPE_INT,
+            "name":           self.constant.TYPE_STRING, # 团队名称
+            "summary":        self.constant.TYPE_STRING, # 职能概述
+            "description":    self.constant.TYPE_STRING, # 团队介绍
+            "coverimg":       self.constant.TYPE_STRING, # 团队主页图片链接
+            "company_id":     self.constant.TYPE_INT, # 团队所在母公司
+            "create_time":    self.constant.TYPE_TIMESTAMP, # 创建时间
+            "update_time":    self.constant.TYPE_TIMESTAMP, # 更新时间
+        }
