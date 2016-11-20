@@ -122,7 +122,8 @@ def check_signature(func):
                 yield func(self, *args, **kwargs)
     return wrapper
 
-#todo (yiliang) 临时封锁手机浏览器打开网页
+
+# todo (yiliang) 临时封锁手机浏览器打开网页
 def check_outside_wechat(func):
     @functools.wraps(func)
     @gen.coroutine
@@ -133,4 +134,28 @@ def check_outside_wechat(func):
             return
         else:
             yield func(self, *args, **kwargs)
+    return wrapper
+
+
+def check_sub_company(func):
+    """
+    Check request sub_company data or not.
+    :param func:
+    :return: Http404 or set sub_company in params
+    """
+
+    @functools.wraps(func)
+    @gen.coroutine
+    def wrapper(self, *args, **kwargs):
+        if self.params.did:
+            sub_company = yield self.team_ps.get_sub_company(self.params.did)
+            if not sub_company or \
+                    sub_company.parent_id != self.current_user.company.id:
+                self.write_error(404)
+                return
+            else:
+                self.params.sub_company = sub_company
+
+        return func(self, *args, **kwargs)
+
     return wrapper

@@ -77,9 +77,24 @@ class TeamPageService(PageService):
 
         raise gen.Return(data)
 
+    @gen.coroutine
+    def get_team_detail(self, user, company, team, team_members, positions):
+        data = ObjectDict()
+        vst_cmpy = yield self.user_company_visit_req_ds.get_visit_cmpy(
+            conds={'user_id': user.id, 'company_id': company.id},
+            fields=['id', 'company_id'])
 
-    # @gen.corotine
+        data.relation = ObjectDict({
+            'want_visit': self.constant.YES if vst_cmpy else self.constant.NO
+        })
+        data.header = temp_date_tool.make_header(company, True, team)
+        data.templates = temp_date_tool.make_team_detail_template(
+                            team, team_members, positions, bool(vst_cmpy))
+        data.templates.append(temp_date_tool.make_other_team(company.id,
+                                                             team.id))
+        data.templates_total = len(data.templates)
 
+        raise gen.Return(data)
 
     @gen.coroutine
     def get_more_team_info(self, team_name, params):
@@ -199,7 +214,7 @@ class TeamPageService(PageService):
             data.templates.append(ObjectDict({'type': 5, 'title': '', 'data': None}))
 
         # 其他团队
-        otherteam =  ObjectDict({
+        otherteam = ObjectDict({
             'type':     4,
             'sub_type':  0,
             'title':    '其他团队',
