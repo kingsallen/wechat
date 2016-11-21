@@ -1,0 +1,47 @@
+
+jobdb 添加
+ALTER TABLE 'job_position' ADD 'team_id' int(11) NOT NULL DEFAULT 0 COMMENT '职位所属团队',	
+
+
+hrdb 添加 
+
+CREATE TABLE 'hr_team'(
+'id' int(11) NOT NULL AUTO_INCREMENT '主键',
+'name' varchar(128) NOT NULL DEFAULT '' COMMENT '团队/部门名称',
+'summary' varchar(256) NOT NULL DEFAULT '' COMMENT '职能概述', 
+'description' varchar(2048) NOT NULL DEFAULT '团队介绍',
+'show_order'int(4) NOT NULL DEFAULT 0 COMMENT '团队显示顺序', 
+'media_id' int(11) NOT NULL DEFAULT 0 COMMENT '团队主图片hr_media.id',
+'jd_medias' varchar(256) NOT NULL DEFAULT '' COMMENT '成员一天信息hr_media.id: [1, 23, 32]',
+'company_id' int(11) NOT NULL DEFAULT 0 COMMENT '团队所在母公司',
+'create_time' timestamp NOT NULL DEFAULT CURRENT_TIEMSTAMP COMMENT '创建时间', 
+'update_time' timestamp NOT NULL DEFAULT CURRENT_TIEMSTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='团队信息'
+
+
+CREATE TABLE 'hr_team_member'(
+'id' int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
+'name' varchar(128) NOT NULL DEFAULT '' COMMENT '成员名称',
+'title' varchar(128) NOT NULL DEFAULT '' COMMENT '成员职称',
+'description' varchar(2048) NOT NULL DEFAULT '成员描述',
+'headimg_id' int(11) NOT NULL DEFAULT 0 COMMENT '成员头像hr_media.id',
+'media_id' int(11) NOT NULL DEFAULT 0 COMMENT '成员视频hr_media.id',
+'team_id' int(11) NOT NULL DEFAULT 0 COMMENT '成员所属团队',
+'user_id' int(11) NOT NULL DEFAULT 0 COMMENT '成员对应用户',
+'create_time' timestamp NOT NULL DEFAULT CURRENT_TIEMSTAMP COMMENT '创建时间', 
+'update_time' timestamp NOT NULL DEFAULT CURRENT_TIEMSTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='团队成员信息'
+
+
+CREATE TABLE 'hr_media'(
+'id' int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
+'media_url' varchar(512) NOT NULL DEFAULT '' COMMENT '资源链接',
+'media_type' int(1) NOT NULL DEFAULT 0 COMMENT '0：image  1: video',
+'longtext' varchar(2048) NOT NULL DEFAULT '描述',
+'attrs' varchar(2048) NOT NULL DEFAULT '客户属性，可选字段',
+'tpl_type' int(3) NOT NULL DEFAULT 0 COMMENT '模板类型1,2,3...对应前端不同template',
+'title' varchar(128) NOT NULL DEFAULT '' COMMENT '模板名称',
+'sub_title' varchar(128) NOT NULL DEFAULT '' COMMENT '模板子名称',
+'link' varchar(512) NOT NULL DEFAULT '' COMMENT '模板链接',
+)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='公司，团队和成员多媒体数据'
+

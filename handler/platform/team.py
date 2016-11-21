@@ -7,11 +7,13 @@
 
 """
 from tornado import gen
-from util.common import ObjectDict
+
 from handler.base import BaseHandler
+from util.common import ObjectDict
+from util.common.decorator import check_sub_company
 
 
-class CompanyTeamIndexHandler(BaseHandler):
+class TeamIndexHandler(BaseHandler):
 
     @gen.coroutine
     def get(self):
@@ -44,3 +46,11 @@ class CompanyTeamIndexHandler(BaseHandler):
 
         self.render_page(template_name, data)
         return
+
+
+class TeamDetailHandler(BaseHandler):
+
+    @gen.coroutine
+    @check_sub_company
+    def get(self, team_id):
+        print(team_id)

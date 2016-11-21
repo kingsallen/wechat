@@ -59,14 +59,14 @@ def make_team_detail_template(team, team_members, positions, vst_cmpy=False):
     introduction_data, interview_data = [], []
     for member in team_members:
         introduction_data.append({
-            "icon": member.icon,
+            "icon": member.headimg,
             "name": member.name,
             "title": member.title,
             "description": member.description})
         interview_data.append({
             'title': member.name,
             'longtext': '{}\n'.format(member.title),
-            'media_url': member.video,
+            'media_url': member.media,
             'media_type': 'video',
             'member_list': []})
 
