@@ -61,17 +61,17 @@ class TeamPageService(PageService):
         raise gen.Return(sub_company)
 
     @gen.coroutine
-    def get_team_index(self, company, hander_params):
+    def get_team_index(self, company, handler_params):
         data = ObjectDict(templates=[])
 
         data.header = temp_date_tool.make_header(company, team_flag=True)
 
-        teams = self.hr_team_ds.get_team_list(conds={'company_id': company.id})
+        teams = self.hr_team_ds.get_teams(conds={'company_id': company.id})
         for team in teams:
             team_members = yield self.hr_team_member_ds.get_team_members(
                                 conds={'team_id': team.id})
             data.templates.append(temp_date_tool.make_team_index_template(
-                                hander_params, team, team_members))
+                                  handler_params, team, team_members))
 
         data.template_total = len(data.templates)
 

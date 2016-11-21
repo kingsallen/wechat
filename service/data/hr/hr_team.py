@@ -7,15 +7,15 @@ from service.data.base import DataService
 from util.common.decorator import cache
 from util.common import ObjectDict
 
-class HrTeamDataService(DataService):
 
+class HrTeamDataService(DataService):
     @cache(ttl=60)
     @gen.coroutine
     def get_team(self, conds, fields=[]):
 
         if conds is None or not (isinstance(conds, dict) or isinstance(conds, str)):
             self.logger.warn("Warning:[get_team][invalid parameters], Detail:[conds: {0}, "
-                        "type: {1}]".format(conds, type(conds)))
+                             "type: {1}]".format(conds, type(conds)))
             raise gen.Return(ObjectDict())
 
         if not fields:
@@ -26,11 +26,11 @@ class HrTeamDataService(DataService):
 
     @cache(ttl=60)
     @gen.coroutine
-    def get_team_list(self, conds, fields=[]):
+    def get_teams(self, conds, fields=[]):
 
         if conds is None or not (isinstance(conds, dict) or isinstance(conds, str)):
-            self.logger.warn("Warning:[get_team_list][invalid parameters], Detail:[conds: {0}, "
-                        "type: {1}]".format(conds, type(conds)))
+            self.logger.warn("Warning:[get_teams][invalid parameters], Detail:[conds: {0}, "
+                             "type: {1}]".format(conds, type(conds)))
             raise gen.Return(list())
 
         if not fields:

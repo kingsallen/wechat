@@ -10,20 +10,20 @@
 
 from dao.base import BaseDao
 
-class HrTeamMemberDao(BaseDao):
 
+class HrTeamMemberDao(BaseDao):
     def __init__(self, logger):
         super(HrTeamMemberDao, self).__init__(logger)
         self.table = "hr_team_member"
         self.fields_map = {
-            "id":             self.constant.TYPE_INT,
-            "name":           self.constant.TYPE_STRING, # 成员名称
-            "title":          self.constant.TYPE_STRING,  # 成员职称
-            "description":    self.constant.TYPE_STRING, # 成员描述
-            "headimg":        self.constant.TYPE_STRING,  # 头像链接
-            "media":          self.constant.TYPE_STRING, # 视频链接
-            "team_id":        self.constant.TYPE_INT, # 成员所属团队
-            "user_id":        self.constant.TYPE_INT,  # 成员对应用户
-            "create_time":    self.constant.TYPE_TIMESTAMP, # 创建时间
-            "update_time":    self.constant.TYPE_TIMESTAMP, # 更新时间
+            "id": self.constant.TYPE_INT,
+            "name": self.constant.TYPE_STRING,  # 成员名称
+            "title": self.constant.TYPE_STRING,  # 成员职称
+            "description": self.constant.TYPE_STRING,  # 成员描述
+            "headimg_id": self.constant.TYPE_INT,  # 成员头像hr_media.id
+            "media_id": self.constant.TYPE_INT,  # 成员视频hr_media.id
+            "team_id": self.constant.TYPE_INT,  # 成员所属团队
+            "user_id": self.constant.TYPE_INT,  # 成员对应用户
+            "create_time": self.constant.TYPE_TIMESTAMP,  # 创建时间
+            "update_time": self.constant.TYPE_TIMESTAMP,  # 更新时间
         }

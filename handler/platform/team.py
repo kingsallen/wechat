@@ -14,32 +14,18 @@ from util.common.decorator import check_sub_company
 
 
 class TeamIndexHandler(BaseHandler):
-
     @gen.coroutine
+    @check_sub_company
     def get(self):
         template_name = 'company/team.html'
-        sub_company_id = self.params.get('did', None)
+        current_company = self.params.pop('sub_company') if \
+            self.params.sub_company else self.current_user.company
 
-        if sub_company_id is not None:
-            sub_company = self.team_ps.get_sub_company(sub_company_id)
-            if sub_company.parent_id != self.current_user.company.id:
-                self.write_error(404)
-                return
-            else:
-                # 子公司
-                share_company = 'sub_company'
-                pass
-        else:
-            # 母公司显示全部团队列表
-            data = yield self.team_ps.get_team_index(
-                company=self.current_user.company,
-                hander_params=self.params
-            )
-            share_company = self.current_user
+        data = yield self.team_ps.get_team_index(current_company, self.params)
 
         self.params.share = ObjectDict({
-            "cover": self.static_url(share_company.logo),
-            "title": share_company.name + "的团队",
+            "cover": self.static_url(current_company.logo),
+            "title": current_company.name + "的团队",
             "description": "",
             "link": self.fullurl
         })
@@ -49,7 +35,6 @@ class TeamIndexHandler(BaseHandler):
 
 
 class TeamDetailHandler(BaseHandler):
-
     @gen.coroutine
     @check_sub_company
     def get(self, team_id):
