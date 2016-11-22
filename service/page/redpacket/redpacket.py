@@ -8,6 +8,7 @@ import uuid
 import xml.dom.minidom as minidom
 from datetime import datetime
 from hashlib import sha1,md5
+import traceback
 
 import requests
 import tornado.gen as gen
@@ -210,7 +211,7 @@ class RedpacketPageService(PageService):
                 elif is_apply:
                     self.logger.debug("[RP]转发申请红包结束")
         except Exception as e:
-            self.logger.error(e)
+            self.logger.error(traceback.format_exc())
 
     @gen.coroutine
     def handle_red_packet_card_sending(self, current_user, red_packet_config,

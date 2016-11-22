@@ -47,37 +47,30 @@ class CompanyFollowHandler(BaseHandler):
 class CompanyHandler(BaseHandler):
     @gen.coroutine
     def get(self):
-        team_flag = True if re.match('^/m/company/team', self.request.uri) \
-                    else False
-        param = ObjectDict({
-            'user_id': self.current_user.sysuser.id,
-            'company_id': self.current_user.company.id
+        template_name = 'company/profile.html'
+        sub_company_id = self.params.get('did', None)
+        company = self.current_user.company
+
+        if sub_company_id is not None:
+            sub_company = self.team_ps.get_sub_company(sub_company_id)
+            if sub_company.parent_id != self.current_user.company.id:
+                self.write_error(404)
+                return
+            else:
+                company = sub_company
+
+        data = yield self.user_company_ps.get_companay_data(
+            self.params, company, self.current_user.id)
+
+        company_name = company.abbreviation or company.name
+        self.params.share = ObjectDict({
+            "cover":       self.static_url(self.current_user.company.logo),
+            "title":       company_name + ", 我发现了一个好公司！",
+            "description": "",
+            "link":        self.fullurl
         })
-        response = yield self.user_company_ps.get_companay_data(
-            handler_params=self.params,
-            param=param,
-            team_flag=team_flag)
 
-        template_name = 'company/team.html' if team_flag \
-                         else 'company/profile.html'
-
-        company_name = self.current_user.company.abbreviation or self.current_user.company.name
-        if team_flag:
-            self.params.share = ObjectDict({
-                "cover":       self.static_url(self.current_user.company.logo),
-                "title":       company_name + "的团队",
-                "description": "",
-                "link":        self.fullurl
-            })
-        else:
-            self.params.share = ObjectDict({
-                "cover":       self.static_url(self.current_user.company.logo),
-                "title":       company_name + ", 我发现了一个好公司！",
-                "description": "",
-                "link":        self.fullurl
-            })
-
-        self.render_page(template_name, data=response.data)
+        self.render_page(template_name, data=data)
         return
 
 

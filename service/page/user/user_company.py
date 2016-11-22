@@ -14,67 +14,35 @@ from tests.dev_data.user_company_data import WORKING_ENV, TEAMS, MEMBERS, \
     data2, TEAM_EB, TEAM_BD, TEAM_CS, TEAM_RD, data4_1, data50
 from util.common import ObjectDict
 from util.tool.url_tool import make_url, make_static_url
+from util.tool import temp_date_tool
 import conf.path as path
 
 
 class UserCompanyPageService(PageService):
 
     @gen.coroutine
-    def get_companay_data(self, handler_params, param, team_flag):
+    def get_companay_data(self, handler_params, company, user_id):
         """Develop Status: To be modify with real data.
         :param handler_params:
-        :param param:
-        :param team_flag:
+        :param company: 当前公司
         :return:
         """
-        user_id, company_id = param.get('user_id'), param.get('company_id')
-        response = ObjectDict({'status': 0, 'message': 'sucdess'})
+        data = ObjectDict()
+        data.header = temp_date_tool.make_header(company)
 
-        company = yield self.hr_company_ds.get_company(
-                            conds={'id': company_id})
-
-        if not team_flag:
-            header = ObjectDict({
-                'type':        'company',
-                'name':        company.abbreviation or company.name,
-                'description': "你的职场向导",
-                'icon':        make_static_url(company.logo),
-                'banner':
-                    'https://cdn.moseeker.com/upload/company_profile/qx'
-                    '/banner_qx.jpeg',
-            })
-        else:
-            header = ObjectDict({
-                'type':        'team',
-                'name':        '我们的团队',
-                'description': "",
-                'icon':        make_static_url(company.logo),
-                'banner':
-                    'https://cdn.moseeker.com/upload/company_profile/qx'
-                    '/banner_qx.jpeg',
-            })
-
-        conds = {'user_id': user_id, 'company_id': company_id}
-
+        conds = {'user_id': user_id, 'company_id': company.id}
         fllw_cmpy = yield self.user_company_follow_ds.get_fllw_cmpy(
                         conds=conds, fields=['id', 'company_id'])
         vst_cmpy = yield self.user_company_visit_req_ds.get_visit_cmpy(
                         conds=conds, fields=['id', 'company_id'])
-        data = ObjectDict({'header': header})
-
         data.relation = ObjectDict({
-            'follow':     self.constant.YES if fllw_cmpy else self.constant.NO,
+            'follow': self.constant.YES if fllw_cmpy else self.constant.NO,
             'want_visit': self.constant.YES if vst_cmpy else self.constant.NO
         })
 
-        if team_flag:
-            self._add_team_data(handler_params, data)
-        else:
-            self._add_company_data(handler_params, data)
+        self._add_company_data(handler_params, data)
 
-        response.data = data
-
-        raise gen.Return(response)
+        raise gen.Return(data)
 
     @staticmethod
     def _add_company_data(hander_params, data):

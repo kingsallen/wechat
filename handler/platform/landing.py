@@ -47,4 +47,4 @@ class LandingHandler(BaseHandler):
             "search_seq": search_seq
         })
 
-        self.render("company/search.html", company=company)
+        self.render_page("company/search.html", company)

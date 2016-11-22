@@ -3,12 +3,13 @@
 
 """
 :author 马超（machao@moseeker.com）
-:date 2016.11.1
+:date 2016.11.18
 
 """
 from util.common import ObjectDict
 from tornado import gen
 from service.page.base import PageService
+from util.tool import temp_date_tool
 # from tests.dev_data.user_company_data import WORKING_ENV, TEAMS
 
 
@@ -51,6 +52,110 @@ class TeamPageService(PageService):
             "media_type":  "image"
         }
     )
+
+    @gen.coroutine
+    def get_sub_company(self, sub_company_id):
+        sub_company = yield self.hr_company_dao.get_company(
+            conds={'id': sub_company_id})
+
+        raise gen.Return(sub_company)
+
+    def get_team_by_id(self, team_id):
+        team = yield self.hr_team_ds.get_team(conds={'id': team_id})
+
+        raise gen.Return(team)
+
+    @gen.coroutine
+    def get_team_index(self, company, handler_params, sub_flag=False):
+        data = ObjectDict(templates=[])
+        data.header = temp_date_tool.make_header(company, team_flag=True)
+
+        if sub_flag:
+            publishers = yield self.hr_company_account_ds.get_company_accounts_list(
+                conds={'company_id': company.id})
+            publisher_id_tuple = tuple([p.account_id for p in publishers])
+            teams_id = yield self.job_postion.get_positions_list(
+                conds='publisher in {}'.format(publisher_id_tuple),
+                fields=['team_id'], options=['DISTINCT'])
+            team_id_tuple = tuple([t.team_id for t in teams_id])
+            teams = yield self.hr_team_ds.get_team_list(
+                conds='id in {}'.format(team_id_tuple))
+        else:
+            teams = yield self.hr_team_ds.get_team_list(
+                conds={'company_id': company.id})
+
+        for team in teams:
+            member_list = []
+            team_medium = yield self.hr_media.get_medium(
+                conds={'id': team.media_id})
+
+            team_members = yield self.hr_team_member_ds.get_team_member_list(
+                                conds={'team_id': team.id})
+            for member in team_members:
+                headimg = yield self.hr_media.get_medium(
+                    conds={'id': member.headimg_id})
+                member_list.append(temp_date_tool.make_team_member(
+                    member, headimg))
+            data.templates.append(temp_date_tool.make_team_index_template(
+                handler_params, team, team_medium, member_list))
+
+        data.template_total = len(data.templates)
+
+        raise gen.Return(data)
+
+    @gen.coroutine
+    def get_team_detail(self, user, company, team, handler_params):
+        data = ObjectDict()
+        introduction, interview, other_teams = [], [], []
+        publishers = yield self.hr_company_account_ds.get_company_accounts_list(
+            conds={'company_id': company.id})
+        publisher_id_tuple = tuple([p.account_id for p in publishers])
+        company_positions = yield self.job_postion.get_positions_list(
+                conds='publisher in {}'.format(publisher_id_tuple))
+        team_positions = [pos for pos in company_positions
+                         if pos.team_id == team.id]
+        vst_cmpy = yield self.user_company_visit_req_ds.get_visit_cmpy(
+            conds={'user_id': user.id, 'company_id': company.id},
+            fields=['id', 'company_id'])
+
+        data.header = temp_date_tool.make_header(company, True, team)
+        data.relation = ObjectDict({
+            'want_visit': self.constant.YES if vst_cmpy else self.constant.NO})
+
+        team_members = yield self.hr_team_member_ds.get_team_member_list(
+                            conds={'team_id': team.id})
+        for member in team_members:
+            headimg, meida = yield self.hr_media.get_media_list(
+                conds='id in {}'.format((member.headimg_id, member.media_id)))
+            interview.append(temp_date_tool.make_interview(member, meida))
+            introduction.append(temp_date_tool.make_introduction(
+                member, headimg))
+        position_data = [temp_date_tool.make_positon(position, handler_params)
+                         for position in team_positions]
+        data.templates = temp_date_tool.make_team_detail_template(
+            team, introduction, interview, position_data, bool(vst_cmpy))
+
+        if company.id != user.company.id:
+            team_id_list = list(set([p.team_id for p in company_positions
+                                     if p.team_id != team.id]))
+            for id in team_id_list:
+                other = yield self.hr_team_ds.get_team(conds={'id': id})
+                other_media = yield self.hr_media.get_medium(
+                    conds={'id': other.media_id})
+                other_teams.append(temp_date_tool.make_other_team_data(
+                    other, other_media, handler_params))
+        else:
+            others = yield self.hr_team_ds.get_team_list(
+                conds={'company_id': user.company.id})
+            for other in others:
+                other_media = yield self.hr_media.get_medium(
+                    conds={'id': other.media_id})
+                other_teams.append(temp_date_tool.make_other_team_data(
+                    other, other_media, handler_params))
+        data.templates.append(temp_date_tool.make_other_team(other_teams))
+        data.templates_total = len(data.templates)
+
+        raise gen.Return(data)
 
     @gen.coroutine
     def get_more_team_info(self, team_name, params):
@@ -170,7 +275,7 @@ class TeamPageService(PageService):
             data.templates.append(ObjectDict({'type': 5, 'title': '', 'data': None}))
 
         # 其他团队
-        otherteam =  ObjectDict({
+        otherteam = ObjectDict({
             'type':     4,
             'sub_type':  0,
             'title':    '其他团队',
