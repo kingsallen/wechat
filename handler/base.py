@@ -195,7 +195,7 @@ class BaseHandler(MetaBaseHandler):
                         openid, self._unionid)
 
                 # 保存 code 进 cookie
-                self.set_cookie(const.COOKIE_CODE, to_str(code), expires_days=1)
+                self.set_cookie(const.COOKIE_CODE, to_str(code), expires_days=1, httponly=True)
 
             elif state:  # 用户拒绝授权
                 # TODO 拒绝授权用户，是否让其继续操作? or return
@@ -467,7 +467,7 @@ class BaseHandler(MetaBaseHandler):
 
         session_id = self._make_new_session_id(session.qxuser.sysuser_id)
         logger.debug("session_id: %s" % session_id)
-        self.set_secure_cookie(const.COOKIE_SESSIONID, session_id)
+        self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True)
 
         self._save_sessions(session_id, session)
 
