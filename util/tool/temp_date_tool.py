@@ -17,22 +17,29 @@ def make_header(company, team_flag=False, team=None):
     if team:
         name = team.name
         description = team.description
-        icon = ''
     else:
         name = '我们的团队' if team_flag else company.abbreviation or company.name
         description = '' if team_flag else company.introduction
-        icon = make_static_url(company.logo)
 
     return ObjectDict({
         'type': 'team' if team_flag else 'company',
         'name': name,
         'description': description,
-        'icon': icon,
+        'icon': make_static_url(company.logo),
         'banner': make_static_url(json.loads(company.banner).get('banner0')),
     })
 
 
-def make_team_index_template(handler_params, team, team_members):
+def make_team_member(member, headimg):
+    return ObjectDict({
+        "icon": headimg.media_url,
+        "name": member.name,
+        "title": member.title,
+        "description": member.description,
+    })
+
+
+def make_team_index_template(handler_params, team, team_medium, member_list):
     return ObjectDict({
         'type': 1,
         'sub_type': 'middle',
@@ -41,34 +48,41 @@ def make_team_index_template(handler_params, team, team_members):
         'data': [{
             'title':       team.name,
             'longtext':    team.description,
-            'media_url':   team.logo,
+            'media_url':   team_medium.media_url,
             'media_type':  'image',
-            'member_list': [
-                {
-                    "icon": member.headimg,
-                    "name": member.name,
-                    "title": member.title,
-                    "description": member.description,
-                } for member in team_members
-            ]
+            'member_list': member_list
         }]
     })
 
 
-def make_team_detail_template(team, team_members, positions, vst_cmpy=False):
-    introduction_data, interview_data = [], []
-    for member in team_members:
-        introduction_data.append({
-            "icon": member.headimg,
-            "name": member.name,
-            "title": member.title,
-            "description": member.description})
-        interview_data.append({
+def make_introduction(member, headimg):
+    return {
+        "icon": headimg.media_url,
+        "name": member.name,
+        "title": member.title,
+        "description": member.description
+    }
+
+
+def make_interview(member, media):
+    return {
             'title': member.name,
             'longtext': '{}\n'.format(member.title),
-            'media_url': member.media,
-            'media_type': 'video',
-            'member_list': []})
+            'media_url': media.media_url,
+            'media_type': 'video'
+    }
+
+def make_positon(position, handler_params):
+    return {
+        "title": position.title,  # '文案'
+        "link": make_url('/m/position/{}'.format(position.id), handler_params),  # JD连接
+        "location": position.city,  # '上海
+        "salary": '{}k-{}'.format(position.salary_bottom, position.salary_top)  # '5k-8k'
+    }
+
+
+def make_team_detail_template(team, introduction_data, interview_data,
+                              positions, vst_cmpy=False):
 
     introduction = ObjectDict({
         'type': 1,
@@ -93,12 +107,7 @@ def make_team_detail_template(team, team_members, positions, vst_cmpy=False):
     position = ObjectDict({
         'type': 3,
         'title': "团队在招职位",
-        'data': [{
-            "title": pos.title, # '文案'
-            "link": pos.url,
-            "location": pos.loaction, # '上海
-            "salary": pos.salary  #'5k-8k'
-        } for pos in positions]
+        'data': positions
     })
 
     template = [introduction, interview, position]
@@ -109,24 +118,25 @@ def make_team_detail_template(team, team_members, positions, vst_cmpy=False):
     return template
 
 
-def make_other_team(company_id, team_id):
+def make_other_team_data(team, media, handler_params):
+    return {
+        "title": team.name,
+        "link": make_url('/m/company/team/{}'.format(team.id), handler_params),
+        "description": team.summary,
+        "media_url": media.media_url,
+        "media_type": "image"
+    }
 
-    teams = 'get all teams' % company_id
-    otherteam = ObjectDict({
+
+def make_other_team(other_teams):
+    other_team = ObjectDict({
         'type': 4,
         'sub_type': 0,
         'title': '其他团队',
-        'data': [
-            {
-                "title": team.name,
-                "link": team.link,
-                "description": team.description,
-                "media_url": team.media,
-                "media_type": "image"
-            } for team in teams if team.id != team_id]
+        'data': other_teams
     })
 
-    return otherteam
+    return other_team
 
 
 
