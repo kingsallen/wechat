@@ -15,47 +15,9 @@ from util.tool import temp_date_tool
 
 class TeamPageService(PageService):
 
-    _OTHER_TEAM = ObjectDict(
-        cs={
-            "title": "客户成功团队",
-            "link":  "https://platform.moseeker.com/m/company/team/cs?wechat_signature=NjYyM2M4ZDAzOTk5NThmNjlhMGI0OWM2ZTgwOTk1Njc2MTU0Y2ZhOQ==",
-            "description": "专注于提供企业雇主品牌的策略咨询及实施服务",
-            "media_url": 'https://cdn.moseeker.com/upload/company_profile/qx/'
-                                   'CSFULL.png',
-            "media_type": "image"
-        },
-        bd={
-            "title":       "商务拓展团队",
-            "link": "https://platform.moseeker.com/m/company/team/bd"
-                    "?wechat_signature=NjYyM2M4ZDAzOTk5NThmNjlhMGI0OWM2ZTgwOTk1Njc2MTU0Y2ZhOQ==",
-            "description": "开发优秀企业，提供合作方案，解决招聘难题，提升雇主形象",
-            "media_url":   'https://cdn.moseeker.com/upload/company_profile/qx/'
-                                   'BDFULL.jpeg',
-            "media_type":  "image"
-        },
-        eb={
-            "title":       "雇主品牌团队",
-            "link": "https://platform.moseeker.com/m/company/team/eb"
-                    "?wechat_signature=NjYyM2M4ZDAzOTk5NThmNjlhMGI0OWM2ZTgwOTk1Njc2MTU0Y2ZhOQ==",
-            "description": "专注于提供企业雇主品牌的策略咨询及实施服务",
-            "media_url":   'https://cdn.moseeker.com/upload/company_profile/qx/'
-                                   'EBFULL.jpeg',
-            "media_type":  "image"
-        },
-        rd={
-            "title":       "研发团队",
-            "link": "https://platform.moseeker.com/m/company/team/rd"
-                    "?wechat_signature=NjYyM2M4ZDAzOTk5NThmNjlhMGI0OWM2ZTgwOTk1Njc2MTU0Y2ZhOQ==",
-            "description": "仟寻招聘的技术保证和动力引擎",
-            "media_url":   'https://cdn.moseeker.com/upload/company_profile/qx/'
-                                   'RDFULL.jpeg',
-            "media_type":  "image"
-        }
-    )
-
     @gen.coroutine
     def get_sub_company(self, sub_company_id):
-        sub_company = yield self.hr_company_dao.get_company(
+        sub_company = yield self.hr_company_ds.get_company(
             conds={'id': sub_company_id})
 
         raise gen.Return(sub_company)
@@ -156,6 +118,47 @@ class TeamPageService(PageService):
         data.templates_total = len(data.templates)
 
         raise gen.Return(data)
+
+    '''
+    暂且保留，待新版team功能debug通过后删除
+
+    _OTHER_TEAM = ObjectDict(
+        cs={
+            "title": "客户成功团队",
+            "link":  "https://platform.moseeker.com/m/company/team/cs?wechat_signature=NjYyM2M4ZDAzOTk5NThmNjlhMGI0OWM2ZTgwOTk1Njc2MTU0Y2ZhOQ==",
+            "description": "专注于提供企业雇主品牌的策略咨询及实施服务",
+            "media_url": 'https://cdn.moseeker.com/upload/company_profile/qx/'
+                                   'CSFULL.png',
+            "media_type": "image"
+        },
+        bd={
+            "title":       "商务拓展团队",
+            "link": "https://platform.moseeker.com/m/company/team/bd"
+                    "?wechat_signature=NjYyM2M4ZDAzOTk5NThmNjlhMGI0OWM2ZTgwOTk1Njc2MTU0Y2ZhOQ==",
+            "description": "开发优秀企业，提供合作方案，解决招聘难题，提升雇主形象",
+            "media_url":   'https://cdn.moseeker.com/upload/company_profile/qx/'
+                                   'BDFULL.jpeg',
+            "media_type":  "image"
+        },
+        eb={
+            "title":       "雇主品牌团队",
+            "link": "https://platform.moseeker.com/m/company/team/eb"
+                    "?wechat_signature=NjYyM2M4ZDAzOTk5NThmNjlhMGI0OWM2ZTgwOTk1Njc2MTU0Y2ZhOQ==",
+            "description": "专注于提供企业雇主品牌的策略咨询及实施服务",
+            "media_url":   'https://cdn.moseeker.com/upload/company_profile/qx/'
+                                   'EBFULL.jpeg',
+            "media_type":  "image"
+        },
+        rd={
+            "title":       "研发团队",
+            "link": "https://platform.moseeker.com/m/company/team/rd"
+                    "?wechat_signature=NjYyM2M4ZDAzOTk5NThmNjlhMGI0OWM2ZTgwOTk1Njc2MTU0Y2ZhOQ==",
+            "description": "仟寻招聘的技术保证和动力引擎",
+            "media_url":   'https://cdn.moseeker.com/upload/company_profile/qx/'
+                                   'RDFULL.jpeg',
+            "media_type":  "image"
+        }
+    )
 
     @gen.coroutine
     def get_more_team_info(self, team_name, params):
@@ -637,3 +640,4 @@ class TeamPageService(PageService):
         data.templates_total = len(data.templates)
 
         raise gen.Return(data)
+    '''
