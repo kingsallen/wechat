@@ -250,6 +250,7 @@ class BaseHandler(MetaBaseHandler):
 
         # 创建 qx 的 user_wx_user
         yield self.user_ps.create_qx_wxuser_by_userinfo(userinfo, user_id)
+        yield self.user_ps.ensure_user_unionid(user_id, userinfo.unionid)
 
         if self._authable():
             # 该企业号是服务号

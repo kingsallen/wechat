@@ -204,6 +204,20 @@ class UserPageService(PageService):
             })
 
     @gen.coroutine
+    def ensure_user_unionid(self, user_id, unionid):
+        user = yield self.user_user_ds.get_user(
+            conds={'id': user_id},
+            fields=['unionid']
+        )
+        if user.unionid != unionid:
+            self.logger.warn("user_user.unionid incorrect, user:{}, real_unionid: {}".format(user, unionid))
+            yield self.user_user_ds.update_user(
+                conds={'id': user_id},
+                fields={'unionid': unionid}
+            )
+            self.logger.warn("fixed")
+
+    @gen.coroutine
     def update_user_user_current_info(self, sysuser_id, data):
         """更新用户真实姓名，最近工作单位和最近职位"""
         response = yield self.user_user_ds.update_user(
