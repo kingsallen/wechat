@@ -36,10 +36,10 @@ class TeamPageService(PageService):
             publishers = yield self.hr_company_account_ds.get_company_accounts_list(
                 conds={'company_id': company.id})
             publisher_id_tuple = tuple([p.account_id for p in publishers])
-            teams_id = yield self.job_postion.get_positions_list(
+            team_ids = yield self.job_postion_ds.get_positions_list(
                 conds='publisher in {}'.format(publisher_id_tuple),
                 fields=['team_id'], options=['DISTINCT'])
-            team_id_tuple = tuple([t.team_id for t in teams_id])
+            team_id_tuple = tuple([t.team_id for t in team_ids])
             teams = yield self.hr_team_ds.get_team_list(
                 conds='id in {}'.format(team_id_tuple))
         else:
@@ -48,13 +48,13 @@ class TeamPageService(PageService):
 
         for team in teams:
             member_list = []
-            team_medium = yield self.hr_media.get_medium(
+            team_medium = yield self.hr_media_ds.get_medium(
                 conds={'id': team.media_id})
 
             team_members = yield self.hr_team_member_ds.get_team_member_list(
                                 conds={'team_id': team.id})
             for member in team_members:
-                headimg = yield self.hr_media.get_medium(
+                headimg = yield self.hr_media_ds.get_medium(
                     conds={'id': member.headimg_id})
                 member_list.append(temp_date_tool.make_team_member(
                     member, headimg))
@@ -72,10 +72,10 @@ class TeamPageService(PageService):
         publishers = yield self.hr_company_account_ds.get_company_accounts_list(
             conds={'company_id': company.id})
         publisher_id_tuple = tuple([p.account_id for p in publishers])
-        company_positions = yield self.job_postion.get_positions_list(
+        company_positions = yield self.job_postion_ds.get_positions_list(
                 conds='publisher in {}'.format(publisher_id_tuple))
         team_positions = [pos for pos in company_positions
-                         if pos.team_id == team.id]
+                         if pos.team_id == team.id and pos.status == 0]
         vst_cmpy = yield self.user_company_visit_req_ds.get_visit_cmpy(
             conds={'user_id': user.id, 'company_id': company.id},
             fields=['id', 'company_id'])
@@ -84,10 +84,11 @@ class TeamPageService(PageService):
         data.relation = ObjectDict({
             'want_visit': self.constant.YES if vst_cmpy else self.constant.NO})
 
+        team_medium = yield self.hr_media_ds.get_medium({'id': team.media_id})
         team_members = yield self.hr_team_member_ds.get_team_member_list(
                             conds={'team_id': team.id})
         for member in team_members:
-            headimg, meida = yield self.hr_media.get_media_list(
+            headimg, meida = yield self.hr_media_ds.get_media_list(
                 conds='id in {}'.format((member.headimg_id, member.media_id)))
             interview.append(temp_date_tool.make_interview(member, meida))
             introduction.append(temp_date_tool.make_introduction(
@@ -95,14 +96,15 @@ class TeamPageService(PageService):
         position_data = [temp_date_tool.make_positon(position, handler_params)
                          for position in team_positions]
         data.templates = temp_date_tool.make_team_detail_template(
-            team, introduction, interview, position_data, bool(vst_cmpy))
+            team, team_medium, introduction, interview,
+            position_data, bool(vst_cmpy))
 
         if company.id != user.company.id:
             team_id_list = list(set([p.team_id for p in company_positions
                                      if p.team_id != team.id]))
             for id in team_id_list:
                 other = yield self.hr_team_ds.get_team(conds={'id': id})
-                other_media = yield self.hr_media.get_medium(
+                other_media = yield self.hr_media_ds.get_medium(
                     conds={'id': other.media_id})
                 other_teams.append(temp_date_tool.make_other_team_data(
                     other, other_media, handler_params))
@@ -110,7 +112,7 @@ class TeamPageService(PageService):
             others = yield self.hr_team_ds.get_team_list(
                 conds={'company_id': user.company.id})
             for other in others:
-                other_media = yield self.hr_media.get_medium(
+                other_media = yield self.hr_media_ds.get_medium(
                     conds={'id': other.media_id})
                 other_teams.append(temp_date_tool.make_other_team_data(
                     other, other_media, handler_params))

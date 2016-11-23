@@ -2,14 +2,16 @@
 
 # Copyright 2016 MoSeeker
 
+import json
 from tornado import gen
-from service.page.base import PageService
-import conf.common as const
-from util.common import ObjectDict
-from util.tool.http_tool import http_get, async_das_get
-from util.tool.date_tool import jd_update_date
-from util.tool.str_tool import gen_salary, split
 
+import conf.common as const
+from service.page.base import PageService
+from util.common import ObjectDict
+from util.tool.date_tool import jd_update_date
+from util.tool.http_tool import http_get, async_das_get
+from util.tool.str_tool import gen_salary, split
+from util.tool.temp_date_tool import make_mate, make_team, make_positon
 
 class PositionPageService(PageService):
 
@@ -64,7 +66,8 @@ class PositionPageService(PageService):
             "publisher":        position_res.publisher,
             "source":           position_res.source,
             "share_tpl_id":     position_res.share_tpl_id,
-            "hb_status":        position_res.hb_status
+            "hb_status":        position_res.hb_status,
+            "team_id":          position_res.team_id
         })
 
         # 后置处理：
@@ -121,7 +124,7 @@ class PositionPageService(PageService):
             "sysuser_id": user_id,
             "favorite": const.FAV_YES
         })
-        
+
         raise gen.Return(const.YES if fav else const.NO)
 
     @gen.coroutine
@@ -217,3 +220,38 @@ class PositionPageService(PageService):
             yield async_das_get("candidate/glancePosition", params)
         except Exception as error:
             self.logger.warn(error)
+
+    @gen.coroutine
+    def get_mate_data(self, jd_media):
+        job_media = json.loads(jd_media)
+        if isinstance(job_media, list) and job_media:
+            media_list = yield self.hr_media_ds.get_media_list(
+                conds='id in {}'.format(tuple(job_media)))
+            res = ObjectDict({
+                "title": media_list[0].title,  # 同事的一天
+                "sub_type": "less",
+                "data": [make_mate(obj) for obj in media_list]
+            })
+        else:
+            res = None
+
+        raise gen.Return(res)
+
+    @gen.coroutine
+    def get_team_data(self, team):
+        team_medium = yield self.hr_media_ds.get_medium(
+            conds={'id': team.media_id})
+        res = make_team(team, team_medium)
+
+        raise gen.Return(res)
+
+    @gen.coroutine
+    def get_team_position(self, team_id):
+        positions = yield self.job_position_ds.get_positions_list(
+            conds={'team_id': team_id, 'status': 0})
+        res = ObjectDict({
+            "title": "我们团队还需要",
+            "data": [make_positon(p) for p in positions[0:3]]
+        })
+
+        raise gen.Return(res)
