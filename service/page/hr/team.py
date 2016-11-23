@@ -94,7 +94,7 @@ class TeamPageService(PageService):
             introduction.append(temp_date_tool.make_introduction(
                 member, headimg))
         position_data = [temp_date_tool.make_positon(position, handler_params)
-                         for position in team_positions]
+                         for position in team_positions[0:3]]
         data.templates = temp_date_tool.make_team_detail_template(
             team, team_medium, introduction, interview,
             position_data, bool(vst_cmpy))

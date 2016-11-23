@@ -14,6 +14,44 @@ from util.tool.url_tool import make_static_url, make_url
 from util.tool.str_tool import gen_salary
 
 
+# 企业主页中模板数据 hr_media 中 id 的 list
+COMPANY_CONFIG = ObjectDict({
+    'working_env': [],  # 工作环境对应的 hr_media id list
+    'figure': [],  # 人物寄语
+    'members': [],  # 公司成员
+    'events': [],  # 公司成员
+
+})
+
+
+def template1(sub_type, title, data, more_link):
+    """
+
+    :param data: [{
+        'title': "一楼大会议室",
+        'longtext': "",
+        'media_url': 'https://cdn.moseeker.com/upload/company_profile/qx/meetingroom.jpeg',
+        'media_type': 'image',
+        'member_list': [{
+            "icon":        'https://cdn.moseeker.com/upload/company_profile'
+                           '/qx/neo.jpeg',
+            "name":        'Neo',
+            "title":       '设计师',
+            "description": '我是一个乐观开朗、正气十足的非典型设计师，喜欢篮球，'
+                           '喜欢美食，喜欢奇怪小创意。',
+        }, ...]
+    }, ...]
+    :return:
+    """
+    return ObjectDict({
+        'type': 1,
+        'sub_type': sub_type,
+        'title': title,
+        'data': data,
+        'more_link': more_link
+    })
+
+
 def make_header(company, team_flag=False, team=None):
     if team:
         name = team.name
@@ -31,6 +69,7 @@ def make_header(company, team_flag=False, team=None):
     })
 
 
+# 团队相关模板和生成器
 def make_team_member(member, headimg):
     return ObjectDict({
         "icon": make_static_url(headimg.media_url),
@@ -139,6 +178,17 @@ def make_other_team(other_teams):
     })
 
     return other_team
+
+
+# company main page template generator
+def make_company_working_env():
+    print('I run')
+
+
+def make_company_template(handler_param):
+    template = []
+
+    return template
 
 
 # JD page

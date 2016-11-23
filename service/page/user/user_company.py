@@ -44,6 +44,25 @@ class UserCompanyPageService(PageService):
 
         raise gen.Return(data)
 
+    @gen.coroutine
+    def _get_company_template(self):
+        values = sum(temp_date_tool.COMPANY_CONFIG.values(), [])
+        media_list = yield self.hr_media_ds.get_media_list(
+            conds='id in {}'.format(tuple(values)))
+        media = {str(m.id): m for m in media_list}
+
+        templates = [
+            getattr(temp_date_tool, 'make_company_{}'.format(key))(
+                [media.get(str(v)) for v in values])
+            for key, value in temp_date_tool.COMPANY_CONFIG.items()
+        ]
+
+        raise gen.Return(templates)
+
+
+
+
+
     @staticmethod
     def _add_company_data(hander_params, data):
         """构建公司主页的豆腐干们"""
@@ -179,3 +198,11 @@ class UserCompanyPageService(PageService):
         result = True if response else False
 
         raise gen.Return(result)
+
+
+if __name__ == '__main__':
+    print(getattr(temp_date_tool, 'make_company_working_env')())
+
+
+    # temp_date_tool
+    print('a')
