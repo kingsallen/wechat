@@ -748,6 +748,12 @@ class BaseHandler(MetaBaseHandler):
 
     def _get_info_header(self, log_params):
         """构建日志内容"""
+
+        def _readable_cookies():
+            return ObjectDict(
+                {k: repr(v.value) for k, v in sorted(self.cookies.items())}
+            )
+
         request = self.request
         req_params = request.arguments
 
@@ -779,7 +785,7 @@ class BaseHandler(MetaBaseHandler):
                 request.remote_ip
             ),
             event="{}_{}".format(self._event, request.method),
-            cookie=self.cookies,
+            cookie=_readable_cookies(),
             user_id=user_id,
             req_type=request.method,
             req_uri=request.uri,
