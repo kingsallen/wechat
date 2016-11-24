@@ -40,7 +40,7 @@ class TeamPageService(PageService):
             teams = yield self.hr_team_ds.get_team_list(
                 conds={'company_id': company.id})
 
-        team_id_list = [t.media_id for t in teams]
+        team_id_list = [t.media_id for t in teams] # 修改
         team_media_dict = yield ps_tool.get_media_by_ids(self, team_id_list)
         all_members_dict = yield self._get_all_team_members(team_id_list)
         all_member_headimg_dict = yield ps_tool.get_media_by_ids(
