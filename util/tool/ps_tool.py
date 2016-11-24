@@ -7,14 +7,20 @@ from util.common import ObjectDict
 
 
 @gen.coroutine
-def get_sub_company_teams(self, company_id):
-    publishers = yield self.hr_company_account_ds.get_company_accounts_list(
-        conds={'company_id': company_id})
-    publisher_id_tuple = tuple([p.account_id for p in publishers])
-    team_ids = yield self.job_postion_ds.get_positions_list(
-        conds='publisher in {}'.format(publisher_id_tuple),
-        fields=['team_id'], options=['DISTINCT'])
-    team_id_tuple = tuple([t.team_id for t in team_ids])
+def get_sub_company_teams(self, company_id, publishers=None, team_ids=None):
+    if not team_ids:
+        if not publishers:
+            publishers = yield self.hr_company_account_ds.get_company_accounts_list(
+                conds={'company_id': company_id})
+            publisher_id_tuple = tuple([p.account_id for p in publishers])
+        else:
+            publisher_id_tuple = tuple(publishers)
+        team_ids = yield self.job_postion_ds.get_positions_list(
+            conds='publisher in {}'.format(publisher_id_tuple),
+            fields=['team_id'], options=['DISTINCT'])
+        team_id_tuple = tuple([t.team_id for t in team_ids])
+    else:
+        team_id_tuple = tuple(team_ids)
     teams = yield self.hr_team_ds.get_team_list(
         conds='id in {}'.format(team_id_tuple))
 
