@@ -49,19 +49,10 @@ class CompanyHandler(BaseHandler):
     @gen.coroutine
     @check_sub_company
     def get(self):
-        template_name = 'company/profile.html'
         company = self.params.pop('sub_company') if self.params.sub_company \
             else self.current_user.company
 
-        # if sub_company_id is not None:
-        #     sub_company = self.team_ps.get_sub_company(sub_company_id)
-        #     if sub_company.parent_id != self.current_user.company.id:
-        #         self.write_error(404)
-        #         return
-        #     else:
-        #         company = sub_company
-
-        data = yield self.user_company_ps.get_companay_data(
+        data = yield self.user_company_ps.get_company_data(
             self.params, company, self.current_user.id)
 
         company_name = company.abbreviation or company.name
@@ -72,7 +63,7 @@ class CompanyHandler(BaseHandler):
             'link':        self.fullurl
         })
 
-        self.render_page(template_name, data=data)
+        self.render_page(template_name='company/profile.html', data=data)
         return
 
 

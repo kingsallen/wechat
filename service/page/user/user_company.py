@@ -10,18 +10,17 @@
 from tornado import gen
 
 from service.page.base import PageService
-from tests.dev_data.user_company_data import WORKING_ENV, TEAMS, MEMBERS, \
-    data2, TEAM_EB, TEAM_BD, TEAM_CS, TEAM_RD, data4_1, data50
 from util.common import ObjectDict
-from util.tool.url_tool import make_url, make_static_url
-from util.tool import temp_date_tool
+from util.tool.url_tool import make_url
+from util.tool import temp_date_tool, ps_tool
+from tests.dev_data.user_company_config import COMPANY_CONFIG
 import conf.path as path
 
 
 class UserCompanyPageService(PageService):
 
     @gen.coroutine
-    def get_companay_data(self, handler_params, company, user_id):
+    def get_company_data(self, handler_params, company, user):
         """Develop Status: To be modify with real data.
         :param handler_params:
         :param company: 当前公司
@@ -30,7 +29,7 @@ class UserCompanyPageService(PageService):
         data = ObjectDict()
         data.header = temp_date_tool.make_header(company)
 
-        conds = {'user_id': user_id, 'company_id': company.id}
+        conds = {'user_id': user.id, 'company_id': company.id}
         fllw_cmpy = yield self.user_company_follow_ds.get_fllw_cmpy(
                         conds=conds, fields=['id', 'company_id'])
         vst_cmpy = yield self.user_company_visit_req_ds.get_visit_cmpy(
@@ -40,108 +39,35 @@ class UserCompanyPageService(PageService):
             'want_visit': self.constant.YES if vst_cmpy else self.constant.NO
         })
 
-        self._add_company_data(handler_params, data)
+        if company.id != user.company.id:
+            teams = yield ps_tool.get_sub_company_teams(self, company.id)
+        else:
+            teams = yield self.hr_team_ds.get_team_list(
+                conds={'company_id': company.id})
+        team_resource_list = yield ps_tool.get_team_resource(self, teams)
+        data.templates = yield self._get_company_template(company.id)
+        team_template = temp_date_tool.make_company_team(
+            team_resource_list, make_url(path.COMPANY_TEAM, handler_params))
+        data.templates.insert(2, team_template)  # 暂且固定团队信息在公司主页位置
+        data.template_total = len(data.templates)
 
         raise gen.Return(data)
 
     @gen.coroutine
-    def _get_company_template(self):
-        values = sum(temp_date_tool.COMPANY_CONFIG.values(), [])
+    def _get_company_template(self, company_id):
+        company_config = COMPANY_CONFIG.get(str(company_id))
+        values = sum(company_config.config.values(), [])
         media_list = yield self.hr_media_ds.get_media_list(
             conds='id in {}'.format(tuple(values)))
         media = {str(m.id): m for m in media_list}
 
         templates = [
             getattr(temp_date_tool, 'make_company_{}'.format(key))(
-                [media.get(str(v)) for v in values])
-            for key, value in temp_date_tool.COMPANY_CONFIG.items()
+                [media.get(str(id)) for id in company_config.config.get(key)]
+            ) for key in company_config.order
         ]
 
         raise gen.Return(templates)
-
-
-
-
-
-    @staticmethod
-    def _add_company_data(hander_params, data):
-        """构建公司主页的豆腐干们"""
-
-        data.templates = [
-            ObjectDict({
-                'type': 1,
-                'sub_type': 'less',
-                'title': '办公环境',
-                'data': WORKING_ENV,
-                'more_link': ''
-            }),
-            ObjectDict({'type': 2, 'title': 'template 2', 'data': data2}),
-            ObjectDict({
-                'type':      1,
-                'sub_type':  'less',
-                'title':     '我们的团队',
-                'data':      TEAMS,
-                'more_link': make_url(path.COMPANY_TEAM, hander_params)
-            }),
-            ObjectDict({
-                'type':      1,
-                'sub_type':  'less',
-                'title':     '在这里工作的人们',
-                'data':      MEMBERS,
-                'more_link': ''
-            }),
-            ObjectDict({
-                'type': 4,
-                'sub_type': 0,
-                'title': '公司大事件',
-                'data': data4_1
-            }),
-            # 可能感兴趣的公司，暂时不做
-            # ObjectDict({'type': 4, 'sub_type': 1, 'title': '你可能感兴趣的公司',
-            #             'data': data4_2}),
-            ObjectDict({'type': 50, 'title': 'address', 'data': data50}),
-            ObjectDict({'type': 5, 'title': '', 'data': None})
-        ]
-        data.template_total = len(data.templates)
-
-    @staticmethod
-    def _add_team_data(hander_params, data):
-        """构建团队主页的豆腐干们"""
-
-        data.templates = [
-            ObjectDict({
-                'type':      1,
-                'sub_type':  'middle',
-                'title':     '研发团队',
-                'data':      TEAM_RD,
-                'more_link': make_url('/m/company/team/rd', hander_params)
-            }),
-
-            ObjectDict({
-                'type':      1,
-                'sub_type':  'middle',
-                'title':     '客户成功团队',
-                'data':      TEAM_CS,
-                'more_link': make_url('/m/company/team/cs', hander_params)
-            }),
-
-            ObjectDict({
-                'type':      1,
-                'sub_type':  'middle',
-                'title':     '商务拓展团队',
-                'data':      TEAM_BD,
-                'more_link': make_url('/m/company/team/bd', hander_params)
-            }),
-
-            ObjectDict({
-                'type':      1,
-                'sub_type':  'middle',
-                'title':     '雇主品牌团队',
-                'data':      TEAM_EB,
-                'more_link': make_url('/m/company/team/eb', hander_params)
-            }),
-        ]
-        data.template_total = len(data.templates)
 
     @gen.coroutine
     def set_company_follow(self, param):

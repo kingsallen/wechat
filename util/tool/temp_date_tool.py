@@ -14,34 +14,31 @@ from util.tool.url_tool import make_static_url, make_url
 from util.tool.str_tool import gen_salary
 
 
-# 企业主页中模板数据 hr_media 中 id 的 list
-COMPANY_CONFIG = ObjectDict({
-    'working_env': [],  # 工作环境对应的 hr_media id list
-    'figure': [],  # 人物寄语
-    'members': [],  # 公司成员
-    'events': [],  # 公司成员
-
-})
-
-
-def template1(sub_type, title, data, more_link):
+def template1(sub_type, title, more_link, data):
     """
 
-    :param data: [{
-        'title': "一楼大会议室",
-        'longtext': "",
-        'media_url': 'https://cdn.moseeker.com/upload/company_profile/qx/meetingroom.jpeg',
-        'media_type': 'image',
-        'member_list': [{
-            "icon":        'https://cdn.moseeker.com/upload/company_profile'
-                           '/qx/neo.jpeg',
-            "name":        'Neo',
-            "title":       '设计师',
-            "description": '我是一个乐观开朗、正气十足的非典型设计师，喜欢篮球，'
-                           '喜欢美食，喜欢奇怪小创意。',
-        }, ...]
-    }, ...]
-    :return:
+    :param sub_type:
+    :param title:
+    :param data:
+    :param more_link:
+    :return:ObjectDict({
+        'type': 1,
+        'sub_type': sub_type,
+        'title': title,
+        'more_link': more_link
+        'data': [{
+            'title': resource.title,
+            'longtext': resource.longtext,
+            'media_url': resource.media_url,
+            'media_type': 'image',
+            'member_list':[{
+                "icon": 'https://cdn.moseeker.com/upload/company_profile/qx/neo.jpeg',
+                "name": 'Neo',
+                "title": '设计师',
+                "description": '我是一个乐观开朗、正气十足的非典型设计师，喜欢篮球。'
+            }, ...]
+        }, ....]
+    })
     """
     return ObjectDict({
         'type': 1,
@@ -49,6 +46,77 @@ def template1(sub_type, title, data, more_link):
         'title': title,
         'data': data,
         'more_link': more_link
+    })
+
+
+def template1_data(resource, member_list=None):
+    return {
+        'title': resource.title,
+        'longtext': resource.longtext,
+        'media_url': make_static_url(resource.media_url),
+        'media_type': resource.media_type,
+        'member_list': member_list
+    }
+
+
+def template1_data_member(resource_list):
+    return [{
+        "icon": make_static_url(resource.media_url),
+        "name": resource.name,
+        "title": resource.itle,
+        "description": resource.description,
+    } for resource in resource_list]
+
+
+def template2(title, data):
+    return ObjectDict({
+        'type': 2,
+        'title': title,
+        'data': data
+    })
+
+
+def template2_data(resource_list):
+    return [{
+        'title': resource.title,
+        'description': resource.longtext,
+        'media_url': make_static_url(resource.media_url),
+        'media_type': 'image'
+    } for resource in resource_list]
+
+
+def template4(sub_type, title, data):
+    return ObjectDict({
+        'type': 4,
+        'sub_type': sub_type,
+        'title': title,
+        'data': data
+    })
+
+
+def template4_data(resource_list, sub_type):
+    if sub_type == 0:
+        data = template2_data(resource_list)
+    elif sub_type == 1:
+        data = [{
+            'title': resource.title,
+            'media_url': make_static_url(resource.media_url),
+            'link': resource.link
+        } for resource in resource_list]
+    else:
+        data = None
+
+    return data
+
+
+def template5(resource=None):
+    return ObjectDict({'type': 5, 'title': '', 'data': None})
+
+
+def template50(resource):
+    return ObjectDict({
+        'type': 50, 'title': 'address',
+        'data': [eval(resource.attrs)]
     })
 
 
@@ -79,20 +147,32 @@ def make_team_member(member, headimg):
     })
 
 
-def make_team_index_template(handler_params, team, team_medium, member_list):
-    return ObjectDict({
-        'type': 1,
-        'sub_type': 'middle',
+def make_team_index_template(team, team_medium, more_link, member_list):
+    data = {
         'title': team.name,
-        'more_link': make_url('/m/company/team/{}'.format(team.id), handler_params),
-        'data': [{
-            'title':       team.name,
-            'longtext':    team.description,
-            'media_url':   make_static_url(team_medium.media_url),
-            'media_type':  'image',
-            'member_list': member_list
-        }]
-    })
+        'longtext': team.description,
+        'media_url': make_static_url(team_medium.media_url),
+        'media_type': team_medium.media_type,
+        'member_list': member_list
+    }
+
+    template1(sub_type='middle', title=team.name, more_link=more_link,
+        data=data)
+
+
+    # return ObjectDict({
+    #     'type': 1,
+    #     'sub_type': 'middle',
+    #     'title': team.name,
+    #     'more_link': make_url('/m/company/team/{}'.format(team.id), handler_params),
+    #     'data': [{
+    #         'title':       team.name,
+    #         'longtext':    team.description,
+    #         'media_url':   make_static_url(team_medium.media_url),
+    #         'media_type':  'image',
+    #         'member_list': member_list
+    #     }]
+    # })
 
 
 def make_introduction(member, headimg):
@@ -181,15 +261,36 @@ def make_other_team(other_teams):
 
 
 # company main page template generator
-def make_company_working_env():
-    print('I run')
+def make_company_working_env(media_list):
+    return template1(sub_type='less', title='办公环境', more_link=None,
+                     data=[template1_data(media) for media in media_list])
 
 
-def make_company_template(handler_param):
-    template = []
+def make_company_figure(media_list):
+    return template2(title='template 2', data=template2_data(media_list))
 
-    return template
 
+def make_company_members(media_list):
+    return template1(sub_type='less', title='在这里工作的人们', more_link=None,
+                     data=[template1_data(media) for media in media_list])
+
+
+def make_company_events(media_list):
+    return template4(sub_type=0, title='公司大事件',
+                     data=template4(0, media_list))
+
+
+def make_company_address(media):
+    return template50(resource=media)
+
+
+def make_company_survey(media=None):
+    return template5(media)
+
+
+def make_company_team(resource_list, link):
+    return template1(sub_type='less', title='我们的团队', more_link=link,
+                     data=[template1_data(res) for res in resource_list])
 
 # JD page
 def make_mate(media):

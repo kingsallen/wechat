@@ -10,7 +10,9 @@ from util.common import ObjectDict
 from tornado import gen
 from service.page.base import PageService
 from util.tool import temp_date_tool
-# from tests.dev_data.user_company_data import WORKING_ENV, TEAMS
+from util.tool import ps_tool
+from util.tool.url_tool import make_url
+from conf import path
 
 
 class TeamPageService(PageService):
@@ -33,34 +35,23 @@ class TeamPageService(PageService):
         data.header = temp_date_tool.make_header(company, team_flag=True)
 
         if sub_flag:
-            publishers = yield self.hr_company_account_ds.get_company_accounts_list(
-                conds={'company_id': company.id})
-            publisher_id_tuple = tuple([p.account_id for p in publishers])
-            team_ids = yield self.job_postion_ds.get_positions_list(
-                conds='publisher in {}'.format(publisher_id_tuple),
-                fields=['team_id'], options=['DISTINCT'])
-            team_id_tuple = tuple([t.team_id for t in team_ids])
-            teams = yield self.hr_team_ds.get_team_list(
-                conds='id in {}'.format(team_id_tuple))
+            teams = yield ps_tool.get_sub_company_teams(self, company.id)
         else:
             teams = yield self.hr_team_ds.get_team_list(
                 conds={'company_id': company.id})
 
-        for team in teams:
-            member_list = []
-            team_medium = yield self.hr_media_ds.get_medium(
-                conds={'id': team.media_id})
-
-            team_members = yield self.hr_team_member_ds.get_team_member_list(
-                                conds={'team_id': team.id})
-            for member in team_members:
-                headimg = yield self.hr_media_ds.get_medium(
-                    conds={'id': member.headimg_id})
-                member_list.append(temp_date_tool.make_team_member(
-                    member, headimg))
-            data.templates.append(temp_date_tool.make_team_index_template(
-                handler_params, team, team_medium, member_list))
-
+        team_id_list = [t.media_id for t in teams]
+        team_media_dict = yield ps_tool.get_media_by_ids(self, team_id_list)
+        all_members_dict = yield self._get_all_team_members(team_id_list)
+        all_member_headimg_dict = yield ps_tool.get_media_by_ids(
+            self, all_members_dict.get('all_headimg_list'))
+        data.templates = [temp_date_tool.make_team_index_template(
+            team=t, team_medium=team_media_dict.get(t.media_id),
+            more_link=make_url(path.TEAM_PATH.format(t.id, handler_params)),
+            member_list=[temp_date_tool.make_team_member(
+                m, all_member_headimg_dict.get(m.headimg_id)) for
+                m in all_members_dict.get(t.id)]
+        ) for t in teams]
         data.template_total = len(data.templates)
 
         raise gen.Return(data)
@@ -87,12 +78,16 @@ class TeamPageService(PageService):
         team_medium = yield self.hr_media_ds.get_medium({'id': team.media_id})
         team_members = yield self.hr_team_member_ds.get_team_member_list(
                             conds={'team_id': team.id})
+        members_all_media = yield ps_tool.get_media_by_ids(
+            sum([[m.headimg_id, m.media_id] for m in team_members], []))
+
         for member in team_members:
-            headimg, meida = yield self.hr_media_ds.get_media_list(
-                conds='id in {}'.format((member.headimg_id, member.media_id)))
-            interview.append(temp_date_tool.make_interview(member, meida))
+            # headimg, meida = yield self.hr_media_ds.get_media_list(
+            #     conds='id in {}'.format((member.headimg_id, member.media_id)))
+            interview.append(temp_date_tool.make_interview(
+                member, members_all_media.get(member.media_id)))
             introduction.append(temp_date_tool.make_introduction(
-                member, headimg))
+                member, members_all_media.get(member.headimg_id)))
         position_data = [temp_date_tool.make_positon(position, handler_params)
                          for position in team_positions[0:3]]
         data.templates = temp_date_tool.make_team_detail_template(
@@ -120,6 +115,22 @@ class TeamPageService(PageService):
         data.templates_total = len(data.templates)
 
         raise gen.Return(data)
+
+    @gen.coroutine
+    def _get_all_team_members(self, team_id_list):
+        member_list = yield self.hr_team_member_ds.get_team_member_list(
+            conds='id in {}'.format(tuple([t.team_id for t in team_id_list]))
+        )
+        result = {'all_member_id_list': []}
+        for member in member_list:
+            result['all_headimg_list'].append(member.headimg_id)
+            result['all_media_list'].append(member.media_id)
+            team_member_list = result.get(member.team_id, [])
+            team_member_list.append(member)
+            result[member.team_id] = team_id_list
+
+        raise gen.Return(result)
+
 
     '''
     暂且保留，待新版team功能debug通过后删除
