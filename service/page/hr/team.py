@@ -24,6 +24,7 @@ class TeamPageService(PageService):
 
         raise gen.Return(sub_company)
 
+    @gen.coroutine
     def get_team_by_id(self, team_id):
         team = yield self.hr_team_ds.get_team(conds={'id': team_id})
 
