@@ -3,11 +3,20 @@
 # Copyright 2016 MoSeeker
 
 from tornado import gen
-from util.common import ObjectDict
 
 
 @gen.coroutine
 def get_sub_company_teams(self, company_id, publishers=None, team_ids=None):
+    """
+    获取团队信息
+    当只给定company_id，通过position信息中team_id寻找出所有相关团队
+    当给定team_ids时获取所有对应的团队
+    :param self:
+    :param company_id:
+    :param publishers:
+    :param team_ids:
+    :return: [object_of_hr_team, ...]
+    """
     if not team_ids:
         if not publishers:
             publishers = yield self.hr_company_account_ds.get_company_accounts_list(
@@ -28,43 +37,17 @@ def get_sub_company_teams(self, company_id, publishers=None, team_ids=None):
 
 
 @gen.coroutine
-def get_media_by_ids(self, id_list):
+def get_media_by_ids(self, id_list, list_flag=False):
+    """
+    获取制定media_id列表内所有media对象
+    :param self:
+    :param id_list:
+    :param list_flag: 为真返回media列表
+    :return: {object_hr_media.id: object_hr_media, ...} or [object_hr_media ...]
+    """
     media_list = yield self.hr_media_ds.get_media_list(
         conds='id in {}'.format(tuple(id_list)))
 
+    if list_flag:
+        raise gen.Return(media_list)
     raise gen.Return({m.id: m for m in media_list})
-
-
-@gen.coroutine
-def get_team_resource(self, team_list):
-    media_list = yield self.hr_media_ds.get_media_list(
-        conds='id in {}'.format(tuple([t.media_id for t in team_list])))
-    media_dict = {str(m.id): m for m in media_list}
-
-    raise gen.Return([ObjectDict({
-        # 'show_order': team.show_order, 如果需要对team排序
-        'id': team.id,
-        'title': team.name,
-        'longtext': team.description,
-        'media_url': media_dict.get(str(team.id).media_url),
-        'media_type': media_dict.get(str(team.id).media_type),
-    }) for team in team_list])
-
-
-@gen.coroutine
-def get_team_member_resource(self, team_id, headimgs=True, ):
-    team_members = yield self.hr_team_member_ds.get_team_member_list(
-        conds={'team_id': team_id})
-    headimg_list = yield self.hr_media_ds.get_media_list(
-        conds='id in {}'.format(tuple([m.headimg_id for m in team_members])))
-    headimgs = {str(m.id): m for m in headimg_list}
-
-    raise gen.Return([ObjectDict({
-        'id': member.id,
-        "icon": headimgs.get(member.headimg_id),
-        "name": member.name,
-        "title": member.itle,
-        "description": member.description,
-    }) for member in team_members])
-
-

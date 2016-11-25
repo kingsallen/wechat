@@ -20,6 +20,7 @@ import json
 from util.common import ObjectDict
 from util.tool.url_tool import make_static_url, make_url
 from util.tool.str_tool import gen_salary
+from conf.platform import MEDIA_TYPE
 
 
 def template1(sub_type, title, data, more_link=None):
@@ -38,7 +39,7 @@ def template1(sub_type, title, data, more_link=None):
             'title': resource.title,
             'longtext': resource.longtext,
             'media_url': resource.media_url,
-            'media_type': 'image',
+            'media_type': MEDIA_TYPE'image',
             'member_list':[{
                 "icon": 'https://cdn.moseeker.com/upload/company_profile/qx/neo.jpeg',
                 "name": 'Neo',
@@ -62,7 +63,7 @@ def template1_data(resource, member_list=None):
         'title': resource.title,
         'longtext': resource.longtext,
         'media_url': make_static_url(resource.media_url),
-        'media_type': resource.media_type,
+        'media_type': MEDIA_TYPE[resource.media_type],
         'member_list': member_list
     }
 
@@ -89,7 +90,7 @@ def template2_data(resource_list):
         'title': resource.title,
         'description': resource.longtext,
         'media_url': make_static_url(resource.media_url),
-        'media_type': 'image'
+        'media_type': MEDIA_TYPE['image']
     } for resource in resource_list]
 
 
@@ -161,10 +162,10 @@ def make_header(company, team_flag=False, team=None):
 # 团队列表模板和生成器
 def make_team_member(member, headimg):
     return ObjectDict({
-        "icon": make_static_url(headimg.media_url),
-        "name": member.name,
-        "title": member.title,
-        "description": member.description,
+        'icon': make_static_url(headimg.media_url),
+        'name': member.name,
+        'title': member.title,
+        'description': member.description,
     })
 
 
@@ -173,7 +174,7 @@ def make_team_index_template(team, team_medium, more_link, member_list):
         'title': team.name,
         'longtext': team.description,
         'media_url': make_static_url(team_medium.media_url),
-        'media_type': team_medium.media_type,
+        'media_type': MEDIA_TYPE[team_medium.media_type],
         'member_list': member_list
     }
 
@@ -184,10 +185,10 @@ def make_team_index_template(team, team_medium, more_link, member_list):
 # 团队详情模版生成器
 def make_introduction(member, headimg):
     return {
-        "icon": make_static_url(headimg.media_url),
-        "name": member.name,
-        "title": member.title,
-        "description": member.description
+        'icon': make_static_url(headimg.media_url),
+        'name': member.name,
+        'title': member.title,
+        'description': member.description
     }
 
 
@@ -196,17 +197,17 @@ def make_interview(member, media):
             'title': member.name,
             'longtext': '{}\n'.format(member.title),
             'media_url': make_static_url(media.media_url),
-            'media_type': media.media_type
+            'media_type': MEDIA_TYPE[media.media_type]
     }
 
 
 def make_other_team_data(team, media, handler_params):
     return {
-        "title": team.name,
-        "link": make_url('/m/company/team/{}'.format(team.id), handler_params),
-        "description": team.summary,
-        "media_url": make_static_url(media.media_url),
-        "media_type": "image"
+        'title': team.name,
+        'link': make_url('/m/company/team/{}'.format(team.id), handler_params),
+        'description': team.summary,
+        'media_url': make_static_url(media.media_url),
+        'media_type': MEDIA_TYPE[media.media_type]
     }
 
 
@@ -227,7 +228,7 @@ def make_team_detail_template(team, media_dict, members, positions,
                 'title': '',
                 'longtext': team.description,
                 'media_url': make_static_url(team_media.media_url),
-                'media_type': team_media.media_type,
+                'media_type': MEDIA_TYPE[team_media.media_type],
                 'member_list': introduction,
             }]
         ),
@@ -264,7 +265,7 @@ def make_company_members(media_list):
 
 def make_company_events(media_list):
     return template4(sub_type=0, title='公司大事件',
-                     data=template4(0, media_list))
+                     data=template4_data(media_list, 0))
 
 
 def make_company_address(media):
@@ -279,26 +280,28 @@ def make_company_team(resource_list, link):
     return template1(sub_type='less', title='我们的团队', more_link=link,
                      data=[template1_data(res) for res in resource_list])
 
+
 # JD page
-def make_mate(media):
-    return {
-        'title': media.name,
-        'longtext': '{}\n'.format(media.longtext),
-        'media_url': make_static_url(media.media_url),
-        'media_type': 'video'
-    }
+def make_mate(media_list):
+    return template1(
+        sub_type='less', title=media_list[0].title,
+        data=[{
+            'title': media.sub_title,
+            'longtext': '{}\n'.format(media.longtext),
+            'media_url': make_static_url(media.media_url),
+            'media_type': MEDIA_TYPE[media.media_type]
+        } for media in media_list]
+    )
 
 
 def make_team(team, team_medium):
-    return {
-        'type': 1,
-        'title': '所属团队',
-        'sub_type': 'full',
-        'data': [{
+    return template1(
+        sub_type='full', title='所属团队',
+        data=[{
             'title': '',
             'longtext': team.description,
             'media_url': make_static_url(team_medium.media_url),
-            'media_type': 'image',
+            'media_type': MEDIA_TYPE[team_medium.media_type],
             'member_list': None,
         }]
-    }
+    )

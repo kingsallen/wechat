@@ -11,7 +11,8 @@ from util.common import ObjectDict
 from util.tool.date_tool import jd_update_date
 from util.tool.http_tool import http_get, async_das_get
 from util.tool.str_tool import gen_salary, split
-from util.tool.temp_date_tool import make_mate, make_team, make_positon
+from util.tool.temp_date_tool import make_mate, make_team, template3
+from util.tool import ps_tool
 
 class PositionPageService(PageService):
 
@@ -225,13 +226,8 @@ class PositionPageService(PageService):
     def get_mate_data(self, jd_media):
         job_media = json.loads(jd_media)
         if isinstance(job_media, list) and job_media:
-            media_list = yield self.hr_media_ds.get_media_list(
-                conds='id in {}'.format(tuple(job_media)))
-            res = ObjectDict({
-                "title": media_list[0].title,  # 同事的一天
-                "sub_type": "less",
-                "data": [make_mate(obj) for obj in media_list]
-            })
+            media_list = yield ps_tool.get_media_by_ids(self, job_media, True)
+            res = make_mate(media_list)
         else:
             res = None
 
@@ -246,12 +242,10 @@ class PositionPageService(PageService):
         raise gen.Return(res)
 
     @gen.coroutine
-    def get_team_position(self, team_id):
+    def get_team_position(self, team_id, handler_params):
         positions = yield self.job_position_ds.get_positions_list(
             conds={'team_id': team_id, 'status': 0})
-        res = ObjectDict({
-            "title": "我们团队还需要",
-            "data": [make_positon(p) for p in positions[0:3]]
-        })
+        res = template3(title='我们团队还需要', resource_list=positions,
+                        handler_params=handler_params)
 
         raise gen.Return(res)

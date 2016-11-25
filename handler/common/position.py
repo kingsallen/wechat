@@ -58,16 +58,14 @@ class PositionHandler(BaseHandler):
             self.logger.debug("[JD]构建相似职位推荐")
             recomment_positions_res = yield self.position_ps.get_recommend_positions(position_id)
 
-            header = self._make_json_header(position_info, company_info, star, application, endorse, can_apply)
+            header = self._make_json_header(position_info, company_info, star,
+                                            application, endorse, can_apply)
             module_job_description = self._make_json_job_description(position_info)
             module_job_require = self._make_json_job_require(position_info)
             module_job_need = self._make_json_job_need(position_info)
             module_feature = self._make_json_job_feature(position_info)
             module_company_info = self._make_json_job_company_info(company_info)
             module_position_recommend = self._make_recommend_positions(recomment_positions_res)
-            module_mate_day = yield self._make_mate_day(team)
-            module_team = yield self._make_team(team)
-            module_team_position = yield self._make_team_position(team)
 
             position_data = ObjectDict()
             add_item(position_data, "header", header)
@@ -77,9 +75,15 @@ class PositionHandler(BaseHandler):
             add_item(position_data, "module_feature", module_feature)
             add_item(position_data, "module_company_info", module_company_info)
             add_item(position_data, "module_position_recommend", module_position_recommend)
-            add_item(position_data, "module_mate_day", module_mate_day)
-            add_item(position_data, "module_team", module_team)
-            add_item(position_data, "module_team_position", module_team_position)
+
+            if team:
+                module_mate_day = yield self._make_mate_day(team)
+                module_team = yield self._make_team(team)
+                module_team_position = yield self._make_team_position(team)
+
+                add_item(position_data, "module_mate_day", module_mate_day)
+                add_item(position_data, "module_team", module_team)
+                add_item(position_data, "module_team_position", module_team_position)
 
             self.logger.debug("position_data: %s" % position_data)
             self.logger.debug("self.params: %s" % self.params)
@@ -371,38 +375,28 @@ class PositionHandler(BaseHandler):
     @gen.coroutine
     def _make_team_position(self, team):
         """团队职位，构造数据"""
-
-        if not team:
-            res = None
-        else:
-            res = yield self.position_ps.get_team_position(team.id)
-            # res = ObjectDict({
-            #     "title": "我们团队还需要",
-            #     "data": team.templates[2].data
-            # })
+        res = yield self.position_ps.get_team_position(team.id, self.params)
+        # res = ObjectDict({
+        #     "title": "我们团队还需要",
+        #     "data": team.templates[2].data
+        # })
         raise gen.Return(res)
 
     @gen.coroutine
     def _make_mate_day(self, team):
         """同事的一天，构造数据"""
-        if not team:
-            res = None
-        else:
-            res = yield self.position_ps.get_mate_data(team.jd_media)
-            # res = ObjectDict({
-            #     "title": "同事的一天",
-            #     "sub_type": "less",
-            #     "data": [team.templates[1].data[0]]
-            # })
+        res = yield self.position_ps.get_mate_data(team.jd_media)
+        # res = ObjectDict({
+        #     "title": "同事的一天",
+        #     "sub_type": "less",
+        #     "data": [team.templates[1].data[0]]
+        # })
         raise gen.Return(res)
 
     @gen.coroutine
     def _make_team(self, team):
         """所属团队，构造数据"""
-        if not team:
-            res = None
-        else:
-            res = yield self.position_ps.get_team_data(team)
+        res = yield self.position_ps.get_team_data(team)
         # res = ObjectDict({
         #     "title": "所属团队",
         #     "sub_type": " full",

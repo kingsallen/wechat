@@ -27,27 +27,27 @@ class UserCompanyPageService(PageService):
         :return:
         """
         data = ObjectDict()
-        data.header = temp_date_tool.make_header(company)
 
         conds = {'user_id': user.id, 'company_id': company.id}
         fllw_cmpy = yield self.user_company_follow_ds.get_fllw_cmpy(
                         conds=conds, fields=['id', 'company_id'])
         vst_cmpy = yield self.user_company_visit_req_ds.get_visit_cmpy(
                         conds=conds, fields=['id', 'company_id'])
-        data.relation = ObjectDict({
-            'follow': self.constant.YES if fllw_cmpy else self.constant.NO,
-            'want_visit': self.constant.YES if vst_cmpy else self.constant.NO
-        })
 
         if company.id != user.company.id:
             teams = yield ps_tool.get_sub_company_teams(self, company.id)
         else:
             teams = yield self.hr_team_ds.get_team_list(
                 conds={'company_id': company.id})
-        team_resource_list = yield ps_tool.get_team_resource(self, teams)
-        data.templates = yield self._get_company_template(company.id)
+        team_resource_list = yield self.get_team_resource(teams)
         team_template = temp_date_tool.make_company_team(
             team_resource_list, make_url(path.COMPANY_TEAM, handler_params))
+
+        data.header = temp_date_tool.make_header(company)
+        data.relation = ObjectDict({
+            'follow': self.constant.YES if fllw_cmpy else self.constant.NO,
+            'want_visit': self.constant.YES if vst_cmpy else self.constant.NO})
+        data.templates = yield self._get_company_template(company.id)
         data.templates.insert(2, team_template)  # 暂且固定团队信息在公司主页位置
         data.template_total = len(data.templates)
 
@@ -68,6 +68,20 @@ class UserCompanyPageService(PageService):
         ]
 
         raise gen.Return(templates)
+
+    @gen.coroutine
+    def get_team_resource(self, team_list):
+        media_dict = yield ps_tool.get_media_by_ids(
+            [t.media_id for t in team_list])
+
+        raise gen.Return([ObjectDict({
+            # 'show_order': team.show_order, 如果需要对team排序
+            'id': team.id,
+            'title': team.name,
+            'longtext': team.description,
+            'media_url': media_dict.get(team.id).media_url,
+            'media_type': media_dict.get(team.id).media_type,
+        }) for team in team_list])
 
     @gen.coroutine
     def set_company_follow(self, param):
