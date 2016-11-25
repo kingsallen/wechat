@@ -172,6 +172,8 @@ class BaseHandler(MetaBaseHandler):
         code = self.params.get("code")
         state = self.params.get("state")
 
+        self.logger.debug("prepare: {}".format(self.request))
+
         self.logger.debug("code:{}, state:{}, request_url:{} ".format(code, state, self.request.uri))
 
         if self.in_wechat:
