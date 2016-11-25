@@ -399,6 +399,7 @@ class BaseHandler(MetaBaseHandler):
     @gen.coroutine
     def _get_user_info(self, code):
         self._oauth_service.wechat = self._qx_wechat
+        self.logger.debug("_get_user_info: {}".format(self.request))
         try:
             userinfo = yield self._oauth_service.get_userinfo_by_code(code)
             raise gen.Return(userinfo)
@@ -409,6 +410,7 @@ class BaseHandler(MetaBaseHandler):
     @gen.coroutine
     def _get_user_openid(self, code):
         self._oauth_service.wechat = self._wechat
+        self.logger.debug("_get_user_openid: {}".format(self.request))
         try:
             openid, _ = yield self._oauth_service.get_openid_unionid_by_code(
                 code)
