@@ -32,7 +32,6 @@ class TeamPageService(PageService):
     @gen.coroutine
     def get_team_index(self, company, handler_params, sub_flag=False):
         data = ObjectDict(templates=[])
-        data.header = temp_date_tool.make_header(company, team_flag=True)
 
         if sub_flag:
             teams = yield ps_tool.get_sub_company_teams(self, company.id)
@@ -47,6 +46,7 @@ class TeamPageService(PageService):
         all_member_headimg_dict = yield ps_tool.get_media_by_ids(
             self, all_members_dict.get('all_headimg_list'))
 
+        data.header = temp_date_tool.make_header(company, team_flag=True)
         data.templates = [temp_date_tool.make_team_index_template(
             team=t, team_medium=team_media_dict.get(t.media_id),
             more_link=make_url(path.TEAM_PATH.format(t.id, handler_params)),

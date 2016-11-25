@@ -39,7 +39,7 @@ def get_sub_company_teams(self, company_id, publishers=None, team_ids=None):
 @gen.coroutine
 def get_media_by_ids(self, id_list, list_flag=False):
     """
-    获取制定media_id列表内所有media对象
+    获取指定media_id列表内所有media对象
     :param self:
     :param id_list:
     :param list_flag: 为真返回media列表
