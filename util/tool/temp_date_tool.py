@@ -218,8 +218,9 @@ def make_team_detail_template(team, media_dict, members, positions,
     for member in members:
         introduction.append(make_introduction(
             member, media_dict.get(member.headimg_id)))
-        interview.append(make_interview(
-            member, media_dict.get(member.media_id)))
+        if member.media_id:
+            interview.append(make_interview(
+                member, media_dict.get(member.media_id)))
 
     template = [
         template1(
