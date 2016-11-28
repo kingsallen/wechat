@@ -403,7 +403,8 @@ class BaseHandler(MetaBaseHandler):
             userinfo = yield self._oauth_service.get_userinfo_by_code(code)
             raise gen.Return(userinfo)
         except WeChatOauthError as e:
-            self.logger.error(traceback.format_exc())
+            self.logger.error("_get_user_info: {}".format(self.request))
+            self.logger.error(e)
 
     @gen.coroutine
     def _get_user_openid(self, code):
@@ -413,7 +414,8 @@ class BaseHandler(MetaBaseHandler):
                 code)
             raise gen.Return(openid)
         except WeChatOauthError as e:
-            self.logger.error(traceback.format_exc())
+            self.logger.error("_get_user_openid: {}".format(self.request))
+            self.logger.error(e)
 
     @gen.coroutine
     def _fetch_session(self):
@@ -692,7 +694,7 @@ class BaseHandler(MetaBaseHandler):
                 "data": data
             })
         except TypeError as e:
-            self.logger.error(traceback.format_exc())
+            self.logger.error(e)
             render_json = encode_json_dumps({
                 "status": const.API_FAILURE,
                 "message": msg_const.RESPONSE_FAILURE,
