@@ -173,6 +173,8 @@ class BaseHandler(MetaBaseHandler):
         code = self.params.get("code")
         state = self.params.get("state")
 
+        # self.logger.debug("prepare: {}".format(self.request))
+
         self.logger.debug("code:{}, state:{}, request_url:{} ".format(code, state, self.request.uri))
 
         if self.in_wechat:
@@ -196,7 +198,7 @@ class BaseHandler(MetaBaseHandler):
                         openid, self._unionid)
 
                 # 保存 code 进 cookie
-                self.set_cookie(const.COOKIE_CODE, to_str(code), expires_days=1)
+                self.set_cookie(const.COOKIE_CODE, to_str(code), expires_days=1, httponly=True)
 
             elif state:  # 用户拒绝授权
                 # TODO 拒绝授权用户，是否让其继续操作? or return
@@ -251,6 +253,7 @@ class BaseHandler(MetaBaseHandler):
 
         # 创建 qx 的 user_wx_user
         yield self.user_ps.create_qx_wxuser_by_userinfo(userinfo, user_id)
+        yield self.user_ps.ensure_user_unionid(user_id, userinfo.unionid)
 
         if self._authable():
             # 该企业号是服务号
@@ -403,7 +406,8 @@ class BaseHandler(MetaBaseHandler):
             userinfo = yield self._oauth_service.get_userinfo_by_code(code)
             raise gen.Return(userinfo)
         except WeChatOauthError as e:
-            self.logger.error(traceback.format_exc())
+            self.logger.error("_get_user_info: {}".format(self.request))
+            self.logger.error(e)
 
     @gen.coroutine
     def _get_user_openid(self, code):
@@ -413,7 +417,8 @@ class BaseHandler(MetaBaseHandler):
                 code)
             raise gen.Return(openid)
         except WeChatOauthError as e:
-            self.logger.error(traceback.format_exc())
+            self.logger.error("_get_user_openid: {}".format(self.request))
+            self.logger.error(e)
 
     @gen.coroutine
     def _fetch_session(self):
@@ -468,7 +473,7 @@ class BaseHandler(MetaBaseHandler):
 
         session_id = self._make_new_session_id(session.qxuser.sysuser_id)
         logger.debug("session_id: %s" % session_id)
-        self.set_secure_cookie(const.COOKIE_SESSIONID, session_id)
+        self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True)
 
         self._save_sessions(session_id, session)
 
