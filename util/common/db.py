@@ -75,7 +75,7 @@ class DB(object):
                         params.append(value[2])
                     else:
                         self.logger.error("Error:[getConds][value length error], module:{0}, value:{1}, "
-                                       "length:{2}".format(self.__class__.__name__, value, len(value)))
+                                       "length:{2}, conds:{3}".format(self.__class__.__name__, value, len(value), conds))
                         return False, ()
                 elif isinstance(value, str) or isinstance(value, int) or isinstance(value, datetime):
                     frag = "`{0}` = %s".format(key)
@@ -83,7 +83,7 @@ class DB(object):
                     params.append(value)
                 else:
                     self.logger.error("Error:[getConds][value type error][only accept list/int/str], "
-                                      "module: {0}, key: {1}, value:{2}, type:{3}".format(self.__class__.__name__, key, value, type(value)))
+                                      "module: {0}, key: {1}, value: {2}, type: {3}, conds: {4}".format(self.__class__.__name__, key, value, type(value), conds))
                     return False, ()
 
         return conds_res, params
