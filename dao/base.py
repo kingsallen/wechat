@@ -84,7 +84,7 @@ class BaseDao(DB):
                 "Warn:[get_list_by_conds][conds warn], conds:{0}".format(
                     conds))
             raise gen.Return(list())
-        sql = self.select(self.table, conds, fields, options, appends, index)
+        sql = self.select(self.table.lower(), conds, fields, options, appends, index)
         cursor = yield self.query(sql, params)
         response = cursor.fetchall()
         if not isinstance(response, list):

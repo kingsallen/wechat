@@ -22,7 +22,7 @@ class HrTeamDao(BaseDao):
             "description": self.constant.TYPE_STRING,  # 团队介绍
             "show_order": self.constant.TYPE_INT,
             "media_id": self.constant.TYPE_INT,  # 团队主图片 hr_media.id
-            "jd_media": self.constant.TYPE_INT,  # JD页团队信息hr_media.id: [1, 23, 32]
+            "jd_media": self.constant.TYPE_STRING,  # JD页团队信息hr_media.id: [1, 23, 32]
             "company_id": self.constant.TYPE_INT,  # 团队所在母公司
             "create_time": self.constant.TYPE_TIMESTAMP,  # 创建时间
             "update_time": self.constant.TYPE_TIMESTAMP,  # 更新时间

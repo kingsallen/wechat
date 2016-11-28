@@ -90,7 +90,7 @@ def template2_data(resource_list):
         'title': resource.title,
         'description': resource.longtext,
         'media_url': make_static_url(resource.media_url),
-        'media_type': MEDIA_TYPE['image']
+        'media_type': MEDIA_TYPE[resource.media_type]
     } for resource in resource_list]
 
 
@@ -269,8 +269,9 @@ def make_company_events(media_list):
                      data=template4_data(media_list, 0))
 
 
-def make_company_address(media):
-    return template50(resource=media)
+def make_company_address(media_list):
+    if media_list:
+        return template50(resource=media_list[0])
 
 
 def make_company_survey(media=None):

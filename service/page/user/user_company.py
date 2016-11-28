@@ -27,7 +27,7 @@ class UserCompanyPageService(PageService):
         :return:
         """
         data = ObjectDict()
-
+        self.logger.debug('ps user: {}'.format(user))
         conds = {'user_id': user.id, 'company_id': company.id}
         fllw_cmpy = yield self.user_company_follow_ds.get_fllw_cmpy(
                         conds=conds, fields=['id', 'company_id'])
@@ -57,13 +57,14 @@ class UserCompanyPageService(PageService):
     def _get_company_template(self, company_id):
         company_config = COMPANY_CONFIG.get(str(company_id))
         values = sum(company_config.config.values(), [])
-        media_list = yield self.hr_media_ds.get_media_list(
-            conds='id in {}'.format(tuple(values)))
-        media = {str(m.id): m for m in media_list}
+        media = yield ps_tool.get_media_by_ids(self, tuple(values))
+        # media_list = yield self.hr_media_ds.get_media_list(
+        #     conds='id in {}'.format(tuple(values)))
+        # media = {m.id: m for m in media_list}
 
         templates = [
             getattr(temp_date_tool, 'make_company_{}'.format(key))(
-                [media.get(str(id)) for id in company_config.config.get(key)]
+                [media.get(id) for id in company_config.config.get(key)]
             ) for key in company_config.order
         ]
 
@@ -72,7 +73,7 @@ class UserCompanyPageService(PageService):
     @gen.coroutine
     def get_team_resource(self, team_list):
         media_dict = yield ps_tool.get_media_by_ids(
-            [t.media_id for t in team_list])
+            self, [t.media_id for t in team_list])
 
         raise gen.Return([ObjectDict({
             # 'show_order': team.show_order, 如果需要对team排序

@@ -156,7 +156,7 @@ def check_sub_company(func):
             else:
                 self.params.sub_company = sub_company
 
-        return func(self, *args, **kwargs)
+        yield func(self, *args, **kwargs)
 
     return wrapper
 
