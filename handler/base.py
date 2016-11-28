@@ -681,6 +681,14 @@ class BaseHandler(MetaBaseHandler):
             self.render_page(
                 'system/info.html', data=ObjectDict(code=http_code, message=msg_const.UNKNOWN_DEFAULT))
 
+    def render(self, status_code=const.API_SUCCESS, http_code=200, *args, **kwargs):
+        """override RequestHandler.render()
+        """
+        self.log_info = {"res_type": "html", "status_code": status_code}
+        self.set_status(http_code)
+
+        super().render(*args, **kwargs)
+
     def render_page(self, template_name, data, status_code=const.API_SUCCESS,
                     message=msg_const.RESPONSE_SUCCESS, http_code=200):
         """render 页面"""
@@ -715,7 +723,7 @@ class BaseHandler(MetaBaseHandler):
                 self.finish()
                 return
 
-        self.render(template_name, render_json=render_json)
+        super().render(template_name=template_name, render_json=render_json)
         return
 
     def _send_json(self, data, status_code, message, http_code=200):
@@ -751,6 +759,13 @@ class BaseHandler(MetaBaseHandler):
 
     def _get_info_header(self, log_params):
         """构建日志内容"""
+
+        def _readable_cookies():
+            """基于 self.cookies 的内容构建一个简单可读的 dict"""
+            return ObjectDict(
+                {k: repr(v.value) for k, v in sorted(self.cookies.items())}
+            )
+
         request = self.request
         req_params = request.arguments
 
@@ -782,7 +797,7 @@ class BaseHandler(MetaBaseHandler):
                 request.remote_ip
             ),
             event="{}_{}".format(self._event, request.method),
-            cookie=self.cookies,
+            cookie=_readable_cookies(),
             user_id=user_id,
             req_type=request.method,
             req_uri=request.uri,
