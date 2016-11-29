@@ -24,14 +24,20 @@ def get_sub_company_teams(self, company_id, publishers=None, team_ids=None):
             publisher_id_tuple = tuple([p.account_id for p in publishers])
         else:
             publisher_id_tuple = tuple(publishers)
+
+        if not publisher_id_tuple:
+            gen.Return([])
         team_ids = yield self.job_postion_ds.get_positions_list(
-            conds='publisher in {}'.format(publisher_id_tuple),
+            conds='publisher in {}'.format(publisher_id_tuple).replace(',)', ')'),
             fields=['team_id'], options=['DISTINCT'])
         team_id_tuple = tuple([t.team_id for t in team_ids])
     else:
         team_id_tuple = tuple(team_ids)
+
+    if not team_id_tuple:
+        gen.Return([])
     teams = yield self.hr_team_ds.get_team_list(
-        conds='id in {}'.format(team_id_tuple))
+        conds='id in {}'.format(team_id_tuple).replace(',)', ')'))
 
     raise gen.Return(teams)
 
@@ -45,8 +51,11 @@ def get_media_by_ids(self, id_list, list_flag=False):
     :param list_flag: 为真返回media列表
     :return: {object_hr_media.id: object_hr_media, ...} or [object_hr_media ...]
     """
-    media_list = yield self.hr_media_ds.get_media_list(
-        conds='id in {}'.format(tuple(id_list)))
+    if not id_list:
+        media_list=[]
+    else:
+        media_list = yield self.hr_media_ds.get_media_list(
+            conds='id in {}'.format(tuple(id_list)).replace(',)', ')'))
 
     if list_flag:
         raise gen.Return(media_list)

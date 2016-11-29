@@ -15,8 +15,8 @@ from util.common.decorator import check_sub_company
 
 class TeamIndexHandler(BaseHandler):
 
-    @gen.coroutine
     @check_sub_company
+    @gen.coroutine
     def get(self):
         template_name = 'company/team.html'
         if self.params.sub_company:
@@ -43,8 +43,8 @@ class TeamIndexHandler(BaseHandler):
 
 class TeamDetailHandler(BaseHandler):
 
-    @gen.coroutine
     @check_sub_company
+    @gen.coroutine
     def get(self, team_id):
         current_company = self.params.pop('sub_company') if \
             self.params.sub_company else self.current_user.company

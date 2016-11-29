@@ -21,14 +21,15 @@ class UserCompanyPageService(PageService):
 
     @gen.coroutine
     def get_company_data(self, handler_params, company, user):
-        """Develop Status: To be modify with real data.
+        """
+
         :param handler_params:
         :param company: 当前公司
         :return:
         """
         data = ObjectDict()
         self.logger.debug('ps user: {}'.format(user))
-        conds = {'user_id': user.id, 'company_id': company.id}
+        conds = {'user_id': user.sysuser.id, 'company_id': company.id}
         fllw_cmpy = yield self.user_company_follow_ds.get_fllw_cmpy(
                         conds=conds, fields=['id', 'company_id'])
         vst_cmpy = yield self.user_company_visit_req_ds.get_visit_cmpy(
@@ -58,9 +59,6 @@ class UserCompanyPageService(PageService):
         company_config = COMPANY_CONFIG.get(str(company_id))
         values = sum(company_config.config.values(), [])
         media = yield ps_tool.get_media_by_ids(self, tuple(values))
-        # media_list = yield self.hr_media_ds.get_media_list(
-        #     conds='id in {}'.format(tuple(values)))
-        # media = {m.id: m for m in media_list}
 
         templates = [
             getattr(temp_date_tool, 'make_company_{}'.format(key))(
@@ -139,11 +137,3 @@ class UserCompanyPageService(PageService):
         result = True if response else False
 
         raise gen.Return(result)
-
-
-if __name__ == '__main__':
-    print(getattr(temp_date_tool, 'make_company_working_env')())
-
-
-    # temp_date_tool
-    print('a')

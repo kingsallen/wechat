@@ -170,13 +170,13 @@ def make_team_member(member, headimg):
 
 
 def make_team_index_template(team, team_medium, more_link, member_list):
-    data = {
+    data = [{
         'title': team.name,
         'longtext': team.description,
         'media_url': make_static_url(team_medium.media_url),
         'media_type': MEDIA_TYPE[team_medium.media_type],
         'member_list': member_list
-    }
+    }]
 
     return template1(sub_type='middle', title=team.name,
                      more_link=more_link, data=data)

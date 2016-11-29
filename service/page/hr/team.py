@@ -50,7 +50,7 @@ class TeamPageService(PageService):
         data.header = temp_date_tool.make_header(company, team_flag=True)
         data.templates = [temp_date_tool.make_team_index_template(
             team=t, team_medium=team_media_dict.get(t.media_id),
-            more_link=make_url(path.TEAM_PATH.format(t.id, handler_params)),
+            more_link=make_url(path.TEAM_PATH.format(t.id), handler_params),
             member_list=[temp_date_tool.make_team_member(
                 m, all_member_headimg_dict.get(m.headimg_id)) for
                 m in all_members_dict.get(t.id)]
@@ -63,12 +63,15 @@ class TeamPageService(PageService):
     def get_team_detail(self, user, company, team, handler_params):
         data = ObjectDict()
         publishers = yield self.hr_company_account_ds.get_company_accounts_list(
-            conds={'company_id': company.id})
-        company_positions = yield self.job_postion_ds.get_positions_list(
-            conds='publisher in {}'.format(
-                tuple([p.account_id for p in publishers])))
+            conds={'company_id': company.id}, fields=None)
+        if not publishers:
+            company_positions=[]
+        else:
+            company_positions = yield self.job_position_ds.get_positions_list(
+                conds='publisher in {}'.format(tuple(
+                    [p.account_id for p in publishers])).replace(',)', ')'))
         vst_cmpy = yield self.user_company_visit_req_ds.get_visit_cmpy(
-            conds={'user_id': user.id, 'company_id': company.id},
+            conds={'user_id': user.sysuser.id, 'company_id': company.id},
             fields=['id', 'company_id'])
 
         team_positions = [pos for pos in company_positions
@@ -100,15 +103,20 @@ class TeamPageService(PageService):
 
     @gen.coroutine
     def _get_all_team_members(self, team_id_list):
-        member_list = yield self.hr_team_member_ds.get_team_member_list(
-            conds='id in {}'.format(tuple([t.team_id for t in team_id_list]))
-        )
-        result = {'all_member_id_list': []}
+        if not team_id_list:
+            member_list = []
+        else:
+            member_list = yield self.hr_team_member_ds.get_team_member_list(
+                conds='team_id in {}'.format(tuple(
+                    team_id_list)).replace(',)', ')'))
+
+        result = {'all_headimg_list': [], 'all_media_list': []}
         for member in member_list:
             result['all_headimg_list'].append(member.headimg_id)
             result['all_media_list'].append(member.media_id)
-            team_member_list = result.get(member.team_id, [])
-            team_member_list.append(member)
-            result[member.team_id] = team_id_list
+            if result.get(member.team_id):
+                result[member.team_id].append(member)
+            else:
+                result[member.team_id] = [member]
 
         raise gen.Return(result)

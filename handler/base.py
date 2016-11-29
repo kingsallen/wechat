@@ -381,7 +381,8 @@ class BaseHandler(MetaBaseHandler):
         company = yield self.company_ps.get_company(conds=conds, need_conf=True)
         if company.conf_theme_id:
             theme = yield self.wechat_ps.get_wechat_theme(
-                {'id': company.conf_theme_id, 'disable': 0})
+                {'id': company.conf_theme_id, 'disable': 0,
+                 'theme_id': [5, '<', 5, '>']})
             if theme:
                 company.update({
                     'theme': [
