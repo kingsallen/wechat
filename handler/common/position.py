@@ -23,7 +23,7 @@ class PositionHandler(BaseHandler):
 
         if position_info.id and \
                 position_info.company_id == self.current_user.company.id:
-            team = yield self.team_ps.get_team({'id': position_info.team_id})
+            team = yield self.team_ps.get_team_by_id(position_info.team_id)
 
             self.logger.debug("[JD]构建收藏信息")
             star = yield self.position_ps.is_position_stared_by(
@@ -59,7 +59,7 @@ class PositionHandler(BaseHandler):
             recomment_positions_res = yield self.position_ps.get_recommend_positions(position_id)
 
             header = self._make_json_header(position_info, company_info, star,
-                                            application, endorse, can_apply)
+                                            application, endorse, can_apply, team.id)
             module_job_description = self._make_json_job_description(position_info)
             module_job_require = self._make_json_job_require(position_info)
             module_job_need = self._make_json_job_need(position_info)
@@ -204,6 +204,8 @@ class PositionHandler(BaseHandler):
 
     def _make_recommend_positions(self, positions):
         """处理相似职位推荐"""
+        if not positions:
+            return None
 
         data = []
         for item in positions:
@@ -222,7 +224,7 @@ class PositionHandler(BaseHandler):
 
         return res
 
-    def _make_json_header(self, position_info, company_info, star, application, endorse, can_apply):
+    def _make_json_header(self, position_info, company_info, star, application, endorse, can_apply, team_id):
         """构造头部 header 信息"""
         data = ObjectDict({
             "id": position_info.id,
@@ -237,7 +239,8 @@ class PositionHandler(BaseHandler):
             "endorse": endorse,
             "can_apply": not can_apply,
             "forword_message": company_info.conf_forward_message or msg.POSITION_FORWARD_MESSAGE,
-            "team": position_info.department.lower() if position_info.department else ""
+            "team": team_id
+            #"team": position_info.department.lower() if position_info.department else ""
         })
 
         return data
@@ -251,7 +254,7 @@ class PositionHandler(BaseHandler):
                 "data": position_info.accountabilities,
             })
 
-        raise gen.Return(data)
+        return data
 
     def _make_json_job_require(self, position_info):
         """构造职位要求"""
@@ -282,7 +285,7 @@ class PositionHandler(BaseHandler):
                 "data": position_info.requirement,
             })
 
-        raise gen.Return(data)
+        return data
 
     def _make_json_job_feature(self, position_info):
         """构造职位福利特色"""

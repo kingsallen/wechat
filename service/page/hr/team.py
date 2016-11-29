@@ -85,7 +85,7 @@ class TeamPageService(PageService):
                 self, company_id=None, team_ids=team_id_list)
         else:
             other_teams = yield self.hr_team_ds.get_team_list(
-                conds={'company_id': [company.id, '<', company.id, '>']})
+                conds={'id': [team.id, '<>']})
         media_id_list = [team.media_id] + \
             sum([[m.headimg_id, m.media_id] for m in team_members], []) + \
             [t.media_id for t in other_teams]
