@@ -379,32 +379,18 @@ class PositionHandler(BaseHandler):
     def _make_team_position(self, team):
         """团队职位，构造数据"""
         res = yield self.position_ps.get_team_position(team.id, self.params)
-        # res = ObjectDict({
-        #     "title": "我们团队还需要",
-        #     "data": team.templates[2].data
-        # })
         raise gen.Return(res)
 
     @gen.coroutine
     def _make_mate_day(self, team):
         """同事的一天，构造数据"""
         res = yield self.position_ps.get_mate_data(team.jd_media)
-        # res = ObjectDict({
-        #     "title": "同事的一天",
-        #     "sub_type": "less",
-        #     "data": [team.templates[1].data[0]]
-        # })
         raise gen.Return(res)
 
     @gen.coroutine
     def _make_team(self, team):
         """所属团队，构造数据"""
         res = yield self.position_ps.get_team_data(team)
-        # res = ObjectDict({
-        #     "title": "所属团队",
-        #     "sub_type": " full",
-        #     "data": team.templates[0].data,
-        # })
         raise gen.Return(res)
 
 

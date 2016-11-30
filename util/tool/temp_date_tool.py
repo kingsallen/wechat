@@ -138,7 +138,7 @@ def template5(resource=None):
 def template50(resource):
     return ObjectDict({
         'type': 50, 'title': 'address',
-        'data': [eval(resource.attrs)]
+        'data': eval(resource.attrs)
     })
 
 
@@ -155,7 +155,8 @@ def make_header(company, team_flag=False, team=None):
         'name': name,
         'description': description,
         'icon': make_static_url(company.logo),
-        'banner': make_static_url(json.loads(company.banner).get('banner0')),
+        'banner': make_static_url(json.loads(company.banner).get('banner0')) \
+            if company.banner else None,
     })
 
 

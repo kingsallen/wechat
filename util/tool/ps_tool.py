@@ -20,14 +20,14 @@ def get_sub_company_teams(self, company_id, publishers=None, team_ids=None):
     if not team_ids:
         if not publishers:
             publishers = yield self.hr_company_account_ds.get_company_accounts_list(
-                conds={'company_id': company_id})
+                conds={'company_id': company_id}, fields=None)
             publisher_id_tuple = tuple([p.account_id for p in publishers])
         else:
             publisher_id_tuple = tuple(publishers)
 
         if not publisher_id_tuple:
-            gen.Return([])
-        team_ids = yield self.job_postion_ds.get_positions_list(
+            raise gen.Return([])
+        team_ids = yield self.job_position_ds.get_positions_list(
             conds='publisher in {}'.format(publisher_id_tuple).replace(',)', ')'),
             fields=['team_id'], options=['DISTINCT'])
         team_id_tuple = tuple([t.team_id for t in team_ids])

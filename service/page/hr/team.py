@@ -62,17 +62,17 @@ class TeamPageService(PageService):
     @gen.coroutine
     def get_team_detail(self, user, company, team, handler_params):
         data = ObjectDict()
-        publishers = yield self.hr_company_account_ds.get_company_accounts_list(
-            conds={'company_id': company.id}, fields=None)
-        if not publishers:
-            company_positions=[]
-        else:
-            company_positions = yield self.job_position_ds.get_positions_list(
-                conds='publisher in {}'.format(tuple(
-                    [p.account_id for p in publishers])).replace(',)', ')'))
         vst_cmpy = yield self.user_company_visit_req_ds.get_visit_cmpy(
             conds={'user_id': user.sysuser.id, 'company_id': company.id},
             fields=['id', 'company_id'])
+        position_fields = 'id title status city team_id \
+                           salary_bottom salary_top'.split()
+        if company.id != user.company.id:
+            company_positions = yield self._get_sub_company_positions(
+                company.id, position_fields)
+        else:
+            company_positions = yield self.job_position_ds.get_positions_list(
+                conds={'company_id': company.id}, fields=position_fields)
 
         team_positions = [pos for pos in company_positions
                           if pos.team_id == team.id and pos.status == 0]
@@ -120,3 +120,16 @@ class TeamPageService(PageService):
                 result[member.team_id] = [member]
 
         raise gen.Return(result)
+
+    @gen.coroutine
+    def _get_sub_company_positions(self, company_id, fields=None):
+        publishers = yield self.hr_company_account_ds.get_company_accounts_list(
+            conds={'company_id': company_id}, fields=fields)
+        if not publishers:
+            company_positions = []
+        else:
+            company_positions = yield self.job_position_ds.get_positions_list(
+                conds='publisher in {}'.format(tuple(
+                    [p.account_id for p in publishers])).replace(',)', ')'))
+
+        raise gen.Return(company_positions)

@@ -11,7 +11,6 @@ from util.common import ObjectDict
 
 # 企业主页中模板数据 hr_media 中 id 的 list
 
-
 COMPANY_4 = ObjectDict({
     'order': ['working_env', 'figure', 'members',
               'events', 'address', 'survey'],
@@ -25,8 +24,22 @@ COMPANY_4 = ObjectDict({
     }
 })
 
+COMPANY_72 = ObjectDict({
+    'order': ['working_env', 'figure', 'members',
+              'events', 'address', 'survey'],
+    'config': {
+        'working_env': [28, 29],  # 工作环境对应的 hr_media id list
+        'figure': [31],  # 人物寄语
+        'members': [33, 34],  # 公司成员
+        'events': [37],  # 公司大事件
+        'address': [38],  # 公司地址
+        'survey': [],  # 问卷调查
+    }
+})
+
 
 COMPANY_CONFIG = ObjectDict({
     '4': COMPANY_4,
+    '72': COMPANY_72
     # 'sub_company_2_id': SUB_COMPANY,
 })
