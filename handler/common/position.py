@@ -38,8 +38,9 @@ class PositionHandler(BaseHandler):
                 position_info.publisher, position_info.company_id)
             company_info = yield self.company_ps.get_company(
                 conds={"id": real_company_id}, need_conf=True)
-            if real_company_id != self.current_user.company.id:
-                self.params.did = real_company_id
+
+            did = real_company_id if \
+                real_company_id != self.current_user.company.id else ''
 
             self.logger.debug("[JD]构建转发信息")
             yield self._make_share_info(position_info, company_info)
@@ -58,13 +59,14 @@ class PositionHandler(BaseHandler):
             self.logger.debug("[JD]构建相似职位推荐")
             recomment_positions_res = yield self.position_ps.get_recommend_positions(position_id)
 
-            header = self._make_json_header(position_info, company_info, star,
-                                            application, endorse, can_apply, team.id)
+            header = self._make_json_header(
+                position_info, company_info, star, application, endorse,
+                can_apply, team.id, did)
             module_job_description = self._make_json_job_description(position_info)
             module_job_require = self._make_json_job_require(position_info)
             module_job_need = self._make_json_job_need(position_info)
             module_feature = self._make_json_job_feature(position_info)
-            module_company_info = self._make_json_job_company_info(company_info)
+            module_company_info = self._make_json_job_company_info(company_info, did)
             module_position_recommend = self._make_recommend_positions(recomment_positions_res)
 
             position_data = ObjectDict()
@@ -224,7 +226,8 @@ class PositionHandler(BaseHandler):
 
         return res
 
-    def _make_json_header(self, position_info, company_info, star, application, endorse, can_apply, team_id):
+    def _make_json_header(self, position_info, company_info, star, application,
+                          endorse, can_apply, team_id, did):
         """构造头部 header 信息"""
         data = ObjectDict({
             "id": position_info.id,
@@ -239,7 +242,8 @@ class PositionHandler(BaseHandler):
             "endorse": endorse,
             "can_apply": not can_apply,
             "forword_message": company_info.conf_forward_message or msg.POSITION_FORWARD_MESSAGE,
-            "team": team_id
+            "team": team_id,
+            "did": did
             #"team": position_info.department.lower() if position_info.department else ""
         })
 
@@ -298,12 +302,13 @@ class PositionHandler(BaseHandler):
 
         return data
 
-    def _make_json_job_company_info(self, company_info):
+    def _make_json_job_company_info(self, company_info, did):
         """构造职位公司信息"""
         data = ObjectDict({
             "icon_url": self.static_url(company_info.logo),
             "name": company_info.abbreviation or company_info.name,
             "description": company_info.introduction,
+            "did": did,
         })
 
         return data
