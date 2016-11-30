@@ -158,12 +158,13 @@ class TeamPageService(PageService):
     @gen.coroutine
     def _get_sub_company_positions(self, company_id, fields=None):
         publishers = yield self.hr_company_account_ds.get_company_accounts_list(
-            conds={'company_id': company_id}, fields=fields)
+            conds={'company_id': company_id})
         if not publishers:
             company_positions = []
         else:
             company_positions = yield self.job_position_ds.get_positions_list(
                 conds='publisher in {}'.format(tuple(
-                    [p.account_id for p in publishers])).replace(',)', ')'))
+                    [p.account_id for p in publishers])).replace(',)', ')'),
+                fields=fields)
 
         raise gen.Return(company_positions)

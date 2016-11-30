@@ -379,6 +379,9 @@ class BaseHandler(MetaBaseHandler):
 
         conds = {'id': company_id}
         company = yield self.company_ps.get_company(conds=conds, need_conf=True)
+
+        # 配色处理，如果theme_id为5表示公司使用默认配置，不需要将原始配色信息传给前端
+        # 如果将theme_id为5的传给前端，会导致前端颜色无法正常显示默认颜色
         if company.conf_theme_id != 5:
             theme = yield self.wechat_ps.get_wechat_theme(
                 {'id': company.conf_theme_id, 'disable': 0})
