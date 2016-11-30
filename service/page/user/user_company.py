@@ -29,12 +29,15 @@ class UserCompanyPageService(PageService):
         """
         data = ObjectDict()
         self.logger.debug('ps user: {}'.format(user))
+
+        # 获取当前公司关注，访问信息
         conds = {'user_id': user.sysuser.id, 'company_id': company.id}
         fllw_cmpy = yield self.user_company_follow_ds.get_fllw_cmpy(
                         conds=conds, fields=['id', 'company_id'])
         vst_cmpy = yield self.user_company_visit_req_ds.get_visit_cmpy(
                         conds=conds, fields=['id', 'company_id'])
 
+        # 区分母公司，子公司对待，获取所有团队team
         if company.id != user.company.id:
             teams = yield ps_tool.get_sub_company_teams(self, company.id)
         else:
@@ -44,6 +47,7 @@ class UserCompanyPageService(PageService):
         team_template = temp_date_tool.make_company_team(
             team_resource_list, make_url(path.COMPANY_TEAM, handler_params))
 
+        # 拼装模板数据
         data.header = temp_date_tool.make_header(company)
         data.relation = ObjectDict({
             'follow': self.constant.YES if fllw_cmpy else self.constant.NO,
@@ -56,6 +60,12 @@ class UserCompanyPageService(PageService):
 
     @gen.coroutine
     def _get_company_template(self, company_id):
+        """
+        根据不同company_id去配置文件中获取company配置信息
+        之后根据配置，生成template数据
+        :param company_id:
+        :return:
+        """
         company_config = COMPANY_CONFIG.get(str(company_id))
         values = sum(company_config.config.values(), [])
         media = yield ps_tool.get_media_by_ids(self, tuple(values))

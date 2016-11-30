@@ -32,14 +32,23 @@ class TeamPageService(PageService):
 
     @gen.coroutine
     def get_team_index(self, company, handler_params, sub_flag=False):
+        """
+
+        :param company: 当前需要获取数据的公司
+        :param handler_params: 请求中参数
+        :param sub_flag: 区分母公司和子公司标识， 用以明确团队资源获取方式
+        :return:
+        """
         data = ObjectDict(templates=[])
 
+        # 根据母公司，子公司区分对待，获取团队信息
         if sub_flag:
             teams = yield ps_tool.get_sub_company_teams(self, company.id)
         else:
             teams = yield self.hr_team_ds.get_team_list(
                 conds={'company_id': company.id})
 
+        # 获取团队成员以及所需要的media信息
         team_media_dict = yield ps_tool.get_media_by_ids(
             self, [t.media_id for t in teams])
         all_members_dict = yield self._get_all_team_members(
@@ -47,6 +56,7 @@ class TeamPageService(PageService):
         all_member_headimg_dict = yield ps_tool.get_media_by_ids(
             self, all_members_dict.get('all_headimg_list'))
 
+        # 拼装模板数据
         data.header = temp_date_tool.make_header(company, team_flag=True)
         data.templates = [temp_date_tool.make_team_index_template(
             team=t, team_medium=team_media_dict.get(t.media_id),
@@ -61,36 +71,50 @@ class TeamPageService(PageService):
 
     @gen.coroutine
     def get_team_detail(self, user, company, team, handler_params):
+        """
+
+        :param user: handler中的current_user
+        :param company: 当前需要获取数据的公司
+        :param team: 当前需要获取详情的team
+        :param handler_params: 请求中参数
+        :return:
+        """
         data = ObjectDict()
         vst_cmpy = yield self.user_company_visit_req_ds.get_visit_cmpy(
             conds={'user_id': user.sysuser.id, 'company_id': company.id},
             fields=['id', 'company_id'])
+
+        # 根据母公司，子公司区分对待，获取对应的职位信息，其他团队信息
         position_fields = 'id title status city team_id \
                            salary_bottom salary_top'.split()
         if company.id != user.company.id:
             company_positions = yield self._get_sub_company_positions(
                 company.id, position_fields)
-        else:
-            company_positions = yield self.job_position_ds.get_positions_list(
-                conds={'company_id': company.id}, fields=position_fields)
-
-        team_positions = [pos for pos in company_positions
-                          if pos.team_id == team.id and pos.status == 0]
-        team_members = yield self.hr_team_member_ds.get_team_member_list(
-                            conds={'team_id': team.id})
-        if company.id != user.company.id:
+            team_positions = [pos for pos in company_positions
+                              if pos.team_id == team.id and pos.status == 0]
+            team_members = yield self.hr_team_member_ds.get_team_member_list(
+                conds={'team_id': team.id})
             team_id_list = list(set([p.team_id for p in company_positions
                                      if p.team_id != team.id]))
             other_teams = yield ps_tool.get_sub_company_teams(
                 self, company_id=None, team_ids=team_id_list)
         else:
+            company_positions = yield self.job_position_ds.get_positions_list(
+                conds={'company_id': company.id}, fields=position_fields)
+
+            team_positions = [pos for pos in company_positions
+                              if pos.team_id == team.id and pos.status == 0]
+            team_members = yield self.hr_team_member_ds.get_team_member_list(
+                            conds={'team_id': team.id})
             other_teams = yield self.hr_team_ds.get_team_list(
                 conds={'id': [team.id, '<>']})
+
         media_id_list = [team.media_id] + \
             sum([[m.headimg_id, m.media_id] for m in team_members], []) + \
             [t.media_id for t in other_teams]
         media_dict = yield ps_tool.get_media_by_ids(self, media_id_list)
 
+        # 拼装模板数据
         data.header = temp_date_tool.make_header(company, True, team)
         data.relation = ObjectDict({
             'want_visit': self.constant.YES if vst_cmpy else self.constant.NO})
@@ -103,6 +127,16 @@ class TeamPageService(PageService):
 
     @gen.coroutine
     def _get_all_team_members(self, team_id_list):
+        """
+        根据团队id信息，获取所有团队，所有成员
+        :param team_id_list:
+        :return: {
+            'all_headimg_list': [hr_meida_1, hr_meida_2],
+            'all_media_list': [hr_meida_3, hr_meida_4],
+            team_id_1: [hr_team_member_1, ]
+            team_id_2: [hr_team_member_2, ]
+        }
+        """
         if not team_id_list:
             member_list = []
         else:
