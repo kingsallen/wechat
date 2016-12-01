@@ -93,16 +93,20 @@ class UserCompanyPageService(PageService):
         }) for team in team_list])
 
     @gen.coroutine
-    def set_company_follow(self, param):
+    def set_company_follow(self, current_user, param):
         """
         Store follow company.
         :param param: dict include target user company ids.
         :return:
         """
-        user_id, company_id = param.get('user_id'), param.get('company_id'),
+        user_id = current_user.sysuser.id
         status, source = param.get('status'), param.get('source', 0)
 
-        conds = {'user_id': [user_id, '='], 'company_id': [company_id, '=']}
+        # 区分母公司子公司对待
+        company_id = self.params.sub_company.id if param.did \
+            and param.did != current_user.company.id else current_user.company.id
+
+        conds = {'user_id': user_id, 'company_id': company_id}
         company = yield self.user_company_follow_ds.get_fllw_cmpy(
             conds=conds, fields=['id', 'user_id', 'company_id'])
 
@@ -119,19 +123,24 @@ class UserCompanyPageService(PageService):
         raise gen.Return(result)
 
     @gen.coroutine
-    def set_visit_company(self, param):
+    def set_visit_company(self, current_user, param):
         """
         Store visiting company.
-        :param param: dict include target user company ids.
+        :param current_user: self.current_user in handler
+        :param param: self.params in handler
         :return:
         """
-        user_id, company_id = param.get('user_id'), param.get('company_id'),
+        user_id = current_user.sysuser.id
         status, source = param.get('status'), param.get('source', 0)
+
+        # 区分母公司子公司对待
+        company_id = self.params.sub_company.id if param.did \
+            and param.did != current_user.company.id else current_user.company.id
 
         if int(status) == 0:
             raise gen.Return(False)
 
-        conds = {'user_id': [user_id, '='], 'company_id': [company_id, '=']}
+        conds = {'user_id': user_id, 'company_id': company_id}
         company = yield self.user_company_visit_req_ds.get_visit_cmpy(
                             conds, fields=['id', 'user_id', 'company_id'])
 

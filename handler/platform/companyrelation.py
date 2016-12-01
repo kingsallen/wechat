@@ -16,12 +16,14 @@ from handler.base import BaseHandler
 
 class CompanyVisitReqHandler(BaseHandler):
 
+    @check_sub_company
     @gen.coroutine
     def post(self):
         self.guarantee('status')
-        self.params.company_id = self.current_user.company.id
-        self.params.user_id = self.current_user.sysuser.id
-        result = yield self.user_company_ps.set_visit_company(self.params)
+        # self.params.company_id = self.current_user.company.id
+        # self.params.user_id = self.current_user.sysuser.id
+        result = yield self.user_company_ps.set_visit_company(
+            current_user=self.current_user, param=self.params)
 
         if not result:
             self.send_json_error()
@@ -31,12 +33,14 @@ class CompanyVisitReqHandler(BaseHandler):
 
 class CompanyFollowHandler(BaseHandler):
 
+    @check_sub_company
     @gen.coroutine
     def post(self):
         self.guarantee('status')
-        self.params.company_id = self.current_user.company.id
-        self.params.user_id = self.current_user.sysuser.id
-        result = yield self.user_company_ps.set_company_follow(self.params)
+        # self.params.company_id = self.current_user.company.id
+        # self.params.user_id = self.current_user.sysuser.id
+        result = yield self.user_company_ps.set_company_follow(
+            current_user=self.current_user, param=self.params)
 
         if not result:
             self.send_json_error()
