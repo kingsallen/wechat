@@ -153,6 +153,10 @@ class TeamPageService(PageService):
             else:
                 result[member.team_id] = [member]
 
+        for tid in team_id_list:
+            if tid not in result.keys():
+                result[tid] = []
+
         raise gen.Return(result)
 
     @gen.coroutine
