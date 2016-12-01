@@ -47,6 +47,7 @@ class TeamPageService(PageService):
         else:
             teams = yield self.hr_team_ds.get_team_list(
                 conds={'company_id': company.id})
+        self.logger.debug('team index all teams: {}'.format(teams))
 
         # 获取团队成员以及所需要的media信息
         team_media_dict = yield ps_tool.get_media_by_ids(
