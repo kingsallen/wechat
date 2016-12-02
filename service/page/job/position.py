@@ -242,9 +242,10 @@ class PositionPageService(PageService):
         raise gen.Return(res)
 
     @gen.coroutine
-    def get_team_position(self, team_id, handler_params):
+    def get_team_position(self, team_id, handler_params, current_position_id):
         positions = yield self.job_position_ds.get_positions_list(
-            conds={'team_id': team_id, 'status': 0})
+            conds={'id': [current_position_id, '<>'],
+                   'team_id': team_id, 'status': 0})
         res = template3(title='我们团队还需要', resource_list=positions,
                         handler_params=handler_params)
 
