@@ -11,7 +11,7 @@ class IndexHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         try:
-            self.render("system/app.html")
+            self.render(template_name="system/app.html")
 
         except Exception as e:
             self.LOG.error(e)
