@@ -321,8 +321,6 @@ class BaseHandler(MetaBaseHandler):
 
             mobile = self.params["mobile"]
         """
-        self.params = ObjectDict()
-
         c_arg = None
         try:
             for arg in args:
