@@ -48,7 +48,7 @@ COMPANY_MARS_39978 = ObjectDict({
     'config': {
         'working_env': [27, 28, 29, 30],  # 工作环境对应的 hr_media id list
         'figure': [31],  # 人物寄语
-        'members': [34, 33],  # 公司成员
+        'members': [39, 40],  # 公司成员
         'events': [36, 35, 37],  # 公司大事件
         'address': [38],  # 公司地址
         'survey': [],  # 问卷调查
@@ -61,7 +61,7 @@ SUB_COMPANY_MARS_40120 = ObjectDict({
     'config': {
         'working_env': [30, 27],  # 工作环境对应的 hr_media id list
         'figure': [31],  # 人物寄语
-        'members': [32, 33],  # 公司成员
+        'members': [41],  # 公司成员
         'events': [37, 35],  # 公司大事件
         'address': [38],  # 公司地址
         'survey': [],  # 问卷调查
@@ -74,7 +74,7 @@ SUB_COMPANY_MARS_40627 = ObjectDict({
     'config': {
         'working_env': [29, 28],  # 工作环境对应的 hr_media id list
         'figure': [31],  # 人物寄语
-        'members': [33, 32],  # 公司成员
+        'members': [42],  # 公司成员
         'events': [35, 36],  # 公司大事件
         'address': [38],  # 公司地址
         'survey': [],  # 问卷调查
