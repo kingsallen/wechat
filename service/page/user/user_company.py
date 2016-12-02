@@ -88,8 +88,8 @@ class UserCompanyPageService(PageService):
             'id': team.id,
             'title': team.name,
             'longtext': team.description,
-            'media_url': media_dict.get(team.id).media_url,
-            'media_type': media_dict.get(team.id).media_type,
+            'media_url': media_dict.get(team.media_id).media_url,
+            'media_type': media_dict.get(team.media_id).media_type,
         }) for team in team_list])
 
     @gen.coroutine
