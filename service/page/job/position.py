@@ -246,6 +246,10 @@ class PositionPageService(PageService):
         positions = yield self.job_position_ds.get_positions_list(
             conds={'id': [current_position_id, '<>'],
                    'team_id': team_id, 'status': 0})
+
+        if not positions:
+            raise gen.Return(None)
+
         res = template3(title='我们团队还需要', resource_list=positions,
                         handler_params=handler_params)
 

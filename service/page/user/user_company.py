@@ -104,7 +104,7 @@ class UserCompanyPageService(PageService):
         status, source = param.get('status'), param.get('source', 0)
 
         # 区分母公司子公司对待
-        company_id = self.params.sub_company.id if param.did \
+        company_id = param.sub_company.id if param.did \
             and param.did != current_user.company.id else current_user.company.id
 
         conds = {'user_id': user_id, 'company_id': company_id}
