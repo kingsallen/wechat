@@ -147,6 +147,7 @@ def check_sub_company(func):
     @functools.wraps(func)
     @gen.coroutine
     def wrapper(self, *args, **kwargs):
+        self.logger.debug('Check sub company -- params: {}'.format(self.params))
         if self.params.did:
             sub_company = yield self.team_ps.get_sub_company(self.params.did)
             if not sub_company or \

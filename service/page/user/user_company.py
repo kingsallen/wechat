@@ -100,7 +100,7 @@ class UserCompanyPageService(PageService):
         :param param: dict include target user company ids.
         :return:
         """
-        self.logger.debug('follow current_user {}'.format(current_user))
+        self.logger.debug('follow current_user company {}'.format(current_user.company))
         self.logger.debug('follow param {}'.format(param))
 
         user_id = current_user.sysuser.id
@@ -134,7 +134,7 @@ class UserCompanyPageService(PageService):
         :param param: self.params in handler
         :return:
         """
-        self.logger.debug('follow current_user {}'.format(current_user))
+        self.logger.debug('follow current_user company {}'.format(current_user.company))
         self.logger.debug('follow param {}'.format(param))
 
         user_id = current_user.sysuser.id

@@ -58,6 +58,7 @@ class PositionHandler(BaseHandler):
             # 相似职位推荐
             self.logger.debug("[JD]构建相似职位推荐")
             recomment_positions_res = yield self.position_ps.get_recommend_positions(position_id)
+            self.logger.debug("[JD]获取相似职位推荐结果{}".format(recomment_positions_res))
 
             header = self._make_json_header(
                 position_info, company_info, star, application, endorse,
