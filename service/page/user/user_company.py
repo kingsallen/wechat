@@ -74,6 +74,7 @@ class UserCompanyPageService(PageService):
             getattr(temp_date_tool, 'make_company_{}'.format(key))(
                 [media.get(id) for id in company_config.config.get(key)]
             ) for key in company_config.order
+            if company_config.config.get(key) or key == 'survey'
         ]
 
         raise gen.Return(templates)

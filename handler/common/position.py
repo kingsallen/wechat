@@ -83,9 +83,14 @@ class PositionHandler(BaseHandler):
                 module_team = yield self._make_team(team)
                 module_team_position = yield self._make_team_position(team)
 
-                add_item(position_data, "module_mate_day", module_mate_day)
+                if module_mate_day:
+                    add_item(position_data, "module_mate_day", module_mate_day)
+
                 add_item(position_data, "module_team", module_team)
-                add_item(position_data, "module_team_position", module_team_position)
+
+                if module_team_position:
+                    add_item(position_data, "module_team_position",
+                             module_team_position)
 
             self.logger.debug("position_data: %s" % position_data)
             self.logger.debug("self.params: %s" % self.params)
