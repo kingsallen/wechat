@@ -100,9 +100,12 @@ class UserCompanyPageService(PageService):
         :param param: dict include target user company ids.
         :return:
         """
+        self.logger.debug('follow current_user {}'.format(current_user))
+        self.logger.debug('follow param {}'.format(param))
+
         user_id = current_user.sysuser.id
         status, source = param.get('status'), param.get('source', 0)
-
+        current_user.company.id
         # 区分母公司子公司对待
         company_id = param.sub_company.id if param.did \
             and param.did != current_user.company.id else current_user.company.id
@@ -131,11 +134,14 @@ class UserCompanyPageService(PageService):
         :param param: self.params in handler
         :return:
         """
+        self.logger.debug('follow current_user {}'.format(current_user))
+        self.logger.debug('follow param {}'.format(param))
+
         user_id = current_user.sysuser.id
         status, source = param.get('status'), param.get('source', 0)
 
         # 区分母公司子公司对待
-        company_id = self.params.sub_company.id if param.did \
+        company_id = param.sub_company.id if param.did \
             and param.did != current_user.company.id else current_user.company.id
 
         if int(status) == 0:
