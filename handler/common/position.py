@@ -81,7 +81,8 @@ class PositionHandler(BaseHandler):
             if team:
                 module_mate_day = yield self._make_mate_day(team)
                 module_team = yield self._make_team(team)
-                module_team_position = yield self._make_team_position(team)
+                module_team_position = yield self._make_team_position(
+                    team, position_id)
 
                 if module_mate_day:
                     add_item(position_data, "module_mate_day", module_mate_day)
@@ -386,9 +387,10 @@ class PositionHandler(BaseHandler):
                                    position_info.salary)
 
     @gen.coroutine
-    def _make_team_position(self, team):
+    def _make_team_position(self, team, position_id):
         """团队职位，构造数据"""
-        res = yield self.position_ps.get_team_position(team.id, self.params)
+        res = yield self.position_ps.get_team_position(
+            team.id, self.params, position_id)
         raise gen.Return(res)
 
     @gen.coroutine
