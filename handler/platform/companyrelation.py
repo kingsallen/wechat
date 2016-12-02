@@ -20,8 +20,6 @@ class CompanyVisitReqHandler(BaseHandler):
     @gen.coroutine
     def post(self):
         self.guarantee('status')
-        # self.params.company_id = self.current_user.company.id
-        # self.params.user_id = self.current_user.sysuser.id
         result = yield self.user_company_ps.set_visit_company(
             current_user=self.current_user, param=self.params)
 
@@ -37,8 +35,6 @@ class CompanyFollowHandler(BaseHandler):
     @gen.coroutine
     def post(self):
         self.guarantee('status')
-        # self.params.company_id = self.current_user.company.id
-        # self.params.user_id = self.current_user.sysuser.id
         result = yield self.user_company_ps.set_company_follow(
             current_user=self.current_user, param=self.params)
 
