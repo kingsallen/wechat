@@ -23,6 +23,6 @@ class HrMediaDao(BaseDao):
             "attrs": self.constant.TYPE_STRING,  # 客户属性，可选字段
             "tpl_type": self.constant.TYPE_INT,  # 模板类型1,2,3...对应前端不同template
             "title": self.constant.TYPE_STRING,  # 模板名称
-            "sub_title": self.constant.TYPE_INT,  # 模板子名称
+            "sub_title": self.constant.TYPE_STRING,  # 模板子名称
             "link": self.constant.TYPE_INT,  # 模板链接
         }
