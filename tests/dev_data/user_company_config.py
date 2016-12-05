@@ -19,7 +19,7 @@ COMPANY_4 = ObjectDict({
     'config': {
         'working_env': [26, 27, 28, 29, 30],  # 工作环境对应的 hr_media id list
         'figure': [31],  # 人物寄语
-        'members': [32, 33, 34],  # 公司成员
+        'members': [39, 40],  # 公司成员
         'events': [35, 36, 37],  # 公司大事件
         'address': [38],  # 公司地址
         'survey': [],  # 问卷调查
@@ -32,7 +32,7 @@ COMPANY_72 = ObjectDict({
     'config': {
         'working_env': [28, 29],  # 工作环境对应的 hr_media id list
         'figure': [31],  # 人物寄语
-        'members': [33, 34],  # 公司成员
+        'members': [40],  # 公司成员
         'events': [37],  # 公司大事件
         'address': [38],  # 公司地址
         'survey': [],  # 问卷调查
