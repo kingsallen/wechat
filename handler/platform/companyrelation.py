@@ -51,7 +51,6 @@ class CompanyHandler(BaseHandler):
     def get(self):
         company = self.params.pop('sub_company') if self.params.sub_company \
             else self.current_user.company
-        self.logger.debug({'company: {}',format(company)})
 
         data = yield self.user_company_ps.get_company_data(
             self.params, company, self.current_user)

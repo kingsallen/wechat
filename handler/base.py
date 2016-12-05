@@ -197,8 +197,6 @@ class BaseHandler(MetaBaseHandler):
                     self._wxuser = yield self._handle_ent_openid(
                         openid, self._unionid)
 
-
-
             elif state:  # 用户拒绝授权
                 # TODO 拒绝授权用户，是否让其继续操作? or return
                 pass
