@@ -178,6 +178,8 @@ class BaseHandler(MetaBaseHandler):
         if self.in_wechat:
             # 用户同意授权
             if code and self._verify_code(code):
+                # 保存 code 进 cookie
+                self.set_cookie(const.COOKIE_CODE, to_str(code), expires_days=1)
 
                 # 来自 qx 的授权, 获得 userinfo
                 if state == wx_const.WX_OAUTH_DEFAULT_STATE:
@@ -195,8 +197,7 @@ class BaseHandler(MetaBaseHandler):
                     self._wxuser = yield self._handle_ent_openid(
                         openid, self._unionid)
 
-                # 保存 code 进 cookie
-                self.set_cookie(const.COOKIE_CODE, to_str(code), expires_days=1)
+
 
             elif state:  # 用户拒绝授权
                 # TODO 拒绝授权用户，是否让其继续操作? or return
