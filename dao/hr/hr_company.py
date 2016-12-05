@@ -36,4 +36,5 @@ class HrCompanyDao(BaseDao):
             "update_time":    self.constant.TYPE_TIMESTAMP, # 更新时间
             "disable":        self.constant.TYPE_INT, # 0:无效 1:有效
             "source":         self.constant.TYPE_INT, # 添加来源 0:hr系统, 9:profile添加
+            "slogan":         self.constant.TYPE_STRING,  # 公司口号
         }
