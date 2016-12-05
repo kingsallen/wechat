@@ -313,7 +313,7 @@ class PositionHandler(BaseHandler):
         data = ObjectDict({
             "icon_url": self.static_url(company_info.logo),
             "name": company_info.abbreviation or company_info.name,
-            "description": company_info.introduction,
+            "description": company_info.slogan,
             "did": did,
         })
 
