@@ -241,9 +241,8 @@ def make_team_detail_template(team, media_dict, members, positions,
         template.append(template1(sub_type='less', title='成员采访', data=interview))
     if positions:
         template.append(template3('团队在招职位', positions, handler_params))
-
-    template.append(template5())
-
+    if not vst_cmpy:
+        template.append(template5())
     if other_teams:
         template.append(template4(
             sub_type=0, title='其他团队',
