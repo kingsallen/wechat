@@ -91,8 +91,13 @@ def url_append_query(url, *args, **kwargs):
     query_str = urlencode(query)
     # Add no value query.
     if len(res):
+        count = 0
         for key in res:
-            query_str += "&{}".format(key)
+            if count == 0 and not bool(query_str):
+                query_str += "{}".format(key)
+            else:
+                query_str += "&{}".format(key)
+            count += 1
     url_parts[4] = query_str
 
     return urlunparse(url_parts)
