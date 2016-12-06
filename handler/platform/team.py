@@ -11,6 +11,7 @@ from tornado import gen
 from handler.base import BaseHandler
 from util.common import ObjectDict
 from util.common.decorator import check_sub_company
+from util.tool.url_tool import url_append_query
 
 
 class TeamIndexHandler(BaseHandler):
@@ -32,8 +33,8 @@ class TeamIndexHandler(BaseHandler):
         company_name = current_company.abbreviation or current_company.name
         self.params.share = ObjectDict({
             "cover": self.static_url(current_company.logo),
-            "title": company_name + "的团队",
-            "description": "",
+            "title": company_name + "的核心团队点此查看",
+            "description": u"这可能是你人生的下一站! 不先了解一下未来同事吗?",
             "link": self.fullurl
         })
 
@@ -48,6 +49,7 @@ class TeamDetailHandler(BaseHandler):
     def get(self, team_id):
         current_company = self.params.pop('sub_company') if \
             self.params.sub_company else self.current_user.company
+
         team = yield self.team_ps.get_team_by_id(team_id)
         if team.company_id != self.current_user.company.id:
             self.write_error(404)
@@ -55,10 +57,14 @@ class TeamDetailHandler(BaseHandler):
         data = yield self.team_ps.get_team_detail(
             self.current_user, current_company, team, self.params)
 
+        company_name = current_company.abbreviation or current_company.name
+
+        # TODO: change share cover from company logo to the first picture in the team images.
+        share_cover_url = self.static_url(self.current_user.company.logo)
         self.params.share = ObjectDict({
-            "cover": self.static_url(self.current_user.company.logo),
-            "title": team.name.upper() + "团队",
-            "description": "",
+            "cover": url_append_query(share_cover_url, "imageMogr2/thumbnail/!300x300r"),
+            "title": team.name.upper() + "-" + company_name,
+            "description": u'通常你在点击“加入我们”之类的按钮之前并不了解我们, 现在给你个机会!',
             "link": self.fullurl
         })
 

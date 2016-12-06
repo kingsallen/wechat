@@ -9,8 +9,9 @@
 
 import urllib
 
-from urllib.parse import urlparse, parse_qs, urlencode
+from urllib.parse import urlparse, parse_qs, urlencode, parse_qsl, urlunparse
 from setting import settings
+
 
 def make_url(path, params=None, host="", protocol="http", escape=None,
              **kwargs):
@@ -67,6 +68,37 @@ def url_subtract_query(url, exclude):
     return ret[:-1] if ret[-1] == '?' else ret
 
 
+def url_append_query(url, *args, **kwargs):
+    """
+        为url添加query
+        :example: url_append_query('/m/app', "sjdf","lsdkjf", a=2)
+    """
+    url_parts = list(urlparse(url))
+    query = dict(parse_qsl(url_parts[4]))
+
+    args_set = set(args)
+
+    # 在args里删除那些即在args里面又在kwargs里的
+    res = []
+    if bool(kwargs):
+        for key in args_set:
+            if not key in kwargs:
+                res.append(key)
+    else:
+        res = args_set
+
+        query.update(kwargs)
+
+    query_str = urlencode(query)
+    # Add no value query.
+    if len(res):
+        for key in res:
+            query_str += "&{}".format(key)
+    url_parts[4] = query_str
+
+    return urlunparse(url_parts)
+
+
 def make_static_url(path, protocol='https'):
     if not path:
         return None
@@ -76,3 +108,4 @@ def make_static_url(path, protocol='https'):
     if not path.startswith("http") and protocol is not None:
         path = protocol + ":" + path
     return path
+
