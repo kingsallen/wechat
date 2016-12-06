@@ -82,12 +82,11 @@ def url_append_query(url, *args, **kwargs):
     res = []
     if bool(kwargs):
         for key in args_set:
-            if not key in kwargs:
+            if key not in kwargs:
                 res.append(key)
+        query.update(kwargs)
     else:
         res = args_set
-
-        query.update(kwargs)
 
     query_str = urlencode(query)
     # Add no value query.
@@ -108,4 +107,3 @@ def make_static_url(path, protocol='https'):
     if not path.startswith("http") and protocol is not None:
         path = protocol + ":" + path
     return path
-
