@@ -60,7 +60,7 @@ class TeamDetailHandler(BaseHandler):
         company_name = current_company.abbreviation or current_company.name
 
         # TODO: change share cover from company logo to the first picture in the team images.
-        share_cover_url = self._get_team_detail_share_image(data) or self.static_url(self.current_user.company.logo)
+        share_cover_url = self._get_share_image(data) or self.static_url(self.current_user.company.logo)
         self.params.share = ObjectDict({
             "cover": url_append_query(share_cover_url, "imageMogr2/thumbnail/!300x300r"),
             "title": team.name.upper() + "-" + company_name,
@@ -72,7 +72,8 @@ class TeamDetailHandler(BaseHandler):
         return
 
 
-    def _get_team_detail_share_image(self, page_data):
+    @staticmethod
+    def _get_share_image(page_data):
         templates = page_data.templates
         template_media = templates[0] if len(templates) else None
         if not template_media:
