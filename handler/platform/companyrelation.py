@@ -57,7 +57,7 @@ class CompanyHandler(BaseHandler):
 
         company_name = company.abbreviation or company.name
         self.params.share = ObjectDict({
-            'cover':       self.static_url(self.current_user.company.logo),
+            'cover':       self.static_url(company.get('logo', '')),
             'title':       u'关于{}, 你想知道的都在这里'.format(company_name),
             'description': u'这可能是你人生的下一站! 看清企业全局, 然后定位自己',
             'link':        self.fullurl
