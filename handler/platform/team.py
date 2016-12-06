@@ -79,5 +79,5 @@ class TeamDetailHandler(BaseHandler):
         if not template_media:
             return None
         data = template_media.data[0] if len(template_media.data) else None
-        media_url = data.media_url if data else None
+        media_url = data.get('media_url', None) if data else None
         return media_url
