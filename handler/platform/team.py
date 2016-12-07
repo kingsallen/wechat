@@ -53,6 +53,7 @@ class TeamDetailHandler(BaseHandler):
         team = yield self.team_ps.get_team_by_id(team_id)
         if team.company_id != self.current_user.company.id:
             self.write_error(404)
+            return
 
         data = yield self.team_ps.get_team_detail(
             self.current_user, current_company, team, self.params)
