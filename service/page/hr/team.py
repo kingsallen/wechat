@@ -10,7 +10,6 @@ from util.common import ObjectDict
 from tornado import gen
 from service.page.base import PageService
 from util.tool import temp_date_tool
-from util.tool import ps_tool
 from util.tool.url_tool import make_url
 from conf import path
 
@@ -43,17 +42,17 @@ class TeamPageService(PageService):
 
         # 根据母公司，子公司区分对待，获取团队信息
         if sub_flag:
-            teams = yield ps_tool.get_sub_company_teams(self, company.id)
+            teams = yield self._get_sub_company_teams(self, company.id)
         else:
             teams = yield self.hr_team_ds.get_team_list(
                 conds={'company_id': company.id})
 
         # 获取团队成员以及所需要的media信息
-        team_media_dict = yield ps_tool.get_media_by_ids(
+        team_media_dict = yield self.hr_media_ds.get_media_by_ids(
             self, [t.media_id for t in teams])
         all_members_dict = yield self._get_all_team_members(
             [t.id for t in teams])
-        all_member_headimg_dict = yield ps_tool.get_media_by_ids(
+        all_member_headimg_dict = yield self.hr_media_ds.get_media_by_ids(
             self, all_members_dict.get('all_headimg_list'))
 
         # 拼装模板数据
@@ -96,7 +95,7 @@ class TeamPageService(PageService):
                 conds={'team_id': team.id})
             team_id_list = list(set([p.team_id for p in company_positions
                                      if p.team_id != team.id]))
-            other_teams = yield ps_tool.get_sub_company_teams(
+            other_teams = yield self._get_sub_company_teams(
                 self, company_id=None, team_ids=team_id_list)
         else:
             company_positions = yield self.job_position_ds.get_positions_list(
@@ -112,7 +111,7 @@ class TeamPageService(PageService):
         media_id_list = [team.media_id] + \
             sum([[m.headimg_id, m.media_id] for m in team_members], []) + \
             [t.media_id for t in other_teams]
-        media_dict = yield ps_tool.get_media_by_ids(self, media_id_list)
+        media_dict = yield self.hr_media_ds.get_media_by_ids(self, media_id_list)
 
         # 拼装模板数据
         data.header = temp_date_tool.make_header(company, True, team)
@@ -172,3 +171,36 @@ class TeamPageService(PageService):
                 fields=fields)
 
         raise gen.Return(company_positions)
+
+    @gen.coroutine
+    def _get_sub_company_teams(self, company_id, team_ids=None):
+        """
+        获取团队信息
+        当只给定company_id，通过position信息中team_id寻找出所有相关团队
+        当给定team_ids时获取所有对应的团队
+        :param self:
+        :param company_id:
+        :param team_ids:
+        :return: [object_of_hr_team, ...]
+        """
+        if team_ids is None:
+            publishers = yield self.hr_company_account_ds.get_company_accounts_list(
+                conds={'company_id': company_id}, fields=None)
+            publisher_id_tuple = tuple([p.account_id for p in publishers])
+
+            if not publisher_id_tuple:
+                raise gen.Return([])
+
+            team_ids = yield self.job_position_ds.get_positions_list(
+                conds='publisher in {}'.format(publisher_id_tuple).replace(',)', ')'),
+                fields=['team_id'], options=['DISTINCT'])
+            team_id_tuple = tuple([t.team_id for t in team_ids])
+        else:
+            team_id_tuple = tuple(team_ids)
+
+        if not team_id_tuple:
+            gen.Return([])
+        teams = yield self.hr_team_ds.get_team_list(
+            conds='id in {}'.format(team_id_tuple).replace(',)', ')'))
+
+        raise gen.Return(teams)

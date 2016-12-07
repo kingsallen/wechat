@@ -12,7 +12,7 @@ from util.tool.date_tool import jd_update_date
 from util.tool.http_tool import http_get, async_das_get
 from util.tool.str_tool import gen_salary, split
 from util.tool.temp_date_tool import make_mate, make_team, template3
-from util.tool import ps_tool
+
 
 class PositionPageService(PageService):
 
@@ -226,7 +226,7 @@ class PositionPageService(PageService):
     def get_mate_data(self, jd_media):
         job_media = json.loads(jd_media)
         if isinstance(job_media, list) and job_media:
-            media_list = yield ps_tool.get_media_by_ids(self, job_media, True)
+            media_list = yield self.hr_media_ds.get_media_by_ids(self, job_media, True)
             res = make_mate(media_list)
         else:
             res = None

@@ -6,7 +6,7 @@
 :date 2016.11,24
 
  企业主页中模板数据 hr_media 中 id 的 list
-
+ 配置中除了 问卷调查survey可以为空外，其余均不可为空，否则影响正常运行。
 """
 from util.common import ObjectDict
 
@@ -76,6 +76,23 @@ SUB_COMPANY_MARS_40627 = ObjectDict({
         'figure': [31],  # 人物寄语
         'members': [42],  # 公司成员
         'events': [35, 36],  # 公司大事件
+        'address': [38],  # 公司地址
+        'survey': [],  # 问卷调查
+    }
+})
+
+
+# Product environment company config
+
+COMPANY_MARS = ObjectDict({
+    'order': ['working_env', 'figure', 'team', 'members',
+              'events', 'address', 'survey'],
+    'config': {
+        'working_env': [27, 28, 29, 30],  # 工作环境对应的 hr_media id list
+        'figure': [31],  # 人物寄语
+        'team': [],  # 团队列表
+        'members': [39, 40],  # 公司成员
+        'events': [36, 35, 37],  # 公司大事件
         'address': [38],  # 公司地址
         'survey': [],  # 问卷调查
     }

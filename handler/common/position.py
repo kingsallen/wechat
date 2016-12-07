@@ -1,15 +1,15 @@
 # coding=utf-8
-import conf.common as const
-import conf.path as path
-import conf.message as msg
-import conf.wechat as wx
-
 from tornado import gen
+
+import conf.common as const
+import conf.message as msg
+import conf.path as path
+import conf.wechat as wx
 from handler.base import BaseHandler
 from util.common import ObjectDict
 from util.common.decorator import handle_response
-from util.tool.url_tool import make_url
 from util.tool.str_tool import gen_salary, add_item, split
+from util.tool.url_tool import make_url
 from util.wechat.template import position_view_five
 
 

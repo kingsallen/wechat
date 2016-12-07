@@ -179,7 +179,7 @@ class BaseHandler(MetaBaseHandler):
             # 用户同意授权
             if code and self._verify_code(code):
                 # 保存 code 进 cookie
-                self.set_cookie(const.COOKIE_CODE, to_str(code), expires_days=1)
+                self.set_cookie(const.COOKIE_CODE, to_str(code), expires_days=1, httponly=True)
 
                 # 来自 qx 的授权, 获得 userinfo
                 if state == wx_const.WX_OAUTH_DEFAULT_STATE:
@@ -470,7 +470,8 @@ class BaseHandler(MetaBaseHandler):
 
         session_id = self._make_new_session_id(session.qxuser.sysuser_id)
         logger.debug("session_id: %s" % session_id)
-        self.set_secure_cookie(const.COOKIE_SESSIONID, session_id)
+        self.set_secure_cookie(const.COOKIE_SESSIONID, session_id,
+                               httponly=True)
 
         self._save_sessions(session_id, session)
 

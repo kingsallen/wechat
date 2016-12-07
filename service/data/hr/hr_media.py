@@ -43,3 +43,22 @@ class HrMediaDataService(DataService):
 
         response = yield self.hr_media_dao.get_list_by_conds(conds, fields)
         raise gen.Return(response)
+
+    @gen.coroutine
+    def get_media_by_ids(self, id_list, list_flag=False):
+        """
+        获取指定media_id列表内所有media对象
+        :param self:
+        :param id_list:
+        :param list_flag: 为真返回media列表
+        :return: {object_hr_media.id: object_hr_media, ...} or [object_hr_media ...]
+        """
+        if not id_list:
+            media_list = []
+        else:
+            media_list = yield self.get_media_list(
+                conds='id in {}'.format(tuple(id_list)).replace(',)', ')'))
+
+        if list_flag:
+            raise gen.Return(media_list)
+        raise gen.Return({m.id: m for m in media_list})

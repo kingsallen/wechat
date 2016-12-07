@@ -12,7 +12,7 @@ from tornado import gen
 from service.page.base import PageService
 from util.common import ObjectDict
 from util.tool.url_tool import make_url
-from util.tool import temp_date_tool, ps_tool
+from util.tool import temp_date_tool
 from tests.dev_data.user_company_config import COMPANY_CONFIG
 import conf.path as path
 
@@ -37,24 +37,27 @@ class UserCompanyPageService(PageService):
         vst_cmpy = yield self.user_company_visit_req_ds.get_visit_cmpy(
                         conds=conds, fields=['id', 'company_id'])
 
-        # 区分母公司，子公司对待，获取所有团队team
-        if company.id != user.company.id:
-            teams = yield ps_tool.get_sub_company_teams(self, company.id)
-        else:
-            teams = yield self.hr_team_ds.get_team_list(
-                conds={'company_id': company.id})
-        team_resource_list = yield self.get_team_resource(teams)
-        team_template = temp_date_tool.make_company_team(
-            team_resource_list, make_url(path.COMPANY_TEAM, handler_params))
-
         # 拼装模板数据
         data.header = temp_date_tool.make_header(company)
         data.relation = ObjectDict({
             'follow': self.constant.YES if fllw_cmpy else self.constant.NO,
             'want_visit': self.constant.YES if vst_cmpy else self.constant.NO})
-        data.templates = yield self._get_company_template(company.id)
-        data.templates.insert(2, team_template)  # 暂且固定团队信息在公司主页位置
-        data.template_total = len(data.templates)
+        data.templates, tmp_team = yield self._get_company_template(company.id)
+
+        # 如果没有提供team的配置，去hr_team寻找资源
+        if not tmp_team:
+            # 区分母公司、子公司对待，获取所有团队team
+            if company.id != user.company.id:
+                teams = yield self._get_sub_company_teams(self, company.id)
+            else:
+                teams = yield self.hr_team_ds.get_team_list(
+                    conds={'company_id': company.id})
+            team_resource_list = yield self._get_team_resource(teams)
+            team_template = temp_date_tool.make_company_team(
+                team_resource_list, make_url(path.COMPANY_TEAM, handler_params))
+
+            data.templates.insert(2, team_template)  # 暂且固定团队信息在公司主页位置
+            data.template_total = len(data.templates)
 
         raise gen.Return(data)
 
@@ -68,7 +71,7 @@ class UserCompanyPageService(PageService):
         """
         company_config = COMPANY_CONFIG.get(str(company_id))
         values = sum(company_config.config.values(), [])
-        media = yield ps_tool.get_media_by_ids(self, tuple(values))
+        media = yield self.hr_media_ds.get_media_by_ids(self, tuple(values))
 
         templates = [
             getattr(temp_date_tool, 'make_company_{}'.format(key))(
@@ -77,17 +80,45 @@ class UserCompanyPageService(PageService):
             if company_config.config.get(key) or key == 'survey'
         ]
 
-        raise gen.Return(templates)
+        raise gen.Return(templates, bool(company_config.config.get('team')))
 
     @gen.coroutine
-    def get_team_resource(self, team_list):
-        media_dict = yield ps_tool.get_media_by_ids(
+    def _get_sub_company_teams(self, company_id):
+        """
+        获取团队信息
+        当只给定company_id，通过position信息中team_id寻找出所有相关团队
+        :param self:
+        :param company_id:
+        :return: [object_of_hr_team, ...]
+        """
+        publishers = yield self.hr_company_account_ds.get_company_accounts_list(
+            conds={'company_id': company_id}, fields=None)
+        publisher_id_tuple = tuple([p.account_id for p in publishers])
+
+        if not publisher_id_tuple:
+            raise gen.Return([])
+        team_ids = yield self.job_position_ds.get_positions_list(
+            conds='publisher in {}'.format(publisher_id_tuple).replace(',)', ')'),
+            fields=['team_id'], options=['DISTINCT'])
+        team_id_tuple = tuple([t.team_id for t in team_ids])
+
+        if not team_id_tuple:
+            gen.Return([])
+        teams = yield self.hr_team_ds.get_team_list(
+            conds='id in {}'.format(team_id_tuple).replace(',)', ')'))
+
+        raise gen.Return(teams)
+
+    @gen.coroutine
+    def _get_team_resource(self, team_list):
+        media_dict = yield self.hr_media_ds.get_media_by_ids(
             self, [t.media_id for t in team_list])
 
         raise gen.Return([ObjectDict({
             # 'show_order': team.show_order, 如果需要对team排序
             'id': team.id,
-            'title': team.name,
+            'title': '我们的团队',
+            'subtitle': team.name,
             'longtext': team.description,
             'media_url': media_dict.get(team.media_id).media_url,
             'media_type': media_dict.get(team.media_id).media_type,

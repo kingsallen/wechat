@@ -60,7 +60,7 @@ def template1(sub_type, title, data, more_link=None):
 
 def template1_data(resource, member_list=None):
     return {
-        'title': resource.title,
+        'title': resource.subtitle,
         'longtext': resource.longtext,
         'media_url': make_static_url(resource.media_url),
         'media_type': MEDIA_TYPE[resource.media_type],
@@ -257,7 +257,7 @@ def make_team_detail_template(team, media_dict, members, positions,
 
 # company main page template generator
 def make_company_working_env(media_list):
-    return template1(sub_type='less', title='办公环境',
+    return template1(sub_type='less', title=media_list[0].title,
                      data=[template1_data(media) for media in media_list])
 
 
@@ -266,7 +266,7 @@ def make_company_figure(media_list):
 
 
 def make_company_members(media_list):
-    return template1(sub_type='less', title='在这里工作的人们',
+    return template1(sub_type='less', title=media_list[0].title,
                      data=[template1_data(media) for media in media_list])
 
 
@@ -284,9 +284,11 @@ def make_company_survey(media=None):
     return template5(media)
 
 
-def make_company_team(resource_list, link):
-    return template1(sub_type='less', title='我们的团队', more_link=link,
-                     data=[template1_data(res) for res in resource_list])
+def make_company_team(media_list, link):
+    return template1(sub_type='less',
+                     title=media_list[0].title,
+                     more_link=link,
+                     data=[template1_data(media) for media in media_list])
 
 
 # JD page
