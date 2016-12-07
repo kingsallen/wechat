@@ -21,7 +21,7 @@ from util.common import ObjectDict
 from util.tool.url_tool import make_static_url, make_url
 from util.tool.str_tool import gen_salary
 from conf.platform import MEDIA_TYPE
-
+from conf.path import POSITION_PATH
 
 def template1(sub_type, title, data, more_link=None):
     """
@@ -72,7 +72,7 @@ def template1_data_member(resource_list):
     return [{
         "icon": make_static_url(resource.media_url),
         "name": resource.name,
-        "title": resource.itle,
+        "title": resource.title,
         "description": resource.description,
     } for resource in resource_list]
 
@@ -100,7 +100,7 @@ def template3(title, resource_list, handler_params):
         'title': title,
         'data': [{
             'title': position.title,  # '文案'
-            'link': make_url('/m/position/{}'.format(position.id), handler_params),  # JD连接
+            'link': make_url(POSITION_PATH.format(position.id), handler_params),  # JD连接
             'location': position.city,  # '上海
             'salary': gen_salary(position.salary_top, position.salary_bottom)  # '5k-8k'
         } for position in resource_list]
@@ -173,7 +173,7 @@ def make_team_member(member, headimg):
 def make_team_index_template(team, team_medium, more_link, member_list):
     data = [{
         'title': team.name,
-        'longtext': team.description,
+        'longtext': team.summary,
         'media_url': make_static_url(team_medium.media_url),
         'media_type': MEDIA_TYPE[team_medium.media_type],
         'member_list': member_list
@@ -213,15 +213,22 @@ def make_other_team_data(team, media, handler_params):
 
 
 def make_team_detail_template(team, media_dict, members, positions,
-                              other_teams, handler_params, vst_cmpy=False):
+                              other_teams, handler_params, vst=False,
+                              team_conf=None):
     team_media = media_dict.get(team.media_id)
-    introduction, interview = [], []
-    for member in members:
-        introduction.append(make_introduction(
-            member, media_dict.get(member.headimg_id)))
-        if member.media_id:
-            interview.append(make_interview(
-                member, media_dict.get(member.media_id)))
+
+    if team_conf:
+        introduction = [make_introduction(
+            m, media_dict.get(m.headimg_id)) for m in members]
+        interview = [template1_data(media_dict.get(id)) for id in team_conf]
+    else:
+        introduction, interview = [], []
+        for member in members:
+            introduction.append(make_introduction(
+                member, media_dict.get(member.headimg_id)))
+            if member.media_id:
+                interview.append(make_interview(
+                    member, media_dict.get(member.media_id)))
 
     template = [
         template1(
@@ -238,10 +245,13 @@ def make_team_detail_template(team, media_dict, members, positions,
 
     # 适应没有数据不显示模板块
     if interview:
-        template.append(template1(sub_type='less', title='成员采访', data=interview))
+        template.append(template1(
+            sub_type='less',
+            title=media_dict.get(team_conf[0]) if team_conf else '成员采访',
+            data=interview))
     if positions:
         template.append(template3('团队在招职位', positions, handler_params))
-    if not vst_cmpy:
+    if not vst:
         template.append(template5())
     if other_teams:
         template.append(template4(
@@ -284,10 +294,10 @@ def make_company_survey(media=None):
     return template5(media)
 
 
-def make_company_team(media_list, link):
+def make_company_team(media_list, link=None):
     return template1(sub_type='less',
                      title=media_list[0].title,
-                     more_link=link,
+                     more_link=link or media_list[0].link,
                      data=[template1_data(media) for media in media_list])
 
 
@@ -309,7 +319,7 @@ def make_team(team, team_medium):
         sub_type='full', title='所属团队',
         data=[{
             'title': '',
-            'longtext': team.description,
+            'longtext': team.summary,
             'media_url': make_static_url(team_medium.media_url),
             'media_type': MEDIA_TYPE[team_medium.media_type],
             'member_list': None,

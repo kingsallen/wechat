@@ -36,13 +36,15 @@ class UserCompanyPageService(PageService):
                         conds=conds, fields=['id', 'company_id'])
         vst_cmpy = yield self.user_company_visit_req_ds.get_visit_cmpy(
                         conds=conds, fields=['id', 'company_id'])
+        team_index_url = make_url(path.COMPANY_TEAM, handler_params)
 
         # 拼装模板数据
         data.header = temp_date_tool.make_header(company)
         data.relation = ObjectDict({
             'follow': self.constant.YES if fllw_cmpy else self.constant.NO,
             'want_visit': self.constant.YES if vst_cmpy else self.constant.NO})
-        data.templates, tmp_team = yield self._get_company_template(company.id)
+        data.templates, tmp_team = yield self._get_company_template(
+            company.id, team_index_url)
 
         # 如果没有提供team的配置，去hr_team寻找资源
         if not tmp_team:
@@ -54,24 +56,27 @@ class UserCompanyPageService(PageService):
                     conds={'company_id': company.id})
             team_resource_list = yield self._get_team_resource(teams)
             team_template = temp_date_tool.make_company_team(
-                team_resource_list, make_url(path.COMPANY_TEAM, handler_params))
-
+                team_resource_list, team_index_url)
             data.templates.insert(2, team_template)  # 暂且固定团队信息在公司主页位置
-            data.template_total = len(data.templates)
+
+        data.template_total = len(data.templates)
 
         raise gen.Return(data)
 
     @gen.coroutine
-    def _get_company_template(self, company_id):
+    def _get_company_template(self, company_id, team_index_url):
         """
         根据不同company_id去配置文件中获取company配置信息
         之后根据配置，生成template数据
         :param company_id:
         :return:
         """
-        company_config = COMPANY_CONFIG.get(str(company_id))
+        company_config = COMPANY_CONFIG.get(company_id)
         values = sum(company_config.config.values(), [])
         media = yield self.hr_media_ds.get_media_by_ids(self, tuple(values))
+
+        for team_media_id in company_config.config.get('team'):
+            media.get(team_media_id).link = team_index_url
 
         templates = [
             getattr(temp_date_tool, 'make_company_{}'.format(key))(
@@ -119,7 +124,7 @@ class UserCompanyPageService(PageService):
             'id': team.id,
             'title': '我们的团队',
             'subtitle': team.name,
-            'longtext': team.description,
+            'longtext': team.summary,
             'media_url': media_dict.get(team.media_id).media_url,
             'media_type': media_dict.get(team.media_id).media_type,
         }) for team in team_list])

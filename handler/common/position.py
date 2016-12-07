@@ -11,7 +11,7 @@ from util.common.decorator import handle_response
 from util.tool.str_tool import gen_salary, add_item, split
 from util.tool.url_tool import make_url
 from util.wechat.template import position_view_five
-
+from tests.dev_data.user_company_config import COMPANY_CONFIG
 
 class PositionHandler(BaseHandler):
 
@@ -78,23 +78,9 @@ class PositionHandler(BaseHandler):
             add_item(position_data, "module_company_info", module_company_info)
             add_item(position_data, "module_position_recommend", module_position_recommend)
 
-            if team:
-                module_mate_day = yield self._make_mate_day(team)
-                module_team = yield self._make_team(team)
-                module_team_position = yield self._make_team_position(
-                    team, position_id)
-
-                if module_mate_day:
-                    add_item(position_data, "module_mate_day", module_mate_day)
-
-                add_item(position_data, "module_team", module_team)
-
-                if module_team_position:
-                    add_item(position_data, "module_team_position",
-                             module_team_position)
-
-            self.logger.debug("position_data: %s" % position_data)
-            self.logger.debug("self.params: %s" % self.params)
+            # [JD]职位所属团队及相关信息拼装
+            self.logger.debug("[JD]构建相似职位推荐")
+            self._add_team_data()
 
             self.render_page("position/info.html", data=position_data)
 
@@ -385,6 +371,27 @@ class PositionHandler(BaseHandler):
 
                 yield position_view_five(help_wechat.id, hr_wx_user.openid, link, position_info.title,
                                    position_info.salary)
+
+    def _add_team_data(self, position_data, team, position_id):
+
+        if team:
+            company_config = COMPANY_CONFIG.get(position_data.company_id)
+
+            module_mate_day = yield self._make_mate_day(team)
+            module_team = yield self._make_team(team)
+            module_team_position = yield self._make_team_position(
+                team, position_id)
+
+            if module_mate_day:
+                add_item(position_data, "module_mate_day", module_mate_day)
+
+            if not company_config.no_jd_team:
+                add_item(position_data, "module_team", module_team)
+
+            if module_team_position:
+                add_item(position_data, "module_team_position",
+                         module_team_position)
+
 
     @gen.coroutine
     def _make_team_position(self, team, position_id):
