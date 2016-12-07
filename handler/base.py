@@ -764,9 +764,10 @@ class BaseHandler(MetaBaseHandler):
 
         def _readable_cookies():
             """基于 self.cookies 的内容构建一个简单可读的 dict"""
-            return ObjectDict(
-                {k: repr(v.value) for k, v in sorted(self.cookies.items())}
-            )
+            # return ObjectDict(
+            #     {k: repr(v.value) for k, v in sorted(self.cookies.items())}
+            # )
+            return None
 
         request = self.request
         req_params = request.arguments
