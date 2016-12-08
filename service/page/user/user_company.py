@@ -85,7 +85,7 @@ class UserCompanyPageService(PageService):
             if company_config.config.get(key) or key == 'survey'
         ]
 
-        raise gen.Return(templates, bool(company_config.config.get('team')))
+        raise gen.Return((templates, bool(company_config.config.get('team'))))
 
     @gen.coroutine
     def _get_sub_company_teams(self, company_id):
