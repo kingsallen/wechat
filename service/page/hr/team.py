@@ -49,11 +49,11 @@ class TeamPageService(PageService):
 
         # 获取团队成员以及所需要的media信息
         team_media_dict = yield self.hr_media_ds.get_media_by_ids(
-            self, [t.media_id for t in teams])
+            [t.media_id for t in teams])
         all_members_dict = yield self._get_all_team_members(
             [t.id for t in teams])
         all_member_headimg_dict = yield self.hr_media_ds.get_media_by_ids(
-            self, all_members_dict.get('all_headimg_list'))
+            all_members_dict.get('all_headimg_list'))
 
         # 拼装模板数据
         data.header = temp_date_tool.make_header(company, team_flag=True)
@@ -120,7 +120,7 @@ class TeamPageService(PageService):
 
         media_id_list = [team.media_id] + member_media_ids + \
             [t.media_id for t in other_teams]
-        media_dict = yield self.hr_media_ds.get_media_by_ids(self, media_id_list)
+        media_dict = yield self.hr_media_ds.get_media_by_ids(media_id_list)
 
         # 拼装模板数据
         data.header = temp_date_tool.make_header(company, True, team)

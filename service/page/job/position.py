@@ -226,7 +226,7 @@ class PositionPageService(PageService):
     def get_mate_data(self, jd_media):
         job_media = json.loads(jd_media)
         if isinstance(job_media, list) and job_media:
-            media_list = yield self.hr_media_ds.get_media_by_ids(self, job_media, True)
+            media_list = yield self.hr_media_ds.get_media_by_ids(job_media, True)
             res = make_mate(media_list)
         else:
             res = None

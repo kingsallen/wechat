@@ -73,7 +73,7 @@ class UserCompanyPageService(PageService):
         """
         company_config = COMPANY_CONFIG.get(company_id)
         values = sum(company_config.config.values(), [])
-        media = yield self.hr_media_ds.get_media_by_ids(self, tuple(values))
+        media = yield self.hr_media_ds.get_media_by_ids(values)
 
         for team_media_id in company_config.config.get('team'):
             media.get(team_media_id).link = team_index_url
@@ -117,7 +117,7 @@ class UserCompanyPageService(PageService):
     @gen.coroutine
     def _get_team_resource(self, team_list):
         media_dict = yield self.hr_media_ds.get_media_by_ids(
-            self, [t.media_id for t in team_list])
+            [t.media_id for t in team_list])
 
         raise gen.Return([ObjectDict({
             # 'show_order': team.show_order, 如果需要对team排序
