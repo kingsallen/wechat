@@ -145,7 +145,7 @@ def template50(resource):
 def make_header(company, team_flag=False, team=None):
     if team:
         name = team.name
-        description = team.description
+        description = ''
     else:
         name = '我们的团队' if team_flag else company.abbreviation or company.name
         description = '' if team_flag else company.slogan
