@@ -112,7 +112,7 @@ class TeamPageService(PageService):
                 yield self._get_team_position_members(team, company_positions)
 
             other_teams = yield self.hr_team_ds.get_team_list(
-                conds={'id': [team.id, '<>']})
+                conds={'id': [team.id, '<>'], 'company_id': company.id})
 
         member_media_ids = [m.headimg_id for m in team_members] + \
             team_config.get(team.id) if team_config \
@@ -174,7 +174,7 @@ class TeamPageService(PageService):
         team_members = yield self.hr_team_member_ds.get_team_member_list(
             conds={'team_id': team.id})
 
-        raise gen.Return(team_positions, team_members)
+        raise gen.Return((team_positions, team_members))
 
     @gen.coroutine
     def _get_sub_company_positions(self, company_id, fields=None):

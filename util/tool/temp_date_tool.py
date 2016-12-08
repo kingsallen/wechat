@@ -60,7 +60,7 @@ def template1(sub_type, title, data, more_link=None):
 
 def template1_data(resource, member_list=None):
     return {
-        'title': resource.subtitle,
+        'title': resource.sub_title,
         'longtext': resource.longtext,
         'media_url': make_static_url(resource.media_url),
         'media_type': MEDIA_TYPE[resource.media_type],
@@ -217,11 +217,14 @@ def make_team_detail_template(team, media_dict, members, positions,
                               team_conf=None):
     team_media = media_dict.get(team.media_id)
 
-    if team_conf:
+    if team_conf is not None:
+        interview_title = media_dict.get(team_conf.get(team.id)[0]).title
         introduction = [make_introduction(
             m, media_dict.get(m.headimg_id)) for m in members]
-        interview = [template1_data(media_dict.get(id)) for id in team_conf]
+        interview = [template1_data(media_dict.get(id))
+                     for id in team_conf.get(team.id)]
     else:
+        interview_title = '成员采访'
         introduction, interview = [], []
         for member in members:
             introduction.append(make_introduction(
@@ -247,7 +250,7 @@ def make_team_detail_template(team, media_dict, members, positions,
     if interview:
         template.append(template1(
             sub_type='less',
-            title=media_dict.get(team_conf[0]) if team_conf else '成员采访',
+            title=interview_title,
             data=interview))
     if positions:
         template.append(template3('团队在招职位', positions, handler_params))

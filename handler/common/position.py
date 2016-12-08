@@ -80,7 +80,7 @@ class PositionHandler(BaseHandler):
 
             # [JD]职位所属团队及相关信息拼装
             self.logger.debug("[JD]构建相似职位推荐")
-            self._add_team_data()
+            self._add_team_data(position_data, team)
 
             self.render_page("position/info.html", data=position_data)
 
@@ -372,7 +372,7 @@ class PositionHandler(BaseHandler):
                 yield position_view_five(help_wechat.id, hr_wx_user.openid, link, position_info.title,
                                    position_info.salary)
 
-    def _add_team_data(self, position_data, team, position_id):
+    def _add_team_data(self, position_data, team):
 
         if team:
             company_config = COMPANY_CONFIG.get(position_data.company_id)
@@ -380,7 +380,7 @@ class PositionHandler(BaseHandler):
             module_mate_day = yield self._make_mate_day(team)
             module_team = yield self._make_team(team)
             module_team_position = yield self._make_team_position(
-                team, position_id)
+                team, position_data.id)
 
             if module_mate_day:
                 add_item(position_data, "module_mate_day", module_mate_day)

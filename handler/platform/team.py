@@ -60,7 +60,7 @@ class TeamDetailHandler(BaseHandler):
 
         company_name = current_company.abbreviation or current_company.name
 
-        share_cover_url = data.templates[0].data.get('media_url') or \
+        share_cover_url = data.templates[0].data[0].get('media_url') or \
             self.static_url(self.current_user.company.logo)
         self.params.share = ObjectDict({
             "cover": url_append_query(share_cover_url, "imageMogr2/thumbnail/!300x300r"),

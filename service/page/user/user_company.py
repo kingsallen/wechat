@@ -75,8 +75,9 @@ class UserCompanyPageService(PageService):
         values = sum(company_config.config.values(), [])
         media = yield self.hr_media_ds.get_media_by_ids(values)
 
-        for team_media_id in company_config.config.get('team'):
-            media.get(team_media_id).link = team_index_url
+        if 'team' in company_config.order:
+            for team_media_id in company_config.config.get('team'):
+                media.get(team_media_id).link = team_index_url
 
         templates = [
             getattr(temp_date_tool, 'make_company_{}'.format(key))(
