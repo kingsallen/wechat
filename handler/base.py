@@ -622,19 +622,19 @@ class BaseHandler(MetaBaseHandler):
 
     # tornado hooks
     @gen.coroutine
-    def get(self):
+    def get(self, *args, **kwargs):
         pass
 
     @gen.coroutine
-    def post(self):
+    def post(self, *args, **kwargs):
         pass
 
     @gen.coroutine
-    def put(self):
+    def put(self, *args, **kwargs):
         pass
 
     @gen.coroutine
-    def delete(self):
+    def delete(self, *args, **kwargs):
         pass
 
     def get_template_namespace(self):

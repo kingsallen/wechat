@@ -98,17 +98,8 @@ COMPANY_MARS = ObjectDict({
     },
     'no_jd_team': True,
     'team_config': {
-        5: [64],
-        6: [65],
-        7: [66],
-        8: [67],
-        9: [68],
-        10: [69],
-        11: [70],
-        12: [71],
-        13: [72],
-        14: [73],
-
+        5: [64], 6: [65], 7: [66], 8: [67], 9: [68],
+        10: [69], 11: [70], 12: [71], 13: [72], 14: [73],
     }
 })
 
@@ -116,7 +107,7 @@ COMPANY_MARS = ObjectDict({
 # summary config for all companies
 
 COMPANY_CONFIG = ObjectDict({
-    4: COMPANY_4,
+    4: COMPANY_MARS,
     72: COMPANY_72,
     39978: COMPANY_MARS_39978,
     40120: SUB_COMPANY_MARS_40120,
