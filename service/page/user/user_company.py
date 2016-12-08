@@ -50,7 +50,7 @@ class UserCompanyPageService(PageService):
         if not tmp_team:
             # 区分母公司、子公司对待，获取所有团队team
             if company.id != user.company.id:
-                teams = yield self._get_sub_company_teams(self, company.id)
+                teams = yield self._get_sub_company_teams(company.id)
             else:
                 teams = yield self.hr_team_ds.get_team_list(
                     conds={'company_id': company.id})

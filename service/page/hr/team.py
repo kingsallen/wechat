@@ -42,7 +42,7 @@ class TeamPageService(PageService):
 
         # 根据母公司，子公司区分对待，获取团队信息
         if sub_flag:
-            teams = yield self._get_sub_company_teams(self, company.id)
+            teams = yield self._get_sub_company_teams(company.id)
         else:
             teams = yield self.hr_team_ds.get_team_list(
                 conds={'company_id': company.id})
@@ -103,7 +103,7 @@ class TeamPageService(PageService):
             team_id_list = list(set([p.team_id for p in company_positions
                                      if p.team_id != team.id]))
             other_teams = yield self._get_sub_company_teams(
-                self, company_id=None, team_ids=team_id_list)
+                company_id=None, team_ids=team_id_list)
         else:
             company_positions = yield self.job_position_ds.get_positions_list(
                 conds={'company_id': company.id}, fields=position_fields)
