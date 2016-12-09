@@ -205,10 +205,6 @@ class SharechainPageService(PageService):
 
                 # 如果存在上游数据（last_node）， 转发链长度 + 1
                 if last_node:
-                    print("position_id:%s,recom_id:%s,presentee_id:%s" %
-                          (recom.position_id, last_node.recom_id,
-                           recom.presentee_id))
-
                     yield self.stats_recom_record_ds.insert_stats_recom_record(
                         {
                             "position_id":   recom.position_id,
@@ -223,8 +219,6 @@ class SharechainPageService(PageService):
                 # 如果不存在上游数据，记录为 level 1， recom_id_2 为空，
                 #   last_recom_id 为 recom_id
                 else:
-                    print("position_id:%s,recom_id:%s,presentee_id:%s" %
-                          (recom.position_id, recom.recom_id, recom.presentee_id))
                     yield self.stats_recom_record_ds.insert_stats_recom_record(
                         {
                             "position_id":   recom.position_id,
@@ -309,7 +303,7 @@ class SharechainPageService(PageService):
                 position_id, recom_id, click_time)
 
         # 如果查不到最初联系人, 说明这条链路没有被截断过
-        # 并且 recom_id 这个人是自己点 JD 也访问的
+        # 并且 recom_id 这个人是自己点 JD 页访问的
         if not recom_record_of_recom:
             # 如果直接访问的人是认证员工,返回认证员工的 id
             is_employee = yield self._is_valid_employee(position_id, recom_id)

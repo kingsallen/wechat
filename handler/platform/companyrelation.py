@@ -6,22 +6,22 @@
 :date 2016.10.11
 
 """
-import re
+import ujson
+
 from tornado import gen
 from util.common import ObjectDict
+from util.common.decorator import check_sub_company
 from handler.base import BaseHandler
-import ujson
-import conf.common as const
 
 
 class CompanyVisitReqHandler(BaseHandler):
 
+    @check_sub_company
     @gen.coroutine
     def post(self):
         self.guarantee('status')
-        self.params.company_id = self.current_user.company.id
-        self.params.user_id = self.current_user.sysuser.id
-        result = yield self.user_company_ps.set_visit_company(self.params)
+        result = yield self.user_company_ps.set_visit_company(
+            current_user=self.current_user, param=self.params)
 
         if not result:
             self.send_json_error()
@@ -31,12 +31,12 @@ class CompanyVisitReqHandler(BaseHandler):
 
 class CompanyFollowHandler(BaseHandler):
 
+    @check_sub_company
     @gen.coroutine
     def post(self):
         self.guarantee('status')
-        self.params.company_id = self.current_user.company.id
-        self.params.user_id = self.current_user.sysuser.id
-        result = yield self.user_company_ps.set_company_follow(self.params)
+        result = yield self.user_company_ps.set_company_follow(
+            current_user=self.current_user, param=self.params)
 
         if not result:
             self.send_json_error()
@@ -45,60 +45,25 @@ class CompanyFollowHandler(BaseHandler):
 
 
 class CompanyHandler(BaseHandler):
+
+    @check_sub_company
     @gen.coroutine
     def get(self):
-        team_flag = True if re.match('^/m/company/team', self.request.uri) \
-                    else False
-        param = ObjectDict({
-            'user_id': self.current_user.sysuser.id,
-            'company_id': self.current_user.company.id
-        })
-        response = yield self.user_company_ps.get_companay_data(
-            handler_params=self.params,
-            param=param,
-            team_flag=team_flag)
+        company = self.params.pop('sub_company') if self.params.sub_company \
+            else self.current_user.company
 
-        template_name = 'company/team.html' if team_flag \
-                         else 'company/profile.html'
+        data = yield self.user_company_ps.get_company_data(
+            self.params, company, self.current_user)
 
-        company_name = self.current_user.company.abbreviation or self.current_user.company.name
-        if team_flag:
-            self.params.share = ObjectDict({
-                "cover":       self.static_url(self.current_user.company.logo),
-                "title":       company_name + "的团队",
-                "description": "",
-                "link":        self.fullurl
-            })
-        else:
-            self.params.share = ObjectDict({
-                "cover":       self.static_url(self.current_user.company.logo),
-                "title":       company_name + ", 我发现了一个好公司！",
-                "description": "",
-                "link":        self.fullurl
-            })
-
-        self.render_page(template_name, data=response.data)
-        return
-
-
-class CompanyTeamHandler(BaseHandler):
-
-    @gen.coroutine
-    def get(self, team_name):
-        self.params.company_id = self.current_user.company.id
-        self.params.user_id = self.current_user.sysuser.id
-        result = yield self.team_ps.get_more_team_info(team_name, params=self.params)
-        # icon 为空，出来统一赋值
-        result.header.icon = self.static_url(self.current_user.company.logo)
-
+        company_name = company.abbreviation or company.name
         self.params.share = ObjectDict({
-            "cover":       self.static_url(self.current_user.company.logo),
-            "title":       team_name.upper() + "团队",
-            "description": "",
-            "link":        self.fullurl
+            'cover':       self.static_url(company.get('logo', '')),
+            'title':       u'关于{}, 你想知道的都在这里'.format(company_name),
+            'description': u'这可能是你人生的下一站! 看清企业全局, 然后定位自己',
+            'link':        self.fullurl
         })
 
-        self.render_page(template_name='company/team.html', data=result)
+        self.render_page(template_name='company/profile.html', data=data)
         return
 
 
@@ -112,13 +77,13 @@ class CompanySurveyHandler(BaseHandler):
         _company_id = self.current_user.company.id
         _sysuser_id = self.current_user.sysuser.id
         _selected = ujson.dumps(self.params.selected, ensure_ascii=False)
-        _other = self.params.other or ""
+        _other = self.params.other or ''
 
         inserted_id = yield self.company_ps.save_survey({
-            "company_id": _company_id,
-            "sysuser_id": _sysuser_id,
-            "selected": _selected,
-            "other": _other
+            'company_id': _company_id,
+            'sysuser_id': _sysuser_id,
+            'selected': _selected,
+            'other': _other
         })
 
         if inserted_id and int(inserted_id):

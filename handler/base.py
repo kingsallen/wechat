@@ -11,6 +11,7 @@ import time
 import ujson
 from hashlib import sha1
 import urllib.parse
+import traceback
 
 import tornado.escape
 import tornado.httpclient
@@ -172,13 +173,13 @@ class BaseHandler(MetaBaseHandler):
         code = self.params.get("code")
         state = self.params.get("state")
 
-        # self.logger.debug("prepare: {}".format(self.request))
-
         self.logger.debug("code:{}, state:{}, request_url:{} ".format(code, state, self.request.uri))
 
         if self.in_wechat:
             # 用户同意授权
             if code and self._verify_code(code):
+                # 保存 code 进 cookie
+                self.set_cookie(const.COOKIE_CODE, to_str(code), expires_days=1, httponly=True)
 
                 # 来自 qx 的授权, 获得 userinfo
                 if state == wx_const.WX_OAUTH_DEFAULT_STATE:
@@ -195,9 +196,6 @@ class BaseHandler(MetaBaseHandler):
                     openid = yield self._get_user_openid(code)
                     self._wxuser = yield self._handle_ent_openid(
                         openid, self._unionid)
-
-                # 保存 code 进 cookie
-                self.set_cookie(const.COOKIE_CODE, to_str(code), expires_days=1, httponly=True)
 
             elif state:  # 用户拒绝授权
                 # TODO 拒绝授权用户，是否让其继续操作? or return
@@ -252,7 +250,6 @@ class BaseHandler(MetaBaseHandler):
 
         # 创建 qx 的 user_wx_user
         yield self.user_ps.create_qx_wxuser_by_userinfo(userinfo, user_id)
-        yield self.user_ps.ensure_user_unionid(user_id, userinfo.unionid)
 
         if self._authable():
             # 该企业号是服务号
@@ -323,8 +320,6 @@ class BaseHandler(MetaBaseHandler):
 
             mobile = self.params["mobile"]
         """
-        self.params = ObjectDict()
-
         c_arg = None
         try:
             for arg in args:
@@ -381,7 +376,10 @@ class BaseHandler(MetaBaseHandler):
 
         conds = {'id': company_id}
         company = yield self.company_ps.get_company(conds=conds, need_conf=True)
-        if company.conf_theme_id:
+
+        # 配色处理，如果theme_id为5表示公司使用默认配置，不需要将原始配色信息传给前端
+        # 如果将theme_id为5的传给前端，会导致前端颜色无法正常显示默认颜色
+        if company.conf_theme_id != 5:
             theme = yield self.wechat_ps.get_wechat_theme(
                 {'id': company.conf_theme_id, 'disable': 0})
             if theme:
@@ -472,7 +470,8 @@ class BaseHandler(MetaBaseHandler):
 
         session_id = self._make_new_session_id(session.qxuser.sysuser_id)
         logger.debug("session_id: %s" % session_id)
-        self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True)
+        self.set_secure_cookie(const.COOKIE_SESSIONID, session_id,
+                               httponly=True)
 
         self._save_sessions(session_id, session)
 
@@ -623,19 +622,19 @@ class BaseHandler(MetaBaseHandler):
 
     # tornado hooks
     @gen.coroutine
-    def get(self):
+    def get(self, *args, **kwargs):
         pass
 
     @gen.coroutine
-    def post(self):
+    def post(self, *args, **kwargs):
         pass
 
     @gen.coroutine
-    def put(self):
+    def put(self, *args, **kwargs):
         pass
 
     @gen.coroutine
-    def delete(self):
+    def delete(self, *args, **kwargs):
         pass
 
     def get_template_namespace(self):

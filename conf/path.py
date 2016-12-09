@@ -5,6 +5,7 @@ PATH_AUTH = "/mobile/auth"
 WX_OAUTH_QX_PATH = "/m/wxoauth2"
 POSITION_PATH = "/m/position/{}"
 RED_PACKET_CARD = "/mobile/redpack"
+TEAM_PATH = "/m/company/team/{}"
 
 OLD_POSITION_PATH = "/mobile/position"
 

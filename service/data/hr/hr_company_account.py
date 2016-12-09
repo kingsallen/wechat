@@ -28,7 +28,7 @@ class HrCompanyAccountDataService(DataService):
 
     @cache(ttl=60)
     @gen.coroutine
-    def get_company_accounts_list(self, conds, fields, options=None, appends=None, index='', params=None):
+    def get_company_accounts_list(self, conds, fields=None, options=None, appends=None, index='', params=None):
 
         options = options or []
         appends = appends or []
