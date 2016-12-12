@@ -15,7 +15,7 @@ from util.common import ObjectDict
 
 class HrMediaDataService(DataService):
 
-    @cache(ttl=60)
+    @cache(ttl=300)
     @gen.coroutine
     def get_medium(self, conds, fields=[]):
 
@@ -30,6 +30,7 @@ class HrMediaDataService(DataService):
         response = yield self.hr_media_dao.get_record_by_conds(conds, fields)
         raise gen.Return(response)
 
+    @cache(ttl=300)
     @gen.coroutine
     def get_media_list(self, conds, fields=[]):
 
