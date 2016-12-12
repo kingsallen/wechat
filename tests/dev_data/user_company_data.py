@@ -6,6 +6,94 @@
 :date 2016.10.12
 
 """
+from util.common import ObjectDict
+from util.tool.url_tool import make_url
+import conf.path as path
+
+
+def _add_company_data(hander_params, data):
+    """构建公司主页的豆腐干们"""
+
+    data.templates = [
+        ObjectDict({
+            'type': 1,
+            'sub_type': 'less',
+            'title': '办公环境',
+            'data': WORKING_ENV,
+            'more_link': ''
+        }),
+        ObjectDict({'type': 2, 'title': 'template 2', 'data': data2}),
+        ObjectDict({
+            'type': 1,
+            'sub_type': 'less',
+            'title': '我们的团队',
+            'data': TEAMS,
+            'more_link': make_url(path.COMPANY_TEAM, hander_params)
+        }),
+        ObjectDict({
+            'type': 1,
+            'sub_type': 'less',
+            'title': '在这里工作的人们',
+            'data': MEMBERS,
+            'more_link': ''
+        }),
+        ObjectDict({
+            'type': 4,
+            'sub_type': 0,
+            'title': '公司大事件',
+            'data': data4_1
+        }),
+        # 可能感兴趣的公司，暂时不做
+        # ObjectDict({'type': 4, 'sub_type': 1, 'title': '你可能感兴趣的公司',
+        #             'data': data4_2}),
+        ObjectDict({'type': 50, 'title': 'address', 'data': data50}),
+        ObjectDict({'type': 5, 'title': '', 'data': None})
+    ]
+    data.template_total = len(data.templates)
+
+
+
+def _add_team_data(hander_params, data):
+    """构建团队主页的豆腐干们"""
+
+    data.templates = [
+        ObjectDict({
+            'type': 1,
+            'sub_type': 'middle',
+            'title': '研发团队',
+            'data': TEAM_RD,
+            'more_link': make_url('/m/company/team/rd', hander_params)
+        }),
+
+        ObjectDict({
+            'type': 1,
+            'sub_type': 'middle',
+            'title': '客户成功团队',
+            'data': TEAM_CS,
+            'more_link': make_url('/m/company/team/cs', hander_params)
+        }),
+
+        ObjectDict({
+            'type': 1,
+            'sub_type': 'middle',
+            'title': '商务拓展团队',
+            'data': TEAM_BD,
+            'more_link': make_url('/m/company/team/bd', hander_params)
+        }),
+
+        ObjectDict({
+            'type': 1,
+            'sub_type': 'middle',
+            'title': '雇主品牌团队',
+            'data': TEAM_EB,
+            'more_link': make_url('/m/company/team/eb', hander_params)
+        }),
+    ]
+    data.template_total = len(data.templates)
+
+
+
+
 
 WORKING_ENV = [
     {
@@ -115,7 +203,7 @@ data2 = [
 
 MEMBERS = [
     {
-        'title': "潘老师",
+        'title': "潘煜昕",
         'longtext': "技术经理\n"
                     "行胜于言，希望用技术的力量来提高用户的生活品质。"
                     "我们不断创新技术架构，助力打造一款更具竞争力的产品。",

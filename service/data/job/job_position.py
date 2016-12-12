@@ -26,7 +26,7 @@ class JobPositionDataService(DataService):
 
     @cache(ttl=60)
     @gen.coroutine
-    def get_positions_list(self, conds, fields, options=[], appends=[], index='', params=[]):
+    def get_positions_list(self, conds, fields=None, options=[], appends=[], index='', params=[]):
 
         if conds is None or not (isinstance(conds, dict) or isinstance(conds, str)):
             self.logger.warn("Warning:[get_positions_list][invalid parameters], Detail:[conds: {0}, "

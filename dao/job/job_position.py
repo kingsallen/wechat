@@ -21,6 +21,7 @@ class JobPositionDao(BaseDao):
             "id":                     self.constant.TYPE_INT,
             "jobnumber":              self.constant.TYPE_STRING, # 职位编号
             "company_id":             self.constant.TYPE_INT, # hr_company.id
+            "team_id":                self.constant.TYPE_INT,  # hr_team.id
             "title":                  self.constant.TYPE_STRING, # 职位标题
             "city":                   self.constant.TYPE_STRING, # 所在城市
             "department":             self.constant.TYPE_STRING, # 所在部门

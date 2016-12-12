@@ -48,3 +48,4 @@ class LandingHandler(BaseHandler):
         })
 
         self.render(template_name="company/search.html", company=company)
+

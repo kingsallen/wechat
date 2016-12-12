@@ -60,3 +60,6 @@ DEGREE = {
     "5": "MBA",
     "6": "博士",
 }
+
+# 媒体类型
+MEDIA_TYPE = ('image', 'video')

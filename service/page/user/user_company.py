@@ -10,163 +10,141 @@
 from tornado import gen
 
 from service.page.base import PageService
-from tests.dev_data.user_company_data import WORKING_ENV, TEAMS, MEMBERS, \
-    data2, TEAM_EB, TEAM_BD, TEAM_CS, TEAM_RD, data4_1, data50
 from util.common import ObjectDict
-from util.tool.url_tool import make_url, make_static_url
+from util.tool.url_tool import make_url
+from util.tool import temp_date_tool
+from tests.dev_data.user_company_config import COMPANY_CONFIG
 import conf.path as path
 
 
 class UserCompanyPageService(PageService):
 
     @gen.coroutine
-    def get_companay_data(self, handler_params, param, team_flag):
-        """Develop Status: To be modify with real data.
+    def get_company_data(self, handler_params, company, user):
+        """
+
         :param handler_params:
-        :param param:
-        :param team_flag:
+        :param company: 当前公司
         :return:
         """
-        user_id, company_id = param.get('user_id'), param.get('company_id')
-        response = ObjectDict({'status': 0, 'message': 'sucdess'})
+        data = ObjectDict()
+        self.logger.debug('ps user: {}'.format(user))
 
-        company = yield self.hr_company_ds.get_company(
-                            conds={'id': company_id})
-
-        if not team_flag:
-            header = ObjectDict({
-                'type':        'company',
-                'name':        company.abbreviation or company.name,
-                'description': "你的职场向导",
-                'icon':        make_static_url(company.logo),
-                'banner':
-                    'https://cdn.moseeker.com/upload/company_profile/qx'
-                    '/banner_qx.jpeg',
-            })
-        else:
-            header = ObjectDict({
-                'type':        'team',
-                'name':        '我们的团队',
-                'description': "",
-                'icon':        make_static_url(company.logo),
-                'banner':
-                    'https://cdn.moseeker.com/upload/company_profile/qx'
-                    '/banner_qx.jpeg',
-            })
-
-        conds = {'user_id': user_id, 'company_id': company_id}
-
+        # 获取当前公司关注，访问信息
+        conds = {'user_id': user.sysuser.id, 'company_id': company.id}
         fllw_cmpy = yield self.user_company_follow_ds.get_fllw_cmpy(
                         conds=conds, fields=['id', 'company_id'])
         vst_cmpy = yield self.user_company_visit_req_ds.get_visit_cmpy(
                         conds=conds, fields=['id', 'company_id'])
-        data = ObjectDict({'header': header})
+        team_index_url = make_url(path.COMPANY_TEAM, handler_params)
 
+        # 拼装模板数据
+        data.header = temp_date_tool.make_header(company)
         data.relation = ObjectDict({
-            'follow':     self.constant.YES if fllw_cmpy else self.constant.NO,
-            'want_visit': self.constant.YES if vst_cmpy else self.constant.NO
-        })
+            'follow': self.constant.YES if fllw_cmpy else self.constant.NO,
+            'want_visit': self.constant.YES if vst_cmpy else self.constant.NO})
+        data.templates, tmp_team = yield self._get_company_template(
+            company.id, team_index_url)
 
-        if team_flag:
-            self._add_team_data(handler_params, data)
-        else:
-            self._add_company_data(handler_params, data)
+        # 如果没有提供team的配置，去hr_team寻找资源
+        if not tmp_team:
+            # 区分母公司、子公司对待，获取所有团队team
+            if company.id != user.company.id:
+                teams = yield self._get_sub_company_teams(company.id)
+            else:
+                teams = yield self.hr_team_ds.get_team_list(
+                    conds={'company_id': company.id})
+            team_resource_list = yield self._get_team_resource(teams)
+            team_template = temp_date_tool.make_company_team(
+                team_resource_list, team_index_url)
+            data.templates.insert(2, team_template)  # 暂且固定团队信息在公司主页位置
 
-        response.data = data
-
-        raise gen.Return(response)
-
-    @staticmethod
-    def _add_company_data(hander_params, data):
-        """构建公司主页的豆腐干们"""
-
-        data.templates = [
-            ObjectDict({
-                'type': 1,
-                'sub_type': 'less',
-                'title': '办公环境',
-                'data': WORKING_ENV,
-                'more_link': ''
-            }),
-            ObjectDict({'type': 2, 'title': 'template 2', 'data': data2}),
-            ObjectDict({
-                'type':      1,
-                'sub_type':  'less',
-                'title':     '我们的团队',
-                'data':      TEAMS,
-                'more_link': make_url(path.COMPANY_TEAM, hander_params)
-            }),
-            ObjectDict({
-                'type':      1,
-                'sub_type':  'less',
-                'title':     '在这里工作的人们',
-                'data':      MEMBERS,
-                'more_link': ''
-            }),
-            ObjectDict({
-                'type': 4,
-                'sub_type': 0,
-                'title': '公司大事件',
-                'data': data4_1
-            }),
-            # 可能感兴趣的公司，暂时不做
-            # ObjectDict({'type': 4, 'sub_type': 1, 'title': '你可能感兴趣的公司',
-            #             'data': data4_2}),
-            ObjectDict({'type': 50, 'title': 'address', 'data': data50}),
-            ObjectDict({'type': 5, 'title': '', 'data': None})
-        ]
         data.template_total = len(data.templates)
 
-    @staticmethod
-    def _add_team_data(hander_params, data):
-        """构建团队主页的豆腐干们"""
-
-        data.templates = [
-            ObjectDict({
-                'type':      1,
-                'sub_type':  'middle',
-                'title':     '研发团队',
-                'data':      TEAM_RD,
-                'more_link': make_url('/m/company/team/rd', hander_params)
-            }),
-
-            ObjectDict({
-                'type':      1,
-                'sub_type':  'middle',
-                'title':     '客户成功团队',
-                'data':      TEAM_CS,
-                'more_link': make_url('/m/company/team/cs', hander_params)
-            }),
-
-            ObjectDict({
-                'type':      1,
-                'sub_type':  'middle',
-                'title':     '商务拓展团队',
-                'data':      TEAM_BD,
-                'more_link': make_url('/m/company/team/bd', hander_params)
-            }),
-
-            ObjectDict({
-                'type':      1,
-                'sub_type':  'middle',
-                'title':     '雇主品牌团队',
-                'data':      TEAM_EB,
-                'more_link': make_url('/m/company/team/eb', hander_params)
-            }),
-        ]
-        data.template_total = len(data.templates)
+        raise gen.Return(data)
 
     @gen.coroutine
-    def set_company_follow(self, param):
+    def _get_company_template(self, company_id, team_index_url):
+        """
+        根据不同company_id去配置文件中获取company配置信息
+        之后根据配置，生成template数据
+        :param company_id:
+        :return:
+        """
+        company_config = COMPANY_CONFIG.get(company_id)
+        values = sum(company_config.config.values(), [])
+        media = yield self.hr_media_ds.get_media_by_ids(values)
+
+        if 'team' in company_config.order:
+            for team_media_id in company_config.config.get('team'):
+                media.get(team_media_id).link = team_index_url
+
+        templates = [
+            getattr(temp_date_tool, 'make_company_{}'.format(key))(
+                [media.get(id) for id in company_config.config.get(key)]
+            ) for key in company_config.order
+            if company_config.config.get(key) or key == 'survey'
+        ]
+
+        raise gen.Return((templates, bool(company_config.config.get('team'))))
+
+    @gen.coroutine
+    def _get_sub_company_teams(self, company_id):
+        """
+        获取团队信息
+        当只给定company_id，通过position信息中team_id寻找出所有相关团队
+        :param self:
+        :param company_id:
+        :return: [object_of_hr_team, ...]
+        """
+        publishers = yield self.hr_company_account_ds.get_company_accounts_list(
+            conds={'company_id': company_id}, fields=None)
+        publisher_id_tuple = tuple([p.account_id for p in publishers])
+
+        if not publisher_id_tuple:
+            raise gen.Return([])
+        team_ids = yield self.job_position_ds.get_positions_list(
+            conds='publisher in {}'.format(publisher_id_tuple).replace(',)', ')'),
+            fields=['team_id'], options=['DISTINCT'])
+        team_id_tuple = tuple([t.team_id for t in team_ids])
+
+        if not team_id_tuple:
+            gen.Return([])
+        teams = yield self.hr_team_ds.get_team_list(
+            conds='id in {}'.format(team_id_tuple).replace(',)', ')'))
+
+        raise gen.Return(teams)
+
+    @gen.coroutine
+    def _get_team_resource(self, team_list):
+        media_dict = yield self.hr_media_ds.get_media_by_ids(
+            [t.media_id for t in team_list])
+
+        raise gen.Return([ObjectDict({
+            # 'show_order': team.show_order, 如果需要对team排序
+            'id': team.id,
+            'title': '我们的团队',
+            'subtitle': team.name,
+            'longtext': team.summary,
+            'media_url': media_dict.get(team.media_id).media_url,
+            'media_type': media_dict.get(team.media_id).media_type,
+        }) for team in team_list])
+
+    @gen.coroutine
+    def set_company_follow(self, current_user, param):
         """
         Store follow company.
         :param param: dict include target user company ids.
         :return:
         """
-        user_id, company_id = param.get('user_id'), param.get('company_id'),
+        user_id = current_user.sysuser.id
         status, source = param.get('status'), param.get('source', 0)
+        current_user.company.id
+        # 区分母公司子公司对待
+        company_id = param.sub_company.id if param.did \
+            and param.did != current_user.company.id else current_user.company.id
 
-        conds = {'user_id': [user_id, '='], 'company_id': [company_id, '=']}
+        conds = {'user_id': user_id, 'company_id': company_id}
         company = yield self.user_company_follow_ds.get_fllw_cmpy(
             conds=conds, fields=['id', 'user_id', 'company_id'])
 
@@ -183,19 +161,24 @@ class UserCompanyPageService(PageService):
         raise gen.Return(result)
 
     @gen.coroutine
-    def set_visit_company(self, param):
+    def set_visit_company(self, current_user, param):
         """
         Store visiting company.
-        :param param: dict include target user company ids.
+        :param current_user: self.current_user in handler
+        :param param: self.params in handler
         :return:
         """
-        user_id, company_id = param.get('user_id'), param.get('company_id'),
+        user_id = current_user.sysuser.id
         status, source = param.get('status'), param.get('source', 0)
+
+        # 区分母公司子公司对待
+        company_id = param.sub_company.id if param.did \
+            and param.did != current_user.company.id else current_user.company.id
 
         if int(status) == 0:
             raise gen.Return(False)
 
-        conds = {'user_id': [user_id, '='], 'company_id': [company_id, '=']}
+        conds = {'user_id': user_id, 'company_id': company_id}
         company = yield self.user_company_visit_req_ds.get_visit_cmpy(
                             conds, fields=['id', 'user_id', 'company_id'])
 
