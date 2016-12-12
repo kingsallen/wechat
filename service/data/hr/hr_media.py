@@ -60,6 +60,8 @@ class HrMediaDataService(DataService):
             media_list = yield self.get_media_list(
                 conds='id in {}'.format(tuple(id_list)).replace(',)', ')'))
 
+        media_dict = {m.id: m for m in media_list}
         if list_flag:
-            raise gen.Return(media_list)
-        raise gen.Return({m.id: m for m in media_list})
+            raise gen.Return([media_dict.get(id) for id
+                              in id_list if media_dict.get(id)])
+        raise gen.Return(media_dict)
