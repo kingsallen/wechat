@@ -830,11 +830,13 @@ class BaseHandler(MetaBaseHandler):
         return wechat, mobile
 
     def _debug_set_auth_cookie(self):
+        self.logger.debug("oauth starts")
         self.set_cookie(const.COOKIE_DEBUG_AUTH, str(time.time()))
 
     def _debug_showoff_clean_auth_cookie(self):
         if self.get_cookie(const.COOKIE_DEBUG_AUTH):
+            self.logger.debug("oauth ends")
             start = float(self.get_cookie(const.COOKIE_DEBUG_AUTH))
             end = time.time()
-            self.debug("auth time: %.2f" % (end - start))
+            self.logger.debug("time: %.2f" % (end - start))
             self.clear_cookie(const.COOKIE_DEBUG_AUTH)
