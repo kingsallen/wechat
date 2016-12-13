@@ -36,23 +36,30 @@ COMPANY_72 = ObjectDict({
         'events': [37],  # 公司大事件
         'address': [38],  # 公司地址
         'survey': [],  # 问卷调查
-    }
+    },
 })
 
 
 # System testing setting for Mars
 
 COMPANY_MARS_39978 = ObjectDict({
-    'order': ['working_env', 'figure', 'members',
+    'order': ['working_env', 'figure', 'team', 'members',
               'events', 'address', 'survey'],
     'config': {
-        'working_env': [27, 28, 29, 30],  # 工作环境对应的 hr_media id list
-        'figure': [31],  # 人物寄语
-        'members': [39, 40],  # 公司成员
-        'events': [36, 35, 37],  # 公司大事件
-        'address': [38],  # 公司地址
+        'working_env': [41, 44, 42, 45, 43, 46],  # 工作环境对应的 hr_media id list
+        'figure': [47],  # 人物寄语
+        'team': [48],  # 团队列表
+        'members': [49],  # 公司成员
+        'events': [50, 51, 52],  # 公司大事件
+        'address': [53],  # 公司地址
         'survey': [],  # 问卷调查
-    }
+    },
+    'no_jd_team': True,
+    'team_config': {
+        5: [64, 104], 6: [65, 105], 7: [66, 106], 8: [67, 107],
+        9: [68, 108], 10: [69, 109], 11: [70, 110], 12: [71, 111],
+        13: [72, 112], 14: [73, 113],
+    },
 })
 
 SUB_COMPANY_MARS_40120 = ObjectDict({
@@ -122,11 +129,11 @@ COMPANY_MOSEEKER = ObjectDict({
 
 COMPANY_CONFIG = ObjectDict({
     # 测试调试配置
-    # 4: COMPANY_MARS,
-    # 72: COMPANY_72,
-    # 39978: COMPANY_MARS,
-    # 40120: SUB_COMPANY_MARS_40120,
-    # 40627: SUB_COMPANY_MARS_40627,
+    4: COMPANY_MARS,
+    72: COMPANY_72,
+    39978: COMPANY_MARS_39978,
+    40120: SUB_COMPANY_MARS_40120,
+    40627: SUB_COMPANY_MARS_40627,
 
     # 线上配置
     650: COMPANY_MOSEEKER,
