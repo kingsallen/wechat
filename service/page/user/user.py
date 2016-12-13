@@ -115,8 +115,8 @@ class UserPageService(PageService):
     @gen.coroutine
     def create_user_wx_user_ent(self, openid, unionid, wechat_id):
         """根据 unionid 创建 企业号微信用户信息"""
-        wxuser = yield self.get_wxuser_unionid_wechat_id(
-            unionid=unionid, wechat_id=wechat_id)
+        wxuser = yield self.get_wxuser_openid_wechat_id(
+            openid=openid, wechat_id=wechat_id)
         qx_wxuser = yield self.get_wxuser_unionid_wechat_id(
             unionid=unionid, wechat_id=settings['qx_wechat_id'])
 

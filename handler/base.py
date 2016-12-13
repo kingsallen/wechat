@@ -197,6 +197,8 @@ class BaseHandler(MetaBaseHandler):
                     self._wxuser = yield self._handle_ent_openid(
                         openid, self._unionid)
 
+                    self._debug_showoff_clean_auth_cookie()
+
             elif state:  # 用户拒绝授权
                 # TODO 拒绝授权用户，是否让其继续操作? or return
                 pass
@@ -452,6 +454,7 @@ class BaseHandler(MetaBaseHandler):
                 # 即可进入 _build_session 方法
                 yield self._build_session()
             else:
+                self._debug_set_auth_cookie()
                 self._oauth_service.wechat = self._qx_wechat
                 url = self._oauth_service.get_oauth_code_userinfo_url()
                 self.redirect(url)
@@ -825,3 +828,14 @@ class BaseHandler(MetaBaseHandler):
             wechat = const.CLIENT_WECHAT
 
         return wechat, mobile
+
+    def _debug_set_auth_cookie(self):
+        self.logger.debug("oauth starts")
+        self.set_cookie(const.COOKIE_DEBUG_AUTH, str(time.time()))
+
+    def _debug_showoff_clean_auth_cookie(self):
+        if self.get_cookie(const.COOKIE_DEBUG_AUTH):
+            start = float(self.get_cookie(const.COOKIE_DEBUG_AUTH))
+            end = time.time()
+            self.logger.debug("oauth end in: %.2fs" % (end - start))
+            self.clear_cookie(const.COOKIE_DEBUG_AUTH)
