@@ -835,8 +835,7 @@ class BaseHandler(MetaBaseHandler):
 
     def _debug_showoff_clean_auth_cookie(self):
         if self.get_cookie(const.COOKIE_DEBUG_AUTH):
-            self.logger.debug("oauth ends")
             start = float(self.get_cookie(const.COOKIE_DEBUG_AUTH))
             end = time.time()
-            self.logger.debug("time: %.2f" % (end - start))
+            self.logger.debug("oauth end in: %.2fs" % (end - start))
             self.clear_cookie(const.COOKIE_DEBUG_AUTH)
