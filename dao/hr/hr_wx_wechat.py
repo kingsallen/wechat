@@ -42,7 +42,6 @@ class HrWxWechatDao(BaseDao):
             "jsapi_ticket":    self.constant.TYPE_STRING, # jsapi_ticket
             "authorized":      self.constant.TYPE_INT, # 是否授权0：无关，1：授权2：解除授权
             # "authorizer_refresh_token": self.constant.TYPE_STRING, # 第三方授权的刷新token，用来刷access_token
-            "show_qx_qrcode":  self.constant.TYPE_INT, # 是否允许显示qx二维码
             "create_time":     self.constant.TYPE_TIMESTAMP, # 创建时间
             "update_time":     self.constant.TYPE_TIMESTAMP, # 更新时间
         }
