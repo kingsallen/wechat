@@ -387,7 +387,7 @@ class PositionHandler(BaseHandler):
             if module_mate_day:
                 add_item(position_data, "module_mate_day", module_mate_day)
 
-            if not company_config.no_jd_team:
+            if not company_config.no_jd_team and team.is_show:
                 add_item(position_data, "module_team", module_team)
 
             if module_team_position:

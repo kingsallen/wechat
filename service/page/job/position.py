@@ -11,7 +11,7 @@ from util.common import ObjectDict
 from util.tool.date_tool import jd_update_date
 from util.tool.http_tool import http_get, async_das_get
 from util.tool.str_tool import gen_salary, split
-from util.tool.temp_date_tool import make_mate, make_team, template3
+from util.tool.temp_data_tool import make_mate, make_team, template3
 
 
 class PositionPageService(PageService):
