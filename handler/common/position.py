@@ -377,6 +377,7 @@ class PositionHandler(BaseHandler):
     def _add_team_data(self, position_data, team, company_id, position_id):
 
         if team:
+            company_config = COMPANY_CONFIG.get(company_id)
             module_team_position = yield self._make_team_position(
                 team, position_id)
             if module_team_position:
@@ -385,11 +386,13 @@ class PositionHandler(BaseHandler):
 
             if team.is_show:
                 module_mate_day = yield self._make_mate_day(team)
-                module_team = yield self._make_team(team)
-
-                add_item(position_data, "module_team", module_team)
                 if module_mate_day:
                     add_item(position_data, "module_mate_day", module_mate_day)
+
+                if not company_config.no_jd_team:
+                    module_team = yield self._make_team(team)
+                    add_item(position_data, "module_team", module_team)
+
 
     @gen.coroutine
     def _make_team_position(self, team, position_id):
