@@ -23,6 +23,7 @@ from util.tool.str_tool import gen_salary
 from conf.platform import MEDIA_TYPE
 from conf.path import POSITION_PATH
 
+
 def template1(sub_type, title, data, more_link=None):
     """
 

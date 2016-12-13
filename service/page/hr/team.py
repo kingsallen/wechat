@@ -56,7 +56,7 @@ class TeamPageService(PageService):
             all_members_dict.get('all_headimg_list'))
 
         # 拼装模板数据
-        data.header = temp_data_tool.make_header(company, team_flag=True)
+        data.header = temp_data_tool.make_header(company, team_index=True)
         # 解析生成团队列表页中每个团队信息子模块
         data.templates = [
             temp_data_tool.make_team_index_template(
