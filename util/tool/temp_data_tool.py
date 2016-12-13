@@ -216,28 +216,27 @@ def make_other_team_data(team, media, handler_params):
 def make_team_detail_template(team, media_dict, members, positions,
                               other_teams, handler_params, vst=False,
                               team_conf=None):
-    team_media = media_dict.get(team.media_id)
-
-    if team_conf is not None:
-        interview_title = media_dict.get(team_conf.get(team.id)[0]).title
-        introduction = [make_introduction(
-            m, media_dict.get(m.headimg_id)) for m in members]
-        interview = [template1_data(media_dict.get(id))
-                     for id in team_conf.get(team.id)]
-    else:
-        interview_title = '成员采访'
-        introduction, interview = [], []
-        for member in members:
-            introduction.append(make_introduction(
-                member, media_dict.get(member.headimg_id)))
-            if member.media_id:
-                interview.append(make_interview(
-                    member, media_dict.get(member.media_id)))
-
     template = []
 
     # 无素材不显示团队
     if team.is_show:
+        team_media = media_dict.get(team.media_id)
+        if team_conf is not None:
+            interview_title = media_dict.get(team_conf.get(team.id)[0]).title
+            introduction = [make_introduction(
+                m, media_dict.get(m.headimg_id)) for m in members]
+            interview = [template1_data(media_dict.get(id))
+                         for id in team_conf.get(team.id)]
+        else:
+            interview_title = '成员采访'
+            introduction, interview = [], []
+            for member in members:
+                introduction.append(make_introduction(
+                    member, media_dict.get(member.headimg_id)))
+                if member.media_id:
+                    interview.append(make_interview(
+                        member, media_dict.get(member.media_id)))
+
         template.append(
             template1(
                 sub_type='full', title='团队介绍',
