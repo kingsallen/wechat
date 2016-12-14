@@ -9,7 +9,7 @@
 from util.common import ObjectDict
 from tornado import gen
 from service.page.base import PageService
-from util.tool import temp_date_tool
+from util.tool import temp_data_tool
 from util.tool.url_tool import make_url
 from conf import path
 from tests.dev_data.user_company_config import COMPANY_CONFIG
@@ -45,7 +45,7 @@ class TeamPageService(PageService):
             teams = yield self._get_sub_company_teams(company.id)
         else:
             teams = yield self.hr_team_ds.get_team_list(
-                conds={'company_id': company.id})
+                conds={'company_id': company.id, 'is_show': 1})
 
         # 获取团队成员以及所需要的media信息
         team_media_dict = yield self.hr_media_ds.get_media_by_ids(
@@ -56,15 +56,15 @@ class TeamPageService(PageService):
             all_members_dict.get('all_headimg_list'))
 
         # 拼装模板数据
-        data.header = temp_date_tool.make_header(company, team_flag=True)
+        data.header = temp_data_tool.make_header(company, team_index=True)
         # 解析生成团队列表页中每个团队信息子模块
         data.templates = [
-            temp_date_tool.make_team_index_template(
+            temp_data_tool.make_team_index_template(
                 team=t,
                 team_medium=team_media_dict.get(t.media_id),
                 more_link=make_url(path.TEAM_PATH.format(t.id), handler_param),
                 member_list=[
-                    temp_date_tool.make_team_member(
+                    temp_data_tool.make_team_member(
                         member=m,
                         headimg=all_member_headimg_dict.get(m.headimg_id)
                     ) for m in all_members_dict.get(t.id)]
@@ -112,21 +112,23 @@ class TeamPageService(PageService):
                 yield self._get_team_position_members(team, company_positions)
 
             other_teams = yield self.hr_team_ds.get_team_list(
-                conds={'id': [team.id, '<>'], 'company_id': company.id})
+                conds={'id': [team.id, '<>'],
+                       'company_id': company.id,
+                       'is_show': 1})
 
         member_media_ids = [m.headimg_id for m in team_members] + \
             team_config.get(team.id) if team_config \
             else sum([[m.headimg_id, m.media_id] for m in team_members], [])
+        media_id_list = member_media_ids + [t.media_id for t in other_teams]
+        media_id_list += [team.media_id] if team.is_show else []
 
-        media_id_list = [team.media_id] + member_media_ids + \
-            [t.media_id for t in other_teams]
         media_dict = yield self.hr_media_ds.get_media_by_ids(media_id_list)
 
         # 拼装模板数据
-        data.header = temp_date_tool.make_header(company, True, team)
+        data.header = temp_data_tool.make_header(company, True, team)
         data.relation = ObjectDict({
             'want_visit': self.constant.YES if vst_cmpy else self.constant.NO})
-        data.templates = temp_date_tool.make_team_detail_template(
+        data.templates = temp_data_tool.make_team_detail_template(
             team, media_dict, team_members, team_positions[0:3],
             other_teams, handler_param, bool(vst_cmpy), team_config)
         data.templates_total = len(data.templates)
@@ -210,7 +212,8 @@ class TeamPageService(PageService):
                 raise gen.Return([])
 
             team_ids = yield self.job_position_ds.get_positions_list(
-                conds='publisher in {}'.format(publisher_id_tuple).replace(',)', ')'),
+                conds='publisher in {}'.format(
+                    publisher_id_tuple).replace(',)', ')'),
                 fields=['team_id'], options=['DISTINCT'])
             team_id_tuple = tuple([t.team_id for t in team_ids])
         else:
@@ -219,6 +222,7 @@ class TeamPageService(PageService):
         if not team_id_tuple:
             gen.Return([])
         teams = yield self.hr_team_ds.get_team_list(
-            conds='id in {}'.format(team_id_tuple).replace(',)', ')'))
+            conds='id in {} and is_show=1'.format(
+                team_id_tuple).replace(',)', ')'))
 
         raise gen.Return(teams)

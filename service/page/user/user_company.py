@@ -12,7 +12,7 @@ from tornado import gen
 from service.page.base import PageService
 from util.common import ObjectDict
 from util.tool.url_tool import make_url
-from util.tool import temp_date_tool
+from util.tool import temp_data_tool
 from tests.dev_data.user_company_config import COMPANY_CONFIG
 import conf.path as path
 
@@ -39,7 +39,7 @@ class UserCompanyPageService(PageService):
         team_index_url = make_url(path.COMPANY_TEAM, handler_params)
 
         # 拼装模板数据
-        data.header = temp_date_tool.make_header(company)
+        data.header = temp_data_tool.make_header(company)
         data.relation = ObjectDict({
             'follow': self.constant.YES if fllw_cmpy else self.constant.NO,
             'want_visit': self.constant.YES if vst_cmpy else self.constant.NO})
@@ -53,9 +53,9 @@ class UserCompanyPageService(PageService):
                 teams = yield self._get_sub_company_teams(company.id)
             else:
                 teams = yield self.hr_team_ds.get_team_list(
-                    conds={'company_id': company.id})
+                    conds={'company_id': company.id, 'is_show': 1})
             team_resource_list = yield self._get_team_resource(teams)
-            team_template = temp_date_tool.make_company_team(
+            team_template = temp_data_tool.make_company_team(
                 team_resource_list, team_index_url)
             data.templates.insert(2, team_template)  # 暂且固定团队信息在公司主页位置
 
@@ -80,7 +80,7 @@ class UserCompanyPageService(PageService):
                 media.get(team_media_id).link = team_index_url
 
         templates = [
-            getattr(temp_date_tool, 'make_company_{}'.format(key))(
+            getattr(temp_data_tool, 'make_company_{}'.format(key))(
                 [media.get(id) for id in company_config.config.get(key)]
             ) for key in company_config.order
             if company_config.config.get(key) or key == 'survey'
@@ -104,14 +104,16 @@ class UserCompanyPageService(PageService):
         if not publisher_id_tuple:
             raise gen.Return([])
         team_ids = yield self.job_position_ds.get_positions_list(
-            conds='publisher in {}'.format(publisher_id_tuple).replace(',)', ')'),
+            conds='publisher in {}'.format(
+                publisher_id_tuple).replace(',)', ')'),
             fields=['team_id'], options=['DISTINCT'])
         team_id_tuple = tuple([t.team_id for t in team_ids])
 
         if not team_id_tuple:
             gen.Return([])
         teams = yield self.hr_team_ds.get_team_list(
-            conds='id in {}'.format(team_id_tuple).replace(',)', ')'))
+            conds='id in {} and is_show=1'.format(
+                team_id_tuple).replace(',)', ')'))
 
         raise gen.Return(teams)
 

@@ -23,6 +23,7 @@ from util.tool.str_tool import gen_salary
 from conf.platform import MEDIA_TYPE
 from conf.path import POSITION_PATH
 
+
 def template1(sub_type, title, data, more_link=None):
     """
 
@@ -142,21 +143,21 @@ def template50(resource):
     })
 
 
-def make_header(company, team_flag=False, team=None):
+def make_header(company, team_index=False, team=None):
     if team:
         name = team.name
-        description = ''
+        description = team.slogan
     else:
-        name = '我们的团队' if team_flag else company.abbreviation or company.name
-        description = '' if team_flag else company.slogan
+        name = '我们的团队' if team_index else company.abbreviation or company.name
+        description = '' if team_index else company.slogan
 
     return ObjectDict({
-        'type': 'team' if team_flag else 'company',
+        'type': 'team' if team_index else 'company',
         'name': name,
         'description': description,
         'icon': make_static_url(company.logo),
-        'banner': make_static_url(json.loads(company.banner).get('banner0')) \
-            if company.banner else None,
+        'banner': make_static_url(json.loads(company.banner).get('banner0'))
+        if company.banner else None,
     })
 
 
@@ -215,46 +216,51 @@ def make_other_team_data(team, media, handler_params):
 def make_team_detail_template(team, media_dict, members, positions,
                               other_teams, handler_params, vst=False,
                               team_conf=None):
-    team_media = media_dict.get(team.media_id)
+    template = []
 
-    if team_conf is not None:
-        interview_title = media_dict.get(team_conf.get(team.id)[0]).title
-        introduction = [make_introduction(
-            m, media_dict.get(m.headimg_id)) for m in members]
-        interview = [template1_data(media_dict.get(id))
-                     for id in team_conf.get(team.id)]
-    else:
-        interview_title = '成员采访'
-        introduction, interview = [], []
-        for member in members:
-            introduction.append(make_introduction(
-                member, media_dict.get(member.headimg_id)))
-            if member.media_id:
-                interview.append(make_interview(
-                    member, media_dict.get(member.media_id)))
+    # 无素材不显示团队
+    if team.is_show:
+        team_media = media_dict.get(team.media_id)
+        if team_conf is not None:
+            interview_title = media_dict.get(team_conf.get(team.id)[0]).title
+            introduction = [make_introduction(
+                m, media_dict.get(m.headimg_id)) for m in members]
+            interview = [template1_data(media_dict.get(id))
+                         for id in team_conf.get(team.id)]
+        else:
+            interview_title = '成员采访'
+            introduction, interview = [], []
+            for member in members:
+                introduction.append(make_introduction(
+                    member, media_dict.get(member.headimg_id)))
+                if member.media_id:
+                    interview.append(make_interview(
+                        member, media_dict.get(member.media_id)))
 
-    template = [
-        template1(
-            sub_type='full', title='团队介绍',
-            data=[{
-                'title': '',
-                'longtext': team.description,
-                'media_url': make_static_url(team_media.media_url),
-                'media_type': MEDIA_TYPE[team_media.media_type],
-                'member_list': introduction,
-            }]
-        ),
-    ]
+        template.append(
+            template1(
+                sub_type='full', title='团队介绍',
+                data=[{
+                    'title': '',
+                    'longtext': team.description,
+                    'media_url': make_static_url(team_media.media_url),
+                    'media_type': MEDIA_TYPE[team_media.media_type],
+                    'member_list': introduction,
+                }]
+            )
+        )
+
+        if interview:
+            template.append(template1(
+                sub_type='less',
+                title=interview_title,
+                data=interview)
+            )
 
     # 适应没有数据不显示模板块
-    if interview:
-        template.append(template1(
-            sub_type='less',
-            title=interview_title,
-            data=interview))
     if positions:
         template.append(template3('团队在招职位', positions, handler_params))
-    if not vst:
+    if not vst and team.is_show:
         template.append(template5())
     if other_teams:
         template.append(template4(
