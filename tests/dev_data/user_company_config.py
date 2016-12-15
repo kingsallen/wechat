@@ -14,7 +14,7 @@ from util.common import ObjectDict
 # DEV1 company setting for moseeker.
 
 COMPANY_4 = ObjectDict({
-    'order': ['working_env', 'figure', 'members',
+    'order': ['working_env', 'figure', 'team', 'members',
               'events', 'map', 'survey', 'qr_code'],
     'config': {
         'working_env': [26, 27, 28, 29, 30],  # 工作环境对应的 hr_media id list
@@ -28,7 +28,7 @@ COMPANY_4 = ObjectDict({
 })
 
 COMPANY_72 = ObjectDict({
-    'order': ['working_env', 'figure', 'members',
+    'order': ['working_env', 'figure', 'team', 'members',
               'events', 'map', 'survey', 'qr_code'],
     'config': {
         'working_env': [28, 29],  # 工作环境对应的 hr_media id list
@@ -67,7 +67,7 @@ COMPANY_MARS_39978 = ObjectDict({
 })
 
 SUB_COMPANY_MARS_40120 = ObjectDict({
-    'order': ['working_env', 'figure', 'members',
+    'order': ['working_env', 'figure', 'team', 'members',
               'events', 'map', 'survey', 'qr_code'],
     'config': {
         'working_env': [30, 27],  # 工作环境对应的 hr_media id list
@@ -81,7 +81,7 @@ SUB_COMPANY_MARS_40120 = ObjectDict({
 })
 
 SUB_COMPANY_MARS_40627 = ObjectDict({
-    'order': ['working_env', 'figure', 'members',
+    'order': ['working_env', 'figure', 'team', 'members',
               'events', 'map', 'survey', 'qr_code'],
     'config': {
         'working_env': [29, 28],  # 工作环境对应的 hr_media id list
@@ -98,7 +98,7 @@ SUB_COMPANY_MARS_40627 = ObjectDict({
 # Product environment company config
 
 COMPANY_MOSEEKER = ObjectDict({
-    'order': ['working_env', 'figure', 'members',
+    'order': ['working_env', 'figure', 'team', 'members',
               'events', 'map', 'survey', 'qr_code'],
     'config': {
         'working_env': [26, 27, 28, 29, 30],  # 工作环境对应的 hr_media id list
