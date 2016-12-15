@@ -15,27 +15,29 @@ from util.common import ObjectDict
 
 COMPANY_4 = ObjectDict({
     'order': ['working_env', 'figure', 'members',
-              'events', 'address', 'survey'],
+              'events', 'map', 'survey', 'qr_code'],
     'config': {
         'working_env': [26, 27, 28, 29, 30],  # 工作环境对应的 hr_media id list
         'figure': [31],  # 人物寄语
         'members': [39, 40],  # 公司成员
         'events': [35, 36, 37],  # 公司大事件
-        'address': [38],  # 公司地址
+        'map': [38],  # 公司地图
         'survey': [],  # 问卷调查
+        'qr_code': []  # 二维码
     }
 })
 
 COMPANY_72 = ObjectDict({
     'order': ['working_env', 'figure', 'members',
-              'events', 'address', 'survey'],
+              'events', 'map', 'survey', 'qr_code'],
     'config': {
         'working_env': [28, 29],  # 工作环境对应的 hr_media id list
         'figure': [31],  # 人物寄语
         'members': [40],  # 公司成员
         'events': [37],  # 公司大事件
-        'address': [38],  # 公司地址
+        'map': [38],  # 公司地址
         'survey': [],  # 问卷调查
+        'qr_code': []  # 二维码
     },
 })
 
@@ -44,15 +46,16 @@ COMPANY_72 = ObjectDict({
 
 COMPANY_MARS_39978 = ObjectDict({
     'order': ['working_env', 'figure', 'team', 'members',
-              'events', 'address', 'survey'],
+              'events', 'map', 'survey', 'qr_code'],
     'config': {
         'working_env': [41, 44, 42, 45, 43, 46],  # 工作环境对应的 hr_media id list
         'figure': [47],  # 人物寄语
         'team': [48],  # 团队列表
         'members': [49],  # 公司成员
         'events': [50, 51, 52],  # 公司大事件
-        'address': [53],  # 公司地址
+        'map': [53],  # 公司地址
         'survey': [],  # 问卷调查
+        'qr_code': []  # 二维码
     },
     'no_jd_team': True,
     'team_config': {
@@ -65,44 +68,61 @@ COMPANY_MARS_39978 = ObjectDict({
 
 SUB_COMPANY_MARS_40120 = ObjectDict({
     'order': ['working_env', 'figure', 'members',
-              'events', 'address', 'survey'],
+              'events', 'map', 'survey', 'qr_code'],
     'config': {
         'working_env': [30, 27],  # 工作环境对应的 hr_media id list
         'figure': [31],  # 人物寄语
         'members': [41],  # 公司成员
         'events': [37, 35],  # 公司大事件
-        'address': [38],  # 公司地址
+        'map': [38],  # 公司地址
         'survey': [],  # 问卷调查
+        'qr_code': []  # 二维码
     }
 })
 
 SUB_COMPANY_MARS_40627 = ObjectDict({
     'order': ['working_env', 'figure', 'members',
-              'events', 'address', 'survey'],
+              'events', 'map', 'survey', 'qr_code'],
     'config': {
         'working_env': [29, 28],  # 工作环境对应的 hr_media id list
         'figure': [31],  # 人物寄语
         'members': [42],  # 公司成员
         'events': [35, 36],  # 公司大事件
-        'address': [38],  # 公司地址
+        'map': [38],  # 公司地址
         'survey': [],  # 问卷调查
+        'qr_code': []  # 二维码
     },
 })
 
 
 # Product environment company config
 
+COMPANY_MOSEEKER = ObjectDict({
+    'order': ['working_env', 'figure', 'members',
+              'events', 'map', 'survey', 'qr_code'],
+    'config': {
+        'working_env': [26, 27, 28, 29, 30],  # 工作环境对应的 hr_media id list
+        'figure': [31],  # 人物寄语
+        'members': [39, 40],  # 公司成员
+        'events': [35, 36, 37],  # 公司大事件
+        'map': [38],  # 公司地址
+        'survey': [],  # 问卷调查
+        'qr_code': []  # 二维码
+    }
+})
+
 COMPANY_MARS = ObjectDict({
     'order': ['working_env', 'figure', 'team', 'members',
-              'events', 'address', 'survey'],
+              'events', 'map', 'survey', 'qr_code'],
     'config': {
         'working_env': [41, 44, 42, 45, 43, 46],  # 工作环境对应的 hr_media id list
         'figure': [47],  # 人物寄语
         'team': [48],  # 团队列表
         'members': [49],  # 公司成员
         'events': [50, 51, 52],  # 公司大事件
-        'address': [53],  # 公司地址
+        'map': [53],  # 公司地址
         'survey': [],  # 问卷调查
+        'qr_code': []  # 二维码
     },
     'no_jd_team': True,
     'team_config': {
@@ -113,16 +133,17 @@ COMPANY_MARS = ObjectDict({
     }
 })
 
-COMPANY_MOSEEKER = ObjectDict({
-    'order': ['working_env', 'figure', 'members',
-              'events', 'address', 'survey'],
+COMPANY_OSRAM = ObjectDict({
+    'order': ['figure', 'team', 'members', 'working_env',
+              'events', 'address', 'survey', 'qr_code'],
     'config': {
-        'working_env': [26, 27, 28, 29, 30],  # 工作环境对应的 hr_media id list
-        'figure': [31],  # 人物寄语
-        'members': [39, 40],  # 公司成员
-        'events': [35, 36, 37],  # 公司大事件
-        'address': [38],  # 公司地址
+        'working_env': [120, 121, 122, 123],  # 工作环境对应的 hr_media id list
+        'figure': [114],  # 人物寄语
+        'members': [115, 116, 117, 118, 119],  # 公司成员
+        'events': [124, 125, 126],  # 公司大事件
+        'address': [127, 128, 129, 130, 131],  # 公司地址
         'survey': [],  # 问卷调查
+        'qr_code': []  # 二维码
     }
 })
 
