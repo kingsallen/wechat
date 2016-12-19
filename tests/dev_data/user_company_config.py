@@ -167,6 +167,7 @@ COMPANY_CONFIG = ObjectDict({
 
     # 线上配置
     650: COMPANY_MOSEEKER,
+    27: COMPANY_OSRAM,
     91572: COMPANY_MARS
 
 })
