@@ -85,7 +85,7 @@ class UserCompanyPageService(PageService):
             getattr(temp_data_tool, 'make_company_{}'.format(key))(
                 [media.get(id) for id in company_config.config.get(key)]
             ) for key in company_config.order
-            if company_config.config.get(key) or key == 'survey'
+            if isinstance(company_config.config.get(key), list)
         ]
 
         raise gen.Return((templates, bool(company_config.config.get('team'))))

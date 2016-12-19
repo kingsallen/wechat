@@ -107,7 +107,7 @@ COMPANY_MOSEEKER = ObjectDict({
         'events': [35, 36, 37],  # 公司大事件
         'map': [38],  # 公司地址
         'survey': [],  # 问卷调查
-        'qr_code': []  # 二维码
+        'qr_code': [132]  # 二维码
     }
 })
 
