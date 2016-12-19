@@ -42,12 +42,14 @@ class UserCompanyPageService(PageService):
         data.header = temp_data_tool.make_header(company)
         data.relation = ObjectDict({
             'follow': self.constant.YES if fllw_cmpy else self.constant.NO,
-            'want_visit': self.constant.YES if vst_cmpy else self.constant.NO})
+            'want_visit': self.constant.YES if vst_cmpy else self.constant.NO
+        })
         data.templates, tmp_team = yield self._get_company_template(
             company.id, team_index_url)
 
         # 如果没有提供team的配置，去hr_team寻找资源
         if not tmp_team:
+            team_order = COMPANY_CONFIG.get(company.id).order.index('team')
             # 区分母公司、子公司对待，获取所有团队team
             if company.id != user.company.id:
                 teams = yield self._get_sub_company_teams(company.id)
@@ -57,7 +59,7 @@ class UserCompanyPageService(PageService):
             team_resource_list = yield self._get_team_resource(teams)
             team_template = temp_data_tool.make_company_team(
                 team_resource_list, team_index_url)
-            data.templates.insert(2, team_template)  # 暂且固定团队信息在公司主页位置
+            data.templates.insert(team_order, team_template)
 
         data.template_total = len(data.templates)
 
@@ -75,7 +77,7 @@ class UserCompanyPageService(PageService):
         values = sum(company_config.config.values(), [])
         media = yield self.hr_media_ds.get_media_by_ids(values)
 
-        if 'team' in company_config.order:
+        if company_config.config.get('team'):
             for team_media_id in company_config.config.get('team'):
                 media.get(team_media_id).link = team_index_url
 
@@ -83,7 +85,7 @@ class UserCompanyPageService(PageService):
             getattr(temp_data_tool, 'make_company_{}'.format(key))(
                 [media.get(id) for id in company_config.config.get(key)]
             ) for key in company_config.order
-            if company_config.config.get(key) or key == 'survey'
+            if isinstance(company_config.config.get(key), list)
         ]
 
         raise gen.Return((templates, bool(company_config.config.get('team'))))

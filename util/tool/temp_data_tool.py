@@ -13,6 +13,7 @@
  template 4:  'TemplateLinkList'       连接列表
  template 5:  'TemplateSurvey'         调查问卷模版
  template 50: 'TemplateMap'            地图模版
+ template 51: 'TemplateQRCode'         二维码模版
 
 """
 import json
@@ -138,8 +139,19 @@ def template5(resource=None):
 
 def template50(resource):
     return ObjectDict({
-        'type': 50, 'title': 'address',
+        'type': 50, 'title': 'map',
         'data': eval(resource.attrs)
+    })
+
+
+def template51(resource):
+    return ObjectDict({
+        'type': 51, 'title': 'address',
+        'data':  [{
+            'company_name': resource.sub_title,
+            'media_url': make_static_url(resource.media_url)
+            if resource.media_url else '',
+        }]
     })
 
 
@@ -225,8 +237,8 @@ def make_team_detail_template(team, media_dict, members, positions,
             interview_title = media_dict.get(team_conf.get(team.id)[0]).title
             introduction = [make_introduction(
                 m, media_dict.get(m.headimg_id)) for m in members]
-            interview = [template1_data(media_dict.get(id))
-                         for id in team_conf.get(team.id)]
+            interview = [template1_data(media_dict.get(media_id))
+                         for media_id in team_conf.get(team.id)]
         else:
             interview_title = '成员采访'
             introduction, interview = [], []
@@ -294,13 +306,24 @@ def make_company_events(media_list):
                      data=template4_data(media_list, 0))
 
 
-def make_company_address(media_list):
+def make_company_map(media_list):
     if media_list:
         return template50(resource=media_list[0])
 
 
+def make_company_address(media_list):
+    return template1(sub_type='less', title=media_list[0].title,
+                     data=[template1_data(media) for media in media_list])
+
+
 def make_company_survey(media=None):
     return template5(media)
+
+
+def make_company_qr_code(media_list):
+    media = ObjectDict({'media_url': '', 'company_name': ''}) \
+        if not media_list else media_list[0]
+    return template51(media)
 
 
 def make_company_team(media_list, link=None):
