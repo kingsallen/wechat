@@ -139,17 +139,18 @@ def template5(resource=None):
 
 def template50(resource):
     return ObjectDict({
-        'type': 50, 'title': 'address',
+        'type': 50, 'title': 'map',
         'data': eval(resource.attrs)
     })
 
 
 def template51(resource):
     return ObjectDict({
-        'type': 50, 'title': 'address',
+        'type': 51, 'title': 'address',
         'data':  [{
-            'media_url': make_static_url(resource.media_url),
-            'company_name': resource.sub_title
+            'company_name': resource.sub_title,
+            'media_url': make_static_url(resource.media_url)
+            if resource.media_url else '',
         }]
     })
 
