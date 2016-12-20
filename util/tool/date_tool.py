@@ -89,12 +89,3 @@ def jd_update_date(update_time):
         pass
     finally:
         return update_date
-
-
-if __name__ == '__main__':
-
-    now = datetime(2016, 10, 7, 2,23,0,0)
-    a = jd_update_date(now)
-
-    print (a)
-

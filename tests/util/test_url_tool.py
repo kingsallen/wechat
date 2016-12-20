@@ -5,8 +5,10 @@ from util.tool.url_tool import make_url, url_subtract_query
 from urllib.parse import urlparse, parse_qs
 
 
-class TestUrlTool(unittest.TestCase):
-    PATH = "http://path/to/test"
+class TestMakeUrl(unittest.TestCase):
+
+    def setUp(self):
+        self.PATH = "http://path/to/test"
 
     def test_base_case(self):
         out = make_url(self.PATH, {"arg1": "v1", "arg2": "v2"})
@@ -41,12 +43,20 @@ class TestUrlTool(unittest.TestCase):
         parsed_qs = parse_qs(urlparse(out).query)
         self.assertDictEqual(parsed_qs, {"arg1": ["v1"], "arg2": ["v2"], "arg3": ["v3"]})
 
-    def test_url_subtract_query(self):
-        origin = "http://path/to/test?arg1=v1&arg2=v2&code=code123&status=st"
-        out = url_subtract_query(origin, ['code', 'status'])
+
+class TestUrlSubstractQuery(unittest.TestCase):
+
+    def setUp(self):
+        self.ORIGIN = "http://path/to/test?arg1=v1&arg2=v2&code=code123&status=st"
+
+    def test_normal_case(self):
+        out = url_subtract_query(self.ORIGIN, ['code', 'status'])
         parsed_qs = parse_qs(urlparse(out).query)
         self.assertNotIn('code', parsed_qs)
         self.assertNotIn('status', parsed_qs)
 
-if __name__ == "__main__":
-    unittest.TestLoader().loadTestsFromTestCase(TestUrlTool).run()
+    def test_substract_nonexist_param(self):
+        out = url_subtract_query(self.ORIGIN, ['code1', 'status2'])
+        parsed_qs = parse_qs(urlparse(out).query)
+        self.assertNotIn('code1', parsed_qs)
+        self.assertNotIn('status2', parsed_qs)

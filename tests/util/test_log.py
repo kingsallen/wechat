@@ -1,30 +1,31 @@
 # coding=utf-8
 
-# Copyright 2016 MoSeeker
-
 import unittest
 import shutil
 from util.common.log import Logger
+import os
 
 TEST_LOGS = "/tmp/test_logs/"
 
 
-class LogTestCase(unittest.TestCase):
+class TestLogger(unittest.TestCase):
 
-    def test_debug(self):
+    def tearDown(self):
         shutil.rmtree(TEST_LOGS)
 
+    def setUp(self):
+        if not os.path.exists(TEST_LOGS):
+            os.makedirs(TEST_LOGS)
+
+    def test_debug(self):
         logger = Logger(TEST_LOGS)
         logger.debug("test debug")
-
         with open(TEST_LOGS + "debug/debug.log") as log:
             text = log.readline()
             self.assertTrue("DEBUG" in text)
             self.assertTrue("test debug" in text)
 
     def test_info(self):
-        shutil.rmtree(TEST_LOGS)
-
         logger = Logger(TEST_LOGS)
 
         logger.info("test info")
@@ -33,20 +34,16 @@ class LogTestCase(unittest.TestCase):
             self.assertTrue("INFO" in text)
             self.assertTrue("test info" in text)
 
-    def test_warn(self):
-        shutil.rmtree(TEST_LOGS)
-
+    def test_warning(self):
         logger = Logger(TEST_LOGS)
 
-        logger.warn("test warn")
+        logger.warning("test warn")
         with open(TEST_LOGS + "warn/warn.log") as log:
             text = log.readline()
             self.assertTrue("WARN" in text)
             self.assertTrue("test warn" in text)
 
     def test_error(self):
-        shutil.rmtree(TEST_LOGS)
-
         logger = Logger(TEST_LOGS)
 
         logger.error("test error")
@@ -56,8 +53,6 @@ class LogTestCase(unittest.TestCase):
             self.assertTrue("test error" in text)
 
     def test_stats(self):
-        shutil.rmtree(TEST_LOGS)
-
         logger = Logger(TEST_LOGS)
 
         logger.stats("test stats")
@@ -65,6 +60,3 @@ class LogTestCase(unittest.TestCase):
             text = log.readline()
             self.assertTrue("STATS" in text)
             self.assertTrue("test stats" in text)
-
-if __name__ == "__main__":
-    unittest.TestLoader().loadTestsFromTestCase(LogTestCase).run()

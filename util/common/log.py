@@ -95,8 +95,8 @@ class Logger(object):
     def info(self, message):
         self.__logger.info(message, exc_info=0)
 
-    def warn(self, message):
-        self.__logger.warn(message, exc_info=0)
+    def warning(self, message):
+        self.__logger.warning(message, exc_info=0)
 
     def error(self, message):
         self.__logger.error(message, exc_info=0)
@@ -121,8 +121,8 @@ class MessageLogger(Logger):
         super(MessageLogger, self).info(message)
         self.impl.send_message("info", message)
 
-    def warn(self, message):
-        super(MessageLogger, self).warn(message)
+    def warning(self, message):
+        super(MessageLogger, self).warning(message)
         self.impl.send_message("warn", message)
 
     def error(self, message):
