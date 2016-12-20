@@ -20,9 +20,10 @@ class HrTeamDao(BaseDao):
             "name": self.constant.TYPE_STRING,  # 团队名称
             "summary": self.constant.TYPE_STRING,  # 职能概述
             "description": self.constant.TYPE_STRING,  # 团队介绍
-            "show_order": self.constant.TYPE_INT,
-            "media_id": self.constant.TYPE_INT,  # 团队主图片 hr_media.id
+            "show_order": self.constant.TYPE_INT,  # 团队列表顺序
+            "res_id": self.constant.TYPE_INT,  # 团队主图片 hr_resource.id
             "jd_media": self.constant.TYPE_STRING,  # JD页团队信息hr_media.id: [1, 23, 32]
+            "team_detail": self.constant.TYPE_STRING,  # 团队详情hr_media.id: [34, 35]
             "slogan": self.constant.TYPE_STRING,  # 团队口号
             "is_show": self.constant.TYPE_INT,  # 团队是否显示（列表页，other team） 0：不显示，1：显示
             "company_id": self.constant.TYPE_INT,  # 团队所在母公司
