@@ -107,7 +107,7 @@ COMPANY_MOSEEKER = ObjectDict({
         'events': [35, 36, 37],  # 公司大事件
         'map': [38],  # 公司地址
         'survey': [],  # 问卷调查
-        'qr_code': []  # 二维码
+        'qr_code': [175]  # 二维码
     }
 })
 
@@ -122,7 +122,7 @@ COMPANY_MARS = ObjectDict({
         'events': [50, 51, 52],  # 公司大事件
         'map': [53],  # 公司地址
         'survey': [],  # 问卷调查
-        'qr_code': []  # 二维码
+        'qr_code': [175]  # 二维码
     },
     'no_jd_team': True,
     'custom_visit_recipe': ['火星参观活动暂未开通', '请耐心等待哦~'],
