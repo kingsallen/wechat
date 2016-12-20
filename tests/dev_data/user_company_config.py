@@ -55,9 +55,10 @@ COMPANY_MARS_39978 = ObjectDict({
         'events': [50, 51, 52],  # 公司大事件
         'map': [53],  # 公司地址
         'survey': [],  # 问卷调查
-        'qr_code': []  # 二维码
+        'qr_code': [175]  # 二维码
     },
     'no_jd_team': True,
+    'custom_visit_recipe': ['火星参观活动暂未开通', '请耐心等待哦~'],
     'team_config': {
         5: [64, 104], 6: [65, 105], 7: [66, 106], 8: [67, 107],
         9: [68, 108], 10: [69, 109], 11: [70, 110], 12: [71, 111],
@@ -107,7 +108,7 @@ COMPANY_MOSEEKER = ObjectDict({
         'events': [35, 36, 37],  # 公司大事件
         'map': [38],  # 公司地址
         'survey': [],  # 问卷调查
-        'qr_code': [175]  # 二维码
+        'qr_code': []  # 二维码
     }
 })
 
