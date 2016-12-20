@@ -28,7 +28,6 @@ class UserCompanyPageService(PageService):
         :return:
         """
         data = ObjectDict()
-        self.logger.debug('ps user: {}'.format(user))
 
         # 获取当前公司关注，访问信息
         conds = {'user_id': user.sysuser.id, 'company_id': company.id}
@@ -76,6 +75,14 @@ class UserCompanyPageService(PageService):
         company_config = COMPANY_CONFIG.get(company_id)
         values = sum(company_config.config.values(), [])
         media = yield self.hr_media_ds.get_media_by_ids(values)
+        resources_dict = yield self.hr_resource_ds.get_resource_by_ids(
+            [m.res_id for m in media])
+
+        for m in media:
+            res = resources_dict.get(m.res_id, False)
+            if res:
+                m.media_url = res.res_url
+                m.media_type = res.res_type
 
         if company_config.config.get('team'):
             for team_media_id in company_config.config.get('team'):
@@ -121,8 +128,8 @@ class UserCompanyPageService(PageService):
 
     @gen.coroutine
     def _get_team_resource(self, team_list):
-        media_dict = yield self.hr_media_ds.get_media_by_ids(
-            [t.media_id for t in team_list])
+        resource_dict = yield self.hr_resource_ds.get_resource_by_ids(
+            [t.res_id for t in team_list])
 
         raise gen.Return([ObjectDict({
             # 'show_order': team.show_order, 如果需要对team排序
@@ -130,8 +137,8 @@ class UserCompanyPageService(PageService):
             'title': '我们的团队',
             'subtitle': team.name,
             'longtext': team.summary,
-            'media_url': media_dict.get(team.media_id).media_url,
-            'media_type': media_dict.get(team.media_id).media_type,
+            'media_url': resource_dict.get(team.res_id).res_url,
+            'media_type': resource_dict.get(team.res_id).res_type,
         }) for team in team_list])
 
     @gen.coroutine

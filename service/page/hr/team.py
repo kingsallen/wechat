@@ -14,6 +14,7 @@ from util.tool.url_tool import make_url
 from conf import path
 from tests.dev_data.user_company_config import COMPANY_CONFIG
 
+
 class TeamPageService(PageService):
 
     @gen.coroutine

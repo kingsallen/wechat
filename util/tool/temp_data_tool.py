@@ -287,7 +287,7 @@ def make_team_detail_template(team, media_dict, members, positions,
 
 
 # company main page template generator
-def make_company_working_env(media_list):
+def make_company_working_env(media_list, resource):
     return template1(sub_type='less', title=media_list[0].title,
                      data=[template1_data(media) for media in media_list])
 
