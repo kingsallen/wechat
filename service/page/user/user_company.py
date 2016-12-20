@@ -25,6 +25,7 @@ class UserCompanyPageService(PageService):
 
         :param handler_params:
         :param company: 当前公司
+        :param user: current_user
         :return:
         """
         data = ObjectDict()
@@ -44,6 +45,9 @@ class UserCompanyPageService(PageService):
             'follow': self.constant.YES if fllw_cmpy else self.constant.NO,
             'want_visit': self.constant.YES if vst_cmpy else self.constant.NO
         })
+        if COMPANY_CONFIG.get(company.id).get('custom_visit_recipe', False):
+            data.relation.custom_visit_recipe = COMPANY_CONFIG.get(
+                company.id).custom_visit_recipe
         data.templates, tmp_team = yield self._get_company_template(
             company.id, team_index_url)
 
