@@ -171,10 +171,12 @@ class UserPageService(PageService):
         qx_wxuser = yield self.get_wxuser_openid_wechat_id(
             openid=openid, wechat_id=qx_wechat_id)
 
-        if qx_wxuser and qx_wxuser.sysuser_id == user_id:
+        # 如果 qx_wxuser.sysuser_id = 0 表示只关注过，但是没有打开过页面
+        if qx_wxuser and (qx_wxuser.sysuser_id == 0 or qx_wxuser.sysuser_id == user_id):
             yield self.user_wx_user_ds.update_wxuser(
                 conds={"id": qx_wxuser.id},
                 fields={
+                    "sysuser_id": user_id,
                     "openid":     userinfo.openid,
                     "nickname":   userinfo.nickname,
                     "sex":        userinfo.sex or 0,
