@@ -90,7 +90,7 @@ class UserCompanyPageService(PageService):
 
         templates = [
             getattr(temp_data_tool, 'make_company_{}'.format(key))(
-                [media.get(id) for id in company_config.config.get(key)]
+                [media.get(mid) for mid in company_config.config.get(key)]
             ) for key in company_config.order
             if isinstance(company_config.config.get(key), list)
         ]
