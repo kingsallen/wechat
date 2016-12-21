@@ -12,10 +12,11 @@ from handler.base import BaseHandler
 from util.common import ObjectDict
 from util.common.decorator import check_sub_company
 from util.tool.url_tool import url_append_query
-
+from util.common.decorator import handle_response
 
 class TeamIndexHandler(BaseHandler):
 
+    @handle_response
     @check_sub_company
     @gen.coroutine
     def get(self):
@@ -44,6 +45,7 @@ class TeamIndexHandler(BaseHandler):
 
 class TeamDetailHandler(BaseHandler):
 
+    @handle_response
     @check_sub_company
     @gen.coroutine
     def get(self, team_id):
