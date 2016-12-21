@@ -483,7 +483,7 @@ class BaseHandler(MetaBaseHandler):
         self._add_jsapi_to_wechat(session.wechat)
 
         if self.is_platform:
-            yield self._add_company_info_to_session(session)
+            yield self._add_company_info_to_session(session, called_by="_build_session")
         if self.params.recom:
             yield self._add_recom_to_session(session)
 
@@ -516,7 +516,7 @@ class BaseHandler(MetaBaseHandler):
 
         self._add_jsapi_to_wechat(session.wechat)
         if self.is_platform:
-            yield self._add_company_info_to_session(session)
+            yield self._add_company_info_to_session(session, called_by="_build_session_by_unionid")
         if self.params.recom:
             yield self._add_recom_to_session(session)
 
@@ -537,7 +537,7 @@ class BaseHandler(MetaBaseHandler):
         self.logger.debug("refresh qx session redis key: {}".format(key_qx))
 
     @gen.coroutine
-    def _add_company_info_to_session(self, session):
+    def _add_company_info_to_session(self, session, called_by=None):
         """拼装 session 中的 company, employee
 
         如果该企业号是订阅号，不添加 employee
@@ -546,6 +546,12 @@ class BaseHandler(MetaBaseHandler):
         session.company = yield self._get_current_company(session.wechat.company_id)
 
         if self._authable():
+
+            if not session.wxuser.id:
+                self.logger.warning(
+                    "session.wxuser.id 不存在, 暂停获取 employee, called_by: {}, session: {}".format(called_by, session))
+                return
+
             employee = yield self.session_ps.get_employee(
                 wxuser_id=session.wxuser.id, company_id=session.company.id)
             if employee:
@@ -580,7 +586,7 @@ class BaseHandler(MetaBaseHandler):
         if value:
             # 如果有 value， 返回该 value 作为 self.current_user
             session = ObjectDict(value)
-            yield self._add_company_info_to_session(session)
+            yield self._add_company_info_to_session(session, called_by="_get_session_from_ent")
             yield self._add_sysuser_to_session(session)
             if self.params.recom:
                 yield self._add_recom_to_session(session)
