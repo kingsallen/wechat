@@ -29,10 +29,8 @@ class TestMakeUrl(unittest.TestCase):
         self.assertNotIn('?', out)
 
     def test_path_format(self):
-        try:
+        with self.assertRaises(ValueError):
             make_url(self.PATH + "?abc=def", {})
-        except ValueError as e:
-            self.assertEqual(str(e), "Path should not contain '?'")
 
     def test_urlencod(self):
         out = make_url(self.PATH, {"chinese": "我是中文"})

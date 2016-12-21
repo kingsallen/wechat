@@ -1,7 +1,6 @@
 # coding=utf-8
 
 import tornado.testing
-
 import app
 
 
@@ -11,5 +10,6 @@ class TestHandler(tornado.testing.AsyncHTTPTestCase):
         return app.make_app()
 
     def test_root(self):
-        response = self.fetch('/')
-        self.assertEqual(response.code, 404)
+        with tornado.testing.ExpectLog('tornado.access', "404"):
+            response = self.fetch('/')
+            self.assertEqual(response.code, 404)
