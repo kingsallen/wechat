@@ -6,13 +6,13 @@
 :date 2016.11.18
 
 """
+import json
 from util.common import ObjectDict
 from tornado import gen
 from service.page.base import PageService
 from util.tool import temp_data_tool
 from util.tool.url_tool import make_url
 from conf import path
-from tests.dev_data.user_company_config import COMPANY_CONFIG
 
 
 class TeamPageService(PageService):
@@ -49,12 +49,12 @@ class TeamPageService(PageService):
                 conds={'company_id': company.id, 'is_show': 1})
 
         # 获取团队成员以及所需要的media信息
-        team_media_dict = yield self.hr_media_ds.get_media_by_ids(
-            [t.media_id for t in teams])
+        team_resource_dict = yield self.hr_resource_ds.get_resource_by_ids(
+            [t.res_id for t in teams])
         all_members_dict = yield self._get_all_team_members(
             [t.id for t in teams])
-        all_member_headimg_dict = yield self.hr_media_ds.get_media_by_ids(
-            all_members_dict.get('all_headimg_list'))
+        member_head_img_dict = yield self.hr_resource_ds.get_resource_by_ids(
+            all_members_dict.get('all_head_img_list'))
 
         # 拼装模板数据
         data.header = temp_data_tool.make_header(company, team_index=True)
@@ -62,13 +62,14 @@ class TeamPageService(PageService):
         data.templates = [
             temp_data_tool.make_team_index_template(
                 team=t,
-                team_medium=team_media_dict.get(t.media_id),
+                team_medium=team_resource_dict.get(t.res_id),
                 more_link=make_url(path.TEAM_PATH.format(t.id), handler_param),
                 member_list=[
                     temp_data_tool.make_team_member(
                         member=m,
-                        headimg=all_member_headimg_dict.get(m.headimg_id)
-                    ) for m in all_members_dict.get(t.id)]
+                        headimg=member_head_img_dict.get(m.res_id)
+                    ) for m in all_members_dict.get(t.id)
+                ]
             ) for t in teams
         ]
         data.template_total = len(data.templates)
@@ -86,8 +87,7 @@ class TeamPageService(PageService):
         :return:
         """
         data = ObjectDict()
-        team_config = COMPANY_CONFIG.get(user.company.id).team_config
-        vst_cmpy = yield self.user_company_visit_req_ds.get_visit_cmpy(
+        visit = yield self.user_company_visit_req_ds.get_visit_cmpy(
             conds={'user_id': user.sysuser.id, 'company_id': company.id},
             fields=['id', 'company_id'])
 
@@ -98,9 +98,6 @@ class TeamPageService(PageService):
             company_positions = yield self._get_sub_company_positions(
                 company.id, position_fields)
 
-            team_positions, team_members = \
-                yield self._get_team_position_members(team, company_positions)
-
             team_id_list = list(set([p.team_id for p in company_positions
                                      if p.team_id != team.id]))
             other_teams = yield self._get_sub_company_teams(
@@ -109,29 +106,30 @@ class TeamPageService(PageService):
             company_positions = yield self.job_position_ds.get_positions_list(
                 conds={'company_id': company.id}, fields=position_fields)
 
-            team_positions, team_members = \
-                yield self._get_team_position_members(team, company_positions)
-
             other_teams = yield self.hr_team_ds.get_team_list(
                 conds={'id': [team.id, '<>'],
                        'company_id': company.id,
                        'is_show': 1})
+        team_positions = [pos for pos in company_positions
+                          if pos.team_id == team.id and pos.status == 0]
+        team_members = yield self.hr_team_member_ds.get_team_member_list(
+            conds={'team_id': team.id})
 
-        member_media_ids = [m.headimg_id for m in team_members] + \
-            team_config.get(team.id) if team_config \
-            else sum([[m.headimg_id, m.media_id] for m in team_members], [])
-        media_id_list = member_media_ids + [t.media_id for t in other_teams]
-        media_id_list += [team.media_id] if team.is_show else []
-
-        media_dict = yield self.hr_media_ds.get_media_by_ids(media_id_list)
+        detail_media_list = yield self.hr_media_ds.get_media_by_ids(
+            json.loads(team.team_detail), True)
+        res_id_list = [m.res_id for m in team_members] + \
+                      [m.res_id for m in detail_media_list] + \
+                      [t.res_id for t in other_teams]
+        res_id_list += [team.res_id] if team.is_show else []
+        res_dict = yield self.hr_resource_ds.get_resource_by_ids(res_id_list)
 
         # 拼装模板数据
         data.header = temp_data_tool.make_header(company, True, team)
         data.relation = ObjectDict({
-            'want_visit': self.constant.YES if vst_cmpy else self.constant.NO})
+            'want_visit': self.constant.YES if visit else self.constant.NO})
         data.templates = temp_data_tool.make_team_detail_template(
-            team, media_dict, team_members, team_positions[0:3],
-            other_teams, handler_param, bool(vst_cmpy), team_config)
+            team, team_members, detail_media_list,  team_positions[0:3],
+            other_teams, res_dict, handler_param, bool(visit))
         data.templates_total = len(data.templates)
 
         raise gen.Return(data)
@@ -142,10 +140,10 @@ class TeamPageService(PageService):
         根据团队id信息，获取所有团队，所有成员
         :param team_id_list:
         :return: {
-            'all_headimg_list': [hr_meida_1, hr_meida_2],
-            'all_media_list': [hr_meida_3, hr_meida_4],
-            team_id_1: [hr_team_member_1, ]
-            team_id_2: [hr_team_member_2, ]
+            'all_headimg_list': [hr_resource_1, hr_resource_2],
+            team_id_1: [hr_team_member_1, ],
+            team_id_2: [hr_team_member_2, ],
+            ...
         }
         """
         if not team_id_list:
@@ -155,29 +153,13 @@ class TeamPageService(PageService):
                 conds='team_id in {}'.format(tuple(
                     team_id_list)).replace(',)', ')'))
 
-        result = {'all_headimg_list': [], 'all_media_list': []}
+        result = {tid: [] for tid in team_id_list}
+        result['all_head_img_list'] = []
         for member in member_list:
-            result['all_headimg_list'].append(member.headimg_id)
-            result['all_media_list'].append(member.media_id)
-            if result.get(member.team_id):
-                result[member.team_id].append(member)
-            else:
-                result[member.team_id] = [member]
-
-        for tid in team_id_list:
-            if tid not in result.keys():
-                result[tid] = []
+            result['all_head_img_list'].append(member.res_id)
+            result[member.team_id].append(member)
 
         raise gen.Return(result)
-
-    @gen.coroutine
-    def _get_team_position_members(self, team, company_positions):
-        team_positions = [pos for pos in company_positions
-                          if pos.team_id == team.id and pos.status == 0]
-        team_members = yield self.hr_team_member_ds.get_team_member_list(
-            conds={'team_id': team.id})
-
-        raise gen.Return((team_positions, team_members))
 
     @gen.coroutine
     def _get_sub_company_positions(self, company_id, fields=None):

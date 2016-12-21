@@ -35,10 +35,10 @@ def template1(sub_type, title, data, more_link=None):
     :return:ObjectDict({
         'type': 1,
         'sub_type': sub_type,
-        'title': title,
+        'title': resource.title,
         'more_link': more_link
         'data': [{
-            'title': resource.title,
+            'sub_title': resource.sub_title,
             'longtext': resource.longtext,
             'media_url': resource.media_url,
             'media_type': MEDIA_TYPE'image',
@@ -62,7 +62,7 @@ def template1(sub_type, title, data, more_link=None):
 
 def template1_data(resource, member_list=None):
     return {
-        'title': resource.sub_title,
+        'sub_title': resource.sub_title,
         'longtext': resource.longtext,
         'media_url': make_static_url(resource.media_url),
         'media_type': MEDIA_TYPE[resource.media_type],
@@ -174,21 +174,21 @@ def make_header(company, team_index=False, team=None):
 
 
 # 团队列表模板和生成器
-def make_team_member(member, headimg):
+def make_team_member(member, head_img):
     return ObjectDict({
-        'icon': make_static_url(headimg.media_url),
+        'icon': make_static_url(head_img.res_url),
         'name': member.name,
         'title': member.title,
         'description': member.description,
     })
 
 
-def make_team_index_template(team, team_medium, more_link, member_list):
+def make_team_index_template(team, team_resource, more_link, member_list):
     data = [{
         'title': team.name,
         'longtext': team.summary,
-        'media_url': make_static_url(team_medium.media_url),
-        'media_type': MEDIA_TYPE[team_medium.media_type],
+        'media_url': make_static_url(team_resource.res_url),
+        'media_type': MEDIA_TYPE[team_resource.res_type],
         'member_list': member_list
     }]
 
@@ -197,76 +197,63 @@ def make_team_index_template(team, team_medium, more_link, member_list):
 
 
 # 团队详情模版生成器
-def make_introduction(member, headimg):
+def make_introduction(member, res):
     return {
-        'icon': make_static_url(headimg.media_url),
+        'icon': make_static_url(res.res_url) if res else '',
         'name': member.name,
         'title': member.title,
         'description': member.description
     }
 
 
-def make_interview(member, media):
+def make_interview(media, res):
     return {
-            'title': member.name,
-            'longtext': '{}\n'.format(member.title),
-            'media_url': make_static_url(media.media_url),
-            'media_type': MEDIA_TYPE[media.media_type]
+        'sub_title': media.sub_title,
+        'longtext': '{}\n'.format(media.longtext),
+        'media_url': make_static_url(res.res_url) if res else '',
+        'media_type': MEDIA_TYPE[res.res_type if res else 0]
     }
 
 
-def make_other_team_data(team, media, handler_params):
+def make_other_team_data(team, res, handler_params):
     return {
         'title': team.name,
         'link': make_url('/m/company/team/{}'.format(team.id), handler_params),
         'description': team.summary,
-        'media_url': make_static_url(media.media_url),
-        'media_type': MEDIA_TYPE[media.media_type]
+        'media_url': make_static_url(res.res_url),
+        'media_type': MEDIA_TYPE[res.res_type]
     }
 
 
-def make_team_detail_template(team, media_dict, members, positions,
-                              other_teams, handler_params, vst=False,
-                              team_conf=None):
+def make_team_detail_template(team, members, detail_media_list, positions,
+                              other_teams, res_dic, handler_params, vst=False):
     template = []
 
     # 无素材不显示团队
     if team.is_show:
-        team_media = media_dict.get(team.media_id)
-        if team_conf is not None:
-            interview_title = media_dict.get(team_conf.get(team.id)[0]).title
-            introduction = [make_introduction(
-                m, media_dict.get(m.headimg_id)) for m in members]
-            interview = [template1_data(media_dict.get(media_id))
-                         for media_id in team_conf.get(team.id)]
-        else:
-            interview_title = '成员采访'
-            introduction, interview = [], []
-            for member in members:
-                introduction.append(make_introduction(
-                    member, media_dict.get(member.headimg_id)))
-                if member.media_id:
-                    interview.append(make_interview(
-                        member, media_dict.get(member.media_id)))
-
         template.append(
             template1(
-                sub_type='full', title='团队介绍',
+                sub_type='full',
+                title='团队介绍',
                 data=[{
-                    'title': '',
+                    'sub_title': '',
                     'longtext': team.description,
-                    'media_url': make_static_url(team_media.media_url),
-                    'media_type': MEDIA_TYPE[team_media.media_type],
-                    'member_list': introduction,
+                    'media_url': make_static_url(res_dic.get(team.res_id).res_url),
+                    'media_type': MEDIA_TYPE[res_dic.get(team.res_id).res_type],
+                    'member_list': [make_introduction(m, res_dic.get(m.red_id))
+                                    for m in members],
                 }]
             )
         )
 
-        if interview:
-            template.append(template1(
-                sub_type='less',
-                title=interview_title,
-                data=interview)
+        if detail_media_list:
+            template.append(
+                template1(
+                    sub_type='less',
+                    title=detail_media_list[0].title,
+                    data=[make_interview(m, res_dic.get(m.red_id))
+                          for m in detail_media_list]
+                )
             )
 
     # 适应没有数据不显示模板块
@@ -276,10 +263,14 @@ def make_team_detail_template(team, media_dict, members, positions,
         template.append(template5())
     if other_teams:
         template.append(template4(
-            sub_type=0, title='其他团队',
-            data=[make_other_team_data(
-                team=t, media=media_dict.get(t.media_id),
-                handler_params=handler_params) for t in other_teams
+            sub_type=0,
+            title='其他团队',
+            data=[
+                make_other_team_data(
+                    team=t,
+                    media=res_dic.get(t.res_id),
+                    handler_params=handler_params
+                ) for t in other_teams
             ])
         )
 
