@@ -548,7 +548,7 @@ class BaseHandler(MetaBaseHandler):
         if self._authable():
 
             if not session.wxuser.id:
-                self.logger.warning(
+                self.logger.error(
                     "session.wxuser.id 不存在, 暂停获取 employee, called_by: {}, session: {}".format(called_by, session))
                 return
 
