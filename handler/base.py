@@ -432,7 +432,7 @@ class BaseHandler(MetaBaseHandler):
 
         if session_id:
             if self.is_platform:
-                self.logger.warn(
+                self.logger.debug(
                     "is_platform _fetch_session session_id: {}".format(session_id))
                 ok = yield self._get_session_from_ent(session_id)
                 if not ok:
@@ -537,7 +537,7 @@ class BaseHandler(MetaBaseHandler):
 
         key_qx = const.SESSION_USER.format(session_id, self.settings['qx_wechat_id'])
         self.redis.set(key_qx, ObjectDict(qxuser=session.qxuser), 60 * 60 * 24 * 30)
-        self.logger.debug("refresh qx session redis key: {} session: {}".format(key_qx, session.qxuser))
+        self.logger.debug("refresh qx session redis key: {} session: {}".format(key_qx, ObjectDict(qxuser=session.qxuser)))
 
     @gen.coroutine
     def _add_company_info_to_session(self, session, called_by=None):
@@ -551,7 +551,7 @@ class BaseHandler(MetaBaseHandler):
         if self._authable():
 
             if not session.wxuser.id:
-                self.logger.warn(
+                self.logger.debug(
                     "session.wxuser.id 不存在, 暂停获取 employee, called_by: {}, session: {}".format(called_by, session))
                 return
 
@@ -586,7 +586,7 @@ class BaseHandler(MetaBaseHandler):
 
         key = const.SESSION_USER.format(session_id, self._wechat.id)
         value = self.redis.get(key)
-        self.logger.warn(
+        self.logger.debug(
             "_get_session_from_ent redis session: {}, key: {}".format(value, key))
         if value:
             # 如果有 value， 返回该 value 作为 self.current_user
