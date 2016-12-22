@@ -147,7 +147,7 @@ class RedpacketPageService(PageService):
         return ret
 
     @gen.coroutine
-    def handle_red_packet_position_related(self, current_user, position,
+    def handle_red_packet_position_related(self, current_user, position, redislocker,
                                            is_click=False, is_apply=False):
         """转发类红包触发总入口
         """
@@ -192,19 +192,31 @@ class RedpacketPageService(PageService):
 
                 recom = current_user.recom
                 recom_wechat = current_user.wechat
+                trigger_wxuser_id = current_user.wxuser.id
 
-                ret = yield self.handle_red_packet_card_sending(
-                    current_user, rp_config, recom,
-                    recom_wechat, position)
-
-                if send_to_employee:
-                    # 同时发红包给最近员工
-                    employee_wxuser = yield self.user_wx_user_ds.get_wxuser({
-                        "id": last_employee_recom_id})
-
+                # 为红包处理加 redis 锁
+                # 检查红包锁
+                rplock_key = const.RP_LOCK_FMT % (rp_config.id, recom.id, trigger_wxuser_id)
+                if redislocker.incr(rplock_key) == 1:
+                    self.logger.debug("[RP]红包创建成功， rplock_key: %s" % rplock_key)
                     ret = yield self.handle_red_packet_card_sending(
-                        current_user, rp_config, employee_wxuser,
-                        recom_wechat, position, send_to_employee=True)
+                        current_user, rp_config, recom,
+                        recom_wechat, position)
+
+                    if send_to_employee:
+                        # 同时发红包给最近员工
+                        employee_wxuser = yield self.user_wx_user_ds.get_wxuser({
+                            "id": last_employee_recom_id})
+
+                        ret = yield self.handle_red_packet_card_sending(
+                            current_user, rp_config, employee_wxuser,
+                            recom_wechat, position, send_to_employee=True)
+
+                    # 释放红包锁
+                    redislocker.delete(rplock_key)
+                    self.logger.debug(u"[RP]红包锁释放成功， rplock_key: %s" % rplock_key)
+                else:
+                    self.logger.debug(u"[RP]触发红包锁，该红包逻辑正在处理中， rplock_key: %s" % rplock_key)
 
                 if is_click:
                     self.logger.debug("[RP]转发点击红包结束")

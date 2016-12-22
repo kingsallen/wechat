@@ -161,6 +161,7 @@ RECRUIT_STATUS_REJECT_ID = 4  # 拒绝
 
 
 # 红包
+RP_LOCK_FMT = "rplock:%s:%s:%s"
 # 职位状态
 RP_POSITION_STATUS_NONE = 0
 RP_POSITION_STATUS_CLICK = 1

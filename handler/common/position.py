@@ -95,7 +95,7 @@ class PositionHandler(BaseHandler):
             if self.is_platform and self.current_user.recom:
                 self.logger.debug("[JD]红包处理")
                 yield self.redpacket_ps.handle_red_packet_position_related(
-                    self.current_user, position_info, is_click=True)
+                    self.current_user, position_info, redislocker=self.redis, is_click=True)
 
             self.logger.debug("[JD]更新职位浏览量")
             yield self._make_position_visitnum(position_info)
