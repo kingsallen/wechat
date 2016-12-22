@@ -153,7 +153,7 @@ class BaseDao(DB):
         sql, params = self.insert(self.table, fields, options)
         cursor = yield self.query(sql, params)
         insert_id = cursor.lastrowid
-        # self.logger.debug("[debug][{0}][response: {1}]".format(self.__class__.__module__, insert_id))
+        self.logger.debug("[debug][{0}][response: {1}]".format(self.__class__.__module__, insert_id))
         raise gen.Return(insert_id)
 
     @gen.coroutine
@@ -188,7 +188,7 @@ class BaseDao(DB):
         cursor = yield self.query(sql, params_update)
         cursor.fetchone()
         rows_count = cursor.rowcount
-        # self.logger.debug("[debug][{0}][response: {1}]".format(self.__class__.__module__, rows_count))
+        self.logger.debug("[debug][{0}][response: {1}]".format(self.__class__.__module__, rows_count))
         if rows_count:
             raise gen.Return(True)
         else:
@@ -212,7 +212,7 @@ class BaseDao(DB):
         cursor = yield self.query(sql, params)
         cursor.fetchone()
         rows_count = cursor.rowcount
-        # self.logger.debug("[debug][{0}][response: {1}]".format(self.__class__.__module__, rows_count))
+        self.logger.debug("[debug][{0}][response: {1}]".format(self.__class__.__module__, rows_count))
         if rows_count:
             raise gen.Return(True)
         else:
