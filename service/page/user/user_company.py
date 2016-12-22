@@ -29,7 +29,6 @@ class UserCompanyPageService(PageService):
         :return:
         """
         data = ObjectDict()
-        self.logger.debug('ps user: {}'.format(user))
 
         # 获取当前公司关注，访问信息
         conds = {'user_id': user.sysuser.id, 'company_id': company.id}

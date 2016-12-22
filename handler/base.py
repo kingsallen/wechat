@@ -250,6 +250,8 @@ class BaseHandler(MetaBaseHandler):
             remote_ip=self.request.remote_ip,
             source=source)
 
+        self.logger.debug("[_handle_user_info]user_id: {}".format(user_id))
+
         # 创建 qx 的 user_wx_user
         yield self.user_ps.create_qx_wxuser_by_userinfo(userinfo, user_id)
 
@@ -271,6 +273,7 @@ class BaseHandler(MetaBaseHandler):
         if self.is_platform:
             wxuser = yield self.user_ps.create_user_wx_user_ent(
                 openid, unionid, self._wechat.id)
+            self.logger.debug("_handle_ent_openid, wxuser:{}".format(wxuser))
         raise gen.Return(wxuser)
 
     # noinspection PyTypeChecker
@@ -475,9 +478,7 @@ class BaseHandler(MetaBaseHandler):
             unionid=self._unionid, wechat_id=self.settings['qx_wechat_id'])
 
         session_id = self._make_new_session_id(session.qxuser.sysuser_id)
-        logger.debug("session_id: %s" % session_id)
-        self.set_secure_cookie(const.COOKIE_SESSIONID, session_id,
-                               httponly=True)
+        self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True)
 
         self._save_sessions(session_id, session)
 
@@ -509,7 +510,7 @@ class BaseHandler(MetaBaseHandler):
             unionid=unionid, wechat_id=self.settings['qx_wechat_id'])
 
         session_id = to_str(self.get_secure_cookie(const.COOKIE_SESSIONID))
-        # 当使用手机浏览器访问的时候可能没有 session_id
+        # 当使用手机浏览器访问的时候可能没有 session_idrefresh ent session
         # 那么就创建它
         if not session_id:
             session_id = self._make_new_session_id(session.qxuser.sysuser_id)
