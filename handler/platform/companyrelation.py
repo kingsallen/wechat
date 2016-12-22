@@ -12,10 +12,12 @@ from tornado import gen
 from util.common import ObjectDict
 from util.common.decorator import check_sub_company
 from handler.base import BaseHandler
+from util.common.decorator import handle_response
 
 
 class CompanyVisitReqHandler(BaseHandler):
 
+    @handle_response
     @check_sub_company
     @gen.coroutine
     def post(self):
@@ -31,6 +33,7 @@ class CompanyVisitReqHandler(BaseHandler):
 
 class CompanyFollowHandler(BaseHandler):
 
+    @handle_response
     @check_sub_company
     @gen.coroutine
     def post(self):
@@ -46,6 +49,7 @@ class CompanyFollowHandler(BaseHandler):
 
 class CompanyHandler(BaseHandler):
 
+    @handle_response
     @check_sub_company
     @gen.coroutine
     def get(self):
@@ -64,11 +68,11 @@ class CompanyHandler(BaseHandler):
         })
 
         self.render_page(template_name='company/profile.html', data=data)
-        return
 
 
 class CompanySurveyHandler(BaseHandler):
 
+    @handle_response
     @gen.coroutine
     def post(self):
         """处理用户填写公司 survey 的 post api 请求"""
