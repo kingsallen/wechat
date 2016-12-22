@@ -35,7 +35,7 @@ def template1(sub_type, title, data, more_link=None):
     :return:ObjectDict({
         'type': 1,
         'sub_type': sub_type,
-        'title': resource.title,
+        'title': title,
         'more_link': more_link
         'data': [{
             'sub_title': resource.sub_title,
@@ -185,7 +185,7 @@ def make_team_member(member, head_img):
 
 def make_team_index_template(team, team_resource, more_link, member_list):
     data = [{
-        'title': team.name,
+        'sub_title': team.name,
         'longtext': team.summary,
         'media_url': make_static_url(team_resource.res_url),
         'media_type': MEDIA_TYPE[team_resource.res_type],
@@ -325,26 +325,28 @@ def make_company_team(media_list, link=None):
 
 
 # JD page
-def make_mate(media_list):
+def make_mate(media_list, res_dict):
     return template1(
-        sub_type='less', title=media_list[0].title,
+        sub_type='less',
+        title=media_list[0].title,
         data=[{
-            'title': media.sub_title,
-            'longtext': '{}\n'.format(media.longtext),
-            'media_url': make_static_url(media.media_url),
-            'media_type': MEDIA_TYPE[media.media_type]
-        } for media in media_list]
+            'sub_title': m.sub_title,
+            'longtext': '{}\n'.format(m.longtext),
+            'media_url': make_static_url(res_dict.get(m.red_id).res_url),
+            'media_type': MEDIA_TYPE[res_dict.get(m.red_id).res_type]
+        } for m in media_list]
     )
 
 
-def make_team(team, team_medium):
+def make_team(team, team_res):
     return template1(
-        sub_type='full', title='所属团队',
+        sub_type='full',
+        title='所属团队',
         data=[{
-            'title': '',
+            'sub_title': '',
             'longtext': team.summary,
-            'media_url': make_static_url(team_medium.media_url),
-            'media_type': MEDIA_TYPE[team_medium.media_type],
+            'media_url': make_static_url(team_res.res_url),
+            'media_type': MEDIA_TYPE[team_res.res_type],
             'member_list': None,
         }]
     )
