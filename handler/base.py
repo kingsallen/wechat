@@ -608,6 +608,9 @@ class BaseHandler(MetaBaseHandler):
         key = const.SESSION_USER.format(session_id, self.settings['qx_wechat_id'])
 
         value = self.redis.get(key)
+        self.logger.debug(
+            "_get_session_from_qx redis session: {}, key: {}".format(value, key))
+
         if value:
             session_qx = value
             qxuser = ObjectDict(session_qx.get('qxuser'))
@@ -809,7 +812,7 @@ class BaseHandler(MetaBaseHandler):
             referer=request.headers.get('Referer'),
             remote_ip=(
                 request.headers.get('Remoteip') or
-                request.headers.get('X-Forwarded-For') or
+                request.headers.get('X-Real-Ip') or
                 request.remote_ip
             ),
             event="{}_{}".format(self._event, request.method),
