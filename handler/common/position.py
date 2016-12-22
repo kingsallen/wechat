@@ -13,6 +13,7 @@ from util.tool.url_tool import make_url
 from util.wechat.template import position_view_five
 from tests.dev_data.user_company_config import COMPANY_CONFIG
 
+
 class PositionHandler(BaseHandler):
 
     @gen.coroutine
@@ -148,7 +149,8 @@ class PositionHandler(BaseHandler):
             if position_info.share_description:
                 description = "".join(split(position_info.share_description))
 
-        link = make_url(path.POSITION_PATH.format(position_info.id),
+        link = make_url(
+            path.POSITION_PATH.format(position_info.id),
             self.params,
             host=self.request.host,
             protocol=self.request.protocol,
@@ -328,7 +330,8 @@ class PositionHandler(BaseHandler):
             if position_info.status == 0:
                 res = yield self.sharechain_ps.refresh_share_chain(self.current_user.wxuser.id, position_info.id)
                 if res:
-                    last_recom_id = yield self.sharechain_ps.get_referral_employee_wxuser_id(self.current_user.wxuser.id, position_info.id)
+                    last_recom_id = yield self.sharechain_ps.get_referral_employee_wxuser_id(
+                        self.current_user.wxuser.id, position_info.id)
 
         yield self.position_ps.send_candidate_view_position(params={
             "wxuser_id": self.current_user.wxuser.id,
@@ -343,11 +346,10 @@ class PositionHandler(BaseHandler):
         """给员工加积分"""
 
         if self.current_user.employee and last_recom_wxuser_id != self.current_user.wxuser.id:
-            res = yield self.position_ps.add_reward_for_recom_click(self.current_user.employee,
-                                                              self.current_user.company.id,
-                                                              self.current_user.wxuser.id,
-                                                              position_info.id,
-                                                              last_recom_wxuser_id)
+            res = yield self.position_ps.add_reward_for_recom_click(
+                self.current_user.employee, self.current_user.company.id,
+                self.current_user.wxuser.id, position_info.id,
+                last_recom_wxuser_id)
             self.logger.debug("给员工加积分： %s" % res)
 
     @gen.coroutine
@@ -360,18 +362,24 @@ class PositionHandler(BaseHandler):
                 "signature": self.settings.helper_signature
             })
 
-            hr_account, hr_wx_user = yield self._make_hr_info(position_info.publisher)
+            hr_account, hr_wx_user = yield self._make_hr_info(
+                position_info.publisher)
 
             if hr_wx_user.openid:
                 # 如果企业有公众号，发企业链接，若无，发集合号链接
                 if self.current_user.wechat:
-                    link = make_url(path.POSITION_PATH.format(position_info.id), host=self.settings.platform_host,
-                                    wechat_signature=self.current_user.wechat.signature)
+                    link = make_url(
+                        path.POSITION_PATH.format(position_info.id),
+                        host=self.settings.platform_host,
+                        wechat_signature=self.current_user.wechat.signature)
                 else:
-                    link = make_url(path.OLD_POSITION_PATH, host=self.settings.qx_host, m="info", pid=position_info.id)
+                    link = make_url(path.OLD_POSITION_PATH,
+                                    host=self.settings.qx_host, m="info",
+                                    pid=position_info.id)
 
-                yield position_view_five(help_wechat.id, hr_wx_user.openid, link, position_info.title,
-                                   position_info.salary)
+                yield position_view_five(help_wechat.id, hr_wx_user.openid,
+                                         link, position_info.title,
+                                         position_info.salary)
 
     @gen.coroutine
     def _add_team_data(self, position_data, team, company_id, position_id):
