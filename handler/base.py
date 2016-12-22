@@ -173,7 +173,7 @@ class BaseHandler(MetaBaseHandler):
         code = self.params.get("code")
         state = self.params.get("state")
 
-        self.logger.debug("code:{}, state:{}, request_url:{} ".format(code, state, self.request.uri))
+        self.logger.debug("[prepare]code:{}, state:{}, request_url:{} ".format(code, state, self.request.uri))
 
         if self.in_wechat:
             # 用户同意授权
@@ -212,7 +212,7 @@ class BaseHandler(MetaBaseHandler):
         self._unionid = None
         self._wxuser = None
 
-        self.logger.debug("current_user: {}".format(self.current_user))
+        self.logger.debug("[prepare]current_user: {}".format(self.current_user))
 
     # PROTECTED
     @gen.coroutine
@@ -235,7 +235,7 @@ class BaseHandler(MetaBaseHandler):
         "unionid": "o6_bmasdasdsad6_2sgVt7hMZOPfL"
         )
         """
-        self.logger.debug("userinfo: {}".format(userinfo))
+        self.logger.debug("[_handle_user_info]userinfo: {}".format(userinfo))
 
         unionid = userinfo.unionid
         if self.is_platform:
@@ -341,8 +341,8 @@ class BaseHandler(MetaBaseHandler):
         """检查 code 是不是之前使用过的"""
 
         old = self.get_cookie(const.COOKIE_CODE)
-        self.logger.debug("old code: {}".format(old))
-        self.logger.debug("new code: {}".format(code))
+        self.logger.debug("[_verify_code]old code: {}".format(old))
+        self.logger.debug("[_verify_code]new code: {}".format(code))
 
         if not old:
             return True
