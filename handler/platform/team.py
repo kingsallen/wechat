@@ -40,8 +40,6 @@ class TeamIndexHandler(BaseHandler):
         })
 
         self.render_page(template_name, data)
-        return
-
 
 class TeamDetailHandler(BaseHandler):
 
@@ -72,14 +70,3 @@ class TeamDetailHandler(BaseHandler):
         })
 
         self.render_page(template_name='company/team.html', data=data)
-        return
-
-    # @staticmethod
-    # def _get_share_image(page_data):
-    #     templates = page_data.templates
-    #     template_media = data.templates.data.get('media_url')
-    #     if not template_media:
-    #         return None
-    #     data = template_media.data[0] if len(template_media.data) else None
-    #     media_url = data.get('media_url', None) if data else None
-    #     return media_url

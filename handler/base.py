@@ -405,6 +405,7 @@ class BaseHandler(MetaBaseHandler):
             userinfo = yield self._oauth_service.get_userinfo_by_code(code)
             raise gen.Return(userinfo)
         except WeChatOauthError as e:
+            self.logger.error("_get_user_info cookie code : {}".format(self.get_cookie(const.COOKIE_CODE)))
             self.logger.error("_get_user_info: {}".format(self.request))
             self.logger.error(e)
 
@@ -431,6 +432,8 @@ class BaseHandler(MetaBaseHandler):
 
         if session_id:
             if self.is_platform:
+                self.logger.debug(
+                    "is_platform _fetch_session session_id: {}".format(session_id))
                 ok = yield self._get_session_from_ent(session_id)
                 if not ok:
                     ok = yield self._get_session_from_qx(session_id)
@@ -530,11 +533,11 @@ class BaseHandler(MetaBaseHandler):
 
         key_ent = const.SESSION_USER.format(session_id, self._wechat.id)
         self.redis.set(key_ent, session, 60 * 60 * 2)
-        self.logger.debug("refresh ent session redis key: {}".format(key_ent))
+        self.logger.debug("refresh ent session redis key: {} session: {}".format(key_ent, session))
 
         key_qx = const.SESSION_USER.format(session_id, self.settings['qx_wechat_id'])
         self.redis.set(key_qx, ObjectDict(qxuser=session.qxuser), 60 * 60 * 24 * 30)
-        self.logger.debug("refresh qx session redis key: {}".format(key_qx))
+        self.logger.debug("refresh qx session redis key: {} session: {}".format(key_qx, ObjectDict(qxuser=session.qxuser)))
 
     @gen.coroutine
     def _add_company_info_to_session(self, session, called_by=None):
@@ -548,7 +551,7 @@ class BaseHandler(MetaBaseHandler):
         if self._authable():
 
             if not session.wxuser.id:
-                self.logger.warn(
+                self.logger.debug(
                     "session.wxuser.id 不存在, 暂停获取 employee, called_by: {}, session: {}".format(called_by, session))
                 return
 
@@ -583,6 +586,8 @@ class BaseHandler(MetaBaseHandler):
 
         key = const.SESSION_USER.format(session_id, self._wechat.id)
         value = self.redis.get(key)
+        self.logger.debug(
+            "_get_session_from_ent redis session: {}, key: {}".format(value, key))
         if value:
             # 如果有 value， 返回该 value 作为 self.current_user
             session = ObjectDict(value)
