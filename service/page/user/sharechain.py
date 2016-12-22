@@ -76,13 +76,15 @@ class SharechainPageService(PageService):
 
     @gen.coroutine
     def _copy_to_candidate_recom_record(self, rec):
+        if isinstance(rec.click_time, str):
+            rec.click_time = datetime.strptime(rec.click_time, const.TIME_FORMAT)
         yield self.candidate_recom_record_ds.insert_candidate_recom_record({
             "position_id":  rec.position_id,
             "presentee_id": rec.presentee_id,
             "depth":        rec.depth,
             "recom_id":     rec.recom_id,
             "recom_id_2":   rec.recom_id_2,
-            "click_time":   datetime.strptime(rec.click_time, const.TIME_FORMAT)
+            "click_time":   rec.click_time
         })
 
     @gen.coroutine
