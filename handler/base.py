@@ -432,7 +432,7 @@ class BaseHandler(MetaBaseHandler):
         if session_id:
             if self.is_platform:
                 self.logger.warn(
-                    "_fetch_session session_id: {}".format(session_id))
+                    "is_platform _fetch_session session_id: {}".format(session_id))
                 ok = yield self._get_session_from_ent(session_id)
                 if not ok:
                     ok = yield self._get_session_from_qx(session_id)
