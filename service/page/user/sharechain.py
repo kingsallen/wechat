@@ -1,5 +1,7 @@
 # coding=utf-8
 
+from datetime import datetime
+
 import tornado.gen as gen
 
 import conf.common as const
@@ -80,7 +82,7 @@ class SharechainPageService(PageService):
             "depth":        rec.depth,
             "recom_id":     rec.recom_id,
             "recom_id_2":   rec.recom_id_2,
-            "click_time":   rec.click_time
+            "click_time":   datetime.strptime(rec.click_time, const.TIME_FORMAT)
         })
 
     @gen.coroutine
