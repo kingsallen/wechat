@@ -9,7 +9,6 @@ from util.common import ObjectDict
 
 class CandidatePositionShareRecordDataService(DataService):
 
-    @cache(ttl=60)
     @gen.coroutine
     def get_share_record(self, conds, fields=None, options=None, appends=None,
                          index=None):
