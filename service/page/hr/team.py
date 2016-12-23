@@ -47,6 +47,7 @@ class TeamPageService(PageService):
         else:
             teams = yield self.hr_team_ds.get_team_list(
                 conds={'company_id': company.id, 'is_show': 1})
+        teams.sort(key=lambda t: t.show_order)
 
         # 获取团队成员以及所需要的media信息
         team_resource_dict = yield self.hr_resource_ds.get_resource_by_ids(
@@ -110,6 +111,8 @@ class TeamPageService(PageService):
                 conds={'id': [team.id, '<>'],
                        'company_id': company.id,
                        'is_show': 1})
+        other_teams.sort(key=lambda t: t.show_order)
+
         team_positions = [pos for pos in company_positions
                           if pos.team_id == team.id and pos.status == 0]
         team_members = yield self.hr_team_member_ds.get_team_member_list(
