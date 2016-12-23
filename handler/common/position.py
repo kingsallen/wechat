@@ -15,6 +15,7 @@ from tests.dev_data.user_company_config import COMPANY_CONFIG
 
 class PositionHandler(BaseHandler):
 
+    @handle_response
     @gen.coroutine
     def get(self, position_id):
         """显示 JD 页

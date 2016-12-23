@@ -11,6 +11,7 @@ import conf.common as const
 
 from tornado import gen
 from handler.base import BaseHandler
+from util.common.decorator import handle_response
 import conf.message as msg
 
 
@@ -20,6 +21,7 @@ class CellphoneBindHandler(BaseHandler):
                          Point 32, 33
     """
 
+    @handle_response
     @gen.coroutine
     def get(self):
         result = yield self.cellphone_ps.send_valid_code(
@@ -31,6 +33,7 @@ class CellphoneBindHandler(BaseHandler):
         else:
             self.send_json_success()
 
+    @handle_response
     @gen.coroutine
     def post(self):
         """校验短信验证码

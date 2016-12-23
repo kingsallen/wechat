@@ -6,12 +6,13 @@ from tornado import gen
 from util.common import ObjectDict
 from util.tool.url_tool import make_url
 import conf.path as path_const
-import conf.message as msg_const
 import conf.common as const
+from util.common.decorator import handle_response
 
 
 class LoginHandler(BaseHandler):
 
+    @handle_response
     @gen.coroutine
     def get(self):
         """渲染 login 页面模板"""
@@ -40,6 +41,7 @@ class LoginHandler(BaseHandler):
         )
         self.render_page("/system/login.html", data=data)
 
+    @handle_response
     @gen.coroutine
     def post(self):
         """登录操作， api 请求"""
