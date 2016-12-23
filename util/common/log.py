@@ -22,7 +22,7 @@ FORMATER = logging.Formatter(
 
 SUFFIX = '%Y%m%d%H.log'
 
-# Highest built-in level is 50, so make CUSTOMER as 60
+# Highest built-in level is 50, so make STATS as 60
 logging.addLevelName(60, 'STATS')
 
 LOG_LEVELS = {
