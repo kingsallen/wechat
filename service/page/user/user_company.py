@@ -59,6 +59,7 @@ class UserCompanyPageService(PageService):
             else:
                 teams = yield self.hr_team_ds.get_team_list(
                     conds={'company_id': company.id, 'is_show': 1})
+            teams.sort(key=lambda t: t.show_order)
             team_resource_list = yield self._get_team_resource(teams)
             team_template = temp_data_tool.make_company_team(
                 team_resource_list, team_index_url)
@@ -136,7 +137,6 @@ class UserCompanyPageService(PageService):
             [t.res_id for t in team_list])
 
         raise gen.Return([ObjectDict({
-            # 'show_order': team.show_order, 如果需要对team排序
             'id': team.id,
             'title': '我们的团队',
             'subtitle': team.name,
