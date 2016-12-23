@@ -9,7 +9,6 @@ from util.common import ObjectDict
 
 class CandidateRecomRecordDataService(DataService):
 
-    @cache(ttl=60)
     @gen.coroutine
     def get_candidate_recom_record(self, conds, fields=None, options=None, appends=None, index=None):
         fields = fields or []
