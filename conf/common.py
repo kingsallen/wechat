@@ -159,14 +159,40 @@ RECRUIT_STATUS_OFFERACCEPTED_ID = 11  # 接受录取通知
 RECRUIT_STATUS_HIRED_ID = 3  # 入职
 RECRUIT_STATUS_REJECT_ID = 4  # 拒绝
 
-
-# 红包
-RP_LOCK_FMT = "rplock:%s:%s:%s"
 # 职位状态
 RP_POSITION_STATUS_NONE = 0
 RP_POSITION_STATUS_CLICK = 1
 RP_POSITION_STATUS_APPLY = 2
 RP_POSITION_STATUS_BOTH = 3
+
+
+# ============= 红包相关常量 =============
+# 红包锁字符串模版
+RP_LOCK_FMT = "rplock:%s:%s:%s"
+
+# RP_ITEM 状态常量
+# 默认初始状态
+RP_ITEM_STATUS_DEFAULT = 0
+# 发送了消息模成功
+RP_ITEM_STATUS_SENT_WX_MSG_SUCCESS = 1
+# 发送消息模板失败，红包停发
+RP_ITEM_STATUS_SENT_WX_MSG_FAILURE = 2
+# 打开刮刮卡，点击红包数字前
+RP_ITEM_STATUS_CARD_LINK_OPENED = 3
+# 点击刮刮卡上红包数字后
+RP_ITEM_STATUS_CARD_OPENED = 4
+# 发送红包前，校验 current_user.qxuser 不通过，红包停发
+RP_ITEM_STATUS_CURRENT_USER_CHECK_FAILURE = 5
+# 发送红包前，校验刮刮卡中的 hb_item 不通过，红包停发
+RP_ITEM_STATUS_CARD_CHECK_FAILURE = 6
+# 跳过模版消息直接发送红包失败
+RP_ITEM_STATUS_NO_WX_MSG_MONEY_SEND_FAILURE = 7
+# 发送消息模板后成功发送了红包
+RP_ITEM_STATUS_WX_MSG_MONEY_SENT_SUCCESS = 100
+# 跳过发送消息模板后成功发送了红包
+RP_ITEM_STATUS_NO_WX_MSG_MONEY_SENT_SUCCESS = 101
+# 发送了 0 元红包的消息模板
+RP_ITEM_STATUS_ZERO_AMOUNT_WX_MSG_SENT = -1
 
 # 红包发送对象
 RED_PACKET_CONFIG_TARGET_EMPLOYEE = 0
@@ -185,11 +211,11 @@ HB_STATUS_CLICK = 1
 HB_STATUS_APPLY = 2
 HB_STATUS_BOTH = 3
 
-#红包活动状态
+# 红包活动状态
 HB_CONFIG_FINISHED = 5
 HB_CONFIG_RUNNING = 3
 
-#红包活动调用方式
+# 红包活动调用方式
 HB_TRIGGER_WAY_CLICK = 1
 HB_TRIGGER_WAY_APPLY = 2
 
@@ -221,3 +247,4 @@ SEND_RP_REQUEST_FORMAT = """
 <nonce_str><![CDATA[{nonce_str}]]></nonce_str>
 </xml>
 """
+# ============= 红包相关常量结束 =============
