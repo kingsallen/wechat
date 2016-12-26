@@ -175,7 +175,7 @@ RP_LOCK_FMT = "rplock:%s:%s:%s"
 RP_ITEM_STATUS_DEFAULT = 0
 # 发送了消息模成功
 RP_ITEM_STATUS_SENT_WX_MSG_SUCCESS = 1
-# 发送消息模板失败，红包停发
+# 发送消息模板失败, 尝试直接发送有金额的红包
 RP_ITEM_STATUS_SENT_WX_MSG_FAILURE = 2
 # 打开刮刮卡，点击红包数字前
 RP_ITEM_STATUS_CARD_LINK_OPENED = 3

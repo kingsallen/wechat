@@ -562,6 +562,12 @@ class RedpacketPageService(PageService):
 
         # 因为有金额, 如果没有发送成功，就直接发送红包
         else:
+            # 将这张刮刮卡所对应的 hb_item 的状态设置成
+            # 发送消息模板失败, 尝试直接发送有金额的红包
+            yield self.__update_hb_item_status_with_id(
+                rp_item.id,
+                to=const.RP_ITEM_STATUS_SENT_WX_MSG_FAILURE)
+
             self.logger.debug("[RP]使用聚合号发送模版消息失败, 直接发红包")
             rp_sent_ret = yield self.__send_red_packet(
                 red_packet_config, recom_wechat.id,
