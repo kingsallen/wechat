@@ -12,6 +12,7 @@ from tornado import gen
 from util.common import ObjectDict
 from util.common.decorator import check_sub_company
 from handler.base import BaseHandler
+from tests.dev_data.user_company_config import COMPANY_CONFIG
 
 
 class CompanyVisitReqHandler(BaseHandler):
@@ -55,16 +56,24 @@ class CompanyHandler(BaseHandler):
         data = yield self.user_company_ps.get_company_data(
             self.params, company, self.current_user)
 
+        self.params.share = self._share(company)
+
+        self.render_page(template_name='company/profile.html', data=data)
+        return
+
+    def _share(self, company):
+        config = COMPANY_CONFIG.get(company.id)
         company_name = company.abbreviation or company.name
-        self.params.share = ObjectDict({
+        default = ObjectDict({
             'cover':       self.static_url(company.get('logo', '')),
             'title':       u'关于{}, 你想知道的都在这里'.format(company_name),
             'description': u'这可能是你人生的下一站! 看清企业全局, 然后定位自己',
             'link':        self.fullurl
         })
+        if config.get('transfer', False) and config.transfer.get('cm', False):
+            default.description = config.transfer.get('cm')
 
-        self.render_page(template_name='company/profile.html', data=data)
-        return
+        return default
 
 
 class CompanySurveyHandler(BaseHandler):

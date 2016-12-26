@@ -13,6 +13,8 @@ from util.common import ObjectDict
 from util.common.decorator import check_sub_company
 from util.tool.url_tool import url_append_query
 from util.common.decorator import handle_response
+from tests.dev_data.user_company_config import COMPANY_CONFIG
+
 
 class TeamIndexHandler(BaseHandler):
 
@@ -31,16 +33,24 @@ class TeamIndexHandler(BaseHandler):
         data = yield self.team_ps.get_team_index(
             current_company, self.params, sub_company_flag)
 
-        company_name = current_company.abbreviation or current_company.name
-        self.params.share = ObjectDict({
-            "cover": self.static_url(current_company.logo),
+        self.params.share = self._share(current_company)
+
+        self.render_page(template_name, data)
+        return
+
+    def _share(self, company):
+        config = COMPANY_CONFIG.get(company.id)
+        company_name = company.abbreviation or company.name
+        default = ObjectDict({
+            "cover": self.static_url(company.logo),
             "title": company_name + "的核心团队点此查看",
             "description": u"这可能是你人生的下一站! 不先了解一下未来同事吗?",
             "link": self.fullurl
         })
+        if config.get('transfer', False) and config.transfer.get('tl', False):
+            default.description = config.transfer.get('tl')
 
-        self.render_page(template_name, data)
-        return
+        return default
 
 
 class TeamDetailHandler(BaseHandler):
@@ -60,26 +70,24 @@ class TeamDetailHandler(BaseHandler):
         data = yield self.team_ps.get_team_detail(
             self.current_user, current_company, team, self.params)
 
-        company_name = current_company.abbreviation or current_company.name
-
         share_cover_url = data.templates[0].data[0].get('media_url') or \
             self.static_url(self.current_user.company.logo)
-        self.params.share = ObjectDict({
-            "cover": url_append_query(share_cover_url, "imageMogr2/thumbnail/!300x300r"),
-            "title": team.name.upper() + "-" + company_name,
-            "description": u'通常你在点击“加入我们”之类的按钮之前并不了解我们, 现在给你个机会!',
-            "link": self.fullurl
-        })
+        self.params.share = self._share(current_company,
+                                        team.name, share_cover_url)
 
         self.render_page(template_name='company/team.html', data=data)
         return
 
-    # @staticmethod
-    # def _get_share_image(page_data):
-    #     templates = page_data.templates
-    #     template_media = data.templates.data.get('media_url')
-    #     if not template_media:
-    #         return None
-    #     data = template_media.data[0] if len(template_media.data) else None
-    #     media_url = data.get('media_url', None) if data else None
-    #     return media_url
+    def _share(self, company, team_name, share_cover_url):
+        config = COMPANY_CONFIG.get(company.id)
+        company_name = company.abbreviation or company.name
+        default = ObjectDict({
+            "cover": url_append_query(share_cover_url, "imageMogr2/thumbnail/!300x300r"),
+            "title": team_name.upper() + "-" + company_name,
+            "description": u'通常你在点击“加入我们”之类的按钮之前并不了解我们, 现在给你个机会!',
+            "link": self.fullurl
+        })
+        if config.get('transfer', False) and config.transfer.get('td', False):
+            default.description = config.transfer.get('td')
+
+        return default
