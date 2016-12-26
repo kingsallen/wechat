@@ -197,7 +197,7 @@ class RedpacketPageService(PageService):
                 # 为红包处理加 redis 锁
                 # 检查红包锁
                 rplock_key = const.RP_LOCK_FMT % (rp_config.id, recom.id, trigger_wxuser_id)
-                if redislocker.incr(rplock_key) == 1:
+                if int(redislocker.incr(rplock_key)) == 1:
                     self.logger.debug("[RP]红包锁创建成功， rplock_key: %s" % rplock_key)
                     ret = yield self.handle_red_packet_card_sending(
                         current_user, rp_config, recom,
