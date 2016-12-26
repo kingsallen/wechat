@@ -293,7 +293,7 @@ def make_company_members(media_list):
 
 
 def make_company_events(media_list):
-    return template4(sub_type=0, title='公司大事件',
+    return template4(sub_type=0, title=media_list[0].title,
                      data=template4_data(media_list, 0))
 
 
