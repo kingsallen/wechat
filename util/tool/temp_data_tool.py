@@ -89,7 +89,7 @@ def template2(title, data):
 
 def template2_data(resource_list):
     return [{
-        'title': resource.title,
+        'sub_title': resource.sub_title,
         'description': resource.longtext,
         'media_url': make_static_url(resource.media_url),
         'media_type': MEDIA_TYPE[resource.media_type]
@@ -123,7 +123,7 @@ def template4_data(resource_list, sub_type):
         data = template2_data(resource_list)
     elif sub_type == 1:
         data = [{
-            'title': resource.title,
+            'sub_title': resource.sub_title,
             'media_url': make_static_url(resource.media_url),
             'link': resource.link
         } for resource in resource_list]
@@ -217,7 +217,7 @@ def make_interview(media, res):
 
 def make_other_team_data(team, res, handler_params):
     return {
-        'title': team.name,
+        'sub_title': team.name,
         'link': make_url('/m/company/team/{}'.format(team.id), handler_params),
         'description': team.summary,
         'media_url': make_static_url(res.res_url),
