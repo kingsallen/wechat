@@ -240,7 +240,7 @@ def make_team_detail_template(team, members, detail_media_list, positions,
                     'longtext': team.description,
                     'media_url': make_static_url(res_dic.get(team.res_id).res_url),
                     'media_type': MEDIA_TYPE[res_dic.get(team.res_id).res_type],
-                    'member_list': [make_introduction(m, res_dic.get(m.red_id))
+                    'member_list': [make_introduction(m, res_dic.get(m.res_id))
                                     for m in members],
                 }]
             )
@@ -251,7 +251,7 @@ def make_team_detail_template(team, members, detail_media_list, positions,
                 template1(
                     sub_type='less',
                     title=detail_media_list[0].title,
-                    data=[make_interview(m, res_dic.get(m.red_id))
+                    data=[make_interview(m, res_dic.get(m.res_id))
                           for m in detail_media_list]
                 )
             )
@@ -268,7 +268,7 @@ def make_team_detail_template(team, members, detail_media_list, positions,
             data=[
                 make_other_team_data(
                     team=t,
-                    media=res_dic.get(t.res_id),
+                    res=res_dic.get(t.res_id),
                     handler_params=handler_params
                 ) for t in other_teams
             ])
@@ -332,8 +332,8 @@ def make_mate(media_list, res_dict):
         data=[{
             'sub_title': m.sub_title,
             'longtext': '{}\n'.format(m.longtext),
-            'media_url': make_static_url(res_dict.get(m.red_id).res_url),
-            'media_type': MEDIA_TYPE[res_dict.get(m.red_id).res_type]
+            'media_url': make_static_url(res_dict.get(m.res_id).res_url),
+            'media_type': MEDIA_TYPE[res_dict.get(m.res_id).res_type]
         } for m in media_list]
     )
 

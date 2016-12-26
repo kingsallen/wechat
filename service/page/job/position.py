@@ -228,7 +228,7 @@ class PositionPageService(PageService):
         if isinstance(job_media, list) and job_media:
             media_list = yield self.hr_media_ds.get_media_by_ids(job_media, True)
             res_dict = yield self.hr_resource_ds.get_resource_by_ids(
-                [m.id for m in media_list])
+                [m.res_id for m in media_list])
             res = make_mate(media_list, res_dict)
         else:
             res = None

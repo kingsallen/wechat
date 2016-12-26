@@ -63,12 +63,12 @@ class TeamPageService(PageService):
         data.templates = [
             temp_data_tool.make_team_index_template(
                 team=t,
-                team_medium=team_resource_dict.get(t.res_id),
+                team_resource=team_resource_dict.get(t.res_id),
                 more_link=make_url(path.TEAM_PATH.format(t.id), handler_param),
                 member_list=[
                     temp_data_tool.make_team_member(
                         member=m,
-                        headimg=member_head_img_dict.get(m.res_id)
+                        head_img=member_head_img_dict.get(m.res_id)
                     ) for m in all_members_dict.get(t.id)
                 ]
             ) for t in teams
