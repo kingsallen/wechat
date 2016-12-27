@@ -169,6 +169,7 @@ RP_POSITION_STATUS_BOTH = 3
 # ============= 红包相关常量 =============
 # 红包锁字符串模版
 RP_LOCK_FMT = "rplock:%s:%s:%s"
+RP_LOCKED = 1
 
 # RP_ITEM 状态常量
 # 默认初始状态

@@ -80,7 +80,7 @@ class BaseRedis(object):
 
     def incr(self, key):
         key = self.key_name(key)
-        self._redis.incr(key)
+        return self._redis.incr(key)
 
     def exists(self, key):
         key = self.key_name(key)
