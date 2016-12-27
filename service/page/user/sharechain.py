@@ -1,5 +1,7 @@
 # coding=utf-8
 
+from datetime import datetime
+
 import tornado.gen as gen
 
 import conf.common as const
@@ -74,6 +76,10 @@ class SharechainPageService(PageService):
 
     @gen.coroutine
     def _copy_to_candidate_recom_record(self, rec):
+        # 如果 recom_record 被 cache， 会返回字符串
+        # if isinstance(rec.click_time, str):
+        #     rec.click_time = datetime.strptime(rec.click_time, const.TIME_FORMAT)
+
         yield self.candidate_recom_record_ds.insert_candidate_recom_record({
             "position_id":  rec.position_id,
             "presentee_id": rec.presentee_id,

@@ -14,6 +14,7 @@ import requests
 import tornado.gen as gen
 
 import conf.common as const
+from conf.common import RP_LOCKED as FIRST_LOCK
 import conf.message as msg
 import conf.path as path
 import conf.wechat as wx
@@ -147,7 +148,7 @@ class RedpacketPageService(PageService):
         return ret
 
     @gen.coroutine
-    def handle_red_packet_position_related(self, current_user, position,
+    def handle_red_packet_position_related(self, current_user, position, redislocker,
                                            is_click=False, is_apply=False):
         """转发类红包触发总入口
         """
@@ -192,19 +193,31 @@ class RedpacketPageService(PageService):
 
                 recom = current_user.recom
                 recom_wechat = current_user.wechat
+                trigger_wxuser_id = current_user.wxuser.id
 
-                ret = yield self.handle_red_packet_card_sending(
-                    current_user, rp_config, recom,
-                    recom_wechat, position)
-
-                if send_to_employee:
-                    # 同时发红包给最近员工
-                    employee_wxuser = yield self.user_wx_user_ds.get_wxuser({
-                        "id": last_employee_recom_id})
-
+                # 为红包处理加 redis 锁
+                # 检查红包锁
+                rplock_key = const.RP_LOCK_FMT % (rp_config.id, recom.id, trigger_wxuser_id)
+                if redislocker.incr(rplock_key) is FIRST_LOCK:
+                    self.logger.debug("[RP]红包锁创建成功， rplock_key: %s" % rplock_key)
                     ret = yield self.handle_red_packet_card_sending(
-                        current_user, rp_config, employee_wxuser,
-                        recom_wechat, position, send_to_employee=True)
+                        current_user, rp_config, recom,
+                        recom_wechat, position)
+
+                    if send_to_employee:
+                        # 同时发红包给最近员工
+                        employee_wxuser = yield self.user_wx_user_ds.get_wxuser({
+                            "id": last_employee_recom_id})
+
+                        ret = yield self.handle_red_packet_card_sending(
+                            current_user, rp_config, employee_wxuser,
+                            recom_wechat, position, send_to_employee=True)
+
+                    # 释放红包锁
+                    redislocker.delete(rplock_key)
+                    self.logger.debug(u"[RP]红包锁释放成功， rplock_key: %s" % rplock_key)
+                else:
+                    self.logger.debug(u"[RP]触发红包锁，该红包逻辑正在处理中， rplock_key: %s" % rplock_key)
 
                 if is_click:
                     self.logger.debug("[RP]转发点击红包结束")
@@ -539,17 +552,47 @@ class RedpacketPageService(PageService):
             settings['qx_host'], red_packet_config, card,
             recom_openid, recom_wechat, **kwargs)
 
+        if result == const.YES:
+            # 如果模版消息发送成功
+            # 将这张刮刮卡所对应的 hb_item 的状态设置成
+            # 发送了消息模成功
+            yield self.__update_hb_item_status_with_id(
+                rp_item.id,
+                to=const.RP_ITEM_STATUS_SENT_WX_MSG_SUCCESS,
+                refresh_open_time=True)
+
         # 因为有金额, 如果没有发送成功，就直接发送红包
-        if result == const.NO:
+        else:
+            # 将这张刮刮卡所对应的 hb_item 的状态设置成
+            # 发送消息模板失败, 尝试直接发送有金额的红包
+            yield self.__update_hb_item_status_with_id(
+                rp_item.id,
+                to=const.RP_ITEM_STATUS_SENT_WX_MSG_FAILURE)
+
             self.logger.debug("[RP]使用聚合号发送模版消息失败, 直接发红包")
             rp_sent_ret = yield self.__send_red_packet(
                 red_packet_config, recom_wechat.id,
-                qx_openid, card.amount)
+                qx_openid, card.amount, rp_item.id)
 
             if rp_sent_ret:
                 self.logger.debug("[RP]直接发送红包成功!")
+
+                # 将这张刮刮卡所对应的 hb_item 的状态设置成
+                # 跳过发送消息模板后成功发送了红包
+                # 同时刷新 open_time
+                yield self.__update_hb_item_status_with_id(
+                    rp_item.id,
+                    to=const.RP_ITEM_STATUS_NO_WX_MSG_MONEY_SENT_SUCCESS,
+                    refresh_open_time=True)
+
             else:
                 self.logger.debug("[RP]直接发送红包失败!")
+
+                # 将这张刮刮卡所对应的 hb_item 的状态设置成
+                # 跳过模版消息直接发送红包失败
+                yield self.__update_hb_item_status_with_id(
+                    rp_item.id,
+                    to=const.RP_ITEM_STATUS_NO_WX_MSG_MONEY_SEND_FAILURE)
 
         # 不管用户是否点击拆开了红包
         # 记录当前用户 wxuser_id 和红包获得者 wxuser_id
@@ -559,9 +602,16 @@ class RedpacketPageService(PageService):
         raise gen.Return(result)
 
     @gen.coroutine
+    def __update_hb_item_status_with_id(self, hb_item_id, to, refresh_open_time=False):
+        conds = {"id": hb_item_id}
+        fields = {"status": to}
+        if refresh_open_time:
+            fields.update(open_time=datetime.now())
+        yield self.hr_hb_items_ds.update_hb_items(conds=conds, fields=fields)
+
+    @gen.coroutine
     def __send_zero_amount_card(
-        self, recom_openid, recom_wechat_id, red_packet_config,
-        current_wxuser_id, **kwargs):
+        self, recom_openid, recom_wechat_id, red_packet_config, current_wxuser_id, **kwargs):
         """发送红包模版消息(始终是0元)
         """
         qx_wechat = yield self.hr_wx_wechat_ds.get_wechat({
@@ -678,7 +728,6 @@ class RedpacketPageService(PageService):
             "openid": qx_openid,
             "wechat_id": settings['qx_wechat_id']
         })
-        open_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         current_wxuser_id = current_wxuser_id or 0
         yield self.hr_hb_items_ds.update_hb_items(
             conds={
@@ -767,13 +816,13 @@ class RedpacketPageService(PageService):
             "binding_id": 0,
             "index": -1,
             "amount": 0.0,
-            "status": 1,
+            "status": const.RP_ITEM_STATUS_ZERO_AMOUNT_WX_MSG_SENT,
             "wxuser_id": wxuser.id,
             "trigger_wxuser_id": current_wxuser_id
         })
 
     @gen.coroutine
-    def __send_red_packet(self, rp_config, wechat_id, openid, amount):
+    def __send_red_packet(self, rp_config, wechat_id, openid, amount, hb_item_id):
         """
         直接发送红包到用户
         """
@@ -837,7 +886,7 @@ class RedpacketPageService(PageService):
             self.logger.debug("[RP]发送红包结果 res: {}".format(res))
 
             # 记录红包发送结果
-            yield self.__insert_red_packet_sent_record(self.__xml_to_dict(res))
+            yield self.__insert_red_packet_sent_record(self.__xml_to_dict(res), hb_item_id)
 
             return "FAIL" not in res
 
@@ -943,7 +992,7 @@ class RedpacketPageService(PageService):
         return ret
 
     @gen.coroutine
-    def __insert_red_packet_sent_record(self, args_dict):
+    def __insert_red_packet_sent_record(self, args_dict, hb_item_id):
         """插入红包发送记录"""
         yield self.hr_hb_send_record_ds.insert_record({
             "return_code":  args_dict.get('return_code', ''),
@@ -958,7 +1007,8 @@ class RedpacketPageService(PageService):
             "re_openid":    args_dict.get('re_openid', ''),
             "total_amount": args_dict.get('total_amount', ''),
             "send_time":    args_dict.get('send_time', ''),
-            "send_listid":  args_dict.get('send_listid', '')
+            "send_listid":  args_dict.get('send_listid', ''),
+            "hb_item_id":   hb_item_id
         })
 
     @gen.coroutine
