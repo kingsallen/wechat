@@ -338,7 +338,7 @@ def make_mate(media_list, res_dict):
     )
 
 
-def make_team(team, team_res):
+def make_team(team, team_res, more_link):
     return template1(
         sub_type='full',
         title='所属团队',
@@ -348,5 +348,6 @@ def make_team(team, team_res):
             'media_url': make_static_url(team_res.res_url),
             'media_type': MEDIA_TYPE[team_res.res_type],
             'member_list': None,
-        }]
+        }],
+        more_link=more_link
     )
