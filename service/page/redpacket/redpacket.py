@@ -809,7 +809,7 @@ class RedpacketPageService(PageService):
 
         wxuser = yield self.user_wx_user_ds.get_wxuser({
             "openid": qx_openid,
-            "wechat_id": settings['wx_wechat_id']
+            "wechat_id": settings['qx_wechat_id']
         })
         yield self.hr_hb_items_ds.create_hb_items(fields={
             "hb_config_id": hb_config_id,
