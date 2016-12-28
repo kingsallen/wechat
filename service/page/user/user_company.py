@@ -61,6 +61,7 @@ class UserCompanyPageService(PageService):
                     conds={'company_id': company.id, 'is_show': 1})
 
             if teams:
+                teams = teams[0:6]  # 企业主业团队数不超过6个
                 teams.sort(key=lambda t: t.show_order)
                 team_resource_list = yield self._get_team_resource(teams)
                 team_template = temp_data_tool.make_company_team(
