@@ -11,11 +11,9 @@ TEST_LOGS = "/tmp/test_logs/"
 class TestLogger(unittest.TestCase):
 
     def tearDown(self):
-        super().tearDown()
         shutil.rmtree(TEST_LOGS)
 
     def setUp(self):
-        super().setUp()
         if not os.path.exists(TEST_LOGS):
             os.makedirs(TEST_LOGS)
 
