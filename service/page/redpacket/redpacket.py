@@ -335,7 +335,7 @@ class RedpacketPageService(PageService):
         is_employee = yield self.__is_wxuser_employee_of_wechat(recom_wxuser_id,
                                              recom_wechat)
         if is_employee:
-            self.logger.debug("[RP]当前红包发送对象是员工,跳过非员工检查红包检查")
+            self.logger.debug("[RP]当前红包发送对象是员工,跳过非员工红包检查")
             raise gen.Return(True)
         else:
             self.logger.debug("[RP]当前红包发送对象是非员工")
@@ -391,14 +391,14 @@ class RedpacketPageService(PageService):
 
         elif rp_config.target == const.RED_PACKET_CONFIG_TARGET_EMPLOYEE_1DEGREE:
             if is_employee:
-                gen.Return(True)
+                raise gen.Return(True)
             else:
                 sharechain_ps = SharechainPageService(self.logger)
                 is_1degree = yield sharechain_ps.is_1degree_of_employee(
                     position.id, wxuser.id)
                 sharechain_ps = None
 
-                gen.Return(is_1degree)
+                raise gen.Return(is_1degree)
         else:
             raise ValueError(msg.RED_PACKET_CONFIG_TARGET_VALUE_ERROR)
 
