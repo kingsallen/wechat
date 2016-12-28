@@ -12,6 +12,7 @@ from tornado import gen
 from service.page.base import PageService
 from util.tool import temp_data_tool
 from util.tool.url_tool import make_url
+from tests.dev_data.user_company_config import COMPANY_CONFIG
 from conf import path
 
 
@@ -130,6 +131,10 @@ class TeamPageService(PageService):
         data.header = temp_data_tool.make_header(company, True, team)
         data.relation = ObjectDict({
             'want_visit': self.constant.YES if visit else self.constant.NO})
+        if COMPANY_CONFIG.get(company.id).get('custom_visit_recipe', False):
+            data.relation.custom_visit_recipe = COMPANY_CONFIG.get(
+                company.id).custom_visit_recipe
+
         data.templates = temp_data_tool.make_team_detail_template(
             team, team_members, detail_media_list,  team_positions[0:3],
             other_teams, res_dict, handler_param, bool(visit))
