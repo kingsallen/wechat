@@ -59,10 +59,14 @@ class UserCompanyPageService(PageService):
             else:
                 teams = yield self.hr_team_ds.get_team_list(
                     conds={'company_id': company.id, 'is_show': 1})
-            team_resource_list = yield self._get_team_resource(teams)
-            team_template = temp_data_tool.make_company_team(
-                team_resource_list, team_index_url)
-            data.templates.insert(team_order, team_template)
+
+            if teams:
+                teams.sort(key=lambda t: t.show_order)
+                teams = teams[0:6]  # 企业主业团队数不超过6个
+                team_resource_list = yield self._get_team_resource(teams)
+                team_template = temp_data_tool.make_company_team(
+                    team_resource_list, team_index_url)
+                data.templates.insert(team_order, team_template)
 
         data.template_total = len(data.templates)
 
@@ -78,15 +82,22 @@ class UserCompanyPageService(PageService):
         """
         company_config = COMPANY_CONFIG.get(company_id)
         values = sum(company_config.config.values(), [])
-        media = yield self.hr_media_ds.get_media_by_ids(values)
+        media_dict = yield self.hr_media_ds.get_media_by_ids(values)
+        resources_dict = yield self.hr_resource_ds.get_resource_by_ids(
+            [m.res_id for m in media_dict.values()])
+
+        for m in media_dict.values():
+            res = resources_dict.get(m.res_id, False)
+            m.media_url = res.res_url if res else ''
+            m.media_type = res.res_type if res else 0
 
         if company_config.config.get('team'):
             for team_media_id in company_config.config.get('team'):
-                media.get(team_media_id).link = team_index_url
+                media_dict.get(team_media_id).link = team_index_url
 
         templates = [
             getattr(temp_data_tool, 'make_company_{}'.format(key))(
-                [media.get(id) for id in company_config.config.get(key)]
+                [media_dict.get(mid) for mid in company_config.config.get(key)]
             ) for key in company_config.order
             if isinstance(company_config.config.get(key), list)
         ]
@@ -124,17 +135,16 @@ class UserCompanyPageService(PageService):
 
     @gen.coroutine
     def _get_team_resource(self, team_list):
-        media_dict = yield self.hr_media_ds.get_media_by_ids(
-            [t.media_id for t in team_list])
+        resource_dict = yield self.hr_resource_ds.get_resource_by_ids(
+            [t.res_id for t in team_list])
 
         raise gen.Return([ObjectDict({
-            # 'show_order': team.show_order, 如果需要对team排序
             'id': team.id,
             'title': '我们的团队',
             'subtitle': team.name,
             'longtext': team.summary,
-            'media_url': media_dict.get(team.media_id).media_url,
-            'media_type': media_dict.get(team.media_id).media_type,
+            'media_url': resource_dict.get(team.res_id).res_url or '',
+            'media_type': resource_dict.get(team.res_id).res_type or 0,
         }) for team in team_list])
 
     @gen.coroutine

@@ -20,8 +20,7 @@ class HrTeamMemberDao(BaseDao):
             "name": self.constant.TYPE_STRING,  # 成员名称
             "title": self.constant.TYPE_STRING,  # 成员职称
             "description": self.constant.TYPE_STRING,  # 成员描述
-            "headimg_id": self.constant.TYPE_INT,  # 成员头像hr_media.id
-            "media_id": self.constant.TYPE_INT,  # 成员视频hr_media.id
+            "res_id": self.constant.TYPE_INT,  # 成员头像hr_resource.id
             "team_id": self.constant.TYPE_INT,  # 成员所属团队
             "user_id": self.constant.TYPE_INT,  # 成员对应用户
             "create_time": self.constant.TYPE_TIMESTAMP,  # 创建时间

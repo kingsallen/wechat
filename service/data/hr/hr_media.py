@@ -62,6 +62,6 @@ class HrMediaDataService(DataService):
 
         media_dict = {m.id: m for m in media_list}
         if list_flag:
-            raise gen.Return([media_dict.get(id) for id
-                              in id_list if media_dict.get(id)])
+            raise gen.Return([media_dict.get(mid) for mid
+                              in id_list if media_dict.get(mid)])
         raise gen.Return(media_dict)
