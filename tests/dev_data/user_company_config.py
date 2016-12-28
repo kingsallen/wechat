@@ -66,20 +66,6 @@ SUB_COMPANY_MARS_40120 = ObjectDict({
     }
 })
 
-SUB_COMPANY_MARS_40627 = ObjectDict({
-    'order': ['working_env', 'figure', 'team', 'members',
-              'events', 'map', 'survey', 'qr_code'],
-    'config': {
-        'working_env': [29, 28],  # 工作环境对应的 hr_media id list
-        'figure': [31],  # 人物寄语
-        'members': [42],  # 公司成员
-        'events': [35, 36],  # 公司大事件
-        'map': [38],  # 公司地址
-        'survey': [],  # 问卷调查
-        'qr_code': []  # 二维码
-    },
-})
-
 
 # Product environment company config
 
@@ -133,7 +119,7 @@ COMPANY_OSRAM = ObjectDict({
     },
 })
 
-COMPANY_NETEASE = ObjectDict({
+COMPANY_NET_EASE = ObjectDict({
     'order': ['working_env', 'members', 'team',
               'events', 'address', 'survey', 'qr_code'],
     'config': {
@@ -150,13 +136,11 @@ COMPANY_NETEASE = ObjectDict({
 
 COMPANY_CONFIG = ObjectDict({
     # 测试调试配置
-    # 4: COMPANY_MARS,
     # 72: COMPANY_72,
-    4: COMPANY_OSRAM,
+    4: COMPANY_NET_EASE,
     39979: COMPANY_72,
-    39978: COMPANY_MARS_39978,
-    40120: SUB_COMPANY_MARS_40120,
-    40627: SUB_COMPANY_MARS_40627,
+    # 39978: COMPANY_MOSEEKER,
+    # 40120: SUB_COMPANY_MARS_40120,
 
     # 线上配置
     650: COMPANY_MOSEEKER,
