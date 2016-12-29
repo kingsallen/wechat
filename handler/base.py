@@ -185,6 +185,7 @@ class BaseHandler(MetaBaseHandler):
                 if state == wx_const.WX_OAUTH_DEFAULT_STATE:
                     self.logger.debug("来自 qx 的授权, 获得 userinfo")
                     userinfo = yield self._get_user_info(code)
+                    self.logger.debug("来自 qx 的授权, 获得 userinfo: {}".format(userinfo))
                     yield self._handle_user_info(userinfo)
                     if self.request.connection.stream.closed():
                         return
@@ -194,6 +195,7 @@ class BaseHandler(MetaBaseHandler):
                     self.logger.debug("来自企业号的静默授权")
                     self._unionid = from_hex(state)
                     openid = yield self._get_user_openid(code)
+                    self.logger.debug("来自企业号的静默授权, openid:{}".format(openid))
                     self._wxuser = yield self._handle_ent_openid(
                         openid, self._unionid)
 
