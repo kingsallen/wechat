@@ -200,22 +200,28 @@ class RedpacketPageService(PageService):
                 rplock_key = const.RP_LOCK_FMT % (rp_config.id, recom.id, trigger_wxuser_id)
                 if redislocker.incr(rplock_key) is FIRST_LOCK:
                     self.logger.debug("[RP]红包锁创建成功， rplock_key: %s" % rplock_key)
-                    ret = yield self.handle_red_packet_card_sending(
-                        current_user, rp_config, recom,
-                        recom_wechat, position)
-
-                    if send_to_employee:
-                        # 同时发红包给最近员工
-                        employee_wxuser = yield self.user_wx_user_ds.get_wxuser({
-                            "id": last_employee_recom_id})
-
+                    try:
                         ret = yield self.handle_red_packet_card_sending(
-                            current_user, rp_config, employee_wxuser,
-                            recom_wechat, position, send_to_employee=True)
+                            current_user, rp_config, recom,
+                            recom_wechat, position)
+                        self.logger.debug(ret)
 
-                    # 释放红包锁
-                    redislocker.delete(rplock_key)
-                    self.logger.debug(u"[RP]红包锁释放成功， rplock_key: %s" % rplock_key)
+                        if send_to_employee:
+                            # 同时发红包给最近员工
+                            employee_wxuser = yield self.user_wx_user_ds.get_wxuser({
+                                "id": last_employee_recom_id})
+
+                            ret = yield self.handle_red_packet_card_sending(
+                                current_user, rp_config, employee_wxuser,
+                                recom_wechat, position, send_to_employee=True)
+                            self.logger.debug(ret)
+
+                    except Exception as e:
+                        self.logger.error(e)
+                    finally:
+                        # 释放红包锁
+                        redislocker.delete(rplock_key)
+                        self.logger.debug(u"[RP]红包锁释放成功， rplock_key: %s" % rplock_key)
                 else:
                     self.logger.debug(u"[RP]触发红包锁，该红包逻辑正在处理中， rplock_key: %s" % rplock_key)
 
@@ -446,8 +452,13 @@ class RedpacketPageService(PageService):
             "wxuser_id": wxuser_id,
         }, fields=["amount"])
         if len(sent_items) == 0:
-            raise gen.Return(0)
-        raise gen.Return(sum([a.amount for a in sent_items]))
+            raise gen.Return(0.0)
+        else:
+            ret = 0.0
+            for item in sent_items:
+                ret += float(item.amount)
+
+            raise gen.Return(ret)
 
     @gen.coroutine
     def __get_next_rp_item(self, hb_config_id, hb_config_type, position_id=None):
