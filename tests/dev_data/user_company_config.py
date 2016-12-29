@@ -121,14 +121,13 @@ COMPANY_OSRAM = ObjectDict({
 
 COMPANY_NET_EASE = ObjectDict({
     'order': ['working_env', 'members', 'team',
-              'events', 'address', 'survey', 'qr_code'],
+              'events', 'survey', 'qr_code'],
     'config': {
         'working_env': [179, 180, 181, 182, 183, 184],  # 工作环境对应的 hr_media id list
         'members': [185],  # 公司成员
-        'events': [124, 125, 126],  # 公司大事件
-        'address': [127, 176, 128, 129, 130, 131],  # 公司地址
+        'events': [192, 193, 194],  # 公司大事件
         'survey': [],  # 问卷调查
-        'qr_code': [132]  # 二维码
+        'qr_code': [195]  # 二维码
     },
 })
 
