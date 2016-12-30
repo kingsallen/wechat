@@ -9,6 +9,7 @@ from util.common import ObjectDict
 
 
 class StatsRecomRecordDataService(DataService):
+
     @gen.coroutine
     def get_stats_recom_record(self, conds, fields=None, options=None, appends=None, index=None):
         fields = fields or []

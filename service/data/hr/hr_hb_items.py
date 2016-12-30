@@ -3,13 +3,11 @@
 
 from tornado import gen
 from service.data.base import DataService
-from util.common.decorator import cache
 from util.common import ObjectDict
 
 
 class HrHbItemsDataService(DataService):
 
-    @cache(ttl=60)
     @gen.coroutine
     def get_hb_items(self, conds, fields=None,options=None, appends=None,
                      index=None):
@@ -27,10 +25,8 @@ class HrHbItemsDataService(DataService):
 
         raise gen.Return(response)
 
-    @cache(ttl=60)
     @gen.coroutine
-    def get_hb_items_list(self, conds, fields, options=None,
-                              appends=None, index='', params=None):
+    def get_hb_items_list(self, conds, fields, options=None, appends=None, index='', params=None):
         fields = fields or []
         options = options or []
         appends = appends or []

@@ -7,7 +7,7 @@ from dao.base import BaseDao
 class HrHbSendRecordDao(BaseDao):
     def __init__(self, logger):
         super(HrHbSendRecordDao, self).__init__(logger)
-        self.table = "hr_hb_config"
+        self.table = "hr_hb_send_record"
         self.fields_map = {
             "id":           self.constant.TYPE_INT,
             "return_code":  self.constant.TYPE_STRING,
@@ -24,4 +24,5 @@ class HrHbSendRecordDao(BaseDao):
             "send_time":    self.constant.TYPE_STRING,
             "send_listid":  self.constant.TYPE_STRING,
             "create_time":  self.constant.TYPE_TIMESTAMP,
+            "hb_item_id":   self.constant.TYPE_INT
         }

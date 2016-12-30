@@ -78,6 +78,10 @@ class BaseRedis(object):
         key = self.key_name(key)
         self._redis.delete(key)
 
+    def incr(self, key):
+        key = self.key_name(key)
+        return self._redis.incr(key)
+
     def exists(self, key):
         key = self.key_name(key)
         return self._redis.exists(key)
