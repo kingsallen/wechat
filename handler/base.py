@@ -211,7 +211,7 @@ class BaseHandler(MetaBaseHandler):
 
         # todo (tangyiliang) 作为 session 中 没有 wxuser 的补救措施
         # 需要排查代码为什么在企业号 session 中会存在 wxuser 为 {} 的情况，同时不排除是微信问题
-        if self._authable() and not self.current_user.wxuser:
+        if self.current_user and self._authable() and not self.current_user.wxuser:
             yield self._hotfix_for_wxuser_is_not_in_current_user()
 
         # 内存优化
