@@ -11,7 +11,6 @@ import time
 import ujson
 from hashlib import sha1
 import urllib.parse
-import traceback
 
 import tornado.escape
 import tornado.httpclient
@@ -206,13 +205,39 @@ class BaseHandler(MetaBaseHandler):
         # 构造并拼装 session
         yield self._fetch_session()
 
+        self.logger.debug("[prepare]current_user: {}".format(self.current_user))
+
+        # todo (tangyiliang) 作为 session 中 没有 wxuser 的补救措施
+        # 需要排查代码为什么在企业号 session 中会存在 wxuser 为 {} 的情况，同时不排除是微信问题
+        if self._authable() and not self.current_user.wxuser:
+            yield self._hotfix_for_wxuser_is_not_in_current_user()
+
         # 内存优化
         self._wechat = None
         self._qx_wechat = None
         self._unionid = None
         self._wxuser = None
 
-        self.logger.debug("[prepare]current_user: {}".format(self.current_user))
+    # todo (tangyiliang) 作为 session 中 没有 wxuser 的补救措施
+    # 需要排查代码为什么在企业号 session 中会存在 wxuser 为 {} 的情况，同时不排除是微信问题
+    @gen.coroutine
+    def _hotfix_for_wxuser_is_not_in_current_user(self):
+        # 先清除 cookie
+        self.clear_cookie(const.COOKIE_SESSIONID)
+
+        # 从数据库查询企业号的 wxuser，如果存在，加入 current_user
+        wxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
+            unionid=self._unionid,
+            wechat_id=self._wechat.id
+        )
+
+        if wxuser:
+            self.current_user.wxuser = wxuser
+
+        else:
+            # 如果没有企业号的 wxuser，说明静默授权企业号没有成功，跳出一个错误页面，请重试
+            self.write_error(403)
+            self.finish()
 
     # PROTECTED
     @gen.coroutine
