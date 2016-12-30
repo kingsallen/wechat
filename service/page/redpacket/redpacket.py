@@ -464,13 +464,13 @@ class RedpacketPageService(PageService):
             next_item = yield self.hr_hb_items_ds.get_hb_items({
                 "binding_id": binding.id,
                 "wxuser_id": 0
-            }, appends=["order by `index`", "limit 1"])
+            }, appends=["order by rand()", "limit 1"])
 
         else:
             next_item = yield self.hr_hb_items_ds.get_hb_items({
                 "hb_config_id": hb_config_id,
                 "wxuser_id":  0
-            }, appends=["order by `index`", "limit 1"])
+            }, appends=["order by rand()", "limit 1"])
 
         raise gen.Return(next_item)
 
