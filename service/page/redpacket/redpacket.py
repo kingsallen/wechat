@@ -439,10 +439,9 @@ class RedpacketPageService(PageService):
         })
         hb_throttle = company_conf.hb_throttle
 
-        self.logger("[RP]current_amount_sum: %s" % current_amount_sum)
-        self.logger("[RP]next_amount: %s" % next_amount)
-        self.logger("[RP]hb_throttle: %s" % hb_throttle)
-
+        self.logger.debug("[RP]current_amount_sum: %s" % current_amount_sum)
+        self.logger.debug("[RP]next_amount: %s" % next_amount)
+        self.logger.debug("[RP]hb_throttle: %s" % hb_throttle)
         ret = float(current_amount_sum) + float(next_amount) <= float(hb_throttle)
 
         raise gen.Return(ret)
