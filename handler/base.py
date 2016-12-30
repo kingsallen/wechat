@@ -218,10 +218,14 @@ class BaseHandler(MetaBaseHandler):
         self._unionid = None
         self._wxuser = None
 
-    # todo (tangyiliang) 作为 session 中 没有 wxuser 的补救措施
-    # 需要排查代码为什么在企业号 session 中会存在 wxuser 为 {} 的情况，同时不排除是微信问题
     @gen.coroutine
     def _hotfix_for_wxuser_is_not_in_current_user(self):
+        """
+        todo (tangyiliang) 作为 session 中 没有 wxuser 的补救措施
+        需要排查代码为什么在企业号 session 中会存在 wxuser 为 {} 的情况，同时不排除是微信问题
+        """
+        self.logger.debug("[prepare]current 中不存在 wxuser, 进入补救措施，清除 cookie")
+
         # 先清除 cookie
         self.clear_cookie(const.COOKIE_SESSIONID)
 
@@ -232,10 +236,12 @@ class BaseHandler(MetaBaseHandler):
         )
 
         if wxuser:
+            self.logger.debug("[prepare] DB 中找到 wxuser")
             self.current_user.wxuser = wxuser
 
         else:
             # 如果没有企业号的 wxuser，说明静默授权企业号没有成功，跳出一个错误页面，请重试
+            self.logger.debug("[prepare] DB 中没有找到 wxuser, http 403")
             self.write_error(403)
             self.finish()
 
