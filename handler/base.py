@@ -231,7 +231,7 @@ class BaseHandler(MetaBaseHandler):
 
         # 从数据库查询企业号的 wxuser，如果存在，加入 current_user
         wxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
-            unionid=self._unionid,
+            unionid=self.current_user.sysuser.unionid,
             wechat_id=self._wechat.id
         )
 
@@ -243,7 +243,6 @@ class BaseHandler(MetaBaseHandler):
             # 如果没有企业号的 wxuser，说明静默授权企业号没有成功，跳出一个错误页面，请重试
             self.logger.debug("[prepare] DB 中没有找到 wxuser, http 403")
             self.write_error(403)
-            self.finish()
 
     # PROTECTED
     @gen.coroutine
