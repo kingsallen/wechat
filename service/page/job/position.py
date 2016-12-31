@@ -227,17 +227,21 @@ class PositionPageService(PageService):
         job_media = json.loads(jd_media)
         if isinstance(job_media, list) and job_media:
             media_list = yield self.hr_media_ds.get_media_by_ids(job_media, True)
-            res = make_mate(media_list)
+            res_dict = yield self.hr_resource_ds.get_resource_by_ids(
+                [m.res_id for m in media_list])
+            res = make_mate(media_list, res_dict)
         else:
             res = None
 
         raise gen.Return(res)
 
     @gen.coroutine
-    def get_team_data(self, team):
-        team_medium = yield self.hr_media_ds.get_medium(
-            conds={'id': team.media_id})
-        res = make_team(team, team_medium)
+    def get_team_data(self, team, more_link):
+        team_res = yield self.hr_resource_ds.get_resource(
+            conds={'id': team.res_id},
+            fields=['id', 'res_url', 'res_type']
+        )
+        res = make_team(team, team_res, more_link)
 
         raise gen.Return(res)
 

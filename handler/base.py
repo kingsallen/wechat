@@ -184,6 +184,7 @@ class BaseHandler(MetaBaseHandler):
                 if state == wx_const.WX_OAUTH_DEFAULT_STATE:
                     self.logger.debug("来自 qx 的授权, 获得 userinfo")
                     userinfo = yield self._get_user_info(code)
+                    self.logger.debug("来自 qx 的授权, 获得 userinfo: {}".format(userinfo))
                     yield self._handle_user_info(userinfo)
                     if self.request.connection.stream.closed():
                         return
@@ -193,6 +194,7 @@ class BaseHandler(MetaBaseHandler):
                     self.logger.debug("来自企业号的静默授权")
                     self._unionid = from_hex(state)
                     openid = yield self._get_user_openid(code)
+                    self.logger.debug("来自企业号的静默授权, openid:{}".format(openid))
                     self._wxuser = yield self._handle_ent_openid(
                         openid, self._unionid)
 
@@ -207,10 +209,10 @@ class BaseHandler(MetaBaseHandler):
 
         self.logger.debug("[prepare]current_user: {}".format(self.current_user))
 
-        # todo (tangyiliang) 作为 session 中 没有 wxuser 的补救措施
-        # 需要排查代码为什么在企业号 session 中会存在 wxuser 为 {} 的情况，同时不排除是微信问题
-        if self.current_user and self._authable() and not self.current_user.wxuser:
-            yield self._hotfix_for_wxuser_is_not_in_current_user()
+        # # todo (tangyiliang) 作为 session 中 没有 wxuser 的补救措施
+        # # 需要排查代码为什么在企业号 session 中会存在 wxuser 为 {} 的情况，同时不排除是微信问题
+        # if self.current_user and self._authable() and not self.current_user.wxuser:
+        #     yield self._hotfix_for_wxuser_is_not_in_current_user()
 
         # 内存优化
         self._wechat = None

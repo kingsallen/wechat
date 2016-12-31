@@ -200,22 +200,28 @@ class RedpacketPageService(PageService):
                 rplock_key = const.RP_LOCK_FMT % (rp_config.id, recom.id, trigger_wxuser_id)
                 if redislocker.incr(rplock_key) is FIRST_LOCK:
                     self.logger.debug("[RP]红包锁创建成功， rplock_key: %s" % rplock_key)
-                    ret = yield self.handle_red_packet_card_sending(
-                        current_user, rp_config, recom,
-                        recom_wechat, position)
-
-                    if send_to_employee:
-                        # 同时发红包给最近员工
-                        employee_wxuser = yield self.user_wx_user_ds.get_wxuser({
-                            "id": last_employee_recom_id})
-
+                    try:
                         ret = yield self.handle_red_packet_card_sending(
-                            current_user, rp_config, employee_wxuser,
-                            recom_wechat, position, send_to_employee=True)
+                            current_user, rp_config, recom,
+                            recom_wechat, position)
+                        self.logger.debug(ret)
 
-                    # 释放红包锁
-                    redislocker.delete(rplock_key)
-                    self.logger.debug(u"[RP]红包锁释放成功， rplock_key: %s" % rplock_key)
+                        if send_to_employee:
+                            # 同时发红包给最近员工
+                            employee_wxuser = yield self.user_wx_user_ds.get_wxuser({
+                                "id": last_employee_recom_id})
+
+                            ret = yield self.handle_red_packet_card_sending(
+                                current_user, rp_config, employee_wxuser,
+                                recom_wechat, position, send_to_employee=True)
+                            self.logger.debug(ret)
+
+                    except Exception as e:
+                        self.logger.error(e)
+                    finally:
+                        # 释放红包锁
+                        redislocker.delete(rplock_key)
+                        self.logger.debug(u"[RP]红包锁释放成功， rplock_key: %s" % rplock_key)
                 else:
                     self.logger.debug(u"[RP]触发红包锁，该红包逻辑正在处理中， rplock_key: %s" % rplock_key)
 
@@ -335,7 +341,7 @@ class RedpacketPageService(PageService):
         is_employee = yield self.__is_wxuser_employee_of_wechat(recom_wxuser_id,
                                              recom_wechat)
         if is_employee:
-            self.logger.debug("[RP]当前红包发送对象是员工,跳过非员工检查红包检查")
+            self.logger.debug("[RP]当前红包发送对象是员工,跳过非员工红包检查")
             raise gen.Return(True)
         else:
             self.logger.debug("[RP]当前红包发送对象是非员工")
@@ -391,14 +397,14 @@ class RedpacketPageService(PageService):
 
         elif rp_config.target == const.RED_PACKET_CONFIG_TARGET_EMPLOYEE_1DEGREE:
             if is_employee:
-                gen.Return(True)
+                raise gen.Return(True)
             else:
                 sharechain_ps = SharechainPageService(self.logger)
                 is_1degree = yield sharechain_ps.is_1degree_of_employee(
                     position.id, wxuser.id)
                 sharechain_ps = None
 
-                gen.Return(is_1degree)
+                raise gen.Return(is_1degree)
         else:
             raise ValueError(msg.RED_PACKET_CONFIG_TARGET_VALUE_ERROR)
 
@@ -433,10 +439,12 @@ class RedpacketPageService(PageService):
         })
         hb_throttle = company_conf.hb_throttle
 
-        self.logger.debug("[RP]check_throttle_passed?:{}".format(
-            float(current_amount_sum) + float(next_amount) <= float(hb_throttle)))
+        self.logger.debug("[RP]current_amount_sum: %s" % current_amount_sum)
+        self.logger.debug("[RP]next_amount: %s" % next_amount)
+        self.logger.debug("[RP]hb_throttle: %s" % hb_throttle)
+        ret = float(current_amount_sum) + float(next_amount) <= float(hb_throttle)
 
-        raise gen.Return(float(current_amount_sum) + float(next_amount) <= float(hb_throttle))
+        raise gen.Return(ret)
 
     @gen.coroutine
     def __get_amount_sum_config_id_and_wxuser_id(self, hb_config_id, wxuser_id):
@@ -446,8 +454,13 @@ class RedpacketPageService(PageService):
             "wxuser_id": wxuser_id,
         }, fields=["amount"])
         if len(sent_items) == 0:
-            raise gen.Return(0)
-        raise gen.Return(sum([a.amount for a in sent_items]))
+            raise gen.Return(0.0)
+        else:
+            ret = 0.0
+            for item in sent_items:
+                ret += float(item.amount)
+
+            raise gen.Return(ret)
 
     @gen.coroutine
     def __get_next_rp_item(self, hb_config_id, hb_config_type, position_id=None):
@@ -809,7 +822,7 @@ class RedpacketPageService(PageService):
 
         wxuser = yield self.user_wx_user_ds.get_wxuser({
             "openid": qx_openid,
-            "wechat_id": settings['wx_wechat_id']
+            "wechat_id": settings['qx_wechat_id']
         })
         yield self.hr_hb_items_ds.create_hb_items(fields={
             "hb_config_id": hb_config_id,
