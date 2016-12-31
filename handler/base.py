@@ -210,9 +210,9 @@ class BaseHandler(MetaBaseHandler):
         self.logger.debug("[prepare]current_user: {}".format(self.current_user))
 
         # # todo (tangyiliang) 作为 session 中 没有 wxuser 的补救措施
-        # # 需要排查代码为什么在企业号 session 中会存在 wxuser 为 {} 的情况，同时不排除是微信问题
-        # if self.current_user and self._authable() and not self.current_user.wxuser:
-        #     yield self._hotfix_for_wxuser_is_not_in_current_user()
+        # 需要排查代码为什么在企业号 session 中会存在 wxuser 为空的情况，同时不排除是微信问题
+        if self.current_user and self._authable() and not self.current_user.wxuser:
+            yield self._fix_for_wxuser_is_not_in_current_user()
 
         # 内存优化
         self._wechat = None
@@ -221,30 +221,37 @@ class BaseHandler(MetaBaseHandler):
         self._wxuser = None
 
     @gen.coroutine
-    def _hotfix_for_wxuser_is_not_in_current_user(self):
-        """
-        todo (tangyiliang) 作为 session 中 没有 wxuser 的补救措施
+    def _fix_for_wxuser_is_not_in_current_user(self):
+        """(tangyiliang) 作为 session 中 没有 wxuser 的补救措施
         需要排查代码为什么在企业号 session 中会存在 wxuser 为 {} 的情况，同时不排除是微信问题
         """
-        self.logger.debug("[prepare]current 中不存在 wxuser, 进入补救措施，清除 cookie")
+        self.logger.debug("[prepare]current 中不存在 wxuser, 进入补救措施")
 
-        # 先清除 cookie
-        self.clear_cookie(const.COOKIE_SESSIONID)
+        # 获取 qxuser.unionid(最稳定的存在)，企业号 wechat_id 再静默授权一次
+        unionid = self.current_user.qxuser.unionid
+        self._oauth_service.wechat = self._wechat
+        self._oauth_service.state = to_hex(unionid)
+        url = self._oauth_service.get_oauth_code_base_url()
+        self.redirect(url)
 
-        # 从数据库查询企业号的 wxuser，如果存在，加入 current_user
-        wxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
-            unionid=self.current_user.sysuser.unionid,
-            wechat_id=self._wechat.id
-        )
-
-        if wxuser:
-            self.logger.debug("[prepare] DB 中找到 wxuser")
-            self.current_user.wxuser = wxuser
-
-        else:
-            # 如果没有企业号的 wxuser，说明静默授权企业号没有成功，跳出一个错误页面，请重试
-            self.logger.debug("[prepare] DB 中没有找到 wxuser, http 403")
-            self.write_error(403)
+        #
+        # # 先清除 cookie
+        # self.clear_cookie(const.COOKIE_SESSIONID)
+        #
+        # # 从数据库查询企业号的 wxuser，如果存在，加入 current_user
+        # wxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
+        #     unionid=self.current_user.sysuser.unionid,
+        #     wechat_id=self._wechat.id
+        # )
+        #
+        # if wxuser:
+        #     self.logger.debug("[prepare] DB 中找到 wxuser")
+        #     self.current_user.wxuser = wxuser
+        #
+        # else:
+        #     # 如果没有企业号的 wxuser，说明静默授权企业号没有成功，跳出一个错误页面，请重试
+        #     self.logger.debug("[prepare] DB 中没有找到 wxuser, http 403")
+        #     self.write_error(403)
 
     # PROTECTED
     @gen.coroutine
