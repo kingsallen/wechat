@@ -3,13 +3,11 @@
 
 from tornado import gen
 from service.data.base import DataService
-from util.common.decorator import cache
 from util.common import ObjectDict
 
 
 class HrHbScratchCardDataService(DataService):
 
-    @cache(ttl=60)
     @gen.coroutine
     def get_scratch_card(self, conds, fields=None):
         fields = fields or []

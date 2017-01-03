@@ -80,11 +80,11 @@ class BaseDao(DB):
 
         conds, params = self.getConds(conds, conds_params)
         if not conds:
-            self.logger.error(
-                "Error:[get_list_by_conds][conds error], conds:{0}".format(
+            self.logger.warn(
+                "Warn:[get_list_by_conds][conds warn], conds:{0}".format(
                     conds))
             raise gen.Return(list())
-        sql = self.select(self.table, conds, fields, options, appends, index)
+        sql = self.select(self.table.lower(), conds, fields, options, appends, index)
         cursor = yield self.query(sql, params)
         response = cursor.fetchall()
         if not isinstance(response, list):
@@ -92,7 +92,7 @@ class BaseDao(DB):
         else:
             response = [self.optResType(item, self.fields_map) for item in response]
 
-        self.logger.debug("[debug][{0}][response: {1}]".format(self.__class__.__module__, response))
+        # self.logger.debug("[debug][get_list_by_conds][{0}][response: {1}]".format(self.__class__.__module__, response))
         raise gen.Return(response)
 
     @gen.coroutine
@@ -114,8 +114,8 @@ class BaseDao(DB):
 
         conds, params = self.getConds(conds)
         if not conds:
-            self.logger.error(
-                "Error:[get_record_by_conds][conds error], conds:{0}".format(
+            self.logger.warn(
+                "Warn:[get_record_by_conds][conds warn], conds:{0}".format(
                     conds))
             raise gen.Return(ObjectDict())
         sql = self.select(self.table, conds, fields, options, appends, index)
@@ -126,7 +126,7 @@ class BaseDao(DB):
         else:
             response = self.optResType(response, self.fields_map)
 
-        self.logger.debug("[debug][{0}][response: {1}]".format(self.__class__.__module__, response))
+        # self.logger.debug("[debug][get_record_by_conds][{0}][response: {1}]".format(self.__class__.__module__, response))
         raise gen.Return(response)
 
     @gen.coroutine
@@ -146,14 +146,14 @@ class BaseDao(DB):
 
         fields = self.checkFieldType(fields, self.fields_map)
         if not fields:
-            self.logger.error(
-                "Error:[insert_record][fields error], fields:{0}".format(
+            self.logger.warn(
+                "Warn:[insert_record][fields warn], fields:{0}".format(
                     fields))
             raise gen.Return(None)
         sql, params = self.insert(self.table, fields, options)
         cursor = yield self.query(sql, params)
         insert_id = cursor.lastrowid
-        self.logger.debug("[debug][{0}][response: {1}]".format(self.__class__.__module__, insert_id))
+        self.logger.debug("[debug][insert_record][{0}][response: {1}]".format(self.__class__.__module__, insert_id))
         raise gen.Return(insert_id)
 
     @gen.coroutine
@@ -171,14 +171,14 @@ class BaseDao(DB):
 
         fields = self.checkFieldType(fields, self.fields_map)
         if not fields:
-            self.logger.error(
-                "Error:[update_by_conds][fields error], fields:{0}".format(
+            self.logger.warn(
+                "Warn:[update_by_conds][fields warn], fields:{0}".format(
                     fields))
             raise gen.Return(False)
         conds, conds_params = self.getConds(conds)
         if not conds:
-            self.logger.error(
-                "Error:[update_by_conds][conds error], conds:{0}".format(
+            self.logger.warn(
+                "Warn:[update_by_conds][conds warn], conds:{0}".format(
                     conds))
             raise gen.Return(False)
         sql, params = self.update(self.table, conds, fields, options, appends)
@@ -188,7 +188,7 @@ class BaseDao(DB):
         cursor = yield self.query(sql, params_update)
         cursor.fetchone()
         rows_count = cursor.rowcount
-        self.logger.debug("[debug][{0}][response: {1}]".format(self.__class__.__module__, rows_count))
+        self.logger.debug("[debug][update_by_conds][{0}][response: {1}]".format(self.__class__.__module__, rows_count))
         if rows_count:
             raise gen.Return(True)
         else:
@@ -204,15 +204,15 @@ class BaseDao(DB):
 
         conds, params = self.getConds(conds)
         if not conds:
-            self.logger.error(
-                "Error:[delete_by_conds][conds error], conds:{0}".format(
+            self.logger.warn(
+                "Warn:[delete_by_conds][conds warn], conds:{0}".format(
                     conds))
             raise gen.Return(False)
         sql = self.delete(self.table, conds)
         cursor = yield self.query(sql, params)
         cursor.fetchone()
         rows_count = cursor.rowcount
-        self.logger.debug("[debug][{0}][response: {1}]".format(self.__class__.__module__, rows_count))
+        self.logger.debug("[debug][delete_by_conds][{0}][response: {1}]".format(self.__class__.__module__, rows_count))
         if rows_count:
             raise gen.Return(True)
         else:
@@ -234,14 +234,14 @@ class BaseDao(DB):
 
         conds, params = self.getConds(conds)
         if not conds:
-            self.logger.error(
-                "Error:[get_cnt_by_conds][conds error], conds:{0}".format(
+            self.logger.warn(
+                "Warn:[get_cnt_by_conds][conds warn], conds:{0}".format(
                     conds))
             raise gen.Return(None)
         sql = self.select_cnt(self.table, conds, fields, appends, index)
         cursor = yield self.query(sql, params)
         response = cursor.fetchone()
-        self.logger.debug("[debug][{0}][response: {1}]".format(self.__class__.__module__, response))
+        # self.logger.debug("[debug][get_cnt_by_conds][{0}][response: {1}]".format(self.__class__.__module__, response))
         raise gen.Return(ObjectDict(response))
 
     @gen.coroutine
@@ -260,23 +260,23 @@ class BaseDao(DB):
 
         conds, params = self.getConds(conds)
         if not conds:
-            self.logger.error(
-                "Error:[get_cnt_by_conds][conds error], conds:{0}".format(
+            self.logger.warn(
+                "Warn:[get_cnt_by_conds][conds warn], conds:{0}".format(
                     conds))
             raise gen.Return(None)
         sql = self.select_sum(self.table, conds, fields, appends, index)
         cursor = yield self.query(sql, params)
         response = cursor.fetchone()
-        self.logger.debug("[debug][{0}][response: {1}]".format(self.__class__.__module__, response))
+        # self.logger.debug("[debug][get_sum_by_conds][{0}][response: {1}]".format(self.__class__.__module__, response))
         raise gen.Return(ObjectDict(response))
 
-    @gen.coroutine
-    def start_transaction(self):
-
-        """
-        开始一个事务，待完善
-        :return:
-        """
-
-        transaction = self.pool.begin()
-        raise gen.Return(transaction)
+    # @gen.coroutine
+    # def start_transaction(self):
+    #
+    #     """
+    #     开始一个事务，待完善
+    #     :return:
+    #     """
+    #
+    #     transaction = self.pool.begin()
+    #     raise gen.Return(transaction)

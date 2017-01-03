@@ -115,10 +115,14 @@ class UserPageService(PageService):
     @gen.coroutine
     def create_user_wx_user_ent(self, openid, unionid, wechat_id):
         """根据 unionid 创建 企业号微信用户信息"""
-        wxuser = yield self.get_wxuser_unionid_wechat_id(
-            unionid=unionid, wechat_id=wechat_id)
+
+        wxuser = yield self.get_wxuser_openid_wechat_id(
+            openid=openid, wechat_id=wechat_id)
         qx_wxuser = yield self.get_wxuser_unionid_wechat_id(
             unionid=unionid, wechat_id=settings['qx_wechat_id'])
+
+        self.logger.debug("create_user_wx_user_ent, wxuser:{}".format(wxuser))
+        self.logger.debug("create_user_wx_user_ent, qx_wxuser:{}".format(qx_wxuser))
 
         if wxuser:
             wxuser_id = wxuser.id
@@ -171,10 +175,14 @@ class UserPageService(PageService):
         qx_wxuser = yield self.get_wxuser_openid_wechat_id(
             openid=openid, wechat_id=qx_wechat_id)
 
-        if qx_wxuser and qx_wxuser.sysuser_id == user_id:
+        self.logger.debug("create_qx_wxuser_by_userinfo, qx_wxuser:{}".format(qx_wxuser))
+
+        # 如果 qx_wxuser.sysuser_id = 0 表示只关注过，但是没有打开过页面
+        if qx_wxuser and (qx_wxuser.sysuser_id == 0 or qx_wxuser.sysuser_id == user_id):
             yield self.user_wx_user_ds.update_wxuser(
                 conds={"id": qx_wxuser.id},
                 fields={
+                    "sysuser_id": user_id,
                     "openid":     userinfo.openid,
                     "nickname":   userinfo.nickname,
                     "sex":        userinfo.sex or 0,

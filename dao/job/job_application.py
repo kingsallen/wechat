@@ -23,7 +23,7 @@ class JobApplicationDao(BaseDao):
             "interview_id":     self.constant.TYPE_INT,
             # "resume_id":        self.constant.TYPE_STRING, 旧时代的产物，已废
             "ats_status":       self.constant.TYPE_INT,
-            "applier_name":     self.constant.TYPE_INT,
+            "applier_name":     self.constant.TYPE_STRING,
             "disable":          self.constant.TYPE_INT,
             "routine":          self.constant.TYPE_INT,
             "is_viewed":        self.constant.TYPE_INT,

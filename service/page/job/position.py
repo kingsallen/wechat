@@ -2,13 +2,16 @@
 
 # Copyright 2016 MoSeeker
 
+import json
 from tornado import gen
-from service.page.base import PageService
+
 import conf.common as const
+from service.page.base import PageService
 from util.common import ObjectDict
-from util.tool.http_tool import http_get, async_das_get
 from util.tool.date_tool import jd_update_date
+from util.tool.http_tool import http_get, async_das_get
 from util.tool.str_tool import gen_salary, split
+from util.tool.temp_data_tool import make_mate, make_team, template3
 
 
 class PositionPageService(PageService):
@@ -64,7 +67,8 @@ class PositionPageService(PageService):
             "publisher":        position_res.publisher,
             "source":           position_res.source,
             "share_tpl_id":     position_res.share_tpl_id,
-            "hb_status":        position_res.hb_status
+            "hb_status":        position_res.hb_status,
+            "team_id":          position_res.team_id
         })
 
         # 后置处理：
@@ -121,7 +125,7 @@ class PositionPageService(PageService):
             "sysuser_id": user_id,
             "favorite": const.FAV_YES
         })
-        
+
         raise gen.Return(const.YES if fav else const.NO)
 
     @gen.coroutine
@@ -217,3 +221,40 @@ class PositionPageService(PageService):
             yield async_das_get("candidate/glancePosition", params)
         except Exception as error:
             self.logger.warn(error)
+
+    @gen.coroutine
+    def get_mate_data(self, jd_media):
+        job_media = json.loads(jd_media)
+        if isinstance(job_media, list) and job_media:
+            media_list = yield self.hr_media_ds.get_media_by_ids(job_media, True)
+            res_dict = yield self.hr_resource_ds.get_resource_by_ids(
+                [m.res_id for m in media_list])
+            res = make_mate(media_list, res_dict)
+        else:
+            res = None
+
+        raise gen.Return(res)
+
+    @gen.coroutine
+    def get_team_data(self, team, more_link):
+        team_res = yield self.hr_resource_ds.get_resource(
+            conds={'id': team.res_id},
+            fields=['id', 'res_url', 'res_type']
+        )
+        res = make_team(team, team_res, more_link)
+
+        raise gen.Return(res)
+
+    @gen.coroutine
+    def get_team_position(self, team_id, handler_params, current_position_id):
+        positions = yield self.job_position_ds.get_positions_list(
+            conds={'id': [current_position_id, '<>'],
+                   'team_id': team_id, 'status': 0})
+
+        if not positions:
+            raise gen.Return(None)
+
+        res = template3(title='我们团队还需要', resource_list=positions,
+                        handler_params=handler_params)
+
+        raise gen.Return(res)

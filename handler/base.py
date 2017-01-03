@@ -172,18 +172,19 @@ class BaseHandler(MetaBaseHandler):
         code = self.params.get("code")
         state = self.params.get("state")
 
-        # self.logger.debug("prepare: {}".format(self.request))
-
-        self.logger.debug("code:{}, state:{}, request_url:{} ".format(code, state, self.request.uri))
+        self.logger.debug("[prepare]code:{}, state:{}, request_url:{} ".format(code, state, self.request.uri))
 
         if self.in_wechat:
             # 用户同意授权
             if code and self._verify_code(code):
+                # 保存 code 进 cookie
+                self.set_cookie(const.COOKIE_CODE, to_str(code), expires_days=1, httponly=True)
 
                 # 来自 qx 的授权, 获得 userinfo
                 if state == wx_const.WX_OAUTH_DEFAULT_STATE:
                     self.logger.debug("来自 qx 的授权, 获得 userinfo")
                     userinfo = yield self._get_user_info(code)
+                    self.logger.debug("来自 qx 的授权, 获得 userinfo:{}".format(userinfo))
                     yield self._handle_user_info(userinfo)
                     if self.request.connection.stream.closed():
                         return
@@ -193,11 +194,11 @@ class BaseHandler(MetaBaseHandler):
                     self.logger.debug("来自企业号的静默授权")
                     self._unionid = from_hex(state)
                     openid = yield self._get_user_openid(code)
+                    self.logger.debug("来自企业号的静默授权, openid:{}".format(openid))
                     self._wxuser = yield self._handle_ent_openid(
                         openid, self._unionid)
 
-                # 保存 code 进 cookie
-                self.set_cookie(const.COOKIE_CODE, to_str(code), expires_days=1, httponly=True)
+                    self._debug_showoff_clean_auth_cookie()
 
             elif state:  # 用户拒绝授权
                 # TODO 拒绝授权用户，是否让其继续操作? or return
@@ -206,13 +207,56 @@ class BaseHandler(MetaBaseHandler):
         # 构造并拼装 session
         yield self._fetch_session()
 
+        # session 中 没有 wxuser 的补救措施
+        if self.current_user and self._authable() and not self.current_user.wxuser:
+            yield self._fix_for_wxuser_is_not_in_current_user()
+
+        self.logger.debug("[prepare]current_user: {}".format(self.current_user))
+
         # 内存优化
         self._wechat = None
         self._qx_wechat = None
         self._unionid = None
         self._wxuser = None
 
-        self.logger.debug("current_user: {}".format(self.current_user))
+    @gen.coroutine
+    def _fix_for_wxuser_is_not_in_current_user(self):
+        """session 中 没有 wxuser 的补救措施
+
+        如果这次访问本来就是从企业号静默授权过来的，那么应该存在 self._wxuser,
+        就利用 self._wxuser 重建 session，并刷新 redis 缓存
+        否则，再进行一次企业号静默授权
+        """
+        self.logger.debug("[prepare] current_user 中不存在 wxuser, 进入补救措施")
+
+        if self._wxuser:
+            self.logger.debug("[prepare] 存在 self._wxuser: %s" % self._wxuser)
+            session_id = to_str(self.get_secure_cookie(const.COOKIE_SESSIONID))
+            if not session_id:
+                session_id = self._make_new_session_id(self.current_user.sysuser.id)
+
+            wechat = self.current_user.wechat.copy()
+            wechat.pop('jsapi', None)
+
+            session = ObjectDict(
+                wxuser=self._wxuser,
+                qxuser=self.current_user.qxuser,
+                wechat=wechat
+            )
+            self.logger.debug("[prepare]刷新 session 入 redis 缓存, session: %s" % session)
+            self._save_sessions(session_id, session)
+
+            self.logger.debug("[prepare]刷新当前 current_user")
+            self.current_user.wxuser = self._wxuser
+
+        else:
+            self.logger.debug("[prepare] 不存在 self._wxuser, 重新静默授权")
+            # 获取 qxuser.unionid(最稳定的存在)，企业号 wechat_id 再静默授权一次
+            unionid = self.current_user.qxuser.unionid
+            self._oauth_service.wechat = self._wechat
+            self._oauth_service.state = to_hex(unionid)
+            url = self._oauth_service.get_oauth_code_base_url()
+            self.redirect(url)
 
     # PROTECTED
     @gen.coroutine
@@ -235,7 +279,7 @@ class BaseHandler(MetaBaseHandler):
         "unionid": "o6_bmasdasdsad6_2sgVt7hMZOPfL"
         )
         """
-        self.logger.debug("userinfo: {}".format(userinfo))
+        self.logger.debug("[_handle_user_info]userinfo: {}".format(userinfo))
 
         unionid = userinfo.unionid
         if self.is_platform:
@@ -250,9 +294,10 @@ class BaseHandler(MetaBaseHandler):
             remote_ip=self.request.remote_ip,
             source=source)
 
+        self.logger.debug("[_handle_user_info]user_id: {}".format(user_id))
+
         # 创建 qx 的 user_wx_user
         yield self.user_ps.create_qx_wxuser_by_userinfo(userinfo, user_id)
-        yield self.user_ps.ensure_user_unionid(user_id, userinfo.unionid)
 
         if self._authable():
             # 该企业号是服务号
@@ -272,6 +317,7 @@ class BaseHandler(MetaBaseHandler):
         if self.is_platform:
             wxuser = yield self.user_ps.create_user_wx_user_ent(
                 openid, unionid, self._wechat.id)
+            self.logger.debug("_handle_ent_openid, wxuser:{}".format(wxuser))
         raise gen.Return(wxuser)
 
     # noinspection PyTypeChecker
@@ -323,8 +369,6 @@ class BaseHandler(MetaBaseHandler):
 
             mobile = self.params["mobile"]
         """
-        self.params = ObjectDict()
-
         c_arg = None
         try:
             for arg in args:
@@ -344,8 +388,8 @@ class BaseHandler(MetaBaseHandler):
         """检查 code 是不是之前使用过的"""
 
         old = self.get_cookie(const.COOKIE_CODE)
-        self.logger.debug("old code: {}".format(old))
-        self.logger.debug("new code: {}".format(code))
+        self.logger.debug("[_verify_code]old code: {}".format(old))
+        self.logger.debug("[_verify_code]new code: {}".format(code))
 
         if not old:
             return True
@@ -381,7 +425,10 @@ class BaseHandler(MetaBaseHandler):
 
         conds = {'id': company_id}
         company = yield self.company_ps.get_company(conds=conds, need_conf=True)
-        if company.conf_theme_id:
+
+        # 配色处理，如果theme_id为5表示公司使用默认配置，不需要将原始配色信息传给前端
+        # 如果将theme_id为5的传给前端，会导致前端颜色无法正常显示默认颜色
+        if company.conf_theme_id != 5:
             theme = yield self.wechat_ps.get_wechat_theme(
                 {'id': company.conf_theme_id, 'disable': 0})
             if theme:
@@ -405,6 +452,7 @@ class BaseHandler(MetaBaseHandler):
             userinfo = yield self._oauth_service.get_userinfo_by_code(code)
             raise gen.Return(userinfo)
         except WeChatOauthError as e:
+            self.logger.error("_get_user_info cookie code : {}".format(self.get_cookie(const.COOKIE_CODE)))
             self.logger.error("_get_user_info: {}".format(self.request))
             self.logger.error(e)
 
@@ -431,6 +479,8 @@ class BaseHandler(MetaBaseHandler):
 
         if session_id:
             if self.is_platform:
+                self.logger.debug(
+                    "is_platform _fetch_session session_id: {}".format(session_id))
                 ok = yield self._get_session_from_ent(session_id)
                 if not ok:
                     ok = yield self._get_session_from_qx(session_id)
@@ -454,6 +504,7 @@ class BaseHandler(MetaBaseHandler):
                 # 即可进入 _build_session 方法
                 yield self._build_session()
             else:
+                self._debug_set_auth_cookie()
                 self._oauth_service.wechat = self._qx_wechat
                 url = self._oauth_service.get_oauth_code_userinfo_url()
                 self.redirect(url)
@@ -471,7 +522,6 @@ class BaseHandler(MetaBaseHandler):
             unionid=self._unionid, wechat_id=self.settings['qx_wechat_id'])
 
         session_id = self._make_new_session_id(session.qxuser.sysuser_id)
-        logger.debug("session_id: %s" % session_id)
         self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True)
 
         self._save_sessions(session_id, session)
@@ -481,7 +531,7 @@ class BaseHandler(MetaBaseHandler):
         self._add_jsapi_to_wechat(session.wechat)
 
         if self.is_platform:
-            yield self._add_company_info_to_session(session)
+            yield self._add_company_info_to_session(session, called_by="_build_session")
         if self.params.recom:
             yield self._add_recom_to_session(session)
 
@@ -504,7 +554,7 @@ class BaseHandler(MetaBaseHandler):
             unionid=unionid, wechat_id=self.settings['qx_wechat_id'])
 
         session_id = to_str(self.get_secure_cookie(const.COOKIE_SESSIONID))
-        # 当使用手机浏览器访问的时候可能没有 session_id
+        # 当使用手机浏览器访问的时候可能没有 session_idrefresh ent session
         # 那么就创建它
         if not session_id:
             session_id = self._make_new_session_id(session.qxuser.sysuser_id)
@@ -514,7 +564,7 @@ class BaseHandler(MetaBaseHandler):
 
         self._add_jsapi_to_wechat(session.wechat)
         if self.is_platform:
-            yield self._add_company_info_to_session(session)
+            yield self._add_company_info_to_session(session, called_by="_build_session_by_unionid")
         if self.params.recom:
             yield self._add_recom_to_session(session)
 
@@ -528,14 +578,14 @@ class BaseHandler(MetaBaseHandler):
 
         key_ent = const.SESSION_USER.format(session_id, self._wechat.id)
         self.redis.set(key_ent, session, 60 * 60 * 2)
-        self.logger.debug("refresh ent session redis key: {}".format(key_ent))
+        self.logger.debug("refresh ent session redis key: {} session: {}".format(key_ent, session))
 
         key_qx = const.SESSION_USER.format(session_id, self.settings['qx_wechat_id'])
         self.redis.set(key_qx, ObjectDict(qxuser=session.qxuser), 60 * 60 * 24 * 30)
-        self.logger.debug("refresh qx session redis key: {}".format(key_qx))
+        self.logger.debug("refresh qx session redis key: {} session: {}".format(key_qx, ObjectDict(qxuser=session.qxuser)))
 
     @gen.coroutine
-    def _add_company_info_to_session(self, session):
+    def _add_company_info_to_session(self, session, called_by=None):
         """拼装 session 中的 company, employee
 
         如果该企业号是订阅号，不添加 employee
@@ -544,6 +594,12 @@ class BaseHandler(MetaBaseHandler):
         session.company = yield self._get_current_company(session.wechat.company_id)
 
         if self._authable():
+
+            if not session.wxuser.id:
+                self.logger.debug(
+                    "session.wxuser.id 不存在, 暂停获取 employee, called_by: {}, session: {}".format(called_by, session))
+                return
+
             employee = yield self.session_ps.get_employee(
                 wxuser_id=session.wxuser.id, company_id=session.company.id)
             if employee:
@@ -575,10 +631,12 @@ class BaseHandler(MetaBaseHandler):
 
         key = const.SESSION_USER.format(session_id, self._wechat.id)
         value = self.redis.get(key)
+        self.logger.debug(
+            "_get_session_from_ent redis session: {}, key: {}".format(value, key))
         if value:
             # 如果有 value， 返回该 value 作为 self.current_user
             session = ObjectDict(value)
-            yield self._add_company_info_to_session(session)
+            yield self._add_company_info_to_session(session, called_by="_get_session_from_ent")
             yield self._add_sysuser_to_session(session)
             if self.params.recom:
                 yield self._add_recom_to_session(session)
@@ -595,6 +653,9 @@ class BaseHandler(MetaBaseHandler):
         key = const.SESSION_USER.format(session_id, self.settings['qx_wechat_id'])
 
         value = self.redis.get(key)
+        self.logger.debug(
+            "_get_session_from_qx redis session: {}, key: {}".format(value, key))
+
         if value:
             session_qx = value
             qxuser = ObjectDict(session_qx.get('qxuser'))
@@ -623,19 +684,19 @@ class BaseHandler(MetaBaseHandler):
 
     # tornado hooks
     @gen.coroutine
-    def get(self):
+    def get(self, *args, **kwargs):
         pass
 
     @gen.coroutine
-    def post(self):
+    def post(self, *args, **kwargs):
         pass
 
     @gen.coroutine
-    def put(self):
+    def put(self, *args, **kwargs):
         pass
 
     @gen.coroutine
-    def delete(self):
+    def delete(self, *args, **kwargs):
         pass
 
     def get_template_namespace(self):
@@ -764,9 +825,10 @@ class BaseHandler(MetaBaseHandler):
 
         def _readable_cookies():
             """基于 self.cookies 的内容构建一个简单可读的 dict"""
-            return ObjectDict(
-                {k: repr(v.value) for k, v in sorted(self.cookies.items())}
-            )
+            # return ObjectDict(
+            #     {k: repr(v.value) for k, v in sorted(self.cookies.items())}
+            # )
+            return None
 
         request = self.request
         req_params = request.arguments
@@ -795,7 +857,7 @@ class BaseHandler(MetaBaseHandler):
             referer=request.headers.get('Referer'),
             remote_ip=(
                 request.headers.get('Remoteip') or
-                request.headers.get('X-Forwarded-For') or
+                request.headers.get('X-Real-Ip') or
                 request.remote_ip
             ),
             event="{}_{}".format(self._event, request.method),
@@ -825,3 +887,14 @@ class BaseHandler(MetaBaseHandler):
             wechat = const.CLIENT_WECHAT
 
         return wechat, mobile
+
+    def _debug_set_auth_cookie(self):
+        self.logger.debug("oauth starts")
+        self.set_cookie(const.COOKIE_DEBUG_AUTH, str(time.time()))
+
+    def _debug_showoff_clean_auth_cookie(self):
+        if self.get_cookie(const.COOKIE_DEBUG_AUTH):
+            start = float(self.get_cookie(const.COOKIE_DEBUG_AUTH))
+            end = time.time()
+            self.logger.debug("oauth end in: %.2fs" % (end - start))
+            self.clear_cookie(const.COOKIE_DEBUG_AUTH)

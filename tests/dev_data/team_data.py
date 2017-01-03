@@ -3,16 +3,16 @@
 
 """
 :author 马超（machao@moseeker.com）
-:date 2016.11.1
+:date 2016.10.25
+
+    暂且保留，待新版team功能debug通过后删除
 
 """
-from util.common import ObjectDict
 from tornado import gen
-from service.page.base import PageService
-# from tests.dev_data.user_company_data import WORKING_ENV, TEAMS
+from util.common import ObjectDict
 
 
-class TeamPageService(PageService):
+class OriginalTeamData(object):
 
     _OTHER_TEAM = ObjectDict(
         cs={
@@ -170,7 +170,7 @@ class TeamPageService(PageService):
             data.templates.append(ObjectDict({'type': 5, 'title': '', 'data': None}))
 
         # 其他团队
-        otherteam =  ObjectDict({
+        otherteam = ObjectDict({
             'type':     4,
             'sub_type':  0,
             'title':    '其他团队',
@@ -532,3 +532,4 @@ class TeamPageService(PageService):
         data.templates_total = len(data.templates)
 
         raise gen.Return(data)
+
