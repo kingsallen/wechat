@@ -57,7 +57,7 @@ class PositionPageService(PageService):
             "experience":       position_res.experience + (self.constant.EXPERIENCE_UNIT if position_res.experience else '') + (self.constant.POSITION_ABOVE if position_res.experience_above else ''),
             "language":         position_res.language,
             "count":            position_res.count,
-            "degree":           self.constant.DEGREE.get(str(position_res.degree)) + self.constant.POSITION_ABOVE if position_res.degree_above else '',
+            "degree":           self.constant.DEGREE.get(str(position_res.degree)) + (self.constant.POSITION_ABOVE if position_res.degree_above else ''),
             "management":       position_res.management,
             "visitnum":         position_res.visitnum,
             "accountabilities": position_res.accountabilities,
