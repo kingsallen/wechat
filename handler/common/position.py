@@ -26,11 +26,12 @@ class PositionHandler(BaseHandler):
         if position_info.id and \
                 position_info.company_id == self.current_user.company.id:
 
-            if position_info.team_id != 0:
-                team = yield self.team_ps.get_team_by_id(position_info.team_id)
-            else:
+            # hr端功能不全，暂且通过团队名称优先匹配
+            if position_info.department:
                 team = yield self.team_ps.get_team_by_name(
                     position_info.department, position_info.company_id)
+            if not team:
+                team = yield self.team_ps.get_team_by_id(position_info.team_id)
 
             self.logger.debug("[JD]构建收藏信息")
             star = yield self.position_ps.is_position_stared_by(
