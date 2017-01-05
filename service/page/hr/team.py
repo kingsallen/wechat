@@ -102,7 +102,7 @@ class TeamPageService(PageService):
 
         # 根据母公司，子公司区分对待，获取对应的职位信息，其他团队信息
         position_fields = 'id title status city team_id \
-                           salary_bottom salary_top'.split()
+                           salary_bottom salary_top department'.split()
         if company.id != user.company.id:
             company_positions = yield self._get_sub_company_positions(
                 company.id, position_fields)
@@ -122,7 +122,7 @@ class TeamPageService(PageService):
         other_teams.sort(key=lambda t: t.show_order)
 
         team_positions = [pos for pos in company_positions
-                          if pos.team_id == team.id and pos.status == 0]
+                          if pos.department == team.name and pos.status == 0]
         team_members = yield self.hr_team_member_ds.get_team_member_list(
             conds={'team_id': team.id})
 
