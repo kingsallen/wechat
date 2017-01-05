@@ -246,10 +246,12 @@ class PositionPageService(PageService):
         raise gen.Return(res)
 
     @gen.coroutine
-    def get_team_position(self, team_id, handler_params, current_position_id):
+    def get_team_position(self, department, handler_params, current_position_id, company_id):
         positions = yield self.job_position_ds.get_positions_list(
             conds={'id': [current_position_id, '<>'],
-                   'team_id': team_id, 'status': 0})
+                   'company_id': company_id,
+                   'department': department,
+                   'status': 0})
 
         if not positions:
             raise gen.Return(None)
