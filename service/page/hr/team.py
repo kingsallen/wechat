@@ -32,6 +32,13 @@ class TeamPageService(PageService):
         raise gen.Return(team)
 
     @gen.coroutine
+    def get_team_by_name(self, department, company_id):
+        team = yield self.hr_team_ds.get_team(
+            conds={'company_id': company_id, 'name':department})
+
+        raise gen.Return(team)
+
+    @gen.coroutine
     def get_team_index(self, company, handler_param, sub_flag=False):
         """
 
