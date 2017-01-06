@@ -25,7 +25,11 @@ class PositionHandler(BaseHandler):
 
         if position_info.id and \
                 position_info.company_id == self.current_user.company.id:
-            team = yield self.team_ps.get_team_by_id(position_info.team_id)
+
+            # hr端功能不全，暂且通过团队名称匹配
+            team = yield self.team_ps.get_team_by_name(
+                position_info.department, position_info.company_id)
+            # team = yield self.team_ps.get_team_by_id(position_info.team_id)
 
             self.logger.debug("[JD]构建收藏信息")
             star = yield self.position_ps.is_position_stared_by(
@@ -388,7 +392,7 @@ class PositionHandler(BaseHandler):
         if team:
             company_config = COMPANY_CONFIG.get(company_id)
             module_team_position = yield self._make_team_position(
-                team, position_id)
+                team, position_id, company_id)
             if module_team_position:
                 add_item(position_data, "module_team_position",
                          module_team_position)
@@ -402,12 +406,11 @@ class PositionHandler(BaseHandler):
                     module_team = yield self._make_team(team)
                     add_item(position_data, "module_team", module_team)
 
-
     @gen.coroutine
-    def _make_team_position(self, team, position_id):
+    def _make_team_position(self, team, position_id, company_id):
         """团队职位，构造数据"""
         res = yield self.position_ps.get_team_position(
-            team.id, self.params, position_id)
+            team.name, self.params, position_id, company_id)
         raise gen.Return(res)
 
     @gen.coroutine
