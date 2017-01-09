@@ -13,6 +13,7 @@ OLD_POSITION_PATH = "/mobile/position"
 ## 用户服务
 USER_LOGIN_PATH = "user/login"
 USER_BIND_WX_MOBILE = 'user/wxbindmobile'
+USER_INFO = 'user'
 
 ## 申请服务
 APPLICATION_APPLY_COUNT = "application/count/check"
