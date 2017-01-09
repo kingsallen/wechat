@@ -7,10 +7,16 @@ class Home(BaseHandler):
     个人中心首页, 渲染个人中心页面.
     """
     def get(self):
+        """
+        个人中心首页视图.
+        """
         self.render("weixin/sysuser/personalcenter.html")
 
 
 class Logout(BaseHandler):
+    """
+    用户登出.
+    """
     def get(self):
         """
         登出操作，登出后跳转到职位列表页.
@@ -37,10 +43,14 @@ class ConfigPasswd(BaseHandler):
     """
     def get(self):
         view = self.get_argument('view', None)
-        if not view in ['set', 'change']:
-            # Invalid access.
-            # redirect to config home page.
-            self.redirect("None")
+
+        if view == 'set':
+            return self.view_set()
+        elif view == 'change':
+            return self.view_change()
+        else:
+            # Invalid access, redirect to config home.
+            return self.redirect('')
 
     def post(self):
         """
