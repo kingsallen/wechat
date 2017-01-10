@@ -609,8 +609,8 @@ class BaseHandler(MetaBaseHandler):
     def _add_recom_to_session(self, session):
         """拼装 session 中的 recom"""
 
-        session.recom = yield self.user_ps.get_wxuser_openid_wechat_id(
-            openid=self.params.recom, wechat_id=self._wechat.id)
+        session.recom = yield self.user_ps.get_user_user_id(
+            user_id=self.params.recom)
 
     @gen.coroutine
     def _add_sysuser_to_session(self, session):

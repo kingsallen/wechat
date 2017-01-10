@@ -21,6 +21,7 @@ import conf.wechat as wx
 from service.page.base import PageService
 from setting import settings
 from service.page.user.sharechain import SharechainPageService
+from service.page.user.user import UserPageService
 from util.tool.str_tool import set_literl, trunc, generate_nonce_str, to_bytes
 from util.tool.url_tool import make_url
 from util.wechat.template import \
@@ -107,7 +108,8 @@ class RedpacketPageService(PageService):
         else:
             raise gen.Return(ObjectDict())
 
-    def __need_to_send(self, current_user, position, is_click=False, is_apply=False):
+    def __need_to_send(self, current_user, position,
+                       is_click=False, is_apply=False):
         """
         检查职位是否正在参与转发点击红包活动
         :param position: 相应职位
@@ -121,11 +123,12 @@ class RedpacketPageService(PageService):
         # 校验当前职位是否是属于当前公众号的公司
         if current_user.wechat.company_id != position.company_id:
             self.logger.debug(
-                "[RP] position not belong to the wechat.company_id, return False")
+                "[RP] position not belong to the wechat.company_id, "
+                "return False")
             return False
 
         check_hb_status_passed = False
-        self.logger.debug("[RP]position.hb_status:{}".format(position.hb_status))
+        self.logger.debug("[RP]position.hb_status: %s" % position.hb_status)
         if is_click:
             check_hb_status_passed = (
                 position.hb_status == const.RP_POSITION_STATUS_CLICK or
@@ -137,19 +140,25 @@ class RedpacketPageService(PageService):
         else:
             self.logger.debug("[RP]something goes wrong")
 
-        self.logger.debug("[RP]check_hb_status_passed:{}".format(check_hb_status_passed))
+        self.logger.debug(
+            "[RP]check_hb_status_passed: %s" % check_hb_status_passed)
 
-        ret = bool(current_user.recom.openid and
+        ret = bool(current_user.recom and
                    current_user.wxuser.id and
                    check_hb_status_passed and
-                   int(current_user.recom.id) != int(current_user.wxuser.id))
+                   int(current_user.recom.id) != int(current_user.sysuser.id))
 
-        self.logger.debug("[RP]need_to_send_red_packet_card: {}".format(ret))
+        self.logger.debug("[RP]need_to_send_red_packet_card: %s" % ret)
         return ret
 
     @gen.coroutine
-    def handle_red_packet_position_related(self, current_user, position, redislocker,
-                                           is_click=False, is_apply=False):
+    def handle_red_packet_position_related(self,
+                                           current_user,
+                                           position,
+                                           redislocker,
+                                           is_click=False,
+                                           is_apply=False,
+                                           **kwargs):
         """转发类红包触发总入口
         """
         assert is_click or is_apply
@@ -170,30 +179,34 @@ class RedpacketPageService(PageService):
                 current_user, position, is_click=is_click, is_apply=is_apply)
 
             if need_to_send_card and rp_config:
-                if is_click:
-                    self.logger.debug("[RP]转发点击红包开始")
-                elif is_apply:
-                    self.logger.debug("[RP]转发申请红包开始")
-
-                self.logger.debug("[RP]当前点击者 wxuser_id:{},pid:{}".format(
-                    current_user.wxuser.id, position.id))
-
-                sharechain_ps = SharechainPageService(self.logger)
-                last_employee_recom_id = yield sharechain_ps.get_referral_employee_wxuser_id(
-                    current_user.wxuser.id, position.id)
-                sharechain_ps = None
-
-                self.logger.debug("[RP]转发链最近员工 wxuser_id:{}".format(
-                    last_employee_recom_id))
-
-                # 是否同时发给最近员工红包
-                send_to_employee = (
-                    last_employee_recom_id and
-                    last_employee_recom_id != current_user.recom.id)
+                self.logger.debug("[RP]转发点击红包开始" if is_click
+                                  else "[RP]转发申请红包开始")
 
                 recom = current_user.recom
                 recom_wechat = current_user.wechat
                 trigger_wxuser_id = current_user.wxuser.id
+                trigger_user_id = current_user.sysuser.id
+
+                self.logger.debug("[RP]当前点击者 wxuser_id: %s,pid: %s" %
+                                  (current_user.wxuser.id, position.id))
+
+                sharechain_ps = SharechainPageService(self.logger)
+                last_employee_user_id = yield sharechain_ps.get_referral_employee_user_id(
+                    trigger_user_id, position.id)
+
+                self.logger.debug("[RP]转发链最近员工 user_id:{}".format(
+                    last_employee_user_id))
+
+                user_ps = UserPageService(self.logger)
+
+                recom_wxuser = yield user_ps.get_wxuser_sysuser_id_wechat_id(
+                    recom.id, recom_wechat.id
+                )
+
+                # 是否同时发给最近员工红包
+                send_to_employee = (
+                    last_employee_user_id and
+                    last_employee_user_id != current_user.recom.id)
 
                 # 为红包处理加 redis 锁
                 # 检查红包锁
@@ -202,18 +215,34 @@ class RedpacketPageService(PageService):
                     self.logger.debug("[RP]红包锁创建成功， rplock_key: %s" % rplock_key)
                     try:
                         ret = yield self.handle_red_packet_card_sending(
-                            current_user, rp_config, recom,
-                            recom_wechat, position)
+                            current_user,
+                            rp_config,
+                            recom,
+                            recom_wxuser,
+                            recom_wechat,
+                            position,
+                            **kwargs
+                        )
+
                         self.logger.debug(ret)
 
                         if send_to_employee:
-                            # 同时发红包给最近员工
-                            employee_wxuser = yield self.user_wx_user_ds.get_wxuser({
-                                "id": last_employee_recom_id})
-
+                            last_employee_user = yield user_ps.get_user_user_id(
+                                last_employee_user_id)
+                            last_employee_wxuser = yield user_ps.get_wxuser_sysuser_id_wechat_id(
+                                last_employee_user_id, recom_wechat.id
+                            )
                             ret = yield self.handle_red_packet_card_sending(
-                                current_user, rp_config, employee_wxuser,
-                                recom_wechat, position, send_to_employee=True)
+                                current_user,
+                                rp_config,
+                                last_employee_user,
+                                last_employee_wxuser,
+                                recom_wechat,
+                                position,
+                                send_to_employee=True,
+                                **kwargs
+                            )
+
                             self.logger.debug(ret)
 
                     except Exception as e:
@@ -222,6 +251,8 @@ class RedpacketPageService(PageService):
                         # 释放红包锁
                         redislocker.delete(rplock_key)
                         self.logger.debug(u"[RP]红包锁释放成功， rplock_key: %s" % rplock_key)
+                        user_ps = None
+                        sharechain_ps = None
                 else:
                     self.logger.debug(u"[RP]触发红包锁，该红包逻辑正在处理中， rplock_key: %s" % rplock_key)
 
@@ -233,54 +264,59 @@ class RedpacketPageService(PageService):
             self.logger.error(traceback.format_exc())
 
     @gen.coroutine
-    def handle_red_packet_card_sending(self, current_user, red_packet_config,
-                                       recom, recom_wechat, position,
-                                       send_to_employee=False):
+    def handle_red_packet_card_sending(self,
+                                       current_user,
+                                       red_packet_config,
+                                       recom_user,
+                                       recom_wxuser,
+                                       recom_wechat,
+                                       position,
+                                       send_to_employee=False,
+                                       **kwargs):
         """转发类红包发送消息模板
         """
-        recom_sysuser_id = recom.sysuser_id
 
-        self.logger.debug("[RP]recom_sysuser_id:{}".format(recom_sysuser_id))
-        recom_sysuser = yield self.user_user_ds.get_user({
-            "id": recom_sysuser_id
-        })
-        recom_unionid = recom_sysuser.unionid
+        recom_unionid = recom_user.unionid
 
-        self.logger.debug("[RP]recom_unionid:{}".format(recom_unionid))
+        self.logger.debug("[RP]recom_unionid: %s" % recom_unionid)
 
         recom_qx_wxuser = yield self.user_wx_user_ds.get_wxuser({
             "unionid": recom_unionid,
             "wechat_id": settings['qx_wechat_id']
         })
-        self.logger.debug("[RP]recom_qx_wxuser:{}".format(recom_qx_wxuser))
+        self.logger.debug("[RP]recom_qx_wxuser: %s" % recom_qx_wxuser)
 
         nickname = current_user.wxuser.nickname
 
         # 判断当前用户在这个活动中是否已经为这个受益人发过红包, check 不通过暂停发红包
         malicious_passed = yield self.__checked_maliciousness_passed(
-                red_packet_config.id, recom_qx_wxuser.id,
-                current_user.wxuser.id)
+            red_packet_config.id,
+            recom_qx_wxuser.id,
+            current_user.wxuser.id)
+
         if not malicious_passed:
             self.logger.debug(
-                "[RP]用户刷单, 红包暂停发送: rp_config_id:{},recom_wxuser_id:{}, wxuser_id:{}"
-                .format(red_packet_config.id, recom.id, current_user.wxuser.id))
+                "[RP]用户刷单, 红包暂停发送: rp_config_id: %s,recom_wxuser_id: %s, wxuser_id: %s"
+                %(red_packet_config.id, recom_wxuser.id, current_user.wxuser.id))
             raise gen.Return(None)
 
         # 非员工只能领取一个红包的检查, check 不通过暂停发红包
         non_employee_single_rp_passed = yield self.__non_employee_rp_check_passed(
-                red_packet_config.id, recom_wechat, recom.id,
+                red_packet_config.id, recom_wechat, recom_wxuser.id,
                 recom_qx_wxuser.id)
 
-        self.logger.debug("[RP]non_employee_single_rp_passed: {}".format(non_employee_single_rp_passed))
+        self.logger.debug("[RP]non_employee_single_rp_passed: %s" % non_employee_single_rp_passed)
+
         if not non_employee_single_rp_passed:
             self.logger.debug(
-                "[RP]非员工已经领取过红包, 此红包暂停发送: rp_config_id:{},recom_wxuser_id:{}, wxuser_id:{}"
-                .format(red_packet_config.id,  recom.id, current_user.wxuser.id))
+                "[RP]非员工已经领取过红包, 此红包暂停发送: rp_config_id: %s, recom_wxuser_id: %s, wxuser_id: %s"
+                .format(red_packet_config.id,  recom_wxuser.id, current_user.wxuser.id))
             raise gen.Return(None)
 
         # 红包发送对象是否符合配置要求
-        matches = yield self.__recom_matches(red_packet_config, recom.openid,
-                                             recom_wechat, position)
+        matches = yield self.__recom_matches(
+            red_packet_config, recom_wxuser.openid, recom_wechat, **kwargs)
+
         if send_to_employee or matches:
             self.logger.debug("[RP]用户是发送红包对象,准备掷骰子")
 
@@ -298,7 +334,7 @@ class RedpacketPageService(PageService):
 
                 # 发送红包消息模版(有金额)
                 self.__send_red_packet_card(
-                    recom.openid,
+                    recom_wxuser.openid,
                     recom_wechat.id,
                     red_packet_config,
                     current_user.wxuser.id,
@@ -310,7 +346,7 @@ class RedpacketPageService(PageService):
                 # 发送红包消息模版(抽不中)
                 self.logger.debug("[RP]掷骰子不通过,准备发送红包信封(无金额)")
                 self.__send_zero_amount_card(
-                    recom.openid,
+                    recom_wxuser.openid,
                     recom_wechat.id,
                     red_packet_config,
                     current_user.wxuser.id,
@@ -331,15 +367,15 @@ class RedpacketPageService(PageService):
         return not item
 
     @gen.coroutine
-    def __non_employee_rp_check_passed(self, hb_config_id, recom_wechat, recom_wxuser_id,
-            recom_qx_wxuser_id):
+    def __non_employee_rp_check_passed(
+        self, hb_config_id, recom_wechat, recom_wxuser_id, recom_qx_wxuser_id):
         """
         员工返回 True
         非员工且以前没领过红包返回 True
         非员工且以前领过红包返回 False
         """
-        is_employee = yield self.__is_wxuser_employee_of_wechat(recom_wxuser_id,
-                                             recom_wechat)
+        is_employee = yield self.__is_wxuser_employee_of_wechat(
+            recom_wxuser_id, recom_wechat)
         if is_employee:
             self.logger.debug("[RP]当前红包发送对象是员工,跳过非员工红包检查")
             raise gen.Return(True)
@@ -377,7 +413,7 @@ class RedpacketPageService(PageService):
         raise gen.Return(item)
 
     @gen.coroutine
-    def __recom_matches(self, rp_config, openid, wechat, position):
+    def __recom_matches(self, rp_config, openid, wechat, **kwargs):
         """返回 recom 是否符合发送红包对象的要求
         """
         wxuser = yield self.user_wx_user_ds.get_wxuser({
@@ -400,10 +436,10 @@ class RedpacketPageService(PageService):
                 raise gen.Return(True)
             else:
                 sharechain_ps = SharechainPageService(self.logger)
-                is_1degree = yield sharechain_ps.is_1degree_of_employee(
-                    position.id, wxuser.id)
-                sharechain_ps = None
+                is_1degree = yield sharechain_ps.is_employee_presentee(
+                    kwargs.get("psc"))
 
+                sharechain_ps = None
                 raise gen.Return(is_1degree)
         else:
             raise ValueError(msg.RED_PACKET_CONFIG_TARGET_VALUE_ERROR)

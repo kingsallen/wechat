@@ -96,6 +96,15 @@ class UserPageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
+    def get_wxuser_sysuser_id_wechat_id(self, sysuser_id, wechat_id):
+        """根据 sysuer_id 和 wechat_id 获取 wxuser"""
+        ret = yield self.user_wx_user_ds.get_wxuser({
+            "wechat_id":  wechat_id,
+            "sysuser_id": sysuser_id
+        })
+        raise gen.Return(ret)
+
+    @gen.coroutine
     def get_wxuser_unionid_wechat_id(self, unionid, wechat_id):
         """根据 unionid 和 wechat_id 获取 wxuser"""
         ret = yield self.user_wx_user_ds.get_wxuser({
