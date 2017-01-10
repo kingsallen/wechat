@@ -3,9 +3,8 @@
 from datetime import datetime
 
 from mockito import *
-from tornado.log import gen_log
 from tornado.concurrent import Future
-from tornado.testing import AsyncTestCase, gen_test, ExpectLog
+from tornado.testing import AsyncTestCase, gen_test
 from tornado.util import ObjectDict
 
 from service.page.user.sharechain import SharechainPageService
