@@ -360,7 +360,7 @@ class PositionHandler(BaseHandler):
                 params.presentee_user_id, params.position_id)
 
         yield self.position_ps.send_candidate_view_position(params={
-            "wxuser_id": self.current_user.wxuser.id,
+            "user_id": self.current_user.sysuser.id,
             "position_id": position_info.id,
             "from_employee": 1 if last_employee_user_id else 0,
         })
