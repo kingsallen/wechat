@@ -13,7 +13,7 @@ import socket
 
 # Moseeker Slack team webhook settings url:
 # https://moseekermm.slack.com/services/B0TUGEK60#service_setup
-WEBHOOK_URL="https://hooks.slack.com/services/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"
+WEBHOOK_URL = "https://hooks.slack.com/services/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"
 
 
 class Alarm(object):
@@ -34,6 +34,3 @@ class Alarm(object):
         return ret.content == 'ok'
 
 Alarm = Alarm(WEBHOOK_URL)
-
-if __name__ == '__main__':
-    Alarm.biu('biu')
