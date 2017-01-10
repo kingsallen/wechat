@@ -7,7 +7,7 @@ from service.data.base import DataService
 from util.common import ObjectDict
 
 
-class CandidateShareRecordDataService(DataService):
+class CandidateShareChainDataService(DataService):
 
     @gen.coroutine
     def get_share_chain(self, conds, fields=None, options=None, appends=None,
