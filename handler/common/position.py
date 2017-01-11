@@ -365,7 +365,8 @@ class PositionHandler(BaseHandler):
                     share_chain_parent_id=get_psc()
                 )
                 self.logger.debug("[JD]inserted_share_chain_id: %s" % inserted_share_chain_id)
-                self.params.update(psc=str(inserted_share_chain_id))
+                if inserted_share_chain_id:
+                    self.params.update(psc=str(inserted_share_chain_id))
 
             last_employee_user_id = yield self.sharechain_ps.get_referral_employee_user_id(
                 params.presentee_user_id, params.position_id)
