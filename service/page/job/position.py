@@ -177,9 +177,7 @@ class PositionPageService(PageService):
                                    company_id,
                                    berecom_wxuser_id,
                                    berecom_user_id,
-                                   position_id,
-                                   recom_employee_wxuser_id,
-                                   recom_employee_user_id):
+                                   position_id):
         """转发被点击添加积分"""
 
         points_conf = yield self.hr_points_conf_ds.get_points_conf(conds={
@@ -199,10 +197,10 @@ class PositionPageService(PageService):
                 "employee_id": employee.id,
                 "reason": points_conf.status_name,
                 "award": points_conf.reward,
-                "recom_wxuser": recom_employee_wxuser_id,
-                "recom_user_id": recom_employee_user_id,
+                "recom_wxuser": employee.wxuser_id,
+                "recom_user_id": employee.sysuser_id,
                 "berecom_wxuser_id": berecom_wxuser_id,
-                "berecom_user_id": recom_employee_user_id,
+                "berecom_user_id": berecom_user_id,
                 "position_id": position_id,
                 "award_config_id": points_conf.id,
             })

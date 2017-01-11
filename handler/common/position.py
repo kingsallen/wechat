@@ -382,23 +382,19 @@ class PositionHandler(BaseHandler):
     def _make_add_reward_click(self, position_info, recom_employee_user_id):
         """给员工加积分"""
 
-        if self.current_user.employee and \
+        if not self.current_user.employee and \
                 recom_employee_user_id != self.current_user.sysuser.id:
 
             recom_employee = yield self.user_ps.get_valid_employee_by_user_id(
                 recom_employee_user_id)
 
-            recom_employee_wxuser_id = recom_employee.wxuser_id
-            if recom_employee and recom_employee_wxuser_id:
+            if recom_employee and recom_employee.wxuser_id:
                 res = yield self.position_ps.add_reward_for_recom_click(
-
-                    employee=self.current_user.employee,
+                    employee=recom_employee,
                     company_id=self.current_user.company.id,
                     berecom_wxuser_id=self.current_user.wxuser.id,
                     berecom_user_id=self.current_user.sysuser.id,
-                    position_id=position_info.id,
-                    recom_employee_wxuser_id=recom_employee_wxuser_id,
-                    recom_employee_user_id=recom_employee_user_id)
+                    position_id=position_info.id)
 
                 self.logger.debug("[JD]给员工加积分： %s" % res)
             else:
