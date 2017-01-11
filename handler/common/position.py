@@ -383,8 +383,9 @@ class PositionHandler(BaseHandler):
     def _make_add_reward_click(self, position_info, recom_employee_user_id):
         """给员工加积分"""
 
-        if not self.current_user.employee and \
-                recom_employee_user_id != self.current_user.sysuser.id:
+        if (not self.current_user.employee and
+            recom_employee_user_id != self.current_user.sysuser.id and
+            self.is_platform):
 
             recom_employee = yield self.user_ps.get_valid_employee_by_user_id(
                 recom_employee_user_id)
