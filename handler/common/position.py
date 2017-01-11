@@ -50,10 +50,10 @@ class PositionHandler(BaseHandler):
 
             # 刷新链路
             self.logger.debug("[JD]刷新链路")
-            last_recom_wxuser_id = yield self._make_refresh_share_chain(
+            recom_employee_user_id = yield self._make_refresh_share_chain(
                 position_info)
             self.logger.debug(
-                "[JD]last_recom_wxuser_id: %s" % last_recom_wxuser_id)
+                "[JD]recom_employee_user_id: %s" % recom_employee_user_id)
 
             self.logger.debug("[JD]构建转发信息")
             yield self._make_share_info(position_info, company_info)
@@ -113,7 +113,7 @@ class PositionHandler(BaseHandler):
             yield self._make_position_visitnum(position_info)
 
             self.logger.debug("[JD]转发积分操作")
-            yield self._make_add_reward_click(position_info, last_recom_wxuser_id)
+            yield self._make_add_reward_click(position_info, recom_employee_user_id)
 
             yield self._make_send_publish_template(position_info)
 
@@ -347,16 +347,27 @@ class PositionHandler(BaseHandler):
             yield self.sharechain_ps.create_share_record(params)
 
             # 需要实时算出链路数据
+            def get_psc():
+                """获取 query 中的 psc (parent share chain id)
+                返回 int 类型"""
+                ret = 0
+                try:
+                    ret = int(self.params.psc) if self.params.psc else 0
+                except ValueError:
+                    pass
+                finally:
+                    return ret
+
             if position_info.status == 0:
                 inserted_share_chain_id = yield self.sharechain_ps.refresh_share_chain(
                     presentee_user_id=params.presentee_user_id,
                     position_id=position_info.id,
-                    share_chain_parent_id=self.params.psc
+                    share_chain_parent_id=get_psc()
                 )
                 self.logger.debug("[JD]inserted_share_chain_id: %s" % inserted_share_chain_id)
                 self.params.update(psc=str(inserted_share_chain_id))
 
-            last_employee_user_id = yield self.share_chain_ps.get_referral_employee_user_id(
+            last_employee_user_id = yield self.sharechain_ps.get_referral_employee_user_id(
                 params.presentee_user_id, params.position_id)
 
         yield self.position_ps.send_candidate_view_position(params={
@@ -368,15 +379,32 @@ class PositionHandler(BaseHandler):
         raise gen.Return(last_employee_user_id)
 
     @gen.coroutine
-    def _make_add_reward_click(self, position_info, last_recom_wxuser_id):
+    def _make_add_reward_click(self, position_info, recom_employee_user_id):
         """给员工加积分"""
 
-        if self.current_user.employee and last_recom_wxuser_id != self.current_user.wxuser.id:
-            res = yield self.position_ps.add_reward_for_recom_click(
-                self.current_user.employee, self.current_user.company.id,
-                self.current_user.wxuser.id, position_info.id,
-                last_recom_wxuser_id)
-            self.logger.debug("给员工加积分： %s" % res)
+        if self.current_user.employee and \
+                recom_employee_user_id != self.current_user.sysuser.id:
+
+            recom_employee = yield self.user_ps.get_valid_employee_by_user_id(
+                recom_employee_user_id)
+
+            recom_employee_wxuser_id = recom_employee.wxuser_id
+            if recom_employee and recom_employee_wxuser_id:
+                res = yield self.position_ps.add_reward_for_recom_click(
+
+                    employee=self.current_user.employee,
+                    company_id=self.current_user.company.id,
+                    berecom_wxuser_id=self.current_user.wxuser.id,
+                    berecom_user_id=self.current_user.sysuser.id,
+                    position_id=position_info.id,
+                    recom_employee_wxuser_id=recom_employee_wxuser_id,
+                    recom_employee_user_id=recom_employee_user_id)
+
+                self.logger.debug("[JD]给员工加积分： %s" % res)
+            else:
+                self.logger.warning(
+                    "[JD]给员工加积分异常：员工不存在或员工 wxuser_id 不存在: %s" %
+                    recom_employee)
 
     @gen.coroutine
     def _make_send_publish_template(self, position_info):
