@@ -429,7 +429,7 @@ class RedpacketPageService(PageService):
             next_red_packet = yield self.__get_next_rp_item(
                 red_packet_config.id, red_packet_config.type)
 
-        if next_red_packet is None:
+        if not next_red_packet:
             # 直接返回 True 这样可以在后续发送消息模版之前判断并结束活动
             return True
 
