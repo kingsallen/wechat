@@ -329,7 +329,8 @@ class PositionHandler(BaseHandler):
 
         last_employee_user_id = 0
         if self.current_user.recom:
-            yield self._make_share_record(position_info)
+            yield self._make_share_record(
+                position_info, recom_user_id=self.current_user.recom.id)
 
             # 需要实时算出链路数据
             def get_psc():
@@ -366,7 +367,7 @@ class PositionHandler(BaseHandler):
         raise gen.Return(last_employee_user_id)
 
     @gen.coroutine
-    def _make_share_record(self, position_info):
+    def _make_share_record(self, position_info, recom_user_id):
         """插入 position share record 的原子操作"""
         params = ObjectDict()
         params.wechat_id = self.current_user.wechat.id
@@ -379,7 +380,7 @@ class PositionHandler(BaseHandler):
         params.presentee_id = self.current_user.wxuser.id
         params.presentee_user_id = self.current_user.sysuser.id
         params.position_id = position_info.id
-        params.recom_user_id = self.current_user.recom.id
+        params.recom_user_id = recom_user_id
 
         recom_wx_user = yield self.user_ps.get_wxuser_unionid_wechat_id(
             unionid=self.current_user.recom.unionid,
@@ -390,7 +391,10 @@ class PositionHandler(BaseHandler):
         yield self.sharechain_ps.create_share_record(params)
 
     @gen.coroutine
-    def _refresh_share_chain(self, presentee_user_id, position_id, last_psc):
+    def _refresh_share_chain(self,
+                             presentee_user_id,
+                             position_id,
+                             last_psc=None):
         """刷新链路的原子操作"""
         inserted_share_chain_id = yield self.sharechain_ps.refresh_share_chain(
             presentee_user_id=presentee_user_id,
@@ -413,11 +417,9 @@ class PositionHandler(BaseHandler):
                 wechat_id=self.current_user.wechat.id)
             replace_query = dict(recom=encode_id(recom_wxuser.sysuser_id))
 
-            yield self._refresh_share_chain(position_info)
-            psc = yield self._make_refresh_share_chain(
-                presentee_user_id=self.current_user.sysuser.id,
-                position_id=position_info.id
-            )
+            psc = yield self.sharechain_ps.find_last_psc(
+                position_id=position_info.id,
+                presentee_user_id=recom_wxuser.sysuser_id)
             if psc:
                 replace_query.update(psc=psc)
 

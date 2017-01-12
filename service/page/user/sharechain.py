@@ -389,3 +389,18 @@ class SharechainPageService(PageService):
                 parent_share_chain.parent_share_chain_id == 0
             )
         )
+
+    @gen.coroutine
+    def find_last_psc(self, position_id, presentee_user_id):
+        """根据职位和查看者寻找最近的链路记录"""
+        parent_share_chain = yield self.candidate_share_chain_ds.get_share_chain(
+            conds={
+                "position_id": position_id,
+                "presentee_user_id": presentee_user_id
+            },
+            appends=['order by click_time',
+                     'limit 1'])
+        if parent_share_chain:
+            raise gen.Return(parent_share_chain.id)
+        else:
+            raise gen.Return(0)
