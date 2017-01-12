@@ -67,7 +67,7 @@ def encode_id(inputi, length=10):
 
 def decode_id(inputs, length=10):
     if len(inputs) == 10:
-        return __alphaMeow(inputs[1:], to_num=True, pad_up=length)
+        return __alphaMeow(inputs, to_num=True, pad_up=length)
     else:
         return inputs
 
