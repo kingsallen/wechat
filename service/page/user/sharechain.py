@@ -398,7 +398,7 @@ class SharechainPageService(PageService):
                 "position_id": position_id,
                 "presentee_user_id": presentee_user_id
             },
-            appends=['order by click_time',
+            appends=['order by click_time desc',
                      'limit 1'])
         if parent_share_chain:
             raise gen.Return(parent_share_chain.id)
