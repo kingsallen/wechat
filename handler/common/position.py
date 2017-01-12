@@ -10,7 +10,7 @@ from util.common import ObjectDict
 from util.common.decorator import handle_response
 from util.common.cipher import encode_id
 from util.tool.str_tool import gen_salary, add_item, split
-from util.tool.url_tool import make_url
+from util.tool.url_tool import make_url, url_append_query
 from util.wechat.template import position_view_five
 from tests.dev_data.user_company_config import COMPANY_CONFIG
 
@@ -26,6 +26,9 @@ class PositionHandler(BaseHandler):
 
         if position_info.id and \
                 position_info.company_id == self.current_user.company.id:
+            yield self._redirect_when_recom_is_openid(position_info)
+            if self.request.connection.stream.closed():
+                return
 
             # hr端功能不全，暂且通过团队名称匹配
             team = yield self.team_ps.get_team_by_name(
@@ -326,26 +329,7 @@ class PositionHandler(BaseHandler):
 
         last_employee_user_id = 0
         if self.current_user.recom:
-            params = ObjectDict()
-            params.wechat_id = self.current_user.wechat.id
-            params.viewer_id = 0
-            params.viewer_ip = self.request.remote_ip
-            params.source = 0 if self.is_platform else 1
-            params.click_from = wx.CLICK_FROM.get(
-                self.get_argument("from", ""), 0)
-
-            params.presentee_id = self.current_user.wxuser.id
-            params.presentee_user_id = self.current_user.sysuser.id
-            params.position_id = position_info.id
-            params.recom_user_id = self.current_user.recom.id
-
-            recom_wx_user = yield self.user_ps.get_wxuser_unionid_wechat_id(
-                unionid=self.current_user.recom.unionid,
-                wechat_id=self.current_user.wechat.id
-            )
-            params.recom_id = recom_wx_user.id
-
-            yield self.sharechain_ps.create_share_record(params)
+            yield self._make_share_record(position_info)
 
             # 需要实时算出链路数据
             def get_psc():
@@ -360,17 +344,18 @@ class PositionHandler(BaseHandler):
                     return ret
 
             if position_info.status == 0:
-                inserted_share_chain_id = yield self.sharechain_ps.refresh_share_chain(
-                    presentee_user_id=params.presentee_user_id,
+                inserted_share_chain_id = yield self._refresh_share_chain(
+                    presentee_user_id=self.current_user.sysuser.id,
                     position_id=position_info.id,
-                    share_chain_parent_id=get_psc()
-                )
-                self.logger.debug("[JD]inserted_share_chain_id: %s" % inserted_share_chain_id)
+                    last_psc=get_psc())
+                self.logger.debug(
+                    "[JD]inserted_share_chain_id: %s" % inserted_share_chain_id)
+
                 if inserted_share_chain_id:
                     self.params.update(psc=str(inserted_share_chain_id))
 
             last_employee_user_id = yield self.sharechain_ps.get_referral_employee_user_id(
-                params.presentee_user_id, params.position_id)
+                self.current_user.sysuser.id, position_info.id)
 
         yield self.position_ps.send_candidate_view_position(params={
             "user_id": self.current_user.sysuser.id,
@@ -379,6 +364,65 @@ class PositionHandler(BaseHandler):
         })
 
         raise gen.Return(last_employee_user_id)
+
+    @gen.coroutine
+    def _make_share_record(self, position_info):
+        """插入 position share record 的原子操作"""
+        params = ObjectDict()
+        params.wechat_id = self.current_user.wechat.id
+        params.viewer_id = 0
+        params.viewer_ip = self.request.remote_ip
+        params.source = 0 if self.is_platform else 1
+        params.click_from = wx.CLICK_FROM.get(
+            self.get_argument("from", ""), 0)
+
+        params.presentee_id = self.current_user.wxuser.id
+        params.presentee_user_id = self.current_user.sysuser.id
+        params.position_id = position_info.id
+        params.recom_user_id = self.current_user.recom.id
+
+        recom_wx_user = yield self.user_ps.get_wxuser_unionid_wechat_id(
+            unionid=self.current_user.recom.unionid,
+            wechat_id=self.current_user.wechat.id
+        )
+        params.recom_id = recom_wx_user.id
+
+        yield self.sharechain_ps.create_share_record(params)
+
+    @gen.coroutine
+    def _refresh_share_chain(self, presentee_user_id, position_id, last_psc):
+        """刷新链路的原子操作"""
+        inserted_share_chain_id = yield self.sharechain_ps.refresh_share_chain(
+            presentee_user_id=presentee_user_id,
+            position_id=position_id,
+            share_chain_parent_id=last_psc
+        )
+        raise gen.Return(inserted_share_chain_id)
+
+    @gen.coroutine
+    def _redirect_when_recom_is_openid(self, position_info):
+        """当recom是openid时，刷新链路，改变recom的值，跳转"""
+        def recom_is_like_openid():
+            return (self.params.recom and
+                    self.params.recom.startswith('o') and
+                    not str(self.params.recom).isdigit())
+
+        if recom_is_like_openid():
+            recom_wxuser = yield self.user_ps.get_wxuser_openid_wechat_id(
+                openid=self.params.recom,
+                wechat_id=self.current_user.wechat.id)
+            replace_query = dict(recom=encode_id(recom_wxuser.sysuser_id))
+
+            yield self._refresh_share_chain(position_info)
+            psc = yield self._make_refresh_share_chain(
+                presentee_user_id=self.current_user.sysuser.id,
+                position_id=position_info.id
+            )
+            if psc:
+                replace_query.update(psc=psc)
+
+            redirect_url = url_append_query(self.fullurl, **replace_query)
+            self.redirect(redirect_url)
 
     @gen.coroutine
     def _make_add_reward_click(self, position_info, recom_employee_user_id):
