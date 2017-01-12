@@ -19,6 +19,7 @@ from tornado import gen, web
 from app import logger
 from oauth.wechat import WeChatOauth2Service, WeChatOauthError, JsApi
 from util.common import ObjectDict
+from util.common.cipher import decode_id
 from util.common.decorator import check_signature, check_outside_wechat
 from util.tool.date_tool import curr_now
 from util.tool.json_tool import encode_json_dumps, json_dumps
@@ -609,8 +610,9 @@ class BaseHandler(MetaBaseHandler):
     def _add_recom_to_session(self, session):
         """拼装 session 中的 recom"""
 
+        recom_user_id = decode_id(self.params.recom)
         session.recom = yield self.user_ps.get_user_user_id(
-            user_id=self.params.recom)
+            user_id=recom_user_id)
 
     @gen.coroutine
     def _add_sysuser_to_session(self, session):

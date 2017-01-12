@@ -8,6 +8,7 @@ import conf.wechat as wx
 from handler.base import BaseHandler
 from util.common import ObjectDict
 from util.common.decorator import handle_response
+from util.common.cipher import encode_id
 from util.tool.str_tool import gen_salary, add_item, split
 from util.tool.url_tool import make_url
 from util.wechat.template import position_view_five
@@ -134,7 +135,7 @@ class PositionHandler(BaseHandler):
     def _make_recom(self):
         """用于微信分享和职位推荐时，传出的 recom 参数"""
 
-        return str(self.current_user.sysuser.id)
+        return encode_id(self.current_user.sysuser.id)
 
     @gen.coroutine
     def _make_share_info(self, position_info, company_info):
