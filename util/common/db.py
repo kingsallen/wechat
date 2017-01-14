@@ -116,8 +116,8 @@ class DB(object):
             self.logger.debug("key: %s" % key)
             self.logger.debug("value: %s" % value)
             self.logger.debug("value type: %s" % type(value))
-            self.logger.debug("field value: %s" % fields[key])
-            self.logger.debug("field value type: %s" % type(fields[key]))
+            self.logger.debug("field value: %s" % fields.get(key))
+            self.logger.debug("field value type: %s" % type(fields.get(key)))
             self.logger.debug("\n\n")
 
             if fields.get(key):
