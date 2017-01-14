@@ -458,6 +458,9 @@ class PositionHandler(BaseHandler):
         """浏览量达到5次后，向 HR 发布模板消息
         注：只向 HR 平台发布的职位发送模板消息，ATS 同步的职位不发送"""
 
+        self.logger.debug("setting: %s" % self.settings)
+        self.logger.debug("self.settings.helper_signature: %s" % self.settings.helper_signature)
+
         if position_info.visitnum == 4 and position_info.source == 0:
             help_wechat = yield self.wechat_ps.get_wechat(conds={
                 "signature": self.settings.helper_signature
