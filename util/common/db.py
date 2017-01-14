@@ -109,16 +109,17 @@ class DB(object):
 
         for key, value in maps.items():
             if fields.get(key):
-                self.logger.error("!!!!!!!!!!!!!!!!!!!!!!!!!!")
-                self.logger.error("key: %s" % key)
-                self.logger.error("value: %s" % value)
-                self.logger.error("value type: %s" % type(value))
-                self.logger.error("field value: %s" % fields[key])
-                self.logger.error("field value type: %s" % type(fields[key]))
-                self.logger.error("\n\n")
+                self.logger.debug("!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                self.logger.debug("key: %s" % key)
+                self.logger.debug("value: %s" % value)
+                self.logger.debug("value type: %s" % type(value))
+                self.logger.debug("field value: %s" % fields[key])
+                self.logger.debug("field value type: %s" % type(fields[key]))
+                self.logger.debug("\n\n")
 
 
                 if value == constant.TYPE_INT:
+                    self.logger.debug("fields[key] 2: %s" % fields[key])
                     if not isinstance(fields[key], int):
                         self.logger.error("Error:[checkFieldType][field type error], Module:{0} Detail:[key:{1} value:{2} "
                                     "should by int]".format(self.__class__.__name__, key, fields[key]))
