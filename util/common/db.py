@@ -107,43 +107,31 @@ class DB(object):
                               "types:{1}, type:{2}".format(self.__class__.__name__, maps, type(maps)))
             return False
 
-        self.logger.debug("\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!")
-        self.logger.debug("fields: %s" % fields)
-        self.logger.debug("maps: %s" % maps)
-
         for key, value in maps.items():
-            self.logger.debug("!!!!!!!!!!!!!!!!!!!!!!!!!!")
-            self.logger.debug("key: %s" % key)
-            self.logger.debug("value: %s" % value)
-            self.logger.debug("value type: %s" % type(value))
-            self.logger.debug("field value: %s" % fields.get(key))
-            self.logger.debug("field value type: %s" % type(fields.get(key)))
-            self.logger.debug("\n\n")
-
-            if value == constant.TYPE_INT:
-                self.logger.debug("fields[key] 2: %s" % fields[key])
-                if not isinstance(fields[key], int):
-                    self.logger.error("Error:[checkFieldType][field type error], Module:{0} Detail:[key:{1} value:{2} "
-                                "should by int]".format(self.__class__.__name__, key, fields[key]))
-                    return False
-                fields[key] = int(fields[key]) if fields[key] else 0
-            elif value == constant.TYPE_JSON:
-                if isinstance(fields[key], list):
-                    fields[key] = ujson.encode(fields[key]) if fields[key] else ""
-                elif not isinstance(fields[key], str):
-                    self.logger.error("Error:[checkFieldType][field type error], Module:{0}, Detail:[key:{1} value:{2} "
-                                "should by json]".format(self.__class__.__name__, key, fields[key]))
-                    return False
-            elif value == constant.TYPE_FLOAT:
-                if not isinstance(fields[key], float):
-                    self.logger.error("Error:[checkFieldType][field type error], Module:{0} Detail:[key:{1} value:{2} "
-                                "should by float]".format(self.__class__.__name__, key, fields[key]))
-                    return False
-                fields[key] = float(fields[key]) if fields[key] else 0
-            elif value == constant.TYPE_TIMESTAMP:
-               fields[key] = fields[key].strftime(constant.TIME_FORMAT) if fields[key] else ""
-            else:
-                fields[key] = str(fields[key]) if fields[key] else ""
+            if fields.get(key):
+                if value == constant.TYPE_INT:
+                    if not isinstance(fields[key], int):
+                        self.logger.error("Error:[checkFieldType][field type error], Module:{0} Detail:[key:{1} value:{2} "
+                                    "should by int]".format(self.__class__.__name__, key, fields[key]))
+                        return False
+                    fields[key] = int(fields[key])
+                elif value == constant.TYPE_JSON:
+                    if isinstance(fields[key], list):
+                        fields[key] = ujson.encode(fields[key])
+                    elif not isinstance(fields[key], str):
+                        self.logger.error("Error:[checkFieldType][field type error], Module:{0}, Detail:[key:{1} value:{2} "
+                                    "should by json]".format(self.__class__.__name__, key, fields[key]))
+                        return False
+                elif value == constant.TYPE_FLOAT:
+                    if not isinstance(fields[key], float):
+                        self.logger.error("Error:[checkFieldType][field type error], Module:{0} Detail:[key:{1} value:{2} "
+                                    "should by float]".format(self.__class__.__name__, key, fields[key]))
+                        return False
+                    fields[key] = float(fields[key])
+                elif value == constant.TYPE_TIMESTAMP:
+                   fields[key] = fields[key].strftime(constant.TIME_FORMAT)
+                else:
+                    fields[key] = str(fields[key])
 
         return fields
 

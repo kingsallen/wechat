@@ -284,7 +284,7 @@ class UserPageService(PageService):
                 "position_id": pid,
                 "sysuser_id":  current_user.sysuser.id,
                 "favorite":    const.FAV_YES,
-                "wxuser_id":   current_user.wxuser.id
+                "wxuser_id":   current_user.wxuser.id or 0
             }
             if current_user.recom:
                 fields.update({

@@ -379,7 +379,7 @@ class PositionHandler(BaseHandler):
         params.click_from = wx.CLICK_FROM.get(
             self.get_argument("from", ""), 0)
 
-        params.presentee_id = self.current_user.wxuser.id
+        params.presentee_id = self.current_user.wxuser.id or 0
         params.presentee_user_id = self.current_user.sysuser.id
         params.position_id = position_info.id
         params.recom_user_id = recom_user_id
@@ -388,7 +388,7 @@ class PositionHandler(BaseHandler):
             unionid=self.current_user.recom.unionid,
             wechat_id=self.current_user.wechat.id
         )
-        params.recom_id = recom_wx_user.id
+        params.recom_id = recom_wx_user.id or 0
 
         yield self.sharechain_ps.create_share_record(params)
 
@@ -443,7 +443,7 @@ class PositionHandler(BaseHandler):
                 res = yield self.position_ps.add_reward_for_recom_click(
                     employee=recom_employee,
                     company_id=self.current_user.company.id,
-                    berecom_wxuser_id=self.current_user.wxuser.id,
+                    berecom_wxuser_id=self.current_user.wxuser.id or 0,
                     berecom_user_id=self.current_user.sysuser.id,
                     position_id=position_info.id)
 
