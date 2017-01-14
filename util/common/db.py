@@ -114,7 +114,7 @@ class DB(object):
                         self.logger.error("Error:[checkFieldType][field type error], Module:{0} Detail:[key:{1} value:{2} "
                                     "should by int]".format(self.__class__.__name__, key, fields[key]))
                         return False
-                    fields[key] = int(fields[key])
+                    fields[key] = int(fields[key]) if fields[key] else 0
                 elif value == constant.TYPE_JSON:
                     if isinstance(fields[key], list):
                         fields[key] = ujson.encode(fields[key])
@@ -131,7 +131,7 @@ class DB(object):
                 elif value == constant.TYPE_TIMESTAMP:
                    fields[key] = fields[key].strftime(constant.TIME_FORMAT)
                 else:
-                    fields[key] = str(fields[key])
+                    fields[key] = str(fields[key]) if fields[key] else ""
 
         return fields
 
