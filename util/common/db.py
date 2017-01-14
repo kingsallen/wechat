@@ -107,17 +107,20 @@ class DB(object):
                               "types:{1}, type:{2}".format(self.__class__.__name__, maps, type(maps)))
             return False
 
+        self.logger.debug("\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        self.logger.debug("fields: %s" % fields)
+        self.logger.debug("maps: %s" % maps)
+
         for key, value in maps.items():
+            self.logger.debug("!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            self.logger.debug("key: %s" % key)
+            self.logger.debug("value: %s" % value)
+            self.logger.debug("value type: %s" % type(value))
+            self.logger.debug("field value: %s" % fields[key])
+            self.logger.debug("field value type: %s" % type(fields[key]))
+            self.logger.debug("\n\n")
+
             if fields.get(key):
-                self.logger.debug("!!!!!!!!!!!!!!!!!!!!!!!!!!")
-                self.logger.debug("key: %s" % key)
-                self.logger.debug("value: %s" % value)
-                self.logger.debug("value type: %s" % type(value))
-                self.logger.debug("field value: %s" % fields[key])
-                self.logger.debug("field value type: %s" % type(fields[key]))
-                self.logger.debug("\n\n")
-
-
                 if value == constant.TYPE_INT:
                     self.logger.debug("fields[key] 2: %s" % fields[key])
                     if not isinstance(fields[key], int):
