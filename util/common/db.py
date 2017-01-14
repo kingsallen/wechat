@@ -129,7 +129,7 @@ class DB(object):
                 fields[key] = int(fields[key]) if fields[key] else 0
             elif value == constant.TYPE_JSON:
                 if isinstance(fields[key], list):
-                    fields[key] = ujson.encode(fields[key])
+                    fields[key] = ujson.encode(fields[key]) if fields[key] else ""
                 elif not isinstance(fields[key], str):
                     self.logger.error("Error:[checkFieldType][field type error], Module:{0}, Detail:[key:{1} value:{2} "
                                 "should by json]".format(self.__class__.__name__, key, fields[key]))
@@ -139,9 +139,9 @@ class DB(object):
                     self.logger.error("Error:[checkFieldType][field type error], Module:{0} Detail:[key:{1} value:{2} "
                                 "should by float]".format(self.__class__.__name__, key, fields[key]))
                     return False
-                fields[key] = float(fields[key])
+                fields[key] = float(fields[key]) if fields[key] else 0
             elif value == constant.TYPE_TIMESTAMP:
-               fields[key] = fields[key].strftime(constant.TIME_FORMAT)
+               fields[key] = fields[key].strftime(constant.TIME_FORMAT) if fields[key] else ""
             else:
                 fields[key] = str(fields[key]) if fields[key] else ""
 
