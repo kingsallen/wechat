@@ -362,9 +362,12 @@ class SharechainPageService(PageService):
 
     @gen.coroutine
     def is_employee_presentee(self, share_chain_id):
-        """
-        返回是否是员工一度
-        仅限于新版红包调用
+        """返回 share_chain_id 所指向的 share chain record 是不是员工一度点击
+
+        先查询 share_chain_id 指向的记录是否有 parent
+        如果有 parent 且 parent share chain record 是员工所转发出的点击，返回 True
+        否则返回 False
+        仅限于红包调用
         :param share_chain_id:
         :return: bool
         """
@@ -372,13 +375,20 @@ class SharechainPageService(PageService):
         if not share_chain_id:
             raise gen.Return(False)
 
-        parent_share_chain = yield self.candidate_share_chain_ds.get_share_chain({
+        share_chain = yield self.candidate_share_chain_ds.get_share_chain({
             "id": share_chain_id
+        })
+
+        if not share_chain or not share_chain.parent_id:
+            return False
+
+        parent_share_chain = yield self.candidate_share_chain_ds.get_share_chain({
+            "id": share_chain.parent_id
         })
 
         valid_employee = yield self._is_valid_employee(
             parent_share_chain.position_id,
-            parent_share_chain.presentee_user_id)
+            parent_share_chain.recom_user_id)
 
         raise gen.Return(
             parent_share_chain and
@@ -386,7 +396,7 @@ class SharechainPageService(PageService):
                 parent_share_chain.depth == 0 or
                 parent_share_chain.depth == 1 and
                 valid_employee and
-                parent_share_chain.parent_share_chain_id == 0
+                parent_share_chain.parent_id == 0
             )
         )
 
