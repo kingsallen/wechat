@@ -414,34 +414,31 @@ class RedpacketPageService(PageService):
         """返回 recom 是否符合发送红包对象的要求
         """
 
-        is_employee = yield self.__is_wxuser_employee_of_wechat(
-            recom_user.id, wechat.company_id)
-
         if rp_config.target == const.RED_PACKET_CONFIG_TARGET_FANS:
             wxuser = yield self.user_wx_user_ds.get_wxuser({
                 "unionid":   recom_user.unionid,
                 "wechat_id": wechat.id
             })
-            if not wxuser:
-                raise gen.Return(False)
 
-            raise gen.Return(wxuser.is_subscribe)
+            raise gen.Return(wxuser and wxuser.is_subscribe)
 
-        elif rp_config.target == const.RED_PACKET_CONFIG_TARGET_EMPLOYEE:
-            raise gen.Return(is_employee)
-
-        elif rp_config.target == const.RED_PACKET_CONFIG_TARGET_EMPLOYEE_1DEGREE:
-            if is_employee:
-                raise gen.Return(True)
-            else:
-                sharechain_ps = SharechainPageService(self.logger)
-                is_1degree = yield sharechain_ps.is_employee_presentee(
-                    kwargs.get("psc"))
-
-                sharechain_ps = None
-                raise gen.Return(is_1degree)
         else:
-            raise ValueError(msg.RED_PACKET_CONFIG_TARGET_VALUE_ERROR)
+            is_employee = yield self.__is_wxuser_employee_of_wechat(
+                recom_user.id, wechat.company_id)
+
+            if rp_config.target == const.RED_PACKET_CONFIG_TARGET_EMPLOYEE:
+                raise gen.Return(is_employee)
+
+            elif rp_config.target == const.RED_PACKET_CONFIG_TARGET_EMPLOYEE_1DEGREE:
+                if is_employee:
+                    raise gen.Return(True)
+                else:
+                    sharechain_ps = SharechainPageService(self.logger)
+                    is_1degree = yield sharechain_ps.is_employee_presentee(
+                        kwargs.get("psc"))
+
+                    sharechain_ps = None
+                    raise gen.Return(is_1degree)
 
     @gen.coroutine
     def __check_throttle_passed(self, red_packet_config, wxuser_id, position=None):
