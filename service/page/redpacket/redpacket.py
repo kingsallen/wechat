@@ -897,7 +897,7 @@ class RedpacketPageService(PageService):
             "id": wechat_id
         })
 
-        company = yield self.hr_company_ds.get_comany({
+        company = yield self.hr_company_ds.get_company({
             "id": wechat.company_id
         })
 
