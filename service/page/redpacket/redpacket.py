@@ -22,6 +22,7 @@ from service.page.base import PageService
 from setting import settings
 from service.page.user.sharechain import SharechainPageService
 from service.page.user.user import UserPageService
+from service.page.hr.wechat import WechatPageService
 from util.tool.str_tool import set_literl, trunc, generate_nonce_str, to_bytes
 from util.tool.url_tool import make_url
 from util.wechat.template import \
@@ -198,10 +199,19 @@ class RedpacketPageService(PageService):
                     last_employee_user_id))
 
                 user_ps = UserPageService(self.logger)
+                wechat_ps = WechatPageService(self.logger)
 
-                recom_wxuser = yield user_ps.get_wxuser_sysuser_id_wechat_id(
-                    recom.id, recom_wechat.id
-                )
+                is_service_wechat = recom_wechat.type == 1
+                if is_service_wechat:
+                    recom_wxuser = yield user_ps.get_wxuser_sysuser_id_wechat_id(
+                        recom.id, recom_wechat.id)
+                    # recom_wechat = recom_wechat
+
+                else:
+                    recom_wxuser = yield user_ps.get_wxuser_sysuser_id_wechat_id(
+                        recom.id, settings.qx_wechat_id)
+                    recom_wechat = yield wechat_ps.get_wechat(
+                        {"id": settings.qx_wechat_id})
 
                 # 是否同时发给最近员工红包
                 send_to_employee = (
@@ -229,9 +239,14 @@ class RedpacketPageService(PageService):
                         if send_to_employee:
                             last_employee_user = yield user_ps.get_user_user_id(
                                 last_employee_user_id)
-                            last_employee_wxuser = yield user_ps.get_wxuser_sysuser_id_wechat_id(
-                                last_employee_user_id, recom_wechat.id
-                            )
+
+                            if is_service_wechat:
+                                last_employee_wxuser = yield user_ps.get_wxuser_sysuser_id_wechat_id(
+                                    last_employee_user_id, recom_wechat.id)
+                            else:
+                                last_employee_wxuser = yield user_ps.get_wxuser_sysuser_id_wechat_id(
+                                    last_employee_user_id, settings.qx_wechat_id)
+
                             ret = yield self.handle_red_packet_card_sending(
                                 current_user,
                                 rp_config,
@@ -302,8 +317,7 @@ class RedpacketPageService(PageService):
 
         # 非员工只能领取一个红包的检查, check 不通过暂停发红包
         non_employee_single_rp_passed = yield self.__non_employee_rp_check_passed(
-                red_packet_config.id, recom_wechat, recom_user.id,
-                recom_qx_wxuser.id)
+                red_packet_config, recom_user.id, recom_qx_wxuser.id)
 
         if not non_employee_single_rp_passed:
             self.logger.debug(
@@ -312,6 +326,8 @@ class RedpacketPageService(PageService):
             raise gen.Return(None)
 
         # 红包发送对象是否符合配置要求
+
+
         matches = yield self.__recom_matches(
             red_packet_config, recom_user, recom_wechat, **kwargs)
 
@@ -366,21 +382,21 @@ class RedpacketPageService(PageService):
 
     @gen.coroutine
     def __non_employee_rp_check_passed(
-        self, hb_config_id, recom_wechat, recom_user_id, recom_qx_wxuser_id):
+        self, hb_config, recom_user_id, recom_qx_wxuser_id):
         """
         员工返回 True
         非员工且以前没领过红包返回 True
         非员工且以前领过红包返回 False
         """
         is_employee = yield self.__is_wxuser_employee_of_wechat(
-            recom_user_id, recom_wechat.company_id)
+            recom_user_id, hb_config.company_id)
         if is_employee:
             self.logger.debug("[RP]当前红包发送对象是员工,跳过非员工红包检查")
             raise gen.Return(True)
         else:
             self.logger.debug("[RP]当前红包发送对象是非员工")
             item = yield self.__get_sent_item_by_qx_wxuser_id(
-                hb_config_id, recom_qx_wxuser_id)
+                hb_config.id, recom_qx_wxuser_id)
             if item:
                 self.logger.debug("[RP]当前非员工已经拿过红包")
             else:
@@ -415,16 +431,20 @@ class RedpacketPageService(PageService):
         """
 
         if rp_config.target == const.RED_PACKET_CONFIG_TARGET_FANS:
+            if wechat.id == settings.qx_wechat_id:
+                wechat_ps = WechatPageService(self.logger)
+                wechat = yield wechat_ps.get_wechat({"company_id": rp_config.company_id})
+                wechat_ps = None
+
             wxuser = yield self.user_wx_user_ds.get_wxuser({
                 "unionid":   recom_user.unionid,
                 "wechat_id": wechat.id
             })
-
             raise gen.Return(wxuser and wxuser.is_subscribe)
 
         else:
             is_employee = yield self.__is_wxuser_employee_of_wechat(
-                recom_user.id, wechat.company_id)
+                recom_user.id, rp_config.company_id)
 
             if rp_config.target == const.RED_PACKET_CONFIG_TARGET_EMPLOYEE:
                 raise gen.Return(is_employee)
