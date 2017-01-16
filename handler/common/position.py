@@ -54,11 +54,10 @@ class PositionHandler(BaseHandler):
 
             # 刷新链路
             self.logger.debug("[JD]刷新链路")
-            inserted_share_chain_id, last_employee_user_id = yield self._make_refresh_share_chain(
+            last_employee_user_id = yield self._make_refresh_share_chain(
                 position_info)
             self.logger.debug(
-                "[JD]inserted_share_chain_id: %s, last_employee_user_id: %s" %
-                (inserted_share_chain_id, last_employee_user_id))
+                "[JD]last_employee_user_id: %s" % (last_employee_user_id))
 
             self.logger.debug("[JD]构建转发信息")
             yield self._make_share_info(position_info, company_info)
@@ -118,7 +117,8 @@ class PositionHandler(BaseHandler):
             yield self._make_position_visitnum(position_info)
 
             self.logger.debug("[JD]转发积分操作")
-            yield self._make_add_reward_click(position_info, last_employee_user_id)
+            yield self._make_add_reward_click(
+                position_info, last_employee_user_id)
 
             yield self._make_send_publish_template(position_info)
 
@@ -367,7 +367,7 @@ class PositionHandler(BaseHandler):
             "from_employee": 1 if last_employee_user_id else 0,
         })
 
-        raise gen.Return((inserted_share_chain_id, last_employee_user_id))
+        raise gen.Return(last_employee_user_id)
 
     @gen.coroutine
     def _make_share_record(self, position_info, recom_user_id):
