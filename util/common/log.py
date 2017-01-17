@@ -37,10 +37,9 @@ LOG_LEVELS = {
 #  Logger class and functions
 # --------------------------------------------------------------------------
 
+
 class ExactLogLevelFilter(logging.Filter):
-    """
-    The filter appended to handlers
-    """
+    """The filter appended to handlers"""
     def __init__(self, level):
         self.__level = level
 
@@ -83,6 +82,7 @@ class Logger(object):
                 path, backupCount=self._log_backcount)
             self._handlers[level].setFormatter(FORMATER)
             self._handlers[level].suffix = SUFFIX
+            self._handlers[level].setLevel(LOG_LEVELS[level])
             self._handlers[level].addFilter(
                 ExactLogLevelFilter(LOG_LEVELS[level]))
 
