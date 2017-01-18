@@ -11,6 +11,7 @@ import json
 from util.common.cache import BaseRedis
 
 
+# todo (tangyiliang): 关注关系未加缓存，这块以后是否要使用？
 class UserCompanyFollowsCache(BaseRedis):
     """
     Develop Status: To be tested.

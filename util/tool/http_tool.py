@@ -2,9 +2,7 @@
 
 # Copyright 2016 MoSeeker
 
-"""
-基础服务 api 调用工具类，
-"""
+"""基础服务 api 调用工具"""
 
 import tornado.httpclient
 import ujson
