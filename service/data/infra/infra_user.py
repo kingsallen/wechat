@@ -7,7 +7,7 @@ from conf.path import USER_BIND_WX_MOBILE
 from util.tool.http_tool import http_get, http_post, http_put, http_delete, http_patch
 
 
-class UserInfraService(DataService):
+class InfraUserDataService(DataService):
 
     @gen.coroutine
     def post_user_wxbindmobile(self, **kwargs):
