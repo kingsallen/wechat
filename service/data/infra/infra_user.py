@@ -21,4 +21,4 @@
 #         ret = yield http_post(USER_BIND_WX_MOBILE, params)
 #
 #         raise gen.Return(ret)
-# 
+#
