@@ -84,13 +84,13 @@ class CompanyInfoHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def get(self, did):
-        pass
 
-        # company_info = yield self.company_ps.get_company(
-        #     conds={"id": did}, need_conf=True)
-        #
-        # self.render("weixin/position/companyintro.html",
-        #             company=company)
+        company_info = yield self.company_ps.get_company(
+            conds={"id": did}, need_conf=True)
+
+        self.logger.debug("company_info: %s" %  company_info)
+
+        self.render_page(template_name='company/info_old.html', data=company_info)
 
 
 class CompanySurveyHandler(BaseHandler):
