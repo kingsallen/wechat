@@ -5,7 +5,6 @@
 import json
 from tornado import gen
 
-import conf.common as const
 from service.page.base import PageService
 from util.common import ObjectDict
 from util.tool.date_tool import jd_update_date
@@ -127,10 +126,10 @@ class PositionPageService(PageService):
         fav = yield self.user_fav_position_ds.get_user_fav_position({
             "position_id": position_id,
             "sysuser_id": user_id,
-            "favorite": const.FAV_YES
+            "favorite": self.constant.FAV_YES
         })
 
-        raise gen.Return(const.YES if fav else const.NO)
+        raise gen.Return(self.constant.YES if fav else self.constant.NO)
 
     @gen.coroutine
     def get_hr_info(self, publisher):
@@ -174,7 +173,7 @@ class PositionPageService(PageService):
 
         points_conf = yield self.hr_points_conf_ds.get_points_conf(conds={
             "company_id": company_id,
-            "template_id": const.RECRUIT_STATUS_RECOMCLICK_ID,
+            "template_id": self.constant.RECRUIT_STATUS_RECOMCLICK_ID,
         }, appends=["ORDER BY id DESC", "LIMIT 1"])
 
         click_record = yield self.user_employee_points_record_ds.get_user_employee_points_record_cnt(conds={

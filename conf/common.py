@@ -76,6 +76,7 @@ STATUS_UNUSE = 0
 # 页面 meta 属性
 PAGE_META_TITLE = "仟寻招聘"
 PAGE_POSITION_INFO = "职位详情"
+PAGE_COMPANY_INFO = "公司详情"
 
 # ++++++++++REDIS KEYS++++++++
 SESSION_USER = "SESSION_USER_{0}_{1}"
@@ -143,6 +144,19 @@ DEGREE = {
 # 及以上 工作经验、学历中使用
 POSITION_ABOVE = "及以上"
 EXPERIENCE_UNIT = "年"
+
+# 公司相关
+SCALE = {
+    "0": "",
+    "1": "少于15人",
+    "2": "15-50人",
+    "3": "50-150人",
+    "4": "150-500人",
+    "5": "500-1000人",
+    "6": "1000-5000人",
+    "7": "5000-10000人",
+    "8": "10000人以上",
+}
 
 # 默认图标
 SYSUSER_HEADIMG = "weixin/images/hr-avatar-default.png"

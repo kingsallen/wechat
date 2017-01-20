@@ -6,6 +6,7 @@ import re
 from util.common import ObjectDict
 from tornado import gen
 from service.page.base import PageService
+from util.tool.url_tool import make_static_url
 
 
 class CompanyPageService(PageService):
@@ -64,6 +65,19 @@ class CompanyPageService(PageService):
                 "conf_search_img": company_conf_res.get("search_img"),
             })
             company.update(company_conf)
+
+        # 处理公司规模
+        if company.scale:
+            company.scale_name = self.constant.SCALE.get(str(company.scale))
+
+        # 处理 impression:
+        if company.impression:
+            company.impression = [make_static_url(item) for item in company.impression.values()]
+
+        # 处理 banner
+        if company.banner:
+            company.banner = [make_static_url(item) for item in company.banner.values()]
+
 
         raise gen.Return(company)
 

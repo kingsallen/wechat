@@ -7,13 +7,17 @@
 
 """
 import ujson
-
 from tornado import gen
+
+import conf.common as const
+from handler.base import BaseHandler
+
 from util.common import ObjectDict
 from util.common.decorator import check_sub_company
-from handler.base import BaseHandler
-from tests.dev_data.user_company_config import COMPANY_CONFIG
 from util.common.decorator import handle_response
+from util.tool.str_tool import add_item
+
+from tests.dev_data.user_company_config import COMPANY_CONFIG
 
 
 class CompanyVisitReqHandler(BaseHandler):
@@ -88,9 +92,23 @@ class CompanyInfoHandler(BaseHandler):
         company_info = yield self.company_ps.get_company(
             conds={"id": did}, need_conf=True)
 
-        self.logger.debug("company_info: %s" %  company_info)
+        company_data = ObjectDict()
+        company = ObjectDict({
+            "abbreviation": company_info.abbreviation,
+            "name": company_info.name,
+            "logo": self.static_url(company_info.logo or const.COMPANY_HEADIMG),
+            "industry": company_info.industry,
+            "scale_name": company_info.scale_name,
+            "homepage": company_info.homepage,
+            "introduction": company_info.introduction,
+            "impression": company_info.impression
+        })
 
-        self.render_page(template_name='company/info_old.html', data=company_info)
+        add_item(company_data, "company", company)
+
+        self.logger.debug("company_info: %s" % company_data)
+
+        self.render_page(template_name='company/info_old.html', data=company_data, meta_title=const.PAGE_COMPANY_INFO)
 
 
 class CompanySurveyHandler(BaseHandler):
