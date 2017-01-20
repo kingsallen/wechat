@@ -702,6 +702,7 @@ class BaseHandler(MetaBaseHandler):
 
     def get_template_namespace(self):
         namespace = super().get_template_namespace()
+        # TODO 添加前端 url 的白名单参数
         add_namespace = ObjectDict(
             env=self.env,
             params=self.params,
