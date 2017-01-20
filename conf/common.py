@@ -73,6 +73,9 @@ JD_TIME_FORMAT_YESTERDAY = "昨天 {:0>2}:{:0>2}"
 STATUS_INUSE = 1
 STATUS_UNUSE = 0
 
+# 页面 meta 属性
+PAGE_POSITION_INFO = "职位详情"
+
 # ++++++++++REDIS KEYS++++++++
 SESSION_USER = "SESSION_USER_{0}_{1}"
 SESSION_ID = "{0}:{1}"
