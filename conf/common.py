@@ -74,6 +74,7 @@ STATUS_INUSE = 1
 STATUS_UNUSE = 0
 
 # 页面 meta 属性
+PAGE_META_TITLE = "仟寻招聘"
 PAGE_POSITION_INFO = "职位详情"
 
 # ++++++++++REDIS KEYS++++++++

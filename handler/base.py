@@ -755,7 +755,7 @@ class BaseHandler(MetaBaseHandler):
         super().render(*args, **kwargs)
 
     def render_page(self, template_name, data, status_code=const.API_SUCCESS,
-                    message=msg_const.RESPONSE_SUCCESS, http_code=200):
+                    message=msg_const.RESPONSE_SUCCESS, meta_title=const.PAGE_META_TITLE, http_code=200):
         """render 页面"""
         self.log_info = {"res_type": "html", "status_code": status_code}
         self.set_status(http_code)
@@ -788,7 +788,7 @@ class BaseHandler(MetaBaseHandler):
                 self.finish()
                 return
 
-        super().render(template_name=template_name, render_json=render_json)
+        super().render(template_name=template_name, render_json=render_json, title=meta_title)
         return
 
     def _send_json(self, data, status_code, message, http_code=200):

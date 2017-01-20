@@ -105,7 +105,7 @@ class PositionHandler(BaseHandler):
                 # TODO 定制插入
                 # 诺华定制
                 # 代理投递
-                self.render_page("position/info_old.html", data = position_data, title=const.PAGE_POSITION_INFO)
+                self.render_page("position/info_old.html", data=position_data, meta_title=const.PAGE_POSITION_INFO)
             else:
                 # [JD]职位所属团队及相关信息拼装
                 module_job_require = self._make_json_job_require(position_info)
@@ -116,7 +116,7 @@ class PositionHandler(BaseHandler):
 
                 add_item(position_data, "module_company_info", module_company_info)
                 add_item(position_data, "module_job_require", module_job_require)
-                self.render_page("position/info.html", data = position_data, title=const.PAGE_POSITION_INFO)
+                self.render_page("position/info.html", data=position_data, meta_title=const.PAGE_POSITION_INFO)
 
             # 后置操作
             # 红包处理
