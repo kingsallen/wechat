@@ -3,6 +3,7 @@
 # Copyright 2016 MoSeeker
 
 import re
+import ujson
 from util.common import ObjectDict
 from tornado import gen
 from service.page.base import PageService
@@ -72,11 +73,11 @@ class CompanyPageService(PageService):
 
         # 处理 impression:
         if company.impression:
-            company.impression = [make_static_url(item) for item in company.impression.values()]
+            company.impression = [make_static_url(item) for item in ujson.decode(company.impression).values()]
 
         # 处理 banner
         if company.banner:
-            company.banner = [make_static_url(item) for item in company.banner.values()]
+            company.banner = [make_static_url(item) for item in ujson.decode(company.banner).values()]
 
 
         raise gen.Return(company)
