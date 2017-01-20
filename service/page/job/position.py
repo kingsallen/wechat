@@ -73,7 +73,6 @@ class PositionPageService(PageService):
 
         # 后置处理：
         # 福利特色 需要分割
-
         if position_res.feature:
             position.feature = split(position_res.feature, ["#"])
 
@@ -89,7 +88,12 @@ class PositionPageService(PageService):
             position.share_title = share_conf.title
             position.share_description = share_conf.share_description
 
-        # 职位自定义字段
+        # 职能自定义字段（自定义字段 job_occupation）
+        if position_ext_res.job_occupation_id:
+            job_occupation_res = yield self.job_occupation_ds.get_occupation(conds={"id": position_ext_res.job_occupation_id})
+            position.job_occupation = job_occupation_res.name
+
+        # 属性自定义字段（自定义字段 job_custom）
         if position_ext_res.job_custom_id:
             job_custom_res = yield self.job_custom_ds.get_custom(conds={"id": position_ext_res.job_custom_id})
             position.job_custom = job_custom_res.name
@@ -153,23 +157,11 @@ class PositionPageService(PageService):
     @gen.coroutine
     def get_recommend_positions(self, position_id):
         """获得 JD 页推荐职位
-        reference: https://wiki.moseeker.com/position-api.md#recommended
-
         :param position_id: 职位 id
         """
 
-        req = ObjectDict({
-            'pid': position_id,
-        })
-        try:
-            response = list()
-            ret = yield http_get(self.path.POSITION_RECOMMEND, req)
-            if ret.status == 0:
-                response = ret.data
-        except Exception as error:
-            self.logger.warn(error)
-
-        raise gen.Return(response)
+        pos_recommends = yield self.job_position_ds.get_recommend_positions(position_id=position_id)
+        raise gen.Return(pos_recommends)
 
     @gen.coroutine
     def add_reward_for_recom_click(self,

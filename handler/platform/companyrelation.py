@@ -79,6 +79,13 @@ class CompanyHandler(BaseHandler):
 
         return default
 
+class CompanyInfoHandler(BaseHandler):
+
+    @handle_response
+    @gen.coroutine
+    def get(self, did):
+        pass
+
 
 class CompanySurveyHandler(BaseHandler):
 

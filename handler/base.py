@@ -20,7 +20,7 @@ from app import logger
 from oauth.wechat import WeChatOauth2Service, WeChatOauthError, JsApi
 from util.common import ObjectDict
 from util.common.cipher import decode_id
-from util.common.decorator import check_signature, check_outside_wechat
+from util.common.decorator import check_signature
 from util.tool.date_tool import curr_now
 from util.tool.json_tool import encode_json_dumps, json_dumps
 from util.tool.str_tool import to_str, to_hex, from_hex
@@ -155,7 +155,6 @@ class BaseHandler(MetaBaseHandler):
         self._log_info = dict(value)
 
     # PUBLIC API
-    @check_outside_wechat
     @check_signature
     @gen.coroutine
     def prepare(self):

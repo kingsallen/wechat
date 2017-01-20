@@ -6,6 +6,7 @@ from tornado import gen
 from service.data.base import DataService
 from util.common.decorator import cache
 from util.common import ObjectDict
+from util.tool.http_tool import http_get
 
 
 class JobPositionDataService(DataService):
@@ -52,3 +53,24 @@ class JobPositionDataService(DataService):
             fields=fields)
 
         raise gen.Return(ret)
+
+    @gen.coroutine
+    def get_recommend_positions(self, position_id):
+        """获得 JD 页推荐职位
+        reference: https://wiki.moseeker.com/position-api.md#recommended
+
+        :param position_id: 职位 id
+        """
+
+        req = ObjectDict({
+            'pid': position_id,
+        })
+        try:
+            response = list()
+            ret = yield http_get(self.path.POSITION_RECOMMEND, req)
+            if ret.status == 0:
+                response = ret.data
+        except Exception as error:
+            self.logger.warn(error)
+
+        raise gen.Return(response)

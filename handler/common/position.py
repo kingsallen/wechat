@@ -70,8 +70,6 @@ class PositionHandler(BaseHandler):
             can_apply = yield self.application_ps.is_allowed_apply_position(
                 self.current_user.sysuser.id, company_info.id)
 
-            # 诺华定制。本次不实现
-
             # 相似职位推荐
             self.logger.debug("[JD]构建相似职位推荐")
             recomment_positions_res = yield self.position_ps.get_recommend_positions(position_id)
@@ -80,27 +78,44 @@ class PositionHandler(BaseHandler):
                 position_info, company_info, star, application, endorse,
                 can_apply, team.id, did)
             module_job_description = self._make_json_job_description(position_info)
-            module_job_require = self._make_json_job_require(position_info)
             module_job_need = self._make_json_job_need(position_info)
             module_feature = self._make_json_job_feature(position_info)
-            module_company_info = self._make_json_job_company_info(company_info, did)
             module_position_recommend = self._make_recommend_positions(recomment_positions_res)
 
             position_data = ObjectDict()
             add_item(position_data, "header", header)
             add_item(position_data, "module_job_description", module_job_description)
-            add_item(position_data, "module_job_require", module_job_require)
             add_item(position_data, "module_job_need", module_job_need)
             add_item(position_data, "module_feature", module_feature)
-            add_item(position_data, "module_company_info", module_company_info)
             add_item(position_data, "module_position_recommend", module_position_recommend)
 
-            # [JD]职位所属团队及相关信息拼装
-            self.logger.debug("[JD]构建团队相关信息")
-            yield self._add_team_data(position_data, team,
-                                      position_info.company_id, position_id)
+            # 构建老微信样式所需要的数据
+            if not self.current_user.wechat.show_new_jd:
+                module_job_require_old = self._make_json_job_require_old(position_info)
+                module_department_old = self._make_json_job_department(position_info)
+                module_job_attr_old = self._make_json_job_attr(position_info)
+                module_hr_register_old = self.current_user.wechat.hr_register & True
 
-            self.render_page("position/info.html", data=position_data)
+                add_item(position_data, "module_job_require", module_job_require_old)
+                add_item(position_data, "module_department", module_department_old)
+                add_item(position_data, "module_job_attr", module_job_attr_old)
+                add_item(position_data, "module_hr_register", module_hr_register_old)
+
+                # TODO 定制插入
+                # 诺华定制
+                # 代理投递
+                self.render("position/info_old.html", data = position_data)
+            else:
+                # [JD]职位所属团队及相关信息拼装
+                module_job_require = self._make_json_job_require(position_info)
+                module_company_info = self._make_json_job_company_info(company_info, did)
+                self.logger.debug("[JD]构建团队相关信息")
+                yield self._add_team_data(position_data, team,
+                                          position_info.company_id, position_id)
+
+                add_item(position_data, "module_company_info", module_company_info)
+                add_item(position_data, "module_job_require", module_job_require)
+                self.render_page("position/info.html", data = position_data)
 
             # 后置操作
             # 红包处理
@@ -229,6 +244,7 @@ class PositionHandler(BaseHandler):
             pos.link = make_url(path.POSITION_PATH.format(item.get("pid")), self.params,
                                 escape=["pid", "keywords", "cities", "candidate_source", "employment_type", "salary",
                                 "department", "occupations", "custom", "degree", "page_from", "page_size"])
+            pos.company_logo = self.static_url(item.get("company_logo") or const.COMPANY_HEADIMG)
             data.append(pos)
             if len(data) > 2:
                 break
@@ -254,7 +270,8 @@ class PositionHandler(BaseHandler):
             "can_apply": not can_apply,
             "forword_message": company_info.conf_forward_message or msg.POSITION_FORWARD_MESSAGE,
             "team": team_id,
-            "did": did
+            "did": did,
+            "salary": position_info.salary,
             #"team": position_info.department.lower() if position_info.department else ""
         })
 
@@ -324,13 +341,50 @@ class PositionHandler(BaseHandler):
 
         return data
 
+    def _make_json_job_require_old(self, position_info):
+        """构造老微信样式的职位要求"""
+        require = []
+
+        if position_info.degree:
+            require.append(["学历", position_info.degree])
+        if position_info.experience:
+            require.append(["工作经验", position_info.experience])
+        if position_info.language:
+            require.append(["语言要求", position_info.language])
+
+        if len(require) == 0:
+            data = None
+        else:
+            data = ObjectDict({
+                "data":  require
+            })
+        return data
+
+    def _make_json_job_department(self, position_info):
+        """构造老微信的所属部门，自定义职能，自定义属性"""
+        data = ObjectDict({
+            "department_name": position_info.department,
+            "occupation_name": position_info.employment_type,
+            "custom_name": position_info.job_occupation,
+        })
+
+        return data
+
+    def _make_json_job_attr(self, position_info):
+        """构造老微信的职位属性"""
+        data = ObjectDict({
+            "job_type": position_info.candidate_source,
+            "work_type": position_info.employment_type,
+        })
+
+        return data
+
     @gen.coroutine
     def _make_refresh_share_chain(self, position_info):
         """构造刷新链路"""
 
         last_employee_user_id = 0
 
-        # TODO 如果分享者，点击自己分享的链接，是否需要刷新链路？ by 煜昕 1.14
         if self.current_user.recom:
             yield self._make_share_record(
                 position_info, recom_user_id=self.current_user.recom.id)

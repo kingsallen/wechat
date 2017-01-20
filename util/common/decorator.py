@@ -5,6 +5,7 @@
 import functools
 import hashlib
 import traceback
+from urllib.parse import urlsplit, urlencode
 
 from tornado import gen
 from tornado.locks import Semaphore
@@ -122,21 +123,6 @@ def check_signature(func):
                 yield func(self, *args, **kwargs)
     return wrapper
 
-
-# todo (yiliang) 临时封锁手机浏览器打开网页
-def check_outside_wechat(func):
-    @functools.wraps(func)
-    @gen.coroutine
-    def wrapper(self, *args, **kwargs):
-        if not self.in_wechat:
-            self.write("<span style='font-size: 24px'>请在微信中打开</span>")
-            self.finish()
-            return
-        else:
-            yield func(self, *args, **kwargs)
-    return wrapper
-
-
 def check_sub_company(func):
     """
     Check request sub_company data or not.
@@ -161,4 +147,35 @@ def check_sub_company(func):
         yield func(self, *args, **kwargs)
 
     return wrapper
+
+def authenticated(func):
+    """
+    判断用户是否登录
+    若在非微信环境（即手机浏览器等）用户未登录，
+    则跳转到配置到 setting 的登录 url。`login url <RequestHandler.get_login_url>`
+    若在企业号的服务号环境，则进行静默授权
+    """
+
+    @functools.wraps(func)
+    @gen.coroutine
+    def wrapper(self, *args, **kwargs):
+        if self.in_wechat:
+            if not self._authable:
+                pass
+
+
+        elif not self.current_user.sysuser:
+                url = self.get_login_url()
+                if "?" not in url:
+                    if urlsplit(url).scheme:
+                        # if login url is absolute, make next absolute too
+                        next_url = self.request.full_url()
+                    else:
+                        next_url = self.request.uri
+                    url += "?" + urlencode(dict(next=next_url))
+                self.redirect(url)
+                return
+        yield func(self, *args, **kwargs)
+    return wrapper
+
 
