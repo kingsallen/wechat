@@ -86,6 +86,12 @@ class CompanyInfoHandler(BaseHandler):
     def get(self, did):
         pass
 
+        # company_info = yield self.company_ps.get_company(
+        #     conds={"id": did}, need_conf=True)
+        #
+        # self.render("weixin/position/companyintro.html",
+        #             company=company)
+
 
 class CompanySurveyHandler(BaseHandler):
 

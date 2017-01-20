@@ -90,6 +90,7 @@ class PositionHandler(BaseHandler):
             add_item(position_data, "module_position_recommend", module_position_recommend)
 
             # 构建老微信样式所需要的数据
+            self.logger.debug("[JD]是否显示新样式: {}".format(self.current_user.wechat.show_new_jd))
             if not self.current_user.wechat.show_new_jd:
                 module_job_require_old = self._make_json_job_require_old(position_info)
                 module_department_old = self._make_json_job_department(position_info)
