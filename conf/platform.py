@@ -9,6 +9,7 @@
 例如 SUCCESS = "成功"
 
 """
+from util.common import ObjectDict
 
 ## 企业号搜索页设置
 
@@ -41,15 +42,15 @@ LANDING = {
 }
 
 #### 薪资范围搜索项
-SALARY = {
-    "0" : {"name": "4k及以下", "salary_bottom": 1, "salary_top": 4},
-    "1" : {"name": "4k-6k", "salary_bottom": 4, "salary_top": 6},
-    "2" : {"name": "6k-8k", "salary_bottom": 6, "salary_top": 8},
-    "3" : {"name": "8k-10k", "salary_bottom": 8, "salary_top": 10},
-    "4" : {"name": "10k-15k", "salary_bottom": 10, "salary_top": 15},
-    "5" : {"name": "15k-25k", "salary_bottom": 15, "salary_top": 25},
-    "6" : {"name": "25k及以上", "salary_bottom": 25, "salary_top": 999},
-}
+SALARY = ObjectDict({
+    "0": {"name": "4k及以下", "salary_bottom": 1, "salary_top": 4},
+    "1": {"name": "4k-6k", "salary_bottom": 4, "salary_top": 6},
+    "2": {"name": "6k-8k", "salary_bottom": 6, "salary_top": 8},
+    "3": {"name": "8k-10k", "salary_bottom": 8, "salary_top": 10},
+    "4": {"name": "10k-15k", "salary_bottom": 10, "salary_top": 15},
+    "5": {"name": "15k-25k", "salary_bottom": 15, "salary_top": 25},
+    "6": {"name": "25k及以上", "salary_bottom": 25, "salary_top": 999},
+})
 
 ### 学历搜索项
 DEGREE = {
@@ -61,5 +62,21 @@ DEGREE = {
     "6": "博士",
 }
 
+
 # 媒体类型
 MEDIA_TYPE = ('image', 'video')
+
+##########
+# 职位列表页设置
+POSITION_LIST_PAGE_COUNT = 10
+
+### 职位列表调用基础服务使用的学历查询字符串
+
+SEARCH_DEGREE = ObjectDict({
+    "1": "初中,中专,高中,初中及以上,中专及以上,高中及以上",
+    "2": "大专,初中及以上,中专及以上,高中及以上,大专及以上",
+    "3": "本科,初中及以上,中专及以上,高中及以上,大专及以上,本科及以上",
+    "4": "硕士,初中及以上,中专及以上,高中及以上,大专及以上,本科及以上,硕士及以上",
+    "5": "MBA,初中及以上,中专及以上,高中及以上,大专及以上,本科及以上,硕士及以上,MBA及以上",
+    "6": "博士,初中及以上,中专及以上,高中及以上,大专及以上,本科及以上,硕士及以上,MBA及以上,博士及以上",
+})

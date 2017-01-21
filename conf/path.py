@@ -20,4 +20,5 @@ APPLICATION_APPLY_COUNT = "application/count/check"
 
 # 职位服务
 POSITION_RECOMMEND = "positions/recommended"
+POSITION_LIST = "position/list"
 # ============================ 基础服务结束 ============================

@@ -117,6 +117,7 @@ FAV_INTEREST = 2
 CANDIDATE_SOURCE = {
     "0": "社招",
     "1": "校招",
+    "2": "定向招聘"
 }
 
 # 工作性质

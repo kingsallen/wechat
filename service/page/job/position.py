@@ -258,3 +258,8 @@ class PositionPageService(PageService):
                         handler_params=handler_params)
 
         raise gen.Return(res)
+
+    @gen.coroutine
+    def infra_get_position_list(self, params):
+        res = yield self.infra_position_ds.get_position_list(params)
+        raise gen.Return(res)

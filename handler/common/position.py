@@ -3,6 +3,7 @@
 from tornado import gen
 
 import conf.common as const
+import conf.platform as const_platorm
 import conf.message as msg
 import conf.path as path
 import conf.wechat as wx
@@ -600,3 +601,122 @@ class PositionStarHandler(BaseHandler):
             self.send_json_success()
         else:
             self.send_json_error()
+
+
+class PositionListHandler(BaseHandler):
+    """职位列表"""
+
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        # 收集 params
+
+        if self.params.hb_c:
+            # todo 红包职位列表
+            infra_params = {}
+        else:
+            # 普通职位列表
+            infra_params = self._make_position_list_infra_params()
+
+        position_list = yield self.position_ps.infra_get_position_list(
+            infra_params)
+
+        # todo 红包分享信息
+        yield self._make_share_info(
+            self.current_user.company.id, self.params.did)
+
+        # 如果是下拉刷新请求的职位, 返回新增职位的页面
+        if self.params.get("restype", "") == "json":
+            self.render("weixin/position/position_list_items.html",
+                        positions=position_list,
+                        is_employee=bool(self.current_user.employee)
+                        )
+            return
+
+        # 直接请求页面返回
+        else:
+            _title = {  # recomlist 还没有明显区分前的临时做法.
+                'list':      '我要求职',
+                'recomlist': '我要推荐'
+            }
+            self.render("neo_weixin/position/position_list.html",
+                        positions=position_list,
+                        position_title=_title.get(self.params.m, u'我要求职'),
+                        url='',
+                        is_employee=bool(self.current_user.employee))
+
+    @gen.coroutine
+    def _make_share_info(self, company_id, did=None):
+        """构建 share 内容"""
+
+        company_info = yield self.company_ps.get_company(
+            conds={"id": did or company_id}, need_conf=True)
+
+        cover = self.static_url(company_info.logo)
+        title = "%s热招职位" % company_info.abbreviation
+        description = msg.SHARE_DES_DEFAULT
+        link = make_url(
+            path.POSITION_LIST,
+            self.params,
+            host=self.request.host,
+            protocol=self.request.protocol,
+            recom=self._make_recom(),
+            escape=["pid", "keywords", "cities", "candidate_source",
+                    "employment_type", "salary", "department", "occupations",
+                    "custom", "degree", "page_from", "page_size"]
+        )
+        self.params.share = ObjectDict({
+            "cover":       cover,
+            "title":       title,
+            "description": description,
+            "link":        link
+        })
+
+    def _make_position_list_infra_params(self):
+        """构建调用基础服务职位列表的 params"""
+
+        infra_params = ObjectDict()
+
+        # 暂时不考虑 QX 的情况
+        infra_params.company_id = self.current_user.company.id
+
+        if self.params.did:
+            infra_params.did = self.params.did
+
+        start_count = (int(self.params.get("count", 0)) *
+                       const_platorm.POSITION_LIST_PAGE_COUNT)
+
+        infra_params.page_from = start_count
+        infra_params.page_size = const_platorm.POSITION_LIST_PAGE_COUNT
+
+        if self.params.salary:
+            k = str(self.params.salary)
+            infra_params.salary = "%d,%d" % (
+                const_platorm.SALARY.get(k).salary_bottom,
+                const_platorm.SALARY.get(k).salary_top)
+
+        if self.params.degree:
+            k = str(self.params.degree)
+            infra_params.degree = const_platorm.SEARCH_DEGREE.get(k) or ""
+
+        if self.params.candidate_source:
+            infra_params.candidate_source = const.CANDIDATE_SOURCE.get(
+                self.params.candidate_source)
+        else:
+            infra_params.candidate_source = ""
+
+        if self.params.employment_type:
+            infra_params.employment_type = const.EMPLOYMENT_TYPE.get(
+                self.params.employement_type)
+        else:
+            infra_params.employement_type = ""
+
+        infra_params.update(
+            keywords=self.params.keyword or "",
+            cities=self.params.city or "",
+            department=self.params.department or "",
+            occupations=self.params.occupation or "",
+            custom=self.params.custom or "",
+            order_by_priority=True)
+
+        return infra_params
