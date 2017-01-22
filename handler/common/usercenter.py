@@ -21,7 +21,7 @@ class HomeHandler(BaseHandler):
         self.params._binding_state = employee.activation if employee else 1
         self.params.user = yield self.usercenter_ps.get_user(self.current_user.sysuser.id)
 
-        self.render("weixin/sysuser/personalcenter.html")
+        self.render(template_name="weixin/sysuser/personalcenter.html")
 
 class Logout(BaseHandler):
     """

@@ -634,6 +634,7 @@ class PositionListHandler(BaseHandler):
             return
 
         # 直接请求页面返回
+        # TODO 可以把 title 常量放到 common 中，参考 # 页面 meta 属性
         else:
             _title = {  # recomlist 还没有明显区分前的临时做法.
                 'list':      '我要求职',
