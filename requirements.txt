@@ -22,5 +22,4 @@ Tornado-MySQL==0.5.1
 traitlets==4.3.1
 ujson==1.35
 wcwidth==0.1.7
-cStringIO
-qiniu
+qiniu==7.0.7
