@@ -11,7 +11,7 @@ from tornado import gen
 
 from service.page.base import PageService
 
-class UserCenterPageService(PageService):
+class UsercenterPageService(PageService):
 
     @gen.coroutine
     def get_user(self, user_id):
