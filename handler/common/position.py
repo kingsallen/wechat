@@ -215,9 +215,13 @@ class PositionHandler(BaseHandler):
             pos.title = item.get("job_title")
             pos.location = item.get("job_city", "")
             pos.salary = gen_salary(item.get("salary_top"), item.get("salary_bottom"))
-            pos.link = make_url(path.POSITION_PATH.format(item.get("pid")), self.params,
-                                escape=["pid", "keywords", "cities", "candidate_source", "employment_type", "salary",
-                                "department", "occupations", "custom", "degree", "page_from", "page_size"])
+            pos.link = make_url(
+                path.POSITION_PATH.format(item.get("pid")), self.params,
+                escape=[
+                    "recom", "pid", "keywords", "cities", "candidate_source",
+                    "employment_type", "salary", "department", "occupations",
+                    "custom", "degree", "page_from", "page_size"
+                ])
             data.append(pos)
             if len(data) > 2:
                 break
