@@ -13,7 +13,7 @@ from urllib.parse import urlparse, parse_qs, urlencode, parse_qsl, urlunparse
 from setting import settings
 
 
-def make_url(path, params=None, host="", protocol="http", escape=None,
+def make_url(path, params=None, host="", protocol="https", escape=None,
              **kwargs):
     """
     生成 url 的 helper 方法， 一般在 handler 调用

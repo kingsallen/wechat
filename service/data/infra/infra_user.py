@@ -51,7 +51,7 @@ class InfraUserDataService(DataService):
         """更新用户信息"""
 
         params = ObjectDict({
-            "user_id": user_id
+            "id": user_id
         })
         params.update(req)
 

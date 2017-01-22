@@ -55,6 +55,11 @@ settings['elk_cluster'] = {
     'redis_port': 6379,
 }
 
+# qiniu账号
+settings['qiniu_ak'] = 'rMkcbmVYotu9Zxi0MqjmP5EFy6a9sZ5-h78Qt5GV'
+settings['qiniu_sk'] = 'n8qRg0VJBsGyHlZJh1W887LDn2Z-2gbavg9xgoRP'
+settings['qiniu_bucket'] = "moseekertest"
+
 # tornado log配置
 settings['blocking_log_threshold'] = 0.5
 

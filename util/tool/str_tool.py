@@ -116,3 +116,14 @@ def add_item(d, k, v=None, strict=True):
     if strict is True and v:
         return d.setdefault(k, v) == v
     return None
+
+def email_validate(email):
+    """邮箱验证
+    :param email:
+    :return:
+    """
+    result = re.match(r"^[A-Za-z0-9_\-\.]*@([-A-Za-z0-9]+\.)+[A-Za-z]*", email)
+    if result:
+        return result.group(0) == email
+    else:
+        return False

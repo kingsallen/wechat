@@ -32,9 +32,14 @@ common_routes = [
     # position
     (r"/m/position/([0-9]+)",              "handler.common.position.PositionHandler",                   {"event": "position_info"}),
     (r"/m/position",                       "handler.common.position.PositionListHandler",               {"event": "position_list"}),
-    # app forward 给前端，展示纯前端渲染的 SPA
+    # usercenter
+    (r"/m/usercenter/applications",        "handler.common.usercenter.AppRecordsHandler",               {"event": "usercenter_applications"}),
+    (r"/m/usercenter/favpositions",        "handler.common.usercenter.FavPositionsHandler",             {"event": "usercenter_favpositions"}),
+    (r"/m/usercenter/setting/(\s+)",       "handler.common.usercenter.UserSettingHandler",              {"event": "usercenter_settings"}),
     (r"/m/usercenter",                     "handler.common.usercenter.HomeHandler",                     {"event": "usercenter_home"}),
+    # app forward 给前端，展示纯前端渲染的 SPA
     (r"/m/app/.*",                         "handler.common.app.IndexHandler",                           {"event": "app_index"}),
+
     # common api
     (r"/m/api/position/star",              "handler.common.position.PositionStarHandler",               {"event": "position_star"}),
     (r"/m/api/chat/unread[\/]*([0-9]+)*",  "handler.common.im.UnreadCountHandler",                      {"event": "chat_unread"}),
@@ -46,10 +51,11 @@ common_routes = [
 # 企业号的单独 routes
 platform_routes = [
     (r"/m/start",                          "handler.platform.landing.LandingHandler",                   {"event": "start_landing"}),
-    (r"/m/company",                        "handler.platform.companyrelation.CompanyHandler",           {"event": "company_info"}),
     (r"/m/company/(\d+)",                  "handler.platform.companyrelation.CompanyInfoHandler",       {"event": "company_old_info"}),
-    (r"/m/company/team",                   "handler.platform.team.TeamIndexHandler",                    {"event": "team_info"}),
+    (r"/m/company",                        "handler.platform.companyrelation.CompanyHandler",           {"event": "company_info"}),
     (r"/m/company/team/(\d+)",             "handler.platform.team.TeamDetailHandler",                   {"event": "team_detail"}),
+    (r"/m/company/team",                   "handler.platform.team.TeamIndexHandler",                    {"event": "team_info"}),
+
     (r"/m/api/company/visitreq",           "handler.platform.companyrelation.CompanyVisitReqHandler",   {"event": "company_visitreq"}),
     (r"/m/api/company/survey",             "handler.platform.companyrelation.CompanySurveyHandler",     {"event": "company_survey"}),
     (r"/m/api/company/follow",             "handler.platform.companyrelation.CompanyFollowHandler",     {"event": "company_follow"})

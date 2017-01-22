@@ -17,7 +17,6 @@ class LandingHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def get(self):
-        signature = str(self.get_argument("wechat_signature", ""))
         selected = ObjectDict({
             "city": self.get_argument("city", ''),
             "salary": self.get_argument("salary", ''),
@@ -30,15 +29,8 @@ class LandingHandler(BaseHandler):
             "custom": self.get_argument("custom", '')
         })
 
-        if signature:
-            conds = {'signature': signature}
-            wechat = yield self.wechat_ps.get_wechat(conds)
-            company_id = wechat.get("company_id")
-        else:
-            self.write_error(404)
-            return
-
-        search_seq = yield self.landing_ps.get_landing_item(self.current_user.company, company_id, selected)
+        search_seq = yield self.landing_ps.get_landing_item(self.current_user.company,
+                                                            self.current_user.wechat.company_id, selected)
 
         company = ObjectDict({
             "logo": self.static_url(self.current_user.company.get("logo")),
@@ -48,4 +40,3 @@ class LandingHandler(BaseHandler):
         })
 
         self.render(template_name="company/search.html", company=company)
-

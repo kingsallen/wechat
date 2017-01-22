@@ -33,3 +33,10 @@ class UsercenterPageService(PageService):
 
         ret = yield self.infra_user_ds.get_fav_positions(user_id)
         raise gen.Return(ret)
+
+    @gen.coroutine
+    def update_user(self, user_id, params):
+        """更新用户数据"""
+
+        ret = yield self.infra_user_ds.post_user(self, user_id, params)
+        raise gen.Return(ret)

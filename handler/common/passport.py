@@ -61,3 +61,14 @@ class LoginHandler(BaseHandler):
                 return
 
         self.send_json_error()
+
+class Logout(BaseHandler):
+    """
+    用户登出.
+    """
+
+    def get(self):
+        """
+        登出操作，登出后跳转到职位列表页.
+        """
+        pass

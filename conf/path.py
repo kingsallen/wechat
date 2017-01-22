@@ -7,6 +7,8 @@ POSITION_PATH = '/m/position/{}'
 RED_PACKET_CARD = '/mobile/redpack'
 TEAM_PATH = '/m/company/team/{}'
 COMPANY_TEAM = '/m/company/team'
+USER_CENTER = '/m/usercenter'
+USER_CENTER_SETTING = 'm/usercenter/setting/home'
 
 OLD_POSITION_PATH = '/mobile/position'
 

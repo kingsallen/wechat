@@ -1,4 +1,4 @@
-# -*- coding=utf-8 -*-
+# coding=utf-8
 # Copyright 2016 MoSeeker
 
 """
@@ -6,13 +6,13 @@
 :date 2016.10.13
 
 """
+from tornado import gen
 
 import conf.common as const
+import conf.message as msg
 
-from tornado import gen
 from handler.base import BaseHandler
 from util.common.decorator import handle_response
-import conf.message as msg
 
 
 class CellphoneBindHandler(BaseHandler):

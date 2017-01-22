@@ -2,183 +2,188 @@
 
 from tornado import gen
 from handler.base import BaseHandler
+
+import conf.common as const
+import conf.path as path
+import conf.message as msg
 from util.common.decorator import handle_response
+from util.tool.str_tool import gen_salary, email_validate
+from util.tool.date_tool import jd_update_date
+from util.tool.url_tool import make_url
+from util.image.upload import QiniuUpload
 
 class HomeHandler(BaseHandler):
-    """
-    个人中心首页, 渲染个人中心页面.
+    """个人中心首页, 渲染个人中心页面
     """
 
     @handle_response
     @gen.coroutine
     def get(self):
-        """
-        个人中心首页视图.
-        """
 
         employee = yield self.user_ps.get_valid_employee_by_user_id(
             self.current_user.sysuser.id, self.current_user.company.id)
         self.params._binding_state = employee.activation if employee else 1
-        self.params.user = yield self.usercenter_ps.get_user(self.current_user.sysuser.id)
+        res = yield self.usercenter_ps.get_user(self.current_user.sysuser.id)
+        res.data.headimg = self.static_url(res.data.headimg or const.SYSUSER_HEADIMG)
+        self.params.user = res.data
+
+        self.logger.debug("home: %s" % self.params)
 
         self.render(template_name="weixin/sysuser/personalcenter.html")
 
-class Logout(BaseHandler):
+class AppRecordsHandler(BaseHandler):
+    """求职记录
     """
-    用户登出.
-    """
+
+    @handle_response
+    @gen.coroutine
     def get(self):
-        """
-        登出操作，登出后跳转到职位列表页.
-        """
-        pass
 
+        res = yield self.usercenter_ps.get_applied_applications(self.current_user.sysuser.id)
+        self.params.application = res.data
+        self.logger.debug("home: %s" % self.params)
 
-class ConfigHome(BaseHandler):
+        self.render(template_name="weixin/sysuser/applicationrecord_new.html")
+
+class FavPositionsHandler(BaseHandler):
+    """感兴趣的职位
     """
-    用户配置.
-    """
+
+    @handle_response
+    @gen.coroutine
     def get(self):
-        """
-        获取用户的配置数据并展示.
-        """
-        pass
 
+        res = yield self.usercenter_ps.get_fav_positions(self.current_user.sysuser.id)
+        if res.status == const.API_SUCCESS:
+            for item in res.data:
+                item['salary'] = gen_salary(item['salary_top'], item['salary_bottom'])
+                item['update_time'] = jd_update_date(item['update_time'])
+        self.params.position = res.data
 
-class ConfigPasswd(BaseHandler):
+        self.logger.debug("home: %s" % self.params)
+        self.render(template_name="weixin/sysuser/favoriteposition.html")
+
+class UserSettingHandler(BaseHandler):
+    """用户配置
     """
-    用户密码.
-    * 设置密码视图
-    * 更改密码视图
-    """
-    def get(self):
-        view = self.get_argument('view', None)
 
-        if view == 'set':
-            return self.view_set()
-        elif view == 'change':
-            return self.view_change()
+    @handle_response
+    @gen.coroutine
+    def get(self, method):
+
+        res = yield self.usercenter_ps.get_user(self.current_user.sysuser.id)
+        if res.data and method == "home":
+            # 配置-首页
+            self.params.user = res.data
+            self.params._headimg = self.static_url(res.data.headimg or const.SYSUSER_HEADIMG)
+            self.render(template_name="neo_weixin/sysuser/accountconfig.html")
+
+        elif res.data and method == "name":
+            # 配置-真实姓名
+            self.params._name = res.data.name or ''
+            self.render(template_name="weixin/sysuser/accountconfig-name.html")
+
+        elif res.data and method == "email":
+            # 配置-Email
+            self.params._email = res.data.email or ''
+            self.render(template_name="weixin/sysuser/accountconfig-email.html")
+
+        elif res.data.password is None and method == "set_passwd":
+            # 配置-设置密码
+            self.render(template_name="weixin/sysuser/accountconfig-password.html")
+
+        elif res.data.password and method == "change_passwd":
+            # 配置-修改密码
+            self.params._mobile = res.data.mobile or ''
+            self.render(template_name="weixin/sysuser/accountconfig-password-mobilevalidate.html")
+
         else:
-            # Invalid access, redirect to config home.
-            return self.redirect('')
+            self.write_error(404)
 
-    def post(self):
-        """
-        更改密码处理器
-        """
-        pass
+    @handle_response
+    @gen.coroutine
+    def post(self, method):
 
-    def view_set(self):
-        """
-        设置密码视图
-        """
-        pass
+        res = yield self.usercenter_ps.get_user(self.current_user.sysuser.id)
+        if res.data and method == "avatar":
+            # 配置-设置头像
+            vfile = self.request.files.get('vfile', None)
+            if vfile is None:
+                self.write_error(500)
+                return
 
-    def view_change(self):
-        """
-        更改密码视图
-        """
-        pass
+            body = vfile[0].get('body')
+            upload_settings = dict()
+            upload_settings['filename'] = vfile[0].get('filename')
+            upload_settings['filename_prefix'] = "upload/avatar/{}".format(self.current_user.sysuser.id)
+            upload_settings['max_filesize'] = 1024 * 1024 * 2  # MB
+            upload_settings['min_width'] = 30  # px
+            upload_settings['before_upload'] = ['expand', 'crop']
+            upload_settings['filter_expand'] = {
+                "width": 300,
+                "height": 300,
+            }
 
+            # upload the avatar to qiniu
+            uploader = QiniuUpload(upload_settings)
+            uploader.set_logger(self.logger)
+            result = uploader.upload_bytes(body)
 
-class ConfigName(BaseHandler):
-    """
-    用户姓名.
-    """
-    def get(self):
-        """
-        更改姓名视图.
-        """
-        pass
+            if result.status != const.API_SUCCESS:
+                self.write_error(500)
+                return
 
-    def post(self):
-        """
-        更改姓名处理器.
-        """
-        pass
+            res = yield self.usercenter_ps.update_user(self.current_user.sysuser.id, params={
+                "headimg": result.data,
+            })
 
+            if res.status == const.API_SUCCESS:
+                self.redirect(make_url(path=path.USER_CENTER_SETTING))
+            else:
+                self.params.message = msg.OPERATE_FAILURE
+                self.render("neo_weixin/sysuser/accountconfig.html")
 
-class ConfigEmail(BaseHandler):
-    """
-    用户邮箱.
-    """
-    def get(self):
-        """
-        更改邮箱视图.
-        """
-        pass
+        elif res.data and method == "name":
+            # 配置-真实姓名
+            try:
+                self.guarantee('_name')
+            except:
+                return
+            res = yield self.usercenter_ps.update_user(self.current_user.sysuser.id, params={
+                "name": self.params._name,
+            })
+            if res.status == const.API_SUCCESS:
+                self.redirect(make_url(path=path.USER_CENTER_SETTING))
+            else:
+                self.params.message = msg.OPERATE_FAILURE
+                self.render("weixin/sysuser/accountconfig-name.html")
 
-    def post(self):
-        """
-        更改邮箱处理器.
-        """
-        pass
+        elif res.data and method == "email":
+            # 配置-Email
+            if email_validate(self.params._email):
+                res = yield self.usercenter_ps.update_user(self.current_user.sysuser.id, params={
+                    "email": self.params._email,
+                })
+                if res.status == const.API_SUCCESS:
+                    self.redirect(make_url(path=path.USER_CENTER_SETTING))
+            else:
+                self.params.message = msg.OPERATE_FAILURE
+                self.render("weixin/sysuser/accountconfig-email.html")
 
+        elif res.data.password and method == "change_passwd":
+            # 配置-修改密码
+            try:
+                self.guarantee('_password')
+            except:
+                return
+            res = yield self.usercenter_ps.update_user(self.current_user.sysuser.id, params={
+                "password": self.params._password,
+            })
+            if res.status == const.API_SUCCESS:
+                self.redirect(make_url(path=path.USER_CENTER_SETTING))
+            else:
+                self.params.message = msg.OPERATE_FAILURE
+                self.render("weixin/sysuser/accountconfig-password.html")
 
-class ApplicationRecord(BaseHandler):
-    """
-    用户的申请信息.
-    """
-    def get(self):
-        """
-        我的申请信息视图.
-        """
-        pass
-
-
-class Avatar(BaseHandler):
-    """
-    用户头像.
-    """
-    def post(self):
-        """
-        更新用户头像处理器.
-        更新用户头像到七牛云.
-        """
-        pass
-
-
-class FavoritePosition(BaseHandler):
-    """
-    感兴趣的职位.
-    """
-    def get(self):
-        """
-        感兴趣的职位视图.
-        """
-        pass
-
-
-class Binding(BaseHandler):
-    """
-    用户绑定.
-    """
-    def get(self):
-        """
-        用户绑定视图.
-        """
-        pass
-
-    def post(self):
-        """
-        用户绑定处理器.
-        """
-        pass
-
-
-class Intension(BaseHandler):
-    """
-    我的兴趣.
-    """
-    def get(self):
-        """
-        我的兴趣视图.
-        """
-        pass
-
-    def post(self):
-        """
-        我的兴趣处理器.
-        """
-        pass
-
+        else:
+            self.write_error(500)
