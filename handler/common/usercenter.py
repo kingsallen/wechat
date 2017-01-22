@@ -108,7 +108,6 @@ class UserSettingHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def post_name(self):
-        res = yield self.usercenter_ps.get_user(self.current_user.sysuser.id)
         # 配置-真实姓名
         try:
             self.guarantee('_name')
