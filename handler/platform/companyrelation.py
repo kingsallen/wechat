@@ -53,6 +53,7 @@ class CompanyFollowHandler(BaseHandler):
 
 
 class CompanyHandler(BaseHandler):
+    """公司详情页新样式"""
 
     @handle_response
     @check_sub_company
@@ -84,6 +85,7 @@ class CompanyHandler(BaseHandler):
         return default
 
 class CompanyInfoHandler(BaseHandler):
+    """公司详情页老样式"""
 
     @handle_response
     @gen.coroutine
@@ -101,15 +103,11 @@ class CompanyInfoHandler(BaseHandler):
             "scale_name": company_info.scale_name,
             "homepage": company_info.homepage,
             "introduction": company_info.introduction,
-            "impression": company_info.impression
+            "impression": company_info.impression_processed
         })
 
         add_item(company_data, "company", company)
-
-        self.logger.debug("company_info: %s" % company_data)
-
         self.render_page(template_name='company/info_old.html', data=company_data, meta_title=const.PAGE_COMPANY_INFO)
-
 
 class CompanySurveyHandler(BaseHandler):
 
