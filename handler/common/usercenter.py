@@ -6,7 +6,7 @@ from handler.base import BaseHandler
 import conf.common as const
 import conf.path as path
 import conf.message as msg
-from util.common.decorator import handle_response
+from util.common.decorator import handle_response, verified_mobile_oneself
 from util.tool.str_tool import gen_salary, email_validate
 from util.tool.date_tool import jd_update_date
 from util.tool.url_tool import make_url
@@ -103,13 +103,73 @@ class UserSettingHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def post(self, method):
+        yield getattr(self, 'post_' + method)()
+
+    @handle_response
+    @gen.coroutine
+    def post_name(self):
+        res = yield self.usercenter_ps.get_user(self.current_user.sysuser.id)
+        # 配置-真实姓名
+        try:
+            self.guarantee('_name')
+        except:
+            return
+        res = yield self.usercenter_ps.update_user(self.current_user.sysuser.id, params={
+            "name": self.params._name,
+        })
+        if res.status == const.API_SUCCESS:
+            self.redirect(make_url(path=path.USER_CENTER_SETTING))
+        else:
+            self.params.message = msg.OPERATE_FAILURE
+            self.render(template_name="refer/weixin/sysuser/accountconfig-name.html")
+
+    @handle_response
+    @verified_mobile_oneself
+    @gen.coroutine
+    def post_email(self):
+        # 配置-Email
+        if email_validate(self.params._email):
+            res = yield self.usercenter_ps.update_user(self.current_user.sysuser.id, params={
+                "email": self.params._email,
+            })
+            if res.status == const.API_SUCCESS:
+                self.redirect(make_url(path=path.USER_CENTER_SETTING))
+        else:
+            self.params.message = msg.OPERATE_FAILURE
+            self.render(template_name="refer/weixin/sysuser/accountconfig-email.html")
+
+    @handle_response
+    @verified_mobile_oneself
+    @gen.coroutine
+    def post_change_passwd(self):
+        # 配置-修改密码
+        try:
+            self.guarantee('_password')
+        except:
+            return
+        res = yield self.usercenter_ps.update_user(self.current_user.sysuser.id, params={
+            "password": self.params._password,
+        })
+        if res.status == const.API_SUCCESS:
+            self.redirect(make_url(path=path.USER_CENTER_SETTING))
+        else:
+            self.params.message = msg.OPERATE_FAILURE
+            self.render(template_name="refer/weixin/sysuser/accountconfig-password.html")
+
+class UploadHandler(BaseHandler):
+    """图片上传
+    """
+
+    @handle_response
+    @gen.coroutine
+    def post(self, method):
 
         res = yield self.usercenter_ps.get_user(self.current_user.sysuser.id)
         if res.data and method == "avatar":
             # 配置-设置头像
             vfile = self.request.files.get('vfile', None)
             if vfile is None:
-                self.write_error(500)
+                self.send_json_error()
                 return
 
             body = vfile[0].get('body')
@@ -130,7 +190,7 @@ class UserSettingHandler(BaseHandler):
             result = uploader.upload_bytes(body)
 
             if result.status != const.API_SUCCESS:
-                self.write_error(500)
+                self.send_json_error()
                 return
 
             res = yield self.usercenter_ps.update_user(self.current_user.sysuser.id, params={
@@ -138,52 +198,11 @@ class UserSettingHandler(BaseHandler):
             })
 
             if res.status == const.API_SUCCESS:
-                self.redirect(make_url(path=path.USER_CENTER_SETTING))
-            else:
-                self.params.message = msg.OPERATE_FAILURE
-                self.render("refer/neo_weixin/sysuser/accountconfig.html")
-
-        elif res.data and method == "name":
-            # 配置-真实姓名
-            try:
-                self.guarantee('_name')
-            except:
-                return
-            res = yield self.usercenter_ps.update_user(self.current_user.sysuser.id, params={
-                "name": self.params._name,
-            })
-            if res.status == const.API_SUCCESS:
-                self.redirect(make_url(path=path.USER_CENTER_SETTING))
-            else:
-                self.params.message = msg.OPERATE_FAILURE
-                self.render("refer/weixin/sysuser/accountconfig-name.html")
-
-        elif res.data and method == "email":
-            # 配置-Email
-            if email_validate(self.params._email):
-                res = yield self.usercenter_ps.update_user(self.current_user.sysuser.id, params={
-                    "email": self.params._email,
+                self.send_json_success(data={
+                    "url": self.static_url(result.data)
                 })
-                if res.status == const.API_SUCCESS:
-                    self.redirect(make_url(path=path.USER_CENTER_SETTING))
             else:
-                self.params.message = msg.OPERATE_FAILURE
-                self.render("refer/weixin/sysuser/accountconfig-email.html")
-
-        elif res.data.password and method == "change_passwd":
-            # 配置-修改密码
-            try:
-                self.guarantee('_password')
-            except:
-                return
-            res = yield self.usercenter_ps.update_user(self.current_user.sysuser.id, params={
-                "password": self.params._password,
-            })
-            if res.status == const.API_SUCCESS:
-                self.redirect(make_url(path=path.USER_CENTER_SETTING))
-            else:
-                self.params.message = msg.OPERATE_FAILURE
-                self.render("refer/weixin/sysuser/accountconfig-password.html")
+                self.send_json_error()
 
         else:
-            self.write_error(500)
+            self.send_json_error()

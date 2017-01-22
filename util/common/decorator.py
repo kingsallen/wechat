@@ -11,8 +11,12 @@ from tornado import gen
 from tornado.locks import Semaphore
 from tornado.web import MissingArgumentError
 
+import conf.common as const
+import conf.path as path
 from util.common.cache import BaseRedis
 from util.common import ObjectDict
+from util.common.cipher import encode_id
+from util.tool.url_tool import make_url
 
 
 def handle_response(func):
@@ -165,17 +169,47 @@ def authenticated(func):
 
 
         elif not self.current_user.sysuser:
-                url = self.get_login_url()
-                if "?" not in url:
-                    if urlsplit(url).scheme:
-                        # if login url is absolute, make next absolute too
-                        next_url = self.request.full_url()
-                    else:
-                        next_url = self.request.uri
-                    url += "?" + urlencode(dict(next=next_url))
-                self.redirect(url)
-                return
+            url = self.get_login_url()
+            if "?" not in url:
+                if urlsplit(url).scheme:
+                    # if login url is absolute, make next absolute too
+                    next_url = self.request.full_url()
+                else:
+                    next_url = self.request.uri
+                url += "?" + urlencode(dict(next=next_url))
+            self.redirect(url)
+            return
         yield func(self, *args, **kwargs)
     return wrapper
+
+def verified_mobile_oneself(func):
+
+    """重要的操作前，如修改密码，修改邮箱等，需要先用手机验证是否是本人操作
+    方法：
+        1.获得 cookie 中的验证码 code
+        2.获取 url 中的加密 code 值
+        3.两者是否相等，若相等，则已经验证是本人操作；若不相等，则跳转到验证手机号页面
+    """
+
+    @functools.wraps(func)
+    @gen.coroutine
+    def wrapper(self, *args, **kwargs):
+        mobile_code = self.get_secure_cookie(const.COOKIE_MOBILE_CODE)
+        url_code = self.params.mc
+        if mobile_code is not None and url_code is not None \
+            and encode_id(mobile_code, 12) == url_code:
+            yield func(self, *args, **kwargs)
+
+        else:
+            redirect_url = make_url(
+                path.MOBILE_VERIFY, escape=['next_url'])
+
+            redirect_url += "&" + urlencode(
+                dict(next_url=self.request.uri))
+            self.redirect(redirect_url)
+
+    return wrapper
+
+
 
 

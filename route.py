@@ -46,6 +46,8 @@ common_routes = [
     (r"/m/api/mobilebinded",               "handler.common.user.UserMobileBindedHandler",               {"event": "user_usermobilebinded"}),
     (r"/m/api/cellphone",                  "handler.common.cellphone.CellphoneBindHandler",             {"event": "cellphone_bind"}),
     (r"/m/api/user/currentinfo",           "handler.common.interest.UserCurrentInfoHandler",            {"event": "user_currentinfo"})
+    (r"/m/api/upload/(\s+)",               "handler.common.usercenter.UploadHandler",                   {"event": "image_upload"})
+
 ]
 
 # 企业号的单独 routes

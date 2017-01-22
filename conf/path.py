@@ -9,6 +9,7 @@ TEAM_PATH = '/m/company/team/{}'
 COMPANY_TEAM = '/m/company/team'
 USER_CENTER = '/m/usercenter'
 USER_CENTER_SETTING = 'm/usercenter/setting/home'
+MOBILE_VERIFY = '/m/app/phone/verify'
 
 OLD_POSITION_PATH = '/mobile/position'
 

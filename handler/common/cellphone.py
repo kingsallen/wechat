@@ -13,6 +13,7 @@ import conf.message as msg
 
 from handler.base import BaseHandler
 from util.common.decorator import handle_response
+from util.common.cipher import encode_id
 
 
 class CellphoneBindHandler(BaseHandler):
@@ -66,8 +67,14 @@ class CellphoneBindHandler(BaseHandler):
         ret_user_id = response.data.id
         if str(ret_user_id) != str(self.current_user.sysuser.id):
             self.clear_cookie(name=const.COOKIE_SESSIONID)
-            self.send_json_success()
+
         else:
             yield self.user_ps.bind_mobile(self.current_user.sysuser.id,
                                            self.params.mobile)
-            self.send_json_success()
+
+        # 返回加密的 code 值，供前端拼接 url，以验证用户重要操作是否已经验证手机号
+        self.send_json_success(data={
+            "mc": encode_id(self.params.code, 12)
+        })
+
+        self.set_secure_cookie(const.COOKIE_MOBILE_CODE, self.params.code, expires_days=0.01, httponly=True, )
