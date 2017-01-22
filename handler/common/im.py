@@ -1,8 +1,7 @@
 # coding=utf-8
 
-from handler.base import BaseHandler
-
 from tornado import gen
+from handler.base import BaseHandler
 from util.common.decorator import handle_response
 
 
