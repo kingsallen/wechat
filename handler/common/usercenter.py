@@ -29,7 +29,7 @@ class HomeHandler(BaseHandler):
 
         self.logger.debug("home: %s" % self.params)
 
-        self.render(template_name="weixin/sysuser/personalcenter.html")
+        self.render(template_name="refer/weixin/sysuser/personalcenter.html")
 
 class AppRecordsHandler(BaseHandler):
     """求职记录
@@ -43,7 +43,7 @@ class AppRecordsHandler(BaseHandler):
         self.params.application = res.data
         self.logger.debug("home: %s" % self.params)
 
-        self.render(template_name="weixin/sysuser/applicationrecord_new.html")
+        self.render(template_name="refer/weixin/sysuser/applicationrecord_new.html")
 
 class FavPositionsHandler(BaseHandler):
     """感兴趣的职位
@@ -61,7 +61,7 @@ class FavPositionsHandler(BaseHandler):
         self.params.position = res.data
 
         self.logger.debug("home: %s" % self.params)
-        self.render(template_name="weixin/sysuser/favoriteposition.html")
+        self.render(template_name="refer/weixin/sysuser/favoriteposition.html")
 
 class UserSettingHandler(BaseHandler):
     """用户配置
@@ -76,26 +76,26 @@ class UserSettingHandler(BaseHandler):
             # 配置-首页
             self.params.user = res.data
             self.params._headimg = self.static_url(res.data.headimg or const.SYSUSER_HEADIMG)
-            self.render(template_name="neo_weixin/sysuser/accountconfig.html")
+            self.render(template_name="refer/neo_weixin/sysuser/accountconfig.html")
 
         elif res.data and method == "name":
             # 配置-真实姓名
             self.params._name = res.data.name or ''
-            self.render(template_name="weixin/sysuser/accountconfig-name.html")
+            self.render(template_name="refer/weixin/sysuser/accountconfig-name.html")
 
         elif res.data and method == "email":
             # 配置-Email
             self.params._email = res.data.email or ''
-            self.render(template_name="weixin/sysuser/accountconfig-email.html")
+            self.render(template_name="refer/weixin/sysuser/accountconfig-email.html")
 
         elif res.data.password is None and method == "set_passwd":
             # 配置-设置密码
-            self.render(template_name="weixin/sysuser/accountconfig-password.html")
+            self.render(template_name="refer/weixin/sysuser/accountconfig-password.html")
 
         elif res.data.password and method == "change_passwd":
             # 配置-修改密码
             self.params._mobile = res.data.mobile or ''
-            self.render(template_name="weixin/sysuser/accountconfig-password-mobilevalidate.html")
+            self.render(template_name="refer/weixin/sysuser/accountconfig-password-mobilevalidate.html")
 
         else:
             self.write_error(404)
@@ -141,7 +141,7 @@ class UserSettingHandler(BaseHandler):
                 self.redirect(make_url(path=path.USER_CENTER_SETTING))
             else:
                 self.params.message = msg.OPERATE_FAILURE
-                self.render("neo_weixin/sysuser/accountconfig.html")
+                self.render("refer/neo_weixin/sysuser/accountconfig.html")
 
         elif res.data and method == "name":
             # 配置-真实姓名
@@ -156,7 +156,7 @@ class UserSettingHandler(BaseHandler):
                 self.redirect(make_url(path=path.USER_CENTER_SETTING))
             else:
                 self.params.message = msg.OPERATE_FAILURE
-                self.render("weixin/sysuser/accountconfig-name.html")
+                self.render("refer/weixin/sysuser/accountconfig-name.html")
 
         elif res.data and method == "email":
             # 配置-Email
@@ -168,7 +168,7 @@ class UserSettingHandler(BaseHandler):
                     self.redirect(make_url(path=path.USER_CENTER_SETTING))
             else:
                 self.params.message = msg.OPERATE_FAILURE
-                self.render("weixin/sysuser/accountconfig-email.html")
+                self.render("refer/weixin/sysuser/accountconfig-email.html")
 
         elif res.data.password and method == "change_passwd":
             # 配置-修改密码
@@ -183,7 +183,7 @@ class UserSettingHandler(BaseHandler):
                 self.redirect(make_url(path=path.USER_CENTER_SETTING))
             else:
                 self.params.message = msg.OPERATE_FAILURE
-                self.render("weixin/sysuser/accountconfig-password.html")
+                self.render("refer/weixin/sysuser/accountconfig-password.html")
 
         else:
             self.write_error(500)
