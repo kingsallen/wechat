@@ -1,24 +1,102 @@
 # coding=utf-8
 
-from service.data.base import DataService
 import tornado.gen as gen
 from util.common import ObjectDict
-from conf.path import USER_BIND_WX_MOBILE
+
+import conf.path as path
+
+from service.data.base import DataService
 from util.tool.http_tool import http_get, http_post, http_put, http_delete, http_patch
 
 
 class InfraUserDataService(DataService):
 
+    """对接 User服务
+    referer: https://wiki.moseeker.com/user_account_api.md"""
+
+    _OPT_TYPE = ObjectDict({
+        'code_login':      1,
+        'forget_password': 2,
+        'modify_info':     3,
+        'change_mobile':   4
+    })
+
     @gen.coroutine
-    def post_user_wxbindmobile(self, **kwargs):
+    def get_user(self, user_id):
+        """获得用户数据"""
 
         params = ObjectDict({
-            "unionid": kwargs["unionid"],
-            "mobile": kwargs["mobile"],
-            "code": kwargs.get("code" "")
+            "user_id": user_id,
         })
 
-        ret = yield http_post(USER_BIND_WX_MOBILE, params)
-
+        ret = yield http_get(path.USER_INFO, params)
         raise gen.Return(ret)
 
+    @gen.coroutine
+    def get_applied_applications(self, user_id):
+        """获得求职记录"""
+
+        ret = yield http_get(path.USER_APPLIED_APPLICATIONS.format(user_id))
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def get_fav_positions(self, user_id):
+        """获得职位收藏"""
+
+        ret = yield http_get(path.USER_FAV_POSITION.format(user_id))
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def post_user(self, user_id, req):
+        """更新用户信息"""
+
+        params = ObjectDict({
+            "user_id": user_id
+        })
+        params.update(req)
+
+        ret = yield http_post(path.USER_INFO, params)
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def post_wx_pc_combine(self, mobile, unionid):
+        """手机号和微信号绑定接口"""
+
+        params = ObjectDict({
+            'mobile':  mobile,
+            'unionid': unionid,
+        })
+
+        ret = yield http_post(path.USER_COMBINE, params)
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def post_send_valid_code(self, mobile):
+        """Request basic service send valid code to target mobile
+        :param mobile: target mobile number
+        :param app_id: request source(platform, qx...)
+        :return:
+        """
+        params = ObjectDict({
+            'mobile': mobile,
+            'type':   self._OPT_TYPE.change_mobile,
+        })
+        ret = yield http_post(path.USER_VALID, params)
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def post_verify_mobile(self, params):
+        """
+        Send code submitted by user to basic service.
+        :param params: dict include user mobile number and valid code
+        :param app_id: request source(platform, qx...)
+        :return:
+        """
+        params = ObjectDict({
+            'mobile': params.mobile,
+            'code':   params.code,
+            'type':   self._OPT_TYPE.change_mobile,
+        })
+
+        ret = yield http_post(path.USER_VERIFY, params)
+        raise gen.Return(ret)

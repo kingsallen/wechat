@@ -495,9 +495,9 @@ class PositionHandler(BaseHandler):
             self.is_platform):
 
             recom_employee = yield self.user_ps.get_valid_employee_by_user_id(
-                recom_employee_user_id)
+                recom_employee_user_id, self.current_user.company.id)
 
-            if recom_employee and recom_employee.wxuser_id:
+            if recom_employee and recom_employee.sysuser_id:
                 res = yield self.position_ps.add_reward_for_recom_click(
                     employee=recom_employee,
                     company_id=self.current_user.company.id,

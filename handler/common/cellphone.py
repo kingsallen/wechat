@@ -26,7 +26,6 @@ class CellphoneBindHandler(BaseHandler):
     def get(self):
         result = yield self.cellphone_ps.send_valid_code(
             self.params.get('mobile', None),
-            self.app_id
         )
         if result.status != const.API_SUCCESS:
             self.send_json_error(message=result.message)
@@ -47,7 +46,6 @@ class CellphoneBindHandler(BaseHandler):
         # 验证验证码
         response = yield self.cellphone_ps.verify_mobile(
             params=self.params,
-            app_id=self.app_id
         )
         if response.status != const.API_SUCCESS:
             self.send_json_error(message=response.message)
@@ -60,7 +58,6 @@ class CellphoneBindHandler(BaseHandler):
         response = yield self.cellphone_ps.wx_pc_combine(
             mobile=self.params.mobile,
             unionid=self.current_user.sysuser.unionid,
-            app_id=self.app_id
         )
         if response.status != const.API_SUCCESS:
             self.send_json_error(message=response.message)

@@ -2,7 +2,7 @@
 
 from handler.base import BaseHandler
 
-class Home(BaseHandler):
+class HomeHandler(BaseHandler):
     """
     个人中心首页, 渲染个人中心页面.
     """
@@ -10,8 +10,13 @@ class Home(BaseHandler):
         """
         个人中心首页视图.
         """
-        self.render("weixin/sysuser/personalcenter.html")
 
+        employee = self.user_ps.get_valid_employee_by_user_id(
+            self.current_user.sysuser.id, self.current_user.company.id)
+        self.params._binding_state = employee.activation if employee else 1
+        self.params.user = yield self.usercenter_ps.get_user(self.current_user.sysuser.id)
+
+        self.render("weixin/sysuser/personalcenter.html")
 
 class Logout(BaseHandler):
     """
