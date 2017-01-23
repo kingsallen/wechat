@@ -706,8 +706,8 @@ class BaseHandler(MetaBaseHandler):
         add_namespace = ObjectDict(
             env=self.env,
             params=self.params,
-            make_url=make_url(),
-            static_url=self.static_url(),
+            make_url=make_url,
+            static_url=self.static_url,
             current_user=self.current_user,
             settings=self.settings)
         namespace.update(add_namespace)
