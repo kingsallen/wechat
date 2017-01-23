@@ -47,18 +47,6 @@ class InfraUserDataService(DataService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def post_user(self, user_id, req):
-        """更新用户信息"""
-
-        params = ObjectDict({
-            "id": user_id
-        })
-        params.update(req)
-
-        ret = yield http_post(path.USER_INFO, params)
-        raise gen.Return(ret)
-
-    @gen.coroutine
     def post_wx_pc_combine(self, mobile, unionid):
         """手机号和微信号绑定接口"""
 
@@ -109,4 +97,17 @@ class InfraUserDataService(DataService):
 
 
         ret = yield http_post(path.USER_INFO, params)
+        raise gen.Return(ret)
+
+
+    @gen.coroutine
+    def put_user(self, user_id, req):
+        """更新用户信息"""
+
+        params = ObjectDict({
+            "id": user_id
+        })
+        params.update(req)
+
+        ret = yield http_put(path.USER_INFO, params)
         raise gen.Return(ret)
