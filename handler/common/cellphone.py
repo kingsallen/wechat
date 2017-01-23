@@ -27,6 +27,7 @@ class CellphoneBindHandler(BaseHandler):
     def get(self):
         result = yield self.cellphone_ps.send_valid_code(
             self.params.get('mobile', None),
+            self.app_id
         )
         if result.status != const.API_SUCCESS:
             self.send_json_error(message=result.message)
