@@ -40,3 +40,16 @@ class UsercenterPageService(PageService):
 
         ret = yield self.infra_user_ds.put_user(user_id, params)
         raise gen.Return(ret)
+
+    @gen.coroutine
+    def post_login(self, params):
+        """用户登录
+        微信 unionid, 或者 mobile+password, 或者mobile+code, 3选1
+        :param mobile: 手机号
+        :param password: 密码
+        :param code: 手机验证码
+        :param unionid: 微信 unionid
+        """
+
+        ret = yield self.infra_user_ds.post_login(params)
+        raise gen.Return(ret)

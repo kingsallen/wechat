@@ -65,6 +65,8 @@ class UserSettingHandler(BaseHandler):
     def get(self, method):
 
         try:
+            # 重置 event，准确描述
+            self._event = self._event + method
             yield getattr(self, 'get_' + method)()
         except Exception as e:
             self.write_error(404)
@@ -136,7 +138,10 @@ class UserSettingHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def post(self, method):
+
         try:
+            # 重置 event，准确描述
+            self._event = self._event + method
             yield getattr(self, 'post_' + method)()
         except Exception as e:
             self.send_json_error()
@@ -203,6 +208,8 @@ class UploadHandler(BaseHandler):
     @gen.coroutine
     def post(self, method):
         try:
+            # 重置 event，准确描述
+            self._event = self._event + method
             yield getattr(self, 'post_' + method)()
         except Exception as e:
             self.send_json_error()
@@ -231,12 +238,9 @@ class UploadHandler(BaseHandler):
                 "height": 300,
             }
 
-            # upload the avatar to qiniu
             uploader = QiniuUpload(upload_settings)
             uploader.set_logger(self.logger)
             result = uploader.upload_bytes(body)
-            self.logger.debug("upload result: %s" % result)
-            self.logger.debug("upload result.status: %s" % result.status)
 
             if result.status != const.API_SUCCESS:
                 self.send_json_error(message=result.message)
@@ -245,8 +249,6 @@ class UploadHandler(BaseHandler):
             res = yield self.usercenter_ps.update_user(self.current_user.sysuser.id, params={
                 "headimg": result.data,
             })
-
-            self.logger.debug("put user res: %s" % res)
 
             if res.status == const.API_SUCCESS:
                 self.send_json_success(data={

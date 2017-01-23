@@ -92,13 +92,15 @@ class InfraUserDataService(DataService):
     @gen.coroutine
     def post_login(self, params):
         """用户登录
-        :param
+        微信 unionid, 或者 mobile+password, 或者mobile+code, 3选1
+        :param mobile: 手机号
+        :param password: 密码
+        :param code: 手机验证码
+        :param unionid: 微信 unionid
         """
 
-
-        ret = yield http_post(path.USER_INFO, params)
+        ret = yield http_post(path.USER_LOGIN_PATH, params)
         raise gen.Return(ret)
-
 
     @gen.coroutine
     def put_user(self, user_id, req):

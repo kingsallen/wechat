@@ -17,7 +17,7 @@ class LoginHandler(BaseHandler):
     def get(self):
         """渲染 login 页面模板"""
         _mobile = ""
-        _code = "86"
+        _national_code = "86"
 
         # TODO 注册和忘记密码 url 码暂时走老微信
         _register_url = make_url(
@@ -33,7 +33,7 @@ class LoginHandler(BaseHandler):
 
         data = ObjectDict(
             mobile=_mobile,
-            code=_code,
+            code=_national_code,
             links=dict(
                 forget_pass_url=_forget_pass_url,
                 register_url=_register_url
