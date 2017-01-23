@@ -22,7 +22,7 @@ class HomeHandler(BaseHandler):
 
         employee = yield self.user_ps.get_valid_employee_by_user_id(
             self.current_user.sysuser.id, self.current_user.company.id)
-        self.params._binding_state = employee.activation if employee else 1
+        self.params._binding_state = int(employee.activation) if employee else 1
         res = yield self.usercenter_ps.get_user(self.current_user.sysuser.id)
         res.data.headimg = self.static_url(res.data.headimg or const.SYSUSER_HEADIMG)
         self.params.user = res.data
