@@ -133,7 +133,7 @@ class MoImage(Connector):
 
     def get_stream(self):
         import io
-        buff = io.StringIO()
+        buff = io.BytesIO()
 
         self.copy.save(buff, self.ext, quality=90)
         buff.seek(0)

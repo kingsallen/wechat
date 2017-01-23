@@ -45,7 +45,7 @@ class QiniuUpload(BaseUpload):
         上传文件，从文件内容进行上传，适用于表单的上传.
         如果你要其他的上传方式，可以在这里添加你的上传方式.
         """
-        buff = io.StringIO()
+        buff = io.BytesIO()
         buff.write(content)
 
         # get file size
