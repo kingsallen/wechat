@@ -239,7 +239,9 @@ class UploadHandler(BaseHandler):
             self.logger.debug("upload result.status: %s" % result.status)
 
             if result.status != const.API_SUCCESS:
-                self.send_json_error()
+                self.send_json_error(
+                    msg = result.message
+                )
                 return
 
             res = yield self.usercenter_ps.update_user(self.current_user.sysuser.id, params={
