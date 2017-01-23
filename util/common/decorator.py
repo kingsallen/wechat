@@ -121,11 +121,7 @@ def check_signature(func):
         if self.is_platform:
             key = "wechat_signature"
             try:
-                self.logger.debug("signature get_argument: %s" % self.get_argument(key))
-                self.logger.debug("signature get_query_argument: %s" % self.get_query_argument(key))
-
-                self.get_query_argument(key, strip=True)
-
+                self.get_argument(key, strip=True)
             except MissingArgumentError:
                 self.write_error(http_code=404)
                 return
