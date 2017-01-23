@@ -21,7 +21,6 @@ class CellphonePageService(PageService):
     def send_valid_code(self, mobile):
         """Request basic service send valid code to target mobile
         :param mobile: target mobile number
-        :param app_id: request source(platform, qx...)
         :return:
         """
         ret = yield self.infra_user_ds.post_send_valid_code(mobile)
@@ -32,7 +31,6 @@ class CellphonePageService(PageService):
         """
         Send code submitted by user to basic service.
         :param params: dict include user mobile number and valid code
-        :param app_id: request source(platform, qx...)
         :return:
         """
         ret = yield self.infra_user_ds.post_verify_mobile(params)

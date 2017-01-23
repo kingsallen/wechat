@@ -62,7 +62,6 @@ class InfraUserDataService(DataService):
     def post_send_valid_code(self, mobile):
         """Request basic service send valid code to target mobile
         :param mobile: target mobile number
-        :param app_id: request source(platform, qx...)
         :return:
         """
         params = ObjectDict({
@@ -77,7 +76,6 @@ class InfraUserDataService(DataService):
         """
         Send code submitted by user to basic service.
         :param params: dict include user mobile number and valid code
-        :param app_id: request source(platform, qx...)
         :return:
         """
         params = ObjectDict({
