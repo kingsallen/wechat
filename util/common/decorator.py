@@ -34,7 +34,7 @@ def handle_response(func):
                 self.send_json_error()
             else:
                 self.write_error(500)
-                return
+            return
     return wrapper
 
 
@@ -124,6 +124,7 @@ def check_signature(func):
                 self.get_query_argument(key, strip=True)
             except MissingArgumentError:
                 self.write_error(http_code=404)
+                return
             else:
                 yield func(self, *args, **kwargs)
     return wrapper
@@ -164,7 +165,7 @@ def authenticated(func):
     @functools.wraps(func)
     @gen.coroutine
     def wrapper(self, *args, **kwargs):
-        if self.in_wechat:
+        if self.current_user.sysuser and self.in_wechat:
             if not self._authable:
                 pass
 
@@ -199,7 +200,7 @@ def verified_mobile_oneself(func):
         mobile_code = self.get_secure_cookie(const.COOKIE_MOBILE_CODE)
         url_code = self.params.mc
         if mobile_code is not None and url_code is not None \
-            and encode_id(mobile_code, 12) == url_code:
+            and encode_id(mobile_code, 8) == url_code:
             yield func(self, *args, **kwargs)
 
         else:
@@ -210,11 +211,8 @@ def verified_mobile_oneself(func):
                 redirect_url += "&" + urlencode(
                     dict(next_url=self.request.uri))
                 self.redirect(redirect_url)
+                return
             else:
                 self.send_json_error(message=msg.MOBILE_VERIFY)
 
     return wrapper
-
-
-
-
