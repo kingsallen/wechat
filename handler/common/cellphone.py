@@ -45,28 +45,30 @@ class CellphoneBindHandler(BaseHandler):
             return
 
         # 验证验证码
-        response = yield self.cellphone_ps.verify_mobile(
+        verify_response = yield self.cellphone_ps.verify_mobile(
             params=self.params,
         )
-        if response.status != const.API_SUCCESS:
-            self.send_json_error(message=response.message)
+        if verify_response.status != const.API_SUCCESS:
+            self.send_json_error(message=verify_response.message)
             return
-        elif response.data == const.NO:
+        elif verify_response.data == const.NO:
             self.send_json_error(message=msg.CELLPHONE_INVALID_CODE)
             return
 
         # 检查是否需要合并 pc 账号
-        response = yield self.cellphone_ps.wx_pc_combine(
-            mobile=self.params.mobile,
-            unionid=self.current_user.sysuser.unionid,
-        )
-        if response.status != const.API_SUCCESS:
-            self.send_json_error(message=response.message)
-            return
+        if self.current_user.sysuser \
+            and str(self.current_user.sysuser.mobile) != str(self.current_user.sysuser.username):
+            response = yield self.cellphone_ps.wx_pc_combine(
+                mobile=self.params.mobile,
+                unionid=self.current_user.sysuser.unionid,
+            )
+            if response.status != const.API_SUCCESS:
+                self.send_json_error(message=response.message)
+                return
 
-        ret_user_id = response.data.id
-        if str(ret_user_id) != str(self.current_user.sysuser.id):
-            self.clear_cookie(name=const.COOKIE_SESSIONID)
+            ret_user_id = response.data.id
+            if str(ret_user_id) != str(self.current_user.sysuser.id):
+                self.clear_cookie(name=const.COOKIE_SESSIONID)
 
         else:
             yield self.user_ps.bind_mobile(self.current_user.sysuser.id,
