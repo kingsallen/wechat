@@ -100,3 +100,13 @@ class InfraUserDataService(DataService):
 
         ret = yield http_post(path.USER_VERIFY, params)
         raise gen.Return(ret)
+
+    @gen.coroutine
+    def post_login(self, params):
+        """用户登录
+        :param
+        """
+
+
+        ret = yield http_post(path.USER_INFO, params)
+        raise gen.Return(ret)

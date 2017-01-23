@@ -9,6 +9,7 @@ TEAM_PATH = '/m/company/team/{}'
 COMPANY_TEAM = '/m/company/team'
 USER_CENTER = '/m/usercenter'
 USER_LOGIN = '/m/login'
+USER_LOGOUT = '/m/logout'
 USER_CENTER_SETTING = 'm/usercenter/setting/home'
 MOBILE_VERIFY = '/m/app/phone/verify'
 
