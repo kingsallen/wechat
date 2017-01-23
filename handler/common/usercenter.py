@@ -236,6 +236,7 @@ class UploadHandler(BaseHandler):
             uploader.set_logger(self.logger)
             result = uploader.upload_bytes(body)
             self.logger.debug("upload result: %s" % result)
+            self.logger.debug("upload result.status: %s" % result.status)
 
             if result.status != const.API_SUCCESS:
                 self.send_json_error()
@@ -244,6 +245,8 @@ class UploadHandler(BaseHandler):
             res = yield self.usercenter_ps.update_user(self.current_user.sysuser.id, params={
                 "headimg": result.data,
             })
+
+            self.logger.debug("put user res: %s" % res)
 
             if res.status == const.API_SUCCESS:
                 self.send_json_success(data={
