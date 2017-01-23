@@ -70,6 +70,11 @@ class UserSettingHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def get(self, method):
+
+        self.logger.debug("method: %s" % method)
+        self.logger.debug("re: %s" % self.request.arguments)
+
+
         try:
             yield getattr(self, 'get_' + method)()
         except Exception as e:
