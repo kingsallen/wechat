@@ -235,6 +235,7 @@ class UploadHandler(BaseHandler):
             uploader = QiniuUpload(upload_settings)
             uploader.set_logger(self.logger)
             result = uploader.upload_bytes(body)
+            self.logger.debug("upload result: %s" % result)
 
             if result.status != const.API_SUCCESS:
                 self.send_json_error()
