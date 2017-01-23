@@ -35,6 +35,7 @@ import conf.common as constant
 from route import platform_routes, qx_routes, help_routes
 from util.common.log import MessageLogger
 from util.common.cache import BaseRedis
+from handler.common.navmenu import NavMenuModule
 
 tornado.options.parse_command_line()
 logger = MessageLogger(logpath=options.logpath)
@@ -57,6 +58,9 @@ class Application(tornado.web.Application):
         self.logger = logger
         self.env = env
         self.redis = redis
+        self.ui_modules.update({
+            'NavMenu': NavMenuModule
+        })
 
 
 def make_app():
