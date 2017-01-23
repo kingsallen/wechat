@@ -38,5 +38,5 @@ class UsercenterPageService(PageService):
     def update_user(self, user_id, params):
         """更新用户数据"""
 
-        ret = yield self.infra_user_ds.post_user(self, user_id, params)
+        ret = yield self.infra_user_ds.post_user(user_id, params)
         raise gen.Return(ret)
