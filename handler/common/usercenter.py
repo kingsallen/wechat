@@ -29,7 +29,7 @@ class HomeHandler(BaseHandler):
 
         self.logger.debug("home: %s" % self.params)
 
-        self.render(template_name="refer/weixin/neo_sysuser/personalcenter.html")
+        self.render(template_name="refer/weixin/sysuser_v2/personalcenter.html")
 
 class AppRecordsHandler(BaseHandler):
     """求职记录
@@ -43,7 +43,7 @@ class AppRecordsHandler(BaseHandler):
         self.params.application = res.data
         self.logger.debug("home: %s" % self.params)
 
-        self.render(template_name="refer/weixin/sysuser/applicationrecord_new.html")
+        self.render(template_name="refer/weixin/sysuser_v2/applicationrecord_new.html")
 
 class FavPositionsHandler(BaseHandler):
     """感兴趣的职位
@@ -61,7 +61,7 @@ class FavPositionsHandler(BaseHandler):
         self.params.position = res.data
 
         self.logger.debug("home: %s" % self.params)
-        self.render(template_name="refer/weixin/sysuser/favoriteposition.html")
+        self.render(template_name="refer/weixin/sysuser_v2/favoriteposition.html")
 
 class UserSettingHandler(BaseHandler):
     """用户配置
@@ -89,7 +89,7 @@ class UserSettingHandler(BaseHandler):
         if res.data:
             self.params.user = res.data
             self.params._headimg = self.static_url(res.data.headimg or const.SYSUSER_HEADIMG)
-            self.render(template_name="refer/neo_weixin/sysuser/accountconfig.html")
+            self.render(template_name="refer/neo_weixin/sysuser_v2/accountconfig.html")
         else:
             self.write_error(404)
 
@@ -101,7 +101,7 @@ class UserSettingHandler(BaseHandler):
         res = yield self.usercenter_ps.get_user(self.current_user.sysuser.id)
         if res.data:
             self.params._name = res.data.name or ''
-            self.render(template_name="refer/weixin/sysuser/accountconfig-name.html")
+            self.render(template_name="refer/weixin/sysuser_v2/accountconfig-name.html")
         else:
             self.write_error(404)
 
@@ -114,7 +114,7 @@ class UserSettingHandler(BaseHandler):
         res = yield self.usercenter_ps.get_user(self.current_user.sysuser.id)
         if res.data:
             self.params._email = res.data.email or ''
-            self.render(template_name="refer/weixin/sysuser/accountconfig-email.html")
+            self.render(template_name="refer/weixin/sysuser_v2/accountconfig-email.html")
         else:
             self.write_error(404)
 
@@ -126,7 +126,7 @@ class UserSettingHandler(BaseHandler):
 
         res = yield self.usercenter_ps.get_user(self.current_user.sysuser.id)
         if res.data.password is None:
-            self.render(template_name="refer/weixin/sysuser/accountconfig-password.html")
+            self.render(template_name="refer/weixin/sysuser_v2/accountconfig-password.html")
         else:
             self.write_error(404)
 
