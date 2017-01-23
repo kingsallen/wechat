@@ -18,9 +18,9 @@ from util.image.upload.base import BaseUpload
 from util.image.image.mo_image import MoImage
 from setting import settings
 
-QINIU_AK = settings.get("qiniu_ak", None)
-QINIU_SK = settings.get("qiniu_sk", None)
-QINIU_BUCKET = settings.get("qiniu_bucket", None)
+QINIU_AK = settings.get('qiniu_ak', 'rMkcbmVYotu9Zxi0MqjmP5EFy6a9sZ5-h78Qt5GV')
+QINIU_SK = settings.get('qiniu_sk', 'n8qRg0VJBsGyHlZJh1W887LDn2Z-2gbavg9xgoRP')
+QINIU_BUCKET = settings.get('qiniu_bucket', 'moseekertest')
 
 try:
     basestring
