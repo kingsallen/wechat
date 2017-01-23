@@ -708,7 +708,8 @@ class BaseHandler(MetaBaseHandler):
             env=self.env,
             params=self.params,
             make_url=make_url,
-            const=path,
+            const=const,
+            path=path,
             static_url=self.static_url,
             current_user=self.current_user,
             settings=self.settings)
