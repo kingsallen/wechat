@@ -82,4 +82,4 @@ class CellphoneBindHandler(BaseHandler):
             "mc": encode_id(int(self.params.code), 8)
         })
 
-        self.set_secure_cookie(const.COOKIE_MOBILE_CODE, self.params.code, expires_days=0.001, httponly=True)
+        self.set_secure_cookie(const.COOKIE_MOBILE_CODE, self.params.code, expires_days=0.05, httponly=True)
