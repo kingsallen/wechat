@@ -201,8 +201,15 @@ def verified_mobile_oneself(func):
     def wrapper(self, *args, **kwargs):
         mobile_code = self.get_secure_cookie(const.COOKIE_MOBILE_CODE)
         url_code = self.params.mc
+
+        self.logger.debug("mobile_code: %s" % mobile_code)
+        self.logger.debug("mobile_code type : %s" % type(mobile_code))
+
+        self.logger.debug("url_code: %s" % url_code)
+        self.logger.debug("url_code type : %s" % type(url_code))
+
         if mobile_code is not None and url_code is not None \
-            and encode_id(mobile_code, 8) == url_code:
+            and encode_id(int(mobile_code), 8) == url_code:
             yield func(self, *args, **kwargs)
 
         else:
