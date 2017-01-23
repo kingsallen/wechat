@@ -70,40 +70,82 @@ class UserSettingHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def get(self, method):
+        try:
+            yield getattr(self, 'get_' + method)()
+        except Exception as e:
+            self.write_error(404)
+
+    @handle_response
+    @gen.coroutine
+    def get_home(self):
+        """配置-首页"""
 
         res = yield self.usercenter_ps.get_user(self.current_user.sysuser.id)
-        if res.data and method == "home":
-            # 配置-首页
+        if res.data:
             self.params.user = res.data
             self.params._headimg = self.static_url(res.data.headimg or const.SYSUSER_HEADIMG)
             self.render(template_name="refer/neo_weixin/sysuser/accountconfig.html")
+        else:
+            self.write_error(404)
 
-        elif res.data and method == "name":
-            # 配置-真实姓名
+    @handle_response
+    @gen.coroutine
+    def get_name(self):
+        """配置-真实姓名"""
+
+        res = yield self.usercenter_ps.get_user(self.current_user.sysuser.id)
+        if res.data:
             self.params._name = res.data.name or ''
             self.render(template_name="refer/weixin/sysuser/accountconfig-name.html")
+        else:
+            self.write_error(404)
 
-        elif res.data and method == "email":
-            # 配置-Email
+    @handle_response
+    @verified_mobile_oneself
+    @gen.coroutine
+    def get_email(self):
+        """配置-Email"""
+
+        res = yield self.usercenter_ps.get_user(self.current_user.sysuser.id)
+        if res.data:
             self.params._email = res.data.email or ''
             self.render(template_name="refer/weixin/sysuser/accountconfig-email.html")
+        else:
+            self.write_error(404)
 
-        elif res.data.password is None and method == "set_passwd":
-            # 配置-设置密码
+    @handle_response
+    @verified_mobile_oneself
+    @gen.coroutine
+    def get_set_passwd(self):
+        """配置-设置密码"""
+
+        res = yield self.usercenter_ps.get_user(self.current_user.sysuser.id)
+        if res.data.password is None:
             self.render(template_name="refer/weixin/sysuser/accountconfig-password.html")
+        else:
+            self.write_error(404)
 
-        elif res.data.password and method == "change_passwd":
-            # 配置-修改密码
+
+    @handle_response
+    @verified_mobile_oneself
+    @gen.coroutine
+    def get_change_passwd(self):
+        """配置-修改密码"""
+
+        res = yield self.usercenter_ps.get_user(self.current_user.sysuser.id)
+        if res.data.password:
             self.params._mobile = res.data.mobile or ''
             self.render(template_name="refer/weixin/sysuser/accountconfig-password-mobilevalidate.html")
-
         else:
             self.write_error(404)
 
     @handle_response
     @gen.coroutine
     def post(self, method):
-        yield getattr(self, 'post_' + method)()
+        try:
+            yield getattr(self, 'post_' + method)()
+        except Exception as e:
+            self.send_json_error()
 
     @handle_response
     @gen.coroutine
@@ -146,6 +188,7 @@ class UserSettingHandler(BaseHandler):
             self.guarantee('_password')
         except:
             return
+
         res = yield self.usercenter_ps.update_user(self.current_user.sysuser.id, params={
             "password": self.params._password,
         })
@@ -162,10 +205,18 @@ class UploadHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def post(self, method):
+        try:
+            yield getattr(self, 'post_' + method)()
+        except Exception as e:
+            self.send_json_error()
+
+    @handle_response
+    @gen.coroutine
+    def post_avatar(self):
+        """配置-设置头像"""
 
         res = yield self.usercenter_ps.get_user(self.current_user.sysuser.id)
-        if res.data and method == "avatar":
-            # 配置-设置头像
+        if res.data:
             vfile = self.request.files.get('vfile', None)
             if vfile is None:
                 self.send_json_error()

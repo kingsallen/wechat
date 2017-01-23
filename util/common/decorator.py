@@ -13,6 +13,7 @@ from tornado.web import MissingArgumentError
 
 import conf.common as const
 import conf.path as path
+import conf.message as msg
 from util.common.cache import BaseRedis
 from util.common import ObjectDict
 from util.common.cipher import encode_id
@@ -170,6 +171,7 @@ def authenticated(func):
 
         elif not self.current_user.sysuser:
             url = self.get_login_url()
+            # if self.request.method in ("GET", "HEAD"):
             if "?" not in url:
                 if urlsplit(url).scheme:
                     # if login url is absolute, make next absolute too
@@ -201,12 +203,15 @@ def verified_mobile_oneself(func):
             yield func(self, *args, **kwargs)
 
         else:
-            redirect_url = make_url(
-                path.MOBILE_VERIFY, escape=['next_url'])
+            if self.request.method in ("GET", "HEAD"):
+                redirect_url = make_url(
+                    path.MOBILE_VERIFY, escape=['next_url'])
 
-            redirect_url += "&" + urlencode(
-                dict(next_url=self.request.uri))
-            self.redirect(redirect_url)
+                redirect_url += "&" + urlencode(
+                    dict(next_url=self.request.uri))
+                self.redirect(redirect_url)
+            else:
+                self.send_json_error(message=msg.MOBILE_VERIFY)
 
     return wrapper
 
