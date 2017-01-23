@@ -24,7 +24,7 @@ from util.common.decorator import check_signature
 from util.tool.date_tool import curr_now
 from util.tool.json_tool import encode_json_dumps, json_dumps
 from util.tool.str_tool import to_str, to_hex, from_hex
-from util.tool.url_tool import url_subtract_query, make_static_url
+from util.tool.url_tool import url_subtract_query, make_static_url, make_url
 
 import conf.message as msg_const
 import conf.common as const
@@ -706,6 +706,8 @@ class BaseHandler(MetaBaseHandler):
         add_namespace = ObjectDict(
             env=self.env,
             params=self.params,
+            make_url=make_url(),
+            static_url=self.static_url(),
             current_user=self.current_user,
             settings=self.settings)
         namespace.update(add_namespace)
