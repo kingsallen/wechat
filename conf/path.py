@@ -1,13 +1,14 @@
 # coding=utf-8
 
 # url path
-PATH_AUTH = '/mobile/auth'
+USER_LOGIN = '/m/login'
 WX_OAUTH_QX_PATH = '/m/wxoauth2'
 POSITION_PATH = '/m/position/{}'
 RED_PACKET_CARD = '/mobile/redpack'
 TEAM_PATH = '/m/company/team/{}'
 COMPANY_TEAM = '/m/company/team'
 USER_CENTER = '/m/usercenter'
+USER_LOGIN = '/m/login'
 USER_CENTER_SETTING = 'm/usercenter/setting/home'
 MOBILE_VERIFY = '/m/app/phone/verify'
 

@@ -171,18 +171,19 @@ def authenticated(func):
 
 
         elif not self.current_user.sysuser:
-            url = self.get_login_url()
-            # if self.request.method in ("GET", "HEAD"):
-            if "?" not in url:
-                if urlsplit(url).scheme:
-                    # if login url is absolute, make next absolute too
-                    next_url = self.request.full_url()
-                else:
-                    next_url = self.request.uri
-                url += "?" + urlencode(dict(next=next_url))
-            self.redirect(url)
-            return
+            if self.request.method in ("GET", "HEAD"):
+                redirect_url = make_url(
+                    path.USER_LOGIN, escape=['next_url'])
+
+                redirect_url += "&" + urlencode(
+                    dict(next_url=self.request.uri))
+                self.redirect(redirect_url)
+                return
+            else:
+                self.send_json_error(message=msg.NOT_AUTHORIZED)
+
         yield func(self, *args, **kwargs)
+
     return wrapper
 
 def verified_mobile_oneself(func):

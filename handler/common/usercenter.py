@@ -26,9 +26,6 @@ class HomeHandler(BaseHandler):
         res = yield self.usercenter_ps.get_user(self.current_user.sysuser.id)
         res.data.headimg = self.static_url(res.data.headimg or const.SYSUSER_HEADIMG)
         self.params.user = res.data
-
-        self.logger.debug("home: %s" % self.params)
-
         self.render(template_name="refer/weixin/sysuser_v2/personalcenter.html")
 
 class AppRecordsHandler(BaseHandler):
@@ -41,8 +38,6 @@ class AppRecordsHandler(BaseHandler):
 
         res = yield self.usercenter_ps.get_applied_applications(self.current_user.sysuser.id)
         self.params.application = res.data
-        self.logger.debug("home: %s" % self.params)
-
         self.render(template_name="refer/weixin/sysuser_v2/applicationrecord_new.html")
 
 class FavPositionsHandler(BaseHandler):
@@ -59,8 +54,6 @@ class FavPositionsHandler(BaseHandler):
                 item['salary'] = gen_salary(item['salary_top'], item['salary_bottom'])
                 item['update_time'] = jd_update_date(item['update_time'])
         self.params.position = res.data
-
-        self.logger.debug("home: %s" % self.params)
         self.render(template_name="refer/weixin/sysuser_v2/favoriteposition.html")
 
 class UserSettingHandler(BaseHandler):
@@ -70,10 +63,6 @@ class UserSettingHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def get(self, method):
-
-        self.logger.debug("method: %s" % method)
-        self.logger.debug("re: %s" % self.request.arguments)
-
 
         try:
             yield getattr(self, 'get_' + method)()
@@ -140,7 +129,7 @@ class UserSettingHandler(BaseHandler):
         res = yield self.usercenter_ps.get_user(self.current_user.sysuser.id)
         if res.data.password:
             self.params._mobile = res.data.mobile or ''
-            self.render(template_name="refer/weixin/sysuser/accountconfig-password-mobilevalidate.html")
+            self.render(template_name="refer/weixin/sysuser_v2/accountconfig-password-mobilevalidate.html")
         else:
             self.write_error(404)
 
@@ -155,7 +144,8 @@ class UserSettingHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def post_name(self):
-        # 配置-真实姓名
+        """配置-真实姓名"""
+
         try:
             self.guarantee('_name')
         except:
@@ -167,13 +157,14 @@ class UserSettingHandler(BaseHandler):
             self.redirect(make_url(path=path.USER_CENTER_SETTING))
         else:
             self.params.message = msg.OPERATE_FAILURE
-            self.render(template_name="refer/weixin/sysuser/accountconfig-name.html")
+            self.render(template_name="refer/weixin/sysuser_v2/accountconfig-name.html")
 
     @handle_response
     @verified_mobile_oneself
     @gen.coroutine
     def post_email(self):
-        # 配置-Email
+        """配置-Email"""
+
         if email_validate(self.params._email):
             res = yield self.usercenter_ps.update_user(self.current_user.sysuser.id, params={
                 "email": self.params._email,
@@ -182,13 +173,14 @@ class UserSettingHandler(BaseHandler):
                 self.redirect(make_url(path=path.USER_CENTER_SETTING))
         else:
             self.params.message = msg.OPERATE_FAILURE
-            self.render(template_name="refer/weixin/sysuser/accountconfig-email.html")
+            self.render(template_name="refer/weixin/sysuser_v2/accountconfig-email.html")
 
     @handle_response
     @verified_mobile_oneself
     @gen.coroutine
     def post_change_passwd(self):
-        # 配置-修改密码
+        """配置-修改密码"""
+
         try:
             self.guarantee('_password')
         except:
@@ -201,7 +193,7 @@ class UserSettingHandler(BaseHandler):
             self.redirect(make_url(path=path.USER_CENTER_SETTING))
         else:
             self.params.message = msg.OPERATE_FAILURE
-            self.render(template_name="refer/weixin/sysuser/accountconfig-password.html")
+            self.render(template_name="refer/weixin/sysuser_v2/accountconfig-password.html")
 
 class UploadHandler(BaseHandler):
     """图片上传

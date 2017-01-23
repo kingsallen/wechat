@@ -27,8 +27,9 @@ help_routes: 继承自common_routes, 供help单独使用，一般 handler 在 he
 common_routes = [
     # wechat
     (r"/m/wechat",                         "handler.common.wechat.WechatHandler",                       {"event": "wechat_wechat"}),
-    # account
-    # (r"/m/account/login",                  "handler.common.login.LoginHandler",                         {"event": "login_login"}),
+    # passport
+    (r"/m/login",                          "handler.common.passport.LoginHandler",                      {"event": "passport_login"}),
+    (r"/m/logout",                         "handler.common.passport.LogoutHandler",                     {"event": "passport_logout"}),
     # position
     (r"/m/position/([0-9]+)",              "handler.common.position.PositionHandler",                   {"event": "position_info"}),
     (r"/m/position",                       "handler.common.position.PositionListHandler",               {"event": "position_list"}),

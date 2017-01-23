@@ -336,11 +336,11 @@ class BaseHandler(MetaBaseHandler):
 
         json_args = {}
         headers = self.request.headers
-        body = to_str(self.request.body)
+        body = self.request.body
 
         if (headers.get('Content-Type') and
             'application/json' in headers.get('Content-Type') and body):
-            json_args = ujson.loads(body)
+            json_args = ujson.loads(to_str(body))
 
         return json_args
 

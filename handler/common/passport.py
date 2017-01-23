@@ -62,7 +62,7 @@ class LoginHandler(BaseHandler):
 
         self.send_json_error()
 
-class Logout(BaseHandler):
+class LogoutHandler(BaseHandler):
     """
     用户登出.
     """
