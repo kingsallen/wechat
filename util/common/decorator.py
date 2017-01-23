@@ -173,7 +173,8 @@ def authenticated(func):
         elif not self.current_user.sysuser:
             if self.request.method in ("GET", "HEAD"):
                 redirect_url = make_url(
-                    path.USER_LOGIN, escape=['next_url'])
+                    path.USER_LOGIN, wechat_signature=self.get_argument("wechat_signature", strip=True),
+                    escape=['next_url'])
 
                 redirect_url += "&" + urlencode(
                     dict(next_url=self.request.uri))
@@ -207,7 +208,8 @@ def verified_mobile_oneself(func):
         else:
             if self.request.method in ("GET", "HEAD"):
                 redirect_url = make_url(
-                    path.MOBILE_VERIFY, self.params, escape=['next_url'])
+                    path.MOBILE_VERIFY, wechat_signature=self.get_argument("wechat_signature", strip=True),
+                    escape=['next_url'])
 
                 redirect_url += "&" + urlencode(
                     dict(next_url=self.request.uri))
