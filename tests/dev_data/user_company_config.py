@@ -149,7 +149,7 @@ COMPANY_MONDELEZ = ObjectDict({
     'order': ['working_env', 'figure', 'team',
               'events', 'map', 'survey', 'qr_code'],
     'config': {
-        'working_env': [280, 292, 293],  # 工作环境对应的 hr_media id list
+        'working_env': [293, 292, 280],  # 公司文化 hr_media id list
         'figure': [291],  # 人物寄语
         'events': [281, 282, 283],  # 公司大事件
         'map': [294],  # 公司地图
@@ -164,7 +164,7 @@ COMPANY_CONFIG = ObjectDict({
     # 测试调试配置
     # 72: COMPANY_72,
     4: COMPANY_MONDELEZ,
-    39978: COMPANY_JOHNSON,
+    39978: COMPANY_MONDELEZ,
     # 39979: COMPANY_72,
     # 40120: SUB_COMPANY_MARS_40120,
 
