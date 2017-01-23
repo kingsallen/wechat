@@ -207,7 +207,7 @@ def verified_mobile_oneself(func):
         else:
             if self.request.method in ("GET", "HEAD"):
                 redirect_url = make_url(
-                    path.MOBILE_VERIFY, escape=['next_url'])
+                    path.MOBILE_VERIFY, self.params, escape=['next_url'])
 
                 redirect_url += "&" + urlencode(
                     dict(next_url=self.request.uri))
