@@ -6,4 +6,4 @@ class NavMenuModule(UIModule):
     """老微信样式的 menu"""
 
     def render(self):
-        return self.render_string('refer/common/navmenu.html')
+        return self.render_string('refer/neo_common/neo_navmenu.html')

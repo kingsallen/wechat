@@ -11,7 +11,10 @@ USER_CENTER = '/m/usercenter'
 USER_CENTER_SETTING = 'm/usercenter/setting/home'
 MOBILE_VERIFY = '/m/app/phone/verify'
 
-OLD_POSITION_PATH = '/mobile/position'
+## 供侧边栏使用
+OLD_POSITION = '/mobile/position'
+OLD_PROFILE = '/mobile/profile'
+OLD_CHAT = '/mobile/chatroom'
 
 # ============================ 基础服务开始 ============================
 # 用户服务

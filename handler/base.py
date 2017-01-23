@@ -29,6 +29,7 @@ from util.tool.url_tool import url_subtract_query, make_static_url, make_url
 import conf.message as msg_const
 import conf.common as const
 import conf.wechat as wx_const
+import conf.path as path
 
 # 动态加载所有 PageService
 obDict = {}
@@ -707,6 +708,7 @@ class BaseHandler(MetaBaseHandler):
             env=self.env,
             params=self.params,
             make_url=make_url,
+            const=path,
             static_url=self.static_url,
             current_user=self.current_user,
             settings=self.settings)
