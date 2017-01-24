@@ -155,12 +155,18 @@ class UserSettingHandler(BaseHandler):
             res = yield self.usercenter_ps.update_user(self.current_user.sysuser.id, params={
                 "name": self.params._name,
             })
+
+            self.logger.debug("res: %s" % res)
+            self.logger.debug("url : %s" % make_url(path.USER_CENTER_SETTING, self.params))
             if res.status == const.API_SUCCESS:
+                self.logger.debug(1)
                 self.redirect(make_url(path.USER_CENTER_SETTING, self.params))
             else:
+                self.logger.debug(2)
                 self.params.message = msg.INPUT_DISORDER
                 self.render(template_name="refer/weixin/sysuser_v2/accountconfig-name.html")
         else:
+            self.logger.debug(3)
             self.params.message = msg.OPERATE_FAILURE
             self.render(template_name="refer/weixin/sysuser_v2/accountconfig-name.html")
 
