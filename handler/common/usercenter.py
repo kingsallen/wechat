@@ -159,7 +159,7 @@ class UserSettingHandler(BaseHandler):
             "name": self.params._name,
         })
         if res.status == const.API_SUCCESS:
-            self.redirect(make_url(path=path.USER_CENTER_SETTING))
+            self.redirect(make_url(path.USER_CENTER_SETTING, self.params))
         else:
             self.params.message = msg.OPERATE_FAILURE
             self.render(template_name="refer/weixin/sysuser_v2/accountconfig-name.html")
@@ -175,7 +175,7 @@ class UserSettingHandler(BaseHandler):
                 "email": self.params._email,
             })
             if res.status == const.API_SUCCESS:
-                self.redirect(make_url(path=path.USER_CENTER_SETTING))
+                self.redirect(make_url(path.USER_CENTER_SETTING, self.params))
         else:
             self.params.message = msg.OPERATE_FAILURE
             self.render(template_name="refer/weixin/sysuser_v2/accountconfig-email.html")
@@ -195,7 +195,7 @@ class UserSettingHandler(BaseHandler):
             "password": self.params._password,
         })
         if res.status == const.API_SUCCESS:
-            self.redirect(make_url(path=path.USER_CENTER_SETTING))
+            self.redirect(make_url(path.USER_CENTER_SETTING, self.params))
         else:
             self.params.message = msg.OPERATE_FAILURE
             self.render(template_name="refer/weixin/sysuser_v2/accountconfig-password.html")
