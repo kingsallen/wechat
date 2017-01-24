@@ -145,6 +145,18 @@ COMPANY_JOHNSON = ObjectDict({
     },
 })
 
+COMPANY_MONDELEZ = ObjectDict({
+    'order': ['working_env', 'figure', 'team',
+              'events', 'map', 'survey', 'qr_code'],
+    'config': {
+        'working_env': [293, 292, 280],  # 公司文化 hr_media id list
+        'figure': [291],  # 人物寄语
+        'events': [281, 282, 283],  # 公司大事件
+        'map': [294],  # 公司地图
+        'survey': [],  # 问卷调查
+        'qr_code': [295]  # 二维码
+    },
+})
 
 # summary config for all companies
 
@@ -152,7 +164,7 @@ COMPANY_CONFIG = ObjectDict({
     # 测试调试配置
     # 72: COMPANY_72,
     4: COMPANY_MOSEEKER,
-    39978: COMPANY_JOHNSON,
+    39978: COMPANY_MOSEEKER,
     # 39979: COMPANY_72,
     # 40120: SUB_COMPANY_MARS_40120,
 
@@ -162,4 +174,5 @@ COMPANY_CONFIG = ObjectDict({
     91572: COMPANY_MARS,
     1424: COMPANY_NET_EASE,
     102566: COMPANY_JOHNSON,
+    157: COMPANY_MONDELEZ,
 })
