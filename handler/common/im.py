@@ -2,12 +2,13 @@
 
 from tornado import gen
 from handler.base import BaseHandler
-from util.common.decorator import handle_response
+from util.common.decorator import handle_response, authenticated
 
 
 class UnreadCountHandler(BaseHandler):
 
     @handle_response
+    @authenticated
     @gen.coroutine
     def get(self, publisher):
 

@@ -167,4 +167,7 @@ if __name__ == '__main__':
     print (is_alphabet("中国人"))
     print (is_chinese(""))
     print (is_alphabet("6789dgagh"))
+    print (to_str("jiu "))
+    print (to_str(" jid"))
+    print (to_str("j dfd"))
 

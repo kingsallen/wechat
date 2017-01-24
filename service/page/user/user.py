@@ -86,12 +86,12 @@ class UserPageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def get_wxuser_unionid_wechat_id(self, unionid, wechat_id):
+    def get_wxuser_unionid_wechat_id(self, unionid, wechat_id, fields=None):
         """根据 unionid 和 wechat_id 获取 wxuser"""
         ret = yield self.user_wx_user_ds.get_wxuser({
             "wechat_id": wechat_id,
             "unionid":   unionid
-        })
+        }, fields=fields)
         raise gen.Return(ret)
 
     @gen.coroutine

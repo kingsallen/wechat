@@ -9,7 +9,7 @@ import conf.path as path
 import conf.wechat as wx
 from handler.base import BaseHandler
 from util.common import ObjectDict
-from util.common.decorator import handle_response
+from util.common.decorator import handle_response, authenticated
 from util.common.cipher import encode_id
 from util.tool.str_tool import gen_salary, add_item, split
 from util.tool.url_tool import make_url, url_append_query
@@ -485,6 +485,7 @@ class PositionHandler(BaseHandler):
 
             redirect_url = url_append_query(self.fullurl, **replace_query)
             self.redirect(redirect_url)
+            return
 
     @gen.coroutine
     def _make_add_reward_click(self, position_info, recom_employee_user_id):
@@ -585,6 +586,7 @@ class PositionStarHandler(BaseHandler):
     """处理收藏（加星）操作"""
 
     @handle_response
+    @authenticated
     @gen.coroutine
     def post(self):
         self.guarantee('star', 'pid')

@@ -187,8 +187,6 @@ class BaseHandler(MetaBaseHandler):
                     userinfo = yield self._get_user_info(code)
                     self.logger.debug("来自 qx 的授权, 获得 userinfo:{}".format(userinfo))
                     yield self._handle_user_info(userinfo)
-                    if self.request.connection.stream.closed():
-                        return
 
                 # 来自企业号的静默授权
                 else:
@@ -199,8 +197,6 @@ class BaseHandler(MetaBaseHandler):
                     self._wxuser = yield self._handle_ent_openid(
                         openid, self._unionid)
 
-                    self._debug_showoff_clean_auth_cookie()
-
             elif state:  # 用户拒绝授权
                 # TODO 拒绝授权用户，是否让其继续操作? or return
                 pass
@@ -208,56 +204,11 @@ class BaseHandler(MetaBaseHandler):
         # 构造并拼装 session
         yield self._fetch_session()
 
-        # session 中 没有 wxuser 的补救措施
-        if self.current_user and self._authable() and not self.current_user.wxuser:
-            yield self._fix_for_wxuser_is_not_in_current_user()
-
-        self.logger.debug("[prepare]current_user: {}".format(self.current_user))
-
         # 内存优化
         self._wechat = None
         self._qx_wechat = None
         self._unionid = None
         self._wxuser = None
-
-    @gen.coroutine
-    def _fix_for_wxuser_is_not_in_current_user(self):
-        """session 中 没有 wxuser 的补救措施
-
-        如果这次访问本来就是从企业号静默授权过来的，那么应该存在 self._wxuser,
-        就利用 self._wxuser 重建 session，并刷新 redis 缓存
-        否则，再进行一次企业号静默授权
-        """
-        self.logger.debug("[prepare] current_user 中不存在 wxuser, 进入补救措施")
-
-        if self._wxuser:
-            self.logger.debug("[prepare] 存在 self._wxuser: %s" % self._wxuser)
-            session_id = to_str(self.get_secure_cookie(const.COOKIE_SESSIONID))
-            if not session_id:
-                session_id = self._make_new_session_id(self.current_user.sysuser.id)
-
-            wechat = self.current_user.wechat.copy()
-            wechat.pop('jsapi', None)
-
-            session = ObjectDict(
-                wxuser=self._wxuser,
-                qxuser=self.current_user.qxuser,
-                wechat=wechat
-            )
-            self.logger.debug("[prepare]刷新 session 入 redis 缓存, session: %s" % session)
-            self._save_sessions(session_id, session)
-
-            self.logger.debug("[prepare]刷新当前 current_user")
-            self.current_user.wxuser = self._wxuser
-
-        else:
-            self.logger.debug("[prepare] 不存在 self._wxuser, 重新静默授权")
-            # 获取 qxuser.unionid(最稳定的存在)，企业号 wechat_id 再静默授权一次
-            unionid = self.current_user.qxuser.unionid
-            self._oauth_service.wechat = self._wechat
-            self._oauth_service.state = to_hex(unionid)
-            url = self._oauth_service.get_oauth_code_base_url()
-            self.redirect(url)
 
     # PROTECTED
     @gen.coroutine
@@ -300,13 +251,7 @@ class BaseHandler(MetaBaseHandler):
         # 创建 qx 的 user_wx_user
         yield self.user_ps.create_qx_wxuser_by_userinfo(userinfo, user_id)
 
-        if self._authable():
-            # 该企业号是服务号
-            self._oauth_service.wechat = self._wechat
-            self._oauth_service.state = to_hex(unionid)
-            url = self._oauth_service.get_oauth_code_base_url()
-            self.redirect(url)
-        else:
+        if not self._authable():
             # 该企业号是订阅号 则无法获得当前 wxuser 信息, 无需静默授权
             self._unionid = unionid
             self._wxuser = ObjectDict()
@@ -328,7 +273,7 @@ class BaseHandler(MetaBaseHandler):
         params = ObjectDict(self.request.arguments)
         for key in params:
             if isinstance(params[key], list) and params[key]:
-                params[to_str(key)] = to_str(params[key][0])
+                params[to_str(key)] = to_str(params[key][0]).strip()
         return params
 
     def _get_json_args(self):
@@ -505,7 +450,6 @@ class BaseHandler(MetaBaseHandler):
                 # 即可进入 _build_session 方法
                 yield self._build_session()
             else:
-                self._debug_set_auth_cookie()
                 self._oauth_service.wechat = self._qx_wechat
                 url = self._oauth_service.get_oauth_code_userinfo_url()
                 self.redirect(url)
@@ -520,7 +464,10 @@ class BaseHandler(MetaBaseHandler):
         session.wxuser = self._wxuser
 
         session.qxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
-            unionid=self._unionid, wechat_id=self.settings['qx_wechat_id'])
+            unionid=self._unionid,
+            wechat_id=self.settings['qx_wechat_id'],
+            fields=['id', 'unionid']
+        )
 
         session_id = self._make_new_session_id(session.qxuser.sysuser_id)
         self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True)
@@ -894,14 +841,3 @@ class BaseHandler(MetaBaseHandler):
             wechat = const.CLIENT_WECHAT
 
         return wechat, mobile
-
-    def _debug_set_auth_cookie(self):
-        self.logger.debug("oauth starts")
-        self.set_cookie(const.COOKIE_DEBUG_AUTH, str(time.time()))
-
-    def _debug_showoff_clean_auth_cookie(self):
-        if self.get_cookie(const.COOKIE_DEBUG_AUTH):
-            start = float(self.get_cookie(const.COOKIE_DEBUG_AUTH))
-            end = time.time()
-            self.logger.debug("oauth end in: %.2fs" % (end - start))
-            self.clear_cookie(const.COOKIE_DEBUG_AUTH)

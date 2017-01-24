@@ -14,7 +14,7 @@ from handler.base import BaseHandler
 
 from util.common import ObjectDict
 from util.common.decorator import check_sub_company
-from util.common.decorator import handle_response
+from util.common.decorator import handle_response, authenticated
 from util.tool.str_tool import add_item
 
 from tests.dev_data.user_company_config import COMPANY_CONFIG
@@ -24,6 +24,7 @@ class CompanyVisitReqHandler(BaseHandler):
 
     @handle_response
     @check_sub_company
+    @authenticated
     @gen.coroutine
     def post(self):
         self.guarantee('status')
@@ -40,6 +41,7 @@ class CompanyFollowHandler(BaseHandler):
 
     @handle_response
     @check_sub_company
+    @authenticated
     @gen.coroutine
     def post(self):
         self.guarantee('status')
@@ -112,6 +114,7 @@ class CompanyInfoHandler(BaseHandler):
 class CompanySurveyHandler(BaseHandler):
 
     @handle_response
+    @authenticated
     @gen.coroutine
     def post(self):
         """处理用户填写公司 survey 的 post api 请求"""

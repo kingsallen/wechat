@@ -18,6 +18,7 @@ from util.common.cache import BaseRedis
 from util.common import ObjectDict
 from util.common.cipher import encode_id
 from util.tool.url_tool import make_url
+from util.tool.str_tool import to_hex
 
 
 def handle_response(func):
@@ -166,9 +167,13 @@ def authenticated(func):
     @gen.coroutine
     def wrapper(self, *args, **kwargs):
         if self.current_user.sysuser and self.in_wechat:
-            if not self._authable:
-                pass
-
+            if self._authable:
+                # 该企业号是服务号
+                self._oauth_service.wechat = self.current_user.wechat
+                self._oauth_service.state = to_hex(self.current_user.qxuser.unionid)
+                url = self._oauth_service.get_oauth_code_base_url()
+                self.redirect(url)
+                return
 
         elif not self.current_user.sysuser:
             if self.request.method in ("GET", "HEAD"):
@@ -199,12 +204,6 @@ def verified_mobile_oneself(func):
     def wrapper(self, *args, **kwargs):
         mobile_code = self.get_secure_cookie(const.COOKIE_MOBILE_CODE)
         url_code = self.params.mc
-
-        self.logger.debug("mobile_code: %s" % mobile_code)
-        self.logger.debug("mobile_code type : %s" % type(mobile_code))
-
-        self.logger.debug("url_code: %s" % url_code)
-        self.logger.debug("url_code type : %s" % type(url_code))
 
         if mobile_code is not None and url_code is not None \
             and encode_id(int(mobile_code), 8) == url_code:

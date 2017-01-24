@@ -5,12 +5,13 @@ from tornado import gen
 import conf.common as const
 from handler.base import BaseHandler
 from util.common import ObjectDict
-from util.common.decorator import handle_response
+from util.common.decorator import handle_response, authenticated
 
 
 class UserCurrentInfoHandler(BaseHandler):
 
     @handle_response
+    @authenticated
     @gen.coroutine
     def get(self):
         """返回用户填写的现在公司和现在职位接口
@@ -37,6 +38,7 @@ class UserCurrentInfoHandler(BaseHandler):
             self.send_json_success(data=const.NO)
 
     @handle_response
+    @authenticated
     @gen.coroutine
     def post(self):
         """更新用户现在公司和现在职位接口

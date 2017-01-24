@@ -1,7 +1,6 @@
 # coding=utf-8
 
 # url path
-USER_LOGIN = '/m/login'
 WX_OAUTH_QX_PATH = '/m/wxoauth2'
 POSITION_PATH = '/m/position/{}'
 RED_PACKET_CARD = '/mobile/redpack'

@@ -6,7 +6,7 @@ from handler.base import BaseHandler
 import conf.common as const
 import conf.path as path
 import conf.message as msg
-from util.common.decorator import handle_response, verified_mobile_oneself
+from util.common.decorator import handle_response, verified_mobile_oneself, authenticated
 from util.tool.str_tool import gen_salary, email_validate, is_alphabet, is_chinese
 from util.tool.date_tool import jd_update_date
 from util.tool.url_tool import make_url
@@ -17,6 +17,7 @@ class HomeHandler(BaseHandler):
     """
 
     @handle_response
+    @authenticated
     @gen.coroutine
     def get(self):
 
@@ -33,6 +34,7 @@ class AppRecordsHandler(BaseHandler):
     """
 
     @handle_response
+    @authenticated
     @gen.coroutine
     def get(self):
 
@@ -45,6 +47,7 @@ class FavPositionsHandler(BaseHandler):
     """
 
     @handle_response
+    @authenticated
     @gen.coroutine
     def get(self):
 
@@ -61,6 +64,7 @@ class UserSettingHandler(BaseHandler):
     """
 
     @handle_response
+    @authenticated
     @gen.coroutine
     def get(self, method):
 
@@ -72,6 +76,7 @@ class UserSettingHandler(BaseHandler):
             self.write_error(404)
 
     @handle_response
+    @authenticated
     @gen.coroutine
     def get_home(self):
         """配置-首页"""
@@ -85,6 +90,7 @@ class UserSettingHandler(BaseHandler):
             self.write_error(404)
 
     @handle_response
+    @authenticated
     @gen.coroutine
     def get_name(self):
         """配置-真实姓名"""
@@ -98,6 +104,7 @@ class UserSettingHandler(BaseHandler):
 
     @handle_response
     @verified_mobile_oneself
+    @authenticated
     @gen.coroutine
     def get_email(self):
         """配置-Email"""
@@ -111,6 +118,7 @@ class UserSettingHandler(BaseHandler):
 
     @handle_response
     @verified_mobile_oneself
+    @authenticated
     @gen.coroutine
     def get_set_passwd(self):
         """配置-设置密码"""
@@ -124,6 +132,7 @@ class UserSettingHandler(BaseHandler):
 
     @handle_response
     @verified_mobile_oneself
+    @authenticated
     @gen.coroutine
     def get_change_passwd(self):
         """配置-修改密码"""
@@ -136,6 +145,7 @@ class UserSettingHandler(BaseHandler):
             self.write_error(404)
 
     @handle_response
+    @authenticated
     @gen.coroutine
     def post(self, method):
 
@@ -147,6 +157,7 @@ class UserSettingHandler(BaseHandler):
             self.send_json_error()
 
     @handle_response
+    @authenticated
     @gen.coroutine
     def post_name(self):
         """配置-真实姓名"""
@@ -173,6 +184,7 @@ class UserSettingHandler(BaseHandler):
 
     @handle_response
     @verified_mobile_oneself
+    @authenticated
     @gen.coroutine
     def post_email(self):
         """配置-Email"""
@@ -189,6 +201,7 @@ class UserSettingHandler(BaseHandler):
 
     @handle_response
     @verified_mobile_oneself
+    @authenticated
     @gen.coroutine
     def post_change_passwd(self):
         """配置-修改密码"""
@@ -212,6 +225,7 @@ class UploadHandler(BaseHandler):
     """
 
     @handle_response
+    @authenticated
     @gen.coroutine
     def post(self, method):
         try:
@@ -222,6 +236,7 @@ class UploadHandler(BaseHandler):
             self.send_json_error()
 
     @handle_response
+    @authenticated
     @gen.coroutine
     def post_avatar(self):
         """配置-设置头像"""

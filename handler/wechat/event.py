@@ -1,25 +1,23 @@
 # coding=utf-8
 
+# @Time    : 1/24/17 17:03
+# @Author  : panda (panyuxin@moseeker.com)
+# @File    : event.py
+# @DES     : 微信消息，指仟寻服务器与微信服务器之间的消息交互
+
 # Copyright 2016 MoSeeker
 
-from handler.base import BaseHandler
-
-import hashlib
-from tornado import gen
-from util.common.decorator import handle_response
-
-
-class WechatHandler(BaseHandler):
-
-    @handle_response
-    @gen.coroutine
-    def get(self):
-
-        self.send_json_success(
-                data={
-                    "a": 'hello world!'
-                }
-            )
+# class WechatHandler(BaseHandler):
+#
+#     @handle_response
+#     @gen.coroutine
+#     def get(self):
+#
+#         self.send_json_success(
+#                 data={
+#                     "a": 'hello world!'
+#                 }
+#             )
 
     # def get(self, *args, **kwargs):
     #     """
