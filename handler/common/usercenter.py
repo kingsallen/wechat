@@ -161,6 +161,7 @@ class UserSettingHandler(BaseHandler):
             if res.status == const.API_SUCCESS:
                 self.logger.debug(1)
                 self.redirect(make_url(path.USER_CENTER_SETTING, self.params))
+                self.logger.debug("headers :%s" % self.request)
             else:
                 self.logger.debug(2)
                 self.params.message = msg.INPUT_DISORDER
