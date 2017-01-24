@@ -141,7 +141,7 @@ class UserCompanyPageService(PageService):
         raise gen.Return([ObjectDict({
             'id': team.id,
             'title': '我们的团队',
-            'subtitle': team.name,
+            'sub_title': team.name,
             'longtext': team.summary,
             'media_url': resource_dict.get(team.res_id).res_url or '',
             'media_type': resource_dict.get(team.res_id).res_type or 0,
