@@ -127,3 +127,44 @@ def email_validate(email):
         return result.group(0) == email
     else:
         return False
+
+def is_chinese(uchar):
+    """判断一个unicode是否是汉字"""
+    if '\u4e00' <= uchar <= '\u9fff':
+        return True
+    else:
+        return False
+
+def is_number(uchar):
+    """判断一个unicode是否是数字"""
+    if '\u0030' <= uchar <= '\u0039':
+        return True
+    else:
+        return False
+
+def is_alphabet(uchar):
+    """判断一个unicode是否是英文字母"""
+    if ('\u0041' <= uchar <= '\u005a') or ('\u0061' <= uchar <= '\u007a'):
+        return True
+    else:
+        return False
+
+def is_other(uchar):
+    """判断是否非汉字，数字和英文字符"""
+    if not (is_chinese(uchar) or is_number(uchar) or is_alphabet(uchar)):
+        return True
+    else:
+        return False
+
+
+if __name__ == '__main__':
+
+    print (is_chinese("中国人"))
+    print (is_chinese("中国人 chinese"))
+    print (is_chinese("chinese"))
+    print (is_number("123abs"))
+    print (is_alphabet("chine china"))
+    print (is_alphabet("中国人"))
+    print (is_chinese(""))
+    print (is_alphabet("6789dgagh"))
+

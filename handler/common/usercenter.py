@@ -7,7 +7,7 @@ import conf.common as const
 import conf.path as path
 import conf.message as msg
 from util.common.decorator import handle_response, verified_mobile_oneself
-from util.tool.str_tool import gen_salary, email_validate
+from util.tool.str_tool import gen_salary, email_validate, is_alphabet, is_chinese
 from util.tool.date_tool import jd_update_date
 from util.tool.url_tool import make_url
 from util.image.upload import QiniuUpload
@@ -151,15 +151,15 @@ class UserSettingHandler(BaseHandler):
     def post_name(self):
         """配置-真实姓名"""
 
-        try:
-            self.guarantee('_name')
-        except:
-            return
-        res = yield self.usercenter_ps.update_user(self.current_user.sysuser.id, params={
-            "name": self.params._name,
-        })
-        if res.status == const.API_SUCCESS:
-            self.redirect(make_url(path.USER_CENTER_SETTING, self.params))
+        if is_chinese(self.params._name) or is_alphabet(self.params._name):
+            res = yield self.usercenter_ps.update_user(self.current_user.sysuser.id, params={
+                "name": self.params._name,
+            })
+            if res.status == const.API_SUCCESS:
+                self.redirect(make_url(path.USER_CENTER_SETTING, self.params))
+            else:
+                self.params.message = msg.INPUT_DISORDER
+                self.render(template_name="refer/weixin/sysuser_v2/accountconfig-name.html")
         else:
             self.params.message = msg.OPERATE_FAILURE
             self.render(template_name="refer/weixin/sysuser_v2/accountconfig-name.html")
@@ -186,16 +186,16 @@ class UserSettingHandler(BaseHandler):
     def post_change_passwd(self):
         """配置-修改密码"""
 
-        try:
-            self.guarantee('_password')
-        except:
-            return
+        if not self.params._password:
 
-        res = yield self.usercenter_ps.update_user(self.current_user.sysuser.id, params={
-            "password": self.params._password,
-        })
-        if res.status == const.API_SUCCESS:
-            self.redirect(make_url(path.USER_CENTER_SETTING, self.params))
+            res = yield self.usercenter_ps.update_user(self.current_user.sysuser.id, params={
+                "password": self.params._password,
+            })
+            if res.status == const.API_SUCCESS:
+                self.redirect(make_url(path.USER_CENTER_SETTING, self.params))
+            else:
+                self.params.message = msg.INPUT_DISORDER
+                self.render(template_name="refer/weixin/sysuser_v2/accountconfig-password.html")
         else:
             self.params.message = msg.OPERATE_FAILURE
             self.render(template_name="refer/weixin/sysuser_v2/accountconfig-password.html")
