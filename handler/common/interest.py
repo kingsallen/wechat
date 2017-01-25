@@ -20,8 +20,9 @@ class UserCurrentInfoHandler(BaseHandler):
         """
 
         full = const.YES if int(self.params.full) else const.NO
-        result = yield self.user_ps.get_user_user_id(
-            self.current_user.sysuser.id)
+        result = yield self.user_ps.get_user_user({
+            "id": self.current_user.sysuser.id
+        })
 
         if result:
             if full:

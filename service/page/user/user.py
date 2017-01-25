@@ -60,19 +60,20 @@ class UserPageService(PageService):
         raise gen.Return(user_id)
 
     @gen.coroutine
-    def get_user_user_id(self, user_id):
-        """根据 id 获取 user_user"""
-        ret = yield self.user_user_ds.get_user({
-            "id": user_id
-        })
-        raise gen.Return(ret)
+    def get_user_user(self, params):
+        """
+        根据参数，查找 user_user
+        Usage:
+            get_user_user({
+                'id': id,
+                'unionid': unionid,
+                'mobile': mobile
+            })
+        :param params:
+        :return: dict()
+        """
 
-    @gen.coroutine
-    def get_user_user_by_unionid(self, unionid):
-        """根据 unionid 获取 user_user"""
-        ret = yield self.user_user_ds.get_user({
-            "unionid": unionid
-        })
+        ret = yield self.user_user_ds.get_user(params)
         raise gen.Return(ret)
 
     @gen.coroutine

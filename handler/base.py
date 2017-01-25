@@ -563,15 +563,17 @@ class BaseHandler(MetaBaseHandler):
         """拼装 session 中的 recom"""
 
         recom_user_id = decode_id(self.params.recom)
-        session.recom = yield self.user_ps.get_user_user_id(
-            user_id=recom_user_id)
+        session.recom = yield self.user_ps.get_user_user({
+            "id": recom_user_id
+        })
 
     @gen.coroutine
     def _add_sysuser_to_session(self, session):
         """拼装 session 中的 sysuser"""
 
-        session.sysuser = yield self.user_ps.get_user_user_by_unionid(
-            session.qxuser.unionid)
+        session.sysuser = yield self.user_ps.get_user_user({
+            "unionid": session.qxuser.unionid
+        })
 
     def _add_jsapi_to_wechat(self, wechat):
         """拼装 jsapi"""

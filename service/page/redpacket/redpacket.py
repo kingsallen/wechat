@@ -237,8 +237,9 @@ class RedpacketPageService(PageService):
                         self.logger.debug(ret)
 
                         if send_to_employee:
-                            last_employee_user = yield user_ps.get_user_user_id(
-                                last_employee_user_id)
+                            last_employee_user = yield user_ps.get_user_user({
+                                "id": last_employee_user_id
+                            })
 
                             if is_service_wechat:
                                 last_employee_wxuser = yield user_ps.get_wxuser_sysuser_id_wechat_id(
