@@ -373,6 +373,7 @@ class BaseHandler(MetaBaseHandler):
             if self.is_platform:
                 self.logger.debug(
                     "is_platform _fetch_session session_id: {}".format(session_id))
+                # 判断是否可以通过 session，直接获得用户信息，这样就不用跳授权页面
                 ok = yield self._get_session_by_wechat_id(session_id, self._wechat.id)
                 if not ok:
                     ok = yield self._get_session_by_wechat_id(session_id, self.settings['qx_wechat_id'])
@@ -408,8 +409,7 @@ class BaseHandler(MetaBaseHandler):
 
     @gen.coroutine
     def _build_session(self):
-        """构建 session
-        只可能在微信环境中被调用"""
+        """用户确认向仟寻授权后的处理，构建 session"""
 
         session = ObjectDict()
         session.wechat = self._wechat
@@ -424,16 +424,18 @@ class BaseHandler(MetaBaseHandler):
         self._save_qx_sessions(session_id, session.qxuser)
         self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True)
 
-        yield self._add_sysuser_to_session(session)
-
-        self._add_jsapi_to_wechat(session.wechat)
-
-        if self.is_platform:
-            yield self._add_company_info_to_session(session, called_by="_build_session")
-        if self.params.recom:
-            yield self._add_recom_to_session(session)
-
-        self.current_user = session
+        yield self._build_session_by_unionid(self._unionid)
+        #
+        # yield self._add_sysuser_to_session(session)
+        #
+        # self._add_jsapi_to_wechat(session.wechat)
+        #
+        # if self.is_platform:
+        #     yield self._add_company_info_to_session(session, called_by="_build_session")
+        # if self.params.recom:
+        #     yield self._add_recom_to_session(session)
+        #
+        # self.current_user = session
 
     @gen.coroutine
     def _get_session_by_wechat_id(self, session_id, wechat_id):

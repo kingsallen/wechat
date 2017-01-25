@@ -19,7 +19,6 @@ from util.common import ObjectDict
 from util.common.cipher import encode_id
 from util.tool.url_tool import make_url
 from util.tool.str_tool import to_hex
-from app import logger
 
 
 def handle_response(func):
@@ -93,13 +92,10 @@ def cache(prefix=None, key=None, ttl=60, hash=True, lock=True, separator=":"):
 
                 redis_key = "{prefix}{separator}{redis_key}".format(prefix=prefix, separator=separator, redis_key=redis_key)
 
-                logger.debug("[cache]key: {}".format(redis_key))
                 if base_cache.exists(redis_key):
                     cache_data = base_cache.get(redis_key)
-                    logger.debug("[cache]cache_data exists: {}".format(cache_data))
                 else:
                     cache_data = yield func(*args, **kwargs)
-                    logger.debug("[cache]cache_data: {}".format(cache_data))
                     if cache_data is not None:
                         base_cache.set(redis_key, cache_data, ttl)
 
