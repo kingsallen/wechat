@@ -1,5 +1,6 @@
 # coding=utf-8
 
+import traceback
 from tornado import gen
 from handler.base import BaseHandler
 
@@ -71,8 +72,11 @@ class UserSettingHandler(BaseHandler):
         try:
             # 重置 event，准确描述
             self._event = self._event + method
+            self.logger.debug("method: %s" % method)
+            self.logger.debug("request: %s" % self.request)
             yield getattr(self, 'get_' + method)()
         except Exception as e:
+            self.logger.error(traceback.format_exc())
             self.write_error(404)
 
     @handle_response
@@ -122,7 +126,7 @@ class UserSettingHandler(BaseHandler):
     @gen.coroutine
     def get_set_passwd(self):
         """配置-设置密码"""
-
+        self.logger.debug("get_set_passwd")
         res = yield self.usercenter_ps.get_user(self.current_user.sysuser.id)
         if res.data.password is None:
             self.render(template_name="refer/weixin/sysuser_v2/accountconfig-password.html")
