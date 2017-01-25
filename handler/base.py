@@ -411,6 +411,8 @@ class BaseHandler(MetaBaseHandler):
     def _build_session(self):
         """用户确认向仟寻授权后的处理，构建 session"""
 
+        self.logger.debug("start build_session")
+
         session = ObjectDict()
         session.wechat = self._wechat
 

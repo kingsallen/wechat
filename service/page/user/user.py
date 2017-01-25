@@ -120,7 +120,9 @@ class UserPageService(PageService):
         qx_wxuser = yield self.get_wxuser_unionid_wechat_id(
             unionid=unionid, wechat_id=settings['qx_wechat_id'])
 
+        self.logger.debug("create_user_wx_user_ent, wxuser openid:{} wechat_id:{}".format(openid, wechat_id))
         self.logger.debug("create_user_wx_user_ent, wxuser:{}".format(wxuser))
+        self.logger.debug("create_user_wx_user_ent, qx_wxuser unionid:{} wechat_id:{}".format(unionid, wechat_id))
         self.logger.debug("create_user_wx_user_ent, qx_wxuser:{}".format(qx_wxuser))
 
         if wxuser:
