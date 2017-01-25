@@ -442,6 +442,12 @@ class BaseHandler(MetaBaseHandler):
         else:
             need_oauth = True
 
+        self.logger.debug("need_oauth: %s" % need_oauth)
+        self.logger.debug("_unionid: %s" % self._unionid)
+        self.logger.debug("_wxuser: %s" % self._wxuser)
+        self.logger.debug("_authable: %s" % self._authable())
+
+
         if need_oauth and self.in_wechat:
             if (self._unionid and self._wxuser and self._authable() or
                 self._unionid and not self._authable()):
