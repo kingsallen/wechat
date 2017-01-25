@@ -233,7 +233,7 @@ class BaseHandler(MetaBaseHandler):
         """
         self.logger.debug("[_handle_user_info]userinfo: {}".format(userinfo))
 
-        unionid = userinfo.unionid
+        self._unionid = userinfo.unionid
         if self.is_platform:
             source = const.WECHAT_REGISTER_SOURCE_PLATFORM
         else:
@@ -251,7 +251,6 @@ class BaseHandler(MetaBaseHandler):
         # 创建 qx 的 user_wx_user
         yield self.user_ps.create_qx_wxuser_by_userinfo(userinfo, user_id)
 
-        self._unionid = unionid
         if not self._authable():
             # 该企业号是订阅号 则无法获得当前 wxuser 信息, 无需静默授权
             self._wxuser = ObjectDict()
@@ -373,11 +372,11 @@ class BaseHandler(MetaBaseHandler):
             if self.is_platform:
                 self.logger.debug(
                     "is_platform _fetch_session session_id: {}".format(session_id))
-                ok = yield self._get_session_from_ent(session_id)
+                ok = yield self._get_session_by_wechat_id(session_id, self._wechat.id)
                 if not ok:
-                    ok = yield self._get_session_from_qx(session_id)
+                    ok = yield self._get_session_by_wechat_id(session_id, self.settings['qx_wechat_id'])
             elif self.is_qx:
-                ok = yield self._get_session_from_qx(session_id)
+                ok = yield self._get_session_by_wechat_id(session_id, self.settings['qx_wechat_id'])
 
             elif self.is_help:
                 # TODO 需讨论
@@ -434,6 +433,23 @@ class BaseHandler(MetaBaseHandler):
             yield self._add_recom_to_session(session)
 
         self.current_user = session
+
+    @gen.coroutine
+    def _get_session_by_wechat_id(self, session_id, wechat_id):
+        """尝试获取企业号 session"""
+
+        key = const.SESSION_USER.format(session_id, wechat_id)
+        value = self.redis.get(key)
+        self.logger.debug(
+            "_get_session_by_wechat_id redis wechat_id:{} session: {}, key: {}".format(wechat_id, value, key))
+        if value:
+            # 如果有 value， 返回该 value 作为 self.current_user
+            session = ObjectDict(value)
+            self._unionid = session.qxuser.unionid
+            yield self._build_session_by_unionid(self._unionid)
+            raise gen.Return(True)
+
+        raise gen.Return(False)
 
     @gen.coroutine
     def _build_session_by_unionid(self, unionid):
@@ -521,45 +537,6 @@ class BaseHandler(MetaBaseHandler):
         session.sysuser = yield self.user_ps.get_user_user({
             "unionid": session.qxuser.unionid
         })
-
-    @gen.coroutine
-    def _get_session_from_ent(self, session_id):
-        """尝试获取企业号 session"""
-
-        key = const.SESSION_USER.format(session_id, self._wechat.id)
-        value = self.redis.get(key)
-        self.logger.debug(
-            "_get_session_from_ent redis session: {}, key: {}".format(value, key))
-        if value:
-            # 如果有 value， 返回该 value 作为 self.current_user
-            session = ObjectDict(value)
-            yield self._add_sysuser_to_session(session)
-            self._add_jsapi_to_wechat(session.wechat)
-            yield self._add_company_info_to_session(session, called_by="_get_session_from_ent")
-            if self.params.recom:
-                yield self._add_recom_to_session(session)
-            self.current_user = session
-            raise gen.Return(True)
-
-        raise gen.Return(False)
-
-    @gen.coroutine
-    def _get_session_from_qx(self, session_id):
-        """尝试获取聚合号 session"""
-
-        key = const.SESSION_USER.format(session_id, self.settings['qx_wechat_id'])
-
-        value = self.redis.get(key)
-        self.logger.debug(
-            "_get_session_from_qx redis session: {}, key: {}".format(value, key))
-
-        if value:
-            session_qx = value
-            qxuser = ObjectDict(session_qx.get('qxuser'))
-            yield self._build_session_by_unionid(qxuser.unionid)
-            raise gen.Return(True)
-        
-        raise gen.Return(False)
 
     def _add_jsapi_to_wechat(self, wechat):
         """拼装 jsapi"""
