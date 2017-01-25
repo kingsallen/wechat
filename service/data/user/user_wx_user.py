@@ -21,7 +21,6 @@ class UserWxUserDataService(DataService):
         response = yield self.user_wx_user_dao.get_record_by_conds(conds, fields)
         raise gen.Return(response)
 
-    @cache(ttl=30)
     @gen.coroutine
     def get_wxuser(self, conds=None, fields=None):
         if not self._valid_conds(conds):
