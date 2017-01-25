@@ -9,7 +9,7 @@ from util.common import ObjectDict
 
 class HrCompanyDataService(DataService):
 
-    @cache(ttl=60)
+    @cache(ttl=300)
     @gen.coroutine
     def get_company(self, conds, fields=[]):
 
@@ -24,7 +24,7 @@ class HrCompanyDataService(DataService):
         response = yield self.hr_company_dao.get_record_by_conds(conds, fields)
         raise gen.Return(response)
 
-    @cache(ttl=60)
+    @cache(ttl=300)
     @gen.coroutine
     def get_companys_list(self, conds, fields, options=[], appends=[], index='', params=[]):
 

@@ -9,7 +9,7 @@ from util.common import ObjectDict
 
 class HrCompanyConfDataService(DataService):
 
-    @cache(ttl=60)
+    @cache(ttl=300)
     @gen.coroutine
     def get_company_conf(self, conds, fields=[]):
 
