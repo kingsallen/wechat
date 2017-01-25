@@ -414,6 +414,8 @@ class BaseHandler(MetaBaseHandler):
         session = ObjectDict()
         session.wechat = self._wechat
 
+        # qx session 中，只需要存储 id，unioid 即可，且俩变量一旦生成不会改变，不会影响 session 一致性
+        # 该 session 只做首次仟寻登录查找各关联帐号所用
         session.qxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
             unionid=self._unionid,
             wechat_id=self.settings['qx_wechat_id'],
@@ -424,6 +426,9 @@ class BaseHandler(MetaBaseHandler):
         self._save_qx_sessions(session_id, session.qxuser)
         self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True)
 
+        # 重置 wxuser，qxuser，构建完整的 session
+        self._wxuser = ObjectDict()
+        self._qxuser = ObjectDict()
         yield self._build_session_by_unionid(self._unionid)
         #
         # yield self._add_sysuser_to_session(session)
