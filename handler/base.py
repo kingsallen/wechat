@@ -570,8 +570,8 @@ class BaseHandler(MetaBaseHandler):
     def _add_sysuser_to_session(self, session):
         """拼装 session 中的 sysuser"""
 
-        session.sysuser = yield self.user_ps.get_user_user_id(
-            session.qxuser.sysuser_id)
+        session.sysuser = yield self.user_ps.get_user_user_by_unionid(
+            session.qxuser.unionid)
 
     def _add_jsapi_to_wechat(self, wechat):
         """拼装 jsapi"""
