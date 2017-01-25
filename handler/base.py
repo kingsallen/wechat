@@ -209,6 +209,7 @@ class BaseHandler(MetaBaseHandler):
         self._qx_wechat = None
         self._unionid = None
         self._wxuser = None
+        self._qxuser = None
 
     # PROTECTED
     @gen.coroutine
@@ -436,7 +437,7 @@ class BaseHandler(MetaBaseHandler):
 
     @gen.coroutine
     def _get_session_by_wechat_id(self, session_id, wechat_id):
-        """尝试获取企业号 session"""
+        """尝试获取 session"""
 
         key = const.SESSION_USER.format(session_id, wechat_id)
         value = self.redis.get(key)
@@ -446,6 +447,8 @@ class BaseHandler(MetaBaseHandler):
             # 如果有 value， 返回该 value 作为 self.current_user
             session = ObjectDict(value)
             self._unionid = session.qxuser.unionid
+            self._wxuser = session.wxuser
+            self._qxuser = session.qxuser
             yield self._build_session_by_unionid(self._unionid)
             raise gen.Return(True)
 
@@ -464,8 +467,11 @@ class BaseHandler(MetaBaseHandler):
             session.wxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
                 unionid=unionid, wechat_id=self._wechat.id)
 
-        session.qxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
-            unionid=unionid, wechat_id=self.settings['qx_wechat_id'])
+        if self._qxuser:
+            session.qxuser = self._qxuser
+        else:
+            session.qxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
+                unionid=unionid, wechat_id=self.settings['qx_wechat_id'])
 
         session_id = to_str(self.get_secure_cookie(const.COOKIE_SESSIONID))
         # 当使用手机浏览器访问的时候可能没有 session_id, refresh ent session
