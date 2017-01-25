@@ -474,15 +474,16 @@ class BaseHandler(MetaBaseHandler):
             session_id = self._make_new_session_id(session.qxuser.unionid)
         self._save_ent_sessions(session_id, session)
 
+        session.wechat = self._wechat
+        self._add_jsapi_to_wechat(session.wechat)
+
         yield self._add_sysuser_to_session(session)
 
-        self._add_jsapi_to_wechat(session.wechat)
         if self.is_platform:
             yield self._add_company_info_to_session(session, called_by="_build_session_by_unionid")
         if self.params.recom:
             yield self._add_recom_to_session(session)
 
-        session.wechat = self._wechat
         self.current_user = session
 
     def _save_qx_sessions(self, session_id, qxuser):
