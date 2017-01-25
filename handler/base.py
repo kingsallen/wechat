@@ -420,7 +420,7 @@ class BaseHandler(MetaBaseHandler):
         )
 
         session_id = self._make_new_session_id(session.qxuser.unionid)
-        self._save_sessions(session_id, session)
+        self._save_qx_sessions(session_id, session.qxuser)
         self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True)
 
         yield self._add_sysuser_to_session(session)
@@ -456,8 +456,6 @@ class BaseHandler(MetaBaseHandler):
         """从 unionid 构建 session"""
 
         session = ObjectDict()
-        session.wechat = self._wechat
-
         self.logger.debug("_build_session_by_unionid: %s" % self._wxuser)
 
         if self._wxuser:
@@ -474,7 +472,7 @@ class BaseHandler(MetaBaseHandler):
         # 那么就创建它
         if not session_id:
             session_id = self._make_new_session_id(session.qxuser.unionid)
-        self._save_sessions(session_id, session)
+        self._save_ent_sessions(session_id, session)
 
         yield self._add_sysuser_to_session(session)
 
@@ -484,21 +482,27 @@ class BaseHandler(MetaBaseHandler):
         if self.params.recom:
             yield self._add_recom_to_session(session)
 
+        session.wechat = self._wechat
         self.current_user = session
 
-    def _save_sessions(self, session_id, session):
+    def _save_qx_sessions(self, session_id, qxuser):
         """
-        1. 保存企业号 session， 包含 wechat, wxuser, qxuser, sysuser
-        2. 保存聚合号 session， 只包含 qxuser
+        1. 保存聚合号 session， 只包含 qxuser
+        """
+
+        key_qx = const.SESSION_USER.format(session_id, self.settings['qx_wechat_id'])
+        self.redis.set(key_qx, ObjectDict(qxuser=qxuser), 60 * 60 * 24 * 30)
+        self.logger.debug("refresh qx session redis key: {} session: {}".format(key_qx, ObjectDict(qxuser=qxuser)))
+
+
+    def _save_ent_sessions(self, session_id, session):
+        """
+        1. 保存企业号 session， 包含 wxuser, qxuser, sysuser
         """
 
         key_ent = const.SESSION_USER.format(session_id, self._wechat.id)
         self.redis.set(key_ent, session, 60 * 60 * 2)
         self.logger.debug("refresh ent session redis key: {} session: {}".format(key_ent, session))
-
-        key_qx = const.SESSION_USER.format(session_id, self.settings['qx_wechat_id'])
-        self.redis.set(key_qx, ObjectDict(qxuser=session.qxuser), 60 * 60 * 24 * 30)
-        self.logger.debug("refresh qx session redis key: {} session: {}".format(key_qx, ObjectDict(qxuser=session.qxuser)))
 
     @gen.coroutine
     def _add_company_info_to_session(self, session, called_by=None):
