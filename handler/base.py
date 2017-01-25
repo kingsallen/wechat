@@ -23,7 +23,7 @@ from util.common.cipher import decode_id
 from util.common.decorator import check_signature
 from util.tool.date_tool import curr_now
 from util.tool.json_tool import encode_json_dumps, json_dumps
-from util.tool.str_tool import to_str, to_hex, from_hex
+from util.tool.str_tool import to_str, to_bytes, to_hex, from_hex
 from util.tool.url_tool import url_subtract_query, make_static_url, make_url
 
 import conf.message as msg_const
@@ -451,8 +451,7 @@ class BaseHandler(MetaBaseHandler):
 
         if need_oauth and self.in_wechat:
             if self._unionid:
-                # 服务号，有 unionid， 且存在 wxuser，或者
-                # 订阅号，只需 unionid 存在
+                # 只需 unionid 存在
                 # 即可进入 _build_session 方法
                 yield self._build_session()
                 self.logger.debug("_build_session: %s" % self.current_user)
@@ -464,7 +463,8 @@ class BaseHandler(MetaBaseHandler):
 
     @gen.coroutine
     def _build_session(self):
-        """构建 session"""
+        """构建 session
+        只可能在微信环境中被调用"""
 
         session = ObjectDict()
         session.wechat = self._wechat
@@ -475,10 +475,9 @@ class BaseHandler(MetaBaseHandler):
             fields=['id', 'unionid']
         )
 
-        session_id = self._make_new_session_id(session.qxuser.sysuser_id)
-        self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True)
-
+        session_id = self._make_new_session_id(session.qxuser.unionid)
         self._save_sessions(session_id, session)
+        self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True)
 
         yield self._add_sysuser_to_session(session)
 
@@ -508,10 +507,10 @@ class BaseHandler(MetaBaseHandler):
             unionid=unionid, wechat_id=self.settings['qx_wechat_id'])
 
         session_id = to_str(self.get_secure_cookie(const.COOKIE_SESSIONID))
-        # 当使用手机浏览器访问的时候可能没有 session_idrefresh ent session
+        # 当使用手机浏览器访问的时候可能没有 session_id, refresh ent session
         # 那么就创建它
         if not session_id:
-            session_id = self._make_new_session_id(session.qxuser.sysuser_id)
+            session_id = self._make_new_session_id(session.qxuser.unionid)
         self._save_sessions(session_id, session)
 
         yield self._add_sysuser_to_session(session)
@@ -618,7 +617,7 @@ class BaseHandler(MetaBaseHandler):
             raise gen.Return(True)
         raise gen.Return(False)
 
-    def _make_new_session_id(self, sysuser_id):
+    def _make_new_session_id(self, unionid):
         """创建新的 session_id
 
         redis 中 session 的 key 的格式为 session_id_<wechat_id>
@@ -629,7 +628,7 @@ class BaseHandler(MetaBaseHandler):
         """
         while True:
             session_id = const.SESSION_ID.format(
-                sha1(bytes(sysuser_id)).hexdigest(),
+                sha1(to_bytes(unionid)).hexdigest(),
                 sha1(os.urandom(24)).hexdigest())
             record = self.redis.exists(session_id + "_*")
             if record:

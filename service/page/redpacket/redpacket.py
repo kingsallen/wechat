@@ -301,7 +301,7 @@ class RedpacketPageService(PageService):
         })
         self.logger.debug("[RP]recom_qx_wxuser: %s" % recom_qx_wxuser)
 
-        nickname = current_user.qxuser.nickname
+        nickname = current_user.sysuser.name or current_user.sysuser.nickname
 
         # 判断当前用户在这个活动中是否已经为这个受益人发过红包, check 不通过暂停发红包
         malicious_passed = yield self.__checked_maliciousness_passed(
