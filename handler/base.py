@@ -251,9 +251,9 @@ class BaseHandler(MetaBaseHandler):
         # 创建 qx 的 user_wx_user
         yield self.user_ps.create_qx_wxuser_by_userinfo(userinfo, user_id)
 
+        self._unionid = unionid
         if not self._authable():
             # 该企业号是订阅号 则无法获得当前 wxuser 信息, 无需静默授权
-            self._unionid = unionid
             self._wxuser = ObjectDict()
 
     @gen.coroutine
@@ -446,15 +446,16 @@ class BaseHandler(MetaBaseHandler):
         self.logger.debug("_unionid: %s" % self._unionid)
         self.logger.debug("_wxuser: %s" % self._wxuser)
         self.logger.debug("_authable: %s" % self._authable())
+        self.logger.debug("_qx_wechat: %s" % self._qx_wechat)
 
 
         if need_oauth and self.in_wechat:
-            if (self._unionid and self._wxuser and self._authable() or
-                self._unionid and not self._authable()):
+            if self._unionid:
                 # 服务号，有 unionid， 且存在 wxuser，或者
                 # 订阅号，只需 unionid 存在
                 # 即可进入 _build_session 方法
                 yield self._build_session()
+                self.logger.debug("_build_session: %s" % self.current_user)
             else:
                 self._oauth_service.wechat = self._qx_wechat
                 url = self._oauth_service.get_oauth_code_userinfo_url()
@@ -467,7 +468,6 @@ class BaseHandler(MetaBaseHandler):
 
         session = ObjectDict()
         session.wechat = self._wechat
-        session.wxuser = self._wxuser
 
         session.qxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
             unionid=self._unionid,
