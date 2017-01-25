@@ -73,11 +73,11 @@ class CompanyPageService(PageService):
 
         # 处理 impression:
         if company.impression:
-            company.impression_processed = [make_static_url(item) for item in ujson.decode(company.impression).values()]
+            company.impression = [make_static_url(item) for item in ujson.decode(company.impression).values()]
 
         # 处理 banner
         if company.banner:
-            company.banner_processed = [make_static_url(item) for item in ujson.decode(company.banner).values()]
+            company.banner = [make_static_url(item) for item in ujson.decode(company.banner).values()]
 
 
         raise gen.Return(company)

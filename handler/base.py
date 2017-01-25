@@ -23,7 +23,7 @@ from util.common.cipher import decode_id
 from util.common.decorator import check_signature
 from util.tool.date_tool import curr_now
 from util.tool.json_tool import encode_json_dumps, json_dumps
-from util.tool.str_tool import to_str, to_bytes, to_hex, from_hex
+from util.tool.str_tool import to_str, to_bytes, from_hex
 from util.tool.url_tool import url_subtract_query, make_static_url, make_url
 
 import conf.message as msg_const
@@ -266,29 +266,6 @@ class BaseHandler(MetaBaseHandler):
             self.logger.debug("_handle_ent_openid, wxuser:{}".format(wxuser))
         raise gen.Return(wxuser)
 
-    # noinspection PyTypeChecker
-    def _get_params(self):
-        """To get all GET or POST arguments from http request
-        """
-        params = ObjectDict(self.request.arguments)
-        for key in params:
-            if isinstance(params[key], list) and params[key]:
-                params[to_str(key)] = to_str(params[key][0]).strip()
-        return params
-
-    def _get_json_args(self):
-        """获取 api 调用的 json dict"""
-
-        json_args = {}
-        headers = self.request.headers
-        body = self.request.body
-
-        if (headers.get('Content-Type') and
-            'application/json' in headers.get('Content-Type') and body):
-            json_args = ujson.loads(to_str(body))
-
-        return json_args
-
     def _authable(self):
         """返回当前公众号是否可以 OAuth
 
@@ -299,36 +276,6 @@ class BaseHandler(MetaBaseHandler):
         if self._wechat is None:
             return False
         return self._wechat.type is const.WECHAT_TYPE_SERVICE
-
-    def guarantee(self, *args):
-        """对 API 调用输入做参数检查
-
-        注意: 请不要在guarantee 后直接使用 json_args 因为在执行
-        guarantee 的过程中, json_args 会陆续pop 出元素.
-        相对的应该使用params
-
-        usage code view::
-            try:
-                self.guarantee("mobile", "name", "password")
-            except AttributeError:
-                return
-
-            mobile = self.params["mobile"]
-        """
-        c_arg = None
-        try:
-            for arg in args:
-                c_arg = arg
-                self.params[arg] = self.json_args[arg]
-                self.json_args.pop(arg)
-        except KeyError as e:
-            self.send_json_error(message="{}不能为空".format(c_arg),
-                                 http_code=416)
-            self.finish()
-            self.logger.error(str(e) + " 缺失")
-            raise AttributeError(str(e) + " 缺失")
-
-        self.params.update(self.json_args)
 
     def _verify_code(self, code):
         """检查 code 是不是之前使用过的"""
@@ -357,7 +304,6 @@ class BaseHandler(MetaBaseHandler):
                 raise NoSignatureError()
 
         wechat = yield self.session_ps.get_wechat_by_signature(signature)
-
         raise gen.Return(wechat)
 
     @gen.coroutine
@@ -447,7 +393,6 @@ class BaseHandler(MetaBaseHandler):
         self.logger.debug("_wxuser: %s" % self._wxuser)
         self.logger.debug("_authable: %s" % self._authable())
         self.logger.debug("_qx_wechat: %s" % self._qx_wechat)
-
 
         if need_oauth and self.in_wechat:
             if self._unionid:
@@ -588,15 +533,15 @@ class BaseHandler(MetaBaseHandler):
         if value:
             # 如果有 value， 返回该 value 作为 self.current_user
             session = ObjectDict(value)
-            yield self._add_company_info_to_session(session, called_by="_get_session_from_ent")
             yield self._add_sysuser_to_session(session)
+            self._add_jsapi_to_wechat(session.wechat)
+            yield self._add_company_info_to_session(session, called_by="_get_session_from_ent")
             if self.params.recom:
                 yield self._add_recom_to_session(session)
-            self._add_jsapi_to_wechat(session.wechat)
             self.current_user = session
+            raise gen.Return(True)
 
-            return True
-        return False
+        raise gen.Return(False)
 
     @gen.coroutine
     def _get_session_from_qx(self, session_id):
@@ -613,6 +558,7 @@ class BaseHandler(MetaBaseHandler):
             qxuser = ObjectDict(session_qx.get('qxuser'))
             yield self._build_session_by_unionid(qxuser.unionid)
             raise gen.Return(True)
+        
         raise gen.Return(False)
 
     def _add_jsapi_to_wechat(self, wechat):
@@ -639,6 +585,59 @@ class BaseHandler(MetaBaseHandler):
                 continue
             else:
                 return session_id
+
+    def guarantee(self, *args):
+        """对 API 调用输入做参数检查
+
+        注意: 请不要在guarantee 后直接使用 json_args 因为在执行
+        guarantee 的过程中, json_args 会陆续pop 出元素.
+        相对的应该使用params
+
+        usage code view::
+            try:
+                self.guarantee("mobile", "name", "password")
+            except AttributeError:
+                return
+
+            mobile = self.params["mobile"]
+        """
+        c_arg = None
+        try:
+            for arg in args:
+                c_arg = arg
+                self.params[arg] = self.json_args[arg]
+                self.json_args.pop(arg)
+        except KeyError as e:
+            self.send_json_error(message="{}不能为空".format(c_arg),
+                                 http_code=416)
+            self.finish()
+            self.logger.error(str(e) + " 缺失")
+            raise AttributeError(str(e) + " 缺失")
+
+        self.params.update(self.json_args)
+
+    # noinspection PyTypeChecker
+    def _get_params(self):
+        """To get all GET or POST arguments from http request
+        """
+        params = ObjectDict(self.request.arguments)
+        for key in params:
+            if isinstance(params[key], list) and params[key]:
+                params[to_str(key)] = to_str(params[key][0]).strip()
+        return params
+
+    def _get_json_args(self):
+        """获取 api 调用的 json dict"""
+
+        json_args = {}
+        headers = self.request.headers
+        body = self.request.body
+
+        if (headers.get('Content-Type') and
+                    'application/json' in headers.get('Content-Type') and body):
+            json_args = ujson.loads(to_str(body))
+
+        return json_args
 
     # tornado hooks
     @gen.coroutine
