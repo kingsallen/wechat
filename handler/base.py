@@ -497,6 +497,8 @@ class BaseHandler(MetaBaseHandler):
         session = ObjectDict()
         session.wechat = self._wechat
 
+        self.logger.debug("_build_session_by_unionid: %s" % self._wxuser)
+
         if self._wxuser:
             session.wxuser = self._wxuser
         else:
@@ -548,13 +550,13 @@ class BaseHandler(MetaBaseHandler):
 
         if self._authable():
 
-            if not session.wxuser.id:
+            if not session.sysuser.id:
                 self.logger.debug(
-                    "session.wxuser.id 不存在, 暂停获取 employee, called_by: {}, session: {}".format(called_by, session))
+                    "session.sysuser.id 不存在, 暂停获取 employee, called_by: {}, session: {}".format(called_by, session))
                 return
 
             employee = yield self.session_ps.get_employee(
-                wxuser_id=session.wxuser.id, company_id=session.company.id)
+                user_id=session.sysuser.id, company_id=session.company.id)
             if employee:
                 session.employee = employee
 
@@ -574,12 +576,6 @@ class BaseHandler(MetaBaseHandler):
         session.sysuser = yield self.user_ps.get_user_user({
             "unionid": session.qxuser.unionid
         })
-
-    def _add_jsapi_to_wechat(self, wechat):
-        """拼装 jsapi"""
-        wechat.jsapi = JsApi(
-            jsapi_ticket=wechat.jsapi_ticket,
-            url=self.request.full_url())
 
     @gen.coroutine
     def _get_session_from_ent(self, session_id):
@@ -618,6 +614,12 @@ class BaseHandler(MetaBaseHandler):
             yield self._build_session_by_unionid(qxuser.unionid)
             raise gen.Return(True)
         raise gen.Return(False)
+
+    def _add_jsapi_to_wechat(self, wechat):
+        """拼装 jsapi"""
+        wechat.jsapi = JsApi(
+            jsapi_ticket=wechat.jsapi_ticket,
+            url=self.request.full_url())
 
     def _make_new_session_id(self, unionid):
         """创建新的 session_id

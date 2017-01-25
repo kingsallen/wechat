@@ -17,10 +17,10 @@ class SessionPageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def get_employee(self, wxuser_id, company_id):
+    def get_employee(self, user_id, company_id):
         res = yield self.user_employee_ds.get_employee(
             conds={
-                "wxuser_id":  wxuser_id,
+                "sysuser_id":  user_id,
                 "company_id": company_id,
                 "disable":    "0",
                 "activation": "0",
