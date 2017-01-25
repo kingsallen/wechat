@@ -466,7 +466,7 @@ class BaseHandler(MetaBaseHandler):
         """从 unionid 构建 session"""
 
         session = ObjectDict()
-        self.logger.debug("_build_session_by_unionid: %s" % self._wxuser)
+        self.logger.debug("_build_session_by_unionid")
 
         if self._wxuser:
             session.wxuser = self._wxuser

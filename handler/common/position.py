@@ -120,6 +120,8 @@ class PositionHandler(BaseHandler):
                 add_item(position_data, "module_job_require", module_job_require)
                 self.render_page("position/info.html", data=position_data, meta_title=const.PAGE_POSITION_INFO)
 
+            self.flush()
+            
             # 后置操作
             # 红包处理
             if self.is_platform and self.current_user.recom:
