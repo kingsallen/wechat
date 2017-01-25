@@ -28,14 +28,14 @@ common_routes = [
     # wechat
     # (r"/m/wechat",                         "handler.common.wechat.WechatHandler",                       {"event": "wechat_wechat"}),
     # passport
-    (r"/m/user/([0-9a-z]*)",               "handler.common.passport.LoginHandler",                      {"event": "user_login"}),
+    (r"/m/user/([a-z_]*)",                 "handler.common.passport.LoginHandler",                      {"event": "user_login"}),
     # position
     (r"/m/position/([0-9]+)",              "handler.common.position.PositionHandler",                   {"event": "position_info"}),
     (r"/m/position",                       "handler.common.position.PositionListHandler",               {"event": "position_list"}),
     # usercenter
     (r"/m/usercenter/applications",        "handler.common.usercenter.AppRecordsHandler",               {"event": "usercenter_applications"}),
     (r"/m/usercenter/favpositions",        "handler.common.usercenter.FavPositionsHandler",             {"event": "usercenter_favpositions"}),
-    (r"/m/usercenter/setting/([0-9a-z]*)", "handler.common.usercenter.UserSettingHandler",              {"event": "usercenter_"}),
+    (r"/m/usercenter/setting/([a-z_]*)",   "handler.common.usercenter.UserSettingHandler",              {"event": "usercenter_"}),
     (r"/m/usercenter",                     "handler.common.usercenter.HomeHandler",                     {"event": "usercenter_home"}),
     # app forward 给前端，展示纯前端渲染的 SPA
     (r"/m/app/.*",                         "handler.common.app.IndexHandler",                           {"event": "app_index"}),
@@ -46,7 +46,7 @@ common_routes = [
     (r"/m/api/mobilebinded",               "handler.common.user.UserMobileBindedHandler",               {"event": "user_usermobilebinded"}),
     (r"/m/api/cellphone",                  "handler.common.cellphone.CellphoneBindHandler",             {"event": "cellphone_bind"}),
     (r"/m/api/user/currentinfo",           "handler.common.interest.UserCurrentInfoHandler",            {"event": "user_currentinfo"}),
-    (r"/m/api/upload/([0-9a-z]*)",         "handler.common.usercenter.UploadHandler",                   {"event": "image_"})
+    (r"/m/api/upload/([a-z_]*)",           "handler.common.usercenter.UploadHandler",                   {"event": "image_"})
 
 ]
 
