@@ -827,8 +827,6 @@ class RedpacketPageService(PageService):
         yield self.hr_hb_items_ds.create_hb_items(fields={
             "hb_config_id": hb_config_id,
             "binding_id": 0,
-            "index": -1,
-            "amount": 0.0,
             "status": const.RP_ITEM_STATUS_ZERO_AMOUNT_WX_MSG_SENT,
             "wxuser_id": wxuser.id,
             "trigger_wxuser_id": current_wxuser_id
