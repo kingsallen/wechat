@@ -85,3 +85,4 @@ POSITION_LIST_TITLE = ObjectDict({  # recomlist 还没有明显区分前的临�
     'list':      '我要求职',
     'recomlist': '我要推荐'
 })
+POSITION_LIST_TITLE_DEFAULT = "我要求职"

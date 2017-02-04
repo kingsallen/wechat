@@ -7,8 +7,9 @@ from tornado import gen
 
 from service.page.base import PageService
 from util.common import ObjectDict
+from util.common.cipher import encode_id
 from util.tool.date_tool import jd_update_date
-from util.tool.http_tool import http_get, async_das_get
+from util.tool.http_tool import async_das_get
 from util.tool.str_tool import gen_salary, split
 from util.tool.temp_data_tool import make_mate, make_team, template3
 
@@ -103,6 +104,11 @@ class PositionPageService(PageService):
     def update_position(self, conds, fields):
         response = yield self.job_position_ds.update_position(conds, fields)
         raise gen.Return(response)
+
+    @staticmethod
+    def _make_recom(user_id):
+        """用于微信分享和职位推荐时，传出的 recom 参数"""
+        return encode_id(user_id)
 
     @gen.coroutine
     def get_positions_list(self, conds, fields, options=[], appends=[]):

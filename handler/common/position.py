@@ -156,11 +156,6 @@ class PositionHandler(BaseHandler):
             "update_time": position_info.update_time_ori,
         })
 
-    def _make_recom(self):
-        """用于微信分享和职位推荐时，传出的 recom 参数"""
-
-        return encode_id(self.current_user.sysuser.id)
-
     @gen.coroutine
     def _make_share_info(self, position_info, company_info):
         """构建 share 内容"""
@@ -190,7 +185,7 @@ class PositionHandler(BaseHandler):
             self.params,
             host=self.request.host,
             protocol=self.request.protocol,
-            recom=self._make_recom(),
+            recom=self.position_ps._make_recom(self.current_user.sysuser.id),
             escape=["pid", "keywords", "cities", "candidate_source",
                     "employment_type", "salary", "department", "occupations",
                     "custom", "degree", "page_from", "page_size"]
@@ -642,7 +637,9 @@ class PositionListHandler(BaseHandler):
             self.render(
                 "neo_weixin/position/position_list.html",
                 positions=position_list,
-                position_title=const_platorm.POSITION_LIST_TITLE.get(self.params.m, '我要求职'),
+                position_title=const_platorm.POSITION_LIST_TITLE.get(
+                    self.params.m,
+                    const_platorm.POSITION_LIST_TITLE_DEFAULT),
                 url='',
                 is_employee=bool(self.current_user.employee))
 
@@ -661,7 +658,7 @@ class PositionListHandler(BaseHandler):
             self.params,
             host=self.request.host,
             protocol=self.request.protocol,
-            recom=self._make_recom(),
+            recom=self.position_ps._make_recom(self.current_user.sysuser.id),
             escape=["pid", "keywords", "cities", "candidate_source",
                     "employment_type", "salary", "department", "occupations",
                     "custom", "degree", "page_from", "page_size"]
