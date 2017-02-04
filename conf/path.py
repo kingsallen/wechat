@@ -12,7 +12,7 @@ USER_LOGOUT = '/m/logout'
 USER_CENTER_SETTING = 'm/usercenter/setting/home'
 MOBILE_VERIFY = '/m/app/phone/verify'
 
-## 供侧边栏使用
+# 供侧边栏使用
 OLD_POSITION = '/mobile/position'
 OLD_PROFILE = '/mobile/profile'
 OLD_CHAT = '/mobile/chatroom'
@@ -37,4 +37,7 @@ APPLICATION_APPLY_COUNT = 'application/count/check'
 # REFERER: https://wiki.moseeker.com/position-api.md
 POSITION_RECOMMEND = 'positions/recommended'
 POSITION_LIST = 'position/list'
+POSITION_LIST_RP_EXT = 'position/rpext'
+RP_POSITION_LIST = 'position/rplist'
+RP_POSITION_LIST_SHARE_INFO = 'position/list/hb_share_info'
 # ============================ 基础服务结束 ============================

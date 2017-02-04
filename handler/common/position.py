@@ -614,41 +614,37 @@ class PositionListHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         # 收集 params
+        infra_params = self._make_position_list_infra_params()
+        # todo check if hb_c is an integer (tangyiliang)
 
         if self.params.hb_c:
-            # todo 红包职位列表
-            infra_params = {}
+            # 红包职位列表
+            infra_params.update(hb_config_id=int(self.params.hb_c))
+            position_list = yield self.position_ps.get_rp_position_list(
+                infra_params)
         else:
             # 普通职位列表
-            infra_params = self._make_position_list_infra_params()
-
-        position_list = yield self.position_ps.infra_get_position_list(
-            infra_params)
-
-        # todo 红包分享信息
-        yield self._make_share_info(
-            self.current_user.company.id, self.params.did)
+            position_list = yield self.position_ps.infra_get_position_list(
+                infra_params)
+            yield self._make_share_info(
+                self.current_user.company.id, self.params.did)
 
         # 如果是下拉刷新请求的职位, 返回新增职位的页面
         if self.params.get("restype", "") == "json":
-            self.render("weixin/position/position_list_items.html",
-                        positions=position_list,
-                        is_employee=bool(self.current_user.employee)
-                        )
+            self.render(
+                "weixin/position/position_list_items.html",
+                positions=position_list,
+                is_employee=bool(self.current_user.employee))
             return
 
         # 直接请求页面返回
-        # TODO 可以把 title 常量放到 common 中，参考 # 页面 meta 属性
         else:
-            _title = {  # recomlist 还没有明显区分前的临时做法.
-                'list':      '我要求职',
-                'recomlist': '我要推荐'
-            }
-            self.render("neo_weixin/position/position_list.html",
-                        positions=position_list,
-                        position_title=_title.get(self.params.m, u'我要求职'),
-                        url='',
-                        is_employee=bool(self.current_user.employee))
+            self.render(
+                "neo_weixin/position/position_list.html",
+                positions=position_list,
+                position_title=const_platorm.POSITION_LIST_TITLE.get(self.params.m, '我要求职'),
+                url='',
+                is_employee=bool(self.current_user.employee))
 
     @gen.coroutine
     def _make_share_info(self, company_id, did=None):
