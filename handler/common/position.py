@@ -617,17 +617,22 @@ class PositionListHandler(BaseHandler):
             infra_params.update(hb_config_id=int(self.params.hb_c))
             position_list = yield self.position_ps.get_rp_position_list(
                 infra_params)
+            self.logger.debug("[PL]position_list: %s" % position_list)
+            rp_share_info = yield self.position_ps.get_rp_share_info(
+                infra_params)
+            self.logger.debug("[PL]rp_share_info: %s" % rp_share_info)
         else:
             # 普通职位列表
             position_list = yield self.position_ps.infra_get_position_list(
                 infra_params)
+            self.logger.debug("[PL]position_list: %s" % position_list)
             yield self._make_share_info(
                 self.current_user.company.id, self.params.did)
 
         # 如果是下拉刷新请求的职位, 返回新增职位的页面
         if self.params.get("restype", "") == "json":
             self.render(
-                "weixin/position/position_list_items.html",
+                template_name="refer/weixin/position/position_list_items.html",
                 positions=position_list,
                 is_employee=bool(self.current_user.employee))
             return
@@ -635,7 +640,7 @@ class PositionListHandler(BaseHandler):
         # 直接请求页面返回
         else:
             self.render(
-                "neo_weixin/position/position_list.html",
+                template_name="refer/neo_weixin/position/position_list.html",
                 positions=position_list,
                 position_title=const_platorm.POSITION_LIST_TITLE.get(
                     self.params.m,
