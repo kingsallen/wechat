@@ -629,15 +629,20 @@ class PositionListHandler(BaseHandler):
             yield self._make_share_info(
                 self.current_user.company.id, self.params.did)
 
+
+
         # 如果是下拉刷新请求的职位, 返回新增职位的页面
         if self.params.get("restype", "") == "json":
             self.render(
                 template_name="refer/weixin/position/position_list_items.html",
                 positions=position_list,
-                is_employee=bool(self.current_user.employee))
+                is_employee=bool(self.current_user.employee),
+                use_neowx=1 # TODO (tangyiliang) always be 1 becuase it's neo wx now!  To edit template.
+            )
             return
 
         # 直接请求页面返回
+
         else:
             self.render(
                 template_name="refer/neo_weixin/position/position_list.html",
@@ -646,7 +651,21 @@ class PositionListHandler(BaseHandler):
                     self.params.m,
                     const_platorm.POSITION_LIST_TITLE_DEFAULT),
                 url='',
-                is_employee=bool(self.current_user.employee))
+                use_neowx=1, # TODO (tangyiliang) always be 1 becuase it's neo wx now!  To edit template.
+                is_employee=bool(self.current_user.employee),
+                searchFilterNum=self.get_search_filter_num()
+            )
+
+    def get_search_filter_num(self):
+        """get search filter number for statistics"""
+        ret = 0
+        if self.is_platform:
+            self.params.pop("page_from", None)
+            self.params.pop("page_size", None)
+            self.params.pop("order_by_priority", None)
+            for k, v in self.params.items():
+                if v:
+                    ret += 1
 
     @gen.coroutine
     def _make_share_info(self, company_id, did=None):
