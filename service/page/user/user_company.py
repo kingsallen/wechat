@@ -43,6 +43,7 @@ class UserCompanyPageService(PageService):
         data.header = temp_data_tool.make_header(company)
         data.relation = ObjectDict({
             'want_visit': self.constant.YES if vst_cmpy else self.constant.NO,
+            'qrcode': user.wechat.qrcode,
             'follow': self.constant.YES if wx_user.is_subscribe
             else self.constant.NO,
         })

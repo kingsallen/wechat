@@ -248,7 +248,7 @@ class PositionHandler(BaseHandler):
             "forword_message": company_info.conf_forward_message or msg.POSITION_FORWARD_MESSAGE,
             "team": team_id,
             "did": did,
-            "hr_chat": self.current_user.wechat.hr_chat,
+            "hr_chat": int(self.current_user.wechat.hr_chat),
             #"team": position_info.department.lower() if position_info.department else ""
         })
 
