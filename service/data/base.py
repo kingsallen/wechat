@@ -48,6 +48,7 @@ class DataService:
             klass = getattr(
                 importlib.import_module('dao.{0}.{1}'.format(p, m)), pm_dao)
             instance = klass()
+
             setattr(self, pm_obj, instance)
 
     @staticmethod

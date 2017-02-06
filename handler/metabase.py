@@ -29,26 +29,26 @@ from util.tool.str_tool import to_str
 from util.tool.url_tool import make_static_url
 from util.tool.json_tool import encode_json_dumps, json_dumps
 
-class MetaBaseHandler(web.RequestHandler):
+# 动态加载所有 PageService
+obDict = {}
+d = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)) + \
+    "/service/page/**/*.py"
+for module in filter(lambda x: not x.endswith("init__.py"), glob.glob(d)):
+    p = module.split("/")[-2]
+    m = module.split("/")[-1].split(".")[0]
+    m_list = [item.title() for item in re.split("_", m)]
+    pmPS = "".join(m_list) + "PageService"
+    pmObj = m + "_ps"
+    obDict.update({
+        pmObj: getattr(importlib.import_module(
+            'service.page.{0}.{1}'.format(p, m)), pmPS)()
+    })
+
+AtomHandler = type("AtomHandler", (web.RequestHandler,), obDict)
+
+class MetaBaseHandler(AtomHandler):
 
     """baseHandler 基类，不能被业务 hander 直接调用。除非是不能继承 BaseHandler"""
-
-    # 动态初始化所有 page service
-    d = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)) + \
-        "/service/page/**/*.py"
-    for module in filter(lambda x: not x.endswith("init__.py"), glob.glob(d)):
-        p = module.split("/")[-2]
-        m = module.split("/")[-1].split(".")[0]
-        m_list = [item.title() for item in re.split("_", m)]
-        pmPS = "".join(m_list) + "PageService"
-        pmObj = m + "_ps"
-
-        pmObj = getattr(
-            importlib.import_module('service.page.{0}.{1}'.format(p, m)),
-            pmPS)()
-        # instance = klass()
-
-        # setattr(pmObj, klass)
 
     def __init__(self, application, request, **kwargs):
         super(MetaBaseHandler, self).__init__(application, request, **kwargs)
