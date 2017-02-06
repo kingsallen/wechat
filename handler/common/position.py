@@ -624,15 +624,17 @@ class PositionListHandler(BaseHandler):
             # 普通职位列表
             position_list = yield self.position_ps.infra_get_position_list(
                 infra_params)
-
             rpext_list = yield self.position_ps.infra_get_position_list_rp_ext(
                 position_list)
 
-            print(rpext_list)
-
-            # TODO (yiliang) 验证这些职位中有没有红包职位
             for position in position_list:
-                position.is_rp_reward = False
+                pext = [e for e in rpext_list if e.pid == position.id]
+                if pext:
+                    position.is_rp_reward = True
+                    position.remain = pext[0].remain
+                    position.employee_only = pext[0].employee_only
+                else:
+                    position.is_rp_reward = False
 
             yield self._make_share_info(
                 self.current_user.company.id, self.params.did)
