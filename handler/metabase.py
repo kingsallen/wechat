@@ -65,7 +65,7 @@ class MetaBaseHandler(web.RequestHandler):
             pmObj = m + "_ps"
 
             klass = getattr(
-                importlib.import_module('service.data.{0}.{1}'.format(p, m)),
+                importlib.import_module('service.page.{0}.{1}'.format(p, m)),
                 pmPS)
             instance = klass(self.logger)
 
