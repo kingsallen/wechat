@@ -33,7 +33,8 @@ class BaseHandler(MetaBaseHandler):
     http://www.tornadoweb.org/en/stable/web.html#other
     """
 
-    def initialize(self, event):
+    def __init__(self, application, request, **kwargs):
+        super(BaseHandler, self).__init__(application, request, **kwargs)
 
         # 构建 session 过程中会缓存一份当前公众号信息
         self._wechat = None

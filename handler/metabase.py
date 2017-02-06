@@ -33,9 +33,9 @@ class MetaBaseHandler(web.RequestHandler):
 
     """baseHandler 基类，不能被业务 hander 直接调用。除非是不能继承 BaseHandler"""
 
-    def initialize(self, event):
-        # 日志需要，由 route 定义
-        self._event = event
+    def __init__(self, application, request, **kwargs):
+        super(MetaBaseHandler, self).__init__(application, request, **kwargs)
+
         # 全部 arguments
         self.params = self._get_params()
         # api 使用，json arguments
@@ -48,6 +48,10 @@ class MetaBaseHandler(web.RequestHandler):
         self._log_info = None
         # page service 初始化
         self.init_ps()
+
+    def initialize(self, event):
+        # 日志需要，由 route 定义
+        self._event = event
 
     def init_ps(self):
 
