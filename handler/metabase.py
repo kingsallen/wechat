@@ -46,9 +46,9 @@ class MetaBaseHandler(web.RequestHandler):
         klass = getattr(
             importlib.import_module('service.page.{0}.{1}'.format(p, m)),
             pmPS)
-        instance = klass()
+        # instance = klass()
 
-        setattr(pmObj, instance)
+        setattr(pmObj, klass)
 
     def __init__(self, application, request, **kwargs):
         super(MetaBaseHandler, self).__init__(application, request, **kwargs)
