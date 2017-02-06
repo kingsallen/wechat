@@ -625,7 +625,7 @@ class PositionListHandler(BaseHandler):
             position_list = yield self.position_ps.infra_get_position_list(
                 infra_params)
             rpext_list = yield self.position_ps.infra_get_position_list_rp_ext(
-                position_list)
+                [position for position in position_list if position.in_hb])
 
             for position in position_list:
                 pext = [e for e in rpext_list if e.pid == position.id]

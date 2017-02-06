@@ -3,6 +3,8 @@
 # Copyright 2016 MoSeeker
 
 import json
+from datetime import datetime
+
 from tornado import gen
 
 from service.page.base import PageService
@@ -13,6 +15,7 @@ from util.tool.http_tool import async_das_get
 from util.tool.str_tool import gen_salary, split
 from util.tool.temp_data_tool import make_mate, make_team, template3
 import conf.path as path
+
 
 class PositionPageService(PageService):
 
@@ -287,6 +290,8 @@ class PositionPageService(PageService):
             for position in position_list:
                 position.salary = gen_salary(
                     position.salary_top, position.salary_bottom)
+                position.publish_date = jd_update_date(
+                    datetime.strptime(position.publish_date, '%Y-%m-%d %H:%M:%S'))
 
             raise gen.Return(position_list)
         raise gen.Return(res)
