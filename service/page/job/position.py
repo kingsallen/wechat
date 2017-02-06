@@ -282,7 +282,8 @@ class PositionPageService(PageService):
         """普通职位列表"""
         res = yield self.infra_position_ds.get_position_list(params)
         if res.status == 0:
-            raise gen.Return(res.data)
+            position_list = [ObjectDict(e) for e in res.data]
+            raise gen.Return(position_list)
         raise gen.Return(res)
 
     @gen.coroutine

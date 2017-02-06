@@ -624,7 +624,11 @@ class PositionListHandler(BaseHandler):
             # 普通职位列表
             position_list = yield self.position_ps.infra_get_position_list(
                 infra_params)
-            self.logger.debug("[PL]position_list: %s" % position_list)
+
+            # TODO (yiliang) 验证这些职位中有没有红包职位
+            for position in position_list:
+                position.is_rp_reward = False
+
             yield self._make_share_info(
                 self.current_user.company.id, self.params.did)
 
