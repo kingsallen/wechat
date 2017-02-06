@@ -625,6 +625,11 @@ class PositionListHandler(BaseHandler):
             position_list = yield self.position_ps.infra_get_position_list(
                 infra_params)
 
+            rpext_list = yield self.position_ps.infra_get_position_list_rp_ext(
+                position_list)
+
+            print(rpext_list)
+
             # TODO (yiliang) 验证这些职位中有没有红包职位
             for position in position_list:
                 position.is_rp_reward = False
