@@ -267,15 +267,15 @@ class PositionPageService(PageService):
 
     @staticmethod
     def limited_company_info(current_company):
-        """返回一个 current_company 的数据子集，用于职位列表的渲染"""
-        return ObjectDict(
+        """返回一个 company 的数据子集，用于职位列表的渲染"""
+        return (ObjectDict(
             logo=current_company.logo or path.DEFAULT_COMPANY_LOGO,
             abbreviation=current_company.abbreviation or '',
             industry=current_company.industry or '',
             scale_name=current_company.scale,
             homepage=current_company.homepage or '',
             banner=current_company.banner
-        )
+        ))
 
     @gen.coroutine
     def infra_get_position_list(self, params):

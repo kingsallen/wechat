@@ -611,6 +611,7 @@ class PositionListHandler(BaseHandler):
         # 收集 params
         infra_params = self._make_position_list_infra_params()
         # todo check if hb_c is an integer (tangyiliang)
+        # todo check if did is an integer if there is any (tangyiliang)
 
         if self.params.hb_c:
             # 红包职位列表
@@ -630,8 +631,7 @@ class PositionListHandler(BaseHandler):
                 self.current_user.company.id, self.params.did)
 
         # 只渲染必要的公司信息
-        self.params.company = self.position_ps.limited_company_info(
-            self.current_user.company)
+        yield self.make_company_info()
 
         # 如果是下拉刷新请求的职位, 返回新增职位的页面
         if self.params.get("restype", "") == "json":
@@ -656,6 +656,16 @@ class PositionListHandler(BaseHandler):
                 is_employee=bool(self.current_user.employee),
                 searchFilterNum=self.get_search_filter_num()
             )
+
+    @gen.coroutine
+    def make_company_info(self):
+        """只提取必要的company信息用于渲染"""
+        if self.params.did:
+            company = yield self.company_ps.get_company(
+                conds={'id': self.params.did}, need_conf=True)
+        else:
+            company = self.current_user.company
+        self.params.company = self.position_ps.limited_company_info(company)
 
     def get_search_filter_num(self):
         """get search filter number for statistics"""
