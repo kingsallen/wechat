@@ -173,6 +173,7 @@ class UserSettingHandler(BaseHandler):
                 self.logger.debug(1)
                 self.redirect(make_url(path.USER_CENTER_SETTING, self.params))
                 self.logger.debug("headers :%s" % self.request)
+                return
             else:
                 self.logger.debug(2)
                 self.params.message = msg.INPUT_DISORDER
@@ -195,6 +196,7 @@ class UserSettingHandler(BaseHandler):
             })
             if res.status == const.API_SUCCESS:
                 self.redirect(make_url(path.USER_CENTER_SETTING, self.params))
+                return
         else:
             self.params.message = msg.OPERATE_FAILURE
             self.render(template_name="refer/weixin/sysuser_v2/accountconfig-email.html")
@@ -213,6 +215,7 @@ class UserSettingHandler(BaseHandler):
             })
             if res.status == const.API_SUCCESS:
                 self.redirect(make_url(path.USER_CENTER_SETTING, self.params))
+                return
             else:
                 self.params.message = msg.INPUT_DISORDER
                 self.render(template_name="refer/weixin/sysuser_v2/accountconfig-password.html")

@@ -74,9 +74,6 @@ class CellphoneBindHandler(BaseHandler):
             yield self.user_ps.bind_mobile(self.current_user.sysuser.id,
                                            self.params.mobile)
 
-        self.logger.debug("mobile code: %s" % self.params.code)
-        self.logger.debug("mobile code type: %s" % type(self.params.code))
-
         # 返回加密的 code 值，供前端拼接 url，以验证用户重要操作是否已经验证手机号
         self.send_json_success(data={
             "mc": encode_id(int(self.params.code), 8)

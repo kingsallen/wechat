@@ -1,13 +1,15 @@
 # coding=utf-8
 
-# @Time    : 1/24/17 17:03
+# @Time    : 2/6/17 09:03
 # @Author  : panda (panyuxin@moseeker.com)
 # @File    : event.py
 # @DES     : 微信消息，指仟寻服务器与微信服务器之间的消息交互
 
 # Copyright 2016 MoSeeker
 
-# class WechatHandler(BaseHandler):
+
+
+# class WechatOauthHandler(BaseHandler):
 #
 #     @handle_response
 #     @gen.coroutine

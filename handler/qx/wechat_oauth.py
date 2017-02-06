@@ -19,3 +19,4 @@ class WxOauthHandler(tornado.web.RequestHandler):
         next_url = urllib.parse.unquote(
             re.findall(r"/wxoauth2\?next_url=(.*)", url)[0])
         self.redirect(next_url)
+        return

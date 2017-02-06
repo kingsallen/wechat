@@ -11,9 +11,11 @@ from tornado import gen
 
 import conf.common as const
 import conf.message as msg
+import conf.path as path
 
 from handler.base import BaseHandler
 from util.common.decorator import handle_response
+from util.tool.url_tool import make_url
 
 
 class CompatibleHandler(BaseHandler):
@@ -25,12 +27,15 @@ class CompatibleHandler(BaseHandler):
     def get(self):
 
         if self.is_platform:
+            route = self.request.uri
+            if route.startwith("/mobile/position") and self.params.m == "info":
+                # JD 页
+                replace_query = dict()
+                self.redirect(make_url(path.POSITION_PATH.format(self.params.pid), self.params))
+                return
+
+
             self.logger.debug("request: %s" % self.request)
-
-
-
-
-
 
 
     @handle_response
