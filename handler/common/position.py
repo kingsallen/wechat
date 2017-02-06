@@ -618,10 +618,8 @@ class PositionListHandler(BaseHandler):
             infra_params.update(hb_config_id=int(self.params.hb_c))
             position_list = yield self.position_ps.get_rp_position_list(
                 infra_params)
-            self.logger.debug("[PL]position_list: %s" % position_list)
             rp_share_info = yield self.position_ps.get_rp_share_info(
                 infra_params)
-            self.logger.debug("[PL]rp_share_info: %s" % rp_share_info)
         else:
             # 普通职位列表
             position_list = yield self.position_ps.infra_get_position_list(

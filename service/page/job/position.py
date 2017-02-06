@@ -281,22 +281,30 @@ class PositionPageService(PageService):
     def infra_get_position_list(self, params):
         """普通职位列表"""
         res = yield self.infra_position_ds.get_position_list(params)
+        if res.status == 0:
+            raise gen.Return(res.data)
         raise gen.Return(res)
 
     @gen.coroutine
     def infra_get_position_list_rp_ext(self, params):
         """获取职位的红包信息"""
         res = yield self.infra_position_ds.get_position_list_rp_ext(params)
+        if res.status == 0:
+            raise gen.Return(res.data)
         raise gen.Return(res)
 
     @gen.coroutine
     def infra_get_rp_position_list(self, params):
         """红包职位列表"""
         res = yield self.infra_position_ds.get_rp_position_list(params)
+        if res.status == 0:
+            raise gen.Return(res.data)
         raise gen.Return(res)
 
     @gen.coroutine
     def infra_get_rp_share_info(self, params):
         """红包职位列表的分享信息"""
         res = yield self.infra_position_ds.get_rp_share_info(params)
+        if res.status == 0:
+            raise gen.Return(res.data)
         raise gen.Return(res)
