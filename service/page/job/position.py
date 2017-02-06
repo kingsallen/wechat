@@ -299,7 +299,7 @@ class PositionPageService(PageService):
         params = dict(pids=pids_str)
         res = yield self.infra_position_ds.get_position_list_rp_ext(params)
         if res.status == 0:
-            raise gen.Return(res.data)
+            raise gen.Return([ObjectDict(e) for e in res.data])
         raise gen.Return(res)
 
     @gen.coroutine
