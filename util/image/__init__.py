@@ -28,11 +28,11 @@ class Logger(object):
 
 class Connector(object):
     def __init__(self):
-        self._LOG = Logger()
+        self._logger = Logger()
 
     def set_logger(self, logger):
-        self._LOG = logger
+        self._logger = logger
 
     @property
-    def LOG(self):
-        return self._LOG
+    def logger(self):
+        return self._logger

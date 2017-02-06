@@ -46,7 +46,10 @@ common_routes = [
     (r"/m/api/mobilebinded",               "handler.common.user.UserMobileBindedHandler",               {"event": "user_usermobilebinded"}),
     (r"/m/api/cellphone",                  "handler.common.cellphone.CellphoneBindHandler",             {"event": "cellphone_bind"}),
     (r"/m/api/user/currentinfo",           "handler.common.interest.UserCurrentInfoHandler",            {"event": "user_currentinfo"}),
-    (r"/m/api/upload/([a-z_]*)",           "handler.common.usercenter.UploadHandler",                   {"event": "image_"})
+    (r"/m/api/upload/([a-z_]*)",           "handler.common.usercenter.UploadHandler",                   {"event": "image_"}),
+
+    # 兼容老微信 url，进行302跳转，event 设置为 NULL
+    (r"/.*",                               "handler.common.compatible.CompatibleHandler",               {"event": "NULL"})
 
 ]
 

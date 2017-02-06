@@ -75,7 +75,7 @@ class BaseUpload(Connector):
         m = getattr(filter_parent, _attr) if hasattr(filter_parent, _attr) else None
         if m is None or not hasattr(m, '__call__'):
             raise NameError("apply filter failed, no such filter {}".format(_attr))
-        self.LOG.info("[apply filter] - use filter {}".format(_attr))
+        self.logger.info("[apply filter] - use filter {}".format(_attr))
         m(setting)
 
 class UploadResult(object):

@@ -47,10 +47,13 @@ def http_patch(route, jdata, timeout=5):
 
 
 @gen.coroutine
-def _async_http_get(route, jdata, timeout=5, method='GET'):
+def _async_http_get(route, jdata=None, timeout=5, method='GET'):
     """可用 HTTP 动词为 GET 和 DELETE"""
     if method.lower() not in "get delete":
         raise ValueError("method is not in GET and DELETE")
+
+    if jdata is None:
+        jdata = ObjectDict()
 
     # 指定 appid，必填
     jdata.update({"appid": constant.APPID[env]})
@@ -66,10 +69,13 @@ def _async_http_get(route, jdata, timeout=5, method='GET'):
 
 
 @gen.coroutine
-def _async_http_post(route, jdata, timeout=5, method='POST'):
+def _async_http_post(route, jdata=None, timeout=5, method='POST'):
     """可用 HTTP 动词为 POST, PATCH 和 PUT"""
     if method.lower() not in "post put patch":
         raise ValueError("method is not in POST, PUT and PATCH")
+
+    if jdata is None:
+        jdata = ObjectDict()
 
     # 指定 appid，必填
     jdata.update({"appid": constant.APPID[env]})
