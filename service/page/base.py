@@ -56,6 +56,6 @@ class PageService:
             klass = getattr(
                 importlib.import_module('service.data.{0}.{1}'.format(p, m)),
                 pm_ds)
-            instance = klass(self.logger)
+            instance = klass()
 
             setattr(self, pm_obj, instance)

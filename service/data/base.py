@@ -17,6 +17,7 @@ import glob
 import importlib
 import re
 
+from app import logger
 import conf.common as constant
 import conf.help as help_constant
 import conf.platform as plat_constant
@@ -30,7 +31,7 @@ class DataService:
 
     __metaclass__ = Singleton
 
-    def __init__(self, logger):
+    def __init__(self):
         self.logger = logger
         self.constant = constant
         self.plat_constant = plat_constant
@@ -46,7 +47,7 @@ class DataService:
             pm_obj = m + "_dao"
             klass = getattr(
                 importlib.import_module('dao.{0}.{1}'.format(p, m)), pm_dao)
-            instance = klass(self.logger)
+            instance = klass()
             setattr(self, pm_obj, instance)
 
     @staticmethod
