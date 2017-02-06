@@ -284,6 +284,10 @@ class PositionPageService(PageService):
         res = yield self.infra_position_ds.get_position_list(params)
         if res.status == 0:
             position_list = [ObjectDict(e) for e in res.data]
+            for position in position_list:
+                position.salary = gen_salary(
+                    position.salary_top, position.salary_bottom)
+
             raise gen.Return(position_list)
         raise gen.Return(res)
 
