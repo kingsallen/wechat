@@ -33,6 +33,23 @@ class MetaBaseHandler(web.RequestHandler):
 
     """baseHandler 基类，不能被业务 hander 直接调用。除非是不能继承 BaseHandler"""
 
+    # 动态初始化所有 page service
+    d = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)) + \
+        "/service/page/**/*.py"
+    for module in filter(lambda x: not x.endswith("init__.py"), glob.glob(d)):
+        p = module.split("/")[-2]
+        m = module.split("/")[-1].split(".")[0]
+        m_list = [item.title() for item in re.split("_", m)]
+        pmPS = "".join(m_list) + "PageService"
+        pmObj = m + "_ps"
+
+        klass = getattr(
+            importlib.import_module('service.page.{0}.{1}'.format(p, m)),
+            pmPS)
+        instance = klass()
+
+        setattr(pmObj, instance)
+
     def __init__(self, application, request, **kwargs):
         super(MetaBaseHandler, self).__init__(application, request, **kwargs)
 
@@ -47,29 +64,10 @@ class MetaBaseHandler(web.RequestHandler):
         # 日志信息
         self._log_info = None
         # page service 初始化
-        self.init_ps()
 
     def initialize(self, event):
         # 日志需要，由 route 定义
         self._event = event
-
-    def init_ps(self):
-
-        d = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)) + \
-            "/service/page/**/*.py"
-        for module in filter(lambda x: not x.endswith("init__.py"), glob.glob(d)):
-            p = module.split("/")[-2]
-            m = module.split("/")[-1].split(".")[0]
-            m_list = [item.title() for item in re.split("_", m)]
-            pmPS = "".join(m_list) + "PageService"
-            pmObj = m + "_ps"
-
-            klass = getattr(
-                importlib.import_module('service.page.{0}.{1}'.format(p, m)),
-                pmPS)
-            instance = klass(self.logger)
-
-            setattr(self, pmObj, instance)
 
     # PROPERTIES
     @property

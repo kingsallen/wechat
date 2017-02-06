@@ -18,6 +18,7 @@ import re
 import importlib
 import glob
 
+from app import logger
 from setting import settings
 import conf.common as constant
 import conf.platform as plat_constant
@@ -30,7 +31,7 @@ from util.common.singleton import Singleton
 class PageService:
     __metaclass__ = Singleton
 
-    def __init__(self, logger):
+    def __init__(self):
 
         """
         初始化dataservice
