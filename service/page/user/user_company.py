@@ -32,8 +32,9 @@ class UserCompanyPageService(PageService):
 
         # 获取当前公司关注，访问信息
         conds = {'user_id': user.sysuser.id, 'company_id': company.id}
-        fllw_cmpy = yield self.user_company_follow_ds.get_fllw_cmpy(
-                        conds=conds, fields=['id', 'company_id'])
+        wx_user = yield self.user_wx_user_ds.get_wxuser(
+            conds={'id', user.wxuser.id},
+            fields=['id', 'is_subscribe'])
         vst_cmpy = yield self.user_company_visit_req_ds.get_visit_cmpy(
                         conds=conds, fields=['id', 'company_id'])
         team_index_url = make_url(path.COMPANY_TEAM, handler_params)
@@ -41,8 +42,10 @@ class UserCompanyPageService(PageService):
         # 拼装模板数据
         data.header = temp_data_tool.make_header(company)
         data.relation = ObjectDict({
-            'follow': self.constant.YES if fllw_cmpy else self.constant.NO,
-            'want_visit': self.constant.YES if vst_cmpy else self.constant.NO
+            'want_visit': self.constant.YES if vst_cmpy else self.constant.NO,
+            'qrcode': user.wechat.qrcode,
+            'follow': self.constant.YES if wx_user.is_subscribe
+            else self.constant.NO,
         })
         if COMPANY_CONFIG.get(company.id).get('custom_visit_recipe', False):
             data.relation.custom_visit_recipe = COMPANY_CONFIG.get(
