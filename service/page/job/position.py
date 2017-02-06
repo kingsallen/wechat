@@ -295,7 +295,7 @@ class PositionPageService(PageService):
     def infra_get_position_list_rp_ext(self, position_list):
         """获取职位的红包信息"""
 
-        pids_str = ','.join([e.id for e in position_list])
+        pids_str = ','.join([str(e.id) for e in position_list])
         params = dict(pids=pids_str)
         res = yield self.infra_position_ds.get_position_list_rp_ext(params)
         if res.status == 0:
