@@ -12,7 +12,7 @@ from util.tool.date_tool import jd_update_date
 from util.tool.http_tool import async_das_get
 from util.tool.str_tool import gen_salary, split
 from util.tool.temp_data_tool import make_mate, make_team, template3
-
+import conf.path as path
 
 class PositionPageService(PageService):
 
@@ -264,6 +264,18 @@ class PositionPageService(PageService):
                         handler_params=handler_params)
 
         raise gen.Return(res)
+
+    @staticmethod
+    def limited_company_info(current_company):
+        """返回一个 current_company 的数据子集，用于职位列表的渲染"""
+        return ObjectDict(
+            logo=current_company.logo or path.DEFAULT_COMPANY_LOGO,
+            abbreviation=current_company.abbreviation or '',
+            industry=current_company.industry or '',
+            scale_name=current_company.scale,
+            homepage=current_company.homepage or '',
+            banner=current_company.banner
+        )
 
     @gen.coroutine
     def infra_get_position_list(self, params):

@@ -629,6 +629,10 @@ class PositionListHandler(BaseHandler):
             yield self._make_share_info(
                 self.current_user.company.id, self.params.did)
 
+        # 只渲染必要的公司信息
+        self.params.company = self.position_ps.limited_company_info(
+            self.current_user.company)
+
         # 如果是下拉刷新请求的职位, 返回新增职位的页面
         if self.params.get("restype", "") == "json":
             self.render(
