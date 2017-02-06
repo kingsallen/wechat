@@ -629,12 +629,10 @@ class PositionListHandler(BaseHandler):
             yield self._make_share_info(
                 self.current_user.company.id, self.params.did)
 
-
-
         # 如果是下拉刷新请求的职位, 返回新增职位的页面
         if self.params.get("restype", "") == "json":
             self.render(
-                template_name="refer/weixin/position/position_list_items.html",
+                template_name="refer/neo_weixin/position_v2/position_list_items.html",
                 positions=position_list,
                 is_employee=bool(self.current_user.employee),
                 use_neowx=1 # TODO (tangyiliang) always be 1 becuase it's neo wx now!  To edit template.
@@ -642,10 +640,9 @@ class PositionListHandler(BaseHandler):
             return
 
         # 直接请求页面返回
-
         else:
             self.render(
-                template_name="refer/neo_weixin/position/position_list.html",
+                template_name="refer/neo_weixin/position_v2/position_list.html",
                 positions=position_list,
                 position_title=const_platorm.POSITION_LIST_TITLE.get(
                     self.params.m,
