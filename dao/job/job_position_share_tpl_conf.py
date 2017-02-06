@@ -5,8 +5,8 @@ from dao.base import BaseDao
 
 class JobPositionShareTplConfDao(BaseDao):
 
-    def __init__(self, logger):
-        super(JobPositionShareTplConfDao, self).__init__(logger)
+    def __init__(self):
+        super(JobPositionShareTplConfDao, self).__init__()
         self.table = "job_position_share_tpl_conf"
         self.fields_map = {
             "id":          self.constant.TYPE_INT,

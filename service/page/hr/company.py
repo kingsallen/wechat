@@ -12,8 +12,8 @@ from util.tool.url_tool import make_static_url
 
 class CompanyPageService(PageService):
 
-    def __init__(self, logger):
-        super(CompanyPageService, self).__init__(logger)
+    def __init__(self):
+        super(CompanyPageService, self).__init__()
 
     @gen.coroutine
     def get_company(self, conds, need_conf=None, fields=None):

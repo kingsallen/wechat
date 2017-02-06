@@ -6,8 +6,8 @@ from dao.base import BaseDao
 
 
 class UserEmployeePointsRecordDao(BaseDao):
-    def __init__(self, logger):
-        super(UserEmployeePointsRecordDao, self).__init__(logger)
+    def __init__(self):
+        super(UserEmployeePointsRecordDao, self).__init__()
         self.table = "user_employee_points_record"
         self.fields_map = {
             'id':                self.constant.TYPE_INT,

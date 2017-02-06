@@ -4,8 +4,8 @@ from dao.base import BaseDao
 
 
 class UserSettingsDao(BaseDao):
-    def __init__(self, logger):
-        super(UserSettingsDao, self).__init__(logger)
+    def __init__(self):
+        super(UserSettingsDao, self).__init__()
         self.table = "user_settings"
         self.fields_map = {
             "id":             self.constant.TYPE_INT,

@@ -5,8 +5,8 @@ from dao.base import BaseDao
 
 class JobApplicationDao(BaseDao):
 
-    def __init__(self, logger):
-        super(JobApplicationDao, self).__init__(logger)
+    def __init__(self):
+        super(JobApplicationDao, self).__init__()
         self.table = "job_application"
         self.fields_map = {
             "id":               self.constant.TYPE_INT,

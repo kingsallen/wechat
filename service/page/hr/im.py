@@ -13,8 +13,8 @@ from service.page.base import PageService
 
 class ImPageService(PageService):
 
-    def __init__(self, logger):
-        super().__init__(logger)
+    def __init__(self):
+        super().__init__()
 
     @gen.coroutine
     def get_chats(self, conds, fields=None, options=None, appends=None):

@@ -8,8 +8,8 @@ from service.page.base import PageService
 
 class JobCustomPageService(PageService):
 
-    def __init__(self, logger):
-        super().__init__(logger)
+    def __init__(self):
+        super().__init__()
 
     @gen.coroutine
     def get_custom(self, conds, fields):

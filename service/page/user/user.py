@@ -11,8 +11,8 @@ from util.tool.http_tool import http_post
 
 
 class UserPageService(PageService):
-    def __init__(self, logger):
-        super().__init__(logger)
+    def __init__(self):
+        super().__init__()
 
     @gen.coroutine
     def create_user_user(self, userinfo, wechat_id, remote_ip, source):

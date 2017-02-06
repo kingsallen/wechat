@@ -10,8 +10,8 @@ from util.tool.date_tool import curr_now
 
 class SharechainPageService(PageService):
 
-    def __init__(self, logger):
-        super().__init__(logger)
+    def __init__(self):
+        super().__init__()
 
     @gen.coroutine
     def refresh_share_chain(self,

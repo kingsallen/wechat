@@ -16,8 +16,8 @@ import conf.path as path
 
 class PositionPageService(PageService):
 
-    def __init__(self, logger):
-        super().__init__(logger)
+    def __init__(self):
+        super().__init__()
 
     @gen.coroutine
     def get_position(self, position_id, fields=None):

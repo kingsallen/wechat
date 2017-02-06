@@ -12,8 +12,8 @@ from dao.base import BaseDao
 
 
 class HrTeamDao(BaseDao):
-    def __init__(self, logger):
-        super(HrTeamDao, self).__init__(logger)
+    def __init__(self):
+        super(HrTeamDao, self).__init__()
         self.table = "hr_team"
         self.fields_map = {
             "id": self.constant.TYPE_INT,

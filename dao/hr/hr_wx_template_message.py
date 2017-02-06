@@ -4,8 +4,8 @@ from dao.base import BaseDao
 
 
 class HrWxTemplateMessageDao(BaseDao):
-    def __init__(self, logger):
-        super(HrWxTemplateMessageDao, self).__init__(logger)
+    def __init__(self):
+        super(HrWxTemplateMessageDao, self).__init__()
         self.table = "hr_wx_template_message"
         self.fields_map = {
             "id":              self.constant.TYPE_INT,

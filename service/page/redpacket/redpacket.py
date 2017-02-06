@@ -36,8 +36,8 @@ from util.common import ObjectDict
 
 class RedpacketPageService(PageService):
 
-    def __init__(self, logger):
-        super().__init__(logger)
+    def __init__(self):
+        super().__init__()
 
     @gen.coroutine
     def __get_card_by_cardno(self, cardno):

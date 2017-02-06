@@ -4,11 +4,9 @@ from dao.base import BaseDao
 
 
 class UserFavPositionDao(BaseDao):
-    def __init__(self, logger):
-        super(UserFavPositionDao, self).__init__(logger)
-
+    def __init__(self):
+        super(UserFavPositionDao, self).__init__()
         self.table = "user_fav_position"
-
         self.fields_map = {
             'sysuser_id':  self.constant.TYPE_INT,
             'position_id': self.constant.TYPE_INT,

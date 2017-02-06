@@ -8,8 +8,8 @@ from util.tool.http_tool import http_post
 
 class ApplicationPageService(PageService):
 
-    def __init__(self, logger):
-        super().__init__(logger)
+    def __init__(self):
+        super().__init__()
 
     @gen.coroutine
     def get_application(self, position_id, user_id):

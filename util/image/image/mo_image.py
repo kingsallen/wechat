@@ -2,7 +2,7 @@
 
 # @Time    : 1/22/17 16:12
 # @Author  : towry (wanglintao@moseeker.com)
-# @File    : __init__.py.py
+# @File    : __init__.py
 # @DES     :
 
 # Copyright 2016 MoSeeker

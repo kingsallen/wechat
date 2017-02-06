@@ -13,8 +13,8 @@ from dao.base import BaseDao
 
 
 class HrMediaDao(BaseDao):
-    def __init__(self, logger):
-        super(HrMediaDao, self).__init__(logger)
+    def __init__(self):
+        super(HrMediaDao, self).__init__()
         self.table = "hr_media"
         self.fields_map = {
             "id": self.constant.TYPE_INT,

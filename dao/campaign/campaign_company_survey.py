@@ -7,8 +7,8 @@ from dao.base import BaseDao
 
 class CampaignCompanySurveyDao(BaseDao):
 
-    def __init__(self, logger):
-        super(CampaignCompanySurveyDao, self).__init__(logger)
+    def __init__(self):
+        super(CampaignCompanySurveyDao, self).__init__()
         self.table = "campaign_company_survey"
         self.fields_map = {
             "id":           self.constant.TYPE_INT,
