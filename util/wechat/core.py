@@ -37,10 +37,10 @@ class WechatTemplateMessager(object):
     def __init__(self):
         super(WechatTemplateMessager, self).__init__()
         self.logger = logger
-        self.hr_wx_wechat_ds = HrWxWechatDataService(logger)
-        self.hr_wx_template_message_ds = HrWxTemplateMessageDataService(logger)
-        self.user_wx_user_ds = UserWxUserDataService(logger)
-        self.log_wx_message_record_ds = LogWxMessageRecordDataService(logger)
+        self.hr_wx_wechat_ds = HrWxWechatDataService()
+        self.hr_wx_template_message_ds = HrWxTemplateMessageDataService()
+        self.user_wx_user_ds = UserWxUserDataService()
+        self.log_wx_message_record_ds = LogWxMessageRecordDataService()
 
     @gen.coroutine
     def send_template(self, wechat_id, openid, sys_template_id, link,
