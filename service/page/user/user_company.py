@@ -15,6 +15,7 @@ from util.tool.url_tool import make_url
 from util.tool import temp_data_tool
 from tests.dev_data.user_company_config import COMPANY_CONFIG
 import conf.path as path
+import re
 
 
 class UserCompanyPageService(PageService):
@@ -36,10 +37,10 @@ class UserCompanyPageService(PageService):
             conds={'openid': user.wxuser.openid,
                    'wechat_id': user.wxuser.wechat_id},
             fields=['id', 'is_subscribe'])
-        wechat = yield self.hr_wx_wechat_ds.get_wechat(
-            conds={'id': user.wechat.id},
-            fields=['id', 'qrcode']
-        )
+        # wechat = yield self.hr_wx_wechat_ds.get_wechat(
+        #     conds={'id': user.wechat.id},
+        #     fields=['id', 'qrcode']
+        # )
         vst_cmpy = yield self.user_company_visit_req_ds.get_visit_cmpy(
                         conds=conds, fields=['id', 'company_id'])
         team_index_url = make_url(path.COMPANY_TEAM, handler_params)
@@ -48,7 +49,7 @@ class UserCompanyPageService(PageService):
         data.header = temp_data_tool.make_header(company)
         data.relation = ObjectDict({
             'want_visit': self.constant.YES if vst_cmpy else self.constant.NO,
-            'qrcode': wechat.qrcode,
+            'qrcode': self._make_qrcode(user.wechat.qrcode),
             'follow': self.constant.YES if wx_user.is_subscribe
             else self.constant.NO,
         })
@@ -79,6 +80,12 @@ class UserCompanyPageService(PageService):
         data.template_total = len(data.templates)
 
         raise gen.Return(data)
+
+    def _make_qrcode(self, qrcode_url):
+        link_head = 'https://www.moseeker.com/common/image?url={}'
+        if not re.match(r'^https://www.moseeker.com/common/image?url=', qrcode_url):
+            return link_head.format(qrcode_url)
+        return qrcode_url
 
     @gen.coroutine
     def _get_company_template(self, company_id, team_index_url):
