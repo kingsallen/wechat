@@ -36,7 +36,7 @@ class UserCompanyPageService(PageService):
             conds={'openid': user.wxuser.openid,
                    'wechat_id': user.wxuser.wechat_id},
             fields=['id', 'is_subscribe'])
-        wechat = yield self.user_wx_user_ds.get_wechat(
+        wechat = yield self.hr_wx_wechat_ds.get_wechat(
             conds={'id': user.wechat.id},
             fields=['id', 'qrcode']
         )
