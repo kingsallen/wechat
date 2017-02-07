@@ -41,6 +41,11 @@ class WechatOauthHandler(MetaBaseHandler):
     def _get_current_user(self, wechat_id):
         pass
 
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        self.logger.debug("wechat oauth: %s" % self.request.uri)
+
 
 
 class WechatThirdOauthHandler(WechatOauthHandler):
@@ -59,6 +64,12 @@ class WechatThirdOauthHandler(WechatOauthHandler):
     @gen.coroutine
     def post(self, app_id):
         pass
+
+    @handle_response
+    @gen.coroutine
+    def get(self, appid):
+        self.logger.debug("wechat thirdoauth appid: %s" % appid)
+        self.logger.debug("wechat thirdoauth: %s" % self.request.uri)
 
 
 
