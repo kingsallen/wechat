@@ -22,7 +22,6 @@ from tornado import web, gen
 
 import conf.message as msg_const
 import conf.common as const
-
 from util.common import ObjectDict
 from util.tool.date_tool import curr_now
 from util.tool.str_tool import to_str
