@@ -211,7 +211,7 @@ class WechatThirdOauthHandler(WechatOauthHandler):
             decrypt = WXBizMsgCrypt(self.component_token, self.component_encodingAESKey, self.component_app_id)
             ret, decryp_xml = decrypt.DecryptMsg(from_xml, msg_sign, timestamp, nonce)
 
-            self.logger.debug("get_msg from :{0} decryp_xml: {1}".format(decryp_xml))
+            self.logger.debug("get_msg decryp_xml: {0}".format(decryp_xml))
             self.logger.debug("get_msg ret: %s" % ret)
 
         except Exception as e:
