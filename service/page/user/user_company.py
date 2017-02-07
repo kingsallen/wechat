@@ -36,6 +36,10 @@ class UserCompanyPageService(PageService):
             conds={'openid': user.wxuser.openid,
                    'wechat_id': user.wxuser.wechat_id},
             fields=['id', 'is_subscribe'])
+        wechat = yield self.user_wx_user_ds.get_wechat(
+            conds={'id': user.wechat.id},
+            fields=['id', 'qrcode']
+        )
         vst_cmpy = yield self.user_company_visit_req_ds.get_visit_cmpy(
                         conds=conds, fields=['id', 'company_id'])
         team_index_url = make_url(path.COMPANY_TEAM, handler_params)
@@ -44,7 +48,7 @@ class UserCompanyPageService(PageService):
         data.header = temp_data_tool.make_header(company)
         data.relation = ObjectDict({
             'want_visit': self.constant.YES if vst_cmpy else self.constant.NO,
-            'qrcode': user.wechat.qrcode,
+            'qrcode': wechat.qrcode,
             'follow': self.constant.YES if wx_user.is_subscribe
             else self.constant.NO,
         })
