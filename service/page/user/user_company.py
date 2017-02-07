@@ -37,10 +37,6 @@ class UserCompanyPageService(PageService):
             conds={'openid': user.wxuser.openid,
                    'wechat_id': user.wxuser.wechat_id},
             fields=['id', 'is_subscribe'])
-        # wechat = yield self.hr_wx_wechat_ds.get_wechat(
-        #     conds={'id': user.wechat.id},
-        #     fields=['id', 'qrcode']
-        # )
         vst_cmpy = yield self.user_company_visit_req_ds.get_visit_cmpy(
                         conds=conds, fields=['id', 'company_id'])
         team_index_url = make_url(path.COMPANY_TEAM, handler_params)
