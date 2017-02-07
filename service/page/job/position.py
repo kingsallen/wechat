@@ -312,7 +312,15 @@ class PositionPageService(PageService):
         """红包职位列表"""
         res = yield self.infra_position_ds.get_rp_position_list(params)
         if res.status == 0:
-            raise gen.Return(res.data)
+            rp_position_list = [ObjectDict(e) for e in res.data]
+            for position in rp_position_list:
+                position.is_rp_reward = True
+                position.salary = gen_salary(
+                    position.salary_top, position.salary_bottom)
+                position.publish_date = jd_update_date(
+                    datetime.strptime(position.publish_date,
+                                      '%Y-%m-%d %H:%M:%S.0'))
+            raise gen.Return(rp_position_list)
         raise gen.Return(res)
 
     @gen.coroutine

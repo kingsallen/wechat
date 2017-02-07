@@ -46,6 +46,22 @@ def http_patch(route, jdata, timeout=5):
     raise gen.Return(ret)
 
 
+def _objectdictify(result):
+    """将结果 ObjectDict 化"""
+    ret = result
+    try:
+        if isinstance(result, list):
+            ret = [ObjectDict(e) for e in result]
+        elif isinstance(result, dict):
+            ret = ObjectDict(result)
+        else:
+            pass
+    except Exception as e:
+        logger.error(e)
+    finally:
+        return ret
+
+
 @gen.coroutine
 def _async_http_get(route, jdata=None, timeout=5, method='GET'):
     """可用 HTTP 动词为 GET 和 DELETE"""
@@ -64,8 +80,10 @@ def _async_http_get(route, jdata=None, timeout=5, method='GET'):
         url, request_timeout=timeout, method=method.upper(),
         headers=HTTPHeaders({"Content-Type": "application/json"}))
 
-    logger.debug("[infra][_async_http_get][url: {}][ret: {}] ".format(url, ujson.decode(response.body)))
-    raise gen.Return(ObjectDict(ujson.decode(response.body)))
+    logger.debug("[infra][_async_http_get][url: {}][ret: {}] ".format(
+        url, ujson.decode(response.body)))
+    body = ujson.decode(response.body)
+    raise gen.Return(_objectdictify(body))
 
 
 @gen.coroutine
@@ -89,8 +107,10 @@ def _async_http_post(route, jdata=None, timeout=5, method='POST'):
         request_timeout=timeout,
         headers=HTTPHeaders({"Content-Type": "application/json"})
     )
-    logger.debug("[infra][_async_http_post][url: {}][body: {}][ret: {}] ".format(url, ujson.encode(jdata), ujson.decode(response.body)))
-    raise gen.Return(ObjectDict(ujson.decode(response.body)))
+    logger.debug("[infra][_async_http_post][url: {}][body: {}][ret: {}] ".format(
+        url, ujson.encode(jdata), ujson.decode(response.body)))
+    body = ujson.decode(response.body)
+    raise gen.Return(_objectdictify(body))
 
 
 @gen.coroutine
@@ -108,8 +128,10 @@ def async_das_get(route, jdata, timeout=5, method='GET'):
     response = yield http_client.fetch(
         url, request_timeout=timeout, method=method.upper())
 
-    logger.debug("[infra][async_das_get][url: {}][ret: {}] ".format(url, ujson.decode(response.body)))
-    raise gen.Return(ObjectDict(ujson.decode(response.body)))
+    logger.debug("[infra][async_das_get][url: {}][ret: {}] ".format(
+        url, ujson.decode(response.body)))
+    body = ujson.decode(response.body)
+    raise gen.Return(_objectdictify(body))
 
 
 @gen.coroutine
@@ -125,5 +147,7 @@ def async_das_post(route, jdata, timeout=5):
         request_timeout=timeout,
     )
 
-    logger.debug("[infra][_async_http_post][url: {}][body: {}][ret: {}] ".format(url, ujson.encode(jdata), ujson.decode(response.body)))
-    raise gen.Return(ObjectDict(ujson.decode(response.body)))
+    logger.debug("[infra][_async_http_post][url: {}][body: {}][ret: {}] ".format(
+        url, ujson.encode(jdata), ujson.decode(response.body)))
+    body = ujson.decode(response.body)
+    raise gen.Return(_objectdictify(body))

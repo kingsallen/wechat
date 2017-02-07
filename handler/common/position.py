@@ -616,10 +616,13 @@ class PositionListHandler(BaseHandler):
         if self.params.hb_c:
             # 红包职位列表
             infra_params.update(hb_config_id=int(self.params.hb_c))
-            position_list = yield self.position_ps.get_rp_position_list(
+            position_list = yield self.position_ps.infra_get_rp_position_list(
                 infra_params)
-            rp_share_info = yield self.position_ps.get_rp_share_info(
+            rp_share_info = yield self.position_ps.infra_get_rp_share_info(
                 infra_params)
+            yield self._make_share_info(
+                self.current_user.company.id, self.params.did, rp_share_info)
+
         else:
             # 普通职位列表
             position_list = yield self.position_ps.infra_get_position_list(
@@ -688,15 +691,11 @@ class PositionListHandler(BaseHandler):
                     ret += 1
 
     @gen.coroutine
-    def _make_share_info(self, company_id, did=None):
+    def _make_share_info(self, company_id, did=None, rp_share_info=None):
         """构建 share 内容"""
 
         company_info = yield self.company_ps.get_company(
             conds={"id": did or company_id}, need_conf=True)
-
-        cover = self.static_url(company_info.logo)
-        title = "%s热招职位" % company_info.abbreviation
-        description = msg.SHARE_DES_DEFAULT
         link = make_url(
             path.POSITION_LIST,
             self.params,
@@ -705,8 +704,17 @@ class PositionListHandler(BaseHandler):
             recom=self.position_ps._make_recom(self.current_user.sysuser.id),
             escape=["pid", "keywords", "cities", "candidate_source",
                     "employment_type", "salary", "department", "occupations",
-                    "custom", "degree", "page_from", "page_size"]
-        )
+                    "custom", "degree", "page_from", "page_size"])
+
+        if not rp_share_info:
+            cover = self.static_url(company_info.logo)
+            title = "%s热招职位" % company_info.abbreviation
+            description = msg.SHARE_DES_DEFAULT
+        else:
+            cover = rp_share_info.cover
+            title = rp_share_info.title
+            description = rp_share_info.description
+
         self.params.share = ObjectDict({
             "cover":       cover,
             "title":       title,
