@@ -207,8 +207,15 @@ class WechatThirdOauthHandler(WechatOauthHandler):
         msg_sign = self.params.msg_signature
         nonce = self.params.nonce
 
+        self.logger.debug("requests: %s" % self.request)
+        self.logger.debug("from_xml: %s" % from_xml)
+        self.logger.debug("timestamp: %s" % timestamp)
+        self.logger.debug("msg_sign: %s" % msg_sign)
+        self.logger.debug("nonce: %s" %  nonce)
+
         try:
             decrypt = WXBizMsgCrypt(self.component_token, self.component_encodingAESKey, self.component_app_id)
+            self.logger.debug("decrypt: %s" % decrypt)
             ret, decryp_xml = decrypt.DecryptMsg(from_xml, msg_sign, timestamp, nonce)
 
             self.logger.debug("get_msg decryp_xml: {0}".format(decryp_xml))
