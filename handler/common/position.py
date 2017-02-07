@@ -608,7 +608,6 @@ class PositionListHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def get(self):
-        # 收集 params
         infra_params = self._make_position_list_infra_params()
         # todo check if hb_c is an integer (tangyiliang)
         # todo check if did is an integer if there is any (tangyiliang)
