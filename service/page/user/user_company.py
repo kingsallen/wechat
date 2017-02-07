@@ -19,7 +19,6 @@ import re
 
 
 class UserCompanyPageService(PageService):
-
     @gen.coroutine
     def get_company_data(self, handler_params, company, user):
         """
@@ -38,7 +37,7 @@ class UserCompanyPageService(PageService):
                    'wechat_id': user.wxuser.wechat_id},
             fields=['id', 'is_subscribe'])
         vst_cmpy = yield self.user_company_visit_req_ds.get_visit_cmpy(
-                        conds=conds, fields=['id', 'company_id'])
+            conds=conds, fields=['id', 'company_id'])
         team_index_url = make_url(path.COMPANY_TEAM, handler_params)
 
         # 拼装模板数据
@@ -77,9 +76,13 @@ class UserCompanyPageService(PageService):
 
         raise gen.Return(data)
 
-    def _make_qrcode(self, qrcode_url):
+    @staticmethod
+    def _make_qrcode(qrcode_url):
         link_head = 'https://www.moseeker.com/common/image?url={}'
-        if not re.match(r'^https://www.moseeker.com/common/image?url=', qrcode_url):
+        if qrcode_url and \
+            not re.match(
+                r'^https://www.moseeker.com/common/image?url=',
+                qrcode_url):
             return link_head.format(qrcode_url)
         return qrcode_url
 
@@ -111,7 +114,7 @@ class UserCompanyPageService(PageService):
                 [media_dict.get(mid) for mid in company_config.config.get(key)]
             ) for key in company_config.order
             if isinstance(company_config.config.get(key), list)
-        ]
+            ]
 
         raise gen.Return((templates, bool(company_config.config.get('team'))))
 
@@ -170,7 +173,7 @@ class UserCompanyPageService(PageService):
         current_user.company.id
         # 区分母公司子公司对待
         company_id = param.sub_company.id if param.did \
-            and param.did != current_user.company.id else current_user.company.id
+                                             and param.did != current_user.company.id else current_user.company.id
 
         conds = {'user_id': user_id, 'company_id': company_id}
         company = yield self.user_company_follow_ds.get_fllw_cmpy(
@@ -201,19 +204,19 @@ class UserCompanyPageService(PageService):
 
         # 区分母公司子公司对待
         company_id = param.sub_company.id if param.did \
-            and param.did != current_user.company.id else current_user.company.id
+                                             and param.did != current_user.company.id else current_user.company.id
 
         if int(status) == 0:
             raise gen.Return(False)
 
         conds = {'user_id': user_id, 'company_id': company_id}
         company = yield self.user_company_visit_req_ds.get_visit_cmpy(
-                            conds, fields=['id', 'user_id', 'company_id'])
+            conds, fields=['id', 'user_id', 'company_id'])
 
         if company:
             response = yield self.user_company_visit_req_ds.update_visit_cmpy(
-                            conds=conds,
-                            fields={'status': status, 'source': source})
+                conds=conds,
+                fields={'status': status, 'source': source})
         else:
             response = yield self.user_company_visit_req_ds.create_visit_cmpy(
                 fields={'user_id': user_id, 'company_id': company_id,
