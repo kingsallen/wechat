@@ -11,9 +11,10 @@ from util.tool.str_tool import gen_salary, email_validate, is_alphabet, is_chine
 from util.tool.date_tool import jd_update_date
 from util.tool.url_tool import make_url
 from util.image.upload import QiniuUpload
+from util.common import ObjectDict
 
 class HomeHandler(BaseHandler):
-    """个人中心首页, 渲染个人中心页面
+    """个人中心首页, 单页应用。以 api 形式提供
     """
 
     @handle_response
@@ -23,11 +24,19 @@ class HomeHandler(BaseHandler):
 
         employee = yield self.user_ps.get_valid_employee_by_user_id(
             self.current_user.sysuser.id, self.current_user.company.id)
-        self.params._binding_state = int(employee.activation) if employee else 1
+        # 查询该公司是否开启了员工认证
+        employee_cert_conf = yield self.user_ps.get_employee_cert_conf(self.current_user.company.id)
+
         res = yield self.usercenter_ps.get_user(self.current_user.sysuser.id)
-        res.data.headimg = self.static_url(res.data.headimg or const.SYSUSER_HEADIMG)
-        self.params.user = res.data
-        self.render(template_name="refer/weixin/sysuser_v2/personalcenter.html")
+
+        self.send_json_success(data=ObjectDict(
+            headimg=self.static_url(res.data.headimg or const.SYSUSER_HEADIMG),
+            name=res.data.name or res.data.nickname,
+            email=res.data.email,
+            mobile=res.data.mobile,
+            bind_disable=employee_cert_conf.disable==const.OLD_YES if employee_cert_conf else False, # 该公司是否启用了认证
+            bind_status=int(employee.activation) if employee else 1
+        ))
 
 class AppRecordsHandler(BaseHandler):
     """求职记录

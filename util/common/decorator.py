@@ -168,7 +168,7 @@ def authenticated(func):
     def wrapper(self, *args, **kwargs):
         self.logger.debug("!!!!!!authenticated: %s" % self.current_user)
         if self.current_user.sysuser and self.in_wechat:
-            if self._authable and not self.current_user.wxuser:
+            if self._authable and not self.current_user.wxuser and self.request.method in ("GET", "HEAD"):
                 # 该企业号是服务号，静默授权
                 self._oauth_service.wechat = self.current_user.wechat
                 self._oauth_service.state = to_hex(self.current_user.qxuser.unionid)

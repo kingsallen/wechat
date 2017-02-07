@@ -261,6 +261,13 @@ class UserPageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
+    def get_employee_cert_conf(self, company_id):
+        ret = yield self.hr_employee_cert_conf_ds.get_employee_cert_conf({
+            "company_id": company_id
+        })
+        raise gen.Return(ret)
+
+    @gen.coroutine
     def favorite_position(self, current_user, pid):
         """用户收藏职位的粒子操作
         :param current_user: user session 信息

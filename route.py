@@ -28,7 +28,7 @@ common_routes = [
     # 开发者方式
     (r"/wechat",                           "handler.wechat.event.WechatOauthHandler",                   {"event": "wechat_oauth"}),
     # 第三方授权方式
-    # (r"/wechat/([0-9a-z]*)",               "handler.wechat.event.WechatThirdOauthHandler",              {"event": "wechat_thirdoauth"}),  # passport
+    (r"/wechat/([0-9a-z]*)",               "handler.wechat.event.WechatThirdOauthHandler",              {"event": "wechat_thirdoauth"}),  # passport
     (r"/m/user/([a-z_]*)",                 "handler.common.passport.LoginHandler",                      {"event": "user_login"}),
     # position
     (r"/m/position/([0-9]+)",              "handler.common.position.PositionHandler",                   {"event": "position_info"}),
@@ -37,7 +37,7 @@ common_routes = [
     (r"/m/usercenter/applications",        "handler.common.usercenter.AppRecordsHandler",               {"event": "usercenter_applications"}),
     (r"/m/usercenter/favpositions",        "handler.common.usercenter.FavPositionsHandler",             {"event": "usercenter_favpositions"}),
     (r"/m/usercenter/setting/([a-z_]*)",   "handler.common.usercenter.UserSettingHandler",              {"event": "usercenter_"}),
-    (r"/m/usercenter",                     "handler.common.usercenter.HomeHandler",                     {"event": "usercenter_home"}),
+
     # app forward 给前端，展示纯前端渲染的 SPA
     (r"/m/app/.*",                         "handler.common.app.IndexHandler",                           {"event": "app_index"}),
 
@@ -48,6 +48,7 @@ common_routes = [
     (r"/m/api/cellphone",                  "handler.common.cellphone.CellphoneBindHandler",             {"event": "cellphone_bind"}),
     (r"/m/api/user/currentinfo",           "handler.common.interest.UserCurrentInfoHandler",            {"event": "user_currentinfo"}),
     (r"/m/api/upload/([a-z_]*)",           "handler.common.usercenter.UploadHandler",                   {"event": "image_"}),
+    (r"/m/api/usercenter",                 "handler.common.usercenter.HomeHandler",                     {"event": "usercenter_home"}),
 
     # 兼容老微信 url，进行302跳转，event 设置为 NULL
     (r"/.*",                               "handler.common.compatible.CompatibleHandler",               {"event": "NULL"})
