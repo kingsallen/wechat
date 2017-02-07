@@ -64,7 +64,7 @@ class WechatOauthHandler(MetaBaseHandler):
     @handle_response
     @gen.coroutine
     def post(self):
-        
+
         self.logger.debug("oauth: %s" % self.request.uri)
         self.logger.debug("oauth msg: %s" % self.msg)
         self.logger.debug("oauth wechat: %s" % self.wechat)
