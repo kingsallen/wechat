@@ -15,10 +15,10 @@ from util.tool.url_tool import make_url
 from util.tool import temp_data_tool
 from tests.dev_data.user_company_config import COMPANY_CONFIG
 import conf.path as path
+import re
 
 
 class UserCompanyPageService(PageService):
-
     @gen.coroutine
     def get_company_data(self, handler_params, company, user):
         """
@@ -36,19 +36,15 @@ class UserCompanyPageService(PageService):
             conds={'openid': user.wxuser.openid,
                    'wechat_id': user.wxuser.wechat_id},
             fields=['id', 'is_subscribe'])
-        wechat = yield self.hr_wx_wechat_ds.get_wechat(
-            conds={'id': user.wechat.id},
-            fields=['id', 'qrcode']
-        )
         vst_cmpy = yield self.user_company_visit_req_ds.get_visit_cmpy(
-                        conds=conds, fields=['id', 'company_id'])
+            conds=conds, fields=['id', 'company_id'])
         team_index_url = make_url(path.COMPANY_TEAM, handler_params)
 
         # 拼装模板数据
         data.header = temp_data_tool.make_header(company)
         data.relation = ObjectDict({
             'want_visit': self.constant.YES if vst_cmpy else self.constant.NO,
-            'qrcode': wechat.qrcode,
+            'qrcode': self._make_qrcode(user.wechat.qrcode),
             'follow': self.constant.YES if wx_user.is_subscribe
             else self.constant.NO,
         })
@@ -80,6 +76,16 @@ class UserCompanyPageService(PageService):
 
         raise gen.Return(data)
 
+    @staticmethod
+    def _make_qrcode(qrcode_url):
+        link_head = 'https://www.moseeker.com/common/image?url={}'
+        if qrcode_url and \
+            not re.match(
+                r'^https://www.moseeker.com/common/image?url=',
+                qrcode_url):
+            return link_head.format(qrcode_url)
+        return qrcode_url
+
     @gen.coroutine
     def _get_company_template(self, company_id, team_index_url):
         """
@@ -108,7 +114,7 @@ class UserCompanyPageService(PageService):
                 [media_dict.get(mid) for mid in company_config.config.get(key)]
             ) for key in company_config.order
             if isinstance(company_config.config.get(key), list)
-        ]
+            ]
 
         raise gen.Return((templates, bool(company_config.config.get('team'))))
 
@@ -167,7 +173,7 @@ class UserCompanyPageService(PageService):
         current_user.company.id
         # 区分母公司子公司对待
         company_id = param.sub_company.id if param.did \
-            and param.did != current_user.company.id else current_user.company.id
+                                             and param.did != current_user.company.id else current_user.company.id
 
         conds = {'user_id': user_id, 'company_id': company_id}
         company = yield self.user_company_follow_ds.get_fllw_cmpy(
@@ -198,19 +204,19 @@ class UserCompanyPageService(PageService):
 
         # 区分母公司子公司对待
         company_id = param.sub_company.id if param.did \
-            and param.did != current_user.company.id else current_user.company.id
+                                             and param.did != current_user.company.id else current_user.company.id
 
         if int(status) == 0:
             raise gen.Return(False)
 
         conds = {'user_id': user_id, 'company_id': company_id}
         company = yield self.user_company_visit_req_ds.get_visit_cmpy(
-                            conds, fields=['id', 'user_id', 'company_id'])
+            conds, fields=['id', 'user_id', 'company_id'])
 
         if company:
             response = yield self.user_company_visit_req_ds.update_visit_cmpy(
-                            conds=conds,
-                            fields={'status': status, 'source': source})
+                conds=conds,
+                fields={'status': status, 'source': source})
         else:
             response = yield self.user_company_visit_req_ds.create_visit_cmpy(
                 fields={'user_id': user_id, 'company_id': company_id,
