@@ -26,9 +26,9 @@ help_routes: 继承自common_routes, 供help单独使用，一般 handler 在 he
 # 微信端公共的 routes
 common_routes = [
     # 第三方授权方式
-    # (r"/wechat/([0-9a-z]*)",               "handler.common.event.WechatThirdOauthHandler",              {"event": "wechat_thirdoauth"}),
+    (r"/wechat/([0-9a-z]*)",               "handler.common.event.WechatThirdOauthHandler",              {"event": "wechat_thirdoauth"}),
     # 开发者方式
-    # (r"/wechat",                           "handler.common.event.WechatOauthHandler",                   {"event": "wechat_oauth"}),
+    (r"/wechat",                           "handler.common.event.WechatOauthHandler",                   {"event": "wechat_oauth"}),
     # passport
     (r"/m/user/([a-z_]*)",                 "handler.common.passport.LoginHandler",                      {"event": "user_login"}),
     # position

@@ -7,44 +7,60 @@
 
 # Copyright 2016 MoSeeker
 
+from tornado import gen
+
+from handler.metabase import MetaBaseHandler
+from util.common.decorator import handle_response
 
 
-# class WechatOauthHandler(BaseHandler):
-#
-#     @handle_response
-#     @gen.coroutine
-#     def get(self):
-#
-#         self.send_json_success(
-#                 data={
-#                     "a": 'hello world!'
-#                 }
-#             )
-#
-#     def get(self, *args, **kwargs):
-#         """
-#         公众平台接入
-#         :param args:
-#         :param kwargs:
-#         :return:
-#         """
-#         self.write("hello")
-#         # if self.get_argument("echostr", "") and self._verify_wexin_request():
-#         #     ret = self.get_argument("echostr", "", True)
-#         #     self.write(ret)
-#
-#     def _verify_wexin_request(self):
-#         signature = self.get_argument("signature")
-#         timestamp = self.get_argument("timestamp")
-#         nonce = self.get_argument("nonce")
-#         # id = self.get_argument("id")
-#         #
-#         # token = self.db.get(
-#         #     "SELECT token FROM hr_wx_wechat "
-#         #     "WHERE id = %s", id)
-#         token = "cd717d02a93d11e5a2be00163e004a1f"
-#
-#         hashstr = hashlib.sha1(
-#             "".join(sorted([token, timestamp, nonce]))).hexdigest()
-#
-#         return hashstr == signature
+class WechatOauthHandler(MetaBaseHandler):
+
+    """开发者模式"""
+
+    def __init__(self, application, request, **kwargs):
+        super(WechatOauthHandler, self).__init__(application, request, **kwargs)
+
+        self.third_oauth = 0
+        self.component_app_id = self.settings.component_app_id
+        self.component_encodingAESKey = self.settings.component_encodingAESKey
+        self.component_token = self.settings.component_token
+
+    def check_xsrf_cookie(self):
+        return True
+
+    def _verification(self):
+        return True
+
+    @gen.coroutine
+    def prepare(self):
+
+
+        wechat_id = self.params.id
+
+    @gen.coroutine
+    def _get_current_user(self, wechat_id):
+        pass
+
+
+
+class WechatThirdOauthHandler(WechatOauthHandler):
+
+    """第三方授权模式"""
+
+    def __init__(self, application, request, **kwargs):
+        super(WechatThirdOauthHandler, self).__init__(application, request, **kwargs)
+
+        self.third_oauth = 1
+
+    def _verification(self):
+        return True
+
+    @handle_response
+    @gen.coroutine
+    def post(self, app_id):
+        pass
+
+
+
+
+
