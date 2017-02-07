@@ -244,11 +244,13 @@ class PositionPageService(PageService):
 
     @gen.coroutine
     def get_team_data(self, team, more_link):
-        team_res = yield self.hr_resource_ds.get_resource(
-            conds={'id': team.res_id},
-            fields=['id', 'res_url', 'res_type']
+        team_members = yield self.hr_team_member_ds.get_team_member_list(
+            conds={'team_id': team.id}
         )
-        res = make_team(team, team_res, more_link)
+        resources = yield self.hr_resource_ds.get_resource_by_ids(
+            id_list=[m.res_id for m in team_members] + [team.res_id]
+        )
+        res = make_team(team, resources, more_link, team_members)
 
         raise gen.Return(res)
 
