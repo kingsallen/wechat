@@ -28,7 +28,7 @@ common_routes = [
     # 开发者方式
     (r"/wechat",                           "handler.wechat.event.WechatOauthHandler",                   {"event": "wechat_oauth"}),
     # 第三方授权方式
-    (r"/wechat/([0-9a-z]*)",               "handler.wechat.event.WechatThirdOauthHandler",              {"event": "wechat_thirdoauth"}),  # passport
+    # (r"/wechat/([0-9a-z]*)",               "handler.wechat.event.WechatThirdOauthHandler",              {"event": "wechat_thirdoauth"}),  # passport
     (r"/m/user/([a-z_]*)",                 "handler.common.passport.LoginHandler",                      {"event": "user_login"}),
     # position
     (r"/m/position/([0-9]+)",              "handler.common.position.PositionHandler",                   {"event": "position_info"}),
