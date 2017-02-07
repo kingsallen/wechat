@@ -11,6 +11,7 @@ from tornado import gen
 
 from handler.metabase import MetaBaseHandler
 from util.common.decorator import handle_response
+from util.tool.xml_tool import parse_msg
 
 
 class WechatOauthHandler(MetaBaseHandler):
@@ -20,10 +21,14 @@ class WechatOauthHandler(MetaBaseHandler):
     def __init__(self, application, request, **kwargs):
         super(WechatOauthHandler, self).__init__(application, request, **kwargs)
 
-        self.third_oauth = 0
         self.component_app_id = self.settings.component_app_id
         self.component_encodingAESKey = self.settings.component_encodingAESKey
         self.component_token = self.settings.component_token
+        # 0:开发者模式 1:第三方授权模式
+        self.third_oauth = 0
+        self.wechat_id = 0
+
+        print (4)
 
     def check_xsrf_cookie(self):
         return True
@@ -33,7 +38,7 @@ class WechatOauthHandler(MetaBaseHandler):
 
     @gen.coroutine
     def prepare(self):
-
+        print (5)
 
         wechat_id = self.params.id
 
@@ -44,7 +49,13 @@ class WechatOauthHandler(MetaBaseHandler):
     @handle_response
     @gen.coroutine
     def get(self):
+        print (6)
         self.logger.debug("wechat oauth: %s" % self.request.uri)
+
+
+    def get_msg(self):
+        from_xml = self.request.body
+        return parse_msg(from_xml)
 
 
 
@@ -56,6 +67,9 @@ class WechatThirdOauthHandler(WechatOauthHandler):
         super(WechatThirdOauthHandler, self).__init__(application, request, **kwargs)
 
         self.third_oauth = 1
+        self.wechat_id = 0
+
+        print (1)
 
     def _verification(self):
         return True
@@ -63,13 +77,45 @@ class WechatThirdOauthHandler(WechatOauthHandler):
     @handle_response
     @gen.coroutine
     def post(self, app_id):
-        pass
+        if app_id:
+            wechat = yield self.event_ps.get_wechat(params={
+                "appid": app_id,
+                "third_oauth": self.third_oauth
+            })
 
-    @handle_response
-    @gen.coroutine
-    def get(self, appid):
-        self.logger.debug("wechat thirdoauth appid: %s" % appid)
-        self.logger.debug("wechat thirdoauth: %s" % self.request.uri)
+            if wechat:
+                self.current_user = self._get_current_user(wechat.id)
+            else:
+                # TODO 返回的默认消息
+                pass
+
+
+
+        else:
+            # TODO 返回的默认消息
+            pass
+
+    def get_msg(self):
+
+        timestamp = self.params.timestamp
+        msg_sign = self.params.msg_signature
+        nonce = self.params.nonce
+        #
+        # try:
+        #     decrypt_test = WXBizMsgCrypt(self.component_token, self.component_encodingAESKey, self.component_app_id)
+        #     ret, decryp_xml = decrypt_test.DecryptMsg(from_xml, msg_sign, timestamp, nonce)
+        #
+        #     self.LOG.error("get_msg from :{0} decryp_xml: {1}".format(fr, decryp_xml))
+        #     self.LOG.error("get_msg ret: %s" % ret)
+        #
+        # except Exception, e:
+        #     self.LOG.error(e)
+        #
+        # from_xml = decryp_xml
+
+
+        from_xml = self.request.body
+        return parse_msg(from_xml)
 
 
 
