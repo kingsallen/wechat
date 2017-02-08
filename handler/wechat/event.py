@@ -54,8 +54,8 @@ class WechatOauthHandler(MetaBaseHandler):
     def _get_current_user(self):
         user = ObjectDict()
 
-        openid = self.msg.get('FromUserName', ''),
-        wxuser = yield self.event_ps.get_wxuser_openid_wechat_id(openid, self.wechat.id)
+        openid = self.msg.get('FromUserName', '')
+        wxuser = yield self.event_ps.get_wxuser_by_openid(openid, self.wechat.id)
 
         user.wechat = self.wechat
         user.wxuser = wxuser
@@ -67,13 +67,13 @@ class WechatOauthHandler(MetaBaseHandler):
 
         self.logger.debug("oauth: %s" % self.request.uri)
         self.logger.debug("oauth msg: %s" % self.msg)
-        self.logger.debug("oauth wechat: %s" % self.wechat)
+        self.logger.debug("oauth current_user: %s" % self.current_user)
 
 
         try:
             msg_type = self.msg['MsgType']
             if self.verification():
-                yield getattr(self, 'post_' + msg_type)(self.msg)
+                yield getattr(self, 'post_' + msg_type)()
             else:
                 self.logger.error("[wechat_oauth]verification failed:{}".format(self.msg))
         except Exception as e:
@@ -177,6 +177,7 @@ class WechatThirdOauthHandler(WechatOauthHandler):
     @handle_response
     @gen.coroutine
     def post(self, app_id):
+    # def get(self, app_id):
         print (1.2)
         if app_id:
             print (1.3)
@@ -187,6 +188,7 @@ class WechatThirdOauthHandler(WechatOauthHandler):
 
             self.wechat = wechat
             self.msg = self.get_msg()
+            print (self.msg)
             if wechat:
 
                 yield self._get_current_user()
@@ -207,20 +209,24 @@ class WechatThirdOauthHandler(WechatOauthHandler):
         msg_sign = self.params.msg_signature
         nonce = self.params.nonce
 
+        print (self.wechat)
         self.logger.debug("requests: %s" % self.request)
         self.logger.debug("from_xml: %s" % from_xml)
         self.logger.debug("timestamp: %s" % timestamp)
         self.logger.debug("msg_sign: %s" % msg_sign)
         self.logger.debug("nonce: %s" %  nonce)
 
+        # from_xml = """<xml>
+        # <ToUserName><![CDATA[gh_04300a34b7fa]]></ToUserName>
+        # <Encrypt><![CDATA[8xgjCBMI1IZvOySpQXBkdGN0l4YIg/Xv8AlFmRNawnxicMMM2QuodRU2iI6AI7mbDrLgVqhN2JheNX6vHNseb1AZgRbiXL6DN44yetRbA8SU290ehNcL6ECwALVQ/itGL9CRYmd9v+oVz97iBysEY2G6tUpSJHiL5P/wbOZxe6bMzDznkUihbRD17fqqK68p/7s7PiPdDFNg/ujnCMtGPcKztEPxckxFV3wO8hOKVYxKKqU1mZF+GQyfvyYgBWBJrSzmrgkZb+ivKiD2qZSJrSOPPK7zxeGYDXyO0+Q/Kxlt3ZtFqLC+VrIO5dY9/7W+ak9DDlPCYlpuWeHa+8yosZN8SIR9zqgrxPAWWjA0fmulvQNtrXW990l3L9JioS+/9y4IHSb3WCixYFr6zGacMkoBP+HWRIq6b8b8mr1VoUfm/BNHPRH7OVokMlSOB2rsHbYtj5xX4FiaXd+AK4SShg==]]></Encrypt>
+        # </xml>"""
+        # timestamp = '1486520908'
+        # msg_sign='ad6b6fc7158815dd98e8ac58f914ecd09b008e09'
+        # nonce='742356626'
+
         try:
             decrypt = WXBizMsgCrypt(self.component_token, self.component_encodingAESKey, self.component_app_id)
-            self.logger.debug("decrypt: %s" % decrypt)
             ret, decryp_xml = decrypt.DecryptMsg(from_xml, msg_sign, timestamp, nonce)
-
-            self.logger.debug("get_msg decryp_xml: {0}".format(decryp_xml))
-            self.logger.debug("get_msg ret: %s" % ret)
-
         except Exception as e:
             self.LOG.error(e)
 

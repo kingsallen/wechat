@@ -87,7 +87,7 @@ settings['platform_qianxun_signature'] = 'YWNkNmIyYWExOGViOTRkODMyMzk5N2MxM2NkZD
 settings['helper_signature'] = 'NGZiMThkZWMwMmVkMjU4OGRlMWY3Nzk1N2FiZWExMWUxODI4ODJiZQ=='
 
 # 微信第三方平台信息
-settings['component_app_id'] = 'wx5024b0daabd7bb23'
-settings['component_app_secret'] = 'dad5d29cdaeb4d1d6309ab82effb27b6'
+settings['component_app_id'] = 'wxee9d0552f867959b'
+settings['component_app_secret'] = '9ebcf7f4b719bf1384184ca50f2b82aa'
 settings['component_encodingAESKey'] = 'YhwSCu0CGkfeaHaAE9XHXfxeX2P0r5skvlDEl1pVK2a'
 settings['component_token'] = 'c37f1cd03cb111e5a2be00163e004a1f'
