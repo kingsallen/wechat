@@ -38,14 +38,14 @@ class WechatOauthHandler(MetaBaseHandler):
 
     @gen.coroutine
     def prepare(self):
+        self.msg = self.get_msg()
         wechat_id = self.params.id
-        wechat = yield self.event_ps.get_wechat(params={
+        wechat = yield self.wechat_ps.get_wechat(conds={
             "id": wechat_id,
             "third_oauth": self.third_oauth
         })
 
         self.wechat = wechat
-        self.msg = self.get_msg()
         yield self._get_current_user()
 
     @gen.coroutine
@@ -53,7 +53,7 @@ class WechatOauthHandler(MetaBaseHandler):
         user = ObjectDict()
 
         openid = self.msg.get('FromUserName', '')
-        wxuser = yield self.event_ps.get_wxuser_by_openid(openid, self.wechat.id)
+        wxuser = yield self.user_ps.get_wxuser_openid_wechat_id(openid, self.wechat.id)
 
         user.wechat = self.wechat
         user.wxuser = wxuser
@@ -100,6 +100,7 @@ class WechatOauthHandler(MetaBaseHandler):
     def post_text(self):
         """文本消息, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140453&t=0.33078310940365907"""
         self.logger.debug("post_text")
+        raise gen.Return("")
         pass
 
     # @handle_response
@@ -138,6 +139,15 @@ class WechatOauthHandler(MetaBaseHandler):
     #     """链接消息, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140453&t=0.33078310940365907"""
     #     self.write(self.rep_default(msg))
 
+    def on_finish(self):
+        """继承MetaBaseHandler.on_finish(),添加部分日志"""
+
+        self.log_info = {"res_type": "xml",
+                         "wxmsg_type": self.msg.MsgType,
+                         "wxmsg_msgid": self.msg.MsgId,
+                         "wxmsg_event": self.msg.Event}
+
+        super().on_finish()
 
     def get_msg(self):
         from_xml = self.request.body
@@ -189,13 +199,13 @@ class WechatThirdOauthHandler(WechatOauthHandler):
     def post(self, app_id):
 
         if app_id:
-            wechat = yield self.event_ps.get_wechat(params={
+            self.msg = self.get_msg()
+            wechat = yield self.wechat_ps.get_wechat(conds={
                 "appid": app_id,
                 "third_oauth": self.third_oauth
             })
 
             self.wechat = wechat
-            self.msg = self.get_msg()
             if wechat:
                 yield self._get_current_user()
                 yield self._post()

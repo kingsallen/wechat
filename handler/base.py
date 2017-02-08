@@ -209,7 +209,9 @@ class BaseHandler(MetaBaseHandler):
                 self.logger.error("wechat_signature missing")
                 raise NoSignatureError()
 
-        wechat = yield self.session_ps.get_wechat_by_signature(signature)
+        wechat = yield self.wechat_ps.get_wechat(conds={
+            "signature": signature
+        })
         raise gen.Return(wechat)
 
     @gen.coroutine
@@ -442,8 +444,9 @@ class BaseHandler(MetaBaseHandler):
                     "session.sysuser.id 不存在, 暂停获取 employee, called_by: {}, session: {}".format(called_by, session))
                 return
 
-            employee = yield self.session_ps.get_employee(
+            employee = yield self.user_ps.get_valid_employee_by_user_id(
                 user_id=session.sysuser.id, company_id=session.company.id)
+
             if employee:
                 session.employee = employee
 

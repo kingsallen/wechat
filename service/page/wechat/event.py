@@ -14,16 +14,6 @@ from service.page.base import PageService
 class EventPageService(PageService):
 
     @gen.coroutine
-    def get_wechat(self, params):
-        """获得微信号信息
-        :param params:
-        :return:
-        """
-
-        ret = yield self.hr_wx_wechat_ds.get_wechat(params)
-        raise gen.Return(ret)
-
-    @gen.coroutine
     def get_wxuser_by_openid(self, openid, wechat_id):
         """根据 openid 和 wechat_id 获取 wxuser
         :param openid:
