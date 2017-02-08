@@ -32,15 +32,11 @@ class WechatOauthHandler(MetaBaseHandler):
         self.msg = None
         self.wechat = None
 
-        print (4)
-
     def check_xsrf_cookie(self):
         return True
 
     @gen.coroutine
     def prepare(self):
-        print (5)
-
         wechat_id = self.params.id
         wechat = yield self.event_ps.get_wechat(params={
             "id": wechat_id,
@@ -64,11 +60,16 @@ class WechatOauthHandler(MetaBaseHandler):
     @handle_response
     @gen.coroutine
     def post(self):
+        yield self._post()
+
+
+    @handle_response
+    @gen.coroutine
+    def _post(self):
 
         self.logger.debug("oauth: %s" % self.request.uri)
         self.logger.debug("oauth msg: %s" % self.msg)
         self.logger.debug("oauth current_user: %s" % self.current_user)
-
 
         try:
             msg_type = self.msg['MsgType']
@@ -78,6 +79,7 @@ class WechatOauthHandler(MetaBaseHandler):
                 self.logger.error("[wechat_oauth]verification failed:{}".format(self.msg))
         except Exception as e:
             self.logger.error(e)
+
 
     @handle_response
     @gen.coroutine
@@ -95,6 +97,7 @@ class WechatOauthHandler(MetaBaseHandler):
     @gen.coroutine
     def post_text(self):
         """文本消息, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140453&t=0.33078310940365907"""
+        self.logger.debug("post_text")
         pass
 
     # @handle_response
@@ -135,8 +138,9 @@ class WechatOauthHandler(MetaBaseHandler):
 
 
     def get_msg(self):
-        print (7)
         from_xml = self.request.body
+        self.logger.debug("base get_msg: %s" % from_xml)
+
         return parse_msg(from_xml)
 
     def verification(self):
@@ -165,7 +169,6 @@ class WechatThirdOauthHandler(WechatOauthHandler):
         self.third_oauth = 1
         self.msg = None
         self.wechat = None
-        print (1.0)
 
     def verification(self):
         return True
@@ -177,10 +180,8 @@ class WechatThirdOauthHandler(WechatOauthHandler):
     @handle_response
     @gen.coroutine
     def post(self, app_id):
-    # def get(self, app_id):
-        print (1.2)
+
         if app_id:
-            print (1.3)
             wechat = yield self.event_ps.get_wechat(params={
                 "appid": app_id,
                 "third_oauth": self.third_oauth
@@ -188,11 +189,9 @@ class WechatThirdOauthHandler(WechatOauthHandler):
 
             self.wechat = wechat
             self.msg = self.get_msg()
-            print (self.msg)
             if wechat:
-
                 yield self._get_current_user()
-                yield self.post()
+                yield self._post()
             else:
                 # TODO 返回的默认消息
                 pass
@@ -203,26 +202,24 @@ class WechatThirdOauthHandler(WechatOauthHandler):
 
     def get_msg(self):
 
-        print(1.1)
         from_xml = self.request.body
         timestamp = self.params.timestamp
         msg_sign = self.params.msg_signature
         nonce = self.params.nonce
 
-        print (self.wechat)
         self.logger.debug("requests: %s" % self.request)
         self.logger.debug("from_xml: %s" % from_xml)
         self.logger.debug("timestamp: %s" % timestamp)
         self.logger.debug("msg_sign: %s" % msg_sign)
         self.logger.debug("nonce: %s" %  nonce)
 
-        # from_xml = """<xml>
-        # <ToUserName><![CDATA[gh_04300a34b7fa]]></ToUserName>
-        # <Encrypt><![CDATA[8xgjCBMI1IZvOySpQXBkdGN0l4YIg/Xv8AlFmRNawnxicMMM2QuodRU2iI6AI7mbDrLgVqhN2JheNX6vHNseb1AZgRbiXL6DN44yetRbA8SU290ehNcL6ECwALVQ/itGL9CRYmd9v+oVz97iBysEY2G6tUpSJHiL5P/wbOZxe6bMzDznkUihbRD17fqqK68p/7s7PiPdDFNg/ujnCMtGPcKztEPxckxFV3wO8hOKVYxKKqU1mZF+GQyfvyYgBWBJrSzmrgkZb+ivKiD2qZSJrSOPPK7zxeGYDXyO0+Q/Kxlt3ZtFqLC+VrIO5dY9/7W+ak9DDlPCYlpuWeHa+8yosZN8SIR9zqgrxPAWWjA0fmulvQNtrXW990l3L9JioS+/9y4IHSb3WCixYFr6zGacMkoBP+HWRIq6b8b8mr1VoUfm/BNHPRH7OVokMlSOB2rsHbYtj5xX4FiaXd+AK4SShg==]]></Encrypt>
-        # </xml>"""
-        # timestamp = '1486520908'
-        # msg_sign='ad6b6fc7158815dd98e8ac58f914ecd09b008e09'
-        # nonce='742356626'
+        from_xml = """<xml>
+        <ToUserName><![CDATA[gh_04300a34b7fa]]></ToUserName>
+        <Encrypt><![CDATA[db47zq/5zM6GH2rTbEP9QT7J97/ygB/HV81bqC30qEie1Ykw+lweA5k0e4u0uyG9GgkcOK+kZMB45XiLgLjJTyCczHYfmdzDANRUGs7cVNKGM1MCUaOgSTqAWWnNjHOA++wYiqmq6jbgby3KdGScN24+yLokZ46mH0lo0OyivsR944FMK7fafWAtokANlXH23PW0/u21t55/VjcD71qyKhQim1pFKqknIvUxd1glCnJ505iGVQrXCbFM9Bl62n2fkFaX8v4/5yLT8BxDR11HT9YbqPBtk00DMGW5N4ftNtaxMj99ELCfJOKA69Fo+2godjBvGKdVmiJhAE4W5lq0bSIj4v5TDE+7SdVK9Qmt6dQxNQi0on+MVteyFxEwn3a717XohPxyDCJCdCFEtTl9DB9sOgyvPy8jVM/Cj3t7yrk=]]></Encrypt>
+        </xml>"""
+        timestamp = '1486541176'
+        msg_sign='ca1f51583463f5ee9d1e0213dcee4484d70aab21'
+        nonce='1542922659'
 
         try:
             decrypt = WXBizMsgCrypt(self.component_token, self.component_encodingAESKey, self.component_app_id)
@@ -231,4 +228,6 @@ class WechatThirdOauthHandler(WechatOauthHandler):
             self.LOG.error(e)
 
         from_xml = decryp_xml
+
+        self.logger.debug("third get_msg: %s" % from_xml)
         return parse_msg(from_xml)
