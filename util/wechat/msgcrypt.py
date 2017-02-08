@@ -5,6 +5,7 @@
 """
 # ------------------------------------------------------------------------
 
+import traceback
 import base64
 import string
 import random
@@ -67,6 +68,7 @@ class SHA1:
             sha.update(to_utf8_bytes("".join(sortlist)))
             return WXBizMsgCrypt_OK, sha.hexdigest()
         except Exception as e:
+            print (traceback.format_exc())
             return WXBizMsgCrypt_ComputeSignature_Error, None
 
 

@@ -26,7 +26,7 @@ class HrWxWechatDao(BaseDao):
             # "alias":          self.constant.TYPE_STRING, # 别名
             # "username":       self.constant.TYPE_STRING, # 用户名
             # "password":       self.constant.TYPE_STRING, # 密码
-            # "token":          self.constant.TYPE_STRING, # 开发者token
+            "token":          self.constant.TYPE_STRING, # 开发者token
             "appid":           self.constant.TYPE_STRING, # 开发者appid
             "secret":          self.constant.TYPE_STRING, # 开发者secret
             # "welcome":        self.constant.TYPE_INT, # welcome message
