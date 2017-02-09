@@ -19,7 +19,7 @@ from util.tool.url_tool import make_static_url
 class EventPageService(PageService):
 
     @gen.coroutine
-    def opt_default(self, msg):
+    def opt_default(self, msg, wechat):
         """被动回复用户消息的总控处理
         referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140543&t=0.5116553557196903
         :param msg: 消息
@@ -27,17 +27,17 @@ class EventPageService(PageService):
         """
 
         rule = yield self.hr_wx_rule_ds.get_wx_rule(conds={
-            "wechat_id": self.current_user.wechat.id,
-            "id": self.current_user.wechat.default,
+            "wechat_id": wechat.id,
+            "id": wechat.default,
         })
 
         if rule:
-            yield getattr(self, 'rep_{}'.format(rule.module))(msg, rule.id)
+            yield getattr(self, 'rep_{}'.format(rule.module))(msg, rule.id, wechat)
         else:
             raise gen.Return("")
 
     @gen.coroutine
-    def rep_basic(self, msg, rule_id):
+    def rep_basic(self, msg, rule_id, wechat=None):
         """hr_wx_rule 中 module为 basic 的文字处理
         :param msg: 消息
         :param rule_id: hr_wx_rule.id
@@ -53,7 +53,7 @@ class EventPageService(PageService):
         yield self.rep_text(msg, reply)
 
     @gen.coroutine
-    def rep_image(self, msg, rule_id):
+    def rep_image(self, msg, rule_id, wechat=None):
         """hr_wx_rule 中 module为 image 的处理。暂不支持
         :param msg:
         :param rule_id: hr_wx_rule.id
@@ -62,7 +62,7 @@ class EventPageService(PageService):
         raise gen.Return("")
 
     @gen.coroutine
-    def rep_news(self, msg, rule_id):
+    def rep_news(self, msg, rule_id, wechat=None):
         """hr_wx_rule 中 module为 news 的图文处理
         :param msg:
         :param rule_id: hr_wx_rule.id
@@ -91,7 +91,7 @@ class EventPageService(PageService):
 
         news_info = new + wx_const.WX_NEWS_REPLY_FOOT_TPL
 
-        if self.current_user.wechat.third_oauth == 1:
+        if wechat.third_oauth == 1:
             # 第三方授权方式
             encryp_test = WXBizMsgCrypt(self.component_token, self.component_encodingAESKey, self.component_app_id)
             ret, encrypt_xml = encryp_test.EncryptMsg(news_info, self.params.nonce)
@@ -102,23 +102,23 @@ class EventPageService(PageService):
 
 
     @gen.coroutine
-    def opt_follow(self, msg):
+    def opt_follow(self, wechat, msg):
         """处理用户关注微信后的欢迎语
         :param msg:
         :return:
         """
         rule = yield self.hr_wx_rule_ds.get_wx_rule(conds={
-            "wechat_id": self.current_user.wechat.id,
-            "id": self.current_user.wechat.welcome,
+            "wechat_id": wechat.id,
+            "id": wechat.welcome,
         })
 
         if rule:
-            yield getattr(self, 'wx_rep_{}'.format(rule.module))(msg, rule.id)
+            yield getattr(self, 'wx_rep_{}'.format(rule.module))(wechat, msg, rule.id)
         else:
             raise gen.Return("")
 
     @gen.coroutine
-    def wx_rep_text(self, msg, text):
+    def wx_rep_text(self, wechat, msg, text):
         """微信交互：回复文本消息
         :param msg: 消息
         :param text: 文本消息
@@ -130,7 +130,7 @@ class EventPageService(PageService):
                                                    str(time.time()),
                                                    str(text))
 
-        if self.current_user.wechat.third_oauth == 1:
+        if wechat.third_oauth == 1:
             # 第三方授权方式
             encryp_test = WXBizMsgCrypt(self.component_token, self.component_encodingAESKey, self.component_app_id)
             ret, encrypt_xml = encryp_test.EncryptMsg(text_info, self.params.nonce)

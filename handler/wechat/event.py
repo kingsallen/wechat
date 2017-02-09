@@ -85,55 +85,55 @@ class WechatOauthHandler(MetaBaseHandler):
     @handle_response
     @gen.coroutine
     def post_verify(self):
-        self.send_xml("")
+        self.send_xml()
 
     @handle_response
     @gen.coroutine
     def post_text(self):
         """文本消息, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140453&t=0.33078310940365907"""
         self.logger.debug("post_text")
-        self.send_xml("")
+        self.send_xml()
 
     @handle_response
     @gen.coroutine
     def post_image(self):
         """图片消息, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140453&t=0.33078310940365907"""
-        res = yield self.event_ps.opt_default(self.msg)
+        res = yield self.event_ps.opt_default(self.msg, self.wechat)
         self.send_xml(res)
 
     @handle_response
     @gen.coroutine
     def post_voice(self):
         """语音消息, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140453&t=0.33078310940365907"""
-        res = yield self.event_ps.opt_default(self.msg)
+        res = yield self.event_ps.opt_default(self.msg, self.wechat)
         self.send_xml(res)
 
     @handle_response
     @gen.coroutine
     def post_video(self):
         """视频消息, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140453&t=0.33078310940365907"""
-        res = yield self.event_ps.opt_default(self.msg)
+        res = yield self.event_ps.opt_default(self.msg, self.wechat)
         self.send_xml(res)
 
     @handle_response
     @gen.coroutine
     def post_shortvideo(self):
         """小视屏消息, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140453&t=0.33078310940365907"""
-        res = yield self.event_ps.opt_default(self.msg)
+        res = yield self.event_ps.opt_default(self.msg, self.wechat)
         self.send_xml(res)
 
     @handle_response
     @gen.coroutine
     def post_location(self):
         """地理位置消息, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140453&t=0.33078310940365907"""
-        res = yield self.event_ps.opt_default(self.msg)
+        res = yield self.event_ps.opt_default(self.msg, self.wechat)
         self.send_xml(res)
 
     @handle_response
     @gen.coroutine
     def post_link(self):
         """链接消息, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140453&t=0.33078310940365907"""
-        res = yield self.event_ps.opt_default(self.msg)
+        res = yield self.event_ps.opt_default(self.msg, self.wechat)
         self.send_xml(res)
 
 
@@ -143,6 +143,10 @@ class WechatOauthHandler(MetaBaseHandler):
         """微信事件, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140454&t=0.6181039380535693"""
         event = self.msg['Event']
         yield getattr(self, 'event_' + event)()
+
+
+
+
 
     def on_finish(self):
         """继承MetaBaseHandler.on_finish(),添加部分日志"""
