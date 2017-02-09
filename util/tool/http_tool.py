@@ -17,31 +17,31 @@ from app import logger
 
 
 @gen.coroutine
-def http_get(route, jdata, timeout=5):
+def http_get(route, jdata=None, timeout=5):
     ret = yield _async_http_get(route, jdata, timeout=timeout, method='GET')
     raise gen.Return(ret)
 
 
 @gen.coroutine
-def http_delete(route, jdata, timeout=5):
+def http_delete(route, jdata=None, timeout=5):
     ret = yield _async_http_get(route, jdata, timeout=timeout, method='DELETE')
     raise gen.Return(ret)
 
 
 @gen.coroutine
-def http_post(route, jdata, timeout=5):
+def http_post(route, jdata=None, timeout=5):
     ret = yield _async_http_post(route, jdata, timeout=timeout, method='POST')
     raise gen.Return(ret)
 
 
 @gen.coroutine
-def http_put(route, jdata, timeout=5):
+def http_put(route, jdata=None, timeout=5):
     ret = yield _async_http_post(route, jdata, timeout=timeout, method='PUT')
     raise gen.Return(ret)
 
 
 @gen.coroutine
-def http_patch(route, jdata, timeout=5):
+def http_patch(route, jdata=None, timeout=5):
     ret = yield _async_http_post(route, jdata, timeout=timeout, method='PATCH')
     raise gen.Return(ret)
 

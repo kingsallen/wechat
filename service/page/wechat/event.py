@@ -10,6 +10,7 @@
 import time
 from tornado import gen
 
+
 import conf.wechat as wx_const
 from service.page.base import PageService
 from util.wechat.msgcrypt import WXBizMsgCrypt
@@ -19,7 +20,7 @@ from util.tool.url_tool import make_static_url
 class EventPageService(PageService):
 
     @gen.coroutine
-    def opt_default(self, msg, wechat):
+    def opt_default(self, msg, nonce, wechat):
         """被动回复用户消息的总控处理
         referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140543&t=0.5116553557196903
         :param msg: 消息
@@ -32,12 +33,12 @@ class EventPageService(PageService):
         })
 
         if rule:
-            yield getattr(self, 'rep_{}'.format(rule.module))(msg, rule.id, wechat)
+            yield getattr(self, 'rep_{}'.format(rule.module))(msg, rule.id, nonce, wechat)
         else:
             raise gen.Return("")
 
     @gen.coroutine
-    def rep_basic(self, msg, rule_id, wechat=None):
+    def rep_basic(self, msg, rule_id, nonce=None, wechat=None):
         """hr_wx_rule 中 module为 basic 的文字处理
         :param msg: 消息
         :param rule_id: hr_wx_rule.id
@@ -50,10 +51,10 @@ class EventPageService(PageService):
         reply = yield self.hr_wx_basic_reply_ds.get_wx_basic_reply(conds={
             "rid": rule_id
         })
-        yield self.wx_rep_text(msg, reply, wechat)
+        yield self.wx_rep_text(msg, reply, wechat, nonce)
 
     @gen.coroutine
-    def rep_image(self, msg, rule_id, wechat=None):
+    def rep_image(self, msg, rule_id, nonce=None, wechat=None):
         """hr_wx_rule 中 module为 image 的处理。暂不支持
         :param msg:
         :param rule_id: hr_wx_rule.id
@@ -62,7 +63,7 @@ class EventPageService(PageService):
         raise gen.Return("")
 
     @gen.coroutine
-    def rep_news(self, msg, rule_id, wechat=None):
+    def rep_news(self, msg, rule_id, nonce, wechat=None):
         """hr_wx_rule 中 module为 news 的图文处理
         :param msg:
         :param rule_id: hr_wx_rule.id
@@ -93,16 +94,13 @@ class EventPageService(PageService):
 
         if wechat.third_oauth == 1:
             # 第三方授权方式
-            encryp_test = WXBizMsgCrypt(self.component_token, self.component_encodingAESKey, self.component_app_id)
-            ret, encrypt_xml = encryp_test.EncryptMsg(news_info, self.params.nonce)
-
-            news_info = encrypt_xml
+            news_info = self._encryMsg(news_info, nonce)
 
         raise gen.Return(news_info)
 
 
     @gen.coroutine
-    def opt_follow(self, wechat, msg):
+    def opt_follow(self, msg, wechat, nonce):
         """处理用户关注微信后的欢迎语
         :param msg:
         :return:
@@ -113,12 +111,12 @@ class EventPageService(PageService):
         })
 
         if rule:
-            yield getattr(self, 'wx_rep_{}'.format(rule.module))(wechat, msg, rule.id)
+            yield getattr(self, 'wx_rep_{}'.format(rule.module))(msg, rule, wechat, nonce)
         else:
             raise gen.Return("")
 
     @gen.coroutine
-    def wx_rep_text(self, msg, text, wechat):
+    def wx_rep_text(self, msg, text, wechat, nonce):
         """微信交互：回复文本消息
         :param msg: 消息
         :param text: 文本消息
@@ -131,10 +129,22 @@ class EventPageService(PageService):
                                                    str(text))
 
         if wechat.third_oauth == 1:
-            # 第三方授权方式
-            encryp_test = WXBizMsgCrypt(self.component_token, self.component_encodingAESKey, self.component_app_id)
-            ret, encrypt_xml = encryp_test.EncryptMsg(text_info, self.params.nonce)
-
-            text_info = encrypt_xml
+            text_info = self._encryMsg(text_info, nonce)
 
         raise gen.Return(text_info)
+
+    def _encryMsg(self, uncrypt_xml, nonce):
+        """
+        第三方授权方式返回的 xml 需要加密
+        :param uncrypt_xml:
+        :param nonce:
+        :return:
+        """
+
+        decrypt_obj = WXBizMsgCrypt(self.settings.component_app_id,
+                                    self.settings.component_encodingAESKey,
+                                    self.settings.component_token)
+
+        ret, encrypt_xml = decrypt_obj.EncryptMsg(uncrypt_xml, nonce)
+
+        return encrypt_xml

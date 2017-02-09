@@ -24,10 +24,6 @@ class WechatOauthHandler(MetaBaseHandler):
     def __init__(self, application, request, **kwargs):
         super(WechatOauthHandler, self).__init__(application, request, **kwargs)
 
-        self.component_app_id = self.settings.component_app_id
-        self.component_encodingAESKey = self.settings.component_encodingAESKey
-        self.component_token = self.settings.component_token
-
         # 0:开发者模式 1:第三方授权模式
         self.third_oauth = 0
         self.msg = None
@@ -98,42 +94,42 @@ class WechatOauthHandler(MetaBaseHandler):
     @gen.coroutine
     def post_image(self):
         """图片消息, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140453&t=0.33078310940365907"""
-        res = yield self.event_ps.opt_default(self.msg, self.wechat)
+        res = yield self.event_ps.opt_default(self.msg, self.params.nonce, self.wechat)
         self.send_xml(res)
 
     @handle_response
     @gen.coroutine
     def post_voice(self):
         """语音消息, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140453&t=0.33078310940365907"""
-        res = yield self.event_ps.opt_default(self.msg, self.wechat)
+        res = yield self.event_ps.opt_default(self.msg, self.params.nonce, self.wechat)
         self.send_xml(res)
 
     @handle_response
     @gen.coroutine
     def post_video(self):
         """视频消息, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140453&t=0.33078310940365907"""
-        res = yield self.event_ps.opt_default(self.msg, self.wechat)
+        res = yield self.event_ps.opt_default(self.msg, self.params.nonce, self.wechat)
         self.send_xml(res)
 
     @handle_response
     @gen.coroutine
     def post_shortvideo(self):
         """小视屏消息, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140453&t=0.33078310940365907"""
-        res = yield self.event_ps.opt_default(self.msg, self.wechat)
+        res = yield self.event_ps.opt_default(self.msg, self.params.nonce, self.wechat)
         self.send_xml(res)
 
     @handle_response
     @gen.coroutine
     def post_location(self):
         """地理位置消息, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140453&t=0.33078310940365907"""
-        res = yield self.event_ps.opt_default(self.msg, self.wechat)
+        res = yield self.event_ps.opt_default(self.msg, self.params.nonce, self.wechat)
         self.send_xml(res)
 
     @handle_response
     @gen.coroutine
     def post_link(self):
         """链接消息, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140453&t=0.33078310940365907"""
-        res = yield self.event_ps.opt_default(self.msg, self.wechat)
+        res = yield self.event_ps.opt_default(self.msg, self.params.nonce, self.wechat)
         self.send_xml(res)
 
 
@@ -215,18 +211,19 @@ class WechatThirdOauthHandler(WechatOauthHandler):
                 yield self._get_current_user()
                 yield self._post()
             else:
-                # TODO 返回的默认消息
-                pass
+                self.send_xml()
 
         else:
-            # TODO 返回的默认消息
-            pass
+            self.send_xml()
 
     def get_msg(self):
 
+        decrypt_obj = WXBizMsgCrypt(self.settings.component_app_id,
+                                         self.settings.component_encodingAESKey,
+                                         self.settings.component_token)
+
         try:
-            decrypt = WXBizMsgCrypt(self.component_token, self.component_encodingAESKey, self.component_app_id)
-            ret, decryp_xml = decrypt.DecryptMsg(self.request.body,
+            ret, decryp_xml = decrypt_obj.DecryptMsg(self.request.body,
                                                  self.params.msg_signature,
                                                  self.params.timestamp,
                                                  self.params.nonce)
