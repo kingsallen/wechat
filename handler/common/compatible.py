@@ -27,10 +27,9 @@ class CompatibleHandler(BaseHandler):
     def get(self):
 
         if self.is_platform:
-            route = self.request.uri
-            if route.startwith("/mobile/position") and self.params.m == "info":
+            url = self.request.uri
+            if url.startswith("/mobile/position") and self.params.m == "info":
                 # JD 页
-                replace_query = dict()
                 self.redirect(make_url(path.POSITION_PATH.format(self.params.pid), self.params))
                 return
 

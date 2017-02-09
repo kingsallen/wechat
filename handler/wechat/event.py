@@ -82,6 +82,60 @@ class WechatOauthHandler(MetaBaseHandler):
         except Exception as e:
             self.logger.error(traceback.format_exc())
 
+    @handle_response
+    @gen.coroutine
+    def post_verify(self):
+        self.send_xml("")
+
+    @handle_response
+    @gen.coroutine
+    def post_text(self):
+        """文本消息, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140453&t=0.33078310940365907"""
+        self.logger.debug("post_text")
+        self.send_xml("")
+
+    @handle_response
+    @gen.coroutine
+    def post_image(self):
+        """图片消息, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140453&t=0.33078310940365907"""
+        res = yield self.event_ps.opt_default(self.msg)
+        self.send_xml(res)
+
+    @handle_response
+    @gen.coroutine
+    def post_voice(self, msg):
+        """语音消息, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140453&t=0.33078310940365907"""
+        res = yield self.event_ps.opt_default(self.msg)
+        self.send_xml(res)
+
+    @handle_response
+    @gen.coroutine
+    def post_video(self, msg):
+        """视频消息, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140453&t=0.33078310940365907"""
+        res = yield self.event_ps.opt_default(self.msg)
+        self.send_xml(res)
+
+    @handle_response
+    @gen.coroutine
+    def post_shortvideo(self, msg):
+        """小视屏消息, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140453&t=0.33078310940365907"""
+        res = yield self.event_ps.opt_default(self.msg)
+        self.send_xml(res)
+
+    @handle_response
+    @gen.coroutine
+    def post_location(self, msg):
+        """地理位置消息, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140453&t=0.33078310940365907"""
+        res = yield self.event_ps.opt_default(self.msg)
+        self.send_xml(res)
+
+    @handle_response
+    @gen.coroutine
+    def post_link(self, msg):
+        """链接消息, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140453&t=0.33078310940365907"""
+        res = yield self.event_ps.opt_default(self.msg)
+        self.send_xml(res)
+
 
     @handle_response
     @gen.coroutine
@@ -90,63 +144,10 @@ class WechatOauthHandler(MetaBaseHandler):
         event = self.msg['Event']
         yield getattr(self, 'event_' + event)()
 
-    @handle_response
-    @gen.coroutine
-    def post_verify(self):
-        pass
-
-    @handle_response
-    @gen.coroutine
-    def post_text(self):
-        """文本消息, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140453&t=0.33078310940365907"""
-        self.logger.debug("post_text")
-        raise gen.Return("")
-        pass
-
-    # @handle_response
-    # @gen.coroutine
-    # def post_image(self):
-    #     """图片消息, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140453&t=0.33078310940365907"""
-    #     self.write(self.rep_default(msg))
-    #
-    # @handle_response
-    # @gen.coroutine
-    # def post_voice(self, msg):
-    #     """语音消息, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140453&t=0.33078310940365907"""
-    #     self.write(self.rep_default(msg))
-    #
-    # @handle_response
-    # @gen.coroutine
-    # def post_video(self, msg):
-    #     """视频消息, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140453&t=0.33078310940365907"""
-    #     self.write(self.rep_default(msg))
-    #
-    # @handle_response
-    # @gen.coroutine
-    # def post_shortvideo(self, msg):
-    #     """小视屏消息, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140453&t=0.33078310940365907"""
-    #     self.write(self.rep_default(msg))
-    #
-    # @handle_response
-    # @gen.coroutine
-    # def post_location(self, msg):
-    #     """地理位置消息, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140453&t=0.33078310940365907"""
-    #     self.write(self.rep_default(msg))
-    #
-    # @handle_response
-    # @gen.coroutine
-    # def post_link(self, msg):
-    #     """链接消息, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140453&t=0.33078310940365907"""
-    #     self.write(self.rep_default(msg))
-
     def on_finish(self):
         """继承MetaBaseHandler.on_finish(),添加部分日志"""
 
-        self.log_info = {"res_type": "xml",
-                         "wxmsg_type": self.msg.MsgType,
-                         "wxmsg_msgid": self.msg.MsgId,
-                         "wxmsg_event": self.msg.Event}
-
+        self.log_info = {"wxmsg": self.msg}
         super().on_finish()
 
     def get_msg(self):

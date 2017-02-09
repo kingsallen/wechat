@@ -26,11 +26,11 @@ class HrWxWechatDao(BaseDao):
             # "alias":          self.constant.TYPE_STRING, # 别名
             # "username":       self.constant.TYPE_STRING, # 用户名
             # "password":       self.constant.TYPE_STRING, # 密码
-            "token":          self.constant.TYPE_STRING, # 开发者token
+            "token":           self.constant.TYPE_STRING, # 开发者token
             "appid":           self.constant.TYPE_STRING, # 开发者appid
             "secret":          self.constant.TYPE_STRING, # 开发者secret
-            # "welcome":        self.constant.TYPE_INT, # welcome message
-            # "default":        self.constant.TYPE_INT, # default message
+            "welcome":         self.constant.TYPE_INT, # 对关注微信的用户的欢迎语，hr_wx_rule.id
+            "default":         self.constant.TYPE_INT, # 对微信的默认消息回复，hr_wx_rule.id
             "qrcode":          self.constant.TYPE_STRING, # 关注公众号的二维码
             "third_oauth":     self.constant.TYPE_INT, # 授权大岂第三方平台0：未授权 1：授权了
             "passive_seeker":  self.constant.TYPE_INT, # 被动求职者开关，0：开启，1：不开启

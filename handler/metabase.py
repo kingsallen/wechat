@@ -292,6 +292,15 @@ class MetaBaseHandler(AtomHandler):
         self.set_status(http_code)
         self.write(render_json)
 
+    def send_xml(self, data, http_code=200):
+        """传递 xml 到前端 Used for API"""
+
+        self.set_header("Content-Type", "application/xml; charset=utf-8")
+        self.log_info = {"res_type": "xml"}
+        self.set_status(http_code)
+        self.logger.debug("Wechat MSG: %s" % data)
+        self.write(data)
+
     def send_json_success(self, data=None, message=msg_const.RESPONSE_SUCCESS, http_code=200):
         """API 成功返回的便捷方法"""
         self._send_json(data=data,
