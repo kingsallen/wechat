@@ -88,7 +88,10 @@ class WechatOauthHandler(MetaBaseHandler):
     def post_text(self):
         """文本消息, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140453&t=0.33078310940365907"""
         self.logger.debug("post_text")
-        self.send_xml()
+        res = yield self.event_ps.opt_default(self.msg, self.params.nonce, self.wechat)
+        self.send_xml(res)
+
+
 
     @handle_response
     @gen.coroutine
@@ -183,6 +186,10 @@ class WechatThirdOauthHandler(WechatOauthHandler):
     def __init__(self, application, request, **kwargs):
         super(WechatThirdOauthHandler, self).__init__(application, request, **kwargs)
 
+        self.component_app_id = self.settings.component_app_id
+        self.component_encodingAESKey = self.settings.component_encodingAESKey
+        self.component_token = self.settings.component_token
+
         self.third_oauth = 1
         self.msg = None
         self.wechat = None
@@ -218,12 +225,9 @@ class WechatThirdOauthHandler(WechatOauthHandler):
 
     def get_msg(self):
 
-        decrypt_obj = WXBizMsgCrypt(self.settings.component_app_id,
-                                         self.settings.component_encodingAESKey,
-                                         self.settings.component_token)
-
         try:
-            ret, decryp_xml = decrypt_obj.DecryptMsg(self.request.body,
+            decrypt = WXBizMsgCrypt(self.component_token, self.component_encodingAESKey, self.component_app_id)
+            ret, decryp_xml = decrypt.DecryptMsg(self.request.body,
                                                  self.params.msg_signature,
                                                  self.params.timestamp,
                                                  self.params.nonce)
