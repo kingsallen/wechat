@@ -50,7 +50,7 @@ class EventPageService(PageService):
         reply = yield self.hr_wx_basic_reply_ds.get_wx_basic_reply(conds={
             "rid": rule_id
         })
-        yield self.rep_text(msg, reply)
+        yield self.wx_rep_text(msg, reply)
 
     @gen.coroutine
     def rep_image(self, msg, rule_id, wechat=None):
@@ -138,6 +138,3 @@ class EventPageService(PageService):
             text_info = encrypt_xml
 
         raise gen.Return(text_info)
-
-
-
