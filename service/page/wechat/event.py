@@ -123,6 +123,11 @@ class EventPageService(PageService):
         :return:
         """
 
+        text = "你好"
+
+        if text is None:
+            raise gen.Return("")
+
         text_info = wx_const.WX_TEXT_REPLY % (msg.FromUserName,
                                                    msg.ToUserName,
                                                    str(time.time()),
