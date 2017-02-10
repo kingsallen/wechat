@@ -177,8 +177,10 @@ class EventPageService(PageService):
                                             int(time.time()),
                                             str(text))
 
-        if wechat.third_oauth == 1:
-            text_info = self._encryMsg(text_info, nonce)
+        self.logger.debug("text_info: %s" % text_info)
+
+        # if wechat.third_oauth == 1:
+        #     text_info = self._encryMsg(text_info, nonce)
 
         raise gen.Return(text_info)
 
