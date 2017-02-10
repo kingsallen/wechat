@@ -20,12 +20,7 @@ class UserCompanyVisitReqDataService(DataService):
             raise gen.Return(ObjectDict())
         if not fields:
             fields = self.user_company_visit_req_dao.fields_map.keys()
-        try:
-            response = yield self.user_company_visit_req_dao.get_list_by_conds(
-                conds, fields)
-        except Exception as error:
-            self.logger.warn(error)
-            raise gen.Return(ObjectDict())
+        response = yield self.user_company_visit_req_dao.get_list_by_conds(conds, fields)
 
         raise gen.Return(response)
 

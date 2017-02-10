@@ -33,13 +33,8 @@ class UserCompanyFollowDataService(DataService):
             raise gen.Return(ObjectDict())
         if not fields:
             fields = self.user_company_follow_dao.fields_map.keys()
-        try:
-            response = yield self.user_company_follow_dao.get_list_by_conds(
-                                    conds, fields)
-        except Exception as error:
-            self.logger.warn(error)
-            raise gen.Return(ObjectDict())
 
+        response = yield self.user_company_follow_dao.get_list_by_conds(conds, fields)
         raise gen.Return(response)
 
     @gen.coroutine

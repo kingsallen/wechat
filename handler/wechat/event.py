@@ -97,7 +97,6 @@ class WechatOauthHandler(MetaBaseHandler):
         res = yield self.event_ps.opt_text(self.msg, self.params.nonce, self.wechat)
         self.send_xml(res)
 
-
     @handle_response
     @gen.coroutine
     def post_image(self):
@@ -140,7 +139,6 @@ class WechatOauthHandler(MetaBaseHandler):
         res = yield self.event_ps.opt_default(self.msg, self.params.nonce, self.wechat)
         self.send_xml(res)
 
-
     @handle_response
     @gen.coroutine
     def post_event(self):
@@ -152,7 +150,8 @@ class WechatOauthHandler(MetaBaseHandler):
     @gen.coroutine
     def event_subscribe(self):
         """关注事件"""
-        pass
+        res = yield self.event_ps.opt_event_subscribe(self.msg, self.current_user, self.params.nonce)
+        self.send_xml(res)
 
     @handle_response
     @gen.coroutine
@@ -218,18 +217,6 @@ class WechatOauthHandler(MetaBaseHandler):
         """消息模板推送结果 referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1433751277&t=0.29629938341489237
         在模版消息发送任务完成后，微信服务器会将是否送达成功作为通知，发送到开发者中心中填写的服务器配置地址中"""
         self.send_xml()
-
-
-
-
-
-
-
-
-
-
-
-
 
     def on_finish(self):
         """继承MetaBaseHandler.on_finish(),添加部分日志"""

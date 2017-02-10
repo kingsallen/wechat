@@ -7,11 +7,14 @@
 
 # Copyright 2016 MoSeeker
 
+import re
 import time
+import traceback
 from tornado import gen
 
 import conf.common as const
 import conf.wechat as wx_const
+from cache.user.user_hr_account import UserHrAccountCache
 from service.page.base import PageService
 from util.wechat.msgcrypt import WXBizMsgCrypt
 from util.tool.url_tool import make_static_url
@@ -183,6 +186,84 @@ class EventPageService(PageService):
         self.logger.debug("text_info: %s" % text_info)
 
         raise gen.Return(text_info)
+
+
+    @gen.coroutine
+    def opt_event_subscribe(self, msg, current_user, nonce):
+
+        openid = msg.FromUserName
+
+        # 处理临时二维码，目前主要在 PC 上创建帐号、绑定账号时使用
+        if current_user.wechat.id == self.settings.qx_wechat_id and msg.EventKey:
+            if current_user.wxuser:
+                # TODO
+                yield self._update_wxuser()
+
+            # 临时二维码处理逻辑, 5位type+27为自定义id
+            int_scene_id = re.match(r'qrscene_(\d+)', msg.EventKey)
+            if int_scene_id:
+                # TODO
+                yield self._do_weixin_qrcode(msg)
+
+
+        if not current_user.wxuser:
+            # 新微信用户
+            # TODO
+            wxuser = yield self._create_wxuser()
+
+            # 关注仟寻招聘助手时，将 user_hr_account.wxuser_id 与 wxuser 绑定
+            if current_user.wechat.id == self.settings.help_wechat_id and msg.EventKey:
+                try:
+                    hr_id = re.match(r'qrscene_([0-9]*)_([0-9]*)_([0-9]*)', msg['EventKey'])
+                    # 扫码换绑
+                    if hr_id.group(1) and int(hr_id.group(3)) == 1:
+                        yield self.user_hr_account_ds.update_hr_account(
+                            conds={
+                                "id": int(hr_id.group(1))
+                            }, fields={
+                                "wxuser_id": int(wxuser.id)
+                            })
+                    # 初次绑定
+                    elif hr_id.group(1):
+                        yield self.user_hr_account_ds.update_hr_account(
+                            conds={
+                                "id": int(hr_id.group(1)),
+                                "wxuser_id": ['NULL', 'is']
+                            }, fields={
+                                "wxuser_id": int(wxuser.id)
+                            })
+
+                    # 更新 user_hr_account 的缓存,HR招聘管理平台使用,需同时更新 wxuser_id 和 wxuser
+                    user_hr_account_cache = UserHrAccountCache()
+                    user_hr_account_cache.update_user_hr_account_session(
+                        hr_id.group(1),
+                        value={
+                            "wxuser_id": int(wxuser.id),
+                            "wxuser": wxuser
+                        })
+
+                    # HR招聘管理平台对于HR 帐号绑定微信长轮训机制，需要实时的将状态返回给 HR 平台
+                    user_hr_account_cache.pub_wx_binding(hr_id.group(1))
+                except Exception as e:
+                    self.logger.error("[wechat][opt_event_subscribe]binding user_hr_account "
+                                      "failed: {}".format(traceback.format_exc()))
+                    user_hr_account_cache.pub_wx_binding(hr_id.group(1), msg='-1')
+        else:
+            # 老微信用户
+            # TODO
+            yield self._update_wxuser()
+
+        res = self.opt_follow(msg, current_user.wechat, nonce)
+        raise gen.Return(res)
+
+    @gen.coroutine
+    def _create_wxuser(self):
+        pass
+
+    @gen.coroutine
+    def _update_wxuser(self):
+        pass
+
 
     def _encryMsg(self, uncrypt_xml, nonce):
         """

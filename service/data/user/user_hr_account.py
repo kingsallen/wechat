@@ -23,3 +23,15 @@ class UserHrAccountDataService(DataService):
         response = yield self.user_hr_account_dao.get_record_by_conds(conds, fields)
         raise gen.Return(response)
 
+    @gen.coroutine
+    def update_hr_account(self, conds, fields):
+        try:
+            response = yield self.user_hr_account_dao.update_by_conds(
+                conds=conds, fields=fields
+            )
+        except Exception as error:
+            self.logger.warn(error)
+            raise gen.Return(False)
+
+        raise gen.Return(response)
+

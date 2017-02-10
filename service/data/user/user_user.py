@@ -45,16 +45,6 @@ class UserUserDataService(DataService):
             )
         except Exception as error:
             self.logger.warn(error)
-            raise gen.Return(ObjectDict({'status': 1,
-                                         'message': mes_const.DATABASE_ERROR}))
+            raise gen.Return(False)
 
-        raise gen.Return(ObjectDict({
-            'status': 0 if response else 1,
-            'message': 'success' if response else mes_const.DATABASE_ERROR
-        }))
-
-
-
-
-
-
+        raise gen.Return(response)

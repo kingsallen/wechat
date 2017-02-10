@@ -81,9 +81,9 @@ settings['helper_host'] = 'platform1.dqprism.com'
 
 # 公众号 signatures
 settings['qx_wechat_id'] = 1
+settings['help_wechat_id'] = 9
 
 settings['qx_signature'] = 'ZWFkYmZmNjNmYjc3Yjk1YWFlYzg5MWMyNTllOWExNTFkZTE2MzYyMA=='
-settings['platform_qianxun_signature'] = 'YWNkNmIyYWExOGViOTRkODMyMzk5N2MxM2NkZDZlOTUxNmRjYzJiYQ=='
 settings['helper_signature'] = 'NGZiMThkZWMwMmVkMjU4OGRlMWY3Nzk1N2FiZWExMWUxODI4ODJiZQ=='
 
 # 微信第三方平台信息
