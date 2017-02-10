@@ -172,8 +172,6 @@ class EventPageService(PageService):
         if text is None:
             raise gen.Return("")
 
-        text = "hello"
-
         text_info = wx_const.WX_TEXT_REPLY % (msg.FromUserName,
                                             msg.ToUserName,
                                             int(time.time()),
@@ -198,16 +196,6 @@ class EventPageService(PageService):
                                     self.settings.component_encodingAESKey,
                                     self.settings.component_app_id)
 
-        self.logger.debug("component_app_id: %s" % self.settings.component_app_id)
-        self.logger.debug("component_encodingAESKey: %s" % self.settings.component_encodingAESKey)
-        self.logger.debug("component_token: %s" % self.settings.component_token)
-
         ret, encrypt_xml = decrypt_obj.EncryptMsg(uncrypt_xml, nonce)
-
-        print ("+++++++++")
-        print (uncrypt_xml)
-        print (nonce)
-        print (encrypt_xml)
-        print("+++++++++")
 
         return encrypt_xml

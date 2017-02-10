@@ -93,10 +93,6 @@ class XMLParse:
             encrypt  = xml_tree.find("Encrypt")
             touser_name    = xml_tree.find("ToUserName")
 
-            print (encrypt.text)
-            print (touser_name)
-
-
             return WXBizMsgCrypt_OK, encrypt.text, touser_name.text
         except Exception as e:
             print (traceback.format_exc())
@@ -245,14 +241,6 @@ class WXBizMsgCrypt(object):
             timestamp = str(int(time.time()))
         # 生成安全签名
         sha1 = SHA1()
-
-        print ("!!!!!!!!!!!!!!")
-        print (self.token)
-        print (timestamp)
-        print (sNonce)
-        print (encrypt)
-        print ("!!!!!!!!!!!!!!!!")
-
         ret,signature = sha1.getSHA1(self.token, timestamp, sNonce, encrypt)
         if ret != 0:
             return ret,None
