@@ -10,7 +10,7 @@
 import time
 from tornado import gen
 
-
+import conf.common as const
 import conf.wechat as wx_const
 from service.page.base import PageService
 from util.wechat.msgcrypt import WXBizMsgCrypt
@@ -24,6 +24,8 @@ class EventPageService(PageService):
         """被动回复用户消息的总控处理
         referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140543&t=0.5116553557196903
         :param msg: 消息
+        :param nonce:
+        :param wechat:
         :return:
         """
 
@@ -33,7 +35,8 @@ class EventPageService(PageService):
         })
 
         if rule:
-            yield getattr(self, 'rep_{}'.format(rule.module))(msg, rule.id, nonce, wechat)
+            res = yield getattr(self, 'rep_{}'.format(rule.module))(msg, rule.id, nonce, wechat)
+            raise gen.Return(res)
         else:
             raise gen.Return("")
 
@@ -42,6 +45,8 @@ class EventPageService(PageService):
         """hr_wx_rule 中 module为 basic 的文字处理
         :param msg: 消息
         :param rule_id: hr_wx_rule.id
+        :param nonce:
+        :param wechat:
         :return:
         """
 
@@ -51,13 +56,16 @@ class EventPageService(PageService):
         reply = yield self.hr_wx_basic_reply_ds.get_wx_basic_reply(conds={
             "rid": rule_id
         })
-        yield self.wx_rep_text(msg, reply, wechat, nonce)
+        res = yield self.wx_rep_text(msg, reply.content, wechat, nonce)
+        raise gen.Return(res)
 
     @gen.coroutine
     def rep_image(self, msg, rule_id, nonce=None, wechat=None):
         """hr_wx_rule 中 module为 image 的处理。暂不支持
         :param msg:
         :param rule_id: hr_wx_rule.id
+        :param nonce:
+        :param wechat:
         :return:
         """
         raise gen.Return("")
@@ -67,6 +75,8 @@ class EventPageService(PageService):
         """hr_wx_rule 中 module为 news 的图文处理
         :param msg:
         :param rule_id: hr_wx_rule.id
+        :param nonce:
+        :param wechat:
         :return:
         """
 
@@ -98,11 +108,44 @@ class EventPageService(PageService):
 
         raise gen.Return(news_info)
 
+    @gen.coroutine
+    def opt_text(self, msg, nonce, wechat):
+        """针对用户的文本消息，被动回复消息
+        :param msg: 消息
+        :param nonce:
+        :param wechat:
+        :return:
+        """
+
+        keyword = msg.Content.strip()
+        keyword_head = keyword.split(' ')[0]
+
+        rules = yield self.hr_wx_rule_ds.get_wx_rules(conds={
+            "wechat_id": wechat.id,
+            "status": const.OLD_YES,
+        })
+
+        rule = None
+        for rule in rules:
+            if rule.keywords and keyword_head in str(rule.keywords).replace("，", ",").split(","):
+                break
+            else:
+                rule = None
+
+        if rule:
+            res = yield getattr(self, 'rep_{}'.format(rule.module))(msg, rule.id, nonce, wechat)
+            raise gen.Return(res)
+        else:
+            res = yield self.opt_default(msg, nonce, wechat)
+            raise gen.Return(res)
+
 
     @gen.coroutine
     def opt_follow(self, msg, wechat, nonce):
         """处理用户关注微信后的欢迎语
         :param msg:
+        :param nonce:
+        :param wechat:
         :return:
         """
         rule = yield self.hr_wx_rule_ds.get_wx_rule(conds={
@@ -111,7 +154,8 @@ class EventPageService(PageService):
         })
 
         if rule:
-            yield getattr(self, 'wx_rep_{}'.format(rule.module))(msg, rule, wechat, nonce)
+            res = yield getattr(self, 'wx_rep_{}'.format(rule.module))(msg, rule, wechat, nonce)
+            raise gen.Return(res)
         else:
             raise gen.Return("")
 
@@ -120,17 +164,17 @@ class EventPageService(PageService):
         """微信交互：回复文本消息
         :param msg: 消息
         :param text: 文本消息
+        :param nonce:
+        :param wechat:
         :return:
         """
-
-        text = "你好"
 
         if text is None:
             raise gen.Return("")
 
         text_info = wx_const.WX_TEXT_REPLY % (msg.FromUserName,
                                                    msg.ToUserName,
-                                                   str(time.time()),
+                                                   int(time.time()),
                                                    str(text))
 
         if wechat.third_oauth == 1:

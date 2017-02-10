@@ -7,9 +7,8 @@
 
 # Copyright 2016 MoSeeker
 
-import urllib
 
-from urllib.parse import urlparse, parse_qs, urlencode, parse_qsl, urlunparse
+from urllib.parse import urlparse, parse_qs, urlencode, parse_qsl, urlunparse, urljoin
 from setting import settings
 
 
@@ -107,7 +106,7 @@ def make_static_url(path, protocol='https'):
     if not path:
         return None
     if not path.startswith("http"):
-        path = urllib.parse.urljoin(settings['static_domain'], path)
+        path = urljoin(settings['static_domain'], path)
 
     if not path.startswith("http") and protocol is not None:
         path = protocol + ":" + path

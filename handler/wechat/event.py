@@ -88,9 +88,13 @@ class WechatOauthHandler(MetaBaseHandler):
     def post_text(self):
         """文本消息, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140453&t=0.33078310940365907"""
         self.logger.debug("post_text")
-        res = yield self.event_ps.opt_default(self.msg, self.params.nonce, self.wechat)
-        self.send_xml(res)
 
+
+
+
+
+        res = yield self.event_ps.opt_text(self.msg, self.params.nonce, self.wechat)
+        self.send_xml(res)
 
 
     @handle_response

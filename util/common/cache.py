@@ -8,7 +8,6 @@
 # Copyright 2016 MoSeeker
 
 import json
-
 import redis
 
 from setting import settings
