@@ -91,16 +91,16 @@ class EventPageService(PageService):
                                          str(time.time()),
                                          len(replies))
 
-        for new in news:
+        for replie in replies:
             item = wx_const.WX_NEWS_REPLY_ITEM_TPL % (
-                new.title,
-                new.description,
-                make_static_url(new.thumb),
-                new.url
+                replie.title,
+                replie.description,
+                make_static_url(replie.thumb),
+                replie.url
             )
             news += item
 
-        news_info = new + wx_const.WX_NEWS_REPLY_FOOT_TPL
+        news_info = news + wx_const.WX_NEWS_REPLY_FOOT_TPL
 
         if wechat.third_oauth == 1:
             # 第三方授权方式
