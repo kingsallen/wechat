@@ -180,8 +180,8 @@ class EventPageService(PageService):
         self.logger.debug("text_info 1: %s" % text_info)
 
         if wechat.third_oauth == 1:
-            self.logger.debug("text_info 2: %s" % text_info)
             text_info = self._encryMsg(text_info, nonce)
+            self.logger.debug("text_info 2: %s" % text_info)
 
         raise gen.Return(text_info)
 
@@ -198,5 +198,11 @@ class EventPageService(PageService):
                                     self.settings.component_token)
 
         ret, encrypt_xml = decrypt_obj.EncryptMsg(uncrypt_xml, nonce)
+
+        print ("+++++++++")
+        print (uncrypt_xml)
+        print (nonce)
+        print (encrypt_xml)
+        print("+++++++++")
 
         return encrypt_xml

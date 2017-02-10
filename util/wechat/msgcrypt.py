@@ -277,17 +277,25 @@ if __name__ == "__main__":
     encodingAESKey = "YhwSCu0CGkfeaHaAE9XHXfxeX2P0r5skvlDEl1pVK2a"
     token = "c37f1cd03cb111e5a2be00163e004a1f"
     appid = "wxee9d0552f867959b"
+    nonce = "1542922659"
 
-    # # 测试加密接口
-    # to_xml = """ <xml><ToUserName><![CDATA[oia2TjjewbmiOUlr6X-1crbLOvLw]]></ToUserName><FromUserName><![CDATA[gh_7f083739789a]]></FromUserName><CreateTime>1407743423</CreateTime><MsgType>  <![CDATA[video]]></MsgType><Video><MediaId><![CDATA[eYJ1MbwPRJtOvIEabaxHs7TX2D-HV71s79GUxqdUkjm6Gs2Ed1KF3ulAOA9H1xG0]]></MediaId><Title><![CDATA[testCallBackReplyVideo]]></Title><Description><![CDATA[testCallBackReplyVideo加点中文]]></Description></Video></xml>"""
-    # encryp_test = WXBizMsgCrypt(token, encodingAESKey, appid)
-    # ret, encrypt_xml = encryp_test.EncryptMsg(to_xml, nonce)
-    # print(ret, encrypt_xml)
+    # 测试加密接口
+    to_xml = """<xml>
+<ToUserName><![CDATA[oeuAKwX0oQdSrb5C12gBsXqmqvtA]]></ToUserName>
+<FromUserName><![CDATA[gh_04300a34b7fa]]></FromUserName>
+<CreateTime>1486701825</CreateTime>
+<MsgType><![CDATA[text]]></MsgType>
+<Content><![CDATA[你好，这是自动回复]]></Content>
+</xml>"""
+
+    encryp_test = WXBizMsgCrypt(token, encodingAESKey, appid)
+    ret, encrypt_xml = encryp_test.EncryptMsg(to_xml, nonce)
+    print(ret, encrypt_xml)
+    print ("\n\n\n")
 
     # 测试解密接口
     timestamp = "1486520908"
     msg_sign = "ad6b6fc7158815dd98e8ac58f914ecd09b008e09"
-    nonce = "742356626"
     from_xml = """<xml>
     <ToUserName><![CDATA[gh_04300a34b7fa]]></ToUserName>
     <Encrypt><![CDATA[8xgjCBMI1IZvOySpQXBkdGN0l4YIg/Xv8AlFmRNawnxicMMM2QuodRU2iI6AI7mbDrLgVqhN2JheNX6vHNseb1AZgRbiXL6DN44yetRbA8SU290ehNcL6ECwALVQ/itGL9CRYmd9v+oVz97iBysEY2G6tUpSJHiL5P/wbOZxe6bMzDznkUihbRD17fqqK68p/7s7PiPdDFNg/ujnCMtGPcKztEPxckxFV3wO8hOKVYxKKqU1mZF+GQyfvyYgBWBJrSzmrgkZb+ivKiD2qZSJrSOPPK7zxeGYDXyO0+Q/Kxlt3ZtFqLC+VrIO5dY9/7W+ak9DDlPCYlpuWeHa+8yosZN8SIR9zqgrxPAWWjA0fmulvQNtrXW990l3L9JioS+/9y4IHSb3WCixYFr6zGacMkoBP+HWRIq6b8b8mr1VoUfm/BNHPRH7OVokMlSOB2rsHbYtj5xX4FiaXd+AK4SShg==]]></Encrypt>
