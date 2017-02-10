@@ -65,7 +65,7 @@ class SHA1:
             sortlist = [token, timestamp, nonce, encrypt]
             sortlist.sort()
             sha = hashlib.sha1()
-            sha.update(to_utf8_bytes("".join(sortlist)))
+            sha.update("".join(sortlist).encode("ascii"))
             return WXBizMsgCrypt_OK, sha.hexdigest()
         except Exception as e:
             print (traceback.format_exc())
@@ -92,8 +92,14 @@ class XMLParse:
             xml_tree = ET.fromstring(xmltext)
             encrypt  = xml_tree.find("Encrypt")
             touser_name    = xml_tree.find("ToUserName")
+
+            print (encrypt.text)
+            print (touser_name)
+
+
             return WXBizMsgCrypt_OK, encrypt.text, touser_name.text
         except Exception as e:
+            print (traceback.format_exc())
             return WXBizMsgCrypt_ParseXml_Error,None,None
 
     def generate(self, encrypt, signature, timestamp, nonce):
@@ -104,12 +110,11 @@ class XMLParse:
         @param nonce: 随机字符串
         @return: 生成的xml字符串
         """
-        resp_dict = {
-                    'msg_encrypt' : encrypt,
+        resp_dict = {'msg_encrypt' : encrypt,
                     'msg_signaturet': signature,
                     'timestamp'    : timestamp,
                     'nonce'        : nonce,
-                     }
+        }
         resp_xml = self.AES_TEXT_RESPONSE_TEMPLATE % resp_dict
         return resp_xml
 
@@ -279,27 +284,30 @@ if __name__ == "__main__":
     appid = "wxee9d0552f867959b"
     nonce = "1542922659"
 
-    # 测试加密接口
-    to_xml = """<xml>
-<ToUserName><![CDATA[oeuAKwX0oQdSrb5C12gBsXqmqvtA]]></ToUserName>
-<FromUserName><![CDATA[gh_04300a34b7fa]]></FromUserName>
-<CreateTime>1486701825</CreateTime>
-<MsgType><![CDATA[text]]></MsgType>
-<Content><![CDATA[你好，这是自动回复]]></Content>
-</xml>"""
-
-    encryp_test = WXBizMsgCrypt(token, encodingAESKey, appid)
-    ret, encrypt_xml = encryp_test.EncryptMsg(to_xml, nonce)
-    print(ret, encrypt_xml)
-    print ("\n\n\n")
+#     # 测试加密接口
+#     to_xml = """<xml>
+# <ToUserName><![CDATA[oeuAKwX0oQdSrb5C12gBsXqmqvtA]]></ToUserName>
+# <FromUserName><![CDATA[gh_04300a34b7fa]]></FromUserName>
+# <CreateTime>1486701825</CreateTime>
+# <MsgType><![CDATA[text]]></MsgType>
+# <Content><![CDATA[你好，这是自动回复]]></Content>
+# </xml>"""
+#
+#     encryp_test = WXBizMsgCrypt(token, encodingAESKey, appid)
+#     ret, encrypt_xml = encryp_test.EncryptMsg(to_xml, nonce)
+#     print(ret, encrypt_xml)
+#     print ("\n\n\n")
 
     # 测试解密接口
-    timestamp = "1486520908"
-    msg_sign = "ad6b6fc7158815dd98e8ac58f914ecd09b008e09"
+    timestamp = "1486702347"
+    msg_sign = "ea5b01b339910d50ca1e00287ae95d4c79a8ac56"
     from_xml = """<xml>
-    <ToUserName><![CDATA[gh_04300a34b7fa]]></ToUserName>
-    <Encrypt><![CDATA[8xgjCBMI1IZvOySpQXBkdGN0l4YIg/Xv8AlFmRNawnxicMMM2QuodRU2iI6AI7mbDrLgVqhN2JheNX6vHNseb1AZgRbiXL6DN44yetRbA8SU290ehNcL6ECwALVQ/itGL9CRYmd9v+oVz97iBysEY2G6tUpSJHiL5P/wbOZxe6bMzDznkUihbRD17fqqK68p/7s7PiPdDFNg/ujnCMtGPcKztEPxckxFV3wO8hOKVYxKKqU1mZF+GQyfvyYgBWBJrSzmrgkZb+ivKiD2qZSJrSOPPK7zxeGYDXyO0+Q/Kxlt3ZtFqLC+VrIO5dY9/7W+ak9DDlPCYlpuWeHa+8yosZN8SIR9zqgrxPAWWjA0fmulvQNtrXW990l3L9JioS+/9y4IHSb3WCixYFr6zGacMkoBP+HWRIq6b8b8mr1VoUfm/BNHPRH7OVokMlSOB2rsHbYtj5xX4FiaXd+AK4SShg==]]></Encrypt>
-    </xml>"""
+<Encrypt><![CDATA[XyjMOKmqWYTCmNqA3Q5nezVBajfEJKCQtaN2C0Qo4xhlLVgtUzSzYlac3tXSJqDPI+M10bydaMfdZNeqbPwbkrcGQNABf6XX/Y3CfYe4Ym2NWJlCI7BcisDmhYOkwFJaRbqm7mt1RhD3OLZwln8NN4DLz9OX1tjUMFbrHGowKTUS2DHhpIgn233N7WJAXFseUeBTZN06lbxO7ug4Rhqb33rNEX53ykYznvWgZ+Tbml9m+md22vbVoxP4JaKi/iovxz4+0wqUJIyqewPsftgZXyJXx9s9vV9xSbzwSTOYDWOyF7Vjm/8My8P3jceZOIUHq8q56bT8W6VtvtoRIbtITbjOdxc1y5UM1spAiskJlV9sKSsGUH0+oNzArGQTqW25pNDEzxBqTTMqOJoBm6dx5Jx9/LNXUoiZPiRtCgsW8AnzgZzW4xhpByNFC+LNdF0A9wFJRCGPrcvXJaI0/tzq5A==]]></Encrypt>
+<MsgSignature><![CDATA[ea5b01b339910d50ca1e00287ae95d4c79a8ac56]]></MsgSignature>
+<TimeStamp>1486702347</TimeStamp>
+<Nonce><![CDATA[1542922659]]></Nonce>
+</xml>"""
+
 
     decrypt_test = WXBizMsgCrypt(token, encodingAESKey, appid)
     ret, decryp_xml = decrypt_test.DecryptMsg(from_xml, msg_sign, timestamp, nonce)
