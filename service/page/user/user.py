@@ -96,6 +96,15 @@ class UserPageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
+    def get_wxuser_sysuser_id_wechat_id(self, sysuser_id, wechat_id):
+        """根据 sysuer_id 和 wechat_id 获取 wxuser"""
+        ret = yield self.user_wx_user_ds.get_wxuser({
+            "wechat_id":  wechat_id,
+            "sysuser_id": sysuser_id
+        })
+        raise gen.Return(ret)
+
+    @gen.coroutine
     def get_wxuser_unionid_wechat_id(self, unionid, wechat_id):
         """根据 unionid 和 wechat_id 获取 wxuser"""
         ret = yield self.user_wx_user_ds.get_wxuser({
@@ -250,6 +259,16 @@ class UserPageService(PageService):
             })
 
     @gen.coroutine
+    def get_valid_employee_by_user_id(self, user_id):
+        ret = yield self.user_employee_ds.get_employee({
+            "sysuser_id": user_id,
+            "disable":    const.OLD_YES,
+            "status":     const.OLD_YES,
+            "activation": const.OLD_YES
+        })
+        raise gen.Return(ret)
+
+    @gen.coroutine
     def favorite_position(self, current_user, pid):
         """用户收藏职位的粒子操作
         :param current_user: user session 信息
@@ -265,7 +284,7 @@ class UserPageService(PageService):
                 "position_id": pid,
                 "sysuser_id":  current_user.sysuser.id,
                 "favorite":    const.FAV_YES,
-                "wxuser_id":   current_user.wxuser.id
+                "wxuser_id":   current_user.wxuser.id or 0
             }
             if current_user.recom:
                 fields.update({
@@ -340,7 +359,7 @@ class UserPageService(PageService):
             raise gen.Return(ret)
 
     @gen.coroutine
-    def _get_user_favorite_records(self, user_id, pid) -> list:
+    def _get_user_favorite_records(self, user_id, pid):
         """获取用户收藏职位信息
         :param user_id:
         :param pid:

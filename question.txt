@@ -1,5 +1,0 @@
-service/page/redpacket/redpacket.py
-
-__need_to_send 118
-
-

@@ -108,7 +108,7 @@ class DB(object):
             return False
 
         for key, value in maps.items():
-            if fields.get(key, 0):
+            if fields.get(key):
                 if value == constant.TYPE_INT:
                     if not isinstance(fields[key], int):
                         self.logger.error("Error:[checkFieldType][field type error], Module:{0} Detail:[key:{1} value:{2} "

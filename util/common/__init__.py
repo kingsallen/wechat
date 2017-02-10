@@ -27,10 +27,12 @@ class ObjectDict(tornado.util.ObjectDict):
             if isinstance(arg, dict):
                 for t in arg.items():
                     self[t[0]] = (
-                        self.__class__(t[1]) if isinstance(t[1], dict) else t[1])
+                        self.__class__(t[1]) if isinstance(t[1], dict)
+                        else t[1])
         if kwargs:
             for t in kwargs.items():
-                self[t[0]] = self.__class__(t[1]) if isinstance(t[1], dict) else t[1]
+                self[t[0]] = self.__class__(t[1]) if isinstance(t[1], dict) \
+                    else t[1]
 
     def __getattr__(self, key):
         try:
@@ -46,10 +48,12 @@ class _Const(object):
         pass
 
     def __setattr__(self, name, value):
-        if self.__dict__.has_key(name):
-            raise self.ConstantError("can't change const value '%s'." % name)
+        if name in self.__dict__:
+            raise self.ConstantError(
+                "can't change const value '%s'." % name)
         if not name.isupper():
-            raise self.ConstantError("constant name '%s' is not all uppercase." % name)
+            raise self.ConstantError(
+                "constant name '%s' is not all uppercase." % name)
         object.__setattr__(self, name, value)
 
 const = _Const()

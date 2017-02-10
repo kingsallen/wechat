@@ -58,8 +58,15 @@ class Application(tornado.web.Application):
         self.env = env
         self.redis = redis
 
+
+def make_app():
+    """Shared by this module and test as well"""
+    app = Application()
+    return app
+
+
 def main():
-    application = Application()
+    application = make_app()
     try:
         logger.info('Wechat server starting on port: {0}'.format(options.port))
         http_server = tornado.httpserver.HTTPServer(application, xheaders=True)
@@ -74,5 +81,4 @@ def main():
         logger.info('Wechat server closing on port: {0}'.format(options.port))
 
 if __name__ == "__main__":
-
     main()

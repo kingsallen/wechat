@@ -28,10 +28,8 @@ class CandidatePositionShareRecordDataService(DataService):
             fields = list(
                 self.candidate_position_share_record_dao.fields_map.keys())
 
-        response = yield self.candidate_position_share_record_dao\
-            .get_record_by_conds(
-            conds, fields, options, appends,
-            index)
+        response = yield self.candidate_position_share_record_dao.get_record_by_conds(
+            conds, fields, options, appends, index)
         raise gen.Return(response)
 
     @gen.coroutine

@@ -22,7 +22,7 @@ FORMATER = logging.Formatter(
 
 SUFFIX = '%Y%m%d%H.log'
 
-# Highest built-in level is 50, so make CUSTOMER as 60
+# Highest built-in level is 50, so make STATS as 60
 logging.addLevelName(60, 'STATS')
 
 LOG_LEVELS = {
@@ -37,10 +37,9 @@ LOG_LEVELS = {
 #  Logger class and functions
 # --------------------------------------------------------------------------
 
+
 class ExactLogLevelFilter(logging.Filter):
-    """
-    The filter appended to handlers
-    """
+    """The filter appended to handlers"""
     def __init__(self, level):
         self.__level = level
 
@@ -83,6 +82,7 @@ class Logger(object):
                 path, backupCount=self._log_backcount)
             self._handlers[level].setFormatter(FORMATER)
             self._handlers[level].suffix = SUFFIX
+            self._handlers[level].setLevel(LOG_LEVELS[level])
             self._handlers[level].addFilter(
                 ExactLogLevelFilter(LOG_LEVELS[level]))
 
@@ -95,8 +95,11 @@ class Logger(object):
     def info(self, message):
         self.__logger.info(message, exc_info=0)
 
+    def warning(self, message):
+        self.__logger.warning(message, exc_info=0)
+
     def warn(self, message):
-        self.__logger.warn(message, exc_info=0)
+        self.warning(message)
 
     def error(self, message):
         self.__logger.error(message, exc_info=0)
@@ -123,9 +126,12 @@ class MessageLogger(Logger):
         # TODO (tangyiliang) info log 不使用 elk
         # self.impl.send_message("info", message)
 
-    def warn(self, message):
-        super(MessageLogger, self).warn(message)
+    def warning(self, message):
+        super(MessageLogger, self).warning(message)
         self.impl.send_message("warn", message)
+
+    def warn(self, message):
+        self.warning(message)
 
     def error(self, message):
         super(MessageLogger, self).error(message)

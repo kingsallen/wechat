@@ -1,6 +1,5 @@
 # coding=utf-8
 
-from datetime import datetime
 
 import tornado.gen as gen
 
@@ -15,105 +14,118 @@ class SharechainPageService(PageService):
         super().__init__(logger)
 
     @gen.coroutine
-    def refresh_share_chain(self, wxuser_id=None, position_id=None):
+    def refresh_share_chain(self,
+                            presentee_user_id=None,
+                            position_id=None,
+                            share_chain_parent_id=None):
         """
-        对给定的 wxuser_id 和 position_id 做链路原数据的入库操作
-        :param wxuser_id: 查看 JD 页的用户 wxsuer_id
+        对给定的 presentee_user_id 和 position_id 做链路原数据的入库操作
+        :param presentee_user_id: 查看 JD 页的用户 wxsuer_id
         :param position_id: 被查看的职位 id
+        :param share_chain_parent_id
         :return: 如果创建链路愿数据成功,返回 True; 否则返回 False
         """
 
-        assert wxuser_id and position_id
+        assert presentee_user_id and position_id
 
-        # 找到这个 wxuser_id 最后访问该职位的点击记录
-        share_record = yield self._get_latest_share_record(
-            wxuser_id, position_id)
+        # 找到这个 user_id 最后访问该职位的点击记录
+        last_share_record = yield self._get_latest_share_record(
+            user_id=presentee_user_id, position_id=position_id)
 
-        if share_record:
-            # 找到 share_record 后创建 stats.recom_record
-            yield self._save_recom(share_record)
+        if not last_share_record:
+            self.logger.debug("no need to refresh sharechain, skip...")
+            raise gen.Return(0)
 
-            rec = yield self._select_recom_record_real_time(position_id, wxuser_id)
-            if rec:
-                yield self._copy_to_candidate_recom_record(rec)
+        # 找到 share_record 后创建 candiate_share_chain
+        inserted_share_chain_id = yield self._save_recom(
+            last_share_record, share_chain_parent_id)
 
-            raise gen.Return(True)
-        else:
-            raise gen.Return(False)
+        share_chain_rec = yield self._select_recom_record(
+            position_id, presentee_user_id)
+
+        if share_chain_rec:
+            yield self._copy_to_candidate_recom_record(share_chain_rec)
+
+        raise gen.Return(inserted_share_chain_id)
 
     @gen.coroutine
     def create_share_record(self, params):
         """创建分享链路"""
 
         record_id = yield self.candidate_position_share_record_ds.create_share_record({
-            "wechat_id":        params.wechat_id,
-            "recom_id":         params.recom_id,
-            "position_id":      params.position_id,
-            "presentee_id":     params.presentee_id,
-            "sysuser_id":       params.sysuser_id,
-            "viewer_id":        params.viewer_id,
-            "viewer_ip":        params.viewer_ip,
-            "source":           params.source,
-            "click_from":       params.click_from,
+            "wechat_id":         params.wechat_id,
+            "recom_id":          params.recom_id,
+            "position_id":       params.position_id,
+            "presentee_id":      params.presentee_id,
+            "presentee_user_id": params.presentee_user_id,
+            "recom_user_id":     params.recom_user_id,
+            "viewer_id":         params.viewer_id,
+            "viewer_ip":         params.viewer_ip,
+            "source":            params.source,
+            "click_from":        params.click_from,
         })
 
         assert record_id
         raise gen.Return(record_id)
 
     @gen.coroutine
-    def _select_recom_record_real_time(self, position_id, wxuser_id):
+    def _select_recom_record(self, position_id, user_id):
         # 现在无论是否开启挖掘被动求职者，都要放到链路表中
-        record = yield self.stats_recom_record_ds.get_stats_recom_record(
+        record = yield self.candidate_share_chain_ds.get_share_chain(
             conds={
                 "depth": [0, "!="],
-                "presentee_id": wxuser_id,
+                "presentee_user_id": user_id,
                 "position_id": position_id
             },
-            fields=['position_id', 'presentee_id', 'click_time', 'depth', 'recom_id_2', 'recom_id'],
             appends=['order by id desc']
         )
         raise gen.Return(record)
 
     @gen.coroutine
     def _copy_to_candidate_recom_record(self, rec):
-        # 如果 recom_record 被 cache， 会返回字符串
-        # if isinstance(rec.click_time, str):
-        #     rec.click_time = datetime.strptime(rec.click_time, const.TIME_FORMAT)
-
         yield self.candidate_recom_record_ds.insert_candidate_recom_record({
-            "position_id":  rec.position_id,
-            "presentee_id": rec.presentee_id,
-            "depth":        rec.depth,
-            "recom_id":     rec.recom_id,
-            "recom_id_2":   rec.recom_id_2,
-            "click_time":   rec.click_time
+            "position_id":       rec.position_id,
+            "presentee_user_id": rec.presentee_user_id,
+            "click_time":        rec.click_time,
+            "depth":             rec.depth,
+            "repost_user_id":    rec.root2_recom_user_id,
+            "post_user_id":      rec.root_recom_user_id
         })
 
     @gen.coroutine
-    def _get_latest_share_record(self,wxuser_id, position_id):
+    def _get_latest_share_record(self, user_id, position_id):
         """获得最新的转发触发数据"""
+
         ret = yield self.candidate_position_share_record_ds.get_share_record(
             conds={
-                "presentee_id": wxuser_id,
+                "presentee_user_id": user_id,
                 "position_id": position_id,
             },
-            fields=['create_time', 'wechat_id', 'recom_id', 'position_id', 'presentee_id'],
-            appends=["AND `recom_id` != `presentee_id`",
-                     "ORDER BY create_time DESC"]
+            fields=[
+                'create_time',
+                'wechat_id',
+                'recom_user_id',
+                'position_id',
+                'presentee_user_id'
+            ],
+            appends=[
+                'AND `recom_user_id` != `presentee_user_id`',
+                'ORDER BY create_time DESC'
+            ]
         )
         raise gen.Return(ret)
 
     @gen.coroutine
-    def _is_valid_employee(self, position_id, wxuser_id):
-        """返回 wxuser 是否是 position 所在企业的员工
-        """
+    def _is_valid_employee(self, position_id, user_id):
+        """返回 user 是否是 position 所在企业的员工"""
+
         position = yield self.job_position_ds.get_position({
             "id": position_id
         })
         company_id = position.company_id
 
         employee = yield self.user_employee_ds.get_employee({
-            "wxuser_id": wxuser_id,
+            "sysuser_id": user_id,
             "company_id": company_id,
             "activation": const.OLD_YES,
             "disable": const.OLD_YES,
@@ -122,33 +134,19 @@ class SharechainPageService(PageService):
         raise gen.Return(bool(employee))
 
     @gen.coroutine
-    def _no_existed_record(self, recom):
+    def _no_existed_record(self, share_record):
         """检查原始链路数据中是否有该数据"""
 
-        record = yield self.stats_recom_record_ds.get_stats_recom_record(
-            conds={
-                "position_id": recom.position_id,
-                "presentee_id": recom.presentee_id,
-                "click_time": recom.create_time
-            })
+        record = yield self.candidate_share_chain_ds.get_share_chain({
+            "position_id":       share_record.position_id,
+            "presentee_user_id": share_record.presentee_user_id,
+            "click_time":        share_record.create_time
+        })
         raise gen.Return(not bool(record))
 
     @gen.coroutine
-    def _get_recom_history_record(self, position_id, recom_id, create_time):
-        recom = yield self.stats_recom_record_ds.get_stats_recom_record(
-            conds={
-                "position_id": position_id,
-                "presentee_id": recom_id,
-                "click_time": [create_time, "<"]
-            },
-            appends=['order by id desc']
-        )
-        raise gen.Return(recom)
-
-    @gen.coroutine
-    def _hr_remark_ignored_record(self, recom):
-        """检查这个候选人是否曾今被 hr 设置为 ignore
-        """
+    def _hr_remark_ignored_record(self, share_record):
+        """检查这个候选人是否曾今被 hr 设置为 ignore"""
 
         # TODO (yiliang) 要改成不用 join 的 方式
         # 逻辑 SQL
@@ -159,113 +157,138 @@ class SharechainPageService(PageService):
         #   AND r.hraccount_id IN ( SELECT e.id FROM user_employee e
         #     JOIN job_position p ON p.company_id = e.company_id
         #     WHERE p.id = %s )
-        #   AND r.wxuser_id = %s
+        #   AND r.user_id = %s
         # """
 
-        record = yield self.candidate_remark_ds.get_candidate_remark(
-            conds={"status": 2, "wxuser_id": recom.presentee_id},
+        ret = yield self.candidate_remark_ds.get_candidate_remark(
+            conds={
+                "status": 2,
+                "user_id": share_record.presentee_user_id
+            },
+
             fields=['hraccount_id'],
-            appends=["""AND hraccount_id IN ( SELECT e.id FROM user_employee e
-            JOIN job_position p ON p.company_id = e.company_id
-            WHERE p.id = %s )""" % recom.position_id]
+
+            appends=["""
+            AND hraccount_id IN (
+                SELECT e.id FROM user_employee e
+                JOIN job_position p ON p.company_id = e.company_id
+                WHERE p.id = %s
+            )
+            """ % share_record.position_id]
         )
-        raise gen.Return(record)
+
+        raise gen.Return(ret)
 
     @gen.coroutine
-    def _save_recom(self, recom):
-        """ 处理转发轨迹
+    def _save_recom(self, last_share_record, share_chain_parent_id):
+        """ 入库链路数据 candidate_share_chain
+
         将浏览者置为关系最近的员工的初被动求职者
         如果链路中不存在员工，则将浏览者置为第一个转发人的被动求职者
 
-        Args:
-            l: 转发记录
+        如果存在 share_chain_parent_id，基于上一条记录插入新记录
+        如果不存在 share_chain_parent_id，
+        说明这是一条首次转发带来的推荐记录，也就是说转发人并没有点击其他人的转发，而是自主打开 JD 页
         """
 
-        # 如果看的人是员工，记录为 level 0， recom_id 为自己，
-        #   recom_id_2 为空， last_recom_id 为空
+        ret = 0
 
-        is_employee = yield self._is_valid_employee(recom.position_id, recom.presentee_id)
+        # 如果是重复数据，直接返回
+        no_existed_record = yield self._no_existed_record(last_share_record)
+        if not no_existed_record:
+            return ret
 
-        no_existed_record = yield self._no_existed_record(recom)
+        self.logger.debug(
+            "[SC]last_share_record: %s" % last_share_record)
 
-        if is_employee and no_existed_record:
-            self.logger.debug(
-                "position_id:%s,recom_id:%s,presentee_id:%s" %
-                (recom.position_id, recom.presentee_id, recom.presentee_id))
+        position_id = last_share_record.position_id
 
-            yield self.stats_recom_record_ds.insert_stats_recom_record({
-                    "position_id": recom.position_id,
-                    "presentee_id": recom.presentee_id,
-                    "click_time": recom.create_time,
-                    "depth": 0,
-                    "recom_id_2": 0,
-                    "recom_id": recom.presentee_id,
-                    "last_recom_id": 0
-                })
+        presentee_user_is_valid_employee = yield self._is_valid_employee(
+            position_id, last_share_record.presentee_user_id)
+
+        if presentee_user_is_valid_employee:
+
+            ret = yield self.candidate_share_chain_ds.insert_share_chain({
+                "position_id":         position_id,
+                "presentee_user_id":   last_share_record.presentee_user_id,
+                "recom_user_id":       last_share_record.presentee_user_id,
+                "root_recom_user_id":  last_share_record.presentee_user_id,
+                "root2_recom_user_id": 0,
+                "click_time":          last_share_record.create_time,
+                "depth":               0,
+                "parent_id":           0
+            })
+
         # 如果看的人不是员工，
         else:
-            # 如果数据已经记录，则不会重复记录
-            if no_existed_record:
-                last_node = yield self._get_recom_history_record(
-                    recom.position_id, recom.recom_id, recom.create_time)
+            # 如果存在上游数据（last_node）， 转发链长度 + 1
+            if share_chain_parent_id:
 
-                # 如果存在上游数据（last_node）， 转发链长度 + 1
-                if last_node:
-                    yield self.stats_recom_record_ds.insert_stats_recom_record(
-                        {
-                            "position_id":   recom.position_id,
-                            "presentee_id":  recom.presentee_id,
-                            "click_time":    recom.create_time,
-                            "depth":         last_node.depth + 1,
-                            "recom_id_2":    recom.recom_id if last_node.depth == 1 else last_node.recom_id_2,
-                            "recom_id":      last_node.recom_id,
-                            "last_recom_id": recom.recom_id
-                        })
+                parent_share_chain_record = yield self.candidate_share_chain_ds.get_share_chain({
+                    "id": share_chain_parent_id
+                })
 
-                # 如果不存在上游数据，记录为 level 1， recom_id_2 为空，
-                #   last_recom_id 为 recom_id
+                if parent_share_chain_record.depth == 1:
+                    root2_to_insert = last_share_record.recom_user_id
                 else:
-                    yield self.stats_recom_record_ds.insert_stats_recom_record(
-                        {
-                            "position_id":   recom.position_id,
-                            "presentee_id":  recom.presentee_id,
-                            "click_time":    recom.create_time,
-                            "depth":         1,
-                            "recom_id_2":    0,
-                            "recom_id":      recom.recom_id,
-                            "last_recom_id": recom.recom_id
-                        })
+                    root2_to_insert = parent_share_chain_record.root2_recom_user_id
 
-                # 查询 hr_candidate_remark, 如果对应数据被忽略，则设为新数据
-                remark_record = yield self._hr_remark_ignored_record(recom)
-                if remark_record:
-                    self.logger.debug("renew candidate_remark: hraccount_id:%s,wxuser_id:%s" %
-                        (remark_record['hraccount_id'], recom['presentee_id']))
+                ret = yield self.candidate_share_chain_ds.insert_share_chain({
+                    "position_id":         position_id,
+                    "presentee_user_id":   last_share_record.presentee_user_id,
+                    "recom_user_id":       last_share_record.recom_user_id,
+                    "root_recom_user_id":  parent_share_chain_record.root_recom_user_id,
+                    "root2_recom_user_id": root2_to_insert,
+                    "click_time":          last_share_record.create_time,
+                    "depth":               parent_share_chain_record.depth + 1,
+                    "parent_id":           share_chain_parent_id
+                })
 
-                    yield self.candidate_remark_ds.update_candidate_remark(
-                        conds={
-                            "hraccount_id": remark_record.hraccount_id,
-                            "wxuser_id": recom.presentee_id
-                        },
-                        fields={"status": 0}
-                    )
+            # 如果不存在上游数据，记录为 depth 1
+            else:
+                ret = yield self.candidate_share_chain_ds.insert_share_chain({
+                    "position_id":         position_id,
+                    "presentee_user_id":   last_share_record.presentee_user_id,
+                    "recom_user_id":       last_share_record.recom_user_id,
+                    "root_recom_user_id":  last_share_record.recom_user_id,
+                    "root2_recom_user_id": 0,
+                    "click_time":          last_share_record.create_time,
+                    "depth":               1,
+                    "parent_id":           0
+                    })
+
+            # 查询 hr_candidate_remark, 如果对应数据被忽略，则设为新数据
+            remark_record = yield self._hr_remark_ignored_record(last_share_record)
+            if remark_record:
+                self.logger.debug(
+                    "[SC]renew candidate_remark: %s" % remark_record)
+
+                yield self.candidate_remark_ds.update_candidate_remark(
+                    conds={
+                        "hraccount_id": remark_record.hraccount_id,
+                        "user_id": last_share_record.presentee_user_id
+                    },
+                    fields={
+                        "status": 0
+                    }
+                )
+
+        raise gen.Return(ret)
 
     @gen.coroutine
-    def _get_latest_recom_record(self, position_id, wxuser_id, fixed_now):
-        # SQL_GET_LATEST_RECOM_RECORD = """
-        # SELECT position_id, presentee_id, depth, recom_id, click_time
-        # FROM recom_record
-        # WHERE position_id = %s
-        #   AND presentee_id = %s
-        #   AND click_time <= '%s'
-        # ORDER BY click_time DESC
-        # LIMIT 1
-        # """
-
-        record = yield self.stats_recom_record_ds.get_stats_recom_record(
-            conds={
+    def _get_latest_recom_record(self, position_id, user_id, fixed_now):
+        """
+        SELECT *
+        FROM candidate_share_chain
+        WHERE position_id = %s AND
+              presentee_user_id = %s AND
+              click_time <= %s
+        ORDER BY click_time DESC
+        LIMIT 1
+        """
+        record = yield self.candidate_share_chain_ds.get_share_chain({
                 "position_id": position_id,
-                "presentee_id": wxuser_id,
+                "presentee_user_id": user_id,
                 "click_time": [fixed_now, "<="]
             },
             appends=['ORDER BY click_time DESC']
@@ -273,84 +296,121 @@ class SharechainPageService(PageService):
         raise gen.Return(record)
 
     @gen.coroutine
-    def get_referral_employee_wxuser_id(self, wxuser_id=None, position_id=None):
-        """
-        返回 wxuser_id 申请职位时,是否经过了员工内推.
+    def get_referral_employee_user_id(self, user_id=None, position_id=None):
+        """返回 user_id 申请职位时,是否经过了员工内推
         如果经过了员工内推,返回内推员工 user_wx_user id
-        :param wxuser_id: 申请人 user_wx_user id
+
+        :param user_id: 申请人 user_user id
         :param position_id: 被申请职位 id
-        :return: 如果有内推员工,返回内推员工 user_wx_user id; 如果没有内推员工或参数不全
+        :return: 如果有内推员工,返回内推员工 user_user id;如果没有内推员工或参数不全
         ,返回 0.
-        返回的内推员工 wxuser id 以这次申请点击时候的链路为准.
+
+        返回的内推员工 user_id 以这次申请点击时候的链路为准.
         如果这个用户看了其他包含员工转发的链路, 但是没有从这条链路申请职位,
             是不能正常获取到员工 wxuser id 的.
         """
 
-        is_employee = yield self._is_valid_employee(position_id, wxuser_id)
+        if user_id is None or position_id is None:
+            raise gen.Return(0)
+
+        is_employee = yield self._is_valid_employee(position_id, user_id)
 
         if is_employee:
+            self.logger.debug(
+                "[SC]employee application, referral_employee_user_id = 0")
             raise gen.Return(0)
 
         fixed_now = curr_now()
 
         # 获取这条申请的 recom_record 条目
-        recom_record = yield self._get_latest_recom_record(position_id, wxuser_id, fixed_now)
+        share_chain_record = yield self._get_latest_recom_record(
+            position_id, user_id, fixed_now)
 
         # 如果是直接点入申请职位的, 不存在内推员工
-        if len(recom_record) == 0:
+        if not share_chain_record:
             raise gen.Return(0)
 
         # 获取 recom_record 中的 recom_id
-        recom_id = recom_record["recom_id"]
-        click_time = recom_record["click_time"]
+        root_recom_user_id = share_chain_record.root_recom_user_id
+        click_time = share_chain_record.click_time
+
+        self.logger.debug("[SC]Got referral user_id: %s" % root_recom_user_id)
 
         # 查找 “最初推荐人” 的 recom_record 的记录，如果这条记录的 depth 是 0，那么这条记录就是内推
-        recom_record_of_recom = yield self._get_latest_recom_record(
-                position_id, recom_id, click_time)
+        share_chain_of_root = yield self._get_latest_recom_record(
+                position_id, root_recom_user_id, click_time)
 
         # 如果查不到最初联系人, 说明这条链路没有被截断过
         # 并且 recom_id 这个人是自己点 JD 页访问的
-        if not recom_record_of_recom:
-            # 如果直接访问的人是认证员工,返回认证员工的 id
-            is_employee = yield self._is_valid_employee(position_id, recom_id)
-            if is_employee:
-                raise gen.Return(recom_id)
-            else:
-                raise gen.Return(0)
+        root_recom_user_is_employee = yield self._is_valid_employee(
+            position_id, root_recom_user_id)
 
-        # 如果可以查到最初联系人, 说明这个链路被截断过
-        # 那么在被截断的时候, 当时的 presentee_id 就是内推员工 id
-        if recom_record_of_recom["depth"] == 0 and recom_id != wxuser_id:
-            raise gen.Return(recom_id)
-        else:
-            raise gen.Return(0)
+        # 如果查不到最初点击人, 说明这条链路没有被截断过,
+        # 并且 root_recom_user_id 这个人是自己主动点 jd 页访问的
+        # 那么如果直接访问的人是认证员工, 者返回此认证员工的 id
+        if (not share_chain_of_root and root_recom_user_is_employee or
+            # 如果可以查到最初点击人, 说明这个链路被截断过
+            # 那么在被截断的时候, 当时的 presentee_user_id 就是内推员工 id
+            share_chain_of_root and share_chain_of_root.depth == 0 and
+                root_recom_user_id != user_id):
+
+            self.logger.debug(
+                "[SC]return referral employee user_id: %s" % root_recom_user_id)
+            raise gen.Return(root_recom_user_id)
+
+        raise gen.Return(0)
 
     @gen.coroutine
-    def is_1degree_of_employee(self, position_id, wxuser_id):
-        """
-        返回是否是员工一度
-        仅限于新版红包调用
-        :param position_id:
-        :param wxuser_id:
+    def is_employee_presentee(self, share_chain_id):
+        """返回 share_chain_id 所指向的 share chain record 是不是员工一度点击
+
+        先查询 share_chain_id 指向的记录是否有 parent
+        如果有 parent 且 parent share chain record 是员工所转发出的点击，返回 True
+        否则返回 False
+        仅限于红包调用
+        :param share_chain_id:
         :return: bool
         """
-        fixed_now = curr_now()
 
-        recom_record = yield self._get_latest_recom_record(position_id, wxuser_id, fixed_now)
-
-        if not recom_record or recom_record.depth != 1:
+        if not share_chain_id:
             raise gen.Return(False)
 
-        recom_id = recom_record.recom_id
-        click_time = recom_record.click_time
+        share_chain = yield self.candidate_share_chain_ds.get_share_chain({
+            "id": share_chain_id
+        })
 
-        recom_record_of_recom = yield self._get_latest_recom_record(position_id, recom_id, click_time)
+        if not share_chain or not share_chain.parent_id:
+            return False
 
-        if recom_record_of_recom and recom_record_of_recom.depth == 0:
-            raise gen.Return(True)
+        parent_share_chain = yield self.candidate_share_chain_ds.get_share_chain({
+            "id": share_chain.parent_id
+        })
 
-        is_employee = yield self._is_valid_employee(position_id, recom_id)
-        if not recom_record_of_recom and is_employee:
-            raise gen.Return(True)
+        valid_employee = yield self._is_valid_employee(
+            parent_share_chain.position_id,
+            parent_share_chain.recom_user_id)
 
-        raise gen.Return(False)
+        raise gen.Return(
+            parent_share_chain and
+            (
+                parent_share_chain.depth == 0 or
+                parent_share_chain.depth == 1 and
+                valid_employee and
+                parent_share_chain.parent_id == 0
+            )
+        )
+
+    @gen.coroutine
+    def find_last_psc(self, position_id, presentee_user_id):
+        """根据职位和查看者寻找最近的链路记录"""
+        parent_share_chain = yield self.candidate_share_chain_ds.get_share_chain(
+            conds={
+                "position_id": position_id,
+                "presentee_user_id": presentee_user_id
+            },
+            appends=['order by click_time desc',
+                     'limit 1'])
+        if parent_share_chain:
+            raise gen.Return(parent_share_chain.id)
+        else:
+            raise gen.Return(0)

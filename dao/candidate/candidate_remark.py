@@ -25,5 +25,6 @@ class CandidateRemarkDao(BaseDao):
             "create_time":      self.constant.TYPE_TIMESTAMP,
             "update_time":      self.constant.TYPE_TIMESTAMP,
             "status":           self.constant.TYPE_INT,
-            "name":             self.constant.TYPE_STRING
+            "name":             self.constant.TYPE_STRING,
+            "user_id":          self.constant.TYPE_INT
         }

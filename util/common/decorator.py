@@ -117,7 +117,7 @@ def check_signature(func):
             try:
                 self.get_query_argument(key, strip=True)
             except MissingArgumentError:
-                self.write_error(status_code=404)
+                self.write_error(http_code=404)
             else:
                 yield func(self, *args, **kwargs)
     return wrapper
