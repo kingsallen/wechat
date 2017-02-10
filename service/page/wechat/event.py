@@ -172,15 +172,17 @@ class EventPageService(PageService):
         if text is None:
             raise gen.Return("")
 
+        text = "hello"
+
         text_info = wx_const.WX_TEXT_REPLY % (msg.FromUserName,
                                             msg.ToUserName,
                                             int(time.time()),
-                                            str(text))
+                                            text)
+
+        if wechat.third_oauth == 1:
+            text_info = self._encryMsg(text_info, nonce)
 
         self.logger.debug("text_info: %s" % text_info)
-
-        # if wechat.third_oauth == 1:
-        #     text_info = self._encryMsg(text_info, nonce)
 
         raise gen.Return(text_info)
 
