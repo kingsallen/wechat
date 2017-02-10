@@ -194,9 +194,9 @@ class EventPageService(PageService):
         :return:
         """
 
-        decrypt_obj = WXBizMsgCrypt(self.settings.component_app_id,
+        decrypt_obj = WXBizMsgCrypt(self.settings.component_token,
                                     self.settings.component_encodingAESKey,
-                                    self.settings.component_token)
+                                    self.settings.component_app_id)
 
         self.logger.debug("component_app_id: %s" % self.settings.component_app_id)
         self.logger.debug("component_encodingAESKey: %s" % self.settings.component_encodingAESKey)
