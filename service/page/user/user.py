@@ -144,7 +144,7 @@ class UserPageService(PageService):
                     "headimgurl":   qx_wxuser.headimgurl,
                     "wechat_id":    wechat_id,
                     "unionid":      qx_wxuser.unionid,
-                    "source":       const.WXUSER_OAUTH_UPDATE
+                    "source":       const.WX_USER_SOURCE_OAUTH_UPDATE
                 })
 
         else:
@@ -161,7 +161,7 @@ class UserPageService(PageService):
                 "headimgurl":   qx_wxuser.headimgurl,
                 "wechat_id":    wechat_id,
                 "unionid":      qx_wxuser.unionid,
-                "source":       const.WXUSER_OAUTH
+                "source":       const.WX_USER_SOURCE_OAUTH
             })
 
         wxuser = yield self.get_wxuser_id(wxuser_id=wxuser_id)
@@ -193,7 +193,7 @@ class UserPageService(PageService):
                     "language":   userinfo.language,
                     "headimgurl": userinfo.headimgurl,
                     "unionid":    userinfo.unionid if userinfo.unionid else "",
-                    "source":     const.WXUSER_OAUTH_UPDATE
+                    "source":     const.WX_USER_SOURCE_OAUTH_UPDATE
                 })
         else:
             yield self.user_wx_user_ds.create_wxuser({
@@ -209,7 +209,7 @@ class UserPageService(PageService):
                 "headimgurl":   userinfo.headimgurl,
                 "wechat_id":    qx_wechat_id,
                 "unionid":      userinfo.unionid if userinfo.unionid else "",
-                "source":       const.WXUSER_OAUTH
+                "source":       const.WX_USER_SOURCE_OAUTH
             })
 
     @gen.coroutine

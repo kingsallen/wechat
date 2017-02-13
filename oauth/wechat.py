@@ -225,3 +225,41 @@ class JsApi(object):
     def __init__(self, jsapi_ticket, url):
         self.sign = Sign(jsapi_ticket=jsapi_ticket)
         self.__dict__.update(self.sign.sign(url=url))
+
+class WechatUtil(object):
+
+    """微信工具类，可用户与微信 API 之间的交互"""
+
+    @gen.coroutine
+    def get_wxuser(self, access_token, openid):
+        """用 openid 拉取用户信息
+        https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140839&t=0.8130415470934214
+        :return ObjectDict
+        when success
+        {
+           "subscribe": 1,
+           "openid": "o6_bmjrPTlm6_2sgVt7hMZOPfL2M",
+           "nickname": "Band",
+           "sex": 1,
+           "language": "zh_CN",
+           "city": "广州",
+           "province": "广东",
+           "country": "中国",
+           "headimgurl":  "http://wx.qlogo.cn/mmopen/g3MonUZtNHkdmzicIlibx6iaFqAc56vxLSUfpb6n5WKSYVY0ChQKkiaJSgQ1dZuTOgvLLrhJbERQQ4
+        eMsv84eavHiaiceqxibJxCfHe/0",
+          "subscribe_time": 1382694957,
+          "unionid": " o6_bmasdasdsad6_2sgVt7hMZOPfL"
+          "remark": "",
+          "groupid": 0,
+          "tagid_list":[128,2]
+        }
+
+        when error
+        {"errcode":40003,"errmsg":" invalid openid"}
+        """
+        response = yield self.async_http.fetch(
+            wx_const.WX_INFO_USER_API % (access_token, openid))
+
+        ret = ObjectDict(ujson.loads(response.body))
+        logger.debug("[WechatUtil][get_wxuser]wxuser:{}".format(ret))
+        raise gen.Return(ret)

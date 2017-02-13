@@ -31,6 +31,7 @@ USER_COMBINE = 'user/wxbindmobile'
 USER_LOGIN_PATH = 'user/login'
 USER_APPLIED_APPLICATIONS = 'user/{}/applications'
 USER_FAV_POSITION = 'user/{}/fav-position'
+WXUSER_QRCODE_SCANRESULT = 'weixin/qrcode/scanresult'
 
 # 申请服务
 # REFERER: https://wiki.moseeker.com/application-api.md

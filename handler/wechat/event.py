@@ -156,12 +156,16 @@ class WechatOauthHandler(MetaBaseHandler):
     @handle_response
     @gen.coroutine
     def event_unsubscribe(self):
-        pass
+        """取消关注事件"""
+        res = yield self.event_ps.opt_event_unsubscribe(self.current_user)
+        self.send_xml(res)
 
     @handle_response
     @gen.coroutine
     def event_SCAN(self):
-        pass
+        """用户扫码事件"""
+        res = yield self.event_ps.opt_event_scan(self.current_user, self.msg)
+        self.send_xml(res)
 
     @handle_response
     @gen.coroutine

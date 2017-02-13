@@ -5,8 +5,8 @@
 """
 时间工具类
 """
-
-from datetime import datetime, date, timedelta
+import time
+from datetime import datetime, timedelta
 
 import conf.common as constant
 
@@ -38,6 +38,8 @@ def curr_now_msec():
 def format_dateonly(time):
     return time.strftime(constant.TIME_FORMAT_DATEONLY)
 
+def format_time(timestamp):
+    return time.strftime(constant.TIME_FORMAT, time.localtime(timestamp))
 
 def is_time_valid(str_time, form):
     """

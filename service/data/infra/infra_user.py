@@ -120,3 +120,14 @@ class InfraUserDataService(DataService):
 
         ret = yield http_put(path.USER_INFO, params)
         raise gen.Return(ret)
+
+    @gen.coroutine
+    def post_scanresult(self, params):
+        """
+        设置二维码扫描结果
+        :param params:
+        :return:
+        """
+
+        ret = yield http_post(path.WXUSER_QRCODE_SCANRESULT, params)
+        raise gen.Return(ret)
