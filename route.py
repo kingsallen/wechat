@@ -26,53 +26,52 @@ help_routes: 继承自common_routes, 供help单独使用，一般 handler 在 he
 # 微信端公共的 routes
 common_routes = [
     # 开发者方式
-    (r"/wechat",                           "handler.wechat.event.WechatOauthHandler",                   {"event": "wechat_oauth"}),
+    (r"/wechat",                                       "handler.wechat.event.WechatOauthHandler",                   {"event": "wechat_oauth"}),
     # 第三方授权方式
-    (r"/wechat[\/]*([0-9a-z]+)*",          "handler.wechat.event.WechatThirdOauthHandler",              {"event": "wechat_thirdoauth"}),  # passport
-    (r"/m/user/([a-z_]*)",                 "handler.common.passport.LoginHandler",                      {"event": "user_login"}),
+    (r"/wechat[\/]*([0-9a-z]+)*",                      "handler.wechat.event.WechatThirdOauthHandler",              {"event": "wechat_thirdoauth"}),  # passport
+    (r"/m/user/([a-z]*)",                              "handler.common.passport.LoginHandler",                      {"event": "user_login"}),
     # position
-    (r"/m/position/([0-9]+)",              "handler.common.position.PositionHandler",                   {"event": "position_info"}),
-    (r"/m/position",                       "handler.common.position.PositionListHandler",               {"event": "position_list"}),
-    # usercenter
-    (r"/m/usercenter/applications",        "handler.common.usercenter.AppRecordsHandler",               {"event": "usercenter_applications"}),
-    (r"/m/usercenter/favpositions",        "handler.common.usercenter.FavPositionsHandler",             {"event": "usercenter_favpositions"}),
-    (r"/m/usercenter/setting/([a-z_]*)",   "handler.common.usercenter.UserSettingHandler",              {"event": "usercenter_"}),
+    (r"/m/position/([0-9]+)",                          "handler.common.position.PositionHandler",                   {"event": "position_info"}),
+    (r"/m/position",                                   "handler.common.position.PositionListHandler",               {"event": "position_list"}),
 
     # app forward 给前端，展示纯前端渲染的 SPA
-    (r"/m/app/.*",                         "handler.common.app.IndexHandler",                           {"event": "app_index"}),
+    (r"/m/app/.*",                                     "handler.common.app.IndexHandler",                           {"event": "app_index"}),
 
     # common api
-    (r"/m/api/position/star",              "handler.common.position.PositionStarHandler",               {"event": "position_star"}),
-    (r"/m/api/chat/unread[\/]*([0-9]+)*",  "handler.common.im.UnreadCountHandler",                      {"event": "chat_unread"}),
-    (r"/m/api/mobilebinded",               "handler.common.user.UserMobileBindedHandler",               {"event": "user_usermobilebinded"}),
-    (r"/m/api/cellphone",                  "handler.common.cellphone.CellphoneBindHandler",             {"event": "cellphone_bind"}),
-    (r"/m/api/user/currentinfo",           "handler.common.interest.UserCurrentInfoHandler",            {"event": "user_currentinfo"}),
-    (r"/m/api/upload/([a-z_]*)",           "handler.common.usercenter.UploadHandler",                   {"event": "image_"}),
-    (r"/m/api/usercenter/(.*)",                 "handler.common.usercenter.HomeHandler",                     {"event": "usercenter_home"}),
+    (r"/m/api/position/star",                          "handler.common.position.PositionStarHandler",               {"event": "position_star"}),
+    (r"/m/api/chat/unread[\/]*([0-9]+)*",              "handler.common.im.UnreadCountHandler",                      {"event": "chat_unread"}),
+    (r"/m/api/mobilebinded",                           "handler.common.user.UserMobileBindedHandler",               {"event": "user_usermobilebinded"}),
+    (r"/m/api/cellphone",                              "handler.common.cellphone.CellphoneBindHandler",             {"event": "cellphone_bind"}),
+    (r"/m/api/user/currentinfo",                       "handler.common.interest.UserCurrentInfoHandler",            {"event": "user_currentinfo"}),
+    (r"/m/api/upload/([a-z]*)",                        "handler.common.usercenter.UploadHandler",                   {"event": "image_"}),
+    (r"/m/api/usercenter/favpositions",                "handler.common.usercenter.FavpositionHandler",              {"event": "usercenter_favpositions"}),
+    (r"/m/api/usercenter/applyrecords[\/]*([0-9]+)*",  "handler.common.usercenter.ApplyrecordsHandler",             {"event": "usercenter_applyredords"}),
+
+    (r"/m/api/usercenter",                             "handler.common.usercenter.UsercenterHandler",               {"event": "usercenter_"}),
 
     # 兼容老微信 url，进行302跳转，event 设置为 NULL
-    (r"/.*",                               "handler.common.compatible.CompatibleHandler",               {"event": "NULL"})
+    (r"/.*",                                           "handler.common.compatible.CompatibleHandler",               {"event": "NULL"})
 
 ]
 
 # 企业号的单独 routes
 platform_routes = [
-    (r"/m/start",                          "handler.platform.landing.LandingHandler",                   {"event": "start_landing"}),
-    (r"/m/company/(\d+)",                  "handler.platform.companyrelation.CompanyInfoHandler",       {"event": "company_old_info"}),
-    (r"/m/company",                        "handler.platform.companyrelation.CompanyHandler",           {"event": "company_info"}),
-    (r"/m/company/team/(\d+)",             "handler.platform.team.TeamDetailHandler",                   {"event": "team_detail"}),
-    (r"/m/company/team",                   "handler.platform.team.TeamIndexHandler",                    {"event": "team_info"}),
+    (r"/m/start",                                      "handler.platform.landing.LandingHandler",                   {"event": "start_landing"}),
+    (r"/m/company/(\d+)",                              "handler.platform.companyrelation.CompanyInfoHandler",       {"event": "company_old_info"}),
+    (r"/m/company",                                    "handler.platform.companyrelation.CompanyHandler",           {"event": "company_info"}),
+    (r"/m/company/team/(\d+)",                         "handler.platform.team.TeamDetailHandler",                   {"event": "team_detail"}),
+    (r"/m/company/team",                               "handler.platform.team.TeamIndexHandler",                    {"event": "team_info"}),
 
-    (r"/m/api/company/visitreq",           "handler.platform.companyrelation.CompanyVisitReqHandler",   {"event": "company_visitreq"}),
-    (r"/m/api/company/survey",             "handler.platform.companyrelation.CompanySurveyHandler",     {"event": "company_survey"}),
-    (r"/m/api/company/follow",             "handler.platform.companyrelation.CompanyFollowHandler",     {"event": "company_follow"})
+    (r"/m/api/company/visitreq",                       "handler.platform.companyrelation.CompanyVisitReqHandler",   {"event": "company_visitreq"}),
+    (r"/m/api/company/survey",                         "handler.platform.companyrelation.CompanySurveyHandler",     {"event": "company_survey"}),
+    (r"/m/api/company/follow",                         "handler.platform.companyrelation.CompanyFollowHandler",     {"event": "company_follow"})
 ]
 platform_routes.extend(common_routes)
 
 
 # 聚合号的单独 routes
 qx_routes = [
-    (r"/m/wxoauth2",                       "handler.qx.wechat_oauth.WxOauthHandler",                    {"event": "wxoauth_wxoauth"})
+    (r"/m/wxoauth2",                                   "handler.qx.wechat_oauth.WxOauthHandler",                    {"event": "wxoauth_wxoauth"})
 ]
 qx_routes.extend(common_routes)
 
