@@ -49,7 +49,7 @@ class DB(object):
         """
         conds_params = conds_params or []
 
-        if conds is None or not (isinstance(conds, dict) or isinstance(conds, str)):
+        if conds is None or not (isinstance(conds, (dict, str))):
             self.logger.error("Error:[getConds][conds type error], module:{0}, "
                               "conds:{1}, type:{2}".format(self.__class__.__name__, conds, type(conds)))
             return False, ()
@@ -77,7 +77,7 @@ class DB(object):
                         self.logger.error("Error:[getConds][value length error], module:{0}, value:{1}, "
                                        "length:{2}, conds:{3}".format(self.__class__.__name__, value, len(value), conds))
                         return False, ()
-                elif isinstance(value, str) or isinstance(value, int) or isinstance(value, datetime):
+                elif isinstance(value, (str, int, datetime)):
                     frag = "`{0}` = %s".format(key)
                     conds_res.append(frag)
                     params.append(value)

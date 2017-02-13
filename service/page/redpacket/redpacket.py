@@ -482,7 +482,7 @@ class RedpacketPageService(PageService):
             next_red_packet = yield self.__get_next_rp_item(
                 red_packet_config.id, red_packet_config.type)
 
-        if next_red_packet is None:
+        if not next_red_packet:
             # 直接返回 True 这样可以在后续发送消息模版之前判断并结束活动
             return True
 
@@ -881,8 +881,6 @@ class RedpacketPageService(PageService):
         yield self.hr_hb_items_ds.create_hb_items(fields={
             "hb_config_id": hb_config_id,
             "binding_id": 0,
-            "index": -1,
-            "amount": 0.0,
             "status": const.RP_ITEM_STATUS_ZERO_AMOUNT_WX_MSG_SENT,
             "wxuser_id": wxuser.id,
             "trigger_wxuser_id": current_wxuser_id

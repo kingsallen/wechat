@@ -118,11 +118,13 @@ class MessageLogger(Logger):
 
     def debug(self, message):
         super(MessageLogger, self).debug(message)
-        self.impl.send_message("debug", message)
+        # TODO (tangyiliang) debug log 不使用 elk
+        # self.impl.send_message("debug", message)
 
     def info(self, message):
         super(MessageLogger, self).info(message)
-        self.impl.send_message("info", message)
+        # TODO (tangyiliang) info log 不使用 elk
+        # self.impl.send_message("info", message)
 
     def warning(self, message):
         super(MessageLogger, self).warning(message)

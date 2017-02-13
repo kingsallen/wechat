@@ -102,7 +102,8 @@ def template3(title, resource_list, handler_params):
         'title': title,
         'data': [{
             'title': position.title,  # '文案'
-            'link': make_url(POSITION_PATH.format(position.id), handler_params),  # JD连接
+            'link': make_url(POSITION_PATH.format(position.id), handler_params,
+                             escape=['recom']),  # JD连接
             'location': position.city,  # '上海
             'salary': gen_salary(position.salary_top, position.salary_bottom)  # '5k-8k'
         } for position in resource_list]
@@ -338,16 +339,17 @@ def make_mate(media_list, res_dict):
     )
 
 
-def make_team(team, team_res, more_link):
+def make_team(team, resources, more_link, team_members):
     return template1(
-        sub_type='full',
+        sub_type='middle',
         title='所属团队',
         data=[{
-            'sub_title': '',
+            'sub_title': team.name,
             'longtext': team.summary,
-            'media_url': make_static_url(team_res.res_url),
-            'media_type': MEDIA_TYPE[team_res.res_type],
-            'member_list': None,
+            'media_url': make_static_url(resources.get(team.res_id).res_url),
+            'media_type': MEDIA_TYPE[resources.get(team.res_id).res_type],
+            'member_list': [make_team_member(m, resources.get(m.res_id))
+                            for m in team_members],
         }],
         more_link=more_link
     )

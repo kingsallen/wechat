@@ -21,7 +21,7 @@ class HrWxBasicReplyDataService(DataService):
 
         fields = fields or []
 
-        if conds is None or not (isinstance(conds, dict) or isinstance(conds, str)):
+        if conds is None or not (isinstance(conds, (dict, str))):
             self.logger.warn("Warning:[get_wx_basic_reply][invalid parameters], Detail:[conds: {0}, "
                         "type: {1}]".format(conds, type(conds)))
             raise gen.Return(ObjectDict())

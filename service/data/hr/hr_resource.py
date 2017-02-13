@@ -19,7 +19,7 @@ class HrResourceDataService(DataService):
     @gen.coroutine
     def get_resource(self, conds, fields=[]):
 
-        if conds is None or not (isinstance(conds, dict) or isinstance(conds, str)):
+        if conds is None or not (isinstance(conds, (dict, str))):
             self.logger.warn("Warning:[get_resource][invalid parameters], \
                     Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
             raise gen.Return(ObjectDict())
@@ -34,7 +34,7 @@ class HrResourceDataService(DataService):
     @gen.coroutine
     def get_resource_list(self, conds, fields=[]):
 
-        if conds is None or not (isinstance(conds, dict) or isinstance(conds, str)):
+        if conds is None or not (isinstance(conds, (dict, str))):
             self.logger.warn("Warning:[get_resource_list][invalid parameters], \
                     Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
             raise gen.Return(list())

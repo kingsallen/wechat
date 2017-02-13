@@ -272,6 +272,7 @@ class PositionHandler(BaseHandler):
             "team": team_id,
             "did": did,
             "salary": position_info.salary,
+            "hr_chat": int(self.current_user.wechat.hr_chat),
             #"team": position_info.department.lower() if position_info.department else ""
         })
 

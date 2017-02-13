@@ -13,7 +13,7 @@ class HrCompanyConfDataService(DataService):
     @gen.coroutine
     def get_company_conf(self, conds, fields=[]):
 
-        if conds is None or not (isinstance(conds, dict) or isinstance(conds, str)):
+        if conds is None or not (isinstance(conds, (dict, str))):
             self.logger.warn("Warning:[get_company_conf][invalid parameters], Detail:[conds: {0}, "
                         "type: {1}]".format(conds, type(conds)))
             raise gen.Return(ObjectDict())

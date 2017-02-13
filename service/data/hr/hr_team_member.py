@@ -14,7 +14,7 @@ class HrTeamMemberDataService(DataService):
     @gen.coroutine
     def get_team_member(self, conds, fields=[]):
 
-        if conds is None or not (isinstance(conds, dict) or isinstance(conds, str)):
+        if conds is None or not (isinstance(conds, (dict, str))):
             self.logger.warn("Warning:[get_team_member][invalid parameters], \
                     Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
             raise gen.Return(ObjectDict())
@@ -29,7 +29,7 @@ class HrTeamMemberDataService(DataService):
     @gen.coroutine
     def get_team_member_list(self, conds, fields=[]):
 
-        if conds is None or not (isinstance(conds, dict) or isinstance(conds, str)):
+        if conds is None or not (isinstance(conds, (dict, str))):
             self.logger.warn("Warning:[get_team_member_list][invalid parameters], \
                     Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
             raise gen.Return(list())

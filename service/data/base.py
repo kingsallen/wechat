@@ -56,7 +56,7 @@ class DataService:
         ret = False
         if not conds:
             return ret
-        return isinstance(conds, dict) or isinstance(conds, str)
+        return isinstance(conds, (dict, str))
 
     @staticmethod
     def _search_path():
