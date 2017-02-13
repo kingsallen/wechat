@@ -3,7 +3,7 @@
 from service.data.base import DataService
 import tornado.gen as gen
 from util.common import ObjectDict
-from conf.path import USER_BIND_WX_MOBILE
+from conf.path import USER_COMBINE
 from util.tool.http_tool import http_get, http_post, http_put, http_delete, http_patch
 
 
@@ -18,7 +18,7 @@ class InfraUserDataService(DataService):
             "code": kwargs.get("code" "")
         })
 
-        ret = yield http_post(USER_BIND_WX_MOBILE, params)
+        ret = yield http_post(USER_COMBINE, params)
 
         raise gen.Return(ret)
 
