@@ -301,6 +301,8 @@ class WechatThirdOauthHandler(WechatOauthHandler):
 
     def get_msg(self):
 
+        self.logger.debug("oauth request body: {}".format(self.request.body))
+
         try:
             decrypt = WXBizMsgCrypt(self.component_token, self.component_encodingAESKey, self.component_app_id)
             ret, decryp_xml = decrypt.DecryptMsg(self.request.body,

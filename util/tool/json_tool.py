@@ -6,7 +6,6 @@ import datetime
 import decimal
 import json
 import ujson  # for encode json first time
-import logging
 
 class JSONEncoder(json.JSONEncoder):
 
@@ -24,11 +23,11 @@ class JSONEncoder(json.JSONEncoder):
 
 
 def json_dumps(p_dict):
-    
-    logging.debug("[json_dumps] p_dict is:{}".format(type(p_dict)))
-    logging.debug("[json_dumps] p_dict is dict {}".format(isinstance(p_dict, dict)))
-    logging.debug("[json_dumps] p_dict is list {}".format(isinstance(p_dict, list)))
-    logging.debug("[json_dumps] p_dict is boolean {}".format(not (isinstance(p_dict, (dict, list)))))
+
+    print ("[json_dumps] p_dict is:{}".format(type(p_dict)))
+    print ("[json_dumps] p_dict is dict {}".format(isinstance(p_dict, dict)))
+    print ("[json_dumps] p_dict is list {}".format(isinstance(p_dict, list)))
+    print ("[json_dumps] p_dict is boolean {}".format(not (isinstance(p_dict, (dict, list)))))
 
     if not (isinstance(p_dict, (dict, list))):
         raise ValueError("p_dict is not a required instance.")
