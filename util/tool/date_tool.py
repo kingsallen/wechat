@@ -38,9 +38,6 @@ def curr_now_msec():
 def format_dateonly(time):
     return time.strftime(constant.TIME_FORMAT_DATEONLY)
 
-def format_time(timestamp):
-    return time.strftime(constant.TIME_FORMAT, time.localtime(timestamp))
-
 def is_time_valid(str_time, form):
     """
     判断时间格式是否符合要求
