@@ -230,6 +230,8 @@ class WechatUtil(object):
 
     """微信工具类，可用户与微信 API 之间的交互"""
 
+    async_http = tornado.httpclient.AsyncHTTPClient()
+
     @gen.coroutine
     def get_wxuser(self, access_token, openid):
         """用 openid 拉取用户信息
