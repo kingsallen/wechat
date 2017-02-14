@@ -472,24 +472,29 @@ class EventPageService(PageService):
                         })
                     self.logger.debug("[__opt_help_wxuser] res 2: {0}".format(res))
 
-                # 更新 user_hr_account 的缓存, HR招聘管理平台使用,需同时更新 wxuser_id 和 wxuser
-                wxuser = yield self.user_wx_user_ds.get_wxuser({
-                    "id": wxuser_id,
-                })
+                if res:
+                    # 更新 user_hr_account 和 user_wx_user 的关系成功后,
+                    # 更新 user_hr_account 的缓存, HR招聘管理平台使用, 需同时更新 wxuser_id 和 wxuser
+                    wxuser = yield self.user_wx_user_ds.get_wxuser({
+                        "id": wxuser_id,
+                    })
 
-                self.logger.debug("[__opt_help_wxuser] wxuser: {0}".format(wxuser))
-                user_hr_account_cache.update_user_hr_account_session(
-                    scan_info.group(1),
-                    value = ObjectDict(
-                        wxuser_id = int(wxuser_id),
-                        wxuser = wxuser
-                    ))
+                    self.logger.debug("[__opt_help_wxuser] wxuser: {0}".format(wxuser))
+                    user_hr_account_cache.update_user_hr_account_session(
+                        scan_info.group(1),
+                        value = ObjectDict(
+                            wxuser_id = int(wxuser_id),
+                            wxuser = wxuser
+                        ))
 
-                self.logger.debug("[__opt_help_wxuser] get_user_hr_account_session: {0}".format(
-                    user_hr_account_cache.get_user_hr_account_session(scan_info.group(1))))
+                    self.logger.debug("[__opt_help_wxuser] get_user_hr_account_session: {0}".format(
+                        user_hr_account_cache.get_user_hr_account_session(scan_info.group(1))))
 
-                # HR招聘管理平台对于HR 帐号绑定微信长轮训机制，需要实时的将状态返回给 HR 平台
-                user_hr_account_cache.pub_wx_binding(scan_info.group(1))
+                    # HR招聘管理平台对于HR 帐号绑定微信长轮训机制，需要实时的将状态返回给 HR 平台
+                    user_hr_account_cache.pub_wx_binding(scan_info.group(1))
+                else:
+                    user_hr_account_cache.pub_wx_binding(scan_info.group(1), msg="-1")
+
             except Exception as e:
                 self.logger.error("[wechat][opt_event_subscribe]binding user_hr_account "
                                   "failed: {}".format(traceback.format_exc()))
