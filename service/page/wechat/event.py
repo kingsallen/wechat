@@ -374,10 +374,10 @@ class EventPageService(PageService):
                     user_hr_account_cache = UserHrAccountCache()
                     user_hr_account_cache.update_user_hr_account_session(
                         user_hr_account.id,
-                        value={
-                            "wxuser_id": 0,
-                            "wxuser": ObjectDict()
-                        })
+                        value = ObjectDict(
+                            wxuser_id = 0,
+                            wxuser = ObjectDict()
+                        ))
                     self.logger.debug("[opt_event_unsubscribe] get_user_hr_account_session: {0}".format(
                         user_hr_account_cache.get_user_hr_account_session(user_hr_account.id)))
 
@@ -464,7 +464,7 @@ class EventPageService(PageService):
                     res = yield self.user_hr_account_ds.update_hr_account(
                         conds={
                             "id": int(scan_info.group(1)),
-                            "wxuser_id": ["NULL", "is"]
+                            "wxuser_id": [None, "is"]
                         }, fields={
                             "wxuser_id": wxuser_id
                         })
@@ -478,10 +478,10 @@ class EventPageService(PageService):
                 self.logger.debug("[__opt_help_wxuser] wxuser: {0}".format(wxuser))
                 user_hr_account_cache.update_user_hr_account_session(
                     scan_info.group(1),
-                    value={
-                        "wxuser_id": int(wxuser_id),
-                        "wxuser": wxuser
-                    })
+                    value = ObjectDict(
+                        wxuser_id = int(wxuser_id),
+                        wxuser = wxuser
+                    ))
 
                 self.logger.debug("[__opt_help_wxuser] get_user_hr_account_session: {0}".format(
                     user_hr_account_cache.get_user_hr_account_session(scan_info.group(1))))
