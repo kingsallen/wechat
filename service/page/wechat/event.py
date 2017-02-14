@@ -342,20 +342,25 @@ class EventPageService(PageService):
         :return:
         """
 
+        self.logger.debug("[opt_event_unsubscribe] current_user: {0}".format(current_user))
+
         if current_user.wxuser:
-            yield self.user_wx_user_ds.update_wxuser(
+            res = yield self.user_wx_user_ds.update_wxuser(
                 conds={"id": current_user.wxuser.id},
                 fields={
                     "is_subscribe": const.WX_USER_UNSUBSCRIBED,
                     "unsubscibe_time": current_user.wxuser.subscribe_time or curr_now(),
                     "source": const.WX_USER_SOURCE_UNSUBSCRIBE
                 })
+            self.logger.debug("[opt_event_unsubscribe] res: {0}".format(res))
             # 取消关注仟寻招聘助手时，将user_hr_account.wxuser_id与user_wx_user.id 解绑
             if current_user.wechat.id == self.settings.help_wechat_id:
                 user_hr_account = yield self.user_hr_account_ds.get_hr_account(conds={
                     "wxuser_id": current_user.wxuser.id
                 })
-                if current_user:
+
+                self.logger.debug("[opt_event_unsubscribe] user_hr_account: {0}".format(user_hr_account))
+                if user_hr_account:
                     yield self.user_hr_account_ds.update_hr_account(
                         conds={
                             "wxuser_id": current_user.wxuser.id
@@ -369,6 +374,9 @@ class EventPageService(PageService):
                             "wxuser_id": 0,
                             "wxuser": ObjectDict()
                         })
+                    self.logger.debug("[opt_event_unsubscribe] get_user_hr_account_session: {0}".format(
+                        user_hr_account_cache.get_user_hr_account_session(user_hr_account.id)))
+
 
         raise gen.Return()
 
@@ -381,10 +389,12 @@ class EventPageService(PageService):
         :return:
         """
 
+        self.logger.debug("[opt_event_scan] current_user: {0} msg:{1}".format(current_user, msg))
         if current_user.wechat.id == self.settings.help_wechat_id and msg.EventKey:
             scan_info = re.match(r"([0-9]*)_([0-9]*)_([0-9]*)", msg.EventKey)
+            self.logger.debug("[opt_event_scan] scan_info: {0}".format(scan_info))
             # 更新仟寻招聘助手公众号下的用户openid
-            yield self.user_wx_user_ds.update_wxuser(
+            res = yield self.user_wx_user_ds.update_wxuser(
                 conds={
                     "id": scan_info.group(2),
                     "wechat_id": current_user.wechat.id,
@@ -393,6 +403,8 @@ class EventPageService(PageService):
                     "openid": msg.FromUserName,
                     "source": const.WX_USER_SOURCE_UPDATE_SHORT
                 })
+
+            self.logger.debug("[opt_event_scan] res: {0}".format(res))
 
             # 已绑定过的微信号，不能再绑定第二个hr_account账号，否则微信扫码登录会出错
             user_hr_account = yield self.user_hr_account_ds.get_hr_account(conds={
