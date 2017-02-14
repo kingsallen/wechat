@@ -162,7 +162,7 @@ class EventPageService(PageService):
         })
 
         if rule:
-            res = yield getattr(self, "wx_rep_{}".format(rule.module))(msg, rule, wechat, nonce)
+            res = yield getattr(self, "rep_{}".format(rule.module))(msg, rule.id, nonce, wechat)
             raise gen.Return(res)
         else:
             raise gen.Return("")
