@@ -398,17 +398,18 @@ class EventPageService(PageService):
             scan_info = re.match(r"([0-9]*)_([0-9]*)_([0-9]*)", msg.EventKey)
             self.logger.debug("[opt_event_scan] scan_info: {0}".format(scan_info))
             # 更新仟寻招聘助手公众号下的用户openid
-            res = yield self.user_wx_user_ds.update_wxuser(
-                conds={
-                    "id": scan_info.group(2),
-                    "wechat_id": current_user.wechat.id,
-                },
-                fields={
-                    "openid": msg.FromUserName, # 重置 openid，因为 openid 可能为 HR 雇主平台的网页 openid
-                    "source": const.WX_USER_SOURCE_UPDATE_SHORT
-                })
-
-            self.logger.debug("[opt_event_scan] res: {0}".format(res))
+            # 暂时没找到作用，先注释 by 煜昕 02.14
+            # res = yield self.user_wx_user_ds.update_wxuser(
+            #     conds={
+            #         "id": scan_info.group(2),
+            #         "wechat_id": current_user.wechat.id,
+            #     },
+            #     fields={
+            #         "openid": msg.FromUserName, # 重置 openid，因为 openid 可能为 HR 雇主平台的网页 openid
+            #         "source": const.WX_USER_SOURCE_UPDATE_SHORT
+            #     })
+            #
+            # self.logger.debug("[opt_event_scan] res: {0}".format(res))
 
             # 已绑定过的微信号，不能再绑定第二个hr_account账号，否则微信扫码登录会出错
             user_hr_account = yield self.user_hr_account_ds.get_hr_account(conds={
@@ -419,6 +420,7 @@ class EventPageService(PageService):
             if user_hr_account:
                 user_hr_account_cache = UserHrAccountCache()
                 user_hr_account_cache.pub_wx_binding(user_hr_account.id, msg="-1")
+                raise gen.Return()
 
             yield self.__opt_help_wxuser(current_user.wxuser.id, current_user.wechat, msg)
 

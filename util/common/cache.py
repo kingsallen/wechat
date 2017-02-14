@@ -59,24 +59,15 @@ class BaseRedis(object):
             return default
 
     def set(self, key, value, ttl=None, prefix=True):
-        print (123214)
-        print (key)
         key = self.key_name(key, prefix)
-        print (key)
         value = json_dumps(value)
-        print (value)
         self._redis.set(key, value, ex=ttl)
 
     def update(self, key, value, ttl=None, prefix=False):
         if value is None:
             return
         key = self.key_name(key, prefix)
-        print (key)
         redis_value = self._get(key)
-        print (key)
-        print (prefix)
-        print (777)
-        print (redis_value)
         if redis_value:
             redis_value.update(value)
             self.set(key, redis_value, ttl, prefix=prefix)
@@ -117,5 +108,4 @@ if __name__ == "__main__":
     }
 
     res = redis.update(key, value2, prefix=False)
-    print ("1111\n")
     print (redis.get(key, prefix=False))
