@@ -7,10 +7,10 @@
 
 # Copyright 2016 MoSeeker
 
-from util.common.cache import BaseRedis
+from app import redis
 
 
-class UserHrAccountCache(BaseRedis):
+class UserHrAccountCache(object):
     """
     Develop Status: To be tested.
     """
@@ -20,11 +20,12 @@ class UserHrAccountCache(BaseRedis):
         self.user_hr_account = 'user_hr_account_{}'
         # hr平台绑定微信后的 pub/sub key
         self.wx_binding = 'wx_binding_{}'
+        self.redis = redis
 
     def get_user_hr_account_session(self, hr_id):
         """获得 user_hr_acount 的 session 信息"""
         key = self.user_hr_account(hr_id)
-        user_hr_account = self.get(key, prefix=False)
+        user_hr_account = self.redis.get(key, prefix=False)
         return user_hr_account
 
     def update_user_hr_account_session(self, hr_id, value):
@@ -39,13 +40,13 @@ class UserHrAccountCache(BaseRedis):
             return False
 
         key = self.user_hr_account(hr_id)
-        self.update(key, value, ttl=2592000, prefix=False)
+        self.redis.update(key, value, ttl=2592000, prefix=False)
         return True
 
     def del_user_hr_account_session(self, hr_id):
         """删除 user_hr_acount 的 session 信息"""
         key = self.user_hr_account(hr_id)
-        self.delete(key, prefix=False)
+        self.redis.delete(key, prefix=False)
         return True
 
     def pub_wx_binding(self, hr_id, msg='0'):
@@ -56,5 +57,5 @@ class UserHrAccountCache(BaseRedis):
         :return:
         """
         key = self.wx_binding(hr_id)
-        self.pub(key, msg, prefix=False)
+        self.redis.pub(key, msg, prefix=False)
         return True
