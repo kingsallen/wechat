@@ -75,6 +75,7 @@ class WechatOauthHandler(MetaBaseHandler):
         self.logger.debug("oauth msg: %s" % self.msg)
         self.logger.debug("oauth params: %s" % self.params)
         self.logger.debug("oauth current_user: %s" % self.current_user)
+        self.logger.debug("++++++DEBUG START++++++++++++++++++++++++++++++++++++++\n")
 
         try:
             msg_type = self.msg['MsgType']

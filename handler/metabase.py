@@ -299,6 +299,7 @@ class MetaBaseHandler(AtomHandler):
 
         self.log_info = {"res_type": "xml"}
         self.logger.debug("Wechat MSG: %s" % data)
+        self.logger.debug("++++++DEBUG END++++++++++++++++++++++++++++++++++++++\n")
         self.write(data)
 
     def send_json_success(self, data=None, message=msg_const.RESPONSE_SUCCESS, http_code=200):
