@@ -22,7 +22,7 @@ class HrWxHrChatDataService(DataService):
         fields = fields or []
 
         if conds is None or not (isinstance(conds, (dict, str))):
-            self.logger.warn("Warning:[get_chat][invalid parameters], Detail:[conds: {0}, "
+            self.logger.warning("Warning:[get_chat][invalid parameters], Detail:[conds: {0}, "
                         "type: {1}]".format(conds, type(conds)))
             raise gen.Return(ObjectDict())
 
@@ -41,7 +41,7 @@ class HrWxHrChatDataService(DataService):
         params = params or []
 
         if conds is None or not (isinstance(conds, (dict, str))):
-            self.logger.warn("Warning:[get_chats][invalid parameters], Detail:[conds: {0}, "
+            self.logger.warning("Warning:[get_chats][invalid parameters], Detail:[conds: {0}, "
                         "type: {1}]".format(conds, type(conds)))
             raise gen.Return(list())
 

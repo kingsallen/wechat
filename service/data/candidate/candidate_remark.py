@@ -16,7 +16,7 @@ class CandidateRemarkDataService(DataService):
         index = index or ''
 
         if not self._valid_conds(conds):
-            self.logger.warn(
+            self.logger.warning(
                 "Warning:[get_candidate_remark][invalid parameters], Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
             raise gen.Return(ObjectDict())
 
@@ -32,7 +32,7 @@ class CandidateRemarkDataService(DataService):
     @gen.coroutine
     def update_candidate_remark(self, conds=None, fields=None):
         if not conds or not fields:
-            self.logger.warn(
+            self.logger.warning(
                 "Warning:[update_candidate_remark][invalid parameters], Detail:[conds: {0}, fields: {1}]".format(conds, fields))
             raise gen.Return(False)
 

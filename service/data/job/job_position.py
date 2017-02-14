@@ -15,7 +15,7 @@ class JobPositionDataService(DataService):
     def get_position(self, conds, fields=[]):
 
         if conds is None or not (isinstance(conds, (dict, str))):
-            self.logger.warn("Warning:[get_position][invalid parameters], Detail:[conds: {0}, "
+            self.logger.warning("Warning:[get_position][invalid parameters], Detail:[conds: {0}, "
                         "type: {1}]".format(conds, type(conds)))
             raise gen.Return(ObjectDict())
 
@@ -30,7 +30,7 @@ class JobPositionDataService(DataService):
     def get_positions_list(self, conds, fields=None, options=[], appends=[], index='', params=[]):
 
         if conds is None or not (isinstance(conds, (dict, str))):
-            self.logger.warn("Warning:[get_positions_list][invalid parameters], Detail:[conds: {0}, "
+            self.logger.warning("Warning:[get_positions_list][invalid parameters], Detail:[conds: {0}, "
                         "type: {1}]".format(conds, type(conds)))
             raise gen.Return(list())
 
@@ -43,7 +43,7 @@ class JobPositionDataService(DataService):
     @gen.coroutine
     def update_position(self, conds=None, fields=None):
         if not conds or not fields:
-            self.logger.warn(
+            self.logger.warning(
                 "Warning:[update_position][invalid parameters], Detail:[conds: {0}, fields: {1}]".format(
                     conds, fields))
             raise gen.Return(None)
@@ -71,6 +71,6 @@ class JobPositionDataService(DataService):
             if ret.status == 0:
                 response = ret.data
         except Exception as error:
-            self.logger.warn(error)
+            self.logger.warning(error)
 
         raise gen.Return(response)

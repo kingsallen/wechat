@@ -20,7 +20,7 @@ class HrResourceDataService(DataService):
     def get_resource(self, conds, fields=[]):
 
         if conds is None or not (isinstance(conds, (dict, str))):
-            self.logger.warn("Warning:[get_resource][invalid parameters], \
+            self.logger.warning("Warning:[get_resource][invalid parameters], \
                     Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
             raise gen.Return(ObjectDict())
 
@@ -35,7 +35,7 @@ class HrResourceDataService(DataService):
     def get_resource_list(self, conds, fields=[]):
 
         if conds is None or not (isinstance(conds, (dict, str))):
-            self.logger.warn("Warning:[get_resource_list][invalid parameters], \
+            self.logger.warning("Warning:[get_resource_list][invalid parameters], \
                     Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
             raise gen.Return(list())
 

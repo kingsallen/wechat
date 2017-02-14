@@ -18,7 +18,7 @@ class UserUserDataService(DataService):
     def get_user(self, conds, fields=None):
 
         if not self._valid_conds(conds):
-            self.logger.warn(
+            self.logger.warning(
                 "Warning:[get_user][invalid parameters], Detail:[conds: {0}, "
                 "type: {1}]".format(
                     conds, type(conds)))
@@ -44,7 +44,7 @@ class UserUserDataService(DataService):
                 conds=conds, fields=fields
             )
         except Exception as error:
-            self.logger.warn(error)
+            self.logger.warning(error)
             raise gen.Return(False)
 
         raise gen.Return(response)

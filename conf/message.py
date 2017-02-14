@@ -30,3 +30,9 @@ SHARE_DES_DEFAULT = "点击即可快速申请！"
 RED_PACKET_TYPE_VALUE_ERROR = "红包配置类型错误!"
 RED_PACKET_CONFIG_TARGET_VALUE_ERROR = "红包配置对象错误!"
 RED_PACKET_WISHING = "红包一个，聊表心意，祝君好运"
+
+WECHAT_SCAN_HAD_BINDED = "当前扫描微信号已经绑定其他帐号了, 请更换微信号重新扫描"
+WECHAT_SCAN_FAILED = "绑定失败, 请尝试先解绑微信号"
+WECHAT_SCAN_CHANGE_WECHAT = "当前扫描微信号不是已绑定微信号, 请使用正确的微信号进行扫描"
+
+

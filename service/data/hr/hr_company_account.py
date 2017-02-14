@@ -16,7 +16,7 @@ class HrCompanyAccountDataService(DataService):
         fields = fields or []
 
         if conds is None or not (isinstance(conds, (dict, str))):
-            self.logger.warn("Warning:[get_company_account][invalid parameters], Detail:[conds: {0}, "
+            self.logger.warning("Warning:[get_company_account][invalid parameters], Detail:[conds: {0}, "
                         "type: {1}]".format(conds, type(conds)))
             raise gen.Return(ObjectDict())
 
@@ -35,7 +35,7 @@ class HrCompanyAccountDataService(DataService):
         params = params or []
 
         if conds is None or not (isinstance(conds, (dict, str))):
-            self.logger.warn("Warning:[get_company_accounts_list][invalid parameters], Detail:[conds: {0}, "
+            self.logger.warning("Warning:[get_company_accounts_list][invalid parameters], Detail:[conds: {0}, "
                         "type: {1}]".format(conds, type(conds)))
             raise gen.Return(list())
 

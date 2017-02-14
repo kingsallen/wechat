@@ -12,7 +12,7 @@ class UserFavPositionDataService(DataService):
     def get_user_fav_position(self, conds, fields=None):
 
         if not self._valid_conds(conds):
-            self.logger.warn("Warning:[get_user_fav_position][invalid parameters], Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
+            self.logger.warning("Warning:[get_user_fav_position][invalid parameters], Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
             raise gen.Return(ObjectDict())
 
         if not fields:
@@ -30,7 +30,7 @@ class UserFavPositionDataService(DataService):
         params = params or []
 
         if not self._valid_conds(conds):
-            self.logger.warn("Warning:[get_hr_hb_position_binding_list][invalid parameters], Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
+            self.logger.warning("Warning:[get_hr_hb_position_binding_list][invalid parameters], Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
             raise gen.Return(list())
 
         if not fields:
@@ -53,7 +53,7 @@ class UserFavPositionDataService(DataService):
     @gen.coroutine
     def update_user_fav_position(self, conds=None, fields=None):
         if not conds or not fields:
-            self.logger.warn("Warning:[update_user_fav_position][invalid parameters], Detail:[conds: {0}, fields: {1}]".format(conds, fields))
+            self.logger.warning("Warning:[update_user_fav_position][invalid parameters], Detail:[conds: {0}, fields: {1}]".format(conds, fields))
             raise gen.Return(False)
 
         ret = yield self.user_fav_position_dao.update_by_conds(

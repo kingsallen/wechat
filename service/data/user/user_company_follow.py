@@ -43,7 +43,7 @@ class UserCompanyFollowDataService(DataService):
             response = self.user_company_follow_dao.update_by_conds(
                             conds, fields)
         except Exception as error:
-            self.logger.warn(error)
+            self.logger.warning(error)
             raise gen.Return(False)
 
         raise gen.Return(response)
@@ -53,7 +53,7 @@ class UserCompanyFollowDataService(DataService):
         try:
             response = self.user_company_follow_dao.insert_record(fields)
         except Exception as error:
-            self.logger.warn(error)
+            self.logger.warning(error)
             raise gen.Return(None)
 
         raise gen.Return(response)

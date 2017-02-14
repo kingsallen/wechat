@@ -130,9 +130,6 @@ class MessageLogger(Logger):
         super(MessageLogger, self).warning(message)
         self.impl.send_message("warn", message)
 
-    def warn(self, message):
-        self.warning(message)
-
     def error(self, message):
         super(MessageLogger, self).error(message)
         self.impl.send_message("error", message)

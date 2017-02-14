@@ -13,7 +13,7 @@ class JobApplicationDataService(DataService):
     def get_job_application(self, conds, fields=None):
 
         if not self._valid_conds(conds):
-            self.logger.warn("Warning:[get_job_application][invalid parameters], Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
+            self.logger.warning("Warning:[get_job_application][invalid parameters], Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
             raise gen.Return(ObjectDict())
 
         if not fields:

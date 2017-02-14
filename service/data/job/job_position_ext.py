@@ -21,7 +21,7 @@ class JobPositionExtDataService(DataService):
         fields = fields or []
 
         if conds is None or not (isinstance(conds, (dict, str))):
-            self.logger.warn("Warning:[get_position_ext][invalid parameters], Detail:[conds: {0}, "
+            self.logger.warning("Warning:[get_position_ext][invalid parameters], Detail:[conds: {0}, "
                         "type: {1}]".format(conds, type(conds)))
             raise gen.Return(ObjectDict())
 

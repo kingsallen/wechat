@@ -15,7 +15,7 @@ class JobCustomDataService(DataService):
     def get_custom(self, conds, fields=[]):
 
         if conds is None or not (isinstance(conds, (dict, str))):
-            self.logger.warn("Warning:[get_custom][invalid parameters], Detail:[conds: {0}, "
+            self.logger.warning("Warning:[get_custom][invalid parameters], Detail:[conds: {0}, "
                         "type: {1}]".format(conds, type(conds)))
             raise gen.Return(ObjectDict())
 
@@ -30,7 +30,7 @@ class JobCustomDataService(DataService):
     def get_customs_list(self, conds, fields, options=[], appends=[], index='', params=[]):
 
         if conds is None or not (isinstance(conds, (dict, str))):
-            self.logger.warn("Warning:[get_customs_list][invalid parameters], Detail:[conds: {0}, "
+            self.logger.warning("Warning:[get_customs_list][invalid parameters], Detail:[conds: {0}, "
                         "type: {1}]".format(conds, type(conds)))
             raise gen.Return(list())
 

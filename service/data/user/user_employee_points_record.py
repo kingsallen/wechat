@@ -19,7 +19,7 @@ class UserEmployeePointsRecordDataService(DataService):
     def get_user_employee_points_record(self, conds, fields=None):
 
         if not self._valid_conds(conds):
-            self.logger.warn("Warning:[get_user_employee_points_record][invalid parameters], Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
+            self.logger.warning("Warning:[get_user_employee_points_record][invalid parameters], Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
             raise gen.Return(ObjectDict())
 
         if not fields:
@@ -34,7 +34,7 @@ class UserEmployeePointsRecordDataService(DataService):
         appends = appends or []
 
         if conds is None or not (isinstance(conds, (dict, str))):
-            self.logger.warn("Warning:[get_user_employee_points_record_cnt][invalid parameters], Detail:[conds: {0}, "
+            self.logger.warning("Warning:[get_user_employee_points_record_cnt][invalid parameters], Detail:[conds: {0}, "
                         "type: {1}]".format(conds, type(conds)))
             raise gen.Return(list())
 
@@ -50,7 +50,7 @@ class UserEmployeePointsRecordDataService(DataService):
         appends = appends or []
 
         if conds is None or not (isinstance(conds, (dict, str))):
-            self.logger.warn("Warning:[get_user_employee_points_record_sum][invalid parameters], Detail:[conds: {0}, "
+            self.logger.warning("Warning:[get_user_employee_points_record_sum][invalid parameters], Detail:[conds: {0}, "
                         "type: {1}]".format(conds, type(conds)))
             raise gen.Return(list())
 

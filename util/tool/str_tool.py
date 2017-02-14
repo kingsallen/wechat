@@ -128,6 +128,17 @@ def email_validate(email):
     else:
         return False
 
+def mobile_validate(mobile):
+    """
+    手机号验证
+    :param mobile:
+    :return:
+    """
+    if isinstance(mobile, int):
+        mobile = str(mobile)
+    p = re.compile(r'(?:1)\d{10}$')
+    return p.match(mobile) is not None
+
 def is_chinese(uchar):
     """判断一个unicode是否是汉字"""
     if '\u4e00' <= uchar <= '\u9fff':
@@ -159,15 +170,17 @@ def is_other(uchar):
 
 if __name__ == '__main__':
 
-    print (is_chinese("中国人"))
-    print (is_chinese("中国人 chinese"))
-    print (is_chinese("chinese"))
-    print (is_number("123abs"))
-    print (is_alphabet("chine china"))
-    print (is_alphabet("中国人"))
-    print (is_chinese(""))
-    print (is_alphabet("6789dgagh"))
-    print (to_str("jiu "))
-    print (to_str(" jid"))
-    print (to_str("j dfd"))
+    # print (is_chinese("中国人"))
+    # print (is_chinese("中国人 chinese"))
+    # print (is_chinese("chinese"))
+    # print (is_number("123abs"))
+    # print (is_alphabet("chine china"))
+    # print (is_alphabet("中国人"))
+    # print (is_chinese(""))
+    # print (is_alphabet("6789dgagh"))
+    # print (to_str("jiu "))
+    # print (to_str(" jid"))
+    # print (to_str("j dfd"))
+
+    print (mobile_validate(13656789068))
 

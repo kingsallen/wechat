@@ -14,7 +14,7 @@ class JobOccupationDataService(DataService):
     def get_occupation(self, conds, fields=[]):
 
         if conds is None or not (isinstance(conds, (dict, str))):
-            self.logger.warn("Warning:[get_occupation][invalid parameters], Detail:[conds: {0}, "
+            self.logger.warning("Warning:[get_occupation][invalid parameters], Detail:[conds: {0}, "
                         "type: {1}]".format(conds, type(conds)))
             raise gen.Return(ObjectDict())
 
@@ -29,7 +29,7 @@ class JobOccupationDataService(DataService):
     def get_occupations_list(self, conds, fields, options=[], appends=[], index='', params=[]):
 
         if conds is None or not (isinstance(conds, (dict, str))):
-            self.logger.warn("Warning:[get_occupations_list][invalid parameters], Detail:[conds: {0}, "
+            self.logger.warning("Warning:[get_occupations_list][invalid parameters], Detail:[conds: {0}, "
                         "type: {1}]".format(conds, type(conds)))
             raise gen.Return(list())
 

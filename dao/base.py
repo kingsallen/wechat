@@ -81,7 +81,7 @@ class BaseDao(DB):
 
         conds, params = self.getConds(conds, conds_params)
         if not conds:
-            self.logger.warn(
+            self.logger.warning(
                 "Warn:[get_list_by_conds][conds warn], conds:{0}".format(
                     conds))
             raise gen.Return(list())
@@ -115,7 +115,7 @@ class BaseDao(DB):
 
         conds, params = self.getConds(conds)
         if not conds:
-            self.logger.warn(
+            self.logger.warning(
                 "Warn:[get_record_by_conds][conds warn], conds:{0}".format(
                     conds))
             raise gen.Return(ObjectDict())
@@ -147,7 +147,7 @@ class BaseDao(DB):
 
         fields = self.checkFieldType(fields, self.fields_map)
         if not fields:
-            self.logger.warn(
+            self.logger.warning(
                 "Warn:[insert_record][fields warn], fields:{0}".format(
                     fields))
             raise gen.Return(None)
@@ -172,13 +172,13 @@ class BaseDao(DB):
 
         fields = self.checkFieldType(fields, self.fields_map)
         if not fields:
-            self.logger.warn(
+            self.logger.warning(
                 "Warn:[update_by_conds][fields warn], fields:{0}".format(
                     fields))
             raise gen.Return(False)
         conds, conds_params = self.getConds(conds)
         if not conds:
-            self.logger.warn(
+            self.logger.warning(
                 "Warn:[update_by_conds][conds warn], conds:{0}".format(
                     conds))
             raise gen.Return(False)
@@ -205,7 +205,7 @@ class BaseDao(DB):
 
         conds, params = self.getConds(conds)
         if not conds:
-            self.logger.warn(
+            self.logger.warning(
                 "Warn:[delete_by_conds][conds warn], conds:{0}".format(
                     conds))
             raise gen.Return(False)
@@ -235,7 +235,7 @@ class BaseDao(DB):
 
         conds, params = self.getConds(conds)
         if not conds:
-            self.logger.warn(
+            self.logger.warning(
                 "Warn:[get_cnt_by_conds][conds warn], conds:{0}".format(
                     conds))
             raise gen.Return(None)
@@ -261,7 +261,7 @@ class BaseDao(DB):
 
         conds, params = self.getConds(conds)
         if not conds:
-            self.logger.warn(
+            self.logger.warning(
                 "Warn:[get_cnt_by_conds][conds warn], conds:{0}".format(
                     conds))
             raise gen.Return(None)

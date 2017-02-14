@@ -24,7 +24,7 @@ class HrWxNewsReplyDataService(DataService):
         params = params or []
 
         if conds is None or not (isinstance(conds, (dict, str))):
-            self.logger.warn("Warning:[get_wx_news_replys][invalid parameters], Detail:[conds: {0}, "
+            self.logger.warning("Warning:[get_wx_news_replys][invalid parameters], Detail:[conds: {0}, "
                         "type: {1}]".format(conds, type(conds)))
             raise gen.Return(list())
 

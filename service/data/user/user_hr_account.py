@@ -14,7 +14,7 @@ class UserHrAccountDataService(DataService):
     def get_hr_account(self, conds, fields=None):
 
         if not self._valid_conds(conds):
-            self.logger.warn("Warning:[get_hr_account][invalid parameters], Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
+            self.logger.warning("Warning:[get_hr_account][invalid parameters], Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
             raise gen.Return(ObjectDict())
 
         if not fields:
@@ -30,7 +30,7 @@ class UserHrAccountDataService(DataService):
                 conds=conds, fields=fields
             )
         except Exception as error:
-            self.logger.warn(error)
+            self.logger.warning(error)
             raise gen.Return(False)
 
         raise gen.Return(response)

@@ -219,12 +219,12 @@ class UserPageService(PageService):
             fields=['unionid']
         )
         if user.unionid != unionid:
-            self.logger.warn("user_user.unionid incorrect, user:{}, real_unionid: {}".format(user, unionid))
+            self.logger.warning("user_user.unionid incorrect, user:{}, real_unionid: {}".format(user, unionid))
             yield self.user_user_ds.update_user(
                 conds={'id': user_id},
                 fields={'unionid': unionid}
             )
-            self.logger.warn("fixed")
+            self.logger.warning("fixed")
 
     @gen.coroutine
     def update_user_user_current_info(self, sysuser_id, data):
@@ -300,7 +300,7 @@ class UserPageService(PageService):
 
             # 如果已经收藏，则不作任何操作
             if position_fav.favorite == const.FAV_YES:
-                self.logger.warn(
+                self.logger.warning(
                     "User already favorited the position. "
                     "user_id: {}, pid: {}".format(current_user.sysuser.id,
                                                   pid))
@@ -328,7 +328,7 @@ class UserPageService(PageService):
 
         # 没有数据时, 不做任何操作
         if not position_fav:
-            self.logger.warn(
+            self.logger.warning(
                 "Cannot unfavorite the position because user hasn't "
                 "favorited it. "
                 "user_id: {}, pid: {}".format(current_user.sysuser.id, pid))
@@ -340,7 +340,7 @@ class UserPageService(PageService):
 
             # 如果已经取消收藏，则不作任何操作
             if position_fav.favorite == const.FAV_NO:
-                self.logger.warn(
+                self.logger.warning(
                     "User already unfavorited the position. user_id: {}, "
                     "pid: {}".format(
                         current_user.sysuser.id, pid))

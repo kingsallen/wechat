@@ -18,7 +18,7 @@ class CandidatePositionShareRecordDataService(DataService):
         index = index or ''
 
         if not self._valid_conds(conds):
-            self.logger.warn(
+            self.logger.warning(
                 "Warning:[get_share_record][invalid parameters], Detail:["
                 "conds: {0}, type: {1}]".format(
                     conds, type(conds)))

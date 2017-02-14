@@ -15,7 +15,7 @@ class HrTeamMemberDataService(DataService):
     def get_team_member(self, conds, fields=[]):
 
         if conds is None or not (isinstance(conds, (dict, str))):
-            self.logger.warn("Warning:[get_team_member][invalid parameters], \
+            self.logger.warning("Warning:[get_team_member][invalid parameters], \
                     Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
             raise gen.Return(ObjectDict())
 
@@ -30,7 +30,7 @@ class HrTeamMemberDataService(DataService):
     def get_team_member_list(self, conds, fields=[]):
 
         if conds is None or not (isinstance(conds, (dict, str))):
-            self.logger.warn("Warning:[get_team_member_list][invalid parameters], \
+            self.logger.warning("Warning:[get_team_member_list][invalid parameters], \
                     Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
             raise gen.Return(list())
 

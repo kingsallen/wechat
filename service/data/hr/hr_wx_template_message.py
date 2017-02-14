@@ -14,7 +14,7 @@ class HrWxTemplateMessageDataService(DataService):
                         index=None):
 
         if not self._valid_conds(conds):
-            self.logger.warn("Warning:[get_wx_template][invalid parameters], Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
+            self.logger.warning("Warning:[get_wx_template][invalid parameters], Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
             raise gen.Return(False)
 
         if not fields:

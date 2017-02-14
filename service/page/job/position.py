@@ -227,7 +227,7 @@ class PositionPageService(PageService):
         try:
             yield async_das_get("candidate/glancePosition", params)
         except Exception as error:
-            self.logger.warn(error)
+            self.logger.warning(error)
 
     @gen.coroutine
     def get_mate_data(self, jd_media):
