@@ -263,5 +263,4 @@ class WechatUtil(object):
             wx_const.WX_INFO_USER_API % (access_token, openid))
 
         ret = ObjectDict(ujson.loads(response.body))
-        logger.debug("[WechatUtil][get_wxuser]wxuser:{}".format(ret))
         raise gen.Return(ret)

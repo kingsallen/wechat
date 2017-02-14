@@ -225,7 +225,7 @@ class EventPageService(PageService):
             # 临时二维码处理逻辑, 5位type+27为自定义id
             yield self._do_weixin_qrcode(current_user.wechat, msg, is_newbie=is_newbie)
 
-        res = self.opt_follow(msg, current_user.wechat, nonce)
+        res = yield self.opt_follow(msg, current_user.wechat, nonce)
         raise gen.Return(res)
 
     @gen.coroutine
@@ -436,8 +436,8 @@ class EventPageService(PageService):
         self.logger.debug("[__opt_help_wxuser] wxuser_id: {0}, wechat:{1}, msg:{2}".format(wxuser_id, wechat, msg))
 
         # 关注仟寻招聘助手时，将 user_hr_account.wxuser_id 与 wxuser 绑定
-        user_hr_account_cache = UserHrAccountCache()
         if wechat.id == self.settings.help_wechat_id and msg.EventKey:
+            user_hr_account_cache = UserHrAccountCache()
             try:
                 scan_info = re.match(r"qrscene_([0-9]*)_([0-9]*)_([0-9]*)", msg.EventKey)
                 self.logger.debug(
