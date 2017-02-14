@@ -14,8 +14,8 @@ class UserHrAccountCache(BaseRedis):
     """
     Develop Status: To be tested.
     """
-    def __init__(self, redis):
-        super(UserHrAccountCache, self).__init__(redis)
+    def __init__(self):
+        super(UserHrAccountCache, self).__init__()
         # hr帐号的 session key
         self.user_hr_account = 'user_hr_account_{}'
         # hr平台绑定微信后的 pub/sub key
