@@ -404,7 +404,7 @@ class EventPageService(PageService):
                     "wechat_id": current_user.wechat.id,
                 },
                 fields={
-                    "openid": msg.FromUserName,
+                    "openid": msg.FromUserName, # 重置 openid，因为 openid 可能为 HR 雇主平台的网页 openid
                     "source": const.WX_USER_SOURCE_UPDATE_SHORT
                 })
 
@@ -414,9 +414,11 @@ class EventPageService(PageService):
             user_hr_account = yield self.user_hr_account_ds.get_hr_account(conds={
                 "wxuser_id": current_user.wxuser.id
             })
+            self.logger.debug("[opt_event_scan] user_hr_account res: {0}".format(user_hr_account))
+
             if user_hr_account:
                 user_hr_account_cache = UserHrAccountCache()
-                user_hr_account_cache.pub_wx_binding(scan_info.group(1), msg="-1")
+                user_hr_account_cache.pub_wx_binding(user_hr_account.id, msg="-1")
 
             yield self.__opt_help_wxuser(current_user.wxuser.id, current_user.wechat, msg)
 
@@ -444,6 +446,8 @@ class EventPageService(PageService):
             user_hr_account_cache = UserHrAccountCache()
             try:
                 scan_info = re.match(r"qrscene_([0-9]*)_([0-9]*)_([0-9]*)", msg.EventKey)
+                if not scan_info:
+                    scan_info = re.match(r"([0-9]*)_([0-9]*)_([0-9]*)", msg.EventKey)
                 self.logger.debug(
                     "[__opt_help_wxuser] scan_info: {0}".format(scan_info))
                 # 扫码换绑
