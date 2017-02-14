@@ -265,6 +265,7 @@ class EventPageService(PageService):
                     "headimgurl":      wechat_userinfo.headimgurl,
                     "unionid":         current_user.wxuser.unionid or wechat_userinfo.unionid,
                     "subscribe_time" : current_user.wxuser.subscribe_time or curr_now(),
+                    "unsubscibe_time": None,
                     "source":          const.WX_USER_SOURCE_UPDATE_SHORT
                 })
             self.logger.debug("[_create_wxuser] update res: {}".format(res))
@@ -272,19 +273,20 @@ class EventPageService(PageService):
         if not current_user.wxuser:
             self.logger.debug("[_create_wxuser] create")
             wxuser_id = yield self.user_wx_user_ds.create_wxuser({
-                "is_subscribe": const.WX_USER_SUBSCRIBED,
-                "openid":         openid,
-                "nickname":       wechat_userinfo.nickname,
-                "sex":            wechat_userinfo.sex or 0,
-                "city":           wechat_userinfo.city,
-                "country":        wechat_userinfo.country,
-                "province":       wechat_userinfo.province,
-                "language":       wechat_userinfo.language,
-                "headimgurl":     wechat_userinfo.headimgurl,
-                "wechat_id":      current_user.wechat.id,
-                "unionid":        wechat_userinfo.unionid or "",
-                "subscribe_time": curr_now(),
-                "source":         const.WX_USER_SOURCE_SUBSCRIBE
+                "is_subscribe":    const.WX_USER_SUBSCRIBED,
+                "openid":          openid,
+                "nickname":        wechat_userinfo.nickname,
+                "sex":             wechat_userinfo.sex or 0,
+                "city":            wechat_userinfo.city,
+                "country":         wechat_userinfo.country,
+                "province":        wechat_userinfo.province,
+                "language":        wechat_userinfo.language,
+                "headimgurl":      wechat_userinfo.headimgurl,
+                "wechat_id":       current_user.wechat.id,
+                "unionid":         wechat_userinfo.unionid or "",
+                "subscribe_time":  curr_now(),
+                "unsubscibe_time": None,
+                "source":          const.WX_USER_SOURCE_SUBSCRIBE
             })
             self.logger.debug("[_create_wxuser] create res: {}".format(wxuser_id))
 
@@ -313,17 +315,18 @@ class EventPageService(PageService):
         res = yield self.user_wx_user_ds.update_wxuser(
             conds={"id": current_user.wxuser.id},
             fields={
-                "is_subscribe": const.WX_USER_SUBSCRIBED,
-                "nickname": wechat_userinfo.nickname,
-                "sex": wechat_userinfo.sex or 0,
-                "city": wechat_userinfo.city,
-                "country": wechat_userinfo.country,
-                "province": wechat_userinfo.province,
-                "language": wechat_userinfo.language,
-                "headimgurl": wechat_userinfo.headimgurl,
-                "unionid": current_user.wxuser.unionid or wechat_userinfo.unionid,
-                "subscribe_time": current_user.wxuser.subscribe_time or curr_now(),
-                "source": const.WX_USER_SOURCE_UPDATE_ALL
+                "is_subscribe":    const.WX_USER_SUBSCRIBED,
+                "nickname":        wechat_userinfo.nickname,
+                "sex":             wechat_userinfo.sex or 0,
+                "city":            wechat_userinfo.city,
+                "country":         wechat_userinfo.country,
+                "province":        wechat_userinfo.province,
+                "language":        wechat_userinfo.language,
+                "headimgurl":      wechat_userinfo.headimgurl,
+                "unionid":         current_user.wxuser.unionid or wechat_userinfo.unionid,
+                "subscribe_time":  current_user.wxuser.subscribe_time or curr_now(),
+                "unsubscibe_time": None,
+                "source":          const.WX_USER_SOURCE_UPDATE_ALL
             })
         self.logger.debug("[_update_wxuser] res: {}".format(res))
 
@@ -348,9 +351,10 @@ class EventPageService(PageService):
             res = yield self.user_wx_user_ds.update_wxuser(
                 conds={"id": current_user.wxuser.id},
                 fields={
-                    "is_subscribe": const.WX_USER_UNSUBSCRIBED,
+                    "is_subscribe":    const.WX_USER_UNSUBSCRIBED,
                     "unsubscibe_time": current_user.wxuser.subscribe_time or curr_now(),
-                    "source": const.WX_USER_SOURCE_UNSUBSCRIBE
+                    "subscribe_time":  None,
+                    "source":          const.WX_USER_SOURCE_UNSUBSCRIBE
                 })
             self.logger.debug("[opt_event_unsubscribe] res: {0}".format(res))
             # 取消关注仟寻招聘助手时，将user_hr_account.wxuser_id与user_wx_user.id 解绑
