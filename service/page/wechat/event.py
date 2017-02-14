@@ -217,7 +217,7 @@ class EventPageService(PageService):
 
         else:
             # 老微信用户
-            yield self._update_wxuser(openid, current_user, self.msg)
+            yield self._update_wxuser(openid, current_user, msg)
             self.logger.debug("[opt_event_subscribe] update")
 
         # 处理临时二维码，目前主要在 PC 上创建帐号、绑定账号时使用
