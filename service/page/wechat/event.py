@@ -461,7 +461,7 @@ class EventPageService(PageService):
                             "wxuser_id": wxuser_id
                         })
                     self.logger.debug("[__opt_help_wxuser] res 1: {0}".format(res))
-                # 初次绑定
+                # 普通扫码绑定
                 elif scan_info.group(1):
                     res = yield self.user_hr_account_ds.update_hr_account(
                         conds={
