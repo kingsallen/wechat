@@ -44,6 +44,7 @@ class UserHrAccountCache(object):
 
         logger.debug("[UserHrAccountCache] update_user_hr_account_session key:{0} "
                      "value:{1} type:{2}".format(key, value, type(value)))
+
         self.redis.update(key, value, ttl=2592000, prefix=False)
         return True
 

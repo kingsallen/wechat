@@ -43,7 +43,13 @@ class BaseRedis(object):
         return '{0}_{1}'.format(self._PREFIX, key)
 
     def _get(self, key, default=None):
+        print (222222222222222)
+        print (key)
+        print (self._redis.get(key))
         value = to_str(self._redis.get(key))
+        print (value)
+        print ("\n\n\n\n")
+
         if value is None:
             return default
         return json.loads(value)
@@ -69,6 +75,9 @@ class BaseRedis(object):
 
         key = self.key_name(key, prefix)
         redis_value = self._get(key)
+        print (key)
+        print (type(redis_value))
+        print (redis_value)
         if redis_value:
             redis_value.update(value)
             self.set(key, json_dumps(redis_value), ttl)
