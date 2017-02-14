@@ -24,7 +24,7 @@ class UserHrAccountCache(object):
 
     def get_user_hr_account_session(self, hr_id):
         """获得 user_hr_acount 的 session 信息"""
-        key = self.user_hr_account(hr_id)
+        key = self.user_hr_account.format(hr_id)
         user_hr_account = self.redis.get(key, prefix=False)
         return user_hr_account
 
@@ -39,13 +39,13 @@ class UserHrAccountCache(object):
         if not isinstance(value, dict) or not value:
             return False
 
-        key = self.user_hr_account(hr_id)
+        key = self.user_hr_account.format(hr_id)
         self.redis.update(key, value, ttl=2592000, prefix=False)
         return True
 
     def del_user_hr_account_session(self, hr_id):
         """删除 user_hr_acount 的 session 信息"""
-        key = self.user_hr_account(hr_id)
+        key = self.user_hr_account.format(hr_id)
         self.redis.delete(key, prefix=False)
         return True
 
@@ -56,6 +56,6 @@ class UserHrAccountCache(object):
         :param msg:
         :return:
         """
-        key = self.wx_binding(hr_id)
+        key = self.wx_binding.format(hr_id)
         self.redis.pub(key, msg, prefix=False)
         return True
