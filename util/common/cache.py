@@ -43,13 +43,7 @@ class BaseRedis(object):
         return '{0}_{1}'.format(self._PREFIX, key)
 
     def _get(self, key, default=None):
-        print (222222222222222)
-        print (key)
-        print (self._redis.get(key))
         value = to_str(self._redis.get(key))
-        print (value)
-        print ("\n\n\n\n")
-
         if value is None:
             return default
         return json.loads(value)
@@ -65,22 +59,27 @@ class BaseRedis(object):
             return default
 
     def set(self, key, value, ttl=None, prefix=True):
+        print (123214)
+        print (key)
         key = self.key_name(key, prefix)
+        print (key)
         value = json_dumps(value)
+        print (value)
         self._redis.set(key, value, ex=ttl)
 
-    def update(self, key, value, ttl=None, prefix=True):
+    def update(self, key, value, ttl=None, prefix=False):
         if value is None:
             return
-
         key = self.key_name(key, prefix)
+        print (key)
         redis_value = self._get(key)
         print (key)
-        print (type(redis_value))
+        print (prefix)
+        print (777)
         print (redis_value)
         if redis_value:
             redis_value.update(value)
-            self.set(key, json_dumps(redis_value), ttl)
+            self.set(key, redis_value, ttl, prefix=prefix)
 
     def delete(self, key, prefix=True):
         key = self.key_name(key, prefix)
@@ -97,3 +96,26 @@ class BaseRedis(object):
     def pub(self, key, message, prefix=True):
         channel = self.key_name(key, prefix)
         return self._redis.publish(channel, message)
+
+if __name__ == "__main__":
+
+    redis = BaseRedis()
+
+    key = "aaa"
+    value1 = {
+        "a": 1,
+        "b": {}
+    }
+
+    # res = redis.set(key, value1, ttl=3333, prefix=False)
+
+    value2 = {
+        "a": 2,
+        "b": {
+            "bbb": 7
+        }
+    }
+
+    res = redis.update(key, value2, prefix=False)
+    print ("1111\n")
+    print (redis.get(key, prefix=False))
