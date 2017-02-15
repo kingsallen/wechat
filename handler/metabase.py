@@ -363,7 +363,8 @@ class MetaBaseHandler(AtomHandler):
             req_uri=request.uri,
             req_params=req_params,
             customs=customs,
-            session_id=to_str(self.get_secure_cookie(const.COOKIE_SESSIONID))
+            session_id=to_str(self.get_secure_cookie(const.COOKIE_SESSIONID
+                                                     or self.get_secure_cookie(const.COOKIE_MVIEWERID)))
         )
 
         log_params.update(log_info_common)

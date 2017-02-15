@@ -3,6 +3,7 @@
 # Copyright 2016 MoSeeker
 
 import os
+import re
 from hashlib import sha1
 from tornado import gen
 
@@ -276,13 +277,18 @@ class BaseHandler(MetaBaseHandler):
         if need_oauth:
             if self.in_wechat and not self._unionid:
                 # unionid 不存在，则进行仟寻授权
+                self.logger.debug("start oauth!!!!")
                 self._oauth_service.wechat = self._qx_wechat
                 url = self._oauth_service.get_oauth_code_userinfo_url()
                 self.redirect(url)
                 return
             else:
+                self.logger.debug("beyond wechat start!!!")
                 yield self._build_session()
                 self.logger.debug("_build_session: %s" % self.current_user)
+        else:
+            self.logger.error("!!!!!!!need_oauth error!!!!!!!")
+            self.logger.error("!!!!!!!need_oauth error current_user: {}".format(self.current_user))
 
     @gen.coroutine
     def _build_session(self):
@@ -294,16 +300,21 @@ class BaseHandler(MetaBaseHandler):
         session.wechat = self._wechat
 
         # qx session 中，只需要存储 id，unioid 即可，且俩变量一旦生成不会改变，不会影响 session 一致性
-        # 该 session 只做首次仟寻登录查找各关联帐号所用
-        session.qxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
-            unionid=self._unionid,
-            wechat_id=self.settings['qx_wechat_id'],
-            fields=['id', 'unionid', 'sysuser_id']
-        )
+        # 该 session 只做首次仟寻登录查找各关联帐号所用(微信环境内)
+        if self._unionid:
+            # 只对微信 oauth 用户创建qx session
+            session.qxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
+                unionid=self._unionid,
+                wechat_id=self.settings['qx_wechat_id'],
+                fields=['id', 'unionid']
+            )
+            session_id = self._make_new_session_id(session.qxuser.sysuser_id)
+            self._save_qx_sessions(session_id, session.qxuser)
+            self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True)
 
-        session_id = self._make_new_session_id(session.qxuser.sysuser_id)
-        self._save_qx_sessions(session_id, session.qxuser)
-        self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True)
+        # 登录，或非登录用户（非微信环境），都需要创建 mviewer_id
+        mviewer_id = self._make_new_moseeker_viewer_id()
+        self.set_secure_cookie(const.COOKIE_MVIEWERID, mviewer_id, httponly=True)
 
         # 重置 wxuser，qxuser，构建完整的 session
         self._wxuser = ObjectDict()
@@ -330,35 +341,53 @@ class BaseHandler(MetaBaseHandler):
         raise gen.Return(False)
 
     @gen.coroutine
+    def build_session_by_user_id(self, user_id):
+        """从 user_id 构建 session"""
+
+        session = ObjectDict()
+        self.logger.debug("build_session_by_user_id")
+
+        # 非微信环境, 忽略 wxuser, qxuser
+        session.wxuser = ObjectDict()
+        session.qxuser = ObjectDict()
+
+        session_id = self._make_new_session_id(user_id)
+        self._save_ent_sessions(session_id, session)
+        self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True)
+
+    @gen.coroutine
     def _build_session_by_unionid(self, unionid):
         """从 unionid 构建 session"""
 
         session = ObjectDict()
+        session_id = to_str(self.get_secure_cookie(const.COOKIE_SESSIONID))
         self.logger.debug("_build_session_by_unionid")
 
-        if self._wxuser or not unionid:
-            session.wxuser = self._wxuser
+        if not unionid:
+            # 非微信环境, 忽略 wxuser, qxuser
+            session.wxuser = ObjectDict()
+            session.qxuser = ObjectDict()
         else:
-            session.wxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
-                unionid=unionid, wechat_id=self._wechat.id)
+            if self._wxuser:
+                session.wxuser = self._wxuser
+            else:
+                session.wxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
+                    unionid=unionid, wechat_id=self._wechat.id)
 
-        if self._qxuser or not unionid:
-            session.qxuser = self._qxuser
-        else:
-            session.qxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
-                unionid=unionid, wechat_id=self.settings['qx_wechat_id'])
+            if self._qxuser:
+                session.qxuser = self._qxuser
+            else:
+                session.qxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
+                    unionid=unionid, wechat_id=self.settings['qx_wechat_id'])
 
-        session_id = to_str(self.get_secure_cookie(const.COOKIE_SESSIONID))
-        # 当使用手机浏览器访问的时候可能没有 session_id, refresh ent session
-        # 那么就创建它
-        if not session_id:
-            session_id = self._make_new_session_id(session.qxuser.sysuser_id)
-        self._save_ent_sessions(session_id, session)
+            if session_id:
+                # session_id = self._make_new_session_id(session.qxuser.sysuser_id)
+                self._save_ent_sessions(session_id, session)
+
+        yield self._add_sysuser_to_session(session, session_id)
 
         session.wechat = self._wechat
         self._add_jsapi_to_wechat(session.wechat)
-
-        yield self._add_sysuser_to_session(session)
 
         if self.is_platform:
             yield self._add_company_info_to_session(session)
@@ -433,11 +462,12 @@ class BaseHandler(MetaBaseHandler):
         })
 
     @gen.coroutine
-    def _add_sysuser_to_session(self, session):
+    def _add_sysuser_to_session(self, session, session_id):
         """拼装 session 中的 sysuser"""
 
+        user_id = self._get_user_id_from_session_id(session_id)
         session.sysuser = yield self.user_ps.get_user_user({
-            "unionid": session.qxuser.unionid
+            "id": user_id
         })
 
     def _add_jsapi_to_wechat(self, wechat):
@@ -457,13 +487,34 @@ class BaseHandler(MetaBaseHandler):
         """
         while True:
             session_id = const.SESSION_ID.format(
-                sha1(to_bytes(user_id)).hexdigest(),
+                sha1(str(user_id)).hexdigest(),
                 sha1(os.urandom(24)).hexdigest())
             record = self.redis.exists(session_id + "_*")
             if record:
                 continue
             else:
                 return session_id
+
+    def _make_new_moseeker_viewer_id(self):
+        """创建新的mviewer_id
+        不论是登录，或非登录用户，都会有唯一的 mviewer_id，标识独立的用户。
+        主要用于日志统计中 UV 的统计
+        """
+
+        while True:
+            mviewer_id = const.SESSION_ID.format(
+                "",
+                sha1(os.urandom(24)).hexdigest())
+            return mviewer_id
+
+    def _get_user_id_from_session_id(self, session_id):
+        """从 session_id 中得到 user_id"""
+
+        if session_id:
+            session_id_list = re.match(r"([0-9]*)_([0-9a-z]*)_([0-9]*)", session_id)
+            return session_id_list.group(1) if session_id_list.group(1) else ""
+        else:
+            return ""
 
     def get_template_namespace(self):
         namespace = super().get_template_namespace()
