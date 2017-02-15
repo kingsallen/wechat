@@ -383,9 +383,9 @@ class BaseHandler(MetaBaseHandler):
                 session.qxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
                     unionid=unionid, wechat_id=self.settings['qx_wechat_id'])
 
-            if session_id:
-                # session_id = self._make_new_session_id(session.qxuser.sysuser_id)
-                self._save_ent_sessions(session_id, session)
+            if not session_id:
+                session_id = self._make_new_session_id(session.qxuser.sysuser_id)
+            self._save_ent_sessions(session_id, session)
 
         yield self._add_sysuser_to_session(session, session_id)
 
@@ -395,8 +395,9 @@ class BaseHandler(MetaBaseHandler):
         self.logger.debug("_build_session_by_unionid params: {}".format(self.params))
         if self.is_platform:
             yield self._add_company_info_to_session(session)
-            self.logger.debug("_build_session_by_unionid company: {}".format(session.company))
+            self.logger.debug("_build_session_by_unionid start company")
         if self.params.recom:
+            self.logger.debug("_build_session_by_unionid start recom")
             yield self._add_recom_to_session(session)
             self.logger.debug("_build_session_by_unionid recom: {}".format(session.recom))
 
