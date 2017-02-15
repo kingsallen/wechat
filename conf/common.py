@@ -100,7 +100,7 @@ SESSION_ID = "{0}:{1}"
 
 # ++++++++++业务常量+++++++++++
 # Cookie name
-COOKIE_SESSIONID = "5EM8A838"
+COOKIE_SESSIONID = "5EM8A938"
 COOKIE_MVIEWERID = "mviewer_id"
 COOKIE_CODE = "JKKSDF89"
 COOKIE_DEBUG_AUTH = "cda"
