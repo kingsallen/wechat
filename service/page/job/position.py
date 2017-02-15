@@ -111,6 +111,8 @@ class PositionPageService(PageService):
     @staticmethod
     def _make_recom(user_id):
         """用于微信分享和职位推荐时，传出的 recom 参数"""
+        if user_id is None:
+            return ""
         return encode_id(user_id)
 
     @gen.coroutine
