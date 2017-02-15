@@ -307,7 +307,7 @@ class BaseHandler(MetaBaseHandler):
             session.qxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
                 unionid=self._unionid,
                 wechat_id=self.settings['qx_wechat_id'],
-                fields=['id', 'unionid']
+                fields=['id', 'unionid', 'sysuser_id']
             )
             session_id = self._make_new_session_id(session.qxuser.sysuser_id)
             self._save_qx_sessions(session_id, session.qxuser)
@@ -518,7 +518,7 @@ class BaseHandler(MetaBaseHandler):
 
         if session_id:
             session_id_list = re.match(r"([0-9]*)_([0-9a-z]*)_([0-9]*)", session_id)
-            return session_id_list.group(1) if session_id_list.group(1) else ""
+            return session_id_list.group(1) if session_id_list else ""
         else:
             return ""
 
