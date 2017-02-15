@@ -273,16 +273,16 @@ class BaseHandler(MetaBaseHandler):
         self.logger.debug("_wxuser: %s" % self._wxuser)
         self.logger.debug("_qx_wechat: %s" % self._qx_wechat)
 
-        if need_oauth and self.in_wechat:
-            if not self._unionid:
+        if need_oauth:
+            if self.in_wechat and not self._unionid:
                 # unionid 不存在，则进行仟寻授权
                 self._oauth_service.wechat = self._qx_wechat
                 url = self._oauth_service.get_oauth_code_userinfo_url()
                 self.redirect(url)
                 return
-
-        yield self._build_session()
-        self.logger.debug("_build_session: %s" % self.current_user)
+            else:
+                yield self._build_session()
+                self.logger.debug("_build_session: %s" % self.current_user)
 
     @gen.coroutine
     def _build_session(self):
@@ -298,10 +298,10 @@ class BaseHandler(MetaBaseHandler):
         session.qxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
             unionid=self._unionid,
             wechat_id=self.settings['qx_wechat_id'],
-            fields=['id', 'unionid']
+            fields=['id', 'unionid', 'sysuser_id']
         )
 
-        session_id = self._make_new_session_id(session.qxuser.unionid)
+        session_id = self._make_new_session_id(session.qxuser.sysuser_id)
         self._save_qx_sessions(session_id, session.qxuser)
         self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True)
 
@@ -336,13 +336,13 @@ class BaseHandler(MetaBaseHandler):
         session = ObjectDict()
         self.logger.debug("_build_session_by_unionid")
 
-        if self._wxuser:
+        if self._wxuser or not unionid:
             session.wxuser = self._wxuser
         else:
             session.wxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
                 unionid=unionid, wechat_id=self._wechat.id)
 
-        if self._qxuser:
+        if self._qxuser or not unionid:
             session.qxuser = self._qxuser
         else:
             session.qxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
@@ -352,7 +352,7 @@ class BaseHandler(MetaBaseHandler):
         # 当使用手机浏览器访问的时候可能没有 session_id, refresh ent session
         # 那么就创建它
         if not session_id:
-            session_id = self._make_new_session_id(session.qxuser.unionid)
+            session_id = self._make_new_session_id(session.qxuser.sysuser_id)
         self._save_ent_sessions(session_id, session)
 
         session.wechat = self._wechat
@@ -378,7 +378,7 @@ class BaseHandler(MetaBaseHandler):
 
     def _save_ent_sessions(self, session_id, session):
         """
-        1. 保存企业号 session， 包含 wxuser, qxuser, sysuser
+        保存企业号 session， 包含 wxuser, qxuser, sysuser
         """
 
         key_ent = const.SESSION_USER.format(session_id, self._wechat.id)
@@ -446,7 +446,7 @@ class BaseHandler(MetaBaseHandler):
             jsapi_ticket=wechat.jsapi_ticket,
             url=self.request.full_url())
 
-    def _make_new_session_id(self, unionid):
+    def _make_new_session_id(self, user_id):
         """创建新的 session_id
 
         redis 中 session 的 key 的格式为 session_id_<wechat_id>
@@ -457,7 +457,7 @@ class BaseHandler(MetaBaseHandler):
         """
         while True:
             session_id = const.SESSION_ID.format(
-                sha1(to_bytes(unionid)).hexdigest(),
+                sha1(to_bytes(user_id)).hexdigest(),
                 sha1(os.urandom(24)).hexdigest())
             record = self.redis.exists(session_id + "_*")
             if record:
