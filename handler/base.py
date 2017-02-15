@@ -363,6 +363,8 @@ class BaseHandler(MetaBaseHandler):
         session = ObjectDict()
         session_id = to_str(self.get_secure_cookie(const.COOKIE_SESSIONID))
         self.logger.debug("_build_session_by_unionid")
+        self.logger.debug("_build_session_by_unionid unionid: {}".format(unionid))
+        self.logger.debug("_build_session_by_unionid session_id: {}".format(session_id))
 
         if not unionid:
             # 非微信环境, 忽略 wxuser, qxuser
@@ -390,10 +392,13 @@ class BaseHandler(MetaBaseHandler):
         session.wechat = self._wechat
         self._add_jsapi_to_wechat(session.wechat)
 
+        self.logger.debug("_build_session_by_unionid params: {}".format(self.params))
         if self.is_platform:
             yield self._add_company_info_to_session(session)
+            self.logger.debug("_build_session_by_unionid company: {}".format(session.company))
         if self.params.recom:
             yield self._add_recom_to_session(session)
+            self.logger.debug("_build_session_by_unionid recom: {}".format(session.recom))
 
         self.current_user = session
 
@@ -488,7 +493,7 @@ class BaseHandler(MetaBaseHandler):
         """
         while True:
             session_id = const.SESSION_ID.format(
-                sha1(str(user_id).encode("utf-8")).hexdigest(),
+                str(user_id),
                 sha1(os.urandom(24)).hexdigest())
             record = self.redis.exists(session_id + "_*")
             if record:
