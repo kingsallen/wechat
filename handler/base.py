@@ -80,6 +80,7 @@ class BaseHandler(MetaBaseHandler):
         code = self.params.get("code")
         state = self.params.get("state")
 
+        self.logger.debug("+++++++++++++++++START OAUTH+++++++++++++++++++++")
         self.logger.debug("[prepare]code:{}, state:{}, request_url:{} ".format(code, state, self.request.uri))
 
         if self.in_wechat:
@@ -487,7 +488,7 @@ class BaseHandler(MetaBaseHandler):
         """
         while True:
             session_id = const.SESSION_ID.format(
-                sha1(str(user_id)).hexdigest(),
+                sha1(str(user_id).encode("utf-8")).hexdigest(),
                 sha1(os.urandom(24)).hexdigest())
             record = self.redis.exists(session_id + "_*")
             if record:
@@ -503,7 +504,7 @@ class BaseHandler(MetaBaseHandler):
 
         while True:
             mviewer_id = const.SESSION_ID.format(
-                "",
+                "_",
                 sha1(os.urandom(24)).hexdigest())
             return mviewer_id
 

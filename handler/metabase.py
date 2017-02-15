@@ -212,6 +212,8 @@ class MetaBaseHandler(AtomHandler):
         self.logger.stats(
             ujson.dumps(self._get_info_header(info), ensure_ascii=0))
 
+        self.logger.debug("+++++++++++++++++END OAUTH+++++++++++++++++++++")
+
     def write_error(self, http_code, **kwargs):
         """错误页
         403（用户未被授权请求） Forbidden: Request failed because user does not have authorization to access a specific resource
