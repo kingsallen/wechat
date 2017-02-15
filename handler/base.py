@@ -295,7 +295,7 @@ class BaseHandler(MetaBaseHandler):
     def _build_session(self):
         """用户确认向仟寻授权后的处理，构建 session"""
 
-        self.logger.debug("start build_session")
+        self.logger.debug("_build_session start")
 
         session = ObjectDict()
         session.wechat = self._wechat
@@ -316,6 +316,7 @@ class BaseHandler(MetaBaseHandler):
         # 登录，或非登录用户（非微信环境），都需要创建 mviewer_id
         mviewer_id = self._make_new_moseeker_viewer_id()
         self.set_secure_cookie(const.COOKIE_MVIEWERID, mviewer_id, httponly=True)
+        self.logger.debug("build_session mviewer_id:{}".format(mviewer_id))
 
         # 重置 wxuser，qxuser，构建完整的 session
         self._wxuser = ObjectDict()
@@ -392,10 +393,12 @@ class BaseHandler(MetaBaseHandler):
         session.wechat = self._wechat
         self._add_jsapi_to_wechat(session.wechat)
 
+        self.logger.debug("_build_session_by_unionid session: {}".format(session))
         self.logger.debug("_build_session_by_unionid params: {}".format(self.params))
         if self.is_platform:
-            yield self._add_company_info_to_session(session)
             self.logger.debug("_build_session_by_unionid start company")
+            yield self._add_company_info_to_session(session)
+            self.logger.debug("_build_session_by_unionid company: {}".format(session.company))
         if self.params.recom:
             self.logger.debug("_build_session_by_unionid start recom")
             yield self._add_recom_to_session(session)
@@ -427,10 +430,9 @@ class BaseHandler(MetaBaseHandler):
         """
 
         session.company = yield self._get_current_company(session.wechat.company_id)
-        employee = yield self.user_ps.get_valid_employee_by_user_id(
-            user_id=session.sysuser.id, company_id=session.company.id)
-
-        if employee:
+        if session.sysuser.id:
+            employee = yield self.user_ps.get_valid_employee_by_user_id(
+                user_id=session.sysuser.id, company_id=session.company.id)
             session.employee = employee
 
     @gen.coroutine
@@ -517,10 +519,14 @@ class BaseHandler(MetaBaseHandler):
     def _get_user_id_from_session_id(self, session_id):
         """从 session_id 中得到 user_id"""
 
+        self.logger.debug("_get_user_id_from_session_id: {}".format(session_id))
+
         if session_id:
-            session_id_list = re.match(r"([0-9]*)_([0-9a-z]*)_([0-9]*)", session_id)
+            session_id_list = re.match(r"([0-9]*)_([0-9a-zA-Z]*)_([0-9]*)", session_id)
+            self.logger.debug("_get_user_id_from_session_id session_id_list: {}".format(session_id_list))
             return session_id_list.group(1) if session_id_list else ""
         else:
+
             return ""
 
     def get_template_namespace(self):
