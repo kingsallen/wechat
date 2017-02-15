@@ -26,7 +26,6 @@ shell commond::
 import tornado.httpserver
 import tornado.web
 import tornado.ioloop
-import tornado.options
 from tornado.options import options
 
 from setting import settings

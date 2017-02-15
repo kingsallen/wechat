@@ -10,6 +10,7 @@
 import requests
 import ujson
 import socket
+from setting import settings
 
 # Moseeker Slack team webhook settings url:
 # https://moseekermm.slack.com/services/B0TUGEK60#service_setup

@@ -220,32 +220,6 @@ class BaseHandler(MetaBaseHandler):
         raise gen.Return(wechat)
 
     @gen.coroutine
-    def _get_current_company(self, company_id):
-        """获得企业母公司信息"""
-
-        conds = {'id': company_id}
-        company = yield self.company_ps.get_company(conds=conds, need_conf=True)
-
-        # 配色处理，如果theme_id为5表示公司使用默认配置，不需要将原始配色信息传给前端
-        # 如果将theme_id为5的传给前端，会导致前端颜色无法正常显示默认颜色
-        if company.conf_theme_id != 5:
-            theme = yield self.wechat_ps.get_wechat_theme(
-                {'id': company.conf_theme_id, 'disable': 0})
-            if theme:
-                company.update({
-                    'theme': [
-                        theme.background_color,
-                        theme.title_color,
-                        theme.button_color,
-                        theme.other_color
-                    ]
-                })
-        else:
-            company.update({'theme': None})
-
-        raise gen.Return(company)
-
-    @gen.coroutine
     def _get_user_info(self, code):
         self._oauth_service.wechat = self._qx_wechat
         try:
@@ -270,11 +244,8 @@ class BaseHandler(MetaBaseHandler):
     @gen.coroutine
     def _fetch_session(self):
         """尝试获取 session 并创建 current_user，如果获取失败走 oauth 流程"""
-        need_oauth = False
         ok = False
-
         session_id = to_str(self.get_secure_cookie(const.COOKIE_SESSIONID))
-
         self.logger.debug("_fetch_session session_id: %s" % session_id)
 
         if session_id:
@@ -300,20 +271,18 @@ class BaseHandler(MetaBaseHandler):
         self.logger.debug("need_oauth: %s" % need_oauth)
         self.logger.debug("_unionid: %s" % self._unionid)
         self.logger.debug("_wxuser: %s" % self._wxuser)
-        self.logger.debug("_authable: %s" % self._authable())
         self.logger.debug("_qx_wechat: %s" % self._qx_wechat)
 
         if need_oauth and self.in_wechat:
-            if self._unionid:
-                # 只需 unionid 存在
-                # 即可进入 _build_session 方法
-                yield self._build_session()
-                self.logger.debug("_build_session: %s" % self.current_user)
-            else:
+            if not self._unionid:
+                # unionid 不存在，则进行仟寻授权
                 self._oauth_service.wechat = self._qx_wechat
                 url = self._oauth_service.get_oauth_code_userinfo_url()
                 self.redirect(url)
                 return
+
+        yield self._build_session()
+        self.logger.debug("_build_session: %s" % self.current_user)
 
     @gen.coroutine
     def _build_session(self):
@@ -340,17 +309,6 @@ class BaseHandler(MetaBaseHandler):
         self._wxuser = ObjectDict()
         self._qxuser = ObjectDict()
         yield self._build_session_by_unionid(self._unionid)
-        #
-        # yield self._add_sysuser_to_session(session)
-        #
-        # self._add_jsapi_to_wechat(session.wechat)
-        #
-        # if self.is_platform:
-        #     yield self._add_company_info_to_session(session, called_by="_build_session")
-        # if self.params.recom:
-        #     yield self._add_recom_to_session(session)
-        #
-        # self.current_user = session
 
     @gen.coroutine
     def _get_session_by_wechat_id(self, session_id, wechat_id):
@@ -403,7 +361,7 @@ class BaseHandler(MetaBaseHandler):
         yield self._add_sysuser_to_session(session)
 
         if self.is_platform:
-            yield self._add_company_info_to_session(session, called_by="_build_session_by_unionid")
+            yield self._add_company_info_to_session(session)
         if self.params.recom:
             yield self._add_recom_to_session(session)
 
@@ -411,13 +369,12 @@ class BaseHandler(MetaBaseHandler):
 
     def _save_qx_sessions(self, session_id, qxuser):
         """
-        1. 保存聚合号 session， 只包含 qxuser
+        保存聚合号 session， 只包含 qxuser
         """
 
         key_qx = const.SESSION_USER.format(session_id, self.settings['qx_wechat_id'])
         self.redis.set(key_qx, ObjectDict(qxuser=qxuser), 60 * 60 * 24 * 30)
         self.logger.debug("refresh qx session redis key: {} session: {}".format(key_qx, ObjectDict(qxuser=qxuser)))
-
 
     def _save_ent_sessions(self, session_id, session):
         """
@@ -429,26 +386,42 @@ class BaseHandler(MetaBaseHandler):
         self.logger.debug("refresh ent session redis key: {} session: {}".format(key_ent, session))
 
     @gen.coroutine
-    def _add_company_info_to_session(self, session, called_by=None):
+    def _add_company_info_to_session(self, session):
         """拼装 session 中的 company, employee
-
-        如果该企业号是订阅号，不添加 employee
         """
 
         session.company = yield self._get_current_company(session.wechat.company_id)
+        employee = yield self.user_ps.get_valid_employee_by_user_id(
+            user_id=session.sysuser.id, company_id=session.company.id)
 
-        if self._authable():
+        if employee:
+            session.employee = employee
 
-            if not session.sysuser.id:
-                self.logger.debug(
-                    "session.sysuser.id 不存在, 暂停获取 employee, called_by: {}, session: {}".format(called_by, session))
-                return
+    @gen.coroutine
+    def _get_current_company(self, company_id):
+        """获得企业母公司信息"""
 
-            employee = yield self.user_ps.get_valid_employee_by_user_id(
-                user_id=session.sysuser.id, company_id=session.company.id)
+        conds = {'id': company_id}
+        company = yield self.company_ps.get_company(conds=conds, need_conf=True)
 
-            if employee:
-                session.employee = employee
+        # 配色处理，如果theme_id为5表示公司使用默认配置，不需要将原始配色信息传给前端
+        # 如果将theme_id为5的传给前端，会导致前端颜色无法正常显示默认颜色
+        if company.conf_theme_id != 5:
+            theme = yield self.wechat_ps.get_wechat_theme(
+                {'id': company.conf_theme_id, 'disable': 0})
+            if theme:
+                company.update({
+                    'theme': [
+                        theme.background_color,
+                        theme.title_color,
+                        theme.button_color,
+                        theme.other_color
+                    ]
+                })
+        else:
+            company.update({'theme': None})
+
+        raise gen.Return(company)
 
     @gen.coroutine
     def _add_recom_to_session(self, session):

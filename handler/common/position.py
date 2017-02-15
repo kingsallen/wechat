@@ -507,7 +507,7 @@ class PositionHandler(BaseHandler):
                 self.logger.debug("[JD]给员工加积分： %s" % res)
             else:
                 self.logger.warning(
-                    "[JD]给员工加积分异常：员工不存在或员工 wxuser_id 不存在: %s" %
+                    "[JD]给员工加积分异常：员工不存在或员工 sysuser_id 不存在: %s" %
                     recom_employee)
 
     @gen.coroutine
