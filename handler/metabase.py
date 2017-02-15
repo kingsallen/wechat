@@ -212,6 +212,9 @@ class MetaBaseHandler(AtomHandler):
         self.logger.stats(
             ujson.dumps(self._get_info_header(info), ensure_ascii=0))
 
+        self.logger.debug("mviewer_id: {}".format(self.get_secure_cookie(const.COOKIE_MVIEWERID)))
+        self.logger.debug("mviewer_id: {}".format(self.get_secure_cookie(const.COOKIE_SESSIONID)))
+
         self.logger.debug("+++++++++++++++++END OAUTH+++++++++++++++++++++")
 
     def write_error(self, http_code, **kwargs):
