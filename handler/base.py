@@ -522,7 +522,7 @@ class BaseHandler(MetaBaseHandler):
         self.logger.debug("_get_user_id_from_session_id: {}".format(session_id))
 
         if session_id:
-            session_id_list = re.match(r"([0-9]*)_([0-9a-zA-Z]*)_([0-9]*)", session_id)
+            session_id_list = re.match(r"([0-9]*):([0-9a-zA-Z]*)_([0-9]*)", session_id)
             self.logger.debug("_get_user_id_from_session_id session_id_list: {}".format(session_id_list))
             return session_id_list.group(1) if session_id_list else ""
         else:
