@@ -15,6 +15,9 @@ class ApplicationPageService(PageService):
     def get_application(self, position_id, user_id):
         """返回用户申请的职位"""
 
+        if user_id is None:
+            raise gen.Return(ObjectDict())
+
         ret = yield self.job_application_ds.get_job_application(conds={
             "position_id": position_id,
             "applier_id": user_id

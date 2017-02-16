@@ -213,7 +213,7 @@ class MetaBaseHandler(AtomHandler):
             ujson.dumps(self._get_info_header(info), ensure_ascii=0))
 
         self.logger.debug("mviewer_id: {}".format(self.get_secure_cookie(const.COOKIE_MVIEWERID)))
-        self.logger.debug("mviewer_id: {}".format(self.get_secure_cookie(const.COOKIE_SESSIONID)))
+        self.logger.debug("session_id: {}".format(self.get_secure_cookie(const.COOKIE_SESSIONID)))
 
         self.logger.debug("+++++++++++++++++END OAUTH+++++++++++++++++++++")
 
@@ -368,8 +368,8 @@ class MetaBaseHandler(AtomHandler):
             req_uri=request.uri,
             req_params=req_params,
             customs=customs,
-            session_id=to_str(self.get_secure_cookie(const.COOKIE_SESSIONID
-                                                     or self.get_secure_cookie(const.COOKIE_MVIEWERID)))
+            session_id=to_str(self.get_secure_cookie(const.COOKIE_SESSIONID)
+                              or to_str(self.get_secure_cookie(const.COOKIE_MVIEWERID)))
         )
 
         log_params.update(log_info_common)

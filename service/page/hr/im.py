@@ -37,6 +37,9 @@ class ImPageService(PageService):
     @gen.coroutine
     def get_unread_chat_num(self, user_id, hr_id):
 
+        if user_id is None or not hr_id:
+            raise gen.Return(1)
+
         """返回JD 页，求职者与 HR 之间的未读消息数"""
         chatroom = yield self.hr_wx_hr_chat_list_ds.get_chatroom(conds={
             "sysuser_id": user_id,
@@ -70,6 +73,9 @@ class ImPageService(PageService):
     def get_all_unread_chat_num(self, user_id):
 
         """返回求职者所有的未读消息数，供侧边栏我的消息未读消息提示"""
+
+        if user_id is None:
+            raise gen.Return(0)
 
         chatrooms = yield self.hr_wx_hr_chat_list_ds.get_chatroom_list(conds={
             "sysuser_id": user_id

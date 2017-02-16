@@ -39,7 +39,7 @@ common_routes = [
 
     # common api
     (r"/m/api/position/star",                          "handler.common.position.PositionStarHandler",               {"event": "position_star"}),
-    (r"/m/api/chat/unread[\/]*([0-9]+)*",              "handler.common.im.UnreadCountHandler",                      {"event": "chat_unread"}),
+    (r"/m/api/chat/unread[\/]*([0-9]+)*",              "handler.common.im.UnreadCountHandler",                      {"event": "chat_"}),
     (r"/m/api/mobilebinded",                           "handler.common.user.UserMobileBindedHandler",               {"event": "user_usermobilebinded"}),
     (r"/m/api/cellphone",                              "handler.common.cellphone.CellphoneBindHandler",             {"event": "cellphone_bind"}),
     (r"/m/api/user/currentinfo",                       "handler.common.interest.UserCurrentInfoHandler",            {"event": "user_currentinfo"}),

@@ -134,6 +134,9 @@ class PositionPageService(PageService):
     def is_position_stared_by(self, position_id, user_id):
         """返回用户是否收藏了职位"""
 
+        if user_id is None or not position_id:
+            raise gen.Return(self.constant.NO)
+
         fav = yield self.user_fav_position_ds.get_user_fav_position({
             "position_id": position_id,
             "sysuser_id": user_id,

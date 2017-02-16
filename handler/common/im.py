@@ -2,7 +2,6 @@
 
 from tornado import gen
 from handler.base import BaseHandler
-import conf.message as message
 from util.common.decorator import handle_response, authenticated
 
 
@@ -12,19 +11,37 @@ class UnreadCountHandler(BaseHandler):
     @gen.coroutine
     def get(self, publisher):
 
-        if publisher:
-            # JD页未读消息
-            if self.current_user.sysuser.id is None:
-                self.send_json_success(data=1)
-                raise gen.Return()
+        try:
 
-            chat_num = yield self.im_ps.get_unread_chat_num(self.current_user.sysuser.id, publisher)
-            self.send_json_success(data=chat_num)
+            if publisher:
+                yield getattr(self, "get_jd_unread")(publisher)
+                self._event = self._event + "jdunread"
+            else:
+                yield getattr(self, "get_unread_total")(publisher)
+                self._event = self._event + "totalunread"
+        except Exception as e:
+            self.send_json_error()
 
-        else:
-            # 侧边栏我的消息未读消息数
-            if self.current_user.sysuser.id is None:
-                self.send_json_error(message=message.NOT_AUTHORIZED)
-                raise gen.Return()
-            chat_num = yield self.im_ps.get_all_unread_chat_num(self.current_user.sysuser.id)
-            self.send_json_success(data=chat_num)
+    @handle_response
+    @gen.coroutine
+    def get_jd_unread(self, publisher):
+        """
+        获得 JD 页未读消息数，未登录用户返回默认值1
+        :param publisher:
+        :return:
+        """
+
+        chat_num = yield self.im_ps.get_unread_chat_num(self.current_user.sysuser.id, publisher)
+        self.send_json_success(data=chat_num)
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get_unread_total(self):
+        """
+        获得侧边栏用户未读消息总数，需要用户先登录
+        :return:
+        """
+
+        chat_num = yield self.im_ps.get_all_unread_chat_num(self.current_user.sysuser.id)
+        self.send_json_success(data=chat_num)

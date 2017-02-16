@@ -416,11 +416,12 @@ class PositionHandler(BaseHandler):
             last_employee_user_id = yield self.sharechain_ps.get_referral_employee_user_id(
                 self.current_user.sysuser.id, position_info.id)
 
-        yield self.position_ps.send_candidate_view_position(params={
-            "user_id": self.current_user.sysuser.id,
-            "position_id": position_info.id,
-            "from_employee": 1 if last_employee_user_id else 0,
-        })
+        if self.current_user.sysuser.id:
+            yield self.position_ps.send_candidate_view_position(params={
+                "user_id": self.current_user.sysuser.id,
+                "position_id": position_info.id,
+                "from_employee": 1 if last_employee_user_id else 0,
+            })
 
         raise gen.Return(last_employee_user_id)
 
