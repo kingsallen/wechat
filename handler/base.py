@@ -13,6 +13,7 @@ import conf.path as path
 
 from handler.metabase import MetaBaseHandler
 from oauth.wechat import WeChatOauth2Service, WeChatOauthError, JsApi
+from cache.user.passport_session import PassportCache
 from util.common import ObjectDict
 from util.common.cipher import decode_id
 from util.common.decorator import check_signature
@@ -45,6 +46,7 @@ class BaseHandler(MetaBaseHandler):
         self._session_id = None
         # 处理 oauth 的 service, 会在使用时初始化
         self._oauth_service = None
+        self._pass_session = None
 
     @property
     def fullurl(self):
@@ -76,6 +78,8 @@ class BaseHandler(MetaBaseHandler):
         # 初始化 oauth service
         self._oauth_service = WeChatOauth2Service(
             self._wechat, self.fullurl, self.component_access_token)
+
+        self._pass_session = PassportCache()
 
         # 如果有 code，说明刚刚从微信 oauth 回来
         code = self.params.get("code")
@@ -319,7 +323,7 @@ class BaseHandler(MetaBaseHandler):
                 fields=['id', 'unionid', 'sysuser_id']
             )
             self._session_id = self._make_new_session_id(session.qxuser.sysuser_id)
-            self._save_qx_sessions(self._session_id, session.qxuser)
+            self._pass_session.save_qx_sessions(self._session_id, session.qxuser)
             self.set_secure_cookie(const.COOKIE_SESSIONID, self._session_id, httponly=True)
             self.logger.debug("_build_session get_secure_cookie: {}".format(self.get_secure_cookie(const.COOKIE_SESSIONID)))
 
@@ -345,24 +349,7 @@ class BaseHandler(MetaBaseHandler):
             yield self._build_session_by_unionid(self._unionid)
             raise gen.Return(True)
 
-        # 清除cookie 中无效的 session_id
-        self.clear_cookie(name=const.COOKIE_SESSIONID)
         raise gen.Return(False)
-
-    @gen.coroutine
-    def build_session_by_user_id(self, user_id):
-        """从 user_id 构建 session"""
-
-        session = ObjectDict()
-        self.logger.debug("build_session_by_user_id")
-
-        # 非微信环境, 忽略 wxuser, qxuser
-        session.wxuser = ObjectDict()
-        session.qxuser = ObjectDict()
-
-        session_id = self._make_new_session_id(user_id)
-        self._save_ent_sessions(session_id, session)
-        self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True)
 
     @gen.coroutine
     def _build_session_by_unionid(self, unionid):
@@ -405,7 +392,7 @@ class BaseHandler(MetaBaseHandler):
                 self._session_id = self._make_new_session_id(session.qxuser.sysuser_id)
                 self.set_secure_cookie(const.COOKIE_SESSIONID, self._session_id, httponly=True)
 
-            self._save_ent_sessions(self._session_id, session)
+            self._pass_session.save_ent_sessions(self._session_id, session, self._wechat.id)
 
         yield self._add_sysuser_to_session(session, self._session_id)
 
@@ -424,24 +411,6 @@ class BaseHandler(MetaBaseHandler):
             self.logger.debug("_build_session_by_unionid recom: {}".format(session.recom))
 
         self.current_user = session
-
-    def _save_qx_sessions(self, session_id, qxuser):
-        """
-        保存聚合号 session， 只包含 qxuser
-        """
-
-        key_qx = const.SESSION_USER.format(session_id, self.settings['qx_wechat_id'])
-        self.redis.set(key_qx, ObjectDict(qxuser=qxuser), 60 * 60 * 24 * 30)
-        self.logger.debug("refresh qx session redis key: {} session: {}".format(key_qx, ObjectDict(qxuser=qxuser)))
-
-    def _save_ent_sessions(self, session_id, session):
-        """
-        保存企业号 session， 包含 wxuser, qxuser, sysuser
-        """
-
-        key_ent = const.SESSION_USER.format(session_id, self._wechat.id)
-        self.redis.set(key_ent, session, 60 * 60 * 2)
-        self.logger.debug("refresh ent session redis key: {} session: {}".format(key_ent, session))
 
     @gen.coroutine
     def _add_company_info_to_session(self, session):
@@ -556,7 +525,6 @@ class BaseHandler(MetaBaseHandler):
             self.logger.debug("_get_user_id_from_session_id session_id_list: {}".format(session_id_list))
             return session_id_list.group(1) if session_id_list else ""
         else:
-
             return ""
 
     def get_template_namespace(self):

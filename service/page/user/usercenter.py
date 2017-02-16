@@ -53,3 +53,23 @@ class UsercenterPageService(PageService):
 
         ret = yield self.infra_user_ds.post_login(params)
         raise gen.Return(ret)
+
+    @gen.coroutine
+    def post_logout(self, user_id):
+        """用户登出
+        :param user_id:
+        """
+
+        ret = yield self.infra_user_ds.post_logout(user_id)
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def post_register(self, mobile, password, code):
+        """用户注册
+        :param mobile: 手机号
+        :param password: 密码
+        :param code: 验证码
+        """
+
+        ret = yield self.infra_user_ds.post_register(mobile, password, code)
+        raise gen.Return(ret)

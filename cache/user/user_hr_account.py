@@ -2,25 +2,26 @@
 
 # @Time    : 2/7/17 15:38
 # @Author  : panda (panyuxin@moseeker.com)
-# @File    : event.py
+# @File    : user_hr_account.py
 # @DES     :
 
 # Copyright 2016 MoSeeker
 
 from app import redis
 from app import logger
+import conf.common as const
 
 
 class UserHrAccountCache(object):
     """
-    Develop Status: To be tested.
+    HR 用户相关 session
     """
     def __init__(self):
         super(UserHrAccountCache, self).__init__()
         # hr帐号的 session key
-        self.user_hr_account = 'user_hr_account_{}'
+        self.user_hr_account = const.SESSION_USER_HR_ACCOUNT
         # hr平台绑定微信后的 pub/sub key
-        self.wx_binding = 'wx_binding_{}'
+        self.wx_binding = const.SESSION_WX_BINDING
         self.redis = redis
 
     def get_user_hr_account_session(self, hr_id):

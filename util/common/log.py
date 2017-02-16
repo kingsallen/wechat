@@ -6,10 +6,10 @@ import logging
 import traceback
 import os
 from logging.handlers import TimedRotatingFileHandler
+from tornado.log import gen_log
+
 from util.common.elk import RedisELK
 from util.common.alarm import Alarm
-
-from tornado.log import gen_log
 
 # --------------------------------------------------------------------------
 #  Configurations
@@ -97,9 +97,6 @@ class Logger(object):
 
     def warning(self, message):
         self.__logger.warning(message, exc_info=0)
-
-    def warn(self, message):
-        self.warning(message)
 
     def error(self, message):
         self.__logger.error(message, exc_info=0)

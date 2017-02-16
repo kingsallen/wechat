@@ -18,22 +18,24 @@ class CellphonePageService(PageService):
     """
 
     @gen.coroutine
-    def send_valid_code(self, mobile):
+    def send_valid_code(self, mobile, type):
         """Request basic service send valid code to target mobile
         :param mobile: target mobile number
         :return:
         """
-        ret = yield self.infra_user_ds.post_send_valid_code(mobile)
+        ret = yield self.infra_user_ds.post_send_valid_code(mobile, type)
         raise gen.Return(ret)
 
     @gen.coroutine
-    def verify_mobile(self, params):
+    def verify_mobile(self, mobile, code, type):
         """
         Send code submitted by user to basic service.
-        :param params: dict include user mobile number and valid code
+        :param mobile: target mobile number
+        :param code:
+        :param type
         :return:
         """
-        ret = yield self.infra_user_ds.post_verify_mobile(params)
+        ret = yield self.infra_user_ds.post_verify_mobile(mobile, code, type)
         raise gen.Return(ret)
 
     @gen.coroutine

@@ -92,11 +92,16 @@ STATUS_UNUSE = 0
 PAGE_META_TITLE = "仟寻招聘"
 PAGE_POSITION_INFO = "职位详情"
 PAGE_COMPANY_INFO = "公司详情"
+PAGE_REGISTER = "注册"
+PAGE_FORGET_PASSWORD = "忘记密码"
 
 # ++++++++++REDIS KEYS++++++++
 SESSION_USER = "SESSION_USER_{0}_{1}"
 SESSION_ID = "{0}:{1}"
-MVIEWER_ID = "{0}:{1}"
+# hr帐号的 session key
+SESSION_USER_HR_ACCOUNT = 'user_hr_account_{}'
+# hr平台绑定微信后的 pub/sub key
+SESSION_WX_BINDING = 'wx_binding_{}'
 
 
 # ++++++++++业务常量+++++++++++
@@ -106,6 +111,7 @@ COOKIE_MVIEWERID = "mviewer_id"
 COOKIE_CODE = "JKKSDF89"
 COOKIE_DEBUG_AUTH = "cda"
 COOKIE_MOBILE_CODE = "ER2T45YU"
+MVIEWER_ID = "{0}:{1}"
 
 # Cache 相关常量
 VIEWER_TYPE_NEW = 1
@@ -208,6 +214,18 @@ RP_POSITION_STATUS_NONE = 0
 RP_POSITION_STATUS_CLICK = 1
 RP_POSITION_STATUS_APPLY = 2
 RP_POSITION_STATUS_BOTH = 3
+
+# 国际编码列表
+NATIONAL_CODE = [
+    {'id': 1, 'code': '+86', 'country': '中国'}
+]
+
+MOBILE_CODE_OPT_TYPE = ObjectDict({
+    'code_register': 1,
+    'forget_password': 2,
+    'valid_old_mobile': 3,
+    'change_mobile': 4
+})
 
 
 # ============= 红包相关常量 =============

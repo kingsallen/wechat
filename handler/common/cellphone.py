@@ -27,6 +27,7 @@ class CellphoneBindHandler(BaseHandler):
     def get(self):
         result = yield self.cellphone_ps.send_valid_code(
             self.params.get('mobile', None),
+            const.MOBILE_CODE_OPT_TYPE.change_mobile
         )
         if result.status != const.API_SUCCESS:
             self.send_json_error(message=result.message)
@@ -46,7 +47,7 @@ class CellphoneBindHandler(BaseHandler):
 
         # 验证验证码
         verify_response = yield self.cellphone_ps.verify_mobile(
-            params=self.params,
+            self.params.mobile, self.params.code, const.MOBILE_CODE_OPT_TYPE.change_mobile
         )
         if verify_response.status != const.API_SUCCESS:
             self.send_json_error(message=verify_response.message)

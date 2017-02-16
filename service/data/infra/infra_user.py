@@ -12,13 +12,6 @@ class InfraUserDataService(DataService):
     """对接 User服务
     referer: https://wiki.moseeker.com/user_account_api.md"""
 
-    _OPT_TYPE = ObjectDict({
-        'code_login': 1,
-        'forget_password': 2,
-        'modify_info': 3,
-        'change_mobile': 4
-    })
-
     @gen.coroutine
     def get_user(self, user_id):
         """获得用户数据"""
@@ -68,29 +61,32 @@ class InfraUserDataService(DataService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def post_send_valid_code(self, mobile):
+    def post_send_valid_code(self, mobile, type):
         """Request basic service send valid code to target mobile
         :param mobile: target mobile number
+        :param type:
         :return:
         """
         params = ObjectDict({
             'mobile': mobile,
-            'type': self._OPT_TYPE.change_mobile,
+            'type': type
         })
         ret = yield http_post(path.USER_VALID, params)
         raise gen.Return(ret)
 
     @gen.coroutine
-    def post_verify_mobile(self, params):
+    def post_verify_mobile(self, mobile, code, type):
         """
         Send code submitted by user to basic service.
-        :param params: dict include user mobile number and valid code
+        :param mobile: target mobile number
+        :param code:
+        :param type
         :return:
         """
         params = ObjectDict({
-            'mobile': params.mobile,
-            'code': params.code,
-            'type': self._OPT_TYPE.change_mobile,
+            'mobile': mobile,
+            'code': code,
+            'type': type,
         })
 
         ret = yield http_post(path.USER_VERIFY, params)
@@ -106,7 +102,35 @@ class InfraUserDataService(DataService):
         :param unionid: 微信 unionid
         """
 
-        ret = yield http_post(path.USER_LOGIN_PATH, params)
+        ret = yield http_post(path.USER_LOGIN, params)
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def post_logout(self, user_id):
+        """用户登出
+        :param user_id: 用户 id
+        """
+        params = ObjectDict(
+            user_id=user_id
+        )
+
+        ret = yield http_post(path.USER_LOGOUT, params)
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def post_register(self, mobile, password, code):
+        """用户注册
+        :param mobile: 手机号
+        :param password: 密码
+        """
+        params = ObjectDict(
+            username=mobile,
+            mobile=mobile,
+            password=password,
+            code=code
+        )
+
+        ret = yield http_post(path.USER_REGISTER, params)
         raise gen.Return(ret)
 
     @gen.coroutine
