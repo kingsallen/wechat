@@ -35,7 +35,7 @@ common_routes = [
     (r"/m/position",                                   "handler.common.position.PositionListHandler",               {"event": "position_list"}),
 
     # app forward 给前端，展示纯前端渲染的 SPA
-    (r"/m/app/([a-zA-Z][a-zA-Z0-9]*)?.*/g",            "handler.common.app.IndexHandler",                           {"event": "app_"}),
+    (r"/m/app/(.*)",                                   "handler.common.app.IndexHandler",                           {"event": "app_"}),
 
     # common api
     (r"/m/api/position/star",                          "handler.common.position.PositionStarHandler",               {"event": "position_star"}),

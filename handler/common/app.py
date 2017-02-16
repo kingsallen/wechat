@@ -1,5 +1,5 @@
 # coding=utf-8
-
+import re
 from handler.base import BaseHandler
 
 from tornado import gen
@@ -11,9 +11,12 @@ class IndexHandler(BaseHandler):
 
     @handle_response
     @gen.coroutine
-    def get(self, method='default'):
+    def get(self):
 
-        self.logger.debug("IndexHandler request: {}".format(self.request))
+        method_list = re.match("\/m\/app\/([a-zA-Z][a-zA-Z0-9]*)?.*/g", self.request.uri)
+        self.logger.debug("IndexHandler: {}".format(method_list))
+        method = method_list.group(1) if method_list else "default"
+
         self.logger.debug("IndexHandler: {}".format(method))
 
         try:
