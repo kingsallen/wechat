@@ -16,6 +16,7 @@ class IndexHandler(BaseHandler):
         try:
             # 重置 event，准确描述
             self._event = self._event + method
+            self.logger.debug("IndexHandler event: %s" % self._event)
             yield getattr(self, 'get_' + method)()
         except Exception as e:
             self.write_error(404)
@@ -23,7 +24,7 @@ class IndexHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def get_default(self):
-
+        self.logger.debug("IndexHandler default")
         self.render(template_name="system/app.html")
 
     @handle_response
@@ -31,5 +32,5 @@ class IndexHandler(BaseHandler):
     @gen.coroutine
     def get_usercenter(self):
         """个人中心，需要使用authenticated判断是否登录，及静默授权"""
-
+        self.logger.debug("IndexHandler usercenter")
         self.render(template_name="system/app.html")
