@@ -288,8 +288,8 @@ class BaseHandler(MetaBaseHandler):
                 yield self._build_session()
                 self.logger.debug("_build_session: %s" % self.current_user)
         else:
-            self.logger.error("!!!!!!!need_oauth error!!!!!!!")
-            self.logger.error("!!!!!!!need_oauth error current_user: {}".format(self.current_user))
+            self.logger.debug("!!!!!!!need_oauth error!!!!!!!")
+            self.logger.debug("!!!!!!!need_oauth error current_user: {}".format(self.current_user))
 
     @gen.coroutine
     def _build_session(self):
@@ -314,8 +314,10 @@ class BaseHandler(MetaBaseHandler):
             self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True)
 
         # 登录，或非登录用户（非微信环境），都需要创建 mviewer_id
-        mviewer_id = self._make_new_moseeker_viewer_id()
-        self.set_secure_cookie(const.COOKIE_MVIEWERID, mviewer_id, httponly=True)
+        mviewer_id = to_str(self.get_secure_cookie(const.COOKIE_MVIEWERID))
+        if not mviewer_id:
+            mviewer_id = self._make_new_moseeker_viewer_id()
+            self.set_secure_cookie(const.COOKIE_MVIEWERID, mviewer_id, httponly=True)
         self.logger.debug("build_session mviewer_id:{}".format(mviewer_id))
 
         # 重置 wxuser，qxuser，构建完整的 session
@@ -369,20 +371,30 @@ class BaseHandler(MetaBaseHandler):
 
         if not unionid:
             # 非微信环境, 忽略 wxuser, qxuser
+            self.logger.debug("_build_session_by_unionid not unionid")
             session.wxuser = ObjectDict()
             session.qxuser = ObjectDict()
         else:
+            self.logger.debug("_build_session_by_unionid unionid")
+            self.logger.debug("_build_session_by_unionid _wxuser:{}".format(self._wxuser))
+            self.logger.debug("_build_session_by_unionid _qxuser:{}".format(self._qxuser))
+            self.logger.debug("_build_session_by_unionid _wechat:{}".format(self._wechat))
+
             if self._wxuser:
                 session.wxuser = self._wxuser
             else:
                 session.wxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
                     unionid=unionid, wechat_id=self._wechat.id)
+                self.logger.debug("_build_session_by_unionid wxuser:{}".format(session.wxuser))
 
             if self._qxuser:
                 session.qxuser = self._qxuser
             else:
                 session.qxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
                     unionid=unionid, wechat_id=self.settings['qx_wechat_id'])
+                self.logger.debug("_build_session_by_unionid qxuser:{}".format(session.qxuser))
+
+            self.logger.debug("_build_session_by_unionid session: {}".format(session))
 
             if not session_id:
                 session_id = self._make_new_session_id(session.qxuser.sysuser_id)
@@ -494,6 +506,7 @@ class BaseHandler(MetaBaseHandler):
         后续是否需要做持久化待讨论
         :return: session_id
         """
+        self.logger.debug("_make_new_session_id\n")
         while True:
             session_id = const.SESSION_ID.format(
                 str(user_id),
@@ -511,7 +524,7 @@ class BaseHandler(MetaBaseHandler):
         """
 
         while True:
-            mviewer_id = const.SESSION_ID.format(
+            mviewer_id = const.MVIEWER_ID.format(
                 "_",
                 sha1(os.urandom(24)).hexdigest())
             return mviewer_id

@@ -96,6 +96,7 @@ PAGE_COMPANY_INFO = "公司详情"
 # ++++++++++REDIS KEYS++++++++
 SESSION_USER = "SESSION_USER_{0}_{1}"
 SESSION_ID = "{0}:{1}"
+MVIEWER_ID = "{0}:{1}"
 
 
 # ++++++++++业务常量+++++++++++
