@@ -35,7 +35,7 @@ common_routes = [
     (r"/m/position",                                   "handler.common.position.PositionListHandler",               {"event": "position_list"}),
 
     # app forward 给前端，展示纯前端渲染的 SPA
-    (r"/m/app/.*",                                     "handler.common.app.IndexHandler",                           {"event": "app_index"}),
+    (r"/m/app/.*",                                     "handler.common.app.IndexHandler",                           {"event": "app_"}),
 
     # common api
     (r"/m/api/position/star",                          "handler.common.position.PositionStarHandler",               {"event": "position_star"}),
@@ -46,7 +46,6 @@ common_routes = [
     (r"/m/api/upload/([a-z]*)",                        "handler.common.usercenter.UploadHandler",                   {"event": "image_"}),
     (r"/m/api/usercenter/favpositions",                "handler.common.usercenter.FavpositionHandler",              {"event": "usercenter_favpositions"}),
     (r"/m/api/usercenter/applyrecords[\/]*([0-9]+)*",  "handler.common.usercenter.ApplyrecordsHandler",             {"event": "usercenter_applyredords"}),
-
     (r"/m/api/usercenter",                             "handler.common.usercenter.UsercenterHandler",               {"event": "usercenter_"}),
 
     # 兼容老微信 url，进行302跳转，event 设置为 NULL

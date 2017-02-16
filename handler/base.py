@@ -417,7 +417,7 @@ class BaseHandler(MetaBaseHandler):
         if self.is_platform:
             self.logger.debug("_build_session_by_unionid start company")
             yield self._add_company_info_to_session(session)
-            self.logger.debug("_build_session_by_unionid company: {}".format(session.company))
+            self.logger.debug("_build_session_by_unionid company: {}".format(session))
         if self.params.recom:
             self.logger.debug("_build_session_by_unionid start recom")
             yield self._add_recom_to_session(session)
@@ -449,6 +449,7 @@ class BaseHandler(MetaBaseHandler):
         """
 
         session.company = yield self._get_current_company(session.wechat.company_id)
+
         if session.sysuser.id:
             employee = yield self.user_ps.get_valid_employee_by_user_id(
                 user_id=session.sysuser.id, company_id=session.company.id)
