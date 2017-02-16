@@ -112,6 +112,8 @@ class BaseHandler(MetaBaseHandler):
 
         # 构造并拼装 session
         yield self._fetch_session()
+        # 构造 mviewer_id
+        self._make_moseeker_viewer_id()
 
         # 内存优化
         self._wechat = None
@@ -316,13 +318,6 @@ class BaseHandler(MetaBaseHandler):
             self.set_secure_cookie(const.COOKIE_SESSIONID, self._session_id, httponly=True)
             self.logger.debug("_build_session get_secure_cookie: {}".format(self.get_secure_cookie(const.COOKIE_SESSIONID)))
 
-        # 登录，或非登录用户（非微信环境），都需要创建 mviewer_id
-        mviewer_id = to_str(self.get_secure_cookie(const.COOKIE_MVIEWERID))
-        if not mviewer_id:
-            mviewer_id = self._make_new_moseeker_viewer_id()
-            self.set_secure_cookie(const.COOKIE_MVIEWERID, mviewer_id, httponly=True)
-        self.logger.debug("_build_session mviewer_id:{}".format(mviewer_id))
-
         # 重置 wxuser，qxuser，构建完整的 session
         self._wxuser = ObjectDict()
         self._qxuser = ObjectDict()
@@ -525,17 +520,25 @@ class BaseHandler(MetaBaseHandler):
             else:
                 return session_id
 
-    def _make_new_moseeker_viewer_id(self):
+    def _make_moseeker_viewer_id(self):
         """创建新的mviewer_id
         不论是登录，或非登录用户，都会有唯一的 mviewer_id，标识独立的用户。
         主要用于日志统计中 UV 的统计
         """
+        def _make_new_moseeker_viewer_id():
 
-        while True:
-            mviewer_id = const.MVIEWER_ID.format(
-                "_",
-                sha1(os.urandom(24)).hexdigest())
-            return mviewer_id
+            while True:
+                mviewer_id = const.MVIEWER_ID.format(
+                    "_",
+                    sha1(os.urandom(24)).hexdigest())
+                return mviewer_id
+
+        # 登录，或非登录用户（非微信环境），都需要创建 mviewer_id
+        mviewer_id = to_str(self.get_secure_cookie(const.COOKIE_MVIEWERID))
+        if not mviewer_id:
+            mviewer_id = _make_new_moseeker_viewer_id()
+            self.set_secure_cookie(const.COOKIE_MVIEWERID, mviewer_id, httponly=True)
+        self.logger.debug("_build_session mviewer_id:{}".format(mviewer_id))
 
     def _get_user_id_from_session_id(self, session_id):
         """从 session_id 中得到 user_id"""
