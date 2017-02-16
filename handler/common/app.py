@@ -13,6 +13,8 @@ class IndexHandler(BaseHandler):
     @gen.coroutine
     def get(self, method='default'):
 
+        self.logger.debug("IndexHandler: {}".format(method))
+
         try:
             if method == "usercenter":
                 yield getattr(self, 'get_usercenter')()
