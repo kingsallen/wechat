@@ -14,7 +14,7 @@ class IndexHandler(BaseHandler):
     def get(self):
 
         self.logger.debug("IndexHandler request.uri: {}".format(self.request.uri))
-        method_list = re.match("\/m\/app\/([a-zA-Z][a-zA-Z0-9]*)?.*/g", self.request.uri)
+        method_list = re.match("\/m\/app\/([a-zA-Z-][a-zA-Z0-9-]*)?.*", self.request.uri)
         self.logger.debug("IndexHandler: {}".format(method_list))
         method = method_list.group(1) if method_list else "default"
 
