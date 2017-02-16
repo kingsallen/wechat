@@ -168,12 +168,19 @@ def authenticated(func):
     @gen.coroutine
     def wrapper(self, *args, **kwargs):
         self.logger.debug("!!!!!!authenticated: %s" % self.current_user)
+        self.logger.debug("!!!!!!authenticated self._authable: %s" % self._authable)
+        self.logger.debug("!!!!!!authenticated: self.current_user.wxuser %s" % self.current_user.wxuser)
+        self.logger.debug("!!!!!!authenticated: self.request.uri %s" % self.request.uri)
+        self.logger.debug("!!!!!!authenticated: not self.request.uri.startswith: {}".format(self.request.uri.startswith("/m/api/")))
+
+
         if self.current_user.sysuser and self.in_wechat:
             if self._authable and not self.current_user.wxuser \
                 and self.request.method in ("GET", "HEAD") \
                 and not self.request.uri.startswith("/m/api/"):
                 # 该企业号是服务号，静默授权
                 # api 类接口，不适合做302静默授权，微信服务器不会跳转
+                self.logger.debug("!!!!!!authenticated!!!!!!!!!!!!!!!!!")
                 self._oauth_service.wechat = self.current_user.wechat
                 self._oauth_service.state = to_hex(self.current_user.qxuser.unionid)
                 url = self._oauth_service.get_oauth_code_base_url()
