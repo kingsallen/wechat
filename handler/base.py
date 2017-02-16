@@ -321,7 +321,7 @@ class BaseHandler(MetaBaseHandler):
         if not mviewer_id:
             mviewer_id = self._make_new_moseeker_viewer_id()
             self.set_secure_cookie(const.COOKIE_MVIEWERID, mviewer_id, httponly=True)
-        self.logger.debug("build_session mviewer_id:{}".format(mviewer_id))
+        self.logger.debug("_build_session mviewer_id:{}".format(mviewer_id))
 
         # 重置 wxuser，qxuser，构建完整的 session
         self._wxuser = ObjectDict()
@@ -399,12 +399,12 @@ class BaseHandler(MetaBaseHandler):
                     unionid=unionid, wechat_id=self.settings['qx_wechat_id'])
                 self.logger.debug("_build_session_by_unionid qxuser:{}".format(session.qxuser))
 
-            self.logger.debug("_build_session_by_unionid session: {}".format(session))
+            self.logger.debug("_build_session_by_unionid session 1: {}".format(session))
 
             if not self._session_id:
                 self._session_id = self._make_new_session_id(session.qxuser.sysuser_id)
                 self.set_secure_cookie(const.COOKIE_SESSIONID, self._session_id, httponly=True)
-                
+
             self._save_ent_sessions(self._session_id, session)
 
         yield self._add_sysuser_to_session(session, self._session_id)
@@ -412,7 +412,7 @@ class BaseHandler(MetaBaseHandler):
         session.wechat = self._wechat
         self._add_jsapi_to_wechat(session.wechat)
 
-        self.logger.debug("_build_session_by_unionid session: {}".format(session))
+        self.logger.debug("_build_session_by_unionid session 2: {}".format(session))
         self.logger.debug("_build_session_by_unionid params: {}".format(self.params))
         if self.is_platform:
             self.logger.debug("_build_session_by_unionid start company")
