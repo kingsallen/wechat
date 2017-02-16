@@ -122,6 +122,7 @@ class InfraUserDataService(DataService):
         """用户注册
         :param mobile: 手机号
         :param password: 密码
+        :param code:
         """
         params = ObjectDict(
             username=mobile,
@@ -131,6 +132,18 @@ class InfraUserDataService(DataService):
         )
 
         ret = yield http_post(path.USER_REGISTER, params)
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def post_ismobileregistered(self, mobile):
+        """判断手机号是否已经注册
+        :param mobile: 手机号
+        """
+        params = ObjectDict(
+            username=mobile,
+        )
+
+        ret = yield http_post(path.USER_ISMOBILEREGISTERED, params)
         raise gen.Return(ret)
 
     @gen.coroutine

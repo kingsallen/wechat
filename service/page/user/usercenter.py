@@ -73,3 +73,12 @@ class UsercenterPageService(PageService):
 
         ret = yield self.infra_user_ds.post_register(mobile, password, code)
         raise gen.Return(ret)
+
+    @gen.coroutine
+    def post_ismobileregistered(self, mobile):
+        """判断手机号是否已经注册
+        :param mobile: 手机号
+        """
+
+        ret = yield self.infra_user_ds.post_ismobileregistered(mobile)
+        raise gen.Return(ret)
