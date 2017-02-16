@@ -312,6 +312,7 @@ class BaseHandler(MetaBaseHandler):
             session_id = self._make_new_session_id(session.qxuser.sysuser_id)
             self._save_qx_sessions(session_id, session.qxuser)
             self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True)
+            self.logger.debug("_build_session get_secure_cookie: {}".format(self.get_secure_cookie(const.COOKIE_SESSIONID)))
 
         # 登录，或非登录用户（非微信环境），都需要创建 mviewer_id
         mviewer_id = to_str(self.get_secure_cookie(const.COOKIE_MVIEWERID))
@@ -342,6 +343,8 @@ class BaseHandler(MetaBaseHandler):
             yield self._build_session_by_unionid(self._unionid)
             raise gen.Return(True)
 
+        # 清除cookie 中无效的 session_id
+        self.clear_cookie(name=const.COOKIE_SESSIONID)
         raise gen.Return(False)
 
     @gen.coroutine
@@ -399,6 +402,7 @@ class BaseHandler(MetaBaseHandler):
             if not session_id:
                 session_id = self._make_new_session_id(session.qxuser.sysuser_id)
             self._save_ent_sessions(session_id, session)
+            self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True)
 
         yield self._add_sysuser_to_session(session, session_id)
 
