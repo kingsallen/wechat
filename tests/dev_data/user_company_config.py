@@ -159,14 +159,14 @@ COMPANY_MONDELEZ = ObjectDict({
 })
 
 COMPANY_ACTIONSKY = ObjectDict({
-    'order': ['working_env', 'figure', 'members', 'team',
-              'events', 'map', 'survey', 'qr_code'],
+    'order': ['working_env', 'members', 'team',
+              'events', 'address', 'survey', 'qr_code'],
     'config': {
         'working_env': [296, 297, 298, 299, 300],  # 工作环境对应的 hr_media id list
-        'figure': [],  # 人物寄语
+        #'figure': [],  # 人物寄语
         'members': [301, 302],  # 成员采访
         'events': [303, 304, 305],  # 公司大事件
-        'map': [306],  # 公司地图
+        'address': [306],  # 公司地图
         'survey': [],  # 问卷调查
         'qr_code': [307]  # 二维码
     },
