@@ -188,14 +188,19 @@ def authenticated(func):
                 return
 
         elif not self.current_user.sysuser:
+            self.logger.debug("!!!!!!authenticated: need login")
+            self.logger.debug("!!!!!!authenticated: need login method:{}".format(self.request.method))
             if self.request.method in ("GET", "HEAD"):
                 redirect_url = make_url(path.USER_LOGIN, self.params, escape=['next_url'])
-
+                self.logger.debug("!!!!!!authenticated: need login redirect_url params:{}".format(self.params))
+                self.logger.debug("!!!!!!authenticated: need login redirect_url 1:{}".format(redirect_url))
                 redirect_url += "&" + urlencode(
                     dict(next_url=self.request.uri))
+                self.logger.debug("!!!!!!authenticated: need login redirect_url 2:{}".format(redirect_url))
                 self.redirect(redirect_url)
                 return
             else:
+                self.logger.debug("!!!!!!authenticated: need login else!!")
                 self.send_json_error(message=msg.NOT_AUTHORIZED)
 
         yield func(self, *args, **kwargs)

@@ -542,8 +542,9 @@ class BaseHandler(MetaBaseHandler):
         mviewer_id = to_str(self.get_secure_cookie(const.COOKIE_MVIEWERID))
         if not mviewer_id:
             mviewer_id = _make_new_moseeker_viewer_id()
+            self.logger.debug("_build_session mviewer_id make")
             self.set_secure_cookie(const.COOKIE_MVIEWERID, mviewer_id, httponly=True)
-        self.logger.debug("_build_session mviewer_id:{}".format(mviewer_id))
+        self.logger.debug("_build_session mviewer_id old:{}".format(mviewer_id))
 
     def _get_user_id_from_session_id(self, session_id):
         """从 session_id 中得到 user_id"""
