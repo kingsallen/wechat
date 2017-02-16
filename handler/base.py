@@ -186,10 +186,10 @@ class BaseHandler(MetaBaseHandler):
         https://mp.weixin.qq.com/wiki/7/2d301d4b757dedc333b9a9854b457b47.html
         """
 
-        self.log_info.debug("_authable _wechat: {}".format(self._wechat))
-        self.log_info.debug("_authable _wechat type: {}".format(self._wechat.type))
-        self.log_info.debug("_authable const.WECHAT_TYPE_SERVICE: {}".format(const.WECHAT_TYPE_SERVICE))
-        self.log_info.debug("_authable res: {}".format(self._wechat.type is const.WECHAT_TYPE_SERVICE))
+        self.logger.debug("_authable _wechat: {}".format(self._wechat))
+        self.logger.debug("_authable _wechat type: {}".format(self._wechat.type))
+        self.logger.debug("_authable const.WECHAT_TYPE_SERVICE: {}".format(const.WECHAT_TYPE_SERVICE))
+        self.logger.debug("_authable res: {}".format(self._wechat.type is const.WECHAT_TYPE_SERVICE))
 
         if self._wechat is None:
             return False
