@@ -13,6 +13,7 @@ class IndexHandler(BaseHandler):
     @gen.coroutine
     def get(self, method='default'):
 
+        self.logger.debug("IndexHandler request: {}".format(self.request))
         self.logger.debug("IndexHandler: {}".format(method))
 
         try:
