@@ -188,7 +188,7 @@ class BaseHandler(MetaBaseHandler):
 
         self.logger.debug("_authable _wechat type: {}".format(wechat_type))
         self.logger.debug("_authable const.WECHAT_TYPE_SERVICE: {}".format(const.WECHAT_TYPE_SERVICE))
-        self.logger.debug("_authable res: {}".format(self._wechat.type is const.WECHAT_TYPE_SERVICE))
+        self.logger.debug("_authable res: {}".format(wechat_type is const.WECHAT_TYPE_SERVICE))
 
         if wechat_type is None:
             return False
