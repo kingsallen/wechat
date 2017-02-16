@@ -164,7 +164,7 @@ class BaseHandler(MetaBaseHandler):
         # 创建 qx 的 user_wx_user
         yield self.user_ps.create_qx_wxuser_by_userinfo(userinfo, user_id)
 
-        if not self._authable():
+        if not self._authable(self._wechat.type):
             # 该企业号是订阅号 则无法获得当前 wxuser 信息, 无需静默授权
             self._wxuser = ObjectDict()
 
@@ -178,7 +178,7 @@ class BaseHandler(MetaBaseHandler):
             self.logger.debug("_handle_ent_openid, wxuser:{}".format(wxuser))
         raise gen.Return(wxuser)
 
-    def _authable(self):
+    def _authable(self, wechat_type):
         """返回当前公众号是否可以 OAuth
 
         服务号有网页 OAuth 权限
@@ -186,14 +186,13 @@ class BaseHandler(MetaBaseHandler):
         https://mp.weixin.qq.com/wiki/7/2d301d4b757dedc333b9a9854b457b47.html
         """
 
-        self.logger.debug("_authable _wechat: {}".format(self._wechat))
-        self.logger.debug("_authable _wechat type: {}".format(self._wechat.type))
+        self.logger.debug("_authable _wechat type: {}".format(wechat_type))
         self.logger.debug("_authable const.WECHAT_TYPE_SERVICE: {}".format(const.WECHAT_TYPE_SERVICE))
         self.logger.debug("_authable res: {}".format(self._wechat.type is const.WECHAT_TYPE_SERVICE))
 
-        if self._wechat is None:
+        if wechat_type is None:
             return False
-        return self._wechat.type is const.WECHAT_TYPE_SERVICE
+        return wechat_type is const.WECHAT_TYPE_SERVICE
 
     def _verify_code(self, code):
         """检查 code 是不是之前使用过的"""
