@@ -16,7 +16,7 @@ from oauth.wechat import WeChatOauth2Service, WeChatOauthError, JsApi
 from util.common import ObjectDict
 from util.common.cipher import decode_id
 from util.common.decorator import check_signature
-from util.tool.str_tool import to_str, to_bytes, from_hex
+from util.tool.str_tool import to_str, from_hex
 from util.tool.url_tool import url_subtract_query, make_url
 
 
@@ -42,6 +42,7 @@ class BaseHandler(MetaBaseHandler):
         self._qx_wechat = None
         self._unionid = None
         self._wxuser = None
+        self._session_id = None
         # 处理 oauth 的 service, 会在使用时初始化
         self._oauth_service = None
 
@@ -118,6 +119,7 @@ class BaseHandler(MetaBaseHandler):
         self._unionid = None
         self._wxuser = None
         self._qxuser = None
+        self._session_id = None
 
     # PROTECTED
     @gen.coroutine
@@ -247,19 +249,19 @@ class BaseHandler(MetaBaseHandler):
     def _fetch_session(self):
         """尝试获取 session 并创建 current_user，如果获取失败走 oauth 流程"""
         ok = False
-        session_id = to_str(self.get_secure_cookie(const.COOKIE_SESSIONID))
-        self.logger.debug("_fetch_session session_id: %s" % session_id)
+        self._session_id = to_str(self.get_secure_cookie(const.COOKIE_SESSIONID))
+        self.logger.debug("_fetch_session session_id: %s" % self._session_id)
 
-        if session_id:
+        if self._session_id:
             if self.is_platform:
                 self.logger.debug(
-                    "is_platform _fetch_session session_id: {}".format(session_id))
+                    "is_platform _fetch_session session_id: {}".format(self._session_id))
                 # 判断是否可以通过 session，直接获得用户信息，这样就不用跳授权页面
-                ok = yield self._get_session_by_wechat_id(session_id, self._wechat.id)
+                ok = yield self._get_session_by_wechat_id(self._session_id, self._wechat.id)
                 if not ok:
-                    ok = yield self._get_session_by_wechat_id(session_id, self.settings['qx_wechat_id'])
+                    ok = yield self._get_session_by_wechat_id(self._session_id, self.settings['qx_wechat_id'])
             elif self.is_qx:
-                ok = yield self._get_session_by_wechat_id(session_id, self.settings['qx_wechat_id'])
+                ok = yield self._get_session_by_wechat_id(self._session_id, self.settings['qx_wechat_id'])
 
             elif self.is_help:
                 # TODO 需讨论
@@ -309,9 +311,9 @@ class BaseHandler(MetaBaseHandler):
                 wechat_id=self.settings['qx_wechat_id'],
                 fields=['id', 'unionid', 'sysuser_id']
             )
-            session_id = self._make_new_session_id(session.qxuser.sysuser_id)
-            self._save_qx_sessions(session_id, session.qxuser)
-            self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True)
+            self._session_id = self._make_new_session_id(session.qxuser.sysuser_id)
+            self._save_qx_sessions(self._session_id, session.qxuser)
+            self.set_secure_cookie(const.COOKIE_SESSIONID, self._session_id, httponly=True)
             self.logger.debug("_build_session get_secure_cookie: {}".format(self.get_secure_cookie(const.COOKIE_SESSIONID)))
 
         # 登录，或非登录用户（非微信环境），都需要创建 mviewer_id
@@ -367,10 +369,10 @@ class BaseHandler(MetaBaseHandler):
         """从 unionid 构建 session"""
 
         session = ObjectDict()
-        session_id = to_str(self.get_secure_cookie(const.COOKIE_SESSIONID))
+        # session_id = to_str(self.get_secure_cookie(const.COOKIE_SESSIONID))
         self.logger.debug("_build_session_by_unionid")
         self.logger.debug("_build_session_by_unionid unionid: {}".format(unionid))
-        self.logger.debug("_build_session_by_unionid session_id: {}".format(session_id))
+        self.logger.debug("_build_session_by_unionid session_id: {}".format(self._session_id))
 
         if not unionid:
             # 非微信环境, 忽略 wxuser, qxuser
@@ -399,12 +401,13 @@ class BaseHandler(MetaBaseHandler):
 
             self.logger.debug("_build_session_by_unionid session: {}".format(session))
 
-            if not session_id:
-                session_id = self._make_new_session_id(session.qxuser.sysuser_id)
-            self._save_ent_sessions(session_id, session)
-            self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True)
+            if not self._session_id:
+                self._session_id = self._make_new_session_id(session.qxuser.sysuser_id)
+                self.set_secure_cookie(const.COOKIE_SESSIONID, self._session_id, httponly=True)
+                
+            self._save_ent_sessions(self._session_id, session)
 
-        yield self._add_sysuser_to_session(session, session_id)
+        yield self._add_sysuser_to_session(session, self._session_id)
 
         session.wechat = self._wechat
         self._add_jsapi_to_wechat(session.wechat)
