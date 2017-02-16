@@ -14,10 +14,15 @@ class IndexHandler(BaseHandler):
     def get(self, method='default'):
 
         try:
+            if method == "usercenter":
+                yield getattr(self, 'get_usercenter')()
+            else:
+                yield getattr(self, 'get_default')()
+
             # 重置 event，准确描述
             self._event = self._event + method
             self.logger.debug("IndexHandler event: %s" % self._event)
-            yield getattr(self, 'get_' + method)()
+
         except Exception as e:
             self.write_error(404)
 
