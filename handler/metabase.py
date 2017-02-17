@@ -277,7 +277,7 @@ class MetaBaseHandler(AtomHandler):
                 self.finish()
                 return
 
-        super().render(template_name=template_name, render_json=render_json, title=meta_title)
+        super().render(template_name=template_name, render_json=render_json, meta_title=meta_title)
         return
 
     def _send_json(self, data, status_code, message, http_code=200):
