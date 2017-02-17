@@ -147,7 +147,7 @@ class RegisterHandler(BaseHandler):
 
     @handle_response
     @gen.coroutine
-    def get_setpassed(self):
+    def get_setpasswd(self):
         """设置密码"""
         code_type = self.params.code_type
         mmc = self.params._mmc or ""
@@ -243,7 +243,7 @@ class RegisterHandler(BaseHandler):
 
     @handle_response
     @gen.coroutine
-    def post_setpassed(self):
+    def post_setpasswd(self):
         """提交设置的密码"""
 
         try:
