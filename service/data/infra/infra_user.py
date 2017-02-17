@@ -19,7 +19,7 @@ class InfraUserDataService(DataService):
             'user_id': user_id,
         })
 
-        ret = yield http_get(path.USER_INFO, params)
+        ret = yield http_get(path.INFRA_USER_INFO, params)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -31,21 +31,21 @@ class InfraUserDataService(DataService):
             "code": kwargs.get("code" "")
         })
 
-        ret = yield http_post(path.USER_COMBINE, params)
+        ret = yield http_post(path.INFRA_USER_COMBINE, params)
 
         raise gen.Return(ret)
 
     @gen.coroutine
     def get_applied_applications(self, user_id):
         """获得求职记录"""
-        ret = yield http_get(path.USER_APPLIED_APPLICATIONS.format(user_id))
+        ret = yield http_get(path.INFRA_USER_APPLIED_APPLICATIONS.format(user_id))
         raise gen.Return(ret)
 
     @gen.coroutine
     def get_fav_positions(self, user_id):
         """获得职位收藏"""
 
-        ret = yield http_get(path.USER_FAV_POSITION.format(user_id))
+        ret = yield http_get(path.INFRA_USER_FAV_POSITION.format(user_id))
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -57,7 +57,7 @@ class InfraUserDataService(DataService):
             'unionid': unionid,
         })
 
-        ret = yield http_post(path.USER_COMBINE, params)
+        ret = yield http_post(path.INFRA_USER_COMBINE, params)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -71,7 +71,7 @@ class InfraUserDataService(DataService):
             'mobile': mobile,
             'type': type
         })
-        ret = yield http_post(path.USER_VALID, params)
+        ret = yield http_post(path.INFRA_USER_VALID, params)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -89,7 +89,7 @@ class InfraUserDataService(DataService):
             'type': type,
         })
 
-        ret = yield http_post(path.USER_VERIFY, params)
+        ret = yield http_post(path.INFRA_USER_VERIFY, params)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -102,7 +102,7 @@ class InfraUserDataService(DataService):
         :param unionid: 微信 unionid
         """
 
-        ret = yield http_post(path.USER_LOGIN, params)
+        ret = yield http_post(path.INFRA_USER_LOGIN, params)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -114,7 +114,7 @@ class InfraUserDataService(DataService):
             user_id=user_id
         )
 
-        ret = yield http_post(path.USER_LOGOUT, params)
+        ret = yield http_post(path.INFRA_USER_LOGOUT, params)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -131,7 +131,7 @@ class InfraUserDataService(DataService):
             code=code
         )
 
-        ret = yield http_post(path.USER_REGISTER, params)
+        ret = yield http_post(path.INFRA_USER_REGISTER, params)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -143,7 +143,7 @@ class InfraUserDataService(DataService):
             username=mobile,
         )
 
-        ret = yield http_post(path.USER_ISMOBILEREGISTERED, params)
+        ret = yield http_post(path.INFRA_USER_ISMOBILEREGISTERED, params)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -155,7 +155,7 @@ class InfraUserDataService(DataService):
         })
         params.update(req)
 
-        ret = yield http_put(path.USER_INFO, params)
+        ret = yield http_put(path.INFRA_USER_INFO, params)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -166,5 +166,5 @@ class InfraUserDataService(DataService):
         :return:
         """
 
-        ret = yield http_post(path.WXUSER_QRCODE_SCANRESULT, params)
+        ret = yield http_post(path.INFRA_WXUSER_QRCODE_SCANRESULT, params)
         raise gen.Return(ret)

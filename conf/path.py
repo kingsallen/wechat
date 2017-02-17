@@ -25,27 +25,27 @@ DEFAULT_COMPANY_LOGO = 'weixin/images/default-company.png'
 # ============================ 基础服务开始 ============================
 # 用户服务
 # REFERER: https://wiki.moseeker.com/user_account_api.md
-USER_INFO = 'user'
-USER_VALID = 'user/sendCode'
-USER_VERIFY = 'user/verifyCode'
-USER_COMBINE = 'user/wxbindmobile'
-USER_LOGIN = 'user/login'
-USER_LOGOUT = 'user/logout'
-USER_REGISTER = 'user/mobilesignup'
-USER_ISMOBILEREGISTERED = 'user/ismobileregistered'
-USER_APPLIED_APPLICATIONS = 'user/{}/applications'
-USER_FAV_POSITION = 'user/{}/fav-position'
-WXUSER_QRCODE_SCANRESULT = 'weixin/qrcode/scanresult'
+INFRA_USER_INFO = 'user'
+INFRA_USER_VALID = 'user/sendCode'
+INFRA_USER_VERIFY = 'user/verifyCode'
+INFRA_USER_COMBINE = 'user/wxbindmobile'
+INFRA_USER_LOGIN = 'user/login'
+INFRA_USER_LOGOUT = 'user/logout'
+INFRA_USER_REGISTER = 'user/mobilesignup'
+INFRA_USER_ISMOBILEREGISTERED = 'user/ismobileregistered'
+INFRA_USER_APPLIED_APPLICATIONS = 'user/{}/applications'
+INFRA_USER_FAV_POSITION = 'user/{}/fav-position'
+INFRA_WXUSER_QRCODE_SCANRESULT = 'weixin/qrcode/scanresult'
 
 # 申请服务
 # REFERER: https://wiki.moseeker.com/application-api.md
-APPLICATION_APPLY_COUNT = 'application/count/check'
+INFRA_APPLICATION_APPLY_COUNT = 'application/count/check'
 
 # 职位服务
 # REFERER: https://wiki.moseeker.com/position-api.md
-POSITION_RECOMMEND = 'positions/recommended'
-POSITION_LIST = 'position/list'
-POSITION_LIST_RP_EXT = 'position/rpext'
-RP_POSITION_LIST = 'position/rplist'
-RP_POSITION_LIST_SHARE_INFO = 'position/list/hb_share_info'
+INFRA_POSITION_RECOMMEND = 'positions/recommended'
+INFRA_POSITION_LIST = 'position/list'
+INFRA_POSITION_LIST_RP_EXT = 'position/rpext'
+INFRA_RP_POSITION_LIST = 'position/rplist'
+INFRA_RP_POSITION_LIST_SHARE_INFO = 'position/list/hb_share_info'
 # ============================ 基础服务结束 ============================

@@ -228,6 +228,8 @@ class PositionPageService(PageService):
         """刷新候选人链路信息
         暂时调用 DAS，后续迁移到基础服务"""
 
+        # TODO 替换为基础服务，待 thrift 客户端可用
+
         self.logger.debug("send_candidate_view_position: %s" % params)
         try:
             yield async_das_get("candidate/glancePosition", params)

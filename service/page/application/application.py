@@ -46,7 +46,7 @@ class ApplicationPageService(PageService):
         })
         try:
             bool_res = True
-            ret = yield http_post(self.path.APPLICATION_APPLY_COUNT, req)
+            ret = yield http_post(self.path.INFRA_APPLICATION_APPLY_COUNT, req)
             bool_res = ret.data if ret.status == 0 else True
         except Exception as error:
             self.logger.warning(error)

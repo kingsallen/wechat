@@ -67,7 +67,7 @@ class JobPositionDataService(DataService):
         })
         try:
             response = list()
-            ret = yield http_get(self.path.POSITION_RECOMMEND, req)
+            ret = yield http_get(self.path.INFRA_POSITION_RECOMMEND, req)
             if ret.status == 0:
                 response = ret.data
         except Exception as error:

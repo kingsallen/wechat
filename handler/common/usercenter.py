@@ -22,9 +22,7 @@ class UsercenterHandler(BaseHandler):
 
         try:
             # 重置 event，准确描述
-
             method = self.json_args.get("$key")
-
             self._event = self._event + method
             yield getattr(self, 'put_' + method)()
         except Exception as e:
@@ -168,38 +166,6 @@ class ApplyrecordsHandler(BaseHandler):
                 records=res.data
             ))
 
-
-# class UserSettingHandler(BaseHandler):
-#     """用户配置"""
-#
-#
-#     @handle_response
-#     @verified_mobile_oneself
-#     @authenticated
-#     @gen.coroutine
-#     def get_set_passwd(self):
-#         """配置-设置密码"""
-#
-#         res = yield self.usercenter_ps.get_user(self.current_user.sysuser.id)
-#         if res.data.password is None:
-#             self.render(template_name="refer/weixin/sysuser_v2/accountconfig-password.html")
-#         else:
-#             self.write_error(404)
-#
-#
-#     @handle_response
-#     @verified_mobile_oneself
-#     @authenticated
-#     @gen.coroutine
-#     def get_change_passwd(self):
-#         """配置-修改密码"""
-#
-#         res = yield self.usercenter_ps.get_user(self.current_user.sysuser.id)
-#         if res.data.password:
-#             self.params._mobile = res.data.mobile or ''
-#             self.render(template_name="refer/weixin/sysuser_v2/accountconfig-password-mobilevalidate.html")
-#         else:
-#             self.write_error(404)
 
 class UploadHandler(BaseHandler):
     """图片上传

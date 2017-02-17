@@ -11,23 +11,23 @@ class InfraPositionDataService(DataService):
     @gen.coroutine
     def get_position_list(self, params):
         """普通职位列表"""
-        ret = yield http_get(path.POSITION_LIST, params)
+        ret = yield http_get(path.INFRA_POSITION_LIST, params)
         raise gen.Return(ret)
 
     @gen.coroutine
     def get_position_list_rp_ext(self, params):
         """获取职位的红包信息"""
-        ret = yield http_get(path.POSITION_LIST_RP_EXT, params)
+        ret = yield http_get(path.INFRA_POSITION_LIST_RP_EXT, params)
         raise gen.Return(ret)
 
     @gen.coroutine
     def get_rp_position_list(self, params):
         """红包职位列表"""
-        ret = yield http_get(path.RP_POSITION_LIST, params)
+        ret = yield http_get(path.INFRA_RP_POSITION_LIST, params)
         raise gen.Return(ret)
 
     @gen.coroutine
     def get_rp_share_info(self, params):
         """红包职位列表的分享信息"""
-        ret = yield http_get(path.RP_POSITION_LIST_SHARE_INFO, params)
+        ret = yield http_get(path.INFRA_RP_POSITION_LIST_SHARE_INFO, params)
         raise gen.Return(ret)
