@@ -135,8 +135,8 @@ class RegisterHandler(BaseHandler):
         """填写验证码"""
 
         mobile = self.get_secure_cookie(const.COOKIE_MOBILE_REGISTER)
-        code_type = self.params.code_type or None
-        if not code_type:
+        code_type = self.params.code_type
+        if not self._code_type_valid(code_type):
             return self.write_error(404)
 
         data = ObjectDict(
@@ -149,11 +149,21 @@ class RegisterHandler(BaseHandler):
     @gen.coroutine
     def get_setpassed(self):
         """设置密码"""
+        code_type = self.params.code_type
+        mmc = self.params._mmc or ""
+        site_title = "注册"
+
+        if code_type == 1:
+            # 忘记密码
+            site_title = "找回密码"
 
         data = ObjectDict(
-            code_type=self.params.code_type # 指定为设置密码的类型
+            code_type=code_type, # 指定为设置密码的类型
+            _mmc=mmc
         )
-        self.render_page("", data=data)
+        self.render_page("system/auth_set_passwd.html",
+            data=data,
+            site_title=site_title)
 
     @handle_response
     @gen.coroutine
@@ -264,3 +274,6 @@ class RegisterHandler(BaseHandler):
         self.send_json_success(data={
             "next_url": next_url
         })
+
+    def _code_type_valid(self, code):
+        return code in [0, 1]
