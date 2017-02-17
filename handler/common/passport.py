@@ -53,7 +53,7 @@ class LoginHandler(BaseHandler):
                 "next_url": next_url
             })
         else:
-            self.send_json_error()
+            self.send_json_error(res.message)
 
 
 class LogoutHandler(BaseHandler):

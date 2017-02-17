@@ -67,7 +67,6 @@ class CellphoneBindHandler(BaseHandler):
     def get_changemobile(self):
         yield self._opt_get_cellphone_code(const.MOBILE_CODE_OPT_TYPE.change_mobile)
 
-    @handle_response
     @gen.coroutine
     def _opt_get_cellphone_code(self, type):
 
@@ -90,78 +89,29 @@ class CellphoneBindHandler(BaseHandler):
     @gen.coroutine
     def post_register(self):
         res = yield self._opt_post_cellphone_code(const.MOBILE_CODE_OPT_TYPE.code_register)
-
         if res:
-            # 返回加密的 code 值，供前端拼接 url，以验证用户重要操作是否已经验证手机号
-            self.send_json_success(data={
-                "mc": encode_id(int(self.params.code), 8)
-            })
-
-            self.set_secure_cookie(const.COOKIE_MOBILE_CODE, self.params.code, expires_days=0.05, httponly=True)
-
-            # 检查是否需要合并 pc 账号
-            if self.current_user.sysuser \
-                and str(self.current_user.sysuser.mobile) != str(self.current_user.sysuser.username):
-                response = yield self.cellphone_ps.wx_pc_combine(
-                    mobile=self.params.mobile,
-                    unionid=self.current_user.sysuser.unionid,
-                )
-                if response.status != const.API_SUCCESS:
-                    self.send_json_error(message=response.message)
-                    return
-
-                ret_user_id = response.data.id
-                if str(ret_user_id) != str(self.current_user.sysuser.id):
-                    self.clear_cookie(name=const.COOKIE_SESSIONID)
-
-            else:
-                yield self.user_ps.bind_mobile(self.current_user.sysuser.id,
-                                               self.params.mobile)
+            yield self._opt_post_user_account()
 
     @handle_response
     @gen.coroutine
     def post_forgetpasswd(self):
-        res = yield self._opt_post_cellphone_code(const.MOBILE_CODE_OPT_TYPE.forget_password)
-
-        if res:
-            # 返回加密的 code 值，供前端拼接 url，以验证用户重要操作是否已经验证手机号
-            self.send_json_success(data={
-                "mc": encode_id(int(self.params.code), 8)
-            })
-
-            self.set_secure_cookie(const.COOKIE_MOBILE_CODE, self.params.code, expires_days=0.05, httponly=True)
+        yield self._opt_post_cellphone_code(const.MOBILE_CODE_OPT_TYPE.forget_password)
 
     @handle_response
     @gen.coroutine
     def post_setpassed(self):
-        res = yield self._opt_post_cellphone_code(const.MOBILE_CODE_OPT_TYPE.valid_old_mobile)
-
-        if res:
-            # 返回加密的 code 值，供前端拼接 url，以验证用户重要操作是否已经验证手机号
-            self.send_json_success(data={
-                "mc": encode_id(int(self.params.code), 8)
-            })
-
-            self.set_secure_cookie(const.COOKIE_MOBILE_CODE, self.params.code, expires_days=0.05, httponly=True)
+        yield self._opt_post_cellphone_code(const.MOBILE_CODE_OPT_TYPE.valid_old_mobile)
 
     @handle_response
     @gen.coroutine
     def post_changemobile(self):
         res = yield self._opt_post_cellphone_code(const.MOBILE_CODE_OPT_TYPE.change_mobile)
-
         if res:
-            # 返回加密的 code 值，供前端拼接 url，以验证用户重要操作是否已经验证手机号
-            self.send_json_success(data={
-                "mc": encode_id(int(self.params.code), 8)
-            })
+            yield self._opt_post_user_account()
 
-            self.set_secure_cookie(const.COOKIE_MOBILE_CODE, self.params.code, expires_days=0.05, httponly=True)
-
-
-    @handle_response
     @gen.coroutine
     def _opt_post_cellphone_code(self, type):
-
+        """处理验证码是否有效，正确"""
         try:
             self.guarantee('mobile', 'code')
         except:
@@ -178,4 +128,32 @@ class CellphoneBindHandler(BaseHandler):
             self.send_json_error(message=msg.CELLPHONE_INVALID_CODE)
             raise gen.Return(False)
 
+        # 返回加密的 code 值，供前端拼接 url，以验证用户重要操作是否已经验证手机号
+        self.send_json_success(data={
+            "mc": encode_id(int(self.params.code), 8)
+        })
+
+        self.set_secure_cookie(const.COOKIE_MOBILE_CODE, self.params.code, expires_days=0.05, httponly=True)
+
         raise gen.Return(True)
+
+    @gen.coroutine
+    def _opt_post_user_account(self):
+
+        # 检查是否需要合并 pc 账号
+        if self.current_user.sysuser \
+            and str(self.current_user.sysuser.mobile) != str(self.current_user.sysuser.username):
+            response = yield self.cellphone_ps.wx_pc_combine(
+                mobile=self.params.mobile,
+                unionid=self.current_user.sysuser.unionid,
+            )
+            if response.status != const.API_SUCCESS:
+                return
+
+            ret_user_id = response.data.id
+            if str(ret_user_id) != str(self.current_user.sysuser.id):
+                self.clear_cookie(name=const.COOKIE_SESSIONID)
+
+        else:
+            yield self.user_ps.bind_mobile(self.current_user.sysuser.id,
+                                           self.params.mobile)

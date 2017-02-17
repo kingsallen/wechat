@@ -220,7 +220,7 @@ def verified_mobile_oneself(func):
     @gen.coroutine
     def wrapper(self, *args, **kwargs):
         mobile_code = self.get_secure_cookie(const.COOKIE_MOBILE_CODE)
-        url_code = self.params.mc
+        url_code = self.params._mc
 
         if mobile_code is not None and url_code is not None \
             and encode_id(int(mobile_code), 8) == url_code:
