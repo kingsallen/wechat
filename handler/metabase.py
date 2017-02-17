@@ -309,6 +309,8 @@ class MetaBaseHandler(AtomHandler):
 
     def send_json_success(self, data=None, message=msg_const.RESPONSE_SUCCESS, http_code=200):
         """API 成功返回的便捷方法"""
+        if data is None:
+            data = ""
         self._send_json(data=data,
                         status_code=const.API_SUCCESS,
                         message=message,
@@ -316,6 +318,8 @@ class MetaBaseHandler(AtomHandler):
 
     def send_json_error(self, data=None, message=msg_const.RESPONSE_FAILURE, http_code=416):
         """API 错误返回的便捷方法"""
+        if data is None:
+            data = ""
         self._send_json(data=data,
                         status_code=const.API_FAILURE,
                         message=message,

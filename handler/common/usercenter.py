@@ -98,13 +98,13 @@ class UsercenterHandler(BaseHandler):
     @verified_mobile_oneself
     @authenticated
     @gen.coroutine
-    def put_change_passwd(self):
+    def put_password(self):
         """配置-修改密码"""
 
-        if not self.json_args.change_passwd:
+        if not self.json_args.password:
 
             res = yield self.usercenter_ps.update_user(self.current_user.sysuser.id, params={
-                "password": self.json_args.change_passwd,
+                "password": self.json_args.password,
             })
             if res.status == const.API_SUCCESS:
                 self.send_json_success()
