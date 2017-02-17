@@ -135,8 +135,13 @@ class RegisterHandler(BaseHandler):
         """填写验证码"""
 
         mobile = self.get_secure_cookie(const.COOKIE_MOBILE_REGISTER)
+        code_type = self.params.code_type or None
+        if not code_type:
+            return self.write_error(404)
+
         data = ObjectDict(
-            mobile=mobile
+            mobile=mobile,
+            code_type=code_type
         )
         self.render_page("system/register.html", data=data)
 
