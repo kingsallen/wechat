@@ -60,9 +60,14 @@ class UsercenterHandler(BaseHandler):
     def put_name(self):
         """配置-真实姓名"""
 
-        if is_chinese(self.json_args.name) or is_alphabet(self.json_args.name):
+        try:
+            self.guarantee('name')
+        except:
+            raise gen.Return()
+
+        if is_chinese(self.params.name) or is_alphabet(self.params.name):
             res = yield self.usercenter_ps.update_user(self.current_user.sysuser.id, params={
-                "name": self.json_args.name,
+                "name": self.params.name,
             })
 
             if res.status == const.API_SUCCESS:
@@ -84,9 +89,14 @@ class UsercenterHandler(BaseHandler):
     def put_email(self):
         """配置-Email"""
 
-        if email_validate(self.json_args.email):
+        try:
+            self.guarantee('email')
+        except:
+            raise gen.Return()
+
+        if email_validate(self.params.email):
             res = yield self.usercenter_ps.update_user(self.current_user.sysuser.id, params={
-                "email": self.json_args.email,
+                "email": self.params.email,
             })
             if res.status == const.API_SUCCESS:
                 self.send_json_success()
@@ -101,19 +111,23 @@ class UsercenterHandler(BaseHandler):
     def put_password(self):
         """配置-修改密码"""
 
-        if not self.json_args.password:
+        try:
+            self.guarantee('password')
+        except:
+            raise gen.Return()
 
-            res = yield self.usercenter_ps.update_user(self.current_user.sysuser.id, params={
-                "password": self.json_args.password,
-            })
-            if res.status == const.API_SUCCESS:
-                self.send_json_success()
-                return
-            else:
-                self.send_json_error(message=msg.INPUT_DISORDER)
-                return
+        self.logger.debug("params: {}".format(self.params))
+        self.logger.debug("json_args: {}".format(self.json_args))
+
+        res = yield self.usercenter_ps.update_user(self.current_user.sysuser.id, params={
+            "password": self.params.password,
+        })
+        if res.status == const.API_SUCCESS:
+            self.send_json_success()
+            return
         else:
-            self.send_json_error(message=msg.OPERATE_FAILURE)
+            self.send_json_error(message=msg.INPUT_DISORDER)
+            return
 
 class FavpositionHandler(BaseHandler):
     """个人中心-收藏职位"""
