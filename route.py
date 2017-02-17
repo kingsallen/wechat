@@ -44,7 +44,7 @@ common_routes = [
     (r"/m/api/position/star",                          "handler.common.position.PositionStarHandler",               {"event": "position_star"}),
     (r"/m/api/chat/unread[\/]*([0-9]+)*",              "handler.common.im.UnreadCountHandler",                      {"event": "chat_"}),
     (r"/m/api/mobilebinded",                           "handler.common.user.UserMobileBindedHandler",               {"event": "user_usermobilebinded"}),
-    (r"/m/api/cellphone",                              "handler.common.cellphone.CellphoneBindHandler",             {"event": "cellphone_bind"}),
+    (r"/m/api/cellphone[\/]*([a-z]+)*",                "handler.common.cellphone.CellphoneBindHandler",             {"event": "cellphone_*"}),
     (r"/m/api/user/currentinfo",                       "handler.common.interest.UserCurrentInfoHandler",            {"event": "user_currentinfo"}),
     (r"/m/api/upload/([a-z]*)",                        "handler.common.usercenter.UploadHandler",                   {"event": "image_"}),
     (r"/m/api/usercenter/favpositions",                "handler.common.usercenter.FavpositionHandler",              {"event": "usercenter_favpositions"}),

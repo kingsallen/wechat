@@ -7,8 +7,6 @@ import tornado.gen as gen
 import conf.common as const
 from service.page.base import PageService
 from setting import settings
-from util.tool.http_tool import http_post
-
 
 class UserPageService(PageService):
     def __init__(self):

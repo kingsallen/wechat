@@ -172,7 +172,7 @@ class PositionPageService(PageService):
         :param position_id: 职位 id
         """
 
-        pos_recommends = yield self.job_position_ds.get_recommend_positions(position_id=position_id)
+        pos_recommends = yield self.infra_position_ds.get_recommend_positions(position_id=position_id)
         raise gen.Return(pos_recommends)
 
     @gen.coroutine

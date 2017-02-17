@@ -53,24 +53,3 @@ class JobPositionDataService(DataService):
             fields=fields)
 
         raise gen.Return(ret)
-
-    @gen.coroutine
-    def get_recommend_positions(self, position_id):
-        """获得 JD 页推荐职位
-        reference: https://wiki.moseeker.com/position-api.md#recommended
-
-        :param position_id: 职位 id
-        """
-
-        req = ObjectDict({
-            'pid': position_id,
-        })
-        try:
-            response = list()
-            ret = yield http_get(self.path.INFRA_POSITION_RECOMMEND, req)
-            if ret.status == 0:
-                response = ret.data
-        except Exception as error:
-            self.logger.warning(error)
-
-        raise gen.Return(response)

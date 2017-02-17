@@ -31,7 +31,7 @@ def handle_response(func):
             yield func(self, *args, **kwargs)
         except Exception as e:
             self.logger.error(traceback.format_exc())
-            if self.request.headers.get("Accept", "").startswith("application/json") \
+            if self.request.headers.get("Content-Type", "").startswith("application/json") \
                 or self.request.method in ("PUT", "POST", "DELETE"):
                 self.send_json_error()
             else:

@@ -3,8 +3,6 @@
 from tornado import gen
 from service.page.base import PageService
 from util.common import ObjectDict
-from util.tool.http_tool import http_post
-
 
 class ApplicationPageService(PageService):
 
@@ -39,6 +37,9 @@ class ApplicationPageService(PageService):
         }
 
         """
+
+        if user_id is None or company_id is None:
+            raise gen.Return(True)
 
         req = ObjectDict({
             'user_id': user_id,

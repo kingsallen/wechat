@@ -4,6 +4,7 @@ from service.data.base import DataService
 import tornado.gen as gen
 import conf.path as path
 from util.tool.http_tool import http_get
+from util.common import ObjectDict
 
 
 class InfraPositionDataService(DataService):
@@ -33,3 +34,24 @@ class InfraPositionDataService(DataService):
         """红包职位列表的分享信息"""
         ret = yield http_get(path.INFRA_RP_POSITION_LIST_SHARE_INFO, params)
         raise gen.Return(ret)
+
+    @gen.coroutine
+    def get_recommend_positions(self, position_id):
+        """获得 JD 页推荐职位
+        reference: https://wiki.moseeker.com/position-api.md#recommended
+
+        :param position_id: 职位 id
+        """
+
+        req = ObjectDict({
+            'pid': position_id,
+        })
+        try:
+            response = list()
+            ret = yield http_get(path.INFRA_POSITION_RECOMMEND, req)
+            if ret.status == 0:
+                response = ret.data
+        except Exception as error:
+            self.logger.warning(error)
+
+        raise gen.Return(response)
