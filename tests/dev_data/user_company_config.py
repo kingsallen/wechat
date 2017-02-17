@@ -165,7 +165,7 @@ COMPANY_ACTIONSKY = ObjectDict({
         'working_env': [296, 297, 298, 299, 300],  # 工作环境对应的 hr_media id list
         #'figure': [],  # 人物寄语
         'members': [301, 302],  # 成员采访
-        'events': [303, 304, 305],  # 公司大事件
+        'events': [305, 304, 303],  # 公司大事件
         'address': [306],  # 公司地图
         'survey': [],  # 问卷调查
         'qr_code': [307]  # 二维码
