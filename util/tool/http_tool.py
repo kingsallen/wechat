@@ -9,11 +9,11 @@ import ujson
 from tornado import gen
 from tornado.httputil import url_concat, HTTPHeaders
 
-from util.common import ObjectDict
-from setting import settings
-import conf.common as constant
 from app import env
 from app import logger
+from setting import settings
+import conf.common as constant
+from util.common import ObjectDict
 
 
 @gen.coroutine

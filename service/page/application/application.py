@@ -44,11 +44,8 @@ class ApplicationPageService(PageService):
             'user_id': user_id,
             'company_id': company_id,
         })
-        try:
-            bool_res = True
-            ret = yield http_post(self.path.INFRA_APPLICATION_APPLY_COUNT, req)
-            bool_res = ret.data if ret.status == 0 else True
-        except Exception as error:
-            self.logger.warning(error)
+
+        ret = yield self.infra_application_ds.get_application_apply_count(req)
+        bool_res = ret.data if ret.status == 0 else True
 
         raise gen.Return(bool_res)

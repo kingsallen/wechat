@@ -19,8 +19,6 @@ OLD_PROFILE = '/mobile/profile'
 OLD_CHAT = '/mobile/chatroom'
 OLD_SYSUSER = '/mobile/sysuser'
 
-# 默认图片地址
-DEFAULT_COMPANY_LOGO = 'weixin/images/default-company.png'
 
 # ============================ 基础服务开始 ============================
 # 用户服务

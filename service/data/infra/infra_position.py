@@ -7,6 +7,8 @@ from util.tool.http_tool import http_get
 
 
 class InfraPositionDataService(DataService):
+    """对接职位服务
+        referer: https://wiki.moseeker.com/position-api.md"""
 
     @gen.coroutine
     def get_position_list(self, params):
