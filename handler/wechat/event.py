@@ -12,7 +12,6 @@ from tornado import gen
 
 from handler.metabase import MetaBaseHandler
 from util.common import ObjectDict
-from util.common.decorator import handle_response
 from util.tool.xml_tool import parse_msg
 from util.wechat.msgcrypt import WXBizMsgCrypt, SHA1
 
@@ -55,19 +54,14 @@ class WechatOauthHandler(MetaBaseHandler):
         user.wxuser = wxuser
         self.current_user = user
 
-    @handle_response
     @gen.coroutine
     def get(self):
         self.send_xml()
 
-
-    @handle_response
     @gen.coroutine
     def post(self):
         yield self._post()
 
-
-    @handle_response
     @gen.coroutine
     def _post(self):
 
@@ -86,103 +80,88 @@ class WechatOauthHandler(MetaBaseHandler):
         except Exception as e:
             self.logger.error(traceback.format_exc())
 
-    @handle_response
     @gen.coroutine
     def post_verify(self):
         self.send_xml()
 
-    @handle_response
     @gen.coroutine
     def post_text(self):
         """文本消息, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140453&t=0.33078310940365907"""
         res = yield self.event_ps.opt_text(self.msg, self.params.nonce, self.wechat)
         self.send_xml(res)
 
-    @handle_response
     @gen.coroutine
     def post_image(self):
         """图片消息, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140453&t=0.33078310940365907"""
         res = yield self.event_ps.opt_default(self.msg, self.params.nonce, self.wechat)
         self.send_xml(res)
 
-    @handle_response
     @gen.coroutine
     def post_voice(self):
         """语音消息, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140453&t=0.33078310940365907"""
         res = yield self.event_ps.opt_default(self.msg, self.params.nonce, self.wechat)
         self.send_xml(res)
 
-    @handle_response
     @gen.coroutine
     def post_video(self):
         """视频消息, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140453&t=0.33078310940365907"""
         res = yield self.event_ps.opt_default(self.msg, self.params.nonce, self.wechat)
         self.send_xml(res)
 
-    @handle_response
     @gen.coroutine
     def post_shortvideo(self):
         """小视屏消息, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140453&t=0.33078310940365907"""
         res = yield self.event_ps.opt_default(self.msg, self.params.nonce, self.wechat)
         self.send_xml(res)
 
-    @handle_response
     @gen.coroutine
     def post_location(self):
         """地理位置消息, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140453&t=0.33078310940365907"""
         res = yield self.event_ps.opt_default(self.msg, self.params.nonce, self.wechat)
         self.send_xml(res)
 
-    @handle_response
     @gen.coroutine
     def post_link(self):
         """链接消息, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140453&t=0.33078310940365907"""
         res = yield self.event_ps.opt_default(self.msg, self.params.nonce, self.wechat)
         self.send_xml(res)
 
-    @handle_response
     @gen.coroutine
     def post_event(self):
         """微信事件, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140454&t=0.6181039380535693"""
         event = self.msg['Event']
         yield getattr(self, 'event_' + event)()
 
-    @handle_response
     @gen.coroutine
     def event_subscribe(self):
         """关注事件"""
         res = yield self.event_ps.opt_event_subscribe(self.msg, self.current_user, self.params.nonce)
         self.send_xml(res)
 
-    @handle_response
     @gen.coroutine
     def event_unsubscribe(self):
         """取消关注事件"""
         res = yield self.event_ps.opt_event_unsubscribe(self.current_user)
         self.send_xml(res)
 
-    @handle_response
     @gen.coroutine
     def event_SCAN(self):
         """用户扫码事件"""
         res = yield self.event_ps.opt_event_scan(self.current_user, self.msg)
         self.send_xml(res)
 
-    @handle_response
     @gen.coroutine
     def event_CLICK(self):
         """自定义菜单事件
         用户点击自定义菜单后，微信会把点击事件推送给开发者，请注意，点击菜单弹出子菜单，不会产生上报"""
         self.send_xml()
 
-    @handle_response
     @gen.coroutine
     def event_VIEW(self):
         """自定义菜单事件
         点击菜单跳转链接时的事件推送"""
         self.send_xml()
 
-    @handle_response
     @gen.coroutine
     def event_LOCATION(self):
         """上报地理位置事件
@@ -191,32 +170,27 @@ class WechatOauthHandler(MetaBaseHandler):
         上报地理位置时，微信会将上报地理位置事件推送到开发者填写的URL。"""
         self.send_xml()
 
-    @handle_response
     @gen.coroutine
     def event_kf_create_session(self):
         """客服功能, referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140547&t=0.4438341066455047
         获取多客服会话状态推送事件 - 接入会话"""
         self.send_xml()
 
-    @handle_response
     @gen.coroutine
     def event_kf_close_session(self):
         """获取多客服会话状态推送事件 - 关闭会话"""
         self.send_xml()
 
-    @handle_response
     @gen.coroutine
     def event_kf_switch_session(self):
         """获取多客服会话状态推送事件 - 转接会话"""
         self.send_xml()
 
-    @handle_response
     @gen.coroutine
     def event_MASSSENDJOBFINISH(self):
         """微信群发事件 referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1481187827_i0l21&t=0.944874910600048"""
         self.send_xml()
 
-    @handle_response
     @gen.coroutine
     def event_TEMPLATESENDJOBFINISH(self):
         """消息模板推送结果 referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1433751277&t=0.29629938341489237
@@ -278,7 +252,6 @@ class WechatThirdOauthHandler(WechatOauthHandler):
     def prepare(self):
         pass
 
-    @handle_response
     @gen.coroutine
     def post(self, app_id):
 

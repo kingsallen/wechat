@@ -33,10 +33,6 @@ class CompatibleHandler(BaseHandler):
                 self.redirect(make_url(path.POSITION_PATH.format(self.params.pid), self.params))
                 return
 
-
-            self.logger.debug("request: %s" % self.request)
-
-
     @handle_response
     @gen.coroutine
     def post(self):

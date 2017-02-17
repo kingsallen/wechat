@@ -220,7 +220,7 @@ class RegisterHandler(BaseHandler):
         else:
             # 返回加密的 code 值，供前端拼接 url，以验证用户重要操作是否已经验证手机号
             self.send_json_success(data={
-                "mmc": encode_id(int(self.params.mobile), 8),
+                "_mmc": encode_id(int(self.params.mobile), 8),
                 "code_type": self.params.code_type
             })
 
@@ -232,14 +232,14 @@ class RegisterHandler(BaseHandler):
         try:
             self.guarantee("password", "repassword")
         except AttributeError:
-            return
+            raise gen.Return()
 
         if self.params.password != self.params.repassword:
             self.send_json_error(message=msg.CELLPHONE_REGISTER_PASSWD_NOT_MATCH)
             raise gen.Return()
 
         mobile = self.get_secure_cookie(const.COOKIE_MOBILE_REGISTER)
-        url_mobile = self.params.mmc
+        url_mobile = self.params._mmc
 
         if mobile is None or url_mobile is None \
             or encode_id(int(mobile), 8) != url_mobile:

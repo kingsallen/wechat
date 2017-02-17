@@ -588,7 +588,10 @@ class PositionStarHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def post(self):
-        self.guarantee('star', 'pid')
+        try:
+            self.guarantee('star', 'pid')
+        except:
+            raise gen.Return()
 
         # 收藏操作
         if self.params.star:

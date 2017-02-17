@@ -18,15 +18,15 @@ class LandingHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         selected = ObjectDict({
-            "city": self.get_argument("city", ''),
-            "salary": self.get_argument("salary", ''),
-            "occupation": self.get_argument("occupation", ''),
-            "department": self.get_argument("department", ''),
-            "candidate_source": self.get_argument("candidate_source", ''),
-            "employment_type": self.get_argument("employment_type", ''),
-            "degree": self.get_argument("degree", ''),
-            "did": int(self.get_argument("did", 0)) if self.get_argument("did", 0) else 0,
-            "custom": self.get_argument("custom", '')
+            "city": self.params.city,
+            "salary": self.params.salary,
+            "occupation": self.params.occupation,
+            "department": self.params.department,
+            "candidate_source": self.params.candidate_source,
+            "employment_type": self.params.employment_type,
+            "degree": self.params.degree,
+            "did": int(self.params.did) if self.params.did else 0,
+            "custom": self.params.custom
         })
 
         search_seq = yield self.landing_ps.get_landing_item(self.current_user.company,

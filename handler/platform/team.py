@@ -22,7 +22,6 @@ class TeamIndexHandler(BaseHandler):
     @check_sub_company
     @gen.coroutine
     def get(self):
-        template_name = 'company/team.html'
         if self.params.sub_company:
             sub_company_flag = True
             current_company = self.params.pop('sub_company')
@@ -35,7 +34,7 @@ class TeamIndexHandler(BaseHandler):
 
         self.params.share = self._share(current_company)
 
-        self.render_page(template_name, data)
+        self.render_page("company/team.html", data)
         return
 
     def _share(self, company):
@@ -65,7 +64,7 @@ class TeamDetailHandler(BaseHandler):
         team = yield self.team_ps.get_team_by_id(team_id)
         if team.company_id != self.current_user.company.id:
             self.write_error(404)
-            return
+            raise gen.Return()
 
         data = yield self.team_ps.get_team_detail(
             self.current_user, current_company, team, self.params)
@@ -76,7 +75,6 @@ class TeamDetailHandler(BaseHandler):
                                         team.name, share_cover_url)
 
         self.render_page(template_name='company/team.html', data=data)
-        return
 
     def _share(self, company, team_name, share_cover_url):
         config = COMPANY_CONFIG.get(company.id)

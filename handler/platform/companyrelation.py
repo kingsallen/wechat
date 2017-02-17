@@ -27,7 +27,11 @@ class CompanyVisitReqHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def post(self):
-        self.guarantee('status')
+        try:
+            self.guarantee('status')
+        except:
+            raise gen.Return()
+
         result = yield self.user_company_ps.set_visit_company(
             current_user=self.current_user, param=self.params)
 
@@ -44,7 +48,11 @@ class CompanyFollowHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def post(self):
-        self.guarantee('status')
+        try:
+            self.guarantee('status')
+        except:
+            raise gen.Return()
+
         result = yield self.user_company_ps.set_company_follow(
             current_user=self.current_user, param=self.params)
 
@@ -118,7 +126,10 @@ class CompanySurveyHandler(BaseHandler):
     @gen.coroutine
     def post(self):
         """处理用户填写公司 survey 的 post api 请求"""
-        self.guarantee('selected', 'other')
+        try:
+            self.guarantee('selected', 'other')
+        except:
+            raise gen.Return()
 
         _company_id = self.current_user.company.id
         _sysuser_id = self.current_user.sysuser.id
