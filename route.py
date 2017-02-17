@@ -52,7 +52,7 @@ common_routes = [
     (r"/m/api/usercenter",                             "handler.common.usercenter.UsercenterHandler",               {"event": "usercenter_"}),
 
     # 兼容老微信 url，进行302跳转，event 设置为 NULL
-    (r"/.*",                                           "handler.common.compatible.CompatibleHandler",               {"event": "NULL"})
+    # (r"/.*",                                           "handler.common.compatible.CompatibleHandler",               {"event": "NULL"})
 
 ]
 

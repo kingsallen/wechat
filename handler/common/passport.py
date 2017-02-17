@@ -53,7 +53,7 @@ class LoginHandler(BaseHandler):
                 "next_url": next_url
             })
         else:
-            self.send_json_error(res.message)
+            self.send_json_error(message=res.message)
 
 
 class LogoutHandler(BaseHandler):
@@ -72,7 +72,9 @@ class LogoutHandler(BaseHandler):
         session_id = to_str(self.get_secure_cookie(const.COOKIE_SESSIONID))
         self.clear_cookie(name=const.COOKIE_SESSIONID)
         pass_session = PassportCache()
+        # 清除公众号，仟寻下的用户 session
         pass_session.clear_session(session_id, self.current_user.wechat.id)
+        pass_session.clear_session(session_id, self.settings.qx_wechat_id)
         redirect_url = make_url(path.POSITIONLIST_PATH, params=self.params, escape=['next_url'])
         self.redirect(redirect_url)
 

@@ -280,7 +280,7 @@ class PositionPageService(PageService):
     def limited_company_info(current_company):
         """返回一个 company 的数据子集，用于职位列表的渲染"""
         return (ObjectDict(
-            logo=current_company.logo or const.COMPANY_HEADIMG,
+            logo=current_company.logo,
             abbreviation=current_company.abbreviation or '',
             industry=current_company.industry or '',
             scale_name=current_company.scale,

@@ -33,9 +33,9 @@ class LandingHandler(BaseHandler):
                                                             self.current_user.wechat.company_id, selected)
 
         company = ObjectDict({
-            "logo": self.static_url(self.current_user.company.get("logo")),
+            "logo": self.static_url(self.current_user.company.logo),
             "name": self.current_user.company.get("abbreviation"),
-            "image": self.static_url(self.current_user.company.get("conf_search_img")),
+            "image": self.static_url(self.current_user.company.conf_search_img),
             "search_seq": search_seq
         })
 

@@ -4,6 +4,7 @@
 
 import re
 import ujson
+import conf.common as const
 from util.common import ObjectDict
 from tornado import gen
 from service.page.base import PageService
@@ -70,6 +71,10 @@ class CompanyPageService(PageService):
         # 处理公司规模
         if company.scale:
             company.scale_name = self.constant.SCALE.get(str(company.scale))
+
+        # 处理公司默认 logo
+        if not company.logo:
+            company.logo = const.COMPANY_HEADIMG
 
         # 处理 impression:
         if company.impression:

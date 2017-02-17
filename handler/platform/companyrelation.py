@@ -108,7 +108,7 @@ class CompanyInfoHandler(BaseHandler):
         company = ObjectDict({
             "abbreviation": company_info.abbreviation,
             "name": company_info.name,
-            "logo": self.static_url(company_info.logo or const.COMPANY_HEADIMG),
+            "logo": self.static_url(company_info.logo),
             "industry": company_info.industry,
             "scale_name": company_info.scale_name,
             "homepage": company_info.homepage,
