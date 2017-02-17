@@ -138,7 +138,7 @@ class RegisterHandler(BaseHandler):
         data = ObjectDict(
             mobile=mobile
         )
-        self.render_page("", data=data)
+        self.render_page("system/register.html", data=data)
 
     @handle_response
     @gen.coroutine
