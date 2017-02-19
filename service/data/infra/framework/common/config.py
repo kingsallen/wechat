@@ -52,10 +52,15 @@ class Config(object):
             raise ValueError('Not a boolean: %s' % v)
         return self._boolean_mappings[v.lower()]
 
+conf_path = os.path.join(os.path.dirname(__file__), "service.conf")
+CONF = Config(conf_path)
+
 if __name__ == "__main__":
-    conf = Config("./local.conf")
-    print(conf.get("zookeeper", "address"))
-    print(conf.getboolean("zookeeper", "se_redis", "False"))
-    print(conf.getint("zookeeper", "alskdj"))
-    conf.set("server", "port", "8888")
-    print(conf.getint("server", "port"))
+    pass
+
+    # conf = Config("./local.conf")
+    # print(conf.get("zookeeper", "address"))
+    # print(conf.getboolean("zookeeper", "se_redis", "False"))
+    # print(conf.getint("zookeeper", "alskdj"))
+    # conf.set("server", "port", "8888")
+    # print(conf.getint("server", "port"))

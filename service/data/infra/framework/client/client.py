@@ -1,9 +1,9 @@
 # coding:UTF-8
 
-from framework.client.connection_pool import ConnectionPool
-from framework.client.load_balancer.loadbalancer import LoadBalancer
-from framework.client.load_balancer.loadbalancer import RoundRobinStrategy
-from framework.common.zookeeper_manager import ZkManager
+from ...framework.client.connection_pool import ConnectionPool
+from ...framework.client.load_balancer.loadbalancer import LoadBalancer
+from ...framework.client.load_balancer.loadbalancer import RoundRobinStrategy
+from ...framework.common.zookeeper_manager import ZkManager
 
 import tornado
 from kazoo.client import KazooClient, KazooState
