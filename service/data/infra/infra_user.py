@@ -140,7 +140,7 @@ class InfraUserDataService(DataService):
         :param mobile: 手机号
         """
         params = ObjectDict(
-            username=mobile,
+            mobile=mobile,
         )
 
         ret = yield http_post(path.INFRA_USER_ISMOBILEREGISTERED, params)
