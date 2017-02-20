@@ -179,7 +179,7 @@ class RegisterHandler(BaseHandler):
 
         if self.params.code_type == 1:
             # 忘记密码
-            if not ret.data.exist:
+            if ret.status != const.API_SUCCESS or not ret.data.exist:
                 # 手机号不存在，无法修改密码
                 self.send_json_error(message=msg.CELLPHONE_INVALID_MOBILE)
                 raise gen.Return()
@@ -187,7 +187,7 @@ class RegisterHandler(BaseHandler):
             valid_type = const.MOBILE_CODE_OPT_TYPE.code_register
         else:
             # 普通注册
-            if ret.data.exist:
+            if ret.status != const.API_SUCCESS or ret.data.exist:
                 # 手机号已存在，不能再注册新用户
                 self.send_json_error(message=msg.CELLPHONE_MOBILE_HAD_REGISTERED)
                 raise gen.Return()
