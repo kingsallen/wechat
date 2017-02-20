@@ -88,6 +88,10 @@ def cache(prefix=None, key=None, ttl=60, hash=True, lock=True, separator=":"):
                 else:
                     redis_key = key
 
+                print ("args: {}".format(args))
+                print ("kwargs: {}".format(kwargs))
+                print ("redis_key: {}".format(redis_key))
+
                 if hash:
                     redis_key = hashlib.md5(redis_key.encode("utf-8")).hexdigest()
 
@@ -95,8 +99,12 @@ def cache(prefix=None, key=None, ttl=60, hash=True, lock=True, separator=":"):
 
                 if base_cache.exists(redis_key):
                     cache_data = base_cache.get(redis_key)
+                    print ("3333333")
+                    print (cache_data)
                 else:
                     cache_data = yield func(*args, **kwargs)
+                    print ("44444444")
+                    print (cache_data)
                     if cache_data is not None:
                         base_cache.set(redis_key, cache_data, ttl)
 

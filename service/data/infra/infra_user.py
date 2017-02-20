@@ -118,17 +118,15 @@ class InfraUserDataService(DataService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def post_register(self, mobile, password, code):
+    def post_register(self, mobile, password):
         """用户注册
         :param mobile: 手机号
         :param password: 密码
-        :param code:
         """
         params = ObjectDict(
             username=mobile,
             mobile=mobile,
             password=password,
-            code=code
         )
 
         ret = yield http_post(path.INFRA_USER_REGISTER, params)
