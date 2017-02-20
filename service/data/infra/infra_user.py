@@ -157,6 +157,18 @@ class InfraUserDataService(DataService):
         raise gen.Return(ret)
 
     @gen.coroutine
+    def post_resetpassword(self, mobile, password):
+        """重置密码"""
+
+        params = ObjectDict({
+            "mobile": mobile,
+            "password": password
+        })
+
+        ret = yield http_post(path.INFRA_USER_RESETPASSWD, params)
+        raise gen.Return(ret)
+
+    @gen.coroutine
     def post_scanresult(self, params):
         """
         设置二维码扫描结果

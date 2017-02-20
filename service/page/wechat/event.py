@@ -24,12 +24,10 @@ from util.tool.date_tool import curr_now
 from util.tool.str_tool import mobile_validate
 from util.common import ObjectDict
 from util.tool.json_tool import json_dumps
-from util.common.decorator import cache
 
 
 class EventPageService(PageService):
 
-    # @cache(ttl=100)
     @gen.coroutine
     def opt_default(self, msg, nonce, wechat):
         """被动回复用户消息的总控处理

@@ -42,6 +42,13 @@ class UsercenterPageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
+    def post_resetpassword(self, mobile, password):
+        """重置密码"""
+
+        ret = yield self.infra_user_ds.post_resetpassword(mobile, password)
+        raise gen.Return(ret)
+
+    @gen.coroutine
     def post_login(self, params):
         """用户登录
         微信 unionid, 或者 mobile+password, 或者mobile+code, 3选1

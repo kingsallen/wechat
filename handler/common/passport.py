@@ -245,7 +245,7 @@ class RegisterHandler(BaseHandler):
         """提交设置的密码"""
 
         try:
-            self.guarantee("password", "repassword")
+            self.guarantee("password", "repassword", "code_type")
         except AttributeError:
             raise gen.Return()
 
@@ -261,10 +261,17 @@ class RegisterHandler(BaseHandler):
             self.send_json_error(message=msg.CELLPHONE_MOBILE_SET_PASSWD_FAILED)
             raise gen.Return()
 
-        res = yield self.usercenter_ps.post_register(mobile, self.params.password)
-        if res.status != const.API_SUCCESS:
-            self.send_json_error(message=msg.CELLPHONE_REGISTER_FAILED)
-            raise gen.Return()
+        if self.params.code_type == 1:
+            # 忘记密码
+            res = yield self.usercenter_ps.post_resetpassword(mobile, self.params.password)
+            if res.status != const.API_SUCCESS:
+                self.send_json_error(message=msg.CELLPHONE_RESET_PASSWORD)
+                raise gen.Return()
+        else:
+            res = yield self.usercenter_ps.post_register(mobile, self.params.password)
+            if res.status != const.API_SUCCESS:
+                self.send_json_error(message=msg.CELLPHONE_REGISTER_FAILED)
+                raise gen.Return()
 
         next_url = self.json_args.get("next_url", "")
         session_id = self._make_new_session_id(res.data.user_id)
