@@ -11,7 +11,9 @@ class JobOccupationDataService(DataService):
 
     @cache(ttl=60)
     @gen.coroutine
-    def get_occupation(self, conds, fields=[]):
+    def get_occupation(self, conds, fields=None):
+
+        fields = fields or []
 
         if conds is None or not (isinstance(conds, (dict, str))):
             self.logger.warning("Warning:[get_occupation][invalid parameters], Detail:[conds: {0}, "
@@ -26,7 +28,11 @@ class JobOccupationDataService(DataService):
 
     @cache(ttl=60)
     @gen.coroutine
-    def get_occupations_list(self, conds, fields, options=[], appends=[], index='', params=[]):
+    def get_occupations_list(self, conds, fields, options=None, appends=None, index='', params=None):
+
+        options = options or []
+        appends = appends or []
+        params = params or []
 
         if conds is None or not (isinstance(conds, (dict, str))):
             self.logger.warning("Warning:[get_occupations_list][invalid parameters], Detail:[conds: {0}, "

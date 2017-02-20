@@ -17,7 +17,9 @@ class HrResourceDataService(DataService):
 
     @cache(ttl=300)
     @gen.coroutine
-    def get_resource(self, conds, fields=[]):
+    def get_resource(self, conds, fields=None):
+
+        fields = fields or []
 
         if conds is None or not (isinstance(conds, (dict, str))):
             self.logger.warning("Warning:[get_resource][invalid parameters], \
@@ -32,7 +34,9 @@ class HrResourceDataService(DataService):
 
     @cache(ttl=300)
     @gen.coroutine
-    def get_resource_list(self, conds, fields=[]):
+    def get_resource_list(self, conds, fields=None):
+
+        fields = fields or []
 
         if conds is None or not (isinstance(conds, (dict, str))):
             self.logger.warning("Warning:[get_resource_list][invalid parameters], \

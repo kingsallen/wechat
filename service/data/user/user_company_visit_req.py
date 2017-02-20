@@ -15,7 +15,8 @@ from util.common import ObjectDict
 class UserCompanyVisitReqDataService(DataService):
 
     @gen.coroutine
-    def get_visit_cmpy(self, conds, fields=[]):
+    def get_visit_cmpy(self, conds, fields=None):
+        fields = fields or []
         if not self._valid_conds(conds):
             raise gen.Return(ObjectDict())
         if not fields:

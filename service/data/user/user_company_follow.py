@@ -15,10 +15,12 @@ from util.common import ObjectDict
 class UserCompanyFollowDataService(DataService):
 
     @gen.coroutine
-    def get_user(self, conds, fields=[]):
+    def get_user(self, conds, fields=None):
         """
         Testing code and delete when release
         """
+
+        fields = fields or []
         if not self._valid_conds(conds):
             raise gen.Return(ObjectDict())
         if not fields:
@@ -28,7 +30,9 @@ class UserCompanyFollowDataService(DataService):
         raise gen.Return(response)
 
     @gen.coroutine
-    def get_fllw_cmpy(self, conds, fields=[]):
+    def get_fllw_cmpy(self, conds, fields=None):
+
+        fields = fields or []
         if not self._valid_conds(conds):
             raise gen.Return(ObjectDict())
         if not fields:

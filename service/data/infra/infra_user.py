@@ -89,7 +89,7 @@ class InfraUserDataService(DataService):
             'type': type,
         })
 
-        ret = yield http_post(path.INFRA_USER_VERIFY, params)
+        ret = yield http_get(path.INFRA_USER_VERIFY, params)
         raise gen.Return(ret)
 
     @gen.coroutine

@@ -12,6 +12,7 @@ class HrHbConfigDataService(DataService):
     @cache(ttl=60)
     @gen.coroutine
     def get_hr_hb_config(self, conds, fields=None):
+
         fields = fields or []
 
         if not self._valid_conds(conds):

@@ -12,7 +12,10 @@ class HrTeamDataService(DataService):
 
     @cache(ttl=300)
     @gen.coroutine
-    def get_team(self, conds, fields=[]):
+    def get_team(self, conds, fields=None):
+
+        fields = fields or []
+
         if conds is None or not (isinstance(conds, (dict, str))):
             self.logger.warning("Warning:[get_team][invalid parameters], \
                     Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
@@ -26,7 +29,10 @@ class HrTeamDataService(DataService):
 
     @cache(ttl=300)
     @gen.coroutine
-    def get_team_list(self, conds, fields=[]):
+    def get_team_list(self, conds, fields=None):
+
+        fields = fields or []
+
         if conds is None or not (isinstance(conds, (dict, str))):
             self.logger.warning("Warning:[get_team_list][invalid parameters], \
                     Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))

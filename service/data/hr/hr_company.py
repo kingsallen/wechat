@@ -11,7 +11,9 @@ class HrCompanyDataService(DataService):
 
     @cache(ttl=300)
     @gen.coroutine
-    def get_company(self, conds, fields=[]):
+    def get_company(self, conds, fields=None):
+
+        fields = fields or []
 
         if conds is None or not (isinstance(conds, (dict, str))):
             self.logger.warning("Warning:[get_company][invalid parameters], Detail:[conds: {0}, "
@@ -26,7 +28,11 @@ class HrCompanyDataService(DataService):
 
     @cache(ttl=300)
     @gen.coroutine
-    def get_companys_list(self, conds, fields, options=[], appends=[], index='', params=[]):
+    def get_companys_list(self, conds, fields, options=None, appends=None, index='', params=None):
+
+        options = options or []
+        appends = appends or []
+        params = params or []
 
         if conds is None or not (isinstance(conds, (dict, str))):
             self.logger.warning("Warning:[get_companys_list][invalid parameters], Detail:[conds: {0}, "

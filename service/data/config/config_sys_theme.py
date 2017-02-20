@@ -14,6 +14,8 @@ class ConfigSysThemeDataService(DataService):
     @gen.coroutine
     def get_theme(self, conds, fields=None):
 
+        fields = fields or []
+
         if conds is None or not (isinstance(conds, (dict, str))):
             self.logger.warning("Warning:[get_theme][invalid parameters], Detail:[conds: {0}, "
                         "type: {1}]".format(conds, type(conds)))

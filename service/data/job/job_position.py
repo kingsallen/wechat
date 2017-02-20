@@ -11,7 +11,9 @@ from util.common import ObjectDict
 class JobPositionDataService(DataService):
 
     @gen.coroutine
-    def get_position(self, conds, fields=[]):
+    def get_position(self, conds, fields=None):
+
+        fields = fields or []
 
         if conds is None or not (isinstance(conds, (dict, str))):
             self.logger.warning("Warning:[get_position][invalid parameters], Detail:[conds: {0}, "
@@ -26,7 +28,11 @@ class JobPositionDataService(DataService):
 
     @cache(ttl=60)
     @gen.coroutine
-    def get_positions_list(self, conds, fields=None, options=[], appends=[], index='', params=[]):
+    def get_positions_list(self, conds, fields=None, options=None, appends=None, index='', params=None):
+
+        options = options or []
+        appends = appends or []
+        params = params or []
 
         if conds is None or not (isinstance(conds, (dict, str))):
             self.logger.warning("Warning:[get_positions_list][invalid parameters], Detail:[conds: {0}, "

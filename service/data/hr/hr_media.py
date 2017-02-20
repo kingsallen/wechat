@@ -17,7 +17,9 @@ class HrMediaDataService(DataService):
 
     @cache(ttl=300)
     @gen.coroutine
-    def get_medium(self, conds, fields=[]):
+    def get_medium(self, conds, fields=None):
+
+        fields = fields or []
 
         if conds is None or not (isinstance(conds, (dict, str))):
             self.logger.warning("Warning:[get_medium][invalid parameters], \
@@ -32,7 +34,9 @@ class HrMediaDataService(DataService):
 
     @cache(ttl=300)
     @gen.coroutine
-    def get_media_list(self, conds, fields=[]):
+    def get_media_list(self, conds, fields=None):
+
+        fields = fields or []
 
         if conds is None or not (isinstance(conds, (dict, str))):
             self.logger.warning("Warning:[get_media_list][invalid parameters], \

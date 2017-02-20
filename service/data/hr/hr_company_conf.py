@@ -11,7 +11,9 @@ class HrCompanyConfDataService(DataService):
 
     @cache(ttl=300)
     @gen.coroutine
-    def get_company_conf(self, conds, fields=[]):
+    def get_company_conf(self, conds, fields=None):
+
+        fields = fields or []
 
         if conds is None or not (isinstance(conds, (dict, str))):
             self.logger.warning("Warning:[get_company_conf][invalid parameters], Detail:[conds: {0}, "
