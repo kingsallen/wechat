@@ -9,7 +9,7 @@ import conf.common as const
 from handler.base import BaseHandler
 from cache.user.passport_session import PassportCache
 from util.common.decorator import handle_response
-from util.tool.str_tool import to_str
+from util.tool.str_tool import to_str, password_crypt
 from util.tool.url_tool import make_url
 from util.common.cipher import encode_id
 
@@ -41,7 +41,7 @@ class LoginHandler(BaseHandler):
 
         res = yield self.usercenter_ps.post_login(params={
             "mobile": self.params.mobile,
-            "password": self.params.password,
+            "password": password_crypt(self.params.password),
         })
 
         next_url = self.json_args.get("next_url", "")
@@ -261,14 +261,15 @@ class RegisterHandler(BaseHandler):
             self.send_json_error(message=msg.CELLPHONE_MOBILE_SET_PASSWD_FAILED)
             raise gen.Return()
 
+        password = password_crypt(self.params.password)
         if self.params.code_type == 1:
             # 忘记密码
-            res = yield self.usercenter_ps.post_resetpassword(mobile, self.params.password)
+            res = yield self.usercenter_ps.post_resetpassword(mobile, password)
             if res.status != const.API_SUCCESS:
                 self.send_json_error(message=msg.CELLPHONE_RESET_PASSWORD)
                 raise gen.Return()
         else:
-            res = yield self.usercenter_ps.post_register(mobile, self.params.password)
+            res = yield self.usercenter_ps.post_register(mobile, password)
             if res.status != const.API_SUCCESS:
                 self.send_json_error(message=msg.CELLPHONE_REGISTER_FAILED)
                 raise gen.Return()

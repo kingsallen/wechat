@@ -6,7 +6,7 @@ from handler.base import BaseHandler
 import conf.common as const
 import conf.message as msg
 from util.common.decorator import handle_response, verified_mobile_oneself, authenticated
-from util.tool.str_tool import gen_salary, email_validate, is_alphabet, is_chinese
+from util.tool.str_tool import gen_salary, email_validate, is_alphabet, is_chinese, password_crypt
 from util.tool.date_tool import jd_update_date
 from util.image.upload import QiniuUpload
 from util.common import ObjectDict
@@ -120,7 +120,7 @@ class UsercenterHandler(BaseHandler):
         self.logger.debug("json_args: {}".format(self.json_args))
 
         res = yield self.usercenter_ps.update_user(self.current_user.sysuser.id, params={
-            "password": self.params.password,
+            "password": password_crypt(self.params.password),
         })
         if res.status == const.API_SUCCESS:
             self.send_json_success()

@@ -5,6 +5,19 @@
 import re
 import random
 import string
+import hashlib
+
+def password_crypt(password):
+    """
+    密码加密
+    :parameter:
+        password : 需要加密的密码
+    :Exception:加密出错，异常上抛处理
+    """
+    try:
+        return hashlib.sha1(password.strip().encode("utf-8")).hexdigest()
+    except Exception as e:
+        raise e
 
 
 def gen_salary(salary_top, salary_bottom):
@@ -182,5 +195,6 @@ if __name__ == '__main__':
     # print (to_str(" jid"))
     # print (to_str("j dfd"))
 
-    print (mobile_validate(13656789068))
+    # print (mobile_validate(13656789068))
+    print (password_crypt("123456"))
 
