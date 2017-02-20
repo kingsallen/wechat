@@ -95,6 +95,7 @@ PAGE_COMPANY_INFO = "公司详情"
 PAGE_REGISTER = "注册"
 PAGE_FORGET_PASSWORD = "忘记密码"
 
+
 # ++++++++++REDIS KEYS++++++++
 SESSION_USER = "SESSION_USER_{0}_{1}"
 SESSION_ID = "{0}:{1}"

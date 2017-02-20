@@ -69,7 +69,7 @@ class InfraUserDataService(DataService):
         """
         params = ObjectDict({
             'mobile': mobile,
-            'type': type
+            'type': int(type)
         })
         ret = yield http_post(path.INFRA_USER_VALID, params)
         raise gen.Return(ret)
@@ -86,7 +86,7 @@ class InfraUserDataService(DataService):
         params = ObjectDict({
             'mobile': mobile,
             'code': code,
-            'type': type,
+            'type': int(type),
         })
 
         ret = yield http_post(path.INFRA_USER_VERIFY, params)
