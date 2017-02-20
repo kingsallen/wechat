@@ -137,7 +137,7 @@ class RegisterHandler(BaseHandler):
         mobile = self.get_secure_cookie(const.COOKIE_MOBILE_REGISTER)
         code_type = self.params.code_type
         if not self._code_type_valid(code_type):
-            self.logger.debug("[m/register/code] invalid code_type")
+            self.logger.debug("[m/register/code] invalid code_type {}".format(code_type))
             return self.write_error(404)
 
         data = ObjectDict(
@@ -275,4 +275,4 @@ class RegisterHandler(BaseHandler):
         })
 
     def _code_type_valid(self, code):
-        return code in [0, 1]
+        return code in ["0", "1"]
