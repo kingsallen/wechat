@@ -161,9 +161,7 @@ class RegisterHandler(BaseHandler):
             code_type=code_type, # 指定为设置密码的类型
             _mmc=mmc
         )
-        self.render_page("system/auth_set_passwd.html",
-            data=data,
-            site_title=site_title)
+        self.render_page("system/auth_set_passwd.html", data=data, meta_title=site_title)
 
     @handle_response
     @gen.coroutine
