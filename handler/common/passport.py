@@ -135,13 +135,13 @@ class RegisterHandler(BaseHandler):
         """填写验证码"""
 
         mobile = self.get_secure_cookie(const.COOKIE_MOBILE_REGISTER)
-        code_type = self.params.code_type
+        code_type = int(self.params.code_type)
 
         data = ObjectDict(
             national_code_tpl=const.NATIONAL_CODE,
             national_code=1,
             mobile=mobile,
-            code_type=int(code_type)
+            code_type=code_type
         )
         self.render_page("system/register.html", data=data)
 
@@ -149,7 +149,7 @@ class RegisterHandler(BaseHandler):
     @gen.coroutine
     def get_setpasswd(self):
         """设置密码"""
-        code_type = self.params.code_type
+        code_type = int(self.params.code_type)
         mmc = self.params._mmc or ""
         site_title = const.PAGE_REGISTER
 
@@ -158,7 +158,7 @@ class RegisterHandler(BaseHandler):
             site_title = const.PAGE_FORGET_PASSWORD
 
         data = ObjectDict(
-            code_type=int(code_type), # 指定为设置密码的类型
+            code_type=code_type, # 指定为设置密码的类型
             _mmc=mmc
         )
         self.render_page("system/auth_set_passwd.html", data=data, meta_title=site_title)
