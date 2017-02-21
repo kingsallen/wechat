@@ -11,6 +11,7 @@ from util.tool.date_tool import jd_update_date
 from util.image.upload import QiniuUpload
 from util.common import ObjectDict
 
+
 class UsercenterHandler(BaseHandler):
     """个人中心首页, 单页应用。以 api 形式提供
     """
@@ -32,7 +33,6 @@ class UsercenterHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def get(self):
-
         """
         个人中心首页
         :return:
@@ -50,8 +50,9 @@ class UsercenterHandler(BaseHandler):
             name=res.data.name or res.data.nickname,
             email=res.data.email,
             mobile=res.data.mobile,
-            bind_disable=employee_cert_conf.disable==const.OLD_YES if employee_cert_conf else False, # 该公司是否启用了认证
-            bind_status=int(employee.activation) if employee else 1
+            bind_disable=employee_cert_conf.disable == const.OLD_YES if employee_cert_conf else False,  # 该公司是否启用了认证
+            bind_status=int(employee.activation) if employee else 1,
+            has_password=True if res.data.password else False,
         ))
 
     @handle_response
@@ -116,18 +117,14 @@ class UsercenterHandler(BaseHandler):
         except:
             raise gen.Return()
 
-        self.logger.debug("params: {}".format(self.params))
-        self.logger.debug("json_args: {}".format(self.json_args))
+        res = yield self.usercenter_ps.post_resetpassword(self.current_user.sysuser.username,
+                                                          password_crypt(self.params.password))
+        if res.status != const.API_SUCCESS:
+            self.send_json_error(message=res.message)
+            raise gen.Return()
 
-        res = yield self.usercenter_ps.update_user(self.current_user.sysuser.id, params={
-            "password": password_crypt(self.params.password),
-        })
-        if res.status == const.API_SUCCESS:
-            self.send_json_success()
-            return
-        else:
-            self.send_json_error(message=msg.INPUT_DISORDER)
-            return
+        self.send_json_success()
+
 
 class FavpositionHandler(BaseHandler):
     """个人中心-收藏职位"""
@@ -136,7 +133,6 @@ class FavpositionHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def get(self):
-
         """
         收藏记录
         :return:
@@ -145,12 +141,14 @@ class FavpositionHandler(BaseHandler):
         res = yield self.usercenter_ps.get_fav_positions(self.current_user.sysuser.id)
         if res.status == const.API_SUCCESS:
             for item in res.data:
-                item['salary'] = gen_salary(item['salary_top'], item['salary_bottom'])
+                item['salary'] = gen_salary(
+                    item['salary_top'], item['salary_bottom'])
                 item['update_time'] = jd_update_date(item['update_time'])
 
         self.send_json_success(data=ObjectDict(
             records=res.data
         ))
+
 
 class ApplyrecordsHandler(BaseHandler):
     """个人中心-求职记录"""
@@ -159,7 +157,6 @@ class ApplyrecordsHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def get(self, apply_id):
-
         """
         求职记录
         :return:
@@ -171,7 +168,6 @@ class ApplyrecordsHandler(BaseHandler):
             self.send_json_success(data=ObjectDict(
                 pid=1
             ))
-
 
         else:
             # 查看申请记录列表
@@ -212,7 +208,8 @@ class UploadHandler(BaseHandler):
             body = vfile[0].get('body')
             upload_settings = dict()
             upload_settings['filename'] = vfile[0].get('filename')
-            upload_settings['filename_prefix'] = "upload/avatar/{}".format(self.current_user.sysuser.id)
+            upload_settings[
+                'filename_prefix'] = "upload/avatar/{}".format(self.current_user.sysuser.id)
             upload_settings['max_filesize'] = 1024 * 1024 * 2  # MB
             upload_settings['min_width'] = 30  # px
             upload_settings['before_upload'] = ['expand', 'crop']

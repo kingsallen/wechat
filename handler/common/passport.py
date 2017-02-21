@@ -266,7 +266,7 @@ class RegisterHandler(BaseHandler):
             # 忘记密码
             res = yield self.usercenter_ps.post_resetpassword(mobile, password)
             if res.status != const.API_SUCCESS:
-                self.send_json_error(message=msg.CELLPHONE_RESET_PASSWORD)
+                self.send_json_error(message=res.message)
                 raise gen.Return()
         else:
             res = yield self.usercenter_ps.post_register(mobile, password)
