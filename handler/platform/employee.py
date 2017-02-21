@@ -40,7 +40,7 @@ class AwardsHandler(BaseHandler):
                 total = result.total
 
         self.render(
-            "weixin/employee/reward.html",
+            "refer/weixin/employee/reward.html",
             rewards=rewards,
             reward_configs=reward_configs,
             total=total,
