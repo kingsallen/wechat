@@ -34,7 +34,6 @@ class DB(object):
         self.logger = logger
 
     def getConds(self, conds, conds_params=None):
-
         """
         对传入的SQL限制条件数组或字符串，转换成MYSQL可识别的形式
         :param conds: 字符串或者数组格式的SQL限制条件, 格式示例：
@@ -50,8 +49,10 @@ class DB(object):
         conds_params = conds_params or []
 
         if conds is None or not (isinstance(conds, (dict, str))):
-            self.logger.error("Error:[getConds][conds type error], module:{0}, "
-                              "conds:{1}, type:{2}".format(self.__class__.__name__, conds, type(conds)))
+            self.logger.error(
+                "Error:[getConds][conds type error], module:{0}, "
+                "conds:{1}, type:{2}".format(
+                    self.__class__.__name__, conds, type(conds)))
             return False, ()
 
         conds_res = []
@@ -74,22 +75,25 @@ class DB(object):
                         params.append(value[0])
                         params.append(value[2])
                     else:
-                        self.logger.error("Error:[getConds][value length error], module:{0}, value:{1}, "
-                                       "length:{2}, conds:{3}".format(self.__class__.__name__, value, len(value), conds))
+                        self.logger.error(
+                            "Error:[getConds][value length error], module:{0}, value:{1}, "
+                            "length:{2}, conds:{3}".format(
+                                self.__class__.__name__, value, len(value), conds))
                         return False, ()
                 elif isinstance(value, (str, int, datetime)):
                     frag = "`{0}` = %s".format(key)
                     conds_res.append(frag)
                     params.append(value)
                 else:
-                    self.logger.error("Error:[getConds][value type error][only accept list/int/str], "
-                                      "module: {0}, key: {1}, value: {2}, type: {3}, conds: {4}".format(self.__class__.__name__, key, value, type(value), conds))
+                    self.logger.error(
+                        "Error:[getConds][value type error][only accept list/int/str], "
+                        "module: {0}, key: {1}, value: {2}, type: {3}, conds: {4}".format(
+                            self.__class__.__name__, key, value, type(value), conds))
                     return False, ()
 
         return conds_res, params
 
     def checkFieldType(self, fields=None, maps=None):
-
         """
         对插入或者更新的字段进行类型检查和转换，类型映射中没有的默认为字符串
         :param fields: 待插入或者更新的字段数组
@@ -98,34 +102,44 @@ class DB(object):
         """
 
         if fields is None or not isinstance(fields, dict):
-            self.logger.error("Error:[checkFieldType][fields type error], Module:{0}, "
-                              "fields:{1}, type:{2}".format(self.__class__.__name__, fields, type(fields)))
+            self.logger.error(
+                "Error:[checkFieldType][fields type error], Module:{0}, "
+                "fields:{1}, type:{2}".format(
+                    self.__class__.__name__, fields, type(fields)))
             return False
 
         if maps is None or not isinstance(maps, dict):
-            self.logger.error("Error:[checkFieldType][maps type error], module:{0}, "
-                              "types:{1}, type:{2}".format(self.__class__.__name__, maps, type(maps)))
+            self.logger.error(
+                "Error:[checkFieldType][maps type error], module:{0}, "
+                "types:{1}, type:{2}".format(
+                    self.__class__.__name__, maps, type(maps)))
             return False
 
         for key, value in maps.items():
             if fields.get(key):
                 if value == constant.TYPE_INT:
                     if not isinstance(fields[key], int):
-                        self.logger.error("Error:[checkFieldType][field type error], Module:{0} Detail:[key:{1} value:{2} "
-                                    "should by int]".format(self.__class__.__name__, key, fields[key]))
+                        self.logger.error(
+                            "Error:[checkFieldType][field type error], Module:{0} Detail:[key:{1} value:{2} "
+                            "should by int]".format(
+                                self.__class__.__name__, key, fields[key]))
                         return False
                     fields[key] = int(fields[key])
                 elif value == constant.TYPE_JSON:
                     if isinstance(fields[key], list):
                         fields[key] = ujson.encode(fields[key])
                     elif not isinstance(fields[key], str):
-                        self.logger.error("Error:[checkFieldType][field type error], Module:{0}, Detail:[key:{1} value:{2} "
-                                    "should by json]".format(self.__class__.__name__, key, fields[key]))
+                        self.logger.error(
+                            "Error:[checkFieldType][field type error], Module:{0}, Detail:[key:{1} value:{2} "
+                            "should by json]".format(
+                                self.__class__.__name__, key, fields[key]))
                         return False
                 elif value == constant.TYPE_FLOAT:
                     if not isinstance(fields[key], float):
-                        self.logger.error("Error:[checkFieldType][field type error], Module:{0} Detail:[key:{1} value:{2} "
-                                    "should by float]".format(self.__class__.__name__, key, fields[key]))
+                        self.logger.error(
+                            "Error:[checkFieldType][field type error], Module:{0} Detail:[key:{1} value:{2} "
+                            "should by float]".format(
+                                self.__class__.__name__, key, fields[key]))
                         return False
                     fields[key] = float(fields[key])
                 elif value == constant.TYPE_TIMESTAMP:
@@ -137,7 +151,6 @@ class DB(object):
         return fields
 
     def optResType(self, response=None, maps=None):
-
         """
         处理返回结果，字段类型符合 map 的定义
         :param  response: 返回的数据
@@ -149,8 +162,10 @@ class DB(object):
             return ObjectDict()
 
         if maps is None or not isinstance(maps, dict):
-            self.logger.error("Error:[optResType][maps type error], "
-                              "module:{0} types:{1}, type:{2}".format(self.__class__.__name__, maps, type(maps)))
+            self.logger.error(
+                "Error:[optResType][maps type error], "
+                "module:{0} types:{1}, type:{2}".format(
+                    self.__class__.__name__, maps, type(maps)))
             return ObjectDict()
 
         for key, value in maps.items():
@@ -158,7 +173,8 @@ class DB(object):
                 if value == constant.TYPE_INT:
                     response[key] = int(response[key]) if response[key] else 0
                 elif value == constant.TYPE_FLOAT:
-                    response[key] = float(response[key]) if response[key] else 0.0
+                    response[key] = float(
+                        response[key]) if response[key] else 0.0
                 elif value == constant.TYPE_TIMESTAMP:
                     response[key] = response[key]
                 else:
@@ -166,8 +182,14 @@ class DB(object):
 
         return ObjectDict(response)
 
-    def select(self, table, conds=None, fields=None, options=None, appends=None, index=''):
-
+    def select(
+            self,
+            table,
+            conds=None,
+            fields=None,
+            options=None,
+            appends=None,
+            index=''):
         """
         Select查询
         :param table: 表名
@@ -193,8 +215,13 @@ class DB(object):
         if isinstance(fields, list) and len(fields) > 0:
             sql += "`, `".join(fields)
         else:
-            self.logger.error("Error:[select][fields error], module:{0} fields:{1}, type:{2}, "
-                           "length:{3}".format(self.__class__.__name__, fields, type(fields), len(fields)))
+            self.logger.error(
+                "Error:[select][fields error], module:{0} fields:{1}, type:{2}, "
+                "length:{3}".format(
+                    self.__class__.__name__,
+                    fields,
+                    type(fields),
+                    len(fields)))
             return False
 
         sql += "` FROM {0}".format(table)
@@ -213,7 +240,6 @@ class DB(object):
         return sql
 
     def insert(self, table, fields, options=None):
-
         """
         Insert插入
         :param table: 数据表
@@ -243,7 +269,6 @@ class DB(object):
         return sql, list(fields.values())
 
     def update(self, table, conds, fields, options=None, appends=None):
-
         """
         Update更新，根据限制条件更新对应的数据库记录
         :param table: 数据表
@@ -270,8 +295,10 @@ class DB(object):
                 sql += "`{0}` = %s, ".format(key)
                 params.append(value)
         else:
-            self.logger.error("Error:[update][fields error], module:{0} "
-                              "fields:{1}, type:{2}".format(self.__class__.__name__, fields, type(fields)))
+            self.logger.error(
+                "Error:[update][fields error], module:{0} "
+                "fields:{1}, type:{2}".format(
+                    self.__class__.__name__, fields, type(fields)))
             return False
 
         sql = sql[:-2]
@@ -286,7 +313,6 @@ class DB(object):
         return sql, params
 
     def delete(self, table, conds):
-
         """
         Delete删除，根据限制条件删除对应的数据库记录
         :param table: 数据表
@@ -303,8 +329,13 @@ class DB(object):
 
         return sql
 
-    def select_cnt(self, table, conds=None, fields=None, appends=None, index=''):
-
+    def select_cnt(
+            self,
+            table,
+            conds=None,
+            fields=None,
+            appends=None,
+            index=''):
         """
         Select查询记录数
         :param table: 表名
@@ -328,8 +359,13 @@ class DB(object):
                 sql_tmp += "COUNT(`{}`) as count_{}, ".format(field, field)
             sql += sql_tmp
         else:
-            self.logger.error("Error:[select_cnt][fields error], module:{0} fields:{1}, type:{2}, "
-                           "length:{3}".format(self.__class__.__name__, fields, type(fields), len(fields)))
+            self.logger.error(
+                "Error:[select_cnt][fields error], module:{0} fields:{1}, type:{2}, "
+                "length:{3}".format(
+                    self.__class__.__name__,
+                    fields,
+                    type(fields),
+                    len(fields)))
             return False
 
         sql = sql[:-2]
@@ -347,8 +383,13 @@ class DB(object):
 
         return sql
 
-    def select_sum(self, table, conds=None, fields=None, appends=None, index=''):
-
+    def select_sum(
+            self,
+            table,
+            conds=None,
+            fields=None,
+            appends=None,
+            index=''):
         """
         Select查询记录列值总和
         :param table: 表名
@@ -372,8 +413,13 @@ class DB(object):
                 sql_tmp += " SUM(`{}`) as sum_{}, ".format(field, field)
             sql += sql_tmp
         else:
-            self.logger.error("Error:[select_cnt][fields error], module:{0} fields:{1}, type:{2}, "
-                           "length:{3}".format(self.__class__.__name__, fields, type(fields), len(fields)))
+            self.logger.error(
+                "Error:[select_cnt][fields error], module:{0} fields:{1}, type:{2}, "
+                "length:{3}".format(
+                    self.__class__.__name__,
+                    fields,
+                    type(fields),
+                    len(fields)))
             return False
 
         sql = sql[:-2]

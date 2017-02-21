@@ -18,6 +18,7 @@ class PassportCache(object):
     """
     C端用户相关 Session
     """
+
     def __init__(self):
         super(PassportCache, self).__init__()
         # C 端帐号的 session key
@@ -30,9 +31,13 @@ class PassportCache(object):
         保存聚合号 session， 只包含 qxuser
         """
 
-        key_qx = self.session_user.format(session_id, self.settings['qx_wechat_id'])
+        key_qx = self.session_user.format(
+            session_id, self.settings['qx_wechat_id'])
         self.redis.set(key_qx, ObjectDict(qxuser=qxuser), 60 * 60 * 24 * 30)
-        logger.debug("refresh qx session redis key: {} session: {}".format(key_qx, ObjectDict(qxuser=qxuser)))
+        logger.debug(
+            "refresh qx session redis key: {} session: {}".format(
+                key_qx, ObjectDict(
+                    qxuser=qxuser)))
 
     def save_ent_sessions(self, session_id, session, wechat_id):
         """
@@ -41,7 +46,9 @@ class PassportCache(object):
 
         key_ent = self.session_user.format(session_id, wechat_id)
         self.redis.set(key_ent, session, 60 * 60 * 2)
-        logger.debug("refresh ent session redis key: {} session: {}".format(key_ent, session))
+        logger.debug(
+            "refresh ent session redis key: {} session: {}".format(
+                key_ent, session))
 
     def clear_session(self, session_id, wechat_id):
         """情况用户所用的 session"""

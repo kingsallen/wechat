@@ -45,6 +45,7 @@ for module in filter(lambda x: not x.endswith("init__.py"), glob.glob(d)):
 
 AtomHandler = type("AtomHandler", (web.RequestHandler,), obDict)
 
+
 class MetaBaseHandler(AtomHandler):
 
     """baseHandler 基类，不能被业务 hander 直接调用。除非是不能继承 BaseHandler"""
@@ -140,7 +141,7 @@ class MetaBaseHandler(AtomHandler):
         body = self.request.body
 
         if (headers.get('Content-Type') and
-                    'application/json' in headers.get('Content-Type') and body):
+                'application/json' in headers.get('Content-Type') and body):
             json_args = ujson.loads(to_str(body))
 
         return json_args
@@ -212,8 +213,14 @@ class MetaBaseHandler(AtomHandler):
         self.logger.stats(
             ujson.dumps(self._get_info_header(info), ensure_ascii=0))
 
-        self.logger.debug("mviewer_id: {}".format(self.get_secure_cookie(const.COOKIE_MVIEWERID)))
-        self.logger.debug("session_id: {}".format(self.get_secure_cookie(const.COOKIE_SESSIONID)))
+        self.logger.debug(
+            "mviewer_id: {}".format(
+                self.get_secure_cookie(
+                    const.COOKIE_MVIEWERID)))
+        self.logger.debug(
+            "session_id: {}".format(
+                self.get_secure_cookie(
+                    const.COOKIE_SESSIONID)))
 
         self.logger.debug("+++++++++++++++++END OAUTH+++++++++++++++++++++")
 
@@ -227,15 +234,29 @@ class MetaBaseHandler(AtomHandler):
         if http_code == 403:
             self.render_page(
                 'system/info.html',
-                data=ObjectDict(code=http_code, css="warning", message=msg_const.NOT_AUTHORIZED))
+                data=ObjectDict(
+                    code=http_code,
+                    css="warning",
+                    message=msg_const.NOT_AUTHORIZED))
         elif http_code == 404:
             self.render_page(
-                'system/info.html', data=ObjectDict(code=http_code, message=msg_const.NO_DATA))
+                'system/info.html',
+                data=ObjectDict(
+                    code=http_code,
+                    message=msg_const.NO_DATA))
         else:
             self.render_page(
-                'system/info.html', data=ObjectDict(code=http_code, message=msg_const.UNKNOWN_DEFAULT))
+                'system/info.html',
+                data=ObjectDict(
+                    code=http_code,
+                    message=msg_const.UNKNOWN_DEFAULT))
 
-    def render(self, status_code=const.API_SUCCESS, http_code=200, *args, **kwargs):
+    def render(
+            self,
+            status_code=const.API_SUCCESS,
+            http_code=200,
+            *args,
+            **kwargs):
         """override RequestHandler.render()
         """
         self.log_info = {"res_type": "html", "status_code": status_code}
@@ -243,8 +264,14 @@ class MetaBaseHandler(AtomHandler):
 
         super().render(*args, **kwargs)
 
-    def render_page(self, template_name, data, status_code=const.API_SUCCESS,
-                    message=msg_const.RESPONSE_SUCCESS, meta_title=const.PAGE_META_TITLE, http_code=200):
+    def render_page(
+            self,
+            template_name,
+            data,
+            status_code=const.API_SUCCESS,
+            message=msg_const.RESPONSE_SUCCESS,
+            meta_title=const.PAGE_META_TITLE,
+            http_code=200):
         """render 页面"""
         self.log_info = {"res_type": "html", "status_code": status_code}
         self.set_status(http_code)
@@ -268,8 +295,8 @@ class MetaBaseHandler(AtomHandler):
             if self.settings.get('remote_debug', False) is True:
                 template_string = self.render_string(template_name,
                                                      render_json=render_json)
-                post_url = urllib.parse.urljoin(self.settings.get('remote_debug_ip'),
-                                   template_name)
+                post_url = urllib.parse.urljoin(
+                    self.settings.get('remote_debug_ip'), template_name)
                 http_client = tornado.httpclient.HTTPClient()
                 r = http_client.fetch(post_url, method="POST",
                                       body=template_string)
@@ -277,7 +304,10 @@ class MetaBaseHandler(AtomHandler):
                 self.finish()
                 return
 
-        super().render(template_name=template_name, render_json=render_json, meta_title=meta_title)
+        super().render(
+            template_name=template_name,
+            render_json=render_json,
+            meta_title=meta_title)
         return
 
     def _send_json(self, data, status_code, message, http_code=200):
@@ -304,10 +334,15 @@ class MetaBaseHandler(AtomHandler):
 
         self.log_info = {"res_type": "xml"}
         self.logger.debug("Wechat MSG: %s" % data)
-        self.logger.debug("++++++WECHAT END++++++++++++++++++++++++++++++++++++++\n")
+        self.logger.debug(
+            "++++++WECHAT END++++++++++++++++++++++++++++++++++++++\n")
         self.write(data)
 
-    def send_json_success(self, data=None, message=msg_const.RESPONSE_SUCCESS, http_code=200):
+    def send_json_success(
+            self,
+            data=None,
+            message=msg_const.RESPONSE_SUCCESS,
+            http_code=200):
         """API 成功返回的便捷方法"""
         if data is None:
             data = ""
@@ -316,7 +351,11 @@ class MetaBaseHandler(AtomHandler):
                         message=message,
                         http_code=http_code)
 
-    def send_json_error(self, data=None, message=msg_const.RESPONSE_FAILURE, http_code=416):
+    def send_json_error(
+            self,
+            data=None,
+            message=msg_const.RESPONSE_FAILURE,
+            http_code=416):
         """API 错误返回的便捷方法"""
         if data is None:
             data = ""

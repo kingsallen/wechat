@@ -17,6 +17,7 @@ class UserCompanyFollowsCache(BaseRedis):
     """
     Develop Status: To be tested.
     """
+
     def __init__(self):
         super(UserCompanyFollowsCache, self).__init__()
         self.company_fans_hash = '{0}_company_fans'.format(self._PREFIX)

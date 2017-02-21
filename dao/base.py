@@ -40,8 +40,9 @@ class BaseDao(DB):
         :param params SQL 语句的 params 插值
         :return: cursor游标
         """
-        self.logger.debug("[debug][{0}][start][time: {1}][sql: {2}][params: {3}]".format(
-            self.__class__.__module__, curr_now(), sql, params))
+        self.logger.debug(
+            "[debug][{0}][start][time: {1}][sql: {2}][params: {3}]".format(
+                self.__class__.__module__, curr_now(), sql, params))
         cursor = yield self.pool.execute(sql, params)
         raise gen.Return(cursor)
 
@@ -85,13 +86,20 @@ class BaseDao(DB):
                 "Warn:[get_list_by_conds][conds warn], conds:{0}".format(
                     conds))
             raise gen.Return(list())
-        sql = self.select(self.table.lower(), conds, fields, options, appends, index)
+        sql = self.select(
+            self.table.lower(),
+            conds,
+            fields,
+            options,
+            appends,
+            index)
         cursor = yield self.query(sql, params)
         response = cursor.fetchall()
         if not isinstance(response, list):
             response = list()
         else:
-            response = [self.optResType(item, self.fields_map) for item in response]
+            response = [self.optResType(item, self.fields_map)
+                        for item in response]
 
         # self.logger.debug("[debug][get_list_by_conds][{0}][response: {1}]".format(self.__class__.__module__, response))
         raise gen.Return(response)
@@ -154,7 +162,9 @@ class BaseDao(DB):
         sql, params = self.insert(self.table, fields, options)
         cursor = yield self.query(sql, params)
         insert_id = cursor.lastrowid
-        self.logger.debug("[debug][insert_record][{0}][response: {1}]".format(self.__class__.__module__, insert_id))
+        self.logger.debug(
+            "[debug][insert_record][{0}][response: {1}]".format(
+                self.__class__.__module__, insert_id))
         raise gen.Return(insert_id)
 
     @gen.coroutine
@@ -189,7 +199,9 @@ class BaseDao(DB):
         cursor = yield self.query(sql, params_update)
         cursor.fetchone()
         rows_count = cursor.rowcount
-        self.logger.debug("[debug][update_by_conds][{0}][response: {1}]".format(self.__class__.__module__, rows_count))
+        self.logger.debug(
+            "[debug][update_by_conds][{0}][response: {1}]".format(
+                self.__class__.__module__, rows_count))
         if rows_count:
             raise gen.Return(True)
         else:
@@ -213,7 +225,9 @@ class BaseDao(DB):
         cursor = yield self.query(sql, params)
         cursor.fetchone()
         rows_count = cursor.rowcount
-        self.logger.debug("[debug][delete_by_conds][{0}][response: {1}]".format(self.__class__.__module__, rows_count))
+        self.logger.debug(
+            "[debug][delete_by_conds][{0}][response: {1}]".format(
+                self.__class__.__module__, rows_count))
         if rows_count:
             raise gen.Return(True)
         else:

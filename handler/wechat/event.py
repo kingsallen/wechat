@@ -21,7 +21,12 @@ class WechatOauthHandler(MetaBaseHandler):
     """开发者模式"""
 
     def __init__(self, application, request, **kwargs):
-        super(WechatOauthHandler, self).__init__(application, request, **kwargs)
+        super(
+            WechatOauthHandler,
+            self).__init__(
+            application,
+            request,
+            **kwargs)
 
         # 0:开发者模式 1:第三方授权模式
         self.third_oauth = 0
@@ -69,14 +74,17 @@ class WechatOauthHandler(MetaBaseHandler):
         self.logger.debug("oauth msg: %s" % self.msg)
         self.logger.debug("oauth params: %s" % self.params)
         self.logger.debug("oauth current_user: %s" % self.current_user)
-        self.logger.debug("++++++WECHAT START++++++++++++++++++++++++++++++++++++++\n")
+        self.logger.debug(
+            "++++++WECHAT START++++++++++++++++++++++++++++++++++++++\n")
 
         try:
             msg_type = self.msg['MsgType']
             if self.verification():
                 yield getattr(self, 'post_' + msg_type)()
             else:
-                self.logger.error("[wechat_oauth]verification failed:{}".format(self.msg))
+                self.logger.error(
+                    "[wechat_oauth]verification failed:{}".format(
+                        self.msg))
         except Exception as e:
             self.logger.error(traceback.format_exc())
 
@@ -234,7 +242,12 @@ class WechatThirdOauthHandler(WechatOauthHandler):
     """第三方授权模式"""
 
     def __init__(self, application, request, **kwargs):
-        super(WechatThirdOauthHandler, self).__init__(application, request, **kwargs)
+        super(
+            WechatThirdOauthHandler,
+            self).__init__(
+            application,
+            request,
+            **kwargs)
 
         self.component_app_id = self.settings.component_app_id
         self.component_encodingAESKey = self.settings.component_encodingAESKey
@@ -277,7 +290,10 @@ class WechatThirdOauthHandler(WechatOauthHandler):
         self.logger.debug("oauth request body: {}".format(self.request.body))
 
         try:
-            decrypt = WXBizMsgCrypt(self.component_token, self.component_encodingAESKey, self.component_app_id)
+            decrypt = WXBizMsgCrypt(
+                self.component_token,
+                self.component_encodingAESKey,
+                self.component_app_id)
             ret, decryp_xml = decrypt.DecryptMsg(self.request.body,
                                                  self.params.msg_signature,
                                                  self.params.timestamp,
