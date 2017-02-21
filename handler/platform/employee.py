@@ -51,11 +51,15 @@ class EmployeeUnbindHandler(BaseHandler):
     @gen.coroutine
     def post(self):
         if self.current_user.employee:
-            result = yield self.employee_ps.unbind(
-                self.current_user.employee.id,
-                self.current_user.company.id,
-                self.current_user.sysuser.id
-            )
+            try:
+                result = yield self.employee_ps.unbind(
+                    self.current_user.employee.id,
+                    self.current_user.company.id,
+                    self.current_user.sysuser.id
+                )
+            except TException as te:
+                self.logger.error(te)
+                raise
             if result:
                 self.send_json_success()
                 return
@@ -92,7 +96,11 @@ class EmployeeBindHandler(BaseHandler):
             answer2=self.params.answer2)
 
         if not self.current_user.employee:
-            result = yield self.employee_ps.bind(binding_params)
+            try:
+                result = yield self.employee_ps.bind(binding_params)
+            except TException as te:
+                self.logger.error(te)
+                raise
             if result:
                 self.send_json_success()
                 return
