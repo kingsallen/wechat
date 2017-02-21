@@ -287,9 +287,7 @@ class UserPageService(PageService):
                 fields.update({
                     "recom_id": current_user.recom.id
                 })
-            inserted_id = yield \
-                self.user_fav_position_ds.insert_user_fav_position(
-                    fields)
+            inserted_id = yield self.user_fav_position_ds.insert_user_fav_position(fields)
             raise gen.Return(bool(inserted_id))
 
         # 有数据时
