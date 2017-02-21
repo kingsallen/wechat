@@ -72,11 +72,9 @@ class UsercenterHandler(BaseHandler):
             })
 
             if res.status == const.API_SUCCESS:
-                self.logger.debug(1)
                 self.send_json_success()
                 return
             else:
-                self.logger.debug(2)
                 self.send_json_error(message=msg.INPUT_DISORDER)
                 return
         else:
@@ -141,9 +139,9 @@ class FavpositionHandler(BaseHandler):
         res = yield self.usercenter_ps.get_fav_positions(self.current_user.sysuser.id)
         if res.status == const.API_SUCCESS:
             for item in res.data:
-                item['salary'] = gen_salary(
-                    item['salary_top'], item['salary_bottom'])
+                item['salary'] = gen_salary(item['salary_top'], item['salary_bottom'])
                 item['update_time'] = jd_update_date(item['update_time'])
+                item['states'] = "已过期" if item['status'] == 2 else ""
 
         self.send_json_success(data=ObjectDict(
             records=res.data

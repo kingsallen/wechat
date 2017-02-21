@@ -67,6 +67,12 @@ class CellphoneBindHandler(BaseHandler):
     def get_changemobile(self):
         yield self._opt_get_cellphone_code(const.MOBILE_CODE_OPT_TYPE.change_mobile)
 
+    @handle_response
+    @gen.coroutine
+    def get_validmobile(self):
+        """部分操作，需要先确定是否为本人操作。要求验证本人手机号"""
+        yield self._opt_get_cellphone_code(const.MOBILE_CODE_OPT_TYPE.valid_old_mobile)
+
     @gen.coroutine
     def _opt_get_cellphone_code(self, type):
 
@@ -100,6 +106,11 @@ class CellphoneBindHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def post_setpassed(self):
+        yield self._opt_post_cellphone_code(const.MOBILE_CODE_OPT_TYPE.valid_old_mobile)
+
+    @handle_response
+    @gen.coroutine
+    def post_validmobile(self):
         yield self._opt_post_cellphone_code(const.MOBILE_CODE_OPT_TYPE.valid_old_mobile)
 
     @handle_response

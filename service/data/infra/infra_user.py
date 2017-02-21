@@ -1,9 +1,11 @@
 # coding=utf-8
 
-from service.data.base import DataService
 import tornado.gen as gen
-from util.common import ObjectDict
+
+from service.data.base import DataService
 import conf.path as path
+from util.common import ObjectDict
+from util.common.decorator import cache
 from util.tool.http_tool import http_get, http_post, http_put, http_delete, http_patch
 
 
@@ -35,12 +37,14 @@ class InfraUserDataService(DataService):
 
         raise gen.Return(ret)
 
+    @cache(ttl=60)
     @gen.coroutine
     def get_applied_applications(self, user_id):
         """获得求职记录"""
         ret = yield http_get(path.INFRA_USER_APPLIED_APPLICATIONS.format(user_id))
         raise gen.Return(ret)
 
+    @cache(ttl=60)
     @gen.coroutine
     def get_fav_positions(self, user_id):
         """获得职位收藏"""
