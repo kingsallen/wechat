@@ -67,7 +67,9 @@ platform_routes = [
 
     (r"/m/api/company/visitreq",                       "handler.platform.companyrelation.CompanyVisitReqHandler",   {"event": "company_visitreq"}),
     (r"/m/api/company/survey",                         "handler.platform.companyrelation.CompanySurveyHandler",     {"event": "company_survey"}),
-    (r"/m/api/company/follow",                         "handler.platform.companyrelation.CompanyFollowHandler",     {"event": "company_follow"})
+    (r"/m/api/company/follow",                         "handler.platform.companyrelation.CompanyFollowHandler",     {"event": "company_follow"}),
+    (r"/m/api/employee/bind",                          "handler.platform.employee.EmployeeBindHandler",             {"event": "employee_bind"}),
+    (r"/m/api/employee/unbind",                        "handler.platform.employee.EmployeeUnbindHandler",           {"event": "employee_unbind"}),
 ]
 platform_routes.extend(common_routes)
 

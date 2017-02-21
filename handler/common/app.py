@@ -9,6 +9,9 @@ from util.common.decorator import handle_response, authenticated
 class IndexHandler(BaseHandler):
     """页面Index, 单页应用使用"""
 
+    # 需要静默授权的 path
+    _NEED_AUTH_PATHS = ['usercenter', 'employee']
+
     @handle_response
     @gen.coroutine
     def get(self):
@@ -21,8 +24,8 @@ class IndexHandler(BaseHandler):
         self.logger.debug("IndexHandler: {}".format(method))
 
         try:
-            if method == "usercenter":
-                yield getattr(self, 'get_usercenter')()
+            if method in self._NEED_AUTH_PATHS:
+                yield getattr(self, 'get_auth_first')()
             else:
                 yield getattr(self, 'get_default')()
 
@@ -42,7 +45,7 @@ class IndexHandler(BaseHandler):
     @handle_response
     @authenticated
     @gen.coroutine
-    def get_usercenter(self):
+    def get_auth_first(self):
         """个人中心，需要使用authenticated判断是否登录，及静默授权"""
         self.logger.debug("IndexHandler usercenter")
         self.render(template_name="system/app.html")
