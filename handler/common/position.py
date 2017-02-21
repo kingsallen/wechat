@@ -229,6 +229,8 @@ class PositionHandler(BaseHandler):
             "department": position_info.department
         })
 
+        self.logger.debug("_make_endorse_info: {}".format(endorse))
+
         raise gen.Return(endorse)
 
     def _make_recommend_positions(self, positions):
