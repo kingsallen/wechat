@@ -273,10 +273,11 @@ class RegisterHandler(BaseHandler):
             if res.status != const.API_SUCCESS:
                 self.send_json_error(message=msg.CELLPHONE_REGISTER_FAILED)
                 raise gen.Return()
+            # 设置登录cookie
+            session_id = self._make_new_session_id(res.data.user_id)
+            self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True)
 
         next_url = self.json_args.get("next_url", "")
-        session_id = self._make_new_session_id(res.data.user_id)
-        self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True)
         self.send_json_success(data={
             "next_url": next_url
         })
