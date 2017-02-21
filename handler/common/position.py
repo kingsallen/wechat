@@ -217,7 +217,8 @@ class PositionHandler(BaseHandler):
         hr_name = hr_account.name or hr_wx_user.nickname or ''
         company_name = company_info.abbreviation or company_info.company_name or ''
 
-        is_hr = self.current_user.qxuser.unionid == hr_wx_user.unionid
+        is_hr = (self.current_user.qxuser.unionid is not None
+                 and self.current_user.qxuser.unionid == hr_wx_user.unionid)
 
         endorse = ObjectDict({
             "publisher": position_info.publisher,

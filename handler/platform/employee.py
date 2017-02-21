@@ -47,5 +47,3 @@ class AwardsHandler(BaseHandler):
             binded=is_binded,
             email_activation_state=0 if is_binded else \
                 self.current_user.employee.activation)
-
-
