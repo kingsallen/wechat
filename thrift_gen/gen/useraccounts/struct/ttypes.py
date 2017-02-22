@@ -13,16 +13,2470 @@ import sys
 from thrift.transport import TTransport
 
 
-class BindType(object):
-    WECHAT = 0
-    BAIDU = 1
+class Userloginreq(object):
+    """
+    Attributes:
+     - unionid
+     - mobile
+     - password
+     - code
+    """
 
-    _VALUES_TO_NAMES = {
-        0: "WECHAT",
-        1: "BAIDU",
-    }
+    thrift_spec = (
+        None,  # 0
+        (1, TType.STRING, 'unionid', 'UTF8', None, ),  # 1
+        (2, TType.STRING, 'mobile', 'UTF8', None, ),  # 2
+        (3, TType.STRING, 'password', 'UTF8', None, ),  # 3
+        (4, TType.STRING, 'code', 'UTF8', None, ),  # 4
+    )
 
-    _NAMES_TO_VALUES = {
-        "WECHAT": 0,
-        "BAIDU": 1,
-    }
+    def __init__(self, unionid=None, mobile=None, password=None, code=None,):
+        self.unionid = unionid
+        self.mobile = mobile
+        self.password = password
+        self.code = code
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.unionid = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRING:
+                    self.mobile = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.STRING:
+                    self.password = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.STRING:
+                    self.code = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('Userloginreq')
+        if self.unionid is not None:
+            oprot.writeFieldBegin('unionid', TType.STRING, 1)
+            oprot.writeString(self.unionid.encode('utf-8') if sys.version_info[0] == 2 else self.unionid)
+            oprot.writeFieldEnd()
+        if self.mobile is not None:
+            oprot.writeFieldBegin('mobile', TType.STRING, 2)
+            oprot.writeString(self.mobile.encode('utf-8') if sys.version_info[0] == 2 else self.mobile)
+            oprot.writeFieldEnd()
+        if self.password is not None:
+            oprot.writeFieldBegin('password', TType.STRING, 3)
+            oprot.writeString(self.password.encode('utf-8') if sys.version_info[0] == 2 else self.password)
+            oprot.writeFieldEnd()
+        if self.code is not None:
+            oprot.writeFieldBegin('code', TType.STRING, 4)
+            oprot.writeString(self.code.encode('utf-8') if sys.version_info[0] == 2 else self.code)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class Usersetting(object):
+    """
+    Attributes:
+     - id
+     - user_id
+     - banner_url
+     - privacy_policy
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'id', None, None, ),  # 1
+        (2, TType.I32, 'user_id', None, None, ),  # 2
+        (3, TType.STRING, 'banner_url', 'UTF8', None, ),  # 3
+        (4, TType.I32, 'privacy_policy', None, None, ),  # 4
+    )
+
+    def __init__(self, id=None, user_id=None, banner_url=None, privacy_policy=None,):
+        self.id = id
+        self.user_id = user_id
+        self.banner_url = banner_url
+        self.privacy_policy = privacy_policy
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.id = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.I32:
+                    self.user_id = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.STRING:
+                    self.banner_url = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.I32:
+                    self.privacy_policy = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('Usersetting')
+        if self.id is not None:
+            oprot.writeFieldBegin('id', TType.I32, 1)
+            oprot.writeI32(self.id)
+            oprot.writeFieldEnd()
+        if self.user_id is not None:
+            oprot.writeFieldBegin('user_id', TType.I32, 2)
+            oprot.writeI32(self.user_id)
+            oprot.writeFieldEnd()
+        if self.banner_url is not None:
+            oprot.writeFieldBegin('banner_url', TType.STRING, 3)
+            oprot.writeString(self.banner_url.encode('utf-8') if sys.version_info[0] == 2 else self.banner_url)
+            oprot.writeFieldEnd()
+        if self.privacy_policy is not None:
+            oprot.writeFieldBegin('privacy_policy', TType.I32, 4)
+            oprot.writeI32(self.privacy_policy)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class User(object):
+    """
+    Attributes:
+     - id
+     - username
+     - password
+     - is_disable
+     - rank
+     - register_time
+     - register_ip
+     - last_login_time
+     - last_login_ip
+     - login_count
+     - mobile
+     - email
+     - activation
+     - activation_code
+     - token
+     - name
+     - headimg
+     - country_id
+     - wechat_id
+     - unionid
+     - source
+     - company
+     - position
+     - parentid
+     - email_verified
+     - nickname
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I64, 'id', None, None, ),  # 1
+        (2, TType.STRING, 'username', 'UTF8', None, ),  # 2
+        (3, TType.STRING, 'password', 'UTF8', None, ),  # 3
+        (4, TType.BYTE, 'is_disable', None, None, ),  # 4
+        (5, TType.I64, 'rank', None, None, ),  # 5
+        (6, TType.STRING, 'register_time', 'UTF8', None, ),  # 6
+        (7, TType.STRING, 'register_ip', 'UTF8', None, ),  # 7
+        (8, TType.STRING, 'last_login_time', 'UTF8', None, ),  # 8
+        (9, TType.STRING, 'last_login_ip', 'UTF8', None, ),  # 9
+        (10, TType.I64, 'login_count', None, None, ),  # 10
+        (11, TType.I64, 'mobile', None, None, ),  # 11
+        (12, TType.STRING, 'email', 'UTF8', None, ),  # 12
+        (13, TType.BYTE, 'activation', None, None, ),  # 13
+        (14, TType.STRING, 'activation_code', 'UTF8', None, ),  # 14
+        (15, TType.STRING, 'token', 'UTF8', None, ),  # 15
+        (16, TType.STRING, 'name', 'UTF8', None, ),  # 16
+        (17, TType.STRING, 'headimg', 'UTF8', None, ),  # 17
+        (18, TType.I64, 'country_id', None, None, ),  # 18
+        (19, TType.I64, 'wechat_id', None, None, ),  # 19
+        (20, TType.STRING, 'unionid', 'UTF8', None, ),  # 20
+        (21, TType.BYTE, 'source', None, None, ),  # 21
+        (22, TType.STRING, 'company', 'UTF8', None, ),  # 22
+        (23, TType.STRING, 'position', 'UTF8', None, ),  # 23
+        (24, TType.I64, 'parentid', None, None, ),  # 24
+        (25, TType.I32, 'email_verified', None, None, ),  # 25
+        (26, TType.STRING, 'nickname', 'UTF8', None, ),  # 26
+    )
+
+    def __init__(self, id=None, username=None, password=None, is_disable=None, rank=None, register_time=None, register_ip=None, last_login_time=None, last_login_ip=None, login_count=None, mobile=None, email=None, activation=None, activation_code=None, token=None, name=None, headimg=None, country_id=None, wechat_id=None, unionid=None, source=None, company=None, position=None, parentid=None, email_verified=None, nickname=None,):
+        self.id = id
+        self.username = username
+        self.password = password
+        self.is_disable = is_disable
+        self.rank = rank
+        self.register_time = register_time
+        self.register_ip = register_ip
+        self.last_login_time = last_login_time
+        self.last_login_ip = last_login_ip
+        self.login_count = login_count
+        self.mobile = mobile
+        self.email = email
+        self.activation = activation
+        self.activation_code = activation_code
+        self.token = token
+        self.name = name
+        self.headimg = headimg
+        self.country_id = country_id
+        self.wechat_id = wechat_id
+        self.unionid = unionid
+        self.source = source
+        self.company = company
+        self.position = position
+        self.parentid = parentid
+        self.email_verified = email_verified
+        self.nickname = nickname
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I64:
+                    self.id = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRING:
+                    self.username = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.STRING:
+                    self.password = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.BYTE:
+                    self.is_disable = iprot.readByte()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 5:
+                if ftype == TType.I64:
+                    self.rank = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 6:
+                if ftype == TType.STRING:
+                    self.register_time = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 7:
+                if ftype == TType.STRING:
+                    self.register_ip = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 8:
+                if ftype == TType.STRING:
+                    self.last_login_time = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 9:
+                if ftype == TType.STRING:
+                    self.last_login_ip = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 10:
+                if ftype == TType.I64:
+                    self.login_count = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 11:
+                if ftype == TType.I64:
+                    self.mobile = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 12:
+                if ftype == TType.STRING:
+                    self.email = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 13:
+                if ftype == TType.BYTE:
+                    self.activation = iprot.readByte()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 14:
+                if ftype == TType.STRING:
+                    self.activation_code = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 15:
+                if ftype == TType.STRING:
+                    self.token = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 16:
+                if ftype == TType.STRING:
+                    self.name = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 17:
+                if ftype == TType.STRING:
+                    self.headimg = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 18:
+                if ftype == TType.I64:
+                    self.country_id = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 19:
+                if ftype == TType.I64:
+                    self.wechat_id = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 20:
+                if ftype == TType.STRING:
+                    self.unionid = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 21:
+                if ftype == TType.BYTE:
+                    self.source = iprot.readByte()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 22:
+                if ftype == TType.STRING:
+                    self.company = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 23:
+                if ftype == TType.STRING:
+                    self.position = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 24:
+                if ftype == TType.I64:
+                    self.parentid = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 25:
+                if ftype == TType.I32:
+                    self.email_verified = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 26:
+                if ftype == TType.STRING:
+                    self.nickname = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('User')
+        if self.id is not None:
+            oprot.writeFieldBegin('id', TType.I64, 1)
+            oprot.writeI64(self.id)
+            oprot.writeFieldEnd()
+        if self.username is not None:
+            oprot.writeFieldBegin('username', TType.STRING, 2)
+            oprot.writeString(self.username.encode('utf-8') if sys.version_info[0] == 2 else self.username)
+            oprot.writeFieldEnd()
+        if self.password is not None:
+            oprot.writeFieldBegin('password', TType.STRING, 3)
+            oprot.writeString(self.password.encode('utf-8') if sys.version_info[0] == 2 else self.password)
+            oprot.writeFieldEnd()
+        if self.is_disable is not None:
+            oprot.writeFieldBegin('is_disable', TType.BYTE, 4)
+            oprot.writeByte(self.is_disable)
+            oprot.writeFieldEnd()
+        if self.rank is not None:
+            oprot.writeFieldBegin('rank', TType.I64, 5)
+            oprot.writeI64(self.rank)
+            oprot.writeFieldEnd()
+        if self.register_time is not None:
+            oprot.writeFieldBegin('register_time', TType.STRING, 6)
+            oprot.writeString(self.register_time.encode('utf-8') if sys.version_info[0] == 2 else self.register_time)
+            oprot.writeFieldEnd()
+        if self.register_ip is not None:
+            oprot.writeFieldBegin('register_ip', TType.STRING, 7)
+            oprot.writeString(self.register_ip.encode('utf-8') if sys.version_info[0] == 2 else self.register_ip)
+            oprot.writeFieldEnd()
+        if self.last_login_time is not None:
+            oprot.writeFieldBegin('last_login_time', TType.STRING, 8)
+            oprot.writeString(self.last_login_time.encode('utf-8') if sys.version_info[0] == 2 else self.last_login_time)
+            oprot.writeFieldEnd()
+        if self.last_login_ip is not None:
+            oprot.writeFieldBegin('last_login_ip', TType.STRING, 9)
+            oprot.writeString(self.last_login_ip.encode('utf-8') if sys.version_info[0] == 2 else self.last_login_ip)
+            oprot.writeFieldEnd()
+        if self.login_count is not None:
+            oprot.writeFieldBegin('login_count', TType.I64, 10)
+            oprot.writeI64(self.login_count)
+            oprot.writeFieldEnd()
+        if self.mobile is not None:
+            oprot.writeFieldBegin('mobile', TType.I64, 11)
+            oprot.writeI64(self.mobile)
+            oprot.writeFieldEnd()
+        if self.email is not None:
+            oprot.writeFieldBegin('email', TType.STRING, 12)
+            oprot.writeString(self.email.encode('utf-8') if sys.version_info[0] == 2 else self.email)
+            oprot.writeFieldEnd()
+        if self.activation is not None:
+            oprot.writeFieldBegin('activation', TType.BYTE, 13)
+            oprot.writeByte(self.activation)
+            oprot.writeFieldEnd()
+        if self.activation_code is not None:
+            oprot.writeFieldBegin('activation_code', TType.STRING, 14)
+            oprot.writeString(self.activation_code.encode('utf-8') if sys.version_info[0] == 2 else self.activation_code)
+            oprot.writeFieldEnd()
+        if self.token is not None:
+            oprot.writeFieldBegin('token', TType.STRING, 15)
+            oprot.writeString(self.token.encode('utf-8') if sys.version_info[0] == 2 else self.token)
+            oprot.writeFieldEnd()
+        if self.name is not None:
+            oprot.writeFieldBegin('name', TType.STRING, 16)
+            oprot.writeString(self.name.encode('utf-8') if sys.version_info[0] == 2 else self.name)
+            oprot.writeFieldEnd()
+        if self.headimg is not None:
+            oprot.writeFieldBegin('headimg', TType.STRING, 17)
+            oprot.writeString(self.headimg.encode('utf-8') if sys.version_info[0] == 2 else self.headimg)
+            oprot.writeFieldEnd()
+        if self.country_id is not None:
+            oprot.writeFieldBegin('country_id', TType.I64, 18)
+            oprot.writeI64(self.country_id)
+            oprot.writeFieldEnd()
+        if self.wechat_id is not None:
+            oprot.writeFieldBegin('wechat_id', TType.I64, 19)
+            oprot.writeI64(self.wechat_id)
+            oprot.writeFieldEnd()
+        if self.unionid is not None:
+            oprot.writeFieldBegin('unionid', TType.STRING, 20)
+            oprot.writeString(self.unionid.encode('utf-8') if sys.version_info[0] == 2 else self.unionid)
+            oprot.writeFieldEnd()
+        if self.source is not None:
+            oprot.writeFieldBegin('source', TType.BYTE, 21)
+            oprot.writeByte(self.source)
+            oprot.writeFieldEnd()
+        if self.company is not None:
+            oprot.writeFieldBegin('company', TType.STRING, 22)
+            oprot.writeString(self.company.encode('utf-8') if sys.version_info[0] == 2 else self.company)
+            oprot.writeFieldEnd()
+        if self.position is not None:
+            oprot.writeFieldBegin('position', TType.STRING, 23)
+            oprot.writeString(self.position.encode('utf-8') if sys.version_info[0] == 2 else self.position)
+            oprot.writeFieldEnd()
+        if self.parentid is not None:
+            oprot.writeFieldBegin('parentid', TType.I64, 24)
+            oprot.writeI64(self.parentid)
+            oprot.writeFieldEnd()
+        if self.email_verified is not None:
+            oprot.writeFieldBegin('email_verified', TType.I32, 25)
+            oprot.writeI32(self.email_verified)
+            oprot.writeFieldEnd()
+        if self.nickname is not None:
+            oprot.writeFieldBegin('nickname', TType.STRING, 26)
+            oprot.writeString(self.nickname.encode('utf-8') if sys.version_info[0] == 2 else self.nickname)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class UserFavoritePosition(object):
+    """
+    Attributes:
+     - id
+     - sysuser_id
+     - position_id
+     - favorite
+     - mobile
+     - wxuser_id
+     - recom_id
+     - create_time
+     - update_time
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I64, 'id', None, None, ),  # 1
+        (2, TType.I32, 'sysuser_id', None, None, ),  # 2
+        (3, TType.I32, 'position_id', None, None, ),  # 3
+        (4, TType.BYTE, 'favorite', None, None, ),  # 4
+        (5, TType.STRING, 'mobile', 'UTF8', None, ),  # 5
+        (6, TType.I64, 'wxuser_id', None, None, ),  # 6
+        (7, TType.I32, 'recom_id', None, None, ),  # 7
+        (8, TType.STRING, 'create_time', 'UTF8', None, ),  # 8
+        (9, TType.STRING, 'update_time', 'UTF8', None, ),  # 9
+    )
+
+    def __init__(self, id=None, sysuser_id=None, position_id=None, favorite=None, mobile=None, wxuser_id=None, recom_id=None, create_time=None, update_time=None,):
+        self.id = id
+        self.sysuser_id = sysuser_id
+        self.position_id = position_id
+        self.favorite = favorite
+        self.mobile = mobile
+        self.wxuser_id = wxuser_id
+        self.recom_id = recom_id
+        self.create_time = create_time
+        self.update_time = update_time
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I64:
+                    self.id = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.I32:
+                    self.sysuser_id = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.I32:
+                    self.position_id = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.BYTE:
+                    self.favorite = iprot.readByte()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 5:
+                if ftype == TType.STRING:
+                    self.mobile = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 6:
+                if ftype == TType.I64:
+                    self.wxuser_id = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 7:
+                if ftype == TType.I32:
+                    self.recom_id = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 8:
+                if ftype == TType.STRING:
+                    self.create_time = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 9:
+                if ftype == TType.STRING:
+                    self.update_time = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('UserFavoritePosition')
+        if self.id is not None:
+            oprot.writeFieldBegin('id', TType.I64, 1)
+            oprot.writeI64(self.id)
+            oprot.writeFieldEnd()
+        if self.sysuser_id is not None:
+            oprot.writeFieldBegin('sysuser_id', TType.I32, 2)
+            oprot.writeI32(self.sysuser_id)
+            oprot.writeFieldEnd()
+        if self.position_id is not None:
+            oprot.writeFieldBegin('position_id', TType.I32, 3)
+            oprot.writeI32(self.position_id)
+            oprot.writeFieldEnd()
+        if self.favorite is not None:
+            oprot.writeFieldBegin('favorite', TType.BYTE, 4)
+            oprot.writeByte(self.favorite)
+            oprot.writeFieldEnd()
+        if self.mobile is not None:
+            oprot.writeFieldBegin('mobile', TType.STRING, 5)
+            oprot.writeString(self.mobile.encode('utf-8') if sys.version_info[0] == 2 else self.mobile)
+            oprot.writeFieldEnd()
+        if self.wxuser_id is not None:
+            oprot.writeFieldBegin('wxuser_id', TType.I64, 6)
+            oprot.writeI64(self.wxuser_id)
+            oprot.writeFieldEnd()
+        if self.recom_id is not None:
+            oprot.writeFieldBegin('recom_id', TType.I32, 7)
+            oprot.writeI32(self.recom_id)
+            oprot.writeFieldEnd()
+        if self.create_time is not None:
+            oprot.writeFieldBegin('create_time', TType.STRING, 8)
+            oprot.writeString(self.create_time.encode('utf-8') if sys.version_info[0] == 2 else self.create_time)
+            oprot.writeFieldEnd()
+        if self.update_time is not None:
+            oprot.writeFieldBegin('update_time', TType.STRING, 9)
+            oprot.writeString(self.update_time.encode('utf-8') if sys.version_info[0] == 2 else self.update_time)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class UserHrAccount(object):
+    """
+    Attributes:
+     - id
+     - company_id
+     - mobile
+     - email
+     - wxuser_id
+     - password
+     - username
+     - account_type
+     - activation
+     - disable
+     - register_time
+     - register_ip
+     - last_login_time
+     - last_login_ip
+     - login_count
+     - source
+     - download_token
+     - create_time
+     - update_time
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I64, 'id', None, None, ),  # 1
+        (2, TType.I64, 'company_id', None, None, ),  # 2
+        (3, TType.STRING, 'mobile', 'UTF8', None, ),  # 3
+        (4, TType.STRING, 'email', 'UTF8', None, ),  # 4
+        (5, TType.I64, 'wxuser_id', None, None, ),  # 5
+        (6, TType.STRING, 'password', 'UTF8', None, ),  # 6
+        (7, TType.STRING, 'username', 'UTF8', None, ),  # 7
+        (8, TType.BYTE, 'account_type', None, None, ),  # 8
+        (9, TType.BYTE, 'activation', None, None, ),  # 9
+        (10, TType.BYTE, 'disable', None, None, ),  # 10
+        (11, TType.STRING, 'register_time', 'UTF8', None, ),  # 11
+        (12, TType.STRING, 'register_ip', 'UTF8', None, ),  # 12
+        (13, TType.STRING, 'last_login_time', 'UTF8', None, ),  # 13
+        (14, TType.STRING, 'last_login_ip', 'UTF8', None, ),  # 14
+        (15, TType.I32, 'login_count', None, None, ),  # 15
+        (16, TType.I32, 'source', None, None, ),  # 16
+        (17, TType.STRING, 'download_token', 'UTF8', None, ),  # 17
+        (18, TType.STRING, 'create_time', 'UTF8', None, ),  # 18
+        (19, TType.STRING, 'update_time', 'UTF8', None, ),  # 19
+    )
+
+    def __init__(self, id=None, company_id=None, mobile=None, email=None, wxuser_id=None, password=None, username=None, account_type=None, activation=None, disable=None, register_time=None, register_ip=None, last_login_time=None, last_login_ip=None, login_count=None, source=None, download_token=None, create_time=None, update_time=None,):
+        self.id = id
+        self.company_id = company_id
+        self.mobile = mobile
+        self.email = email
+        self.wxuser_id = wxuser_id
+        self.password = password
+        self.username = username
+        self.account_type = account_type
+        self.activation = activation
+        self.disable = disable
+        self.register_time = register_time
+        self.register_ip = register_ip
+        self.last_login_time = last_login_time
+        self.last_login_ip = last_login_ip
+        self.login_count = login_count
+        self.source = source
+        self.download_token = download_token
+        self.create_time = create_time
+        self.update_time = update_time
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I64:
+                    self.id = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.I64:
+                    self.company_id = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.STRING:
+                    self.mobile = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.STRING:
+                    self.email = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 5:
+                if ftype == TType.I64:
+                    self.wxuser_id = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 6:
+                if ftype == TType.STRING:
+                    self.password = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 7:
+                if ftype == TType.STRING:
+                    self.username = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 8:
+                if ftype == TType.BYTE:
+                    self.account_type = iprot.readByte()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 9:
+                if ftype == TType.BYTE:
+                    self.activation = iprot.readByte()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 10:
+                if ftype == TType.BYTE:
+                    self.disable = iprot.readByte()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 11:
+                if ftype == TType.STRING:
+                    self.register_time = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 12:
+                if ftype == TType.STRING:
+                    self.register_ip = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 13:
+                if ftype == TType.STRING:
+                    self.last_login_time = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 14:
+                if ftype == TType.STRING:
+                    self.last_login_ip = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 15:
+                if ftype == TType.I32:
+                    self.login_count = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 16:
+                if ftype == TType.I32:
+                    self.source = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 17:
+                if ftype == TType.STRING:
+                    self.download_token = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 18:
+                if ftype == TType.STRING:
+                    self.create_time = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 19:
+                if ftype == TType.STRING:
+                    self.update_time = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('UserHrAccount')
+        if self.id is not None:
+            oprot.writeFieldBegin('id', TType.I64, 1)
+            oprot.writeI64(self.id)
+            oprot.writeFieldEnd()
+        if self.company_id is not None:
+            oprot.writeFieldBegin('company_id', TType.I64, 2)
+            oprot.writeI64(self.company_id)
+            oprot.writeFieldEnd()
+        if self.mobile is not None:
+            oprot.writeFieldBegin('mobile', TType.STRING, 3)
+            oprot.writeString(self.mobile.encode('utf-8') if sys.version_info[0] == 2 else self.mobile)
+            oprot.writeFieldEnd()
+        if self.email is not None:
+            oprot.writeFieldBegin('email', TType.STRING, 4)
+            oprot.writeString(self.email.encode('utf-8') if sys.version_info[0] == 2 else self.email)
+            oprot.writeFieldEnd()
+        if self.wxuser_id is not None:
+            oprot.writeFieldBegin('wxuser_id', TType.I64, 5)
+            oprot.writeI64(self.wxuser_id)
+            oprot.writeFieldEnd()
+        if self.password is not None:
+            oprot.writeFieldBegin('password', TType.STRING, 6)
+            oprot.writeString(self.password.encode('utf-8') if sys.version_info[0] == 2 else self.password)
+            oprot.writeFieldEnd()
+        if self.username is not None:
+            oprot.writeFieldBegin('username', TType.STRING, 7)
+            oprot.writeString(self.username.encode('utf-8') if sys.version_info[0] == 2 else self.username)
+            oprot.writeFieldEnd()
+        if self.account_type is not None:
+            oprot.writeFieldBegin('account_type', TType.BYTE, 8)
+            oprot.writeByte(self.account_type)
+            oprot.writeFieldEnd()
+        if self.activation is not None:
+            oprot.writeFieldBegin('activation', TType.BYTE, 9)
+            oprot.writeByte(self.activation)
+            oprot.writeFieldEnd()
+        if self.disable is not None:
+            oprot.writeFieldBegin('disable', TType.BYTE, 10)
+            oprot.writeByte(self.disable)
+            oprot.writeFieldEnd()
+        if self.register_time is not None:
+            oprot.writeFieldBegin('register_time', TType.STRING, 11)
+            oprot.writeString(self.register_time.encode('utf-8') if sys.version_info[0] == 2 else self.register_time)
+            oprot.writeFieldEnd()
+        if self.register_ip is not None:
+            oprot.writeFieldBegin('register_ip', TType.STRING, 12)
+            oprot.writeString(self.register_ip.encode('utf-8') if sys.version_info[0] == 2 else self.register_ip)
+            oprot.writeFieldEnd()
+        if self.last_login_time is not None:
+            oprot.writeFieldBegin('last_login_time', TType.STRING, 13)
+            oprot.writeString(self.last_login_time.encode('utf-8') if sys.version_info[0] == 2 else self.last_login_time)
+            oprot.writeFieldEnd()
+        if self.last_login_ip is not None:
+            oprot.writeFieldBegin('last_login_ip', TType.STRING, 14)
+            oprot.writeString(self.last_login_ip.encode('utf-8') if sys.version_info[0] == 2 else self.last_login_ip)
+            oprot.writeFieldEnd()
+        if self.login_count is not None:
+            oprot.writeFieldBegin('login_count', TType.I32, 15)
+            oprot.writeI32(self.login_count)
+            oprot.writeFieldEnd()
+        if self.source is not None:
+            oprot.writeFieldBegin('source', TType.I32, 16)
+            oprot.writeI32(self.source)
+            oprot.writeFieldEnd()
+        if self.download_token is not None:
+            oprot.writeFieldBegin('download_token', TType.STRING, 17)
+            oprot.writeString(self.download_token.encode('utf-8') if sys.version_info[0] == 2 else self.download_token)
+            oprot.writeFieldEnd()
+        if self.create_time is not None:
+            oprot.writeFieldBegin('create_time', TType.STRING, 18)
+            oprot.writeString(self.create_time.encode('utf-8') if sys.version_info[0] == 2 else self.create_time)
+            oprot.writeFieldEnd()
+        if self.update_time is not None:
+            oprot.writeFieldBegin('update_time', TType.STRING, 19)
+            oprot.writeString(self.update_time.encode('utf-8') if sys.version_info[0] == 2 else self.update_time)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class DownloadReport(object):
+    """
+    Attributes:
+     - code
+     - company_name
+     - mobile
+     - name
+     - source
+     - register_ip
+     - last_login_ip
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.STRING, 'code', 'UTF8', None, ),  # 1
+        (2, TType.STRING, 'company_name', 'UTF8', None, ),  # 2
+        (3, TType.STRING, 'mobile', 'UTF8', None, ),  # 3
+        (4, TType.STRING, 'name', 'UTF8', None, ),  # 4
+        (5, TType.I32, 'source', None, None, ),  # 5
+        (6, TType.STRING, 'register_ip', 'UTF8', None, ),  # 6
+        (7, TType.STRING, 'last_login_ip', 'UTF8', None, ),  # 7
+    )
+
+    def __init__(self, code=None, company_name=None, mobile=None, name=None, source=None, register_ip=None, last_login_ip=None,):
+        self.code = code
+        self.company_name = company_name
+        self.mobile = mobile
+        self.name = name
+        self.source = source
+        self.register_ip = register_ip
+        self.last_login_ip = last_login_ip
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.code = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRING:
+                    self.company_name = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.STRING:
+                    self.mobile = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.STRING:
+                    self.name = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 5:
+                if ftype == TType.I32:
+                    self.source = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 6:
+                if ftype == TType.STRING:
+                    self.register_ip = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 7:
+                if ftype == TType.STRING:
+                    self.last_login_ip = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('DownloadReport')
+        if self.code is not None:
+            oprot.writeFieldBegin('code', TType.STRING, 1)
+            oprot.writeString(self.code.encode('utf-8') if sys.version_info[0] == 2 else self.code)
+            oprot.writeFieldEnd()
+        if self.company_name is not None:
+            oprot.writeFieldBegin('company_name', TType.STRING, 2)
+            oprot.writeString(self.company_name.encode('utf-8') if sys.version_info[0] == 2 else self.company_name)
+            oprot.writeFieldEnd()
+        if self.mobile is not None:
+            oprot.writeFieldBegin('mobile', TType.STRING, 3)
+            oprot.writeString(self.mobile.encode('utf-8') if sys.version_info[0] == 2 else self.mobile)
+            oprot.writeFieldEnd()
+        if self.name is not None:
+            oprot.writeFieldBegin('name', TType.STRING, 4)
+            oprot.writeString(self.name.encode('utf-8') if sys.version_info[0] == 2 else self.name)
+            oprot.writeFieldEnd()
+        if self.source is not None:
+            oprot.writeFieldBegin('source', TType.I32, 5)
+            oprot.writeI32(self.source)
+            oprot.writeFieldEnd()
+        if self.register_ip is not None:
+            oprot.writeFieldBegin('register_ip', TType.STRING, 6)
+            oprot.writeString(self.register_ip.encode('utf-8') if sys.version_info[0] == 2 else self.register_ip)
+            oprot.writeFieldEnd()
+        if self.last_login_ip is not None:
+            oprot.writeFieldBegin('last_login_ip', TType.STRING, 7)
+            oprot.writeString(self.last_login_ip.encode('utf-8') if sys.version_info[0] == 2 else self.last_login_ip)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class BindAccountStruct(object):
+    """
+    Attributes:
+     - username
+     - password
+     - member_name
+     - channel
+     - appid
+     - user_id
+     - company_id
+     - remainNum
+     - binding
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.STRING, 'username', 'UTF8', None, ),  # 1
+        (2, TType.STRING, 'password', 'UTF8', None, ),  # 2
+        (3, TType.STRING, 'member_name', 'UTF8', None, ),  # 3
+        (4, TType.BYTE, 'channel', None, None, ),  # 4
+        (5, TType.I32, 'appid', None, None, ),  # 5
+        (6, TType.I32, 'user_id', None, None, ),  # 6
+        (7, TType.I32, 'company_id', None, None, ),  # 7
+        (8, TType.I32, 'remainNum', None, None, ),  # 8
+        (9, TType.I32, 'binding', None, None, ),  # 9
+    )
+
+    def __init__(self, username=None, password=None, member_name=None, channel=None, appid=None, user_id=None, company_id=None, remainNum=None, binding=None,):
+        self.username = username
+        self.password = password
+        self.member_name = member_name
+        self.channel = channel
+        self.appid = appid
+        self.user_id = user_id
+        self.company_id = company_id
+        self.remainNum = remainNum
+        self.binding = binding
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.username = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRING:
+                    self.password = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.STRING:
+                    self.member_name = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.BYTE:
+                    self.channel = iprot.readByte()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 5:
+                if ftype == TType.I32:
+                    self.appid = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 6:
+                if ftype == TType.I32:
+                    self.user_id = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 7:
+                if ftype == TType.I32:
+                    self.company_id = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 8:
+                if ftype == TType.I32:
+                    self.remainNum = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 9:
+                if ftype == TType.I32:
+                    self.binding = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('BindAccountStruct')
+        if self.username is not None:
+            oprot.writeFieldBegin('username', TType.STRING, 1)
+            oprot.writeString(self.username.encode('utf-8') if sys.version_info[0] == 2 else self.username)
+            oprot.writeFieldEnd()
+        if self.password is not None:
+            oprot.writeFieldBegin('password', TType.STRING, 2)
+            oprot.writeString(self.password.encode('utf-8') if sys.version_info[0] == 2 else self.password)
+            oprot.writeFieldEnd()
+        if self.member_name is not None:
+            oprot.writeFieldBegin('member_name', TType.STRING, 3)
+            oprot.writeString(self.member_name.encode('utf-8') if sys.version_info[0] == 2 else self.member_name)
+            oprot.writeFieldEnd()
+        if self.channel is not None:
+            oprot.writeFieldBegin('channel', TType.BYTE, 4)
+            oprot.writeByte(self.channel)
+            oprot.writeFieldEnd()
+        if self.appid is not None:
+            oprot.writeFieldBegin('appid', TType.I32, 5)
+            oprot.writeI32(self.appid)
+            oprot.writeFieldEnd()
+        if self.user_id is not None:
+            oprot.writeFieldBegin('user_id', TType.I32, 6)
+            oprot.writeI32(self.user_id)
+            oprot.writeFieldEnd()
+        if self.company_id is not None:
+            oprot.writeFieldBegin('company_id', TType.I32, 7)
+            oprot.writeI32(self.company_id)
+            oprot.writeFieldEnd()
+        if self.remainNum is not None:
+            oprot.writeFieldBegin('remainNum', TType.I32, 8)
+            oprot.writeI32(self.remainNum)
+            oprot.writeFieldEnd()
+        if self.binding is not None:
+            oprot.writeFieldBegin('binding', TType.I32, 9)
+            oprot.writeI32(self.binding)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class UserEmployeeStruct(object):
+    """
+    Attributes:
+     - id
+     - employeeid
+     - company_id
+     - role_id
+     - wxuser_id
+     - ename
+     - position_id
+     - section_id
+     - custom_field
+     - award
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'id', None, None, ),  # 1
+        (2, TType.STRING, 'employeeid', 'UTF8', None, ),  # 2
+        (3, TType.I32, 'company_id', None, None, ),  # 3
+        (4, TType.I32, 'role_id', None, None, ),  # 4
+        (5, TType.I32, 'wxuser_id', None, None, ),  # 5
+        (6, TType.STRING, 'ename', 'UTF8', None, ),  # 6
+        (7, TType.I32, 'position_id', None, None, ),  # 7
+        (8, TType.I32, 'section_id', None, None, ),  # 8
+        (9, TType.STRING, 'custom_field', 'UTF8', None, ),  # 9
+        (10, TType.I64, 'award', None, None, ),  # 10
+    )
+
+    def __init__(self, id=None, employeeid=None, company_id=None, role_id=None, wxuser_id=None, ename=None, position_id=None, section_id=None, custom_field=None, award=None,):
+        self.id = id
+        self.employeeid = employeeid
+        self.company_id = company_id
+        self.role_id = role_id
+        self.wxuser_id = wxuser_id
+        self.ename = ename
+        self.position_id = position_id
+        self.section_id = section_id
+        self.custom_field = custom_field
+        self.award = award
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.id = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRING:
+                    self.employeeid = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.I32:
+                    self.company_id = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.I32:
+                    self.role_id = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 5:
+                if ftype == TType.I32:
+                    self.wxuser_id = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 6:
+                if ftype == TType.STRING:
+                    self.ename = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 7:
+                if ftype == TType.I32:
+                    self.position_id = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 8:
+                if ftype == TType.I32:
+                    self.section_id = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 9:
+                if ftype == TType.STRING:
+                    self.custom_field = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 10:
+                if ftype == TType.I64:
+                    self.award = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('UserEmployeeStruct')
+        if self.id is not None:
+            oprot.writeFieldBegin('id', TType.I32, 1)
+            oprot.writeI32(self.id)
+            oprot.writeFieldEnd()
+        if self.employeeid is not None:
+            oprot.writeFieldBegin('employeeid', TType.STRING, 2)
+            oprot.writeString(self.employeeid.encode('utf-8') if sys.version_info[0] == 2 else self.employeeid)
+            oprot.writeFieldEnd()
+        if self.company_id is not None:
+            oprot.writeFieldBegin('company_id', TType.I32, 3)
+            oprot.writeI32(self.company_id)
+            oprot.writeFieldEnd()
+        if self.role_id is not None:
+            oprot.writeFieldBegin('role_id', TType.I32, 4)
+            oprot.writeI32(self.role_id)
+            oprot.writeFieldEnd()
+        if self.wxuser_id is not None:
+            oprot.writeFieldBegin('wxuser_id', TType.I32, 5)
+            oprot.writeI32(self.wxuser_id)
+            oprot.writeFieldEnd()
+        if self.ename is not None:
+            oprot.writeFieldBegin('ename', TType.STRING, 6)
+            oprot.writeString(self.ename.encode('utf-8') if sys.version_info[0] == 2 else self.ename)
+            oprot.writeFieldEnd()
+        if self.position_id is not None:
+            oprot.writeFieldBegin('position_id', TType.I32, 7)
+            oprot.writeI32(self.position_id)
+            oprot.writeFieldEnd()
+        if self.section_id is not None:
+            oprot.writeFieldBegin('section_id', TType.I32, 8)
+            oprot.writeI32(self.section_id)
+            oprot.writeFieldEnd()
+        if self.custom_field is not None:
+            oprot.writeFieldBegin('custom_field', TType.STRING, 9)
+            oprot.writeString(self.custom_field.encode('utf-8') if sys.version_info[0] == 2 else self.custom_field)
+            oprot.writeFieldEnd()
+        if self.award is not None:
+            oprot.writeFieldBegin('award', TType.I64, 10)
+            oprot.writeI64(self.award)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class UserEmployeePointStruct(object):
+    """
+    Attributes:
+     - id
+     - employee_id
+     - reason
+     - award
+     - application_id
+     - recom_wxuser
+     - position_id
+     - berecom_wxuser_id
+     - award_config_id
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'id', None, None, ),  # 1
+        (2, TType.DOUBLE, 'employee_id', None, None, ),  # 2
+        (3, TType.STRING, 'reason', 'UTF8', None, ),  # 3
+        (4, TType.I32, 'award', None, None, ),  # 4
+        (5, TType.DOUBLE, 'application_id', None, None, ),  # 5
+        (6, TType.DOUBLE, 'recom_wxuser', None, None, ),  # 6
+        (7, TType.DOUBLE, 'position_id', None, None, ),  # 7
+        (8, TType.DOUBLE, 'berecom_wxuser_id', None, None, ),  # 8
+        (9, TType.DOUBLE, 'award_config_id', None, None, ),  # 9
+    )
+
+    def __init__(self, id=None, employee_id=None, reason=None, award=None, application_id=None, recom_wxuser=None, position_id=None, berecom_wxuser_id=None, award_config_id=None,):
+        self.id = id
+        self.employee_id = employee_id
+        self.reason = reason
+        self.award = award
+        self.application_id = application_id
+        self.recom_wxuser = recom_wxuser
+        self.position_id = position_id
+        self.berecom_wxuser_id = berecom_wxuser_id
+        self.award_config_id = award_config_id
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.id = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.DOUBLE:
+                    self.employee_id = iprot.readDouble()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.STRING:
+                    self.reason = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.I32:
+                    self.award = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 5:
+                if ftype == TType.DOUBLE:
+                    self.application_id = iprot.readDouble()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 6:
+                if ftype == TType.DOUBLE:
+                    self.recom_wxuser = iprot.readDouble()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 7:
+                if ftype == TType.DOUBLE:
+                    self.position_id = iprot.readDouble()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 8:
+                if ftype == TType.DOUBLE:
+                    self.berecom_wxuser_id = iprot.readDouble()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 9:
+                if ftype == TType.DOUBLE:
+                    self.award_config_id = iprot.readDouble()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('UserEmployeePointStruct')
+        if self.id is not None:
+            oprot.writeFieldBegin('id', TType.I32, 1)
+            oprot.writeI32(self.id)
+            oprot.writeFieldEnd()
+        if self.employee_id is not None:
+            oprot.writeFieldBegin('employee_id', TType.DOUBLE, 2)
+            oprot.writeDouble(self.employee_id)
+            oprot.writeFieldEnd()
+        if self.reason is not None:
+            oprot.writeFieldBegin('reason', TType.STRING, 3)
+            oprot.writeString(self.reason.encode('utf-8') if sys.version_info[0] == 2 else self.reason)
+            oprot.writeFieldEnd()
+        if self.award is not None:
+            oprot.writeFieldBegin('award', TType.I32, 4)
+            oprot.writeI32(self.award)
+            oprot.writeFieldEnd()
+        if self.application_id is not None:
+            oprot.writeFieldBegin('application_id', TType.DOUBLE, 5)
+            oprot.writeDouble(self.application_id)
+            oprot.writeFieldEnd()
+        if self.recom_wxuser is not None:
+            oprot.writeFieldBegin('recom_wxuser', TType.DOUBLE, 6)
+            oprot.writeDouble(self.recom_wxuser)
+            oprot.writeFieldEnd()
+        if self.position_id is not None:
+            oprot.writeFieldBegin('position_id', TType.DOUBLE, 7)
+            oprot.writeDouble(self.position_id)
+            oprot.writeFieldEnd()
+        if self.berecom_wxuser_id is not None:
+            oprot.writeFieldBegin('berecom_wxuser_id', TType.DOUBLE, 8)
+            oprot.writeDouble(self.berecom_wxuser_id)
+            oprot.writeFieldEnd()
+        if self.award_config_id is not None:
+            oprot.writeFieldBegin('award_config_id', TType.DOUBLE, 9)
+            oprot.writeDouble(self.award_config_id)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class UserEmployeePointSum(object):
+    """
+    Attributes:
+     - award
+     - employee_id
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I64, 'award', None, None, ),  # 1
+        (2, TType.I64, 'employee_id', None, None, ),  # 2
+    )
+
+    def __init__(self, award=None, employee_id=None,):
+        self.award = award
+        self.employee_id = employee_id
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I64:
+                    self.award = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.I64:
+                    self.employee_id = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('UserEmployeePointSum')
+        if self.award is not None:
+            oprot.writeFieldBegin('award', TType.I64, 1)
+            oprot.writeI64(self.award)
+            oprot.writeFieldEnd()
+        if self.employee_id is not None:
+            oprot.writeFieldBegin('employee_id', TType.I64, 2)
+            oprot.writeI64(self.employee_id)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class ApplicationRecordsForm(object):
+    """
+    Attributes:
+     - id
+     - title
+     - department
+     - status
+     - time
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'id', None, None, ),  # 1
+        (2, TType.STRING, 'title', 'UTF8', None, ),  # 2
+        (3, TType.STRING, 'department', 'UTF8', None, ),  # 3
+        (4, TType.BYTE, 'status', None, None, ),  # 4
+        (5, TType.STRING, 'time', 'UTF8', None, ),  # 5
+    )
+
+    def __init__(self, id=None, title=None, department=None, status=None, time=None,):
+        self.id = id
+        self.title = title
+        self.department = department
+        self.status = status
+        self.time = time
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.id = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRING:
+                    self.title = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.STRING:
+                    self.department = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.BYTE:
+                    self.status = iprot.readByte()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 5:
+                if ftype == TType.STRING:
+                    self.time = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('ApplicationRecordsForm')
+        if self.id is not None:
+            oprot.writeFieldBegin('id', TType.I32, 1)
+            oprot.writeI32(self.id)
+            oprot.writeFieldEnd()
+        if self.title is not None:
+            oprot.writeFieldBegin('title', TType.STRING, 2)
+            oprot.writeString(self.title.encode('utf-8') if sys.version_info[0] == 2 else self.title)
+            oprot.writeFieldEnd()
+        if self.department is not None:
+            oprot.writeFieldBegin('department', TType.STRING, 3)
+            oprot.writeString(self.department.encode('utf-8') if sys.version_info[0] == 2 else self.department)
+            oprot.writeFieldEnd()
+        if self.status is not None:
+            oprot.writeFieldBegin('status', TType.BYTE, 4)
+            oprot.writeByte(self.status)
+            oprot.writeFieldEnd()
+        if self.time is not None:
+            oprot.writeFieldBegin('time', TType.STRING, 5)
+            oprot.writeString(self.time.encode('utf-8') if sys.version_info[0] == 2 else self.time)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class FavPositionForm(object):
+    """
+    Attributes:
+     - id
+     - title
+     - department
+     - time
+     - city
+     - salary_top
+     - salary_bottom
+     - status
+     - update_time
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'id', None, None, ),  # 1
+        (2, TType.STRING, 'title', 'UTF8', None, ),  # 2
+        (3, TType.STRING, 'department', 'UTF8', None, ),  # 3
+        (4, TType.STRING, 'time', 'UTF8', None, ),  # 4
+        (5, TType.STRING, 'city', 'UTF8', None, ),  # 5
+        (6, TType.I32, 'salary_top', None, None, ),  # 6
+        (7, TType.I32, 'salary_bottom', None, None, ),  # 7
+        (8, TType.BYTE, 'status', None, None, ),  # 8
+        (9, TType.STRING, 'update_time', 'UTF8', None, ),  # 9
+    )
+
+    def __init__(self, id=None, title=None, department=None, time=None, city=None, salary_top=None, salary_bottom=None, status=None, update_time=None,):
+        self.id = id
+        self.title = title
+        self.department = department
+        self.time = time
+        self.city = city
+        self.salary_top = salary_top
+        self.salary_bottom = salary_bottom
+        self.status = status
+        self.update_time = update_time
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.id = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRING:
+                    self.title = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.STRING:
+                    self.department = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.STRING:
+                    self.time = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 5:
+                if ftype == TType.STRING:
+                    self.city = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 6:
+                if ftype == TType.I32:
+                    self.salary_top = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 7:
+                if ftype == TType.I32:
+                    self.salary_bottom = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 8:
+                if ftype == TType.BYTE:
+                    self.status = iprot.readByte()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 9:
+                if ftype == TType.STRING:
+                    self.update_time = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('FavPositionForm')
+        if self.id is not None:
+            oprot.writeFieldBegin('id', TType.I32, 1)
+            oprot.writeI32(self.id)
+            oprot.writeFieldEnd()
+        if self.title is not None:
+            oprot.writeFieldBegin('title', TType.STRING, 2)
+            oprot.writeString(self.title.encode('utf-8') if sys.version_info[0] == 2 else self.title)
+            oprot.writeFieldEnd()
+        if self.department is not None:
+            oprot.writeFieldBegin('department', TType.STRING, 3)
+            oprot.writeString(self.department.encode('utf-8') if sys.version_info[0] == 2 else self.department)
+            oprot.writeFieldEnd()
+        if self.time is not None:
+            oprot.writeFieldBegin('time', TType.STRING, 4)
+            oprot.writeString(self.time.encode('utf-8') if sys.version_info[0] == 2 else self.time)
+            oprot.writeFieldEnd()
+        if self.city is not None:
+            oprot.writeFieldBegin('city', TType.STRING, 5)
+            oprot.writeString(self.city.encode('utf-8') if sys.version_info[0] == 2 else self.city)
+            oprot.writeFieldEnd()
+        if self.salary_top is not None:
+            oprot.writeFieldBegin('salary_top', TType.I32, 6)
+            oprot.writeI32(self.salary_top)
+            oprot.writeFieldEnd()
+        if self.salary_bottom is not None:
+            oprot.writeFieldBegin('salary_bottom', TType.I32, 7)
+            oprot.writeI32(self.salary_bottom)
+            oprot.writeFieldEnd()
+        if self.status is not None:
+            oprot.writeFieldBegin('status', TType.BYTE, 8)
+            oprot.writeByte(self.status)
+            oprot.writeFieldEnd()
+        if self.update_time is not None:
+            oprot.writeFieldBegin('update_time', TType.STRING, 9)
+            oprot.writeString(self.update_time.encode('utf-8') if sys.version_info[0] == 2 else self.update_time)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class RecommendationForm(object):
+    """
+    Attributes:
+     - recom_status
+     - app_id
+     - applier_name
+     - position
+     - click_time
+     - recom_time
+     - status
+     - recom_2nd_nickname
+     - applier_id
+     - candidate_recom_record_id
+     - app_time
+     - is_interested
+     - view_number
+     - headimgurl
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.BYTE, 'recom_status', None, None, ),  # 1
+        (2, TType.I32, 'app_id', None, None, ),  # 2
+        (3, TType.STRING, 'applier_name', 'UTF8', None, ),  # 3
+        (4, TType.STRING, 'position', 'UTF8', None, ),  # 4
+        (5, TType.STRING, 'click_time', 'UTF8', None, ),  # 5
+        (6, TType.STRING, 'recom_time', 'UTF8', None, ),  # 6
+        (7, TType.I16, 'status', None, None, ),  # 7
+        (8, TType.STRING, 'recom_2nd_nickname', 'UTF8', None, ),  # 8
+        (9, TType.I32, 'applier_id', None, None, ),  # 9
+        (10, TType.I32, 'candidate_recom_record_id', None, None, ),  # 10
+        (11, TType.STRING, 'app_time', 'UTF8', None, ),  # 11
+        (12, TType.BYTE, 'is_interested', None, None, ),  # 12
+        (13, TType.I32, 'view_number', None, None, ),  # 13
+        (14, TType.STRING, 'headimgurl', 'UTF8', None, ),  # 14
+    )
+
+    def __init__(self, recom_status=None, app_id=None, applier_name=None, position=None, click_time=None, recom_time=None, status=None, recom_2nd_nickname=None, applier_id=None, candidate_recom_record_id=None, app_time=None, is_interested=None, view_number=None, headimgurl=None,):
+        self.recom_status = recom_status
+        self.app_id = app_id
+        self.applier_name = applier_name
+        self.position = position
+        self.click_time = click_time
+        self.recom_time = recom_time
+        self.status = status
+        self.recom_2nd_nickname = recom_2nd_nickname
+        self.applier_id = applier_id
+        self.candidate_recom_record_id = candidate_recom_record_id
+        self.app_time = app_time
+        self.is_interested = is_interested
+        self.view_number = view_number
+        self.headimgurl = headimgurl
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.BYTE:
+                    self.recom_status = iprot.readByte()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.I32:
+                    self.app_id = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.STRING:
+                    self.applier_name = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.STRING:
+                    self.position = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 5:
+                if ftype == TType.STRING:
+                    self.click_time = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 6:
+                if ftype == TType.STRING:
+                    self.recom_time = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 7:
+                if ftype == TType.I16:
+                    self.status = iprot.readI16()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 8:
+                if ftype == TType.STRING:
+                    self.recom_2nd_nickname = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 9:
+                if ftype == TType.I32:
+                    self.applier_id = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 10:
+                if ftype == TType.I32:
+                    self.candidate_recom_record_id = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 11:
+                if ftype == TType.STRING:
+                    self.app_time = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 12:
+                if ftype == TType.BYTE:
+                    self.is_interested = iprot.readByte()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 13:
+                if ftype == TType.I32:
+                    self.view_number = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 14:
+                if ftype == TType.STRING:
+                    self.headimgurl = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('RecommendationForm')
+        if self.recom_status is not None:
+            oprot.writeFieldBegin('recom_status', TType.BYTE, 1)
+            oprot.writeByte(self.recom_status)
+            oprot.writeFieldEnd()
+        if self.app_id is not None:
+            oprot.writeFieldBegin('app_id', TType.I32, 2)
+            oprot.writeI32(self.app_id)
+            oprot.writeFieldEnd()
+        if self.applier_name is not None:
+            oprot.writeFieldBegin('applier_name', TType.STRING, 3)
+            oprot.writeString(self.applier_name.encode('utf-8') if sys.version_info[0] == 2 else self.applier_name)
+            oprot.writeFieldEnd()
+        if self.position is not None:
+            oprot.writeFieldBegin('position', TType.STRING, 4)
+            oprot.writeString(self.position.encode('utf-8') if sys.version_info[0] == 2 else self.position)
+            oprot.writeFieldEnd()
+        if self.click_time is not None:
+            oprot.writeFieldBegin('click_time', TType.STRING, 5)
+            oprot.writeString(self.click_time.encode('utf-8') if sys.version_info[0] == 2 else self.click_time)
+            oprot.writeFieldEnd()
+        if self.recom_time is not None:
+            oprot.writeFieldBegin('recom_time', TType.STRING, 6)
+            oprot.writeString(self.recom_time.encode('utf-8') if sys.version_info[0] == 2 else self.recom_time)
+            oprot.writeFieldEnd()
+        if self.status is not None:
+            oprot.writeFieldBegin('status', TType.I16, 7)
+            oprot.writeI16(self.status)
+            oprot.writeFieldEnd()
+        if self.recom_2nd_nickname is not None:
+            oprot.writeFieldBegin('recom_2nd_nickname', TType.STRING, 8)
+            oprot.writeString(self.recom_2nd_nickname.encode('utf-8') if sys.version_info[0] == 2 else self.recom_2nd_nickname)
+            oprot.writeFieldEnd()
+        if self.applier_id is not None:
+            oprot.writeFieldBegin('applier_id', TType.I32, 9)
+            oprot.writeI32(self.applier_id)
+            oprot.writeFieldEnd()
+        if self.candidate_recom_record_id is not None:
+            oprot.writeFieldBegin('candidate_recom_record_id', TType.I32, 10)
+            oprot.writeI32(self.candidate_recom_record_id)
+            oprot.writeFieldEnd()
+        if self.app_time is not None:
+            oprot.writeFieldBegin('app_time', TType.STRING, 11)
+            oprot.writeString(self.app_time.encode('utf-8') if sys.version_info[0] == 2 else self.app_time)
+            oprot.writeFieldEnd()
+        if self.is_interested is not None:
+            oprot.writeFieldBegin('is_interested', TType.BYTE, 12)
+            oprot.writeByte(self.is_interested)
+            oprot.writeFieldEnd()
+        if self.view_number is not None:
+            oprot.writeFieldBegin('view_number', TType.I32, 13)
+            oprot.writeI32(self.view_number)
+            oprot.writeFieldEnd()
+        if self.headimgurl is not None:
+            oprot.writeFieldBegin('headimgurl', TType.STRING, 14)
+            oprot.writeString(self.headimgurl.encode('utf-8') if sys.version_info[0] == 2 else self.headimgurl)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class AwardRecordForm(object):
+    """
+    Attributes:
+     - id
+     - reason
+     - title
+     - create_time
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'id', None, None, ),  # 1
+        (2, TType.STRING, 'reason', 'UTF8', None, ),  # 2
+        (3, TType.STRING, 'title', 'UTF8', None, ),  # 3
+        (4, TType.STRING, 'create_time', 'UTF8', None, ),  # 4
+    )
+
+    def __init__(self, id=None, reason=None, title=None, create_time=None,):
+        self.id = id
+        self.reason = reason
+        self.title = title
+        self.create_time = create_time
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.id = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRING:
+                    self.reason = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.STRING:
+                    self.title = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.STRING:
+                    self.create_time = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('AwardRecordForm')
+        if self.id is not None:
+            oprot.writeFieldBegin('id', TType.I32, 1)
+            oprot.writeI32(self.id)
+            oprot.writeFieldEnd()
+        if self.reason is not None:
+            oprot.writeFieldBegin('reason', TType.STRING, 2)
+            oprot.writeString(self.reason.encode('utf-8') if sys.version_info[0] == 2 else self.reason)
+            oprot.writeFieldEnd()
+        if self.title is not None:
+            oprot.writeFieldBegin('title', TType.STRING, 3)
+            oprot.writeString(self.title.encode('utf-8') if sys.version_info[0] == 2 else self.title)
+            oprot.writeFieldEnd()
+        if self.create_time is not None:
+            oprot.writeFieldBegin('create_time', TType.STRING, 4)
+            oprot.writeString(self.create_time.encode('utf-8') if sys.version_info[0] == 2 else self.create_time)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class ApplicationDetailVO(object):
+    """
+    Attributes:
+     - pid
+     - position_title
+     - company_title
+     - step
+     - step_status
+     - status_timeline
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'pid', None, None, ),  # 1
+        (2, TType.STRING, 'position_title', 'UTF8', None, ),  # 2
+        (3, TType.STRING, 'company_title', 'UTF8', None, ),  # 3
+        (4, TType.BYTE, 'step', None, None, ),  # 4
+        (5, TType.BYTE, 'step_status', None, None, ),  # 5
+        (6, TType.LIST, 'status_timeline', (TType.STRUCT, (ApplicationOperationRecordVO, ApplicationOperationRecordVO.thrift_spec), False), None, ),  # 6
+    )
+
+    def __init__(self, pid=None, position_title=None, company_title=None, step=None, step_status=None, status_timeline=None,):
+        self.pid = pid
+        self.position_title = position_title
+        self.company_title = company_title
+        self.step = step
+        self.step_status = step_status
+        self.status_timeline = status_timeline
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.pid = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRING:
+                    self.position_title = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.STRING:
+                    self.company_title = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.BYTE:
+                    self.step = iprot.readByte()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 5:
+                if ftype == TType.BYTE:
+                    self.step_status = iprot.readByte()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 6:
+                if ftype == TType.LIST:
+                    self.status_timeline = []
+                    (_etype3, _size0) = iprot.readListBegin()
+                    for _i4 in range(_size0):
+                        _elem5 = ApplicationOperationRecordVO()
+                        _elem5.read(iprot)
+                        self.status_timeline.append(_elem5)
+                    iprot.readListEnd()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('ApplicationDetailVO')
+        if self.pid is not None:
+            oprot.writeFieldBegin('pid', TType.I32, 1)
+            oprot.writeI32(self.pid)
+            oprot.writeFieldEnd()
+        if self.position_title is not None:
+            oprot.writeFieldBegin('position_title', TType.STRING, 2)
+            oprot.writeString(self.position_title.encode('utf-8') if sys.version_info[0] == 2 else self.position_title)
+            oprot.writeFieldEnd()
+        if self.company_title is not None:
+            oprot.writeFieldBegin('company_title', TType.STRING, 3)
+            oprot.writeString(self.company_title.encode('utf-8') if sys.version_info[0] == 2 else self.company_title)
+            oprot.writeFieldEnd()
+        if self.step is not None:
+            oprot.writeFieldBegin('step', TType.BYTE, 4)
+            oprot.writeByte(self.step)
+            oprot.writeFieldEnd()
+        if self.step_status is not None:
+            oprot.writeFieldBegin('step_status', TType.BYTE, 5)
+            oprot.writeByte(self.step_status)
+            oprot.writeFieldEnd()
+        if self.status_timeline is not None:
+            oprot.writeFieldBegin('status_timeline', TType.LIST, 6)
+            oprot.writeListBegin(TType.STRUCT, len(self.status_timeline))
+            for iter6 in self.status_timeline:
+                iter6.write(oprot)
+            oprot.writeListEnd()
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class ApplicationOperationRecordVO(object):
+    """
+    Attributes:
+     - date
+     - event
+     - hide
+     - step_status
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.STRING, 'date', 'UTF8', None, ),  # 1
+        (2, TType.STRING, 'event', 'UTF8', None, ),  # 2
+        (3, TType.I32, 'hide', None, None, ),  # 3
+        (4, TType.I32, 'step_status', None, None, ),  # 4
+    )
+
+    def __init__(self, date=None, event=None, hide=None, step_status=None,):
+        self.date = date
+        self.event = event
+        self.hide = hide
+        self.step_status = step_status
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.date = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRING:
+                    self.event = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.I32:
+                    self.hide = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.I32:
+                    self.step_status = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('ApplicationOperationRecordVO')
+        if self.date is not None:
+            oprot.writeFieldBegin('date', TType.STRING, 1)
+            oprot.writeString(self.date.encode('utf-8') if sys.version_info[0] == 2 else self.date)
+            oprot.writeFieldEnd()
+        if self.event is not None:
+            oprot.writeFieldBegin('event', TType.STRING, 2)
+            oprot.writeString(self.event.encode('utf-8') if sys.version_info[0] == 2 else self.event)
+            oprot.writeFieldEnd()
+        if self.hide is not None:
+            oprot.writeFieldBegin('hide', TType.I32, 3)
+            oprot.writeI32(self.hide)
+            oprot.writeFieldEnd()
+        if self.step_status is not None:
+            oprot.writeFieldBegin('step_status', TType.I32, 4)
+            oprot.writeI32(self.step_status)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
