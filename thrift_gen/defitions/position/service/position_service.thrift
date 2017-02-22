@@ -3,6 +3,7 @@ include "../../common/struct/common_struct.thrift"
 include "../../apps/struct/appbs_struct.thrift"
 include "../../dao/struct/dao_struct.thrift"
 
+namespace java com.moseeker.thrift.gen.position.service
 namespace py thrift_gen.gen.position.service
 /*
     查询第三方职位职能

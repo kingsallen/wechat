@@ -1,3 +1,4 @@
+namespace java com.moseeker.thrift.gen.mq.struct
 namespace py thrift_gen.gen.mq.struct
 
 /*

@@ -18,12 +18,17 @@ service HrDBDao {
     hrdb_struct.HrHbScratchCardDO getHbScratchCard(1: common_struct.CommonQuery query);
     
     hrdb_struct.HrHbSendRecordDO getHbSendRecord(1: common_struct.CommonQuery query);
-    common_struct.Response postHrOperationrecords(1:list<hrdb_struct.HrOperationrecordDO> record);
-    common_struct.Response postHrOperationrecord(1:hrdb_struct.HrOperationrecordDO record);
+    
+    common_struct.Response postHrOperationrecords(1:list<hrdb_struct.HrOperationRecordDO> record);
+    common_struct.Response postHrOperationrecord(1:hrdb_struct.HrOperationRecordDO record);
     common_struct.Response getHrHistoryOperations(1:list<application_struct.ProcessValidationStruct> record);
+    list<hrdb_struct.HrOperationRecordDO> listHrOperationRecord(1: common_struct.CommonQuery query);
+    list<hrdb_struct.HrOperationRecordDO> listLatestOperationRecordByAppIdSet(1: set<i32> appidSet);
 
     hrdb_struct.HrEmployeeCertConfDO getEmployeeCertConf(1: common_struct.CommonQuery query);
 
     list<hrdb_struct.HrEmployeeCustomFieldsDO> getEmployeeCustomFields(1: common_struct.CommonQuery query);
     list<hrdb_struct.HrPointsConfDO> getPointsConfs(1: common_struct.CommonQuery query);
+    
+    hrdb_struct.HrCompanyDO getCompany(1: common_struct.CommonQuery query);
 }

@@ -7,7 +7,7 @@ namespace py thrift_gen.gen.dao.struct.configdb
  */
 typedef string Timestamp;
 
-struct AwardConfigTpl{
+struct ConfigSysPointConfTplDO {
     1: optional i32 id,                 //编号 唯一标识
     2: optional string status,          //申请状态
     3: optional i32 award,              //奖励积分

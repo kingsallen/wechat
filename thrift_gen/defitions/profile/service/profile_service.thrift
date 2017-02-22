@@ -2,6 +2,7 @@
 
 include "../struct/profile_struct.thrift"
 include "../../common/struct/common_struct.thrift"
+namespace java com.moseeker.thrift.gen.profile.service
 namespace py thrift_gen.gen.profile.service
 
 /**

@@ -3,7 +3,10 @@
 include "../../../common/struct/common_struct.thrift"
 include "../struct/chaos_struct.thrift"
 include "../../../position/struct/position_struct.thrift"
+
+namespace java com.moseeker.thrift.gen.foundation.chaos.service
 namespace py thrift_gen.gen.foundation.chaos.service
+
 
 /**
  * TODO:list what notation this dateTime represents. eg ISO-8601

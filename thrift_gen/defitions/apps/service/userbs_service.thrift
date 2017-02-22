@@ -2,6 +2,8 @@
 
 include "../../common/struct/common_struct.thrift"
 include "../../useraccounts/struct/bindtype_struct.thrift"
+
+namespace java com.moseeker.thrift.gen.apps.userbs.service
 namespace py thrift_gen.gen.apps.userbs.service
 
 /**

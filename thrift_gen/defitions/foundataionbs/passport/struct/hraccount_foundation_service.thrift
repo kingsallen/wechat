@@ -1,5 +1,5 @@
 
-namespace py thrift_gen.gen.foundation.hraccount.struct
+namespace java com.moseeker.thrift.gen.foundation.hraccount.struct
 
 typedef string Datetime;
 struct ThirdPartAccount{

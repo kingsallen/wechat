@@ -4,6 +4,7 @@
 include "../../common/struct/common_struct.thrift"
 include "../struct/company_struct.thrift"
 
+namespace java com.moseeker.thrift.gen.company.service
 namespace py thrift_gen.gen.company.service
 
 service CompanyServices {

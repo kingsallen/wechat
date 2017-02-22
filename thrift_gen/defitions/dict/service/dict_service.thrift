@@ -1,6 +1,7 @@
 include "../struct/dict_struct.thrift"
 include "../../common/struct/common_struct.thrift"
 
+namespace java com.moseeker.thrift.gen.dict.service
 namespace py thrift_gen.gen.dict.service
 
 service CityServices {

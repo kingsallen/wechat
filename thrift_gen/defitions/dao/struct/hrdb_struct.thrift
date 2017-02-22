@@ -7,12 +7,13 @@ namespace py thrift_gen.gen.dao.struct.hrdb
  */
 typedef string Timestamp
 
-struct HrOperationrecordDO {
-    1: optional double admin_id,
-    2: optional double company_id,
-    3: optional double app_id,
-    4: optional double status_id,
-    5: optional i32 operate_tpl_id
+struct HrOperationRecordDO {
+    1: optional double adminId,
+    2: optional double companyId,
+    3: optional double appId,
+    4: optional double statusId,
+    5: optional i32 operateTplId,
+    6: optional string optTime 
 }
 
 struct HrHbConfigDO {
@@ -143,3 +144,25 @@ struct HrPointsConfDO {
     16: optional i32 template_id
 }
 
+struct HrCompanyDO { 
+    1: optional i32 id,
+    2: optional i8  type,
+    3: optional string name,
+    4: optional string introduction,
+    5: optional i16 scale,
+    6: optional string address,
+    7: optional i8 property,
+    8: optional string industry,
+    9: optional string homepage,
+    10: optional string logo,
+    11: optional string abbreviation,
+    12: optional string impression,
+    13: optional string banner,
+    14: optional i32 parentId,
+    15: optional i32 hraccountId,
+    16: optional i32 disable,
+    17: optional Timestamp createTime,
+    18: optional Timestamp updateTime,
+    19: optional i32 source,
+    20: optional string slogan
+}

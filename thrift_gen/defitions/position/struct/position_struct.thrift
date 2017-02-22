@@ -1,5 +1,6 @@
 # file: profile.thrift
 
+namespace java com.moseeker.thrift.gen.position.struct
 namespace py thrift_gen.gen.position.struct
 
 /**

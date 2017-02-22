@@ -1,3 +1,4 @@
+namespace java com.moseeker.thrift.gen.application.struct
 namespace py thrift_gen.gen.application.struct
 
 typedef string Timestamp

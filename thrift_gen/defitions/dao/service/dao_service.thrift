@@ -6,6 +6,7 @@ include "../../useraccounts/struct/useraccounts_struct.thrift"
 include "../../position/struct/position_struct.thrift"
 include "../../dict/struct/dict_struct.thrift"
 include "../struct/dao_struct.thrift"
+include "../struct/hrdb_struct.thrift"
 include "../../company/struct/company_struct.thrift"
 include "../../application/struct/application_struct.thrift"
 
@@ -43,7 +44,7 @@ service CompanyDao {
 	common_struct.Response upsertThirdPartyPositions(1: list<dao_struct.ThirdPartyPositionData> positions);
 	common_struct.Response updatePartyAccountByCompanyIdChannel(1: dao_struct.ThirdPartAccountData account);
 	//查找公司信息
-	company_struct.Hrcompany getCompany(1:common_struct.CommonQuery query);
+	hrdb_struct.HrCompanyDO getCompany(1:common_struct.CommonQuery query);
 	list<company_struct.Hrcompany> getCompanies(1:common_struct.CommonQuery query);
 	common_struct.Response getHrCompanyConfig(1:common_struct.CommonQuery query);
 }

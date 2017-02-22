@@ -1,5 +1,6 @@
 # file: useraccounts.struct
 
+namespace java com.moseeker.thrift.gen.useraccounts.struct
 namespace py thrift_gen.gen.useraccounts.struct
 
 typedef string Timestamp;

@@ -11,10 +11,8 @@ import conf.common as const
 from util.common import ObjectDict
 from util.common.cipher import encode_id
 from util.tool.date_tool import jd_update_date
-from util.tool.http_tool import async_das_get
 from util.tool.str_tool import gen_salary, split
 from util.tool.temp_data_tool import make_mate, make_team, template3
-
 
 class PositionPageService(PageService):
 
@@ -221,19 +219,6 @@ class PositionPageService(PageService):
                 }, fields={
                     "award": int(employee_sum.sum_award),
                 })
-
-    @gen.coroutine
-    def send_candidate_view_position(self, params):
-        """刷新候选人链路信息
-        暂时调用 DAS，后续迁移到基础服务"""
-
-        # TODO 替换为基础服务，待 thrift 客户端可用
-
-        self.logger.debug("send_candidate_view_position: %s" % params)
-        try:
-            yield async_das_get("candidate/glancePosition", params)
-        except Exception as error:
-            self.logger.warning(error)
 
     @gen.coroutine
     def get_mate_data(self, jd_media):

@@ -18,6 +18,9 @@ from conf import path
 
 class TeamPageService(PageService):
 
+    def __init__(self):
+        super().__init__()
+
     @gen.coroutine
     def get_sub_company(self, sub_company_id):
         sub_company = yield self.hr_company_ds.get_company(

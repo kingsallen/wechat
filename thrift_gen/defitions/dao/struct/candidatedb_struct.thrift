@@ -7,6 +7,11 @@ namespace py thrift_gen.gen.dao.struct.candidatedb
  */
 typedef string Timestamp;
 
+exception CURDException {
+    1: i32 code,
+    2: string message
+}
+
 /*
  * 候选人记录
  */
@@ -16,13 +21,13 @@ struct CandidateCompanyDO {
     3: optional Timestamp updateTime,       // 修改时间
     4: optional i8 status,                  // 状态 0：不是候选人，1：候选人
     5: optional bool isRecommend,           // 是否推荐 false:未推荐，true:推荐
-    6: optional string name,                //申请状态ID（可能已经废弃）
-    7: optional string email,               //申请状态ID（可能已经废弃）
-    8: optional string mobile,              //申请状态ID（可能已经废弃）
-    9: optional string nickname,            //申请状态ID（可能已经废弃）
-    10: optional string headimgurl,         //申请状态ID（可能已经废弃）
-    11: optional string sysUserId,          //申请状态ID（可能已经废弃）
-    12: optional string clickFrom           //申请状态ID（可能已经废弃）
+    6: optional string name,                // 姓名或微信昵称
+    7: optional string email,               // 邮箱
+    8: optional string mobile,              // 手机号码
+    9: optional string nickname,            // 昵称
+    10: optional string headimgurl,         // 头像
+    11: optional i32 sysUserId,          // userdb.user_user.id C端账号编号，表示该候选人绑定的C端账号
+    12: optional i8 clickFrom           // 点击入口0:未知, 朋友圈(timeline ) 1, 微信群(groupmessage) 2, 个人消息(singlemessage)
 }
 
 /**

@@ -1,6 +1,8 @@
 # file: profile_service.thrift
 
 include "../../common/struct/common_struct.thrift"
+
+namespace java com.moseeker.thrift.gen.apps.profilebs.service
 namespace py thrift_gen.gen.apps.profilebs.service
 
 /**

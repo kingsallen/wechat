@@ -1,5 +1,6 @@
 # file: function.thrift
 
+namespace java com.moseeker.thrift.gen.foundation.chaos.struct
 namespace py thrift_gen.gen.foundation.chaos.struct
 
 /**

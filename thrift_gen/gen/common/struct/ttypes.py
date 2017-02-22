@@ -108,6 +108,8 @@ class CommonQuery(object):
      - fields
      - nocache
      - equalFilter
+     - attributes
+     - grouops
     """
 
     thrift_spec = (
@@ -120,9 +122,11 @@ class CommonQuery(object):
         (6, TType.STRING, 'fields', 'UTF8', None, ),  # 6
         (7, TType.BOOL, 'nocache', None, False, ),  # 7
         (8, TType.MAP, 'equalFilter', (TType.STRING, 'UTF8', TType.STRING, 'UTF8', False), None, ),  # 8
+        (9, TType.LIST, 'attributes', (TType.STRING, 'UTF8', False), None, ),  # 9
+        (10, TType.LIST, 'grouops', (TType.STRING, 'UTF8', False), None, ),  # 10
     )
 
-    def __init__(self, appid=None, page=None, per_page=None, sortby=None, order=None, fields=None, nocache=thrift_spec[7][4], equalFilter=None,):
+    def __init__(self, appid=None, page=None, per_page=None, sortby=None, order=None, fields=None, nocache=thrift_spec[7][4], equalFilter=None, attributes=None, grouops=None,):
         self.appid = appid
         self.page = page
         self.per_page = per_page
@@ -131,6 +135,8 @@ class CommonQuery(object):
         self.fields = fields
         self.nocache = nocache
         self.equalFilter = equalFilter
+        self.attributes = attributes
+        self.grouops = grouops
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -187,6 +193,26 @@ class CommonQuery(object):
                     iprot.readMapEnd()
                 else:
                     iprot.skip(ftype)
+            elif fid == 9:
+                if ftype == TType.LIST:
+                    self.attributes = []
+                    (_etype10, _size7) = iprot.readListBegin()
+                    for _i11 in range(_size7):
+                        _elem12 = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                        self.attributes.append(_elem12)
+                    iprot.readListEnd()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 10:
+                if ftype == TType.LIST:
+                    self.grouops = []
+                    (_etype16, _size13) = iprot.readListBegin()
+                    for _i17 in range(_size13):
+                        _elem18 = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                        self.grouops.append(_elem18)
+                    iprot.readListEnd()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -228,10 +254,24 @@ class CommonQuery(object):
         if self.equalFilter is not None:
             oprot.writeFieldBegin('equalFilter', TType.MAP, 8)
             oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.equalFilter))
-            for kiter7, viter8 in self.equalFilter.items():
-                oprot.writeString(kiter7.encode('utf-8') if sys.version_info[0] == 2 else kiter7)
-                oprot.writeString(viter8.encode('utf-8') if sys.version_info[0] == 2 else viter8)
+            for kiter19, viter20 in self.equalFilter.items():
+                oprot.writeString(kiter19.encode('utf-8') if sys.version_info[0] == 2 else kiter19)
+                oprot.writeString(viter20.encode('utf-8') if sys.version_info[0] == 2 else viter20)
             oprot.writeMapEnd()
+            oprot.writeFieldEnd()
+        if self.attributes is not None:
+            oprot.writeFieldBegin('attributes', TType.LIST, 9)
+            oprot.writeListBegin(TType.STRING, len(self.attributes))
+            for iter21 in self.attributes:
+                oprot.writeString(iter21.encode('utf-8') if sys.version_info[0] == 2 else iter21)
+            oprot.writeListEnd()
+            oprot.writeFieldEnd()
+        if self.grouops is not None:
+            oprot.writeFieldBegin('grouops', TType.LIST, 10)
+            oprot.writeListBegin(TType.STRING, len(self.grouops))
+            for iter22 in self.grouops:
+                oprot.writeString(iter22.encode('utf-8') if sys.version_info[0] == 2 else iter22)
+            oprot.writeListEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()

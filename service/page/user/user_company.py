@@ -19,6 +19,10 @@ import re
 
 
 class UserCompanyPageService(PageService):
+
+    def __init__(self):
+        super().__init__()
+
     @gen.coroutine
     def get_company_data(self, handler_params, company, user):
         """

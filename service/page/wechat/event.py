@@ -28,6 +28,9 @@ from util.tool.json_tool import json_dumps
 
 class EventPageService(PageService):
 
+    def __init__(self):
+        super().__init__()
+
     @gen.coroutine
     def opt_default(self, msg, nonce, wechat):
         """被动回复用户消息的总控处理

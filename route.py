@@ -29,10 +29,6 @@ common_routes = [
     (r"/wechat",                                       "handler.wechat.event.WechatOauthHandler",                   {"event": "wechat_oauth"}),
     # 第三方授权方式
     (r"/wechat[\/]*([0-9a-z]+)*",                      "handler.wechat.event.WechatThirdOauthHandler",              {"event": "wechat_thirdoauth"}),  # passport
-    (r"/m/user/([a-z]*)",                              "handler.common.passport.LoginHandler",                      {"event": "user_login"}),
-    # position
-    (r"/m/position/([0-9]+)",                          "handler.common.position.PositionHandler",                   {"event": "position_info"}),
-    (r"/m/position",                                   "handler.common.position.PositionListHandler",               {"event": "position_list"}),
 
     # app forward 给前端，展示纯前端渲染的 SPA
     (r"/m/app/.*",                                     "handler.common.app.IndexHandler",                           {"event": "app_"}),
@@ -58,18 +54,24 @@ common_routes = [
 
 # 企业号的单独 routes
 platform_routes = [
+    # position
+    (r"/m/position/([0-9]+)",                          "handler.platform.position.PositionHandler",                 {"event": "position_info"}),
+    (r"/m/position",                                   "handler.platform.position.PositionListHandler",             {"event": "position_list"}),
+
     (r"/m/start",                                      "handler.platform.landing.LandingHandler",                   {"event": "start_landing"}),
     (r"/m/company/(\d+)",                              "handler.platform.companyrelation.CompanyInfoHandler",       {"event": "company_old_info"}),
     (r"/m/company",                                    "handler.platform.companyrelation.CompanyHandler",           {"event": "company_info"}),
     (r"/m/company/team/(\d+)",                         "handler.platform.team.TeamDetailHandler",                   {"event": "team_detail"}),
     (r"/m/company/team",                               "handler.platform.team.TeamIndexHandler",                    {"event": "team_info"}),
-    (r"/m/awards",                                     "handler.platform.employee.AwardsHandler",                   {"event":  "awards"}),
+    # (r"/m/employee/awards",                            "handler.platform.employee.AwardsHandler",                   {"event": "employee_awards"}),
 
     (r"/m/api/company/visitreq",                       "handler.platform.companyrelation.CompanyVisitReqHandler",   {"event": "company_visitreq"}),
     (r"/m/api/company/survey",                         "handler.platform.companyrelation.CompanySurveyHandler",     {"event": "company_survey"}),
     (r"/m/api/company/follow",                         "handler.platform.companyrelation.CompanyFollowHandler",     {"event": "company_follow"}),
     (r"/m/api/employee/bind",                          "handler.platform.employee.EmployeeBindHandler",             {"event": "employee_bind"}),
     (r"/m/api/employee/unbind",                        "handler.platform.employee.EmployeeUnbindHandler",           {"event": "employee_unbind"}),
+    (r"/m/api/employee/recommendrecords",              "handler.platform.employee.RecommendrecordsHandler",         {"event": "employee_recommendrecords"}),
+
 ]
 platform_routes.extend(common_routes)
 

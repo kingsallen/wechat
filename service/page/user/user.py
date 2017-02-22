@@ -9,6 +9,7 @@ from service.page.base import PageService
 from setting import settings
 
 class UserPageService(PageService):
+
     def __init__(self):
         super().__init__()
 

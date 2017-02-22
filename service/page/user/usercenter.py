@@ -11,27 +11,23 @@ from tornado import gen
 
 from service.page.base import PageService
 
+from thrift_gen.gen.useraccounts.service.UseraccountsService import Client as UseraccountsServiceClient
+from service.data.infra.framework.client.client import ServiceClientFactory
+from service.data.infra.framework.common.config import CONF
+
 class UsercenterPageService(PageService):
+
+    useraccounts_service_cilent = ServiceClientFactory.get_service(
+        UseraccountsServiceClient, "useraccounts", CONF)
+
+    def __init__(self):
+        super().__init__()
 
     @gen.coroutine
     def get_user(self, user_id):
         """获得用户数据"""
 
         ret = yield self.infra_user_ds.get_user(user_id)
-        raise gen.Return(ret)
-
-    @gen.coroutine
-    def get_applied_applications(self, user_id):
-        """获得求职记录"""
-
-        ret = yield self.infra_user_ds.get_applied_applications(user_id)
-        raise gen.Return(ret)
-
-    @gen.coroutine
-    def get_fav_positions(self, user_id):
-        """获得职位收藏"""
-
-        ret = yield self.infra_user_ds.get_fav_positions(user_id)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -87,4 +83,32 @@ class UsercenterPageService(PageService):
         """
 
         ret = yield self.infra_user_ds.post_ismobileregistered(mobile)
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def get_applied_applications(self, user_id):
+        """获得求职记录，调用 thrify 接口"""
+
+        ret = yield self.useraccounts_service_cilent.getApplication(
+            userId=user_id)
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def get_fav_positions(self, user_id):
+        """获得职位收藏，调用 thrify 接口"""
+
+        ret = yield self.useraccounts_service_cilent.get_fav_positions(
+            userId=user_id)
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def get_applied_progress(self, app_id, user_id):
+        """
+        求职记录中的求职详情进度，调用 thrify 接口
+        :param app_id:
+        :param user_id:
+        :return:
+        """
+        ret = yield self.useraccounts_service_cilent.getApplication(
+            appId=app_id, userId=user_id)
         raise gen.Return(ret)

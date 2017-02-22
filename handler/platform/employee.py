@@ -105,3 +105,18 @@ class EmployeeBindHandler(BaseHandler):
                 self.send_json_success()
                 return
         self.send_json_error()
+
+class RecommendrecordsHandler(BaseHandler):
+    """员工-推荐记录"""
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        page_no = self.params.page_no or 0
+        page_size = self.params.page_size or 10
+
+        res = yield self.employee_ps.get_recommend_records(self.current_user.sysuser.id, page_no, page_size)
+        data = res.data
+
+        self.send_json_success(data=res.data)

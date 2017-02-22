@@ -1,4 +1,4 @@
-namespace py thrift_gen.gen.warn.struct
+namespace java com.moseeker.thrift.gen.warn.struct
 
 struct WarnBean{
 1:string project_appid;

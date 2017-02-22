@@ -161,11 +161,9 @@ class ApplyrecordsHandler(BaseHandler):
         """
 
         if apply_id:
-            # 查看具体职位申请状态
-            # TODO
-            self.send_json_success(data=ObjectDict(
-                pid=1
-            ))
+            # 查看具体申请记录的进度
+            res = yield self.usercenter_ps.get_applied_progress(apply_id, self.current_user.sysuser.id)
+            self.send_json_success(data=res.data)
 
         else:
             # 查看申请记录列表
@@ -173,7 +171,6 @@ class ApplyrecordsHandler(BaseHandler):
             self.send_json_success(data=ObjectDict(
                 records=res.data
             ))
-
 
 class UploadHandler(BaseHandler):
     """图片上传

@@ -1,5 +1,6 @@
 # file: common.struct
 
+namespace java com.moseeker.thrift.gen.common.struct
 namespace py thrift_gen.gen.common.struct
 
 struct Response {
@@ -16,5 +17,7 @@ struct CommonQuery {
     5: optional string order,
     6: optional string fields,
     7: optional bool nocache=false,
-    8: optional map<string, string> equalFilter
+    8: optional map<string, string> equalFilter,
+    9: optional list<string> attributes,
+    10: optional list<string> grouops
 }

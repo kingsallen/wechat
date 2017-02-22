@@ -17,6 +17,9 @@ class CellphonePageService(PageService):
                          Point 32, 33
     """
 
+    def __init__(self):
+        super().__init__()
+
     @gen.coroutine
     def send_valid_code(self, mobile, type):
         """Request basic service send valid code to target mobile

@@ -1,5 +1,6 @@
 # file: useraccounts.struct
 
+namespace java com.moseeker.thrift.gen.useraccounts.struct
 namespace py thrift_gen.gen.useraccounts.struct
 
 typedef string Timestamp;
@@ -164,7 +165,8 @@ struct FavPositionForm {
     5: optional string city,            //再招城市
     6: optional i32 salary_top,          //薪资上限
     7: optional i32 salary_bottom,       //薪资下限
-    8: optional Timestamp update_time    //职位的更新时间
+    8: optional i8 status,              //薪资下限
+    9: optional Timestamp update_time    //职位的更新时间
 }
 /*
  * 查询推荐信息(只有用户是员工时才具备该功能)
@@ -193,4 +195,26 @@ struct AwardRecordForm {
     2: optional string reason,         //申请编号
     3: optional string title,          //职位名称
     4: optional Timestamp create_time  //创建时间
+}
+
+/*
+ * 求职记录详情
+ */
+struct ApplicationDetailVO {
+    1: optional i32 pid,                                //积分记录表编号
+    2: optional string position_title,                  //申请编号
+    3: optional string company_title,                   //职位名称
+    4: optional i8 step,                                //进度
+    5: optional i8 step_status,                         //状态
+    6: optional list<ApplicationOperationRecordVO> status_timeline  //操作记录
+}
+
+/*
+ * 操作记录
+ */
+struct ApplicationOperationRecordVO {
+    1: optional string date,                    // 操作日期
+    2: optional string event,                   // 描述
+    3: optional i32 hide,                       // 是否隐藏
+    4: optional i32 step_status                 // 状态 2表示拒绝
 }

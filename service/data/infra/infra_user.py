@@ -37,21 +37,6 @@ class InfraUserDataService(DataService):
 
         raise gen.Return(ret)
 
-    @cache(ttl=60)
-    @gen.coroutine
-    def get_applied_applications(self, user_id):
-        """获得求职记录"""
-        ret = yield http_get(path.INFRA_USER_APPLIED_APPLICATIONS.format(user_id))
-        raise gen.Return(ret)
-
-    @cache(ttl=60)
-    @gen.coroutine
-    def get_fav_positions(self, user_id):
-        """获得职位收藏"""
-
-        ret = yield http_get(path.INFRA_USER_FAV_POSITION.format(user_id))
-        raise gen.Return(ret)
-
     @gen.coroutine
     def post_wx_pc_combine(self, mobile, unionid):
         """手机号和微信号绑定接口"""

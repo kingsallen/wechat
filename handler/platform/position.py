@@ -79,46 +79,80 @@ class PositionHandler(BaseHandler):
             header = self._make_json_header(
                 position_info, company_info, star, application, endorse,
                 can_apply, team.id, did)
-            module_job_description = self._make_json_job_description(position_info)
+            module_job_description = self._make_json_job_description(
+                position_info)
             module_job_need = self._make_json_job_need(position_info)
             module_feature = self._make_json_job_feature(position_info)
-            module_position_recommend = self._make_recommend_positions(recomment_positions_res)
+            module_position_recommend = self._make_recommend_positions(
+                recomment_positions_res)
 
             position_data = ObjectDict()
             add_item(position_data, "header", header)
-            add_item(position_data, "module_job_description", module_job_description)
+            add_item(
+                position_data,
+                "module_job_description",
+                module_job_description)
             add_item(position_data, "module_job_need", module_job_need)
             add_item(position_data, "module_feature", module_feature)
-            add_item(position_data, "module_position_recommend", module_position_recommend)
+            add_item(
+                position_data,
+                "module_position_recommend",
+                module_position_recommend)
 
             # 构建老微信样式所需要的数据
-            self.logger.debug("[JD]是否显示新样式: {}".format(self.current_user.wechat.show_new_jd))
+            self.logger.debug(
+                "[JD]是否显示新样式: {}".format(
+                    self.current_user.wechat.show_new_jd))
             if not self.current_user.wechat.show_new_jd:
-                module_job_require_old = self._make_json_job_require_old(position_info)
-                module_department_old = self._make_json_job_department(position_info)
+                module_job_require_old = self._make_json_job_require_old(
+                    position_info)
+                module_department_old = self._make_json_job_department(
+                    position_info)
                 module_job_attr_old = self._make_json_job_attr(position_info)
                 module_hr_register_old = self.current_user.wechat.hr_register & True
 
-                add_item(position_data, "module_job_require", module_job_require_old)
-                add_item(position_data, "module_department", module_department_old)
+                add_item(
+                    position_data,
+                    "module_job_require",
+                    module_job_require_old)
+                add_item(
+                    position_data,
+                    "module_department",
+                    module_department_old)
                 add_item(position_data, "module_job_attr", module_job_attr_old)
-                add_item(position_data, "module_hr_register", module_hr_register_old)
+                add_item(
+                    position_data,
+                    "module_hr_register",
+                    module_hr_register_old)
 
                 # TODO 定制插入
                 # 诺华定制
                 # 代理投递
-                self.render_page("position/info_old.html", data=position_data, meta_title=const.PAGE_POSITION_INFO)
+                self.render_page(
+                    "position/info_old.html",
+                    data=position_data,
+                    meta_title=const.PAGE_POSITION_INFO)
             else:
                 # [JD]职位所属团队及相关信息拼装
                 module_job_require = self._make_json_job_require(position_info)
-                module_company_info = self._make_json_job_company_info(company_info, did)
+                module_company_info = self._make_json_job_company_info(
+                    company_info, did)
                 self.logger.debug("[JD]构建团队相关信息")
                 yield self._add_team_data(position_data, team,
                                           position_info.company_id, position_id)
 
-                add_item(position_data, "module_company_info", module_company_info)
-                add_item(position_data, "module_job_require", module_job_require)
-                self.render_page("position/info.html", data=position_data, meta_title=const.PAGE_POSITION_INFO)
+                add_item(
+                    position_data,
+                    "module_company_info",
+                    module_company_info)
+                add_item(
+                    position_data,
+                    "module_job_require",
+                    module_job_require)
+                self.render_page(
+                    "position/info.html",
+                    data=position_data,
+                    meta_title=const.PAGE_POSITION_INFO)
 
             self.flush()
 
@@ -204,7 +238,6 @@ class PositionHandler(BaseHandler):
         hr_account, hr_wx_user = yield self.position_ps.get_hr_info(publisher)
         raise gen.Return((hr_account, hr_wx_user))
 
-
     @gen.coroutine
     def _make_endorse_info(self, position_info, company_info):
         """构建 JD 页左下角背书信息"""
@@ -243,11 +276,28 @@ class PositionHandler(BaseHandler):
             pos = ObjectDict()
             pos.title = item.get("job_title")
             pos.location = item.get("job_city", "")
-            pos.salary = gen_salary(item.get("salary_top"), item.get("salary_bottom"))
-            pos.link = make_url(path.POSITION_PATH.format(item.get("pid")), self.params,
-                                escape=["pid", "keywords", "cities", "candidate_source", "employment_type", "salary",
-                                "department", "occupations", "custom", "degree", "page_from", "page_size"])
-            pos.company_logo = self.static_url(item.get("company_logo") or const.COMPANY_HEADIMG)
+            pos.salary = gen_salary(
+                item.get("salary_top"),
+                item.get("salary_bottom"))
+            pos.link = make_url(
+                path.POSITION_PATH.format(
+                    item.get("pid")),
+                self.params,
+                escape=[
+                    "pid",
+                    "keywords",
+                    "cities",
+                    "candidate_source",
+                    "employment_type",
+                    "salary",
+                    "department",
+                    "occupations",
+                    "custom",
+                    "degree",
+                    "page_from",
+                    "page_size"])
+            pos.company_logo = self.static_url(
+                item.get("company_logo") or const.COMPANY_HEADIMG)
             data.append(pos)
             if len(data) > 2:
                 break
@@ -307,7 +357,7 @@ class PositionHandler(BaseHandler):
             data = None
         else:
             data = ObjectDict({
-                "data":  require
+                "data": require
             })
         return data
 
@@ -360,7 +410,7 @@ class PositionHandler(BaseHandler):
             data = None
         else:
             data = ObjectDict({
-                "data":  require
+                "data": require
             })
         return data
 
@@ -411,7 +461,8 @@ class PositionHandler(BaseHandler):
                     position_id=position_info.id,
                     last_psc=get_psc())
                 self.logger.debug(
-                    "[JD]inserted_share_chain_id: %s" % inserted_share_chain_id)
+                    "[JD]inserted_share_chain_id: %s" %
+                    inserted_share_chain_id)
 
                 if inserted_share_chain_id:
                     self.params.update(psc=str(inserted_share_chain_id))
@@ -420,11 +471,11 @@ class PositionHandler(BaseHandler):
                 self.current_user.sysuser.id, position_info.id)
 
         if self.current_user.sysuser.id:
-            yield self.position_ps.send_candidate_view_position(params={
-                "user_id": self.current_user.sysuser.id,
-                "position_id": position_info.id,
-                "from_employee": 1 if last_employee_user_id else 0,
-            })
+            yield self.candidate_ps.send_candidate_view_position(
+                user_id=self.current_user.sysuser.id,
+                position_id=position_info.id,
+                from_employee=True if last_employee_user_id else False,
+            )
 
         raise gen.Return(last_employee_user_id)
 
@@ -495,7 +546,7 @@ class PositionHandler(BaseHandler):
 
         if (not self.current_user.employee and
             recom_employee_user_id != self.current_user.sysuser.id and
-            self.is_platform):
+                self.is_platform):
 
             recom_employee = yield self.user_ps.get_valid_employee_by_user_id(
                 recom_employee_user_id, self.current_user.company.id)
@@ -658,7 +709,9 @@ class PositionListHandler(BaseHandler):
                 template_name="refer/neo_weixin/position_v2/position_list_items.html",
                 positions=position_list,
                 is_employee=bool(self.current_user.employee),
-                use_neowx=1 # TODO (tangyiliang) always be 1 becuase it's neo wx now!  To edit template.
+                # TODO (tangyiliang) always be 1 becuase it's neo wx now!  To
+                # edit template.
+                use_neowx=1
             )
             return
 
@@ -671,7 +724,9 @@ class PositionListHandler(BaseHandler):
                     self.params.m,
                     const_platorm.POSITION_LIST_TITLE_DEFAULT),
                 url='',
-                use_neowx=1, # TODO (tangyiliang) always be 1 becuase it's neo wx now!  To edit template.
+                use_neowx=1,
+                # TODO (tangyiliang) always be 1 becuase it's neo wx now!  To
+                # edit template.
                 is_employee=bool(self.current_user.employee),
                 searchFilterNum=self.get_search_filter_num()
             )
@@ -723,10 +778,10 @@ class PositionListHandler(BaseHandler):
             description = rp_share_info.description
 
         self.params.share = ObjectDict({
-            "cover":       cover,
-            "title":       title,
+            "cover": cover,
+            "title": title,
             "description": description,
-            "link":        link
+            "link": link
         })
 
     def _make_position_list_infra_params(self):

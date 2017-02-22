@@ -1,4 +1,5 @@
 
+namespace java com.moseeker.thrift.gen.dao.struct
 namespace py thrift_gen.gen.dao.struct
 
 struct ConfigSysPointsConfTpl{

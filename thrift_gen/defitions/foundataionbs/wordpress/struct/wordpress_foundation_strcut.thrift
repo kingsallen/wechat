@@ -1,5 +1,5 @@
 
-namespace py thrift_gen.gen.foundation.wordpress.struct
+namespace java com.moseeker.thrift.gen.foundation.wordpress.struct
 
 typedef string Datetime;
 

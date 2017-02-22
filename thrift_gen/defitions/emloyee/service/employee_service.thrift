@@ -1,6 +1,6 @@
-namespace py thrift_gen.gen.employee.service
-
 include '../struct/employee_struct.thrift'
+
+namespace py thrift_gen.gen.employee.service
 
 service EmployeeService {
     // 获取用户员工信息

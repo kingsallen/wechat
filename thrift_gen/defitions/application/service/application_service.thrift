@@ -1,6 +1,7 @@
 include "../struct/application_struct.thrift"
 include "../../common/struct/common_struct.thrift"
 
+namespace java com.moseeker.thrift.gen.application.service
 namespace py thrift_gen.gen.application.service
 
 /*

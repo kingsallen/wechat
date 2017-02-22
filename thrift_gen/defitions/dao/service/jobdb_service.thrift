@@ -10,5 +10,6 @@ service JobDBDao {
 	list<jobdb_struct.JobPositionDO> getPositions(1:common_struct.CommonQuery query);
 	jobdb_struct.JobPositionDO getPosition(1:common_struct.CommonQuery query);
 
-	list<application_struct.JobApplication> getApplications(1:common_struct.CommonQuery query);
+	list<jobdb_struct.JobApplicationDO> getApplications(1:common_struct.CommonQuery query);
+    jobdb_struct.JobApplicationDO getApplication(1:common_struct.CommonQuery query);
 }

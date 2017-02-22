@@ -1,5 +1,5 @@
 
-namespace py thrift_gen.gen.thirdpart.struct
+namespace java com.moseeker.thrift.gen.thirdpart.struct
 
 typedef string Datetime;
 struct ThirdPartAccount{

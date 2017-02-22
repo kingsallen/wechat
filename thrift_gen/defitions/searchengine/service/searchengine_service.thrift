@@ -3,6 +3,7 @@
 #include "../struct/useraccounts_struct.thrift"
 include "../../common/struct/common_struct.thrift"
 
+namespace java com.moseeker.thrift.gen.searchengine.service
 namespace py thrift_gen.gen.searchengine.service
 
 service SearchengineServices {
