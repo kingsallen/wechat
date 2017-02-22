@@ -3,7 +3,7 @@
 from tornado import gen
 from service.page.base import PageService
 
-from thrift_gen.gen.useraccounts.service.UseraccountsService import Client as UseraccountsServiceClient
+from thrift_gen.gen.useraccounts.service.UseraccountsServices import Client as UseraccountsServiceClient
 from thrift_gen.gen.employee.service.EmployeeService import Client as EmployeeServiceClient
 from service.data.infra.framework.client.client import ServiceClientFactory
 from service.data.infra.framework.common.config import CONF
