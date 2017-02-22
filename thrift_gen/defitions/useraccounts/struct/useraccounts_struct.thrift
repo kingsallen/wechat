@@ -198,6 +198,16 @@ struct AwardRecordForm {
 }
 
 /*
+ * 操作记录
+ */
+struct ApplicationOperationRecordVO {
+    1: optional string date,                    // 操作日期
+    2: optional string event,                   // 描述
+    3: optional i32 hide,                       // 是否隐藏
+    4: optional i32 step_status                 // 状态 2表示拒绝
+}
+
+/*
  * 求职记录详情
  */
 struct ApplicationDetailVO {
@@ -207,14 +217,4 @@ struct ApplicationDetailVO {
     4: optional i8 step,                                //进度
     5: optional i8 step_status,                         //状态
     6: optional list<ApplicationOperationRecordVO> status_timeline  //操作记录
-}
-
-/*
- * 操作记录
- */
-struct ApplicationOperationRecordVO {
-    1: optional string date,                    // 操作日期
-    2: optional string event,                   // 描述
-    3: optional i32 hide,                       // 是否隐藏
-    4: optional i32 step_status                 // 状态 2表示拒绝
 }

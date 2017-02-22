@@ -2257,6 +2257,102 @@ class AwardRecordForm(object):
         return not (self == other)
 
 
+class ApplicationOperationRecordVO(object):
+    """
+    Attributes:
+     - date
+     - event
+     - hide
+     - step_status
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.STRING, 'date', 'UTF8', None, ),  # 1
+        (2, TType.STRING, 'event', 'UTF8', None, ),  # 2
+        (3, TType.I32, 'hide', None, None, ),  # 3
+        (4, TType.I32, 'step_status', None, None, ),  # 4
+    )
+
+    def __init__(self, date=None, event=None, hide=None, step_status=None,):
+        self.date = date
+        self.event = event
+        self.hide = hide
+        self.step_status = step_status
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.date = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRING:
+                    self.event = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.I32:
+                    self.hide = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.I32:
+                    self.step_status = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('ApplicationOperationRecordVO')
+        if self.date is not None:
+            oprot.writeFieldBegin('date', TType.STRING, 1)
+            oprot.writeString(self.date.encode('utf-8') if sys.version_info[0] == 2 else self.date)
+            oprot.writeFieldEnd()
+        if self.event is not None:
+            oprot.writeFieldBegin('event', TType.STRING, 2)
+            oprot.writeString(self.event.encode('utf-8') if sys.version_info[0] == 2 else self.event)
+            oprot.writeFieldEnd()
+        if self.hide is not None:
+            oprot.writeFieldBegin('hide', TType.I32, 3)
+            oprot.writeI32(self.hide)
+            oprot.writeFieldEnd()
+        if self.step_status is not None:
+            oprot.writeFieldBegin('step_status', TType.I32, 4)
+            oprot.writeI32(self.step_status)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
 class ApplicationDetailVO(object):
     """
     Attributes:
@@ -2367,102 +2463,6 @@ class ApplicationDetailVO(object):
             for iter6 in self.status_timeline:
                 iter6.write(oprot)
             oprot.writeListEnd()
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-
-
-class ApplicationOperationRecordVO(object):
-    """
-    Attributes:
-     - date
-     - event
-     - hide
-     - step_status
-    """
-
-    thrift_spec = (
-        None,  # 0
-        (1, TType.STRING, 'date', 'UTF8', None, ),  # 1
-        (2, TType.STRING, 'event', 'UTF8', None, ),  # 2
-        (3, TType.I32, 'hide', None, None, ),  # 3
-        (4, TType.I32, 'step_status', None, None, ),  # 4
-    )
-
-    def __init__(self, date=None, event=None, hide=None, step_status=None,):
-        self.date = date
-        self.event = event
-        self.hide = hide
-        self.step_status = step_status
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 1:
-                if ftype == TType.STRING:
-                    self.date = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 2:
-                if ftype == TType.STRING:
-                    self.event = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 3:
-                if ftype == TType.I32:
-                    self.hide = iprot.readI32()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 4:
-                if ftype == TType.I32:
-                    self.step_status = iprot.readI32()
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
-            return
-        oprot.writeStructBegin('ApplicationOperationRecordVO')
-        if self.date is not None:
-            oprot.writeFieldBegin('date', TType.STRING, 1)
-            oprot.writeString(self.date.encode('utf-8') if sys.version_info[0] == 2 else self.date)
-            oprot.writeFieldEnd()
-        if self.event is not None:
-            oprot.writeFieldBegin('event', TType.STRING, 2)
-            oprot.writeString(self.event.encode('utf-8') if sys.version_info[0] == 2 else self.event)
-            oprot.writeFieldEnd()
-        if self.hide is not None:
-            oprot.writeFieldBegin('hide', TType.I32, 3)
-            oprot.writeI32(self.hide)
-            oprot.writeFieldEnd()
-        if self.step_status is not None:
-            oprot.writeFieldBegin('step_status', TType.I32, 4)
-            oprot.writeI32(self.step_status)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
