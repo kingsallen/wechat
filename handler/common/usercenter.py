@@ -201,7 +201,33 @@ class ApplyrecordsHandler(BaseHandler):
 
         if apply_id:
             # 查看具体申请记录的进度
-            res = yield self.usercenter_ps.get_applied_progress(apply_id, self.current_user.sysuser.id)
+            # res = yield self.usercenter_ps.get_applied_progress(apply_id, self.current_user.sysuser.id)
+            res = ObjectDict({
+                "status": 0,
+                "message": "SUCCESS",
+                "data": {
+                    "pid": 2,
+                    "position_title": "职位名称",
+                    "company_name": "职位所属公司",
+                    "step": 2, # 1, 2, 3 分别对应 ["投递简历", "面试", "入职"],
+                    "step_status": 2, #0, 1, 2, 如果是0，说明没开始，如果是1, 则是这个步骤通过了，2是这个步骤不通过
+                    "status_timeline": [
+                        {
+                            "date": '2016-08-01 19:01:09',
+                            "event": '简历提交成功',
+                            "hide": 0, # 是否隐藏这个历史记录
+                            "step_status": 0, # 0, 1, 2
+                        },
+
+                        {
+                            "date": '2016-08-01 19:02:11',
+                            "event": 'HR查看了您的简历',
+                            "hide": 0,
+                            "step_status": 2,  #0, 1, 2
+                        }
+                    ]
+                }
+            })
             self.send_json_success(data=res.data)
 
         else:
