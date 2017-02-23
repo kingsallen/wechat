@@ -7,7 +7,7 @@ import conf.common as const
 import conf.message as msg
 from util.common.decorator import handle_response, verified_mobile_oneself, authenticated
 from util.tool.str_tool import gen_salary, email_validate, is_alphabet, is_chinese, password_crypt
-from util.tool.date_tool import jd_update_date
+from util.tool.date_tool import jd_update_date, curr_now
 from util.image.upload import QiniuUpload
 from util.common import ObjectDict
 
@@ -145,12 +145,12 @@ class FavpositionHandler(BaseHandler):
                     "id": 2,
                     "title": "职位名称1",
                     "department": "部门名称1",
-                    "time": "2017-01-02 12:23:34",
+                    "time": "2017-01-02 12:23:34", # 收藏的时间
                     "city": "上海，北京",
                     "salary_top": 34,
                     "salary_bottom": 10,
-                    "update_time": "2017-01-08 12:23:34",
-                    "status": 0
+                    "update_time": curr_now(),  # 职位更新时间
+                    "status": 0 # 职位状态
                 },
                 {
                     "id": 3,
@@ -160,7 +160,7 @@ class FavpositionHandler(BaseHandler):
                     "city": "上海，北京，南京",
                     "salary_top": 4,
                     "salary_bottom": 0,
-                    "update_time": "2017-01-08 12:23:34",
+                    "update_time": curr_now(),
                     "status": 2
                 },
                 {
@@ -171,7 +171,7 @@ class FavpositionHandler(BaseHandler):
                     "city": "上海，北京，南京",
                     "salary_top": 0,
                     "salary_bottom": 0,
-                    "update_time": "2017-01-08 12:23:34",
+                    "update_time": curr_now(),
                     "status": 2
                 },
             ]
@@ -212,25 +212,25 @@ class ApplyrecordsHandler(BaseHandler):
                 "message": "SUCCESS",
                 "data": [
                     {
-                        "id": 2,
-                        "name": "职位名称1",
-                        "department": "部门名称1",
-                        "time": "2017-01-08 12:23:34",
-                        "status": 0
+                        "id": 2, #app_id
+                        "position_title": "职位名称1",
+                        "company_name": "公司名称1",  # 公司名称
+                        "time": "2017-01-08 12:23:34", # 申请时间
+                        "status_name": "HR查看了你的简历"  # 申请进度状态
                     },
                     {
                         "id": 3,
-                        "title": "职位名称2",
-                        "department": "部门名称2",
+                        "position_title": "职位名称2",
+                        "company_name": "公司名称2",
                         "time": "2017-01-02 12:23:34",
-                        "status": 2
+                        "status_name": "面试成功"
                     },
                     {
                         "id": 4,
-                        "title": "职位名称3",
-                        "department": "部门名称3",
+                        "position_title": "职位名称3",
+                        "company_name": "公司名称3",
                         "time": "2017-01-02 12:23:34",
-                        "status": 2
+                        "status_name": "已入职"
                     },
                 ]
             })
