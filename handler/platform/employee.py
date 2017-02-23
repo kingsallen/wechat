@@ -165,7 +165,6 @@ class RecommendrecordsHandler(BaseHandler):
                         "recom_status": '0',
                     }),
                 ],
-                page_no: 1, # 当前的页码
             })
         })
 
