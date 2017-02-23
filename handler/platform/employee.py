@@ -133,7 +133,7 @@ class RecommendrecordsHandler(BaseHandler):
                 "recommends": [
                     ObjectDict({
                         "status": 0, # 求职的进度，含义，需要参考 das 的代码
-                        "is_interested": True, # 是否求推荐
+                        "is_interested": '1', # 是否求推荐
                         "headimgurl": '',
                         "applier_name": 'towry',
                         "applier_rel": '汤亦亮', # 前端会显示为(汤亦亮的好友),表示 towry 是汤亦亮的好友
@@ -144,7 +144,7 @@ class RecommendrecordsHandler(BaseHandler):
                     }),
                     ObjectDict({
                         "status": 1,
-                        "is_interested": False,
+                        "is_interested": '0',
                         "headimgurl": '',
                         "applier_name": 'duolala',
                         "applier_rel": '',  # 前端会显示为(汤亦亮的好友),表示 towry 是汤亦亮的好友
@@ -155,7 +155,7 @@ class RecommendrecordsHandler(BaseHandler):
                     }),
                     ObjectDict({
                         "status": 2,
-                        "is_interested": True,
+                        "is_interested": '1',
                         "headimgurl": '',
                         "applier_name": '习大大',
                         "applier_rel": 'dodada',  # 前端会显示为(汤亦亮的好友),表示 towry 是汤亦亮的好友
