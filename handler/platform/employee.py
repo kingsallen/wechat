@@ -171,6 +171,6 @@ class RecommendrecordsHandler(BaseHandler):
 
         if res.status == const.API_SUCCESS and res.data.recommends:
             for item in res.data.recommends:
-                item['headimgurl'] = self.static_url(item.headimg or const.SYSUSER_HEADIMG),
+                item['headimgurl'] = self.static_url(item.headimgurl or const.SYSUSER_HEADIMG),
 
         self.send_json_success(data=res.data)
