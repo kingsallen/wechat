@@ -136,7 +136,46 @@ class FavpositionHandler(BaseHandler):
         :return:
         """
 
-        res = yield self.usercenter_ps.get_fav_positions(self.current_user.sysuser.id)
+        # res = yield self.usercenter_ps.get_fav_positions(self.current_user.sysuser.id)
+        res = ObjectDict({
+            "status": 0,
+            "message": "SUCCESS",
+            "data": [
+                {
+                    "id": 2,
+                    "title": "职位名称1",
+                    "department": "部门名称1",
+                    "time": "2017-01-02 12:23:34",
+                    "city": "上海，北京",
+                    "salary_top": 34,
+                    "salary_bottom": 10,
+                    "update_time": "2017-01-08 12:23:34",
+                    "status": 0
+                },
+                {
+                    "id": 3,
+                    "title": "职位名称2",
+                    "department": "部门名称2",
+                    "time": "2017-01-02 12:23:34",
+                    "city": "上海，北京，南京",
+                    "salary_top": 4,
+                    "salary_bottom": 0,
+                    "update_time": "2017-01-08 12:23:34",
+                    "status": 2
+                },
+                {
+                    "id": 4,
+                    "title": "职位名称3",
+                    "department": "部门名称3",
+                    "time": "2017-01-02 12:23:34",
+                    "city": "上海，北京，南京",
+                    "salary_top": 0,
+                    "salary_bottom": 0,
+                    "update_time": "2017-01-08 12:23:34",
+                    "status": 2
+                },
+            ]
+        })
         if res.status == const.API_SUCCESS:
             for item in res.data:
                 item['salary'] = gen_salary(item['salary_top'], item['salary_bottom'])
@@ -167,7 +206,34 @@ class ApplyrecordsHandler(BaseHandler):
 
         else:
             # 查看申请记录列表
-            res = yield self.usercenter_ps.get_applied_applications(self.current_user.sysuser.id)
+            # res = yield self.usercenter_ps.get_applied_applications(self.current_user.sysuser.id)
+            res = ObjectDict({
+                "status": 0,
+                "message": "SUCCESS",
+                "data": [
+                    {
+                        "id": 2,
+                        "name": "职位名称1",
+                        "department": "部门名称1",
+                        "time": "2017-01-08 12:23:34",
+                        "status": 0
+                    },
+                    {
+                        "id": 3,
+                        "title": "职位名称2",
+                        "department": "部门名称2",
+                        "time": "2017-01-02 12:23:34",
+                        "status": 2
+                    },
+                    {
+                        "id": 4,
+                        "title": "职位名称3",
+                        "department": "部门名称3",
+                        "time": "2017-01-02 12:23:34",
+                        "status": 2
+                    },
+                ]
+            })
             self.send_json_success(data=ObjectDict(
                 records=res.data
             ))
