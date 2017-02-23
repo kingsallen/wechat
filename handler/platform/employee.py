@@ -123,7 +123,7 @@ class RecommendrecordsHandler(BaseHandler):
         res = ObjectDict({
             "status": 0,
             "message": "SUCCESS",
-            "data": {
+            "data": ObjectDict({
                 "has_recommends": True,  # 是否有推荐记录
                 "score": {
                     "link_viewed_count": 23, # 浏览人次 type=1
@@ -166,11 +166,11 @@ class RecommendrecordsHandler(BaseHandler):
                     },
                 ],
                 page_no: 1, # 当前的页码
-            }
+            })
         })
 
-        if res.status == const.API_SUCCESS:
-            for item in res.data:
-                item['headimgurl'] = self.static_url(res.data.headimg or const.SYSUSER_HEADIMG),
+        if res.status == const.API_SUCCESS and res.data.recommends:
+            for item in res.data.recommends:
+                item['headimgurl'] = self.static_url(item.headimg or const.SYSUSER_HEADIMG),
 
         self.send_json_success(data=res.data)
