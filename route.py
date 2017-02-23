@@ -71,6 +71,7 @@ platform_routes = [
     (r"/m/api/employee/bind",                          "handler.platform.employee.EmployeeBindHandler",             {"event": "employee_bind"}),
     (r"/m/api/employee/unbind",                        "handler.platform.employee.EmployeeUnbindHandler",           {"event": "employee_unbind"}),
     (r"/m/api/employee/recommendrecords",              "handler.platform.employee.RecommendrecordsHandler",         {"event": "employee_recommendrecords"}),
+    (r"/m/api/employee/rewards",                       "handler.platform.employee.AwardsHandler",                   {"event": "employee_awards"}),
 
 ]
 platform_routes.extend(common_routes)
