@@ -4,9 +4,11 @@
 from thrift.Thrift import TException
 from tornado import gen
 
+import conf.common as const
 from handler.base import BaseHandler
 from thrift_gen.gen.employee.struct.ttypes import BindingParams
 from util.common.decorator import handle_response, authenticated
+from util.common import ObjectDict
 
 
 class AwardsHandler(BaseHandler):
@@ -116,7 +118,59 @@ class RecommendrecordsHandler(BaseHandler):
         page_no = self.params.page_no or 0
         page_size = self.params.page_size or 10
 
-        res = yield self.employee_ps.get_recommend_records(self.current_user.sysuser.id, page_no, page_size)
-        data = res.data
+        # res = yield self.employee_ps.get_recommend_records(self.current_user.sysuser.id, page_no, page_size)
+        # data = res.data
+        res = ObjectDict({
+            "status": 0,
+            "message": "SUCCESS",
+            "data": {
+                "has_recommends": True,  # 是否有推荐记录
+                "score": {
+                    "link_viewed_count": 23, # 浏览人次 type=1
+                    "interested_count": 10, # 求推荐人次 type=2
+                    "applied_count": 10, # 投了简历人次 type=3
+                },
+                "recommends": [
+                    {
+                        "status": 0, # 求职的进度，含义，需要参考 das 的代码
+                        "is_interested": True, # 是否求推荐
+                        "headimgurl": '',
+                        "applier_name": 'towry',
+                        "applier_rel": '汤亦亮', # 前端会显示为(汤亦亮的好友),表示 towry 是汤亦亮的好友
+                        "view_number": 0, # 浏览次数
+                        "position": 'position2', # 浏览的职位名称
+                        "click_time": '2013-10-12', # 浏览时间
+                        "recom_status": '0', # 0: 已推荐 1：未推荐
+                    },
+                    {
+                        "status": 1,
+                        "is_interested": False,
+                        "headimgurl": '',
+                        "applier_name": 'duolala',
+                        "applier_rel": '',  # 前端会显示为(汤亦亮的好友),表示 towry 是汤亦亮的好友
+                        "view_number": 4,
+                        "position": 'position5',
+                        "click_time": '2017-12-12',
+                        "recom_status": '1',
+                    },
+                    {
+                        "status": 2,
+                        "is_interested": True,
+                        "headimgurl": '',
+                        "applier_name": '习大大',
+                        "applier_rel": 'dodada',  # 前端会显示为(汤亦亮的好友),表示 towry 是汤亦亮的好友
+                        "view_number": 12,
+                        "position": 'position3',
+                        "click_time": '2016-08-12',
+                        "recom_status": '0',
+                    },
+                ],
+                page_no: 1, # 当前的页码
+            }
+        })
+
+        if res.status == const.API_SUCCESS:
+            for item in res.data:
+                item['headimgurl'] = self.static_url(res.data.headimg or const.SYSUSER_HEADIMG),
 
         self.send_json_success(data=res.data)
