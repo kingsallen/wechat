@@ -131,7 +131,7 @@ class RecommendrecordsHandler(BaseHandler):
                     "applied_count": 10, # 投了简历人次 type=3
                 },
                 "recommends": [
-                    {
+                    ObjectDict({
                         "status": 0, # 求职的进度，含义，需要参考 das 的代码
                         "is_interested": True, # 是否求推荐
                         "headimgurl": '',
@@ -141,8 +141,8 @@ class RecommendrecordsHandler(BaseHandler):
                         "position": 'position2', # 浏览的职位名称
                         "click_time": '2013-10-12', # 浏览时间
                         "recom_status": '0', # 0: 已推荐 1：未推荐
-                    },
-                    {
+                    }),
+                    ObjectDict({
                         "status": 1,
                         "is_interested": False,
                         "headimgurl": '',
@@ -152,8 +152,8 @@ class RecommendrecordsHandler(BaseHandler):
                         "position": 'position5',
                         "click_time": '2017-12-12',
                         "recom_status": '1',
-                    },
-                    {
+                    }),
+                    ObjectDict({
                         "status": 2,
                         "is_interested": True,
                         "headimgurl": '',
@@ -163,14 +163,16 @@ class RecommendrecordsHandler(BaseHandler):
                         "position": 'position3',
                         "click_time": '2016-08-12',
                         "recom_status": '0',
-                    },
+                    }),
                 ],
                 page_no: 1, # 当前的页码
             })
         })
 
         if res.status == const.API_SUCCESS and res.data.recommends:
+            self.logger.debug("recommends: %s" % res.data.recommends)
             for item in res.data.recommends:
+                self.logger.debug("item: %s" % item)
                 item['headimgurl'] = self.static_url(item.headimgurl or const.SYSUSER_HEADIMG),
 
         self.send_json_success(data=res.data)
