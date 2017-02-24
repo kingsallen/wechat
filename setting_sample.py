@@ -72,7 +72,6 @@ settings['wechat_pay_mchid'] = 'xxxx'
 
 # 基础服务
 settings['infra'] = 'http://api1.dqprism.com'
-settings['das'] = 'http://das1.dqprism.com/das'
 
 # wechat host
 settings['qx_host'] = 'qx1.dqprism.com'
@@ -81,7 +80,7 @@ settings['helper_host'] = 'platform1.dqprism.com'
 
 # 公众号 signatures
 settings['qx_wechat_id'] = 1
-settings['help_wechat_id'] = 9
+settings['helper_wechat_id'] = 9
 
 settings['qx_signature'] = 'ZWFkYmZmNjNmYjc3Yjk1YWFlYzg5MWMyNTllOWExNTFkZTE2MzYyMA=='
 settings['helper_signature'] = 'NGZiMThkZWMwMmVkMjU4OGRlMWY3Nzk1N2FiZWExMWUxODI4ODJiZQ=='

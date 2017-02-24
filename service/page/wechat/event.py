@@ -252,7 +252,7 @@ class EventPageService(PageService):
             raise gen.Return(wxuser_id)
 
         # 已授权给仟寻，或者 HR 雇主平台的用户，已经创建了 wxuser，故不需要再创建 wxuser
-        if (current_user.wechat.id == self.settings.help_wechat_id
+        if (current_user.wechat.id == self.settings.helper_wechat_id
             or current_user.wechat.id == self.settings.qx_wechat_id) and current_user.wxuser:
             self.logger.debug("[_create_wxuser] update")
             res = yield self.user_wx_user_ds.update_wxuser(
@@ -361,7 +361,7 @@ class EventPageService(PageService):
                 })
             self.logger.debug("[opt_event_unsubscribe] res: {0}".format(res))
             # 取消关注仟寻招聘助手时，将user_hr_account.wxuser_id与user_wx_user.id 解绑
-            if current_user.wechat.id == self.settings.help_wechat_id:
+            if current_user.wechat.id == self.settings.helper_wechat_id:
                 user_hr_account = yield self.user_hr_account_ds.get_hr_account(conds={
                     "wxuser_id": current_user.wxuser.id
                 })
@@ -397,7 +397,7 @@ class EventPageService(PageService):
         """
 
         self.logger.debug("[opt_event_scan] current_user: {0} msg:{1}".format(current_user, msg))
-        if current_user.wechat.id == self.settings.help_wechat_id and msg.EventKey:
+        if current_user.wechat.id == self.settings.helper_wechat_id and msg.EventKey:
             scan_info = re.match(r"([0-9]*)_([0-9]*)_([0-9]*)", msg.EventKey)
             self.logger.debug("[opt_event_scan] scan_info: {0}".format(scan_info))
             # 更新仟寻招聘助手公众号下的用户openid
@@ -447,7 +447,7 @@ class EventPageService(PageService):
         self.logger.debug("[__opt_help_wxuser] wxuser_id: {0}, wechat:{1}, msg:{2}".format(wxuser_id, wechat, msg))
 
         # 关注仟寻招聘助手时，将 user_hr_account.wxuser_id 与 wxuser 绑定
-        if wechat.id == self.settings.help_wechat_id and msg.EventKey:
+        if wechat.id == self.settings.helper_wechat_id and msg.EventKey:
             user_hr_account_cache = UserHrAccountCache()
             try:
                 scan_info = re.match(r"qrscene_([0-9]*)_([0-9]*)_([0-9]*)", msg.EventKey)
