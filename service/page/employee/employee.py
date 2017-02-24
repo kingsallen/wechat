@@ -27,7 +27,7 @@ class EmployeePageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def get_recommend_records(self, user_id, type, page_no, page_size):
+    def get_recommend_records(self, user_id, req_type, page_no, page_size):
         """
         推荐历史记录
         :param user_id:
@@ -36,5 +36,5 @@ class EmployeePageService(PageService):
         :param page_size:
         :return:
         """
-        ret = yield self.thrift_useraccounts_ds.get_recommend_records(user_id, type, page_no, page_size)
+        ret = yield self.thrift_useraccounts_ds.get_recommend_records(int(user_id), int(req_type), int(page_no), int(page_size))
         raise gen.Return(ret)

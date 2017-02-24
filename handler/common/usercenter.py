@@ -175,14 +175,14 @@ class FavpositionHandler(BaseHandler):
         #         },
         #     ]
         # })
-        if res.status == const.API_SUCCESS and res.data:
-            for item in res.data:
+        if res:
+            for item in res:
                 item['salary'] = gen_salary(item['salary_top'], item['salary_bottom'])
                 item['update_time'] = jd_update_date(item['update_time'])
                 item['states'] = "已过期" if item['status'] == 2 else ""
 
         self.send_json_success(data=ObjectDict(
-            records=res.data
+            records=res
         ))
 
 
@@ -228,7 +228,7 @@ class ApplyrecordsHandler(BaseHandler):
             #         ]
             #     }
             # })
-            self.send_json_success(data=res.data)
+            self.send_json_success(data=res)
 
         else:
             # 查看申请记录列表
@@ -262,7 +262,7 @@ class ApplyrecordsHandler(BaseHandler):
             #     ]
             # })
             self.send_json_success(data=ObjectDict(
-                records=res.data
+                records=res
             ))
 
 class UploadHandler(BaseHandler):

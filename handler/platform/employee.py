@@ -141,11 +141,12 @@ class RecommendrecordsHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def get(self):
+
         page_no = self.params.page_no or 0
         page_size = self.params.page_size or 10
-        type = self.params.type or 1
+        req_type = self.params.type or 1
 
-        res = yield self.employee_ps.get_recommend_records(self.current_user.sysuser.id, type, page_no, page_size)
+        res = yield self.employee_ps.get_recommend_records(self.current_user.sysuser.id, req_type, page_no, page_size)
         # res = ObjectDict({
         #     "status": 0,
         #     "message": "SUCCESS",
@@ -196,8 +197,8 @@ class RecommendrecordsHandler(BaseHandler):
 
         self.logger.debug("get_recommend_records: %s" % res)
 
-        if res.status == const.API_SUCCESS and res.data.recommends:
-            for item in res.data.recommends:
+        if res:
+            for item in res.recommends:
                 item['headimgurl'] = self.static_url(item.headimgurl or const.SYSUSER_HEADIMG),
 
-        self.send_json_success(data=res.data)
+        self.send_json_success(data=res)

@@ -23,4 +23,5 @@ class ThriftCandidateDataService(DataService):
         """刷新候选人链路信息，调用基础服务"""
 
         ret = yield self.candidate_service_cilent.glancePosition(user_id, position_id, sharechain_id)
+        self.logger.debug("[thrift]send_candidate_view_position: %s" % ret)
         raise gen.Return(ret)

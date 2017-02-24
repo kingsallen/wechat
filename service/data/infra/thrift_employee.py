@@ -21,14 +21,17 @@ class ThriftEmployeeDataService(DataService):
     @gen.coroutine
     def get_employee_rewards(self, employee_id, company_id):
         ret = yield self.employee_service_cilent.getEmployeeRewards(employee_id, company_id)
+        self.logger.debug("[thrift]get_employee_rewards: %s" % ret)
         raise gen.Return(ret)
 
     @gen.coroutine
     def unbind(self, employee_id, company_id, user_id):
         ret = yield self.employee_service_cilent.unbind(employee_id, company_id, user_id)
+        self.logger.debug("[thrift]unbind: %s" % ret)
         raise gen.Return(ret)
 
     @gen.coroutine
     def bind(self, binding_params):
         ret = yield self.employee_service_cilent.bind(binding_params)
+        self.logger.debug("[thrift]bind: %s" % ret)
         raise gen.Return(ret)

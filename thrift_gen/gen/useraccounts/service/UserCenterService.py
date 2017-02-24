@@ -40,7 +40,7 @@ class Iface(object):
         """
         pass
 
-    def getRecommendation(self, userId, type, pageNo, pageSize):
+    def getRecommendations(self, userId, type, pageNo, pageSize):
         """
         Parameters:
          - userId
@@ -184,7 +184,7 @@ class Client(Iface):
             return result.success
         raise TApplicationException(TApplicationException.MISSING_RESULT, "getFavPositions failed: unknown result")
 
-    def getRecommendation(self, userId, type, pageNo, pageSize):
+    def getRecommendations(self, userId, type, pageNo, pageSize):
         """
         Parameters:
          - userId
@@ -194,13 +194,13 @@ class Client(Iface):
         """
         self._seqid += 1
         future = self._reqs[self._seqid] = concurrent.Future()
-        self.send_getRecommendation(userId, type, pageNo, pageSize)
+        self.send_getRecommendations(userId, type, pageNo, pageSize)
         return future
 
-    def send_getRecommendation(self, userId, type, pageNo, pageSize):
+    def send_getRecommendations(self, userId, type, pageNo, pageSize):
         oprot = self._oprot_factory.getProtocol(self._transport)
-        oprot.writeMessageBegin('getRecommendation', TMessageType.CALL, self._seqid)
-        args = getRecommendation_args()
+        oprot.writeMessageBegin('getRecommendations', TMessageType.CALL, self._seqid)
+        args = getRecommendations_args()
         args.userId = userId
         args.type = type
         args.pageNo = pageNo
@@ -209,18 +209,18 @@ class Client(Iface):
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-    def recv_getRecommendation(self, iprot, mtype, rseqid):
+    def recv_getRecommendations(self, iprot, mtype, rseqid):
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
             iprot.readMessageEnd()
             raise x
-        result = getRecommendation_result()
+        result = getRecommendations_result()
         result.read(iprot)
         iprot.readMessageEnd()
         if result.success is not None:
             return result.success
-        raise TApplicationException(TApplicationException.MISSING_RESULT, "getRecommendation failed: unknown result")
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "getRecommendations failed: unknown result")
 
 
 class Processor(Iface, TProcessor):
@@ -230,7 +230,7 @@ class Processor(Iface, TProcessor):
         self._processMap["getApplications"] = Processor.process_getApplications
         self._processMap["getApplicationDetail"] = Processor.process_getApplicationDetail
         self._processMap["getFavPositions"] = Processor.process_getFavPositions
-        self._processMap["getRecommendation"] = Processor.process_getRecommendation
+        self._processMap["getRecommendations"] = Processor.process_getRecommendations
 
     def process(self, iprot, oprot):
         (name, type, seqid) = iprot.readMessageBegin()
@@ -283,13 +283,13 @@ class Processor(Iface, TProcessor):
         oprot.trans.flush()
 
     @gen.coroutine
-    def process_getRecommendation(self, seqid, iprot, oprot):
-        args = getRecommendation_args()
+    def process_getRecommendations(self, seqid, iprot, oprot):
+        args = getRecommendations_args()
         args.read(iprot)
         iprot.readMessageEnd()
-        result = getRecommendation_result()
-        result.success = yield gen.maybe_future(self._handler.getRecommendation(args.userId, args.type, args.pageNo, args.pageSize))
-        oprot.writeMessageBegin("getRecommendation", TMessageType.REPLY, seqid)
+        result = getRecommendations_result()
+        result.success = yield gen.maybe_future(self._handler.getRecommendations(args.userId, args.type, args.pageNo, args.pageSize))
+        oprot.writeMessageBegin("getRecommendations", TMessageType.REPLY, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -685,7 +685,7 @@ class getFavPositions_result(object):
         return not (self == other)
 
 
-class getRecommendation_args(object):
+class getRecommendations_args(object):
     """
     Attributes:
      - userId
@@ -746,7 +746,7 @@ class getRecommendation_args(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
-        oprot.writeStructBegin('getRecommendation_args')
+        oprot.writeStructBegin('getRecommendations_args')
         if self.userId is not None:
             oprot.writeFieldBegin('userId', TType.I32, 1)
             oprot.writeI32(self.userId)
@@ -781,7 +781,7 @@ class getRecommendation_args(object):
         return not (self == other)
 
 
-class getRecommendation_result(object):
+class getRecommendations_result(object):
     """
     Attributes:
      - success
@@ -818,7 +818,7 @@ class getRecommendation_result(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
-        oprot.writeStructBegin('getRecommendation_result')
+        oprot.writeStructBegin('getRecommendations_result')
         if self.success is not None:
             oprot.writeFieldBegin('success', TType.STRUCT, 0)
             self.success.write(oprot)

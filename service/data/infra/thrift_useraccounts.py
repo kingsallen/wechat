@@ -19,7 +19,7 @@ class ThriftUseraccountsDataService(DataService):
         UsercenterServiceClient, CONF)
 
     @gen.coroutine
-    def get_recommend_records(self, user_id, type, page_no, page_size):
+    def get_recommend_records(self, user_id, req_type, page_no, page_size):
         """
         推荐历史记录，调用 thrify 接口
         :param user_id:
@@ -28,7 +28,12 @@ class ThriftUseraccountsDataService(DataService):
         :param page_size:
         :return:
         """
-        ret = yield self.usercenter_service_cilent.getRecommendation(user_id, type, page_no, page_size)
+        self.logger.debug("[thrift]get_recommend_records user_id: {}".format(type(user_id)))
+        self.logger.debug("[thrift]get_recommend_records type: {}".format(type(req_type)))
+        self.logger.debug("[thrift]get_recommend_records page_no: {}".format(type(page_no)))
+        self.logger.debug("[thrift]get_recommend_records page_size: {}".format(type(page_size)))
+        ret = yield self.usercenter_service_cilent.getRecommendations(user_id, req_type, page_no, page_size)
+        self.logger.debug("[thrift]get_recommend_records: %s" % ret)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -36,6 +41,7 @@ class ThriftUseraccountsDataService(DataService):
         """获得职位收藏，调用 thrify 接口"""
 
         ret = yield self.usercenter_service_cilent.getFavPositions(user_id)
+        self.logger.debug("[thrift]get_fav_positions: %s" % ret)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -43,6 +49,7 @@ class ThriftUseraccountsDataService(DataService):
         """获得求职记录，调用 thrify 接口"""
 
         ret = yield self.usercenter_service_cilent.getApplications(user_id)
+        self.logger.debug("[thrift]get_applied_applications: %s" % ret)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -54,4 +61,5 @@ class ThriftUseraccountsDataService(DataService):
         :return:
         """
         ret = yield self.usercenter_service_cilent.getApplicationDetail(app_id, user_id)
+        self.logger.debug("[thrift]get_applied_progress: %s" % ret)
         raise gen.Return(ret)
