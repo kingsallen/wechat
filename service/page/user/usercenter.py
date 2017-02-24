@@ -89,16 +89,14 @@ class UsercenterPageService(PageService):
     def get_fav_positions(self, user_id):
         """获得职位收藏，调用 thrify 接口"""
 
-        ret = yield self.usercenter_service_cilent.getFavPositions(
-            userId=user_id)
+        ret = yield self.usercenter_service_cilent.getFavPositions(user_id)
         raise gen.Return(ret)
 
     @gen.coroutine
     def get_applied_applications(self, user_id):
         """获得求职记录，调用 thrify 接口"""
 
-        ret = yield self.usercenter_service_cilent.getApplications(
-            userId=user_id)
+        ret = yield self.usercenter_service_cilent.getApplications(user_id)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -109,6 +107,5 @@ class UsercenterPageService(PageService):
         :param user_id:
         :return:
         """
-        ret = yield self.usercenter_service_cilent.getApplicationDetail(
-            appId=app_id, userId=user_id)
+        ret = yield self.usercenter_service_cilent.getApplicationDetail(app_id, user_id)
         raise gen.Return(ret)

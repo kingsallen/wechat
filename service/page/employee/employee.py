@@ -46,6 +46,5 @@ class EmployeePageService(PageService):
         :param page_size:
         :return:
         """
-        ret = yield self.usercenter_service_cilent.getRecommendation(
-            userId=user_id, type=type, pageNo=page_no, pageSize=page_size)
+        ret = yield self.usercenter_service_cilent.getRecommendation(user_id, type, page_no, page_size)
         raise gen.Return(ret)
