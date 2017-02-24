@@ -145,7 +145,7 @@ class newsletter_args(object):
 
     thrift_spec = (
         None,  # 0
-        (1, TType.STRUCT, 'form', (wordpress_foundation_strcut.ttypes.NewsletterForm, wordpress_foundation_strcut.ttypes.NewsletterForm.thrift_spec), None, ),  # 1
+        (1, TType.STRUCT, 'form', (thrift_gen.gen.foundation.wordpress.struct.ttypes.NewsletterForm, thrift_gen.gen.foundation.wordpress.struct.ttypes.NewsletterForm.thrift_spec), None, ),  # 1
     )
 
     def __init__(self, form=None,):
@@ -162,7 +162,7 @@ class newsletter_args(object):
                 break
             if fid == 1:
                 if ftype == TType.STRUCT:
-                    self.form = wordpress_foundation_strcut.ttypes.NewsletterForm()
+                    self.form = thrift_gen.gen.foundation.wordpress.struct.ttypes.NewsletterForm()
                     self.form.read(iprot)
                 else:
                     iprot.skip(ftype)

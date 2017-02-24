@@ -144,7 +144,6 @@ class RecommendrecordsHandler(BaseHandler):
         page_no = self.params.page_no or 0
         page_size = self.params.page_size or 10
 
-<<<<<<< HEAD
         # res = yield self.employee_ps.get_recommend_records(self.current_user.sysuser.id, page_no, page_size)
         # data = res.data
         res = ObjectDict({
@@ -200,10 +199,5 @@ class RecommendrecordsHandler(BaseHandler):
             for item in res.data.recommends:
                 self.logger.debug("item: %s" % item)
                 item['headimgurl'] = self.static_url(item.headimgurl or const.SYSUSER_HEADIMG),
-=======
-        res = yield self.employee_ps.get_recommend_records(
-            self.current_user.sysuser.id, page_no, page_size)
-        data = res.data
->>>>>>> temp commit
 
         self.send_json_success(data=res.data)

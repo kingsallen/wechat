@@ -11,7 +11,7 @@ from thrift.protocol.TProtocol import TProtocolException
 import sys
 import thrift_gen.gen.useraccounts.struct.ttypes
 import thrift_gen.gen.common.struct.ttypes
-import wordpress_foundation_strcut.ttypes
+import thrift_gen.gen.foundation.wordpress.struct.ttypes
 import thrift_gen.gen.useraccounts.struct.ttypes
 import thrift_gen.gen.dao.struct.userdb.ttypes
 
