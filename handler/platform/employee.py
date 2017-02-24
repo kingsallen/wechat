@@ -9,6 +9,7 @@ from handler.base import BaseHandler
 from thrift_gen.gen.employee.struct.ttypes import BindingParams
 from util.common.decorator import handle_response, authenticated
 from util.common import ObjectDict
+from conf.common import YES, NO, OLD_YES
 
 
 class AwardsHandler(BaseHandler):
@@ -17,32 +18,56 @@ class AwardsHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def get(self):
+        # 一些初始化的工作
         rewards = []
         reward_configs = []
         total = 0
-        is_binded = bool(self.current_user.employee)
 
-        if is_binded:
-            try:
-                result = yield self.employee_ps.get_employee_rewards(
-                    self.current_user.employee.id, self.current_user.company.id
-                )
-            except TException as te:
-                self.logger.error(te)
-                raise
-            else:
-                rewards = result.rewards
-                reward_configs = result.reward_configs
-                total = result.total
+        # 判断是否已经绑定员工
+        binded = YES if self.current_user.employee else NO
 
-        # todo (tangyiliang) 前端渲染
-        self.render(
-            "refer/weixin/employee/reward.html",
-            rewards=rewards,
-            reward_configs=reward_configs,
-            total=total,
-            binded=is_binded,
-            email_activation_state=0 if is_binded else self.current_user.employee.activation)
+        if binded:
+            # 获取绑定员工
+            result = yield self.employee_ps.get_employee_rewards(
+                self.current_user.employee.id, self.current_user.company.id)
+            rewards = result.rewards
+            reward_configs = result.reward_configs
+            total = result.total
+        else:
+            # 使用初始化数据
+            pass
+
+        # 构建输出数据格式
+        award_rules = []
+        for rc in reward_configs:
+            e = ObjectDict()
+            e.name = rc.statusName
+            e.point = rc.points
+            award_rules.append(e)
+
+        email_activation_state = OLD_YES if binded \
+            else self.current_user.employee.activation
+
+        res_rewards = []
+        for rc in rewards:
+            e = ObjectDict()
+            e.reason = rc.reason
+            e.hptitle = rc.title
+            e.title = rc.title
+            e.create_time = rc.updateTime
+            e.points = rc.point
+            res_rewards.append(e)
+        # 构建输出数据格式完成
+
+
+
+        self.send_json_success(data={
+            'rewards': rewards,
+            'award_rules': award_rules,
+            'point_total': total,
+            'binded': binded,
+            'email_activation_state': email_activation_state
+        })
 
 
 class EmployeeUnbindHandler(BaseHandler):
@@ -108,6 +133,7 @@ class EmployeeBindHandler(BaseHandler):
                 return
         self.send_json_error()
 
+
 class RecommendrecordsHandler(BaseHandler):
     """员工-推荐记录"""
 
@@ -118,6 +144,7 @@ class RecommendrecordsHandler(BaseHandler):
         page_no = self.params.page_no or 0
         page_size = self.params.page_size or 10
 
+<<<<<<< HEAD
         # res = yield self.employee_ps.get_recommend_records(self.current_user.sysuser.id, page_no, page_size)
         # data = res.data
         res = ObjectDict({
@@ -173,5 +200,10 @@ class RecommendrecordsHandler(BaseHandler):
             for item in res.data.recommends:
                 self.logger.debug("item: %s" % item)
                 item['headimgurl'] = self.static_url(item.headimgurl or const.SYSUSER_HEADIMG),
+=======
+        res = yield self.employee_ps.get_recommend_records(
+            self.current_user.sysuser.id, page_no, page_size)
+        data = res.data
+>>>>>>> temp commit
 
         self.send_json_success(data=res.data)
