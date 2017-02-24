@@ -2,7 +2,7 @@
 
 from tornado import gen
 from handler.base import BaseHandler
-from util.common.decorator import handle_response
+from util.common.decorator import handle_response, authenticated
 
 
 class UnreadCountHandler(BaseHandler):
@@ -34,6 +34,7 @@ class UnreadCountHandler(BaseHandler):
         chat_num = yield self.im_ps.get_unread_chat_num(self.current_user.sysuser.id, publisher)
         self.send_json_success(data=chat_num)
 
+    @authenticated
     @handle_response
     @gen.coroutine
     def get_unread_total(self):

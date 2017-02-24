@@ -17,7 +17,6 @@ class UsercenterHandler(BaseHandler):
     """
 
     @handle_response
-    @authenticated
     @gen.coroutine
     def put(self):
 
@@ -30,7 +29,6 @@ class UsercenterHandler(BaseHandler):
             self.send_json_error()
 
     @handle_response
-    @authenticated
     @gen.coroutine
     def get(self):
         """
@@ -269,7 +267,6 @@ class UploadHandler(BaseHandler):
     """
 
     @handle_response
-    @authenticated
     @gen.coroutine
     def post(self, method):
         try:

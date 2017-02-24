@@ -8,7 +8,7 @@ import conf.path as path
 import conf.common as const
 from handler.base import BaseHandler
 from cache.user.passport_session import PassportCache
-from util.common.decorator import handle_response
+from util.common.decorator import handle_response, authenticated
 from util.tool.str_tool import to_str, password_crypt
 from util.tool.url_tool import make_url
 from util.common.cipher import encode_id
@@ -61,6 +61,7 @@ class LogoutHandler(BaseHandler):
     用户登出.
     """
 
+    @authenticated
     @handle_response
     @gen.coroutine
     def get(self):
