@@ -334,8 +334,8 @@ class PositionHandler(BaseHandler):
         """构造刷新链路"""
 
         last_employee_user_id = 0
+        inserted_share_chain_id = 0
 
-        # TODO 如果分享者，点击自己分享的链接，是否需要刷新链路？ by 煜昕 1.14
         if self.current_user.recom:
             yield self._make_share_record(
                 position_info, recom_user_id=self.current_user.recom.id)
@@ -369,7 +369,7 @@ class PositionHandler(BaseHandler):
         yield self.position_ps.send_candidate_view_position(params={
             "user_id": self.current_user.sysuser.id,
             "position_id": position_info.id,
-            "from_employee": 1 if last_employee_user_id else 0,
+            "share_chain_id": inserted_share_chain_id
         })
 
         raise gen.Return(last_employee_user_id)
