@@ -3,7 +3,7 @@
 from tornado import gen
 from service.page.base import PageService
 
-from thrift_gen.gen.useraccounts.service.UseraccountsServices import Client as UseraccountsServiceClient
+from thrift_gen.gen.useraccounts.service.UserCenterService import Client as UsercenterServiceClient
 from thrift_gen.gen.employee.service.EmployeeService import Client as EmployeeServiceClient
 from service.data.infra.framework.client.client import ServiceClientFactory
 from service.data.infra.framework.common.config import CONF
@@ -13,8 +13,8 @@ class EmployeePageService(PageService):
 
     employee_service_cilent = ServiceClientFactory.get_service(
         EmployeeServiceClient, "employee", CONF)
-    useraccounts_service_cilent = ServiceClientFactory.get_service(
-        UseraccountsServiceClient, "useraccounts", CONF)
+    usercenter_service_cilent = ServiceClientFactory.get_service(
+        UsercenterServiceClient, "useraccounts", CONF)
 
     def __init__(self):
         super().__init__()
@@ -46,6 +46,6 @@ class EmployeePageService(PageService):
         :param page_size:
         :return:
         """
-        ret = yield self.useraccounts_service_cilent.listRecommendation(
+        ret = yield self.usercenter_service_cilent.getRecommendation(
             userId=user_id, type=type, pageNo=page_no, pageSize=page_size)
         raise gen.Return(ret)
