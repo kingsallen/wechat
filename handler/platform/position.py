@@ -438,6 +438,7 @@ class PositionHandler(BaseHandler):
         """构造刷新链路"""
 
         last_employee_user_id = 0
+        inserted_share_chain_id = 0
 
         if self.current_user.recom:
             yield self._make_share_record(
@@ -474,7 +475,7 @@ class PositionHandler(BaseHandler):
             yield self.candidate_ps.send_candidate_view_position(
                 user_id=self.current_user.sysuser.id,
                 position_id=position_info.id,
-                from_employee=True if last_employee_user_id else False,
+                sharechain_id=inserted_share_chain_id,
             )
 
         raise gen.Return(last_employee_user_id)

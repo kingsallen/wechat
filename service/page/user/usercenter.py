@@ -11,14 +11,14 @@ from tornado import gen
 
 from service.page.base import PageService
 
-from thrift_gen.gen.useraccounts.service.UseraccountsServices import Client as UseraccountsServiceClient
+from thrift_gen.gen.useraccounts.service.UserCenterService import Client as UserCenterServiceClient
 from service.data.infra.framework.client.client import ServiceClientFactory
 from service.data.infra.framework.common.config import CONF
 
 class UsercenterPageService(PageService):
 
-    useraccounts_service_cilent = ServiceClientFactory.get_service(
-        UseraccountsServiceClient, "useraccounts", CONF)
+    usercenter_service_cilent = ServiceClientFactory.get_service(
+        UserCenterServiceClient, "useraccounts", CONF)
 
     def __init__(self):
         super().__init__()
@@ -86,18 +86,18 @@ class UsercenterPageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def get_applied_applications(self, user_id):
-        """获得求职记录，调用 thrify 接口"""
+    def get_fav_positions(self, user_id):
+        """获得职位收藏，调用 thrify 接口"""
 
-        ret = yield self.useraccounts_service_cilent.getApplications(
+        ret = yield self.usercenter_service_cilent.getFavPositions(
             userId=user_id)
         raise gen.Return(ret)
 
     @gen.coroutine
-    def get_fav_positions(self, user_id):
-        """获得职位收藏，调用 thrify 接口"""
+    def get_applied_applications(self, user_id):
+        """获得求职记录，调用 thrify 接口"""
 
-        ret = yield self.useraccounts_service_cilent.getFavPositions(
+        ret = yield self.usercenter_service_cilent.getApplications(
             userId=user_id)
         raise gen.Return(ret)
 
@@ -109,6 +109,6 @@ class UsercenterPageService(PageService):
         :param user_id:
         :return:
         """
-        ret = yield self.useraccounts_service_cilent.getApplicationDetail(
+        ret = yield self.usercenter_service_cilent.getApplicationDetail(
             appId=app_id, userId=user_id)
         raise gen.Return(ret)
