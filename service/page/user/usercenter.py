@@ -18,7 +18,7 @@ from service.data.infra.framework.common.config import CONF
 class UsercenterPageService(PageService):
 
     usercenter_service_cilent = ServiceClientFactory.get_service(
-        UserCenterServiceClient, "useraccounts", CONF)
+        UserCenterServiceClient, CONF)
 
     def __init__(self):
         super().__init__()

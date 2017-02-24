@@ -16,7 +16,7 @@ class ThriftUseraccountsDataService(DataService):
     """
 
     usercenter_service_cilent = ServiceClientFactory.get_service(
-        UsercenterServiceClient, "useraccounts", CONF)
+        UsercenterServiceClient, CONF)
 
     @gen.coroutine
     def get_recommend_records(self, user_id, type, page_no, page_size):

@@ -4,6 +4,7 @@ from ...framework.client.connection_pool import ConnectionPool
 from ...framework.client.load_balancer.loadbalancer import LoadBalancer
 from ...framework.client.load_balancer.loadbalancer import RoundRobinStrategy
 from ...framework.common.zookeeper_manager import ZkManager
+from ...framework.common import utils
 
 import tornado
 from kazoo.client import KazooClient, KazooState
@@ -18,7 +19,8 @@ import socket
 
 class ServiceClientFactory(object):
     @staticmethod
-    def get_service(service_client_cls, service_name, conf):
+    def get_service(service_client_cls, conf):
+        service_name = utils.get_module_name(service_client_cls).lower()
         return ServiceClient(service_client_cls, service_name, conf).create_proxy()
 
 

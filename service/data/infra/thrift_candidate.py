@@ -16,7 +16,7 @@ class ThriftCandidateDataService(DataService):
     """
 
     candidate_service_cilent = ServiceClientFactory.get_service(
-        CandidateServiceClient, "candidate", CONF)
+        CandidateServiceClient, CONF)
 
     @gen.coroutine
     def send_candidate_view_position(self, user_id, position_id, sharechain_id):

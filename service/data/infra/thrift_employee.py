@@ -16,7 +16,7 @@ class ThriftEmployeeDataService(DataService):
     """
 
     employee_service_cilent = ServiceClientFactory.get_service(
-        EmployeeServiceClient, "employee", CONF)
+        EmployeeServiceClient, CONF)
 
     @gen.coroutine
     def get_employee_rewards(self, employee_id, company_id):
