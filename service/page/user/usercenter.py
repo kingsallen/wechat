@@ -87,25 +87,25 @@ class UsercenterPageService(PageService):
 
     @gen.coroutine
     def get_fav_positions(self, user_id):
-        """获得职位收藏，调用 thrify 接口"""
+        """获得职位收藏"""
 
-        ret = yield self.usercenter_service_cilent.getFavPositions(user_id)
+        ret = yield self.thrift_useraccounts_ds.get_fav_positions(user_id)
         raise gen.Return(ret)
 
     @gen.coroutine
     def get_applied_applications(self, user_id):
-        """获得求职记录，调用 thrify 接口"""
+        """获得求职记录"""
 
-        ret = yield self.usercenter_service_cilent.getApplications(user_id)
+        ret = yield self.thrift_useraccounts_ds.get_applied_applications(user_id)
         raise gen.Return(ret)
 
     @gen.coroutine
     def get_applied_progress(self, app_id, user_id):
         """
-        求职记录中的求职详情进度，调用 thrify 接口
+        求职记录中的求职详情进度
         :param app_id:
         :param user_id:
         :return:
         """
-        ret = yield self.usercenter_service_cilent.getApplicationDetail(app_id, user_id)
+        ret = yield self.thrift_useraccounts_ds.get_applied_progress(app_id, user_id)
         raise gen.Return(ret)
