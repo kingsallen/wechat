@@ -25,6 +25,14 @@ class Iface(object):
         """
         pass
 
+    def getApplicationDetail(self, userId, appId):
+        """
+        Parameters:
+         - userId
+         - appId
+        """
+        pass
+
     def getFavPositions(self, userId):
         """
         Parameters:
@@ -32,10 +40,11 @@ class Iface(object):
         """
         pass
 
-    def listRecommendation(self, userId, pageNo, pageSize):
+    def getRecommendation(self, userId, type, pageNo, pageSize):
         """
         Parameters:
          - userId
+         - type
          - pageNo
          - pageSize
         """
@@ -109,6 +118,40 @@ class Client(Iface):
             return result.success
         raise TApplicationException(TApplicationException.MISSING_RESULT, "getApplications failed: unknown result")
 
+    def getApplicationDetail(self, userId, appId):
+        """
+        Parameters:
+         - userId
+         - appId
+        """
+        self._seqid += 1
+        future = self._reqs[self._seqid] = concurrent.Future()
+        self.send_getApplicationDetail(userId, appId)
+        return future
+
+    def send_getApplicationDetail(self, userId, appId):
+        oprot = self._oprot_factory.getProtocol(self._transport)
+        oprot.writeMessageBegin('getApplicationDetail', TMessageType.CALL, self._seqid)
+        args = getApplicationDetail_args()
+        args.userId = userId
+        args.appId = appId
+        args.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def recv_getApplicationDetail(self, iprot, mtype, rseqid):
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = getApplicationDetail_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "getApplicationDetail failed: unknown result")
+
     def getFavPositions(self, userId):
         """
         Parameters:
@@ -141,41 +184,43 @@ class Client(Iface):
             return result.success
         raise TApplicationException(TApplicationException.MISSING_RESULT, "getFavPositions failed: unknown result")
 
-    def listRecommendation(self, userId, pageNo, pageSize):
+    def getRecommendation(self, userId, type, pageNo, pageSize):
         """
         Parameters:
          - userId
+         - type
          - pageNo
          - pageSize
         """
         self._seqid += 1
         future = self._reqs[self._seqid] = concurrent.Future()
-        self.send_listRecommendation(userId, pageNo, pageSize)
+        self.send_getRecommendation(userId, type, pageNo, pageSize)
         return future
 
-    def send_listRecommendation(self, userId, pageNo, pageSize):
+    def send_getRecommendation(self, userId, type, pageNo, pageSize):
         oprot = self._oprot_factory.getProtocol(self._transport)
-        oprot.writeMessageBegin('listRecommendation', TMessageType.CALL, self._seqid)
-        args = listRecommendation_args()
+        oprot.writeMessageBegin('getRecommendation', TMessageType.CALL, self._seqid)
+        args = getRecommendation_args()
         args.userId = userId
+        args.type = type
         args.pageNo = pageNo
         args.pageSize = pageSize
         args.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-    def recv_listRecommendation(self, iprot, mtype, rseqid):
+    def recv_getRecommendation(self, iprot, mtype, rseqid):
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
             iprot.readMessageEnd()
             raise x
-        result = listRecommendation_result()
+        result = getRecommendation_result()
         result.read(iprot)
         iprot.readMessageEnd()
         if result.success is not None:
             return result.success
-        raise TApplicationException(TApplicationException.MISSING_RESULT, "listRecommendation failed: unknown result")
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "getRecommendation failed: unknown result")
 
 
 class Processor(Iface, TProcessor):
@@ -183,8 +228,9 @@ class Processor(Iface, TProcessor):
         self._handler = handler
         self._processMap = {}
         self._processMap["getApplications"] = Processor.process_getApplications
+        self._processMap["getApplicationDetail"] = Processor.process_getApplicationDetail
         self._processMap["getFavPositions"] = Processor.process_getFavPositions
-        self._processMap["listRecommendation"] = Processor.process_listRecommendation
+        self._processMap["getRecommendation"] = Processor.process_getRecommendation
 
     def process(self, iprot, oprot):
         (name, type, seqid) = iprot.readMessageBegin()
@@ -213,6 +259,18 @@ class Processor(Iface, TProcessor):
         oprot.trans.flush()
 
     @gen.coroutine
+    def process_getApplicationDetail(self, seqid, iprot, oprot):
+        args = getApplicationDetail_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = getApplicationDetail_result()
+        result.success = yield gen.maybe_future(self._handler.getApplicationDetail(args.userId, args.appId))
+        oprot.writeMessageBegin("getApplicationDetail", TMessageType.REPLY, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    @gen.coroutine
     def process_getFavPositions(self, seqid, iprot, oprot):
         args = getFavPositions_args()
         args.read(iprot)
@@ -225,13 +283,13 @@ class Processor(Iface, TProcessor):
         oprot.trans.flush()
 
     @gen.coroutine
-    def process_listRecommendation(self, seqid, iprot, oprot):
-        args = listRecommendation_args()
+    def process_getRecommendation(self, seqid, iprot, oprot):
+        args = getRecommendation_args()
         args.read(iprot)
         iprot.readMessageEnd()
-        result = listRecommendation_result()
-        result.success = yield gen.maybe_future(self._handler.listRecommendation(args.userId, args.pageNo, args.pageSize))
-        oprot.writeMessageBegin("listRecommendation", TMessageType.REPLY, seqid)
+        result = getRecommendation_result()
+        result.success = yield gen.maybe_future(self._handler.getRecommendation(args.userId, args.type, args.pageNo, args.pageSize))
+        oprot.writeMessageBegin("getRecommendation", TMessageType.REPLY, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -348,6 +406,138 @@ class getApplications_result(object):
             for iter6 in self.success:
                 iter6.write(oprot)
             oprot.writeListEnd()
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class getApplicationDetail_args(object):
+    """
+    Attributes:
+     - userId
+     - appId
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'userId', None, None, ),  # 1
+        (2, TType.I32, 'appId', None, None, ),  # 2
+    )
+
+    def __init__(self, userId=None, appId=None,):
+        self.userId = userId
+        self.appId = appId
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.userId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.I32:
+                    self.appId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('getApplicationDetail_args')
+        if self.userId is not None:
+            oprot.writeFieldBegin('userId', TType.I32, 1)
+            oprot.writeI32(self.userId)
+            oprot.writeFieldEnd()
+        if self.appId is not None:
+            oprot.writeFieldBegin('appId', TType.I32, 2)
+            oprot.writeI32(self.appId)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class getApplicationDetail_result(object):
+    """
+    Attributes:
+     - success
+    """
+
+    thrift_spec = (
+        (0, TType.STRUCT, 'success', (thrift_gen.gen.useraccounts.struct.ttypes.ApplicationDetailVO, thrift_gen.gen.useraccounts.struct.ttypes.ApplicationDetailVO.thrift_spec), None, ),  # 0
+    )
+
+    def __init__(self, success=None,):
+        self.success = success
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRUCT:
+                    self.success = thrift_gen.gen.useraccounts.struct.ttypes.ApplicationDetailVO()
+                    self.success.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('getApplicationDetail_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.STRUCT, 0)
+            self.success.write(oprot)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -495,10 +685,11 @@ class getFavPositions_result(object):
         return not (self == other)
 
 
-class listRecommendation_args(object):
+class getRecommendation_args(object):
     """
     Attributes:
      - userId
+     - type
      - pageNo
      - pageSize
     """
@@ -506,12 +697,14 @@ class listRecommendation_args(object):
     thrift_spec = (
         None,  # 0
         (1, TType.I32, 'userId', None, None, ),  # 1
-        (2, TType.I32, 'pageNo', None, None, ),  # 2
-        (3, TType.I32, 'pageSize', None, None, ),  # 3
+        (2, TType.BYTE, 'type', None, None, ),  # 2
+        (3, TType.I32, 'pageNo', None, None, ),  # 3
+        (4, TType.I32, 'pageSize', None, None, ),  # 4
     )
 
-    def __init__(self, userId=None, pageNo=None, pageSize=None,):
+    def __init__(self, userId=None, type=None, pageNo=None, pageSize=None,):
         self.userId = userId
+        self.type = type
         self.pageNo = pageNo
         self.pageSize = pageSize
 
@@ -530,11 +723,16 @@ class listRecommendation_args(object):
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
+                if ftype == TType.BYTE:
+                    self.type = iprot.readByte()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
                 if ftype == TType.I32:
                     self.pageNo = iprot.readI32()
                 else:
                     iprot.skip(ftype)
-            elif fid == 3:
+            elif fid == 4:
                 if ftype == TType.I32:
                     self.pageSize = iprot.readI32()
                 else:
@@ -548,17 +746,21 @@ class listRecommendation_args(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
-        oprot.writeStructBegin('listRecommendation_args')
+        oprot.writeStructBegin('getRecommendation_args')
         if self.userId is not None:
             oprot.writeFieldBegin('userId', TType.I32, 1)
             oprot.writeI32(self.userId)
             oprot.writeFieldEnd()
+        if self.type is not None:
+            oprot.writeFieldBegin('type', TType.BYTE, 2)
+            oprot.writeByte(self.type)
+            oprot.writeFieldEnd()
         if self.pageNo is not None:
-            oprot.writeFieldBegin('pageNo', TType.I32, 2)
+            oprot.writeFieldBegin('pageNo', TType.I32, 3)
             oprot.writeI32(self.pageNo)
             oprot.writeFieldEnd()
         if self.pageSize is not None:
-            oprot.writeFieldBegin('pageSize', TType.I32, 3)
+            oprot.writeFieldBegin('pageSize', TType.I32, 4)
             oprot.writeI32(self.pageSize)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -579,14 +781,14 @@ class listRecommendation_args(object):
         return not (self == other)
 
 
-class listRecommendation_result(object):
+class getRecommendation_result(object):
     """
     Attributes:
      - success
     """
 
     thrift_spec = (
-        (0, TType.LIST, 'success', (TType.STRUCT, (thrift_gen.gen.useraccounts.struct.ttypes.RecommendationForm, thrift_gen.gen.useraccounts.struct.ttypes.RecommendationForm.thrift_spec), False), None, ),  # 0
+        (0, TType.STRUCT, 'success', (thrift_gen.gen.useraccounts.struct.ttypes.RecommendationVO, thrift_gen.gen.useraccounts.struct.ttypes.RecommendationVO.thrift_spec), None, ),  # 0
     )
 
     def __init__(self, success=None,):
@@ -602,14 +804,9 @@ class listRecommendation_result(object):
             if ftype == TType.STOP:
                 break
             if fid == 0:
-                if ftype == TType.LIST:
-                    self.success = []
-                    (_etype17, _size14) = iprot.readListBegin()
-                    for _i18 in range(_size14):
-                        _elem19 = thrift_gen.gen.useraccounts.struct.ttypes.RecommendationForm()
-                        _elem19.read(iprot)
-                        self.success.append(_elem19)
-                    iprot.readListEnd()
+                if ftype == TType.STRUCT:
+                    self.success = thrift_gen.gen.useraccounts.struct.ttypes.RecommendationVO()
+                    self.success.read(iprot)
                 else:
                     iprot.skip(ftype)
             else:
@@ -621,13 +818,10 @@ class listRecommendation_result(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
-        oprot.writeStructBegin('listRecommendation_result')
+        oprot.writeStructBegin('getRecommendation_result')
         if self.success is not None:
-            oprot.writeFieldBegin('success', TType.LIST, 0)
-            oprot.writeListBegin(TType.STRUCT, len(self.success))
-            for iter20 in self.success:
-                iter20.write(oprot)
-            oprot.writeListEnd()
+            oprot.writeFieldBegin('success', TType.STRUCT, 0)
+            self.success.write(oprot)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()

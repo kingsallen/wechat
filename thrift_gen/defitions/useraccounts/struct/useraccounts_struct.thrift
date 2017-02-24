@@ -168,24 +168,34 @@ struct FavPositionForm {
     8: optional i8 status,              //薪资下限
     9: optional Timestamp update_time    //职位的更新时间
 }
+
+struct RecommendationScoreVO {
+    1:i32 link_viewed_count,
+    2:i32 interested_count,
+    3:i32 applied_count
+}
+
+/*
+ * 个人中心推荐历史记录信息主体
+ */
+struct RecommendationRecordVO {
+    1: optional i8 recom_status,                //职位编号
+    2: optional string applier_name,            //申请人姓名
+    3: optional string position,                //职位名称
+    4: optional Timestamp click_time,           //点击事件
+    5: optional i16 status,                     //招聘进度状态
+    6: optional i8 is_interested,              //是否推荐 0没有推荐 1推荐
+    7: optional i32 view_number,               //点击次数
+    8: optional string headimgurl              //头像
+}
+
 /*
  * 查询推荐信息(只有用户是员工时才具备该功能)
  */
-struct RecommendationForm {
-    1: optional i8 recom_status,                //职位编号
-    2: optional i32 app_id,                     //申请编号
-    3: optional string applier_name,            //申请人姓名
-    4: optional string position,                //职位名称
-    5: optional Timestamp click_time,           //点击事件
-    6: optional Timestamp recom_time,           //推荐事件
-    7: optional i16 status,                     //招聘进度状态
-    8: optional string recom_2nd_nickname,      //员工二度转发者昵称(标记谁的朋友)可以为空字符串
-    9: optional i32 applier_id,                 //申请人的C端账号编号userdb.user_user.id
-    10: optional i32 candidate_recom_record_id, //candidatedb.candidate_company.id
-    11: optional Timestamp app_time,            //申请时间
-    12: optional i8 is_interested,              //是否推荐 0没有推荐 1推荐
-    13: optional i32 view_number,               //点击次数
-    14: optional string headimgurl              //头像
+struct RecommendationVO {
+    1: optional bool hasRecommends,                     //职位编号
+    2: optional RecommendationScoreVO score,            //申请编号
+    3: optional list<RecommendationRecordVO> recommends //头像
 }
 /*
  * 个人中心积分记录（只有用户是员工时才具备）
@@ -213,7 +223,7 @@ struct ApplicationOperationRecordVO {
 struct ApplicationDetailVO {
     1: optional i32 pid,                                //积分记录表编号
     2: optional string position_title,                  //申请编号
-    3: optional string company_title,                   //职位名称
+    3: optional string company_name,                    //职位名称
     4: optional i8 step,                                //进度
     5: optional i8 step_status,                         //状态
     6: optional list<ApplicationOperationRecordVO> status_timeline  //操作记录

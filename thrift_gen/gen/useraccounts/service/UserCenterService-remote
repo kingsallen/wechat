@@ -25,8 +25,9 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('')
     print('Functions:')
     print('   getApplications(i32 userId)')
+    print('  ApplicationDetailVO getApplicationDetail(i32 userId, i32 appId)')
     print('   getFavPositions(i32 userId)')
-    print('   listRecommendation(i32 userId, i32 pageNo, i32 pageSize)')
+    print('  RecommendationVO getRecommendation(i32 userId, i8 type, i32 pageNo, i32 pageSize)')
     print('')
     sys.exit(0)
 
@@ -112,17 +113,23 @@ if cmd == 'getApplications':
         sys.exit(1)
     pp.pprint(client.getApplications(eval(args[0]),))
 
+elif cmd == 'getApplicationDetail':
+    if len(args) != 2:
+        print('getApplicationDetail requires 2 args')
+        sys.exit(1)
+    pp.pprint(client.getApplicationDetail(eval(args[0]), eval(args[1]),))
+
 elif cmd == 'getFavPositions':
     if len(args) != 1:
         print('getFavPositions requires 1 args')
         sys.exit(1)
     pp.pprint(client.getFavPositions(eval(args[0]),))
 
-elif cmd == 'listRecommendation':
-    if len(args) != 3:
-        print('listRecommendation requires 3 args')
+elif cmd == 'getRecommendation':
+    if len(args) != 4:
+        print('getRecommendation requires 4 args')
         sys.exit(1)
-    pp.pprint(client.listRecommendation(eval(args[0]), eval(args[1]), eval(args[2]),))
+    pp.pprint(client.getRecommendation(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]),))
 
 else:
     print('Unrecognized method %s' % cmd)

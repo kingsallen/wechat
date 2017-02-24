@@ -100,8 +100,9 @@ service UserCommonService {
 service UserCenterService {
     //查询用户的申请记录
     list<useraccounts_struct.ApplicationRecordsForm> getApplications(1: i32 userId);
+    useraccounts_struct.ApplicationDetailVO getApplicationDetail(1: i32 userId, 2: i32 appId);
     //查询用户的只为收藏记录
     list<useraccounts_struct.FavPositionForm> getFavPositions(1: i32 userId);
     //查询推荐记录
-    list<useraccounts_struct.RecommendationForm> listRecommendation(1: i32 userId, 2: i32 pageNo, 3: i32 pageSize);
+    useraccounts_struct.RecommendationVO getRecommendation(1: i32 userId, 2:i8 type, 3: i32 pageNo, 4: i32 pageSize);
 }

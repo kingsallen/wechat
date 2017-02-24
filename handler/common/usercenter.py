@@ -134,47 +134,48 @@ class FavpositionHandler(BaseHandler):
         :return:
         """
 
-        # res = yield self.usercenter_ps.get_fav_positions(self.current_user.sysuser.id)
-        res = ObjectDict({
-            "status": 0,
-            "message": "SUCCESS",
-            "data": [
-                {
-                    "id": 2,
-                    "title": "职位名称1",
-                    "department": "部门名称1",
-                    "time": "2017-01-02 12:23:34", # 收藏的时间
-                    "city": "上海，北京",
-                    "salary_top": 34,
-                    "salary_bottom": 10,
-                    "update_time": curr_now(),  # 职位更新时间
-                    "status": 0 # 职位状态
-                },
-                {
-                    "id": 3,
-                    "title": "职位名称2",
-                    "department": "部门名称2",
-                    "time": "2017-01-02 12:23:34",
-                    "city": "上海，北京，南京",
-                    "salary_top": 4,
-                    "salary_bottom": 0,
-                    "update_time": curr_now(),
-                    "status": 2
-                },
-                {
-                    "id": 4,
-                    "title": "职位名称3",
-                    "department": "部门名称3",
-                    "time": "2017-01-02 12:23:34",
-                    "city": "上海，北京，南京",
-                    "salary_top": 0,
-                    "salary_bottom": 0,
-                    "update_time": curr_now(),
-                    "status": 2
-                },
-            ]
-        })
-        if res.status == const.API_SUCCESS:
+        res = yield self.usercenter_ps.get_fav_positions(self.current_user.sysuser.id)
+        self.logger.debug("get_fav_positions: %s" % res)
+        # res = ObjectDict({
+        #     "status": 0,
+        #     "message": "SUCCESS",
+        #     "data": [
+        #         {
+        #             "id": 2,
+        #             "title": "职位名称1",
+        #             "department": "部门名称1",
+        #             "time": "2017-01-02 12:23:34", # 收藏的时间
+        #             "city": "上海，北京",
+        #             "salary_top": 34,
+        #             "salary_bottom": 10,
+        #             "update_time": curr_now(),  # 职位更新时间
+        #             "status": 0 # 职位状态
+        #         },
+        #         {
+        #             "id": 3,
+        #             "title": "职位名称2",
+        #             "department": "部门名称2",
+        #             "time": "2017-01-02 12:23:34",
+        #             "city": "上海，北京，南京",
+        #             "salary_top": 4,
+        #             "salary_bottom": 0,
+        #             "update_time": curr_now(),
+        #             "status": 2
+        #         },
+        #         {
+        #             "id": 4,
+        #             "title": "职位名称3",
+        #             "department": "部门名称3",
+        #             "time": "2017-01-02 12:23:34",
+        #             "city": "上海，北京，南京",
+        #             "salary_top": 0,
+        #             "salary_bottom": 0,
+        #             "update_time": curr_now(),
+        #             "status": 2
+        #         },
+        #     ]
+        # })
+        if res.status == const.API_SUCCESS and res.data:
             for item in res.data:
                 item['salary'] = gen_salary(item['salary_top'], item['salary_bottom'])
                 item['update_time'] = jd_update_date(item['update_time'])
@@ -199,65 +200,67 @@ class ApplyrecordsHandler(BaseHandler):
 
         if apply_id:
             # 查看具体申请记录的进度
-            # res = yield self.usercenter_ps.get_applied_progress(apply_id, self.current_user.sysuser.id)
-            res = ObjectDict({
-                "status": 0,
-                "message": "SUCCESS",
-                "data": {
-                    "pid": 2,
-                    "position_title": "职位名称",
-                    "company_name": "职位所属公司",
-                    "step": 2, # 1, 2, 3 分别对应 ["投递简历", "面试", "入职"],
-                    "step_status": 2, #0, 1, 2, 如果是0，说明没开始，如果是1, 则是这个步骤通过了，2是这个步骤不通过
-                    "status_timeline": [
-                        {
-                            "date": '2016-08-01 19:01:09',
-                            "event": '简历提交成功',
-                            "hide": 0, # 是否隐藏这个历史记录
-                            "step_status": 0, # 0, 1, 2
-                        },
-
-                        {
-                            "date": '2016-08-01 19:02:11',
-                            "event": 'HR查看了您的简历',
-                            "hide": 0,
-                            "step_status": 2,  #0, 1, 2
-                        }
-                    ]
-                }
-            })
+            res = yield self.usercenter_ps.get_applied_progress(apply_id, self.current_user.sysuser.id)
+            self.logger.debug("get_applied_progress: %s" % res)
+            # res = ObjectDict({
+            #     "status": 0,
+            #     "message": "SUCCESS",
+            #     "data": {
+            #         "pid": 2,
+            #         "position_title": "职位名称",
+            #         "company_name": "职位所属公司",
+            #         "step": 2, # 1, 2, 3 分别对应 ["投递简历", "面试", "入职"],
+            #         "step_status": 2, #0, 1, 2, 如果是0，说明没开始，如果是1, 则是这个步骤通过了，2是这个步骤不通过
+            #         "status_timeline": [
+            #             {
+            #                 "date": '2016-08-01 19:01:09',
+            #                 "event": '简历提交成功',
+            #                 "hide": 0, # 是否隐藏这个历史记录
+            #                 "step_status": 0, # 0, 1, 2
+            #             },
+            #
+            #             {
+            #                 "date": '2016-08-01 19:02:11',
+            #                 "event": 'HR查看了您的简历',
+            #                 "hide": 0,
+            #                 "step_status": 2,  #0, 1, 2
+            #             }
+            #         ]
+            #     }
+            # })
             self.send_json_success(data=res.data)
 
         else:
             # 查看申请记录列表
-            # res = yield self.usercenter_ps.get_applied_applications(self.current_user.sysuser.id)
-            res = ObjectDict({
-                "status": 0,
-                "message": "SUCCESS",
-                "data": [
-                    {
-                        "id": 2, #app_id
-                        "position_title": "职位名称1",
-                        "company_name": "公司名称1",  # 公司名称
-                        "time": "2017-01-08 12:23:34", # 申请时间
-                        "status_name": "HR查看了你的简历"  # 申请进度状态
-                    },
-                    {
-                        "id": 3,
-                        "position_title": "职位名称2",
-                        "company_name": "公司名称2",
-                        "time": "2017-01-02 12:23:34",
-                        "status_name": "面试成功"
-                    },
-                    {
-                        "id": 4,
-                        "position_title": "职位名称3",
-                        "company_name": "公司名称3",
-                        "time": "2017-01-02 12:23:34",
-                        "status_name": "已入职"
-                    },
-                ]
-            })
+            res = yield self.usercenter_ps.get_applied_applications(self.current_user.sysuser.id)
+            self.logger.debug("get_applied_applications: %s" % res)
+            # res = ObjectDict({
+            #     "status": 0,
+            #     "message": "SUCCESS",
+            #     "data": [
+            #         {
+            #             "id": 2, #app_id
+            #             "position_title": "职位名称1",
+            #             "company_name": "公司名称1",  # 公司名称
+            #             "time": "2017-01-08 12:23:34", # 申请时间
+            #             "status_name": "HR查看了你的简历"  # 申请进度状态
+            #         },
+            #         {
+            #             "id": 3,
+            #             "position_title": "职位名称2",
+            #             "company_name": "公司名称2",
+            #             "time": "2017-01-02 12:23:34",
+            #             "status_name": "面试成功"
+            #         },
+            #         {
+            #             "id": 4,
+            #             "position_title": "职位名称3",
+            #             "company_name": "公司名称3",
+            #             "time": "2017-01-02 12:23:34",
+            #             "status_name": "已入职"
+            #         },
+            #     ]
+            # })
             self.send_json_success(data=ObjectDict(
                 records=res.data
             ))

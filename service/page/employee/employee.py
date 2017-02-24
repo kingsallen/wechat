@@ -37,7 +37,7 @@ class EmployeePageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def get_recommend_records(self,  user_id, page_no, page_size):
+    def get_recommend_records(self, user_id, page_no, page_size):
         """
         推荐记录，调用 thrify 接口
         :param app_id:
