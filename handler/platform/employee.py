@@ -143,8 +143,9 @@ class RecommendrecordsHandler(BaseHandler):
     def get(self):
         page_no = self.params.page_no or 0
         page_size = self.params.page_size or 10
+        type = self.params.type or 1
 
-        res = yield self.employee_ps.get_recommend_records(self.current_user.sysuser.id, page_no, page_size)
+        res = yield self.employee_ps.get_recommend_records(self.current_user.sysuser.id, type, page_no, page_size)
         # res = ObjectDict({
         #     "status": 0,
         #     "message": "SUCCESS",

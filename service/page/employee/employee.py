@@ -37,13 +37,15 @@ class EmployeePageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def get_recommend_records(self, user_id, page_no, page_size):
+    def get_recommend_records(self, user_id, type, page_no, page_size):
         """
-        推荐记录，调用 thrify 接口
-        :param app_id:
+        推荐历史记录，调用 thrify 接口
         :param user_id:
+        :param type: 数据类型 1表示浏览人数，2表示浏览人数中感兴趣的人数，3表示浏览人数中投递的人数
+        :param page_no:
+        :param page_size:
         :return:
         """
         ret = yield self.useraccounts_service_cilent.listRecommendation(
-            userId=user_id, pageNo=page_no, pageSize=page_size)
+            userId=user_id, type=type, pageNo=page_no, pageSize=page_size)
         raise gen.Return(ret)

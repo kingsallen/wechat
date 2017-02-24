@@ -138,13 +138,18 @@ class RegisterHandler(BaseHandler):
         mobile = self.get_secure_cookie(const.COOKIE_MOBILE_REGISTER)
         code_type = int(self.params.code_type)
 
+        site_title = const.PAGE_REGISTER
+        if code_type == 1:
+            # 忘记密码
+            site_title = const.PAGE_FORGET_PASSWORD
+
         data = ObjectDict(
             national_code_tpl=const.NATIONAL_CODE,
             national_code=1,
             mobile=mobile,
             code_type=code_type
         )
-        self.render_page("system/register.html", data=data)
+        self.render_page("system/register.html", data=data, meta_title=site_title)
 
     @handle_response
     @gen.coroutine
