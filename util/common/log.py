@@ -125,15 +125,15 @@ class MessageLogger(Logger):
 
     def warning(self, message):
         super(MessageLogger, self).warning(message)
-        self.impl.send_message("warn", message)
+        # self.impl.send_message("warn", message)
 
     def error(self, message):
         super(MessageLogger, self).error(message)
-        self.impl.send_message("error", message)
+        # self.impl.send_message("error", message)
         # error 及时报警
-        Alarm.biu(message)
-        Alarm.biu(traceback.format_exc())
+        # Alarm.biu(message)
+        # Alarm.biu(traceback.format_exc())
 
     def stats(self, message):
         super(MessageLogger, self).stats(message)
-        self.impl.send_message("stats", message)
+        # self.impl.send_message("stats", message)
