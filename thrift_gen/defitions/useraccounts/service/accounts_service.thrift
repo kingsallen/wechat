@@ -104,5 +104,5 @@ service UserCenterService {
     //查询用户的只为收藏记录
     list<useraccounts_struct.FavPositionForm> getFavPositions(1: i32 userId);
     //查询推荐记录
-    useraccounts_struct.RecommendationVO getRecommendations(1: i32 userId, 2:i8 type, 3: i32 pageNo, 4: i32 pageSize);
+    useraccounts_struct.RecommendationVO getRecommendation(1: i32 userId, 2:i8 type, 3: i32 pageNo, 4: i32 pageSize);
 }
