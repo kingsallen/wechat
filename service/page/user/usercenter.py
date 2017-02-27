@@ -10,6 +10,9 @@
 from tornado import gen
 
 from service.page.base import PageService
+from util.common import ObjectDict
+from util.tool.str_tool import gen_salary
+from util.tool.date_tool import jd_update_date
 
 from thrift_gen.gen.useraccounts.service.UserCenterService import Client as UserCenterServiceClient
 from service.data.infra.framework.client.client import ServiceClientFactory
@@ -90,14 +93,35 @@ class UsercenterPageService(PageService):
         """获得职位收藏"""
 
         ret = yield self.thrift_useraccounts_ds.get_fav_positions(user_id)
-        raise gen.Return(ret)
+        obj_list = list()
+        for e in ret:
+            fav_pos = ObjectDict()
+            fav_pos['id'] = e.id
+            fav_pos['title'] = e.title
+            fav_pos['time'] = e.time
+            fav_pos['department'] = e.department
+            fav_pos['city'] = e.city
+            fav_pos['salary'] = gen_salary(str(e.salary_top), str(e.salary_bottom))
+            fav_pos['update_time'] = jd_update_date(e.update_time)
+            fav_pos['states'] = "已过期" if e.status == 2 else ""
+            obj_list.append(fav_pos)
+        raise gen.Return(obj_list)
 
     @gen.coroutine
     def get_applied_applications(self, user_id):
         """获得求职记录"""
 
         ret = yield self.thrift_useraccounts_ds.get_applied_applications(user_id)
-        raise gen.Return(ret)
+        obj_list = list()
+        for e in ret:
+            app_rec = ObjectDict()
+            app_rec['id'] = e.id
+            app_rec['position_title'] = e.position_title
+            app_rec['company_name'] = e.company_name
+            app_rec['status_name'] = e.status_name
+            app_rec['time'] = e.time
+            obj_list.append(app_rec)
+        raise gen.Return(obj_list)
 
     @gen.coroutine
     def get_applied_progress(self, app_id, user_id):
@@ -108,4 +132,24 @@ class UsercenterPageService(PageService):
         :return:
         """
         ret = yield self.thrift_useraccounts_ds.get_applied_progress(app_id, user_id)
-        raise gen.Return(ret)
+        time_lines = list()
+        if ret.status_timeline:
+            for e in ret.status_timeline:
+                timeline = ObjectDict({
+                    "date": e.date,
+                    "event": e.event,
+                    "hide": e.hide,
+                    "step_status": e.step_status,
+                })
+                time_lines.append(timeline)
+
+        res = ObjectDict({
+            "pid": e.pid,
+            "position_title": e.position_title,
+            "company_name": e.company_name,
+            "step": e.step,
+            "step_status": e.step_status,
+            "status_timeline": time_lines,
+        })
+
+        raise gen.Return(res)
