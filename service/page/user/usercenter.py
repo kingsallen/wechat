@@ -12,7 +12,7 @@ from tornado import gen
 from service.page.base import PageService
 from util.common import ObjectDict
 from util.tool.str_tool import gen_salary
-from util.tool.date_tool import jd_update_date
+from util.tool.date_tool import jd_update_date, str_2_date
 
 from thrift_gen.gen.useraccounts.service.UserCenterService import Client as UserCenterServiceClient
 from service.data.infra.framework.client.client import ServiceClientFactory
@@ -102,7 +102,7 @@ class UsercenterPageService(PageService):
             fav_pos['department'] = e.department
             fav_pos['city'] = e.city
             fav_pos['salary'] = gen_salary(str(e.salary_top), str(e.salary_bottom))
-            fav_pos['update_time'] = jd_update_date(e.update_time)
+            fav_pos['update_time'] = jd_update_date(str_2_date(e.update_time, self.constant.TIME_FORMAT))
             fav_pos['states'] = "已过期" if e.status == 2 else ""
             obj_list.append(fav_pos)
         raise gen.Return(obj_list)
@@ -132,6 +132,7 @@ class UsercenterPageService(PageService):
         :return:
         """
         ret = yield self.thrift_useraccounts_ds.get_applied_progress(app_id, user_id)
+
         time_lines = list()
         if ret.status_timeline:
             for e in ret.status_timeline:
