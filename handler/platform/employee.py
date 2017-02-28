@@ -31,19 +31,19 @@ class AwardsHandler(BaseHandler):
             result = yield self.employee_ps.get_employee_rewards(
                 self.current_user.employee.id, self.current_user.company.id)
             rewards = result.rewards
-            reward_configs = result.reward_configs
+            reward_configs = result.rewardCofnigs
             total = result.total
         else:
             # 使用初始化数据
             pass
 
         # 构建输出数据格式
-        award_rules = []
+        res_award_rules = []
         for rc in reward_configs:
             e = ObjectDict()
             e.name = rc.statusName
             e.point = rc.points
-            award_rules.append(e)
+            res_award_rules.append(e)
 
         email_activation_state = OLD_YES if binded \
             else self.current_user.employee.activation
@@ -55,15 +55,13 @@ class AwardsHandler(BaseHandler):
             e.hptitle = rc.title
             e.title = rc.title
             e.create_time = rc.updateTime
-            e.points = rc.point
+            e.point = rc.points
             res_rewards.append(e)
         # 构建输出数据格式完成
 
-
-
         self.send_json_success(data={
-            'rewards': rewards,
-            'award_rules': award_rules,
+            'rewards': res_rewards,
+            'award_rules': res_award_rules,
             'point_total': total,
             'binded': binded,
             'email_activation_state': email_activation_state
@@ -97,6 +95,44 @@ class EmployeeUnbindHandler(BaseHandler):
 class EmployeeBindHandler(BaseHandler):
     """员工绑定 API
     /m/api/employee/bind"""
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        data = {
+            'type':            'email',
+            'binding_message': 'binding message ...',
+            'binding_status':  1,
+            'send_hour':       2,
+            'headimg':         'http://o8g4x4uja.bkt.clouddn.com/0.jpeg',
+            'employeeid':      23,
+            'name':            'name',
+            'mobile':          '15000234929',
+            'conf':            {
+                'custom_name':   'custom',
+                'custom_hint':   'custom hint',
+                'custom_value':  'user input value for custom',
+                ''
+                'email_suffixs': [
+                    'qq.com',
+                    'foxmail.com',
+                ],
+                'email_name':    'tovvry',
+                'email_suffix':  'qq.com',
+
+                # // 最多两个问题
+                'questions':     [
+                    {'q': "你的姓名是什么", 'a': 'b', id: 1},
+                    {'q': "你的弟弟的姓名是什么", 'a': 'a', id: 2},
+                ],
+                # // null, question, or email
+                'switch':        'email',
+            }
+        }
+
+        self.send_json_success(data=data)
+
 
     @handle_response
     @authenticated

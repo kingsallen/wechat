@@ -9,7 +9,7 @@ import conf.path as path
 import conf.wechat as wx
 from handler.base import BaseHandler
 from util.common import ObjectDict
-from util.common.decorator import handle_response, authenticated
+from util.common.decorator import handle_response, authenticated, check_employee
 from util.common.cipher import encode_id
 from util.tool.str_tool import gen_salary, add_item, split
 from util.tool.url_tool import make_url, url_append_query
@@ -640,8 +640,14 @@ class PositionListHandler(BaseHandler):
     """职位列表"""
 
     @handle_response
+    @check_employee
     @gen.coroutine
     def get(self):
+        # if self.params.recomlist and not self.current_user.employee:
+        #     del self.params.recomlist
+        #     self.redirect(make_url(path.EMPLOYEE_VERIFY, self.params))
+        #     return
+
         infra_params = self._make_position_list_infra_params()
         # todo check if hb_c is an integer (tangyiliang)
         # todo check if did is an integer if there is any (tangyiliang)

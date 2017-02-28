@@ -12,6 +12,7 @@ USER_LOGIN = '/m/login'
 USER_LOGOUT = '/m/logout'
 USER_CENTER_SETTING = 'm/usercenter/setting/home'
 MOBILE_VERIFY = '/m/app/phone/verify'
+EMPLOYEE_VERIFY = '/m/app/employee/binding'
 
 # 供侧边栏使用
 OLD_POSITION = '/mobile/position'

@@ -131,6 +131,27 @@ def check_signature(func):
                 yield func(self, *args, **kwargs)
     return wrapper
 
+
+def check_employee(func):
+    """前置判断当前用户是否是员工
+
+    如果是员工，这正常进入 handler 的对应方法，如果不是员工，跳转到认证员工页面
+    用于我要推荐
+    """
+    @functools.wraps(func)
+    @gen.coroutine
+    def wrapper(self, *args, **kwargs):
+        if self.params.recomlist and not self.current_user.employee:
+            # 如果从我要推荐点进来，但当前用户不是员工
+            # 跳转到员工绑定页面
+            self.redirect(make_url(path.EMPLOYEE_VERIFY, self.params))
+            return
+        else:
+            yield func(self, *args, **kwargs)
+
+    return wrapper
+
+
 def check_sub_company(func):
     """
     Check request sub_company data or not.

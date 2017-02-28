@@ -57,7 +57,6 @@ platform_routes = [
     # position
     (r"/m/position/([0-9]+)",                          "handler.platform.position.PositionHandler",                 {"event": "position_info"}),
     (r"/m/position",                                   "handler.platform.position.PositionListHandler",             {"event": "position_list"}),
-
     (r"/m/start",                                      "handler.platform.landing.LandingHandler",                   {"event": "start_landing"}),
     (r"/m/company/(\d+)",                              "handler.platform.companyrelation.CompanyInfoHandler",       {"event": "company_old_info"}),
     (r"/m/company",                                    "handler.platform.companyrelation.CompanyHandler",           {"event": "company_info"}),
