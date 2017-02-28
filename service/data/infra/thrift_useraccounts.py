@@ -32,7 +32,7 @@ class ThriftUseraccountsDataService(DataService):
         self.logger.debug("[thrift]get_recommend_records type: {}".format(type(req_type)))
         self.logger.debug("[thrift]get_recommend_records page_no: {}".format(type(page_no)))
         self.logger.debug("[thrift]get_recommend_records page_size: {}".format(type(page_size)))
-        ret = yield self.usercenter_service_cilent.getRecommendations(user_id, req_type, page_no, page_size)
+        ret = yield self.usercenter_service_cilent.getRecommendation(user_id, req_type, page_no, page_size)
         self.logger.debug("[thrift]get_recommend_records: %s" % ret)
         raise gen.Return(ret)
 

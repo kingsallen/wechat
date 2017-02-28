@@ -1,6 +1,8 @@
 # coding=utf-8
 
 from tornado import gen
+import conf.common as const
+from util.common import ObjectDict
 from service.page.base import PageService
 
 class EmployeePageService(PageService):
@@ -37,4 +39,34 @@ class EmployeePageService(PageService):
         :return:
         """
         ret = yield self.thrift_useraccounts_ds.get_recommend_records(int(user_id), int(req_type), int(page_no), int(page_size))
-        raise gen.Return(ret)
+
+        score = ObjectDict()
+        if ret.score:
+            score = ObjectDict({
+                "link_viewed_count": ret.score.link_viewed_count,
+                "interested_count": ret.score.interested_count,
+                "applied_count": ret.score.applied_count
+            })
+        recommends = list()
+        if ret.recommends:
+            for e in ret.recommends:
+                recom = ObjectDict({
+                    "status": e.status,
+                    "headimgurl": self.static_url(e.headimgurl or const.SYSUSER_HEADIMG),
+                    "is_interested": e.is_interested,
+                    "applier_name": e.applier_name,
+                    "applier_rel": "", # TODO
+                    "view_number": e.view_number,
+                    "position": e.position,
+                    "click_time": e.click_time,
+                    "recom_status": e.recom_status
+                })
+                recommends.append(recom)
+
+        res = ObjectDict({
+            "has_recommends": ret.hasRecommends if ret.hasRecommends else False,
+            "score": score,
+            "recommends": recommends
+        })
+
+        raise gen.Return(res)
