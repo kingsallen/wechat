@@ -645,8 +645,12 @@ class PositionListHandler(BaseHandler):
     def get(self):
 
         infra_params = self._make_position_list_infra_params()
-        # todo check if hb_c is an integer (tangyiliang)
-        # todo check if did is an integer if there is any (tangyiliang)
+
+        if self.params.hb_c:
+            int(self.params.hb_c)
+
+        if self.params.did:
+            int(self.params.did)
 
         if self.params.hb_c:
             # 红包职位列表
@@ -662,17 +666,21 @@ class PositionListHandler(BaseHandler):
             # 普通职位列表
             position_list = yield self.position_ps.infra_get_position_list(
                 infra_params)
-            rpext_list = yield self.position_ps.infra_get_position_list_rp_ext(
-                [position for position in position_list if position.in_hb])
+            # 获取获取到普通职位列表，则根据获取的数据查找其中红包职位的红包相关信息
+            if position_list:
+                rpext_list = yield (
+                    self.position_ps.infra_get_position_list_rp_ext(
+                        [position for position in position_list
+                         if position.in_hb]))
 
-            for position in position_list:
-                pext = [e for e in rpext_list if e.pid == position.id]
-                if pext:
-                    position.is_rp_reward = True
-                    position.remain = pext[0].remain
-                    position.employee_only = pext[0].employee_only
-                else:
-                    position.is_rp_reward = False
+                for position in position_list:
+                    pext = [e for e in rpext_list if e.pid == position.id]
+                    if pext:
+                        position.is_rp_reward = True
+                        position.remain = pext[0].remain
+                        position.employee_only = pext[0].employee_only
+                    else:
+                        position.is_rp_reward = False
 
             yield self._make_share_info(
                 self.current_user.company.id, self.params.did)
@@ -681,31 +689,29 @@ class PositionListHandler(BaseHandler):
         yield self.make_company_info()
 
         # 如果是下拉刷新请求的职位, 返回新增职位的页面
-        if self.params.get("restype", "") == "json":
+        if self.params.restype == "json":
             self.render(
-                template_name="refer/neo_weixin/position_v2/position_list_items.html",
-                positions=position_list,
-                is_employee=bool(self.current_user.employee),
-                # TODO (tangyiliang) always be 1 becuase it's neo wx now!  To
-                # edit template.
-                use_neowx=1
+            template_name="refer/neo_weixin/position_v2/position_list_items.html",
+            positions=position_list,
+            is_employee=bool(self.current_user.employee),
+            # TODO (tangyiliang) always be 1 becuase it's neo wx now!  To edit template.
+            use_neowx=int(self.current_user.wechat.show_new_jd)
             )
             return
 
         # 直接请求页面返回
         else:
             self.render(
-                template_name="refer/neo_weixin/position_v2/position_list.html",
-                positions=position_list,
-                position_title=const_platorm.POSITION_LIST_TITLE.get(
-                    self.params.m,
-                    const_platorm.POSITION_LIST_TITLE_DEFAULT),
-                url='',
-                use_neowx=1,
-                # TODO (tangyiliang) always be 1 becuase it's neo wx now!  To
-                # edit template.
-                is_employee=bool(self.current_user.employee),
-                searchFilterNum=self.get_search_filter_num()
+            template_name="refer/neo_weixin/position_v2/position_list.html",
+            positions=position_list,
+            position_title=const_platorm.POSITION_LIST_TITLE.get(
+                self.params.m,
+                const_platorm.POSITION_LIST_TITLE_DEFAULT),
+            url='',
+            use_neowx=int(self.current_user.wechat.show_new_jd),
+            # TODO (tangyiliang) always be 1 becuase it's neo wx now!  To edit template.
+            is_employee=bool(self.current_user.employee),
+            searchFilterNum=self.get_search_filter_num()
             )
 
     @gen.coroutine

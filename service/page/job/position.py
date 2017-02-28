@@ -4,15 +4,16 @@
 
 import json
 from datetime import datetime
+
 from tornado import gen
 
 from service.page.base import PageService
-import conf.common as const
 from util.common import ObjectDict
 from util.common.cipher import encode_id
-from util.tool.date_tool import jd_update_date
+from util.tool.date_tool import jd_update_date, str_2_date
 from util.tool.str_tool import gen_salary, split
 from util.tool.temp_data_tool import make_mate, make_team, template3
+
 
 class PositionPageService(PageService):
 
@@ -283,8 +284,9 @@ class PositionPageService(PageService):
             for position in position_list:
                 position.salary = gen_salary(
                     position.salary_top, position.salary_bottom)
-                position.publish_date = jd_update_date(datetime.strptime(
-                    position.publish_date, '%Y-%m-%d %H:%M:%S'))
+                position.publish_date = jd_update_date(
+                    str_2_date(position.publish_date,
+                               self.constant.TIME_FORMAT))
 
             raise gen.Return(position_list)
         raise gen.Return(res)
