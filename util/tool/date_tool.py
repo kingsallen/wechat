@@ -60,7 +60,7 @@ def str_2_date(str_time, format):
     """
     res_date_time = str_time
     try:
-        res_date_time = datetime.srtptime(str_time, format)
+        res_date_time = datetime.strptime(str_time, format)
     except ValueError:
         pass
     finally:
