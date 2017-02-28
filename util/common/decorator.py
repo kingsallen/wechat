@@ -144,6 +144,7 @@ def check_employee(func):
         if self.params.recomlist and not self.current_user.employee:
             # 如果从我要推荐点进来，但当前用户不是员工
             # 跳转到员工绑定页面
+            del self.params.recomlist
             self.redirect(make_url(path.EMPLOYEE_VERIFY, self.params))
             return
         else:

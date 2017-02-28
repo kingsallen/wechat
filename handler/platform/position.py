@@ -643,10 +643,6 @@ class PositionListHandler(BaseHandler):
     @check_employee
     @gen.coroutine
     def get(self):
-        # if self.params.recomlist and not self.current_user.employee:
-        #     del self.params.recomlist
-        #     self.redirect(make_url(path.EMPLOYEE_VERIFY, self.params))
-        #     return
 
         infra_params = self._make_position_list_infra_params()
         # todo check if hb_c is an integer (tangyiliang)
