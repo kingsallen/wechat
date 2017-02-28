@@ -55,7 +55,7 @@ class EmployeePageService(PageService):
                     "headimgurl": self.static_url(e.headimgurl or const.SYSUSER_HEADIMG),
                     "is_interested": e.is_interested,
                     "applier_name": e.applier_name,
-                    "applier_rel": "", # TODO
+                    "applier_rel": e.applier_rel,
                     "view_number": e.view_number,
                     "position": e.position,
                     "click_time": e.click_time,
