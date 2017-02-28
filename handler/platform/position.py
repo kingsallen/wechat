@@ -694,7 +694,6 @@ class PositionListHandler(BaseHandler):
             template_name="refer/neo_weixin/position_v2/position_list_items.html",
             positions=position_list,
             is_employee=bool(self.current_user.employee),
-            # TODO (tangyiliang) always be 1 becuase it's neo wx now!  To edit template.
             use_neowx=int(self.current_user.wechat.show_new_jd)
             )
             return
@@ -709,7 +708,6 @@ class PositionListHandler(BaseHandler):
                 const_platorm.POSITION_LIST_TITLE_DEFAULT),
             url='',
             use_neowx=int(self.current_user.wechat.show_new_jd),
-            # TODO (tangyiliang) always be 1 becuase it's neo wx now!  To edit template.
             is_employee=bool(self.current_user.employee),
             searchFilterNum=self.get_search_filter_num()
             )
