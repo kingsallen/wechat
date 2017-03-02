@@ -666,12 +666,14 @@ class PositionListHandler(BaseHandler):
             # 普通职位列表
             position_list = yield self.position_ps.infra_get_position_list(
                 infra_params)
+
             # 获取获取到普通职位列表，则根据获取的数据查找其中红包职位的红包相关信息
-            if position_list:
-                rpext_list = yield (
-                    self.position_ps.infra_get_position_list_rp_ext(
-                        [position for position in position_list
-                         if position.in_hb]))
+            rp_position_list = [position for position in position_list
+                                if position.in_hb]
+
+            if position_list and rp_position_list:
+                rpext_list = yield self.position_ps.infra_get_position_list_rp_ext(
+                    rp_position_list)
 
                 for position in position_list:
                     pext = [e for e in rpext_list if e.pid == position.id]
