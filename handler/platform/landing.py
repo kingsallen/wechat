@@ -4,9 +4,11 @@
 
 from tornado import gen
 
+import conf.path as path
 from handler.base import BaseHandler
 from util.common import ObjectDict
 from util.common.decorator import handle_response
+from util.tool.url_tool import make_url
 
 
 class LandingHandler(BaseHandler):
@@ -47,5 +49,32 @@ class LandingHandler(BaseHandler):
             "search_seq": search_seq
         })
 
+        self.logger.debug("[JD]构建转发信息")
+        yield self._make_share_info(self.current_user.company)
+
         self.render(template_name="company/search.html", company=company)
+
+    @gen.coroutine
+    def _make_share_info(self, company_info):
+        """构建 share 内容"""
+
+        cover = self.static_url(company_info.logo)
+        title = "{}高级搜索".format(company_info.abbreviation)
+        description = ""
+
+        link = make_url(
+            path.SEARCH_FILITER,
+            self.params,
+            host=self.request.host,
+            protocol=self.request.protocol,
+            recom=self._make_recom(),
+            escape=["pid"]
+        )
+
+        self.params.share = ObjectDict({
+            "cover": cover,
+            "title": title,
+            "description": description,
+            "link": link
+        })
 

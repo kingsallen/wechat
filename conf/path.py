@@ -7,6 +7,7 @@ POSITION_PATH = "/m/position/{}"
 RED_PACKET_CARD = "/mobile/redpack"
 TEAM_PATH = "/m/company/team/{}"
 COMPANY_TEAM = "/m/company/team"
+SEARCH_FILITER = "m/start"
 OLD_POSITION_PATH = "/mobile/position"
 
 # ============================ 基础服务开始 ============================
