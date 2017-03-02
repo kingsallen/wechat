@@ -9,6 +9,7 @@ from handler.base import BaseHandler
 from util.common import ObjectDict
 from util.common.decorator import handle_response
 from util.tool.url_tool import make_url
+from util.common.cipher import encode_id
 
 
 class LandingHandler(BaseHandler):
@@ -77,4 +78,9 @@ class LandingHandler(BaseHandler):
             "description": description,
             "link": link
         })
+
+    def _make_recom(self):
+        """用于微信分享和职位推荐时，传出的 recom 参数"""
+
+        return encode_id(self.current_user.sysuser.id)
 
