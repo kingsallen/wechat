@@ -101,7 +101,7 @@ class UsercenterPageService(PageService):
             fav_pos['time'] = e.time
             fav_pos['department'] = e.department
             fav_pos['city'] = e.city
-            fav_pos['salary'] = gen_salary(str(e.salary_top), str(e.salary_bottom))
+            fav_pos['salary'] = gen_salary(e.salary_top, e.salary_bottom)
             fav_pos['update_time'] = jd_update_date(str_2_date(e.update_time, self.constant.TIME_FORMAT))
             fav_pos['states'] = "已过期" if e.status == 2 else ""
             obj_list.append(fav_pos)

@@ -197,4 +197,5 @@ if __name__ == '__main__':
 
     # print (mobile_validate(13656789068))
     print (password_crypt("123456"))
+    print (gen_salary(0,0))
 
