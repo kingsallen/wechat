@@ -145,11 +145,11 @@ class UsercenterPageService(PageService):
                 time_lines.append(timeline)
 
         res = ObjectDict({
-            "pid": e.pid,
-            "position_title": e.position_title,
+            "pid": ret.pid,
+            "position_title": ret.position_title,
             "company_name": e.company_name,
-            "step": e.step,
-            "step_status": e.step_status,
+            "step": ret.step,
+            "step_status": ret.step_status,
             "status_timeline": time_lines,
         })
 
