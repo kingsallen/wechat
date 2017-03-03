@@ -5,7 +5,6 @@ from tornado import gen
 from handler.base import BaseHandler
 from util.common.decorator import handle_response, authenticated
 
-
 class PositionStarHandler(BaseHandler):
     """处理收藏（加星）操作"""
 

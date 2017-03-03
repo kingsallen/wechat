@@ -6,8 +6,7 @@ from handler.base import BaseHandler
 import conf.common as const
 import conf.message as msg
 from util.common.decorator import handle_response, verified_mobile_oneself, authenticated
-from util.tool.str_tool import gen_salary, email_validate, is_alphabet, is_chinese, password_crypt
-from util.tool.date_tool import jd_update_date, curr_now
+from util.tool.str_tool import email_validate, is_alphabet, is_chinese, password_crypt, password_validate
 from util.image.upload import QiniuUpload
 from util.common import ObjectDict
 
@@ -111,6 +110,10 @@ class UsercenterHandler(BaseHandler):
         try:
             self.guarantee('password')
         except:
+            raise gen.Return()
+
+        if not password_validate(self.params.password):
+            self.send_json_error(message=msg.CELLPHONE_PASSWORD_ERROR)
             raise gen.Return()
 
         res = yield self.usercenter_ps.post_resetpassword(self.current_user.sysuser.username,

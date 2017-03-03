@@ -152,6 +152,20 @@ def mobile_validate(mobile):
     p = re.compile(r'(?:1)\d{10}$')
     return p.match(mobile) is not None
 
+def password_validate(password):
+    """
+    密码验证，必须为大于等于6位的数字和字母组合
+    :param password:
+    :return:
+    """
+    if len(password) >= 6 \
+        and re.findall("[a-zA-Z]+", password) \
+        and re.findall("[0-9]+", password):
+        return True
+    else:
+        return False
+
+
 def is_chinese(uchar):
     """判断一个unicode是否是汉字"""
     if '\u4e00' <= uchar <= '\u9fff':
@@ -196,6 +210,6 @@ if __name__ == '__main__':
     # print (to_str("j dfd"))
 
     # print (mobile_validate(13656789068))
-    print (password_crypt("123456"))
-    print (gen_salary(0,0))
-
+    # print (password_crypt("123456"))
+    # print (gen_salary(0,0))
+    print (password_validate("fhj1k"))

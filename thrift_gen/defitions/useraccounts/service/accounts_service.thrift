@@ -86,6 +86,16 @@ service UserHrAccountService {
     common_struct.Response putResource(1: useraccounts_struct.UserHrAccount userHrAccount);
     //绑定第三方帐号
     common_struct.Response bind(1: useraccounts_struct.BindAccountStruct account);
+    // 获取常用筛选项
+    common_struct.Response getSearchCondition(1: i32 hrAccountId, 2: i32 type);
+    // 保存常用筛选项
+    common_struct.Response postSearchCondition(1: useraccounts_struct.SearchCondition searchCondition)
+    // 删除常用筛选项
+    common_struct.Response delSearchCondition(1: i32 hrAccountId, 2: i32 id);
+    // 加入人才库
+    common_struct.Response joinTalentpool(1: i32 hrAccountId, 2: list<i32> applierIds)
+    // 移出人才库
+    common_struct.Response shiftOutTalentpool(1: i32 hrAccountId, 2: list<i32> applierIds)
 }
 
 /**

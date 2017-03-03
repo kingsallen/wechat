@@ -7,7 +7,7 @@ POSITION_LIST = '/m/position'
 RED_PACKET_CARD = '/mobile/redpack'
 TEAM_PATH = '/m/company/team/{}'
 COMPANY_TEAM = '/m/company/team'
-USER_CENTER = '/m/usercenter'
+USER_CENTER = '/m/app/usercenter'
 USER_LOGIN = '/m/login'
 USER_LOGOUT = '/m/logout'
 USER_CENTER_SETTING = 'm/usercenter/setting/home'
@@ -19,7 +19,6 @@ OLD_POSITION = '/mobile/position'
 OLD_PROFILE = '/mobile/profile'
 OLD_CHAT = '/mobile/chatroom'
 OLD_SYSUSER = '/mobile/sysuser'
-
 
 # ============================ 基础服务开始 ============================
 # 用户服务

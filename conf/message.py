@@ -21,6 +21,7 @@ CELLPHONE_MOBILE_SET_PASSWD_FAILED = "设置密码无效，请重新验证手机
 CELLPHONE_REGISTER_PASSWD_NOT_MATCH = "两次输入密码不一致，请重新设置"
 CELLPHONE_REGISTER_FAILED = "用户注册失败"
 CELLPHONE_RESET_PASSWORD = "设置密码失败，请重试"
+CELLPHONE_PASSWORD_ERROR = "密码要求为至少六位以上的数字与字母组合"
 CELLPHONE_NOT_MATCH = "输入的手机号与原绑定手机号不一致"
 
 DATABASE_ERROR = "数据库操作失败"
