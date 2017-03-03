@@ -125,9 +125,17 @@ class PositionHandler(BaseHandler):
                     "module_hr_register",
                     module_hr_register_old)
 
-                # TODO 定制插入
+                # 定制化 start
                 # 诺华定制
+                suppress_apply = yield self.customize_ps.get_suppress_apply(position_info)
                 # 代理投递
+                delegate_drop = yield self.customize_ps.get_delegate_drop(self.current_user.wechat,
+                                                                          self.current_user.employee,
+                                                                          self.params)
+                add_item(position_data, "suppress_apply", suppress_apply)
+                add_item(position_data, "delegate_drop", delegate_drop)
+                # 定制化 end
+
                 self.render_page(
                     "position/info_old.html",
                     data=position_data,

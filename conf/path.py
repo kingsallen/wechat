@@ -14,6 +14,7 @@ USER_CENTER_SETTING = 'm/usercenter/setting/home'
 MOBILE_VERIFY = '/m/app/phone/verify'
 EMPLOYEE_VERIFY = '/m/app/employee/binding'
 SEARCH_FILITER = '/m/start'
+CUSTOMIZE_EDX = '/m/custom/edx'
 
 # 供侧边栏使用
 OLD_POSITION = '/mobile/position'

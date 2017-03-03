@@ -1,8 +1,10 @@
 # coding=utf-8
 
 from tornado import gen
+import conf.path as path
 from service.page.base import PageService
 from util.common import ObjectDict
+from util.tool.url_tool import make_url
 
 class CustomPageService(PageService):
 
@@ -40,9 +42,40 @@ class CustomPageService(PageService):
             "suppress_apply_data": suppress_apply_data
         })
 
+    def _is_edx_wechat(self, current_wechat, current_employee):
+        """
+        判断是否为代理投递目标用户
+        :param current_wechat:
+        :param current_employee:
+        :return:
+        """
+        if (current_wechat.company_id in self._AGENT_APPLY_CIDS and current_employee.id):
+            return True
+        return False
+
     @gen.coroutine
-    def get_delegate_drop(self, handler):
-        return {
-            'is_delegate_drop':  self.is_edx_wechat(handler),
-            'delegate_drop_url':  make_url("/mobile/custom/edx", handler.params, m='recom_friend')
+    def get_delegate_drop(self, current_wechat, current_employee, params):
+        return ObjectDict({
+            'is_delegate_drop':  self._is_edx_wechat(current_wechat, current_employee),
+            'delegate_drop_url': make_url(path.CUSTOMIZE_EDX, params, recom_friend=1)
+        })
+
+    @gen.coroutine
+    def create_campaign_email_agentdelivery(self, params):
+        """
+        创建 Email 代理投递记录
+        :param params:
+        {
+            "company_id": "",
+            "position_id": "",
+            "employee_id": "",
+            "friendname": "",
+            "email": "",
+            "code": "",
         }
+        :return:
+        """
+
+        res = yield self.create_campaign_email_agentdelivery(params)
+        raise gen.Return(res)
+

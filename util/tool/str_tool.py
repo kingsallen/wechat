@@ -6,6 +6,7 @@ import re
 import random
 import string
 import hashlib
+import uuid
 
 def password_crypt(password):
     """
@@ -193,6 +194,17 @@ def is_other(uchar):
         return True
     else:
         return False
+
+def get_uucode(lenth=36):
+    """
+    生成 uuid
+    :param lenth:
+    :return:
+    """
+
+    assert isinstance(lenth, int) and lenth <= 72, 'uucode is too long.'
+    return str(uuid.uuid1())[0:lenth] if lenth < 36 else \
+        (str(uuid.uuid1()) + str(uuid.uuid4()))[0:lenth]
 
 
 if __name__ == '__main__':

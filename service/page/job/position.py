@@ -158,6 +158,15 @@ class PositionPageService(PageService):
         raise gen.Return((hr_account, hr_wx_user))
 
     @gen.coroutine
+    def get_hr_info_by_wxuser_id(self, wxuser_id):
+        """获取 hr 信息"""
+        hr_account = yield self.user_hr_account_ds.get_hr_account({
+            "wxuser_id": wxuser_id
+        })
+
+        raise gen.Return(hr_account)
+
+    @gen.coroutine
     def __get_share_conf(self, conf_id):
         """获取职位自定义分享模板"""
         ret = yield self.job_position_share_tpl_conf_ds.get_share_conf({

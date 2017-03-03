@@ -15,7 +15,7 @@ from util.common import ObjectDict
 
 class HrWxRuleDataService(DataService):
 
-    @cache(ttl=60)
+    # @cache(ttl=60)
     @gen.coroutine
     def get_wx_rule(self, conds, fields=None):
 
@@ -32,7 +32,7 @@ class HrWxRuleDataService(DataService):
         response = yield self.hr_wx_rule_dao.get_record_by_conds(conds, fields)
         raise gen.Return(response)
 
-    @cache(ttl=60)
+    # @cache(ttl=60)
     @gen.coroutine
     def get_wx_rules(self, conds, fields=None, options=None, appends=None, index='', params=None):
 

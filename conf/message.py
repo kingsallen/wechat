@@ -23,6 +23,7 @@ CELLPHONE_REGISTER_FAILED = "用户注册失败"
 CELLPHONE_RESET_PASSWORD = "设置密码失败，请重试"
 CELLPHONE_PASSWORD_ERROR = "密码要求为至少六位以上的数字与字母组合"
 CELLPHONE_NOT_MATCH = "输入的手机号与原绑定手机号不一致"
+CELLPHONE_NAME_EMAIL = "姓名或者邮箱格式错误"
 
 DATABASE_ERROR = "数据库操作失败"
 
