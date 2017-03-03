@@ -147,7 +147,7 @@ class UsercenterPageService(PageService):
         res = ObjectDict({
             "pid": ret.pid,
             "position_title": ret.position_title,
-            "company_name": e.company_name,
+            "company_name": ret.company_name,
             "step": ret.step,
             "step_status": ret.step_status,
             "status_timeline": time_lines,
