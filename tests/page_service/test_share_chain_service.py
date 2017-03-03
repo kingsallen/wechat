@@ -15,7 +15,7 @@ class TestShareChainService(AsyncTestCase):
     def setUp(self):
         super().setUp()
         self.logger = Logger()
-        self.service_to_test = SharechainPageService(self.logger)
+        self.service_to_test = SharechainPageService()
 
         self.future_false = Future()
         self.future_false.set_result(False)
