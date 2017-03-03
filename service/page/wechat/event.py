@@ -116,7 +116,7 @@ class EventPageService(PageService):
 
         if wechat.third_oauth == 1:
             # 第三方授权方式
-            news_info = self._encryMsg(news_info, nonce)
+            news_info = self.__encryMsg(news_info, nonce)
 
         raise gen.Return(news_info)
 

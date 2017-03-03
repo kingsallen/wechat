@@ -52,6 +52,45 @@ class Iface(object):
         """
         pass
 
+    def getSearchCondition(self, hrAccountId, type):
+        """
+        Parameters:
+         - hrAccountId
+         - type
+        """
+        pass
+
+    def postSearchCondition(self, searchCondition):
+        """
+        Parameters:
+         - searchCondition
+        """
+        pass
+
+    def delSearchCondition(self, hrAccountId, id):
+        """
+        Parameters:
+         - hrAccountId
+         - id
+        """
+        pass
+
+    def joinTalentpool(self, hrAccountId, applierIds):
+        """
+        Parameters:
+         - hrAccountId
+         - applierIds
+        """
+        pass
+
+    def shiftOutTalentpool(self, hrAccountId, applierIds):
+        """
+        Parameters:
+         - hrAccountId
+         - applierIds
+        """
+        pass
+
 
 class Client(Iface):
     """
@@ -224,6 +263,174 @@ class Client(Iface):
             return result.success
         raise TApplicationException(TApplicationException.MISSING_RESULT, "bind failed: unknown result")
 
+    def getSearchCondition(self, hrAccountId, type):
+        """
+        Parameters:
+         - hrAccountId
+         - type
+        """
+        self._seqid += 1
+        future = self._reqs[self._seqid] = concurrent.Future()
+        self.send_getSearchCondition(hrAccountId, type)
+        return future
+
+    def send_getSearchCondition(self, hrAccountId, type):
+        oprot = self._oprot_factory.getProtocol(self._transport)
+        oprot.writeMessageBegin('getSearchCondition', TMessageType.CALL, self._seqid)
+        args = getSearchCondition_args()
+        args.hrAccountId = hrAccountId
+        args.type = type
+        args.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def recv_getSearchCondition(self, iprot, mtype, rseqid):
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = getSearchCondition_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "getSearchCondition failed: unknown result")
+
+    def postSearchCondition(self, searchCondition):
+        """
+        Parameters:
+         - searchCondition
+        """
+        self._seqid += 1
+        future = self._reqs[self._seqid] = concurrent.Future()
+        self.send_postSearchCondition(searchCondition)
+        return future
+
+    def send_postSearchCondition(self, searchCondition):
+        oprot = self._oprot_factory.getProtocol(self._transport)
+        oprot.writeMessageBegin('postSearchCondition', TMessageType.CALL, self._seqid)
+        args = postSearchCondition_args()
+        args.searchCondition = searchCondition
+        args.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def recv_postSearchCondition(self, iprot, mtype, rseqid):
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = postSearchCondition_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "postSearchCondition failed: unknown result")
+
+    def delSearchCondition(self, hrAccountId, id):
+        """
+        Parameters:
+         - hrAccountId
+         - id
+        """
+        self._seqid += 1
+        future = self._reqs[self._seqid] = concurrent.Future()
+        self.send_delSearchCondition(hrAccountId, id)
+        return future
+
+    def send_delSearchCondition(self, hrAccountId, id):
+        oprot = self._oprot_factory.getProtocol(self._transport)
+        oprot.writeMessageBegin('delSearchCondition', TMessageType.CALL, self._seqid)
+        args = delSearchCondition_args()
+        args.hrAccountId = hrAccountId
+        args.id = id
+        args.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def recv_delSearchCondition(self, iprot, mtype, rseqid):
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = delSearchCondition_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "delSearchCondition failed: unknown result")
+
+    def joinTalentpool(self, hrAccountId, applierIds):
+        """
+        Parameters:
+         - hrAccountId
+         - applierIds
+        """
+        self._seqid += 1
+        future = self._reqs[self._seqid] = concurrent.Future()
+        self.send_joinTalentpool(hrAccountId, applierIds)
+        return future
+
+    def send_joinTalentpool(self, hrAccountId, applierIds):
+        oprot = self._oprot_factory.getProtocol(self._transport)
+        oprot.writeMessageBegin('joinTalentpool', TMessageType.CALL, self._seqid)
+        args = joinTalentpool_args()
+        args.hrAccountId = hrAccountId
+        args.applierIds = applierIds
+        args.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def recv_joinTalentpool(self, iprot, mtype, rseqid):
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = joinTalentpool_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "joinTalentpool failed: unknown result")
+
+    def shiftOutTalentpool(self, hrAccountId, applierIds):
+        """
+        Parameters:
+         - hrAccountId
+         - applierIds
+        """
+        self._seqid += 1
+        future = self._reqs[self._seqid] = concurrent.Future()
+        self.send_shiftOutTalentpool(hrAccountId, applierIds)
+        return future
+
+    def send_shiftOutTalentpool(self, hrAccountId, applierIds):
+        oprot = self._oprot_factory.getProtocol(self._transport)
+        oprot.writeMessageBegin('shiftOutTalentpool', TMessageType.CALL, self._seqid)
+        args = shiftOutTalentpool_args()
+        args.hrAccountId = hrAccountId
+        args.applierIds = applierIds
+        args.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def recv_shiftOutTalentpool(self, iprot, mtype, rseqid):
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = shiftOutTalentpool_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "shiftOutTalentpool failed: unknown result")
+
 
 class Processor(Iface, TProcessor):
     def __init__(self, handler):
@@ -233,6 +440,11 @@ class Processor(Iface, TProcessor):
         self._processMap["postResource"] = Processor.process_postResource
         self._processMap["putResource"] = Processor.process_putResource
         self._processMap["bind"] = Processor.process_bind
+        self._processMap["getSearchCondition"] = Processor.process_getSearchCondition
+        self._processMap["postSearchCondition"] = Processor.process_postSearchCondition
+        self._processMap["delSearchCondition"] = Processor.process_delSearchCondition
+        self._processMap["joinTalentpool"] = Processor.process_joinTalentpool
+        self._processMap["shiftOutTalentpool"] = Processor.process_shiftOutTalentpool
 
     def process(self, iprot, oprot):
         (name, type, seqid) = iprot.readMessageBegin()
@@ -292,6 +504,66 @@ class Processor(Iface, TProcessor):
         result = bind_result()
         result.success = yield gen.maybe_future(self._handler.bind(args.account))
         oprot.writeMessageBegin("bind", TMessageType.REPLY, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    @gen.coroutine
+    def process_getSearchCondition(self, seqid, iprot, oprot):
+        args = getSearchCondition_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = getSearchCondition_result()
+        result.success = yield gen.maybe_future(self._handler.getSearchCondition(args.hrAccountId, args.type))
+        oprot.writeMessageBegin("getSearchCondition", TMessageType.REPLY, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    @gen.coroutine
+    def process_postSearchCondition(self, seqid, iprot, oprot):
+        args = postSearchCondition_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = postSearchCondition_result()
+        result.success = yield gen.maybe_future(self._handler.postSearchCondition(args.searchCondition))
+        oprot.writeMessageBegin("postSearchCondition", TMessageType.REPLY, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    @gen.coroutine
+    def process_delSearchCondition(self, seqid, iprot, oprot):
+        args = delSearchCondition_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = delSearchCondition_result()
+        result.success = yield gen.maybe_future(self._handler.delSearchCondition(args.hrAccountId, args.id))
+        oprot.writeMessageBegin("delSearchCondition", TMessageType.REPLY, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    @gen.coroutine
+    def process_joinTalentpool(self, seqid, iprot, oprot):
+        args = joinTalentpool_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = joinTalentpool_result()
+        result.success = yield gen.maybe_future(self._handler.joinTalentpool(args.hrAccountId, args.applierIds))
+        oprot.writeMessageBegin("joinTalentpool", TMessageType.REPLY, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    @gen.coroutine
+    def process_shiftOutTalentpool(self, seqid, iprot, oprot):
+        args = shiftOutTalentpool_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = shiftOutTalentpool_result()
+        result.success = yield gen.maybe_future(self._handler.shiftOutTalentpool(args.hrAccountId, args.applierIds))
+        oprot.writeMessageBegin("shiftOutTalentpool", TMessageType.REPLY, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -784,6 +1056,671 @@ class bind_result(object):
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
         oprot.writeStructBegin('bind_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.STRUCT, 0)
+            self.success.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class getSearchCondition_args(object):
+    """
+    Attributes:
+     - hrAccountId
+     - type
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'hrAccountId', None, None, ),  # 1
+        (2, TType.I32, 'type', None, None, ),  # 2
+    )
+
+    def __init__(self, hrAccountId=None, type=None,):
+        self.hrAccountId = hrAccountId
+        self.type = type
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.hrAccountId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.I32:
+                    self.type = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('getSearchCondition_args')
+        if self.hrAccountId is not None:
+            oprot.writeFieldBegin('hrAccountId', TType.I32, 1)
+            oprot.writeI32(self.hrAccountId)
+            oprot.writeFieldEnd()
+        if self.type is not None:
+            oprot.writeFieldBegin('type', TType.I32, 2)
+            oprot.writeI32(self.type)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class getSearchCondition_result(object):
+    """
+    Attributes:
+     - success
+    """
+
+    thrift_spec = (
+        (0, TType.STRUCT, 'success', (thrift_gen.gen.common.struct.ttypes.Response, thrift_gen.gen.common.struct.ttypes.Response.thrift_spec), None, ),  # 0
+    )
+
+    def __init__(self, success=None,):
+        self.success = success
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRUCT:
+                    self.success = thrift_gen.gen.common.struct.ttypes.Response()
+                    self.success.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('getSearchCondition_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.STRUCT, 0)
+            self.success.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class postSearchCondition_args(object):
+    """
+    Attributes:
+     - searchCondition
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.STRUCT, 'searchCondition', (thrift_gen.gen.useraccounts.struct.ttypes.SearchCondition, thrift_gen.gen.useraccounts.struct.ttypes.SearchCondition.thrift_spec), None, ),  # 1
+    )
+
+    def __init__(self, searchCondition=None,):
+        self.searchCondition = searchCondition
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.searchCondition = thrift_gen.gen.useraccounts.struct.ttypes.SearchCondition()
+                    self.searchCondition.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('postSearchCondition_args')
+        if self.searchCondition is not None:
+            oprot.writeFieldBegin('searchCondition', TType.STRUCT, 1)
+            self.searchCondition.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class postSearchCondition_result(object):
+    """
+    Attributes:
+     - success
+    """
+
+    thrift_spec = (
+        (0, TType.STRUCT, 'success', (thrift_gen.gen.common.struct.ttypes.Response, thrift_gen.gen.common.struct.ttypes.Response.thrift_spec), None, ),  # 0
+    )
+
+    def __init__(self, success=None,):
+        self.success = success
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRUCT:
+                    self.success = thrift_gen.gen.common.struct.ttypes.Response()
+                    self.success.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('postSearchCondition_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.STRUCT, 0)
+            self.success.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class delSearchCondition_args(object):
+    """
+    Attributes:
+     - hrAccountId
+     - id
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'hrAccountId', None, None, ),  # 1
+        (2, TType.I32, 'id', None, None, ),  # 2
+    )
+
+    def __init__(self, hrAccountId=None, id=None,):
+        self.hrAccountId = hrAccountId
+        self.id = id
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.hrAccountId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.I32:
+                    self.id = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('delSearchCondition_args')
+        if self.hrAccountId is not None:
+            oprot.writeFieldBegin('hrAccountId', TType.I32, 1)
+            oprot.writeI32(self.hrAccountId)
+            oprot.writeFieldEnd()
+        if self.id is not None:
+            oprot.writeFieldBegin('id', TType.I32, 2)
+            oprot.writeI32(self.id)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class delSearchCondition_result(object):
+    """
+    Attributes:
+     - success
+    """
+
+    thrift_spec = (
+        (0, TType.STRUCT, 'success', (thrift_gen.gen.common.struct.ttypes.Response, thrift_gen.gen.common.struct.ttypes.Response.thrift_spec), None, ),  # 0
+    )
+
+    def __init__(self, success=None,):
+        self.success = success
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRUCT:
+                    self.success = thrift_gen.gen.common.struct.ttypes.Response()
+                    self.success.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('delSearchCondition_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.STRUCT, 0)
+            self.success.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class joinTalentpool_args(object):
+    """
+    Attributes:
+     - hrAccountId
+     - applierIds
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'hrAccountId', None, None, ),  # 1
+        (2, TType.LIST, 'applierIds', (TType.I32, None, False), None, ),  # 2
+    )
+
+    def __init__(self, hrAccountId=None, applierIds=None,):
+        self.hrAccountId = hrAccountId
+        self.applierIds = applierIds
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.hrAccountId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.LIST:
+                    self.applierIds = []
+                    (_etype3, _size0) = iprot.readListBegin()
+                    for _i4 in range(_size0):
+                        _elem5 = iprot.readI32()
+                        self.applierIds.append(_elem5)
+                    iprot.readListEnd()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('joinTalentpool_args')
+        if self.hrAccountId is not None:
+            oprot.writeFieldBegin('hrAccountId', TType.I32, 1)
+            oprot.writeI32(self.hrAccountId)
+            oprot.writeFieldEnd()
+        if self.applierIds is not None:
+            oprot.writeFieldBegin('applierIds', TType.LIST, 2)
+            oprot.writeListBegin(TType.I32, len(self.applierIds))
+            for iter6 in self.applierIds:
+                oprot.writeI32(iter6)
+            oprot.writeListEnd()
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class joinTalentpool_result(object):
+    """
+    Attributes:
+     - success
+    """
+
+    thrift_spec = (
+        (0, TType.STRUCT, 'success', (thrift_gen.gen.common.struct.ttypes.Response, thrift_gen.gen.common.struct.ttypes.Response.thrift_spec), None, ),  # 0
+    )
+
+    def __init__(self, success=None,):
+        self.success = success
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRUCT:
+                    self.success = thrift_gen.gen.common.struct.ttypes.Response()
+                    self.success.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('joinTalentpool_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.STRUCT, 0)
+            self.success.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class shiftOutTalentpool_args(object):
+    """
+    Attributes:
+     - hrAccountId
+     - applierIds
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'hrAccountId', None, None, ),  # 1
+        (2, TType.LIST, 'applierIds', (TType.I32, None, False), None, ),  # 2
+    )
+
+    def __init__(self, hrAccountId=None, applierIds=None,):
+        self.hrAccountId = hrAccountId
+        self.applierIds = applierIds
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.hrAccountId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.LIST:
+                    self.applierIds = []
+                    (_etype10, _size7) = iprot.readListBegin()
+                    for _i11 in range(_size7):
+                        _elem12 = iprot.readI32()
+                        self.applierIds.append(_elem12)
+                    iprot.readListEnd()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('shiftOutTalentpool_args')
+        if self.hrAccountId is not None:
+            oprot.writeFieldBegin('hrAccountId', TType.I32, 1)
+            oprot.writeI32(self.hrAccountId)
+            oprot.writeFieldEnd()
+        if self.applierIds is not None:
+            oprot.writeFieldBegin('applierIds', TType.LIST, 2)
+            oprot.writeListBegin(TType.I32, len(self.applierIds))
+            for iter13 in self.applierIds:
+                oprot.writeI32(iter13)
+            oprot.writeListEnd()
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class shiftOutTalentpool_result(object):
+    """
+    Attributes:
+     - success
+    """
+
+    thrift_spec = (
+        (0, TType.STRUCT, 'success', (thrift_gen.gen.common.struct.ttypes.Response, thrift_gen.gen.common.struct.ttypes.Response.thrift_spec), None, ),  # 0
+    )
+
+    def __init__(self, success=None,):
+        self.success = success
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRUCT:
+                    self.success = thrift_gen.gen.common.struct.ttypes.Response()
+                    self.success.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('shiftOutTalentpool_result')
         if self.success is not None:
             oprot.writeFieldBegin('success', TType.STRUCT, 0)
             self.success.write(oprot)

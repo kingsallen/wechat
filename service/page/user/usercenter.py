@@ -116,9 +116,9 @@ class UsercenterPageService(PageService):
         for e in ret:
             app_rec = ObjectDict()
             app_rec['id'] = e.id
-            app_rec['position_title'] = e.title
-            app_rec['company_name'] = e.department
-            app_rec['status_name'] = e.status
+            app_rec['position_title'] = e.position_title
+            app_rec['company_name'] = e.company_name
+            app_rec['status_name'] = e.status_name
             app_rec['time'] = e.time
             obj_list.append(app_rec)
         raise gen.Return(obj_list)

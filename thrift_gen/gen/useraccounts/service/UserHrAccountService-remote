@@ -28,6 +28,11 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('  Response postResource(DownloadReport downloadReport)')
     print('  Response putResource(UserHrAccount userHrAccount)')
     print('  Response bind(BindAccountStruct account)')
+    print('  Response getSearchCondition(i32 hrAccountId, i32 type)')
+    print('  Response postSearchCondition(SearchCondition searchCondition)')
+    print('  Response delSearchCondition(i32 hrAccountId, i32 id)')
+    print('  Response joinTalentpool(i32 hrAccountId,  applierIds)')
+    print('  Response shiftOutTalentpool(i32 hrAccountId,  applierIds)')
     print('')
     sys.exit(0)
 
@@ -130,6 +135,36 @@ elif cmd == 'bind':
         print('bind requires 1 args')
         sys.exit(1)
     pp.pprint(client.bind(eval(args[0]),))
+
+elif cmd == 'getSearchCondition':
+    if len(args) != 2:
+        print('getSearchCondition requires 2 args')
+        sys.exit(1)
+    pp.pprint(client.getSearchCondition(eval(args[0]), eval(args[1]),))
+
+elif cmd == 'postSearchCondition':
+    if len(args) != 1:
+        print('postSearchCondition requires 1 args')
+        sys.exit(1)
+    pp.pprint(client.postSearchCondition(eval(args[0]),))
+
+elif cmd == 'delSearchCondition':
+    if len(args) != 2:
+        print('delSearchCondition requires 2 args')
+        sys.exit(1)
+    pp.pprint(client.delSearchCondition(eval(args[0]), eval(args[1]),))
+
+elif cmd == 'joinTalentpool':
+    if len(args) != 2:
+        print('joinTalentpool requires 2 args')
+        sys.exit(1)
+    pp.pprint(client.joinTalentpool(eval(args[0]), eval(args[1]),))
+
+elif cmd == 'shiftOutTalentpool':
+    if len(args) != 2:
+        print('shiftOutTalentpool requires 2 args')
+        sys.exit(1)
+    pp.pprint(client.shiftOutTalentpool(eval(args[0]), eval(args[1]),))
 
 else:
     print('Unrecognized method %s' % cmd)
