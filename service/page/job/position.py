@@ -312,8 +312,7 @@ class PositionPageService(PageService):
                 position.is_rp_reward = True
                 position.salary = gen_salary(
                     position.salary_top, position.salary_bottom)
-                position.publish_date = jd_update_date(datetime.strptime(
-                    position.publish_date, '%Y-%m-%d %H:%M:%S'))
+                position.publish_date = jd_update_date(str_2_date(position.publish_date, self.constant.TIME_FORMAT))
             raise gen.Return(rp_position_list)
         raise gen.Return(res)
 

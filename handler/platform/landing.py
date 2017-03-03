@@ -9,8 +9,6 @@ from handler.base import BaseHandler
 from util.common import ObjectDict
 from util.common.decorator import handle_response
 from util.tool.url_tool import make_url
-from util.common.cipher import encode_id
-
 
 class LandingHandler(BaseHandler):
     """
@@ -42,8 +40,9 @@ class LandingHandler(BaseHandler):
             "search_seq": search_seq
         })
 
-        self.logger.debug("[JD]构建转发信息")
+        self.logger.debug("[LANDING]构建转发信息")
         yield self._make_share_info(self.current_user.company)
+        self.logger.debug("share: {}".format(self.params.share))
 
         self.render(template_name="company/search.html", company=company)
 
@@ -60,7 +59,7 @@ class LandingHandler(BaseHandler):
             self.params,
             host=self.request.host,
             protocol=self.request.protocol,
-            recom=self._make_recom(),
+            recom=self.position_ps._make_recom(self.current_user.sysuser.id),
             escape=["pid"]
         )
 
@@ -70,8 +69,3 @@ class LandingHandler(BaseHandler):
             "description": description,
             "link": link
         })
-
-    def _make_recom(self):
-        """用于微信分享和职位推荐时，传出的 recom 参数"""
-
-        return encode_id(self.current_user.sysuser.id)
