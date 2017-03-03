@@ -22,7 +22,7 @@ OLD_SYSUSER = '/mobile/sysuser'
 
 # ============================ 基础服务开始 ============================
 # 用户服务
-# REFERER: https://wiki.moseeker.com/user_account_api.md
+# Ref: https://wiki.moseeker.com/user_account_api.md
 INFRA_USER_INFO = 'user'
 INFRA_USER_VALID = 'user/sendCode'
 INFRA_USER_VERIFY = 'user/verifyCode'
@@ -37,14 +37,37 @@ INFRA_USER_FAV_POSITION = 'user/{}/fav-position'
 INFRA_WXUSER_QRCODE_SCANRESULT = 'weixin/qrcode/scanresult'
 
 # 申请服务
-# REFERER: https://wiki.moseeker.com/application-api.md
+# Ref: https://wiki.moseeker.com/application-api.md
+INFRA_APPLICATION = "application",
 INFRA_APPLICATION_APPLY_COUNT = 'application/count/check'
 
 # 职位服务
-# REFERER: https://wiki.moseeker.com/position-api.md
+# REF: https://wiki.moseeker.com/position-api.md
 INFRA_POSITION_RECOMMEND = 'positions/recommended'
 INFRA_POSITION_LIST = 'position/list'
 INFRA_POSITION_LIST_RP_EXT = 'position/rpext'
 INFRA_RP_POSITION_LIST = 'position/rplist'
 INFRA_RP_POSITION_LIST_SHARE_INFO = 'position/list/hb_share_info'
+
+# Profile 服务
+# Ref: https://wiki.moseeker.com/profile-api.md
+INFRA_PROFILE_CRAWLER = "profile/crawler"
+INFRA_PROFILE_BASIC = "profile/basic"
+INFRA_PROFILE_LANGUAGE = "profile/language"
+INFRA_PROFILE_SKILL = "profile/skill"
+INFRA_PROFILE_CREDENTIALS = "profile/credentials"
+INFRA_PROFILE_EDUCATION = "profile/education"
+INFRA_PROFILE_PROFILE = "profile/profile"
+INFRA_PROFILE_WORKEXP = "profile/workexp"
+INFRA_PROFILE_PROJECTEXP = "profile/projectexp"
+INFRA_PROFILE_AWARDS = "profile/awards"
+INFRA_PROFILE_WORKS = "profile/works"
+INFRA_PROFILE_INTENTION = "profile/intention"
+
+# 字典服务
+DICT_CONSTANT = "dict/constant"
+DICT_CITIES = "dict/cities"
+DICT_COLLEGE = "dict/college"
+DICT_INDUSTRY = "dict/industry"
+DICT_POSITION = "dict/position"
 # ============================ 基础服务结束 ============================

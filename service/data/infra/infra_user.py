@@ -5,8 +5,7 @@ import tornado.gen as gen
 from service.data.base import DataService
 import conf.path as path
 from util.common import ObjectDict
-from util.common.decorator import cache
-from util.tool.http_tool import http_get, http_post, http_put, http_delete, http_patch
+from util.tool.http_tool import http_get, http_post, http_put
 
 
 class InfraUserDataService(DataService):

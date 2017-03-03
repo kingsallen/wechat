@@ -71,14 +71,16 @@ def _async_http_get(route, jdata=None, timeout=5, method='GET'):
     if jdata is None:
         jdata = ObjectDict()
 
-    # 指定 appid，必填
     jdata.update({"appid": constant.APPID[env]})
 
     url = url_concat("{0}/{1}".format(settings['infra'], route), jdata)
     http_client = tornado.httpclient.AsyncHTTPClient()
     response = yield http_client.fetch(
-        url, request_timeout=timeout, method=method.upper(),
-        headers=HTTPHeaders({"Content-Type": "application/json"}))
+        url,
+        method=method.upper(),
+        request_timeout=timeout,
+        headers=HTTPHeaders({"Content-Type": "application/json"})
+    )
 
     logger.debug("[infra][_async_http_get][url: {}][ret: {}] ".format(
         url, ujson.decode(response.body)))
@@ -95,7 +97,6 @@ def _async_http_post(route, jdata=None, timeout=5, method='POST'):
     if jdata is None:
         jdata = ObjectDict()
 
-    # 指定 appid，必填
     jdata.update({"appid": constant.APPID[env]})
 
     http_client = tornado.httpclient.AsyncHTTPClient()
@@ -107,7 +108,9 @@ def _async_http_post(route, jdata=None, timeout=5, method='POST'):
         request_timeout=timeout,
         headers=HTTPHeaders({"Content-Type": "application/json"})
     )
-    logger.debug("[infra][_async_http_post][url: {}][body: {}][ret: {}] ".format(
-        url, ujson.encode(jdata), ujson.decode(response.body)))
+
+    logger.debug(
+        "[infra][_async_http_post][url: {}][body: {}][ret: {}] "
+        .format(url, ujson.encode(jdata), ujson.decode(response.body)))
     body = ujson.decode(response.body)
     raise gen.Return(_objectdictify(body))

@@ -8,7 +8,8 @@
 # Copyright 2016 MoSeeker
 
 
-from urllib.parse import urlparse, parse_qs, urlencode, parse_qsl, urlunparse, urljoin
+from urllib.parse import (
+    urlparse, parse_qs, urlencode, parse_qsl, urlunparse, urljoin)
 from setting import settings
 
 
@@ -68,9 +69,8 @@ def url_subtract_query(url, exclude):
 
 
 def url_append_query(url, *args, **kwargs):
-    """
-        为url添加query
-        :example: url_append_query('/m/app', "sjdf","lsdkjf", a=2)
+    """为url添加query
+    :example: url_append_query('/m/app', "sjdf","lsdkjf", a=2)
     """
     url_parts = list(urlparse(url))
     query = dict(parse_qsl(url_parts[4]))

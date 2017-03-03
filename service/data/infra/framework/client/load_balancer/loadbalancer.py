@@ -2,8 +2,10 @@
 
 import itertools
 
+
 class NoBackendException(Exception):
     pass
+
 
 class RoundRobinStrategy(object):
 
@@ -15,6 +17,7 @@ class RoundRobinStrategy(object):
         if len(self.backends) == 0:
             raise NoBackendException()
         return next(self.cycle_iterator)
+
 
 class LoadBalancer(object):
 
@@ -35,7 +38,3 @@ class LoadBalancer(object):
         backend = self.strategy.get_backend()
         print(backend)
         return backend
-
-
-
-

@@ -7,8 +7,8 @@ import decimal
 import json
 import ujson  # for encode json first time
 
-class JSONEncoder(json.JSONEncoder):
 
+class JSONEncoder(json.JSONEncoder):
     """
     指定非内置 JSON serializable 的类型应该如何转换
     """
@@ -32,13 +32,4 @@ def encode_json_dumps(p_dict):
     if not isinstance(p_dict, dict):
         raise ValueError("p_dict is not a dict instance.")
     return json.dumps(ujson.dumps(p_dict), cls=JSONEncoder)
-
-
-if __name__ == '__main__':
-
-    print (json_dumps({
-        "status": 0,
-        "message": "success",
-        "data": 0
-    }))
 

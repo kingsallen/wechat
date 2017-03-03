@@ -30,11 +30,12 @@ from tornado.options import options
 
 from setting import settings
 import conf.common as constant
-
+import tornado.options
 from route import platform_routes, qx_routes, help_routes
 from util.common.log import MessageLogger
 from util.common.cache import BaseRedis
 from handler.common.navmenu import NavMenuModule
+
 
 tornado.options.parse_command_line()
 logger = MessageLogger(logpath=options.logpath)
