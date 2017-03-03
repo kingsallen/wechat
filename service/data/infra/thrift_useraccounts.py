@@ -60,6 +60,6 @@ class ThriftUseraccountsDataService(DataService):
         :param user_id:
         :return:
         """
-        ret = yield self.usercenter_service_cilent.getApplicationDetail(int(app_id), user_id)
+        ret = yield self.usercenter_service_cilent.getApplicationDetail(user_id, int(app_id))
         self.logger.debug("[thrift]get_applied_progress: %s" % ret)
         raise gen.Return(ret)
