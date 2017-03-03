@@ -158,12 +158,12 @@ def password_validate(password):
     :param password:
     :return:
     """
-    heh = re.match("\d+", password) and re.match("\d+", password)
-    print (heh)
-    if heh:
-        print (333)
+    if len(password) >= 6 \
+        and re.findall("[a-zA-Z]+", password) \
+        and re.findall("[0-9]+", password):
+        return True
     else:
-        print (444)
+        return False
 
 
 def is_chinese(uchar):
@@ -212,4 +212,4 @@ if __name__ == '__main__':
     # print (mobile_validate(13656789068))
     # print (password_crypt("123456"))
     # print (gen_salary(0,0))
-    print (password_validate("123456"))
+    print (password_validate("fhj1k"))
