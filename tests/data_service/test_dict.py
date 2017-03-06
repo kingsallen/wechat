@@ -6,7 +6,7 @@ from pprint import pprint
 
 from tornado.testing import AsyncTestCase, gen_test, main
 
-from service.data.dict.dict import DictDataService
+from service.data.infra.infra_dict import DictDataService
 from util.common import ObjectDict
 
 

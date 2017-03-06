@@ -16,35 +16,34 @@ from util.tool.http_tool import http_get
 
 
 class DictDataService(DataService):
-
     CONSTANT_TYPES = ObjectDict(
-        COMPANY_TYPE=1101,          # 公司类型
-        COMPANY_SCALE=1102,         # 公司规模
-        COMPANY_PROPERTY=1103,      # 公司性质
-        DEGREE_POSITION=2101,       # 公司职位要求学历
-        GENDER_POSITION=2102,       # 性别
-        JOB_TYPE=2103,              # 工作性质
-        EMPLOYMENT_TYPE=2104,       # 招聘类型
-        PRIVACY_POLICY=3101,        # 隐私策略
-        WORK_STATUS=3102,           # 工作状态
-        POLITIC_STATUS=3103,        # 政治面貌
-        DEGREE_USER=3104,           # 用户学历
-        WORK_INTENTION=3105,        # 求职意愿-工作类型
-        TIME_TO_BE_ON_BOARD=3106,   # 到岗时间
-        WORKDAYS_PER_WEEK=3107,     # 每周到岗时间
-        LANGUAGE_FRUENCY=3108,      # 语言能力-掌握程度
-        GENDER_USER=3109,           # 性别
-        MARRIAGE_STATUS=3110,       # 婚姻情况
-        ID_TYPE=3111,               # 证件类型
-        RECIDENCE_TYPE=3112,        # 户口类型
-        MAJOR_RANK=3113,            # 专业排名
+        COMPANY_TYPE=1101,  # 公司类型
+        COMPANY_SCALE=1102,  # 公司规模
+        COMPANY_PROPERTY=1103,  # 公司性质
+        DEGREE_POSITION=2101,  # 公司职位要求学历
+        GENDER_POSITION=2102,  # 性别
+        JOB_TYPE=2103,  # 工作性质
+        EMPLOYMENT_TYPE=2104,  # 招聘类型
+        PRIVACY_POLICY=3101,  # 隐私策略
+        WORK_STATUS=3102,  # 工作状态
+        POLITIC_STATUS=3103,  # 政治面貌
+        DEGREE_USER=3104,  # 用户学历
+        WORK_INTENTION=3105,  # 求职意愿-工作类型
+        TIME_TO_BE_ON_BOARD=3106,  # 到岗时间
+        WORKDAYS_PER_WEEK=3107,  # 每周到岗时间
+        LANGUAGE_FRUENCY=3108,  # 语言能力-掌握程度
+        GENDER_USER=3109,  # 性别
+        MARRIAGE_STATUS=3110,  # 婚姻情况
+        ID_TYPE=3111,  # 证件类型
+        RECIDENCE_TYPE=3112,  # 户口类型
+        MAJOR_RANK=3113,  # 专业排名
         CURRENT_SALARY_MONTH=3114,  # 当前月薪
-        CURRENT_SALARY_YEAR=3115,   # 当前年薪
-        CAN_ON_SITE=3116,           # 是否接受出差
-        WORK_ROTATION=3117,         # 选择班次
-        PROFILE_IMPORT_SOURCE=3118, # Profile来源
-        PROFILE_SOURCE=3119,        # Profile创建来源
-        REGISTER_SOURCE=4101,       # 用户注册来源(source)
+        CURRENT_SALARY_YEAR=3115,  # 当前年薪
+        CAN_ON_SITE=3116,  # 是否接受出差
+        WORK_ROTATION=3117,  # 选择班次
+        PROFILE_IMPORT_SOURCE=3118,  # Profile来源
+        PROFILE_SOURCE=3119,  # Profile创建来源
+        REGISTER_SOURCE=4101,  # 用户注册来源(source)
     )
 
     # 热门城市编号列表
@@ -69,7 +68,7 @@ class DictDataService(DataService):
         """
         # 参数校验
         if (parent_code is None or
-                parent_code not in self.CONSTANT_TYPES.values()):
+                    parent_code not in self.CONSTANT_TYPES.values()):
             raise ValueError('invalid parent_code')
 
         params = ObjectDict(parent_code=parent_code)
@@ -273,12 +272,14 @@ class DictDataService(DataService):
             el = ObjectDict(el)
             out = ObjectDict()
             out.text = el.name
-            level2 = yield http_get(path.DICT_INDUSTRY, dict(parent=el.code)).data
-            out.list = list(map(lambda x: sub_dict(x, ['code', 'name']), level2))
+            level2 = yield http_get(path.DICT_INDUSTRY,
+                                    dict(parent=el.code)).data
+            out.list = list(
+                map(lambda x: sub_dict(x, ['code', 'name']), level2))
             industries.append(out)
         return industries
 
-    @cache(ttl=60*60*5)
+    @cache(ttl=60 * 60 * 5)
     @gen.coroutine
     def get_functions(self, code=0):
         """获取职能
