@@ -36,7 +36,7 @@ class CustomizePageService(PageService):
         :param position_info:
         :return:
         """
-        is_suppress_apply, suppress_apply_data=self._is_suppress_apply(position_info)
+        is_suppress_apply, suppress_apply_data = yield self._is_suppress_apply(position_info)
         return ObjectDict({
             "is_suppress_apply": is_suppress_apply,
             "suppress_apply_data": suppress_apply_data
@@ -56,7 +56,7 @@ class CustomizePageService(PageService):
     @gen.coroutine
     def get_delegate_drop(self, current_wechat, current_employee, params):
         return ObjectDict({
-            'is_delegate_drop':  self._is_edx_wechat(current_wechat, current_employee),
+            'is_delegate_drop': self._is_edx_wechat(current_wechat, current_employee),
             'delegate_drop_url': make_url(path.CUSTOMIZE_EDX, params, recom_friend=1)
         })
 
