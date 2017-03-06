@@ -5,9 +5,9 @@
 # @File    : application.py
 # @DES     :
 
-import json
 from tornado import gen
 
+import conf.path as path
 import conf.common as const
 import conf.message as msg
 
@@ -15,6 +15,7 @@ from handler.base import BaseHandler
 from util.common.decorator import handle_response, authenticated
 from util.tool.json_tool import encode_json_dumps
 from util.tool.url_tool import make_url
+
 
 class ApplicationHandler(BaseHandler):
 
@@ -27,6 +28,16 @@ class ApplicationHandler(BaseHandler):
             yield getattr(self, 'get_' + method)()
         except Exception as e:
             self.write_error(404)
+
+    @handle_response
+    @gen.coroutine
+    def post(self, method):
+        try:
+            # 重置 event，准确描述
+            self._event = self._event + method
+            yield getattr(self, 'post_' + method)()
+        except Exception as e:
+            self.send_json_error()
 
     @handle_response
     @authenticated
@@ -53,7 +64,7 @@ class ApplicationHandler(BaseHandler):
         #    检查该 profile 是否符合自定义简历必填项,
         #        如果不符合的话跳转到自定义简历填写页
         if position.app_cv_config_id:
-            resume_dict, json_config = yield self._custom_check_failure_redirection(profile, position)
+            resume_dict, json_config = yield self.application_ps.custom_check_failure_redirection(profile, position)
             if json_config:
                 self.render('weixin/application/app_cv_conf.html',
                             resume=encode_json_dumps(resume_dict),
@@ -70,40 +81,52 @@ class ApplicationHandler(BaseHandler):
         self.redirect(make_url(const.PROFILE_URL, self.params,
                                apply="1", is_skip=is_skip))
 
+    @handle_response
+    @authenticated
     @gen.coroutine
-    def _custom_check_failure_redirection(self, profile, position):
-        """
-        处理自定义简历校验和失败后的跳转,
-        通用方法, 在 handler 中使用,
-        hanlder 调用完此方法后需要立即 return
-        """
+    def get_checkstatus(self, **kwargs):
+        # TODO
+        # 查看求职进度，可直接转到个人中心-申请记录-具体某个求职进度
+        pass
 
-        cv_conf = yield self.application_ps.get_app_cv_conf(position.app_cv_config_id)
-        json_config = json.loads(cv_conf.field_value)
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get_custom(self):
 
-        self.logger.debug("json_confg:{}".format(json_config))
+        # 定制化
+        # 宝洁投递成功后展示提示文案
+        message = yield self.customize_ps.get_pgcareers_msg(self.current_user.wechat.company_id)
+        nexturl = make_url(path.POSITION_LIST, params=self.params, escape=['next_url'])
+        self.render('weixin/systemmessage/successapply.html', message=message, nexturl=nexturl)
 
-        for c in json_config:
-            fields = c.get("fields")
-            for field in fields:
-                field_name = field.get("field_name")
-                required = not field.get("required")
-                # 校验失败条件:
-                # 1. rquired and
-                # 2. field_name 在 profile 对应字端中,但是 profile 中这个字段为空值
-                #    or
-                #    field_name 是纯自定义字段,但是在 custom_others 中没有这个值
-                check_ret = yield self.application_ps.check_custom_field(profile, field_name, self.current_user.sysuser)
-                if required and not check_ret:
-                    self.logger.debug("自定义字段必填校验错误, 返回app_cv_conf.html\n"
-                                      "field_name:{}".format(field_name))
-                    # TODO
-                    resume_dict = _generate_resume_cv(profile)
-                    self.logger.debug("resume_dict: {}".format(resume_dict))
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def post_create_email(self):
 
-                    raise gen.Return((resume_dict, json_config))
+        # 更新姓名，邮箱信息
+        yield self.usercenter_ps.update_user(self.current_user.sysuser.id, params={
+            "name": self.current_user.sysuser.name or self.params.name.strip(),
+            "email": self.current_user.sysuser.email or self.params.email.strip()
+        })
 
-        raise gen.Return((None, None))
+        # 候选人信息更新
+        yield self.application_ps.update_candidate_company(self.params.name, self.current_user.sysuser.id)
 
+        position = yield self.position_ps.get_position(self.params.pid)
+        if self.params.pid and position.email_resume_conf == 0:
+            # 职位必须能接受Email投递 而且params含有pid
+            self.logger.debug(u"Start to create email application..")
+            # TODO
+            create_status = yield self.create_email_reply()
+            if not create_status:
+                # 职位不能申请, 直接返回不能再次redirect
+                self.send_json_error()
+                return
+        else:
+            self.LOG.debug(u"Start to create email profile..")
+            # TODO 
+            yield self.create_email_profile()
 
-
+        self.render("weixin/sysuser/emailresume_sent.html")

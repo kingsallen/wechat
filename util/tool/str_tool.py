@@ -17,7 +17,7 @@ def password_crypt(code=None):
     """
     if not code:
         code1 = "".join(random.sample('0123456789', 1))
-        code2 = "".join(random.sample('0123456789abcdefghijklmnopqrstuvwxyz', 4))
+        code2 = "".join(random.sample('0123456789ABCDEFGHIJKLMNOPQISTUVWXYZ', 4))
         code3 = "".join(random.sample('abcdefghijklmnopqrstuvwxyz', 1))
         code = code1 + code2 + code3
 

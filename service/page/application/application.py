@@ -87,6 +87,57 @@ class ApplicationPageService(PageService):
         raise gen.Return(cv_conf)
 
     @gen.coroutine
+    def update_candidate_company(self, name, user_id):
+        """
+        更新candidate_company表中的name
+        :param user_id:
+        :return:
+        """
+
+        res = yield self.candidate_company_ds.update_candidate_company(
+            fields={
+                "sys_user_id": user_id
+            }, conds={
+                "name": name,
+            })
+        raise gen.Return(res)
+
+    @gen.coroutine
+    def custom_check_failure_redirection(self, profile, position):
+        """
+        处理自定义简历校验和失败后的跳转,
+        通用方法, 在 handler 中使用,
+        hanlder 调用完此方法后需要立即 return
+        """
+
+        cv_conf = yield self.application_ps.get_app_cv_conf(position.app_cv_config_id)
+        json_config = json.loads(cv_conf.field_value)
+
+        self.logger.debug("json_confg:{}".format(json_config))
+
+        for c in json_config:
+            fields = c.get("fields")
+            for field in fields:
+                field_name = field.get("field_name")
+                required = not field.get("required")
+                # 校验失败条件:
+                # 1. rquired and
+                # 2. field_name 在 profile 对应字端中,但是 profile 中这个字段为空值
+                #    or
+                #    field_name 是纯自定义字段,但是在 custom_others 中没有这个值
+                check_ret = yield self.application_ps.check_custom_field(profile, field_name, self.current_user.sysuser)
+                if required and not check_ret:
+                    self.logger.debug("自定义字段必填校验错误, 返回app_cv_conf.html\n"
+                                      "field_name:{}".format(field_name))
+                    # TODO
+                    resume_dict = _generate_resume_cv(profile)
+                    self.logger.debug("resume_dict: {}".format(resume_dict))
+
+                    raise gen.Return((resume_dict, json_config))
+
+        raise gen.Return((None, None))
+
+    @gen.coroutine
     def check_custom_field(self, profile, field_name, user):
         """
         检查自定义字段必填项

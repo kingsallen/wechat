@@ -14,21 +14,27 @@ from util.tool.str_tool import email_validate, get_uucode
 from util.tool.url_tool import make_url
 from util.common import ObjectDict
 
-class CustomizeEDXHandler(BaseHandler):
+class CustomizeEmailApplyHandler(BaseHandler):
 
     '''
     作用：员工代理投递简历
     定制方：e袋洗
     '''
 
+    _EMAIL_APPLY_COMPANY = [926]
+
     @gen.coroutine
     def get(self):
+        if self.current_user.wechat.company_id not in self._EMAIL_APPLY_COMPANY:
+            self.write_error(404)
+            return
+
         if self.params.emailfriendsent:
             self.render("neo_weixin/sysuser/emailFriendResumeSent.html", params=self.params)
-            return
         elif self.params.recom_friend:
             self._get_recom_friend()
-            return
+        else:
+            self.write_error(404)
 
     @gen.coroutine
     def _get_recom_friend(self, pid=0, status=0, message=None):
@@ -42,6 +48,10 @@ class CustomizeEDXHandler(BaseHandler):
 
     @gen.coroutine
     def post(self):
+
+        if self.current_user.wechat.company_id not in self._EMAIL_APPLY_COMPANY:
+            self.send_json_error()
+            return
 
         if not self.params.name or not email_validate(self.params.email):
             self._get_recom_friend(pid=self.params.pid, status=1, message=msg.CELLPHONE_NAME_EMAIL)
@@ -63,7 +73,6 @@ class CustomizeEDXHandler(BaseHandler):
         # send_recom_friends_notice_to_employee(db=self.db, email=recom_email,
         #                                       company_name=self.current_user.company.abbreviation, code=uucode)
 
-       # 旧模板
         self.redirect(make_url(path.CUSTOMIZE_EDX, self.params, emailfriendsent=1))
 
 

@@ -168,10 +168,11 @@ class CellphoneBindHandler(BaseHandler):
                 self.clear_cookie(name=const.COOKIE_SESSIONID)
 
         else:
-            if not self.current_user.sysuser.password:
+            password = self.current_user.sysuser.password
+            if not password:
                 # 生成随机密码
                 code, password = password_crypt()
-
+                # TODO
                 # 发送注册成功短信
                 data = ObjectDict({
                     "mobile": self.params.mobile,
@@ -187,4 +188,4 @@ class CellphoneBindHandler(BaseHandler):
                     })
 
             yield self.user_ps.bind_mobile_password(self.current_user.sysuser.id,
-                                           self.params.mobile)
+                                           self.params.mobile, password)

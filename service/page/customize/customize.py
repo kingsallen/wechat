@@ -20,6 +20,9 @@ class CustomizePageService(PageService):
     # 雅诗兰黛直接投递
     _DIRECT_APPLY = [82]
 
+    # 宝洁投递成功提示页面
+    _APPLY_SUCCESS = [1753]
+
     def __init__(self):
         super().__init__()
 
@@ -98,4 +101,19 @@ class CustomizePageService(PageService):
             is_esteelauder = True
 
         return is_esteelauder
+
+    @gen.coroutine
+    def get_pgcareers_msg(self, company_id):
+        """
+        申请成功后，跳转到宝洁宝洁页面
+        :param company_id:
+        :return:
+        """
+        message = ""
+        if company_id in self._APPLY_SUCCESS:
+            message = '<p>恭喜申请成功!</p><p>请务必在网申截至时间前到宝洁官网</p>' + \
+                      '<p><a href="http://china.pgcareers.com/">http://china.pgcareers.com/</a></p>' + \
+                      '<p>完成网申, 网申前请仔细阅读网申指南呦!</p>'
+
+        raise gen.Return(message)
 
