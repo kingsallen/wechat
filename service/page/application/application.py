@@ -23,6 +23,14 @@ class ApplicationPageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
+    def get_position_applied_cnt(self, conds, fields):
+        """返回申请数统计"""
+
+        response = yield self.job_application_ds.get_position_applied_cnt(conds=conds, fields=fields)
+
+        raise gen.Return(response)
+
+    @gen.coroutine
     def is_allowed_apply_position(self, user_id, company_id):
         """获取一个月内该用户再该用户的申请数量
         返回该用户是否可申请该职位

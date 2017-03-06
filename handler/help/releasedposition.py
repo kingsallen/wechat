@@ -2,6 +2,7 @@
 
 from tornado import gen
 
+import conf.common as const
 from handler.base import BaseHandler
 from util.common.decorator import handle_response, authenticated
 
@@ -47,7 +48,13 @@ class ReleasedPositionHandler(BaseHandler):
             ]
         )
 
-        # TODO 投递信息
+        for item in positions_list:
+            count_int = yield self.applicaion_ps.get_position_applied_cnt(conds={
+                "position_id": item.id,
+                "email_status": const.NO,
+            }, fields=["id"])
+
+            item['resume_num'] = count_int
 
         self.render("weixin/wx_published_position_list/wx_published_position_list.html",
                     positions = positions_list)

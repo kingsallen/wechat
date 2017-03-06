@@ -13,11 +13,31 @@ class JobApplicationDataService(DataService):
     def get_job_application(self, conds, fields=None):
 
         if not self._valid_conds(conds):
-            self.logger.warning("Warning:[get_job_application][invalid parameters], Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
+            self.logger.warning(
+                "Warning:[get_job_application][invalid parameters], Detail:[conds: {0}, type: {1}]".format(
+                    conds, type(conds)))
             raise gen.Return(ObjectDict())
 
         if not fields:
             fields = list(self.job_application_dao.fields_map.keys())
 
         response = yield self.job_application_dao.get_record_by_conds(conds, fields)
+        raise gen.Return(response)
+
+    @gen.coroutine
+    def get_position_applied_cnt(self, conds, fields, appends=None, index=''):
+
+        appends = appends or []
+
+        if conds is None or not (isinstance(conds, (dict, str))):
+            self.logger.warning(
+                "Warning:[get_position_applied_cnt][invalid parameters], Detail:[conds: {0}, "
+                "type: {1}]".format(
+                    conds, type(conds)))
+            raise gen.Return(list())
+
+        if not fields:
+            fields = list(self.job_application_dao.fields_map.keys())
+
+        response = yield self.job_application_dao.get_cnt_by_conds(conds, fields, appends, index)
         raise gen.Return(response)

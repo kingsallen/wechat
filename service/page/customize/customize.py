@@ -6,7 +6,7 @@ from service.page.base import PageService
 from util.common import ObjectDict
 from util.tool.url_tool import make_url
 
-class CustomPageService(PageService):
+class CustomizePageService(PageService):
 
     """企业定制化相关内容"""
 
