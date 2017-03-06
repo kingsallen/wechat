@@ -6,14 +6,14 @@ from pprint import pprint
 
 from tornado.testing import AsyncTestCase, gen_test, main
 
-from service.data.infra.infra_dict import DictDataService
+from service.data.infra.infra_dict import InfraDictDataService
 from util.common import ObjectDict
 
 
 class DictDataServiceTestCase(AsyncTestCase):
     def setUp(self):
         super().setUp()
-        self.service = DictDataService()
+        self.service = InfraDictDataService()
 
         self.dict_const_degree_http_response = """
         {"data":{"3104":[{"update_time":1464060232000,"code":0,"create_time":1464060199000,"name":"未选择","parent_code":3104,"id":74,"priority":1},{"update_time":1464060247000,"code":1,"create_time":1464060247000,"name":"初中及以下","parent_code":3104,"id":75,"priority":2},{"update_time":1464060260000,"code":2,"create_time":1464060260000,"name":"中专","parent_code":3104,"id":76,"priority":3},{"update_time":1464060272000,"code":3,"create_time":1464060272000,"name":"高中","parent_code":3104,"id":77,"priority":4},{"update_time":1464060284000,"code":4,"create_time":1464060284000,"name":"大专","parent_code":3104,"id":78,"priority":5},{"update_time":1464060296000,"code":5,"create_time":1464060296000,"name":"本科","parent_code":3104,"id":79,"priority":6},{"update_time":1464060307000,"code":6,"create_time":1464060307000,"name":"硕士","parent_code":3104,"id":80,"priority":7},{"update_time":1464060320000,"code":7,"create_time":1464060320000,"name":"博士","parent_code":3104,"id":81,"priority":8},{"update_time":1464060338000,"code":8,"create_time":1464060338000,"name":"博士以上","parent_code":3104,"id":82,"priority":9},{"update_time":1464060404000,"code":9,"create_time":1464060353000,"name":"其他","parent_code":3104,"id":83,"priority":10}]},"message":"success","status":0}
@@ -47,7 +47,7 @@ class DictDataServiceTestCase(AsyncTestCase):
         http_response = self.dict_functions_http_response
         res_data = ObjectDict(ujson.loads(http_response)).data
         result = self.service.get_function_result_level12(res_data)
-        pprint(result)
+        #pprint(result)
         self.assertIsInstance(result, list)
         self.assertIn(
             {'code':   110000, 'level': 1, 'name': '计算机/互联网/通信/电子',
@@ -62,7 +62,7 @@ class DictDataServiceTestCase(AsyncTestCase):
         res_data = ObjectDict(ujson.loads(http_response)).data
         result = self.service.get_function_result_level23(res_data,
                                                           code=110100)
-        pprint(result)
+        #pprint(result)
         self.assertIsInstance(result, list)
         self.assertIn(
             {'code': 110100, 'level': 2, 'name': '计算机软件', 'parent': 110000},
@@ -88,19 +88,19 @@ class DictDataServiceTestCase(AsyncTestCase):
         http_response = ObjectDict(
             ujson.loads(self.dict_level1_cities_http_response))
         c1 = self.service._make_level_1_cities_result(http_response)
-        pprint(c1)
+        #pprint(c1)
         self.assertIsInstance(c1, list)
 
         # level2
         http_response = ObjectDict(
             ujson.loads(self.dict_level2_cities_http_response))
         c2 = self.service._make_level_2_cities_result(http_response)
-        pprint(c2)
+        #pprint(c2)
         self.assertIsInstance(c2, list)
 
         # whole citi list
         result = self.service.make_cities_result(c1, c2)
-        pprint(result)
+        #pprint(result)
         self.assertIn(
             {'list': [{'code': 152900, 'name': '阿拉善盟'},
                       {'code': 210300, 'name': '鞍山'},
@@ -116,23 +116,23 @@ class DictDataServiceTestCase(AsyncTestCase):
 
         # hot cities
         result = self.service.make_cities_result(c1, c2, hot=True)
-        pprint(result)
+        #pprint(result)
         self.assertIn({'code': 310000, 'name': '上海'}, result)
 
         # get name by code
         result = self.service.make_city_code_by_name_result(c2, '珠海')
-        pprint(result)
+        #pprint(result)
         self.assertEqual(result, 440400)
         result = self.service.make_city_code_by_name_result(c2, '我是不存在')
-        pprint(result)
+        #pprint(result)
         self.assertEqual(result, 0)
 
         # get code by name
         result = self.service.make_city_name_by_code_result(c2, 440400)
-        pprint(result)
+        #pprint(result)
         self.assertEqual(result, '珠海')
         result = self.service.make_city_name_by_code_result(c2, 1010100101001)
-        pprint(result)
+        #pprint(result)
         self.assertEqual(result, None)
 
         # invalid input check
@@ -171,7 +171,7 @@ class DictDataServiceTestCase(AsyncTestCase):
         http_response = ObjectDict(
             ujson.loads(self.dict_college_http_response))
         colleges = self.service.make_college_list_result(http_response)
-        pprint(colleges)
+        #pprint(colleges)
         self.assertIsInstance(colleges, list)
         self.assertIn({
             'code': 10056, 'logo': 'upload/college/logo/10056.jpg',
@@ -181,7 +181,7 @@ class DictDataServiceTestCase(AsyncTestCase):
         # get code by name
         code = self.service.get_code_by_name_from(
             colleges, school_name="天津大学")
-        pprint(code)
+        #pprint(code)
         self.assertIsInstance(code, int)
         self.assertEqual(code, 10056)
 
@@ -191,7 +191,7 @@ class DictDataServiceTestCase(AsyncTestCase):
             ujson.loads(self.dict_const_degree_http_response))
         ret = self.service.make_const_dict_result(
             http_response, parent_code=3104)
-        pprint(ret)
+        #pprint(ret)
         self.assertIsInstance(ret, dict)
         with self.assertRaises(ValueError) as cm:
             yield self.service.get_const_dict(parent_code=None)

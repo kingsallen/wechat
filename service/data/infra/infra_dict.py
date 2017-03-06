@@ -15,7 +15,7 @@ from util.tool.dict_tool import sub_dict
 from util.tool.http_tool import http_get
 
 
-class DictDataService(DataService):
+class InfraDictDataService(DataService):
     CONSTANT_TYPES = ObjectDict(
         COMPANY_TYPE=1101,  # 公司类型
         COMPANY_SCALE=1102,  # 公司规模
@@ -60,7 +60,7 @@ class DictDataService(DataService):
     # 港澳台城市编号前缀
     _GAT_PREFIX = [81, 82, 71]
 
-    @cache(ttl=60 * 60 * 5)
+    @cache(ttl=60*60*5)
     @gen.coroutine
     def get_const_dict(self, parent_code):
         """根据 parent_code 获取常量字典
@@ -86,7 +86,7 @@ class DictDataService(DataService):
         ret = collections.OrderedDict(sorted(ret.items()))
         return ret
 
-    @cache(ttl=60 * 60 * 5)
+    @cache(ttl=60*60*5)
     @gen.coroutine
     def get_colleges(self):
         """获取学校列表"""
@@ -105,7 +105,7 @@ class DictDataService(DataService):
                     collegecode_list.append(pair)
         return collegecode_list
 
-    @cache(ttl=60 * 60 * 5)
+    @cache(ttl=60*60*5)
     @gen.coroutine
     def get_college_code_by_name(self, school_name):
         """根据学校名称返回学校 code"""
@@ -123,7 +123,7 @@ class DictDataService(DataService):
             code = 0
         return code
 
-    @cache(ttl=60 * 60 * 5)
+    @cache(ttl=60*60*5)
     @gen.coroutine
     def _get_level_1_cities(self):
         """获取一级城市列表"""
@@ -137,7 +137,7 @@ class DictDataService(DataService):
             filter(lambda x: x.get('code') in self._LEVEL1_CITY_CODES,
                    res_data))
 
-    @cache(ttl=60 * 60 * 5)
+    @cache(ttl=60*60*5)
     @gen.coroutine
     def _get_level_2_cities(self):
         """获取二级城市列表"""
@@ -149,7 +149,7 @@ class DictDataService(DataService):
     def _make_level_2_cities_result(http_response):
         return http_response.data
 
-    @cache(ttl=60 * 60 * 5)
+    @cache(ttl=60*60*5)
     @gen.coroutine
     def get_cities(self, hot=False):
         """获取城市列表
@@ -200,14 +200,14 @@ class DictDataService(DataService):
             ret = sorted(cities, key=lambda x: x.text)
             return ret
 
-    @cache(ttl=60 * 60 * 5)
+    @cache(ttl=60*60*5)
     @gen.coroutine
     def get_hot_cities(self):
         """Alias for get_cities(hot=False) :)"""
         cities = yield self.get_cities(hot=True)
         return cities
 
-    @cache(ttl=60 * 60 * 5)
+    @cache(ttl=60*60*5)
     @gen.coroutine
     def get_city_code_by(self, city_name):
         """city_name -> code
@@ -228,7 +228,7 @@ class DictDataService(DataService):
         else:
             return 0
 
-    @cache(ttl=60 * 60 * 5)
+    @cache(ttl=60*60*5)
     @gen.coroutine
     def get_city_name_by(self, city_code):
         """code -> city name
@@ -253,7 +253,7 @@ class DictDataService(DataService):
         else:
             return None
 
-    @cache(ttl=60 * 60 * 5)
+    @cache(ttl=60*60*5)
     @gen.coroutine
     def get_industries(self):
         """获取行业
@@ -279,7 +279,7 @@ class DictDataService(DataService):
             industries.append(out)
         return industries
 
-    @cache(ttl=60 * 60 * 5)
+    @cache(ttl=60*60*5)
     @gen.coroutine
     def get_functions(self, code=0):
         """获取职能

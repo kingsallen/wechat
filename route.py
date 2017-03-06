@@ -48,6 +48,7 @@ common_routes = [
     (r"/m/api/usercenter/applyrecords[\/]*([0-9]+)*",  "handler.common.usercenter.ApplyrecordsHandler",             {"event": "usercenter_applyredords"}),
     (r"/m/api/usercenter",                             "handler.common.usercenter.UsercenterHandler",               {"event": "usercenter_"}),
 
+
     # 兼容老微信 url，进行302跳转，event 设置为 NULL
     # (r"/.*",                                           "handler.common.compatible.CompatibleHandler",               {"event": "NULL"})
 
@@ -74,6 +75,9 @@ platform_routes = [
     (r"/m/api/employee/unbind",                        "handler.platform.employee.EmployeeUnbindHandler",           {"event": "employee_unbind"}),
     (r"/m/api/employee/recommendrecords",              "handler.platform.employee.RecommendrecordsHandler",         {"event": "employee_recommendrecords"}),
     (r"/m/api/employee/rewards",                       "handler.platform.employee.AwardsHandler",                   {"event": "employee_awards"}),
+    (r"/m/api/dict/city",                              "handler.platform.dictionary.DictCityHandler",               {"event": "dict_city"}),
+    (r"/m/api/dict/industry",                          "handler.platform.dictionary.DictIndustryHandler",           {"event": "dict_industry"}),
+    (r"/m/api/dict/function",                          "handler.platform.dictionary.DictFunctionHandler",           {"event": "dict_function"}),
 
 ]
 platform_routes.extend(common_routes)
