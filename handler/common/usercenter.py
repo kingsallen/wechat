@@ -116,14 +116,13 @@ class UsercenterHandler(BaseHandler):
             self.send_json_error(message=msg.CELLPHONE_PASSWORD_ERROR)
             raise gen.Return()
 
-        res = yield self.usercenter_ps.post_resetpassword(self.current_user.sysuser.username,
-                                                          password_crypt(self.params.password))
+        code, password = password_crypt(self.params.password)
+        res = yield self.usercenter_ps.post_resetpassword(self.current_user.sysuser.username, password)
         if res.status != const.API_SUCCESS:
             self.send_json_error(message=res.message)
             raise gen.Return()
 
         self.send_json_success()
-
 
 class FavpositionHandler(BaseHandler):
     """个人中心-收藏职位"""

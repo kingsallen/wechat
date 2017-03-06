@@ -17,6 +17,9 @@ class CustomizePageService(PageService):
     # e袋洗
     _AGENT_APPLY_CIDS = [926]
 
+    # 雅诗兰黛直接投递
+    _DIRECT_APPLY = [82]
+
     def __init__(self):
         super().__init__()
 
@@ -78,4 +81,21 @@ class CustomizePageService(PageService):
 
         res = yield self.create_campaign_email_agentdelivery(params)
         raise gen.Return(res)
+
+    @gen.coroutine
+    def create_esteelauder_apply(self, company_id, app_cv_config_id):
+        """
+        雅诗兰黛直接投递
+        :param company_id:
+        :param app_cv_config_id:
+        :return:
+        """
+
+        is_esteelauder = False
+        if (company_id in self._DIRECT_APPLY and
+                app_cv_config_id):
+            self.LOG.debug(u"雅诗兰黛特殊处理: 直接投递")
+            is_esteelauder = True
+
+        return is_esteelauder
 

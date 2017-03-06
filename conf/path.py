@@ -53,6 +53,7 @@ INFRA_RP_POSITION_LIST_SHARE_INFO = 'position/list/hb_share_info'
 
 # Profile 服务
 # Ref: https://wiki.moseeker.com/profile-api.md
+INFRA_PROFILE = "profile"
 INFRA_PROFILE_CRAWLER = "profile/crawler"
 INFRA_PROFILE_BASIC = "profile/basic"
 INFRA_PROFILE_LANGUAGE = "profile/language"

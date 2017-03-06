@@ -1,6 +1,8 @@
 # coding=utf-8
 
+import json
 from tornado import gen
+import conf.common as const
 from service.page.base import PageService
 from util.common import ObjectDict
 
@@ -58,3 +60,104 @@ class ApplicationPageService(PageService):
         bool_res = ret.data if ret.status == 0 else True
 
         raise gen.Return(bool_res)
+
+    @gen.coroutine
+    def has_profile(self, user_id):
+        """
+        判断 user_user 是否有 profile (profile_profile 表数据)
+        :param user_id:
+        :return:
+        """
+
+        has_profile, profile = yield self.infra_profile_ds.has_profile(user_id)
+        raise gen.Return((has_profile, profile))
+
+    @gen.coroutine
+    def get_app_cv_conf(self, conf_id):
+        """
+        获得企业申请简历校验配置
+        :param user_id:
+        :return:
+        """
+
+        cv_conf = yield self.hr_app_cv_conf_ds.get_app_cv_conf(conds={
+            "id": conf_id,
+            "disable": const.NO,
+        })
+        raise gen.Return(cv_conf)
+
+    @gen.coroutine
+    def check_custom_field(self, profile, field_name, user):
+        """
+        检查自定义字段必填项
+        """
+
+        profile_id = profile.get("profile", {}).get("id", None)
+        assert profile_id is not None
+
+        # TODO
+        if field_name in cv_profile_keys():
+            self.logger.debug("field_name: {}".format(field_name))
+
+            mapping = const.CUSTOM_FIELD_NAME_TO_PROFILE_FIELD[field_name]
+            if mapping.startswith("user_user"):
+
+                sysuser_id = profile.get("profile", {}).get("user_id", None)
+                if not sysuser_id:
+                    return False
+                column_name = mapping.split(".")[1]
+                self.logger.debug("sysuser_id:{}, column_name:{}".format(sysuser_id, column_name))
+                if column_name not in ['email', 'name', 'mobile', 'headimg']:
+                    return False
+                self.logger.debug("sysuser:{}".format(user))
+                return bool(user.__getattr__(column_name))
+
+            if mapping.startswith("profile_education"):
+                return bool(profile.get('educations', []))
+
+            if mapping.startswith("profile_workexp"):
+                return bool(profile.get('workexps', []))
+
+            if mapping.startswith("profile_projectexp"):
+                return bool(profile.get('projectexps', []))
+
+            if mapping.startswith("profile_basic"):
+                table_name, column_name = self.__split_dot(mapping)
+                key_1 = table_name.split("_")[1]  # should be "basic"
+                key_2 = column_name
+                return bool(profile.get(key_1, {}).get(key_2, None))
+
+        # TODO
+        elif field_name in cv_pure_custom_keys():
+            other = get_profile_other_by_profile_id(handler.db, profile_id)
+
+            # 如果存在 other row ,获取 other column
+            if other:
+                other = other.other
+            else:
+                return False
+
+            self.logger.debug("other: {}".format(other))
+            other_json = json.loads(other)
+            self.logger.debug("other_json: {}".format(other_json))
+
+            if not other_json or "null" in other_json:
+                return False
+            else:
+                return bool(other_json.get(field_name))
+        else:
+            self.logger.error(
+                "{} is in neither _cv_profile_keys nor _cv_pure_custom_keys..."
+                    .format(field_name)
+            )
+            return False
+
+    def __split_dot(self, p_str):
+        """
+        内部方法,不要无故使用
+        """
+        if p_str.find(".") > 0:
+            r_ret = p_str.split(".")
+            if len(r_ret) == 2:
+                return tuple(r_ret)
+        return None

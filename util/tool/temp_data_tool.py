@@ -157,6 +157,7 @@ def template51(resource):
 
 
 def make_header(company, team_index=False, team=None):
+
     if team:
         name = team.name
         description = team.slogan
@@ -169,7 +170,7 @@ def make_header(company, team_index=False, team=None):
         'name': name,
         'description': description,
         'icon': make_static_url(company.logo),
-        'banner': make_static_url(json.loads(company.banner).get('banner0'))
+        'banner': make_static_url(company.banner[0] if company.banner else "")
         if company.banner else None,
     })
 

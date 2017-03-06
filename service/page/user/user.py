@@ -238,15 +238,16 @@ class UserPageService(PageService):
         raise gen.Return(response)
 
     @gen.coroutine
-    def bind_mobile(self, user_id, mobile):
-        """用户手机号绑定操作，更新 username 为手机号"""
+    def bind_mobile_password(self, user_id, mobile, password):
+        """用户手机号绑定操作，更新 username, mobile, password"""
         yield self.user_user_ds.update_user(
             conds={
                 'id': user_id
             },
             fields={
                 'mobile':   int(mobile),
-                'username': str(mobile)
+                'username': str(mobile),
+                'password': password,
             })
 
     @gen.coroutine

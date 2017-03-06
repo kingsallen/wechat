@@ -54,13 +54,6 @@ class PositionHandler(BaseHandler):
             did = real_company_id if \
                 real_company_id != self.current_user.company.id else ''
 
-            # 刷新链路
-            self.logger.debug("[JD]刷新链路")
-            last_employee_user_id = yield self._make_refresh_share_chain(
-                position_info)
-            self.logger.debug(
-                "[JD]last_employee_user_id: %s" % (last_employee_user_id))
-
             self.logger.debug("[JD]构建转发信息")
             yield self._make_share_info(position_info, company_info)
 
@@ -103,6 +96,7 @@ class PositionHandler(BaseHandler):
             self.logger.debug(
                 "[JD]是否显示新样式: {}".format(
                     self.current_user.wechat.show_new_jd))
+            self.logger.debug("[wechat]:{}".format(self.current_user.wechat))
             if not self.current_user.wechat.show_new_jd:
                 module_job_require_old = self._make_json_job_require_old(
                     position_info)
@@ -165,6 +159,13 @@ class PositionHandler(BaseHandler):
             self.flush()
 
             # 后置操作
+            # 刷新链路
+            self.logger.debug("[JD]刷新链路")
+            last_employee_user_id = yield self._make_refresh_share_chain(
+                position_info)
+            self.logger.debug(
+                "[JD]last_employee_user_id: %s" % (last_employee_user_id))
+
             # 红包处理
             if self.is_platform and self.current_user.recom:
                 self.logger.debug("[JD]红包处理")
@@ -479,13 +480,12 @@ class PositionHandler(BaseHandler):
             last_employee_user_id = yield self.sharechain_ps.get_referral_employee_user_id(
                 self.current_user.sysuser.id, position_info.id)
 
-        # TODO
-        # if self.current_user.sysuser.id:
-        #     yield self.candidate_ps.send_candidate_view_position(
-        #         user_id=self.current_user.sysuser.id,
-        #         position_id=position_info.id,
-        #         sharechain_id=inserted_share_chain_id,
-        #     )
+        if self.current_user.sysuser.id:
+            yield self.candidate_ps.send_candidate_view_position(
+                user_id=self.current_user.sysuser.id,
+                position_id=position_info.id,
+                sharechain_id=inserted_share_chain_id,
+            )
 
         raise gen.Return(last_employee_user_id)
 
@@ -678,7 +678,7 @@ class PositionListHandler(BaseHandler):
 
             # 获取获取到普通职位列表，则根据获取的数据查找其中红包职位的红包相关信息
             rp_position_list = [position for position in position_list
-                                if position.in_hb]
+                                if isinstance(position, dict) and position.in_hb]
 
             if position_list and rp_position_list:
                 rpext_list = yield self.position_ps.infra_get_position_list_rp_ext(
@@ -702,25 +702,25 @@ class PositionListHandler(BaseHandler):
         # 如果是下拉刷新请求的职位, 返回新增职位的页面
         if self.params.restype == "json":
             self.render(
-            template_name="refer/neo_weixin/position_v2/position_list_items.html",
-            positions=position_list,
-            is_employee=bool(self.current_user.employee),
-            use_neowx=int(self.current_user.wechat.show_new_jd)
+                template_name="refer/neo_weixin/position_v2/position_list_items.html",
+                positions=position_list,
+                is_employee=bool(self.current_user.employee),
+                use_neowx=int(self.current_user.wechat.show_new_jd)
             )
             return
 
         # 直接请求页面返回
         else:
             self.render(
-            template_name="refer/neo_weixin/position_v2/position_list.html",
-            positions=position_list,
-            position_title=const_platorm.POSITION_LIST_TITLE.get(
-                self.params.m,
-                const_platorm.POSITION_LIST_TITLE_DEFAULT),
-            url='',
-            use_neowx=int(self.current_user.wechat.show_new_jd),
-            is_employee=bool(self.current_user.employee),
-            searchFilterNum=self.get_search_filter_num()
+                template_name="refer/neo_weixin/position_v2/position_list.html",
+                positions=position_list,
+                position_title=const_platorm.POSITION_LIST_TITLE.get(
+                    self.params.m,
+                    const_platorm.POSITION_LIST_TITLE_DEFAULT),
+                url='',
+                use_neowx=int(self.current_user.wechat.show_new_jd),
+                is_employee=bool(self.current_user.employee),
+                searchFilterNum=self.get_search_filter_num()
             )
 
     @gen.coroutine

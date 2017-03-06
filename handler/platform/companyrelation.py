@@ -76,7 +76,6 @@ class CompanyHandler(BaseHandler):
             self.params, company, self.current_user)
 
         self.params.share = self._share(company)
-
         self.render_page(template_name='company/profile.html', data=data)
         return
 

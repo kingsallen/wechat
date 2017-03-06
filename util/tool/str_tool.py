@@ -8,18 +8,23 @@ import string
 import hashlib
 import uuid
 
-def password_crypt(password):
+def password_crypt(code=None):
     """
     密码加密
     :parameter:
-        password : 需要加密的密码
+        code : 需要加密的密码
     :Exception:加密出错，异常上抛处理
     """
+    if not code:
+        code1 = "".join(random.sample('0123456789', 1))
+        code2 = "".join(random.sample('0123456789abcdefghijklmnopqrstuvwxyz', 4))
+        code3 = "".join(random.sample('abcdefghijklmnopqrstuvwxyz', 1))
+        code = code1 + code2 + code3
+
     try:
-        return hashlib.sha1(password.strip().encode("utf-8")).hexdigest()
+        return code, hashlib.sha1(code.strip().encode("utf-8")).hexdigest()
     except Exception as e:
         raise e
-
 
 def gen_salary(salary_top, salary_bottom):
     """月薪，统一由服务端返回，前端只负责展现
