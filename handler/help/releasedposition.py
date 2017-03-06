@@ -47,5 +47,7 @@ class ReleasedPositionHandler(BaseHandler):
             ]
         )
 
+        # TODO 投递信息
+
         self.render("weixin/wx_published_position_list/wx_published_position_list.html",
                     positions = positions_list)
