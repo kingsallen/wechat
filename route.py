@@ -57,16 +57,16 @@ common_routes = [
 # 企业号的单独 routes
 platform_routes = [
     # position
-    (r"/m/position/([0-9]+)",                          "handler.platform.position.PositionHandler",                 {"event": "position_info"}),
-    (r"/m/position",                                   "handler.platform.position.PositionListHandler",             {"event": "position_list"}),
-    (r"/m/start",                                      "handler.platform.landing.LandingHandler",                   {"event": "start_landing"}),
-    (r"/m/company/(\d+)",                              "handler.platform.companyrelation.CompanyInfoHandler",       {"event": "company_old_info"}),
-    (r"/m/company",                                    "handler.platform.companyrelation.CompanyHandler",           {"event": "company_info"}),
-    (r"/m/company/team/(\d+)",                         "handler.platform.team.TeamDetailHandler",                   {"event": "team_detail"}),
-    (r"/m/company/team",                               "handler.platform.team.TeamIndexHandler",                    {"event": "team_info"}),
+    (r"/m/position/([0-9]+)",                   "handler.platform.position.PositionHandler",                 {"event": "position_info"}),
+    (r"/m/position",                            "handler.platform.position.PositionListHandler",             {"event": "position_list"}),
+    (r"/m/start",                               "handler.platform.landing.LandingHandler",                   {"event": "start_landing"}),
+    (r"/m/company/(\d+)",                       "handler.platform.companyrelation.CompanyInfoHandler",       {"event": "company_old_info"}),
+    (r"/m/company",                             "handler.platform.companyrelation.CompanyHandler",           {"event": "company_info"}),
+    (r"/m/company/team/(\d+)",                  "handler.platform.team.TeamDetailHandler",                   {"event": "team_detail"}),
+    (r"/m/company/team",                        "handler.platform.team.TeamIndexHandler",                    {"event": "team_info"}),
 
     # 各大公司的自定义配置
-    (r"/m/custom/edx",                                 "handler.platform.customize.CustomizeEDXHandler",            {"event": "customize_edx"}),
+    (r"/m/custom/edx",                          "handler.platform.customize.CustomizeEDXHandler",            {"event": "customize_edx"}),
 
     (r"/m/api/company/visitreq",                       "handler.platform.companyrelation.CompanyVisitReqHandler",   {"event": "company_visitreq"}),
     (r"/m/api/company/survey",                         "handler.platform.companyrelation.CompanySurveyHandler",     {"event": "company_survey"}),

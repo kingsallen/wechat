@@ -53,19 +53,22 @@ INFRA_RP_POSITION_LIST_SHARE_INFO = 'position/list/hb_share_info'
 
 # Profile 服务
 # Ref: https://wiki.moseeker.com/profile-api.md
-INFRA_PROFILE = "profile"
-INFRA_PROFILE_CRAWLER = "profile/crawler"
-INFRA_PROFILE_BASIC = "profile/basic"
-INFRA_PROFILE_LANGUAGE = "profile/language"
-INFRA_PROFILE_SKILL = "profile/skill"
-INFRA_PROFILE_CREDENTIALS = "profile/credentials"
-INFRA_PROFILE_EDUCATION = "profile/education"
-INFRA_PROFILE_PROFILE = "profile/profile"
-INFRA_PROFILE_WORKEXP = "profile/workexp"
-INFRA_PROFILE_PROJECTEXP = "profile/projectexp"
-INFRA_PROFILE_AWARDS = "profile/awards"
-INFRA_PROFILE_WORKS = "profile/works"
-INFRA_PROFILE_INTENTION = "profile/intention"
+PROFILE = "profile"
+PROFILE_BASIC = "profile/basic"
+PROFILE_LANGUAGE = "profile/language"
+PROFILE_SKILL = "profile/skill"
+PROFILE_CREDENTIALS = "profile/credentials"
+PROFILE_EDUCATION = "profile/education"
+PROFILE_PROFILE = "profile/profile"
+PROFILE_WORKEXP = "profile/workexp"
+PROFILE_PROJECTEXP = "profile/projectexp"
+PROFILE_AWARDS = "profile/awards"
+PROFILE_WORKS = "profile/works"
+PROFILE_INTENTION = "profile/intention"
+
+# TODO (tangyiliang) 关于爬虫和导入，具体作用待查
+PROFILE_CRAWLER = "profile/crawler"
+PROFILE_IMPORT = "crawler"
 
 # 字典服务
 DICT_CONSTANT = "dict/constant"

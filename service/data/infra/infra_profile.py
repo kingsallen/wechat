@@ -2,36 +2,72 @@
 
 import tornado.gen as gen
 
+import conf.common as const
 import conf.path as path
 from service.data.base import DataService
 from util.common import ObjectDict
-from util.tool.http_tool import http_get, http_post
+from util.tool.http_tool import http_get, http_post, http_put, http_delete
 
 
 class InfraProfileDataService(DataService):
 
-    """对接profile服务
-        referer: https://wiki.moseeker.com/profile-api.md"""
-
     @gen.coroutine
-    def has_profile(self, user_id):
-        """
-        判断 user_user 是否有 profile (profile_profile 表数据)
-        :param user_id:
-        :param from_hr: 是否模拟hr端调用接口
-        :return: tuple (bool, profile or None)
-
-        调用方式:
-        profile = has_profile[1]
-        """
+    def get_profile(self, user_id):
         params = ObjectDict(user_id=user_id)
-        res = yield http_get(path.INFRA_PROFILE, params)
-        ret = "status" not in res
-        raise gen.Return((ret, res))
+        response = yield http_get(path.PROFILE, params)
+        return response
+
+    # TODO (tangyiliang)
+    # @gen.coroutine
+    # def import_profile(self, source, username, password, user_id):
+    #     params = ObjectDict(
+    #         type=int(source),
+    #         username=username,
+    #         password=password,
+    #         user_id=int(user_id))
+    #     res = yield self._import_profile(params)
+    #     return res
+    #
+    # @gen.coroutine
+    # def import_profile(self, params):
+    #     response = yield http_post(path.PROFILE_IMPORT, params)
+    #     return response
 
     @gen.coroutine
-    def get_application_apply_count(self, params):
-        """获取一个月内该用户再该用户的申请数量
+    def _handle_profile_section(self, params, method=None, section=None):
+        """修改 profile 部分数据的底层方法，
+        对应CRUD的method参数为 get, create, update, delete
+        对应的 HTTP 动词为 GET, POST, PUT, DELETE
+
+        profile 部分标记字符串 (大小写不限)：
+        BASIC
+        LANGUAGE
+        SKILL
+        CREDENTIALS
+        EDUCATION
+        PROFILE
+        WORKEXP
+        PROJECTEXP
+        AWARDS
+        WORKS
+        INTENTION
         """
-        ret = yield http_post(path.INFRA_APPLICATION_APPLY_COUNT, params)
-        raise gen.Return(ret)
+        try:
+            if not method or not section:
+                raise ValueError
+            assert method in ['get', 'create', 'update', 'delete']
+            route = getattr(path, ("profile" + section).upper())
+        except:
+            raise ValueError('Invalid method or section')
+
+        if method == "get":
+            response = yield http_get(route, params)
+        elif method == "create":
+            response = yield http_post(route, params)
+        elif method == "update":
+            response = yield http_put(route, params)
+        elif method == "delete":
+            response = yield http_delete(route, params)
+        else:
+            raise Exception('Unknow Exception')
+        return response
