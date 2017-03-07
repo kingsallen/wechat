@@ -153,6 +153,26 @@ def check_employee(func):
     return wrapper
 
 
+def check_and_apply_profile(func):
+    """前置判断当前用户是否有 profile
+    如果没有， 跳转到新建 profile 页面
+    如果有，将 profile 放到 current_user 下"""
+
+    @functools.wraps(func)
+    @gen.coroutine
+    def wrapper(self, *args, **kwargs):
+        user_id = self.current_user.sysuser.id
+        has_profile, profile = yield self.profile_ps.has_profile(user_id)
+        if not has_profile:
+            # TODO (tangyiliang)
+            self.redirect(make_url('/path/to/create/profile'))
+        else:
+            self.current_user.profile = profile
+            yield func(self, *args, **kwargs)
+
+    return wrapper
+
+
 def check_sub_company(func):
     """
     Check request sub_company data or not.

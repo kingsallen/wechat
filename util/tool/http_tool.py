@@ -14,52 +14,52 @@ from app import logger
 from setting import settings
 import conf.common as constant
 from util.common import ObjectDict
+from util.tool.dict_tool import objectdictify
 
 
 @gen.coroutine
 def http_get(route, jdata=None, timeout=5):
     ret = yield _async_http_get(route, jdata, timeout=timeout, method='GET')
-    raise gen.Return(ret)
+    return ret
 
 
 @gen.coroutine
 def http_delete(route, jdata=None, timeout=5):
     ret = yield _async_http_get(route, jdata, timeout=timeout, method='DELETE')
-    raise gen.Return(ret)
+    return ret
 
 
 @gen.coroutine
 def http_post(route, jdata=None, timeout=5):
     ret = yield _async_http_post(route, jdata, timeout=timeout, method='POST')
-    raise gen.Return(ret)
+    return ret
 
 
 @gen.coroutine
 def http_put(route, jdata=None, timeout=5):
     ret = yield _async_http_post(route, jdata, timeout=timeout, method='PUT')
-    raise gen.Return(ret)
+    return ret
 
 
 @gen.coroutine
 def http_patch(route, jdata=None, timeout=5):
     ret = yield _async_http_post(route, jdata, timeout=timeout, method='PATCH')
-    raise gen.Return(ret)
+    return ret
 
 
-def _objectdictify(result):
-    """将结果 ObjectDict 化"""
-    ret = result
-    try:
-        if isinstance(result, list):
-            ret = [ObjectDict(e) for e in result]
-        elif isinstance(result, dict):
-            ret = ObjectDict(result)
-        else:
-            pass
-    except Exception as e:
-        logger.error(e)
-    finally:
-        return ret
+
+
+def unboxing(http_response):
+    """标准 restful api 返回拆箱"""
+
+    result = bool(http_response.status == constant.API_SUCCESS)
+
+    if result:
+        data = http_response.data
+    else:
+        data = http_response
+
+    return result, data
 
 
 @gen.coroutine
@@ -85,7 +85,7 @@ def _async_http_get(route, jdata=None, timeout=5, method='GET'):
     logger.debug("[infra][_async_http_get][url: {}][ret: {}] ".format(
         url, ujson.decode(response.body)))
     body = ujson.decode(response.body)
-    raise gen.Return(_objectdictify(body))
+    return objectdictify(body)
 
 
 @gen.coroutine
@@ -113,4 +113,4 @@ def _async_http_post(route, jdata=None, timeout=5, method='POST'):
         "[infra][_async_http_post][url: {}][body: {}][ret: {}] "
         .format(url, ujson.encode(jdata), ujson.decode(response.body)))
     body = ujson.decode(response.body)
-    raise gen.Return(_objectdictify(body))
+    return objectdictify(body)

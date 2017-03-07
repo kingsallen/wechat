@@ -113,7 +113,7 @@ class WechatTemplateMessager(object):
         raise gen.Return((ret.errcode == 0, ret))
 
     @gen.coroutine
-    def _get_template(self, wechat_id, sys_template_id) -> int:
+    def _get_template(self, wechat_id, sys_template_id):
         """根据 wechat_id, 系统模板id 获取这个 wechat 下的 template_id
 
         :param wechat_id: 微信 id
