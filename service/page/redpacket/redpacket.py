@@ -205,7 +205,6 @@ class RedpacketPageService(PageService):
                 if is_service_wechat:
                     recom_wxuser = yield user_ps.get_wxuser_sysuser_id_wechat_id(
                         recom.id, recom_wechat.id)
-                    # recom_wechat = recom_wechat
 
                 else:
                     recom_wxuser = yield user_ps.get_wxuser_sysuser_id_wechat_id(

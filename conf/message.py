@@ -25,6 +25,7 @@ CELLPHONE_RESET_PASSWORD = "设置密码失败，请重试"
 CELLPHONE_PASSWORD_ERROR = "密码要求为至少六位以上的数字与字母组合"
 CELLPHONE_NOT_MATCH = "输入的手机号与原绑定手机号不一致"
 CELLPHONE_NAME_EMAIL = "姓名或者邮箱格式错误"
+CELLPHONE_MOBILE_INVALID = "手机号未提供或未验证"
 
 DATABASE_ERROR = "数据库操作失败"
 
@@ -44,5 +45,10 @@ RED_PACKET_WISHING = "红包一个，聊表心意，祝君好运"
 WECHAT_SCAN_HAD_BINDED = "当前扫描微信号已经绑定其他帐号了, 请更换微信号重新扫描"
 WECHAT_SCAN_FAILED = "绑定失败, 请尝试先解绑微信号"
 WECHAT_SCAN_CHANGE_WECHAT = "当前扫描微信号不是已绑定微信号, 请使用正确的微信号进行扫描"
+
+POSITION_NOT_EXIST = "您访问的职位不存在"
+POSITION_ALREADY_EXPIRED = "您申请的职位已经过期"
+DUPLICATE_APPLICATION = "您已申请过该职位，请在个人中心查询您的申请详情"
+CREATE_APPLICATION_FAILED = "您的申请失败了，请稍候再试"
 
 

@@ -103,6 +103,8 @@ SESSION_ID = "{0}:{1}"
 SESSION_USER_HR_ACCOUNT = 'user_hr_account_{}'
 # hr平台绑定微信后的 pub/sub key
 SESSION_WX_BINDING = 'wx_binding_{}'
+# Email投递创建Redis格式(邮件解析, 提醒脚本都会用到)
+FORMAT_EMAIL_CREATE = "EMAIL_CREATE:{}"  #
 
 
 # ++++++++++业务常量+++++++++++

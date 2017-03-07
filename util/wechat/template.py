@@ -117,7 +117,7 @@ def rp_transfer_apply_success_notice_tpl(wechat_id, openid, link, nickname,
     raise gen.Return(ret)
 
 @gen.coroutine
-def position_view_five(wechat_id, openid, link, title,
+def position_view_five_notice_tpl(wechat_id, openid, link, title,
                     salary, sys_template_id=const.TEMPLATES.POSITION_VIEWED):
 
     """职位浏览5次，向 HR 发送消息模板"""
@@ -126,6 +126,27 @@ def position_view_five(wechat_id, openid, link, title,
     json_data = _make_json_data(
         first="您好，您发布的职位已被浏览5次",
         remark="请点击查看详情",
+        keyword1="已有5人次浏览该职位",
+        keyword2=title,
+        keyword3=salary,
+        keyword4="{}年{}月{}日{:0>2}:{:0>2} ".format(d.year, d.month, d.day,
+                                                     d.hour, d.minute))
+
+    ret = yield messager.send_template(
+        wechat_id, openid, sys_template_id, link, json_data, qx_retry=False)
+
+    raise gen.Return(ret)
+
+@gen.coroutine
+def application_notice_tpl(wechat_id, openid, link, title,
+                    salary, sys_template_id=const.TEMPLATES.POSITION_VIEWED):
+
+    """职位浏览5次，向 HR 发送消息模板"""
+
+    d = datetime.now()
+    json_data = _make_json_data(
+        first="感谢您抽出时间申请该职位，我们将尽快查阅您的简历",
+        remark="",
         keyword1="已有5人次浏览该职位",
         keyword2=title,
         keyword3=salary,

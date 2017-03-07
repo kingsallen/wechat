@@ -425,16 +425,16 @@ class BaseHandler(MetaBaseHandler):
             self.logger.debug(
                 "_build_session_by_unionid session 1: {}".format(session))
 
-            if not self._session_id:
-                self._session_id = self._make_new_session_id(
-                    session.qxuser.sysuser_id)
-                self.set_secure_cookie(
-                    const.COOKIE_SESSIONID,
-                    self._session_id,
-                    httponly=True)
+        if not self._session_id:
+            self._session_id = self._make_new_session_id(
+                session.qxuser.sysuser_id)
+            self.set_secure_cookie(
+                const.COOKIE_SESSIONID,
+                self._session_id,
+                httponly=True)
 
-            self._pass_session.save_ent_sessions(
-                self._session_id, session, self._wechat.id)
+        self._pass_session.save_ent_sessions(
+            self._session_id, session, self._wechat.id)
 
         yield self._add_sysuser_to_session(session, self._session_id)
 

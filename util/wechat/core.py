@@ -2,7 +2,6 @@
 
 import ujson
 
-import tornado.httpclient
 import tornado.gen as gen
 
 import conf.common as const
@@ -11,6 +10,7 @@ from setting import settings
 from util.common import ObjectDict
 from util.common.singleton import Singleton
 from util.tool.date_tool import curr_datetime_now
+from util.tool.http_tool import http_post
 
 from app import logger
 from service.data.hr.hr_wx_wechat import HrWxWechatDataService
@@ -31,8 +31,6 @@ class WechatNoTemplateError(WechatException):
 class WechatTemplateMessager(object):
 
     __metaclass__ = Singleton
-
-    async_http = tornado.httpclient.AsyncHTTPClient()
 
     def __init__(self):
         super(WechatTemplateMessager, self).__init__()
@@ -102,11 +100,7 @@ class WechatTemplateMessager(object):
         jdata.topcolor = topcolor,
         jdata.data = ujson.loads(json_data)
 
-        response = yield self.async_http.fetch(
-            url,
-            method="POST",
-            body=ujson.dumps(jdata),
-        )
+        response = yield http_post(url, jdata, infra=False)
 
         ret = ObjectDict(ujson.decode(response.body))
 

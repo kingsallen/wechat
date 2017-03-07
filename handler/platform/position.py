@@ -13,7 +13,7 @@ from util.common.decorator import handle_response, check_employee
 from util.common.cipher import encode_id
 from util.tool.str_tool import gen_salary, add_item, split
 from util.tool.url_tool import make_url, url_append_query
-from util.wechat.template import position_view_five
+from util.wechat.template import position_view_five_notice_tpl
 from tests.dev_data.user_company_config import COMPANY_CONFIG
 
 
@@ -600,7 +600,7 @@ class PositionHandler(BaseHandler):
                                     host=self.settings.qx_host, m="info",
                                     pid=position_info.id)
 
-                yield position_view_five(help_wechat.id, hr_wx_user.openid,
+                yield position_view_five_notice_tpl(help_wechat.id, hr_wx_user.openid,
                                          link, position_info.title,
                                          position_info.salary)
 
@@ -677,8 +677,9 @@ class PositionListHandler(BaseHandler):
                 infra_params)
 
             # 获取获取到普通职位列表，则根据获取的数据查找其中红包职位的红包相关信息
-            rp_position_list = [position for position in position_list
-                                if isinstance(position, dict) and position.in_hb]
+            rp_position_list = [
+                position for position in position_list if isinstance(
+                    position, dict) and position.in_hb]
 
             if position_list and rp_position_list:
                 rpext_list = yield self.position_ps.infra_get_position_list_rp_ext(
@@ -705,8 +706,7 @@ class PositionListHandler(BaseHandler):
                 template_name="refer/neo_weixin/position_v2/position_list_items.html",
                 positions=position_list,
                 is_employee=bool(self.current_user.employee),
-                use_neowx=int(self.current_user.wechat.show_new_jd)
-            )
+                use_neowx=int(self.current_user.wechat.show_new_jd))
             return
 
         # 直接请求页面返回
@@ -714,14 +714,11 @@ class PositionListHandler(BaseHandler):
             self.render(
                 template_name="refer/neo_weixin/position_v2/position_list.html",
                 positions=position_list,
-                position_title=const_platorm.POSITION_LIST_TITLE.get(
-                    self.params.m,
-                    const_platorm.POSITION_LIST_TITLE_DEFAULT),
+                position_title=const_platorm.POSITION_LIST_TITLE_DEFAULT if not self.params.recomlist else const_platorm.POSITION_LIST_TITLE_RECOMLIST,
                 url='',
                 use_neowx=int(self.current_user.wechat.show_new_jd),
                 is_employee=bool(self.current_user.employee),
-                searchFilterNum=self.get_search_filter_num()
-            )
+                searchFilterNum=self.get_search_filter_num())
 
     @gen.coroutine
     def make_company_info(self):

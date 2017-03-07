@@ -18,36 +18,29 @@ from util.tool.dict_tool import objectdictify
 
 
 @gen.coroutine
-def http_get(route, jdata=None, timeout=5):
-    ret = yield _async_http_get(route, jdata, timeout=timeout, method='GET')
+def http_get(route, jdata=None, timeout=5, infra=True):
+    ret = yield _async_http_get(route, jdata, timeout=timeout, method='GET', infra=infra)
     return ret
-
 
 @gen.coroutine
-def http_delete(route, jdata=None, timeout=5):
-    ret = yield _async_http_get(route, jdata, timeout=timeout, method='DELETE')
+def http_delete(route, jdata=None, timeout=5, infra=True):
+    ret = yield _async_http_get(route, jdata, timeout=timeout, method='DELETE', infra=infra)
     return ret
-
 
 @gen.coroutine
-def http_post(route, jdata=None, timeout=5):
-    ret = yield _async_http_post(route, jdata, timeout=timeout, method='POST')
+def http_post(route, jdata=None, timeout=5, infra=True):
+    ret = yield _async_http_post(route, jdata, timeout=timeout, method='POST', infra=infra)
     return ret
-
 
 @gen.coroutine
-def http_put(route, jdata=None, timeout=5):
-    ret = yield _async_http_post(route, jdata, timeout=timeout, method='PUT')
+def http_put(route, jdata=None, timeout=5, infra=True):
+    ret = yield _async_http_post(route, jdata, timeout=timeout, method='PUT', infra=infra)
     return ret
-
 
 @gen.coroutine
-def http_patch(route, jdata=None, timeout=5):
-    ret = yield _async_http_post(route, jdata, timeout=timeout, method='PATCH')
+def http_patch(route, jdata=None, timeout=5, infra=True):
+    ret = yield _async_http_post(route, jdata, timeout=timeout, method='PATCH', infra=infra)
     return ret
-
-
-
 
 def unboxing(http_response):
     """标准 restful api 返回拆箱"""
@@ -63,7 +56,7 @@ def unboxing(http_response):
 
 
 @gen.coroutine
-def _async_http_get(route, jdata=None, timeout=5, method='GET'):
+def _async_http_get(route, jdata=None, timeout=5, method='GET', infra=True):
     """可用 HTTP 动词为 GET 和 DELETE"""
     if method.lower() not in "get delete":
         raise ValueError("method is not in GET and DELETE")
@@ -71,9 +64,12 @@ def _async_http_get(route, jdata=None, timeout=5, method='GET'):
     if jdata is None:
         jdata = ObjectDict()
 
-    jdata.update({"appid": constant.APPID[env]})
+    if infra:
+        jdata.update({"appid": constant.APPID[env]})
+        url = url_concat("{0}/{1}".format(settings['infra'], route), jdata)
+    else:
+        url = url_concat(route, jdata)
 
-    url = url_concat("{0}/{1}".format(settings['infra'], route), jdata)
     http_client = tornado.httpclient.AsyncHTTPClient()
     response = yield http_client.fetch(
         url,
@@ -89,7 +85,7 @@ def _async_http_get(route, jdata=None, timeout=5, method='GET'):
 
 
 @gen.coroutine
-def _async_http_post(route, jdata=None, timeout=5, method='POST'):
+def _async_http_post(route, jdata=None, timeout=5, method='POST', infra=True):
     """可用 HTTP 动词为 POST, PATCH 和 PUT"""
     if method.lower() not in "post put patch":
         raise ValueError("method is not in POST, PUT and PATCH")
@@ -97,10 +93,13 @@ def _async_http_post(route, jdata=None, timeout=5, method='POST'):
     if jdata is None:
         jdata = ObjectDict()
 
-    jdata.update({"appid": constant.APPID[env]})
+    if infra:
+        jdata.update({"appid": constant.APPID[env]})
+        url = "{0}/{1}".format(settings['infra'], route)
+    else:
+        url = route
 
     http_client = tornado.httpclient.AsyncHTTPClient()
-    url = "{0}/{1}".format(settings['infra'], route)
     response = yield http_client.fetch(
         url,
         method=method.upper(),

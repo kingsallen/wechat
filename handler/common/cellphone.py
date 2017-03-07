@@ -146,7 +146,11 @@ class CellphoneBindHandler(BaseHandler):
             "_mc": encode_id(int(self.params.code), 8)
         })
 
-        self.set_secure_cookie(const.COOKIE_MOBILE_CODE, self.params.code, expires_days=0.05, httponly=True)
+        self.set_secure_cookie(
+            const.COOKIE_MOBILE_CODE,
+            self.params.code,
+            expires_days=0.05,
+            httponly=True)
 
         raise gen.Return(True)
 
@@ -154,8 +158,9 @@ class CellphoneBindHandler(BaseHandler):
     def _opt_post_user_account(self):
 
         # 检查是否需要合并 pc 账号
-        if self.current_user.sysuser \
-            and str(self.current_user.sysuser.mobile) != str(self.current_user.sysuser.username):
+        if self.current_user.sysuser and str(
+                self.current_user.sysuser.mobile) != str(
+                self.current_user.sysuser.username):
             response = yield self.cellphone_ps.wx_pc_combine(
                 mobile=self.params.mobile,
                 unionid=self.current_user.sysuser.unionid,
@@ -188,4 +193,4 @@ class CellphoneBindHandler(BaseHandler):
                     })
 
             yield self.user_ps.bind_mobile_password(self.current_user.sysuser.id,
-                                           self.params.mobile, password)
+                                                    self.params.mobile, password)
