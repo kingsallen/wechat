@@ -126,7 +126,7 @@ class ApplicationHandler(BaseHandler):
                 return
         else:
             self.LOG.debug(u"Start to create email profile..")
-            # TODO 
+            # TODO
             yield self.create_email_profile()
 
         self.render("weixin/sysuser/emailresume_sent.html")
