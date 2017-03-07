@@ -34,7 +34,7 @@ class InfraProfileDataService(DataService):
     #     return response
 
     @gen.coroutine
-    def _handle_profile_section(self, params, method=None, section=None):
+    def handle_profile_section(self, params, method=None, section=None):
         """修改 profile 部分数据的底层方法，
         对应CRUD的method参数为 get, create, update, delete
         对应的 HTTP 动词为 GET, POST, PUT, DELETE

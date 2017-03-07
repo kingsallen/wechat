@@ -334,31 +334,29 @@ class MetaBaseHandler(AtomHandler):
         self.logger.debug("Wechat MSG: %s" % data)
         self.write(data)
 
-    def send_json_success(
-            self,
-            data=None,
-            message=msg_const.RESPONSE_SUCCESS,
-            http_code=200):
+    def send_json_success(self, data=None, message=msg_const.RESPONSE_SUCCESS,
+                          http_code=200):
         """API 成功返回的便捷方法"""
         if data is None:
             data = ""
-        self._send_json(data=data,
-                        status_code=const.API_SUCCESS,
-                        message=message,
-                        http_code=http_code)
+        self._send_json(data=data, status_code=const.API_SUCCESS,
+                        message=message, http_code=http_code)
 
-    def send_json_error(
-            self,
-            data=None,
-            message=msg_const.RESPONSE_FAILURE,
-            http_code=416):
+    def send_json_warning(self, data=None, message=msg_const.RESPONSE_WARNING,
+                          http_code=200):
+        """API 返回部分成功的便捷方法"""
+        if data is None:
+            data = ""
+        self._send_json(data=data, status_code=const.API_WARNING,
+                        message=message, http_code=http_code)
+
+    def send_json_error(self, data=None, message=msg_const.RESPONSE_FAILURE,
+                        http_code=416):
         """API 错误返回的便捷方法"""
         if data is None:
             data = ""
-        self._send_json(data=data,
-                        status_code=const.API_FAILURE,
-                        message=message,
-                        http_code=http_code)
+        self._send_json(data=data, status_code=const.API_FAILURE,
+                        message=message, http_code=http_code)
 
     def _get_info_header(self, log_params):
         """构建日志内容"""
