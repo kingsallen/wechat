@@ -24,6 +24,10 @@ from util.tool.str_tool import gen_salary
 from conf.platform import MEDIA_TYPE
 from conf.path import POSITION_PATH
 
+def make_up_for_missing_res(res):
+    if res is None:
+        res = ObjectDict(res_url="", res_type=0)
+    return res
 
 def template1(sub_type, title, data, more_link=None):
     """
@@ -61,6 +65,7 @@ def template1(sub_type, title, data, more_link=None):
 
 
 def template1_data(resource, member_list=None):
+    resource = make_up_for_missing_res(resource)
     return {
         'sub_title': resource.sub_title,
         'longtext': resource.longtext,
@@ -185,6 +190,7 @@ def make_team_member(member, head_img):
 
 
 def make_team_index_template(team, team_resource, more_link, member_list):
+    team_resource = make_up_for_missing_res(team_resource)
     data = [{
         'sub_title': team.name,
         'longtext': team.summary,
@@ -217,6 +223,7 @@ def make_interview(media, res):
 
 
 def make_other_team_data(team, res, handler_params):
+    res = make_up_for_missing_res(res)
     return {
         'sub_title': team.name,
         'link': make_url('/m/company/team/{}'.format(team.id), handler_params),
@@ -232,6 +239,7 @@ def make_team_detail_template(team, members, detail_media_list, positions,
 
     # 无素材不显示团队
     if team.is_show:
+        team_res = make_up_for_missing_res(res_dic.get(team.res_id))
         template.append(
             template1(
                 sub_type='full',
@@ -239,8 +247,8 @@ def make_team_detail_template(team, members, detail_media_list, positions,
                 data=[{
                     'sub_title': '',
                     'longtext': team.description,
-                    'media_url': make_static_url(res_dic.get(team.res_id).res_url),
-                    'media_type': MEDIA_TYPE[res_dic.get(team.res_id).res_type],
+                    'media_url': make_static_url(team_res.res_url),
+                    'media_type': MEDIA_TYPE[team_res.res_type],
                     'member_list': [make_introduction(m, res_dic.get(m.res_id))
                                     for m in members],
                 }]
@@ -340,16 +348,19 @@ def make_mate(media_list, res_dict):
 
 
 def make_team(team, resources, more_link, team_members):
+    team_res = make_up_for_missing_res(resources.get(team.res_id))
     return template1(
         sub_type='middle',
         title='所属团队',
         data=[{
             'sub_title': team.name,
             'longtext': team.summary,
-            'media_url': make_static_url(resources.get(team.res_id).res_url),
-            'media_type': MEDIA_TYPE[resources.get(team.res_id).res_type],
+            'media_url': make_static_url(team_res.res_url),
+            'media_type': MEDIA_TYPE[team_res.res_type],
             'member_list': [make_team_member(m, resources.get(m.res_id))
                             for m in team_members],
         }],
         more_link=more_link
     )
+
+
