@@ -48,6 +48,8 @@ common_routes = [
     (r"/m/api/usercenter/applyrecords[\/]*([0-9]+)*",  "handler.common.usercenter.ApplyrecordsHandler",             {"event": "usercenter_applyredords"}),
     (r"/m/api/usercenter",                             "handler.common.usercenter.UsercenterHandler",               {"event": "usercenter_"}),
 
+    # websocket
+    (r"/websocket/([A-Za-z0-9_]{1,32})", "handler.common.im.ChatWebSocketHandler"),
 
     # 兼容老微信 url，进行302跳转，event 设置为 NULL
     # (r"/.*",                                           "handler.common.compatible.CompatibleHandler",               {"event": "NULL"})

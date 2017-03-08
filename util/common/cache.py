@@ -37,6 +37,9 @@ class BaseRedis(object):
         for method_name in methods:
             assert hasattr(self, method_name)
 
+    def get_raw_redis_client(self):
+        return self._redis
+
     def key_name(self, key, prefix=True):
         if not prefix:
             return key

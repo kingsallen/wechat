@@ -71,6 +71,10 @@ PROFILE_INTENTION = "profile/intention"
 PROFILE_CRAWLER = "profile/crawler"
 PROFILE_IMPORT = "crawler"
 
+# 公司服务
+COMPANY_ALL = 'company/all'
+COMPANY = 'company'
+
 # 字典服务
 DICT_CONSTANT = "dict/constant"
 DICT_CITIES = "dict/cities"

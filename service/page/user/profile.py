@@ -3,10 +3,7 @@
 import tornado.gen as gen
 
 from service.page.base import PageService
-import conf.common as const
-import conf.path as path
 from util.common import ObjectDict
-from util.tool.http_tool import http_get, http_post
 
 
 class ProfilePageService(PageService):
@@ -38,7 +35,7 @@ class ProfilePageService(PageService):
         'id', 'name', 'level'
     ]
 
-    CERT_KEYS = _SKILL_KEYS = [
+    CERT_KEYS = SKILL_KEYS = [
         'id', 'name'
     ]
 
@@ -118,3 +115,132 @@ class ProfilePageService(PageService):
         result, data = yield self.infra_profile_ds.delete_profile_language(
             record, profile_id)
         return result, data
+
+    @gen.coroutine
+    def get_profile_skill(self, profile_id):
+        result, data = yield self.infra_profile_ds.get_profile_skill(
+            profile_id)
+        return result, data
+
+    @gen.coroutine
+    def create_profile_skill(self, record, profile_id):
+        result, data = yield self.infra_profile_ds.create_profile_skill(
+            record, profile_id)
+        return result, data
+
+    @gen.coroutine
+    def update_profile_skill(self, record, profile_id):
+        result, data = yield self.infra_profile_ds.update_profile_skill(
+            record, profile_id)
+        return result, data
+
+    @gen.coroutine
+    def delete_profile_skill(self, record, profile_id):
+        result, data = yield self.infra_profile_ds.delete_profile_skill(
+            record, profile_id)
+        return result, data
+
+    @gen.coroutine
+    def get_profile_cert(self, profile_id):
+        result, data = yield self.infra_profile_ds.get_profile_cert(
+            profile_id)
+        return result, data
+
+    @gen.coroutine
+    def create_profile_cert(self, record, profile_id):
+        result, data = yield self.infra_profile_ds.create_profile_cert(
+            record, profile_id)
+        return result, data
+
+    @gen.coroutine
+    def update_profile_cert(self, record, profile_id):
+        result, data = yield self.infra_profile_ds.update_profile_cert(
+            record, profile_id)
+        return result, data
+
+    @gen.coroutine
+    def delete_profile_cert(self, record, profile_id):
+        result, data = yield self.infra_profile_ds.delete_profile_cert(
+            record, profile_id)
+        return result, data
+
+    @gen.coroutine
+    def get_profile_workexp(self, workexp_id):
+        result, data = yield self.infra_profile_ds.get_profile_workexp(
+            workexp_id)
+        return result, data
+
+    @gen.coroutine
+    def create_profile_workexp(self, record, profile_id):
+        result, data = yield self.infra_profile_ds.create_profile_workexp(
+            record, profile_id)
+        return result, data
+
+    @gen.coroutine
+    def update_profile_workexp(self, record, profile_id):
+        result, data = yield self.infra_profile_ds.update_profile_workexp(
+            record, profile_id)
+        return result, data
+
+    @gen.coroutine
+    def delete_profile_workexp(self, record, profile_id):
+        result, data = yield self.infra_profile_ds.delete_profile_workexp(
+            record, profile_id)
+        return result, data
+
+    @gen.coroutine
+    def get_profile_education(self, education_id):
+        result, data = yield self.infra_profile_ds.get_profile_education(
+            education_id)
+        return result, data
+
+    @gen.coroutine
+    def create_profile_education(self, record, profile_id):
+        college_code = yield self.infra_dict_ds.get_college_code_by_name(
+            record.college_name)
+        result, data = yield self.infra_profile_ds.create_profile_education(
+            record, profile_id, college_code)
+        return result, data
+
+    @gen.coroutine
+    def update_profile_education(self, record, profile_id):
+        college_code = yield self.infra_dict_ds.get_college_code_by_name(
+            record.college_name)
+        result, data = yield self.infra_profile_ds.update_profile_education(
+            record, profile_id, college_code)
+        return result, data
+
+    @gen.coroutine
+    def delete_profile_education(self, record, profile_id):
+        result, data = yield self.infra_profile_ds.delete_profile_education(
+            record, profile_id)
+        return result, data
+
+    @gen.coroutine
+    def get_profile_projectexp(self, projectexp_id):
+        result, data = yield self.infra_profile_ds.get_profile_projectexp(
+            projectexp_id)
+        return result, data
+
+    # @gen.coroutine
+    # def create_profile_projectexp(self, record, profile_id):
+    #     college_code = yield self.infra_dict_ds.get_college_code_by_name(
+    #         record.college_name)
+    #     result, data = yield self.infra_profile_ds.create_profile_projectexp(
+    #         record, profile_id, college_code)
+    #     return result, data
+    #
+    # @gen.coroutine
+    # def update_profile_projectexp(self, record, profile_id):
+    #     college_code = yield self.infra_dict_ds.get_college_code_by_name(
+    #         record.college_name)
+    #     result, data = yield self.infra_profile_ds.update_profile_projectexp(
+    #         record, profile_id, college_code)
+    #     return result, data
+    #
+    # @gen.coroutine
+    # def delete_profile_projectexp(self, record, profile_id):
+    #     result, data = yield self.infra_profile_ds.delete_profile_projectexp(
+    #         record, profile_id)
+    #     return result, data
+

@@ -9,7 +9,9 @@ from util.common import ObjectDict
 from tornado import gen
 from service.page.base import PageService
 from util.tool.url_tool import make_static_url
+from util.tool.dict_tool import sub_dict
 
+cached_company_sug_wechat = None
 
 class CompanyPageService(PageService):
 
@@ -127,3 +129,53 @@ class CompanyPageService(PageService):
         lastrowid = yield self.campaign_company_survey_ds.create_survey(fields)
         raise gen.Return(lastrowid)
 
+    @gen.coroutine
+    def create_company_on_wechat(self, record):
+        result, data = yield self.infra_company_ds.create_company_on_wechat({
+            "type":         1,
+            "name":         record.name,
+            "abbreviation": record.abbreviation,
+            "source":       8,  # 微信端添加
+            "scale":        record.scale,
+            "industry":     record.industry,
+            "logo":         record.logo
+        })
+        return result, data
+
+    @gen.coroutine
+    def get_cp_for_sug_wechat(self, name=None):
+        """
+        通过 profile 编辑出公司名称 sug
+        :param name: 如果 name 有值, 通过 name 做 filter
+        :return:
+        """
+        global cached_company_sug_wechat
+
+        if cached_company_sug_wechat and name is None:
+            return True, cached_company_sug_wechat
+
+        params = ObjectDict(type=0, parent_id=0)
+        if name is not None:
+            params.update(name=name)
+
+        res = yield self.infra_company_ds.get_company_all(params)
+
+        if not isinstance(res, list) or not res:
+            # Error, No data
+            return False, res
+        else:
+            keys = ['id', 'name', 'logo']
+            result = []
+            unique_names = []
+            for e in res:
+                e = ObjectDict(e)
+                if e.name in unique_names:
+                    continue
+                e = ObjectDict(sub_dict(e, keys))
+                result.append(e)
+                unique_names.append(e.name)
+
+            if cached_company_sug_wechat is None:
+                cached_company_sug_wechat = result
+
+            return True, result

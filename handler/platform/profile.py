@@ -510,24 +510,25 @@ class ProfileHandler(BaseHandler):
             self.send_json_error(message='no component_data')
 
     @tornado.gen.coroutine
-    def get_edit_description(self):
+    def get_description(self):
         yield self.get_edit_basic(self_intro=True)
 
     @tornado.gen.coroutine
-    def post_edit_description(self):
+    def post_description(self):
         yield self.post_edit_basic(self_intro=True)
 
     # Profile 编辑 -- basic & self-introduction 结束
 
     # Profile 编辑 -- language 开始
     @tornado.gen.coroutine
-    def get_edit_language(self):
+    def get_language(self):
         profile_id = yield self._get_profile_id()
         result, languages = yield self.profile_ps.get_profile_language(
             profile_id)
         if not result:
             raise ValueError('cannot get language')
-        else: pass
+        else:
+            pass
         component = self.params.component
 
         component_data = []
@@ -541,7 +542,7 @@ class ProfileHandler(BaseHandler):
             data=self._make_json_data(component, component_data))
 
     @tornado.gen.coroutine
-    def post_edit_language(self):
+    def post_language(self):
         profile_id = yield self._get_profile_id()
         component_data = objectdictify(self.params.data)
 
@@ -559,345 +560,290 @@ class ProfileHandler(BaseHandler):
                 self.profile_ps, verb + "_profile_language")(e, profile_id)
             results.append(result)
 
-        success_results = [result for result in results if result == True]
+        self._send_json_result(results, len(component_data))
 
-        if len(success_results) == component_data:
+    # Profile 编辑 -- language 结束
+
+    # Profile 编辑 -- skill 开始
+    @tornado.gen.coroutine
+    def get_skill(self):
+        profile_id = yield self._get_profile_id()
+        result, skills = yield self._profile_service.get_profile_skill(
+            profile_id)
+        if not result:
+            raise ValueError('cannot get skills')
+        else:
+            pass
+
+        component = self.params.component
+        component_data = []
+        for s in skills:
+            s = sub_dict(s, self.profile_ps.SKILL_KEYS)
+            component_data.append(s)
+
+        self.send_json_success(
+            data=self._make_json_data(component, component_data))
+
+    @tornado.gen.coroutine
+    def post_skill(self):
+        profile_id = yield self._get_profile_id()
+        component_data = json_decode(self.params.data)
+
+        results = []
+        for e in component_data:
+            e = ObjectDict(e)
+            if hasattr(e, "__status") and getattr(e, "__status") == 'x':
+                verb = "delete"
+            else:
+                if e.get("id", 0):
+                    verb = "update"
+                else:
+                    verb = "create"
+            result, res = yield getattr(
+                self.profile_ps, verb + "_profile_skill")(e, profile_id)
+            results.append(result)
+
+        self._send_json_result(results, len(component_data))
+
+    # Profile 编辑 -- skill 结束
+
+    # Profile 编辑 -- cert 开始
+    @tornado.gen.coroutine
+    def get_cert(self):
+        profile_id = yield self._get_profile_id()
+        result, certs = yield self.profile_ps.get_profile_cert(
+            profile_id)
+        if not result:
+            raise ValueError('cannot get certs')
+
+        component = self.params.component
+        if result:
+            component_data = []
+            for s in certs:
+                s = sub_dict(s, self._CERT_KEYS)
+                component_data.append(s)
+        else:
+            component_data = None
+
+        self.send_json_success(
+            data=self._make_json_data(component, component_data))
+
+    @tornado.gen.coroutine
+    def post_cert(self):
+        profile_id = yield self._get_profile_id()
+        component_data = json_decode(self.params.data)
+
+        results = []
+        for e in component_data:
+            e = ObjectDict(e)
+
+            if hasattr(e, "__status") and getattr(e, "__status") == 'x':
+                verb = "delete"
+            else:
+                if e.get("id", 0):
+                    verb = "update"
+                else:
+                    verb = "create"
+
+            result, res = yield getattr(
+                self.profile_ps, verb + "_profile_cert")(e, profile_id)
+            results.append(result)
+
+        self._send_json_result(results, len(component_data))
+
+    # Profile 编辑 -- cert 结束
+
+    # Profile 编辑 -- jobexp 开始
+    @tornado.gen.coroutine
+    def get_jobexp(self):
+        profile_id = yield self._get_profile_id()
+        component = self._get_to_field()
+
+        scale_list = yield self.dictionary_ps.get_constants(
+            parent_code=const.CONSTANT_PARENT_CODE.COMPANY_SCALE)
+        constant = ObjectDict(scale_list=scale_list)
+
+        component_data = {}
+        new = False
+
+        if not self.params.id:
+            new = True
+
+        else:
+            workexp = yield self.profile_ps.get_profile_workexp(
+                workexp_id=self.params.id)
+            workexp = workexp[0]
+
+            if workexp and profile_id == workexp.profile_id:
+                component_data.update(
+                    sub_dict(workexp, self.profile_ps.WORKEXP_KEYS))
+
+        self.send_json_success(
+            data=self._make_json_data(
+                component=component,
+                component_data=component_data,
+                new=new,
+                constant=constant))
+
+    @tornado.gen.coroutine
+    def post_jobexp(self):
+
+        profile_id = yield self._get_profile_id()
+        component_data = ObjectDict(json_decode(self.params.data))
+        record = component_data
+
+        if hasattr(record, "__status") and getattr(record, "__status") == 'x':
+            verb = "delete"
+        else:
+            if record.get("id", 0):
+                verb = "update"
+            else:
+                verb = "create"
+
+        result, res = yield getattr(
+            self.profile_ps, verb + "_profile_workexp")(
+            record, profile_id)
+
+        if result:
             self.send_json_success()
-
-        elif len(success_results):
-            self.send_json_warning()
-
         else:
             self.send_json_error()
 
-    # Profile 编辑 -- language 结束
-    #
-    # @tornado.gen.coroutine
-    # def get_edit_skill(self):
-    #     """
-    #     GET edit skill page
-    #     """
-    #     profile_id = yield self._get_profile_id()
-    #     result, skills = yield self._profile_service.get_profile_skill(
-    #         profile_id)
-    #
-    #     component = self._get_to_field()
-    #     if result:
-    #         component_data = []
-    #         for s in skills:
-    #             s = sub_dict(s, self._SKILL_KEYS)
-    #             component_data.append(s)
-    #     else:
-    #         component_data = None
-    #
-    #     render_json = encode_json_dumps(self._make_render_json(
-    #         component=component,
-    #         component_data=component_data))
-    #
-    #     self.render("neo_weixin/profile/edit.html",
-    #                 render_json=render_json)
-    #
-    # @tornado.gen.coroutine
-    # def post_edit_skill(self):
-    #     """
-    #     POST save skill
-    #     """
-    #     profile_id = yield self._get_profile_id()
-    #     component_data = json_decode(self.params.data)
-    #
-    #     results = []
-    #     for e in component_data:
-    #         e = ObjectDict(e)
-    #
-    #         if hasattr(e, "__status") and getattr(e, "__status") == 'x':
-    #             verb = "delete"
-    #         else:
-    #             if e.get("id", 0):
-    #                 verb = "update"
-    #             else:
-    #                 verb = "create"
-    #
-    #         result, res = yield getattr(
-    #             self._profile_service, verb + "_profile_skill")(e, profile_id)
-    #         results.append(result)
-    #
-    #     if any(results):
-    #         self.send_json_success()
-    #     else:
-    #         self.send_json_error()
-    #
-    # @tornado.gen.coroutine
-    # def get_edit_cert(self):
-    #     """
-    #     GET edit cert page
-    #     """
-    #     profile_id = yield self._get_profile_id()
-    #     result, certs = yield self._profile_service.get_profile_cert(
-    #         profile_id)
-    #
-    #     component = self._get_to_field()
-    #     if result:
-    #         component_data = []
-    #         for s in certs:
-    #             s = sub_dict(s, self._CERT_KEYS)
-    #             component_data.append(s)
-    #     else:
-    #         component_data = None
-    #
-    #     render_json = encode_json_dumps(self._make_render_json(
-    #         component=component,
-    #         component_data=component_data))
-    #
-    #     self.render("neo_weixin/profile/edit.html",
-    #                 render_json=render_json)
-    #
-    # @tornado.gen.coroutine
-    # def post_edit_cert(self):
-    #     """
-    #     POST save cert
-    #     """
-    #     profile_id = yield self._get_profile_id()
-    #     component_data = json_decode(self.params.data)
-    #
-    #     results = []
-    #     for e in component_data:
-    #         e = ObjectDict(e)
-    #
-    #         if hasattr(e, "__status") and getattr(e, "__status") == 'x':
-    #             verb = "delete"
-    #         else:
-    #             if e.get("id", 0):
-    #                 verb = "update"
-    #             else:
-    #                 verb = "create"
-    #
-    #         result, res = yield getattr(
-    #             self._profile_service, verb + "_profile_cert")(e, profile_id)
-    #         results.append(result)
-    #
-    #     if any(results):
-    #         self.send_json_success()
-    #     else:
-    #         self.send_json_error()
-    #
-    # @tornado.gen.coroutine
-    # def get_edit_jobexp(self):
-    #     """
-    #     GET edit workexp page
-    #     """
-    #     profile_id = yield self._get_profile_id()
-    #     component = self._get_to_field()
-    #
-    #     constant = {"scale_list": self._dict_service.get_const_dict(
-    #         parent_code=CONSTANT_TYPES.COMPANY_SCALE)}
-    #
-    #     if not self.params.id:
-    #         render_json = encode_json_dumps(self._make_render_json(
-    #             component=component,
-    #             component_data={}, new=True, constant=constant
-    #         ))
-    #         self.render(
-    #             "neo_weixin/profile/edit.html", render_json=render_json)
-    #         return
-    #
-    #     else:
-    #         workexp = yield self._profile_service.get_profile_workexp(
-    #             workexp_id=self.params.id)
-    #         workexp = workexp[0]
-    #
-    #         component_data = {}
-    #         if workexp and profile_id == workexp.get("profile_id"):
-    #             component_data.update(sub_dict(workexp, self._WORKEXP_KEYS))
-    #             render_json = encode_json_dumps(self._make_render_json(
-    #                 component=component,
-    #                 component_data=component_data, constant=constant))
-    #
-    #             self.render(
-    #                 "neo_weixin/profile/edit.html", render_json=render_json)
-    #
-    # @tornado.gen.coroutine
-    # def post_edit_jobexp(self):
-    #     """
-    #     POST save workexp
-    #     """
-    #     profile_id = yield self._get_profile_id()
-    #     component_data = ObjectDict(json_decode(self.params.data))
-    #     record = component_data
-    #     if hasattr(record, "__status") and getattr(record, "__status") == 'x':
-    #         verb = "delete"
-    #     else:
-    #         if record.get("id", 0):
-    #             verb = "update"
-    #         else:
-    #             verb = "create"
-    #
-    #     result, res = yield getattr(
-    #         self._profile_service, verb + "_profile_workexp")(
-    #         record, profile_id)
-    #
-    #     self._return_json(
-    #         result=result,
-    #         success_message=msg_const.PROFILE_WORKEXP_SUCCESS if result else
-    #         None,
-    #         error_message=None if result else msg_const.PROFILE_WORKEXP_FAILURE
-    #     )
-    #
-    # @tornado.gen.coroutine
-    # def post_edit_jobexp_company(self):
-    #     """
-    #     POST create a new company record
-    #     """
-    #     # noinspection PyUnusedLocal
-    #     profile_id = yield self._get_profile_id()
-    #     component_data = ObjectDict(json_decode(self.params.data))
-    #     record = ObjectDict(component_data)
-    #
-    #     # 通过名称查询企业是否已经存在
-    #     name = record.name
-    #     result, res = yield self._company_service.get_cp_for_sug_wechat(
-    #         name=name)
-    #
-    #     if result:
-    #         self._return_json(
-    #             result=False,
-    #             error_message=msg_const.PROFILE_CREATE_COMPANY_EXISTED,
-    #             double_dump=False)
-    #         return
-    #
-    #     result, res = yield self._company_service.create_company_on_wechat(
-    #         record)
-    #
-    #     self._return_json(
-    #         result=result,
-    #         success_message=msg_const.PROFILE_CREATE_COMPANY_SUCCESS
-    #         if result else None,
-    #         error_message=None
-    #         if result else msg_const.PROFILE_CREATE_COMPANY_FAILURE
-    #     )
-    #
-    # @tornado.gen.coroutine
-    # def get_edit_eduexp(self):
-    #     """
-    #     GET edit education page
-    #     """
-    #     profile_id = yield self._get_profile_id()
-    #     component = self._get_to_field()
-    #     constant = {'degree_list': self._dict_service.get_const_dict(
-    #         parent_code=CONSTANT_TYPES.DEGREE_USER)}
-    #
-    #     if not self.params.id:
-    #         render_json = encode_json_dumps(self._make_render_json(
-    #             component=component,
-    #             component_data={},
-    #             new=True,
-    #             constant=constant))
-    #
-    #         self.render("neo_weixin/profile/edit.html",
-    #                     render_json=render_json)
-    #         return
-    #
-    #     else:
-    #         education = yield self._profile_service.get_profile_education(
-    #             education_id=self.params.id)
-    #         education = education[0]
-    #
-    #         component_data = {}
-    #         if education and profile_id == education.get("profile_id"):
-    #             component_data.update(sub_dict(education, self._EDU_KEYS))
-    #             render_json = encode_json_dumps(self._make_render_json(
-    #                 component=component,
-    #                 component_data=component_data,
-    #                 constant=constant))
-    #
-    #             self.render("neo_weixin/profile/edit.html",
-    #                         render_json=render_json)
-    #
-    # @tornado.gen.coroutine
-    # def post_edit_eduexp(self):
-    #     """
-    #     POST save education
-    #     """
-    #     profile_id = yield self._get_profile_id()
-    #     component_data = ObjectDict(json_decode(self.params.data))
-    #     record = component_data
-    #
-    #     if hasattr(record, "__status") and getattr(record, "__status") == 'x':
-    #         verb = "delete"
-    #     else:
-    #         if record.get("id", 0):
-    #             verb = "update"
-    #         else:
-    #             verb = "create"
-    #
-    #     result, res = yield getattr(
-    #         self._profile_service, verb + "_profile_education")(
-    #         record, profile_id)
-    #
-    #     if result:
-    #         self.send_json_success()
-    #     else:
-    #         self.send_json_error()
-    #
-    #
-    # @tornado.gen.coroutine
-    # def get_edit_projectexp(self):
-    #     """
-    #     GET edit projectexp page
-    #     """
-    #     profile_id = yield self._get_profile_id()
-    #     component = self._get_to_field()
-    #     constant = {"scale_list": self._dict_service.get_const_dict(
-    #         parent_code=CONSTANT_TYPES.COMPANY_SCALE)}
-    #
-    #     if not self.params.id:
-    #         render_json = encode_json_dumps(self._make_render_json(
-    #             component=component,
-    #             component_data={}, new=True, constant=constant))
-    #         self.render(
-    #             "neo_weixin/profile/edit.html", render_json=render_json)
-    #         return
-    #
-    #     else:
-    #         projectexp = yield self._profile_service.get_profile_projectexp(
-    #             projectexp_id=self.params.id)
-    #         projectexp = projectexp[0]
-    #
-    #         component_data = {}
-    #         if projectexp and profile_id == projectexp.get("profile_id"):
-    #             component_data.update(sub_dict(projectexp,
-    #                                            self._PROJECTEXP_KEYS))
-    #             render_json = encode_json_dumps(self._make_render_json(
-    #                 component=component,
-    #                 component_data=component_data, constant=constant))
-    #
-    #             self.render(
-    #                 "neo_weixin/profile/edit.html", render_json=render_json)
-    #
-    # @tornado.gen.coroutine
-    # def post_edit_projectexp(self):
-    #     """
-    #     POST save projectexp
-    #     """
-    #     profile_id = yield self._get_profile_id()
-    #     component_data = ObjectDict(json_decode(self.params.data))
-    #     record = component_data
-    #     if hasattr(record, "__status") and getattr(record, "__status") == 'x':
-    #         verb = "delete"
-    #     else:
-    #         if record.get("id", 0):
-    #             verb = "update"
-    #         else:
-    #             verb = "create"
-    #
-    #     result, res = yield getattr(
-    #         self._profile_service, verb + "_profile_projectexp")(
-    #         record, profile_id)
-    #
-    #     if result:
-    #         self.send_json_success()
-    #     else:
-    #         self.send_json_error()
-    #
+    @tornado.gen.coroutine
+    def post_jobexp_company(self):
+        profile_id = yield self._get_profile_id()
+        component_data = ObjectDict(json_decode(self.params.data))
+        record = ObjectDict(component_data)
+
+        # 通过名称查询企业是否已经存在
+        name = record.name
+        result, res = yield self.company_ps.get_cp_for_sug_wechat(name)
+
+        if result:
+            self.send_json_error(message='company name existed')
+            return
+        else:
+            result, res = yield self.company_ps.create_company_on_wechat(
+                record)
+            if result:
+                self.send_json_success(message='company created')
+            else:
+                self.send_json_error(message='company creation error')
+
+    # Profile 编辑 -- jobexp 结束
+
+    # Profile 编辑 -- eduexp 开始
+    @tornado.gen.coroutine
+    def get_eduexp(self):
+        profile_id = yield self._get_profile_id()
+        component = self.params.component
+
+        degree_list = yield self.dictionary_ps.get_constants(
+            parent_code=const.CONSTANT_PARENT_CODE.DEGREE_USER)
+        constant = {'degree_list': degree_list}
+
+        component_data = {}
+        new = False
+
+        if not self.params.id:
+            new = True
+
+        else:
+            education = yield self.profile_ps.get_profile_education(
+                education_id=self.params.id)
+            education = education[0]
+
+            if education and profile_id == education.get("profile_id"):
+                component_data.update(sub_dict(
+                    education, self.profile_ps.EDU_KEYS))
+
+        self.send_json_success(
+            data=self._make_json_data(
+                component=component,
+                component_data=component_data,
+                new=new,
+                constant=constant))
+
+    @tornado.gen.coroutine
+    def post_eduexp(self):
+        profile_id = yield self._get_profile_id()
+        component_data = ObjectDict(json_decode(self.params.data))
+        record = component_data
+
+        if hasattr(record, "__status") and getattr(record, "__status") == 'x':
+            verb = "delete"
+        else:
+            if record.get("id", 0):
+                verb = "update"
+            else:
+                verb = "create"
+
+        result, res = yield getattr(
+            self._profile_service, verb + "_profile_education")(
+            record, profile_id)
+
+        if result:
+            self.send_json_success()
+        else:
+            self.send_json_error()
+    # Profile 编辑 -- eduexp 结束
+
+    # Profile 编辑 -- projectexp 开始
+    @tornado.gen.coroutine
+    def get_projectexp(self):
+        profile_id = yield self._get_profile_id()
+        component = self.params.component
+
+        scale_list = yield self.dictionary_ps.get_constants(
+            parent_code=const.CONSTANT_PARENT_CODE.COMPANY_SCALE)
+        constant = ObjectDict(scale_list=scale_list)
+
+        component_data = {}
+        new = False
+
+        if not self.params.id:
+            new = True
+
+        else:
+            projectexp = yield self.profile_ps.get_profile_projectexp(
+                projectexp_id=self.params.id)
+            projectexp = projectexp[0]
+
+            if projectexp and profile_id == projectexp.get("profile_id"):
+                component_data.update(sub_dict(
+                    projectexp, self.profile_ps.PROJECTEXP_KEYS))
+
+        self.send_json_success(
+            data=self._make_json_data(
+                component=component,
+                component_data=component_data,
+                new=new,
+                constant=constant))
+
+    @tornado.gen.coroutine
+    def post_edit_projectexp(self):
+        profile_id = yield self._get_profile_id()
+        component_data = ObjectDict(json_decode(self.params.data))
+        record = component_data
+        if hasattr(record, "__status") and getattr(record, "__status") == 'x':
+            verb = "delete"
+        else:
+            if record.get("id", 0):
+                verb = "update"
+            else:
+                verb = "create"
+
+        result, res = yield getattr(
+            self._profile_service, verb + "_profile_projectexp")(
+            record, profile_id)
+
+        if result:
+            self.send_json_success()
+        else:
+            self.send_json_error()
+
+    # Profile 编辑 -- projectexp 结束
+
     # @tornado.gen.coroutine
     # def get_edit_prize(self):
     #     """
@@ -1090,3 +1036,13 @@ class ProfileHandler(BaseHandler):
     #         if result else None,
     #         error_message=None if result else
     #         msg_const.PROFILE_JOBREF_FAILURE)
+
+    def _send_json_result(self, results, component_len):
+        """json api 返回修改成功，失败，部分成功的"""
+        success_results = [result for result in results if result is True]
+        if len(success_results) == component_len:
+            self.send_json_success()
+        elif len(success_results):
+            self.send_json_warning()
+        else:
+            self.send_json_error()
