@@ -27,14 +27,14 @@ class TeamPageService(PageService):
 
     @gen.coroutine
     def get_team_by_id(self, team_id):
-        team = yield self.hr_team_ds.get_team(conds={'id': team_id})
+        team = yield self.hr_team_ds.get_team(conds={'id': team_id, 'disable': 0})
 
         raise gen.Return(team)
 
     @gen.coroutine
     def get_team_by_name(self, department, company_id):
         team = yield self.hr_team_ds.get_team(
-            conds={'company_id': company_id, 'name':department})
+            conds={'company_id': company_id, 'name':department, 'disable': 0})
 
         raise gen.Return(team)
 
@@ -54,7 +54,7 @@ class TeamPageService(PageService):
             teams = yield self._get_sub_company_teams(company.id)
         else:
             teams = yield self.hr_team_ds.get_team_list(
-                conds={'company_id': company.id, 'is_show': 1})
+                conds={'company_id': company.id, 'is_show': 1, 'disable': 0})
         teams.sort(key=lambda t: t.show_order)
 
         # 获取团队成员以及所需要的media信息
@@ -118,7 +118,8 @@ class TeamPageService(PageService):
             other_teams = yield self.hr_team_ds.get_team_list(
                 conds={'id': [team.id, '<>'],
                        'company_id': company.id,
-                       'is_show': 1})
+                       'is_show': 1,
+                       'disable': 0})
         other_teams.sort(key=lambda t: t.show_order)
 
         team_positions = [pos for pos in company_positions
@@ -220,7 +221,7 @@ class TeamPageService(PageService):
         if not team_id_tuple:
             gen.Return([])
         teams = yield self.hr_team_ds.get_team_list(
-            conds='id in {} and is_show=1'.format(
+            conds='id in {} and is_show=1 and disable=0'.format(
                 team_id_tuple).replace(',)', ')'))
 
         raise gen.Return(teams)
