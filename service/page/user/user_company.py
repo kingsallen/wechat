@@ -63,7 +63,7 @@ class UserCompanyPageService(PageService):
                 teams = yield self._get_sub_company_teams(company.id)
             else:
                 teams = yield self.hr_team_ds.get_team_list(
-                    conds={'company_id': company.id, 'is_show': 1})
+                    conds={'company_id': company.id, 'is_show': 1, 'disable': 0})
 
             if teams:
                 teams.sort(key=lambda t: t.show_order)
@@ -143,7 +143,7 @@ class UserCompanyPageService(PageService):
         if not team_id_tuple:
             gen.Return([])
         teams = yield self.hr_team_ds.get_team_list(
-            conds='id in {} and is_show=1'.format(
+            conds='id in {} and is_show=1 and disable=0'.format(
                 team_id_tuple).replace(',)', ')'))
 
         raise gen.Return(teams)
