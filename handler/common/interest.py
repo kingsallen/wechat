@@ -5,7 +5,7 @@ from tornado import gen
 import conf.common as const
 from handler.base import BaseHandler
 from util.common import ObjectDict
-from util.common.decorator import handle_response, authenticated
+from util.common.decorator import handle_response, authenticated, verified_mobile_oneself
 
 
 class UserCurrentInfoHandler(BaseHandler):
@@ -14,7 +14,8 @@ class UserCurrentInfoHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def get(self):
-        """返回用户填写的现在公司和现在职位接口
+        """
+        返回用户填写的现在公司和现在职位接口
 
         full 参数用以判断只要返回 bool 就好了还是需要详细的数据
         """
@@ -37,6 +38,20 @@ class UserCurrentInfoHandler(BaseHandler):
                     data=const.YES if has_info else const.NO)
         else:
             self.send_json_success(data=const.NO)
+
+        isfav = const.YES if int(self.params.isfav) else const.NO
+        if isfav:
+            # 1.添加感兴趣记录
+            yield self.user_ps.add_user_fav_position(self.params.pid,
+                                                         self.current_user.sysuser.id,
+                                                         const.FAV_INTEREST,
+                                                         self.current_user.sysuser.mobile,
+                                                         self.current_user.wxuser.id,
+                                                         self.current_user.recom.id)
+            # 2.添加候选人相关记录
+            # TODO
+            # 3.添加定时任务，若2小时候，没有完善则发送消息模板
+
 
     @handle_response
     @authenticated

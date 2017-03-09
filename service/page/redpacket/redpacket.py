@@ -13,6 +13,7 @@ import traceback
 import requests
 import tornado.gen as gen
 
+import conf.wechat as const_wechat
 import conf.common as const
 from conf.common import RP_LOCKED as FIRST_LOCK
 import conf.message as msg
@@ -1008,7 +1009,7 @@ class RedpacketPageService(PageService):
         """
         将 dict 数据合成 post 方法的 xml content
         """
-        return const.SEND_RP_REQUEST_FORMAT.format(
+        return const_wechat.WX_SEND_RP_REQUEST_FORMAT.format(
             sign=d['sign'],
             mch_billno=d['mch_billno'],
             mch_id=d['mch_id'],

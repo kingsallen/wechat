@@ -7,16 +7,16 @@ POSITION_LIST = '/m/position'
 RED_PACKET_CARD = '/mobile/redpack'
 TEAM_PATH = '/m/company/team/{}'
 COMPANY_TEAM = '/m/company/team'
-USER_CENTER = '/m/app/usercenter'
 USER_LOGIN = '/m/login'
 USER_LOGOUT = '/m/logout'
-USER_CENTER_SETTING = 'm/usercenter/setting/home'
+SEARCH_FILITER = '/m/start'
+CUSTOMIZE_EDX = '/m/custom/emailapply'
+APPLICATION = '/m/application'
+USER_CENTER = '/m/app/usercenter'
 MOBILE_VERIFY = '/m/app/phone/verify'
 EMPLOYEE_VERIFY = '/m/app/employee/binding'
-SEARCH_FILITER = '/m/start'
-CUSTOMIZE_EDX = '/m/custom/edx'
-USERCENTER_APPLYRECORD = 'm/app/usercenter/applyrecords/{}'
 EMPLOYEE_RECOMMENDS = 'm/app/employee/recommends'
+USERCENTER_APPLYRECORD = 'm/app/usercenter/applyrecords/{}'
 
 # 供侧边栏使用
 OLD_POSITION = '/mobile/position'
@@ -68,9 +68,6 @@ PROFILE_PROJECTEXP = "profile/projectexp"
 PROFILE_AWARDS = "profile/awards"
 PROFILE_WORKS = "profile/works"
 PROFILE_INTENTION = "profile/intention"
-
-# TODO (tangyiliang) 关于爬虫和导入，具体作用待查
-PROFILE_CRAWLER = "profile/crawler"
 PROFILE_IMPORT = "crawler"
 
 # 公司服务

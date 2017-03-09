@@ -7,6 +7,7 @@ import tornado.gen as gen
 import conf.common as const
 from service.page.base import PageService
 from setting import settings
+from util.common import ObjectDict
 
 class UserPageService(PageService):
 
@@ -357,7 +358,7 @@ class UserPageService(PageService):
 
     @gen.coroutine
     def _get_user_favorite_records(self, user_id, pid):
-        """获取用户收藏职位信息
+        """获取用户收藏、感兴趣职位信息
         :param user_id:
         :param pid:
         :return: list
@@ -371,3 +372,35 @@ class UserPageService(PageService):
         position_fav = [p for p in position_fav if
                         p.favorite in (const.FAV_YES, const.FAV_NO)]
         raise gen.Return(position_fav)
+
+    @gen.coroutine
+    def add_user_fav_position(self, position_id, user_id, favorite, mobile, wxuser_id, recom_user_id):
+        """
+        增加用户收藏、感兴趣记录
+        :param position_id:
+        :param user_id:
+        :param favorite: 0:收藏，1:取消收藏，2:感兴趣
+        :param mobile:
+        :param wxuser_id:
+        :param recom_user_id:
+        :return:
+        """
+
+        fav = yield self.user_fav_position_ds.get_user_fav_position({
+            "position_id": position_id,
+            "sysuser_id": user_id,
+            "favorite": favorite,
+        })
+
+        if fav:
+            raise gen.Return(fav.id)
+        else:
+            fav_id = yield self.user_fav_position_ds.insert_user_fav_position(fields=ObjectDict(
+                sysuser_id=user_id,
+                position_id=position_id,
+                mobile=mobile,
+                favorite=favorite,
+                wxuser_id=wxuser_id,
+                recom_user_id=recom_user_id
+            ))
+            raise gen.Return(fav_id)

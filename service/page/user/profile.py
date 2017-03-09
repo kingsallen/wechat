@@ -81,6 +81,23 @@ class ProfilePageService(PageService):
         return result, profile
 
     @gen.coroutine
+    def import_profile(self, source, username, password, user_id):
+        """
+        导入第三方简历（51job, 智联招聘，linked，猎聘）
+        :param source: int
+        :param username: string
+        :param password: string
+        :param user_id: int
+        :return: tuple (bool, result or None)
+
+        调用方式:
+        profile = import_profile[1,"ab","123",2]
+        """
+
+        is_ok, result = yield self.infra_profile_ds.import_profile(source, username, password, user_id)
+        return is_ok, result
+
+    @gen.coroutine
     def get_profile_basic(self, profile_id):
         result, data = yield self.infra_profile_ds.get_profile_basic(
             profile_id)

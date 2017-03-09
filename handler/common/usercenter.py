@@ -23,7 +23,7 @@ class UsercenterHandler(BaseHandler):
             # 重置 event，准确描述
             method = self.json_args.get("$key")
             self._event = self._event + method
-            yield getattr(self, 'put_' + method)()
+            yield getattr(self, "put_" + method)()
         except Exception as e:
             self.send_json_error()
 
@@ -36,6 +36,7 @@ class UsercenterHandler(BaseHandler):
         """
         # 手动指定 event
         self._event = self._event + "home"
+
         employee = yield self.user_ps.get_valid_employee_by_user_id(
             self.current_user.sysuser.id, self.current_user.company.id)
         # 查询该公司是否开启了员工认证
@@ -59,9 +60,9 @@ class UsercenterHandler(BaseHandler):
         """配置-真实姓名"""
 
         try:
-            self.guarantee('name')
+            self.guarantee("name")
         except:
-            raise gen.Return()
+            return
 
         if is_chinese(self.params.name) or is_alphabet(self.params.name):
             res = yield self.usercenter_ps.update_user(self.current_user.sysuser.id, params={
@@ -86,9 +87,9 @@ class UsercenterHandler(BaseHandler):
         """配置-Email"""
 
         try:
-            self.guarantee('email')
+            self.guarantee("email")
         except:
-            raise gen.Return()
+            return
 
         if email_validate(self.params.email):
             res = yield self.usercenter_ps.update_user(self.current_user.sysuser.id, params={
@@ -108,9 +109,9 @@ class UsercenterHandler(BaseHandler):
         """配置-修改密码"""
 
         try:
-            self.guarantee('password')
+            self.guarantee("password")
         except:
-            raise gen.Return()
+            return
 
         if not password_validate(self.params.password):
             self.send_json_error(message=msg.CELLPHONE_PASSWORD_ERROR)
@@ -123,6 +124,7 @@ class UsercenterHandler(BaseHandler):
             raise gen.Return()
 
         self.send_json_success()
+
 
 class FavpositionHandler(BaseHandler):
     """个人中心-收藏职位"""
@@ -166,6 +168,21 @@ class ApplyrecordsHandler(BaseHandler):
                 records=res
             ))
 
+class UserMobileBindedHandler(BaseHandler):
+
+    """是否绑定了手机号"""
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def post(self):
+        res = str(self.current_user.sysuser.mobile) == self.current_user.sysuser.username
+
+        if res:
+            self.send_json_success(data=const.YES)
+        else:
+            self.send_json_success(data=const.NO)
+
+
 class UploadHandler(BaseHandler):
     """图片上传
     """
@@ -176,7 +193,7 @@ class UploadHandler(BaseHandler):
         try:
             # 重置 event，准确描述
             self._event = self._event + method
-            yield getattr(self, 'post_' + method)()
+            yield getattr(self, "post_" + method)()
         except Exception as e:
             self.send_json_error()
 
@@ -188,32 +205,16 @@ class UploadHandler(BaseHandler):
 
         res = yield self.usercenter_ps.get_user(self.current_user.sysuser.id)
         if res.data:
-            vfile = self.request.files.get('vfile', None)
-            if vfile is None:
-                self.send_json_error()
-                return
-
-            body = vfile[0].get('body')
-            upload_settings = dict()
-            upload_settings['filename'] = vfile[0].get('filename')
+            upload_settings = ObjectDict()
             upload_settings[
-                'filename_prefix'] = "upload/avatar/{}".format(self.current_user.sysuser.id)
-            upload_settings['max_filesize'] = 1024 * 1024 * 2  # MB
-            upload_settings['min_width'] = 30  # px
-            upload_settings['before_upload'] = ['expand', 'crop']
-            upload_settings['filter_expand'] = {
+                "filename_prefix"] = "upload/avatar/{}".format(self.current_user.sysuser.id)
+            upload_settings["before_upload"] = ["expand", "crop"]
+            upload_settings["filter_expand"] = {
                 "width": 300,
                 "height": 300,
             }
 
-            uploader = QiniuUpload(upload_settings)
-            uploader.set_logger(self.logger)
-            result = uploader.upload_bytes(body)
-
-            if result.status != const.API_SUCCESS:
-                self.send_json_error(message=result.message)
-                return
-
+            result = self._upload(upload_settings)
             res = yield self.usercenter_ps.update_user(self.current_user.sysuser.id, params={
                 "headimg": result.data,
             })
@@ -227,3 +228,114 @@ class UploadHandler(BaseHandler):
 
         else:
             self.send_json_error()
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def post_school_logo(self):
+        """proifle，上传学校 logo"""
+
+        upload_settings = ObjectDict()
+        upload_settings["filename_prefix"] = "upload/college_logo"
+        upload_settings["before_upload"] = ["crop", "resize"]
+        upload_settings["filter_resize"] = {
+            "width": 300,
+            "height": 300,
+        }
+
+        result = self._upload(upload_settings)
+        self.send_json_success(data={
+            "url": result.data
+        })
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def post_company_logo(self):
+        """proifle，上传公司 logo"""
+
+        upload_settings = ObjectDict()
+        upload_settings["filename_prefix"] = "upload/company_logo"
+        upload_settings["before_upload"] = ["crop", "resize"]
+        upload_settings["filter_resize"] = {
+            "width": 300,
+            "height": 300,
+        }
+
+        result = self._upload(upload_settings)
+        self.send_json_success(data={
+            "url": result.data
+        })
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def post_link_banner(self):
+        """proifle，上传链接图片"""
+
+        upload_settings = ObjectDict()
+        upload_settings[
+            "filename_prefix"] = "upload/profile_link_banner/{}".format(self.current_user.sysuser.id)
+        upload_settings["before_upload"] = ["expand", "crop"]
+        # will resize image to 460x287
+        upload_settings["filter_expand"] = {
+            "width": 460,
+            "height": 287,
+        }
+        upload_settings["filter_crop"] = {
+            "width": 460,
+            "height": 287
+        }
+
+        result = self._upload(upload_settings)
+        self.send_json_success(data={
+            "url": result.data
+        })
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def post_profile_portrait(self):
+        """prifle，上传证件照"""
+
+        upload_settings = ObjectDict()
+        upload_settings[
+            "filename_prefix"] = "upload/profile_portrait/{}".format(self.current_user.sysuser.id)
+        upload_settings["before_upload"] = ["expand", "crop"]
+        # will resize image to 300x300
+        upload_settings["filter_expand"] = {
+            "width": 300,
+            "height": 300,
+        }
+
+        result = self._upload(upload_settings)
+        self.send_json_success(data={
+            "url": result.data
+        })
+
+    def _upload(self, upload_settings):
+
+        vfile = self.request.files.get("vfile", None)
+
+        if vfile is None:
+            self.send_json_error()
+            return
+
+        upload_settings.update({
+            "filename": vfile[0].get("filename"),
+            "max_filesize": 1024 * 1024 * 2,  # MB
+            "min_width": 30,  # px
+        })
+
+        uploader = QiniuUpload(upload_settings)
+        uploader.set_logger(self.logger)
+        body = vfile[0].get("body")
+        result = uploader.upload_bytes(body)
+
+        self.logger.debug("[_upload]reusult:{}".format(result))
+
+        if result.status != const.API_SUCCESS:
+            self.send_json_error(message=result.message)
+            return
+
+        return result

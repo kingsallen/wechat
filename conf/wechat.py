@@ -276,3 +276,22 @@ WX_NEWS_REPLY_FOOT_TPL = """
 </Articles>
 </xml>
 """
+
+
+WX_SEND_RP_REQUEST_FORMAT = """
+<xml>
+<sign><![CDATA[{sign}]]></sign>
+<mch_billno><![CDATA[{mch_billno}]]></mch_billno>
+<mch_id><![CDATA[{mch_id}]]></mch_id>
+<wxappid><![CDATA[{wxappid}]]></wxappid>
+<send_name><![CDATA[{send_name}]]></send_name>
+<re_openid><![CDATA[{re_openid}]]></re_openid>
+<total_amount><![CDATA[{total_amount}]]></total_amount>
+<total_num><![CDATA[{total_num}]]></total_num>
+<wishing><![CDATA[{wishing}]]></wishing>
+<client_ip><![CDATA[{client_ip}]]></client_ip>
+<act_name><![CDATA[{act_name}]]></act_name>
+<remark><![CDATA[{remark}]]></remark>
+<nonce_str><![CDATA[{nonce_str}]]></nonce_str>
+</xml>
+"""

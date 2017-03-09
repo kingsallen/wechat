@@ -18,6 +18,17 @@ class InfraProfileDataService(DataService):
         return http_tool.unboxing(res)
 
     @gen.coroutine
+    def import_profile(self, source, username, password, user_id):
+        params = ObjectDict(
+            source=source,
+            username=username,
+            password=password,
+            user_id=user_id
+        )
+        res = yield http_tool.http_post(path.PROFILE_IMPORT, params, timeout=60)
+        return http_tool.unboxing(res)
+
+    @gen.coroutine
     def get_profile_basic(self, profile_id):
         ret = yield self.handle_profile_section(
             {'profile_id': profile_id}, 'get', 'basic')

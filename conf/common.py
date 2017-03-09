@@ -232,6 +232,27 @@ MOBILE_CODE_OPT_TYPE = ObjectDict({
     'change_mobile': 4
 })
 
+# 简历导入
+RESUME_WAY_MOSEEKER_PC = "0"
+RESUME_WAY_MOSEEKER = "1"
+RESUME_WAY_51JOB = "2"
+RESUME_WAY_LIEPIN = "3"
+RESUME_WAY_ZHILIAN = "4"
+RESUME_WAY_LINKEDIN = "5"
+
+RESUME_WAY_SPIDER = {
+    RESUME_WAY_51JOB: "51job.html",
+    RESUME_WAY_ZHILIAN: "zhaopin.html",
+    RESUME_WAY_LIEPIN: "liepin.html"
+}
+
+RESUME_WAY_TO_INFRA = {
+    RESUME_WAY_51JOB: 1,
+    RESUME_WAY_LIEPIN: 2,
+    RESUME_WAY_ZHILIAN: 3,
+    RESUME_WAY_LINKEDIN: 4
+}
+
 
 # ============= 红包相关常量 =============
 # 红包锁字符串模版
@@ -305,23 +326,6 @@ WX_MESSAGE_TEMPLATE_SEND_TYPE_WEIXIN = 0
 WX_MESSAGE_TEMPLATE_SEND_TYPE_EMAIL = 1
 WX_MESSAGE_TEMPLATE_SEND_TYPE_SMS = 2
 
-SEND_RP_REQUEST_FORMAT = """
-<xml>
-<sign><![CDATA[{sign}]]></sign>
-<mch_billno><![CDATA[{mch_billno}]]></mch_billno>
-<mch_id><![CDATA[{mch_id}]]></mch_id>
-<wxappid><![CDATA[{wxappid}]]></wxappid>
-<send_name><![CDATA[{send_name}]]></send_name>
-<re_openid><![CDATA[{re_openid}]]></re_openid>
-<total_amount><![CDATA[{total_amount}]]></total_amount>
-<total_num><![CDATA[{total_num}]]></total_num>
-<wishing><![CDATA[{wishing}]]></wishing>
-<client_ip><![CDATA[{client_ip}]]></client_ip>
-<act_name><![CDATA[{act_name}]]></act_name>
-<remark><![CDATA[{remark}]]></remark>
-<nonce_str><![CDATA[{nonce_str}]]></nonce_str>
-</xml>
-"""
 # ============= 红包相关常量结束 =============
 
 # 常量 Parent code
