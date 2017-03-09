@@ -14,6 +14,7 @@ from util.tool.http_tool import http_post
 
 from app import logger
 from service.data.hr.hr_wx_wechat import HrWxWechatDataService
+from service.data.hr.hr_wx_notice_message import HrWxNoticeMessageDataService
 from service.data.hr.hr_wx_template_message import \
     HrWxTemplateMessageDataService
 from service.data.user.user_wx_user import UserWxUserDataService
@@ -23,6 +24,7 @@ from service.data.log.log_wx_message_record import \
 
 class WechatException(Exception):
     pass
+
 
 class WechatNoTemplateError(WechatException):
     pass
@@ -36,19 +38,21 @@ class WechatTemplateMessager(object):
         super(WechatTemplateMessager, self).__init__()
         self.logger = logger
         self.hr_wx_wechat_ds = HrWxWechatDataService()
+        self.hr_wx_notice_message_ds = HrWxNoticeMessageDataService()
         self.hr_wx_template_message_ds = HrWxTemplateMessageDataService()
         self.user_wx_user_ds = UserWxUserDataService()
         self.log_wx_message_record_ds = LogWxMessageRecordDataService()
 
     @gen.coroutine
     def send_template(self, wechat_id, openid, sys_template_id, link,
-                      json_data, qx_retry=False):
+                      json_data, qx_retry=False, link_qx=None, platform_switch=True):
         """发送消息模板到用户
 
         :param wechat_id: 企业号 wechat_id
         :param openid: 发送对象的企业号 open_id
         :param sys_template_id: 系统模板库 id
-        :param link: 点击跳转 url
+        :param link: 点击跳转 url,
+        :param link_qx: 点击跳转的 qx url
         :param qx_retry: 失败后是否使用 qx 再次尝试发送
         :param json_data: 填充内容
         :return: 发送成功: const.YES, 发送失败:const.NO
@@ -60,9 +64,11 @@ class WechatTemplateMessager(object):
         # 获取 wechat
         wechat = yield self.hr_wx_wechat_ds.get_wechat({"id": wechat_id})
 
-        # 发送以及记录结果
-        ok = yield self._send_and_log(wechat, openid, template, link,
-                                      json_data)
+        # 企业号可选择是否开启消息模板。发送以及记录结果
+        ok = False
+        if platform_switch:
+            ok = yield self._send_and_log(wechat, openid, template, link,
+                                          json_data)
 
         if ok:
             raise gen.Return(const.YES)
@@ -73,7 +79,7 @@ class WechatTemplateMessager(object):
             ret = yield self.send_template(settings['qx_wechat_id'],
                                            qx_openid,
                                            sys_template_id,
-                                           link,
+                                           link_qx or link,
                                            json_data,
                                            qx_retry=False)
             raise gen.Return(ret)
@@ -81,7 +87,14 @@ class WechatTemplateMessager(object):
             raise gen.Return(const.NO)
 
     @gen.coroutine
-    def _send(self, access_token, openid, template_id, link, topcolor, json_data):
+    def _send(
+            self,
+            access_token,
+            openid,
+            template_id,
+            link,
+            topcolor,
+            json_data):
         """发送模板消息例子操作
 
         :param access_token: 公众号的 access_token
@@ -131,18 +144,18 @@ class WechatTemplateMessager(object):
 
         yield self.log_wx_message_record_ds.create_wx_message_log_record(
             fields={
-                "template_id":  template_id,
-                "wechat_id":    wechat.id,
-                "msgid":        res.get("msgid", 0),
-                "open_id":      openid,
-                "url":          link,
-                "topcolor":     topcolor,
-                "jsondata":     json_data,
-                "errcode":      res.get("errcode", -3),
-                "errmsg":       res.get("errmsg", ""),
-                "sendtime":     now,
-                "updatetime":   now,
-                "sendtype":     const.WX_MESSAGE_TEMPLATE_SEND_TYPE_WEIXIN,
+                "template_id": template_id,
+                "wechat_id": wechat.id,
+                "msgid": res.get("msgid", 0),
+                "open_id": openid,
+                "url": link,
+                "topcolor": topcolor,
+                "jsondata": json_data,
+                "errcode": res.get("errcode", -3),
+                "errmsg": res.get("errmsg", ""),
+                "sendtime": now,
+                "updatetime": now,
+                "sendtype": const.WX_MESSAGE_TEMPLATE_SEND_TYPE_WEIXIN,
                 "access_token": wechat.access_token
             })
 
@@ -167,15 +180,33 @@ class WechatTemplateMessager(object):
         :return:
         """
         wxuser = yield self.user_wx_user_ds.get_wxuser({
-            "openid":    openid,
+            "openid": openid,
             "wechat_id": wechat_id
         })
 
         qx_wxuser = yield self.user_wx_user_ds.get_wxuser({
-            "unionid":           wxuser.unionid,
+            "unionid": wxuser.unionid,
             "wechat_id": settings['qx_wechat_id']
         })
 
         raise gen.Return(qx_wxuser.openid)
+
+    @gen.coroutine
+    def get_send_switch(self, wechat, notice_id):
+        """
+        获取企业号消息模板发送开关
+        :param wechat:
+        :param notice_id:
+        :return:
+        """
+        send_switch = yield self.hr_wx_notice_message_ds.get_wx_notice_message({
+            "wechat_id": wechat.id,
+            "notice_id": notice_id,
+            "status": 1,
+        })
+
+        res = False if not send_switch else True
+
+        raise gen.Return(res)
 
 messager = WechatTemplateMessager()

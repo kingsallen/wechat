@@ -466,7 +466,6 @@ class BaseHandler(MetaBaseHandler):
         """
 
         session.company = yield self._get_current_company(session.wechat.company_id)
-
         if session.sysuser.id:
             employee = yield self.user_ps.get_valid_employee_by_user_id(
                 user_id=session.sysuser.id, company_id=session.company.id)
@@ -503,9 +502,16 @@ class BaseHandler(MetaBaseHandler):
         """拼装 session 中的 recom"""
 
         recom_user_id = decode_id(self.params.recom)
-        session.recom = yield self.user_ps.get_user_user({
+        recom = yield self.user_ps.get_user_user({
             "id": recom_user_id
         })
+        if recom:
+            recom_wxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
+                        unionid=recom.unionid, wechat_id=self._wechat.id)
+            recom.openid = recom_wxuser.openid
+            recom.wxuser_id = recom_wxuser.id
+
+        session.recom = recom
 
     @gen.coroutine
     def _add_sysuser_to_session(self, session, session_id):

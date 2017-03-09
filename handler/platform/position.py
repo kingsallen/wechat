@@ -589,7 +589,7 @@ class PositionHandler(BaseHandler):
                 position_info.publisher)
 
             if hr_wx_user.openid:
-                # 如果企业有公众号，发企业链接，若无，发集合号链接
+                # 如果企业有公众号，发企业链接，若无，发聚合号链接
                 if self.current_user.wechat:
                     link = make_url(
                         path.POSITION_PATH.format(position_info.id),

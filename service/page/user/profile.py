@@ -4,7 +4,7 @@ import tornado.gen as gen
 
 from service.page.base import PageService
 from util.common import ObjectDict
-
+from util.tool.date_tool import curr_datetime_now
 
 class ProfilePageService(PageService):
     """对接profile服务
@@ -243,4 +243,76 @@ class ProfilePageService(PageService):
     #     result, data = yield self.infra_profile_ds.delete_profile_projectexp(
     #         record, profile_id)
     #     return result, data
+
+    def calculate_workyears(p_workexps):
+        """
+        :param p_workexps:
+        :return:
+        """
+        min_start_date = None
+        max_end_date = None
+        until_now = False
+        workyears = 0
+        try:
+            for workexp in p_workexps:
+                if (min_start_date is None or
+                            min_start_date > workexp.get("start_date")):
+                    min_start_date = workexp.get("start_date")
+
+                if (max_end_date is None or
+                            max_end_date < workexp.get("end_date")):
+                    max_end_date = workexp.get("end_date")
+
+                if not until_now and workexp.get("end_until_now"):
+                    until_now = workexp.get("end_until_now")
+
+            if until_now:
+                max_end_date = curr_datetime_now().year
+            else:
+                max_end_date = max_end_date[:4]
+            workyears = (int(max_end_date) - int(min_start_date[:4]))
+        except Exception as e:
+            workyears = 0
+        finally:
+            return workyears
+
+    def get_job_for_application(self, profile):
+        """
+        获取最新的工作经历用以申请
+        """
+        if not profile.get("workexps", []):
+            return None
+
+        if self.has_current_job(profile):
+            return self.get_current_job(profile)
+
+        return self.get_latest_job(profile)
+
+    def has_current_job(self, profile):
+        """
+        判断 profile 是否包含"含有至今"的工作信息
+        """
+        wexps = profile.get('workexps', [])
+        if wexps:
+            return (len(filter(
+                lambda w: w.get("end_until_now", 0) == 1, wexps)) > 0)
+        return False
+
+    def get_current_job(self, profile):
+        """
+        获取 profile 中最新的一条"含有至今"的工作信息
+        """
+        wexps = profile.get('workexps', [])
+
+        latest_jobs = filter(lambda w: w.get("end_until_now", 0) == 1, wexps)
+        return (sorted(latest_jobs, key=lambda x: x.get("start_date", ""),
+                       reverse=True)[0])
+
+    def get_latest_job(self, profile):
+        """
+        获取最新的一条工作记录
+        """
+        wexps = profile.get('workexps', [])
+        return (sorted(wexps, key=lambda x: x.get('start_date', ""),
+                       reverse=True)[0])
 

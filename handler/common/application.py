@@ -85,14 +85,6 @@ class ApplicationHandler(BaseHandler):
                                apply="1", is_skip=is_skip))
 
     @handle_response
-    @authenticated
-    @gen.coroutine
-    def get_checkstatus(self, **kwargs):
-        # TODO
-        # 查看求职进度，可直接转到个人中心-申请记录-具体某个求职进度
-        pass
-
-    @handle_response
     @verified_mobile_oneself
     @authenticated
     @gen.coroutine
@@ -149,10 +141,3 @@ class ApplicationHandler(BaseHandler):
                 self.redirect(make_url(path.USERCENTER_APPLYRECORD.format(apply_id), self.params, escape=['next_url', 'pid']))
         else:
             self.send_json_error(message=message)
-
-        # 申请的后续处理
-        self.logger.debug("[post_apply]投递后续处理")
-        yield self.application_ps.opt_after_apply_success()
-
-
-

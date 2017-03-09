@@ -10,6 +10,8 @@ import conf.common as const
 from service.page.base import PageService
 from cache.application.email_apply import EmailApplyCache
 from util.common import ObjectDict
+from util.tool.url_tool import make_url
+from util.wechat.template import application_notice_to_applier_tpl, application_notice_to_recommender_tpl, application_notice_to_hr_tpl
 
 class ApplicationPageService(PageService):
 
@@ -365,23 +367,6 @@ class ApplicationPageService(PageService):
                 # TODO message 可调整
                 raise gen.Return((False, None, None))
 
-        # TODO 可能不需要
-        # profile_other 获取和处理
-        # other_record = get_profile_other_by_profile_id(
-        #     self.db, profile.get('profile').get('id'))
-        #
-        # if other_record:
-        #     other = ujson.loads(other_record.other)
-        # else:
-        #     other = {}
-        # self.LOG.debug("profile, other:{}".format(other))
-        # if other:
-        #     other = sub_dict(other, pure_other_keys())
-        # # 此乃 profile 模版填充物,用于页面返回
-        # profile_tpl = yield profile_to_tempalte(profile, other)
-        #
-        # self.LOG.debug("profile, profile_tpl:{}".format(profile_tpl))
-
         # 3.创建申请
         recommender_user_id, recommender_wxuser_id, recom_employee = yield self.get_recommend_user(current_user, position, is_platform)
 
@@ -403,6 +388,22 @@ class ApplicationPageService(PageService):
         yield self._create_job_resume_other(position, params.cv)
 
         raise gen.Return((True, msg.RESPONSE_SUCCESS, apply_id))
+
+        # 申请的后续处理
+        self.logger.debug("[post_apply]投递后续处理")
+
+        # 1. 添加积分
+        yield self.opt_add_reward(apply_id, current_user, position, is_platform)
+        # 2. 发红包
+        yield self.opt_send_redpacket(current_user, position)
+        # 3. 向求职者发送消息通知（消息模板，短信）
+        yield self.opt_send_applier_msg(apply_id, current_user, position)
+        # 4. 向推荐人发送消息模板
+        yield self.opt_send_recommender_msg(recommend_user_id, current_user, position, profile)
+        # 5. 更新挖掘被动求职者信息
+        yield self.opt_update_candidate_recom_records(apply_id, current_user, recommend_user_id, position)
+        # 6. 向 HR 发送消息通知（消息模板，短信，邮件）
+        yield self.opt_hr_msg(current_user, profile, position)
 
     @gen.coroutine
     def get_recommend_user(self, current_user, position, is_platform):
@@ -467,23 +468,15 @@ class ApplicationPageService(PageService):
                             "utf-8"))
 
     @gen.coroutine
-    def opt_after_apply_success(self, apply_id, current_user, position, is_platform):
-
-        self.logger.debug("[opt_after_apply_success]start")
-
-        # 1. 添加积分
-        yield self.opt_add_reward(self, apply_id, current_user, position, is_platform)
-        # 2. 发红包
-        yield self.opt_send_redpacket(current_user, position)
-        # 3. 向求职者发送消息通知（消息模板，短信）
-
-        # 4. 向推荐人发送消息模板
-        # 5. 更新挖掘被动求职者信息
-        # 6. 向 HR 发送消息通知（消息模板，短信，邮件）
-        pass
-
-    @gen.coroutine
     def opt_add_reward(self, apply_id, current_user, position, is_platform):
+        """
+        添加积分
+        :param apply_id:
+        :param current_user:
+        :param position:
+        :param is_platform:
+        :return:
+        """
 
         recommender_user_id, recommender_wxuser_id, recom_employee = yield self.get_recommend_user(current_user, position, is_platform)
 
@@ -518,7 +511,12 @@ class ApplicationPageService(PageService):
 
     @gen.coroutine
     def opt_send_redpacket(self, current_user, position):
-
+        """
+        发送申请红包
+        :param current_user:
+        :param position:
+        :return:
+        """
         # TODO 待yiliang校验
         yield self.redpacket_ps.handle_red_packet_position_related(
             current_user,
@@ -528,4 +526,142 @@ class ApplicationPageService(PageService):
         )
 
     @gen.coroutine
-    def opt_send_applier_msg(self):
+    def opt_send_applier_msg(self, apply_id, current_user, position):
+        """
+        向求职者发送消息通知（消息模板，短信）
+        :param apply_id:
+        :param current_user:
+        :param position:
+        :return:
+        """
+
+        # 发送消息模板，先发企业号，再发仟寻
+        link = make_url(
+            path.USERCENTER_APPLYRECORD.format(apply_id),
+            host=self.settings.platform_host,
+            wechat_signature=current_user.wechat.signature)
+
+
+        link_qx = make_url(path.OLD_APPLICATION,
+                        host=self.settings.qx_host, m="checkstatus", app_id=apply_id)
+
+        self.logger.debug("[opt_send_applier_msg]link:{}".format(link))
+        self.logger.debug("[opt_send_applier_msg]link_qx:{}".format(link_qx))
+
+        res = yield application_notice_to_applier_tpl(current_user.wechat.id,
+                                                      current_user.wxuser.openid,
+                                                      link,
+                                                      link_qx,
+                                                      position.title,
+                                                      current_user.company.name)
+        if not res:
+            # TODO 发送短信
+            # data = ObjectDict({
+            #     "mobile": self.current_user.sysuser.mobile,
+            #     "company": position.company_name,
+            #     "position": position.title,
+            #     "ip": self.request.remote_ip,
+            #     "sys": 1
+            # })
+            #
+            # result = RandCode().send_new_appliacation_to_applier(data)
+            pass
+
+
+    @gen.coroutine
+    def opt_send_recommender_msg(self, recommend_user_id, current_user, position, profile):
+        """
+        向推荐人发送消息模板
+        :param recommend_user_id:
+        :param current_user:
+        :param position:
+        :param profile:
+        :return:
+        """
+
+        recom_record = yield self.candidate_recom_record_ds.get_candidate_recom_record(conds={
+            "position_id": position.id,
+            "presentee_user_id": current_user.sysuser.id,
+            "post_user_id": recommend_user_id,
+        }, appends=["LIMIT 1"])
+
+        work_exp_years = self.profile_ps.calculate_workyears(profile.get("workexps", []))
+        job = self.profile_psd.get_job_for_application(profile)
+        recent_job = job.get("company_name", "")
+
+        link = make_url(path.EMPLOYEE_RECOMMENDS, host=self.settings.platform_host, wechat_signature=current_user.wechat.signature)
+
+        self.logger.debug("[opt_send_recommender_msg]link:{}".format(link))
+
+        if recom_record and current_user.recom.id:
+            application_notice_to_recommender_tpl(current_user.wechat.id,
+                                                  current_user.recom.openid,
+                                                  link,
+                                                  current_user.sysuser.name or current_user.sysuser.nickname,
+                                                  position.title,
+                                                  work_exp_years,
+                                                  recent_job)
+
+    @gen.coroutine
+    def opt_update_candidate_recom_records(self, apply_id, current_user, recommend_user_id, position):
+        """
+        更新挖掘被动求职者相关信息
+        :param apply_id:
+        :param current_user:
+        :param recommend_user_id:
+        :param position:
+        :return:
+        """
+        self.logger.debug("[opt_update_candidate_recom_records]start")
+        if current_user.wechat.passive_seeker == const.OLD_YES and recommend_user_id:
+            yield self.candidate_recom_record_ds.update_candidate_recom_record(
+                conds={
+                    "position_id": position.id,
+                    "post_user_id": recommend_user_id,
+                    "presentee_user_id": current_user.sysuser.id,
+                },fields={
+                    "app_id": apply_id
+                }
+            )
+
+    @gen.coroutine
+    def opt_hr_msg(self, current_user, profile, position):
+
+        # 1. 向 HR 发送消息模板通知，短信
+        if position.publisher:
+            work_exp_years = self.profile_ps.calculate_workyears(profile.get("workexps", []))
+            job = self.profile_psd.get_job_for_application(profile)
+            recent_job = job.get("company_name", "")
+
+            hr_info = yield self.user_hr_account_ds.get_hr_account(conds={
+                "id": position.publisher
+            })
+            is_ok = False
+            if hr_info.wxuser_id:
+                hr_wxuser = yield self.user_wx_user_ds.get_wxuser(conds={
+                    "id": hr_info.wxuser_id
+                })
+
+                is_ok = application_notice_to_hr_tpl(current_user.wechat.id,
+                                             hr_wxuser.openid,
+                                             hr_info.name or hr_wxuser.nickname,
+                                             position.title,
+                                             current_user.sysuser.name or current_user.sysuser.nickname,
+                                             work_exp_years,
+                                             recent_job)
+
+            if not is_ok:
+                # 消息模板发送失败时，只对普通客户发送短信
+                if hr_info.mobile and hr_info.account_type == 2:
+                    # TODO
+                    # data = ObjectDict({
+                    #     "mobile": mobile,
+                    #     "position": position.title,
+                    #     "ip": self.request.remote_ip,
+                    #     "sys": 1
+                    # })
+                    # result = RandCode().send_new_application_to_hr(data)
+
+
+        # 2. 向 HR 发送邮件通知
+        # TODO

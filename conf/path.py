@@ -16,12 +16,14 @@ EMPLOYEE_VERIFY = '/m/app/employee/binding'
 SEARCH_FILITER = '/m/start'
 CUSTOMIZE_EDX = '/m/custom/edx'
 USERCENTER_APPLYRECORD = 'm/app/usercenter/applyrecords/{}'
+EMPLOYEE_RECOMMENDS = 'm/app/employee/recommends'
 
 # 供侧边栏使用
 OLD_POSITION = '/mobile/position'
 OLD_PROFILE = '/mobile/profile'
 OLD_CHAT = '/mobile/chatroom'
 OLD_SYSUSER = '/mobile/sysuser'
+OLD_APPLICATION = '/mobile/application'
 
 # ============================ 基础服务开始 ============================
 # 用户服务
