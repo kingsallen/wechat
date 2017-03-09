@@ -120,7 +120,7 @@ class TeamPageService(PageService):
                 company_id=None, team_ids=team_id_list)
         else:
             company_positions = yield self.job_position_ds.get_positions_list(
-                conds={'company_id': company.id}, fields=position_fields)
+                conds={'company_id': company.id, 'status': 0}, fields=position_fields)
 
             other_teams = yield self.hr_team_ds.get_team_list(
                 conds={'id': [team.id, '<>'],
@@ -130,7 +130,7 @@ class TeamPageService(PageService):
         other_teams.sort(key=lambda t: t.show_order)
 
         team_positions = [pos for pos in company_positions
-                          if pos.department == team.name and pos.status == 0]
+                          if pos.team_id == team.id and pos.status == 0]
         team_members = yield self.hr_team_member_ds.get_team_member_list(
             conds={'team_id': team.id})
 
