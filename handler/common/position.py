@@ -16,7 +16,6 @@ from tests.dev_data.user_company_config import COMPANY_CONFIG
 
 
 class PositionHandler(BaseHandler):
-
     @handle_response
     @gen.coroutine
     def get(self, position_id):
@@ -76,9 +75,12 @@ class PositionHandler(BaseHandler):
             self.logger.debug("[JD]构建相似职位推荐")
             recomment_positions_res = yield self.position_ps.get_recommend_positions(position_id)
 
+            # 获取公司配置信息
+            teamname_custom = yield self.company_ps.get_company_teamname_custom(self.current_user.company.id)
+
             header = self._make_json_header(
                 position_info, company_info, star, application, endorse,
-                can_apply, team.id if team else 0, did)
+                can_apply, team.id if team else 0, did, teamname_custom)
             module_job_description = self._make_json_job_description(position_info)
             module_job_require = self._make_json_job_require(position_info)
             module_job_need = self._make_json_job_need(position_info)
@@ -98,7 +100,7 @@ class PositionHandler(BaseHandler):
             # [JD]职位所属团队及相关信息拼装
             self.logger.debug("[JD]构建团队相关信息")
             yield self._add_team_data(position_data, team,
-                                      position_info.company_id, position_id)
+                                      position_info.company_id, position_id, teamname_custom)
 
             self.render_page("position/info.html", data=position_data)
 
@@ -189,7 +191,6 @@ class PositionHandler(BaseHandler):
         hr_account, hr_wx_user = yield self.position_ps.get_hr_info(publisher)
         raise gen.Return((hr_account, hr_wx_user))
 
-
     @gen.coroutine
     def _make_endorse_info(self, position_info, company_info):
         """构建 JD 页左下角背书信息"""
@@ -242,7 +243,7 @@ class PositionHandler(BaseHandler):
         return res
 
     def _make_json_header(self, position_info, company_info, star, application,
-                          endorse, can_apply, team_id, did):
+                          endorse, can_apply, team_id, did, teamname_custom):
         """构造头部 header 信息"""
         data = ObjectDict({
             "id": position_info.id,
@@ -260,7 +261,8 @@ class PositionHandler(BaseHandler):
             "team": team_id,
             "did": did,
             "hr_chat": int(self.current_user.wechat.hr_chat),
-            #"team": position_info.department.lower() if position_info.department else ""
+            "teamname_custom": teamname_custom["teamname_custom"]
+            # "team": position_info.department.lower() if position_info.department else ""
         })
 
         return data
@@ -291,7 +293,7 @@ class PositionHandler(BaseHandler):
             data = None
         else:
             data = ObjectDict({
-                "data":  require
+                "data": require
             })
         return data
 
@@ -414,6 +416,7 @@ class PositionHandler(BaseHandler):
     @gen.coroutine
     def _redirect_when_recom_is_openid(self, position_info):
         """当recom是openid时，刷新链路，改变recom的值，跳转"""
+
         def recom_is_like_openid():
             return (self.params.recom and
                     self.params.recom.startswith('o') and
@@ -439,8 +442,8 @@ class PositionHandler(BaseHandler):
         """给员工加积分"""
 
         if (not self.current_user.employee and
-            recom_employee_user_id != self.current_user.sysuser.id and
-            self.is_platform):
+                    recom_employee_user_id != self.current_user.sysuser.id and
+                self.is_platform):
 
             recom_employee = yield self.user_ps.get_valid_employee_by_user_id(
                 recom_employee_user_id)
@@ -489,12 +492,12 @@ class PositionHandler(BaseHandler):
                                          position_info.salary)
 
     @gen.coroutine
-    def _add_team_data(self, position_data, team, company_id, position_id):
+    def _add_team_data(self, position_data, team, company_id, position_id, teamname_custom):
 
         if team:
             company_config = COMPANY_CONFIG.get(company_id)
             module_team_position = yield self._make_team_position(
-                team, position_id, company_id)
+                team, position_id, company_id, teamname_custom)
             if module_team_position:
                 add_item(position_data, "module_team_position",
                          module_team_position)
@@ -505,14 +508,14 @@ class PositionHandler(BaseHandler):
                     add_item(position_data, "module_mate_day", module_mate_day)
 
                 if not company_config.no_jd_team:
-                    module_team = yield self._make_team(team)
+                    module_team = yield self._make_team(team, teamname_custom)
                     add_item(position_data, "module_team", module_team)
 
     @gen.coroutine
-    def _make_team_position(self, team, position_id, company_id):
+    def _make_team_position(self, team, position_id, company_id, teamname_custom):
         """团队职位，构造数据"""
         res = yield self.position_ps.get_team_position(
-            team.name, self.params, position_id, company_id)
+            team.id, self.params, position_id, company_id, teamname_custom)
         raise gen.Return(res)
 
     @gen.coroutine
@@ -522,10 +525,10 @@ class PositionHandler(BaseHandler):
         raise gen.Return(res)
 
     @gen.coroutine
-    def _make_team(self, team):
+    def _make_team(self, team, teamname_custom):
         """所属团队，构造数据"""
         more_link = make_url(path.TEAM_PATH.format(team.id), self.params),
-        res = yield self.position_ps.get_team_data(team, more_link)
+        res = yield self.position_ps.get_team_data(team, more_link, teamname_custom)
         raise gen.Return(res)
 
 

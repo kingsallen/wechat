@@ -9,7 +9,6 @@ from service.page.base import PageService
 
 
 class CompanyPageService(PageService):
-
     def __init__(self, logger):
         super(CompanyPageService, self).__init__(logger)
 
@@ -35,7 +34,7 @@ class CompanyPageService(PageService):
         # 公司副表
         if need_conf:
             conds = {
-               "company_id" : company.get("id"),
+                "company_id": company.get("id"),
             }
             company_conf_res = yield self.hr_company_conf_ds.get_company_conf(conds)
 
@@ -107,3 +106,14 @@ class CompanyPageService(PageService):
         lastrowid = yield self.campaign_company_survey_ds.create_survey(fields)
         raise gen.Return(lastrowid)
 
+    @gen.coroutine
+    def get_company_conf(self, company_id, fields):
+        company_conf = yield self.hr_company_conf_ds.get_company_conf({"company_id": company_id}, fields)
+        raise gen.Return(company_conf)
+
+    @gen.coroutine
+    def get_company_teamname_custom(self, company_id):
+        company_conf = yield self.get_company_conf(company_id, fields=["teamname_custom"])
+        if not company_conf:
+            company_conf = {'teamname_custom': self.constant.TEAMNAME_CUSTOM_DEFAULT}
+        raise gen.Return(company_conf)
