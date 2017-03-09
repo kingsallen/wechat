@@ -78,7 +78,7 @@ class PositionHandler(BaseHandler):
 
             header = self._make_json_header(
                 position_info, company_info, star, application, endorse,
-                can_apply, team.id, did)
+                can_apply, team.id if team else 0, did)
             module_job_description = self._make_json_job_description(position_info)
             module_job_require = self._make_json_job_require(position_info)
             module_job_need = self._make_json_job_need(position_info)
