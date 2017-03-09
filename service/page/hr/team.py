@@ -17,7 +17,6 @@ from conf import path
 
 
 class TeamPageService(PageService):
-
     @gen.coroutine
     def get_sub_company(self, sub_company_id):
         sub_company = yield self.hr_company_ds.get_company(
@@ -34,7 +33,7 @@ class TeamPageService(PageService):
     @gen.coroutine
     def get_team_by_name(self, department, company_id):
         team = yield self.hr_team_ds.get_team(
-            conds={'company_id': company_id, 'name':department, 'disable': 0})
+            conds={'company_id': company_id, 'name': department, 'disable': 0})
 
         raise gen.Return(team)
 
@@ -78,10 +77,16 @@ class TeamPageService(PageService):
                         member=m,
                         head_img=member_head_img_dict.get(m.res_id)
                     ) for m in all_members_dict.get(t.id)
-                ]
+                    ]
             ) for t in teams
-        ]
+            ]
         data.template_total = len(data.templates)
+
+        teamname_custom = yield self.hr_company_conf_ds.get_company_conf(conds={'company_id': company.id},
+                                                                         fields=['teamname_custom'])
+
+        data.bottombar = teamname_custom if teamname_custom else {
+            'teamname_custom': self.constant.TEAMNAME_CUSTOM_DEFAULT}
 
         raise gen.Return(data)
 
@@ -144,9 +149,14 @@ class TeamPageService(PageService):
                 company.id).custom_visit_recipe
 
         data.templates = temp_data_tool.make_team_detail_template(
-            team, team_members, detail_media_list,  team_positions[0:3],
+            team, team_members, detail_media_list, team_positions[0:3],
             other_teams, res_dict, handler_param, bool(visit))
         data.templates_total = len(data.templates)
+        teamname_custom = yield self.hr_company_conf_ds.get_company_conf(conds={'company_id': company.id},
+                                                                         fields=['teamname_custom'])
+
+        data.bottombar = teamname_custom if teamname_custom else {
+            'teamname_custom': self.constant.TEAMNAME_CUSTOM_DEFAULT}
 
         raise gen.Return(data)
 

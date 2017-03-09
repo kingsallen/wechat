@@ -30,4 +30,5 @@ class HrCompanyConfDao(BaseDao):
             "job_custom_title":     self.constant.TYPE_STRING, # 职位自定义字段标题
             "search_seq":           self.constant.TYPE_STRING, # 搜索页页面设置顺序,3#1#2
             "search_img":           self.constant.TYPE_STRING, # 搜索页页面设置背景图
+            "teamname_custom":      self.constant.TYPE_STRING, # 职位部门字段名称
         }
