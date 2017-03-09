@@ -24,10 +24,12 @@ from util.tool.str_tool import gen_salary
 from conf.platform import MEDIA_TYPE
 from conf.path import POSITION_PATH
 
+
 def make_up_for_missing_res(res):
     if res is None:
         res = ObjectDict(res_url="", res_type=0)
     return res
+
 
 def template1(sub_type, title, data, more_link=None):
     """
@@ -77,11 +79,11 @@ def template1_data(resource, member_list=None):
 
 def template1_data_member(resource_list):
     return [{
-        "icon": make_static_url(resource.media_url),
-        "name": resource.name,
-        "title": resource.title,
-        "description": resource.description,
-    } for resource in resource_list]
+                "icon": make_static_url(resource.media_url),
+                "name": resource.name,
+                "title": resource.title,
+                "description": resource.description,
+            } for resource in resource_list]
 
 
 def template2(title, data):
@@ -94,11 +96,11 @@ def template2(title, data):
 
 def template2_data(resource_list):
     return [{
-        'sub_title': resource.sub_title,
-        'description': resource.longtext,
-        'media_url': make_static_url(resource.media_url),
-        'media_type': MEDIA_TYPE[resource.media_type]
-    } for resource in resource_list]
+                'sub_title': resource.sub_title,
+                'description': resource.longtext,
+                'media_url': make_static_url(resource.media_url),
+                'media_type': MEDIA_TYPE[resource.media_type]
+            } for resource in resource_list]
 
 
 def template3(title, resource_list, handler_params):
@@ -106,12 +108,12 @@ def template3(title, resource_list, handler_params):
         'type': 3,
         'title': title,
         'data': [{
-            'title': position.title,  # '文案'
-            'link': make_url(POSITION_PATH.format(position.id), handler_params,
-                             escape=['recom']),  # JD连接
-            'location': position.city,  # '上海
-            'salary': gen_salary(position.salary_top, position.salary_bottom)  # '5k-8k'
-        } for position in resource_list]
+                     'title': position.title,  # '文案'
+                     'link': make_url(POSITION_PATH.format(position.id), handler_params,
+                                      escape=['recom']),  # JD连接
+                     'location': position.city,  # '上海
+                     'salary': gen_salary(position.salary_top, position.salary_bottom)  # '5k-8k'
+                 } for position in resource_list]
     })
 
 
@@ -129,10 +131,10 @@ def template4_data(resource_list, sub_type):
         data = template2_data(resource_list)
     elif sub_type == 1:
         data = [{
-            'sub_title': resource.sub_title,
-            'media_url': make_static_url(resource.media_url),
-            'link': resource.link
-        } for resource in resource_list]
+                    'sub_title': resource.sub_title,
+                    'media_url': make_static_url(resource.media_url),
+                    'link': resource.link
+                } for resource in resource_list]
     else:
         data = None
 
@@ -153,7 +155,7 @@ def template50(resource):
 def template51(resource):
     return ObjectDict({
         'type': 51, 'title': 'address',
-        'data':  [{
+        'data': [{
             'company_name': resource.sub_title,
             'media_url': make_static_url(resource.media_url)
             if resource.media_url else '',
@@ -161,12 +163,15 @@ def template51(resource):
     })
 
 
-def make_header(company, team_index=False, team=None):
+def make_header(company, team_index=False, team=None, **extra):
     if team:
         name = team.name
         description = team.slogan
     else:
-        name = '我们的团队' if team_index else company.abbreviation or company.name
+        if team_index:
+            name = '我们的' + extra["teamname_custom"] if extra and "teamname_custom" in extra else "团队"
+        else:
+            name = company.abbreviation or company.name
         description = '' if team_index else company.slogan
 
     return ObjectDict({
@@ -234,8 +239,9 @@ def make_other_team_data(team, res, handler_params):
 
 
 def make_team_detail_template(team, members, detail_media_list, positions,
-                              other_teams, res_dic, handler_params, vst=False):
+                              other_teams, res_dic, handler_params, teamname_custom=None, vst=False):
     template = []
+    teamname_field = teamname_custom["teamname_custom"] if teamname_custom else '团队'
 
     # 无素材不显示团队
     if team.is_show:
@@ -243,7 +249,7 @@ def make_team_detail_template(team, members, detail_media_list, positions,
         template.append(
             template1(
                 sub_type='full',
-                title='团队介绍',
+                title=teamname_field + '介绍',
                 data=[{
                     'sub_title': '',
                     'longtext': team.description,
@@ -267,20 +273,20 @@ def make_team_detail_template(team, members, detail_media_list, positions,
 
     # 适应没有数据不显示模板块
     if positions:
-        template.append(template3('团队在招职位', positions, handler_params))
+        template.append(template3(teamname_field + '在招职位', positions, handler_params))
     if not vst and team.is_show:
         template.append(template5())
     if other_teams:
         template.append(template4(
             sub_type=0,
-            title='其他团队',
+            title='其他' + teamname_field,
             data=[
                 make_other_team_data(
                     team=t,
                     res=res_dic.get(t.res_id),
                     handler_params=handler_params
                 ) for t in other_teams
-            ])
+                ])
         )
 
     return template
@@ -339,11 +345,11 @@ def make_mate(media_list, res_dict):
         sub_type='less',
         title=media_list[0].title,
         data=[{
-            'sub_title': m.sub_title,
-            'longtext': '{}\n'.format(m.longtext),
-            'media_url': make_static_url(res_dict.get(m.res_id).res_url),
-            'media_type': MEDIA_TYPE[res_dict.get(m.res_id).res_type]
-        } for m in media_list]
+                  'sub_title': m.sub_title,
+                  'longtext': '{}\n'.format(m.longtext),
+                  'media_url': make_static_url(res_dict.get(m.res_id).res_url),
+                  'media_type': MEDIA_TYPE[res_dict.get(m.res_id).res_type]
+              } for m in media_list]
     )
 
 
@@ -362,5 +368,3 @@ def make_team(team, resources, more_link, team_members):
         }],
         more_link=more_link
     )
-
-

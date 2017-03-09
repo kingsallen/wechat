@@ -65,7 +65,14 @@ class TeamPageService(PageService):
             all_members_dict.get('all_head_img_list'))
 
         # 拼装模板数据
-        data.header = temp_data_tool.make_header(company, team_index=True)
+
+        teamname_custom = yield self.hr_company_conf_ds.get_company_conf(conds={'company_id': company.id},
+                                                                         fields=['teamname_custom'])
+
+        data.bottombar = teamname_custom if teamname_custom else {
+            'teamname_custom': self.constant.TEAMNAME_CUSTOM_DEFAULT}
+
+        data.header = temp_data_tool.make_header(company, team_index=True, **teamname_custom)
         # 解析生成团队列表页中每个团队信息子模块
         data.templates = [
             temp_data_tool.make_team_index_template(
@@ -82,11 +89,6 @@ class TeamPageService(PageService):
             ]
         data.template_total = len(data.templates)
 
-        teamname_custom = yield self.hr_company_conf_ds.get_company_conf(conds={'company_id': company.id},
-                                                                         fields=['teamname_custom'])
-
-        data.bottombar = teamname_custom if teamname_custom else {
-            'teamname_custom': self.constant.TEAMNAME_CUSTOM_DEFAULT}
 
         raise gen.Return(data)
 
@@ -141,6 +143,11 @@ class TeamPageService(PageService):
         res_dict = yield self.hr_resource_ds.get_resource_by_ids(res_id_list)
 
         # 拼装模板数据
+        teamname_custom = yield self.hr_company_conf_ds.get_company_conf(conds={'company_id': company.id},
+                                                                         fields=['teamname_custom'])
+
+        data.bottombar = teamname_custom if teamname_custom else {
+            'teamname_custom': self.constant.TEAMNAME_CUSTOM_DEFAULT}
         data.header = temp_data_tool.make_header(company, True, team)
         data.relation = ObjectDict({
             'want_visit': self.constant.YES if visit else self.constant.NO})
@@ -150,13 +157,8 @@ class TeamPageService(PageService):
 
         data.templates = temp_data_tool.make_team_detail_template(
             team, team_members, detail_media_list, team_positions[0:3],
-            other_teams, res_dict, handler_param, bool(visit))
+            other_teams, res_dict, handler_param, teamname_custom=teamname_custom, vst=bool(visit))
         data.templates_total = len(data.templates)
-        teamname_custom = yield self.hr_company_conf_ds.get_company_conf(conds={'company_id': company.id},
-                                                                         fields=['teamname_custom'])
-
-        data.bottombar = teamname_custom if teamname_custom else {
-            'teamname_custom': self.constant.TEAMNAME_CUSTOM_DEFAULT}
 
         raise gen.Return(data)
 

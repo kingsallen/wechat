@@ -35,7 +35,7 @@ class TeamIndexHandler(BaseHandler):
 
         self.params.share = self._share(current_company)
 
-        self.render_page(template_name, data)
+        self.render_page(template_name, data, title=data.bottombar.teamname_custom)
         return
 
     def _share(self, company):
@@ -75,7 +75,7 @@ class TeamDetailHandler(BaseHandler):
         self.params.share = self._share(current_company,
                                         team.name, share_cover_url)
 
-        self.render_page(template_name='company/team.html', data=data)
+        self.render_page(template_name='company/team.html', data=data, title=data.bottombar.teamname_custom)
         return
 
     def _share(self, company, team_name, share_cover_url):
