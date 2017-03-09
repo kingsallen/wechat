@@ -10,13 +10,19 @@ class Subscriber(object):
                  ignore_subscribe_messages=True,
                  sleep_time=0.01,
                  channel=None,
-                 message_handler=None):
+                 message_handler=None,
+                 subscribe_mode='subscribe'):
 
         self._pubsub = redis_client.pubsub()
         self._pubsub.ignore_subscribe_messages = ignore_subscribe_messages
 
         if channel:
-            self.subscribe(channel, message_handler)
+            if subscribe_mode == 'subscribe':
+                self.subscribe(channel, message_handler)
+            elif subscribe_mode == 'psubscribe':
+                self.psubscribe(channel, message_handler)
+            else:
+                raise ValueError('invalid subscribe_mode')
 
         self._sleep_time = sleep_time
         self._thread = None
