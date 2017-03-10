@@ -14,14 +14,7 @@ from util.common import ObjectDict
 from util.tool.str_tool import gen_salary
 from util.tool.date_tool import jd_update_date, str_2_date
 
-from thrift_gen.gen.useraccounts.service.UserCenterService import Client as UserCenterServiceClient
-from service.data.infra.framework.client.client import ServiceClientFactory
-from service.data.infra.framework.common.config import CONF
-
 class UsercenterPageService(PageService):
-
-    usercenter_service_cilent = ServiceClientFactory.get_service(
-        UserCenterServiceClient, CONF)
 
     def __init__(self):
         super().__init__()

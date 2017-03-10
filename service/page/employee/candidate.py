@@ -8,7 +8,6 @@ class CandidatePageService(PageService):
     def __init__(self):
         super().__init__()
 
-
     @gen.coroutine
     def send_candidate_view_position(self, user_id, position_id, sharechain_id):
         """刷新候选人链路信息，调用基础服务"""

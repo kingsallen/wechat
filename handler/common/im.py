@@ -1,10 +1,15 @@
 # coding=utf-8
 
-from tornado import gen, websocket, escape, ioloop, web
+import traceback
+from tornado import gen, websocket, escape, ioloop
+
+import conf.common as const
+import conf.message as msg
 from handler.base import BaseHandler
+from cache.user.chat_session import ChatCache
 from util.common.decorator import handle_response, authenticated
 from util.tool.pubsub_tool import Subscriber
-import traceback
+from util.common import ObjectDict
 
 
 class UnreadCountHandler(BaseHandler):
@@ -36,8 +41,8 @@ class UnreadCountHandler(BaseHandler):
         chat_num = yield self.im_ps.get_unread_chat_num(self.current_user.sysuser.id, publisher)
         self.send_json_success(data=chat_num)
 
-    @authenticated
     @handle_response
+    @authenticated
     @gen.coroutine
     def get_unread_total(self):
         """
@@ -62,6 +67,8 @@ class ChatWebSocketHandler(BaseHandler, websocket.WebSocketHandler):
         self.ping_timeout = None
 
         self.chatroom_channel = ''
+        self.chat_session = ChatCache()
+        self.room_id = 0
 
     def _send_ping(self):
         self.ping(self.ping_message)
@@ -92,7 +99,13 @@ class ChatWebSocketHandler(BaseHandler, websocket.WebSocketHandler):
             callback=self._send_ping,
         )
 
-        self.chatroom_channel = chatroom_channel
+        # TODO 如何获得 user_id, hr_id, room_id
+        self.room_id = self.params.room_id
+        if not (user_id and hr_id and room_id):
+            self.close(1000, "not authorized")
+
+        self.chatroom_channel = const.CHAT_CHATROOM_CHANNEL.format(hr_id, user_id)
+        self.chat_session.mark_enter_chatroom(self.current_user.sysuser.id)
 
         def message_handler(message):
             nonlocal self
@@ -113,10 +126,74 @@ class ChatWebSocketHandler(BaseHandler, websocket.WebSocketHandler):
         self.subscriber.stop_run_in_thread()
         self.subscriber.cleanup()
 
+        yield self.chat_ps.leave_chatroom(self.room_id)
+        self.chat_session.mark_leave_chatroom(self.current_user.sysuser.id)
+
     def on_message(self, message):
         message_body = escape.linkify(message)
         self.redis_client.publish(self.chatroom_channel, message_body)
         # TODO save message to db, async
+
+
+class ChatHandler(BaseHandler):
+    """聊天相关处理"""
+
+    @handle_response
+    @gen.coroutine
+    def get(self, method):
+
+        try:
+            # 重置 event，准确描述
+            self._event = self._event + method
+            yield getattr(self, "get_" + method)()
+        except Exception as e:
+            self.write_error(404)
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get_chatrooms(self):
+        """获得 C 端用户的聊天室列表"""
+
+        page_no = self.params.page_no or 0
+        page_size = self.params.page_size or 10
+        res = yield self.chat_ps.get_chatrooms(self.current_user.sysuser.id, page_no, page_size)
+        self.send_json_success(data=ObjectDict(
+            records = res
+        ))
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get_chats(self):
+        """获得指定聊天室的聊天历史记录"""
+
+        if not self.params.room_id:
+            self.send_json_error(message=msg.REQUEST_PARAM_ERROR)
+            return
+
+        page_no = self.params.page_no or 0
+        page_size = self.params.page_size or 10
+
+        res = yield self.chat_ps.get_chatrooms(self.params.room_id, page_no, page_size)
+        self.send_json_success(data=ObjectDict(
+            records = res
+        ))
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get_room(self):
+        """进入聊天室"""
+
+        if not self.params.hr_id:
+            self.send_json_error(message=msg.REQUEST_PARAM_ERROR)
+            return
+        pid = self.params.pid or 0
+        room_id = self.params.room_id or 0
+        res = yield self.chat_ps.get_chatroom(self.current_user.sysuser.id, self.params.hr_id, pid, self.current_user.qxuser, room_id)
+        self.send_json_success(data=res)
+
 
 
 # import tornado.ioloop

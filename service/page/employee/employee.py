@@ -1,9 +1,12 @@
 # coding=utf-8
 
 from tornado import gen
+
+from service.page.base import PageService
 import conf.common as const
 from util.common import ObjectDict
-from service.page.base import PageService
+from util.tool.url_tool import make_static_url
+
 
 class EmployeePageService(PageService):
 
@@ -52,7 +55,7 @@ class EmployeePageService(PageService):
             for e in ret.recommends:
                 recom = ObjectDict({
                     "status": e.status,
-                    "headimgurl": self.static_url(e.headimgurl or const.SYSUSER_HEADIMG),
+                    "headimgurl": make_static_url(e.headimgurl or const.SYSUSER_HEADIMG),
                     "is_interested": e.is_interested,
                     "applier_name": e.applier_name,
                     "applier_rel": e.applier_rel,
