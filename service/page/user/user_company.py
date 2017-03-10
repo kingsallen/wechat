@@ -77,8 +77,8 @@ class UserCompanyPageService(PageService):
 
         teamname_custom = yield self.hr_company_conf_ds.get_company_conf(conds={'company_id': company.id},
                                                                          fields=['teamname_custom'])
-        data.bottombar = teamname_custom if teamname_custom else {
-            'teamname_custom': self.constant.TEAMNAME_CUSTOM_DEFAULT}
+        data.bottombar = teamname_custom if teamname_custom and teamname_custom["teamname_custom"] else ObjectDict({
+            'teamname_custom': self.constant.TEAMNAME_CUSTOM_DEFAULT})
 
         raise gen.Return(data)
 
