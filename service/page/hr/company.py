@@ -114,6 +114,6 @@ class CompanyPageService(PageService):
     @gen.coroutine
     def get_company_teamname_custom(self, company_id):
         company_conf = yield self.get_company_conf(company_id, fields=["teamname_custom"])
-        if not company_conf:
+        if not company_conf or not company_conf["teamname_custom"]:
             company_conf = {'teamname_custom': self.constant.TEAMNAME_CUSTOM_DEFAULT}
         raise gen.Return(company_conf)
