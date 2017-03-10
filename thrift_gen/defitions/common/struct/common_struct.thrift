@@ -21,3 +21,8 @@ struct CommonQuery {
     9: optional list<string> attributes,
     10: optional list<string> grouops
 }
+
+exception CURDException {
+    1: i32 code,
+    2: string message
+}
