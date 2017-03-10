@@ -311,8 +311,8 @@ class ProfilePageService(PageService):
         """
         wexps = profile.get('workexps', [])
         if wexps:
-            return (len(filter(
-                lambda w: w.get("end_until_now", 0) == 1, wexps)) > 0)
+            return (len(list(filter(
+                lambda w: w.get("end_until_now", 0) == 1, wexps))) > 0)
         return False
 
     def get_current_job(self, profile):
@@ -321,7 +321,7 @@ class ProfilePageService(PageService):
         """
         wexps = profile.get('workexps', [])
 
-        latest_jobs = filter(lambda w: w.get("end_until_now", 0) == 1, wexps)
+        latest_jobs = list(filter(lambda w: w.get("end_until_now", 0) == 1, wexps))
         return (sorted(latest_jobs, key=lambda x: x.get("start_date", ""),
                        reverse=True)[0])
 

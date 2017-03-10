@@ -4,6 +4,7 @@ import ujson
 
 import tornado.gen as gen
 
+import conf.path as path
 import conf.common as const
 import conf.wechat as wx
 from setting import settings
@@ -45,14 +46,13 @@ class WechatTemplateMessager(object):
 
     @gen.coroutine
     def send_template(self, wechat_id, openid, sys_template_id, link,
-                      json_data, qx_retry=False, link_qx=None, platform_switch=True):
+                      json_data, qx_retry=False, platform_switch=True):
         """发送消息模板到用户
 
         :param wechat_id: 企业号 wechat_id
         :param openid: 发送对象的企业号 open_id
         :param sys_template_id: 系统模板库 id
         :param link: 点击跳转 url,
-        :param link_qx: 点击跳转的 qx url
         :param qx_retry: 失败后是否使用 qx 再次尝试发送
         :param json_data: 填充内容
         :return: 发送成功: const.YES, 发送失败:const.NO
@@ -79,10 +79,39 @@ class WechatTemplateMessager(object):
             ret = yield self.send_template(settings['qx_wechat_id'],
                                            qx_openid,
                                            sys_template_id,
-                                           link_qx or link,
+                                           link,
                                            json_data,
                                            qx_retry=False)
             raise gen.Return(ret)
+        else:
+            raise gen.Return(const.NO)
+
+    @gen.coroutine
+    def send_template_infra(self, delay, validators, sys_template_id, user_id,
+                            type, company_id, url, data, enable_qx_retry=0):
+        """
+        通过基础服务，发送消息模板到用户
+
+        TODO 基础服务需要按send_template，升级现有的接口，支持企业号发送开关，招聘助手发送
+        company_id改为 wechat_id，增加 type 类型
+
+        :param delay: int，必填，延迟时间，单位秒
+        :param validators: string，非必填，处理前的校验器, 用;分开多个, 每个校验器均返回 true 才能继续处理, 否则放弃处理
+        :param sys_template_id: int，必填，需要发送的消息模板ID，config_sys_template_message_library.id
+        :param user_id: string, 必填，user_user.id
+        :param type: int，非必填，用户类型，默认（包括不传递任何值）为C端用户。0 或 不传递表示C端帐号，1表示B端帐号。如果type=1是，company_id和enable_qx_retry将无效
+        :param company_id: int，必填，hr_company.id 主公司的ID
+        :param url: string，非必填，消息模板点击链接url
+        :param data: string，必填，模板数据
+        :param enable_qx_retry: int，非必填，如果企业发送失败后，是否需用使用仟寻再次发送，0:不用 1：可以
+        :return: 发送成功: const.YES, 发送失败:const.NO
+        """
+
+        res = yield http_post(path.MESSAGE_TEMPLATE, delay, validators, sys_template_id,
+                              user_id, type, company_id, url, data, enable_qx_retry)
+
+        if res.status == const.API_SUCCESS:
+            raise gen.Return(const.YES)
         else:
             raise gen.Return(const.NO)
 

@@ -86,7 +86,6 @@ class CompanyPageService(PageService):
         if company.banner:
             company.banner = [make_static_url(item) for item in ujson.decode(company.banner).values()]
 
-
         raise gen.Return(company)
 
     @gen.coroutine

@@ -2,6 +2,7 @@
 
 from tornado import gen
 
+import conf.common as const
 import conf.path as path
 from handler.base import BaseHandler
 from util.common.decorator import handle_response, authenticated, verified_mobile_oneself
@@ -32,19 +33,25 @@ class PositionStarHandler(BaseHandler):
         else:
             self.send_json_error()
 
+
 class PositionFavHandler(BaseHandler):
 
     @handle_response
     @verified_mobile_oneself
     @authenticated
     @gen.coroutine
-    def get(self):
+    def get(self, position_id):
         """感兴趣成功"""
 
-
+        yield self.user_ps.add_user_fav_position(position_id,
+                                                 self.current_user.sysuser.id,
+                                                 const.FAV_INTEREST,
+                                                 self.current_user.sysuser.mobile,
+                                                 self.current_user.wxuser.id,
+                                                 self.current_user.recom.id)
 
         application_url = make_url(path.APPLICATION+"/app", self.params, escape=['next_url', 'name', 'company', 'position'])
-        position_info_url = make_url(path.POSITION_PATH.format(self.params.pid), self.params, escape=['next_url', 'name', 'company', 'position'])
+        position_info_url = make_url(path.POSITION_PATH.format(position_id), self.params, escape=['next_url', 'name', 'company', 'position'])
 
         self.render("weixin/sysuser/interest-success.html",
                     application_url=application_url,

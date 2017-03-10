@@ -9,6 +9,7 @@ import conf.common as const
 
 from datetime import datetime
 from util.wechat.core import messager
+from util.common import ObjectDict
 
 def _make_json_data(first, remark=None, colors=None, **kwargs):
     """
@@ -138,8 +139,8 @@ def position_view_five_notice_tpl(wechat_id, openid, link, title,
     raise gen.Return(ret)
 
 @gen.coroutine
-def application_notice_to_applier_tpl(wechat_id, openid, link, link_qx, job,
-                    company_name, sys_template_id=const.TEMPLATES.APPLY_NOTICE_TPL):
+def application_notice_to_applier_tpl(wechat_id, openid, link, job, company_name,
+                                      sys_template_id=const.TEMPLATES.APPLY_NOTICE_TPL):
 
     """向求职者发送求职成功消息通知"""
 
@@ -155,7 +156,7 @@ def application_notice_to_applier_tpl(wechat_id, openid, link, link_qx, job,
     send_switch = yield messager.get_send_switch(wechat_id, const.TEMPLATES_SWITCH.sys_template_id)
 
     ret = yield messager.send_template(
-        wechat_id, openid, sys_template_id, link, json_data, qx_retry=True, link_qx=link_qx, platform_switch=send_switch)
+        wechat_id, openid, sys_template_id, link, json_data, qx_retry=True, platform_switch=send_switch)
 
     raise gen.Return(ret)
 
@@ -198,5 +199,47 @@ def application_notice_to_hr_tpl(wechat_id, openid, hr_name, title, applier_name
 
     ret = yield messager.send_template(
         wechat_id, openid, sys_template_id, None, json_data, qx_retry=False)
+
+    raise gen.Return(ret)
+
+@gen.coroutine
+def favposition_notice_to_hr_tpl(wechat_id, openid, title, candidate_name, mobile,
+                                          sys_template_id=const.TEMPLATES.RECOM_NOTICE_TPL):
+
+    """用户感兴趣某职位后，向HR发送消息通知"""
+
+    json_data = _make_json_data(
+        first="您发布的“{0}”职位有了一位新候选人，请及时与TA联系".format(title),
+        remark="",
+        keyword1=title,
+        keyword2=candidate_name,
+        keyword3=mobile)
+
+    ret = yield messager.send_template(
+        wechat_id, openid, sys_template_id, None, json_data, qx_retry=False)
+
+    raise gen.Return(ret)
+
+@gen.coroutine
+def favposition_notice_to_applier_tpl(company_id, title, company_name, city, user_id,
+                           url, sys_template_id=const.TEMPLATES.FAVPOSITION):
+
+    """用户感兴趣某职位后，向用户发送消息模板"""
+
+    # 延迟2小时发送
+    delay = 7200
+    # 延迟消息队列消费者
+    validators = 'mtp.scripts.consumer.validators.user_basic_info_not_complete'
+    type = 0
+
+    data = ObjectDict(
+        first="您好, 我们对您的职业经历十分感兴趣, 希望能更了解您",
+        remark="点击完善个人职业信息",
+        keyword1=title,
+        keyword2=company_name,
+        keyword3=city)
+
+    ret = yield messager.send_template_infra(delay, validators, sys_template_id, user_id,
+                            type, company_id, url, data, enable_qx_retry=1)
 
     raise gen.Return(ret)

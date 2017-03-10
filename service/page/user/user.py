@@ -393,6 +393,14 @@ class UserPageService(PageService):
         })
 
         if fav:
+            yield self.user_fav_position_ds.update_user_fav_position(
+                conds={
+                    "id": fav.id
+                },
+                fields={
+                    "mobile": fav.mobile or mobile
+                }
+            )
             raise gen.Return(fav.id)
         else:
             fav_id = yield self.user_fav_position_ds.insert_user_fav_position(fields=ObjectDict(

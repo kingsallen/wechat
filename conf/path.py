@@ -12,6 +12,7 @@ USER_LOGOUT = '/m/logout'
 SEARCH_FILITER = '/m/start'
 CUSTOMIZE_EDX = '/m/custom/emailapply'
 APPLICATION = '/m/application'
+POSITION_FAV = '/m/positionfav/{}'
 USER_CENTER = '/m/app/usercenter'
 MOBILE_VERIFY = '/m/app/phone/verify'
 EMPLOYEE_VERIFY = '/m/app/employee/binding'
@@ -80,4 +81,7 @@ DICT_CITIES = "dict/cities"
 DICT_COLLEGE = "dict/college"
 DICT_INDUSTRY = "dict/industry"
 DICT_POSITION = "dict/position"
+
+# 消息通知服务
+MESSAGE_TEMPLATE = "message/template"
 # ============================ 基础服务结束 ============================

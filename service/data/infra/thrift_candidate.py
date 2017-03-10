@@ -25,3 +25,11 @@ class ThriftCandidateDataService(DataService):
         ret = yield self.candidate_service_cilent.glancePosition(user_id, position_id, sharechain_id)
         self.logger.debug("[thrift]send_candidate_view_position: %s" % ret)
         raise gen.Return(ret)
+
+    @gen.coroutine
+    def send_candidate_interested(self, user_id, position_id, is_interested):
+        """刷新候选人感兴趣，调用基础服务"""
+
+        ret = yield self.candidate_service_cilent.glancePosition(user_id, position_id, is_interested)
+        self.logger.debug("[thrift]send_candidate_interested: %s" % ret)
+        raise gen.Return(ret)

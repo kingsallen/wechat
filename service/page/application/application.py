@@ -541,17 +541,11 @@ class ApplicationPageService(PageService):
             host=self.settings.platform_host,
             wechat_signature=current_user.wechat.signature)
 
-
-        link_qx = make_url(path.OLD_APPLICATION,
-                        host=self.settings.qx_host, m="checkstatus", app_id=apply_id)
-
         self.logger.debug("[opt_send_applier_msg]link:{}".format(link))
-        self.logger.debug("[opt_send_applier_msg]link_qx:{}".format(link_qx))
 
         res = yield application_notice_to_applier_tpl(current_user.wechat.id,
                                                       current_user.wxuser.openid,
                                                       link,
-                                                      link_qx,
                                                       position.title,
                                                       current_user.company.name)
         if not res:
@@ -639,10 +633,11 @@ class ApplicationPageService(PageService):
             is_ok = False
             if hr_info.wxuser_id:
                 hr_wxuser = yield self.user_wx_user_ds.get_wxuser(conds={
-                    "id": hr_info.wxuser_id
+                    "id": hr_info.wxuser_id,
+                    "wechat_id": self.settings.helper_wechat_id,
                 })
 
-                is_ok = application_notice_to_hr_tpl(current_user.wechat.id,
+                is_ok = application_notice_to_hr_tpl(self.settings.helper_wechat_id,
                                              hr_wxuser.openid,
                                              hr_info.name or hr_wxuser.nickname,
                                              position.title,

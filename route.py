@@ -36,6 +36,7 @@ common_routes = [
     (r"/m/logout",                                     "handler.common.passport.LogoutHandler",                     {"event": "passport_logout"}),
     (r"/m/register[\/]*([a-z]+)*",                     "handler.common.passport.RegisterHandler",                   {"event": "register_"}),
     (r"/m/application[\/]*([a-z]+)*",                  "handler.common.application.ApplicationHandler",             {"event": "application_"}),
+    (r"/m/positionfav/([0-9]+)",                       "handler.common.position.PositionFavHandler",                {"event": "position_fav"}),
 
     # common api
     (r"/m/api/position/star",                          "handler.common.position.PositionStarHandler",               {"event": "position_star"}),
