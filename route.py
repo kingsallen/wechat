@@ -50,9 +50,11 @@ common_routes = [
     (r"/m/api/usercenter/applyrecords[\/]*([0-9]+)*",  "handler.common.usercenter.ApplyrecordsHandler",             {"event": "usercenter_applyredords"}),
     (r"/m/api/usercenter",                             "handler.common.usercenter.UsercenterHandler",               {"event": "usercenter_"}),
     (r"/m/api/resume/import",                          "handler.common.resume.ResumeImportHandler",                 {"event": "resume_import"}),
+    (r"/m/api/sug/company",                            "handler.common.suggest.SuggestCompanyHandler",              {"event": "sug_company"}),
+    (r"/m/api/sug/college",                            "handler.common.suggest.SuggestCollegeHandler",              {"event": "sug_college"}),
 
     # websocket
-    (r"/websocket/([A-Za-z0-9_]{1,32})", "handler.common.im.ChatWebSocketHandler"),
+    (r"/websocket/([A-Za-z0-9_]{1,32})",                "handler.common.im.ChatWebSocketHandler"),
 
     # 兼容老微信 url，进行302跳转，event 设置为 NULL
     # (r"/.*",                                           "handler.common.compatible.CompatibleHandler",               {"event": "NULL"})
@@ -69,6 +71,7 @@ platform_routes = [
     (r"/m/company",                                    "handler.platform.companyrelation.CompanyHandler",           {"event": "company_info"}),
     (r"/m/company/team/(\d+)",                         "handler.platform.team.TeamDetailHandler",                   {"event": "team_detail"}),
     (r"/m/company/team",                               "handler.platform.team.TeamIndexHandler",                    {"event": "team_info"}),
+    (r"/m/employee/bindemail",                         "handler.platform.employee.EmployeeBindEmailHandler",        {"event": "employee_bindemail"}),
 
     # 各大公司的自定义配置
     (r"/m/custom/emailapply",                          "handler.platform.customize.CustomizeEmailApplyHandler",     {"event": "customize_emailapply"}),

@@ -1,46 +1,231 @@
 # coding=utf-8
 
-"""
-前后端数据传输格式
-``` json
-{
-  status: 0/1, // 0:成功， 非0:异常
-  message: "", // 消息文本，前端根据 status 判断渲染样式
-  data: {
-    component: "", // 模块名称
-    componentData: { // 模块所需数据
-      key1: '', // 模块所需数据 1，此为举例
-      key2: '', // 模块所需数据 2，此为举例
-      ...,
-      __status: 'o'/'x' // 仅前端往后端传递数据时存在，代表这条数据是新建还是删除。如果这条数据含有 id， 那么将这条数据视为更新
-    },
-    constant: { // 仅后端往前端传递数据时存在，该模块所需的常量列表
-      degree_list: { // 此为学历常量的例子
-        '0': '未选择',
-        '1': '小学'
-      }
-      scale_list: {......} // 此为公司规模常量的例子
-    },
-    isAdd: 1 // 仅后端往前端传递数据时存在，某些复合信息(教育经历，工作经历) 以此字段判断是否是展示新建页面
-  }
-}
-```
-"""
-
+import tornado
+import tornado.gen
+from tornado.escape import json_decode, json_encode
 
 from handler.base import BaseHandler
-import tornado.gen
+
 from util.common.decorator import handle_response, check_and_apply_profile
 from util.common import ObjectDict
-from tornado.escape import json_decode, json_encode
+from util.tool.str_tool import mobile_validate
 from util.tool.dict_tool import sub_dict, objectdictify
+from util.tool.url_tool import make_url
+
 import conf.common as const
+import conf.message as msg
+import conf.path as path
 
 
 class ProfileHandler(BaseHandler):
+    """ProfileHandler
+    GET Profile 页面渲染
+    POST 手动创建Profile -> 俗称老6步
     """
-    ProfileHandler
-    Profile 相关 Api 处理
+
+    @handle_response
+    @check_and_apply_profile
+    @tornado.gen.coroutine
+    def get(self):
+        """ 查看个人 Profile
+        如果有 GET 请求参数包含 pid,
+        在 profile 页面吸顶显示申请按钮
+        """
+        is_apply = self.params.get("apply", '0')
+
+        # TODO (tangyiliang) use decorator
+        # # 对雅诗兰黛无微不至的特别服务
+        # is_skip = self.params.get("is_skip", '0')
+
+        pid = self.params.get("pid", 0)
+        if not pid and self.get_cookie("dq_pid", 0):
+            pid = int(self.get_cookie("dq_pid"))
+        if not is_apply and pid:
+            is_apply = "1"
+
+        # TODO (tangyiliang) use decorator
+        # 获取不到 Profile 的情况下,跳转到新建 Profile 页面,
+        # 雅诗兰黛的自定义职位,跳转到新六步
+        # profile = yield self._prepare()
+        # if not profile:
+        #     no_profile_redirection(self, pid)
+        #     return
+
+        need_mobile_confirmation = 0
+        if is_apply and pid:
+            if str(self.current_user.sysuser.mobile) != str(
+                self.current_user.sysuser.username):
+                need_mobile_confirmation = 1
+
+        # profile_other 获取和处理
+        # other_record = get_profile_other_by_profile_id(
+        #     self.db, profile.get('profile').get('id'))
+        # if other_record:
+        #     other = json_decode(other_record.other)
+        # else:
+        #     other = {}
+        # other = {}
+        #
+        # if other:
+        #     other = sub_dict(other, pure_other_keys())
+
+        other = {}
+        profile_tpl = self.profile_ps.profile_to_tempalte(self.params.profile, other)
+
+        self.render(
+            template_name='neo_weixin/profile/profile.html',
+            profile_json=profile_tpl,
+            title="个人档案",
+            need_mobile_confirmation=need_mobile_confirmation,
+            current_mobile=self.current_user.sysuser.mobile,
+            is_apply=is_apply,
+            post_msg="",
+            post_status=0,
+            is_skip=0,
+            no_name='0' if self.current_user.sysuser.name else '1')
+
+    @tornado.gen.coroutine
+    def post(self):
+        has_profile, _ = yield self.profile_ps.has_profile(
+            self.current_user.sysuser.id)
+        if has_profile:
+            self.send_json_error(message='profile existed')
+
+        profile_data = self.request.body_arguments.get("profile", None)
+        assert profile_data is not None
+        profile = ObjectDict(json_decode(profile_data[0]))
+
+        # 姓名必填
+        if not profile.basicInfo or not profile.basicInfo.get('name', None):
+            message = "".join([msg.PROFILE_REQUIRED_HINT_HEAD, u"姓名",
+                               msg.PROFILE_REQUIRED_HINT_TAIL])
+            self.render('weixin/profile/mobile.html', profile=profile,
+                        message=message)
+            return
+
+        # 手机号必填
+        if not profile.contacts or not profile.contacts.get('mobile', None):
+            message = "".join([msg.PROFILE_REQUIRED_HINT_HEAD, u"手机号",
+                               msg.PROFILE_REQUIRED_HINT_TAIL])
+            self.render('weixin/profile/mobile.html', profile=profile,
+                        message=message)
+            return
+
+        # 手机号格式验证
+        ok = mobile_validate(profile.contacts.get('mobile', None))
+        if not ok:
+            message = "手机号码格式不正确"  # 手机号码格式不正确
+            self.render('weixin/profile/mobile.html',
+                        profile=profile, message=message)
+            return
+
+        # TODO
+        # 更新 user_user 表的字段,
+        # 这里使用 [] 可以让程序在需要时报错查看是否有漏洞导致需要的数据没有获取到
+        # self._profile_service.update_user_user_fields(ObjectDict(
+        #     mobile=profile.contacts['mobile'],
+        #     name=profile.basicInfo['name'],
+        #     email=profile.contacts['email'],
+        #     headimg=None
+        # ), self.current_user.sysuser.id)
+
+        # PROFILE_PROFILE
+        profile_id = None
+        profile_ok = basic_info_ok = education_ok = workexp_ok = 0
+
+        res_profile = yield self._profile_service.create_profile(
+            self.current_user.sysuser.id)
+
+        if res_profile[0]:
+            profile_id = res_profile[1]
+            profile_ok = 1
+            # 初始化user_setting表，profile的公开度
+            yield self.sysuser_service.post_user_setting(
+                self.current_user.sysuser.id)
+        else:
+            self.LOG.error(
+                "profile_profile creation failed. res:{}".format(
+                    res_profile[1]))
+
+        if profile_id:
+            # BASIC INFO
+            res_basic_info = yield self._profile_service.create_basic_info(
+                profile, profile_id)
+            if res_basic_info[0]:
+                basic_info_ok = 1
+            else:
+                self.LOG.error(
+                    "profile_basic creation failed. res:{}".format(
+                        res_basic_info[1]))
+
+            # EDUCATION
+            education_res = yield self._profile_service.create_education(
+                profile, profile_id)
+            if education_res[0]:
+                education_ok = 1
+                self.LOG.debug(
+                    "profile_education creation passed. New record num:{}"
+                    .format(education_res[1]))
+            else:
+                self.LOG.error(
+                    "profile_education creation failed. res:{}".format(
+                        education_res[1]))
+
+            # WORK EXP
+            workexp_res = yield self._profile_service.create_workexp(
+                profile, profile_id)
+            if workexp_res[0]:
+                workexp_ok = 1
+                self.LOG.debug(
+                    "profile_work_exp creation passed. New record num:{}"
+                    .format(workexp_res[1]))
+            else:
+                self.LOG.error(
+                    "profile_work_exp creation failed. res:{}".format(
+                        workexp_res[1]))
+
+        if profile_ok and basic_info_ok and education_ok and workexp_ok:
+            is_apply = '1' if self.get_cookie('dq_pid') else '0'
+            pid = self.get_cookie('dq_pid', None)
+
+            data = ObjectDict(
+                url=make_url(path.PROFILE, self.params, escape=['profile', 'abapply'], m='view',
+                             apply=is_apply, pid=pid)
+            )
+            self.send_json_success(data)
+        else:
+            self.send_json_warning(message='profile created partially')
+
+
+class ProfileSectionHandler(BaseHandler):
+    """
+    ProfileSectionHandler
+    Profile 各部分修改 相关 Api 处理
+
+    前后端数据传输格式
+    ``` json
+    {
+      status: 0/1, // 0:成功， 非0:异常
+      message: "", // 消息文本，前端根据 status 判断渲染样式
+      data: {
+        component: "", // 模块名称
+        componentData: { // 模块所需数据
+          key1: '', // 模块所需数据 1，此为举例
+          key2: '', // 模块所需数据 2，此为举例
+          ...,
+          __status: 'o'/'x' // 仅前端往后端传递数据时存在，代表这条数据是新建还是删除。如果这条数据含有 id， 那么将这条数据视为更新
+        },
+        constant: { // 仅后端往前端传递数据时存在，该模块所需的常量列表
+          degree_list: { // 此为学历常量的例子
+            '0': '未选择',
+            '1': '小学'
+          }
+          scale_list: {......} // 此为公司规模常量的例子
+        },
+        isAdd: 1 // 仅后端往前端传递数据时存在，某些复合信息(教育经历，工作经历) 以此字段判断是否是展示新建页面
+      }
+    }
+    ```
     """
 
     @handle_response
@@ -58,61 +243,7 @@ class ProfileHandler(BaseHandler):
         self.guarantee('route', 'component', 'componentData')
         yield getattr(self, "post_" + self.params.route)()
 
-    # @handle_response
-    # @tornado.gen.coroutine
-    # def get_view(self):
-    #     """ 查看个人 Profile
-    #     如果有 GET 请求参数包含 pid,
-    #     在 profile 页面吸顶显示申请按钮
-    #     """
-    #
-    #     is_apply = self.params.get("apply", '0')
-    #     # TODO (tangyiliang) use decorator
-    #     # # 对雅诗兰黛无微不至的特别服务
-    #     # is_skip = self.params.get("is_skip", '0')
-    #
-    #     pid = self.params.get("pid", 0)
-    #     if not pid and self.get_cookie("dq_pid", 0):
-    #         pid = int(self.get_cookie("dq_pid"))
-    #     if not is_apply and pid:
-    #         is_apply = "1"
-    #
-    #     # TODO (tangyiliang) use decorator
-    #     # 获取不到 Profile 的情况下,跳转到新建 Profile 页面,
-    #     # 雅诗兰黛的自定义职位,跳转到新六步
-    #     # profile = yield self._prepare()
-    #     # if not profile:
-    #     #     no_profile_redirection(self, pid)
-    #     #     return
-    #
-    #     need_mobile_confirmation = 0
-    #     if is_apply and pid:
-    #         if str(self.current_user.sysuser.mobile) != str(self.current_user.sysuser.username):
-    #             need_mobile_confirmation = 1
-    #
-    #     # # profile_other 获取和处理
-    #     # other_record = get_profile_other_by_profile_id(
-    #     #     self.db, profile.get('profile').get('id'))
-    #     # if other_record:
-    #     #     other = json_decode(other_record.other)
-    #     # else:
-    #     #     other = {}
-    #     # if other:
-    #     #     other = sub_dict(other, pure_other_keys())
-    #     #
-    #     # profile_tpl = yield profile_to_tempalte(profile, other)
-    #
-    #
-    #     # self.render('neo_weixin/profile/profile.html',
-    #     #             profile_json=profile_tpl,
-    #     #             title=u"个人档案",
-    #     #             need_mobile_confirmation=need_mobile_confirmation,
-    #     #             current_mobile=self.current_user.sysuser.mobile,
-    #     #             is_apply=is_apply,
-    #     #             post_msg="",
-    #     #             post_status=0,
-    #     #             is_skip=is_skip,
-    #     #             no_name='0' if self.current_user.sysuser.name else '1')
+
     #
     # @tornado.gen.coroutine
     # def get_manual(self):
@@ -167,129 +298,7 @@ class ProfileHandler(BaseHandler):
     #                 total_steps=(5 if jump_work_exp else 6),
     #                 jump_work_exp=jump_work_exp)
     #
-    # @tornado.gen.coroutine
-    # def post_create(self):
-    #     """
-    #     创建 profile
-    #     """
-    #     has_profile, _ = yield self.profile_ps.has_profile(
-    #         self.current_user.sysuser.id)
-    #     if has_profile:
-    #         self.send_json_error(message='profile existed')
-    #         self.finish()
-    #         return
-    #
-    #     profile_data = self.request.body_arguments.get("profile", None)
-    #     assert profile_data is not None
-    #     profile = ObjectDict(json_decode(profile_data[0]))
-    #
-    #     # 姓名必填
-    #     if not profile.basicInfo or not profile.basicInfo.get('name', None):
-    #         message = "".join([msg.RESUME_REQUIRED_HINT_HEAD, "姓名",
-    #                            msg.RESUME_REQUIRED_HINT_TAIL])
-    #         self.render('weixin/profile/mobile.html', profile=profile,
-    #                     message=message)
-    #         return
-    #
-    #     # 手机号必填
-    #     if not profile.contacts or not profile.contacts.get('mobile', None):
-    #         message = "".join([msg.RESUME_REQUIRED_HINT_HEAD, u"手机号",
-    #                            msg.RESUME_REQUIRED_HINT_TAIL])
-    #         self.render('weixin/profile/mobile.html', profile=profile,
-    #                     message=message)
-    #         return
-    #
-    #     # 手机号格式验证
-    #     ok = yield validate.mobile_validate_async(
-    #         profile.contacts.get('mobile', None))
-    #     if not ok:
-    #         message = "手机号码格式不正确"  # 手机号码格式不正确
-    #         self.render('weixin/profile/mobile.html',
-    #                     profile=profile, message=message)
-    #         return
-    #
-    #     # 更新 user_user 表的字段,
-    #     # 这里使用 [] 可以让程序在需要时报错查看是否有漏洞导致需要的数据没有获取到
-    #     self._profile_service.update_user_user_fields(ObjectDict(
-    #         mobile=profile.contacts['mobile'],
-    #         name=profile.basicInfo['name'],
-    #         email=profile.contacts['email'],
-    #         headimg=None
-    #     ), self.current_user.sysuser.id)
-    #
-    #     # PROFILE_PROFILE
-    #     profile_id = None
-    #     profile_ok = basic_info_ok = education_ok = workexp_ok = 0
-    #
-    #     source = 4 if self.PROJECT == const.PROJECT_BAGGING else 1
-    #     res_profile = yield self._profile_service.create_profile(
-    #         self.current_user.sysuser.id,
-    #         source=source)
-    #
-    #     if res_profile[0]:
-    #         profile_id = res_profile[1]
-    #         profile_ok = 1
-    #         # 初始化user_setting表，profile的公开度
-    #         yield self.sysuser_service.post_user_setting(
-    #             self.current_user.sysuser.id)
-    #     else:
-    #         self.LOG.error(
-    #             "profile_profile creation failed. res:{}".format(
-    #                 res_profile[1]))
-    #
-    #     if profile_id:
-    #         # BASIC INFO
-    #         res_basic_info = yield self._profile_service.create_basic_info(
-    #             profile, profile_id)
-    #         if res_basic_info[0]:
-    #             basic_info_ok = 1
-    #         else:
-    #             self.LOG.error(
-    #                 "profile_basic creation failed. res:{}".format(
-    #                     res_basic_info[1]))
-    #
-    #         # EDUCATION
-    #         education_res = yield self._profile_service.create_education(
-    #             profile, profile_id)
-    #         if education_res[0]:
-    #             education_ok = 1
-    #             self.LOG.debug(
-    #                 "profile_education creation passed. New record num:{}"
-    #                 .format(education_res[1]))
-    #         else:
-    #             self.LOG.error(
-    #                 "profile_education creation failed. res:{}".format(
-    #                     education_res[1]))
-    #
-    #         # WORK EXP
-    #         workexp_res = yield self._profile_service.create_workexp(
-    #             profile, profile_id)
-    #         if workexp_res[0]:
-    #             workexp_ok = 1
-    #             self.LOG.debug(
-    #                 "profile_work_exp creation passed. New record num:{}"
-    #                 .format(workexp_res[1]))
-    #         else:
-    #             self.LOG.error(
-    #                 "profile_work_exp creation failed. res:{}".format(
-    #                     workexp_res[1]))
-    #
-    #     if profile_ok and basic_info_ok and education_ok and workexp_ok:
-    #         is_apply = '1' if self.get_cookie('dq_pid') else '0'
-    #         pid = self.get_cookie('dq_pid', None)
-    #
-    #         data = ObjectDict(
-    #             url=make_url(const.PROFILE_URL, self.params,
-    #                                 escape=['profile', 'abapply'],
-    #                                 m='view',
-    #                                 apply=is_apply,
-    #                                 pid=pid)
-    #         )
-    #         self.send_json_success(data)
-    #     else:
-    #         self.send_json_warning(message='profile created partially')
-    #
-    #     return
+
     #
     # @tornado.gen.coroutine
     # def post_custom_create(self):
@@ -551,10 +560,7 @@ class ProfileHandler(BaseHandler):
             if hasattr(e, "__status") and getattr(e, "__status") == 'x':
                 verb = "delete"
             else:
-                if e.get("id", 0):
-                    verb = "update"
-                else:
-                    verb = "create"
+                verb = 'update' if e.id else 'create'
 
             result, res = yield getattr(
                 self.profile_ps, verb + "_profile_language")(e, profile_id)
@@ -572,8 +578,7 @@ class ProfileHandler(BaseHandler):
             profile_id)
         if not result:
             raise ValueError('cannot get skills')
-        else:
-            pass
+        else: pass
 
         component = self.params.component
         component_data = []
@@ -587,18 +592,15 @@ class ProfileHandler(BaseHandler):
     @tornado.gen.coroutine
     def post_skill(self):
         profile_id = yield self._get_profile_id()
-        component_data = json_decode(self.params.data)
+        component_data = objectdictify(json_decode(self.params.data))
 
         results = []
         for e in component_data:
-            e = ObjectDict(e)
             if hasattr(e, "__status") and getattr(e, "__status") == 'x':
                 verb = "delete"
             else:
-                if e.get("id", 0):
-                    verb = "update"
-                else:
-                    verb = "create"
+                verb = 'update' if e.id else 'create'
+
             result, res = yield getattr(
                 self.profile_ps, verb + "_profile_skill")(e, profile_id)
             results.append(result)
@@ -631,19 +633,14 @@ class ProfileHandler(BaseHandler):
     @tornado.gen.coroutine
     def post_cert(self):
         profile_id = yield self._get_profile_id()
-        component_data = json_decode(self.params.data)
+        component_data = objectdictify(json_decode(self.params.data))
 
         results = []
         for e in component_data:
-            e = ObjectDict(e)
-
             if hasattr(e, "__status") and getattr(e, "__status") == 'x':
                 verb = "delete"
             else:
-                if e.get("id", 0):
-                    verb = "update"
-                else:
-                    verb = "create"
+                verb = 'update' if e.id else 'create'
 
             result, res = yield getattr(
                 self.profile_ps, verb + "_profile_cert")(e, profile_id)
@@ -687,7 +684,6 @@ class ProfileHandler(BaseHandler):
 
     @tornado.gen.coroutine
     def post_jobexp(self):
-
         profile_id = yield self._get_profile_id()
         component_data = ObjectDict(json_decode(self.params.data))
         record = component_data
@@ -695,10 +691,7 @@ class ProfileHandler(BaseHandler):
         if hasattr(record, "__status") and getattr(record, "__status") == 'x':
             verb = "delete"
         else:
-            if record.get("id", 0):
-                verb = "update"
-            else:
-                verb = "create"
+            verb = 'update' if record.id else 'create'
 
         result, res = yield getattr(
             self.profile_ps, verb + "_profile_workexp")(
@@ -729,7 +722,6 @@ class ProfileHandler(BaseHandler):
                 self.send_json_success(message='company created')
             else:
                 self.send_json_error(message='company creation error')
-
     # Profile 编辑 -- jobexp 结束
 
     # Profile 编辑 -- eduexp 开始
@@ -773,10 +765,7 @@ class ProfileHandler(BaseHandler):
         if hasattr(record, "__status") and getattr(record, "__status") == 'x':
             verb = "delete"
         else:
-            if record.get("id", 0):
-                verb = "update"
-            else:
-                verb = "create"
+            verb = 'update' if record.id else 'create'
 
         result, res = yield getattr(
             self._profile_service, verb + "_profile_education")(
@@ -828,10 +817,7 @@ class ProfileHandler(BaseHandler):
         if hasattr(record, "__status") and getattr(record, "__status") == 'x':
             verb = "delete"
         else:
-            if record.get("id", 0):
-                verb = "update"
-            else:
-                verb = "create"
+            verb = 'update' if record.id else 'create'
 
         result, res = yield getattr(
             self._profile_service, verb + "_profile_projectexp")(
@@ -844,198 +830,152 @@ class ProfileHandler(BaseHandler):
 
     # Profile 编辑 -- projectexp 结束
 
-    # @tornado.gen.coroutine
-    # def get_edit_prize(self):
-    #     """
-    #     GET edit prize(awards) page
-    #     """
-    #     profile_id = yield self._get_profile_id()
-    #     component = self._get_to_field()
-    #
-    #     result, awards = yield self._profile_service.get_profile_awards(
-    #         profile_id)
-    #
-    #     component_data = []
-    #     if result and awards:
-    #         for award in awards:
-    #             component_data.append(sub_dict(award, self._AWARDS_KEYS))
-    #
-    #     render_json = encode_json_dumps(self._make_render_json(
-    #         component=component,
-    #         component_data=component_data))
-    #
-    #     self.render(
-    #         "neo_weixin/profile/edit.html", render_json=render_json)
-    #
-    # @tornado.gen.coroutine
-    # def post_edit_prize(self):
-    #     """
-    #     POST save prize(awards)
-    #     """
-    #     profile_id = yield self._get_profile_id()
-    #     component_data = json_decode(self.params.data)
-    #
-    #     results = []
-    #     for e in component_data:
-    #         e = ObjectDict(e)
-    #
-    #         if hasattr(e, "__status") and getattr(e, "__status") == 'x':
-    #             verb = "delete"
-    #         else:
-    #             if e.get("id", 0):
-    #                 verb = "update"
-    #             else:
-    #                 verb = "create"
-    #
-    #         result, res = yield getattr(
-    #             self._profile_service, verb + "_profile_awards")(e, profile_id)
-    #         results.append(result)
-    #
-    #     result = any(results)
-    #     self._return_json(
-    #         result=result,
-    #         success_message=msg_const.PROFILE_AWARDS_SUCCESS
-    #         if result else None,
-    #         error_message=None if result else
-    #         msg_const.PROFILE_AWARDS_FAILURE)
-    #
-    # @tornado.gen.coroutine
-    # def get_edit_link(self):
-    #     """
-    #     GET edit link(works) page
-    #     """
-    #
-    #     # noinspection PyUnusedLocal
-    #     profile_id = yield self._get_profile_id()
-    #     component = self._get_to_field()
-    #
-    #     if not self.params.id:
-    #         render_json = encode_json_dumps(self._make_render_json(
-    #             component=component,
-    #             component_data={},
-    #             new=True))
-    #         self.render(
-    #             "neo_weixin/profile/edit.html", render_json=render_json)
-    #         return
-    #
-    #     else:
-    #         result, works = yield self._profile_service.get_profile_works(
-    #             self.params.id)
-    #         works = works[0]
-    #
-    #         component_data = {}
-    #         if result and works:
-    #             component_data.update(sub_dict(works, self._WORKS_KEYS))
-    #
-    #         render_json = encode_json_dumps(self._make_render_json(
-    #             component=component,
-    #             component_data=component_data))
-    #
-    #         self.render(
-    #             "neo_weixin/profile/edit.html", render_json=render_json)
-    #
-    # @tornado.gen.coroutine
-    # def post_edit_link(self):
-    #     """
-    #     POST save link(works)
-    #     """
-    #     profile_id = yield self._get_profile_id()
-    #     component_data = json_encode(self.params.data)
-    #     record = ObjectDict(component_data)
-    #
-    #     if record.get("id"):
-    #         verb = "update"
-    #     else:
-    #         verb = "create"
-    #
-    #     result, res = yield getattr(
-    #         self._profile_service, verb + "_profile_works")(record, profile_id)
-    #
-    #     self._return_json(
-    #         result=result,
-    #         success_message=msg_const.PROFILE_LINK_SUCCESS
-    #         if result else None,
-    #         error_message=None if result else
-    #         msg_const.PROFILE_LINK_FAILURE)
-    #
-    # @tornado.gen.coroutine
-    # def get_edit_jobpref(self):
-    #     """
-    #     GET edit jobref (intention) page
-    #     """
-    #     # noinspection PyUnusedLocal
-    #     profile_id = yield self._get_profile_id()
-    #     component = self._get_to_field()
-    #     constant = ObjectDict()
-    #     worktype_list = self._dict_service.get_const_dict(
-    #         CONSTANT_TYPES.WORK_INTENTION)
-    #     salary_list = self._dict_service.get_const_dict(
-    #         CONSTANT_TYPES.CURRENT_SALARY_MONTH)
-    #
-    #     constant.worktype_list = worktype_list
-    #     constant.salary_list = salary_list
-    #
-    #     if not self.params.id:
-    #         render_json = encode_json_dumps(self._make_render_json(
-    #             component=component,
-    #             component_data={},
-    #             new=True, constant=constant))
-    #
-    #         self.render(
-    #             "neo_weixin/profile/edit.html", render_json=render_json)
-    #         return
-    #
-    #     else:
-    #         result, intention = yield \
-    #             self._profile_service.get_profile_intention(self.params.id)
-    #         intention = ObjectDict(intention[0])
-    #
-    #         component_data = ObjectDict()
-    #         if result and intention:
-    #             component_data.update(
-    #                 sub_dict(intention, self._INTENTION_KEYS))
-    #
-    #             positions = intention.get("positions")
-    #             if positions:
-    #                 position_name = positions[0].get("position_name")
-    #                 component_data.position_name = position_name
-    #
-    #             cities = intention.get("cities")
-    #             if cities:
-    #                 city_name = cities[0].get("city_name")
-    #                 component_data.city_name = city_name
-    #
-    #         render_json = encode_json_dumps(self._make_render_json(
-    #             component=component,
-    #             component_data=component_data, constant=constant))
-    #
-    #         self.render(
-    #             "neo_weixin/profile/edit.html", render_json=render_json)
-    #
-    # @tornado.gen.coroutine
-    # def post_edit_jobpref(self):
-    #     """
-    #     POST save jobref (intention)
-    #     """
-    #     profile_id = yield self._get_profile_id()
-    #     component_data = json_encode(self.params.data)
-    #     record = ObjectDict(component_data)
-    #
-    #     if record.get("id"):
-    #         verb = "update"
-    #     else:
-    #         verb = "create"
-    #
-    #     result, res = yield getattr(
-    #         self._profile_service, verb + "_profile_intention")(
-    #         record, profile_id)
-    #
-    #     self._return_json(
-    #         result=result,
-    #         success_message=msg_const.PROFILE_JOBREF_SUCCESS
-    #         if result else None,
-    #         error_message=None if result else
-    #         msg_const.PROFILE_JOBREF_FAILURE)
+    # Profile 编辑 -- prize 开始
+    @tornado.gen.coroutine
+    def get_prize(self):
+        profile_id = yield self._get_profile_id()
+        component = self.params.component
+
+        result, awards = yield self.profile_ps.get_profile_awards(profile_id)
+
+        component_data = []
+        if result:
+            for award in awards:
+                component_data.append(sub_dict(
+                    award, self.profile_ps.AWARDS_KEYS))
+        else:
+            component_data = None
+
+        self.send_json_success(
+            data=self._make_json_data(component, component_data))
+
+    @tornado.gen.coroutine
+    def post_prize(self):
+        profile_id = yield self._get_profile_id()
+        component_data = objectdictify(json_decode(self.params.data))  # =>List
+
+        results = []
+        for e in component_data:
+            if hasattr(e, "__status") and getattr(e, "__status") == 'x':
+                verb = "delete"
+            else:
+                verb = 'update' if e.id else 'create'
+
+            result, res = yield getattr(
+                self._profile_service, verb + "_profile_awards")(e, profile_id)
+
+            results.append(result)
+
+        self._send_json_result(results, len(component_data))
+    # Profile 编辑 -- prize 结束
+
+    # Profile 编辑 -- link 开始
+    @tornado.gen.coroutine
+    def get_link(self):
+        profile_id = yield self._get_profile_id()
+        component = self.params.component
+
+        new = False
+        component_data = {}
+
+        if not self.params.id:
+            new = True
+        else:
+            result, works = yield self._profile_service.get_profile_works(
+                self.params.id)
+
+            if result and works and works[0].profile_id == profile_id:
+                component_data.update(
+                    sub_dict(works[0], self.profile_ps.WORKS_KEYS))
+            else:
+                self.send_json_error('cannot get works')
+
+        self.send_json_success(
+            data=self._make_json_data(component, component_data, new=new))
+
+    @tornado.gen.coroutine
+    def post_link(self):
+        profile_id = yield self._get_profile_id()
+        component_data = ObjectDict(json_encode(self.params.data))
+
+        record = component_data
+        if record.id:
+            verb = "update"
+        else:
+            verb = "create"
+
+        result, _ = yield getattr(
+            self._profile_service, verb + "_profile_works")(record, profile_id)
+
+        if result:
+            self.send_json_success()
+        else:
+            self.send_json_error()
+    # Profile 编辑 -- link 结束
+
+    # Profile 编辑 -- jobpref 开始
+    @tornado.gen.coroutine
+    def get_jobpref(self):
+        profile_id = yield self._get_profile_id()
+        component = self.params.component
+
+        worktype_list = yield self.dictionary_ps.get_constants(
+            parent_code=const.CONSTANT_PARENT_CODE.WORK_INTENTION)
+        salary_list = yield self.dictionary_ps.get_constants(
+            parent_code=const.CONSTANT_PARENT_CODE.CURRENT_SALARY_MONTH)
+
+        constant = ObjectDict()
+        constant.worktype_list = worktype_list
+        constant.salary_list = salary_list
+
+        component_data = ObjectDict(),
+        new = False
+
+        if not self.params.id:
+            new = True
+        else:
+            result, intention = yield self.profile_ps.get_profile_intention(
+                self.params.id)
+
+            if result and intention and intention[0].profile_id == profile_id:
+                intention = ObjectDict(intention[0])
+
+                component_data.update(
+                    sub_dict(intention, self.profile_ps.INTENTION_KEYS))
+
+                positions = intention.positions
+                if positions:
+                    position_name = positions[0].get("position_name")
+                    component_data.position_name = position_name
+
+                cities = intention.cities
+                if cities:
+                    city_name = cities[0].get("city_name")
+                    component_data.city_name = city_name
+            else:
+                self.send_json_error('cannot get intention')
+
+        self.send_json_success(data=self._make_json_data(
+            component=component, component_data=component_data, new=new,
+            constant=constant))
+
+    @tornado.gen.coroutine
+    def post_jobpref(self):
+        profile_id = yield self._get_profile_id()
+        component_data = json_decode(self.params.data)
+        record = ObjectDict(component_data)
+
+        verb = 'update' if record.id else 'create'
+
+        result, _ = yield getattr(
+            self._profile_service, verb + "_profile_intention")(
+            record, profile_id)
+
+        if result:
+            self.send_json_success()
+        else:
+            self.send_json_error()
+    # Profile 编辑 -- jobpref 结束
 
     def _send_json_result(self, results, component_len):
         """json api 返回修改成功，失败，部分成功的"""

@@ -7,6 +7,10 @@ import random
 import string
 import hashlib
 import uuid
+import pypinyin
+from pypinyin import lazy_pinyin
+import functools
+
 
 def password_crypt(code=None):
     """
@@ -171,34 +175,39 @@ def password_validate(password):
     else:
         return False
 
+def pinyin_match(text, search):
+    """
+    返回 text 是否和 search 匹配
+    text 可以是英文,也可以是中文 text
+    search 英文,中文或中文拼音
+
+    从左往右匹配
+    当两者都是汉字 或 两者都是英文 或 后者是前者的拼音时 返回 True
+    """
+
+    if text.startswith(search):
+        return True
+
+    py = functools.reduce(
+        lambda x, y: x + y, lazy_pinyin(text, style=pypinyin.NORMAL))
+
+    return py.startswith(search)
 
 def is_chinese(uchar):
     """判断一个unicode是否是汉字"""
-    if '\u4e00' <= uchar <= '\u9fff':
-        return True
-    else:
-        return False
+    return '\u4e00' <= uchar <= '\u9fff'
 
 def is_number(uchar):
     """判断一个unicode是否是数字"""
-    if '\u0030' <= uchar <= '\u0039':
-        return True
-    else:
-        return False
+    return '\u0030' <= uchar <= '\u0039'
 
 def is_alphabet(uchar):
     """判断一个unicode是否是英文字母"""
-    if ('\u0041' <= uchar <= '\u005a') or ('\u0061' <= uchar <= '\u007a'):
-        return True
-    else:
-        return False
+    return ('\u0041' <= uchar <= '\u005a') or ('\u0061' <= uchar <= '\u007a')
 
 def is_other(uchar):
     """判断是否非汉字，数字和英文字符"""
-    if not (is_chinese(uchar) or is_number(uchar) or is_alphabet(uchar)):
-        return True
-    else:
-        return False
+    return not (is_chinese(uchar) or is_number(uchar) or is_alphabet(uchar))
 
 def get_uucode(lenth=36):
     """
@@ -210,23 +219,3 @@ def get_uucode(lenth=36):
     assert isinstance(lenth, int) and lenth <= 72, 'uucode is too long.'
     return str(uuid.uuid1())[0:lenth] if lenth < 36 else \
         (str(uuid.uuid1()) + str(uuid.uuid4()))[0:lenth]
-
-
-if __name__ == '__main__':
-
-    # print (is_chinese("中国人"))
-    # print (is_chinese("中国人 chinese"))
-    # print (is_chinese("chinese"))
-    # print (is_number("123abs"))
-    # print (is_alphabet("chine china"))
-    # print (is_alphabet("中国人"))
-    # print (is_chinese(""))
-    # print (is_alphabet("6789dgagh"))
-    # print (to_str("jiu "))
-    # print (to_str(" jid"))
-    # print (to_str("j dfd"))
-
-    # print (mobile_validate(13656789068))
-    # print (password_crypt("123456"))
-    # print (gen_salary(0,0))
-    print (password_validate("fhj1k"))

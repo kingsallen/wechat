@@ -2,7 +2,6 @@
 
 import tornado.gen as gen
 
-import conf.common as const
 import conf.path as path
 from service.data.base import DataService
 from util.common import ObjectDict
@@ -26,6 +25,23 @@ class InfraProfileDataService(DataService):
             user_id=user_id
         )
         res = yield http_tool.http_post(path.PROFILE_IMPORT, params, timeout=60)
+        return http_tool.unboxing(res)
+
+    @gen.coroutine
+    def create_profile(self, user_id):
+        # source 默认为 1 代表微信端创建的 profile
+        # ref: http://wiki.moseeker.com/profile-api.md
+        source = 1
+
+        params = ObjectDict(
+            lang=1,  # 语言默认为中文
+            source=source,  # 标记为来自手机端
+            user_id=user_id,
+            disable=1
+        )
+
+        res = yield self.handle_profile_section(
+            params, method="create", section="profile")
         return http_tool.unboxing(res)
 
     @gen.coroutine
@@ -339,6 +355,199 @@ class InfraProfileDataService(DataService):
         res = yield self.handle_profile_section(
             {"id": record.id}, method="delete", section="education"
         )
+        return http_tool.unboxing(res)
+
+    @gen.coroutine
+    def get_profile_projectexp(self, projectexp_id):
+        res = yield self.handle_profile_section(
+            {"id": projectexp_id}, method="get", section="projectexp")
+        return http_tool.unboxing(res)
+
+    @gen.coroutine
+    def create_profile_projectexp(self, record, profile_id):
+        params = {
+            "profile_id":    profile_id,
+            "name":          record.name,
+            "start_date":    record.start_date,
+            "end_date":      None if record.end_until_now else record.end_date,
+            "end_until_now": record.end_until_now
+        }
+
+        if record.get("company_name") is not None:
+            params.update(company_name=record.company_name)
+
+        if record.get("description") is not None:
+            params.update(description=record.description.strip())
+
+        res = yield self.handle_profile_section(
+            params, method="create", section="projectexp")
+        return http_tool.unboxing(res)
+
+    @gen.coroutine
+    def update_profile_projectexp(self, record, profile_id):
+        params = {
+            "id":            record.id,
+            "profile_id":    profile_id,
+            "name":          record.name,
+            "start_date":    record.start_date,
+            "end_date":      None if record.end_until_now else record.end_date,
+            "end_until_now": record.end_until_now
+        }
+
+        if record.get("company_name") is not None:
+            params.update(company_name=record.company_name)
+
+        if record.get("description") is not None:
+            params.update(description=record.description.strip())
+
+        res = yield self.handle_profile_section(
+            params, method="update", section="projectexp")
+        return http_tool.unboxing(res)
+
+    @gen.coroutine
+    def delete_profile_projectexp(self, record, profile_id):
+        res = yield self.handle_profile_section(
+            {"id": record.id}, method="delete", section="projectexp")
+        return http_tool.unboxing(res)
+
+    @gen.coroutine
+    def get_profile_awards(self, profile_id):
+        res = yield self.handle_profile_section(
+            {"profile_id": profile_id}, method="get", section="awards")
+        return http_tool.unboxing(res)
+
+    @gen.coroutine
+    def create_profile_awards(self, record, profile_id):
+        res = yield self.handle_profile_section({
+                "profile_id":  profile_id,
+                "name":        record.name.strip(),
+                "reward_date": record.reward_date,
+            }, method="create", section="awards")
+        return http_tool.unboxing(res)
+
+    @gen.coroutine
+    def update_profile_awards(self, record, profile_id):
+        res = yield self.handle_profile_section({
+                "id":          record.id,
+                "profile_id":  profile_id,
+                "name":        record.name.strip(),
+                "reward_date": record.reward_date,
+            }, method="update", section="awards")
+        return http_tool.unboxing(res)
+
+    @gen.coroutine
+    def delete_profile_awards(self, record, profile_id):
+        res = yield self.handle_profile_section(
+            {"id": record.id}, method="delete", section="awards")
+        return http_tool.unboxing(res)
+
+    @gen.coroutine
+    def get_profile_works(self, works_id):
+        res = yield self.handle_profile_section(
+            {"id": works_id}, method="get", section="works")
+        return http_tool.unboxing(res)
+
+    @gen.coroutine
+    def create_profile_works(self, record, profile_id):
+        # 必填项和选填项分开处理
+        # 然而 works 没有必填项
+
+        params = {"profile_id": profile_id}
+
+        if record.get('cover') is not None:
+            params.update(cover=record.cover)
+
+        if record.get('url') is not None:
+            params.update(url=record.url)
+
+        if record.get('description') is not None:
+            params.update(description=record.description)
+
+        res = yield self.handle_profile_section(
+            params, method="create", section="works")
+        return http_tool.unboxing(res)
+
+    @gen.coroutine
+    def update_profile_works(self, record, profile_id):
+        # 必填项和选填项分开处理
+        # 然而 works 没有必填项
+
+        params = {
+            "id":         record.id,
+            "profile_id": profile_id,
+        }
+
+        if record.get('cover') is None or record.get('cover').strip() == "":
+            params.update(cover="")
+        else:
+            params.update(cover=record.cover)
+
+        if record.get('url') is None or record.get('url').strip() == "":
+            params.update(url="")
+        else:
+            params.update(url=record.url)
+
+        if record.get('description') is None or \
+                record.get('description').strip() == "":
+            params.update(description="")
+        else:
+            params.update(description=record.description)
+
+        res = yield self.handle_profile_section(
+            params, method="update", section="works")
+        return http_tool.unboxing(res)
+
+    @gen.coroutine
+    def delete_profile_works(self, record, profile_id):
+        res = yield self.handle_profile_section(
+            {"id": record.id}, method="delete", section="works")
+        return http_tool.unboxing(res)
+
+    @gen.coroutine
+    def get_profile_intention(self, intention_id):
+        res = yield self.handle_profile_section(
+            {"id": intention_id}, method="get", section="intention")
+        return http_tool.unboxing(res)
+
+    @gen.coroutine
+    def create_profile_intention(self, record, profile_id):
+        params = {"profile_id": profile_id}
+        if record.get('city_name'):
+            params.update({"cities[0]city_name": record.city_name})
+        if record.get('position_name'):
+            params.update({"positions[0]position_name": record.position_name})
+        if record.get('worktype'):
+            params.update({"worktype": record.worktype})
+        if record.get('salary_code'):
+            params.update({"salary_code": record.salary_code})
+
+        res = yield self.handle_profile_section(
+            params, method="create", section="intention")
+        return http_tool.unboxing(res)
+
+    @gen.coroutine
+    def update_profile_intention(self, record, profile_id):
+        params = {
+            "id":         record.id,
+            "profile_id": profile_id
+        }
+        if record.get('city_name'):
+            params.update({"cities[0]city_name": record.city_name})
+        if record.get('position_name'):
+            params.update({"positions[0]position_name": record.position_name})
+        if record.get('worktype'):
+            params.update({"worktype": record.worktype})
+        if record.get('salary_code'):
+            params.update({"salary_code": record.salary_code})
+
+        res = yield self.handle_profile_section(
+            params, method="update", section="intention")
+        return http_tool.unboxing(res)
+
+    @gen.coroutine
+    def delete_profile_intention(self, record, profile_id):
+        res = yield self.handle_profile_section(
+            {"id": record.id}, method="delete", section="intention")
         return http_tool.unboxing(res)
 
     @gen.coroutine
