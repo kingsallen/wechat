@@ -51,6 +51,34 @@ class InfraProfileDataService(DataService):
         return http_tool.unboxing(ret)
 
     @gen.coroutine
+    def create_profile_basic_manually(self, profile, profile_id):
+        """ 老六步创建 basic
+        profile": {
+        "basicInfo":{"name":"汤亦蓝","birthday":"2013-08-08"},
+        "gender":"1",
+        "contacts":{"mobile":18058808263,"email":"panyuxin@moseeker.net"},
+        "education":[{"start":"2007-04","end":"2012-08","university":"学校","diploma":"4","major":"专业"}],
+        "workexp":[{"start":"2004-10","end":"2011-06","company":"1","position":"2"}],
+        }
+        :param profile:
+        :return:
+        """
+
+        params = ObjectDict(name=profile.basicInfo.name,
+                            gender=profile.gender,
+                            birth=profile.basicInfo.birthday,
+                            profile_id=profile_id)
+
+        if profile.email and profile.email.strip():
+            params.update(email=profile.email.strip())
+
+        self.logger.debug("params:{}".format(params))
+
+        res = yield self.handle_profile_section(
+            params, method="create", section="basic")
+        return http_tool.unboxing(res)
+
+    @gen.coroutine
     def update_profile_basic(self, profile_id, basic):
         # TODO tangyiliang 现在自定义简历和常规 profile basic 更新混在一起，最好分开
         params = ObjectDict(
@@ -209,7 +237,7 @@ class InfraProfileDataService(DataService):
             "profile_id":    profile_id,
             "company_name":  record.company_name,
             "start_date":    record.start_date,
-            "end_date":      None if record.end_until_now else record.end_date,
+            "end_date":      "" if record.end_until_now else record.end_date,
             "end_until_now": record.end_until_now
         }
         if record.get('department_name') is None or \
@@ -288,7 +316,7 @@ class InfraProfileDataService(DataService):
             "college_code":  college_code,
             "degree":        record.degree,
             "start_date":    record.start_date,
-            "end_date":      None if record.end_until_now else record.end_date,
+            "end_date":      "" if record.end_until_now else record.end_date,
             "end_until_now": record.end_until_now,
         }
 

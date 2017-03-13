@@ -1,20 +1,20 @@
 # coding=utf-8
 
+import pprint
+
 import tornado
 import tornado.gen
-from tornado.escape import json_decode, json_encode
-import pprint
-from handler.base import BaseHandler
-
-from util.common.decorator import handle_response, check_and_apply_profile
-from util.common import ObjectDict
-from util.tool.str_tool import mobile_validate
-from util.tool.dict_tool import sub_dict, objectdictify
-from util.tool.url_tool import make_url
+from tornado.escape import json_decode
 
 import conf.common as const
 import conf.message as msg
 import conf.path as path
+from handler.base import BaseHandler
+from util.common import ObjectDict
+from util.common.decorator import handle_response, check_and_apply_profile
+from util.tool.dict_tool import sub_dict, objectdictify
+from util.tool.str_tool import mobile_validate
+from util.tool.url_tool import make_url
 
 
 class ProfileNewHandler(BaseHandler):
@@ -28,6 +28,102 @@ class ProfileNewHandler(BaseHandler):
         data.mobile = self.current_user.sysuser.mobile or ''
         data.degreeList = yield self.dictionary_ps.get_degrees()
         self.send_json_success(data=data)
+
+    @handle_response
+    @tornado.gen.coroutine
+    def post(self):
+        # has_profile, _ = yield self.profile_ps.has_profile(
+        #     self.current_user.sysuser.id)
+        # if has_profile:
+        #     self.send_json_error(message='profile existed')
+
+        profile = ObjectDict(json_decode(self.request.body)).profile
+
+        # 姓名必填
+        if not profile.basicInfo or not profile.basicInfo.name:
+            message = "".join([msg.PROFILE_REQUIRED_HINT_HEAD, "姓名",
+                               msg.PROFILE_REQUIRED_HINT_TAIL])
+            self.send_json_error(message=message)
+            return
+
+        # 手机号必填
+        if not profile.contacts or not profile.contacts.get('mobile', None):
+            message = "".join([msg.PROFILE_REQUIRED_HINT_HEAD, "手机号",
+                               msg.PROFILE_REQUIRED_HINT_TAIL])
+            self.send_json_error(message=message)
+            return
+
+        # 手机号格式验证
+        ok = mobile_validate(profile.contacts.get('mobile', None))
+        if not ok:
+            message = "手机号码格式不正确"  # 手机号码格式不正确
+            self.send_json_error(message=message)
+            return
+
+        # TODO
+        # 更新 user_user 表的字段,
+        # 这里使用 [] 可以让程序在需要时报错查看是否有漏洞导致需要的数据没有获取到
+        # self._profile_service.update_user_user_fields(ObjectDict(
+        #     mobile=profile.contacts['mobile'],
+        #     name=profile.basicInfo['name'],
+        #     email=profile.contacts['email'],
+        #     headimg=None
+        # ), self.current_user.sysuser.id)
+
+        # PROFILE_PROFILE
+        profile_id = None
+        profile_ok = basic_info_ok = False
+        education_ok = workexp_ok = True
+
+        result, data = yield self.profile_ps.create_profile(self.current_user.sysuser.id)
+
+        if result:
+            profile_id = data
+            profile_ok = True
+            # 初始化user_setting表，profile的公开度
+            # yield self.sysuser_service.post_user_setting(
+            #     self.current_user.sysuser.id)
+            self.logger.debug("profile_profile created with id: %s" % profile_id)
+        else:
+            self.logger.error("profile_profile creation failed. res:{}".format(
+                    data))
+
+        if profile_id:
+            result, data = yield self.profile_ps.create_profile_basic(profile, profile_id)
+            if result:
+                basic_info_ok = True
+                self.logger.debug("profile_basic created, id: %s" % data)
+            else:
+                self.logger.error("profile_basic creation failed. res: %s" % data)
+            for edu in profile.education:
+                result, data = yield self.profile_ps.create_profile_education(ObjectDict(edu), profile_id)
+                if result:
+                    self.logger.debug(
+                        "profile_education creation passed. New record num: %s" % data)
+                else:
+                    education_ok = False
+                    self.logger.error("profile_education creation failed. res: %s" % data)
+                    break
+            for wxp in profile.workexp:
+                result, data = yield self.profile_ps.create_profile_workexp(ObjectDict(wxp), profile_id)
+                if result:
+                    self.logger.debug("profile_work_exp creation passed. New record num: %s" % data)
+                else:
+                    workexp_ok = False
+                    self.logger.error("profile_work_exp creation failed. res: %s" % data)
+                    break
+
+        if profile_ok and basic_info_ok and education_ok and workexp_ok:
+            # is_apply = '1' if self.get_cookie('dq_pid') else '0'
+            # pid = self.get_cookie('dq_pid', None)
+
+            data = ObjectDict(
+                url=make_url(path.PROFILE, self.params, escape=['profile', 'abapply'], m='view',
+                             #apply=is_apply, pid=pid)
+                                           ))
+            self.send_json_success(data)
+        else:
+            self.send_json_warning(message='profile created partially')
 
 
 class ProfileHandler(BaseHandler):
@@ -93,119 +189,6 @@ class ProfileHandler(BaseHandler):
 
         self.render_page(template_name='profile/main.html',
                          data=profile_tpl)
-
-    @tornado.gen.coroutine
-    def post(self):
-        has_profile, _ = yield self.profile_ps.has_profile(
-            self.current_user.sysuser.id)
-        if has_profile:
-            self.send_json_error(message='profile existed')
-
-        profile_data = self.request.body_arguments.get("profile", None)
-        assert profile_data is not None
-        profile = ObjectDict(json_decode(profile_data[0]))
-
-        # 姓名必填
-        if not profile.basicInfo or not profile.basicInfo.get('name', None):
-            message = "".join([msg.PROFILE_REQUIRED_HINT_HEAD, u"姓名",
-                               msg.PROFILE_REQUIRED_HINT_TAIL])
-            self.render('weixin/profile/mobile.html', profile=profile,
-                        message=message)
-            return
-
-        # 手机号必填
-        if not profile.contacts or not profile.contacts.get('mobile', None):
-            message = "".join([msg.PROFILE_REQUIRED_HINT_HEAD, u"手机号",
-                               msg.PROFILE_REQUIRED_HINT_TAIL])
-            self.render('weixin/profile/mobile.html', profile=profile,
-                        message=message)
-            return
-
-        # 手机号格式验证
-        ok = mobile_validate(profile.contacts.get('mobile', None))
-        if not ok:
-            message = "手机号码格式不正确"  # 手机号码格式不正确
-            self.render('weixin/profile/mobile.html',
-                        profile=profile, message=message)
-            return
-
-        # TODO
-        # 更新 user_user 表的字段,
-        # 这里使用 [] 可以让程序在需要时报错查看是否有漏洞导致需要的数据没有获取到
-        # self._profile_service.update_user_user_fields(ObjectDict(
-        #     mobile=profile.contacts['mobile'],
-        #     name=profile.basicInfo['name'],
-        #     email=profile.contacts['email'],
-        #     headimg=None
-        # ), self.current_user.sysuser.id)
-
-        # PROFILE_PROFILE
-        profile_id = None
-        profile_ok = basic_info_ok = education_ok = workexp_ok = 0
-
-        res_profile = yield self._profile_service.create_profile(
-            self.current_user.sysuser.id)
-
-        if res_profile[0]:
-            profile_id = res_profile[1]
-            profile_ok = 1
-            # 初始化user_setting表，profile的公开度
-            yield self.sysuser_service.post_user_setting(
-                self.current_user.sysuser.id)
-        else:
-            self.LOG.error(
-                "profile_profile creation failed. res:{}".format(
-                    res_profile[1]))
-
-        if profile_id:
-            # BASIC INFO
-            res_basic_info = yield self._profile_service.create_basic_info(
-                profile, profile_id)
-            if res_basic_info[0]:
-                basic_info_ok = 1
-            else:
-                self.LOG.error(
-                    "profile_basic creation failed. res:{}".format(
-                        res_basic_info[1]))
-
-            # EDUCATION
-            education_res = yield self._profile_service.create_education(
-                profile, profile_id)
-            if education_res[0]:
-                education_ok = 1
-                self.LOG.debug(
-                    "profile_education creation passed. New record num:{}"
-                    .format(education_res[1]))
-            else:
-                self.LOG.error(
-                    "profile_education creation failed. res:{}".format(
-                        education_res[1]))
-
-            # WORK EXP
-            workexp_res = yield self._profile_service.create_workexp(
-                profile, profile_id)
-            if workexp_res[0]:
-                workexp_ok = 1
-                self.LOG.debug(
-                    "profile_work_exp creation passed. New record num:{}"
-                    .format(workexp_res[1]))
-            else:
-                self.LOG.error(
-                    "profile_work_exp creation failed. res:{}".format(
-                        workexp_res[1]))
-
-        if profile_ok and basic_info_ok and education_ok and workexp_ok:
-            is_apply = '1' if self.get_cookie('dq_pid') else '0'
-            pid = self.get_cookie('dq_pid', None)
-
-            data = ObjectDict(
-                url=make_url(path.PROFILE, self.params, escape=['profile', 'abapply'], m='view',
-                             apply=is_apply, pid=pid)
-            )
-            self.send_json_success(data)
-        else:
-            self.send_json_warning(message='profile created partially')
-
 
 class ProfileSectionHandler(BaseHandler):
     """
