@@ -87,9 +87,7 @@ class ProfileHandler(BaseHandler):
         profile_tpl = self.profile_ps.profile_to_tempalte(
             self.params.profile, other)
 
-        self.render(
-            template_name='profile/main.html',
-            render_json=profile_tpl)
+        self.render(template_name='profile/main.html', render_json=profile_tpl)
 
     @tornado.gen.coroutine
     def post(self):
@@ -448,8 +446,7 @@ class ProfileSectionHandler(BaseHandler):
         else:
             return profile_id
 
-    def _make_json_data(self, route=None, model=None,
-                        constant=None, new=False):
+    def _make_json_data(self, route=None, model=None, constant=None, new=False):
         try:
             assert route in self.profile_ps.FE_ROUTES.keys()
         except:
