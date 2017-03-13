@@ -243,12 +243,12 @@ class ProfileSectionHandler(BaseHandler):
         yield getattr(self, "get_" + self.params.route)()
 
     @handle_response
+    @check_and_apply_profile
     @tornado.gen.coroutine
     def post(self):
         # 根据 route 跳转到不同的子方法
         self.guarantee('route', 'model')
         yield getattr(self, "post_" + self.params.route)()
-
 
     #
     # @tornado.gen.coroutine
