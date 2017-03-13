@@ -87,6 +87,7 @@ platform_routes = [
     (r"/m/api/dict/industry",                          "handler.platform.dictionary.DictIndustryHandler",           {"event": "dict_industry"}),
     (r"/m/api/dict/function",                          "handler.platform.dictionary.DictFunctionHandler",           {"event": "dict_function"}),
     (r"/m/api/profile/edit[\/]?",                      "handler.platform.profile.ProfileSectionHandler",            {"event": "profile_section_"}),
+    (r"/m/api/profile/new[\/]?",                       "handler.platform.profile.ProfileNewHandler",                {"event": "profile_new"}),
 ]
 platform_routes.extend(common_routes)
 
