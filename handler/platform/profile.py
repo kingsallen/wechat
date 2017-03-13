@@ -215,8 +215,8 @@ class ProfileSectionHandler(BaseHandler):
       status: 0/1, // 0:成功， 非0:异常
       message: "", // 消息文本，前端根据 status 判断渲染样式
       data: {
-        component: "", // 模块名称
-        componentData: { // 模块所需数据
+        route: "", // 模块名称
+        model: { // 模块所需数据
           key1: '', // 模块所需数据 1，此为举例
           key2: '', // 模块所需数据 2，此为举例
           ...,
@@ -246,7 +246,7 @@ class ProfileSectionHandler(BaseHandler):
     @tornado.gen.coroutine
     def post(self):
         # 根据 route 跳转到不同的子方法
-        self.guarantee('route', 'component', 'componentData')
+        self.guarantee('route', 'componentData')
         yield getattr(self, "post_" + self.params.route)()
 
 
@@ -441,7 +441,7 @@ class ProfileSectionHandler(BaseHandler):
     def _get_profile_id(self):
         """"""
         try:
-            profile_id = self.current_user.profile.id
+            profile_id = self.current_user.profile.profile.id
         except AttributeError as e:
             self.logger.error(e)
             self.logger.error('Forget to use @check_and_apply_profile?')
@@ -449,19 +449,19 @@ class ProfileSectionHandler(BaseHandler):
         else:
             return profile_id
 
-    def _make_json_data(self, component=None, component_data=None,
+    def _make_json_data(self, route=None, model=None,
                         constant=None, new=False):
         try:
-            # TODO (yiliang) to check more
-            assert component in self.profile_ps.FE_ROUTES.keys()
+            assert route in self.profile_ps.FE_ROUTES.keys()
         except:
             raise ValueError('invalid component')
 
         data = ObjectDict(
-            component=component,
-            component_data=component_data,
+            route=route,
+            model=model,
             constant=constant
         )
+
         if new is True:
             data.update(isAdd=const.YES)
         return data
@@ -474,32 +474,33 @@ class ProfileSectionHandler(BaseHandler):
             profile_id)
         if not result:
             raise ValueError('cannot get profile_basic')
-        else: pass
+        else:
+            pass
 
-        component = self.params.component
+        route = self.params.route
 
         if self_intro:
-            component_data = sub_dict(profile_basic[0], 'self_introduction')
+            model = sub_dict(profile_basic[0], 'self_introduction')
         else:
-            component_data = sub_dict(profile_basic[0],
+            model = sub_dict(profile_basic[0],
                                       self.profile_ps.BASIC_KEYS)
 
         self.send_json_success(
-            data=self._make_json_data(component, component_data))
+            data=self._make_json_data(route, model))
 
     @tornado.gen.coroutine
     def post_basic(self, self_intro=False):
         profile_id = yield self._get_profile_id()
-        component_data = ObjectDict(json_decode(self.params.data))
+        model = ObjectDict(json_decode(self.params.data))
 
-        if component_data:
+        if model:
             basic = ObjectDict()
             if self_intro:
                 basic.update(
-                    self_introduction=component_data.self_introduction)
+                    self_introduction=model.self_introduction)
             else:
                 basic.update(
-                    sub_dict(component_data, self.profile_ps.BASIC_KEYS))
+                    sub_dict(model, self.profile_ps.BASIC_KEYS))
                 basic.pop('self_introduction')
 
                 if basic.city_name == "未知":
@@ -522,7 +523,6 @@ class ProfileSectionHandler(BaseHandler):
     @tornado.gen.coroutine
     def post_description(self):
         yield self.post_basic(self_intro=True)
-
     # Profile 编辑 -- basic & self-introduction 结束
 
     # Profile 编辑 -- language 开始
