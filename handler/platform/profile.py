@@ -91,7 +91,6 @@ class ProfileHandler(BaseHandler):
             template_name='profile/main.html',
             render_json=profile_tpl)
 
-
     @tornado.gen.coroutine
     def post(self):
         has_profile, _ = yield self.profile_ps.has_profile(
