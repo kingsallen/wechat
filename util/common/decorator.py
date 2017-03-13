@@ -164,6 +164,7 @@ def check_and_apply_profile(func):
         user_id = self.current_user.sysuser.id
         has_profile, profile = yield self.profile_ps.has_profile(user_id)
         if not has_profile:
+            self.logger.warning("has no profile, redirect to profile_new")
             self.redirect(make_url(path.PROFILE_NEW, self.params))
         else:
             self.current_user.profile = profile

@@ -98,6 +98,9 @@ class Logger(object):
     def warning(self, message):
         self.__logger.warning(message, exc_info=0)
 
+    def warn(self, message):
+        self.warning(message)
+
     def error(self, message):
         self.__logger.error(message, exc_info=0)
 
@@ -115,25 +118,23 @@ class MessageLogger(Logger):
 
     def debug(self, message):
         super(MessageLogger, self).debug(message)
-        # TODO (tangyiliang) debug log 不使用 elk
-        # self.impl.send_message("debug", message)
 
     def info(self, message):
         super(MessageLogger, self).info(message)
-        # TODO (tangyiliang) info log 不使用 elk
-        # self.impl.send_message("info", message)
 
     def warning(self, message):
         super(MessageLogger, self).warning(message)
-        # self.impl.send_message("warn", message)
+
+    def warn(self, message):
+        self.warning(message)
 
     def error(self, message):
         super(MessageLogger, self).error(message)
-        # self.impl.send_message("error", message)
         # error 及时报警
         # Alarm.biu(message)
         # Alarm.biu(traceback.format_exc())
 
     def stats(self, message):
         super(MessageLogger, self).stats(message)
+        # TODO (tangyiliang) 上线前解开
         # self.impl.send_message("stats", message)
