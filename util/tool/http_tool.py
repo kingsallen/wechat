@@ -78,8 +78,8 @@ def _async_http_get(route, jdata=None, timeout=5, method='GET', infra=True):
         headers=HTTPHeaders({"Content-Type": "application/json"})
     )
 
-    logger.debug("[infra][_async_http_get][url: {}][ret: {}] ".format(
-        url, ujson.decode(response.body)))
+    logger.debug("[infra][http_{}][url: {}][ret: {}] ".format(
+        method.lower(), url, ujson.decode(response.body)))
     body = ujson.decode(response.body)
     return objectdictify(body)
 
@@ -109,7 +109,7 @@ def _async_http_post(route, jdata=None, timeout=5, method='POST', infra=True):
     )
 
     logger.debug(
-        "[infra][_async_http_post][url: {}][body: {}][ret: {}] "
-        .format(url, ujson.encode(jdata), ujson.decode(response.body)))
+        "[infra][http_{}][url: {}][body: {}][ret: {}] "
+        .format(method.lower(), url, ujson.encode(jdata), ujson.decode(response.body)))
     body = ujson.decode(response.body)
     return objectdictify(body)

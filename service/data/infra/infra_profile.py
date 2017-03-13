@@ -577,6 +577,9 @@ class InfraProfileDataService(DataService):
         except:
             raise ValueError('Invalid method or section')
 
+        # 基础服务（大飞）要求，将 params 中 value 为 None 的剔除掉，
+        params = {k: v for k, v in params.items() if v is not None}
+
         if method == "get":
             response = yield http_tool.http_get(route, params)
         elif method == "create":
