@@ -246,7 +246,7 @@ class ProfileSectionHandler(BaseHandler):
     @tornado.gen.coroutine
     def post(self):
         # 根据 route 跳转到不同的子方法
-        self.guarantee('route', 'componentData')
+        self.guarantee('route', 'model')
         yield getattr(self, "post_" + self.params.route)()
 
 
@@ -482,8 +482,7 @@ class ProfileSectionHandler(BaseHandler):
         if self_intro:
             model = sub_dict(profile_basic[0], 'self_introduction')
         else:
-            model = sub_dict(profile_basic[0],
-                                      self.profile_ps.BASIC_KEYS)
+            model = sub_dict(profile_basic[0], self.profile_ps.BASIC_KEYS)
 
         self.send_json_success(
             data=self._make_json_data(route, model))
