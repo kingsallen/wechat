@@ -24,7 +24,7 @@ class ProfileHandler(BaseHandler):
     """
 
     @handle_response
-    # @check_and_apply_profile
+    @check_and_apply_profile
     @tornado.gen.coroutine
     def get(self):
         """ 查看个人 Profile
@@ -70,13 +70,13 @@ class ProfileHandler(BaseHandler):
         #     other = sub_dict(other, pure_other_keys())
 
         other = {}
-        self.params.profile=ObjectDict()
+        #self.params.profile =ObjectDict()
         profile_tpl = self.profile_ps.profile_to_tempalte(
             self.params.profile, other)
 
         self.render(
             template_name='profile/main.html',
-            profile_json=profile_tpl)
+            render_json=profile_tpl)
 
 
     @tornado.gen.coroutine
