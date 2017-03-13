@@ -439,7 +439,6 @@ class ProfileSectionHandler(BaseHandler):
     #         raise e
 
     def _get_profile_id(self):
-        """"""
         try:
             profile_id = self.current_user.profile.profile.id
         except AttributeError as e:
@@ -489,24 +488,22 @@ class ProfileSectionHandler(BaseHandler):
 
     @tornado.gen.coroutine
     def post_basic(self, self_intro=False):
-        profile_id = yield self._get_profile_id()
-        model = ObjectDict(json_decode(self.params.data))
+        profile_id = self._get_profile_id()
+        model = ObjectDict(self.params.model)
 
         if model:
-            basic = ObjectDict()
             if self_intro:
-                basic.update(
+                model.update(
                     self_introduction=model.self_introduction)
             else:
-                basic.update(
-                    sub_dict(model, self.profile_ps.BASIC_KEYS))
-                basic.pop('self_introduction')
+                model.update(sub_dict(model, self.profile_ps.BASIC_KEYS))
+                model.pop('self_introduction')
 
-                if basic.city_name == "未知":
-                    basic.pop('city_name')
+                if model.city_name == "未知" or model.city_name is None:
+                    model.pop('city_name')
 
             result, data = yield self.profile_ps.update_profile_basic(
-                profile_id, basic)
+                profile_id, model)
 
             if result:
                 self.send_json_success()
@@ -527,32 +524,34 @@ class ProfileSectionHandler(BaseHandler):
     # Profile 编辑 -- language 开始
     @tornado.gen.coroutine
     def get_language(self):
-        profile_id = yield self._get_profile_id()
+        profile_id = self._get_profile_id()
         result, languages = yield self.profile_ps.get_profile_language(
             profile_id)
         if not result:
             raise ValueError('cannot get language')
         else:
             pass
-        component = self.params.component
 
-        component_data = []
+        route = self.params.route
+
+        model = []
         for l in languages:
             e = sub_dict(l, self.profile_ps.LANGUAGE_KEYS)
             e.update(language=e.name)
             del e['name']
-            component_data.append(e)
+            model.append(e)
 
         self.send_json_success(
-            data=self._make_json_data(component, component_data))
+            data=self._make_json_data(route, model))
 
     @tornado.gen.coroutine
     def post_language(self):
-        profile_id = yield self._get_profile_id()
-        component_data = objectdictify(self.params.data)
+        profile_id = self._get_profile_id()
+
+        model = objectdictify(self.params.model)
 
         results = []
-        for e in component_data:
+        for e in model:
             if hasattr(e, "__status") and getattr(e, "__status") == 'x':
                 verb = "delete"
             else:
@@ -562,36 +561,35 @@ class ProfileSectionHandler(BaseHandler):
                 self.profile_ps, verb + "_profile_language")(e, profile_id)
             results.append(result)
 
-        self._send_json_result(results, len(component_data))
-
+        self._send_json_result(results, len(model))
     # Profile 编辑 -- language 结束
 
     # Profile 编辑 -- skill 开始
     @tornado.gen.coroutine
     def get_skill(self):
-        profile_id = yield self._get_profile_id()
+        profile_id = self._get_profile_id()
         result, skills = yield self._profile_service.get_profile_skill(
             profile_id)
         if not result:
             raise ValueError('cannot get skills')
         else: pass
 
-        component = self.params.component
-        component_data = []
+        route = self.params.route
+        model = []
         for s in skills:
             s = sub_dict(s, self.profile_ps.SKILL_KEYS)
-            component_data.append(s)
+            model.append(s)
 
         self.send_json_success(
-            data=self._make_json_data(component, component_data))
+            data=self._make_json_data(route, model))
 
     @tornado.gen.coroutine
     def post_skill(self):
-        profile_id = yield self._get_profile_id()
-        component_data = objectdictify(json_decode(self.params.data))
+        profile_id = self._get_profile_id()
+        model = objectdictify(json_decode(self.params.model))
 
         results = []
-        for e in component_data:
+        for e in model:
             if hasattr(e, "__status") and getattr(e, "__status") == 'x':
                 verb = "delete"
             else:
@@ -601,38 +599,37 @@ class ProfileSectionHandler(BaseHandler):
                 self.profile_ps, verb + "_profile_skill")(e, profile_id)
             results.append(result)
 
-        self._send_json_result(results, len(component_data))
-
+        self._send_json_result(results, len(model))
     # Profile 编辑 -- skill 结束
 
     # Profile 编辑 -- cert 开始
     @tornado.gen.coroutine
     def get_cert(self):
-        profile_id = yield self._get_profile_id()
+        profile_id = self._get_profile_id()
         result, certs = yield self.profile_ps.get_profile_cert(
             profile_id)
         if not result:
             raise ValueError('cannot get certs')
 
-        component = self.params.component
+        route = self.params.route
         if result:
-            component_data = []
+            model = []
             for s in certs:
                 s = sub_dict(s, self._CERT_KEYS)
-                component_data.append(s)
+                model.append(s)
         else:
-            component_data = None
+            model = None
 
         self.send_json_success(
-            data=self._make_json_data(component, component_data))
+            data=self._make_json_data(route, model))
 
     @tornado.gen.coroutine
     def post_cert(self):
-        profile_id = yield self._get_profile_id()
-        component_data = objectdictify(json_decode(self.params.data))
+        profile_id = self._get_profile_id()
+        model = objectdictify(json_decode(self.params.model))
 
         results = []
-        for e in component_data:
+        for e in model:
             if hasattr(e, "__status") and getattr(e, "__status") == 'x':
                 verb = "delete"
             else:
@@ -642,21 +639,20 @@ class ProfileSectionHandler(BaseHandler):
                 self.profile_ps, verb + "_profile_cert")(e, profile_id)
             results.append(result)
 
-        self._send_json_result(results, len(component_data))
-
+        self._send_json_result(results, len(model))
     # Profile 编辑 -- cert 结束
 
     # Profile 编辑 -- jobexp 开始
     @tornado.gen.coroutine
     def get_jobexp(self):
-        profile_id = yield self._get_profile_id()
-        component = self._get_to_field()
+        profile_id = self._get_profile_id()
+        route = self.params.route
 
         scale_list = yield self.dictionary_ps.get_constants(
             parent_code=const.CONSTANT_PARENT_CODE.COMPANY_SCALE)
         constant = ObjectDict(scale_list=scale_list)
 
-        component_data = {}
+        model = {}
         new = False
 
         if not self.params.id:
@@ -668,30 +664,27 @@ class ProfileSectionHandler(BaseHandler):
             workexp = workexp[0]
 
             if workexp and profile_id == workexp.profile_id:
-                component_data.update(
+                model.update(
                     sub_dict(workexp, self.profile_ps.WORKEXP_KEYS))
 
         self.send_json_success(
             data=self._make_json_data(
-                component=component,
-                component_data=component_data,
-                new=new,
+                route=route, model=model, new=new,
                 constant=constant))
 
     @tornado.gen.coroutine
     def post_jobexp(self):
-        profile_id = yield self._get_profile_id()
-        component_data = ObjectDict(json_decode(self.params.data))
-        record = component_data
+        profile_id = self._get_profile_id()
+        model = ObjectDict(self.params.model)
 
-        if hasattr(record, "__status") and getattr(record, "__status") == 'x':
+        if hasattr(model, "__status") and getattr(model, "__status") == 'x':
             verb = "delete"
         else:
-            verb = 'update' if record.id else 'create'
+            verb = 'update' if model.id else 'create'
 
         result, res = yield getattr(
             self.profile_ps, verb + "_profile_workexp")(
-            record, profile_id)
+            model, profile_id)
 
         if result:
             self.send_json_success()
@@ -700,12 +693,11 @@ class ProfileSectionHandler(BaseHandler):
 
     @tornado.gen.coroutine
     def post_jobexp_company(self):
-        profile_id = yield self._get_profile_id()
-        component_data = ObjectDict(json_decode(self.params.data))
-        record = ObjectDict(component_data)
+        profile_id = self._get_profile_id()
+        model = ObjectDict(self.params.model)
 
         # 通过名称查询企业是否已经存在
-        name = record.name
+        name = model.name
         result, res = yield self.company_ps.get_cp_for_sug_wechat(name)
 
         if result:
@@ -713,7 +705,7 @@ class ProfileSectionHandler(BaseHandler):
             return
         else:
             result, res = yield self.company_ps.create_company_on_wechat(
-                record)
+                model)
             if result:
                 self.send_json_success(message='company created')
             else:
@@ -723,14 +715,14 @@ class ProfileSectionHandler(BaseHandler):
     # Profile 编辑 -- eduexp 开始
     @tornado.gen.coroutine
     def get_eduexp(self):
-        profile_id = yield self._get_profile_id()
-        component = self.params.component
+        profile_id = self._get_profile_id()
+        route = self.params.route
 
         degree_list = yield self.dictionary_ps.get_constants(
             parent_code=const.CONSTANT_PARENT_CODE.DEGREE_USER)
         constant = {'degree_list': degree_list}
 
-        component_data = {}
+        model = {}
         new = False
 
         if not self.params.id:
@@ -742,30 +734,26 @@ class ProfileSectionHandler(BaseHandler):
             education = education[0]
 
             if education and profile_id == education.get("profile_id"):
-                component_data.update(sub_dict(
+                model.update(sub_dict(
                     education, self.profile_ps.EDU_KEYS))
 
         self.send_json_success(
-            data=self._make_json_data(
-                component=component,
-                component_data=component_data,
-                new=new,
+            data=self._make_json_data(route=route, model=model, new=new,
                 constant=constant))
 
     @tornado.gen.coroutine
     def post_eduexp(self):
-        profile_id = yield self._get_profile_id()
-        component_data = ObjectDict(json_decode(self.params.data))
-        record = component_data
+        profile_id = self._get_profile_id()
+        model = ObjectDict(self.params.data)
 
-        if hasattr(record, "__status") and getattr(record, "__status") == 'x':
+        if hasattr(model, "__status") and getattr(model, "__status") == 'x':
             verb = "delete"
         else:
-            verb = 'update' if record.id else 'create'
+            verb = 'update' if model.id else 'create'
 
         result, res = yield getattr(
             self._profile_service, verb + "_profile_education")(
-            record, profile_id)
+            model, profile_id)
 
         if result:
             self.send_json_success()
@@ -776,14 +764,14 @@ class ProfileSectionHandler(BaseHandler):
     # Profile 编辑 -- projectexp 开始
     @tornado.gen.coroutine
     def get_projectexp(self):
-        profile_id = yield self._get_profile_id()
-        component = self.params.component
+        profile_id = self._get_profile_id()
+        route = self.params.route
 
         scale_list = yield self.dictionary_ps.get_constants(
             parent_code=const.CONSTANT_PARENT_CODE.COMPANY_SCALE)
         constant = ObjectDict(scale_list=scale_list)
 
-        component_data = {}
+        model = {}
         new = False
 
         if not self.params.id:
@@ -795,63 +783,58 @@ class ProfileSectionHandler(BaseHandler):
             projectexp = projectexp[0]
 
             if projectexp and profile_id == projectexp.get("profile_id"):
-                component_data.update(sub_dict(
+                model.update(sub_dict(
                     projectexp, self.profile_ps.PROJECTEXP_KEYS))
 
         self.send_json_success(
-            data=self._make_json_data(
-                component=component,
-                component_data=component_data,
-                new=new,
+            data=self._make_json_data(route=route, model=model, new=new,
                 constant=constant))
 
     @tornado.gen.coroutine
     def post_edit_projectexp(self):
-        profile_id = yield self._get_profile_id()
-        component_data = ObjectDict(json_decode(self.params.data))
-        record = component_data
-        if hasattr(record, "__status") and getattr(record, "__status") == 'x':
+        profile_id = self._get_profile_id()
+        model = ObjectDict(self.params.model)
+        if hasattr(model, "__status") and getattr(model, "__status") == 'x':
             verb = "delete"
         else:
-            verb = 'update' if record.id else 'create'
+            verb = 'update' if model.id else 'create'
 
         result, res = yield getattr(
             self._profile_service, verb + "_profile_projectexp")(
-            record, profile_id)
+            model, profile_id)
 
         if result:
             self.send_json_success()
         else:
             self.send_json_error()
-
     # Profile 编辑 -- projectexp 结束
 
     # Profile 编辑 -- prize 开始
     @tornado.gen.coroutine
     def get_prize(self):
-        profile_id = yield self._get_profile_id()
-        component = self.params.component
+        profile_id = self._get_profile_id()
+        route = self.params.route
 
         result, awards = yield self.profile_ps.get_profile_awards(profile_id)
 
-        component_data = []
+        model = []
         if result:
             for award in awards:
-                component_data.append(sub_dict(
+                model.append(sub_dict(
                     award, self.profile_ps.AWARDS_KEYS))
         else:
-            component_data = None
+            model = None
 
         self.send_json_success(
-            data=self._make_json_data(component, component_data))
+            data=self._make_json_data(route, model))
 
     @tornado.gen.coroutine
     def post_prize(self):
-        profile_id = yield self._get_profile_id()
-        component_data = objectdictify(json_decode(self.params.data))  # =>List
+        profile_id = self._get_profile_id()
+        model = objectdictify(self.params.model)  # =>List
 
         results = []
-        for e in component_data:
+        for e in model:
             if hasattr(e, "__status") and getattr(e, "__status") == 'x':
                 verb = "delete"
             else:
@@ -862,17 +845,17 @@ class ProfileSectionHandler(BaseHandler):
 
             results.append(result)
 
-        self._send_json_result(results, len(component_data))
+        self._send_json_result(results, len(model))
     # Profile 编辑 -- prize 结束
 
     # Profile 编辑 -- link 开始
     @tornado.gen.coroutine
     def get_link(self):
-        profile_id = yield self._get_profile_id()
-        component = self.params.component
+        profile_id = self._get_profile_id()
+        route = self.params.route
 
         new = False
-        component_data = {}
+        model = {}
 
         if not self.params.id:
             new = True
@@ -881,27 +864,26 @@ class ProfileSectionHandler(BaseHandler):
                 self.params.id)
 
             if result and works and works[0].profile_id == profile_id:
-                component_data.update(
+                model.update(
                     sub_dict(works[0], self.profile_ps.WORKS_KEYS))
             else:
                 self.send_json_error('cannot get works')
 
         self.send_json_success(
-            data=self._make_json_data(component, component_data, new=new))
+            data=self._make_json_data(route, model, new=new))
 
     @tornado.gen.coroutine
     def post_link(self):
-        profile_id = yield self._get_profile_id()
-        component_data = ObjectDict(json_encode(self.params.data))
+        profile_id = self._get_profile_id()
+        model = ObjectDict(self.params.model)
 
-        record = component_data
-        if record.id:
+        if model.id:
             verb = "update"
         else:
             verb = "create"
 
         result, _ = yield getattr(
-            self._profile_service, verb + "_profile_works")(record, profile_id)
+            self._profile_service, verb + "_profile_works")(model, profile_id)
 
         if result:
             self.send_json_success()
@@ -912,8 +894,8 @@ class ProfileSectionHandler(BaseHandler):
     # Profile 编辑 -- jobpref 开始
     @tornado.gen.coroutine
     def get_jobpref(self):
-        profile_id = yield self._get_profile_id()
-        component = self.params.component
+        profile_id = self._get_profile_id()
+        route = self.params.route
 
         worktype_list = yield self.dictionary_ps.get_constants(
             parent_code=const.CONSTANT_PARENT_CODE.WORK_INTENTION)
@@ -924,7 +906,7 @@ class ProfileSectionHandler(BaseHandler):
         constant.worktype_list = worktype_list
         constant.salary_list = salary_list
 
-        component_data = ObjectDict(),
+        model = ObjectDict(),
         new = False
 
         if not self.params.id:
@@ -936,36 +918,35 @@ class ProfileSectionHandler(BaseHandler):
             if result and intention and intention[0].profile_id == profile_id:
                 intention = ObjectDict(intention[0])
 
-                component_data.update(
+                model.update(
                     sub_dict(intention, self.profile_ps.INTENTION_KEYS))
 
                 positions = intention.positions
                 if positions:
                     position_name = positions[0].get("position_name")
-                    component_data.position_name = position_name
+                    model.position_name = position_name
 
                 cities = intention.cities
                 if cities:
                     city_name = cities[0].get("city_name")
-                    component_data.city_name = city_name
+                    model.city_name = city_name
             else:
                 self.send_json_error('cannot get intention')
 
         self.send_json_success(data=self._make_json_data(
-            component=component, component_data=component_data, new=new,
+            route=route, model=model, new=new,
             constant=constant))
 
     @tornado.gen.coroutine
     def post_jobpref(self):
-        profile_id = yield self._get_profile_id()
-        component_data = json_decode(self.params.data)
-        record = ObjectDict(component_data)
+        profile_id = self._get_profile_id()
+        model = ObjectDict(self.params.model)
 
-        verb = 'update' if record.id else 'create'
+        verb = 'update' if model.id else 'create'
 
         result, _ = yield getattr(
             self._profile_service, verb + "_profile_intention")(
-            record, profile_id)
+            model, profile_id)
 
         if result:
             self.send_json_success()
