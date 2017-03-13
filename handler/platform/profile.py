@@ -3,7 +3,7 @@
 import tornado
 import tornado.gen
 from tornado.escape import json_decode, json_encode
-
+import pprint
 from handler.base import BaseHandler
 
 from util.common.decorator import handle_response, check_and_apply_profile
@@ -82,12 +82,17 @@ class ProfileHandler(BaseHandler):
         # if other:
         #     other = sub_dict(other, pure_other_keys())
 
+        self.logger.debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+        self.logger.debug(pprint.pformat(self.current_user.profile))
+        self.logger.debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+
         other = {}
         #self.params.profile =ObjectDict()
-        profile_tpl = self.profile_ps.profile_to_tempalte(
-            self.params.profile, other)
+        profile_tpl = yield self.profile_ps.profile_to_tempalte(
+            self.current_user.profile, other)
 
-        self.render(template_name='profile/main.html', render_json=profile_tpl)
+        self.render_page(template_name='profile/main.html',
+                         data=profile_tpl)
 
     @tornado.gen.coroutine
     def post(self):

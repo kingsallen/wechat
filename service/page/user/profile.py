@@ -562,7 +562,7 @@ class ProfilePageService(PageService):
         #             other.keyvalues.append(lvm)
         #     profile.other = other
 
-        return json_encode(json_encode(profile))
+        return profile
 
     @staticmethod
     def calculate_workyears(p_workexps):

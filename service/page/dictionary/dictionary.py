@@ -29,4 +29,5 @@ class DictionaryPageService(PageService):
 
     @tornado.gen.coroutine
     def get_degrees(self):
-        yield self.get_constants(parent_code=CONSTANT_PARENT_CODE.DEGREE_USER)
+        ret = yield self.get_constants(parent_code=CONSTANT_PARENT_CODE.DEGREE_USER)
+        return ret
