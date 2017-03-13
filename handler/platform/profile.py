@@ -17,6 +17,19 @@ import conf.message as msg
 import conf.path as path
 
 
+class ProfileNewHandler(BaseHandler):
+
+    @handle_response
+    @tornado.gen.coroutine
+    def get(self):
+        """初始化新建 profile 页面"""
+        data = ObjectDict()
+        data.email = self.current_user.sysuser.email or ''
+        data.mobile = self.current_user.sysuser.mobile or ''
+        data.degreeList = yield self.dictionary_ps.get_degrees()
+        self.send_json_success(data=data)
+
+
 class ProfileHandler(BaseHandler):
     """ProfileHandler
     GET Profile 页面渲染
@@ -228,7 +241,6 @@ class ProfileSectionHandler(BaseHandler):
     @tornado.gen.coroutine
     def get(self):
         # 根据 route 跳转到不同的子方法
-        self.guarantee('route', 'component', 'componentData')
         yield getattr(self, "get_" + self.params.route)()
 
     @handle_response
@@ -427,15 +439,6 @@ class ProfileSectionHandler(BaseHandler):
     #         self.LOG.error(e)
     #         raise e
 
-    ##########################################################################
-    # profile 编辑
-    ##########################################################################
-    # def _get_to_field(self):
-    #     ret = self.params.get('to', None)
-    #     if not ret or ret not in self._EDITABLE_COMPONENT:
-    #         return None
-    #     return ret
-
     def _get_profile_id(self):
         """"""
         try:
@@ -515,11 +518,11 @@ class ProfileSectionHandler(BaseHandler):
 
     @tornado.gen.coroutine
     def get_description(self):
-        yield self.get_edit_basic(self_intro=True)
+        yield self.get_basic(self_intro=True)
 
     @tornado.gen.coroutine
     def post_description(self):
-        yield self.post_edit_basic(self_intro=True)
+        yield self.post_basic(self_intro=True)
 
     # Profile 编辑 -- basic & self-introduction 结束
 

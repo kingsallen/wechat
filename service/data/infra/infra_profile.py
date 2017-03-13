@@ -573,7 +573,7 @@ class InfraProfileDataService(DataService):
             if not method or not section:
                 raise ValueError
             assert method in ['get', 'create', 'update', 'delete']
-            route = getattr(path, ("profile" + section).upper())
+            route = getattr(path, ("profile_" + section).upper())
         except:
             raise ValueError('Invalid method or section')
 
