@@ -55,15 +55,25 @@ class Iface(object):
         """
         pass
 
-    def saveChatRoom(self, userId, hrId):
+    def enterRoom(self, userId, hrId, positionId, roomId):
         """
         Parameters:
          - userId
          - hrId
+         - positionId
+         - roomId
         """
         pass
 
     def getChat(self, roomId, speaker):
+        """
+        Parameters:
+         - roomId
+         - speaker
+        """
+        pass
+
+    def leaveChatRoom(self, roomId, speaker):
         """
         Parameters:
          - roomId
@@ -259,41 +269,45 @@ class Client(Iface):
             raise result.e
         return
 
-    def saveChatRoom(self, userId, hrId):
+    def enterRoom(self, userId, hrId, positionId, roomId):
         """
         Parameters:
          - userId
          - hrId
+         - positionId
+         - roomId
         """
         self._seqid += 1
         future = self._reqs[self._seqid] = concurrent.Future()
-        self.send_saveChatRoom(userId, hrId)
+        self.send_enterRoom(userId, hrId, positionId, roomId)
         return future
 
-    def send_saveChatRoom(self, userId, hrId):
+    def send_enterRoom(self, userId, hrId, positionId, roomId):
         oprot = self._oprot_factory.getProtocol(self._transport)
-        oprot.writeMessageBegin('saveChatRoom', TMessageType.CALL, self._seqid)
-        args = saveChatRoom_args()
+        oprot.writeMessageBegin('enterRoom', TMessageType.CALL, self._seqid)
+        args = enterRoom_args()
         args.userId = userId
         args.hrId = hrId
+        args.positionId = positionId
+        args.roomId = roomId
         args.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-    def recv_saveChatRoom(self, iprot, mtype, rseqid):
+    def recv_enterRoom(self, iprot, mtype, rseqid):
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
             iprot.readMessageEnd()
             raise x
-        result = saveChatRoom_result()
+        result = enterRoom_result()
         result.read(iprot)
         iprot.readMessageEnd()
         if result.success is not None:
             return result.success
         if result.e is not None:
             raise result.e
-        raise TApplicationException(TApplicationException.MISSING_RESULT, "saveChatRoom failed: unknown result")
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "enterRoom failed: unknown result")
 
     def getChat(self, roomId, speaker):
         """
@@ -331,6 +345,38 @@ class Client(Iface):
             raise result.e
         raise TApplicationException(TApplicationException.MISSING_RESULT, "getChat failed: unknown result")
 
+    def leaveChatRoom(self, roomId, speaker):
+        """
+        Parameters:
+         - roomId
+         - speaker
+        """
+        self._seqid += 1
+        future = self._reqs[self._seqid] = concurrent.Future()
+        self.send_leaveChatRoom(roomId, speaker)
+        return future
+
+    def send_leaveChatRoom(self, roomId, speaker):
+        oprot = self._oprot_factory.getProtocol(self._transport)
+        oprot.writeMessageBegin('leaveChatRoom', TMessageType.CALL, self._seqid)
+        args = leaveChatRoom_args()
+        args.roomId = roomId
+        args.speaker = speaker
+        args.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def recv_leaveChatRoom(self, iprot, mtype, rseqid):
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = leaveChatRoom_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        return
+
 
 class Processor(Iface, TProcessor):
     def __init__(self, handler):
@@ -340,8 +386,9 @@ class Processor(Iface, TProcessor):
         self._processMap["listUserChatRoom"] = Processor.process_listUserChatRoom
         self._processMap["listChatLogs"] = Processor.process_listChatLogs
         self._processMap["saveChat"] = Processor.process_saveChat
-        self._processMap["saveChatRoom"] = Processor.process_saveChatRoom
+        self._processMap["enterRoom"] = Processor.process_enterRoom
         self._processMap["getChat"] = Processor.process_getChat
+        self._processMap["leaveChatRoom"] = Processor.process_leaveChatRoom
 
     def process(self, iprot, oprot):
         (name, type, seqid) = iprot.readMessageBegin()
@@ -418,16 +465,16 @@ class Processor(Iface, TProcessor):
         oprot.trans.flush()
 
     @gen.coroutine
-    def process_saveChatRoom(self, seqid, iprot, oprot):
-        args = saveChatRoom_args()
+    def process_enterRoom(self, seqid, iprot, oprot):
+        args = enterRoom_args()
         args.read(iprot)
         iprot.readMessageEnd()
-        result = saveChatRoom_result()
+        result = enterRoom_result()
         try:
-            result.success = yield gen.maybe_future(self._handler.saveChatRoom(args.userId, args.hrId))
+            result.success = yield gen.maybe_future(self._handler.enterRoom(args.userId, args.hrId, args.positionId, args.roomId))
         except thrift_gen.gen.common.struct.ttypes.CURDException as e:
             result.e = e
-        oprot.writeMessageBegin("saveChatRoom", TMessageType.REPLY, seqid)
+        oprot.writeMessageBegin("enterRoom", TMessageType.REPLY, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -443,6 +490,18 @@ class Processor(Iface, TProcessor):
         except thrift_gen.gen.common.struct.ttypes.CURDException as e:
             result.e = e
         oprot.writeMessageBegin("getChat", TMessageType.REPLY, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    @gen.coroutine
+    def process_leaveChatRoom(self, seqid, iprot, oprot):
+        args = leaveChatRoom_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = leaveChatRoom_result()
+        yield gen.maybe_future(self._handler.leaveChatRoom(args.roomId, args.speaker))
+        oprot.writeMessageBegin("leaveChatRoom", TMessageType.REPLY, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -1078,22 +1137,28 @@ class saveChat_result(object):
         return not (self == other)
 
 
-class saveChatRoom_args(object):
+class enterRoom_args(object):
     """
     Attributes:
      - userId
      - hrId
+     - positionId
+     - roomId
     """
 
     thrift_spec = (
         None,  # 0
         (1, TType.I32, 'userId', None, None, ),  # 1
         (2, TType.I32, 'hrId', None, None, ),  # 2
+        (3, TType.I32, 'positionId', None, None, ),  # 3
+        (4, TType.I32, 'roomId', None, None, ),  # 4
     )
 
-    def __init__(self, userId=None, hrId=None,):
+    def __init__(self, userId=None, hrId=None, positionId=None, roomId=None,):
         self.userId = userId
         self.hrId = hrId
+        self.positionId = positionId
+        self.roomId = roomId
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -1114,6 +1179,16 @@ class saveChatRoom_args(object):
                     self.hrId = iprot.readI32()
                 else:
                     iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.I32:
+                    self.positionId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.I32:
+                    self.roomId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -1123,7 +1198,7 @@ class saveChatRoom_args(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
-        oprot.writeStructBegin('saveChatRoom_args')
+        oprot.writeStructBegin('enterRoom_args')
         if self.userId is not None:
             oprot.writeFieldBegin('userId', TType.I32, 1)
             oprot.writeI32(self.userId)
@@ -1131,6 +1206,14 @@ class saveChatRoom_args(object):
         if self.hrId is not None:
             oprot.writeFieldBegin('hrId', TType.I32, 2)
             oprot.writeI32(self.hrId)
+            oprot.writeFieldEnd()
+        if self.positionId is not None:
+            oprot.writeFieldBegin('positionId', TType.I32, 3)
+            oprot.writeI32(self.positionId)
+            oprot.writeFieldEnd()
+        if self.roomId is not None:
+            oprot.writeFieldBegin('roomId', TType.I32, 4)
+            oprot.writeI32(self.roomId)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -1150,7 +1233,7 @@ class saveChatRoom_args(object):
         return not (self == other)
 
 
-class saveChatRoom_result(object):
+class enterRoom_result(object):
     """
     Attributes:
      - success
@@ -1196,7 +1279,7 @@ class saveChatRoom_result(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
-        oprot.writeStructBegin('saveChatRoom_result')
+        oprot.writeStructBegin('enterRoom_result')
         if self.success is not None:
             oprot.writeFieldBegin('success', TType.STRUCT, 0)
             self.success.write(oprot)
@@ -1350,6 +1433,120 @@ class getChat_result(object):
             oprot.writeFieldBegin('e', TType.STRUCT, 1)
             self.e.write(oprot)
             oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class leaveChatRoom_args(object):
+    """
+    Attributes:
+     - roomId
+     - speaker
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'roomId', None, None, ),  # 1
+        (2, TType.BYTE, 'speaker', None, None, ),  # 2
+    )
+
+    def __init__(self, roomId=None, speaker=None,):
+        self.roomId = roomId
+        self.speaker = speaker
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.roomId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.BYTE:
+                    self.speaker = iprot.readByte()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('leaveChatRoom_args')
+        if self.roomId is not None:
+            oprot.writeFieldBegin('roomId', TType.I32, 1)
+            oprot.writeI32(self.roomId)
+            oprot.writeFieldEnd()
+        if self.speaker is not None:
+            oprot.writeFieldBegin('speaker', TType.BYTE, 2)
+            oprot.writeByte(self.speaker)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class leaveChatRoom_result(object):
+
+    thrift_spec = (
+    )
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('leaveChatRoom_result')
         oprot.writeFieldStop()
         oprot.writeStructEnd()
 

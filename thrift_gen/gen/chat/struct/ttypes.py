@@ -266,9 +266,11 @@ class UserChatRoomVO(object):
     """
     Attributes:
      - id
-     - userId
+     - hrId
      - name
      - headImgUrl
+     - companyName
+     - companyLogo
      - createTime
      - status
      - unReadNum
@@ -277,19 +279,23 @@ class UserChatRoomVO(object):
     thrift_spec = (
         None,  # 0
         (1, TType.I32, 'id', None, None, ),  # 1
-        (2, TType.I32, 'userId', None, None, ),  # 2
+        (2, TType.I32, 'hrId', None, None, ),  # 2
         (3, TType.STRING, 'name', 'UTF8', None, ),  # 3
         (4, TType.STRING, 'headImgUrl', 'UTF8', None, ),  # 4
-        (5, TType.STRING, 'createTime', 'UTF8', None, ),  # 5
-        (6, TType.I32, 'status', None, None, ),  # 6
-        (7, TType.I32, 'unReadNum', None, None, ),  # 7
+        (5, TType.STRING, 'companyName', 'UTF8', None, ),  # 5
+        (6, TType.STRING, 'companyLogo', 'UTF8', None, ),  # 6
+        (7, TType.STRING, 'createTime', 'UTF8', None, ),  # 7
+        (8, TType.I32, 'status', None, None, ),  # 8
+        (9, TType.I32, 'unReadNum', None, None, ),  # 9
     )
 
-    def __init__(self, id=None, userId=None, name=None, headImgUrl=None, createTime=None, status=None, unReadNum=None,):
+    def __init__(self, id=None, hrId=None, name=None, headImgUrl=None, companyName=None, companyLogo=None, createTime=None, status=None, unReadNum=None,):
         self.id = id
-        self.userId = userId
+        self.hrId = hrId
         self.name = name
         self.headImgUrl = headImgUrl
+        self.companyName = companyName
+        self.companyLogo = companyLogo
         self.createTime = createTime
         self.status = status
         self.unReadNum = unReadNum
@@ -310,7 +316,7 @@ class UserChatRoomVO(object):
                     iprot.skip(ftype)
             elif fid == 2:
                 if ftype == TType.I32:
-                    self.userId = iprot.readI32()
+                    self.hrId = iprot.readI32()
                 else:
                     iprot.skip(ftype)
             elif fid == 3:
@@ -325,15 +331,25 @@ class UserChatRoomVO(object):
                     iprot.skip(ftype)
             elif fid == 5:
                 if ftype == TType.STRING:
-                    self.createTime = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                    self.companyName = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
             elif fid == 6:
+                if ftype == TType.STRING:
+                    self.companyLogo = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 7:
+                if ftype == TType.STRING:
+                    self.createTime = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 8:
                 if ftype == TType.I32:
                     self.status = iprot.readI32()
                 else:
                     iprot.skip(ftype)
-            elif fid == 7:
+            elif fid == 9:
                 if ftype == TType.I32:
                     self.unReadNum = iprot.readI32()
                 else:
@@ -352,9 +368,9 @@ class UserChatRoomVO(object):
             oprot.writeFieldBegin('id', TType.I32, 1)
             oprot.writeI32(self.id)
             oprot.writeFieldEnd()
-        if self.userId is not None:
-            oprot.writeFieldBegin('userId', TType.I32, 2)
-            oprot.writeI32(self.userId)
+        if self.hrId is not None:
+            oprot.writeFieldBegin('hrId', TType.I32, 2)
+            oprot.writeI32(self.hrId)
             oprot.writeFieldEnd()
         if self.name is not None:
             oprot.writeFieldBegin('name', TType.STRING, 3)
@@ -364,16 +380,24 @@ class UserChatRoomVO(object):
             oprot.writeFieldBegin('headImgUrl', TType.STRING, 4)
             oprot.writeString(self.headImgUrl.encode('utf-8') if sys.version_info[0] == 2 else self.headImgUrl)
             oprot.writeFieldEnd()
+        if self.companyName is not None:
+            oprot.writeFieldBegin('companyName', TType.STRING, 5)
+            oprot.writeString(self.companyName.encode('utf-8') if sys.version_info[0] == 2 else self.companyName)
+            oprot.writeFieldEnd()
+        if self.companyLogo is not None:
+            oprot.writeFieldBegin('companyLogo', TType.STRING, 6)
+            oprot.writeString(self.companyLogo.encode('utf-8') if sys.version_info[0] == 2 else self.companyLogo)
+            oprot.writeFieldEnd()
         if self.createTime is not None:
-            oprot.writeFieldBegin('createTime', TType.STRING, 5)
+            oprot.writeFieldBegin('createTime', TType.STRING, 7)
             oprot.writeString(self.createTime.encode('utf-8') if sys.version_info[0] == 2 else self.createTime)
             oprot.writeFieldEnd()
         if self.status is not None:
-            oprot.writeFieldBegin('status', TType.I32, 6)
+            oprot.writeFieldBegin('status', TType.I32, 8)
             oprot.writeI32(self.status)
             oprot.writeFieldEnd()
         if self.unReadNum is not None:
-            oprot.writeFieldBegin('unReadNum', TType.I32, 7)
+            oprot.writeFieldBegin('unReadNum', TType.I32, 9)
             oprot.writeI32(self.unReadNum)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -724,49 +748,25 @@ class ChatsVO(object):
         return not (self == other)
 
 
-class ResultOfSaveRoomVO(object):
+class HrVO(object):
     """
     Attributes:
-     - id
-     - positionId
-     - positionTitle
-     - companyName
-     - city
-     - salaryBottom
-     - salaryTop
-     - positionUpdateTime
-     - hrName
-     - hrHeadImgUrl
      - hrId
+     - hrName
+     - hrHeadImg
     """
 
     thrift_spec = (
         None,  # 0
-        (1, TType.I32, 'id', None, None, ),  # 1
-        (2, TType.I32, 'positionId', None, None, ),  # 2
-        (3, TType.STRING, 'positionTitle', 'UTF8', None, ),  # 3
-        (4, TType.STRING, 'companyName', 'UTF8', None, ),  # 4
-        (5, TType.STRING, 'city', 'UTF8', None, ),  # 5
-        (6, TType.I32, 'salaryBottom', None, None, ),  # 6
-        (7, TType.I32, 'salaryTop', None, None, ),  # 7
-        (8, TType.STRING, 'positionUpdateTime', 'UTF8', None, ),  # 8
-        (9, TType.STRING, 'hrName', 'UTF8', None, ),  # 9
-        (10, TType.STRING, 'hrHeadImgUrl', 'UTF8', None, ),  # 10
-        (11, TType.I32, 'hrId', None, None, ),  # 11
+        (1, TType.I32, 'hrId', None, None, ),  # 1
+        (2, TType.STRING, 'hrName', 'UTF8', None, ),  # 2
+        (3, TType.STRING, 'hrHeadImg', 'UTF8', None, ),  # 3
     )
 
-    def __init__(self, id=None, positionId=None, positionTitle=None, companyName=None, city=None, salaryBottom=None, salaryTop=None, positionUpdateTime=None, hrName=None, hrHeadImgUrl=None, hrId=None,):
-        self.id = id
-        self.positionId = positionId
-        self.positionTitle = positionTitle
-        self.companyName = companyName
-        self.city = city
-        self.salaryBottom = salaryBottom
-        self.salaryTop = salaryTop
-        self.positionUpdateTime = positionUpdateTime
-        self.hrName = hrName
-        self.hrHeadImgUrl = hrHeadImgUrl
+    def __init__(self, hrId=None, hrName=None, hrHeadImg=None,):
         self.hrId = hrId
+        self.hrName = hrName
+        self.hrHeadImg = hrHeadImg
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -779,27 +779,207 @@ class ResultOfSaveRoomVO(object):
                 break
             if fid == 1:
                 if ftype == TType.I32:
-                    self.id = iprot.readI32()
+                    self.hrId = iprot.readI32()
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
-                if ftype == TType.I32:
-                    self.positionId = iprot.readI32()
+                if ftype == TType.STRING:
+                    self.hrName = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
             elif fid == 3:
                 if ftype == TType.STRING:
+                    self.hrHeadImg = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('HrVO')
+        if self.hrId is not None:
+            oprot.writeFieldBegin('hrId', TType.I32, 1)
+            oprot.writeI32(self.hrId)
+            oprot.writeFieldEnd()
+        if self.hrName is not None:
+            oprot.writeFieldBegin('hrName', TType.STRING, 2)
+            oprot.writeString(self.hrName.encode('utf-8') if sys.version_info[0] == 2 else self.hrName)
+            oprot.writeFieldEnd()
+        if self.hrHeadImg is not None:
+            oprot.writeFieldBegin('hrHeadImg', TType.STRING, 3)
+            oprot.writeString(self.hrHeadImg.encode('utf-8') if sys.version_info[0] == 2 else self.hrHeadImg)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class UserVO(object):
+    """
+    Attributes:
+     - userId
+     - userName
+     - userHeadImg
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'userId', None, None, ),  # 1
+        (2, TType.STRING, 'userName', 'UTF8', None, ),  # 2
+        (3, TType.STRING, 'userHeadImg', 'UTF8', None, ),  # 3
+    )
+
+    def __init__(self, userId=None, userName=None, userHeadImg=None,):
+        self.userId = userId
+        self.userName = userName
+        self.userHeadImg = userHeadImg
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.userId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRING:
+                    self.userName = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.STRING:
+                    self.userHeadImg = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('UserVO')
+        if self.userId is not None:
+            oprot.writeFieldBegin('userId', TType.I32, 1)
+            oprot.writeI32(self.userId)
+            oprot.writeFieldEnd()
+        if self.userName is not None:
+            oprot.writeFieldBegin('userName', TType.STRING, 2)
+            oprot.writeString(self.userName.encode('utf-8') if sys.version_info[0] == 2 else self.userName)
+            oprot.writeFieldEnd()
+        if self.userHeadImg is not None:
+            oprot.writeFieldBegin('userHeadImg', TType.STRING, 3)
+            oprot.writeString(self.userHeadImg.encode('utf-8') if sys.version_info[0] == 2 else self.userHeadImg)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class PositionVO(object):
+    """
+    Attributes:
+     - positionId
+     - positionTitle
+     - companyName
+     - city
+     - salaryTop
+     - salaryBottom
+     - updateTime
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'positionId', None, None, ),  # 1
+        (2, TType.STRING, 'positionTitle', 'UTF8', None, ),  # 2
+        (3, TType.STRING, 'companyName', 'UTF8', None, ),  # 3
+        (4, TType.STRING, 'city', 'UTF8', None, ),  # 4
+        (5, TType.I32, 'salaryTop', None, None, ),  # 5
+        (6, TType.I32, 'salaryBottom', None, None, ),  # 6
+        (7, TType.STRING, 'updateTime', 'UTF8', None, ),  # 7
+    )
+
+    def __init__(self, positionId=None, positionTitle=None, companyName=None, city=None, salaryTop=None, salaryBottom=None, updateTime=None,):
+        self.positionId = positionId
+        self.positionTitle = positionTitle
+        self.companyName = companyName
+        self.city = city
+        self.salaryTop = salaryTop
+        self.salaryBottom = salaryBottom
+        self.updateTime = updateTime
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.positionId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRING:
                     self.positionTitle = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
-            elif fid == 4:
+            elif fid == 3:
                 if ftype == TType.STRING:
                     self.companyName = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
-            elif fid == 5:
+            elif fid == 4:
                 if ftype == TType.STRING:
                     self.city = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 5:
+                if ftype == TType.I32:
+                    self.salaryTop = iprot.readI32()
                 else:
                     iprot.skip(ftype)
             elif fid == 6:
@@ -808,28 +988,127 @@ class ResultOfSaveRoomVO(object):
                 else:
                     iprot.skip(ftype)
             elif fid == 7:
+                if ftype == TType.STRING:
+                    self.updateTime = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('PositionVO')
+        if self.positionId is not None:
+            oprot.writeFieldBegin('positionId', TType.I32, 1)
+            oprot.writeI32(self.positionId)
+            oprot.writeFieldEnd()
+        if self.positionTitle is not None:
+            oprot.writeFieldBegin('positionTitle', TType.STRING, 2)
+            oprot.writeString(self.positionTitle.encode('utf-8') if sys.version_info[0] == 2 else self.positionTitle)
+            oprot.writeFieldEnd()
+        if self.companyName is not None:
+            oprot.writeFieldBegin('companyName', TType.STRING, 3)
+            oprot.writeString(self.companyName.encode('utf-8') if sys.version_info[0] == 2 else self.companyName)
+            oprot.writeFieldEnd()
+        if self.city is not None:
+            oprot.writeFieldBegin('city', TType.STRING, 4)
+            oprot.writeString(self.city.encode('utf-8') if sys.version_info[0] == 2 else self.city)
+            oprot.writeFieldEnd()
+        if self.salaryTop is not None:
+            oprot.writeFieldBegin('salaryTop', TType.I32, 5)
+            oprot.writeI32(self.salaryTop)
+            oprot.writeFieldEnd()
+        if self.salaryBottom is not None:
+            oprot.writeFieldBegin('salaryBottom', TType.I32, 6)
+            oprot.writeI32(self.salaryBottom)
+            oprot.writeFieldEnd()
+        if self.updateTime is not None:
+            oprot.writeFieldBegin('updateTime', TType.STRING, 7)
+            oprot.writeString(self.updateTime.encode('utf-8') if sys.version_info[0] == 2 else self.updateTime)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class ResultOfSaveRoomVO(object):
+    """
+    Attributes:
+     - roomId
+     - chatDebut
+     - position
+     - user
+     - hr
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'roomId', None, None, ),  # 1
+        (2, TType.BOOL, 'chatDebut', None, None, ),  # 2
+        (3, TType.STRUCT, 'position', (PositionVO, PositionVO.thrift_spec), None, ),  # 3
+        (4, TType.STRUCT, 'user', (UserVO, UserVO.thrift_spec), None, ),  # 4
+        (5, TType.STRUCT, 'hr', (HrVO, HrVO.thrift_spec), None, ),  # 5
+    )
+
+    def __init__(self, roomId=None, chatDebut=None, position=None, user=None, hr=None,):
+        self.roomId = roomId
+        self.chatDebut = chatDebut
+        self.position = position
+        self.user = user
+        self.hr = hr
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
                 if ftype == TType.I32:
-                    self.salaryTop = iprot.readI32()
+                    self.roomId = iprot.readI32()
                 else:
                     iprot.skip(ftype)
-            elif fid == 8:
-                if ftype == TType.STRING:
-                    self.positionUpdateTime = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+            elif fid == 2:
+                if ftype == TType.BOOL:
+                    self.chatDebut = iprot.readBool()
                 else:
                     iprot.skip(ftype)
-            elif fid == 9:
-                if ftype == TType.STRING:
-                    self.hrName = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+            elif fid == 3:
+                if ftype == TType.STRUCT:
+                    self.position = PositionVO()
+                    self.position.read(iprot)
                 else:
                     iprot.skip(ftype)
-            elif fid == 10:
-                if ftype == TType.STRING:
-                    self.hrHeadImgUrl = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+            elif fid == 4:
+                if ftype == TType.STRUCT:
+                    self.user = UserVO()
+                    self.user.read(iprot)
                 else:
                     iprot.skip(ftype)
-            elif fid == 11:
-                if ftype == TType.I32:
-                    self.hrId = iprot.readI32()
+            elif fid == 5:
+                if ftype == TType.STRUCT:
+                    self.hr = HrVO()
+                    self.hr.read(iprot)
                 else:
                     iprot.skip(ftype)
             else:
@@ -842,49 +1121,25 @@ class ResultOfSaveRoomVO(object):
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
         oprot.writeStructBegin('ResultOfSaveRoomVO')
-        if self.id is not None:
-            oprot.writeFieldBegin('id', TType.I32, 1)
-            oprot.writeI32(self.id)
+        if self.roomId is not None:
+            oprot.writeFieldBegin('roomId', TType.I32, 1)
+            oprot.writeI32(self.roomId)
             oprot.writeFieldEnd()
-        if self.positionId is not None:
-            oprot.writeFieldBegin('positionId', TType.I32, 2)
-            oprot.writeI32(self.positionId)
+        if self.chatDebut is not None:
+            oprot.writeFieldBegin('chatDebut', TType.BOOL, 2)
+            oprot.writeBool(self.chatDebut)
             oprot.writeFieldEnd()
-        if self.positionTitle is not None:
-            oprot.writeFieldBegin('positionTitle', TType.STRING, 3)
-            oprot.writeString(self.positionTitle.encode('utf-8') if sys.version_info[0] == 2 else self.positionTitle)
+        if self.position is not None:
+            oprot.writeFieldBegin('position', TType.STRUCT, 3)
+            self.position.write(oprot)
             oprot.writeFieldEnd()
-        if self.companyName is not None:
-            oprot.writeFieldBegin('companyName', TType.STRING, 4)
-            oprot.writeString(self.companyName.encode('utf-8') if sys.version_info[0] == 2 else self.companyName)
+        if self.user is not None:
+            oprot.writeFieldBegin('user', TType.STRUCT, 4)
+            self.user.write(oprot)
             oprot.writeFieldEnd()
-        if self.city is not None:
-            oprot.writeFieldBegin('city', TType.STRING, 5)
-            oprot.writeString(self.city.encode('utf-8') if sys.version_info[0] == 2 else self.city)
-            oprot.writeFieldEnd()
-        if self.salaryBottom is not None:
-            oprot.writeFieldBegin('salaryBottom', TType.I32, 6)
-            oprot.writeI32(self.salaryBottom)
-            oprot.writeFieldEnd()
-        if self.salaryTop is not None:
-            oprot.writeFieldBegin('salaryTop', TType.I32, 7)
-            oprot.writeI32(self.salaryTop)
-            oprot.writeFieldEnd()
-        if self.positionUpdateTime is not None:
-            oprot.writeFieldBegin('positionUpdateTime', TType.STRING, 8)
-            oprot.writeString(self.positionUpdateTime.encode('utf-8') if sys.version_info[0] == 2 else self.positionUpdateTime)
-            oprot.writeFieldEnd()
-        if self.hrName is not None:
-            oprot.writeFieldBegin('hrName', TType.STRING, 9)
-            oprot.writeString(self.hrName.encode('utf-8') if sys.version_info[0] == 2 else self.hrName)
-            oprot.writeFieldEnd()
-        if self.hrHeadImgUrl is not None:
-            oprot.writeFieldBegin('hrHeadImgUrl', TType.STRING, 10)
-            oprot.writeString(self.hrHeadImgUrl.encode('utf-8') if sys.version_info[0] == 2 else self.hrHeadImgUrl)
-            oprot.writeFieldEnd()
-        if self.hrId is not None:
-            oprot.writeFieldBegin('hrId', TType.I32, 11)
-            oprot.writeI32(self.hrId)
+        if self.hr is not None:
+            oprot.writeFieldBegin('hr', TType.STRUCT, 5)
+            self.hr.write(oprot)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
