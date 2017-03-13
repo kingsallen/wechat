@@ -60,7 +60,7 @@ class ApplicationHandler(BaseHandler):
         # 2. 如果没有 profile 按照规则跳转
         if not has_profile:
             # TODO 与 profile 共用
-            no_profile_redirection(self.params.pid)
+            # no_profile_redirection(self.params.pid)
             return
 
         # 3. 如果有 profile 但是是自定义职位,

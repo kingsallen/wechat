@@ -71,7 +71,9 @@ platform_routes = [
     (r"/m/company",                                    "handler.platform.companyrelation.CompanyHandler",           {"event": "company_info"}),
     (r"/m/company/team/(\d+)",                         "handler.platform.team.TeamDetailHandler",                   {"event": "team_detail"}),
     (r"/m/company/team",                               "handler.platform.team.TeamIndexHandler",                    {"event": "team_info"}),
-    (r"/m/employee/bindemail",                         "handler.platform.employee.EmployeeBindEmailHandler",        {"event": "employee_bindemail"}),
+    # (r"/m/employee/bindemail",                       "handler.platform.employee.EmployeeBindEmailHandler",        {"event": "employee_bindemail"}),
+    (r"/m/profile[\/]?",                               "handler.platform.profile.ProfileHandler",                  {"event": "profile_"}),
+    (r"/m/profile/section[\/]?",                       "handler.platform.profile.ProfileSectionHandler",           {"event": "profile_section_"}),
 
     # 各大公司的自定义配置
     (r"/m/custom/emailapply",                          "handler.platform.customize.CustomizeEmailApplyHandler",     {"event": "customize_emailapply"}),

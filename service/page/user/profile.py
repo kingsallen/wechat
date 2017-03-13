@@ -1,13 +1,14 @@
 # coding=utf-8
 
 import tornado.gen as gen
-import tornado.escape
+from tornado.escape import json_decode, json_encode
 
 from service.page.base import PageService
 import conf.common as const
 from util.common import ObjectDict
 from util.tool.date_tool import curr_datetime_now
 from datetime import datetime
+
 
 class ProfilePageService(PageService):
     """对接profile服务
@@ -561,7 +562,7 @@ class ProfilePageService(PageService):
         #             other.keyvalues.append(lvm)
         #     profile.other = other
 
-        return tornado.escape.json_encode(profile)
+        return json_encode(json_encode(profile))
 
     @staticmethod
     def calculate_workyears(p_workexps):

@@ -24,24 +24,24 @@ class ProfileHandler(BaseHandler):
     """
 
     @handle_response
-    @check_and_apply_profile
+    # @check_and_apply_profile
     @tornado.gen.coroutine
     def get(self):
         """ 查看个人 Profile
         如果有 GET 请求参数包含 pid,
         在 profile 页面吸顶显示申请按钮
         """
-        is_apply = self.params.get("apply", '0')
+        # is_apply = self.params.get("apply", '0')
 
         # TODO (tangyiliang) use decorator
         # # 对雅诗兰黛无微不至的特别服务
         # is_skip = self.params.get("is_skip", '0')
-
-        pid = self.params.get("pid", 0)
-        if not pid and self.get_cookie("dq_pid", 0):
-            pid = int(self.get_cookie("dq_pid"))
-        if not is_apply and pid:
-            is_apply = "1"
+        #
+        # pid = self.params.get("pid", 0)
+        # if not pid and self.get_cookie("dq_pid", 0):
+        #     pid = int(self.get_cookie("dq_pid"))
+        # if not is_apply and pid:
+        #     is_apply = "1"
 
         # TODO (tangyiliang) use decorator
         # 获取不到 Profile 的情况下,跳转到新建 Profile 页面,
@@ -52,10 +52,10 @@ class ProfileHandler(BaseHandler):
         #     return
 
         need_mobile_confirmation = 0
-        if is_apply and pid:
-            if str(self.current_user.sysuser.mobile) != str(
-                self.current_user.sysuser.username):
-                need_mobile_confirmation = 1
+        # if is_apply and pid:
+        #     if str(self.current_user.sysuser.mobile) != str(
+        #         self.current_user.sysuser.username):
+        #         need_mobile_confirmation = 1
 
         # profile_other 获取和处理
         # other_record = get_profile_other_by_profile_id(
@@ -70,19 +70,14 @@ class ProfileHandler(BaseHandler):
         #     other = sub_dict(other, pure_other_keys())
 
         other = {}
-        profile_tpl = self.profile_ps.profile_to_tempalte(self.params.profile, other)
+        self.params.profile=ObjectDict()
+        profile_tpl = self.profile_ps.profile_to_tempalte(
+            self.params.profile, other)
 
         self.render(
-            template_name='neo_weixin/profile/profile.html',
-            profile_json=profile_tpl,
-            title="个人档案",
-            need_mobile_confirmation=need_mobile_confirmation,
-            current_mobile=self.current_user.sysuser.mobile,
-            is_apply=is_apply,
-            post_msg="",
-            post_status=0,
-            is_skip=0,
-            no_name='0' if self.current_user.sysuser.name else '1')
+            template_name='profile/main.html',
+            profile_json=profile_tpl)
+
 
     @tornado.gen.coroutine
     def post(self):
