@@ -41,7 +41,7 @@ class ThriftChatDataService(DataService):
         :param page_size:
         :return:
         """
-        ret = yield self.chat_service_cilent.listUserChatRoom(room_id, page_no, page_size)
+        ret = yield self.chat_service_cilent.listChatLogs(room_id, page_no, page_size)
         self.logger.debug("[thrift]get_chats: %s" % ret)
         raise gen.Return(ret)
 
@@ -56,7 +56,7 @@ class ThriftChatDataService(DataService):
         :return:
         """
 
-        ret = yield self.chat_service_cilent.saveChatRoom(user_id, hr_id, position_id, room_id)
+        ret = yield self.chat_service_cilent.enterRoom(user_id, hr_id, position_id, room_id)
         self.logger.debug("[thrift]enter_chatroom: %s" % ret)
         raise gen.Return(ret)
 
