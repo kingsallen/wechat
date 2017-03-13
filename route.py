@@ -38,6 +38,8 @@ common_routes = [
     (r"/m/application[\/]*([a-z]+)*",                  "handler.common.application.ApplicationHandler",             {"event": "application_"}),
     (r"/m/positionfav/([0-9]+)",                       "handler.common.position.PositionFavHandler",                {"event": "position_fav"}),
     (r"/m/chat[\/]*([a-z]+)*",                         "handler.common.im.ChatHandler",                             {"event": "chat_"}),
+    # websocket
+    (r"/m/websocket([A-Za-z0-9_]{1,32})",              "handler.common.im.ChatWebSocketHandler",                    {"event": "chat_ws"}),
 
     # common api
     (r"/m/api/position/star",                          "handler.common.position.PositionStarHandler",               {"event": "position_star"}),
@@ -52,9 +54,6 @@ common_routes = [
     (r"/m/api/resume/import",                          "handler.common.resume.ResumeImportHandler",                 {"event": "resume_import"}),
     (r"/m/api/sug/company",                            "handler.common.suggest.SuggestCompanyHandler",              {"event": "sug_company"}),
     (r"/m/api/sug/college",                            "handler.common.suggest.SuggestCollegeHandler",              {"event": "sug_college"}),
-
-    # websocket
-    (r"/websocket/([A-Za-z0-9_]{1,32})",                "handler.common.im.ChatWebSocketHandler"),
 
     # 兼容老微信 url，进行302跳转，event 设置为 NULL
     # (r"/.*",                                           "handler.common.compatible.CompatibleHandler",               {"event": "NULL"})

@@ -49,6 +49,14 @@ class ChatPageService(PageService):
             room['content'] = e.content
             room['chat_time'] = str_2_date(e.create_time, const.TIME_FORMAT_MINUTE)
             room['speaker'] = e.speaker # 0：求职者，1：HR
+            room['speaker_id'] = e.speaker_id
+            room['speaker_name'] = e.speaker_name
+            if e.speaker == 1:
+                # HR
+                default_icon = const.HR_HEADIMG
+            else:
+                default_icon = const.SYSUSER_HEADIMG
+            room['speaker_icon'] = make_static_url(e.speaker_icon or default_icon)
             obj_list.append(room)
         raise gen.Return(obj_list)
 
@@ -66,6 +74,14 @@ class ChatPageService(PageService):
                 hr_headimg = make_static_url(ret.hr.hrHeadImg or const.HR_HEADIMG)
             )
 
+        user_info = ObjectDict()
+        if ret.user:
+            user_info = ObjectDict(
+                user_id = ret.user.userId,
+                user_name = ret.user.userName,
+                user_headimg = make_static_url(ret.user.userHeadImg or const.SYSUSER_HEADIMG)
+            )
+
         position_info = ObjectDict()
         if ret.position:
             position_info = ObjectDict(
@@ -78,6 +94,7 @@ class ChatPageService(PageService):
             )
         res = ObjectDict(
             hr = hr_info,
+            user = user_info,
             position = position_info,
             chat_debut = ret.chatDebut,
             follow_qx = qxuser.is_subscribe == 1,

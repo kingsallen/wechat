@@ -99,12 +99,12 @@ class ChatWebSocketHandler(BaseHandler, websocket.WebSocketHandler):
             callback=self._send_ping,
         )
 
-        # TODO 如何获得 user_id, hr_id, room_id
         self.room_id = self.params.room_id
-        if not (user_id and hr_id and room_id):
+
+        if not (self.current_user.sysuser.id and self.params.hr_id and self.room_id):
             self.close(1000, "not authorized")
 
-        self.chatroom_channel = const.CHAT_CHATROOM_CHANNEL.format(hr_id, user_id)
+        self.chatroom_channel = const.CHAT_CHATROOM_CHANNEL.format(self.params.hr_id, self.current_user.sysuser.id)
         self.chat_session.mark_enter_chatroom(self.current_user.sysuser.id)
 
         def message_handler(message):
@@ -193,35 +193,3 @@ class ChatHandler(BaseHandler):
         room_id = self.params.room_id or 0
         res = yield self.chat_ps.get_chatroom(self.current_user.sysuser.id, self.params.hr_id, pid, self.current_user.qxuser, room_id)
         self.send_json_success(data=res)
-
-
-
-# import tornado.ioloop
-# from tornado import websocket, gen
-#
-# from tornado.testing import gen_test, AsyncHTTPTestCase
-# class TestPingPong(AsyncHTTPTestCase):
-#
-#     def get_app(self):
-#         return get_tornado_app()
-#
-#     def tearDown(self):
-#         tornado.ioloop.IOLoop.instance().stop()
-#
-#     def setUp(self):
-#         super().setUp()
-#
-#     def test_http_on_ws(self):
-#         response = self.fetch('/')
-#         self.assertTrue(response.code, 400)
-#
-#     @gen_test(timeout=15)
-#     def test_ping_pong(self):
-#
-#         url = 'ws://localhost:%d/' % self.get_http_port()
-#
-#         ws = yield websocket.websocket_connect(url, io_loop=self.io_loop)
-#         msg = yield ws.read_message()
-#
-#         self.assertEqual(msg, 'OK')
-#         yield gen.sleep(12)
