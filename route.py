@@ -73,7 +73,6 @@ platform_routes = [
     (r"/m/company/team",                               "handler.platform.team.TeamIndexHandler",                    {"event": "team_info"}),
     # (r"/m/employee/bindemail",                       "handler.platform.employee.EmployeeBindEmailHandler",        {"event": "employee_bindemail"}),
     (r"/m/profile[\/]?",                               "handler.platform.profile.ProfileHandler",                  {"event": "profile_"}),
-    (r"/m/profile/edit[\/]?",                       "handler.platform.profile.ProfileSectionHandler",           {"event": "profile_section_"}),
 
     # 各大公司的自定义配置
     (r"/m/custom/emailapply",                          "handler.platform.customize.CustomizeEmailApplyHandler",     {"event": "customize_emailapply"}),
@@ -87,7 +86,7 @@ platform_routes = [
     (r"/m/api/dict/city",                              "handler.platform.dictionary.DictCityHandler",               {"event": "dict_city"}),
     (r"/m/api/dict/industry",                          "handler.platform.dictionary.DictIndustryHandler",           {"event": "dict_industry"}),
     (r"/m/api/dict/function",                          "handler.platform.dictionary.DictFunctionHandler",           {"event": "dict_function"}),
-
+    (r"/m/api/profile/edit[\/]?",                      "handler.platform.profile.ProfileSectionHandler",            {"event": "profile_section_"}),
 ]
 platform_routes.extend(common_routes)
 
