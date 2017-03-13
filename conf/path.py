@@ -18,7 +18,9 @@ MOBILE_VERIFY = '/m/app/phone/verify'
 EMPLOYEE_VERIFY = '/m/app/employee/binding'
 EMPLOYEE_RECOMMENDS = 'm/app/employee/recommends'
 USERCENTER_APPLYRECORD = 'm/app/usercenter/applyrecords/{}'
-PROFILE = '/m/profile'
+
+PROFILE_VIEW = '/m/profile'
+PROFILE_NEW = '/m/app/profile/new'
 
 # 供侧边栏使用
 OLD_POSITION = '/mobile/position'
