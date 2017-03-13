@@ -21,11 +21,11 @@ class UnreadCountHandler(BaseHandler):
         try:
 
             if publisher:
-                yield getattr(self, "get_jd_unread")(publisher)
                 self._event = self._event + "jdunread"
+                yield getattr(self, "get_jd_unread")(publisher)
             else:
-                yield getattr(self, "get_unread_total")()
                 self._event = self._event + "totalunread"
+                yield getattr(self, "get_unread_total")()
         except Exception as e:
             self.send_json_error()
 
@@ -66,8 +66,8 @@ class ChatWebSocketHandler(BaseHandler, websocket.WebSocketHandler):
         self.ping_message = b'p'
         self.ping_timeout = None
 
-        self.chatroom_channel = ''
         self.chat_session = ChatCache()
+        self.chatroom_channel = ''
         self.room_id = 0
 
     def _send_ping(self):
@@ -93,13 +93,13 @@ class ChatWebSocketHandler(BaseHandler, websocket.WebSocketHandler):
         then close the connection """
         self.close(1001, 'ping-pong timeout')
 
-    def open(self, chatroom_channel, *args, **kwargs):
+    def open(self, room_id, *args, **kwargs):
         self.ping_timeout = self.io_loop.call_later(
             delay=self.get_ping_timeout(initial=True),
             callback=self._send_ping,
         )
 
-        self.room_id = self.params.room_id
+        self.room_id = room_id
 
         if not (self.current_user.sysuser.id and self.params.hr_id and self.room_id):
             self.close(1000, "not authorized")
@@ -120,7 +120,7 @@ class ChatWebSocketHandler(BaseHandler, websocket.WebSocketHandler):
                                      message_handler=message_handler)
         self.subscriber.start_run_in_thread()
 
-        self.redis_client.publish(chatroom_channel, 'OK')
+        self.redis_client.publish(self.chatroom_channel, 'OK')
 
     def on_close(self):
         self.subscriber.stop_run_in_thread()
