@@ -610,7 +610,7 @@ class ProfileSectionHandler(BaseHandler):
     @tornado.gen.coroutine
     def post_jobexp(self):
         profile_id = self._get_profile_id()
-        model = ObjectDict(self.params.model)
+        model = objectdictify(self.params.model)
 
         if hasattr(model, "__status") and getattr(model, "__status") == 'x':
             verb = "delete"
@@ -628,8 +628,7 @@ class ProfileSectionHandler(BaseHandler):
 
     @tornado.gen.coroutine
     def post_jobexp_company(self):
-        profile_id = self._get_profile_id()
-        model = ObjectDict(self.params.model)
+        model = objectdictify(self.params.model)
 
         # 通过名称查询企业是否已经存在
         name = model.name
@@ -676,7 +675,7 @@ class ProfileSectionHandler(BaseHandler):
     @tornado.gen.coroutine
     def post_eduexp(self):
         profile_id = self._get_profile_id()
-        model = ObjectDict(self.params.data)
+        model = objectdictify(self.params.model)
 
         if hasattr(model, "__status") and getattr(model, "__status") == 'x':
             verb = "delete"
@@ -719,9 +718,10 @@ class ProfileSectionHandler(BaseHandler):
                                       constant=constant))
 
     @tornado.gen.coroutine
-    def post_edit_projectexp(self):
+    def post_projectexp(self):
         profile_id = self._get_profile_id()
-        model = ObjectDict(self.params.model)
+        model = objectdictify(self.params.model)
+
         if hasattr(model, "__status") and getattr(model, "__status") == 'x':
             verb = "delete"
         else:
