@@ -101,6 +101,7 @@ class ProfilePageService(PageService):
         is_ok, result = yield self.infra_profile_ds.import_profile(source, username, password, user_id)
         return is_ok, result
 
+    @gen.coroutine
     def create_profile(self, user_id):
         """ 创建 profile_profile 基础数据 """
         result, data = yield self.infra_profile_ds.create_profile(
@@ -111,6 +112,23 @@ class ProfilePageService(PageService):
     def get_profile_basic(self, profile_id):
         result, data = yield self.infra_profile_ds.get_profile_basic(
             profile_id)
+        return result, data
+
+    @gen.coroutine
+    def create_profile_basic(self, params, profile_id, mode='m'):
+        """
+        创建 profile basic
+        :param params:
+        :param profile_id:
+        :param mode: 'm': 手动（老6步）创建
+        :return:
+        """
+        if mode == 'm':
+            result, data = yield self.infra_profile_ds.create_profile_basic_manually(
+                params, profile_id)
+        else:
+            raise ValueError('invalid mode')
+
         return result, data
 
     @gen.coroutine
@@ -198,7 +216,18 @@ class ProfilePageService(PageService):
         return result, data
 
     @gen.coroutine
-    def create_profile_workexp(self, record, profile_id):
+    def create_profile_workexp(self, record, profile_id, mode='m'):
+        if mode == 'm':
+            record.company_name = record.company
+            record.job = record.position
+            record.start_date = record.start + '-01'
+            if record.end == '至今':
+                record.end_until_now = 1
+            else:
+                record.end_date = record.end + '-01'
+                record.end_until_now = 0
+        else:
+            raise ValueError('invalid mode')
         result, data = yield self.infra_profile_ds.create_profile_workexp(
             record, profile_id)
         return result, data
@@ -222,9 +251,22 @@ class ProfilePageService(PageService):
         return result, data
 
     @gen.coroutine
-    def create_profile_education(self, record, profile_id):
+    def create_profile_education(self, record, profile_id, mode='m'):
+        if mode == 'm':  # 老六步
+            record.college_name = record.university
+            record.start_date = record.start + '-01'
+            if record.end == '至今':
+                record.end_until_now = 1
+            else:
+                record.end_date = record.end + '-01'
+                record.end_until_now = 0
+
+        else:
+            raise ValueError('invalid mode')
+
         college_code = yield self.infra_dict_ds.get_college_code_by_name(
             record.college_name)
+
         result, data = yield self.infra_profile_ds.create_profile_education(
             record, profile_id, college_code)
         return result, data
@@ -562,7 +604,7 @@ class ProfilePageService(PageService):
         #             other.keyvalues.append(lvm)
         #     profile.other = other
 
-        return json_encode(json_encode(profile))
+        return profile
 
     @staticmethod
     def calculate_workyears(p_workexps):
