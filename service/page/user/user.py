@@ -276,7 +276,7 @@ class UserPageService(PageService):
         if kwargs.email:
             fields.update(email=kwargs.email)
         if kwargs.mobile:
-            fields.update(mobile=str(kwargs.mobile))
+            fields.update(mobile=int(kwargs.mobile))
         if kwargs.name:
             fields.update(name=kwargs.name)
 
