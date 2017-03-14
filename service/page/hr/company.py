@@ -157,16 +157,15 @@ class CompanyPageService(PageService):
         if name is not None:
             params.update(name=name)
 
-        res = yield self.infra_company_ds.get_company_all(params)
+        result, data = yield self.infra_company_ds.get_company_all(params)
 
-        if not isinstance(res, list) or not res:
-            # Error, No data
-            return False, res
+        if not result:
+            return False, data
         else:
             keys = ['id', 'name', 'logo']
             result = []
             unique_names = []
-            for e in res:
+            for e in data:
                 e = ObjectDict(e)
                 if e.name in unique_names:
                     continue
