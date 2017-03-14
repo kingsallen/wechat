@@ -10,7 +10,6 @@ from util.tool.str_tool import pinyin_match
 
 
 class SuggestCompanyHandler(BaseHandler):
-
     @gen.coroutine
     def get(self):
         result, companies = yield self.company_ps.get_cp_for_sug_wechat()
@@ -18,9 +17,9 @@ class SuggestCompanyHandler(BaseHandler):
         if result and s:
             company_names = list(filter(partial(pinyin_match, search=s), map(lambda x: x.get("name"), companies)))
             companies = list(filter(lambda x: x.get("name") in company_names, companies))
-            self.send_json_success(companies)
+            self.write(json_encode(companies))
         else:
-            self.send_json_success([])
+            self.write(json_encode([]))
 
 
 class SuggestCollegeHandler(BaseHandler):
@@ -30,9 +29,7 @@ class SuggestCollegeHandler(BaseHandler):
         s = self.params.s
         if s:
             college_names = list(filter(partial(pinyin_match, search=s), map(lambda x: x.get("name"), colleges)))
-
             colleges = list(filter(lambda x: x.get("name") in college_names, colleges))
-
-            self.send_json_success(colleges)
+            self.write(json_encode(colleges))
         else:
-            self.send_json_success([])
+            self.write(json_encode([]))
