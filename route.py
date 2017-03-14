@@ -100,7 +100,7 @@ qx_routes.extend(common_routes)
 
 # 招聘助手的单独 routes
 help_routes = [
-    (r"/h/position",                                   "handler.help.releasedposition.ReleasedPositionHandler",     {"event": "helper_positions"})
+    (r"/h/position",                                   "handler.help.releasedposition.ReleasedPositionHandler",     {"event": "helper_positions"}),
     (r"/h/register[\/]*([a-z]+)*",                     "handler.help.passport.RegisterHandler",                     {"event": "helper_"})
 
 ]

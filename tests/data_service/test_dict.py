@@ -50,11 +50,15 @@ class DictDataServiceTestCase(AsyncTestCase):
         #pprint(result)
         self.assertIsInstance(result, list)
         self.assertIn(
-            {'code':   110000, 'level': 1, 'name': '计算机/互联网/通信/电子',
-             'parent': 0},
-            result)
-        self.assertIn({
-            'code': 110100, 'level': 2, 'name': '计算机软件', 'parent': 110000},
+            {'list': [{'name': '计算机软件', 'code': 110100},
+                      {'name': '计算机硬件', 'code': 110200},
+                      {'name': '互联网/电商务/网游', 'code': 110300},
+                      {'name': '网店淘宝', 'code': 110400},
+                      {'name': 'IT-管理', 'code': 110500},
+                      {'name': 'IT-品管、技术支持及其它', 'code': 110600},
+                      {'name': '通信技术开发及应用', 'code': 110700},
+                      {'name': '电子/电器/半导体/仪器仪表', 'code': 110800}],
+             'text': '计算机/互联网/通信/电子'},
             result)
 
     def test_get_function_result_level23(self):
@@ -65,10 +69,7 @@ class DictDataServiceTestCase(AsyncTestCase):
         #pprint(result)
         self.assertIsInstance(result, list)
         self.assertIn(
-            {'code': 110100, 'level': 2, 'name': '计算机软件', 'parent': 110000},
-            result)
-        self.assertIn(
-            {'code': 110101, 'level': 3, 'name': '高级软件工程师', 'parent': 110100},
+            {'name': '高级软件工程师', 'code': 110101},
             result)
 
     @gen_test
