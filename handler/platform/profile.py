@@ -706,7 +706,7 @@ class ProfileSectionHandler(BaseHandler):
             verb = 'update' if model.id else 'create'
 
         result, res = yield getattr(
-            self._profile_service, verb + "_profile_education")(
+            self.profile_ps, verb + "_profile_education")(
             model, profile_id)
 
         if result:
@@ -754,7 +754,7 @@ class ProfileSectionHandler(BaseHandler):
             verb = 'update' if model.id else 'create'
 
         result, res = yield getattr(
-            self._profile_service, verb + "_profile_projectexp")(
+            self.profile_ps, verb + "_profile_projectexp")(
             model, profile_id)
 
         if result:
@@ -871,12 +871,8 @@ class ProfileSectionHandler(BaseHandler):
     def post_jobpref(self):
         profile_id = self._get_profile_id()
         model = ObjectDict(self.params.model)
-
         verb = 'update' if model.id else 'create'
-
-        result, _ = yield getattr(
-            self._profile_service, verb + "_profile_intention")(
-            model, profile_id)
+        result, _ = yield getattr(self.profile_ps, verb + "_profile_intention")(model, profile_id)
 
         if result:
             self.send_json_success()
