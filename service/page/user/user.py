@@ -288,6 +288,15 @@ class UserPageService(PageService):
         return ret
 
     @gen.coroutine
+    def get_hr_info_by_mobile(self, mobile):
+        """获取 hr 信息"""
+        hr_account = yield self.user_hr_account_ds.get_hr_account({
+            "mobile": mobile
+        })
+
+        raise gen.Return(hr_account)
+
+    @gen.coroutine
     def favorite_position(self, current_user, pid):
         """用户收藏职位的粒子操作
         :param current_user: user session 信息
@@ -431,3 +440,14 @@ class UserPageService(PageService):
                 recom_user_id=recom_user_id
             ))
             raise gen.Return(fav_id)
+
+    @gen.coroutine
+    def post_hr_register(self, params):
+        """
+        注册 HR 用户
+        :param params:
+        :return:
+        """
+
+        ret = yield self.infra_user_ds.post_hr_register(params)
+        raise gen.Return(ret)

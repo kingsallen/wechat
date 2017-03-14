@@ -166,3 +166,12 @@ class InfraUserDataService(DataService):
 
         ret = yield http_post(path.INFRA_WXUSER_QRCODE_SCANRESULT, params)
         raise gen.Return(ret)
+
+    @gen.coroutine
+    def post_hr_register(self, params):
+        """HR用户注册
+        :param params
+        """
+
+        ret = yield http_post(path.INFRA_HRUSER, params)
+        raise gen.Return(ret)

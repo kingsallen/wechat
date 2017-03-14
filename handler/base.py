@@ -108,7 +108,7 @@ class BaseHandler(MetaBaseHandler):
                         "来自 qx 的授权, 获得 userinfo:{}".format(userinfo))
                     yield self._handle_user_info(userinfo)
 
-                # 来自企业号的静默授权
+                # 来自企业号，招聘助手的静默授权
                 else:
                     self.logger.debug("来自企业号的静默授权")
                     self._unionid = from_hex(state)
@@ -183,7 +183,7 @@ class BaseHandler(MetaBaseHandler):
     def _handle_ent_openid(self, openid, unionid):
         """根据企业号 openid 和 unionid 创建企业号微信用户"""
         wxuser = None
-        if self.is_platform:
+        if self.is_platform or self.is_help:
             wxuser = yield self.user_ps.create_user_wx_user_ent(
                 openid, unionid, self._wechat.id)
             self.logger.debug("_handle_ent_openid, wxuser:{}".format(wxuser))
@@ -275,7 +275,7 @@ class BaseHandler(MetaBaseHandler):
         self.logger.debug("_fetch_session session_id: %s" % self._session_id)
 
         if self._session_id:
-            if self.is_platform:
+            if self.is_platform or self.is_help:
                 self.logger.debug(
                     "is_platform _fetch_session session_id: {}".format(
                         self._session_id))
@@ -285,10 +285,6 @@ class BaseHandler(MetaBaseHandler):
                     ok = yield self._get_session_by_wechat_id(self._session_id, self.settings['qx_wechat_id'])
             elif self.is_qx:
                 ok = yield self._get_session_by_wechat_id(self._session_id, self.settings['qx_wechat_id'])
-
-            elif self.is_help:
-                # TODO 需讨论
-                pass
 
             need_oauth = not ok
 

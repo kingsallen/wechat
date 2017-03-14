@@ -58,3 +58,7 @@ CREATE_APPLICATION_FAILED = "您的申请失败了，请稍候再试"
 
 PROFILE_REQUIRED_HINT_HEAD = "请完善个人简历，其中"
 PROFILE_REQUIRED_HINT_TAIL = "为必填项"
+
+# 招聘助手
+HELPER_HR_REGISTERED = "您的账户已存在，请联系管理员"
+HELPER_COMPANY_REGISTERED = "该公司名称已注册"

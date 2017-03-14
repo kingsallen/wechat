@@ -13,6 +13,7 @@ import conf.path as path
 
 from util.common import ObjectDict
 from util.common.sign import Sign
+from util.tool.http_tool import http_get, http_post
 
 from app import logger
 from setting import settings
@@ -28,7 +29,6 @@ class WeChatOauth2Service(object):
     refer to:
     http://mp.weixin.qq.com/wiki/17/c0f37d5704f0b64713d5d2c37b468d75.html
     """
-    async_http = tornado.httpclient.AsyncHTTPClient()
 
     def __init__(self, wechat, redirect_url, component_access_token):
         self.redirect_url = redirect_url
@@ -158,9 +158,7 @@ class WeChatOauth2Service(object):
         when error
         {"errcode":40029,"errmsg":"invalid code"}
         """
-        response = yield self.async_http.fetch(
-            self._get_access_token_url(code))
-        ret = ObjectDict(ujson.loads(response.body))
+        ret = yield http_get(self._get_access_token_url(code), infra=False)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -186,10 +184,7 @@ class WeChatOauth2Service(object):
         when error
         {"errcode":40003,"errmsg":" invalid openid"}
         """
-        response = yield self.async_http.fetch(
-            wx_const.WX_OAUTH_GET_USERINFO % (self._access_token, openid))
-
-        ret = ObjectDict(ujson.loads(response.body))
+        ret = yield http_get(wx_const.WX_OAUTH_GET_USERINFO % (self._access_token, openid), infra=False)
         raise gen.Return(ret)
 
     def __adjust_url(self, is_base):
@@ -229,8 +224,6 @@ class WechatUtil(object):
 
     """微信工具类，可用户与微信 API 之间的交互"""
 
-    async_http = tornado.httpclient.AsyncHTTPClient()
-
     @gen.coroutine
     def get_wxuser(self, access_token, openid):
         """用 openid 拉取用户信息
@@ -258,8 +251,24 @@ class WechatUtil(object):
         when error
         {"errcode":40003,"errmsg":" invalid openid"}
         """
-        response = yield self.async_http.fetch(
-            wx_const.WX_INFO_USER_API % (access_token, openid))
-
-        ret = ObjectDict(ujson.loads(response.body))
+        ret = yield http_get(wx_const.WX_INFO_USER_API % (access_token, openid), infra=False)
         raise gen.Return(ret)
+
+    @gen.coroutine
+    def get_qrcode(self, access_token, scene_str, action_name="QR_LIMIT_STR_SCENE"):
+        """获得专属二维码
+        :return url
+        """
+        params = ObjectDict(
+            action_name=action_name,
+            action_info=ObjectDict(
+                scene=ObjectDict(
+                    scene_str=scene_str
+                )
+            )
+        )
+
+        ret = yield http_post(wx_const.WX_CREATE_QRCODE_API % access_token, params, infra=False)
+        if ret:
+            raise gen.Return(wx_const.WX_SHOWQRCODE_API % (ret.get("ticket")))
+        raise gen.Return(None)

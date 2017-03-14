@@ -16,6 +16,7 @@ from util.common.decorator import handle_response
 from util.common import ObjectDict
 from util.common.cipher import encode_id
 from util.tool.str_tool import password_crypt
+from thrift_gen.gen.mq.struct.ttypes import SmsType
 
 
 class CellphoneBindHandler(BaseHandler):
@@ -179,20 +180,15 @@ class CellphoneBindHandler(BaseHandler):
             if not password:
                 # 生成随机密码
                 code, password = password_crypt()
-                # TODO
                 # 发送注册成功短信
-                data = ObjectDict({
+                params = ObjectDict({
                     "mobile": self.params.mobile,
                     "code": code,
                     "ip": self.request.remote_ip,
-                    "sys": 2 if self.current_user.wechat.id == settings.bagging_wechat_id else 1
+                    "sys": 2 if self.is_qx else 1
                 })
-                result = RandCode().send_update_sysuser_sms(data)
-                if result.code == 1:
-                    self._send_json({
-                        "status": 1,
-                        "message": u"添加失败，本日发送短信超出上限"
-                    })
+                yield self.cellphone_ps.send_sms(SmsType.UPDATE_SYSUSER_SMS, self.params.mobile,
+                                                                  params)
 
             yield self.user_ps.bind_mobile_password(self.current_user.sysuser.id,
                                                     self.params.mobile, password)

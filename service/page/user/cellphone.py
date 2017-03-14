@@ -46,3 +46,18 @@ class CellphonePageService(PageService):
         """调用账号绑定接口"""
         ret = yield self.infra_user_ds.post_wx_pc_combine(mobile, unionid)
         raise gen.Return(ret)
+
+    @gen.coroutine
+    def send_sms(self, type, mobile, params):
+        """
+        发送短信，调用 thrift 接口
+        :param type: 对应 thrift_gen/gen/mq/struct/ttypes
+        :param mobile:
+        :param params:
+        :return:
+        """
+
+        ret = yield self.thrift_mq_ds.send_sms(type, mobile, params)
+        self.logger.debug("[send_sms]ret:{}".format(ret))
+        result = bool(ret.status == self.constant.API_SUCCESS)
+        return result, ret.message

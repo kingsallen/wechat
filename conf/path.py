@@ -44,6 +44,7 @@ INFRA_USER_ISMOBILEREGISTERED = 'user/ismobileregistered'
 INFRA_USER_APPLIED_APPLICATIONS = 'user/{}/applications'
 INFRA_USER_FAV_POSITION = 'user/{}/fav-position'
 INFRA_WXUSER_QRCODE_SCANRESULT = 'weixin/qrcode/scanresult'
+INFRA_HRUSER = 'hraccount'
 
 # 申请服务
 # Ref: https://wiki.moseeker.com/application-api.md
