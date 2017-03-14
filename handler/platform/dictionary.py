@@ -19,7 +19,7 @@ class DictFunctionHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         functions = yield self.dictionary_ps.get_functions(
-            code=int(self.params.code) if self.params.code else 0)
+            code=int(self.params.fcode) if self.params.fcode else 0)
         self.send_json_success(functions)
 
 
