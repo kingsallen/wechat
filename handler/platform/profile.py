@@ -545,26 +545,15 @@ class ProfileSectionHandler(BaseHandler):
     # Profile 编辑 -- skill 开始
     @tornado.gen.coroutine
     def get_skill(self):
-        profile_id = self._get_profile_id()
-        result, skills = yield self._profile_service.get_profile_skill(
-            profile_id)
-        if not result:
-            raise ValueError('cannot get skills')
-        else: pass
-
+        skills = self.current_user.profile.skills
         route = self.params.route
-        model = []
-        for s in skills:
-            s = sub_dict(s, self.profile_ps.SKILL_KEYS)
-            model.append(s)
-
-        self.send_json_success(
-            data=self._make_json_data(route, model))
+        model = [sub_dict(s, self.profile_ps.SKILL_KEYS) for s in skills]
+        self.send_json_success(data=self._make_json_data(route, model))
 
     @tornado.gen.coroutine
     def post_skill(self):
         profile_id = self._get_profile_id()
-        model = objectdictify(json_decode(self.params.model))
+        model = objectdictify(self.params.model)
 
         results = []
         for e in model:
@@ -583,28 +572,15 @@ class ProfileSectionHandler(BaseHandler):
     # Profile 编辑 -- cert 开始
     @tornado.gen.coroutine
     def get_cert(self):
-        profile_id = self._get_profile_id()
-        result, certs = yield self.profile_ps.get_profile_cert(
-            profile_id)
-        if not result:
-            raise ValueError('cannot get certs')
-
+        credentials = self.current_user.profile.credentials
         route = self.params.route
-        if result:
-            model = []
-            for s in certs:
-                s = sub_dict(s, self._CERT_KEYS)
-                model.append(s)
-        else:
-            model = None
-
-        self.send_json_success(
-            data=self._make_json_data(route, model))
+        model = [sub_dict(s, self.profile_ps.CERT_KEYS) for s in credentials]
+        self.send_json_success(data=self._make_json_data(route, model))
 
     @tornado.gen.coroutine
     def post_cert(self):
         profile_id = self._get_profile_id()
-        model = objectdictify(json_decode(self.params.model))
+        model = objectdictify(self.params.model)
 
         results = []
         for e in model:
