@@ -283,7 +283,7 @@ class UserPageService(PageService):
         ret = 0
         if fields:
             ret = yield self.user_user_ds.update_user(
-                cond={"id": user_id},
+                conds={"id": user_id},
                 fields=fields)
         return ret
 
