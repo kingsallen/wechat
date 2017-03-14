@@ -599,15 +599,12 @@ class ProfileSectionHandler(BaseHandler):
 
         if not self.params.id:
             new = True
-
         else:
-            workexp = yield self.profile_ps.get_profile_workexp(
-                workexp_id=self.params.id)
-            workexp = workexp[0]
-
-            if workexp and profile_id == workexp.profile_id:
-                model.update(
-                    sub_dict(workexp, self.profile_ps.WORKEXP_KEYS))
+            result, data = yield self.profile_ps.get_profile_workexp(workexp_id=self.params.id)
+            if result and data[0].get('profile_id') == profile_id:
+                model.update(sub_dict(data[0], self.profile_ps.WORKEXP_KEYS))
+            else:
+                self.send_json_error()
 
         self.send_json_success(
             data=self._make_json_data(
@@ -671,17 +668,14 @@ class ProfileSectionHandler(BaseHandler):
             new = True
 
         else:
-            education = yield self.profile_ps.get_profile_education(
+            result, data = yield self.profile_ps.get_profile_education(
                 education_id=self.params.id)
-            education = education[0]
 
-            if education and profile_id == education.get("profile_id"):
-                model.update(sub_dict(
-                    education, self.profile_ps.EDU_KEYS))
+            if result and data[0].get("profile_id") == profile_id:
+                model.update(sub_dict(data[0], self.profile_ps.EDU_KEYS))
 
         self.send_json_success(
-            data=self._make_json_data(route=route, model=model, new=new,
-                constant=constant))
+            data=self._make_json_data(route=route, model=model, new=new, constant=constant))
 
     @tornado.gen.coroutine
     def post_eduexp(self):
@@ -694,8 +688,7 @@ class ProfileSectionHandler(BaseHandler):
             verb = 'update' if model.id else 'create'
 
         result, res = yield getattr(
-            self.profile_ps, verb + "_profile_education")(
-            model, profile_id)
+            self.profile_ps, verb + "_profile_education")(model, profile_id)
 
         if result:
             self.send_json_success()
@@ -720,17 +713,14 @@ class ProfileSectionHandler(BaseHandler):
             new = True
 
         else:
-            projectexp = yield self.profile_ps.get_profile_projectexp(
+            result, data = yield self.profile_ps.get_profile_projectexp(
                 projectexp_id=self.params.id)
-            projectexp = projectexp[0]
-
-            if projectexp and profile_id == projectexp.get("profile_id"):
-                model.update(sub_dict(
-                    projectexp, self.profile_ps.PROJECTEXP_KEYS))
+            if result and data[0].get('profile_id') == profile_id:
+                model.update(sub_dict(data[0], self.profile_ps.PROJECTEXP_KEYS))
 
         self.send_json_success(
             data=self._make_json_data(route=route, model=model, new=new,
-                constant=constant))
+                                      constant=constant))
 
     @tornado.gen.coroutine
     def post_edit_projectexp(self):
@@ -742,8 +732,7 @@ class ProfileSectionHandler(BaseHandler):
             verb = 'update' if model.id else 'create'
 
         result, res = yield getattr(
-            self.profile_ps, verb + "_profile_projectexp")(
-            model, profile_id)
+            self.profile_ps, verb + "_profile_projectexp")(model, profile_id)
 
         if result:
             self.send_json_success()
