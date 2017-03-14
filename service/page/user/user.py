@@ -276,9 +276,10 @@ class UserPageService(PageService):
         if kwargs.email:
             fields.update(email=kwargs.email)
         if kwargs.mobile:
-            fields.update(mobile=int(kwargs.mobile))
+            fields.update(mobile=kwargs.mobile)
         if kwargs.name:
             fields.update(name=kwargs.name)
+        self.logger.debug(fields)
 
         ret = 0
         if fields:

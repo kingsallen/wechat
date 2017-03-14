@@ -254,6 +254,7 @@ class ProfilePageService(PageService):
     def create_profile_education(self, record, profile_id, mode='m'):
         if mode == 'm':  # 老六步
             record.college_name = record.university
+            record.degree = record.deploma
             record.start_date = record.start + '-01'
             if record.end == '至今':
                 record.end_until_now = 1
