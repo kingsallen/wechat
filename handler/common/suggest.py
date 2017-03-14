@@ -26,8 +26,8 @@ class SuggestCompanyHandler(BaseHandler):
         else:
             self.write(json_encode([]))
 
-class SuggestCollegeHandler(BaseHandler):
 
+class SuggestCollegeHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         colleges = yield self.dictionary_ps.get_colleges()

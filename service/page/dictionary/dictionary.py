@@ -31,3 +31,8 @@ class DictionaryPageService(PageService):
     def get_degrees(self):
         ret = yield self.get_constants(parent_code=CONSTANT_PARENT_CODE.DEGREE_USER)
         return ret
+
+    @tornado.gen.coroutine
+    def get_colleges(self):
+        ret = yield self.get_colleges()
+        return ret
