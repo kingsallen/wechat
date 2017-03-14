@@ -766,21 +766,10 @@ class ProfileSectionHandler(BaseHandler):
     # Profile 编辑 -- prize 开始
     @tornado.gen.coroutine
     def get_prize(self):
-        profile_id = self._get_profile_id()
+        awards = self.current_user.profile.awards
         route = self.params.route
-
-        result, awards = yield self.profile_ps.get_profile_awards(profile_id)
-
-        model = []
-        if result:
-            for award in awards:
-                model.append(sub_dict(
-                    award, self.profile_ps.AWARDS_KEYS))
-        else:
-            model = None
-
-        self.send_json_success(
-            data=self._make_json_data(route, model))
+        model = [sub_dict(s, self.profile_ps.AWARDS_KEYS) for s in awards]
+        self.send_json_success(data=self._make_json_data(route, model))
 
     @tornado.gen.coroutine
     def post_prize(self):
@@ -793,10 +782,8 @@ class ProfileSectionHandler(BaseHandler):
                 verb = "delete"
             else:
                 verb = 'update' if e.id else 'create'
-
             result, res = yield getattr(
-                self._profile_service, verb + "_profile_awards")(e, profile_id)
-
+                self.profile_ps, verb + "_profile_awards")(e, profile_id)
             results.append(result)
 
         self._send_json_result(results, len(model))
@@ -805,23 +792,12 @@ class ProfileSectionHandler(BaseHandler):
     # Profile 编辑 -- link 开始
     @tornado.gen.coroutine
     def get_link(self):
-        profile_id = self._get_profile_id()
+        works = self.current_user.profile.works
         route = self.params.route
-
-        new = False
-        model = {}
-
-        if not self.params.id:
-            new = True
-        else:
-            result, works = yield self._profile_service.get_profile_works(
-                self.params.id)
-
-            if result and works and works[0].profile_id == profile_id:
-                model.update(
-                    sub_dict(works[0], self.profile_ps.WORKS_KEYS))
-            else:
-                self.send_json_error('cannot get works')
+        new = not bool(works)
+        if not new:
+            model = sub_dict(works[0], self.profile_ps.WORKS_KEYS)
+        else: model = {}
 
         self.send_json_success(
             data=self._make_json_data(route, model, new=new))
@@ -829,7 +805,7 @@ class ProfileSectionHandler(BaseHandler):
     @tornado.gen.coroutine
     def post_link(self):
         profile_id = self._get_profile_id()
-        model = ObjectDict(self.params.model)
+        model = objectdictify(self.params.model)
 
         if model.id:
             verb = "update"
@@ -837,7 +813,7 @@ class ProfileSectionHandler(BaseHandler):
             verb = "create"
 
         result, _ = yield getattr(
-            self._profile_service, verb + "_profile_works")(model, profile_id)
+            self.profile_ps, verb + "_profile_works")(model, profile_id)
 
         if result:
             self.send_json_success()
