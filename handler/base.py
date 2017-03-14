@@ -17,7 +17,7 @@ from cache.user.passport_session import PassportCache
 from util.common import ObjectDict
 from util.common.cipher import decode_id
 from util.common.decorator import check_signature
-from util.tool.str_tool import to_str, from_hex
+from util.tool.str_tool import to_str, from_hex, match_session_id
 from util.tool.url_tool import url_subtract_query, make_url
 
 
@@ -517,7 +517,7 @@ class BaseHandler(MetaBaseHandler):
     def _add_sysuser_to_session(self, session, session_id):
         """拼装 session 中的 sysuser"""
 
-        user_id = self._get_user_id_from_session_id(session_id)
+        user_id = match_session_id(session_id)
         sysuser = yield self.user_ps.get_user_user({
             "id": user_id
         })
@@ -574,20 +574,6 @@ class BaseHandler(MetaBaseHandler):
                 httponly=True)
         self.logger.debug(
             "_build_session mviewer_id old:{}".format(mviewer_id))
-
-    def _get_user_id_from_session_id(self, session_id):
-        """从 session_id 中得到 user_id"""
-
-        self.logger.debug(
-            "_get_user_id_from_session_id: {}".format(session_id))
-
-        if session_id:
-            session_id_list = re.match(r"([0-9]*):([0-9a-zA-Z]*)", session_id)
-            self.logger.debug(
-                "_get_user_id_from_session_id session_id_list: {}".format(session_id_list))
-            return session_id_list.group(1) if session_id_list else ""
-        else:
-            return ""
 
     def get_template_namespace(self):
         namespace = super().get_template_namespace()

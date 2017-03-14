@@ -35,6 +35,8 @@ class ChatPageService(PageService):
             room['chat_time'] = str_2_date(e.createTime, self.constant.TIME_FORMAT_MINUTE)
             room['unread_num'] = e.unReadNum
             obj_list.append(room)
+
+        self.logger.debug("[get_chatrooms]ret:{}".format(obj_list))
         raise gen.Return(obj_list)
 
     @gen.coroutine
@@ -49,15 +51,9 @@ class ChatPageService(PageService):
             room['content'] = e.content
             room['chat_time'] = str_2_date(e.create_time, const.TIME_FORMAT_MINUTE)
             room['speaker'] = e.speaker # 0：求职者，1：HR
-            room['speaker_id'] = e.speaker_id
-            room['speaker_name'] = e.speaker_name
-            if e.speaker == 1:
-                # HR
-                default_icon = const.HR_HEADIMG
-            else:
-                default_icon = const.SYSUSER_HEADIMG
-            room['speaker_icon'] = make_static_url(e.speaker_icon or default_icon)
             obj_list.append(room)
+
+        self.logger.debug("[get_chats]ret:{}".format(obj_list))
         raise gen.Return(obj_list)
 
     @gen.coroutine
@@ -101,6 +97,8 @@ class ChatPageService(PageService):
             room_id = ret.roomId,
         )
 
+        self.logger.debug("[get_chatroom]ret:{}".format(res))
+
         raise gen.Return(res)
 
     @gen.coroutine
@@ -112,7 +110,10 @@ class ChatPageService(PageService):
         :return:
         """
 
+        print (888888)
+
         ret = yield self.thrift_chat_ds.leave_chatroom(room_id, speaker)
+        self.logger.debug("[leave_chatroom]ret:{}".format(ret))
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -126,5 +127,8 @@ class ChatPageService(PageService):
         :return:
         """
 
+        print (3438437)
+
         ret = yield self.thrift_chat_ds.save_chat(room_id, content, position_id, speaker)
+        self.logger.debug("[save_chat]ret:{}".format(ret))
         raise gen.Return(ret)

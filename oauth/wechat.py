@@ -4,7 +4,6 @@
 import re
 import ujson
 from urllib.parse import urlparse, quote
-
 import tornado.gen as gen
 import tornado.httpclient
 

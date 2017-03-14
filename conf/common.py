@@ -105,8 +105,10 @@ SESSION_USER_HR_ACCOUNT = 'user_hr_account_{}'
 SESSION_WX_BINDING = 'wx_binding_{}'
 # Email投递创建Redis格式(邮件解析, 提醒脚本都会用到)
 FORMAT_EMAIL_CREATE = "EMAIL_CREATE:{}"  #
-# 聊天频道
+# C端用户监听频道
 CHAT_CHATROOM_CHANNEL = "chatroom_{0}_{1}"
+# HR聊天监听频道
+CHAT_HR_CHANNEL = "chatroom_{0}"
 # 进入聊天室标志位
 CHAT_CHATROOM_ENTER = "chat_sysuser_{}"
 

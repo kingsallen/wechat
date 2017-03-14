@@ -37,9 +37,9 @@ common_routes = [
     (r"/m/register[\/]*([a-z]+)*",                     "handler.common.passport.RegisterHandler",                   {"event": "register_"}),
     (r"/m/application[\/]*([a-z]+)*",                  "handler.common.application.ApplicationHandler",             {"event": "application_"}),
     (r"/m/positionfav/([0-9]+)",                       "handler.common.position.PositionFavHandler",                {"event": "position_fav"}),
-    (r"/m/api/chat[\/]*([a-z]+)*",                         "handler.common.im.ChatHandler",                             {"event": "chat_"}),
+    (r"/m/api/chat[\/]*([a-z]+)*",                     "handler.common.im.ChatHandler",                             {"event": "chat_"}),
     # websocket
-    (r"/m/websocket([A-Za-z0-9_]{1,32})",              "handler.common.im.ChatWebSocketHandler",                    {"event": "chat_ws"}),
+    (r"/m/websocket/([A-Za-z0-9_]{1,32})",             "handler.common.im.ChatWebSocketHandler"),
 
     # common api
     (r"/m/api/position/star",                          "handler.common.position.PositionStarHandler",               {"event": "position_star"}),

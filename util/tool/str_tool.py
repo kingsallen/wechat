@@ -70,6 +70,14 @@ def to_hex(string):
 def from_hex(hex_string):
     return to_str(bytes.fromhex(hex_string))
 
+def match_session_id(session_id):
+    """从 session_id 中得到 user_id"""
+
+    if session_id:
+        session_id_list = re.match(r"([0-9]*):([0-9a-zA-Z]*)", session_id)
+        return session_id_list.group(1) if session_id_list else 0
+    else:
+        return 0
 
 def split(input_s, delimiter=None):
     """分割字符串成字符串数组
