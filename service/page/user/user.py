@@ -9,6 +9,7 @@ from service.page.base import PageService
 from setting import settings
 from util.common import ObjectDict
 
+
 class UserPageService(PageService):
 
     def __init__(self):
@@ -267,6 +268,25 @@ class UserPageService(PageService):
             "company_id": company_id
         })
         raise gen.Return(ret)
+
+    @gen.coroutine
+    def update_user(self, user_id, **kwargs):
+        kwargs = ObjectDict(kwargs)
+        fields = {}
+        if kwargs.email:
+            fields.update(email=kwargs.email)
+        if kwargs.mobile:
+            fields.update(mobile=str(kwargs.mobile))
+        if kwargs.name:
+            fields.update(name=kwargs.name)
+
+        ret = 0
+        if fields:
+            ret = yield self.user_user_ds.update_user(
+                cond={"id": user_id},
+                fields=fields)
+        return ret
+
 
     @gen.coroutine
     def favorite_position(self, current_user, pid):

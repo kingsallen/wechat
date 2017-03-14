@@ -58,12 +58,12 @@ class ProfileNewHandler(BaseHandler):
         # TODO
         # 更新 user_user 表的字段,
         # 这里使用 [] 可以让程序在需要时报错查看是否有漏洞导致需要的数据没有获取到
-        # self._profile_service.update_user_user_fields(ObjectDict(
-        #     mobile=profile.contacts['mobile'],
-        #     name=profile.basicInfo['name'],
-        #     email=profile.contacts['email'],
-        #     headimg=None
-        # ), self.current_user.sysuser.id)
+
+        yield self.user_ps.update_user(
+            self.current_user.sysuser_id,
+            name=profile.basicInfo['name'],
+            email=profile.contacts['email'],
+            mobile=profile.contacts['mobile'])
 
         # PROFILE_PROFILE
         profile_id = None
