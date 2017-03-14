@@ -226,6 +226,7 @@ class ProfileSectionHandler(BaseHandler):
     @tornado.gen.coroutine
     def get(self):
         # 根据 route 跳转到不同的子方法
+        self.logger.debug(pprint.pformat(self.current_user.profile))
         yield getattr(self, "get_" + self.params.route)()
 
     @handle_response
@@ -509,16 +510,8 @@ class ProfileSectionHandler(BaseHandler):
     # Profile 编辑 -- language 开始
     @tornado.gen.coroutine
     def get_language(self):
-        profile_id = self._get_profile_id()
-        result, languages = yield self.profile_ps.get_profile_language(
-            profile_id)
-        if not result:
-            raise ValueError('cannot get language')
-        else:
-            pass
-
         route = self.params.route
-
+        languages = self.current_user.profile.languages
         model = []
         for l in languages:
             e = sub_dict(l, self.profile_ps.LANGUAGE_KEYS)
