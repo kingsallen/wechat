@@ -55,12 +55,8 @@ class ProfileNewHandler(BaseHandler):
             self.send_json_error(message=message)
             return
 
-        # TODO
-        # 更新 user_user 表的字段,
-        # 这里使用 [] 可以让程序在需要时报错查看是否有漏洞导致需要的数据没有获取到
-
         yield self.user_ps.update_user(
-            self.current_user.sysuser_id,
+            self.current_user.sysuser.id,
             name=profile.basicInfo['name'],
             email=profile.contacts['email'],
             mobile=profile.contacts['mobile'])

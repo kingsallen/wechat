@@ -284,10 +284,8 @@ class UserPageService(PageService):
         ret = 0
         if fields:
             ret = yield self.user_user_ds.update_user(
-                conds={"id": user_id},
-                fields=fields)
+                conds={"id": user_id}, fields=fields)
         return ret
-
 
     @gen.coroutine
     def favorite_position(self, current_user, pid):
