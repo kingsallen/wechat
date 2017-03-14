@@ -34,5 +34,5 @@ class DictionaryPageService(PageService):
 
     @tornado.gen.coroutine
     def get_colleges(self):
-        ret = yield self.get_colleges()
+        ret = yield self.infra_dict_ds.get_colleges()
         return ret

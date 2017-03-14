@@ -17,9 +17,9 @@ class SuggestCompanyHandler(BaseHandler):
         if result and s:
             company_names = list(filter(partial(pinyin_match, search=s), map(lambda x: x.get("name"), companies)))
             companies = list(filter(lambda x: x.get("name") in company_names, companies))
-            self.write(json_encode(companies))
+            self.send_json_success(companies)
         else:
-            self.write(json_encode([]))
+            self.send_json_success([])
 
 
 class SuggestCollegeHandler(BaseHandler):
@@ -30,6 +30,6 @@ class SuggestCollegeHandler(BaseHandler):
         if s:
             college_names = list(filter(partial(pinyin_match, search=s), map(lambda x: x.get("name"), colleges)))
             colleges = list(filter(lambda x: x.get("name") in college_names, colleges))
-            self.write(json_encode(colleges))
+            self.send_json_success(colleges)
         else:
-            self.write(json_encode([]))
+            self.send_json_success([])
