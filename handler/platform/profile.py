@@ -1,7 +1,5 @@
 # coding=utf-8
 
-import pprint
-
 import tornado
 import tornado.gen
 from tornado.escape import json_decode
@@ -41,22 +39,19 @@ class ProfileNewHandler(BaseHandler):
 
         # 姓名必填
         if not profile.basicInfo or not profile.basicInfo.name:
-            message = "".join([msg.PROFILE_REQUIRED_HINT_HEAD, "姓名",
-                               msg.PROFILE_REQUIRED_HINT_TAIL])
+            message = "".join([msg.PROFILE_REQUIRED_HINT_HEAD, "姓名", msg.PROFILE_REQUIRED_HINT_TAIL])
             self.send_json_error(message=message)
             return
 
         # 手机号必填
         if not profile.contacts or not profile.contacts.get('mobile', None):
-            message = "".join([msg.PROFILE_REQUIRED_HINT_HEAD, "手机号",
-                               msg.PROFILE_REQUIRED_HINT_TAIL])
+            message = "".join([msg.PROFILE_REQUIRED_HINT_HEAD, "手机号", msg.PROFILE_REQUIRED_HINT_TAIL])
             self.send_json_error(message=message)
             return
 
         # 手机号格式验证
-        ok = mobile_validate(profile.contacts.get('mobile', None))
-        if not ok:
-            message = "手机号码格式不正确"  # 手机号码格式不正确
+        if not mobile_validate(profile.contacts.get('mobile', None)):
+            message = "手机号码格式不正确"
             self.send_json_error(message=message)
             return
 
@@ -85,42 +80,41 @@ class ProfileNewHandler(BaseHandler):
             #     self.current_user.sysuser.id)
             self.logger.debug("profile_profile created with id: %s" % profile_id)
         else:
-            self.logger.error("profile_profile creation failed. res:{}".format(
-                    data))
+            self.logger.error("profile_profile creation failed. res:{}".format(data))
+            self.send_json_error()
+            return
 
-        if profile_id:
-            result, data = yield self.profile_ps.create_profile_basic(profile, profile_id)
+        result, data = yield self.profile_ps.create_profile_basic(profile, profile_id)
+        if result:
+            basic_info_ok = True
+            self.logger.debug("profile_basic created, id: %s" % data)
+        else:
+            self.logger.error("profile_basic creation failed. res: %s" % data)
+
+        for edu in profile.education:
+            result, data = yield self.profile_ps.create_profile_education(ObjectDict(edu), profile_id)
             if result:
-                basic_info_ok = True
-                self.logger.debug("profile_basic created, id: %s" % data)
+                self.logger.debug(
+                    "profile_education creation passed. New record num: %s" % data)
             else:
-                self.logger.error("profile_basic creation failed. res: %s" % data)
-            for edu in profile.education:
-                result, data = yield self.profile_ps.create_profile_education(ObjectDict(edu), profile_id)
-                if result:
-                    self.logger.debug(
-                        "profile_education creation passed. New record num: %s" % data)
-                else:
-                    education_ok = False
-                    self.logger.error("profile_education creation failed. res: %s" % data)
-                    break
-            for wxp in profile.workexp:
-                result, data = yield self.profile_ps.create_profile_workexp(ObjectDict(wxp), profile_id)
-                if result:
-                    self.logger.debug("profile_work_exp creation passed. New record num: %s" % data)
-                else:
-                    workexp_ok = False
-                    self.logger.error("profile_work_exp creation failed. res: %s" % data)
-                    break
+                education_ok = False
+                self.logger.error("profile_education creation failed. res: %s" % data)
+                break
+
+        for wxp in profile.workexp:
+            result, data = yield self.profile_ps.create_profile_workexp(ObjectDict(wxp), profile_id)
+            if result:
+                self.logger.debug("profile_work_exp creation passed. New record num: %s" % data)
+            else:
+                workexp_ok = False
+                self.logger.error("profile_work_exp creation failed. res: %s" % data)
+                break
 
         if profile_ok and basic_info_ok and education_ok and workexp_ok:
             # is_apply = '1' if self.get_cookie('dq_pid') else '0'
             # pid = self.get_cookie('dq_pid', None)
-
-            data = ObjectDict(
-                url=make_url(path.PROFILE, self.params, escape=['profile', 'abapply'], m='view',
+            data = ObjectDict(url=make_url(path.PROFILE_VIEW, self.params))
                              #apply=is_apply, pid=pid)
-                                           ))
             self.send_json_success(data)
         else:
             self.send_json_warning(message='profile created partially')
@@ -178,17 +172,12 @@ class ProfileHandler(BaseHandler):
         # if other:
         #     other = sub_dict(other, pure_other_keys())
 
-        self.logger.debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-        self.logger.debug(pprint.pformat(self.current_user.profile))
-        self.logger.debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-
         other = {}
-        #self.params.profile =ObjectDict()
         profile_tpl = yield self.profile_ps.profile_to_tempalte(
             self.current_user.profile, other)
 
-        self.render_page(template_name='profile/main.html',
-                         data=profile_tpl)
+        self.render_page(template_name='profile/main.html', data=profile_tpl)
+
 
 class ProfileSectionHandler(BaseHandler):
     """
@@ -226,7 +215,6 @@ class ProfileSectionHandler(BaseHandler):
     @tornado.gen.coroutine
     def get(self):
         # 根据 route 跳转到不同的子方法
-        self.logger.debug(pprint.pformat(self.current_user.profile))
         yield getattr(self, "get_" + self.params.route)()
 
     @handle_response

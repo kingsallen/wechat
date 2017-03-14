@@ -5,6 +5,7 @@
 import functools
 import hashlib
 import traceback
+import pprint
 from urllib.parse import urlencode
 
 from tornado import gen
@@ -165,11 +166,11 @@ def check_and_apply_profile(func):
         has_profile, profile = yield self.profile_ps.has_profile(user_id)
         if has_profile:
             self.current_user['profile'] = profile
+            self.logger.debug(pprint.pformat(profile))
             yield func(self, *args, **kwargs)
         else:
             self.logger.warning("has no profile, redirect to profile_new")
             self.redirect(make_url(path.PROFILE_NEW, self.params))
-
 
     return wrapper
 
