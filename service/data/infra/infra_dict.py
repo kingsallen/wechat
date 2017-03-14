@@ -273,12 +273,25 @@ class InfraDictDataService(DataService):
 
     @staticmethod
     def get_function_result_level12(res_data):
-        filtered = [f for f in res_data if f['level'] in [1, 2]]
-        return filtered
+        level1 = [ObjectDict(f) for f in res_data if f['level'] == 1]
+        ret = []
+        for l in level1:
+            list = []
+            level2 = [sub_dict(ObjectDict(f), ['code', 'name']) for f in res_data if f['parent'] == l.code and f['level'] == 2]
+            for l2 in level2:
+                list.append(l2)
+            e = ObjectDict()
+            e.list = list
+            e.text = l.name
+            ret.append(e)
+        return ret
 
     @staticmethod
     def get_function_result_level23(res_data, code):
-        return list(itertools.chain(
-            [f for f in res_data if f['level'] == 2 and f['code'] == code],
-            [f for f in res_data if f['level'] == 3 and f['parent'] == code]
-        ))
+        level2 = [ObjectDict(f) for f in res_data if f['level'] == 2 and f['code'] == code][0]
+
+        level3 = [sub_dict(ObjectDict(f), ['code', 'name']) for f in res_data
+                  if f['parent'] == level2.code and f['level'] == 3]
+
+        return level3
+
