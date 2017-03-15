@@ -15,10 +15,11 @@ class EmployeePageService(PageService):
     def __init__(self):
         super().__init__()
 
-    def show_make_employee_binding_data(self, current_user, conf_response):
+    def make_binding_render_data(self, current_user, conf_response):
+        """构建员工绑定页面的渲染数据"""
         data = ObjectDict()
         data.name = current_user.sysuser.name
-        data.headimg = current_user.wxuser.headimg
+        data.headimg = current_user.sysuser.headimg
         data.mobile = current_user.sysuser.mobile
         data.binding_status = YES if current_user.employee else NO
         data.employeeid = current_user.employee.id if data.binding_status else NO
@@ -27,7 +28,6 @@ class EmployeePageService(PageService):
 
         data.conf = ObjectDict()
         data.binding_success_message = conf.bindSuccessMessage or ''
-
         if conf.authMode == const.EMPLOYEE_BIND_AUTH_MODE.DISABLE:
             data.type = 'disabled'
             return data

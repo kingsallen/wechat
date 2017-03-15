@@ -3,6 +3,7 @@
 
 from thrift.Thrift import TException
 from tornado import gen
+import pprint
 from tornado.escape import json_decode, json_encode
 
 import conf.common as const
@@ -129,16 +130,14 @@ class EmployeeBindHandler(BaseHandler):
         conf_response = yield self.employee_ps.get_employee_conf(
             self.current_user.company.id)
 
-        
-
         if not conf_response.exists:
             self.send_json_error("no employee conf")
         else:
             pass
 
-        data = self.employee_ps.make_employee_binding_data(
+        data = self.employee_ps.make_binding_render_data(
             self.current_user, conf_response)
-
+        self.logger.debug(pprint.pformat(data))
         self.send_json_success(data=data)
 
     @handle_response
