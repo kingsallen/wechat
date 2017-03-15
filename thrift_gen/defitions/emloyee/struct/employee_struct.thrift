@@ -34,7 +34,7 @@ struct EmployeeVerificationConf {
 }
 
 struct EmployeeVerificationConfResponse {
-    1: required bool exits,
+    1: required bool exists,
     2: optional EmployeeVerificationConf employeeVerificationConf
 }
 

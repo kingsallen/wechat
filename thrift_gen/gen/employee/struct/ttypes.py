@@ -471,18 +471,18 @@ class EmployeeVerificationConf(object):
 class EmployeeVerificationConfResponse(object):
     """
     Attributes:
-     - exits
+     - exists
      - employeeVerificationConf
     """
 
     thrift_spec = (
         None,  # 0
-        (1, TType.BOOL, 'exits', None, None, ),  # 1
+        (1, TType.BOOL, 'exists', None, None, ),  # 1
         (2, TType.STRUCT, 'employeeVerificationConf', (EmployeeVerificationConf, EmployeeVerificationConf.thrift_spec), None, ),  # 2
     )
 
-    def __init__(self, exits=None, employeeVerificationConf=None,):
-        self.exits = exits
+    def __init__(self, exists=None, employeeVerificationConf=None,):
+        self.exists = exists
         self.employeeVerificationConf = employeeVerificationConf
 
     def read(self, iprot):
@@ -496,7 +496,7 @@ class EmployeeVerificationConfResponse(object):
                 break
             if fid == 1:
                 if ftype == TType.BOOL:
-                    self.exits = iprot.readBool()
+                    self.exists = iprot.readBool()
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
@@ -515,9 +515,9 @@ class EmployeeVerificationConfResponse(object):
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
         oprot.writeStructBegin('EmployeeVerificationConfResponse')
-        if self.exits is not None:
-            oprot.writeFieldBegin('exits', TType.BOOL, 1)
-            oprot.writeBool(self.exits)
+        if self.exists is not None:
+            oprot.writeFieldBegin('exists', TType.BOOL, 1)
+            oprot.writeBool(self.exists)
             oprot.writeFieldEnd()
         if self.employeeVerificationConf is not None:
             oprot.writeFieldBegin('employeeVerificationConf', TType.STRUCT, 2)
@@ -527,8 +527,8 @@ class EmployeeVerificationConfResponse(object):
         oprot.writeStructEnd()
 
     def validate(self):
-        if self.exits is None:
-            raise TProtocolException(message='Required field exits is unset!')
+        if self.exists is None:
+            raise TProtocolException(message='Required field exists is unset!')
         return
 
     def __repr__(self):

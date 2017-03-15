@@ -129,6 +129,8 @@ class EmployeeBindHandler(BaseHandler):
         conf_response = yield self.employee_ps.get_employee_conf(
             self.current_user.company.id)
 
+        
+
         if not conf_response.exists:
             self.send_json_error("no employee conf")
         else:

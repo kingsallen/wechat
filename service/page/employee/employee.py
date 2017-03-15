@@ -7,7 +7,7 @@ import conf.common as const
 from util.common import ObjectDict
 from util.tool.url_tool import make_static_url
 from conf.common import YES,NO
-from tornado.escape import json_decode,json_encode
+from tornado.escape import json_decode, json_encode
 
 
 class EmployeePageService(PageService):
@@ -15,9 +15,7 @@ class EmployeePageService(PageService):
     def __init__(self):
         super().__init__()
 
-
     def show_make_employee_binding_data(self, current_user, conf_response):
-
         data = ObjectDict()
         data.name = current_user.sysuser.name
         data.headimg = current_user.wxuser.headimg
