@@ -67,8 +67,8 @@ class LandingPageService(PageService):
                 department['name'] = self.plat_constant.LANDING.get(index).get("chpe")
                 # department['values'] = [{"value": dep.get("id"), "text": dep.get("name", "")}for dep in enabled_departments]
                 department['values'] = [dep.get("name", "") for dep in enabled_departments]
-                department['key'] = "department"
-                department['selected'] = selected.get("department")
+                department['key'] = "team_name"
+                department['selected'] = selected.get("team_name")
                 res.append(department)
 
             # 招聘类型
