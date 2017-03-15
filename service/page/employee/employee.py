@@ -2,18 +2,18 @@
 
 from tornado import gen
 
-from service.page.base import PageService
 import conf.common as const
+from conf.common import YES,NO
+from service.page.base import PageService
 from util.common import ObjectDict
 from util.tool.url_tool import make_static_url
-from conf.common import YES,NO
-from tornado.escape import json_decode, json_encode
 
 
 class EmployeePageService(PageService):
 
     def __init__(self):
         super().__init__()
+
 
     def make_binding_render_data(self, current_user, conf_response):
         """构建员工绑定页面的渲染数据"""
@@ -48,7 +48,7 @@ class EmployeePageService(PageService):
 
             if conf.authMode == const.EMPLOYEE_BIND_AUTH_MODE.EMAIL_OR_QUESTION:
                 data.conf.switch = 'question'
-                data.conf.questions = json_decode(conf)
+                data.conf.questions = conf.questions
 
         elif conf.authMode == const.EMPLOYEE_BIND_AUTH_MODE.CUSTOM:
             data.type = 'custom'
@@ -57,7 +57,7 @@ class EmployeePageService(PageService):
 
         elif conf.authMode == const.EMPLOYEE_BIND_AUTH_MODE.QUESTION:
             data.type = 'question'
-            data.conf.questions = json_decode(conf.questions)
+            data.conf.questions = conf.questions
         else:
             raise ValueError('invalid authMode')
 

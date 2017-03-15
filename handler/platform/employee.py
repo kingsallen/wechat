@@ -1,21 +1,18 @@
 # coding=utf-8
 
+import pprint
 
 from thrift.Thrift import TException
 from tornado import gen
-import pprint
-from tornado.escape import json_decode, json_encode
 
-import conf.common as const
+from conf.common import YES, NO, OLD_YES
 from handler.base import BaseHandler
 from thrift_gen.gen.employee.struct.ttypes import BindingParams
-from util.common.decorator import handle_response, authenticated
 from util.common import ObjectDict
-from conf.common import YES, NO, OLD_YES
+from util.common.decorator import handle_response, authenticated
 
 
 class AwardsHandler(BaseHandler):
-
     @handle_response
     @authenticated
     @gen.coroutine
