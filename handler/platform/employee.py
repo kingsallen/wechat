@@ -173,6 +173,12 @@ class EmployeeBindHandler(BaseHandler):
                 return
         self.send_json_error()
 
+class EmployeeBindEmailHandler(BaseHandler):
+
+    @gen.coroutine
+    def get(self):
+        pass
+
 
 class RecommendrecordsHandler(BaseHandler):
     """员工-推荐记录"""

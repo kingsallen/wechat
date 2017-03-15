@@ -70,9 +70,8 @@ platform_routes = [
     (r"/m/company",                                    "handler.platform.companyrelation.CompanyHandler",           {"event": "company_info"}),
     (r"/m/company/team/(\d+)",                         "handler.platform.team.TeamDetailHandler",                   {"event": "team_detail"}),
     (r"/m/company/team",                               "handler.platform.team.TeamIndexHandler",                    {"event": "team_info"}),
-    # (r"/m/employee/bindemail",                       "handler.platform.employee.EmployeeBindEmailHandler",        {"event": "employee_bindemail"}),
     (r"/m/profile[\/]?",                               "handler.platform.profile.ProfileHandler",                   {"event": "profile"}),
-
+    (r"/m/employee/bindemail[\/]?",                    "handler.platform.employee.EmployeeBindEmailHandler",        {"event": "employee_bindemail"}),
     # 各大公司的自定义配置
     (r"/m/custom/emailapply",                          "handler.platform.customize.CustomizeEmailApplyHandler",     {"event": "customize_emailapply"}),
     (r"/m/api/company/visitreq",                       "handler.platform.companyrelation.CompanyVisitReqHandler",   {"event": "company_visitreq"}),
