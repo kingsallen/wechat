@@ -32,4 +32,3 @@ def encode_json_dumps(p_dict):
     if not isinstance(p_dict, dict):
         raise ValueError("p_dict is not a dict instance.")
     return json.dumps(ujson.dumps(p_dict), cls=JSONEncoder)
-

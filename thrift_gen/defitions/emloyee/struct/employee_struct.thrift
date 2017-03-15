@@ -29,7 +29,8 @@ struct EmployeeVerificationConf {
     4: optional string authCode,
     5: optional string custom,
     6: optional list<Question> questions,
-    7: optional string customHint
+    7: optional string customHint,
+    8: optional string bindSuccessMessage
 }
 
 struct EmployeeVerificationConfResponse {

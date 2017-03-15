@@ -304,6 +304,7 @@ class EmployeeVerificationConf(object):
      - custom
      - questions
      - customHint
+     - bindSuccessMessage
     """
 
     thrift_spec = (
@@ -315,9 +316,10 @@ class EmployeeVerificationConf(object):
         (5, TType.STRING, 'custom', 'UTF8', None, ),  # 5
         (6, TType.LIST, 'questions', (TType.MAP, (TType.STRING, 'UTF8', TType.STRING, 'UTF8', False), False), None, ),  # 6
         (7, TType.STRING, 'customHint', 'UTF8', None, ),  # 7
+        (8, TType.STRING, 'bindSuccessMessage', 'UTF8', None, ),  # 8
     )
 
-    def __init__(self, companyId=None, emailSuffix=None, authMode=None, authCode=None, custom=None, questions=None, customHint=None,):
+    def __init__(self, companyId=None, emailSuffix=None, authMode=None, authCode=None, custom=None, questions=None, customHint=None, bindSuccessMessage=None,):
         self.companyId = companyId
         self.emailSuffix = emailSuffix
         self.authMode = authMode
@@ -325,6 +327,7 @@ class EmployeeVerificationConf(object):
         self.custom = custom
         self.questions = questions
         self.customHint = customHint
+        self.bindSuccessMessage = bindSuccessMessage
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -386,6 +389,11 @@ class EmployeeVerificationConf(object):
                     self.customHint = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
+            elif fid == 8:
+                if ftype == TType.STRING:
+                    self.bindSuccessMessage = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -433,6 +441,10 @@ class EmployeeVerificationConf(object):
         if self.customHint is not None:
             oprot.writeFieldBegin('customHint', TType.STRING, 7)
             oprot.writeString(self.customHint.encode('utf-8') if sys.version_info[0] == 2 else self.customHint)
+            oprot.writeFieldEnd()
+        if self.bindSuccessMessage is not None:
+            oprot.writeFieldBegin('bindSuccessMessage', TType.STRING, 8)
+            oprot.writeString(self.bindSuccessMessage.encode('utf-8') if sys.version_info[0] == 2 else self.bindSuccessMessage)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()

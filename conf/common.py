@@ -366,3 +366,13 @@ CONSTANT_PARENT_CODE = ObjectDict(
     PROFILE_SOURCE=3119,  # Profile创建来源
     REGISTER_SOURCE=4101,  # 用户注册来源(source)
 )
+
+# hr_employee_cert_conf.auth_mode 的数据库枚举值
+EMPLOYEE_BIND_AUTH_MODE = ObjectDict(
+    DISABLE=0,
+    EMAIL=1,
+    CUSTOM=2,
+    EMAIL_OR_CUSTOM=4,
+    QUESTION=5,
+    EMAIL_OR_QUESTION=6
+)

@@ -78,7 +78,7 @@ platform_routes = [
     (r"/m/api/company/visitreq",                       "handler.platform.companyrelation.CompanyVisitReqHandler",   {"event": "company_visitreq"}),
     (r"/m/api/company/survey",                         "handler.platform.companyrelation.CompanySurveyHandler",     {"event": "company_survey"}),
     (r"/m/api/company/follow",                         "handler.platform.companyrelation.CompanyFollowHandler",     {"event": "company_follow"}),
-    (r"/m/api/employee/bind",                          "handler.platform.employee.EmployeeBindHandler",             {"event": "employee_bind"}),
+    (r"/m/api/employee/binding",                       "handler.platform.employee.EmployeeBindHandler",             {"event": "employee_bind"}),
     (r"/m/api/employee/unbind",                        "handler.platform.employee.EmployeeUnbindHandler",           {"event": "employee_unbind"}),
     (r"/m/api/employee/recommendrecords",              "handler.platform.employee.RecommendrecordsHandler",         {"event": "employee_recommendrecords"}),
     (r"/m/api/employee/rewards",                       "handler.platform.employee.AwardsHandler",                   {"event": "employee_awards"}),

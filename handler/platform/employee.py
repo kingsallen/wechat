@@ -3,6 +3,7 @@
 
 from thrift.Thrift import TException
 from tornado import gen
+from tornado.escape import json_decode, json_encode
 
 import conf.common as const
 from handler.base import BaseHandler
@@ -93,14 +94,15 @@ class EmployeeUnbindHandler(BaseHandler):
 
 class EmployeeBindHandler(BaseHandler):
     """员工绑定 API
-    /m/api/employee/bind"""
+    /m/api/employee/binding"""
 
     @handle_response
     @authenticated
     @gen.coroutine
     def get(self):
-
-        data = {
+        """
+        返回 json.data
+        {
             'type':            'email',
             'binding_message': 'binding message ...',
             'binding_status':  1,
@@ -113,23 +115,27 @@ class EmployeeBindHandler(BaseHandler):
                 'custom_name':   'custom',
                 'custom_hint':   'custom hint',
                 'custom_value':  'user input value for custom',
-                ''
-                'email_suffixs': [
-                    'qq.com',
-                    'foxmail.com',
-                ],
+                'email_suffixs': ['qq.com', 'foxmail.com'],
                 'email_name':    'tovvry',
                 'email_suffix':  'qq.com',
-
-                # // 最多两个问题
-                'questions':     [
-                    {'q': "你的姓名是什么", 'a': 'b', id: 1},
-                    {'q': "你的弟弟的姓名是什么", 'a': 'a', id: 2},
-                ],
+                'questions':     [ {'q': "你的姓名是什么", 'a': 'b', 'id': 1},
+                                   {'q': "你的弟弟的姓名是什么", 'a': 'a', 'id': 2} ],
                 # // null, question, or email
                 'switch':        'email',
             }
-        }
+        """
+
+        # 先获取员工认证配置信息
+        conf_response = yield self.employee_ps.get_employee_conf(
+            self.current_user.company.id)
+
+        if not conf_response.exists:
+            self.send_json_error("no employee conf")
+        else:
+            pass
+
+        data = self.employee_ps.make_employee_binding_data(
+            self.current_user, conf_response)
 
         self.send_json_success(data=data)
 
@@ -138,9 +144,8 @@ class EmployeeBindHandler(BaseHandler):
     @gen.coroutine
     def post(self):
         guarantee_list = [
-            'name', 'mobile', 'custom_field', 'email', 'answer1', 'answer2',
-            'type'
-        ]
+            'name', 'mobile', 'custom_field', 'email', 'answer1', 'answer2', 'type']
+
         self.guarantee(guarantee_list)
 
         # TODO (yiliang) 是否要强制验证 name 和 mobile 不为空？
