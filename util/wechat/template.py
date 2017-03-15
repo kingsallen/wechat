@@ -7,7 +7,7 @@ import ujson
 import tornado.gen as gen
 import conf.common as const
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from util.wechat.core import messager
 from util.common import ObjectDict
 
@@ -238,6 +238,36 @@ def favposition_notice_to_applier_tpl(company_id, title, company_name, city, use
         keyword1=title,
         keyword2=company_name,
         keyword3=city)
+
+    ret = yield messager.send_template_infra(delay, validators, sys_template_id, user_id,
+                            type, company_id, url, data, enable_qx_retry=1)
+
+    raise gen.Return(ret)
+
+@gen.coroutine
+def position_share_notice_employee_tpl(company_id, title, salary, user_id, pid,
+                           url, sys_template_id=const.TEMPLATES.POSITION_VIEWED):
+
+    """认证员工转发职位后，向员工发送转发结果消息模板"""
+
+    # 延迟10分钟发送
+    delay = 600
+    # 延迟消息队列消费者
+    validators = 'mtp.scripts.consumer.validators.send_viewed_template_to_employee'
+    type = 0
+
+    # 十分钟后的时间
+    d = datetime.now() + timedelta(minutes=10)
+    data = ObjectDict(
+        first="您好，您转发的职位还没有人浏览",
+        remark="多转发几个朋友或许就有浏览量了哟",
+        keyword1="没有人浏览该职位",
+        keyword2=title,
+        keyword3=salary,
+        keyword4="{}年{}月{}日{:0>2}:{:0>2} ".format(d.year, d.month, d.day,
+                                                     d.hour, d.minute),
+        keyword5=pid # 作为附加字段，业务逻辑需要，微信消息模板不需要
+    )
 
     ret = yield messager.send_template_infra(delay, validators, sys_template_id, user_id,
                             type, company_id, url, data, enable_qx_retry=1)

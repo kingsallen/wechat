@@ -35,3 +35,10 @@ class UserHrAccountDataService(DataService):
 
         raise gen.Return(response)
 
+    @gen.coroutine
+    def insert_hr_account(self, fields, options=None):
+        options = options or []
+
+        response = yield self.user_hr_account_dao.insert_record(fields, options)
+        raise gen.Return(response)
+

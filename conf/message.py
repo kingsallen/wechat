@@ -62,3 +62,5 @@ PROFILE_REQUIRED_HINT_TAIL = "为必填项"
 # 招聘助手
 HELPER_HR_REGISTERED = "您的账户已存在，请联系管理员"
 HELPER_COMPANY_REGISTERED = "该公司名称已注册"
+HELPER_HR_REGISTERED = "注册失败"
+HELPER_HR_HAD_REGISTERED = "手机号已经注册，请勿重复注册"

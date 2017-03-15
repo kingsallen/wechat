@@ -49,12 +49,14 @@ class Iface(object):
         """
         pass
 
-    def sendSMS(self, smsType, mobile, data):
+    def sendSMS(self, smsType, mobile, data, sys, ip):
         """
         Parameters:
          - smsType
          - mobile
          - data
+         - sys
+         - ip
         """
         pass
 
@@ -228,25 +230,29 @@ class Client(Iface):
             return result.success
         raise TApplicationException(TApplicationException.MISSING_RESULT, "sendMandrilEmail failed: unknown result")
 
-    def sendSMS(self, smsType, mobile, data):
+    def sendSMS(self, smsType, mobile, data, sys, ip):
         """
         Parameters:
          - smsType
          - mobile
          - data
+         - sys
+         - ip
         """
         self._seqid += 1
         future = self._reqs[self._seqid] = concurrent.Future()
-        self.send_sendSMS(smsType, mobile, data)
+        self.send_sendSMS(smsType, mobile, data, sys, ip)
         return future
 
-    def send_sendSMS(self, smsType, mobile, data):
+    def send_sendSMS(self, smsType, mobile, data, sys, ip):
         oprot = self._oprot_factory.getProtocol(self._transport)
         oprot.writeMessageBegin('sendSMS', TMessageType.CALL, self._seqid)
         args = sendSMS_args()
         args.smsType = smsType
         args.mobile = mobile
         args.data = data
+        args.sys = sys
+        args.ip = ip
         args.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -343,7 +349,7 @@ class Processor(Iface, TProcessor):
         args.read(iprot)
         iprot.readMessageEnd()
         result = sendSMS_result()
-        result.success = yield gen.maybe_future(self._handler.sendSMS(args.smsType, args.mobile, args.data))
+        result.success = yield gen.maybe_future(self._handler.sendSMS(args.smsType, args.mobile, args.data, args.sys, args.ip))
         oprot.writeMessageBegin("sendSMS", TMessageType.REPLY, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
@@ -887,6 +893,8 @@ class sendSMS_args(object):
      - smsType
      - mobile
      - data
+     - sys
+     - ip
     """
 
     thrift_spec = (
@@ -894,12 +902,16 @@ class sendSMS_args(object):
         (1, TType.I32, 'smsType', None, None, ),  # 1
         (2, TType.STRING, 'mobile', 'UTF8', None, ),  # 2
         (3, TType.MAP, 'data', (TType.STRING, 'UTF8', TType.STRING, 'UTF8', False), None, ),  # 3
+        (4, TType.STRING, 'sys', 'UTF8', None, ),  # 4
+        (5, TType.STRING, 'ip', 'UTF8', None, ),  # 5
     )
 
-    def __init__(self, smsType=None, mobile=None, data=None,):
+    def __init__(self, smsType=None, mobile=None, data=None, sys=None, ip=None,):
         self.smsType = smsType
         self.mobile = mobile
         self.data = data
+        self.sys = sys
+        self.ip = ip
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -931,6 +943,16 @@ class sendSMS_args(object):
                     iprot.readMapEnd()
                 else:
                     iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.STRING:
+                    self.sys = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 5:
+                if ftype == TType.STRING:
+                    self.ip = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -956,6 +978,14 @@ class sendSMS_args(object):
                 oprot.writeString(kiter16.encode('utf-8') if sys.version_info[0] == 2 else kiter16)
                 oprot.writeString(viter17.encode('utf-8') if sys.version_info[0] == 2 else viter17)
             oprot.writeMapEnd()
+            oprot.writeFieldEnd()
+        if self.sys is not None:
+            oprot.writeFieldBegin('sys', TType.STRING, 4)
+            oprot.writeString(self.sys.encode('utf-8') if sys.version_info[0] == 2 else self.sys)
+            oprot.writeFieldEnd()
+        if self.ip is not None:
+            oprot.writeFieldBegin('ip', TType.STRING, 5)
+            oprot.writeString(self.ip.encode('utf-8') if sys.version_info[0] == 2 else self.ip)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()

@@ -13,7 +13,7 @@ from util.common.decorator import handle_response, check_employee
 from util.common.cipher import encode_id
 from util.tool.str_tool import gen_salary, add_item, split
 from util.tool.url_tool import make_url, url_append_query
-from util.wechat.template import position_view_five_notice_tpl
+from util.wechat.template import position_view_five_notice_tpl, position_share_notice_employee_tpl
 from tests.dev_data.user_company_config import COMPANY_CONFIG
 
 
@@ -821,3 +821,31 @@ class PositionListHandler(BaseHandler):
             order_by_priority=True)
 
         return infra_params
+
+
+class PositionEmpNoticeHandler(BaseHandler):
+
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        """
+        职位相关转发后的回调。10分钟后发送模板消息
+        :return:
+        """
+        if not self.current_user.employee or not self.params.pid:
+            self.send_json_error()
+            return
+
+        position = yield self.position_ps.get_position(self.params.pid)
+
+        link = make_url(path.EMPLOYEE_RECOMMENDS, host=self.settings.platform_host, wechat_signature=self.current_user.wechat.signature)
+
+        if self.current_user.wechat.passive_seeker == const.OLD_YES:
+            yield position_share_notice_employee_tpl(self.current_user.company.id,
+                                                     position.title,
+                                                     position.salary,
+                                                     self.current_user.sysuser.id,
+                                                     self.params.pid,
+                                                     link)
+
+        self.send_json_success()

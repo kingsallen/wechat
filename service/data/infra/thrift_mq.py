@@ -19,16 +19,16 @@ class ThriftMqDataService(DataService):
         MqServiceClient, CONF)
 
     @gen.coroutine
-    def send_sms(self, type, mobile, params):
+    def send_sms(self, sms_type, mobile, params, sys, ip):
         """
         发送短信，调用 thrift 接口
-        :param type: int
+        :param sms_type: int
         :param mobile: string
         :param params: dict
         :return:
         """
 
-        ret = yield self.mq_service_cilent.sendSMS(type, str(mobile), params)
+        ret = yield self.mq_service_cilent.sendSMS(sms_type, str(mobile), params, str(sys), str(ip))
         self.logger.debug("[thrift]send_sms: %s" % ret)
         raise gen.Return(ret)
 

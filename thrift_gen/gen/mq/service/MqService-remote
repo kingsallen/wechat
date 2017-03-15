@@ -28,7 +28,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('  Response sendEMail(EmailStruct emailStruct)')
     print('  Response sendAuthEMail( params, i32 eventType, string email, string subject)')
     print('  Response sendMandrilEmail(MandrillEmailStruct mandrillEmailStruct)')
-    print('  Response sendSMS(SmsType smsType, string mobile,  data)')
+    print('  Response sendSMS(SmsType smsType, string mobile,  data, string sys, string ip)')
     print('')
     sys.exit(0)
 
@@ -133,10 +133,10 @@ elif cmd == 'sendMandrilEmail':
     pp.pprint(client.sendMandrilEmail(eval(args[0]),))
 
 elif cmd == 'sendSMS':
-    if len(args) != 3:
-        print('sendSMS requires 3 args')
+    if len(args) != 5:
+        print('sendSMS requires 5 args')
         sys.exit(1)
-    pp.pprint(client.sendSMS(eval(args[0]), args[1], eval(args[2]),))
+    pp.pprint(client.sendSMS(eval(args[0]), args[1], eval(args[2]), args[3], args[4],))
 
 else:
     print('Unrecognized method %s' % cmd)

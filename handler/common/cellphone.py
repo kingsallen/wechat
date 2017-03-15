@@ -33,7 +33,10 @@ class CellphoneBindHandler(BaseHandler):
 
         try:
             # 重置 event，准确描述
+            print (122)
+            print (method)
             self._event = self._event + method
+            print (self._event)
             yield getattr(self, 'get_' + method)()
         except Exception as e:
             self.send_json_error()
@@ -43,8 +46,11 @@ class CellphoneBindHandler(BaseHandler):
     def post(self, method='register'):
 
         try:
+            print (333)
+            print (method)
             # 重置 event，准确描述
             self._event = self._event + method
+            print (self._event)
             yield getattr(self, 'post_' + method)()
         except Exception as e:
             self.send_json_error()
@@ -59,6 +65,12 @@ class CellphoneBindHandler(BaseHandler):
     @gen.coroutine
     def get_forgetpasswd(self):
         yield self._opt_get_cellphone_code(const.MOBILE_CODE_OPT_TYPE.forget_password)
+
+    @handle_response
+    @gen.coroutine
+    def get_certificate(self):
+        """只是验证手机号有效性，不判断手机号是否已经注册等其他逻辑"""
+        yield self._opt_get_cellphone_code(const.MOBILE_CODE_OPT_TYPE.code_register)
 
     @handle_response
     @gen.coroutine
@@ -110,6 +122,12 @@ class CellphoneBindHandler(BaseHandler):
     @gen.coroutine
     def post_setpassed(self):
         yield self._opt_post_cellphone_code(const.MOBILE_CODE_OPT_TYPE.valid_old_mobile)
+
+    @handle_response
+    @gen.coroutine
+    def post_certificate(self):
+        """只是验证手机号有效性，不判断手机号是否已经注册等其他逻辑"""
+        yield self._opt_post_cellphone_code(const.MOBILE_CODE_OPT_TYPE.code_register)
 
     @handle_response
     @gen.coroutine
@@ -184,11 +202,9 @@ class CellphoneBindHandler(BaseHandler):
                 params = ObjectDict({
                     "mobile": self.params.mobile,
                     "code": code,
-                    "ip": self.request.remote_ip,
-                    "sys": 2 if self.is_qx else 1
                 })
                 yield self.cellphone_ps.send_sms(SmsType.UPDATE_SYSUSER_SMS, self.params.mobile,
-                                                                  params)
+                                                                  params, isqx=self.is_qx, ip=self.request.headers.get('Remoteip'))
 
             yield self.user_ps.bind_mobile_password(self.current_user.sysuser.id,
                                                     self.params.mobile, password)

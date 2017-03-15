@@ -17,7 +17,7 @@ help_routes: 继承自common_routes, 供help单独使用，一般 handler 在 he
 一个 handler 对应一个 route，handler 中遵守 restful 风格
 例如 (
     r"/m/wechat",     路由
-    "handler.common.wechat.WechatHandler",    handler
+    "handler.common.wechat.WechatHandl `        qertyuiop[er",    handler
     {"event": "wechat_wechat"}   event事件，必须，log 需要。可由页面_功能组成，例如 company_info
 )
 
@@ -37,7 +37,6 @@ common_routes = [
     (r"/m/register[\/]*([a-z]+)*",                     "handler.common.passport.RegisterHandler",                   {"event": "register_"}),
     (r"/m/application[\/]*([a-z]+)*",                  "handler.common.application.ApplicationHandler",             {"event": "application_"}),
     (r"/m/positionfav/([0-9]+)",                       "handler.common.position.PositionFavHandler",                {"event": "position_fav"}),
-    (r"/m/api/chat[\/]*([a-z]+)*",                     "handler.common.im.ChatHandler",                             {"event": "chat_"}),
     # websocket
     (r"/m/websocket/([A-Za-z0-9_]{1,32})",             "handler.common.im.ChatWebSocketHandler"),
 
@@ -45,7 +44,7 @@ common_routes = [
     (r"/m/api/position/star",                          "handler.common.position.PositionStarHandler",               {"event": "position_star"}),
     (r"/m/api/chat/unread[\/]*([0-9]+)*",              "handler.common.im.UnreadCountHandler",                      {"event": "chat"}),
     (r"/m/api/mobilebinded",                           "handler.common.usercenter.UserMobileBindedHandler",         {"event": "user_usermobilebinded"}),
-    (r"/m/api/cellphone[\/]*([a-z]+)*",                "handler.common.cellphone.CellphoneBindHandler",             {"event": "cellphone_*"}),
+    (r"/m/api/cellphone[\/]*([a-z]+)*",                "handler.common.cellphone.CellphoneBindHandler",             {"event": "cellphone_"}),
     (r"/m/api/user/currentinfo",                       "handler.common.interest.UserCurrentInfoHandler",            {"event": "user_currentinfo"}),
     (r"/m/api/upload/([a-z]*)",                        "handler.common.usercenter.UploadHandler",                   {"event": "image"}),
     (r"/m/api/usercenter/favpositions",                "handler.common.usercenter.FavpositionHandler",              {"event": "usercenter_favpositions"}),
@@ -54,6 +53,7 @@ common_routes = [
     (r"/m/api/resume/import",                          "handler.common.resume.ResumeImportHandler",                 {"event": "resume_import"}),
     (r"/m/api/sug/company",                            "handler.common.suggest.SuggestCompanyHandler",              {"event": "sug_company"}),
     (r"/m/api/sug/college",                            "handler.common.suggest.SuggestCollegeHandler",              {"event": "sug_college"}),
+    (r"/m/api/chat[\/]*([a-z]+)*",                     "handler.common.im.ChatHandler",                             {"event": "chat_"}),
 
     # 兼容老微信 url，进行302跳转，event 设置为 NULL
     # (r"/.*",                                           "handler.common.compatible.CompatibleHandler",               {"event": "NULL"})
@@ -74,6 +74,7 @@ platform_routes = [
     (r"/m/employee/bindemail[\/]?",                    "handler.platform.employee.EmployeeBindEmailHandler",        {"event": "employee_bindemail"}),
     # 各大公司的自定义配置
     (r"/m/custom/emailapply",                          "handler.platform.customize.CustomizeEmailApplyHandler",     {"event": "customize_emailapply"}),
+
     (r"/m/api/company/visitreq",                       "handler.platform.companyrelation.CompanyVisitReqHandler",   {"event": "company_visitreq"}),
     (r"/m/api/company/survey",                         "handler.platform.companyrelation.CompanySurveyHandler",     {"event": "company_survey"}),
     (r"/m/api/company/follow",                         "handler.platform.companyrelation.CompanyFollowHandler",     {"event": "company_follow"}),
@@ -86,21 +87,27 @@ platform_routes = [
     (r"/m/api/dict/function",                          "handler.platform.dictionary.DictFunctionHandler",           {"event": "dict_function"}),
     (r"/m/api/profile/edit[\/]?",                      "handler.platform.profile.ProfileSectionHandler",            {"event": "profile_section"}),
     (r"/m/api/profile/new[\/]?",                       "handler.platform.profile.ProfileNewHandler",                {"event": "profile_new"}),
+    (r"/m/api/position/empnotice",                     "handler.platform.position.PositionEmpNoticeHandler",        {"event": "position_empnotice"}),
+
+    # 招聘助手的 route，临时放这里，方便调试
+    (r"/h/position", "handler.help.releasedposition.ReleasedPositionHandler", {"event": "helper_positions"}),
+    (r"/h/register/qrcode", "handler.help.passport.RegisterQrcodeHandler", {"event": "helper_qrcode"}),
+
+    (r"/m/api/register", "handler.help.passport.RegisterHandler", {"event": "helper_register"}),
+
 ]
 platform_routes.extend(common_routes)
 
 
 # 聚合号的单独 routes
 qx_routes = [
-    (r"/m/wxoauth2",                                   "handler.qx.wechat_oauth.WxOauthHandler",                    {"event": "wxoauth_wxoauth"})
+    (r"/m/wxoauth2",                                   "handler.qx.wechat_oauth.WxOauthHandler",                    {"event": "wxoauth_wxoauth"}),
 ]
 qx_routes.extend(common_routes)
 
 
 # 招聘助手的单独 routes
 help_routes = [
-    (r"/h/position",                                   "handler.help.releasedposition.ReleasedPositionHandler",     {"event": "helper_positions"}),
-    (r"/h/register[\/]*([a-z]+)*",                     "handler.help.passport.RegisterHandler",                     {"event": "helper_"})
 
 ]
 help_routes.extend(common_routes)

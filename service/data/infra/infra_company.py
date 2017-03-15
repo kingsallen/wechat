@@ -15,6 +15,6 @@ class InfraCompanyDataService(DataService):
         return unboxing(res)
 
     @gen.coroutine
-    def create_company_on_wechat(self, params) -> list:
+    def create_company_on_wechat(self, params):
         res = yield http_post(path.COMPANY, params)
-        return res
+        return unboxing(res)

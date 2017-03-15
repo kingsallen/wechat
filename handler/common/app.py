@@ -10,7 +10,7 @@ class IndexHandler(BaseHandler):
     """页面Index, 单页应用使用"""
 
     # 需要静默授权的 path
-    _NEED_AUTH_PATHS = ['usercenter', 'employee']
+    _NEED_AUTH_PATHS = ['usercenter', 'employee', 'asist']
 
     @handle_response
     @gen.coroutine

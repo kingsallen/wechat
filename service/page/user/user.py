@@ -449,5 +449,5 @@ class UserPageService(PageService):
         :return:
         """
 
-        ret = yield self.infra_user_ds.post_hr_register(params)
+        ret = yield self.user_hr_account_ds.insert_hr_account(params)
         raise gen.Return(ret)
