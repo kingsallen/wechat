@@ -25,16 +25,17 @@ class ChatPageService(PageService):
 
         ret = yield self.thrift_chat_ds.get_chatrooms_list(user_id, page_no, page_size)
         obj_list = list()
-        for e in ret.rooms:
-            room = ObjectDict()
-            room['id'] = e.id
-            room['hr_id'] = e.hrId
-            room['hr_name'] = e.name or "HR"
-            room['hr_headimg'] = make_static_url(e.headImgUrl or e.companyLogo or const.HR_HEADIMG)
-            room['company_name'] = e.companyName
-            room['chat_time'] = str_2_date(e.createTime, self.constant.TIME_FORMAT_MINUTE)
-            room['unread_num'] = e.unReadNum
-            obj_list.append(room)
+        if ret.rooms:
+            for e in ret.rooms:
+                room = ObjectDict()
+                room['id'] = e.id
+                room['hr_id'] = e.hrId
+                room['hr_name'] = e.name or "HR"
+                room['hr_headimg'] = make_static_url(e.headImgUrl or e.companyLogo or const.HR_HEADIMG)
+                room['company_name'] = e.companyName
+                room['chat_time'] = str_2_date(e.createTime, self.constant.TIME_FORMAT_MINUTE)
+                room['unread_num'] = e.unReadNum
+                obj_list.append(room)
 
         self.logger.debug("[get_chatrooms]ret:{}".format(obj_list))
         raise gen.Return(obj_list)
@@ -61,6 +62,7 @@ class ChatPageService(PageService):
         """进入聊天室"""
 
         ret = yield self.thrift_chat_ds.enter_chatroom(user_id, hr_id, position_id, room_id)
+        print (ret)
 
         hr_info = ObjectDict()
         if ret.hr:
@@ -85,7 +87,7 @@ class ChatPageService(PageService):
                 title = ret.position.positionTitle,
                 company_name = ret.position.companyName,
                 city = ret.position.city,
-                salary = gen_salary(ret.position.salary_top, ret.position.salary_bottom),
+                salary = gen_salary(ret.position.salaryTop, ret.position.salaryBottom),
                 update_time = str_2_date(ret.position.updateTime, const.TIME_FORMAT_MINUTE)
             )
         res = ObjectDict(

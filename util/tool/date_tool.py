@@ -60,9 +60,10 @@ def str_2_date(str_time, format):
     """
     res_date_time = str_time
     try:
-        res_date_time = datetime.strptime(str_time, format)
+        res_date_time = datetime.strptime(str(str_time), format)
     except ValueError:
-        pass
+        res_date_time = datetime.strptime(str(str_time), constant.TIME_FORMAT)
+        res_date_time = res_date_time.strftime(format)
     finally:
         return res_date_time
 
@@ -103,3 +104,7 @@ def jd_update_date(update_time):
         pass
     finally:
         return update_date
+
+if __name__ == "__main__":
+
+    print (str_2_date("2017-03-13 16:39:35", "%Y-%m-%d %H:%M"))

@@ -55,6 +55,7 @@ class ThriftChatDataService(DataService):
         :param room_id
         :return:
         """
+        print (33333333333333)
 
         ret = yield self.chat_service_cilent.enterRoom(int(user_id), int(hr_id), int(position_id), int(room_id))
         self.logger.debug("[thrift]enter_chatroom: %s" % ret)
