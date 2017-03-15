@@ -5,6 +5,7 @@ import tornado.gen as gen
 from service.data.base import DataService
 from util.common import ObjectDict
 from util.common.decorator import cache
+from tornado.testing import AsyncTestCase, gen_test
 
 from thrift_gen.gen.employee.service.EmployeeService import Client as EmployeeServiceClient
 from service.data.infra.framework.client.client import ServiceClientFactory
@@ -35,3 +36,14 @@ class ThriftEmployeeDataService(DataService):
     def bind(self, binding_params):
         ret = yield self.employee_service_cilent.bind(binding_params)
         return ret
+
+
+class TestEmployeeServiceCount(AsyncTestCase):
+    def setUp(self):
+        super().setUp()
+        self.employee_service_cilent = ServiceClientFactory.get_service(
+            EmployeeServiceClient, CONF)
+    @gen_test
+    def test1(self):
+        ret = yield self.employee_service_cilent.getEmployeeVerificationConf(1)
+        print(ret)
