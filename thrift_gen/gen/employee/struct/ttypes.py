@@ -613,6 +613,7 @@ class EmployeeCustomFieldsConf(object):
      - fieldName
      - fieldValues
      - mandatory
+     - order
     """
 
     thrift_spec = (
@@ -622,14 +623,16 @@ class EmployeeCustomFieldsConf(object):
         (3, TType.STRING, 'fieldName', 'UTF8', None, ),  # 3
         (4, TType.LIST, 'fieldValues', (TType.STRING, 'UTF8', False), None, ),  # 4
         (5, TType.BOOL, 'mandatory', None, None, ),  # 5
+        (6, TType.I32, 'order', None, None, ),  # 6
     )
 
-    def __init__(self, id=None, companyId=None, fieldName=None, fieldValues=None, mandatory=None,):
+    def __init__(self, id=None, companyId=None, fieldName=None, fieldValues=None, mandatory=None, order=None,):
         self.id = id
         self.companyId = companyId
         self.fieldName = fieldName
         self.fieldValues = fieldValues
         self.mandatory = mandatory
+        self.order = order
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -670,6 +673,11 @@ class EmployeeCustomFieldsConf(object):
                     self.mandatory = iprot.readBool()
                 else:
                     iprot.skip(ftype)
+            elif fid == 6:
+                if ftype == TType.I32:
+                    self.order = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -703,6 +711,10 @@ class EmployeeCustomFieldsConf(object):
             oprot.writeFieldBegin('mandatory', TType.BOOL, 5)
             oprot.writeBool(self.mandatory)
             oprot.writeFieldEnd()
+        if self.order is not None:
+            oprot.writeFieldBegin('order', TType.I32, 6)
+            oprot.writeI32(self.order)
+            oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
 
@@ -717,6 +729,8 @@ class EmployeeCustomFieldsConf(object):
             raise TProtocolException(message='Required field fieldValues is unset!')
         if self.mandatory is None:
             raise TProtocolException(message='Required field mandatory is unset!')
+        if self.order is None:
+            raise TProtocolException(message='Required field order is unset!')
         return
 
     def __repr__(self):
@@ -1078,20 +1092,20 @@ class RewardsResponse(object):
     Attributes:
      - total
      - rewards
-     - rewardCofnigs
+     - rewardConfigs
     """
 
     thrift_spec = (
         None,  # 0
         (1, TType.I32, 'total', None, None, ),  # 1
         (2, TType.LIST, 'rewards', (TType.STRUCT, (Reward, Reward.thrift_spec), False), None, ),  # 2
-        (3, TType.LIST, 'rewardCofnigs', (TType.STRUCT, (RewardConfig, RewardConfig.thrift_spec), False), None, ),  # 3
+        (3, TType.LIST, 'rewardConfigs', (TType.STRUCT, (RewardConfig, RewardConfig.thrift_spec), False), None, ),  # 3
     )
 
-    def __init__(self, total=None, rewards=None, rewardCofnigs=None,):
+    def __init__(self, total=None, rewards=None, rewardConfigs=None,):
         self.total = total
         self.rewards = rewards
-        self.rewardCofnigs = rewardCofnigs
+        self.rewardConfigs = rewardConfigs
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -1120,12 +1134,12 @@ class RewardsResponse(object):
                     iprot.skip(ftype)
             elif fid == 3:
                 if ftype == TType.LIST:
-                    self.rewardCofnigs = []
+                    self.rewardConfigs = []
                     (_etype39, _size36) = iprot.readListBegin()
                     for _i40 in range(_size36):
                         _elem41 = RewardConfig()
                         _elem41.read(iprot)
-                        self.rewardCofnigs.append(_elem41)
+                        self.rewardConfigs.append(_elem41)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
@@ -1150,10 +1164,10 @@ class RewardsResponse(object):
                 iter42.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
-        if self.rewardCofnigs is not None:
-            oprot.writeFieldBegin('rewardCofnigs', TType.LIST, 3)
-            oprot.writeListBegin(TType.STRUCT, len(self.rewardCofnigs))
-            for iter43 in self.rewardCofnigs:
+        if self.rewardConfigs is not None:
+            oprot.writeFieldBegin('rewardConfigs', TType.LIST, 3)
+            oprot.writeListBegin(TType.STRUCT, len(self.rewardConfigs))
+            for iter43 in self.rewardConfigs:
                 iter43.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()

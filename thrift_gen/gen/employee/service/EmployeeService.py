@@ -56,9 +56,10 @@ class Iface(object):
         """
         pass
 
-    def setEmployeeCustomInfo(self, customValues):
+    def setEmployeeCustomInfo(self, employeeId, customValues):
         """
         Parameters:
+         - employeeId
          - customValues
         """
         pass
@@ -75,6 +76,13 @@ class Iface(object):
         """
         Parameters:
          - recomId
+        """
+        pass
+
+    def emailActivation(self, activationCodee):
+        """
+        Parameters:
+         - activationCodee
         """
         pass
 
@@ -280,20 +288,22 @@ class Client(Iface):
             return result.success
         raise TApplicationException(TApplicationException.MISSING_RESULT, "getEmployeeCustomFieldsConf failed: unknown result")
 
-    def setEmployeeCustomInfo(self, customValues):
+    def setEmployeeCustomInfo(self, employeeId, customValues):
         """
         Parameters:
+         - employeeId
          - customValues
         """
         self._seqid += 1
         future = self._reqs[self._seqid] = concurrent.Future()
-        self.send_setEmployeeCustomInfo(customValues)
+        self.send_setEmployeeCustomInfo(employeeId, customValues)
         return future
 
-    def send_setEmployeeCustomInfo(self, customValues):
+    def send_setEmployeeCustomInfo(self, employeeId, customValues):
         oprot = self._oprot_factory.getProtocol(self._transport)
         oprot.writeMessageBegin('setEmployeeCustomInfo', TMessageType.CALL, self._seqid)
         args = setEmployeeCustomInfo_args()
+        args.employeeId = employeeId
         args.customValues = customValues
         args.write(oprot)
         oprot.writeMessageEnd()
@@ -378,6 +388,38 @@ class Client(Iface):
             return result.success
         raise TApplicationException(TApplicationException.MISSING_RESULT, "getEmployeeRecoms failed: unknown result")
 
+    def emailActivation(self, activationCodee):
+        """
+        Parameters:
+         - activationCodee
+        """
+        self._seqid += 1
+        future = self._reqs[self._seqid] = concurrent.Future()
+        self.send_emailActivation(activationCodee)
+        return future
+
+    def send_emailActivation(self, activationCodee):
+        oprot = self._oprot_factory.getProtocol(self._transport)
+        oprot.writeMessageBegin('emailActivation', TMessageType.CALL, self._seqid)
+        args = emailActivation_args()
+        args.activationCodee = activationCodee
+        args.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def recv_emailActivation(self, iprot, mtype, rseqid):
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = emailActivation_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "emailActivation failed: unknown result")
+
 
 class Processor(Iface, TProcessor):
     def __init__(self, handler):
@@ -391,6 +433,7 @@ class Processor(Iface, TProcessor):
         self._processMap["setEmployeeCustomInfo"] = Processor.process_setEmployeeCustomInfo
         self._processMap["getEmployeeRewards"] = Processor.process_getEmployeeRewards
         self._processMap["getEmployeeRecoms"] = Processor.process_getEmployeeRecoms
+        self._processMap["emailActivation"] = Processor.process_emailActivation
 
     def process(self, iprot, oprot):
         (name, type, seqid) = iprot.readMessageBegin()
@@ -472,7 +515,7 @@ class Processor(Iface, TProcessor):
         args.read(iprot)
         iprot.readMessageEnd()
         result = setEmployeeCustomInfo_result()
-        result.success = yield gen.maybe_future(self._handler.setEmployeeCustomInfo(args.customValues))
+        result.success = yield gen.maybe_future(self._handler.setEmployeeCustomInfo(args.employeeId, args.customValues))
         oprot.writeMessageBegin("setEmployeeCustomInfo", TMessageType.REPLY, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
@@ -498,6 +541,18 @@ class Processor(Iface, TProcessor):
         result = getEmployeeRecoms_result()
         result.success = yield gen.maybe_future(self._handler.getEmployeeRecoms(args.recomId))
         oprot.writeMessageBegin("getEmployeeRecoms", TMessageType.REPLY, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    @gen.coroutine
+    def process_emailActivation(self, seqid, iprot, oprot):
+        args = emailActivation_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = emailActivation_result()
+        result.success = yield gen.maybe_future(self._handler.emailActivation(args.activationCodee))
+        oprot.writeMessageBegin("emailActivation", TMessageType.REPLY, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -1153,15 +1208,18 @@ class getEmployeeCustomFieldsConf_result(object):
 class setEmployeeCustomInfo_args(object):
     """
     Attributes:
+     - employeeId
      - customValues
     """
 
     thrift_spec = (
         None,  # 0
-        (1, TType.STRING, 'customValues', 'UTF8', None, ),  # 1
+        (1, TType.I32, 'employeeId', None, None, ),  # 1
+        (2, TType.STRING, 'customValues', 'UTF8', None, ),  # 2
     )
 
-    def __init__(self, customValues=None,):
+    def __init__(self, employeeId=None, customValues=None,):
+        self.employeeId = employeeId
         self.customValues = customValues
 
     def read(self, iprot):
@@ -1174,6 +1232,11 @@ class setEmployeeCustomInfo_args(object):
             if ftype == TType.STOP:
                 break
             if fid == 1:
+                if ftype == TType.I32:
+                    self.employeeId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
                 if ftype == TType.STRING:
                     self.customValues = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
@@ -1188,8 +1251,12 @@ class setEmployeeCustomInfo_args(object):
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
         oprot.writeStructBegin('setEmployeeCustomInfo_args')
+        if self.employeeId is not None:
+            oprot.writeFieldBegin('employeeId', TType.I32, 1)
+            oprot.writeI32(self.employeeId)
+            oprot.writeFieldEnd()
         if self.customValues is not None:
-            oprot.writeFieldBegin('customValues', TType.STRING, 1)
+            oprot.writeFieldBegin('customValues', TType.STRING, 2)
             oprot.writeString(self.customValues.encode('utf-8') if sys.version_info[0] == 2 else self.customValues)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -1511,6 +1578,126 @@ class getEmployeeRecoms_result(object):
             for iter13 in self.success:
                 iter13.write(oprot)
             oprot.writeListEnd()
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class emailActivation_args(object):
+    """
+    Attributes:
+     - activationCodee
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.STRING, 'activationCodee', 'UTF8', None, ),  # 1
+    )
+
+    def __init__(self, activationCodee=None,):
+        self.activationCodee = activationCodee
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.activationCodee = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('emailActivation_args')
+        if self.activationCodee is not None:
+            oprot.writeFieldBegin('activationCodee', TType.STRING, 1)
+            oprot.writeString(self.activationCodee.encode('utf-8') if sys.version_info[0] == 2 else self.activationCodee)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class emailActivation_result(object):
+    """
+    Attributes:
+     - success
+    """
+
+    thrift_spec = (
+        (0, TType.STRUCT, 'success', (thrift_gen.gen.employee.struct.ttypes.Result, thrift_gen.gen.employee.struct.ttypes.Result.thrift_spec), None, ),  # 0
+    )
+
+    def __init__(self, success=None,):
+        self.success = success
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRUCT:
+                    self.success = thrift_gen.gen.employee.struct.ttypes.Result()
+                    self.success.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('emailActivation_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.STRUCT, 0)
+            self.success.write(oprot)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()

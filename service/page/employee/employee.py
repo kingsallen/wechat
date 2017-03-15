@@ -17,8 +17,7 @@ class EmployeePageService(PageService):
     def get_employee_rewards(self, employee_id, company_id):
 
         ret = yield self.thrift_employee_ds.get_employee_rewards(employee_id, company_id)
-        raise gen.Return(ret)
-
+        return ret
     @gen.coroutine
     def unbind(self, employee_id, company_id, user_id):
 

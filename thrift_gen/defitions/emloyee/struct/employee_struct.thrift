@@ -1,3 +1,4 @@
+namespace java com.moseeker.thrift.gen.employee.struct
 namespace py thrift_gen.gen.employee.struct
 
 struct Employee {
@@ -46,7 +47,8 @@ struct EmployeeCustomFieldsConf {
     2: required i32 companyId,
     3: required string fieldName,
     4: required list<string> fieldValues,
-    5: required bool mandatory
+    5: required bool mandatory,
+    6: required i32 order
 }
 
 enum BindType {
@@ -84,7 +86,7 @@ struct RewardConfig {
 struct RewardsResponse {
     1: optional i32 total,
     2: optional list<Reward> rewards,
-    3: optional list<RewardConfig> rewardCofnigs
+    3: optional list<RewardConfig> rewardConfigs
 }
 
 

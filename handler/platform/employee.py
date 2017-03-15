@@ -28,14 +28,13 @@ class AwardsHandler(BaseHandler):
 
         if binded:
             # 获取绑定员工
-            result = yield self.employee_ps.get_employee_rewards(
-                self.current_user.employee.id, self.current_user.company.id)
-            rewards = result.rewards
-            reward_configs = result.rewardCofnigs
-            total = result.total
-        else:
-            # 使用初始化数据
-            pass
+            rewards_response = yield self.employee_ps.get_employee_rewards(
+                self.current_user.employee.id,
+                self.current_user.company.id)
+            rewards = rewards_response.rewards
+            reward_configs = rewards_response.rewardCofnigs
+            total = rewards_response.total
+        else: pass  # 使用初始化数据
 
         # 构建输出数据格式
         res_award_rules = []
@@ -59,7 +58,7 @@ class AwardsHandler(BaseHandler):
             res_rewards.append(e)
         # 构建输出数据格式完成
 
-        self.send_json_success(data={
+        self.send_json_success({
             'rewards': res_rewards,
             'award_rules': res_award_rules,
             'point_total': total,
@@ -100,6 +99,7 @@ class EmployeeBindHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def get(self):
+
         data = {
             'type':            'email',
             'binding_message': 'binding message ...',
@@ -132,7 +132,6 @@ class EmployeeBindHandler(BaseHandler):
         }
 
         self.send_json_success(data=data)
-
 
     @handle_response
     @authenticated

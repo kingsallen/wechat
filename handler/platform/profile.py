@@ -9,7 +9,7 @@ import conf.message as msg
 import conf.path as path
 from handler.base import BaseHandler
 from util.common import ObjectDict
-from util.common.decorator import handle_response, check_and_apply_profile
+from util.common.decorator import handle_response, check_and_apply_profile, authenticated
 from util.tool.dict_tool import sub_dict, objectdictify
 from util.tool.str_tool import mobile_validate
 from util.tool.url_tool import make_url
@@ -18,6 +18,7 @@ from util.tool.url_tool import make_url
 class ProfileNewHandler(BaseHandler):
 
     @handle_response
+    @authenticated
     @tornado.gen.coroutine
     def get(self):
         """初始化新建 profile 页面"""
@@ -28,6 +29,7 @@ class ProfileNewHandler(BaseHandler):
         self.send_json_success(data=data)
 
     @handle_response
+    @authenticated
     @tornado.gen.coroutine
     def post(self):
         # has_profile, _ = yield self.profile_ps.has_profile(
@@ -123,6 +125,7 @@ class ProfileHandler(BaseHandler):
     """
 
     @handle_response
+    @authenticated
     @check_and_apply_profile
     @tornado.gen.coroutine
     def get(self):
@@ -207,6 +210,7 @@ class ProfileSectionHandler(BaseHandler):
     """
 
     @handle_response
+    @authenticated
     @check_and_apply_profile
     @tornado.gen.coroutine
     def get(self):
@@ -214,6 +218,7 @@ class ProfileSectionHandler(BaseHandler):
         yield getattr(self, "get_" + self.params.route)()
 
     @handle_response
+    @authenticated
     @check_and_apply_profile
     @tornado.gen.coroutine
     def post(self):

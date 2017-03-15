@@ -9,6 +9,7 @@
 from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
 from thrift.protocol.TProtocol import TProtocolException
 import sys
+import thrift_gen.gen.common.struct.ttypes
 import thrift_gen.gen.employee.struct.ttypes
 
 from thrift.transport import TTransport
