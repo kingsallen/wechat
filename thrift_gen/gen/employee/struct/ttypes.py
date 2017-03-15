@@ -13,6 +13,24 @@ import sys
 from thrift.transport import TTransport
 
 
+class BindStatus(object):
+    BINDED = 0
+    UNBIND = 1
+    PENDING = 2
+
+    _VALUES_TO_NAMES = {
+        0: "BINDED",
+        1: "UNBIND",
+        2: "PENDING",
+    }
+
+    _NAMES_TO_VALUES = {
+        "BINDED": 0,
+        "UNBIND": 1,
+        "PENDING": 2,
+    }
+
+
 class BindType(object):
     EMAIL = 0
     CUSTOMFIELD = 1
@@ -222,18 +240,18 @@ class Employee(object):
 class EmployeeResponse(object):
     """
     Attributes:
-     - exists
+     - bindStatus
      - employee
     """
 
     thrift_spec = (
         None,  # 0
-        (1, TType.BOOL, 'exists', None, None, ),  # 1
+        (1, TType.I32, 'bindStatus', None, None, ),  # 1
         (2, TType.STRUCT, 'employee', (Employee, Employee.thrift_spec), None, ),  # 2
     )
 
-    def __init__(self, exists=None, employee=None,):
-        self.exists = exists
+    def __init__(self, bindStatus=None, employee=None,):
+        self.bindStatus = bindStatus
         self.employee = employee
 
     def read(self, iprot):
@@ -246,8 +264,8 @@ class EmployeeResponse(object):
             if ftype == TType.STOP:
                 break
             if fid == 1:
-                if ftype == TType.BOOL:
-                    self.exists = iprot.readBool()
+                if ftype == TType.I32:
+                    self.bindStatus = iprot.readI32()
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
@@ -266,9 +284,9 @@ class EmployeeResponse(object):
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
         oprot.writeStructBegin('EmployeeResponse')
-        if self.exists is not None:
-            oprot.writeFieldBegin('exists', TType.BOOL, 1)
-            oprot.writeBool(self.exists)
+        if self.bindStatus is not None:
+            oprot.writeFieldBegin('bindStatus', TType.I32, 1)
+            oprot.writeI32(self.bindStatus)
             oprot.writeFieldEnd()
         if self.employee is not None:
             oprot.writeFieldBegin('employee', TType.STRUCT, 2)
@@ -278,8 +296,8 @@ class EmployeeResponse(object):
         oprot.writeStructEnd()
 
     def validate(self):
-        if self.exists is None:
-            raise TProtocolException(message='Required field exists is unset!')
+        if self.bindStatus is None:
+            raise TProtocolException(message='Required field bindStatus is unset!')
         return
 
     def __repr__(self):

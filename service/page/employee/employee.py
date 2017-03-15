@@ -3,7 +3,7 @@
 from tornado import gen
 
 import conf.common as const
-from conf.common import YES,NO
+from conf.common import YES,NO, OLD_YES, OLD_NO
 from service.page.base import PageService
 from util.common import ObjectDict
 from util.tool.url_tool import make_static_url
@@ -21,7 +21,17 @@ class EmployeePageService(PageService):
         data.name = current_user.sysuser.name
         data.headimg = current_user.sysuser.headimg
         data.mobile = current_user.sysuser.mobile
-        data.binding_status = YES if current_user.employee else NO
+
+        data.binding_status = OLD_YES if current_user.employee else OLD_NO
+
+        if data.binding_status == OLD_NO:
+            # 检查是否已发邮件
+            pass
+            # SUCCESS: 0,
+            # UNBINDING: 1, // 解绑中
+            # NEED_VALIDATE: 2,
+            # FAILURE: 3, // 失败
+
         data.employeeid = current_user.employee.id if data.binding_status else NO
         data.send_hour = 2  # fixed
         conf = conf_response.employeeVerificationConf

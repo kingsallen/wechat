@@ -14,8 +14,15 @@ struct Employee {
     10: required string customFieldValues
 }
 
+
+enum BindStatus {
+    BINDED,
+    UNBIND,
+    PENDING
+}
+
 struct EmployeeResponse {
-    1: required bool exists,
+    1: required BindStatus bindStatus,
     2: optional Employee employee
 }
 

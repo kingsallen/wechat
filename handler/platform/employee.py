@@ -171,6 +171,7 @@ class EmployeeBindHandler(BaseHandler):
                 return
         self.send_json_error()
 
+
 class EmployeeBindEmailHandler(BaseHandler):
 
     @gen.coroutine
