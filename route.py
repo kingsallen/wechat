@@ -90,6 +90,7 @@ platform_routes = [
     (r"/m/api/profile/new[\/]?",                       "handler.platform.profile.ProfileNewHandler",                {"event": "profile_new"}),
     (r"/m/api/position/empnotice",                     "handler.platform.position.PositionEmpNoticeHandler",        {"event": "position_empnotice"}),
 
+
     # 招聘助手的 route，临时放这里，方便调试
     (r"/h/position", "handler.help.releasedposition.ReleasedPositionHandler", {"event": "helper_positions"}),
     (r"/h/register/qrcode", "handler.help.passport.RegisterQrcodeHandler", {"event": "helper_qrcode"}),
