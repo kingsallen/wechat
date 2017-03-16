@@ -68,7 +68,7 @@ class UserCurrentInfoHandler(BaseHandler):
     def _opt_fav_position(self):
         """处理感兴趣后的业务逻辑"""
 
-        isfav = const.YES if int(self.params.isfav) else const.NO
+        isfav = const.YES if self.params.isfav else const.NO
         if isfav and self.params.pid:
             # 1.添加感兴趣记录
             yield self.user_ps.add_user_fav_position(self.params.pid,
@@ -76,7 +76,7 @@ class UserCurrentInfoHandler(BaseHandler):
                                                          const.FAV_INTEREST,
                                                          self.current_user.sysuser.mobile,
                                                          self.current_user.wxuser.id,
-                                                         self.current_user.recom.id)
+                                                         self.current_user.recom.id if self.params.recom else 0)
             # 2.添加候选人相关记录
             yield self.candidate_ps.send_candidate_interested(self.current_user.sysuser.id, self.params.pid, 1)
 

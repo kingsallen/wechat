@@ -46,13 +46,10 @@ class PositionHandler(BaseHandler):
                 position_id, self.current_user.sysuser.id)
 
             self.logger.debug("[JD]构建职位所属公司信息")
-            real_company_id = yield self.company_ps.get_real_company_id(
+            did = yield self.company_ps.get_real_company_id(
                 position_info.publisher, position_info.company_id)
             company_info = yield self.company_ps.get_company(
-                conds={"id": real_company_id}, need_conf=True)
-
-            did = real_company_id if \
-                real_company_id != self.current_user.company.id else ''
+                conds={"id": did}, need_conf=True)
 
             self.logger.debug("[JD]构建转发信息")
             yield self._make_share_info(position_info, company_info)
@@ -98,6 +95,7 @@ class PositionHandler(BaseHandler):
                     self.current_user.wechat.show_new_jd))
             self.logger.debug("[wechat]:{}".format(self.current_user.wechat))
             if not self.current_user.wechat.show_new_jd:
+                # 老样式
                 module_job_require_old = self._make_json_job_require_old(
                     position_info)
                 module_department_old = self._make_json_job_department(
@@ -129,6 +127,9 @@ class PositionHandler(BaseHandler):
                 add_item(position_data, "suppress_apply", suppress_apply)
                 add_item(position_data, "delegate_drop", delegate_drop)
                 # 定制化 end
+
+                print ("++++++++++++++++\n\n")
+                print(position_data)
 
                 self.render_page(
                     "position/info_old.html",
