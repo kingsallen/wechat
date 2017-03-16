@@ -3,8 +3,6 @@
 import tornado.gen as gen
 
 from service.data.base import DataService
-from util.common import ObjectDict
-from util.common.decorator import cache
 from tornado.testing import AsyncTestCase, gen_test
 
 from thrift_gen.gen.employee.service.EmployeeService import Client as EmployeeServiceClient
@@ -24,12 +22,14 @@ class ThriftEmployeeDataService(DataService):
 
     @gen.coroutine
     def get_employee_rewards(self, employee_id, company_id):
-        ret = yield self.employee_service_cilent.getEmployeeRewards(employee_id, company_id)
+        ret = yield self.employee_service_cilent.getEmployeeRewards(
+            employee_id, company_id)
         return ret
 
     @gen.coroutine
     def unbind(self, employee_id, company_id, user_id):
-        ret = yield self.employee_service_cilent.unbind(employee_id, company_id, user_id)
+        ret = yield self.employee_service_cilent.unbind(
+            employee_id, company_id, user_id)
         return ret
 
     @gen.coroutine
@@ -39,15 +39,15 @@ class ThriftEmployeeDataService(DataService):
 
     @gen.coroutine
     def get_employee(self, user_id, company_id):
-        ret = yield self.employee_service_cilent.get_employee(user_id, company_id)
+        ret = yield self.employee_service_cilent.getEmployee(user_id, company_id)
         return ret
 
 
 class TestEmployeeService(AsyncTestCase):
     def setUp(self):
-        super().setUp()
         self.employee_service_cilent = ServiceClientFactory.get_service(
             EmployeeServiceClient, CONF)
+        super().setUp()
 
     @gen_test
     def test1(self):
