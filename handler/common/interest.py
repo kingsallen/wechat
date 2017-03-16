@@ -23,7 +23,7 @@ class UserCurrentInfoHandler(BaseHandler):
         full 参数用以判断只要返回 bool 就好了还是需要详细的数据
         """
 
-        full = const.YES if int(self.params.full) else const.NO
+        full = const.YES if self.params.full else const.NO
         result = yield self.user_ps.get_user_user({
             "id": self.current_user.sysuser.id
         })
