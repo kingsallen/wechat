@@ -98,18 +98,12 @@ class UserCurrentInfoHandler(BaseHandler):
 
             # 4.向 HR 发送消息模板提示
             if position_info.publisher:
-                hr_info = yield self.user_hr_account_ds.get_hr_account(conds={
-                    "id": position_info.publisher
-                })
-                if hr_info.wxuser_id:
-                    hr_wxuser = yield self.user_wx_user_ds.get_wxuser(conds={
-                        "id": hr_info.wxuser_id,
-                        "wechat_id": self.settings.helper_wechat_id,
-                    })
+                hr_account, hr_wx_user = yield self.position_ps.get_hr_info(position_info.publisher)
 
+                if hr_wx_user:
                     # 4. 向 HR 发送消息模板
                     yield favposition_notice_to_hr_tpl(self.settings.helper_wechat_id,
-                                                       hr_wxuser.openid,
+                                                       hr_wx_user.openid,
                                                        position_info.title,
                                                        self.current_user.sysuser.name or self.current_user.sysuser.nickname,
                                                        self.current_user.sysuser.mobile)
