@@ -22,7 +22,7 @@ class ThriftCandidateDataService(DataService):
     def send_candidate_view_position(self, user_id, position_id, sharechain_id):
         """刷新候选人链路信息，调用基础服务"""
 
-        ret = yield self.candidate_service_cilent.glancePosition(user_id, position_id, sharechain_id)
+        ret = yield self.candidate_service_cilent.glancePosition(int(user_id), int(position_id), int(sharechain_id))
         self.logger.debug("[thrift]send_candidate_view_position: %s" % ret)
         raise gen.Return(ret)
 
@@ -30,6 +30,6 @@ class ThriftCandidateDataService(DataService):
     def send_candidate_interested(self, user_id, position_id, is_interested):
         """刷新候选人感兴趣，调用基础服务"""
 
-        ret = yield self.candidate_service_cilent.glancePosition(user_id, position_id, is_interested)
+        ret = yield self.candidate_service_cilent.changeInteresting(int(user_id), int(position_id), int(is_interested))
         self.logger.debug("[thrift]send_candidate_interested: %s" % ret)
         raise gen.Return(ret)
