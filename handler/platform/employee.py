@@ -109,7 +109,7 @@ class EmployeeBindHandler(BaseHandler):
         # 根据 conf 来构建 api 的返回 data
         data = yield self.employee_ps.make_binding_render_data(
             self.current_user, conf_response.employeeVerificationConf)
-        self.logger.debug(pprint.pformat(data))
+        self.logger.debug(data)
         self.send_json_success(data=data)
 
     @handle_response

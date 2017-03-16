@@ -3,6 +3,7 @@
 # Copyright 2016 MoSeeker
 
 import logging
+import pprint
 import traceback
 import os
 from logging.handlers import TimedRotatingFileHandler
@@ -90,7 +91,7 @@ class Logger(object):
             self.__tornado_gen_log.addHandler(self._handlers[level])
 
     def debug(self, message):
-        self.__logger.debug(message, exc_info=0)
+        self.__logger.debug(pprint.pformat(message), exc_info=0)
 
     def info(self, message):
         self.__logger.info(message, exc_info=0)
