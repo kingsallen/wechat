@@ -120,10 +120,13 @@ class EmployeeBindHandler(BaseHandler):
             result, message = yield self.employee_ps.bind(binding_params)
             if result:
                 self.send_json_success()
+                print(1111111111111111)
             else:
                 self.send_json_error(message=message)
+                print(222222222222222)
         else:
             self.send_json_error(message='binded')
+            print(444444444444444)
 
 
 class EmployeeBindEmailHandler(BaseHandler):
