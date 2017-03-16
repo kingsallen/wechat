@@ -112,21 +112,24 @@ class EmployeeBindHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def post(self):
+        self.logger.debug("%%%%%%%%%%%")
         binding_params = self.employee_ps.make_bind_params(
             self.current_user.sysuser.id, self.current_user.company.id,
             self.json_args)
+        self.logger.debug(binding_params)
 
         if not self.current_user.employee:
             result, message = yield self.employee_ps.bind(binding_params)
+            self.logger.debug(result)
+            self.logger.debug(message)
             if result:
                 self.send_json_success()
-                print(1111111111111111)
             else:
                 self.send_json_error(message=message)
-                print(222222222222222)
         else:
             self.send_json_error(message='binded')
-            print(444444444444444)
+
+        self.logger.debug("%%%%%%%%%%%")
 
 
 class EmployeeBindEmailHandler(BaseHandler):
