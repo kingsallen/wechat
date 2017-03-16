@@ -1,17 +1,14 @@
-# -*- coding: utf-8 -*-
+# coding=utf-8
+
+# @Time    : 3/16/17 10:40
+# @Author  : panda (panyuxin@moseeker.com)
+# @File    : jssdkerror.py
+# @DES     :
 
 from tornado import gen
-from tornado.web import UIModule
 
 from handler.base import BaseHandler
 from util.common.decorator import handle_response
-
-class NavMenuModule(UIModule):
-    """老微信样式的 menu"""
-
-    def render(self):
-        return self.render_string('refer/neo_common/neo_navmenu.html')
-
 
 class JSSDKErrorHandler(BaseHandler):
 
