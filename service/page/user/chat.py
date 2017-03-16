@@ -67,7 +67,7 @@ class ChatPageService(PageService):
         if ret.hr:
             hr_info = ObjectDict(
                 hr_id = ret.hr.hrId,
-                hr_name = ret.hr.hrName,
+                hr_name = ret.hr.hrName or "HR",
                 hr_headimg = make_static_url(ret.hr.hrHeadImg or const.HR_HEADIMG)
             )
 

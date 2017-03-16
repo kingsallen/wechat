@@ -37,7 +37,6 @@ class PositionStarHandler(BaseHandler):
 class PositionFavHandler(BaseHandler):
 
     @handle_response
-    @verified_mobile_oneself
     @authenticated
     @gen.coroutine
     def get(self, position_id):
@@ -48,12 +47,12 @@ class PositionFavHandler(BaseHandler):
                                                  const.FAV_INTEREST,
                                                  self.current_user.sysuser.mobile,
                                                  self.current_user.wxuser.id,
-                                                 self.current_user.recom.id)
+                                                 self.current_user.recom.id if self.current_user.recom else 0)
 
         application_url = make_url(path.APPLICATION+"/app", self.params, escape=['next_url', 'name', 'company', 'position'])
         position_info_url = make_url(path.POSITION_PATH.format(position_id), self.params, escape=['next_url', 'name', 'company', 'position'])
 
-        self.render("weixin/sysuser/interest-success.html",
+        self.render(template_name="refer/weixin/sysuser/interest-success.html",
                     application_url=application_url,
                     position_info_url=position_info_url)
 

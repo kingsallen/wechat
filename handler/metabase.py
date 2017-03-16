@@ -344,6 +344,7 @@ class MetaBaseHandler(AtomHandler):
         """API 成功返回的便捷方法"""
         if data is None:
             data = ""
+
         self._send_json(data=data, status_code=const.API_SUCCESS,
                         message=message, http_code=http_code)
 

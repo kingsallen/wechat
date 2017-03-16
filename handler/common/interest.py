@@ -36,15 +36,16 @@ class UserCurrentInfoHandler(BaseHandler):
                     position=result.position
                 ))
             else:
+                # 处理感兴趣
+                if self.params.isfav:
+                    yield self._opt_fav_position()
+
                 has_info = result.company or result.position
                 self.send_json_success(
                     data=const.YES if has_info else const.NO)
+            return
         else:
             self.send_json_success(data=const.NO)
-
-        # 处理感兴趣
-        yield self._opt_fav_position()
-
 
     @handle_response
     @authenticated
@@ -68,8 +69,7 @@ class UserCurrentInfoHandler(BaseHandler):
     def _opt_fav_position(self):
         """处理感兴趣后的业务逻辑"""
 
-        isfav = const.YES if self.params.isfav else const.NO
-        if isfav and self.params.pid:
+        if self.params.pid:
             # 1.添加感兴趣记录
             yield self.user_ps.add_user_fav_position(self.params.pid,
                                                          self.current_user.sysuser.id,
@@ -78,7 +78,7 @@ class UserCurrentInfoHandler(BaseHandler):
                                                          self.current_user.wxuser.id,
                                                          self.current_user.recom.id if self.params.recom else 0)
             # 2.添加候选人相关记录
-            yield self.candidate_ps.send_candidate_interested(self.current_user.sysuser.id, self.params.pid, 1)
+            # yield self.candidate_ps.send_candidate_interested(self.current_user.sysuser.id, self.params.pid, 1)
 
             # 3.添加定时任务，若2小时候，没有完善则发送消息模板
             position_info = yield self.position_ps.get_position(self.params.pid)
@@ -107,3 +107,6 @@ class UserCurrentInfoHandler(BaseHandler):
                                                        position_info.title,
                                                        self.current_user.sysuser.name or self.current_user.sysuser.nickname,
                                                        self.current_user.sysuser.mobile)
+                    return True
+
+        return False
