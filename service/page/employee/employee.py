@@ -33,7 +33,7 @@ class EmployeePageService(PageService):
         return bind_status
 
     @gen.coroutine
-    def make_binding_render_data(self, current_user, conf_response):
+    def make_binding_render_data(self, current_user, conf):
         """构建员工绑定页面的渲染数据"""
 
         data = ObjectDict()
@@ -58,7 +58,6 @@ class EmployeePageService(PageService):
 
         data.employeeid = current_user.employee.id if data.binding_status else NO
         data.send_hour = 2  # fixed
-        conf = conf_response.employeeVerificationConf
 
         data.conf = ObjectDict()
         data.binding_success_message = conf.bindSuccessMessage or ''

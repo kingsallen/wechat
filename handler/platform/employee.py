@@ -128,7 +128,7 @@ class EmployeeBindHandler(BaseHandler):
             pass
 
         data = yield self.employee_ps.make_binding_render_data(
-            self.current_user, conf_response)
+            self.current_user, conf_response.employeeVerificationConf)
         self.logger.debug(pprint.pformat(data))
         self.send_json_success(data=data)
 
