@@ -238,7 +238,8 @@ class PositionHandler(BaseHandler):
             "cover": cover,
             "title": title,
             "description": description,
-            "link": link
+            "link": link,
+            "pid": position_info.id,
         })
 
     @gen.coroutine
@@ -838,7 +839,7 @@ class PositionEmpNoticeHandler(BaseHandler):
 
         position = yield self.position_ps.get_position(self.params.pid)
 
-        link = make_url(path.EMPLOYEE_RECOMMENDS, host=self.settings.platform_host, wechat_signature=self.current_user.wechat.signature)
+        link = make_url(path.EMPLOYEE_RECOMMENDS, host=self.request.host, wechat_signature=self.current_user.wechat.signature)
 
         if self.current_user.wechat.passive_seeker == const.OLD_YES:
             yield position_share_notice_employee_tpl(self.current_user.company.id,
