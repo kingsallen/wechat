@@ -21,6 +21,12 @@ class EmployeePageService(PageService):
     FE_BIND_TYPE_EMAIL = 'email'
     FE_BIND_TYPE_QUESTION = 'question'
 
+    BIND_AUTH_MODE = ObjectDict({
+        FE_BIND_TYPE_EMAIL:    0,
+        FE_BIND_TYPE_CUSTOM:   1,
+        FE_BIND_TYPE_QUESTION: 2
+    })
+
     def __init__(self):
         super().__init__()
 
@@ -145,18 +151,18 @@ class EmployeePageService(PageService):
         if type == self.FE_BIND_TYPE_EMAIL:
             param_dict.email = '%s@%s' % (param_dict.email_name, param_dict.email_suffix)
         if type == self.FE_BIND_TYPE_QUESTION:
-            param_dict.answer1 = param_dict.answers.get('1')
-            if param_dict.answers.get('2'):
-                param_dict.answer2 = param_dict.answers.get('2')
+            param_dict.answer1 = param_dict.answers[0]
+            if len(param_dict.answers) > 1:
+                param_dict.answer2 = param_dict.answers[1]
             else:
                 param_dict.answer2 = ''
 
         binding_params = BindingParams(
-            type=param_dict.type,
+            type=self.BIND_AUTH_MODE[param_dict.type],
             userId=user_id,
             companyId=company_id,
             email=param_dict.email,
-            mobile=param_dict.mobile,
+            mobile=str(param_dict.mobile),
             customField=param_dict.custom_value,
             name=param_dict.name,
             answer1=param_dict.answer1,
@@ -187,7 +193,7 @@ class EmployeePageService(PageService):
     @gen.coroutine
     def bind(self, binding_params):
         ret = yield self.thrift_employee_ds.bind(binding_params)
-        return ret.sucess, ret.message
+        return ret.success, ret.message
 
     @gen.coroutine
     def get_recommend_records(self, user_id, req_type, page_no, page_size):
