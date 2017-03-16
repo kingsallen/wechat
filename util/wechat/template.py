@@ -11,38 +11,39 @@ from datetime import datetime, timedelta
 from util.wechat.core import messager
 from util.common import ObjectDict
 
-def _make_json_data(first, remark=None, colors=None, **kwargs):
+def _make_json_data(first, remark=None, colors=None, encode=True, **kwargs):
     """
     构造发送消息模板的内容 json
 
     :param colors: 形如{'first': '#173177'}字典
-    :param kwargs: 只接受名为 keyword1 --- keyword5 的参数
-    :return: json data
+    :param kwargs:
+    :param encode: True/False 是否需要对结果进行 dumps
+    :return: json/dict
     """
     default = {"default": "#173177"}
     colors = dict(colors, **default) if isinstance(colors, dict) else default
 
-    json_data = {
+    data_dict = {
         "first": {"value": first or "",
                   "color": colors.get("first", colors["default"])},
     }
     for key, value in kwargs.items():
-        if re.match('^keyword[1-5]$', key):
-            json_data.update({
-                key: {"value": value,
-                      "color": colors.get(key, colors["default"])}
-            })
-        else:
-            raise Exception('_make_json_data wrong keywords {}.'.format(key))
+        data_dict.update({
+            key: {"value": value,
+                  "color": colors.get(key, colors["default"])}
+        })
 
     if remark:
-        json_data.update({
+        data_dict.update({
             "remark": {"value": remark,
                        "color": colors.get("remark", colors["default"])}
         })
 
-    json_data = ujson.dumps(json_data, ensure_ascii=False)
-    return json_data
+    if encode:
+        json_data = ujson.dumps(data_dict, ensure_ascii=False)
+        return json_data
+
+    return data_dict
 
 @gen.coroutine
 def rp_binding_success_notice_tpl(wechat_id, openid, link, company_name,
@@ -232,9 +233,10 @@ def favposition_notice_to_applier_tpl(company_id, title, company_name, city, use
     validators = 'mtp.scripts.consumer.validators.user_basic_info_not_complete'
     type = 0
 
-    data = ObjectDict(
+    data = _make_json_data(
         first="您好, 我们对您的职业经历十分感兴趣, 希望能更了解您",
         remark="点击完善个人职业信息",
+        encode=False,
         keyword1=title,
         keyword2=company_name,
         keyword3=city)
@@ -258,9 +260,10 @@ def position_share_notice_employee_tpl(company_id, title, salary, user_id, pid,
 
     # 十分钟后的时间
     d = datetime.now() + timedelta(minutes=10)
-    data = ObjectDict(
+    data = _make_json_data(
         first="您好，您转发的职位还没有人浏览",
         remark="多转发几个朋友或许就有浏览量了哟",
+        encode=False,
         keyword1="没有人浏览该职位",
         keyword2=title,
         keyword3=salary,
