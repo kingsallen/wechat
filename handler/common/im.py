@@ -199,7 +199,7 @@ class ChatHandler(BaseHandler):
     def get_chatrooms(self):
         """获得 C 端用户的聊天室列表"""
 
-        page_no = self.params.page_no or 0
+        page_no = self.params.page_no or 1
         page_size = self.params.page_size or 10
         res = yield self.chat_ps.get_chatrooms(self.current_user.sysuser.id, page_no, page_size)
         self.send_json_success(data=ObjectDict(
@@ -216,7 +216,7 @@ class ChatHandler(BaseHandler):
             self.send_json_error(message=msg.REQUEST_PARAM_ERROR)
             return
 
-        page_no = self.params.page_no or 0
+        page_no = self.params.page_no or 1
         page_size = self.params.page_size or 10
 
         res = yield self.chat_ps.get_chats(self.params.room_id, page_no, page_size)
