@@ -122,7 +122,11 @@ class MetaBaseHandler(AtomHandler):
 
     @log_info.setter
     def log_info(self, value):
-        self._log_info = dict(value)
+
+        if self._log_info is None:
+            self._log_info = ObjectDict()
+
+        self._log_info.update(dict(value))
 
     # noinspection PyTypeChecker
     def _get_params(self):

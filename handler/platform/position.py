@@ -834,7 +834,7 @@ class PositionEmpNoticeHandler(BaseHandler):
         :return:
         """
         if not self.current_user.employee or not self.params.pid:
-            self.send_json_error()
+            self.send_json_success()
             return
 
         position = yield self.position_ps.get_position(self.params.pid)

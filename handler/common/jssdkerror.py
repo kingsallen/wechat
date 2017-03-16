@@ -17,9 +17,10 @@ class JSSDKErrorHandler(BaseHandler):
     def post(self):
         """记录微信 js 调用错误信息"""
 
-        self.log_info({
-            "jserror": self.json_args['jssdk_error']
-        })
-        self.logger.error("[JSSDKErrorHandler]wx_js_sdkerror:{}".format(self.json_args['jssdk_error']))
+        self.logger.error("[JSSDKErrorHandler]wechat_id:{0}, wx_js_sdkerror:{1}".format(self.current_user.wechat.id,
+                                                                                        self.json_args.get("jssdk_error")))
+        self.log_info = {
+            "jssdk_error": self.json_args.get("jssdk_error"),
+        }
 
         self.send_json_success()

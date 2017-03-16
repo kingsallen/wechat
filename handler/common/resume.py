@@ -31,8 +31,8 @@ class ResumeImportHandler(BaseHandler):
         -5      用户名密码错误,用户名, 密码没填写
         """
 
-        username = self.json_args['_username']
-        password = self.json_args['_password']
+        username = self.json_args.get("_username", "")
+        password = self.json_args.get("_password", "")
 
         if not username or not password:
             # 日志打点返回用户名和密码没有填写
