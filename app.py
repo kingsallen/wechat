@@ -34,7 +34,7 @@ import tornado.options
 from route import platform_routes, qx_routes, help_routes
 from util.common.log import MessageLogger
 from util.common.cache import BaseRedis
-from handler.common.navmenu import NavMenuModule
+from handler.common.frontend import NavMenuModule
 
 
 tornado.options.parse_command_line()

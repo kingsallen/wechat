@@ -54,6 +54,7 @@ common_routes = [
     (r"/m/api/sug/company",                            "handler.common.suggest.SuggestCompanyHandler",              {"event": "sug_company"}),
     (r"/m/api/sug/college",                            "handler.common.suggest.SuggestCollegeHandler",              {"event": "sug_college"}),
     (r"/m/api/chat[\/]*([a-z]+)*",                     "handler.common.im.ChatHandler",                             {"event": "chat_"}),
+    (r"/m/api/JSSDKError",                             "handler.common.frontend.JSSDKErrorHandler",                 {"event": "frontend_jssdkerror"}),
 
     # 兼容老微信 url，进行302跳转，event 设置为 NULL
     # (r"/.*",                                           "handler.common.compatible.CompatibleHandler",               {"event": "NULL"})
