@@ -27,6 +27,15 @@ class Iface(object):
         """
         pass
 
+    def changeInteresting(self, user_id, position_id, is_interested):
+        """
+        Parameters:
+         - user_id
+         - position_id
+         - is_interested
+        """
+        pass
+
 
 class Client(Iface):
     def __init__(self, transport, iprot_factory, oprot_factory=None):
@@ -97,12 +106,49 @@ class Client(Iface):
         iprot.readMessageEnd()
         return
 
+    def changeInteresting(self, user_id, position_id, is_interested):
+        """
+        Parameters:
+         - user_id
+         - position_id
+         - is_interested
+        """
+        self._seqid += 1
+        future = self._reqs[self._seqid] = concurrent.Future()
+        self.send_changeInteresting(user_id, position_id, is_interested)
+        return future
+
+    def send_changeInteresting(self, user_id, position_id, is_interested):
+        oprot = self._oprot_factory.getProtocol(self._transport)
+        oprot.writeMessageBegin('changeInteresting', TMessageType.CALL, self._seqid)
+        args = changeInteresting_args()
+        args.user_id = user_id
+        args.position_id = position_id
+        args.is_interested = is_interested
+        args.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def recv_changeInteresting(self, iprot, mtype, rseqid):
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = changeInteresting_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "changeInteresting failed: unknown result")
+
 
 class Processor(Iface, TProcessor):
     def __init__(self, handler):
         self._handler = handler
         self._processMap = {}
         self._processMap["glancePosition"] = Processor.process_glancePosition
+        self._processMap["changeInteresting"] = Processor.process_changeInteresting
 
     def process(self, iprot, oprot):
         (name, type, seqid) = iprot.readMessageBegin()
@@ -126,6 +172,18 @@ class Processor(Iface, TProcessor):
         result = glancePosition_result()
         yield gen.maybe_future(self._handler.glancePosition(args.userId, args.positionId, args.shareChainId))
         oprot.writeMessageBegin("glancePosition", TMessageType.REPLY, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    @gen.coroutine
+    def process_changeInteresting(self, seqid, iprot, oprot):
+        args = changeInteresting_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = changeInteresting_result()
+        result.success = yield gen.maybe_future(self._handler.changeInteresting(args.user_id, args.position_id, args.is_interested))
+        oprot.writeMessageBegin("changeInteresting", TMessageType.REPLY, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -241,6 +299,150 @@ class glancePosition_result(object):
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
         oprot.writeStructBegin('glancePosition_result')
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class changeInteresting_args(object):
+    """
+    Attributes:
+     - user_id
+     - position_id
+     - is_interested
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'user_id', None, None, ),  # 1
+        (2, TType.I32, 'position_id', None, None, ),  # 2
+        (3, TType.BYTE, 'is_interested', None, None, ),  # 3
+    )
+
+    def __init__(self, user_id=None, position_id=None, is_interested=None,):
+        self.user_id = user_id
+        self.position_id = position_id
+        self.is_interested = is_interested
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.user_id = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.I32:
+                    self.position_id = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.BYTE:
+                    self.is_interested = iprot.readByte()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('changeInteresting_args')
+        if self.user_id is not None:
+            oprot.writeFieldBegin('user_id', TType.I32, 1)
+            oprot.writeI32(self.user_id)
+            oprot.writeFieldEnd()
+        if self.position_id is not None:
+            oprot.writeFieldBegin('position_id', TType.I32, 2)
+            oprot.writeI32(self.position_id)
+            oprot.writeFieldEnd()
+        if self.is_interested is not None:
+            oprot.writeFieldBegin('is_interested', TType.BYTE, 3)
+            oprot.writeByte(self.is_interested)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class changeInteresting_result(object):
+    """
+    Attributes:
+     - success
+    """
+
+    thrift_spec = (
+        (0, TType.STRUCT, 'success', (thrift_gen.gen.common.struct.ttypes.Response, thrift_gen.gen.common.struct.ttypes.Response.thrift_spec), None, ),  # 0
+    )
+
+    def __init__(self, success=None,):
+        self.success = success
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRUCT:
+                    self.success = thrift_gen.gen.common.struct.ttypes.Response()
+                    self.success.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('changeInteresting_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.STRUCT, 0)
+            self.success.write(oprot)
+            oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
 
