@@ -112,10 +112,9 @@ class EmployeeBindHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def post(self):
-        guarantee_list = [
-            'name', 'mobile', 'custom_field', 'email', 'answer1', 'answer2', 'type']
+        bind_type = self.json_args.type
 
-        self.guarantee(guarantee_list)
+        binding_params = self.employee_ps.make_bind_params(self.json_args)
 
         # TODO (yiliang) 是否要强制验证 name 和 mobile 不为空？
 
@@ -140,6 +139,7 @@ class EmployeeBindHandler(BaseHandler):
             if result:
                 self.send_json_success()
                 return
+
         self.send_json_error()
 
 

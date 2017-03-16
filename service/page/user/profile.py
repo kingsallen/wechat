@@ -218,16 +218,20 @@ class ProfilePageService(PageService):
     @gen.coroutine
     def create_profile_workexp(self, record, profile_id, mode='m'):
         if mode == 'm':
-            record.company_name = record.company
-            record.job = record.position
-            record.start_date = record.start + '-01'
-            if record.end == '至今':
-                record.end_until_now = 1
-            else:
-                record.end_date = record.end + '-01'
-                record.end_until_now = 0
+            #经过前端的命名修改后这些都不需要了
+            # record.company_name = record.company
+            # record.job = record.position
+            # record.start_date = record.start + '-01'
+            # if record.end == '至今':
+            #     record.end_until_now = 1
+            # else:
+            #     record.end_date = record.end + '-01'
+            #     record.end_until_now = 0
+            pass
+
         else:
             raise ValueError('invalid mode')
+
         result, data = yield self.infra_profile_ds.create_profile_workexp(
             record, profile_id)
         return result, data
@@ -253,14 +257,16 @@ class ProfilePageService(PageService):
     @gen.coroutine
     def create_profile_education(self, record, profile_id, mode='m'):
         if mode == 'm':  # 老六步
-            record.college_name = record.university
-            record.degree = record.diploma
-            record.start_date = record.start + '-01'
-            if record.end == '至今':
-                record.end_until_now = 1
-            else:
-                record.end_date = record.end + '-01'
-                record.end_until_now = 0
+            # 经过前端的命名修改以后，这些都不需要了
+            # record.college_name = record.university
+            # record.degree = record.diploma
+            # record.start_date = record.start + '-01'
+            # if record.end == '至今':
+            #     record.end_until_now = 1
+            # else:
+            #     record.end_date = record.end + '-01'
+            #     record.end_until_now = 0
+            pass
 
         else:
             raise ValueError('invalid mode')

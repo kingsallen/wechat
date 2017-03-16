@@ -23,6 +23,7 @@ from tornado import web, gen
 import conf.message as msg_const
 import conf.common as const
 from util.common import ObjectDict
+from util.tool.dict_tool import objectdictify
 from util.tool.date_tool import curr_now
 from util.tool.str_tool import to_str
 from util.tool.url_tool import make_static_url
@@ -144,7 +145,7 @@ class MetaBaseHandler(AtomHandler):
                 'application/json' in headers.get('Content-Type') and body):
             json_args = ujson.loads(to_str(body))
 
-        return json_args
+        return objectdictify(json_args)
 
     def guarantee(self, *args):
         """对 API 调用输入做参数检查

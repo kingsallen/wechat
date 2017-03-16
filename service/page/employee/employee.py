@@ -7,6 +7,7 @@ from conf.common import NO
 from service.page.base import PageService
 from util.common import ObjectDict
 from util.tool.url_tool import make_static_url
+from util.tool.dict_tool import sub_dict
 
 
 class EmployeePageService(PageService):
@@ -14,6 +15,10 @@ class EmployeePageService(PageService):
     FE_BIND_STATUS_UNBINDING = 1
     FE_BIND_STATUS_NEED_VALIDATE = 2
     FE_BIND_STATUS_FAILURE = 3
+
+    FE_BIND_TYPE_CUSTOM = 'custom'
+    FE_BIND_TYPE_EMAIL = 'email'
+    FE_BIND_TYPE_QUESTION = 'question'
 
     def __init__(self):
         super().__init__()
@@ -121,6 +126,15 @@ class EmployeePageService(PageService):
             raise ValueError('invalid authMode')
 
         return data
+
+    def make_bind_params(self, json_args):
+        type = json_args.type
+        if type == self.FE_BIND_TYPE_CUSTOM:
+            ret = sub_dict(json_args, ['type'])
+        elif type == self.FE_BIND_TYPE_EMAIL:
+            pass
+        elif type == self.FE_BIND_TYPE_QUESTION:
+            pass
 
     @gen.coroutine
     def get_employee_conf(self, company_id):
