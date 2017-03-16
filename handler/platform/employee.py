@@ -79,6 +79,9 @@ class EmployeeUnbindHandler(BaseHandler):
                 self.current_user.company.id,
                 self.current_user.sysuser.id
             )
+            self.logger.debug('*' * 80)
+            self.logger.debug('unbind result: %s' % result)
+            self.logger.debug('*' * 80)
             if result:
                 self.send_json_success()
             else:
