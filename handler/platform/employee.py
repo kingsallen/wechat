@@ -118,13 +118,12 @@ class EmployeeBindHandler(BaseHandler):
 
         if not self.current_user.employee:
             result, message = yield self.employee_ps.bind(binding_params)
-
             if result:
                 self.send_json_success()
             else:
                 self.send_json_error(message=message)
-
-        self.send_json_error(message='binded')
+        else:
+            self.send_json_error(message='binded')
 
 
 class EmployeeBindEmailHandler(BaseHandler):
