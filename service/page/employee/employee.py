@@ -9,6 +9,7 @@ from util.common import ObjectDict
 from util.tool.url_tool import make_static_url
 from util.tool.dict_tool import sub_dict
 
+from thrift_gen.gen.employee.struct.ttypes import BindingParams
 
 class EmployeePageService(PageService):
     FE_BIND_STATUS_SUCCESS = 0
@@ -127,14 +128,41 @@ class EmployeePageService(PageService):
 
         return data
 
-    def make_bind_params(self, json_args):
+    def make_bind_params(self,user_id, company_id, json_args):
         type = json_args.type
+        needed_keys = ['type', 'name', 'mobile']
+
         if type == self.FE_BIND_TYPE_CUSTOM:
-            ret = sub_dict(json_args, ['type'])
+            needed_keys.append('custom_value')
         elif type == self.FE_BIND_TYPE_EMAIL:
-            pass
+            needed_keys.append('email_name')
+            needed_keys.append('email_suffix')
         elif type == self.FE_BIND_TYPE_QUESTION:
-            pass
+            needed_keys.append('answers')
+
+        param_dict = sub_dict(json_args, needed_keys)
+
+        if type == self.FE_BIND_TYPE_EMAIL:
+            param_dict.email = '%s@%s' % (param_dict.email_name, param_dict.email_suffix)
+        if type == self.FE_BIND_TYPE_QUESTION:
+            param_dict.answer1 = param_dict.answers.get('1')
+            if param_dict.answers.get('2'):
+                param_dict.answer2 = param_dict.answers.get('2')
+            else:
+                param_dict.answer2 = ''
+
+        binding_params = BindingParams(
+            type=param_dict.type,
+            userId=user_id,
+            companyId=company_id,
+            email=param_dict.email,
+            mobile=param_dict.mobile,
+            customField=param_dict.custom_value,
+            name=param_dict.name,
+            answer1=param_dict.answer1,
+            answer2=param_dict.answer2)
+
+        return binding_params
 
     @gen.coroutine
     def get_employee_conf(self, company_id):
@@ -158,9 +186,8 @@ class EmployeePageService(PageService):
 
     @gen.coroutine
     def bind(self, binding_params):
-
         ret = yield self.thrift_employee_ds.bind(binding_params)
-        raise gen.Return(ret)
+        return ret.sucess, ret.message
 
     @gen.coroutine
     def get_recommend_records(self, user_id, req_type, page_no, page_size):

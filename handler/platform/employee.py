@@ -7,7 +7,7 @@ from tornado import gen
 
 from conf.common import YES, NO, OLD_YES
 from handler.base import BaseHandler
-from thrift_gen.gen.employee.struct.ttypes import BindingParams
+
 from util.common import ObjectDict
 from util.common.decorator import handle_response, authenticated
 
@@ -112,35 +112,19 @@ class EmployeeBindHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def post(self):
-        bind_type = self.json_args.type
-
-        binding_params = self.employee_ps.make_bind_params(self.json_args)
-
-        # TODO (yiliang) 是否要强制验证 name 和 mobile 不为空？
-
-        # 构建 bindingParams
-        binding_params = BindingParams(
-            type=self.params.type,
-            userId=self.current_user.sysuser.id,
-            companyId=self.current_user.company.id,
-            email=self.params.email,
-            mobile=self.params.mobile,
-            customField=self.params.custom_field,
-            name=self.params.name,
-            answer1=self.params.answer1,
-            answer2=self.params.answer2)
+        binding_params = self.employee_ps.make_bind_params(
+            self.current_user.sysuser.id, self.current_user.company.id,
+            self.json_args)
 
         if not self.current_user.employee:
-            try:
-                result = yield self.employee_ps.bind(binding_params)
-            except TException as te:
-                self.logger.error(te)
-                raise
+            result, message = yield self.employee_ps.bind(binding_params)
+
             if result:
                 self.send_json_success()
-                return
+            else:
+                self.send_json_error(message=message)
 
-        self.send_json_error()
+        self.send_json_error(message='binded')
 
 
 class EmployeeBindEmailHandler(BaseHandler):
