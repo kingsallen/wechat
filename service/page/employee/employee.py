@@ -11,26 +11,50 @@ from util.tool.url_tool import make_static_url
 
 class EmployeePageService(PageService):
 
+    FE_BIND_STATUS_SUCCESS = 0
+    FE_BIND_STATUS_UNBINDING = 1
+    FE_BIND_STATUS_NEED_VALIDATE = 2
+    FE_BIND_STATUS_FAILURE = 3
+
     def __init__(self):
         super().__init__()
 
+    @gen.coroutine
+    def get_employee_info(self, user_id, company_id):
+        """获取员工信息"""
+        employee_response = yield self.thrift_employee_ds.get_employee(
+            user_id, company_id)
+        return employee_response.bindStatus, employee_response.employee
 
+    @gen.coroutine
+    def get_employee_bind_status(self, user_id, company_id):
+        """获取员工绑定状态"""
+        bind_status, _ = yield self.get_employee_info(user_id, company_id)
+        return bind_status
+
+    @gen.coroutine
     def make_binding_render_data(self, current_user, conf_response):
         """构建员工绑定页面的渲染数据"""
+
         data = ObjectDict()
         data.name = current_user.sysuser.name
         data.headimg = current_user.sysuser.headimg
         data.mobile = current_user.sysuser.mobile
 
-        data.binding_status = OLD_YES if current_user.employee else OLD_NO
+        # 如果current_user 中有 employee，表示当前用户是已认证的员工
+        if current_user.employee:
+            data.binding_status = self.FE_BIND_STATUS_SUCCESS
+        else:
+            # 否则，调用基础服务判断当前用户的认证状态：没有认证还是 pending 中
+            bind_status = yield self.get_employee_bind_status(
+                current_user.sysuser.id, current_user.company.id)
 
-        if data.binding_status == OLD_NO:
-            # 检查是否已发邮件
-            pass
-            # SUCCESS: 0,
-            # UNBINDING: 1, // 解绑中
-            # NEED_VALIDATE: 2,
-            # FAILURE: 3, // 失败
+            if bind_status == const.EMPLOYEE_BIND_STATUS_UNBINDING:
+                data.binding_status = self.FE_BIND_STATUS_UNBINDING
+            elif bind_status == const.EMPLOYEE_BIND_STATUS_EMAIL_PENDING:
+                data.binding_status = self.FE_BIND_STATUS_NEED_VALIDATE
+            else:
+                data.binding_status = self.FE_BIND_STATUS_FAILURE
 
         data.employeeid = current_user.employee.id if data.binding_status else NO
         data.send_hour = 2  # fixed

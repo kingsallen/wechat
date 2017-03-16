@@ -74,15 +74,11 @@ class EmployeeUnbindHandler(BaseHandler):
     @gen.coroutine
     def post(self):
         if self.current_user.employee:
-            try:
-                result = yield self.employee_ps.unbind(
-                    self.current_user.employee.id,
-                    self.current_user.company.id,
-                    self.current_user.sysuser.id
-                )
-            except TException as te:
-                self.logger.error(te)
-                raise
+            result = yield self.employee_ps.unbind(
+                self.current_user.employee.id,
+                self.current_user.company.id,
+                self.current_user.sysuser.id
+            )
             if result:
                 self.send_json_success()
                 return
@@ -126,13 +122,12 @@ class EmployeeBindHandler(BaseHandler):
         # 先获取员工认证配置信息
         conf_response = yield self.employee_ps.get_employee_conf(
             self.current_user.company.id)
-
         if not conf_response.exists:
             self.send_json_error("no employee conf")
         else:
             pass
 
-        data = self.employee_ps.make_binding_render_data(
+        data = yield self.employee_ps.make_binding_render_data(
             self.current_user, conf_response)
         self.logger.debug(pprint.pformat(data))
         self.send_json_success(data=data)

@@ -37,13 +37,21 @@ class ThriftEmployeeDataService(DataService):
         ret = yield self.employee_service_cilent.bind(binding_params)
         return ret
 
+    @gen.coroutine
+    def get_employee(self, user_id, company_id):
+        ret = yield self.employee_service_cilent.get_employee(user_id, company_id)
+        return ret
 
-class TestEmployeeServiceCount(AsyncTestCase):
+
+class TestEmployeeService(AsyncTestCase):
     def setUp(self):
         super().setUp()
         self.employee_service_cilent = ServiceClientFactory.get_service(
             EmployeeServiceClient, CONF)
+
     @gen_test
     def test1(self):
         ret = yield self.employee_service_cilent.getEmployeeVerificationConf(1)
+        print(ret)
+        ret = yield self.employee_service_cilent.getEmployee(4, 1)
         print(ret)
