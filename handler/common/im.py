@@ -236,29 +236,5 @@ class ChatHandler(BaseHandler):
         pid = self.params.pid or 0
         room_id = self.params.room_id or 0
 
-        # res = ObjectDict({
-        #     "hr": {
-        #         "hr_id": 1,
-        #         "hr_name": "HR",
-        #         "hr_headimg": self.static_url(const.HR_HEADIMG),
-        #     },
-        #     "user": {
-        #         "user_id": 1,
-        #         "user_name": "用户",
-        #         "user_headimg": self.static_url(const.SYSUSER_HEADIMG),
-        #     },
-        #     "position":{
-        #         "pid": 3,
-        #         "title": "职位标题",
-        #         "company_name": "公司名称",
-        #         "city": "杭州",
-        #         "salary": "面议",
-        #         "update_time": "刚刚",
-        #     },
-        #     "follow_qx": True,
-        #     "room_id": 5,
-        # })
-
-        print ("++++++++++++++++++")
         res = yield self.chat_ps.get_chatroom(self.current_user.sysuser.id, self.params.hr_id, pid, room_id, self.current_user.qxuser)
         self.send_json_success(data=res)

@@ -107,8 +107,19 @@ class WechatTemplateMessager(object):
         :return: 发送成功: const.YES, 发送失败:const.NO
         """
 
-        res = yield http_post(path.MESSAGE_TEMPLATE, delay, validators, sys_template_id,
-                              user_id, type, company_id, url, data, enable_qx_retry)
+        jdata = ObjectDict(
+            delay = delay,
+            validators = validators,
+            sys_template_id = sys_template_id,
+            user_id = user_id,
+            type = type,
+            company_id = company_id,
+            url = url,
+            data = data,
+            enable_qx_retry = enable_qx_retry
+        )
+
+        res = yield http_post(path.MESSAGE_TEMPLATE, jdata)
 
         if res.status == const.API_SUCCESS:
             raise gen.Return(const.YES)

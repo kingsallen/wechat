@@ -62,7 +62,6 @@ class ChatPageService(PageService):
         """进入聊天室"""
 
         ret = yield self.thrift_chat_ds.enter_chatroom(user_id, hr_id, position_id, room_id)
-        print (ret)
 
         hr_info = ObjectDict()
         if ret.hr:
@@ -112,8 +111,6 @@ class ChatPageService(PageService):
         :return:
         """
 
-        print (888888)
-
         ret = yield self.thrift_chat_ds.leave_chatroom(room_id, speaker)
         self.logger.debug("[leave_chatroom]ret:{}".format(ret))
         raise gen.Return(ret)
@@ -128,8 +125,6 @@ class ChatPageService(PageService):
         :param speaker: 0：求职者，1：HR
         :return:
         """
-
-        print (3438437)
 
         ret = yield self.thrift_chat_ds.save_chat(room_id, content, position_id, speaker)
         self.logger.debug("[save_chat]ret:{}".format(ret))
