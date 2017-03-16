@@ -94,31 +94,6 @@ class EmployeeBindHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def get(self):
-        """
-        返回 json.data
-        {
-            'type':            'email',
-            'binding_message': 'binding message ...',
-            'binding_status':  1,
-            'send_hour':       2,
-            'headimg':         'http://o8g4x4uja.bkt.clouddn.com/0.jpeg',
-            'employeeid':      23,
-            'name':            'name',
-            'mobile':          '15000234929',
-            'conf':            {
-                'custom_name':   'custom',
-                'custom_hint':   'custom hint',
-                'custom_value':  'user input value for custom',
-                'email_suffixs': ['qq.com', 'foxmail.com'],
-                'email_name':    'tovvry',
-                'email_suffix':  'qq.com',
-                'questions':     [ {'q': "你的姓名是什么", 'a': 'b', 'id': 1},
-                                   {'q': "你的弟弟的姓名是什么", 'a': 'a', 'id': 2} ],
-                # // null, question, or email
-                'switch':        'email',
-            }
-        """
-
         # 先获取员工认证配置信息
         conf_response = yield self.employee_ps.get_employee_conf(
             self.current_user.company.id)
@@ -127,6 +102,7 @@ class EmployeeBindHandler(BaseHandler):
         else:
             pass
 
+        # 根据 conf 来构建 api 的返回 data
         data = yield self.employee_ps.make_binding_render_data(
             self.current_user, conf_response.employeeVerificationConf)
         self.logger.debug(pprint.pformat(data))

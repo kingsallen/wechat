@@ -44,6 +44,7 @@ class ThriftEmployeeDataService(DataService):
 
 
 class TestEmployeeService(AsyncTestCase):
+    """Just for test(or try results) during development :)"""
     def setUp(self):
         self.employee_service_cilent = ServiceClientFactory.get_service(
             EmployeeServiceClient, CONF)

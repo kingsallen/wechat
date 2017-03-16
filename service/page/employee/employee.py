@@ -3,14 +3,13 @@
 from tornado import gen
 
 import conf.common as const
-from conf.common import YES,NO, OLD_YES, OLD_NO
+from conf.common import NO
 from service.page.base import PageService
 from util.common import ObjectDict
 from util.tool.url_tool import make_static_url
 
 
 class EmployeePageService(PageService):
-
     FE_BIND_STATUS_SUCCESS = 0
     FE_BIND_STATUS_UNBINDING = 1
     FE_BIND_STATUS_NEED_VALIDATE = 2
@@ -34,30 +33,56 @@ class EmployeePageService(PageService):
 
     @gen.coroutine
     def make_binding_render_data(self, current_user, conf):
-        """构建员工绑定页面的渲染数据"""
+        """构建员工绑定页面的渲染数据
+        :returns:
+        {
+            'type':            'email',
+            'binding_message': 'binding message ...',
+            'binding_status':  1,
+            'send_hour':       2,
+            'headimg':         'http://o8g4x4uja.bkt.clouddn.com/0.jpeg',
+            'employeeid':      23,
+            'name':            'name',
+            'mobile':          '15000234929',
+            'conf':            {
+                'custom_name':   'custom',
+                'custom_hint':   'custom hint',
+                'custom_value':  'user input value for custom',
+                'email_suffixs': ['qq.com', 'foxmail.com'],
+                'email_name':    'tovvry',
+                'email_suffix':  'qq.com',
+                'questions':     [ {'q': "你的姓名是什么", 'a': 'b', 'id': 1}, {'q': "你的弟弟的姓名是什么", 'a': 'a', 'id': 2} ],
+                # // null, question, or email
+                'switch':        'email',
+            }
+        """
 
         data = ObjectDict()
         data.name = current_user.sysuser.name
         data.headimg = current_user.sysuser.headimg
         data.mobile = current_user.sysuser.mobile
+        data.send_hour = 2  # fixed
 
+        self.logger.debug("employee_verify_conf: %s" % conf)
         # 如果current_user 中有 employee，表示当前用户是已认证的员工
         if current_user.employee:
             data.binding_status = self.FE_BIND_STATUS_SUCCESS
+            data.employeeid = current_user.employee.id
         else:
             # 否则，调用基础服务判断当前用户的认证状态：没有认证还是 pending 中
+            data.employeeid = NO
+
             bind_status = yield self.get_employee_bind_status(
                 current_user.sysuser.id, current_user.company.id)
 
             if bind_status == const.EMPLOYEE_BIND_STATUS_UNBINDING:
                 data.binding_status = self.FE_BIND_STATUS_UNBINDING
+
             elif bind_status == const.EMPLOYEE_BIND_STATUS_EMAIL_PENDING:
                 data.binding_status = self.FE_BIND_STATUS_NEED_VALIDATE
+
             else:
                 data.binding_status = self.FE_BIND_STATUS_FAILURE
-
-        data.employeeid = current_user.employee.id if data.binding_status else NO
-        data.send_hour = 2  # fixed
 
         data.conf = ObjectDict()
         data.binding_success_message = conf.bindSuccessMessage or ''
@@ -91,6 +116,7 @@ class EmployeePageService(PageService):
         elif conf.authMode == const.EMPLOYEE_BIND_AUTH_MODE.QUESTION:
             data.type = 'question'
             data.conf.questions = conf.questions
+
         else:
             raise ValueError('invalid authMode')
 
@@ -98,19 +124,22 @@ class EmployeePageService(PageService):
 
     @gen.coroutine
     def get_employee_conf(self, company_id):
-        ret = yield self.thrift_employee_ds.get_employee_verification_conf(company_id)
+        ret = yield self.thrift_employee_ds.get_employee_verification_conf(
+            company_id)
         return ret
 
     @gen.coroutine
     def get_employee_rewards(self, employee_id, company_id):
 
-        ret = yield self.thrift_employee_ds.get_employee_rewards(employee_id, company_id)
+        ret = yield self.thrift_employee_ds.get_employee_rewards(
+            employee_id, company_id)
         return ret
 
     @gen.coroutine
     def unbind(self, employee_id, company_id, user_id):
 
-        ret = yield self.thrift_employee_ds.unbind(employee_id, company_id, user_id)
+        ret = yield self.thrift_employee_ds.unbind(
+            employee_id, company_id, user_id)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -129,35 +158,37 @@ class EmployeePageService(PageService):
         :param page_size:
         :return:
         """
-        ret = yield self.thrift_useraccounts_ds.get_recommend_records(int(user_id), int(req_type), int(page_no), int(page_size))
+        ret = yield self.thrift_useraccounts_ds.get_recommend_records(
+            int(user_id), int(req_type), int(page_no), int(page_size))
 
         score = ObjectDict()
         if ret.score:
             score = ObjectDict({
                 "link_viewed_count": ret.score.link_viewed_count,
-                "interested_count": ret.score.interested_count,
-                "applied_count": ret.score.applied_count
+                "interested_count":  ret.score.interested_count,
+                "applied_count":     ret.score.applied_count
             })
         recommends = list()
         if ret.recommends:
             for e in ret.recommends:
                 recom = ObjectDict({
-                    "status": e.status,
-                    "headimgurl": make_static_url(e.headimgurl or const.SYSUSER_HEADIMG),
+                    "status":        e.status,
+                    "headimgurl":    make_static_url(
+                        e.headimgurl or const.SYSUSER_HEADIMG),
                     "is_interested": e.is_interested,
-                    "applier_name": e.applier_name,
-                    "applier_rel": e.applier_rel,
-                    "view_number": e.view_number,
-                    "position": e.position,
-                    "click_time": e.click_time,
-                    "recom_status": e.recom_status
+                    "applier_name":  e.applier_name,
+                    "applier_rel":   e.applier_rel,
+                    "view_number":   e.view_number,
+                    "position":      e.position,
+                    "click_time":    e.click_time,
+                    "recom_status":  e.recom_status
                 })
                 recommends.append(recom)
 
         res = ObjectDict({
             "has_recommends": ret.hasRecommends if ret.hasRecommends else False,
-            "score": score,
-            "recommends": recommends
+            "score":          score,
+            "recommends":     recommends
         })
 
         raise gen.Return(res)
