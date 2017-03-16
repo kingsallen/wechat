@@ -188,7 +188,7 @@ class EmployeePageService(PageService):
 
         ret = yield self.thrift_employee_ds.unbind(
             employee_id, company_id, user_id)
-        raise gen.Return(ret)
+        return ret.success, ret.message
 
     @gen.coroutine
     def bind(self, binding_params):

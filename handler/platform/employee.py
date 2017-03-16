@@ -74,16 +74,17 @@ class EmployeeUnbindHandler(BaseHandler):
     @gen.coroutine
     def post(self):
         if self.current_user.employee:
-            result = yield self.employee_ps.unbind(
+            result, message = yield self.employee_ps.unbind(
                 self.current_user.employee.id,
                 self.current_user.company.id,
                 self.current_user.sysuser.id
             )
             if result:
                 self.send_json_success()
-                return
-
-        self.send_json_error()
+            else:
+                self.send_json_error(message)
+        else:
+            self.send_json_error('unbind error')
 
 
 class EmployeeBindHandler(BaseHandler):
