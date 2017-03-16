@@ -203,26 +203,6 @@ class Employee(object):
         oprot.writeStructEnd()
 
     def validate(self):
-        if self.id is None:
-            raise TProtocolException(message='Required field id is unset!')
-        if self.employeeId is None:
-            raise TProtocolException(message='Required field employeeId is unset!')
-        if self.companyId is None:
-            raise TProtocolException(message='Required field companyId is unset!')
-        if self.sysuerId is None:
-            raise TProtocolException(message='Required field sysuerId is unset!')
-        if self.mobile is None:
-            raise TProtocolException(message='Required field mobile is unset!')
-        if self.wxuserId is None:
-            raise TProtocolException(message='Required field wxuserId is unset!')
-        if self.cname is None:
-            raise TProtocolException(message='Required field cname is unset!')
-        if self.award is None:
-            raise TProtocolException(message='Required field award is unset!')
-        if self.isRpSent is None:
-            raise TProtocolException(message='Required field isRpSent is unset!')
-        if self.customFieldValues is None:
-            raise TProtocolException(message='Required field customFieldValues is unset!')
         return
 
     def __repr__(self):

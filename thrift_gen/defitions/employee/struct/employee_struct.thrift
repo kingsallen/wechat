@@ -2,16 +2,16 @@ namespace java com.moseeker.thrift.gen.employee.struct
 namespace py thrift_gen.gen.employee.struct
 
 struct Employee {
-    1: required i32 id,
-    2: required string employeeId,
-    3: required i32 companyId,
-    4: required i32 sysuerId,
-    5: required string mobile,
-    6: required i32 wxuserId,
-    7: required string cname,
-    8: required i32 award,
-    9: required bool isRpSent,
-    10: required string customFieldValues
+    1: optional i32 id,
+    2: optional string employeeId,
+    3: optional i32 companyId,
+    4: optional i32 sysuerId,
+    5: optional string mobile,
+    6: optional i32 wxuserId,
+    7: optional string cname,
+    8: optional i32 award,
+    9: optional bool isRpSent,
+    10: optional string customFieldValues
 }
 
 
