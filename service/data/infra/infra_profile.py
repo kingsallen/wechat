@@ -19,7 +19,7 @@ class InfraProfileDataService(DataService):
     @gen.coroutine
     def import_profile(self, source, username, password, user_id):
         params = ObjectDict(
-            source=source,
+            type=int(source),
             username=username,
             password=password,
             user_id=user_id
