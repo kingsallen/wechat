@@ -67,7 +67,7 @@ class ApplicationHandler(BaseHandler):
     def post(self):
         """ 处理普通申请 """
 
-        position = yield self.position_ps.get_position(self.params.pid)
+        position = yield self.position_ps.get_position(self.json_args.pid)
 
         is_applied, message, apply_id = yield self.application_ps.create_application(
             {},
@@ -81,9 +81,9 @@ class ApplicationHandler(BaseHandler):
             # 宝洁投递后，跳转到指定页面
             message = yield self.customize_ps.get_pgcareers_msg(self.current_user.wechat.company_id)
 
-            self.send_json_success(message)
+            self.send_json_success(data={apply_id: apply_id}, message=message)
         else:
-            self.send_json_error(message)
+            self.send_json_error(message=message)
 
 
 class ApplicationEmailHandler(BaseHandler):

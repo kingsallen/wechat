@@ -44,7 +44,7 @@ INFRA_HRUSER = 'hraccount'
 
 # 申请服务
 # Ref: https://wiki.moseeker.com/application-api.md
-INFRA_APPLICATION = "application",
+INFRA_APPLICATION = "application"
 INFRA_APPLICATION_APPLY_COUNT = 'application/count/check'
 
 # 职位服务

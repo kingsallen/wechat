@@ -8,6 +8,7 @@ from tornado import gen
 import conf.message as msg
 import conf.path as path
 import conf.common as const
+from service.page.user.sharechain import SharechainPageService
 from service.page.base import PageService
 from cache.application.email_apply import EmailApplyCache
 from util.common import ObjectDict
@@ -353,7 +354,7 @@ class ApplicationPageService(PageService):
     def create_application(self, params, position, current_user, is_platform=True):
 
         # 1.初始化
-        check_status, message = self.check_position(position, current_user)
+        check_status, message = yield self.check_position(position, current_user)
         self.logger.debug("[create_reply]check_status:{}, message:{}".format(check_status, message))
         if not check_status:
             return False, message, None
@@ -373,7 +374,8 @@ class ApplicationPageService(PageService):
         #         raise gen.Return((False, None, None))
 
         # 3.创建申请
-        recommender_user_id, recommender_wxuser_id, recom_employee = yield self.get_recommend_user(current_user, position, is_platform)
+        recommender_user_id, recommender_wxuser_id, recom_employee = \
+            yield self.get_recommend_user(current_user, position, is_platform)
 
         params_for_application = ObjectDict(
             position_id=position.id,
@@ -383,10 +385,16 @@ class ApplicationPageService(PageService):
             company_id=position.company_id,
             routine=0 if is_platform else 1
         )
-        self.logger.debug("params_for_application: {}".format(params_for_application))
-        ret = yield self.infra_application_ds.create_application(params_for_application)
+        self.logger.debug("params_for_application: {}".format(
+            params_for_application))
+
+        ret = yield self.infra_application_ds.create_application(
+            params_for_application)
+
         if ret.status != const.API_SUCCESS:
-            raise gen.Return((False, msg.CREATE_APPLICATION_FAILED))
+            return False, msg.CREATE_APPLICATION_FAILED
+        else: pass
+
         apply_id = ret.data.jobApplicationId
 
         # # 4. 将本次提交的自定义字段存到 job_resume_other 中去
@@ -395,7 +403,7 @@ class ApplicationPageService(PageService):
         # 申请的后续处理
         self.logger.debug("[post_apply]投递后续处理")
 
-        # 1. 添加积分
+        #1. 添加积分
         # yield self.opt_add_reward(apply_id, current_user, position, is_platform)
         # 2. 发红包
         # yield self.opt_send_redpacket(current_user, position)
@@ -418,8 +426,10 @@ class ApplicationPageService(PageService):
         recommender_user_id = 0
         recommender_wxuser_id = 0
         recom_employee = ObjectDict()
+        sharechain_ps = SharechainPageService()
+
         if is_platform:
-            recommender_user_id = yield self.sharechain_ps.get_referral_employee_user_id(
+            recommender_user_id = yield sharechain_ps.get_referral_employee_user_id(
                 current_user.sysuser.id, position.id)
 
             if recommender_user_id:
@@ -430,7 +440,9 @@ class ApplicationPageService(PageService):
                     "activation": const.NO,
                 })
                 recommender_wxuser_id = recom_employee.wxuser_id or 0
-        raise gen.Return((recommender_user_id, recommender_wxuser_id, recom_employee))
+
+        sharechain_ps = None
+        return recommender_user_id, recommender_wxuser_id, recom_employee
 
 #     @gen.coroutine
 #     def _create_job_resume_other(self, position, cv):
