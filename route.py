@@ -34,9 +34,9 @@ common_routes = [
     (r"/m/app/.*",                                     "handler.common.app.IndexHandler",                           {"event": "app_"}),
     (r"/m/login",                                      "handler.common.passport.LoginHandler",                      {"event": "passport_login"}),
     (r"/m/logout",                                     "handler.common.passport.LogoutHandler",                     {"event": "passport_logout"}),
-    (r"/m/register[\/]*([a-z]+)*",                     "handler.common.passport.RegisterHandler",                   {"event": "register_"}),j
-    (r"/m/application[\/]?",                           "handler.common.application.ApplicationHandler",             {"event": "application"}),
-    (r"/m/application/email[\/]?",                     "handler.common.application.ApplicationEmailHandler",        {"event": "application_email"}),
+    (r"/m/register[\/]*([a-z]+)*",                     "handler.common.passport.RegisterHandler",                   {"event": "register_"}),
+    (r"/m/application",                                "handler.common.application.ApplicationHandler",             {"event": "application_profile"}),
+    (r"/m/application/email",                          "handler.common.application.ApplicationEmailHandler",        {"event": "application_email"}),
     (r"/m/positionfav/([0-9]+)",                       "handler.common.position.PositionFavHandler",                {"event": "position_fav"}),
     # websocket
     (r"/m/websocket/([A-Za-z0-9_]{1,32})",             "handler.common.im.ChatWebSocketHandler"),
