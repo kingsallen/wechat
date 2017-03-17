@@ -16,9 +16,8 @@ COLLECT_USERINFO = '/m/app/asist/collect_userinfo/positionfav'
 USER_CENTER = '/m/app/usercenter'
 MOBILE_VERIFY = '/m/app/validate_mobile'
 EMPLOYEE_VERIFY = '/m/app/employee/binding'
-EMPLOYEE_RECOMMENDS = 'm/app/employee/recommends'
-USERCENTER_APPLYRECORD = 'm/app/usercenter/applyrecords/{}'
-HR_WX_IMAGE_URL = "https://www.moseeker.com/common/image?url="
+EMPLOYEE_RECOMMENDS = '/m/app/employee/recommends'
+USERCENTER_APPLYRECORD = '/m/app/usercenter/applyrecords/{}'
 
 PROFILE_VIEW = '/m/profile'
 PROFILE_NEW = '/m/app/profile/new'
@@ -29,6 +28,8 @@ OLD_PROFILE = '/mobile/profile'
 OLD_CHAT = '/mobile/chatroom'
 OLD_SYSUSER = '/mobile/sysuser'
 OLD_APPLICATION = '/mobile/application'
+
+HR_WX_IMAGE_URL = "https://www.moseeker.com/common/image?url="
 
 # ============================ 基础服务开始 ============================
 # 用户服务
