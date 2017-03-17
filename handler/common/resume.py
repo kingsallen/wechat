@@ -39,11 +39,19 @@ class ResumeImportHandler(BaseHandler):
         -5      用户名密码错误,用户名, 密码没填写
         """
 
-        self.logger.debug("json_args:{}".format(self.json_args))
-        self.logger.debug("params: {}".format(self.params))
+        username = self.params.get("_username", "")
+        password = self.params.get("_password", "")
 
-        username = self.json_args.get("_username", "")
-        password = self.json_args.get("_password", "")
+        self.logger.debug("params 1: {}".format(self.params))
+
+        del self.params.recom_time
+        del self.params.ajax
+        del self.params.m
+        del self.params.abgroup
+        del self.params.tjtoken
+        del self.params.abapply
+
+        self.logger.debug("params 2: {}".format(self.params))
 
         if not username or not password:
             # 日志打点返回用户名和密码没有填写
@@ -63,10 +71,9 @@ class ResumeImportHandler(BaseHandler):
                 self.current_user.sysuser.id)
 
             if self.params.pid:
-                next_url = make_url(path.APPLICATION+"/app", self.params)
+                next_url = make_url(path.PROFILE_PREVIEW, self.params)
             else:
-                # TODO profile 预览页面
-                next_url = make_url(path.APPLICATION + "/app", self.params)
+                next_url = make_url(path.PROFILE_VIEW, self.params)
 
             if is_ok:
                 self.log_info = ObjectDict(
