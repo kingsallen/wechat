@@ -44,12 +44,12 @@ class ResumeImportHandler(BaseHandler):
 
         self.logger.debug("params 1: {}".format(self.params))
 
-        del self.params.recom_time
-        del self.params.ajax
-        del self.params.m
-        del self.params.abgroup
-        del self.params.tjtoken
-        del self.params.abapply
+        self.params.pop("recom_time", None)
+        self.params.pop("ajax", None)
+        self.params.pop("m", None)
+        self.params.pop("abgroup", None)
+        self.params.pop("tjtoken", None)
+        self.params.pop("abapply",None)
 
         self.logger.debug("params 2: {}".format(self.params))
 
