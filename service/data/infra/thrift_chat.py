@@ -29,10 +29,6 @@ class ThriftChatDataService(DataService):
         :return:
         """
 
-        print (user_id)
-        print (page_no)
-        print (page_size)
-
         ret = yield self.chat_service_cilent.listUserChatRoom(int(user_id), int(page_no), int(page_size))
         self.logger.debug("[thrift]get_chatrooms_list: %s" % ret)
         raise gen.Return(ret)
@@ -60,12 +56,11 @@ class ThriftChatDataService(DataService):
         :param room_id
         :return:
         """
-        print (33333333333333)
 
-        print (user_id)
-        print (hr_id)
-        print (position_id)
-        print (room_id)
+        self.logger.debug(user_id)
+        self.logger.debug(hr_id)
+        self.logger.debug(position_id)
+        self.logger.debug(room_id)
 
         ret = yield self.chat_service_cilent.enterRoom(int(user_id), int(hr_id), int(position_id), int(room_id))
         self.logger.debug("[thrift]enter_chatroom: %s" % ret)
@@ -95,9 +90,6 @@ class ThriftChatDataService(DataService):
         :return:
         """
 
-        print (999000)
         ret = yield self.chat_service_cilent.saveChat(int(room_id), str(content), int(position_id), int(speaker))
         self.logger.debug("[thrift]save_chat: %s" % ret)
         raise gen.Return(ret)
-
-
