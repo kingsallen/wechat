@@ -60,14 +60,19 @@ class ApplicationHandler(BaseHandler):
         self.redirect(make_url(path.PROFILE_PREVIEW, self.params, is_skip=is_skip))
 
     @handle_response
-    @verified_mobile_oneself
+    # @verified_mobile_oneself
+    @check_and_apply_profile
     @authenticated
     @gen.coroutine
     def post(self):
         """ 处理普通申请 """
 
-        is_applied, message, apply_id = yield self.position_ps.get_position(
-            self.params.pid)
+        position = yield self.position_ps.get_position(self.params.pid)
+
+        is_applied, message, apply_id = yield self.application_ps.create_application(
+            {},
+            position,
+            self.current_user)
 
         self.logger.debug("[post_apply]is_applied:{}, message:{}, appid:{}".format(is_applied, message, apply_id))
 
@@ -76,13 +81,9 @@ class ApplicationHandler(BaseHandler):
             # 宝洁投递后，跳转到指定页面
             message = yield self.customize_ps.get_pgcareers_msg(self.current_user.wechat.company_id)
 
-            if message:
-                nexturl = make_url(path.POSITION_LIST, params=self.params, escape=['next_url', 'pid'])
-                self.render('weixin/systemmessage/successapply.html', message=message, nexturl=nexturl)
-            else:
-                self.redirect(make_url(path.USERCENTER_APPLYRECORD.format(apply_id), self.params, escape=['next_url', 'pid']))
+            self.send_json_success(message)
         else:
-            self.send_json_error(message=message)
+            self.send_json_error(message)
 
 
 class ApplicationEmailHandler(BaseHandler):
