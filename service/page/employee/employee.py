@@ -196,6 +196,11 @@ class EmployeePageService(PageService):
         return ret.success, ret.message
 
     @gen.coroutine
+    def activate_email(self, activation_code):
+        ret = yield self.thrift_employee_ds.activate_email(activation_code)
+        return ret.success, ret.message
+
+    @gen.coroutine
     def get_recommend_records(self, user_id, req_type, page_no, page_size):
         """
         推荐历史记录

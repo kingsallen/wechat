@@ -18,6 +18,7 @@ MOBILE_VERIFY = '/m/app/validate_mobile'
 EMPLOYEE_VERIFY = '/m/app/employee/binding'
 EMPLOYEE_RECOMMENDS = 'm/app/employee/recommends'
 USERCENTER_APPLYRECORD = 'm/app/usercenter/applyrecords/{}'
+HR_WX_IMAGE_URL = "https://www.moseeker.com/common/image?url="
 
 PROFILE_VIEW = '/m/profile'
 PROFILE_NEW = '/m/app/profile/new'

@@ -3,6 +3,7 @@
 import pprint
 
 from thrift.Thrift import TException
+import conf.path as path
 from tornado import gen
 
 from conf.common import YES, NO, OLD_YES
@@ -116,7 +117,6 @@ class EmployeeBindHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def post(self):
-        self.logger.debug("%%%%%%%%%%%")
         binding_params = self.employee_ps.make_bind_params(
             self.current_user.sysuser.id, self.current_user.company.id,
             self.json_args)
@@ -133,14 +133,23 @@ class EmployeeBindHandler(BaseHandler):
         else:
             self.send_json_error(message='binded')
 
-        self.logger.debug("%%%%%%%%%%%")
-
 
 class EmployeeBindEmailHandler(BaseHandler):
 
+    @handle_response
     @gen.coroutine
     def get(self):
-        pass
+        activation_code = self.params.activation_code
+        result, message = yield self.employee_ps.activate_email(
+            activation_code)
+
+        tparams = dict(
+            qrcode_url=path.HR_WX_IMAGE_URL + self.current_user.wechat.qrcode,
+            wechat_name = self.current_user.wechat.name
+        )
+        tname = 'success' if result else 'failure'
+
+        self.render('employee/certification-%s.html' % tname, **tparams)
 
 
 class RecommendrecordsHandler(BaseHandler):
