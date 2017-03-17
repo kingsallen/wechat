@@ -38,6 +38,8 @@ common_routes = [
     (r"/m/application",                                "handler.common.application.ApplicationHandler",             {"event": "application_profile"}),
     (r"/m/application/email",                          "handler.common.application.ApplicationEmailHandler",        {"event": "application_email"}),
     (r"/m/positionfav/([0-9]+)",                       "handler.common.position.PositionFavHandler",                {"event": "position_fav"}),
+    (r"/m/resume/import",                              "handler.common.resume.ResumeImportHandler",                 {"event": "resume_auth"}),
+
     # websocket
     (r"/m/websocket/([A-Za-z0-9_]{1,32})",             "handler.common.im.ChatWebSocketHandler"),
 

@@ -24,23 +24,20 @@ class UserCurrentInfoHandler(BaseHandler):
         """
 
         full = const.YES if self.params.full else const.NO
-        result = yield self.user_ps.get_user_user({
-            "id": self.current_user.sysuser.id
-        })
 
-        if result:
+        if self.current_user.sysuser:
             if full:
                 self.send_json_success(data=ObjectDict(
-                    name=result.name,
-                    company=result.company,
-                    position=result.position
+                    name=self.current_user.sysuser.name,
+                    company=self.current_user.sysuser.company,
+                    position=self.current_user.sysuser.position
                 ))
             else:
+                has_info = self.current_user.sysuser.company or self.current_user.sysuser.position
                 # 处理感兴趣
                 if self.params.isfav:
-                    yield self._opt_fav_position()
+                    yield self._opt_fav_position(has_info)
 
-                has_info = result.company or result.position
                 self.send_json_success(
                     data=const.YES if has_info else const.NO)
             return
@@ -66,7 +63,7 @@ class UserCurrentInfoHandler(BaseHandler):
         self.send_json_success()
 
     @gen.coroutine
-    def _opt_fav_position(self):
+    def _opt_fav_position(self, has_info):
         """处理感兴趣后的业务逻辑"""
 
         if self.params.pid:
@@ -87,12 +84,13 @@ class UserCurrentInfoHandler(BaseHandler):
 
             link = make_url(path.COLLECT_USERINFO, pid=self.params.pid, wechat_signature=self.current_user.wechat.signature, host=self.request.host)
 
-            yield favposition_notice_to_applier_tpl(self.current_user.wechat.company_id,
-                                         position_info.title,
-                                         company_info.name,
-                                         position_info.city,
-                                         self.current_user.sysuser.id,
-                                         link)
+            if not has_info:
+                yield favposition_notice_to_applier_tpl(self.current_user.wechat.company_id,
+                                             position_info.title,
+                                             company_info.name,
+                                             position_info.city,
+                                             self.current_user.sysuser.id,
+                                             link)
 
             # 3.添加候选人相关记录
             yield self.candidate_ps.send_candidate_interested(self.current_user.sysuser.id, self.params.pid, 1)

@@ -14,6 +14,14 @@ from util.tool.url_tool import make_url
 class ResumeImportHandler(BaseHandler):
 
     @handle_response
+    @gen.coroutine
+    def get(self):
+
+        self.params.headimg = self.current_user.sysuser.headimg
+        self.render(template_name='neo_weixin/sysuser/importresume-auth.html', message='')
+
+
+    @handle_response
     @authenticated
     @gen.coroutine
     def post(self):

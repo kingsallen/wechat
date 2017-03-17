@@ -128,10 +128,6 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
             # 处理 sub 接受到的消息
             nonlocal self
             try:
-                print ("-----------")
-                print (777777)
-                print (message)
-                print (type(message))
                 data = ujson.loads(message.get("data"))
                 if data:
                     self.write_message(json_dumps(ObjectDict(
@@ -144,15 +140,12 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
                 self.close(1002)
                 raise
 
-        print ("---")
-        print (self.chatroom_channel)
         self.subscriber = Subscriber(self.redis_client, channel=self.chatroom_channel,
                                      message_handler=message_handler)
         self.subscriber.start_run_in_thread()
 
     @gen.coroutine
     def on_close(self):
-        print (444)
         self.subscriber.stop_run_in_thread()
         self.subscriber.cleanup()
 
@@ -162,9 +155,6 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
     @gen.coroutine
     def on_message(self, message):
         # 处理通过 websocket 发送的消息
-        print ("++++++++++")
-        print (888)
-        print (message)
         message = ujson.loads(message)
         message_body = json_dumps(ObjectDict(
             content = message.get("content"),
@@ -173,8 +163,6 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
             pid = self.position_id,
             create_time = curr_now_minute()
         ))
-        print (message_body)
-        print (self.hr_channel)
         self.redis_client.publish(self.hr_channel, message_body)
         yield self.chat_ps.save_chat(self.room_id, message.get("content"), self.position_id,)
 
