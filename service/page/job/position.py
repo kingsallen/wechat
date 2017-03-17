@@ -280,7 +280,8 @@ class PositionPageService(PageService):
             industry=current_company.industry or '',
             scale_name=current_company.scale,
             homepage=current_company.homepage or '',
-            banner=current_company.banner
+            banner=current_company.banner,
+            id=current_company.id,
         ))
 
     @gen.coroutine
