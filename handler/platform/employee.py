@@ -149,7 +149,8 @@ class EmployeeBindEmailHandler(BaseHandler):
         )
         tname = 'success' if result else 'failure'
 
-        self.render('employee/certification-%s.html' % tname, **tparams)
+        self.render(template_name='employee/certification-%s.html' % tname,
+                    **tparams)
 
 
 class RecommendrecordsHandler(BaseHandler):
