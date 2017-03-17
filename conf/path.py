@@ -22,13 +22,6 @@ USERCENTER_APPLYRECORD = '/m/app/usercenter/applyrecords/{}'
 PROFILE_VIEW = '/m/profile'
 PROFILE_NEW = '/m/app/profile/new'
 
-# 供侧边栏使用
-OLD_POSITION = '/mobile/position'
-OLD_PROFILE = '/mobile/profile'
-OLD_CHAT = '/mobile/chatroom'
-OLD_SYSUSER = '/mobile/sysuser'
-OLD_APPLICATION = '/mobile/application'
-
 HR_WX_IMAGE_URL = "https://www.moseeker.com/common/image?url="
 
 # ============================ 基础服务开始 ============================
