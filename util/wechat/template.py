@@ -154,7 +154,7 @@ def application_notice_to_applier_tpl(wechat_id, openid, link, job, company_name
         time="{}年{}月{}日{:0>2}:{:0>2} ".format(d.year, d.month, d.day,
                                                      d.hour, d.minute))
 
-    send_switch = yield messager.get_send_switch(wechat_id, const.TEMPLATES_SWITCH.sys_template_id)
+    send_switch = yield messager.get_send_switch(wechat_id, const.TEMPLATES_SWITCH.APPLY_NOTICE_TPL)
 
     ret = yield messager.send_template(
         wechat_id, openid, sys_template_id, link, json_data, qx_retry=True, platform_switch=send_switch)
@@ -176,7 +176,7 @@ def application_notice_to_recommender_tpl(wechat_id, openid, link, applier_name,
         exp=work_exp_years,
         lastjob=lastjob)
 
-    send_switch = yield messager.get_send_switch(wechat_id, const.TEMPLATES_SWITCH.sys_template_id)
+    send_switch = yield messager.get_send_switch(wechat_id, const.TEMPLATES_SWITCH.NEW_RESUME_TPL)
 
     ret = yield messager.send_template(
         wechat_id, openid, sys_template_id, link, json_data, qx_retry=False, platform_switch=send_switch)
