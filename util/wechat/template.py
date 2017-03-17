@@ -227,14 +227,14 @@ def favposition_notice_to_applier_tpl(company_id, title, company_name, city, use
 
     """用户感兴趣某职位后，向用户发送消息模板"""
 
-    # 延迟2小时发送 TODO
-    delay = 2
+    # 延迟2小时发送
+    delay = 7200
     # 延迟消息队列消费者
     validators = 'mtp.scripts.consumer.validators.user_basic_info_not_complete'
     type = 0
 
     data = _make_json_data(
-        first="您好, 我们对您的职业经历十分感兴趣, 希望能更了解您",
+        first="您好，我们对您的职业经历十分感兴趣，希望能更了解您",
         remark="点击完善个人职业信息",
         encode=False,
         keyword1=title,

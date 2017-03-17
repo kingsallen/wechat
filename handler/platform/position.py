@@ -702,6 +702,8 @@ class PositionListHandler(BaseHandler):
         # 只渲染必要的公司信息
         yield self.make_company_info()
 
+        self.logger.debug("[PositionListHandler]params:{}".format(self.params))
+
         # 如果是下拉刷新请求的职位, 返回新增职位的页面
         if self.params.restype == "json":
             self.render(
