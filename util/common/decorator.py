@@ -170,7 +170,7 @@ def check_and_apply_profile(func):
         else:
             self.logger.warning("has no profile, redirect to profile_new")
             # render new profile entry 页面
-            self.render(template_name='refer/neo_weixin/sysuser/importresume.html')
+            self.render(template_name='refer/neo_weixin/sysuser/importresume.html', use_email=True)
             # self.redirect(make_url(path.PROFILE_NEW, self.params))
     return wrapper
 
