@@ -20,7 +20,6 @@ class ResumeImportHandler(BaseHandler):
         self.params.headimg = self.current_user.sysuser.headimg
         self.render(template_name='refer/neo_weixin/sysuser/importresume-auth.html', message='')
 
-
     @handle_response
     @authenticated
     @gen.coroutine
@@ -42,16 +41,12 @@ class ResumeImportHandler(BaseHandler):
         username = self.params.get("_username", "")
         password = self.params.get("_password", "")
 
-        self.logger.debug("params 1: {}".format(self.params))
-
         self.params.pop("recom_time", None)
         self.params.pop("ajax", None)
         self.params.pop("m", None)
         self.params.pop("abgroup", None)
         self.params.pop("tjtoken", None)
         self.params.pop("abapply",None)
-
-        self.logger.debug("params 2: {}".format(self.params))
 
         if not username or not password:
             # 日志打点返回用户名和密码没有填写
