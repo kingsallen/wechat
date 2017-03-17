@@ -757,6 +757,7 @@ class PositionListHandler(BaseHandler):
             host=self.request.host,
             protocol=self.request.protocol,
             recom=self.position_ps._make_recom(self.current_user.sysuser.id),
+            test="testaaa",
             escape=["pid", "keywords", "cities", "candidate_source",
                     "employment_type", "salary", "department", "occupations",
                     "custom", "degree", "page_from", "page_size"])

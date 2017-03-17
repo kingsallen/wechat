@@ -34,14 +34,15 @@ def make_url(path, params=None, host="", protocol="https", escape=None,
     if not isinstance(params, dict):
         raise TypeError("Params is not a dict")
 
-    params.update(kwargs)
+    d = params.copy()
+    d.update(kwargs)
 
     # 默认 query 黑名单：state, code, _xsrf , appid, tjtoken不传递
     _ESCAPE_DEFAULT = ['state', 'code', '_xsrf', 'appid', 'tjtoken']
 
     escape = set((escape or []) + _ESCAPE_DEFAULT)
 
-    pairs = {k: v for k, v in params.items() if k not in escape}
+    pairs = {k: v for k, v in d.items() if k not in escape}
 
     def valid(k, v):
         return v and isinstance(k, str) and isinstance(v, str) and not k.startswith("_")
