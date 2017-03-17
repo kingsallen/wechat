@@ -39,6 +39,9 @@ class ResumeImportHandler(BaseHandler):
         -5      用户名密码错误,用户名, 密码没填写
         """
 
+        self.logger.debug("json_args:{}".format(self.json_args))
+        self.logger.debug("params: {}".format(self.params))
+
         username = self.json_args.get("_username", "")
         password = self.json_args.get("_password", "")
 
