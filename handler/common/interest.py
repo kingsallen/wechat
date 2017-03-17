@@ -77,10 +77,8 @@ class UserCurrentInfoHandler(BaseHandler):
                                                          self.current_user.sysuser.mobile,
                                                          self.current_user.wxuser.id,
                                                          self.current_user.recom.id if self.params.recom else 0)
-            # 2.添加候选人相关记录
-            # yield self.candidate_ps.send_candidate_interested(self.current_user.sysuser.id, self.params.pid, 1)
 
-            # 3.添加定时任务，若2小时候，没有完善则发送消息模板
+            # 2.添加定时任务，若2小时候，没有完善则发送消息模板
             position_info = yield self.position_ps.get_position(self.params.pid)
             real_company_id = yield self.company_ps.get_real_company_id(
                 position_info.publisher, position_info.company_id)
@@ -95,6 +93,9 @@ class UserCurrentInfoHandler(BaseHandler):
                                          position_info.city,
                                          self.current_user.sysuser.id,
                                          link)
+
+            # 3.添加候选人相关记录
+            yield self.candidate_ps.send_candidate_interested(self.current_user.sysuser.id, self.params.pid, 1)
 
             # 4.向 HR 发送消息模板提示
             if position_info.publisher:

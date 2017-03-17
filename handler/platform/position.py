@@ -834,7 +834,6 @@ class PositionEmpNoticeHandler(BaseHandler):
         职位相关转发后的回调。10分钟后发送模板消息
         :return:
         """
-        self.logger.debug("PositionEmpNoticeHandler start")
         if not self.current_user.employee or not self.params.pid:
             self.send_json_success()
             return
@@ -842,9 +841,6 @@ class PositionEmpNoticeHandler(BaseHandler):
         position = yield self.position_ps.get_position(self.params.pid)
 
         link = make_url(path.EMPLOYEE_RECOMMENDS, host=self.request.host, wechat_signature=self.current_user.wechat.signature)
-
-        self.logger.debug("PositionEmpNoticeHandler position:{}".format(position))
-        self.logger.debug("PositionEmpNoticeHandler link:{}".format(link))
 
         if self.current_user.wechat.passive_seeker == const.OLD_YES:
             yield position_share_notice_employee_tpl(self.current_user.company.id,

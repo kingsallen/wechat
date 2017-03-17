@@ -291,11 +291,6 @@ class BaseHandler(MetaBaseHandler):
         else:
             need_oauth = True
 
-        self.logger.debug("need_oauth: %s" % need_oauth)
-        self.logger.debug("_unionid: %s" % self._unionid)
-        self.logger.debug("_wxuser: %s" % self._wxuser)
-        self.logger.debug("_qx_wechat: %s" % self._qx_wechat)
-
         if need_oauth:
             if self.in_wechat and not self._unionid:
                 # unionid 不存在，则进行仟寻授权
@@ -308,11 +303,6 @@ class BaseHandler(MetaBaseHandler):
                 self.logger.debug("beyond wechat start!!!")
                 yield self._build_session()
                 self.logger.debug("_build_session: %s" % self.current_user)
-        else:
-            self.logger.debug("!!!!!!!need_oauth error!!!!!!!")
-            self.logger.debug(
-                "!!!!!!!need_oauth error current_user: {}".format(
-                    self.current_user))
 
     @gen.coroutine
     def _build_session(self):
@@ -535,7 +525,6 @@ class BaseHandler(MetaBaseHandler):
         后续是否需要做持久化待讨论
         :return: session_id
         """
-        self.logger.debug("_make_new_session_id\n")
         while True:
             session_id = const.SESSION_ID.format(
                 str(user_id),
@@ -563,13 +552,10 @@ class BaseHandler(MetaBaseHandler):
         mviewer_id = to_str(self.get_secure_cookie(const.COOKIE_MVIEWERID))
         if not mviewer_id:
             mviewer_id = _make_new_moseeker_viewer_id()
-            self.logger.debug("_build_session mviewer_id make")
             self.set_secure_cookie(
                 const.COOKIE_MVIEWERID,
                 mviewer_id,
                 httponly=True)
-        self.logger.debug(
-            "_build_session mviewer_id old:{}".format(mviewer_id))
 
     def get_template_namespace(self):
         namespace = super().get_template_namespace()

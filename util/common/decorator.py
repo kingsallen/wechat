@@ -5,7 +5,6 @@
 import functools
 import hashlib
 import traceback
-import pprint
 from urllib.parse import urlencode
 
 from tornado import gen
@@ -211,12 +210,6 @@ def authenticated(func):
     @functools.wraps(func)
     @gen.coroutine
     def wrapper(self, *args, **kwargs):
-        self.logger.debug("!!!!!!authenticated: %s" % self.current_user)
-        self.logger.debug("!!!!!!authenticated self._authable: %s" % self._authable(self.current_user.wechat.type))
-        self.logger.debug("!!!!!!authenticated: self.current_user.wxuser %s" % self.current_user.wxuser)
-        self.logger.debug("!!!!!!authenticated: self.request.uri %s" % self.request.uri)
-        self.logger.debug("!!!!!!authenticated: not self.request.uri.startswith: {}".format(self.request.uri.startswith("/m/api/")))
-
 
         if self.current_user.sysuser and self.in_wechat:
             if self._authable(self.current_user.wechat.type) and not self.current_user.wxuser \
@@ -224,7 +217,6 @@ def authenticated(func):
                 and not self.request.uri.startswith("/m/api/"):
                 # 该企业号是服务号，静默授权
                 # api 类接口，不适合做302静默授权，微信服务器不会跳转
-                self.logger.debug("!!!!!!authenticated!!!!!!!!!!!!!!!!!")
                 self._oauth_service.wechat = self.current_user.wechat
                 self._oauth_service.state = to_hex(self.current_user.qxuser.unionid)
                 url = self._oauth_service.get_oauth_code_base_url()
@@ -232,19 +224,13 @@ def authenticated(func):
                 return
 
         elif not self.current_user.sysuser:
-            self.logger.debug("!!!!!!authenticated: need login")
-            self.logger.debug("!!!!!!authenticated: need login method:{}".format(self.request.method))
             if self.request.method in ("GET", "HEAD"):
                 redirect_url = make_url(path.USER_LOGIN, self.params, escape=['next_url'])
-                self.logger.debug("!!!!!!authenticated: need login redirect_url params:{}".format(self.params))
-                self.logger.debug("!!!!!!authenticated: need login redirect_url 1:{}".format(redirect_url))
                 redirect_url += "&" + urlencode(
                     dict(next_url=self.request.uri))
-                self.logger.debug("!!!!!!authenticated: need login redirect_url 2:{}".format(redirect_url))
                 self.redirect(redirect_url)
                 return
             else:
-                self.logger.debug("!!!!!!authenticated: need login else!!")
                 self.send_json_error(message=msg.NOT_AUTHORIZED)
 
         yield func(self, *args, **kwargs)
