@@ -25,25 +25,15 @@ class ApplicationHandler(BaseHandler):
     def get(self):
 
         position = yield self.position_ps.get_position(self.params.pid)
-        check_status, message = self.check_position(
+        check_status, message = yield self.application_ps.check_position(
             position, self.current_user)
         self.logger.debug( "[create_email_reply]check_status:{}, message:{}".format(check_status, message))
 
         if not check_status:
-            self.render('weixin/systemmessage/successapply.html',
+            self.render(template_name='weixin/systemmessage/successapply.html',
                         message=message, nexturl=make_url(path.POSITION_LIST, self.params, escape=['next_url', 'pid']))
             return
 
-        # # 判断 current_user 的 profile 是否符合要求
-        # # 1. 获取 profile
-        # has_profile, profile = yield self.profile_ps.has_profile(
-        #     self.current_user.sysuser.id)
-        #
-        # # 2. 如果没有 profile 按照规则跳转
-        # if not has_profile:
-        #     # TODO 与 profile 共用
-        #     # no_profile_redirection(self.params.pid)
-        #     return
 
         # 3. 如果有 profile 但是是自定义职位,
         #    检查该 profile 是否符合自定义简历必填项,
@@ -64,18 +54,14 @@ class ApplicationHandler(BaseHandler):
         is_skip = "1" if is_esteelauder else "0"
 
         # 跳转到 profile get_view, 传递 apply 和 pid
-        self.redirect(make_url(path.PROFILE_VIEW, self.params,
-                               apply="1", is_skip=is_skip))
+        self.redirect(make_url(path.PROFILE_VIEW, self.params, apply="1", is_skip=is_skip))
 
     @handle_response
     @verified_mobile_oneself
     @authenticated
     @gen.coroutine
     def post(self):
-        """
-        处理普通申请
-        :return:
-        """
+        """ 处理普通申请 """
 
         is_applied, message, apply_id = yield self.position_ps.get_position(
             self.params.pid)

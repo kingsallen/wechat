@@ -272,36 +272,38 @@ class ApplicationPageService(PageService):
 #
 #         raise gen.Return((True, None))
 #
-#     @gen.coroutine
-#     def check_position(self, position, current_user):
-#         """
-#         职位验证，包含是否含有职位，职位是否过期，是否可以申请的验证
-#         :param position:
-#         :param current_user:
-#         :return:
-#         """
-#         is_ok = True
-#         if not position:
-#             message=msg.POSITION_NOT_EXIST
-#             is_ok = False
-#
-#         # 职位是否过期
-#         if position.status != const.OLD_YES:
-#             message=msg.POSITION_ALREADY_EXPIRED
-#             is_ok=False
-#
-#         # 判断当前职位是否提交过？
-#         application = self.get_application(position.id, current_user.sysuser.id)
-#         if application:
-#             message=msg.DUPLICATE_APPLICATION
-#             is_ok=False
-#
-#         # 判断当前用户手机号
-#         if str(current_user.sysuser.mobile) != str(current_user.sysuser.username):
-#             message=msg.CELLPHONE_MOBILE_INVALID
-#             is_ok=False
-#
-#         raise gen.Return((is_ok, message))
+    @gen.coroutine
+    def check_position(self, position, current_user):
+        """
+        职位验证，包含是否含有职位，职位是否过期，是否可以申请的验证
+        :param position:
+        :param current_user:
+        :return:
+        """
+        is_ok = True
+        message = ''
+
+        # 职位是否过期
+        if position.status != const.OLD_YES:
+            message = msg.POSITION_ALREADY_EXPIRED
+            is_ok = False
+
+        # 判断当前职位是否提交过？
+        application = yield self.get_application(
+            position.id, current_user.sysuser.id)
+
+        if application:
+            message = msg.DUPLICATE_APPLICATION
+            is_ok = False
+
+        # 判断当前用户手机号
+        if str(current_user.sysuser.mobile) != str(
+            current_user.sysuser.username):
+            message = msg.CELLPHONE_MOBILE_INVALID
+            is_ok = False
+
+        return is_ok, message
+
 #
 #     @gen.coroutine
 #     def create_email_profile(self, params, current_user, is_platform=True):
