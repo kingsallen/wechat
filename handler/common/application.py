@@ -81,7 +81,9 @@ class ApplicationHandler(BaseHandler):
             # 宝洁投递后，跳转到指定页面
             message = yield self.customize_ps.get_pgcareers_msg(self.current_user.wechat.company_id)
 
-            self.send_json_success(data={apply_id: apply_id}, message=message)
+            self.send_json_success(
+                data=dict(apply_id=apply_id),
+                message=message)
         else:
             self.send_json_error(message=message)
 
