@@ -118,6 +118,37 @@ class ProfileNewHandler(BaseHandler):
             self.send_json_warning(message='profile created partially')
 
 
+class ProfilePreviewHandler(BaseHandler):
+
+    @handle_response
+    @authenticated
+    @check_and_apply_profile
+    @tornado.gen.coroutine
+    def get(self):
+        if not self.params.pid or not self.params.is_skip:
+            raise ValueError()
+
+        other = {}
+        profile_tpl = yield self.profile_ps.profile_to_tempalte(
+            self.current_user.profile, other)
+
+        if self.current_user.sysuser.mobile:
+            current_mobile = str(self.current_user.sysuser.mobile)
+        else:
+            current_mobile = ''
+
+        data = ObjectDict(
+            profile=profile_tpl,
+            pid=self.params.pid,
+            is_skip=bool(self.params.is_skip),
+            need_mobile_validate=str(self.current_user.sysuser.mobile) != str(self.current_user.sysuser.username),
+            no_name=not self.current_user.sysuser.name,
+            current_mobile=current_mobile
+        )
+
+        self.render_page(template_name='profile/preview.html', data=data)
+
+
 class ProfileHandler(BaseHandler):
     """ProfileHandler
     GET Profile 页面渲染

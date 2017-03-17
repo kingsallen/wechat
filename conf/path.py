@@ -20,6 +20,7 @@ EMPLOYEE_RECOMMENDS = '/m/app/employee/recommends'
 USERCENTER_APPLYRECORD = '/m/app/usercenter/applyrecords/{}'
 
 PROFILE_VIEW = '/m/profile'
+PROFILE_PREVIEW = '/m/profile/preview'
 PROFILE_NEW = '/m/app/profile/new'
 
 HR_WX_IMAGE_URL = "https://www.moseeker.com/common/image?url="

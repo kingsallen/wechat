@@ -54,7 +54,7 @@ class ApplicationHandler(BaseHandler):
         is_skip = "1" if is_esteelauder else "0"
 
         # 跳转到 profile get_view, 传递 apply 和 pid
-        self.redirect(make_url(path.PROFILE_VIEW, self.params, apply="1", is_skip=is_skip))
+        self.redirect(make_url(path.PROFILE_PREVIEW, self.params, is_skip=is_skip))
 
     @handle_response
     @verified_mobile_oneself
