@@ -137,10 +137,15 @@ class ProfilePreviewHandler(BaseHandler):
         else:
             current_mobile = ''
 
+        try:
+            is_skip = int(self.params.is_skip) == const.YES
+        except Exception:
+            is_skip = False
+
         data = ObjectDict(
             profile=profile_tpl,
             pid=self.params.pid,
-            is_skip=bool(self.params.is_skip),
+            is_skip=is_skip,
             need_mobile_validate=str(self.current_user.sysuser.mobile) != str(self.current_user.sysuser.username),
             no_name=not self.current_user.sysuser.name,
             current_mobile=current_mobile
