@@ -18,7 +18,7 @@ class ResumeImportHandler(BaseHandler):
     def get(self):
 
         self.params.headimg = self.current_user.sysuser.headimg
-        self.render(template_name='neo_weixin/sysuser/importresume-auth.html', message='')
+        self.render(template_name='refer/neo_weixin/sysuser/importresume-auth.html', message='')
 
 
     @handle_response
