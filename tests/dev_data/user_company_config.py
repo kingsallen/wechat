@@ -10,7 +10,6 @@
 """
 from util.common import ObjectDict
 
-
 # DEV1 company setting for moseeker.
 
 COMPANY_72 = ObjectDict({
@@ -26,7 +25,6 @@ COMPANY_72 = ObjectDict({
         'qr_code': []  # 二维码
     },
 })
-
 
 # System testing setting for Mars
 
@@ -65,7 +63,6 @@ SUB_COMPANY_MARS_40120 = ObjectDict({
         'qr_code': []  # 二维码
     }
 })
-
 
 # Product environment company config
 
@@ -163,7 +160,7 @@ COMPANY_ACTIONSKY = ObjectDict({
               'events', 'address', 'survey', 'qr_code'],
     'config': {
         'working_env': [296, 297, 298, 299, 300],  # 工作环境对应的 hr_media id list
-        #'figure': [],  # 人物寄语
+        # 'figure': [],  # 人物寄语
         'members': [301, 302],  # 成员采访
         'events': [305, 304, 303],  # 公司大事件
         'address': [306],  # 公司地图
@@ -172,12 +169,27 @@ COMPANY_ACTIONSKY = ObjectDict({
     },
 })
 
+COMPANY_BLUEFOCUS = ObjectDict({
+    'order': ['figure', 'team', 'members', 'working_env',
+              'events', 'survey', 'qr_code'],
+    'config': {
+        'figure': [310],  # 人物寄语
+        'team': [354],
+        'members': [311],  # 成员采访
+        'working_env': [312, 313, 314, 315, 316, 317],  # 工作环境对应的 hr_media id list
+        'events': [318, 319, 320],  # 公司大事件
+        # 'address': [306],  # 公司地图
+        'survey': [],  # 问卷调查
+        'qr_code': [321]  # 二维码
+    },
+})
+
 # summary config for all companies
 
 COMPANY_CONFIG = ObjectDict({
     # 测试调试配置
     # 72: COMPANY_72,
-    4: COMPANY_MOSEEKER,
+    4: COMPANY_BLUEFOCUS,
     39978: COMPANY_ACTIONSKY,
     # 39979: COMPANY_72,
     # 40120: SUB_COMPANY_MARS_40120,
@@ -189,5 +201,6 @@ COMPANY_CONFIG = ObjectDict({
     1424: COMPANY_NET_EASE,
     102566: COMPANY_JOHNSON,
     157: COMPANY_MONDELEZ,
-    87954: COMPANY_ACTIONSKY
+    87954: COMPANY_ACTIONSKY,
+    52813: COMPANY_BLUEFOCUS
 })
