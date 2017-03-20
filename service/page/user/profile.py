@@ -85,21 +85,41 @@ class ProfilePageService(PageService):
         return result, profile
 
     @gen.coroutine
-    def import_profile(self, source, username, password, user_id):
+    def import_profile(self, source, username, password, user_id, token=None):
         """
         导入第三方简历（51job, 智联招聘，linked，猎聘）
         :param source: int
         :param username: string
         :param password: string
         :param user_id: int
+        :param token: string linkedin 网站的access_token
         :return: tuple (bool, result or None)
 
         调用方式:
         profile = import_profile[1,"ab","123",2]
         """
 
-        is_ok, result = yield self.infra_profile_ds.import_profile(source, username, password, user_id)
+        is_ok, result = yield self.infra_profile_ds.import_profile(source, username, password, user_id, token)
         return is_ok, result
+
+    @gen.coroutine
+    def get_linkedin_token(self, code, redirect_url):
+        """
+        获得 linkedin oauth2.0的 access_token
+        :param params: int
+        :return:dict
+        """
+
+        params = ObjectDict(
+            grant_type = "authorization_code",
+            code = code,
+            redirect_uri = redirect_url,
+            client_id = self.settings.linkedin_client_id,
+            client_secret = self.settings.linkedin_client_secret,
+        )
+
+        response = yield self.infra_profile_ds.get_linkedin_token(params)
+        return response
 
     @gen.coroutine
     def create_profile(self, user_id):

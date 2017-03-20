@@ -8,6 +8,7 @@ import tornado.httpclient
 import ujson
 from tornado import gen
 from tornado.httputil import url_concat, HTTPHeaders
+from urllib.parse import urlencode
 
 from app import env
 from app import logger
@@ -42,6 +43,53 @@ def http_patch(route, jdata=None, timeout=5, infra=True):
     ret = yield _async_http_post(route, jdata, timeout=timeout, method='PATCH', infra=infra)
     return ret
 
+@gen.coroutine
+def http_fetch(route, data=None, timeout=5, method='POST'):
+    """
+    使用 www-form 形式异步请求，支持 GET，POST
+    :param route:
+    :param jdata:
+    :param timeout:
+    :return:
+    """
+    if method.lower() not in "get post":
+        raise ValueError("method is not in GET and POST")
+
+    if data is None:
+        data = ObjectDict()
+
+    tornado.httpclient.AsyncHTTPClient.configure(
+        "tornado.curl_httpclient.CurlAsyncHTTPClient")
+
+    http_client = tornado.httpclient.AsyncHTTPClient()
+
+    try:
+        if method.upper() == "GET":
+            if data:
+                route = "{}?{}".format(route, urlencode(data))
+
+            http_request = tornado.httpclient.HTTPRequest(
+                route,
+                method=method.upper(),
+                request_timeout=timeout,
+            )
+        else:
+            http_request = tornado.httpclient.HTTPRequest(
+                route,
+                method=method.upper(),
+                body=urlencode(data),
+                request_timeout=timeout,
+            )
+        response = yield http_client.fetch(http_request)
+        raise gen.Return(response.body)
+
+    except tornado.httpclient.HTTPError as e:
+        logger.warning("[http_fetch][url: {}][body: {}]".format(
+            route, ujson.encode(data)))
+        logger.warning("http_fetch httperror: {}".format(e))
+
+    raise gen.Return(ObjectDict())
+
 def unboxing(http_response):
     """标准 restful api 返回拆箱"""
 
@@ -51,9 +99,7 @@ def unboxing(http_response):
         data = http_response.data
     else:
         data = http_response
-
     return result, data
-
 
 @gen.coroutine
 def _async_http_get(route, jdata=None, timeout=5, method='GET', infra=True):

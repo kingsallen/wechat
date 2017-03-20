@@ -17,12 +17,22 @@ class InfraProfileDataService(DataService):
         return http_tool.unboxing(res)
 
     @gen.coroutine
-    def import_profile(self, source, username, password, user_id):
+    def import_profile(self, type, username, password, user_id, token=None):
+        """
+        从第三方导入 profile
+        :param source: 必填 来源, 0:无法识别 1:51Job 2:Liepin 3:zhilian 4:linkedin
+        :param username: 选填（除了选择linkedin导入方式，其余都是必填） 帐号
+        :param password: 选填（除了选择linkedin导入方式，其余都是必填） 密码
+        :param user_id: 必填 登录用户的编号
+        :param token: 选填（除了选择linkedin导入方式是必填，其余都是选填）linkedin 网站的access_token
+        :return:
+        """
         params = ObjectDict(
-            type=int(source),
+            type=int(type),
             username=username,
             password=password,
-            user_id=user_id
+            user_id=user_id,
+            token=token,
         )
         res = yield http_tool.http_post(path.PROFILE_IMPORT, params, timeout=60)
         return http_tool.unboxing(res)
@@ -618,4 +628,16 @@ class InfraProfileDataService(DataService):
             response = yield http_tool.http_delete(route, params)
         else:
             raise Exception('Unknow Exception')
+        return response
+
+    @gen.coroutine
+    def get_linkedin_token(self, params):
+        """
+        获得 linkedin 的 access_token
+        referer: https://developer.linkedin.com/docs/oauth2
+        :param params:
+        :return:
+        """
+
+        response = yield http_tool.http_fetch(path.LINKEDIN_ACCESSTOKEN, params, timeout=20)
         return response

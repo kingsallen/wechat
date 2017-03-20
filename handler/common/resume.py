@@ -6,14 +6,52 @@ import conf.path as path
 import conf.message as msg
 import conf.common as const
 from handler.base import BaseHandler
+from handler.metabase import MetaBaseHandler
 from util.common import ObjectDict
 from util.common.decorator import handle_response, authenticated
 from util.tool.url_tool import make_url
+from util.tool.str_tool import to_str, match_session_id
 
+
+class LinkedinImportHandler(MetaBaseHandler):
+    """linkedin 导入，由于 linkedin 为 oauth2.0导入，与微信 oauth2.0授权冲突（code问题），故直接继承 MetaBaseHandler"""
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+
+        code = self.params.code
+        if not code:
+            self.write_error(404)
+            return
+
+        user_id = match_session_id(to_str(self.get_secure_cookie(const.COOKIE_SESSIONID)))
+
+        redirect_url = make_url(path.RESUME_LINKEDIN,
+                                host=self.request.host,
+                                recom=self.params.recom,
+                                wechat_signature=self.params.wechat_signature)
+
+        response = yield self.profile_ps.get_linkedin_token(code=code, redirect_url=redirect_url)
+        access_token = response.access_token
+
+        is_ok, result = yield self.profile_ps.import_profile(4, "", "", user_id, access_token)
+        if is_ok:
+            if self.params.pid:
+                next_url = make_url(path.PROFILE_VIEW, params=self.params, apply='1')
+            else:
+                next_url = make_url(path.PROFILE_VIEW, params=self.params)
+
+            self.redirect(next_url)
+            return
+        else:
+            self.write_error(500)
 
 class ResumeImportHandler(BaseHandler):
 
     @handle_response
+    @authenticated
     @gen.coroutine
     def get(self):
 

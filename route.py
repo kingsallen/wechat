@@ -39,6 +39,7 @@ common_routes = [
     (r"/m/application/email",                          "handler.common.application.ApplicationEmailHandler",        {"event": "application_email"}),
     (r"/m/positionfav/([0-9]+)",                       "handler.common.position.PositionFavHandler",                {"event": "position_fav"}),
     (r"/m/resume/import",                              "handler.common.resume.ResumeImportHandler",                 {"event": "resume_auth"}),
+    (r"/m/resume/linkedin",                            "handler.common.resume.LinkedinImportHandler",               {"event": "resume_linkedin"}),
 
     # websocket
     (r"/m/websocket/([A-Za-z0-9_]{1,32})",             "handler.common.im.ChatWebSocketHandler"),
@@ -96,10 +97,10 @@ platform_routes = [
     (r"/m/api/position/empnotice",                     "handler.platform.position.PositionEmpNoticeHandler",        {"event": "position_empnotice"}),
 
 
-    # 招聘助手的 route，临时放这里，方便调试
+    # 招聘助手的 route，由于域名还没有确定，临时放这里
     (r"/h/position", "handler.help.releasedposition.ReleasedPositionHandler", {"event": "helper_positions"}),
     (r"/h/register/qrcode", "handler.help.passport.RegisterQrcodeHandler", {"event": "helper_qrcode"}),
-
+    # 我也要招人
     (r"/m/api/register", "handler.help.passport.RegisterHandler", {"event": "helper_register"}),
 
 ]

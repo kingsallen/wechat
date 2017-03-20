@@ -31,7 +31,7 @@ class ApplicationHandler(BaseHandler):
 
         if not check_status:
             self.render(
-                template_name='weixin/systemmessage/successapply.html',
+                template_name='refer/weixin/systemmessage/successapply.html',
                 message=message,
                 nexturl=make_url(path.POSITION_LIST, self.params,
                                  escape=['next_url', 'pid']))
@@ -91,6 +91,17 @@ class ApplicationHandler(BaseHandler):
 class ApplicationEmailHandler(BaseHandler):
 
     @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        """Email 信息填写页面和确认页面"""
+
+        if self.params.confirm:
+            self.render(template_name="refer/weixin/sysuser/emailresume_sent.html")
+        else:
+            self.render(template_name="refer/weixin/sysuser/emailresume_inputemail.html", name=self.current_user.sysuser.name)
+
+    @handle_response
     @verified_mobile_oneself
     @authenticated
     @gen.coroutine
@@ -122,5 +133,4 @@ class ApplicationEmailHandler(BaseHandler):
             self.LOG.debug(u"Start to create email profile..")
             yield self.application_ps.create_email_profile(self.params, self.current_user, self.is_platform)
 
-        self.render("weixin/sysuser/emailresume_sent.html")
-
+        self.render(template_name="refer/weixin/sysuser/emailresume_sent.html")

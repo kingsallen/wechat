@@ -192,87 +192,87 @@ class ApplicationPageService(PageService):
 #             )
 #             return False
 #
-#     @gen.coroutine
-#     def create_email_apply(self, params, position, current_user, is_platform=True):
-#         """
-#         创建Email申请
-#         :param params:
-#         :param position:
-#         :param current_user:
-#         :param is_platform:
-#         :return:
-#         """
-#
-#         check_status, message = self.check_position(position, current_user)
-#         self.logger.debug("[create_email_reply]check_status:{}, message:{}".format(check_status, message))
-#         if not check_status:
-#             raise gen.Return((False, message))
-#
-#         # 获取推荐人信息
-#         recommender_user_id, recommender_wxuser_id, recom_employee = yield self.get_recommend_user(current_user, position, is_platform)
-#
-#         self.logger.debug("[create_email_reply]recommender_user_id:{}, recommender_wxuser_id:{}".format(recommender_user_id, recommender_wxuser_id))
-#
-#         params_for_application = ObjectDict(
-#             wechat_id=current_user.wechat.id,
-#             position_id=position.id,
-#             recommender_id=recommender_wxuser_id,
-#             recommender_user_id=recommender_user_id,
-#             applier_id=current_user.sysuser.id,
-#             company_id=position.company_id,
-#             routine=0 if is_platform else 1,
-#             apply_type=1,  # 投递区分， 0：profile投递， 1：email投递
-#             email_status=1  # email解析状态: 0，有效；1,未收到回复邮件；2，文件格式不支持；3，附件超过10M；9，提取邮件失败
-#         )
-#
-#         self.logger.debug(
-#             "[create_email_reply]params_for_application:{}".format(recommender_wxuser_id))
-#
-#         ret = yield self.infra_application_ds.create_application(params_for_application)
-#
-#         # 申请创建失败,  跳转到申请失败页面
-#         if not ret.status != const.API_SUCCESS:
-#             message=msg.CREATE_APPLICATION_FAILED
-#             raise gen.Return((False, message))
-#
-#         uuidcode = str(uuid.uuid4())
-#         email_params = ObjectDict(
-#             email_address=params.email,
-#             company_abbr=current_user.company.abbreviation or current_user.company.name,
-#             applier_name=params.name or current_user.sysuser.name,
-#             invitation_code=uuidcode,
-#             plat_type=1 if is_platform else 2
-#         )
-#         if is_platform:
-#             # 如果是platform的话, 都是KA用户, 需要以下额外的信息
-#             email_params_wechat_info = dict(
-#                 company_logo=current_user.company.logo,
-#                 official_account_name=current_user.wechat.name,
-#                 official_account_qrcode=current_user.wechat.qrcode
-#             )
-#             email_params.update(email_params_wechat_info)
-#
-#         # 将部分申请信息存入redis, 解析邮件脚本使用.
-#         value_dict = ObjectDict(
-#             user_id=current_user.sysuser.id,
-#             curr_wxuser_id=current_user.wxuser.id or 0,
-#             mobile=current_user.sysuser.mobile,
-#             app_id=ret.data.jobApplicationId,
-#             last_employee_recom_user_id=recommender_user_id,
-#             last_employee_recom_id=recommender_wxuser_id,
-#             project=is_platform,
-#             reply_email_info=email_params
-#         )
-#
-#         self.logger.debug(
-#             "[create_email_reply]value_dict:{}".format(value_dict))
-#
-#         self.email_apply_session.save_email_apply_sessions(uuidcode, value_dict)
-#         rst = send_email_create_application_notice(email_params, position)  # 1是platform, 2是qx
-#         self.logger.debug("[create_email_reply]Send Email to creator " + str(rst))
-#
-#         raise gen.Return((True, None))
-#
+    @gen.coroutine
+    def create_email_apply(self, params, position, current_user, is_platform=True):
+        """
+        创建Email申请
+        :param params:
+        :param position:
+        :param current_user:
+        :param is_platform:
+        :return:
+        """
+
+        check_status, message = self.check_position(position, current_user)
+        self.logger.debug("[create_email_reply]check_status:{}, message:{}".format(check_status, message))
+        if not check_status:
+            raise gen.Return((False, message))
+
+        # 获取推荐人信息
+        recommender_user_id, recommender_wxuser_id, recom_employee = yield self.get_recommend_user(current_user, position, is_platform)
+
+        self.logger.debug("[create_email_reply]recommender_user_id:{}, recommender_wxuser_id:{}".format(recommender_user_id, recommender_wxuser_id))
+
+        params_for_application = ObjectDict(
+            wechat_id=current_user.wechat.id,
+            position_id=position.id,
+            recommender_id=recommender_wxuser_id,
+            recommender_user_id=recommender_user_id,
+            applier_id=current_user.sysuser.id,
+            company_id=position.company_id,
+            routine=0 if is_platform else 1,
+            apply_type=1,  # 投递区分， 0：profile投递， 1：email投递
+            email_status=1  # email解析状态: 0，有效；1,未收到回复邮件；2，文件格式不支持；3，附件超过10M；9，提取邮件失败
+        )
+
+        self.logger.debug(
+            "[create_email_reply]params_for_application:{}".format(recommender_wxuser_id))
+
+        ret = yield self.infra_application_ds.create_application(params_for_application)
+
+        # 申请创建失败,  跳转到申请失败页面
+        if not ret.status != const.API_SUCCESS:
+            message=msg.CREATE_APPLICATION_FAILED
+            raise gen.Return((False, message))
+
+        uuidcode = str(uuid.uuid4())
+        email_params = ObjectDict(
+            email_address=params.email,
+            company_abbr=current_user.company.abbreviation or current_user.company.name,
+            applier_name=params.name or current_user.sysuser.name,
+            invitation_code=uuidcode,
+            plat_type=1 if is_platform else 2
+        )
+        if is_platform:
+            # 如果是platform的话, 都是KA用户, 需要以下额外的信息
+            email_params_wechat_info = dict(
+                company_logo=current_user.company.logo,
+                official_account_name=current_user.wechat.name,
+                official_account_qrcode=current_user.wechat.qrcode
+            )
+            email_params.update(email_params_wechat_info)
+
+        # 将部分申请信息存入redis, 解析邮件脚本使用.
+        value_dict = ObjectDict(
+            user_id=current_user.sysuser.id,
+            curr_wxuser_id=current_user.wxuser.id or 0,
+            mobile=current_user.sysuser.mobile,
+            app_id=ret.data.jobApplicationId,
+            last_employee_recom_user_id=recommender_user_id,
+            last_employee_recom_id=recommender_wxuser_id,
+            project=is_platform,
+            reply_email_info=email_params
+        )
+
+        self.logger.debug(
+            "[create_email_reply]value_dict:{}".format(value_dict))
+
+        self.email_apply_session.save_email_apply_sessions(uuidcode, value_dict)
+        rst = send_email_create_application_notice(email_params, position)  # 1是platform, 2是qx
+        self.logger.debug("[create_email_reply]Send Email to creator " + str(rst))
+
+        raise gen.Return((True, None))
+
     @gen.coroutine
     def check_position(self, position, current_user):
         """
@@ -305,50 +305,49 @@ class ApplicationPageService(PageService):
 
         return is_ok, message
 
-#
-#     @gen.coroutine
-#     def create_email_profile(self, params, current_user, is_platform=True):
-#         """
-#         只是创建创建Email Profile 不包含申请
-#         将部分申请信息存入redis, 解析邮件脚本使用.
-#         :param params:
-#         :param current_user:
-#         :param is_platform:
-#         :return:
-#         """
-#
-#         uuidcode = str(uuid.uuid4())
-#
-#         email_params = ObjectDict(
-#             email_address = params.email,
-#             applier_name=params.name or current_user.sysuser.name,
-#             invitation_code=uuidcode,
-#             plat_type=1 if is_platform else 2
-#         )
-#         value_dict = ObjectDict(
-#             user_id=current_user.sysuser.id,
-#             curr_wxuser_id=current_user.wxuser.id or 0,
-#             mobile=current_user.sysuser.mobile,
-#             project=is_platform,
-#             reply_email_info=email_params
-#         )
-#
-#         self.email_apply_session.save_email_apply_sessions(uuidcode, value_dict)
-#         self.logger.debug("[create_email_profile]value_dict:{}".format(value_dict))
-#         # 求职者发送Email创建邮件
-#         rst = send_email_create_profile_notice(email_params)
-#         self.logger.debug("[create_email_profile]Send Email to creator " + str(rst))
-#
-#     def __split_dot(self, p_str):
-#         """
-#         内部方法,不要无故使用
-#         """
-#         if p_str.find(".") > 0:
-#             r_ret = p_str.split(".")
-#             if len(r_ret) == 2:
-#                 return tuple(r_ret)
-#         return None
-#
+    @gen.coroutine
+    def create_email_profile(self, params, current_user, is_platform=True):
+        """
+        只是创建创建Email Profile 不包含申请
+        将部分申请信息存入redis, 解析邮件脚本使用.
+        :param params:
+        :param current_user:
+        :param is_platform:
+        :return:
+        """
+
+        uuidcode = str(uuid.uuid4())
+
+        email_params = ObjectDict(
+            email_address = params.email,
+            applier_name=params.name or current_user.sysuser.name,
+            invitation_code=uuidcode,
+            plat_type=1 if is_platform else 2
+        )
+        value_dict = ObjectDict(
+            user_id=current_user.sysuser.id,
+            curr_wxuser_id=current_user.wxuser.id or 0,
+            mobile=current_user.sysuser.mobile,
+            project=is_platform,
+            reply_email_info=email_params
+        )
+
+        self.email_apply_session.save_email_apply_sessions(uuidcode, value_dict)
+        self.logger.debug("[create_email_profile]value_dict:{}".format(value_dict))
+        # 求职者发送Email创建邮件
+        rst = send_email_create_profile_notice(email_params)
+        self.logger.debug("[create_email_profile]Send Email to creator " + str(rst))
+
+    def __split_dot(self, p_str):
+        """
+        内部方法,不要无故使用
+        """
+        if p_str.find(".") > 0:
+            r_ret = p_str.split(".")
+            if len(r_ret) == 2:
+                return tuple(r_ret)
+        return None
+
 
     @gen.coroutine
     def create_application(self, params, position, current_user, is_platform=True):

@@ -60,6 +60,10 @@ settings['qiniu_ak'] = 'rMkcbmVYotu9Zxi0MqjmP5EFy6a9sZ5-h78Qt5GV'
 settings['qiniu_sk'] = 'n8qRg0VJBsGyHlZJh1W887LDn2Z-2gbavg9xgoRP'
 settings['qiniu_bucket'] = 'moseekertest'
 
+#linkedin oauth
+settings['linkedin_client_id'] = '7559ny1z1ti7d2'
+settings['linkedin_client_secret'] = 'KtwstrKAGhI4MUVf'
+
 # tornado log配置
 settings['blocking_log_threshold'] = 0.5
 

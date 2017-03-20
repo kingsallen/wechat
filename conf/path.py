@@ -12,6 +12,7 @@ USER_LOGOUT = '/m/logout'
 SEARCH_FILITER = '/m/start'
 CUSTOMIZE_EDX = '/m/custom/emailapply'
 RESUME_URL = '/m/resume/import'
+RESUME_LINKEDIN = '/m/resume/linkedin'
 APPLICATION = '/m/application'
 COLLECT_USERINFO = '/m/app/asist/collect_userinfo/positionfav'
 USER_CENTER = '/m/app/usercenter'
@@ -24,7 +25,7 @@ PROFILE_VIEW = '/m/profile'
 PROFILE_PREVIEW = '/m/profile/preview'
 PROFILE_NEW = '/m/app/profile/new'
 
-HR_WX_IMAGE_URL = "https://www.moseeker.com/common/image?url="
+
 
 # ============================ 基础服务开始 ============================
 # 用户服务
@@ -86,3 +87,7 @@ DICT_POSITION = "dict/position"
 # 消息通知服务
 MESSAGE_TEMPLATE = "message/template"
 # ============================ 基础服务结束 ============================
+
+# 其他外部服务
+HR_WX_IMAGE_URL = "https://www.moseeker.com/common/image?url="
+LINKEDIN_ACCESSTOKEN = "https://www.linkedin.com/uas/oauth2/accessToken"
