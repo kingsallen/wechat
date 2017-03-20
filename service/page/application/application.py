@@ -393,7 +393,8 @@ class ApplicationPageService(PageService):
 
         if ret.status != const.API_SUCCESS:
             return False, msg.CREATE_APPLICATION_FAILED
-        else: pass
+        else:
+            pass
 
         apply_id = ret.data.jobApplicationId
 
@@ -404,22 +405,23 @@ class ApplicationPageService(PageService):
         self.logger.debug("[post_apply]投递后续处理")
 
         #1. 添加积分
-        # yield self.opt_add_reward(apply_id, current_user, position, is_platform)
-        # 2. 发红包
-        # yield self.opt_send_redpacket(current_user, position)
-        # 3. 向求职者发送消息通知（消息模板，短信）
+        yield self.opt_add_reward(apply_id, current_user, position, is_platform)
+
+        #2. 向求职者发送消息通知（消息模板，短信）
         # yield self.opt_send_applier_msg(apply_id, current_user, position)
-        # 4. 向推荐人发送消息模板
+        #3. 向推荐人发送消息模板
         # yield self.opt_send_recommender_msg(recommender_user_id, current_user, position, current_user.profile)
-        # 5. 更新挖掘被动求职者信息
+        #4. 更新挖掘被动求职者信息
         # yield self.opt_update_candidate_recom_records(apply_id, current_user, recommender_user_id, position)
-        # 6. 向 HR 发送消息通知（消息模板，短信，邮件）
+        #5. 向 HR 发送消息通知（消息模板，短信，邮件）
         # yield self.opt_hr_msg(current_user, current_user.profile, position)
+
+        # TODO (tangyiliang) 发红包
+        # yield self.opt_send_redpacket(current_user, position)
 
         return True, msg.RESPONSE_SUCCESS, apply_id
 
 
-#
     @gen.coroutine
     def get_recommend_user(self, current_user, position, is_platform):
 
@@ -488,13 +490,11 @@ class ApplicationPageService(PageService):
 #
     @gen.coroutine
     def opt_add_reward(self, apply_id, current_user, position, is_platform):
-        """
-        添加积分
+        """ 添加积分
         :param apply_id:
         :param current_user:
         :param position:
         :param is_platform:
-        :return:
         """
 
         recommender_user_id, recommender_wxuser_id, recom_employee = yield self.get_recommend_user(current_user, position, is_platform)
