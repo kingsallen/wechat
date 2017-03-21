@@ -900,7 +900,7 @@ class ApplicationPageService(PageService):
             )
 
 
-        yield self.thrift_mq_ds.send_mandrill_email(self, template_name, to_email, "", from_email, "", "", merge_vars)
+        yield self.thrift_mq_ds.send_mandrill_email(template_name, to_email, "", from_email, "", "", merge_vars)
 
     @gen.coroutine
     def opt_send_email_create_profile_notice(self, email_params):
@@ -918,11 +918,10 @@ class ApplicationPageService(PageService):
             invitation_code=invitation_code,
         )
 
-        yield self.thrift_mq_ds.send_mandrill_email(self, template_name, to_email, "", from_email, "", "", merge_vars)
+        yield self.thrift_mq_ds.send_mandrill_email(template_name, to_email, "", from_email, "", "", merge_vars)
 
 
 import unittest
-
 
 class ApplicationPSTest(unittest.TestCase):
     def setUp(self):

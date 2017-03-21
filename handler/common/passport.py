@@ -9,7 +9,7 @@ import conf.common as const
 from handler.base import BaseHandler
 from cache.user.passport_session import PassportCache
 from util.common.decorator import handle_response, authenticated
-from util.tool.str_tool import to_str, password_crypt
+from util.tool.str_tool import to_str, password_crypt, password_validate
 from util.tool.url_tool import make_url
 from util.common.cipher import encode_id
 
@@ -266,6 +266,10 @@ class RegisterHandler(BaseHandler):
         if mobile is None or url_mobile is None \
             or encode_id(int(mobile), 8) != url_mobile:
             self.send_json_error(message=msg.CELLPHONE_MOBILE_SET_PASSWD_FAILED)
+            raise gen.Return()
+
+        if not password_validate(self.params.password):
+            self.send_json_error(message=msg.CELLPHONE_PASSWORD_ERROR)
             raise gen.Return()
 
         code, password = password_crypt(self.params.password)

@@ -31,7 +31,8 @@ class LinkedinImportHandler(MetaBaseHandler):
         redirect_url = make_url(path.RESUME_LINKEDIN,
                                 host=self.request.host,
                                 recom=self.params.recom,
-                                wechat_signature=self.params.wechat_signature)
+                                pid=self.params.pid,
+                                wechat_signature=self.current_user.wechat.signature)
 
         response = yield self.profile_ps.get_linkedin_token(code=code, redirect_url=redirect_url)
         access_token = response.access_token
@@ -79,6 +80,7 @@ class ResumeImportHandler(BaseHandler):
         username = self.params.get("_username", "")
         password = self.params.get("_password", "")
 
+        # 置空不必要参数，避免在 make_url 中被用到
         self.params.pop("recom_time", None)
         self.params.pop("ajax", None)
         self.params.pop("m", None)

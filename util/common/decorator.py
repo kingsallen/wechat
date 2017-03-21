@@ -5,7 +5,7 @@
 import functools
 import hashlib
 import traceback
-from urllib.parse import urlencode
+from urllib.parse import urlencode, quote
 
 from tornado import gen
 from tornado.locks import Semaphore
@@ -170,7 +170,21 @@ def check_and_apply_profile(func):
         else:
             self.logger.warning("has no profile, redirect to profile_new")
             # render new profile entry 页面
-            self.render(template_name='refer/neo_weixin/sysuser/importresume.html', use_email=True)
+            # 拼装 linkedin oauth 路由
+            redirect_uri = make_url(path.RESUME_LINKEDIN,
+                                    host=self.request.host,
+                                    recom=self.params.recom,
+                                    pid=self.params.pid,
+                                    wechat_signature=self.current_user.wechat.signature)
+
+            linkedin_url = make_url(path.LINKEDIN_AUTH, params = ObjectDict(
+                response_type="code",
+                client_id=self.settings.linkedin_client_id,
+                scope=quote("r_basicprofile r_emailaddress"),
+                state=self.current_user.wechat.signature,
+                redirect_uri=redirect_uri
+            ))
+            self.render(template_name='refer/neo_weixin/sysuser/importresume.html', use_email=True, linkedin_url=linkedin_url)
             # self.redirect(make_url(path.PROFILE_NEW, self.params))
     return wrapper
 

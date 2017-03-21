@@ -33,10 +33,7 @@ class CellphoneBindHandler(BaseHandler):
 
         try:
             # 重置 event，准确描述
-            print (122)
-            print (method)
             self._event = self._event + method
-            print (self._event)
             yield getattr(self, 'get_' + method)()
         except Exception as e:
             self.send_json_error()
@@ -46,11 +43,8 @@ class CellphoneBindHandler(BaseHandler):
     def post(self, method='register'):
 
         try:
-            print (333)
-            print (method)
             # 重置 event，准确描述
             self._event = self._event + method
-            print (self._event)
             yield getattr(self, 'post_' + method)()
         except Exception as e:
             self.send_json_error()

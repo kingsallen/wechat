@@ -110,28 +110,31 @@ class ApplicationEmailHandler(BaseHandler):
         if self.params.confirm:
             self.render(template_name="refer/weixin/sysuser/emailresume_sent.html")
         else:
-            #TODO
-            self.render_page(template_name="", data={
-                "mobile_valid": self.current_user.sysuser.username == self.current_user.sysuser.mobile
+            self.render_page(template_name="profile/email-input.html", data={
+                "mobile_valid": self.current_user.sysuser.username == str(self.current_user.sysuser.mobile)
             })
 
     @handle_response
-    @verified_mobile_oneself
+    # @verified_mobile_oneself
     @authenticated
     @gen.coroutine
-    def post_(self):
+    def post(self):
         """
         处理 Email 投递
         :return:
         """
         # 更新姓名，邮箱信息
-        yield self.usercenter_ps.update_user(self.current_user.sysuser.id, params={
+        res = yield self.usercenter_ps.update_user(self.current_user.sysuser.id, params={
             "name": self.current_user.sysuser.name or self.params.name.strip(),
             "email": self.current_user.sysuser.email or self.params.email.strip()
         })
 
+        self.logger.debug("update_user:{}".format(res))
+
         # 候选人信息更新
-        yield self.application_ps.update_candidate_company(self.params.name, self.current_user.sysuser.id)
+        res = yield self.application_ps.update_candidate_company(self.params.name, self.current_user.sysuser.id)
+
+        self.logger.debug("update_candidate_company:{}".format(res))
 
         position = yield self.position_ps.get_position(self.params.pid)
         if self.params.pid and position.email_resume_conf == 0:
@@ -144,7 +147,11 @@ class ApplicationEmailHandler(BaseHandler):
                 self.send_json_error(message=message)
                 return
         else:
-            self.LOG.debug(u"Start to create email profile..")
+            self.logger.debug(u"Start to create email profile..")
             yield self.application_ps.create_email_profile(self.params, self.current_user, self.is_platform)
 
-        self.render(template_name="refer/weixin/sysuser/emailresume_sent.html")
+        # 置空不必要参数，避免在 make_url 中被用到
+        self.params.pop("name", None)
+        self.params.pop("email", None)
+
+        self.redirct(make_url(path.APPLICATION_EMAIL, self.params, confirm="1"))

@@ -14,6 +14,7 @@ CUSTOMIZE_EDX = '/m/custom/emailapply'
 RESUME_URL = '/m/resume/import'
 RESUME_LINKEDIN = '/m/resume/linkedin'
 APPLICATION = '/m/application'
+APPLICATION_EMAIL = '/m/application/email'
 COLLECT_USERINFO = '/m/app/asist/collect_userinfo/positionfav'
 USER_CENTER = '/m/app/usercenter'
 MOBILE_VERIFY = '/m/app/validate_mobile'
@@ -92,3 +93,4 @@ MESSAGE_TEMPLATE = "message/template"
 # 其他外部服务
 HR_WX_IMAGE_URL = "https://www.moseeker.com/common/image?url="
 LINKEDIN_ACCESSTOKEN = "https://www.linkedin.com/uas/oauth2/accessToken"
+LINKEDIN_AUTH = "https://www.linkedin.com/uas/oauth2/authorization"

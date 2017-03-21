@@ -87,8 +87,3 @@ class RegisterHandler(BaseHandler):
         }
         yield self.cellphone_ps.send_sms(SmsType.EMPLOYEE_MERGE_ACCOUNT_SMS, self.params.mobile,
                                                           params, ip=self.request.headers.get('Remoteip'))
-
-        # 置空关键参数，避免在 make_url 中被用到
-        self.params.pop("company_name")
-        self.params.pop("mobile")
-        self.params.pop("source")

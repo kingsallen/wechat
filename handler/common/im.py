@@ -204,6 +204,12 @@ class ChatHandler(BaseHandler):
             self.send_json_error(message=msg.REQUEST_PARAM_ERROR)
             return
 
+        res = yield self.chat_ps.get_chatroom(self.current_user.sysuser.id, 0, 0, self.params.room_id, self.current_user.qxuser)
+        # 需要判断用户是否进入自己的聊天室
+        if res.user.user_id != self.current_user.sysuser.id:
+            self.send_json_error(message=msg.NOT_AUTHORIZED)
+            return
+
         page_no = self.params.page_no or 1
         page_size = self.params.page_size or 10
 
@@ -225,6 +231,7 @@ class ChatHandler(BaseHandler):
         room_id = self.params.room_id or 0
 
         res = yield self.chat_ps.get_chatroom(self.current_user.sysuser.id, self.params.hr_id, pid, room_id, self.current_user.qxuser)
+        # 需要判断用户是否进入自己的聊天室
         if res.user.user_id != self.current_user.sysuser.id:
             self.send_json_error(message=msg.NOT_AUTHORIZED)
             return
