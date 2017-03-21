@@ -3,7 +3,7 @@
 from datetime import datetime
 
 import tornado.gen as gen
-
+from util.tool import http_tool
 import conf.common as const
 from service.page.base import PageService
 from setting import settings
@@ -451,3 +451,11 @@ class UserPageService(PageService):
 
         ret = yield self.user_hr_account_ds.insert_hr_account(params)
         raise gen.Return(ret)
+
+    @gen.coroutine
+    def create_user_setting(self, user_id, banner_url='', privacy_policy=0):
+
+        res = yield self.infra_user_ds.create_user_setting(
+            user_id, banner_url, privacy_policy)
+
+        return http_tool.unboxing(res)

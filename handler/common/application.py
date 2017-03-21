@@ -44,7 +44,7 @@ class ApplicationHandler(BaseHandler):
         # 如果不符合的话跳转到自定义简历填写页
         if position.app_cv_config_id:
             # 读取自定义字段 meta 信息
-            custom_cv_tpls = yield self.get_custom_tpl_all()
+            custom_cv_tpls = yield self.profile_ps.get_custom_tpl_all()
             # -> formats of custom_cv_tpls is like:
             # [{"field_name1": "map1"}, {"field_name2": "map2"}]
 

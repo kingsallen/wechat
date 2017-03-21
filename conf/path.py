@@ -42,6 +42,7 @@ INFRA_USER_RESETPASSWD = 'user/resetpassword'
 INFRA_USER_ISMOBILEREGISTERED = 'user/ismobileregistered'
 INFRA_USER_APPLIED_APPLICATIONS = 'user/{}/applications'
 INFRA_USER_FAV_POSITION = 'user/{}/fav-position'
+INFRA_USER_SETTINGS = 'user/settings'
 INFRA_WXUSER_QRCODE_SCANRESULT = 'weixin/qrcode/scanresult'
 INFRA_HRUSER = 'hraccount'
 

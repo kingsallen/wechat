@@ -175,3 +175,21 @@ class InfraUserDataService(DataService):
 
         ret = yield http_post(path.INFRA_HRUSER, params)
         raise gen.Return(ret)
+
+    @gen.coroutine
+    def create_user_setting(self, user_id, banner_url='', privacy_policy=0):
+        """
+        添加帐号设置，user_setting,设置profile的公开度
+        :param user_id:
+        :param banner_url:
+        :param privacy_policy:
+        :return: list of dict
+        """
+        params = {
+            'user_id':        user_id,
+            'banner_url':     banner_url,
+            'privacy_policy': privacy_policy
+        }
+
+        ret = yield http_post(path.INFRA_USER_SETTINGS,params)
+        return ret
