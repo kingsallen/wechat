@@ -227,3 +227,16 @@ def get_uucode(lenth=36):
     assert isinstance(lenth, int) and lenth <= 72, 'uucode is too long.'
     return str(uuid.uuid1())[0:lenth] if lenth < 36 else \
         (str(uuid.uuid1()) + str(uuid.uuid4()))[0:lenth]
+
+def trunc(s, limit, encoding="UTF-8", postfix='...'):
+
+    nums = (len(bytes(y.encode(encoding))) for y in s.decode(encoding))
+    sum = 0
+    use_postfix = ''
+    for n in nums:
+        if sum+n > limit:
+            use_postfix = postfix
+            break
+        else:
+            sum += n
+    return s[:sum] + use_postfix

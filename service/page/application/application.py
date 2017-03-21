@@ -12,8 +12,10 @@ from service.page.user.sharechain import SharechainPageService
 from service.page.base import PageService
 from cache.application.email_apply import EmailApplyCache
 from util.common import ObjectDict
+from util.tool.str_tool import trunc
 from util.tool.url_tool import make_url
 from util.wechat.template import application_notice_to_applier_tpl, application_notice_to_recommender_tpl, application_notice_to_hr_tpl
+from thrift_gen.gen.mq.struct.ttypes import SmsType
 
 class ApplicationPageService(PageService):
     pass
@@ -268,7 +270,7 @@ class ApplicationPageService(PageService):
             "[create_email_reply]value_dict:{}".format(value_dict))
 
         self.email_apply_session.save_email_apply_sessions(uuidcode, value_dict)
-        rst = send_email_create_application_notice(email_params, position)  # 1是platform, 2是qx
+        rst = yield self.opt_send_email_create_application_notice(email_params)
         self.logger.debug("[create_email_reply]Send Email to creator " + str(rst))
 
         raise gen.Return((True, None))
@@ -335,8 +337,7 @@ class ApplicationPageService(PageService):
         self.email_apply_session.save_email_apply_sessions(uuidcode, value_dict)
         self.logger.debug("[create_email_profile]value_dict:{}".format(value_dict))
         # 求职者发送Email创建邮件
-        rst = send_email_create_profile_notice(email_params)
-        self.logger.debug("[create_email_profile]Send Email to creator " + str(rst))
+        yield self.opt_send_email_create_profile_notice(email_params)
 
     def __split_dot(self, p_str):
         """
@@ -357,12 +358,6 @@ class ApplicationPageService(PageService):
         self.logger.debug("[create_reply]check_status:{}, message:{}".format(check_status, message))
         if not check_status:
             return False, message, None
-
-        # # 2.校验
-        # has_profile, profile = yield self.profile_ps.has_profile(current_user.sysuser.id)
-        # if not has_profile:
-        #     # TODO message 可调整
-        #     raise gen.Return((False, None, None))
 
         # # 如果有 profile 但是是自定义职位, 检查该 profile 是否符合自定义简历必填项
         # if position.app_cv_config_id:
@@ -407,13 +402,13 @@ class ApplicationPageService(PageService):
         yield self.opt_add_reward(apply_id, current_user, position, is_platform)
 
         #2. 向求职者发送消息通知（消息模板，短信）
-        # yield self.opt_send_applier_msg(apply_id, current_user, position)
+        yield self.opt_send_applier_msg(apply_id, current_user, position, is_platform)
         #3. 向推荐人发送消息模板
-        # yield self.opt_send_recommender_msg(recommender_user_id, current_user, position, current_user.profile)
+        yield self.opt_send_recommender_msg(recommender_user_id, current_user, position, current_user.profile)
         #4. 更新挖掘被动求职者信息
-        # yield self.opt_update_candidate_recom_records(apply_id, current_user, recommender_user_id, position)
+        yield self.opt_update_candidate_recom_records(apply_id, current_user, recommender_user_id, position)
         #5. 向 HR 发送消息通知（消息模板，短信，邮件）
-        # yield self.opt_hr_msg(current_user, current_user.profile, position)
+        yield self.opt_hr_msg(current_user, current_user.profile, position, is_platform)
 
         # TODO (tangyiliang) 发红包
         # yield self.opt_send_redpacket(current_user, position)
@@ -544,7 +539,7 @@ class ApplicationPageService(PageService):
 #         )
 #
     @gen.coroutine
-    def opt_send_applier_msg(self, apply_id, current_user, position):
+    def opt_send_applier_msg(self, apply_id, current_user, position, is_platform=True):
         """
         向求职者发送消息通知（消息模板，短信）
         :param apply_id:
@@ -567,18 +562,12 @@ class ApplicationPageService(PageService):
                                                       position.title,
                                                       current_user.company.name)
         if not res:
-            # TODO 发送短信
-            # data = ObjectDict({
-            #     "mobile": self.current_user.sysuser.mobile,
-            #     "company": position.company_name,
-            #     "position": position.title,
-            #     "ip": self.request.remote_ip,
-            #     "sys": 1
-            # })
-            #
-            # result = RandCode().send_new_appliacation_to_applier(data)
-            pass
-
+            params = ObjectDict({
+                "company": current_user.company.abbreviation or current_user.company.name,
+                "position": position.title
+            })
+            yield self.thrift_mq_ds.send_sms(SmsType.NEW_APPLIACATION_TO_APPLIER_SMS, current_user.sysuser.mobile,
+                                             params, isqx=not is_platform)
 
     @gen.coroutine
     def opt_send_recommender_msg(self, recommend_user_id, current_user, position,profile):
@@ -637,7 +626,7 @@ class ApplicationPageService(PageService):
             )
 #
     @gen.coroutine
-    def opt_hr_msg(self, current_user, profile, position):
+    def opt_hr_msg(self, current_user, profile, position, is_platform=True):
 
         # 1. 向 HR 发送消息模板通知，短信
         if position.publisher:
@@ -666,16 +655,71 @@ class ApplicationPageService(PageService):
             if not is_ok:
                 # 消息模板发送失败时，只对普通客户发送短信
                 if hr_info.mobile and hr_info.account_type == 2:
-                    pass
-                    #
-                    # data = ObjectDict({
-                    #     "mobile": mobile,
-                    #     "position": position.title,
-                    #     "ip": self.request.remote_ip,
-                    #     "sys": 1
-                    # })
-                    # result = RandCode().send_new_application_to_hr(data)
+                    params = ObjectDict({
+                        "position": position.title
+                    })
+                    yield self.thrift_mq_ds.send_sms(SmsType.NEW_APPLICATION_TO_HR_SMS,
+                                                     current_user.sysuser.mobile,
+                                                     params, isqx=not is_platform)
 
 
         # 2. 向 HR 发送邮件通知
         # TODO
+
+    @gen.coroutine
+    def opt_send_email_create_application_notice(self, email_params):
+        """向求职者发送创建 email 申请邮件"""
+
+        to_email = email_params["email_address"]
+        company_abbr = email_params["company_abbr"]
+        applier_name = email_params["applier_name"]
+        invitation_code = email_params["invitation_code"]
+        plat_type = email_params["plat_type"]
+
+        if plat_type == 2:
+            # 2是qx, 不管是不是KA, 都是以仟寻名义发送
+            template_name = "non-ka-email-application-invitation"
+            from_email = self.settings.cv_mail_sender_email
+            merge_vars = ObjectDict(
+                company_abbr =company_abbr,
+                header_company_abbr = trunc(company_abbr, const.MANDRILL_EMAIL_HEADER_LIMIT),
+                applier_name = applier_name,
+                header_applier_name = trunc(applier_name, const.MANDRILL_EMAIL_HEADER_LIMIT),
+                invitation_code = invitation_code
+            )
+        else:
+            # 1是platform, 都是KA, 以公司的名义发送
+            template_name = "ka-email-application-invitation"
+            from_email = self.settings.cv_mail_sender_email
+            merge_vars = ObjectDict(
+                company_abbr=company_abbr,
+                header_company_abbr=trunc(company_abbr, const.MANDRILL_EMAIL_HEADER_LIMIT),
+                applier_name=applier_name,
+                header_applier_name=trunc(applier_name, const.MANDRILL_EMAIL_HEADER_LIMIT),
+                invitation_code=invitation_code,
+                company_logo=email_params['company_logo'],
+                official_account_name=email_params['official_account_name'],
+                official_account_qrcode=email_params['official_account_qrcode']
+            )
+
+
+        yield self.thrift_mq_ds.send_mandrill_email(self, template_name, to_email, "", from_email, "", "", merge_vars)
+
+    @gen.coroutine
+    def opt_send_email_create_profile_notice(self, email_params):
+        """向求职者发送创建 profile 邮件"""
+
+        to_email = email_params["email_address"]
+        applier_name = email_params["applier_name"]
+        invitation_code = email_params["invitation_code"]
+
+        template_name = "email-profile-creation-invitation"
+        from_email = self.settings.cv_mail_sender_email
+        merge_vars = ObjectDict(
+            applier_name=applier_name,
+            header_applier_name=trunc(applier_name, const.MANDRILL_EMAIL_HEADER_LIMIT),
+            invitation_code=invitation_code,
+        )
+
+        yield self.thrift_mq_ds.send_mandrill_email(self, template_name, to_email, "", from_email, "", "", merge_vars)
+

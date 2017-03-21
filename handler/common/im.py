@@ -225,4 +225,8 @@ class ChatHandler(BaseHandler):
         room_id = self.params.room_id or 0
 
         res = yield self.chat_ps.get_chatroom(self.current_user.sysuser.id, self.params.hr_id, pid, room_id, self.current_user.qxuser)
+        if res.user.user_id != self.current_user.sysuser.id:
+            self.send_json_error(message=msg.NOT_AUTHORIZED)
+            return
+
         self.send_json_success(data=res)

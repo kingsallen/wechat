@@ -43,7 +43,10 @@ class UsercenterHandler(BaseHandler):
         # 查询该公司是否开启了员工认证
         employee_cert_conf = yield self.user_ps.get_employee_cert_conf(
             self.current_user.company.id)
-        res = yield self.usercenter_ps.get_user(self.current_user.sysuser.id)
+        if not self.current_user.sysuser.id:
+            res = ObjectDict(data=ObjectDict)
+        else:
+            res = yield self.usercenter_ps.get_user(self.current_user.sysuser.id)
 
         self.send_json_success(data=ObjectDict(
             headimg=self.static_url(res.data.headimg or const.SYSUSER_HEADIMG),

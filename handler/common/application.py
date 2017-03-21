@@ -99,7 +99,10 @@ class ApplicationEmailHandler(BaseHandler):
         if self.params.confirm:
             self.render(template_name="refer/weixin/sysuser/emailresume_sent.html")
         else:
-            self.render(template_name="refer/weixin/sysuser/emailresume_inputemail.html", name=self.current_user.sysuser.name)
+            #TODO
+            self.render_page(template_name="", data={
+                "mobile_valid": self.current_user.sysuser.username == self.current_user.sysuser.mobile
+            })
 
     @handle_response
     @verified_mobile_oneself
