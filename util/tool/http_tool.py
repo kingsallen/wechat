@@ -56,17 +56,12 @@ def http_patch(route, jdata=None, timeout=5, infra=True):
 
 
 @gen.coroutine
-def http_fetch(route, data=None, timeout=5, method='POST'):
-    """
-    使用 www-form 形式异步请求，支持 GET，POST
+def http_fetch(route, data=None, timeout=5):
+    """使用 www-form 形式 HTTP 异步 POST 请求
     :param route:
     :param data:
     :param timeout:
-    :param method:
-    :return:
     """
-    if method.lower() not in "get post":
-        raise ValueError("method is not in GET and POST")
 
     if data is None:
         data = ObjectDict()
@@ -77,31 +72,21 @@ def http_fetch(route, data=None, timeout=5, method='POST'):
     http_client = tornado.httpclient.AsyncHTTPClient()
 
     try:
-        if method.upper() == "GET":
-            if data:
-                route = "{}?{}".format(route, urlencode(data))
+        http_request = tornado.httpclient.HTTPRequest(
+            route,
+            method='POST',
+            body=urlencode(data),
+            request_timeout=timeout)
 
-            http_request = tornado.httpclient.HTTPRequest(
-                route,
-                method=method.upper(),
-                request_timeout=timeout,
-            )
-        else:
-            http_request = tornado.httpclient.HTTPRequest(
-                route,
-                method=method.upper(),
-                body=urlencode(data),
-                request_timeout=timeout,
-            )
         response = yield http_client.fetch(http_request)
-        raise gen.Return(response.body)
+        return response.body
 
     except tornado.httpclient.HTTPError as e:
         logger.warning("[http_fetch][url: {}][body: {}]".format(
             route, ujson.encode(data)))
         logger.warning("http_fetch httperror: {}".format(e))
 
-    raise gen.Return(ObjectDict())
+    return ObjectDict()
 
 
 def unboxing(http_response):
