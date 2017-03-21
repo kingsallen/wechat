@@ -116,7 +116,7 @@ class ApplicationEmailHandler(BaseHandler):
     @verified_mobile_oneself
     @authenticated
     @gen.coroutine
-    def post_(self):
+    def post(self):
         """
         处理 Email 投递
         :return:

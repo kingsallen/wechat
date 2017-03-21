@@ -170,7 +170,7 @@ class ProfileHandler(BaseHandler):
         在 profile 页面吸顶显示申请按钮
         """
 
-        profile_tpl = yield self.application_ps.profile_to_tempalte(
+        profile_tpl = yield self.profile_ps.profile_to_tempalte(
             self.current_user.profile)
 
         self.render_page(template_name='profile/main.html', data=profile_tpl)

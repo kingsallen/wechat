@@ -544,6 +544,7 @@ class ProfilePageService(PageService):
         p_works = p_profile.get("works")
         p_intentions = p_profile.get('intentions')
         p_attachments = p_profile.get('attachments')
+        p_others = p_profile.get('others')
 
         profile = ObjectDict()
         profile.gender = ""
@@ -701,8 +702,8 @@ class ProfilePageService(PageService):
                 name=p_attachment.get('name'))
             profile.attachment = attachment
 
-        other_json = profile.other[0]
-        if other_json:
+        if p_others:
+            other_json = ObjectDict(json_decode(p_others[0].get('other')))
             application_ps = ApplicationPageService()
             sys_cv_tpls = yield application_ps.get_custom_tpl_all()
             other = ObjectDict()
