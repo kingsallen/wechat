@@ -23,7 +23,9 @@ class ApplicationHandler(BaseHandler):
     @check_and_apply_profile
     @gen.coroutine
     def get(self):
+        # 获得职位信息
 
+        # 判断职位相关状态是否合规
         position = yield self.position_ps.get_position(self.params.pid)
         check_status, message = yield self.application_ps.check_position(
             position, self.current_user)
@@ -37,18 +39,23 @@ class ApplicationHandler(BaseHandler):
                                  escape=['next_url', 'pid']))
             return
 
+        # 如果是自定义简历职位
+        # 检查该 profile 是否符合自定义简历必填项,
+        # 如果不符合的话跳转到自定义简历填写页
+        if position.app_cv_config_id:
+            # 读取自定义字段 meta 信息
+            custom_cv_tpls = yield self.get_custom_tpl_all()
+            # -> formats of custom_cv_tpls is like:
+            # [{"field_name1": "map1"}, {"field_name2": "map2"}]
 
-        # 3. 如果有 profile 但是是自定义职位,
-        #    检查该 profile 是否符合自定义简历必填项,
-        #        如果不符合的话跳转到自定义简历填写页
-        # if position.app_cv_config_id:
-        #     is_true, resume_dict, json_config = yield self.application_ps.custom_check_failure_redirection(
-        #         profile, position, self.current_user.sysuser)
-        #     if is_true:
-        #         self.render('weixin/application/app_cv_conf.html',
-        #                     resume=encode_json_dumps(resume_dict),
-        #                     cv_conf=encode_json_dumps(json_config))
-        #         return
+            result, resume_dict, json_config = yield self.application_ps.check_custom_cv(
+                self.current_user, position, custom_cv_tpls)
+
+            if not result:
+                self.render('refer/weixin/application/app_cv_conf.html',
+                            resume=encode_json_dumps(resume_dict),
+                            cv_conf=encode_json_dumps(json_config))
+                return
 
         # 定制化需求
         # 雅诗兰黛直接投递
@@ -73,10 +80,14 @@ class ApplicationHandler(BaseHandler):
             {},
             position,
             self.current_user)
-
         self.logger.debug("[post_apply]is_applied:{}, message:{}, appid:{}".format(is_applied, message, apply_id))
 
         if is_applied:
+            # 如果是自定义职位，入库 job_resume_other
+            # 暂时不接其返回值
+            yield self.application_ps.save_job_resume_other(
+                self.current_user.profile, apply_id, position)
+
             # 定制化
             # 宝洁投递后，跳转到指定页面
             message = yield self.customize_ps.get_pgcareers_msg(self.current_user.wechat.company_id)

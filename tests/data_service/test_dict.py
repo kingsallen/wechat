@@ -192,12 +192,11 @@ class DictDataServiceTestCase(AsyncTestCase):
             ujson.loads(self.dict_const_degree_http_response))
         ret = self.service.make_const_dict_result(
             http_response, parent_code=3104)
-        #pprint(ret)
         self.assertIsInstance(ret, dict)
+        self.assertEqual(ret.get('1'), '初中及以下')
         with self.assertRaises(ValueError) as cm:
             yield self.service.get_const_dict(parent_code=None)
         self.assertEqual(cm.exception.args[0], 'invalid parent_code')
-
 
 if __name__ == '__main__':
     main()

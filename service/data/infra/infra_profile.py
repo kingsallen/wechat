@@ -589,12 +589,32 @@ class InfraProfileDataService(DataService):
         return http_tool.unboxing(res)
 
     @gen.coroutine
+    def get_profile_other(self, profile_id):
+        res = yield self.handle_profile_section(
+            {"profile_id": profile_id}, method="get", section="other")
+        return http_tool.unboxing(res)
+
+    @gen.coroutine
+    def create_profile_other(self, record, profile_id):
+        params = {"profile_id": profile_id}
+        params.update(record)
+        res = yield self.handle_profile_section(
+            params, method="create", section="other")
+        return http_tool.unboxing(res)
+
+    @gen.coroutine
+    def update_profile_other(self, record):
+        res = yield self.handle_profile_section(
+            record, method="update", section="other")
+        return http_tool.unboxing(res)
+
+    @gen.coroutine
     def handle_profile_section(self, params, method=None, section=None):
         """修改 profile 部分数据的底层方法，
         对应CRUD的method参数为 get, create, update, delete
         对应的 HTTP 动词为 GET, POST, PUT, DELETE
 
-        profile 部分标记字符串 (大小写不限)：
+        profile section 标记字符串 (大小写不限)：
         BASIC
         LANGUAGE
         SKILL
@@ -606,6 +626,7 @@ class InfraProfileDataService(DataService):
         AWARDS
         WORKS
         INTENTION
+        OTHER
         """
         try:
             if not method or not section:

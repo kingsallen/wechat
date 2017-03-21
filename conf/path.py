@@ -71,6 +71,7 @@ PROFILE_PROJECTEXP = "profile/projectexp"
 PROFILE_AWARDS = "profile/awards"
 PROFILE_WORKS = "profile/works"
 PROFILE_INTENTION = "profile/intention"
+PROFILE_OTHER = "profile/other"
 PROFILE_IMPORT = "crawler"
 
 # 公司服务
