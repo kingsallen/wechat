@@ -14,6 +14,7 @@ from tornado.web import MissingArgumentError
 import conf.common as const
 import conf.message as msg
 import conf.path as path
+from util.common import ObjectDict
 from util.common.cache import BaseRedis
 from util.common.cipher import encode_id
 from util.tool.str_tool import to_hex
