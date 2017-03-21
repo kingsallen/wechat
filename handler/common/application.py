@@ -48,10 +48,8 @@ class ApplicationHandler(BaseHandler):
             # -> formats of custom_cv_tpls is like:
             # [{"field_name1": "map1"}, {"field_name2": "map2"}]
 
-            result, resume_dict, json_config = yield self.application_ps.custom_check_redirection(
-                self.current_user,
-                position,
-                custom_cv_tpls)
+            result, resume_dict, json_config = yield self.application_ps.check_custom_cv(
+                self.current_user, position, custom_cv_tpls)
 
             if not result:
                 self.render('refer/weixin/application/app_cv_conf.html',
@@ -82,10 +80,14 @@ class ApplicationHandler(BaseHandler):
             {},
             position,
             self.current_user)
-
         self.logger.debug("[post_apply]is_applied:{}, message:{}, appid:{}".format(is_applied, message, apply_id))
 
         if is_applied:
+            # 如果是自定义职位，入库 job_resume_other
+            # 暂时不接其返回值
+            yield self.application_ps.save_job_resume_other(
+                self.current_user.profile, apply_id, position)
+
             # 定制化
             # 宝洁投递后，跳转到指定页面
             message = yield self.customize_ps.get_pgcareers_msg(self.current_user.wechat.company_id)
