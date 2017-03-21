@@ -38,14 +38,13 @@ class InfraProfileDataService(DataService):
         return http_tool.unboxing(res)
 
     @gen.coroutine
-    def create_profile(self, user_id):
+    def create_profile(self, user_id, source=1):
         # source 默认为 1 代表微信端创建的 profile
-        # ref: http://wiki.moseeker.com/profile-api.md
-        source = 1
 
+        # ref: http://wiki.moseeker.com/profile-api.md
         params = ObjectDict(
             lang=1,  # 语言默认为中文
-            source=source,  # 标记为来自手机端
+            source=source,
             user_id=user_id,
             disable=1
         )
@@ -88,9 +87,47 @@ class InfraProfileDataService(DataService):
             params, method="create", section="basic")
         return http_tool.unboxing(res)
 
+    # @gen.coroutine
+    # def create_profile_basic_custom(self, custom_cv, profile_id):
+    #     """
+    #     从自定义简历创建 basic_info 数据
+    #     """
+    #
+    #     params = ObjectDict(
+    #         profile_id=profile_id,
+    #         gender=custom_cv.get("gender", 0),
+    #         name=custom_cv.get('name', ""),
+    #         # 微信上没有修改国籍的方式, 默认为中国(43)
+    #         nationality_code=43)
+    #
+    #     if custom_cv.get('birth', ""):
+    #         params.update(birth=custom_cv.get('birth'))
+    #
+    #     if custom_cv.get("nationality", ""):
+    #         params.update(nationality_name=custom_cv.get("nationality"))
+    #
+    #     if custom_cv.get("email", ""):
+    #         params.update(email=custom_cv.get("email"))
+    #
+    #     if custom_cv.get("weixin", ""):
+    #         params.update(weixin=custom_cv.get("weixin"))
+    #
+    #     if custom_cv.get("qq", ""):
+    #         params.update(qq=custom_cv.get("qq"))
+    #
+    #     if custom_cv.get("location", ""):
+    #         params.update(city_name=custom_cv.get("location"))
+    #
+    #     if custom_cv.get("remarks", ""):
+    #         params.update(self_introduction=custom_cv.get("remarks"))
+    #
+    #     res = yield self.handle_profile_section(
+    #         params, method="create", section="basic")
+    #
+    #     return http_tool.unboxing(res)
+
     @gen.coroutine
     def update_profile_basic(self, profile_id, basic):
-        # TODO tangyiliang 现在自定义简历和常规 profile basic 更新混在一起，最好分开
         params = ObjectDict(
             profile_id=profile_id,
             name=basic.name,

@@ -99,7 +99,7 @@ class ApplicationPageService(PageService):
     def get_custom_tpl_all(self):
         ret = yield self.config_sys_cv_tpl_ds.get_config_sys_cv_tpls(
             conds={'disable': const.OLD_YES},
-            fields=['field_name', 'map']
+            fields=['field_name', 'field_title', 'map']
         )
         return ret
 
@@ -156,8 +156,9 @@ class ApplicationPageService(PageService):
 
         # 如果 filed 是 profile 字段
         if field_name in profile_fields:
-            return self._check_profile_fields(profile, field_name,
-                                              custom_tpls[field_name])
+            return self._check_profile_fields(
+                profile, field_name, custom_tpls[field_name])
+
         # 如果 field 是纯自定义字段
         elif field_name in custom_fields:
             ret = yield self._check_custom_fields(profile, field_name, user)

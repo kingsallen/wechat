@@ -4,6 +4,7 @@ import tornado.gen as gen
 from tornado.escape import json_decode, json_encode
 
 from service.page.base import PageService
+from service.page.application.application import ApplicationPageService
 import conf.common as const
 from util.common import ObjectDict
 from util.tool.date_tool import curr_datetime_now
@@ -99,7 +100,11 @@ class ProfilePageService(PageService):
         profile = import_profile[1,"ab","123",2]
         """
 
-        is_ok, result = yield self.infra_profile_ds.import_profile(source, username, password, user_id, token)
+        is_ok, result = yield self.infra_profile_ds.import_profile(source,
+                                                                   username,
+                                                                   password,
+                                                                   user_id,
+                                                                   token)
         return is_ok, result
 
     @gen.coroutine
@@ -111,21 +116,21 @@ class ProfilePageService(PageService):
         """
 
         params = ObjectDict(
-            grant_type = "authorization_code",
-            code = code,
-            redirect_uri = redirect_url,
-            client_id = self.settings.linkedin_client_id,
-            client_secret = self.settings.linkedin_client_secret,
+            grant_type="authorization_code",
+            code=code,
+            redirect_uri=redirect_url,
+            client_id=self.settings.linkedin_client_id,
+            client_secret=self.settings.linkedin_client_secret,
         )
 
         response = yield self.infra_profile_ds.get_linkedin_token(params)
         return response
 
     @gen.coroutine
-    def create_profile(self, user_id):
+    def create_profile(self, user_id, source=const.PROFILE_SOURCE_PLATFORM):
         """ 创建 profile_profile 基础数据 """
         result, data = yield self.infra_profile_ds.create_profile(
-            user_id)
+            user_id, source)
         return result, data
 
     @gen.coroutine
@@ -145,6 +150,9 @@ class ProfilePageService(PageService):
         """
         if mode == 'm':
             result, data = yield self.infra_profile_ds.create_profile_basic_manually(
+                params, profile_id)
+        elif mode == 'c':
+            result, data = yield self.infra_profile_ds.create_profile_basic_custom(
                 params, profile_id)
         else:
             raise ValueError('invalid mode')
@@ -238,7 +246,7 @@ class ProfilePageService(PageService):
     @gen.coroutine
     def create_profile_workexp(self, record, profile_id, mode='m'):
         if mode == 'm':
-            #经过前端的命名修改后这些都不需要了
+            # 经过前端的命名修改后这些都不需要了
             # record.company_name = record.company
             # record.job = record.position
             # record.start_date = record.start + '-01'
@@ -388,6 +396,93 @@ class ProfilePageService(PageService):
         result, data = yield self.infra_profile_ds.create_profile_intention(
             record, profile_id)
         return result, data
+
+    @gen.coroutine
+    def update_profile_embedded_info_from_cv(self, profile_id, custom_cv):
+        """使用 custom_cv 更新 profile 的复合字段 (education, workexp, projectext)
+        :param profile_id: profile_id
+        :param custom_cv: 自定义简历模版输出 (dict)
+        """
+        custom_cv = ObjectDict(custom_cv)
+        education = custom_cv.get("education", [])
+        workexp = custom_cv.get("workexp", [])
+        projectexp = custom_cv.get("projectexp", [])
+
+        for e in education:
+            status = e.get('__status', None)
+            college_name = e.get('school')
+            college_code = yield self.infra_dict_ds.get_college_code_by_name(
+                college_name)
+
+            if status:
+                params = ObjectDict(
+                    eid=e.get('id'),
+                    profile_id=profile_id,
+                    start_date=e.get('start'),
+                    end_date=e.get('end'),
+                    end_until_now=1 if e.get('end') == u"至今" else 0,
+                    college_name=college_name,
+                    college_code=college_code,
+                    major_name=e.get('major'),
+                    degree=int(e.get('degree', '0'))
+                )
+                if status == 'o':
+                    yield self.create_profile_education(params, profile_id)
+
+                elif status == 'x':
+                    yield self.delete_profile_education({"id": params.eid})
+
+                elif status == 'e':
+                    params['id'] = params.eid
+                    yield self.update_profile_education(params)
+
+        for w in workexp:
+            status = w.get('__status', None)
+            if status:
+                params = ObjectDict(
+                    wid=w.get('id'),
+                    profile_id=profile_id,
+                    start_date=w.get('start'),
+                    end_date=w.get('end'),
+                    end_until_now=1 if w.get('end') == u"至今" else 0,
+                    company_name=w.get('company'),
+                    department_name=w.get('department'),
+                    job=w.get('position'),
+                    description=w.get('describe')
+                )
+                if status == 'o':
+                    yield self.create_profile_workexp(params, profile_id)
+
+                elif status == 'x':
+                    yield self.delete_profile_workexp({"id": params.wid})
+
+                elif status == 'e':
+                    params['id'] = params.wid
+                    yield self.update_profile_workexp(params)
+
+        for p in projectexp:
+            status = p.get('__status', None)
+            if status:
+                params = ObjectDict(
+                    pid=p.get('id'),
+                    profile_id=profile_id,
+                    start_date=p.get('start'),
+                    end_date=p.get('end'),
+                    end_until_now=1 if p.get('end') == u"至今" else 0,
+                    name=p.get('name'),
+                    role=p.get('position'),
+                    description=p.get('introduce'),
+                    responsibility=p.get("describe")
+                )
+                if status == 'o':
+                    yield self.create_profile_projectexp(params, profile_id)
+
+                elif status == 'x':
+                    yield self.delete_profile_projectexp({"id": params.pid})
+
+                elif status == 'e':
+                    params['id'] = params.pid
+                    yield self.update_profile_projectexp(params)
 
     @staticmethod
     def get_zodiac(date_string):
@@ -606,30 +701,30 @@ class ProfilePageService(PageService):
                 name=p_attachment.get('name'))
             profile.attachment = attachment
 
-        # TODO (tangyiliang) 稍后专注攻坚 others!
-        # other_json = ProfileOtherDict(other_json)
-        # if other_json:
-        #     other = ObjectDict()
-        #     other.keyvalues = []
-        #
-        #     for k, v in other_json.items():
-        #         if v:
-        #             if isinstance(v, list):
-        #                 setattr(other, k, v)
-        #                 continue
-        #             if k == "IDPhoto":
-        #                 setattr(other, "id_photo", v)
-        #                 continue
-        #             try:
-        #                 lvm = {
-        #                     "label": const.CUSTOM_FIELD_NAME_TO_DISPLAY_NAME[
-        #                         k],
-        #                     "value":                                        v
-        #                 }
-        #             except KeyError:
-        #                 continue
-        #             other.keyvalues.append(lvm)
-        #     profile.other = other
+        other_json = profile.other[0]
+        if other_json:
+            application_ps = ApplicationPageService()
+            sys_cv_tpls = yield application_ps.get_custom_tpl_all()
+            other = ObjectDict()
+            other.keyvalues = []
+
+            for k, v in other_json.items():
+                if v:
+                    if isinstance(v, list):
+                        setattr(other, k, v)
+                        continue
+                    if k == "IDPhoto":
+                        setattr(other, "id_photo", v)
+                        continue
+                    try:
+                        lvm = {
+                            "label": [e.field_title for e in sys_cv_tpls if e.field_name == k][0],
+                            "value": v
+                        }
+                    except KeyError:
+                        continue
+                    other.keyvalues.append(lvm)
+            profile.other = other
 
         return profile
 
@@ -687,7 +782,8 @@ class ProfilePageService(PageService):
         """ 获取 profile 中最新的一条"含有至今"的工作信息 """
         wexps = profile.get('workexps', [])
 
-        latest_jobs = list(filter(lambda w: w.get("end_until_now", 0) == 1, wexps))
+        latest_jobs = list(
+            filter(lambda w: w.get("end_until_now", 0) == 1, wexps))
         return (sorted(latest_jobs, key=lambda x: x.get("start_date", ""),
                        reverse=True)[0])
 
@@ -697,4 +793,3 @@ class ProfilePageService(PageService):
         wexps = profile.get('workexps', [])
         return (sorted(wexps, key=lambda x: x.get('start_date', ""),
                        reverse=True)[0])
-

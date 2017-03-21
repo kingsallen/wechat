@@ -169,49 +169,126 @@ class ProfileHandler(BaseHandler):
         如果有 GET 请求参数包含 pid,
         在 profile 页面吸顶显示申请按钮
         """
-        # is_apply = self.params.get("apply", '0')
 
-        # TODO (tangyiliang) use decorator
-        # # 对雅诗兰黛无微不至的特别服务
-        # is_skip = self.params.get("is_skip", '0')
-        #
-        # pid = self.params.get("pid", 0)
-        # if not pid and self.get_cookie("dq_pid", 0):
-        #     pid = int(self.get_cookie("dq_pid"))
-        # if not is_apply and pid:
-        #     is_apply = "1"
-
-        # TODO (tangyiliang) use decorator
-        # 获取不到 Profile 的情况下,跳转到新建 Profile 页面,
-        # 雅诗兰黛的自定义职位,跳转到新六步
-        # profile = yield self._prepare()
-        # if not profile:
-        #     no_profile_redirection(self, pid)
-        #     return
-
-        need_mobile_confirmation = 0
-        # if is_apply and pid:
-        #     if str(self.current_user.sysuser.mobile) != str(
-        #         self.current_user.sysuser.username):
-        #         need_mobile_confirmation = 1
-
-        # profile_other 获取和处理
-        # other_record = get_profile_other_by_profile_id(
-        #     self.db, profile.get('profile').get('id'))
-        # if other_record:
-        #     other = json_decode(other_record.other)
-        # else:
-        #     other = {}
-        # other = {}
-        #
-        # if other:
-        #     other = sub_dict(other, pure_other_keys())
-
-        other = {}
-        profile_tpl = yield self.profile_ps.profile_to_tempalte(
-            self.current_user.profile, other)
+        profile_tpl = yield self.application_ps.profile_to_tempalte(
+            self.current_user.profile)
 
         self.render_page(template_name='profile/main.html', data=profile_tpl)
+
+
+class ProfileCustomHandler(BaseHandler):
+    """使用自定义简历页创建或更新profile"""
+
+    @handle_response
+    @authenticated
+    @tornado.gen.coroutine
+    def post(self):
+
+        custom_cv = ObjectDict(json_decode(self.get_argument("_cv", "")))
+        if not custom_cv:
+            raise Exception("get custom_cv failed")
+
+        yield self._save_custom_cv(custom_cv)
+
+        p = dict()
+        p.update(is_skip=(self.current_user.company.id in self.customiz_ps._DIRECT_APPLY))
+        # if self.current_user.company.id == const.CUSTOM_C_ID.EsteeLauder:
+        #     pid = self.params.get("pid", 0)
+        #     if not pid and self.get_cookie("dq_pid", 0):
+        #         pid = int(self.get_cookie("dq_pid"))
+        #     if pid:
+        #         pos_ser = positionService(self.db)
+        #         position = pos_ser.get_position_info(pid)
+        #         if position.app_cv_config_id:
+        #             self.LOG.debug(u"雅诗兰黛特殊处理: 直接投递")
+        #             p.update(is_skip='1')
+
+        self.redirect(make_url(path.PROFILE_PREVIEW, self.params, **p))
+
+    @tornado.gen.coroutine
+    def _save_custom_cv(self, custom_cv):
+        # 更新 user 信息（非 profile 信息）
+        yield self.user_ps.update_user(
+            user_id=self.current_user.sysuser.id,
+            mobile=custom_cv.get('mobile'),
+            name=custom_cv.get('name'),
+            email=custom_cv.get('email'))
+
+        has_profile, profile = yield self.profile_ps.has_profile(
+            self.current_user.sysuser.id)
+
+        custom_cv_tpls = yield self.get_custom_tpl_all()
+        custom_fields = [c.field_name for c in custom_cv_tpls if not c.map]
+
+        profile_id = 0
+        # 已经有 profile，更新和自定义简历联动的 profile 信息
+        if has_profile:
+            profile_id = profile.get("profile", {}).get("id", None)
+            basic = profile.get("basic")
+            basic.update(custom_cv)
+            # 更新 profile_basic 表的对应字段
+            yield self.profile_ps.update_profile_basic(profile_id, basic)
+            # 更新 education, workexp, projectext
+            yield self.profile_ps.update_profile_embedded_info_from_cv(
+                profile_id, custom_cv)
+
+        else:
+            # 还不存在 profile， 创建 profile
+            # 进入自定义简历创建 profile 逻辑的话，来源必定是企业号（我要投递）
+            result, data = yield self.profile_ps.create_profile(
+                self.current_user.sysuser.id,
+                source=const.PROFILE_SOURCE_PLATFORM_APPLY)
+
+            # 创建 profile 成功
+            if result:
+                profile_id = data
+
+                cv_profile_values = {k: v for k, v in custom_cv.items() if
+                                     k in custom_fields}
+
+                # BASIC INFO
+                result, data = yield self.profile_ps.create_profile_basic(
+                    cv_profile_values, profile_id, mode='c')
+
+                if result:
+                    self.LOG.debug(
+                        "profile_basic creation passed. Got basic info id: %s" % data)
+                else:
+                    self.LOG.error(
+                        "profile_basic creation failed. res: %s" % data)
+
+                # 初始化user_setting表，profile的公开度
+                yield self.user_ps.create_user_setting(
+                    self.current_user.sysuser.id)
+
+                yield self.profile_ps.update_profile_basic(profile_id,
+                                                           custom_cv)
+
+            else:
+                raise ValueError('profile creation error')
+
+        if profile_id:
+            # profile = ObjectDict()
+            # basicInfo = ObjectDict()
+
+            # const.CUSTOM_FIELD_NAME_TO_PROFILE_FIELD
+            # 为自定义字段到 profile 字段的对应
+
+            # 如果 value 为 "",表明没有对应的 profile 字段,
+            # 应该存入 profile_others
+            # 因为 profile 对应字段都是属于 basic 的,所以都加入 basicInfo 中
+            # 这样可以做到和老六步兼容
+            #  *const.CUSTOM_FIELD_NAME_TO_PROFILE_FIELD 需要微信后端自行维护
+
+            # 自定义简历模版提交的 picUrl 作为 IDPhoto 使用
+            if custom_cv.get('picUrl'):
+                custom_cv['IDPhoto'] = custom_cv.get('picUrl')
+
+            cv_pure_custom = {k: v for k, v in custom_cv.items() if
+                              k in custom_fields}
+
+            yield self.profile_ps.update_profile_other(
+                cv_pure_custom, profile_id)
 
 
 class ProfileSectionHandler(BaseHandler):
@@ -261,194 +338,6 @@ class ProfileSectionHandler(BaseHandler):
         # 根据 route 跳转到不同的子方法
         self.guarantee('route', 'model')
         yield getattr(self, "post_" + self.params.route)()
-
-    #
-    # @tornado.gen.coroutine
-    # def get_manual(self):
-    #     """
-    #     手动创建 Profile
-    #     先查看有无 pid, 然后根据职位判断:
-    #     如果该职位是自定义职位,跳转到自定义简历页面填写
-    #     否则,跳转到老六步
-    #     """
-    #     pid = self.params.pid or self.get_cookie('dq_pid', 0)
-    #     if pid:
-    #         pos_ser = positionService(self.db)
-    #         position = pos_ser.get_position_info(pid)
-    #         if position.app_cv_config_id > 0:
-    #             user_id = self.current_user.sysuser.id
-    #             sysuser_ser = sysuserService(self.db)
-    #
-    #             user = sysuser_ser.get_sysuser_by_id(user_id)
-    #             user_info = ObjectDict(
-    #                 email=user.email if user.email else "",
-    #                 mobile=user.mobile if user.mobile else ""
-    #             )
-    #
-    #             config = pos_ser.get_custom_template(position.app_cv_config_id)
-    #             json_config = json_decode(config.field_value)
-    #             self.render(
-    #                 'weixin/application/app_cv_conf.html',
-    #                 resume=json_encode(json_encode(user_info)) if user_info
-    #                 else None,
-    #                 cv_conf=json_encode(json_encode(json_config)))
-    #             return
-    #
-    #     basicinfo = ObjectDict(
-    #         name='',
-    #         email=self.current_user.sysuser.email or '',
-    #         mobile=self.current_user.sysuser.mobile or ''
-    #     )
-    #
-    #     # 根据 params.pid 判断 JD 的职位 id
-    #     # 判断是否需要跳过工作经历的填写
-    #     jump_work_exp = 0
-    #     if pid:
-    #         position = positionDao.get_position_by_id(self, pid)
-    #         # candidate_source = 0(社招)/1(校招)/2(定向招聘)
-    #         if position and position.candidate_source == 1:
-    #             jump_work_exp = position.candidate_source
-    #
-    #     self.render('neo_weixin/profile/new.html',
-    #                 basicinfo=basicinfo,
-    #                 degree_mapping=const.DICT_PROFILE_EDUCATION_DEGREE,
-    #                 gender_mapping=const.DICT_PROFILE_GENDER,
-    #                 total_steps=(5 if jump_work_exp else 6),
-    #                 jump_work_exp=jump_work_exp)
-    #
-
-    #
-    # @tornado.gen.coroutine
-    # def post_custom_create(self):
-    #     """
-    #     自定义配置简历的post保存
-    #     :return:
-    #     """
-    #     try:
-    #         yield self._custom_create()
-    #         p = dict(m='view', apply='1')
-    #
-    #         if self.current_user.company.id == const.CUSTOM_C_ID.EsteeLauder:
-    #             pid = self.params.get("pid", 0)
-    #             if not pid and self.get_cookie("dq_pid", 0):
-    #                 pid = int(self.get_cookie("dq_pid"))
-    #             if pid:
-    #                 pos_ser = positionService(self.db)
-    #                 position = pos_ser.get_position_info(pid)
-    #                 if position.app_cv_config_id:
-    #                     self.LOG.debug(u"雅诗兰黛特殊处理: 直接投递")
-    #                     p.update(is_skip='1')
-    #
-    #         self.redirect(
-    #             make_url(const.PROFILE_URL, self.params, **p))
-    #
-    #     except Exception as e:
-    #         self.LOG.error(e)
-    #         raise e
-    #
-    # @tornado.gen.coroutine
-    # def _custom_create(self):
-    #     """
-    #     自定义配置简历的post保存
-    #     """
-    #     try:
-    #         custom_cv = json_decode(self.get_argument("_cv", ""))
-    #         if not custom_cv:
-    #             raise Exception("get custom_cv failed")
-    #
-    #         # 更新 user_user 表的字段,
-    #         self._profile_service.update_user_user_fields(ObjectDict(
-    #             mobile=custom_cv.get('mobile'),
-    #             name=custom_cv.get('name'),
-    #             email=custom_cv.get('email')
-    #             # 自定义字段中上传的头像不作为 user_user 的头像
-    #             # headimg=custom_cv.get('picUrl')
-    #         ), self.current_user.sysuser.id)
-    #
-    #         # PROFILE_PROFILE
-    #         has_profile, profile = yield self._profile_service.has_profile(
-    #             self.current_user.sysuser.id)
-    #
-    #         profile_id = profile.get("profile", {}).get("id", None)
-    #
-    #         if has_profile:
-    #             old_basic = profile.get("basic")
-    #             old_basic.update(custom_cv)
-    #             yield self._profile_service.update_profile_basic(
-    #                 profile_id, old_basic)
-    #             yield (
-    #                 self.
-    #                 _profile_service.update_profile_embedded_info_from_cv(
-    #                     profile_id, custom_cv))
-    #
-    #         else:
-    #             source = 4 if self.PROJECT == const.PROJECT_BAGGING else 1
-    #             res_profile = yield self._profile_service.create_profile(
-    #                 self.current_user.sysuser.id,
-    #                 source=source)
-    #
-    #             if res_profile[0]:
-    #                 profile_id = res_profile[1]
-    #
-    #                 cv_profile_values = {
-    #                     key: value for key, value in custom_cv.iteritems()
-    #                     if key in cv_profile_keys_profile_basic()
-    #                     }
-    #
-    #                 # BASIC INFO
-    #                 res_basic_info = yield \
-    #                     self._profile_service.create_profile_basic_from_cv(
-    #                         cv_profile_values, profile_id)
-    #                 if res_basic_info[0]:
-    #                     self.LOG.debug(
-    #                         "profile_basic creation passed. Got basic info "
-    #                         "id:{}".format(res_basic_info[1]))
-    #                 else:
-    #                     self.LOG.error(
-    #                         "profile_basic creation failed. res:{}"
-    #                         .format(res_basic_info[1]))
-    #
-    #                 # 初始化user_setting表，profile的公开度
-    #                 yield self.sysuser_service.post_user_setting(
-    #                     self.current_user.sysuser.id)
-    #
-    #                 yield (
-    #                     self.
-    #                     _profile_service.update_profile_embedded_info_from_cv(
-    #                         profile_id, custom_cv))
-    #             else:
-    #                 self.LOG.error(
-    #                     "profile_profile creation failed. res:{}".format(
-    #                         res_profile[1]))
-    #
-    #         if profile_id:
-    #             # profile = ObjectDict()
-    #             # basicInfo = ObjectDict()
-    #
-    #             # const.CUSTOM_FIELD_NAME_TO_PROFILE_FIELD
-    #             # 为自定义字段到 profile 字段的对应
-    #
-    #             # 如果 value 为 "",表明没有对应的 profile 字段,
-    #             # 应该存入 profile_others
-    #             # 因为 profile 对应字段都是属于 basic 的,所以都加入 basicInfo 中
-    #             # 这样可以做到和老六步兼容
-    #             #  *const.CUSTOM_FIELD_NAME_TO_PROFILE_FIELD 需要微信后端自行维护
-    #
-    #             # 自定义简历模版提交的 picUrl 作为 IDPhoto 使用
-    #             if custom_cv.get('picUrl'):
-    #                 custom_cv['IDPhoto'] = custom_cv.get('picUrl')
-    #
-    #             cv_pure_custom = {
-    #                 key: value for key, value in custom_cv.iteritems()
-    #                 if key in cv_pure_custom_keys()
-    #             }
-    #
-    #             profile_dao.update_profile_other_by_profile_id(
-    #                 self.db, profile_id, cv_pure_custom)
-    #
-    #     except Exception as e:
-    #         self.LOG.error(e)
-    #         raise e
 
     def _get_profile_id(self):
         try:
