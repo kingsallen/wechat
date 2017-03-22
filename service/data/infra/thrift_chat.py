@@ -90,6 +90,11 @@ class ThriftChatDataService(DataService):
         :return:
         """
 
+        self.logger.debug("[save_chat]room_id:{}".format(int(room_id)))
+        self.logger.debug("[save_chat]content:{}".format(str(content)))
+        self.logger.debug("[save_chat]position_id:{}".format(int(position_id)))
+        self.logger.debug("[save_chat]speaker:{}".format(int(speaker)))
+
         ret = yield self.chat_service_cilent.saveChat(int(room_id), str(content), int(position_id), int(speaker))
         self.logger.debug("[thrift]save_chat: %s" % ret)
         raise gen.Return(ret)
