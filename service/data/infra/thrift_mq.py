@@ -56,6 +56,15 @@ class ThriftMqDataService(DataService):
                                            str(from_name),
                                            str(subject))
 
+        self.logger.debug("template_name:{}".format(template_name))
+        self.logger.debug("to_email:{}".format(to_email))
+        self.logger.debug("to_name:{}".format(to_name))
+        self.logger.debug("merge_vars:{}".format(merge_vars))
+        self.logger.debug("from_email:{}".format(from_email))
+        self.logger.debug("from_name:{}".format(from_name))
+        self.logger.debug("subject:{}".format(subject))
+
+
         ret = yield self.mq_service_cilent.sendMandrilEmail(mandrill_obj)
         self.logger.debug("[thrift]send_mandrill_email: %s" % ret)
         raise gen.Return(ret)
