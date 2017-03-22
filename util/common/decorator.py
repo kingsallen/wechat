@@ -186,9 +186,6 @@ def check_and_apply_profile(func):
 
             # 由于 make_url 会过滤 state，但 linkedin 必须传 state，故此处手动添加
             linkedin_url = "{}&state={}".format(linkedin_url, encode_id(self.current_user.sysuser.id))
-            self.logger.debug("linkedin:{}".format(redirect_uri))
-            self.logger.debug("linkedin 2:{}".format(linkedin_url))
-
             self.render(template_name='refer/neo_weixin/sysuser/importresume.html', use_email=True, linkedin_url=linkedin_url)
             # self.redirect(make_url(path.PROFILE_NEW, self.params))
     return wrapper

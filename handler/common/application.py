@@ -149,6 +149,5 @@ class ApplicationEmailHandler(BaseHandler):
 
         # 置空不必要参数，避免在 make_url 中被用到
         self.params.pop("name", None)
-        self.params.pop("email", None)
 
-        self.redirct(make_url(path.APPLICATION_EMAIL, self.params, confirm="1"))
+        self.redirect(make_url(path.APPLICATION_EMAIL, self.params, confirm="1"))

@@ -874,7 +874,8 @@ class ApplicationPageService(PageService):
             invitation_code=invitation_code,
         )
 
-        yield self.thrift_mq_ds.send_mandrill_email(template_name, to_email, "", from_email, "", "", merge_vars)
+        # yield self.thrift_mq_ds.send_mandrill_email(template_name, to_email, "", from_email, "", "", merge_vars)
+        yield self.thrift_mq_ds.send_mandrill_email(template_name, to_email, "这是主题", from_email, "这是发件人", "这是收件人", merge_vars)
 
 #
 # import unittest
