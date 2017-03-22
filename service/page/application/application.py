@@ -12,12 +12,14 @@ import conf.path as path
 from cache.application.email_apply import EmailApplyCache
 from service.page.base import PageService
 from service.page.user.sharechain import SharechainPageService
+from thrift_gen.gen.mq.struct.ttypes import SmsType
 from util.common import ObjectDict
+from util.tool.dict_tool import objectdictify
+from util.tool.json_tool import json_dumps
 from util.tool.str_tool import trunc
 from util.tool.url_tool import make_url
-from util.wechat.template import application_notice_to_applier_tpl, application_notice_to_recommender_tpl, application_notice_to_hr_tpl
-from thrift_gen.gen.mq.struct.ttypes import SmsType
-from util.tool.dict_tool import objectdictify
+from util.wechat.template import application_notice_to_applier_tpl, \
+    application_notice_to_recommender_tpl, application_notice_to_hr_tpl
 
 
 class ApplicationPageService(PageService):
@@ -325,9 +327,8 @@ class ApplicationPageService(PageService):
     @gen.coroutine
     def update_profile_other(self, new_record, profile_id):
         old_other = yield self.get_profile_other(profile_id)
-        self.logger.warn("new_record: %s" % new_record)
-        self.logger.warn("old_record: %s" % old_other)
 
+        # Sample:
         # new_record: {'other': '{"nationality": "\\u4e2d\\u56fd 123", "height": "177"}'}
         # old_other: {'nationality': '中国', 'height': '177'}
 
@@ -335,16 +336,18 @@ class ApplicationPageService(PageService):
             new_other_dict = json_decode(new_record.other)
             old_other.update(new_other_dict)
             other_dict_to_update = old_other
-
             params = {
-                'other': json_encode(other_dict_to_update),
+                'other': json_dumps(other_dict_to_update),
                 'profile_id': profile_id
             }
-            result, data = yield self.infra_profile_ds.update_profile_other(
-                params)
+            result, data = yield self.infra_profile_ds.update_profile_other(params)
 
         else:
+            # 转换一下 new_record 中 utf-8 char
+            new_record = ObjectDict(new_record)
+            new_record.other = json_dumps(json_decode(new_record.other))
             record_to_update = new_record
+
             result, data = yield self.infra_profile_ds.create_profile_other(
                 record_to_update, profile_id)
 

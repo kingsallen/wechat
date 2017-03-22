@@ -9,7 +9,8 @@ import conf.message as msg
 import conf.path as path
 from handler.base import BaseHandler
 from util.common import ObjectDict
-from util.common.decorator import handle_response, check_and_apply_profile, authenticated
+from util.common.decorator import handle_response, check_and_apply_profile, \
+    authenticated
 from util.tool.dict_tool import sub_dict, objectdictify
 from util.tool.str_tool import mobile_validate
 from util.tool.url_tool import make_url
@@ -130,9 +131,8 @@ class ProfilePreviewHandler(BaseHandler):
             # or not self.params.is_skip:
             raise ValueError()
 
-        other = {}
         profile_tpl = yield self.profile_ps.profile_to_tempalte(
-            self.current_user.profile, other)
+            self.current_user.profile)
 
         if self.current_user.sysuser.mobile:
             current_mobile = str(self.current_user.sysuser.mobile)
@@ -280,18 +280,18 @@ class ProfileCustomHandler(BaseHandler):
                     cv_profile_values, profile_id, mode='c')
 
                 if result:
-                    self.LOG.debug(
-                        "profile_basic creation passed. Got basic info id: %s" % data)
+                    self.logger.debug("profile_basic creation passed. Got basic info id: %s" % data)
                 else:
-                    self.LOG.error(
-                        "profile_basic creation failed. res: %s" % data)
+                    self.logger.error("profile_basic creation failed. res: %s" % data)
 
                 # 初始化user_setting表，profile的公开度
-                yield self.user_ps.create_user_setting(
-                    self.current_user.sysuser.id)
+                # TODO (tangyiliang) 建议在创建 user_user 的时候创建 user_settings 记录
+                # try:
+                #     yield self.user_ps.create_user_setting(self.current_user.sysuser.id)
+                # except InfraOperationError:
+                #     self.logger.error("create user_setting error, user_id: %s" % self.current_user.sysuser.id)
 
-                yield self.profile_ps.update_profile_basic(profile_id,
-                                                           custom_cv)
+                yield self.profile_ps.update_profile_basic(profile_id, custom_cv)
 
             else:
                 raise ValueError('profile creation error')
@@ -318,8 +318,7 @@ class ProfileCustomHandler(BaseHandler):
 
             other_string = json_encode(cv_pure_custom)
             record = ObjectDict(other=other_string)
-            yield self.application_ps.update_profile_other(
-                record, profile_id)
+            yield self.application_ps.update_profile_other(record, profile_id)
 
 
 class ProfileSectionHandler(BaseHandler):

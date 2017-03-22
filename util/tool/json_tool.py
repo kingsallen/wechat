@@ -6,15 +6,14 @@ import json
 
 
 class JSONEncoder(json.JSONEncoder):
-    """
-    指定非内置 JSON serializable 的类型应该如何转换
+    """指定非内置 JSON serializable 的类型应该如何转换
     """
     def default(self, o):
         if isinstance(o, decimal.Decimal):
             return float(o)
-        if isinstance(o, datetime.datetime):
+        elif isinstance(o, datetime.datetime):
             return o.__str__()
-        if isinstance(o, datetime.date):
+        elif isinstance(o, datetime.date):
             return o.__str__()
         return json.JSONEncoder.default(self, o)
 
@@ -26,13 +25,11 @@ def json_dumps(obj):
 
     不要直接使用此方法除非有明确的理由
     """
-    if not (isinstance(obj, (dict, list))):
-        raise ValueError("p_dict is not a required instance.")
-    return json.dumps(obj, cls=JSONEncoder)
+    return json.dumps(obj, cls=JSONEncoder, ensure_ascii=False)
 
 
 def encode_json_dumps(obj):
     """对对象进行两次dump
     主要用于 render json, 也在封装职位信息时使用
     """
-    return json.dumps(json.dumps(obj, cls=JSONEncoder))
+    return json.dumps(json_dumps(obj))
