@@ -19,17 +19,20 @@ class JSONEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, o)
 
 
-def json_dumps(p_dict):
-    """用于将含有不符合 JSON 规范的类型的 dict 对象序列化，使用自定义的 JSONEncoder。
-    不要使用此方法除非有明确的理由。
+def json_dumps(obj):
+    """用于将含有不符合 JSON 规范的类型的 dict 对象序列化，
+    使用自定义的 JSONEncoder。
+    不符合JSON规范的类型包括： decimal.Decimal, datetime.datetime, datetime.date
+
+    不要直接使用此方法除非有明确的理由
     """
-    if not (isinstance(p_dict, (dict, list))):
+    if not (isinstance(obj, (dict, list))):
         raise ValueError("p_dict is not a required instance.")
-    return JSONEncoder().encode(p_dict)
+    return json.dumps(obj, cls=JSONEncoder)
 
 
 def encode_json_dumps(obj):
     """对对象进行两次dump
-    主要用于 render json
+    主要用于 render json, 也在封装职位信息时使用
     """
-    return json.dumps(json.dumps(obj), cls=JSONEncoder)
+    return json.dumps(json.dumps(obj, cls=JSONEncoder))

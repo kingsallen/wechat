@@ -1,20 +1,12 @@
 # coding=utf-8
 
-# @Time    : 3/6/17 10:55
-# @Author  : panda (panyuxin@moseeker.com)
-# @File    : application.py
-# @DES     :
-
 from tornado import gen
-
-import conf.path as path
-import conf.common as const
-import conf.message as msg
 from tornado.escape import json_encode
 
+import conf.path as path
 from handler.base import BaseHandler
-from util.common.decorator import handle_response, authenticated, verified_mobile_oneself, check_and_apply_profile
-from util.tool.json_tool import encode_json_dumps
+from util.common.decorator import handle_response, authenticated, \
+    check_and_apply_profile
 from util.tool.url_tool import make_url
 
 
@@ -30,7 +22,9 @@ class ApplicationHandler(BaseHandler):
         position = yield self.position_ps.get_position(self.params.pid)
         check_status, message = yield self.application_ps.check_position(
             position, self.current_user)
-        self.logger.debug("[create_reply]check_status:{}, message:{}".format(check_status, message))
+        self.logger.debug(
+            "[create_reply]check_status:{}, message:{}".format(
+                check_status, message))
 
         if not check_status:
             self.render(
@@ -49,9 +43,9 @@ class ApplicationHandler(BaseHandler):
             # -> formats of custom_cv_tpls is like:
             # [{"field_name1": "map1"}, {"field_name2": "map2"}]
 
-            self.logger.warn(custom_cv_tpls)
-            result, resume_dict, json_config = yield self.application_ps.check_custom_cv(
-                self.current_user, position, custom_cv_tpls)
+            result, resume_dict, json_config = yield \
+                self.application_ps.check_custom_cv(
+                    self.current_user, position, custom_cv_tpls)
 
             if not result:
                 self.render(

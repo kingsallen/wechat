@@ -318,7 +318,7 @@ class ApplicationPageService(PageService):
         result, data = yield self.infra_profile_ds.get_profile_other(
             profile_id)
         if result:
-            return data[0].other
+            return ObjectDict(json_decode(data[0]['other']))
         else:
             return ObjectDict()
 
@@ -367,8 +367,7 @@ class ApplicationPageService(PageService):
 
     @gen.coroutine
     def create_email_apply(self, params, position, current_user, is_platform=True):
-        """
-        创建Email申请
+        """ 创建Email申请
         :param params:
         :param position:
         :param current_user:
@@ -619,48 +618,6 @@ class ApplicationPageService(PageService):
         sharechain_ps = None
         return recommender_user_id, recommender_wxuser_id, recom_employee
 
-    #     @gen.coroutine
-    #     def _create_job_resume_other(self, position, cv):
-    #
-    #         others_json = {}
-    #         if position.app_cv_config_id > 0:
-    #             # 经过新六步过来的申请
-    #             if cv:
-    #                 if not isinstance(cv, dict):
-    #                     _cv = ujson.loads(cv)
-    #                 others_json = sub_dict(cv, cv_pure_custom_keys())
-    #                 insert_hr_resume_others(
-    #                     self.db, self.params.appid,
-    #                     ujson.dumps(others_json, ensure_ascii=False).encode("utf-8"))
-    #
-    #             # 已经有全字段
-    #             else:
-    #                 config = pos_ser.get_custom_template(position.app_cv_config_id)
-    #                 json_config = ujson.loads(config.field_value)
-    #
-    #                 profile_other = get_profile_other_by_profile_id(
-    #                     self.db, profile_id)
-    #                 if profile_other:
-    #                     profile_other = profile_other.other
-    #                     profile_other_dict = ujson.loads(profile_other)
-    #
-    #                     hr_resume_other = {}
-    #                     for c in json_config:
-    #                         fields = c.get("fields")
-    #                         for field in fields:
-    #                             field_name = field.get("field_name")
-    #                             if profile_other_dict.get(field_name):
-    #                                 hr_resume_other.update({
-    #                                     field_name: profile_other_dict.get(field_name)
-    #                                 })
-    #
-    #                     self.LOG.debug("hr_resume_other: {}".format(hr_resume_other))
-    #                     others_json = hr_resume_other
-    #                     insert_hr_resume_others(
-    #                         self.db, self.params.appid,
-    #                         ujson.dumps(hr_resume_other, ensure_ascii=False).encode(
-    #                             "utf-8"))
-    #
     @gen.coroutine
     def opt_add_reward(self, apply_id, current_user, position, is_platform):
         """ 添加积分
