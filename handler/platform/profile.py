@@ -2,7 +2,7 @@
 
 import tornado
 import tornado.gen
-from tornado.escape import json_decode
+from tornado.escape import json_decode, json_encode
 
 import conf.common as const
 import conf.message as msg
@@ -156,36 +156,6 @@ class ProfilePreviewHandler(BaseHandler):
         self.render_page(template_name='profile/preview.html', data=data)
 
 
-class ProfileCustomCVHandler(BaseHandler):
-    """直接渲染自定义字段填写页面"""
-
-    @handle_response
-    @authenticated
-    @tornado.gen.coroutine
-    def get(self):
-        self.logger.debug("111111111111111111")
-        pid = int(self.params.pid)
-        position = yield self.position_ps.get_position(pid)
-        if not position.app_cv_config_id:
-            self.write_error(404)
-            return
-
-        self.logger.debug("22222222222222222222")
-        has_profile, profile = yield self.profile_ps.has_profile(self.current_user.sysuser.id)
-        if has_profile:
-            resume_dict = yield self.application_ps._generate_resume_cv(profile)
-        else:
-            resume_dict = {}
-        json_config = yield self.application_ps.get_hr_app_cv_conf(position.app_cv_config_id)
-
-        self.logger.debug("333333333333333333333")
-
-        self.render(
-            template_name='refer/weixin/application/app_cv_conf.html',
-            resume=encode_json_dumps(resume_dict),
-            cv_conf=encode_json_dumps(json_config))
-
-
 class ProfileHandler(BaseHandler):
     """ProfileHandler
     GET Profile 页面渲染
@@ -210,6 +180,31 @@ class ProfileHandler(BaseHandler):
 
 class ProfileCustomHandler(BaseHandler):
     """使用自定义简历页创建或更新profile"""
+
+    @handle_response
+    @authenticated
+    @tornado.gen.coroutine
+    def get(self):
+        pid = int(self.params.pid)
+        position = yield self.position_ps.get_position(pid)
+        if not position.app_cv_config_id:
+            self.write_error(404)
+            return
+
+        has_profile, profile = yield self.profile_ps.has_profile(
+            self.current_user.sysuser.id)
+        if has_profile:
+            resume_dict = yield self.application_ps._generate_resume_cv(
+                profile)
+        else:
+            resume_dict = {}
+        json_config = yield self.application_ps.get_hr_app_cv_conf(
+            position.app_cv_config_id)
+
+        self.render(
+            template_name='refer/weixin/application/app_cv_conf.html',
+            resume=json_encode(resume_dict),
+            cv_conf=json_encode(json_config))
 
     @handle_response
     @authenticated
