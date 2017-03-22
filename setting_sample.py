@@ -94,3 +94,11 @@ settings['component_app_id'] = 'wxee9d0552f867959b'
 settings['component_app_secret'] = '9ebcf7f4b719bf1384184ca50f2b82aa'
 settings['component_encodingAESKey'] = 'YhwSCu0CGkfeaHaAE9XHXfxeX2P0r5skvlDEl1pVK2a'
 settings['component_token'] = 'c37f1cd03cb111e5a2be00163e004a1f'
+
+# cv mail notice
+settings['cv_mail_sender_name'] = 'MoSeeker'
+settings['cv_mail_sender_email'] = 'emailtest@moseeker.net'
+settings['cv_mail_sender'] = settings['cv_mail_sender_name'] + " <" + settings['cv_mail_sender_email'] + ">"
+settings['cv_mail_smtpserver'] = 'mail.moseeker.net'
+settings['cv_mail_username'] = 'emailtest'
+settings['cv_mail_password'] = 'emts%2dqv'
