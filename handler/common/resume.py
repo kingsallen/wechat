@@ -1,5 +1,6 @@
 # coding=utf-8
 
+import json
 from tornado import gen
 
 import conf.path as path
@@ -33,16 +34,21 @@ class LinkedinImportHandler(MetaBaseHandler):
                                 pid=self.params.pid,
                                 wechat_signature=self.params.wechat_signature)
 
+        self.logger.debug("redirect_url:{}".format(redirect_url))
         response = yield self.profile_ps.get_linkedin_token(code=code, redirect_url=redirect_url)
-        access_token = response.access_token
+        self.logger.debug("response: {}".format(response))
+        response = json.loads(response)
+        access_token = response.get("access_token")
 
         is_ok, result = yield self.profile_ps.import_profile(4, "", "", user_id, access_token)
+        self.logger.debug("is_ok:{} result:{}".format(is_ok, result))
         if is_ok:
             if self.params.pid:
                 next_url = make_url(path.PROFILE_VIEW, params=self.params, apply='1')
             else:
                 next_url = make_url(path.PROFILE_VIEW, params=self.params)
 
+            self.logger.debug("next_url:{}".format(next_url))
             self.redirect(next_url)
             return
         else:
