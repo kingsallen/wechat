@@ -315,7 +315,7 @@ class ProfileCustomHandler(BaseHandler):
             cv_pure_custom = {k: v for k, v in custom_cv.items() if
                               k in custom_fields}
 
-            yield self.profile_ps.update_profile_other(
+            yield self.application_ps.update_profile_other(
                 cv_pure_custom, profile_id)
 
 
