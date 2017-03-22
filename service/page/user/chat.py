@@ -126,6 +126,12 @@ class ChatPageService(PageService):
         :return:
         """
 
+        self.logger.debug("save_chat_ps start")
+        self.logger.debug("save_chat_ps room_id:{}".format(room_id))
+        self.logger.debug("save_chat_ps content:{}".format(content))
+        self.logger.debug("save_chat_ps position_id:{}".format(position_id))
+        self.logger.debug("save_chat_ps speaker:{}".format(speaker))
+
         ret = yield self.thrift_chat_ds.save_chat(room_id, content, position_id, speaker)
         self.logger.debug("[save_chat]ret:{}".format(ret))
         raise gen.Return(ret)
