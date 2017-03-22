@@ -57,11 +57,6 @@ class ThriftChatDataService(DataService):
         :return:
         """
 
-        self.logger.debug(user_id)
-        self.logger.debug(hr_id)
-        self.logger.debug(position_id)
-        self.logger.debug(room_id)
-
         ret = yield self.chat_service_cilent.enterRoom(int(user_id), int(hr_id), int(position_id), int(room_id))
         self.logger.debug("[thrift]enter_chatroom: %s" % ret)
         raise gen.Return(ret)

@@ -115,7 +115,7 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
         self.room_id = room_id
         self.user_id = match_session_id(to_str(self.get_secure_cookie(const.COOKIE_SESSIONID)))
         self.hr_id = self.get_argument("hr_id")
-        self.position_id = self.get_argument("pid") if self.get_argument("pid") else 0
+        self.position_id = self.get_argument("pid", 0) or 0
 
         if not (self.user_id and self.hr_id and self.room_id):
             self.close(1000, "not authorized")
@@ -164,7 +164,7 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
             create_time = curr_now_minute()
         ))
         self.redis_client.publish(self.hr_channel, message_body)
-        yield self.chat_ps.save_chat(self.room_id, message.get("content"), self.position_id,)
+        yield self.chat_ps.save_chat(self.room_id, message.get("content"), self.position_id)
 
 
 class ChatHandler(BaseHandler):
