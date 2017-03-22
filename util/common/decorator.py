@@ -180,7 +180,7 @@ def check_and_apply_profile(func):
             linkedin_url = make_url(path.LINKEDIN_AUTH, params = ObjectDict(
                 response_type="code",
                 client_id=self.settings.linkedin_client_id,
-                scope=quote("r_basicprofile r_emailaddress"),
+                scope="r_basicprofile r_emailaddress",
                 redirect_uri=redirect_uri
             ))
 
