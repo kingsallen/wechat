@@ -10,6 +10,7 @@ from tornado import gen
 import conf.path as path
 import conf.common as const
 import conf.message as msg
+from tornado.escape import json_encode
 
 from handler.base import BaseHandler
 from util.common.decorator import handle_response, authenticated, verified_mobile_oneself, check_and_apply_profile
@@ -39,9 +40,6 @@ class ApplicationHandler(BaseHandler):
                                  escape=['next_url', 'pid']))
             return
 
-        self.logger.warn("<<<<<<<<<<<<<<<<<<<<<")
-        self.logger.warn(position)
-
         # 如果是自定义简历职位
         # 检查该 profile 是否符合自定义简历必填项,
         # 如果不符合的话跳转到自定义简历填写页
@@ -55,12 +53,11 @@ class ApplicationHandler(BaseHandler):
             result, resume_dict, json_config = yield self.application_ps.check_custom_cv(
                 self.current_user, position, custom_cv_tpls)
 
-            self.logger.warn(result, resume_dict, json_config)
-            self.logger.warn("<<<<<<<<<<<<<<<<<<<<<")
             if not result:
-                self.render('refer/weixin/application/app_cv_conf.html',
-                            resume=encode_json_dumps(resume_dict),
-                            cv_conf=encode_json_dumps(json_config))
+                self.render(
+                    template_name='refer/weixin/application/app_cv_conf.html',
+                    resume=json_encode(json_encode(resume_dict)),
+                    cv_conf=json_encode(json_encode(json_config)))
                 return
 
         # 定制化需求

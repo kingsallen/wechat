@@ -1,11 +1,8 @@
 # coding: utf-8
 
-# Copyright 2016 MoSeeker
-
 import datetime
 import decimal
 import json
-import ujson  # for encode json first time
 
 
 class JSONEncoder(json.JSONEncoder):
@@ -23,12 +20,16 @@ class JSONEncoder(json.JSONEncoder):
 
 
 def json_dumps(p_dict):
+    """用于将含有不符合 JSON 规范的类型的 dict 对象序列化，使用自定义的 JSONEncoder。
+    不要使用此方法除非有明确的理由。
+    """
     if not (isinstance(p_dict, (dict, list))):
         raise ValueError("p_dict is not a required instance.")
     return JSONEncoder().encode(p_dict)
 
 
-def encode_json_dumps(p_dict):
-    if not isinstance(p_dict, dict):
-        raise ValueError("p_dict is not a dict instance.")
-    return json.dumps(ujson.dumps(p_dict), cls=JSONEncoder)
+def encode_json_dumps(obj):
+    """对对象进行两次dump
+    主要用于 render json
+    """
+    return json.dumps(json.dumps(obj), cls=JSONEncoder)
