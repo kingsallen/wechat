@@ -69,7 +69,8 @@ class PositionPageService(PageService):
             "source":           position_res.source,
             "share_tpl_id":     position_res.share_tpl_id,
             "hb_status":        position_res.hb_status,
-            "team_id":          position_res.team_id
+            "team_id":          position_res.team_id,
+            "app_cv_config_id": position_res.app_cv_config_id
         })
 
         # 后置处理：

@@ -39,18 +39,24 @@ class ApplicationHandler(BaseHandler):
                                  escape=['next_url', 'pid']))
             return
 
+        self.logger.warn("<<<<<<<<<<<<<<<<<<<<<")
+        self.logger.warn(position)
+
         # 如果是自定义简历职位
         # 检查该 profile 是否符合自定义简历必填项,
         # 如果不符合的话跳转到自定义简历填写页
         if position.app_cv_config_id:
             # 读取自定义字段 meta 信息
-            custom_cv_tpls = yield self.profile_ps.get_custom_tpl_all()
+            custom_cv_tpls = yield self.application_ps.get_custom_tpl_all()
             # -> formats of custom_cv_tpls is like:
             # [{"field_name1": "map1"}, {"field_name2": "map2"}]
 
+            self.logger.warn(custom_cv_tpls)
             result, resume_dict, json_config = yield self.application_ps.check_custom_cv(
                 self.current_user, position, custom_cv_tpls)
 
+            self.logger.warn(result, resume_dict, json_config)
+            self.logger.warn("<<<<<<<<<<<<<<<<<<<<<")
             if not result:
                 self.render('refer/weixin/application/app_cv_conf.html',
                             resume=encode_json_dumps(resume_dict),

@@ -147,19 +147,18 @@ class ApplicationPageService(PageService):
 
     @gen.coroutine
     def _check(self, profile, field_name, user, custom_tpls):
-        """检查自定义字段必填项
-        """
+        """检查自定义字段必填项"""
         profile_fields = [c.field_name for c in custom_tpls if c.map]
         custom_fields = [c.field_name for c in custom_tpls if not c.map]
 
         # 如果 filed 是 profile 字段
         if field_name in profile_fields:
             return self._check_profile_fields(
-                profile, field_name, custom_tpls[field_name])
+                profile, field_name, custom_tpls[field_name], custom_tpls)
 
         # 如果 field 是纯自定义字段
         elif field_name in custom_fields:
-            ret = yield self._check_custom_fields(profile, field_name, user)
+            ret = yield self._check_custom_fields(profile, field_name, user, custom_tpls)
             return ret
 
         assert False  # should not be here
@@ -209,7 +208,7 @@ class ApplicationPageService(PageService):
         return None, None
 
     @gen.coroutine
-    def _check_custom_fields(self, profile, field_name, user):
+    def _check_custom_fields(self, profile, field_name, user, custom_tpls):
         profile_id = profile.profile.id
         other = yield self.get_profile_other(profile_id)
 
