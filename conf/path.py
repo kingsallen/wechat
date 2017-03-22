@@ -25,6 +25,7 @@ USERCENTER_APPLYRECORD = '/m/app/usercenter/applyrecords/{}'
 PROFILE_VIEW = '/m/profile'
 PROFILE_PREVIEW = '/m/profile/preview'
 PROFILE_NEW = '/m/app/profile/new'
+PROFILE_CUSTOM_CV = '/m/profile/custom'
 
 
 

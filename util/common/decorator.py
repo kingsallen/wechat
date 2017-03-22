@@ -5,7 +5,8 @@
 import functools
 import hashlib
 import traceback
-from urllib.parse import urlencode, quote
+from urllib.parse import urlencode
+from util.tool.json_tool import encode_json_dumps
 
 from tornado import gen
 from tornado.locks import Semaphore
@@ -19,6 +20,7 @@ from util.common.cache import BaseRedis
 from util.common.cipher import encode_id
 from util.tool.str_tool import to_hex
 from util.tool.url_tool import make_url
+from util.tool.dict_tool import sub_dict
 
 
 def handle_response(func):
@@ -168,8 +170,35 @@ def check_and_apply_profile(func):
             self.logger.debug(profile)
             yield func(self, *args, **kwargs)
         else:
-            self.logger.warning("has no profile, redirect to profile_new")
             # render new profile entry 页面
+            self.logger.debug(self.request.uri)
+            self.logger.warn(
+                "userid: %s has no profile, redirect to profile_new" %
+                self.current_user.sysuser.id)
+
+            # 跳转模版需要的参数初始值
+            redirect_params = {
+                "use_email": False,
+                "goto_custom_url": '',
+            }
+            # 如果是申请中跳转到这个页面，需要做详细检查
+            if self.request.uri.split('?')[0] == path.APPLICATION and \
+                isinstance(self.params.pid, int):
+                pid = int(self.params.pid)
+                position = yield self.position_ps.get_position(pid)
+
+                # 判断是否可以接受 email 投递
+                if position.email_resume_conf == const.OLD_YES:
+                    redirect_params.update(use_email=True)
+
+                # 判断是否是自定义职位
+                if position.app_cv_config_id:
+                    redirect_params.update(goto_custom_url=make_url(
+                        path.PROFILE_CUSTOM_CV,
+                        sub_dict(self.params, ['pid', 'wechat_signature'])))
+            else:
+                pass
+            # ========== LINKEDIN OAUTH ==============
             # 拼装 linkedin oauth 路由
             redirect_uri = make_url(path.RESUME_LINKEDIN,
                                     host=self.request.host,
@@ -177,17 +206,23 @@ def check_and_apply_profile(func):
                                     pid=self.params.pid,
                                     wechat_signature=self.current_user.wechat.signature)
 
-            linkedin_url = make_url(path.LINKEDIN_AUTH, params = ObjectDict(
+            linkedin_url = make_url(path.LINKEDIN_AUTH, params=ObjectDict(
                 response_type="code",
                 client_id=self.settings.linkedin_client_id,
                 scope="r_basicprofile r_emailaddress",
                 redirect_uri=redirect_uri
             ))
-
             # 由于 make_url 会过滤 state，但 linkedin 必须传 state，故此处手动添加
             linkedin_url = "{}&state={}".format(linkedin_url, encode_id(self.current_user.sysuser.id))
-            self.render(template_name='refer/neo_weixin/sysuser/importresume.html', use_email=True, linkedin_url=linkedin_url)
-            # self.redirect(make_url(path.PROFILE_NEW, self.params))
+
+            self.logger.debug("linkedin:{}".format(redirect_uri))
+            self.logger.debug("linkedin 2:{}".format(linkedin_url))
+            redirect_params.update(linkedin_url=linkedin_url)
+            # ========== LINKEDIN OAUTH ==============
+
+            self.render(template_name='refer/neo_weixin/sysuser/importresume.html',
+                        **redirect_params)
+
     return wrapper
 
 

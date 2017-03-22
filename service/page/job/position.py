@@ -21,17 +21,15 @@ class PositionPageService(PageService):
         super().__init__()
 
     @gen.coroutine
-    def get_position(self, position_id, fields=None):
-
-        fields = fields or []
+    def get_position(self, position_id):
         position = ObjectDict()
         position_res = yield self.job_position_ds.get_position({
             'id': position_id
-        }, fields)
+        })
 
         position_ext_res = yield self.job_position_ext_ds.get_position_ext({
             "pid": position_id
-        }, fields)
+        })
 
         if not position_res:
             raise gen.Return(position)
@@ -70,7 +68,8 @@ class PositionPageService(PageService):
             "share_tpl_id":     position_res.share_tpl_id,
             "hb_status":        position_res.hb_status,
             "team_id":          position_res.team_id,
-            "app_cv_config_id": position_res.app_cv_config_id
+            "app_cv_config_id": position_res.app_cv_config_id,
+            "email_resume_conf": position_res.email_resume_conf
         })
 
         # 后置处理：
