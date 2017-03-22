@@ -126,7 +126,8 @@ class ProfilePreviewHandler(BaseHandler):
     @check_and_apply_profile
     @tornado.gen.coroutine
     def get(self):
-        if not self.params.pid or not self.params.is_skip:
+        if not self.params.pid:
+            # or not self.params.is_skip:
             raise ValueError()
 
         other = {}
