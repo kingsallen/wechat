@@ -17,7 +17,6 @@ class LinkedinImportHandler(MetaBaseHandler):
     """linkedin 导入，由于 linkedin 为 oauth2.0导入，与微信 oauth2.0授权冲突（code问题），故直接继承 MetaBaseHandler"""
 
     @handle_response
-    @authenticated
     @gen.coroutine
     def get(self):
 
