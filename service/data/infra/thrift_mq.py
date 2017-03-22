@@ -6,6 +6,7 @@ from service.data.base import DataService
 from util.common import ObjectDict
 from util.common.decorator import cache
 from thrift_gen.gen.mq.service.MqService import Client as MqServiceClient
+from thrift_gen.gen.mq.struct.ttypes import MandrillEmailStruct
 from service.data.infra.framework.client.client import ServiceClientFactory
 from service.data.infra.framework.common.config import CONF
 from util.tool.json_tool import json_dumps
@@ -47,16 +48,14 @@ class ThriftMqDataService(DataService):
         :return:
         """
 
-        params = {
-            "templateName" : str(template_name),
-            "to_email": str(to_email),
-            "mergeVars": json_dumps(merge_vars),
-            "subject": subject,
-            "from_email": from_email,
-            "from_name": from_name,
-            "to_name": to_name
-        }
+        mandrill_obj = MandrillEmailStruct(str(template_name),
+                                           str(to_email),
+                                           str(to_name),
+                                           merge_vars,
+                                           str(from_email),
+                                           str(from_name),
+                                           str(subject))
 
-        ret = yield self.mq_service_cilent.sendMandrilEmail(params)
+        ret = yield self.mq_service_cilent.sendMandrilEmail(mandrill_obj)
         self.logger.debug("[thrift]send_mandrill_email: %s" % ret)
         raise gen.Return(ret)

@@ -34,9 +34,7 @@ class LinkedinImportHandler(MetaBaseHandler):
                                 pid=self.params.pid,
                                 wechat_signature=self.params.wechat_signature)
 
-        self.logger.debug("redirect_url:{}".format(redirect_url))
         response = yield self.profile_ps.get_linkedin_token(code=code, redirect_url=redirect_url)
-        self.logger.debug("response: {}".format(response))
         response = json.loads(to_str(response))
         access_token = response.get("access_token")
 
@@ -48,7 +46,6 @@ class LinkedinImportHandler(MetaBaseHandler):
             else:
                 next_url = make_url(path.PROFILE_VIEW, params=self.params)
 
-            self.logger.debug("next_url:{}".format(next_url))
             self.redirect(next_url)
             return
         else:
