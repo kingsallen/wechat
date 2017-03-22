@@ -3,14 +3,13 @@
 # Copyright 2016 MoSeeker
 
 import logging
-import pprint
-import traceback
 import os
+import pprint
 from logging.handlers import TimedRotatingFileHandler
+
 from tornado.log import gen_log
 
 from util.common.elk import RedisELK
-from util.common.alarm import Alarm
 
 # --------------------------------------------------------------------------
 #  Configurations
@@ -91,7 +90,7 @@ class Logger(object):
             self.__tornado_gen_log.addHandler(self._handlers[level])
 
     def debug(self, message):
-        self.__logger.debug(pprint.pformat(message), exc_info=0)
+        self.__logger.debug(message, exc_info=0)
 
     def info(self, message):
         self.__logger.info(message, exc_info=0)
