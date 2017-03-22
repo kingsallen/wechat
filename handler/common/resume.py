@@ -37,7 +37,7 @@ class LinkedinImportHandler(MetaBaseHandler):
         self.logger.debug("redirect_url:{}".format(redirect_url))
         response = yield self.profile_ps.get_linkedin_token(code=code, redirect_url=redirect_url)
         self.logger.debug("response: {}".format(response))
-        response = json.loads(response)
+        response = json.loads(to_str(response))
         access_token = response.get("access_token")
 
         is_ok, result = yield self.profile_ps.import_profile(4, "", "", user_id, access_token)
