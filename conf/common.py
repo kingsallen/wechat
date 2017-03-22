@@ -389,3 +389,7 @@ PROFILE_SOURCE_PLATFORM = 1
 PROFILE_SOURCE_PLATFORM_APPLY = 2
 
 INFRA_ERROR_CODES = [1, -1, 99999]
+
+# mandrill template_name
+KA_EMAIL_APPLICATION_INVITATION = "ka-email-application-invitation"
+NON_KA_EMAIL_APPLICATION_INVITATION = "non-ka-email-application-invitation"

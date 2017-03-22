@@ -18,8 +18,10 @@ from util.tool.dict_tool import objectdictify
 from util.tool.json_tool import json_dumps
 from util.tool.str_tool import trunc
 from util.tool.url_tool import make_url
-from util.wechat.template import application_notice_to_applier_tpl, \
-    application_notice_to_recommender_tpl, application_notice_to_hr_tpl
+from util.wechat.template import application_notice_to_applier_tpl, application_notice_to_recommender_tpl, application_notice_to_hr_tpl
+from thrift_gen.gen.mq.struct.ttypes import SmsType
+from util.tool.dict_tool import objectdictify
+from util.common.subprocess import Sub
 
 
 class ApplicationPageService(PageService):
@@ -837,7 +839,7 @@ class ApplicationPageService(PageService):
 
         if plat_type == 2:
             # 2是qx, 不管是不是KA, 都是以仟寻名义发送
-            template_name = "non-ka-email-application-invitation"
+            template_name = const.NON_KA_EMAIL_APPLICATION_INVITATION
             from_email = self.settings.cv_mail_sender_email
             merge_vars = ObjectDict(
                 company_abbr =company_abbr,
@@ -848,7 +850,7 @@ class ApplicationPageService(PageService):
             )
         else:
             # 1是platform, 都是KA, 以公司的名义发送
-            template_name = "ka-email-application-invitation"
+            template_name = const.KA_EMAIL_APPLICATION_INVITATION
             from_email = self.settings.cv_mail_sender_email
             merge_vars = ObjectDict(
                 company_abbr=company_abbr,
@@ -860,7 +862,6 @@ class ApplicationPageService(PageService):
                 official_account_name=email_params['official_account_name'],
                 official_account_qrcode=email_params['official_account_qrcode']
             )
-
 
         yield self.thrift_mq_ds.send_mandrill_email(template_name, to_email, "", from_email, "", "", merge_vars)
 
@@ -881,7 +882,56 @@ class ApplicationPageService(PageService):
         )
 
         yield self.thrift_mq_ds.send_mandrill_email(template_name, to_email, "", from_email, "", "", merge_vars)
-        # yield self.thrift_mq_ds.send_mandrill_email(template_name, to_email, "这是主题", from_email, "这是发件人", "这是收件人", merge_vars)
+
+
+    @gen.coroutine
+    def opt_send_hr_email(self, current_user, position, hr_info):
+
+        def send(data):
+            self.logger.info("Finish creating pdf resume : {}".format(pdf_fname))
+            self.logger.info("response data: " + str(data))
+
+        # # applier of resume send hr mail 0:yes 1:no?
+
+        def send_mail_hr():
+
+            send_email = position.hr_email or hr_info.email
+
+            if self.params.last_employee_user_id:
+                query_params = {
+                    "sysuser_id": self.params.last_employee_user_id,
+                    "company_id": self.current_user.company.id
+                }
+                emp_conf = employeeDao.get_employee_config(
+                    self.db, self.current_user.company.id)
+                conf = (emp_conf.get("custom", u"自定义字段") if emp_conf
+                        else u"自定义字段")
+            else:
+                employee = {}
+                conf = ""
+
+            employee = current_user.employee
+            employee_cert_conf = yield self.user_ps.get_employee_cert_conf(
+                current_user.company.id)
+            try:
+                if position.email_notice == const.ONUSE and send_email:
+                    send_mail_notice_hr(
+                        self, position, employee, conf,
+                        self.current_user.sysuser.id, profile, send_email,
+                        others_json, pdf_fname)
+                self.LOG.info(
+                    "Send application to HR success:sysuser id:{sid},"
+                    "aid:{aid},pid:{pid},email:{email}"
+                        .format(sid=self.current_user.sysuser.id,
+                                aid=self.params.appid, pid=position.id,
+                                email=send_email))
+            except Exception as e:
+                self.logger.info(
+                    "Send application to HR failed:{e}".format(e=str(e)))
+
+
+        Sub().subprocess(cmd, self.settings["resume_path"], send, send_mail_hr)
+
 
 #
 # import unittest
