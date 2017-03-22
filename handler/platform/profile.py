@@ -219,7 +219,7 @@ class ProfileCustomHandler(BaseHandler):
         yield self._save_custom_cv(custom_cv)
 
         p = dict()
-        p.update(is_skip=(self.current_user.company.id in self.customiz_ps._DIRECT_APPLY))
+        p.update(is_skip=(self.current_user.company.id in self.customize_ps._DIRECT_APPLY))
         # if self.current_user.company.id == const.CUSTOM_C_ID.EsteeLauder:
         #     pid = self.params.get("pid", 0)
         #     if not pid and self.get_cookie("dq_pid", 0):

@@ -324,12 +324,25 @@ class ApplicationPageService(PageService):
 
     @gen.coroutine
     def update_profile_other(self, new_record, profile_id):
-        old_record = yield self.get_profile_other(profile_id)
+        old_other = yield self.get_profile_other(profile_id)
+        self.logger.warn("new_record: %s" % new_record)
+        self.logger.warn("old_record: %s" % old_other)
 
-        if old_record:
-            record_to_update = old_record.update(new_record)
+        # new_record: {'other': '{"nationality": "\\u4e2d\\u56fd 123", "height": "177"}'}
+        # old_other: {'nationality': '中国', 'height': '177'}
+
+        if old_other:
+            new_other_dict = json_decode(new_record.other)
+            old_other.update(new_other_dict)
+            other_dict_to_update = old_other
+
+            params = {
+                'other': json_encode(other_dict_to_update),
+                'profile_id': profile_id
+            }
             result, data = yield self.infra_profile_ds.update_profile_other(
-                record_to_update)
+                params)
+
         else:
             record_to_update = new_record
             result, data = yield self.infra_profile_ds.create_profile_other(
