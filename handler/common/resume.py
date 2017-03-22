@@ -31,7 +31,7 @@ class LinkedinImportHandler(MetaBaseHandler):
                                 host=self.request.host,
                                 recom=self.params.recom,
                                 pid=self.params.pid,
-                                wechat_signature=self.current_user.wechat.signature)
+                                wechat_signature=self.params.wechat_signature)
 
         response = yield self.profile_ps.get_linkedin_token(code=code, redirect_url=redirect_url)
         access_token = response.access_token
