@@ -140,20 +140,25 @@ class ProfilePreviewHandler(BaseHandler):
             current_mobile = ''
 
         try:
+            # 只有存在 is_skip 且值为 '1' 时才跳过 preview
             is_skip = int(self.params.is_skip) == const.YES
         except Exception:
             is_skip = False
 
-        data = ObjectDict(
-            profile=profile_tpl,
-            pid=self.params.pid,
-            is_skip=is_skip,
-            need_mobile_validate=str(self.current_user.sysuser.mobile) != str(self.current_user.sysuser.username),
-            no_name=not self.current_user.sysuser.name,
-            current_mobile=current_mobile
-        )
+        need_mobile_validate = str(
+                self.current_user.sysuser.mobile) != str(
+                self.current_user.sysuser.username)
 
-        self.render_page(template_name='profile/preview.html', data=data)
+        tparams = {
+            'profile':              profile_tpl,
+            'pid':                  self.params.pid,
+            'is_skip':              is_skip,
+            'need_mobile_validate': need_mobile_validate,
+            'no_name':              not bool(self.current_user.sysuser.name),
+            'current_mobile':       current_mobile
+        }
+
+        self.render_page(template_name='profile/preview.html', data=tparams)
 
 
 class ProfileHandler(BaseHandler):
