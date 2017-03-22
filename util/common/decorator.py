@@ -181,10 +181,11 @@ def check_and_apply_profile(func):
                 response_type="code",
                 client_id=self.settings.linkedin_client_id,
                 scope=quote("r_basicprofile r_emailaddress"),
-                state=self.current_user.wechat.signature,
                 redirect_uri=redirect_uri
             ))
 
+            # 由于 make_url 会过滤 state，但 linkedin 必须传 state，故此处手动添加
+            linkedin_url = "{}&state={}".format(linkedin_url, encode_id(self.current_user.sysuser.id))
             self.logger.debug("linkedin:{}".format(redirect_uri))
             self.logger.debug("linkedin 2:{}".format(linkedin_url))
 
