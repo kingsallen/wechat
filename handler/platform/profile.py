@@ -156,7 +156,7 @@ class ProfilePreviewHandler(BaseHandler):
         self.render_page(template_name='profile/preview.html', data=data)
 
 
-class ProfileCustomHandler(BaseHandler):
+class ProfileCustomCVHandler(BaseHandler):
     """直接渲染自定义字段填写页面"""
 
     @handle_response

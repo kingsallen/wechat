@@ -134,6 +134,8 @@ class BaseHandler(MetaBaseHandler):
         self._qxuser = None
         self._session_id = None
 
+        self.logger.warn(">>>>>>>>>>BaseHandler prepare over!<<<<<<<<<<")
+
     # PROTECTED
     @gen.coroutine
     def _handle_user_info(self, userinfo):
