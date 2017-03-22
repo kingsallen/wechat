@@ -6,7 +6,6 @@ import functools
 import hashlib
 import traceback
 from urllib.parse import urlencode
-from util.tool.json_tool import encode_json_dumps
 
 from tornado import gen
 from tornado.locks import Semaphore
@@ -173,7 +172,7 @@ def check_and_apply_profile(func):
             # render new profile entry 页面
             self.logger.debug(self.request.uri)
             self.logger.warn(
-                "userid: %s has no profile, redirect to profile_new" %
+                "userid:%s has no profile, redirect to profile_new" %
                 self.current_user.sysuser.id)
 
             # 跳转模版需要的参数初始值
@@ -181,11 +180,18 @@ def check_and_apply_profile(func):
                 "use_email": False,
                 "goto_custom_url": '',
             }
+
             # 如果是申请中跳转到这个页面，需要做详细检查
+            self.logger.warn(self.request.uri.split('?')[0])
+            self.logger.warn(self.params)
+
             if self.request.uri.split('?')[0] == path.APPLICATION and \
-                isinstance(self.params.pid, int):
+                self.params.pid and self.params.pid.isdigit():
+
                 pid = int(self.params.pid)
                 position = yield self.position_ps.get_position(pid)
+
+                self.logger.warn(position)
 
                 # 判断是否可以接受 email 投递
                 if position.email_resume_conf == const.OLD_YES:
@@ -198,6 +204,7 @@ def check_and_apply_profile(func):
                         sub_dict(self.params, ['pid', 'wechat_signature'])))
             else:
                 pass
+
             # ========== LINKEDIN OAUTH ==============
             # 拼装 linkedin oauth 路由
             redirect_uri = make_url(path.RESUME_LINKEDIN,
@@ -219,6 +226,8 @@ def check_and_apply_profile(func):
             self.logger.debug("linkedin 2:{}".format(linkedin_url))
             redirect_params.update(linkedin_url=linkedin_url)
             # ========== LINKEDIN OAUTH ==============
+
+            self.logger.warn(redirect_params)
 
             self.render(template_name='refer/neo_weixin/sysuser/importresume.html',
                         **redirect_params)

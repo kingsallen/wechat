@@ -51,11 +51,6 @@ class ApplicationHandler(BaseHandler):
                               pid=self.params.pid,
                               wechat_signature=self.params.wechat_signature))
                 return
-                # self.render(
-                #     template_name='refer/weixin/application/app_cv_conf.html',
-                #     resume=json_encode(json_encode(resume_dict)),
-                #     cv_conf=json_encode(json_encode(json_config)))
-                # return
 
         # 定制化需求
         # 雅诗兰黛直接投递

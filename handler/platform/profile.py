@@ -163,18 +163,22 @@ class ProfileCustomHandler(BaseHandler):
     @authenticated
     @tornado.gen.coroutine
     def get(self):
+        self.logger.debug("111111111111111111")
         pid = int(self.params.pid)
         position = yield self.position_ps.get_position(pid)
         if not position.app_cv_config_id:
             self.write_error(404)
             return
 
+        self.logger.debug("22222222222222222222")
         has_profile, profile = yield self.profile_ps.has_profile(self.current_user.sysuser.id)
         if has_profile:
             resume_dict = yield self.application_ps._generate_resume_cv(profile)
         else:
             resume_dict = {}
         json_config = yield self.application_ps.get_hr_app_cv_conf(position.app_cv_config_id)
+
+        self.logger.debug("333333333333333333333")
 
         self.render(
             template_name='refer/weixin/application/app_cv_conf.html',
