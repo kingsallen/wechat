@@ -315,8 +315,10 @@ class ProfileCustomHandler(BaseHandler):
             cv_pure_custom = {k: v for k, v in custom_cv.items() if
                               k in custom_fields}
 
+            other_string = json_encode(cv_pure_custom)
+            record = ObjectDict(other=other_string)
             yield self.application_ps.update_profile_other(
-                cv_pure_custom, profile_id)
+                record, profile_id)
 
 
 class ProfileSectionHandler(BaseHandler):
