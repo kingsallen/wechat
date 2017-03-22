@@ -13,7 +13,6 @@ from util.common.decorator import handle_response, check_and_apply_profile, auth
 from util.tool.dict_tool import sub_dict, objectdictify
 from util.tool.str_tool import mobile_validate
 from util.tool.url_tool import make_url
-from util.tool.json_tool import encode_json_dumps
 
 
 class ProfileNewHandler(BaseHandler):
@@ -198,13 +197,15 @@ class ProfileCustomHandler(BaseHandler):
                 profile)
         else:
             resume_dict = {}
+
         json_config = yield self.application_ps.get_hr_app_cv_conf(
             position.app_cv_config_id)
+        cv_conf = json_config.field_value
 
         self.render(
             template_name='refer/weixin/application/app_cv_conf.html',
-            resume=json_encode(resume_dict),
-            cv_conf=json_encode(json_config))
+            resume=json_encode(json_encode(resume_dict)),
+            cv_conf=json_encode(cv_conf))
 
     @handle_response
     @authenticated
