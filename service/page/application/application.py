@@ -568,8 +568,6 @@ class ApplicationPageService(PageService):
 
         if ret.status != const.API_SUCCESS:
             return False, msg.CREATE_APPLICATION_FAILED
-        else:
-            pass
 
         apply_id = ret.data.jobApplicationId
 
@@ -732,7 +730,7 @@ class ApplicationPageService(PageService):
         :return:
         """
         self.logger.debug("[opt_send_recommender_msg]start")
-        profile_ps = ProfilePageService()
+
         recom_record = yield self.candidate_recom_record_ds.get_candidate_recom_record(
             conds={
                 "position_id":       position.id,
@@ -740,18 +738,19 @@ class ApplicationPageService(PageService):
                 "post_user_id":      recommend_user_id,
             }, appends=["LIMIT 1"])
 
-        work_exp_years = profile_ps.calculate_workyears(
-            profile.get("workexps", []))
-        job = profile_ps.get_job_for_application(profile)
-        recent_job = job.get("company_name", "")
-
-        link = make_url(path.EMPLOYEE_RECOMMENDS,
-                        host=self.settings.platform_host,
-                        wechat_signature=current_user.wechat.signature)
-
-        self.logger.debug("[opt_send_recommender_msg]link:{}".format(link))
-
         if recom_record and current_user.recom.id:
+            profile_ps = ProfilePageService()
+            work_exp_years = profile_ps.calculate_workyears(
+                profile.get("workexps", []))
+            job = profile_ps.get_job_for_application(profile)
+            recent_job = job.get("company_name", "")
+
+            link = make_url(path.EMPLOYEE_RECOMMENDS,
+                            host=self.settings.platform_host,
+                            wechat_signature=current_user.wechat.signature)
+
+            self.logger.debug("[opt_send_recommender_msg]link:{}".format(link))
+
             application_notice_to_recommender_tpl(current_user.wechat.id,
                                                   current_user.recom.openid,
                                                   link,
@@ -759,7 +758,7 @@ class ApplicationPageService(PageService):
                                                   position.title,
                                                   work_exp_years,
                                                   recent_job)
-        profile_ps = None
+            profile_ps = None
         self.logger.debug("[opt_send_recommender_msg]end")
 
     @gen.coroutine
@@ -790,9 +789,9 @@ class ApplicationPageService(PageService):
     def opt_hr_msg(self, apply_id, current_user, profile, position, is_platform=True):
 
         self.logger.debug("[opt_hr_msg]start")
-        profile_ps = ProfilePageService()
         # 1. 向 HR 发送消息模板通知，短信
         if position.publisher:
+            profile_ps = ProfilePageService()
             work_exp_years = profile_ps.calculate_workyears(
                 profile.get("workexps", []))
             job = profile_ps.get_job_for_application(profile)
@@ -827,67 +826,11 @@ class ApplicationPageService(PageService):
                     yield self.thrift_mq_ds.send_sms(SmsType.NEW_APPLICATION_TO_HR_SMS,
                                                      current_user.sysuser.mobile,
                                                      params, isqx=not is_platform)
+            profile_ps = None
 
         # 2. 向 HR 发送邮件通知
         yield self.opt_send_hr_email(apply_id, current_user, profile, position, hr_info)
-        profile_ps = None
         self.logger.debug("[opt_hr_msg]end")
-
-    @gen.coroutine
-    def opt_send_email_create_application_notice(self, email_params):
-        """向求职者发送创建 email 申请邮件"""
-
-        to_email = email_params["email_address"]
-        company_abbr = email_params["company_abbr"]
-        applier_name = email_params["applier_name"]
-        invitation_code = email_params["invitation_code"]
-        plat_type = email_params["plat_type"]
-
-        if plat_type == 2:
-            # 2是qx, 不管是不是KA, 都是以仟寻名义发送
-            template_name = const.NON_KA_EMAIL_APPLICATION_INVITATION
-            from_email = self.settings.cv_mail_sender_email
-            merge_vars = ObjectDict(
-                company_abbr =company_abbr,
-                header_company_abbr = trunc(company_abbr, const.MANDRILL_EMAIL_HEADER_LIMIT),
-                applier_name = applier_name,
-                header_applier_name = trunc(applier_name, const.MANDRILL_EMAIL_HEADER_LIMIT),
-                invitation_code = invitation_code
-            )
-        else:
-            # 1是platform, 都是KA, 以公司的名义发送
-            template_name = const.KA_EMAIL_APPLICATION_INVITATION
-            from_email = self.settings.cv_mail_sender_email
-            merge_vars = ObjectDict(
-                company_abbr=company_abbr,
-                header_company_abbr=trunc(company_abbr, const.MANDRILL_EMAIL_HEADER_LIMIT),
-                applier_name=applier_name,
-                header_applier_name=trunc(applier_name, const.MANDRILL_EMAIL_HEADER_LIMIT),
-                invitation_code=invitation_code,
-                company_logo=email_params['company_logo'],
-                official_account_name=email_params['official_account_name'],
-                official_account_qrcode=email_params['official_account_qrcode']
-            )
-
-        yield self.thrift_mq_ds.send_mandrill_email(template_name, to_email, "", from_email, "", "", merge_vars)
-
-    @gen.coroutine
-    def opt_send_email_create_profile_notice(self, email_params):
-        """向求职者发送创建 profile 邮件"""
-
-        to_email = email_params["email_address"]
-        applier_name = email_params["applier_name"]
-        invitation_code = email_params["invitation_code"]
-
-        template_name = "email-profile-creation-invitation"
-        from_email = self.settings.cv_mail_sender_email
-        merge_vars = ObjectDict(
-            applier_name=applier_name,
-            header_applier_name=trunc(applier_name, const.MANDRILL_EMAIL_HEADER_LIMIT),
-            invitation_code=invitation_code,
-        )
-
-        yield self.thrift_mq_ds.send_mandrill_email(template_name, to_email, "", from_email, "", "", merge_vars)
 
     @gen.coroutine
     def opt_send_hr_email(self, apply_id, current_user, profile, position, hr_info):
@@ -943,7 +886,62 @@ class ApplicationPageService(PageService):
 
         Sub().subprocess(cmd, self.settings.resume_path, send, send_mail_hr)
         self.logger.debug("[opt_send_hr_email]end")
+        
+    @gen.coroutine
+    def opt_send_email_create_application_notice(self, email_params):
+        """向求职者发送创建 email 申请邮件"""
 
+        to_email = email_params["email_address"]
+        company_abbr = email_params["company_abbr"]
+        applier_name = email_params["applier_name"]
+        invitation_code = email_params["invitation_code"]
+        plat_type = email_params["plat_type"]
+
+        if plat_type == 2:
+            # 2是qx, 不管是不是KA, 都是以仟寻名义发送
+            template_name = const.NON_KA_EMAIL_APPLICATION_INVITATION
+            from_email = self.settings.cv_mail_sender_email
+            merge_vars = ObjectDict(
+                company_abbr =company_abbr,
+                header_company_abbr = trunc(company_abbr, const.MANDRILL_EMAIL_HEADER_LIMIT),
+                applier_name = applier_name,
+                header_applier_name = trunc(applier_name, const.MANDRILL_EMAIL_HEADER_LIMIT),
+                invitation_code = invitation_code
+            )
+        else:
+            # 1是platform, 都是KA, 以公司的名义发送
+            template_name = const.KA_EMAIL_APPLICATION_INVITATION
+            from_email = self.settings.cv_mail_sender_email
+            merge_vars = ObjectDict(
+                company_abbr=company_abbr,
+                header_company_abbr=trunc(company_abbr, const.MANDRILL_EMAIL_HEADER_LIMIT),
+                applier_name=applier_name,
+                header_applier_name=trunc(applier_name, const.MANDRILL_EMAIL_HEADER_LIMIT),
+                invitation_code=invitation_code,
+                company_logo=email_params['company_logo'],
+                official_account_name=email_params['official_account_name'],
+                official_account_qrcode=email_params['official_account_qrcode']
+            )
+
+        yield self.thrift_mq_ds.send_mandrill_email(template_name, to_email, "", from_email, "", "", merge_vars)
+
+    @gen.coroutine
+    def opt_send_email_create_profile_notice(self, email_params):
+        """向求职者发送创建 profile 邮件"""
+
+        to_email = email_params["email_address"]
+        applier_name = email_params["applier_name"]
+        invitation_code = email_params["invitation_code"]
+
+        template_name = "email-profile-creation-invitation"
+        from_email = self.settings.cv_mail_sender_email
+        merge_vars = ObjectDict(
+            applier_name=applier_name,
+            header_applier_name=trunc(applier_name, const.MANDRILL_EMAIL_HEADER_LIMIT),
+            invitation_code=invitation_code,
+        )
+
+        yield self.thrift_mq_ds.send_mandrill_email(template_name, to_email, "", from_email, "", "", merge_vars)
 
 #
 # import unittest
