@@ -1,6 +1,7 @@
 # coding=utf-8
 
 import redis
+import unittest
 
 
 class Subscriber(object):
@@ -52,20 +53,21 @@ class Subscriber(object):
         self._sleep_time = 0.01
 
 
-def main():
-    redis_client = redis.StrictRedis()
+class TestSubscriber(unittest.TestCase):
+    def test1(self):
+        redis_client = redis.StrictRedis()
 
-    def handler(message):
-        data = message['data']
-        print("handle message.data: %s" % data)
+        def handler(message):
+            data = message['data']
+            print("handle message.data: %s" % data)
 
-    subs = Subscriber(redis_client, channel='yiliang', message_handler=handler)
-    subs.start_run_in_thread()
-    redis_client.publish('yiliang', 'hey')
-    redis_client.publish('yiliang', 'hey2')
-    redis_client.publish('yiliang', 'hey3')
-    subs.stop_run_in_thread()
-
+        subs = Subscriber(redis_client, channel='yiliang', message_handler=handler)
+        subs.start_run_in_thread()
+        redis_client.publish('yiliang', 'hey')
+        redis_client.publish('yiliang', 'hey2')
+        redis_client.publish('yiliang', 'hey3')
+        subs.stop_run_in_thread()
 
 if __name__ == '__main__':
-    main()
+    unittest.main()
+
