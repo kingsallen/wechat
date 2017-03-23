@@ -128,8 +128,7 @@ class ApplicationPageService(PageService):
                 self.logger.debug("自定义字段必填校验错误, field_name: %s" % field_name)
                 resume_dict = yield self._generate_resume_cv(profile)
                 self.logger.debug("resume_dict: %s" % resume_dict)
-                return (False, resume_dict,
-                        objectdictify(json_decode(cv_conf.field_value)))
+                return (False, resume_dict, objectdictify(json_decode(cv_conf.field_value)))
         return True, None, None
 
     @staticmethod
@@ -541,27 +540,19 @@ class ApplicationPageService(PageService):
         return None
 
     @gen.coroutine
-    def create_application(self, params, position, current_user,
+    def create_application(self, position, current_user,
                            is_platform=True):
 
         # 1.初始化
-        check_status, message = yield self.check_position(position,
-                                                          current_user)
+        check_status, message = yield self.check_position(position, current_user)
         self.logger.debug(
-            "[create_reply]check_status:{}, message:{}".format(check_status,
-                                                               message))
+            "[create_reply]check_status:{}, message:{}"
+            .format(check_status, message))
+
         if not check_status:
             return False, message, None
 
-        # # 如果有 profile 但是是自定义职位, 检查该 profile 是否符合自定义简历必填项
-        # if position.app_cv_config_id:
-        #     is_true, resume_dict, json_config = yield self.custom_check_failure_redirection(
-        #         profile, position, current_user.sysuser)
-        #     if is_true:
-        #         # TODO message 可调整
-        #         raise gen.Return((False, None, None))
-
-        # 3.创建申请
+        # 2.创建申请
         recommender_user_id, recommender_wxuser_id, recom_employee = \
             yield self.get_recommend_user(current_user, position, is_platform)
 

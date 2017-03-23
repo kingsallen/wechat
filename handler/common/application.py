@@ -72,7 +72,6 @@ class ApplicationHandler(BaseHandler):
         position = yield self.position_ps.get_position(self.json_args.pid)
 
         is_applied, message, apply_id = yield self.application_ps.create_application(
-            {},
             position,
             self.current_user)
         self.logger.debug("[post_apply]is_applied:{}, message:{}, appid:{}".format(is_applied, message, apply_id))
