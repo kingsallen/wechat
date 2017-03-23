@@ -20,6 +20,7 @@ from util.tool.str_tool import trunc
 from util.tool.url_tool import make_url
 from util.wechat.template import application_notice_to_applier_tpl, \
     application_notice_to_recommender_tpl, application_notice_to_hr_tpl
+from service.page.user.profile import ProfilePageService
 
 
 class ApplicationPageService(PageService):
@@ -727,6 +728,7 @@ class ApplicationPageService(PageService):
         :param profile:
         :return:
         """
+        profile_ps = ProfilePageService()
 
         recom_record = yield self.candidate_recom_record_ds.get_candidate_recom_record(
             conds={
@@ -735,9 +737,9 @@ class ApplicationPageService(PageService):
                 "post_user_id":      recommend_user_id,
             }, appends=["LIMIT 1"])
 
-        work_exp_years = self.profile_ps.calculate_workyears(
+        work_exp_years = profile_ps.calculate_workyears(
             profile.get("workexps", []))
-        job = self.profile_psd.get_job_for_application(profile)
+        job = profile_ps.get_job_for_application(profile)
         recent_job = job.get("company_name", "")
 
         link = make_url(path.EMPLOYEE_RECOMMENDS,
