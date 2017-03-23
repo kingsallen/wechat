@@ -1,7 +1,6 @@
 # coding=utf-8
 
 from tornado import gen
-from tornado.escape import json_encode
 
 import conf.path as path
 from handler.base import BaseHandler
@@ -16,7 +15,6 @@ class ApplicationHandler(BaseHandler):
     @check_and_apply_profile
     @gen.coroutine
     def get(self):
-        # 获得职位信息
 
         # 判断职位相关状态是否合规
         position = yield self.position_ps.get_position(self.params.pid)
@@ -39,7 +37,7 @@ class ApplicationHandler(BaseHandler):
         # 如果不符合的话跳转到自定义简历填写页
         if position.app_cv_config_id:
             # 读取自定义字段 meta 信息
-            custom_cv_tpls = yield self.application_ps.get_custom_tpl_all()
+            custom_cv_tpls = yield self.profile_ps.get_custom_tpl_all()
             # -> formats of custom_cv_tpls is like:
             # [{"field_name1": "map1"}, {"field_name2": "map2"}]
 

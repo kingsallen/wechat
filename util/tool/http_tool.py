@@ -129,7 +129,7 @@ def _async_http_get(route, jdata=None, timeout=5, method='GET', infra=True):
 
     body = objectdictify(ujson.decode(response.body))
     if infra and body.status in INFRA_ERROR_CODES:
-            raise InfraOperationError(body.message)
+        raise InfraOperationError(body.message)
 
     return body
 
@@ -165,6 +165,6 @@ def _async_http_post(route, jdata=None, timeout=5, method='POST', infra=True):
 
     body = objectdictify(ujson.decode(response.body))
     if infra and body.status in INFRA_ERROR_CODES:
-            raise InfraOperationError(body.message)
+        raise InfraOperationError(body.message)
 
     return body

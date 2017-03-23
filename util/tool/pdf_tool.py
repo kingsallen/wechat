@@ -7,6 +7,8 @@
 
 import os
 from tornado import template
+
+import conf.common as const
 from setting import settings
 from util.tool.url_tool import make_static_url
 
@@ -63,7 +65,7 @@ def get_create_pdf_by_html_cmd(html_fname, pdf_fname):
     '''
     return "xvfb-run -a -s '-screen 0 640x480x16' wkhtmltopdf {hfile} {pfile}".format(hfile=html_fname, pfile=pdf_fname)
 
-def generate_html_template_resume(employee, conf, profile, template_others, position, const):
+def generate_html_template_resume(employee, conf, profile, template_others, position):
     """
     申请后发送给hr简历的邮件模板
     :param self
@@ -72,7 +74,6 @@ def generate_html_template_resume(employee, conf, profile, template_others, posi
     :param profile:
     :param template_others:
     :param position:
-    :param const:
     :return:
     """
     loader = template.Loader(settings.template_path + "/neo_weixin/systemmessage/")

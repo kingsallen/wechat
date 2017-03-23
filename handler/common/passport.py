@@ -39,10 +39,9 @@ class LoginHandler(BaseHandler):
         except AttributeError:
             return
 
-        code, password = password_crypt(self.params.password)
         res = yield self.usercenter_ps.post_login(params={
             "mobile": self.params.mobile,
-            "password": password,
+            "password": self.params.password,
         })
 
         next_url = self.json_args.get("next_url", "")
@@ -272,15 +271,14 @@ class RegisterHandler(BaseHandler):
             self.send_json_error(message=msg.CELLPHONE_PASSWORD_ERROR)
             raise gen.Return()
 
-        code, password = password_crypt(self.params.password)
         if self.params.code_type == 1:
             # 忘记密码
-            res = yield self.usercenter_ps.post_resetpassword(mobile, password)
+            res = yield self.usercenter_ps.post_resetpassword(mobile, self.params.password)
             if res.status != const.API_SUCCESS:
                 self.send_json_error(message=res.message)
                 raise gen.Return()
         else:
-            res = yield self.usercenter_ps.post_register(mobile, password)
+            res = yield self.usercenter_ps.post_register(mobile, self.params.password)
             if res.status != const.API_SUCCESS:
                 self.send_json_error(message=msg.CELLPHONE_REGISTER_FAILED)
                 raise gen.Return()

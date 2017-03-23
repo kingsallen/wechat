@@ -48,18 +48,15 @@ class CellphonePageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def send_sms(self, type, mobile, params, isqx=False, ip=""):
+    def send_sms(self, sms_type, mobile, params, isqx=False, ip=""):
         """
         发送短信，调用 thrift 接口
-        :param type: 对应 thrift_gen/gen/mq/struct/ttypes
+        :param sms_type: 对应 thrift_gen/gen/mq/struct/ttypes
         :param mobile:
         :param params:
         :param isqx: 是否为聚合号
         :return:
         """
 
-        sys = 2 if isqx else 1
-        ret = yield self.thrift_mq_ds.send_sms(type, mobile, params, sys, ip)
-        self.logger.debug("[send_sms]ret:{}".format(ret))
-        result = bool(ret.status == self.constant.API_SUCCESS)
-        return result, ret.message
+        ret, msg = yield self.thrift_mq_ds.send_sms(sms_type, mobile, params, isqx, ip)
+        return ret, msg

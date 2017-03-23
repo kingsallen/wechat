@@ -21,18 +21,22 @@ class ThriftMqDataService(DataService):
         MqServiceClient, CONF)
 
     @gen.coroutine
-    def send_sms(self, sms_type, mobile, params, sys, ip):
+    def send_sms(self, sms_type, mobile, params, isqx=False, ip=''):
         """
         发送短信，调用 thrift 接口
         :param sms_type: int
         :param mobile: string
         :param params: dict
+        :param isqx: True/False
+        :param ip:
         :return:
         """
 
+        sys = 2 if isqx else 1
         ret = yield self.mq_service_cilent.sendSMS(sms_type, str(mobile), params, str(sys), str(ip))
         self.logger.debug("[thrift]send_sms: %s" % ret)
-        raise gen.Return(ret)
+        result = bool(ret.status == self.constant.API_SUCCESS)
+        return result, ret.message
 
     @gen.coroutine
     def send_mandrill_email(self, template_name, to_email, subject, from_email, from_name, to_name, merge_vars):

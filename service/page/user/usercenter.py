@@ -45,7 +45,7 @@ class UsercenterPageService(PageService):
         """用户登录
         微信 unionid, 或者 mobile+password, 或者mobile+code, 3选1
         :param mobile: 手机号
-        :param password: 密码
+        :param password: 密码，非加密的原密码
         :param code: 手机验证码
         :param unionid: 微信 unionid
         """

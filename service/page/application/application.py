@@ -13,6 +13,7 @@ import conf.path as path
 from cache.application.email_apply import EmailApplyCache
 from service.page.base import PageService
 from service.page.user.sharechain import SharechainPageService
+from service.page.user.profile import ProfilePageService
 from util.common.subprocess import Sub
 from util.common import ObjectDict
 from util.tool.json_tool import json_dumps
@@ -96,14 +97,6 @@ class ApplicationPageService(PageService):
                 "name": name,
             })
         raise gen.Return(res)
-
-    @gen.coroutine
-    def get_custom_tpl_all(self):
-        ret = yield self.config_sys_cv_tpl_ds.get_config_sys_cv_tpls(
-            conds={'disable': const.OLD_YES},
-            fields=['field_name', 'field_title', 'map']
-        )
-        return ret
 
     @gen.coroutine
     def check_custom_cv(self, current_user, position, custom_tpls):
@@ -583,10 +576,8 @@ class ApplicationPageService(PageService):
         # 申请的后续处理
         self.logger.debug("[post_apply]投递后续处理")
 
-        # 1. 添加积分
-        yield self.opt_add_reward(apply_id, current_user, position,
-                                  is_platform)
-
+        #1. 添加积分
+        yield self.opt_add_reward(apply_id, current_user, position, is_platform)
         #2. 向求职者发送消息通知（消息模板，短信）
         yield self.opt_send_applier_msg(apply_id, current_user, position, is_platform)
         #3. 向推荐人发送消息模板
@@ -604,6 +595,7 @@ class ApplicationPageService(PageService):
     @gen.coroutine
     def get_recommend_user(self, current_user, position, is_platform):
 
+        self.logger.debug("[get_recommend_user]start")
         recommender_user_id = 0
         recommender_wxuser_id = 0
         recom_employee = ObjectDict()
@@ -623,6 +615,7 @@ class ApplicationPageService(PageService):
                 recommender_wxuser_id = recom_employee.wxuser_id or 0
 
         sharechain_ps = None
+        self.logger.debug("[get_recommend_user]end")
         return recommender_user_id, recommender_wxuser_id, recom_employee
 
     @gen.coroutine
@@ -633,7 +626,7 @@ class ApplicationPageService(PageService):
         :param position:
         :param is_platform:
         """
-
+        self.logger.debug("[opt_add_reward]start")
         recommender_user_id, recommender_wxuser_id, recom_employee = yield self.get_recommend_user(
             current_user, position, is_platform)
 
@@ -646,6 +639,7 @@ class ApplicationPageService(PageService):
         }, appends=["ORDER BY id DESC", "LIMIT 1"])
 
         if recom_employee and points_conf:
+            self.logger.debug("[opt_add_reward]添加积分")
             yield self.user_employee_points_record_ds.create_user_employee_points_record(
                 fields={
                     "employee_id":    recom_employee.id,
@@ -686,6 +680,7 @@ class ApplicationPageService(PageService):
                 #             is_apply=True
                 #         )
                 #
+        self.logger.debug("[opt_add_reward]end")
 
     @gen.coroutine
     def opt_send_applier_msg(self, apply_id, current_user, position, is_platform=True):
@@ -697,6 +692,7 @@ class ApplicationPageService(PageService):
         :return:
         """
 
+        self.logger.debug("[opt_send_applier_msg]start")
         # 发送消息模板，先发企业号，再发仟寻
         link = make_url(
             path.USERCENTER_APPLYRECORD.format(apply_id),
@@ -705,18 +701,23 @@ class ApplicationPageService(PageService):
 
         self.logger.debug("[opt_send_applier_msg]link:{}".format(link))
 
-        res = yield application_notice_to_applier_tpl(current_user.wechat.id,
-                                                      current_user.wxuser.openid,
-                                                      link,
-                                                      position.title,
-                                                      current_user.company.name)
-        if not res:
+        res_bool = False
+        if current_user.wxuser:
+            res_bool = yield application_notice_to_applier_tpl(current_user.wechat.id,
+                                                          current_user.wxuser.openid,
+                                                          link,
+                                                          position.title,
+                                                          current_user.company.name)
+        if not res_bool:
             params = ObjectDict({
                 "company": current_user.company.abbreviation or current_user.company.name,
                 "position": position.title
             })
+
             yield self.thrift_mq_ds.send_sms(SmsType.NEW_APPLIACATION_TO_APPLIER_SMS, current_user.sysuser.mobile,
                                              params, isqx=not is_platform)
+
+        self.logger.debug("[opt_send_applier_msg]end")
 
 
     @gen.coroutine
@@ -730,9 +731,8 @@ class ApplicationPageService(PageService):
         :param profile:
         :return:
         """
-        from service.page.user.profile import ProfilePageService
+        self.logger.debug("[opt_send_recommender_msg]start")
         profile_ps = ProfilePageService()
-
         recom_record = yield self.candidate_recom_record_ds.get_candidate_recom_record(
             conds={
                 "position_id":       position.id,
@@ -759,7 +759,8 @@ class ApplicationPageService(PageService):
                                                   position.title,
                                                   work_exp_years,
                                                   recent_job)
-            #
+        profile_ps = None
+        self.logger.debug("[opt_send_recommender_msg]end")
 
     @gen.coroutine
     def opt_update_candidate_recom_records(self, apply_id, current_user,
@@ -783,36 +784,39 @@ class ApplicationPageService(PageService):
                     "app_id": apply_id
                 }
             )
-            #
+        self.logger.debug("[opt_update_candidate_recom_records]end")
 
     @gen.coroutine
     def opt_hr_msg(self, apply_id, current_user, profile, position, is_platform=True):
 
+        self.logger.debug("[opt_hr_msg]start")
+        profile_ps = ProfilePageService()
         # 1. 向 HR 发送消息模板通知，短信
         if position.publisher:
-            work_exp_years = self.profile_ps.calculate_workyears(
+            work_exp_years = profile_ps.calculate_workyears(
                 profile.get("workexps", []))
-            job = self.profile_psd.get_job_for_application(profile)
+            job = profile_ps.get_job_for_application(profile)
             recent_job = job.get("company_name", "")
 
             hr_info = yield self.user_hr_account_ds.get_hr_account(conds={
                 "id": position.publisher
             })
             is_ok = False
+            self.logger.debug("[opt_hr_msg]hr_info:{}".format(hr_info))
             if hr_info.wxuser_id:
                 hr_wxuser = yield self.user_wx_user_ds.get_wxuser(conds={
                     "id":        hr_info.wxuser_id,
                     "wechat_id": self.settings.helper_wechat_id,
                 })
-
-                is_ok = application_notice_to_hr_tpl(
-                    self.settings.helper_wechat_id,
-                    hr_wxuser.openid,
-                    hr_info.name or hr_wxuser.nickname,
-                    position.title,
-                    current_user.sysuser.name or current_user.sysuser.nickname,
-                    work_exp_years,
-                    recent_job)
+                if hr_wxuser.openid:
+                    is_ok = application_notice_to_hr_tpl(
+                        self.settings.helper_wechat_id,
+                        hr_wxuser.openid,
+                        hr_info.name or hr_wxuser.nickname,
+                        position.title,
+                        current_user.sysuser.name or current_user.sysuser.nickname,
+                        work_exp_years,
+                        recent_job)
 
             if not is_ok:
                 # 消息模板发送失败时，只对普通客户发送短信
@@ -824,9 +828,10 @@ class ApplicationPageService(PageService):
                                                      current_user.sysuser.mobile,
                                                      params, isqx=not is_platform)
 
-
         # 2. 向 HR 发送邮件通知
-        # TODO
+        yield self.opt_send_hr_email(apply_id, current_user, profile, position, hr_info)
+        profile_ps = None
+        self.logger.debug("[opt_hr_msg]end")
 
     @gen.coroutine
     def opt_send_email_create_application_notice(self, email_params):
@@ -884,9 +889,10 @@ class ApplicationPageService(PageService):
 
         yield self.thrift_mq_ds.send_mandrill_email(template_name, to_email, "", from_email, "", "", merge_vars)
 
-
     @gen.coroutine
     def opt_send_hr_email(self, apply_id, current_user, profile, position, hr_info):
+
+        self.logger.debug("[opt_send_hr_email]start")
 
         html_fname = "{aid}.html".format(aid=apply_id)
         pdf_fname = "{aid}.pdf".format(aid=apply_id)
@@ -896,8 +902,6 @@ class ApplicationPageService(PageService):
         def send(data):
             self.logger.info("[opt_send_hr_email]Finish creating pdf resume : {}".format(pdf_fname))
             self.logger.info("[opt_send_hr_email]response data: " + str(data))
-
-        # # applier of resume send hr mail 0:yes 1:no?
 
         def send_mail_hr():
 
@@ -917,9 +921,10 @@ class ApplicationPageService(PageService):
 
             send_email = position.hr_email or hr_info.email
             employee = current_user.employee
-            employee_cert_conf = yield self.user_ps.get_employee_cert_conf(
+            employee_cert_conf = yield self.hr_employee_cert_conf_ds.get_employee_cert_conf(
                 current_user.company.id)
             conf = employee_cert_conf.custom or "自定义字段"
+
             if position.email_notice == const.OLD_YES and send_email:
                 send_mail_notice_hr(
                     position, employee, conf,
@@ -937,6 +942,7 @@ class ApplicationPageService(PageService):
                                  "email_notice:{}, email:{}".format(position.email_notice, send_email))
 
         Sub().subprocess(cmd, self.settings.resume_path, send, send_mail_hr)
+        self.logger.debug("[opt_send_hr_email]end")
 
 
 #

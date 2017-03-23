@@ -251,7 +251,7 @@ class ProfileCustomHandler(BaseHandler):
         has_profile, profile = yield self.profile_ps.has_profile(
             self.current_user.sysuser.id)
 
-        custom_cv_tpls = yield self.application_ps.get_custom_tpl_all()
+        custom_cv_tpls = yield self.profile_ps.get_custom_tpl_all()
         custom_fields = [c.field_name for c in custom_cv_tpls if not c.map]
 
         profile_id = 0

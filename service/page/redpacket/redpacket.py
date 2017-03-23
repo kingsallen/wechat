@@ -192,15 +192,15 @@ class RedpacketPageService(PageService):
                 self.logger.debug("[RP]当前点击者 wxuser_id: %s,pid: %s" %
                                   (current_user.wxuser.id, position.id))
 
-                sharechain_ps = SharechainPageService(self.logger)
+                sharechain_ps = SharechainPageService()
                 last_employee_user_id = yield sharechain_ps.get_referral_employee_user_id(
                     trigger_user_id, position.id)
 
                 self.logger.debug("[RP]转发链最近员工 user_id:{}".format(
                     last_employee_user_id))
 
-                user_ps = UserPageService(self.logger)
-                wechat_ps = WechatPageService(self.logger)
+                user_ps = UserPageService()
+                wechat_ps = WechatPageService()
 
                 is_service_wechat = recom_wechat.type == 1
                 if is_service_wechat:
@@ -433,7 +433,7 @@ class RedpacketPageService(PageService):
 
         if rp_config.target == const.RED_PACKET_CONFIG_TARGET_FANS:
             if wechat.id == settings.qx_wechat_id:
-                wechat_ps = WechatPageService(self.logger)
+                wechat_ps = WechatPageService()
                 wechat = yield wechat_ps.get_wechat({"company_id": rp_config.company_id})
                 wechat_ps = None
 
@@ -454,7 +454,7 @@ class RedpacketPageService(PageService):
                 if is_employee:
                     raise gen.Return(True)
                 else:
-                    sharechain_ps = SharechainPageService(self.logger)
+                    sharechain_ps = SharechainPageService()
                     is_1degree = yield sharechain_ps.is_employee_presentee(
                         kwargs.get("psc"))
 

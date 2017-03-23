@@ -1,10 +1,9 @@
 # coding=utf-8
 
 import tornado.gen as gen
-from tornado.escape import json_decode, json_encode
+from tornado.escape import json_decode
 
 from service.page.base import PageService
-from service.page.application.application import ApplicationPageService
 import conf.common as const
 from util.common import ObjectDict
 from util.tool.date_tool import curr_datetime_now
@@ -525,6 +524,14 @@ class ProfilePageService(PageService):
             return "sheshou"
 
     @gen.coroutine
+    def get_custom_tpl_all(self):
+        ret = yield self.config_sys_cv_tpl_ds.get_config_sys_cv_tpls(
+            conds={'disable': const.OLD_YES},
+            fields=['field_name', 'field_title', 'map']
+        )
+        return ret
+
+    @gen.coroutine
     def profile_to_tempalte(self, p_profile, other_json=None):
         """将从基础服务获得的 profile dict 转换成模版格式
         :param p_profile: 从基础服务获得的 profile dict
@@ -704,8 +711,7 @@ class ProfilePageService(PageService):
 
         if p_others:
             other_json = ObjectDict(json_decode(p_others[0].get('other')))
-            application_ps = ApplicationPageService()
-            sys_cv_tpls = yield application_ps.get_custom_tpl_all()
+            sys_cv_tpls = yield self.get_custom_tpl_all()
             other = ObjectDict()
             other.keyvalues = []
 
@@ -762,7 +768,7 @@ class ProfilePageService(PageService):
     def get_job_for_application(self, profile):
         """ 获取最新的工作经历用以申请 """
         if not profile.get("workexps", []):
-            return None
+            return ObjectDict()
 
         if self.has_current_job(profile):
             return self.get_current_job(profile)

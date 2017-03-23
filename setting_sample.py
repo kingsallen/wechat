@@ -33,7 +33,9 @@ settings['root_path'] = os.path.join(os.path.dirname(__file__), '')
 settings['template_path'] = os.path.join(settings['root_path'], 'template')
 settings['static_path'] = os.path.join(settings['root_path'], 'static')
 settings['static_upload_path'] = os.path.join(settings['static_path'], 'upload')
+
 settings['resume_path'] = "/mnt/nfs/resume/generated"
+settings['emailresume_path'] = "/mnt/nfs/resume/email"
 
 # 数据库配置
 settings['mysql_host'] = 'db2.dqprism.com'
