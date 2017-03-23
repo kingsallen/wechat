@@ -20,7 +20,6 @@ from util.tool.str_tool import trunc
 from util.tool.url_tool import make_url
 from util.wechat.template import application_notice_to_applier_tpl, \
     application_notice_to_recommender_tpl, application_notice_to_hr_tpl
-from service.page.user.profile import ProfilePageService
 
 
 class ApplicationPageService(PageService):
@@ -728,6 +727,7 @@ class ApplicationPageService(PageService):
         :param profile:
         :return:
         """
+        from service.page.user.profile import ProfilePageService
         profile_ps = ProfilePageService()
 
         recom_record = yield self.candidate_recom_record_ds.get_candidate_recom_record(
