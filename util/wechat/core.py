@@ -153,15 +153,8 @@ class WechatTemplateMessager(object):
         jdata.topcolor = topcolor,
         jdata.data = ujson.loads(json_data)
 
-<<<<<<< HEAD
         res = yield http_post(url, jdata, infra=False)
-
         return res.errcode == 0, res
-=======
-        ret = yield http_post(url, jdata, infra=False)
-
-        raise gen.Return((ret.errcode == 0, ret))
->>>>>>> 调整投递后续操作
 
     @gen.coroutine
     def _get_template(self, wechat_id, sys_template_id):
