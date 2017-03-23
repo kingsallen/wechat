@@ -23,7 +23,7 @@ settings['xsrf_cookies'] = True
 settings['cookie_secret'] = 'EAB1D2AB05EEF04D35BA5FDF789DD6A3'
 settings['debug'] = True
 settings['log_level'] = 'DEBUG'
-settings['static_domain'] = '//static1.dqprism.com'
+settings['static_domain'] = '//static2.dqprism.com'
 # 和前端工程师远程调试时可以开启此项,并配置remote_debug_ip选项
 settings['remote_debug'] = False
 # 远程/本地 前端build服务器地址
@@ -33,9 +33,10 @@ settings['root_path'] = os.path.join(os.path.dirname(__file__), '')
 settings['template_path'] = os.path.join(settings['root_path'], 'template')
 settings['static_path'] = os.path.join(settings['root_path'], 'static')
 settings['static_upload_path'] = os.path.join(settings['static_path'], 'upload')
+settings['resume_path'] = "/mnt/nfs/resume/generated"
 
 # 数据库配置
-settings['mysql_host'] = 'db1.dqprism.com'
+settings['mysql_host'] = 'db2.dqprism.com'
 settings['mysql_port'] = 3307
 settings['mysql_database'] = 'dqv4'
 settings['mysql_user'] = 'daqi'
@@ -75,12 +76,13 @@ settings['wechat_pay_appid'] = 'wx....'
 settings['wechat_pay_mchid'] = 'xxxx'
 
 # 基础服务
-settings['infra'] = 'http://api1.dqprism.com'
+settings['infra'] = 'http://api2.dqprism.com'
 
 # wechat host
-settings['qx_host'] = 'qx1.dqprism.com'
-settings['platform_host'] = 'platform1.dqprism.com'
-settings['helper_host'] = 'platform1.dqprism.com'
+settings['qx_host'] = 'qx2.dqprism.com'
+settings['platform_host'] = 'platform2.dqprism.com'
+settings['helper_host'] = 'platform2.dqprism.com'
+settings['pc_host'] = 'www2.dqprism.com'
 
 # 公众号 signatures
 settings['qx_wechat_id'] = 1

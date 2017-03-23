@@ -1,5 +1,6 @@
 # coding=utf-8
 
+import os
 import functools
 import uuid
 
@@ -12,16 +13,16 @@ import conf.path as path
 from cache.application.email_apply import EmailApplyCache
 from service.page.base import PageService
 from service.page.user.sharechain import SharechainPageService
-from thrift_gen.gen.mq.struct.ttypes import SmsType
+from util.common.subprocess import Sub
 from util.common import ObjectDict
-from util.tool.dict_tool import objectdictify
 from util.tool.json_tool import json_dumps
 from util.tool.str_tool import trunc
 from util.tool.url_tool import make_url
+from util.tool.dict_tool import objectdictify
+from util.tool.pdf_tool import save_application_file, get_create_pdf_by_html_cmd
+from util.tool.mail_tool import send_mail_notice_hr
 from util.wechat.template import application_notice_to_applier_tpl, application_notice_to_recommender_tpl, application_notice_to_hr_tpl
 from thrift_gen.gen.mq.struct.ttypes import SmsType
-from util.tool.dict_tool import objectdictify
-from util.common.subprocess import Sub
 
 
 class ApplicationPageService(PageService):
@@ -593,7 +594,7 @@ class ApplicationPageService(PageService):
         #4. 更新挖掘被动求职者信息
         yield self.opt_update_candidate_recom_records(apply_id, current_user, recommender_user_id, position)
         #5. 向 HR 发送消息通知（消息模板，短信，邮件）
-        yield self.opt_hr_msg(current_user, current_user.profile, position, is_platform)
+        yield self.opt_hr_msg(apply_id, current_user, current_user.profile, position, is_platform)
 
         # TODO (tangyiliang) 发红包
         # yield self.opt_send_redpacket(current_user, position)
@@ -785,7 +786,7 @@ class ApplicationPageService(PageService):
             #
 
     @gen.coroutine
-    def opt_hr_msg(self, current_user, profile, position, is_platform=True):
+    def opt_hr_msg(self, apply_id, current_user, profile, position, is_platform=True):
 
         # 1. 向 HR 发送消息模板通知，短信
         if position.publisher:
@@ -885,52 +886,57 @@ class ApplicationPageService(PageService):
 
 
     @gen.coroutine
-    def opt_send_hr_email(self, current_user, position, hr_info):
+    def opt_send_hr_email(self, apply_id, current_user, profile, position, hr_info):
+
+        html_fname = "{aid}.html".format(aid=apply_id)
+        pdf_fname = "{aid}.pdf".format(aid=apply_id)
+
+        cmd = get_create_pdf_by_html_cmd(html_fname, pdf_fname)
 
         def send(data):
-            self.logger.info("Finish creating pdf resume : {}".format(pdf_fname))
-            self.logger.info("response data: " + str(data))
+            self.logger.info("[opt_send_hr_email]Finish creating pdf resume : {}".format(pdf_fname))
+            self.logger.info("[opt_send_hr_email]response data: " + str(data))
 
         # # applier of resume send hr mail 0:yes 1:no?
 
         def send_mail_hr():
 
+            # 生成pdf文件名发生改变,现在的生成方式是按照一个appid生成
+            resume_tpath = os.path.join(self.settings.template_path, 'weixin/application/')
+
+            # template_others = custom_kvmapping(others_json)
+            template_others = ObjectDict()
+
+            save_application_file(
+                resume_tpath,
+                'resume2pdf_new.html',
+                profile,
+                html_fname,
+                template_others,
+                self.settings.resume_path)
+
             send_email = position.hr_email or hr_info.email
-
-            if self.params.last_employee_user_id:
-                query_params = {
-                    "sysuser_id": self.params.last_employee_user_id,
-                    "company_id": self.current_user.company.id
-                }
-                emp_conf = employeeDao.get_employee_config(
-                    self.db, self.current_user.company.id)
-                conf = (emp_conf.get("custom", u"自定义字段") if emp_conf
-                        else u"自定义字段")
-            else:
-                employee = {}
-                conf = ""
-
             employee = current_user.employee
             employee_cert_conf = yield self.user_ps.get_employee_cert_conf(
                 current_user.company.id)
-            try:
-                if position.email_notice == const.ONUSE and send_email:
-                    send_mail_notice_hr(
-                        self, position, employee, conf,
-                        self.current_user.sysuser.id, profile, send_email,
-                        others_json, pdf_fname)
-                self.LOG.info(
-                    "Send application to HR success:sysuser id:{sid},"
-                    "aid:{aid},pid:{pid},email:{email}"
-                        .format(sid=self.current_user.sysuser.id,
-                                aid=self.params.appid, pid=position.id,
-                                email=send_email))
-            except Exception as e:
+            conf = employee_cert_conf.custom or "自定义字段"
+            if position.email_notice == const.OLD_YES and send_email:
+                send_mail_notice_hr(
+                    position, employee, conf,
+                    current_user.sysuser.id, profile, send_email,
+                    template_others, pdf_fname)
                 self.logger.info(
-                    "Send application to HR failed:{e}".format(e=str(e)))
+                    "[opt_send_hr_email]Send application to HR success:sysuser id:{sid},"
+                    "aid:{aid},pid:{pid},email:{email}"
+                        .format(sid=current_user.sysuser.id,
+                                aid=apply_id,
+                                pid=position.id,
+                                email=send_email))
+            else:
+                self.logger.info("[opt_send_hr_email]not send email。"
+                                 "email_notice:{}, email:{}".format(position.email_notice, send_email))
 
-
-        Sub().subprocess(cmd, self.settings["resume_path"], send, send_mail_hr)
+        Sub().subprocess(cmd, self.settings.resume_path, send, send_mail_hr)
 
 
 #
