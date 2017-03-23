@@ -143,7 +143,7 @@ class WechatTemplateMessager(object):
         :param link: 点击跳转 url
         :param topcolor:
         :param json_data: 填充内容
-        :return: (True/False, Response)
+        :return: (True/False, Response Body)
         """
         url = wx.API_SEND_TEMPLATE_MESSAGE % access_token
         jdata = ObjectDict()
@@ -153,11 +153,9 @@ class WechatTemplateMessager(object):
         jdata.topcolor = topcolor,
         jdata.data = ujson.loads(json_data)
 
-        response = yield http_post(url, jdata, infra=False)
+        res = yield http_post(url, jdata, infra=False)
 
-        ret = ObjectDict(ujson.decode(response.body))
-
-        raise gen.Return((ret.errcode == 0, ret))
+        return res.errcode == 0, res
 
     @gen.coroutine
     def _get_template(self, wechat_id, sys_template_id):
