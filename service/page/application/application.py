@@ -586,9 +586,6 @@ class ApplicationPageService(PageService):
 
         apply_id = ret.data.jobApplicationId
 
-        # # 4. 将本次提交的自定义字段存到 job_resume_other 中去
-        # yield self._create_job_resume_other(position, params.cv)
-
         # 申请的后续处理
         self.logger.debug("[post_apply]投递后续处理")
 
