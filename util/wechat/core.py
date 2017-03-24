@@ -13,7 +13,7 @@ from util.common.singleton import Singleton
 from util.tool.date_tool import curr_datetime_now
 from util.tool.http_tool import http_post
 
-from app import logger
+from globals import logger
 from service.data.hr.hr_wx_wechat import HrWxWechatDataService
 from service.data.hr.hr_wx_notice_message import HrWxNoticeMessageDataService
 from service.data.hr.hr_wx_template_message import \

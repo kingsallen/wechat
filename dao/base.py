@@ -9,7 +9,7 @@ Model基类，封装对数据库的访问，对传入参数的处理
 
 from tornado import gen
 
-from app import logger
+from globals import logger
 import conf.common as constant
 import conf.platform as plat_constant
 import conf.qx as qx_constant

@@ -15,7 +15,7 @@ from util.common import ObjectDict
 from util.common.sign import Sign
 from util.tool.http_tool import http_get, http_post
 
-from app import logger
+from globals import logger
 from setting import settings
 
 

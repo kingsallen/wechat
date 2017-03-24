@@ -18,7 +18,7 @@ import re
 import importlib
 import glob
 
-from app import logger
+from globals import logger
 from setting import settings
 import conf.common as constant
 import conf.platform as plat_constant

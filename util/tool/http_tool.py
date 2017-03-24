@@ -12,7 +12,7 @@ from tornado import gen
 from tornado.httputil import url_concat, HTTPHeaders
 
 import conf.common as constant
-from app import env, logger
+from globals import env, logger
 from conf.common import INFRA_ERROR_CODES
 from setting import settings
 from util.common import ObjectDict

@@ -23,12 +23,13 @@ help_routes: 继承自common_routes, 供help单独使用，一般 handler 在 he
 
 """
 
+import handler.wechat.event
 # 微信端公共的 routes
 common_routes = [
     # 开发者方式
-    (r"/wechat",                                       "handler.wechat.event.WechatOauthHandler",                   {"event": "wechat_oauth"}),
+    (r"/wechat",  handler.wechat.event.WechatOauthHandler, {"event": "wechat_oauth"}),
     # 第三方授权方式
-    (r"/wechat[\/]*([0-9a-z]+)*",                      "handler.wechat.event.WechatThirdOauthHandler",              {"event": "wechat_thirdoauth"}),  # passport
+    (r"/wechat[\/]*([0-9a-z]+)*", "handler.wechat.event.WechatThirdOauthHandler",              {"event": "wechat_thirdoauth"}),  # passport
 
     # app forward 给前端，展示纯前端渲染的 SPA
     (r"/m/app/.*",                                     "handler.common.app.IndexHandler",                           {"event": "app_"}),

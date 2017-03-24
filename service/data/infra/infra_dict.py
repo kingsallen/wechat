@@ -11,7 +11,6 @@ from tornado.util import ObjectDict
 import conf.common as const
 import conf.path as path
 from service.data.base import DataService
-from util.common.decorator import cache
 from util.tool.dict_tool import sub_dict
 from util.tool.http_tool import http_get
 

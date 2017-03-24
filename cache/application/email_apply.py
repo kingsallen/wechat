@@ -6,8 +6,8 @@
 # @DES     :
 
 
-from app import redis
-from app import logger
+from globals import redis
+from globals import logger
 import conf.common as const
 
 

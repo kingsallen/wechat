@@ -11,7 +11,7 @@ from datetime import datetime
 from tornado_mysql import pools, cursors
 
 import conf.common as constant
-from app import logger
+from globals import logger
 from setting import settings
 from util.common import ObjectDict
 

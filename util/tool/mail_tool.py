@@ -15,7 +15,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
 
-from app import logger
+from globals import logger
 from setting import settings
 
 from util.tool.pdf_tool import generate_html_template_resume

@@ -3,7 +3,6 @@
 # Copyright 2016 MoSeeker
 
 import os
-import re
 from hashlib import sha1
 from tornado import gen
 

@@ -32,16 +32,9 @@ from setting import settings
 import conf.common as constant
 import tornado.options
 from route import platform_routes, qx_routes, help_routes
-from util.common.log import MessageLogger
-from util.common.cache import BaseRedis
 from handler.common.navmenu import NavMenuModule
 
-
-tornado.options.parse_command_line()
-logger = MessageLogger(logpath=options.logpath)
-redis = BaseRedis()
-env = options.env
-
+from globals import env, logger, redis
 
 class Application(tornado.web.Application):
 
@@ -70,7 +63,9 @@ def make_app():
 
 
 def main():
+    tornado.options.parse_command_line()
     application = make_app()
+
     try:
         logger.info('Wechat server starting on port: {0}'.format(options.port))
         http_server = tornado.httpserver.HTTPServer(application, xheaders=True)
