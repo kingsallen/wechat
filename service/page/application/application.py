@@ -842,33 +842,33 @@ class ApplicationPageService(PageService):
 
         cmd = get_create_pdf_by_html_cmd(html_fname, pdf_fname)
 
+        # 生成pdf文件名发生改变,现在的生成方式是按照一个appid生成
+        resume_tpath = os.path.join(self.settings.template_path, 'weixin/application/')
+
+        # template_others = custom_kvmapping(others_json)
+        template_others = ObjectDict()
+
+        self.logger.debug("[send_mail_hr]html_fname:{}".format(html_fname))
+        self.logger.debug("[send_mail_hr]pdf_fname:{}".format(pdf_fname))
+        self.logger.debug("[send_mail_hr]cmd:{}".format(cmd))
+        self.logger.debug("[send_mail_hr]resume_tpath:{}".format(resume_tpath))
+        self.logger.debug("[send_mail_hr]profile:{}".format(profile))
+        self.logger.debug("[send_mail_hr]template_others:{}".format(template_others))
+        self.logger.debug("[send_mail_hr]resume_path:{}".format(self.settings.resume_path))
+
+        save_application_file(
+            resume_tpath,
+            'resume2pdf_new.html',
+            profile,
+            html_fname,
+            template_others,
+            self.settings.resume_path)
+
         def send(data):
             self.logger.info("[opt_send_hr_email][send]Finish creating pdf resume : {}".format(pdf_fname))
             self.logger.info("[opt_send_hr_email][send]response data: " + str(data))
 
         def send_mail_hr():
-
-            # 生成pdf文件名发生改变,现在的生成方式是按照一个appid生成
-            resume_tpath = os.path.join(self.settings.template_path, 'weixin/application/')
-
-            # template_others = custom_kvmapping(others_json)
-            template_others = ObjectDict()
-
-            self.logger.debug("[send_mail_hr]html_fname:{}".format(html_fname))
-            self.logger.debug("[send_mail_hr]pdf_fname:{}".format(pdf_fname))
-            self.logger.debug("[send_mail_hr]cmd:{}".format(cmd))
-            self.logger.debug("[send_mail_hr]resume_tpath:{}".format(resume_tpath))
-            self.logger.debug("[send_mail_hr]profile:{}".format(profile))
-            self.logger.debug("[send_mail_hr]template_others:{}".format(template_others))
-            self.logger.debug("[send_mail_hr]resume_path:{}".format(self.settings.resume_path))
-
-            save_application_file(
-                resume_tpath,
-                'resume2pdf_new.html',
-                profile,
-                html_fname,
-                template_others,
-                self.settings.resume_path)
 
             send_email = position.hr_email or hr_info.email
             employee = current_user.employee
