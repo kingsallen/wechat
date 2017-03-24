@@ -1,10 +1,10 @@
 # coding=utf-8
 
 import json
-import os
 import functools
 import uuid
 import re
+import traceback
 
 from tornado import gen
 from tornado.escape import json_decode, json_encode
@@ -884,6 +884,8 @@ class ApplicationPageService(PageService):
 
         def send_mail_hr():
 
+            self.logger.debug("send_mail_hr start start start!!!")
+
             send_email = position.hr_email or hr_info.email
             employee = current_user.employee
             employee_cert_conf = yield self.hr_employee_cert_conf_ds.get_employee_cert_conf(
@@ -927,8 +929,11 @@ class ApplicationPageService(PageService):
         self.logger.debug("[send_mail_hr]cmd:{}".format(cmd))
         self.logger.debug("[send_mail_hr]resume_path:{}".format(self.settings.resume_path))
 
-        Sub().subprocess(cmd, self.settings.resume_path, send, send_mail_hr)
-        self.logger.debug("[opt_send_hr_email]end")
+        try:
+            Sub().subprocess(cmd, self.settings.resume_path, send, send_mail_hr)
+            self.logger.debug("[opt_send_hr_email]end")
+        except Exception as e:
+            self.logger.error(traceback.format_exc())
 
     @gen.coroutine
     def opt_send_email_create_application_notice(self, email_params):
