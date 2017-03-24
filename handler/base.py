@@ -134,7 +134,7 @@ class BaseHandler(MetaBaseHandler):
         self._qxuser = None
         self._session_id = None
 
-        self.logger.warn(">>>>>>>>>>BaseHandler prepare over!<<<<<<<<<<")
+        self.logger.debug("+++++++++++++++++PREPARE OVER+++++++++++++++++++++")
 
     # PROTECTED
     @gen.coroutine
