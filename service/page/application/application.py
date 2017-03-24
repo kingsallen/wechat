@@ -591,11 +591,11 @@ class ApplicationPageService(PageService):
         #2. 向求职者发送消息通知（消息模板，短信）
         yield self.opt_send_applier_msg(apply_id, current_user, position, is_platform)
         #3. 向推荐人发送消息模板
-        yield self.opt_send_recommender_msg(recommender_user_id, current_user, position, current_user.profile)
+        yield self.opt_send_recommender_msg(recommender_user_id, current_user, position)
         #4. 更新挖掘被动求职者信息
         yield self.opt_update_candidate_recom_records(apply_id, current_user, recommender_user_id, position)
         #5. 向 HR 发送消息通知（消息模板，短信，邮件）
-        yield self.opt_hr_msg(apply_id, current_user, current_user.profile, position, is_platform)
+        yield self.opt_hr_msg(current_user, position, is_platform)
 
         # TODO (tangyiliang) 发红包
         # yield self.opt_send_redpacket(current_user, position)
@@ -732,7 +732,7 @@ class ApplicationPageService(PageService):
 
     @gen.coroutine
     def opt_send_recommender_msg(self, recommend_user_id, current_user,
-                                 position, profile):
+                                 position):
         """
         向推荐人发送消息模板
         :param recommend_user_id:
@@ -742,7 +742,7 @@ class ApplicationPageService(PageService):
         :return:
         """
         self.logger.debug("[opt_send_recommender_msg]start")
-
+        profile = current_user.profile
         recom_record = yield self.candidate_recom_record_ds.get_candidate_recom_record(
             conds={
                 "position_id":       position.id,
@@ -798,10 +798,11 @@ class ApplicationPageService(PageService):
         self.logger.debug("[opt_update_candidate_recom_records]end")
 
     @gen.coroutine
-    def opt_hr_msg(self, current_user, profile, position, is_platform=True):
+    def opt_hr_msg(self, current_user, position, is_platform=True):
 
         self.logger.debug("[opt_hr_msg]start")
         # 1. 向 HR 发送消息模板通知，短信
+        profile = current_user.profile
         if position.publisher:
             profile_ps = ProfilePageService()
             work_exp_years = profile_ps.calculate_workyears(
