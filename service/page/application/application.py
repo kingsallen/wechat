@@ -1208,8 +1208,7 @@ class ApplicationPageService(PageService):
         """
 
         # 有 kv mapping 的字段
-        records = [ObjectDict(r) for r in config_cv_tpls if
-                   r.get('field_value')]
+        records = [ObjectDict(r) for r in config_cv_tpls]
         kvmappinp_ret = ObjectDict()
         for record in records:
             value_list = re.split(',|:', record.field_value)
@@ -1273,14 +1272,14 @@ class ApplicationPageService(PageService):
         iter_others = []
         special_others = {}
 
-        for key, value in purify(others_json):
+        for key, value in purify(others_json).items():
             if key == "picUrl":
                 # because we already have IDPhoto as key
                 continue
             if key in CV_OTHER_SPECIAL_KEYS:
                 special_others[key] = value
             else:
-                iter_other = list()
+                iter_other = []
                 iter_other.append(kvmap.get(key, {}).get("title", ""))
                 if kvmap.get(key, {}).get("value"):
                     iter_other.append(
