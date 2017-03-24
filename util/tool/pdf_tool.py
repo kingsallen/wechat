@@ -11,6 +11,7 @@ from tornado import template
 import conf.common as const
 from setting import settings
 from util.tool.url_tool import make_static_url
+from util.tool.str_tool import to_str
 
 resume_tpath = os.path.join(settings.template_path, 'refer/weixin/application/')
 
@@ -23,7 +24,7 @@ def save_file(spath, sname, content):
     :return:
     """
     with open(os.path.join(spath, sname), "w", encoding="utf-8") as f:
-        f.write(content)
+        f.write(to_str(content))
         f.close()
 
 def get_render_resume_content(resume, template_others, dict_conf):
