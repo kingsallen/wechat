@@ -8,7 +8,6 @@
 import os
 from tornado import template
 
-import conf.common as const
 from setting import settings
 from util.tool.url_tool import make_static_url
 from util.tool.str_tool import to_str
@@ -64,7 +63,7 @@ def get_create_pdf_by_html_cmd(html_fname, pdf_fname):
     return "xvfb-run -a -s '-screen 0 640x480x16' wkhtmltopdf %s %s" % (
         html_fname, pdf_fname)
 
-def generate_html_template_resume(employee, conf, profile, template_others, position):
+def generate_html_template_resume(employee, conf, profile, template_others, position, dict_conf):
     """
     申请后发送给hr简历的邮件模板
     :param employee:
@@ -81,6 +80,6 @@ def generate_html_template_resume(employee, conf, profile, template_others, posi
         position=position,
         employee=employee,
         conf=conf,
-        const=const,
+        const=dict_conf,
         static_url=make_static_url,
         pc=settings.pc_host)

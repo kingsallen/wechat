@@ -848,6 +848,7 @@ class ApplicationPageService(PageService):
     @gen.coroutine
     def opt_send_hr_email(self, apply_id, current_user, position):
 
+        profile_ps = ProfilePageService()
         self.logger.debug("[opt_send_hr_email]start")
 
         html_fname = "{aid}.html".format(aid=apply_id)
@@ -874,10 +875,13 @@ class ApplicationPageService(PageService):
         res_language = yield self.infra_dict_ds.get_const_dict(parent_code=const.CONSTANT_PARENT_CODE.LANGUAGE_FRUENCY)
         dict_conf = ObjectDict(
             degree=res_degree,
-            language=res_language
+            language=res_language,
+            email_basicinfo=profile_ps.EMAIL_BASICINFO.keys(),
+            profile_basicinfo=profile_ps.EMAIL_BASICINFO,
+            intention=profile_ps.EMAIL_INTENTION.keys(),
+            profile_intention=profile_ps.EMAIL_INTENTION,
         )
 
-        profile_ps = ProfilePageService()
         work_exp_years = profile_ps.calculate_workyears(
             profile.get("workexps", []))
 

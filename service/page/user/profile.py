@@ -73,6 +73,27 @@ class ProfilePageService(PageService):
         "id", "city_name", "worktype", "position_name", "salary_code"
     ]
 
+    EMAIL_BASICINFO = ObjectDict({
+        "birth": "出生年月",
+        "nationality": "国籍",
+        "gender_name": "性别",
+        "city_name": "现居地",
+        "weixin": "微信号",
+        "qq": "QQ号",
+        "email": "邮箱",
+        "industry_name": "所属行业",
+        "company_name": "当前公司",
+        "current_job": "当前职位",
+        "position_name": "职位职能",
+    })
+
+    EMAIL_INTENTION = ObjectDict({
+        "positions": "职位",
+        "salary_code_name": "薪资",
+        "cities": "期望城市",
+        "worktype_name": "工作类型",
+    })
+
     @gen.coroutine
     def has_profile(self, user_id):
         """
