@@ -25,17 +25,13 @@ def save_file(spath, sname, content):
         f.write(content)
         f.close()
 
-
-def get_render_resume_content(template_path, template_name, resume,
-                              template_others, constants):
-    """ 模板填充, 使用与被finish掉之后使用
-    :param template_path:
-    :param template_name:
-    :param resume:
-    :param template_others:
-    :param constants:
-    :return:
-    """
+def get_render_resume_content(template_path, template_name, resume, template_others, dict_conf):
+    '''
+    :parameter template_path 路径
+    :parameter template_name 名称
+    :parameter resume 简历名
+    模板填充, 使用与被finish掉之后使用
+    '''
     if not template_path.endswith('/'):
         template_path += '/'
     loader = template.Loader(template_path)
@@ -43,11 +39,9 @@ def get_render_resume_content(template_path, template_name, resume,
         resume=resume,
         template_others=template_others or {},
         static_url=make_static_url,
-        const=constants)
+        const=dict_conf)
 
-
-def save_application_file(template_path, template_name, resume,
-                          save_html_fname, template_others, savepath):
+def save_application_file(template_path, template_name, resume, save_html_fname, template_others, savepath, dict_conf):
     """
     存储申请的通用文件名,HR和mtp的申请通用,谨慎修改
     该方法将模板填充,生成同名的pdf文件
@@ -57,10 +51,11 @@ def save_application_file(template_path, template_name, resume,
     :param save_html_fname:
     :param template_others:
     :param savepath:
+    :param dict_conf:
     :return:
     """
-    fd = get_render_resume_content(template_path, template_name, resume,
-                                   template_others, make_static_url)
+
+    fd = get_render_resume_content(template_path, template_name, resume, template_others, dict_conf)
     save_file(savepath, save_html_fname, fd)
 
 

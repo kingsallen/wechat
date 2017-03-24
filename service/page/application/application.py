@@ -856,6 +856,7 @@ class ApplicationPageService(PageService):
         resume_tpath = os.path.join(self.settings.template_path, 'refer/weixin/application/')
 
         # template_others = custom_kvmapping(others_json)
+
         template_others = ObjectDict()
 
         self.logger.debug("[send_mail_hr]html_fname:{}".format(html_fname))
@@ -866,13 +867,22 @@ class ApplicationPageService(PageService):
         self.logger.debug("[send_mail_hr]template_others:{}".format(template_others))
         self.logger.debug("[send_mail_hr]resume_path:{}".format(self.settings.resume_path))
 
+        # 常量字段
+        res_degree = yield self.infra_dict_ds.get_const_dict(parent_code=const.CONSTANT_PARENT_CODE.DEGREE_USER)
+        res_language = yield self.infra_dict_ds.get_const_dict(parent_code=const.CONSTANT_PARENT_CODE.LANGUAGE_FRUENCY)
+        dict_conf = ObjectDict(
+            degree=res_degree,
+            language=res_language
+        )
         save_application_file(
             resume_tpath,
             'resume2pdf_new.html',
             profile,
             html_fname,
             template_others,
-            self.settings.resume_path)
+            self.settings.resume_path,
+            dict_conf,
+        )
 
         def send(data):
             self.logger.info("[opt_send_hr_email][send]Finish creating pdf resume : {}".format(pdf_fname))
