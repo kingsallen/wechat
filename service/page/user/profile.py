@@ -1,13 +1,16 @@
 # coding=utf-8
 
+import re
+from datetime import datetime
+
 import tornado.gen as gen
 from tornado.escape import json_decode
 
-from service.page.base import PageService
 import conf.common as const
+from service.page.base import PageService
 from util.common import ObjectDict
 from util.tool.date_tool import curr_datetime_now
-from datetime import datetime
+from util.tool.dict_tool import purify
 
 
 class ProfilePageService(PageService):
@@ -800,3 +803,351 @@ class ProfilePageService(PageService):
         wexps = profile.get('workexps', [])
         return (sorted(wexps, key=lambda x: x.get('start_date', ""),
                        reverse=True)[0])
+
+    @gen.coroutine
+    def custom_fields_need_kvmapping(self, config_cv_tpls):
+        """
+        工具方法，
+        查找 config_cv_tpls 表中值为字典值的数据，
+        然后组合成如下数据结构：(截止至 2017-03-24)
+        {
+            'AddressProvince':       {
+                'title': '地址所在省/直辖市',
+                'value': {'0':  '',
+                          '1':  '安徽省',
+                          '10': '海南省',
+                          '11': '河北省',
+                          '12': '河南省',
+                          '13': '黑龙江省',
+                          '14': '湖北省',
+                          '15': '湖南省',
+                          '16': '吉林省',
+                          '17': '江苏省',
+                          '18': '江西省',
+                          '19': '辽宁省',
+                          '2':  '澳门',
+                          '20': '内蒙古自治区',
+                          '21': '宁夏回族自治区',
+                          '22': '青海省',
+                          '23': '山东省',
+                          '24': '山西省',
+                          '25': '陕西省',
+                          '26': '上海',
+                          '27': '四川省',
+                          '28': '天津',
+                          '29': '台湾省',
+                          '3':  '北京',
+                          '30': '香港',
+                          '31': '西藏自治区',
+                          '32': '新疆省',
+                          '33': '浙江省',
+                          '34': '云南省',
+                          '4':  '重庆',
+                          '5':  '福建省',
+                          '6':  '甘肃省',
+                          '7':  '广东省',
+                          '8':  '广西省',
+                          '9':  '贵州省'}},
+            'ExpectedInterviewCity': {'title': '期望面试城市',
+                                      'value': {'0': '',
+                                                '1': '哈尔滨',
+                                                '2': '沈阳',
+                                                '3': '石家庄',
+                                                '4': '重庆',
+                                                '5': '青岛',
+                                                '6': '济南',
+                                                '7': '无锡',
+                                                '8': '郑州',
+                                                '9': '开封'}},
+            'InterestedJobFunction': {'title': ' 感兴趣职能',
+                                      'value': {'0':  '',
+                                                '1':  '行政管理',
+                                                '10': '市场营销',
+                                                '11': '生产制造',
+                                                '12': '采购',
+                                                '13': '研发',
+                                                '14': '销售',
+                                                '15': '供应链计划/物流',
+                                                '16': '宠物医院服务',
+                                                '17': '动物医学',
+                                                '18': '兽医师（未持证）',
+                                                '19': '职业技术/技工',
+                                                '2':  '企业事务/公共关系',
+                                                '20': '培训生项目',
+                                                '21': '实习生',
+                                                '3':  '法律/合规',
+                                                '4':  '执业兽医师',
+                                                '5':  '工程/机械',
+                                                '6':  '财务',
+                                                '7':  '医疗护理',
+                                                '8':  '人力资源',
+                                                '9':  'IT信息技术'}},
+            'InterestingExtent':     {'title': '感兴趣程度',
+                                      'value': {'0': '',
+                                                '1': '暂不考虑新的工作机会',
+                                                '2': '随意浏览，了解工作机会',
+                                                '3': '积极求职，目前处于在职状态',
+                                                '4': '可以立即入职'}},
+            'IsFreshGraduated':      {'title': '应届/往届',
+                                      'value': {'0': '', '1': '应届',
+                                                '2': '往届'}},
+            'JapaneseLevel':         {'title': '日语等级',
+                                      'value': {'0': '',
+                                                '1': '一级',
+                                                '2': '二级',
+                                                '3': '三级',
+                                                '4': '四级',
+                                                '5': '未通过'}},
+            'PoliticalStatus':       {'title': '政治面貌',
+                                      'value': {'0': '',
+                                                '1': '中共党员(含预备党员)',
+                                                '2': '团员',
+                                                '3': '群众'}},
+            'cpa':                   {'title': 'CPA证书',
+                                      'value': {'0': '', '1': '有CPA',
+                                                '2': '无CPA'}},
+            'degree':                {'title': '学历',
+                                      'value': {'0': '',
+                                                '1': '大专以下',
+                                                '2': '大专',
+                                                '3': '本科',
+                                                '4': '硕士',
+                                                '5': '博士',
+                                                '6': '博士以上'}},
+            'expectsalary':          {'title': '期望年薪',
+                                      'value': {'0': '',
+                                                '1': '6万以下',
+                                                '2': '6万-8万',
+                                                '3': '8万-12万',
+                                                '4': '12-20万',
+                                                '5': '20万-30万',
+                                                '6': '30万以上'}},
+            'frequency':             {'title': '选择班次',
+                                      'value': {'0': '', '1': '早', '2': '中',
+                                                '3': '晚'}},
+            'gender':                {'title': '性别',
+                                      'value': {'0': '', '1': '男', '2': '女'}},
+            'icanstart':             {'title': '到岗时间',
+                                      'value': {'0': '',
+                                                '1': '随时',
+                                                '2': '两周',
+                                                '3': '一个月',
+                                                '4': '一个月以上'}},
+            'industry':              {'title': '期望行业',
+                                      'value': {'0':  '',
+                                                '1':  '计算机/通信/电子/互联网',
+                                                '10': '服务业',
+                                                '11': '文化/传媒/娱乐/体育',
+                                                '12': '能源/矿产/环保',
+                                                '13': '政府/非盈利机构/其他',
+                                                '2':  '会计/金融/银行/保险',
+                                                '3':  '房地产/建筑业',
+                                                '4':  '商业服务/教育/培训',
+                                                '5':  '贸易/批发/零售/租赁业',
+                                                '6':  '制药/医疗',
+                                                '7':  '广告/媒体',
+                                                '8':  '生产/加工/制造',
+                                                '9':  '交通/运输/物流/仓储'}},
+            'majorrank':             {'title': '专业排名',
+                                      'value': {'0': '',
+                                                '1': '5%',
+                                                '2': '5%—15%',
+                                                '3': '15%-30%',
+                                                '4': '30%-50%',
+                                                '5': '50%以下'}},
+            'marriage':              {'title': '婚姻状况',
+                                      'value': {'0': '', '1': '未婚',
+                                                '2': '已婚'}},
+            'nightjob':              {'title': '是否接受夜班',
+                                      'value': {'0': '', '1': '接受',
+                                                '2': '不接受'}},
+            'residencetype':         {'title': '户口类型',
+                                      'value': {'0': '', '1': '农业户口',
+                                                '2': '非农业户口'}},
+            'salary':                {'title': '当前年薪',
+                                      'value': {'0': '',
+                                                '1': '6万以下',
+                                                '2': '6万-8万',
+                                                '3': '8万-12万',
+                                                '4': '12-20万',
+                                                '5': '20万-30万',
+                                                '6': '30万以上'}},
+            'servedoffice':          {'title': '曾供职事务所',
+                                      'value': {'0': '',
+                                                '1': 'KPMG',
+                                                '2': 'Deloitte',
+                                                '3': 'PWC',
+                                                '4': 'EY',
+                                                '5': '其他'}},
+            'trip':                  {'title': '是否接受长期出差',
+                                      'value': {'0': '', '1': '接受',
+                                                '2': '不接受'}},
+            'workdays':              {'title': '每周到岗天数(实习)',
+                                      'value': {'0': '',
+                                                '1': '1天/周',
+                                                '2': '2天/周',
+                                                '3': '3天/周',
+                                                '4': '4天/周',
+                                                '5': '5天/周'}},
+            'workstate':             {'title': '工作状态',
+                                      'value': {'0': '',
+                                                '1': '在职，看看新机会',
+                                                '2': '在职，急寻新工作',
+                                                '3': '在职，暂无跳槽打算',
+                                                '4': '离职，正在找工作',
+                                                '5': '应届毕业生'}}}
+        :param config_cv_tpls:
+        :return:
+        """
+
+        # 有 kv mapping 的字段
+        records = [ObjectDict(r) for r in config_cv_tpls if
+                   r.get('field_value')]
+        kvmappinp_ret = ObjectDict()
+        for record in records:
+            value_list = re.split(',|:', record.field_value)
+            value = {}
+            index = 0
+            while True:
+                try:
+                    if value_list[index] and value_list[index + 1]:
+                        value.update(
+                            {value_list[index + 1]: value_list[index]})
+                        index += 2
+                except Exception:
+                    break
+            value.update({'0': ''})
+
+            kvmappinp_ret.update({
+                record.field_name: {
+                    "title": record.field_title,
+                    "value": value}
+            })
+            return kvmappinp_ret
+
+    @gen.coroutine
+    def custom_kvmapping(self, others_json):
+        """
+        把 profile others 字段中的 key 转换为 value, 供模板使用
+        :param others_json
+        :return:
+        others:{
+            "iter_others":[["学历", "本科"], ["城市", "佛山"]....],
+            "special_others":{
+                "projectexp":[
+                    "start": "2015-06"
+                    ...
+                ],
+                "awards":[
+                    ...
+                ]
+            }
+        }
+        """
+        # 自定义字段中的符复合字段
+        CV_OTHER_SPECIAL_KEYS = [
+            "recentjob", "schooljob", "education", "reward", "language",
+            "competition", "workexp", "projectexp", "internship", "industry",
+            "position", "IDPhoto"]
+
+        # 这些字段虽然是复合字段，但是需要在发给 hr 的邮件中被当成普通字段看待
+        CV_OTHER_SPECIAL_ITER_KEYS = [
+            "reward", "language", "competition", "industry", "position"]
+
+        config_cv_tpls = yield self.config_sys_cv_tpl_ds.get_config_sys_cv_tpls(
+            conds={'disable': const.OLD_YES},
+            fields=['field_name', 'field_title', 'map', 'field_value']
+        )
+
+        # 先找出那哪些自定义字段需要做 kvmapping
+        kvmap = yield self.custom_fields_need_kvmapping(config_cv_tpls)
+
+        others = ObjectDict()
+        iter_others = []
+        special_others = {}
+
+        for key, value in purify(others_json):
+            if key == "picUrl":
+                # because we already have IDPhoto as key
+                continue
+            if key in CV_OTHER_SPECIAL_KEYS:
+                special_others[key] = value
+            else:
+                iter_other = list()
+                iter_other.append(kvmap.get(key, {}).get("title", ""))
+                if kvmap.get(key, {}).get("value"):
+                    iter_other.append(
+                        kvmap[key].get("value").get(str(value), ""))
+                else:
+                    iter_other.append(value)
+                iter_others.append(iter_other)
+
+            display_name_mapping = {
+                e.get('field_name'): e.get('field_title')
+                for e in config_cv_tpls
+            }
+
+            # 将部分 special_keys 转为iter_others
+            if key in CV_OTHER_SPECIAL_ITER_KEYS:
+                iter_other = []
+                if isinstance(value, list) and len(value) > 0:
+                    iter_other.append(display_name_mapping.get(key))
+                    msg = " ".join(value)
+                    iter_other.append(msg)
+                if key == "industry" and value:
+                    # 期望工作行业，存储为字典值，需要处理为具体的行业名称
+                    iter_other.append(display_name_mapping.get(key))
+                    iter_other.append(kvmap.get(key).get('value').get(value))
+                elif key == "position" and value:
+                    # 期望职能
+                    iter_other.append(display_name_mapping.get(key))
+                    iter_other.append(value)
+                iter_others.append(iter_other)
+
+        others.iter_others = iter_others
+        others.special_others = special_others
+        return others
+
+#
+# from tornado.testing import AsyncTestCase, gen_test, main
+# from service.data.config.config_sys_cv_tpl import ConfigSysCvTplDataService
+# from pprint import pprint
+# import re
+#
+#
+# class TestKVMapping(AsyncTestCase):
+#
+#     @gen_test
+#     def test_custom_fields_need_kvmapping(self):
+#         config_sys_cv_tpl_ds = ConfigSysCvTplDataService()
+#         config_cv_tpls = yield config_sys_cv_tpl_ds.get_config_sys_cv_tpls(
+#             conds={'disable': const.OLD_YES},
+#             fields=['field_name', 'field_title', 'map', 'field_value']
+#         )
+#         # 有 kv mapping 的字段
+#         records = [ObjectDict(r) for r in config_cv_tpls if r.get('field_value')]
+#         kvmappinp_ret = ObjectDict()
+#         for record in records:
+#             value_list = re.split(',|:', record.field_value)
+#             value = {}
+#             index = 0
+#             while True:
+#                 try:
+#                     if value_list[index] and value_list[index + 1]:
+#                         value.update(
+#                             {value_list[index + 1]: value_list[index]})
+#                         index += 2
+#                 except Exception:
+#                     break
+#             value.update({'0': ''})
+#
+#             kvmappinp_ret.update({
+#                 record.field_name: {
+#                     "title": record.field_title,
+#                     "value": value}
+#             })
+#         pprint(kvmappinp_ret)
+#
+#
+# if __name__ == '__main__':
+#     main()

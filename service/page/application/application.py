@@ -27,6 +27,7 @@ from thrift_gen.gen.mq.struct.ttypes import SmsType
 
 
 class ApplicationPageService(PageService):
+
     def __init__(self):
         super().__init__()
         self.email_apply_session = EmailApplyCache()
@@ -97,6 +98,17 @@ class ApplicationPageService(PageService):
                 "name": name,
             })
         raise gen.Return(res)
+
+    @gen.coroutine
+    def get_custom_tpl_all(self):
+        ret = yield self.config_sys_cv_tpl_ds.get_config_sys_cv_tpls(
+            conds={'disable': const.OLD_YES},
+            fields=['field_name', 'field_title', 'map']
+        )
+        self.logger.debug(">>>>>>>>>> get_custom_tpl_all <<<<<<<<<<")
+        self.logger.debug(ret)
+        self.logger.debug(">>>>>>>>>> get_custom_tpl_all <<<<<<<<<<")
+        return ret
 
     @gen.coroutine
     def check_custom_cv(self, current_user, position, custom_tpls):

@@ -32,3 +32,10 @@ def objectdictify(result):
 
     return ret
 
+
+def purify(obj):
+    """去除 dict 对象中没有 value 的 key
+    对于非 dict 对象返回其本身"""
+    if isinstance(obj, dict):
+        return {k: v for k, v in obj.items() if v}
+    return obj
