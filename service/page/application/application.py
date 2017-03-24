@@ -1,5 +1,6 @@
 # coding=utf-8
 
+import json
 import os
 import functools
 import uuid
@@ -852,17 +853,12 @@ class ApplicationPageService(PageService):
 
         cmd = get_create_pdf_by_html_cmd(html_fname, pdf_fname)
 
-        # 生成pdf文件名发生改变,现在的生成方式是按照一个appid生成
-        resume_tpath = os.path.join(self.settings.template_path, 'refer/weixin/application/')
-
-        # template_others = custom_kvmapping(others_json)
-
-        template_others = ObjectDict()
+        other_json = json.loads(profile.get("others", [])[0].get("other")) if profile.get("others", []) else ObjectDict()
+        template_others = yield self.custom_kvmapping(other_json)
 
         self.logger.debug("[send_mail_hr]html_fname:{}".format(html_fname))
         self.logger.debug("[send_mail_hr]pdf_fname:{}".format(pdf_fname))
         self.logger.debug("[send_mail_hr]cmd:{}".format(cmd))
-        self.logger.debug("[send_mail_hr]resume_tpath:{}".format(resume_tpath))
         self.logger.debug("[send_mail_hr]profile:{}".format(profile))
         self.logger.debug("[send_mail_hr]template_others:{}".format(template_others))
         self.logger.debug("[send_mail_hr]resume_path:{}".format(self.settings.resume_path))
@@ -875,8 +871,6 @@ class ApplicationPageService(PageService):
             language=res_language
         )
         save_application_file(
-            resume_tpath,
-            'resume2pdf_new.html',
             profile,
             html_fname,
             template_others,
