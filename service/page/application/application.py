@@ -843,8 +843,8 @@ class ApplicationPageService(PageService):
         cmd = get_create_pdf_by_html_cmd(html_fname, pdf_fname)
 
         def send(data):
-            self.logger.info("[opt_send_hr_email]Finish creating pdf resume : {}".format(pdf_fname))
-            self.logger.info("[opt_send_hr_email]response data: " + str(data))
+            self.logger.info("[opt_send_hr_email][send]Finish creating pdf resume : {}".format(pdf_fname))
+            self.logger.info("[opt_send_hr_email][send]response data: " + str(data))
 
         def send_mail_hr():
 
@@ -853,6 +853,14 @@ class ApplicationPageService(PageService):
 
             # template_others = custom_kvmapping(others_json)
             template_others = ObjectDict()
+
+            self.logger.debug("[send_mail_hr]html_fname:{}".format(html_fname))
+            self.logger.debug("[send_mail_hr]pdf_fname:{}".format(pdf_fname))
+            self.logger.debug("[send_mail_hr]cmd:{}".format(cmd))
+            self.logger.debug("[send_mail_hr]resume_tpath:{}".format(resume_tpath))
+            self.logger.debug("[send_mail_hr]profile:{}".format(profile))
+            self.logger.debug("[send_mail_hr]template_others:{}".format(template_others))
+            self.logger.debug("[send_mail_hr]resume_path:{}".format(self.settings.resume_path))
 
             save_application_file(
                 resume_tpath,
@@ -868,11 +876,26 @@ class ApplicationPageService(PageService):
                 current_user.company.id)
             conf = employee_cert_conf.custom or "自定义字段"
 
+            self.logger.debug("[send_mail_hr]send_email:{}".format(send_email))
+            self.logger.debug("[send_mail_hr]employee:{}".format(employee))
+            self.logger.debug("[send_mail_hr]employee_cert_conf:{}".format(employee_cert_conf))
+            self.logger.debug("[send_mail_hr]conf:{}".format(conf))
+
             if position.email_notice == const.OLD_YES and send_email:
                 send_mail_notice_hr(
                     position, employee, conf,
                     current_user.sysuser.id, profile, send_email,
                     template_others, pdf_fname)
+
+                self.logger.debug("[send_mail_hr]position:{}".format(position))
+                self.logger.debug("[send_mail_hr]employee:{}".format(employee))
+                self.logger.debug("[send_mail_hr]conf:{}".format(conf))
+                self.logger.debug("[send_mail_hr]current_user.sysuser.id:{}".format(current_user.sysuser.id))
+                self.logger.debug("[send_mail_hr]profile:{}".format(profile))
+                self.logger.debug("[send_mail_hr]send_email:{}".format(send_email))
+                self.logger.debug("[send_mail_hr]template_others:{}".format(template_others))
+                self.logger.debug("[send_mail_hr]pdf_fname:{}".format(pdf_fname))
+
                 self.logger.info(
                     "[opt_send_hr_email]Send application to HR success:sysuser id:{sid},"
                     "aid:{aid},pid:{pid},email:{email}"

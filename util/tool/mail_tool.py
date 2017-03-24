@@ -101,11 +101,16 @@ def send_mail_notice_hr(position, employee, conf, sysuserid, profile, email, tem
         profile_email = parse_profile_for_email(profile)
         resume_html = generate_html_template_resume(employee, conf, profile_email, template_other, position)
 
+        logger.debug("[send_mail_notice_hr]profile_email:{}".format(profile_email))
+        logger.debug("[send_mail_notice_hr]resume_html:{}".format(resume_html))
+
         attachments = []
         part = ObjectDict()
         part.filename = html_to_pdf
         part.fileurl = settings.resume_path
         part.sendname = get_hrdownload_filename(position.title, profile_email)
+
+        logger.debug("[send_mail_notice_hr]part:{}".format(part))
 
         attachments.append(part)
         attach_name, attach_path = get_profile_attachment(profile)
@@ -115,6 +120,8 @@ def send_mail_notice_hr(position, employee, conf, sysuserid, profile, email, tem
             email_attach.fileurl = settings.emailresume_path
             email_attach.sendname = attach_name
             attachments.append(email_attach)
+
+        logger.debug("[send_mail_notice_hr]attachments:{}".format(attachments))
 
         if position.jobnumber:
             title = "{}:{}-职位申请通知".format(position.jobnumber, position.title)
