@@ -903,9 +903,8 @@ class ApplicationPageService(PageService):
 
             if position.email_notice == const.OLD_YES and send_email:
                 send_mail_notice_hr(
-                    position, employee, conf,
-                    current_user.sysuser.id, profile, send_email,
-                    template_others, pdf_fname)
+                    position, employee, conf, profile, send_email,
+                    template_others, dict_conf, pdf_fname)
 
                 self.logger.debug("[send_mail_hr]position:{}".format(position))
                 self.logger.debug("[send_mail_hr]employee:{}".format(employee))

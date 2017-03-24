@@ -38,3 +38,11 @@ class Sub:
         # read handler
         ioloop.add_timeout(time.time() + 5, on_timeout)
         ioloop.add_handler(fd, recv, ioloop.READ)
+
+if __name__ == "__main__":
+
+    cmd = "ls"
+    def c():
+        print (1)
+
+    Sub.subprocess(cmd, "aa", "f", c)
