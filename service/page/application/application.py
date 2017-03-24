@@ -907,6 +907,12 @@ class ApplicationPageService(PageService):
                 self.logger.info("[opt_send_hr_email]not send email。"
                                  "email_notice:{}, email:{}".format(position.email_notice, send_email))
 
+        self.logger.debug("[send_mail_hr]html_fname:{}".format(html_fname))
+        self.logger.debug("[send_mail_hr]pdf_fname:{}".format(pdf_fname))
+
+        self.logger.debug("[send_mail_hr]cmd:{}".format(cmd))
+        self.logger.debug("[send_mail_hr]resume_path:{}".format(self.settings.resume_path))
+
         Sub().subprocess(cmd, self.settings.resume_path, send, send_mail_hr)
         self.logger.debug("[opt_send_hr_email]end")
 
