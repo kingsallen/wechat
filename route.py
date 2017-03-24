@@ -72,7 +72,6 @@ common_routes = [
     (r"/m/websocket/([A-Za-z0-9_]{1,32})",             handler.common.im.ChatWebSocketHandler),
 
     # common api
-<<<<<<< HEAD
     (r"/m/api/position/star",                          handler.common.position.PositionStarHandler,               {"event": "position_star"}),
     (r"/m/api/chat/unread[\/]*([0-9]+)*",              handler.common.im.UnreadCountHandler,                      {"event": "chat_"}),
     (r"/m/api/mobilebinded",                           handler.common.usercenter.UserMobileBindedHandler,         {"event": "user_usermobilebinded"}),
