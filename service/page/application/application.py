@@ -798,7 +798,7 @@ class ApplicationPageService(PageService):
         self.logger.debug("[opt_update_candidate_recom_records]end")
 
     @gen.coroutine
-    def opt_hr_msg(self, apply_id, current_user, profile, position, is_platform=True):
+    def opt_hr_msg(self, current_user, profile, position, is_platform=True):
 
         self.logger.debug("[opt_hr_msg]start")
         # 1. 向 HR 发送消息模板通知，短信
@@ -840,18 +840,22 @@ class ApplicationPageService(PageService):
                                                      params, isqx=not is_platform)
             profile_ps = None
 
-        # 2. 向 HR 发送邮件通知
-        yield self.opt_send_hr_email(apply_id, current_user, profile, position, hr_info)
-        self.logger.debug("[opt_hr_msg]end")
+        # # 2. 向 HR 发送邮件通知
+        # yield self.opt_send_hr_email(apply_id, current_user, profile, position)
+        # self.logger.debug("[opt_hr_msg]end")
 
     @run_on_executor
-    def opt_send_hr_email(self, apply_id, current_user, profile, position, hr_info):
+    def opt_send_hr_email(self, apply_id, current_user, position):
 
         self.logger.debug("[opt_send_hr_email]start")
 
         html_fname = "{aid}.html".format(aid=apply_id)
         pdf_fname = "{aid}.pdf".format(aid=apply_id)
 
+        hr_info = yield self.user_hr_account_ds.get_hr_account(conds={
+            "id": position.publisher
+        })
+        profile = current_user.profile
         cmd = get_create_pdf_by_html_cmd(html_fname, pdf_fname)
 
         other_json = json.loads(profile.get("others", [])[0].get("other")) if profile.get("others", []) else ObjectDict()
