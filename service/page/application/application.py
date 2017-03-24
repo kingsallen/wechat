@@ -886,7 +886,7 @@ class ApplicationPageService(PageService):
 
         Sub().subprocess(cmd, self.settings.resume_path, send, send_mail_hr)
         self.logger.debug("[opt_send_hr_email]end")
-        
+
     @gen.coroutine
     def opt_send_email_create_application_notice(self, email_params):
         """向求职者发送创建 email 申请邮件"""
