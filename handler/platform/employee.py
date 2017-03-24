@@ -28,7 +28,7 @@ class AwardsHandler(BaseHandler):
                 self.current_user.employee.id,
                 self.current_user.company.id)
             rewards = rewards_response.rewards
-            reward_configs = rewards_response.rewardCofnigs
+            reward_configs = rewards_response.rewardConfigs
             total = rewards_response.total
         else:
             pass  # 使用初始化数据
