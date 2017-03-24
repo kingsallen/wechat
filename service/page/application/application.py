@@ -843,7 +843,7 @@ class ApplicationPageService(PageService):
         cmd = get_create_pdf_by_html_cmd(html_fname, pdf_fname)
 
         # 生成pdf文件名发生改变,现在的生成方式是按照一个appid生成
-        resume_tpath = os.path.join(self.settings.template_path, 'weixin/application/')
+        resume_tpath = os.path.join(self.settings.template_path, 'refer/weixin/application/')
 
         # template_others = custom_kvmapping(others_json)
         template_others = ObjectDict()
