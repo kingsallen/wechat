@@ -22,7 +22,7 @@ from util.tool.pdf_tool import generate_html_template_resume
 from util.common import ObjectDict
 
 
-def send_mail_notice_hr(position, employee, conf, profile, email, template_other, dict_conf, html_to_pdf=''):
+def send_mail_notice_hr(position, employee, conf, profile, email, template_other, dict_conf, workyears, html_to_pdf=''):
 
     def parse_profile_for_email(profile):
         """
@@ -64,8 +64,6 @@ def send_mail_notice_hr(position, employee, conf, profile, email, template_other
         education = get_edu_for_application(resume)  # check education 为空
         degree = dict_conf.degree.get(str(education.get("degree", "0")))
         degree_text = "_{}".format(degree) if degree else ""
-        # workyears = calculate_workyears(resume)
-        workyears = "3"
         if resume.get("workexps"):
             workyears_text = u"_{}年工作经验".format(workyears) if workyears > 0 else u"_少于1年工作经验"
         else:

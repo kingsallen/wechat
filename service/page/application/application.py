@@ -876,6 +876,11 @@ class ApplicationPageService(PageService):
             degree=res_degree,
             language=res_language
         )
+
+        profile_ps = ProfilePageService()
+        work_exp_years = profile_ps.calculate_workyears(
+            profile.get("workexps", []))
+
         save_application_file(
             profile,
             html_fname,
@@ -905,7 +910,7 @@ class ApplicationPageService(PageService):
             if position.email_notice == const.OLD_YES and send_email:
                 send_mail_notice_hr(
                     position, employee, conf, profile, send_email,
-                    template_others, dict_conf, pdf_fname)
+                    template_others, dict_conf, work_exp_years, pdf_fname)
 
                 self.logger.debug("[send_mail_hr]position:{}".format(position))
                 self.logger.debug("[send_mail_hr]employee:{}".format(employee))
@@ -926,6 +931,8 @@ class ApplicationPageService(PageService):
             else:
                 self.logger.info("[opt_send_hr_email]not send email。"
                                  "email_notice:{}, email:{}".format(position.email_notice, send_email))
+
+        profile_ps = None
 
         self.logger.debug("[send_mail_hr]html_fname:{}".format(html_fname))
         self.logger.debug("[send_mail_hr]pdf_fname:{}".format(pdf_fname))
