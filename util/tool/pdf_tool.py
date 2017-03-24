@@ -22,7 +22,7 @@ def save_file(spath, sname, content):
     :param content: 存储内容
     :return:
     """
-    with open(os.path.join(spath, sname), "w") as f:
+    with open(os.path.join(spath, sname), "w", encoding="utf-8") as f:
         f.write(content)
         f.close()
 
