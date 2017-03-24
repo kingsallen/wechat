@@ -27,7 +27,7 @@ from util.tool.pdf_tool import save_application_file, get_create_pdf_by_html_cmd
 from util.tool.mail_tool import send_mail_notice_hr
 from util.wechat.template import application_notice_to_applier_tpl, application_notice_to_recommender_tpl, application_notice_to_hr_tpl
 from thrift_gen.gen.mq.struct.ttypes import SmsType
-
+import tornado.concurrent
 
 class ApplicationPageService(PageService):
 
@@ -363,7 +363,7 @@ class ApplicationPageService(PageService):
     @gen.coroutine
     def save_job_resume_other(self, profile, app_id, position):
         """申请成功后将 profile other 的对应字段保存到 job_resume_other
-        :param profile: 全profile
+        :param profile: 全 profile
         :param app_id:  申请id
         :param position: 申请职位
         :return: (result, message)
@@ -375,18 +375,22 @@ class ApplicationPageService(PageService):
 
         cv_conf = yield self.get_hr_app_cv_conf(position.app_cv_config_id)
         fields = self.make_fields_list(cv_conf)
-        p_other = profile.others
 
-        for field in fields:
-            if p_other.get(field):
-                resume_other.update({field: p_other.get(field)})
-        resume_other_to_insert = json_encode(resume_other, ensure_ascii=False)
-        self.logger.debug('resume_other_to_insert: %s' % resume_other_to_insert)
-        yield self.hr_resume_other_ds.insert_job_resume_other({
-            'appid': app_id,
-            'other': resume_other_to_insert
-        })
-        return True, None
+        if profile.others:
+            p_other = json.loads(profile.others[0].get('other'))
+
+            for field in fields:
+                if p_other.get(field):
+                    resume_other.update({field: p_other.get(field)})
+            resume_other_to_insert = json_dumps(resume_other)
+            self.logger.debug('resume_other_to_insert: %s' % resume_other_to_insert)
+            yield self.hr_resume_other_ds.insert_job_resume_other({
+                'appid': app_id,
+                'other': resume_other_to_insert
+            })
+            return True, None
+        else:
+            raise ValueError('profile has no other field')
 
     @gen.coroutine
     def create_email_apply(self, params, position, current_user, is_platform=True):
@@ -841,11 +845,7 @@ class ApplicationPageService(PageService):
                                                      params, isqx=not is_platform)
             profile_ps = None
 
-        # # 2. 向 HR 发送邮件通知
-        # yield self.opt_send_hr_email(apply_id, current_user, profile, position)
-        # self.logger.debug("[opt_hr_msg]end")
-
-    @run_on_executor
+    @gen.coroutine
     def opt_send_hr_email(self, apply_id, current_user, position):
 
         self.logger.debug("[opt_send_hr_email]start")
@@ -936,11 +936,14 @@ class ApplicationPageService(PageService):
         try:
             # Sub().subprocess(cmd, self.settings.resume_path, send, send_mail_hr)
             import subprocess
-            completed_process = subprocess.run([cmd], check=True, shell=True, stdout=subprocess.PIPE)
+            completed_process = subprocess.run(cmd, check=True, shell=True,
+                                               stdout=subprocess.PIPE)
             if completed_process.returncode == 0:
+                self.logger.debug(completed_process.stdout)
                 send_mail_hr()
             else:
-                pass
+                self.logger.error('generate pdf error:%s' % completed_process.stderr)
+
             self.logger.debug("[opt_send_hr_email]end")
         except Exception as e:
             self.logger.error(traceback.format_exc())
@@ -1305,48 +1308,10 @@ class ApplicationPageService(PageService):
         others.special_others = special_others
         return others
 
-
-#
-# from tornado.testing import AsyncTestCase, gen_test, main
-# from service.data.config.config_sys_cv_tpl import ConfigSysCvTplDataService
-# from pprint import pprint
-# import re
-#
-#
-# class TestKVMapping(AsyncTestCase):
-#
-#     @gen_test
-#     def test_custom_fields_need_kvmapping(self):
-#         config_sys_cv_tpl_ds = ConfigSysCvTplDataService()
-#         config_cv_tpls = yield config_sys_cv_tpl_ds.get_config_sys_cv_tpls(
-#             conds={'disable': const.OLD_YES},
-#             fields=['field_name', 'field_title', 'map', 'field_value']
-#         )
-#         # 有 kv mapping 的字段
-#         records = [ObjectDict(r) for r in config_cv_tpls if r.get('field_value')]
-#         kvmappinp_ret = ObjectDict()
-#         for record in records:
-#             value_list = re.split(',|:', record.field_value)
-#             value = {}
-#             index = 0
-#             while True:
-#                 try:
-#                     if value_list[index] and value_list[index + 1]:
-#                         value.update(
-#                             {value_list[index + 1]: value_list[index]})
-#                         index += 2
-#                 except Exception:
-#                     break
-#             value.update({'0': ''})
-#
-#             kvmappinp_ret.update({
-#                 record.field_name: {
-#                     "title": record.field_title,
-#                     "value": value}
-#             })
-#         pprint(kvmappinp_ret)
-#
 #
 # if __name__ == '__main__':
-#     main()
-
+#     import subprocess
+#     result = subprocess.run(['ls', '-l'])
+#     print(result.stdout)
+#
+#     print(result.stderr)
