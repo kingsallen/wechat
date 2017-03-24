@@ -1,20 +1,20 @@
 # coding:UTF-8
 
+import inspect
+import traceback
+import socket
+
+import tornado
+
+from thrift.transport.TTransport import TTransportException
+from kazoo.exceptions import NoNodeError
+from kazoo.recipe.watchers import ChildrenWatch
+
 from ...framework.client.connection_pool import ConnectionPool
 from ...framework.client.load_balancer.loadbalancer import LoadBalancer
 from ...framework.client.load_balancer.loadbalancer import RoundRobinStrategy
 from ...framework.common.zookeeper_manager import ZkManager
 from ...framework.common import utils
-
-import tornado
-from kazoo.client import KazooClient, KazooState
-from kazoo.exceptions import NoNodeError
-from kazoo.recipe.watchers import ChildrenWatch
-from thrift.transport.TTransport import TTransportException
-
-import inspect
-import traceback
-import socket
 
 
 class ServiceClientFactory(object):
@@ -24,7 +24,8 @@ class ServiceClientFactory(object):
         return ServiceClient(service_client_cls, service_name, conf).create_proxy()
 
 
-class ClientRpcException(Exception): pass
+class ClientRpcException(Exception):
+    pass
 
 
 class ServiceClient(object):
@@ -38,7 +39,7 @@ class ServiceClient(object):
         self.retry_times = conf.getint("client", "retry_times", default="3")
 
         self.zk_client = self._connect_to_zookeeper()
-        self.service_path = "/service_menu/{}/servers".format(self.service_name)
+        self.service_path = "/service_menu/%s/servers" % self.service_name
         self.fetch_service_server_nodes()
         for server_node in self.all_server_nodes:
             pool = ConnectionPool(server_node, self.service_client_cls, self.service_name, self.conf)
@@ -79,11 +80,10 @@ class ServiceClient(object):
             print(no_node_error)
         print(self.all_server_nodes)
 
-    @staticmethod
-    def _to_service_server_nodes(node_str):
+    def _to_service_server_nodes(self, node_str):
         ip, port = node_str.split(":")
         port = int(port)
-        return ip, port
+        return ip, port, self.service_name
 
     def register_service_server_nodes_watcher(self):
         try:

@@ -1,14 +1,10 @@
 # coding=utf-8
 
-import pprint
-
-from thrift.Thrift import TException
-import conf.path as path
 from tornado import gen
 
+import conf.path as path
 from conf.common import YES, NO, OLD_YES
 from handler.base import BaseHandler
-
 from util.common import ObjectDict
 from util.common.decorator import handle_response, authenticated
 
@@ -34,7 +30,8 @@ class AwardsHandler(BaseHandler):
             rewards = rewards_response.rewards
             reward_configs = rewards_response.rewardCofnigs
             total = rewards_response.total
-        else: pass  # 使用初始化数据
+        else:
+            pass  # 使用初始化数据
 
         # 构建输出数据格式
         res_award_rules = []
@@ -59,10 +56,10 @@ class AwardsHandler(BaseHandler):
         # 构建输出数据格式完成
 
         self.send_json_success({
-            'rewards': res_rewards,
-            'award_rules': res_award_rules,
-            'point_total': total,
-            'binded': binded,
+            'rewards':                res_rewards,
+            'award_rules':            res_award_rules,
+            'point_total':            total,
+            'binded':                 binded,
             'email_activation_state': email_activation_state
         })
 
@@ -135,7 +132,6 @@ class EmployeeBindHandler(BaseHandler):
 
 
 class EmployeeBindEmailHandler(BaseHandler):
-
     @handle_response
     @gen.coroutine
     def get(self):
@@ -145,7 +141,7 @@ class EmployeeBindEmailHandler(BaseHandler):
 
         tparams = dict(
             qrcode_url=path.HR_WX_IMAGE_URL + self.current_user.wechat.qrcode,
-            wechat_name = self.current_user.wechat.name
+            wechat_name=self.current_user.wechat.name
         )
         tname = 'success' if result else 'failure'
 
@@ -160,9 +156,9 @@ class RecommendrecordsHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def get(self):
-
         page_no = self.params.page_no or 0
         page_size = self.params.page_size or 10
         req_type = self.params.type or 1
-        res = yield self.employee_ps.get_recommend_records(self.current_user.sysuser.id, req_type, page_no, page_size)
+        res = yield self.employee_ps.get_recommend_records(
+            self.current_user.sysuser.id, req_type, page_no, page_size)
         self.send_json_success(data=res)

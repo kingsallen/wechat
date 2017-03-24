@@ -8,6 +8,7 @@ import traceback
 
 from tornado import gen
 from tornado.escape import json_decode, json_encode
+from tornado.concurrent import run_on_executor
 
 import conf.common as const
 import conf.message as msg
@@ -843,7 +844,7 @@ class ApplicationPageService(PageService):
         yield self.opt_send_hr_email(apply_id, current_user, profile, position, hr_info)
         self.logger.debug("[opt_hr_msg]end")
 
-    @gen.coroutine
+    @run_on_executor
     def opt_send_hr_email(self, apply_id, current_user, profile, position, hr_info):
 
         self.logger.debug("[opt_send_hr_email]start")
@@ -883,7 +884,6 @@ class ApplicationPageService(PageService):
             self.logger.info("[opt_send_hr_email][send]response data: " + str(data))
 
         def send_mail_hr():
-
             self.logger.debug("send_mail_hr start start start!!!")
 
             send_email = position.hr_email or hr_info.email
@@ -930,7 +930,13 @@ class ApplicationPageService(PageService):
         self.logger.debug("[send_mail_hr]resume_path:{}".format(self.settings.resume_path))
 
         try:
-            Sub().subprocess(cmd, self.settings.resume_path, send, send_mail_hr)
+            # Sub().subprocess(cmd, self.settings.resume_path, send, send_mail_hr)
+            import subprocess
+            completed_process = subprocess.run([cmd], check=True, shell=True, stdout=subprocess.PIPE)
+            if completed_process.returncode == 0:
+                send_mail_hr()
+            else:
+                pass
             self.logger.debug("[opt_send_hr_email]end")
         except Exception as e:
             self.logger.error(traceback.format_exc())

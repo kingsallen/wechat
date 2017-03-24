@@ -21,10 +21,12 @@ class Sub:
 
         def recv(*args):
             data = pipe.stdout.readline()
-            if data: callback(data)
+            if data:
+                callback(data)
             elif pipe.poll() is not None:
                 ioloop.remove_handler(fd)
                 callback(None)
+
                 command()
 
         def on_timeout():

@@ -26,6 +26,7 @@ shell commond::
 import tornado.httpserver
 import tornado.web
 import tornado.ioloop
+import tornado.concurrent
 from tornado.options import options
 
 from setting import settings
@@ -54,6 +55,7 @@ class Application(tornado.web.Application):
         self.ui_modules.update({
             'NavMenu': NavMenuModule
         })
+        self._executor = tornado.concurrent.futures.ThreadPoolExecutor(10)
 
 
 def make_app():
