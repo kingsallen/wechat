@@ -77,12 +77,12 @@ class ApplicationHandler(BaseHandler):
         if is_applied:
             # 如果是自定义职位，入库 job_resume_other
             # 暂时不接其返回值
-            self.logger.debug(
-                "[post_apply]<<<<<send hr mail start")
-            yield self.application_ps.opt_send_hr_email(
-                apply_id, self.current_user, position)
-            self.logger.debug(
-                "[post_apply]>>>>>send hr mail finished")
+            # self.logger.debug(
+            #     "[post_apply]<<<<<send hr mail start")
+            # yield self.application_ps.opt_send_hr_email(
+            #     apply_id, self.current_user, position)
+            # self.logger.debug(
+            #     "[post_apply]>>>>>send hr mail finished")
 
             yield self.application_ps.save_job_resume_other(
                 self.current_user.profile, apply_id, position)

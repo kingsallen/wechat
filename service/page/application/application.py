@@ -1,33 +1,32 @@
 # coding=utf-8
 
-import json
 import functools
-import uuid
+import json
 import re
 import traceback
+import uuid
 
 from tornado import gen
-from tornado.escape import json_decode, json_encode
-from tornado.concurrent import run_on_executor
+from tornado.escape import json_decode
 
 import conf.common as const
 import conf.message as msg
 import conf.path as path
 from cache.application.email_apply import EmailApplyCache
 from service.page.base import PageService
-from service.page.user.sharechain import SharechainPageService
 from service.page.user.profile import ProfilePageService
-from util.common.subprocess import Sub
+from service.page.user.sharechain import SharechainPageService
+from thrift_gen.gen.mq.struct.ttypes import SmsType
 from util.common import ObjectDict
+from util.common.subprocesswrapper import SubProcessWrapper
+from util.tool.dict_tool import objectdictify, purify
 from util.tool.json_tool import json_dumps
+from util.tool.mail_tool import send_mail_notice_hr
+from util.tool.pdf_tool import save_application_file, get_create_pdf_by_html_cmd
 from util.tool.str_tool import trunc
 from util.tool.url_tool import make_url
-from util.tool.dict_tool import objectdictify, purify
-from util.tool.pdf_tool import save_application_file, get_create_pdf_by_html_cmd
-from util.tool.mail_tool import send_mail_notice_hr
 from util.wechat.template import application_notice_to_applier_tpl, application_notice_to_recommender_tpl, application_notice_to_hr_tpl
-from thrift_gen.gen.mq.struct.ttypes import SmsType
-import tornado.concurrent
+
 
 class ApplicationPageService(PageService):
 
@@ -599,7 +598,7 @@ class ApplicationPageService(PageService):
         #4. 更新挖掘被动求职者信息
         yield self.opt_update_candidate_recom_records(apply_id, current_user, recommender_user_id, position)
         #5. 向 HR 发送消息通知（消息模板，短信，邮件）
-        yield self.opt_hr_msg(current_user, position, is_platform)
+        yield self.opt_hr_msg(apply_id, current_user, position, is_platform)
 
         # TODO (tangyiliang) 发红包
         # yield self.opt_send_redpacket(current_user, position)
@@ -802,7 +801,7 @@ class ApplicationPageService(PageService):
         self.logger.debug("[opt_update_candidate_recom_records]end")
 
     @gen.coroutine
-    def opt_hr_msg(self, current_user, position, is_platform=True):
+    def opt_hr_msg(self, app_id, current_user, position, is_platform=True):
 
         self.logger.debug("[opt_hr_msg]start")
         # 1. 向 HR 发送消息模板通知，短信
@@ -844,6 +843,9 @@ class ApplicationPageService(PageService):
                                                      current_user.sysuser.mobile,
                                                      params, isqx=not is_platform)
             profile_ps = None
+
+            # 发送邮件
+            yield self.opt_send_hr_email(app_id, current_user, position)
 
     @gen.coroutine
     def opt_send_hr_email(self, apply_id, current_user, position):
@@ -945,15 +947,15 @@ class ApplicationPageService(PageService):
         self.logger.debug("[send_mail_hr]resume_path:{}".format(self.settings.resume_path))
 
         try:
-            # Sub().subprocess(cmd, self.settings.resume_path, send, send_mail_hr)
-            import subprocess
-            completed_process = subprocess.run(cmd, check=True, shell=True,
-                                               stdout=subprocess.PIPE)
-            if completed_process.returncode == 0:
-                self.logger.debug(completed_process.stdout)
-                send_mail_hr()
-            else:
-                self.logger.error('generate pdf error:%s' % completed_process.stderr)
+            SubProcessWrapper.run(cmd, self.settings.resume_path, send, send_mail_hr)
+            # import subprocess
+            # completed_process = subprocess.run(cmd, check=True, shell=True,
+            #                                    stdout=subprocess.PIPE)
+            # if completed_process.returncode == 0:
+            #     self.logger.debug(completed_process.stdout)
+            #     send_mail_hr()
+            # else:
+            #     self.logger.error('generate pdf error:%s' % completed_process.stderr)
 
             self.logger.debug("[opt_send_hr_email]end")
         except Exception as e:
