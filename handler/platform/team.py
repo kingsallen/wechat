@@ -31,7 +31,7 @@ class TeamIndexHandler(BaseHandler):
             current_company = self.current_user.company
 
         data = yield self.team_ps.get_team_index(
-            current_company, self.params, sub_company_flag)
+            current_company, self.params, sub_company_flag, self.current_user.company)
 
         self.params.share = self._share(current_company)
 

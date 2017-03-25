@@ -38,12 +38,13 @@ class TeamPageService(PageService):
         raise gen.Return(team)
 
     @gen.coroutine
-    def get_team_index(self, company, handler_param, sub_flag=False):
+    def get_team_index(self, company, handler_param, sub_flag=False, parent_company=None):
         """
 
         :param company: 当前需要获取数据的公司
         :param handler_param: 请求中参数
         :param sub_flag: 区分母公司和子公司标识， 用以明确团队资源获取方式
+        :param parent_company: 当sub_flag为True时, 表示母公司信息
         :return:
         """
         data = ObjectDict(templates=[])
@@ -65,13 +66,9 @@ class TeamPageService(PageService):
             all_members_dict.get('all_head_img_list'))
 
         # 拼装模板数据
+        teamname_custom = yield self._get_teamname_custom(parent_company.id)
 
-        teamname_custom = yield self.hr_company_conf_ds.get_company_conf(conds={'company_id': company.id},
-                                                                         fields=['teamname_custom'])
-
-        data.bottombar = teamname_custom if teamname_custom and teamname_custom["teamname_custom"] else ObjectDict({
-            'teamname_custom': self.constant.TEAMNAME_CUSTOM_DEFAULT})
-
+        data.bottombar = teamname_custom
         data.header = temp_data_tool.make_header(company, team_index=True, **teamname_custom)
         # 解析生成团队列表页中每个团队信息子模块
         data.templates = [
@@ -142,15 +139,13 @@ class TeamPageService(PageService):
         res_dict = yield self.hr_resource_ds.get_resource_by_ids(res_id_list)
 
         # 拼装模板数据
-        teamname_custom = yield self.hr_company_conf_ds.get_company_conf(conds={'company_id': company.id},
-                                                                         fields=['teamname_custom'])
-
-        data.bottombar = teamname_custom if teamname_custom and teamname_custom["teamname_custom"] else ObjectDict({
-            'teamname_custom': self.constant.TEAMNAME_CUSTOM_DEFAULT})
+        teamname_custom = yield self._get_teamname_custom(user.company.id)
+        data.bottombar = teamname_custom
         data.header = temp_data_tool.make_header(company, True, team)
         data.relation = ObjectDict({
             'want_visit': self.constant.YES if visit else self.constant.NO})
-        if COMPANY_CONFIG.get(company.id).get('custom_visit_recipe', False):
+        company_config = COMPANY_CONFIG.get(company.id)
+        if company_config and company_config.get('custom_visit_recipe', False):
             data.relation.custom_visit_recipe = COMPANY_CONFIG.get(
                 company.id).custom_visit_recipe
 
@@ -223,7 +218,7 @@ class TeamPageService(PageService):
             team_ids = yield self.job_position_ds.get_positions_list(
                 conds='publisher in {} and status = {}'.format(publisher_id_tuple,
                                                                self.constant.POSITION_STATUS_RECRUITING)
-                                                       .replace(',)', ')'),
+                    .replace(',)', ')'),
                 fields=['team_id'], options=['DISTINCT'])
             team_id_tuple = tuple([t.team_id for t in team_ids])
         else:
@@ -236,3 +231,14 @@ class TeamPageService(PageService):
                 team_id_tuple).replace(',)', ')'))
 
         raise gen.Return(teams)
+
+    @gen.coroutine
+    def _get_teamname_custom(self, company_id):
+        teamname_custom = yield self.hr_company_conf_ds.get_company_conf(conds={'company_id': company_id},
+                                                                         fields=['teamname_custom'])
+        if teamname_custom and teamname_custom.get("teamname_custom", "").strip():
+            return teamname_custom
+        else:
+            return {
+                "teamname_custom": self.constant.TEAMNAME_CUSTOM_DEFAULT
+            }

@@ -169,11 +169,7 @@ def make_header(company, team_index=False, team=None, **extra):
         description = team.slogan
     else:
         if team_index:
-            if extra and extra.get("teamname_custom", "").strip():
-                teamname_custom = extra.get("teamname_custom").strip()
-            else:
-                teamname_custom = "团队"
-            name = '我们的' + teamname_custom
+            name = '我们的' + extra.get("teamname_custom")
         else:
             name = company.abbreviation or company.name
         description = '' if team_index else company.slogan
