@@ -39,7 +39,6 @@ class TeamIndexHandler(BaseHandler):
         return
 
     def _share(self, company):
-        config = COMPANY_CONFIG.get(company.id)
         company_name = company.abbreviation or company.name
         default = ObjectDict({
             "cover": self.static_url(company.logo),
@@ -47,7 +46,8 @@ class TeamIndexHandler(BaseHandler):
             "description": u"这可能是你人生的下一站! 不先了解一下未来同事吗?",
             "link": self.fullurl
         })
-        if config.get('transfer', False) and config.transfer.get('tl', False):
+        config = COMPANY_CONFIG.get(company.id)
+        if config and config.get('transfer', False) and config.transfer.get('tl', False):
             default.description = config.transfer.get('tl')
 
         return default
