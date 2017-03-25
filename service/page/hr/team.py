@@ -89,7 +89,6 @@ class TeamPageService(PageService):
             ]
         data.template_total = len(data.templates)
 
-
         raise gen.Return(data)
 
     @gen.coroutine
@@ -178,8 +177,7 @@ class TeamPageService(PageService):
             member_list = []
         else:
             member_list = yield self.hr_team_member_ds.get_team_member_list(
-                conds='team_id in {}'.format(tuple(
-                    team_id_list)).replace(',)', ')'))
+                conds='team_id in {} and disable=0'.format(tuple(team_id_list)).replace(',)', ')'))
 
         result = {tid: [] for tid in team_id_list}
         result['all_head_img_list'] = []
