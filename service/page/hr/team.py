@@ -234,11 +234,5 @@ class TeamPageService(PageService):
 
     @gen.coroutine
     def _get_teamname_custom(self, company_id):
-        teamname_custom = yield self.hr_company_conf_ds.get_company_conf(conds={'company_id': company_id},
-                                                                         fields=['teamname_custom'])
-        if teamname_custom and teamname_custom.get("teamname_custom", "").strip():
-            return teamname_custom
-        else:
-            return {
-                "teamname_custom": self.constant.TEAMNAME_CUSTOM_DEFAULT
-            }
+        teamname_custom = yield self.hr_company_conf_ds.get_company_teamname_custom(company_id)
+        return teamname_custom

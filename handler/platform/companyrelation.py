@@ -66,7 +66,6 @@ class CompanyHandler(BaseHandler):
         return
 
     def _share(self, company):
-        config = COMPANY_CONFIG.get(company.id)
         company_name = company.abbreviation or company.name
         default = ObjectDict({
             'cover':       self.static_url(company.get('logo', '')),
@@ -74,7 +73,8 @@ class CompanyHandler(BaseHandler):
             'description': u'这可能是你人生的下一站! 看清企业全局, 然后定位自己',
             'link':        self.fullurl
         })
-        if config.get('transfer', False) and config.transfer.get('cm', False):
+        config = COMPANY_CONFIG.get(company.id)
+        if config and config.get('transfer', False) and config.transfer.get('cm', False):
             default.description = config.transfer.get('cm')
 
         return default

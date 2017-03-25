@@ -49,15 +49,15 @@ class UserCompanyPageService(PageService):
             'follow': self.constant.YES if wx_user.is_subscribe
             else self.constant.NO,
         })
-        if COMPANY_CONFIG.get(company.id).get('custom_visit_recipe', False):
-            data.relation.custom_visit_recipe = COMPANY_CONFIG.get(
-                company.id).custom_visit_recipe
+        company_config = COMPANY_CONFIG.get(company.id)
+        if company_config and company_config.get('custom_visit_recipe', False):
+            data.relation.custom_visit_recipe = company_config.custom_visit_recipe
         data.templates, tmp_team = yield self._get_company_template(
             company.id, team_index_url)
 
         # 如果没有提供team的配置，去hr_team寻找资源
         if not tmp_team:
-            team_order = COMPANY_CONFIG.get(company.id).order.index('team')
+            team_order = company_config.order.index('team')
             # 区分母公司、子公司对待，获取所有团队team
             if company.id != user.company.id:
                 teams = yield self._get_sub_company_teams(company.id)
