@@ -221,8 +221,9 @@ class TeamPageService(PageService):
                 raise gen.Return([])
 
             team_ids = yield self.job_position_ds.get_positions_list(
-                conds='publisher in {}'.format(
-                    publisher_id_tuple).replace(',)', ')'),
+                conds='publisher in {} and status = {}'.format(publisher_id_tuple,
+                                                               self.constant.POSITION_STATUS_RECRUITING)
+                                                       .replace(',)', ')'),
                 fields=['team_id'], options=['DISTINCT'])
             team_id_tuple = tuple([t.team_id for t in team_ids])
         else:
