@@ -13,10 +13,12 @@ from service.page.base import PageService
 from util.common import ObjectDict
 from util.tool.url_tool import make_url
 from util.tool import temp_data_tool
+from util.tool import iterable_tool
 from util.tool.temp_data_tool import make_up_for_missing_res
 from tests.dev_data.user_company_config import COMPANY_CONFIG
 import conf.path as path
 import re
+import operator
 
 
 class UserCompanyPageService(PageService):
@@ -53,11 +55,10 @@ class UserCompanyPageService(PageService):
         if company_config and company_config.get('custom_visit_recipe', False):
             data.relation.custom_visit_recipe = company_config.custom_visit_recipe
 
+        # data.templates, tmp_team = yield self._get_company_template(company.id, team_index_url)
+        data.templates = yield self._get_company_cms_page(company.id, team_index_url)
 
-        data.templates, tmp_team = yield self._get_company_template(
-            company.id, team_index_url)
-
-
+        tmp_team = True
         # [hr3.4], 这段逻辑应该取消掉了, 全部来自自定义配置, 脚本要注意
         # 如果没有提供team的配置，去hr_team寻找资源
         if not tmp_team:
@@ -81,7 +82,6 @@ class UserCompanyPageService(PageService):
 
         teamname_custom = yield self.hr_company_conf_ds.get_company_teamname_custom(user.company.id)
         data.bottombar = teamname_custom
-
 
         raise gen.Return(data)
 
@@ -126,6 +126,44 @@ class UserCompanyPageService(PageService):
             ]
 
         raise gen.Return((templates, bool(company_config.config.get('team'))))
+
+    @gen.coroutine
+    def _get_company_cms_page(self, company_id, team_index_url):
+        """
+        [hr3.4]不在从配置文件中去获取企业首页豆腐块配置信息, 而是从hr_cms_*系列数据库获取数据
+        :param company_id:
+        :return:
+        """
+        templates = None
+        cms_page = yield self.hr_cms_pages_ds.get_page(conds={
+            "config_id": company_id,
+            "type": self.constant.CMS_PAGES_TYPE_COMPANY_INDEX,
+            "disable": 0
+        })
+        if cms_page:
+            cms_page_id = cms_page.id
+            cms_modules = yield self.hr_cms_module_ds.get_module_list(conds={
+                "page_id": cms_page_id,
+                "disable": 0
+            })
+            if cms_modules:
+                cms_modules.sort(key=operator.itemgetter("orders"))
+                cms_modules_ids = [m.id for m in cms_modules]
+                cms_medias = yield self.hr_cms_media_ds.get_media_list(
+                    conds="module_id in {} and disable=0".format(tuple(cms_modules_ids)).replace(',)', ')')
+                )
+                if cms_medias:
+                    cms_medias_res_ids = [m.res_id for m in cms_medias]
+                    resources_dict = yield self.hr_resource_ds.get_resource_by_ids(cms_medias_res_ids)
+                    for m in cms_medias:
+                        res = resources_dict.get(m.res_id, False)
+                        m.media_url = res.res_url if res else ''
+                        m.media_type = res.res_type if res else 0
+                    cms_medias = iterable_tool.group(cms_medias, "module_id")
+                    templates = [getattr(temp_data_tool, "make_company_module_type_{}".format(module.type))(
+                        cms_medias.get(module.id), module.module_name)
+                                 for module in cms_modules]
+        return templates
 
     @gen.coroutine
     def _get_sub_company_teams(self, company_id):

@@ -70,7 +70,7 @@ def template1_data(resource, member_list=None):
     resource = make_up_for_missing_res(resource)
     return {
         'sub_title': resource.sub_title,
-        'longtext': resource.longtext,
+        'longtext': resource.longtexts,
         'media_url': make_static_url(resource.media_url),
         'media_type': MEDIA_TYPE[resource.media_type],
         'member_list': member_list
@@ -337,6 +337,90 @@ def make_company_team(media_list, link=None):
                      title=media_list[0].title,
                      more_link=link or media_list[0].link,
                      data=[template1_data(media) for media in media_list])
+
+
+# hr3.4
+def make_company_module_type_1(media_list, module_name):
+    """
+    PRD A模块
+    :param media_list:
+    :param module_name:
+    :return:
+    """
+    return template1(sub_type='less', title=module_name,
+                     data=[template1_data(media) for media in media_list])
+
+
+def make_company_module_type_2(media_list, module_name):
+    """
+    PRD B模块
+    团队列表页样式
+    :param media_list:
+    :param module_name:
+    :return:
+    """
+    pass
+
+
+def make_company_module_type_3(media_list, module_name):
+    """
+    PRD C模块
+    团队详情页样式
+    :param media_list:
+    :param module_name:
+    :return:
+    """
+    pass
+
+
+# 漏掉一个survey
+# def make_company_module_type_?(media_list, module_name):
+#     pass
+
+
+def make_company_module_type_4(media_list, module_name):
+    """
+    PRD D模块
+    CEO寄语样式, module_name没有作用
+    :param media_list:
+    :param module_name:
+    :return:
+    """
+    return template2(title='template 2', data=template2_data(media_list))
+
+
+def make_company_module_type_5(media_list, module_name):
+    """
+    PRD E模块
+    公司大事件样式
+    :param media_list:
+    :param module_name:
+    :return:
+    """
+    return template4(sub_type=0, title=module_name, data=template4_data(media_list, 0))
+
+
+def make_company_module_type_6(media_list, module_name):
+    """
+    地图样式, 没有module_name
+    :param media_list:
+    :param module_name:
+    :return:
+    """
+    if media_list:
+        return template50(resource=media_list[0])
+
+
+def make_company_module_type_7(media_list, module_name):
+    """
+    二维码样式, 没有module_name
+    :param media_list:
+    :param module_name:
+    :return:
+    """
+    media = ObjectDict({'media_url': '', 'company_name': ''}) \
+        if not media_list else media_list[0]
+    return template51(media)
 
 
 # JD page
