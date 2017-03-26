@@ -340,7 +340,7 @@ def make_company_team(media_list, link=None):
 
 
 # JD page
-def make_mate(media_list, res_dict, module_name):
+def make_position_detail_cms(media_list, res_dict, module_name):
     return template1(
         sub_type='less',
         title=module_name,

@@ -11,7 +11,7 @@ from util.common import ObjectDict
 from util.tool.date_tool import jd_update_date
 from util.tool.http_tool import http_get, async_das_get
 from util.tool.str_tool import gen_salary, split
-from util.tool.temp_data_tool import make_mate, make_team, template3
+from util.tool.temp_data_tool import make_position_detail_cms, make_team, template3
 
 
 class PositionPageService(PageService):
@@ -231,19 +231,6 @@ class PositionPageService(PageService):
         except Exception as error:
             self.logger.warn(error)
 
-    # @gen.coroutine
-    # def get_mate_data(self, jd_media):
-    #     job_media = json.loads(jd_media)
-    #     if isinstance(job_media, list) and job_media:
-    #         media_list = yield self.hr_media_ds.get_media_by_ids(job_media, True)
-    #         res_dict = yield self.hr_resource_ds.get_resource_by_ids(
-    #             [m.res_id for m in media_list])
-    #         res = make_mate(media_list, res_dict)
-    #     else:
-    #         res = None
-    #
-    #     raise gen.Return(res)
-
     @gen.coroutine
     def get_cms_page(self, team_id):
         res = None
@@ -267,7 +254,7 @@ class PositionPageService(PageService):
                 })
                 res_ids = [m.res_id for m in cms_media]
                 res_dict = yield self.hr_resource_ds.get_resource_by_ids(res_ids)
-                res = make_mate(cms_media, res_dict, module_name)
+                res = make_position_detail_cms(cms_media, res_dict, module_name)
         return res
 
     @gen.coroutine
