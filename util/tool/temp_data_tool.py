@@ -221,7 +221,7 @@ def make_introduction(member, res):
 def make_interview(media, res):
     return {
         'sub_title': media.sub_title,
-        'longtext': '{}\n'.format(media.longtext),
+        'longtext': '{}\n'.format(media.longtexts),
         'media_url': make_static_url(res.res_url) if res else '',
         'media_type': MEDIA_TYPE[res.res_type if res else 0]
     }
@@ -238,7 +238,7 @@ def make_other_team_data(team, res, handler_params):
     }
 
 
-def make_team_detail_template(team, members, detail_media_list, positions,
+def make_team_detail_template(team, members, modulename, detail_media_list, positions,
                               other_teams, res_dic, handler_params, teamname_custom=None, vst=False):
     template = []
     teamname_field = teamname_custom["teamname_custom"] if teamname_custom else '团队'
@@ -265,7 +265,7 @@ def make_team_detail_template(team, members, detail_media_list, positions,
             template.append(
                 template1(
                     sub_type='less',
-                    title=detail_media_list[0].title,
+                    title=modulename,
                     data=[make_interview(m, res_dic.get(m.res_id))
                           for m in detail_media_list]
                 )

@@ -130,8 +130,8 @@ class TeamPageService(PageService):
         team_members = yield self.hr_team_member_ds.get_team_member_list(
             conds={'team_id': team.id})
 
-        detail_media_list = yield self.hr_media_ds.get_media_by_ids(
-            json.loads(team.team_detail), True)
+        # detail_media_list = yield self.hr_media_ds.get_media_by_ids(json.loads(team.team_detail), True)
+        modulename, detail_media_list = yield self._get_team_detail_cms(team.id)
         res_id_list = [m.res_id for m in team_members] + \
                       [m.res_id for m in detail_media_list] + \
                       [t.res_id for t in other_teams]
@@ -150,11 +150,39 @@ class TeamPageService(PageService):
                 company.id).custom_visit_recipe
 
         data.templates = temp_data_tool.make_team_detail_template(
-            team, team_members, detail_media_list, team_positions[0:3],
+            team, team_members, modulename, detail_media_list, team_positions[0:3],
             other_teams, res_dict, handler_param, teamname_custom=teamname_custom, vst=bool(visit))
         data.templates_total = len(data.templates)
 
         raise gen.Return(data)
+
+    @gen.coroutine
+    def _get_team_detail_cms(self, team_id):
+        # 默认的空值
+        # 从业务要求来看, 这里有数据完整性的要求, 有cms_page, 必须有cms_module, 必须有cms_media
+        # 所以, 这里还是兼容了存在脏数据的情况
+        module_name = ""
+        cms_media = []
+        # hr_cms_pages拿团队详情页的配置信息
+        cms_page = yield self.hr_cms_pages_ds.get_page(conds={
+            "config_id": team_id,
+            "type": self.constant.CMS_PAGES_TYPE_TEAM_DETAIL,
+            "disable": 0
+        })
+        if cms_page:
+            page_id = cms_page.id
+            cms_module = yield self.hr_cms_module_ds.get_module(conds={
+                "page_id": page_id,
+                "disable": 0
+            })
+            if cms_module:
+                module_id = cms_module.id
+                module_name = cms_module.module_name
+                cms_media = yield self.hr_cms_media_ds.get_media_list(conds={
+                    "disable": 0,
+                    "module_id": module_id
+                })
+        return module_name, cms_media
 
     @gen.coroutine
     def _get_all_team_members(self, team_id_list):
