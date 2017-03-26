@@ -862,8 +862,15 @@ class ApplicationPageService(PageService):
         profile = current_user.profile
         cmd = get_create_pdf_by_html_cmd(html_fname, pdf_fname)
 
-        other_json = json.loads(profile.get("others", [])[0].get("other")) if profile.get("others", []) else ObjectDict()
+        other_json = ObjectDict()
+        if profile.get("others"):
+            other_json = json.loads(profile.get("others", [])[0].get("other"))
+
+        self.logger.warn(other_json)
+
+        self.logger.warn("before make kvmapping")
         template_others = yield self.custom_kvmapping(other_json)
+        self.logger.warn("after make kvmapping")
 
         self.logger.debug("[send_mail_hr]html_fname:{}".format(html_fname))
         self.logger.debug("[send_mail_hr]pdf_fname:{}".format(pdf_fname))
@@ -1217,24 +1224,28 @@ class ApplicationPageService(PageService):
         records = [ObjectDict(r) for r in config_cv_tpls]
         kvmappinp_ret = ObjectDict()
         for record in records:
-            value_list = re.split(',|:', record.field_value)
             value = {}
-            index = 0
-            while True:
-                try:
-                    if value_list[index] and value_list[index + 1]:
-                        value.update(
-                            {value_list[index + 1]: value_list[index]})
-                        index += 2
-                except Exception:
-                    break
-            value.update({'0': ''})
+            if record.field_value:
+                value_list = re.split(',|:', record.field_value)
+                index = 0
+                while True:
+                    try:
+                        if value_list[index] and value_list[index + 1]:
+                            value.update(
+                                {value_list[index + 1]: value_list[index]})
+                            index += 2
+                    except Exception:
+                        break
+                value.update({'0': ''})
+            else:
+                pass
 
             kvmappinp_ret.update({
                 record.field_name: {
                     "title": record.field_title,
                     "value": value}
             })
+            self.logger.warn(kvmappinp_ret)
             return kvmappinp_ret
 
     @gen.coroutine
@@ -1285,7 +1296,7 @@ class ApplicationPageService(PageService):
             if key in CV_OTHER_SPECIAL_KEYS:
                 special_others[key] = value
             else:
-                iter_other = []
+                iter_other = list()
                 iter_other.append(kvmap.get(key, {}).get("title", ""))
                 if kvmap.get(key, {}).get("value"):
                     iter_other.append(
@@ -1321,9 +1332,102 @@ class ApplicationPageService(PageService):
         return others
 
 #
-# if __name__ == '__main__':
-#     import subprocess
-#     result = subprocess.run(['ls', '-l'])
-#     print(result.stdout)
+# from tornado.testing import AsyncTestCase, gen_test, main
+# import pprint
+# from service.data.config.config_sys_cv_tpl import ConfigSysCvTplDataService
+# class TestCase(AsyncTestCase):
+#     @gen_test
+#     def test_abc(self):
+#         config_sys_cv_tpl_ds = ConfigSysCvTplDataService()
+#         config_cv_tpls = yield config_sys_cv_tpl_ds.get_config_sys_cv_tpls(
+#             conds={'disable': const.OLD_YES},
+#             fields=['field_name', 'field_title', 'map', 'field_value']
+#         )
 #
-#     print(result.stderr)
+#         records = [ObjectDict(r) for r in config_cv_tpls]
+#         kvmappinp_ret = ObjectDict()
+#         for record in records:
+#             value = {}
+#             if record.field_value:
+#                 value_list = re.split(',|:', record.field_value)
+#                 index = 0
+#                 while True:
+#                     try:
+#                         if value_list[index] and value_list[index + 1]:
+#                             value.update(
+#                                 {value_list[index + 1]: value_list[index]})
+#                             index += 2
+#                     except Exception:
+#                         break
+#                 value.update({'0': ''})
+#             else:
+#                 pass
+#
+#             kvmappinp_ret.update({
+#                 record.field_name: {
+#                     "title": record.field_title,
+#                     "value": value}
+#             })
+#
+#         kvmap = kvmappinp_ret
+#
+#         CV_OTHER_SPECIAL_KEYS = [
+#             "recentjob", "schooljob", "education", "reward", "language",
+#             "competition", "workexp", "projectexp", "internship", "industry",
+#             "position", "IDPhoto"]
+#
+#         # 这些字段虽然是复合字段，但是需要在发给 hr 的邮件中被当成普通字段看待
+#         CV_OTHER_SPECIAL_ITER_KEYS = [
+#             "reward", "language", "competition", "industry", "position"]
+#
+#         others = ObjectDict()
+#         iter_others = []
+#         special_others = {}
+#
+#         others_json = {'height': '177', 'qq': '', 'weixin': '', 'nationality': '123'}
+#
+#         for key, value in purify(others_json).items():
+#             if key == "picUrl":
+#                 # because we already have IDPhoto as key
+#                 continue
+#             if key in CV_OTHER_SPECIAL_KEYS:
+#                 special_others[key] = value
+#             else:
+#                 iter_other = []
+#                 iter_other.append(kvmap.get(key, {}).get("title", ""))
+#                 if kvmap.get(key, {}).get("value"):
+#                     iter_other.append(
+#                         kvmap[key].get("value").get(str(value), ""))
+#                 else:
+#                     iter_other.append(value)
+#                 iter_others.append(iter_other)
+#
+#             display_name_mapping = {
+#                 e.get('field_name'): e.get('field_title')
+#                 for e in config_cv_tpls
+#                 }
+#
+#             # 将部分 special_keys 转为iter_others
+#             if key in CV_OTHER_SPECIAL_ITER_KEYS:
+#                 iter_other = []
+#                 if isinstance(value, list) and len(value) > 0:
+#                     iter_other.append(display_name_mapping.get(key))
+#                     msg = " ".join(value)
+#                     iter_other.append(msg)
+#                 if key == "industry" and value:
+#                     # 期望工作行业，存储为字典值，需要处理为具体的行业名称
+#                     iter_other.append(display_name_mapping.get(key))
+#                     iter_other.append(kvmap.get(key).get('value').get(value))
+#                 elif key == "position" and value:
+#                     # 期望职能
+#                     iter_other.append(display_name_mapping.get(key))
+#                     iter_other.append(value)
+#                 iter_others.append(iter_other)
+#
+#         others.iter_others = iter_others
+#         others.special_others = special_others
+#
+#         print(others)
+#
+# if __name__ == '__main__':
+#     main()
