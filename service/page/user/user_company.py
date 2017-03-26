@@ -52,9 +52,13 @@ class UserCompanyPageService(PageService):
         company_config = COMPANY_CONFIG.get(company.id)
         if company_config and company_config.get('custom_visit_recipe', False):
             data.relation.custom_visit_recipe = company_config.custom_visit_recipe
+
+
         data.templates, tmp_team = yield self._get_company_template(
             company.id, team_index_url)
 
+
+        # [hr3.4], 这段逻辑应该取消掉了, 全部来自自定义配置, 脚本要注意
         # 如果没有提供team的配置，去hr_team寻找资源
         if not tmp_team:
             team_order = company_config.order.index('team')

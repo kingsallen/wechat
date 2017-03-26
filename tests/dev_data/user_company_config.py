@@ -189,7 +189,7 @@ COMPANY_BLUEFOCUS = ObjectDict({
 COMPANY_CONFIG = ObjectDict({
     # 测试调试配置
     # 72: COMPANY_72,
-    4: COMPANY_BLUEFOCUS,
+    4: COMPANY_MOSEEKER,
     39978: COMPANY_BLUEFOCUS,
     # 39979: COMPANY_72,
     # 40120: SUB_COMPANY_MARS_40120,
@@ -204,3 +204,14 @@ COMPANY_CONFIG = ObjectDict({
     87954: COMPANY_ACTIONSKY,
     52813: COMPANY_BLUEFOCUS
 })
+
+if __name__ == "__main__":
+    all_keys = list(COMPANY_BLUEFOCUS["config"].keys())\
+        + list(COMPANY_ACTIONSKY["config"].keys())\
+        + list(COMPANY_JOHNSON["config"].keys())\
+        + list(COMPANY_MONDELEZ["config"].keys()) \
+        + list(COMPANY_MARS["config"].keys()) \
+        + list(COMPANY_MOSEEKER["config"].keys()) \
+        + list(COMPANY_NET_EASE["config"].keys()) \
+        + list(COMPANY_OSRAM["config"].keys())
+    print(set(all_keys))
