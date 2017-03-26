@@ -231,18 +231,44 @@ class PositionPageService(PageService):
         except Exception as error:
             self.logger.warn(error)
 
-    @gen.coroutine
-    def get_mate_data(self, jd_media):
-        job_media = json.loads(jd_media)
-        if isinstance(job_media, list) and job_media:
-            media_list = yield self.hr_media_ds.get_media_by_ids(job_media, True)
-            res_dict = yield self.hr_resource_ds.get_resource_by_ids(
-                [m.res_id for m in media_list])
-            res = make_mate(media_list, res_dict)
-        else:
-            res = None
+    # @gen.coroutine
+    # def get_mate_data(self, jd_media):
+    #     job_media = json.loads(jd_media)
+    #     if isinstance(job_media, list) and job_media:
+    #         media_list = yield self.hr_media_ds.get_media_by_ids(job_media, True)
+    #         res_dict = yield self.hr_resource_ds.get_resource_by_ids(
+    #             [m.res_id for m in media_list])
+    #         res = make_mate(media_list, res_dict)
+    #     else:
+    #         res = None
+    #
+    #     raise gen.Return(res)
 
-        raise gen.Return(res)
+    @gen.coroutine
+    def get_cms_page(self, team_id):
+        res = None
+        cms_page = yield self.hr_cms_pages_ds.get_page(conds={
+            "config_id": team_id,
+            "type": self.constant.CMS_PAGES_TYPE_POSITION_DETAIL,
+            "disable": 0
+        })
+        if cms_page:
+            page_id = cms_page.id
+            cms_module = yield self.hr_cms_module_ds.get_module({
+                "page_id": page_id,
+                "disable": 0
+            })
+            if cms_module:
+                module_id = cms_module.id
+                module_name = cms_module.module_name
+                cms_media = yield self.hr_cms_media_ds.get_media_list(conds={
+                    "disable": 0,
+                    "module_id": module_id
+                })
+                res_ids = [m.res_id for m in cms_media]
+                res_dict = yield self.hr_resource_ds.get_resource_by_ids(res_ids)
+                res = make_mate(cms_media, res_dict, module_name)
+        return res
 
     @gen.coroutine
     def get_team_data(self, team, more_link, teamname_custom):

@@ -340,13 +340,13 @@ def make_company_team(media_list, link=None):
 
 
 # JD page
-def make_mate(media_list, res_dict):
+def make_mate(media_list, res_dict, module_name):
     return template1(
         sub_type='less',
-        title=media_list[0].title,
+        title=module_name,
         data=[{
                   'sub_title': m.sub_title,
-                  'longtext': '{}\n'.format(m.longtext),
+                  'longtext': '{}\n'.format(m.longtexts),
                   'media_url': make_static_url(res_dict.get(m.res_id).res_url),
                   'media_type': MEDIA_TYPE[res_dict.get(m.res_id).res_type]
               } for m in media_list]
