@@ -778,7 +778,7 @@ class ProfileSectionHandler(BaseHandler):
         constant.worktype_list = worktype_list
         constant.salary_list = salary_list
 
-        model = ObjectDict(),
+        model = ObjectDict()
         new = False
 
         if not self.params.id:
