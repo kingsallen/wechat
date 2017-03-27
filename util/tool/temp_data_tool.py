@@ -156,7 +156,7 @@ def template51(resource):
     return ObjectDict({
         'type': 51, 'title': 'address',
         'data': [{
-            'company_name': resource.sub_title,
+            'company_name': resource.company_name,
             'media_url': make_static_url(resource.media_url)
             if resource.media_url else '',
         }]

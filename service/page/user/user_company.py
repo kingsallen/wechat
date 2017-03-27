@@ -56,7 +56,7 @@ class UserCompanyPageService(PageService):
             data.relation.custom_visit_recipe = company_config.custom_visit_recipe
 
         # data.templates, tmp_team = yield self._get_company_template(company.id, team_index_url)
-        data.templates = yield self._get_company_cms_page(company.id, team_index_url)
+        data.templates = yield self._get_company_cms_page(company.id, user, team_index_url)
 
         tmp_team = True
         # [hr3.4], 这段逻辑应该取消掉了, 全部来自自定义配置, 脚本要注意
@@ -128,7 +128,7 @@ class UserCompanyPageService(PageService):
         raise gen.Return((templates, bool(company_config.config.get('team'))))
 
     @gen.coroutine
-    def _get_company_cms_page(self, company_id, team_index_url):
+    def _get_company_cms_page(self, company_id, user, team_index_url):
         """
         [hr3.4]不在从配置文件中去获取企业首页豆腐块配置信息, 而是从hr_cms_*系列数据库获取数据
         :param company_id:
@@ -147,7 +147,8 @@ class UserCompanyPageService(PageService):
                 "disable": 0
             })
             if cms_modules:
-                cms_modules.sort(key=operator.itemgetter("orders"))
+                cms_modules.sort(key=operator.itemgetter("orders"))  # 模块排序
+
                 cms_modules_ids = [m.id for m in cms_modules]
                 cms_medias = yield self.hr_cms_media_ds.get_media_list(
                     conds="module_id in {} and disable=0".format(tuple(cms_modules_ids)).replace(',)', ')')
@@ -159,6 +160,21 @@ class UserCompanyPageService(PageService):
                         res = resources_dict.get(m.res_id, False)
                         m.media_url = res.res_url if res else ''
                         m.media_type = res.res_type if res else 0
+
+                    # 给二维码模块注入qrcode地址
+                    qrcode_module = list(
+                        filter(lambda m: m.get("type") == self.constant.CMS_PAGES_MODULE_QRCODE, cms_modules))
+                    if len(qrcode_module) > 0:
+                        qrcode_module = qrcode_module[0]
+                        qrcode_module_id = qrcode_module.id
+                        qrcode_cms_media = ObjectDict({
+                            "module_id": qrcode_module_id,
+                            "media_type": self.constant.CMS_PAGES_RESOURCES_TYPE_IMAGE,
+                            "company_name": user.wechat.name,
+                            "media_url": self._make_qrcode(user.wechat.qrcode)
+                        })
+                        cms_medias.append(qrcode_cms_media)
+
                     cms_medias = iterable_tool.group(cms_medias, "module_id")
                     templates = [getattr(temp_data_tool, "make_company_module_type_{}".format(module.type))(
                         cms_medias.get(module.id), module.module_name)
