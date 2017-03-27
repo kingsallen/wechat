@@ -913,7 +913,7 @@ class ApplicationPageService(PageService):
 
             self.logger.debug("[send_mail_hr]send_email:{}".format(send_email))
 
-            if position.email_notice == const.OLD_YES and send_email:
+            if position.email_resume_conf == const.OLD_YES and send_email:
                 employee = current_user.employee
                 employee_cert_conf = yield self.hr_employee_cert_conf_ds.get_employee_cert_conf(
                     current_user.company.id)
