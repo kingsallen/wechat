@@ -893,6 +893,9 @@ class ApplicationPageService(PageService):
             profile_intention=profile_ps.EMAIL_INTENTION,
         )
 
+        work_exp_years = profile_ps.calculate_workyears(
+            profile.get("workexps", []))
+
         save_application_file(
             profile,
             html_fname,
@@ -919,9 +922,6 @@ class ApplicationPageService(PageService):
                     "company_id": current_user.company.id
                 })
                 conf = employee_cert_conf.custom or "自定义字段"
-
-                work_exp_years = profile_ps.calculate_workyears(
-                    profile.get("workexps", []))
 
                 self.logger.debug("[send_mail_hr]employee:{}".format(employee))
                 self.logger.debug("[send_mail_hr]employee_cert_conf:{}".format(employee_cert_conf))
