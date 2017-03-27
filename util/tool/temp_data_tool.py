@@ -362,7 +362,7 @@ def make_company_module_type_2(media_list, module_name):
     :return:
     """
     big_one = media_list[0]
-    small_ones = media_list[1:]  # needs furthur transfer
+    small_ones = media_list[1:]
     member_list = []
     if small_ones:
         member_list = [ObjectDict({
@@ -389,7 +389,24 @@ def make_company_module_type_3(media_list, module_name):
     :param module_name:
     :return:
     """
-    pass
+    big_one = media_list[0]
+    small_ones = media_list[1:]
+    member_list = []
+    if small_ones:
+        member_list = [ObjectDict({
+            "icon": make_static_url(m.media_url),
+            "name": m.title,
+            "title": m.sub_title,
+            "description": m.longtexts
+        }) for m in small_ones]
+    data = [{
+        'sub_title': big_one.sub_title,
+        'longtext': big_one.longtexts,
+        'media_url': make_static_url(big_one.media_url),
+        'media_type': MEDIA_TYPE[big_one.media_type],
+        'member_list': member_list
+    }]
+    return template1(sub_type='full', title=module_name, data=data)
 
 
 # 漏掉一个survey
