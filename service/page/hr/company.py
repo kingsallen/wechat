@@ -61,6 +61,7 @@ class CompanyPageService(PageService):
                 "conf_job_custom_title": company_conf_res.get("job_custom_title"),
                 "conf_search_seq": search_seq,
                 "conf_search_img": company_conf_res.get("search_img"),
+                "conf_newjd_status": company_conf_res.get("newjd_status")
             })
             company.update(company_conf)
 

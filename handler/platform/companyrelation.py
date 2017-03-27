@@ -14,10 +14,10 @@ from util.common.decorator import check_sub_company
 from handler.base import BaseHandler
 from tests.dev_data.user_company_config import COMPANY_CONFIG
 from util.common.decorator import handle_response
+from util.common.decorator import check_newjd_status
 
 
 class CompanyVisitReqHandler(BaseHandler):
-
     @handle_response
     @check_sub_company
     @gen.coroutine
@@ -33,7 +33,6 @@ class CompanyVisitReqHandler(BaseHandler):
 
 
 class CompanyFollowHandler(BaseHandler):
-
     @handle_response
     @check_sub_company
     @gen.coroutine
@@ -49,7 +48,7 @@ class CompanyFollowHandler(BaseHandler):
 
 
 class CompanyHandler(BaseHandler):
-
+    @check_newjd_status
     @handle_response
     @check_sub_company
     @gen.coroutine
@@ -68,10 +67,10 @@ class CompanyHandler(BaseHandler):
     def _share(self, company):
         company_name = company.abbreviation or company.name
         default = ObjectDict({
-            'cover':       self.static_url(company.get('logo', '')),
-            'title':       u'关于{}, 你想知道的都在这里'.format(company_name),
+            'cover': self.static_url(company.get('logo', '')),
+            'title': u'关于{}, 你想知道的都在这里'.format(company_name),
             'description': u'这可能是你人生的下一站! 看清企业全局, 然后定位自己',
-            'link':        self.fullurl
+            'link': self.fullurl
         })
         config = COMPANY_CONFIG.get(company.id)
         if config and config.get('transfer', False) and config.transfer.get('cm', False):
@@ -81,7 +80,6 @@ class CompanyHandler(BaseHandler):
 
 
 class CompanySurveyHandler(BaseHandler):
-
     @handle_response
     @gen.coroutine
     def post(self):

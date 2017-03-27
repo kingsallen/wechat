@@ -444,6 +444,8 @@ class BaseHandler(MetaBaseHandler):
         else:
             company.update({'theme': None})
 
+
+
         raise gen.Return(company)
 
     @gen.coroutine
