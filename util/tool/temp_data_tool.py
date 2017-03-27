@@ -340,26 +340,45 @@ def make_company_team(media_list, link=None):
 
 
 # hr3.4
-def make_company_module_type_1(media_list, module_name):
+def make_company_module_type_1(media_list, module_name, more_link=""):
     """
     PRD A模块
     :param media_list:
     :param module_name:
     :return:
     """
-    return template1(sub_type='less', title=module_name,
+    # 还有一个链接没有处理
+    return template1(sub_type='less', title=module_name, more_link=more_link,
                      data=[template1_data(media) for media in media_list])
 
 
 def make_company_module_type_2(media_list, module_name):
     """
-    PRD B模块
-    团队列表页样式
+    PRD B模块 - 团队列表页团队样式
+    大图 小标题 描述 来自media_list[0], 参考team
+    下面小图来自media_list[1:], 参考member_list
     :param media_list:
     :param module_name:
     :return:
     """
-    pass
+    big_one = media_list[0]
+    small_ones = media_list[1:]  # needs furthur transfer
+    member_list = []
+    if small_ones:
+        member_list = [ObjectDict({
+            "icon": make_static_url(m.media_url),
+            "name": "",
+            "title": "",
+            "description": ""
+        }) for m in small_ones]
+    data = [{
+        'sub_title': big_one.sub_title,
+        'longtext': big_one.longtexts,
+        'media_url': make_static_url(big_one.media_url),
+        'media_type': MEDIA_TYPE[big_one.media_type],
+        'member_list': member_list
+    }]
+    return template1(sub_type='middle', title=module_name, data=data)
 
 
 def make_company_module_type_3(media_list, module_name):
