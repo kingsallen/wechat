@@ -80,6 +80,8 @@ class EmployeePageService(PageService):
         if current_user.employee:
             data.binding_status = self.FE_BIND_STATUS_SUCCESS
             data.employeeid = current_user.employee.id
+            data.name = current_user.employee.cname
+
         else:
             # 否则，调用基础服务判断当前用户的认证状态：没有认证还是 pending 中
             data.employeeid = NO
@@ -106,7 +108,9 @@ class EmployeePageService(PageService):
                              const.EMPLOYEE_BIND_AUTH_MODE.EMAIL_OR_CUSTOM,
                              const.EMPLOYEE_BIND_AUTH_MODE.EMAIL_OR_QUESTION]:
             data.type = 'email'
-            data.conf.email_name = ""  # fixed
+            data.conf.email_name = ''
+            if current_user.employee:
+                data.conf.email_name = current_user.employee.email
             data.conf.email_suffixs = conf.emailSuffix
             data.conf.email_suffix = data.conf.email_suffixs[0] if len(
                 data.conf.email_suffixs) else ''

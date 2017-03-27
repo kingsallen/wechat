@@ -866,13 +866,7 @@ class ApplicationPageService(PageService):
         if profile.get("others"):
             other_json = json.loads(profile.get("others", [])[0].get("other"))
 
-        # self.logger.warn('\n' * 10)
-        # self.logger.warn("json_other: %s " % other_json)
-        # self.logger.warn("before make kvmapping")
         template_others = yield self.custom_kvmapping(other_json)
-        # self.logger.warn("template_others: %s" % template_others)
-        # self.logger.warn("after make kvmapping")
-        # self.logger.warn('\n' * 10)
 
         self.logger.debug("[send_mail_hr]html_fname:{}".format(html_fname))
         self.logger.debug("[send_mail_hr]pdf_fname:{}".format(pdf_fname))
