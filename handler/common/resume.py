@@ -37,8 +37,9 @@ class LinkedinImportHandler(MetaBaseHandler):
         response = yield self.profile_ps.get_linkedin_token(code=code, redirect_url=redirect_url)
         response = json.loads(to_str(response))
         access_token = response.get("access_token")
-
-        is_ok, result = yield self.profile_ps.import_profile(4, "", "", user_id, access_token)
+        # 判断是否在微信端
+        ua = 1 if self.in_wechat else 2
+        is_ok, result = yield self.profile_ps.import_profile(4, "", "", user_id, ua, access_token)
         self.logger.debug("is_ok:{} result:{}".format(is_ok, result))
         if is_ok:
             if self.params.pid:
@@ -101,11 +102,15 @@ class ResumeImportHandler(BaseHandler):
 
         # 微信端用户只能导入一次简历，故不需要做导入频率限制
         if self.params.way in const.RESUME_WAY_SPIDER.keys():
+            # 判断是否在微信端
+            ua = 1 if self.in_wechat else 2
             is_ok, result = yield self.profile_ps.import_profile(
                 const.RESUME_WAY_TO_INFRA.get(self.params.way, 0),
                 username,
                 password,
-                self.current_user.sysuser.id)
+                self.current_user.sysuser.id,
+                ua
+            )
 
             if self.params.pid:
                 next_url = make_url(path.PROFILE_PREVIEW, self.params)

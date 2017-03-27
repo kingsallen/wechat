@@ -70,7 +70,11 @@ class ProfileNewHandler(BaseHandler):
         profile_ok = basic_info_ok = False
         education_ok = workexp_ok = True
 
-        result, data = yield self.profile_ps.create_profile(self.current_user.sysuser.id)
+        source = 1 if self.is_platform else 4 # 判断是否来自企业号，聚合号
+        if not self.in_wechat:
+            # 移动网页端来源
+            source = 8
+        result, data = yield self.profile_ps.create_profile(self.current_user.sysuser.id, source)
 
         if result:
             profile_id = data

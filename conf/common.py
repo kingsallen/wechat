@@ -377,18 +377,19 @@ EMPLOYEE_BIND_STATUS_BINDED = 0
 EMPLOYEE_BIND_STATUS_UNBINDING = 1
 EMPLOYEE_BIND_STATUS_EMAIL_PENDING = 2
 
-# mandrill
-MANDRILL_EMAIL_HEADER_LIMIT = 50
-
 # 1:微信企业端(正常), 2:微信企业端(我要投递), 3:微信企业端(我感兴趣),
 # 4:微信聚合端(正常), 5:微信聚合端(我要投递), 6:微信聚合端(我感兴趣),
+# 8:移动网页端(正常), 9:移动网页端(我要投递)
 # 100:微信企业端Email申请, 101:微信聚合端Email申请,
-# 150:微信企业端导入, 151:微信聚合端导入, 152:PC导入,
+# 150:微信企业端导入, 151:微信聚合端导入, 152:PC导入, 153:移动网页端导入
 # 200:PC(正常添加) 201:PC(我要投递) 202: PC(我感兴趣)',
 PROFILE_SOURCE_PLATFORM = 1
 PROFILE_SOURCE_PLATFORM_APPLY = 2
 
 INFRA_ERROR_CODES = [1, -1, 99999]
+
+# mandrill
+MANDRILL_EMAIL_HEADER_LIMIT = 50
 
 # mandrill template_name
 KA_EMAIL_APPLICATION_INVITATION = "ka-email-application-invitation"

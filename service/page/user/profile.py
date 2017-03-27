@@ -109,13 +109,14 @@ class ProfilePageService(PageService):
         return result, profile
 
     @gen.coroutine
-    def import_profile(self, source, username, password, user_id, token=None):
+    def import_profile(self, type_source, username, password, user_id, ua, token=None):
         """
-        导入第三方简历（51job, 智联招聘，linked，猎聘）
-        :param source: int
+        导入第三方简历（51job, 智联招聘，linkedin，猎聘）
+        :param type_source: int 来源, 0:无法识别 1:51Job 2:Liepin 3:zhilian 4:linkedin
         :param username: string
         :param password: string
         :param user_id: int
+        :param ua: int UA来源, 0:无法识别 1:微信端 2:移动浏览器 3:PC端
         :param token: string linkedin 网站的access_token
         :return: tuple (bool, result or None)
 
@@ -123,10 +124,11 @@ class ProfilePageService(PageService):
         profile = import_profile[1,"ab","123",2]
         """
 
-        is_ok, result = yield self.infra_profile_ds.import_profile(source,
+        is_ok, result = yield self.infra_profile_ds.import_profile(int(type_source),
                                                                    username,
                                                                    password,
                                                                    user_id,
+                                                                   int(ua),
                                                                    token)
         return is_ok, result
 
