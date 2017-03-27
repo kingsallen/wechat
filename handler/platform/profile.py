@@ -787,7 +787,7 @@ class ProfileSectionHandler(BaseHandler):
             result, intention = yield self.profile_ps.get_profile_intention(
                 self.params.id)
 
-            if result and intention and intention[0].profile_id == profile_id:
+            if result and intention and intention[0].get("profile_id", 0) == profile_id:
                 intention = ObjectDict(intention[0])
 
                 model.update(
