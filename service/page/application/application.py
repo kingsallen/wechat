@@ -915,8 +915,9 @@ class ApplicationPageService(PageService):
 
             if position.email_resume_conf == const.OLD_YES and send_email:
                 employee = current_user.employee
-                employee_cert_conf = yield self.hr_employee_cert_conf_ds.get_employee_cert_conf(
-                    current_user.company.id)
+                employee_cert_conf = yield self.hr_employee_cert_conf_ds.get_employee_cert_conf({
+                    "company_id": current_user.company.id
+                })
                 conf = employee_cert_conf.custom or "自定义字段"
 
                 work_exp_years = profile_ps.calculate_workyears(
