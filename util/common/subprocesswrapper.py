@@ -52,5 +52,5 @@ if __name__ == "__main__":
     def callback_f(arg):
         print("in callback", arg)
 
-    SubProcessWrapper.run('ls', "/Users/yiliangt5/", callback_f ,c)
+    SubProcessWrapper.run('ls', "/Users/panda/Downloads", callback_f ,c)
     tornado.ioloop.IOLoop.instance().start()

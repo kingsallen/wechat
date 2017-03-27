@@ -893,9 +893,6 @@ class ApplicationPageService(PageService):
             profile_intention=profile_ps.EMAIL_INTENTION,
         )
 
-        work_exp_years = profile_ps.calculate_workyears(
-            profile.get("workexps", []))
-
         save_application_file(
             profile,
             html_fname,
@@ -908,21 +905,27 @@ class ApplicationPageService(PageService):
             self.logger.info("[opt_send_hr_email][send]Finish creating pdf resume : {}".format(pdf_fname))
             self.logger.info("[opt_send_hr_email][send]response data: " + str(data))
 
+        @gen.coroutine
         def send_mail_hr():
             self.logger.debug("send_mail_hr start start start!!!")
 
             send_email = position.hr_email or hr_info.email
-            employee = current_user.employee
-            employee_cert_conf = yield self.hr_employee_cert_conf_ds.get_employee_cert_conf(
-                current_user.company.id)
-            conf = employee_cert_conf.custom or "自定义字段"
 
             self.logger.debug("[send_mail_hr]send_email:{}".format(send_email))
-            self.logger.debug("[send_mail_hr]employee:{}".format(employee))
-            self.logger.debug("[send_mail_hr]employee_cert_conf:{}".format(employee_cert_conf))
-            self.logger.debug("[send_mail_hr]conf:{}".format(conf))
 
             if position.email_notice == const.OLD_YES and send_email:
+                employee = current_user.employee
+                employee_cert_conf = yield self.hr_employee_cert_conf_ds.get_employee_cert_conf(
+                    current_user.company.id)
+                conf = employee_cert_conf.custom or "自定义字段"
+
+                work_exp_years = profile_ps.calculate_workyears(
+                    profile.get("workexps", []))
+
+                self.logger.debug("[send_mail_hr]employee:{}".format(employee))
+                self.logger.debug("[send_mail_hr]employee_cert_conf:{}".format(employee_cert_conf))
+                self.logger.debug("[send_mail_hr]conf:{}".format(conf))
+
                 send_mail_notice_hr(
                     position, employee, conf, profile, send_email,
                     template_others, dict_conf, work_exp_years, pdf_fname)
