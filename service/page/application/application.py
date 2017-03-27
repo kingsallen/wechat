@@ -866,11 +866,13 @@ class ApplicationPageService(PageService):
         if profile.get("others"):
             other_json = json.loads(profile.get("others", [])[0].get("other"))
 
-        self.logger.warn(other_json)
-
-        self.logger.warn("before make kvmapping")
+        # self.logger.warn('\n' * 10)
+        # self.logger.warn("json_other: %s " % other_json)
+        # self.logger.warn("before make kvmapping")
         template_others = yield self.custom_kvmapping(other_json)
-        self.logger.warn("after make kvmapping")
+        # self.logger.warn("template_others: %s" % template_others)
+        # self.logger.warn("after make kvmapping")
+        # self.logger.warn('\n' * 10)
 
         self.logger.debug("[send_mail_hr]html_fname:{}".format(html_fname))
         self.logger.debug("[send_mail_hr]pdf_fname:{}".format(pdf_fname))
@@ -1281,15 +1283,24 @@ class ApplicationPageService(PageService):
             conds={'disable': const.OLD_YES},
             fields=['field_name', 'field_title', 'map', 'field_value']
         )
+        display_name_mapping = {e.get('field_name'): e.get('field_title')
+                                for e in config_cv_tpls}
 
         # 先找出那哪些自定义字段需要做 kvmapping
         kvmap = yield self.custom_fields_need_kvmapping(config_cv_tpls)
+
+        # self.logger.debug("config_cv_tpls: %s" % config_cv_tpls)
+        # self.logger.debug("display_name_mapping: %s" % display_name_mapping )
+        # self.logger.debug("kvmap: %s" % kvmap)
 
         others = ObjectDict()
         iter_others = []
         special_others = {}
 
         for key, value in purify(others_json).items():
+            # self.logger.debug("key: %s" % key)
+            # self.logger.debug("value: %s" % value)
+
             if key == "picUrl":
                 # because we already have IDPhoto as key
                 continue
@@ -1297,18 +1308,13 @@ class ApplicationPageService(PageService):
                 special_others[key] = value
             else:
                 iter_other = list()
-                iter_other.append(kvmap.get(key, {}).get("title", ""))
+                iter_other.append(display_name_mapping.get(key, ''))
                 if kvmap.get(key, {}).get("value"):
                     iter_other.append(
                         kvmap[key].get("value").get(str(value), ""))
                 else:
                     iter_other.append(value)
                 iter_others.append(iter_other)
-
-            display_name_mapping = {
-                e.get('field_name'): e.get('field_title')
-                for e in config_cv_tpls
-                }
 
             # 将部分 special_keys 转为iter_others
             if key in CV_OTHER_SPECIAL_ITER_KEYS:
