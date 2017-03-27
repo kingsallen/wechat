@@ -46,7 +46,7 @@ class ThriftUseraccountsDataService(DataService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def get_applied_progress(self, app_id, user_id):
+    def get_applied_progress(self, user_id, app_id):
         """
         求职记录中的求职详情进度，调用 thrift 接口
         :param app_id:

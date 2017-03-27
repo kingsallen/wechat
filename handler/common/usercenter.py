@@ -160,7 +160,7 @@ class ApplyrecordsHandler(BaseHandler):
 
         if apply_id:
             # 查看具体申请记录的进度
-            res = yield self.usercenter_ps.get_applied_progress(apply_id, self.current_user.sysuser.id)
+            res = yield self.usercenter_ps.get_applied_progress(self.current_user.sysuser.id, apply_id)
             self.logger.debug("get_applied_progress: %s" % res)
             self.send_json_success(data=res)
 

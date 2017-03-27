@@ -117,14 +117,18 @@ class UsercenterPageService(PageService):
         raise gen.Return(obj_list)
 
     @gen.coroutine
-    def get_applied_progress(self, app_id, user_id):
+    def get_applied_progress(self, user_id, app_id):
         """
         求职记录中的求职详情进度
         :param app_id:
         :param user_id:
         :return:
         """
-        ret = yield self.thrift_useraccounts_ds.get_applied_progress(app_id, user_id)
+        ret = yield self.thrift_useraccounts_ds.get_applied_progress(user_id, app_id)
+
+        self.logger.debug("[get_applied_progress]user_id:{}".format(user_id))
+        self.logger.debug("[get_applied_progress]app_id:{}".format(app_id))
+        self.logger.debug("[get_applied_progress]ret:{}".format(ret))
 
         time_lines = list()
         if ret.status_timeline:
