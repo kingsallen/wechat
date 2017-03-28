@@ -244,10 +244,8 @@ class InfraDictDataService(DataService):
             el = ObjectDict(el)
             out = ObjectDict()
             out.text = el.name
-            level2 = yield http_get(path.DICT_INDUSTRY,
-                                    dict(parent=el.code)).data
-            out.list = list(
-                map(lambda x: sub_dict(x, ['code', 'name']), level2))
+            level2 = yield http_get(path.DICT_INDUSTRY, dict(parent=el.code))
+            out.list = list(map(lambda x: sub_dict(x, ['code', 'name']), level2.data))
             industries.append(out)
         return industries
 
