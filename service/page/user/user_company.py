@@ -153,7 +153,8 @@ class UserCompanyPageService(PageService):
                 cms_medias = yield self.hr_cms_media_ds.get_media_list(
                     conds="module_id in {} and disable=0".format(tuple(cms_modules_ids)).replace(',)', ')')
                 )
-                # if cms_medias:
+
+                # 不需要价差cms_medias存不存在
                 cms_medias_res_ids = [m.res_id for m in cms_medias]
                 resources_dict = yield self.hr_resource_ds.get_resource_by_ids(cms_medias_res_ids)
                 for m in cms_medias:
@@ -177,7 +178,7 @@ class UserCompanyPageService(PageService):
 
                 cms_medias = iterable_tool.group(cms_medias, "module_id")
                 templates = [getattr(temp_data_tool, "make_company_module_type_{}".format(module.type))(
-                    cms_medias.get(module.id), module.module_name)
+                    cms_medias.get(module.id, []), module.module_name, module.link)
                              for module in cms_modules]
         return templates
 

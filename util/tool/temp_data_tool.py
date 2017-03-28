@@ -352,7 +352,7 @@ def make_company_module_type_1(media_list, module_name, more_link=""):
                      data=[template1_data(media) for media in media_list])
 
 
-def make_company_module_type_2(media_list, module_name):
+def make_company_module_type_2(media_list, module_name, more_link=""):
     """
     PRD B模块 - 团队列表页团队样式
     大图 小标题 描述 来自media_list[0], 参考team
@@ -381,7 +381,7 @@ def make_company_module_type_2(media_list, module_name):
     return template1(sub_type='middle', title=module_name, data=data)
 
 
-def make_company_module_type_3(media_list, module_name):
+def make_company_module_type_3(media_list, module_name, more_link=""):
     """
     PRD C模块
     团队详情页样式
@@ -409,7 +409,7 @@ def make_company_module_type_3(media_list, module_name):
     return template1(sub_type='full', title=module_name, data=data)
 
 
-def make_company_module_type_4(media_list, module_name):
+def make_company_module_type_4(media_list, module_name, module_link=""):
     """
     PRD D模块
     CEO寄语样式, module_name没有作用
@@ -420,7 +420,7 @@ def make_company_module_type_4(media_list, module_name):
     return template2(title='template 2', data=template2_data(media_list))
 
 
-def make_company_module_type_5(media_list, module_name):
+def make_company_module_type_5(media_list, module_name, module_link=""):
     """
     PRD E模块
     公司大事件样式
@@ -431,7 +431,7 @@ def make_company_module_type_5(media_list, module_name):
     return template4(sub_type=0, title=module_name, data=template4_data(media_list, 0))
 
 
-def make_company_module_type_6(media_list, module_name):
+def make_company_module_type_6(media_list, module_name, module_link=""):
     """
     地图样式, 没有module_name
     :param media_list:
@@ -442,7 +442,7 @@ def make_company_module_type_6(media_list, module_name):
         return template50(resource=media_list[0])
 
 
-def make_company_module_type_7(media_list, module_name):
+def make_company_module_type_7(media_list, module_name, module_link=""):
     """
     二维码样式, 没有module_name
     :param media_list:
@@ -454,7 +454,7 @@ def make_company_module_type_7(media_list, module_name):
     return template51(media)
 
 
-def make_company_module_type_10(media_list, module_name):
+def make_company_module_type_10(media_list, module_name, module_link=""):
     """
     survey样式, 没有module_name
     :param media_list:
