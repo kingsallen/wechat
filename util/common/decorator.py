@@ -173,21 +173,25 @@ def check_sub_company(func):
     return wrapper
 
 
-def check_newjd_status(func):
-    """
-    Check request sub_company data or not.
-    :param func:
-    :return: Http404 or set sub_company in params
-    """
-
-    @functools.wraps(func)
-    @gen.coroutine
-    def wrapper(self, *args, **kwargs):
-        if self.current_user.company.conf_newjd_status != constant.NEWJD_STATUS_ON:
-            self.write_error(404)
-            return
-
-        self.logger.debug('New JD On: {}'.format(self.current_user.wechat.id))
-        yield func(self, *args, **kwargs)
-
-    return wrapper
+# def check_newjd_status(func):
+#     """
+#     检查新JD状态, 如果不是启用状态:
+#     1. JD --> 跳老页面
+#     2. Company --> 跳老页面
+#     3. TeamIndex --> 404
+#     4. TeamDetail --> 404
+#     :param func:
+#     :return: Http404
+#     """
+#
+#     @functools.wraps(func)
+#     @gen.coroutine
+#     def wrapper(self, *args, **kwargs):
+#         if self.current_user.company.conf_newjd_status != constant.NEWJD_STATUS_ON:
+#             self.write_error(404)
+#             return
+#
+#         self.logger.debug('New JD On: {}'.format(self.current_user.wechat.id))
+#         yield func(self, *args, **kwargs)
+#
+#     return wrapper

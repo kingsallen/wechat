@@ -13,9 +13,11 @@ from util.tool.str_tool import gen_salary, add_item, split
 from util.tool.url_tool import make_url, url_append_query
 from util.wechat.template import position_view_five
 from tests.dev_data.user_company_config import COMPANY_CONFIG
+from handler.help.newjd_status_check import NewJDStatusCheckerRedirect
 
 
-class PositionHandler(BaseHandler):
+class PositionHandler(BaseHandler, NewJDStatusCheckerRedirect):
+    @NewJDStatusCheckerRedirect.check_newjd_status
     @handle_response
     @gen.coroutine
     def get(self, position_id):

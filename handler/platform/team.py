@@ -14,10 +14,11 @@ from util.common.decorator import check_sub_company
 from util.tool.url_tool import url_append_query
 from util.common.decorator import handle_response
 from tests.dev_data.user_company_config import COMPANY_CONFIG
+from handler.help.newjd_status_check import NewJDStatusChecker404
 
 
-class TeamIndexHandler(BaseHandler):
-
+class TeamIndexHandler(BaseHandler, NewJDStatusChecker404):
+    @NewJDStatusChecker404.check_newjd_status
     @handle_response
     @check_sub_company
     @gen.coroutine
@@ -53,8 +54,8 @@ class TeamIndexHandler(BaseHandler):
         return default
 
 
-class TeamDetailHandler(BaseHandler):
-
+class TeamDetailHandler(BaseHandler, NewJDStatusChecker404):
+    @NewJDStatusChecker404.check_newjd_status
     @handle_response
     @check_sub_company
     @gen.coroutine
@@ -71,7 +72,7 @@ class TeamDetailHandler(BaseHandler):
             self.current_user, current_company, team, self.params)
 
         share_cover_url = data.templates[0].data[0].get('media_url') or \
-            self.static_url(self.current_user.company.logo)
+                          self.static_url(self.current_user.company.logo)
         self.params.share = self._share(current_company,
                                         team.name, share_cover_url)
 

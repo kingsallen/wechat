@@ -134,7 +134,7 @@ class UserCompanyPageService(PageService):
         :param company_id:
         :return:
         """
-        templates = None
+        templates = []
         cms_page = yield self.hr_cms_pages_ds.get_page(conds={
             "config_id": company_id,
             "type": self.constant.CMS_PAGES_TYPE_COMPANY_INDEX,
@@ -153,32 +153,32 @@ class UserCompanyPageService(PageService):
                 cms_medias = yield self.hr_cms_media_ds.get_media_list(
                     conds="module_id in {} and disable=0".format(tuple(cms_modules_ids)).replace(',)', ')')
                 )
-                if cms_medias:
-                    cms_medias_res_ids = [m.res_id for m in cms_medias]
-                    resources_dict = yield self.hr_resource_ds.get_resource_by_ids(cms_medias_res_ids)
-                    for m in cms_medias:
-                        res = resources_dict.get(m.res_id, False)
-                        m.media_url = res.res_url if res else ''
-                        m.media_type = res.res_type if res else 0
+                # if cms_medias:
+                cms_medias_res_ids = [m.res_id for m in cms_medias]
+                resources_dict = yield self.hr_resource_ds.get_resource_by_ids(cms_medias_res_ids)
+                for m in cms_medias:
+                    res = resources_dict.get(m.res_id, False)
+                    m.media_url = res.res_url if res else ''
+                    m.media_type = res.res_type if res else 0
 
-                    # 给二维码模块注入qrcode地址
-                    qrcode_module = list(
-                        filter(lambda m: m.get("type") == self.constant.CMS_PAGES_MODULE_QRCODE, cms_modules))
-                    if len(qrcode_module) > 0:
-                        qrcode_module = qrcode_module[0]
-                        qrcode_module_id = qrcode_module.id
-                        qrcode_cms_media = ObjectDict({
-                            "module_id": qrcode_module_id,
-                            "media_type": self.constant.CMS_PAGES_RESOURCES_TYPE_IMAGE,
-                            "company_name": user.wechat.name,
-                            "media_url": self._make_qrcode(user.wechat.qrcode)
-                        })
-                        cms_medias.append(qrcode_cms_media)
+                # 给二维码模块注入qrcode地址
+                qrcode_module = list(
+                    filter(lambda m: m.get("type") == self.constant.CMS_PAGES_MODULE_QRCODE, cms_modules))
+                if len(qrcode_module) > 0:
+                    qrcode_module = qrcode_module[0]
+                    qrcode_module_id = qrcode_module.id
+                    qrcode_cms_media = ObjectDict({
+                        "module_id": qrcode_module_id,
+                        "media_type": self.constant.CMS_PAGES_RESOURCES_TYPE_IMAGE,
+                        "company_name": user.wechat.name,
+                        "media_url": self._make_qrcode(user.wechat.qrcode)
+                    })
+                    cms_medias.append(qrcode_cms_media)
 
-                    cms_medias = iterable_tool.group(cms_medias, "module_id")
-                    templates = [getattr(temp_data_tool, "make_company_module_type_{}".format(module.type))(
-                        cms_medias.get(module.id), module.module_name)
-                                 for module in cms_modules]
+                cms_medias = iterable_tool.group(cms_medias, "module_id")
+                templates = [getattr(temp_data_tool, "make_company_module_type_{}".format(module.type))(
+                    cms_medias.get(module.id), module.module_name)
+                             for module in cms_modules]
         return templates
 
     @gen.coroutine
