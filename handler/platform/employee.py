@@ -118,7 +118,8 @@ class EmployeeBindHandler(BaseHandler):
     @gen.coroutine
     def post(self):
         binding_params = self.employee_ps.make_bind_params(
-            self.current_user.sysuser.id, self.current_user.company.id,
+            self.current_user.sysuser.id,
+            self.current_user.company.id,
             self.json_args)
         self.logger.debug(binding_params)
 
@@ -128,6 +129,7 @@ class EmployeeBindHandler(BaseHandler):
             self.logger.debug(message)
             if result:
                 self.send_json_success()
+                # TODO (tangyiliang) 员工认证红包
             else:
                 self.send_json_error(message=message)
         else:
@@ -147,6 +149,8 @@ class EmployeeBindEmailHandler(BaseHandler):
             wechat_name=self.current_user.wechat.name
         )
         tname = 'success' if result else 'failure'
+
+        # TODO (tangyiliang) 员工认证红包
 
         self.render(template_name='employee/certification-%s.html' % tname,
                     **tparams)

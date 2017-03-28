@@ -70,30 +70,32 @@ class ApplicationHandler(BaseHandler):
         position = yield self.position_ps.get_position(self.json_args.pid)
 
         is_applied, message, apply_id = yield self.application_ps.create_application(
-            position,
-            self.current_user)
+            position, self.current_user)
         self.logger.debug("[post_apply]is_applied:{}, message:{}, appid:{}".format(is_applied, message, apply_id))
 
         if is_applied:
             # 如果是自定义职位，入库 job_resume_other
             # 暂时不接其返回值
-            # self.logger.debug(
-            #     "[post_apply]<<<<<send hr mail start")
-            # yield self.application_ps.opt_send_hr_email(
-            #     apply_id, self.current_user, position)
-            # self.logger.debug(
-            #     "[post_apply]>>>>>send hr mail finished")
-
             yield self.application_ps.save_job_resume_other(
                 self.current_user.profile, apply_id, position)
 
             # 定制化
             # 宝洁投递后，跳转到指定页面
-            message = yield self.customize_ps.get_pgcareers_msg(self.current_user.wechat.company_id)
+            message = yield self.customize_ps.get_pgcareers_msg(
+                self.current_user.wechat.company_id)
 
-            self.send_json_success(
-                data=dict(apply_id=apply_id),
-                message=message)
+            self.send_json_success(data=dict(apply_id=apply_id),
+                                   message=message)
+
+            # 发送转发申请红包
+            if self.json_args.recom:
+                yield self.redpacket_ps.handle_red_packet_position_related(
+                    self.current_user,
+                    position,
+                    redislocker=self.redis,
+                    is_apply=True,
+                    psc=self.json_args.psc)
+
         else:
             self.send_json_error(message=message)
 

@@ -33,23 +33,18 @@ class PositionHandler(BaseHandler):
                 return
 
             # hr端功能不全，暂且通过团队名称匹配
-            team = yield self.team_ps.get_team_by_name(
-                position_info.department, position_info.company_id)
+            team = yield self.team_ps.get_team_by_name(position_info.department, position_info.company_id)
             # team = yield self.team_ps.get_team_by_id(position_info.team_id)
 
             self.logger.debug("[JD]构建收藏信息")
-            star = yield self.position_ps.is_position_stared_by(
-                position_id, self.current_user.sysuser.id)
+            star = yield self.position_ps.is_position_stared_by(position_id, self.current_user.sysuser.id)
 
             self.logger.debug("[JD]构建申请信息")
-            application = yield self.application_ps.get_application(
-                position_id, self.current_user.sysuser.id)
+            application = yield self.application_ps.get_application(position_id, self.current_user.sysuser.id)
 
             self.logger.debug("[JD]构建职位所属公司信息")
-            did = yield self.company_ps.get_real_company_id(
-                position_info.publisher, position_info.company_id)
-            company_info = yield self.company_ps.get_company(
-                conds={"id": did}, need_conf=True)
+            did = yield self.company_ps.get_real_company_id(position_info.publisher, position_info.company_id)
+            company_info = yield self.company_ps.get_company(conds={"id": did}, need_conf=True)
 
             self.logger.debug("[JD]构建转发信息")
             yield self._make_share_info(position_info, company_info)
@@ -66,56 +61,33 @@ class PositionHandler(BaseHandler):
             self.logger.debug("[JD]构建相似职位推荐")
             recomment_positions_res = yield self.position_ps.get_recommend_positions(position_id)
 
-            header = self._make_json_header(
-                position_info, company_info, star, application, endorse,
-                can_apply, team.id, did)
-            module_job_description = self._make_json_job_description(
-                position_info)
+            header = self._make_json_header(position_info, company_info, star, application, endorse, can_apply, team.id, did)
+            module_job_description = self._make_json_job_description(position_info)
             module_job_need = self._make_json_job_need(position_info)
             module_feature = self._make_json_job_feature(position_info)
-            module_position_recommend = self._make_recommend_positions(
-                recomment_positions_res)
+            module_position_recommend = self._make_recommend_positions(recomment_positions_res)
 
             position_data = ObjectDict()
             add_item(position_data, "header", header)
-            add_item(
-                position_data,
-                "module_job_description",
-                module_job_description)
+            add_item(position_data, "module_job_description", module_job_description)
             add_item(position_data, "module_job_need", module_job_need)
             add_item(position_data, "module_feature", module_feature)
-            add_item(
-                position_data,
-                "module_position_recommend",
-                module_position_recommend)
+            add_item(position_data, "module_position_recommend", module_position_recommend)
 
             # 构建老微信样式所需要的数据
-            self.logger.debug(
-                "[JD]是否显示新样式: {}".format(
-                    self.current_user.wechat.show_new_jd))
+            self.logger.debug("[JD]是否显示新样式: {}".format(self.current_user.wechat.show_new_jd))
             self.logger.debug("[wechat]:{}".format(self.current_user.wechat))
             if not self.current_user.wechat.show_new_jd:
                 # 老样式
-                module_job_require_old = self._make_json_job_require_old(
-                    position_info)
-                module_department_old = self._make_json_job_department(
-                    position_info)
+                module_job_require_old = self._make_json_job_require_old(position_info)
+                module_department_old = self._make_json_job_department(position_info)
                 module_job_attr_old = self._make_json_job_attr(position_info)
                 module_hr_register_old = self.current_user.wechat.hr_register & True
 
-                add_item(
-                    position_data,
-                    "module_job_require",
-                    module_job_require_old)
-                add_item(
-                    position_data,
-                    "module_department",
-                    module_department_old)
+                add_item(position_data, "module_job_require", module_job_require_old)
+                add_item(position_data, "module_department", module_department_old)
                 add_item(position_data, "module_job_attr", module_job_attr_old)
-                add_item(
-                    position_data,
-                    "module_hr_register",
-                    module_hr_register_old)
+                add_item(position_data, "module_hr_register", module_hr_register_old)
 
                 # 定制化 start
                 # 诺华定制
@@ -138,20 +110,13 @@ class PositionHandler(BaseHandler):
             else:
                 # [JD]职位所属团队及相关信息拼装
                 module_job_require = self._make_json_job_require(position_info)
-                module_company_info = self._make_json_job_company_info(
-                    company_info, did)
+                module_company_info = self._make_json_job_company_info(company_info, did)
                 self.logger.debug("[JD]构建团队相关信息")
                 yield self._add_team_data(position_data, team,
                                           position_info.company_id, position_id)
 
-                add_item(
-                    position_data,
-                    "module_company_info",
-                    module_company_info)
-                add_item(
-                    position_data,
-                    "module_job_require",
-                    module_job_require)
+                add_item(position_data, "module_company_info", module_company_info)
+                add_item(position_data, "module_job_require", module_job_require)
                 self.render_page(
                     "position/info.html",
                     data=position_data,
@@ -161,11 +126,13 @@ class PositionHandler(BaseHandler):
 
             # 后置操作
             # 刷新链路
-            self.logger.debug("[JD]刷新链路")
-            last_employee_user_id = yield self._make_refresh_share_chain(
-                position_info)
-            self.logger.debug(
-                "[JD]last_employee_user_id: %s" % (last_employee_user_id))
+            if self.is_platform:
+                self.logger.debug("[JD]刷新链路")
+                last_employee_user_id = yield self._make_refresh_share_chain(position_info)
+                self.logger.debug("[JD]last_employee_user_id: %s" % (last_employee_user_id))
+
+                self.logger.debug("[JD]转发积分操作")
+                yield self._make_add_reward_click(position_info, last_employee_user_id)
 
             # 红包处理
             if self.is_platform and self.current_user.recom:
@@ -180,10 +147,7 @@ class PositionHandler(BaseHandler):
             self.logger.debug("[JD]更新职位浏览量")
             yield self._make_position_visitnum(position_info)
 
-            self.logger.debug("[JD]转发积分操作")
-            yield self._make_add_reward_click(
-                position_info, last_employee_user_id)
-
+            # 浏览量达到5次后，向 HR 发布模板消息
             yield self._make_send_publish_template(position_info)
 
         else:
@@ -557,8 +521,7 @@ class PositionHandler(BaseHandler):
         """给员工加积分"""
 
         if (not self.current_user.employee and
-            recom_employee_user_id != self.current_user.sysuser.id and
-                self.is_platform):
+            recom_employee_user_id != self.current_user.sysuser.id):
 
             recom_employee = yield self.user_ps.get_valid_employee_by_user_id(
                 recom_employee_user_id, self.current_user.company.id)

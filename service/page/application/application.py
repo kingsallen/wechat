@@ -552,7 +552,7 @@ class ApplicationPageService(PageService):
 
     @gen.coroutine
     def create_application(self, position, current_user,
-                           is_platform=True):
+                           is_platform=True, psc=None):
 
         # 1.初始化
         check_status, message = yield self.check_position(position, current_user)
@@ -600,8 +600,9 @@ class ApplicationPageService(PageService):
         #5. 向 HR 发送消息通知（消息模板，短信，邮件）
         yield self.opt_hr_msg(apply_id, current_user, position, is_platform)
 
-        # TODO (tangyiliang) 发红包
-        # yield self.opt_send_redpacket(current_user, position)
+
+
+
 
         return True, msg.RESPONSE_SUCCESS, apply_id
 

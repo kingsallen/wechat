@@ -959,31 +959,32 @@ class RedpacketPageService(PageService):
             return False
 
     @staticmethod
-    def __make_billno(self, mch_id):
+    def __make_billno(mch_id):
         """创建微信支付订单号"""
         return (mch_id + datetime.now().strftime("%Y%m%d") +
                 str(uuid.uuid1().int)[:10])
 
-    def __generate_red_packet_dict(self, qx_wechat_pay, openid, total_amount, **kwargs):
+    def __generate_red_packet_dict(self, qx_wechat_pay, openid, total_amount,
+                                   **kwargs):
         """
         生成包含发送红包信息的 dict
         """
         red_packet_dict = {}
 
         red_packet_dict.update({
-            'nonce_str':        generate_nonce_str(),
-            'wxappid':          qx_wechat_pay['appid'],
-            'mch_id':           qx_wechat_pay ['mch_id'],
-            'act_name':         kwargs.get("act_name", '仟寻'),
-            'send_name':        kwargs.get("send_name", '仟寻'),
-            'wishing':          msg.RED_PACKET_WISHING,
-            'remark':           kwargs.get("remark", '仟寻红包活动'),
-            'mch_billno':       self.__make_billno(qx_wechat_pay['mch_id']),
-            'total_amount':     total_amount,
-            'total_num':        kwargs.get("total_num", 1),
-            'client_ip':        socket.gethostbyname(kwargs.get("host", "qx.moseeker.com")),
-            're_openid':        openid,
-            'key':              kwargs.get("apikey"),
+            'nonce_str':            generate_nonce_str(),
+            'wxappid':              qx_wechat_pay['appid'],
+            'mch_id':               qx_wechat_pay['mch_id'],
+            'act_name':             kwargs.get("act_name", '仟寻'),
+            'send_name':            kwargs.get("send_name", '仟寻'),
+            'wishing':              msg.RED_PACKET_WISHING,
+            'remark':               kwargs.get("remark", '仟寻红包活动'),
+            'mch_billno':           self.__make_billno(qx_wechat_pay['mch_id']),
+            'total_amount':         total_amount,
+            'total_num':            kwargs.get("total_num", 1),
+            'client_ip':            socket.gethostbyname(kwargs.get("host", "qx.moseeker.com")),
+            're_openid':            openid,
+            'key':                  kwargs.get("apikey"),
         })
 
         siganature = self.__generate_sign(red_packet_dict)
@@ -1038,7 +1039,6 @@ class RedpacketPageService(PageService):
         cert = (cert_file_path, key_file_path)
         r = requests.post(url, data=xml_content.encode("utf-8"), cert=cert,
                           verify=False)
-
         return r.content
 
     @staticmethod
