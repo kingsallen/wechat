@@ -409,11 +409,6 @@ def make_company_module_type_3(media_list, module_name):
     return template1(sub_type='full', title=module_name, data=data)
 
 
-# 漏掉一个survey
-# def make_company_module_type_?(media_list, module_name):
-#     pass
-
-
 def make_company_module_type_4(media_list, module_name):
     """
     PRD D模块
@@ -457,6 +452,16 @@ def make_company_module_type_7(media_list, module_name):
     media = ObjectDict({'media_url': '', 'company_name': ''}) \
         if not media_list else media_list[0]
     return template51(media)
+
+
+def make_company_module_type_10(media_list, module_name):
+    """
+    survey样式, 没有module_name
+    :param media_list:
+    :param module_name:
+    :return:
+    """
+    return template5(media_list)
 
 
 # JD page
