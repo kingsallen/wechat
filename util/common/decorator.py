@@ -245,7 +245,7 @@ def check_sub_company(func):
     @functools.wraps(func)
     @gen.coroutine
     def wrapper(self, *args, **kwargs):
-        if self.params.did and self.params.did != self.current_user.company.id:
+        if self.params.did and self.params.did != str(self.current_user.company.id):
             sub_company = yield self.team_ps.get_sub_company(self.params.did)
             if not sub_company or \
                     sub_company.parent_id != self.current_user.company.id:
