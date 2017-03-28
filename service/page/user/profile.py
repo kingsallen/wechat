@@ -423,6 +423,12 @@ class ProfilePageService(PageService):
         return result, data
 
     @gen.coroutine
+    def update_profile_intention(self, record, profile_id):
+        result, data = yield self.infra_profile_ds.update_profile_intention(
+            record, profile_id)
+        return result, data
+
+    @gen.coroutine
     def update_profile_embedded_info_from_cv(self, profile_id, custom_cv):
         """使用 custom_cv 更新 profile 的复合字段 (education, workexp, projectext)
         :param profile_id: profile_id

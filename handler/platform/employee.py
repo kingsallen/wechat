@@ -3,13 +3,14 @@
 from tornado import gen
 
 import conf.path as path
-from conf.common import YES, NO, OLD_YES
+import conf.common as const
 from handler.base import BaseHandler
 from util.common import ObjectDict
 from util.common.decorator import handle_response, authenticated
 
 
 class AwardsHandler(BaseHandler):
+
     @handle_response
     @authenticated
     @gen.coroutine
@@ -20,7 +21,7 @@ class AwardsHandler(BaseHandler):
         total = 0
 
         # 判断是否已经绑定员工
-        binded = YES if self.current_user.employee else NO
+        binded = const.YES if self.current_user.employee else const.NO
 
         if binded:
             # 获取绑定员工
@@ -35,26 +36,28 @@ class AwardsHandler(BaseHandler):
 
         # 构建输出数据格式
         res_award_rules = []
-        for rc in reward_configs:
-            e = ObjectDict()
-            e.name = rc.statusName
-            e.point = rc.points
-            res_award_rules.append(e)
+        if reward_configs:
+            for rc in reward_configs:
+                e = ObjectDict()
+                e.name = rc.statusName
+                e.point = rc.points
+                res_award_rules.append(e)
 
-        email_activation_state = OLD_YES if binded \
+        email_activation_state = const.OLD_YES if binded \
             else self.current_user.employee.activation
 
         res_rewards = []
-        for rc in rewards:
-            e = ObjectDict()
-            e.reason = rc.reason
-            e.hptitle = rc.title
-            e.title = rc.title
-            e.create_time = rc.updateTime
-            e.point = rc.points
-            res_rewards.append(e)
-        # 构建输出数据格式完成
+        if rewards:
+            for rc in rewards:
+                e = ObjectDict()
+                e.reason = rc.reason
+                e.hptitle = rc.title
+                e.title = rc.title
+                e.create_time = rc.updateTime
+                e.point = rc.points
+                res_rewards.append(e)
 
+        # 构建输出数据格式完成
         self.send_json_success({
             'rewards':                res_rewards,
             'award_rules':            res_award_rules,
