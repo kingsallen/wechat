@@ -232,7 +232,8 @@ class InfraDictDataService(DataService):
         level1 + level2
         """
         response = yield http_get(path.DICT_INDUSTRY, dict(parent=0))
-        return self.make_industries_result(response)
+        ret = yield self.make_industries_result(response)
+        return ret
 
     @staticmethod
     @gen.coroutine
