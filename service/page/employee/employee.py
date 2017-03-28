@@ -108,12 +108,14 @@ class EmployeePageService(PageService):
                              const.EMPLOYEE_BIND_AUTH_MODE.EMAIL_OR_CUSTOM,
                              const.EMPLOYEE_BIND_AUTH_MODE.EMAIL_OR_QUESTION]:
             data.type = 'email'
-            data.conf.email_name = ''
-            if current_user.employee:
-                data.conf.email_name = current_user.employee.email
             data.conf.email_suffixs = conf.emailSuffix
-            data.conf.email_suffix = data.conf.email_suffixs[0] if len(
-                data.conf.email_suffixs) else ''
+            if current_user.employee:
+                data.conf.email_name = current_user.employee.email.split('@')[0]
+                data.conf.email_suffix = current_user.employee.email.split('@')[1]
+            else:
+                data.conf.email_name = ''
+                data.conf.email_suffix = data.conf.email_suffixs[0] if len(
+                    data.conf.email_suffixs) else ''
 
             if conf.authMode == const.EMPLOYEE_BIND_AUTH_MODE.EMAIL_OR_CUSTOM:
                 data.conf.switch = 'custom'
