@@ -11,7 +11,9 @@ from util.tool.dict_tool import sub_dict
 
 from thrift_gen.gen.employee.struct.ttypes import BindingParams
 
+
 class EmployeePageService(PageService):
+
     FE_BIND_STATUS_SUCCESS = 0
     FE_BIND_STATUS_UNBINDING = 1
     FE_BIND_STATUS_NEED_VALIDATE = 2
@@ -107,7 +109,7 @@ class EmployeePageService(PageService):
         if conf.authMode in [const.EMPLOYEE_BIND_AUTH_MODE.EMAIL,
                              const.EMPLOYEE_BIND_AUTH_MODE.EMAIL_OR_CUSTOM,
                              const.EMPLOYEE_BIND_AUTH_MODE.EMAIL_OR_QUESTION]:
-            data.type = 'email'
+            data.type = self.FE_BIND_TYPE_EMAIL
             data.conf.email_suffixs = conf.emailSuffix
             if current_user.employee:
                 data.conf.email_name = current_user.employee.email.split('@')[0]
@@ -118,21 +120,21 @@ class EmployeePageService(PageService):
                     data.conf.email_suffixs) else ''
 
             if conf.authMode == const.EMPLOYEE_BIND_AUTH_MODE.EMAIL_OR_CUSTOM:
-                data.conf.switch = 'custom'
+                data.conf.switch = self.FE_BIND_TYPE_CUSTOM
                 data.conf.custom_hint = conf.customHint
                 data.conf.custom_value = ''
 
             if conf.authMode == const.EMPLOYEE_BIND_AUTH_MODE.EMAIL_OR_QUESTION:
-                data.conf.switch = 'question'
+                data.conf.switch = self.FE_BIND_TYPE_QUESTION
                 data.conf.questions = conf.questions
 
         elif conf.authMode == const.EMPLOYEE_BIND_AUTH_MODE.CUSTOM:
-            data.type = 'custom'
+            data.type = self.FE_BIND_TYPE_CUSTOM
             data.conf.custom_hint = conf.customHint
             data.conf.custom_value = ''
 
         elif conf.authMode == const.EMPLOYEE_BIND_AUTH_MODE.QUESTION:
-            data.type = 'question'
+            data.type = self.FE_BIND_TYPE_QUESTION
             data.conf.questions = conf.questions
 
         else:
@@ -141,6 +143,13 @@ class EmployeePageService(PageService):
         return data
 
     def make_bind_params(self,user_id, company_id, json_args):
+        """
+        构建员工绑定的参数集合
+        :param user_id:
+        :param company_id:
+        :param json_args:
+        :return:
+        """
         type = json_args.type
         needed_keys = ['type', 'name', 'mobile']
 
@@ -178,31 +187,34 @@ class EmployeePageService(PageService):
 
     @gen.coroutine
     def get_employee_conf(self, company_id):
+        """获取员工绑定配置"""
         ret = yield self.thrift_employee_ds.get_employee_verification_conf(
             company_id)
         return ret
 
     @gen.coroutine
     def get_employee_rewards(self, employee_id, company_id):
-
+        """获取员工积分信息"""
         ret = yield self.thrift_employee_ds.get_employee_rewards(
             employee_id, company_id)
         return ret
 
     @gen.coroutine
     def unbind(self, employee_id, company_id, user_id):
-
+        """员工解绑"""
         ret = yield self.thrift_employee_ds.unbind(
             employee_id, company_id, user_id)
         return ret.success, ret.message
 
     @gen.coroutine
     def bind(self, binding_params):
+        """员工绑定"""
         ret = yield self.thrift_employee_ds.bind(binding_params)
         return ret.success, ret.message
 
     @gen.coroutine
     def activate_email(self, activation_code):
+        """通过邮箱激活员工"""
         ret = yield self.thrift_employee_ds.activate_email(activation_code)
         return ret.success, ret.message
 
