@@ -366,7 +366,7 @@ class PositionHandler(BaseHandler):
             "icon_url": self.static_url(company_info.logo),
             "name": company_info.abbreviation or company_info.name,
             "description": company_info.slogan,
-            "did": did,
+            "did": did if did != self.current_user.company.id else "", # 主公司不需要提供 did
         })
 
         return data
