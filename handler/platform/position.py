@@ -285,12 +285,6 @@ class PositionHandler(BaseHandler):
                           endorse, can_apply, team_id, did):
         """构造头部 header 信息"""
 
-        print ("9999999999999999999")
-        print (str(self.current_user.company.id))
-        print (str(did))
-        print (str(did) == str(self.current_user.company.id))
-
-
         data = ObjectDict({
             "id": position_info.id,
             "title": position_info.title,
