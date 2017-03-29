@@ -255,7 +255,9 @@ RESUME_WAY_TO_INFRA = {
 
 # ============= 红包相关常量 =============
 # 红包锁字符串模版
-RP_LOCK_FMT = "rplock:%s:%s:%s"
+RP_POS_LOCK_FMT = "rplock_pos:%s:%s:%s"
+RP_EMP_LOCK_FMT = "rplock_emp:%s:%s"
+RP_RECOM_LOCK_FMT = "rplock_recom:%s:%s"
 RP_LOCKED = 1
 
 # RP_ITEM 状态常量

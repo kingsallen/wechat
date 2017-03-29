@@ -129,7 +129,11 @@ class EmployeeBindHandler(BaseHandler):
             self.logger.debug(message)
             if result:
                 self.send_json_success()
-                # TODO (tangyiliang) 员工认证红包
+                # 处理员工认证红包
+                yield self.redpacket_ps.handle_red_packet_employee_verification(
+                    user_id=self.current_user.sysuser.id,
+                    company_id=self.current_user.company.id
+                )
             else:
                 self.send_json_error(message=message)
         else:
@@ -150,10 +154,23 @@ class EmployeeBindEmailHandler(BaseHandler):
         )
         tname = 'success' if result else 'failure'
 
-        # TODO (tangyiliang) 员工认证红包
-
         self.render(template_name='employee/certification-%s.html' % tname,
                     **tparams)
+
+        # 处理员工认证红包开始
+        employee = yield self.user_employee_ds.get_employee({
+            'activation_code': activation_code,
+            'activation':      const.OLD_YES,
+            'disable':         const.OLD_YES,
+            'status':          const.OLD_YES
+        })
+
+        if result and employee:
+            yield self.redpacket_ps.handle_red_packet_employee_verification(
+                user_id=employee.sysuser_id,
+                company_id=employee.company_id
+            )
+        # 处理员工认证红包结束
 
 
 class RecommendrecordsHandler(BaseHandler):

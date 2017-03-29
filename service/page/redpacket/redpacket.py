@@ -32,6 +32,8 @@ from util.wechat.template import \
     rp_transfer_apply_success_notice_tpl, \
     rp_transfer_click_success_notice_tpl
 
+from thrift_gen.gen.employee.struct.ttypes import Employee, BindStatus
+
 from util.common import ObjectDict
 
 
@@ -154,6 +156,73 @@ class RedpacketPageService(PageService):
         return ret
 
     @gen.coroutine
+    def handle_red_packet_employee_verification(self, user_id, company_id, redislocker):
+        """对于 user_id, company_id
+        发送员工认证红包
+        """
+        # 校验红包活动
+        rp_config = yield self.hr_hb_config_ds.get_hr_hb_config(
+            {'company_id': company_id,
+             'type':       const.RED_PACKET_TYPE_EMPLOYEE_BINDING,
+             'status':     const.HB_CONFIG_RUNNING})
+        if not rp_config:
+            self.logger.debug('[RP]员工认证红包活动不存在, company_id: %s' % company_id)
+            return
+
+        # 校验员工信息
+        employee_response = yield self.infra_employee_ds.getEmployee(user_id, company_id)
+        if (employee_response.bindStatus != BindStatus.BINDED or
+                employee_response.employee.isRpSent):
+            self.logger.debug('[RP]员工绑定状态不正确或红包已经发送过, user_id: %s, company_id: %s' % (user_id, company_id))
+            return
+
+        # 员工认证红包不需要校验上限
+        # 为红包处理加 redis 锁
+        # 检查红包锁
+        rplock_key = const.RP_EMP_LOCK_FMT % (rp_config.id, user_id)
+        if redislocker.incr(rplock_key) is FIRST_LOCK:
+            self.logger.debug("[RP]红包锁创建成功， rplock_key: %s" % rplock_key)
+            company = yield self.hr_company_ds.get_company({'id': company_id})
+            wechat = yield self.hr_wx_wechat_ds.get_wechat({'company_id': company_id})
+            qxuser = yield self.user_wx_user_ds.get_wxuser({
+                'sysuser_id': user_id, 'wechat_id': settings['qx_wechat_id']
+            })
+            recom_wxuser = yield self.user_wx_user_ds.get_wxuser({
+                'sysuser_id': user_id, 'wechat_id': wechat.id
+            })
+
+            try:
+                if self.__hit_red_packet(rp_config.probability):
+                    self.logger.debug("[RP]掷骰子通过,准备发送红包信封(有金额)")
+
+                    # 发送红包消息模版(有金额)
+                    self.__send_red_packet_card(
+                        recom_wxuser.openid,
+                        wechat.id,
+                        rp_config,
+                        qxuser.id,
+                        company_name=company.name)
+                else:
+                    # 发送红包消息模版(抽不中)
+                    self.logger.debug("[RP]掷骰子不通过,准备发送红包信封(无金额)")
+                    self.__send_zero_amount_card(
+                        recom_wxuser.openid,
+                        wechat.id,
+                        rp_config,
+                        qxuser.id,
+                        company_name=company.name)
+
+            except Exception as e:
+                self.logger.error(e)
+            finally:
+                # 释放红包锁
+                redislocker.delete(rplock_key)
+                self.logger.debug("[RP]红包锁释放成功， rplock_key: %s" % rplock_key)
+        else:
+            self.logger.debug("[RP]触发红包锁，该红包逻辑正在处理中， rplock_key: %s" % rplock_key)
+            self.logger.debug("[RP]员工认证红包发送成功")
+
+    @gen.coroutine
     def handle_red_packet_position_related(self,
                                            current_user,
                                            position,
@@ -220,7 +289,7 @@ class RedpacketPageService(PageService):
 
                 # 为红包处理加 redis 锁
                 # 检查红包锁
-                rplock_key = const.RP_LOCK_FMT % (rp_config.id, recom.id, trigger_qxuser_id)
+                rplock_key = const.RP_POS_LOCK_FMT % (rp_config.id, recom.id, trigger_qxuser_id)
                 if redislocker.incr(rplock_key) is FIRST_LOCK:
                     self.logger.debug("[RP]红包锁创建成功， rplock_key: %s" % rplock_key)
                     try:
@@ -553,8 +622,7 @@ class RedpacketPageService(PageService):
         :param recom_wechat_id:
         :param red_packet_config:
         :param current_qxuser_id: 当前点击用户的 qxwxuser_id
-        :param position:
-        :param tips: 如果超过全局上限, 触发 tips = True 哥赏你 0.01 - 0.03 元
+        :param position: 职位信息
         :return:
         """
         recom_wx_user = yield self.user_wx_user_ds.get_wxuser({
