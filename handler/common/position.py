@@ -49,7 +49,7 @@ class PositionFavHandler(BaseHandler):
                                                  self.current_user.wxuser.id,
                                                  self.current_user.recom.id if self.current_user.recom else 0)
 
-        application_url = make_url(path.APPLICATION+"/app", self.params, escape=['next_url', 'name', 'company', 'position'])
+        application_url = make_url(path.APPLICATION, self.params, pid=position_id, escape=['next_url', 'name', 'company', 'position'])
         position_info_url = make_url(path.POSITION_PATH.format(position_id), self.params, escape=['next_url', 'name', 'company', 'position'])
 
         self.render(template_name="refer/weixin/sysuser/interest-success.html",
