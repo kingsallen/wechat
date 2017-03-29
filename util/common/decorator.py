@@ -81,8 +81,10 @@ def cache(prefix=None, key=None, ttl=60, hash=True, lock=True, separator=":"):
                     redis_key = ""
 
                     if args and len(args) > 1:
-                        redis_key = separator.join([str(_) for _ in list(args[1].values())])
-
+                        if isinstance(args[1], dict):
+                            redis_key = separator.join([str(_) for _ in list(args[1].values())])
+                        else:
+                            redis_key = separator.join([str(_) for _ in args[1:]])
                     if kwargs:
                         spliter = separator if redis_key else ""
                         redis_key = redis_key + spliter + separator.join([str(_) for _ in list(kwargs.values())])
