@@ -284,6 +284,13 @@ class PositionHandler(BaseHandler):
     def _make_json_header(self, position_info, company_info, star, application,
                           endorse, can_apply, team_id, did):
         """构造头部 header 信息"""
+
+        print ("9999999999999999999")
+        print (str(self.current_user.company.id))
+        print (str(did))
+        print (str(did) == str(self.current_user.company.id))
+
+
         data = ObjectDict({
             "id": position_info.id,
             "title": position_info.title,
@@ -298,7 +305,7 @@ class PositionHandler(BaseHandler):
             "can_apply": not can_apply,
             "forword_message": company_info.conf_forward_message or msg.POSITION_FORWARD_MESSAGE,
             "team": team_id,
-            "did": did if str(did) == str(self.current_user.company.id) else "",
+            "did": did if did != self.current_user.company.id else "", # 主公司不需要提供 did
             "salary": position_info.salary,
             "hr_chat": int(self.current_user.wechat.hr_chat),
             #"team": position_info.department.lower() if position_info.department else ""
