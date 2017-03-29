@@ -61,6 +61,7 @@ class CompanyPageService(PageService):
                 "conf_job_custom_title": company_conf_res.get("job_custom_title"),
                 "conf_search_seq": search_seq,
                 "conf_search_img": company_conf_res.get("search_img"),
+                "conf_newjd_status": company_conf_res.get("newjd_status")
             })
             company.update(company_conf)
 
@@ -113,7 +114,5 @@ class CompanyPageService(PageService):
 
     @gen.coroutine
     def get_company_teamname_custom(self, company_id):
-        company_conf = yield self.get_company_conf(company_id, fields=["teamname_custom"])
-        if not company_conf or not company_conf["teamname_custom"]:
-            company_conf = {'teamname_custom': self.constant.TEAMNAME_CUSTOM_DEFAULT}
-        raise gen.Return(company_conf)
+        teamname_custom = yield self.hr_company_conf_ds.get_company_teamname_custom(company_id)
+        return teamname_custom

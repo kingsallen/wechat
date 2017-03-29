@@ -70,7 +70,7 @@ def template1_data(resource, member_list=None):
     resource = make_up_for_missing_res(resource)
     return {
         'sub_title': resource.sub_title,
-        'longtext': resource.longtext,
+        'longtext': resource.longtexts,
         'media_url': make_static_url(resource.media_url),
         'media_type': MEDIA_TYPE[resource.media_type],
         'member_list': member_list
@@ -156,7 +156,7 @@ def template51(resource):
     return ObjectDict({
         'type': 51, 'title': 'address',
         'data': [{
-            'company_name': resource.sub_title,
+            'company_name': resource.company_name,
             'media_url': make_static_url(resource.media_url)
             if resource.media_url else '',
         }]
@@ -169,7 +169,7 @@ def make_header(company, team_index=False, team=None, **extra):
         description = team.slogan
     else:
         if team_index:
-            name = '我们的' + extra["teamname_custom"] if extra and "teamname_custom" in extra else "团队"
+            name = '我们的' + extra.get("teamname_custom")
         else:
             name = company.abbreviation or company.name
         description = '' if team_index else company.slogan
@@ -221,7 +221,7 @@ def make_introduction(member, res):
 def make_interview(media, res):
     return {
         'sub_title': media.sub_title,
-        'longtext': '{}\n'.format(media.longtext),
+        'longtext': '{}\n'.format(media.longtexts),
         'media_url': make_static_url(res.res_url) if res else '',
         'media_type': MEDIA_TYPE[res.res_type if res else 0]
     }
@@ -238,7 +238,7 @@ def make_other_team_data(team, res, handler_params):
     }
 
 
-def make_team_detail_template(team, members, detail_media_list, positions,
+def make_team_detail_template(team, members, modulename, detail_media_list, positions,
                               other_teams, res_dic, handler_params, teamname_custom=None, vst=False):
     template = []
     teamname_field = teamname_custom["teamname_custom"] if teamname_custom else '团队'
@@ -265,7 +265,7 @@ def make_team_detail_template(team, members, detail_media_list, positions,
             template.append(
                 template1(
                     sub_type='less',
-                    title=detail_media_list[0].title,
+                    title=modulename,
                     data=[make_interview(m, res_dic.get(m.res_id))
                           for m in detail_media_list]
                 )
@@ -339,14 +339,139 @@ def make_company_team(media_list, link=None):
                      data=[template1_data(media) for media in media_list])
 
 
+# hr3.4
+def make_company_module_type_1(media_list, module_name, more_link=""):
+    """
+    PRD A模块
+    :param media_list:
+    :param module_name:
+    :return:
+    """
+    # 还有一个链接没有处理
+    return template1(sub_type='less', title=module_name, more_link=more_link,
+                     data=[template1_data(media) for media in media_list])
+
+
+def make_company_module_type_2(media_list, module_name, more_link=""):
+    """
+    PRD B模块 - 团队列表页团队样式
+    大图 小标题 描述 来自media_list[0], 参考team
+    下面小图来自media_list[1:], 参考member_list
+    :param media_list:
+    :param module_name:
+    :return:
+    """
+    big_one = media_list[0]
+    small_ones = media_list[1:]
+    member_list = []
+    if small_ones:
+        member_list = [ObjectDict({
+            "icon": make_static_url(m.media_url),
+            "name": "",
+            "title": "",
+            "description": ""
+        }) for m in small_ones]
+    data = [{
+        'sub_title': big_one.sub_title,
+        'longtext': big_one.longtexts,
+        'media_url': make_static_url(big_one.media_url),
+        'media_type': MEDIA_TYPE[big_one.media_type],
+        'member_list': member_list
+    }]
+    return template1(sub_type='middle', title=module_name, data=data)
+
+
+def make_company_module_type_3(media_list, module_name, more_link=""):
+    """
+    PRD C模块
+    团队详情页样式
+    :param media_list:
+    :param module_name:
+    :return:
+    """
+    big_one = media_list[0]
+    small_ones = media_list[1:]
+    member_list = []
+    if small_ones:
+        member_list = [ObjectDict({
+            "icon": make_static_url(m.media_url),
+            "name": m.title,
+            "title": m.sub_title,
+            "description": m.longtexts
+        }) for m in small_ones]
+    data = [{
+        'sub_title': big_one.sub_title,
+        'longtext': big_one.longtexts,
+        'media_url': make_static_url(big_one.media_url),
+        'media_type': MEDIA_TYPE[big_one.media_type],
+        'member_list': member_list
+    }]
+    return template1(sub_type='full', title=module_name, data=data)
+
+
+def make_company_module_type_4(media_list, module_name, module_link=""):
+    """
+    PRD D模块
+    CEO寄语样式, module_name没有作用
+    :param media_list:
+    :param module_name:
+    :return:
+    """
+    return template2(title='template 2', data=template2_data(media_list))
+
+
+def make_company_module_type_5(media_list, module_name, module_link=""):
+    """
+    PRD E模块
+    公司大事件样式
+    :param media_list:
+    :param module_name:
+    :return:
+    """
+    return template4(sub_type=0, title=module_name, data=template4_data(media_list, 0))
+
+
+def make_company_module_type_6(media_list, module_name, module_link=""):
+    """
+    地图样式, 没有module_name
+    :param media_list:
+    :param module_name:
+    :return:
+    """
+    if media_list:
+        return template50(resource=media_list[0])
+
+
+def make_company_module_type_7(media_list, module_name, module_link=""):
+    """
+    二维码样式, 没有module_name
+    :param media_list:
+    :param module_name:
+    :return:
+    """
+    media = ObjectDict({'media_url': '', 'company_name': ''}) \
+        if not media_list else media_list[0]
+    return template51(media)
+
+
+def make_company_module_type_10(media_list, module_name, module_link=""):
+    """
+    survey样式, 没有module_name
+    :param media_list:
+    :param module_name:
+    :return:
+    """
+    return template5(media_list)
+
+
 # JD page
-def make_mate(media_list, res_dict):
+def make_position_detail_cms(media_list, res_dict, module_name):
     return template1(
         sub_type='less',
-        title=media_list[0].title,
+        title=module_name,
         data=[{
                   'sub_title': m.sub_title,
-                  'longtext': '{}\n'.format(m.longtext),
+                  'longtext': '{}\n'.format(m.longtexts),
                   'media_url': make_static_url(res_dict.get(m.res_id).res_url),
                   'media_type': MEDIA_TYPE[res_dict.get(m.res_id).res_type]
               } for m in media_list]

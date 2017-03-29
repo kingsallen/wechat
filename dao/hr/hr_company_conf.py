@@ -31,4 +31,6 @@ class HrCompanyConfDao(BaseDao):
             "search_seq":           self.constant.TYPE_STRING, # 搜索页页面设置顺序,3#1#2
             "search_img":           self.constant.TYPE_STRING, # 搜索页页面设置背景图
             "teamname_custom":      self.constant.TYPE_STRING, # 职位部门字段名称
+            "newjd_status":         self.constant.TYPE_INT,  # 新JD申请状态
+            "application_time":     self.constant.TYPE_TIMESTAMP,  # 新JD开通申请时间
         }

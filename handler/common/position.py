@@ -13,9 +13,11 @@ from util.tool.str_tool import gen_salary, add_item, split
 from util.tool.url_tool import make_url, url_append_query
 from util.wechat.template import position_view_five
 from tests.dev_data.user_company_config import COMPANY_CONFIG
+from handler.help.newjd_status_check import NewJDStatusCheckerRedirect
 
 
-class PositionHandler(BaseHandler):
+class PositionHandler(BaseHandler, NewJDStatusCheckerRedirect):
+    @NewJDStatusCheckerRedirect.check_newjd_status
     @handle_response
     @gen.coroutine
     def get(self, position_id):
@@ -495,21 +497,21 @@ class PositionHandler(BaseHandler):
     def _add_team_data(self, position_data, team, company_id, position_id, teamname_custom):
 
         if team:
-            company_config = COMPANY_CONFIG.get(company_id)
             module_team_position = yield self._make_team_position(
                 team, position_id, company_id, teamname_custom)
             if module_team_position:
                 add_item(position_data, "module_team_position",
                          module_team_position)
 
-            if team.is_show:
-                module_mate_day = yield self._make_mate_day(team)
-                if module_mate_day:
-                    add_item(position_data, "module_mate_day", module_mate_day)
+            # [hr3.4]team.is_show只是用来判断是否在团队列表显示
+            cms_page = yield self._make_cms_page(team.id)
+            if cms_page:
+                add_item(position_data, "module_mate_day", cms_page)
 
-                if not company_config.no_jd_team:
-                    module_team = yield self._make_team(team, teamname_custom)
-                    add_item(position_data, "module_team", module_team)
+            company_config = COMPANY_CONFIG.get(company_id)
+            if not company_config.no_jd_team:  # 不在职位详情页展示所属团队, 目前只有Mars有这个需求,
+                module_team = yield self._make_team(team, teamname_custom)
+                add_item(position_data, "module_team", module_team)
 
     @gen.coroutine
     def _make_team_position(self, team, position_id, company_id, teamname_custom):
@@ -518,11 +520,16 @@ class PositionHandler(BaseHandler):
             team.id, self.params, position_id, company_id, teamname_custom)
         raise gen.Return(res)
 
+    # @gen.coroutine
+    # def _make_mate_day(self, team):
+    #     """同事的一天，构造数据"""
+    #     res = yield self.position_ps.get_mate_data(team.jd_media)
+    #     raise gen.Return(res)
+
     @gen.coroutine
-    def _make_mate_day(self, team):
-        """同事的一天，构造数据"""
-        res = yield self.position_ps.get_mate_data(team.jd_media)
-        raise gen.Return(res)
+    def _make_cms_page(self, team_id):
+        res = yield self.position_ps.get_cms_page(team_id)
+        return res
 
     @gen.coroutine
     def _make_team(self, team, teamname_custom):

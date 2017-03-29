@@ -30,7 +30,7 @@ common_routes = [
     # account
     (r"/m/account/login",                  "handler.common.login.LoginHandler",                         {"event": "login_login"}),
     # position
-    (r"/m/position/([0-9]+)",              "handler.common.position.PositionHandler",                   {"event": "position_info"}),
+    (r"/m/position/(?P<position_id>\d+)",  "handler.common.position.PositionHandler",                   {"event": "position_info"}),
     # app forward 给前端，展示纯前端渲染的 SPA
     (r"/m/app/.*",                         "handler.common.app.IndexHandler",                           {"event": "app_index"}),
     # common api
