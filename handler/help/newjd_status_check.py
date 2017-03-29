@@ -33,7 +33,12 @@ class BaseNewJDStatusChecker(metaclass=ABCMeta):
         @functools.wraps(func)
         @gen.coroutine
         def wrapper(self, *args, **kwargs):
-            if self.current_user.company.conf_newjd_status != constant.NEWJD_STATUS_ON:
+            # 新JD开启状态
+            is_newjs_status_on = self.current_user.company.conf_newjd_status == constant.NEWJD_STATUS_ON
+            # 预览状态
+            is_preview = self.current_user.company.conf_newjd_status == constant.NEWJD_STATUS_WAITING \
+                         and self.params.preview != None
+            if not (is_newjs_status_on or is_preview):
                 self.fail_action(*args, **kwargs)
                 return
 
