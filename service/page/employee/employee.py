@@ -9,8 +9,7 @@ from util.common import ObjectDict
 from util.tool.url_tool import make_static_url
 from util.tool.dict_tool import sub_dict
 
-from thrift_gen.gen.employee.struct.ttypes import BindingParams
-
+from thrift_gen.gen.employee.struct.ttypes import BindingParams, BindStatus
 
 class EmployeePageService(PageService):
 
@@ -77,9 +76,11 @@ class EmployeePageService(PageService):
         data.mobile = current_user.sysuser.mobile
         data.send_hour = 2  # fixed
 
-        self.logger.debug("employee_verify_conf: %s" % conf)
         # 如果current_user 中有 employee，表示当前用户是已认证的员工
-        if current_user.employee:
+        bind_status, employee = yield self.get_employee_info(
+            user_id=current_user.sysuser.id, company_id=current_user.company.id)
+
+        if bind_status == BindStatus.BINDED:
             data.binding_status = self.FE_BIND_STATUS_SUCCESS
             data.employeeid = current_user.employee.id
             data.name = current_user.employee.cname
