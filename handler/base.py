@@ -70,6 +70,8 @@ class BaseHandler(MetaBaseHandler):
     def prepare(self):
         """用于生成 current_user"""
 
+        yield gen.sleep(0.001)  # be nice to cpu
+
         # 构建 session 之前先缓存一份 wechat
         self._wechat = yield self._get_current_wechat()
         self._qx_wechat = yield self._get_qx_wechat()
