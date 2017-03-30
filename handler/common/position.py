@@ -16,8 +16,8 @@ from tests.dev_data.user_company_config import COMPANY_CONFIG
 from handler.help.newjd_status_check import NewJDStatusCheckerRedirect
 
 
-class PositionHandler(BaseHandler, NewJDStatusCheckerRedirect):
-    @NewJDStatusCheckerRedirect.check_newjd_status
+class PositionHandler(BaseHandler):
+    @NewJDStatusCheckerRedirect()
     @handle_response
     @gen.coroutine
     def get(self, position_id):

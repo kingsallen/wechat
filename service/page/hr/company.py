@@ -68,7 +68,7 @@ class CompanyPageService(PageService):
 
             # 处理公司自定义团队名称
             conf_teamname_custom = company_conf.get("conf_teamname_custom")
-            if conf_teamname_custom.strip():
+            if conf_teamname_custom and conf_teamname_custom.strip():
                 teamname_custom = ObjectDict({'teamname_custom': conf_teamname_custom.strip()})
             else:
                 teamname_custom = ObjectDict({'teamname_custom': self.constant.TEAMNAME_CUSTOM_DEFAULT})

@@ -47,8 +47,8 @@ class CompanyFollowHandler(BaseHandler):
         self.send_json_success()
 
 
-class CompanyHandler(BaseHandler, NewJDStatusCheckerRedirect):
-    @NewJDStatusCheckerRedirect.check_newjd_status
+class CompanyHandler(BaseHandler):
+    @NewJDStatusCheckerRedirect()
     @handle_response
     @check_sub_company
     @gen.coroutine
