@@ -72,6 +72,7 @@ class CompanyHandler(BaseHandler):
             'description': u'这可能是你人生的下一站! 看清企业全局, 然后定位自己',
             'link': self.fullurl
         })
+        # 玛氏定制
         config = COMPANY_CONFIG.get(company.id)
         if config and config.get('transfer', False) and config.transfer.get('cm', False):
             default.description = config.transfer.get('cm')

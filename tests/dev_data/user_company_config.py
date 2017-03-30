@@ -66,19 +66,7 @@ SUB_COMPANY_MARS_40120 = ObjectDict({
 
 # Product environment company config
 
-COMPANY_MOSEEKER = ObjectDict({
-    'order': ['working_env', 'figure', 'team', 'members',
-              'events', 'map', 'survey', 'qr_code'],
-    'config': {
-        'working_env': [26, 27, 28, 29, 30],  # 工作环境对应的 hr_media id list
-        'figure': [31],  # 人物寄语
-        'members': [39, 40],  # 公司成员
-        'events': [35, 36, 37],  # 公司大事件
-        'map': [38],  # 公司地址
-        'survey': [],  # 问卷调查
-        'qr_code': []  # 二维码
-    }
-})
+COMPANY_MOSEEKER = ObjectDict({})
 
 COMPANY_MARS = ObjectDict({
     'order': ['working_env', 'figure', 'team', 'members',

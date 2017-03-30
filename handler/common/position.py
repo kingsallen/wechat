@@ -508,6 +508,7 @@ class PositionHandler(BaseHandler):
             if cms_page:
                 add_item(position_data, "module_mate_day", cms_page)
 
+            # 玛氏定制
             company_config = COMPANY_CONFIG.get(company_id)
             if not company_config.no_jd_team:  # 不在职位详情页展示所属团队, 目前只有Mars有这个需求,
                 module_team = yield self._make_team(team, teamname_custom)
