@@ -17,8 +17,8 @@ from tests.dev_data.user_company_config import COMPANY_CONFIG
 from handler.help.newjd_status_check import NewJDStatusChecker404
 
 
-class TeamIndexHandler(BaseHandler, NewJDStatusChecker404):
-    @NewJDStatusChecker404.check_newjd_status
+class TeamIndexHandler(BaseHandler):
+    @NewJDStatusChecker404()
     @handle_response
     @check_sub_company
     @gen.coroutine
@@ -54,8 +54,8 @@ class TeamIndexHandler(BaseHandler, NewJDStatusChecker404):
         return default
 
 
-class TeamDetailHandler(BaseHandler, NewJDStatusChecker404):
-    @NewJDStatusChecker404.check_newjd_status
+class TeamDetailHandler(BaseHandler):
+    @NewJDStatusChecker404()
     @handle_response
     @check_sub_company
     @gen.coroutine
