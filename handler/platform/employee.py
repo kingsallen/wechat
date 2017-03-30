@@ -128,11 +128,14 @@ class EmployeeBindHandler(BaseHandler):
             self.logger.debug(result)
             self.logger.debug(message)
             if result:
-                self.send_json_success()
+                self.send_json_success(message=message)
+                self.finish()
+
                 # 处理员工认证红包
                 yield self.redpacket_ps.handle_red_packet_employee_verification(
                     user_id=self.current_user.sysuser.id,
-                    company_id=self.current_user.company.id
+                    company_id=self.current_user.company.id,
+                    redislocker=self.redis
                 )
             else:
                 self.send_json_error(message=message)
@@ -168,7 +171,8 @@ class EmployeeBindEmailHandler(BaseHandler):
         if result and employee:
             yield self.redpacket_ps.handle_red_packet_employee_verification(
                 user_id=employee.sysuser_id,
-                company_id=employee.company_id
+                company_id=employee.company_id,
+                redislocker=self.redis
             )
         # 处理员工认证红包结束
 

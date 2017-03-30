@@ -119,14 +119,16 @@ class ApplicationPageService(PageService):
 
         cv_conf = yield self.get_hr_app_cv_conf(position.app_cv_config_id)
         fields = self.make_fields_list(cv_conf)
-        fileds_to_check = [f for f in objectdictify(fields) if f.required == const.OLD_YES]
+        fields_to_check = [f for f in objectdictify(fields) if f.required == const.OLD_YES]
+
+        self.logger.debug("fields_to_check: %s" % fields_to_check)
 
         # 对于 fileds_to_check 进行逐个检查
         # 校验失败条件:
         # field_name 在 profile 对应字端中,但是 profile 中这个字段为空值
         # or
         # field_name 是纯自定义字段,但是在 custom_others 中没有这个值
-        for field in fileds_to_check:
+        for field in fields_to_check:
             field_name = field.field_name
             mapping = field.map
             passed = yield self._check(profile, field_name, user, mapping)
