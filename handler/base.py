@@ -238,6 +238,10 @@ class BaseHandler(MetaBaseHandler):
         wechat = yield self.wechat_ps.get_wechat(conds={
             "signature": signature
         })
+        if not wechat:
+            self.write_error(http_code=404)
+            return
+
         raise gen.Return(wechat)
 
     @gen.coroutine

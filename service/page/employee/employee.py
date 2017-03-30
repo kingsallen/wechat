@@ -1,7 +1,6 @@
 # coding=utf-8
 
 from tornado import gen
-
 import conf.common as const
 from conf.common import NO
 from service.page.base import PageService
