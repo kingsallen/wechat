@@ -143,6 +143,8 @@ class TeamPageService(PageService):
         data.header = temp_data_tool.make_header(company, True, team)
         data.relation = ObjectDict({
             'want_visit': self.constant.YES if visit else self.constant.NO})
+
+        # 玛氏定制
         company_config = COMPANY_CONFIG.get(company.id)
         if company_config and company_config.get('custom_visit_recipe', False):
             data.relation.custom_visit_recipe = COMPANY_CONFIG.get(

@@ -66,8 +66,7 @@ SUB_COMPANY_MARS_40120 = ObjectDict({
 
 # Product environment company config
 
-COMPANY_MOSEEKER = ObjectDict({
-})
+COMPANY_MOSEEKER = ObjectDict({})
 
 COMPANY_MARS = ObjectDict({
     'order': ['working_env', 'figure', 'team', 'members',

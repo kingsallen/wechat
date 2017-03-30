@@ -51,36 +51,17 @@ class UserCompanyPageService(PageService):
             'follow': self.constant.YES if wx_user.is_subscribe
             else self.constant.NO,
         })
+
+        # 玛氏定制需求
         company_config = COMPANY_CONFIG.get(company.id)
         if company_config and company_config.get('custom_visit_recipe', False):
             data.relation.custom_visit_recipe = company_config.custom_visit_recipe
 
-        # data.templates, tmp_team = yield self._get_company_template(company.id, team_index_url)
         data.templates = yield self._get_company_cms_page(company.id, user, team_index_url)
-
-        # [hr3.4], 这段逻辑应该取消掉了, 全部来自自定义配置, 脚本要注意
-        # 暂时不删除
-        # 如果没有提供team的配置，去hr_team寻找资源
-        tmp_team = True
-        if not tmp_team:
-            team_order = company_config.order.index('team')
-            # 区分母公司、子公司对待，获取所有团队team
-            if company.id != user.company.id:
-                teams = yield self._get_sub_company_teams(company.id)
-            else:
-                teams = yield self.hr_team_ds.get_team_list(
-                    conds={'company_id': company.id, 'is_show': 1, 'disable': 0})
-
-            if teams:
-                teams.sort(key=lambda t: t.show_order)
-                teams = teams[0:6]  # 企业主业团队数不超过6个
-                team_resource_list = yield self._get_team_resource(teams)
-                team_template = temp_data_tool.make_company_team(
-                    team_resource_list, team_index_url)
-                data.templates.insert(team_order, team_template)
 
         data.template_total = len(data.templates)
 
+        # 自定义团队文案
         teamname_custom = user.company.conf_teamname_custom
         data.bottombar = teamname_custom
 
@@ -95,38 +76,6 @@ class UserCompanyPageService(PageService):
                 qrcode_url):
             return link_head.format(qrcode_url)
         return qrcode_url
-
-    @gen.coroutine
-    def _get_company_template(self, company_id, team_index_url):
-        """
-        根据不同company_id去配置文件中获取company配置信息
-        之后根据配置，生成template数据
-        :param company_id:
-        :return:
-        """
-        company_config = COMPANY_CONFIG.get(company_id)
-        values = sum(company_config.config.values(), [])
-        media_dict = yield self.hr_media_ds.get_media_by_ids(values)
-        resources_dict = yield self.hr_resource_ds.get_resource_by_ids(
-            [m.res_id for m in media_dict.values()])
-
-        for m in media_dict.values():
-            res = resources_dict.get(m.res_id, False)
-            m.media_url = res.res_url if res else ''
-            m.media_type = res.res_type if res else 0
-
-        if company_config.config.get('team'):
-            for team_media_id in company_config.config.get('team'):
-                media_dict.get(team_media_id).link = team_index_url
-
-        templates = [
-            getattr(temp_data_tool, 'make_company_{}'.format(key))(
-                [media_dict.get(mid) for mid in company_config.config.get(key)]
-            ) for key in company_config.order
-            if isinstance(company_config.config.get(key), list)
-            ]
-
-        raise gen.Return((templates, bool(company_config.config.get('team'))))
 
     @gen.coroutine
     def _get_company_cms_page(self, company_id, user, team_index_url):
