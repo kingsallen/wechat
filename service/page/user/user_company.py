@@ -58,9 +58,10 @@ class UserCompanyPageService(PageService):
         # data.templates, tmp_team = yield self._get_company_template(company.id, team_index_url)
         data.templates = yield self._get_company_cms_page(company.id, user, team_index_url)
 
-        tmp_team = True
         # [hr3.4], 这段逻辑应该取消掉了, 全部来自自定义配置, 脚本要注意
+        # 暂时不删除
         # 如果没有提供team的配置，去hr_team寻找资源
+        tmp_team = True
         if not tmp_team:
             team_order = company_config.order.index('team')
             # 区分母公司、子公司对待，获取所有团队team
@@ -80,7 +81,7 @@ class UserCompanyPageService(PageService):
 
         data.template_total = len(data.templates)
 
-        teamname_custom = yield self.hr_company_conf_ds.get_company_teamname_custom(user.company.id)
+        teamname_custom = user.company.conf_teamname_custom
         data.bottombar = teamname_custom
 
         raise gen.Return(data)

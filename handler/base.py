@@ -339,7 +339,7 @@ class BaseHandler(MetaBaseHandler):
         body = to_str(self.request.body)
 
         if (headers.get('Content-Type') and
-            'application/json' in headers.get('Content-Type') and body):
+                    'application/json' in headers.get('Content-Type') and body):
             json_args = ujson.loads(body)
 
         return json_args
@@ -444,8 +444,6 @@ class BaseHandler(MetaBaseHandler):
         else:
             company.update({'theme': None})
 
-
-
         raise gen.Return(company)
 
     @gen.coroutine
@@ -501,7 +499,7 @@ class BaseHandler(MetaBaseHandler):
 
         if need_oauth and self.in_wechat:
             if (self._unionid and self._wxuser and self._authable() or
-                self._unionid and not self._authable()):
+                        self._unionid and not self._authable()):
                 # 服务号，有 unionid， 且存在 wxuser，或者
                 # 订阅号，只需 unionid 存在
                 # 即可进入 _build_session 方法
@@ -585,7 +583,8 @@ class BaseHandler(MetaBaseHandler):
 
         key_qx = const.SESSION_USER.format(session_id, self.settings['qx_wechat_id'])
         self.redis.set(key_qx, ObjectDict(qxuser=session.qxuser), 60 * 60 * 24 * 30)
-        self.logger.debug("refresh qx session redis key: {} session: {}".format(key_qx, ObjectDict(qxuser=session.qxuser)))
+        self.logger.debug(
+            "refresh qx session redis key: {} session: {}".format(key_qx, ObjectDict(qxuser=session.qxuser)))
 
     @gen.coroutine
     def _add_company_info_to_session(self, session, called_by=None):
@@ -782,7 +781,7 @@ class BaseHandler(MetaBaseHandler):
                 template_string = self.render_string(template_name,
                                                      render_json=render_json)
                 post_url = urllib.parse.urljoin(self.settings.get('remote_debug_ip'),
-                                   template_name)
+                                                template_name)
                 http_client = tornado.httpclient.HTTPClient()
                 r = http_client.fetch(post_url, method="POST",
                                       body=template_string)

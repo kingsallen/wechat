@@ -66,7 +66,7 @@ class TeamPageService(PageService):
             all_members_dict.get('all_head_img_list'))
 
         # 拼装模板数据
-        teamname_custom = yield self._get_teamname_custom(parent_company.id)
+        teamname_custom = parent_company.conf_teamname_custom
         data.bottombar = teamname_custom
         data.header = temp_data_tool.make_header(company, team_index=True, **teamname_custom)
         # 解析生成团队列表页中每个团队信息子模块
@@ -138,7 +138,7 @@ class TeamPageService(PageService):
         res_dict = yield self.hr_resource_ds.get_resource_by_ids(res_id_list)
 
         # 拼装模板数据
-        teamname_custom = yield self._get_teamname_custom(user.company.id)
+        teamname_custom = user.company.conf_teamname_custom
         data.bottombar = teamname_custom
         data.header = temp_data_tool.make_header(company, True, team)
         data.relation = ObjectDict({
@@ -259,7 +259,3 @@ class TeamPageService(PageService):
 
         raise gen.Return(teams)
 
-    @gen.coroutine
-    def _get_teamname_custom(self, company_id):
-        teamname_custom = yield self.hr_company_conf_ds.get_company_teamname_custom(company_id)
-        return teamname_custom

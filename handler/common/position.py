@@ -78,7 +78,7 @@ class PositionHandler(BaseHandler, NewJDStatusCheckerRedirect):
             recomment_positions_res = yield self.position_ps.get_recommend_positions(position_id)
 
             # 获取公司配置信息
-            teamname_custom = yield self.company_ps.get_company_teamname_custom(self.current_user.company.id)
+            teamname_custom = self.current_user.company.conf_teamname_custom
 
             header = self._make_json_header(
                 position_info, company_info, star, application, endorse,
