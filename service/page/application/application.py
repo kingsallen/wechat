@@ -172,6 +172,9 @@ class ApplicationPageService(PageService):
 
     def _check_profile_fields(self, profile, field_name, user, mapping):
         self.logger.debug("field_name: %s" % field_name)
+        self.logger.debug("mapping: %s" % mapping)
+        self.logger.debug("user: %s" % user)
+        self.logger.debug("profile: %s" % profile)
 
         if mapping.startswith("user_user"):
             sysuser_id = profile.get("profile", {}).get("user_id", None)
