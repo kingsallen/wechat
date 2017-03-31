@@ -226,7 +226,11 @@ class RedpacketPageService(PageService):
                 self.logger.debug("[RP]红包锁释放成功， rplock_key: %s" % rplock_key)
         else:
             self.logger.debug("[RP]触发红包锁，该红包逻辑正在处理中， rplock_key: %s" % rplock_key)
-            self.logger.debug("[RP]员工认证红包发送成功")
+
+        yield self.user_employee_ds.update_employee(
+            conds={'id': employee.id}, fields={'is_rp_sent': const.YES}
+        )
+        self.logger.debug("[RP]员工认证红包发送成功")
 
     @gen.coroutine
     def handle_red_packet_position_related(self,
