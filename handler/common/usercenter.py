@@ -50,7 +50,7 @@ class UsercenterHandler(BaseHandler):
         bind_status, _ = yield self.employee_ps.get_employee_info(
             self.current_user.sysuser.id, self.current_user.company.id)
 
-        fe_bind_status = self.employee.convert_bind_status_from_thrift_to_fe(
+        fe_bind_status = self.employee_ps.convert_bind_status_from_thrift_to_fe(
             bind_status)
 
         self.send_json_success(data=ObjectDict(
