@@ -7,6 +7,7 @@ from service.page.base import PageService
 from util.common import ObjectDict
 from util.tool.url_tool import make_static_url
 from util.tool.dict_tool import sub_dict
+import conf.fe as fe
 
 from thrift_gen.gen.employee.struct.ttypes import BindingParams, BindStatus
 
@@ -36,6 +37,22 @@ class EmployeePageService(PageService):
         employee_response = yield self.thrift_employee_ds.get_employee(
             user_id, company_id)
         return employee_response.bindStatus, employee_response.employee
+
+    @staticmethod
+    def convert_bind_status_from_thrift_to_fe(thrift_bind_status):
+        """convert bind status value to FE format"""
+        fe_bind_status = fe.FE_EMPLOYEE_BIND_STATUS_DEFAULT_INVALID
+
+        if thrift_bind_status == BindStatus.BINDED:
+            fe_bind_status = fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS
+        elif thrift_bind_status == BindStatus.UNBIND:
+            fe_bind_status = fe.FE_EMPLOYEE_BIND_STATUS_UNBINDED
+        elif thrift_bind_status == BindStatus.PENDING:
+            fe_bind_status = fe.FE_EMPLOYEE_BIND_STATUS_PENDING
+        else:
+            assert False  # should not be here
+
+        return fe_bind_status
 
     @gen.coroutine
     def get_employee_bind_status(self, user_id, company_id):

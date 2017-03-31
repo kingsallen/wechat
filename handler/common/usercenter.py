@@ -5,6 +5,7 @@ from handler.base import BaseHandler
 
 import conf.common as const
 import conf.message as msg
+from thrift_gen.gen.employee.struct.ttypes import BindStatus
 from util.common.decorator import handle_response, verified_mobile_oneself, authenticated
 from util.tool.str_tool import email_validate, is_alphabet, is_chinese, password_crypt, password_validate
 from util.image.upload import QiniuUpload
@@ -37,9 +38,6 @@ class UsercenterHandler(BaseHandler):
         # 手动指定 event
         self._event = self._event + "home"
 
-        employee = yield self.user_ps.get_valid_employee_by_user_id(
-            self.current_user.sysuser.id, self.current_user.company.id)
-
         # 查询该公司是否开启了员工认证
         employee_cert_conf = yield self.user_ps.get_employee_cert_conf(
             self.current_user.company.id)
@@ -48,14 +46,22 @@ class UsercenterHandler(BaseHandler):
         else:
             res = yield self.usercenter_ps.get_user(self.current_user.sysuser.id)
 
+        # 检查员工绑定状态
+        bind_status, _ = yield self.employee_ps.get_employee_info(
+            self.current_user.sysuser.id, self.current_user.company.id)
+
+        fe_bind_status = self.employee.convert_bind_status_from_thrift_to_fe(
+            bind_status)
+
         self.send_json_success(data=ObjectDict(
             headimg=self.static_url(res.data.headimg or const.SYSUSER_HEADIMG),
             name=res.data.name or res.data.nickname,
             email=res.data.email,
             mobile=res.data.mobile,
-            bind_disable=employee_cert_conf.disable == const.OLD_NO,  # 该公司是否启用了认证
-            bind_status=int(employee.activation) if employee else 1,
-            has_password=True if res.data.password else False,
+            # 该公司是否启用了认证
+            bind_disable=employee_cert_conf.disable == const.OLD_NO,
+            bind_status=fe_bind_status,
+            has_password=bool(res.data.password)
         ))
 
     @handle_response
