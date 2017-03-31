@@ -75,21 +75,26 @@ class EmployeeUnbindHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def post(self):
-        if self.current_user.employee:
+        infra_bind_status = yield self.employee_ps.get_employee_bind_status(
+            self.current_user.sysuser.id,
+            self.current_user.company.id
+        )
+        fe_bind_status = self.employee_ps.convert_bind_status_from_thrift_to_fe(infra_bind_status)
+
+        if fe_bind_status == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS:
             result, message = yield self.employee_ps.unbind(
                 self.current_user.employee.id,
                 self.current_user.company.id,
                 self.current_user.sysuser.id
             )
-            self.logger.debug('*' * 80)
             self.logger.debug('unbind result: %s' % result)
-            self.logger.debug('*' * 80)
+            self.logger.debug('unbind message: %s' % message)
             if result:
                 self.send_json_success()
             else:
                 self.send_json_error(message)
         else:
-            self.send_json_error('unbind error')
+            self.send_json_error('not binded')
 
 
 class EmployeeBindHandler(BaseHandler):
