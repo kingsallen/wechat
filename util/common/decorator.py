@@ -164,7 +164,11 @@ def check_and_apply_profile(func):
     @functools.wraps(func)
     @gen.coroutine
     def wrapper(self, *args, **kwargs):
+        print (8888888899999999999)
+        print (self.current_user)
+        print (self.current_user.sysuser)
         user_id = self.current_user.sysuser.id
+        print (user_id)
         has_profile, profile = yield self.profile_ps.has_profile(user_id)
         if has_profile:
             self.current_user['profile'] = profile
@@ -206,6 +210,10 @@ def check_and_apply_profile(func):
                         sub_dict(self.params, ['pid', 'wechat_signature'])))
             else:
                 pass
+
+            print (999999999999)
+            print (self.current_user)
+            print (self.current_user.sysuser.id)
 
             # ========== LINKEDIN OAUTH ==============
             # 拼装 linkedin oauth 路由
@@ -273,8 +281,7 @@ def authenticated(func):
     @functools.wraps(func)
     @gen.coroutine
     def wrapper(self, *args, **kwargs):
-
-        if self.current_user.sysuser and self.in_wechat:
+        if self.current_user.sysuser.id and self.in_wechat:
             if self._authable(self.current_user.wechat.type) and not self.current_user.wxuser \
                 and self.request.method in ("GET", "HEAD") \
                 and not self.request.uri.startswith("/m/api/"):
@@ -286,7 +293,7 @@ def authenticated(func):
                 self.redirect(url)
                 return
 
-        elif not self.current_user.sysuser:
+        elif not self.current_user.sysuser.id:
             if self.request.method in ("GET", "HEAD"):
                 redirect_url = make_url(path.USER_LOGIN, self.params, escape=['next_url'])
                 redirect_url += "&" + urlencode(

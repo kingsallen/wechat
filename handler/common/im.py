@@ -159,8 +159,8 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
         message_body = json_dumps(ObjectDict(
             content = message.get("content"),
             speaker = 0,
-            cid = self.room_id,
-            pid = self.position_id,
+            cid = int(self.room_id),
+            pid = int(self.position_id),
             create_time = curr_now_minute()
         ))
         self.redis_client.publish(self.hr_channel, message_body)

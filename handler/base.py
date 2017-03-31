@@ -514,7 +514,8 @@ class BaseHandler(MetaBaseHandler):
         sysuser = yield self.user_ps.get_user_user({
             "id": user_id
         })
-        sysuser.headimg = self.static_url(sysuser.headimg or const.SYSUSER_HEADIMG)
+        if sysuser:
+            sysuser.headimg = self.static_url(sysuser.headimg or const.SYSUSER_HEADIMG)
         session.sysuser = sysuser
 
     def _add_jsapi_to_wechat(self, wechat):

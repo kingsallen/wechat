@@ -116,6 +116,8 @@ def _async_http_get(route, jdata=None, timeout=5, method='GET', infra=True):
     else:
         url = url_concat(route, jdata)
 
+    print (url)
+
     http_client = tornado.httpclient.AsyncHTTPClient()
     response = yield http_client.fetch(
         url,

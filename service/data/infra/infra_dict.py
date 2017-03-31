@@ -58,13 +58,6 @@ class InfraDictDataService(DataService):
         ret = collections.OrderedDict(sorted(ret.items()))
         return ret
 
-    @cache(ttl=60*60*5)
-    @gen.coroutine
-    def get_colleges(self):
-        """获取学校列表"""
-        response = yield http_get(path.DICT_COLLEGE, {})
-        return self.make_college_list_result(response)
-
     @staticmethod
     def make_college_list_result(http_response):
         res_data = http_response.data
@@ -77,14 +70,21 @@ class InfraDictDataService(DataService):
                     collegecode_list.append(pair)
         return collegecode_list
 
-    @cache(ttl=60*60*5)
     @gen.coroutine
     def get_college_code_by_name(self, school_name):
         """根据学校名称返回学校 code"""
+
         if school_name is None or not isinstance(school_name, str):
             raise ValueError('invalid school_name')
         colleges = yield self.get_colleges()
         return self.get_code_by_name_from(colleges, school_name)
+
+    @cache(ttl=60*60*5)
+    @gen.coroutine
+    def get_colleges(self):
+        """获取学校列表"""
+        response = yield http_get(path.DICT_COLLEGE)
+        return self.make_college_list_result(response)
 
     @staticmethod
     def get_code_by_name_from(colleges, school_name):
@@ -95,7 +95,6 @@ class InfraDictDataService(DataService):
             code = 0
         return code
 
-    @cache(ttl=60*60*5)
     @gen.coroutine
     def _get_level_1_cities(self):
         """获取一级城市列表"""
@@ -109,7 +108,6 @@ class InfraDictDataService(DataService):
             filter(lambda x: x.get('code') in self._LEVEL1_CITY_CODES,
                    res_data))
 
-    @cache(ttl=60*60*5)
     @gen.coroutine
     def _get_level_2_cities(self):
         """获取二级城市列表"""

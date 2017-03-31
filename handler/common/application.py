@@ -13,6 +13,7 @@ class ApplicationHandler(BaseHandler):
 
     @handle_response
     @check_and_apply_profile
+    @authenticated
     @gen.coroutine
     def get(self):
 

@@ -140,8 +140,8 @@ class ProfileNewHandler(BaseHandler):
 class ProfilePreviewHandler(BaseHandler):
 
     @handle_response
-    @authenticated
     @check_and_apply_profile
+    @authenticated
     @tornado.gen.coroutine
     def get(self):
         if not self.params.pid:
@@ -375,16 +375,16 @@ class ProfileSectionHandler(BaseHandler):
     """
 
     @handle_response
-    @authenticated
     @check_and_apply_profile
+    @authenticated
     @tornado.gen.coroutine
     def get(self):
         # 根据 route 跳转到不同的子方法
         yield getattr(self, "get_" + self.params.route)()
 
     @handle_response
-    @authenticated
     @check_and_apply_profile
+    @authenticated
     @tornado.gen.coroutine
     def post(self):
         # 根据 route 跳转到不同的子方法
