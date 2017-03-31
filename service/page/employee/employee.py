@@ -1,15 +1,16 @@
 # coding=utf-8
 
 from tornado import gen
+
 import conf.common as const
+import conf.fe as fe
 from conf.common import NO
 from service.page.base import PageService
-from util.common import ObjectDict
-from util.tool.url_tool import make_static_url
-from util.tool.dict_tool import sub_dict
-import conf.fe as fe
-
 from thrift_gen.gen.employee.struct.ttypes import BindingParams, BindStatus
+from util.common import ObjectDict
+from util.tool.dict_tool import sub_dict
+from util.tool.url_tool import make_static_url
+
 
 class EmployeePageService(PageService):
 
@@ -252,7 +253,7 @@ class EmployeePageService(PageService):
         """
         推荐历史记录
         :param user_id:
-        :param type: 数据类型 1表示浏览人数，2表示浏览人数中感兴趣的人数，3表示浏览人数中投递的人数
+        :param req_type: 数据类型 1表示浏览人数，2表示浏览人数中感兴趣的人数，3表示浏览人数中投递的人数
         :param page_no:
         :param page_size:
         :return:

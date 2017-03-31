@@ -170,9 +170,15 @@ class RedpacketPageService(PageService):
             return
 
         # 校验员工信息
-        employee_response = yield self.infra_employee_ds.getEmployee(user_id, company_id)
-        if (employee_response.bindStatus != BindStatus.BINDED or
-                employee_response.employee.isRpSent):
+        employee = yield self.user_employee_ds.get_employee({
+            'sysuser_id': user_id,
+            'company_id': company_id,
+            'activation': const.OLD_YES,
+            'status':     const.OLD_YES,
+            'disable':    const.OLD_YES,
+            'is_rp_sent': const.NO
+        })
+        if not employee:
             self.logger.debug('[RP]员工绑定状态不正确或红包已经发送过, user_id: %s, company_id: %s' % (user_id, company_id))
             return
 

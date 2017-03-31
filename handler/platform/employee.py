@@ -132,8 +132,8 @@ class EmployeeBindHandler(BaseHandler):
 
         if fe_bind_status == fe.FE_EMPLOYEE_BIND_STATUS_UNBINDED:
             result, message = yield self.employee_ps.bind(binding_params)
-            self.logger.debug(result)
-            self.logger.debug(message)
+            self.logger.debug("bind_result: %s" %result)
+            self.logger.debug("bind_message: %s" %message)
             if result:
                 self.send_json_success(message=message)
                 self.finish()
