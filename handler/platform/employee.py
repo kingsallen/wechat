@@ -4,6 +4,7 @@ from tornado import gen
 
 import conf.path as path
 import conf.common as const
+import conf.fe as fe
 from handler.base import BaseHandler
 from util.common import ObjectDict
 from util.common.decorator import handle_response, authenticated
@@ -123,7 +124,13 @@ class EmployeeBindHandler(BaseHandler):
             self.json_args)
         self.logger.debug(binding_params)
 
-        if not self.current_user.employee:
+        thrift_bind_status = yield self.employee_ps.get_employee_bind_status(
+            self.current_user.sysuser.id,
+            self.current_user.company.id
+        )
+        fe_bind_status = self.employee_ps.convert_bind_status_from_thrift_to_fe(thrift_bind_status)
+
+        if fe_bind_status == fe.FE_EMPLOYEE_BIND_STATUS_UNBINDED:
             result, message = yield self.employee_ps.bind(binding_params)
             self.logger.debug(result)
             self.logger.debug(message)
@@ -140,7 +147,7 @@ class EmployeeBindHandler(BaseHandler):
             else:
                 self.send_json_error(message=message)
         else:
-            self.send_json_error(message='binded')
+            self.send_json_error(message='binded or pending')
 
 
 class EmployeeBindEmailHandler(BaseHandler):
