@@ -88,6 +88,8 @@ class ProfileNewHandler(BaseHandler):
             self.send_json_error()
             return
 
+        self.logger.debug("[profile post]profile:{}".format(profile))
+
         result, data = yield self.profile_ps.create_profile_basic(profile, profile_id)
         if result:
             basic_info_ok = True
@@ -95,7 +97,11 @@ class ProfileNewHandler(BaseHandler):
         else:
             self.logger.error("profile_basic creation failed. res: %s" % data)
 
+        self.logger.debug("[profile post]create_profile_basic result:{}".format(result))
+        self.logger.debug("[profile post]create_profile_basic data:{}".format(data))
+
         for edu in profile.education:
+            self.logger.debug("[profile post]profile.education edu:{}".format(edu))
             result, data = yield self.profile_ps.create_profile_education(ObjectDict(edu), profile_id)
             if result:
                 self.logger.debug(
@@ -105,7 +111,11 @@ class ProfileNewHandler(BaseHandler):
                 self.logger.error("profile_education creation failed. res: %s" % data)
                 break
 
+        self.logger.debug("[profile post]create_profile_education result:{}".format(result))
+        self.logger.debug("[profile post]create_profile_education data:{}".format(data))
+
         for wxp in profile.workexp:
+            self.logger.debug("[profile post]profile.workexp wxp:{}".format(wxp))
             result, data = yield self.profile_ps.create_profile_workexp(ObjectDict(wxp), profile_id)
             if result:
                 self.logger.debug("profile_work_exp creation passed. New record num: %s" % data)
@@ -113,6 +123,9 @@ class ProfileNewHandler(BaseHandler):
                 workexp_ok = False
                 self.logger.error("profile_work_exp creation failed. res: %s" % data)
                 break
+
+        self.logger.debug("[profile post]create_profile_workexp result:{}".format(result))
+        self.logger.debug("[profile post]create_profile_workexp data:{}".format(data))
 
         if profile_ok and basic_info_ok and education_ok and workexp_ok:
             # is_apply = '1' if self.get_cookie('dq_pid') else '0'
