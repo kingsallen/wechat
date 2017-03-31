@@ -116,21 +116,16 @@ class EmployeePageService(PageService):
         else:
             # 否则，调用基础服务判断当前用户的认证状态：没有认证还是 pending 中
             data.employeeid = NO
-
-            bind_status = yield self.get_employee_bind_status(
-                current_user.sysuser.id, current_user.company.id)
-
             if bind_status == const.EMPLOYEE_BIND_STATUS_UNBINDING:
                 data.binding_status = self.FE_BIND_STATUS_UNBINDING
-
             elif bind_status == const.EMPLOYEE_BIND_STATUS_EMAIL_PENDING:
                 data.binding_status = self.FE_BIND_STATUS_NEED_VALIDATE
-
             else:
                 data.binding_status = self.FE_BIND_STATUS_FAILURE
 
         data.conf = ObjectDict()
         data.binding_success_message = conf.bindSuccessMessage or ''
+
         if conf.authMode == const.EMPLOYEE_BIND_AUTH_MODE.DISABLE:
             data.type = 'disabled'
             return data
@@ -140,9 +135,9 @@ class EmployeePageService(PageService):
                              const.EMPLOYEE_BIND_AUTH_MODE.EMAIL_OR_QUESTION]:
             data.type = self.FE_BIND_TYPE_EMAIL
             data.conf.email_suffixs = conf.emailSuffix
-            if current_user.employee:
-                data.conf.email_name = current_user.employee.email.split('@')[0]
-                data.conf.email_suffix = current_user.employee.email.split('@')[1]
+            if bind_status in [BindStatus.BINDED, BindStatus.PENDING]:
+                data.conf.email_name = employee.email.split('@')[0]
+                data.conf.email_suffix = employee.email.split('@')[1]
             else:
                 data.conf.email_name = ''
                 data.conf.email_suffix = data.conf.email_suffixs[0] if len(
