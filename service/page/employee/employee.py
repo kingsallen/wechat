@@ -92,7 +92,7 @@ class EmployeePageService(PageService):
                 'email_suffixs': ['qq.com', 'foxmail.com'],
                 'email_name':    'tovvry',
                 'email_suffix':  'qq.com',
-                'questions':     [ {'q': "你的姓名是什么", 'a': 'b', 'id': 1}, {'q': "你的弟弟的姓名是什么", 'a': 'a', 'id': 2} ],
+                'questions':     [ {'q': "你的姓名是什么", 'a':''}, {'q': "你的弟弟的姓名是什么", 'a': ''} ],
                 # // null, question, or email
                 'switch':        'email',
             }
@@ -130,6 +130,13 @@ class EmployeePageService(PageService):
             data.type = 'disabled'
             return data
 
+        def _make_custom_conf():
+            data.conf.custom_hint = conf.customHint
+            data.conf.custom_value = ''
+
+        def _make_questions_conf():
+            data.conf.questions = [sub_dict(e, 'q') for e in conf.questions]
+
         if conf.authMode in [const.EMPLOYEE_BIND_AUTH_MODE.EMAIL,
                              const.EMPLOYEE_BIND_AUTH_MODE.EMAIL_OR_CUSTOM,
                              const.EMPLOYEE_BIND_AUTH_MODE.EMAIL_OR_QUESTION]:
@@ -145,21 +152,19 @@ class EmployeePageService(PageService):
 
             if conf.authMode == const.EMPLOYEE_BIND_AUTH_MODE.EMAIL_OR_CUSTOM:
                 data.conf.switch = self.FE_BIND_TYPE_CUSTOM
-                data.conf.custom_hint = conf.customHint
-                data.conf.custom_value = ''
+                _make_custom_conf()
 
             if conf.authMode == const.EMPLOYEE_BIND_AUTH_MODE.EMAIL_OR_QUESTION:
                 data.conf.switch = self.FE_BIND_TYPE_QUESTION
-                data.conf.questions = conf.questions
+                _make_questions_conf()
 
         elif conf.authMode == const.EMPLOYEE_BIND_AUTH_MODE.CUSTOM:
             data.type = self.FE_BIND_TYPE_CUSTOM
-            data.conf.custom_hint = conf.customHint
-            data.conf.custom_value = ''
+            _make_custom_conf()
 
         elif conf.authMode == const.EMPLOYEE_BIND_AUTH_MODE.QUESTION:
             data.type = self.FE_BIND_TYPE_QUESTION
-            data.conf.questions = conf.questions
+            _make_questions_conf()
 
         else:
             raise ValueError('invalid authMode')
