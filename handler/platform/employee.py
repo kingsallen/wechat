@@ -161,12 +161,7 @@ class EmployeeBindEmailHandler(BaseHandler):
                     **tparams)
 
         # 处理员工认证红包开始
-        employee = yield self.user_employee_ds.get_employee({
-            'activation_code': activation_code,
-            'activation':      const.OLD_YES,
-            'disable':         const.OLD_YES,
-            'status':          const.OLD_YES
-        })
+        employee = yield self.employee_ps.get_valid_employee_record_by_activation_code(activation_code)
 
         if result and employee:
             yield self.redpacket_ps.handle_red_packet_employee_verification(

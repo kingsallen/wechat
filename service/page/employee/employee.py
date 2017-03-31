@@ -32,6 +32,18 @@ class EmployeePageService(PageService):
         super().__init__()
 
     @gen.coroutine
+    def get_valid_employee_record_by_activation_code(self, code):
+        """通过新微信 DAO 来判断 activation code 对应的员工是否已经成功绑定
+        用于email员工绑定点击链接后"""
+        record = yield self.user_employee_ds.get_employee({
+            'activation_code': code,
+            'activation':      const.OLD_YES,
+            'disable':         const.OLD_YES,
+            'status':          const.OLD_YES
+        })
+        return record
+
+    @gen.coroutine
     def get_employee_info(self, user_id, company_id):
         """获取员工信息"""
         employee_response = yield self.thrift_employee_ds.get_employee(

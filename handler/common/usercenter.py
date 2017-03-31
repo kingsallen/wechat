@@ -47,8 +47,10 @@ class UsercenterHandler(BaseHandler):
             res = yield self.usercenter_ps.get_user(self.current_user.sysuser.id)
 
         # 检查员工绑定状态
-        bind_status, _ = yield self.employee_ps.get_employee_info(
-            self.current_user.sysuser.id, self.current_user.company.id)
+        bind_status = yield self.employee_ps.get_employee_bind_status(
+            self.current_user.sysuser.id,
+            self.current_user.company.id
+        )
 
         fe_bind_status = self.employee_ps.convert_bind_status_from_thrift_to_fe(
             bind_status)
