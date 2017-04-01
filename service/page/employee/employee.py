@@ -325,7 +325,7 @@ class EmployeePageService(PageService):
         :return:
         """
 
-        ret = yield self.hr_employee_custom_fields_ds.update_employee_custom_fields(
+        ret = yield self.user_employee_ds.update_employee(
             conds={ 'id': employee_id },
             fields={'custom_field_values': custom_fields_json}
         )

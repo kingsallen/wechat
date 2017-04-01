@@ -11,6 +11,7 @@ from util.common import ObjectDict
 from util.common.decorator import handle_response, authenticated
 from util.tool.url_tool import make_url
 from util.tool.json_tool import json_dumps
+from util.tool.str_tool import to_str
 
 
 class AwardsHandler(BaseHandler):
@@ -298,7 +299,9 @@ class CustomInfoHandler(BaseHandler):
             if k.startswith("key_"):
                 escape.append(k)
                 confid = int(k[4:])
-                keys.append({confid: v})
+                keys.append({confid: [to_str(v[0])]})
+
+        self.logger.debug("keys: %s" % keys)
         custom_fields = json_dumps(keys)
 
         yield self.employee_ps.update_employee_custom_fields(employee.id, custom_fields)
