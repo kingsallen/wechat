@@ -8,7 +8,7 @@ class HrEmployeeCustomFieldsDao(BaseDao):
 
     def __init__(self):
         super(HrEmployeeCustomFieldsDao, self).__init__()
-        self.table = "hr_employee_cert_conf"
+        self.table = "hr_employee_custom_fields"
         self.fields_map = {
             "id":          self.constant.TYPE_INT,
             "company_id":  self.constant.TYPE_INT,
