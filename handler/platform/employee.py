@@ -258,7 +258,7 @@ class CustomInfoHandler(BaseHandler):
         else:
             pass
 
-        selects = yield self.get_employee_custom_fields(
+        selects = yield self.employee_ps.get_employee_custom_fields(
             self.current_user.company.id)
 
         data = ObjectDict(

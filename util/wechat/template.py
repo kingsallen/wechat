@@ -137,7 +137,7 @@ def employee_refine_custom_fields_tpl(wechat_id, openid, link, company_name,
     )
     ret = yield messager.send_template(
         wechat_id, openid, sys_template_id, link, json_data,
-        qx_retry=True, send_switch=send_switch)
+        qx_retry=True, platform_switch=send_switch)
 
     raise gen.Return(ret)
 

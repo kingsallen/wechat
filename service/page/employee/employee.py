@@ -12,7 +12,7 @@ from util.common import ObjectDict
 from util.tool.dict_tool import sub_dict
 from util.tool.url_tool import make_static_url, make_url
 from util.wechat.template import employee_refine_custom_fields_tpl
-
+from setting import settings
 
 
 class EmployeePageService(PageService):
@@ -332,6 +332,7 @@ class EmployeePageService(PageService):
     @gen.coroutine
     def send_emp_custom_info_template(self, current_user):
         link = make_url(path.EMPLOYEE_CUSTOMINFO,
+                        host=settings['platform_host'],
                         wechat_signature=current_user.wechat.signature,
                         from_wx_template='o')
         yield employee_refine_custom_fields_tpl(
