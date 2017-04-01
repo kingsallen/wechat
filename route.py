@@ -107,6 +107,8 @@ platform_routes = [
     (r"/m/profile/preview[\/]?",                       handler.platform.profile.ProfilePreviewHandler,            {"event": "profile_preview"}),
     (r"/m/profile/custom[\/]?",                        handler.platform.profile.ProfileCustomHandler,             {"event": "profile_customcv"}),
     (r"/m/employee/bindemail[\/]?",                    handler.platform.employee.EmployeeBindEmailHandler,        {"event": "employee_bindemail"}),
+    (r"/m/employee/custominfo[\/?",                    handler.platform.employee.CustomInfoHandler,               {"event": "employee_custominfo"}),
+    (r"/m/employee/binded[\/]?",                       handler.platform.employee.BindedHandler,                   {"event": "employee_binded"}),
     # 各大公司的自定义配置
     (r"/m/custom/emailapply",                          handler.platform.customize.CustomizeEmailApplyHandler,     {"event": "customize_emailapply"}),
     (r"/m/api/company/visitreq",                       handler.platform.companyrelation.CompanyVisitReqHandler,   {"event": "company_visitreq"}),

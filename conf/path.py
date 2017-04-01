@@ -17,16 +17,19 @@ APPLICATION = '/m/application'
 APPLICATION_EMAIL = '/m/application/email'
 COLLECT_USERINFO = '/m/app/asist/collect_userinfo/positionfav'
 USER_CENTER = '/m/app/usercenter'
+USERCENTER_APPLYRECORD = '/m/app/usercenter/applyrecords/{}'
+
 MOBILE_VERIFY = '/m/app/validate_mobile'
+
 EMPLOYEE_VERIFY = '/m/app/employee/binding'
 EMPLOYEE_RECOMMENDS = '/m/app/employee/recommends'
-USERCENTER_APPLYRECORD = '/m/app/usercenter/applyrecords/{}'
+EMPLOYEE_CUSTOMINFO = '/m/employee/custominfo'
+EMPLOYEE_BINDED = '/m/employee/binded'
 
 PROFILE_VIEW = '/m/profile'
 PROFILE_PREVIEW = '/m/profile/preview'
 PROFILE_NEW = '/m/app/profile/new'
 PROFILE_CUSTOM_CV = '/m/profile/custom'
-
 
 
 # ============================ 基础服务开始 ============================

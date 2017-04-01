@@ -5,11 +5,14 @@ from tornado import gen
 import conf.common as const
 import conf.fe as fe
 from conf.common import NO
+import conf.path as path
 from service.page.base import PageService
 from thrift_gen.gen.employee.struct.ttypes import BindingParams, BindStatus
 from util.common import ObjectDict
 from util.tool.dict_tool import sub_dict
-from util.tool.url_tool import make_static_url
+from util.tool.url_tool import make_static_url, make_url
+from util.wechat.template import employee_refine_custom_fields_tpl
+
 
 
 class EmployeePageService(PageService):
@@ -292,3 +295,51 @@ class EmployeePageService(PageService):
         })
 
         raise gen.Return(res)
+
+    @gen.coroutine
+    def get_employee_custom_fields(self, company_id):
+        """
+        根据公司 id 返回员工认证自定义字段配置 -> list
+        并按照 forder 字段排序返回
+        """
+        selects_from_ds = yield self.hr_employee_custom_fields_ds.\
+            get_employee_custom_field_records({
+                "company_id": company_id,
+                "status": const.OLD_YES,
+                "disable": const.NO
+            })
+
+        selects = sorted(selects_from_ds, key=lambda x: x.forder)
+
+        return selects
+
+    @gen.coroutine
+    def update_employee_custom_fields(self, employee_id, custom_fields_json):
+        """
+        更新员工记录 custom_fields
+        :param employee_id:
+        :param custom_fields_json:
+        :return:
+        """
+
+        ret = yield self.hr_employee_custom_fields_ds.update_employee_custom_fields(
+            conds={ 'id': employee_id },
+            fields={'custom_field_values': custom_fields_json}
+        )
+
+        return ret
+
+    @gen.coroutine
+    def send_emp_custom_info_template(self, current_user):
+        link = make_url(path.EMPLOYEE_CUSTOMINFO,
+                        wechat_signature=current_user.wechat.signature,
+                        from_wx_template='o')
+        yield employee_refine_custom_fields_tpl(
+            wechat_id=current_user.wechat.id,
+            openid=current_user.wxuser.openid,
+            link=link,
+            company_name=current_user.company.name
+        )
+
+
+

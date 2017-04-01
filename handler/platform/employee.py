@@ -5,9 +5,12 @@ from tornado import gen
 import conf.path as path
 import conf.common as const
 import conf.fe as fe
+import conf.message as messages
 from handler.base import BaseHandler
 from util.common import ObjectDict
 from util.common.decorator import handle_response, authenticated
+from util.tool.url_tool import make_url
+from util.tool.json_tool import json_dumps
 
 
 class AwardsHandler(BaseHandler):
@@ -134,26 +137,53 @@ class EmployeeBindHandler(BaseHandler):
             self.current_user.sysuser.id,
             self.current_user.company.id
         )
-        fe_bind_status = self.employee_ps.convert_bind_status_from_thrift_to_fe(thrift_bind_status)
 
-        if fe_bind_status == fe.FE_EMPLOYEE_BIND_STATUS_UNBINDED:
-            result, message = yield self.employee_ps.bind(binding_params)
-            self.logger.debug("bind_result: %s" %result)
-            self.logger.debug("bind_message: %s" %message)
-            if result:
-                self.send_json_success(message=message)
-                self.finish()
+        fe_bind_status = self.employee_ps.convert_bind_status_from_thrift_to_fe(
+            thrift_bind_status)
 
-                # 处理员工认证红包
-                yield self.redpacket_ps.handle_red_packet_employee_verification(
-                    user_id=self.current_user.sysuser.id,
-                    company_id=self.current_user.company.id,
-                    redislocker=self.redis
-                )
-            else:
-                self.send_json_error(message=message)
-        else:
+        # early return 1
+        if not fe_bind_status == fe.FE_EMPLOYEE_BIND_STATUS_UNBINDED:
             self.send_json_error(message='binded or pending')
+            return
+
+        result, result_message = yield self.employee_ps.bind(binding_params)
+        self.logger.debug("bind_result: %s" % result)
+        self.logger.debug("result_message: %s" % result_message)
+
+        # early return 2
+        if not result:
+            self.send_json_error(message=result_message)
+            return
+
+        message = result_message
+        refine_info_way = self.company_ps.emp_custom_field_refine_way(
+            self.current_user.company.id)
+
+        if refine_info_way == const.EMPLOYEE_CUSTOM_FIELD_REFINE_REDIRECT:
+            next_url = make_url(path.EMPLOYEE_CUSTOMINFO,
+                                self.params,
+                                from_wx_template='x')
+
+        elif refine_info_way == const.EMPLOYEE_CUSTOM_FIELD_REFINE_TEMPLATE_MSG:
+            yield self.employee_ps.send_emp_custom_info_template(
+                self.current_user)
+
+            next_url = make_url(path.EMPLOYEE_BINDED, self.params)
+        else:
+            assert False  # should not be here
+
+        self.send_json_success(
+            message=message,
+            data={ 'next_url': next_url }
+        )
+        self.finish()
+
+        # 处理员工认证红包
+        yield self.redpacket_ps.handle_red_packet_employee_verification(
+            user_id=self.current_user.sysuser.id,
+            company_id=self.current_user.company.id,
+            redislocker=self.redis
+        )
 
 
 class EmployeeBindEmailHandler(BaseHandler):
@@ -173,16 +203,25 @@ class EmployeeBindEmailHandler(BaseHandler):
         self.render(template_name='employee/certification-%s.html' % tname,
                     **tparams)
 
-        # 处理员工认证红包开始
+
         employee = yield self.employee_ps.get_valid_employee_record_by_activation_code(activation_code)
 
         if result and employee:
+            # 处理员工认证红包开始
             yield self.redpacket_ps.handle_red_packet_employee_verification(
                 user_id=employee.sysuser_id,
                 company_id=employee.company_id,
                 redislocker=self.redis
             )
-        # 处理员工认证红包结束
+            # 处理员工认证红包结束
+
+            # 员工认证信息填写消息模板
+            refine_info_way = self.company_ps.emp_custom_field_refine_way(
+                self.current_user.company.id)
+
+            if refine_info_way == const.EMPLOYEE_CUSTOM_FIELD_REFINE_TEMPLATE_MSG:
+                yield self.employee_ps.send_emp_custom_info_template(
+                    self.current_user)
 
 
 class RecommendrecordsHandler(BaseHandler):
@@ -198,3 +237,112 @@ class RecommendrecordsHandler(BaseHandler):
         res = yield self.employee_ps.get_recommend_records(
             self.current_user.sysuser.id, req_type, page_no, page_size)
         self.send_json_success(data=res)
+
+
+class CustomInfoHandler(BaseHandler):
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        binding_status, employee = yield self.employee_ps.get_employee_info(
+            self.current_user.sysuser.id,
+            self.current_user.company.id
+        )
+
+        # unbinded users may not need to know this page
+        if (self.employee_ps.convert_bind_status_from_thrift_to_fe(
+            binding_status) !=
+                fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS):
+            self.write_error(404)
+        else:
+            pass
+
+        selects = yield self.get_employee_custom_fields(
+            self.current_user.company.id)
+
+        data = ObjectDict(
+            selects=selects,
+            from_wx_template=self.params.from_wx_template or "x",
+            employee_id=employee.id,
+            action_url=path.EMPLOYEE_CUSTOMINFO
+        )
+
+        self.render_page(
+            template_name="employee/bind_success_info.html",
+            data=data)
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def post(self):
+        binding_status, employee = yield self.employee_ps.get_employee_info(
+            self.current_user.sysuser.id,
+            self.current_user.company.id
+        )
+        # unbinded users may not need to know this page
+        if (self.employee_ps.convert_bind_status_from_thrift_to_fe(
+            binding_status) !=
+                fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS):
+            self.write_error(404)
+        elif (str(employee.id) != self.params._employeeid or
+                not self.params._employeeid):
+            self.write_error(416)
+        else:
+            pass
+
+        # 构建跳转 make_url 的 escape
+        escape = ['headimg', 'next_url']
+        keys = []
+        for k, v in self.request.arguments.items():
+            if k.startswith("key_"):
+                escape.append(k)
+                confid = int(k[4:])
+                keys.append({confid: v})
+        custom_fields = json_dumps(keys)
+
+        yield self.employee_ps.update_employee_custom_fields(employee.id, custom_fields)
+
+        # 判断与跳转
+        self.params.pop('next_url', None)
+        self.params.pop('headimg', None)
+        next_url = make_url(path.POSITION_LIST, self.params, escape=escape)
+
+        if self.params.from_wx_template == "o":
+            message = messages.EMPLOYEE_BINDING_CUSTOM_FIELDS_DONE
+        else:
+            message = messages.EMPLOYEE_BINDING_EMAIL_DONE
+
+        self.render(
+            template_name='refer/weixin/employee/employee_binding_tip.html',
+            result=0,
+            messages=message,
+            nexturl=next_url,
+            source=1)
+        return
+
+
+class BindedHandler(BaseHandler):
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+
+        binding_status, employee = yield self.employee_ps.get_employee_info(
+            self.current_user.sysuser.id,
+            self.current_user.company.id
+        )
+        # unbinded users may not need to know this page
+        if (self.employee_ps.convert_bind_status_from_thrift_to_fe(
+            binding_status) !=
+                fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS):
+            self.write_error(404)
+
+        else:
+            self.render(
+                template_name='refer/weixin/employee/employee_binding_tip.html',
+                result=0,
+                messages=messages.EMPLOYEE_BINDING_SUCCESS,
+                nexturl=make_url(path.POSITION_LIST, self.params)
+            )

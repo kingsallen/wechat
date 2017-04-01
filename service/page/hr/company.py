@@ -10,6 +10,7 @@ from tornado import gen
 from service.page.base import PageService
 from util.tool.url_tool import make_static_url
 from util.tool.dict_tool import sub_dict
+from util.tool.str_tool import is_odd
 
 cached_company_sug_wechat = None
 
@@ -140,6 +141,19 @@ class CompanyPageService(PageService):
             "logo":         record.logo
         })
         return result, data
+
+    @staticmethod
+    def emp_custom_field_refine_way(company_id):
+        """通过companyid 奇偶判断员工认证自定义字段填写的途径
+        奇数：认证成功后直接跳转
+        偶数：认证成功后发送消息模板，点击消息模版填写
+        """
+        if is_odd(company_id):
+            return const.EMPLOYEE_CUSTOM_FIELD_REFINE_TEMPLATE_MSG
+
+        else:
+            return const.EMPLOYEE_CUSTOM_FIELD_REFINE_REDIRECT
+
 
     @gen.coroutine
     def get_cp_for_sug_wechat(self, name=None):

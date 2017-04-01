@@ -118,6 +118,27 @@ def rp_transfer_apply_success_notice_tpl(wechat_id, openid, link, nickname,
 
 
 @gen.coroutine
+def employee_refine_custom_fields_tpl(wechat_id, openid, link, company_name,
+    sys_template_id=const.TEMPLATES.REFINE_EMPLOYEE_INFO_TPL):
+    """员工认证自定义字段填写通知模版"""
+
+    d = datetime.now()
+    json_data = _make_json_data(
+        first="您已完成员工认证",
+        remark="点击填写详细信息",
+        keyword1="已认证",
+        keyword2="员工认证",
+        keyword3=company_name,
+        keyword4="{}年{}月{}日{:0>2}:{:0>2} ".format(
+            d.year, d.month, d.day, d.hour, d.minute)
+    )
+    ret = yield messager.send_template(
+        wechat_id, openid, sys_template_id, link, json_data, qx_retry=True)
+
+    raise gen.Return(ret)
+
+
+@gen.coroutine
 def position_view_five_notice_tpl(wechat_id, openid, link, title,
     salary, sys_template_id=const.TEMPLATES.POSITION_VIEWED):
     """职位浏览5次，向 HR 发送消息模板"""

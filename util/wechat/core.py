@@ -55,6 +55,7 @@ class WechatTemplateMessager(object):
         :param link: 点击跳转 url,
         :param qx_retry: 失败后是否使用 qx 再次尝试发送
         :param json_data: 填充内容
+        :platform_switch: 是否发送开关
         :return: 发送成功: const.YES, 发送失败:const.NO
         """
 
