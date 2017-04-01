@@ -13,6 +13,7 @@ from util.tool.dict_tool import sub_dict
 from util.tool.url_tool import make_static_url, make_url
 from util.wechat.template import employee_refine_custom_fields_tpl
 from setting import settings
+import json
 
 
 class EmployeePageService(PageService):
@@ -311,6 +312,8 @@ class EmployeePageService(PageService):
 
         selects = sorted(selects_from_ds, key=lambda x: x.forder)
 
+        for s in selects:
+            s.fvalues = json.loads(s.fvalues)
         return selects
 
     @gen.coroutine
@@ -336,6 +339,8 @@ class EmployeePageService(PageService):
 
         company_id = current_user.company.id
         custom_fields = yield self.get_employee_custom_fields(company_id)
+
+        self.logger.debug("custom_fields: %s" % custom_fields)
 
         if not custom_fields:
             return
