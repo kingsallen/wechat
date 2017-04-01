@@ -331,10 +331,20 @@ class EmployeePageService(PageService):
 
     @gen.coroutine
     def send_emp_custom_info_template(self, current_user):
+        """发送员工认证自定义字段填写template
+        """
+
+        company_id = current_user.company.id
+        custom_fields = yield self.get_employee_custom_fields(company_id)
+
+        if not custom_fields:
+            return
+
         link = make_url(path.EMPLOYEE_CUSTOMINFO,
                         host=settings['platform_host'],
                         wechat_signature=current_user.wechat.signature,
                         from_wx_template='o')
+
         yield employee_refine_custom_fields_tpl(
             wechat_id=current_user.wechat.id,
             openid=current_user.wxuser.openid,
