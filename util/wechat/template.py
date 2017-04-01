@@ -122,6 +122,9 @@ def employee_refine_custom_fields_tpl(wechat_id, openid, link, company_name,
     sys_template_id=const.TEMPLATES.REFINE_EMPLOYEE_INFO_TPL):
     """员工认证自定义字段填写通知模版"""
 
+    send_switch = yield messager.get_send_switch(
+        wechat_id, const.TEMPLATES_SWITCH.REFINE_EMPLOYEE_INFO_TPL)
+
     d = datetime.now()
     json_data = _make_json_data(
         first="您已完成员工认证",
@@ -133,7 +136,8 @@ def employee_refine_custom_fields_tpl(wechat_id, openid, link, company_name,
             d.year, d.month, d.day, d.hour, d.minute)
     )
     ret = yield messager.send_template(
-        wechat_id, openid, sys_template_id, link, json_data, qx_retry=True)
+        wechat_id, openid, sys_template_id, link, json_data,
+        qx_retry=True, send_switch=send_switch)
 
     raise gen.Return(ret)
 
