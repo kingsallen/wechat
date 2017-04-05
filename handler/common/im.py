@@ -2,7 +2,7 @@
 
 import ujson
 import traceback
-from tornado import gen, websocket, ioloop, web
+from tornado import gen, websocket, ioloop
 
 import conf.common as const
 import conf.message as msg

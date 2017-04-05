@@ -90,6 +90,7 @@ class WechatOauthHandler(MetaBaseHandler):
                     "[wechat_oauth]verification failed:{}".format(
                         self.msg))
         except Exception as e:
+            self.send_xml()
             self.logger.error(traceback.format_exc())
 
     @gen.coroutine
