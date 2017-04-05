@@ -27,21 +27,31 @@ class ThriftUseraccountsDataService(DataService):
         :param page_size:
         :return:
         """
+        self.logger.debug(
+            "[ThriftUseraccountsDataService] get_applied_progress user_id:{} req_type:{}, "
+            "page_no:{}, page_size:{}".format(user_id, req_type, page_no, page_size))
         ret = yield self.usercenter_service_cilent.getRecommendation(user_id, req_type, page_no, page_size)
+        self.logger.debug("[ThriftUseraccountsDataService] get_recommend_records:{}".format(ret))
         raise gen.Return(ret)
 
     @gen.coroutine
     def get_fav_positions(self, user_id):
         """获得职位收藏，调用 thrift 接口"""
 
+        self.logger.debug(
+            "[ThriftUseraccountsDataService] get_applied_progress user_id:{}".format(user_id))
         ret = yield self.usercenter_service_cilent.getFavPositions(user_id)
+        self.logger.debug("[ThriftUseraccountsDataService] get_fav_positions:{}".format(ret))
         raise gen.Return(ret)
 
     @gen.coroutine
     def get_applied_applications(self, user_id):
         """获得求职记录，调用 thrift 接口"""
 
+        self.logger.debug(
+            "[ThriftUseraccountsDataService] get_applied_progress user_id:{}".format(user_id))
         ret = yield self.usercenter_service_cilent.getApplications(user_id)
+        self.logger.debug("[ThriftUseraccountsDataService] get_applied_applications:{}".format(ret))
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -53,5 +63,7 @@ class ThriftUseraccountsDataService(DataService):
         :return:
         """
 
+        self.logger.debug("[ThriftUseraccountsDataService] get_applied_progress user_id:{} app_id:{}".format(user_id, app_id))
         ret = yield self.usercenter_service_cilent.getApplicationDetail(user_id, int(app_id))
+        self.logger.debug("[ThriftUseraccountsDataService] get_applied_progress:{}".format(ret))
         raise gen.Return(ret)

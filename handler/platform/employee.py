@@ -237,6 +237,7 @@ class RecommendrecordsHandler(BaseHandler):
         req_type = self.params.type or 1
         res = yield self.employee_ps.get_recommend_records(
             self.current_user.sysuser.id, req_type, page_no, page_size)
+        self.logger.debug("RecommendrecordsHandler:{}".format(res))
         self.send_json_success(data=res)
 
 
