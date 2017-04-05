@@ -96,6 +96,7 @@ def template2(title, data):
 
 def template2_data(resource_list):
     return [{
+                'title': resource.title,
                 'sub_title': resource.sub_title,
                 'description': resource.longtext,
                 'media_url': make_static_url(resource.media_url),
