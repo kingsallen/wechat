@@ -7,7 +7,6 @@ from util.common import ObjectDict
 from util.common.decorator import cache
 from thrift_gen.gen.chat.service.ChatService import Client as ChatServiceClient
 from service.data.infra.framework.client.client import ServiceClientFactory
-from service.data.infra.framework.common.config import CONF
 
 
 class ThriftChatDataService(DataService):
@@ -17,7 +16,7 @@ class ThriftChatDataService(DataService):
     """
 
     chat_service_cilent = ServiceClientFactory.get_service(
-        ChatServiceClient, CONF)
+        ChatServiceClient)
 
     @gen.coroutine
     def get_chatrooms_list(self, user_id, page_no, page_size):

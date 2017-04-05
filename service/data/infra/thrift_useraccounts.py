@@ -7,7 +7,6 @@ from util.common import ObjectDict
 from util.common.decorator import cache
 from thrift_gen.gen.useraccounts.service.UserCenterService import Client as UsercenterServiceClient
 from service.data.infra.framework.client.client import ServiceClientFactory
-from service.data.infra.framework.common.config import CONF
 
 
 class ThriftUseraccountsDataService(DataService):
@@ -16,7 +15,7 @@ class ThriftUseraccountsDataService(DataService):
     """
 
     usercenter_service_cilent = ServiceClientFactory.get_service(
-        UsercenterServiceClient, CONF)
+        UsercenterServiceClient)
 
     @gen.coroutine
     def get_recommend_records(self, user_id, req_type, page_no, page_size):

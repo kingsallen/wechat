@@ -11,8 +11,7 @@ from tornado import ioloop
 
 @gen.coroutine
 def testClient():
-    conf = Config("/Users/yiliangt5/moseeker/alphapy/employee_service/service.conf")
-    employee_service_cilent = ServiceClientFactory.get_service(EmployeeServiceClient, "employee", conf)
+    employee_service_cilent = ServiceClientFactory.get_service(EmployeeServiceClient, "employee")
 
     result = yield employee_service_cilent.getEmployeeRewards(1,3)
     print(result)

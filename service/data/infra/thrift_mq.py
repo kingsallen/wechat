@@ -8,7 +8,6 @@ from util.common.decorator import cache
 from thrift_gen.gen.mq.service.MqService import Client as MqServiceClient
 from thrift_gen.gen.mq.struct.ttypes import MandrillEmailStruct
 from service.data.infra.framework.client.client import ServiceClientFactory
-from service.data.infra.framework.common.config import CONF
 from util.tool.json_tool import json_dumps
 
 
@@ -18,7 +17,7 @@ class ThriftMqDataService(DataService):
     """
 
     mq_service_cilent = ServiceClientFactory.get_service(
-        MqServiceClient, CONF)
+        MqServiceClient)
 
     @gen.coroutine
     def send_sms(self, sms_type, mobile, params, isqx=False, ip=''):

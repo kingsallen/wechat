@@ -16,12 +16,13 @@ from ...framework.client.load_balancer.loadbalancer import RoundRobinStrategy
 from ...framework.common.zookeeper_manager import ZkManager
 from ...framework.common import utils
 
+from setting import settings
 
 class ServiceClientFactory(object):
     @staticmethod
-    def get_service(service_client_cls, conf):
+    def get_service(service_client_cls):
         service_name = utils.get_module_name(service_client_cls).lower()
-        return ServiceClient(service_client_cls, service_name, conf).create_proxy()
+        return ServiceClient(service_client_cls, service_name).create_proxy()
 
 
 class ClientRpcException(Exception):
@@ -29,26 +30,26 @@ class ClientRpcException(Exception):
 
 
 class ServiceClient(object):
-    def __init__(self, service_client_cls, service_name, conf):
+    def __init__(self, service_client_cls, service_name):
         self.service_client_cls = service_client_cls
         self.service_name = service_name
-        self.conf = conf
+        self.conf = settings
         self._client_pool_map = {}
         self.all_server_nodes = []
         self._watcher_added = False
-        self.retry_times = conf.getint("client", "retry_times", default="3")
+        self.retry_times = settings.get("zookeeper").get("retry", 3)
 
         self.zk_client = self._connect_to_zookeeper()
         self.service_path = "/service_menu/%s/servers" % self.service_name
         self.fetch_service_server_nodes()
         for server_node in self.all_server_nodes:
-            pool = ConnectionPool(server_node, self.service_client_cls, self.service_name, self.conf)
+            pool = ConnectionPool(server_node, self.service_client_cls, self.service_name)
             self._client_pool_map.update({server_node: pool})
         self.load_balancer = LoadBalancer(self.all_server_nodes, RoundRobinStrategy)
         self.register_service_server_nodes_watcher()
 
     def _connect_to_zookeeper(self):
-        zookeeper_connect_str = "{}".format(self.conf.get("zookeeper", "address", required=True))
+        zookeeper_connect_str = "{}".format(self.conf.get("zookeeper").get("address"))
         zk_client = ZkManager.get_zk_client(zookeeper_connect_str)
         return zk_client
 
@@ -125,7 +126,7 @@ class ServiceClient(object):
         print("add node to pool {}".format(node))
         if node in self.all_server_nodes:
             return
-        pool = ConnectionPool(node, self.service_client_cls, self.service_name, self.conf)
+        pool = ConnectionPool(node, self.service_client_cls, self.service_name,)
         self._client_pool_map.update({node: pool})
         print(self._client_pool_map)
 

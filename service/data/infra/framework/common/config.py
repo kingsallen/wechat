@@ -52,8 +52,8 @@ class Config(object):
             raise ValueError('Not a boolean: %s' % v)
         return self._boolean_mappings[v.lower()]
 
-conf_path = os.path.join(os.path.dirname(__file__), "service.conf")
-CONF = Config(conf_path)
+# conf_path = os.path.join("setting.py")
+# CONF = Config(conf_path)
 
 if __name__ == "__main__":
     pass

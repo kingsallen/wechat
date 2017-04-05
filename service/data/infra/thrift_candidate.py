@@ -7,7 +7,6 @@ from util.common import ObjectDict
 from util.common.decorator import cache
 from thrift_gen.gen.candidate.service.CandidateService import Client as CandidateServiceClient
 from service.data.infra.framework.client.client import ServiceClientFactory
-from service.data.infra.framework.common.config import CONF
 
 
 class ThriftCandidateDataService(DataService):
@@ -16,7 +15,7 @@ class ThriftCandidateDataService(DataService):
     """
 
     candidate_service_cilent = ServiceClientFactory.get_service(
-        CandidateServiceClient, CONF)
+        CandidateServiceClient)
 
     @gen.coroutine
     def send_candidate_view_position(self, user_id, position_id, sharechain_id):

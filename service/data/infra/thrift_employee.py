@@ -7,13 +7,12 @@ from tornado.testing import AsyncTestCase, gen_test
 
 from thrift_gen.gen.employee.service.EmployeeService import Client as EmployeeServiceClient
 from service.data.infra.framework.client.client import ServiceClientFactory
-from service.data.infra.framework.common.config import CONF
 
 
 class ThriftEmployeeDataService(DataService):
 
     employee_service_cilent = ServiceClientFactory.get_service(
-        EmployeeServiceClient, CONF)
+        EmployeeServiceClient)
 
     @gen.coroutine
     def get_employee_verification_conf(self, company_id):
@@ -53,7 +52,7 @@ class TestEmployeeService(AsyncTestCase):
     """Just for test(or try results) during development :)"""
     def setUp(self):
         self.employee_service_cilent = ServiceClientFactory.get_service(
-            EmployeeServiceClient, CONF)
+            EmployeeServiceClient)
         super().setUp()
 
     @gen_test

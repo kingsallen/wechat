@@ -79,6 +79,12 @@ settings['wechat_pay_mchid'] = 'xxxx'
 
 # 基础服务
 settings['infra'] = 'http://api2.dqprism.com'
+# thrift 接口
+settings['zookeeper'] = {
+    'address': '127.0.0.1:2181',
+    'connection_pool': 10,
+    'retry': 3
+}
 
 # wechat host
 settings['qx_host'] = 'qx2.dqprism.com'

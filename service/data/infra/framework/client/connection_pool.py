@@ -10,6 +10,8 @@ from tornado.locks import BoundedSemaphore
 
 import traceback
 
+from setting import settings
+
 
 class TMultiplexedCompactProtocolFactory(TCompactProtocol.TCompactProtocolFactory):
     def __init__(self, service_name, *args, **kwargs):
@@ -22,12 +24,12 @@ class TMultiplexedCompactProtocolFactory(TCompactProtocol.TCompactProtocolFactor
 
 
 class ConnectionPool(object):
-    def __init__(self, server_node, client_cls, service_name, conf):
+    def __init__(self, server_node, client_cls, service_name):
         self.server_node = server_node
         self.client_cls = client_cls
         self.service_name = service_name
-        self.conf = conf
-        self.pool_size = conf.getint("connection_pool", "size")
+        self.conf = settings
+        self.pool_size = settings.get("zookeeper").get("connection_pool", 10)
         self.connection_queue = LifoQueue(self.pool_size)
         self.semaphore = BoundedSemaphore(self.pool_size)
 
