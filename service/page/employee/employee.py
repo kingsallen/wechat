@@ -337,25 +337,26 @@ class EmployeePageService(PageService):
         """发送员工认证自定义字段填写template
         """
 
-        company_id = current_user.company.id
-        custom_fields = yield self.get_employee_custom_fields(company_id)
+        if current_user.wxuser:
+            company_id = current_user.company.id
+            custom_fields = yield self.get_employee_custom_fields(company_id)
 
-        self.logger.debug("custom_fields: %s" % custom_fields)
+            self.logger.debug("custom_fields: %s" % custom_fields)
 
-        if not custom_fields:
-            return
+            if not custom_fields:
+                return
 
-        link = make_url(path.EMPLOYEE_CUSTOMINFO,
-                        host=settings['platform_host'],
-                        wechat_signature=current_user.wechat.signature,
-                        from_wx_template='o')
+            link = make_url(path.EMPLOYEE_CUSTOMINFO,
+                            host=settings['platform_host'],
+                            wechat_signature=current_user.wechat.signature,
+                            from_wx_template='o')
 
-        yield employee_refine_custom_fields_tpl(
-            wechat_id=current_user.wechat.id,
-            openid=current_user.wxuser.openid,
-            link=link,
-            company_name=current_user.company.name
-        )
+            yield employee_refine_custom_fields_tpl(
+                wechat_id=current_user.wechat.id,
+                openid=current_user.wxuser.openid,
+                link=link,
+                company_name=current_user.company.name
+            )
 
 
 
