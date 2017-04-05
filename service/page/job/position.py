@@ -260,7 +260,7 @@ class PositionPageService(PageService):
     @gen.coroutine
     def get_team_data(self, team, more_link, teamname_custom):
         team_members = yield self.hr_team_member_ds.get_team_member_list(
-            conds={'team_id': team.id}
+            conds={'team_id': team.id, 'disable': 0}
         )
         resources = yield self.hr_resource_ds.get_resource_by_ids(
             id_list=[m.res_id for m in team_members] + [team.res_id]
