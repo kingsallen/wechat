@@ -31,6 +31,10 @@ PROFILE_PREVIEW = '/m/profile/preview'
 PROFILE_NEW = '/m/app/profile/new'
 PROFILE_CUSTOM_CV = '/m/profile/custom'
 
+# 老微信 QX
+# TODO 聚合号改版后要调整
+OLD_POSITION_PATH = '/mobile/position'
+
 
 # ============================ 基础服务开始 ============================
 # 用户服务
