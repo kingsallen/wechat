@@ -12,10 +12,11 @@ from tornado.web import MissingArgumentError
 
 from util.common.cache import BaseRedis
 from util.common import ObjectDict
+from setting import settings
+import conf.common as constant
 
 
 def handle_response(func):
-
     @functools.wraps(func)
     @gen.coroutine
     def wrapper(self, *args, **kwargs):
@@ -29,11 +30,14 @@ def handle_response(func):
             else:
                 self.write_error(500)
                 return
+
     return wrapper
 
 
 base_cache = BaseRedis()
 sem = Semaphore(1)
+
+
 def cache(prefix=None, key=None, ttl=60, hash=True, lock=True, separator=":"):
     """
     cache装饰器
@@ -83,13 +87,16 @@ def cache(prefix=None, key=None, ttl=60, hash=True, lock=True, separator=":"):
                 if hash:
                     redis_key = hashlib.md5(redis_key.encode("utf-8")).hexdigest()
 
-                redis_key = "{prefix}{separator}{redis_key}".format(prefix=prefix, separator=separator, redis_key=redis_key)
+                redis_key = "{prefix}{separator}{redis_key}".format(prefix=prefix, separator=separator,
+                                                                    redis_key=redis_key)
 
                 if base_cache.exists(redis_key):
                     cache_data = base_cache.get(redis_key)
                 else:
                     cache_data = yield func(*args, **kwargs)
                     if cache_data is not None:
+                        if settings["debug"]:
+                            ttl = 1
                         base_cache.set(redis_key, cache_data, ttl)
 
                 raise gen.Return(cache_data)
@@ -109,6 +116,7 @@ def check_signature(func):
     此装饰器用来装饰 tornado.web.RequestHandler 异步方法，
     如：prepare
     """
+
     @functools.wraps(func)
     @gen.coroutine
     def wrapper(self, *args, **kwargs):
@@ -120,6 +128,7 @@ def check_signature(func):
                 self.write_error(http_code=404)
             else:
                 yield func(self, *args, **kwargs)
+
     return wrapper
 
 
@@ -134,6 +143,7 @@ def check_outside_wechat(func):
             return
         else:
             yield func(self, *args, **kwargs)
+
     return wrapper
 
 
@@ -162,3 +172,26 @@ def check_sub_company(func):
 
     return wrapper
 
+
+# def check_newjd_status(func):
+#     """
+#     检查新JD状态, 如果不是启用状态:
+#     1. JD --> 跳老页面
+#     2. Company --> 跳老页面
+#     3. TeamIndex --> 404
+#     4. TeamDetail --> 404
+#     :param func:
+#     :return: Http404
+#     """
+#
+#     @functools.wraps(func)
+#     @gen.coroutine
+#     def wrapper(self, *args, **kwargs):
+#         if self.current_user.company.conf_newjd_status != constant.NEWJD_STATUS_ON:
+#             self.write_error(404)
+#             return
+#
+#         self.logger.debug('New JD On: {}'.format(self.current_user.wechat.id))
+#         yield func(self, *args, **kwargs)
+#
+#     return wrapper

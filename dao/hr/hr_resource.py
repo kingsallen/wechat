@@ -20,4 +20,8 @@ class HrResourceDao(BaseDao):
             "res_url": self.constant.TYPE_STRING,  # 资源链接
             "res_type": self.constant.TYPE_INT,  # 资源类型 0: image, 1: video
             "remark": self.constant.TYPE_STRING,  # 资源备注，方便调用者识别资源
+            "disable": self.constant.TYPE_INT,  # 0:无效 1:有效
+            "company_id": self.constant.TYPE_INT,  # hr_company.id
+            "title": self.constant.TYPE_STRING,  # 资源名称
+            "cover": self.constant.TYPE_STRING,  # 视频封面
         }

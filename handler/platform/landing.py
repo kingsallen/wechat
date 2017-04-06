@@ -25,7 +25,7 @@ class LandingHandler(BaseHandler):
             "city": self.get_argument("city", ''),
             "salary": self.get_argument("salary", ''),
             "occupation": self.get_argument("occupation", ''),
-            "department": self.get_argument("department", ''),
+            "team_name": self.get_argument("team_name", ''),
             "candidate_source": self.get_argument("candidate_source", ''),
             "employment_type": self.get_argument("employment_type", ''),
             "degree": self.get_argument("degree", ''),

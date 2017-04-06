@@ -11,11 +11,10 @@ from util.common import ObjectDict
 from util.tool.date_tool import jd_update_date
 from util.tool.http_tool import http_get, async_das_get
 from util.tool.str_tool import gen_salary, split
-from util.tool.temp_data_tool import make_mate, make_team, template3
+from util.tool.temp_data_tool import make_position_detail_cms, make_team, template3
 
 
 class PositionPageService(PageService):
-
     def __init__(self, logger):
         super().__init__(logger)
 
@@ -43,32 +42,35 @@ class PositionPageService(PageService):
 
         # 职位基础信息拼装
         position = ObjectDict({
-            'id':               position_res.id,
-            'title':            position_res.title,
-            'company_id':       position_res.company_id,
-            'department':       position_res.department,
+            'id': position_res.id,
+            'title': position_res.title,
+            'company_id': position_res.company_id,
+            'department': position_res.department,
             'candidate_source': self.constant.CANDIDATE_SOURCE.get(str(position_res.candidate_source)),
-            'employment_type':  self.constant.EMPLOYMENT_TYPE.get(str(position_res.employment_type)),
-            'update_time':      update_time,
-            'update_time_ori':  position_res.update_time,  # 没有被处理过的原始的更新时间
-            "salary":           salary,
-            "city":             position_res.city,
-            "occupation":       position_res.occupation,
-            "experience":       position_res.experience + (self.constant.EXPERIENCE_UNIT if position_res.experience else '') + (self.constant.POSITION_ABOVE if position_res.experience_above else ''),
-            "language":         position_res.language,
-            "count":            position_res.count,
-            "degree":           self.constant.DEGREE.get(str(position_res.degree)) + (self.constant.POSITION_ABOVE if position_res.degree_above else ''),
-            "management":       position_res.management,
-            "visitnum":         position_res.visitnum,
+            'employment_type': self.constant.EMPLOYMENT_TYPE.get(str(position_res.employment_type)),
+            'update_time': update_time,
+            'update_time_ori': position_res.update_time,  # 没有被处理过的原始的更新时间
+            "salary": salary,
+            "city": position_res.city,
+            "occupation": position_res.occupation,
+            "experience": position_res.experience + (
+            self.constant.EXPERIENCE_UNIT if position_res.experience else '') + (
+                          self.constant.POSITION_ABOVE if position_res.experience_above else ''),
+            "language": position_res.language,
+            "count": position_res.count,
+            "degree": self.constant.DEGREE.get(str(position_res.degree)) + (
+            self.constant.POSITION_ABOVE if position_res.degree_above else ''),
+            "management": position_res.management,
+            "visitnum": position_res.visitnum,
             "accountabilities": position_res.accountabilities,
-            "requirement":      position_res.requirement,
-            "feature":          position_res.feature,
-            "status":           position_res.status,
-            "publisher":        position_res.publisher,
-            "source":           position_res.source,
-            "share_tpl_id":     position_res.share_tpl_id,
-            "hb_status":        position_res.hb_status,
-            "team_id":          position_res.team_id
+            "requirement": position_res.requirement,
+            "feature": position_res.feature,
+            "status": position_res.status,
+            "publisher": position_res.publisher,
+            "source": position_res.source,
+            "share_tpl_id": position_res.share_tpl_id,
+            "hb_status": position_res.hb_status,
+            "team_id": position_res.team_id
         })
 
         # 后置处理：
@@ -230,42 +232,55 @@ class PositionPageService(PageService):
             self.logger.warn(error)
 
     @gen.coroutine
-    def get_mate_data(self, jd_media):
-        job_media = json.loads(jd_media)
-        if isinstance(job_media, list) and job_media:
-            media_list = yield self.hr_media_ds.get_media_by_ids(job_media, True)
-            res_dict = yield self.hr_resource_ds.get_resource_by_ids(
-                [m.res_id for m in media_list])
-            res = make_mate(media_list, res_dict)
-        else:
-            res = None
-
-        raise gen.Return(res)
+    def get_cms_page(self, team_id):
+        res = None
+        cms_page = yield self.hr_cms_pages_ds.get_page(conds={
+            "config_id": team_id,
+            "type": self.constant.CMS_PAGES_TYPE_POSITION_DETAIL,
+            "disable": 0
+        })
+        if cms_page:
+            page_id = cms_page.id
+            cms_module = yield self.hr_cms_module_ds.get_module({
+                "page_id": page_id,
+                "disable": 0
+            })
+            if cms_module:
+                module_id = cms_module.id
+                module_name = cms_module.module_name
+                cms_media = yield self.hr_cms_media_ds.get_media_list(conds={
+                    "disable": 0,
+                    "module_id": module_id
+                })
+                res_ids = [m.res_id for m in cms_media]
+                res_dict = yield self.hr_resource_ds.get_resource_by_ids(res_ids)
+                res = make_position_detail_cms(cms_media, res_dict, module_name)
+        return res
 
     @gen.coroutine
-    def get_team_data(self, team, more_link):
+    def get_team_data(self, team, more_link, teamname_custom):
         team_members = yield self.hr_team_member_ds.get_team_member_list(
-            conds={'team_id': team.id}
+            conds={'team_id': team.id, 'disable': 0}
         )
         resources = yield self.hr_resource_ds.get_resource_by_ids(
             id_list=[m.res_id for m in team_members] + [team.res_id]
         )
-        res = make_team(team, resources, more_link, team_members)
+        res = make_team(team, resources, more_link, team_members, teamname_custom)
 
         raise gen.Return(res)
 
     @gen.coroutine
-    def get_team_position(self, department, handler_params, current_position_id, company_id):
+    def get_team_position(self, team_id, handler_params, current_position_id, company_id, teamname_custom):
         positions = yield self.job_position_ds.get_positions_list(
             conds={'id': [current_position_id, '<>'],
                    'company_id': company_id,
-                   'department': department,
+                   'team_id': team_id,
                    'status': 0})
 
         if not positions:
             raise gen.Return(None)
 
-        res = template3(title='我们团队还需要', resource_list=positions,
+        res = template3(title='我们' + teamname_custom['teamname_custom'] + '还需要', resource_list=positions,
                         handler_params=handler_params)
 
         raise gen.Return(res)

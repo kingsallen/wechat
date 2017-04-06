@@ -23,3 +23,4 @@ class HrCompanyConfDataService(DataService):
 
         response = yield self.hr_company_conf_dao.get_record_by_conds(conds, fields)
         raise gen.Return(response)
+

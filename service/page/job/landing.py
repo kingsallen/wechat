@@ -62,11 +62,13 @@ class LandingPageService(PageService):
 
             # 所属部门
             elif index == self.plat_constant.LANDING_INDEX_DEPARTMENT:
+                enabled_departments = yield self.hr_team_ds.get_team_list(conds={"disable": 0, "company_id": company_id}, fields=["id", "name"])
                 department = {}
                 department['name'] = self.plat_constant.LANDING.get(index).get("chpe")
-                department['values'] = result.get("departments")
-                department['key'] = "department"
-                department['selected'] = selected.get("department")
+                # department['values'] = [{"value": dep.get("id"), "text": dep.get("name", "")}for dep in enabled_departments]
+                department['values'] = [dep.get("name", "") for dep in enabled_departments]
+                department['key'] = "team_name"
+                department['selected'] = selected.get("team_name")
                 res.append(department)
 
             # 招聘类型
@@ -139,7 +141,7 @@ class LandingPageService(PageService):
     def get_positions_filter_list(self, company_id):
 
         """
-        获得公司发布的职位中所有城市列表，职能列表，部门列表，
+        获得公司发布的职位中所有城市列表，，部门列表，职能列表
         :param company_id:
         :return:
         """
