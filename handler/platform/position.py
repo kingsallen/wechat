@@ -75,9 +75,10 @@ class PositionHandler(BaseHandler):
             add_item(position_data, "module_position_recommend", module_position_recommend)
 
             # 构建老微信样式所需要的数据
-            self.logger.debug("[JD]是否显示新样式: {}".format(self.current_user.wechat.show_new_jd))
+            self.logger.debug("[JD]是否显示新样式: {}".format(self.current_user.company.conf_newjd_status))
             self.logger.debug("[wechat]:{}".format(self.current_user.wechat))
-            if not self.current_user.wechat.show_new_jd:
+            if self.current_user.company.conf_newjd_status != 2:
+                # 0是未开启，1是用户申请开启，2是审核通过（使用新jd），3撤销（返回基础版）
                 # 老样式
                 module_job_require_old = self._make_json_job_require_old(position_info)
                 module_department_old = self._make_json_job_department(position_info)
@@ -99,9 +100,6 @@ class PositionHandler(BaseHandler):
                 add_item(position_data, "suppress_apply", suppress_apply)
                 add_item(position_data, "delegate_drop", delegate_drop)
                 # 定制化 end
-
-                print ("++++++++++++++++\n\n")
-                print(position_data)
 
                 self.render_page(
                     "position/info_old.html",
@@ -674,7 +672,7 @@ class PositionListHandler(BaseHandler):
                 template_name="refer/neo_weixin/position_v2/position_list_items.html",
                 positions=position_list,
                 is_employee=bool(self.current_user.employee),
-                use_neowx=int(self.current_user.wechat.show_new_jd))
+                use_neowx=bool(self.current_user.company.conf_newjd_status == 2))
             return
 
         # 直接请求页面返回
@@ -684,7 +682,7 @@ class PositionListHandler(BaseHandler):
                 positions=position_list,
                 position_title=const_platorm.POSITION_LIST_TITLE_DEFAULT if not self.params.recomlist else const_platorm.POSITION_LIST_TITLE_RECOMLIST,
                 url='',
-                use_neowx=int(self.current_user.wechat.show_new_jd),
+                use_neowx=bool(self.current_user.company.conf_newjd_status == 2),
                 is_employee=bool(self.current_user.employee),
                 searchFilterNum=self.get_search_filter_num())
 
