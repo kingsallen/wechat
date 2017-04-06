@@ -4,6 +4,7 @@ decorator==4.0.10
 greenlet==0.4.10
 ipython==5.1.0
 ipython-genutils==0.1.0
+kazoo==2.2.1
 mockito==0.7.1
 msgpack-python==0.4.8
 pexpect==4.2.1
@@ -23,9 +24,8 @@ requests==2.12.1
 simplegeneric==0.8.1
 six==1.10.0
 thrift==0.10.0
-tornado==4.4.2
+tornado==4.4.3
 Tornado-MySQL==0.5.1
 traitlets==4.3.1
 ujson==1.35
 wcwidth==0.1.7
-kazoo==2.2.1
