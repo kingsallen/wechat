@@ -95,8 +95,6 @@ def cache(prefix=None, key=None, ttl=60, hash=True, lock=True, separator=":"):
                 else:
                     cache_data = yield func(*args, **kwargs)
                     if cache_data is not None:
-                        if settings["debug"]:
-                            ttl = 1
                         base_cache.set(redis_key, cache_data, ttl)
 
                 raise gen.Return(cache_data)
@@ -171,7 +169,6 @@ def check_sub_company(func):
         yield func(self, *args, **kwargs)
 
     return wrapper
-
 
 # def check_newjd_status(func):
 #     """
