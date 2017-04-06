@@ -51,9 +51,9 @@ ENV_HELP = "help"
 
 """appid for infra"""
 APPID = {
-    ENV_QX:       "5",
+    ENV_QX: "5",
     ENV_PLATFORM: "6",
-    ENV_HELP:     "7"
+    ENV_HELP: "7"
 }
 
 # 微信客户端类型
@@ -112,7 +112,6 @@ CHAT_HR_CHANNEL = "chatroom_{0}"
 # 进入聊天室标志位
 CHAT_CHATROOM_ENTER = "chat_sysuser_{}"
 
-
 # ++++++++++业务常量+++++++++++
 # Cookie name
 COOKIE_SESSIONID = "5MA8A989"
@@ -147,6 +146,8 @@ FAV_NO = 1
 FAV_INTEREST = 2
 
 # 职位相关，主要涉及到职位，职位列表，搜索页
+TEAMNAME_CUSTOM_DEFAULT = "团队"
+
 # 招聘类型
 CANDIDATE_SOURCE = {
     "0": "社招",
@@ -213,6 +214,11 @@ RECRUIT_STATUS_OFFERACCEPTED_ID = 11  # 接受录取通知
 RECRUIT_STATUS_HIRED_ID = 3  # 入职
 RECRUIT_STATUS_REJECT_ID = 4  # 拒绝
 
+# 职位在招状态
+POSITION_STATUS_RECRUITING = 0  # 有效
+POSITION_STATUS_DELETED = 1  # 删除
+POSITION_STATUS_WITHDRAWN = 2  # 撤下
+
 # 职位状态
 RP_POSITION_STATUS_NONE = 0
 RP_POSITION_STATUS_CLICK = 1
@@ -252,6 +258,31 @@ RESUME_WAY_TO_INFRA = {
     RESUME_WAY_LINKEDIN: 4
 }
 
+# 新JD公司hr_cms_pages.type
+CMS_PAGES_TYPE_COMPANY_INDEX = 1
+CMS_PAGES_TYPE_TEAM_DETAIL = 2
+CMS_PAGES_TYPE_POSITION_DETAIL = 3
+
+# 新JD状态
+NEWJD_STATUS_NO_TEMPTED = 0  # 未开启
+NEWJD_STATUS_WAITING = 1  # 用户开启, 等待审核
+NEWJD_STATUS_ON = 2  # 开启
+NEWJD_STATUS_OFF = 3  # 撤销
+
+# 新JD模块类型
+CMS_PAGES_MODULE_A = 1
+CMS_PAGES_MODULE_B = 2
+CMS_PAGES_MODULE_C = 3
+CMS_PAGES_MODULE_D = 4
+CMS_PAGES_MODULE_E = 5
+CMS_PAGES_MODULE_MAP = 6
+CMS_PAGES_MODULE_QRCODE = 7
+CMS_PAGES_MODULE_TEAM_DETAIL = 8
+CMS_PAGES_MODULE_POSITION_DETAIL = 9
+
+# 新JD Resources类型
+CMS_PAGES_RESOURCES_TYPE_IMAGE = 0
+CMS_PAGES_RESOURCES_TYPE_VIDEO = 1
 
 # ============= 红包相关常量 =============
 # 红包锁字符串模版

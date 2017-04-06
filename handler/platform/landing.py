@@ -10,6 +10,7 @@ from util.common import ObjectDict
 from util.common.decorator import handle_response
 from util.tool.url_tool import make_url
 
+
 class LandingHandler(BaseHandler):
     """
     企业搜索页
@@ -19,15 +20,15 @@ class LandingHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         selected = ObjectDict({
-            "city": self.params.city,
-            "salary": self.params.salary,
-            "occupation": self.params.occupation,
-            "department": self.params.department,
+            "city":             self.params.city,
+            "salary":           self.params.salary,
+            "occupation":       self.params.occupation,
+            "team_name":        self.params.team_name,
             "candidate_source": self.params.candidate_source,
-            "employment_type": self.params.employment_type,
-            "degree": self.params.degree,
-            "did": int(self.params.did) if self.params.did else 0,
-            "custom": self.params.custom
+            "employment_type":  self.params.employment_type,
+            "degree":           self.params.degree,
+            "did":              int(self.params.did) if self.params.did else 0,
+            "custom":           self.params.custom
         })
 
         search_seq = yield self.landing_ps.get_landing_item(self.current_user.company,

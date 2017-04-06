@@ -12,6 +12,9 @@ from urllib.parse import (
     urlparse, parse_qs, urlencode, parse_qsl, urlunparse, urljoin)
 from setting import settings
 
+# 默认 query 黑名单：m, state, code, _xsrf , appid, tjtoken不传递
+_ESCAPE_DEFAULT = frozenset(['m', 'state', 'code', '_xsrf', 'appid', 'tjtoken'])
+
 
 def make_url(path, params=None, host="", protocol="https", escape=None,
              **kwargs):
@@ -37,10 +40,7 @@ def make_url(path, params=None, host="", protocol="https", escape=None,
     d = params.copy()
     d.update(kwargs)
 
-    # 默认 query 黑名单：state, code, _xsrf , appid, tjtoken不传递
-    _ESCAPE_DEFAULT = ['state', 'code', '_xsrf', 'appid', 'tjtoken']
-
-    escape = set((escape or []) + _ESCAPE_DEFAULT)
+    escape = set((escape or []) + list(_ESCAPE_DEFAULT))
 
     pairs = {k: v for k, v in d.items() if k not in escape}
 

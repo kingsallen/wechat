@@ -302,6 +302,7 @@ class BaseHandler(MetaBaseHandler):
             if self.in_wechat and not self._unionid:
                 # unionid 不存在，则进行仟寻授权
                 self.logger.debug("start oauth!!!!")
+
                 self._oauth_service.wechat = self._qx_wechat
                 url = self._oauth_service.get_oauth_code_userinfo_url()
                 self.redirect(url)

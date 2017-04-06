@@ -18,10 +18,10 @@ from util.common.decorator import handle_response, authenticated
 from util.tool.str_tool import add_item
 
 from tests.dev_data.user_company_config import COMPANY_CONFIG
+from handler.help.newjd_status_check import NewJDStatusCheckerRedirect
 
 
 class CompanyVisitReqHandler(BaseHandler):
-
     @handle_response
     @check_sub_company
     @authenticated
@@ -42,7 +42,6 @@ class CompanyVisitReqHandler(BaseHandler):
 
 
 class CompanyFollowHandler(BaseHandler):
-
     @handle_response
     @check_sub_company
     @authenticated
@@ -65,6 +64,7 @@ class CompanyFollowHandler(BaseHandler):
 class CompanyHandler(BaseHandler):
     """公司详情页新样式"""
 
+    @NewJDStatusCheckerRedirect()
     @handle_response
     @check_sub_company
     @gen.coroutine
@@ -80,15 +80,16 @@ class CompanyHandler(BaseHandler):
         return
 
     def _share(self, company):
-        config = COMPANY_CONFIG.get(company.id)
         company_name = company.abbreviation or company.name
         default = ObjectDict({
-            'cover':       self.static_url(company.get('logo', '')),
-            'title':       u'关于{}, 你想知道的都在这里'.format(company_name),
+            'cover': self.static_url(company.get('logo', '')),
+            'title': u'关于{}, 你想知道的都在这里'.format(company_name),
             'description': u'这可能是你人生的下一站! 看清企业全局, 然后定位自己',
-            'link':        self.fullurl
+            'link': self.fullurl
         })
-        if config.get('transfer', False) and config.transfer.get('cm', False):
+        # 玛氏定制
+        config = COMPANY_CONFIG.get(company.id)
+        if config and config.get('transfer', False) and config.transfer.get('cm', False):
             default.description = config.transfer.get('cm')
 
         return default
@@ -119,7 +120,6 @@ class CompanyInfoHandler(BaseHandler):
         self.render_page(template_name='company/info_old.html', data=company_data, meta_title=const.PAGE_COMPANY_INFO)
 
 class CompanySurveyHandler(BaseHandler):
-
     @handle_response
     @authenticated
     @gen.coroutine

@@ -14,6 +14,7 @@ from util.tool.str_tool import is_odd
 
 cached_company_sug_wechat = None
 
+
 class CompanyPageService(PageService):
 
     def __init__(self):
@@ -41,7 +42,7 @@ class CompanyPageService(PageService):
         # 公司副表
         if need_conf:
             conds = {
-               "company_id" : company.get("id"),
+                "company_id": company.get("id"),
             }
             company_conf_res = yield self.hr_company_conf_ds.get_company_conf(conds)
 
@@ -68,7 +69,19 @@ class CompanyPageService(PageService):
                 "conf_job_custom_title": company_conf_res.get("job_custom_title"),
                 "conf_search_seq": search_seq,
                 "conf_search_img": company_conf_res.get("search_img"),
+                "conf_newjd_status": company_conf_res.get("newjd_status"),
+                "conf_teamname_custom": company_conf_res.get("teamname_custom"),  # 职位部门字段名称
+                "conf_application_time": company_conf_res.get("application_time"),  # 新JD开通申请时间
             })
+
+            # 处理公司自定义团队名称
+            conf_teamname_custom = company_conf.get("conf_teamname_custom")
+            if conf_teamname_custom and conf_teamname_custom.strip():
+                teamname_custom = ObjectDict({'teamname_custom': conf_teamname_custom.strip()})
+            else:
+                teamname_custom = ObjectDict({'teamname_custom': self.constant.TEAMNAME_CUSTOM_DEFAULT})
+            company_conf.update(ObjectDict({"conf_teamname_custom": teamname_custom}))
+
             company.update(company_conf)
 
         # 处理公司规模
@@ -189,5 +202,10 @@ class CompanyPageService(PageService):
 
             if cached_company_sug_wechat is None:
                 cached_company_sug_wechat = result
-
             return True, result
+
+    def get_company_conf(self, company_id, fields):
+        # TODO （tangyiliang）  是否要删？ 不应该放在 ps 中
+        company_conf = yield self.hr_company_conf_ds.get_company_conf({"company_id": company_id}, fields)
+        raise gen.Return(company_conf)
+

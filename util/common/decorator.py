@@ -14,16 +14,16 @@ from tornado.web import MissingArgumentError
 import conf.common as const
 import conf.message as msg
 import conf.path as path
+from setting import settings
 from util.common import ObjectDict
 from util.common.cache import BaseRedis
 from util.common.cipher import encode_id
+from util.tool.dict_tool import sub_dict
 from util.tool.str_tool import to_hex
 from util.tool.url_tool import make_url
-from util.tool.dict_tool import sub_dict
 
 
 def handle_response(func):
-
     @functools.wraps(func)
     @gen.coroutine
     def wrapper(self, *args, **kwargs):
@@ -37,12 +37,14 @@ def handle_response(func):
                 self.send_json_error()
             else:
                 self.write_error(500)
-            return
+                return
     return wrapper
 
 
 base_cache = BaseRedis()
 sem = Semaphore(1)
+
+
 def cache(prefix=None, key=None, ttl=60, hash=True, lock=True, separator=":"):
     """
     cache装饰器
@@ -94,13 +96,17 @@ def cache(prefix=None, key=None, ttl=60, hash=True, lock=True, separator=":"):
                 if hash:
                     redis_key = hashlib.md5(redis_key.encode("utf-8")).hexdigest()
 
-                redis_key = "{prefix}{separator}{redis_key}".format(prefix=prefix, separator=separator, redis_key=redis_key)
+                redis_key = "{prefix}{separator}{redis_key}".format(prefix=prefix, separator=separator,
+                                                                    redis_key=redis_key)
 
                 if base_cache.exists(redis_key):
                     cache_data = base_cache.get(redis_key)
                 else:
                     cache_data = yield func(*args, **kwargs)
                     if cache_data is not None:
+                        if settings["debug"]:
+                            ttl = 1
+                            # todo tangyiliang 看一下 warning
                         base_cache.set(redis_key, cache_data, ttl)
 
                 raise gen.Return(cache_data)
@@ -120,6 +126,7 @@ def check_signature(func):
     此装饰器用来装饰 tornado.web.RequestHandler 异步方法，
     如：prepare
     """
+
     @functools.wraps(func)
     @gen.coroutine
     def wrapper(self, *args, **kwargs):
@@ -132,6 +139,7 @@ def check_signature(func):
                 return
             else:
                 yield func(self, *args, **kwargs)
+
     return wrapper
 
 
@@ -164,11 +172,7 @@ def check_and_apply_profile(func):
     @functools.wraps(func)
     @gen.coroutine
     def wrapper(self, *args, **kwargs):
-        print (8888888899999999999)
-        print (self.current_user)
-        print (self.current_user.sysuser)
         user_id = self.current_user.sysuser.id
-        print (user_id)
         has_profile, profile = yield self.profile_ps.has_profile(user_id)
         if has_profile:
             self.current_user['profile'] = profile
@@ -210,10 +214,6 @@ def check_and_apply_profile(func):
                         sub_dict(self.params, ['pid', 'wechat_signature'])))
             else:
                 pass
-
-            print (999999999999)
-            print (self.current_user)
-            print (self.current_user.sysuser.id)
 
             # ========== LINKEDIN OAUTH ==============
             # 拼装 linkedin oauth 路由
@@ -269,6 +269,7 @@ def check_sub_company(func):
         yield func(self, *args, **kwargs)
 
     return wrapper
+
 
 def authenticated(func):
     """

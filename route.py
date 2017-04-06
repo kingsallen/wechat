@@ -53,9 +53,9 @@ import handler.qx.wechat_oauth
 # 微信端公共的 routes
 common_routes = [
     # 开发者方式
-    (r"/wechat",  handler.wechat.event.WechatOauthHandler, {"event": "wechat_oauth"}),
+    (r"/wechat",                                       handler.wechat.event.WechatOauthHandler,                   {"event": "wechat_oauth"}),
     # 第三方授权方式
-    (r"/wechat[\/]*([0-9a-z]+)*", handler.wechat.event.WechatThirdOauthHandler,              {"event": "wechat_thirdoauth"}),  # passport
+    (r"/wechat[\/]*([0-9a-z]+)*",                      handler.wechat.event.WechatThirdOauthHandler,              {"event": "wechat_thirdoauth"}),  # passport
 
     # app forward 给前端，展示纯前端渲染的 SPA
     (r"/m/app/.*",                                     handler.common.app.IndexHandler,                           {"event": "app_"}),
@@ -96,7 +96,7 @@ common_routes = [
 # 企业号的单独 routes
 platform_routes = [
     # position
-    (r"/m/position/([0-9]+)",                          handler.platform.position.PositionHandler,                 {"event": "position_info"}),
+    (r"/m/position/(?P<position_id>\d+)",              handler.platform.position.PositionHandler,                 {"event": "position_info"}),
     (r"/m/position",                                   handler.platform.position.PositionListHandler,             {"event": "position_list"}),
     (r"/m/start",                                      handler.platform.landing.LandingHandler,                   {"event": "start_landing"}),
     (r"/m/company/(\d+)",                              handler.platform.companyrelation.CompanyInfoHandler,       {"event": "company_old_info"}),

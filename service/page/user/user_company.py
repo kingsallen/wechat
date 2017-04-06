@@ -13,9 +13,12 @@ from service.page.base import PageService
 from util.common import ObjectDict
 from util.tool.url_tool import make_url
 from util.tool import temp_data_tool
+from util.tool import iterable_tool
+from util.tool.temp_data_tool import make_up_for_missing_res
 from tests.dev_data.user_company_config import COMPANY_CONFIG
 import conf.path as path
 import re
+import operator
 
 
 class UserCompanyPageService(PageService):
@@ -48,31 +51,19 @@ class UserCompanyPageService(PageService):
             'follow': self.constant.YES if user.wxuser.is_subscribe
             else self.constant.NO,
         })
-        if COMPANY_CONFIG.get(company.id).get('custom_visit_recipe', False):
-            data.relation.custom_visit_recipe = COMPANY_CONFIG.get(
-                company.id).custom_visit_recipe
-        data.templates, tmp_team = yield self._get_company_template(
-            company.id, team_index_url)
 
-        # 如果没有提供team的配置，去hr_team寻找资源
-        if not tmp_team:
-            team_order = COMPANY_CONFIG.get(company.id).order.index('team')
-            # 区分母公司、子公司对待，获取所有团队team
-            if company.id != user.company.id:
-                teams = yield self._get_sub_company_teams(company.id)
-            else:
-                teams = yield self.hr_team_ds.get_team_list(
-                    conds={'company_id': company.id, 'is_show': 1})
+        # 玛氏定制需求
+        company_config = COMPANY_CONFIG.get(company.id)
+        if company_config and company_config.get('custom_visit_recipe', False):
+            data.relation.custom_visit_recipe = company_config.custom_visit_recipe
 
-            if teams:
-                teams.sort(key=lambda t: t.show_order)
-                teams = teams[0:6]  # 企业主业团队数不超过6个
-                team_resource_list = yield self._get_team_resource(teams)
-                team_template = temp_data_tool.make_company_team(
-                    team_resource_list, team_index_url)
-                data.templates.insert(team_order, team_template)
+        data.templates = yield self._get_company_cms_page(company.id, user, team_index_url)
 
         data.template_total = len(data.templates)
+
+        # 自定义团队文案
+        teamname_custom = user.company.conf_teamname_custom
+        data.bottombar = teamname_custom
 
         raise gen.Return(data)
 
@@ -87,36 +78,59 @@ class UserCompanyPageService(PageService):
         return qrcode_url
 
     @gen.coroutine
-    def _get_company_template(self, company_id, team_index_url):
+    def _get_company_cms_page(self, company_id, user, team_index_url):
         """
-        根据不同company_id去配置文件中获取company配置信息
-        之后根据配置，生成template数据
+        [hr3.4]不在从配置文件中去获取企业首页豆腐块配置信息, 而是从hr_cms_*系列数据库获取数据
         :param company_id:
         :return:
         """
-        company_config = COMPANY_CONFIG.get(company_id)
-        values = sum(company_config.config.values(), [])
-        media_dict = yield self.hr_media_ds.get_media_by_ids(values)
-        resources_dict = yield self.hr_resource_ds.get_resource_by_ids(
-            [m.res_id for m in media_dict.values()])
+        templates = []
+        cms_page = yield self.hr_cms_pages_ds.get_page(conds={
+            "config_id": company_id,
+            "type": self.constant.CMS_PAGES_TYPE_COMPANY_INDEX,
+            "disable": 0
+        })
+        if cms_page:
+            cms_page_id = cms_page.id
+            cms_modules = yield self.hr_cms_module_ds.get_module_list(conds={
+                "page_id": cms_page_id,
+                "disable": 0
+            })
+            if cms_modules:
+                cms_modules.sort(key=operator.itemgetter("orders"))  # 模块排序
 
-        for m in media_dict.values():
-            res = resources_dict.get(m.res_id, False)
-            m.media_url = res.res_url if res else ''
-            m.media_type = res.res_type if res else 0
+                cms_modules_ids = [m.id for m in cms_modules]
+                cms_medias = yield self.hr_cms_media_ds.get_media_list(
+                    conds="module_id in {} and disable=0".format(tuple(cms_modules_ids)).replace(',)', ')')
+                )
 
-        if company_config.config.get('team'):
-            for team_media_id in company_config.config.get('team'):
-                media_dict.get(team_media_id).link = team_index_url
+                # 不需要价差cms_medias存不存在
+                cms_medias_res_ids = [m.res_id for m in cms_medias]
+                resources_dict = yield self.hr_resource_ds.get_resource_by_ids(cms_medias_res_ids)
+                for m in cms_medias:
+                    res = resources_dict.get(m.res_id, False)
+                    m.media_url = res.res_url if res else ''
+                    m.media_type = res.res_type if res else 0
 
-        templates = [
-            getattr(temp_data_tool, 'make_company_{}'.format(key))(
-                [media_dict.get(mid) for mid in company_config.config.get(key)]
-            ) for key in company_config.order
-            if isinstance(company_config.config.get(key), list)
-            ]
+                # 给二维码模块注入qrcode地址
+                qrcode_module = list(
+                    filter(lambda m: m.get("type") == self.constant.CMS_PAGES_MODULE_QRCODE, cms_modules))
+                if len(qrcode_module) > 0:
+                    qrcode_module = qrcode_module[0]
+                    qrcode_module_id = qrcode_module.id
+                    qrcode_cms_media = ObjectDict({
+                        "module_id": qrcode_module_id,
+                        "media_type": self.constant.CMS_PAGES_RESOURCES_TYPE_IMAGE,
+                        "company_name": user.wechat.name,
+                        "media_url": self._make_qrcode(user.wechat.qrcode)
+                    })
+                    cms_medias.append(qrcode_cms_media)
 
-        raise gen.Return((templates, bool(company_config.config.get('team'))))
+                cms_medias = iterable_tool.group(cms_medias, "module_id")
+                templates = [getattr(temp_data_tool, "make_company_module_type_{}".format(module.type))(
+                    cms_medias.get(module.id, []), module.module_name, module.link)
+                             for module in cms_modules]
+        return templates
 
     @gen.coroutine
     def _get_sub_company_teams(self, company_id):
@@ -142,7 +156,7 @@ class UserCompanyPageService(PageService):
         if not team_id_tuple:
             gen.Return([])
         teams = yield self.hr_team_ds.get_team_list(
-            conds='id in {} and is_show=1'.format(
+            conds='id in {} and is_show=1 and disable=0'.format(
                 team_id_tuple).replace(',)', ')'))
 
         raise gen.Return(teams)
@@ -152,14 +166,19 @@ class UserCompanyPageService(PageService):
         resource_dict = yield self.hr_resource_ds.get_resource_by_ids(
             [t.res_id for t in team_list])
 
-        raise gen.Return([ObjectDict({
-            'id': team.id,
-            'title': '我们的团队',
-            'sub_title': team.name,
-            'longtext': team.summary,
-            'media_url': resource_dict.get(team.res_id).res_url or '',
-            'media_type': resource_dict.get(team.res_id).res_type or 0,
-        }) for team in team_list])
+        team_resource = []
+        for team in team_list:
+            team_res = make_up_for_missing_res(resource_dict.get(team.res_id))
+            team_resource.append(ObjectDict({
+                'id': team.id,
+                'title': '我们的团队',
+                'sub_title': team.name,
+                'longtext': team.summary,
+                'media_url': team_res.res_url,
+                'media_type': team_res.res_type,
+            }))
+
+        raise gen.Return(team_resource)
 
     @gen.coroutine
     def set_company_follow(self, current_user, param):

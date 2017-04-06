@@ -25,4 +25,5 @@ class HrTeamMemberDao(BaseDao):
             "user_id": self.constant.TYPE_INT,  # 成员对应用户
             "create_time": self.constant.TYPE_TIMESTAMP,  # 创建时间
             "update_time": self.constant.TYPE_TIMESTAMP,  # 更新时间
+            "disable": self.constant.TYPE_INT  # 0:无效 1:有效
         }
