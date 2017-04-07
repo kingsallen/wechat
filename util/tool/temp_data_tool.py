@@ -147,9 +147,13 @@ def template5(resource=None):
 
 
 def template50(resource):
+    try:
+        d = json.loads(resource.attrs)
+    except:
+        d = []
     return ObjectDict({
         'type': 50, 'title': 'map',
-        'data': eval(resource.attrs)
+        'data': d
     })
 
 
