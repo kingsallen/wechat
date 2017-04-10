@@ -225,7 +225,7 @@ class EmployeeBindEmailHandler(BaseHandler):
                     self.current_user)
 
 
-class RecommendrecordsHandler(BaseHandler):
+class RecommendRecordsHandler(BaseHandler):
     """员工-推荐记录"""
 
     @handle_response

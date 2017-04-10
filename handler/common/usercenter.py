@@ -138,7 +138,7 @@ class UsercenterHandler(BaseHandler):
         self.send_json_success()
 
 
-class FavpositionHandler(BaseHandler):
+class FavPositionHandler(BaseHandler):
     """个人中心-收藏职位"""
 
     @handle_response
@@ -154,7 +154,7 @@ class FavpositionHandler(BaseHandler):
         self.send_json_success(data=ObjectDict(records=res))
 
 
-class ApplyrecordsHandler(BaseHandler):
+class ApplyRecordsHandler(BaseHandler):
     """个人中心-求职记录"""
 
     @handle_response
