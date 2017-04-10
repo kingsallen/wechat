@@ -44,7 +44,9 @@ class UnreadCountHandler(BaseHandler):
         """
 
         chat_num = yield self.im_ps.get_unread_chat_num(self.current_user.sysuser.id, publisher)
-        self.send_json_success(data=chat_num)
+        self.send_json_success(data={
+            "unread": chat_num
+        })
 
     @handle_response
     @authenticated
@@ -56,7 +58,9 @@ class UnreadCountHandler(BaseHandler):
         """
 
         chat_num = yield self.im_ps.get_all_unread_chat_num(self.current_user.sysuser.id)
-        self.send_json_success(data=chat_num)
+        self.send_json_success(data={
+            "unread": chat_num
+        })
 
 
 class ChatWebSocketHandler(websocket.WebSocketHandler):
