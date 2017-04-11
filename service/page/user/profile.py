@@ -1,6 +1,5 @@
 # coding=utf-8
 
-import re
 from datetime import datetime
 
 import tornado.gen as gen
@@ -608,7 +607,7 @@ class ProfilePageService(PageService):
         profile.avatar_url = p_basic.get("headimg", "")
         profile.username = p_basic.get("name", "")
         profile.description = p_basic.get("motto", "")
-        profile.job = p_basic.get("position_name", "")
+        profile.job = p_basic.get("current_job", "")
         profile.company = p_basic.get("company_name", "")
         profile.location = p_basic.get("city_name", "")
         profile.zodiac = self.get_zodiac(p_basic.get("birth", ""))
