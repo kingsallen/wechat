@@ -223,13 +223,9 @@ class MetaBaseHandler(AtomHandler):
             ujson.dumps(self._get_info_header(info), ensure_ascii=0))
 
         self.logger.debug(
-            "mviewer_id: {}".format(
-                self.get_secure_cookie(
-                    const.COOKIE_MVIEWERID)))
+            "mviewer_id: {}".format(self.get_secure_cookie(const.COOKIE_MVIEWERID)))
         self.logger.debug(
-            "session_id: {}".format(
-                self.get_secure_cookie(
-                    const.COOKIE_SESSIONID)))
+            "session_id: {}".format(self.get_secure_cookie(const.COOKIE_SESSIONID)))
 
     def write_error(self, http_code, **kwargs):
         """错误页
@@ -238,34 +234,30 @@ class MetaBaseHandler(AtomHandler):
         500（服务器错误）      Internal Server Error: Something went wrong on the server, check status site and/or report the issue
         """
 
-        if http_code == 403:
-            self.render_page(
-                'system/info.html',
-                data=ObjectDict(
-                    code=http_code,
-                    css="warning",
-                    message=msg_const.NOT_AUTHORIZED))
-        elif http_code == 404:
-            self.render_page(
-                'system/info.html',
-                data=ObjectDict(
-                    code=http_code,
-                    message=msg_const.NO_DATA))
-        else:
-            self.render_page(
-                'system/info.html',
-                data=ObjectDict(
-                    code=http_code,
-                    message=msg_const.UNKNOWN_DEFAULT))
+        template = 'system/info.html'
 
-    def render(
-            self,
-            status_code=const.API_SUCCESS,
-            http_code=200,
-            *args,
-            **kwargs):
-        """override RequestHandler.render()
-        """
+        if http_code == 403:
+            self.render_page(template, data={
+                    'code': http_code,
+                    'css': 'warning',
+                    'message': msg_const.NOT_AUTHORIZED
+                })
+
+        elif http_code == 404:
+            self.render_page(template, data={
+                    'code': http_code,
+                    'message': msg_const.NO_DATA
+                })
+        else:
+            message = kwargs.get('message') or msg_const.UNKNOWN_DEFAULT
+            self.render_page(template, data={
+                    'code': http_code,
+                    'message':message
+                })
+
+    def render(self, status_code=const.API_SUCCESS, http_code=200, *args, **kwargs):
+        """override RequestHandler.render()"""
+
         self.log_info = {"res_type": "html", "status_code": status_code}
         self.set_status(http_code)
 

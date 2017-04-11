@@ -1,11 +1,5 @@
 # coding=utf-8
 
-# @Time    : 10/28/16 11:04
-# @Author  : panda (panyuxin@moseeker.com)
-# @File    : user_employee_points_record.py
-# @DES     :
-
-# Copyright 2016 MoSeeker
 
 from tornado import gen
 from service.data.base import DataService

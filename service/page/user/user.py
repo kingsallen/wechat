@@ -3,7 +3,7 @@
 from datetime import datetime
 
 import tornado.gen as gen
-from util.tool import http_tool
+from util.tool import http_tool, str_tool
 import conf.common as const
 from service.page.base import PageService
 from setting import settings
@@ -261,6 +261,40 @@ class UserPageService(PageService):
             "company_id": company_id
         })
         raise gen.Return(ret)
+
+    @gen.coroutine
+    def get_employee_total_points(self, employee_id):
+        """获取员工总积分"""
+        employee_sum = yield self.user_employee_points_record_ds.get_user_employee_points_record_sum(
+            conds={ "employee_id": employee_id }, fields=["award"])
+
+        if employee_sum.sum_award:
+            return employee_sum.sum_award
+        return 0
+
+    @gen.coroutine
+    def get_employee_recommend_hb_amount(self, company_id, qx_wxuserid):
+        """
+        获取在在公司下单个 qx_openid 获取的推荐红包金额总额
+        :param company_id:
+        :param qx_wxuserid:
+        :return:
+        """
+        hb_config_list = yield self.hr_hb_config_ds.get_hr_hb_config({
+            'company_id': company_id,
+            'type': 1
+        })
+
+        if not hb_config_list:
+            return 0
+
+        hb_config_ids = set([e.id for e in hb_config_list])
+
+        hb_items_sum = yield self.hr_hb_items_ds.get_hb_items_amount_sum(
+            conds={ "wxuser_id": qx_wxuserid }, fields=['amount'],
+            appends="hb_config_id in %s" % str_tool.set_literl(hb_config_ids))
+
+        return hb_items_sum.sum_amount if hb_items_sum.sum_amount else 0
 
     @gen.coroutine
     def get_employee_cert_conf(self, company_id):

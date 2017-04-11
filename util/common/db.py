@@ -383,19 +383,13 @@ class DB(object):
 
         return sql
 
-    def select_sum(
-            self,
-            table,
-            conds=None,
-            fields=None,
-            appends=None,
-            index=''):
+    def select_sum(self, table, conds=None, fields=None, appends=None,
+                   index=''):
         """
         Select查询记录列值总和
         :param table: 表名
         :param conds: 限制条件
         :param fields: 查询字段
-        :param options: SQL前置条件
         :param appends: SQL后置选项
         :param index: 支持mysql的USE/IGNORE/FORCE Index的语法，指定索引名称
         :return: 返回拼装SQL

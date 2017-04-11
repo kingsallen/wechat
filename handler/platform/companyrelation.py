@@ -7,18 +7,16 @@
 
 """
 import ujson
+
 from tornado import gen
 
 import conf.common as const
 from handler.base import BaseHandler
-
-from util.common import ObjectDict
-from util.common.decorator import check_sub_company
-from util.common.decorator import handle_response, authenticated
-from util.tool.str_tool import add_item
-
 from tests.dev_data.user_company_config import COMPANY_CONFIG
-from handler.help.newjd_status_check import NewJDStatusCheckerRedirect
+from util.common import ObjectDict
+from util.common.decorator import check_sub_company, handle_response, \
+    authenticated, NewJDStatusCheckerRedirect
+from util.tool.str_tool import add_item
 
 
 class CompanyVisitReqHandler(BaseHandler):
@@ -94,6 +92,7 @@ class CompanyHandler(BaseHandler):
 
         return default
 
+
 class CompanyInfoHandler(BaseHandler):
     """公司详情页老样式"""
 
@@ -117,7 +116,11 @@ class CompanyInfoHandler(BaseHandler):
         })
 
         add_item(company_data, "company", company)
-        self.render_page(template_name='company/info_old.html', data=company_data, meta_title=const.PAGE_COMPANY_INFO)
+        self.render_page(
+            template_name='company/info_old.html',
+            data=company_data,
+            meta_title=const.PAGE_COMPANY_INFO)
+
 
 class CompanySurveyHandler(BaseHandler):
     @handle_response

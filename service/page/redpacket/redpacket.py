@@ -233,6 +233,109 @@ class RedpacketPageService(PageService):
         self.logger.debug("[RP]员工认证红包发送成功")
 
     @gen.coroutine
+    def handle_red_packet_recom(self, recom_current_user, recom_record_id, redislocker,
+                                realname, position_title):
+        """推荐类红包入口"""
+
+        # 校验红包活动
+        rp_config = yield self.hr_hb_config_ds.get_hr_hb_config({
+            'company_id': recom_current_user.company.id,
+            'type':       const.RED_PACKET_TYPE_RECOM,
+            'status':     const.HB_CONFIG_RUNNING
+        })
+
+        if not rp_config:
+            self.logger.debug('[RP]推荐红包活动不存在, company_id: %s' %
+                              recom_current_user.company.id)
+            return
+
+        # 校验员工信息
+        employee = yield self.user_employee_ds.get_employee({
+            'sysuser_id': recom_current_user.sysuser.id,
+            'company_id': recom_current_user.company.id,
+            'activation': const.OLD_YES,
+            'status':     const.OLD_YES,
+            'disable':    const.OLD_YES
+        })
+        if not employee:
+            self.logger.debug(
+                '[RP]员工绑定状态不正确, user_id: %s, company_id: %s' % (
+                    recom_current_user.sysuser.id,
+                    recom_current_user.company.id))
+            return
+
+        recom_record = yield self.candidate_recom_record_ds.get_candidate_recom_record(
+            {'id': recom_record_id})
+
+        if not recom_record:
+            self.logger.debug(
+                '[RP]推荐数据不正确, recom_record_id: %s' % recom_record_id)
+            return
+
+        self.logger.debug("[RP]推荐红包开始")
+
+        company_id = recom_current_user.company.id
+        user_id = recom_current_user.sysuser.id
+        recom_wechat = recom_current_user.wechat
+        recom_wxuser = recom_current_user.wxuser
+        recom_qxuser = recom_current_user.qxuser
+        # trigger_user_id = recom_record.presentee_user_id
+        # trigger_qxuser_id = 0
+
+        throttle_passed = yield self.__check_throttle_passed(rp_config,recom_qxuser.id)
+        if not throttle_passed:
+            self.logger.debug(
+                '[RP]throttle上限校验失败, company_id: %s， user_id: %s' % company_id, user_id)
+            return
+
+        rplock_key = const.RP_RECOM_LOCK_FMT % (rp_config.id, user_id)
+        if redislocker.incr(rplock_key) is FIRST_LOCK:
+            self.logger.debug("[RP]红包锁创建成功， rplock_key: %s" % rplock_key)
+
+            try:
+                if self.__hit_red_packet(rp_config.probability):
+                    self.logger.debug("[RP]掷骰子通过,准备发送红包信封(有金额)")
+
+                    # 发送红包消息模版(有金额)
+                    self.__send_red_packet_card(
+                        recom_wxuser.openid,
+                        recom_wechat.id,
+                        rp_config,
+                        recom_qxuser.id,
+                        position=None,
+                        company_name=recom_current_user.company.name,
+                        recomee_name=realname,
+                        position_title=position_title,
+                        recom_qx_user=recom_qxuser
+                    )
+                else:
+                    # 发送红包消息模版(抽不中)
+                    self.logger.debug("[RP]掷骰子不通过,准备发送红包信封(无金额)")
+                    self.__send_zero_amount_card(
+                        recom_wxuser.openid,
+                        recom_wechat.id,
+                        rp_config,
+                        recom_qxuser.id,
+                        company_name=recom_current_user.company.name,
+                        recomee_name=realname,
+                        position_title=position_title,
+                        recom_qx_user=recom_qxuser
+                    )
+
+            except Exception as e:
+                self.logger.error(e)
+            finally:
+                # 释放红包锁
+                redislocker.delete(rplock_key)
+                self.logger.debug("[RP]红包锁释放成功， rplock_key: %s" % rplock_key)
+        else:
+            self.logger.debug(
+                "[RP]触发红包锁，该红包逻辑正在处理中， rplock_key: %s" % rplock_key)
+
+        self.logger.debug("[RP]推荐红包发送成功")
+
+
+    @gen.coroutine
     def handle_red_packet_position_related(self,
                                            current_user,
                                            position,
@@ -576,7 +679,7 @@ class RedpacketPageService(PageService):
         self.logger.debug("[RP]hb_throttle: %s" % hb_throttle)
         ret = float(current_amount_sum) + float(next_amount) <= float(hb_throttle)
 
-        raise gen.Return(ret)
+        return ret
 
     @gen.coroutine
     def __get_amount_sum_config_id_and_wxuser_id(self, hb_config_id, wxuser_id):
@@ -1191,3 +1294,15 @@ class RedpacketPageService(PageService):
 
         raise gen.Return(ret)
 
+    @gen.coroutine
+    def get_position_title_by_recom_record_id(self, recom_record_id):
+        ret = ''
+        try:
+            recom_record = yield self.candidate_recom_record_ds.get_candidate_recom_record({'id': recom_record_id})
+            position_id = recom_record.position_id
+            position = yield self.job_position_ds.get_position({'id': position_id})
+            ret = position.title
+        except AttributeError as e:
+            self.logger.error(e)
+        finally:
+            return ret

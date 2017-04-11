@@ -7,11 +7,10 @@ import conf.message as msg
 import conf.path as path
 import conf.wechat as wx
 from handler.base import BaseHandler
-from handler.help.newjd_status_check import NewJDStatusCheckerRedirect
 from tests.dev_data.user_company_config import COMPANY_CONFIG
 from util.common import ObjectDict
 from util.common.cipher import encode_id
-from util.common.decorator import handle_response, authenticated
+from util.common.decorator import handle_response, authenticated, NewJDStatusCheckerRedirect
 from util.tool.str_tool import gen_salary, add_item, split
 from util.tool.url_tool import make_url, url_append_query
 from util.wechat.template import position_view_five_notice_tpl

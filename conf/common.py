@@ -199,7 +199,7 @@ SYSUSER_HEADIMG = "weixin/images/hr-avatar-default.png"
 HR_HEADIMG = "weixin/images/default-HR.png"
 COMPANY_HEADIMG = "common/images/default-company-logo.jpg"
 
-# 招聘进度全状态(对应hr_points_conf中template_id)
+# 招聘进度全状态(对应hr_points_conf 中 template_id)
 RECRUIT_STATUS_RECOMCLICK_ID = 7  # 转发被点击
 RECRUIT_STATUS_FULL_RECOM_INFO_ID = 13  # 完善被推荐人
 RECRUIT_STATUS_APPLY_ID = 1  # 提交简历成功

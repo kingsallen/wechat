@@ -835,6 +835,8 @@ class ProfileSectionHandler(BaseHandler):
             self.send_json_error()
     # Profile 编辑 -- jobpref 结束
 
+
+
     def _send_json_result(self, results, component_len):
         """json api 返回修改成功，失败，部分成功的"""
         success_results = [result for result in results if result is True]

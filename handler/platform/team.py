@@ -5,10 +5,10 @@
 from tornado import gen
 
 from handler.base import BaseHandler
-from handler.help.newjd_status_check import NewJDStatusChecker404
 from tests.dev_data.user_company_config import COMPANY_CONFIG
 from util.common import ObjectDict
-from util.common.decorator import check_sub_company, handle_response
+from util.common.decorator import NewJDStatusChecker404, check_sub_company, \
+    handle_response
 from util.tool.url_tool import url_append_query
 
 

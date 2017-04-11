@@ -9,10 +9,7 @@
 
 from tornado import gen
 
-import conf.common as const
-import conf.message as msg
 import conf.path as path
-
 from handler.base import BaseHandler
 from util.common.decorator import handle_response
 from util.tool.url_tool import make_url

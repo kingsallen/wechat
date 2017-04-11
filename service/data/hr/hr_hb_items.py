@@ -62,3 +62,23 @@ class HrHbItemsDataService(DataService):
 
         response = yield self.hr_hb_items_dao.insert_record(fields, options)
         raise gen.Return(response)
+
+    @gen.coroutine
+    def get_hb_items_amount_sum(self, conds, fields, appends=None, index=''):
+
+        appends = appends or []
+
+        if conds is None or not (isinstance(conds, (dict, str))):
+            self.logger.warning(
+                "Warning:[get_hb_items_amount_sum][invalid parameters], "
+                "Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
+            raise gen.Return(None)
+
+        if not fields:
+            fields = list(
+                self.hr_hb_items_dao.fields_map.keys())
+
+        response = yield self.hr_hb_items_dao.get_sum_by_conds(
+            conds, fields, appends, index)
+
+        raise gen.Return(response)

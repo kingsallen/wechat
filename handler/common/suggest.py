@@ -3,7 +3,6 @@
 from functools import partial
 
 import tornado.gen as gen
-from tornado.escape import json_encode
 
 from handler.base import BaseHandler
 from util.tool.str_tool import pinyin_match
