@@ -613,10 +613,10 @@ class PositionHandler(BaseHandler):
         return res
 
     @gen.coroutine
-    def _make_team(self, team):
+    def _make_team(self, team, teamname_custom):
         """所属团队，构造数据"""
         more_link = make_url(path.TEAM_PATH.format(team.id), self.params),
-        res = yield self.position_ps.get_team_data(team, more_link)
+        res = yield self.position_ps.get_team_data(team, more_link, teamname_custom)
         raise gen.Return(res)
 
 
