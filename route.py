@@ -62,7 +62,7 @@ common_routes = [
     (r"/m/login",                                      handler.common.passport.LoginHandler,                      {"event": "passport_login"}),
     (r"/m/logout",                                     handler.common.passport.LogoutHandler,                     {"event": "passport_logout"}),
     (r"/m/register[\/]*([a-z]+)*",                     handler.common.passport.RegisterHandler,                   {"event": "register_"}),
-    (r"/m/position/(?P<position_id>\d+)",              handler.common.position.PositionHandler,                   {"event": "position_info"}),
+
     (r"/m/application",                                handler.common.application.ApplicationHandler,             {"event": "application_profile"}),
     (r"/m/application/email",                          handler.common.application.ApplicationEmailHandler,        {"event": "application_email"}),
     (r"/m/positionfav/([0-9]+)",                       handler.common.position.PositionFavHandler,                {"event": "position_fav"}),
@@ -96,6 +96,7 @@ common_routes = [
 # 企业号的单独 routes
 platform_routes = [
     # position
+    (r"/m/position/(?P<position_id>\d+)",              handler.platform.position.PositionHandler,                 {"event": "position_info"}),
     (r"/m/position",                                   handler.platform.position.PositionListHandler,             {"event": "position_list"}),
     (r"/m/start",                                      handler.platform.landing.LandingHandler,                   {"event": "start_landing"}),
     (r"/m/company/(\d+)",                              handler.platform.companyrelation.CompanyInfoHandler,       {"event": "company_old_info"}),

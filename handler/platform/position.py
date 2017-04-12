@@ -61,7 +61,12 @@ class PositionHandler(BaseHandler):
             self.logger.debug("[JD]构建相似职位推荐")
             recomment_positions_res = yield self.position_ps.get_recommend_positions(position_id)
 
-            header = self._make_json_header(position_info, company_info, star, application, endorse, can_apply, team.id, did)
+            # 获取公司配置信息
+            teamname_custom = self.current_user.company.conf_teamname_custom
+
+            header = self._make_json_header(
+                position_info, company_info, star, application, endorse,
+                can_apply, team.id if team else 0, did, teamname_custom)
             module_job_description = self._make_json_job_description(position_info)
             module_job_need = self._make_json_job_need(position_info)
             module_feature = self._make_json_job_feature(position_info)
@@ -280,9 +285,8 @@ class PositionHandler(BaseHandler):
         return res
 
     def _make_json_header(self, position_info, company_info, star, application,
-                          endorse, can_apply, team_id, did):
+                          endorse, can_apply, team_id, did, teamname_custom):
         """构造头部 header 信息"""
-
         data = ObjectDict({
             "id": position_info.id,
             "title": position_info.title,
@@ -300,6 +304,7 @@ class PositionHandler(BaseHandler):
             "did": did if did != self.current_user.company.id else "", # 主公司不需要提供 did
             "salary": position_info.salary,
             "hr_chat": int(self.current_user.wechat.hr_chat),
+            "teamname_custom": teamname_custom["teamname_custom"]
             #"team": position_info.department.lower() if position_info.department else ""
         })
 
