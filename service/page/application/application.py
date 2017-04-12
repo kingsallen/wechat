@@ -895,6 +895,7 @@ class ApplicationPageService(PageService):
 
         work_exp_years = profile_ps.calculate_workyears(
             profile.get("workexps", []))
+        profile.work_exp_years = work_exp_years
 
         save_application_file(
             profile,
