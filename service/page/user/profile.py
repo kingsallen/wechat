@@ -786,24 +786,31 @@ class ProfilePageService(PageService):
         max_end_date = None
         until_now = False
         workyears = 0
+
+        if not p_workexps:
+            return workyears
+
         try:
             for workexp in p_workexps:
-                if (min_start_date is None or min_start_date > workexp.get(
-                    "start_date")):
+                if (min_start_date is None or
+                    min_start_date > workexp.get("start_date")):
+
                     min_start_date = workexp.get("start_date")
 
-                if (max_end_date is None or max_end_date < workexp.get(
-                    "end_date")):
+                if (max_end_date is None or
+                    max_end_date < workexp.get("end_date")):
+
                     max_end_date = workexp.get("end_date")
 
-                if not until_now and workexp.get(
-                    "end_until_now"): until_now = workexp.get("end_until_now")
+                if not until_now and workexp.get("end_until_now"):
+                    until_now = workexp.get("end_until_now")
 
             if until_now:
                 max_end_date = curr_datetime_now().year
             else:
                 max_end_date = max_end_date[:4]
-            workyears = (int(max_end_date) - int(min_start_date[:4]))
+
+            workyears = int(max_end_date) - int(min_start_date[:4])
         except Exception:
             workyears = 0
         finally:
