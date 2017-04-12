@@ -177,7 +177,7 @@ class EmployeePageService(PageService):
 
         return data
 
-    def make_bind_params(self,user_id, company_id, json_args):
+    def make_bind_params(self, user_id, company_id, json_args):
         """
         构建员工绑定的参数集合
         :param user_id:
@@ -186,6 +186,7 @@ class EmployeePageService(PageService):
         :return:
         """
         type = json_args.type
+
         needed_keys = ['type', 'name', 'mobile']
 
         if type == self.FE_BIND_TYPE_CUSTOM:

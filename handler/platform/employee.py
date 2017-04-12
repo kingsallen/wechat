@@ -176,7 +176,7 @@ class EmployeeBindHandler(BaseHandler):
 
         self.send_json_success(
             message=message,
-            data={ 'next_url': next_url }
+            data={'next_url': next_url}
         )
         self.finish()
 
@@ -204,7 +204,6 @@ class EmployeeBindEmailHandler(BaseHandler):
 
         self.render(template_name='employee/certification-%s.html' % tname,
                     **tparams)
-
 
         employee = yield self.employee_ps.get_valid_employee_record_by_activation_code(activation_code)
 
@@ -350,5 +349,5 @@ class BindedHandler(BaseHandler):
                 template_name='refer/weixin/employee/employee_binding_tip.html',
                 result=0,
                 messages=messages.EMPLOYEE_BINDING_SUCCESS,
-                nexturl=make_url(path.POSITION_LIST, self.params)
+                nexturl=make_url(path.EMPLOYEE_VERIFY, self.params)
             )
