@@ -33,8 +33,8 @@ class PositionHandler(BaseHandler):
                 return
 
             # hr端功能不全，暂且通过团队名称匹配
-            team = yield self.team_ps.get_team_by_name(position_info.department, position_info.company_id)
-            # team = yield self.team_ps.get_team_by_id(position_info.team_id)
+            #team = yield self.team_ps.get_team_by_name(position_info.department, position_info.company_id)
+            team = yield self.team_ps.get_team_by_id(position_info.team_id)
 
             self.logger.debug("[JD]构建收藏信息")
             star = yield self.position_ps.is_position_stared_by(position_id, self.current_user.sysuser.id)
