@@ -85,7 +85,8 @@ class EmployeeUnbindHandler(BaseHandler):
         )
         fe_bind_status = self.employee_ps.convert_bind_status_from_thrift_to_fe(infra_bind_status)
 
-        if fe_bind_status == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS:
+        if fe_bind_status in [fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS,
+                              fe.FE_EMPLOYEE_BIND_STATUS_PENDING]:
 
             result, message = yield self.employee_ps.unbind(
                 employee.id,
@@ -99,7 +100,7 @@ class EmployeeUnbindHandler(BaseHandler):
             else:
                 self.send_json_error(message=message)
         else:
-            self.send_json_error(message='not binded')
+            self.send_json_error(message='not binded or pending')
 
 
 class EmployeeBindHandler(BaseHandler):
