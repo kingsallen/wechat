@@ -314,6 +314,7 @@ class EmployeePageService(PageService):
 
         for s in selects:
             s.fvalues = json.loads(s.fvalues)
+            s.required = s.mandatory == const.YES
         return selects
 
     @gen.coroutine
