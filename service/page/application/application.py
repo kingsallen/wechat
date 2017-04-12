@@ -379,17 +379,21 @@ class ApplicationPageService(PageService):
 
         cv_conf = yield self.get_hr_app_cv_conf(position.app_cv_config_id)
         fields = self.make_fields_list(cv_conf)
+        custom_fields = [e.get('field_name') for e in fields
+                         if not e.get('map')]
 
         if profile.others:
             p_other = json.loads(profile.others[0].get('other'))
 
-            for field in fields:
-                if p_other.get(field):
-                    resume_other.update({field: p_other.get(field)})
+            for custom_field in custom_fields:
+                if p_other.get(custom_field):
+                    resume_other.update({custom_field: p_other.get(custom_field)})
+
             resume_other_to_insert = json_dumps(resume_other)
             self.logger.debug('resume_other_to_insert: %s' % resume_other_to_insert)
-            yield self.hr_resume_other_ds.insert_job_resume_other({
-                'appid': app_id,
+
+            yield self.job_resume_other_ds.insert_job_resume_other({
+                'app_id': app_id,
                 'other': resume_other_to_insert
             })
             return True, None
@@ -895,6 +899,8 @@ class ApplicationPageService(PageService):
 
         work_exp_years = profile_ps.calculate_workyears(
             profile.get("workexps", []))
+        # add work_exp_years attribute manually
+        # pdf generating will use this attribute
         profile.work_exp_years = work_exp_years
 
         save_application_file(

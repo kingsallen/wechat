@@ -24,7 +24,7 @@ class Candidate(object):
      - presenteeLogo
      - isRecom
      - viewNumber
-     - isInsterested
+     - insterested
     """
 
     thrift_spec = (
@@ -37,10 +37,10 @@ class Candidate(object):
         (6, TType.STRING, 'presenteeLogo', 'UTF8', None, ),  # 6
         (7, TType.I32, 'isRecom', None, None, ),  # 7
         (8, TType.I32, 'viewNumber', None, None, ),  # 8
-        (9, TType.BOOL, 'isInsterested', None, None, ),  # 9
+        (9, TType.BOOL, 'insterested', None, None, ),  # 9
     )
 
-    def __init__(self, id=None, presenteeUserId=None, presenteeName=None, presenteeFriendId=None, presenteeFriendName=None, presenteeLogo=None, isRecom=None, viewNumber=None, isInsterested=None,):
+    def __init__(self, id=None, presenteeUserId=None, presenteeName=None, presenteeFriendId=None, presenteeFriendName=None, presenteeLogo=None, isRecom=None, viewNumber=None, insterested=None,):
         self.id = id
         self.presenteeUserId = presenteeUserId
         self.presenteeName = presenteeName
@@ -49,7 +49,7 @@ class Candidate(object):
         self.presenteeLogo = presenteeLogo
         self.isRecom = isRecom
         self.viewNumber = viewNumber
-        self.isInsterested = isInsterested
+        self.insterested = insterested
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -102,7 +102,7 @@ class Candidate(object):
                     iprot.skip(ftype)
             elif fid == 9:
                 if ftype == TType.BOOL:
-                    self.isInsterested = iprot.readBool()
+                    self.insterested = iprot.readBool()
                 else:
                     iprot.skip(ftype)
             else:
@@ -147,9 +147,9 @@ class Candidate(object):
             oprot.writeFieldBegin('viewNumber', TType.I32, 8)
             oprot.writeI32(self.viewNumber)
             oprot.writeFieldEnd()
-        if self.isInsterested is not None:
-            oprot.writeFieldBegin('isInsterested', TType.BOOL, 9)
-            oprot.writeBool(self.isInsterested)
+        if self.insterested is not None:
+            oprot.writeFieldBegin('insterested', TType.BOOL, 9)
+            oprot.writeBool(self.insterested)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
