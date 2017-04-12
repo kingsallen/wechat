@@ -286,8 +286,8 @@ class CustomInfoHandler(BaseHandler):
         )
         # unbinded users may not need to know this page
         if (self.employee_ps.convert_bind_status_from_thrift_to_fe(
-            binding_status) !=
-                fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS):
+            binding_status) not in [fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS,
+                                    fe.FE_EMPLOYEE_BIND_STATUS_PENDING]):
             self.write_error(404)
         elif (str(employee.id) != self.params._employeeid or
                 not self.params._employeeid):
