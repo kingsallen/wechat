@@ -248,7 +248,7 @@ class CustomInfoHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def get(self):
-        binding_status = yield self.employee_ps.get_employee_bind_status(
+        binding_status, employee = yield self.employee_ps.get_employee_info(
             self.current_user.sysuser.id,
             self.current_user.company.id
         )
