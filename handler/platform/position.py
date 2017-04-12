@@ -116,7 +116,7 @@ class PositionHandler(BaseHandler):
                 module_company_info = self._make_json_job_company_info(company_info, did)
                 self.logger.debug("[JD]构建团队相关信息")
                 yield self._add_team_data(position_data, team,
-                                          position_info.company_id, position_id)
+                                          position_info.company_id, position_id, teamname_custom)
 
                 add_item(position_data, "module_company_info", module_company_info)
                 add_item(position_data, "module_job_require", module_job_require)
@@ -574,12 +574,12 @@ class PositionHandler(BaseHandler):
                                          position_info.salary)
 
     @gen.coroutine
-    def _add_team_data(self, position_data, team, company_id, position_id):
+    def _add_team_data(self, position_data, team, company_id, position_id, teamname_custom):
 
         if team:
             company_config = COMPANY_CONFIG.get(company_id)
             module_team_position = yield self._make_team_position(
-                team, position_id, company_id)
+                team, position_id, company_id, teamname_custom)
             if module_team_position:
                 add_item(position_data, "module_team_position",
                          module_team_position)
@@ -594,10 +594,10 @@ class PositionHandler(BaseHandler):
                     add_item(position_data, "module_team", module_team)
 
     @gen.coroutine
-    def _make_team_position(self, team, position_id, company_id):
+    def _make_team_position(self, team, position_id, company_id, teamname_custom):
         """团队职位，构造数据"""
         res = yield self.position_ps.get_team_position(
-            team.name, self.params, position_id, company_id)
+            team.id, self.params, position_id, company_id, teamname_custom)
         raise gen.Return(res)
 
     @gen.coroutine
