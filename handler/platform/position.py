@@ -745,7 +745,6 @@ class PositionListHandler(BaseHandler):
 
         infra_params = ObjectDict()
 
-        # 暂时不考虑 QX 的情况
         infra_params.company_id = self.current_user.company.id
 
         if self.params.did:
