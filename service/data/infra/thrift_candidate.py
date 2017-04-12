@@ -3,15 +3,17 @@
 import tornado.gen as gen
 
 from service.data.base import DataService
-from util.common import ObjectDict
-from util.common.decorator import cache
-from thrift_gen.gen.candidate.service.CandidateService import Client as CandidateServiceClient
 from service.data.infra.framework.client.client import ServiceClientFactory
+from service.page.employee.candidate import RecomException
+from thrift_gen.gen.candidate.service.CandidateService import Client as CandidateServiceClient
+from thrift_gen.gen.candidate.struct.ttypes import CandidateListParam
+from thrift_gen.gen.common.struct.ttypes import BIZException
+from util.common import ObjectDict
 
 
 class ThriftCandidateDataService(DataService):
 
-    """对接 useraccounts 的 thrift 接口
+    """对接 CandidateService 的 thrift 接口
     """
 
     candidate_service_cilent = ServiceClientFactory.get_service(
@@ -32,3 +34,58 @@ class ThriftCandidateDataService(DataService):
         ret = yield self.candidate_service_cilent.changeInteresting(int(user_id), int(position_id), int(is_interested))
         self.logger.debug("[thrift]send_candidate_interested: %s" % ret)
         raise gen.Return(ret)
+
+    @gen.coroutine
+    def get_candidate_list(self, post_user_id, click_time, is_recom, company_id):
+        """获取候选人（要推荐的人）列表"""
+
+        params = CandidateListParam()
+        params.postUserId = int(post_user_id)
+        params.clickTime = str(click_time)
+        params.recoms = is_recom  # -> [int]
+        params.companyId = int(company_id)
+
+        try:
+            ret_list = yield self.candidate_service_cilent.candidateList(params)
+            self.logger.debug("[thrift]get_candidate_list: %s" % ret_list)
+
+            ret = []
+
+            for el in ret_list:
+                recom_group = ObjectDict()
+                recom_group.position_id = el.positionId
+                recom_group.position_title = el.positionName
+                recom_group.candidates = []
+
+                for c in el.candidates:
+                    c_info = ObjectDict()
+                    c_info.recom_record_id = c.id
+                    c_info.presentee_user_id = c.presenteeUserId  # 被动求职者编号
+                    c_info.presentee_name = c.presenteeName  # 被动求职者称呼
+                    c_info.presentee_friend_id = c.presenteeFriendId  # 一度朋友编号
+                    c_info.presentee_friend_name = c.presenteeFriendName  # 一度朋友称呼
+                    c_info.presentee_logo = c.presenteeLogo  # 头像
+                    c_info.is_recom = c.isRecom  # 推荐状态
+                    c_info.is_interested = c.isInsterested
+                    c_info.view_num = c.viewNumber
+                    recom_group.candidates.append(c_info)
+
+                ret.append(recom_group)
+
+        except BIZException as BizE:
+
+            self.logger.warn("%s - %s" % (BizE.code, BizE.message))
+            e = RecomException()
+            e.code = BizE.code
+            e.message = BizE.message
+            raise e
+
+        return ret
+
+    # @gen.coroutine
+    # def get_recomendations(self, company_id, id_list):
+    #     try:
+    #         recommend_result = yield self.candidate_service_cilent.getRecomendations(int(company_id), id_list)
+    #         return recommend_result
+    #     except
+

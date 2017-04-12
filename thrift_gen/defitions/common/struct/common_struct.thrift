@@ -26,3 +26,8 @@ exception CURDException {
     1: i32 code,
     2: string message
 }
+
+exception BIZException {
+    1: i32 code,
+    2: string message
+}

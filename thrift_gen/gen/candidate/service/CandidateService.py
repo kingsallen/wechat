@@ -36,6 +36,54 @@ class Iface(object):
         """
         pass
 
+    def candidateList(self, param):
+        """
+        Parameters:
+         - param
+        """
+        pass
+
+    def getRecomendations(self, companyId, idList):
+        """
+        Parameters:
+         - companyId
+         - idList
+        """
+        pass
+
+    def recommend(self, param):
+        """
+        Parameters:
+         - param
+        """
+        pass
+
+    def getRecommendation(self, id, postUserId):
+        """
+        Parameters:
+         - id
+         - postUserId
+        """
+        pass
+
+    def getRecommendatorySorting(self, postUserId, companyId):
+        """
+        Parameters:
+         - postUserId
+         - companyId
+        """
+        pass
+
+    def ignore(self, id, companyId, postUserId, clickTime):
+        """
+        Parameters:
+         - id
+         - companyId
+         - postUserId
+         - clickTime
+        """
+        pass
+
 
 class Client(Iface):
     def __init__(self, transport, iprot_factory, oprot_factory=None):
@@ -142,6 +190,222 @@ class Client(Iface):
             return result.success
         raise TApplicationException(TApplicationException.MISSING_RESULT, "changeInteresting failed: unknown result")
 
+    def candidateList(self, param):
+        """
+        Parameters:
+         - param
+        """
+        self._seqid += 1
+        future = self._reqs[self._seqid] = concurrent.Future()
+        self.send_candidateList(param)
+        return future
+
+    def send_candidateList(self, param):
+        oprot = self._oprot_factory.getProtocol(self._transport)
+        oprot.writeMessageBegin('candidateList', TMessageType.CALL, self._seqid)
+        args = candidateList_args()
+        args.param = param
+        args.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def recv_candidateList(self, iprot, mtype, rseqid):
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = candidateList_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        if result.e is not None:
+            raise result.e
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "candidateList failed: unknown result")
+
+    def getRecomendations(self, companyId, idList):
+        """
+        Parameters:
+         - companyId
+         - idList
+        """
+        self._seqid += 1
+        future = self._reqs[self._seqid] = concurrent.Future()
+        self.send_getRecomendations(companyId, idList)
+        return future
+
+    def send_getRecomendations(self, companyId, idList):
+        oprot = self._oprot_factory.getProtocol(self._transport)
+        oprot.writeMessageBegin('getRecomendations', TMessageType.CALL, self._seqid)
+        args = getRecomendations_args()
+        args.companyId = companyId
+        args.idList = idList
+        args.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def recv_getRecomendations(self, iprot, mtype, rseqid):
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = getRecomendations_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        if result.e is not None:
+            raise result.e
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "getRecomendations failed: unknown result")
+
+    def recommend(self, param):
+        """
+        Parameters:
+         - param
+        """
+        self._seqid += 1
+        future = self._reqs[self._seqid] = concurrent.Future()
+        self.send_recommend(param)
+        return future
+
+    def send_recommend(self, param):
+        oprot = self._oprot_factory.getProtocol(self._transport)
+        oprot.writeMessageBegin('recommend', TMessageType.CALL, self._seqid)
+        args = recommend_args()
+        args.param = param
+        args.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def recv_recommend(self, iprot, mtype, rseqid):
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = recommend_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        if result.e is not None:
+            raise result.e
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "recommend failed: unknown result")
+
+    def getRecommendation(self, id, postUserId):
+        """
+        Parameters:
+         - id
+         - postUserId
+        """
+        self._seqid += 1
+        future = self._reqs[self._seqid] = concurrent.Future()
+        self.send_getRecommendation(id, postUserId)
+        return future
+
+    def send_getRecommendation(self, id, postUserId):
+        oprot = self._oprot_factory.getProtocol(self._transport)
+        oprot.writeMessageBegin('getRecommendation', TMessageType.CALL, self._seqid)
+        args = getRecommendation_args()
+        args.id = id
+        args.postUserId = postUserId
+        args.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def recv_getRecommendation(self, iprot, mtype, rseqid):
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = getRecommendation_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        if result.e is not None:
+            raise result.e
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "getRecommendation failed: unknown result")
+
+    def getRecommendatorySorting(self, postUserId, companyId):
+        """
+        Parameters:
+         - postUserId
+         - companyId
+        """
+        self._seqid += 1
+        future = self._reqs[self._seqid] = concurrent.Future()
+        self.send_getRecommendatorySorting(postUserId, companyId)
+        return future
+
+    def send_getRecommendatorySorting(self, postUserId, companyId):
+        oprot = self._oprot_factory.getProtocol(self._transport)
+        oprot.writeMessageBegin('getRecommendatorySorting', TMessageType.CALL, self._seqid)
+        args = getRecommendatorySorting_args()
+        args.postUserId = postUserId
+        args.companyId = companyId
+        args.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def recv_getRecommendatorySorting(self, iprot, mtype, rseqid):
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = getRecommendatorySorting_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        if result.e is not None:
+            raise result.e
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "getRecommendatorySorting failed: unknown result")
+
+    def ignore(self, id, companyId, postUserId, clickTime):
+        """
+        Parameters:
+         - id
+         - companyId
+         - postUserId
+         - clickTime
+        """
+        self._seqid += 1
+        future = self._reqs[self._seqid] = concurrent.Future()
+        self.send_ignore(id, companyId, postUserId, clickTime)
+        return future
+
+    def send_ignore(self, id, companyId, postUserId, clickTime):
+        oprot = self._oprot_factory.getProtocol(self._transport)
+        oprot.writeMessageBegin('ignore', TMessageType.CALL, self._seqid)
+        args = ignore_args()
+        args.id = id
+        args.companyId = companyId
+        args.postUserId = postUserId
+        args.clickTime = clickTime
+        args.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def recv_ignore(self, iprot, mtype, rseqid):
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = ignore_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        if result.e is not None:
+            raise result.e
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "ignore failed: unknown result")
+
 
 class Processor(Iface, TProcessor):
     def __init__(self, handler):
@@ -149,6 +413,12 @@ class Processor(Iface, TProcessor):
         self._processMap = {}
         self._processMap["glancePosition"] = Processor.process_glancePosition
         self._processMap["changeInteresting"] = Processor.process_changeInteresting
+        self._processMap["candidateList"] = Processor.process_candidateList
+        self._processMap["getRecomendations"] = Processor.process_getRecomendations
+        self._processMap["recommend"] = Processor.process_recommend
+        self._processMap["getRecommendation"] = Processor.process_getRecommendation
+        self._processMap["getRecommendatorySorting"] = Processor.process_getRecommendatorySorting
+        self._processMap["ignore"] = Processor.process_ignore
 
     def process(self, iprot, oprot):
         (name, type, seqid) = iprot.readMessageBegin()
@@ -184,6 +454,96 @@ class Processor(Iface, TProcessor):
         result = changeInteresting_result()
         result.success = yield gen.maybe_future(self._handler.changeInteresting(args.user_id, args.position_id, args.is_interested))
         oprot.writeMessageBegin("changeInteresting", TMessageType.REPLY, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    @gen.coroutine
+    def process_candidateList(self, seqid, iprot, oprot):
+        args = candidateList_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = candidateList_result()
+        try:
+            result.success = yield gen.maybe_future(self._handler.candidateList(args.param))
+        except thrift_gen.gen.common.struct.ttypes.BIZException as e:
+            result.e = e
+        oprot.writeMessageBegin("candidateList", TMessageType.REPLY, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    @gen.coroutine
+    def process_getRecomendations(self, seqid, iprot, oprot):
+        args = getRecomendations_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = getRecomendations_result()
+        try:
+            result.success = yield gen.maybe_future(self._handler.getRecomendations(args.companyId, args.idList))
+        except thrift_gen.gen.common.struct.ttypes.BIZException as e:
+            result.e = e
+        oprot.writeMessageBegin("getRecomendations", TMessageType.REPLY, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    @gen.coroutine
+    def process_recommend(self, seqid, iprot, oprot):
+        args = recommend_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = recommend_result()
+        try:
+            result.success = yield gen.maybe_future(self._handler.recommend(args.param))
+        except thrift_gen.gen.common.struct.ttypes.BIZException as e:
+            result.e = e
+        oprot.writeMessageBegin("recommend", TMessageType.REPLY, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    @gen.coroutine
+    def process_getRecommendation(self, seqid, iprot, oprot):
+        args = getRecommendation_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = getRecommendation_result()
+        try:
+            result.success = yield gen.maybe_future(self._handler.getRecommendation(args.id, args.postUserId))
+        except thrift_gen.gen.common.struct.ttypes.BIZException as e:
+            result.e = e
+        oprot.writeMessageBegin("getRecommendation", TMessageType.REPLY, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    @gen.coroutine
+    def process_getRecommendatorySorting(self, seqid, iprot, oprot):
+        args = getRecommendatorySorting_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = getRecommendatorySorting_result()
+        try:
+            result.success = yield gen.maybe_future(self._handler.getRecommendatorySorting(args.postUserId, args.companyId))
+        except thrift_gen.gen.common.struct.ttypes.BIZException as e:
+            result.e = e
+        oprot.writeMessageBegin("getRecommendatorySorting", TMessageType.REPLY, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    @gen.coroutine
+    def process_ignore(self, seqid, iprot, oprot):
+        args = ignore_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = ignore_result()
+        try:
+            result.success = yield gen.maybe_future(self._handler.ignore(args.id, args.companyId, args.postUserId, args.clickTime))
+        except thrift_gen.gen.common.struct.ttypes.BIZException as e:
+            result.e = e
+        oprot.writeMessageBegin("ignore", TMessageType.REPLY, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -442,6 +802,894 @@ class changeInteresting_result(object):
         if self.success is not None:
             oprot.writeFieldBegin('success', TType.STRUCT, 0)
             self.success.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class candidateList_args(object):
+    """
+    Attributes:
+     - param
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.STRUCT, 'param', (thrift_gen.gen.candidate.struct.ttypes.CandidateListParam, thrift_gen.gen.candidate.struct.ttypes.CandidateListParam.thrift_spec), None, ),  # 1
+    )
+
+    def __init__(self, param=None,):
+        self.param = param
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.param = thrift_gen.gen.candidate.struct.ttypes.CandidateListParam()
+                    self.param.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('candidateList_args')
+        if self.param is not None:
+            oprot.writeFieldBegin('param', TType.STRUCT, 1)
+            self.param.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class candidateList_result(object):
+    """
+    Attributes:
+     - success
+     - e
+    """
+
+    thrift_spec = (
+        (0, TType.LIST, 'success', (TType.STRUCT, (thrift_gen.gen.candidate.struct.ttypes.CandidateList, thrift_gen.gen.candidate.struct.ttypes.CandidateList.thrift_spec), False), None, ),  # 0
+        (1, TType.STRUCT, 'e', (thrift_gen.gen.common.struct.ttypes.BIZException, thrift_gen.gen.common.struct.ttypes.BIZException.thrift_spec), None, ),  # 1
+    )
+
+    def __init__(self, success=None, e=None,):
+        self.success = success
+        self.e = e
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.LIST:
+                    self.success = []
+                    (_etype3, _size0) = iprot.readListBegin()
+                    for _i4 in range(_size0):
+                        _elem5 = thrift_gen.gen.candidate.struct.ttypes.CandidateList()
+                        _elem5.read(iprot)
+                        self.success.append(_elem5)
+                    iprot.readListEnd()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.e = thrift_gen.gen.common.struct.ttypes.BIZException()
+                    self.e.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('candidateList_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.LIST, 0)
+            oprot.writeListBegin(TType.STRUCT, len(self.success))
+            for iter6 in self.success:
+                iter6.write(oprot)
+            oprot.writeListEnd()
+            oprot.writeFieldEnd()
+        if self.e is not None:
+            oprot.writeFieldBegin('e', TType.STRUCT, 1)
+            self.e.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class getRecomendations_args(object):
+    """
+    Attributes:
+     - companyId
+     - idList
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'companyId', None, None, ),  # 1
+        (2, TType.LIST, 'idList', (TType.I32, None, False), None, ),  # 2
+    )
+
+    def __init__(self, companyId=None, idList=None,):
+        self.companyId = companyId
+        self.idList = idList
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.companyId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.LIST:
+                    self.idList = []
+                    (_etype10, _size7) = iprot.readListBegin()
+                    for _i11 in range(_size7):
+                        _elem12 = iprot.readI32()
+                        self.idList.append(_elem12)
+                    iprot.readListEnd()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('getRecomendations_args')
+        if self.companyId is not None:
+            oprot.writeFieldBegin('companyId', TType.I32, 1)
+            oprot.writeI32(self.companyId)
+            oprot.writeFieldEnd()
+        if self.idList is not None:
+            oprot.writeFieldBegin('idList', TType.LIST, 2)
+            oprot.writeListBegin(TType.I32, len(self.idList))
+            for iter13 in self.idList:
+                oprot.writeI32(iter13)
+            oprot.writeListEnd()
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class getRecomendations_result(object):
+    """
+    Attributes:
+     - success
+     - e
+    """
+
+    thrift_spec = (
+        (0, TType.STRUCT, 'success', (thrift_gen.gen.candidate.struct.ttypes.RecommendResult, thrift_gen.gen.candidate.struct.ttypes.RecommendResult.thrift_spec), None, ),  # 0
+        (1, TType.STRUCT, 'e', (thrift_gen.gen.common.struct.ttypes.BIZException, thrift_gen.gen.common.struct.ttypes.BIZException.thrift_spec), None, ),  # 1
+    )
+
+    def __init__(self, success=None, e=None,):
+        self.success = success
+        self.e = e
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRUCT:
+                    self.success = thrift_gen.gen.candidate.struct.ttypes.RecommendResult()
+                    self.success.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.e = thrift_gen.gen.common.struct.ttypes.BIZException()
+                    self.e.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('getRecomendations_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.STRUCT, 0)
+            self.success.write(oprot)
+            oprot.writeFieldEnd()
+        if self.e is not None:
+            oprot.writeFieldBegin('e', TType.STRUCT, 1)
+            self.e.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class recommend_args(object):
+    """
+    Attributes:
+     - param
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.STRUCT, 'param', (thrift_gen.gen.candidate.struct.ttypes.RecommmendParam, thrift_gen.gen.candidate.struct.ttypes.RecommmendParam.thrift_spec), None, ),  # 1
+    )
+
+    def __init__(self, param=None,):
+        self.param = param
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.param = thrift_gen.gen.candidate.struct.ttypes.RecommmendParam()
+                    self.param.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('recommend_args')
+        if self.param is not None:
+            oprot.writeFieldBegin('param', TType.STRUCT, 1)
+            self.param.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class recommend_result(object):
+    """
+    Attributes:
+     - success
+     - e
+    """
+
+    thrift_spec = (
+        (0, TType.STRUCT, 'success', (thrift_gen.gen.candidate.struct.ttypes.RecommendResult, thrift_gen.gen.candidate.struct.ttypes.RecommendResult.thrift_spec), None, ),  # 0
+        (1, TType.STRUCT, 'e', (thrift_gen.gen.common.struct.ttypes.BIZException, thrift_gen.gen.common.struct.ttypes.BIZException.thrift_spec), None, ),  # 1
+    )
+
+    def __init__(self, success=None, e=None,):
+        self.success = success
+        self.e = e
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRUCT:
+                    self.success = thrift_gen.gen.candidate.struct.ttypes.RecommendResult()
+                    self.success.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.e = thrift_gen.gen.common.struct.ttypes.BIZException()
+                    self.e.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('recommend_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.STRUCT, 0)
+            self.success.write(oprot)
+            oprot.writeFieldEnd()
+        if self.e is not None:
+            oprot.writeFieldBegin('e', TType.STRUCT, 1)
+            self.e.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class getRecommendation_args(object):
+    """
+    Attributes:
+     - id
+     - postUserId
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'id', None, None, ),  # 1
+        (2, TType.I32, 'postUserId', None, None, ),  # 2
+    )
+
+    def __init__(self, id=None, postUserId=None,):
+        self.id = id
+        self.postUserId = postUserId
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.id = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.I32:
+                    self.postUserId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('getRecommendation_args')
+        if self.id is not None:
+            oprot.writeFieldBegin('id', TType.I32, 1)
+            oprot.writeI32(self.id)
+            oprot.writeFieldEnd()
+        if self.postUserId is not None:
+            oprot.writeFieldBegin('postUserId', TType.I32, 2)
+            oprot.writeI32(self.postUserId)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class getRecommendation_result(object):
+    """
+    Attributes:
+     - success
+     - e
+    """
+
+    thrift_spec = (
+        (0, TType.STRUCT, 'success', (thrift_gen.gen.candidate.struct.ttypes.RecomRecordResult, thrift_gen.gen.candidate.struct.ttypes.RecomRecordResult.thrift_spec), None, ),  # 0
+        (1, TType.STRUCT, 'e', (thrift_gen.gen.common.struct.ttypes.BIZException, thrift_gen.gen.common.struct.ttypes.BIZException.thrift_spec), None, ),  # 1
+    )
+
+    def __init__(self, success=None, e=None,):
+        self.success = success
+        self.e = e
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRUCT:
+                    self.success = thrift_gen.gen.candidate.struct.ttypes.RecomRecordResult()
+                    self.success.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.e = thrift_gen.gen.common.struct.ttypes.BIZException()
+                    self.e.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('getRecommendation_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.STRUCT, 0)
+            self.success.write(oprot)
+            oprot.writeFieldEnd()
+        if self.e is not None:
+            oprot.writeFieldBegin('e', TType.STRUCT, 1)
+            self.e.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class getRecommendatorySorting_args(object):
+    """
+    Attributes:
+     - postUserId
+     - companyId
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'postUserId', None, None, ),  # 1
+        (2, TType.I32, 'companyId', None, None, ),  # 2
+    )
+
+    def __init__(self, postUserId=None, companyId=None,):
+        self.postUserId = postUserId
+        self.companyId = companyId
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.postUserId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.I32:
+                    self.companyId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('getRecommendatorySorting_args')
+        if self.postUserId is not None:
+            oprot.writeFieldBegin('postUserId', TType.I32, 1)
+            oprot.writeI32(self.postUserId)
+            oprot.writeFieldEnd()
+        if self.companyId is not None:
+            oprot.writeFieldBegin('companyId', TType.I32, 2)
+            oprot.writeI32(self.companyId)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class getRecommendatorySorting_result(object):
+    """
+    Attributes:
+     - success
+     - e
+    """
+
+    thrift_spec = (
+        (0, TType.STRUCT, 'success', (thrift_gen.gen.candidate.struct.ttypes.SortResult, thrift_gen.gen.candidate.struct.ttypes.SortResult.thrift_spec), None, ),  # 0
+        (1, TType.STRUCT, 'e', (thrift_gen.gen.common.struct.ttypes.BIZException, thrift_gen.gen.common.struct.ttypes.BIZException.thrift_spec), None, ),  # 1
+    )
+
+    def __init__(self, success=None, e=None,):
+        self.success = success
+        self.e = e
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRUCT:
+                    self.success = thrift_gen.gen.candidate.struct.ttypes.SortResult()
+                    self.success.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.e = thrift_gen.gen.common.struct.ttypes.BIZException()
+                    self.e.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('getRecommendatorySorting_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.STRUCT, 0)
+            self.success.write(oprot)
+            oprot.writeFieldEnd()
+        if self.e is not None:
+            oprot.writeFieldBegin('e', TType.STRUCT, 1)
+            self.e.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class ignore_args(object):
+    """
+    Attributes:
+     - id
+     - companyId
+     - postUserId
+     - clickTime
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'id', None, None, ),  # 1
+        (2, TType.I32, 'companyId', None, None, ),  # 2
+        (3, TType.I32, 'postUserId', None, None, ),  # 3
+        (4, TType.STRING, 'clickTime', 'UTF8', None, ),  # 4
+    )
+
+    def __init__(self, id=None, companyId=None, postUserId=None, clickTime=None,):
+        self.id = id
+        self.companyId = companyId
+        self.postUserId = postUserId
+        self.clickTime = clickTime
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.id = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.I32:
+                    self.companyId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.I32:
+                    self.postUserId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.STRING:
+                    self.clickTime = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('ignore_args')
+        if self.id is not None:
+            oprot.writeFieldBegin('id', TType.I32, 1)
+            oprot.writeI32(self.id)
+            oprot.writeFieldEnd()
+        if self.companyId is not None:
+            oprot.writeFieldBegin('companyId', TType.I32, 2)
+            oprot.writeI32(self.companyId)
+            oprot.writeFieldEnd()
+        if self.postUserId is not None:
+            oprot.writeFieldBegin('postUserId', TType.I32, 3)
+            oprot.writeI32(self.postUserId)
+            oprot.writeFieldEnd()
+        if self.clickTime is not None:
+            oprot.writeFieldBegin('clickTime', TType.STRING, 4)
+            oprot.writeString(self.clickTime.encode('utf-8') if sys.version_info[0] == 2 else self.clickTime)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class ignore_result(object):
+    """
+    Attributes:
+     - success
+     - e
+    """
+
+    thrift_spec = (
+        (0, TType.STRUCT, 'success', (thrift_gen.gen.candidate.struct.ttypes.RecommendResult, thrift_gen.gen.candidate.struct.ttypes.RecommendResult.thrift_spec), None, ),  # 0
+        (1, TType.STRUCT, 'e', (thrift_gen.gen.common.struct.ttypes.BIZException, thrift_gen.gen.common.struct.ttypes.BIZException.thrift_spec), None, ),  # 1
+    )
+
+    def __init__(self, success=None, e=None,):
+        self.success = success
+        self.e = e
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRUCT:
+                    self.success = thrift_gen.gen.candidate.struct.ttypes.RecommendResult()
+                    self.success.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.e = thrift_gen.gen.common.struct.ttypes.BIZException()
+                    self.e.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('ignore_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.STRUCT, 0)
+            self.success.write(oprot)
+            oprot.writeFieldEnd()
+        if self.e is not None:
+            oprot.writeFieldBegin('e', TType.STRUCT, 1)
+            self.e.write(oprot)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()

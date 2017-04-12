@@ -9,6 +9,7 @@ from handler.base import BaseHandler
 
 import conf.message as msg
 from util.tool.date_tool import curr_now_dateonly
+from service.page.employee.candidate import RecomException
 import conf.common as const
 
 
@@ -150,6 +151,7 @@ class RecomIgnoreHandler(RecomCustomVariableMixIn, BaseHandler):
 
 
 class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
+    """处理 recom 相关的各种 GET POST 请求"""
 
     @tornado.gen.coroutine
     def get(self):
@@ -157,7 +159,7 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
             self.write_error(416, message=msg.EMPLOYEE_NOT_BINDED_WARNING)
             return
 
-        id = self.params.id
+        id = self.params.get('id')
 
         if id:
             yield self._get_recom_candidate(id)
@@ -191,7 +193,8 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
                         passive_seeker=passive_seeker,
                         recommend_presentee=self.recommend_presentee)
         else:
-            self.render("refer/weixin/passive-seeker/passive-wanting_no-more.html")
+            self.render(
+                "refer/weixin/passive-seeker/passive-wanting_no-more.html")
 
     @tornado.gen.coroutine
     def _get_recom_candidates(self):
@@ -199,36 +202,35 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
         click_time = self.get_argument("click_time", curr_now_dateonly())
         is_recom = ",".join(['1', '2', '3'])
 
-        # TODO 调用基础服务
-        # passive_seekers = self.recomService.get_passive_seekers(
-        #     self.post_user_id, click_time, is_recom, company_id)
+        try:
+            passive_seekers = yield self.candidate_ps.get_candidate_list(
+                self.current_user.sysuser.id,
+                click_time,
+                is_recom,
+                company_id)
 
-        passive_seekers = []
-        if isinstance(passive_seekers, dict):
-            # {'errcode': 2107, 'errmsg': '没有推荐记录！'}
-            # {'errcode': 2101, "errmsg":"没有操作权限，请先开启被动求职者！"}
-            if passive_seekers.get('errorcode') in [2107, 2101]:
-                self.render(
-                    "refer/weixin/passive-seeker/passive-wanting_no-more.html",
-                    passive_seekers=passive_seekers,
-                    message=passive_seekers.get('message'))
+            # for passive_seeker in passive_seekers:
+            #     p_id = passive_seeker.position_id
+            #     for candidate in passive_seeker.candidates:
+            #         user_id = candidate.presentee_user_id
+            #         view_fav_res = self.recomService.get_wxuser_view_and_fav(
+            #             self.db, p_id, user_id)
+            # TODO view_number, is_interested 放在基础服务提供 （tangyiliang）
+            # candidate["view_number"] = view_fav_res.get("view_number", 0)
+            # candidate["is_interested"] = view_fav_res.get("is_interested", 0)
 
-        elif isinstance(passive_seekers, list):
-            for passive_seeker in passive_seekers:
-                p_id = passive_seeker.get("position_id")
-                for candidate in passive_seeker.get("candidates"):
-                    user_id = candidate.get("presentee_user_id")
-                    view_fav_res = self.recomService.get_wxuser_view_and_fav(
-                        self.db, p_id, user_id)
-                    candidate["view_number"] = view_fav_res.get("view_number",
-                                                                0)
-                    candidate["is_interested"] = view_fav_res.get(
-                        "is_interested", 0)
             self.LOG.debug("get_passive_seekers: %s" % passive_seekers)
 
-        self.render("refer/weixin/passive-seeker/passive-wanting_recom.html",
-                    passive_seekers=passive_seekers,
-                    message="placeholder")
+            self.render(
+                "refer/weixin/passive-seeker/passive-wanting_recom.html",
+                passive_seekers=passive_seekers,
+                message="placeholder")
+
+        except RecomException as e:
+            self.render(
+                "refer/weixin/passive-seeker/passive-wanting_no-more.html",
+                passive_seekers=[],
+                message=e.message)
 
     @tornado.gen.coroutine
     def _post_recom_candidate(self, id):
@@ -300,72 +302,6 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
             realname=realname,
             position_title=position_title
         )
-
-        # # ===== 红包第二版 (RED PACKET V2 ) 开始 =====
-        # # 推荐评价红包
-        # company_id = self.current_user.company.id
-        #
-        # hb_config = get_hongbao_config_by_company_id(
-        #     self.db, company_id, rptype=const.RED_PACKET_TYPE_RECOM)
-        #
-        # rp_ser = red_packet_service.RedPacketService()
-        #
-        # position_title = get_position_title_by_recom_record_id(
-        #     self.db, recom_record_id).title
-        #
-        # is_service_wechat = self.current_user.wechat.type == 1
-        # if is_service_wechat:
-        #     recom_openid = self.current_user.wxuser.openid
-        #     recom_wechat_id = self.current_user.wechat.id
-        #     recom_qx_user = None
-        # else:
-        #     recom_openid = self.current_user.qxuser.openid
-        #     recom_wechat_id = settings.bagging_wechat_id
-        #     recom_qx_user = self.current_user.qxuser
-        #
-        # if hb_config:
-        #     self.LOG.debug(u"推荐评价红包发送开始")
-        #     if rp_ser.hit_red_packet(hb_config.probability):
-        #         self.LOG.debug(u"用户是发送红包对象,准备掷骰子")
-        #         if rp_ser.check_throttle_passed(self,
-        #                                         hb_config,
-        #                                         self.current_user.qxuser.id,
-        #                                         position=None):
-        #             self.LOG.debug(u"全局上限验证通过")
-        #             # 发送红包消息模版(有金额)
-        #             rp_ser.send_red_packet_card(
-        #                 self,
-        #                 recom_openid,
-        #                 recom_wechat_id,
-        #                 hb_config,
-        #                 self.current_user.qxuser.id,
-        #                 position=None,
-        #                 company_name=self.current_user.company.name,
-        #                 recomee_name=realname,
-        #                 position_title=position_title,
-        #                 recom_qx_user=recom_qx_user
-        #             )
-        #         else:
-        #             self.LOG.debug(u"全局上限验证不通过, 暂停发送")
-        #
-        #     else:
-        #         # 发送红包消息模版(抽不中)
-        #         self.LOG.debug(u"掷骰子不通过,准备发送红包信封(无金额)")
-        #         rp_ser.send_zero_amount_card(
-        #             self,
-        #             recom_openid,
-        #             recom_wechat_id,
-        #             hb_config,
-        #             self.current_user.qxuser.id,
-        #             company_name=self.current_user.company.name,
-        #             recomee_name=realname,
-        #             position_title=position_title,
-        #             recom_qx_user=recom_qx_user
-        #         )
-        #
-        # self.LOG.debug(u"推荐评价红包发送结束")
-        # # ===== 红包第二版 (RED PACKET V2 ) 结束 =====
-
 
         # 已经全部推荐了
         if passive_seeker.get('recom_total') == passive_seeker.get(
