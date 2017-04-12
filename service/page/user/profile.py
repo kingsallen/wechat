@@ -477,7 +477,7 @@ class ProfilePageService(PageService):
 
                 elif status == 'e':
                     params['id'] = params.eid
-                    yield self.update_profile_education(params)
+                    yield self.update_profile_education(params, profile_id)
 
         for w in workexp:
             status = w.get('__status', None)
@@ -501,7 +501,7 @@ class ProfilePageService(PageService):
 
                 elif status == 'e':
                     params['id'] = params.wid
-                    yield self.update_profile_workexp(params)
+                    yield self.update_profile_workexp(params, profile_id)
 
         for p in projectexp:
             status = p.get('__status', None)
@@ -525,7 +525,7 @@ class ProfilePageService(PageService):
 
                 elif status == 'e':
                     params['id'] = params.pid
-                    yield self.update_profile_projectexp(params)
+                    yield self.update_profile_projectexp(params, profile_id)
 
     @staticmethod
     def get_zodiac(date_string):
