@@ -248,14 +248,15 @@ class CustomInfoHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def get(self):
-        binding_status, employee = yield self.employee_ps.get_employee_info(
+        binding_status = yield self.employee_ps.get_employee_bind_status(
             self.current_user.sysuser.id,
             self.current_user.company.id
         )
 
         # unbinded users may not need to know this page
         if (self.employee_ps.convert_bind_status_from_thrift_to_fe(
-            binding_status) != fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS):
+            binding_status) not in [fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS,
+                                    fe.FE_EMPLOYEE_BIND_STATUS_PENDING]):
             self.write_error(404)
             return
         else:
