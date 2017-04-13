@@ -137,6 +137,7 @@ class EmployeePageService(PageService):
 
         def _make_custom_conf():
             data.conf.custom_hint = conf.customHint
+            data.conf.custom_name = conf.custom
             data.conf.custom_value = ''
 
         def _make_questions_conf():
@@ -176,7 +177,7 @@ class EmployeePageService(PageService):
 
         return data
 
-    def make_bind_params(self,user_id, company_id, json_args):
+    def make_bind_params(self, user_id, company_id, json_args):
         """
         构建员工绑定的参数集合
         :param user_id:
@@ -185,6 +186,7 @@ class EmployeePageService(PageService):
         :return:
         """
         type = json_args.type
+
         needed_keys = ['type', 'name', 'mobile']
 
         if type == self.FE_BIND_TYPE_CUSTOM:
@@ -314,6 +316,7 @@ class EmployeePageService(PageService):
 
         for s in selects:
             s.fvalues = json.loads(s.fvalues)
+            s.required = s.mandatory == const.YES
         return selects
 
     @gen.coroutine

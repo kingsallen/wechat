@@ -146,7 +146,7 @@ class RegisterHandler(BaseHandler):
         data = ObjectDict(
             national_code_tpl=const.NATIONAL_CODE,
             national_code=1,
-            mobile=mobile,
+            mobile=to_str(mobile),
             code_type=code_type
         )
         self.render_page("system/register.html", data=data, meta_title=site_title)

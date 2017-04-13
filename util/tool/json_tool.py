@@ -22,6 +22,9 @@ class JSONEncoder(json.JSONEncoder):
             return o.__str__()
         elif isinstance(o, datetime.date):
             return o.__str__()
+        elif isinstance(o, bytes):
+            return str(o)
+
         return json.JSONEncoder.default(self, o)
 
 

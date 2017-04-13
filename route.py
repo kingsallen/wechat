@@ -54,6 +54,7 @@ import handler.qx.wechat_oauth
 common_routes = [
     # 开发者方式
     (r"/wechat",                                       handler.wechat.event.WechatOauthHandler,                   {"event": "wechat_oauth"}),
+
     # 第三方授权方式
     (r"/wechat[\/]*([0-9a-z]+)*",                      handler.wechat.event.WechatThirdOauthHandler,              {"event": "wechat_thirdoauth"}),  # passport
 
@@ -62,6 +63,7 @@ common_routes = [
     (r"/m/login",                                      handler.common.passport.LoginHandler,                      {"event": "passport_login"}),
     (r"/m/logout",                                     handler.common.passport.LogoutHandler,                     {"event": "passport_logout"}),
     (r"/m/register[\/]*([a-z]+)*",                     handler.common.passport.RegisterHandler,                   {"event": "register_"}),
+
     (r"/m/application",                                handler.common.application.ApplicationHandler,             {"event": "application_profile"}),
     (r"/m/application/email",                          handler.common.application.ApplicationEmailHandler,        {"event": "application_email"}),
     (r"/m/positionfav/([0-9]+)",                       handler.common.position.PositionFavHandler,                {"event": "position_fav"}),
@@ -108,6 +110,7 @@ platform_routes = [
     (r"/m/employee/bindemail[\/]?",                    handler.platform.employee.EmployeeBindEmailHandler,        {"event": "employee_bindemail"}),
     (r"/m/employee/custominfo[\/]?",                   handler.platform.employee.CustomInfoHandler,               {"event": "employee_custominfo"}),
     (r"/m/employee/binded[\/]?",                       handler.platform.employee.BindedHandler,                   {"event": "employee_binded"}),
+
     # 各大公司的自定义配置
     (r"/m/custom/emailapply[\/]?",                     handler.platform.customize.CustomizeEmailApplyHandler,     {"event": "customize_emailapply"}),
     (r"/m/api/company/visitreq[\/]?",                  handler.platform.companyrelation.CompanyVisitReqHandler,   {"event": "company_visitreq"}),

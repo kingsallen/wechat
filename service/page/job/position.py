@@ -197,14 +197,14 @@ class PositionPageService(PageService):
             "template_id": self.constant.RECRUIT_STATUS_RECOMCLICK_ID,
         }, appends=["ORDER BY id DESC", "LIMIT 1"])
 
-        click_record = yield self.user_employee_points_record_ds.get_user_employee_points_record_cnt(conds={
+        click_record = yield self.user_employee_points_record_ds.get_user_employee_points_record(conds={
             "berecom_user_id": berecom_user_id,
             "position_id": position_id,
             "award_config_id": points_conf.id
         }, fields=["id"])
 
         # 转发被点击添加积分，同一个职位，相同的人点击多次不加积分
-        if click_record.count_id < 1:
+        if not click_record:
             yield self.user_employee_points_record_ds.create_user_employee_points_record(fields={
                 "employee_id": employee.id,
                 "reason": points_conf.status_name,

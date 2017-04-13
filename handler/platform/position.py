@@ -33,8 +33,8 @@ class PositionHandler(BaseHandler):
                 return
 
             # hr端功能不全，暂且通过团队名称匹配
-            team = yield self.team_ps.get_team_by_name(position_info.department, position_info.company_id)
-            # team = yield self.team_ps.get_team_by_id(position_info.team_id)
+            #team = yield self.team_ps.get_team_by_name(position_info.department, position_info.company_id)
+            team = yield self.team_ps.get_team_by_id(position_info.team_id)
 
             self.logger.debug("[JD]构建收藏信息")
             star = yield self.position_ps.is_position_stared_by(position_id, self.current_user.sysuser.id)
@@ -61,7 +61,12 @@ class PositionHandler(BaseHandler):
             self.logger.debug("[JD]构建相似职位推荐")
             recomment_positions_res = yield self.position_ps.get_recommend_positions(position_id)
 
-            header = self._make_json_header(position_info, company_info, star, application, endorse, can_apply, team.id, did)
+            # 获取公司配置信息
+            teamname_custom = self.current_user.company.conf_teamname_custom
+
+            header = self._make_json_header(
+                position_info, company_info, star, application, endorse,
+                can_apply, team.id if team else 0, did, teamname_custom)
             module_job_description = self._make_json_job_description(position_info)
             module_job_need = self._make_json_job_need(position_info)
             module_feature = self._make_json_job_feature(position_info)
@@ -111,7 +116,7 @@ class PositionHandler(BaseHandler):
                 module_company_info = self._make_json_job_company_info(company_info, did)
                 self.logger.debug("[JD]构建团队相关信息")
                 yield self._add_team_data(position_data, team,
-                                          position_info.company_id, position_id)
+                                          position_info.company_id, position_id, teamname_custom)
 
                 add_item(position_data, "module_company_info", module_company_info)
                 add_item(position_data, "module_job_require", module_job_require)
@@ -280,9 +285,8 @@ class PositionHandler(BaseHandler):
         return res
 
     def _make_json_header(self, position_info, company_info, star, application,
-                          endorse, can_apply, team_id, did):
+                          endorse, can_apply, team_id, did, teamname_custom):
         """构造头部 header 信息"""
-
         data = ObjectDict({
             "id": position_info.id,
             "title": position_info.title,
@@ -300,6 +304,7 @@ class PositionHandler(BaseHandler):
             "did": did if did != self.current_user.company.id else "", # 主公司不需要提供 did
             "salary": position_info.salary,
             "hr_chat": int(self.current_user.wechat.hr_chat),
+            "teamname_custom": teamname_custom["teamname_custom"]
             #"team": position_info.department.lower() if position_info.department else ""
         })
 
@@ -569,43 +574,49 @@ class PositionHandler(BaseHandler):
                                          position_info.salary)
 
     @gen.coroutine
-    def _add_team_data(self, position_data, team, company_id, position_id):
+    def _add_team_data(self, position_data, team, company_id, position_id, teamname_custom):
 
         if team:
-            company_config = COMPANY_CONFIG.get(company_id)
             module_team_position = yield self._make_team_position(
-                team, position_id, company_id)
+                team, position_id, company_id, teamname_custom)
             if module_team_position:
                 add_item(position_data, "module_team_position",
                          module_team_position)
 
-            if team.is_show:
-                module_mate_day = yield self._make_mate_day(team)
-                if module_mate_day:
-                    add_item(position_data, "module_mate_day", module_mate_day)
+            # [hr3.4]team.is_show只是用来判断是否在团队列表显示
+            cms_page = yield self._make_cms_page(team.id)
+            if cms_page:
+                add_item(position_data, "module_mate_day", cms_page)
 
-                if not company_config.no_jd_team:
-                    module_team = yield self._make_team(team)
-                    add_item(position_data, "module_team", module_team)
+            # 玛氏定制
+            company_config = COMPANY_CONFIG.get(company_id)
+            if not company_config.no_jd_team:  # 不在职位详情页展示所属团队, 目前只有Mars有这个需求,
+                module_team = yield self._make_team(team, teamname_custom)
+                add_item(position_data, "module_team", module_team)
 
     @gen.coroutine
-    def _make_team_position(self, team, position_id, company_id):
+    def _make_team_position(self, team, position_id, company_id, teamname_custom):
         """团队职位，构造数据"""
         res = yield self.position_ps.get_team_position(
-            team.name, self.params, position_id, company_id)
+            team.id, self.params, position_id, company_id, teamname_custom)
         raise gen.Return(res)
 
-    @gen.coroutine
-    def _make_mate_day(self, team):
-        """同事的一天，构造数据"""
-        res = yield self.position_ps.get_mate_data(team.jd_media)
-        raise gen.Return(res)
+    # @gen.coroutine
+    # def _make_mate_day(self, team):
+    #     """同事的一天，构造数据"""
+    #     res = yield self.position_ps.get_mate_data(team.jd_media)
+    #     raise gen.Return(res)
 
     @gen.coroutine
-    def _make_team(self, team):
+    def _make_cms_page(self, team_id):
+        res = yield self.position_ps.get_cms_page(team_id)
+        return res
+
+    @gen.coroutine
+    def _make_team(self, team, teamname_custom):
         """所属团队，构造数据"""
         more_link = make_url(path.TEAM_PATH.format(team.id), self.params),
-        res = yield self.position_ps.get_team_data(team, more_link)
+        res = yield self.position_ps.get_team_data(team, more_link, teamname_custom)
         raise gen.Return(res)
 
 
@@ -745,7 +756,6 @@ class PositionListHandler(BaseHandler):
 
         infra_params = ObjectDict()
 
-        # 暂时不考虑 QX 的情况
         infra_params.company_id = self.current_user.company.id
 
         if self.params.did:
