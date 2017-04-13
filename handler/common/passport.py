@@ -115,7 +115,8 @@ class RegisterHandler(BaseHandler):
             national_code=1, # 目前只支持中国大陆手机号注册
             code_type=1 # 指定为忘记密码类型，提交手机号时需要
         )
-        self.render_page("system/auth_check_mobile.html", data=data, meta_title=const.PAGE_FORGET_PASSWORD)
+        self.render_page("system/auth_check_mobile.html",
+                         data=data, meta_title=const.PAGE_FORGET_PASSWORD)
 
     @handle_response
     @gen.coroutine
@@ -128,14 +129,15 @@ class RegisterHandler(BaseHandler):
             national_code=1, # 目前只支持中国大陆手机号注册
             code_type=0 # 指定为正常注册类型，提交手机号时需要
         )
-        self.render_page("system/auth_check_mobile.html", data=data, meta_title=const.PAGE_REGISTER)
+        self.render_page("system/auth_check_mobile.html",
+                         data=data, meta_title=const.PAGE_REGISTER)
 
     @handle_response
     @gen.coroutine
     def get_code(self):
         """填写验证码"""
 
-        mobile = self.get_secure_cookie(const.COOKIE_MOBILE_REGISTER)
+        mobile = to_str(self.get_secure_cookie(const.COOKIE_MOBILE_REGISTER))
         code_type = int(self.params.code_type)
 
         site_title = const.PAGE_REGISTER
@@ -146,10 +148,11 @@ class RegisterHandler(BaseHandler):
         data = ObjectDict(
             national_code_tpl=const.NATIONAL_CODE,
             national_code=1,
-            mobile=to_str(mobile),
+            mobile=mobile,
             code_type=code_type
         )
-        self.render_page("system/register.html", data=data, meta_title=site_title)
+        self.render_page("system/register.html",
+                         data=data, meta_title=site_title)
 
     @handle_response
     @gen.coroutine

@@ -144,8 +144,8 @@ class EmployeeBindHandler(BaseHandler):
             thrift_bind_status)
 
         # early return 1
-        if not fe_bind_status == fe.FE_EMPLOYEE_BIND_STATUS_UNBINDED:
-            self.send_json_error(message='binded or pending')
+        if fe_bind_status == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS:
+            self.send_json_error(message=messages.EMPLOYEE_BINDED_WARNING)
             return
 
         result, result_message = yield self.employee_ps.bind(binding_params)
@@ -174,9 +174,11 @@ class EmployeeBindHandler(BaseHandler):
         else:
             assert False  # should not be here
 
+        self.logger.debug(next_url)
+        self.logger.debug(message)
         self.send_json_success(
-            message=message,
-            data={'next_url': next_url}
+            data={'next_url': next_url},
+            message=message
         )
         self.finish()
 

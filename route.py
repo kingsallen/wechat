@@ -70,6 +70,10 @@ common_routes = [
     (r"/m/resume/import",                              handler.common.resume.ResumeImportHandler,                 {"event": "resume_auth"}),
     (r"/m/resume/linkedin",                            handler.common.resume.LinkedinImportHandler,               {"event": "resume_linkedin"}),
 
+    (r"/m/profile[\/]?",                               handler.platform.profile.ProfileHandler,                   {"event": "profile_profile"}),
+    (r"/m/profile/preview[\/]?",                       handler.platform.profile.ProfilePreviewHandler,            {"event": "profile_preview"}),
+    (r"/m/profile/custom[\/]?",                        handler.platform.profile.ProfileCustomHandler,             {"event": "profile_customcv"}),
+
     # websocket
     (r"/m/websocket/([A-Za-z0-9_]{1,32})",             handler.common.im.ChatWebSocketHandler),
 
@@ -104,9 +108,7 @@ platform_routes = [
     (r"/m/company",                                    handler.platform.companyrelation.CompanyHandler,           {"event": "company_info"}),
     (r"/m/company/team/(\d+)",                         handler.platform.team.TeamDetailHandler,                   {"event": "team_detail"}),
     (r"/m/company/team",                               handler.platform.team.TeamIndexHandler,                    {"event": "team_info"}),
-    (r"/m/profile[\/]?",                               handler.platform.profile.ProfileHandler,                   {"event": "profile_profile"}),
-    (r"/m/profile/preview[\/]?",                       handler.platform.profile.ProfilePreviewHandler,            {"event": "profile_preview"}),
-    (r"/m/profile/custom[\/]?",                        handler.platform.profile.ProfileCustomHandler,             {"event": "profile_customcv"}),
+
     (r"/m/employee/bindemail[\/]?",                    handler.platform.employee.EmployeeBindEmailHandler,        {"event": "employee_bindemail"}),
     (r"/m/employee/custominfo[\/]?",                   handler.platform.employee.CustomInfoHandler,               {"event": "employee_custominfo"}),
     (r"/m/employee/binded[\/]?",                       handler.platform.employee.BindedHandler,                   {"event": "employee_binded"}),
