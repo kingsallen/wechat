@@ -127,9 +127,7 @@ class ResumeImportHandler(BaseHandler):
                     url=self.params.way
                 )
                 self.send_json_success(message=msg.RESUME_IMPORT_SUCCESS,
-                                       data={
-                                           "url": next_url
-                                       })
+                                       data={ "url": next_url })
                 return
             else:
                 if result.status == 32001:
@@ -162,8 +160,7 @@ class ResumeImportHandler(BaseHandler):
                     url=self.params.way,
                 )
 
-                self.send_json_error(
-                    message=result.get('message', msg.RESUME_IMPORT_FAILED))
+                self.send_json_error(message=result.message)
 
         else:
             self.log_info = ObjectDict(
