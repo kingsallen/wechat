@@ -94,8 +94,8 @@ class ResumeImportHandler(BaseHandler):
         if not username or not password:
             # 日志打点返回用户名和密码没有填写
             self.log_info = ObjectDict(
-                status = -5,
-                url = self.params.way
+                status=-5,
+                url=self.params.way
             )
             self.send_json_error(message=msg.RESUME_IMPORT_NAME_PASSWD_ERROR)
             return
@@ -119,12 +119,13 @@ class ResumeImportHandler(BaseHandler):
 
             if is_ok:
                 self.log_info = ObjectDict(
-                    status = 0,
-                    url = self.params.way
+                    status=0,
+                    url=self.params.way
                 )
-                self.send_json_success(message=msg.RESUME_IMPORT_SUCCESS, data={
-                    "url": next_url
-                })
+                self.send_json_success(message=msg.RESUME_IMPORT_SUCCESS,
+                                       data={
+                                           "url": next_url
+                                       })
                 return
             else:
                 if result.status == 32001:
@@ -153,16 +154,17 @@ class ResumeImportHandler(BaseHandler):
                     status_log = -2
 
                 self.log_info = ObjectDict(
-                    status = status_log,
-                    url = self.params.way,
+                    status=status_log,
+                    url=self.params.way,
                 )
 
-                self.send_json_error(message=msg.RESUME_IMPORT_FAILED)
+                self.send_json_error(
+                    message=result.get('message', msg.RESUME_IMPORT_FAILED))
 
         else:
             self.log_info = ObjectDict(
-                status = -1,
-                url = self.params.way,
+                status=-1,
+                url=self.params.way,
             )
 
             self.send_json_error(message=msg.RESUME_IMPORT_FAILED)
