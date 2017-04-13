@@ -179,14 +179,15 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
 
     @tornado.gen.coroutine
     def _get_recom_candidate(self, id):
-        # TODO
-        # 调用基础服务
-        # passive_seeker = self.recomService.get_recom_record_by_id(
-        #     self.post_user_id, id)
-        passive_seeker = {}
+
+        passive_seeker = yield self.candidate_ps.get_recommendation(
+            id,
+            self.current_user.sysuser.id)
 
         if passive_seeker:
-            passive_seeker.update(recom_index=0, recom_total=1, recom_ignore=0)
+            passive_seeker.recom_index = 0
+            passive_seeker.recom_total = 1
+            passive_seeker.recom_ignore = 0
             self.render("refer/weixin/passive-seeker/passive-wanting_form.html",
                         passive_seeker=passive_seeker,
                         recommend_presentee=self.recommend_presentee)
