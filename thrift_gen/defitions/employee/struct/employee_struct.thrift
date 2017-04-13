@@ -12,7 +12,8 @@ struct Employee {
     8: optional i32 award,
     9: optional bool isRpSent,
     10: optional string customFieldValues,
-    11: optional string email
+    11: optional string email,
+    12: optional string customField
 }
 
 
