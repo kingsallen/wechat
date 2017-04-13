@@ -331,108 +331,35 @@ class UserPageService(PageService):
         raise gen.Return(hr_account)
 
     @gen.coroutine
-    def favorite_position(self, current_user, pid):
+    def favorite_position(self, user_id, pid):
         """用户收藏职位的粒子操作
-        :param current_user: user session 信息
+        :param user_id: user_id
         :param pid: 职位id
         """
 
-        position_fav = yield self._get_user_favorite_records(
-            current_user.sysuser.id, pid)
-
-        # 没有数据时
-        if not position_fav:
-            fields = {
-                "position_id": pid,
-                "sysuser_id":  current_user.sysuser.id,
-                "favorite":    const.FAV_YES,
-                "wxuser_id":   current_user.wxuser.id or 0
-            }
-            if current_user.recom:
-                fields.update({
-                    "recom_id": current_user.recom.id
-                })
-            inserted_id = yield self.user_fav_position_ds.insert_user_fav_position(fields)
-            raise gen.Return(bool(inserted_id))
-
-        # 有数据时
-        else:
-            position_fav = position_fav[0]
-
-            # 如果已经收藏，则不作任何操作
-            if position_fav.favorite == const.FAV_YES:
-                self.logger.warning(
-                    "User already favorited the position. "
-                    "user_id: {}, pid: {}".format(current_user.sysuser.id,
-                                                  pid))
-                ret = True
-            else:
-                # 变更 favorite 为 FAV_YES
-                ret = self.user_fav_position_ds.update_user_fav_position(
-                    fields={
-                        "favorite": const.FAV_YES
-                    },
-                    conds={
-                        "id": position_fav.id
-                    }
-                )
-            raise gen.Return(ret)
+        ret = yield \
+            self.thrift_useraccounts_ds.create_collect_position(user_id, pid)
+        raise gen.Return(ret)
 
     @gen.coroutine
-    def unfavorite_position(self, current_user, pid):
+    def unfavorite_position(self, user_id, pid):
         """用户取消收藏职位的粒子操作
-        :param current_user: user session 信息
+        :param user_id: user_id
         :param pid: 职位id
         """
-        position_fav = yield self._get_user_favorite_records(
-            current_user.sysuser.id, pid)
-
-        # 没有数据时, 不做任何操作
-        if not position_fav:
-            self.logger.warning(
-                "Cannot unfavorite the position because user hasn't "
-                "favorited it. "
-                "user_id: {}, pid: {}".format(current_user.sysuser.id, pid))
-            raise gen.Return(True)
-
-        # 有数据时
-        else:
-            position_fav = position_fav[0]
-
-            # 如果已经取消收藏，则不作任何操作
-            if position_fav.favorite == const.FAV_NO:
-                self.logger.warning(
-                    "User already unfavorited the position. user_id: {}, "
-                    "pid: {}".format(
-                        current_user.sysuser.id, pid))
-                ret = True
-            else:
-                # 变更 favorite 为 FAV_NO
-                ret = self.user_fav_position_ds.update_user_fav_position(
-                    fields={
-                        "favorite": const.FAV_NO
-                    },
-                    conds={
-                        "id": position_fav.id
-                    }
-                )
-            raise gen.Return(ret)
+        ret = yield \
+            self.thrift_useraccounts_ds.delete_collect_position(user_id, pid)
+        raise gen.Return(ret)
 
     @gen.coroutine
-    def _get_user_favorite_records(self, user_id, pid):
+    def get_collect_position(self, user_id, pid):
         """获取用户收藏、感兴趣职位信息
         :param user_id:
         :param pid:
-        :return: list
+        :return: object
         """
         position_fav = yield \
-            self.user_fav_position_ds.get_user_fav_position_list({
-                "position_id": pid,
-                "sysuser_id":  user_id
-            })
-        # filter 数据，应该有 0 条或 1 条数据
-        position_fav = [p for p in position_fav if
-                        p.favorite in (const.FAV_YES, const.FAV_NO)]
+            self.thrift_useraccounts_ds.get_collect_position(user_id, pid)
         raise gen.Return(position_fav)
 
     @gen.coroutine

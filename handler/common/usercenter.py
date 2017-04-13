@@ -150,7 +150,7 @@ class FavPositionHandler(BaseHandler):
         :return:
         """
 
-        res = yield self.usercenter_ps.get_fav_positions(self.current_user.sysuser.id)
+        res = yield self.usercenter_ps.get_collect_positions(self.current_user.sysuser.id)
         self.send_json_success(data=ObjectDict(records=res))
 
 

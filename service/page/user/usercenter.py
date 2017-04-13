@@ -82,10 +82,10 @@ class UsercenterPageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def get_fav_positions(self, user_id):
+    def get_collect_positions(self, user_id):
         """获得职位收藏"""
 
-        ret = yield self.thrift_useraccounts_ds.get_fav_positions(user_id)
+        ret = yield self.thrift_useraccounts_ds.get_collect_positions(user_id)
         obj_list = list()
         for e in ret:
             fav_pos = ObjectDict()
