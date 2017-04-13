@@ -136,11 +136,15 @@ class EmployeePageService(PageService):
             return data
 
         def _make_custom_conf():
+            if bind_status != BindStatus.BINDED:
+                data.binding_status = self.FE_BIND_STATUS_UNBINDING
             data.conf.custom_hint = conf.customHint
             data.conf.custom_name = conf.custom
             data.conf.custom_value = ''
 
         def _make_questions_conf():
+            if bind_status != BindStatus.BINDED:
+                data.binding_status = self.FE_BIND_STATUS_UNBINDING
             data.conf.questions = [sub_dict(e, 'q') for e in conf.questions]
 
         if conf.authMode in [const.EMPLOYEE_BIND_AUTH_MODE.EMAIL,
