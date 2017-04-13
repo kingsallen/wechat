@@ -135,3 +135,36 @@ class ChatPageService(PageService):
         ret = yield self.thrift_chat_ds.save_chat(room_id, content, position_id, speaker)
         self.logger.debug("[save_chat]ret:{}".format(ret))
         raise gen.Return(ret)
+
+    @gen.coroutine
+    def get_unread_chat_num(self, user_id, hr_id):
+
+        if user_id is None or not hr_id:
+            raise gen.Return(1)
+
+        """返回JD 页，求职者与 HR 之间的未读消息数"""
+        chatroom_unread_count = yield self.hr_chat_unread_count_ds.get_chat_unread_count(conds={
+            "user_id": user_id,
+            "hr_id": hr_id
+        })
+
+        # 若无聊天，则默认显示1条未读消息
+        if not chatroom_unread_count:
+            raise gen.Return(1)
+
+        raise gen.Return(chatroom_unread_count.user_unread_count)
+
+    @gen.coroutine
+    def get_all_unread_chat_num(self, user_id):
+
+        """返回求职者所有的未读消息数，供侧边栏我的消息未读消息提示"""
+
+        if user_id is None:
+            raise gen.Return(0)
+
+        """返回求职者所有的未读消息数"""
+        unread_count_total = yield self.hr_chat_unread_count_ds.get_chat_unread_count_cnt(conds={
+            "user_id": user_id,
+        }, fields=["user_unread_count"])
+
+        raise gen.Return(unread_count_total.count_user_unread_count)

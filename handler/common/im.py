@@ -43,7 +43,7 @@ class UnreadCountHandler(BaseHandler):
         :return:
         """
 
-        chat_num = yield self.im_ps.get_unread_chat_num(self.current_user.sysuser.id, publisher)
+        chat_num = yield self.chat_ps.get_unread_chat_num(self.current_user.sysuser.id, publisher)
         self.send_json_success(data={
             "unread": chat_num
         })
@@ -57,7 +57,7 @@ class UnreadCountHandler(BaseHandler):
         :return:
         """
 
-        chat_num = yield self.im_ps.get_all_unread_chat_num(self.current_user.sysuser.id)
+        chat_num = yield self.chat_ps.get_all_unread_chat_num(self.current_user.sysuser.id)
         self.send_json_success(data={
             "unread": chat_num
         })

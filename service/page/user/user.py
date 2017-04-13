@@ -365,7 +365,7 @@ class UserPageService(PageService):
     @gen.coroutine
     def add_user_fav_position(self, position_id, user_id, favorite, mobile, wxuser_id, recom_user_id):
         """
-        增加用户收藏、感兴趣记录
+        增加用户感兴趣记录
         :param position_id:
         :param user_id:
         :param favorite: 0:收藏，1:取消收藏，2:感兴趣
