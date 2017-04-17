@@ -251,7 +251,7 @@ class ProfileCustomHandler(BaseHandler):
         #         pos_ser = positionService(self.db)
         #         position = pos_ser.get_position_info(pid)
         #         if position.app_cv_config_id:
-        #             self.LOG.debug(u"雅诗兰黛特殊处理: 直接投递")
+        #             self.logger.debug(u"雅诗兰黛特殊处理: 直接投递")
         #             p.update(is_skip='1')
 
         self.redirect(make_url(path.PROFILE_PREVIEW, self.params, **p))
