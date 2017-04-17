@@ -675,7 +675,7 @@ class PositionListHandler(BaseHandler):
 
         # 获取 team name
         teamname_custom = (
-            self.current_user.company.conf_teamname_custom.conf_teamname_custom
+            self.current_user.company.conf_teamname_custom.teamname_custom
             or const.TEAMNAME_CUSTOM_DEFAULT
         )
 
