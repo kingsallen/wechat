@@ -1,7 +1,5 @@
 # coding=utf-8
 
-# Copyright 2016 MoSeeker
-
 """ 说明:
 route不需要添加v2，web网页没有维护旧版本的概念
 api接口的route都加上api，非api的route会被统计为PV、UV
@@ -57,7 +55,7 @@ common_routes = [
     (r"/wechat",                                       handler.wechat.event.WechatOauthHandler,                   {"event": "wechat_oauth"}),
 
     # 第三方授权方式
-    (r"/wechat[\/]*([0-9a-z]+)*",                      handler.wechat.event.WechatThirdOauthHandler,              {"event": "wechat_thirdoauth"}),  # passport
+    (r"/wechat[\/]*([0-9a-z]+)*",                      handler.wechat.event.WechatThirdOauthHandler,              {"event": "wechat_thirdoauth"}),
 
     # app forward 给前端，展示纯前端渲染的 SPA
     (r"/m/app/.*",                                     handler.common.app.IndexHandler,                           {"event": "app_"}),
@@ -71,14 +69,14 @@ common_routes = [
     (r"/m/resume/import",                              handler.common.resume.ResumeImportHandler,                 {"event": "resume_auth"}),
     (r"/m/resume/linkedin",                            handler.common.resume.LinkedinImportHandler,               {"event": "resume_linkedin"}),
 
-    (r"/m/profile[\/]?",                               handler.common.profile.ProfileHandler,                   {"event": "profile_profile"}),
-    (r"/m/profile/preview[\/]?",                       handler.common.profile.ProfilePreviewHandler,            {"event": "profile_preview"}),
-    (r"/m/profile/custom[\/]?",                        handler.common.profile.ProfileCustomHandler,             {"event": "profile_customcv"}),
-    (r"/m/api/dict/city[\/]?",                         handler.common.dictionary.DictCityHandler,               {"event": "dict_city"}),
-    (r"/m/api/dict/industry[\/]?",                     handler.common.dictionary.DictIndustryHandler,           {"event": "dict_industry"}),
-    (r"/m/api/dict/function[\/]?",                     handler.common.dictionary.DictFunctionHandler,           {"event": "dict_function"}),
-    (r"/m/api/profile/edit[\/]?",                      handler.common.profile.ProfileSectionHandler,            {"event": "profile_section"}),
-    (r"/m/api/profile/new[\/]?",                       handler.common.profile.ProfileNewHandler,                {"event": "profile_new"}),
+    (r"/m/profile[\/]?",                               handler.common.profile.ProfileHandler,                     {"event": "profile_profile"}),
+    (r"/m/profile/preview[\/]?",                       handler.common.profile.ProfilePreviewHandler,              {"event": "profile_preview"}),
+    (r"/m/profile/custom[\/]?",                        handler.common.profile.ProfileCustomHandler,               {"event": "profile_customcv"}),
+    (r"/m/api/dict/city[\/]?",                         handler.common.dictionary.DictCityHandler,                 {"event": "dict_city"}),
+    (r"/m/api/dict/industry[\/]?",                     handler.common.dictionary.DictIndustryHandler,             {"event": "dict_industry"}),
+    (r"/m/api/dict/function[\/]?",                     handler.common.dictionary.DictFunctionHandler,             {"event": "dict_function"}),
+    (r"/m/api/profile/edit[\/]?",                      handler.common.profile.ProfileSectionHandler,              {"event": "profile_section"}),
+    (r"/m/api/profile/new[\/]?",                       handler.common.profile.ProfileNewHandler,                  {"event": "profile_new"}),
 
 
     # websocket
@@ -123,6 +121,7 @@ platform_routes = [
 
     # 各大公司的自定义配置
     (r"/m/custom/emailapply[\/]?",                     handler.platform.customize.CustomizeEmailApplyHandler,     {"event": "customize_emailapply"}),
+
     (r"/m/api/company/visitreq[\/]?",                  handler.platform.companyrelation.CompanyVisitReqHandler,   {"event": "company_visitreq"}),
     (r"/m/api/company/survey[\/]?",                    handler.platform.companyrelation.CompanySurveyHandler,     {"event": "company_survey"}),
     (r"/m/api/company/follow[\/]?",                    handler.platform.companyrelation.CompanyFollowHandler,     {"event": "company_follow"}),

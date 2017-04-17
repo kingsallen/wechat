@@ -443,8 +443,9 @@ class BaseHandler(MetaBaseHandler):
                 self._session_id,
                 httponly=True)
 
-        self._pass_session.save_ent_sessions(
-            self._session_id, session, self._wechat.id)
+        if self.is_platform:
+            self._pass_session.save_ent_sessions(
+                self._session_id, session, self._wechat.id)
 
         yield self._add_sysuser_to_session(session, self._session_id)
 
@@ -461,7 +462,7 @@ class BaseHandler(MetaBaseHandler):
             yield self._add_company_info_to_session(session)
             self.logger.debug(
                 "_build_session_by_unionid company: {}".format(session))
-        if self.params.recom:
+        if self.is_platform and self.params.recom:
             self.logger.debug("_build_session_by_unionid start recom")
             yield self._add_recom_to_session(session)
             self.logger.debug(

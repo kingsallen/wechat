@@ -2,10 +2,8 @@
 
 
 import re
-import ujson
 from urllib.parse import urlparse, quote
 import tornado.gen as gen
-import tornado.httpclient
 
 import conf.common as const
 import conf.wechat as wx_const

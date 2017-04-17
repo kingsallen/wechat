@@ -31,11 +31,10 @@ from tornado.options import options
 
 from setting import settings
 import conf.common as constant
-import tornado.options
 from route import platform_routes, qx_routes, help_routes
 from handler.common.navmenu import NavMenuModule
 
-from globals import env, logger, redis
+from globals import env, logger, redis, es
 
 class Application(tornado.web.Application):
 
@@ -52,6 +51,7 @@ class Application(tornado.web.Application):
         self.logger = logger
         self.env = env
         self.redis = redis
+        self.es = es
         self.ui_modules.update({
             'NavMenu': NavMenuModule
         })
@@ -65,7 +65,7 @@ def make_app():
 
 
 def main():
-    tornado.options.parse_command_line()
+    options.parse_command_line()
     application = make_app()
 
     try:

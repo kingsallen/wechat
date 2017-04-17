@@ -77,6 +77,8 @@ settings['key_file_path'] = 'xxx/apiclient_key.pem'
 settings['wechat_pay_appid'] = 'wx....'
 settings['wechat_pay_mchid'] = 'xxxx'
 
+# elasticsearch host
+settings['es'] = '192.168.31.10'
 # 基础服务
 settings['infra'] = 'http://api2.dqprism.com'
 # thrift 接口

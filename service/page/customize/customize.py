@@ -97,7 +97,7 @@ class CustomizePageService(PageService):
         is_esteelauder = False
         if (company_id in self._DIRECT_APPLY and
                 app_cv_config_id):
-            self.LOG.debug(u"雅诗兰黛特殊处理: 直接投递")
+            self.logger.debug(u"雅诗兰黛特殊处理: 直接投递")
             is_esteelauder = True
 
         return is_esteelauder

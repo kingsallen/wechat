@@ -13,6 +13,8 @@ class PositionHandler(BaseHandler):
     @gen.coroutine
     def get(self):
 
+        pass
+
 
 
 
