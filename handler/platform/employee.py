@@ -254,10 +254,15 @@ class CustomInfoHandler(BaseHandler):
             self.current_user.company.id
         )
 
+        fe_binding_status = self.employee_ps.convert_bind_status_from_thrift_to_fe(
+            binding_status)
+
+        self.logger.debug('binding_status: %s' % binding_status)
+        self.logger.debug('fe_binding_status: %s' % fe_binding_status)
+
         # unbinded users may not need to know this page
-        if (self.employee_ps.convert_bind_status_from_thrift_to_fe(
-            binding_status) not in [fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS,
-                                    fe.FE_EMPLOYEE_BIND_STATUS_PENDING]):
+        if (fe_binding_status not in [fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS,
+                                      fe.FE_EMPLOYEE_BIND_STATUS_PENDING]):
             self.write_error(404)
             return
         else:

@@ -94,6 +94,10 @@ class ResumeImportHandler(BaseHandler):
         self.params.pop("abgroup", None)
         self.params.pop("tjtoken", None)
         self.params.pop("abapply", None)
+        try:
+            int(self.params.pid)
+        except ValueError:
+            self.params.pop('pid', None)
 
         if not username or not password:
             # 日志打点返回用户名和密码没有填写
