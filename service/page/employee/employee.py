@@ -138,7 +138,10 @@ class EmployeePageService(PageService):
         def _make_custom_conf():
             data.conf.custom_hint = conf.customHint
             data.conf.custom_name = conf.custom
-            data.conf.custom_value = employee.customField or ''
+            if bind_status == const.EMPLOYEE_BIND_STATUS_BINDED:
+                data.conf.custom_value = employee.customField
+            else:
+                data.conf.custom_value = ''
 
         def _make_questions_conf():
             if bind_status == const.EMPLOYEE_BIND_STATUS_BINDED:

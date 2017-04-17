@@ -673,6 +673,10 @@ class PositionListHandler(BaseHandler):
         # 只渲染必要的公司信息
         yield self.make_company_info()
 
+        # 获取 team name
+        teamname_custom = self.current_user.company.conf_teamname_custom or \
+                          const.TEAMNAME_CUSTOM_DEFAULT
+
         self.logger.debug("[PositionListHandler]params:{}".format(self.params))
 
         # 如果是下拉刷新请求的职位, 返回新增职位的页面
@@ -693,7 +697,9 @@ class PositionListHandler(BaseHandler):
                 url='',
                 use_neowx=bool(self.current_user.company.conf_newjd_status == 2),
                 is_employee=bool(self.current_user.employee),
-                searchFilterNum=self.get_search_filter_num())
+                searchFilterNum=self.get_search_filter_num(),
+                teamname_custom=teamname_custom
+            )
 
     @gen.coroutine
     def make_company_info(self):
