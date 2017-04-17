@@ -207,8 +207,8 @@ def check_and_apply_profile(func):
                 self.logger.warn(position)
 
                 # 判断是否可以接受 email 投递
-                if position.email_resume_conf == const.OLD_YES:
-                    redirect_params.update(use_email=True)
+                redirect_params.update(
+                    use_email=(position.email_resume_conf == const.OLD_YES))
 
                 # 判断是否是自定义职位
                 if position.app_cv_config_id:
@@ -216,7 +216,8 @@ def check_and_apply_profile(func):
                         path.PROFILE_CUSTOM_CV,
                         sub_dict(self.params, ['pid', 'wechat_signature'])))
             else:
-                pass
+                # 从侧边栏直接进入，允许使用 email 创建 profile
+                redirect_params.update(use_email=True)
 
             # ========== LINKEDIN OAUTH ==============
             # 拼装 linkedin oauth 路由
@@ -462,7 +463,6 @@ class NewJDStatusCheckerRedirect(BaseNewJDStatusChecker):
         url_tool._ESCAPE_DEFAULT = _OLD_ESCAPE_DEFAULT
         return url
 
-#
 # if __name__ == "__main__":
 #     to = ObjectDict({'extra': {'m': 'company'}, 'field_mapping': {}, 'url': '/mobile/position'})
 #     params = ObjectDict({'wechat_signature': 'YWNkNmIyYWExOGViOTRkODMyMzk5N2MxM2NkZDZlOTUxNmRjYzJiYQ=='})

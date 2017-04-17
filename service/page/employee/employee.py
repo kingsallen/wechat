@@ -138,7 +138,10 @@ class EmployeePageService(PageService):
         def _make_custom_conf():
             data.conf.custom_hint = conf.customHint
             data.conf.custom_name = conf.custom
-            data.conf.custom_value = employee.customField or ''
+            if bind_status == const.EMPLOYEE_BIND_STATUS_BINDED:
+                data.conf.custom_value = employee.customField
+            else:
+                data.conf.custom_value = ''
 
         def _make_questions_conf():
             if bind_status == const.EMPLOYEE_BIND_STATUS_BINDED:
@@ -151,7 +154,10 @@ class EmployeePageService(PageService):
                              const.EMPLOYEE_BIND_AUTH_MODE.EMAIL_OR_QUESTION]:
             data.type = self.FE_BIND_TYPE_EMAIL
             data.conf.email_suffixs = conf.emailSuffix
-            if bind_status in [BindStatus.BINDED, BindStatus.PENDING]:
+            self.logger.error("employee.email: %s" % employee.email)
+            self.logger.error("bind_status: %s" % bind_status)
+            if bind_status in [const.EMPLOYEE_BIND_STATUS_BINDED,
+                               const.EMPLOYEE_BIND_STATUS_EMAIL_PENDING]:
                 data.conf.email_name = employee.email.split('@')[0]
                 data.conf.email_suffix = employee.email.split('@')[1]
             else:

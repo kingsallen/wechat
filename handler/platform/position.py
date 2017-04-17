@@ -3,18 +3,18 @@
 from tornado import gen
 
 import conf.common as const
-import conf.platform as const_platorm
 import conf.message as msg
 import conf.path as path
+import conf.platform as const_platorm
 import conf.wechat as wx
 from handler.base import BaseHandler
+from tests.dev_data.user_company_config import COMPANY_CONFIG
 from util.common import ObjectDict
-from util.common.decorator import handle_response, check_employee
 from util.common.cipher import encode_id
+from util.common.decorator import handle_response, check_employee
 from util.tool.str_tool import gen_salary, add_item, split
 from util.tool.url_tool import make_url, url_append_query
 from util.wechat.template import position_view_five_notice_tpl, position_share_notice_employee_tpl
-from tests.dev_data.user_company_config import COMPANY_CONFIG
 
 
 class PositionHandler(BaseHandler):
@@ -601,12 +601,6 @@ class PositionHandler(BaseHandler):
             team.id, self.params, position_id, company_id, teamname_custom)
         raise gen.Return(res)
 
-    # @gen.coroutine
-    # def _make_mate_day(self, team):
-    #     """同事的一天，构造数据"""
-    #     res = yield self.position_ps.get_mate_data(team.jd_media)
-    #     raise gen.Return(res)
-
     @gen.coroutine
     def _make_cms_page(self, team_id):
         res = yield self.position_ps.get_cms_page(team_id)
@@ -639,27 +633,19 @@ class PositionListHandler(BaseHandler):
         if self.params.hb_c:
             # 红包职位列表
             infra_params.update(hb_config_id=int(self.params.hb_c))
-            position_list = yield self.position_ps.infra_get_rp_position_list(
-                infra_params)
-            rp_share_info = yield self.position_ps.infra_get_rp_share_info(
-                infra_params)
-            yield self._make_share_info(
-                self.current_user.company.id, self.params.did, rp_share_info)
+            position_list = yield self.position_ps.infra_get_rp_position_list(infra_params)
+            rp_share_info = yield self.position_ps.infra_get_rp_share_info(infra_params)
+            yield self._make_share_info(self.current_user.company.id, self.params.did, rp_share_info)
 
         else:
             # 普通职位列表
-            position_list = yield self.position_ps.infra_get_position_list(
-                infra_params)
+            position_list = yield self.position_ps.infra_get_position_list(infra_params)
 
             # 获取获取到普通职位列表，则根据获取的数据查找其中红包职位的红包相关信息
-            if self.current_user.employee:
-                rp_position_list = [position for position in position_list if isinstance(position, dict) and position.in_hb]
-            else:
-                rp_position_list = []
+            rp_position_list = [position for position in position_list if isinstance(position, dict) and position.in_hb]
 
             if position_list and rp_position_list:
-                rpext_list = yield self.position_ps.infra_get_position_list_rp_ext(
-                    rp_position_list)
+                rpext_list = yield self.position_ps.infra_get_position_list_rp_ext(rp_position_list)
 
                 for position in position_list:
                     pext = [e for e in rpext_list if e.pid == position.id]
@@ -689,14 +675,22 @@ class PositionListHandler(BaseHandler):
 
         # 直接请求页面返回
         else:
+            position_title = const_platorm.POSITION_LIST_TITLE_DEFAULT
+            if self.params.recomlist:
+                position_title = const_platorm.POSITION_LIST_TITLE_RECOMLIST
+
+            teamname_custom = self.current_user.company.conf_teamname_custom.teamname_custom
+
             self.render(
                 template_name="refer/neo_weixin/position_v2/position_list.html",
                 positions=position_list,
-                position_title=const_platorm.POSITION_LIST_TITLE_DEFAULT if not self.params.recomlist else const_platorm.POSITION_LIST_TITLE_RECOMLIST,
+                position_title=position_title,
                 url='',
                 use_neowx=bool(self.current_user.company.conf_newjd_status == 2),
                 is_employee=bool(self.current_user.employee),
-                searchFilterNum=self.get_search_filter_num())
+                searchFilterNum=self.get_search_filter_num(),
+                teamname_custom=teamname_custom
+            )
 
     @gen.coroutine
     def make_company_info(self):
