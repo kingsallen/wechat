@@ -89,16 +89,10 @@ class ApplicationPageService(PageService):
     def update_candidate_company(self, name, user_id):
         """
         更新candidate_company表中的name
-        :param user_id:
-        :return:
         """
-
         res = yield self.candidate_company_ds.update_candidate_company(
-            fields={
-                "sys_user_id": user_id
-            }, conds={
-                "name": name,
-            })
+            fields={"name": name},
+            conds={"sys_user_id": user_id})
         raise gen.Return(res)
 
     @gen.coroutine
