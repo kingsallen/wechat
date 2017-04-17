@@ -652,10 +652,7 @@ class PositionListHandler(BaseHandler):
                 infra_params)
 
             # 获取获取到普通职位列表，则根据获取的数据查找其中红包职位的红包相关信息
-            if self.current_user.employee:
-                rp_position_list = [position for position in position_list if isinstance(position, dict) and position.in_hb]
-            else:
-                rp_position_list = []
+            rp_position_list = [position for position in position_list if isinstance(position, dict) and position.in_hb]
 
             if position_list and rp_position_list:
                 rpext_list = yield self.position_ps.infra_get_position_list_rp_ext(

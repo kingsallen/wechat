@@ -51,9 +51,10 @@ class UsercenterHandler(BaseHandler):
             self.current_user.sysuser.id,
             self.current_user.company.id
         )
-
+        self.logger.debug('bind_status: %s' % bind_status)
         fe_bind_status = self.employee_ps.convert_bind_status_from_thrift_to_fe(
             bind_status)
+        self.logger.debug('fe_bind_status: %s' % fe_bind_status)
 
         self.send_json_success(data=ObjectDict(
             headimg=self.static_url(res.data.headimg or const.SYSUSER_HEADIMG),
