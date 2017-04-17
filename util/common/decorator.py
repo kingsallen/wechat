@@ -462,7 +462,6 @@ class NewJDStatusCheckerRedirect(BaseNewJDStatusChecker):
         url_tool._ESCAPE_DEFAULT = _OLD_ESCAPE_DEFAULT
         return url
 
-#
 # if __name__ == "__main__":
 #     to = ObjectDict({'extra': {'m': 'company'}, 'field_mapping': {}, 'url': '/mobile/position'})
 #     params = ObjectDict({'wechat_signature': 'YWNkNmIyYWExOGViOTRkODMyMzk5N2MxM2NkZDZlOTUxNmRjYzJiYQ=='})

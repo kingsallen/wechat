@@ -30,7 +30,7 @@ def make_up_for_missing_res(res):
     return res
 
 
-def template1(sub_type, title, data, more_link=None):
+def template1(sub_type, title, data, more_link=None, expandable=False):
     """
 
     :param sub_type:
@@ -61,7 +61,8 @@ def template1(sub_type, title, data, more_link=None):
         'sub_type': sub_type,
         'title': title,
         'data': data,
-        'more_link': more_link
+        'more_link': more_link,
+        'expandable': expandable
     })
 
 
@@ -146,9 +147,13 @@ def template5(resource=None):
 
 
 def template50(resource):
+    try:
+        d = json.loads(resource.attrs)
+    except:
+        d = []
     return ObjectDict({
         'type': 50, 'title': 'map',
-        'data': eval(resource.attrs)
+        'data': d
     })
 
 
@@ -186,6 +191,7 @@ def make_header(company, team_index=False, team=None, **extra):
 
 # 团队列表模板和生成器
 def make_team_member(member, head_img):
+    head_img = make_up_for_missing_res(head_img)
     return ObjectDict({
         'icon': make_static_url(head_img.res_url),
         'name': member.name,
@@ -197,15 +203,15 @@ def make_team_member(member, head_img):
 def make_team_index_template(team, team_resource, more_link, member_list):
     team_resource = make_up_for_missing_res(team_resource)
     data = [{
-        'sub_title': team.name,
-        'longtext': team.summary,
+        # 'sub_title': team.name, # 在团队列表页面,小标题就是团队名称,重复了,且hr端控制不了,=>不显示了
+        'longtext': team.description,
         'media_url': make_static_url(team_resource.res_url),
         'media_type': MEDIA_TYPE[team_resource.res_type],
-        'member_list': member_list
+        'member_list': member_list,
     }]
 
     return template1(sub_type='middle', title=team.name,
-                     more_link=more_link, data=data)
+                     more_link=more_link, data=data, expandable=True)
 
 
 # 团队详情模版生成器
@@ -232,7 +238,7 @@ def make_other_team_data(team, res, handler_params):
     return {
         'sub_title': team.name,
         'link': make_url('/m/company/team/{}'.format(team.id), handler_params),
-        'description': team.summary,
+        'description': team.slogan,
         'media_url': make_static_url(res.res_url),
         'media_type': MEDIA_TYPE[res.res_type]
     }
