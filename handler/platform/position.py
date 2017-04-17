@@ -674,8 +674,10 @@ class PositionListHandler(BaseHandler):
         yield self.make_company_info()
 
         # 获取 team name
-        teamname_custom = self.current_user.company.conf_teamname_custom or \
-                          const.TEAMNAME_CUSTOM_DEFAULT
+        teamname_custom = (
+            self.current_user.company.conf_teamname_custom.conf_teamname_custom
+            or const.TEAMNAME_CUSTOM_DEFAULT
+        )
 
         self.logger.debug("[PositionListHandler]params:{}".format(self.params))
 
