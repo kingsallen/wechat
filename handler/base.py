@@ -604,5 +604,5 @@ class BaseHandler(MetaBaseHandler):
         """
         cookie_name = '_ac'
         if not self.get_cookie(cookie_name):
-            unix_time_stamp = int(time.time())
+            unix_time_stamp = str(int(time.time()))
             self.set_cookie(cookie_name, unix_time_stamp)
