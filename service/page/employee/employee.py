@@ -141,7 +141,10 @@ class EmployeePageService(PageService):
             data.conf.custom_value = employee.customField or ''
 
         def _make_questions_conf():
-            data.conf.questions = [sub_dict(e, 'q') for e in conf.questions]
+            if bind_status == const.EMPLOYEE_BIND_STATUS_BINDED:
+                data.conf.questions = [ObjectDict(e) for e in conf.questions]
+            else:
+                data.conf.questions = [sub_dict(e, 'q') for e in conf.questions]
 
         if conf.authMode in [const.EMPLOYEE_BIND_AUTH_MODE.EMAIL,
                              const.EMPLOYEE_BIND_AUTH_MODE.EMAIL_OR_CUSTOM,
