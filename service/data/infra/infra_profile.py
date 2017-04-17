@@ -56,6 +56,14 @@ class InfraProfileDataService(DataService):
         return http_tool.unboxing(res)
 
     @gen.coroutine
+    def has_profile(self, user_id):
+        res = yield self.handle_profile_section(
+            {'user_id': user_id}, method='get', section='profile')
+
+        ret_has_profile, _ = http_tool.unboxing(res)
+        return bool(ret_has_profile)
+
+    @gen.coroutine
     def get_profile_basic(self, profile_id):
         ret = yield self.handle_profile_section(
             {'profile_id': profile_id}, 'get', 'basic')

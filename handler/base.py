@@ -5,6 +5,7 @@
 import os
 from hashlib import sha1
 from tornado import gen
+import time
 
 import conf.common as const
 import conf.wechat as wx_const
@@ -124,6 +125,10 @@ class BaseHandler(MetaBaseHandler):
 
         # 构造并拼装 session
         yield self._fetch_session()
+
+        # 构造 access_time cookie
+        self._set_access_time_cookie()
+
         # 构造 mviewer_id
         self._make_moseeker_viewer_id()
 
@@ -283,9 +288,7 @@ class BaseHandler(MetaBaseHandler):
 
         if self._session_id:
             if self.is_platform or self.is_help:
-                self.logger.debug(
-                    "is_platform _fetch_session session_id: {}".format(
-                        self._session_id))
+                self.logger.debug("is_platform _fetch_session session_id: {}".format(self._session_id))
                 # 判断是否可以通过 session，直接获得用户信息，这样就不用跳授权页面
                 ok = yield self._get_session_by_wechat_id(self._session_id, self._wechat.id)
                 if not ok:
@@ -311,6 +314,19 @@ class BaseHandler(MetaBaseHandler):
                 self.logger.debug("beyond wechat start!!!")
                 yield self._build_session()
                 self.logger.debug("_build_session: %s" % self.current_user)
+
+        # GA 需求：
+        # 在 current_user 中添加 has_profile flag
+        # 在企业微信端页面，现有代码的  ga('send', 'pageview’) 前，
+        # 判断如果该页是用户该session登陆后（主动或者被动都可以）访问的第一个页面的话，
+        # 插入以下语句：
+        # ga('set', 'userId', ‘XXXXXX’);
+        # ga('set', 'dimension2', 'YYYYY’);
+        # ga('set', 'dimension3', 'ZZZZZZ’);
+
+        if self.current_user:
+            self.current_user.has_profile = yield self.profile_ps.has_profile(
+                self.current_user.sysuser.id)
 
     @gen.coroutine
     def _build_session(self):
@@ -580,3 +596,13 @@ class BaseHandler(MetaBaseHandler):
             settings=self.settings)
         namespace.update(add_namespace)
         return namespace
+
+    def _set_access_time_cookie(self):
+        """设置 _ac cookie 表示该session首次访问页面时间
+        使用 unix 时间戳
+        https://timanovsky.wordpress.com/2009/04/09/get-unix-timestamp-in-java-python-erlang/
+        """
+        cookie_name = '_ac'
+        if not self.get_cookie(cookie_name):
+            unix_time_stamp = str(int(time.time()))
+            self.set_cookie(cookie_name, unix_time_stamp)

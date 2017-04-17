@@ -73,3 +73,11 @@ class CandidatePageService(PageService):
 
         self.logger.debug("get_recommendations: %s" % ret)
         return ret
+
+    @gen.coroutine
+    def get_recommendation(self, recom_record_id, post_user_id):
+        ret = yield self.thrift_candidate_ds.get_recommendation(
+            recom_record_id, post_user_id)
+
+        self.logger.debug("get_recommendation: %s" % ret)
+        return ret

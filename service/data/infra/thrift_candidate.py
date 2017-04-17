@@ -132,7 +132,24 @@ class ThriftCandidateDataService(DataService):
             e.code = BizE.code
             e.message = BizE.message
             raise e
+
         return recom_result
+
+    @gen.coroutine
+    def get_recommendation(self, recom_id, post_user_id):
+        try:
+            recom_record_result = yield self.candidate_service_cilent.getRecomendation(
+                recom_id, post_user_id)
+
+        except BIZException as BizE:
+
+            self.logger.warn("%s - %s" % (BizE.code, BizE.message))
+            e = RecomException()
+            e.code = BizE.code
+            e.message = BizE.message
+            raise e
+
+        return recom_record_result
 
     @gen.coroutine
     def ignore(self, id, company_id, post_user_id,  click_time):
