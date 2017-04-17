@@ -21,16 +21,13 @@ class ApplicationHandler(BaseHandler):
         position = yield self.position_ps.get_position(self.params.pid)
         check_status, message = yield self.application_ps.check_position(
             position, self.current_user)
-        self.logger.debug(
-            "[create_reply]check_status:{}, message:{}".format(
-                check_status, message))
+        self.logger.debug("[create_reply]check_status:{}, message:{}".format(check_status, message))
 
         if not check_status:
             self.render(
                 template_name='refer/weixin/systemmessage/successapply.html',
                 message=message,
-                nexturl=make_url(path.POSITION_LIST, self.params,
-                                 escape=['next_url', 'pid']))
+                nexturl=make_url(path.POSITION_LIST, self.params, escape=['next_url', 'pid']))
             return
 
         # 如果是自定义简历职位

@@ -500,12 +500,12 @@ class ApplicationPageService(PageService):
         if application:
             message = msg.DUPLICATE_APPLICATION
             is_ok = False
-
-        # 判断当前用户手机号
-        if str(current_user.sysuser.mobile) != str(
-            current_user.sysuser.username):
-            message = msg.CELLPHONE_MOBILE_INVALID
-            is_ok = False
+        #
+        # # 判断当前用户手机号
+        # if str(current_user.sysuser.mobile) != str(
+        #     current_user.sysuser.username):
+        #     message = msg.CELLPHONE_MOBILE_INVALID
+        #     is_ok = False
 
         return is_ok, message
 

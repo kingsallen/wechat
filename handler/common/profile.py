@@ -162,9 +162,8 @@ class ProfilePreviewHandler(BaseHandler):
         except Exception:
             is_skip = False
 
-        need_mobile_validate = str(
-                self.current_user.sysuser.mobile) != str(
-                self.current_user.sysuser.username)
+        need_mobile_validate = str(self.current_user.sysuser.mobile) != \
+                               str(self.current_user.sysuser.username)
 
         tparams = {
             'profile':              profile_tpl,
@@ -174,6 +173,8 @@ class ProfilePreviewHandler(BaseHandler):
             'no_name':              not bool(self.current_user.sysuser.name),
             'current_mobile':       current_mobile
         }
+
+        self.logger.debug('tparams: %s' % tparams)
 
         self.render_page(template_name='profile/preview.html', data=tparams)
 
