@@ -64,10 +64,31 @@ class ApplicationHandler(BaseHandler):
     @gen.coroutine
     def post(self):
         """ 处理普通申请 """
+        pid = self.json_args.pid
+        position = yield self.position_ps.get_position(pid)
 
-        position = yield self.position_ps.get_position(self.json_args.pid)
+        check_status, message = yield self.application_ps.check_position(
+            position, self.current_user)
+        self.logger.debug("[create_reply]check_status:{}, message:{}".format(check_status, message))
+        if not check_status:
+            self.send_json_error(message=message)
+            return
 
-        self.logger.debug("[post_apply]current_user.recom: %s" % self.current_user.recom)
+        if position.app_cv_config_id:
+            # 读取自定义字段 meta 信息
+            custom_cv_tpls = yield self.profile_ps.get_custom_tpl_all()
+            # -> formats of custom_cv_tpls is like:
+            # [{"field_name1": "map1"}, {"field_name2": "map2"}]
+
+            result, _, _ = yield self.application_ps.check_custom_cv(
+                    self.current_user, position, custom_cv_tpls)
+
+            if not result:
+                self.send_json_error(
+                    data=dict(next_url=make_url(path.PROFILE_CUSTOM_CV, pid=pid, wechat_signature=self.params.wechat_signature)),
+                    message='')
+                return
+
         is_applied, message, apply_id = yield self.application_ps.create_application(
             position, self.current_user)
         self.logger.debug("[post_apply]is_applied:{}, message:{}, appid:{}".format(is_applied, message, apply_id))
@@ -87,8 +108,6 @@ class ApplicationHandler(BaseHandler):
                                    message=message)
 
             # 发送转发申请红包
-
-
             if self.json_args.recom:
                 yield self.redpacket_ps.handle_red_packet_position_related(
                     self.current_user,
