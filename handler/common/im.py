@@ -126,7 +126,7 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
 
         self.chatroom_channel = const.CHAT_CHATROOM_CHANNEL.format(self.hr_id, self.user_id)
         self.hr_channel = const.CHAT_HR_CHANNEL.format(self.hr_id)
-        self.chat_session.mark_enter_chatroom(self.user_id)
+        self.chat_session.mark_enter_chatroom(self.room_id)
 
         def message_handler(message):
             # 处理 sub 接受到的消息
