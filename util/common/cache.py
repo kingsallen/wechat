@@ -14,6 +14,7 @@ from setting import settings
 from util.common import ObjectDict
 from util.tool.json_tool import json_dumps
 from util.tool.str_tool import to_str
+from globals import logger
 
 
 class BaseRedis(object):
@@ -49,7 +50,14 @@ class BaseRedis(object):
         value = to_str(self._redis.get(key))
         if value is None:
             return default
-        return json.loads(value)
+        try:
+            ret = json.loads(value)
+        except TypeError as e:
+            logger.error(e)
+            logger.error('key: %s, value: %s' % (key, value))
+            raise e
+        else:
+            return ret
 
     def get(self, key, default=None, prefix=True):
         key = self.key_name(key, prefix)
