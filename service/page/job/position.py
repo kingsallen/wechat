@@ -5,6 +5,7 @@
 from tornado import gen
 
 from service.page.base import PageService
+import conf.common as const
 from util.common import ObjectDict
 from util.common.cipher import encode_id
 from util.tool.date_tool import jd_update_date, str_2_date
@@ -302,6 +303,17 @@ class PositionPageService(PageService):
         """普通职位列表"""
 
         res = yield self.infra_position_ds.get_position_list(params)
+        res_team_names = yield self.hr_team_ds.get_team_list(
+            conds={'company_id': params.company_id,
+                   'disable':    const.OLD_YES},
+            fields=['id', 'name'])
+
+        team_name_dict = {}
+        for team in res_team_names:
+            team_name_dict.update({team.id: team.name})
+
+        self.logger.debug('team_name_dict: %s' % team_name_dict)
+
         if res.status == 0:
             position_list = [ObjectDict(e) for e in res.data]
             for position in position_list:
@@ -310,6 +322,7 @@ class PositionPageService(PageService):
                 position.publish_date = jd_update_date(
                     str_2_date(position.publish_date,
                                self.constant.TIME_FORMAT))
+                position.team_name = team_name_dict.get(position.team_id, '')
 
             raise gen.Return(position_list)
         raise gen.Return(res)
