@@ -617,7 +617,7 @@ class ApplicationPageService(PageService):
                 current_user.sysuser.id, position.id)
 
             if recommender_user_id:
-                recom_employee = yield self.employee_ds.get_employee(conds={
+                recom_employee = yield self.user_employee_ds.get_employee(conds={
                     "sysuser_id": current_user.sysuser.id,
                     "status":     const.NO,
                     "disable":    const.NO,
@@ -675,22 +675,6 @@ class ApplicationPageService(PageService):
                     "award": int(employee_sum.sum_award),
                 })
 
-                #     @gen.coroutine
-                #     def opt_send_redpacket(self, current_user, position):
-                #         """
-                #         发送申请红包
-                #         :param current_user:
-                #         :param position:
-                #         :return:
-                #         """
-                #         # TODO 待yiliang校验
-                #         yield self.redpacket_ps.handle_red_packet_position_related(
-                #             current_user,
-                #             position,
-                #             redislocker=self.redis,
-                #             is_apply=True
-                #         )
-                #
         self.logger.debug("[opt_add_reward]end")
 
     @gen.coroutine
