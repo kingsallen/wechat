@@ -308,11 +308,11 @@ class UserPageService(PageService):
         kwargs = ObjectDict(kwargs)
         fields = {}
         if kwargs.email:
-            fields.update(email=kwargs.email)
+            fields.update(email=str(kwargs.email))
         if kwargs.mobile:
-            fields.update(mobile=kwargs.mobile)
+            fields.update(mobile=int(kwargs.mobile))
         if kwargs.name:
-            fields.update(name=kwargs.name)
+            fields.update(name=str(kwargs.name))
         self.logger.debug(fields)
 
         ret = 0

@@ -87,6 +87,8 @@ class ApplicationHandler(BaseHandler):
                                    message=message)
 
             # 发送转发申请红包
+
+
             if self.json_args.recom:
                 yield self.redpacket_ps.handle_red_packet_position_related(
                     self.current_user,
