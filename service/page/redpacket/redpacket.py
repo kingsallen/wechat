@@ -147,6 +147,14 @@ class RedpacketPageService(PageService):
         self.logger.debug(
             "[RP]check_hb_status_passed: %s" % check_hb_status_passed)
 
+        self.logger.debug('<><><><><><><><><>')
+        self.logger.debug('in __need_to_send')
+        self.logger.debug(current_user.recom)
+        self.logger.debug(current_user.qxuser.id)
+        self.logger.debug(check_hb_status_passed)
+        self.logger.debug(int(current_user.recom.id) != int(current_user.sysuser.id))
+        self.logger.debug('<><><><><><><><><>')
+
         ret = bool(current_user.recom and
                    current_user.qxuser.id and
                    check_hb_status_passed and

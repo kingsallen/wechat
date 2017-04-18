@@ -726,12 +726,7 @@ class ApplicationPageService(PageService):
                 "post_user_id":      recommend_user_id,
             }, appends=["LIMIT 1"])
 
-        self.logger.debug("<><><><><><><><><><><><><><><><><><><><>")
-        self.logger.debug('in opt_send_recommender_msg')
-        self.logger.debug('current_user.recom: %s' % current_user.recom)
-        self.logger.debug("<><><><><><><><><><><><><><><><><><><><>")
-
-        if recom_record and current_user.recom.id:
+        if recom_record and current_user.recom:
             profile_ps = ProfilePageService()
             work_exp_years = profile_ps.calculate_workyears(
                 profile.get("workexps", []))
