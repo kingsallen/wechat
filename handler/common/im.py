@@ -153,7 +153,7 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
         self.subscriber.stop_run_in_thread()
         self.subscriber.cleanup()
 
-        self.chat_session.mark_leave_chatroom(self.user_id)
+        self.chat_session.mark_leave_chatroom(self.room_id)
         yield self.chat_ps.leave_chatroom(self.room_id)
 
     @gen.coroutine
