@@ -1,7 +1,5 @@
 # coding=utf-8
 
-# Copyright 2016 MoSeeker
-
 """
 :author 潘煜昕（panyuxin@moseeker.com）
 :date 2016.07.22
@@ -19,6 +17,7 @@ import importlib
 import glob
 
 from globals import logger
+from globals import es
 from setting import settings
 import conf.common as constant
 import conf.platform as plat_constant
@@ -38,6 +37,7 @@ class PageService:
         :return:
         """
         self.logger = logger
+        self.es = es
         self.settings = settings
         self.constant = constant
         self.plat_constant = plat_constant

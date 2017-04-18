@@ -1,7 +1,5 @@
 # coding=utf-8
 
-# Copyright 2016 MoSeeker
-
 import functools
 import hashlib
 import re
@@ -16,13 +14,14 @@ from tornado.web import MissingArgumentError
 import conf.common as const
 import conf.message as msg
 import conf.path as path
+import conf.qx as qx_const
 from setting import settings
 from util.common import ObjectDict
 from util.common.cache import BaseRedis
 from util.common.cipher import encode_id
 from util.tool import url_tool
 from util.tool.dict_tool import sub_dict
-from util.tool.str_tool import to_hex
+from util.tool.str_tool import to_hex, to_str
 from util.tool.url_tool import make_url
 
 
@@ -46,7 +45,6 @@ def handle_response(func):
 
 base_cache = BaseRedis()
 sem = Semaphore(1)
-
 
 def cache(prefix=None, key=None, ttl=60, hash=True, lock=True, separator=":"):
     """
@@ -341,6 +339,40 @@ def verified_mobile_oneself(func):
                 return
             else:
                 self.send_json_error(message=msg.MOBILE_VERIFY)
+
+    return wrapper
+
+def gamma_welcome(func):
+
+    """
+    聚合号 gamma 的欢迎页，对于 C 端用户不同性别展现不同的皮肤
+    :param func:
+    :return:
+    """
+
+    @functools.wraps(func)
+    @gen.coroutine
+    def wrapper(self, *args, **kwargs):
+
+        search_keywords = to_str(self.get_secure_cookie(qx_const.COOKIE_WELCOME_SEARCH))
+
+        self.logger.debug("gamma_welcome: {}".format(search_keywords))
+
+        if not search_keywords:
+            gender = "unkonwn"
+            if self.current_user.qxuser.sex == 1:
+                gender = "male"
+            elif self.current_user.qxuser.sex == 2:
+                gender = "female"
+
+            self.logger.debug("gamma_welcome gender: {}".format(gender))
+            self.render_page(template_name='',
+                        data={
+                            "gender": gender
+                        })
+            return
+
+        yield func(self, *args, **kwargs)
 
     return wrapper
 

@@ -6,7 +6,6 @@
 # @Author  : Panda
 # @File    : landing.py
 
-import re
 from tornado import gen
 from pypinyin import lazy_pinyin
 from service.page.base import PageService
