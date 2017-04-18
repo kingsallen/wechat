@@ -14,7 +14,6 @@ from setting import settings
 from util.common import ObjectDict
 from util.tool.json_tool import json_dumps
 from util.tool.str_tool import to_str
-from globals import logger
 
 
 class BaseRedis(object):
@@ -53,8 +52,8 @@ class BaseRedis(object):
         try:
             ret = json.loads(value)
         except TypeError as e:
-            logger.error(e)
-            logger.error('key: %s, value: %s' % (key, value))
+            print(e)
+            print('key: %s, value: %s' % (key, value))
             raise e
         else:
             return ret
