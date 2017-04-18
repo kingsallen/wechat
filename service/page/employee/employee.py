@@ -368,6 +368,3 @@ class EmployeePageService(PageService):
                 link=link,
                 company_name=current_user.company.name
             )
-
-
-

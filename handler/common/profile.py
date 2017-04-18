@@ -34,10 +34,6 @@ class ProfileNewHandler(BaseHandler):
     @authenticated
     @tornado.gen.coroutine
     def post(self):
-        # has_profile, _ = yield self.profile_ps.has_profile(
-        #     self.current_user.sysuser.id)
-        # if has_profile:
-        #     self.send_json_error(message='profile existed')
 
         profile = ObjectDict(json_decode(self.request.body)).profile
 
@@ -66,22 +62,26 @@ class ProfileNewHandler(BaseHandler):
             mobile=profile.contacts['mobile'])
 
         # PROFILE_PROFILE
-        profile_id = None
-        profile_ok = basic_info_ok = False
-        education_ok = workexp_ok = True
+        basic_info_ok = False
 
-        source = 1 if self.is_platform else 4 # 判断是否来自企业号，聚合号
+        education_ok = True
+        workexp_ok = True
+
+        # 判断是否来自企业号，聚合号, 还是移动网页端
         if not self.in_wechat:
-            # 移动网页端来源
-            source = 8
+            source = const.ProfileSource.mobile_browser.value
+        else:
+            if self.is_platform:
+                source = const.ProfileSource.platform.value
+            else:
+                source = const.ProfileSource.qx.value
+
+        # create Profile
         result, data = yield self.profile_ps.create_profile(self.current_user.sysuser.id, source)
 
         if result:
             profile_id = data
             profile_ok = True
-            # 初始化user_setting表，profile的公开度
-            # yield self.sysuser_service.post_user_setting(
-            #     self.current_user.sysuser.id)
             self.logger.debug("profile_profile created with id: %s" % profile_id)
         else:
             self.logger.error("profile_profile creation failed. res:{}".format(data))
@@ -89,6 +89,7 @@ class ProfileNewHandler(BaseHandler):
             return
 
         self.logger.debug("[profile post]profile:{}".format(profile))
+
 
         result, data = yield self.profile_ps.create_profile_basic(profile, profile_id)
         if result:
@@ -100,12 +101,12 @@ class ProfileNewHandler(BaseHandler):
         self.logger.debug("[profile post]create_profile_basic result:{}".format(result))
         self.logger.debug("[profile post]create_profile_basic data:{}".format(data))
 
+
         for edu in profile.education:
             self.logger.debug("[profile post]profile.education edu:{}".format(edu))
             result, data = yield self.profile_ps.create_profile_education(ObjectDict(edu), profile_id)
             if result:
-                self.logger.debug(
-                    "profile_education creation passed. New record num: %s" % data)
+                self.logger.debug("profile_education creation passed. New record num: %s" % data)
             else:
                 education_ok = False
                 self.logger.error("profile_education creation failed. res: %s" % data)

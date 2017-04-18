@@ -1,6 +1,5 @@
 # coding=utf-8
 
-
 """
 说明:
 constant配置常量规范：
@@ -12,7 +11,9 @@ constant配置常量规范：
 常量使用大写字母
 例如 SUCCESS = "成功"
 """
+
 from util.common import ObjectDict
+import enum
 
 # ++++++++++系统常量++++++++++
 
@@ -430,6 +431,11 @@ MANDRILL_EMAIL_HEADER_LIMIT = 50
 KA_EMAIL_APPLICATION_INVITATION = "ka-email-application-invitation"
 NON_KA_EMAIL_APPLICATION_INVITATION = "non-ka-email-application-invitation"
 
-
 EMPLOYEE_CUSTOM_FIELD_REFINE_REDIRECT = 1
 EMPLOYEE_CUSTOM_FIELD_REFINE_TEMPLATE_MSG = 2
+
+
+class ProfileSource(enum.Enum):
+    platform = 1
+    qx = 4
+    mobile_browser = 8
