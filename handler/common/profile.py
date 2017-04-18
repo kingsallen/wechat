@@ -61,20 +61,18 @@ class ProfileNewHandler(BaseHandler):
             email=profile.contacts['email'],
             mobile=profile.contacts['mobile'])
 
-        # PROFILE_PROFILE
         basic_info_ok = False
-
         education_ok = True
         workexp_ok = True
 
         # 判断是否来自企业号，聚合号, 还是移动网页端
         if not self.in_wechat:
-            source = const.ProfileSource.mobile_browser.value
+            source = const.PROFILE_SOURCE_MOBILE_BROWSER
         else:
             if self.is_platform:
-                source = const.ProfileSource.platform.value
+                source = const.PROFILE_SOURCE_PLATFORM
             else:
-                source = const.ProfileSource.qx.value
+                source = const.PROFILE_SOURCE_QX
 
         # create Profile
         result, data = yield self.profile_ps.create_profile(self.current_user.sysuser.id, source)
@@ -89,7 +87,6 @@ class ProfileNewHandler(BaseHandler):
             return
 
         self.logger.debug("[profile post]profile:{}".format(profile))
-
 
         result, data = yield self.profile_ps.create_profile_basic(profile, profile_id)
         if result:
@@ -307,13 +304,6 @@ class ProfileCustomHandler(BaseHandler):
                     self.logger.debug("profile_basic creation passed. Got basic info id: %s" % data)
                 else:
                     self.logger.error("profile_basic creation failed. res: %s" % data)
-
-                # 初始化user_setting表，profile的公开度
-                # TODO (tangyiliang) 建议在创建 user_user 的时候创建 user_settings 记录
-                # try:
-                #     yield self.user_ps.create_user_setting(self.current_user.sysuser.id)
-                # except InfraOperationError:
-                #     self.logger.error("create user_setting error, user_id: %s" % self.current_user.sysuser.id)
 
                 yield self.profile_ps.update_profile_basic(profile_id, custom_cv)
 

@@ -109,22 +109,23 @@ class EmployeePageService(PageService):
         data.mobile = current_user.sysuser.mobile
         data.send_hour = 2  # fixed
 
-        # 如果current_user 中有 employee，表示当前用户是已认证的员工
         bind_status, employee = yield self.get_employee_info(
             user_id=current_user.sysuser.id, company_id=current_user.company.id)
 
         if bind_status == BindStatus.BINDED:
             data.binding_status = self.FE_BIND_STATUS_SUCCESS
-            data.employeeid = current_user.employee.id
-            data.name = current_user.employee.cname
+            data.employeeid = employee.id
+            data.name = employee.cname
 
         else:
             # 否则，调用基础服务判断当前用户的认证状态：没有认证还是 pending 中
             data.employeeid = NO
             if bind_status == const.EMPLOYEE_BIND_STATUS_UNBINDING:
                 data.binding_status = self.FE_BIND_STATUS_UNBINDING
+
             elif bind_status == const.EMPLOYEE_BIND_STATUS_EMAIL_PENDING:
                 data.binding_status = self.FE_BIND_STATUS_NEED_VALIDATE
+
             else:
                 data.binding_status = self.FE_BIND_STATUS_FAILURE
 

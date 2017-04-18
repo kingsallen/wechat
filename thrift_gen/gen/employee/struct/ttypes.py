@@ -64,6 +64,7 @@ class Employee(object):
      - customFieldValues
      - email
      - customField
+     - authMode
     """
 
     thrift_spec = (
@@ -80,9 +81,10 @@ class Employee(object):
         (10, TType.STRING, 'customFieldValues', 'UTF8', None, ),  # 10
         (11, TType.STRING, 'email', 'UTF8', None, ),  # 11
         (12, TType.STRING, 'customField', 'UTF8', None, ),  # 12
+        (13, TType.I32, 'authMode', None, None, ),  # 13
     )
 
-    def __init__(self, id=None, employeeId=None, companyId=None, sysuerId=None, mobile=None, wxuserId=None, cname=None, award=None, isRpSent=None, customFieldValues=None, email=None, customField=None,):
+    def __init__(self, id=None, employeeId=None, companyId=None, sysuerId=None, mobile=None, wxuserId=None, cname=None, award=None, isRpSent=None, customFieldValues=None, email=None, customField=None, authMode=None,):
         self.id = id
         self.employeeId = employeeId
         self.companyId = companyId
@@ -95,6 +97,7 @@ class Employee(object):
         self.customFieldValues = customFieldValues
         self.email = email
         self.customField = customField
+        self.authMode = authMode
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -165,6 +168,11 @@ class Employee(object):
                     self.customField = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
+            elif fid == 13:
+                if ftype == TType.I32:
+                    self.authMode = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -222,6 +230,10 @@ class Employee(object):
         if self.customField is not None:
             oprot.writeFieldBegin('customField', TType.STRING, 12)
             oprot.writeString(self.customField.encode('utf-8') if sys.version_info[0] == 2 else self.customField)
+            oprot.writeFieldEnd()
+        if self.authMode is not None:
+            oprot.writeFieldBegin('authMode', TType.I32, 13)
+            oprot.writeI32(self.authMode)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
