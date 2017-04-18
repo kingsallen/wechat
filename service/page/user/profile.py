@@ -270,17 +270,8 @@ class ProfilePageService(PageService):
     @gen.coroutine
     def create_profile_workexp(self, record, profile_id, mode='m'):
         if mode == 'm':
-            # 经过前端的命名修改后这些都不需要了
-            # record.company_name = record.company
-            # record.job = record.position
-            # record.start_date = record.start + '-01'
-            # if record.end == '至今':
-            #     record.end_until_now = 1
-            # else:
-            #     record.end_date = record.end + '-01'
-            #     record.end_until_now = 0
-            pass
-
+            record.company_name = record.company
+            record.job = record.position
         else:
             raise ValueError('invalid mode')
 

@@ -297,13 +297,6 @@ class InfraProfileDataService(DataService):
             "end_until_now": record.end_until_now
         }
 
-        # 老 6 部创建特殊部分开始
-        if record.company:
-            params.update(company_name=record.company.strip())
-        if record.position:
-            params.update(job=record.position.strip())
-        # 老 6 部创建特殊部分结束
-
         if record.get('department_name') is None or not record.get('department_name').strip():
             params.update(department_name="")
         else:
