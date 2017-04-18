@@ -339,6 +339,8 @@ class ApplicationPageService(PageService):
 
         if old_other:
             new_other_dict = json_decode(new_record.other)
+            # 需对 picUrl 做特殊处理
+            new_other_dict.pop('picUrl', None)
             old_other.update(new_other_dict)
             other_dict_to_update = old_other
             params = {
@@ -350,7 +352,10 @@ class ApplicationPageService(PageService):
         else:
             # 转换一下 new_record 中 utf-8 char
             new_record = ObjectDict(new_record)
-            new_record.other = json_dumps(json_decode(new_record.other))
+            other_dict_to_insert = new_record.other
+            other_dict_to_insert.pop('picUrl', None)
+
+            new_record.other = json_dumps(json_decode(other_dict_to_insert))
             record_to_update = new_record
 
             result, data = yield self.infra_profile_ds.create_profile_other(
