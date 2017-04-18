@@ -129,7 +129,7 @@ class RecomIgnoreHandler(RecomCustomVariableMixIn, BaseHandler):
                     self.current_user.sysuser.id,
                     self.current_user.company.id)
 
-                self.LOG.debug("sort: %s" % sort)
+                self.logger.debug("sort: %s" % sort)
             except RecomException:
                 self.render(
                     "refer/weixin/passive-seeker/passive-wanting_no-more.html")
@@ -208,7 +208,7 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
                 is_recom,
                 company_id)
 
-            self.LOG.debug("get_passive_seekers: %s" % passive_seekers)
+            self.logger.debug("get_passive_seekers: %s" % passive_seekers)
 
             self.render(
                 "refer/weixin/passive-seeker/passive-wanting_recom.html",
@@ -241,7 +241,7 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
                       position,
                       recom_reason]
 
-        self.LOG.debug("post_recom_passive_seeker form_items: %s" % form_items)
+        self.logger.debug("post_recom_passive_seeker form_items: %s" % form_items)
 
         # 如果校验失败返回原页面并附加 message
         message = None
@@ -275,7 +275,7 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
             position, mobile, recom_reason,
             self.current_user.company.id)
 
-        self.LOG.debug("post_recom_passive_seeker passive_seeker: %s" %
+        self.logger.debug("post_recom_passive_seeker passive_seeker: %s" %
                        recom_result)
 
         # 推荐完成以后需要重新获取一下总积分
@@ -297,7 +297,7 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
                 self.current_user.company.id)
 
             sort.hongbao = int(recom_result.recomIndex) * 2 if sort else 0
-            self.LOG.debug("_post_recom_candidate sort: %s" % sort)
+            self.logger.debug("_post_recom_candidate sort: %s" % sort)
             self.render(
                 "refer/weixin/passive-seeker/passive-wanting_finished.html",
                 stats=sort, recommend_success=self.recommend_success)
@@ -317,11 +317,11 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
             return
 
         list_of_ids = ",".join(ids)
-        self.LOG.debug(list_of_ids)
+        self.logger.debug(list_of_ids)
         recom_result = yield self.candidate_ps.get_recommendations(
             self.current_user.company.id, list_of_ids)
 
-        self.LOG.debug("recom_result: %s" % recom_result)
+        self.logger.debug("recom_result: %s" % recom_result)
 
         # 返回第一个推荐的被动求职者
         self.render("refer/weixin/passive-seeker/passive-wanting_form.html",

@@ -154,8 +154,6 @@ class EmployeePageService(PageService):
                              const.EMPLOYEE_BIND_AUTH_MODE.EMAIL_OR_QUESTION]:
             data.type = self.FE_BIND_TYPE_EMAIL
             data.conf.email_suffixs = conf.emailSuffix
-            self.logger.error("employee.email: %s" % employee.email)
-            self.logger.error("bind_status: %s" % bind_status)
             if bind_status in [const.EMPLOYEE_BIND_STATUS_BINDED,
                                const.EMPLOYEE_BIND_STATUS_EMAIL_PENDING]:
                 data.conf.email_name = employee.email.split('@')[0]
@@ -184,6 +182,7 @@ class EmployeePageService(PageService):
         else:
             raise ValueError('invalid authMode')
 
+        self.logger.debug('binding_render_data: %s' % data)
         return data
 
     def make_bind_params(self, user_id, company_id, json_args):

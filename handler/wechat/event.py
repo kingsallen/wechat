@@ -306,6 +306,6 @@ class WechatThirdOauthHandler(WechatOauthHandler):
                                                  self.params.timestamp,
                                                  self.params.nonce)
         except Exception as e:
-            self.LOG.error(traceback.format_exc())
+            self.logger.error(traceback.format_exc())
 
         return parse_msg(decryp_xml)

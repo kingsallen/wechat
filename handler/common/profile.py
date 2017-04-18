@@ -162,9 +162,8 @@ class ProfilePreviewHandler(BaseHandler):
         except Exception:
             is_skip = False
 
-        need_mobile_validate = str(
-                self.current_user.sysuser.mobile) != str(
-                self.current_user.sysuser.username)
+        need_mobile_validate = str(self.current_user.sysuser.mobile) != \
+                               str(self.current_user.sysuser.username)
 
         tparams = {
             'profile':              profile_tpl,
@@ -174,6 +173,8 @@ class ProfilePreviewHandler(BaseHandler):
             'no_name':              not bool(self.current_user.sysuser.name),
             'current_mobile':       current_mobile
         }
+
+        self.logger.debug('tparams: %s' % tparams)
 
         self.render_page(template_name='profile/preview.html', data=tparams)
 
@@ -251,7 +252,7 @@ class ProfileCustomHandler(BaseHandler):
         #         pos_ser = positionService(self.db)
         #         position = pos_ser.get_position_info(pid)
         #         if position.app_cv_config_id:
-        #             self.LOG.debug(u"雅诗兰黛特殊处理: 直接投递")
+        #             self.logger.debug(u"雅诗兰黛特殊处理: 直接投递")
         #             p.update(is_skip='1')
 
         self.redirect(make_url(path.PROFILE_PREVIEW, self.params, **p))
