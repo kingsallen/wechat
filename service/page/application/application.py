@@ -404,7 +404,7 @@ class ApplicationPageService(PageService):
         :return:
         """
 
-        check_status, message = self.check_position(position, current_user)
+        check_status, message = yield self.check_position(position, current_user)
         self.logger.debug(
             "[create_email_reply]check_status:{}, message:{}".format(
                 check_status, message))
@@ -500,12 +500,6 @@ class ApplicationPageService(PageService):
         if application:
             message = msg.DUPLICATE_APPLICATION
             is_ok = False
-        #
-        # # 判断当前用户手机号
-        # if str(current_user.sysuser.mobile) != str(
-        #     current_user.sysuser.username):
-        #     message = msg.CELLPHONE_MOBILE_INVALID
-        #     is_ok = False
 
         return is_ok, message
 
@@ -1341,104 +1335,3 @@ class ApplicationPageService(PageService):
         others.iter_others = iter_others
         others.special_others = special_others
         return others
-
-#
-# from tornado.testing import AsyncTestCase, gen_test, main
-# import pprint
-# from service.data.config.config_sys_cv_tpl import ConfigSysCvTplDataService
-# class TestCase(AsyncTestCase):
-#     @gen_test
-#     def test_abc(self):
-#         config_sys_cv_tpl_ds = ConfigSysCvTplDataService()
-#         config_cv_tpls = yield config_sys_cv_tpl_ds.get_config_sys_cv_tpls(
-#             conds={'disable': const.OLD_YES},
-#             fields=['field_name', 'field_title', 'map', 'field_value']
-#         )
-#
-#         records = [ObjectDict(r) for r in config_cv_tpls]
-#         kvmappinp_ret = ObjectDict()
-#         for record in records:
-#             value = {}
-#             if record.field_value:
-#                 value_list = re.split(',|:', record.field_value)
-#                 index = 0
-#                 while True:
-#                     try:
-#                         if value_list[index] and value_list[index + 1]:
-#                             value.update(
-#                                 {value_list[index + 1]: value_list[index]})
-#                             index += 2
-#                     except Exception:
-#                         break
-#                 value.update({'0': ''})
-#             else:
-#                 pass
-#
-#             kvmappinp_ret.update({
-#                 record.field_name: {
-#                     "title": record.field_title,
-#                     "value": value}
-#             })
-#
-#         kvmap = kvmappinp_ret
-#
-#         CV_OTHER_SPECIAL_KEYS = [
-#             "recentjob", "schooljob", "education", "reward", "language",
-#             "competition", "workexp", "projectexp", "internship", "industry",
-#             "position", "IDPhoto"]
-#
-#         # 这些字段虽然是复合字段，但是需要在发给 hr 的邮件中被当成普通字段看待
-#         CV_OTHER_SPECIAL_ITER_KEYS = [
-#             "reward", "language", "competition", "industry", "position"]
-#
-#         others = ObjectDict()
-#         iter_others = []
-#         special_others = {}
-#
-#         others_json = {'height': '177', 'qq': '', 'weixin': '', 'nationality': '123'}
-#
-#         for key, value in purify(others_json).items():
-#             if key == "picUrl":
-#                 # because we already have IDPhoto as key
-#                 continue
-#             if key in CV_OTHER_SPECIAL_KEYS:
-#                 special_others[key] = value
-#             else:
-#                 iter_other = []
-#                 iter_other.append(kvmap.get(key, {}).get("title", ""))
-#                 if kvmap.get(key, {}).get("value"):
-#                     iter_other.append(
-#                         kvmap[key].get("value").get(str(value), ""))
-#                 else:
-#                     iter_other.append(value)
-#                 iter_others.append(iter_other)
-#
-#             display_name_mapping = {
-#                 e.get('field_name'): e.get('field_title')
-#                 for e in config_cv_tpls
-#                 }
-#
-#             # 将部分 special_keys 转为iter_others
-#             if key in CV_OTHER_SPECIAL_ITER_KEYS:
-#                 iter_other = []
-#                 if isinstance(value, list) and len(value) > 0:
-#                     iter_other.append(display_name_mapping.get(key))
-#                     msg = " ".join(value)
-#                     iter_other.append(msg)
-#                 if key == "industry" and value:
-#                     # 期望工作行业，存储为字典值，需要处理为具体的行业名称
-#                     iter_other.append(display_name_mapping.get(key))
-#                     iter_other.append(kvmap.get(key).get('value').get(value))
-#                 elif key == "position" and value:
-#                     # 期望职能
-#                     iter_other.append(display_name_mapping.get(key))
-#                     iter_other.append(value)
-#                 iter_others.append(iter_other)
-#
-#         others.iter_others = iter_others
-#         others.special_others = special_others
-#
-#         print(others)
-#
-# if __name__ == '__main__':
-#     main()
