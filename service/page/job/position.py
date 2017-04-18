@@ -9,7 +9,7 @@ import conf.common as const
 from util.common import ObjectDict
 from util.common.cipher import encode_id
 from util.tool.date_tool import jd_update_date, str_2_date
-from util.tool.str_tool import gen_salary, split
+from util.tool.str_tool import gen_salary, split, set_literl
 from util.tool.temp_data_tool import make_position_detail_cms, make_team, template3
 
 
@@ -302,30 +302,25 @@ class PositionPageService(PageService):
     def infra_get_position_list(self, params):
         """普通职位列表"""
 
+        # get position ds
         res = yield self.infra_position_ds.get_position_list(params)
-        res_team_names = yield self.hr_team_ds.get_team_list(
-            conds={'company_id': params.company_id,
-                   'disable':    const.OLD_YES},
-            fields=['id', 'name'])
-
-        team_name_dict = {}
-        for team in res_team_names:
-            team_name_dict.update({team.id: team.name})
-
-        self.logger.debug('team_name_dict: %s' % team_name_dict)
+        # get team names
+        team_name_dict = yield self.get_teamid_names_dict(params.company_id)
 
         if res.status == 0:
             position_list = [ObjectDict(e) for e in res.data]
-            for position in position_list:
-                position.salary = gen_salary(
-                    position.salary_top, position.salary_bottom)
-                position.publish_date = jd_update_date(
-                    str_2_date(position.publish_date,
-                               self.constant.TIME_FORMAT))
-                position.team_name = team_name_dict.get(position.team_id, '')
+            pids = [e.id for e in position_list]
+            pid_teamid_dict = yield self.get_pid_teamid_dict(params.company_id, pids)
 
-            raise gen.Return(position_list)
-        raise gen.Return(res)
+            for position in position_list:
+                position.salary = gen_salary(position.salary_top, position.salary_bottom)
+                position.publish_date = jd_update_date(
+                    str_2_date(position.publish_date, self.constant.TIME_FORMAT))
+                position.team_name = team_name_dict.get(pid_teamid_dict.get(position.id, 0), '')
+
+            self.logger.debug('position_list: %s' % position_list)
+            return position_list
+        return res
 
     @gen.coroutine
     def infra_get_position_list_rp_ext(self, position_list):
@@ -342,15 +337,21 @@ class PositionPageService(PageService):
     def infra_get_rp_position_list(self, params):
         """红包职位列表"""
         res = yield self.infra_position_ds.get_rp_position_list(params)
+        team_name_dict = yield self.get_teamid_names_dict(params.company_id)
+
         if res.status == 0:
             rp_position_list = [ObjectDict(e) for e in res.data]
+            pids = [e.id for e in rp_position_list]
+            pid_teamid_dict = yield self.get_pid_teamid_dict(params.company_id,pids)
+
             for position in rp_position_list:
                 position.is_rp_reward = True
                 position.salary = gen_salary(
                     position.salary_top, position.salary_bottom)
                 position.publish_date = jd_update_date(str_2_date(position.publish_date, self.constant.TIME_FORMAT))
-            raise gen.Return(rp_position_list)
-        raise gen.Return(res)
+                position.team_name = team_name_dict.get(pid_teamid_dict.get(position.id, 0), '')
+            return rp_position_list
+        return res
 
     @gen.coroutine
     def infra_get_rp_share_info(self, params):
@@ -359,3 +360,33 @@ class PositionPageService(PageService):
         if res.status == 0:
             raise gen.Return(res.data)
         raise gen.Return(res)
+
+    @gen.coroutine
+    def get_teamid_names_dict(self, company_id):
+        """获取 {<team_id>: <team_name>} 字典"""
+        res_team_names = yield self.hr_team_ds.get_team_list(
+            conds={'company_id': company_id,
+                   'disable':    const.OLD_YES},
+            fields=['id', 'name']
+        )
+        team_name_dict = {e.id: e.name for e in res_team_names}
+        self.logger.debug('team_name_dict: %s' % team_name_dict)
+        return team_name_dict
+
+    @gen.coroutine
+    def get_pid_teamid_dict(self, company_id, list_of_pid=None):
+        """获取 {<position_id>: <team_id>} 字典
+        """
+
+        param = dict(
+            conds={'status':     const.OLD_YES,
+                   'company_id': company_id},
+            fields=['id', 'team_id']
+        )
+        if list_of_pid and isinstance(list_of_pid, list):
+            param.update(appends=["and id in %s" % set_literl(list_of_pid)])
+
+        pid_teamid_list = yield self.job_position_ds.get_positions_list(**param)
+        pid_teamid_dict = {e.id: e.team_id for e in pid_teamid_list}
+        self.logger.debug('pid_teamid_dict: %s' % pid_teamid_dict)
+        return pid_teamid_dict
