@@ -352,10 +352,12 @@ class ApplicationPageService(PageService):
         else:
             # 转换一下 new_record 中 utf-8 char
             new_record = ObjectDict(new_record)
-            other_dict_to_insert = new_record.other
-            other_dict_to_insert.pop('picUrl', None)
+            other_str = new_record.other
 
-            new_record.other = json_dumps(json_decode(other_dict_to_insert))
+            other_dict = json.loads(other_str)
+            other_dict.pop('picUrl', None)
+
+            new_record.other = json_dumps(other_dict)
             record_to_update = new_record
 
             result, data = yield self.infra_profile_ds.create_profile_other(
