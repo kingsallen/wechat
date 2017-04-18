@@ -430,14 +430,12 @@ class ApplicationPageService(PageService):
             # email解析状态: 0，有效；1,未收到回复邮件；2，文件格式不支持；3，附件超过10M；9，提取邮件失败
         )
 
-        self.logger.debug("[create_email_reply]params_for_application:{}".format(recommender_wxuser_id))
-
         ret = yield self.infra_application_ds.create_application(params_for_application)
 
         # 申请创建失败,  跳转到申请失败页面
-        if not ret.status != const.API_SUCCESS:
+        if not ret.status == const.API_SUCCESS:
             message = msg.CREATE_APPLICATION_FAILED
-            raise gen.Return((False, message))
+            return False, message
 
         uuidcode = str(uuid.uuid4())
         email_params = ObjectDict(
