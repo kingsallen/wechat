@@ -257,6 +257,8 @@ class ProfileCustomHandler(BaseHandler):
 
     @tornado.gen.coroutine
     def _save_custom_cv(self, custom_cv):
+        self.logger.debug("custom_cv: %s" % custom_cv)
+
         # 更新 user 信息（非 profile 信息）
         yield self.user_ps.update_user(
             user_id=self.current_user.sysuser.id,
@@ -271,6 +273,7 @@ class ProfileCustomHandler(BaseHandler):
         custom_fields = [c.field_name for c in custom_cv_tpls if not c.map]
 
         profile_id = 0
+
         # 已经有 profile，更新和自定义简历联动的 profile 信息
         if has_profile:
             profile_id = profile.get("profile", {}).get("id", None)
@@ -296,17 +299,21 @@ class ProfileCustomHandler(BaseHandler):
                 cv_profile_values = {k: v for k, v in custom_cv.items() if
                                      k in custom_fields}
 
+                self.logger.debug('cv_profile_values: %s' % cv_profile_values)
+
                 # BASIC INFO
                 result, data = yield self.profile_ps.create_profile_basic(
                     cv_profile_values, profile_id, mode='c')
 
                 if result:
-                    self.logger.debug("profile_basic creation passed. Got basic info id: %s" % data)
+                    self.logger.debug(
+                        "profile_basic creation passed. Got basic info id: %s" % data)
                 else:
                     self.logger.error("profile_basic creation failed. res: %s" % data)
 
                 yield self.profile_ps.update_profile_basic(profile_id, custom_cv)
-
+                yield self.profile_ps.update_profile_embedded_info_from_cv(
+                    profile_id, custom_cv)
             else:
                 raise ValueError('profile creation error')
 
@@ -826,8 +833,6 @@ class ProfileSectionHandler(BaseHandler):
         else:
             self.send_json_error()
     # Profile 编辑 -- jobpref 结束
-
-
 
     def _send_json_result(self, results, component_len):
         """json api 返回修改成功，失败，部分成功的"""

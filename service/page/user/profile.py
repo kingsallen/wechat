@@ -272,6 +272,8 @@ class ProfilePageService(PageService):
         if mode == 'm':
             record.company_name = record.company
             record.job = record.position
+        elif mode == 'c':
+            pass
         else:
             raise ValueError('invalid mode')
 
@@ -301,16 +303,6 @@ class ProfilePageService(PageService):
     def create_profile_education(self, record, profile_id, mode='m'):
         self.logger.debug("create_profile_education start")
         if mode == 'm':  # 老六步
-            # 经过前端的命名修改以后，这些都不需要了
-            # record.college_name = record.university
-            # record.degree = record.diploma
-            # record.start_date = record.start + '-01'
-            # if record.end == '至今':
-            #     record.end_until_now = 1
-            # else:
-            #     record.end_date = record.end + '-01'
-            #     record.end_until_now = 0
-            self.logger.debug("create_profile_education m")
             pass
 
         else:
@@ -478,14 +470,14 @@ class ProfilePageService(PageService):
                     profile_id=profile_id,
                     start_date=w.get('start'),
                     end_date=w.get('end'),
-                    end_until_now=1 if w.get('end') == u"至今" else 0,
+                    end_until_now=1 if w.get('end') == "至今" else 0,
                     company_name=w.get('company'),
                     department_name=w.get('department'),
                     job=w.get('position'),
                     description=w.get('describe')
                 )
                 if status == 'o':
-                    yield self.create_profile_workexp(params, profile_id)
+                    yield self.create_profile_workexp(params, profile_id, mode='c')
 
                 elif status == 'x':
                     yield self.delete_profile_workexp({"id": params.wid})
