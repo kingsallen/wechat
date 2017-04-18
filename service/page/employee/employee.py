@@ -106,20 +106,25 @@ class EmployeePageService(PageService):
         data = ObjectDict()
         data.name = current_user.sysuser.name
         data.headimg = current_user.sysuser.headimg
-        data.mobile = current_user.sysuser.mobile
+        data.mobile = current_user.sysuser.mobile or ''
         data.send_hour = 2  # fixed
+        data.conf = ObjectDict()
+        data.binding_success_message = conf.bindSuccessMessage or ''
 
         bind_status, employee = yield self.get_employee_info(
             user_id=current_user.sysuser.id, company_id=current_user.company.id)
 
+        # 当前是绑定状态
         if bind_status == BindStatus.BINDED:
             data.binding_status = self.FE_BIND_STATUS_SUCCESS
             data.employeeid = employee.id
             data.name = employee.cname
 
+        # 当前是未绑定状态
         else:
             # 否则，调用基础服务判断当前用户的认证状态：没有认证还是 pending 中
             data.employeeid = NO
+
             if bind_status == const.EMPLOYEE_BIND_STATUS_UNBINDING:
                 data.binding_status = self.FE_BIND_STATUS_UNBINDING
 
@@ -128,9 +133,6 @@ class EmployeePageService(PageService):
 
             else:
                 data.binding_status = self.FE_BIND_STATUS_FAILURE
-
-        data.conf = ObjectDict()
-        data.binding_success_message = conf.bindSuccessMessage or ''
 
         if conf.authMode == const.EMPLOYEE_BIND_AUTH_MODE.DISABLE:
             data.type = 'disabled'
@@ -150,38 +152,55 @@ class EmployeePageService(PageService):
             else:
                 data.conf.questions = [sub_dict(e, 'q') for e in conf.questions]
 
-        if conf.authMode in [const.EMPLOYEE_BIND_AUTH_MODE.EMAIL,
-                             const.EMPLOYEE_BIND_AUTH_MODE.EMAIL_OR_CUSTOM,
-                             const.EMPLOYEE_BIND_AUTH_MODE.EMAIL_OR_QUESTION]:
-            data.type = self.FE_BIND_TYPE_EMAIL
-            data.conf.email_suffixs = conf.emailSuffix
-            if bind_status in [const.EMPLOYEE_BIND_STATUS_BINDED,
-                               const.EMPLOYEE_BIND_STATUS_EMAIL_PENDING]:
+        # 已经绑定的员工，根据 employee.authMethod 来渲染
+        if bind_status == BindStatus.BINDED:
+            if employee.authMethod == const.USER_EMPLOYEE_AUTH_METHOD.EMAIL:
+                data.type = self.FE_BIND_TYPE_EMAIL
                 data.conf.email_name = employee.email.split('@')[0]
                 data.conf.email_suffix = employee.email.split('@')[1]
-            else:
-                data.conf.email_name = ''
-                data.conf.email_suffix = data.conf.email_suffixs[0] if len(
-                    data.conf.email_suffixs) else ''
-
-            if conf.authMode == const.EMPLOYEE_BIND_AUTH_MODE.EMAIL_OR_CUSTOM:
+            elif employee.authMethod == const.USER_EMPLOYEE_AUTH_METHOD.CUSTOM:
                 data.conf.switch = self.FE_BIND_TYPE_CUSTOM
                 _make_custom_conf()
+            elif employee.authMethod == const.USER_EMPLOYEE_AUTH_METHOD.QUESTION:
+                data.type = self.FE_BIND_TYPE_QUESTION
+                _make_questions_conf()
+            else:
+                assert False # should not be here
 
-            if conf.authMode == const.EMPLOYEE_BIND_AUTH_MODE.EMAIL_OR_QUESTION:
-                data.conf.switch = self.FE_BIND_TYPE_QUESTION
+        # 未绑定的员工， 根据 conf.authMode 来渲染
+        else:
+            if conf.authMode in [const.EMPLOYEE_BIND_AUTH_MODE.EMAIL,
+                                 const.EMPLOYEE_BIND_AUTH_MODE.EMAIL_OR_CUSTOM,
+                                 const.EMPLOYEE_BIND_AUTH_MODE.EMAIL_OR_QUESTION]:
+                data.type = self.FE_BIND_TYPE_EMAIL
+                data.conf.email_suffixs = conf.emailSuffix
+                if bind_status in [const.EMPLOYEE_BIND_STATUS_BINDED,
+                                   const.EMPLOYEE_BIND_STATUS_EMAIL_PENDING]:
+                    data.conf.email_name = employee.email.split('@')[0]
+                    data.conf.email_suffix = employee.email.split('@')[1]
+                else:
+                    data.conf.email_name = ''
+                    data.conf.email_suffix = data.conf.email_suffixs[0] if len(
+                        data.conf.email_suffixs) else ''
+
+                if conf.authMode == const.EMPLOYEE_BIND_AUTH_MODE.EMAIL_OR_CUSTOM:
+                    data.conf.switch = self.FE_BIND_TYPE_CUSTOM
+                    _make_custom_conf()
+
+                if conf.authMode == const.EMPLOYEE_BIND_AUTH_MODE.EMAIL_OR_QUESTION:
+                    data.conf.switch = self.FE_BIND_TYPE_QUESTION
+                    _make_questions_conf()
+
+            elif conf.authMode == const.EMPLOYEE_BIND_AUTH_MODE.CUSTOM:
+                data.type = self.FE_BIND_TYPE_CUSTOM
+                _make_custom_conf()
+
+            elif conf.authMode == const.EMPLOYEE_BIND_AUTH_MODE.QUESTION:
+                data.type = self.FE_BIND_TYPE_QUESTION
                 _make_questions_conf()
 
-        elif conf.authMode == const.EMPLOYEE_BIND_AUTH_MODE.CUSTOM:
-            data.type = self.FE_BIND_TYPE_CUSTOM
-            _make_custom_conf()
-
-        elif conf.authMode == const.EMPLOYEE_BIND_AUTH_MODE.QUESTION:
-            data.type = self.FE_BIND_TYPE_QUESTION
-            _make_questions_conf()
-
-        else:
-            raise ValueError('invalid authMode')
+            else:
+                raise ValueError('invalid authMode')
 
         self.logger.debug('binding_render_data: %s' % data)
         return data

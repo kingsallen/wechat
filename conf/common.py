@@ -408,7 +408,7 @@ EMPLOYEE_BIND_AUTH_MODE = ObjectDict(
 )
 
 # user_employee.auth_method 的数据库枚举值
-USER_EMPLOYEE_AUTH_MODE = ObjectDict(
+USER_EMPLOYEE_AUTH_METHOD = ObjectDict(
     EMAIL=0,
     CUSTOM=1,
     QUESTION=2

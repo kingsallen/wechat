@@ -14,7 +14,7 @@ struct Employee {
     10: optional string customFieldValues,
     11: optional string email,
     12: optional string customField,
-    13: optional i32 authMode
+    13: optional i32 authMethod
 }
 
 
