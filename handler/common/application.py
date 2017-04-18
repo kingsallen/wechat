@@ -67,6 +67,12 @@ class ApplicationHandler(BaseHandler):
 
         position = yield self.position_ps.get_position(self.json_args.pid)
 
+        self.logger.debug("<><><><><><><><><><><><><><><><><><><><>")
+        self.logger.debug('in application handler')
+        self.logger.debug('current_user.recom: %s' % self.current_user.recom)
+        self.logger.debug("<><><><><><><><><><><><><><><><><><><><>")
+
+        self.logger.debug("[post_apply]current_user.recom: %s" % self.current_user.recom)
         is_applied, message, apply_id = yield self.application_ps.create_application(
             position, self.current_user)
         self.logger.debug("[post_apply]is_applied:{}, message:{}, appid:{}".format(is_applied, message, apply_id))

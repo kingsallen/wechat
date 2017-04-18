@@ -595,10 +595,6 @@ class ApplicationPageService(PageService):
         #5. 向 HR 发送消息通知（消息模板，短信，邮件）
         yield self.opt_hr_msg(apply_id, current_user, position, is_platform)
 
-
-
-
-
         return True, msg.RESPONSE_SUCCESS, apply_id
 
     @gen.coroutine
@@ -712,16 +708,13 @@ class ApplicationPageService(PageService):
 
         self.logger.debug("[opt_send_applier_msg]end")
 
-
     @gen.coroutine
-    def opt_send_recommender_msg(self, recommend_user_id, current_user,
-                                 position):
+    def opt_send_recommender_msg(self, recommend_user_id, current_user, position):
         """
         向推荐人发送消息模板
         :param recommend_user_id:
         :param current_user:
         :param position:
-        :param profile:
         :return:
         """
         self.logger.debug("[opt_send_recommender_msg]start")
@@ -732,6 +725,11 @@ class ApplicationPageService(PageService):
                 "presentee_user_id": current_user.sysuser.id,
                 "post_user_id":      recommend_user_id,
             }, appends=["LIMIT 1"])
+
+        self.logger.debug("<><><><><><><><><><><><><><><><><><><><>")
+        self.logger.debug('in opt_send_recommender_msg')
+        self.logger.debug('current_user.recom: %s' % current_user.recom)
+        self.logger.debug("<><><><><><><><><><><><><><><><><><><><>")
 
         if recom_record and current_user.recom.id:
             profile_ps = ProfilePageService()
