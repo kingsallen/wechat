@@ -176,7 +176,7 @@ class CellphoneBindHandler(BaseHandler):
                 self.current_user.sysuser.username):
             response = yield self.cellphone_ps.wx_pc_combine(
                 mobile=self.params.mobile,
-                unionid=self.current_user.sysuser.unionid,
+                unionid=self.current_user.sysuser.unionid
             )
             if response.status != const.API_SUCCESS:
                 return
@@ -197,8 +197,10 @@ class CellphoneBindHandler(BaseHandler):
                     "mobile": self.params.mobile,
                     "code": code,
                 })
-                yield self.cellphone_ps.send_sms(SmsType.UPDATE_SYSUSER_SMS, self.params.mobile,
-                                                                  params, isqx=self.is_qx, ip=self.request.headers.get('Remoteip'))
+                yield self.cellphone_ps.send_sms(
+                    SmsType.UPDATE_SYSUSER_SMS, self.params.mobile,
+                    params, isqx=self.is_qx,
+                    ip=self.request.headers.get('Remoteip'))
 
-            yield self.user_ps.bind_mobile_password(self.current_user.sysuser.id,
-                                                    self.params.mobile, password)
+            yield self.user_ps.bind_mobile_password(
+                self.current_user.sysuser.id, self.params.mobile, password)

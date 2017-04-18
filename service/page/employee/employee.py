@@ -154,12 +154,13 @@ class EmployeePageService(PageService):
 
         # 已经绑定的员工，根据 employee.authMethod 来渲染
         if bind_status == BindStatus.BINDED:
+            data.mobile = employee.mobile or ''
             if employee.authMethod == const.USER_EMPLOYEE_AUTH_METHOD.EMAIL:
                 data.type = self.FE_BIND_TYPE_EMAIL
                 data.conf.email_name = employee.email.split('@')[0]
                 data.conf.email_suffix = employee.email.split('@')[1]
             elif employee.authMethod == const.USER_EMPLOYEE_AUTH_METHOD.CUSTOM:
-                data.conf.switch = self.FE_BIND_TYPE_CUSTOM
+                data.type = self.FE_BIND_TYPE_CUSTOM
                 _make_custom_conf()
             elif employee.authMethod == const.USER_EMPLOYEE_AUTH_METHOD.QUESTION:
                 data.type = self.FE_BIND_TYPE_QUESTION
