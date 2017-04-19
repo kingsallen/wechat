@@ -75,14 +75,13 @@ class CompanyHandler(BaseHandler):
 
         self.params.share = self._share(company)
         self.render_page(template_name='company/profile.html', data=data)
-        return
 
     def _share(self, company):
         company_name = company.abbreviation or company.name
         default = ObjectDict({
             'cover': self.static_url(company.get('logo', '')),
-            'title': u'关于{}, 你想知道的都在这里'.format(company_name),
-            'description': u'这可能是你人生的下一站! 看清企业全局, 然后定位自己',
+            'title': '关于{}, 你想知道的都在这里'.format(company_name),
+            'description': '这可能是你人生的下一站! 看清企业全局, 然后定位自己',
             'link': self.fullurl
         })
         # 玛氏定制

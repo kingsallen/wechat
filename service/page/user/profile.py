@@ -446,7 +446,7 @@ class ProfilePageService(PageService):
                     profile_id=profile_id,
                     start_date=e.get('start'),
                     end_date=e.get('end'),
-                    end_until_now=1 if e.get('end') == u"至今" else 0,
+                    end_until_now=1 if e.get('end') == "至今" else 0,
                     college_name=college_name,
                     college_code=college_code,
                     major_name=e.get('major'),
@@ -494,7 +494,7 @@ class ProfilePageService(PageService):
                     profile_id=profile_id,
                     start_date=p.get('start'),
                     end_date=p.get('end'),
-                    end_until_now=1 if p.get('end') == u"至今" else 0,
+                    end_until_now=1 if p.get('end') == "至今" else 0,
                     name=p.get('name'),
                     role=p.get('position'),
                     description=p.get('introduce'),
@@ -608,9 +608,9 @@ class ProfilePageService(PageService):
             start_date = w.get("start_date", "")
             end_date = w.get("end_date", "")
             if not end_date or int(w.get("end_until_now", 0)):
-                experience_item.time = start_date[:7] + u" 至今"
+                experience_item.time = start_date[:7] + " 至今"
             else:
-                experience_item.time = start_date[:7] + u" 至 " + end_date[:7]
+                experience_item.time = start_date[:7] + " 至 " + end_date[:7]
             experience_item.description = w.get("description", "")
             experiences.append(experience_item)
         profile.experiences = experiences
@@ -630,9 +630,9 @@ class ProfilePageService(PageService):
             start_date = e.get("start_date", "")
             end_date = e.get("end_date", "")
             if not end_date or int(e.get("end_until_now", 0)):
-                education_item.time = start_date[:7] + u" 至今"
+                education_item.time = start_date[:7] + " 至今"
             else:
-                education_item.time = start_date[:7] + u" 至 " + end_date[:7]
+                education_item.time = start_date[:7] + " 至 " + end_date[:7]
 
             education_item.description = e.get("description", "")
             educations.append(education_item)
@@ -649,9 +649,9 @@ class ProfilePageService(PageService):
             start_date = p.get("start_date", "")
             end_date = p.get("end_date", "")
             if not end_date or int(p.get("end_until_now", 0)):
-                project_item.time = start_date[:7] + u" 至今"
+                project_item.time = start_date[:7] + " 至今"
             else:
-                project_item.time = start_date[:7] + u" 至 " + end_date[:7]
+                project_item.time = start_date[:7] + " 至 " + end_date[:7]
             projects.append(project_item)
         profile.projects = projects
 
@@ -709,7 +709,7 @@ class ProfilePageService(PageService):
                 position = intention.get("positions")[0].get('position_name',
                                                              '')
 
-            worktype_name = intention.get("worktype_name", u"未选择")
+            worktype_name = intention.get("worktype_name", "未选择")
 
             location = u""
             if intention.get("cities", []):

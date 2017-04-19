@@ -177,7 +177,7 @@ class ApplicationEmailHandler(BaseHandler):
                 self.send_json_error(message=message)
                 return
         else:
-            self.logger.debug(u"Start to create email profile..")
+            self.logger.debug("Start to create email profile..")
             yield self.application_ps.create_email_profile(self.params, self.current_user, self.is_platform)
 
         # 置空不必要参数，避免在 make_url 中被用到

@@ -456,11 +456,11 @@ class RedpacketPageService(PageService):
                     finally:
                         # 释放红包锁
                         redislocker.delete(rplock_key)
-                        self.logger.debug(u"[RP]红包锁释放成功， rplock_key: %s" % rplock_key)
+                        self.logger.debug("[RP]红包锁释放成功， rplock_key: %s" % rplock_key)
                         user_ps = None
                         sharechain_ps = None
                 else:
-                    self.logger.debug(u"[RP]触发红包锁，该红包逻辑正在处理中， rplock_key: %s" % rplock_key)
+                    self.logger.debug("[RP]触发红包锁，该红包逻辑正在处理中， rplock_key: %s" % rplock_key)
 
                 if is_click:
                     self.logger.debug("[RP]转发点击红包结束")

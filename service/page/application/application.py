@@ -244,7 +244,7 @@ class ApplicationPageService(PageService):
 
         education = []
         for e in profile.get('educations'):
-            __end = u'至今' if e.get('end_until_now', False) \
+            __end = '至今' if e.get('end_until_now', False) \
                 else e.get('end_date', '')
             end = __end
             __start = e.get('start_date', '')
@@ -260,7 +260,7 @@ class ApplicationPageService(PageService):
                 end=end,
                 __start=__start,
                 start=start,
-                end_until_now=1 if end == u"至今" else 0,
+                end_until_now=1 if end == "至今" else 0,
                 _degree=_degree,
                 degree=degree,
                 major=major,
@@ -269,7 +269,7 @@ class ApplicationPageService(PageService):
 
         workexp = []
         for w in profile.get('workexps'):
-            __end = u'至今' if w.get('end_until_now', False) \
+            __end = '至今' if w.get('end_until_now', False) \
                 else w.get('end_date', '')
             end = __end
             __start = w.get('start_date', '')
@@ -284,7 +284,7 @@ class ApplicationPageService(PageService):
                 end=end,
                 __start=__start,
                 start=start,
-                end_until_now=1 if end == u"至今" else 0,
+                end_until_now=1 if end == "至今" else 0,
                 company=company,
                 department=department,
                 describe=describe,
@@ -293,7 +293,7 @@ class ApplicationPageService(PageService):
 
         projectexp = []
         for p in profile.get('projectexps'):
-            __end = u'至今' if p.get('end_until_now', False) \
+            __end = '至今' if p.get('end_until_now', False) \
                 else p.get('end_date', '')
             end = __end
             __start = p.get('start_date', '')
@@ -308,7 +308,7 @@ class ApplicationPageService(PageService):
                 end=end,
                 __start=__start,
                 start=start,
-                end_until_now=1 if __end == u"至今" else 0,
+                end_until_now=1 if __end == "至今" else 0,
                 name=name,
                 introduce=introduce,
                 role=role,
