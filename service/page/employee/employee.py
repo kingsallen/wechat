@@ -1,19 +1,19 @@
 # coding=utf-8
 
+import json
 from tornado import gen
 
 import conf.common as const
 import conf.fe as fe
-from conf.common import NO
 import conf.path as path
+from setting import settings
+
 from service.page.base import PageService
 from thrift_gen.gen.employee.struct.ttypes import BindingParams, BindStatus
 from util.common import ObjectDict
 from util.tool.dict_tool import sub_dict
 from util.tool.url_tool import make_static_url, make_url
 from util.wechat.template import employee_refine_custom_fields_tpl
-from setting import settings
-import json
 
 
 class EmployeePageService(PageService):
@@ -123,7 +123,7 @@ class EmployeePageService(PageService):
         # 当前是未绑定状态
         else:
             # 否则，调用基础服务判断当前用户的认证状态：没有认证还是 pending 中
-            data.employeeid = NO
+            data.employeeid = const.NO
 
             if bind_status == const.EMPLOYEE_BIND_STATUS_UNBINDING:
                 data.binding_status = self.FE_BIND_STATUS_UNBINDING

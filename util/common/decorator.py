@@ -47,7 +47,6 @@ def handle_response(func):
 base_cache = BaseRedis()
 sem = Semaphore(1)
 
-
 def cache(prefix=None, key=None, ttl=60, hash=True, lock=True, separator=":"):
     """
     cache装饰器
@@ -462,9 +461,3 @@ class NewJDStatusCheckerRedirect(BaseNewJDStatusChecker):
         url = make_url(to.url, params, **to.extra)
         url_tool._ESCAPE_DEFAULT = _OLD_ESCAPE_DEFAULT
         return url
-
-# if __name__ == "__main__":
-#     to = ObjectDict({'extra': {'m': 'company'}, 'field_mapping': {}, 'url': '/mobile/position'})
-#     params = ObjectDict({'wechat_signature': 'YWNkNmIyYWExOGViOTRkODMyMzk5N2MxM2NkZDZlOTUxNmRjYzJiYQ=='})
-#     print(NewJDStatusCheckerRedirect.make_url_with_m(to, params))
-#     print(url_tool._ESCAPE_DEFAULT)

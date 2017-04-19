@@ -1,10 +1,7 @@
 # coding=utf-8
 
-# Copyright 2016 MoSeeker
-
 import logging
 import os
-import pprint
 from logging.handlers import TimedRotatingFileHandler
 
 from tornado.log import gen_log
@@ -136,5 +133,4 @@ class MessageLogger(Logger):
 
     def stats(self, message):
         super(MessageLogger, self).stats(message)
-        # TODO (tangyiliang) 上线前解开
-        # self.impl.send_message("stats", message)
+        self.impl.send_message("stats", message)
