@@ -13,7 +13,6 @@ from util.common import ObjectDict
 
 class UserUserDataService(DataService):
 
-    @cache(ttl=60)
     @gen.coroutine
     def get_user(self, conds, fields=None):
 
