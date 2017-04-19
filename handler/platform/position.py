@@ -451,6 +451,9 @@ class PositionHandler(BaseHandler):
                 self.current_user.sysuser.id, position_info.id)
 
         if self.current_user.sysuser.id:
+            self.logger.debug("_make_refresh_share_chain user_id:{}".format(self.current_user.sysuser.id))
+            self.logger.debug("_make_refresh_share_chain position_id:{}".format(position_info.id))
+            self.logger.debug("_make_refresh_share_chain sharechain_id:{}".format(inserted_share_chain_id))
             yield self.candidate_ps.send_candidate_view_position(
                 user_id=self.current_user.sysuser.id,
                 position_id=position_info.id,
