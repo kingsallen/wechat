@@ -191,7 +191,9 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
             self.render(
                 template_name="refer/weixin/passive-seeker/passive-wanting_form.html",
                 passive_seeker=passive_seeker,
-                recommend_presentee=self.recommend_presentee)
+                recommend_presentee=self.recommend_presentee,
+                message=""
+            )
         else:
             self.render(
                 template_name="refer/weixin/passive-seeker/passive-wanting_no-more.html")

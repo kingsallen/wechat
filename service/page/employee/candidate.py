@@ -2,6 +2,7 @@
 
 from tornado import gen
 from service.page.base import PageService
+from util.common import ObjectDict
 
 
 class RecomException(Exception):
@@ -76,8 +77,16 @@ class CandidatePageService(PageService):
 
     @gen.coroutine
     def get_recommendation(self, recom_record_id, post_user_id):
-        ret = yield self.thrift_candidate_ds.get_recommendation(
+        infra_ret = yield self.thrift_candidate_ds.get_recommendation(
             recom_record_id, post_user_id)
+
+        ret = ObjectDict(
+            title=infra_ret.title,
+            recom=infra_ret.recom,
+            click_time=infra_ret.clickTime,
+            id=infra_ret.id,
+            presentee_name=infra_ret.presenteeName
+        )
 
         self.logger.debug("get_recommendation: %s" % ret)
         return ret
