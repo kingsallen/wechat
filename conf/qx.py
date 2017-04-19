@@ -9,3 +9,18 @@
 例如 SUCCESS = "成功"
 
 """
+from util.common import ObjectDict
+
+
+hot_city = ObjectDict({"hot_city": ['上海',
+                                    '北京',
+                                    '深圳',
+                                    '广州',
+                                    '杭州',
+                                    '南京',
+                                    '成都',
+                                    '苏州',
+                                    '武汉',
+                                    '天津',
+                                    '西安',
+                                    '不限']})

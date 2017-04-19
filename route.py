@@ -49,7 +49,7 @@ import handler.help.releasedposition
 import handler.help.passport
 
 import handler.qx.wechat_oauth
-
+import handler.qx.search
 # 微信端公共的 routes
 common_routes = [
     # 开发者方式
@@ -89,7 +89,11 @@ common_routes = [
     (r"/m/api/JSSDKError",                             handler.common.jssdkerror.JSSDKErrorHandler,               {"event": "frontend_jssdkerror"}),
 
     # 兼容老微信 url，进行302跳转，event 设置为 NULL
-    # (r"/.*",                                         handler.common.compatible.CompatibleHandler,               {"event": "NULL"})
+    # (r"/.*",                                           handler.common.compatible.CompatibleHandler,               {"event": "NULL"})
+    (r"/m/api/search/condition/*", handler.qx.search.SearchConditionHandler, { "event": "search_condition" }),
+    (r"/m/api/search/condition/(\d+)*", handler.qx.search.SearchConditionHandler, { "event": "search_condition" }),
+    (r"/m/api/search/([a-z_]+)", handler.qx.search.SearchCityHandler, { "event": "search_condition" }),
+
 ]
 
 # 企业号的单独 routes
@@ -109,20 +113,21 @@ platform_routes = [
     (r"/m/employee/custominfo[\/]?",                   handler.platform.employee.CustomInfoHandler,               {"event": "employee_custominfo"}),
     (r"/m/employee/binded[\/]?",                       handler.platform.employee.BindedHandler,                   {"event": "employee_binded"}),
     # 各大公司的自定义配置
-    (r"/m/custom/emailapply[\/]?",                     handler.platform.customize.CustomizeEmailApplyHandler,     {"event": "customize_emailapply"}),
-    (r"/m/api/company/visitreq[\/]?",                  handler.platform.companyrelation.CompanyVisitReqHandler,   {"event": "company_visitreq"}),
-    (r"/m/api/company/survey[\/]?",                    handler.platform.companyrelation.CompanySurveyHandler,     {"event": "company_survey"}),
-    (r"/m/api/company/follow[\/]?",                    handler.platform.companyrelation.CompanyFollowHandler,     {"event": "company_follow"}),
-    (r"/m/api/employee/bind[\/]?",                     handler.platform.employee.EmployeeBindHandler,             {"event": "employee_bind"}),
-    (r"/m/api/employee/unbind[\/]?",                   handler.platform.employee.EmployeeUnbindHandler,           {"event": "employee_unbind"}),
-    (r"/m/api/employee/recommendrecords[\/]?",         handler.platform.employee.RecommendRecordsHandler,         {"event": "employee_recommendrecords"}),
-    (r"/m/api/employee/rewards[\/]?",                  handler.platform.employee.AwardsHandler,                   {"event": "employee_awards"}),
-    (r"/m/api/dict/city[\/]?",                         handler.platform.dictionary.DictCityHandler,               {"event": "dict_city"}),
-    (r"/m/api/dict/industry[\/]?",                     handler.platform.dictionary.DictIndustryHandler,           {"event": "dict_industry"}),
-    (r"/m/api/dict/function[\/]?",                     handler.platform.dictionary.DictFunctionHandler,           {"event": "dict_function"}),
+    (r"/m/custom/emailapply",                          handler.platform.customize.CustomizeEmailApplyHandler,     {"event": "customize_emailapply"}),
+    (r"/m/api/company/visitreq",                       handler.platform.companyrelation.CompanyVisitReqHandler,   {"event": "company_visitreq"}),
+    (r"/m/api/company/survey",                         handler.platform.companyrelation.CompanySurveyHandler,     {"event": "company_survey"}),
+    (r"/m/api/company/follow",                         handler.platform.companyrelation.CompanyFollowHandler,     {"event": "company_follow"}),
+    (r"/m/api/employee/bind",                          handler.platform.employee.EmployeeBindHandler,             {"event": "employee_bind"}),
+    (r"/m/api/employee/unbind",                        handler.platform.employee.EmployeeUnbindHandler,           {"event": "employee_unbind"}),
+    (r"/m/api/employee/recommendrecords",              handler.platform.employee.RecommendRecordsHandler,         {"event": "employee_recommendrecords"}),
+    (r"/m/api/employee/rewards",                       handler.platform.employee.AwardsHandler,                   {"event": "employee_awards"}),
+    (r"/m/api/dict/city",                              handler.platform.dictionary.DictCityHandler,               {"event": "dict_city"}),
+    (r"/m/api/dict/industry",                          handler.platform.dictionary.DictIndustryHandler,           {"event": "dict_industry"}),
+    (r"/m/api/dict/function",                          handler.platform.dictionary.DictFunctionHandler,           {"event": "dict_function"}),
     (r"/m/api/profile/edit[\/]?",                      handler.platform.profile.ProfileSectionHandler,            {"event": "profile_section"}),
     (r"/m/api/profile/new[\/]?",                       handler.platform.profile.ProfileNewHandler,                {"event": "profile_new"}),
-    (r"/m/api/position/empnotice[\/]?",                handler.platform.position.PositionEmpNoticeHandler,        {"event": "position_empnotice"}),
+    (r"/m/api/position/empnotice",                     handler.platform.position.PositionEmpNoticeHandler,        {"event": "position_empnotice"}),
+
 
     # 招聘助手的 route，由于域名还没有确定，临时放这里
     (r"/h/position",                                   handler.help.releasedposition.ReleasedPositionHandler,     {"event": "helper_positions"}),
@@ -137,6 +142,8 @@ platform_routes.extend(common_routes)
 # 聚合号的单独 routes
 qx_routes = [
     (r"/m/wxoauth2",                                   handler.qx.wechat_oauth.WxOauthHandler,                    {"event": "wxoauth_wxoauth"}),
+
+
 ]
 qx_routes.extend(common_routes)
 
