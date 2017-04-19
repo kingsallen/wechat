@@ -123,7 +123,7 @@ class ThriftCandidateDataService(DataService):
     def get_recommendations(self, company_id, list_of_recom_ids):
         try:
             recom_result = yield self.candidate_service_cilent.getRecomendations(
-                company_id, list_of_recom_ids)
+                int(company_id), list_of_recom_ids)
 
         except BIZException as BizE:
 
@@ -139,7 +139,7 @@ class ThriftCandidateDataService(DataService):
     def get_recommendation(self, recom_id, post_user_id):
         try:
             recom_record_result = yield self.candidate_service_cilent.getRecommendation(
-                recom_id, post_user_id)
+                int(recom_id), int(post_user_id))
 
         except BIZException as BizE:
 
