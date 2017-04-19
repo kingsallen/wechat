@@ -129,10 +129,10 @@ class ProfileNewHandler(BaseHandler):
             dqpid = self.get_cookie('dqpid')
             self.logger.debug('dqpid: %s' % dqpid)
             if dqpid:
-                next_url = make_url(path.PROFILE_PREVIEW, self.params, pid=int(self.get_cookie('dqpid')))
+                next_url = make_url(path.PROFILE_PREVIEW, self.params, pid=str(dqpid))
             else:
                 next_url = make_url(path.PROFILE_VIEW, self.params)
-
+            self.logger.debug('next_url: %s' % next_url)
             self.clear_cookie(name='dqpid')
             self.send_json_success(data=ObjectDict(next_url=next_url))
         else:
