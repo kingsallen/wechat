@@ -1,7 +1,5 @@
 # coding=utf-8
 
-# Copyright 2016 MoSeeker
-
 """ 说明:
 route不需要添加v2，web网页没有维护旧版本的概念
 api接口的route都加上api，非api的route会被统计为PV、UV
@@ -80,7 +78,6 @@ common_routes = [
     (r"/m/api/dict/function[\/]?",                     handler.common.dictionary.DictFunctionHandler,           {"event": "dict_function"}),
     (r"/m/api/profile/edit[\/]?",                      handler.common.profile.ProfileSectionHandler,            {"event": "profile_section"}),
     (r"/m/api/profile/new[\/]?",                       handler.common.profile.ProfileNewHandler,                {"event": "profile_new"}),
-
 
     # websocket
     (r"/m/websocket/([A-Za-z0-9_]{1,32})",             handler.common.im.ChatWebSocketHandler),
