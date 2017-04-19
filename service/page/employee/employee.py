@@ -180,8 +180,13 @@ class EmployeePageService(PageService):
                 data.conf.email_suffixs = conf.emailSuffix
                 if bind_status in [const.EMPLOYEE_BIND_STATUS_BINDED,
                                    const.EMPLOYEE_BIND_STATUS_EMAIL_PENDING]:
-                    data.conf.email_name = employee.email.split('@')[0]
-                    data.conf.email_suffix = employee.email.split('@')[1]
+                    data.conf.email_name = ''
+                    data.conf.email_suffix = ''
+                    self.logger.debug(employee.email)
+                    if isinstance(employee.email,
+                                  str) and '@' in employee.email:
+                        data.conf.email_name = employee.email.split('@')[0]
+                        data.conf.email_suffix = employee.email.split('@')[1]
                 else:
                     data.conf.email_name = ''
                     data.conf.email_suffix = data.conf.email_suffixs[0] if len(
