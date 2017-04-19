@@ -940,6 +940,7 @@ class WechatPositionListData(object):
      - company_name
      - is_new
      - city
+     - priority
     """
 
     thrift_spec = (
@@ -959,9 +960,10 @@ class WechatPositionListData(object):
         (13, TType.STRING, 'company_name', 'UTF8', None, ),  # 13
         (14, TType.BOOL, 'is_new', None, None, ),  # 14
         (15, TType.STRING, 'city', 'UTF8', None, ),  # 15
+        (16, TType.I32, 'priority', None, None, ),  # 16
     )
 
-    def __init__(self, id=None, title=None, salary_top=None, salary_bottom=None, publish_date=None, department=None, visitnum=None, in_hb=None, count=None, company_abbr=None, company_logo=None, company_name=None, is_new=None, city=None,):
+    def __init__(self, id=None, title=None, salary_top=None, salary_bottom=None, publish_date=None, department=None, visitnum=None, in_hb=None, count=None, company_abbr=None, company_logo=None, company_name=None, is_new=None, city=None, priority=None,):
         self.id = id
         self.title = title
         self.salary_top = salary_top
@@ -976,6 +978,7 @@ class WechatPositionListData(object):
         self.company_name = company_name
         self.is_new = is_new
         self.city = city
+        self.priority = priority
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -1056,6 +1059,11 @@ class WechatPositionListData(object):
                     self.city = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
+            elif fid == 16:
+                if ftype == TType.I32:
+                    self.priority = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -1122,6 +1130,10 @@ class WechatPositionListData(object):
             oprot.writeFieldBegin('city', TType.STRING, 15)
             oprot.writeString(self.city.encode('utf-8') if sys.version_info[0] == 2 else self.city)
             oprot.writeFieldEnd()
+        if self.priority is not None:
+            oprot.writeFieldBegin('priority', TType.I32, 16)
+            oprot.writeI32(self.priority)
+            oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
 
@@ -1150,6 +1162,8 @@ class WechatPositionListData(object):
             raise TProtocolException(message='Required field is_new is unset!')
         if self.city is None:
             raise TProtocolException(message='Required field city is unset!')
+        if self.priority is None:
+            raise TProtocolException(message='Required field priority is unset!')
         return
 
     def __repr__(self):
