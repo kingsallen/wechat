@@ -268,11 +268,19 @@ class ProfilePageService(PageService):
         return result, data
 
     @gen.coroutine
-    def create_profile_workexp(self, record, profile_id, mode='m'):
+    def create_profile_workexp(self, record, profile_id, mode='m', *args, **kwargs):
+        self.logger.warn('$$$$$$$$$$$$$$$$$$$$4')
+        self.logger.warn(record)
+        self.logger.warn('$$$$$$$$$$$$$$$$$$$$4')
         if mode == 'm':
+            # 通过老 6 步 profile 创建添加
             record.company_name = record.company
             record.job = record.position
         elif mode == 'c':
+            # 通过 自定义简历编辑添加
+            pass
+        elif mode == 'p':
+            # 通过 profile 编辑添加
             pass
         else:
             raise ValueError('invalid mode')
@@ -282,13 +290,13 @@ class ProfilePageService(PageService):
         return result, data
 
     @gen.coroutine
-    def update_profile_workexp(self, record, profile_id):
+    def update_profile_workexp(self, record, profile_id, *args, **kwargs):
         result, data = yield self.infra_profile_ds.update_profile_workexp(
             record, profile_id)
         return result, data
 
     @gen.coroutine
-    def delete_profile_workexp(self, record, profile_id):
+    def delete_profile_workexp(self, record, profile_id, *args, **kwargs):
         result, data = yield self.infra_profile_ds.delete_profile_workexp(
             record, profile_id)
         return result, data

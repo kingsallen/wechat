@@ -605,7 +605,7 @@ class ProfileSectionHandler(BaseHandler):
 
         result, res = yield getattr(
             self.profile_ps, verb + "_profile_workexp")(
-            model, profile_id)
+            model, profile_id, mode='p')
 
         if result:
             self.send_json_success()
