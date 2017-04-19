@@ -86,8 +86,8 @@ class CandidatePageService(PageService):
             recom=infra_ret.recom,
             click_time=infra_ret.clickTime,
             id=infra_ret.id,
-            presentee_name=infra_ret.presenteeName,
-            next=0 if infra_ret.nextOne else 1,
+            presentee_name=infra_ret.presenteeName
+            # next=0 if infra_ret.nextOne else 1,
             # recom_total=infra_ret.recomTotal,
             # recom_index=infra_ret.recomIndex,
             # recom_ignore=infra_ret.recomIgnore

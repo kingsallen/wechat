@@ -187,6 +187,8 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
             passive_seeker.recom_index = 0
             passive_seeker.recom_total = 1
             passive_seeker.recom_ignore = 0
+
+            passive_seeker.next = 1
             self.render(
                 template_name="refer/weixin/passive-seeker/passive-wanting_form.html",
                 passive_seeker=passive_seeker,
