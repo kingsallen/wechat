@@ -98,7 +98,6 @@ class ProfileNewHandler(BaseHandler):
         self.logger.debug("[profile post]create_profile_basic result:{}".format(result))
         self.logger.debug("[profile post]create_profile_basic data:{}".format(data))
 
-
         for edu in profile.education:
             self.logger.debug("[profile post]profile.education edu:{}".format(edu))
             result, data = yield self.profile_ps.create_profile_education(ObjectDict(edu), profile_id)
@@ -126,11 +125,13 @@ class ProfileNewHandler(BaseHandler):
         self.logger.debug("[profile post]create_profile_workexp data:{}".format(data))
 
         if profile_ok and basic_info_ok and education_ok and workexp_ok:
-            # is_apply = '1' if self.get_cookie('dq_pid') else '0'
-            # pid = self.get_cookie('dq_pid', None)
-            data = ObjectDict(url=make_url(path.PROFILE_VIEW, self.params))
-                             #apply=is_apply, pid=pid)
-            self.send_json_success(data)
+            self.logger.debug(self.get_cookie('dqpid'))
+            if self.get_cookie('dqpid'):
+                url = make_url(path.PROFILE_PREVIEW, self.params, pid=int(self.get_cookie('dqpid')))
+            else:
+                url = make_url(path.PROFILE_VIEW, self.params)
+
+            self.send_json_success(data=ObjectDict(url=url))
         else:
             self.send_json_warning(message='profile created partially')
 
@@ -143,8 +144,9 @@ class ProfilePreviewHandler(BaseHandler):
     @tornado.gen.coroutine
     def get(self):
         if not self.params.pid:
-            # or not self.params.is_skip:
-            raise ValueError()
+            url = make_url(path.PROFILE_VIEW, self.params)
+            self.redirect(url)
+            return
 
         profile_tpl = yield self.profile_ps.profile_to_tempalte(
             self.current_user.profile)

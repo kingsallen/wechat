@@ -46,6 +46,7 @@ import handler.platform.employee
 import handler.platform.landing
 import handler.platform.position
 import handler.platform.team
+import handler.platform.recom
 
 import handler.qx.wechat_oauth
 
@@ -120,6 +121,8 @@ platform_routes = [
     (r"/m/employee/bindemail[\/]?",                    handler.platform.employee.EmployeeBindEmailHandler,        {"event": "employee_bindemail"}),
     (r"/m/employee/custominfo[\/]?",                   handler.platform.employee.CustomInfoHandler,               {"event": "employee_custominfo"}),
     (r"/m/employee/binded[\/]?",                       handler.platform.employee.BindedHandler,                   {"event": "employee_binded"}),
+    (r"/m/employee/recom/ignore[\/]?",                 handler.platform.recom.RecomIgnoreHandler,                 {"event": "recom_ignore"}),
+    (r"/m/employee/recom[\/]?",                        handler.platform.recom.RecomCandidateHandler,              {"event": "recom_normal"}),
 
     # 各大公司的自定义配置
     (r"/m/custom/emailapply[\/]?",                     handler.platform.customize.CustomizeEmailApplyHandler,     {"event": "customize_emailapply"}),

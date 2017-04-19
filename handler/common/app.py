@@ -23,6 +23,7 @@ class IndexHandler(BaseHandler):
         method = method_list.group(1) if method_list else "default"
 
         self.logger.debug("IndexHandler: {}".format(method))
+        self._save_dqpid_cookie()
 
         try:
             if method in self._NEED_AUTH_PATHS:
@@ -50,3 +51,9 @@ class IndexHandler(BaseHandler):
         """个人中心，需要使用authenticated判断是否登录，及静默授权"""
         self.logger.debug("IndexHandler usercenter")
         self.render(template_name="system/app.html")
+
+    def _save_dqpid_cookie(self):
+        if re.match(r"/m/app/profile/new", self.request.uri):
+            if self.params.pid:
+                self.set_cookie('dqpid', self.params.pid)
+                self.logger.debug('dqpid: %s saved' % self.params.pid)
