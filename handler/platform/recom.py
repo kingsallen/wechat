@@ -181,13 +181,9 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
     def _get_recom_candidate(self, id):
 
         passive_seeker = yield self.candidate_ps.get_recommendation(
-            id,
-            self.current_user.sysuser.id)
+            id, self.current_user.sysuser.id)
 
         if passive_seeker:
-            passive_seeker.recom_index = 0
-            passive_seeker.recom_total = 1
-            passive_seeker.recom_ignore = 0
             self.render(
                 template_name="refer/weixin/passive-seeker/passive-wanting_form.html",
                 passive_seeker=passive_seeker,
