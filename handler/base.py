@@ -535,7 +535,7 @@ class BaseHandler(MetaBaseHandler):
             "id": user_id
         })
 
-        if sysuser.parentid > 0:
+        if sysuser.parentid and sysuser.parentid > 0:
             sysuser = yield self.user_ps.get_user_user({
                 "id": sysuser.parentid
             })

@@ -125,7 +125,7 @@ class ApplicationPageService(PageService):
         for field in fields_to_check:
             field_name = field.field_name
             if field_name == 'picUrl':
-                pass
+                continue
             mapping = field.map
             passed = yield self._check(profile, field_name, user, mapping)
 
