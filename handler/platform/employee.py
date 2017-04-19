@@ -191,7 +191,7 @@ class EmployeeBindHandler(BaseHandler):
 
 
 class EmployeeBindEmailHandler(BaseHandler):
-    
+
     @handle_response
     @gen.coroutine
     def get(self):
