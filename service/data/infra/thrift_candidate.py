@@ -95,15 +95,15 @@ class ThriftCandidateDataService(DataService):
 
         recom_params = RecommmendParam()
 
-        recom_params.postUserId = post_user_id
-        recom_params.clickTime = click_time
-        recom_params.id = recom_record_id
-        recom_params.realName = realname
-        recom_params.company = company
-        recom_params.position = position
-        recom_params.mobile = mobile
-        recom_params.recomReason = recom_reason
-        recom_params.companyId = company_id
+        recom_params.id = int(recom_record_id)
+        recom_params.realName = str(realname)
+        recom_params.company = str(company)
+        recom_params.position = str(position)
+        recom_params.mobile = str(mobile)
+        recom_params.recomReason = str(recom_reason)
+        recom_params.companyId = int(company_id)
+        recom_params.postUserId = int(post_user_id)
+        recom_params.clickTime = str(click_time)
 
         try:
             recommend_result = yield self.candidate_service_cilent.recommend(

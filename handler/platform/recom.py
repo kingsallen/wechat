@@ -11,6 +11,7 @@ import conf.message as msg
 from util.tool.date_tool import curr_now_dateonly
 from service.page.employee.candidate import RecomException
 import conf.common as const
+from util.common import ObjectDict
 
 
 # """
@@ -249,7 +250,7 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
             message = '手机号格式校验失败'
 
         if message:
-            passive_seeker = {
+            passive_seeker = ObjectDict({
                 'id':             recom_record_id,
                 'realname':       realname,
                 'company':        company,
@@ -259,15 +260,16 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
                 'recom_index':    self.get_argument("_recom_index"),
                 'presentee_name': self.get_argument("_presentee_name"),
                 'position_name':  self.get_argument("_position_name"),
-                'message':        message
-            }
+                'next':           1
+            })
             self.render(
                 template_name='refer/weixin/passive-seeker/passive-wanting_form.html',
                 passive_seeker=passive_seeker,
-                recommend_presentee=self.recommend_presentee)
+                recommend_presentee=self.recommend_presentee,
+                message=message)
             return
 
-        recom_result = yield self.candidate_ps.recommend(
+        recom_result = yield self.candidate_ps.post_recommend(
             self.current_user.sysuser.id,
             click_time, recom_record_id, realname, company,
             position, mobile, recom_reason,
