@@ -539,7 +539,7 @@ class BaseHandler(MetaBaseHandler):
             sysuser = yield self.user_ps.get_user_user({
                 "id": sysuser.parentid
             })
-            self.clear_all_cookies()
+            self.clear_cookie(name=const.COOKIE_SESSIONID)
 
         if sysuser:
             sysuser.headimg = self.static_url(sysuser.headimg or const.SYSUSER_HEADIMG)

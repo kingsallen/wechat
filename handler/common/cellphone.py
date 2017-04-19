@@ -183,7 +183,7 @@ class CellphoneBindHandler(BaseHandler):
 
             ret_user_id = response.data.id
             if str(ret_user_id) != str(self.current_user.sysuser.id):
-                self.clear_all_cookies()
+                self.clear_cookie(name=const.COOKIE_SESSIONID)
 
         else:
             password = self.current_user.sysuser.password
