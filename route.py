@@ -87,7 +87,7 @@ common_routes = [
     (r"/m/api/chat/unread[\/]*([0-9]+)*",              handler.common.im.UnreadCountHandler,                      {"event": "chat_"}),
     (r"/m/api/mobilebinded",                           handler.common.usercenter.UserMobileBindedHandler,         {"event": "user_usermobilebinded"}),
     (r"/m/api/cellphone[\/]*([a-z]+)*",                handler.common.cellphone.CellphoneBindHandler,             {"event": "cellphone_"}),
-    (r"/m/api/user/currentinfo",                       handler.common.interest.UserCurrentInfoHandler,            {"event": "user_currentinfo"}),
+    (r"/m/api/user/currentinfo[\/]*([a-z]+)*",         handler.common.interest.UserCurrentInfoHandler,            {"event": "user_currentinfo"}),
     (r"/m/api/upload/([a-z_]*)",                       handler.common.usercenter.UploadHandler,                   {"event": "image_"}),
     (r"/m/api/usercenter/favpositions",                handler.common.usercenter.FavPositionHandler,              {"event": "usercenter_favpositions"}),
     (r"/m/api/usercenter/applyrecords[\/]*([0-9]+)*",  handler.common.usercenter.ApplyRecordsHandler,             {"event": "usercenter_applyredords"}),
