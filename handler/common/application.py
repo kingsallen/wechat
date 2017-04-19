@@ -64,8 +64,13 @@ class ApplicationHandler(BaseHandler):
     @gen.coroutine
     def post(self):
         """ 处理普通申请 """
+
+        self.logger.warn("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& post application api begin &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
         pid = self.json_args.pid
         position = yield self.position_ps.get_position(pid)
+
+        self.logger.warn(pid)
+        self.logger.warn(position)
 
         check_status, message = yield self.application_ps.check_position(
             position, self.current_user)
@@ -75,6 +80,8 @@ class ApplicationHandler(BaseHandler):
             return
 
         if position.app_cv_config_id:
+            self.logger.warn("position.app_cv_config_id: %s" % position.app_cv_config_id)
+
             # 读取自定义字段 meta 信息
             custom_cv_tpls = yield self.profile_ps.get_custom_tpl_all()
             # -> formats of custom_cv_tpls is like:
@@ -82,6 +89,8 @@ class ApplicationHandler(BaseHandler):
 
             result, _, _ = yield self.application_ps.check_custom_cv(
                     self.current_user, position, custom_cv_tpls)
+
+            self.logger.warn("result: %s" % result)
 
             if not result:
                 self.send_json_error(

@@ -157,6 +157,7 @@ class EmployeePageService(PageService):
             data.mobile = employee.mobile or ''
             if employee.authMethod == const.USER_EMPLOYEE_AUTH_METHOD.EMAIL:
                 data.type = self.FE_BIND_TYPE_EMAIL
+                self.logger.debug(employee.email)
                 data.conf.email_name = employee.email.split('@')[0]
                 data.conf.email_suffix = employee.email.split('@')[1]
             elif employee.authMethod == const.USER_EMPLOYEE_AUTH_METHOD.CUSTOM:
