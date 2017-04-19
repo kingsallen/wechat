@@ -541,11 +541,6 @@ class BaseHandler(MetaBaseHandler):
             })
             self.clear_all_cookies()
 
-            # self.clear_cookie(name=const.COOKIE_SESSIONID)
-            # session_id = self._make_new_session_id(sysuser.id)
-            # self.set_secure_cookie(const.COOKIE_SESSIONID, session_id,
-            #                        httponly=True)
-
         if sysuser:
             sysuser.headimg = self.static_url(sysuser.headimg or const.SYSUSER_HEADIMG)
         session.sysuser = sysuser
@@ -621,14 +616,3 @@ class BaseHandler(MetaBaseHandler):
         if not self.get_cookie(cookie_name):
             unix_time_stamp = str(int(time.time()))
             self.set_cookie(cookie_name, unix_time_stamp)
-
-    # @gen.coroutine
-    # def reload_for_account_merge(self):
-    #     """如果 PC 端绑定账号，且发现当前用户存在 parentid 时，
-    #     清空 cookie 且 reload"""
-    #     current_sysuser = yield self.user_ps.get_user_user({
-    #         'id': self.current_user.sysuser.id
-    #     })
-    #     if current_sysuser.parentid:
-    #         self.clear_all_cookies()
-    #         self.redirect(self.fullurl)
