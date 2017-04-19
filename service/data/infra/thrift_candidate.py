@@ -4,7 +4,6 @@ import tornado.gen as gen
 
 from service.data.base import DataService
 from service.data.infra.framework.client.client import ServiceClientFactory
-from service.page.employee.candidate import RecomException
 from thrift_gen.gen.candidate.service.CandidateService import Client as CandidateServiceClient
 from thrift_gen.gen.candidate.struct.ttypes import CandidateListParam, RecommmendParam
 from thrift_gen.gen.common.struct.ttypes import BIZException
@@ -75,10 +74,7 @@ class ThriftCandidateDataService(DataService):
         except BIZException as BizE:
 
             self.logger.warn("%s - %s" % (BizE.code, BizE.message))
-            e = RecomException()
-            e.code = BizE.code
-            e.message = BizE.message
-            raise e
+            raise BizE
 
         return ret
 
@@ -112,10 +108,7 @@ class ThriftCandidateDataService(DataService):
         except BIZException as BizE:
 
             self.logger.warn("%s - %s" % (BizE.code, BizE.message))
-            e = RecomException()
-            e.code = BizE.code
-            e.message = BizE.message
-            raise e
+            raise BizE
 
         return recommend_result
 
@@ -128,10 +121,7 @@ class ThriftCandidateDataService(DataService):
         except BIZException as BizE:
 
             self.logger.warn("%s - %s" % (BizE.code, BizE.message))
-            e = RecomException()
-            e.code = BizE.code
-            e.message = BizE.message
-            raise e
+            raise BizE
 
         return recom_result
 
@@ -144,10 +134,7 @@ class ThriftCandidateDataService(DataService):
         except BIZException as BizE:
 
             self.logger.warn("%s - %s" % (BizE.code, BizE.message))
-            e = RecomException()
-            e.code = BizE.code
-            e.message = BizE.message
-            raise e
+            raise BizE
 
         return recom_record_result
 
@@ -161,10 +148,7 @@ class ThriftCandidateDataService(DataService):
         except BIZException as BizE:
 
             self.logger.warn("%s - %s" % (BizE.code, BizE.message))
-            e = RecomException()
-            e.code = BizE.code
-            e.message = BizE.message
-            raise e
+            raise BizE
 
         return recommend_result
 
@@ -177,9 +161,6 @@ class ThriftCandidateDataService(DataService):
         except BIZException as BizE:
 
             self.logger.warn("%s - %s" % (BizE.code, BizE.message))
-            e = RecomException()
-            e.code = BizE.code
-            e.message = BizE.message
-            raise e
+            raise BizE
 
         return sort_result

@@ -5,10 +5,6 @@ from service.page.base import PageService
 from util.common import ObjectDict
 
 
-class RecomException(Exception):
-    __slots__ = ['code', 'message']
-
-
 class CandidatePageService(PageService):
 
     def __init__(self):
