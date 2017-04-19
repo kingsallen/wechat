@@ -13,8 +13,6 @@ class UserUserDataService(DataService):
     @gen.coroutine
     def get_user(self, conds, fields=None):
 
-        self.logger.debug("UserUserDataService conds:{}".format(conds))
-
         if not self._valid_conds(conds):
             self.logger.warning(
                 "Warning:[get_user][invalid parameters], Detail:[conds: {0}, "

@@ -50,7 +50,7 @@ class UserCurrentInfoHandler(BaseHandler):
 
         if self.params.pid:
             # 1.添加感兴趣记录
-            yield self.user_ps.add_user_fav_position(self.params.pid,
+            yield self.user_ps.add_user_fav_position(int(self.params.pid),
                                                          self.current_user.sysuser.id,
                                                          const.FAV_INTEREST,
                                                          self.current_user.sysuser.mobile,
