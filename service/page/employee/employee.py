@@ -18,11 +18,6 @@ from util.wechat.template import employee_refine_custom_fields_tpl
 
 class EmployeePageService(PageService):
 
-    FE_BIND_STATUS_SUCCESS = 0
-    FE_BIND_STATUS_UNBINDING = 1
-    FE_BIND_STATUS_NEED_VALIDATE = 2
-    FE_BIND_STATUS_FAILURE = 3
-
     FE_BIND_TYPE_CUSTOM = 'custom'
     FE_BIND_TYPE_EMAIL = 'email'
     FE_BIND_TYPE_QUESTION = 'question'
@@ -55,8 +50,8 @@ class EmployeePageService(PageService):
             user_id, company_id)
         return employee_response.bindStatus, employee_response.employee
 
-    @staticmethod
-    def convert_bind_status_from_thrift_to_fe(thrift_bind_status):
+
+    def convert_bind_status_from_thrift_to_fe(self, thrift_bind_status):
         """convert bind status value to FE format"""
         fe_bind_status = fe.FE_EMPLOYEE_BIND_STATUS_DEFAULT_INVALID
 
@@ -107,7 +102,7 @@ class EmployeePageService(PageService):
         data.name = current_user.sysuser.name
         data.headimg = current_user.sysuser.headimg
         data.mobile = current_user.sysuser.mobile or ''
-        data.send_hour = 24  # fixed
+        data.send_hour = 24  # fixed 24 小时
         data.conf = ObjectDict()
         data.binding_success_message = conf.bindSuccessMessage or ''
 
@@ -116,7 +111,7 @@ class EmployeePageService(PageService):
 
         # 当前是绑定状态
         if bind_status == BindStatus.BINDED:
-            data.binding_status = self.FE_BIND_STATUS_SUCCESS
+            data.binding_status = fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS
             data.employeeid = employee.id
             data.name = employee.cname
 
@@ -126,13 +121,13 @@ class EmployeePageService(PageService):
             data.employeeid = const.NO
 
             if bind_status == const.EMPLOYEE_BIND_STATUS_UNBINDING:
-                data.binding_status = self.FE_BIND_STATUS_UNBINDING
+                data.binding_status = fe.FE_EMPLOYEE_BIND_STATUS_UNBINDED
 
             elif bind_status == const.EMPLOYEE_BIND_STATUS_EMAIL_PENDING:
-                data.binding_status = self.FE_BIND_STATUS_NEED_VALIDATE
+                data.binding_status = fe.FE_EMPLOYEE_BIND_STATUS_PENDING
 
             else:
-                data.binding_status = self.FE_BIND_STATUS_FAILURE
+                data.binding_status = fe.FE_EMPLOYEE_BIND_STATUS_DEFAULT_INVALID
 
         if conf.authMode == const.EMPLOYEE_BIND_AUTH_MODE.DISABLE:
             data.type = 'disabled'
@@ -157,6 +152,7 @@ class EmployeePageService(PageService):
             data.mobile = employee.mobile or ''
             if employee.authMethod == const.USER_EMPLOYEE_AUTH_METHOD.EMAIL:
                 data.type = self.FE_BIND_TYPE_EMAIL
+                data.name = employee.cname
 
                 # 初始化 email_name, email_suffix 为空字符串
                 # 随后根据员工的 email 填写数据
