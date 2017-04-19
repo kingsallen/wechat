@@ -126,12 +126,14 @@ class ProfileNewHandler(BaseHandler):
 
         # 只有全部 ok 后才可以跳转
         if profile_ok and basic_info_ok and education_ok and workexp_ok:
-            self.logger.debug('dqpid: %s' % self.get_cookie('dqpid'))
-            if self.get_cookie('dqpid'):
+            dqpid = self.get_cookie('dqpid')
+            self.logger.debug('dqpid: %s' % dqpid)
+            if dqpid:
                 next_url = make_url(path.PROFILE_PREVIEW, self.params, pid=int(self.get_cookie('dqpid')))
             else:
                 next_url = make_url(path.PROFILE_VIEW, self.params)
 
+            self.clear_cookie(name='dqpid')
             self.send_json_success(data=ObjectDict(next_url=next_url))
         else:
             self.send_json_warning(message='profile created partially')

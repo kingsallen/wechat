@@ -85,7 +85,7 @@ class EmployeePageService(PageService):
             'type':            'email',
             'binding_message': 'binding message ...',
             'binding_status':  1,
-            'send_hour':       2,
+            'send_hour':       24,
             'headimg':         'http://o8g4x4uja.bkt.clouddn.com/0.jpeg',
             'employeeid':      23,
             'name':            'name',
@@ -107,7 +107,7 @@ class EmployeePageService(PageService):
         data.name = current_user.sysuser.name
         data.headimg = current_user.sysuser.headimg
         data.mobile = current_user.sysuser.mobile or ''
-        data.send_hour = 2  # fixed
+        data.send_hour = 24  # fixed
         data.conf = ObjectDict()
         data.binding_success_message = conf.bindSuccessMessage or ''
 
