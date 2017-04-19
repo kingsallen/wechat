@@ -280,7 +280,8 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
             'recom_index':    self.get_argument("_recom_index"),
             'presentee_name': self.get_argument("_presentee_name"),
             'position_name':  self.get_argument("_position_name"),
-            'next':           1
+            'click_time':     self.get_argument("_click_time"),
+            'next':           1,
         })
 
         if message:
