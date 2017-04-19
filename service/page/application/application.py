@@ -124,6 +124,8 @@ class ApplicationPageService(PageService):
         # field_name 是纯自定义字段,但是在 custom_others 中没有这个值
         for field in fields_to_check:
             field_name = field.field_name
+            if field_name == 'picUrl':
+                pass
             mapping = field.map
             passed = yield self._check(profile, field_name, user, mapping)
 
