@@ -311,6 +311,7 @@ class BaseHandler(MetaBaseHandler):
 
                 self._oauth_service.wechat = self._qx_wechat
                 url = self._oauth_service.get_oauth_code_userinfo_url()
+                self.logger.debug("get_oauth_code_userinfo_url: url:{}".format(url))
                 self.redirect(url)
                 return
             else:

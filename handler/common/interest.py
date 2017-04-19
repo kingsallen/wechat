@@ -64,7 +64,11 @@ class UserCurrentInfoHandler(BaseHandler):
             company_info = yield self.company_ps.get_company(
                 conds={"id": real_company_id}, need_conf=False)
 
-            link = make_url(path.COLLECT_USERINFO, pid=self.params.pid, wechat_signature=self.current_user.wechat.signature, host=self.request.host)
+            link = make_url(path.COLLECT_USERINFO,
+                            pid=self.params.pid,
+                            source="wx", # 用户前端判断来源
+                            wechat_signature=self.current_user.wechat.signature,
+                            host=self.request.host)
 
             if not has_info:
                 yield favposition_notice_to_applier_tpl(self.current_user.wechat.company_id,
