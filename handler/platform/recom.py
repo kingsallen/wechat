@@ -249,6 +249,9 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
 
         recom_record_id = id
         click_time = self.get_argument("_click_time")
+        if click_time:
+            click_time = click_time[:10]
+
         realname = self.get_argument("_realname")
         company = self.get_argument("_company")
         position = self.get_argument("_position")
