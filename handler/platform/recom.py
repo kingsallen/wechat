@@ -314,7 +314,6 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
 
             # 推荐红包处理
             position_title = yield self.redpacket_ps.get_position_title_by_recom_record_id(recom_record_id)
-            self.logger.debug('position_title: %s' % position_title)
 
             yield self.redpacket_ps.handle_red_packet_recom(
                 recom_current_user=self.current_user,

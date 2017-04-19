@@ -276,8 +276,7 @@ class RedpacketPageService(PageService):
             {'id': recom_record_id})
 
         if not recom_record:
-            self.logger.debug(
-                '[RP]推荐数据不正确, recom_record_id: %s' % recom_record_id)
+            self.logger.debug('[RP]推荐数据不正确, recom_record_id: %s' % recom_record_id)
             return
 
         self.logger.debug("[RP]推荐红包开始")
@@ -287,10 +286,14 @@ class RedpacketPageService(PageService):
         recom_wechat = recom_current_user.wechat
         recom_wxuser = recom_current_user.wxuser
         recom_qxuser = recom_current_user.qxuser
-        # trigger_user_id = recom_record.presentee_user_id
-        # trigger_qxuser_id = 0
 
-        throttle_passed = yield self.__check_throttle_passed(rp_config,recom_qxuser.id)
+        self.logger.debug('[RP] company_id: %s' % company_id)
+        self.logger.debug('[RP] user_id: %s' % user_id)
+        self.logger.debug('[RP] recom_wechat: %s' % recom_wechat)
+        self.logger.debug('[RP] recom_wxuser: %s' % recom_wxuser)
+        self.logger.debug('[RP] recom_qxuser: %s' % recom_qxuser)
+
+        throttle_passed = yield self.__check_throttle_passed(rp_config, recom_qxuser.id)
         if not throttle_passed:
             self.logger.debug(
                 '[RP]throttle上限校验失败, company_id: %s， user_id: %s' % company_id, user_id)
