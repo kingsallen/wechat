@@ -126,8 +126,8 @@ class BaseHandler(MetaBaseHandler):
         # 构造并拼装 session
         yield self._fetch_session()
 
-        # 处理 PC 端账号绑定
-        yield self.reload_for_account_merge()
+        # # 处理 PC 端账号绑定
+        # yield self.reload_for_account_merge()
 
         # 构造 access_time cookie
         self._set_access_time_cookie()
@@ -534,6 +534,18 @@ class BaseHandler(MetaBaseHandler):
         sysuser = yield self.user_ps.get_user_user({
             "id": user_id
         })
+
+        if sysuser.parentid > 0:
+            sysuser = yield self.user_ps.get_user_user({
+                "id": sysuser.parentid
+            })
+            self.clear_all_cookies()
+
+            # self.clear_cookie(name=const.COOKIE_SESSIONID)
+            # session_id = self._make_new_session_id(sysuser.id)
+            # self.set_secure_cookie(const.COOKIE_SESSIONID, session_id,
+            #                        httponly=True)
+
         if sysuser:
             sysuser.headimg = self.static_url(sysuser.headimg or const.SYSUSER_HEADIMG)
         session.sysuser = sysuser
@@ -610,13 +622,13 @@ class BaseHandler(MetaBaseHandler):
             unix_time_stamp = str(int(time.time()))
             self.set_cookie(cookie_name, unix_time_stamp)
 
-    @gen.coroutine
-    def reload_for_account_merge(self):
-        """如果 PC 端绑定账号，且发现当前用户存在 parentid 时，
-        清空 cookie 且 reload"""
-        current_sysuser = yield self.user_ps.get_user_user({
-            'id': self.current_user.sysuser.id
-        })
-        if current_sysuser.parentid:
-            self.clear_all_cookies()
-            self.redirect(self.fullurl)
+    # @gen.coroutine
+    # def reload_for_account_merge(self):
+    #     """如果 PC 端绑定账号，且发现当前用户存在 parentid 时，
+    #     清空 cookie 且 reload"""
+    #     current_sysuser = yield self.user_ps.get_user_user({
+    #         'id': self.current_user.sysuser.id
+    #     })
+    #     if current_sysuser.parentid:
+    #         self.clear_all_cookies()
+    #         self.redirect(self.fullurl)
