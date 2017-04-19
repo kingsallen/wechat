@@ -269,9 +269,6 @@ class ProfilePageService(PageService):
 
     @gen.coroutine
     def create_profile_workexp(self, record, profile_id, mode='m', *args, **kwargs):
-        self.logger.warn('$$$$$$$$$$$$$$$$$$$$4')
-        self.logger.warn(record)
-        self.logger.warn('$$$$$$$$$$$$$$$$$$$$4')
         if mode == 'm':
             # 通过老 6 步 profile 创建添加
             record.company_name = record.company
