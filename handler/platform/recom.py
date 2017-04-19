@@ -63,7 +63,7 @@ class RecomCustomVariableMixIn(BaseHandler):
         self._recommend_success_template = \
             self.current_user.company.conf_recommend_success or msg.DEFAULT_RECOMMEND_SUCCESS
         self._recommend_presentee_template = \
-            self.current_user.company.conf.recommend_presentee or msg.DEFAULT_RECOMMEND_PRESENTEE
+            self.current_user.company.conf_recommend_presentee or msg.DEFAULT_RECOMMEND_PRESENTEE
 
         self.recommend_success = self._recommend_success_template \
             .replace("{current_reward}",
