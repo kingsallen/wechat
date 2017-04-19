@@ -621,7 +621,7 @@ class ProfileSectionHandler(BaseHandler):
         result, res = yield self.company_ps.get_cp_for_sug_wechat(name)
 
         if result:
-            self.send_json_error(message='company name existed')
+            self.send_json_error(message=msg.PROFILE_COMPANY_NAME_EXISTED)
             return
         else:
             result, res = yield self.company_ps.create_company_on_wechat(
