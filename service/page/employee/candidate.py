@@ -57,8 +57,14 @@ class CandidatePageService(PageService):
 
     @gen.coroutine
     def sorting(self, post_user_id, company_id):
-        ret = yield self.thrift_candidate_ds.sort(
+        infra_ret = yield self.thrift_candidate_ds.sort(
             post_user_id, company_id)
+
+        ret = ObjectDict({
+            'recom_count': infra_ret.count,
+            'rank': infra_ret.rank,
+            'hongbao': infra_ret.hongbao
+        })
 
         self.logger.debug("sorting: %s" % ret)
         return ret
