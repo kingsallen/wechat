@@ -16,19 +16,7 @@ class UserCurrentInfoHandler(BaseHandler):
     @handle_response
     @authenticated
     @gen.coroutine
-    def get(self, method='info'):
-
-        try:
-            # 重置 event，准确描述
-            self._event = self._event + method
-            yield getattr(self, 'get_' + method)()
-        except Exception as e:
-            self.send_json_error()
-
-    @handle_response
-    @authenticated
-    @gen.coroutine
-    def get_info(self):
+    def get(self):
         """
         返回用户填写的现在公司和现在职位接口
 
@@ -55,29 +43,6 @@ class UserCurrentInfoHandler(BaseHandler):
             return
         else:
             self.send_json_success(data=const.NO)
-
-    @handle_response
-    @authenticated
-    @gen.coroutine
-    def get_update(self):
-        """更新用户现在公司和现在职位接口
-        调整为 get 方式，原因：更新用户信息，需要用户验证手机号，
-        此时可能会触发帐号合并，合并完帐号后，需要重新微信 oauth，post 请求无法 oauth
-        """
-
-        if not self.params.name or not self.params.company or not self.params.position:
-            self.send_json_error()
-            return
-
-        self.logger.debug("UserCurrentInfoHandler sysuser_id:{}".format(self.current_user.sysuser.id))
-        self.logger.debug("UserCurrentInfoHandler params:{}".format(self.params))
-
-        yield self.user_ps.update_user_user_current_info(
-            sysuser_id=self.current_user.sysuser.id,
-            data=self.params
-        )
-
-        self.send_json_success()
 
     @gen.coroutine
     def _opt_fav_position(self, has_info):
@@ -126,3 +91,28 @@ class UserCurrentInfoHandler(BaseHandler):
                     return True
 
         return False
+
+class UserCurrentUpdateHandler(BaseHandler):
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        """更新用户现在公司和现在职位接口
+        调整为 get 方式，原因：更新用户信息，需要用户验证手机号，
+        此时可能会触发帐号合并，合并完帐号后，需要重新微信 oauth，post 请求无法 oauth
+        """
+
+        if not self.params.name or not self.params.company or not self.params.position:
+            self.send_json_error()
+            return
+
+        self.logger.debug("UserCurrentInfoHandler sysuser_id:{}".format(self.current_user.sysuser.id))
+        self.logger.debug("UserCurrentInfoHandler params:{}".format(self.params))
+
+        yield self.user_ps.update_user_user_current_info(
+            sysuser_id=self.current_user.sysuser.id,
+            data=self.params
+        )
+
+        self.send_json_success()
