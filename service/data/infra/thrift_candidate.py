@@ -72,7 +72,6 @@ class ThriftCandidateDataService(DataService):
                 ret.append(recom_group)
 
         except BIZException as BizE:
-
             self.logger.warn("%s - %s" % (BizE.code, BizE.message))
             raise BizE
 
@@ -106,7 +105,6 @@ class ThriftCandidateDataService(DataService):
                 recom_params)
 
         except BIZException as BizE:
-
             self.logger.warn("%s - %s" % (BizE.code, BizE.message))
             raise BizE
 
@@ -119,7 +117,6 @@ class ThriftCandidateDataService(DataService):
                 int(company_id), list_of_recom_ids)
 
         except BIZException as BizE:
-
             self.logger.warn("%s - %s" % (BizE.code, BizE.message))
             raise BizE
 
@@ -132,7 +129,6 @@ class ThriftCandidateDataService(DataService):
                 int(recom_id), int(post_user_id))
 
         except BIZException as BizE:
-
             self.logger.warn("%s - %s" % (BizE.code, BizE.message))
             raise BizE
 
@@ -140,13 +136,11 @@ class ThriftCandidateDataService(DataService):
 
     @gen.coroutine
     def ignore(self, id, company_id, post_user_id,  click_time):
-
         try:
             recommend_result = yield self.candidate_service_cilent.ignore(
-                id, company_id, post_user_id, click_time)
+                int(id), int(company_id), int(post_user_id), str(click_time))
 
         except BIZException as BizE:
-
             self.logger.warn("%s - %s" % (BizE.code, BizE.message))
             raise BizE
 
@@ -156,10 +150,9 @@ class ThriftCandidateDataService(DataService):
     def sort(self, post_user_id, company_id):
         try:
             sort_result = yield self.candidate_service_cilent.getRecommendatorySorting(
-                post_user_id, company_id)
+                int(post_user_id), int(company_id))
 
         except BIZException as BizE:
-
             self.logger.warn("%s - %s" % (BizE.code, BizE.message))
             raise BizE
 
