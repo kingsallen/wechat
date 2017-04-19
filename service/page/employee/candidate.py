@@ -79,17 +79,18 @@ class CandidatePageService(PageService):
     def get_recommendation(self, recom_record_id, post_user_id):
         infra_ret = yield self.thrift_candidate_ds.get_recommendation(
             recom_record_id, post_user_id)
+        self.logger.debug('infra_ret: %s' % infra_ret)
 
         ret = ObjectDict(
-            position_name=infra_ret.positionName,
+            position_name=infra_ret.title,
             recom=infra_ret.recom,
             click_time=infra_ret.clickTime,
             id=infra_ret.id,
             presentee_name=infra_ret.presenteeName,
             next=0 if infra_ret.nextOne else 1,
-            recom_total=infra_ret.recomTotal,
-            recom_index=infra_ret.recomIndex,
-            recom_ignore=infra_ret.recomIgnore
+            # recom_total=infra_ret.recomTotal,
+            # recom_index=infra_ret.recomIndex,
+            # recom_ignore=infra_ret.recomIgnore
         )
 
         self.logger.debug("get_recommendation: %s" % ret)
