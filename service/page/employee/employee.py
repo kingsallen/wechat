@@ -157,9 +157,15 @@ class EmployeePageService(PageService):
             data.mobile = employee.mobile or ''
             if employee.authMethod == const.USER_EMPLOYEE_AUTH_METHOD.EMAIL:
                 data.type = self.FE_BIND_TYPE_EMAIL
+
+                # 初始化 email_name, email_suffix 为空字符串
+                # 随后根据员工的 email 填写数据
+                data.conf.email_name = ''
+                data.conf.email_suffix = ''
                 self.logger.debug(employee.email)
-                data.conf.email_name = employee.email.split('@')[0]
-                data.conf.email_suffix = employee.email.split('@')[1]
+                if isinstance(employee.email, str) and '@' in employee.email:
+                    data.conf.email_name = employee.email.split('@')[0]
+                    data.conf.email_suffix = employee.email.split('@')[1]
             elif employee.authMethod == const.USER_EMPLOYEE_AUTH_METHOD.CUSTOM:
                 data.type = self.FE_BIND_TYPE_CUSTOM
                 _make_custom_conf()
