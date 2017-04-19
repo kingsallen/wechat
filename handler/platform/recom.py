@@ -327,7 +327,7 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
             # 已经全部推荐了
             if recom_result.recomTotal == recom_result.recomIndex + recom_result.recomIgnore:
 
-                sort = yield self.candiddate_ps.sorting(self.current_user.sysuser.id, self.current_user.company.id)
+                sort = yield self.candidate_ps.sorting(self.current_user.sysuser.id, self.current_user.company.id)
                 sort.hongbao = int(recom_result.recomIndex) * 2 if sort else 0
 
                 self.logger.debug("_post_recom_candidate sort: %s" % sort)
