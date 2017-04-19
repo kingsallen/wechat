@@ -2341,6 +2341,7 @@ class RecommendationRecordVO(object):
      - is_interested
      - view_number
      - headimgurl
+     - id
     """
 
     thrift_spec = (
@@ -2354,9 +2355,10 @@ class RecommendationRecordVO(object):
         (7, TType.BYTE, 'is_interested', None, None, ),  # 7
         (8, TType.I32, 'view_number', None, None, ),  # 8
         (9, TType.STRING, 'headimgurl', 'UTF8', None, ),  # 9
+        (10, TType.I32, 'id', None, None, ),  # 10
     )
 
-    def __init__(self, recom_status=None, applier_name=None, applier_rel=None, position=None, click_time=None, status=None, is_interested=None, view_number=None, headimgurl=None,):
+    def __init__(self, recom_status=None, applier_name=None, applier_rel=None, position=None, click_time=None, status=None, is_interested=None, view_number=None, headimgurl=None, id=None,):
         self.recom_status = recom_status
         self.applier_name = applier_name
         self.applier_rel = applier_rel
@@ -2366,6 +2368,7 @@ class RecommendationRecordVO(object):
         self.is_interested = is_interested
         self.view_number = view_number
         self.headimgurl = headimgurl
+        self.id = id
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -2421,6 +2424,11 @@ class RecommendationRecordVO(object):
                     self.headimgurl = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
+            elif fid == 10:
+                if ftype == TType.I32:
+                    self.id = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -2466,6 +2474,10 @@ class RecommendationRecordVO(object):
         if self.headimgurl is not None:
             oprot.writeFieldBegin('headimgurl', TType.STRING, 9)
             oprot.writeString(self.headimgurl.encode('utf-8') if sys.version_info[0] == 2 else self.headimgurl)
+            oprot.writeFieldEnd()
+        if self.id is not None:
+            oprot.writeFieldBegin('id', TType.I32, 10)
+            oprot.writeI32(self.id)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()

@@ -324,7 +324,8 @@ class EmployeePageService(PageService):
                     "view_number":   e.view_number,
                     "position":      e.position,
                     "click_time":    e.click_time,
-                    "recom_status":  e.recom_status
+                    "recom_status":  e.recom_status,
+                    "id": e.id
                 })
                 recommends.append(recom)
 
