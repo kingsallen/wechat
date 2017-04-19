@@ -4,17 +4,16 @@
 
 from tornado import gen
 
-import conf.message as mes_const
-
 from service.data.base import DataService
 from util.common.decorator import cache
-from util.common import ObjectDict
 from util.common import ObjectDict
 
 class UserUserDataService(DataService):
 
     @gen.coroutine
     def get_user(self, conds, fields=None):
+
+        self.logger.debug("UserUserDataService conds:{}".format(conds))
 
         if not self._valid_conds(conds):
             self.logger.warning(

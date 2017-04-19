@@ -536,14 +536,21 @@ class BaseHandler(MetaBaseHandler):
             "id": user_id
         })
 
+        self.logger.debug("_add_sysuser_to_session user_id:{}".format(user_id))
+        self.logger.debug("_add_sysuser_to_session sysuser:{}".format(sysuser))
+
         if sysuser.parentid and sysuser.parentid > 0:
+            self.logger.debug("帐号已经被合并")
+            self.logger.debug("_add_sysuser_to_session sysuser.parentid:{}".format(sysuser.parentid))
             sysuser = yield self.user_ps.get_user_user({
                 "id": sysuser.parentid
             })
+            self.logger.debug("_add_sysuser_to_session sysuser:{}".format(sysuser))
             self.clear_cookie(name=const.COOKIE_SESSIONID)
 
         if sysuser:
             sysuser.headimg = self.static_url(sysuser.headimg or const.SYSUSER_HEADIMG)
+
         session.sysuser = sysuser
 
     def _add_jsapi_to_wechat(self, wechat):
