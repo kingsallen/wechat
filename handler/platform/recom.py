@@ -4,14 +4,16 @@
 挖掘被动求职者相关的 Handler
 """
 
-import tornado.gen
-from handler.base import BaseHandler
+import enum
 
-import conf.message as msg
-from util.tool.date_tool import curr_now_dateonly
-from thrift_gen.gen.common.struct.ttypes import BIZException
+import tornado.gen
+
 import conf.common as const
+import conf.message as msg
+from handler.base import BaseHandler
+from thrift_gen.gen.common.struct.ttypes import BIZException
 from util.common import ObjectDict
+from util.tool.date_tool import curr_now_dateonly
 
 
 # 基础服务 BizException 返回内容
@@ -26,14 +28,17 @@ from util.common import ObjectDict
 # PASSIVE_SEEKER_ALREADY_APPLIED_OR_RECOMMEND(61009, "已经申请或者被推荐");
 #
 
-# candiate_recom_record.is_recom 字段含义：
-# 0: 推荐，
-# 1: 未推荐（默认），
-# 2：忽略，
-# 3：选中
-
 
 class RecomCustomVariableMixIn(BaseHandler):
+
+    class IsRecomEnum(enum.Enum):
+        """ candiate_recom_record.is_recom 字段含义：
+        0: 推荐， 1: 未推荐（默认）， 2：忽略， 3：选择中
+        """
+        RECOMED = 0
+        NOT_RECOMED = 1
+        IGNORED = 2
+        SELECTED = 3
 
     @tornado.gen.coroutine
     def prepare(self):
@@ -171,7 +176,11 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
         """
         company_id = self.current_user.company.id
         click_time = self.get_argument("click_time", curr_now_dateonly())
-        is_recom = ",".join(['1', '2', '3'])
+        is_recom = [
+            self.IsRecomEnum.NOT_RECOMED.value,
+            self.IsRecomEnum.IGNORED.value,
+            self.IsRecomEnum.SELECTED.value
+        ]
 
         try:
             passive_seekers = yield self.candidate_ps.get_candidate_list(

@@ -65,7 +65,7 @@ class ThriftCandidateDataService(DataService):
                     c_info.presentee_friend_name = c.presenteeFriendName  # 一度朋友称呼
                     c_info.presentee_logo = c.presenteeLogo  # 头像
                     c_info.is_recom = c.isRecom  # 推荐状态
-                    c_info.is_interested = c.isInsterested
+                    c_info.is_interested = c.insterested
                     c_info.view_num = c.viewNumber
                     recom_group.candidates.append(c_info)
 
