@@ -650,6 +650,8 @@ class ApplicationPageService(PageService):
 
         application = yield self.get_application_by_id(apply_id)
 
+
+
         if not application or not application.recommender_user_id:
             return
 
