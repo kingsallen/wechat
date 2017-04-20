@@ -9,14 +9,14 @@ import ujson
 from elasticsearch import Elasticsearch
 
 from setting import settings
+from util.common import ObjectDict
 from util.tool.json_tool import json_dumps
+from util.tool.es_tool import init_gamma_aggregation, rule_gamma_filters
 
 
 class BaseES(object):
 
     _es = Elasticsearch(settings.es)
-
-    _INDEX = "WECHAT"
 
     def __new__(cls, *args, **kwargs):
         if not hasattr(cls, '_instance'):
@@ -28,22 +28,36 @@ class BaseES(object):
         return self._es
 
     def search(self, index=None, doc_type=None, body=None):
-        return self._es.search(index, doc_type, json_dumps(body))
+
+        print (index)
+        print (body)
+
+        res = self._es.search(index, doc_type, json_dumps(body))
+        print (res)
+        return res
 
 
 if __name__ == "__main__":
 
     es = BaseES()
-    body = {
-        "query": {
-            "match": {
-                "position.title":"项目及大客户销售工程师"
-            }
-        },
-        "from": 0,
-        "size": 10000
-    }
+
+    params = ObjectDict({
+        "salary_top": 1000,
+        "salary_bottom": 0,
+        "salary_negotiable": 1,
+        "keywords": "开发",
+        "city": "上海,北京",
+        "industry": "互联网"
+    })
+
+    params = rule_gamma_filters(params)
+    print (params)
+
+    body = init_gamma_aggregation(params.keywords,
+                                  params.city,
+                                  params.industry,
+                                  params.salary_bottom,
+                                  params.salary_top,
+                                  params.salary_negotiable, 0, 10)
 
     res = es.search(index="positions", body=body)
-    print (type(res))
-    print (res.get("position"))

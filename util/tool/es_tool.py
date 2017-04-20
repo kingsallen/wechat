@@ -6,6 +6,7 @@
 # @DES     : 初始化 ES 搜索字段
 
 import re
+from util.common import ObjectDict
 
 def rule_gamma_filters(params):
     ''' 筛选条件, 转成相应的类型, 及对用户的输入进行过滤 '''
@@ -14,15 +15,23 @@ def rule_gamma_filters(params):
     for k in ('salary_top', 'salary_bottom', 'salary_negotiable'):
         if params.get(k):  params[k] = int(params[k])
 
-    # 只搜最近一份工作需要bool
-    for k in ('in_last_job_search_position', 'in_last_job_search_company'):
-        if params.get(k): params[k] = 1
-
     # 需要 list
-    for k in ('keywords', 'industry', 'city'):
-        if params.get(k): params[k] = re.split(",", params[k].strip())
+    for k in ('industry', 'city'):
+        if params.get(k):
+            params[k] = re.split(",", params[k].strip())
+        else:
+            params[k] = list()
+    # 需要用 OR 串联
+    for k in ('keywords'):
+        if params.get(k):
+            k_list = re.split(",", params[k].strip())
+            params[k] = " OR ".join(k_list)
+        else:
+            params[k] = ""
 
-def init_gamma_aggregation(query, city, industry, salary_top, salary_bottom, salary_negotiable, page_from, page_size):
+    return params
+
+def init_gamma_basic_agg(query, city, industry, salary_bottom, salary_top, salary_negotiable, page_from, page_size):
 
     """
     初始化 Gamma 项目列表页搜索
@@ -96,7 +105,6 @@ def init_gamma_aggregation(query, city, industry, salary_top, salary_bottom, sal
                             "if(min>bottom&&min<top&&top>bottom){return true;};"
                             "if(max<top&&max>bottom&&top>bottom){return true;};"
                             "if(min<bottom&&max>top&&top>bottom){return true;};"
-                            "/*此处如果有范围并且可以面议这加上这个，不可以面议则不加，如果只有面议，那么前面那些不需要*/"
                             "if(bottom==0&&top==0){return true;};"
                             "return false"
                     }
