@@ -295,8 +295,7 @@ class RedpacketPageService(PageService):
 
         throttle_passed = yield self.__check_throttle_passed(rp_config, recom_qxuser.id)
         if not throttle_passed:
-            self.logger.debug(
-                '[RP]throttle上限校验失败, company_id: %s， user_id: %s' % company_id, user_id)
+            self.logger.debug('[RP]throttle上限校验失败, company_id: %s， user_id: %s' % (company_id, user_id))
             return
 
         rplock_key = const.RP_RECOM_LOCK_FMT % (rp_config.id, user_id)
@@ -771,7 +770,7 @@ class RedpacketPageService(PageService):
                 red_packet_config.id, red_packet_config.type)
 
         self.logger.debug("[RP]next rp item: {}".format(rp_item))
-        if rp_item is None:
+        if rp_item:
             if position:
                 self.logger.debug("[RP]该职位红包已经发完")
 
