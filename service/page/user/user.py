@@ -547,7 +547,7 @@ class UserPageService(PageService):
             "award_config_id":   points_conf.id,
             "recom_wxuser":      employee.wxuser_id,
             "recom_user_id":     employee.sysuser_id,
-            "be_recom_user_id":  be_recom_wxuser.sysuser_id,
+            "berecom_user_id":   be_recom_wxuser.sysuser_id,
             "berecom_wxuser_id": be_recom_wxuser.id
         }
         yield self.user_employee_points_record_ds.create_user_employee_points_record(

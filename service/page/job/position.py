@@ -195,12 +195,15 @@ class PositionPageService(PageService):
         click_record = yield self.user_employee_points_record_ds.get_user_employee_points_record(conds={
             "berecom_user_id": berecom_user_id,
             "position_id": position_id,
-            "award_config_id": points_conf.id
+            "award_config_id": points_conf.id,
+            "employee_id": employee.id
         }, fields=["id"])
 
         # 转发被点击添加积分，同一个职位，相同的人点击多次不加积分
         if not click_record:
-            be_recom_wxuser = yield self.user_wx_user_ds.get_wxuser(id=berecom_wxuser_id)
+            be_recom_wxuser = yield self.user_wx_user_ds.get_wxuser(
+                {'id': berecom_wxuser_id})
+
             user_ps = UserPageService()
             yield user_ps.employee_add_reward(
                 employee_id=employee.id,
