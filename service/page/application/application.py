@@ -650,8 +650,6 @@ class ApplicationPageService(PageService):
 
         application = yield self.get_application_by_id(apply_id)
 
-
-
         if not application or not application.recommender_user_id:
             return
 
@@ -674,7 +672,7 @@ class ApplicationPageService(PageService):
                 recommender_user_id, recommender_wxuser_id, recom_employee))
 
         points_conf = yield self.hr_points_conf_ds.get_points_conf(conds={
-            "company_id":  current_user.company_id,
+            "company_id":  current_user.company.id,
             "template_id": self.constant.RECRUIT_STATUS_APPLY_ID,
         }, appends=["ORDER BY id DESC", "LIMIT 1"])
 
