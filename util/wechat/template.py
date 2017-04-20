@@ -229,7 +229,7 @@ def application_notice_to_hr_tpl(wechat_id, openid, hr_name, title,
         lastjob=lastjob)
 
     ret = yield messager.send_template(
-        wechat_id, openid, sys_template_id, None, json_data, qx_retry=False)
+        wechat_id, openid, sys_template_id, "", json_data, qx_retry=False)
 
     raise gen.Return(ret)
 
@@ -247,7 +247,7 @@ def favposition_notice_to_hr_tpl(wechat_id, openid, title, candidate_name,
         keyword3=mobile)
 
     ret = yield messager.send_template(
-        wechat_id, openid, sys_template_id, None, json_data, qx_retry=False)
+        wechat_id, openid, sys_template_id, "", json_data, qx_retry=False)
 
     raise gen.Return(ret)
 
