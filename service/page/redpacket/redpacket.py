@@ -770,7 +770,7 @@ class RedpacketPageService(PageService):
                 red_packet_config.id, red_packet_config.type)
 
         self.logger.debug("[RP]next rp item: {}".format(rp_item))
-        if rp_item:
+        if not rp_item:
             if position:
                 self.logger.debug("[RP]该职位红包已经发完")
 
