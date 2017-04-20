@@ -48,6 +48,13 @@ class ApplicationPageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
+    def get_application_by_id(self, id):
+        ret = yield self.job_application_ds.get_job_application(conds={
+            "id": id
+        })
+        raise gen.Return(ret)
+
+    @gen.coroutine
     def get_position_applied_cnt(self, conds, fields):
         """返回申请数统计"""
 
@@ -594,13 +601,17 @@ class ApplicationPageService(PageService):
         self.logger.debug("[post_apply]投递后续处理")
 
         #1. 添加积分
-        yield self.opt_add_reward(apply_id, current_user, position, is_platform)
+        yield self.opt_add_reward(apply_id, current_user)
+
         #2. 向求职者发送消息通知（消息模板，短信）
         yield self.opt_send_applier_msg(apply_id, current_user, position, is_platform)
+
         #3. 向推荐人发送消息模板
         yield self.opt_send_recommender_msg(recommender_user_id, current_user, position)
+
         #4. 更新挖掘被动求职者信息
         yield self.opt_update_candidate_recom_records(apply_id, current_user, recommender_user_id, position)
+
         #5. 向 HR 发送消息通知（消息模板，短信，邮件）
         yield self.opt_hr_msg(apply_id, current_user, position, is_platform)
 
@@ -633,22 +644,35 @@ class ApplicationPageService(PageService):
         return recommender_user_id, recommender_wxuser_id, recom_employee
 
     @gen.coroutine
-    def opt_add_reward(self, apply_id, current_user, position, is_platform):
-        """ 添加积分
-        :param apply_id:
-        :param current_user:
-        :param position:
-        :param is_platform:
-        """
+    def opt_add_reward(self, apply_id, current_user):
+        """ 添加积分 """
         self.logger.debug("[opt_add_reward]start")
-        recommender_user_id, recommender_wxuser_id, recom_employee = yield self.get_recommend_user(
-            current_user, position, is_platform)
+
+        application = yield self.get_application_by_id(apply_id)
+
+        if not application or not application.recommender_user_id:
+            return
+
+        recommender_user_id = application.recommender_user_id
+
+        recom_employee = yield self.user_employee_ds.get_employee({
+            'sysuser_id': recommender_user_id,
+            'company_id': current_user.company.id,
+            'activation': const.OLD_YES,
+            'disable': const.OLD_YES
+        })
+        if not recom_employee:
+            return
+
+        recommender_wxuser_id = recom_employee.wxuser_id
 
         self.logger.debug(
-            "[opt_add_reward]recommender_user_id:{}, recommender_wxuser_id:{}, recom_employee:{}".format(
+            "[opt_add_reward]recommender_user_id:{}, "
+            "recommender_wxuser_id:{}, recom_employee:{}".format(
                 recommender_user_id, recommender_wxuser_id, recom_employee))
+
         points_conf = yield self.hr_points_conf_ds.get_points_conf(conds={
-            "company_id":  position.company_id,
+            "company_id":  current_user.company_id,
             "template_id": self.constant.RECRUIT_STATUS_APPLY_ID,
         }, appends=["ORDER BY id DESC", "LIMIT 1"])
 
