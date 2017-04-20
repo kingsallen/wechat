@@ -13,8 +13,8 @@ from dao.base import BaseDao
 
 class HrCmsPagesDao(BaseDao):
 
-    def __init__(self, logger):
-        super(HrCmsPagesDao, self).__init__(logger)
+    def __init__(self):
+        super(HrCmsPagesDao, self).__init__()
         self.table = "hr_cms_pages"
         self.fields_map = {
             "id":             self.constant.TYPE_INT,

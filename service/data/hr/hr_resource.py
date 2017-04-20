@@ -1,4 +1,4 @@
-# -*- coding=utf-8 -*-
+# coding=utf-8
 # Copyright 2016 MoSeeker
 
 """
@@ -17,10 +17,12 @@ class HrResourceDataService(DataService):
 
     @cache(ttl=300)
     @gen.coroutine
-    def get_resource(self, conds, fields=[]):
+    def get_resource(self, conds, fields=None):
 
-        if conds is None or not (isinstance(conds, dict) or isinstance(conds, str)):
-            self.logger.warn("Warning:[get_resource][invalid parameters], \
+        fields = fields or []
+
+        if conds is None or not (isinstance(conds, (dict, str))):
+            self.logger.warning("Warning:[get_resource][invalid parameters], \
                     Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
             raise gen.Return(ObjectDict())
 
@@ -32,10 +34,12 @@ class HrResourceDataService(DataService):
 
     @cache(ttl=300)
     @gen.coroutine
-    def get_resource_list(self, conds, fields=[]):
+    def get_resource_list(self, conds, fields=None):
 
-        if conds is None or not (isinstance(conds, dict) or isinstance(conds, str)):
-            self.logger.warn("Warning:[get_resource_list][invalid parameters], \
+        fields = fields or []
+
+        if conds is None or not (isinstance(conds, (dict, str))):
+            self.logger.warning("Warning:[get_resource_list][invalid parameters], \
                     Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
             raise gen.Return(list())
 

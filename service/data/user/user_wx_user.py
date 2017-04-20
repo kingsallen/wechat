@@ -12,7 +12,7 @@ class UserWxUserDataService(DataService):
     @gen.coroutine
     def get_wxuser(self, id=None):
         if not id:
-            self.logger.warn("Warning:[get_wxuser][invalid parameters], Detail:[id: {0}]".format(id))
+            self.logger.warning("Warning:[get_wxuser][invalid parameters], Detail:[id: {0}]".format(id))
             raise gen.Return(ObjectDict())
 
         conds = {"id": [str(id), "="]}
@@ -21,11 +21,10 @@ class UserWxUserDataService(DataService):
         response = yield self.user_wx_user_dao.get_record_by_conds(conds, fields)
         raise gen.Return(response)
 
-    @cache(ttl=30)
     @gen.coroutine
     def get_wxuser(self, conds=None, fields=None):
         if not self._valid_conds(conds):
-            self.logger.warn("Warning:[get_wxuser][invalid parameters], Detail:[conds: {0}, fields: {1}]".format(conds, fields))
+            self.logger.warning("Warning:[get_wxuser][invalid parameters], Detail:[conds: {0}, fields: {1}]".format(conds, fields))
             raise gen.Return(ObjectDict())
 
         fields = fields or list(self.user_wx_user_dao.fields_map.keys())
@@ -43,7 +42,7 @@ class UserWxUserDataService(DataService):
     @gen.coroutine
     def update_wxuser(self, conds=None, fields=None):
         if not conds or not fields:
-            self.logger.warn("Warning:[update_wxuser][invalid parameters], Detail:[conds: {0}, fields: {1}]".format(conds, fields))
+            self.logger.warning("Warning:[update_wxuser][invalid parameters], Detail:[conds: {0}, fields: {1}]".format(conds, fields))
             raise gen.Return(False)
 
         ret = yield self.user_wx_user_dao.update_by_conds(

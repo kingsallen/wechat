@@ -1,4 +1,4 @@
-# -*- coding=utf-8 -*-
+# coding=utf-8
 # Copyright 2016 MoSeeker
 
 """
@@ -12,8 +12,8 @@ from dao.base import BaseDao
 
 
 class HrResourceDao(BaseDao):
-    def __init__(self, logger):
-        super(HrResourceDao, self).__init__(logger)
+    def __init__(self):
+        super(HrResourceDao, self).__init__()
         self.table = "hr_resource"
         self.fields_map = {
             "id": self.constant.TYPE_INT,

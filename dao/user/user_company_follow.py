@@ -1,4 +1,4 @@
-# -*- coding=utf-8 -*-
+# coding=utf-8
 # Copyright 2016 MoSeeker
 
 """
@@ -13,8 +13,8 @@ from dao.base import BaseDao
 
 class UserCompanyFollowDao(BaseDao):
 
-    def __init__(self, logger):
-        super(UserCompanyFollowDao, self).__init__(logger)
+    def __init__(self):
+        super(UserCompanyFollowDao, self).__init__()
         self.table = 'user_company_follow'
         self.fields_map = {
             "id":             self.constant.TYPE_INT,

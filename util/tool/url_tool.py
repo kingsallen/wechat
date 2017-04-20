@@ -5,17 +5,16 @@
 # @File    : url_tool.py
 # @DES     : url 拼接
 
-# Copyright 2016 MoSeeker
 
-import urllib
-
-from urllib.parse import urlparse, parse_qs, urlencode, parse_qsl, urlunparse
+from urllib.parse import (
+    urlparse, parse_qs, urlencode, parse_qsl, urlunparse, urljoin)
 from setting import settings
 
+# 默认 query 黑名单：m, state, code, _xsrf , appid, tjtoken不传递
 _ESCAPE_DEFAULT = frozenset(['m', 'state', 'code', '_xsrf', 'appid', 'tjtoken'])
 
 
-def make_url(path, params=None, host="", protocol="http", escape=None,
+def make_url(path, params=None, host="", protocol="https", escape=None,
              **kwargs):
     """
     生成 url 的 helper 方法， 一般在 handler 调用
@@ -36,16 +35,15 @@ def make_url(path, params=None, host="", protocol="http", escape=None,
     if not isinstance(params, dict):
         raise TypeError("Params is not a dict")
 
-    params.update(kwargs)
-
-    # 默认 query 黑名单：m, state, code, _xsrf , appid, tjtoken不传递
+    d = params.copy()
+    d.update(kwargs)
 
     escape = set((escape or []) + list(_ESCAPE_DEFAULT))
 
-    pairs = {k: v for k, v in params.items() if k not in escape}
+    pairs = {k: v for k, v in d.items() if k not in escape}
 
     def valid(k, v):
-        return v and isinstance(k, str) and isinstance(v, str)
+        return v and isinstance(k, str) and isinstance(v, str) and not k.startswith("_")
 
     query = [(k, v) for k, v in pairs.items() if valid(k, v)]
 
@@ -70,9 +68,8 @@ def url_subtract_query(url, exclude):
 
 
 def url_append_query(url, *args, **kwargs):
-    """
-        为url添加query
-        :example: url_append_query('/m/app', "sjdf","lsdkjf", a=2)
+    """为url添加query
+    :example: url_append_query('/m/app', "sjdf","lsdkjf", a=2)
     """
     url_parts = list(urlparse(url))
     query = dict(parse_qsl(url_parts[4]))
@@ -108,7 +105,7 @@ def make_static_url(path, protocol='https'):
     if not path:
         return None
     if not path.startswith("http"):
-        path = urllib.parse.urljoin(settings['static_domain'], path)
+        path = urljoin(settings['static_domain'], path)
 
     if not path.startswith("http") and protocol is not None:
         path = protocol + ":" + path

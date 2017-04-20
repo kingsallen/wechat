@@ -1,4 +1,4 @@
-# -*- coding=utf-8 -*-
+# coding=utf-8
 # Copyright 2016 MoSeeker
 
 """
@@ -10,69 +10,53 @@
 from tornado import gen
 
 from service.page.base import PageService
-from util.common import ObjectDict
-from util.tool.http_tool import http_post
-
 
 class CellphonePageService(PageService):
     """
     Referenced Document: https://wiki.moseeker.com/user_account_api.md
                          Point 32, 33
     """
-    _ROUTE = ObjectDict({
-        'valid':   'user/sendCode',
-        'verify':  'user/verifyCode',
-        'combine': 'user/wxbindmobile'
-    })
 
-    _OPT_TYPE = ObjectDict({
-        'code_login':      1,
-        'forget_password': 2,
-        'modify_info':     3,
-        'change_mobile':   4
-    })
+    def __init__(self):
+        super().__init__()
 
     @gen.coroutine
-    def send_valid_code(self, mobile, app_id):
+    def send_valid_code(self, mobile, type):
         """Request basic service send valid code to target mobile
         :param mobile: target mobile number
-        :param app_id: request source(platform, qx...)
         :return:
         """
-        req = ObjectDict({
-            'mobile': mobile,
-            'type':   self._OPT_TYPE.change_mobile,
-            'appid':  app_id
-        })
-        res = yield http_post(self._ROUTE.valid, req)
-        raise gen.Return(res)
+        ret = yield self.infra_user_ds.post_send_valid_code(mobile, type)
+        raise gen.Return(ret)
 
     @gen.coroutine
-    def verify_mobile(self, params, app_id):
+    def verify_mobile(self, mobile, code, type):
         """
         Send code submitted by user to basic service.
-        :param params: dict include user mobile number and valid code
-        :param app_id: request source(platform, qx...)
+        :param mobile: target mobile number
+        :param code:
+        :param type
         :return:
         """
-        req = ObjectDict({
-            'mobile': params.mobile,
-            'code':   params.code,
-            'type':   self._OPT_TYPE.change_mobile,
-            'appid':  app_id
-        })
-
-        response = yield http_post(self._ROUTE.verify, req)
-        raise gen.Return(response)
+        ret = yield self.infra_user_ds.post_verify_mobile(mobile, code, type)
+        raise gen.Return(ret)
 
     @gen.coroutine
-    def wx_pc_combine(self, mobile, unionid, app_id):
+    def wx_pc_combine(self, mobile, unionid):
         """调用账号绑定接口"""
-        req = ObjectDict({
-            'mobile':  mobile,
-            'unionid': unionid,
-            'appid':   app_id
-        })
+        ret = yield self.infra_user_ds.post_wx_pc_combine(mobile, unionid)
+        raise gen.Return(ret)
 
-        response = yield http_post(self._ROUTE.combine, req)
-        raise gen.Return(response)
+    @gen.coroutine
+    def send_sms(self, sms_type, mobile, params, isqx=False, ip=""):
+        """
+        发送短信，调用 thrift 接口
+        :param sms_type: 对应 thrift_gen/gen/mq/struct/ttypes
+        :param mobile:
+        :param params:
+        :param isqx: 是否为聚合号
+        :return:
+        """
+
+        ret, msg = yield self.thrift_mq_ds.send_sms(sms_type, mobile, params, isqx, ip)
+        return ret, msg

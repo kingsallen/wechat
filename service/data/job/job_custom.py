@@ -12,10 +12,12 @@ class JobCustomDataService(DataService):
 
     @cache(ttl=60)
     @gen.coroutine
-    def get_custom(self, conds, fields=[]):
+    def get_custom(self, conds, fields=None):
 
-        if conds is None or not (isinstance(conds, dict) or isinstance(conds, str)):
-            self.logger.warn("Warning:[get_custom][invalid parameters], Detail:[conds: {0}, "
+        fields = fields or []
+
+        if conds is None or not (isinstance(conds, (dict, str))):
+            self.logger.warning("Warning:[get_custom][invalid parameters], Detail:[conds: {0}, "
                         "type: {1}]".format(conds, type(conds)))
             raise gen.Return(ObjectDict())
 
@@ -27,10 +29,15 @@ class JobCustomDataService(DataService):
 
     @cache(ttl=60)
     @gen.coroutine
-    def get_customs_list(self, conds, fields, options=[], appends=[], index='', params=[]):
+    def get_customs_list(self, conds, fields, options=None, appends=None, index='', params=None):
 
-        if conds is None or not (isinstance(conds, dict) or isinstance(conds, str)):
-            self.logger.warn("Warning:[get_customs_list][invalid parameters], Detail:[conds: {0}, "
+        fields = fields or []
+        options = options or []
+        appends = appends or []
+        params = params or []
+
+        if conds is None or not (isinstance(conds, (dict, str))):
+            self.logger.warning("Warning:[get_customs_list][invalid parameters], Detail:[conds: {0}, "
                         "type: {1}]".format(conds, type(conds)))
             raise gen.Return(list())
 

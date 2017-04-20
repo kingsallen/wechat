@@ -8,7 +8,6 @@
 # Copyright 2016 MoSeeker
 
 import json
-
 import redis
 
 from setting import settings
@@ -38,6 +37,9 @@ class BaseRedis(object):
         for method_name in methods:
             assert hasattr(self, method_name)
 
+    def get_raw_redis_client(self):
+        return self._redis
+
     def key_name(self, key, prefix=True):
         if not prefix:
             return key
@@ -47,7 +49,14 @@ class BaseRedis(object):
         value = to_str(self._redis.get(key))
         if value is None:
             return default
-        return json.loads(value)
+        try:
+            ret = json.loads(value)
+        except TypeError as e:
+            print(e)
+            print('key: %s, value: %s' % (key, value))
+            raise e
+        else:
+            return ret
 
     def get(self, key, default=None, prefix=True):
         key = self.key_name(key, prefix)
@@ -64,24 +73,49 @@ class BaseRedis(object):
         value = json_dumps(value)
         self._redis.set(key, value, ex=ttl)
 
-    def update(self, key, value, ttl=None):
+    def update(self, key, value, ttl=None, prefix=False):
         if value is None:
             return
-
-        key = self.key_name(key)
+        key = self.key_name(key, prefix)
         redis_value = self._get(key)
         if redis_value:
             redis_value.update(value)
-            self.set(key, redis_value, ttl)
+            self.set(key, redis_value, ttl, prefix=prefix)
 
-    def delete(self, key):
-        key = self.key_name(key)
+    def delete(self, key, prefix=True):
+        key = self.key_name(key, prefix)
         self._redis.delete(key)
 
-    def incr(self, key):
-        key = self.key_name(key)
+    def incr(self, key, prefix=True):
+        key = self.key_name(key, prefix)
         return self._redis.incr(key)
 
     def exists(self, key):
         key = self.key_name(key)
         return self._redis.exists(key)
+
+    def pub(self, key, message, prefix=True):
+        channel = self.key_name(key, prefix)
+        return self._redis.publish(channel, message)
+
+if __name__ == "__main__":
+
+    redis = BaseRedis()
+
+    key = "aaa"
+    value1 = {
+        "a": 1,
+        "b": {}
+    }
+
+    # res = redis.set(key, value1, ttl=3333, prefix=False)
+
+    value2 = {
+        "a": 2,
+        "b": {
+            "bbb": 7
+        }
+    }
+
+    res = redis.update(key, value2, prefix=False)
+    print (redis.get(key, prefix=False))

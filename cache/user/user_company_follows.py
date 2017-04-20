@@ -1,4 +1,5 @@
-# -*- coding=utf-8 -*-
+# coding=utf-8
+
 # Copyright 2016 MoSeeker
 
 """
@@ -10,14 +11,13 @@
 import json
 from util.common.cache import BaseRedis
 
-
-# todo (tangyiliang): 关注关系未加缓存，这块以后是否要使用？
 class UserCompanyFollowsCache(BaseRedis):
     """
     Develop Status: To be tested.
     """
-    def __init__(self, redis):
-        super(UserCompanyFollowsCache, self).__init__(redis)
+
+    def __init__(self):
+        super(UserCompanyFollowsCache, self).__init__()
         self.company_fans_hash = '{0}_company_fans'.format(self._PREFIX)
         self.following_companys_hash = '{0}_following_companys'.format(
                                        self._PREFIX)

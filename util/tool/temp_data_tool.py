@@ -16,13 +16,12 @@
  template 51: 'TemplateQRCode'         二维码模版
 
 """
-import json
 
-from util.common import ObjectDict
-from util.tool.url_tool import make_static_url, make_url
-from util.tool.str_tool import gen_salary
-from conf.platform import MEDIA_TYPE
 from conf.path import POSITION_PATH
+from conf.platform import MEDIA_TYPE
+from util.common import ObjectDict
+from util.tool.str_tool import gen_salary
+from util.tool.url_tool import make_static_url, make_url
 
 
 def make_up_for_missing_res(res):
@@ -185,7 +184,7 @@ def make_header(company, team_index=False, team=None, **extra):
         'name': name,
         'description': description,
         'icon': make_static_url(company.logo),
-        'banner': make_static_url(json.loads(company.banner).get('banner0'))
+        'banner': make_static_url(company.banner[0] if company.banner else "")
         if company.banner else None,
     })
 

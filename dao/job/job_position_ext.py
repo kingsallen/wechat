@@ -12,8 +12,8 @@ from dao.base import BaseDao
 
 class JobPositionExtDao(BaseDao):
 
-    def __init__(self, logger):
-        super(JobPositionExtDao, self).__init__(logger)
+    def __init__(self):
+        super(JobPositionExtDao, self).__init__()
         self.table = "job_position_ext"
         self.fields_map = {
             "pid":            self.constant.TYPE_INT,

@@ -1,4 +1,4 @@
-# -*- coding=utf-8 -*-
+# coding=utf-8
 # Copyright 2016 MoSeeker
 
 """
@@ -15,10 +15,12 @@ from util.common import ObjectDict
 class UserCompanyFollowDataService(DataService):
 
     @gen.coroutine
-    def get_user(self, conds, fields=[]):
+    def get_user(self, conds, fields=None):
         """
         Testing code and delete when release
         """
+
+        fields = fields or []
         if not self._valid_conds(conds):
             raise gen.Return(ObjectDict())
         if not fields:
@@ -28,18 +30,15 @@ class UserCompanyFollowDataService(DataService):
         raise gen.Return(response)
 
     @gen.coroutine
-    def get_fllw_cmpy(self, conds, fields=[]):
+    def get_fllw_cmpy(self, conds, fields=None):
+
+        fields = fields or []
         if not self._valid_conds(conds):
             raise gen.Return(ObjectDict())
         if not fields:
             fields = self.user_company_follow_dao.fields_map.keys()
-        try:
-            response = yield self.user_company_follow_dao.get_list_by_conds(
-                                    conds, fields)
-        except Exception as error:
-            self.logger.warn(error)
-            raise gen.Return(ObjectDict())
 
+        response = yield self.user_company_follow_dao.get_list_by_conds(conds, fields)
         raise gen.Return(response)
 
     @gen.coroutine
@@ -48,7 +47,7 @@ class UserCompanyFollowDataService(DataService):
             response = self.user_company_follow_dao.update_by_conds(
                             conds, fields)
         except Exception as error:
-            self.logger.warn(error)
+            self.logger.warning(error)
             raise gen.Return(False)
 
         raise gen.Return(response)
@@ -58,7 +57,7 @@ class UserCompanyFollowDataService(DataService):
         try:
             response = self.user_company_follow_dao.insert_record(fields)
         except Exception as error:
-            self.logger.warn(error)
+            self.logger.warning(error)
             raise gen.Return(None)
 
         raise gen.Return(response)

@@ -12,10 +12,11 @@ class HrHbConfigDataService(DataService):
     @cache(ttl=60)
     @gen.coroutine
     def get_hr_hb_config(self, conds, fields=None):
+
         fields = fields or []
 
         if not self._valid_conds(conds):
-            self.logger.warn("Warning:[get_hr_hb_config][invalid parameters], Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
+            self.logger.warning("Warning:[get_hr_hb_config][invalid parameters], Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
             raise gen.Return(ObjectDict())
 
         if not fields:
@@ -36,7 +37,7 @@ class HrHbConfigDataService(DataService):
         params = params or []
 
         if not self._valid_conds(conds):
-            self.logger.warn(
+            self.logger.warning(
                 "Warning:[get_hr_hb_position_binding_list][invalid "
                 "parameters], "
                 "Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
@@ -53,7 +54,7 @@ class HrHbConfigDataService(DataService):
     @gen.coroutine
     def update_hr_hb_config(self, conds=None, fields=None):
         if not conds or not fields:
-            self.logger.warn(
+            self.logger.warning(
                 "Warning:[update_hr_hb_config][invalid parameters], Detail:["
                 "conds: {0}, fields: {1}]".format(
                     conds, fields))

@@ -1,4 +1,4 @@
-# -*- coding=utf-8 -*-
+# coding=utf-8
 # Copyright 2016 MoSeeker
 
 """
@@ -22,6 +22,10 @@ import operator
 
 
 class UserCompanyPageService(PageService):
+
+    def __init__(self):
+        super().__init__()
+
     @gen.coroutine
     def get_company_data(self, handler_params, company, user):
         """
@@ -35,10 +39,6 @@ class UserCompanyPageService(PageService):
 
         # 获取当前公司关注，访问信息
         conds = {'user_id': user.sysuser.id, 'company_id': company.id}
-        wx_user = yield self.user_wx_user_ds.get_wxuser(
-            conds={'openid': user.wxuser.openid,
-                   'wechat_id': user.wxuser.wechat_id},
-            fields=['id', 'is_subscribe'])
         vst_cmpy = yield self.user_company_visit_req_ds.get_visit_cmpy(
             conds=conds, fields=['id', 'company_id'])
         team_index_url = make_url(path.COMPANY_TEAM, handler_params)
@@ -48,7 +48,7 @@ class UserCompanyPageService(PageService):
         data.relation = ObjectDict({
             'want_visit': self.constant.YES if vst_cmpy else self.constant.NO,
             'qrcode': self._make_qrcode(user.wechat.qrcode),
-            'follow': self.constant.YES if wx_user.is_subscribe
+            'follow': self.constant.YES if user.wxuser.is_subscribe
             else self.constant.NO,
         })
 

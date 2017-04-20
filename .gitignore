@@ -1,7 +1,9 @@
+dump.rdb
 ### Project Specific ##
 logs/
 template/
 setting.py
+.vscode/
 
 ### PyCharm ###
 /.idea

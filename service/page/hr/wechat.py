@@ -7,8 +7,8 @@ from service.page.base import PageService
 
 class WechatPageService(PageService):
 
-    def __init__(self, logger):
-        super().__init__(logger)
+    def __init__(self):
+        super().__init__()
 
     @gen.coroutine
     def get_wechat(self, conds, fields=[]):

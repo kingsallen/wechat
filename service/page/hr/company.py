@@ -3,14 +3,22 @@
 # Copyright 2016 MoSeeker
 
 import re
+import ujson
+import conf.common as const
 from util.common import ObjectDict
 from tornado import gen
 from service.page.base import PageService
+from util.tool.url_tool import make_static_url
+from util.tool.dict_tool import sub_dict
+from util.tool.str_tool import is_odd
+
+cached_company_sug_wechat = None
 
 
 class CompanyPageService(PageService):
-    def __init__(self, logger):
-        super(CompanyPageService, self).__init__(logger)
+
+    def __init__(self):
+        super(CompanyPageService, self).__init__()
 
     @gen.coroutine
     def get_company(self, conds, need_conf=None, fields=None):
@@ -76,6 +84,22 @@ class CompanyPageService(PageService):
 
             company.update(company_conf)
 
+        # 处理公司规模
+        if company.scale:
+            company.scale_name = self.constant.SCALE.get(str(company.scale))
+
+        # 处理公司默认 logo
+        if not company.logo:
+            company.logo = const.COMPANY_HEADIMG
+
+        # 处理 impression:
+        if company.impression:
+            company.impression = [make_static_url(item) for item in ujson.decode(company.impression).values()]
+
+        # 处理 banner
+        if company.banner:
+            company.banner = [make_static_url(item) for item in ujson.decode(company.banner).values()]
+
         raise gen.Return(company)
 
     @gen.coroutine
@@ -119,7 +143,77 @@ class CompanyPageService(PageService):
         raise gen.Return(lastrowid)
 
     @gen.coroutine
-    def get_company_conf(self, company_id, fields):
-        company_conf = yield self.hr_company_conf_ds.get_company_conf({"company_id": company_id}, fields)
-        raise gen.Return(company_conf)
+    def create_company_on_wechat(self, record):
+        result, data = yield self.infra_company_ds.create_company_on_wechat({
+            "type":         1,
+            "name":         record.name,
+            "abbreviation": record.abbreviation,
+            "source":       8,  # 微信端添加
+            "scale":        record.scale,
+            "industry":     record.industry,
+            "logo":         record.logo
+        })
+        return result, data
 
+    @staticmethod
+    def emp_custom_field_refine_way(company_id):
+        """通过companyid 奇偶判断员工认证自定义字段填写的途径
+        奇数：认证成功后直接跳转
+        偶数：认证成功后发送消息模板，点击消息模版填写
+        """
+        if is_odd(company_id):
+            return const.EMPLOYEE_CUSTOM_FIELD_REFINE_TEMPLATE_MSG
+
+        else:
+            return const.EMPLOYEE_CUSTOM_FIELD_REFINE_REDIRECT
+
+
+    @gen.coroutine
+    def get_cp_for_sug_wechat(self, name=None):
+        """
+        通过 profile 编辑出公司名称 sug
+        :param name: 如果 name 有值, 通过 name 做 filter
+        :return:
+        """
+        global cached_company_sug_wechat
+
+        if cached_company_sug_wechat and name is None:
+            return True, cached_company_sug_wechat
+
+        params = ObjectDict(type=0, parent_id=0)
+        if name is not None:
+            params.update(name=name)
+
+        result, data = yield self.infra_company_ds.get_company_all(params)
+
+        if not result:
+            return False, data
+        else:
+            keys = ['id', 'name', 'logo']
+            result = []
+            unique_names = []
+            for e in data:
+                e = ObjectDict(e)
+                if e.name in unique_names:
+                    continue
+                e = ObjectDict(sub_dict(e, keys))
+                result.append(e)
+                unique_names.append(e.name)
+
+            if cached_company_sug_wechat is None:
+                cached_company_sug_wechat = result
+            return True, result
+
+    @gen.coroutine
+    def get_company_reward_by_templateid(self, company_id, tempalte_id):
+        """ 获取公司下新版积分配置 """
+
+        res = yield self.hr_points_conf_ds.get_points_conf(conds={
+            "company_id": company_id,
+            "template_id": tempalte_id
+        })
+
+        if res:
+            return res.reward
+
+        return 0

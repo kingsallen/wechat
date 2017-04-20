@@ -12,8 +12,8 @@ from dao.base import BaseDao
 
 
 class HrCmsMediaDao(BaseDao):
-    def __init__(self, logger):
-        super(HrCmsMediaDao, self).__init__(logger)
+    def __init__(self):
+        super(HrCmsMediaDao, self).__init__()
         self.table = "hr_cms_media"
         self.fields_map = {
             "id": self.constant.TYPE_INT,

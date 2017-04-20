@@ -11,10 +11,12 @@ from util.common import ObjectDict
 class JobPositionDataService(DataService):
 
     @gen.coroutine
-    def get_position(self, conds, fields=[]):
+    def get_position(self, conds, fields=None):
 
-        if conds is None or not (isinstance(conds, dict) or isinstance(conds, str)):
-            self.logger.warn("Warning:[get_position][invalid parameters], Detail:[conds: {0}, "
+        fields = fields or []
+
+        if conds is None or not (isinstance(conds, (dict, str))):
+            self.logger.warning("Warning:[get_position][invalid parameters], Detail:[conds: {0}, "
                         "type: {1}]".format(conds, type(conds)))
             raise gen.Return(ObjectDict())
 
@@ -26,10 +28,14 @@ class JobPositionDataService(DataService):
 
     @cache(ttl=60)
     @gen.coroutine
-    def get_positions_list(self, conds, fields=None, options=[], appends=[], index='', params=[]):
+    def get_positions_list(self, conds, fields=None, options=None, appends=None, index='', params=None):
 
-        if conds is None or not (isinstance(conds, dict) or isinstance(conds, str)):
-            self.logger.warn("Warning:[get_positions_list][invalid parameters], Detail:[conds: {0}, "
+        options = options or []
+        appends = appends or []
+        params = params or []
+
+        if conds is None or not (isinstance(conds, (dict, str))):
+            self.logger.warning("Warning:[get_positions_list][invalid parameters], Detail:[conds: {0}, "
                         "type: {1}]".format(conds, type(conds)))
             raise gen.Return(list())
 
@@ -42,7 +48,7 @@ class JobPositionDataService(DataService):
     @gen.coroutine
     def update_position(self, conds=None, fields=None):
         if not conds or not fields:
-            self.logger.warn(
+            self.logger.warning(
                 "Warning:[update_position][invalid parameters], Detail:[conds: {0}, fields: {1}]".format(
                     conds, fields))
             raise gen.Return(None)

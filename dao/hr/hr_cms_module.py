@@ -12,8 +12,8 @@ from dao.base import BaseDao
 
 
 class HrCmsModuleDao(BaseDao):
-    def __init__(self, logger):
-        super(HrCmsModuleDao, self).__init__(logger)
+    def __init__(self):
+        super(HrCmsModuleDao, self).__init__()
         self.table = "hr_cms_module"
         self.fields_map = {
             "id": self.constant.TYPE_INT,

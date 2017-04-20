@@ -2,9 +2,13 @@
 
 # status_message
 RESPONSE_SUCCESS = "SUCCESS"
+RESPONSE_WARNING = "WARNING"
 RESPONSE_FAILURE = "FAILURE"
 
 LOGIN_FAILURE = "登录失败"
+OPERATE_FAILURE = "操作失败"
+MOBILE_VERIFY = "请先验证手机号"
+INPUT_DISORDER = "请按规范输入"
 
 BASIC_SERVER_DISCONNECTION = "基础服务器连接不上"
 BASIC_SERVER_BUSY = "基础服务器忙碌"
@@ -12,14 +16,28 @@ BASIC_SERVER_BUSY = "基础服务器忙碌"
 CELLPHONE_BIND = "用户已绑定手机号"
 CELLPHONE_UNBIND = "用户未绑定手机号"
 CELLPHONE_INVALID_CODE = "验证码不正确"
+CELLPHONE_INVALID_MOBILE = "该手机号不存在"
+CELLPHONE_MOBILE_HAD_REGISTERED = "该手机号已被注册"
+CELLPHONE_MOBILE_SET_PASSWD_FAILED = "设置密码无效，请重新验证手机号"
+CELLPHONE_REGISTER_PASSWD_NOT_MATCH = "两次输入密码不一致，请重新设置"
+CELLPHONE_REGISTER_FAILED = "用户注册失败"
+CELLPHONE_RESET_PASSWORD = "设置密码失败，请重试"
+CELLPHONE_PASSWORD_ERROR = "密码要求为至少六位以上的数字与字母组合"
+CELLPHONE_NOT_MATCH = "输入的手机号与原绑定手机号不一致"
+CELLPHONE_NAME_EMAIL = "姓名或者邮箱格式错误"
+CELLPHONE_MOBILE_INVALID = "手机号未提供或未验证"
+
+RESUME_IMPORT_NAME_PASSWD_ERROR = "用户名和密码必须填写"
+RESUME_IMPORT_SUCCESS = "导入成功"
+RESUME_IMPORT_FAILED = "导入失败"
 
 DATABASE_ERROR = "数据库操作失败"
 
 REQUEST_PARAM_ERROR = "请求参数错误"
 
 NOT_AUTHORIZED = "用户未被授权请求"
-NO_DATA = "Ta在地球上消失了"
-UNKNOWN_DEFAULT = "正在努力维护服务器中"
+NO_DATA = "404!Ta在地球上消失了"
+UNKNOWN_DEFAULT = "正在努力处理您的问题"
 
 POSITION_FORWARD_MESSAGE = "点击右上角\n将职位推送给朋友,\n或者直接分享到朋友圈吧!"
 SHARE_DES_DEFAULT = "点击即可快速申请！"
@@ -27,3 +45,32 @@ SHARE_DES_DEFAULT = "点击即可快速申请！"
 RED_PACKET_TYPE_VALUE_ERROR = "红包配置类型错误!"
 RED_PACKET_CONFIG_TARGET_VALUE_ERROR = "红包配置对象错误!"
 RED_PACKET_WISHING = "红包一个，聊表心意，祝君好运"
+
+WECHAT_SCAN_HAD_BINDED = "当前扫描微信号已经绑定其他帐号了, 请更换微信号重新扫描"
+WECHAT_SCAN_FAILED = "绑定失败, 请尝试先解绑微信号"
+WECHAT_SCAN_CHANGE_WECHAT = "当前扫描微信号不是已绑定微信号, 请使用正确的微信号进行扫描"
+
+POSITION_NOT_EXIST = "您访问的职位不存在"
+POSITION_ALREADY_EXPIRED = "您申请的职位已经过期"
+DUPLICATE_APPLICATION = "您已申请过该职位，请在个人中心查询您的申请详情"
+CREATE_APPLICATION_FAILED = "您的申请失败了，请稍候再试"
+
+PROFILE_COMPANY_NAME_EXISTED = "该企业已存在，可返回选择"
+
+PROFILE_REQUIRED_HINT_HEAD = "请完善个人简历，其中"
+PROFILE_REQUIRED_HINT_TAIL = "为必填项"
+
+# 招聘助手
+HELPER_HR_REGISTERED = "您的账户已存在，请联系管理员"
+HELPER_COMPANY_REGISTERED = "该公司名称已注册"
+HELPER_HR_REGISTERED_FAILED = "注册失败"
+HELPER_HR_HAD_REGISTERED = "手机号已经注册，请勿重复注册"
+
+EMPLOYEE_BINDING_SUCCESS = "员工认证成功!"
+EMPLOYEE_BINDING_CUSTOM_FIELDS_DONE = "员工信息提交成功!"
+EMPLOYEE_BINDING_EMAIL_DONE = "我知道了!"
+EMPLOYEE_NOT_BINDED_WARNING = "请先进行员工绑定"
+EMPLOYEE_BINDED_WARNING = "该员工已经绑定"
+
+DEFAULT_RECOMMEND_PRESENTEE = "请帮您的好友们做个推荐吧！\n他们很希望能成为您的同事"
+DEFAULT_RECOMMEND_SUCCESS = "感谢您对公司人才库的贡献"

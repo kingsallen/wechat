@@ -1,20 +1,15 @@
-# -*- coding=utf-8 -*-
+# coding=utf-8
 # Copyright 2016 MoSeeker
 
-"""
-:author 马超（machao@moseeker.com）
-:date 2016.11.22
 
-"""
 from tornado import gen
 
 from handler.base import BaseHandler
-from util.common import ObjectDict
-from util.common.decorator import check_sub_company
-from util.tool.url_tool import url_append_query
-from util.common.decorator import handle_response
 from tests.dev_data.user_company_config import COMPANY_CONFIG
-from handler.help.newjd_status_check import NewJDStatusChecker404
+from util.common import ObjectDict
+from util.common.decorator import NewJDStatusChecker404, check_sub_company, \
+    handle_response
+from util.tool.url_tool import url_append_query
 
 
 class TeamIndexHandler(BaseHandler):
@@ -23,7 +18,7 @@ class TeamIndexHandler(BaseHandler):
     @check_sub_company
     @gen.coroutine
     def get(self):
-        template_name = 'company/team.html'
+
         if self.params.sub_company:
             sub_company_flag = True
             current_company = self.params.pop('sub_company')
@@ -36,15 +31,15 @@ class TeamIndexHandler(BaseHandler):
 
         self.params.share = self._share(current_company)
 
-        self.render_page(template_name, data, title=data.bottombar.teamname_custom)
-        return
+        self.render_page('company/team.html', data, meta_title=data.bottombar.teamname_custom)
+
 
     def _share(self, company):
         company_name = company.abbreviation or company.name
         default = ObjectDict({
             "cover": self.static_url(company.logo),
             "title": company_name + "的核心团队点此查看",
-            "description": u"这可能是你人生的下一站! 不先了解一下未来同事吗?",
+            "description": "这可能是你人生的下一站! 不先了解一下未来同事吗?",
             "link": self.fullurl
         })
         config = COMPANY_CONFIG.get(company.id)
@@ -66,7 +61,7 @@ class TeamDetailHandler(BaseHandler):
         team = yield self.team_ps.get_team_by_id(team_id)
         if team.company_id != self.current_user.company.id:
             self.write_error(404)
-            return
+            raise gen.Return()
 
         data = yield self.team_ps.get_team_detail(
             self.current_user, current_company, team, self.params)
@@ -75,16 +70,15 @@ class TeamDetailHandler(BaseHandler):
                           self.static_url(self.current_user.company.logo)
         self.params.share = self._share(current_company,
                                         team.name, share_cover_url)
-
-        self.render_page(template_name='company/team.html', data=data, title=data.bottombar.teamname_custom)
-        return
+        self.render_page(template_name='company/team.html', data=data,
+                         meta_title=data.bottombar.teamname_custom)
 
     def _share(self, company, team_name, share_cover_url):
         company_name = company.abbreviation or company.name
         default = ObjectDict({
             "cover": url_append_query(share_cover_url, "imageMogr2/thumbnail/!300x300r"),
             "title": team_name.upper() + "-" + company_name,
-            "description": u'通常你在点击“加入我们”之类的按钮之前并不了解我们, 现在给你个机会!',
+            "description": '通常你在点击“加入我们”之类的按钮之前并不了解我们, 现在给你个机会!',
             "link": self.fullurl
         })
         config = COMPANY_CONFIG.get(company.id)

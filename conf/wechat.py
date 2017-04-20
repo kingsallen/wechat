@@ -6,6 +6,9 @@ WX_THIRD_OAUTH_GET_CODE = "https://open.weixin.qq.com/connect/oauth2/authorize?a
 WX_OAUTH_GET_ACCESS_TOKEN = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=%s&secret=%s&code=%s&grant_type=authorization_code"
 WX_THIRD_OAUTH_GET_ACCESS_TOKEN = "https://api.weixin.qq.com/sns/oauth2/component/access_token?appid=%s&code=%s&grant_type=authorization_code&component_appid=%s&component_access_token=%s"
 WX_OAUTH_GET_USERINFO = "https://api.weixin.qq.com/sns/userinfo?access_token=%s&openid=%s&lang=zh_CN"
+WX_INFO_USER_API = "https://api.weixin.qq.com/cgi-bin/user/info?access_token=%s&openid=%s&lang=zh_CN"
+WX_CREATE_QRCODE_API = "https://api.weixin.qq.com/cgi-bin/qrcode/create?access_token=%s"
+WX_SHOWQRCODE_API = "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=%s"
 API_SEND_TEMPLATE_MESSAGE = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=%s"
 API_PAY_HONGBAO = "https://api.mch.weixin.qq.com/mmpaymkttransfers/sendredpack"
 
@@ -189,3 +192,108 @@ ERRORS = {
     9001035: "设备申请参数不合法",
     9001036: "查询起始值begin不合法"
 }
+
+WX_TEXT_REPLY = """
+<xml>
+<ToUserName><![CDATA[%s]]></ToUserName>
+<FromUserName><![CDATA[%s]]></FromUserName>
+<CreateTime>%s</CreateTime>
+<MsgType><![CDATA[text]]></MsgType>
+<Content><![CDATA[%s]]></Content>
+</xml>
+"""
+
+WX_IMAGE_REPLY = """
+<xml>
+<ToUserName><![CDATA[%s]]></ToUserName>
+<FromUserName><![CDATA[%s]]></FromUserName>
+<CreateTime>%s</CreateTime>
+<MsgType><![CDATA[image]]></MsgType>
+<Image>
+<MediaId><![CDATA[%s]]></MediaId>
+</Image>
+</xml>
+"""
+
+WX_VOICE_REPLY = """
+<xml>
+<ToUserName><![CDATA[%s]]></ToUserName>
+<FromUserName><![CDATA[%s]]></FromUserName>
+<CreateTime>%s</CreateTime>
+<MsgType><![CDATA[voice]]></MsgType>
+<Voice>
+<MediaId><![CDATA[%s]]></MediaId>
+</Voice>
+</xml>
+"""
+
+WX_VIDEO_REPLY = """
+<xml>
+<ToUserName><![CDATA[%s]]></ToUserName>
+<FromUserName><![CDATA[%s]]></FromUserName>
+<CreateTime>%s</CreateTime>
+<MsgType><![CDATA[video]]></MsgType>
+<Video>
+<MediaId><![CDATA[%s]]></MediaId>
+<Title><![CDATA[%s]]></Title>
+<Description><![CDATA[%s]]></Description>
+</Video>
+</xml>
+"""
+
+WX_MUSIC_REPLY = """
+<xml>
+<ToUserName><![CDATA[%s]]></ToUserName>
+<FromUserName><![CDATA[%s]]></FromUserName>
+<CreateTime>%s</CreateTime>
+<MsgType><![CDATA[music]]></MsgType>
+<Music>
+<Title><![CDATA[%s]]></Title>
+<Description><![CDATA[%s]]></Description>
+<MusicUrl><![CDATA[%s]]></MusicUrl>
+<HQMusicUrl><![CDATA[%s]]></HQMusicUrl>
+<ThumbMediaId><![CDATA[%s]]></ThumbMediaId>
+</Music>
+</xml>
+"""
+
+WX_NEWS_REPLY_HEAD_TPL = """
+<xml>
+<ToUserName><![CDATA[%s]]></ToUserName>
+<FromUserName><![CDATA[%s]]></FromUserName>
+<CreateTime>%s</CreateTime>
+<MsgType><![CDATA[news]]></MsgType>
+<ArticleCount>%d</ArticleCount>
+<Articles>
+"""
+WX_NEWS_REPLY_ITEM_TPL = """
+<item>
+<Title><![CDATA[%s]]></Title>
+<Description><![CDATA[%s]]></Description>
+<PicUrl><![CDATA[%s]]></PicUrl>
+<Url><![CDATA[%s]]></Url>
+</item>
+"""
+WX_NEWS_REPLY_FOOT_TPL = """
+</Articles>
+</xml>
+"""
+
+
+WX_SEND_RP_REQUEST_FORMAT = """
+<xml>
+<sign><![CDATA[{sign}]]></sign>
+<mch_billno><![CDATA[{mch_billno}]]></mch_billno>
+<mch_id><![CDATA[{mch_id}]]></mch_id>
+<wxappid><![CDATA[{wxappid}]]></wxappid>
+<send_name><![CDATA[{send_name}]]></send_name>
+<re_openid><![CDATA[{re_openid}]]></re_openid>
+<total_amount><![CDATA[{total_amount}]]></total_amount>
+<total_num><![CDATA[{total_num}]]></total_num>
+<wishing><![CDATA[{wishing}]]></wishing>
+<client_ip><![CDATA[{client_ip}]]></client_ip>
+<act_name><![CDATA[{act_name}]]></act_name>
+<remark><![CDATA[{remark}]]></remark>
+<nonce_str><![CDATA[{nonce_str}]]></nonce_str>
+</xml>
+"""

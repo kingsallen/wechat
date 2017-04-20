@@ -15,7 +15,7 @@ class UserEmployeeDataService(DataService):
     def get_employee(self, conds, fields=None):
 
         if not self._valid_conds(conds):
-            self.logger.warn("Warning:[get_employee][invalid parameters], Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
+            self.logger.warning("Warning:[get_employee][invalid parameters], Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
             raise gen.Return(ObjectDict())
 
         if not fields:
@@ -28,7 +28,7 @@ class UserEmployeeDataService(DataService):
     def update_employee(self, conds, fields=None):
 
         if not conds or not fields:
-            self.logger.warn("Warning:[update_employee][invalid parameters], Detail:[conds: {0}, "
+            self.logger.warning("Warning:[update_employee][invalid parameters], Detail:[conds: {0}, "
                              "fields: {1}]".format(conds, fields))
             raise gen.Return(False)
 

@@ -5,8 +5,8 @@
 """
 时间工具类
 """
-
-from datetime import datetime, date, timedelta
+import time
+from datetime import datetime, timedelta
 
 import conf.common as constant
 
@@ -38,7 +38,6 @@ def curr_now_msec():
 def format_dateonly(time):
     return time.strftime(constant.TIME_FORMAT_DATEONLY)
 
-
 def is_time_valid(str_time, form):
     """
     判断时间格式是否符合要求
@@ -51,6 +50,22 @@ def is_time_valid(str_time, form):
         pass
     finally:
         return ret
+
+def str_2_date(str_time, format):
+    """
+    将字符串时间格式转化为 datetime
+    :param str_time:
+    :param form:
+    :return:
+    """
+    res_date_time = str_time
+    try:
+        res_date_time = datetime.strptime(str(str_time), format)
+    except ValueError:
+        res_date_time = datetime.strptime(str(str_time), constant.TIME_FORMAT)
+        res_date_time = res_date_time.strftime(format)
+    finally:
+        return res_date_time
 
 
 def jd_update_date(update_time):
@@ -89,3 +104,7 @@ def jd_update_date(update_time):
         pass
     finally:
         return update_date
+
+if __name__ == "__main__":
+
+    print (str_2_date("2017-03-13 16:39:35", "%Y-%m-%d %H:%M"))

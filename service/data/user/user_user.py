@@ -4,21 +4,17 @@
 
 from tornado import gen
 
-import conf.message as mes_const
-
 from service.data.base import DataService
 from util.common.decorator import cache
-from util.common import ObjectDict
 from util.common import ObjectDict
 
 class UserUserDataService(DataService):
 
-    @cache(ttl=60)
     @gen.coroutine
     def get_user(self, conds, fields=None):
 
         if not self._valid_conds(conds):
-            self.logger.warn(
+            self.logger.warning(
                 "Warning:[get_user][invalid parameters], Detail:[conds: {0}, "
                 "type: {1}]".format(
                     conds, type(conds)))
@@ -44,17 +40,7 @@ class UserUserDataService(DataService):
                 conds=conds, fields=fields
             )
         except Exception as error:
-            self.logger.warn(error)
-            raise gen.Return(ObjectDict({'status': 1,
-                                         'message': mes_const.DATABASE_ERROR}))
+            self.logger.warning(error)
+            raise gen.Return(False)
 
-        raise gen.Return(ObjectDict({
-            'status': 0 if response else 1,
-            'message': 'success' if response else mes_const.DATABASE_ERROR
-        }))
-
-
-
-
-
-
+        raise gen.Return(response)

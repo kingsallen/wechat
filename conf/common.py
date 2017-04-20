@@ -1,6 +1,5 @@
 # coding=utf-8
 
-
 """
 说明:
 constant配置常量规范：
@@ -12,7 +11,9 @@ constant配置常量规范：
 常量使用大写字母
 例如 SUCCESS = "成功"
 """
+
 from util.common import ObjectDict
+import enum
 
 # ++++++++++系统常量++++++++++
 
@@ -22,11 +23,26 @@ WECHAT_TYPE_UNCONFIRM_SUBSCRIPTION = 2
 WECHAT_TYPE_SERVICE = 1
 WECHAT_TYPE_UNCONFIRM_SERVICE = 3
 
-# 注册来源
+# USER_USER注册来源
 WECHAT_REGISTER_SOURCE_QX = 1
 WECHAT_REGISTER_SOURCE_PLATFORM = 2
-WXUSER_OAUTH_UPDATE = 7
-WXUSER_OAUTH = 4
+
+# USER_WX_USER创建、更新来源
+WX_USER_SOURCE_SUBSCRIBE = 1
+WX_USER_SOURCE_UNSUBSCRIBE = 2
+WX_USER_SOURCE_SUBSCRIPTION = 3
+WX_USER_SOURCE_OAUTH = 4
+WX_USER_SOURCE_UPDATE_ALL = 5
+WX_USER_SOURCE_UPDATE_SHORT = 6
+WX_USER_SOURCE_OAUTH_UPDATE = 7
+WX_USER_SOURCE_SCAN = 8
+WX_USER_SOURCE_UPDATE_UNIONID = 9
+WX_USER_SOURCE_UPDATE_SYSUSER = 10
+WX_USER_SOURCE_UPDATE = 11
+WX_USER_SOURCE_IWANTYOU = 12 # 微信端我也要招人注册
+
+WX_USER_SUBSCRIBED = 1
+WX_USER_UNSUBSCRIBED = 0
 
 # 环境
 ENV = "new_wechat"
@@ -73,15 +89,39 @@ JD_TIME_FORMAT_YESTERDAY = "昨天 {:0>2}:{:0>2}"
 STATUS_INUSE = 1
 STATUS_UNUSE = 0
 
+# 页面 meta 属性
+PAGE_META_TITLE = "仟寻招聘"
+PAGE_POSITION_INFO = "职位详情"
+PAGE_COMPANY_INFO = "公司详情"
+PAGE_REGISTER = "注册"
+PAGE_FORGET_PASSWORD = "忘记密码"
+
+
 # ++++++++++REDIS KEYS++++++++
 SESSION_USER = "SESSION_USER_{0}_{1}"
 SESSION_ID = "{0}:{1}"
+# hr帐号的 session key
+SESSION_USER_HR_ACCOUNT = 'user_hr_account_{}'
+# hr平台绑定微信后的 pub/sub key
+SESSION_WX_BINDING = 'wx_binding_{}'
+# Email投递创建Redis格式(邮件解析, 提醒脚本都会用到)
+FORMAT_EMAIL_CREATE = "EMAIL_CREATE:{}"  #
+# C端用户监听频道
+CHAT_CHATROOM_CHANNEL = "chatroom_{0}_{1}"
+# HR聊天监听频道
+CHAT_HR_CHANNEL = "chatroom_{0}"
+# 进入聊天室标志位
+CHAT_CHATROOM_ENTER = "chat_sysuser_{}"
 
 # ++++++++++业务常量+++++++++++
 # Cookie name
-COOKIE_SESSIONID = "5E884838DA28047152D0E56F8DC6292773603D0D6AABBDD62A11EF721D1542D8"
-COOKIE_CODE = "JKKSDF89H43HIDJJ0NNBS17YH8O35321DGAF8655KKDWTYE082L1711209AAUC54"
+COOKIE_SESSIONID = "5MA8A989"
+COOKIE_MVIEWERID = "mviewer_id"
+COOKIE_CODE = "JKKSDF89"
 COOKIE_DEBUG_AUTH = "cda"
+COOKIE_MOBILE_CODE = "ER2T45YU"
+COOKIE_MOBILE_REGISTER = "E45645YU"
+MVIEWER_ID = "{0}:{1}"
 
 # Cache 相关常量
 VIEWER_TYPE_NEW = 1
@@ -90,6 +130,7 @@ VIEWER_TYPE_OLD = 0
 # API_STATUS
 API_SUCCESS = 0
 API_FAILURE = 1
+API_WARNING = 2
 
 # 通用状态的布尔值
 YES = 1
@@ -112,6 +153,7 @@ TEAMNAME_CUSTOM_DEFAULT = "团队"
 CANDIDATE_SOURCE = {
     "0": "社招",
     "1": "校招",
+    "2": "定向招聘"
 }
 
 # 工作性质
@@ -140,12 +182,25 @@ DEGREE = {
 POSITION_ABOVE = "及以上"
 EXPERIENCE_UNIT = "年"
 
+# 公司相关
+SCALE = {
+    "0": "",
+    "1": "少于15人",
+    "2": "15-50人",
+    "3": "50-150人",
+    "4": "150-500人",
+    "5": "500-1000人",
+    "6": "1000-5000人",
+    "7": "5000-10000人",
+    "8": "10000人以上",
+}
+
 # 默认图标
 SYSUSER_HEADIMG = "weixin/images/hr-avatar-default.png"
 HR_HEADIMG = "weixin/images/default-HR.png"
 COMPANY_HEADIMG = "common/images/default-company-logo.jpg"
 
-# 招聘进度全状态(对应hr_points_conf中template_id)
+# 招聘进度全状态(对应hr_points_conf 中 template_id)
 RECRUIT_STATUS_RECOMCLICK_ID = 7  # 转发被点击
 RECRUIT_STATUS_FULL_RECOM_INFO_ID = 13  # 完善被推荐人
 RECRUIT_STATUS_APPLY_ID = 1  # 提交简历成功
@@ -170,6 +225,39 @@ RP_POSITION_STATUS_NONE = 0
 RP_POSITION_STATUS_CLICK = 1
 RP_POSITION_STATUS_APPLY = 2
 RP_POSITION_STATUS_BOTH = 3
+
+# 国际编码列表
+NATIONAL_CODE = [
+    {'id': 1, 'code': '+86', 'country': '中国'}
+]
+
+MOBILE_CODE_OPT_TYPE = ObjectDict({
+    'code_register': 1,
+    'forget_password': 2,
+    'valid_old_mobile': 3,
+    'change_mobile': 4
+})
+
+# 简历导入
+RESUME_WAY_MOSEEKER_PC = "0"
+RESUME_WAY_MOSEEKER = "1"
+RESUME_WAY_51JOB = "2"
+RESUME_WAY_LIEPIN = "3"
+RESUME_WAY_ZHILIAN = "4"
+RESUME_WAY_LINKEDIN = "5"
+
+RESUME_WAY_SPIDER = {
+    RESUME_WAY_51JOB: "51job.html",
+    RESUME_WAY_ZHILIAN: "zhaopin.html",
+    RESUME_WAY_LIEPIN: "liepin.html"
+}
+
+RESUME_WAY_TO_INFRA = {
+    RESUME_WAY_51JOB: 1,
+    RESUME_WAY_LIEPIN: 2,
+    RESUME_WAY_ZHILIAN: 3,
+    RESUME_WAY_LINKEDIN: 4
+}
 
 # 新JD公司hr_cms_pages.type
 CMS_PAGES_TYPE_COMPANY_INDEX = 1
@@ -199,7 +287,9 @@ CMS_PAGES_RESOURCES_TYPE_VIDEO = 1
 
 # ============= 红包相关常量 =============
 # 红包锁字符串模版
-RP_LOCK_FMT = "rplock:%s:%s:%s"
+RP_POS_LOCK_FMT = "rplock_pos:%s:%s:%s"
+RP_EMP_LOCK_FMT = "rplock_emp:%s:%s"
+RP_RECOM_LOCK_FMT = "rplock_recom:%s:%s"
 RP_LOCKED = 1
 
 # RP_ITEM 状态常量
@@ -256,27 +346,99 @@ TEMPLATES = ObjectDict()
 TEMPLATES.RP_EMPLOYEE_BINDING = 44
 TEMPLATES.RP_RECOM = 9
 TEMPLATES.RP_SHARE = 25
-TEMPLATES.POSITION_VIEWED = 25  # 职位被查阅通知
+TEMPLATES.POSITION_VIEWED = 25 # 职位被查阅通知
+TEMPLATES.APPLY_NOTICE_TPL = 3  # 微信简历投递反馈通知
+TEMPLATES.NEW_RESUME_TPL = 24 # 新简历通知
+TEMPLATES.FAVPOSITION = 47 # 用户感兴趣后通知
+TEMPLATES.RECOM_NOTICE_TPL = 21  # 新候选人通知
+TEMPLATES.REFINE_EMPLOYEE_INFO_TPL = 44  # 员工认证自定义字段填写通知
+
+# 消息模板开关，控制企业号是否开启某种类型的消息模板发送，与TEMPLATES强对应
+TEMPLATES_SWITCH = ObjectDict()
+TEMPLATES_SWITCH.APPLY_NOTICE_TPL = 29 # 申请成功时 的消息通知ID
+TEMPLATES_SWITCH.NEW_RESUME_TPL = 41 # 认证员工转发之后后有人投递简历 的消息通知ID
+TEMPLATES_SWITCH.POSITION_VIEWED = 39  # 认证员工转发职位 10 分钟后有人查看 的消息通知ID
+TEMPLATES_SWITCH.REFINE_EMPLOYEE_INFO_TPL = 49  # 员工认证自定义字段填写通知
 
 WX_MESSAGE_TEMPLATE_SEND_TYPE_WEIXIN = 0
 WX_MESSAGE_TEMPLATE_SEND_TYPE_EMAIL = 1
 WX_MESSAGE_TEMPLATE_SEND_TYPE_SMS = 2
 
-SEND_RP_REQUEST_FORMAT = """
-<xml>
-<sign><![CDATA[{sign}]]></sign>
-<mch_billno><![CDATA[{mch_billno}]]></mch_billno>
-<mch_id><![CDATA[{mch_id}]]></mch_id>
-<wxappid><![CDATA[{wxappid}]]></wxappid>
-<send_name><![CDATA[{send_name}]]></send_name>
-<re_openid><![CDATA[{re_openid}]]></re_openid>
-<total_amount><![CDATA[{total_amount}]]></total_amount>
-<total_num><![CDATA[{total_num}]]></total_num>
-<wishing><![CDATA[{wishing}]]></wishing>
-<client_ip><![CDATA[{client_ip}]]></client_ip>
-<act_name><![CDATA[{act_name}]]></act_name>
-<remark><![CDATA[{remark}]]></remark>
-<nonce_str><![CDATA[{nonce_str}]]></nonce_str>
-</xml>
-"""
 # ============= 红包相关常量结束 =============
+
+# 常量 Parent code
+CONSTANT_PARENT_CODE = ObjectDict(
+    COMPANY_TYPE=1101,  # 公司类型
+    COMPANY_SCALE=1102,  # 公司规模
+    COMPANY_PROPERTY=1103,  # 公司性质
+    DEGREE_POSITION=2101,  # 公司职位要求学历
+    GENDER_POSITION=2102,  # 性别
+    JOB_TYPE=2103,  # 工作性质
+    EMPLOYMENT_TYPE=2104,  # 招聘类型
+    PRIVACY_POLICY=3101,  # 隐私策略
+    WORK_STATUS=3102,  # 工作状态
+    POLITIC_STATUS=3103,  # 政治面貌
+    DEGREE_USER=3104,  # 用户学历
+    WORK_INTENTION=3105,  # 求职意愿-工作类型
+    TIME_TO_BE_ON_BOARD=3106,  # 到岗时间
+    WORKDAYS_PER_WEEK=3107,  # 每周到岗时间
+    LANGUAGE_FRUENCY=3108,  # 语言能力-掌握程度
+    GENDER_USER=3109,  # 性别
+    MARRIAGE_STATUS=3110,  # 婚姻情况
+    ID_TYPE=3111,  # 证件类型
+    RECIDENCE_TYPE=3112,  # 户口类型
+    MAJOR_RANK=3113,  # 专业排名
+    CURRENT_SALARY_MONTH=3114,  # 当前月薪
+    CURRENT_SALARY_YEAR=3115,  # 当前年薪
+    CAN_ON_SITE=3116,  # 是否接受出差
+    WORK_ROTATION=3117,  # 选择班次
+    PROFILE_IMPORT_SOURCE=3118,  # Profile来源
+    PROFILE_SOURCE=3119,  # Profile创建来源
+    REGISTER_SOURCE=4101,  # 用户注册来源(source)
+)
+
+# hr_employee_cert_conf.auth_mode 的数据库枚举值
+EMPLOYEE_BIND_AUTH_MODE = ObjectDict(
+    DISABLE=0,
+    EMAIL=1,
+    CUSTOM=2,
+    EMAIL_OR_CUSTOM=4,
+    QUESTION=5,
+    EMAIL_OR_QUESTION=6
+)
+
+# user_employee.auth_method 的数据库枚举值
+USER_EMPLOYEE_AUTH_METHOD = ObjectDict(
+    EMAIL=0,
+    CUSTOM=1,
+    QUESTION=2
+)
+
+# 员工认证状态码
+# 和基础服务返回的状态码一致
+EMPLOYEE_BIND_STATUS_BINDED = 0
+EMPLOYEE_BIND_STATUS_UNBINDING = 1
+EMPLOYEE_BIND_STATUS_EMAIL_PENDING = 2
+
+# 1:微信企业端(正常), 2:微信企业端(我要投递), 3:微信企业端(我感兴趣),
+# 4:微信聚合端(正常), 5:微信聚合端(我要投递), 6:微信聚合端(我感兴趣),
+# 8:移动网页端(正常), 9:移动网页端(我要投递)
+# 100:微信企业端Email申请, 101:微信聚合端Email申请,
+# 150:微信企业端导入, 151:微信聚合端导入, 152:PC导入, 153:移动网页端导入
+# 200:PC(正常添加) 201:PC(我要投递) 202: PC(我感兴趣)',
+PROFILE_SOURCE_PLATFORM = 1
+PROFILE_SOURCE_PLATFORM_APPLY = 2
+PROFILE_SOURCE_QX = 4
+PROFILE_SOURCE_MOBILE_BROWSER = 8
+
+INFRA_ERROR_CODES = [1, -1, 99999]
+
+# mandrill
+MANDRILL_EMAIL_HEADER_LIMIT = 50
+
+# mandrill template_name
+KA_EMAIL_APPLICATION_INVITATION = "ka-email-application-invitation"
+NON_KA_EMAIL_APPLICATION_INVITATION = "non-ka-email-application-invitation"
+
+EMPLOYEE_CUSTOM_FIELD_REFINE_REDIRECT = 1
+EMPLOYEE_CUSTOM_FIELD_REFINE_TEMPLATE_MSG = 2

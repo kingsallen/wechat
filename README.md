@@ -1,5 +1,9 @@
 # 新微信项目
 
+测试：
+项目根目录下执行
+`make test`
+
 Python 代码以及风格问题(草稿)：
 http://wiki.moseeker.com/python-code-comments.md
 

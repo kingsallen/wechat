@@ -1,5 +1,8 @@
 # coding=utf-8
 
+"""
+NEED TO MAKE SURE ZKSERVER IS RUNNING ON LOCAL MACHINE WITH DEFAULT PORT
+"""
 
 import json
 import unittest
@@ -44,21 +47,24 @@ class TestBaseHandler(unittest.TestCase):
         verifyNoMoreInteractions(obj)
 
     def test_wechat_ios_env_info(self):
-        self.handler = BaseHandler(self.application, self.request, event='test_event')
+        self.handler = BaseHandler(
+            self.application, self.request, event='test_event')
         self.assertTrue(self.handler.in_wechat_ios)
         self.assertTrue(self.handler.in_wechat)
 
     def test_wechat_android_env_info(self):
         self.headers = HTTPHeaders({'User-Agent': 'MicroMessenger Android'})
         self.request.headers = self.headers
-        self.handler = BaseHandler(self.application, self.request, event='test_event')
+        self.handler = BaseHandler(
+            self.application, self.request, event='test_event')
         self.assertTrue(self.handler.in_wechat_android)
         self.assertTrue(self.handler.in_wechat)
 
     def test_outside_wechat_env_info(self):
         self.headers = HTTPHeaders({'User-Agent': 'Safari'})
         self.request.headers = self.headers
-        self.handler = BaseHandler(self.application, self.request, event='test_event')
+        self.handler = BaseHandler(
+            self.application, self.request, event='test_event')
         self.assertFalse(self.handler.in_wechat)
         self.assertEqual(self.handler._in_wechat, const.CLIENT_NON_WECHAT)
         self.assertEqual(self.handler._client_type, const.CLIENT_TYPE_UNKNOWN)
@@ -66,7 +72,8 @@ class TestBaseHandler(unittest.TestCase):
     def test_json_args(self):
         self.headers.add('Content-Type', 'application/json')
         self.request.body = json.dumps({'a': 1, 'b': 2})
-        self.handler = BaseHandler(self.application, self.request, event='test_event')
+        self.handler = BaseHandler(
+            self.application, self.request, event='test_event')
         self.assertDictEqual(self.handler.json_args, {'a': 1, 'b': 2})
 
 if __name__ == '__main__':

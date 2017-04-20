@@ -4,11 +4,9 @@ from dao.base import BaseDao
 
 
 class UserHrAccountDao(BaseDao):
-    def __init__(self, logger):
-        super(UserHrAccountDao, self).__init__(logger)
-
+    def __init__(self):
+        super(UserHrAccountDao, self).__init__()
         self.table = "user_hr_account"
-
         self.fields_map = {
             "id":              self.constant.TYPE_INT,
             "company_id":      self.constant.TYPE_INT,

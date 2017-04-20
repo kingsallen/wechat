@@ -4,78 +4,152 @@
 
 """基础服务 api 调用工具"""
 
-import tornado.httpclient
 import ujson
+from urllib.parse import urlencode
+
+import tornado.httpclient
 from tornado import gen
 from tornado.httputil import url_concat, HTTPHeaders
 
-from util.common import ObjectDict
-from setting import settings
 import conf.common as constant
-from app import env
-from app import logger
+from globals import env, logger
+from conf.common import INFRA_ERROR_CODES
+from setting import settings
+from util.common import ObjectDict
+from util.common.exception import InfraOperationError
+from util.tool.dict_tool import objectdictify
 
 
 @gen.coroutine
-def http_get(route, jdata, timeout=5):
-    ret = yield _async_http_get(route, jdata, timeout=timeout, method='GET')
-    raise gen.Return(ret)
+def http_get(route, jdata=None, timeout=5, infra=True):
+    ret = yield _async_http_get(route, jdata, timeout=timeout, method='GET',
+                                infra=infra)
+    return ret
 
 
 @gen.coroutine
-def http_delete(route, jdata, timeout=5):
-    ret = yield _async_http_get(route, jdata, timeout=timeout, method='DELETE')
-    raise gen.Return(ret)
+def http_delete(route, jdata=None, timeout=5, infra=True):
+    ret = yield _async_http_get(route, jdata, timeout=timeout, method='DELETE',
+                                infra=infra)
+    return ret
 
 
 @gen.coroutine
-def http_post(route, jdata, timeout=5):
-    ret = yield _async_http_post(route, jdata, timeout=timeout, method='POST')
-    raise gen.Return(ret)
+def http_post(route, jdata=None, timeout=5, infra=True):
+    ret = yield _async_http_post(route, jdata, timeout=timeout, method='POST',
+                                 infra=infra)
+    return ret
 
 
 @gen.coroutine
-def http_put(route, jdata, timeout=5):
-    ret = yield _async_http_post(route, jdata, timeout=timeout, method='PUT')
-    raise gen.Return(ret)
+def http_put(route, jdata=None, timeout=5, infra=True):
+    ret = yield _async_http_post(route, jdata, timeout=timeout, method='PUT',
+                                 infra=infra)
+    return ret
 
 
 @gen.coroutine
-def http_patch(route, jdata, timeout=5):
-    ret = yield _async_http_post(route, jdata, timeout=timeout, method='PATCH')
-    raise gen.Return(ret)
+def http_patch(route, jdata=None, timeout=5, infra=True):
+    ret = yield _async_http_post(route, jdata, timeout=timeout, method='PATCH',
+                                 infra=infra)
+    return ret
 
 
 @gen.coroutine
-def _async_http_get(route, jdata, timeout=5, method='GET'):
+def http_fetch(route, data=None, timeout=5):
+    """使用 www-form 形式 HTTP 异步 POST 请求
+    :param route:
+    :param data:
+    :param timeout:
+    """
+
+    if data is None:
+        data = ObjectDict()
+
+    tornado.httpclient.AsyncHTTPClient.configure(
+        "tornado.curl_httpclient.CurlAsyncHTTPClient")
+
+    http_client = tornado.httpclient.AsyncHTTPClient()
+
+    try:
+        http_request = tornado.httpclient.HTTPRequest(
+            route,
+            method='POST',
+            body=urlencode(data),
+            request_timeout=timeout)
+
+        response = yield http_client.fetch(http_request)
+        return response.body
+
+    except tornado.httpclient.HTTPError as e:
+        logger.warning("[http_fetch][url: {}][body: {}]".format(
+            route, ujson.encode(data)))
+        logger.warning("http_fetch httperror: {}".format(e))
+
+    return ObjectDict()
+
+
+def unboxing(http_response):
+    """标准 restful api 返回拆箱"""
+
+    result = bool(http_response.status == constant.API_SUCCESS)
+
+    if result:
+        data = http_response.data
+    else:
+        data = http_response
+    return result, data
+
+
+@gen.coroutine
+def _async_http_get(route, jdata=None, timeout=5, method='GET', infra=True):
     """可用 HTTP 动词为 GET 和 DELETE"""
     if method.lower() not in "get delete":
         raise ValueError("method is not in GET and DELETE")
 
-    # 指定 appid，必填
-    jdata.update({"appid": constant.APPID[env]})
+    if jdata is None:
+        jdata = ObjectDict()
 
-    url = url_concat("{0}/{1}".format(settings['infra'], route), jdata)
+    if infra:
+        jdata.update({"appid": constant.APPID[env]})
+        url = url_concat("{0}/{1}".format(settings['infra'], route), jdata)
+    else:
+        url = url_concat(route, jdata)
+
     http_client = tornado.httpclient.AsyncHTTPClient()
     response = yield http_client.fetch(
-        url, request_timeout=timeout, method=method.upper(),
-        headers=HTTPHeaders({"Content-Type": "application/json"}))
+        url,
+        method=method.upper(),
+        request_timeout=timeout,
+        headers=HTTPHeaders({"Content-Type": "application/json"})
+    )
 
-    logger.debug("[infra][_async_http_get][url: {}][ret: {}] ".format(url, ujson.decode(response.body)))
-    raise gen.Return(ObjectDict(ujson.decode(response.body)))
+    logger.debug("[infra][http_{}][url: {}][ret: {}] ".format(
+        method.lower(), url, ujson.decode(response.body)))
+
+    body = objectdictify(ujson.decode(response.body))
+    if infra and body.status in INFRA_ERROR_CODES:
+        raise InfraOperationError(body.message)
+
+    return body
 
 
 @gen.coroutine
-def _async_http_post(route, jdata, timeout=5, method='POST'):
+def _async_http_post(route, jdata=None, timeout=5, method='POST', infra=True):
     """可用 HTTP 动词为 POST, PATCH 和 PUT"""
     if method.lower() not in "post put patch":
         raise ValueError("method is not in POST, PUT and PATCH")
 
-    # 指定 appid，必填
-    jdata.update({"appid": constant.APPID[env]})
+    if jdata is None:
+        jdata = ObjectDict()
+
+    if infra:
+        jdata.update({"appid": constant.APPID[env]})
+        url = "{0}/{1}".format(settings['infra'], route)
+    else:
+        url = route
 
     http_client = tornado.httpclient.AsyncHTTPClient()
-    url = "{0}/{1}".format(settings['infra'], route)
     response = yield http_client.fetch(
         url,
         method=method.upper(),
@@ -83,41 +157,14 @@ def _async_http_post(route, jdata, timeout=5, method='POST'):
         request_timeout=timeout,
         headers=HTTPHeaders({"Content-Type": "application/json"})
     )
-    logger.debug("[infra][_async_http_post][url: {}][body: {}][ret: {}] ".format(url, ujson.encode(jdata), ujson.decode(response.body)))
-    raise gen.Return(ObjectDict(ujson.decode(response.body)))
 
+    logger.debug(
+        "[infra][http_{}][url: {}][body: {}][ret: {}] "
+        .format(method.lower(), url, ujson.encode(jdata),
+                ujson.decode(response.body)))
 
-@gen.coroutine
-def async_das_get(route, jdata, timeout=5, method='GET'):
-    """可用 HTTP 动词为 GET 和 DELETE
-    临时接 DAS 使用，后续迁移到基础服务"""
+    body = objectdictify(ujson.decode(response.body))
+    if infra and body.status in INFRA_ERROR_CODES:
+        raise InfraOperationError(body.message)
 
-    logger.debug("[infra][async_das_get][jdata: {}] ".format(jdata))
-    if method.lower() not in "get delete":
-        raise ValueError("method is not in GET and DELETE")
-
-    url = url_concat("{0}/{1}".format(settings['das'], route), jdata)
-    logger.debug("[infra][async_das_get][url: {}] ".format(url))
-    http_client = tornado.httpclient.AsyncHTTPClient()
-    response = yield http_client.fetch(
-        url, request_timeout=timeout, method=method.upper())
-
-    logger.debug("[infra][async_das_get][url: {}][ret: {}] ".format(url, ujson.decode(response.body)))
-    raise gen.Return(ObjectDict(ujson.decode(response.body)))
-
-
-@gen.coroutine
-def async_das_post(route, jdata, timeout=5):
-    """临时接 DAS 使用，后续迁移到基础服务"""
-
-    http_client = tornado.httpclient.AsyncHTTPClient()
-    url = "{0}/{1}".format(settings['das'], route),
-    response = yield http_client.fetch(
-        url,
-        method="POST",
-        body=ujson.encode(jdata),
-        request_timeout=timeout,
-    )
-
-    logger.debug("[infra][_async_http_post][url: {}][body: {}][ret: {}] ".format(url, ujson.encode(jdata), ujson.decode(response.body)))
-    raise gen.Return(ObjectDict(ujson.decode(response.body)))
+    return body

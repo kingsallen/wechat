@@ -74,5 +74,5 @@ def decode_id(inputs, length=10):
 if __name__ == '__main__':
 
     print (encode_id(13232))
-    print (decode_id("0t3xx2xxxe"))
-    print (decode_id("0t3xx2exxe5"))
+    print (decode_id("N3exxxxxxe"))
+    # print (decode_id("0t3xx2exxe5"))

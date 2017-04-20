@@ -23,8 +23,8 @@ class HrPointsConfDataService(DataService):
         options = options or []
         appends = appends or []
 
-        if conds is None or not (isinstance(conds, dict) or isinstance(conds, str)):
-            self.logger.warn("Warning:[get_points_conf][invalid parameters], Detail:[conds: {0}, "
+        if conds is None or not (isinstance(conds, (dict, str))):
+            self.logger.warning("Warning:[get_points_conf][invalid parameters], Detail:[conds: {0}, "
                         "type: {1}]".format(conds, type(conds)))
             raise gen.Return(ObjectDict())
 

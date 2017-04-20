@@ -5,8 +5,8 @@ from dao.base import BaseDao
 
 
 class HrHbPositionBindingDao(BaseDao):
-    def __init__(self, logger):
-        super(HrHbPositionBindingDao, self).__init__(logger)
+    def __init__(self):
+        super(HrHbPositionBindingDao, self).__init__()
         self.table = "hr_hb_position_binding"
         self.fields_map = {
             "id":           self.constant.TYPE_INT,

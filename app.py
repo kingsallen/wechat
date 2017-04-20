@@ -26,21 +26,16 @@ shell commond::
 import tornado.httpserver
 import tornado.web
 import tornado.ioloop
-import tornado.options
+import tornado.concurrent
 from tornado.options import options
 
 from setting import settings
 import conf.common as constant
-
+import tornado.options
 from route import platform_routes, qx_routes, help_routes
-from util.common.log import MessageLogger
-from util.common.cache import BaseRedis
+from handler.common.navmenu import NavMenuModule
 
-tornado.options.parse_command_line()
-logger = MessageLogger(logpath=options.logpath)
-redis = BaseRedis()
-env = options.env
-
+from globals import env, logger, redis
 
 class Application(tornado.web.Application):
 
@@ -57,6 +52,10 @@ class Application(tornado.web.Application):
         self.logger = logger
         self.env = env
         self.redis = redis
+        self.ui_modules.update({
+            'NavMenu': NavMenuModule
+        })
+        self._executor = tornado.concurrent.futures.ThreadPoolExecutor(10)
 
 
 def make_app():
@@ -66,7 +65,9 @@ def make_app():
 
 
 def main():
+    tornado.options.parse_command_line()
     application = make_app()
+
     try:
         logger.info('Wechat server starting on port: {0}'.format(options.port))
         http_server = tornado.httpserver.HTTPServer(application, xheaders=True)

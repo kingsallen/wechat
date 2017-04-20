@@ -1,4 +1,4 @@
-# -*- coding=utf-8 -*-
+# coding=utf-8
 # Copyright 2016 MoSeeker
 
 """
@@ -9,20 +9,27 @@
 import ujson
 
 from tornado import gen
-from util.common import ObjectDict
-from util.common.decorator import check_sub_company
+
+import conf.common as const
 from handler.base import BaseHandler
 from tests.dev_data.user_company_config import COMPANY_CONFIG
-from util.common.decorator import handle_response
-from handler.help.newjd_status_check import NewJDStatusCheckerRedirect
+from util.common import ObjectDict
+from util.common.decorator import check_sub_company, handle_response, \
+    authenticated, NewJDStatusCheckerRedirect
+from util.tool.str_tool import add_item
 
 
 class CompanyVisitReqHandler(BaseHandler):
     @handle_response
     @check_sub_company
+    @authenticated
     @gen.coroutine
     def post(self):
-        self.guarantee('status')
+        try:
+            self.guarantee('status')
+        except:
+            raise gen.Return()
+
         result = yield self.user_company_ps.set_visit_company(
             current_user=self.current_user, param=self.params)
 
@@ -35,9 +42,14 @@ class CompanyVisitReqHandler(BaseHandler):
 class CompanyFollowHandler(BaseHandler):
     @handle_response
     @check_sub_company
+    @authenticated
     @gen.coroutine
     def post(self):
-        self.guarantee('status')
+        try:
+            self.guarantee('status')
+        except:
+            raise gen.Return()
+
         result = yield self.user_company_ps.set_company_follow(
             current_user=self.current_user, param=self.params)
 
@@ -48,6 +60,8 @@ class CompanyFollowHandler(BaseHandler):
 
 
 class CompanyHandler(BaseHandler):
+    """公司详情页新样式"""
+
     @NewJDStatusCheckerRedirect()
     @handle_response
     @check_sub_company
@@ -60,16 +74,14 @@ class CompanyHandler(BaseHandler):
             self.params, company, self.current_user)
 
         self.params.share = self._share(company)
-
         self.render_page(template_name='company/profile.html', data=data)
-        return
 
     def _share(self, company):
         company_name = company.abbreviation or company.name
         default = ObjectDict({
             'cover': self.static_url(company.get('logo', '')),
-            'title': u'关于{}, 你想知道的都在这里'.format(company_name),
-            'description': u'这可能是你人生的下一站! 看清企业全局, 然后定位自己',
+            'title': '关于{}, 你想知道的都在这里'.format(company_name),
+            'description': '这可能是你人生的下一站! 看清企业全局, 然后定位自己',
             'link': self.fullurl
         })
         # 玛氏定制
@@ -80,12 +92,45 @@ class CompanyHandler(BaseHandler):
         return default
 
 
+class CompanyInfoHandler(BaseHandler):
+    """公司详情页老样式"""
+
+    @handle_response
+    @gen.coroutine
+    def get(self, did):
+
+        company_info = yield self.company_ps.get_company(
+            conds={"id": did}, need_conf=True)
+
+        company_data = ObjectDict()
+        company = ObjectDict({
+            "abbreviation": company_info.abbreviation,
+            "name": company_info.name,
+            "logo": self.static_url(company_info.logo),
+            "industry": company_info.industry,
+            "scale_name": company_info.scale_name,
+            "homepage": company_info.homepage,
+            "introduction": company_info.introduction,
+            "impression": company_info.impression_processed
+        })
+
+        add_item(company_data, "company", company)
+        self.render_page(
+            template_name='company/info_old.html',
+            data=company_data,
+            meta_title=const.PAGE_COMPANY_INFO)
+
+
 class CompanySurveyHandler(BaseHandler):
     @handle_response
+    @authenticated
     @gen.coroutine
     def post(self):
         """处理用户填写公司 survey 的 post api 请求"""
-        self.guarantee('selected', 'other')
+        try:
+            self.guarantee('selected', 'other')
+        except:
+            raise gen.Return()
 
         _company_id = self.current_user.company.id
         _sysuser_id = self.current_user.sysuser.id

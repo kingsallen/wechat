@@ -15,7 +15,7 @@ class HrWxWechatDataService(DataService):
     def get_wechat(self, conds, fields=None):
 
         if not self._valid_conds(conds):
-            self.logger.warn("Warning:[get_wechat][invalid parameters], Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
+            self.logger.warning("Warning:[get_wechat][invalid parameters], Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
             raise gen.Return(ObjectDict())
 
         if not fields:

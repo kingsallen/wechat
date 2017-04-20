@@ -14,8 +14,8 @@ from dao.base import BaseDao
 
 class JobCustomDao(BaseDao):
 
-    def __init__(self, logger):
-        super(JobCustomDao, self).__init__(logger)
+    def __init__(self):
+        super(JobCustomDao, self).__init__()
         self.table = "job_custom"
         self.fields_map = {
             "id":             self.constant.TYPE_INT,

@@ -17,10 +17,12 @@ import glob
 import importlib
 import re
 
+from globals import logger
 import conf.common as constant
 import conf.help as help_constant
 import conf.platform as plat_constant
 import conf.qx as qx_constant
+import conf.path as path
 from setting import settings
 from util.common.singleton import Singleton
 
@@ -29,12 +31,13 @@ class DataService:
 
     __metaclass__ = Singleton
 
-    def __init__(self, logger):
+    def __init__(self):
         self.logger = logger
         self.constant = constant
         self.plat_constant = plat_constant
         self.qx_constant = qx_constant
         self.help_constant = help_constant
+        self.path = path
 
         for module in self._search_path():
             p = module.split("/")[-2]
@@ -44,7 +47,8 @@ class DataService:
             pm_obj = m + "_dao"
             klass = getattr(
                 importlib.import_module('dao.{0}.{1}'.format(p, m)), pm_dao)
-            instance = klass(self.logger)
+            instance = klass()
+
             setattr(self, pm_obj, instance)
 
     @staticmethod
@@ -52,7 +56,7 @@ class DataService:
         ret = False
         if not conds:
             return ret
-        return isinstance(conds, dict) or isinstance(conds, str)
+        return isinstance(conds, (dict, str))
 
     @staticmethod
     def _search_path():

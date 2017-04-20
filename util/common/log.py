@@ -1,15 +1,12 @@
 # coding=utf-8
 
-# Copyright 2016 MoSeeker
-
 import logging
-import traceback
 import os
 from logging.handlers import TimedRotatingFileHandler
-from util.common.elk import RedisELK
-from util.common.alarm import Alarm
 
 from tornado.log import gen_log
+
+from util.common.elk import RedisELK
 
 # --------------------------------------------------------------------------
 #  Configurations
@@ -118,27 +115,21 @@ class MessageLogger(Logger):
 
     def debug(self, message):
         super(MessageLogger, self).debug(message)
-        # TODO (tangyiliang) debug log 不使用 elk
-        # self.impl.send_message("debug", message)
 
     def info(self, message):
         super(MessageLogger, self).info(message)
-        # TODO (tangyiliang) info log 不使用 elk
-        # self.impl.send_message("info", message)
 
     def warning(self, message):
         super(MessageLogger, self).warning(message)
-        self.impl.send_message("warn", message)
 
     def warn(self, message):
         self.warning(message)
 
     def error(self, message):
         super(MessageLogger, self).error(message)
-        self.impl.send_message("error", message)
         # error 及时报警
-        Alarm.biu(message)
-        Alarm.biu(traceback.format_exc())
+        # Alarm.biu(message)
+        # Alarm.biu(traceback.format_exc())
 
     def stats(self, message):
         super(MessageLogger, self).stats(message)

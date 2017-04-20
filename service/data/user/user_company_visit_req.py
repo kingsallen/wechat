@@ -1,4 +1,4 @@
-# -*- coding=utf-8 -*-
+# coding=utf-8
 # Copyright 2016 MoSeeker
 
 """
@@ -15,17 +15,13 @@ from util.common import ObjectDict
 class UserCompanyVisitReqDataService(DataService):
 
     @gen.coroutine
-    def get_visit_cmpy(self, conds, fields=[]):
+    def get_visit_cmpy(self, conds, fields=None):
+        fields = fields or []
         if not self._valid_conds(conds):
             raise gen.Return(ObjectDict())
         if not fields:
             fields = self.user_company_visit_req_dao.fields_map.keys()
-        try:
-            response = yield self.user_company_visit_req_dao.get_list_by_conds(
-                conds, fields)
-        except Exception as error:
-            self.logger.warn(error)
-            raise gen.Return(ObjectDict())
+        response = yield self.user_company_visit_req_dao.get_list_by_conds(conds, fields)
 
         raise gen.Return(response)
 
@@ -35,7 +31,7 @@ class UserCompanyVisitReqDataService(DataService):
             response = self.user_company_visit_req_dao.update_by_conds(
                             conds, fields)
         except Exception as error:
-            self.logger.warn(error)
+            self.logger.warning(error)
             raise gen.Return(False)
 
         raise gen.Return(response)
@@ -45,7 +41,7 @@ class UserCompanyVisitReqDataService(DataService):
         try:
             response = yield self.user_company_visit_req_dao.insert_record(fields)
         except Exception as error:
-            self.logger.warn(error)
+            self.logger.warning(error)
             raise gen.Return(None)
 
         raise gen.Return(response)

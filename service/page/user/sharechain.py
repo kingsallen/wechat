@@ -1,6 +1,5 @@
 # coding=utf-8
 
-
 import tornado.gen as gen
 
 import conf.common as const
@@ -10,8 +9,8 @@ from util.tool.date_tool import curr_now
 
 class SharechainPageService(PageService):
 
-    def __init__(self, logger):
-        super().__init__(logger)
+    def __init__(self):
+        super().__init__()
 
     @gen.coroutine
     def refresh_share_chain(self,
@@ -408,8 +407,8 @@ class SharechainPageService(PageService):
                 "position_id": position_id,
                 "presentee_user_id": presentee_user_id
             },
-            appends=['order by click_time desc',
-                     'limit 1'])
+            appends=['ORDER BY click_time DESC',
+                     'LIMIT 1'])
         if parent_share_chain:
             raise gen.Return(parent_share_chain.id)
         else:

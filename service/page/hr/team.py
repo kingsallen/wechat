@@ -1,4 +1,4 @@
-# -*- coding=utf-8 -*-
+# coding=utf-8
 # Copyright 2016 MoSeeker
 
 """
@@ -6,17 +6,21 @@
 :date 2016.11.18
 
 """
-import json
-from util.common import ObjectDict
 from tornado import gen
+
+from conf import path
 from service.page.base import PageService
+from tests.dev_data.user_company_config import COMPANY_CONFIG
+from util.common import ObjectDict
 from util.tool import temp_data_tool
 from util.tool.url_tool import make_url
-from tests.dev_data.user_company_config import COMPANY_CONFIG
-from conf import path
 
 
 class TeamPageService(PageService):
+
+    def __init__(self):
+        super().__init__()
+
     @gen.coroutine
     def get_sub_company(self, sub_company_id):
         sub_company = yield self.hr_company_ds.get_company(

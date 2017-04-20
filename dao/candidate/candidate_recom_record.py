@@ -4,8 +4,8 @@ from dao.base import BaseDao
 
 
 class CandidateRecomRecordDao(BaseDao):
-    def __init__(self, logger):
-        super(CandidateRecomRecordDao, self).__init__(logger)
+    def __init__(self):
+        super(CandidateRecomRecordDao, self).__init__()
         self.table = "candidate_recom_record"
         self.fields_map = {
             "id":           self.constant.TYPE_INT,

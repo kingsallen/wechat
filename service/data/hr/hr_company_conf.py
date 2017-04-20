@@ -9,12 +9,14 @@ from util.common import ObjectDict
 
 class HrCompanyConfDataService(DataService):
 
-    @cache(ttl=60)
+    @cache(ttl=300)
     @gen.coroutine
-    def get_company_conf(self, conds, fields=[]):
+    def get_company_conf(self, conds, fields=None):
 
-        if conds is None or not (isinstance(conds, dict) or isinstance(conds, str)):
-            self.logger.warn("Warning:[get_company_conf][invalid parameters], Detail:[conds: {0}, "
+        fields = fields or []
+
+        if conds is None or not (isinstance(conds, (dict, str))):
+            self.logger.warning("Warning:[get_company_conf][invalid parameters], Detail:[conds: {0}, "
                         "type: {1}]".format(conds, type(conds)))
             raise gen.Return(ObjectDict())
 

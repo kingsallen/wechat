@@ -1,4 +1,4 @@
-# -*- coding=utf-8 -*-
+# coding=utf-8
 # Copyright 2016 MoSeeker
 
 """
@@ -12,8 +12,8 @@ from dao.base import BaseDao
 
 
 class HrTeamMemberDao(BaseDao):
-    def __init__(self, logger):
-        super(HrTeamMemberDao, self).__init__(logger)
+    def __init__(self):
+        super(HrTeamMemberDao, self).__init__()
         self.table = "hr_team_member"
         self.fields_map = {
             "id": self.constant.TYPE_INT,

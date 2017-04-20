@@ -17,7 +17,7 @@ class CandidateRecomRecordDataService(DataService):
         index = index or ''
 
         if not self._valid_conds(conds):
-            self.logger.warn(
+            self.logger.warning(
                 "Warning:[get_candidate_recom_record][invalid parameters], Detail:["
                 "conds: {0}, type: {1}]".format(
                     conds, type(conds)))
@@ -39,3 +39,16 @@ class CandidateRecomRecordDataService(DataService):
         response = yield self.candidate_recom_record_dao.insert_record(fields,
                                                                    options)
         raise gen.Return(response)
+
+    @gen.coroutine
+    def update_candidate_recom_record(self, conds=None, fields=None):
+        if not conds or not fields:
+            self.logger.warning(
+                "Warning:[update_candidate_recom_record][invalid parameters], Detail:[conds: {0}, fields: {1}]".format(conds, fields))
+            raise gen.Return(False)
+
+        ret = yield self.candidate_recom_record_dao.update_by_conds(
+            conds=conds,
+            fields=fields)
+
+        raise gen.Return(ret)

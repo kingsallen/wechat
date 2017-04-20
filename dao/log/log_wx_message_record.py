@@ -4,8 +4,8 @@ from dao.base import BaseDao
 
 
 class LogWxMessageRecordDao(BaseDao):
-    def __init__(self, logger):
-        super(LogWxMessageRecordDao, self).__init__(logger)
+    def __init__(self):
+        super(LogWxMessageRecordDao, self).__init__()
         self.table = "log_wx_message_record"
         self.fields_map = {
             "id":           self.constant.TYPE_INT,

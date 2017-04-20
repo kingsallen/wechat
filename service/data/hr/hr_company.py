@@ -9,12 +9,14 @@ from util.common import ObjectDict
 
 class HrCompanyDataService(DataService):
 
-    @cache(ttl=60)
+    @cache(ttl=300)
     @gen.coroutine
-    def get_company(self, conds, fields=[]):
+    def get_company(self, conds, fields=None):
 
-        if conds is None or not (isinstance(conds, dict) or isinstance(conds, str)):
-            self.logger.warn("Warning:[get_company][invalid parameters], Detail:[conds: {0}, "
+        fields = fields or []
+
+        if conds is None or not (isinstance(conds, (dict, str))):
+            self.logger.warning("Warning:[get_company][invalid parameters], Detail:[conds: {0}, "
                         "type: {1}]".format(conds, type(conds)))
             raise gen.Return(ObjectDict())
 
@@ -24,12 +26,16 @@ class HrCompanyDataService(DataService):
         response = yield self.hr_company_dao.get_record_by_conds(conds, fields)
         raise gen.Return(response)
 
-    @cache(ttl=60)
+    @cache(ttl=300)
     @gen.coroutine
-    def get_companys_list(self, conds, fields, options=[], appends=[], index='', params=[]):
+    def get_companys_list(self, conds, fields, options=None, appends=None, index='', params=None):
 
-        if conds is None or not (isinstance(conds, dict) or isinstance(conds, str)):
-            self.logger.warn("Warning:[get_companys_list][invalid parameters], Detail:[conds: {0}, "
+        options = options or []
+        appends = appends or []
+        params = params or []
+
+        if conds is None or not (isinstance(conds, (dict, str))):
+            self.logger.warning("Warning:[get_companys_list][invalid parameters], Detail:[conds: {0}, "
                         "type: {1}]".format(conds, type(conds)))
             raise gen.Return(list())
 
