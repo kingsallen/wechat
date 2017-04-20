@@ -4,6 +4,7 @@ from tornado import gen
 
 from service.page.base import PageService
 import conf.common as const
+from service.page.user.user import UserPageService
 from util.common import ObjectDict
 from util.common.cipher import encode_id
 from util.tool.date_tool import jd_update_date, str_2_date
@@ -183,12 +184,7 @@ class PositionPageService(PageService):
         raise gen.Return(pos_recommends)
 
     @gen.coroutine
-    def add_reward_for_recom_click(self,
-                                   employee,
-                                   company_id,
-                                   berecom_wxuser_id,
-                                   berecom_user_id,
-                                   position_id):
+    def add_reward_for_recom_click(self, employee, company_id, berecom_wxuser_id, berecom_user_id, position_id):
         """转发被点击添加积分"""
 
         points_conf = yield self.hr_points_conf_ds.get_points_conf(conds={
@@ -204,30 +200,15 @@ class PositionPageService(PageService):
 
         # 转发被点击添加积分，同一个职位，相同的人点击多次不加积分
         if not click_record:
-            yield self.user_employee_points_record_ds.create_user_employee_points_record(fields={
-                "employee_id": employee.id,
-                "reason": points_conf.status_name,
-                "award": points_conf.reward,
-                "recom_wxuser": employee.wxuser_id,
-                "recom_user_id": employee.sysuser_id,
-                "berecom_wxuser_id": berecom_wxuser_id,
-                "berecom_user_id": berecom_user_id,
-                "position_id": position_id,
-                "award_config_id": points_conf.id,
-            })
-
-            # 更新员工的积分
-            employee_sum = yield self.user_employee_points_record_ds.get_user_employee_points_record_sum(conds={
-                "employee_id": employee.id
-            }, fields=["award"])
-
-            if employee_sum.sum_award:
-                yield self.user_employee_ds.update_employee(conds={
-                    "id": employee.id,
-                    "company_id": company_id,
-                }, fields={
-                    "award": int(employee_sum.sum_award),
-                })
+            be_recom_wxuser = yield self.user_wx_user_ds.get_wxuser(id=berecom_wxuser_id)
+            user_ps = UserPageService()
+            yield user_ps.employee_add_reward(
+                employee_id=employee.id,
+                company_id=company_id,
+                position_id=position_id,
+                be_recom_wxuser=be_recom_wxuser,
+                award_type=const.EMPLOYEE_AWARD_TYPE_SHARE_CLICK
+            )
 
     @gen.coroutine
     def get_cms_page(self, team_id):

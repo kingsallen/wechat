@@ -495,3 +495,68 @@ class UserPageService(PageService):
             user_id, banner_url, privacy_policy)
 
         return http_tool.unboxing(res)
+
+    @gen.coroutine
+    def employee_add_reward(self, employee_id, company_id, position_id,
+                            be_recom_wxuser, award_type=const.EMPLOYEE_AWARD_TYPE_DEFAULT_ERROR, **kw):
+        """给员工添加积分的公共方法
+        所有给员工添加积分的动作，都要走这个方法！
+        """
+
+        # 校验 award_type:
+        if award_type == const.EMPLOYEE_AWARD_TYPE_DEFAULT_ERROR:
+            self.logger.warn("award_type is not specified, return")
+            return
+
+        if award_type == const.EMPLOYEE_AWARD_TYPE_SHARE_APPLY and not kw.get('application_id'):
+            self.logger.warn("application_id not specified, return")
+            return
+
+        # 校验员工
+        employee = yield self.user_employee_ds.get_employee({
+            'id':         employee_id,
+            'activation': const.OLD_YES,
+            'disable':    const.OLD_YES
+        })
+        if not employee:
+            return
+
+        # 获取积分模版对应的所需增加积分数 award_points
+        type_templateid_mapping = {
+            const.EMPLOYEE_AWARD_TYPE_SHARE_CLICK: const.RECRUIT_STATUS_RECOMCLICK_ID,
+            const.EMPLOYEE_AWARD_TYPE_SHARE_APPLY: const.RECRUIT_STATUS_APPLY_ID,
+            const.EMPLOYEE_AWARD_TYPE_RECOM: const.RECRUIT_STATUS_FULL_RECOM_INFO_ID
+        }
+        template_id = type_templateid_mapping.get(award_type)
+        if not template_id:
+            raise ValueError("invalid employee_award_type: %s" % award_type)
+
+        points_conf = yield self.hr_points_conf_ds.get_points_conf(
+            conds={"company_id":  company_id, "template_id": template_id },
+            appends=["ORDER BY id DESC", "LIMIT 1"]
+        )
+        award_points = points_conf.reward
+
+        # 插入积分数据 user_employee_points_record
+        fields = {
+            "employee_id":       employee_id,
+            "application_id":    kw['application_id'] if award_type == const.EMPLOYEE_AWARD_TYPE_SHARE_APPLY else 0,
+            "reason":            points_conf.status_name,
+            "award":             award_points,
+            "position_id":       position_id,
+            "award_config_id":   points_conf.id,
+            "recom_wxuser":      employee.wxuser_id,
+            "recom_user_id":     employee.sysuser_id,
+            "be_recom_user_id":  be_recom_wxuser.sysuser_id,
+            "berecom_wxuser_id": be_recom_wxuser.id
+        }
+        yield self.user_employee_points_record_ds.create_user_employee_points_record(
+            fields=fields
+        )
+
+        # 修改 user_employee.award
+        yield self.user_employee_ds.update_employee(
+            conds={'id': employee_id},
+            fields={'award': int(employee.award + award_points)}
+        )
+        return
