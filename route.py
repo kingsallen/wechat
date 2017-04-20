@@ -44,6 +44,7 @@ import handler.platform.employee
 import handler.platform.landing
 import handler.platform.position
 import handler.platform.team
+import handler.platform.recom
 
 import handler.qx.wechat_oauth
 
@@ -78,7 +79,6 @@ common_routes = [
     (r"/m/api/profile/edit[\/]?",                      handler.common.profile.ProfileSectionHandler,              {"event": "profile_section"}),
     (r"/m/api/profile/new[\/]?",                       handler.common.profile.ProfileNewHandler,                  {"event": "profile_new"}),
 
-
     # websocket
     (r"/m/websocket/([A-Za-z0-9_]{1,32})",             handler.common.im.ChatWebSocketHandler),
 
@@ -87,6 +87,7 @@ common_routes = [
     (r"/m/api/chat/unread[\/]*([0-9]+)*",              handler.common.im.UnreadCountHandler,                      {"event": "chat_"}),
     (r"/m/api/mobilebinded",                           handler.common.usercenter.UserMobileBindedHandler,         {"event": "user_usermobilebinded"}),
     (r"/m/api/cellphone[\/]*([a-z]+)*",                handler.common.cellphone.CellphoneBindHandler,             {"event": "cellphone_"}),
+    (r"/m/api/user/currentinfo/update",                handler.common.interest.UserCurrentUpdateHandler,          {"event": "user_currentupdate"}),
     (r"/m/api/user/currentinfo",                       handler.common.interest.UserCurrentInfoHandler,            {"event": "user_currentinfo"}),
     (r"/m/api/upload/([a-z_]*)",                       handler.common.usercenter.UploadHandler,                   {"event": "image_"}),
     (r"/m/api/usercenter/favpositions",                handler.common.usercenter.FavPositionHandler,              {"event": "usercenter_favpositions"}),
@@ -118,6 +119,8 @@ platform_routes = [
     (r"/m/employee/bindemail[\/]?",                    handler.platform.employee.EmployeeBindEmailHandler,        {"event": "employee_bindemail"}),
     (r"/m/employee/custominfo[\/]?",                   handler.platform.employee.CustomInfoHandler,               {"event": "employee_custominfo"}),
     (r"/m/employee/binded[\/]?",                       handler.platform.employee.BindedHandler,                   {"event": "employee_binded"}),
+    (r"/m/employee/recom/ignore[\/]?",                 handler.platform.recom.RecomIgnoreHandler,                 {"event": "recom_ignore"}),
+    (r"/m/employee/recom[\/]?",                        handler.platform.recom.RecomCandidateHandler,              {"event": "recom_normal"}),
 
     # 各大公司的自定义配置
     (r"/m/custom/emailapply[\/]?",                     handler.platform.customize.CustomizeEmailApplyHandler,     {"event": "customize_emailapply"}),

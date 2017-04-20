@@ -1,6 +1,5 @@
 # coding=utf-8
 
-
 """
 说明:
 constant配置常量规范：
@@ -12,7 +11,9 @@ constant配置常量规范：
 常量使用大写字母
 例如 SUCCESS = "成功"
 """
+
 from util.common import ObjectDict
+import enum
 
 # ++++++++++系统常量++++++++++
 
@@ -406,6 +407,13 @@ EMPLOYEE_BIND_AUTH_MODE = ObjectDict(
     EMAIL_OR_QUESTION=6
 )
 
+# user_employee.auth_method 的数据库枚举值
+USER_EMPLOYEE_AUTH_METHOD = ObjectDict(
+    EMAIL=0,
+    CUSTOM=1,
+    QUESTION=2
+)
+
 # 员工认证状态码
 # 和基础服务返回的状态码一致
 EMPLOYEE_BIND_STATUS_BINDED = 0
@@ -420,6 +428,8 @@ EMPLOYEE_BIND_STATUS_EMAIL_PENDING = 2
 # 200:PC(正常添加) 201:PC(我要投递) 202: PC(我感兴趣)',
 PROFILE_SOURCE_PLATFORM = 1
 PROFILE_SOURCE_PLATFORM_APPLY = 2
+PROFILE_SOURCE_QX = 4
+PROFILE_SOURCE_MOBILE_BROWSER = 8
 
 INFRA_ERROR_CODES = [1, -1, 99999]
 
@@ -429,7 +439,6 @@ MANDRILL_EMAIL_HEADER_LIMIT = 50
 # mandrill template_name
 KA_EMAIL_APPLICATION_INVITATION = "ka-email-application-invitation"
 NON_KA_EMAIL_APPLICATION_INVITATION = "non-ka-email-application-invitation"
-
 
 EMPLOYEE_CUSTOM_FIELD_REFINE_REDIRECT = 1
 EMPLOYEE_CUSTOM_FIELD_REFINE_TEMPLATE_MSG = 2

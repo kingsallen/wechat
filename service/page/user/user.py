@@ -280,7 +280,7 @@ class UserPageService(PageService):
         :param qx_wxuserid:
         :return:
         """
-        hb_config_list = yield self.hr_hb_config_ds.get_hr_hb_config({
+        hb_config_list = yield self.hr_hb_config_ds.get_hr_hb_config_list({
             'company_id': company_id,
             'type': 1
         })
@@ -288,11 +288,13 @@ class UserPageService(PageService):
         if not hb_config_list:
             return 0
 
-        hb_config_ids = set([e.id for e in hb_config_list])
+        hb_config_ids = [e.id for e in hb_config_list]
 
         hb_items_sum = yield self.hr_hb_items_ds.get_hb_items_amount_sum(
-            conds={ "wxuser_id": qx_wxuserid }, fields=['amount'],
-            appends="hb_config_id in %s" % str_tool.set_literl(hb_config_ids))
+            conds={ "wxuser_id": qx_wxuserid },
+            fields=['amount'],
+            appends=[" and hb_config_id in %s" % str_tool.set_literl(hb_config_ids)]
+        )
 
         return hb_items_sum.sum_amount if hb_items_sum.sum_amount else 0
 
@@ -308,11 +310,11 @@ class UserPageService(PageService):
         kwargs = ObjectDict(kwargs)
         fields = {}
         if kwargs.email:
-            fields.update(email=kwargs.email)
+            fields.update(email=str(kwargs.email))
         if kwargs.mobile:
-            fields.update(mobile=kwargs.mobile)
+            fields.update(mobile=int(kwargs.mobile))
         if kwargs.name:
-            fields.update(name=kwargs.name)
+            fields.update(name=str(kwargs.name))
         self.logger.debug(fields)
 
         ret = 0

@@ -4,16 +4,12 @@
 
 from tornado import gen
 
-import conf.message as mes_const
-
 from service.data.base import DataService
 from util.common.decorator import cache
-from util.common import ObjectDict
 from util.common import ObjectDict
 
 class UserUserDataService(DataService):
 
-    @cache(ttl=60)
     @gen.coroutine
     def get_user(self, conds, fields=None):
 

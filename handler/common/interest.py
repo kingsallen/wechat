@@ -44,31 +44,13 @@ class UserCurrentInfoHandler(BaseHandler):
         else:
             self.send_json_success(data=const.NO)
 
-    @handle_response
-    @authenticated
-    @gen.coroutine
-    def post(self):
-        """更新用户现在公司和现在职位接口
-        """
-        try:
-            self.guarantee('name', 'company', 'position')
-        except:
-            return
-
-        yield self.user_ps.update_user_user_current_info(
-            sysuser_id=self.current_user.sysuser.id,
-            data=self.params
-        )
-
-        self.send_json_success()
-
     @gen.coroutine
     def _opt_fav_position(self, has_info):
         """处理感兴趣后的业务逻辑"""
 
         if self.params.pid:
             # 1.添加感兴趣记录
-            yield self.user_ps.add_user_fav_position(self.params.pid,
+            yield self.user_ps.add_user_fav_position(int(self.params.pid),
                                                          self.current_user.sysuser.id,
                                                          const.FAV_INTEREST,
                                                          self.current_user.sysuser.mobile,
@@ -82,7 +64,11 @@ class UserCurrentInfoHandler(BaseHandler):
             company_info = yield self.company_ps.get_company(
                 conds={"id": real_company_id}, need_conf=False)
 
-            link = make_url(path.COLLECT_USERINFO, pid=self.params.pid, wechat_signature=self.current_user.wechat.signature, host=self.request.host)
+            link = make_url(path.COLLECT_USERINFO,
+                            pid=self.params.pid,
+                            source="wx", # 用户前端判断来源
+                            wechat_signature=self.current_user.wechat.signature,
+                            host=self.request.host)
 
             if not has_info:
                 yield favposition_notice_to_applier_tpl(self.current_user.wechat.company_id,
@@ -109,3 +95,28 @@ class UserCurrentInfoHandler(BaseHandler):
                     return True
 
         return False
+
+class UserCurrentUpdateHandler(BaseHandler):
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        """更新用户现在公司和现在职位接口
+        调整为 get 方式，原因：更新用户信息，需要用户验证手机号，
+        此时可能会触发帐号合并，合并完帐号后，需要重新微信 oauth，post 请求无法 oauth
+        """
+
+        if not self.params.name or not self.params.company or not self.params.position:
+            self.send_json_error()
+            return
+
+        self.logger.debug("UserCurrentInfoHandler sysuser_id:{}".format(self.current_user.sysuser.id))
+        self.logger.debug("UserCurrentInfoHandler params:{}".format(self.params))
+
+        yield self.user_ps.update_user_user_current_info(
+            sysuser_id=self.current_user.sysuser.id,
+            data=self.params
+        )
+
+        self.send_json_success()

@@ -37,7 +37,7 @@ class BaseUpload(Connector):
     def _check_size(self, _size):
         max_size = self.params.get('max_filesize', 1024 * 1024 * 4)
         if _size > max_size:
-            return UploadResult(message=u"文件大小大于上传上线: {}mb".format(max_size / 1024 / 1024))
+            return UploadResult(message="文件大小大于上传上线: {}mb".format(max_size / 1024 / 1024))
         return None
 
     def _before_upload(self):
@@ -83,7 +83,7 @@ class UploadResult(object):
         self._status = status
         self._data = data
         self._exception = exception
-        self._message = message or u"上传图片时发生未知错误"
+        self._message = message or "上传图片时发生未知错误"
         if self._data is not None:
             self._status = 0
 

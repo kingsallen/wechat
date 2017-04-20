@@ -65,7 +65,38 @@ class ApplicationHandler(BaseHandler):
     def post(self):
         """ 处理普通申请 """
 
-        position = yield self.position_ps.get_position(self.json_args.pid)
+        self.logger.warn("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& post application api begin &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
+        pid = self.json_args.pid
+        position = yield self.position_ps.get_position(pid)
+
+        self.logger.warn(pid)
+        self.logger.warn(position)
+
+        check_status, message = yield self.application_ps.check_position(
+            position, self.current_user)
+        self.logger.debug("[create_reply]check_status:{}, message:{}".format(check_status, message))
+        if not check_status:
+            self.send_json_error(message=message)
+            return
+
+        if position.app_cv_config_id:
+            self.logger.warn("position.app_cv_config_id: %s" % position.app_cv_config_id)
+
+            # 读取自定义字段 meta 信息
+            custom_cv_tpls = yield self.profile_ps.get_custom_tpl_all()
+            # -> formats of custom_cv_tpls is like:
+            # [{"field_name1": "map1"}, {"field_name2": "map2"}]
+
+            result, _, _ = yield self.application_ps.check_custom_cv(
+                    self.current_user, position, custom_cv_tpls)
+
+            self.logger.warn("result: %s" % result)
+
+            if not result:
+                self.send_json_error(
+                    data=dict(next_url=make_url(path.PROFILE_CUSTOM_CV, pid=pid, wechat_signature=self.params.wechat_signature)),
+                    message='')
+                return
 
         is_applied, message, apply_id = yield self.application_ps.create_application(
             position, self.current_user)
@@ -146,7 +177,7 @@ class ApplicationEmailHandler(BaseHandler):
                 self.send_json_error(message=message)
                 return
         else:
-            self.logger.debug(u"Start to create email profile..")
+            self.logger.debug("Start to create email profile..")
             yield self.application_ps.create_email_profile(self.params, self.current_user, self.is_platform)
 
         # 置空不必要参数，避免在 make_url 中被用到

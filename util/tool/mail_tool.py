@@ -65,7 +65,7 @@ def send_mail_notice_hr(position, employee, conf, profile, email, template_other
         degree = dict_conf.degree.get(str(education.get("degree", "0")))
         degree_text = "_{}".format(degree) if degree else ""
         if resume.get("workexps"):
-            workyears_text = u"_{}年工作经验".format(workyears) if workyears > 0 else u"_少于1年工作经验"
+            workyears_text = "_{}年工作经验".format(workyears) if workyears > 0 else "_少于1年工作经验"
         else:
             workyears_text = ""
         file_name = "{position}_{applier_name}{degree}{workyears}_{mobile}{subfix}".format(
@@ -167,7 +167,7 @@ def send_mail(to, subject, text, attachments=[], from_name="", from_mail=""):
         elif isinstance(file_name, bytes):
             return encode_attachment_filename(file_name.decode("utf-8"))
         else:
-            return encode_attachment_filename(u"附件")
+            return encode_attachment_filename("附件")
 
     for attach in attachments:
         url = os.path.join(attach.get('fileurl'), attach.get('filename'))

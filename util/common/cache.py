@@ -49,7 +49,14 @@ class BaseRedis(object):
         value = to_str(self._redis.get(key))
         if value is None:
             return default
-        return json.loads(value)
+        try:
+            ret = json.loads(value)
+        except TypeError as e:
+            print(e)
+            print('key: %s, value: %s' % (key, value))
+            raise e
+        else:
+            return ret
 
     def get(self, key, default=None, prefix=True):
         key = self.key_name(key, prefix)

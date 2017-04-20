@@ -512,6 +512,7 @@ class EventPageService(PageService):
         self.logger.debug("[_do_weixin_qrcode] wechat:{0}, msg:{1}, is_newbie:{2}".format(wechat, msg, is_newbie))
 
         # 处理临时二维码，目前主要在 PC 上创建帐号、绑定账号时使用
+        int_scene_id = ""
         if msg.EventKey:
             # 临时二维码处理逻辑, 5位type+27为自定义id
             int_scene_id = re.match(r"(\d+)", msg.EventKey)
@@ -584,7 +585,8 @@ class EventPageService(PageService):
                             "scene_id": int_scene_id,
                             "result": json_dumps({
                                 "status": 0,
-                                "message": message.RESPONSE_SUCCESS
+                                "message": message.RESPONSE_SUCCESS,
+                                "data": wxuser.unionid,
                             })
                         }
                     self.logger.debug("[_do_weixin_qrcode] params 25 2:{0}".format(params))
@@ -669,26 +671,27 @@ class EventPageService(PageService):
 
         if wxuser.unionid:
             # 先解绑
-            res = yield self.user_wx_user_ds.update_wxuser(
-                conds={"unionid": wxuser.unionid},
-                fields={
-                    "sysuser_id": 0,
-                })
-            self.logger.debug("[__user_bind_wx] res 1: {0}".format(res))
-            # 再更新
-            res = yield self.user_wx_user_ds.update_wxuser(
-                conds={"unionid": wxuser.unionid},
-                fields={
-                    "sysuser_id": user_id,
-                })
-            self.logger.debug("[__user_bind_wx] res 2: {0}".format(res))
-            res = yield self.user_user_ds.update_user(
-                conds={"id": user_id},
-                fields={
-                    "unionid": wxuser.unionid,
-                    "nickname": wxuser.nickname,
-                })
-            self.logger.debug("[__user_bind_wx] res 3: {0}".format(res))
+            # 绑定动作,由本函数返回true后由PC端调用  /user/wxbindmobile 绑定.
+            # res = yield self.user_wx_user_ds.update_wxuser(
+            #     conds={"unionid": wxuser.unionid},
+            #     fields={
+            #         "sysuser_id": 0,
+            #     })
+            # self.logger.debug("[__user_bind_wx] res 1: {0}".format(res))
+            # # 再更新
+            # res = yield self.user_wx_user_ds.update_wxuser(
+            #     conds={"unionid": wxuser.unionid},
+            #     fields={
+            #         "sysuser_id": user_id,
+            #     })
+            # self.logger.debug("[__user_bind_wx] res 2: {0}".format(res))
+            # res = yield self.user_user_ds.update_user(
+            #     conds={"id": user_id},
+            #     fields={
+            #         "unionid": wxuser.unionid,
+            #         "nickname": wxuser.nickname,
+            #     })
+            self.logger.debug("[__user_bind_wx] res 3")
             raise gen.Return(True)
         raise gen.Return(False)
 

@@ -46,13 +46,14 @@ class ChatPageService(PageService):
 
         ret = yield self.thrift_chat_ds.get_chats(room_id, page_no, page_size)
         obj_list = list()
-        for e in ret.chatLogs:
-            room = ObjectDict()
-            room['id'] = e.id
-            room['content'] = e.content
-            room['chat_time'] = str_2_date(e.create_time, const.TIME_FORMAT_MINUTE)
-            room['speaker'] = e.speaker # 0：求职者，1：HR
-            obj_list.append(room)
+        if ret.chatLogs:
+            for e in ret.chatLogs:
+                room = ObjectDict()
+                room['id'] = e.id
+                room['content'] = e.content
+                room['chat_time'] = str_2_date(e.create_time, const.TIME_FORMAT_MINUTE)
+                room['speaker'] = e.speaker # 0：求职者，1：HR
+                obj_list.append(room)
 
         self.logger.debug("[get_chats]ret:{}".format(obj_list))
         raise gen.Return(obj_list)

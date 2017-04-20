@@ -296,8 +296,8 @@ class InfraProfileDataService(DataService):
             "end_date":      "" if record.end_until_now else record.end_date,
             "end_until_now": record.end_until_now
         }
-        if record.get('department_name') is None or \
-            not record.get('department_name').strip():
+
+        if record.get('department_name') is None or not record.get('department_name').strip():
             params.update(department_name="")
         else:
             params.update(department_name=record.department_name)
@@ -307,14 +307,12 @@ class InfraProfileDataService(DataService):
         else:
             params.update(job=record.job)
 
-        if record.get('description') is None or \
-            not record.get('description').strip():
+        if record.get('description') is None or not record.get('description').strip():
             params.update(description="")
         else:
             params.update(description=record.description)
 
-        res = yield self.handle_profile_section(params, method="create",
-                                                 section="workexp")
+        res = yield self.handle_profile_section(params, method="create", section="workexp")
         return http_tool.unboxing(res)
 
     @gen.coroutine

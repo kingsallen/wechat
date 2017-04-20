@@ -2,10 +2,7 @@
 
 from tornado import gen
 from service.page.base import PageService
-
-
-class RecomException(Exception):
-    __slots__ = ['code', 'message']
+from util.common import ObjectDict
 
 
 class CandidatePageService(PageService):
@@ -60,8 +57,14 @@ class CandidatePageService(PageService):
 
     @gen.coroutine
     def sorting(self, post_user_id, company_id):
-        ret = yield self.thrift_candidate_ds.sort(
+        infra_ret = yield self.thrift_candidate_ds.sort(
             post_user_id, company_id)
+
+        ret = ObjectDict({
+            'recom_count': infra_ret.count,
+            'rank': infra_ret.rank,
+            'hongbao': infra_ret.hongbao
+        })
 
         self.logger.debug("sorting: %s" % ret)
         return ret
@@ -76,8 +79,17 @@ class CandidatePageService(PageService):
 
     @gen.coroutine
     def get_recommendation(self, recom_record_id, post_user_id):
-        ret = yield self.thrift_candidate_ds.get_recommendation(
+        infra_ret = yield self.thrift_candidate_ds.get_recommendation(
             recom_record_id, post_user_id)
+        self.logger.debug('infra_ret: %s' % infra_ret)
+
+        ret = ObjectDict(
+            position_name=infra_ret.title,
+            recom=infra_ret.recom,
+            click_time=infra_ret.clickTime,
+            id=infra_ret.id,
+            presentee_name=infra_ret.presenteeName
+        )
 
         self.logger.debug("get_recommendation: %s" % ret)
         return ret

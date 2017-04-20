@@ -22,7 +22,7 @@ class ThriftUseraccountsDataService(DataService):
         """
         推荐历史记录，调用 thrift 接口
         :param user_id:
-        :param type: 数据类型 1表示浏览人数，2表示浏览人数中感兴趣的人数，3表示浏览人数中投递的人数
+        :param req_type: 数据类型 1表示浏览人数，2表示浏览人数中感兴趣的人数，3表示浏览人数中投递的人数
         :param page_no:
         :param page_size:
         :return:

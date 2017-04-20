@@ -126,6 +126,9 @@ class BaseHandler(MetaBaseHandler):
         # 构造并拼装 session
         yield self._fetch_session()
 
+        # # 处理 PC 端账号绑定
+        # yield self.reload_for_account_merge()
+
         # 构造 access_time cookie
         self._set_access_time_cookie()
 
@@ -308,6 +311,7 @@ class BaseHandler(MetaBaseHandler):
 
                 self._oauth_service.wechat = self._qx_wechat
                 url = self._oauth_service.get_oauth_code_userinfo_url()
+                self.logger.debug("get_oauth_code_userinfo_url: url:{}".format(url))
                 self.redirect(url)
                 return
             else:
@@ -532,8 +536,22 @@ class BaseHandler(MetaBaseHandler):
         sysuser = yield self.user_ps.get_user_user({
             "id": user_id
         })
+
+        self.logger.debug("_add_sysuser_to_session user_id:{}".format(user_id))
+        self.logger.debug("_add_sysuser_to_session sysuser:{}".format(sysuser))
+
+        if sysuser.parentid and sysuser.parentid > 0:
+            self.logger.debug("帐号已经被合并")
+            self.logger.debug("_add_sysuser_to_session sysuser.parentid:{}".format(sysuser.parentid))
+            sysuser = yield self.user_ps.get_user_user({
+                "id": sysuser.parentid
+            })
+            self.logger.debug("_add_sysuser_to_session sysuser:{}".format(sysuser))
+            self.clear_cookie(name=const.COOKIE_SESSIONID)
+
         if sysuser:
             sysuser.headimg = self.static_url(sysuser.headimg or const.SYSUSER_HEADIMG)
+
         session.sysuser = sysuser
 
     def _add_jsapi_to_wechat(self, wechat):

@@ -147,6 +147,14 @@ class RedpacketPageService(PageService):
         self.logger.debug(
             "[RP]check_hb_status_passed: %s" % check_hb_status_passed)
 
+        self.logger.debug('<><><><><><><><><>')
+        self.logger.debug('in __need_to_send')
+        self.logger.debug(current_user.recom)
+        self.logger.debug(current_user.qxuser.id)
+        self.logger.debug(check_hb_status_passed)
+        self.logger.debug(int(current_user.recom.id) != int(current_user.sysuser.id))
+        self.logger.debug('<><><><><><><><><>')
+
         ret = bool(current_user.recom and
                    current_user.qxuser.id and
                    check_hb_status_passed and
@@ -268,8 +276,7 @@ class RedpacketPageService(PageService):
             {'id': recom_record_id})
 
         if not recom_record:
-            self.logger.debug(
-                '[RP]推荐数据不正确, recom_record_id: %s' % recom_record_id)
+            self.logger.debug('[RP]推荐数据不正确, recom_record_id: %s' % recom_record_id)
             return
 
         self.logger.debug("[RP]推荐红包开始")
@@ -279,13 +286,16 @@ class RedpacketPageService(PageService):
         recom_wechat = recom_current_user.wechat
         recom_wxuser = recom_current_user.wxuser
         recom_qxuser = recom_current_user.qxuser
-        # trigger_user_id = recom_record.presentee_user_id
-        # trigger_qxuser_id = 0
 
-        throttle_passed = yield self.__check_throttle_passed(rp_config,recom_qxuser.id)
+        self.logger.debug('[RP] company_id: %s' % company_id)
+        self.logger.debug('[RP] user_id: %s' % user_id)
+        self.logger.debug('[RP] recom_wechat: %s' % recom_wechat)
+        self.logger.debug('[RP] recom_wxuser: %s' % recom_wxuser)
+        self.logger.debug('[RP] recom_qxuser: %s' % recom_qxuser)
+
+        throttle_passed = yield self.__check_throttle_passed(rp_config, recom_qxuser.id)
         if not throttle_passed:
-            self.logger.debug(
-                '[RP]throttle上限校验失败, company_id: %s， user_id: %s' % company_id, user_id)
+            self.logger.debug('[RP]throttle上限校验失败, company_id: %s， user_id: %s' % (company_id, user_id))
             return
 
         rplock_key = const.RP_RECOM_LOCK_FMT % (rp_config.id, user_id)
@@ -448,11 +458,11 @@ class RedpacketPageService(PageService):
                     finally:
                         # 释放红包锁
                         redislocker.delete(rplock_key)
-                        self.logger.debug(u"[RP]红包锁释放成功， rplock_key: %s" % rplock_key)
+                        self.logger.debug("[RP]红包锁释放成功， rplock_key: %s" % rplock_key)
                         user_ps = None
                         sharechain_ps = None
                 else:
-                    self.logger.debug(u"[RP]触发红包锁，该红包逻辑正在处理中， rplock_key: %s" % rplock_key)
+                    self.logger.debug("[RP]触发红包锁，该红包逻辑正在处理中， rplock_key: %s" % rplock_key)
 
                 if is_click:
                     self.logger.debug("[RP]转发点击红包结束")
@@ -760,7 +770,7 @@ class RedpacketPageService(PageService):
                 red_packet_config.id, red_packet_config.type)
 
         self.logger.debug("[RP]next rp item: {}".format(rp_item))
-        if rp_item is None:
+        if not rp_item:
             if position:
                 self.logger.debug("[RP]该职位红包已经发完")
 

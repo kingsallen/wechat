@@ -126,7 +126,7 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
 
         self.chatroom_channel = const.CHAT_CHATROOM_CHANNEL.format(self.hr_id, self.user_id)
         self.hr_channel = const.CHAT_HR_CHANNEL.format(self.hr_id)
-        self.chat_session.mark_enter_chatroom(self.user_id)
+        self.chat_session.mark_enter_chatroom(self.room_id)
 
         def message_handler(message):
             # 处理 sub 接受到的消息
@@ -153,7 +153,7 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
         self.subscriber.stop_run_in_thread()
         self.subscriber.cleanup()
 
-        self.chat_session.mark_leave_chatroom(self.user_id)
+        self.chat_session.mark_leave_chatroom(self.room_id)
         yield self.chat_ps.leave_chatroom(self.room_id)
 
     @gen.coroutine
@@ -194,6 +194,7 @@ class ChatHandler(BaseHandler):
         page_no = self.params.page_no or 1
         page_size = self.params.page_size or 10
         res = yield self.chat_ps.get_chatrooms(self.current_user.sysuser.id, page_no, page_size)
+        self.logger.debug("[chat]get_chatrooms:{}".format(res))
         self.send_json_success(data=ObjectDict(
             records = res
         ))
@@ -218,6 +219,7 @@ class ChatHandler(BaseHandler):
         page_size = self.params.page_size or 10
 
         res = yield self.chat_ps.get_chats(self.params.room_id, page_no, page_size)
+        self.logger.debug("[chat]get_messages:{}".format(res))
         self.send_json_success(data=ObjectDict(
             records = res
         ))
@@ -240,4 +242,5 @@ class ChatHandler(BaseHandler):
             self.send_json_error(message=msg.NOT_AUTHORIZED)
             return
 
+        self.logger.debug("[chat]get_room:{}".format(res))
         self.send_json_success(data=res)

@@ -191,6 +191,7 @@ class EmployeeBindHandler(BaseHandler):
 
 
 class EmployeeBindEmailHandler(BaseHandler):
+
     @handle_response
     @gen.coroutine
     def get(self):
@@ -234,7 +235,7 @@ class RecommendRecordsHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def get(self):
-        page_no = self.params.page_no or 0
+        page_no = self.params.page_no or 1
         page_size = self.params.page_size or 10
         req_type = self.params.type or 1
         res = yield self.employee_ps.get_recommend_records(
