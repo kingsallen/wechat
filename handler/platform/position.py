@@ -33,7 +33,6 @@ class PositionHandler(BaseHandler):
                 return
 
             # hr端功能不全，暂且通过团队名称匹配
-            #team = yield self.team_ps.get_team_by_name(position_info.department, position_info.company_id)
             team = yield self.team_ps.get_team_by_id(position_info.team_id)
 
             self.logger.debug("[JD]构建收藏信息")
@@ -693,7 +692,7 @@ class PositionListHandler(BaseHandler):
         # 直接请求页面返回
         else:
             position_title = const_platorm.POSITION_LIST_TITLE_DEFAULT
-            if self.params.recomlist:
+            if self.params.recomlist or self.params.noemprecom:
                 position_title = const_platorm.POSITION_LIST_TITLE_RECOMLIST
 
             teamname_custom = self.current_user.company.conf_teamname_custom.teamname_custom
