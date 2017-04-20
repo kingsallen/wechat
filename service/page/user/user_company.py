@@ -218,8 +218,12 @@ class UserCompanyPageService(PageService):
         :param param: self.params in handler
         :return:
         """
+
         user_id = current_user.sysuser.id
         status, source = param.get('status'), param.get('source', 0)
+
+        if not user_id:
+            raise gen.Return(False)
 
         # 区分母公司子公司对待
         company_id = param.sub_company.id if param.did \

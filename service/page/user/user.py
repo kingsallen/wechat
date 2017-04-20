@@ -339,6 +339,9 @@ class UserPageService(PageService):
         :param pid: 职位id
         """
 
+        if not current_user.sysuser.id:
+            raise gen.Return(False)
+
         position_fav = yield self._get_user_favorite_records(
             current_user.sysuser.id, pid)
 

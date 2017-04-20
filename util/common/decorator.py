@@ -303,6 +303,7 @@ def authenticated(func):
                 return
             else:
                 self.send_json_error(message=msg.NOT_AUTHORIZED)
+                return
 
         yield func(self, *args, **kwargs)
 

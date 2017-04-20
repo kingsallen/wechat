@@ -20,6 +20,7 @@ from util.tool.str_tool import add_item
 
 
 class CompanyVisitReqHandler(BaseHandler):
+
     @handle_response
     @check_sub_company
     @authenticated
