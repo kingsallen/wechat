@@ -274,7 +274,7 @@ class PositionPageService(PageService):
             logo=current_company.logo,
             abbreviation=current_company.abbreviation or '',
             industry=current_company.industry or '',
-            scale_name=current_company.scale,
+            scale_name=const.SCALE.get(str(current_company.scale), ''),
             homepage=current_company.homepage or '',
             banner=current_company.banner,
             id=current_company.id,
