@@ -15,6 +15,7 @@ import conf.path as path
 from cache.application.email_apply import EmailApplyCache
 from service.page.base import PageService
 from service.page.user.profile import ProfilePageService
+from service.page.user.user import UserPageService
 from service.page.user.sharechain import SharechainPageService
 from thrift_gen.gen.mq.struct.ttypes import SmsType
 from util.common import ObjectDict
@@ -645,63 +646,34 @@ class ApplicationPageService(PageService):
 
     @gen.coroutine
     def opt_add_reward(self, apply_id, current_user):
-        """ 添加积分 """
+        """ 申请添加积分 """
         self.logger.debug("[opt_add_reward]start")
 
         application = yield self.get_application_by_id(apply_id)
-
         if not application or not application.recommender_user_id:
             return
 
         recommender_user_id = application.recommender_user_id
 
-        recom_employee = yield self.user_employee_ds.get_employee({
-            'sysuser_id': recommender_user_id,
-            'company_id': current_user.company.id,
-            'activation': const.OLD_YES,
-            'disable': const.OLD_YES
-        })
+        recom_employee = yield self.user_employee_ds.get_employee(
+            conds={
+                'sysuser_id': recommender_user_id,
+                'company_id': current_user.company.id,
+                'activation': const.OLD_YES,
+                'disable': const.OLD_YES
+            }, fields=['id'])
         if not recom_employee:
             return
 
-        recommender_wxuser_id = recom_employee.wxuser_id
-
-        self.logger.debug(
-            "[opt_add_reward]recommender_user_id:{}, "
-            "recommender_wxuser_id:{}, recom_employee:{}".format(
-                recommender_user_id, recommender_wxuser_id, recom_employee))
-
-        points_conf = yield self.hr_points_conf_ds.get_points_conf(conds={
-            "company_id":  current_user.company.id,
-            "template_id": self.constant.RECRUIT_STATUS_APPLY_ID,
-        }, appends=["ORDER BY id DESC", "LIMIT 1"])
-
-        if recom_employee and points_conf:
-            self.logger.debug("[opt_add_reward]添加积分")
-            yield self.user_employee_points_record_ds.create_user_employee_points_record(
-                fields={
-                    "employee_id":    recom_employee.id,
-                    "application_id": apply_id,
-                    "recom_wxuser":   recommender_wxuser_id,
-                    "reason":         points_conf.status_name,
-                    "award":          points_conf.reward,
-                    "recom_user_id":  recommender_user_id,
-                })
-
-            # 更新员工的积分
-            employee_sum = yield self.user_employee_points_record_ds.get_user_employee_points_record_sum(
-                conds={
-                    "employee_id": recom_employee.id
-                }, fields=["award"])
-
-            if employee_sum.sum_award:
-                yield self.user_employee_ds.update_employee(conds={
-                    "id":         recom_employee.id,
-                    "company_id": recom_employee.company_id,
-                }, fields={
-                    "award": int(employee_sum.sum_award),
-                })
-
+        user_ps = UserPageService()
+        yield user_ps.employee_add_reward(
+            employee_id=recom_employee.id,
+            company_id=current_user.company.id,
+            position_id=application.position_id,
+            be_recom_wxuser=current_user.wxuser,
+            award_type=const.EMPLOYEE_AWARD_TYPE_SHARE_APPLY,
+            application_id=application.id
+        )
         self.logger.debug("[opt_add_reward]end")
 
     @gen.coroutine
