@@ -285,8 +285,7 @@ def position_share_notice_employee_tpl(company_id, title, salary, user_id, pid,
     """认证员工转发职位后，向员工发送转发结果消息模板"""
 
     # 延迟10分钟发送
-    # delay = 600
-    delay = 120
+    delay = 600
     # 延迟消息队列消费者
     validators = 'mtp.scripts.consumer.validators.send_viewed_template_to_employee'
     type = 0
