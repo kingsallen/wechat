@@ -840,13 +840,13 @@ class ApplicationPageService(PageService):
                         recent_job)
 
             if not is_ok:
-                # 消息模板发送失败时，只对普通客户发送短信
+                # 消息模板发送失败时，向 HR 发送短信
                 if hr_info.mobile and hr_info.account_type == 2:
                     params = ObjectDict({
                         "position": position.title
                     })
                     yield self.thrift_mq_ds.send_sms(SmsType.NEW_APPLICATION_TO_HR_SMS,
-                                                     current_user.sysuser.mobile,
+                                                     hr_info.mobile,
                                                      params, isqx=not is_platform)
             profile_ps = None
 

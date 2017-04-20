@@ -38,9 +38,11 @@ class UserCompanyPageService(PageService):
         data = ObjectDict()
 
         # 获取当前公司关注，访问信息
-        conds = {'user_id': user.sysuser.id, 'company_id': company.id}
-        vst_cmpy = yield self.user_company_visit_req_ds.get_visit_cmpy(
-            conds=conds, fields=['id', 'company_id'])
+        vst_cmpy = False
+        if user.sysuser.id:
+            conds = {'user_id': user.sysuser.id, 'company_id': company.id}
+            vst_cmpy = yield self.user_company_visit_req_ds.get_visit_cmpy(
+                conds=conds, fields=['id', 'company_id'])
         team_index_url = make_url(path.COMPANY_TEAM, handler_params)
 
         # 拼装模板数据
