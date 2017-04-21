@@ -7,6 +7,36 @@ from util.common.decorator import authenticated,handle_response
 from util.tool.http_tool import http_post,http_delete,http_get
 import conf.path as path
 
+
+import tornado.gen as gen
+
+from service.data.base import DataService
+from util.common import ObjectDict
+from util.common.decorator import cache
+from thrift_gen.gen.searchcondition.service.searchservice.UserQxService import Client as ChatServiceClient
+from service.data.infra.framework.client.client import ServiceClientFactory
+
+
+class test(DataService):
+
+    chat_service_cilent = ServiceClientFactory.get_service(
+        ChatServiceClient)
+
+    @gen.coroutine
+    def get(self):
+        res=yield self.userSearchConditionList(1)
+        print(res)
+        print('-------------')
+
+    @gen.coroutine
+    def userSearchConditionList(self, user_id):
+
+        ret = yield self.chat_service_cilent.userSearchConditionList(int(user_id))
+
+        raise gen.Return(ret)
+
+
+
 class SearchConditionHandler(BaseHandler):
 
     @coroutine
