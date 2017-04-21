@@ -86,8 +86,9 @@ class PositionPageService(PageService):
         # 自定义分享模板
         if position_res.share_tpl_id:
             share_conf = yield self.__get_share_conf(position_res.share_tpl_id)
+            self.logger.debug("")
             position.share_title = share_conf.title
-            position.share_description = share_conf.share_description
+            position.share_description = share_conf.description
 
         # 职能自定义字段（自定义字段 job_occupation）
         if position_ext_res.job_occupation_id:

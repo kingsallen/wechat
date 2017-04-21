@@ -191,7 +191,7 @@ class PositionHandler(BaseHandler):
                 title = str(position_info.share_title).format(
                     company=company_info.abbreviation,
                     position=position_info.title)
-                self.logger.debug("自定义分享 cover 1：%s" % cover)
+                self.logger.debug("自定义分享 cover 1：%s" % title)
             if position_info.share_description:
                 self.logger.debug("自定义分享 description 1：%s" % position_info.share_description)
                 description = "".join(split(position_info.share_description))
