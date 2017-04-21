@@ -319,7 +319,8 @@ class CustomInfoHandler(BaseHandler):
         # 判断与跳转
         self.params.pop('next_url', None)
         self.params.pop('headimg', None)
-        next_url = make_url(path.POSITION_LIST, self.params, escape=escape)
+        next_url = make_url(path.POSITION_LIST, self.params, escape=escape,
+                            noemprecom=const.YES)
 
         if self.params.from_wx_template == "o":
             message = messages.EMPLOYEE_BINDING_CUSTOM_FIELDS_DONE
