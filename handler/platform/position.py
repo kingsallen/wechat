@@ -33,7 +33,6 @@ class PositionHandler(BaseHandler):
                 return
 
             # hr端功能不全，暂且通过团队名称匹配
-            #team = yield self.team_ps.get_team_by_name(position_info.department, position_info.company_id)
             team = yield self.team_ps.get_team_by_id(position_info.team_id)
 
             self.logger.debug("[JD]构建收藏信息")
@@ -179,6 +178,10 @@ class PositionHandler(BaseHandler):
             cover = self.static_url(red_packet.share_img)
             title = "{} {}".format(position_info.title, red_packet.share_title)
             description = "".join(split(red_packet.share_desc))
+
+            self.logger.debug("自定义分享 red_packet cover：%s" % cover)
+            self.logger.debug("自定义分享 red_packet title：%s" % title)
+            self.logger.debug("自定义分享 red_packet description：%s" % description)
         else:
             cover = self.static_url(company_info.logo)
             title = position_info.title
@@ -188,8 +191,16 @@ class PositionHandler(BaseHandler):
                 title = str(position_info.share_title).format(
                     company=company_info.abbreviation,
                     position=position_info.title)
+                self.logger.debug("自定义分享 cover 1：%s" % title)
             if position_info.share_description:
+                self.logger.debug("自定义分享 description 1：%s" % position_info.share_description)
                 description = "".join(split(position_info.share_description))
+                self.logger.debug("自定义分享 description 1：%s" % description)
+
+            self.logger.debug("自定义分享 cover：%s" % cover)
+            self.logger.debug("自定义分享 title：%s" % title)
+            self.logger.debug("自定义分享 description：%s" % description)
+
 
         link = make_url(
             path.POSITION_PATH.format(position_info.id),
@@ -209,6 +220,8 @@ class PositionHandler(BaseHandler):
             "link": link,
             "pid": position_info.id,
         })
+
+        self.logger.debug("_make_share_info:{}".format(self.params.share))
 
     @gen.coroutine
     def _make_hr_info(self, publisher):
@@ -593,7 +606,7 @@ class PositionHandler(BaseHandler):
 
             # 玛氏定制
             company_config = COMPANY_CONFIG.get(company_id)
-            if not company_config.no_jd_team:  # 不在职位详情页展示所属团队, 目前只有Mars有这个需求,
+            if company_config and not company_config.no_jd_team:  # 不在职位详情页展示所属团队, 目前只有Mars有这个需求,
                 module_team = yield self._make_team(team, teamname_custom)
                 add_item(position_data, "module_team", module_team)
 
@@ -679,7 +692,7 @@ class PositionListHandler(BaseHandler):
         # 直接请求页面返回
         else:
             position_title = const_platorm.POSITION_LIST_TITLE_DEFAULT
-            if self.params.recomlist:
+            if self.params.recomlist or self.params.noemprecom:
                 position_title = const_platorm.POSITION_LIST_TITLE_RECOMLIST
 
             teamname_custom = self.current_user.company.conf_teamname_custom.teamname_custom

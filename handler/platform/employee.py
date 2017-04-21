@@ -319,7 +319,8 @@ class CustomInfoHandler(BaseHandler):
         # 判断与跳转
         self.params.pop('next_url', None)
         self.params.pop('headimg', None)
-        next_url = make_url(path.POSITION_LIST, self.params, escape=escape)
+        next_url = make_url(path.POSITION_LIST, self.params, escape=escape,
+                            noemprecom=str(const.YES))
 
         if self.params.from_wx_template == "o":
             message = messages.EMPLOYEE_BINDING_CUSTOM_FIELDS_DONE
@@ -357,5 +358,6 @@ class BindedHandler(BaseHandler):
                 template_name='refer/weixin/employee/employee_binding_tip.html',
                 result=0,
                 messages=messages.EMPLOYEE_BINDING_SUCCESS,
-                nexturl=make_url(path.EMPLOYEE_VERIFY, self.params)
+                nexturl=make_url(path.POSITION_LIST, self.params,
+                                 noemprecom=str(const.YES))
             )
