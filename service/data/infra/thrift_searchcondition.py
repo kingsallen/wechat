@@ -6,6 +6,7 @@ from util.common import ObjectDict
 from util.common.decorator import cache
 from thrift_gen.gen.searchcondition.service.searchservice.UserQxService import Client as SearchConditionServiceClient
 from service.data.infra.framework.client.client import ServiceClientFactory
+from thrift_gen.gen.searchcondition.struct.usersearch.ttypes import UserSearchConditionDO
 
 class ThriftSearchconditionDataService(DataService):
 
@@ -19,6 +20,7 @@ class ThriftSearchconditionDataService(DataService):
 
     @gen.coroutine
     def postUserSearchCondition(self,condition):
+        condition=UserSearchConditionDO(name='test',keywords='["java", "php"]',userId=1)
         res=yield self.searchcondition_service_cilent.postUserSearchCondition(condition)
         raise gen.Return(res)
 

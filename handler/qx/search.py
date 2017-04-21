@@ -6,7 +6,6 @@ from conf.qx import hot_city
 from util.common.decorator import authenticated,handle_response
 from util.tool.http_tool import http_post,http_delete,http_get
 import conf.path as path
-# from service.data.infra.thrift_searchcondition import ThriftSearchconditionDataService
 class SearchConditionHandler(BaseHandler):
 
     @coroutine
@@ -22,12 +21,22 @@ class SearchConditionHandler(BaseHandler):
 
         userid=self.current_user.sysuser.id
 
-        condition = self.json_args.data
+        # condition = self.json_args.data
 
-        condition['userId']=userid or 1
-        print('condition is',condition)
-        res = yield self.searchcondition_ps.addCondition(condition)
-        print(res)
+
+        # condition ={"name":"test",
+        #         "keywords":'',
+        #         "cityName":'',
+        #         "userId":1,
+        #         "salaryTop":10000,
+        #         "salaryBottom": 5000,
+        #         "salaryNegotiable": 0,
+        #         "industry":'' }
+
+        # condition['userId']=userid or 1
+        # print('condition is',condition)
+
+        res = yield self.searchcondition_ps.addCondition(None)
         print('@@@@######')
         # if res.status==0:
         #     self.send_json_success()

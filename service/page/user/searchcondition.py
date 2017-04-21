@@ -2,7 +2,6 @@
 from tornado import gen
 
 from service.page.base import PageService
-
 class SearchconditionPageService(PageService):
     @gen.coroutine
     def getConditionList(self,userId):
@@ -12,4 +11,5 @@ class SearchconditionPageService(PageService):
     @gen.coroutine
     def addCondition(self, condition):
         res = yield self.thrift_searchcondition_ds.postUserSearchCondition(condition)
+        print(res)
         raise gen.Return(res)
