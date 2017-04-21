@@ -93,7 +93,6 @@ common_routes = [
     (r"/m/api/search/condition/*", handler.qx.search.SearchConditionHandler, { "event": "search_condition" }),
     (r"/m/api/search/condition/(\d+)*", handler.qx.search.SearchConditionHandler, { "event": "search_condition" }),
     (r"/m/api/search/([a-z_]+)", handler.qx.search.SearchCityHandler, { "event": "search_condition" }),
-    (r"/m/api/wkjtest", handler.qx.search.test, { "event": "search_condition" }),
 
 ]
 

@@ -6,45 +6,16 @@ from conf.qx import hot_city
 from util.common.decorator import authenticated,handle_response
 from util.tool.http_tool import http_post,http_delete,http_get
 import conf.path as path
-
-
-import tornado.gen as gen
-
-from service.data.base import DataService
-from util.common import ObjectDict
-from util.common.decorator import cache
-from thrift_gen.gen.searchcondition.service.searchservice.UserQxService import Client as ChatServiceClient
-from service.data.infra.framework.client.client import ServiceClientFactory
-
-
-class test(DataService):
-
-    chat_service_cilent = ServiceClientFactory.get_service(
-        ChatServiceClient)
-
-    @gen.coroutine
-    def get(self):
-        res=yield self.userSearchConditionList(1)
-        print(res)
-        print('-------------')
-
-    @gen.coroutine
-    def userSearchConditionList(self, user_id):
-
-        ret = yield self.chat_service_cilent.userSearchConditionList(int(user_id))
-
-        raise gen.Return(ret)
-
-
-
+# from service.data.infra.thrift_searchcondition import ThriftSearchconditionDataService
 class SearchConditionHandler(BaseHandler):
 
     @coroutine
     def get(self):
         userid=self.current_user.sysuser.id
+        res=yield self.searchcondition_ps.getConditionList(userid)
+        conditionlist=res.searchConditionList
+        self.send_json_success({'searchs':conditionlist})
 
-        res = yield http_get(path.SEARCH_CONDITION, {'sysuser_id':userid}, infra = True)
-        self.send_json_success(res)
 
     @coroutine
     def post(self):
@@ -52,10 +23,16 @@ class SearchConditionHandler(BaseHandler):
         userid=self.current_user.sysuser.id
 
         condition = self.json_args.data
-        condition['sysuser_id']=userid
 
-        res = yield http_post(path.SEARCH_CONDITION, condition, infra = True)
-        self.send_json_success(res)
+        condition['userId']=userid or 1
+        print('condition is',condition)
+        res = yield self.searchcondition_ps.addCondition(condition)
+        print(res)
+        print('@@@@######')
+        # if res.status==0:
+        #     self.send_json_success()
+        # else:
+        #     self.send_json_error(message = res.message)
 
     @coroutine
     def delete(self,id):
@@ -67,6 +44,37 @@ class SearchConditionHandler(BaseHandler):
         }
         res=yield http_delete(path.SEARCH_CONDITION,jdata,infra = True)
         self.send_json_success(res)
+
+# class SearchConditionHandler(BaseHandler):
+#
+#     @coroutine
+#     def get(self):
+#         userid=self.current_user.sysuser.id
+#
+#         res = yield http_get(path.SEARCH_CONDITION, {'sysuser_id':userid}, infra = True)
+#         self.send_json_success(res)
+#
+#     @coroutine
+#     def post(self):
+#
+#         userid=self.current_user.sysuser.id
+#
+#         condition = self.json_args.data
+#         condition['sysuser_id']=userid
+#
+#         res = yield http_post(path.SEARCH_CONDITION, condition, infra = True)
+#         self.send_json_success(res)
+#
+#     @coroutine
+#     def delete(self,id):
+#         userid=self.current_user.sysuser.id
+#
+#         jdata={
+#             "userid":userid,
+#             "id": id
+#         }
+#         res=yield http_delete(path.SEARCH_CONDITION,jdata,infra = True)
+#         self.send_json_success(res)
 
 
 
