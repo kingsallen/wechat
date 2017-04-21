@@ -358,5 +358,5 @@ class BindedHandler(BaseHandler):
                 result=0,
                 messages=messages.EMPLOYEE_BINDING_SUCCESS,
                 nexturl=make_url(path.POSITION_LIST, self.params,
-                                 recomlist=const.YES)
+                                 noemprecom=const.YES)
             )
