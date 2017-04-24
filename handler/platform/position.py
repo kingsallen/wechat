@@ -45,6 +45,13 @@ class PositionHandler(BaseHandler):
             did = yield self.company_ps.get_real_company_id(position_info.publisher, position_info.company_id)
             company_info = yield self.company_ps.get_company(conds={"id": did}, need_conf=True)
 
+            # 刷新链路
+            self.logger.debug("[JD]刷新链路")
+            last_employee_user_id = yield self._make_refresh_share_chain(
+                position_info)
+            self.logger.debug(
+                "[JD]last_employee_user_id: %s" % (last_employee_user_id))
+
             self.logger.debug("[JD]构建转发信息")
             yield self._make_share_info(position_info, company_info)
 
@@ -127,12 +134,7 @@ class PositionHandler(BaseHandler):
             self.flush()
 
             # 后置操作
-            # 刷新链路
             if self.is_platform:
-                self.logger.debug("[JD]刷新链路")
-                last_employee_user_id = yield self._make_refresh_share_chain(position_info)
-                self.logger.debug("[JD]last_employee_user_id: %s" % (last_employee_user_id))
-
                 self.logger.debug("[JD]转发积分操作")
                 yield self._make_add_reward_click(position_info, last_employee_user_id)
 
