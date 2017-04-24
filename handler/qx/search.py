@@ -3,6 +3,8 @@ from tornado.gen import coroutine, Return
 from handler.base import BaseHandler
 from conf.qx import hot_city
 import json
+from util.tool.http_tool import http_get
+import conf.path as path
 
 class SearchConditionHandler(BaseHandler):
 
@@ -24,22 +26,24 @@ class SearchConditionHandler(BaseHandler):
 
         name = condition.get('name', None)
         keywords = json.dumps(condition.get('keywords', None))
-        cityName = json.dumps(condition.get('cityName', None))
-
-        salaryTop = condition.get('salaryTop', None)
-        salaryBottom = condition.get('salaryBottom', None)
-        salaryNegotiable = condition.get('salaryNegotiable', None)
-        industry = json.dumps(condition.get('industry', None))
-
-        res = yield self.searchcondition_ps.addCondition(userId=userId, name=name, keywords=keywords,
-                                                         cityName=cityName, salaryTop=salaryTop,
-                                                         salaryBottom=salaryBottom,
-                                                         salaryNegotiable=salaryNegotiable, industry=industry)
-
-        if res.status == 0:
-            self.send_json_success()
+        if not (name and keywords and userId):
+            self.send_json_error(message='Invalid argument')
         else:
-            self.send_json_error(message=res.message)
+            cityName = json.dumps(condition.get('cityName', None))
+            salaryTop = condition.get('salaryTop', None)
+            salaryBottom = condition.get('salaryBottom', None)
+            salaryNegotiable = condition.get('salaryNegotiable', None)
+            industry = json.dumps(condition.get('industry', None))
+
+            res = yield self.searchcondition_ps.addCondition(userId=userId, name=name, keywords=keywords,
+                                                             cityName=cityName, salaryTop=salaryTop,
+                                                             salaryBottom=salaryBottom,
+                                                             salaryNegotiable=salaryNegotiable, industry=industry)
+
+            if res.status == 0:
+                self.send_json_success()
+            else:
+                self.send_json_error(message=res.message)
 
     @coroutine
     def delete(self, id):
@@ -74,8 +78,10 @@ class SearchCityHandler(BaseHandler):
 
     @coroutine
     def get_industries(self):
-
-        industries_list = yield self.dictionary_ps.get_industries()
-        res = map(lambda x: x['text'], industries_list)
-
+        response = yield http_get(path.DICT_INDUSTRY, dict(parent=0))
+        industries_list=response.data
+        res = map(lambda x: x['name'], industries_list)
         raise Return({"industries": list(res)})
+
+
+
