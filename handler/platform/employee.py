@@ -332,8 +332,9 @@ class CustomInfoHandler(BaseHandler):
             result=0,
             messages=message,
             nexturl=next_url,
-            source=1)
-        return
+            source=1,
+            button_text=messages.EMPLOYEE_BINDING_EMAIL_BTN_TEXT
+        )
 
 
 class BindedHandler(BaseHandler):
@@ -359,5 +360,6 @@ class BindedHandler(BaseHandler):
                 result=0,
                 messages=messages.EMPLOYEE_BINDING_SUCCESS,
                 nexturl=make_url(path.POSITION_LIST, self.params,
-                                 noemprecom=str(const.YES))
+                                 noemprecom=str(const.YES)),
+                button_text=messages.EMPLOYEE_BINDING_DEFAULT_BTN_TEXT
             )
