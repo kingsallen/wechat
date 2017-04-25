@@ -6,6 +6,7 @@ import json
 from util.tool.http_tool import http_get
 import conf.path as path
 
+
 class SearchConditionHandler(BaseHandler):
 
     @coroutine
@@ -25,17 +26,20 @@ class SearchConditionHandler(BaseHandler):
         condition = self.json_args
 
         name = condition.get('name', None)
-        keywords = json.dumps(condition.get('keywords', None))
+        keywords = condition.get('keywords', None)
         if not (name and keywords and userId):
             self.send_json_error(message='Invalid argument')
         else:
-            cityName = json.dumps(condition.get('cityName', None))
+            cityNameData = condition.get('cityName', None)
+            industryData = condition.get('industry', None)
+            cityName = json.dumps(cityNameData) if cityNameData else None
+            industry = json.dumps(industryData) if industryData else None
+
             salaryTop = condition.get('salaryTop', None)
             salaryBottom = condition.get('salaryBottom', None)
             salaryNegotiable = condition.get('salaryNegotiable', None)
-            industry = json.dumps(condition.get('industry', None))
 
-            res = yield self.searchcondition_ps.addCondition(userId=userId, name=name, keywords=keywords,
+            res = yield self.searchcondition_ps.addCondition(userId=userId, name=name, keywords=json.dumps(keywords),
                                                              cityName=cityName, salaryTop=salaryTop,
                                                              salaryBottom=salaryBottom,
                                                              salaryNegotiable=salaryNegotiable, industry=industry)
@@ -79,9 +83,6 @@ class SearchCityHandler(BaseHandler):
     @coroutine
     def get_industries(self):
         response = yield http_get(path.DICT_INDUSTRY, dict(parent=0))
-        industries_list=response.data
+        industries_list = response.data
         res = map(lambda x: x['name'], industries_list)
         raise Return({"industries": list(res)})
-
-
-
