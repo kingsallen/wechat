@@ -47,6 +47,7 @@ import handler.platform.team
 import handler.platform.recom
 
 import handler.qx.wechat_oauth
+import handler.qx.aggregation
 
 import handler.wechat.event
 
@@ -147,6 +148,8 @@ platform_routes.extend(common_routes)
 # 聚合号的单独 routes
 qx_routes = [
     (r"/m/wxoauth2",                                   handler.qx.wechat_oauth.WxOauthHandler,                    {"event": "wxoauth_wxoauth"}),
+
+    (r"/m/api/positions[\/]?",                         handler.qx.aggregation.AggregationHandler,                 {"event": "position_aggregation"}),
 ]
 qx_routes.extend(common_routes)
 

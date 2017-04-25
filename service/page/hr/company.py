@@ -72,6 +72,8 @@ class CompanyPageService(PageService):
                 "conf_newjd_status": company_conf_res.get("newjd_status"),
                 "conf_teamname_custom": company_conf_res.get("teamname_custom"),  # 职位部门字段名称
                 "conf_application_time": company_conf_res.get("application_time"),  # 新JD开通申请时间
+                "conf_hr_chat": company_conf_res.get("hr_chat"),  # IM 聊天开关
+                "conf_show_qx_only": company_conf_res.get("show_qx_only"),  # 公司信息、团队信息、职位信息等只在仟寻展示
             })
 
             # 处理公司自定义团队名称

@@ -252,7 +252,7 @@ class BaseDao(DB):
             self.logger.warning(
                 "Warn:[get_cnt_by_conds][conds warn], conds:{0}".format(
                     conds))
-            raise gen.Return(None)
+            raise gen.Return(ObjectDict())
         sql = self.select_cnt(self.table, conds, fields, appends, index)
         cursor = yield self.query(sql, params)
         response = cursor.fetchone()

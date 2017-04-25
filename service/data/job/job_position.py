@@ -58,3 +58,22 @@ class JobPositionDataService(DataService):
             fields=fields)
 
         raise gen.Return(ret)
+
+    @cache(ttl=60)
+    @gen.coroutine
+    def get_position_cnt(self, conds, fields, appends=None, index=''):
+
+        appends = appends or []
+
+        if conds is None or not (isinstance(conds, (dict, str))):
+            self.logger.warning(
+                "Warning:[get_position_cnt][invalid parameters], Detail:[conds: {0}, "
+                "type: {1}]".format(
+                    conds, type(conds)))
+            raise gen.Return(list())
+
+        if not fields:
+            fields = list(self.job_position_dao.fields_map.keys())
+
+        response = yield self.job_position_dao.get_cnt_by_conds(conds, fields, appends, index)
+        raise gen.Return(response)

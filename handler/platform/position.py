@@ -316,7 +316,7 @@ class PositionHandler(BaseHandler):
             "team": team_id,
             "did": did if did != self.current_user.company.id else "", # 主公司不需要提供 did
             "salary": position_info.salary,
-            "hr_chat": int(self.current_user.wechat.hr_chat),
+            "hr_chat": int(company_info.conf_hr_chat),
             "teamname_custom": teamname_custom["teamname_custom"]
             #"team": position_info.department.lower() if position_info.department else ""
         })

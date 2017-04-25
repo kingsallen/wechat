@@ -21,8 +21,9 @@ def rule_gamma_filters(params):
             params[k] = re.split(",", params[k].strip())
         else:
             params[k] = list()
+
     # 需要用 OR 串联
-    for k in ('keywords'):
+    for k in ('keywords',):
         if params.get(k):
             k_list = re.split(",", params[k].strip())
             params[k] = " OR ".join(k_list)
@@ -31,7 +32,7 @@ def rule_gamma_filters(params):
 
     return params
 
-def init_gamma_basic_agg(query, city, industry, salary_bottom, salary_top, salary_negotiable, page_from, page_size):
+def init_gamma_basic(query, city, industry, salary_bottom, salary_top, salary_negotiable, page_from, page_size):
 
     """
     初始化 Gamma 项目列表页搜索
@@ -39,81 +40,15 @@ def init_gamma_basic_agg(query, city, industry, salary_bottom, salary_top, salar
     :return:
     """
 
-    init_es_query = {
-        "query": {
-            "bool": {
-                "must": [{
-                    "query_string": {
-                        "fields": [
-                            {
-                                "field": "position.title",
-                                "boost": 20.0
-                            },
-                            {
-                                "field": "position.city",
-                                "boost": 10.0
-                            },
-                            {
-                                "field": "company.name",
-                                "boost": 5.0
-                            },
-                            {
-                                "field": "company.abbreviation",
-                                "boost": 10.0
-                            },
-                            {
-                                "field": "team.name",
-                                "boost": 7.0
-                            },
-                            {
-                                "field": "company.introduction",
-                                "boost": 2.0
-                            },
-                            {
-                                "field": "position.requirement",
-                                "boost": 5.0
-                            },
-                            {
-                                "field": "position.occupation",
-                                "boost": 2.0
-                            },
-                            {
-                                "field": "position.accountabilities",
-                                "boost": 5.0
-                            }
-                        ],
-                        "query": query
-                    }
-                },
-                {
-                    "terms": {
-                        "position.city": city,
-                    }
-                },
-                {
-                    "terms": {
-                        "position.industry": industry,
-                    }
-                }
-                ],
-                "filter": {
-                    "script": {
-                        "script":
-                            "min=0;max=1000;"
-                            "bottom=_source.position.salary_bottom;"
-                            "top=_source.position.salary_top;"
-                            "if(min>bottom&&min<top&&top>bottom){return true;};"
-                            "if(max<top&&max>bottom&&top>bottom){return true;};"
-                            "if(min<bottom&&max>top&&top>bottom){return true;};"
-                            "if(bottom==0&&top==0){return true;};"
-                            "return false"
-                    }
-                }
-            }
-        },
+    init_es_query = ObjectDict({
+        "query": ObjectDict({
+            "bool": ObjectDict({
+                "must": []
+            })
+        }),
         "track_scores": "true",
-        "sort": {
-            "_script": {
+        "sort": ObjectDict({
+            "_script": ObjectDict({
                 "type": "number",
                 "script": {
                     "inline": "score =_score;"
@@ -126,10 +61,111 @@ def init_gamma_basic_agg(query, city, industry, salary_bottom, salary_top, salar
                               "return score;"
                 },
                 "order": "desc"
-            }
-        },
+            })
+        }),
+        "aggs": ObjectDict({
+            "all_count": ObjectDict({
+                "scripted_metric": ObjectDict({
+                    "init_script": "_agg['transactions'] = []",
+                    "map_script": "banner=_source.company.banner;impression=_source.company.impression;company_id = _source.position.company_id; "
+                                  "if(banner!=''&&impression!=''&&company_id  in _agg['transactions'] ){}else{_agg['transactions'].add(company_id)};",
+                    "reduce_script": "jsay=[];for(a in _aggs){for(ss in a){if(ss in jsay){}else{jsay.add(ss);}}};return jsay",
+                    "combine_script": "jsay=[];for(a in _agg['transactions']){for(ss in a){jsay.add(ss)}};return jsay"
+                })
+            })
+        }),
+
         "from": page_from,
         "size": page_size
-    }
+    })
+
+    if query:
+        # 存在搜索关键字
+        query_sql = ObjectDict({
+            "query_string": {
+                "fields": [
+                    {
+                        "field": "position.title",
+                        "boost": 20.0
+                    },
+                    {
+                        "field": "position.city",
+                        "boost": 10.0
+                    },
+                    {
+                        "field": "company.name",
+                        "boost": 5.0
+                    },
+                    {
+                        "field": "company.abbreviation",
+                        "boost": 10.0
+                    },
+                    {
+                        "field": "team.name",
+                        "boost": 7.0
+                    },
+                    {
+                        "field": "company.introduction",
+                        "boost": 2.0
+                    },
+                    {
+                        "field": "position.requirement",
+                        "boost": 5.0
+                    },
+                    {
+                        "field": "position.occupation",
+                        "boost": 2.0
+                    },
+                    {
+                        "field": "position.accountabilities",
+                        "boost": 5.0
+                    }
+                ],
+                "query": query
+            }
+        })
+        init_es_query['query']['bool']['must'].append(query_sql)
+
+    if city:
+        # 存在城市筛选
+        init_es_query['query']['bool']['must'].append(ObjectDict({
+            "terms": {
+                "position.city": city,
+            }
+        }))
+
+    if industry:
+        # 存在行业筛选
+        init_es_query['query']['bool']['must'].append(ObjectDict({
+            "terms": {
+                "position.industry": industry,
+            }
+        }))
+
+    if (isinstance(salary_bottom, int) and isinstance(salary_top, int)) or salary_negotiable:
+        # 存在薪资上下限
+        # 存在行业筛选
+        min_max = """min=0;max=1000;"""
+        condition = "if(min>bottom&&min<top&&top>bottom){return true;};" \
+                 "if(max<top&&max>bottom&&top>bottom){return true;};" \
+                 "if(min<bottom&&max>top&&top>bottom){return true;};"
+        negotiable = """if(bottom==0&&top==0){return true;};"""
+        filter_script = "{}bottom=_source.position.salary_bottom;" \
+                        "top=_source.position.salary_top;{}{}return false"
+
+        if isinstance(salary_bottom, int) and isinstance(salary_top, int) and not salary_negotiable:
+            script = filter_script.format(min_max, condition, "")
+        elif isinstance(salary_bottom, int) and isinstance(salary_top, int) and salary_negotiable:
+            script = filter_script.format(min_max, condition, negotiable)
+        else:
+            script = filter_script.format("", "", negotiable)
+
+        init_es_query['query']['bool'].update(ObjectDict({
+            "filter": ObjectDict({
+                "script": ObjectDict({
+                    "script": script
+                })
+            })
+        }))
 
     return init_es_query
