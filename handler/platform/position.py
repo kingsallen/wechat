@@ -94,7 +94,7 @@ class PositionHandler(BaseHandler):
                 module_job_require_old = self._make_json_job_require_old(position_info)
                 module_department_old = self._make_json_job_department(position_info)
                 module_job_attr_old = self._make_json_job_attr(position_info)
-                module_hr_register_old = self.current_user.wechat.hr_register & True
+                module_hr_register_old = int(self.current_user.wechat.hr_register) & True
 
                 add_item(position_data, "module_job_require", module_job_require_old)
                 add_item(position_data, "module_department", module_department_old)
