@@ -760,7 +760,7 @@ class ProfilePageService(PageService):
                             "label": [e.field_title for e in sys_cv_tpls if e.field_name == k][0],
                             "value": v
                         }
-                    except KeyError:
+                    except (KeyError, IndexError):
                         continue
                     other.keyvalues.append(lvm)
             profile.other = other
