@@ -22,7 +22,7 @@ class SearchConditionHandler(BaseHandler):
 
     @coroutine
     def post(self):
-        userId = self.current_user.sysuser.id
+        userId = self.current_user.sysuser.id or 1
         condition = self.json_args
 
         name = condition.get('name', None)
@@ -32,14 +32,14 @@ class SearchConditionHandler(BaseHandler):
         else:
             cityNameData = condition.get('cityName', None)
             industryData = condition.get('industry', None)
-            cityName = json.dumps(cityNameData) if cityNameData else None
-            industry = json.dumps(industryData) if industryData else None
+            cityName = json.dumps(cityNameData ,ensure_ascii = False) if cityNameData else None
+            industry = json.dumps(industryData ,ensure_ascii = False) if industryData else None
 
             salaryTop = condition.get('salaryTop', None)
             salaryBottom = condition.get('salaryBottom', None)
             salaryNegotiable = condition.get('salaryNegotiable', None)
 
-            res = yield self.searchcondition_ps.addCondition(userId=userId, name=name, keywords=json.dumps(keywords),
+            res = yield self.searchcondition_ps.addCondition(userId=userId, name=name, keywords=json.dumps(keywords,ensure_ascii = False),
                                                              cityName=cityName, salaryTop=salaryTop,
                                                              salaryBottom=salaryBottom,
                                                              salaryNegotiable=salaryNegotiable, industry=industry)
