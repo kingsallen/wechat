@@ -213,6 +213,7 @@ class ProfileCustomHandler(BaseHandler):
     def get(self):
         pid = int(self.params.pid)
         position = yield self.position_ps.get_position(pid)
+        self.logger.debug("position: %s" % position)
         if not position.app_cv_config_id:
             self.write_error(404)
             return
