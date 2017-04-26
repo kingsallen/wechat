@@ -134,5 +134,5 @@ class AggregationPageService(PageService):
 
         return hot_company
 
-    def _gen_resources(self, jd_pic):
+    # def _gen_resources(self, jd_pic):
 
