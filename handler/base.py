@@ -128,9 +128,6 @@ class BaseHandler(MetaBaseHandler):
         # 构造并拼装 session
         yield self._fetch_session()
 
-        # # 处理 PC 端账号绑定
-        # yield self.reload_for_account_merge()
-
         # 构造 access_time cookie
         self._set_access_time_cookie()
 

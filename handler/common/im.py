@@ -45,7 +45,8 @@ class UnreadCountHandler(BaseHandler):
 
         chat_num = yield self.chat_ps.get_unread_chat_num(self.current_user.sysuser.id, publisher)
         self.send_json_success(data={
-            "unread": chat_num
+            "unread": chat_num,
+            "is_subscribe": self.current_user.qxuser.is_subscribe == 1
         })
 
     @handle_response
@@ -59,7 +60,8 @@ class UnreadCountHandler(BaseHandler):
 
         chat_num = yield self.chat_ps.get_all_unread_chat_num(self.current_user.sysuser.id)
         self.send_json_success(data={
-            "unread": chat_num
+            "unread": chat_num,
+            "is_subscribe": self.current_user.qxuser.is_subscribe == 1
         })
 
 

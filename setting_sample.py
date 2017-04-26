@@ -89,9 +89,10 @@ settings['zookeeper'] = {
 }
 
 # wechat host
-settings['qx_host'] = 'qx2.dqprism.com'
-settings['platform_host'] = 'platform2.dqprism.com'
-settings['helper_host'] = 'platform2.dqprism.com'
+settings['m_host'] = 'platform2.dqprism.com'
+settings['qx_host'] = settings['m_host'] + '/recruit'
+settings['platform_host'] = settings['m_host'] + '/m'
+settings['helper_host'] = settings['m_host'] + '/h'
 settings['pc_host'] = 'www2.dqprism.com'
 
 # 公众号 signatures

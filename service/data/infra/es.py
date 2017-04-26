@@ -18,7 +18,7 @@ class EsDataService(DataService):
     es = BaseES()
 
     @gen.coroutine
-    def get_es_position(self, params, page_no=0, page_size=300):
+    def get_es_position(self, params, page_no, page_size):
         """根据条件获得搜索结果
         """
 

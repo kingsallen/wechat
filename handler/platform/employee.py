@@ -105,7 +105,7 @@ class EmployeeUnbindHandler(BaseHandler):
 
 class EmployeeBindHandler(BaseHandler):
     """员工绑定 API
-    /m/api/employee/binding"""
+    /api/employee/binding"""
 
     @handle_response
     @authenticated

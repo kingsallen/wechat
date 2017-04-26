@@ -11,6 +11,7 @@ import conf.qx as qx_const
 from handler.base import BaseHandler
 from util.common.decorator import handle_response
 from util.common import ObjectDict
+from util.tool.url_tool import make_url
 
 
 class AggregationHandler(BaseHandler):
@@ -32,18 +33,16 @@ class AggregationHandler(BaseHandler):
         page_no = self.params.page_no or 0
         page_size = self.params.page_size or 10
 
-        # 处理热招企业
-        hot_company = yield self.aggregation_ps.get_hot_company(salary_top,
-                                                                salary_bottom,
-                                                                salary_negotiable,
-                                                                keywords,
-                                                                city,
-                                                                industry,
-                                                                page_no,
-                                                                page_size)
+        es_res = yield self.aggregation_ps.opt_es(salary_top,
+                                                  salary_bottom,
+                                                  salary_negotiable,
+                                                  keywords,
+                                                  city,
+                                                  industry,
+                                                  page_no,
+                                                  page_size)
 
-        print(hot_company)
-        positions = list()
+        positions = self.aggregation_ps.opt_agg_positions(es_res, page_size)
 
         result = ObjectDict({
             "page_no": page_no,
@@ -58,13 +57,18 @@ class AggregationHandler(BaseHandler):
 
             # 处理 banner
             banner = yield self.aggregation_ps.get_aggregation_banner()
+
+            # 处理热招企业
+            hot_company = self.aggregation_ps.opt_agg_company(es_res)
+
             result.update({
                 "is_hr_ads": is_show_ads,
                 "banner": banner,
                 "hot_company": hot_company,
             })
 
-            # 设置搜索词
+        # 来自初次进入页面，则设置搜索词 cookie
+        if self.params.fr_wel:
             self._set_welcome_cookie()
 
         self.send_json_success(data=result)
@@ -106,4 +110,36 @@ class AggregationHandler(BaseHandler):
         if int(session_ads_total) > 3:
             return False
         return True
+
+    @gen.coroutine
+    def _make_share_info(self, company_id, did=None, rp_share_info=None):
+        """构建 share 内容"""
+
+        company_info = yield self.company_ps.get_company(
+            conds={"id": did or company_id}, need_conf=True)
+        link = make_url(
+            path.POSITION_LIST,
+            self.params,
+            host=self.request.host,
+            protocol=self.request.protocol,
+            recom=self.position_ps._make_recom(self.current_user.sysuser.id),
+            escape=["pid", "keywords", "cities", "candidate_source",
+                    "employment_type", "salary", "department", "occupations",
+                    "custom", "degree", "page_from", "page_size"])
+
+        if not rp_share_info:
+            cover = self.static_url(company_info.logo)
+            title = "%s热招职位" % company_info.abbreviation
+            description = msg.SHARE_DES_DEFAULT
+        else:
+            cover = rp_share_info.cover
+            title = rp_share_info.title
+            description = rp_share_info.description
+
+        self.params.share = ObjectDict({
+            "cover": cover,
+            "title": title,
+            "description": description,
+            "link": link
+        })
 

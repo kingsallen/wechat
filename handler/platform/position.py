@@ -583,9 +583,8 @@ class PositionHandler(BaseHandler):
                         host=self.settings.platform_host,
                         wechat_signature=self.current_user.wechat.signature)
                 else:
-                    link = make_url(path.OLD_POSITION_PATH,
-                                    host=self.settings.mobile_host, m="info",
-                                    pid=position_info.id)
+                    link = make_url(path.GAMMA_POSITION_JD.format(position_info.id),
+                                    host=self.settings.mobile_host)
 
                 yield position_view_five_notice_tpl(help_wechat.id, hr_wx_user.openid,
                                          link, position_info.title,

@@ -202,7 +202,7 @@ class WeChatOauth2Service(object):
             up = urlparse(self.redirect_url)
             netloc = up.netloc.replace(const.ENV_PLATFORM, const.ENV_QX, 1)
             self.redirect_url = "{}?next_url={}".format(
-                up.scheme + "://" + netloc + path.WX_OAUTH_QX_PATH,
+                up.scheme + "://" + netloc + path.GAMMA_OAUTH_QX,
                 next_url)
 
     @staticmethod

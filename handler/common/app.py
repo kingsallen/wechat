@@ -54,11 +54,11 @@ class IndexHandler(BaseHandler):
 
     def _save_dqpid_cookie(self):
         """ 新用户在申请职位的时候进入老六步创建简历时
-        在 /m/app/profile/new 页面，保存 pid 进 session cookie <dqpid>
+        在 /app/profile/new 页面，保存 pid 进 session cookie <dqpid>
 
         Profile 创建成功后在根据 dqpid 是否存在判断跳转
         """
-        if re.match(r"/m/app/profile/new", self.request.uri):
+        if re.match(r"/app/profile/new", self.request.uri):
             if self.params.pid:
                 self.set_cookie('dqpid', self.params.pid)
                 self.logger.debug('dqpid: %s saved' % self.params.pid)
