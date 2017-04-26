@@ -76,6 +76,8 @@ class BaseHandler(MetaBaseHandler):
         # 构建 session 之前先缓存一份 wechat
         self._wechat = yield self._get_current_wechat()
         self._qx_wechat = yield self._get_qx_wechat()
+        if not self._wechat:
+            self._wechat = self._qx_wechat
 
         # 初始化 oauth service
         self._oauth_service = WeChatOauth2Service(

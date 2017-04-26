@@ -48,7 +48,7 @@ class UserPageService(PageService):
                 "login_count":      1,
                 "unionid":          userinfo.unionid,
                 "source":           source,
-                "nickname":         userinfo.nickname,
+                "nickname":         '匿名用户' if userinfo.nickname == '(未知)' else userinfo.nickname,
                 "name":             "",
                 "headimg":          userinfo.headimgurl,
             })

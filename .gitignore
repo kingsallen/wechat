@@ -123,3 +123,5 @@ cert/*
 
 # Gradle
 .gradle/
+
+node_modules/

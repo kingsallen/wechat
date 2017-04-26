@@ -45,6 +45,13 @@ class PositionHandler(BaseHandler):
             did = yield self.company_ps.get_real_company_id(position_info.publisher, position_info.company_id)
             company_info = yield self.company_ps.get_company(conds={"id": did}, need_conf=True)
 
+            # 刷新链路
+            self.logger.debug("[JD]刷新链路")
+            last_employee_user_id = yield self._make_refresh_share_chain(
+                position_info)
+            self.logger.debug(
+                "[JD]last_employee_user_id: %s" % (last_employee_user_id))
+
             self.logger.debug("[JD]构建转发信息")
             yield self._make_share_info(position_info, company_info)
 
@@ -87,7 +94,7 @@ class PositionHandler(BaseHandler):
                 module_job_require_old = self._make_json_job_require_old(position_info)
                 module_department_old = self._make_json_job_department(position_info)
                 module_job_attr_old = self._make_json_job_attr(position_info)
-                module_hr_register_old = self.current_user.wechat.hr_register & True
+                module_hr_register_old = int(self.current_user.wechat.hr_register) & True
 
                 add_item(position_data, "module_job_require", module_job_require_old)
                 add_item(position_data, "module_department", module_department_old)
@@ -127,12 +134,7 @@ class PositionHandler(BaseHandler):
             self.flush()
 
             # 后置操作
-            # 刷新链路
             if self.is_platform:
-                self.logger.debug("[JD]刷新链路")
-                last_employee_user_id = yield self._make_refresh_share_chain(position_info)
-                self.logger.debug("[JD]last_employee_user_id: %s" % (last_employee_user_id))
-
                 self.logger.debug("[JD]转发积分操作")
                 yield self._make_add_reward_click(position_info, last_employee_user_id)
 

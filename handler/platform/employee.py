@@ -325,15 +325,19 @@ class CustomInfoHandler(BaseHandler):
         if self.params.from_wx_template == "o":
             message = messages.EMPLOYEE_BINDING_CUSTOM_FIELDS_DONE
         else:
-            message = messages.EMPLOYEE_BINDING_EMAIL_DONE
+            if employee.authMethod == const.USER_EMPLOYEE_AUTH_METHOD.EMAIL:
+                message = messages.EMPLOYEE_BINDING_EMAIL_DONE
+            else:
+                message = messages.EMPLOYEE_BINDING_SUCCESS
 
         self.render(
             template_name='refer/weixin/employee/employee_binding_tip.html',
             result=0,
             messages=message,
             nexturl=next_url,
-            source=1)
-        return
+            source=1,
+            button_text=messages.EMPLOYEE_BINDING_EMAIL_BTN_TEXT
+        )
 
 
 class BindedHandler(BaseHandler):
@@ -359,5 +363,6 @@ class BindedHandler(BaseHandler):
                 result=0,
                 messages=messages.EMPLOYEE_BINDING_SUCCESS,
                 nexturl=make_url(path.POSITION_LIST, self.params,
-                                 noemprecom=str(const.YES))
+                                 noemprecom=str(const.YES)),
+                button_text=messages.EMPLOYEE_BINDING_DEFAULT_BTN_TEXT
             )
