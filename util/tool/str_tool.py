@@ -12,6 +12,8 @@ import uuid
 import pypinyin
 from pypinyin import lazy_pinyin
 
+import conf.common as const
+
 
 def password_crypt(code=None):
     """
@@ -47,6 +49,35 @@ def gen_salary(salary_top, salary_bottom):
 
     return salary_res
 
+def gen_degree(degree, degree_above):
+    """
+    处理学历
+    :param degree:
+    :param degree_above:
+    :return:
+    """
+
+    if degree and degree_above:
+        return const.DEGREE.get(str(degree)) + const.POSITION_ABOVE
+    elif degree:
+        return const.DEGREE.get(str(degree))
+    else:
+        return ""
+
+def gen_experience(experience, experience_above):
+    """
+    处理学历要求
+    :param experience:
+    :param experience_above:
+    :return:
+    """
+
+    if experience and experience_above:
+        return experience + const.EXPERIENCE_UNIT + const.POSITION_ABOVE
+    elif experience:
+        return experience + const.EXPERIENCE_UNIT
+    else:
+        return ""
 
 def to_str(bytes_or_str):
     """to Python 3 str type"""

@@ -5,11 +5,13 @@
 # @File    : aggregation.py
 # @DES     : 聚合号列表页
 
+import ujson
 from tornado import gen
 import conf.common as const
+import conf.qx as qx_const
 from service.page.base import PageService
 from util.common import ObjectDict
-from util.tool.str_tool import split, gen_salary
+from util.tool.str_tool import split, gen_salary, gen_degree, gen_experience
 from util.tool.url_tool import make_static_url
 
 class AggregationPageService(PageService):
@@ -25,9 +27,31 @@ class AggregationPageService(PageService):
         :return:
         """
 
-        # banner_res = yield self.thrift_position_ds.get_aggregation_banner()
-        # raise gen.Return(banner_res)
-        pass
+        ret = yield self.thrift_position_ds.get_aggregation_banner()
+        banner = ObjectDict()
+        if ret.data:
+            banner = ObjectDict({
+                "image_url": make_static_url(ret.data.imageUrl),
+                "href_url": ret.data.hrefUrl
+            })
+
+        raise gen.Return(banner)
+
+    @gen.coroutine
+    def get_user_position_status(self, user_id, position_ids):
+        """
+        批量查询用户职位状态：已阅，已收藏，已投递
+        :param user_id:
+        :param position_ids:
+        :return:
+        """
+
+        ret = yield self.thrift_searchcondition_ds.get_user_position_status(user_id, position_ids)
+        banner = ObjectDict()
+        if ret.positionStatus:
+            self.logger.debug("get_user_position_status:{}".format(ret.positionStatus))
+
+        raise gen.Return(banner)
 
     @gen.coroutine
     def opt_es(self, salary_top, salary_bottom, salary_negotiable, keywords, city, industry, page_no, page_size):
@@ -44,11 +68,13 @@ class AggregationPageService(PageService):
         page_from = page_no * page_size
         if page_no == 0:
             # 如果是首页，则取300条数据，热招企业需要
-            page_size = 300
+            # page_size = 300
+            page_size = 10
 
         es_res = yield self.es_ds.get_es_position(params, page_from, page_size)
         return es_res
 
+    @gen.coroutine
     def opt_agg_positions(self, es_res, page_size):
 
         """
@@ -65,17 +91,14 @@ class AggregationPageService(PageService):
                 agg_position["title"] = item.get("_source").get("position").get("title")
                 agg_position["salary"] = gen_salary(item.get("_source").get("position").get("salary_top"), item.get("_source").get("position").get("salary_bottom"))
                 agg_position["team"] = item.get("_source").get("team", {}).get("name","")
-
-                agg_position["degree"] = const.DEGREE.get(str(int(item.get("_source").get("position").get("degree")))) \
-                                         + (const.POSITION_ABOVE if item.get("_source").get("position").get("degree_above") else '')
-                agg_position["experience"] = item.get("_source").get("position").get("experience") \
-                                             + (const.EXPERIENCE_UNIT if item.get("_source").get("position").get("experience") else '') \
-                                             + (const.POSITION_ABOVE if item.get("_source").get("position").get("experience_above") else '')
+                agg_position["degree"] = gen_degree(int(item.get("_source").get("position").get("degree")), item.get("_source").get("position").get("degree_above"))
+                agg_position["experience"] = gen_experience(item.get("_source").get("position").get("experience"), item.get("_source").get("position").get("experience_above"))
                 agg_position["has_team"] = True if item.get("_source").get("team", {}) else False
-                agg_position["team_img"] = item.get("_source").get("team",{}).get("resource",{}).get("res_url")
-                agg_position["job_img"] = item.get("_source").get("jd_pic",{}).get("position_pic",{}).get("first_pic",{}).get("res_url")
-                agg_position["company_img"] = item.get("_source").get("company",{}).get("impression",{}).get("impression0")
 
+                team_img, job_img, company_img = yield self.opt_jd_home_img(item.get("_source").get("company",{}).get("industry"), item)
+                agg_position["team_img"] = make_static_url(team_img)
+                agg_position["job_img"] = make_static_url(job_img)
+                agg_position["company_img"] = make_static_url(company_img)
                 agg_position["resources"] = item.get("_source").get("position").get("title")
 
                 hot_positons.append(agg_position)
@@ -83,6 +106,39 @@ class AggregationPageService(PageService):
                     break
 
         return hot_positons
+
+    @gen.coroutine
+    def opt_jd_home_img(self, industry, item):
+
+        industries = yield self.infra_dict_ds.get_industries()
+        self.logger.debug("industries:{}".format(industries))
+        indus_dict = ObjectDict()
+        for param in industries:
+            for indus in param.get("list"):
+                indus_dict[indus.get("name")] = indus
+
+        if industry:
+            indus_parent_code = int(indus_dict.get(industry).get("code")/100) * 100
+        else:
+            indus_parent_code = ""
+
+        if not item.get("_source").get("team",{}).get("resource"):
+            team_img = qx_const.JD_BACKGROUND_IMG.get(indus_parent_code).get("team_img")
+        else:
+            team_img = item.get("_source").get("team",{}).get("resource",{}).get("res_url")
+
+        if not item.get("_source").get("jd_pic",{}).get("position_pic",{}).get("first_pic",{}):
+            job_img = qx_const.JD_BACKGROUND_IMG.get(indus_parent_code).get("job_img")
+        else:
+            job_img = item.get("_source").get("jd_pic",{}).get("position_pic",{}).get("first_pic",{}).get("res_url")
+
+        if not item.get("_source").get("company",{}).get("impression",{}):
+            company_img = qx_const.JD_BACKGROUND_IMG.get(indus_parent_code).get("company_img")
+        else:
+            impression = ujson.loads(item.get("_source").get("company",{}).get("impression",{}))
+            company_img = impression.get("impression0")
+
+        return team_img, job_img, company_img
 
     def opt_agg_company(self, es_res):
 

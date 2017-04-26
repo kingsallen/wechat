@@ -42,7 +42,7 @@ class AggregationHandler(BaseHandler):
                                                   page_no,
                                                   page_size)
 
-        positions = self.aggregation_ps.opt_agg_positions(es_res, page_size)
+        positions = yield self.aggregation_ps.opt_agg_positions(es_res, page_size)
 
         result = ObjectDict({
             "page_no": page_no,
@@ -56,7 +56,8 @@ class AggregationHandler(BaseHandler):
             is_show_ads = self._show_hr_ads()
 
             # 处理 banner
-            banner = yield self.aggregation_ps.get_aggregation_banner()
+            banner = ObjectDict()
+            # banner = yield self.aggregation_ps.get_aggregation_banner()
 
             # 处理热招企业
             hot_company = self.aggregation_ps.opt_agg_company(es_res)

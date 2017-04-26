@@ -8,7 +8,7 @@ from service.page.user.user import UserPageService
 from util.common import ObjectDict
 from util.common.cipher import encode_id
 from util.tool.date_tool import jd_update_date, str_2_date
-from util.tool.str_tool import gen_salary, split, set_literl
+from util.tool.str_tool import gen_salary, split, set_literl, gen_degree, gen_experience
 from util.tool.temp_data_tool import make_position_detail_cms, make_team, template3
 
 
@@ -50,13 +50,10 @@ class PositionPageService(PageService):
             "salary": salary,
             "city": position_res.city,
             "occupation": position_res.occupation,
-            "experience": position_res.experience + (
-            self.constant.EXPERIENCE_UNIT if position_res.experience else '') + (
-                          self.constant.POSITION_ABOVE if position_res.experience_above else ''),
+            "experience": gen_experience(position_res.experience, position_res.experience_above),
             "language": position_res.language,
             "count": position_res.count,
-            "degree": self.constant.DEGREE.get(str(position_res.degree)) + (
-            self.constant.POSITION_ABOVE if position_res.degree_above else ''),
+            "degree": gen_degree(position_res.degree, position_res.degree_above),
             "management": position_res.management,
             "visitnum": position_res.visitnum,
             "accountabilities": position_res.accountabilities,
