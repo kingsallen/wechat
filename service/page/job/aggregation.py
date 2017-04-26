@@ -72,9 +72,9 @@ class AggregationPageService(PageService):
                                              + (const.EXPERIENCE_UNIT if item.get("_source").get("position").get("experience") else '') \
                                              + (const.POSITION_ABOVE if item.get("_source").get("position").get("experience_above") else '')
                 agg_position["has_team"] = True if item.get("_source").get("team", {}) else False
-                agg_position["team_img"] = item.get("_source").get("position").get("title")
-                agg_position["job_img"] = item.get("_source").get("position").get("title")
-                agg_position["company_img"] = item.get("_source").get("position").get("title")
+                agg_position["team_img"] = item.get("_source").get("team",{}).get("resource",{}).get("res_url")
+                agg_position["job_img"] = item.get("_source").get("jd_pic",{}).get("position_pic",{}).get("first_pic",{}).get("res_url")
+                agg_position["company_img"] = item.get("_source").get("company",{}).get("impression",{}).get("impression0")
 
                 agg_position["resources"] = item.get("_source").get("position").get("title")
 
@@ -133,3 +133,6 @@ class AggregationPageService(PageService):
             hot_company.append(agg_company)
 
         return hot_company
+
+    def _gen_resources(self, jd_pic):
+

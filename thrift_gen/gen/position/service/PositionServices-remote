@@ -37,6 +37,8 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('   getPositionListRpExt( pids)')
     print('   getRpPositionList(i32 hb_config_id)')
     print('  WechatShareData getShareInfo(i32 hb_config_id)')
+    print('  CampaignHeadImageVO headImage()')
+    print('  PositionDetailsVO positionDetails(i32 positionId)')
     print('')
     sys.exit(0)
 
@@ -193,6 +195,18 @@ elif cmd == 'getShareInfo':
         print('getShareInfo requires 1 args')
         sys.exit(1)
     pp.pprint(client.getShareInfo(eval(args[0]),))
+
+elif cmd == 'headImage':
+    if len(args) != 0:
+        print('headImage requires 0 args')
+        sys.exit(1)
+    pp.pprint(client.headImage())
+
+elif cmd == 'positionDetails':
+    if len(args) != 1:
+        print('positionDetails requires 1 args')
+        sys.exit(1)
+    pp.pprint(client.positionDetails(eval(args[0]),))
 
 else:
     print('Unrecognized method %s' % cmd)

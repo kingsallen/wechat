@@ -112,6 +112,19 @@ class Iface(object):
         """
         pass
 
+    def headImage(self):
+        """
+        Gamma 0.9 接口*
+        """
+        pass
+
+    def positionDetails(self, positionId):
+        """
+        Parameters:
+         - positionId
+        """
+        pass
+
 
 class Client(Iface):
     def __init__(self, transport, iprot_factory, oprot_factory=None):
@@ -570,6 +583,68 @@ class Client(Iface):
             return result.success
         raise TApplicationException(TApplicationException.MISSING_RESULT, "getShareInfo failed: unknown result")
 
+    def headImage(self):
+        """
+        Gamma 0.9 接口*
+        """
+        self._seqid += 1
+        future = self._reqs[self._seqid] = concurrent.Future()
+        self.send_headImage()
+        return future
+
+    def send_headImage(self):
+        oprot = self._oprot_factory.getProtocol(self._transport)
+        oprot.writeMessageBegin('headImage', TMessageType.CALL, self._seqid)
+        args = headImage_args()
+        args.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def recv_headImage(self, iprot, mtype, rseqid):
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = headImage_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "headImage failed: unknown result")
+
+    def positionDetails(self, positionId):
+        """
+        Parameters:
+         - positionId
+        """
+        self._seqid += 1
+        future = self._reqs[self._seqid] = concurrent.Future()
+        self.send_positionDetails(positionId)
+        return future
+
+    def send_positionDetails(self, positionId):
+        oprot = self._oprot_factory.getProtocol(self._transport)
+        oprot.writeMessageBegin('positionDetails', TMessageType.CALL, self._seqid)
+        args = positionDetails_args()
+        args.positionId = positionId
+        args.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def recv_positionDetails(self, iprot, mtype, rseqid):
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = positionDetails_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "positionDetails failed: unknown result")
+
 
 class Processor(Iface, TProcessor):
     def __init__(self, handler):
@@ -588,6 +663,8 @@ class Processor(Iface, TProcessor):
         self._processMap["getPositionListRpExt"] = Processor.process_getPositionListRpExt
         self._processMap["getRpPositionList"] = Processor.process_getRpPositionList
         self._processMap["getShareInfo"] = Processor.process_getShareInfo
+        self._processMap["headImage"] = Processor.process_headImage
+        self._processMap["positionDetails"] = Processor.process_positionDetails
 
     def process(self, iprot, oprot):
         (name, type, seqid) = iprot.readMessageBegin()
@@ -755,6 +832,30 @@ class Processor(Iface, TProcessor):
         result = getShareInfo_result()
         result.success = yield gen.maybe_future(self._handler.getShareInfo(args.hb_config_id))
         oprot.writeMessageBegin("getShareInfo", TMessageType.REPLY, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    @gen.coroutine
+    def process_headImage(self, seqid, iprot, oprot):
+        args = headImage_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = headImage_result()
+        result.success = yield gen.maybe_future(self._handler.headImage())
+        oprot.writeMessageBegin("headImage", TMessageType.REPLY, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    @gen.coroutine
+    def process_positionDetails(self, seqid, iprot, oprot):
+        args = positionDetails_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = positionDetails_result()
+        result.success = yield gen.maybe_future(self._handler.positionDetails(args.positionId))
+        oprot.writeMessageBegin("positionDetails", TMessageType.REPLY, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -2396,6 +2497,228 @@ class getShareInfo_result(object):
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
         oprot.writeStructBegin('getShareInfo_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.STRUCT, 0)
+            self.success.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class headImage_args(object):
+
+    thrift_spec = (
+    )
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('headImage_args')
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class headImage_result(object):
+    """
+    Attributes:
+     - success
+    """
+
+    thrift_spec = (
+        (0, TType.STRUCT, 'success', (thrift_gen.gen.dao.struct.candidatedb.ttypes.CampaignHeadImageVO, thrift_gen.gen.dao.struct.candidatedb.ttypes.CampaignHeadImageVO.thrift_spec), None, ),  # 0
+    )
+
+    def __init__(self, success=None,):
+        self.success = success
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRUCT:
+                    self.success = thrift_gen.gen.dao.struct.candidatedb.ttypes.CampaignHeadImageVO()
+                    self.success.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('headImage_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.STRUCT, 0)
+            self.success.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class positionDetails_args(object):
+    """
+    Attributes:
+     - positionId
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'positionId', None, None, ),  # 1
+    )
+
+    def __init__(self, positionId=None,):
+        self.positionId = positionId
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.positionId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('positionDetails_args')
+        if self.positionId is not None:
+            oprot.writeFieldBegin('positionId', TType.I32, 1)
+            oprot.writeI32(self.positionId)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class positionDetails_result(object):
+    """
+    Attributes:
+     - success
+    """
+
+    thrift_spec = (
+        (0, TType.STRUCT, 'success', (thrift_gen.gen.position.struct.ttypes.PositionDetailsVO, thrift_gen.gen.position.struct.ttypes.PositionDetailsVO.thrift_spec), None, ),  # 0
+    )
+
+    def __init__(self, success=None,):
+        self.success = success
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRUCT:
+                    self.success = thrift_gen.gen.position.struct.ttypes.PositionDetailsVO()
+                    self.success.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('positionDetails_result')
         if self.success is not None:
             oprot.writeFieldBegin('success', TType.STRUCT, 0)
             self.success.write(oprot)

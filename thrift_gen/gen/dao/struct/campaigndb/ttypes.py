@@ -13,13 +13,12 @@ import sys
 from thrift.transport import TTransport
 
 
-class UserCollectPositionDO(object):
+class CampaignHeadImageDO(object):
     """
     Attributes:
      - id
-     - userId
-     - positionId
-     - status
+     - imageUrl
+     - hrefUrl
      - createTime
      - updateTime
     """
@@ -27,18 +26,16 @@ class UserCollectPositionDO(object):
     thrift_spec = (
         None,  # 0
         (1, TType.I32, 'id', None, None, ),  # 1
-        (2, TType.I32, 'userId', None, None, ),  # 2
-        (3, TType.I32, 'positionId', None, None, ),  # 3
-        (4, TType.I32, 'status', None, None, ),  # 4
-        (5, TType.STRING, 'createTime', 'UTF8', None, ),  # 5
-        (6, TType.STRING, 'updateTime', 'UTF8', None, ),  # 6
+        (2, TType.STRING, 'imageUrl', 'UTF8', None, ),  # 2
+        (3, TType.STRING, 'hrefUrl', 'UTF8', None, ),  # 3
+        (4, TType.STRING, 'createTime', 'UTF8', None, ),  # 4
+        (5, TType.STRING, 'updateTime', 'UTF8', None, ),  # 5
     )
 
-    def __init__(self, id=None, userId=None, positionId=None, status=None, createTime=None, updateTime=None,):
+    def __init__(self, id=None, imageUrl=None, hrefUrl=None, createTime=None, updateTime=None,):
         self.id = id
-        self.userId = userId
-        self.positionId = positionId
-        self.status = status
+        self.imageUrl = imageUrl
+        self.hrefUrl = hrefUrl
         self.createTime = createTime
         self.updateTime = updateTime
 
@@ -57,26 +54,21 @@ class UserCollectPositionDO(object):
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
-                if ftype == TType.I32:
-                    self.userId = iprot.readI32()
+                if ftype == TType.STRING:
+                    self.imageUrl = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
             elif fid == 3:
-                if ftype == TType.I32:
-                    self.positionId = iprot.readI32()
+                if ftype == TType.STRING:
+                    self.hrefUrl = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
             elif fid == 4:
-                if ftype == TType.I32:
-                    self.status = iprot.readI32()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 5:
                 if ftype == TType.STRING:
                     self.createTime = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
-            elif fid == 6:
+            elif fid == 5:
                 if ftype == TType.STRING:
                     self.updateTime = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
@@ -90,29 +82,25 @@ class UserCollectPositionDO(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
-        oprot.writeStructBegin('UserCollectPositionDO')
+        oprot.writeStructBegin('CampaignHeadImageDO')
         if self.id is not None:
             oprot.writeFieldBegin('id', TType.I32, 1)
             oprot.writeI32(self.id)
             oprot.writeFieldEnd()
-        if self.userId is not None:
-            oprot.writeFieldBegin('userId', TType.I32, 2)
-            oprot.writeI32(self.userId)
+        if self.imageUrl is not None:
+            oprot.writeFieldBegin('imageUrl', TType.STRING, 2)
+            oprot.writeString(self.imageUrl.encode('utf-8') if sys.version_info[0] == 2 else self.imageUrl)
             oprot.writeFieldEnd()
-        if self.positionId is not None:
-            oprot.writeFieldBegin('positionId', TType.I32, 3)
-            oprot.writeI32(self.positionId)
-            oprot.writeFieldEnd()
-        if self.status is not None:
-            oprot.writeFieldBegin('status', TType.I32, 4)
-            oprot.writeI32(self.status)
+        if self.hrefUrl is not None:
+            oprot.writeFieldBegin('hrefUrl', TType.STRING, 3)
+            oprot.writeString(self.hrefUrl.encode('utf-8') if sys.version_info[0] == 2 else self.hrefUrl)
             oprot.writeFieldEnd()
         if self.createTime is not None:
-            oprot.writeFieldBegin('createTime', TType.STRING, 5)
+            oprot.writeFieldBegin('createTime', TType.STRING, 4)
             oprot.writeString(self.createTime.encode('utf-8') if sys.version_info[0] == 2 else self.createTime)
             oprot.writeFieldEnd()
         if self.updateTime is not None:
-            oprot.writeFieldBegin('updateTime', TType.STRING, 6)
+            oprot.writeFieldBegin('updateTime', TType.STRING, 5)
             oprot.writeString(self.updateTime.encode('utf-8') if sys.version_info[0] == 2 else self.updateTime)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
