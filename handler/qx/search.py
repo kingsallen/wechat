@@ -12,7 +12,7 @@ class SearchConditionHandler(BaseHandler):
     @coroutine
     def get(self):
         userid = self.current_user.sysuser.id
-        res = yield self.searchcondition_ps.getConditionList(userid)
+        res = yield self.searchcondition_ps.get_condition_list(userid)
 
         conditionlist = res.searchConditionList
         if res.status == 0:
@@ -39,7 +39,7 @@ class SearchConditionHandler(BaseHandler):
             salaryBottom = condition.get('salaryBottom', None)
             salaryNegotiable = condition.get('salaryNegotiable', None)
 
-            res = yield self.searchcondition_ps.addCondition(userId=userId, name=name, keywords=json.dumps(keywords,ensure_ascii = False),
+            res = yield self.searchcondition_ps.add_condition(userId=userId, name=name, keywords=json.dumps(keywords,ensure_ascii = False),
                                                              cityName=cityName, salaryTop=salaryTop,
                                                              salaryBottom=salaryBottom,
                                                              salaryNegotiable=salaryNegotiable, industry=industry)
@@ -52,7 +52,7 @@ class SearchConditionHandler(BaseHandler):
     @coroutine
     def delete(self, id):
         userId = self.current_user.sysuser.id
-        res = yield self.searchcondition_ps.delCondition(int(userId), int(id))
+        res = yield self.searchcondition_ps.del_condition(int(userId), int(id))
         if res.status == 0:
             self.send_json_success()
         else:

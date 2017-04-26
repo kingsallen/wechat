@@ -7,12 +7,12 @@ from service.page.base import PageService
 class SearchconditionPageService(PageService):
 
     @gen.coroutine
-    def getConditionList(self, userId):
+    def get_condition_list(self, userId):
         res = yield self.thrift_searchcondition_ds.userSearchConditionList(userId)
-        res.searchConditionList=self.formatData(res.searchConditionList)
+        res.searchConditionList=self.format_data(res.searchConditionList)
         raise gen.Return(res)
 
-    def formatData(self, searchConditionList):
+    def format_data(self, searchConditionList):
         data = []
         for i in searchConditionList:
             data.append({
@@ -31,7 +31,7 @@ class SearchconditionPageService(PageService):
         return data
 
     @gen.coroutine
-    def addCondition(self, userId=None, name=None, keywords=None,
+    def add_condition(self, userId=None, name=None, keywords=None,
                      cityName=None, salaryTop=None,
                      salaryBottom=None,
                      salaryNegotiable=None, industry=None):
@@ -45,6 +45,6 @@ class SearchconditionPageService(PageService):
         raise gen.Return(res)
 
     @gen.coroutine
-    def delCondition(self, userId, id):
+    def del_condition(self, userId, id):
         res = yield self.thrift_searchcondition_ds.delUserSearchCondition(userId, id)
         raise gen.Return(res)
