@@ -50,9 +50,10 @@ class SearchconditionPageService(PageService):
         raise gen.Return(res)
 
     @gen.coroutine
-    def get_industries(self):
-        res=yield self.dictionary_ps.get_industries()
-        raise gen.Return(res)
+    def get_industries(self,level):
+        res=yield self.dictionary_ps.get_industries(level=level)
+        industries_list = res.data
+        raise gen.Return(industries_list)
 
     @gen.coroutine
     def get_city_list(self):
