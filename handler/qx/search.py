@@ -77,12 +77,20 @@ class SearchCityHandler(BaseHandler):
 
     @coroutine
     def get_city_list(self):
-        res = yield self.dictionary_ps.get_cities()
+        res = yield self.searchcondition_ps.get_cities()
         raise Return(res)
+
+    # @coroutine
+    # def get_industries(self):
+    #     response = yield http_get(path.DICT_INDUSTRY, dict(parent=0))
+    #     industries_list = response.data
+    #     res = map(lambda x: x['name'], industries_list)
+    #     raise Return({"industries": list(res)})
 
     @coroutine
     def get_industries(self):
-        response = yield http_get(path.DICT_INDUSTRY, dict(parent=0))
-        industries_list = response.data
-        res = map(lambda x: x['name'], industries_list)
-        raise Return({"industries": list(res)})
+
+        industries_list = yield self.searchcondition_ps.get_industries()
+        res=map(lambda x:x['text'],industries_list)
+
+        raise Return({"industries":list(res)})
