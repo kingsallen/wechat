@@ -144,8 +144,8 @@ class EmployeeBindHandler(BaseHandler):
             thrift_bind_status)
 
         # early return 1
-        if not fe_bind_status == fe.FE_EMPLOYEE_BIND_STATUS_UNBINDED:
-            self.send_json_error(message='binded or pending')
+        if fe_bind_status == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS:
+            self.send_json_error(message=messages.EMPLOYEE_BINDED_WARNING)
             return
 
         result, result_message = yield self.employee_ps.bind(binding_params)
@@ -174,9 +174,11 @@ class EmployeeBindHandler(BaseHandler):
         else:
             assert False  # should not be here
 
+        self.logger.debug(next_url)
+        self.logger.debug(message)
         self.send_json_success(
-            message=message,
-            data={ 'next_url': next_url }
+            data={'next_url': next_url},
+            message=message
         )
         self.finish()
 
@@ -189,6 +191,7 @@ class EmployeeBindHandler(BaseHandler):
 
 
 class EmployeeBindEmailHandler(BaseHandler):
+
     @handle_response
     @gen.coroutine
     def get(self):
@@ -204,7 +207,6 @@ class EmployeeBindEmailHandler(BaseHandler):
 
         self.render(template_name='employee/certification-%s.html' % tname,
                     **tparams)
-
 
         employee = yield self.employee_ps.get_valid_employee_record_by_activation_code(activation_code)
 
@@ -233,7 +235,7 @@ class RecommendRecordsHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def get(self):
-        page_no = self.params.page_no or 0
+        page_no = self.params.page_no or 1
         page_size = self.params.page_size or 10
         req_type = self.params.type or 1
         res = yield self.employee_ps.get_recommend_records(
@@ -253,10 +255,15 @@ class CustomInfoHandler(BaseHandler):
             self.current_user.company.id
         )
 
+        fe_binding_status = self.employee_ps.convert_bind_status_from_thrift_to_fe(
+            binding_status)
+
+        self.logger.debug('binding_status: %s' % binding_status)
+        self.logger.debug('fe_binding_status: %s' % fe_binding_status)
+
         # unbinded users may not need to know this page
-        if (self.employee_ps.convert_bind_status_from_thrift_to_fe(
-            binding_status) not in [fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS,
-                                    fe.FE_EMPLOYEE_BIND_STATUS_PENDING]):
+        if (fe_binding_status not in [fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS,
+                                      fe.FE_EMPLOYEE_BIND_STATUS_PENDING]):
             self.write_error(404)
             return
         else:
@@ -312,20 +319,25 @@ class CustomInfoHandler(BaseHandler):
         # 判断与跳转
         self.params.pop('next_url', None)
         self.params.pop('headimg', None)
-        next_url = make_url(path.POSITION_LIST, self.params, escape=escape)
+        next_url = make_url(path.POSITION_LIST, self.params, escape=escape,
+                            noemprecom=str(const.YES))
 
         if self.params.from_wx_template == "o":
             message = messages.EMPLOYEE_BINDING_CUSTOM_FIELDS_DONE
         else:
-            message = messages.EMPLOYEE_BINDING_EMAIL_DONE
+            if employee.authMethod == const.USER_EMPLOYEE_AUTH_METHOD.EMAIL:
+                message = messages.EMPLOYEE_BINDING_EMAIL_DONE
+            else:
+                message = messages.EMPLOYEE_BINDING_SUCCESS
 
         self.render(
             template_name='refer/weixin/employee/employee_binding_tip.html',
             result=0,
             messages=message,
             nexturl=next_url,
-            source=1)
-        return
+            source=1,
+            button_text=messages.EMPLOYEE_BINDING_EMAIL_BTN_TEXT
+        )
 
 
 class BindedHandler(BaseHandler):
@@ -350,5 +362,7 @@ class BindedHandler(BaseHandler):
                 template_name='refer/weixin/employee/employee_binding_tip.html',
                 result=0,
                 messages=messages.EMPLOYEE_BINDING_SUCCESS,
-                nexturl=make_url(path.POSITION_LIST, self.params)
+                nexturl=make_url(path.POSITION_LIST, self.params,
+                                 noemprecom=str(const.YES)),
+                button_text=messages.EMPLOYEE_BINDING_DEFAULT_BTN_TEXT
             )

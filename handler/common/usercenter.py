@@ -51,15 +51,16 @@ class UsercenterHandler(BaseHandler):
             self.current_user.sysuser.id,
             self.current_user.company.id
         )
-
+        self.logger.debug('bind_status: %s' % bind_status)
         fe_bind_status = self.employee_ps.convert_bind_status_from_thrift_to_fe(
             bind_status)
+        self.logger.debug('fe_bind_status: %s' % fe_bind_status)
 
         self.send_json_success(data=ObjectDict(
             headimg=self.static_url(res.data.headimg or const.SYSUSER_HEADIMG),
             name=res.data.name or res.data.nickname,
             email=res.data.email,
-            mobile=res.data.mobile,
+            mobile=res.data.mobile if res.data.mobile else '', # do not pass '0' to FE
             # 该公司是否启用了认证
             bind_disable=employee_cert_conf.disable == const.OLD_NO,
             bind_status=fe_bind_status,

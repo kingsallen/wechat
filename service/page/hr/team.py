@@ -131,7 +131,7 @@ class TeamPageService(PageService):
         team_positions = [pos for pos in company_positions
                           if pos.team_id == team.id and pos.status == 0]
         team_members = yield self.hr_team_member_ds.get_team_member_list(
-            conds={'team_id': team.id})
+            conds={'team_id': team.id, 'disable': 0})
 
         # detail_media_list = yield self.hr_media_ds.get_media_by_ids(json.loads(team.team_detail), True)
         modulename, detail_media_list = yield self._get_team_detail_cms(team.id)

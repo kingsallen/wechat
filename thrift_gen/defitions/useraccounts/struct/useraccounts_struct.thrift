@@ -206,15 +206,16 @@ struct RecommendationScoreVO {
  * 个人中心推荐历史记录信息主体
  */
 struct RecommendationRecordVO {
-    1: optional i8 recom_status,                //职位编号
-    2: optional string applier_name,            //申请人姓名
-    3: optional string applier_rel,             //转发者姓名
-    4: optional string position,                //职位名称
-    5: optional Timestamp click_time,           //点击事件
-    6: optional i16 status,                     //招聘进度状态
-    7: optional i8 is_interested,              //是否推荐 0没有推荐 1推荐
-    8: optional i32 view_number,               //点击次数
-    9: optional string headimgurl              //头像
+    1: optional i8 recom_status,              //职位编号
+    2: optional string applier_name,          //申请人姓名
+    3: optional string applier_rel,           //转发者姓名
+    4: optional string position,              //职位名称
+    5: optional Timestamp click_time,         //点击事件
+    6: optional i16 status,                   //招聘进度状态
+    7: optional i8 is_interested,             //是否推荐 0没有推荐 1推荐
+    8: optional i32 view_number,              //点击次数
+    9: optional string headimgurl,            //头像
+    10: optional i32 id                       // 推荐记录id
 }
 
 /*

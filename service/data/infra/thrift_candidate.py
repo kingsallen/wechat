@@ -4,9 +4,8 @@ import tornado.gen as gen
 
 from service.data.base import DataService
 from service.data.infra.framework.client.client import ServiceClientFactory
-from service.page.employee.candidate import RecomException
 from thrift_gen.gen.candidate.service.CandidateService import Client as CandidateServiceClient
-from thrift_gen.gen.candidate.struct.ttypes import CandidateListParam
+from thrift_gen.gen.candidate.struct.ttypes import CandidateListParam, RecommmendParam
 from thrift_gen.gen.common.struct.ttypes import BIZException
 from util.common import ObjectDict
 
@@ -66,26 +65,95 @@ class ThriftCandidateDataService(DataService):
                     c_info.presentee_friend_name = c.presenteeFriendName  # 一度朋友称呼
                     c_info.presentee_logo = c.presenteeLogo  # 头像
                     c_info.is_recom = c.isRecom  # 推荐状态
-                    c_info.is_interested = c.isInsterested
+                    c_info.is_interested = c.insterested
                     c_info.view_num = c.viewNumber
                     recom_group.candidates.append(c_info)
 
                 ret.append(recom_group)
 
         except BIZException as BizE:
-
             self.logger.warn("%s - %s" % (BizE.code, BizE.message))
-            e = RecomException()
-            e.code = BizE.code
-            e.message = BizE.message
-            raise e
+            raise BizE
 
         return ret
 
-    # @gen.coroutine
-    # def get_recomendations(self, company_id, id_list):
-    #     try:
-    #         recommend_result = yield self.candidate_service_cilent.getRecomendations(int(company_id), id_list)
-    #         return recommend_result
-    #     except
+    @gen.coroutine
+    def recommend(self, post_user_id, click_time, recom_record_id, realname, company,
+                  position, mobile, recom_reason, company_id):
+        """ POST 推荐， 返回 recommend_result
 
+        candidate_struct.RecommendResult recommend(
+            1: candidate_struct.RecommmendParam  param
+        ) throws(1: common_struct.BIZException  e)
+
+        """
+
+        recom_params = RecommmendParam()
+
+        recom_params.id = int(recom_record_id)
+        recom_params.realName = str(realname)
+        recom_params.company = str(company)
+        recom_params.position = str(position)
+        recom_params.mobile = str(mobile)
+        recom_params.recomReason = str(recom_reason)
+        recom_params.companyId = int(company_id)
+        recom_params.postUserId = int(post_user_id)
+        recom_params.clickTime = str(click_time)
+
+        try:
+            recommend_result = yield self.candidate_service_cilent.recommend(
+                recom_params)
+
+        except BIZException as BizE:
+            self.logger.warn("%s - %s" % (BizE.code, BizE.message))
+            raise BizE
+
+        return recommend_result
+
+    @gen.coroutine
+    def get_recommendations(self, company_id, list_of_recom_ids):
+        try:
+            recom_result = yield self.candidate_service_cilent.getRecomendations(
+                int(company_id), list_of_recom_ids)
+
+        except BIZException as BizE:
+            self.logger.warn("%s - %s" % (BizE.code, BizE.message))
+            raise BizE
+
+        return recom_result
+
+    @gen.coroutine
+    def get_recommendation(self, recom_id, post_user_id):
+        try:
+            recom_record_result = yield self.candidate_service_cilent.getRecommendation(
+                int(recom_id), int(post_user_id))
+
+        except BIZException as BizE:
+            self.logger.warn("%s - %s" % (BizE.code, BizE.message))
+            raise BizE
+
+        return recom_record_result
+
+    @gen.coroutine
+    def ignore(self, id, company_id, post_user_id,  click_time):
+        try:
+            recommend_result = yield self.candidate_service_cilent.ignore(
+                int(id), int(company_id), int(post_user_id), str(click_time))
+
+        except BIZException as BizE:
+            self.logger.warn("%s - %s" % (BizE.code, BizE.message))
+            raise BizE
+
+        return recommend_result
+
+    @gen.coroutine
+    def sort(self, post_user_id, company_id):
+        try:
+            sort_result = yield self.candidate_service_cilent.getRecommendatorySorting(
+                int(post_user_id), int(company_id))
+
+        except BIZException as BizE:
+            self.logger.warn("%s - %s" % (BizE.code, BizE.message))
+            raise BizE
+
+        return sort_result

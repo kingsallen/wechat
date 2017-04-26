@@ -1,6 +1,9 @@
 # coding=utf-8
 
 import tornado.gen as gen
+from tornado.testing import AsyncTestCase, gen_test
+from thrift_gen.gen.position.service.PositionServices import Client as PositionServiceClient
+from service.data.infra.framework.client.client import ServiceClientFactory
 
 import conf.path as path
 from service.data.base import DataService
@@ -56,3 +59,17 @@ class InfraPositionDataService(DataService):
             self.logger.warning(error)
 
         return response
+
+
+class TestEmployeeService(AsyncTestCase):
+    """Just for test(or try results) during development :)"""
+    def setUp(self):
+        super().setUp()
+        self.service = ServiceClientFactory.get_service(
+            PositionServiceClient)
+
+    @gen_test
+    def testPositionList(self):
+
+        ret = yield self.service.getPositionList()
+        print(ret)

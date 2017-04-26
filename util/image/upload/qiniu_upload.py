@@ -61,7 +61,7 @@ class QiniuUpload(BaseUpload):
         try:
             im = Image.open(buff)
         except IOError as e:
-            return QiniuUploadResult(message=u"上传失败,请尝试换一个图片", exception=e)
+            return QiniuUploadResult(message="上传失败,请尝试换一个图片", exception=e)
 
         self.image = MoImage(im)
         self.image.set_logger(self.logger)

@@ -1,27 +1,22 @@
 # coding=utf-8
 
+import json
 from tornado import gen
 
 import conf.common as const
 import conf.fe as fe
-from conf.common import NO
 import conf.path as path
+from setting import settings
+
 from service.page.base import PageService
 from thrift_gen.gen.employee.struct.ttypes import BindingParams, BindStatus
 from util.common import ObjectDict
 from util.tool.dict_tool import sub_dict
 from util.tool.url_tool import make_static_url, make_url
 from util.wechat.template import employee_refine_custom_fields_tpl
-from setting import settings
-import json
 
 
 class EmployeePageService(PageService):
-
-    FE_BIND_STATUS_SUCCESS = 0
-    FE_BIND_STATUS_UNBINDING = 1
-    FE_BIND_STATUS_NEED_VALIDATE = 2
-    FE_BIND_STATUS_FAILURE = 3
 
     FE_BIND_TYPE_CUSTOM = 'custom'
     FE_BIND_TYPE_EMAIL = 'email'
@@ -55,8 +50,8 @@ class EmployeePageService(PageService):
             user_id, company_id)
         return employee_response.bindStatus, employee_response.employee
 
-    @staticmethod
-    def convert_bind_status_from_thrift_to_fe(thrift_bind_status):
+
+    def convert_bind_status_from_thrift_to_fe(self, thrift_bind_status):
         """convert bind status value to FE format"""
         fe_bind_status = fe.FE_EMPLOYEE_BIND_STATUS_DEFAULT_INVALID
 
@@ -85,7 +80,7 @@ class EmployeePageService(PageService):
             'type':            'email',
             'binding_message': 'binding message ...',
             'binding_status':  1,
-            'send_hour':       2,
+            'send_hour':       24,
             'headimg':         'http://o8g4x4uja.bkt.clouddn.com/0.jpeg',
             'employeeid':      23,
             'name':            'name',
@@ -106,30 +101,33 @@ class EmployeePageService(PageService):
         data = ObjectDict()
         data.name = current_user.sysuser.name
         data.headimg = current_user.sysuser.headimg
-        data.mobile = current_user.sysuser.mobile
-        data.send_hour = 2  # fixed
+        data.mobile = current_user.sysuser.mobile or ''
+        data.send_hour = 24  # fixed 24 小时
+        data.conf = ObjectDict()
+        data.binding_success_message = conf.bindSuccessMessage or ''
 
-        # 如果current_user 中有 employee，表示当前用户是已认证的员工
         bind_status, employee = yield self.get_employee_info(
             user_id=current_user.sysuser.id, company_id=current_user.company.id)
 
+        # 当前是绑定状态
         if bind_status == BindStatus.BINDED:
-            data.binding_status = self.FE_BIND_STATUS_SUCCESS
-            data.employeeid = current_user.employee.id
-            data.name = current_user.employee.cname
+            data.binding_status = fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS
+            data.employeeid = employee.id
+            data.name = employee.cname
 
+        # 当前是未绑定状态
         else:
             # 否则，调用基础服务判断当前用户的认证状态：没有认证还是 pending 中
-            data.employeeid = NO
-            if bind_status == const.EMPLOYEE_BIND_STATUS_UNBINDING:
-                data.binding_status = self.FE_BIND_STATUS_UNBINDING
-            elif bind_status == const.EMPLOYEE_BIND_STATUS_EMAIL_PENDING:
-                data.binding_status = self.FE_BIND_STATUS_NEED_VALIDATE
-            else:
-                data.binding_status = self.FE_BIND_STATUS_FAILURE
+            data.employeeid = const.NO
 
-        data.conf = ObjectDict()
-        data.binding_success_message = conf.bindSuccessMessage or ''
+            if bind_status == const.EMPLOYEE_BIND_STATUS_UNBINDING:
+                data.binding_status = fe.FE_EMPLOYEE_BIND_STATUS_UNBINDED
+
+            elif bind_status == const.EMPLOYEE_BIND_STATUS_EMAIL_PENDING:
+                data.binding_status = fe.FE_EMPLOYEE_BIND_STATUS_PENDING
+
+            else:
+                data.binding_status = fe.FE_EMPLOYEE_BIND_STATUS_DEFAULT_INVALID
 
         if conf.authMode == const.EMPLOYEE_BIND_AUTH_MODE.DISABLE:
             data.type = 'disabled'
@@ -137,46 +135,86 @@ class EmployeePageService(PageService):
 
         def _make_custom_conf():
             data.conf.custom_hint = conf.customHint
-            data.conf.custom_value = ''
+            data.conf.custom_name = conf.custom
+            if bind_status == const.EMPLOYEE_BIND_STATUS_BINDED:
+                data.conf.custom_value = employee.customField
+            else:
+                data.conf.custom_value = ''
 
         def _make_questions_conf():
-            data.conf.questions = [sub_dict(e, 'q') for e in conf.questions]
-
-        if conf.authMode in [const.EMPLOYEE_BIND_AUTH_MODE.EMAIL,
-                             const.EMPLOYEE_BIND_AUTH_MODE.EMAIL_OR_CUSTOM,
-                             const.EMPLOYEE_BIND_AUTH_MODE.EMAIL_OR_QUESTION]:
-            data.type = self.FE_BIND_TYPE_EMAIL
-            data.conf.email_suffixs = conf.emailSuffix
-            if bind_status in [BindStatus.BINDED, BindStatus.PENDING]:
-                data.conf.email_name = employee.email.split('@')[0]
-                data.conf.email_suffix = employee.email.split('@')[1]
+            if bind_status == const.EMPLOYEE_BIND_STATUS_BINDED:
+                data.conf.questions = [ObjectDict(e) for e in conf.questions]
             else:
-                data.conf.email_name = ''
-                data.conf.email_suffix = data.conf.email_suffixs[0] if len(
-                    data.conf.email_suffixs) else ''
+                data.conf.questions = [sub_dict(e, 'q') for e in conf.questions]
 
-            if conf.authMode == const.EMPLOYEE_BIND_AUTH_MODE.EMAIL_OR_CUSTOM:
-                data.conf.switch = self.FE_BIND_TYPE_CUSTOM
+        # 已经绑定的员工，根据 employee.authMethod 来渲染
+        if bind_status == BindStatus.BINDED:
+            data.mobile = employee.mobile or ''
+            if employee.authMethod == const.USER_EMPLOYEE_AUTH_METHOD.EMAIL:
+                data.type = self.FE_BIND_TYPE_EMAIL
+                data.name = employee.cname
+
+                # 初始化 email_name, email_suffix 为空字符串
+                # 随后根据员工的 email 填写数据
+                data.conf.email_name = ''
+                data.conf.email_suffix = ''
+                self.logger.debug(employee.email)
+                if isinstance(employee.email, str) and '@' in employee.email:
+                    data.conf.email_name = employee.email.split('@')[0]
+                    data.conf.email_suffix = employee.email.split('@')[1]
+            elif employee.authMethod == const.USER_EMPLOYEE_AUTH_METHOD.CUSTOM:
+                data.type = self.FE_BIND_TYPE_CUSTOM
+                _make_custom_conf()
+            elif employee.authMethod == const.USER_EMPLOYEE_AUTH_METHOD.QUESTION:
+                data.type = self.FE_BIND_TYPE_QUESTION
+                _make_questions_conf()
+            else:
+                assert False # should not be here
+
+        # 未绑定的员工， 根据 conf.authMode 来渲染
+        else:
+            if conf.authMode in [const.EMPLOYEE_BIND_AUTH_MODE.EMAIL,
+                                 const.EMPLOYEE_BIND_AUTH_MODE.EMAIL_OR_CUSTOM,
+                                 const.EMPLOYEE_BIND_AUTH_MODE.EMAIL_OR_QUESTION]:
+                data.type = self.FE_BIND_TYPE_EMAIL
+                data.conf.email_suffixs = conf.emailSuffix
+                if bind_status in [const.EMPLOYEE_BIND_STATUS_BINDED,
+                                   const.EMPLOYEE_BIND_STATUS_EMAIL_PENDING]:
+                    data.conf.email_name = ''
+                    data.conf.email_suffix = ''
+                    self.logger.debug(employee.email)
+                    if isinstance(employee.email,
+                                  str) and '@' in employee.email:
+                        data.conf.email_name = employee.email.split('@')[0]
+                        data.conf.email_suffix = employee.email.split('@')[1]
+                else:
+                    data.conf.email_name = ''
+                    data.conf.email_suffix = data.conf.email_suffixs[0] if len(
+                        data.conf.email_suffixs) else ''
+
+                if conf.authMode == const.EMPLOYEE_BIND_AUTH_MODE.EMAIL_OR_CUSTOM:
+                    data.conf.switch = self.FE_BIND_TYPE_CUSTOM
+                    _make_custom_conf()
+
+                if conf.authMode == const.EMPLOYEE_BIND_AUTH_MODE.EMAIL_OR_QUESTION:
+                    data.conf.switch = self.FE_BIND_TYPE_QUESTION
+                    _make_questions_conf()
+
+            elif conf.authMode == const.EMPLOYEE_BIND_AUTH_MODE.CUSTOM:
+                data.type = self.FE_BIND_TYPE_CUSTOM
                 _make_custom_conf()
 
-            if conf.authMode == const.EMPLOYEE_BIND_AUTH_MODE.EMAIL_OR_QUESTION:
-                data.conf.switch = self.FE_BIND_TYPE_QUESTION
+            elif conf.authMode == const.EMPLOYEE_BIND_AUTH_MODE.QUESTION:
+                data.type = self.FE_BIND_TYPE_QUESTION
                 _make_questions_conf()
 
-        elif conf.authMode == const.EMPLOYEE_BIND_AUTH_MODE.CUSTOM:
-            data.type = self.FE_BIND_TYPE_CUSTOM
-            _make_custom_conf()
+            else:
+                raise ValueError('invalid authMode')
 
-        elif conf.authMode == const.EMPLOYEE_BIND_AUTH_MODE.QUESTION:
-            data.type = self.FE_BIND_TYPE_QUESTION
-            _make_questions_conf()
-
-        else:
-            raise ValueError('invalid authMode')
-
+        self.logger.debug('binding_render_data: %s' % data)
         return data
 
-    def make_bind_params(self,user_id, company_id, json_args):
+    def make_bind_params(self, user_id, company_id, json_args):
         """
         构建员工绑定的参数集合
         :param user_id:
@@ -185,6 +223,7 @@ class EmployeePageService(PageService):
         :return:
         """
         type = json_args.type
+
         needed_keys = ['type', 'name', 'mobile']
 
         if type == self.FE_BIND_TYPE_CUSTOM:
@@ -285,7 +324,8 @@ class EmployeePageService(PageService):
                     "view_number":   e.view_number,
                     "position":      e.position,
                     "click_time":    e.click_time,
-                    "recom_status":  e.recom_status
+                    "recom_status":  e.recom_status,
+                    "id": e.id
                 })
                 recommends.append(recom)
 
@@ -314,6 +354,7 @@ class EmployeePageService(PageService):
 
         for s in selects:
             s.fvalues = json.loads(s.fvalues)
+            s.required = s.mandatory == const.YES
         return selects
 
     @gen.coroutine
@@ -357,6 +398,3 @@ class EmployeePageService(PageService):
                 link=link,
                 company_name=current_user.company.name
             )
-
-
-

@@ -9,7 +9,7 @@ import conf.common as const
 from handler.base import BaseHandler
 from cache.user.passport_session import PassportCache
 from util.common.decorator import handle_response, authenticated
-from util.tool.str_tool import to_str, password_crypt, password_validate
+from util.tool.str_tool import to_str, password_validate
 from util.tool.url_tool import make_url
 from util.common.cipher import encode_id
 
@@ -115,7 +115,8 @@ class RegisterHandler(BaseHandler):
             national_code=1, # 目前只支持中国大陆手机号注册
             code_type=1 # 指定为忘记密码类型，提交手机号时需要
         )
-        self.render_page("system/auth_check_mobile.html", data=data, meta_title=const.PAGE_FORGET_PASSWORD)
+        self.render_page("system/auth_check_mobile.html",
+                         data=data, meta_title=const.PAGE_FORGET_PASSWORD)
 
     @handle_response
     @gen.coroutine
@@ -128,14 +129,15 @@ class RegisterHandler(BaseHandler):
             national_code=1, # 目前只支持中国大陆手机号注册
             code_type=0 # 指定为正常注册类型，提交手机号时需要
         )
-        self.render_page("system/auth_check_mobile.html", data=data, meta_title=const.PAGE_REGISTER)
+        self.render_page("system/auth_check_mobile.html",
+                         data=data, meta_title=const.PAGE_REGISTER)
 
     @handle_response
     @gen.coroutine
     def get_code(self):
         """填写验证码"""
 
-        mobile = self.get_secure_cookie(const.COOKIE_MOBILE_REGISTER)
+        mobile = to_str(self.get_secure_cookie(const.COOKIE_MOBILE_REGISTER))
         code_type = int(self.params.code_type)
 
         site_title = const.PAGE_REGISTER
@@ -149,7 +151,8 @@ class RegisterHandler(BaseHandler):
             mobile=mobile,
             code_type=code_type
         )
-        self.render_page("system/register.html", data=data, meta_title=site_title)
+        self.render_page("system/register.html",
+                         data=data, meta_title=site_title)
 
     @handle_response
     @gen.coroutine

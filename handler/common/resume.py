@@ -15,7 +15,10 @@ from util.tool.str_tool import to_str, match_session_id
 
 
 class LinkedinImportHandler(MetaBaseHandler):
-    """linkedin 导入，由于 linkedin 为 oauth2.0导入，与微信 oauth2.0授权冲突（code问题），故直接继承 MetaBaseHandler"""
+    """
+    linkedin 导入，由于 linkedin 为 oauth2.0导入，
+    与微信 oauth2.0授权冲突（code问题），
+    故直接继承 MetaBaseHandler"""
 
     @handle_response
     @gen.coroutine
@@ -51,6 +54,7 @@ class LinkedinImportHandler(MetaBaseHandler):
             return
         else:
             self.write_error(500)
+
 
 class ResumeImportHandler(BaseHandler):
 
@@ -89,13 +93,17 @@ class ResumeImportHandler(BaseHandler):
         self.params.pop("m", None)
         self.params.pop("abgroup", None)
         self.params.pop("tjtoken", None)
-        self.params.pop("abapply",None)
+        self.params.pop("abapply", None)
+        try:
+            int(self.params.pid)
+        except ValueError:
+            self.params.pop('pid', None)
 
         if not username or not password:
             # 日志打点返回用户名和密码没有填写
             self.log_info = ObjectDict(
-                status = -5,
-                url = self.params.way
+                status=-5,
+                url=self.params.way
             )
             self.send_json_error(message=msg.RESUME_IMPORT_NAME_PASSWD_ERROR)
             return
@@ -119,12 +127,11 @@ class ResumeImportHandler(BaseHandler):
 
             if is_ok:
                 self.log_info = ObjectDict(
-                    status = 0,
-                    url = self.params.way
+                    status=0,
+                    url=self.params.way
                 )
-                self.send_json_success(message=msg.RESUME_IMPORT_SUCCESS, data={
-                    "url": next_url
-                })
+                self.send_json_success(message=msg.RESUME_IMPORT_SUCCESS,
+                                       data={ "url": next_url })
                 return
             else:
                 if result.status == 32001:
@@ -153,16 +160,16 @@ class ResumeImportHandler(BaseHandler):
                     status_log = -2
 
                 self.log_info = ObjectDict(
-                    status = status_log,
-                    url = self.params.way,
+                    status=status_log,
+                    url=self.params.way,
                 )
 
-                self.send_json_error(message=msg.RESUME_IMPORT_FAILED)
+                self.send_json_error(message=result.message)
 
         else:
             self.log_info = ObjectDict(
-                status = -1,
-                url = self.params.way,
+                status=-1,
+                url=self.params.way
             )
 
             self.send_json_error(message=msg.RESUME_IMPORT_FAILED)

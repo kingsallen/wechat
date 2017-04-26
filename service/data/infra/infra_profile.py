@@ -56,6 +56,14 @@ class InfraProfileDataService(DataService):
         return http_tool.unboxing(res)
 
     @gen.coroutine
+    def has_profile(self, user_id):
+        res = yield self.handle_profile_section(
+            {'user_id': user_id}, method='get', section='profile')
+
+        ret_has_profile, _ = http_tool.unboxing(res)
+        return bool(ret_has_profile)
+
+    @gen.coroutine
     def get_profile_basic(self, profile_id):
         ret = yield self.handle_profile_section(
             {'profile_id': profile_id}, 'get', 'basic')
@@ -288,8 +296,8 @@ class InfraProfileDataService(DataService):
             "end_date":      "" if record.end_until_now else record.end_date,
             "end_until_now": record.end_until_now
         }
-        if record.get('department_name') is None or \
-            not record.get('department_name').strip():
+
+        if record.get('department_name') is None or not record.get('department_name').strip():
             params.update(department_name="")
         else:
             params.update(department_name=record.department_name)
@@ -299,14 +307,12 @@ class InfraProfileDataService(DataService):
         else:
             params.update(job=record.job)
 
-        if record.get('description') is None or \
-            not record.get('description').strip():
+        if record.get('description') is None or not record.get('description').strip():
             params.update(description="")
         else:
             params.update(description=record.description)
 
-        res = yield self.handle_profile_section(params, method="create",
-                                                 section="workexp")
+        res = yield self.handle_profile_section(params, method="create", section="workexp")
         return http_tool.unboxing(res)
 
     @gen.coroutine

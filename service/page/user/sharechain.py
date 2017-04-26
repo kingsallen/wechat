@@ -1,6 +1,5 @@
 # coding=utf-8
 
-
 import tornado.gen as gen
 
 import conf.common as const
@@ -311,14 +310,13 @@ class SharechainPageService(PageService):
         """
 
         if user_id is None or position_id is None:
-            raise gen.Return(0)
+            return 0
 
         is_employee = yield self._is_valid_employee(position_id, user_id)
 
         if is_employee:
-            self.logger.debug(
-                "[SC]employee application, referral_employee_user_id = 0")
-            raise gen.Return(0)
+            self.logger.debug("[SC]employee application, referral_employee_user_id = 0")
+            return 0
 
         fixed_now = curr_now()
 
@@ -326,39 +324,41 @@ class SharechainPageService(PageService):
         share_chain_record = yield self._get_latest_recom_record(
             position_id, user_id, fixed_now)
 
-        # 如果是直接点入申请职位的, 不存在内推员工
-        if not share_chain_record:
-            raise gen.Return(0)
+        # 如果是直接点入申请职位的, 或者员工申请，不存在内推员工
+        if not share_chain_record or share_chain_record.depth == 0:
+            return 0
 
-        # 获取 recom_record 中的 recom_id
-        root_recom_user_id = share_chain_record.root_recom_user_id
-        click_time = share_chain_record.click_time
+        # 如果 depth = 1， 只需要查看该条记录的 recom_user_id 是否是员工即可
+        elif share_chain_record.depth == 1:
+            is_employee = yield self._is_valid_employee(
+                position_id, share_chain_record.recom_user_id)
+            if is_employee:
+                return share_chain_record.recom_user_id
+        else:
+            # 多重转发
+            # share_chain_record.depth > 1
 
-        self.logger.debug("[SC]Got referral user_id: %s" % root_recom_user_id)
+            # 获取 share_chain_record 中的 root_recom_user_id
+            root_recom_user_id = share_chain_record.root_recom_user_id
+            click_time = share_chain_record.click_time
 
-        # 查找 “最初推荐人” 的 recom_record 的记录，如果这条记录的 depth 是 0，那么这条记录就是内推
-        share_chain_of_root = yield self._get_latest_recom_record(
-                position_id, root_recom_user_id, click_time)
+            # 查找 “最初推荐人” 的 recom_record 的记录，
+            # 如果这条记录的 depth 是 0，那么这条记录就是内推
+            share_chain_of_root = yield self._get_latest_recom_record(
+                    position_id, root_recom_user_id, click_time)
 
-        # 如果查不到最初联系人, 说明这条链路没有被截断过
-        # 并且 recom_id 这个人是自己点 JD 页访问的
-        root_recom_user_is_employee = yield self._is_valid_employee(
-            position_id, root_recom_user_id)
+            if share_chain_of_root and share_chain_of_root.depth == 0:
+                return share_chain_of_root
 
-        # 如果查不到最初点击人, 说明这条链路没有被截断过,
-        # 并且 root_recom_user_id 这个人是自己主动点 jd 页访问的
-        # 那么如果直接访问的人是认证员工, 者返回此认证员工的 id
-        if (not share_chain_of_root and root_recom_user_is_employee or
-            # 如果可以查到最初点击人, 说明这个链路被截断过
-            # 那么在被截断的时候, 当时的 presentee_user_id 就是内推员工 id
-            share_chain_of_root and share_chain_of_root.depth == 0 and
-                root_recom_user_id != user_id):
+            # 如果查不到最初联系人, 说明这条链路没有被员工截断过
+            # 并且 recom_id 这个人是自己点 JD 页访问的
+            else:
+                root_recom_user_is_employee = yield self._is_valid_employee(
+                    position_id, root_recom_user_id)
+                if root_recom_user_is_employee:
+                    return root_recom_user_id
 
-            self.logger.debug(
-                "[SC]return referral employee user_id: %s" % root_recom_user_id)
-            raise gen.Return(root_recom_user_id)
-
-        raise gen.Return(0)
+        return 0
 
     @gen.coroutine
     def is_employee_presentee(self, share_chain_id):
@@ -408,8 +408,8 @@ class SharechainPageService(PageService):
                 "position_id": position_id,
                 "presentee_user_id": presentee_user_id
             },
-            appends=['order by click_time desc',
-                     'limit 1'])
+            appends=['ORDER BY click_time DESC',
+                     'LIMIT 1'])
         if parent_share_chain:
             raise gen.Return(parent_share_chain.id)
         else:

@@ -34,10 +34,6 @@ class ProfileNewHandler(BaseHandler):
     @authenticated
     @tornado.gen.coroutine
     def post(self):
-        # has_profile, _ = yield self.profile_ps.has_profile(
-        #     self.current_user.sysuser.id)
-        # if has_profile:
-        #     self.send_json_error(message='profile existed')
 
         profile = ObjectDict(json_decode(self.request.body)).profile
 
@@ -65,23 +61,25 @@ class ProfileNewHandler(BaseHandler):
             email=profile.contacts['email'],
             mobile=profile.contacts['mobile'])
 
-        # PROFILE_PROFILE
-        profile_id = None
-        profile_ok = basic_info_ok = False
-        education_ok = workexp_ok = True
+        basic_info_ok = False
+        education_ok = True
+        workexp_ok = True
 
-        source = 1 if self.is_platform else 4 # 判断是否来自企业号，聚合号
+        # 判断是否来自企业号，聚合号, 还是移动网页端
         if not self.in_wechat:
-            # 移动网页端来源
-            source = 8
+            source = const.PROFILE_SOURCE_MOBILE_BROWSER
+        else:
+            if self.is_platform:
+                source = const.PROFILE_SOURCE_PLATFORM
+            else:
+                source = const.PROFILE_SOURCE_QX
+
+        # create Profile
         result, data = yield self.profile_ps.create_profile(self.current_user.sysuser.id, source)
 
         if result:
             profile_id = data
             profile_ok = True
-            # 初始化user_setting表，profile的公开度
-            # yield self.sysuser_service.post_user_setting(
-            #     self.current_user.sysuser.id)
             self.logger.debug("profile_profile created with id: %s" % profile_id)
         else:
             self.logger.error("profile_profile creation failed. res:{}".format(data))
@@ -104,8 +102,7 @@ class ProfileNewHandler(BaseHandler):
             self.logger.debug("[profile post]profile.education edu:{}".format(edu))
             result, data = yield self.profile_ps.create_profile_education(ObjectDict(edu), profile_id)
             if result:
-                self.logger.debug(
-                    "profile_education creation passed. New record num: %s" % data)
+                self.logger.debug("profile_education creation passed. New record num: %s" % data)
             else:
                 education_ok = False
                 self.logger.error("profile_education creation failed. res: %s" % data)
@@ -127,12 +124,17 @@ class ProfileNewHandler(BaseHandler):
         self.logger.debug("[profile post]create_profile_workexp result:{}".format(result))
         self.logger.debug("[profile post]create_profile_workexp data:{}".format(data))
 
+        # 只有全部 ok 后才可以跳转
         if profile_ok and basic_info_ok and education_ok and workexp_ok:
-            # is_apply = '1' if self.get_cookie('dq_pid') else '0'
-            # pid = self.get_cookie('dq_pid', None)
-            data = ObjectDict(url=make_url(path.PROFILE_VIEW, self.params))
-                             #apply=is_apply, pid=pid)
-            self.send_json_success(data)
+            dqpid = self.get_cookie('dqpid')
+            self.logger.debug('dqpid: %s' % dqpid)
+            if dqpid:
+                next_url = make_url(path.PROFILE_PREVIEW, self.params, pid=str(dqpid))
+            else:
+                next_url = make_url(path.PROFILE_VIEW, self.params)
+            self.logger.debug('next_url: %s' % next_url)
+            self.clear_cookie(name='dqpid')
+            self.send_json_success(data=ObjectDict(next_url=next_url))
         else:
             self.send_json_warning(message='profile created partially')
 
@@ -145,8 +147,9 @@ class ProfilePreviewHandler(BaseHandler):
     @tornado.gen.coroutine
     def get(self):
         if not self.params.pid:
-            # or not self.params.is_skip:
-            raise ValueError()
+            url = make_url(path.PROFILE_VIEW, self.params)
+            self.redirect(url)
+            return
 
         profile_tpl = yield self.profile_ps.profile_to_tempalte(
             self.current_user.profile)
@@ -162,9 +165,8 @@ class ProfilePreviewHandler(BaseHandler):
         except Exception:
             is_skip = False
 
-        need_mobile_validate = str(
-                self.current_user.sysuser.mobile) != str(
-                self.current_user.sysuser.username)
+        need_mobile_validate = str(self.current_user.sysuser.mobile) != \
+                               str(self.current_user.sysuser.username)
 
         tparams = {
             'profile':              profile_tpl,
@@ -174,6 +176,8 @@ class ProfilePreviewHandler(BaseHandler):
             'no_name':              not bool(self.current_user.sysuser.name),
             'current_mobile':       current_mobile
         }
+
+        self.logger.debug('tparams: %s' % tparams)
 
         self.render_page(template_name='profile/preview.html', data=tparams)
 
@@ -209,6 +213,7 @@ class ProfileCustomHandler(BaseHandler):
     def get(self):
         pid = int(self.params.pid)
         position = yield self.position_ps.get_position(pid)
+        self.logger.debug("position: %s" % position)
         if not position.app_cv_config_id:
             self.write_error(404)
             return
@@ -251,13 +256,15 @@ class ProfileCustomHandler(BaseHandler):
         #         pos_ser = positionService(self.db)
         #         position = pos_ser.get_position_info(pid)
         #         if position.app_cv_config_id:
-        #             self.LOG.debug(u"雅诗兰黛特殊处理: 直接投递")
+        #             self.logger.debug("雅诗兰黛特殊处理: 直接投递")
         #             p.update(is_skip='1')
 
         self.redirect(make_url(path.PROFILE_PREVIEW, self.params, **p))
 
     @tornado.gen.coroutine
     def _save_custom_cv(self, custom_cv):
+        self.logger.debug("custom_cv: %s" % custom_cv)
+
         # 更新 user 信息（非 profile 信息）
         yield self.user_ps.update_user(
             user_id=self.current_user.sysuser.id,
@@ -272,6 +279,7 @@ class ProfileCustomHandler(BaseHandler):
         custom_fields = [c.field_name for c in custom_cv_tpls if not c.map]
 
         profile_id = 0
+
         # 已经有 profile，更新和自定义简历联动的 profile 信息
         if has_profile:
             profile_id = profile.get("profile", {}).get("id", None)
@@ -297,24 +305,21 @@ class ProfileCustomHandler(BaseHandler):
                 cv_profile_values = {k: v for k, v in custom_cv.items() if
                                      k in custom_fields}
 
+                self.logger.debug('cv_profile_values: %s' % cv_profile_values)
+
                 # BASIC INFO
                 result, data = yield self.profile_ps.create_profile_basic(
                     cv_profile_values, profile_id, mode='c')
 
                 if result:
-                    self.logger.debug("profile_basic creation passed. Got basic info id: %s" % data)
+                    self.logger.debug(
+                        "profile_basic creation passed. Got basic info id: %s" % data)
                 else:
                     self.logger.error("profile_basic creation failed. res: %s" % data)
 
-                # 初始化user_setting表，profile的公开度
-                # TODO (tangyiliang) 建议在创建 user_user 的时候创建 user_settings 记录
-                # try:
-                #     yield self.user_ps.create_user_setting(self.current_user.sysuser.id)
-                # except InfraOperationError:
-                #     self.logger.error("create user_setting error, user_id: %s" % self.current_user.sysuser.id)
-
                 yield self.profile_ps.update_profile_basic(profile_id, custom_cv)
-
+                yield self.profile_ps.update_profile_embedded_info_from_cv(
+                    profile_id, custom_cv)
             else:
                 raise ValueError('profile creation error')
 
@@ -601,7 +606,7 @@ class ProfileSectionHandler(BaseHandler):
 
         result, res = yield getattr(
             self.profile_ps, verb + "_profile_workexp")(
-            model, profile_id)
+            model, profile_id, mode='p')
 
         if result:
             self.send_json_success()
@@ -617,7 +622,7 @@ class ProfileSectionHandler(BaseHandler):
         result, res = yield self.company_ps.get_cp_for_sug_wechat(name)
 
         if result:
-            self.send_json_error(message='company name existed')
+            self.send_json_error(message=msg.PROFILE_COMPANY_NAME_EXISTED)
             return
         else:
             result, res = yield self.company_ps.create_company_on_wechat(
@@ -834,8 +839,6 @@ class ProfileSectionHandler(BaseHandler):
         else:
             self.send_json_error()
     # Profile 编辑 -- jobpref 结束
-
-
 
     def _send_json_result(self, results, component_len):
         """json api 返回修改成功，失败，部分成功的"""

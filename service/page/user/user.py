@@ -48,7 +48,7 @@ class UserPageService(PageService):
                 "login_count":      1,
                 "unionid":          userinfo.unionid,
                 "source":           source,
-                "nickname":         userinfo.nickname,
+                "nickname":         '匿名用户' if userinfo.nickname == '(未知)' else userinfo.nickname,
                 "name":             "",
                 "headimg":          userinfo.headimgurl,
             })
@@ -280,7 +280,7 @@ class UserPageService(PageService):
         :param qx_wxuserid:
         :return:
         """
-        hb_config_list = yield self.hr_hb_config_ds.get_hr_hb_config({
+        hb_config_list = yield self.hr_hb_config_ds.get_hr_hb_config_list({
             'company_id': company_id,
             'type': 1
         })
@@ -288,11 +288,13 @@ class UserPageService(PageService):
         if not hb_config_list:
             return 0
 
-        hb_config_ids = set([e.id for e in hb_config_list])
+        hb_config_ids = [e.id for e in hb_config_list]
 
         hb_items_sum = yield self.hr_hb_items_ds.get_hb_items_amount_sum(
-            conds={ "wxuser_id": qx_wxuserid }, fields=['amount'],
-            appends="hb_config_id in %s" % str_tool.set_literl(hb_config_ids))
+            conds={ "wxuser_id": qx_wxuserid },
+            fields=['amount'],
+            appends=[" and hb_config_id in %s" % str_tool.set_literl(hb_config_ids)]
+        )
 
         return hb_items_sum.sum_amount if hb_items_sum.sum_amount else 0
 
@@ -308,11 +310,11 @@ class UserPageService(PageService):
         kwargs = ObjectDict(kwargs)
         fields = {}
         if kwargs.email:
-            fields.update(email=kwargs.email)
+            fields.update(email=str(kwargs.email))
         if kwargs.mobile:
-            fields.update(mobile=kwargs.mobile)
+            fields.update(mobile=int(kwargs.mobile))
         if kwargs.name:
-            fields.update(name=kwargs.name)
+            fields.update(name=str(kwargs.name))
         self.logger.debug(fields)
 
         ret = 0
@@ -336,6 +338,9 @@ class UserPageService(PageService):
         :param current_user: user session 信息
         :param pid: 职位id
         """
+
+        if not current_user.sysuser.id:
+            raise gen.Return(False)
 
         position_fav = yield self._get_user_favorite_records(
             current_user.sysuser.id, pid)
@@ -493,3 +498,68 @@ class UserPageService(PageService):
             user_id, banner_url, privacy_policy)
 
         return http_tool.unboxing(res)
+
+    @gen.coroutine
+    def employee_add_reward(self, employee_id, company_id, position_id,
+                            be_recom_wxuser, award_type=const.EMPLOYEE_AWARD_TYPE_DEFAULT_ERROR, **kw):
+        """给员工添加积分的公共方法
+        所有给员工添加积分的动作，都要走这个方法！
+        """
+
+        # 校验 award_type:
+        if award_type == const.EMPLOYEE_AWARD_TYPE_DEFAULT_ERROR:
+            self.logger.warn("award_type is not specified, return")
+            return
+
+        if award_type == const.EMPLOYEE_AWARD_TYPE_SHARE_APPLY and not kw.get('application_id'):
+            self.logger.warn("application_id not specified, return")
+            return
+
+        # 校验员工
+        employee = yield self.user_employee_ds.get_employee({
+            'id':         employee_id,
+            'activation': const.OLD_YES,
+            'disable':    const.OLD_YES
+        })
+        if not employee:
+            return
+
+        # 获取积分模版对应的所需增加积分数 award_points
+        type_templateid_mapping = {
+            const.EMPLOYEE_AWARD_TYPE_SHARE_CLICK: const.RECRUIT_STATUS_RECOMCLICK_ID,
+            const.EMPLOYEE_AWARD_TYPE_SHARE_APPLY: const.RECRUIT_STATUS_APPLY_ID,
+            const.EMPLOYEE_AWARD_TYPE_RECOM: const.RECRUIT_STATUS_FULL_RECOM_INFO_ID
+        }
+        template_id = type_templateid_mapping.get(award_type)
+        if not template_id:
+            raise ValueError("invalid employee_award_type: %s" % award_type)
+
+        points_conf = yield self.hr_points_conf_ds.get_points_conf(
+            conds={"company_id":  company_id, "template_id": template_id },
+            appends=["ORDER BY id DESC", "LIMIT 1"]
+        )
+        award_points = points_conf.reward
+
+        # 插入积分数据 user_employee_points_record
+        fields = {
+            "employee_id":       employee_id,
+            "application_id":    kw['application_id'] if award_type == const.EMPLOYEE_AWARD_TYPE_SHARE_APPLY else 0,
+            "reason":            points_conf.status_name,
+            "award":             award_points,
+            "position_id":       position_id,
+            "award_config_id":   points_conf.id,
+            "recom_wxuser":      employee.wxuser_id,
+            "recom_user_id":     employee.sysuser_id,
+            "berecom_user_id":   be_recom_wxuser.sysuser_id,
+            "berecom_wxuser_id": be_recom_wxuser.id
+        }
+        yield self.user_employee_points_record_ds.create_user_employee_points_record(
+            fields=fields
+        )
+
+        # 修改 user_employee.award
+        yield self.user_employee_ds.update_employee(
+            conds={'id': employee_id},
+            fields={'award': int(employee.award + award_points)}
+        )
+        return

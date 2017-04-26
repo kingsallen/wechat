@@ -13,6 +13,7 @@ class JobApplicationDao(BaseDao):
             "wechat_id":        self.constant.TYPE_INT,
             "position_id":      self.constant.TYPE_INT,
             "recommender_id":   self.constant.TYPE_INT,
+            "recommender_user_id": self.constant.TYPE_INT,
             "submit_time":      self.constant.TYPE_TIMESTAMP,
             "status_id":        self.constant.TYPE_INT,
             "l_application_id": self.constant.TYPE_INT,

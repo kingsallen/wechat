@@ -1,14 +1,14 @@
 # coding=utf-8
 
-# Copyright 2016 MoSeeker
-
 from tornado import gen
 
 from service.page.base import PageService
+import conf.common as const
+from service.page.user.user import UserPageService
 from util.common import ObjectDict
 from util.common.cipher import encode_id
 from util.tool.date_tool import jd_update_date, str_2_date
-from util.tool.str_tool import gen_salary, split
+from util.tool.str_tool import gen_salary, split, set_literl
 from util.tool.temp_data_tool import make_position_detail_cms, make_team, template3
 
 
@@ -86,8 +86,9 @@ class PositionPageService(PageService):
         # 自定义分享模板
         if position_res.share_tpl_id:
             share_conf = yield self.__get_share_conf(position_res.share_tpl_id)
+            self.logger.debug("")
             position.share_title = share_conf.title
-            position.share_description = share_conf.share_description
+            position.share_description = share_conf.description
 
         # 职能自定义字段（自定义字段 job_occupation）
         if position_ext_res.job_occupation_id:
@@ -184,12 +185,7 @@ class PositionPageService(PageService):
         raise gen.Return(pos_recommends)
 
     @gen.coroutine
-    def add_reward_for_recom_click(self,
-                                   employee,
-                                   company_id,
-                                   berecom_wxuser_id,
-                                   berecom_user_id,
-                                   position_id):
+    def add_reward_for_recom_click(self, employee, company_id, berecom_wxuser_id, berecom_user_id, position_id):
         """转发被点击添加积分"""
 
         points_conf = yield self.hr_points_conf_ds.get_points_conf(conds={
@@ -197,38 +193,26 @@ class PositionPageService(PageService):
             "template_id": self.constant.RECRUIT_STATUS_RECOMCLICK_ID,
         }, appends=["ORDER BY id DESC", "LIMIT 1"])
 
-        click_record = yield self.user_employee_points_record_ds.get_user_employee_points_record_cnt(conds={
+        click_record = yield self.user_employee_points_record_ds.get_user_employee_points_record(conds={
             "berecom_user_id": berecom_user_id,
             "position_id": position_id,
-            "award_config_id": points_conf.id
+            "award_config_id": points_conf.id,
+            "employee_id": employee.id
         }, fields=["id"])
 
         # 转发被点击添加积分，同一个职位，相同的人点击多次不加积分
-        if click_record.count_id < 1:
-            yield self.user_employee_points_record_ds.create_user_employee_points_record(fields={
-                "employee_id": employee.id,
-                "reason": points_conf.status_name,
-                "award": points_conf.reward,
-                "recom_wxuser": employee.wxuser_id,
-                "recom_user_id": employee.sysuser_id,
-                "berecom_wxuser_id": berecom_wxuser_id,
-                "berecom_user_id": berecom_user_id,
-                "position_id": position_id,
-                "award_config_id": points_conf.id,
-            })
+        if not click_record:
+            be_recom_wxuser = yield self.user_wx_user_ds.get_wxuser(
+                {'id': berecom_wxuser_id})
 
-            # 更新员工的积分
-            employee_sum = yield self.user_employee_points_record_ds.get_user_employee_points_record_sum(conds={
-                "employee_id": employee.id
-            }, fields=["award"])
-
-            if employee_sum.sum_award:
-                yield self.user_employee_ds.update_employee(conds={
-                    "id": employee.id,
-                    "company_id": company_id,
-                }, fields={
-                    "award": int(employee_sum.sum_award),
-                })
+            user_ps = UserPageService()
+            yield user_ps.employee_add_reward(
+                employee_id=employee.id,
+                company_id=company_id,
+                position_id=position_id,
+                be_recom_wxuser=be_recom_wxuser,
+                award_type=const.EMPLOYEE_AWARD_TYPE_SHARE_CLICK
+            )
 
     @gen.coroutine
     def get_cms_page(self, team_id):
@@ -291,7 +275,7 @@ class PositionPageService(PageService):
             logo=current_company.logo,
             abbreviation=current_company.abbreviation or '',
             industry=current_company.industry or '',
-            scale_name=current_company.scale,
+            scale_name=const.SCALE.get(str(current_company.scale), ''),
             homepage=current_company.homepage or '',
             banner=current_company.banner,
             id=current_company.id,
@@ -301,18 +285,25 @@ class PositionPageService(PageService):
     def infra_get_position_list(self, params):
         """普通职位列表"""
 
+        # get position ds
         res = yield self.infra_position_ds.get_position_list(params)
+        # get team names
+        team_name_dict = yield self.get_teamid_names_dict(params.company_id)
+
         if res.status == 0:
             position_list = [ObjectDict(e) for e in res.data]
-            for position in position_list:
-                position.salary = gen_salary(
-                    position.salary_top, position.salary_bottom)
-                position.publish_date = jd_update_date(
-                    str_2_date(position.publish_date,
-                               self.constant.TIME_FORMAT))
+            pids = [e.id for e in position_list]
+            pid_teamid_dict = yield self.get_pid_teamid_dict(params.company_id, pids)
 
-            raise gen.Return(position_list)
-        raise gen.Return(res)
+            for position in position_list:
+                position.salary = gen_salary(position.salary_top, position.salary_bottom)
+                position.publish_date = jd_update_date(
+                    str_2_date(position.publish_date, self.constant.TIME_FORMAT))
+                position.team_name = team_name_dict.get(pid_teamid_dict.get(position.id, 0), '')
+
+            self.logger.debug('position_list: %s' % position_list)
+            return position_list
+        return res
 
     @gen.coroutine
     def infra_get_position_list_rp_ext(self, position_list):
@@ -329,15 +320,21 @@ class PositionPageService(PageService):
     def infra_get_rp_position_list(self, params):
         """红包职位列表"""
         res = yield self.infra_position_ds.get_rp_position_list(params)
+        team_name_dict = yield self.get_teamid_names_dict(params.company_id)
+
         if res.status == 0:
             rp_position_list = [ObjectDict(e) for e in res.data]
+            pids = [e.id for e in rp_position_list]
+            pid_teamid_dict = yield self.get_pid_teamid_dict(params.company_id,pids)
+
             for position in rp_position_list:
                 position.is_rp_reward = True
                 position.salary = gen_salary(
                     position.salary_top, position.salary_bottom)
                 position.publish_date = jd_update_date(str_2_date(position.publish_date, self.constant.TIME_FORMAT))
-            raise gen.Return(rp_position_list)
-        raise gen.Return(res)
+                position.team_name = team_name_dict.get(pid_teamid_dict.get(position.id, 0), '')
+            return rp_position_list
+        return res
 
     @gen.coroutine
     def infra_get_rp_share_info(self, params):
@@ -346,3 +343,33 @@ class PositionPageService(PageService):
         if res.status == 0:
             raise gen.Return(res.data)
         raise gen.Return(res)
+
+    @gen.coroutine
+    def get_teamid_names_dict(self, company_id):
+        """获取 {<team_id>: <team_name>} 字典"""
+        res_team_names = yield self.hr_team_ds.get_team_list(
+            conds={'company_id': company_id,
+                   'disable':    const.OLD_YES},
+            fields=['id', 'name']
+        )
+        team_name_dict = {e.id: e.name for e in res_team_names}
+        self.logger.debug('team_name_dict: %s' % team_name_dict)
+        return team_name_dict
+
+    @gen.coroutine
+    def get_pid_teamid_dict(self, company_id, list_of_pid=None):
+        """获取 {<position_id>: <team_id>} 字典
+        """
+
+        param = dict(
+            conds={'status':     const.OLD_YES,
+                   'company_id': company_id},
+            fields=['id', 'team_id']
+        )
+        if list_of_pid and isinstance(list_of_pid, list):
+            param.update(appends=["and id in %s" % set_literl(list_of_pid)])
+
+        pid_teamid_list = yield self.job_position_ds.get_positions_list(**param)
+        pid_teamid_dict = {e.id: e.team_id for e in pid_teamid_list}
+        self.logger.debug('pid_teamid_dict: %s' % pid_teamid_dict)
+        return pid_teamid_dict

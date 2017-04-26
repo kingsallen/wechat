@@ -2,10 +2,7 @@
 
 from tornado import gen
 from service.page.base import PageService
-
-
-class RecomException(Exception):
-    __slots__ = ['code', 'message']
+from util.common import ObjectDict
 
 
 class CandidatePageService(PageService):
@@ -36,4 +33,63 @@ class CandidatePageService(PageService):
         ret = yield self.thrift_candidate_ds.get_candidate_list(post_user_id, click_time, is_recom, company_id)
 
         self.logger.debug("get_candidate_list: %s" % ret)
+        return ret
+
+    @gen.coroutine
+    def post_recommend(self, post_user_id, click_time, recom_record_id,
+                       realname, company, position, mobile, recom_reason,
+                       company_id):
+        ret = yield self.thrift_candidate_ds.recommend(
+            post_user_id, click_time, recom_record_id, realname, company,
+            position, mobile, recom_reason, company_id)
+
+        self.logger.debug("recommend_result: %s" % ret)
+        return ret
+
+    @gen.coroutine
+    def post_ignore(self, recom_record_id, company_id, post_user_id,
+                    click_time):
+        ret = yield self.thrift_candidate_ds.ignore(
+            recom_record_id, company_id, post_user_id,  click_time)
+
+        self.logger.debug("recommend_result: %s" % ret)
+        return ret
+
+    @gen.coroutine
+    def sorting(self, post_user_id, company_id):
+        infra_ret = yield self.thrift_candidate_ds.sort(
+            post_user_id, company_id)
+
+        ret = ObjectDict({
+            'recom_count': infra_ret.count,
+            'rank': infra_ret.rank,
+            'hongbao': infra_ret.hongbao
+        })
+
+        self.logger.debug("sorting: %s" % ret)
+        return ret
+
+    @gen.coroutine
+    def get_recommendations(self, company_id, list_of_recom_ids):
+        ret = yield self.thrift_candidate_ds.get_recommendations(
+            company_id, list_of_recom_ids)
+
+        self.logger.debug("get_recommendations: %s" % ret)
+        return ret
+
+    @gen.coroutine
+    def get_recommendation(self, recom_record_id, post_user_id):
+        infra_ret = yield self.thrift_candidate_ds.get_recommendation(
+            recom_record_id, post_user_id)
+        self.logger.debug('infra_ret: %s' % infra_ret)
+
+        ret = ObjectDict(
+            position_name=infra_ret.title,
+            recom=infra_ret.recom,
+            click_time=infra_ret.clickTime,
+            id=infra_ret.id,
+            presentee_name=infra_ret.presenteeName
+        )
+
+        self.logger.debug("get_recommendation: %s" % ret)
         return ret

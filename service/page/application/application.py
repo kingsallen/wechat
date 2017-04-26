@@ -15,6 +15,7 @@ import conf.path as path
 from cache.application.email_apply import EmailApplyCache
 from service.page.base import PageService
 from service.page.user.profile import ProfilePageService
+from service.page.user.user import UserPageService
 from service.page.user.sharechain import SharechainPageService
 from thrift_gen.gen.mq.struct.ttypes import SmsType
 from util.common import ObjectDict
@@ -44,6 +45,13 @@ class ApplicationPageService(PageService):
         ret = yield self.job_application_ds.get_job_application(conds={
             "position_id": position_id,
             "applier_id":  user_id
+        })
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def get_application_by_id(self, id):
+        ret = yield self.job_application_ds.get_job_application(conds={
+            "id": id
         })
         raise gen.Return(ret)
 
@@ -89,16 +97,10 @@ class ApplicationPageService(PageService):
     def update_candidate_company(self, name, user_id):
         """
         更新candidate_company表中的name
-        :param user_id:
-        :return:
         """
-
         res = yield self.candidate_company_ds.update_candidate_company(
-            fields={
-                "sys_user_id": user_id
-            }, conds={
-                "name": name,
-            })
+            fields={"name": name},
+            conds={"sys_user_id": user_id})
         raise gen.Return(res)
 
     @gen.coroutine
@@ -130,6 +132,8 @@ class ApplicationPageService(PageService):
         # field_name 是纯自定义字段,但是在 custom_others 中没有这个值
         for field in fields_to_check:
             field_name = field.field_name
+            if field_name == 'picUrl':
+                continue
             mapping = field.map
             passed = yield self._check(profile, field_name, user, mapping)
 
@@ -248,7 +252,7 @@ class ApplicationPageService(PageService):
 
         education = []
         for e in profile.get('educations'):
-            __end = u'至今' if e.get('end_until_now', False) \
+            __end = '至今' if e.get('end_until_now', False) \
                 else e.get('end_date', '')
             end = __end
             __start = e.get('start_date', '')
@@ -264,7 +268,7 @@ class ApplicationPageService(PageService):
                 end=end,
                 __start=__start,
                 start=start,
-                end_until_now=1 if end == u"至今" else 0,
+                end_until_now=1 if end == "至今" else 0,
                 _degree=_degree,
                 degree=degree,
                 major=major,
@@ -273,7 +277,7 @@ class ApplicationPageService(PageService):
 
         workexp = []
         for w in profile.get('workexps'):
-            __end = u'至今' if w.get('end_until_now', False) \
+            __end = '至今' if w.get('end_until_now', False) \
                 else w.get('end_date', '')
             end = __end
             __start = w.get('start_date', '')
@@ -288,7 +292,7 @@ class ApplicationPageService(PageService):
                 end=end,
                 __start=__start,
                 start=start,
-                end_until_now=1 if end == u"至今" else 0,
+                end_until_now=1 if end == "至今" else 0,
                 company=company,
                 department=department,
                 describe=describe,
@@ -297,7 +301,7 @@ class ApplicationPageService(PageService):
 
         projectexp = []
         for p in profile.get('projectexps'):
-            __end = u'至今' if p.get('end_until_now', False) \
+            __end = '至今' if p.get('end_until_now', False) \
                 else p.get('end_date', '')
             end = __end
             __start = p.get('start_date', '')
@@ -312,7 +316,7 @@ class ApplicationPageService(PageService):
                 end=end,
                 __start=__start,
                 start=start,
-                end_until_now=1 if __end == u"至今" else 0,
+                end_until_now=1 if __end == "至今" else 0,
                 name=name,
                 introduce=introduce,
                 role=role,
@@ -345,6 +349,8 @@ class ApplicationPageService(PageService):
 
         if old_other:
             new_other_dict = json_decode(new_record.other)
+            # 需对 picUrl 做特殊处理
+            new_other_dict.pop('picUrl', None)
             old_other.update(new_other_dict)
             other_dict_to_update = old_other
             params = {
@@ -356,7 +362,12 @@ class ApplicationPageService(PageService):
         else:
             # 转换一下 new_record 中 utf-8 char
             new_record = ObjectDict(new_record)
-            new_record.other = json_dumps(json_decode(new_record.other))
+            other_str = new_record.other
+
+            other_dict = json.loads(other_str)
+            other_dict.pop('picUrl', None)
+
+            new_record.other = json_dumps(other_dict)
             record_to_update = new_record
 
             result, data = yield self.infra_profile_ds.create_profile_other(
@@ -379,17 +390,21 @@ class ApplicationPageService(PageService):
 
         cv_conf = yield self.get_hr_app_cv_conf(position.app_cv_config_id)
         fields = self.make_fields_list(cv_conf)
+        custom_fields = [e.get('field_name') for e in fields
+                         if not e.get('map')]
 
         if profile.others:
             p_other = json.loads(profile.others[0].get('other'))
 
-            for field in fields:
-                if p_other.get(field):
-                    resume_other.update({field: p_other.get(field)})
+            for custom_field in custom_fields:
+                if p_other.get(custom_field):
+                    resume_other.update({custom_field: p_other.get(custom_field)})
+
             resume_other_to_insert = json_dumps(resume_other)
             self.logger.debug('resume_other_to_insert: %s' % resume_other_to_insert)
-            yield self.hr_resume_other_ds.insert_job_resume_other({
-                'appid': app_id,
+
+            yield self.job_resume_other_ds.insert_job_resume_other({
+                'app_id': app_id,
                 'other': resume_other_to_insert
             })
             return True, None
@@ -406,7 +421,7 @@ class ApplicationPageService(PageService):
         :return:
         """
 
-        check_status, message = self.check_position(position, current_user)
+        check_status, message = yield self.check_position(position, current_user)
         self.logger.debug(
             "[create_email_reply]check_status:{}, message:{}".format(
                 check_status, message))
@@ -432,14 +447,12 @@ class ApplicationPageService(PageService):
             # email解析状态: 0，有效；1,未收到回复邮件；2，文件格式不支持；3，附件超过10M；9，提取邮件失败
         )
 
-        self.logger.debug("[create_email_reply]params_for_application:{}".format(recommender_wxuser_id))
-
         ret = yield self.infra_application_ds.create_application(params_for_application)
 
         # 申请创建失败,  跳转到申请失败页面
-        if not ret.status != const.API_SUCCESS:
+        if not ret.status == const.API_SUCCESS:
             message = msg.CREATE_APPLICATION_FAILED
-            raise gen.Return((False, message))
+            return False, message
 
         uuidcode = str(uuid.uuid4())
         email_params = ObjectDict(
@@ -501,12 +514,6 @@ class ApplicationPageService(PageService):
 
         if application:
             message = msg.DUPLICATE_APPLICATION
-            is_ok = False
-
-        # 判断当前用户手机号
-        if str(current_user.sysuser.mobile) != str(
-            current_user.sysuser.username):
-            message = msg.CELLPHONE_MOBILE_INVALID
             is_ok = False
 
         return is_ok, message
@@ -595,19 +602,19 @@ class ApplicationPageService(PageService):
         self.logger.debug("[post_apply]投递后续处理")
 
         #1. 添加积分
-        yield self.opt_add_reward(apply_id, current_user, position, is_platform)
+        yield self.opt_add_reward(apply_id, current_user)
+
         #2. 向求职者发送消息通知（消息模板，短信）
         yield self.opt_send_applier_msg(apply_id, current_user, position, is_platform)
+
         #3. 向推荐人发送消息模板
         yield self.opt_send_recommender_msg(recommender_user_id, current_user, position)
+
         #4. 更新挖掘被动求职者信息
         yield self.opt_update_candidate_recom_records(apply_id, current_user, recommender_user_id, position)
+
         #5. 向 HR 发送消息通知（消息模板，短信，邮件）
         yield self.opt_hr_msg(apply_id, current_user, position, is_platform)
-
-
-
-
 
         return True, msg.RESPONSE_SUCCESS, apply_id
 
@@ -625,7 +632,7 @@ class ApplicationPageService(PageService):
                 current_user.sysuser.id, position.id)
 
             if recommender_user_id:
-                recom_employee = yield self.employee_ds.get_employee(conds={
+                recom_employee = yield self.user_employee_ds.get_employee(conds={
                     "sysuser_id": current_user.sysuser.id,
                     "status":     const.NO,
                     "disable":    const.NO,
@@ -638,67 +645,35 @@ class ApplicationPageService(PageService):
         return recommender_user_id, recommender_wxuser_id, recom_employee
 
     @gen.coroutine
-    def opt_add_reward(self, apply_id, current_user, position, is_platform):
-        """ 添加积分
-        :param apply_id:
-        :param current_user:
-        :param position:
-        :param is_platform:
-        """
+    def opt_add_reward(self, apply_id, current_user):
+        """ 申请添加积分 """
         self.logger.debug("[opt_add_reward]start")
-        recommender_user_id, recommender_wxuser_id, recom_employee = yield self.get_recommend_user(
-            current_user, position, is_platform)
 
-        self.logger.debug(
-            "[opt_add_reward]recommender_user_id:{}, recommender_wxuser_id:{}, recom_employee:{}".format(
-                recommender_user_id, recommender_wxuser_id, recom_employee))
-        points_conf = yield self.hr_points_conf_ds.get_points_conf(conds={
-            "company_id":  position.company_id,
-            "template_id": self.constant.RECRUIT_STATUS_APPLY_ID,
-        }, appends=["ORDER BY id DESC", "LIMIT 1"])
+        application = yield self.get_application_by_id(apply_id)
+        if not application or not application.recommender_user_id:
+            return
 
-        if recom_employee and points_conf:
-            self.logger.debug("[opt_add_reward]添加积分")
-            yield self.user_employee_points_record_ds.create_user_employee_points_record(
-                fields={
-                    "employee_id":    recom_employee.id,
-                    "application_id": apply_id,
-                    "recom_wxuser":   recommender_wxuser_id,
-                    "reason":         points_conf.status_name,
-                    "award":          points_conf.reward,
-                    "recom_user_id":  recommender_user_id,
-                })
+        recommender_user_id = application.recommender_user_id
 
-            # 更新员工的积分
-            employee_sum = yield self.user_employee_points_record_ds.get_user_employee_points_record_sum(
-                conds={
-                    "employee_id": recom_employee.id
-                }, fields=["award"])
+        recom_employee = yield self.user_employee_ds.get_employee(
+            conds={
+                'sysuser_id': recommender_user_id,
+                'company_id': current_user.company.id,
+                'activation': const.OLD_YES,
+                'disable': const.OLD_YES
+            }, fields=['id'])
+        if not recom_employee:
+            return
 
-            if employee_sum.sum_award:
-                yield self.user_employee_ds.update_employee(conds={
-                    "id":         recom_employee.id,
-                    "company_id": recom_employee.company_id,
-                }, fields={
-                    "award": int(employee_sum.sum_award),
-                })
-
-                #     @gen.coroutine
-                #     def opt_send_redpacket(self, current_user, position):
-                #         """
-                #         发送申请红包
-                #         :param current_user:
-                #         :param position:
-                #         :return:
-                #         """
-                #         # TODO 待yiliang校验
-                #         yield self.redpacket_ps.handle_red_packet_position_related(
-                #             current_user,
-                #             position,
-                #             redislocker=self.redis,
-                #             is_apply=True
-                #         )
-                #
+        user_ps = UserPageService()
+        yield user_ps.employee_add_reward(
+            employee_id=recom_employee.id,
+            company_id=current_user.company.id,
+            position_id=application.position_id,
+            be_recom_wxuser=current_user.wxuser,
+            award_type=const.EMPLOYEE_AWARD_TYPE_SHARE_APPLY,
+            application_id=application.id
+        )
         self.logger.debug("[opt_add_reward]end")
 
     @gen.coroutine
@@ -738,16 +713,13 @@ class ApplicationPageService(PageService):
 
         self.logger.debug("[opt_send_applier_msg]end")
 
-
     @gen.coroutine
-    def opt_send_recommender_msg(self, recommend_user_id, current_user,
-                                 position):
+    def opt_send_recommender_msg(self, recommend_user_id, current_user, position):
         """
         向推荐人发送消息模板
         :param recommend_user_id:
         :param current_user:
         :param position:
-        :param profile:
         :return:
         """
         self.logger.debug("[opt_send_recommender_msg]start")
@@ -759,7 +731,7 @@ class ApplicationPageService(PageService):
                 "post_user_id":      recommend_user_id,
             }, appends=["LIMIT 1"])
 
-        if recom_record and current_user.recom.id:
+        if recom_record and current_user.recom:
             profile_ps = ProfilePageService()
             work_exp_years = profile_ps.calculate_workyears(
                 profile.get("workexps", []))
@@ -840,13 +812,13 @@ class ApplicationPageService(PageService):
                         recent_job)
 
             if not is_ok:
-                # 消息模板发送失败时，只对普通客户发送短信
+                # 消息模板发送失败时，向 HR 发送短信
                 if hr_info.mobile and hr_info.account_type == 2:
                     params = ObjectDict({
                         "position": position.title
                     })
                     yield self.thrift_mq_ds.send_sms(SmsType.NEW_APPLICATION_TO_HR_SMS,
-                                                     current_user.sysuser.mobile,
+                                                     hr_info.mobile,
                                                      params, isqx=not is_platform)
             profile_ps = None
 
@@ -895,6 +867,9 @@ class ApplicationPageService(PageService):
 
         work_exp_years = profile_ps.calculate_workyears(
             profile.get("workexps", []))
+        # add work_exp_years attribute manually
+        # pdf generating will use this attribute
+        profile.work_exp_years = work_exp_years
 
         save_application_file(
             profile,
@@ -1340,104 +1315,3 @@ class ApplicationPageService(PageService):
         others.iter_others = iter_others
         others.special_others = special_others
         return others
-
-#
-# from tornado.testing import AsyncTestCase, gen_test, main
-# import pprint
-# from service.data.config.config_sys_cv_tpl import ConfigSysCvTplDataService
-# class TestCase(AsyncTestCase):
-#     @gen_test
-#     def test_abc(self):
-#         config_sys_cv_tpl_ds = ConfigSysCvTplDataService()
-#         config_cv_tpls = yield config_sys_cv_tpl_ds.get_config_sys_cv_tpls(
-#             conds={'disable': const.OLD_YES},
-#             fields=['field_name', 'field_title', 'map', 'field_value']
-#         )
-#
-#         records = [ObjectDict(r) for r in config_cv_tpls]
-#         kvmappinp_ret = ObjectDict()
-#         for record in records:
-#             value = {}
-#             if record.field_value:
-#                 value_list = re.split(',|:', record.field_value)
-#                 index = 0
-#                 while True:
-#                     try:
-#                         if value_list[index] and value_list[index + 1]:
-#                             value.update(
-#                                 {value_list[index + 1]: value_list[index]})
-#                             index += 2
-#                     except Exception:
-#                         break
-#                 value.update({'0': ''})
-#             else:
-#                 pass
-#
-#             kvmappinp_ret.update({
-#                 record.field_name: {
-#                     "title": record.field_title,
-#                     "value": value}
-#             })
-#
-#         kvmap = kvmappinp_ret
-#
-#         CV_OTHER_SPECIAL_KEYS = [
-#             "recentjob", "schooljob", "education", "reward", "language",
-#             "competition", "workexp", "projectexp", "internship", "industry",
-#             "position", "IDPhoto"]
-#
-#         # 这些字段虽然是复合字段，但是需要在发给 hr 的邮件中被当成普通字段看待
-#         CV_OTHER_SPECIAL_ITER_KEYS = [
-#             "reward", "language", "competition", "industry", "position"]
-#
-#         others = ObjectDict()
-#         iter_others = []
-#         special_others = {}
-#
-#         others_json = {'height': '177', 'qq': '', 'weixin': '', 'nationality': '123'}
-#
-#         for key, value in purify(others_json).items():
-#             if key == "picUrl":
-#                 # because we already have IDPhoto as key
-#                 continue
-#             if key in CV_OTHER_SPECIAL_KEYS:
-#                 special_others[key] = value
-#             else:
-#                 iter_other = []
-#                 iter_other.append(kvmap.get(key, {}).get("title", ""))
-#                 if kvmap.get(key, {}).get("value"):
-#                     iter_other.append(
-#                         kvmap[key].get("value").get(str(value), ""))
-#                 else:
-#                     iter_other.append(value)
-#                 iter_others.append(iter_other)
-#
-#             display_name_mapping = {
-#                 e.get('field_name'): e.get('field_title')
-#                 for e in config_cv_tpls
-#                 }
-#
-#             # 将部分 special_keys 转为iter_others
-#             if key in CV_OTHER_SPECIAL_ITER_KEYS:
-#                 iter_other = []
-#                 if isinstance(value, list) and len(value) > 0:
-#                     iter_other.append(display_name_mapping.get(key))
-#                     msg = " ".join(value)
-#                     iter_other.append(msg)
-#                 if key == "industry" and value:
-#                     # 期望工作行业，存储为字典值，需要处理为具体的行业名称
-#                     iter_other.append(display_name_mapping.get(key))
-#                     iter_other.append(kvmap.get(key).get('value').get(value))
-#                 elif key == "position" and value:
-#                     # 期望职能
-#                     iter_other.append(display_name_mapping.get(key))
-#                     iter_other.append(value)
-#                 iter_others.append(iter_other)
-#
-#         others.iter_others = iter_others
-#         others.special_others = special_others
-#
-#         print(others)
-#
-# if __name__ == '__main__':
-#     main()

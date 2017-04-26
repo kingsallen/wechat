@@ -5,8 +5,6 @@
 # @File    : url_tool.py
 # @DES     : url 拼接
 
-# Copyright 2016 MoSeeker
-
 
 from urllib.parse import (
     urlparse, parse_qs, urlencode, parse_qsl, urlunparse, urljoin)

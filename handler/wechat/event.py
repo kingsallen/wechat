@@ -166,8 +166,13 @@ class WechatOauthHandler(MetaBaseHandler):
     @gen.coroutine
     def event_CLICK(self):
         """自定义菜单事件
-        用户点击自定义菜单后，微信会把点击事件推送给开发者，请注意，点击菜单弹出子菜单，不会产生上报"""
-        self.send_xml()
+        用户点击自定义菜单后，微信会把点击事件推送给开发者，
+        请注意，点击菜单弹出子菜单，不会产生上报
+        https://mp.weixin.qq.com/wiki?id=mp1445241432&lang=zh_CN"""
+
+        # 将 EventKey 的内容当作接受普通消息的 XML 的 Content
+        self.msg['Content'] = self.msg['EventKey']
+        yield self.post_text()
 
     @gen.coroutine
     def event_VIEW(self):
@@ -230,6 +235,7 @@ class WechatOauthHandler(MetaBaseHandler):
         if not self.wechat.token:
             return False
 
+        hashstr = None
         try:
             ret, hashstr = SHA1().getSHA1(self.wechat.token,
                                           self.params.timestamp,
@@ -238,10 +244,7 @@ class WechatOauthHandler(MetaBaseHandler):
         except Exception as e:
             self.logger.error(traceback.format_exc())
 
-        if hashstr == self.params.signature:
-            return True
-
-        return False
+        return hashstr == self.params.signature
 
 
 class WechatThirdOauthHandler(WechatOauthHandler):
@@ -306,6 +309,6 @@ class WechatThirdOauthHandler(WechatOauthHandler):
                                                  self.params.timestamp,
                                                  self.params.nonce)
         except Exception as e:
-            self.LOG.error(traceback.format_exc())
+            self.logger.error(traceback.format_exc())
 
         return parse_msg(decryp_xml)

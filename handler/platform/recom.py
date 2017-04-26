@@ -4,16 +4,19 @@
 挖掘被动求职者相关的 Handler
 """
 
+import enum
+
 import tornado.gen
-from handler.base import BaseHandler
 
-import conf.message as msg
-from util.tool.date_tool import curr_now_dateonly
-from service.page.employee.candidate import RecomException
 import conf.common as const
+import conf.message as msg
+from handler.base import BaseHandler
+from thrift_gen.gen.common.struct.ttypes import BIZException
+from util.common import ObjectDict
+from util.tool.date_tool import curr_now_dateonly
 
 
-# """
+# 基础服务 BizException 返回内容
 # PASSIVE_SEEKER_NOT_START(61001, "没有操作权限，请先开启挖掘被动求职者！"),
 # PASSIVE_SEEKER_SORT_USER_NOT_EXIST(61002, "未能找到用户的推荐信息，无法获取排名！"),
 # PASSIVE_SEEKER_SORT_COMPANY_NOT_EXIST(61003, "无法获取公司信息，无法获取排名！"),
@@ -23,10 +26,19 @@ import conf.common as const
 # PASSIVE_SEEKER_CANDIDATES_RECORD_NOT_EXIST(61007, "没有推荐记录！"),
 # PASSIVE_SEEKER_APPLY_POSITION_ALREADY_APPLY(61008, "重复申请职位！"),
 # PASSIVE_SEEKER_ALREADY_APPLIED_OR_RECOMMEND(61009, "已经申请或者被推荐");
-# """
+#
 
 
 class RecomCustomVariableMixIn(BaseHandler):
+
+    class IsRecomEnum(enum.Enum):
+        """ candiate_recom_record.is_recom 字段含义：
+        0: 推荐， 1: 未推荐（默认）， 2：忽略， 3：选择中
+        """
+        RECOMED = 0
+        NOT_RECOMED = 1
+        IGNORED = 2
+        SELECTED = 3
 
     @tornado.gen.coroutine
     def prepare(self):
@@ -63,7 +75,7 @@ class RecomCustomVariableMixIn(BaseHandler):
         self._recommend_success_template = \
             self.current_user.company.conf_recommend_success or msg.DEFAULT_RECOMMEND_SUCCESS
         self._recommend_presentee_template = \
-            self.current_user.company.conf.recommend_presentee or msg.DEFAULT_RECOMMEND_PRESENTEE
+            self.current_user.company.conf_recommend_presentee or msg.DEFAULT_RECOMMEND_PRESENTEE
 
         self.recommend_success = self._recommend_success_template \
             .replace("{current_reward}",
@@ -88,65 +100,41 @@ class RecomIgnoreHandler(RecomCustomVariableMixIn, BaseHandler):
 
     @tornado.gen.coroutine
     def post(self):
-        """uri: /passiveseeker/ignore
-
-        parameter
-        id:推荐表编号
-        is_recom:推荐状态 0：已推荐 1：未推荐 2：暂时忽略
-        company_id:部门编号
-
-        检查是否开启被动求职者。将推荐列表中对应用户置为已经推荐。
-        如果还有下一个被动求职者，信息保存后，带上下一个推荐成员的信息，如果没有下一个，跳到推荐成功页面。
-
-        response:
-        json:
-        {
-           "id": "recom_record.id",
-           "position_name":  //职位名称,
-           "presentee_name": //nickname,
-           "next":0,         //next:0 有下一个， 1:无,
-           "errcode":0,      //errcode
-           "errmsg":"",      //errcode
-        }
-        """
-
         if not self.current_user.employee:
             self.write_error(416, message=msg.EMPLOYEE_NOT_BINDED_WARNING)
             return
 
         recom_record_id = self.params.get("_id")
         click_time = self.get_argument("click_time")
-        is_recom = 2 # 暂时忽略
+        # is_recom = 2 # 暂时忽略
 
-        # TODO 调用基础服务
-        #
-        # passive_seeker = self.recomService.ignore_passive_seeker(
-        #     self.post_user_id, click_time, recom_record_id,
-        #     self.current_user.company.id,
-        #     is_recom)
-        passive_seeker = {}
-
+        recom_result = yield self.candidate_ps.post_ignore(
+            recom_record_id, self.current_user.company.id,
+            self.current_user.sysuser.id, click_time)
 
         # recom_total 推荐总数， recom_index ： 已推荐人数
-        if passive_seeker.get('recom_total') == (passive_seeker.get('recom_index') + passive_seeker.get('recom_ignore')):
-            # TODO 调用基础服务
-            stats = self.recomService.get_recom_stats(self.current_user.company.id, self.post_user_id)
+        if recom_result.recomTotal == (recom_result.recomIndex + recom_result.recomIgnore):
+            try:
+                sort = yield self.candidate_ps.sorting(
+                    self.current_user.sysuser.id,
+                    self.current_user.company.id)
 
-            self.LOG.debug("post_ignore_passive_seeker stats: %s" % stats)
+                self.logger.debug("sort: %s" % sort)
+            except BIZException as e:
+                self.render(
+                    "refer/weixin/passive-seeker/passive-wanting_no-more.html")
+                return
+            else:
+                sort.hongbao = int(recom_result.recomIndex) * 2 if sort else 0
 
-            # {"errcode":2102, "errmsg":"未能找到用户的推荐信息，无法获取排名！"}
-            if stats.get('errcode') == 2102:
-                self.render("refer/weixin/passive-seeker/passive-wanting_no-more.html")
+                self.render(
+                    "refer/weixin/passive-seeker/passive-wanting_finished.html",
+                    stats=sort,
+                    recommend_success=self.recommend_success)
                 return
 
-            stats['hongbao'] = int(passive_seeker.get('recom_index')) * 2 if stats else 0
-            self.render("refer/weixin/passive-seeker/passive-wanting_finished.html",
-                        stats=stats,
-                        recommend_success=self.recommend_success)
-            return
-
         self.render("refer/weixin/passive-seeker/passive-wanting_form.html",
-                    passive_seeker=passive_seeker,
+                    passive_seeker=recom_result,
                     recommend_presentee=self.recommend_presentee)
 
 
@@ -180,27 +168,19 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
             yield self._post_recom_candidates()
 
     @tornado.gen.coroutine
-    def _get_recom_candidate(self, id):
-        # TODO
-        # 调用基础服务
-        # passive_seeker = self.recomService.get_recom_record_by_id(
-        #     self.post_user_id, id)
-        passive_seeker = {}
-
-        if passive_seeker:
-            passive_seeker.update(recom_index=0, recom_total=1, recom_ignore=0)
-            self.render("refer/weixin/passive-seeker/passive-wanting_form.html",
-                        passive_seeker=passive_seeker,
-                        recommend_presentee=self.recommend_presentee)
-        else:
-            self.render(
-                "refer/weixin/passive-seeker/passive-wanting_no-more.html")
-
-    @tornado.gen.coroutine
-    def _get_recom_candidates(self):
+    def _get_recom_candidates(self, message=''):
+        """
+        入口： 挖掘被动求职者消息模板
+        :param message:
+        :return:
+        """
         company_id = self.current_user.company.id
         click_time = self.get_argument("click_time", curr_now_dateonly())
-        is_recom = ",".join(['1', '2', '3'])
+        is_recom = [
+            self.IsRecomEnum.NOT_RECOMED.value,
+            self.IsRecomEnum.IGNORED.value,
+            self.IsRecomEnum.SELECTED.value
+        ]
 
         try:
             passive_seekers = yield self.candidate_ps.get_candidate_list(
@@ -209,138 +189,165 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
                 is_recom,
                 company_id)
 
-            # for passive_seeker in passive_seekers:
-            #     p_id = passive_seeker.position_id
-            #     for candidate in passive_seeker.candidates:
-            #         user_id = candidate.presentee_user_id
-            #         view_fav_res = self.recomService.get_wxuser_view_and_fav(
-            #             self.db, p_id, user_id)
-            # TODO view_number, is_interested 放在基础服务提供 （tangyiliang）
-            # candidate["view_number"] = view_fav_res.get("view_number", 0)
-            # candidate["is_interested"] = view_fav_res.get("is_interested", 0)
-
-            self.LOG.debug("get_passive_seekers: %s" % passive_seekers)
+            self.logger.debug("get_passive_seekers: %s" % passive_seekers)
 
             self.render(
-                "refer/weixin/passive-seeker/passive-wanting_recom.html",
+                template_name="refer/weixin/passive-seeker/passive-wanting_recom.html",
                 passive_seekers=passive_seekers,
-                message="placeholder")
+                message=message,
+            )
 
-        except RecomException as e:
+        except BIZException as e:
             self.render(
-                "refer/weixin/passive-seeker/passive-wanting_no-more.html",
+                template_name="refer/weixin/passive-seeker/passive-wanting_no-more.html",
                 passive_seekers=[],
                 message=e.message)
+
+    @tornado.gen.coroutine
+    def _post_recom_candidates(self):
+        """入口：
+        从挖掘被动求职者消息模板进入，选中一个或多个被动求职者后按确认进入
+        """
+        ids = self.get_arguments("_ids")
+
+        if not ids:
+            yield self._get_recom_candidates('请选择推荐人！')
+            return
+        else:
+            pass
+
+        list_of_ids = ",".join(ids)
+        self.logger.debug(list_of_ids)
+        recom_result = yield self.candidate_ps.get_recommendations(
+            self.current_user.company.id, list_of_ids)
+
+        self.logger.debug("recom_result: %s" % recom_result)
+
+        # 返回第一个推荐的被动求职者
+        self.render(
+            template_name="refer/weixin/passive-seeker/passive-wanting_form.html",
+            passive_seeker=recom_result,
+            recommend_presentee=self.recommend_presentee)
+
+    @tornado.gen.coroutine
+    def _get_recom_candidate(self, id):
+        """从推荐TA进入，对单条推荐记录进行推荐"""
+
+        passive_seeker = yield self.candidate_ps.get_recommendation(
+            id, self.current_user.sysuser.id)
+
+        if passive_seeker:
+            # 由于是从 "推荐TA" 进入的，所以没有循环推荐的逻辑，hardcode 以下值
+            passive_seeker.recom_index = 0
+            passive_seeker.recom_total = 1
+            passive_seeker.recom_ignore = 0
+            passive_seeker.next = 1
+
+            self.render(
+                template_name="refer/weixin/passive-seeker/passive-wanting_form.html",
+                passive_seeker=passive_seeker,
+                recommend_presentee=self.recommend_presentee,
+                message=""
+            )
+        else:
+            self.render(template_name="refer/weixin/passive-seeker/passive-wanting_no-more.html")
 
     @tornado.gen.coroutine
     def _post_recom_candidate(self, id):
         from util.tool.str_tool import mobile_validate
 
         recom_record_id = id
-        click_time = self.get_argument("click_time")
+        click_time = self.get_argument("_click_time")
+        if click_time:
+            click_time = click_time[:10]
+
         realname = self.get_argument("_realname")
         company = self.get_argument("_company")
         position = self.get_argument("_position")
         mobile = self.get_argument("_mobile")
         recom_reason = self.get_argument("_recom_reason")
 
-        form_items = [recom_record_id,
-                      self.current_user.sysuser.id,
-                      click_time,
-                      realname,
-                      company,
-                      position,
-                      recom_reason]
+        form_items = [recom_record_id, self.current_user.sysuser.id, click_time, realname, company, position, recom_reason]
 
-        self.LOG.debug("post_recom_passive_seeker form_items: %s" % form_items)
+        self.logger.debug("post_recom_passive_seeker form_items: %s" % form_items)
 
         # 如果校验失败返回原页面并附加 message
         message = None
         if any([(x == '') for x in form_items]):
             message = '有必填项未填写'
+
         elif mobile and not mobile_validate(mobile):
             message = '手机号格式校验失败'
 
+        passive_seeker = ObjectDict({
+            'id':             recom_record_id,
+            'realname':       realname,
+            'company':        company,
+            'position':       position,
+            'mobile':         mobile,
+            'recom_reason':   recom_reason,
+            'recom_index':    self.get_argument("_recom_index"),
+            'presentee_name': self.get_argument("_presentee_name"),
+            'position_name':  self.get_argument("_position_name"),
+            'click_time':     self.get_argument("_click_time"),
+            'next':           1,
+        })
+
         if message:
-            passive_seeker = {
-                'id':             recom_record_id,
-                'realname':       realname,
-                'company':        company,
-                'position':       position,
-                'mobile':         mobile,
-                'recom_reason':   recom_reason,
-                'recom_index':    self.get_argument("_recom_index"),
-                'presentee_name': self.get_argument("_presentee_name"),
-                'position_name':  self.get_argument("_position_name"),
-                'message':        message
-            }
             self.render(
-                'refer/weixin/passive-seeker/passive-wanting_form.html',
+                template_name='refer/weixin/passive-seeker/passive-wanting_form.html',
                 passive_seeker=passive_seeker,
-                recommend_presentee=self.recommend_presentee)
+                recommend_presentee=self.recommend_presentee,
+                message=message)
             return
 
-        # {u'presentee_name': u'\u8e0f\u96ea\u65e0\u75d5', u'errcode': 0, u'next': u'0', u'position_name': u'CK\u6d4b\u8bd5\u804c\u4f4d\u540d\u79f0', u'id': u'69', u'errmsg': u'\u5019\u9009\u4eba\u9009\u4e2d\u6210\u529f!'}
+        try:
+            recom_result = yield self.candidate_ps.post_recommend(
+                self.current_user.sysuser.id,
+                click_time, recom_record_id, realname, company,
+                position, mobile, recom_reason,
+                self.current_user.company.id)
 
-        # TODO 调用基础服务
-        # passive_seeker = self.recomService.recom_passive_seeker(
-        #     self.post_user_id, click_time, recom_record_id, realname, company,
-        #     position, mobile, recom_reason,
-        #     self.current_user.company.id)
-        passive_seeker = {}
+            self.logger.debug("post_recom_passive_seeker passive_seeker: %s" % recom_result)
 
-        self.LOG.debug("post_recom_passive_seeker passive_seeker: %s" % passive_seeker)
-
-        # 推荐完成以后需要重新获取一下总积分
-        yield self.refresh_recom_info()
-
-        position_title = yield self.redpacket_ps.get_position_title_by_recom_record_id(recom_record_id)
-        yield self.redpacket_ps.handle_red_packet_recom(
-            recom_current_user=self.current_user,
-            recom_record_id=recom_record_id,
-            redislocker=self.redis,
-            realname=realname,
-            position_title=position_title
-        )
-
-        # 已经全部推荐了
-        if passive_seeker.get('recom_total') == passive_seeker.get(
-            'recom_index') + passive_seeker.get('recom_ignore'):
-            stats = self.recomService.get_recom_stats(
-                self.current_user.company.id, self.post_user_id)
-            stats['hongbao'] = int(
-                passive_seeker.get('recom_index')) * 2 if stats else 0
-            self.LOG.debug("post_recom_passive_seeker stats: %s" % stats)
+        except BIZException as e:
             self.render(
-                "refer/weixin/passive-seeker/passive-wanting_finished.html",
-                stats=stats, recommend_success=self.recommend_success)
-
-        else:  # 还有未推荐的
-            self.render(
-                "refer/weixin/passive-seeker/passive-wanting_form.html",
+                template_name='refer/weixin/passive-seeker/passive-wanting_form.html',
                 passive_seeker=passive_seeker,
-                recommend_presentee=self.recommend_presentee)
-
-    @tornado.gen.coroutine
-    def _post_recom_candidates(self):
-        ids = self.get_arguments("_ids")
-
-        if not ids:
-            self.get_passive_seekers('请选择推荐人！')
+                recommend_presentee=self.recommend_presentee,
+                message=e.message)
             return
 
-        self.LOG.debug(",".join(ids))
+        else:
+            # 推荐完成以后需要重新获取一下总积分
+            yield self.refresh_recom_info()
 
-        # 更新被动求职者的推荐状态为选中 is_recom:2
-        # TODO 调用基础服务
-        passive_seeker = self.recomService.recom_passive_seekers(
-            self.current_user.company.id, ",".join(ids))
+            # 推荐红包处理
+            position_title = yield self.redpacket_ps.get_position_title_by_recom_record_id(recom_record_id)
 
-        # {u'presentee_name': u'\u8e0f\u96ea\u65e0\u75d5', u'errcode': 0, u'next': u'0', u'position_name': u'CK\u6d4b\u8bd5\u804c\u4f4d\u540d\u79f0', u'id': u'69', u'errmsg': u'\u5019\u9009\u4eba\u9009\u4e2d\u6210\u529f!'}
-        self.LOG.debug("post_passive_seekers: %s" % passive_seeker)
+            yield self.redpacket_ps.handle_red_packet_recom(
+                recom_current_user=self.current_user,
+                recom_record_id=recom_record_id,
+                redislocker=self.redis,
+                realname=realname,
+                position_title=position_title
+            )
 
-        # 返回第一个推荐的被动求职者
-        self.render("refer/weixin/passive-seeker/passive-wanting_form.html",
-                    passive_seeker=passive_seeker,
+            # 已经全部推荐了
+            if recom_result.recomTotal == recom_result.recomIndex + recom_result.recomIgnore:
+
+                stats = yield self.candidate_ps.sorting(
+                    self.current_user.sysuser.id, self.current_user.company.id)
+
+                self.logger.debug("_post_recom_candidate stats: %s" % stats)
+                self.render(
+                    template_name="refer/weixin/passive-seeker/passive-wanting_finished.html",
+                    stats=stats,
+                    recommend_success=self.recommend_success)
+
+            # 还有未推荐的
+            else:
+                self.render(
+                    template_name="refer/weixin/passive-seeker/passive-wanting_form.html",
+                    passive_seeker=recom_result,
                     recommend_presentee=self.recommend_presentee)
-

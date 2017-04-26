@@ -204,13 +204,6 @@ class CompanyPageService(PageService):
                 cached_company_sug_wechat = result
             return True, result
 
-    def get_company_conf(self, company_id, fields):
-        # TODO （tangyiliang）  是否要删？ 不应该放在 ps 中
-        company_conf = yield self.hr_company_conf_ds.get_company_conf(
-            {"company_id": company_id}, fields)
-
-        raise gen.Return(company_conf)
-
     @gen.coroutine
     def get_company_reward_by_templateid(self, company_id, tempalte_id):
         """ 获取公司下新版积分配置 """

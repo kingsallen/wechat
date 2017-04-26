@@ -3,18 +3,18 @@
 from tornado import gen
 
 import conf.common as const
-import conf.platform as const_platorm
 import conf.message as msg
 import conf.path as path
+import conf.platform as const_platorm
 import conf.wechat as wx
 from handler.base import BaseHandler
+from tests.dev_data.user_company_config import COMPANY_CONFIG
 from util.common import ObjectDict
-from util.common.decorator import handle_response, check_employee
 from util.common.cipher import encode_id
+from util.common.decorator import handle_response, check_employee
 from util.tool.str_tool import gen_salary, add_item, split
 from util.tool.url_tool import make_url, url_append_query
 from util.wechat.template import position_view_five_notice_tpl, position_share_notice_employee_tpl
-from tests.dev_data.user_company_config import COMPANY_CONFIG
 
 
 class PositionHandler(BaseHandler):
@@ -33,8 +33,7 @@ class PositionHandler(BaseHandler):
                 return
 
             # hr端功能不全，暂且通过团队名称匹配
-            team = yield self.team_ps.get_team_by_name(position_info.department, position_info.company_id)
-            # team = yield self.team_ps.get_team_by_id(position_info.team_id)
+            team = yield self.team_ps.get_team_by_id(position_info.team_id)
 
             self.logger.debug("[JD]构建收藏信息")
             star = yield self.position_ps.is_position_stared_by(position_id, self.current_user.sysuser.id)
@@ -45,6 +44,13 @@ class PositionHandler(BaseHandler):
             self.logger.debug("[JD]构建职位所属公司信息")
             did = yield self.company_ps.get_real_company_id(position_info.publisher, position_info.company_id)
             company_info = yield self.company_ps.get_company(conds={"id": did}, need_conf=True)
+
+            # 刷新链路
+            self.logger.debug("[JD]刷新链路")
+            last_employee_user_id = yield self._make_refresh_share_chain(
+                position_info)
+            self.logger.debug(
+                "[JD]last_employee_user_id: %s" % (last_employee_user_id))
 
             self.logger.debug("[JD]构建转发信息")
             yield self._make_share_info(position_info, company_info)
@@ -61,7 +67,12 @@ class PositionHandler(BaseHandler):
             self.logger.debug("[JD]构建相似职位推荐")
             recomment_positions_res = yield self.position_ps.get_recommend_positions(position_id)
 
-            header = self._make_json_header(position_info, company_info, star, application, endorse, can_apply, team.id, did)
+            # 获取公司配置信息
+            teamname_custom = self.current_user.company.conf_teamname_custom
+
+            header = self._make_json_header(
+                position_info, company_info, star, application, endorse,
+                can_apply, team.id if team else 0, did, teamname_custom)
             module_job_description = self._make_json_job_description(position_info)
             module_job_need = self._make_json_job_need(position_info)
             module_feature = self._make_json_job_feature(position_info)
@@ -83,7 +94,7 @@ class PositionHandler(BaseHandler):
                 module_job_require_old = self._make_json_job_require_old(position_info)
                 module_department_old = self._make_json_job_department(position_info)
                 module_job_attr_old = self._make_json_job_attr(position_info)
-                module_hr_register_old = self.current_user.wechat.hr_register & True
+                module_hr_register_old = int(self.current_user.wechat.hr_register) & True
 
                 add_item(position_data, "module_job_require", module_job_require_old)
                 add_item(position_data, "module_department", module_department_old)
@@ -111,7 +122,7 @@ class PositionHandler(BaseHandler):
                 module_company_info = self._make_json_job_company_info(company_info, did)
                 self.logger.debug("[JD]构建团队相关信息")
                 yield self._add_team_data(position_data, team,
-                                          position_info.company_id, position_id)
+                                          position_info.company_id, position_id, teamname_custom)
 
                 add_item(position_data, "module_company_info", module_company_info)
                 add_item(position_data, "module_job_require", module_job_require)
@@ -123,12 +134,7 @@ class PositionHandler(BaseHandler):
             self.flush()
 
             # 后置操作
-            # 刷新链路
             if self.is_platform:
-                self.logger.debug("[JD]刷新链路")
-                last_employee_user_id = yield self._make_refresh_share_chain(position_info)
-                self.logger.debug("[JD]last_employee_user_id: %s" % (last_employee_user_id))
-
                 self.logger.debug("[JD]转发积分操作")
                 yield self._make_add_reward_click(position_info, last_employee_user_id)
 
@@ -174,6 +180,10 @@ class PositionHandler(BaseHandler):
             cover = self.static_url(red_packet.share_img)
             title = "{} {}".format(position_info.title, red_packet.share_title)
             description = "".join(split(red_packet.share_desc))
+
+            self.logger.debug("自定义分享 red_packet cover：%s" % cover)
+            self.logger.debug("自定义分享 red_packet title：%s" % title)
+            self.logger.debug("自定义分享 red_packet description：%s" % description)
         else:
             cover = self.static_url(company_info.logo)
             title = position_info.title
@@ -183,8 +193,16 @@ class PositionHandler(BaseHandler):
                 title = str(position_info.share_title).format(
                     company=company_info.abbreviation,
                     position=position_info.title)
+                self.logger.debug("自定义分享 cover 1：%s" % title)
             if position_info.share_description:
+                self.logger.debug("自定义分享 description 1：%s" % position_info.share_description)
                 description = "".join(split(position_info.share_description))
+                self.logger.debug("自定义分享 description 1：%s" % description)
+
+            self.logger.debug("自定义分享 cover：%s" % cover)
+            self.logger.debug("自定义分享 title：%s" % title)
+            self.logger.debug("自定义分享 description：%s" % description)
+
 
         link = make_url(
             path.POSITION_PATH.format(position_info.id),
@@ -204,6 +222,8 @@ class PositionHandler(BaseHandler):
             "link": link,
             "pid": position_info.id,
         })
+
+        self.logger.debug("_make_share_info:{}".format(self.params.share))
 
     @gen.coroutine
     def _make_hr_info(self, publisher):
@@ -280,9 +300,8 @@ class PositionHandler(BaseHandler):
         return res
 
     def _make_json_header(self, position_info, company_info, star, application,
-                          endorse, can_apply, team_id, did):
+                          endorse, can_apply, team_id, did, teamname_custom):
         """构造头部 header 信息"""
-
         data = ObjectDict({
             "id": position_info.id,
             "title": position_info.title,
@@ -300,6 +319,7 @@ class PositionHandler(BaseHandler):
             "did": did if did != self.current_user.company.id else "", # 主公司不需要提供 did
             "salary": position_info.salary,
             "hr_chat": int(self.current_user.wechat.hr_chat),
+            "teamname_custom": teamname_custom["teamname_custom"]
             #"team": position_info.department.lower() if position_info.department else ""
         })
 
@@ -446,6 +466,9 @@ class PositionHandler(BaseHandler):
                 self.current_user.sysuser.id, position_info.id)
 
         if self.current_user.sysuser.id:
+            self.logger.debug("_make_refresh_share_chain user_id:{}".format(self.current_user.sysuser.id))
+            self.logger.debug("_make_refresh_share_chain position_id:{}".format(position_info.id))
+            self.logger.debug("_make_refresh_share_chain sharechain_id:{}".format(inserted_share_chain_id))
             yield self.candidate_ps.send_candidate_view_position(
                 user_id=self.current_user.sysuser.id,
                 position_id=position_info.id,
@@ -569,43 +592,43 @@ class PositionHandler(BaseHandler):
                                          position_info.salary)
 
     @gen.coroutine
-    def _add_team_data(self, position_data, team, company_id, position_id):
+    def _add_team_data(self, position_data, team, company_id, position_id, teamname_custom):
 
         if team:
-            company_config = COMPANY_CONFIG.get(company_id)
             module_team_position = yield self._make_team_position(
-                team, position_id, company_id)
+                team, position_id, company_id, teamname_custom)
             if module_team_position:
                 add_item(position_data, "module_team_position",
                          module_team_position)
 
-            if team.is_show:
-                module_mate_day = yield self._make_mate_day(team)
-                if module_mate_day:
-                    add_item(position_data, "module_mate_day", module_mate_day)
+            # [hr3.4]team.is_show只是用来判断是否在团队列表显示
+            cms_page = yield self._make_cms_page(team.id)
+            if cms_page:
+                add_item(position_data, "module_mate_day", cms_page)
 
-                if not company_config.no_jd_team:
-                    module_team = yield self._make_team(team)
-                    add_item(position_data, "module_team", module_team)
+            # 玛氏定制
+            company_config = COMPANY_CONFIG.get(company_id)
+            if company_config and not company_config.no_jd_team:  # 不在职位详情页展示所属团队, 目前只有Mars有这个需求,
+                module_team = yield self._make_team(team, teamname_custom)
+                add_item(position_data, "module_team", module_team)
 
     @gen.coroutine
-    def _make_team_position(self, team, position_id, company_id):
+    def _make_team_position(self, team, position_id, company_id, teamname_custom):
         """团队职位，构造数据"""
         res = yield self.position_ps.get_team_position(
-            team.name, self.params, position_id, company_id)
+            team.id, self.params, position_id, company_id, teamname_custom)
         raise gen.Return(res)
 
     @gen.coroutine
-    def _make_mate_day(self, team):
-        """同事的一天，构造数据"""
-        res = yield self.position_ps.get_mate_data(team.jd_media)
-        raise gen.Return(res)
+    def _make_cms_page(self, team_id):
+        res = yield self.position_ps.get_cms_page(team_id)
+        return res
 
     @gen.coroutine
-    def _make_team(self, team):
+    def _make_team(self, team, teamname_custom):
         """所属团队，构造数据"""
         more_link = make_url(path.TEAM_PATH.format(team.id), self.params),
-        res = yield self.position_ps.get_team_data(team, more_link)
+        res = yield self.position_ps.get_team_data(team, more_link, teamname_custom)
         raise gen.Return(res)
 
 
@@ -628,26 +651,19 @@ class PositionListHandler(BaseHandler):
         if self.params.hb_c:
             # 红包职位列表
             infra_params.update(hb_config_id=int(self.params.hb_c))
-            position_list = yield self.position_ps.infra_get_rp_position_list(
-                infra_params)
-            rp_share_info = yield self.position_ps.infra_get_rp_share_info(
-                infra_params)
-            yield self._make_share_info(
-                self.current_user.company.id, self.params.did, rp_share_info)
+            position_list = yield self.position_ps.infra_get_rp_position_list(infra_params)
+            rp_share_info = yield self.position_ps.infra_get_rp_share_info(infra_params)
+            yield self._make_share_info(self.current_user.company.id, self.params.did, rp_share_info)
 
         else:
             # 普通职位列表
-            position_list = yield self.position_ps.infra_get_position_list(
-                infra_params)
+            position_list = yield self.position_ps.infra_get_position_list(infra_params)
 
             # 获取获取到普通职位列表，则根据获取的数据查找其中红包职位的红包相关信息
-            rp_position_list = [
-                position for position in position_list if isinstance(
-                    position, dict) and position.in_hb]
+            rp_position_list = [position for position in position_list if isinstance(position, dict) and position.in_hb]
 
             if position_list and rp_position_list:
-                rpext_list = yield self.position_ps.infra_get_position_list_rp_ext(
-                    rp_position_list)
+                rpext_list = yield self.position_ps.infra_get_position_list_rp_ext(rp_position_list)
 
                 for position in position_list:
                     pext = [e for e in rpext_list if e.pid == position.id]
@@ -677,14 +693,22 @@ class PositionListHandler(BaseHandler):
 
         # 直接请求页面返回
         else:
+            position_title = const_platorm.POSITION_LIST_TITLE_DEFAULT
+            if self.params.recomlist or self.params.noemprecom:
+                position_title = const_platorm.POSITION_LIST_TITLE_RECOMLIST
+
+            teamname_custom = self.current_user.company.conf_teamname_custom.teamname_custom
+
             self.render(
                 template_name="refer/neo_weixin/position_v2/position_list.html",
                 positions=position_list,
-                position_title=const_platorm.POSITION_LIST_TITLE_DEFAULT if not self.params.recomlist else const_platorm.POSITION_LIST_TITLE_RECOMLIST,
+                position_title=position_title,
                 url='',
                 use_neowx=bool(self.current_user.company.conf_newjd_status == 2),
                 is_employee=bool(self.current_user.employee),
-                searchFilterNum=self.get_search_filter_num())
+                searchFilterNum=self.get_search_filter_num(),
+                teamname_custom=teamname_custom
+            )
 
     @gen.coroutine
     def make_company_info(self):
@@ -719,7 +743,6 @@ class PositionListHandler(BaseHandler):
             host=self.request.host,
             protocol=self.request.protocol,
             recom=self.position_ps._make_recom(self.current_user.sysuser.id),
-            test="testaaa",
             escape=["pid", "keywords", "cities", "candidate_source",
                     "employment_type", "salary", "department", "occupations",
                     "custom", "degree", "page_from", "page_size"])
@@ -745,7 +768,6 @@ class PositionListHandler(BaseHandler):
 
         infra_params = ObjectDict()
 
-        # 暂时不考虑 QX 的情况
         infra_params.company_id = self.current_user.company.id
 
         if self.params.did:

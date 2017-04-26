@@ -176,16 +176,16 @@ class CellphoneBindHandler(BaseHandler):
                 self.current_user.sysuser.username):
             response = yield self.cellphone_ps.wx_pc_combine(
                 mobile=self.params.mobile,
-                unionid=self.current_user.sysuser.unionid,
+                unionid=self.current_user.sysuser.unionid
             )
             if response.status != const.API_SUCCESS:
                 return
 
             ret_user_id = response.data.id
             if str(ret_user_id) != str(self.current_user.sysuser.id):
-                self.clear_cookie(name=const.COOKIE_SESSIONID)
-                session_id = self._make_new_session_id(ret_user_id)
-                self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True)
+                self.logger.warn("触发帐号合并成功 合并前 user_id:{} 合并后 user_id:{}".format(self.current_user.sysuser.id, ret_user_id))
+                # 由于在 baseHandler 中已经有对合并帐号的处理，此处不手动删除 cookie
+                # self.clear_cookie(name=const.COOKIE_SESSIONID)
 
         else:
             password = self.current_user.sysuser.password
@@ -197,8 +197,10 @@ class CellphoneBindHandler(BaseHandler):
                     "mobile": self.params.mobile,
                     "code": code,
                 })
-                yield self.cellphone_ps.send_sms(SmsType.UPDATE_SYSUSER_SMS, self.params.mobile,
-                                                                  params, isqx=self.is_qx, ip=self.request.headers.get('Remoteip'))
+                yield self.cellphone_ps.send_sms(
+                    SmsType.UPDATE_SYSUSER_SMS, self.params.mobile,
+                    params, isqx=self.is_qx,
+                    ip=self.request.headers.get('Remoteip'))
 
-            yield self.user_ps.bind_mobile_password(self.current_user.sysuser.id,
-                                                    self.params.mobile, password)
+            yield self.user_ps.bind_mobile_password(
+                self.current_user.sysuser.id, self.params.mobile, password)
