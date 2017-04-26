@@ -46,6 +46,7 @@ import handler.platform.recom
 import handler.qx.app
 import handler.qx.wechat_oauth
 import handler.qx.aggregation
+import handler.qx.search
 
 import handler.wechat.event
 
@@ -100,7 +101,11 @@ common_routes = [
     (r"/api/JSSDKError",                             handler.common.jssdkerror.JSSDKErrorHandler,               {"event": "frontend_jssdkerror"}),
 
     # 兼容老微信 url，进行302跳转，event 设置为 NULL
-    # (r"/.*",                                         handler.common.compatible.CompatibleHandler,               {"event": "NULL"})
+    # (r"/.*",                                           handler.common.compatible.CompatibleHandler,               {"event": "NULL"})
+    (r"/m/api/search/condition/*", handler.qx.search.SearchConditionHandler, { "event": "search_condition" }),
+    (r"/m/api/search/condition/(\d+)*", handler.qx.search.SearchConditionHandler, { "event": "search_condition" }),
+    (r"/m/api/search/([a-z_]+)", handler.qx.search.SearchCityHandler, { "event": "search_condition" }),
+
 ]
 
 # 企业号的单独 routes，域名 platform.moseeker.com/m
