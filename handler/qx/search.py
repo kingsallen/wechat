@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 from tornado.gen import coroutine, Return
 from handler.base import BaseHandler
-from conf.qx import hot_city
+from conf.qx import HOTCITY
 import json
 from util.tool.http_tool import http_get
 import conf.path as path
@@ -72,7 +72,7 @@ class SearchCityHandler(BaseHandler):
 
     @coroutine
     def get_hot_city(self):
-        res = hot_city
+        res = HOTCITY
         raise Return(res)
 
     @coroutine
