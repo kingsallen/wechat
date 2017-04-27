@@ -18,8 +18,8 @@ class DictionaryPageService(PageService):
         return ret
 
     @tornado.gen.coroutine
-    def get_industries(self):
-        ret = yield self.infra_dict_ds.get_industries()
+    def get_industries(self,level=2):
+        ret = yield self.infra_dict_ds.get_industries(level=level)
         return ret
 
     @tornado.gen.coroutine

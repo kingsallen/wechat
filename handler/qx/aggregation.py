@@ -7,9 +7,11 @@
 
 from tornado import gen
 
+import conf.common as const
+import conf.path as path
 import conf.qx as qx_const
 from handler.base import BaseHandler
-from util.common.decorator import handle_response
+from util.common.decorator import handle_response, gamma_welcome
 from util.common import ObjectDict
 from util.tool.url_tool import make_url
 
@@ -21,6 +23,7 @@ class AggregationHandler(BaseHandler):
     """
 
     @handle_response
+    # @gamma_welcome
     @gen.coroutine
     def get(self):
 
@@ -42,7 +45,7 @@ class AggregationHandler(BaseHandler):
                                                   page_no,
                                                   page_size)
 
-        positions = yield self.aggregation_ps.opt_agg_positions(es_res, page_size)
+        positions = yield self.aggregation_ps.opt_agg_positions(es_res, page_size, self.current_user.sysuser.id)
 
         result = ObjectDict({
             "page_no": page_no,
@@ -57,23 +60,26 @@ class AggregationHandler(BaseHandler):
 
             # 处理 banner
             banner = ObjectDict()
-            # banner = yield self.aggregation_ps.get_aggregation_banner()
+            banner = yield self.aggregation_ps.get_aggregation_banner()
 
             # 处理热招企业
             hot_company = self.aggregation_ps.opt_agg_company(es_res)
+
+            # 自定义分享
+            share = self._make_share_info(hot_company)
 
             result.update({
                 "is_hr_ads": is_show_ads,
                 "banner": banner,
                 "hot_company": hot_company,
+                "share": share,
             })
 
-        # 来自初次进入页面，则设置搜索词 cookie
-        if self.params.fr_wel:
-            self._set_welcome_cookie()
+            # 来自初次进入页面，则设置搜索词 cookie
+            if self.params.fr_wel:
+                self._set_welcome_cookie()
 
         self.send_json_success(data=result)
-
 
     def _set_welcome_cookie(self):
         """用户在搜索页面点击“搜索”或者某个快速搜索条件的时候，系统会记录一个用户主动搜索的cookie。在
@@ -112,35 +118,32 @@ class AggregationHandler(BaseHandler):
             return False
         return True
 
-    @gen.coroutine
-    def _make_share_info(self, company_id, did=None, rp_share_info=None):
+    def _make_share_info(self, hot_company):
         """构建 share 内容"""
 
-        company_info = yield self.company_ps.get_company(
-            conds={"id": did or company_id}, need_conf=True)
         link = make_url(
-            path.POSITION_LIST,
+            path.GAMMA_POSITION,
             self.params,
-            host=self.request.host,
+            host=self.settings.qx_host,
             protocol=self.request.protocol,
             recom=self.position_ps._make_recom(self.current_user.sysuser.id),
-            escape=["pid", "keywords", "cities", "candidate_source",
-                    "employment_type", "salary", "department", "occupations",
-                    "custom", "degree", "page_from", "page_size"])
+            escape=["page_no", "page_size"])
 
-        if not rp_share_info:
-            cover = self.static_url(company_info.logo)
-            title = "%s热招职位" % company_info.abbreviation
-            description = msg.SHARE_DES_DEFAULT
+        if len(hot_company) == 1:
+            logo = hot_company[0].get("logo")
         else:
-            cover = rp_share_info.cover
-            title = rp_share_info.title
-            description = rp_share_info.description
+            logo = make_url(const.COMPANY_HEADIMG)
 
-        self.params.share = ObjectDict({
+        cover = self.static_url(logo)
+        keywords = "【%s】".format(self.params.keywords) if self.params.keywords else ""
+        title = "%s职位推荐" % keywords
+        description = "微信好友%s推荐%s的职位，点击查看详情。找的就是你！" % (self.current_user.qxuser.nickname or "", keywords)
+
+        share = ObjectDict({
             "cover": cover,
             "title": title,
             "description": description,
             "link": link
         })
 
+        return share

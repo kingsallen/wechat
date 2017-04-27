@@ -7,6 +7,7 @@ from util.common.decorator import handle_response
 
 
 class DictCityHandler(BaseHandler):
+
     @handle_response
     @gen.coroutine
     def get(self):
@@ -15,6 +16,7 @@ class DictCityHandler(BaseHandler):
 
 
 class DictFunctionHandler(BaseHandler):
+
     @handle_response
     @gen.coroutine
     def get(self):
@@ -24,6 +26,7 @@ class DictFunctionHandler(BaseHandler):
 
 
 class DictIndustryHandler(BaseHandler):
+
     @handle_response
     @gen.coroutine
     def get(self):

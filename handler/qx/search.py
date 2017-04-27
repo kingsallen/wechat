@@ -1,58 +1,66 @@
 # -*- coding:utf-8 -*-
-from tornado.gen import coroutine, Return
-from handler.base import BaseHandler
-from conf.qx import hot_city
+
 import json
-from util.tool.http_tool import http_get
-import conf.path as path
+from tornado.gen import coroutine
+
+import conf.qx as qx_const
+
+from handler.base import BaseHandler
+from util.common.decorator import handle_response, authenticated
+from util.tool.json_tool import json_dumps
 
 
 class SearchConditionHandler(BaseHandler):
 
+    @handle_response
+    @authenticated
     @coroutine
     def get(self):
-        userid = self.current_user.sysuser.id
-        res = yield self.searchcondition_ps.getConditionList(userid)
 
-        conditionlist = res.searchConditionList
-        if res.status == 0:
-            self.send_json_success({'conditionlist': conditionlist})
-        else:
-            self.send_json_error(message=res.message)
+        res = yield self.searchcondition_ps.get_condition_list(self.current_user.sysuser.id)
+        self.send_json_success({'conditionlist': res})
 
+    @handle_response
+    @authenticated
     @coroutine
     def post(self):
-        userId = self.current_user.sysuser.id or 1
+
         condition = self.json_args
 
         name = condition.get('name', None)
         keywords = condition.get('keywords', None)
-        if not (name and keywords and userId):
+        if not (name and keywords and self.current_user.sysuser.id):
             self.send_json_error(message='Invalid argument')
         else:
             cityNameData = condition.get('cityName', None)
             industryData = condition.get('industry', None)
-            cityName = json.dumps(cityNameData ,ensure_ascii = False) if cityNameData else None
-            industry = json.dumps(industryData ,ensure_ascii = False) if industryData else None
+            cityName = json_dumps(cityNameData) if cityNameData else None
+            industry = json_dumps(industryData) if industryData else None
 
-            salaryTop = condition.get('salaryTop', None)
-            salaryBottom = condition.get('salaryBottom', None)
-            salaryNegotiable = condition.get('salaryNegotiable', None)
+            salary_top = condition.get('salaryTop', None)
+            salary_bottom = condition.get('salaryBottom', None)
+            salary_negotiable = condition.get('salaryNegotiable', None)
 
-            res = yield self.searchcondition_ps.addCondition(userId=userId, name=name, keywords=json.dumps(keywords,ensure_ascii = False),
-                                                             cityName=cityName, salaryTop=salaryTop,
-                                                             salaryBottom=salaryBottom,
-                                                             salaryNegotiable=salaryNegotiable, industry=industry)
+            res = yield self.searchcondition_ps.add_condition(user_id=self.current_user.sysuser.id,
+                                                              name=name,
+                                                              keywords=json_dumps(keywords),
+                                                              city_name=cityName,
+                                                              salary_top=salary_top,
+                                                              salary_bottom=salary_bottom,
+                                                              salary_negotiable=salary_negotiable,
+                                                              industry=industry)
 
             if res.status == 0:
                 self.send_json_success()
             else:
                 self.send_json_error(message=res.message)
 
+    @handle_response
+    @authenticated
     @coroutine
     def delete(self, id):
-        userId = self.current_user.sysuser.id
-        res = yield self.searchcondition_ps.delCondition(int(userId), int(id))
+
+        res = yield self.searchcondition_ps.del_condition(self.current_user.sysuser.id, id)
         if res.status == 0:
             self.send_json_success()
         else:
@@ -61,28 +69,29 @@ class SearchConditionHandler(BaseHandler):
 
 class SearchCityHandler(BaseHandler):
 
+    @handle_response
     @coroutine
     def get(self, action=''):
         func = getattr(self, 'get_' + action, None)
+        self._event = self._event + action
         if not func:
             self.send_json_error(message='Invalid cities params')
         else:
-            res = yield func()
-            self.send_json_success(res)
+            yield func()
 
+    @handle_response
     @coroutine
     def get_hot_city(self):
-        res = hot_city
-        raise Return(res)
 
-    @coroutine
-    def get_city_list(self):
-        res = yield self.dictionary_ps.get_cities()
-        raise Return(res)
+        self.send_json_success(data={
+            "hot_city": qx_const.HOTCITY
+        })
 
+    @handle_response
     @coroutine
     def get_industries(self):
-        response = yield http_get(path.DICT_INDUSTRY, dict(parent=0))
-        industries_list = response.data
-        res = map(lambda x: x['name'], industries_list)
-        raise Return({"industries": list(res)})
+
+        res = yield self.searchcondition_ps.get_industries(level=1)
+        self.send_json_success(data={
+            "industries": list(res)
+        })

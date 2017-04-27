@@ -51,6 +51,6 @@ class ThriftSearchconditionDataService(DataService):
         :return:
         """
 
-        ret = yield self.searchcondition_service_cilent.getUserPositionStatus(user_id, position_ids)
+        ret = yield self.searchcondition_service_cilent.getUserPositionStatus(int(user_id), position_ids)
         self.logger.debug("[thrift]get_user_position_status: %s" % ret)
         raise gen.Return(ret)

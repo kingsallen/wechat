@@ -135,8 +135,8 @@ def check_signature(func):
             except MissingArgumentError:
                 self.write_error(http_code=404)
                 return
-            else:
-                yield func(self, *args, **kwargs)
+
+        yield func(self, *args, **kwargs)
 
     return wrapper
 

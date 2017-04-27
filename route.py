@@ -102,9 +102,6 @@ common_routes = [
 
     # 兼容老微信 url，进行302跳转，event 设置为 NULL
     # (r"/.*",                                           handler.common.compatible.CompatibleHandler,               {"event": "NULL"})
-    (r"/m/api/search/condition/*", handler.qx.search.SearchConditionHandler, { "event": "search_condition" }),
-    (r"/m/api/search/condition/(\d+)*", handler.qx.search.SearchConditionHandler, { "event": "search_condition" }),
-    (r"/m/api/search/([a-z_]+)", handler.qx.search.SearchCityHandler, { "event": "search_condition" }),
 
 ]
 
@@ -155,6 +152,10 @@ qx_routes = [
     (r"/wxoauth2",                                  handler.qx.wechat_oauth.WxOauthHandler,                     {"event": "wxoauth_wxoauth"}),
 
     (r"/api/positions[\/]?",                        handler.qx.aggregation.AggregationHandler,                  {"event": "position_aggregation"}),
+    (r"/api/config[\/]?",                           handler.qx.app.ConfigHandler,                               {"event": "wechat_config"}),
+    (r"/api/search/condition[\/]*([0-9]+)*",        handler.qx.search.SearchConditionHandler,                   {"event": "search_condition"}),
+    (r"/api/search/([a-z_]+)",                      handler.qx.search.SearchCityHandler,                        {"event": "search_condition"}),
+
 ]
 qx_routes.extend(common_routes)
 

@@ -13,7 +13,7 @@
 from util.common import ObjectDict
 
 # ++++++++++业务常量+++++++++++
-hot_city = ObjectDict({
+HOTCITY = ObjectDict({
     "hot_city": ['上海','北京','深圳','广州','杭州',
                  '南京','成都','苏州','武汉','天津',
                  '西安','不限']
@@ -25,7 +25,7 @@ COOKIE_HRADS_SESSIONS = "HR_ADS"
 COOKIE_HRADS_TOTAL = "HR_ADS_TOTAL"
 
 JD_BACKGROUND_IMG = ObjectDict({
-    "": ObjectDict({
+    0: ObjectDict({
         "team_img": "11",
         "job_img": "12",
         "company_img": "13",

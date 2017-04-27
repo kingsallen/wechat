@@ -5,6 +5,7 @@
 # @File    : aggregation.py
 # @DES     : 聚合号列表页
 
+import random
 import ujson
 from tornado import gen
 import conf.common as const
@@ -38,22 +39,6 @@ class AggregationPageService(PageService):
         raise gen.Return(banner)
 
     @gen.coroutine
-    def get_user_position_status(self, user_id, position_ids):
-        """
-        批量查询用户职位状态：已阅，已收藏，已投递
-        :param user_id:
-        :param position_ids:
-        :return:
-        """
-
-        ret = yield self.thrift_searchcondition_ds.get_user_position_status(user_id, position_ids)
-        banner = ObjectDict()
-        if ret.positionStatus:
-            self.logger.debug("get_user_position_status:{}".format(ret.positionStatus))
-
-        raise gen.Return(banner)
-
-    @gen.coroutine
     def opt_es(self, salary_top, salary_bottom, salary_negotiable, keywords, city, industry, page_no, page_size):
 
         params = ObjectDict({
@@ -75,7 +60,7 @@ class AggregationPageService(PageService):
         return es_res
 
     @gen.coroutine
-    def opt_agg_positions(self, es_res, page_size):
+    def opt_agg_positions(self, es_res, page_size, user_id):
 
         """
         处理搜索职位结果
@@ -83,57 +68,51 @@ class AggregationPageService(PageService):
         :return:
         """
 
-        hot_positons = list()
+        hot_positons = ObjectDict()
         if es_res.hits:
-            for item in es_res.hits.hits:
-                agg_position = ObjectDict()
-                agg_position["id"] = item.get("_source").get("position").get("id")
-                agg_position["title"] = item.get("_source").get("position").get("title")
-                agg_position["salary"] = gen_salary(item.get("_source").get("position").get("salary_top"), item.get("_source").get("position").get("salary_bottom"))
-                agg_position["team"] = item.get("_source").get("team", {}).get("name","")
-                agg_position["degree"] = gen_degree(int(item.get("_source").get("position").get("degree")), item.get("_source").get("position").get("degree_above"))
-                agg_position["experience"] = gen_experience(item.get("_source").get("position").get("experience"), item.get("_source").get("position").get("experience_above"))
-                agg_position["has_team"] = True if item.get("_source").get("team", {}) else False
+            hits = es_res.hits.hits[:page_size]
+            for item in hits:
+                id = int(item.get("_source").get("position").get("id"))
+                team_img, job_img, company_img = yield self.opt_jd_home_img(
+                    item.get("_source").get("company", {}).get("industry_type"), item)
+                hot_positons[id] = ObjectDict({
+                    "id": item.get("_source").get("position").get("id"),
+                    "title": item.get("_source").get("position").get("title"),
+                    "salary": gen_salary(item.get("_source").get("position").get("salary_top"), item.get("_source").get("position").get("salary_bottom")),
+                    "team": item.get("_source").get("team", {}).get("name",""),
+                    "degree": gen_degree(int(item.get("_source").get("position").get("degree")), item.get("_source").get("position").get("degree_above")),
+                    "experience":  gen_experience(item.get("_source").get("position").get("experience"), item.get("_source").get("position").get("experience_above")),
+                    "has_team": True if item.get("_source").get("team", {}) else False,
+                    "team_img": make_static_url(team_img),
+                    "job_img": make_static_url(job_img),
+                    "company_img": make_static_url(company_img),
+                    "resources": self._gen_resources(item.get("_source").get("jd_pic",{}), item.get("_source").get("company",{}).get("type")),
+                    "user_status": 0,
+                })
 
-                team_img, job_img, company_img = yield self.opt_jd_home_img(item.get("_source").get("company",{}).get("industry"), item)
-                agg_position["team_img"] = make_static_url(team_img)
-                agg_position["job_img"] = make_static_url(job_img)
-                agg_position["company_img"] = make_static_url(company_img)
-                agg_position["resources"] = item.get("_source").get("position").get("title")
+        # 处理 0: 未阅，1：已阅，2：已收藏，3：已投递
+        # positions = yield self._opt_user_positions_status(hot_positons, user_id)
 
-                hot_positons.append(agg_position)
-                if len(hot_positons) == page_size:
-                    break
-
-        return hot_positons
+        return list(hot_positons.values())
 
     @gen.coroutine
-    def opt_jd_home_img(self, industry, item):
+    def opt_jd_home_img(self, industry_type, item):
 
-        industries = yield self.infra_dict_ds.get_industries()
-        self.logger.debug("industries:{}".format(industries))
-        indus_dict = ObjectDict()
-        for param in industries:
-            for indus in param.get("list"):
-                indus_dict[indus.get("name")] = indus
-
-        if industry:
-            indus_parent_code = int(indus_dict.get(industry).get("code")/100) * 100
-        else:
-            indus_parent_code = ""
+        if not industry_type:
+            industry_type = 0
 
         if not item.get("_source").get("team",{}).get("resource"):
-            team_img = qx_const.JD_BACKGROUND_IMG.get(indus_parent_code).get("team_img")
+            team_img = qx_const.JD_BACKGROUND_IMG.get(industry_type).get("team_img")
         else:
             team_img = item.get("_source").get("team",{}).get("resource",{}).get("res_url")
 
         if not item.get("_source").get("jd_pic",{}).get("position_pic",{}).get("first_pic",{}):
-            job_img = qx_const.JD_BACKGROUND_IMG.get(indus_parent_code).get("job_img")
+            job_img = qx_const.JD_BACKGROUND_IMG.get(industry_type).get("job_img")
         else:
             job_img = item.get("_source").get("jd_pic",{}).get("position_pic",{}).get("first_pic",{}).get("res_url")
 
         if not item.get("_source").get("company",{}).get("impression",{}):
-            company_img = qx_const.JD_BACKGROUND_IMG.get(indus_parent_code).get("company_img")
+            company_img = qx_const.JD_BACKGROUND_IMG.get(industry_type).get("company_img")
         else:
             impression = ujson.loads(item.get("_source").get("company",{}).get("impression",{}))
             company_img = impression.get("impression0")
@@ -190,5 +169,56 @@ class AggregationPageService(PageService):
 
         return hot_company
 
-    # def _gen_resources(self, jd_pic):
+    def _gen_resources(self, jd_pic, company_type):
 
+        """
+        处理图片逻辑
+        :param jd_pic:
+        :param company_type:
+        :return:
+        """
+
+        pic_list = list()
+        if jd_pic.get("position_pic"):
+            pic_list += jd_pic.get("position_pic").get("other_pic")
+        if jd_pic.get("team_pic"):
+            pic_list += jd_pic.get("team_pic").get("other_pic")
+
+        res_resource = list()
+        if company_type != 0 or len(pic_list) == 0:
+            return res_resource
+
+        if len(pic_list) > 3:
+            res_resource = random.sample(jd_pic, 3)
+        else:
+            res_resource = pic_list
+
+        for item in res_resource:
+            item["type"] = item["res_type"]
+            item["url"] = make_static_url(item['res_url'])
+            item.pop("cover", None)
+            item.pop("res_type", None)
+            item.pop("res_url", None)
+            item.pop("title", None)
+
+        return res_resource
+
+    @gen.coroutine
+    def _opt_user_positions_status(self, hot_positons, user_id):
+        """
+        处理 0: 未阅，1：已阅，2：已收藏，3：已投递
+        :param hot_positons:
+        :param user_id:
+        :return:
+        """
+
+        if not user_id:
+            return hot_positons
+
+        position_ids = hot_positons.keys()
+        ret = yield self.thrift_searchcondition_ds.get_user_position_status(user_id, position_ids)
+        if ret.positionStatus:
+            for key, value in hot_positons.items():
+                value["user_status"] = ret.positionStatus.get(key)
+
+        return hot_positons
