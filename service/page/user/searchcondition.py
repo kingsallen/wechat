@@ -49,13 +49,3 @@ class SearchconditionPageService(PageService):
         res = yield self.thrift_searchcondition_ds.delUserSearchCondition(userId, id)
         raise gen.Return(res)
 
-    @gen.coroutine
-    def get_industries(self,level):
-        res=yield self.dictionary_ps.get_industries(level=level)
-        industries_list = res.data
-        raise gen.Return(industries_list)
-
-    @gen.coroutine
-    def get_city_list(self):
-        res=yield self.dictionary_ps.get_city_list()
-        raise gen.Return(res)
