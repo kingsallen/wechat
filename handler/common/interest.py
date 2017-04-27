@@ -83,7 +83,7 @@ class UserCurrentInfoHandler(BaseHandler):
             yield self.candidate_ps.send_candidate_interested(self.current_user.sysuser.id, self.params.pid, 1)
 
             # 4.向 HR 发送消息模板提示
-            if position_info.publisher and result:
+            if position_info.publisher and result and self.current_user.sysuser.mobile:
                 hr_account, hr_wx_user = yield self.position_ps.get_hr_info(position_info.publisher)
 
                 if hr_wx_user:
