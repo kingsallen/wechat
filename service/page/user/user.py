@@ -450,7 +450,7 @@ class UserPageService(PageService):
         :param mobile:
         :param wxuser_id:
         :param recom_user_id:
-        :return:
+        :return: (result, fav_id or None)
         """
 
         fav = yield self.user_fav_position_ds.get_user_fav_position({
@@ -461,14 +461,11 @@ class UserPageService(PageService):
 
         if fav:
             yield self.user_fav_position_ds.update_user_fav_position(
-                conds={
-                    "id": fav.id
-                },
-                fields={
-                    "mobile": fav.mobile or mobile
-                }
+                conds={ "id": fav.id },
+                fields={ "mobile":  fav.mobile or mobile }
             )
-            raise gen.Return(fav.id)
+            return False, None
+
         else:
             fav_id = yield self.user_fav_position_ds.insert_user_fav_position(fields=ObjectDict(
                 sysuser_id=user_id,
@@ -478,7 +475,7 @@ class UserPageService(PageService):
                 wxuser_id=wxuser_id,
                 recom_user_id=recom_user_id
             ))
-            raise gen.Return(fav_id)
+            return True, fav_id
 
     @gen.coroutine
     def post_hr_register(self, params):

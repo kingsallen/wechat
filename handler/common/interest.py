@@ -50,12 +50,13 @@ class UserCurrentInfoHandler(BaseHandler):
 
         if self.params.pid:
             # 1.添加感兴趣记录
-            yield self.user_ps.add_user_fav_position(int(self.params.pid),
-                                                         self.current_user.sysuser.id,
-                                                         const.FAV_INTEREST,
-                                                         self.current_user.sysuser.mobile,
-                                                         self.current_user.wxuser.id,
-                                                         self.current_user.recom.id if self.params.recom else 0)
+            result, _ = yield self.user_ps.add_user_fav_position(
+                int(self.params.pid),
+                self.current_user.sysuser.id,
+                const.FAV_INTEREST,
+                self.current_user.sysuser.mobile,
+                self.current_user.wxuser.id,
+                self.current_user.recom.id if self.params.recom else 0)
 
             # 2.添加定时任务，若2小时候，没有完善则发送消息模板
             position_info = yield self.position_ps.get_position(self.params.pid)
@@ -82,7 +83,7 @@ class UserCurrentInfoHandler(BaseHandler):
             yield self.candidate_ps.send_candidate_interested(self.current_user.sysuser.id, self.params.pid, 1)
 
             # 4.向 HR 发送消息模板提示
-            if position_info.publisher:
+            if position_info.publisher and result:
                 hr_account, hr_wx_user = yield self.position_ps.get_hr_info(position_info.publisher)
 
                 if hr_wx_user:
