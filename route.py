@@ -44,7 +44,6 @@ import handler.platform.team
 import handler.platform.recom
 
 import handler.qx.app
-import handler.qx.wechat_oauth
 import handler.qx.aggregation
 import handler.qx.search
 
@@ -135,33 +134,29 @@ platform_routes = [
     (r"/api/employee/rewards[\/]?",                  handler.platform.employee.AwardsHandler,                   {"event": "employee_awards"}),
     (r"/api/position/empnotice[\/]?",                handler.platform.position.PositionEmpNoticeHandler,        {"event": "position_empnotice"}),
 
-    # 招聘助手的 route，由于域名还没有确定，临时放这里
-    (r"/h/position",                                 handler.help.releasedposition.ReleasedPositionHandler,     {"event": "helper_positions"}),
-    (r"/h/register/qrcode",                          handler.help.passport.RegisterQrcodeHandler,               {"event": "helper_qrcode"}),
-    # 我也要招人
-    (r"/h/api/register",                             handler.help.passport.RegisterHandler,                     {"event": "helper_register"}),
-
 ]
 platform_routes.extend(common_routes)
 
 
 # 聚合号的单独 routes, 域名 platform.moseeker.com/recruit
 qx_routes = [
-    (r"[\/]?",                                      handler.qx.app.IndexHandler,                                {"event": "app_app"}),
+    (r"/[\/]?",                                      handler.qx.app.IndexHandler,                                {"event": "app_app"}),
 
-    (r"/wxoauth2",                                  handler.qx.wechat_oauth.WxOauthHandler,                     {"event": "wxoauth_wxoauth"}),
-
-    (r"/api/positions[\/]?",                        handler.qx.aggregation.AggregationHandler,                  {"event": "position_aggregation"}),
-    (r"/api/config[\/]?",                           handler.qx.app.ConfigHandler,                               {"event": "wechat_config"}),
-    (r"/api/search/condition[\/]*([0-9]+)*",        handler.qx.search.SearchConditionHandler,                   {"event": "search_condition"}),
-    (r"/api/search/([a-z_]+)",                      handler.qx.search.SearchCityHandler,                        {"event": "search_condition"}),
+    (r"/api/positions[\/]?",                         handler.qx.aggregation.AggregationHandler,                  {"event": "position_aggregation"}),
+    (r"/api/config[\/]?",                            handler.qx.app.ConfigHandler,                               {"event": "wechat_config"}),
+    (r"/api/search/condition[\/]*([0-9]+)*",         handler.qx.search.SearchConditionHandler,                   {"event": "search_condition"}),
+    (r"/api/search/([a-z_]+)",                       handler.qx.search.SearchCityHandler,                        {"event": "search_condition"}),
 
 ]
 qx_routes.extend(common_routes)
 
 
-# 招聘助手的单独 routes
+# 招聘助手的单独 routes, 域名 platform.moseeker.com/recruit
 help_routes = [
+    (r"/position",                                   handler.help.releasedposition.ReleasedPositionHandler,      {"event": "helper_positions"}),
+    (r"/register/qrcode",                            handler.help.passport.RegisterQrcodeHandler,                {"event": "helper_qrcode"}),
+    # 我也要招人
+    (r"/api/register",                               handler.help.passport.RegisterHandler,                      {"event": "helper_register"}),
 
 ]
 help_routes.extend(common_routes)

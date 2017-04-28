@@ -364,7 +364,7 @@ def gamma_welcome(func):
                 gender = "female"
 
             self.logger.debug("gamma_welcome gender: {}".format(gender))
-            self.render_page(template_name='',
+            self.render_page(template_name='qx/home/welcome.html',
                         data={
                             "gender": gender
                         })

@@ -91,7 +91,7 @@ class AggregationPageService(PageService):
                 })
 
         # 处理 0: 未阅，1：已阅，2：已收藏，3：已投递
-        # positions = yield self._opt_user_positions_status(hot_positons, user_id)
+        positions = yield self._opt_user_positions_status(hot_positons, user_id)
 
         return list(hot_positons.values())
 

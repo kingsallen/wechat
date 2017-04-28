@@ -19,7 +19,6 @@ EMPLOYEE_BINDED = '/employee/binded'
 PROFILE_CUSTOM_CV = '/profile/custom'
 
 # 聚合号单独链接
-GAMMA_OAUTH_QX = '/m/wxoauth2'
 GAMMA_HOME = '/app/enter'
 GAMMA_POSITION = '/app/position'
 GAMMA_POSITION_JD = '/app/position/{}'
