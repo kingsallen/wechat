@@ -22,12 +22,10 @@ class AggregationHandler(BaseHandler):
     聚合列表：企业+头图
     """
 
-    @handle_response
+    # @handle_response
     # @gamma_welcome
     @gen.coroutine
     def get(self):
-
-        self.logger.debug("ddddddddddddddd")
 
         salary_top = self.params.salary_top
         salary_bottom = self.params.salary_bottom
@@ -35,7 +33,7 @@ class AggregationHandler(BaseHandler):
         keywords = self.params.keywords
         city = self.params.city
         industry = self.params.industry
-        page_no = self.params.page_no or 0
+        page_no = self.params.page_no or 1
         page_size = self.params.page_size or 10
 
         es_res = yield self.aggregation_ps.opt_es(salary_top,
@@ -44,8 +42,8 @@ class AggregationHandler(BaseHandler):
                                                   keywords,
                                                   city,
                                                   industry,
-                                                  page_no,
-                                                  page_size)
+                                                  int(page_no),
+                                                  int(page_size))
 
         positions = yield self.aggregation_ps.opt_agg_positions(es_res, page_size, self.current_user.sysuser.id)
 

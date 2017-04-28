@@ -16,7 +16,7 @@ class EsDataService(DataService):
     es = BaseES()
 
     @gen.coroutine
-    def get_es_position(self, params, page_no, page_size):
+    def get_es_position(self, params, page_from, page_size):
         """根据条件获得搜索结果
         """
 
@@ -28,7 +28,7 @@ class EsDataService(DataService):
                                 params.salary_bottom,
                                 params.salary_top,
                                 params.salary_negotiable,
-                                page_no,
+                                page_from,
                                 page_size)
 
         self.logger.debug("rule_gamma_filters:{}".format(params))

@@ -142,6 +142,7 @@ qx_routes = [
     (r"/api/search/condition[\/]*([0-9]+)*",         handler.qx.search.SearchConditionHandler,                   {"event": "search_condition"}),
     (r"/api/search/([a-z_]+)",                       handler.qx.search.SearchCityHandler,                        {"event": "search_condition"}),
 
+    # App 路由
     (r".*",                                          handler.qx.app.IndexHandler,                                {"event": "app_app"}),
 ]
 qx_routes = common_routes + qx_routes

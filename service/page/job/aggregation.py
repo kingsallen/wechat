@@ -50,11 +50,14 @@ class AggregationPageService(PageService):
             "industry": industry
         })
 
-        page_from = page_no * page_size
-        if page_no == 0:
+        # 查询范围 1-30页
+        if page_no < 0 or page_size > 30:
+            return ObjectDict()
+
+        page_from = (page_no - 1) * page_size
+        if page_no == 1:
             # 如果是首页，则取300条数据，热招企业需要
-            # page_size = 300
-            page_size = 10
+            page_size = 300
 
         es_res = yield self.es_ds.get_es_position(params, page_from, page_size)
         return es_res
@@ -93,7 +96,7 @@ class AggregationPageService(PageService):
         # 处理 0: 未阅，1：已阅，2：已收藏，3：已投递
         positions = yield self._opt_user_positions_status(hot_positons, user_id)
 
-        return list(hot_positons.values())
+        return list(positions.values())
 
     @gen.coroutine
     def opt_jd_home_img(self, industry_type, item):
@@ -212,7 +215,7 @@ class AggregationPageService(PageService):
         :return:
         """
 
-        if not user_id:
+        if not user_id or not hot_positons:
             return hot_positons
 
         position_ids = hot_positons.keys()
