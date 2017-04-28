@@ -98,10 +98,6 @@ common_routes = [
     (r"/api/chat[\/]*([a-z]+)*",                     handler.common.im.ChatHandler,                             {"event": "chat_"}),
     (r"/api/application",                            handler.common.application.ApplicationHandler,             {"event": "application_profile"}),
     (r"/api/JSSDKError",                             handler.common.jssdkerror.JSSDKErrorHandler,               {"event": "frontend_jssdkerror"}),
-
-    # 兼容老微信 url，进行302跳转，event 设置为 NULL
-    # (r"/.*",                                           handler.common.compatible.CompatibleHandler,               {"event": "NULL"})
-
 ]
 
 # 企业号的单独 routes，域名 platform.moseeker.com/m
@@ -147,7 +143,6 @@ qx_routes = [
     (r"/api/search/([a-z_]+)",                       handler.qx.search.SearchCityHandler,                        {"event": "search_condition"}),
 
     (r".*",                                          handler.qx.app.IndexHandler,                                {"event": "app_app"}),
-
 ]
 qx_routes.extend(common_routes)
 

@@ -22,6 +22,7 @@ from tornado import web, gen
 
 import conf.message as msg_const
 import conf.common as const
+import conf.path as path
 from util.common import ObjectDict
 from util.tool.dict_tool import objectdictify
 from util.tool.date_tool import curr_now
@@ -239,12 +240,6 @@ class MetaBaseHandler(AtomHandler):
         self.logger.debug(
             "session_id: {}".format(self.get_secure_cookie(const.COOKIE_SESSIONID)))
 
-        self.logger.debug("env:{}".format(self.env))
-        self.logger.debug("is_platform:{}".format(self.is_platform))
-        self.logger.debug("is_qx:{}".format(self.is_qx))
-        self.logger.debug("is_help:{}".format(self.is_help))
-        self.logger.debug("request:{}".format(self.request))
-
     def write_error(self, http_code, **kwargs):
         """错误页
         403（用户未被授权请求） Forbidden: Request failed because user does not have authorization to access a specific resource
@@ -252,7 +247,13 @@ class MetaBaseHandler(AtomHandler):
         500（服务器错误）      Internal Server Error: Something went wrong on the server, check status site and/or report the issue
         """
 
+        if self.is_qx:
+            self.redirect(path.GAMMA_404)
+            return
+
+
         template = 'system/info.html'
+
 
         if http_code == 403:
             self.render_page(template, data={

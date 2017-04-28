@@ -1,7 +1,5 @@
 # coding=utf-8
 
-# Copyright 2016 MoSeeker
-
 import os
 from hashlib import sha1
 from tornado import gen

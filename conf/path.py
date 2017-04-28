@@ -26,6 +26,7 @@ GAMMA_POSITION_HOME = '/app/position/{}/home'
 GAMMA_POSITION_TEAM = '/app/team/{}'
 GAMMA_POSITION_COMPANY = '/app/company/{}'
 GAMMA_SEARCH = '/app/search'
+GAMMA_404 = '/404'
 
 
 # 企业号、聚合号公共链接
