@@ -56,9 +56,9 @@ class BaseHandler(MetaBaseHandler):
         """
 
         full_url = self.request.full_url()
+        self.logger.debug("full_url:{}".format(full_url))
         real_full_url = full_url.replace(self.settings.m_host, self.host)
 
-        self.logger.debug("full_url:{}".format(full_url))
         self.logger.debug("real_full_url:{}".format(real_full_url))
 
         return url_subtract_query(real_full_url, ['code', 'state'])
