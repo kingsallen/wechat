@@ -55,8 +55,13 @@ class BaseHandler(MetaBaseHandler):
         和 oauth 有关的 参数会影响 prepare 方法
         """
 
-        self.logger.debug("full_url:{}".format(self.request.full_url()))
-        return url_subtract_query(self.request.full_url(), ['code', 'state'])
+        full_url = self.request.full_url()
+        real_full_url = full_url.replace(self.settings.m_host, self.host)
+
+        self.logger.debug("full_url:{}".format(full_url))
+        self.logger.debug("real_full_url:{}".format(real_full_url))
+
+        return url_subtract_query(real_full_url, ['code', 'state'])
 
     @property
     def component_access_token(self):

@@ -57,6 +57,9 @@ def url_subtract_query(url, exclude):
     """削减 url 的 query 中指定的键值"""
     p = urlparse(url)
     query = p.query
+    print(p)
+    print(query)
+
     parsed_query = {k: v for k, v in parse_qs(query).items()
                     if k not in exclude}
 
