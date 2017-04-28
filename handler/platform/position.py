@@ -434,7 +434,7 @@ class PositionHandler(BaseHandler):
         last_employee_user_id = 0
         inserted_share_chain_id = 0
 
-        if self.current_user.recom:
+        if self.current_user.recom and self.current_user.sysuser:
             yield self._make_share_record(
                 position_info, recom_user_id=self.current_user.recom.id)
 
