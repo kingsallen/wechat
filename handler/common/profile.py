@@ -129,9 +129,9 @@ class ProfileNewHandler(BaseHandler):
             dqpid = self.get_cookie('dqpid')
             self.logger.debug('dqpid: %s' % dqpid)
             if dqpid:
-                next_url = make_url(path.PROFILE_PREVIEW, self.params, pid=str(dqpid))
+                next_url = self.make_url(path.PROFILE_PREVIEW, self.params, pid=str(dqpid))
             else:
-                next_url = make_url(path.PROFILE_VIEW, self.params)
+                next_url = self.make_url(path.PROFILE_VIEW, self.params)
             self.logger.debug('next_url: %s' % next_url)
             self.clear_cookie(name='dqpid')
             self.send_json_success(data=ObjectDict(next_url=next_url))
@@ -147,7 +147,7 @@ class ProfilePreviewHandler(BaseHandler):
     @tornado.gen.coroutine
     def get(self):
         if not self.params.pid:
-            url = make_url(path.PROFILE_VIEW, self.params)
+            url = self.make_url(path.PROFILE_VIEW, self.params)
             self.redirect(url)
             return
 
@@ -259,7 +259,7 @@ class ProfileCustomHandler(BaseHandler):
         #             self.logger.debug("雅诗兰黛特殊处理: 直接投递")
         #             p.update(is_skip='1')
 
-        self.redirect(make_url(path.PROFILE_PREVIEW, self.params, **p))
+        self.redirect(self.make_url(path.PROFILE_PREVIEW, self.params, **p))
 
     @tornado.gen.coroutine
     def _save_custom_cv(self, custom_cv):

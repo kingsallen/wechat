@@ -329,7 +329,7 @@ class BaseHandler(MetaBaseHandler):
         # ga('set', 'dimension2', 'YYYYY’);
         # ga('set', 'dimension3', 'ZZZZZZ’);
 
-        if self.current_user:
+        if self.current_user.sysuser:
             self.current_user.has_profile = yield self.profile_ps.has_profile(
                 self.current_user.sysuser.id)
 

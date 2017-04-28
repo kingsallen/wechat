@@ -162,7 +162,7 @@ class EmployeeBindHandler(BaseHandler):
             self.current_user.company.id)
 
         if refine_info_way == const.EMPLOYEE_CUSTOM_FIELD_REFINE_REDIRECT:
-            next_url = make_url(path.EMPLOYEE_CUSTOMINFO,
+            next_url = self.make_url(path.EMPLOYEE_CUSTOMINFO,
                                 self.params,
                                 from_wx_template='x')
 
@@ -170,7 +170,7 @@ class EmployeeBindHandler(BaseHandler):
             yield self.employee_ps.send_emp_custom_info_template(
                 self.current_user)
 
-            next_url = make_url(path.EMPLOYEE_BINDED, self.params)
+            next_url = self.make_url(path.EMPLOYEE_BINDED, self.params)
         else:
             assert False  # should not be here
 
@@ -319,7 +319,7 @@ class CustomInfoHandler(BaseHandler):
         # 判断与跳转
         self.params.pop('next_url', None)
         self.params.pop('headimg', None)
-        next_url = make_url(path.POSITION_LIST, self.params, escape=escape,
+        next_url = self.make_url(path.POSITION_LIST, self.params, escape=escape,
                             noemprecom=str(const.YES))
 
         if self.params.from_wx_template == "o":
@@ -362,7 +362,7 @@ class BindedHandler(BaseHandler):
                 template_name='refer/weixin/employee/employee_binding_tip.html',
                 result=0,
                 messages=messages.EMPLOYEE_BINDING_SUCCESS,
-                nexturl=make_url(path.POSITION_LIST, self.params,
+                nexturl=self.make_url(path.POSITION_LIST, self.params,
                                  noemprecom=str(const.YES)),
                 button_text=messages.EMPLOYEE_BINDING_DEFAULT_BTN_TEXT
             )

@@ -191,10 +191,9 @@ class PositionHandler(BaseHandler):
             if position_info.share_description:
                 description = "".join(split(position_info.share_description))
 
-        link = make_url(
+        link = self.make_url(
             path.POSITION_PATH.format(position_info.id),
             self.params,
-            host=self.host,
             recom=self.position_ps._make_recom(self.current_user.sysuser.id),
             escape=["pid", "keywords", "cities", "candidate_source",
                     "employment_type", "salary", "department", "occupations",
@@ -258,7 +257,7 @@ class PositionHandler(BaseHandler):
             pos.salary = gen_salary(
                 item.get("salary_top"),
                 item.get("salary_bottom"))
-            pos.link = make_url(
+            pos.link = self.make_url(
                 path.POSITION_PATH.format(
                     item.get("pid")),
                 self.params,
@@ -564,13 +563,11 @@ class PositionHandler(BaseHandler):
             if hr_wx_user.openid:
                 # 如果企业有公众号，发企业链接，若无，发聚合号链接
                 if self.current_user.wechat:
-                    link = make_url(
+                    link = self.make_url(
                         path.POSITION_PATH.format(position_info.id),
-                        host=self.settings.platform_host,
                         wechat_signature=self.current_user.wechat.signature)
                 else:
-                    link = make_url(path.GAMMA_POSITION_JD.format(position_info.id),
-                                    host=self.settings.qx_host)
+                    link = self.make_url(path.GAMMA_POSITION_JD.format(position_info.id))
 
                 yield position_view_five_notice_tpl(help_wechat.id, hr_wx_user.openid,
                                          link, position_info.title,
@@ -612,7 +609,7 @@ class PositionHandler(BaseHandler):
     @gen.coroutine
     def _make_team(self, team, teamname_custom):
         """所属团队，构造数据"""
-        more_link = make_url(path.TEAM_PATH.format(team.id), self.params),
+        more_link = self.make_url(path.TEAM_PATH.format(team.id), self.params),
         res = yield self.position_ps.get_team_data(team, more_link, teamname_custom)
         raise gen.Return(res)
 
@@ -722,10 +719,9 @@ class PositionListHandler(BaseHandler):
 
         company_info = yield self.company_ps.get_company(
             conds={"id": did or company_id}, need_conf=True)
-        link = make_url(
+        link = self.make_url(
             path.POSITION_LIST,
             self.params,
-            host=self.host,
             recom=self.position_ps._make_recom(self.current_user.sysuser.id),
             escape=["pid", "keywords", "cities", "candidate_source",
                     "employment_type", "salary", "department", "occupations",
@@ -811,7 +807,7 @@ class PositionEmpNoticeHandler(BaseHandler):
 
         position = yield self.position_ps.get_position(self.params.pid)
 
-        link = make_url(path.EMPLOYEE_RECOMMENDS, host=self.host, wechat_signature=self.current_user.wechat.signature)
+        link = self.make_url(path.EMPLOYEE_RECOMMENDS, wechat_signature=self.current_user.wechat.signature)
 
         if self.current_user.wechat.passive_seeker == const.OLD_YES:
             yield position_share_notice_employee_tpl(self.current_user.company.id,

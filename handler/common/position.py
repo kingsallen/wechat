@@ -59,12 +59,12 @@ class PositionFavHandler(BaseHandler):
 
         # 企业号，聚合号职位详情页链接不同
         if self.is_platform:
-            position_info_url = make_url(
+            position_info_url = self.make_url(
                 path.POSITION_PATH.format(position_id),
                 self.params,
                 escape=['next_url', 'name', 'company', 'position'])
         else:
-            position_info_url = make_url(
+            position_info_url = self.make_url(
                 path.GAMMA_POSITION_JD.format(position_id),
                 self.params,
                 escape=['next_url', 'name', 'company', 'position'])

@@ -13,7 +13,7 @@ import conf.qx as qx_const
 from handler.base import BaseHandler
 from util.common.decorator import handle_response, gamma_welcome
 from util.common import ObjectDict
-from util.tool.url_tool import make_url
+from util.tool.url_tool import make_static_url
 
 
 class AggregationHandler(BaseHandler):
@@ -123,17 +123,16 @@ class AggregationHandler(BaseHandler):
     def _make_share_info(self, hot_company):
         """构建 share 内容"""
 
-        link = make_url(
+        link = self.make_url(
             path.GAMMA_POSITION,
             self.params,
-            host=self.settings.qx_host,
             recom=self.position_ps._make_recom(self.current_user.sysuser.id),
             escape=["page_no", "page_size"])
 
         if len(hot_company) == 1:
             logo = hot_company[0].get("logo")
         else:
-            logo = make_url(const.COMPANY_HEADIMG)
+            logo = make_static_url(const.COMPANY_HEADIMG)
 
         cover = self.static_url(logo)
         keywords = "【%s】".format(self.params.keywords) if self.params.keywords else ""

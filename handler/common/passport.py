@@ -76,7 +76,7 @@ class LogoutHandler(BaseHandler):
         # 清除公众号，仟寻下的用户 session
         pass_session.clear_session(session_id, self.current_user.wechat.id)
         pass_session.clear_session(session_id, self.settings.qx_wechat_id)
-
+        self.clear_all_cookies()
 
         if self.is_platform:
             redirect_url = self.make_url(path.POSITION_LIST, params=self.params, escape=['next_url', 'pid'])

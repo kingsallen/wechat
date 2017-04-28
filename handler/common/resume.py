@@ -31,7 +31,7 @@ class LinkedinImportHandler(MetaBaseHandler):
 
         user_id = match_session_id(to_str(self.get_secure_cookie(const.COOKIE_SESSIONID)))
 
-        redirect_url = make_url(path.RESUME_LINKEDIN,
+        redirect_url = self.make_url(path.RESUME_LINKEDIN,
                                 host=self.host,
                                 recom=self.params.recom,
                                 pid=self.params.pid,
@@ -46,9 +46,9 @@ class LinkedinImportHandler(MetaBaseHandler):
         self.logger.debug("is_ok:{} result:{}".format(is_ok, result))
         if is_ok:
             if self.params.pid:
-                next_url = make_url(path.PROFILE_VIEW, params=self.params, apply='1')
+                next_url = self.make_url(path.PROFILE_VIEW, params=self.params, apply='1')
             else:
-                next_url = make_url(path.PROFILE_VIEW, params=self.params)
+                next_url = self.make_url(path.PROFILE_VIEW, params=self.params)
 
             self.redirect(next_url)
             return
@@ -121,9 +121,9 @@ class ResumeImportHandler(BaseHandler):
             )
 
             if self.params.pid:
-                next_url = make_url(path.PROFILE_PREVIEW, self.params)
+                next_url = self.make_url(path.PROFILE_PREVIEW, self.params)
             else:
-                next_url = make_url(path.PROFILE_VIEW, self.params)
+                next_url = self.make_url(path.PROFILE_VIEW, self.params)
 
             if is_ok:
                 self.log_info = ObjectDict(

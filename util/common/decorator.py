@@ -15,7 +15,6 @@ import conf.common as const
 import conf.message as msg
 import conf.path as path
 import conf.qx as qx_const
-from setting import settings
 from util.common import ObjectDict
 from util.common.cache import BaseRedis
 from util.common.cipher import encode_id
@@ -154,7 +153,7 @@ def check_employee(func):
             # 如果从我要推荐点进来，但当前用户不是员工
             # 跳转到员工绑定页面
             self.params.pop("recomlist", None)
-            self.redirect(make_url(path.EMPLOYEE_VERIFY, self.params))
+            self.redirect(self.make_url(path.EMPLOYEE_VERIFY, self.params))
             return
         else:
             yield func(self, *args, **kwargs)
@@ -207,7 +206,7 @@ def check_and_apply_profile(func):
 
                 # 判断是否是自定义职位
                 if position.app_cv_config_id:
-                    redirect_params.update(goto_custom_url=make_url(
+                    redirect_params.update(goto_custom_url=self.make_url(
                         path.PROFILE_CUSTOM_CV,
                         sub_dict(self.params, ['pid', 'wechat_signature'])))
             else:
@@ -216,13 +215,12 @@ def check_and_apply_profile(func):
 
             # ========== LINKEDIN OAUTH ==============
             # 拼装 linkedin oauth 路由
-            redirect_uri = make_url(path.RESUME_LINKEDIN,
-                                    host=self.host,
+            redirect_uri = self.make_url(path.RESUME_LINKEDIN,
                                     recom=self.params.recom,
                                     pid=self.params.pid,
                                     wechat_signature=self.current_user.wechat.signature)
 
-            linkedin_url = make_url(path.LINKEDIN_AUTH, params=ObjectDict(
+            linkedin_url = self.make_url(path.LINKEDIN_AUTH, params=ObjectDict(
                 response_type="code",
                 client_id=self.settings.linkedin_client_id,
                 scope="r_basicprofile r_emailaddress",
@@ -295,9 +293,9 @@ def authenticated(func):
 
         elif not self.current_user.sysuser.id:
             if self.request.method in ("GET", "HEAD"):
-                redirect_url = make_url(path.USER_LOGIN, self.params, escape=['next_url'])
+                redirect_url = self.make_url(path.USER_LOGIN, self.params, escape=['next_url'])
                 redirect_url += "&" + urlencode(
-                    dict(next_url=self.request.uri))
+                    dict(next_url=self.fullurl))
                 self.redirect(redirect_url)
                 return
             else:
@@ -329,10 +327,10 @@ def verified_mobile_oneself(func):
 
         else:
             if self.request.method in ("GET", "HEAD"):
-                redirect_url = make_url(path.MOBILE_VERIFY, params=self.params, escape=['next_url'])
+                redirect_url = self.make_url(path.MOBILE_VERIFY, params=self.params, escape=['next_url'])
 
                 redirect_url += "&" + urlencode(
-                    dict(next_url=self.request.uri))
+                    dict(next_url=self.fullurl))
                 self.redirect(redirect_url)
                 return
             else:
@@ -463,7 +461,7 @@ class NewJDStatusCheckerRedirect(BaseNewJDStatusChecker):
         handler.logger.debug("to: {}".format(to))
 
         if to:
-            to_path = self.make_url_with_m(to, cloned_params)
+            to_path = self.make_url_with_m(to, handler.host, cloned_params)
             handler.logger.debug('redirect from path: {}, to: {}'.format(from_path, to_path))
             handler.redirect(to_path)
         else:
@@ -486,9 +484,9 @@ class NewJDStatusCheckerRedirect(BaseNewJDStatusChecker):
             return None
 
     @staticmethod
-    def make_url_with_m(to, params):
+    def make_url_with_m(to, host, params):
         _OLD_ESCAPE_DEFAULT = url_tool._ESCAPE_DEFAULT
         url_tool._ESCAPE_DEFAULT = set(_OLD_ESCAPE_DEFAULT) - {'m'}
-        url = make_url(to.url, params, **to.extra)
+        url = make_url(to.url, host, params, **to.extra)
         url_tool._ESCAPE_DEFAULT = _OLD_ESCAPE_DEFAULT
         return url
