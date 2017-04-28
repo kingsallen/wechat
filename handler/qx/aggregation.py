@@ -22,10 +22,12 @@ class AggregationHandler(BaseHandler):
     聚合列表：企业+头图
     """
 
-    @handle_response
+    # @handle_response
     # @gamma_welcome
     @gen.coroutine
     def get(self):
+
+        self.logger.debug("ddddddddddddddd")
 
         salary_top = self.params.salary_top
         salary_bottom = self.params.salary_bottom

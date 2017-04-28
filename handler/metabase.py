@@ -239,6 +239,11 @@ class MetaBaseHandler(AtomHandler):
         self.logger.debug(
             "session_id: {}".format(self.get_secure_cookie(const.COOKIE_SESSIONID)))
 
+        self.logger.debug("is_platform:{}".format(self.is_platform))
+        self.logger.debug("is_qx:{}".format(self.is_qx))
+        self.logger.debug("is_help:{}".format(self.is_help))
+        self.logger.debug("request:{}".format(self.request))
+
     def write_error(self, http_code, **kwargs):
         """错误页
         403（用户未被授权请求） Forbidden: Request failed because user does not have authorization to access a specific resource
