@@ -644,7 +644,7 @@ class BaseHandler(MetaBaseHandler):
         host = self.host
 
         self.logger.debug("make_url path:{}".format(path))
-        self.logger.debug("make_url host:{}".host(host))
+        self.logger.debug("make_url host:{}".format(host))
         self.logger.debug("make_url params:{}".format(params))
         self.logger.debug("make_url protocol:{}".format(protocol))
         self.logger.debug("make_url escape:{}".format(escape))
