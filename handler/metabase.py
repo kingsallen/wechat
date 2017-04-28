@@ -27,7 +27,7 @@ from util.common import ObjectDict
 from util.tool.dict_tool import objectdictify
 from util.tool.date_tool import curr_now
 from util.tool.str_tool import to_str
-from util.tool.url_tool import make_static_url
+from util.tool.url_tool import make_static_url, make_url
 from util.tool.json_tool import encode_json_dumps, json_dumps
 
 # 动态加载所有 PageService
@@ -248,12 +248,10 @@ class MetaBaseHandler(AtomHandler):
         """
 
         if self.is_qx:
-            self.redirect(path.GAMMA_404)
+            self.redirect(make_url(path.GAMMA_404, host=self.host))
             return
 
-
         template = 'system/info.html'
-
 
         if http_code == 403:
             self.render_page(template, data={

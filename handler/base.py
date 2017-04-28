@@ -610,7 +610,7 @@ class BaseHandler(MetaBaseHandler):
         add_namespace = ObjectDict(
             env=self.env,
             params=self.params,
-            make_url=make_url,
+            make_url=self.make_url,
             const=const,
             path=path,
             static_url=self.static_url,
@@ -628,3 +628,18 @@ class BaseHandler(MetaBaseHandler):
         if not self.get_cookie(cookie_name):
             unix_time_stamp = str(int(time.time()))
             self.set_cookie(cookie_name, unix_time_stamp)
+
+    def make_url(self, path, host, params=None, protocol="https", escape=None, **kwargs):
+        """
+        host 环境不能直接从 request 中获取，需要根据环境确定
+        :param path:
+        :param host:
+        :param params:
+        :param protocol:
+        :param escape:
+        :param kwargs:
+        :return:
+        """
+        if not host:
+            host = self.host
+        return make_url(path, host, params, protocol, escape, **kwargs)
