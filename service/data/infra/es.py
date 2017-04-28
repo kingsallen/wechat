@@ -31,6 +31,9 @@ class EsDataService(DataService):
                                 page_no,
                                 page_size)
 
+        self.logger.debug("rule_gamma_filters:{}".format(params))
+        self.logger.debug("init_gamma_basic:{}".format(body))
+
         res = self.es.search(index="positions", body=body)
 
         raise gen.Return(res)

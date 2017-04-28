@@ -7,7 +7,6 @@
 
 import re
 from util.common import ObjectDict
-from globals import logger
 
 def rule_gamma_filters(params):
     ''' 筛选条件, 转成相应的类型, 及对用户的输入进行过滤 '''
@@ -168,7 +167,5 @@ def init_gamma_basic(query, city, industry, salary_bottom, salary_top, salary_ne
                 })
             })
         }))
-
-    logger.debug("init_es_query:{}".format(init_es_query))
 
     return init_es_query
