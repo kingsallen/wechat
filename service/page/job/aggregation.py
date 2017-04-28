@@ -82,7 +82,7 @@ class AggregationPageService(PageService):
                 company = ObjectDict({
                     "id": item.get("_source").get("company", {}).get("id"),
                     "logo": make_static_url(item.get("_source").get("company", {}).get("logo") or const.COMPANY_HEADIMG),
-                    "abbreviation": item.get("_source").get("company", {}).get("logo"),
+                    "abbreviation": item.get("_source").get("company", {}).get("abbreviation"),
                 })
 
                 hot_positons[id] = ObjectDict({
@@ -104,7 +104,6 @@ class AggregationPageService(PageService):
 
         # 处理 0: 未阅，1：已阅，2：已收藏，3：已投递
         positions = yield self._opt_user_positions_status(hot_positons, user_id)
-
         return list(positions.values())
 
     @gen.coroutine
