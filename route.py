@@ -131,7 +131,7 @@ platform_routes = [
     (r"/api/position/empnotice[\/]?",                handler.platform.position.PositionEmpNoticeHandler,        {"event": "position_empnotice"}),
 
 ]
-platform_routes.extend(common_routes)
+platform_routes = common_routes + platform_routes
 
 
 # 聚合号的单独 routes, 域名 platform.moseeker.com/recruit
@@ -142,9 +142,9 @@ qx_routes = [
     (r"/api/search/condition[\/]*([0-9]+)*",         handler.qx.search.SearchConditionHandler,                   {"event": "search_condition"}),
     (r"/api/search/([a-z_]+)",                       handler.qx.search.SearchCityHandler,                        {"event": "search_condition"}),
 
-    # (r".*",                                          handler.qx.app.IndexHandler,                                {"event": "app_app"}),
+    (r".*",                                          handler.qx.app.IndexHandler,                                {"event": "app_app"}),
 ]
-qx_routes.extend(common_routes)
+qx_routes = common_routes + qx_routes
 
 
 # 招聘助手的单独 routes, 域名 platform.moseeker.com/recruit
@@ -155,4 +155,4 @@ help_routes = [
     (r"/api/register",                               handler.help.passport.RegisterHandler,                      {"event": "helper_register"}),
 
 ]
-help_routes.extend(common_routes)
+help_routes = common_routes + help_routes
