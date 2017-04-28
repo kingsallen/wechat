@@ -54,6 +54,8 @@ class BaseHandler(MetaBaseHandler):
 
         和 oauth 有关的 参数会影响 prepare 方法
         """
+
+        self.logger.debug("full_url:{}".format(self.request.full_url()))
         return url_subtract_query(self.request.full_url(), ['code', 'state'])
 
     @property
@@ -231,6 +233,7 @@ class BaseHandler(MetaBaseHandler):
 
     @gen.coroutine
     def _get_current_wechat(self, qx=False):
+
         if qx:
             signature = self.settings['qx_signature']
         else:

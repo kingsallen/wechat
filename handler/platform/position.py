@@ -207,8 +207,7 @@ class PositionHandler(BaseHandler):
         link = make_url(
             path.POSITION_PATH.format(position_info.id),
             self.params,
-            host=self.request.host,
-            protocol=self.request.protocol,
+            host=self.host,
             recom=self.position_ps._make_recom(self.current_user.sysuser.id),
             escape=["pid", "keywords", "cities", "candidate_source",
                     "employment_type", "salary", "department", "occupations",
@@ -584,7 +583,7 @@ class PositionHandler(BaseHandler):
                         wechat_signature=self.current_user.wechat.signature)
                 else:
                     link = make_url(path.GAMMA_POSITION_JD.format(position_info.id),
-                                    host=self.settings.mobile_host)
+                                    host=self.settings.qx_host)
 
                 yield position_view_five_notice_tpl(help_wechat.id, hr_wx_user.openid,
                                          link, position_info.title,
@@ -739,8 +738,7 @@ class PositionListHandler(BaseHandler):
         link = make_url(
             path.POSITION_LIST,
             self.params,
-            host=self.request.host,
-            protocol=self.request.protocol,
+            host=self.host,
             recom=self.position_ps._make_recom(self.current_user.sysuser.id),
             escape=["pid", "keywords", "cities", "candidate_source",
                     "employment_type", "salary", "department", "occupations",
@@ -826,7 +824,7 @@ class PositionEmpNoticeHandler(BaseHandler):
 
         position = yield self.position_ps.get_position(self.params.pid)
 
-        link = make_url(path.EMPLOYEE_RECOMMENDS, host=self.request.host, wechat_signature=self.current_user.wechat.signature)
+        link = make_url(path.EMPLOYEE_RECOMMENDS, host=self.host, wechat_signature=self.current_user.wechat.signature)
 
         if self.current_user.wechat.passive_seeker == const.OLD_YES:
             yield position_share_notice_employee_tpl(self.current_user.company.id,

@@ -102,8 +102,10 @@ def url_append_query(url, *args, **kwargs):
 
 
 def make_static_url(path, protocol='https'):
+
     if not path:
         return None
+
     if not path.startswith("http"):
         path = urljoin(settings['static_domain'], path)
 

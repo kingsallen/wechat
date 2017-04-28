@@ -217,7 +217,7 @@ def check_and_apply_profile(func):
             # ========== LINKEDIN OAUTH ==============
             # 拼装 linkedin oauth 路由
             redirect_uri = make_url(path.RESUME_LINKEDIN,
-                                    host=self.request.host,
+                                    host=self.host,
                                     recom=self.params.recom,
                                     pid=self.params.pid,
                                     wechat_signature=self.current_user.wechat.signature)

@@ -125,7 +125,6 @@ class AggregationHandler(BaseHandler):
             path.GAMMA_POSITION,
             self.params,
             host=self.settings.qx_host,
-            protocol=self.request.protocol,
             recom=self.position_ps._make_recom(self.current_user.sysuser.id),
             escape=["page_no", "page_size"])
 

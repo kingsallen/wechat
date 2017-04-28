@@ -112,6 +112,18 @@ class MetaBaseHandler(AtomHandler):
         return self.in_wechat and self._client_type == const.CLIENT_TYPE_ANDROID
 
     @property
+    def host(self):
+        """判断当前 host，不能简单的从 request.host获得"""
+        if self.is_platform:
+            host = self.settings.platform_host
+        elif self.is_qx:
+            host = self.settings.qx_host
+        else:
+            host = self.settings.helper_host
+
+        return host
+
+    @property
     def app_id(self):
         """appid for infra"""
         return const.APPID[self.env]

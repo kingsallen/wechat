@@ -58,8 +58,7 @@ class LandingHandler(BaseHandler):
         link = make_url(
             path.SEARCH_FILITER,
             self.params,
-            host=self.request.host,
-            protocol=self.request.protocol,
+            host=self.host,
             recom=self.position_ps._make_recom(self.current_user.sysuser.id),
             escape=["pid"]
         )

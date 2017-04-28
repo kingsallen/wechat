@@ -68,7 +68,7 @@ class UserCurrentInfoHandler(BaseHandler):
                             pid=self.params.pid,
                             source="wx", # 用户前端判断来源
                             wechat_signature=self.current_user.wechat.signature,
-                            host=self.request.host)
+                            host=self.host)
 
             if not has_info:
                 yield favposition_notice_to_applier_tpl(self.current_user.wechat.company_id,

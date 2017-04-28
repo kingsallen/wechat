@@ -32,7 +32,7 @@ class LinkedinImportHandler(MetaBaseHandler):
         user_id = match_session_id(to_str(self.get_secure_cookie(const.COOKIE_SESSIONID)))
 
         redirect_url = make_url(path.RESUME_LINKEDIN,
-                                host=self.request.host,
+                                host=self.host,
                                 recom=self.params.recom,
                                 pid=self.params.pid,
                                 wechat_signature=self.params.wechat_signature)
