@@ -8,8 +8,9 @@ from tornado.escape import json_decode
 import conf.common as const
 from service.page.base import PageService
 from util.common import ObjectDict
+from util.common.decorator import cache
 from util.tool.date_tool import curr_datetime_now
-from util.tool.dict_tool import purify
+
 
 
 class ProfilePageService(PageService):
@@ -95,8 +96,7 @@ class ProfilePageService(PageService):
 
     @gen.coroutine
     def has_profile(self, user_id):
-        """
-        判断 user_user 是否有 profile (profile_profile 表数据)
+        """判断 user_user 是否有 profile
         :param user_id:
         :return: tuple (bool, profile or None)
 
@@ -106,6 +106,15 @@ class ProfilePageService(PageService):
 
         result, profile = yield self.infra_profile_ds.get_profile(user_id)
         return result, profile
+
+    @cache(ttl=300)
+    @gen.coroutine
+    def has_profile_lite(self, user_id):
+        """只返回 user_id 是否有 profile,
+        has_profile 的简化版"""
+
+        result = yield self.infra_profile_ds.has_profile(user_id)
+        return result
 
     @gen.coroutine
     def import_profile(self, type_source, username, password, user_id, ua, token=None):

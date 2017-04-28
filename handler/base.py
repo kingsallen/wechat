@@ -329,8 +329,11 @@ class BaseHandler(MetaBaseHandler):
 
         self.current_user.has_profile = False
         if self.current_user and self.current_user.sysuser and self.current_user.sysuser.id:
-            self.current_user.has_profile, _ = yield self.profile_ps.has_profile(
+            self.current_user.has_profile = yield self.profile_ps.has_profile_lite(
                 self.current_user.sysuser.id)
+
+        self.logger.debug(
+            "current_user.has_profile: %s" % self.current_user.has_profile)
 
     @gen.coroutine
     def _build_session(self):
