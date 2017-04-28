@@ -23,8 +23,8 @@ GAMMA_HOME = '/app/enter'
 GAMMA_POSITION = '/app/position'
 GAMMA_POSITION_JD = '/app/position/{}'
 GAMMA_POSITION_HOME = '/app/position/{}/home'
-GAMMA_POSITION_TEAM = '/app/position/{}/team'
-GAMMA_POSITION_COMPANY = '/app/position/{}/company'
+GAMMA_POSITION_TEAM = '/app/team/{}'
+GAMMA_POSITION_COMPANY = '/app/company/{}'
 GAMMA_SEARCH = '/app/search'
 
 

@@ -36,7 +36,7 @@ class PositionHandler(BaseHandler):
             team = yield self.team_ps.get_team_by_id(position_info.team_id)
 
             self.logger.debug("[JD]构建收藏信息")
-            star = yield self.position_ps.is_position_stared_by(position_id, self.current_user.sysuser.id)
+            star = yield self.position_ps.is_position_stared_by(self.current_user.sysuser.id, position_id)
 
             self.logger.debug("[JD]构建申请信息")
             application = yield self.application_ps.get_application(position_id, self.current_user.sysuser.id)
@@ -175,15 +175,10 @@ class PositionHandler(BaseHandler):
         # 如果有红包，则取红包的分享文案
         red_packet = yield self.redpacket_ps.get_last_running_hongbao_config_by_position(position_info)
 
-        self.logger.debug("自定义分享：%s" % red_packet)
         if red_packet:
             cover = self.static_url(red_packet.share_img)
             title = "{} {}".format(position_info.title, red_packet.share_title)
             description = "".join(split(red_packet.share_desc))
-
-            self.logger.debug("自定义分享 red_packet cover：%s" % cover)
-            self.logger.debug("自定义分享 red_packet title：%s" % title)
-            self.logger.debug("自定义分享 red_packet description：%s" % description)
         else:
             cover = self.static_url(company_info.logo)
             title = position_info.title
@@ -193,16 +188,8 @@ class PositionHandler(BaseHandler):
                 title = str(position_info.share_title).format(
                     company=company_info.abbreviation,
                     position=position_info.title)
-                self.logger.debug("自定义分享 cover 1：%s" % title)
             if position_info.share_description:
-                self.logger.debug("自定义分享 description 1：%s" % position_info.share_description)
                 description = "".join(split(position_info.share_description))
-                self.logger.debug("自定义分享 description 1：%s" % description)
-
-            self.logger.debug("自定义分享 cover：%s" % cover)
-            self.logger.debug("自定义分享 title：%s" % title)
-            self.logger.debug("自定义分享 description：%s" % description)
-
 
         link = make_url(
             path.POSITION_PATH.format(position_info.id),

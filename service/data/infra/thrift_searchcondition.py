@@ -54,3 +54,32 @@ class ThriftSearchconditionDataService(DataService):
         ret = yield self.searchcondition_service_cilent.getUserPositionStatus(int(user_id), position_ids)
         self.logger.debug("[thrift]get_user_position_status: %s" % ret)
         raise gen.Return(ret)
+
+    @gen.coroutine
+    def get_collect_position(self, user_id, position_id):
+        """
+        获取职位收藏状态
+        :param user_id: int
+        :param position_id: int
+        :return:
+        """
+
+        ret = yield self.searchcondition_service_cilent.getUserCollectPosition(int(user_id), int(position_id))
+        self.logger.debug("[thrift]get_collect_position: %s" % ret)
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def create_collect_position(self, user_id, position_id):
+        """添加职位收藏，调用 thrift 接口"""
+
+        ret = yield self.searchcondition_service_cilent.postUserCollectPosition(int(user_id), int(position_id))
+        self.logger.debug("[thrift]create_collect_position: %s" % ret)
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def delete_collect_position(self, user_id, position_id):
+        """删除职位收藏，调用 thrift 接口"""
+
+        ret = yield self.searchcondition_service_cilent.delUserCollectPosition(int(user_id), int(position_id))
+        self.logger.debug("[thrift]delete_collect_position: %s" % ret)
+        raise gen.Return(ret)
