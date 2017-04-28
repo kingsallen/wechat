@@ -22,7 +22,7 @@ class AggregationHandler(BaseHandler):
     聚合列表：企业+头图
     """
 
-    # @handle_response
+    @handle_response
     # @gamma_welcome
     @gen.coroutine
     def get(self):
@@ -59,8 +59,7 @@ class AggregationHandler(BaseHandler):
             is_show_ads = self._show_hr_ads()
 
             # 处理 banner
-            banner = ObjectDict()
-            # banner = yield self.aggregation_ps.get_aggregation_banner()
+            banner = yield self.aggregation_ps.get_aggregation_banner()
 
             # 处理热招企业
             hot_company = self.aggregation_ps.opt_agg_company(es_res)

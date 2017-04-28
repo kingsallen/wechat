@@ -78,6 +78,13 @@ class AggregationPageService(PageService):
                 id = int(item.get("_source").get("position").get("id"))
                 team_img, job_img, company_img = yield self.opt_jd_home_img(
                     item.get("_source").get("company", {}).get("industry_type"), item)
+
+                company = ObjectDict({
+                    "id": item.get("_source").get("company", {}).get("id"),
+                    "logo": make_static_url(item.get("_source").get("company", {}).get("logo") or const.COMPANY_HEADIMG),
+                    "abbreviation": item.get("_source").get("company", {}).get("logo"),
+                })
+
                 hot_positons[id] = ObjectDict({
                     "id": item.get("_source").get("position").get("id"),
                     "title": item.get("_source").get("position").get("title"),
@@ -91,6 +98,8 @@ class AggregationPageService(PageService):
                     "company_img": make_static_url(company_img),
                     "resources": self._gen_resources(item.get("_source").get("jd_pic",{}), item.get("_source").get("company",{}).get("type")),
                     "user_status": 0,
+                    "city": split(item.get("_source").get("position").get("city"), ['，', ',']),
+                    "company": company,
                 })
 
         # 处理 0: 未阅，1：已阅，2：已收藏，3：已投递

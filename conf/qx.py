@@ -13,9 +13,18 @@
 from util.common import ObjectDict
 
 # ++++++++++业务常量+++++++++++
-HOTCITY = ['上海','北京','深圳','广州','杭州',
-           '南京','成都','苏州','武汉','天津',
-           '西安','不限']
+HOTCITY = [{"name":"上海"},
+           {"name":"北京"},
+           {"name":"深圳"},
+           {"name":"广州"},
+           {"name":"杭州"},
+           {"name":"南京"},
+           {"name":"成都"},
+           {"name":"苏州"},
+           {"name":"武汉"},
+           {"name":"天津"},
+           {"name":"西安"},
+           {"name":"不限"}]
 
 # Cookie name
 COOKIE_WELCOME_SEARCH = "SEARCH666"
