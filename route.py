@@ -140,7 +140,7 @@ platform_routes.extend(common_routes)
 
 # 聚合号的单独 routes, 域名 platform.moseeker.com/recruit
 qx_routes = [
-    (r"/[\/]?",                                      handler.qx.app.IndexHandler,                                {"event": "app_app"}),
+    (r"[\/]?",                                       handler.qx.app.IndexHandler,                                {"event": "app_app"}),
 
     (r"/api/positions[\/]?",                         handler.qx.aggregation.AggregationHandler,                  {"event": "position_aggregation"}),
     (r"/api/config[\/]?",                            handler.qx.app.ConfigHandler,                               {"event": "wechat_config"}),
