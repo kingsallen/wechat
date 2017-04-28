@@ -53,7 +53,7 @@ class AggregationHandler(BaseHandler):
             "positions": positions,
         })
 
-        if page_no == 1:
+        if int(page_no) == 1:
             # 首页，需要头部信息
             # 处理头部 hr_ads
             is_show_ads = self._show_hr_ads()
