@@ -15,7 +15,7 @@ class SearchConditionHandler(BaseHandler):
     @handle_response
     @authenticated
     @coroutine
-    def get(self):
+    def get(self, id):
 
         res = yield self.searchcondition_ps.get_condition_list(self.current_user.sysuser.id)
         self.send_json_success({'conditionlist': res})
