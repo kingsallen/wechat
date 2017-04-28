@@ -55,7 +55,7 @@ class BaseHandler(MetaBaseHandler):
         和 oauth 有关的 参数会影响 prepare 方法
         """
 
-        full_url = self.request.full_url()
+        full_url = to_str(self.request.full_url())
         self.logger.debug("full_url:{}".format(full_url))
         real_full_url = full_url.replace(self.settings.m_host, self.host)
 
