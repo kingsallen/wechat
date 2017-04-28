@@ -331,7 +331,7 @@ class CustomInfoHandler(BaseHandler):
                 message = messages.EMPLOYEE_BINDING_SUCCESS
 
         self.render(
-            template_name='refer/weixin/employee/employee_binding_tip.html',
+            template_name='refer/weixin/employee/employee_binding_tip_v2.html',
             result=0,
             messages=message,
             nexturl=next_url,
@@ -359,7 +359,7 @@ class BindedHandler(BaseHandler):
 
         else:
             self.render(
-                template_name='refer/weixin/employee/employee_binding_tip.html',
+                template_name='refer/weixin/employee/employee_binding_tip_v2.html',
                 result=0,
                 messages=messages.EMPLOYEE_BINDING_SUCCESS,
                 nexturl=make_url(path.POSITION_LIST, self.params,
