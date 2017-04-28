@@ -107,7 +107,6 @@ class ProfilePageService(PageService):
         result, profile = yield self.infra_profile_ds.get_profile(user_id)
         return result, profile
 
-    @cache(ttl=300)
     @gen.coroutine
     def has_profile_lite(self, user_id):
         """只返回 user_id 是否有 profile,
