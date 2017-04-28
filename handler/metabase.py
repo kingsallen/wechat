@@ -239,6 +239,7 @@ class MetaBaseHandler(AtomHandler):
         self.logger.debug(
             "session_id: {}".format(self.get_secure_cookie(const.COOKIE_SESSIONID)))
 
+        self.logger.debug("env:{}".format(self.env))
         self.logger.debug("is_platform:{}".format(self.is_platform))
         self.logger.debug("is_qx:{}".format(self.is_qx))
         self.logger.debug("is_help:{}".format(self.is_help))

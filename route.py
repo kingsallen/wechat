@@ -59,7 +59,7 @@ common_routes = [
 
     # app forward 给前端，展示纯前端渲染的 SPA
     (r"/app/.*",                                     handler.common.app.IndexHandler,                           {"event": "app_"}),
-    (r"/(m|recruit)/login",                                      handler.common.passport.LoginHandler,                      {"event": "passport_login"}),
+    (r"/login",                                      handler.common.passport.LoginHandler,                      {"event": "passport_login"}),
     (r"/logout",                                     handler.common.passport.LogoutHandler,                     {"event": "passport_logout"}),
     (r"/register[\/]*([a-z]+)*",                     handler.common.passport.RegisterHandler,                   {"event": "register_"}),
 
@@ -140,12 +140,13 @@ platform_routes.extend(common_routes)
 
 # 聚合号的单独 routes, 域名 platform.moseeker.com/recruit
 qx_routes = [
-    (r"[\/]?",                                       handler.qx.app.IndexHandler,                                {"event": "app_app"}),
 
     (r"/api/positions[\/]?",                         handler.qx.aggregation.AggregationHandler,                  {"event": "position_aggregation"}),
     (r"/api/config[\/]?",                            handler.qx.app.ConfigHandler,                               {"event": "wechat_config"}),
     (r"/api/search/condition[\/]*([0-9]+)*",         handler.qx.search.SearchConditionHandler,                   {"event": "search_condition"}),
     (r"/api/search/([a-z_]+)",                       handler.qx.search.SearchCityHandler,                        {"event": "search_condition"}),
+
+    (r".*",                                          handler.qx.app.IndexHandler,                                {"event": "app_app"}),
 
 ]
 qx_routes.extend(common_routes)

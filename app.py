@@ -66,7 +66,6 @@ def make_app():
 
 
 def main():
-    options.parse_command_line()
     application = make_app()
 
     try:
