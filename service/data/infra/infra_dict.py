@@ -127,6 +127,10 @@ class InfraDictDataService(DataService):
         """
         level1_cities = yield self._get_level_1_cities()
         level2_cities = yield self._get_level_2_cities()
+
+        self.logger.debug("level1_cities:{}".format(level1_cities))
+        self.logger.debug("level2_cities:{}".format(level2_cities))
+
         return self.make_cities_result(level1_cities, level2_cities, hot)
 
     def make_cities_result(self, level1_cities, level2_cities, hot=False):
