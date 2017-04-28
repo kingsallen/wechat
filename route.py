@@ -59,7 +59,7 @@ common_routes = [
 
     # app forward 给前端，展示纯前端渲染的 SPA
     (r"/app/.*",                                     handler.common.app.IndexHandler,                           {"event": "app_"}),
-    (r"/login",                                      handler.common.passport.LoginHandler,                      {"event": "passport_login"}),
+    (r"/(m|recruit)/login",                                      handler.common.passport.LoginHandler,                      {"event": "passport_login"}),
     (r"/logout",                                     handler.common.passport.LogoutHandler,                     {"event": "passport_logout"}),
     (r"/register[\/]*([a-z]+)*",                     handler.common.passport.RegisterHandler,                   {"event": "register_"}),
 
