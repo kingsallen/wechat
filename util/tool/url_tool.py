@@ -14,7 +14,7 @@ from setting import settings
 _ESCAPE_DEFAULT = frozenset(['m', 'state', 'code', '_xsrf', 'appid', 'tjtoken'])
 
 
-def make_url(path, host, params=None, protocol="https", escape=None,
+def make_url(path, params=None, host="", protocol="https", escape=None,
              **kwargs):
     """
     生成 url 的 helper 方法， 一般在 handler 调用
