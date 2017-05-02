@@ -153,7 +153,8 @@ qx_routes = [
 
     (r"/api/positions[\/]?",                        handler.qx.aggregation.AggregationHandler,                  {"event": "position_aggregation"}),
     (r"/api/config[\/]?",                           handler.qx.app.ConfigHandler,                               {"event": "wechat_config"}),
-    (r"/api/search/condition[\/]*([0-9]+)*",        handler.qx.search.SearchConditionHandler,                   {"event": "search_condition"}),
+    (r"/api/search/condition/*",                    handler.qx.search.SearchConditionHandler,                   { "event": "search_condition" }),
+    (r"/api/search/condition/(\d+)*",               handler.qx.search.SearchConditionHandler,                   { "event": "search_condition" }),
     (r"/api/search/([a-z_]+)",                      handler.qx.search.SearchCityHandler,                        {"event": "search_condition"}),
 
 ]
