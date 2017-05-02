@@ -71,6 +71,7 @@ common_routes = [
 
     (r"/profile[\/]?",                               handler.common.profile.ProfileHandler,                     {"event": "profile_profile"}),
     (r"/profile/preview[\/]?",                       handler.common.profile.ProfilePreviewHandler,              {"event": "profile_preview"}),
+    (r"/profile/view[\/]*([a-z]+)*",                 handler.common.profile.ProfileViewHandler,                 {"event": "profile_view"}),
     (r"/profile/custom[\/]?",                        handler.common.profile.ProfileCustomHandler,               {"event": "profile_customcv"}),
     (r"/api/dict/city[\/]?",                         handler.common.dictionary.DictCityHandler,                 {"event": "dict_city"}),
     (r"/api/dict/industry[\/]?",                     handler.common.dictionary.DictIndustryHandler,             {"event": "dict_industry"}),

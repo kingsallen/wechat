@@ -181,6 +181,26 @@ class ProfilePreviewHandler(BaseHandler):
 
         self.render_page(template_name='profile/preview.html', data=tparams)
 
+class ProfileViewHandler(BaseHandler):
+
+    @handle_response
+    @tornado.gen.coroutine
+    def get(self, uuid):
+
+        has_profile, profile = yield self.profile_ps.has_profile(user_id='', uuid=uuid)
+
+        if not uuid or not has_profile:
+            self.write_error(404)
+            return
+
+        profile_tpl = yield self.profile_ps.profile_to_tempalte(profile)
+
+        tparams = {
+            'profile': profile_tpl,
+        }
+
+        self.logger.debug('tparams: %s' % tparams)
+        self.render_page(template_name='profile/preview.html', data=tparams)
 
 class ProfileHandler(BaseHandler):
     """ProfileHandler
