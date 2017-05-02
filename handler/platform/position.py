@@ -18,7 +18,6 @@ from util.wechat.template import position_view_five_notice_tpl, position_share_n
 
 
 class PositionHandler(BaseHandler):
-
     @handle_response
     @gen.coroutine
     def get(self, position_id):
@@ -32,7 +31,6 @@ class PositionHandler(BaseHandler):
             if self.request.connection.stream.closed():
                 return
 
-            # hr端功能不全，暂且通过团队名称匹配
             team = yield self.team_ps.get_team_by_id(position_info.team_id)
 
             self.logger.debug("[JD]构建收藏信息")
@@ -203,7 +201,6 @@ class PositionHandler(BaseHandler):
             self.logger.debug("自定义分享 title：%s" % title)
             self.logger.debug("自定义分享 description：%s" % description)
 
-
         link = make_url(
             path.POSITION_PATH.format(position_info.id),
             self.params,
@@ -316,11 +313,11 @@ class PositionHandler(BaseHandler):
             "can_apply": not can_apply,
             "forword_message": company_info.conf_forward_message or msg.POSITION_FORWARD_MESSAGE,
             "team": team_id,
-            "did": did if did != self.current_user.company.id else "", # 主公司不需要提供 did
+            "did": did if did != self.current_user.company.id else "",  # 主公司不需要提供 did
             "salary": position_info.salary,
             "hr_chat": int(self.current_user.wechat.hr_chat),
             "teamname_custom": teamname_custom["teamname_custom"]
-            #"team": position_info.department.lower() if position_info.department else ""
+            # "team": position_info.department.lower() if position_info.department else ""
         })
 
         return data
@@ -384,7 +381,7 @@ class PositionHandler(BaseHandler):
             "icon_url": self.static_url(company_info.logo),
             "name": company_info.abbreviation or company_info.name,
             "description": company_info.slogan,
-            "did": did if did != self.current_user.company.id else "", # 主公司不需要提供 did
+            "did": did if did != self.current_user.company.id else "",  # 主公司不需要提供 did
         })
 
         return data
@@ -517,6 +514,7 @@ class PositionHandler(BaseHandler):
     @gen.coroutine
     def _redirect_when_recom_is_openid(self, position_info):
         """当recom是openid时，刷新链路，改变recom的值，跳转"""
+
         def recom_is_like_openid():
             return (self.params.recom and
                     self.params.recom.startswith('o') and
@@ -543,7 +541,7 @@ class PositionHandler(BaseHandler):
         """给员工加积分"""
 
         if (not self.current_user.employee and
-            recom_employee_user_id != self.current_user.sysuser.id):
+                    recom_employee_user_id != self.current_user.sysuser.id):
 
             recom_employee = yield self.user_ps.get_valid_employee_by_user_id(
                 recom_employee_user_id, self.current_user.company.id)
@@ -588,8 +586,8 @@ class PositionHandler(BaseHandler):
                                     pid=position_info.id)
 
                 yield position_view_five_notice_tpl(help_wechat.id, hr_wx_user.openid,
-                                         link, position_info.title,
-                                         position_info.salary)
+                                                    link, position_info.title,
+                                                    position_info.salary)
 
     @gen.coroutine
     def _add_team_data(self, position_data, team, company_id, position_id, teamname_custom):
@@ -815,7 +813,6 @@ class PositionListHandler(BaseHandler):
 
 
 class PositionEmpNoticeHandler(BaseHandler):
-
     @handle_response
     @gen.coroutine
     def get(self):
@@ -829,7 +826,8 @@ class PositionEmpNoticeHandler(BaseHandler):
 
         position = yield self.position_ps.get_position(self.params.pid)
 
-        link = make_url(path.EMPLOYEE_RECOMMENDS, host=self.request.host, wechat_signature=self.current_user.wechat.signature)
+        link = make_url(path.EMPLOYEE_RECOMMENDS, host=self.request.host,
+                        wechat_signature=self.current_user.wechat.signature)
 
         if self.current_user.wechat.passive_seeker == const.OLD_YES:
             yield position_share_notice_employee_tpl(self.current_user.company.id,
