@@ -23,7 +23,7 @@ class AggregationHandler(BaseHandler):
     """
 
     @handle_response
-    # @gamma_welcome
+    @gamma_welcome
     @gen.coroutine
     def get(self):
 
@@ -123,6 +123,7 @@ class AggregationHandler(BaseHandler):
         link = self.make_url(
             path.GAMMA_POSITION,
             self.params,
+            fr="recruit",
             recom=self.position_ps._make_recom(self.current_user.sysuser.id),
             escape=["page_no", "page_size"])
 

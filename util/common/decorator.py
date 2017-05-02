@@ -354,7 +354,7 @@ def gamma_welcome(func):
 
         self.logger.debug("gamma_welcome: {}".format(search_keywords))
 
-        if not search_keywords:
+        if not search_keywords and self.params.fr != "recruit":
             gender = "unkonwn"
             if self.current_user.qxuser.sex == 1:
                 gender = "male"
