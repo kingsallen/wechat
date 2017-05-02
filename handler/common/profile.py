@@ -183,7 +183,7 @@ class ProfilePreviewHandler(BaseHandler):
 
 class ProfileViewHandler(BaseHandler):
 
-    @handle_response
+    # @handle_response
     @tornado.gen.coroutine
     def get(self, uuid):
 

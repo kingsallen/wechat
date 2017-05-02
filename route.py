@@ -68,7 +68,7 @@ common_routes = [
     (r"/resume/linkedin",                            handler.common.resume.LinkedinImportHandler,               {"event": "resume_linkedin"}),
     (r"/profile[\/]?",                               handler.common.profile.ProfileHandler,                     {"event": "profile_profile"}),
     (r"/profile/preview[\/]?",                       handler.common.profile.ProfilePreviewHandler,              {"event": "profile_preview"}),
-    (r"/profile/view[\/]*([a-z]+)*",                 handler.common.profile.ProfileViewHandler,                 {"event": "profile_view"}),
+    (r"/profile/view/([A-Z0-9a-z_]+)*",               handler.common.profile.ProfileViewHandler,                 {"event": "profile_view"}),
     (r"/profile/custom[\/]?",                        handler.common.profile.ProfileCustomHandler,               {"event": "profile_customcv"}),
 
     # websocket
@@ -136,9 +136,11 @@ qx_routes = [
     (r"/api/search/([a-z_]+)",                       handler.qx.search.SearchCityHandler,                        {"event": "search_condition"}),
 
     # App 路由
-    (r".*",                                          handler.qx.app.IndexHandler,                                {"event": "app_app"}),
+    (r"/.*",                                      handler.qx.app.IndexHandler,                                {"event": "app_app"}),
 ]
 qx_routes = common_routes + qx_routes
+
+print(qx_routes)
 
 
 # 招聘助手的单独 routes, 域名 platform.moseeker.com/recruit
