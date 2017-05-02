@@ -11,6 +11,7 @@ class IndexHandler(BaseHandler):
     """页面Index, Gamma单页应用使用"""
 
     @handle_response
+    @gamma_welcome
     @gen.coroutine
     def get(self):
         self.logger.debug("IndexHandler qx")
