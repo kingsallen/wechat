@@ -3,7 +3,7 @@
 from handler.base import BaseHandler
 
 from tornado import gen
-from util.common.decorator import handle_response
+from util.common.decorator import handle_response, gamma_welcome
 from util.common import ObjectDict
 
 

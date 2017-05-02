@@ -1,5 +1,6 @@
 # coding=utf-8
 
+import re
 import functools
 import hashlib
 import traceback
@@ -351,7 +352,9 @@ def gamma_welcome(func):
 
         self.logger.debug("gamma_welcome: {}".format(search_keywords))
 
-        if not search_keywords and self.params.fr != "recruit":
+        self.logger.debug("match:{}".format(re.match(r"\/position", self.request.uri)))
+
+        if not search_keywords and self.params.fr != "recruit" and re.match(r"\/position", self.request.uri):
             gender = "unkonwn"
             if self.current_user.qxuser.sex == 1:
                 gender = "male"
@@ -367,23 +370,6 @@ def gamma_welcome(func):
 
         yield func(self, *args, **kwargs)
 
-    return wrapper
-
-def handle_response(func):
-    @functools.wraps(func)
-    @gen.coroutine
-    def wrapper(self, *args, **kwargs):
-
-        try:
-            yield func(self, *args, **kwargs)
-        except Exception as e:
-            self.logger.error(traceback.format_exc())
-            if self.request.headers.get("Content-Type", "").startswith("application/json") \
-                or self.request.method in ("PUT", "POST", "DELETE"):
-                self.send_json_error()
-            else:
-                self.write_error(500)
-                return
     return wrapper
 
 # 检查新JD状态, 如果不是启用状态, 当前业务规则:

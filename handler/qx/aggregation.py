@@ -11,7 +11,7 @@ import conf.common as const
 import conf.path as path
 import conf.qx as qx_const
 from handler.base import BaseHandler
-from util.common.decorator import handle_response, gamma_welcome
+from util.common.decorator import handle_response
 from util.common import ObjectDict
 from util.tool.url_tool import make_static_url
 
@@ -23,7 +23,6 @@ class AggregationHandler(BaseHandler):
     """
 
     @handle_response
-    @gamma_welcome
     @gen.coroutine
     def get(self):
 
