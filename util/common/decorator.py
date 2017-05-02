@@ -2,7 +2,6 @@
 
 import functools
 import hashlib
-import re
 import traceback
 from abc import ABCMeta, abstractmethod
 from urllib.parse import urlencode
@@ -18,10 +17,8 @@ import conf.qx as qx_const
 from util.common import ObjectDict
 from util.common.cache import BaseRedis
 from util.common.cipher import encode_id
-from util.tool import url_tool
 from util.tool.dict_tool import sub_dict
 from util.tool.str_tool import to_hex, to_str
-from util.tool.url_tool import make_url
 
 
 def handle_response(func):
@@ -370,6 +367,23 @@ def gamma_welcome(func):
 
         yield func(self, *args, **kwargs)
 
+    return wrapper
+
+def handle_response(func):
+    @functools.wraps(func)
+    @gen.coroutine
+    def wrapper(self, *args, **kwargs):
+
+        try:
+            yield func(self, *args, **kwargs)
+        except Exception as e:
+            self.logger.error(traceback.format_exc())
+            if self.request.headers.get("Content-Type", "").startswith("application/json") \
+                or self.request.method in ("PUT", "POST", "DELETE"):
+                self.send_json_error()
+            else:
+                self.write_error(500)
+                return
     return wrapper
 
 # 检查新JD状态, 如果不是启用状态, 当前业务规则:
