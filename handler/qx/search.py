@@ -90,7 +90,7 @@ class SearchCityHandler(BaseHandler):
     @coroutine
     def get_industries(self):
 
-        res = yield self.searchcondition_ps.get_industries(level=1)
+
         self.send_json_success(data={
-            "industries": list(res)
+            "industries": qx_const.INDUSTRIES
         })

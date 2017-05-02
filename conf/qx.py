@@ -19,6 +19,21 @@ HOTCITY = ObjectDict({
                  '西安','不限']
 })
 
+INDUSTRIES = [
+    "计算机/互联网/通信/电子",
+    "会计/金融/银行/保险",
+    "贸易/消费/制造/营运",
+    "制药/医疗",
+    "生产/加工/制造",
+    "广告/媒体",
+    "房地产/建筑",
+    "专业服务/教育/培训",
+    "服务业",
+    "物流/运输",
+    "能源/原材料",
+    "政府/非赢利机构/其他"
+]
+
 # Cookie name
 COOKIE_WELCOME_SEARCH = "SEARCH666"
 COOKIE_HRADS_SESSIONS = "HR_ADS"
