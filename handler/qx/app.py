@@ -15,8 +15,6 @@ class IndexHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         self.logger.debug("IndexHandler qx")
-        self.logger.debug("index uri:{}".format(self.request))
-
         self.render(template_name="qx/qx.html")
 
 class ConfigHandler(BaseHandler):
