@@ -13,11 +13,17 @@
 from util.common import ObjectDict
 
 # ++++++++++业务常量+++++++++++
-HOTCITY = ObjectDict({
-    "hot_city": ['上海','北京','深圳','广州','杭州',
-                 '南京','成都','苏州','武汉','天津',
-                 '西安']
-})
+HOTCITY = [{"name":"上海"},
+           {"name":"北京"},
+           {"name":"深圳"},
+           {"name":"广州"},
+           {"name":"杭州"},
+           {"name":"南京"},
+           {"name":"成都"},
+           {"name":"苏州"},
+           {"name":"武汉"},
+           {"name":"天津"},
+           {"name":"西安"}]
 
 INDUSTRIES = [
     "计算机/互联网/通信/电子",
@@ -35,7 +41,7 @@ INDUSTRIES = [
 ]
 
 # Cookie name
-COOKIE_WELCOME_SEARCH = "SEARCH666"
+COOKIE_WELCOME_SEARCH = "SEARCH"
 COOKIE_HRADS_SESSIONS = "HR_ADS"
 COOKIE_HRADS_TOTAL = "HR_ADS_TOTAL"
 

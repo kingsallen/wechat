@@ -127,19 +127,14 @@ class PositionPageService(PageService):
         raise gen.Return(positions_list)
 
     @gen.coroutine
-    def is_position_stared_by(self, position_id, user_id):
+    def is_position_stared_by(self, user_id, position_id):
         """返回用户是否收藏了职位"""
 
         if user_id is None or not position_id:
             raise gen.Return(self.constant.NO)
 
-        fav = yield self.user_fav_position_ds.get_user_fav_position({
-            "position_id": position_id,
-            "sysuser_id": user_id,
-            "favorite": self.constant.FAV_YES
-        })
-
-        raise gen.Return(self.constant.YES if fav else self.constant.NO)
+        ret = yield self.thrift_searchcondition_ds.get_collect_position(user_id, position_id)
+        raise gen.Return(self.constant.YES if ret.userCollectPosition else self.constant.NO)
 
     @gen.coroutine
     def get_hr_info(self, publisher):

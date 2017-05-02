@@ -16,7 +16,6 @@ class HrChatUnreadCountDao(BaseDao):
             "room_id":              self.constant.TYPE_INT,
             "hr_id":                self.constant.TYPE_INT,
             "user_id":              self.constant.TYPE_INT,
-            "disable":              self.constant.TYPE_INT,
             "hr_unread_count":      self.constant.TYPE_INT,
             "user_unread_count":    self.constant.TYPE_INT,
         }

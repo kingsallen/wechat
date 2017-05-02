@@ -57,6 +57,7 @@ def url_subtract_query(url, exclude):
     """削减 url 的 query 中指定的键值"""
     p = urlparse(url)
     query = p.query
+
     parsed_query = {k: v for k, v in parse_qs(query).items()
                     if k not in exclude}
 
@@ -102,8 +103,10 @@ def url_append_query(url, *args, **kwargs):
 
 
 def make_static_url(path, protocol='https'):
+
     if not path:
         return None
+
     if not path.startswith("http"):
         path = urljoin(settings['static_domain'], path)
 

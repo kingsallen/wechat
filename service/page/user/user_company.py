@@ -43,7 +43,7 @@ class UserCompanyPageService(PageService):
             conds = {'user_id': user.sysuser.id, 'company_id': company.id}
             vst_cmpy = yield self.user_company_visit_req_ds.get_visit_cmpy(
                 conds=conds, fields=['id', 'company_id'])
-        team_index_url = make_url(path.COMPANY_TEAM, handler_params)
+        team_index_url = make_url(path.COMPANY_TEAM, self.settings.platform_host, handler_params)
 
         # 拼装模板数据
         data.header = temp_data_tool.make_header(company)

@@ -43,7 +43,7 @@ class ApplicationHandler(BaseHandler):
                     self.current_user, position, custom_cv_tpls)
 
             if not result:
-                self.redirect(make_url(path.PROFILE_CUSTOM_CV,
+                self.redirect(self.make_url(path.PROFILE_CUSTOM_CV,
                               pid=self.params.pid,
                               wechat_signature=self.params.wechat_signature))
                 return
@@ -54,7 +54,7 @@ class ApplicationHandler(BaseHandler):
             position.company_id, position.app_cv_config_id)
 
         # 跳转到 profile get_view, 传递 apply 和 pid
-        self.redirect(make_url(path.PROFILE_PREVIEW,
+        self.redirect(self.make_url(path.PROFILE_PREVIEW,
                                self.params,
                                is_skip="1" if is_esteelauder else "0"))
 
@@ -183,4 +183,4 @@ class ApplicationEmailHandler(BaseHandler):
         # 置空不必要参数，避免在 make_url 中被用到
         self.params.pop("name", None)
 
-        self.redirect(make_url(path.APPLICATION_EMAIL, self.params, confirm="1"))
+        self.redirect(self.make_url(path.APPLICATION_EMAIL, self.params, confirm="1"))

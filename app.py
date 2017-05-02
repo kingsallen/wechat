@@ -39,6 +39,7 @@ from globals import env, logger, redis, es
 class Application(tornado.web.Application):
 
     def __init__(self):
+
         # 选择加载的 routes
         if options.env == constant.ENV_PLATFORM:
             tornado.web.Application.__init__(self, platform_routes, **settings)
@@ -65,7 +66,6 @@ def make_app():
 
 
 def main():
-    options.parse_command_line()
     application = make_app()
 
     try:

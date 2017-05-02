@@ -78,7 +78,7 @@ class TeamPageService(PageService):
             temp_data_tool.make_team_index_template(
                 team=t,
                 team_resource=team_resource_dict.get(t.res_id),
-                more_link=make_url(path.TEAM_PATH.format(t.id), handler_param),
+                more_link=make_url(path.TEAM_PATH.format(t.id), self.settings.platform_host, handler_param),
                 member_list=[
                     temp_data_tool.make_team_member(
                         member=m,

@@ -48,9 +48,9 @@ class WeChatOauth2Service(object):
         """正常授权获取 code"""
         return self._get_oauth_code_url(is_base=0)
 
-    @property
-    def handling_qx(self):
-        return self.wechat.id == settings['qx_wechat_id']
+    # @property
+    # def handling_qx(self):
+    #     return self.wechat.id == settings['qx_wechat_id']
 
     @gen.coroutine
     def get_openid_unionid_by_code(self, code):
@@ -104,7 +104,7 @@ class WeChatOauth2Service(object):
 
     def _get_code_url(self, is_base=1):
         """非第三方获取 code 的 url"""
-        self.__adjust_url(is_base)
+        # self.__adjust_url(is_base)
 
         return wx_const.WX_OAUTH_GET_CODE % (
             self.wechat.appid,
@@ -114,7 +114,7 @@ class WeChatOauth2Service(object):
 
     def _get_code_url_3rd_party(self, is_base=1):
         """第三方获取 code 的 url"""
-        self.__adjust_url(is_base)
+        # self.__adjust_url(is_base)
 
         return wx_const.WX_THIRD_OAUTH_GET_CODE % (
             self.wechat.appid,
@@ -185,31 +185,31 @@ class WeChatOauth2Service(object):
         ret = yield http_get(wx_const.WX_OAUTH_GET_USERINFO % (self._access_token, openid), infra=False)
         raise gen.Return(ret)
 
-    def __adjust_url(self, is_base):
-        """必要时调整 redirect_uri 的二级域名
+    # def __adjust_url(self, is_base):
+    #     """必要时调整 redirect_uri 的二级域名
+    #
+    #     '必要时'指： 1.静默授权
+    #                 2. wechat 实例变量是聚合号
+    #                 3. redirect_url 是 platform 开头
+    #
+    #     将 redirect_url 改为 qx 域名，并使用跳转 url，
+    #     将现有 redirect_url 填充 next_url 参数
+    #     """
+    #
+    #     if not is_base and self.handling_qx and self.__is_platform_url(
+    #             self.redirect_url):
+    #         next_url = quote(self.redirect_url)
+    #         up = urlparse(self.redirect_url)
+    #         netloc = up.netloc.replace(const.ENV_PLATFORM, const.ENV_QX, 1)
+    #         self.redirect_url = "{}?next_url={}".format(
+    #             up.scheme + "://" + netloc + path.GAMMA_OAUTH_QX,
+    #             next_url)
 
-        '必要时'指： 1.静默授权
-                    2. wechat 实例变量是聚合号
-                    3. redirect_url 是 platform 开头
-
-        将 redirect_url 改为 qx 域名，并使用跳转 url，
-        将现有 redirect_url 填充 next_url 参数
-        """
-
-        if not is_base and self.handling_qx and self.__is_platform_url(
-                self.redirect_url):
-            next_url = quote(self.redirect_url)
-            up = urlparse(self.redirect_url)
-            netloc = up.netloc.replace(const.ENV_PLATFORM, const.ENV_QX, 1)
-            self.redirect_url = "{}?next_url={}".format(
-                up.scheme + "://" + netloc + path.GAMMA_OAUTH_QX,
-                next_url)
-
-    @staticmethod
-    def __is_platform_url(string):
-        """判断是否是 platform 的 url"""
-        regex = r'^http(s)?:\/\/platform'
-        return re.match(regex, string)
+    # @staticmethod
+    # def __is_platform_url(string):
+    #     """判断是否是 platform 的 url"""
+    #     regex = r'^http(s)?:\/\/platform'
+    #     return re.match(regex, string)
 
 
 class JsApi(object):

@@ -333,36 +333,25 @@ class UserPageService(PageService):
         raise gen.Return(hr_account)
 
     @gen.coroutine
-    def favorite_position(self, user_id, pid):
+    def favorite_position(self, user_id, position_id):
         """用户收藏职位的粒子操作
         :param user_id: user_id
         :param pid: 职位id
         """
 
         ret = yield \
-            self.thrift_useraccounts_ds.create_collect_position(user_id, pid)
-        raise gen.Return(ret)
+            self.thrift_searchcondition_ds.create_collect_position(user_id, position_id)
+        raise gen.Return(ret.status)
 
     @gen.coroutine
-    def unfavorite_position(self, user_id, pid):
+    def unfavorite_position(self, user_id, position_id):
         """用户取消收藏职位的粒子操作
         :param user_id: user_id
         :param pid: 职位id
         """
         ret = yield \
-            self.thrift_useraccounts_ds.delete_collect_position(user_id, pid)
-        raise gen.Return(ret)
-
-    @gen.coroutine
-    def get_collect_position(self, user_id, pid):
-        """获取用户收藏、感兴趣职位信息
-        :param user_id:
-        :param pid:
-        :return: object
-        """
-        position_fav = yield \
-            self.thrift_useraccounts_ds.get_collect_position(user_id, pid)
-        raise gen.Return(position_fav)
+            self.thrift_searchcondition_ds.delete_collect_position(user_id, position_id)
+        raise gen.Return(ret.status)
 
     @gen.coroutine
     def add_user_fav_position(self, position_id, user_id, favorite, mobile, wxuser_id, recom_user_id):
@@ -370,7 +359,7 @@ class UserPageService(PageService):
         增加用户感兴趣记录
         :param position_id:
         :param user_id:
-        :param favorite: 0:收藏，1:取消收藏，2:感兴趣
+        :param favorite: 2:感兴趣
         :param mobile:
         :param wxuser_id:
         :param recom_user_id:

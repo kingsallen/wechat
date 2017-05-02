@@ -94,17 +94,18 @@ class ProfilePageService(PageService):
     })
 
     @gen.coroutine
-    def has_profile(self, user_id):
+    def has_profile(self, user_id, uuid=None):
         """
         判断 user_user 是否有 profile (profile_profile 表数据)
         :param user_id:
+        :param uuid:
         :return: tuple (bool, profile or None)
 
         调用方式:
         profile = has_profile[1]
         """
 
-        result, profile = yield self.infra_profile_ds.get_profile(user_id)
+        result, profile = yield self.infra_profile_ds.get_profile(user_id, uuid)
         return result, profile
 
     @gen.coroutine

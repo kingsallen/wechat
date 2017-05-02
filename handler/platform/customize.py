@@ -73,6 +73,6 @@ class CustomizeEmailApplyHandler(BaseHandler):
         # send_recom_friends_notice_to_employee(db=self.db, email=recom_email,
         #                                       company_name=self.current_user.company.abbreviation, code=uucode)
 
-        self.redirect(make_url(path.CUSTOMIZE_EDX, self.params, emailfriendsent=1))
+        self.redirect(self.make_url(path.CUSTOMIZE_EDX, self.params, emailfriendsent=1))
 
 

@@ -15,7 +15,7 @@ from handler.base import BaseHandler
 from tests.dev_data.user_company_config import COMPANY_CONFIG
 from util.common import ObjectDict
 from util.common.decorator import check_sub_company, handle_response, \
-    authenticated, NewJDStatusCheckerRedirect
+    authenticated
 from util.tool.str_tool import add_item
 
 
@@ -63,7 +63,6 @@ class CompanyFollowHandler(BaseHandler):
 class CompanyHandler(BaseHandler):
     """公司详情页新样式"""
 
-    @NewJDStatusCheckerRedirect()
     @handle_response
     @check_sub_company
     @gen.coroutine

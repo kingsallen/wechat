@@ -55,11 +55,9 @@ class LandingHandler(BaseHandler):
         title = "{}高级搜索".format(company_info.abbreviation)
         description = ""
 
-        link = make_url(
+        link = self.make_url(
             path.SEARCH_FILITER,
             self.params,
-            host=self.request.host,
-            protocol=self.request.protocol,
             recom=self.position_ps._make_recom(self.current_user.sysuser.id),
             escape=["pid"]
         )

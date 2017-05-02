@@ -22,11 +22,12 @@ from tornado import web, gen
 
 import conf.message as msg_const
 import conf.common as const
+import conf.path as path
 from util.common import ObjectDict
 from util.tool.dict_tool import objectdictify
 from util.tool.date_tool import curr_now
 from util.tool.str_tool import to_str
-from util.tool.url_tool import make_static_url
+from util.tool.url_tool import make_static_url, make_url
 from util.tool.json_tool import encode_json_dumps, json_dumps
 
 # 动态加载所有 PageService
@@ -110,6 +111,18 @@ class MetaBaseHandler(AtomHandler):
     @property
     def in_wechat_android(self):
         return self.in_wechat and self._client_type == const.CLIENT_TYPE_ANDROID
+
+    @property
+    def host(self):
+        """判断当前 host，不能简单的从 request.host获得"""
+        if self.is_platform:
+            host = self.settings.platform_host
+        elif self.is_qx:
+            host = self.settings.qx_host
+        else:
+            host = self.settings.helper_host
+
+        return host
 
     @property
     def app_id(self):
@@ -233,6 +246,10 @@ class MetaBaseHandler(AtomHandler):
         404（资源不存在）      Resource not found
         500（服务器错误）      Internal Server Error: Something went wrong on the server, check status site and/or report the issue
         """
+
+        if self.is_qx:
+            self.redirect(make_url(path.GAMMA_404, host=self.host))
+            return
 
         template = 'system/info.html'
 

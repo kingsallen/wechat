@@ -1,7 +1,5 @@
 # coding=utf-8
 
-# Copyright 2016 MoSeeker
-
 import os
 from hashlib import sha1
 from tornado import gen
@@ -54,7 +52,10 @@ class BaseHandler(MetaBaseHandler):
 
         和 oauth 有关的 参数会影响 prepare 方法
         """
-        return url_subtract_query(self.request.full_url(), ['code', 'state'])
+
+        full_url = to_str(self.request.full_url())
+        real_full_url = full_url.replace(self.settings.m_host, self.host)
+        return url_subtract_query(real_full_url, ['code', 'state'])
 
     @property
     def component_access_token(self):
@@ -231,6 +232,7 @@ class BaseHandler(MetaBaseHandler):
 
     @gen.coroutine
     def _get_current_wechat(self, qx=False):
+
         if qx:
             signature = self.settings['qx_signature']
         else:
@@ -327,7 +329,7 @@ class BaseHandler(MetaBaseHandler):
         # ga('set', 'dimension2', 'YYYYY’);
         # ga('set', 'dimension3', 'ZZZZZZ’);
 
-        if self.current_user:
+        if self.current_user.sysuser:
             self.current_user.has_profile = yield self.profile_ps.has_profile(
                 self.current_user.sysuser.id)
 
@@ -340,7 +342,6 @@ class BaseHandler(MetaBaseHandler):
         session = ObjectDict()
         session.wechat = self._wechat
 
-        # qx session 中，只需要存储 id，unioid 即可，且俩变量一旦生成不会改变，不会影响 session 一致性
         # 该 session 只做首次仟寻登录查找各关联帐号所用(微信环境内)
         if self._unionid:
             # 只对微信 oauth 用户创建qx session
@@ -426,7 +427,7 @@ class BaseHandler(MetaBaseHandler):
                     "_build_session_by_unionid wxuser:{}".format(
                         session.wxuser))
 
-            if self._qxuser:
+            if self._qxuser and self.is_platform:
                 session.qxuser = self._qxuser
             else:
                 session.qxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
@@ -608,7 +609,7 @@ class BaseHandler(MetaBaseHandler):
         add_namespace = ObjectDict(
             env=self.env,
             params=self.params,
-            make_url=make_url,
+            make_url=self.make_url,
             const=const,
             path=path,
             static_url=self.static_url,
@@ -626,3 +627,26 @@ class BaseHandler(MetaBaseHandler):
         if not self.get_cookie(cookie_name):
             unix_time_stamp = str(int(time.time()))
             self.set_cookie(cookie_name, unix_time_stamp)
+
+    def make_url(self, path, params=None, protocol="https", escape=None, **kwargs):
+        """
+        host 环境不能直接从 request 中获取，需要根据环境确定
+        :param path:
+        :param host:
+        :param params:
+        :param protocol:
+        :param escape:
+        :param kwargs:
+        :return:
+        """
+
+        host = self.host
+
+        self.logger.debug("make_url path:{}".format(path))
+        self.logger.debug("make_url host:{}".format(host))
+        self.logger.debug("make_url params:{}".format(params))
+        self.logger.debug("make_url protocol:{}".format(protocol))
+        self.logger.debug("make_url escape:{}".format(escape))
+        self.logger.debug("make_url kwargs:{}".format(kwargs))
+
+        return make_url(path, params, host, protocol, escape, **kwargs)

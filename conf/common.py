@@ -142,8 +142,6 @@ OLD_YES = 0
 OLD_NO = 1
 
 # 我感兴趣状态常量
-FAV_YES = 0
-FAV_NO = 1
 FAV_INTEREST = 2
 
 # 职位相关，主要涉及到职位，职位列表，搜索页

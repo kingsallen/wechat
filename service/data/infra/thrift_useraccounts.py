@@ -60,43 +60,10 @@ class ThriftUseraccountsDataService(DataService):
 
     @gen.coroutine
     def get_collect_positions(self, user_id):
-        """获得职位收藏，调用 thrift 接口"""
+        """获得职位收藏列表，调用 thrift 接口"""
 
         self.logger.debug(
             "[ThriftUseraccountsDataService] get_collect_positions user_id:{}".format(user_id))
         ret = yield self.usercenter_service_cilent.getFavPositions(user_id)
         self.logger.debug("[ThriftUseraccountsDataService] get_collect_positions:{}".format(ret))
-        raise gen.Return(ret)
-
-    @gen.coroutine
-    def get_collect_position(self, user_id, pid):
-        """获得职位收藏状态，调用 thrift 接口"""
-        # TODO
-
-        self.logger.debug(
-            "[ThriftUseraccountsDataService] get_collect_position user_id:{} pid:{}".format(user_id, pid))
-        ret = yield self.usercenter_service_cilent.getCollectPosition(user_id, int(pid))
-        self.logger.debug("[ThriftUseraccountsDataService] get_collect_position:{}".format(ret))
-        raise gen.Return(ret)
-
-    @gen.coroutine
-    def create_collect_position(self, user_id, pid):
-        """获得职位收藏状态，调用 thrift 接口"""
-        # TODO
-
-        self.logger.debug(
-            "[ThriftUseraccountsDataService] create_collect_position user_id:{} pid:{}".format(user_id, pid))
-        ret = yield self.usercenter_service_cilent.createCollectPosition(user_id, int(pid))
-        self.logger.debug("[ThriftUseraccountsDataService] create_collect_position:{}".format(ret))
-        raise gen.Return(ret)
-
-    @gen.coroutine
-    def delete_collect_position(self, user_id, pid):
-        """获得职位收藏状态，调用 thrift 接口"""
-        # TODO
-
-        self.logger.debug(
-            "[ThriftUseraccountsDataService] delete_collect_position user_id:{} pid:{}".format(user_id, pid))
-        ret = yield self.usercenter_service_cilent.deleteCollectPosition(user_id, int(pid))
-        self.logger.debug("[ThriftUseraccountsDataService] delete_collect_position:{}".format(ret))
         raise gen.Return(ret)

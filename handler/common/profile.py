@@ -129,9 +129,9 @@ class ProfileNewHandler(BaseHandler):
             dqpid = self.get_cookie('dqpid')
             self.logger.debug('dqpid: %s' % dqpid)
             if dqpid:
-                next_url = make_url(path.PROFILE_PREVIEW, self.params, pid=str(dqpid))
+                next_url = self.make_url(path.PROFILE_PREVIEW, self.params, pid=str(dqpid))
             else:
-                next_url = make_url(path.PROFILE_VIEW, self.params)
+                next_url = self.make_url(path.PROFILE_VIEW, self.params)
             self.logger.debug('next_url: %s' % next_url)
             self.clear_cookie(name='dqpid')
             self.send_json_success(data=ObjectDict(next_url=next_url))
@@ -147,7 +147,7 @@ class ProfilePreviewHandler(BaseHandler):
     @tornado.gen.coroutine
     def get(self):
         if not self.params.pid:
-            url = make_url(path.PROFILE_VIEW, self.params)
+            url = self.make_url(path.PROFILE_VIEW, self.params)
             self.redirect(url)
             return
 
@@ -181,6 +181,26 @@ class ProfilePreviewHandler(BaseHandler):
 
         self.render_page(template_name='profile/preview.html', data=tparams)
 
+class ProfileViewHandler(BaseHandler):
+
+    @handle_response
+    @tornado.gen.coroutine
+    def get(self, uuid):
+
+        has_profile, profile = yield self.profile_ps.has_profile(user_id='', uuid=uuid)
+
+        if not uuid or not has_profile:
+            self.write_error(404)
+            return
+
+        profile_tpl = yield self.profile_ps.profile_to_tempalte(profile)
+
+        tparams = {
+            'profile': profile_tpl,
+        }
+
+        self.logger.debug('tparams: %s' % tparams)
+        self.render_page(template_name='profile/preview.html', data=tparams)
 
 class ProfileHandler(BaseHandler):
     """ProfileHandler
@@ -259,7 +279,7 @@ class ProfileCustomHandler(BaseHandler):
         #             self.logger.debug("雅诗兰黛特殊处理: 直接投递")
         #             p.update(is_skip='1')
 
-        self.redirect(make_url(path.PROFILE_PREVIEW, self.params, **p))
+        self.redirect(self.make_url(path.PROFILE_PREVIEW, self.params, **p))
 
     @tornado.gen.coroutine
     def _save_custom_cv(self, custom_cv):

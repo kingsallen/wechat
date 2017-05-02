@@ -1,8 +1,8 @@
 # coding=utf-8
 
+import re
 import functools
 import hashlib
-import re
 import traceback
 from abc import ABCMeta, abstractmethod
 from urllib.parse import urlencode
@@ -15,14 +15,11 @@ import conf.common as const
 import conf.message as msg
 import conf.path as path
 import conf.qx as qx_const
-from setting import settings
 from util.common import ObjectDict
 from util.common.cache import BaseRedis
 from util.common.cipher import encode_id
-from util.tool import url_tool
 from util.tool.dict_tool import sub_dict
 from util.tool.str_tool import to_hex, to_str
-from util.tool.url_tool import make_url
 
 
 def handle_response(func):
@@ -154,7 +151,7 @@ def check_employee(func):
             # 如果从我要推荐点进来，但当前用户不是员工
             # 跳转到员工绑定页面
             self.params.pop("recomlist", None)
-            self.redirect(make_url(path.EMPLOYEE_VERIFY, self.params))
+            self.redirect(self.make_url(path.EMPLOYEE_VERIFY, self.params))
             return
         else:
             yield func(self, *args, **kwargs)
@@ -207,7 +204,7 @@ def check_and_apply_profile(func):
 
                 # 判断是否是自定义职位
                 if position.app_cv_config_id:
-                    redirect_params.update(goto_custom_url=make_url(
+                    redirect_params.update(goto_custom_url=self.make_url(
                         path.PROFILE_CUSTOM_CV,
                         sub_dict(self.params, ['pid', 'wechat_signature'])))
             else:
@@ -216,13 +213,12 @@ def check_and_apply_profile(func):
 
             # ========== LINKEDIN OAUTH ==============
             # 拼装 linkedin oauth 路由
-            redirect_uri = make_url(path.RESUME_LINKEDIN,
-                                    host=self.request.host,
+            redirect_uri = self.make_url(path.RESUME_LINKEDIN,
                                     recom=self.params.recom,
                                     pid=self.params.pid,
                                     wechat_signature=self.current_user.wechat.signature)
 
-            linkedin_url = make_url(path.LINKEDIN_AUTH, params=ObjectDict(
+            linkedin_url = self.make_url(path.LINKEDIN_AUTH, params=ObjectDict(
                 response_type="code",
                 client_id=self.settings.linkedin_client_id,
                 scope="r_basicprofile r_emailaddress",
@@ -295,9 +291,9 @@ def authenticated(func):
 
         elif not self.current_user.sysuser.id:
             if self.request.method in ("GET", "HEAD"):
-                redirect_url = make_url(path.USER_LOGIN, self.params, escape=['next_url'])
+                redirect_url = self.make_url(path.USER_LOGIN, self.params, escape=['next_url'])
                 redirect_url += "&" + urlencode(
-                    dict(next_url=self.request.uri))
+                    dict(next_url=self.fullurl))
                 self.redirect(redirect_url)
                 return
             else:
@@ -329,10 +325,10 @@ def verified_mobile_oneself(func):
 
         else:
             if self.request.method in ("GET", "HEAD"):
-                redirect_url = make_url(path.MOBILE_VERIFY, params=self.params, escape=['next_url'])
+                redirect_url = self.make_url(path.MOBILE_VERIFY, params=self.params, escape=['next_url'])
 
                 redirect_url += "&" + urlencode(
-                    dict(next_url=self.request.uri))
+                    dict(next_url=self.fullurl))
                 self.redirect(redirect_url)
                 return
             else:
@@ -352,11 +348,15 @@ def gamma_welcome(func):
     @gen.coroutine
     def wrapper(self, *args, **kwargs):
 
-        search_keywords = to_str(self.get_secure_cookie(qx_const.COOKIE_WELCOME_SEARCH))
+        search_keywords = self.get_secure_cookie(qx_const.COOKIE_WELCOME_SEARCH)
 
-        self.logger.debug("gamma_welcome: {}".format(search_keywords))
+        self.logger.debug("gamma_welcome search_keywords: {}".format(search_keywords))
+        self.logger.debug("gamma_welcome self.params: {}".format(self.params))
+        self.logger.debug("gamma_welcome self.params.fr: {}".format(self.params.fr))
+        self.logger.debug("gamma_welcome match:{}".format(re.match(r"^\/position$", self.request.uri)))
 
-        if not search_keywords:
+        if not search_keywords and self.params.fr != "recruit" \
+            and re.match(r"^\/position$", self.request.uri):
             gender = "unkonwn"
             if self.current_user.qxuser.sex == 1:
                 gender = "male"
@@ -364,17 +364,13 @@ def gamma_welcome(func):
                 gender = "female"
 
             self.logger.debug("gamma_welcome gender: {}".format(gender))
-            self.render_page(template_name='',
-                        data={
-                            "gender": gender
-                        })
+            self.render_page(template_name='qx/home/welcome.html',
+                        data={"gender": gender})
             return
 
         yield func(self, *args, **kwargs)
 
     return wrapper
-
-
 
 # 检查新JD状态, 如果不是启用状态, 当前业务规则:
 # 1. JD --> 跳老页面
@@ -382,6 +378,7 @@ def gamma_welcome(func):
 # 3. TeamIndex --> 404
 # 4. TeamDetail --> 404
 class BaseNewJDStatusChecker(metaclass=ABCMeta):
+
     def __init__(self):
         self._handler = None
 
@@ -418,77 +415,3 @@ class NewJDStatusChecker404(BaseNewJDStatusChecker):
             'NewJD status check fail, uri: {}, wechat_id: {}'.format(handler.request.uri,
                                                                      handler.current_user.wechat.id))
         handler.write_error(404)
-
-
-class NewJDStatusCheckerRedirect(BaseNewJDStatusChecker):
-    """ JD status不对应, 则根据redirect_mapping到重定向到对应页面
-    """
-
-    redirect_mapping = {  # from(new): to(old)
-
-        # Job Detail, 职位详情页
-        r"/m/position/([0-9]+)": ObjectDict({
-            "url": "/mobile/position",
-            "extra": ObjectDict({
-                "m": "info"
-            }),
-            "field_mapping": ObjectDict({
-                "position_id": "pid"
-            })
-        }),
-
-        # CompanyProfile, 公司页
-        r"/m/company": ObjectDict({
-            "url": "/mobile/position",
-            "extra": ObjectDict({
-                "m": "company"
-            }),
-            "field_mapping": ObjectDict({})
-        }),
-
-        # Position List, 职位列表页面, 都在老微信
-    }
-
-    def fail_action(self, *args, **kwargs):
-
-        handler = self._handler
-        handler.logger.debug('NewJD status check fail, redirect, uri: {}, wechat_id: {}'
-                             .format(handler.request.uri, handler.current_user.wechat.id))
-        from_path = handler.request.path
-        from_url = handler.request.uri
-
-        cloned_params = handler.params
-        cloned_params.update(kwargs)
-        to = self._get_match(handler.params, from_url)
-        handler.logger.debug("to: {}".format(to))
-
-        if to:
-            to_path = self.make_url_with_m(to, cloned_params)
-            handler.logger.debug('redirect from path: {}, to: {}'.format(from_path, to_path))
-            handler.redirect(to_path)
-        else:
-            handler.write_error(404)
-
-    def _get_match(self, cloned_params, from_url):
-        any_matched = [value for key, value in self.redirect_mapping.items() if re.match(key, from_url)]
-        if any_matched:
-            assert len(any_matched) == 1
-            matched = any_matched[0]
-            field_mapping = matched.field_mapping
-            if field_mapping:
-                mapped = ObjectDict({})
-                for from_key, to_key in field_mapping.items():
-                    mapped[to_key] = cloned_params.get(from_key)
-                    cloned_params.pop(from_key)
-                matched.extra.update(mapped)
-            return matched
-        else:
-            return None
-
-    @staticmethod
-    def make_url_with_m(to, params):
-        _OLD_ESCAPE_DEFAULT = url_tool._ESCAPE_DEFAULT
-        url_tool._ESCAPE_DEFAULT = set(_OLD_ESCAPE_DEFAULT) - {'m'}
-        url = make_url(to.url, params, **to.extra)
-        url_tool._ESCAPE_DEFAULT = _OLD_ESCAPE_DEFAULT
-        return url

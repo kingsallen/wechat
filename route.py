@@ -44,7 +44,6 @@ import handler.platform.team
 import handler.platform.recom
 
 import handler.qx.app
-import handler.qx.wechat_oauth
 import handler.qx.aggregation
 import handler.qx.search
 
@@ -72,6 +71,7 @@ common_routes = [
 
     (r"/profile[\/]?",                               handler.common.profile.ProfileHandler,                     {"event": "profile_profile"}),
     (r"/profile/preview[\/]?",                       handler.common.profile.ProfilePreviewHandler,              {"event": "profile_preview"}),
+    (r"/profile/view[\/]*([a-z]+)*",                 handler.common.profile.ProfileViewHandler,                 {"event": "profile_view"}),
     (r"/profile/custom[\/]?",                        handler.common.profile.ProfileCustomHandler,               {"event": "profile_customcv"}),
     (r"/api/dict/city[\/]?",                         handler.common.dictionary.DictCityHandler,                 {"event": "dict_city"}),
     (r"/api/dict/industry[\/]?",                     handler.common.dictionary.DictIndustryHandler,             {"event": "dict_industry"}),
@@ -99,10 +99,6 @@ common_routes = [
     (r"/api/chat[\/]*([a-z]+)*",                     handler.common.im.ChatHandler,                             {"event": "chat_"}),
     (r"/api/application",                            handler.common.application.ApplicationHandler,             {"event": "application_profile"}),
     (r"/api/JSSDKError",                             handler.common.jssdkerror.JSSDKErrorHandler,               {"event": "frontend_jssdkerror"}),
-
-    # 兼容老微信 url，进行302跳转，event 设置为 NULL
-    # (r"/.*",                                           handler.common.compatible.CompatibleHandler,               {"event": "NULL"})
-
 ]
 
 # 企业号的单独 routes，域名 platform.moseeker.com/m
@@ -135,21 +131,12 @@ platform_routes = [
     (r"/api/employee/rewards[\/]?",                  handler.platform.employee.AwardsHandler,                   {"event": "employee_awards"}),
     (r"/api/position/empnotice[\/]?",                handler.platform.position.PositionEmpNoticeHandler,        {"event": "position_empnotice"}),
 
-    # 招聘助手的 route，由于域名还没有确定，临时放这里
-    (r"/h/position",                                 handler.help.releasedposition.ReleasedPositionHandler,     {"event": "helper_positions"}),
-    (r"/h/register/qrcode",                          handler.help.passport.RegisterQrcodeHandler,               {"event": "helper_qrcode"}),
-    # 我也要招人
-    (r"/h/api/register",                             handler.help.passport.RegisterHandler,                     {"event": "helper_register"}),
-
 ]
-platform_routes.extend(common_routes)
+platform_routes = common_routes + platform_routes
 
 
 # 聚合号的单独 routes, 域名 platform.moseeker.com/recruit
 qx_routes = [
-    (r"[\/]?",                                      handler.qx.app.IndexHandler,                                {"event": "app_app"}),
-
-    (r"/wxoauth2",                                  handler.qx.wechat_oauth.WxOauthHandler,                     {"event": "wxoauth_wxoauth"}),
 
     (r"/api/positions[\/]?",                        handler.qx.aggregation.AggregationHandler,                  {"event": "position_aggregation"}),
     (r"/api/config[\/]?",                           handler.qx.app.ConfigHandler,                               {"event": "wechat_config"}),
@@ -157,12 +144,19 @@ qx_routes = [
     (r"/api/search/condition/(\d+)*",               handler.qx.search.SearchConditionHandler,                   { "event": "search_condition" }),
     (r"/api/search/([a-z_]+)",                      handler.qx.search.SearchCityHandler,                        {"event": "search_condition"}),
 
+
+    # App 路由
+    (r".*",                                          handler.qx.app.IndexHandler,                                {"event": "app_app"}),
 ]
-qx_routes.extend(common_routes)
+qx_routes = common_routes + qx_routes
 
 
-# 招聘助手的单独 routes
+# 招聘助手的单独 routes, 域名 platform.moseeker.com/recruit
 help_routes = [
+    (r"/position",                                   handler.help.releasedposition.ReleasedPositionHandler,      {"event": "helper_positions"}),
+    (r"/register/qrcode",                            handler.help.passport.RegisterQrcodeHandler,                {"event": "helper_qrcode"}),
+    # 我也要招人
+    (r"/api/register",                               handler.help.passport.RegisterHandler,                      {"event": "helper_register"}),
 
 ]
-help_routes.extend(common_routes)
+help_routes = common_routes + help_routes
