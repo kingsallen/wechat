@@ -5,6 +5,7 @@
 # @File    : aggregation.py
 # @DES     : 聚合号列表页
 
+import ujson
 from tornado import gen
 
 import conf.common as const
@@ -14,6 +15,8 @@ from handler.base import BaseHandler
 from util.common.decorator import handle_response
 from util.common import ObjectDict
 from util.tool.url_tool import make_static_url
+from util.tool.json_tool import json_dumps
+from util.tool.str_tool import to_str
 
 
 class AggregationHandler(BaseHandler):
@@ -26,14 +29,27 @@ class AggregationHandler(BaseHandler):
     @gen.coroutine
     def get(self):
 
-        salary_top = self.params.salary_top
-        salary_bottom = self.params.salary_bottom
-        salary_negotiable = self.params.salary_negotiable
-        keywords = self.params.keywords
-        city = self.params.city
-        industry = self.params.industry
+        search_dict = self._get_welcome_cookie()
+
+        self.logger.debug("search_dict:{}".format(search_dict))
+
+        salary_top = self.params.salary_top or search_dict.get("salary_top", None)
+        salary_bottom = self.params.salary_bottom or search_dict.get("salary_bottom", None)
+        salary_negotiable = self.params.salary_negotiable or search_dict.get("salary_negotiable", None)
+        keywords = self.params.keywords or search_dict.get("keywords", None)
+        city = self.params.city or search_dict.get("city", None)
+        industry = self.params.industry or search_dict.get("industry", None)
         page_no = self.params.page_no or 1
         page_size = self.params.page_size or 10
+
+        self.logger.debug("salary_top:{}".format(salary_top))
+        self.logger.debug("salary_bottom:{}".format(salary_bottom))
+        self.logger.debug("salary_negotiable:{}".format(salary_negotiable))
+        self.logger.debug("keywords:{}".format(keywords))
+        self.logger.debug("city:{}".format(city))
+        self.logger.debug("industry:{}".format(industry))
+        self.logger.debug("page_no:{}".format(page_no))
+        self.logger.debug("page_size:{}".format(page_size))
 
         es_res = yield self.aggregation_ps.opt_es(salary_top,
                                                   salary_bottom,
@@ -87,11 +103,21 @@ class AggregationHandler(BaseHandler):
         如果浏览器发现没有该主动搜索的cookie，则到 初次进入页面；
         如果有主动搜索的cookie，则根据cookie的搜索条件，自动到该条件的搜索结果页面。
         """
-        if self.params.keywords:
+        if self.params:
             self.set_secure_cookie(
                 qx_const.COOKIE_WELCOME_SEARCH,
-                self.params.keywords,
+                json_dumps(self.params),
                 httponly=True)
+
+    def _get_welcome_cookie(self):
+        """获得 cookie 中的搜索记录，作为用户打开列表页的默认搜索条件"""
+
+        search_keywords = to_str(self.get_secure_cookie(qx_const.COOKIE_WELCOME_SEARCH))
+        search_dict = ObjectDict()
+        if search_keywords:
+            search_dict = ujson.loads(search_keywords)
+
+        return search_dict
 
     def _show_hr_ads(self):
         """

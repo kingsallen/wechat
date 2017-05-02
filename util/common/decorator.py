@@ -348,12 +348,12 @@ def gamma_welcome(func):
     @gen.coroutine
     def wrapper(self, *args, **kwargs):
 
-        search_keywords = to_str(self.get_secure_cookie(qx_const.COOKIE_WELCOME_SEARCH))
+        search_keywords = self.get_secure_cookie(qx_const.COOKIE_WELCOME_SEARCH)
 
-        self.logger.debug("gamma_welcome: {}".format(search_keywords))
-
-        self.logger.debug("request uri:{}".format(self.request.uri))
-        self.logger.debug("match:{}".format(re.match(r"^\/position$", self.request.uri)))
+        self.logger.debug("gamma_welcome search_keywords: {}".format(search_keywords))
+        self.logger.debug("gamma_welcome self.params: {}".format(self.params))
+        self.logger.debug("gamma_welcome self.params.fr: {}".format(self.params.fr))
+        self.logger.debug("gamma_welcome match:{}".format(re.match(r"^\/position$", self.request.uri)))
 
         if not search_keywords and self.params.fr != "recruit" \
             and re.match(r"^\/position$", self.request.uri):
@@ -365,9 +365,7 @@ def gamma_welcome(func):
 
             self.logger.debug("gamma_welcome gender: {}".format(gender))
             self.render_page(template_name='qx/home/welcome.html',
-                        data={
-                            "gender": gender
-                        })
+                        data={"gender": gender})
             return
 
         yield func(self, *args, **kwargs)
