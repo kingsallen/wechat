@@ -138,7 +138,7 @@ def init_gamma_basic(query, city, industry, salary_bottom, salary_top, salary_ne
         # 存在行业筛选
         init_es_query['query']['bool']['must'].append(ObjectDict({
             "terms": {
-                "position.industry": industry,
+                "company.industry_type_name": industry,
             }
         }))
 

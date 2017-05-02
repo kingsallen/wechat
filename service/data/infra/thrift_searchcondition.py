@@ -1,4 +1,5 @@
 # -*- coding:utf-8 -*-
+
 import tornado.gen as gen
 
 from service.data.base import DataService
@@ -40,3 +41,16 @@ class ThriftSearchconditionDataService(DataService):
     def delUserSearchCondition(self, userId, id):
         res = yield self.searchcondition_service_cilent.delUserSearchCondition(userId, id)
         raise gen.Return(res)
+
+    @gen.coroutine
+    def get_user_position_status(self, user_id, position_ids):
+        """
+        批量查询用户职位状态
+        :param user_id: int
+        :param position_ids: list，如[110,112]
+        :return:
+        """
+
+        ret = yield self.searchcondition_service_cilent.getUserPositionStatus(int(user_id), position_ids)
+        self.logger.debug("[thrift]get_user_position_status: %s" % ret)
+        raise gen.Return(ret)

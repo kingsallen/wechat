@@ -474,6 +474,8 @@ class BaseHandler(MetaBaseHandler):
 
         self.current_user = session
 
+        self.logger.debug("current_user:{}".format(self.current_user))
+
     @gen.coroutine
     def _add_company_info_to_session(self, session):
         """拼装 session 中的 company, employee

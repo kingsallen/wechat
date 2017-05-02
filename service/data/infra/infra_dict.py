@@ -225,13 +225,13 @@ class InfraDictDataService(DataService):
 
     @cache(ttl=60*60*5)
     @gen.coroutine
-    def get_industries(self,level=2):
+    def get_industries(self, level=2):
         """获取行业
         industries
         level1 + level2
         """
         ret = yield http_get(path.DICT_INDUSTRY, dict(parent=0))
-        if level==2:
+        if level == 2:
             ret = yield self.make_industries_result(ret)
         return ret
 
@@ -292,4 +292,3 @@ class InfraDictDataService(DataService):
                   if f['parent'] == level2.code and f['level'] == 3]
 
         return level3
-

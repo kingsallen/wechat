@@ -30,7 +30,6 @@ class BaseES(object):
 
     def search(self, index=None, doc_type=None, body=None):
 
-        print(json_dumps(body))
         result = self._es.search(index, doc_type, json_dumps(body))
         return objectdictify(result)
 

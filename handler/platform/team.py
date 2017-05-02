@@ -13,6 +13,7 @@ from util.tool.url_tool import url_append_query
 
 
 class TeamIndexHandler(BaseHandler):
+
     @NewJDStatusChecker404()
     @handle_response
     @check_sub_company
@@ -50,6 +51,7 @@ class TeamIndexHandler(BaseHandler):
 
 
 class TeamDetailHandler(BaseHandler):
+
     @NewJDStatusChecker404()
     @handle_response
     @check_sub_company

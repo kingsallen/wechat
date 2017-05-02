@@ -2,11 +2,9 @@
 
 import tornado.gen as gen
 
-import conf.path as path
 from service.data.base import DataService
 
 from util.common.es import BaseES
-from util.common import ObjectDict
 from util.tool.es_tool import init_gamma_basic, rule_gamma_filters
 
 
