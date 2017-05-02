@@ -53,7 +53,6 @@ import handler.wechat.event
 common_routes = [
     # 开发者方式
     (r"/wechat",                                     handler.wechat.event.WechatOauthHandler,                   {"event": "wechat_oauth"}),
-
     # 第三方授权方式
     (r"/wechat[\/]*([0-9a-z]+)*",                    handler.wechat.event.WechatThirdOauthHandler,              {"event": "wechat_thirdoauth"}),
 
@@ -62,27 +61,24 @@ common_routes = [
     (r"/login",                                      handler.common.passport.LoginHandler,                      {"event": "passport_login"}),
     (r"/logout",                                     handler.common.passport.LogoutHandler,                     {"event": "passport_logout"}),
     (r"/register[\/]*([a-z]+)*",                     handler.common.passport.RegisterHandler,                   {"event": "register_"}),
-
     (r"/application",                                handler.common.application.ApplicationHandler,             {"event": "application_profile"}),
     (r"/application/email",                          handler.common.application.ApplicationEmailHandler,        {"event": "application_email"}),
     (r"/positionfav/([0-9]+)",                       handler.common.position.PositionFavHandler,                {"event": "position_fav"}),
     (r"/resume/import",                              handler.common.resume.ResumeImportHandler,                 {"event": "resume_auth"}),
     (r"/resume/linkedin",                            handler.common.resume.LinkedinImportHandler,               {"event": "resume_linkedin"}),
-
     (r"/profile[\/]?",                               handler.common.profile.ProfileHandler,                     {"event": "profile_profile"}),
     (r"/profile/preview[\/]?",                       handler.common.profile.ProfilePreviewHandler,              {"event": "profile_preview"}),
     (r"/profile/view[\/]*([a-z]+)*",                 handler.common.profile.ProfileViewHandler,                 {"event": "profile_view"}),
     (r"/profile/custom[\/]?",                        handler.common.profile.ProfileCustomHandler,               {"event": "profile_customcv"}),
+
+    # websocket
+    (r"/websocket/([A-Za-z0-9_]{1,32})",             handler.common.im.ChatWebSocketHandler),
+
     (r"/api/dict/city[\/]?",                         handler.common.dictionary.DictCityHandler,                 {"event": "dict_city"}),
     (r"/api/dict/industry[\/]?",                     handler.common.dictionary.DictIndustryHandler,             {"event": "dict_industry"}),
     (r"/api/dict/function[\/]?",                     handler.common.dictionary.DictFunctionHandler,             {"event": "dict_function"}),
     (r"/api/profile/edit[\/]?",                      handler.common.profile.ProfileSectionHandler,              {"event": "profile_section"}),
     (r"/api/profile/new[\/]?",                       handler.common.profile.ProfileNewHandler,                  {"event": "profile_new"}),
-
-    # websocket
-    (r"/websocket/([A-Za-z0-9_]{1,32})",             handler.common.im.ChatWebSocketHandler),
-
-    # common api
     (r"/api/position/star",                          handler.common.position.PositionStarHandler,               {"event": "position_star"}),
     (r"/api/chat/unread[\/]*([0-9]+)*",              handler.common.im.UnreadCountHandler,                      {"event": "chat_"}),
     (r"/api/mobilebinded",                           handler.common.usercenter.UserMobileBindedHandler,         {"event": "user_usermobilebinded"}),
@@ -106,19 +102,16 @@ platform_routes = [
     # position
     (r"/position/(?P<position_id>\d+)",              handler.platform.position.PositionHandler,                 {"event": "position_info"}),
     (r"/position",                                   handler.platform.position.PositionListHandler,             {"event": "position_list"}),
-
     (r"/start",                                      handler.platform.landing.LandingHandler,                   {"event": "start_landing"}),
     (r"/company/(\d+)",                              handler.platform.companyrelation.CompanyInfoHandler,       {"event": "company_old_info"}),
     (r"/company",                                    handler.platform.companyrelation.CompanyHandler,           {"event": "company_info"}),
     (r"/company/team/(\d+)",                         handler.platform.team.TeamDetailHandler,                   {"event": "team_detail"}),
     (r"/company/team",                               handler.platform.team.TeamIndexHandler,                    {"event": "team_info"}),
-
     (r"/employee/bindemail[\/]?",                    handler.platform.employee.EmployeeBindEmailHandler,        {"event": "employee_bindemail"}),
     (r"/employee/custominfo[\/]?",                   handler.platform.employee.CustomInfoHandler,               {"event": "employee_custominfo"}),
     (r"/employee/binded[\/]?",                       handler.platform.employee.BindedHandler,                   {"event": "employee_binded"}),
     (r"/employee/recom/ignore[\/]?",                 handler.platform.recom.RecomIgnoreHandler,                 {"event": "recom_ignore"}),
     (r"/employee/recom[\/]?",                        handler.platform.recom.RecomCandidateHandler,              {"event": "recom_normal"}),
-
     # 各大公司的自定义配置
     (r"/custom/emailapply[\/]?",                     handler.platform.customize.CustomizeEmailApplyHandler,     {"event": "customize_emailapply"}),
 
@@ -130,7 +123,6 @@ platform_routes = [
     (r"/api/employee/recommendrecords[\/]?",         handler.platform.employee.RecommendRecordsHandler,         {"event": "employee_recommendrecords"}),
     (r"/api/employee/rewards[\/]?",                  handler.platform.employee.AwardsHandler,                   {"event": "employee_awards"}),
     (r"/api/position/empnotice[\/]?",                handler.platform.position.PositionEmpNoticeHandler,        {"event": "position_empnotice"}),
-
 ]
 platform_routes = common_routes + platform_routes
 
