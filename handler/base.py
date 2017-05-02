@@ -342,7 +342,6 @@ class BaseHandler(MetaBaseHandler):
         session = ObjectDict()
         session.wechat = self._wechat
 
-        # qx session 中，只需要存储 id，unioid 即可，且俩变量一旦生成不会改变，不会影响 session 一致性
         # 该 session 只做首次仟寻登录查找各关联帐号所用(微信环境内)
         if self._unionid:
             # 只对微信 oauth 用户创建qx session
@@ -428,7 +427,7 @@ class BaseHandler(MetaBaseHandler):
                     "_build_session_by_unionid wxuser:{}".format(
                         session.wxuser))
 
-            if self._qxuser:
+            if self._qxuser and self.is_platform:
                 session.qxuser = self._qxuser
             else:
                 session.qxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
