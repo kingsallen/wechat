@@ -23,7 +23,7 @@ class AggregationHandler(BaseHandler):
     """
 
     @handle_response
-    # @gamma_welcome
+    @gamma_welcome
     @gen.coroutine
     def get(self):
 
