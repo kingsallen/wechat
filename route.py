@@ -130,10 +130,12 @@ platform_routes = common_routes + platform_routes
 # 聚合号的单独 routes, 域名 platform.moseeker.com/recruit
 qx_routes = [
 
-    (r"/api/positions[\/]?",                         handler.qx.aggregation.AggregationHandler,                  {"event": "position_aggregation"}),
-    (r"/api/config[\/]?",                            handler.qx.app.ConfigHandler,                               {"event": "wechat_config"}),
-    (r"/api/search/condition[\/]*([0-9]+)*",         handler.qx.search.SearchConditionHandler,                   {"event": "search_condition"}),
-    (r"/api/search/([a-z_]+)",                       handler.qx.search.SearchCityHandler,                        {"event": "search_condition"}),
+    (r"/api/positions[\/]?",                        handler.qx.aggregation.AggregationHandler,                  {"event": "position_aggregation"}),
+    (r"/api/config[\/]?",                           handler.qx.app.ConfigHandler,                               {"event": "wechat_config"}),
+    (r"/api/search/condition/*",                    handler.qx.search.SearchConditionHandler,                   { "event": "search_condition" }),
+    (r"/api/search/condition/(\d+)*",               handler.qx.search.SearchConditionHandler,                   { "event": "search_condition" }),
+    (r"/api/search/([a-z_]+)",                      handler.qx.search.SearchCityHandler,                        {"event": "search_condition"}),
+
 
     # App 路由
     (r"/.*",                                      handler.qx.app.IndexHandler,                                {"event": "app_app"}),
