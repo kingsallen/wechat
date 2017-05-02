@@ -89,9 +89,11 @@ class AggregationHandler(BaseHandler):
                 "share": share,
             })
 
-            # 来自初次进入页面，则设置搜索词 cookie
-            if self.params.fr_wel:
-                self._set_welcome_cookie()
+            self._set_welcome_cookie()
+
+            # # 来自初次进入页面，则设置搜索词 cookie
+            # if self.params.fr_wel:
+            #     self._set_welcome_cookie()
 
         self.send_json_success(data=result)
 
