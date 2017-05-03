@@ -809,6 +809,8 @@ class PositionListHandler(BaseHandler):
             custom=self.params.custom or "",
             order_by_priority=True)
 
+        self.logger.debug("[position_list_infra_params]: %s" % infra_params)
+
         return infra_params
 
 
