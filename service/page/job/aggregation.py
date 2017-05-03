@@ -212,12 +212,13 @@ class AggregationPageService(PageService):
 
         pic_list = list()
         if jd_pic.get("position_pic"):
+            self.logger.debug(
+                "_gen_resources position other_pic:{}".format(jd_pic.get("position_pic").get("other_pic")))
             pic_list += jd_pic.get("position_pic").get("other_pic")
         if jd_pic.get("team_pic"):
+            self.logger.debug("_gen_resources team other_pic:{}".format(jd_pic.get("team_pic").get("other_pic")))
             pic_list += jd_pic.get("team_pic").get("other_pic")
-
-        self.logger.debug("_gen_resources position other_pic:{}".format(jd_pic.get("position_pic").get("other_pic")))
-        self.logger.debug("_gen_resources team other_pic:{}".format(jd_pic.get("team_pic").get("other_pic")))
+            
         self.logger.debug("_gen_resources company_type:{}".format(company_type))
         self.logger.debug("_gen_resources pic_list:{}".format(pic_list))
 
