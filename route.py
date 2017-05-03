@@ -130,25 +130,25 @@ platform_routes = common_routes + platform_routes
 # 聚合号的单独 routes, 域名 platform.moseeker.com/recruit
 qx_routes = [
 
-    (r"/api/positions[\/]?",                         handler.qx.aggregation.AggregationHandler,                  {"event": "position_aggregation"}),
-    (r"/api/config[\/]?",                            handler.qx.app.ConfigHandler,                               {"event": "wechat_config"}),
-    (r"/api/search/condition/*",                     handler.qx.search.SearchConditionHandler,                   {"event": "search_condition" }),
-    (r"/api/search/condition/(\d+)*",                handler.qx.search.SearchConditionHandler,                   {"event": "search_condition" }),
-    (r"/api/search/([a-z_]+)",                       handler.qx.search.SearchCityHandler,                        {"event": "search_condition"}),
+    (r"/api/positions[\/]?",                         handler.qx.aggregation.AggregationHandler,                 {"event": "position_aggregation"}),
+    (r"/api/config[\/]?",                            handler.qx.app.ConfigHandler,                              {"event": "wechat_config"}),
+    (r"/api/search/condition/*",                     handler.qx.search.SearchConditionHandler,                  {"event": "search_condition" }),
+    (r"/api/search/condition/(\d+)*",                handler.qx.search.SearchConditionHandler,                  {"event": "search_condition" }),
+    (r"/api/search/([a-z_]+)",                       handler.qx.search.SearchCityHandler,                       {"event": "search_condition"}),
 
 
     # App 路由
-    (r"/qx/.*",                                      handler.qx.app.IndexHandler,                                {"event": "app_app"}),
+    (r"/qx/.*",                                      handler.qx.app.IndexHandler,                               {"event": "app_app"}),
 ]
 qx_routes = common_routes + qx_routes
 
 
-# 招聘助手的单独 routes, 域名 platform.moseeker.com/recruit
+# 招聘助手的单独 routes, 域名 platform.moseeker.com/h
 help_routes = [
-    (r"/position",                                   handler.help.releasedposition.ReleasedPositionHandler,      {"event": "helper_positions"}),
-    (r"/register/qrcode",                            handler.help.passport.RegisterQrcodeHandler,                {"event": "helper_qrcode"}),
+    (r"/position",                                   handler.help.releasedposition.ReleasedPositionHandler,     {"event": "helper_positions"}),
+    (r"/register/qrcode",                            handler.help.passport.RegisterQrcodeHandler,               {"event": "helper_qrcode"}),
     # 我也要招人
-    (r"/api/register",                               handler.help.passport.RegisterHandler,                      {"event": "helper_register"}),
+    (r"/api/register",                               handler.help.passport.RegisterHandler,                     {"event": "helper_register"}),
 
 ]
 help_routes = common_routes + help_routes
