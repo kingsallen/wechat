@@ -212,26 +212,17 @@ class AggregationPageService(PageService):
 
         pic_list = list()
         if jd_pic.get("position_pic"):
-            self.logger.debug(
-                "_gen_resources position other_pic:{}".format(jd_pic.get("position_pic").get("other_pic")))
             pic_list += jd_pic.get("position_pic").get("other_pic")
         if jd_pic.get("team_pic"):
-            self.logger.debug("_gen_resources team other_pic:{}".format(jd_pic.get("team_pic").get("other_pic")))
             pic_list += jd_pic.get("team_pic").get("other_pic")
         if company.get("impression"):
             pic_list += [ObjectDict(res_type=0, res_url=item) for item in ujson.decode(company.get("impression")).values()]
         if company.get("banner"):
             pic_list += [ObjectDict(res_type=0, res_url=item) for item in ujson.decode(company.get("banner")).values()]
 
-        self.logger.debug("_gen_resources company_type:{}".format(company.get("type", None)))
-        self.logger.debug("_gen_resources pic_list:{}".format(pic_list))
-
         res_resource = list()
         if company.get("type", None) != 0 or len(pic_list) == 0:
-            self.logger.debug("_gen_resources 0")
             return res_resource
-
-        self.logger.debug("_gen_resources 1")
 
         if len(pic_list) > 3:
             res_resource = random.sample(jd_pic, 3)
