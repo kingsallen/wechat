@@ -117,7 +117,7 @@ class AggregationPageService(PageService):
                     "team_img": make_static_url(team_img),
                     "job_img": make_static_url(job_img),
                     "company_img": make_static_url(company_img),
-                    "resources": self._gen_resources(item.get("_source").get("jd_pic",{}), item.get("_source").get("company",{}).get("type")),
+                    "resources": self._gen_resources(item.get("_source").get("jd_pic",{}), item.get("_source").get("company",{})),
                     "user_status": 0,
                     "city": split(item.get("_source").get("position").get("city"), ['，', ',']),
                     "company": company,
@@ -201,7 +201,7 @@ class AggregationPageService(PageService):
 
         return hot_company[:9]
 
-    def _gen_resources(self, jd_pic, company_type):
+    def _gen_resources(self, jd_pic, company):
 
         """
         处理图片逻辑
@@ -218,12 +218,16 @@ class AggregationPageService(PageService):
         if jd_pic.get("team_pic"):
             self.logger.debug("_gen_resources team other_pic:{}".format(jd_pic.get("team_pic").get("other_pic")))
             pic_list += jd_pic.get("team_pic").get("other_pic")
-            
-        self.logger.debug("_gen_resources company_type:{}".format(company_type))
+        if company.get("impression"):
+            pic_list += [item for item in ujson.decode(company.impression).values()]
+        if company.get("banner"):
+            pic_list += [item for item in ujson.decode(company.banner).values()]
+
+        self.logger.debug("_gen_resources company_type:{}".format(company.get("type", None)))
         self.logger.debug("_gen_resources pic_list:{}".format(pic_list))
 
         res_resource = list()
-        if company_type != 0 or len(pic_list) == 0:
+        if company.get("type", None) != 0 or len(pic_list) == 0:
             self.logger.debug("_gen_resources 0")
             return res_resource
 
