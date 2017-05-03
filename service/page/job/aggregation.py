@@ -219,9 +219,9 @@ class AggregationPageService(PageService):
             self.logger.debug("_gen_resources team other_pic:{}".format(jd_pic.get("team_pic").get("other_pic")))
             pic_list += jd_pic.get("team_pic").get("other_pic")
         if company.get("impression"):
-            pic_list += [item for item in ujson.decode(company.impression).values()]
+            pic_list += [item for item in ujson.decode(company.get("impression")).values()]
         if company.get("banner"):
-            pic_list += [item for item in ujson.decode(company.banner).values()]
+            pic_list += [item for item in ujson.decode(company.get("banner")).values()]
 
         self.logger.debug("_gen_resources company_type:{}".format(company.get("type", None)))
         self.logger.debug("_gen_resources pic_list:{}".format(pic_list))
