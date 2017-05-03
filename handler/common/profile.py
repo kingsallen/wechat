@@ -13,8 +13,6 @@ from util.common.decorator import handle_response, check_and_apply_profile, \
     authenticated
 from util.tool.dict_tool import sub_dict, objectdictify
 from util.tool.str_tool import mobile_validate
-from util.tool.url_tool import make_url
-
 
 class ProfileNewHandler(BaseHandler):
 
@@ -179,7 +177,7 @@ class ProfilePreviewHandler(BaseHandler):
 
         self.logger.debug('tparams: %s' % tparams)
 
-        self.render_page(template_name='profile/preview.html', data=tparams)
+        self.render_page(template_name='profile/preview.html', data=tparams, meta_title=const.PROFILE_PREVIEW)
 
 class ProfileViewHandler(BaseHandler):
 
@@ -188,9 +186,6 @@ class ProfileViewHandler(BaseHandler):
     @handle_response
     @tornado.gen.coroutine
     def get(self, uuid):
-
-        self.logger.debug("jjjjjjjjjjjjj")
-        self.logger.debug("current:{}".format(self.current_user))
 
         has_profile, profile = yield self.profile_ps.has_profile(user_id='', uuid=uuid)
 
@@ -211,7 +206,8 @@ class ProfileViewHandler(BaseHandler):
 
         self.params.share = self._share(profile_tpl)
         self.logger.debug('tparams: %s' % tparams)
-        self.render_page(template_name='profile/preview.html', data=tparams)
+        self.logger.debug('params: %s' % self.params)
+        self.render_page(template_name='profile/preview.html', data=tparams, meta_title=const.PROFIEL_VIEW)
 
     def _share(self, profile_tpl):
         default = ObjectDict({
