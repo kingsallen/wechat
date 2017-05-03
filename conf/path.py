@@ -19,14 +19,14 @@ EMPLOYEE_BINDED = '/employee/binded'
 PROFILE_CUSTOM_CV = '/profile/custom'
 
 # 聚合号单独链接
-GAMMA_HOME = '/qx/enter'
-GAMMA_POSITION = '/qx/position'
-GAMMA_POSITION_JD = '/qx/position/{}'
-GAMMA_POSITION_HOME = '/qx/position/{}/home'
-GAMMA_POSITION_TEAM = '/qx/team/{}'
-GAMMA_POSITION_COMPANY = '/qx/company/{}'
-GAMMA_SEARCH = '/qx/search'
-GAMMA_404 = '/qx/404'
+GAMMA_HOME = '/enter'
+GAMMA_POSITION = '/position'
+GAMMA_POSITION_JD = '/position/{}'
+GAMMA_POSITION_HOME = '/position/{}/home'
+GAMMA_POSITION_TEAM = '/team/{}'
+GAMMA_POSITION_COMPANY = '/company/{}'
+GAMMA_SEARCH = '/search'
+GAMMA_404 = '/404'
 
 
 # 企业号、聚合号公共链接
