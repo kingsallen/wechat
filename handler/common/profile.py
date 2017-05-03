@@ -183,11 +183,14 @@ class ProfilePreviewHandler(BaseHandler):
 
 class ProfileViewHandler(BaseHandler):
 
-    # @handle_response
+    """Profile 游客页"""
+
+    @handle_response
     @tornado.gen.coroutine
     def get(self, uuid):
 
         self.logger.debug("jjjjjjjjjjjjj")
+        self.logger.debug("current:{}".format(self.current_user))
 
         has_profile, profile = yield self.profile_ps.has_profile(user_id='', uuid=uuid)
 
