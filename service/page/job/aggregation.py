@@ -237,8 +237,6 @@ class AggregationPageService(PageService):
             item.pop("res_url", None)
             item.pop("title", None)
 
-        self.logger.debug("_gen_resources res_resource:{}".format(res_resource))
-
         return res_resource
 
     @gen.coroutine
