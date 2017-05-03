@@ -67,7 +67,7 @@ common_routes = [
     (r"/resume/import",                              handler.common.resume.ResumeImportHandler,                 {"event": "resume_auth"}),
     (r"/resume/linkedin",                            handler.common.resume.LinkedinImportHandler,               {"event": "resume_linkedin"}),
     (r"/profile[\/]?",                               handler.common.profile.ProfileHandler,                     {"event": "profile_profile"}),
-    (r"/profile/view/([A-Z0-9a-z_]+)*",              handler.common.profile.ProfileViewHandler,                 {"event": "profile_view"}),
+    (r"/profile/view/([A-Z0-9a-z_\-]+)*",            handler.common.profile.ProfileViewHandler,                 {"event": "profile_view"}),
     (r"/profile/preview[\/]?",                       handler.common.profile.ProfilePreviewHandler,              {"event": "profile_preview"}),
     (r"/profile/custom[\/]?",                        handler.common.profile.ProfileCustomHandler,               {"event": "profile_customcv"}),
 
