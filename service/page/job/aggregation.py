@@ -199,7 +199,7 @@ class AggregationPageService(PageService):
             agg_company["city"] = item.city
             hot_company.append(agg_company)
 
-        return hot_company
+        return hot_company[:9]
 
     def _gen_resources(self, jd_pic, company_type):
 
