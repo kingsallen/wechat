@@ -22,14 +22,14 @@ class SearchconditionPageService(PageService):
                 'id': i.id,
                 'name': i.name,
                 'keywords': i.keywords,
-                'cityName': i.cityName,
-                'salaryTop': i.salaryTop,
-                'salaryBottom': i.salaryBottom,
-                'salaryNegotiable': i.salaryNegotiable,
+                'city_name': i.cityName,
+                'salary_top': i.salaryTop,
+                'salary_bottom': i.salaryBottom,
+                'salary_negotiable': i.salaryNegotiable,
                 'industry': i.industry,
-                'userId': i.userId,
+                'sysuser_id': i.userId,
                 'disable': i.disable,
-                'createTime': i.createTime,
+                'create_time': i.createTime,
             })
         return data
 
