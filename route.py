@@ -141,10 +141,6 @@ qx_routes = [
 ]
 qx_routes = common_routes + qx_routes
 
-from pprint import pprint
-pprint(qx_routes)
-
-
 # 招聘助手的单独 routes, 域名 platform.moseeker.com/h
 help_routes = [
     (r"/position",                                   handler.help.releasedposition.ReleasedPositionHandler,     {"event": "helper_positions"}),
