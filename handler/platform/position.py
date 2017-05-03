@@ -804,7 +804,7 @@ class PositionListHandler(BaseHandler):
         infra_params.update(
             keywords=self.params.keyword or "",
             cities=self.params.city or "",
-            department=self.params.department or "",
+            department=self.params.team_name or "",
             occupations=self.params.occupation or "",
             custom=self.params.custom or "",
             order_by_priority=True)
