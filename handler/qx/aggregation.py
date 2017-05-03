@@ -103,10 +103,21 @@ class AggregationHandler(BaseHandler):
         如果浏览器发现没有该主动搜索的cookie，则到 初次进入页面；
         如果有主动搜索的cookie，则根据cookie的搜索条件，自动到该条件的搜索结果页面。
         """
-        if self.params:
+
+        if self.params.salary_top or self.params.salary_bottom \
+            or self.params.salary_negotiable or self.params.keywords \
+            or self.params.city or self.params.industry:
+            params = ObjectDict(
+                salary_top=self.params.salary_top,
+                salary_bottom=self.params.salary_bottom,
+                salary_negotiable=self.params.salary_negotiable,
+                keywords=self.params.keywords,
+                city=self.params.city,
+                industry=self.params.industry
+            )
             self.set_secure_cookie(
                 qx_const.COOKIE_WELCOME_SEARCH,
-                json_dumps(self.params),
+                json_dumps(params),
                 httponly=True)
 
     def _get_welcome_cookie(self):

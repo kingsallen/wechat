@@ -40,15 +40,18 @@ class AggregationPageService(PageService):
 
     @gen.coroutine
     def opt_es(self, salary_top, salary_bottom, salary_negotiable, keywords, city, industry, page_no, page_size):
-
-        params = ObjectDict({
-            "salary_top": salary_top,
-            "salary_bottom": salary_bottom,
-            "salary_negotiable": salary_negotiable,
-            "keywords": keywords,
-            "city": city,
-            "industry": industry
-        })
+        """
+        拼接 ES 搜索
+        :param salary_top:
+        :param salary_bottom:
+        :param salary_negotiable:
+        :param keywords:
+        :param city:
+        :param industry:
+        :param page_no:
+        :param page_size:
+        :return:
+        """
 
         # 查询范围 1-30页
         if page_no < 0 or page_size > 30:
@@ -58,6 +61,24 @@ class AggregationPageService(PageService):
         if page_no == 1:
             # 如果是首页，则取300条数据，热招企业需要
             page_size = 300
+
+        # 处理 salley_top, salley_bottom
+        salary_top = int(salary_top/1000) if salary_top else 0
+        salary_bottom = int(salary_bottom/1000) if salary_bottom else 0
+
+        # 如果 salary_top,salary_bottom都为30k，那么salary_top转为999.数据库中上限为999
+        if salary_top and salary_bottom \
+            and salary_top >=30 and salary_bottom >= 30:
+            salary_top = 999
+
+        params = ObjectDict({
+            "salary_top": salary_top,
+            "salary_bottom": salary_bottom,
+            "salary_negotiable": salary_negotiable,
+            "keywords": keywords,
+            "city": city,
+            "industry": industry
+        })
 
         es_res = yield self.es_ds.get_es_position(params, page_from, page_size)
         return es_res

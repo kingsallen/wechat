@@ -13,8 +13,6 @@ from util.common.decorator import handle_response, check_and_apply_profile, \
     authenticated
 from util.tool.dict_tool import sub_dict, objectdictify
 from util.tool.str_tool import mobile_validate
-from util.tool.url_tool import make_url
-
 
 class ProfileNewHandler(BaseHandler):
 
@@ -179,15 +177,21 @@ class ProfilePreviewHandler(BaseHandler):
 
         self.logger.debug('tparams: %s' % tparams)
 
-        self.render_page(template_name='profile/preview.html', data=tparams)
+        self.render_page(template_name='profile/preview.html', data=tparams, meta_title=const.PROFILE_PREVIEW)
 
 class ProfileViewHandler(BaseHandler):
+
+    """Profile 游客页"""
 
     @handle_response
     @tornado.gen.coroutine
     def get(self, uuid):
 
         has_profile, profile = yield self.profile_ps.has_profile(user_id='', uuid=uuid)
+
+        self.logger.debug("uuid:{}".format(uuid))
+        self.logger.debug("profile:{}".format(profile))
+        self.logger.debug("has_profile:{}".format(has_profile))
 
         if not uuid or not has_profile:
             self.write_error(404)
@@ -196,11 +200,24 @@ class ProfileViewHandler(BaseHandler):
         profile_tpl = yield self.profile_ps.profile_to_tempalte(profile)
 
         tparams = {
-            'profile': profile_tpl,
+            "profile": profile_tpl,
+            "is_self": False,
         }
 
+        self.params.share = self._share(profile_tpl)
         self.logger.debug('tparams: %s' % tparams)
-        self.render_page(template_name='profile/preview.html', data=tparams)
+        self.logger.debug('params: %s' % self.params)
+        self.render_page(template_name='profile/preview.html', data=tparams, meta_title=const.PROFIEL_VIEW)
+
+    def _share(self, profile_tpl):
+        default = ObjectDict({
+            'cover': profile_tpl.avatar_url,
+            'title': '【{}】的个人职场档案'.format(profile_tpl.username),
+            'description': '点击查看{}的个人职场档案'.format(profile_tpl.username),
+            'link': self.fullurl
+        })
+
+        return default
 
 class ProfileHandler(BaseHandler):
     """ProfileHandler

@@ -95,7 +95,8 @@ PAGE_POSITION_INFO = "职位详情"
 PAGE_COMPANY_INFO = "公司详情"
 PAGE_REGISTER = "注册"
 PAGE_FORGET_PASSWORD = "忘记密码"
-
+PROFILE_PREVIEW = "预览个人档案"
+PROFIEL_VIEW = "个人信息"
 
 # ++++++++++REDIS KEYS++++++++
 SESSION_USER = "SESSION_USER_{0}_{1}"
