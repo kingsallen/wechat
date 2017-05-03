@@ -81,6 +81,7 @@ class AggregationPageService(PageService):
         })
 
         es_res = yield self.es_ds.get_es_position(params, page_from, page_size)
+        self.logger.debug("es_res:{}".format(es_res))
         return es_res
 
     @gen.coroutine
