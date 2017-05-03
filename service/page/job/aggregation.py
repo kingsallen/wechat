@@ -226,6 +226,7 @@ class AggregationPageService(PageService):
 
         self.logger.debug("res_resource:{}".format(pic_list))
         self.logger.debug("res_resource type:{}".format(type(res_resource)))
+        self.logger.debug("res_resource len:{}".format(len(pic_list)))
 
         if len(pic_list) > 3:
             res_resource = random.sample(list(jd_pic), 3)
