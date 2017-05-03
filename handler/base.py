@@ -496,7 +496,7 @@ class BaseHandler(MetaBaseHandler):
 
         # 配色处理，如果theme_id为5表示公司使用默认配置，不需要将原始配色信息传给前端
         # 如果将theme_id为5的传给前端，会导致前端颜色无法正常显示默认颜色
-        if company.conf_theme_id != 5:
+        if company.conf_theme_id != 5 and company.conf_theme_id:
             theme = yield self.wechat_ps.get_wechat_theme(
                 {'id': company.conf_theme_id, 'disable': 0})
             if theme:
