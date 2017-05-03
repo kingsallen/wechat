@@ -205,11 +205,23 @@ class ProfileViewHandler(BaseHandler):
         profile_tpl = yield self.profile_ps.profile_to_tempalte(profile)
 
         tparams = {
-            'profile': profile_tpl,
+            "profile": profile_tpl,
+            "is_self": False,
         }
 
+        self.params.share = self._share(profile_tpl)
         self.logger.debug('tparams: %s' % tparams)
         self.render_page(template_name='profile/preview.html', data=tparams)
+
+    def _share(self, profile_tpl):
+        default = ObjectDict({
+            'cover': profile_tpl.avatar_url,
+            'title': '【{}】的个人职场档案'.format(profile_tpl.username),
+            'description': '点击查看{}的个人职场档案'.format(profile_tpl.username),
+            'link': self.fullurl
+        })
+
+        return default
 
 class ProfileHandler(BaseHandler):
     """ProfileHandler
