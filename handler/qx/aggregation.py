@@ -153,7 +153,7 @@ class AggregationHandler(BaseHandler):
             return False
         return True
 
-    def _make_share_info(self, hot_company):
+    def _make_share_info(self, hot_company, keywords):
         """构建 share 内容"""
 
         link = self.make_url(
@@ -169,9 +169,9 @@ class AggregationHandler(BaseHandler):
             logo = make_static_url(const.COMPANY_HEADIMG)
 
         cover = self.static_url(logo)
-        keywords = "【%s】".format(self.params.keywords) if self.params.keywords else ""
-        title = "%s职位推荐" % keywords
-        description = "微信好友%s推荐%s的职位，点击查看详情。找的就是你！" % (self.current_user.qxuser.nickname or "", keywords)
+        keywords_title = "【%s】".format(keywords) if keywords else ""
+        title = "%s职位推荐" % keywords_title
+        description = "微信好友%s推荐%s的职位，点击查看详情。找的就是你！" % (self.current_user.qxuser.nickname or "", keywords_title)
 
         share = ObjectDict({
             "cover": cover,
