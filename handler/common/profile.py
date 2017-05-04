@@ -176,7 +176,6 @@ class ProfilePreviewHandler(BaseHandler):
         }
 
         self.logger.debug('tparams: %s' % tparams)
-
         self.render_page(template_name='profile/preview.html', data=tparams, meta_title=const.PROFILE_PREVIEW)
 
 class ProfileViewHandler(BaseHandler):
@@ -204,17 +203,17 @@ class ProfileViewHandler(BaseHandler):
             "is_self": False,
         }
 
-        self.params.share = self._share(profile_tpl)
+        self.params.share = self._share(uuid, profile_tpl)
         self.logger.debug('tparams: %s' % tparams)
         self.logger.debug('params: %s' % self.params)
         self.render_page(template_name='profile/preview.html', data=tparams, meta_title=const.PROFIEL_VIEW)
 
-    def _share(self, profile_tpl):
+    def _share(self, uuid, profile_tpl):
         default = ObjectDict({
             'cover': profile_tpl.avatar_url,
             'title': '【{}】的个人职场档案'.format(profile_tpl.username),
             'description': '点击查看{}的个人职场档案'.format(profile_tpl.username),
-            'link': self.fullurl
+            'link': self.make_url(path.PROFILE_VISITOR_EVIEW.format(uuid), self.params)
         })
 
         return default
@@ -237,8 +236,18 @@ class ProfileHandler(BaseHandler):
 
         profile_tpl = yield self.profile_ps.profile_to_tempalte(
             self.current_user.profile)
-
+        self.params.share = self._share(self.current_user.profile.profile.get("uuid"), profile_tpl)
         self.render_page(template_name='profile/main.html', data=profile_tpl)
+
+    def _share(self, uuid, profile_tpl):
+        default = ObjectDict({
+            'cover': profile_tpl.avatar_url,
+            'title': '【{}】的个人职场档案'.format(profile_tpl.username),
+            'description': '点击查看{}的个人职场档案'.format(profile_tpl.username),
+            'link': self.make_url(path.PROFILE_VISITOR_EVIEW.format(uuid), self.params)
+        })
+
+        return default
 
 
 class ProfileCustomHandler(BaseHandler):

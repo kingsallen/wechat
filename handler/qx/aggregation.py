@@ -139,16 +139,24 @@ class AggregationHandler(BaseHandler):
         session_ads = self.get_cookie(qx_const.COOKIE_HRADS_SESSIONS) or 0
         session_ads_total = self.get_cookie(qx_const.COOKIE_HRADS_TOTAL) or 0
 
+        self.logger.debug("session_ads:{}".format(session_ads))
+        self.logger.debug("session_ads_total:{}".format(session_ads_total))
+
+        if session_ads:
+            return False
+
         if not session_ads:
             self.set_cookie(
                 qx_const.COOKIE_HRADS_SESSIONS,
                 str(1),
                 httponly=True)
             session_ads_total = int(session_ads_total) + 1
+            self.logger.debug("session_ads_total 2:{}".format(session_ads_total))
             self.set_cookie(
                 qx_const.COOKIE_HRADS_TOTAL,
                 str(session_ads_total),
                 httponly=True, expires_days=365)
+
         if int(session_ads_total) > 3:
             return False
         return True

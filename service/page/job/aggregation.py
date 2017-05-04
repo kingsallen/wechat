@@ -222,10 +222,6 @@ class AggregationPageService(PageService):
         if company.get("type", None) != 0 or len(pic_list) == 0:
             return res_resource
 
-        self.logger.debug("res_resource:{}".format(pic_list))
-        self.logger.debug("res_resource type:{}".format(type(res_resource)))
-        self.logger.debug("res_resource len:{}".format(len(pic_list)))
-
         if len(pic_list) > 3:
             res_resource = random.sample(pic_list, 3)
         else:
