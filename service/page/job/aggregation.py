@@ -171,9 +171,7 @@ class AggregationPageService(PageService):
                     if city_list:
                         city_rep = results[company_id_str].get("city") + city_list
                         results[company_id_str].city = city_rep
-
                     results[company_id_str].position_cnt += 1
-
                 else:
                     results[company_id_str] = ObjectDict({
                         "company": item.get("_source").get("company"),
@@ -229,7 +227,7 @@ class AggregationPageService(PageService):
         self.logger.debug("res_resource len:{}".format(len(pic_list)))
 
         if len(pic_list) > 3:
-            res_resource = random.sample(list(jd_pic), 3)
+            res_resource = random.sample(list(pic_list), 3)
         else:
             res_resource = pic_list
 
