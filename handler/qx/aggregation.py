@@ -63,8 +63,8 @@ class AggregationHandler(BaseHandler):
         positions = yield self.aggregation_ps.opt_agg_positions(es_res, page_size, self.current_user.sysuser.id)
 
         result = ObjectDict({
-            "page_no": page_no,
-            "page_size": page_size,
+            "page_no": int(page_no),
+            "page_size": int(page_size),
             "positions": positions,
         })
 
