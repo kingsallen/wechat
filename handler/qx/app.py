@@ -1,8 +1,9 @@
 # coding=utf-8
 
-from handler.base import BaseHandler
-
 from tornado import gen
+
+from handler.base import BaseHandler
+from oauth.wechat import JsApi
 from util.common.decorator import handle_response, gamma_welcome
 from util.common import ObjectDict
 
@@ -24,12 +25,18 @@ class ConfigHandler(BaseHandler):
     @gen.coroutine
     def get(self):
 
+        target_url = self.params.target
+
+        jsapi = JsApi(
+            jsapi_ticket=self.current_user.wechat.jsapi_ticket,
+            url=target_url)
+
         config = ObjectDict({
             "debug": False,
             "appId": self.current_user.wechat.appid,
-            "timestamp": self.current_user.wechat.jsapi.timestamp,
-            "nonceStr": self.current_user.wechat.jsapi.nonceStr,
-            "signature": self.current_user.wechat.jsapi.signature,
+            "timestamp": jsapi.timestamp,
+            "nonceStr": jsapi.nonceStr,
+            "signature": jsapi.signature,
             "jsApiList": ["onMenuShareTimeline",
                           "onMenuShareAppMessage",
                           "onMenuShareQQ",
