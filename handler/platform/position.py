@@ -518,7 +518,7 @@ class PositionHandler(BaseHandler):
             if psc:
                 replace_query.update(psc=psc)
 
-            redirect_url = url_append_query(self.fullurl, **replace_query)
+            redirect_url = url_append_query(self.fullurl(), **replace_query)
             self.redirect(redirect_url)
             return
 

@@ -47,19 +47,6 @@ class BaseHandler(MetaBaseHandler):
         self._pass_session = None
 
     @property
-    def fullurl(self, encode=True):
-        """获取当前 url， 默认删除 query 中的 code 和 state。
-
-        和 oauth 有关的 参数会影响 prepare 方法
-        """
-
-        full_url = to_str(self.request.full_url())
-        real_full_url = full_url.replace(self.settings.m_host, self.host)
-        if not encode:
-            return real_full_url
-        return url_subtract_query(real_full_url, ['code', 'state'])
-
-    @property
     def component_access_token(self):
         """第三方平台 component_access_token"""
         ret = self.redis.get("component_access_token", prefix=False)
@@ -84,7 +71,7 @@ class BaseHandler(MetaBaseHandler):
 
         # 初始化 oauth service
         self._oauth_service = WeChatOauth2Service(
-            self._wechat, self.fullurl, self.component_access_token)
+            self._wechat, self.fullurl(), self.component_access_token)
 
         self._pass_session = PassportCache()
 
@@ -464,7 +451,7 @@ class BaseHandler(MetaBaseHandler):
         self.logger.debug("current wechat jsapi signature:{}".format(session.wechat.jsapi.signature))
         self.logger.debug("current wechat jsapi appid:{}".format(session.wechat.appid))
         self.logger.debug("current wechat jsapi jsapi_ticket:{}".format(session.wechat.jsapi_ticket))
-        self.logger.debug("current wechat jsapi full_url:{}".format(self.fullurl(encoding=False)))
+        self.logger.debug("current wechat jsapi full_url:{}".format(self.fullurl(encode=False)))
         self.logger.debug("current wechat jsapi request full_url:{}".format(self.request.full_url()))
 
         self.logger.debug(
@@ -570,7 +557,7 @@ class BaseHandler(MetaBaseHandler):
         """拼装 jsapi"""
         wechat.jsapi = JsApi(
             jsapi_ticket=wechat.jsapi_ticket,
-            url=self.fullurl(encoding=False))
+            url=self.fullurl(encode=False))
 
     def _make_new_session_id(self, user_id):
         """创建新的 session_id
@@ -652,13 +639,20 @@ class BaseHandler(MetaBaseHandler):
         """
 
         host = self.host
-
-        self.logger.debug("make_url path:{}".format(path))
-        self.logger.debug("make_url host:{}".format(host))
-        self.logger.debug("make_url params:{}".format(params))
-        self.logger.debug("make_url protocol:{}".format(protocol))
-        self.logger.debug("make_url escape:{}".format(escape))
-        self.logger.debug("make_url kwargs:{}".format(kwargs))
-
         return make_url(path, params, host, protocol, escape, **kwargs)
+
+    def fullurl(self, encode=True):
+        """
+        获取当前 url， 默认删除 query 中的 code 和 state。
+
+        和 oauth 有关的 参数会影响 prepare 方法
+        :param encode: False，不会 Encode，主要用在生成 jdsdk signature 时使用
+        :return:
+        """
+
+        full_url = to_str(self.request.full_url())
+        real_full_url = full_url.replace(self.settings.m_host, self.host)
+        if not encode:
+            return real_full_url
+        return url_subtract_query(real_full_url, ['code', 'state'])
 
