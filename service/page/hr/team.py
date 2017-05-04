@@ -17,7 +17,6 @@ from util.tool.url_tool import make_url
 
 
 class TeamPageService(PageService):
-
     def __init__(self):
         super().__init__()
 
@@ -92,13 +91,14 @@ class TeamPageService(PageService):
         raise gen.Return(data)
 
     @gen.coroutine
-    def get_team_detail(self, user, company, team, handler_param):
+    def get_team_detail(self, user, company, team, handler_param, position_num=3):
         """
 
         :param user: handler中的current_user
         :param company: 当前需要获取数据的公司
         :param team: 当前需要获取详情的team
         :param handler_param: 请求中参数
+        :param position_num: 该团队在招职位的展示数量
         :return:
         """
         data = ObjectDict()
@@ -110,16 +110,26 @@ class TeamPageService(PageService):
         position_fields = 'id title status city team_id \
                            salary_bottom salary_top department'.split()
         if company.id != user.company.id:
+            # 子公司 -> 子公司所属hr(pulishers) -> positions -> teams
             company_positions = yield self._get_sub_company_positions(
                 company.id, position_fields)
+
+            team_positions = company_positions[:position_num]
 
             team_id_list = list(set([p.team_id for p in company_positions
                                      if p.team_id != team.id]))
             other_teams = yield self._get_sub_company_teams(
                 company_id=None, team_ids=team_id_list)
         else:
-            company_positions = yield self.job_position_ds.get_positions_list(
-                conds={'company_id': company.id, 'status': 0}, fields=position_fields)
+            team_positions = yield self.job_position_ds.get_positions_list(
+                conds={
+                    'company_id': company.id,
+                    'status': 0,
+                    'team_id': team.id
+                },
+                fields=position_fields,
+                appends=["ORDER BY update_time desc", "LIMIT %d" % position_num]
+            )
 
             other_teams = yield self.hr_team_ds.get_team_list(
                 conds={'id': [team.id, '<>'],
@@ -128,12 +138,9 @@ class TeamPageService(PageService):
                        'disable': 0})
         other_teams.sort(key=lambda t: t.show_order)
 
-        team_positions = [pos for pos in company_positions
-                          if pos.team_id == team.id and pos.status == 0]
         team_members = yield self.hr_team_member_ds.get_team_member_list(
             conds={'team_id': team.id, 'disable': 0})
 
-        # detail_media_list = yield self.hr_media_ds.get_media_by_ids(json.loads(team.team_detail), True)
         modulename, detail_media_list = yield self._get_team_detail_cms(team.id)
         res_id_list = [m.res_id for m in team_members] + \
                       [m.res_id for m in detail_media_list] + \
@@ -151,8 +158,9 @@ class TeamPageService(PageService):
         # 玛氏定制
         company_config = COMPANY_CONFIG.get(company.id)
         if company_config and company_config.get('custom_visit_recipe', False):
-            data.relation.custom_visit_recipe = COMPANY_CONFIG.get(
-                company.id).custom_visit_recipe
+            data.relation.custom_visit_recipe = company_config.custom_visit_recipe
+        else:
+            company_config.custom_visit_recipe = []
 
         data.templates = temp_data_tool.make_team_detail_template(
             team, team_members, modulename, detail_media_list, team_positions[0:3],
@@ -264,4 +272,3 @@ class TeamPageService(PageService):
                 team_id_tuple).replace(',)', ')'))
 
         raise gen.Return(teams)
-

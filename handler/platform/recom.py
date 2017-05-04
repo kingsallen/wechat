@@ -122,18 +122,17 @@ class RecomIgnoreHandler(RecomCustomVariableMixIn, BaseHandler):
                 self.logger.debug("sort: %s" % sort)
             except BIZException as e:
                 self.render(
-                    "refer/weixin/passive-seeker/passive-wanting_no-more.html")
+                    template_name="refer/weixin/passive-seeker_v2/passive-wanting_no-more.html")
                 return
             else:
                 sort.hongbao = int(recom_result.recomIndex) * 2 if sort else 0
 
                 self.render(
-                    "refer/weixin/passive-seeker/passive-wanting_finished.html",
-                    stats=sort,
-                    recommend_success=self.recommend_success)
+                    template_name="refer/weixin/passive-seeker_v2/passive-wanting_finished.html",
+                    stats=sort, recommend_success=self.recommend_success)
                 return
 
-        self.render("refer/weixin/passive-seeker/passive-wanting_form.html",
+        self.render(template_name="refer/weixin/passive-seeker_v2/passive-wanting_form.html",
                     passive_seeker=recom_result,
                     recommend_presentee=self.recommend_presentee)
 
@@ -192,14 +191,14 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
             self.logger.debug("get_passive_seekers: %s" % passive_seekers)
 
             self.render(
-                template_name="refer/weixin/passive-seeker/passive-wanting_recom.html",
+                template_name="refer/weixin/passive-seeker_v2/passive-wanting_recom.html",
                 passive_seekers=passive_seekers,
                 message=message,
             )
 
         except BIZException as e:
             self.render(
-                template_name="refer/weixin/passive-seeker/passive-wanting_no-more.html",
+                template_name="refer/weixin/passive-seeker_v2/passive-wanting_no-more.html",
                 passive_seekers=[],
                 message=e.message)
 
@@ -225,7 +224,7 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
 
         # 返回第一个推荐的被动求职者
         self.render(
-            template_name="refer/weixin/passive-seeker/passive-wanting_form.html",
+            template_name="refer/weixin/passive-seeker_v2/passive-wanting_form.html",
             passive_seeker=recom_result,
             recommend_presentee=self.recommend_presentee)
 
@@ -244,13 +243,13 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
             passive_seeker.next = 1
 
             self.render(
-                template_name="refer/weixin/passive-seeker/passive-wanting_form.html",
+                template_name="refer/weixin/passive-seeker_v2/passive-wanting_form.html",
                 passive_seeker=passive_seeker,
                 recommend_presentee=self.recommend_presentee,
                 message=""
             )
         else:
-            self.render(template_name="refer/weixin/passive-seeker/passive-wanting_no-more.html")
+            self.render(template_name="refer/weixin/passive-seeker_v2/passive-wanting_no-more.html")
 
     @tornado.gen.coroutine
     def _post_recom_candidate(self, id):
@@ -295,7 +294,7 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
 
         if message:
             self.render(
-                template_name='refer/weixin/passive-seeker/passive-wanting_form.html',
+                template_name='refer/weixin/passive-seeker_v2/passive-wanting_form.html',
                 passive_seeker=passive_seeker,
                 recommend_presentee=self.recommend_presentee,
                 message=message)
@@ -312,7 +311,7 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
 
         except BIZException as e:
             self.render(
-                template_name='refer/weixin/passive-seeker/passive-wanting_form.html',
+                template_name='refer/weixin/passive-seeker_v2/passive-wanting_form.html',
                 passive_seeker=passive_seeker,
                 recommend_presentee=self.recommend_presentee,
                 message=e.message)
@@ -341,13 +340,13 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
 
                 self.logger.debug("_post_recom_candidate stats: %s" % stats)
                 self.render(
-                    template_name="refer/weixin/passive-seeker/passive-wanting_finished.html",
+                    template_name="refer/weixin/passive-seeker_v2/passive-wanting_finished.html",
                     stats=stats,
                     recommend_success=self.recommend_success)
 
             # 还有未推荐的
             else:
                 self.render(
-                    template_name="refer/weixin/passive-seeker/passive-wanting_form.html",
+                    template_name="refer/weixin/passive-seeker_v2/passive-wanting_form.html",
                     passive_seeker=recom_result,
                     recommend_presentee=self.recommend_presentee)

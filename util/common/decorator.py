@@ -234,7 +234,7 @@ def check_and_apply_profile(func):
 
             self.logger.warn(redirect_params)
 
-            self.render(template_name='refer/neo_weixin/sysuser/importresume.html',
+            self.render(template_name='refer/neo_weixin/sysuser_v2/importresume.html',
                         **redirect_params)
 
     return wrapper
