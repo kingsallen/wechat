@@ -113,3 +113,10 @@ def make_static_url(path, protocol='https'):
     if not path.startswith("http") and protocol is not None:
         path = protocol + ":" + path
     return path
+
+if __name__ == "__main__":
+
+    url = "https://platform2.dqprism.com/position?wechat_signature=YzVmNzU2NWU4MmZkZDEzZTRkYzAwNTlkYzFjMGRmN2MxYWE2ZDZkMg=="
+
+    a = url_subtract_query(url, ['code', 'state'])
+    print(a)
