@@ -461,7 +461,7 @@ class BaseHandler(MetaBaseHandler):
         self.logger.debug("current wechat jsapi signature:{}".format(session.wechat.jsapi.signature))
         self.logger.debug("current wechat jsapi appid:{}".format(session.wechat.appid))
         self.logger.debug("current wechat jsapi jsapi_ticket:{}".format(session.wechat.jsapi_ticket))
-        self.logger.debug("current wechat jsapi full_url:{}".format(self.request.full_url()))
+        self.logger.debug("current wechat jsapi full_url:{}".format(self.fullurl))
 
         self.logger.debug(
             "_build_session_by_unionid session 2: {}".format(session))
@@ -566,7 +566,7 @@ class BaseHandler(MetaBaseHandler):
         """拼装 jsapi"""
         wechat.jsapi = JsApi(
             jsapi_ticket=wechat.jsapi_ticket,
-            url=self.request.full_url())
+            url=self.fullurl)
 
     def _make_new_session_id(self, user_id):
         """创建新的 session_id
