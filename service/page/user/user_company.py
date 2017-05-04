@@ -22,7 +22,6 @@ import operator
 
 
 class UserCompanyPageService(PageService):
-
     def __init__(self):
         super().__init__()
 
@@ -58,6 +57,8 @@ class UserCompanyPageService(PageService):
         company_config = COMPANY_CONFIG.get(company.id)
         if company_config and company_config.get('custom_visit_recipe', False):
             data.relation.custom_visit_recipe = company_config.custom_visit_recipe
+        else:
+            data.relation.custom_visit_recipe = []
 
         data.templates = yield self._get_company_cms_page(company.id, user, team_index_url)
 

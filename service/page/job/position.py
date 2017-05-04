@@ -13,7 +13,6 @@ from util.tool.temp_data_tool import make_position_detail_cms, make_team, templa
 
 
 class PositionPageService(PageService):
-
     def __init__(self):
         super().__init__()
 
@@ -57,14 +56,14 @@ class PositionPageService(PageService):
             "management": position_res.management,
             "visitnum": position_res.visitnum,
             "accountabilities": position_res.accountabilities,
-            "requirement":      position_res.requirement,
-            "feature":          position_res.feature,
-            "status":           position_res.status,
-            "publisher":        position_res.publisher,
-            "source":           position_res.source,
-            "share_tpl_id":     position_res.share_tpl_id,
-            "hb_status":        position_res.hb_status,
-            "team_id":          position_res.team_id,
+            "requirement": position_res.requirement,
+            "feature": position_res.feature,
+            "status": position_res.status,
+            "publisher": position_res.publisher,
+            "source": position_res.source,
+            "share_tpl_id": position_res.share_tpl_id,
+            "hb_status": position_res.hb_status,
+            "team_id": position_res.team_id,
             "app_cv_config_id": position_res.app_cv_config_id,
             "email_resume_conf": position_res.email_resume_conf
         })
@@ -89,7 +88,8 @@ class PositionPageService(PageService):
 
         # 职能自定义字段（自定义字段 job_occupation）
         if position_ext_res.job_occupation_id:
-            job_occupation_res = yield self.job_occupation_ds.get_occupation(conds={"id": position_ext_res.job_occupation_id})
+            job_occupation_res = yield self.job_occupation_ds.get_occupation(
+                conds={"id": position_ext_res.job_occupation_id})
             position.job_occupation = job_occupation_res.name
 
         # 属性自定义字段（自定义字段 job_custom）
@@ -247,10 +247,14 @@ class PositionPageService(PageService):
     @gen.coroutine
     def get_team_position(self, team_id, handler_params, current_position_id, company_id, teamname_custom):
         positions = yield self.job_position_ds.get_positions_list(
-            conds={'id': [current_position_id, '<>'],
-                   'company_id': company_id,
-                   'team_id': team_id,
-                   'status': 0})
+            conds={
+                'id': [current_position_id, '<>'],
+                'company_id': company_id,
+                'team_id': team_id,
+                'status': 0
+            },
+            appends=["ORDER BY update_time DESC"]
+        )
 
         if not positions:
             raise gen.Return(None)
@@ -317,7 +321,7 @@ class PositionPageService(PageService):
         if res.status == 0:
             rp_position_list = [ObjectDict(e) for e in res.data]
             pids = [e.id for e in rp_position_list]
-            pid_teamid_dict = yield self.get_pid_teamid_dict(params.company_id,pids)
+            pid_teamid_dict = yield self.get_pid_teamid_dict(params.company_id, pids)
 
             for position in rp_position_list:
                 position.is_rp_reward = True
@@ -341,7 +345,7 @@ class PositionPageService(PageService):
         """获取 {<team_id>: <team_name>} 字典"""
         res_team_names = yield self.hr_team_ds.get_team_list(
             conds={'company_id': company_id,
-                   'disable':    const.OLD_YES},
+                   'disable': const.OLD_YES},
             fields=['id', 'name']
         )
         team_name_dict = {e.id: e.name for e in res_team_names}
@@ -354,7 +358,7 @@ class PositionPageService(PageService):
         """
 
         param = dict(
-            conds={'status':     const.OLD_YES,
+            conds={'status': const.OLD_YES,
                    'company_id': company_id},
             fields=['id', 'team_id']
         )

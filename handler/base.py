@@ -333,6 +333,7 @@ class BaseHandler(MetaBaseHandler):
             self.current_user.has_profile = yield self.profile_ps.has_profile(
                 self.current_user.sysuser.id)
 
+
     @gen.coroutine
     def _build_session(self):
         """用户确认向仟寻授权后的处理，构建 session"""
@@ -624,6 +625,7 @@ class BaseHandler(MetaBaseHandler):
         namespace.update(add_namespace)
         return namespace
 
+
     def _set_access_time_cookie(self):
         """设置 _ac cookie 表示该session首次访问页面时间
         使用 unix 时间戳
@@ -656,3 +658,4 @@ class BaseHandler(MetaBaseHandler):
         self.logger.debug("make_url kwargs:{}".format(kwargs))
 
         return make_url(path, params, host, protocol, escape, **kwargs)
+

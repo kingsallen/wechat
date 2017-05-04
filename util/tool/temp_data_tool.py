@@ -17,6 +17,7 @@
 
 """
 
+import json
 from conf.path import POSITION_PATH
 from conf.platform import MEDIA_TYPE
 from util.common import ObjectDict
