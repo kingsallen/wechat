@@ -463,6 +463,7 @@ class BaseHandler(MetaBaseHandler):
         self.logger.debug("current wechat jsapi appid:{}".format(session.wechat.appid))
         self.logger.debug("current wechat jsapi jsapi_ticket:{}".format(session.wechat.jsapi_ticket))
         self.logger.debug("current wechat jsapi full_url:{}".format(self.fullurl))
+        self.logger.debug("current wechat jsapi request full_url:{}".format(self.request.full_url()))
 
         self.logger.debug(
             "_build_session_by_unionid session 2: {}".format(session))
