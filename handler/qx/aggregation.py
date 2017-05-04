@@ -80,7 +80,7 @@ class AggregationHandler(BaseHandler):
             hot_company = self.aggregation_ps.opt_agg_company(es_res)
 
             # 自定义分享
-            share = self._make_share_info(hot_company)
+            share = self._make_share_info(hot_company, keywords)
 
             result.update({
                 "is_hr_ads": is_show_ads,
