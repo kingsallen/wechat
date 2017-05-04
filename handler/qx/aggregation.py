@@ -14,7 +14,6 @@ import conf.qx as qx_const
 from handler.base import BaseHandler
 from util.common.decorator import handle_response
 from util.common import ObjectDict
-from util.tool.url_tool import make_static_url
 from util.tool.json_tool import json_dumps
 from util.tool.str_tool import to_str
 
@@ -174,7 +173,7 @@ class AggregationHandler(BaseHandler):
         if len(hot_company) == 1:
             logo = hot_company[0].get("logo")
         else:
-            logo = make_static_url(const.COMPANY_HEADIMG)
+            logo = const.COMPANY_HEADIMG
 
         cover = self.static_url(logo)
         keywords_title = "【%s】".format(keywords) if keywords else ""

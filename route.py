@@ -46,6 +46,7 @@ import handler.platform.recom
 import handler.qx.app
 import handler.qx.aggregation
 import handler.qx.search
+import handler.qx.position
 
 import handler.wechat.event
 
@@ -130,6 +131,7 @@ platform_routes = common_routes + platform_routes
 # 聚合号的单独 routes, 域名 platform.moseeker.com/recruit
 qx_routes = [
 
+    (r"/api/position/(?P<position_id>\d+)",          handler.qx.position.PositionHandler,                       {"event": "position_info"}),
     (r"/api/positions[\/]?",                         handler.qx.aggregation.AggregationHandler,                 {"event": "position_aggregation"}),
     (r"/api/config[\/]?",                            handler.qx.app.ConfigHandler,                              {"event": "wechat_config"}),
     (r"/api/search/condition/*",                     handler.qx.search.SearchConditionHandler,                  {"event": "search_condition" }),

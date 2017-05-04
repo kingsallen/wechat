@@ -13,11 +13,12 @@ from util.common import ObjectDict
 from util.common.cipher import encode_id
 from util.common.decorator import handle_response, check_employee
 from util.tool.str_tool import gen_salary, add_item, split
-from util.tool.url_tool import make_url, url_append_query
+from util.tool.url_tool import url_append_query
 from util.wechat.template import position_view_five_notice_tpl, position_share_notice_employee_tpl
 
 
 class PositionHandler(BaseHandler):
+
     @handle_response
     @gen.coroutine
     def get(self, position_id):
@@ -731,7 +732,7 @@ class PositionListHandler(BaseHandler):
             title = "%s热招职位" % company_info.abbreviation
             description = msg.SHARE_DES_DEFAULT
         else:
-            cover = rp_share_info.cover
+            cover = self.static_url(rp_share_info.cover)
             title = rp_share_info.title
             description = rp_share_info.description
 
