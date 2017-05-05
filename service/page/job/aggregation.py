@@ -181,6 +181,7 @@ class AggregationPageService(PageService):
                         "company": item.get("_source").get("company"),
                         "city": city_list,
                         "position_cnt": 1,
+                        "weight": 0,
                     })
 
             for key, value in results.items():
@@ -190,6 +191,21 @@ class AggregationPageService(PageService):
                         city[i] = value.city.count(i)
                 city = sorted(city.items(), key=lambda x:x[1], reverse=True)
                 value.city = [item[0] for item in city[:5]]
+
+        self.logger.debug("results:{}".format(results))
+        recommend_company = yield self.campaign_recommend_company_ds.get_campaign_recommend_company(conds={"disable": 0})
+
+        self.logger.debug("recommend_company:{}".format(recommend_company))
+        
+        for r_comp in recommend_company:
+            if results[r_comp.get("company_id")]:
+                results[r_comp.get("company_id")]["weight"] = r_comp.get("weight")
+
+        self.logger.debug("results 2:{}".format(results))
+
+        results_cmp = sorted(results.iteritems(), key=lambda d:d[1].get('weight',0), reverse = True)
+
+        self.logger.debug("results_cmp 2:{}".format(results_cmp))
 
         hot_company = list()
         for item in results.values():

@@ -12,8 +12,7 @@ from util.common.decorator import cache
 
 class CampaignRecommendCompanyDataService(DataService):
 
-
-    @cache(ttl=300)
+    # @cache(ttl=300)
     @gen.coroutine
     def get_campaign_recommend_company(self, conds, fields, options=None, appends=None, index='', params=None):
 
