@@ -25,6 +25,10 @@ class PositionHandler(BaseHandler):
         did = yield self.company_ps.get_real_company_id(position_info.publisher, position_info.company_id)
         company_info = yield self.company_ps.get_company(conds={"id": did}, need_conf=True)
 
+        self.logger.debug("position:{}".format(position_info))
+        self.logger.debug("company:{}".format(company_info))
+
+
         if position_info.id and company_info.conf_show_in_qx:
             self.logger.debug("[JD]构建详细信息")
             jd_detail = yield self._make_jd_detail(position_id, position_info, company_info)
@@ -35,7 +39,7 @@ class PositionHandler(BaseHandler):
                 jd_home = yield self._make_jd_home(position_info, company_info)
 
             self.logger.debug("[JD]构建转发信息")
-            yield self._make_share_info(position_info, company_info)
+            # yield self._make_share_info(position_info, company_info)
 
             data = dict(jd_detail, **jd_home)
             self.send_json_success(data=data)
