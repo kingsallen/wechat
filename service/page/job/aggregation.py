@@ -163,9 +163,10 @@ class AggregationPageService(PageService):
         results = ObjectDict()
         if es_res.hits:
             for item in es_res.hits.hits:
-                if item.get("_source").get("position").get("status") != 0 \
-                    or not item.get("_source").get("company").get("logo") \
-                    or not item.get("_source").get("company").get("banner"):
+                # if item.get("_source").get("position").get("status") != 0 \
+                #     or not item.get("_source").get("company").get("logo") \
+                #     or not item.get("_source").get("company").get("banner"):
+                if item.get("_source").get("position").get("status") != 0:
                     continue
 
                 city_list = split(item.get("_source").get("position").get("city"), ['，', ',']) \
@@ -193,7 +194,12 @@ class AggregationPageService(PageService):
                 city = sorted(city.items(), key=lambda x:x[1], reverse=True)
                 value.city = [item[0] for item in city[:5]]
 
+        hot_company = list()
+        if not results:
+            return hot_company
+
         self.logger.debug("results:{}".format(results))
+
         recommend_company = yield self.campaign_recommend_company_ds.get_campaign_recommend_company(conds={"disable": 0})
 
         self.logger.debug("recommend_company:{}".format(recommend_company))
@@ -208,7 +214,6 @@ class AggregationPageService(PageService):
 
         self.logger.debug("results_cmp 2:{}".format(results_cmp))
 
-        hot_company = list()
         for item in results.values():
             agg_company = ObjectDict()
             agg_company["id"] = item.company.id
