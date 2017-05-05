@@ -11,7 +11,6 @@ import conf.path as path
 import conf.message as msg
 from handler.base import BaseHandler
 from util.tool.str_tool import email_validate, get_uucode
-from util.tool.url_tool import make_url
 from util.common import ObjectDict
 
 class CustomizeEmailApplyHandler(BaseHandler):

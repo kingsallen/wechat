@@ -95,10 +95,23 @@ class ProfilePageService(PageService):
     })
 
     @gen.coroutine
-    def has_profile(self, user_id, uuid=None):
+    def has_profile(self, user_id):
         """
         判断 user_user 是否有 profile (profile_profile 表数据)
         :param user_id:
+        :return: tuple (bool, profile or None)
+
+        调用方式:
+        profile = has_profile[1]
+        """
+
+        result, profile = yield self.infra_profile_ds.get_profile(user_id)
+        return result, profile
+
+    @gen.coroutine
+    def has_profile_by_uuid(self, uuid):
+        """
+        判断 user_user 是否有 profile (profile_profile 表数据)
         :param uuid:
         :return: tuple (bool, profile or None)
 
@@ -106,7 +119,7 @@ class ProfilePageService(PageService):
         profile = has_profile[1]
         """
 
-        result, profile = yield self.infra_profile_ds.get_profile(user_id, uuid)
+        result, profile = yield self.infra_profile_ds.get_profile_by_uuid(uuid)
         return result, profile
 
     @gen.coroutine

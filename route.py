@@ -42,6 +42,7 @@ import handler.platform.landing
 import handler.platform.position
 import handler.platform.team
 import handler.platform.recom
+import handler.platform.compatible
 
 import handler.qx.app
 import handler.qx.aggregation
@@ -124,6 +125,10 @@ platform_routes = [
     (r"/api/employee/recommendrecords[\/]?",         handler.platform.employee.RecommendRecordsHandler,         {"event": "employee_recommendrecords"}),
     (r"/api/employee/rewards[\/]?",                  handler.platform.employee.AwardsHandler,                   {"event": "employee_awards"}),
     (r"/api/position/empnotice[\/]?",                handler.platform.position.PositionEmpNoticeHandler,        {"event": "position_empnotice"}),
+
+    # 兼容老微信 url，进行302跳转
+    (r"/.*",                                         handler.platform.compatible.CompatibleHandler,             {"event": "compatible"})
+
 ]
 platform_routes = common_routes + platform_routes
 

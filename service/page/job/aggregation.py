@@ -162,11 +162,15 @@ class AggregationPageService(PageService):
         results = ObjectDict()
         if es_res.hits:
             for item in es_res.hits.hits:
-                if item.get("_source").get("position").get("status") != 0:
+                if item.get("_source").get("position").get("status") != 0 \
+                    or not item.get("_source").get("company").get("logo") \
+                    or not item.get("_source").get("company").get("banner"):
                     continue
+
                 city_list = split(item.get("_source").get("position").get("city"), ['，', ',']) \
                     if item.get("_source").get("position").get("city") else list()
                 company_id_str = str(item.get("_source").get("company").get("id"))
+
                 if results.get(company_id_str):
                     if city_list:
                         city_rep = results[company_id_str].get("city") + city_list

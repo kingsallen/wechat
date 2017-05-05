@@ -186,7 +186,7 @@ class ProfileViewHandler(BaseHandler):
     @tornado.gen.coroutine
     def get(self, uuid):
 
-        has_profile, profile = yield self.profile_ps.has_profile(user_id='', uuid=uuid)
+        has_profile, profile = yield self.profile_ps.has_profile_by_uuid(uuid=uuid)
 
         self.logger.debug("uuid:{}".format(uuid))
         self.logger.debug("profile:{}".format(profile))
