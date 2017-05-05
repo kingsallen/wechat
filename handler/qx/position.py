@@ -28,15 +28,14 @@ class PositionHandler(BaseHandler):
         self.logger.debug("position:{}".format(position_info))
         self.logger.debug("company:{}".format(company_info))
 
-
         if position_info.id and company_info.conf_show_in_qx:
-            self.logger.debug("[JD]构建详细信息")
-            jd_detail = yield self._make_jd_detail(position_id, position_info, company_info)
+            self.logger.debug("[JD]构建基础信息")
+            jd_home = yield self._make_jd_home(position_info, company_info)
 
-            jd_home = ObjectDict()
-            if not self.params.home:
-                self.logger.debug("[JD]构建基础信息")
-                jd_home = yield self._make_jd_home(position_info, company_info)
+            jd_detail = ObjectDict()
+            if self.params.home:
+                self.logger.debug("[JD]构建详细信息")
+                jd_detail = yield self._make_jd_detail(position_id, position_info, company_info)
 
             self.logger.debug("[JD]构建转发信息")
             # yield self._make_share_info(position_info, company_info)
@@ -93,7 +92,7 @@ class PositionHandler(BaseHandler):
         data = ObjectDict(
             company=company,
             is_applied=bool(application),
-            appid=application.id,
+            appid=application.id or 0,
             is_collected=star,
             can_apply=can_apply,
             job_need=job_need,
@@ -112,14 +111,3 @@ class PositionHandler(BaseHandler):
             require.update({"name": "语言要求", "value": position_info.language})
 
         return require
-
-
-
-
-
-
-
-
-
-
-
