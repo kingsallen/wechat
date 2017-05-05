@@ -3,7 +3,7 @@
 from tornado import gen
 from util.common import ObjectDict
 from service.page.base import PageService
-
+import json
 
 class SearchconditionPageService(PageService):
 
@@ -21,12 +21,12 @@ class SearchconditionPageService(PageService):
             data.append({
                 'id': i.id,
                 'name': i.name,
-                'keywords': i.keywords,
+                'keywords': json.loads(i.keywords) if i.keywords else [],
                 'city_name': i.cityName,
                 'salary_top': i.salaryTop,
                 'salary_bottom': i.salaryBottom,
                 'salary_negotiable': i.salaryNegotiable,
-                'industry': i.industry,
+                'industry': json.loads(i.industry) if i.industry else [],
                 'sysuser_id': i.userId,
                 'disable': i.disable,
                 'create_time': i.createTime,
