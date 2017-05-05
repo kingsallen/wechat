@@ -108,10 +108,6 @@ class PositionHandler(BaseHandler):
         """构造职位要求"""
 
         require = ObjectDict()
-        if position_info.degree:
-            require.update({"name": "学历", "value": position_info.degree})
-        if position_info.experience:
-            require.update({"name": "工作经验", "value": position_info.experience})
         if position_info.language:
             require.update({"name": "语言要求", "value": position_info.language})
 

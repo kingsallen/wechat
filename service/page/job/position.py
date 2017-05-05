@@ -76,8 +76,11 @@ class PositionPageService(PageService):
         # 需要折行
         if position_res.accountabilities:
             position.accountabilities = split(position_res.accountabilities)
+
+        self.logger.debug("get_position11111111:{}".format(position_res.requirement))
         if position.requirement:
             position.requirement = split(position_res.requirement)
+            self.logger.debug("get_position222222222:{}".format(position.requirement))
 
         # 自定义分享模板
         if position_res.share_tpl_id:
