@@ -151,6 +151,7 @@ class AggregationPageService(PageService):
 
         return team_img, job_img, company_img
 
+    @gen.coroutine
     def opt_agg_company(self, es_res):
 
         """

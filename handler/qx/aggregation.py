@@ -76,7 +76,7 @@ class AggregationHandler(BaseHandler):
             banner = yield self.aggregation_ps.get_aggregation_banner()
 
             # 处理热招企业
-            hot_company = self.aggregation_ps.opt_agg_company(es_res)
+            hot_company = yield self.aggregation_ps.opt_agg_company(es_res)
 
             # 自定义分享
             share = self._make_share_info(hot_company, keywords)

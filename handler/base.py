@@ -445,14 +445,6 @@ class BaseHandler(MetaBaseHandler):
         session.wechat = self._wechat
         self._add_jsapi_to_wechat(session.wechat)
 
-        self.logger.debug("current wechat jsapi timestamp:{}".format(session.wechat.jsapi.timestamp))
-        self.logger.debug("current wechat jsapi nonceStr:{}".format(session.wechat.jsapi.nonceStr))
-        self.logger.debug("current wechat jsapi signature:{}".format(session.wechat.jsapi.signature))
-        self.logger.debug("current wechat jsapi appid:{}".format(session.wechat.appid))
-        self.logger.debug("current wechat jsapi jsapi_ticket:{}".format(session.wechat.jsapi_ticket))
-        self.logger.debug("current wechat jsapi full_url:{}".format(self.fullurl(encode=False)))
-        self.logger.debug("current wechat jsapi request full_url:{}".format(self.request.full_url()))
-
         self.logger.debug(
             "_build_session_by_unionid session 2: {}".format(session))
         self.logger.debug(
