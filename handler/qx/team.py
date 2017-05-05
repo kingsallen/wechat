@@ -16,13 +16,12 @@ class TeamDetailHandler(BaseHandler):
 
     @NewJDStatusChecker404()
     @handle_response
-    @check_sub_company
     @gen.coroutine
     def get(self, team_id):
-        current_company = self.params.pop('sub_company') if \
-            self.params.sub_company else self.current_user.company
 
         team = yield self.team_ps.get_team_by_id(team_id)
+        current_company = yield self.company_ps.get_company(conds={"id": team.company_id}, need_conf=True)
+
         if team.company_id != self.current_user.company.id:
             self.write_error(404)
             raise gen.Return()
@@ -32,12 +31,12 @@ class TeamDetailHandler(BaseHandler):
 
         share_cover_url = data.templates[0].data[0].get('media_url') or \
                           self.static_url(self.current_user.company.logo)
-        self.params.share = self._share(current_company,
-                                        team.name, share_cover_url)
-        
+        share = self._share(current_company, team.name, share_cover_url)
 
-        self.render_page(template_name='company/team.html', data=data,
-                         meta_title=data.bottombar.teamname_custom)
+        self.send_json_success(data={
+            "team": data.templates,
+            "share": share
+        })
 
     def _share(self, company, team_name, share_cover_url):
         company_name = company.abbreviation or company.name

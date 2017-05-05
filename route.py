@@ -48,6 +48,8 @@ import handler.qx.app
 import handler.qx.aggregation
 import handler.qx.search
 import handler.qx.position
+import handler.qx.team
+import handler.qx.company
 
 import handler.wechat.event
 
@@ -142,6 +144,8 @@ qx_routes = [
     (r"/api/search/condition/*",                     handler.qx.search.SearchConditionHandler,                  {"event": "search_condition" }),
     (r"/api/search/condition/(\d+)*",                handler.qx.search.SearchConditionHandler,                  {"event": "search_condition" }),
     (r"/api/search/([a-z_]+)",                       handler.qx.search.SearchCityHandler,                       {"event": "search_condition"}),
+    (r"/api/team/(\d+)",                             handler.qx.team.TeamDetailHandler,                         {"event": "team_detail"}),
+    (r"/api/company/(\d+)",                          handler.qx.company.CompanyHandler,                         {"event": "company_detail"}),
 
     # App 路由
     (r"/.*",                                         handler.qx.app.IndexHandler,                               {"event": "app_app"}),
