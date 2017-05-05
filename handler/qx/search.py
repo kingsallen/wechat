@@ -31,14 +31,14 @@ class SearchConditionHandler(BaseHandler):
         if not (name and keywords and self.current_user.sysuser.id):
             self.send_json_error(message='Invalid argument')
         else:
-            cityNameData = condition.get('cityName', None)
+            cityNameData = condition.get('city_name', None)
             industryData = condition.get('industry', None)
             cityName = json_dumps(cityNameData) if cityNameData else None
             industry = json_dumps(industryData) if industryData else None
 
-            salary_top = condition.get('salaryTop', None)
-            salary_bottom = condition.get('salaryBottom', None)
-            salary_negotiable = condition.get('salaryNegotiable', None)
+            salary_top = condition.get('salary_top', None)
+            salary_bottom = condition.get('salary_bottom', None)
+            salary_negotiable = condition.get('salary_negotiable', None)
 
             res = yield self.searchcondition_ps.add_condition(user_id=self.current_user.sysuser.id,
                                                               name=name,
