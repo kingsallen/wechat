@@ -211,17 +211,17 @@ class AggregationPageService(PageService):
 
         self.logger.debug("results 2:{}".format(results))
 
-        results_cmp = sorted(results.iteritems(), key=lambda d:d[1].get('weight',0), reverse = True)
+        results_cmp = sorted(results.items(), key=lambda d:d[1].get('weight',0), reverse = True)
 
         self.logger.debug("results_cmp 2:{}".format(results_cmp))
 
-        for item in results.values():
+        for item in results_cmp:
             agg_company = ObjectDict()
-            agg_company["id"] = item.company.id
-            agg_company["logo"] = make_static_url(item.company.logo or const.COMPANY_HEADIMG)
-            agg_company["abbreviation"] = item.company.abbreviation
-            agg_company["position_count"] = item.position_cnt
-            agg_company["city"] = item.city
+            agg_company["id"] = item[1].company.id
+            agg_company["logo"] = make_static_url(item[1].company.logo or const.COMPANY_HEADIMG)
+            agg_company["abbreviation"] = item[1].company.abbreviation
+            agg_company["position_count"] = item[1].position_cnt
+            agg_company["city"] = item[1].city
             hot_company.append(agg_company)
 
         return hot_company[:9]
