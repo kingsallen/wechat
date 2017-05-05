@@ -163,10 +163,9 @@ class AggregationPageService(PageService):
         results = ObjectDict()
         if es_res.hits:
             for item in es_res.hits.hits:
-                # if item.get("_source").get("position").get("status") != 0 \
-                #     or not item.get("_source").get("company").get("logo") \
-                #     or not item.get("_source").get("company").get("banner"):
-                if item.get("_source").get("position").get("status") != 0:
+                if item.get("_source").get("position").get("status") != 0 \
+                    or not item.get("_source").get("company").get("logo") \
+                    or not item.get("_source").get("company").get("banner"):
                     continue
 
                 city_list = split(item.get("_source").get("position").get("city"), ['，', ',']) \
@@ -198,22 +197,15 @@ class AggregationPageService(PageService):
         if not results:
             return hot_company
 
-        self.logger.debug("results:{}".format(results))
-
+        # 获得运营推荐职位,运营推荐公司排在前面
         recommend_company = yield self.campaign_recommend_company_ds.get_campaign_recommend_company(conds={"disable": 0})
-
-        self.logger.debug("recommend_company:{}".format(recommend_company))
 
         for r_comp in recommend_company:
             comp_id = str(r_comp.get("company_id"))
             if results.get(comp_id):
                 results[comp_id].weight = r_comp.get("weight")
 
-        self.logger.debug("results 2:{}".format(results))
-
         results_cmp = sorted(results.items(), key=lambda d:d[1].get('weight',0), reverse = True)
-
-        self.logger.debug("results_cmp 2:{}".format(results_cmp))
 
         for item in results_cmp:
             agg_company = ObjectDict()
