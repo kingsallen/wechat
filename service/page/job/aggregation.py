@@ -84,13 +84,18 @@ class AggregationPageService(PageService):
         return es_res
 
     @gen.coroutine
-    def opt_agg_positions(self, es_res, page_size, user_id):
+    def opt_agg_positions(self, es_res, page_size, user_id, city):
 
         """
         处理搜索职位结果
         :param es_res:
+        :param page_size:
+        :param user_id:
+        :param city: 如果用户在搜索条件里面输入了选择的城市，那么不管该职位实际在哪些城市发布，在显示在列表页的时候，只显示用户选择的地址
         :return:
         """
+
+        city_list = split(city.strip(), [","])
 
         hot_positons = ObjectDict()
         if es_res.hits:
@@ -106,6 +111,10 @@ class AggregationPageService(PageService):
                     "abbreviation": item.get("_source").get("company", {}).get("abbreviation"),
                 })
 
+                # 求搜索 city 和结果 city 的交集
+                city_ori = split(item.get("_source").get("position").get("city"), ['，', ','])
+                city = [c for c in city_ori if c in city_list]
+
                 hot_positons[id] = ObjectDict({
                     "id": item.get("_source").get("position").get("id"),
                     "title": item.get("_source").get("position").get("title"),
@@ -119,7 +128,7 @@ class AggregationPageService(PageService):
                     "company_img": make_static_url(company_img),
                     "resources": self._gen_resources(item.get("_source").get("jd_pic",{}), item.get("_source").get("company",{})),
                     "user_status": 0,
-                    "city": split(item.get("_source").get("position").get("city"), ['，', ',']),
+                    "city": city,
                     "company": company,
                 })
 

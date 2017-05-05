@@ -7,6 +7,7 @@
 
 import re
 from util.common import ObjectDict
+from util.tool.str_tool import split
 
 def rule_gamma_filters(params):
     ''' 筛选条件, 转成相应的类型, 及对用户的输入进行过滤 '''
@@ -18,7 +19,7 @@ def rule_gamma_filters(params):
     # 需要 list
     for k in ('industry', 'city'):
         if params.get(k):
-            params[k] = re.split(",", params[k].strip())
+            params[k] = split(params[k].strip(), [","])
         else:
             params[k] = list()
 
