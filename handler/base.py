@@ -650,13 +650,13 @@ class BaseHandler(MetaBaseHandler):
         """
 
         full_url = to_str(self.request.full_url())
-        self.logger.debug("fullurl:{}".format(full_url))
+        self.logger.debug("fullurl 1:{}".format(full_url))
 
         if not self.host in self.request.full_url():
-            real_full_url = full_url.replace(self.settings.m_host, self.host)
-            self.logger.debug("real_full_url:{}".format(real_full_url))
+            full_url = full_url.replace(self.settings.m_host, self.host)
+            self.logger.debug("full_url 2:{}".format(full_url))
 
         if not encode:
-            return real_full_url
-        return url_subtract_query(real_full_url, ['code', 'state'])
+            return full_url
+        return url_subtract_query(full_url, ['code', 'state'])
 
