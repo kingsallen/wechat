@@ -205,8 +205,9 @@ class AggregationPageService(PageService):
         self.logger.debug("recommend_company:{}".format(recommend_company))
 
         for r_comp in recommend_company:
-            if results[str(r_comp.get("company_id"))]:
-                results[str(r_comp.get("company_id"))]["weight"] = r_comp.get("weight")
+            comp_id = str(r_comp.get("company_id"))
+            if results.get(comp_id):
+                results[comp_id].weight = r_comp.get("weight")
 
         self.logger.debug("results 2:{}".format(results))
 
