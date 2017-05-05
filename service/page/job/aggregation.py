@@ -95,7 +95,7 @@ class AggregationPageService(PageService):
         :return:
         """
 
-        city_list = split(city.strip(), [","])
+        city_list = split(city, [","]) if city else list()
 
         hot_positons = ObjectDict()
         if es_res.hits:
@@ -113,7 +113,10 @@ class AggregationPageService(PageService):
 
                 # 求搜索 city 和结果 city 的交集
                 city_ori = split(item.get("_source").get("position").get("city"), ['，', ','])
-                city = [c for c in city_ori if c in city_list]
+                if city_list:
+                    city = [c for c in city_ori if c in city_list]
+                else:
+                    city = city_ori
 
                 hot_positons[id] = ObjectDict({
                     "id": item.get("_source").get("position").get("id"),
