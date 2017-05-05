@@ -196,7 +196,7 @@ class AggregationPageService(PageService):
         recommend_company = yield self.campaign_recommend_company_ds.get_campaign_recommend_company(conds={"disable": 0})
 
         self.logger.debug("recommend_company:{}".format(recommend_company))
-        
+
         for r_comp in recommend_company:
             if results[r_comp.get("company_id")]:
                 results[r_comp.get("company_id")]["weight"] = r_comp.get("weight")

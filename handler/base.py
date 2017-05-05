@@ -322,7 +322,6 @@ class BaseHandler(MetaBaseHandler):
             self.current_user.has_profile = yield self.profile_ps.has_profile(
                 self.current_user.sysuser.id)
 
-
     @gen.coroutine
     def _build_session(self):
         """用户确认向仟寻授权后的处理，构建 session"""
@@ -651,7 +650,12 @@ class BaseHandler(MetaBaseHandler):
         """
 
         full_url = to_str(self.request.full_url())
-        real_full_url = full_url.replace(self.settings.m_host, self.host)
+        self.logger.debug("fullurl:{}".format(full_url))
+
+        if not self.host in self.request.full_url():
+            real_full_url = full_url.replace(self.settings.m_host, self.host)
+            self.logger.debug("real_full_url:{}".format(real_full_url))
+
         if not encode:
             return real_full_url
         return url_subtract_query(real_full_url, ['code', 'state'])
