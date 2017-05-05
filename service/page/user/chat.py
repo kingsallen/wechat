@@ -169,3 +169,12 @@ class ChatPageService(PageService):
         }, fields=["user_unread_count"])
 
         raise gen.Return(unread_count_total.count_user_unread_count)
+
+    @gen.coroutine
+    def get_hr_info(self, publisher):
+        """获取 hr 信息"""
+        hr_account = yield self.user_hr_account_ds.get_hr_account({
+            "id": publisher
+        })
+
+        raise gen.Return(hr_account)

@@ -333,6 +333,7 @@ class BaseHandler(MetaBaseHandler):
             self.current_user.has_profile = yield self.profile_ps.has_profile(
                 self.current_user.sysuser.id)
 
+
     @gen.coroutine
     def _build_session(self):
         """用户确认向仟寻授权后的处理，构建 session"""
@@ -456,6 +457,13 @@ class BaseHandler(MetaBaseHandler):
         session.wechat = self._wechat
         self._add_jsapi_to_wechat(session.wechat)
 
+        self.logger.debug("current wechat jsapi timestamp:{}".format(session.wechat.jsapi.timestamp))
+        self.logger.debug("current wechat jsapi nonceStr:{}".format(session.wechat.jsapi.nonceStr))
+        self.logger.debug("current wechat jsapi signature:{}".format(session.wechat.jsapi.signature))
+        self.logger.debug("current wechat jsapi appid:{}".format(session.wechat.appid))
+        self.logger.debug("current wechat jsapi jsapi_ticket:{}".format(session.wechat.jsapi_ticket))
+        self.logger.debug("current wechat jsapi full_url:{}".format(self.request.full_url()))
+
         self.logger.debug(
             "_build_session_by_unionid session 2: {}".format(session))
         self.logger.debug(
@@ -496,7 +504,7 @@ class BaseHandler(MetaBaseHandler):
 
         # 配色处理，如果theme_id为5表示公司使用默认配置，不需要将原始配色信息传给前端
         # 如果将theme_id为5的传给前端，会导致前端颜色无法正常显示默认颜色
-        if company.conf_theme_id != 5:
+        if company.conf_theme_id != 5 and company.conf_theme_id:
             theme = yield self.wechat_ps.get_wechat_theme(
                 {'id': company.conf_theme_id, 'disable': 0})
             if theme:
@@ -617,6 +625,7 @@ class BaseHandler(MetaBaseHandler):
         namespace.update(add_namespace)
         return namespace
 
+
     def _set_access_time_cookie(self):
         """设置 _ac cookie 表示该session首次访问页面时间
         使用 unix 时间戳
@@ -649,3 +658,4 @@ class BaseHandler(MetaBaseHandler):
         self.logger.debug("make_url kwargs:{}".format(kwargs))
 
         return make_url(path, params, host, protocol, escape, **kwargs)
+

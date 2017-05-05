@@ -63,8 +63,8 @@ class AggregationHandler(BaseHandler):
         positions = yield self.aggregation_ps.opt_agg_positions(es_res, page_size, self.current_user.sysuser.id)
 
         result = ObjectDict({
-            "page_no": page_no,
-            "page_size": page_size,
+            "page_no": int(page_no),
+            "page_size": int(page_size),
             "positions": positions,
         })
 
@@ -80,7 +80,7 @@ class AggregationHandler(BaseHandler):
             hot_company = self.aggregation_ps.opt_agg_company(es_res)
 
             # 自定义分享
-            share = self._make_share_info(hot_company)
+            share = self._make_share_info(hot_company, keywords)
 
             result.update({
                 "is_hr_ads": is_show_ads,
@@ -139,21 +139,29 @@ class AggregationHandler(BaseHandler):
         session_ads = self.get_cookie(qx_const.COOKIE_HRADS_SESSIONS) or 0
         session_ads_total = self.get_cookie(qx_const.COOKIE_HRADS_TOTAL) or 0
 
+        self.logger.debug("session_ads:{}".format(session_ads))
+        self.logger.debug("session_ads_total:{}".format(session_ads_total))
+
+        if session_ads:
+            return False
+
         if not session_ads:
             self.set_cookie(
                 qx_const.COOKIE_HRADS_SESSIONS,
                 str(1),
                 httponly=True)
             session_ads_total = int(session_ads_total) + 1
+            self.logger.debug("session_ads_total 2:{}".format(session_ads_total))
             self.set_cookie(
                 qx_const.COOKIE_HRADS_TOTAL,
                 str(session_ads_total),
                 httponly=True, expires_days=365)
+
         if int(session_ads_total) > 3:
             return False
         return True
 
-    def _make_share_info(self, hot_company):
+    def _make_share_info(self, hot_company, keywords):
         """构建 share 内容"""
 
         link = self.make_url(
@@ -169,9 +177,9 @@ class AggregationHandler(BaseHandler):
             logo = make_static_url(const.COMPANY_HEADIMG)
 
         cover = self.static_url(logo)
-        keywords = "【%s】".format(self.params.keywords) if self.params.keywords else ""
-        title = "%s职位推荐" % keywords
-        description = "微信好友%s推荐%s的职位，点击查看详情。找的就是你！" % (self.current_user.qxuser.nickname or "", keywords)
+        keywords_title = "【%s】".format(keywords) if keywords else ""
+        title = "%s职位推荐" % keywords_title
+        description = "微信好友%s推荐%s的职位，点击查看详情。找的就是你！" % (self.current_user.qxuser.nickname or "", keywords_title)
 
         share = ObjectDict({
             "cover": cover,

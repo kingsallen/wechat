@@ -234,7 +234,7 @@ def check_and_apply_profile(func):
 
             self.logger.warn(redirect_params)
 
-            self.render(template_name='refer/neo_weixin/sysuser/importresume.html',
+            self.render(template_name='refer/neo_weixin/sysuser_v2/importresume.html',
                         **redirect_params)
 
     return wrapper
@@ -353,6 +353,7 @@ def gamma_welcome(func):
         self.logger.debug("gamma_welcome search_keywords: {}".format(search_keywords))
         self.logger.debug("gamma_welcome self.params: {}".format(self.params))
         self.logger.debug("gamma_welcome self.params.fr: {}".format(self.params.fr))
+        self.logger.debug("gamma_welcome uri:{}".format(self.request.uri))
         self.logger.debug("gamma_welcome match:{}".format(re.match(r"^\/position$", self.request.uri)))
 
         if not search_keywords and self.params.fr != "recruit" \

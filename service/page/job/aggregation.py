@@ -117,7 +117,7 @@ class AggregationPageService(PageService):
                     "team_img": make_static_url(team_img),
                     "job_img": make_static_url(job_img),
                     "company_img": make_static_url(company_img),
-                    "resources": self._gen_resources(item.get("_source").get("jd_pic",{}), item.get("_source").get("company",{}).get("type")),
+                    "resources": self._gen_resources(item.get("_source").get("jd_pic",{}), item.get("_source").get("company",{})),
                     "user_status": 0,
                     "city": split(item.get("_source").get("position").get("city"), ['，', ',']),
                     "company": company,
@@ -171,9 +171,7 @@ class AggregationPageService(PageService):
                     if city_list:
                         city_rep = results[company_id_str].get("city") + city_list
                         results[company_id_str].city = city_rep
-
                     results[company_id_str].position_cnt += 1
-
                 else:
                     results[company_id_str] = ObjectDict({
                         "company": item.get("_source").get("company"),
@@ -199,9 +197,9 @@ class AggregationPageService(PageService):
             agg_company["city"] = item.city
             hot_company.append(agg_company)
 
-        return hot_company
+        return hot_company[:9]
 
-    def _gen_resources(self, jd_pic, company_type):
+    def _gen_resources(self, jd_pic, company):
 
         """
         处理图片逻辑
@@ -215,13 +213,17 @@ class AggregationPageService(PageService):
             pic_list += jd_pic.get("position_pic").get("other_pic")
         if jd_pic.get("team_pic"):
             pic_list += jd_pic.get("team_pic").get("other_pic")
+        if company.get("impression"):
+            pic_list += [ObjectDict(res_type=0, res_url=item) for item in ujson.decode(company.get("impression")).values()]
+        if company.get("banner"):
+            pic_list += [ObjectDict(res_type=0, res_url=item) for item in ujson.decode(company.get("banner")).values()]
 
         res_resource = list()
-        if company_type != 0 or len(pic_list) == 0:
+        if company.get("type", None) != 0 or len(pic_list) == 0:
             return res_resource
 
         if len(pic_list) > 3:
-            res_resource = random.sample(jd_pic, 3)
+            res_resource = random.sample(pic_list, 3)
         else:
             res_resource = pic_list
 

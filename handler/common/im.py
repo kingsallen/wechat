@@ -44,9 +44,12 @@ class UnreadCountHandler(BaseHandler):
         """
 
         chat_num = yield self.chat_ps.get_unread_chat_num(self.current_user.sysuser.id, publisher)
+        g_event, company_info = yield self._get_ga_event(publisher)
         self.send_json_success(data={
             "unread": chat_num,
-            "is_subscribe": self.current_user.qxuser.is_subscribe == 1
+            "is_subscribe": self.current_user.qxuser.is_subscribe == 1,
+            "event": g_event,
+            "is_chat_on": company_info.conf_hr_chat == 1
         })
 
     @handle_response
@@ -59,11 +62,41 @@ class UnreadCountHandler(BaseHandler):
         """
 
         chat_num = yield self.chat_ps.get_all_unread_chat_num(self.current_user.sysuser.id)
+        g_event, company_info = yield self._get_ga_event()
         self.send_json_success(data={
             "unread": chat_num,
-            "is_subscribe": self.current_user.qxuser.is_subscribe == 1
+            "is_subscribe": self.current_user.qxuser.is_subscribe == 1,
+            "event": g_event,
         })
 
+    @gen.coroutine
+    def _get_ga_event(self, publisher=None):
+        """
+        点击消息按钮类型
+        :param publisher:
+        :return:
+        """
+
+        company_info = ObjectDict()
+        if publisher:
+            hr_info = yield self.chat_ps.get_hr_info(publisher)
+            company_info = yield self.company_ps.get_company(conds={
+                "id": hr_info.company_id
+            }, need_conf=False)
+
+        g_event = 0
+        if not self.in_wechat and not self.current_user.sysuser:
+            g_event = 1
+        elif not self.in_wechat and self.current_user.sysuser and self.current_user.qxuser.is_subscribe != 1:
+            g_event = 2
+        elif self.in_wechat and self.current_user.qxuser.is_subscribe != 1:
+            g_event = 3
+        elif self.current_user.qxuser.is_subscribe == 1 and not company_info.conf_hr_chat:
+            g_event = 4
+        elif self.current_user.qxuser.is_subscribe == 1 and company_info.conf_hr_chat:
+            g_event = 5
+
+        return g_event, company_info
 
 class ChatWebSocketHandler(websocket.WebSocketHandler):
 
