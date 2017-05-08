@@ -84,56 +84,56 @@ struct WechatPositionListQuery {
 }
 
 struct WechatPositionListData {
-    1:  required i32 id,
-    2:  required string title,
+    1:  optional i32 id,
+    2:  optional string title,
     4:  optional i32 salary_top,
     5:  optional i32 salary_bottom,
-    6:  required string publish_date,
-    7:  required string department,
-    8:  required i32 visitnum,
-    9:  required bool in_hb,
-    10: required i32 count,
-    11: required string company_abbr,
-    12: required string company_logo,
-    13: required string company_name,
-    14: required bool is_new,
-    15: required string city,
-    16: required i32 priority
+    6:  optional string publish_date,
+    7:  optional string department,
+    8:  optional i32 visitnum,
+    9:  optional bool in_hb,
+    10: optional i32 count,
+    11: optional string company_abbr,
+    12: optional string company_logo,
+    13: optional string company_name,
+    14: optional bool is_new,
+    15: optional string city,
+    16: optional i32 priority
 }
 
 // 微信端职位列表的附加红包信息
 struct RpExtInfo {
-    1: required i32 pid,
-    2: required i32 remain,
-    3: required bool employee_only
+    1: optional i32 pid,
+    2: optional i32 remain,
+    3: optional bool employee_only
 }
 
 // 微信端红包活动职位列表
 struct WechatRpPositionListData {
-    1:  required i32 id,
-    2:  required string title,
-    3:  required bool fixed,
+    1:  optional i32 id,
+    2:  optional string title,
+    3:  optional bool fixed,
     4:  optional i32 salary_top,
     5:  optional i32 salary_bottom,
-    6:  required string publish_date,
-    7:  required string department,
-    8:  required i32 visitnum,
-    9:  required bool in_hb,
-    10: required i32 count,
-    11: required string company_abbr,
-    12: required string company_logo,
-    13: required string company_name,
-    14: required bool is_new
-    15: required i32 remain,
-    16: required bool employee_only,
-    17: required string city
+    6:  optional string publish_date,
+    7:  optional string department,
+    8:  optional i32 visitnum,
+    9:  optional bool in_hb,
+    10: optional i32 count,
+    11: optional string company_abbr,
+    12: optional string company_logo,
+    13: optional string company_name,
+    14: optional bool is_new
+    15: optional i32 remain,
+    16: optional bool employee_only,
+    17: optional string city
 }
 
 // 微信端获取红包分享信息
 struct WechatShareData {
-    1: required string cover,
-    2: required string title,
-    3: required string description,
+    1: optional string cover,
+    2: optional string title,
+    3: optional string description,
 }
 
 //第三方自定义职能

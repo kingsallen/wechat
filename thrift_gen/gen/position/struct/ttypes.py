@@ -1138,32 +1138,6 @@ class WechatPositionListData(object):
         oprot.writeStructEnd()
 
     def validate(self):
-        if self.id is None:
-            raise TProtocolException(message='Required field id is unset!')
-        if self.title is None:
-            raise TProtocolException(message='Required field title is unset!')
-        if self.publish_date is None:
-            raise TProtocolException(message='Required field publish_date is unset!')
-        if self.department is None:
-            raise TProtocolException(message='Required field department is unset!')
-        if self.visitnum is None:
-            raise TProtocolException(message='Required field visitnum is unset!')
-        if self.in_hb is None:
-            raise TProtocolException(message='Required field in_hb is unset!')
-        if self.count is None:
-            raise TProtocolException(message='Required field count is unset!')
-        if self.company_abbr is None:
-            raise TProtocolException(message='Required field company_abbr is unset!')
-        if self.company_logo is None:
-            raise TProtocolException(message='Required field company_logo is unset!')
-        if self.company_name is None:
-            raise TProtocolException(message='Required field company_name is unset!')
-        if self.is_new is None:
-            raise TProtocolException(message='Required field is_new is unset!')
-        if self.city is None:
-            raise TProtocolException(message='Required field city is unset!')
-        if self.priority is None:
-            raise TProtocolException(message='Required field priority is unset!')
         return
 
     def __repr__(self):
@@ -1248,12 +1222,6 @@ class RpExtInfo(object):
         oprot.writeStructEnd()
 
     def validate(self):
-        if self.pid is None:
-            raise TProtocolException(message='Required field pid is unset!')
-        if self.remain is None:
-            raise TProtocolException(message='Required field remain is unset!')
-        if self.employee_only is None:
-            raise TProtocolException(message='Required field employee_only is unset!')
         return
 
     def __repr__(self):
@@ -1506,36 +1474,6 @@ class WechatRpPositionListData(object):
         oprot.writeStructEnd()
 
     def validate(self):
-        if self.id is None:
-            raise TProtocolException(message='Required field id is unset!')
-        if self.title is None:
-            raise TProtocolException(message='Required field title is unset!')
-        if self.fixed is None:
-            raise TProtocolException(message='Required field fixed is unset!')
-        if self.publish_date is None:
-            raise TProtocolException(message='Required field publish_date is unset!')
-        if self.department is None:
-            raise TProtocolException(message='Required field department is unset!')
-        if self.visitnum is None:
-            raise TProtocolException(message='Required field visitnum is unset!')
-        if self.in_hb is None:
-            raise TProtocolException(message='Required field in_hb is unset!')
-        if self.count is None:
-            raise TProtocolException(message='Required field count is unset!')
-        if self.company_abbr is None:
-            raise TProtocolException(message='Required field company_abbr is unset!')
-        if self.company_logo is None:
-            raise TProtocolException(message='Required field company_logo is unset!')
-        if self.company_name is None:
-            raise TProtocolException(message='Required field company_name is unset!')
-        if self.is_new is None:
-            raise TProtocolException(message='Required field is_new is unset!')
-        if self.remain is None:
-            raise TProtocolException(message='Required field remain is unset!')
-        if self.employee_only is None:
-            raise TProtocolException(message='Required field employee_only is unset!')
-        if self.city is None:
-            raise TProtocolException(message='Required field city is unset!')
         return
 
     def __repr__(self):
@@ -1620,12 +1558,6 @@ class WechatShareData(object):
         oprot.writeStructEnd()
 
     def validate(self):
-        if self.cover is None:
-            raise TProtocolException(message='Required field cover is unset!')
-        if self.title is None:
-            raise TProtocolException(message='Required field title is unset!')
-        if self.description is None:
-            raise TProtocolException(message='Required field description is unset!')
         return
 
     def __repr__(self):
