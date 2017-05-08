@@ -10,11 +10,8 @@ from util.common import ObjectDict
 from util.tool.str_tool import split
 
 def rule_gamma_filters(params):
-    ''' 筛选条件, 转成相应的类型, 及对用户的输入进行过滤 '''
 
-    # 需要int
-    for k in ('salary_top', 'salary_bottom', 'salary_negotiable'):
-        if params.get(k):  params[k] = int(params[k])
+    ''' 筛选条件, 转成相应的类型, 及对用户的输入进行过滤 '''
 
     # 需要 list
     for k in ('industry', 'city'):
