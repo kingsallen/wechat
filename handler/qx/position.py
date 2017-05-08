@@ -53,10 +53,9 @@ class PositionHandler(BaseHandler):
         position = yield self.aggregation_ps.opt_es_position(position_info.id)
         self.logger.debug("position:{}".format(position))
         self.logger.debug("position.hits:{}".format(position.hits))
-        self.logger.debug("position.hits[0]:{}".format(position.hits[0]))
-        team_img, job_img, company_img = yield self.aggregation_ps.opt_jd_home_img(
-            position.hits[0].get("_source").get("company", {}).get("industry_type"), position.hits[0])
-
+        
+        pos_item = position.hits[0] if position.hits else ObjectDict()
+        team_img, job_img, company_img = yield self.aggregation_ps.opt_jd_home_img(pos_item)
         data = ObjectDict(
             id=position_info.id,
             title=position_info.title,

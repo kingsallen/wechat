@@ -113,8 +113,7 @@ class AggregationPageService(PageService):
             hits = es_res.hits.hits[:page_size]
             for item in hits:
                 id = int(item.get("_source").get("position").get("id"))
-                team_img, job_img, company_img = yield self.opt_jd_home_img(
-                    item.get("_source").get("company", {}).get("industry_type"), item)
+                team_img, job_img, company_img = yield self.opt_jd_home_img(item)
 
                 company = ObjectDict({
                     "id": item.get("_source").get("company", {}).get("id"),
@@ -151,30 +150,27 @@ class AggregationPageService(PageService):
         return list(positions.values())
 
     @gen.coroutine
-    def opt_jd_home_img(self, industry_type, item):
+    def opt_jd_home_img(self, item):
         """
         处理JD首页行业默认图
-        :param industry_type:
         :param item:
         :return:
         """
 
-        if not industry_type:
+        if not item.get("_source", {}).get("company", {}).get("industry_type", None):
             industry_type = 0
 
-        if not item.get("_source").get("team",{}).get("resource"):
-            team_img = qx_const.JD_BACKGROUND_IMG.get(industry_type).get("team_img")
-        else:
+        team_img = qx_const.JD_BACKGROUND_IMG.get(industry_type).get("team_img")
+        job_img = qx_const.JD_BACKGROUND_IMG.get(industry_type).get("job_img")
+        company_img = qx_const.JD_BACKGROUND_IMG.get(industry_type).get("company_img")
+
+        if item.get("_source", {}).get("team",{}).get("resource", {}):
             team_img = item.get("_source").get("team",{}).get("resource",{}).get("res_url")
 
-        if not item.get("_source").get("jd_pic",{}).get("position_pic",{}).get("first_pic",{}):
-            job_img = qx_const.JD_BACKGROUND_IMG.get(industry_type).get("job_img")
-        else:
+        if item.get("_source", {}).get("jd_pic",{}).get("position_pic",{}).get("first_pic",{}):
             job_img = item.get("_source").get("jd_pic",{}).get("position_pic",{}).get("first_pic",{}).get("res_url")
 
-        if not item.get("_source").get("company",{}).get("impression",{}):
-            company_img = qx_const.JD_BACKGROUND_IMG.get(industry_type).get("company_img")
-        else:
+        if item.get("_source", {}).get("company",{}).get("impression",{}):
             impression = ujson.loads(item.get("_source").get("company",{}).get("impression",{}))
             company_img = impression.get("impression0")
 
