@@ -12,14 +12,13 @@ from tornado import gen
 import conf.common as const
 from handler.base import BaseHandler
 from util.common import ObjectDict
-from util.common.decorator import check_sub_company, handle_response
+from util.common.decorator import handle_response
 from util.tool.str_tool import add_item
 
 class CompanyHandler(BaseHandler):
     """公司详情页新样式"""
 
     @handle_response
-    @check_sub_company
     @gen.coroutine
     def get(self, did):
 
@@ -43,6 +42,8 @@ class CompanyHandler(BaseHandler):
             abbreviation=company_info.abbreviation,
             description=company_info.introduction,
         )
+
+        self.logger.debug("company info data:{}".format(data))
 
         self.send_json_success(data={
             "company": company,

@@ -44,6 +44,8 @@ class UserCompanyPageService(PageService):
                 conds=conds, fields=['id', 'company_id'])
         team_index_url = make_url(path.COMPANY_TEAM, handler_params, self.settings.platform_host)
 
+        self.logger.debug("get_company_data:{}".format(team_index_url))
+
         # 拼装模板数据
         data.header = temp_data_tool.make_header(company)
         data.relation = ObjectDict({
@@ -61,6 +63,8 @@ class UserCompanyPageService(PageService):
             data.relation.custom_visit_recipe = []
 
         data.templates = yield self._get_company_cms_page(company.id, user, team_index_url)
+
+        self.logger.debug("get_company_data templates:{}".format(data.templates))
 
         data.template_total = len(data.templates)
 
