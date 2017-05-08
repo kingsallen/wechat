@@ -136,9 +136,9 @@ class AggregationPageService(PageService):
                     "degree": gen_degree(int(item.get("_source").get("position").get("degree")), item.get("_source").get("position").get("degree_above")),
                     "experience":  gen_experience(item.get("_source").get("position").get("experience"), item.get("_source").get("position").get("experience_above")),
                     "has_team": True if item.get("_source").get("team", {}) else False,
-                    "team_img": make_static_url(team_img),
-                    "job_img": make_static_url(job_img),
-                    "company_img": make_static_url(company_img),
+                    "team_img": team_img,
+                    "job_img": job_img,
+                    "company_img": company_img,
                     "resources": self._gen_resources(item.get("_source").get("jd_pic",{}), item.get("_source").get("company",{})),
                     "user_status": 0,
                     "city": city,
@@ -178,7 +178,7 @@ class AggregationPageService(PageService):
             impression = ujson.loads(item.get("_source").get("company",{}).get("impression",{}))
             company_img = impression.get("impression0")
 
-        return team_img, job_img, company_img
+        return make_static_url(team_img), make_static_url(job_img), make_static_url(company_img)
 
     @gen.coroutine
     def opt_agg_company(self, es_res):
