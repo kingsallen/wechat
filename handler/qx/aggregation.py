@@ -176,13 +176,8 @@ class AggregationHandler(BaseHandler):
             logo = const.COMPANY_HEADIMG
 
         cover = self.static_url(logo)
-
-
         keywords_title = "【{}】".format(keywords) if keywords else ""
-
         title = "%s职位推荐" % keywords_title
-
-        self.logger.debug("title:{}".format(title))
         description = "微信好友%s推荐%s的职位，点击查看详情。找的就是你！" % (self.current_user.qxuser.nickname or "", keywords_title)
 
         share = ObjectDict({
@@ -191,7 +186,5 @@ class AggregationHandler(BaseHandler):
             "description": description,
             "link": link
         })
-
-        self.logger.debug("share:{}".format(share))
 
         return share
