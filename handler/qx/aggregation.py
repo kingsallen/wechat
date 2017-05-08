@@ -178,7 +178,7 @@ class AggregationHandler(BaseHandler):
         cover = self.static_url(logo)
 
 
-        keywords_title = "【%s】".format(keywords)
+        keywords_title = "【{}】".format(keywords) if keywords else ""
 
         title = "%s职位推荐" % keywords_title
 
