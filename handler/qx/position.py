@@ -156,17 +156,17 @@ class PositionHandler(BaseHandler):
         :return:
         """
         pic_list = list()
-        cover_str = ""
+        cover_str = self.static_url(company_info.logo)
         if company_info.conf_newjd_status != 2:
             # 新 JD
             pic_list += company_info.impression
             pic_list += company_info.banner
         else:
             pic_list_res = list()
-            if pos_item.get("_source").get("jd_pic",{}).get("position_pic"):
-                pic_list_res += pos_item.get("_source").get("jd_pic",{}).get("position_pic")
-            if pos_item.get("_source").get("jd_pic",{}).get("team_pic"):
-                pic_list_res += pos_item.get("_source").get("jd_pic",{}).get("team_pic")
+            if pos_item.get("_source", {}).get("jd_pic",{}).get("position_pic"):
+                pic_list_res += pos_item.get("_source", {}).get("jd_pic",{}).get("position_pic")
+            if pos_item.get("_source", {}).get("jd_pic",{}).get("team_pic"):
+                pic_list_res += pos_item.get("_source", {}).get("jd_pic",{}).get("team_pic")
 
             for item in pic_list_res:
                 pic_list.append(self.static_url(item['res_url']))
