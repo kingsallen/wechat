@@ -26,8 +26,13 @@ class CompanyHandler(BaseHandler):
         company_info = yield self.company_ps.get_company(
             conds={"id": did}, need_conf=True)
 
+        self.logger.debug("company_info:{}".format(company_info))
+
+        if not company_info:
+            return self.write_error(404)
+
         data = yield self.user_company_ps.get_company_data(
-            ObjectDict(), company_info, self.current_user)
+            self.params, company_info, self.current_user)
 
         share = self._share(company_info)
 
