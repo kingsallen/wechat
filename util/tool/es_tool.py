@@ -143,7 +143,7 @@ def init_gamma_basic(query, city, industry, salary_bottom, salary_top, salary_ne
     if (isinstance(salary_bottom, int) and isinstance(salary_top, int)) or salary_negotiable:
         # 存在薪资上下限
         # 存在行业筛选
-        min_max = """min=0;max=1000;"""
+        min_max = """min={};max={};""".format(salary_bottom, salary_top)
         condition = "if(min>bottom&&min<top&&top>bottom){return true;};" \
                  "if(max<top&&max>bottom&&top>bottom){return true;};" \
                  "if(min<bottom&&max>top&&top>bottom){return true;};"
