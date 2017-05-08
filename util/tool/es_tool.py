@@ -180,7 +180,7 @@ def init_gamma_position(position_id):
         "query": ObjectDict({
             "bool": ObjectDict({
                 "must": [{
-                    "terms": {
+                    "term": {
                         "position.id": position_id,
                     }
                 }]
