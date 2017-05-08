@@ -50,7 +50,11 @@ class PositionHandler(BaseHandler):
         team = yield self.team_ps.get_team_by_id(position_info.team_id)
 
         self.logger.debug("[JD]构建职位默认图")
-        position = yield self.aggregation_ps.opt_es_position(position_info.id)
+
+
+
+        # position = yield self.aggregation_ps.opt_es_position(position_info.id)
+        position = yield self.aggregation_ps.opt_es_position(14518)
         self.logger.debug("position:{}".format(position))
         self.logger.debug("position.hits:{}".format(position.hits))
 
