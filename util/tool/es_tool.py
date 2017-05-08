@@ -167,3 +167,45 @@ def init_gamma_basic(query, city, industry, salary_bottom, salary_top, salary_ne
         }))
 
     return init_es_query
+
+def init_gamma_position(position_id):
+
+    """
+    初始化 Gamma 职位详情
+    详情查看: https://wiki.moseeker.com/gamma_0.9_es.md
+    :return:
+    """
+
+    init_es_query = ObjectDict({
+        "query": ObjectDict({
+            "bool": ObjectDict({
+                "must": [{
+                    "terms": {
+                        "position.id": position_id,
+                    }
+                }]
+            })
+        }),
+        "track_scores": "true",
+        "sort": ObjectDict({
+            "_script": ObjectDict({
+                "type": "number",
+                "script": {
+                    "inline": "score =_score;"
+                              "spell=_source.spell;"
+                              "if(spell<4&&spell>0){score=score*1.1}"
+                              "else if(spell>=4&&spell<7){score=score}"
+                              "else if(spell>=7&&spell<10){score=score*0.8}"
+                              "else if(spell>=10&&spell<13){score=score*0.5}"
+                              "else {score=score*0.1};"
+                              "return score;"
+                },
+                "order": "desc"
+            })
+        }),
+
+        "from": 0,
+        "size": 1
+    })
+
+    return init_es_query

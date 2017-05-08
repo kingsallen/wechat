@@ -32,10 +32,8 @@ class PositionHandler(BaseHandler):
             self.logger.debug("[JD]构建基础信息")
             jd_home = yield self._make_jd_home(position_info, company_info)
 
-            jd_detail = ObjectDict()
-            if self.params.home:
-                self.logger.debug("[JD]构建详细信息")
-                jd_detail = yield self._make_jd_detail(position_id, position_info, company_info)
+            self.logger.debug("[JD]构建详细信息")
+            jd_detail = yield self._make_jd_detail(position_id, position_info, company_info)
 
             self.logger.debug("[JD]构建转发信息")
             # yield self._make_share_info(position_info, company_info)
@@ -48,7 +46,16 @@ class PositionHandler(BaseHandler):
 
     @gen.coroutine
     def _make_jd_home(self, position_info, company_info):
+
         team = yield self.team_ps.get_team_by_id(position_info.team_id)
+
+        self.logger.debug("[JD]构建职位默认图")
+        position = yield self.aggregation_ps.opt_es_position(position_info.id)
+        self.logger.debug("position:{}".format(position))
+        self.logger.debug("position.hits:{}".format(position.hits))
+        self.logger.debug("position.hits[0]:{}".format(position.hits[0]))
+        team_img, job_img, company_img = yield self.aggregation_ps.opt_jd_home_img(
+            position.hits[0].get("_source").get("company", {}).get("industry_type"), position.hits[0])
 
         data = ObjectDict(
             id=position_info.id,
@@ -60,6 +67,9 @@ class PositionHandler(BaseHandler):
             city=split(position_info.city, [",","，"]),
             degree=position_info.degree,
             experience=position_info.experience,
+            team_img=team_img,
+            job_img=job_img,
+            company_img=company_img
         )
 
         return data

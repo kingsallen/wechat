@@ -41,7 +41,7 @@ class AggregationPageService(PageService):
     @gen.coroutine
     def opt_es(self, salary_top, salary_bottom, salary_negotiable, keywords, city, industry, page_no, page_size):
         """
-        拼接 ES 搜索
+        拼接 ES 搜索职位
         :param salary_top:
         :param salary_bottom:
         :param salary_negotiable:
@@ -80,7 +80,18 @@ class AggregationPageService(PageService):
             "industry": industry
         })
 
-        es_res = yield self.es_ds.get_es_position(params, page_from, page_size)
+        es_res = yield self.es_ds.get_es_positions(params, page_from, page_size)
+        return es_res
+
+    @gen.coroutine
+    def opt_es_position(self, position_id):
+        """
+        搜索职位
+        :param position_id:
+        :return:
+        """
+
+        es_res = yield self.es_ds.get_es_position(position_id)
         return es_res
 
     @gen.coroutine
@@ -141,6 +152,12 @@ class AggregationPageService(PageService):
 
     @gen.coroutine
     def opt_jd_home_img(self, industry_type, item):
+        """
+        处理JD首页行业默认图
+        :param industry_type:
+        :param item:
+        :return:
+        """
 
         if not industry_type:
             industry_type = 0
