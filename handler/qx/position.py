@@ -53,8 +53,7 @@ class PositionHandler(BaseHandler):
 
 
 
-        # position = yield self.aggregation_ps.opt_es_position(position_info.id)
-        position = yield self.aggregation_ps.opt_es_position(14518)
+        position = yield self.aggregation_ps.opt_es_position(position_info.id)
         self.logger.debug("position:{}".format(position))
         self.logger.debug("position.hits:{}".format(position.hits))
 
