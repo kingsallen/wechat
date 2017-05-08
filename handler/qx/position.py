@@ -51,8 +51,33 @@ class PositionHandler(BaseHandler):
             self.write_error(404)
             return
 
+    def _make_company(self, company_info, job_img):
+        """
+        构造公司信息
+        新JD的话，该图片图使用配的相关团队的第一张图片（非顶部的公司图片，如果没有该图片，
+        则该职位配置里面的第一张图，职位也没有图，则采用套图里面缺省的团队图）。
+        没有新JD，则采用职位列表图；如果没有职位列表图的，则使用缺省的套图里面的图片。
+        :param company_info:
+        :return:
+        """
+
+        if company_info.conf_newjd_status != 2:
+            # 未采用新 JD
+            cover = company_info.banner or job_img
+        else:
+            cover = job_img
+
+        data = ObjectDict(
+            id=company_info.id,
+            abbreviation=company_info.abbreviation,
+            logo=self.static_url(company_info.logo),
+            cover=cover
+        )
+
+        return data
+
     @gen.coroutine
-    def _make_jd_home(self, position_info, company_info, pos_item):
+    def _make_jd_home(self, position_info, pos_item):
 
         team_img, job_img, company_img = yield self.aggregation_ps.opt_jd_home_img(pos_item)
         data = ObjectDict(
@@ -61,7 +86,6 @@ class PositionHandler(BaseHandler):
             salary=position_info.salary,
             team=pos_item.get("_source", {}).get("team",{}).get("name", ""),
             team_id=pos_item.get("_source", {}).get("team",{}).get("id", 0),
-            did=company_info.id,
             city=split(position_info.city, [",","，"]),
             degree=position_info.degree,
             experience=position_info.experience,
@@ -158,7 +182,7 @@ class PositionHandler(BaseHandler):
         pic_list = list()
         cover_str = self.static_url(company_info.logo)
         if company_info.conf_newjd_status != 2:
-            # 新 JD
+            # 为采用新 JD
             pic_list += company_info.impression
             pic_list += company_info.banner
         else:

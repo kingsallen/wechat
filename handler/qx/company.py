@@ -31,9 +31,19 @@ class CompanyHandler(BaseHandler):
 
         share = self._share(company_info)
 
+        company = ObjectDict(
+            id=company_info.id,
+            logo=self.static_url(company_info.logo),
+            name=company_info.name,
+            abbreviation=company_info.abbreviation,
+            description=company_info.introduction,
+        )
+
         self.send_json_success(data={
-            "team": data.templates,
-            "share": share
+            "company": company,
+            "templates": data.templates,
+            "share": share,
+            "cover": "aaa"
         })
 
     def _share(self, company):
@@ -46,32 +56,3 @@ class CompanyHandler(BaseHandler):
         })
 
         return default
-
-
-class CompanyInfoHandler(BaseHandler):
-    """公司详情页老样式"""
-
-    @handle_response
-    @gen.coroutine
-    def get(self, did):
-
-        company_info = yield self.company_ps.get_company(
-            conds={"id": did}, need_conf=True)
-
-        company_data = ObjectDict()
-        company = ObjectDict({
-            "abbreviation": company_info.abbreviation,
-            "name": company_info.name,
-            "logo": self.static_url(company_info.logo),
-            "industry": company_info.industry,
-            "scale_name": company_info.scale_name,
-            "homepage": company_info.homepage,
-            "introduction": company_info.introduction,
-            "impression": company_info.impression_processed
-        })
-
-        add_item(company_data, "company", company)
-        self.render_page(
-            template_name='company/info_old.html',
-            data=company_data,
-            meta_title=const.PAGE_COMPANY_INFO)
