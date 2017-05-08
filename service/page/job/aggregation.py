@@ -157,8 +157,12 @@ class AggregationPageService(PageService):
         :return:
         """
 
-        if not item.get("_source", {}).get("company", {}).get("industry_type", None):
-            industry_type = 0
+        industry_type = 0
+        if item.get("_source", {}).get("company", {}).get("industry_type", None):
+            industry_type = item.get("_source", {}).get("company", {}).get("industry_type")
+
+        self.logger.debug("opt_jd_home_img item:{}".format(item))
+        self.logger.debug("opt_jd_home_img:{}".format(industry_type))
 
         team_img = qx_const.JD_BACKGROUND_IMG.get(industry_type).get("team_img")
         job_img = qx_const.JD_BACKGROUND_IMG.get(industry_type).get("job_img")
