@@ -63,8 +63,8 @@ class AggregationPageService(PageService):
             page_size = 300
 
         # 处理 salley_top, salley_bottom
-        salary_top = int(salary_top/1000) if salary_top else None
-        salary_bottom = int(salary_bottom/1000) if salary_bottom else None
+        salary_top = int(int(salary_top)/1000) if salary_top else None
+        salary_bottom = int(int(salary_bottom)/1000) if salary_bottom else None
 
         # 如果 salary_top,salary_bottom都为30k，那么salary_top转为999.数据库中上限为999
         if salary_top and salary_bottom \
