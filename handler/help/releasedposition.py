@@ -28,7 +28,7 @@ class ReleasedPositionHandler(BaseHandler):
 
         # 暂未注册雇主平台
         if not hr_info or hr_info.company_id == 0:
-            self.render(template_name="weixin/wx_published_position_list/wx_published_position_list.html", positions='')
+            self.render(template_name="refer/weixin/wx_published_position_list/wx_published_position_list.html", positions='')
             return
 
         pageSize = self.params.pageSize or 20
