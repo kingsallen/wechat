@@ -36,9 +36,23 @@ class ThriftPositionDataService(DataService):
         :return:
         """
 
-        self.logger.debug("[thrift]get_aggregation_banner company_id: %s" % company_id)
-        self.logger.debug("[thrift]get_aggregation_banner page_no: %s" % page_no)
-        self.logger.debug("[thrift]get_aggregation_banner page_size: %s" % page_size)
+        self.logger.debug("[thrift]get_company_positions company_id: %s" % company_id)
+        self.logger.debug("[thrift]get_company_positions page_no: %s" % page_no)
+        self.logger.debug("[thrift]get_company_positions page_size: %s" % page_size)
         ret = yield self.position_service_cilent.companyHotPositionDetailsList(int(company_id), int(page_no), int(page_size))
         self.logger.debug("[thrift]get_company_positions: %s" % ret)
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def get_position_positions(self, position_id, page_no, page_size):
+        """
+        查找聚合号职位相似职位，调用 thrift 接口
+        :return:
+        """
+
+        self.logger.debug("[thrift]get_position_positions company_id: %s" % position_id)
+        self.logger.debug("[thrift]get_position_positions page_no: %s" % page_no)
+        self.logger.debug("[thrift]get_position_positions page_size: %s" % page_size)
+        ret = yield self.position_service_cilent.similarityPositionDetailsList(int(position_id), int(page_no), int(page_size))
+        self.logger.debug("[thrift]get_position_positions: %s" % ret)
         raise gen.Return(ret)

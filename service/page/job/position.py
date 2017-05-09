@@ -2,14 +2,16 @@
 
 from tornado import gen
 
-from service.page.base import PageService
 import conf.common as const
+from service.page.base import PageService
 from service.page.user.user import UserPageService
 from util.common import ObjectDict
 from util.common.cipher import encode_id
 from util.tool.date_tool import jd_update_date, str_2_date
 from util.tool.str_tool import gen_salary, split, set_literl, gen_degree, gen_experience
+from util.tool.url_tool import make_static_url
 from util.tool.temp_data_tool import make_position_detail_cms, make_team, template3
+
 
 
 class PositionPageService(PageService):
@@ -369,3 +371,32 @@ class PositionPageService(PageService):
         pid_teamid_dict = {e.id: e.team_id for e in pid_teamid_list}
         self.logger.debug('pid_teamid_dict: %s' % pid_teamid_dict)
         return pid_teamid_dict
+
+    @gen.coroutine
+    def get_position_positions(self, position_id, page_no=1, page_size=5):
+        """
+        gamma JD页，职位相似职位
+        :param company_id:
+        :param page_no:
+        :param page_size:
+        :return:
+        """
+
+        res_list = list()
+        ret = yield self.thrift_position_ds.get_position_positions(position_id, page_no, page_size)
+        if not ret.data:
+            return res_list
+
+        self.logger.debug("get_position_positions:{}".format(ret))
+
+        for item in ret.data:
+            pos = ObjectDict()
+            pos.title=item.title
+            pos.id=item.id
+            pos.salary=gen_salary(item.salaryTop, item.salaryBottom)
+            pos.image_url=make_static_url(item.resUrl)
+            pos.city=split(item.city, [",","，"])
+            pos.team_name=item.teamName
+            res_list.append(pos)
+
+        return res_list

@@ -223,7 +223,7 @@ class CompanyPageService(PageService):
     @gen.coroutine
     def get_company_positions(self, company_id, page_no=1, page_size=5):
         """
-        gamma 公司主页，企业热招滋味
+        gamma 公司主页，企业热招职位
         :param company_id:
         :param page_no:
         :param page_size:

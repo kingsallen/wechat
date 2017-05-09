@@ -53,13 +53,15 @@ class CompanyHandler(BaseHandler):
             basic_tem = self._make_basicinfo_template(company_info)
             templates.append(intro_tem)
             templates.append(basic_tem)
-            templates.append(hot_positions)
+            if hot_positions:
+                templates.append(hot_positions)
         else:
             # 构造公司企业新主页
             company_data = yield self.user_company_ps.get_company_data(
                 self.params, company_info, self.current_user)
             templates = company_data.templates
-            templates.append(hot_positions)
+            if hot_positions:
+                templates.append(hot_positions)
             cover = company_data.header.banner
 
         data.update({
@@ -101,11 +103,16 @@ class CompanyHandler(BaseHandler):
         """
 
         ret = yield self.company_ps.get_company_positions(company_id)
+
+        if not ret:
+            return None
+
         default = ObjectDict(
             type=6,
             title="该企业热招职位",
             data=ret
         )
+
         return default
 
     def _make_intro_template(self, company_info):
