@@ -20,12 +20,16 @@ class CompanyHandler(BaseHandler):
         if not company_info:
             return self.write_error(404)
 
-        # 构造公司企业主页
-        data = yield self.user_company_ps.get_company_data(
-            self.params, company_info, self.current_user)
+        if self.params.page_no > 1:
+            # 热招职位翻页
+            ret = yield self._make_position_list(did, self.params.page_no)
+            self.send_json_success(data=ObjectDict(
+                result=ret
+            ))
+            return
 
         # 构造企业热招企业列表
-        hot_positions = yield self._make_position_list(did)
+        hot_positions = yield self._make_position_list_template(did)
 
         share = self._share(company_info)
         company = ObjectDict(
@@ -36,12 +40,21 @@ class CompanyHandler(BaseHandler):
             description=company_info.introduction,
         )
 
-        self.send_json_success(data={
-            "company": company,
-            "templates": data.templates,
-            "share": share,
-            "cover": data.header.banner
-        })
+        if company_info.conf_newjd_status != 2:
+            # 老 JD 样式
+
+        else:
+
+            # 构造公司企业新主页
+            data = yield self.user_company_ps.get_company_data(
+                self.params, company_info, self.current_user)
+            data.templates.append(hot_positions)
+            self.send_json_success(data={
+                "company": company,
+                "templates": data.templates,
+                "share": share,
+                "cover": data.header.banner
+            })
 
     def _share(self, company):
 
@@ -56,6 +69,30 @@ class CompanyHandler(BaseHandler):
         return default
 
     @gen.coroutine
-    def _make_position_list(self, company_id):
+    def _make_position_list(self, company_id, page_no):
+        """
+        热招职位分页
+        :param company_id:
+        :param page_no:
+        :param page_size:
+        :return:
+        """
+        ret = yield self.company_ps.get_company_positions(company_id, page_no)
+        return ret
+
+    @gen.coroutine
+    def _make_position_list_template(self, company_id):
+        """
+        构造该企业热招职位，拼装 templates
+        :param company_id:
+        :return:
+        """
 
         ret = yield self.company_ps.get_company_positions(company_id)
+        default = ObjectDict(
+            type=6,
+            title="该企业热招职位",
+            data=ret
+        )
+        return default
+
