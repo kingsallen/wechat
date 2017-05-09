@@ -152,8 +152,7 @@ TEAMNAME_CUSTOM_DEFAULT = "团队"
 # 招聘类型
 CANDIDATE_SOURCE = {
     "0": "社招",
-    "1": "校招",
-    "2": "定向招聘"
+    "1": "校招"
 }
 
 # 工作性质
