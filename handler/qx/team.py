@@ -23,6 +23,9 @@ class TeamDetailHandler(BaseHandler):
 
         current_company = yield self.company_ps.get_company(conds={"id": team.company_id}, need_conf=True)
 
+        self.logger.debug("Team team:{}".format(team))
+        self.logger.debug("Team current_company:{}".format(current_company))
+
         data = yield self.team_ps.get_team_detail(
             self.current_user, current_company, team, self.params)
 
