@@ -237,6 +237,8 @@ class CompanyPageService(PageService):
             return res_list
 
         for item in ret.data:
+
+            self.logger.debug("item:{}".format(item))
             pos = ObjectDict()
             pos.title=item.title,
             pos.id=item.id,
