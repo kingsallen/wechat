@@ -54,15 +54,12 @@ class PositionHandler(BaseHandler):
                 modules=jd_detail
             ))
         else:
-            self.write_error(404)
+            self.send_json_error()
             return
 
     def _make_company(self, company_info):
         """
         构造公司信息
-        新JD的话，该图片图使用配的相关团队的第一张图片（非顶部的公司图片，如果没有该图片，
-        则该职位配置里面的第一张图，职位也没有图，则采用套图里面缺省的团队图）。
-        没有新JD，则采用职位列表图；如果没有职位列表图的，则使用缺省的套图里面的图片。
         :param company_info:
         :return:
         """

@@ -18,7 +18,8 @@ class CompanyHandler(BaseHandler):
             conds={"id": int(did)}, need_conf=True)
 
         if not company_info:
-            return self.write_error(404)
+            self.send_json_error()
+            return
 
         if self.params.page_no:
             # 热招职位翻页

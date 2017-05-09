@@ -1,5 +1,4 @@
 # coding=utf-8
-# Copyright 2016 MoSeeker
 
 """
 :author 马超（machao@moseeker.com）
@@ -17,6 +16,7 @@ from util.tool.url_tool import make_url
 
 
 class TeamPageService(PageService):
+
     def __init__(self):
         super().__init__()
 
@@ -110,25 +110,14 @@ class TeamPageService(PageService):
         position_fields = 'id title status city team_id \
                            salary_bottom salary_top department'.split()
 
-        self.logger.debug("get_team_detail user:{}".format(user))
-        self.logger.debug("get_team_detail company:{}".format(company))
-        self.logger.debug("get_team_detail team:{}".format(team))
-        self.logger.debug("get_team_detail handler_param:{}".format(handler_param))
-        self.logger.debug("get_team_detail position_num:{}".format(position_num))
-
         if company.id != user.company.id:
             # 子公司 -> 子公司所属hr(pulishers) -> positions -> teams
             company_positions = yield self._get_sub_company_positions(
                 company.id, position_fields)
 
             team_positions = company_positions[:position_num]
-
-            self.logger.debug("team_positions:{}".format(team_positions))
-
             team_id_list = list(set([p.team_id for p in company_positions
                                      if p.team_id != team.id]))
-            self.logger.debug("team_id_list:{}".format(team_id_list))
-
             other_teams = yield self._get_sub_company_teams(
                 company_id=None, team_ids=team_id_list)
         else:
@@ -260,15 +249,11 @@ class TeamPageService(PageService):
         :return: [object_of_hr_team, ...]
         """
 
-        self.logger.debug("_get_sub_company_teams company_id:{}".format(company_id))
-        self.logger.debug("_get_sub_company_teams team_ids:{}".format(team_ids))
-
         if team_ids is None:
             publishers = yield self.hr_company_account_ds.get_company_accounts_list(
                 conds={'company_id': company_id}, fields=None)
             publisher_id_tuple = tuple([p.account_id for p in publishers])
 
-            self.logger.debug("_get_sub_company_teams publisher_id_tuple:{}".format(publisher_id_tuple))
             if not publisher_id_tuple:
                 raise gen.Return([])
 
@@ -278,18 +263,14 @@ class TeamPageService(PageService):
                     .replace(',)', ')'),
                 fields=['team_id'], options=['DISTINCT'])
             team_id_tuple = tuple([t.team_id for t in team_ids])
-            self.logger.debug("_get_sub_company_teams team_id_tuple 1:{}".format(team_id_tuple))
         else:
             team_id_tuple = tuple(team_ids)
-            self.logger.debug("_get_sub_company_teams team_id_tuple 2:{}".format(team_id_tuple))
 
         if not team_id_tuple:
             raise gen.Return([])
 
-        self.logger.debug("_get_sub_company_teams team_id_tuple 3:{}".format(team_id_tuple))
         teams = yield self.hr_team_ds.get_team_list(
             conds='id in {} and is_show=1 and disable=0'.format(
                 team_id_tuple).replace(',)', ')'))
-        self.logger.debug("_get_sub_company_teams teams:{}".format(teams))
 
         raise gen.Return(teams)
