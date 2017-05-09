@@ -61,5 +61,5 @@ class ReleasedPositionHandler(BaseHandler):
 
             item['resume_num'] = count_int
 
-        self.render("weixin/wx_published_position_list/wx_published_position_list.html",
+        self.render(template_name="refer/weixin/wx_published_position_list/wx_published_position_list.html",
                     positions = positions_list)
