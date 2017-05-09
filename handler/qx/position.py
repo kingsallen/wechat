@@ -45,10 +45,14 @@ class PositionHandler(BaseHandler):
             res_cmp = yield self._make_company(company_info)
 
             self.logger.debug("[JD]构建转发信息")
-            share = yield self._make_share_info(position_info, company_info, position_es)
+            res_share = yield self._make_share_info(position_info, company_info, position_es)
 
-            data.update(ObjectDict(share=share))
-            self.send_json_success(data=data)
+            self.send_json_success(data=ObjectDict(
+                position=res_position,
+                company=res_cmp,
+                share=res_share,
+                modules=jd_detail
+            ))
         else:
             self.write_error(404)
             return
@@ -117,6 +121,7 @@ class PositionHandler(BaseHandler):
 
         return position
 
+    @gen.coroutine
     def _make_jd_detail(self, position_info, pos_item):
         """
         构造职位的 module 信息
