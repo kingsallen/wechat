@@ -48,7 +48,7 @@ WX_USER_UNSUBSCRIBED = 0
 ENV = "new_wechat"
 ENV_PLATFORM = "platform"
 ENV_QX = "qx"
-ENV_HELP = "help"
+ENV_HELP = "helper"
 
 """appid for infra"""
 APPID = {
