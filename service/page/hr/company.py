@@ -239,6 +239,9 @@ class CompanyPageService(PageService):
         for item in ret.data:
 
             self.logger.debug("item:{}".format(item))
+            self.logger.debug("item.title:{}".format(item.title))
+            self.logger.debug("item.PositionDetails:{}".format(item.PositionDetails))
+            self.logger.debug("item.PositionDetails.title:{}".format(item.PositionDetails.title))
             pos = ObjectDict()
             pos.title=item.title,
             pos.id=item.id,
