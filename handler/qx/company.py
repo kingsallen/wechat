@@ -40,21 +40,33 @@ class CompanyHandler(BaseHandler):
             description=company_info.introduction,
         )
 
+        data = ObjectDict(
+            company=company,
+            share=share,
+        )
+
+        templates = list()
         if company_info.conf_newjd_status != 2:
             # 老 JD 样式
-
+            cover = company_info.banner
+            intro_tem = self._make_intro_template(company_info)
+            basic_tem = self._make_basicinfo_template(company_info)
+            templates.append(intro_tem)
+            templates.append(basic_tem)
+            templates.append(hot_positions)
         else:
-
             # 构造公司企业新主页
             data = yield self.user_company_ps.get_company_data(
                 self.params, company_info, self.current_user)
-            data.templates.append(hot_positions)
-            self.send_json_success(data={
-                "company": company,
-                "templates": data.templates,
-                "share": share,
-                "cover": data.header.banner
-            })
+            templates = data.templates
+            templates.append(hot_positions)
+            cover = data.header.banner
+
+        data.update({
+            "cover": cover,
+            "templates": templates
+        })
+        self.send_json_success(data=data)
 
     def _share(self, company):
 
@@ -96,3 +108,52 @@ class CompanyHandler(BaseHandler):
         )
         return default
 
+    def _make_intro_template(self, company_info):
+        """
+        构造企业介绍，拼装 templates
+        :param company_id:
+        :return:
+        """
+
+        default = ObjectDict(
+            type=7,
+            title="企业介绍",
+            data= list(company_info.introduction)
+        )
+        return default
+
+    def _make_basicinfo_template(self, company_info):
+        """
+        构造企业基本信息，拼装 templates
+        :param company_id:
+        :return:
+        """
+
+        data = list()
+        if company_info.name:
+            data.append({
+                "name": "公司全称",
+                "value": company_info.name,
+            })
+        if company_info.industry:
+            data.append({
+                "name": "所属行业",
+                "value": company_info.industry,
+            })
+        if company_info.scale:
+            data.append({
+                "name": "企业规模",
+                "value": "{}人".format(company_info.scale),
+            })
+        if company_info.homepage:
+            data.append({
+                "name": "官网地址",
+                "value": company_info.homepage,
+            })
+
+        default = ObjectDict(
+            type=7,
+            title="企业介绍",
+            data=data
+        )
+        return default
