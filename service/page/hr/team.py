@@ -259,11 +259,16 @@ class TeamPageService(PageService):
         :param team_ids:
         :return: [object_of_hr_team, ...]
         """
+
+        self.logger.debug("_get_sub_company_teams company_id:{}".format(company_id))
+        self.logger.debug("_get_sub_company_teams team_ids:{}".format(team_ids))
+
         if team_ids is None:
             publishers = yield self.hr_company_account_ds.get_company_accounts_list(
                 conds={'company_id': company_id}, fields=None)
             publisher_id_tuple = tuple([p.account_id for p in publishers])
 
+            self.logger.debug("_get_sub_company_teams publisher_id_tuple:{}".format(publisher_id_tuple))
             if not publisher_id_tuple:
                 raise gen.Return([])
 
@@ -273,13 +278,18 @@ class TeamPageService(PageService):
                     .replace(',)', ')'),
                 fields=['team_id'], options=['DISTINCT'])
             team_id_tuple = tuple([t.team_id for t in team_ids])
+            self.logger.debug("_get_sub_company_teams team_id_tuple 1:{}".format(team_id_tuple))
         else:
             team_id_tuple = tuple(team_ids)
+            self.logger.debug("_get_sub_company_teams team_id_tuple 2:{}".format(team_id_tuple))
 
         if not team_id_tuple:
-            gen.Return([])
+            raise gen.Return([])
+
+        self.logger.debug("_get_sub_company_teams team_id_tuple 3:{}".format(team_id_tuple))
         teams = yield self.hr_team_ds.get_team_list(
             conds='id in {} and is_show=1 and disable=0'.format(
                 team_id_tuple).replace(',)', ')'))
+        self.logger.debug("_get_sub_company_teams teams:{}".format(teams))
 
         raise gen.Return(teams)
