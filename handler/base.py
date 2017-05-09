@@ -235,6 +235,8 @@ class BaseHandler(MetaBaseHandler):
                 self.logger.error("wechat_signature missing")
                 raise NoSignatureError()
 
+
+
         wechat = yield self.wechat_ps.get_wechat(conds={
             "signature": signature
         })
