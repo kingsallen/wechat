@@ -242,11 +242,11 @@ class CompanyPageService(PageService):
             self.logger.debug("item.title:{}".format(item.title))
             self.logger.debug("item.title type:{}".format(type(item.title)))
             pos = ObjectDict()
-            pos.title=item.title,
-            pos.id=item.id,
-            pos.salary=gen_salary(item.salaryTop, item.salaryBottom),
-            pos.image_url=make_static_url(item.resUrl),
-            pos.city=split(item.city, [",","，"]),
+            pos.title=item.title
+            pos.id=item.id
+            pos.salary=gen_salary(item.salaryTop, item.salaryBottom)
+            pos.image_url=make_static_url(item.resUrl)
+            pos.city=split(item.city, [",","，"])
             pos.team_name=item.teamName
             self.logger.debug("pos:{}".format(pos))
             res_list.append(pos)
