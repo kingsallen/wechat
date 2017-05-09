@@ -1,5 +1,4 @@
 # coding=utf-8
-# Copyright 2016 MoSeeker
 
 """
 :author 马超（machao@moseeker.com）
@@ -41,6 +40,7 @@ class CompanyVisitReqHandler(BaseHandler):
 
 
 class CompanyFollowHandler(BaseHandler):
+
     @handle_response
     @check_sub_company
     @authenticated

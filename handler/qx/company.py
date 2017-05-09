@@ -1,22 +1,14 @@
 # coding=utf-8
-# Copyright 2016 MoSeeker
-
-"""
-:author 马超（machao@moseeker.com）
-:date 2016.10.11
-
-"""
 
 from tornado import gen
 
-import conf.common as const
+import conf.path as path
 from handler.base import BaseHandler
 from util.common import ObjectDict
 from util.common.decorator import handle_response
-from util.tool.str_tool import add_item
 
 class CompanyHandler(BaseHandler):
-    """公司详情页新样式"""
+    """Gamma公司详情页新样式"""
 
     @handle_response
     @gen.coroutine
@@ -25,16 +17,14 @@ class CompanyHandler(BaseHandler):
         company_info = yield self.company_ps.get_company(
             conds={"id": did}, need_conf=True)
 
-        self.logger.debug("company_info:{}".format(company_info))
-
         if not company_info:
             return self.write_error(404)
 
+        # 构造公司企业主页
         data = yield self.user_company_ps.get_company_data(
             self.params, company_info, self.current_user)
 
         share = self._share(company_info)
-
         company = ObjectDict(
             id=company_info.id,
             logo=self.static_url(company_info.logo),
@@ -43,22 +33,21 @@ class CompanyHandler(BaseHandler):
             description=company_info.introduction,
         )
 
-        self.logger.debug("company info data:{}".format(data))
-
         self.send_json_success(data={
             "company": company,
             "templates": data.templates,
             "share": share,
-            "cover": "aaa"
+            "cover": data.header.banner
         })
 
     def _share(self, company):
+
         company_name = company.abbreviation or company.name
         default = ObjectDict({
-            'cover': self.static_url(company.get('logo', '')),
-            'title': '关于{}, 你想知道的都在这里'.format(company_name),
-            'description': '这可能是你人生的下一站! 看清企业全局, 然后定位自己',
-            'link': self.fullurl()
+            'cover': self.static_url(company.logo),
+            'title': '{}的公司介绍'.format(company_name),
+            'description': '微信好友{}推荐，点击查看公司介绍。打开有公司职位列表哦！'.format(self.current_user.qxuser.nickname),
+            'link': self.make_url(path.GAMMA_POSITION_COMPANY.format(company.id), fr="recruit", did=company.id)
         })
 
         return default
