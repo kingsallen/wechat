@@ -109,6 +109,13 @@ class TeamPageService(PageService):
         # 根据母公司，子公司区分对待，获取对应的职位信息，其他团队信息
         position_fields = 'id title status city team_id \
                            salary_bottom salary_top department'.split()
+
+        self.logger.debug("get_team_detail user:{}".format(user))
+        self.logger.debug("get_team_detail company:{}".format(company))
+        self.logger.debug("get_team_detail team:{}".format(team))
+        self.logger.debug("get_team_detail handler_param:{}".format(handler_param))
+        self.logger.debug("get_team_detail position_num:{}".format(position_num))
+
         if company.id != user.company.id:
             # 子公司 -> 子公司所属hr(pulishers) -> positions -> teams
             company_positions = yield self._get_sub_company_positions(
@@ -116,8 +123,12 @@ class TeamPageService(PageService):
 
             team_positions = company_positions[:position_num]
 
+            self.logger.debug("team_positions:{}".format(team_positions))
+
             team_id_list = list(set([p.team_id for p in company_positions
                                      if p.team_id != team.id]))
+            self.logger.debug("team_id_list:{}".format(team_id_list))
+
             other_teams = yield self._get_sub_company_teams(
                 company_id=None, team_ids=team_id_list)
         else:
