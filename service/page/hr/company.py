@@ -240,8 +240,7 @@ class CompanyPageService(PageService):
 
             self.logger.debug("item:{}".format(item))
             self.logger.debug("item.title:{}".format(item.title))
-            self.logger.debug("item.PositionDetails:{}".format(item.PositionDetails))
-            self.logger.debug("item.PositionDetails.title:{}".format(item.PositionDetails.title))
+            self.logger.debug("item.title type:{}".format(type(item.title)))
             pos = ObjectDict()
             pos.title=item.title,
             pos.id=item.id,
@@ -249,7 +248,9 @@ class CompanyPageService(PageService):
             pos.image_url=make_static_url(item.resUrl),
             pos.city=split(item.city, [",","，"]),
             pos.team_name=item.teamName
+            self.logger.debug("pos:{}".format(pos))
             res_list.append(pos)
 
+        self.logger.debug("res_list:{}".format(res_list))
         return res_list
 
