@@ -15,7 +15,7 @@ class CompanyHandler(BaseHandler):
     def get(self, did):
 
         company_info = yield self.company_ps.get_company(
-            conds={"id": did}, need_conf=True)
+            conds={"id": int(did)}, need_conf=True)
 
         if not company_info:
             return self.write_error(404)
@@ -23,6 +23,9 @@ class CompanyHandler(BaseHandler):
         # 构造公司企业主页
         data = yield self.user_company_ps.get_company_data(
             self.params, company_info, self.current_user)
+
+        # 构造企业热招企业列表
+        hot_positions = yield self._make_position_list(did)
 
         share = self._share(company_info)
         company = ObjectDict(
@@ -47,7 +50,12 @@ class CompanyHandler(BaseHandler):
             'cover': self.static_url(company.logo),
             'title': '{}的公司介绍'.format(company_name),
             'description': '微信好友{}推荐，点击查看公司介绍。打开有公司职位列表哦！'.format(self.current_user.qxuser.nickname),
-            'link': self.make_url(path.GAMMA_POSITION_COMPANY.format(company.id), fr="recruit", did=company.id)
+            'link': self.make_url(path.GAMMA_POSITION_COMPANY.format(company.id), fr="recruit", did=str(company.id))
         })
 
         return default
+
+    @gen.coroutine
+    def _make_position_list(self, company_id):
+
+        ret = yield self.company_ps.get_company_positions(company_id)

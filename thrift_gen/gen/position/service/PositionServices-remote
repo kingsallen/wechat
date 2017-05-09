@@ -39,6 +39,8 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('  WechatShareData getShareInfo(i32 hb_config_id)')
     print('  CampaignHeadImageVO headImage()')
     print('  PositionDetailsVO positionDetails(i32 positionId)')
+    print('  PositionDetailsListVO companyHotPositionDetailsList(i32 companyId, i32 page, i32 per_age)')
+    print('  PositionDetailsListVO similarityPositionDetailsList(i32 pid, i32 page, i32 per_age)')
     print('')
     sys.exit(0)
 
@@ -207,6 +209,18 @@ elif cmd == 'positionDetails':
         print('positionDetails requires 1 args')
         sys.exit(1)
     pp.pprint(client.positionDetails(eval(args[0]),))
+
+elif cmd == 'companyHotPositionDetailsList':
+    if len(args) != 3:
+        print('companyHotPositionDetailsList requires 3 args')
+        sys.exit(1)
+    pp.pprint(client.companyHotPositionDetailsList(eval(args[0]), eval(args[1]), eval(args[2]),))
+
+elif cmd == 'similarityPositionDetailsList':
+    if len(args) != 3:
+        print('similarityPositionDetailsList requires 3 args')
+        sys.exit(1)
+    pp.pprint(client.similarityPositionDetailsList(eval(args[0]), eval(args[1]), eval(args[2]),))
 
 else:
     print('Unrecognized method %s' % cmd)

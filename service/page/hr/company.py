@@ -219,3 +219,15 @@ class CompanyPageService(PageService):
             return res.reward
 
         return 0
+
+    @gen.coroutine
+    def get_company_positions(self, company_id, page_no=1, page_size=10):
+
+        res_list = list()
+        ret = yield self.thrift_position_ds.get_company_positions(company_id, page_no, page_size)
+        self.logger.debug("get_company_positions ret:{}".format(ret))
+        if not ret.data:
+            return res_list
+
+        # for pos in ret.data:
+        #

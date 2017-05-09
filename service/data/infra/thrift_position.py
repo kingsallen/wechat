@@ -28,3 +28,14 @@ class ThriftPositionDataService(DataService):
         ret = yield self.position_service_cilent.headImage()
         self.logger.debug("[thrift]get_aggregation_banner: %s" % ret)
         raise gen.Return(ret)
+
+    @gen.coroutine
+    def get_company_positions(self, company_id, page_no, page_size):
+        """
+        查找聚合号企业热招职位，调用 thrift 接口
+        :return:
+        """
+
+        ret = yield self.position_service_cilent.companyHotPositionDetailsList(int(company_id), int(page_no), int(page_size))
+        self.logger.debug("[thrift]get_company_positions: %s" % ret)
+        raise gen.Return(ret)

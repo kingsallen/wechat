@@ -125,6 +125,24 @@ class Iface(object):
         """
         pass
 
+    def companyHotPositionDetailsList(self, companyId, page, per_age):
+        """
+        Parameters:
+         - companyId
+         - page
+         - per_age
+        """
+        pass
+
+    def similarityPositionDetailsList(self, pid, page, per_age):
+        """
+        Parameters:
+         - pid
+         - page
+         - per_age
+        """
+        pass
+
 
 class Client(Iface):
     def __init__(self, transport, iprot_factory, oprot_factory=None):
@@ -645,6 +663,78 @@ class Client(Iface):
             return result.success
         raise TApplicationException(TApplicationException.MISSING_RESULT, "positionDetails failed: unknown result")
 
+    def companyHotPositionDetailsList(self, companyId, page, per_age):
+        """
+        Parameters:
+         - companyId
+         - page
+         - per_age
+        """
+        self._seqid += 1
+        future = self._reqs[self._seqid] = concurrent.Future()
+        self.send_companyHotPositionDetailsList(companyId, page, per_age)
+        return future
+
+    def send_companyHotPositionDetailsList(self, companyId, page, per_age):
+        oprot = self._oprot_factory.getProtocol(self._transport)
+        oprot.writeMessageBegin('companyHotPositionDetailsList', TMessageType.CALL, self._seqid)
+        args = companyHotPositionDetailsList_args()
+        args.companyId = companyId
+        args.page = page
+        args.per_age = per_age
+        args.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def recv_companyHotPositionDetailsList(self, iprot, mtype, rseqid):
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = companyHotPositionDetailsList_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "companyHotPositionDetailsList failed: unknown result")
+
+    def similarityPositionDetailsList(self, pid, page, per_age):
+        """
+        Parameters:
+         - pid
+         - page
+         - per_age
+        """
+        self._seqid += 1
+        future = self._reqs[self._seqid] = concurrent.Future()
+        self.send_similarityPositionDetailsList(pid, page, per_age)
+        return future
+
+    def send_similarityPositionDetailsList(self, pid, page, per_age):
+        oprot = self._oprot_factory.getProtocol(self._transport)
+        oprot.writeMessageBegin('similarityPositionDetailsList', TMessageType.CALL, self._seqid)
+        args = similarityPositionDetailsList_args()
+        args.pid = pid
+        args.page = page
+        args.per_age = per_age
+        args.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def recv_similarityPositionDetailsList(self, iprot, mtype, rseqid):
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = similarityPositionDetailsList_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "similarityPositionDetailsList failed: unknown result")
+
 
 class Processor(Iface, TProcessor):
     def __init__(self, handler):
@@ -665,6 +755,8 @@ class Processor(Iface, TProcessor):
         self._processMap["getShareInfo"] = Processor.process_getShareInfo
         self._processMap["headImage"] = Processor.process_headImage
         self._processMap["positionDetails"] = Processor.process_positionDetails
+        self._processMap["companyHotPositionDetailsList"] = Processor.process_companyHotPositionDetailsList
+        self._processMap["similarityPositionDetailsList"] = Processor.process_similarityPositionDetailsList
 
     def process(self, iprot, oprot):
         (name, type, seqid) = iprot.readMessageBegin()
@@ -856,6 +948,30 @@ class Processor(Iface, TProcessor):
         result = positionDetails_result()
         result.success = yield gen.maybe_future(self._handler.positionDetails(args.positionId))
         oprot.writeMessageBegin("positionDetails", TMessageType.REPLY, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    @gen.coroutine
+    def process_companyHotPositionDetailsList(self, seqid, iprot, oprot):
+        args = companyHotPositionDetailsList_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = companyHotPositionDetailsList_result()
+        result.success = yield gen.maybe_future(self._handler.companyHotPositionDetailsList(args.companyId, args.page, args.per_age))
+        oprot.writeMessageBegin("companyHotPositionDetailsList", TMessageType.REPLY, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    @gen.coroutine
+    def process_similarityPositionDetailsList(self, seqid, iprot, oprot):
+        args = similarityPositionDetailsList_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = similarityPositionDetailsList_result()
+        result.success = yield gen.maybe_future(self._handler.similarityPositionDetailsList(args.pid, args.page, args.per_age))
+        oprot.writeMessageBegin("similarityPositionDetailsList", TMessageType.REPLY, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -2719,6 +2835,294 @@ class positionDetails_result(object):
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
         oprot.writeStructBegin('positionDetails_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.STRUCT, 0)
+            self.success.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class companyHotPositionDetailsList_args(object):
+    """
+    Attributes:
+     - companyId
+     - page
+     - per_age
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'companyId', None, None, ),  # 1
+        (2, TType.I32, 'page', None, None, ),  # 2
+        (3, TType.I32, 'per_age', None, None, ),  # 3
+    )
+
+    def __init__(self, companyId=None, page=None, per_age=None,):
+        self.companyId = companyId
+        self.page = page
+        self.per_age = per_age
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.companyId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.I32:
+                    self.page = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.I32:
+                    self.per_age = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('companyHotPositionDetailsList_args')
+        if self.companyId is not None:
+            oprot.writeFieldBegin('companyId', TType.I32, 1)
+            oprot.writeI32(self.companyId)
+            oprot.writeFieldEnd()
+        if self.page is not None:
+            oprot.writeFieldBegin('page', TType.I32, 2)
+            oprot.writeI32(self.page)
+            oprot.writeFieldEnd()
+        if self.per_age is not None:
+            oprot.writeFieldBegin('per_age', TType.I32, 3)
+            oprot.writeI32(self.per_age)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class companyHotPositionDetailsList_result(object):
+    """
+    Attributes:
+     - success
+    """
+
+    thrift_spec = (
+        (0, TType.STRUCT, 'success', (thrift_gen.gen.position.struct.ttypes.PositionDetailsListVO, thrift_gen.gen.position.struct.ttypes.PositionDetailsListVO.thrift_spec), None, ),  # 0
+    )
+
+    def __init__(self, success=None,):
+        self.success = success
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRUCT:
+                    self.success = thrift_gen.gen.position.struct.ttypes.PositionDetailsListVO()
+                    self.success.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('companyHotPositionDetailsList_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.STRUCT, 0)
+            self.success.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class similarityPositionDetailsList_args(object):
+    """
+    Attributes:
+     - pid
+     - page
+     - per_age
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'pid', None, None, ),  # 1
+        (2, TType.I32, 'page', None, None, ),  # 2
+        (3, TType.I32, 'per_age', None, None, ),  # 3
+    )
+
+    def __init__(self, pid=None, page=None, per_age=None,):
+        self.pid = pid
+        self.page = page
+        self.per_age = per_age
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.pid = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.I32:
+                    self.page = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.I32:
+                    self.per_age = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('similarityPositionDetailsList_args')
+        if self.pid is not None:
+            oprot.writeFieldBegin('pid', TType.I32, 1)
+            oprot.writeI32(self.pid)
+            oprot.writeFieldEnd()
+        if self.page is not None:
+            oprot.writeFieldBegin('page', TType.I32, 2)
+            oprot.writeI32(self.page)
+            oprot.writeFieldEnd()
+        if self.per_age is not None:
+            oprot.writeFieldBegin('per_age', TType.I32, 3)
+            oprot.writeI32(self.per_age)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class similarityPositionDetailsList_result(object):
+    """
+    Attributes:
+     - success
+    """
+
+    thrift_spec = (
+        (0, TType.STRUCT, 'success', (thrift_gen.gen.position.struct.ttypes.PositionDetailsListVO, thrift_gen.gen.position.struct.ttypes.PositionDetailsListVO.thrift_spec), None, ),  # 0
+    )
+
+    def __init__(self, success=None,):
+        self.success = success
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRUCT:
+                    self.success = thrift_gen.gen.position.struct.ttypes.PositionDetailsListVO()
+                    self.success.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('similarityPositionDetailsList_result')
         if self.success is not None:
             oprot.writeFieldBegin('success', TType.STRUCT, 0)
             self.success.write(oprot)
