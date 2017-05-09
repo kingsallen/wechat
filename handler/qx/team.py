@@ -32,7 +32,7 @@ class TeamDetailHandler(BaseHandler):
 
         share = self._share(team_id, current_company, team.name, share_cover_url)
 
-        basic_team = self._make_team(team)
+        basic_team = self._make_team(team, current_company)
 
         self.send_json_success(data={
             "team": basic_team,
@@ -56,7 +56,7 @@ class TeamDetailHandler(BaseHandler):
 
         return default
 
-    def _make_team(self, team):
+    def _make_team(self, team, company):
 
         """
         构造团队信息
@@ -66,6 +66,7 @@ class TeamDetailHandler(BaseHandler):
 
         default = ObjectDict(
             id=team.id,
+            did=company.id,
             name=team.name,
             description=team.description,
         )
