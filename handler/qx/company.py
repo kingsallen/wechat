@@ -56,11 +56,11 @@ class CompanyHandler(BaseHandler):
             templates.append(hot_positions)
         else:
             # 构造公司企业新主页
-            data = yield self.user_company_ps.get_company_data(
+            company_data = yield self.user_company_ps.get_company_data(
                 self.params, company_info, self.current_user)
-            templates = data.templates
+            templates = company_data.templates
             templates.append(hot_positions)
-            cover = data.header.banner
+            cover = company_data.header.banner
 
         data.update({
             "cover": cover,
