@@ -20,7 +20,7 @@ class CompanyHandler(BaseHandler):
         if not company_info:
             return self.write_error(404)
 
-        if self.params.page_no > 1:
+        if self.params.page_no and int(self.params.page_no) > 1:
             # 热招职位翻页
             ret = yield self._make_position_list(did, self.params.page_no)
             self.send_json_success(data=ObjectDict(
