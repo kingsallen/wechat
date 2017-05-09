@@ -160,7 +160,7 @@ class TeamPageService(PageService):
         if company_config and company_config.get('custom_visit_recipe', False):
             data.relation.custom_visit_recipe = company_config.custom_visit_recipe
         else:
-            company_config.custom_visit_recipe = []
+            data.relation.custom_visit_recipe = []
 
         data.templates = temp_data_tool.make_team_detail_template(
             team, team_members, modulename, detail_media_list, team_positions[0:3],
