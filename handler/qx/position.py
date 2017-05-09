@@ -227,7 +227,8 @@ class PositionHandler(BaseHandler):
             path.GAMMA_POSITION_JD.format(position_info.id),
             self.params,
             recom=self.position_ps._make_recom(self.current_user.sysuser.id),
-            fr="recruit"
+            fr="recruit",
+            did=str(company_info.id)
         )
 
         share = ObjectDict({

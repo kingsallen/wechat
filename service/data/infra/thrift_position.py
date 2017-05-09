@@ -50,7 +50,7 @@ class ThriftPositionDataService(DataService):
         :return:
         """
 
-        self.logger.debug("[thrift]get_position_positions company_id: %s" % position_id)
+        self.logger.debug("[thrift]get_position_positions position_id: %s" % position_id)
         self.logger.debug("[thrift]get_position_positions page_no: %s" % page_no)
         self.logger.debug("[thrift]get_position_positions page_size: %s" % page_size)
         ret = yield self.position_service_cilent.similarityPositionDetailsList(int(position_id), int(page_no), int(page_size))
