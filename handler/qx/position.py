@@ -42,7 +42,7 @@ class PositionHandler(BaseHandler):
             jd_detail = yield self._make_jd_detail(position_info, pos_item)
 
             self.logger.debug("[JD]构建公司信息")
-            res_cmp = yield self._make_company(company_info)
+            res_cmp = self._make_company(company_info)
 
             self.logger.debug("[JD]构建转发信息")
             res_share = yield self._make_share_info(position_info, company_info, position_es)
