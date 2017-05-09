@@ -152,8 +152,8 @@ class CompanyHandler(BaseHandler):
             })
 
         default = ObjectDict(
-            type=7,
-            title="企业介绍",
+            type=8,
+            title="基本信息",
             data=data
         )
         return default

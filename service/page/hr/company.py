@@ -232,15 +232,10 @@ class CompanyPageService(PageService):
 
         res_list = list()
         ret = yield self.thrift_position_ds.get_company_positions(company_id, page_no, page_size)
-        self.logger.debug("get_company_positions ret:{}".format(ret))
         if not ret.data:
             return res_list
 
         for item in ret.data:
-
-            self.logger.debug("item:{}".format(item))
-            self.logger.debug("item.title:{}".format(item.title))
-            self.logger.debug("item.title type:{}".format(type(item.title)))
             pos = ObjectDict()
             pos.title=item.title
             pos.id=item.id
@@ -248,9 +243,6 @@ class CompanyPageService(PageService):
             pos.image_url=make_static_url(item.resUrl)
             pos.city=split(item.city, [",","，"])
             pos.team_name=item.teamName
-            self.logger.debug("pos:{}".format(pos))
             res_list.append(pos)
 
-        self.logger.debug("res_list:{}".format(res_list))
         return res_list
-
