@@ -136,7 +136,11 @@ class PositionPageService(PageService):
             raise gen.Return(self.constant.NO)
 
         ret = yield self.thrift_searchcondition_ds.get_collect_position(user_id, position_id)
-        raise gen.Return(self.constant.YES if ret.userCollectPosition else self.constant.NO)
+
+        if ret.userCollectPosition and ret.userCollectPosition.status == 0:
+            raise gen.Return(self.constant.YES)
+        else:
+            raise gen.Return(self.constant.NO)
 
     @gen.coroutine
     def get_hr_info(self, publisher):

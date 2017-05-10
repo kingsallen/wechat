@@ -198,7 +198,7 @@ class PositionHandler(BaseHandler):
     def __make_recommend_positions(self, position_id):
         """处理相似职位推荐"""
 
-        ret = yield self.company_ps.get_company_positions(position_id)
+        ret = yield self.position_ps.get_position_positions(position_id)
         if not ret:
             return None
 
