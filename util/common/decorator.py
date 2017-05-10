@@ -264,6 +264,7 @@ def check_sub_company(func):
             else:
                 self.logger.debug(
                     'Sub_company: {}'.format(sub_company))
+                sub_company.banner = self.current_user.company.banner # 子公司采用母公司的banner
                 self.params.sub_company = sub_company
 
         yield func(self, *args, **kwargs)
