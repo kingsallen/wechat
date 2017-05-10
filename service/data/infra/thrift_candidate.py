@@ -55,18 +55,18 @@ class ThriftCandidateDataService(DataService):
             for el in ret_list:
                 recom_group = ObjectDict()
                 recom_group.position_id = el.positionId
-                recom_group.position_title = el.positionName
+                recom_group.position_name = el.positionName
                 recom_group.candidates = []
 
                 for c in el.candidates:
                     c_info = ObjectDict()
                     c_info.recom_record_id = c.id
-                    c_info.presentee_user_id = c.presenteeUserId  # 被动求职者编号
-                    c_info.presentee_name = c.presenteeName  # 被动求职者称呼
-                    c_info.presentee_friend_id = c.presenteeFriendId  # 一度朋友编号
+                    c_info.presentee_user_id = c.presenteeUserId          # 被动求职者编号
+                    c_info.presentee_name = c.presenteeName               # 被动求职者称呼
+                    c_info.presentee_friend_id = c.presenteeFriendId      # 一度朋友编号
                     c_info.presentee_friend_name = c.presenteeFriendName  # 一度朋友称呼
-                    c_info.presentee_logo = c.presenteeLogo  # 头像
-                    c_info.is_recom = c.isRecom  # 推荐状态
+                    c_info.presentee_logo = c.presenteeLogo               # 头像
+                    c_info.is_recom = c.isRecom                           # 推荐状态
                     c_info.is_interested = c.insterested or 1
                     c_info.view_number = c.viewNumber or 0
                     recom_group.candidates.append(c_info)
