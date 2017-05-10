@@ -208,18 +208,22 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
         else:
             pass
 
-        list_of_ids = ",".join(ids)
-        self.logger.debug(list_of_ids)
-        recom_result = yield self.candidate_ps.get_recommendations(
+        self.logger.debug("ids: %s, type: %s" % (ids, type(ids)))
+
+        list_of_ids = [int(id) for id in ids]
+
+        next_passive_seeker = yield self.candidate_ps.get_recommendations(
             self.current_user.company.id, list_of_ids)
 
-        self.logger.debug("recom_result: %s" % recom_result)
+        self.logger.debug("next_passive_seeker: %s" % next_passive_seeker)
 
         # 返回第一个推荐的被动求职者
         self.render(
             template_name="refer/weixin/passive-seeker_v2/passive-wanting_form.html",
-            passive_seeker=recom_result,
-            recommend_presentee=self.recommend_presentee)
+            passive_seeker=next_passive_seeker,
+            recommend_presentee=self.recommend_presentee,
+            message=""
+        )
 
     @tornado.gen.coroutine
     def _get_recom_candidate(self, id):
