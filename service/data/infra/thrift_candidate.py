@@ -136,12 +136,11 @@ class ThriftCandidateDataService(DataService):
         try:
             recommend_result = yield self.candidate_service_cilent.ignore(
                 int(id), int(company_id), int(post_user_id), str(click_time))
-
         except BIZException as BizE:
             self.logger.warn("%s - %s" % (BizE.code, BizE.message))
-            raise BizE
-
-        return recommend_result
+            return None
+        else:
+            return recommend_result
 
     @gen.coroutine
     def sort(self, post_user_id, company_id):

@@ -52,7 +52,7 @@ class CandidatePageService(PageService):
         ret = yield self.thrift_candidate_ds.ignore(
             recom_record_id, company_id, post_user_id,  click_time)
 
-        self.logger.debug("recommend_result: %s" % ret)
+        self.logger.debug("ignore_result: %s" % ret)
         return ret
 
     @gen.coroutine
