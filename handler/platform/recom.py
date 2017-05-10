@@ -181,26 +181,20 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
             self.IsRecomEnum.SELECTED.value
         ]
 
-        try:
-            passive_seekers = yield self.candidate_ps.get_candidate_list(
-                self.current_user.sysuser.id,
-                click_time,
-                is_recom,
-                company_id)
+        passive_seekers = yield self.candidate_ps.get_candidate_list(
+            self.current_user.sysuser.id,
+            click_time,
+            is_recom,
+            company_id)
 
-            self.logger.debug("get_passive_seekers: %s" % passive_seekers)
+        self.logger.debug("get_passive_seekers: %s" % passive_seekers)
 
-            self.render(
-                template_name="refer/weixin/passive-seeker_v2/passive-wanting_recom.html",
-                passive_seekers=passive_seekers,
-                message=message,
-            )
+        self.render(
+            template_name="refer/weixin/passive-seeker_v2/passive-wanting_recom.html",
+            passive_seekers=passive_seekers,
+            message=message,
+        )
 
-        except BIZException as e:
-            self.render(
-                template_name="refer/weixin/passive-seeker_v2/passive-wanting_no-more.html",
-                passive_seekers=[],
-                message=e.message)
 
     @tornado.gen.coroutine
     def _post_recom_candidates(self):

@@ -68,7 +68,7 @@ class ThriftCandidateDataService(DataService):
                     c_info.presentee_logo = c.presenteeLogo  # 头像
                     c_info.is_recom = c.isRecom  # 推荐状态
                     c_info.is_interested = c.insterested or 1
-                    c_info.view_num = c.viewNumber or 0
+                    c_info.view_number = c.viewNumber or 0
                     recom_group.candidates.append(c_info)
 
                 ret.append(recom_group)
