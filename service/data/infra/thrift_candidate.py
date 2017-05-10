@@ -44,11 +44,13 @@ class ThriftCandidateDataService(DataService):
         params.recoms = is_recom  # -> [int]
         params.companyId = int(company_id)
 
+        ret = []
         try:
             ret_list = yield self.candidate_service_cilent.candidateList(params)
+        except BIZException as BizE:
+            self.logger.warn("%s - %s" % (BizE.code, BizE.message))
+        else:
             self.logger.debug("[thrift]get_candidate_list: %s" % ret_list)
-
-            ret = []
 
             for el in ret_list:
                 recom_group = ObjectDict()
@@ -65,16 +67,11 @@ class ThriftCandidateDataService(DataService):
                     c_info.presentee_friend_name = c.presenteeFriendName  # 一度朋友称呼
                     c_info.presentee_logo = c.presenteeLogo  # 头像
                     c_info.is_recom = c.isRecom  # 推荐状态
-                    c_info.is_interested = c.insterested
-                    c_info.view_num = c.viewNumber
+                    c_info.is_interested = c.insterested or 1
+                    c_info.view_num = c.viewNumber or 0
                     recom_group.candidates.append(c_info)
 
                 ret.append(recom_group)
-
-        except BIZException as BizE:
-            self.logger.warn("%s - %s" % (BizE.code, BizE.message))
-            raise BizE
-
         return ret
 
     @gen.coroutine
