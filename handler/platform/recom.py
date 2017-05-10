@@ -195,7 +195,6 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
             message=message,
         )
 
-
     @tornado.gen.coroutine
     def _post_recom_candidates(self):
         """入口：

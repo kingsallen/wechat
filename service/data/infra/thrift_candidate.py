@@ -60,7 +60,7 @@ class ThriftCandidateDataService(DataService):
 
                 for c in el.candidates:
                     c_info = ObjectDict()
-                    c_info.recom_record_id = c.id
+                    c_info.id = c.id
                     c_info.presentee_user_id = c.presenteeUserId          # 被动求职者编号
                     c_info.presentee_name = c.presenteeName               # 被动求职者称呼
                     c_info.presentee_friend_id = c.presenteeFriendId      # 一度朋友编号
