@@ -83,6 +83,7 @@ class CandidatePageService(PageService):
         ret.next_one = thrift_res.nextOne
         ret.position_name = thrift_res.positionName
         ret.recom_ignore = thrift_res.recomIgnore
+        ret.click_time = thrift_res.clickTime
 
         self.logger.debug("get_recommendations: %s" % ret)
         return ret
