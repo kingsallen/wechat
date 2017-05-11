@@ -38,7 +38,8 @@ struct RecommendResult {
     4: optional bool nextOne,               //是否还有下一个候选人 false：没有，true：还有
     5: optional i32 recomTotal,             //勾选的候选人总数
     6: optional i32 recomIndex,             //推荐的候选人总数
-    7: optional i32 recomIgnore             //忽略的候选人人数
+    7: optional i32 recomIgnore,            //忽略的候选人人数
+    8: optional string clickTime
 }
 
 struct RecommmendParam {

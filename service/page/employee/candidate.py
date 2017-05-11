@@ -52,7 +52,7 @@ class CandidatePageService(PageService):
         ret = yield self.thrift_candidate_ds.ignore(
             recom_record_id, company_id, post_user_id,  click_time)
 
-        self.logger.debug("recommend_result: %s" % ret)
+        self.logger.debug("ignore_result: %s" % ret)
         return ret
 
     @gen.coroutine
@@ -60,19 +60,31 @@ class CandidatePageService(PageService):
         infra_ret = yield self.thrift_candidate_ds.sort(
             post_user_id, company_id)
 
-        ret = ObjectDict({
-            'recom_count': infra_ret.count,
-            'rank': infra_ret.rank,
-            'hongbao': infra_ret.hongbao
-        })
+        if infra_ret:
+            ret = ObjectDict({
+                'recom_count': infra_ret.count,
+                'rank': infra_ret.rank,
+                'hongbao': infra_ret.hongbao
+            })
 
-        self.logger.debug("sorting: %s" % ret)
-        return ret
+            self.logger.debug("sorting: %s" % ret)
+            return ret
 
     @gen.coroutine
     def get_recommendations(self, company_id, list_of_recom_ids):
-        ret = yield self.thrift_candidate_ds.get_recommendations(
+        thrift_res = yield self.thrift_candidate_ds.get_recommendations(
             company_id, list_of_recom_ids)
+
+        # 转换一下属性的命名
+        ret = ObjectDict()
+        ret.presentee_name = thrift_res.presenteeName
+        ret.recom_total = thrift_res.recomTotal
+        ret.id = thrift_res.id
+        ret.recom_index = thrift_res.recomIndex
+        ret.next_one = thrift_res.nextOne
+        ret.position_name = thrift_res.positionName
+        ret.recom_ignore = thrift_res.recomIgnore
+        ret.click_time = thrift_res.clickTime
 
         self.logger.debug("get_recommendations: %s" % ret)
         return ret
