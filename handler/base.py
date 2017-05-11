@@ -619,7 +619,7 @@ class BaseHandler(MetaBaseHandler):
             unix_time_stamp = str(int(time.time()))
             self.set_cookie(cookie_name, unix_time_stamp)
 
-    def make_url(self, path, params=None, protocol="https", escape=None, **kwargs):
+    def make_url(self, path, params=None, host="", protocol="https", escape=None, **kwargs):
         """
         host 环境不能直接从 request 中获取，需要根据环境确定
         :param path:
@@ -630,8 +630,8 @@ class BaseHandler(MetaBaseHandler):
         :param kwargs:
         :return:
         """
-
-        host = self.host
+        if not host:
+            host = self.host
         return make_url(path, params, host, protocol, escape, **kwargs)
 
     def fullurl(self, encode=True):
