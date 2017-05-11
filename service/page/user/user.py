@@ -473,3 +473,18 @@ class UserPageService(PageService):
             fields={'award': int(employee.award + award_points)}
         )
         return
+
+    @gen.coroutine
+    def add_user_viewed_position(self, user_id, position_id):
+        """
+        添加用户已阅读职位，Gamma 使用
+        :param user_id:
+        :param position_id:
+        :return:
+        """
+
+        if not user_id or not position_id:
+            return False
+
+        ret = yield self.thrift_searchcondidation_ds.add_user_viewed_position(user_id, position_id)
+        return ret

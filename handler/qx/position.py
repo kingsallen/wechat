@@ -53,6 +53,10 @@ class PositionHandler(BaseHandler):
                 share=res_share,
                 modules=jd_detail
             ))
+
+            # 标记用户已阅读职位
+            self.logger.debug("[JD]标记用户已阅读职位")
+            yield self.user_ps.add_user_viewed_position(self.current_user.sysuser.id, position_info.id)
         else:
             self.send_json_error()
             return
