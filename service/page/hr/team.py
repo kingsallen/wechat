@@ -121,7 +121,7 @@ class TeamPageService(PageService):
         self.logger.debug("get_team_detail is_gamma:{}".format(is_gamma))
         self.logger.debug("get_team_detail visit:{}".format(visit))
 
-        if company.id != user.company.id or not is_gamma:
+        if company.id != user.company.id and not is_gamma:
             self.logger.debug("get_team_detail 1111111")
             # 子公司 -> 子公司所属hr(pulishers) -> positions -> teams
             company_positions = yield self._get_sub_company_positions(
