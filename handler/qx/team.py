@@ -70,7 +70,7 @@ class TeamDetailHandler(BaseHandler):
     def _make_team_template(self, current_company, team):
 
         data = yield self.team_ps.get_team_detail(
-            self.current_user, current_company, team, self.params)
+            self.current_user, current_company, team, self.params, 3, True)
 
         templates = data.templates
         share_cover_url = templates[0].data[0].get('media_url') or \
@@ -83,6 +83,7 @@ class TeamDetailHandler(BaseHandler):
             self.logger.debug("template:{}".format(template))
             if template['type'] == 3:
                 # 团队在招职位,调整链接
+                template.pop("more_link", None)
                 for item in template["data"]:
                     position_id = re.match(r"\/position\/(\d+)", item.get("link"))
                     item['link'] = self.make_url(path.GAMMA_POSITION_HOME.format(int(position_id.group(1))))

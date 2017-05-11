@@ -92,7 +92,7 @@ class TeamPageService(PageService):
         raise gen.Return(data)
 
     @gen.coroutine
-    def get_team_detail(self, user, company, team, handler_param, position_num=3):
+    def get_team_detail(self, user, company, team, handler_param, position_num=3, is_gamma=False):
         """
 
         :param user: handler中的current_user
@@ -100,6 +100,7 @@ class TeamPageService(PageService):
         :param team: 当前需要获取详情的team
         :param handler_param: 请求中参数
         :param position_num: 该团队在招职位的展示数量
+        :param is_gamma: 是否来自 gamma 需求
         :return:
         """
         data = ObjectDict()
@@ -111,7 +112,7 @@ class TeamPageService(PageService):
         position_fields = 'id title status city team_id \
                            salary_bottom salary_top department'.split()
 
-        if company.id != user.company.id:
+        if company.id != user.company.id or not is_gamma:
             # 子公司 -> 子公司所属hr(pulishers) -> positions -> teams
             company_positions = yield self._get_sub_company_positions(
                 company.id, position_fields)
