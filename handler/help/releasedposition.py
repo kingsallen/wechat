@@ -14,9 +14,6 @@ class ReleasedPositionHandler(BaseHandler):
     @gen.coroutine
     def get(self):
 
-        self.logger.debug("ReleasedPositionHandler")
-        self.logger.debug("ReleasedPositionHandler current_user:{}".format(self.current_user))
-
         if not self.current_user.wxuser.unionid:
             self.write_error(403)
             return
@@ -54,7 +51,7 @@ class ReleasedPositionHandler(BaseHandler):
         )
 
         for item in positions_list:
-            count_int = yield self.applicaion_ps.get_position_applied_cnt(conds={
+            count_int = yield self.application_ps.get_position_applied_cnt(conds={
                 "position_id": item.id,
                 "email_status": const.NO,
             }, fields=["id"])
