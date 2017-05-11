@@ -41,8 +41,14 @@ class CompanyHandler(BaseHandler):
             cover = company_info.banner
             intro_tem = self._make_intro_template(company_info)
             basic_tem = self._make_basicinfo_template(company_info)
+            impression_tem = self._make_impression_template(company_info)
+            team_tem = yield self._make_team_template()
             templates.append(intro_tem)
             templates.append(basic_tem)
+            if impression_tem:
+                templates.append(impression_tem)
+            if team_tem:
+                templates.append(team_tem)
         else:
             # 构造公司企业新主页
             company_data = yield self.user_company_ps.get_company_data(
@@ -152,6 +158,6 @@ class CompanyHandler(BaseHandler):
         default = ObjectDict(
             type=9,
             title="企业团队",
-            data=company_info.impression
+            data=ret
         )
         return default
