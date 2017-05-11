@@ -42,7 +42,7 @@ class CompanyHandler(BaseHandler):
             intro_tem = self._make_intro_template(company_info)
             basic_tem = self._make_basicinfo_template(company_info)
             impression_tem = self._make_impression_template(company_info)
-            team_tem = yield self._make_team_template()
+            team_tem = yield self._make_team_template(company_info)
             templates.append(intro_tem)
             templates.append(basic_tem)
             if impression_tem:
