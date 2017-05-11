@@ -486,5 +486,5 @@ class UserPageService(PageService):
         if not user_id or not position_id:
             return False
 
-        ret = yield self.thrift_searchcondidation_ds.add_user_viewed_position(user_id, position_id)
+        ret = yield self.thrift_searchcondition_ds.add_user_viewed_position(user_id, position_id)
         return ret
