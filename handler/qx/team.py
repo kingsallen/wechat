@@ -83,11 +83,13 @@ class TeamDetailHandler(BaseHandler):
             self.logger.debug("template:{}".format(template))
             if template['type'] == 3:
                 # 团队在招职位,调整链接
-                position_id = re.match(r"\/position\/(\d+)", template.get("link"))
-                template['link'] = self.make_url(path.GAMMA_POSITION_HOME.format(int(position_id.group(1))))
+                for item in template["data"]:
+                    position_id = re.match(r"\/position\/(\d+)", item.get("link"))
+                    item['link'] = self.make_url(path.GAMMA_POSITION_HOME.format(int(position_id.group(1))))
             if template['type'] == 4:
                 # 其他团队,调整链接
-                team_id = re.match(r"\/m\/company\/team\/(\d+)", template.get("link"))
-                template['link'] = self.make_url(path.GAMMA_POSITION_TEAM.format(int(team_id.group(1))))
+                for item in template["data"]:
+                    team_id = re.match(r"\/m\/company\/team\/(\d+)", item.get("link"))
+                    item['link'] = self.make_url(path.GAMMA_POSITION_TEAM.format(int(team_id.group(1))))
 
         return templates, share_cover
