@@ -302,7 +302,7 @@ class TeamPageService(PageService):
             item = ObjectDict()
             item["name"] = team.name
             item["id"] = team.id
-            team["count"] = position_cnt.get("count_id", 0)
+            item["count"] = position_cnt.get("count_id", 0)
             team_list.append(item)
 
         self.logger.debug("get_gamma_company_team team_list:{}".format(team_list))
