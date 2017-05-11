@@ -1,5 +1,6 @@
 # coding=utf-8
 
+import re
 from tornado import gen
 
 import conf.path as path
@@ -22,21 +23,13 @@ class TeamDetailHandler(BaseHandler):
             return
 
         current_company = yield self.company_ps.get_company(conds={"id": team.company_id}, need_conf=True)
-
-        data = yield self.team_ps.get_team_detail(
-            self.current_user, current_company, team, self.params)
-
-        share_cover_url = data.templates[0].data[0].get('media_url') or \
-                          self.static_url(self.current_user.company.logo)
-        share_cover = url_append_query(share_cover_url, "imageMogr2/thumbnail/!300x300r")
-
-        share = self._share(team_id, current_company, team.name, share_cover_url)
-
+        templates, share_cover = yield self._make_team_template(current_company, team)
+        share = self._share(team_id, current_company, team.name, share_cover)
         basic_team = self._make_team(team, current_company)
 
         self.send_json_success(data={
             "team": basic_team,
-            "templates": data.templates,
+            "templates": templates,
             "share": share,
             "cover": share_cover
         })
@@ -72,3 +65,26 @@ class TeamDetailHandler(BaseHandler):
         )
 
         return default
+
+    @gen.coroutine
+    def _make_team_template(self, current_company, team):
+
+        data = yield self.team_ps.get_team_detail(
+            self.current_user, current_company, team, self.params)
+
+        templates = data.templates
+        share_cover_url = templates[0].data[0].get('media_url') or \
+                          self.static_url(self.current_user.company.logo)
+        share_cover = url_append_query(share_cover_url, "imageMogr2/thumbnail/!300x300r")
+
+        for template in templates:
+            if template.type == 3:
+                # 团队在招职位
+                position_id = re.match(r"\/position\/(\d+)", template.link)
+                template['link'] = self.make_url(path.GAMMA_POSITION_HOME.format(int(position_id.group(1))))
+            if template.type == 4:
+                # 其他团队
+                team_id = re.match(r"\/m\/company\/team\/(\d+)", template.link)
+                template['link'] = self.make_url(path.GAMMA_POSITION_TEAM.format(int(team_id.group(1))))
+
+        return templates, share_cover
