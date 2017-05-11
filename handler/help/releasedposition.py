@@ -51,12 +51,12 @@ class ReleasedPositionHandler(BaseHandler):
         )
 
         for item in positions_list:
-            count_int = yield self.application_ps.get_position_applied_cnt(conds={
+            count = yield self.application_ps.get_position_applied_cnt(conds={
                 "position_id": item.id,
                 "email_status": const.NO,
             }, fields=["id"])
 
-            item['resume_num'] = count_int
+            item['resume_num'] = count.get("count_id", 0)
 
         self.render(template_name="refer/weixin/wx_published_position_list/wx_published_position_list.html",
                     positions = positions_list)
