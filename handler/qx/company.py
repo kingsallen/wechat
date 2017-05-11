@@ -21,17 +21,6 @@ class CompanyHandler(BaseHandler):
             self.send_json_error()
             return
 
-        if self.params.page_no:
-            # 热招职位翻页
-            ret = yield self._make_position_list(did, self.params.page_no)
-            self.send_json_success(data=ObjectDict(
-                result=ret
-            ))
-            return
-
-        # 构造企业热招企业列表
-        hot_positions = yield self._make_position_list_template(did)
-
         share = self._share(company_info)
         company = ObjectDict(
             id=company_info.id,
@@ -54,15 +43,11 @@ class CompanyHandler(BaseHandler):
             basic_tem = self._make_basicinfo_template(company_info)
             templates.append(intro_tem)
             templates.append(basic_tem)
-            if hot_positions:
-                templates.append(hot_positions)
         else:
             # 构造公司企业新主页
             company_data = yield self.user_company_ps.get_company_data(
                 self.params, company_info, self.current_user)
             templates = company_data.templates
-            if hot_positions:
-                templates.append(hot_positions)
             cover = company_data.header.banner
 
         data.update({
@@ -86,43 +71,10 @@ class CompanyHandler(BaseHandler):
 
         return default
 
-    @gen.coroutine
-    def _make_position_list(self, company_id, page_no):
-        """
-        热招职位分页
-        :param company_id:
-        :param page_no:
-        :param page_size:
-        :return:
-        """
-        ret = yield self.company_ps.get_company_positions(company_id, page_no)
-        return ret
-
-    @gen.coroutine
-    def _make_position_list_template(self, company_id):
-        """
-        构造该企业热招职位，拼装 templates
-        :param company_id:
-        :return:
-        """
-
-        ret = yield self.company_ps.get_company_positions(company_id)
-
-        if not ret:
-            return None
-
-        default = ObjectDict(
-            type=6,
-            title="该企业热招职位",
-            data=ret
-        )
-
-        return default
-
     def _make_intro_template(self, company_info):
         """
-        构造企业介绍，拼装 templates
-        :param company_id:
+        构造 老 JD企业介绍，拼装 templates
+        :param company_info:
         :return:
         """
 
@@ -135,8 +87,8 @@ class CompanyHandler(BaseHandler):
 
     def _make_basicinfo_template(self, company_info):
         """
-        构造企业基本信息，拼装 templates
-        :param company_id:
+        构造老 JD企业基本信息，拼装 templates
+        :param company_info:
         :return:
         """
 
@@ -166,5 +118,40 @@ class CompanyHandler(BaseHandler):
             type=8,
             title="基本信息",
             data=data
+        )
+        return default
+
+    def _make_impression_template(self, company_info):
+        """
+        构造老 JD企业impression信息，拼装 templates
+        :param company_info:
+        :return:
+        """
+        if not company_info.impression:
+            return None
+
+        default = ObjectDict(
+            type=10,
+            title="公司环境",
+            data=company_info.impression
+        )
+        return default
+
+    @gen.coroutine
+    def _make_team_template(self, company_info):
+        """
+        构造 老 JD 团队职位数，拼装 templates
+        :param company_info:
+        :return:
+        """
+        ret = yield self.team_ps.get_gamma_company_team(company_info.id)
+
+        if not ret:
+            return None
+
+        default = ObjectDict(
+            type=9,
+            title="企业团队",
+            data=company_info.impression
         )
         return default

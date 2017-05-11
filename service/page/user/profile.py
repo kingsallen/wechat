@@ -8,7 +8,6 @@ from tornado.escape import json_decode
 import conf.common as const
 from service.page.base import PageService
 from util.common import ObjectDict
-from util.common.decorator import cache
 from util.tool.date_tool import curr_datetime_now
 
 

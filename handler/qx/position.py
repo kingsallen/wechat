@@ -113,6 +113,7 @@ class PositionHandler(BaseHandler):
             appid=application.id or 0,
             is_collected=star,
             can_apply=not can_apply,
+            hr_chat=int(company_info.conf_hr_chat),
             cover=cover
         )
 
@@ -131,13 +132,11 @@ class PositionHandler(BaseHandler):
         module_job_need = self.__make_json_job_need(position_info)
         module_feature = self.__make_json_job_feature(position_info)
         module_job_require = self.__make_json_job_require(position_info, pos_item)
-        module_position_recommend = yield self.__make_recommend_positions(position_info.id)
 
         add_item(position_temp, "module_job_description", module_job_description)
         add_item(position_temp, "module_job_need", module_job_need)
         add_item(position_temp, "module_feature", module_feature)
         add_item(position_temp, "module_job_require", module_job_require)
-        add_item(position_temp, "module_position_recommend", module_position_recommend)
 
         return position_temp
 
@@ -193,21 +192,6 @@ class PositionHandler(BaseHandler):
             })
 
         return data
-
-    @gen.coroutine
-    def __make_recommend_positions(self, position_id):
-        """处理相似职位推荐"""
-
-        ret = yield self.position_ps.get_position_positions(position_id)
-        if not ret:
-            return None
-
-        default = ObjectDict(
-            type=6,
-            title="相似职位",
-            data=ret
-        )
-        return default
 
     @gen.coroutine
     def _make_share_info(self, position_info, company_info, pos_item):
@@ -266,3 +250,49 @@ class PositionHandler(BaseHandler):
             cover_str = res_resource[0]
 
         return cover_str
+
+class PositionRecommendHandler(BaseHandler):
+    """JD页，公司主页职位推荐"""
+
+    @handle_response
+    @gen.coroutine
+    def get(self, id):
+
+        hot_positions = ObjectDict()
+        if self.params.is_pos:
+            # 职位详情页相似职位
+            hot_positions = yield self._make_pos_recommend(id, self.params.page_no)
+
+        elif self.params.is_cmp:
+            hot_positions = yield self._make_cmp_positions(id, self.params.page_no)
+
+        self.send_json_success(data=hot_positions)
+
+    @gen.coroutine
+    def _make_pos_positions(self, position_id, page_no):
+        """处理JD 页相似职位推荐"""
+
+        ret = yield self.position_ps.get_position_positions(position_id, page_no)
+
+        default = ObjectDict(
+            title="相似职位",
+            data=ret
+        )
+        return default
+
+    @gen.coroutine
+    def _make_cmp_positions(self, company_id):
+        """
+        构造该企业热招职位
+        :param company_id:
+        :return:
+        """
+
+        ret = yield self.company_ps.get_company_positions(company_id)
+
+        default = ObjectDict(
+            title="该企业热招职位",
+            data=ret
+        )
+
+        return default

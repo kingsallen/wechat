@@ -9,10 +9,11 @@ from tornado import gen
 
 from conf import path
 from service.page.base import PageService
-from tests.dev_data.user_company_config import COMPANY_CONFIG
 from util.common import ObjectDict
 from util.tool import temp_data_tool
 from util.tool.url_tool import make_url
+
+from tests.dev_data.user_company_config import COMPANY_CONFIG
 
 
 class TeamPageService(PageService):
@@ -46,7 +47,7 @@ class TeamPageService(PageService):
 
         :param company: 当前需要获取数据的公司
         :param handler_param: 请求中参数
-        :param sub_flag: 区分母公司和子公司标识， 用以明确团队资源获取方式
+        :param sub_flag: 区分母公司和子公司标识，用以明确团队资源获取方式
         :param parent_company: 当sub_flag为True时, 表示母公司信息
         :return:
         """
@@ -274,3 +275,37 @@ class TeamPageService(PageService):
                 team_id_tuple).replace(',)', ')'))
 
         raise gen.Return(teams)
+
+    @gen.coroutine
+    def get_gamma_company_team(self, company_id):
+        """
+        获得团队在招职位数
+        :param company_id:
+        :return:
+        """
+
+
+        teams = yield self.hr_team_ds.get_team_list(
+            conds={'company_id': company_id, 'is_show': 1, 'disable': 0})
+        teams.sort(key=lambda t: t.show_order)
+
+        self.logger.debug("get_gamma_company_team team:{}".format(teams))
+
+        team_list = list()
+        for team in teams:
+            position_cnt = yield self.job_position_ds.get_position_cnt(conds={
+                "team_id": team.id,
+                "status": 0
+            }, fields=["id"])
+            self.logger.debug("get_gamma_company_team position_cnt:{}".format(position_cnt))
+
+            item = ObjectDict()
+            item["name"] = team.name
+            item["id"] = team.id
+            team["count"] = position_cnt.get("count_id", 0)
+            team_list.append(item)
+
+        self.logger.debug("get_gamma_company_team team_list:{}".format(team_list))
+
+        return teams
+

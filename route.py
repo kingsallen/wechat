@@ -140,6 +140,7 @@ qx_routes = [
 
     (r"/api/position/(?P<position_id>\d+)",          handler.qx.position.PositionHandler,                       {"event": "position_info"}),
     (r"/api/positions[\/]?",                         handler.qx.aggregation.AggregationHandler,                 {"event": "position_aggregation"}),
+    (r"/api/positions/recommend/(\d+)*",             handler.qx.position.PositionRecommendHandler,              {"event": "position_recommend"}),
     (r"/api/config[\/]?",                            handler.qx.app.ConfigHandler,                              {"event": "wechat_config"}),
     (r"/api/search/condition/*",                     handler.qx.search.SearchConditionHandler,                  {"event": "search_condition" }),
     (r"/api/search/condition/(\d+)*",                handler.qx.search.SearchConditionHandler,                  {"event": "search_condition" }),

@@ -12,9 +12,8 @@ from util.tool.str_tool import gen_salary, split, set_literl, gen_degree, gen_ex
 from util.tool.url_tool import make_static_url
 from util.tool.temp_data_tool import make_position_detail_cms, make_team, template3
 
-
-
 class PositionPageService(PageService):
+
     def __init__(self):
         super().__init__()
 
@@ -399,7 +398,7 @@ class PositionPageService(PageService):
             pos.id=item.id
             pos.salary=gen_salary(item.salaryTop, item.salaryBottom)
             pos.image_url=make_static_url(item.resUrl)
-            pos.city=split(item.city, [",","，"])
+            pos.city=item.city
             pos.team_name=item.teamName
             res_list.append(pos)
 
