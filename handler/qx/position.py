@@ -258,13 +258,15 @@ class PositionRecommendHandler(BaseHandler):
     @gen.coroutine
     def get(self, id):
 
+        page_no = self.params.page_no or 1
+
         hot_positions = ObjectDict()
         if self.params.is_pos:
             # 职位详情页相似职位
-            hot_positions = yield self._make_pos_recommend(id, self.params.page_no)
+            hot_positions = yield self._make_pos_positions(id, page_no)
 
         elif self.params.is_cmp:
-            hot_positions = yield self._make_cmp_positions(id, self.params.page_no)
+            hot_positions = yield self._make_cmp_positions(id, page_no)
 
         self.send_json_success(data=hot_positions)
 
