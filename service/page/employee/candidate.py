@@ -60,14 +60,15 @@ class CandidatePageService(PageService):
         infra_ret = yield self.thrift_candidate_ds.sort(
             post_user_id, company_id)
 
-        ret = ObjectDict({
-            'recom_count': infra_ret.count,
-            'rank': infra_ret.rank,
-            'hongbao': infra_ret.hongbao
-        })
+        if infra_ret:
+            ret = ObjectDict({
+                'recom_count': infra_ret.count,
+                'rank': infra_ret.rank,
+                'hongbao': infra_ret.hongbao
+            })
 
-        self.logger.debug("sorting: %s" % ret)
-        return ret
+            self.logger.debug("sorting: %s" % ret)
+            return ret
 
     @gen.coroutine
     def get_recommendations(self, company_id, list_of_recom_ids):

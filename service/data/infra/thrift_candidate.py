@@ -150,6 +150,6 @@ class ThriftCandidateDataService(DataService):
 
         except BIZException as BizE:
             self.logger.warn("%s - %s" % (BizE.code, BizE.message))
-            raise BizE
-
-        return sort_result
+            return None
+        else:
+            return sort_result

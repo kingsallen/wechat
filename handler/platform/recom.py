@@ -114,13 +114,12 @@ class RecomIgnoreHandler(RecomCustomVariableMixIn, BaseHandler):
 
         # recom_total 推荐总数， recom_index ： 已推荐人数
         if recom_result.recomTotal == (recom_result.recomIndex + recom_result.recomIgnore):
-            try:
-                sort = yield self.candidate_ps.sorting(
-                    self.current_user.sysuser.id,
-                    self.current_user.company.id)
+            sort = yield self.candidate_ps.sorting(
+                self.current_user.sysuser.id,
+                self.current_user.company.id)
 
-                self.logger.debug("sort: %s" % sort)
-            except BIZException as e:
+            self.logger.debug("sort: %s" % sort)
+            if not sort:
                 self.render(
                     template_name="refer/weixin/passive-seeker_v2/passive-wanting_no-more.html")
                 return
