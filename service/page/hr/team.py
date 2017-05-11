@@ -307,5 +307,5 @@ class TeamPageService(PageService):
 
         self.logger.debug("get_gamma_company_team team_list:{}".format(team_list))
 
-        return teams
+        return team_list
 
