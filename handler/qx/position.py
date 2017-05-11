@@ -283,14 +283,14 @@ class PositionRecommendHandler(BaseHandler):
         return default
 
     @gen.coroutine
-    def _make_cmp_positions(self, company_id):
+    def _make_cmp_positions(self, company_id, page_no):
         """
         构造该企业热招职位
         :param company_id:
         :return:
         """
 
-        ret = yield self.company_ps.get_company_positions(company_id)
+        ret = yield self.company_ps.get_company_positions(company_id, page_no)
 
         default = ObjectDict(
             title="该企业热招职位",
