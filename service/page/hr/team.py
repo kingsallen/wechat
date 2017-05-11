@@ -289,15 +289,12 @@ class TeamPageService(PageService):
             conds={'company_id': company_id, 'is_show': 1, 'disable': 0})
         teams.sort(key=lambda t: t.show_order)
 
-        self.logger.debug("get_gamma_company_team team:{}".format(teams))
-
         team_list = list()
         for team in teams:
             position_cnt = yield self.job_position_ds.get_position_cnt(conds={
                 "team_id": team.id,
                 "status": 0
             }, fields=["id"])
-            self.logger.debug("get_gamma_company_team position_cnt:{}".format(position_cnt))
 
             item = ObjectDict()
             item["name"] = team.name
@@ -305,7 +302,4 @@ class TeamPageService(PageService):
             item["count"] = position_cnt.get("count_id", 0)
             team_list.append(item)
 
-        self.logger.debug("get_gamma_company_team team_list:{}".format(team_list))
-
         return team_list
-

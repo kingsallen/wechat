@@ -87,7 +87,7 @@ class CompanyHandler(BaseHandler):
         default = ObjectDict(
             type=7,
             title="企业介绍",
-            data= list(company_info.introduction)
+            data= [company_info.introduction]
         )
         return default
 
