@@ -78,13 +78,13 @@ class TeamDetailHandler(BaseHandler):
         share_cover = url_append_query(share_cover_url, "imageMogr2/thumbnail/!300x300r")
 
         for template in templates:
-            if template.type == 3:
-                # 团队在招职位
-                position_id = re.match(r"\/position\/(\d+)", template.link)
+            if template['type'] == 3:
+                # 团队在招职位,调整链接
+                position_id = re.match(r"\/position\/(\d+)", template['link'])
                 template['link'] = self.make_url(path.GAMMA_POSITION_HOME.format(int(position_id.group(1))))
-            if template.type == 4:
-                # 其他团队
-                team_id = re.match(r"\/m\/company\/team\/(\d+)", template.link)
+            if template['type'] == 4:
+                # 其他团队,调整链接
+                team_id = re.match(r"\/m\/company\/team\/(\d+)", template['link'])
                 template['link'] = self.make_url(path.GAMMA_POSITION_TEAM.format(int(team_id.group(1))))
 
         return templates, share_cover
