@@ -63,8 +63,7 @@ class LandingPageService(PageService):
             elif index == self.plat_constant.LANDING_INDEX_DEPARTMENT:
                 enabled_departments = yield self.hr_team_ds.get_team_list(conds={"disable": 0, "company_id": company_id}, fields=["id", "name"])
                 department = {}
-                department['name'] = self.plat_constant.LANDING.get(index).get("chpe")
-                # department['values'] = [{"value": dep.get("id"), "text": dep.get("name", "")}for dep in enabled_departments]
+                department['name'] = company.conf_teamname_custom.get("teamname_custom", "")
                 department['values'] = [dep.get("name", "") for dep in enabled_departments]
                 department['key'] = "team_name"
                 department['selected'] = selected.get("team_name")

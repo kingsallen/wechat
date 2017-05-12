@@ -698,6 +698,9 @@ class PositionListHandler(BaseHandler):
         if self.params.did:
             company = yield self.company_ps.get_company(
                 conds={'id': self.params.did}, need_conf=True)
+            if not company.banner:
+                parent_company = self.current_user.company
+                company.banner = parent_company.banner
         else:
             company = self.current_user.company
         self.params.company = self.position_ps.limited_company_info(company)
