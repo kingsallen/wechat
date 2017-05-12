@@ -196,6 +196,13 @@ class UserPageService(PageService):
                     "unionid":    userinfo.unionid if userinfo.unionid else "",
                     "source":     const.WX_USER_SOURCE_OAUTH_UPDATE
                 })
+
+            # 如果获取到了 unionid，将所有该 unionid 的 wxuser 的 sysuser_id 设置为当前用户 id
+            if userinfo.unionid:
+                yield self.user_wx_user_ds.update_wxuser(
+                    conds={"unionid": userinfo.unionid},
+                    fields={"sysuser_id": user_id}
+                )
         else:
             yield self.user_wx_user_ds.create_wxuser({
                 "is_subscribe": 0,
