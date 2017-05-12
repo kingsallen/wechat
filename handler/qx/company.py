@@ -35,8 +35,6 @@ class CompanyHandler(BaseHandler):
             share=share,
         )
 
-        self.logger.debug("company_info:{}".format(company_info))
-
         templates = list()
         if company_info.conf_newjd_status != 2:
             # 老 JD 样式

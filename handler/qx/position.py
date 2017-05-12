@@ -95,8 +95,6 @@ class PositionHandler(BaseHandler):
         can_apply = yield self.application_ps.is_allowed_apply_position(
             self.current_user.sysuser.id, company_info.id)
 
-        self.logger.debug("_make_jd_info company_info:{}".format(company_info))
-
         if company_info.conf_newjd_status != 2:
             # 未采用新 JD
             cover = company_info.banner[0] if company_info.banner else job_img
