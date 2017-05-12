@@ -38,7 +38,7 @@ class CompanyHandler(BaseHandler):
         templates = list()
         if company_info.conf_newjd_status != 2:
             # 老 JD 样式
-            cover = company_info.banner
+            cover =  company.banner[0] if company.banner else ""
             intro_tem = self._make_intro_template(company_info)
             basic_tem = self._make_basicinfo_template(company_info)
             impression_tem = self._make_impression_template(company_info)

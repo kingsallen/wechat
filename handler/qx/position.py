@@ -36,7 +36,7 @@ class PositionHandler(BaseHandler):
             pos_item = position_es.hits.hits[0] if position_es.hits.hits else ObjectDict()
 
             self.logger.debug("[JD]构建职位基础信息")
-            res_position = yield self._make_jd_info(position_info, company_info, pos_item)
+            res_position, cover = yield self._make_jd_info(position_info, company_info, pos_item)
 
             self.logger.debug("[JD]构建职位详情信息")
             jd_detail = yield self._make_jd_detail(position_info, pos_item)
@@ -51,7 +51,8 @@ class PositionHandler(BaseHandler):
                 position=res_position,
                 company=res_cmp,
                 share=res_share,
-                modules=jd_detail
+                modules=jd_detail,
+                cover=cover,
             ))
 
             # 标记用户已阅读职位
@@ -96,7 +97,7 @@ class PositionHandler(BaseHandler):
 
         if company_info.conf_newjd_status != 2:
             # 未采用新 JD
-            cover = company_info.banner or job_img
+            cover = company_info.banner[0] if company_info.banner else job_img
         else:
             cover = job_img
 
@@ -118,10 +119,9 @@ class PositionHandler(BaseHandler):
             is_collected=star,
             can_apply=not can_apply,
             hr_chat=int(company_info.conf_hr_chat),
-            cover=cover
         )
 
-        return position
+        return position, cover
 
     @gen.coroutine
     def _make_jd_detail(self, position_info, pos_item):
