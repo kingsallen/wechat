@@ -160,11 +160,11 @@ class PositionHandler(BaseHandler):
         require = []
 
         if pos_item.get("_source", {}).get("team",{}).get("name", ""):
-            require.append("所属部门 {}".format(pos_item.get("_source", {}).get("team",{}).get("name", "")))
+            require.append(ObjectDict(name="所属部门", value=pos_item.get("_source", {}).get("team",{}).get("name", "")))
         if position_info.experience:
-            require.append("工作性质 {}".format(position_info.employment_type))
+            require.append(ObjectDict(name="工作性质", value=position_info.employment_type))
         if position_info.language:
-            require.append("语言要求 {}".format(position_info.language))
+            require.append(ObjectDict(name="语言要求", value=position_info.language))
 
         if len(require) == 0:
             data = None
