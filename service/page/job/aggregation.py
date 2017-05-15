@@ -240,6 +240,8 @@ class AggregationPageService(PageService):
             agg_company = ObjectDict()
             agg_company["id"] = item[1].company.id
             agg_company["logo"] = make_static_url(item[1].company.logo or const.COMPANY_HEADIMG)
+            banner = ujson.loads(item[1].company.banner).get("banner0") if item[1].company.banner else ""
+            agg_company["banner"] = make_static_url(banner)
             agg_company["abbreviation"] = item[1].company.abbreviation
             agg_company["position_count"] = item[1].position_cnt
             agg_company["city"] = item[1].city
