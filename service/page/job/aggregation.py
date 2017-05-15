@@ -168,15 +168,15 @@ class AggregationPageService(PageService):
         job_img = qx_const.JD_BACKGROUND_IMG.get(industry_type).get("job_img")
         company_img = qx_const.JD_BACKGROUND_IMG.get(industry_type).get("company_img")
 
-        if item.get("_source", {}).get("team",{}).get("resource", {}):
+        if item.get("_source", {}).get("team",{}).get("resource", {}) \
+            and item.get("_source", {}).get("team",{}).get("resource", {}).get("res_type", 0) == 0:
             team_img = item.get("_source").get("team",{}).get("resource",{}).get("res_url")
 
         if item.get("_source", {}).get("jd_pic",{}).get("position_pic",{}).get("first_pic",{}):
             job_img = item.get("_source").get("jd_pic",{}).get("position_pic",{}).get("first_pic",{}).get("res_url")
 
-        if item.get("_source", {}).get("company",{}).get("impression",{}):
-            impression = ujson.loads(item.get("_source").get("company",{}).get("impression",{}))
-            company_img = impression.get("impression0")
+        if item.get("_source", {}).get("jd_pic",{}).get("company_pic",{}).get("first_pic",{}):
+            company_img = item.get("_source").get("jd_pic",{}).get("company_pic",{}).get("first_pic",{}).get("res_url")
 
         return make_static_url(team_img), make_static_url(job_img), make_static_url(company_img)
 
