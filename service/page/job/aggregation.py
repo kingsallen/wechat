@@ -116,7 +116,6 @@ class AggregationPageService(PageService):
         pos_pids = list()
         if es_res:
             es_res = es_res[page_from:page_block]
-            self.logger.debug("es_res 3:{}".format(es_res))
             for item in es_res:
                 team_img, job_img, company_img = yield self.opt_jd_home_img(item)
 
@@ -154,7 +153,6 @@ class AggregationPageService(PageService):
 
         # 处理 0: 未阅，1：已阅，2：已收藏，3：已投递
         positions = yield self._opt_user_positions_status(hot_positons, pos_pids, user_id)
-        self.logger.debug("positions:{}".format(positions))
         return positions
 
     @gen.coroutine
