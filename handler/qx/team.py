@@ -83,7 +83,7 @@ class TeamDetailHandler(BaseHandler):
 
         self.logger.debug("templates:{}".format(templates))
 
-        for template in templates:
+        for index, template in enumerate(templates):
             self.logger.debug("template:{}".format(template))
             if template.get("type", 0) == 4:
                 # 其他团队,调整链接
@@ -93,6 +93,6 @@ class TeamDetailHandler(BaseHandler):
 
             if template.get("type", 0) == 3:
                 # 不需要团队在招职位
-                template.pop()
+                del template[index]
 
         return templates, share_cover
