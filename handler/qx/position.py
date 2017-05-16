@@ -272,6 +272,9 @@ class PositionRecommendHandler(BaseHandler):
         elif self.params.is_cmp:
             hot_positions = yield self._make_cmp_positions(id, page_no)
 
+        elif self.params.is_team:
+            hot_positions = yield self._make_cmp_positions(id, page_no)
+
         self.send_json_success(data=hot_positions)
 
     @gen.coroutine
@@ -298,6 +301,23 @@ class PositionRecommendHandler(BaseHandler):
 
         default = ObjectDict(
             title="该企业热招职位",
+            data=ret
+        )
+
+        return default
+
+    @gen.coroutine
+    def _make_team_positions(self, company_id, page_no):
+        """
+        构造团队在招职位
+        :param company_id:
+        :return:
+        """
+
+        ret = yield self.company_ps.get_company_positions(company_id, page_no)
+
+        default = ObjectDict(
+            title="团队在招职位",
             data=ret
         )
 

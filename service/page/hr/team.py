@@ -112,29 +112,17 @@ class TeamPageService(PageService):
         position_fields = 'id title status city team_id \
                            salary_bottom salary_top department'.split()
 
-
-        self.logger.debug("get_team_detail user:{}".format(user))
-        self.logger.debug("get_team_detail company:{}".format(company))
-        self.logger.debug("get_team_detail team:{}".format(team))
-        self.logger.debug("get_team_detail handler_param:{}".format(handler_param))
-        self.logger.debug("get_team_detail position_num:{}".format(position_num))
-        self.logger.debug("get_team_detail is_gamma:{}".format(is_gamma))
-        self.logger.debug("get_team_detail visit:{}".format(visit))
-
         if company.id != user.company.id and not is_gamma:
-            self.logger.debug("get_team_detail 1111111")
             # 子公司 -> 子公司所属hr(pulishers) -> positions -> teams
             company_positions = yield self._get_sub_company_positions(
                 company.id, position_fields)
 
-            self.logger.debug("get_team_detail company_positions:{}".format(company_positions))
             team_positions = company_positions[:position_num]
             team_id_list = list(set([p.team_id for p in company_positions
                                      if p.team_id != team.id]))
             other_teams = yield self._get_sub_company_teams(
                 company_id=None, team_ids=team_id_list)
         else:
-            self.logger.debug("get_team_detail 2222222")
             team_positions = yield self.job_position_ds.get_positions_list(
                 conds={
                     'company_id': company.id,
@@ -144,7 +132,6 @@ class TeamPageService(PageService):
                 fields=position_fields,
                 appends=["ORDER BY update_time desc", "LIMIT %d" % position_num]
             )
-            self.logger.debug("get_team_detail team_positions:{}".format(team_positions))
 
             other_teams = yield self.hr_team_ds.get_team_list(
                 conds={'id': [team.id, '<>'],

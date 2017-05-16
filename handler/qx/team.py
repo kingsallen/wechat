@@ -86,11 +86,8 @@ class TeamDetailHandler(BaseHandler):
         for template in templates:
             self.logger.debug("template:{}".format(template))
             if template['type'] == 3:
-                # 团队在招职位,调整链接
-                template.pop("more_link", None)
-                for item in template["data"]:
-                    position_id = re.match(r"\/position\/(\d+)", item.get("link"))
-                    item['link'] = self.make_url(path.GAMMA_POSITION_HOME.format(int(position_id.group(1))))
+                # 不需要团队在招职位
+                del template
             if template['type'] == 4:
                 # 其他团队,调整链接
                 for item in template["data"]:
