@@ -86,6 +86,7 @@ class AggregationPageService(PageService):
             self.logger.debug("aaaaaaaaaa page_block:{}".format(page_block))
             es_res_sorted = sorted(es_res.hits.hits, key=lambda x:x["_source"]["weight"], reverse = True)
             self.logger.debug("aaaaaaaaaaaaaaa:{}".format(es_res_sorted))
+            self.logger.debug("aaaaaaaaaaaaaaa: type: {}".format(type(es_res_sorted)))
             es_res = es_res_sorted[page_from, page_block]
             self.logger.debug("bbbbbbbbbbbbb:{}".format(es_res))
 
