@@ -126,6 +126,9 @@ def split(input_s, delimiter=None):
     else:
         pattern = delimiter
 
+    if not input_s:
+        return list()
+
     try:
         ret = [line.strip() for line in re.split(pattern, input_s)]
     except Exception:

@@ -390,6 +390,9 @@ class MetaBaseHandler(AtomHandler):
         request = self.request
         req_params = request.arguments
 
+        # 简历导入 post 请求 _password 参数需要剔除
+        req_params.pop('_password', None)
+
         customs = ObjectDict(
             type_wechat=self._in_wechat,
             type_mobile=self._client_type)

@@ -259,6 +259,7 @@ def check_sub_company(func):
             else:
                 self.logger.debug(
                     'Sub_company: {}'.format(sub_company))
+                sub_company.banner = self.current_user.company.banner # 子公司采用母公司的banner
                 self.params.sub_company = sub_company
 
         yield func(self, *args, **kwargs)
@@ -293,7 +294,7 @@ def authenticated(func):
             if self.request.method in ("GET", "HEAD"):
                 redirect_url = self.make_url(path.USER_LOGIN, self.params, escape=['next_url'])
                 redirect_url += "&" + urlencode(
-                    dict(next_url=self.fullurl))
+                    dict(next_url=self.fullurl()))
                 self.redirect(redirect_url)
                 return
             else:
@@ -328,7 +329,7 @@ def verified_mobile_oneself(func):
                 redirect_url = self.make_url(path.MOBILE_VERIFY, params=self.params, escape=['next_url'])
 
                 redirect_url += "&" + urlencode(
-                    dict(next_url=self.fullurl))
+                    dict(next_url=self.fullurl()))
                 self.redirect(redirect_url)
                 return
             else:

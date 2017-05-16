@@ -5,7 +5,7 @@ import tornado.gen as gen
 from service.data.base import DataService
 
 from util.common.es import BaseES
-from util.tool.es_tool import init_gamma_basic, rule_gamma_filters
+from util.tool.es_tool import init_gamma_basic, rule_gamma_filters, init_gamma_position
 
 
 class EsDataService(DataService):
@@ -16,11 +16,12 @@ class EsDataService(DataService):
     es = BaseES()
 
     @gen.coroutine
-    def get_es_position(self, params, page_from, page_size):
-        """根据条件获得搜索结果
+    def get_es_positions(self, params, page_from, page_size):
+        """根据条件获得搜索结果列表
         """
 
         params = rule_gamma_filters(params)
+        self.logger.debug("rule_gamma_filters:{}".format(params))
 
         body = init_gamma_basic(params.keywords,
                                 params.city,
@@ -31,9 +32,19 @@ class EsDataService(DataService):
                                 page_from,
                                 page_size)
 
-        self.logger.debug("rule_gamma_filters:{}".format(params))
         self.logger.debug("init_gamma_basic:{}".format(body))
 
         res = self.es.search(index="positions", body=body)
+        raise gen.Return(res)
 
+    @gen.coroutine
+    def get_es_position(self, position_id):
+        """根据条件获得具体搜索结果
+        """
+
+        body = init_gamma_position(position_id)
+
+        self.logger.debug("init_gamma_position:{}".format(body))
+
+        res = self.es.search(index="positions", body=body)
         raise gen.Return(res)

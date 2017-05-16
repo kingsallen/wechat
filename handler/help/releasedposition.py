@@ -21,9 +21,11 @@ class ReleasedPositionHandler(BaseHandler):
         # 招聘助手用户
         hr_info = yield self.position_ps.get_hr_info_by_wxuser_id(self.current_user.wxuser.id)
 
+        self.logger.debug("ReleasedPositionHandler current_user:{}".format(self.current_user))
+
         # 暂未注册雇主平台
         if not hr_info or hr_info.company_id == 0:
-            self.render("weixin/wx_published_position_list/wx_published_position_list.html", positions='')
+            self.render(template_name="refer/weixin/wx_published_position_list/wx_published_position_list.html", positions='')
             return
 
         pageSize = self.params.pageSize or 20
@@ -49,12 +51,12 @@ class ReleasedPositionHandler(BaseHandler):
         )
 
         for item in positions_list:
-            count_int = yield self.applicaion_ps.get_position_applied_cnt(conds={
+            count = yield self.application_ps.get_position_applied_cnt(conds={
                 "position_id": item.id,
                 "email_status": const.NO,
             }, fields=["id"])
 
-            item['resume_num'] = count_int
+            item['resume_num'] = count.get("count_id", 0)
 
-        self.render("weixin/wx_published_position_list/wx_published_position_list.html",
+        self.render(template_name="refer/weixin/wx_published_position_list/wx_published_position_list.html",
                     positions = positions_list)

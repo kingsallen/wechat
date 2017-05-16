@@ -41,7 +41,7 @@ class AggregationPageService(PageService):
     @gen.coroutine
     def opt_es(self, salary_top, salary_bottom, salary_negotiable, keywords, city, industry, page_no, page_size):
         """
-        拼接 ES 搜索
+        拼接 ES 搜索职位
         :param salary_top:
         :param salary_bottom:
         :param salary_negotiable:
@@ -63,8 +63,8 @@ class AggregationPageService(PageService):
             page_size = 300
 
         # 处理 salley_top, salley_bottom
-        salary_top = int(salary_top/1000) if salary_top else 0
-        salary_bottom = int(salary_bottom/1000) if salary_bottom else 0
+        salary_top = int(int(salary_top)/1000) if salary_top else None
+        salary_bottom = int(int(salary_bottom)/1000) if salary_bottom else None
 
         # 如果 salary_top,salary_bottom都为30k，那么salary_top转为999.数据库中上限为999
         if salary_top and salary_bottom \
@@ -80,31 +80,53 @@ class AggregationPageService(PageService):
             "industry": industry
         })
 
-        es_res = yield self.es_ds.get_es_position(params, page_from, page_size)
+        es_res = yield self.es_ds.get_es_positions(params, page_from, page_size)
         return es_res
 
     @gen.coroutine
-    def opt_agg_positions(self, es_res, page_size, user_id):
+    def opt_es_position(self, position_id):
+        """
+        搜索职位
+        :param position_id:
+        :return:
+        """
+
+        es_res = yield self.es_ds.get_es_position(position_id)
+        return es_res
+
+    @gen.coroutine
+    def opt_agg_positions(self, es_res, page_size, user_id, city):
 
         """
         处理搜索职位结果
         :param es_res:
+        :param page_size:
+        :param user_id:
+        :param city: 如果用户在搜索条件里面输入了选择的城市，那么不管该职位实际在哪些城市发布，在显示在列表页的时候，只显示用户选择的地址
         :return:
         """
+
+        city_list = split(city, [","]) if city else list()
 
         hot_positons = ObjectDict()
         if es_res.hits:
             hits = es_res.hits.hits[:page_size]
             for item in hits:
                 id = int(item.get("_source").get("position").get("id"))
-                team_img, job_img, company_img = yield self.opt_jd_home_img(
-                    item.get("_source").get("company", {}).get("industry_type"), item)
+                team_img, job_img, company_img = yield self.opt_jd_home_img(item)
 
                 company = ObjectDict({
                     "id": item.get("_source").get("company", {}).get("id"),
                     "logo": make_static_url(item.get("_source").get("company", {}).get("logo") or const.COMPANY_HEADIMG),
                     "abbreviation": item.get("_source").get("company", {}).get("abbreviation"),
                 })
+
+                # 求搜索 city 和结果 city 的交集
+                city_ori = split(item.get("_source").get("position").get("city"), ['，', ','])
+                if city_list:
+                    city = [c for c in city_ori if c in city_list]
+                else:
+                    city = city_ori
 
                 hot_positons[id] = ObjectDict({
                     "id": item.get("_source").get("position").get("id"),
@@ -114,12 +136,12 @@ class AggregationPageService(PageService):
                     "degree": gen_degree(int(item.get("_source").get("position").get("degree")), item.get("_source").get("position").get("degree_above")),
                     "experience":  gen_experience(item.get("_source").get("position").get("experience"), item.get("_source").get("position").get("experience_above")),
                     "has_team": True if item.get("_source").get("team", {}) else False,
-                    "team_img": make_static_url(team_img),
-                    "job_img": make_static_url(job_img),
-                    "company_img": make_static_url(company_img),
+                    "team_img": team_img,
+                    "job_img": job_img,
+                    "company_img": company_img,
                     "resources": self._gen_resources(item.get("_source").get("jd_pic",{}), item.get("_source").get("company",{})),
                     "user_status": 0,
-                    "city": split(item.get("_source").get("position").get("city"), ['，', ',']),
+                    "city": city,
                     "company": company,
                 })
 
@@ -128,29 +150,34 @@ class AggregationPageService(PageService):
         return list(positions.values())
 
     @gen.coroutine
-    def opt_jd_home_img(self, industry_type, item):
+    def opt_jd_home_img(self, item):
+        """
+        处理JD首页行业默认图
+        :param item:
+        :return:
+        """
 
-        if not industry_type:
-            industry_type = 0
+        industry_type = 0
+        if item.get("_source", {}).get("company", {}).get("industry_type", None):
+            industry_type = item.get("_source", {}).get("company", {}).get("industry_type")
 
-        if not item.get("_source").get("team",{}).get("resource"):
-            team_img = qx_const.JD_BACKGROUND_IMG.get(industry_type).get("team_img")
-        else:
+        team_img = qx_const.JD_BACKGROUND_IMG.get(industry_type).get("team_img")
+        job_img = qx_const.JD_BACKGROUND_IMG.get(industry_type).get("job_img")
+        company_img = qx_const.JD_BACKGROUND_IMG.get(industry_type).get("company_img")
+
+        if item.get("_source", {}).get("team",{}).get("resource", {}) \
+            and item.get("_source", {}).get("team",{}).get("resource", {}).get("res_type", 0) == 0:
             team_img = item.get("_source").get("team",{}).get("resource",{}).get("res_url")
 
-        if not item.get("_source").get("jd_pic",{}).get("position_pic",{}).get("first_pic",{}):
-            job_img = qx_const.JD_BACKGROUND_IMG.get(industry_type).get("job_img")
-        else:
+        if item.get("_source", {}).get("jd_pic",{}).get("position_pic",{}).get("first_pic",{}):
             job_img = item.get("_source").get("jd_pic",{}).get("position_pic",{}).get("first_pic",{}).get("res_url")
 
-        if not item.get("_source").get("company",{}).get("impression",{}):
-            company_img = qx_const.JD_BACKGROUND_IMG.get(industry_type).get("company_img")
-        else:
-            impression = ujson.loads(item.get("_source").get("company",{}).get("impression",{}))
-            company_img = impression.get("impression0")
+        if item.get("_source", {}).get("jd_pic",{}).get("company_pic",{}).get("first_pic",{}):
+            company_img = item.get("_source").get("jd_pic",{}).get("company_pic",{}).get("first_pic",{}).get("res_url")
 
-        return team_img, job_img, company_img
+        return make_static_url(team_img), make_static_url(job_img), make_static_url(company_img)
 
+    @gen.coroutine
     def opt_agg_company(self, es_res):
 
         """
@@ -162,11 +189,15 @@ class AggregationPageService(PageService):
         results = ObjectDict()
         if es_res.hits:
             for item in es_res.hits.hits:
-                if item.get("_source").get("position").get("status") != 0:
+                if item.get("_source").get("position").get("status") != 0 \
+                    or not item.get("_source").get("company").get("logo") \
+                    or not item.get("_source").get("company").get("banner"):
                     continue
+
                 city_list = split(item.get("_source").get("position").get("city"), ['，', ',']) \
                     if item.get("_source").get("position").get("city") else list()
                 company_id_str = str(item.get("_source").get("company").get("id"))
+
                 if results.get(company_id_str):
                     if city_list:
                         city_rep = results[company_id_str].get("city") + city_list
@@ -177,6 +208,7 @@ class AggregationPageService(PageService):
                         "company": item.get("_source").get("company"),
                         "city": city_list,
                         "position_cnt": 1,
+                        "weight": 0,
                     })
 
             for key, value in results.items():
@@ -188,13 +220,28 @@ class AggregationPageService(PageService):
                 value.city = [item[0] for item in city[:5]]
 
         hot_company = list()
-        for item in results.values():
+        if not results:
+            return hot_company
+
+        # 获得运营推荐职位,运营推荐公司排在前面
+        recommend_company = yield self.campaign_recommend_company_ds.get_campaign_recommend_company(conds={"disable": 0})
+
+        for r_comp in recommend_company:
+            comp_id = str(r_comp.get("company_id"))
+            if results.get(comp_id):
+                results[comp_id].weight = r_comp.get("weight")
+
+        results_cmp = sorted(results.items(), key=lambda d:d[1].get('weight',0), reverse = True)
+
+        for item in results_cmp:
             agg_company = ObjectDict()
-            agg_company["id"] = item.company.id
-            agg_company["logo"] = make_static_url(item.company.logo or const.COMPANY_HEADIMG)
-            agg_company["abbreviation"] = item.company.abbreviation
-            agg_company["position_count"] = item.position_cnt
-            agg_company["city"] = item.city
+            agg_company["id"] = item[1].company.id
+            agg_company["logo"] = make_static_url(item[1].company.logo or const.COMPANY_HEADIMG)
+            banner = ujson.loads(item[1].company.banner).get("banner0") if item[1].company.banner else ""
+            agg_company["banner"] = make_static_url(banner)
+            agg_company["abbreviation"] = item[1].company.abbreviation
+            agg_company["position_count"] = item[1].position_cnt
+            agg_company["city"] = item[1].city
             hot_company.append(agg_company)
 
         return hot_company[:9]

@@ -42,10 +42,14 @@ import handler.platform.landing
 import handler.platform.position
 import handler.platform.team
 import handler.platform.recom
+import handler.platform.compatible
 
 import handler.qx.app
 import handler.qx.aggregation
 import handler.qx.search
+import handler.qx.position
+import handler.qx.team
+import handler.qx.company
 
 import handler.wechat.event
 
@@ -123,6 +127,10 @@ platform_routes = [
     (r"/api/employee/recommendrecords[\/]?",         handler.platform.employee.RecommendRecordsHandler,         {"event": "employee_recommendrecords"}),
     (r"/api/employee/rewards[\/]?",                  handler.platform.employee.AwardsHandler,                   {"event": "employee_awards"}),
     (r"/api/position/empnotice[\/]?",                handler.platform.position.PositionEmpNoticeHandler,        {"event": "position_empnotice"}),
+
+    # 兼容老微信 url，进行302跳转
+    (r"/.*",                                         handler.platform.compatible.CompatibleHandler,             {"event": "compatible"})
+
 ]
 platform_routes = common_routes + platform_routes
 
@@ -130,11 +138,15 @@ platform_routes = common_routes + platform_routes
 # 聚合号的单独 routes, 域名 platform.moseeker.com/recruit
 qx_routes = [
 
+    (r"/api/position/(?P<position_id>\d+)",          handler.qx.position.PositionHandler,                       {"event": "position_info"}),
     (r"/api/positions[\/]?",                         handler.qx.aggregation.AggregationHandler,                 {"event": "position_aggregation"}),
+    (r"/api/positions/recommend/(\d+)*",             handler.qx.position.PositionRecommendHandler,              {"event": "position_recommend"}),
     (r"/api/config[\/]?",                            handler.qx.app.ConfigHandler,                              {"event": "wechat_config"}),
     (r"/api/search/condition/*",                     handler.qx.search.SearchConditionHandler,                  {"event": "search_condition" }),
     (r"/api/search/condition/(\d+)*",                handler.qx.search.SearchConditionHandler,                  {"event": "search_condition" }),
     (r"/api/search/([a-z_]+)",                       handler.qx.search.SearchCityHandler,                       {"event": "search_condition"}),
+    (r"/api/team/(\d+)",                             handler.qx.team.TeamDetailHandler,                         {"event": "team_detail"}),
+    (r"/api/company/(\d+)",                          handler.qx.company.CompanyHandler,                         {"event": "company_detail"}),
 
     # App 路由
     (r"/.*",                                         handler.qx.app.IndexHandler,                               {"event": "app_app"}),

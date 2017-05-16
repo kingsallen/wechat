@@ -7,18 +7,16 @@
 
 import re
 from util.common import ObjectDict
+from util.tool.str_tool import split
 
 def rule_gamma_filters(params):
-    ''' 筛选条件, 转成相应的类型, 及对用户的输入进行过滤 '''
 
-    # 需要int
-    for k in ('salary_top', 'salary_bottom', 'salary_negotiable'):
-        if params.get(k):  params[k] = int(params[k])
+    ''' 筛选条件, 转成相应的类型, 及对用户的输入进行过滤 '''
 
     # 需要 list
     for k in ('industry', 'city'):
         if params.get(k):
-            params[k] = re.split(",", params[k].strip())
+            params[k] = split(params[k].strip(), [","])
         else:
             params[k] = list()
 
@@ -145,7 +143,7 @@ def init_gamma_basic(query, city, industry, salary_bottom, salary_top, salary_ne
     if (isinstance(salary_bottom, int) and isinstance(salary_top, int)) or salary_negotiable:
         # 存在薪资上下限
         # 存在行业筛选
-        min_max = """min=0;max=1000;"""
+        min_max = """min={};max={};""".format(salary_bottom, salary_top)
         condition = "if(min>bottom&&min<top&&top>bottom){return true;};" \
                  "if(max<top&&max>bottom&&top>bottom){return true;};" \
                  "if(min<bottom&&max>top&&top>bottom){return true;};"
@@ -167,5 +165,23 @@ def init_gamma_basic(query, city, industry, salary_bottom, salary_top, salary_ne
                 })
             })
         }))
+
+    return init_es_query
+
+def init_gamma_position(position_id):
+
+    """
+    初始化 Gamma 职位详情
+    详情查看: https://wiki.moseeker.com/gamma_0.9_es.md
+    :return:
+    """
+
+    init_es_query = ObjectDict({
+        "query": ObjectDict({
+            "match": ObjectDict({
+                "position.id": position_id,
+            })
+        })
+    })
 
     return init_es_query

@@ -10,7 +10,7 @@ from tornado import gen
 from service.page.base import PageService
 from util.tool.url_tool import make_static_url
 from util.tool.dict_tool import sub_dict
-from util.tool.str_tool import is_odd
+from util.tool.str_tool import is_odd, split, gen_salary
 
 cached_company_sug_wechat = None
 
@@ -219,3 +219,30 @@ class CompanyPageService(PageService):
             return res.reward
 
         return 0
+
+    @gen.coroutine
+    def get_company_positions(self, company_id, page_no=1, page_size=5):
+        """
+        gamma 公司主页，企业热招职位
+        :param company_id:
+        :param page_no:
+        :param page_size:
+        :return:
+        """
+
+        res_list = list()
+        ret = yield self.thrift_position_ds.get_company_positions(company_id, page_no, page_size)
+        if not ret.data:
+            return res_list
+
+        for item in ret.data:
+            pos = ObjectDict()
+            pos.title=item.title
+            pos.id=item.id
+            pos.salary=gen_salary(item.salaryTop, item.salaryBottom)
+            pos.image_url=make_static_url(item.resUrl)
+            pos.city=split(item.city, [",","，"])
+            pos.team_name=item.teamName
+            res_list.append(pos)
+
+        return res_list

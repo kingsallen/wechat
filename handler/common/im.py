@@ -80,6 +80,7 @@ class UnreadCountHandler(BaseHandler):
         company_info = ObjectDict()
         if publisher:
             hr_info = yield self.chat_ps.get_hr_info(publisher)
+            # 是否关闭 IM 聊天，由母公司决定
             company_info = yield self.company_ps.get_company(conds={
                 "id": hr_info.company_id
             }, need_conf=False)

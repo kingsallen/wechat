@@ -47,17 +47,6 @@ class BaseHandler(MetaBaseHandler):
         self._pass_session = None
 
     @property
-    def fullurl(self):
-        """获取当前 url， 默认删除 query 中的 code 和 state。
-
-        和 oauth 有关的 参数会影响 prepare 方法
-        """
-
-        full_url = to_str(self.request.full_url())
-        real_full_url = full_url.replace(self.settings.m_host, self.host)
-        return url_subtract_query(real_full_url, ['code', 'state'])
-
-    @property
     def component_access_token(self):
         """第三方平台 component_access_token"""
         ret = self.redis.get("component_access_token", prefix=False)
@@ -82,7 +71,7 @@ class BaseHandler(MetaBaseHandler):
 
         # 初始化 oauth service
         self._oauth_service = WeChatOauth2Service(
-            self._wechat, self.fullurl, self.component_access_token)
+            self._wechat, self.fullurl(), self.component_access_token)
 
         self._pass_session = PassportCache()
 
@@ -246,6 +235,8 @@ class BaseHandler(MetaBaseHandler):
                 self.logger.error("wechat_signature missing")
                 raise NoSignatureError()
 
+
+
         wechat = yield self.wechat_ps.get_wechat(conds={
             "signature": signature
         })
@@ -332,7 +323,6 @@ class BaseHandler(MetaBaseHandler):
         if self.current_user.sysuser:
             self.current_user.has_profile = yield self.profile_ps.has_profile(
                 self.current_user.sysuser.id)
-
 
     @gen.coroutine
     def _build_session(self):
@@ -457,13 +447,6 @@ class BaseHandler(MetaBaseHandler):
         session.wechat = self._wechat
         self._add_jsapi_to_wechat(session.wechat)
 
-        self.logger.debug("current wechat jsapi timestamp:{}".format(session.wechat.jsapi.timestamp))
-        self.logger.debug("current wechat jsapi nonceStr:{}".format(session.wechat.jsapi.nonceStr))
-        self.logger.debug("current wechat jsapi signature:{}".format(session.wechat.jsapi.signature))
-        self.logger.debug("current wechat jsapi appid:{}".format(session.wechat.appid))
-        self.logger.debug("current wechat jsapi jsapi_ticket:{}".format(session.wechat.jsapi_ticket))
-        self.logger.debug("current wechat jsapi full_url:{}".format(self.request.full_url()))
-
         self.logger.debug(
             "_build_session_by_unionid session 2: {}".format(session))
         self.logger.debug(
@@ -567,7 +550,7 @@ class BaseHandler(MetaBaseHandler):
         """拼装 jsapi"""
         wechat.jsapi = JsApi(
             jsapi_ticket=wechat.jsapi_ticket,
-            url=self.request.full_url())
+            url=self.fullurl(encode=False))
 
     def _make_new_session_id(self, user_id):
         """创建新的 session_id
@@ -636,7 +619,7 @@ class BaseHandler(MetaBaseHandler):
             unix_time_stamp = str(int(time.time()))
             self.set_cookie(cookie_name, unix_time_stamp)
 
-    def make_url(self, path, params=None, protocol="https", escape=None, **kwargs):
+    def make_url(self, path, params=None, host="", protocol="https", escape=None, **kwargs):
         """
         host 环境不能直接从 request 中获取，需要根据环境确定
         :param path:
@@ -647,15 +630,27 @@ class BaseHandler(MetaBaseHandler):
         :param kwargs:
         :return:
         """
-
-        host = self.host
-
-        self.logger.debug("make_url path:{}".format(path))
-        self.logger.debug("make_url host:{}".format(host))
-        self.logger.debug("make_url params:{}".format(params))
-        self.logger.debug("make_url protocol:{}".format(protocol))
-        self.logger.debug("make_url escape:{}".format(escape))
-        self.logger.debug("make_url kwargs:{}".format(kwargs))
-
+        if not host:
+            host = self.host
         return make_url(path, params, host, protocol, escape, **kwargs)
+
+    def fullurl(self, encode=True):
+        """
+        获取当前 url， 默认删除 query 中的 code 和 state。
+
+        和 oauth 有关的 参数会影响 prepare 方法
+        :param encode: False，不会 Encode，主要用在生成 jdsdk signature 时使用
+        :return:
+        """
+
+        full_url = to_str(self.request.full_url())
+        self.logger.debug("fullurl 1:{}".format(full_url))
+
+        if not self.host in self.request.full_url():
+            full_url = full_url.replace(self.settings.m_host, self.host)
+            self.logger.debug("full_url 2:{}".format(full_url))
+
+        if not encode:
+            return full_url
+        return url_subtract_query(full_url, ['code', 'state'])
 

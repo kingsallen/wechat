@@ -185,7 +185,7 @@ def make_header(company, team_index=False, team=None, **extra):
         'name': name,
         'description': description,
         'icon': make_static_url(company.logo),
-        'banner': make_static_url(company.banner[0] if company.banner else "")
+        'banner': company.banner[0] if company.banner else ""
         if company.banner else None,
     })
 

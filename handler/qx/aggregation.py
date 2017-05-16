@@ -14,7 +14,6 @@ import conf.qx as qx_const
 from handler.base import BaseHandler
 from util.common.decorator import handle_response
 from util.common import ObjectDict
-from util.tool.url_tool import make_static_url
 from util.tool.json_tool import json_dumps
 from util.tool.str_tool import to_str
 
@@ -60,7 +59,7 @@ class AggregationHandler(BaseHandler):
                                                   int(page_no),
                                                   int(page_size))
 
-        positions = yield self.aggregation_ps.opt_agg_positions(es_res, page_size, self.current_user.sysuser.id)
+        positions = yield self.aggregation_ps.opt_agg_positions(es_res, page_size, self.current_user.sysuser.id, city)
 
         result = ObjectDict({
             "page_no": int(page_no),
@@ -77,7 +76,7 @@ class AggregationHandler(BaseHandler):
             banner = yield self.aggregation_ps.get_aggregation_banner()
 
             # 处理热招企业
-            hot_company = self.aggregation_ps.opt_agg_company(es_res)
+            hot_company = yield self.aggregation_ps.opt_agg_company(es_res)
 
             # 自定义分享
             share = self._make_share_info(hot_company, keywords)
@@ -166,7 +165,6 @@ class AggregationHandler(BaseHandler):
 
         link = self.make_url(
             path.GAMMA_POSITION,
-            self.params,
             fr="recruit",
             recom=self.position_ps._make_recom(self.current_user.sysuser.id),
             escape=["page_no", "page_size"])
@@ -174,10 +172,10 @@ class AggregationHandler(BaseHandler):
         if len(hot_company) == 1:
             logo = hot_company[0].get("logo")
         else:
-            logo = make_static_url(const.COMPANY_HEADIMG)
+            logo = const.COMPANY_HEADIMG
 
         cover = self.static_url(logo)
-        keywords_title = "【%s】".format(keywords) if keywords else ""
+        keywords_title = "【{}】".format(keywords) if keywords else ""
         title = "%s职位推荐" % keywords_title
         description = "微信好友%s推荐%s的职位，点击查看详情。找的就是你！" % (self.current_user.qxuser.nickname or "", keywords_title)
 

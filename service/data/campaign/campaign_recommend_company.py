@@ -12,11 +12,11 @@ from util.common.decorator import cache
 
 class CampaignRecommendCompanyDataService(DataService):
 
-
-    @cache(ttl=300)
+    # @cache(ttl=300)
     @gen.coroutine
-    def get_campaign_recommend_company(self, conds, fields, options=None, appends=None, index='', params=None):
+    def get_campaign_recommend_company(self, conds, fields=None, options=None, appends=None, index='', params=None):
 
+        fields = fields or []
         options = options or []
         appends = appends or []
         params = params or []

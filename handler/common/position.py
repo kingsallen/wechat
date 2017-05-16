@@ -29,7 +29,7 @@ class PositionStarHandler(BaseHandler):
             ret = yield self.user_ps.unfavorite_position(
                 self.current_user.sysuser.id, self.params.pid)
 
-        if ret:
+        if ret == 0:
             self.send_json_success()
         else:
             self.send_json_error()

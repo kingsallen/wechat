@@ -1,5 +1,4 @@
 # coding=utf-8
-# Copyright 2016 MoSeeker
 
 """
 :author 马超（machao@moseeker.com）
@@ -10,13 +9,15 @@ from tornado import gen
 
 from conf import path
 from service.page.base import PageService
-from tests.dev_data.user_company_config import COMPANY_CONFIG
 from util.common import ObjectDict
 from util.tool import temp_data_tool
 from util.tool.url_tool import make_url
 
+from tests.dev_data.user_company_config import COMPANY_CONFIG
+
 
 class TeamPageService(PageService):
+
     def __init__(self):
         super().__init__()
 
@@ -46,7 +47,7 @@ class TeamPageService(PageService):
 
         :param company: 当前需要获取数据的公司
         :param handler_param: 请求中参数
-        :param sub_flag: 区分母公司和子公司标识， 用以明确团队资源获取方式
+        :param sub_flag: 区分母公司和子公司标识，用以明确团队资源获取方式
         :param parent_company: 当sub_flag为True时, 表示母公司信息
         :return:
         """
@@ -77,7 +78,7 @@ class TeamPageService(PageService):
             temp_data_tool.make_team_index_template(
                 team=t,
                 team_resource=team_resource_dict.get(t.res_id),
-                more_link=make_url(path.TEAM_PATH.format(t.id), self.settings.platform_host, handler_param),
+                more_link=make_url(path.TEAM_PATH.format(t.id), handler_param, self.settings.platform_host),
                 member_list=[
                     temp_data_tool.make_team_member(
                         member=m,
@@ -91,7 +92,7 @@ class TeamPageService(PageService):
         raise gen.Return(data)
 
     @gen.coroutine
-    def get_team_detail(self, user, company, team, handler_param, position_num=3):
+    def get_team_detail(self, user, company, team, handler_param, position_num=3, is_gamma=False):
         """
 
         :param user: handler中的current_user
@@ -99,6 +100,7 @@ class TeamPageService(PageService):
         :param team: 当前需要获取详情的team
         :param handler_param: 请求中参数
         :param position_num: 该团队在招职位的展示数量
+        :param is_gamma: 是否来自 gamma 需求
         :return:
         """
         data = ObjectDict()
@@ -109,18 +111,30 @@ class TeamPageService(PageService):
         # 根据母公司，子公司区分对待，获取对应的职位信息，其他团队信息
         position_fields = 'id title status city team_id \
                            salary_bottom salary_top department'.split()
-        if company.id != user.company.id:
+
+
+        self.logger.debug("get_team_detail user:{}".format(user))
+        self.logger.debug("get_team_detail company:{}".format(company))
+        self.logger.debug("get_team_detail team:{}".format(team))
+        self.logger.debug("get_team_detail handler_param:{}".format(handler_param))
+        self.logger.debug("get_team_detail position_num:{}".format(position_num))
+        self.logger.debug("get_team_detail is_gamma:{}".format(is_gamma))
+        self.logger.debug("get_team_detail visit:{}".format(visit))
+
+        if company.id != user.company.id and not is_gamma:
+            self.logger.debug("get_team_detail 1111111")
             # 子公司 -> 子公司所属hr(pulishers) -> positions -> teams
             company_positions = yield self._get_sub_company_positions(
                 company.id, position_fields)
 
+            self.logger.debug("get_team_detail company_positions:{}".format(company_positions))
             team_positions = company_positions[:position_num]
-
             team_id_list = list(set([p.team_id for p in company_positions
                                      if p.team_id != team.id]))
             other_teams = yield self._get_sub_company_teams(
                 company_id=None, team_ids=team_id_list)
         else:
+            self.logger.debug("get_team_detail 2222222")
             team_positions = yield self.job_position_ds.get_positions_list(
                 conds={
                     'company_id': company.id,
@@ -130,6 +144,7 @@ class TeamPageService(PageService):
                 fields=position_fields,
                 appends=["ORDER BY update_time desc", "LIMIT %d" % position_num]
             )
+            self.logger.debug("get_team_detail team_positions:{}".format(team_positions))
 
             other_teams = yield self.hr_team_ds.get_team_list(
                 conds={'id': [team.id, '<>'],
@@ -160,7 +175,7 @@ class TeamPageService(PageService):
         if company_config and company_config.get('custom_visit_recipe', False):
             data.relation.custom_visit_recipe = company_config.custom_visit_recipe
         else:
-            company_config.custom_visit_recipe = []
+            data.relation.custom_visit_recipe = []
 
         data.templates = temp_data_tool.make_team_detail_template(
             team, team_members, modulename, detail_media_list, team_positions[0:3],
@@ -248,6 +263,7 @@ class TeamPageService(PageService):
         :param team_ids:
         :return: [object_of_hr_team, ...]
         """
+
         if team_ids is None:
             publishers = yield self.hr_company_account_ds.get_company_accounts_list(
                 conds={'company_id': company_id}, fields=None)
@@ -266,9 +282,38 @@ class TeamPageService(PageService):
             team_id_tuple = tuple(team_ids)
 
         if not team_id_tuple:
-            gen.Return([])
+            raise gen.Return([])
+
         teams = yield self.hr_team_ds.get_team_list(
             conds='id in {} and is_show=1 and disable=0'.format(
                 team_id_tuple).replace(',)', ')'))
 
         raise gen.Return(teams)
+
+    @gen.coroutine
+    def get_gamma_company_team(self, company_id):
+        """
+        获得团队在招职位数
+        :param company_id:
+        :return:
+        """
+
+
+        teams = yield self.hr_team_ds.get_team_list(
+            conds={'company_id': company_id, 'is_show': 1, 'disable': 0})
+        teams.sort(key=lambda t: t.show_order)
+
+        team_list = list()
+        for team in teams:
+            position_cnt = yield self.job_position_ds.get_position_cnt(conds={
+                "team_id": team.id,
+                "status": 0
+            }, fields=["id"])
+
+            item = ObjectDict()
+            item["name"] = team.name
+            item["id"] = team.id
+            item["count"] = position_cnt.get("count_id", 0)
+            team_list.append(item)
+
+        return team_list

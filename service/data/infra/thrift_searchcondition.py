@@ -11,6 +11,7 @@ from thrift_gen.gen.searchcondition.struct.usersearch.ttypes import UserSearchCo
 
 
 class ThriftSearchconditionDataService(DataService):
+
     searchcondition_service_cilent = ServiceClientFactory.get_service(
         SearchConditionServiceClient)
 
@@ -82,4 +83,12 @@ class ThriftSearchconditionDataService(DataService):
 
         ret = yield self.searchcondition_service_cilent.delUserCollectPosition(int(user_id), int(position_id))
         self.logger.debug("[thrift]delete_collect_position: %s" % ret)
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def add_user_viewed_position(self, user_id, position_id):
+        """添加用户已阅读职位，调用 thrift 接口"""
+
+        ret = yield self.searchcondition_service_cilent.userViewedPosition(int(user_id), int(position_id))
+        self.logger.debug("[thrift]add_user_viewed_position: %s" % ret)
         raise gen.Return(ret)

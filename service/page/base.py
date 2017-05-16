@@ -22,7 +22,7 @@ from setting import settings
 import conf.common as constant
 import conf.platform as plat_constant
 import conf.qx as qx_constant
-import conf.help as help_constant
+import conf.helper as help_constant
 import conf.path as path
 from util.common.singleton import Singleton
 

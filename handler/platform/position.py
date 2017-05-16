@@ -13,11 +13,12 @@ from util.common import ObjectDict
 from util.common.cipher import encode_id
 from util.common.decorator import handle_response, check_employee
 from util.tool.str_tool import gen_salary, add_item, split
-from util.tool.url_tool import make_url, url_append_query
+from util.tool.url_tool import url_append_query
 from util.wechat.template import position_view_five_notice_tpl, position_share_notice_employee_tpl
 
 
 class PositionHandler(BaseHandler):
+
     @handle_response
     @gen.coroutine
     def get(self, position_id):
@@ -93,11 +94,13 @@ class PositionHandler(BaseHandler):
                 module_department_old = self._make_json_job_department(position_info)
                 module_job_attr_old = self._make_json_job_attr(position_info)
                 module_hr_register_old = int(self.current_user.wechat.hr_register) & True
+                module_cmp_impression = self._make_json_company_impression(company_info)
 
                 add_item(position_data, "module_job_require", module_job_require_old)
                 add_item(position_data, "module_department", module_department_old)
                 add_item(position_data, "module_job_attr", module_job_attr_old)
                 add_item(position_data, "module_hr_register", module_hr_register_old)
+                add_item(position_data, "module_company_impression", module_cmp_impression)
 
                 # 定制化 start
                 # 诺华定制
@@ -391,6 +394,17 @@ class PositionHandler(BaseHandler):
             })
         return data
 
+    def _make_json_company_impression(self, company_info):
+        """构造老微信样式的企业印象"""
+
+        if len(company_info.impression) == 0:
+            data = None
+        else:
+            data = ObjectDict({
+                "data": company_info.impression
+            })
+        return data
+
     def _make_json_job_department(self, position_info):
         """构造老微信的所属部门，自定义职能，自定义属性"""
         data = ObjectDict({
@@ -518,7 +532,7 @@ class PositionHandler(BaseHandler):
             if psc:
                 replace_query.update(psc=psc)
 
-            redirect_url = url_append_query(self.fullurl, **replace_query)
+            redirect_url = url_append_query(self.fullurl(), **replace_query)
             self.redirect(redirect_url)
             return
 
@@ -697,6 +711,9 @@ class PositionListHandler(BaseHandler):
         if self.params.did:
             company = yield self.company_ps.get_company(
                 conds={'id': self.params.did}, need_conf=True)
+            if not company.banner:
+                parent_company = self.current_user.company
+                company.banner = parent_company.banner
         else:
             company = self.current_user.company
         self.params.company = self.position_ps.limited_company_info(company)
@@ -731,7 +748,7 @@ class PositionListHandler(BaseHandler):
             title = "%s热招职位" % company_info.abbreviation
             description = msg.SHARE_DES_DEFAULT
         else:
-            cover = rp_share_info.cover
+            cover = self.static_url(rp_share_info.cover)
             title = rp_share_info.title
             description = rp_share_info.description
 

@@ -11,8 +11,14 @@ import util.tool.http_tool as http_tool
 class InfraProfileDataService(DataService):
 
     @gen.coroutine
-    def get_profile(self, user_id, uuid=None):
-        params = ObjectDict(user_id=user_id, uuid=uuid)
+    def get_profile(self, user_id):
+        params = ObjectDict(user_id=user_id)
+        res = yield http_tool.http_get(path.PROFILE, params)
+        return http_tool.unboxing(res)
+
+    @gen.coroutine
+    def get_profile_by_uuid(self, uuid):
+        params = ObjectDict(uuid=uuid)
         res = yield http_tool.http_get(path.PROFILE, params)
         return http_tool.unboxing(res)
 

@@ -186,7 +186,7 @@ class ProfileViewHandler(BaseHandler):
     @tornado.gen.coroutine
     def get(self, uuid):
 
-        has_profile, profile = yield self.profile_ps.has_profile(user_id='', uuid=uuid)
+        has_profile, profile = yield self.profile_ps.has_profile_by_uuid(uuid=uuid)
 
         self.logger.debug("uuid:{}".format(uuid))
         self.logger.debug("profile:{}".format(profile))
@@ -210,7 +210,7 @@ class ProfileViewHandler(BaseHandler):
 
     def _share(self, uuid, profile_tpl):
         default = ObjectDict({
-            'cover': profile_tpl.avatar_url,
+            'cover': self.static_url(profile_tpl.avatar_url),
             'title': '【{}】的个人职场档案'.format(profile_tpl.username),
             'description': '点击查看{}的个人职场档案'.format(profile_tpl.username),
             'link': self.make_url(path.PROFILE_VISITOR_EVIEW.format(uuid), self.params)
@@ -241,7 +241,7 @@ class ProfileHandler(BaseHandler):
 
     def _share(self, uuid, profile_tpl):
         default = ObjectDict({
-            'cover': profile_tpl.avatar_url,
+            'cover': self.static_url(profile_tpl.avatar_url),
             'title': '【{}】的个人职场档案'.format(profile_tpl.username),
             'description': '点击查看{}的个人职场档案'.format(profile_tpl.username),
             'link': self.make_url(path.PROFILE_VISITOR_EVIEW.format(uuid), self.params)
