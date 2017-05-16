@@ -124,6 +124,7 @@ class AggregationPageService(PageService):
                 self.logger.debug("1111111111:{}".format(item.get("_source").get("weight")))
                 self.logger.debug("1111111111:{}".format(item.get("_source").get("position").get("id")))
                 self.logger.debug("1111111111:{}".format(item.get("_source").get("position").get("title")))
+                self.logger.debug("1111111111:{}".format(item.get("_source").get("position").get("city")))
                 id = int(item.get("_source").get("position").get("id"))
                 team_img, job_img, company_img = yield self.opt_jd_home_img(item)
 
@@ -314,11 +315,15 @@ class AggregationPageService(PageService):
         if not user_id or not pids:
             return hot_positions
 
+        self.logger.debug("_opt_user_positions_status:{}".format(pids))
         ret = yield self.thrift_searchcondition_ds.get_user_position_status(user_id, pids)
         if ret.positionStatus:
             for item in hot_positions:
                 pid = item.get("id")
+                self.logger.debug("_opt_user_positions_status pid:{}".format(pid))
                 if pid == ret.positionStatus.get(pid):
+                    self.logger.debug("_opt_user_positions_status user_status:{}".format(ret.positionStatus.get(pid)))
                     item["user_status"] = ret.positionStatus.get(pid)
+                    self.logger.debug("_opt_user_positions_status item:{}".format(item))
 
         return hot_positions
