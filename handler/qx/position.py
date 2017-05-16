@@ -237,8 +237,10 @@ class PositionHandler(BaseHandler):
         cover_str = self.static_url(company_info.logo)
         if company_info.conf_newjd_status != 2:
             # 为采用新 JD
-            pic_list += company_info.impression
-            pic_list += company_info.banner
+            if company_info.impression:
+                pic_list += company_info.impression
+            if company_info.banner:
+                pic_list += company_info.banner
         else:
             pic_list_res = list()
             if pos_item.get("_source", {}).get("jd_pic",{}).get("position_pic"):
