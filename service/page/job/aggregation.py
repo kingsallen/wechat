@@ -79,9 +79,9 @@ class AggregationPageService(PageService):
         # 因此由 python 实现排序，并分页
         es_res = yield self.es_ds.get_es_positions(params, 0, 300)
         if es_res.hits.hits:
-            es_res_sorted = sorted(es_res.hits.hits, key=lambda x:x["_source"]["weight"], reverse = True)
-            self.logger.debug("aaaaaaaaaaaaaaa:{}".format(es_res_sorted))
-            self.logger.debug("aaaaaaaaaaaaaaa: type: {}".format(type(es_res_sorted)))
+            es_res = sorted(es_res.hits.hits, key=lambda x:x["_source"]["weight"], reverse = True)
+            self.logger.debug("aaaaaaaaaaaaaaa:{}".format(es_res))
+            self.logger.debug("aaaaaaaaaaaaaaa: type: {}".format(type(es_res)))
             self.logger.debug("bbbbbbbbbbbbb:{}".format(es_res))
 
         return es_res
