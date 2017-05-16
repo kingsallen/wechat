@@ -17,7 +17,7 @@ class CompanyHandler(BaseHandler):
         company_info = yield self.company_ps.get_company(
             conds={"id": int(did)}, need_conf=True)
 
-        if not company_info or not company_info.conf_show_in_qx == 0:
+        if not company_info or company_info.conf_show_in_qx == 0:
             self.send_json_error()
             return
 
