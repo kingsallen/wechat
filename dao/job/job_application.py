@@ -18,7 +18,7 @@ class JobApplicationDao(BaseDao):
             "status_id":        self.constant.TYPE_INT,
             "l_application_id": self.constant.TYPE_INT,
             "reward":           self.constant.TYPE_INT,
-            "source_id":        self.constant.TYPE_INT,
+            # "source_id":        self.constant.TYPE_INT,
             "_create_time":     self.constant.TYPE_TIMESTAMP,
             "applier_id":       self.constant.TYPE_INT,
             "interview_id":     self.constant.TYPE_INT,

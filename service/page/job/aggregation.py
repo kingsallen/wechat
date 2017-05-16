@@ -54,13 +54,11 @@ class AggregationPageService(PageService):
         """
 
         # 查询范围 1-30页
-        if page_no < 0 or page_size > 30:
+        if page_no < 0 or page_no > 30:
             return ObjectDict()
 
         page_from = (page_no - 1) * page_size
-        if page_no == 1:
-            # 如果是首页，则取300条数据，热招企业需要
-            page_size = 300
+        page_block = page_no * page_size
 
         # 处理 salley_top, salley_bottom
         salary_top = int(int(salary_top)/1000) if salary_top else None
@@ -80,7 +78,17 @@ class AggregationPageService(PageService):
             "industry": industry
         })
 
-        es_res = yield self.es_ds.get_es_positions(params, page_from, page_size)
+        # 由于需要按人工设置的 weight进行排序，es 不支持先按关键词搜索，再按 weight 排序
+        # 因此由 python 实现排序，并分页
+        es_res = yield self.es_ds.get_es_positions(params, 0, 300)
+        if es_res.hits.hits:
+            self.logger.debug("aaaaaaaaaa page_from:{}".format(page_from))
+            self.logger.debug("aaaaaaaaaa page_block:{}".format(page_block))
+            es_res_sorted = sorted(es_res.hits.hits, key=lambda x:x["_source"]["weight"], reverse = True)
+            self.logger.debug("aaaaaaaaaaaaaaa:{}".format(es_res_sorted))
+            es_res = es_res_sorted[page_from, page_block]
+            self.logger.debug("bbbbbbbbbbbbb:{}".format(es_res))
+
         return es_res
 
     @gen.coroutine
@@ -223,7 +231,7 @@ class AggregationPageService(PageService):
         if not results:
             return hot_company
 
-        # 获得运营推荐职位,运营推荐公司排在前面
+        # 获得运营推荐公司排在前面
         recommend_company = yield self.campaign_recommend_company_ds.get_campaign_recommend_company(conds={"disable": 0})
 
         for r_comp in recommend_company:
