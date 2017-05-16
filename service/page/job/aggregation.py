@@ -112,20 +112,12 @@ class AggregationPageService(PageService):
         page_from = (page_no - 1) * page_size
         page_block = page_no * page_size
 
-        self.logger.debug("page_from:{}".format(page_from))
-        self.logger.debug("page_block:{}".format(page_block))
-
         hot_positons = list()
         pos_pids = list()
         if es_res:
             es_res = es_res[page_from:page_block]
             self.logger.debug("es_res 3:{}".format(es_res))
             for item in es_res:
-                self.logger.debug("1111111111:{}".format(item.get("_source").get("weight")))
-                self.logger.debug("1111111111:{}".format(item.get("_source").get("position").get("id")))
-                self.logger.debug("1111111111:{}".format(item.get("_source").get("position").get("title")))
-                self.logger.debug("1111111111:{}".format(item.get("_source").get("position").get("city")))
-                id = int(item.get("_source").get("position").get("id"))
                 team_img, job_img, company_img = yield self.opt_jd_home_img(item)
 
                 company = ObjectDict({
@@ -159,8 +151,6 @@ class AggregationPageService(PageService):
                 })
                 pos_pids.append(item.get("_source").get("position").get("id"))
                 hot_positons.append(hot_positon)
-
-        self.logger.debug("hot_positons:{}".format(hot_positons))
 
         # 处理 0: 未阅，1：已阅，2：已收藏，3：已投递
         positions = yield self._opt_user_positions_status(hot_positons, pos_pids, user_id)
@@ -315,15 +305,11 @@ class AggregationPageService(PageService):
         if not user_id or not pids:
             return hot_positions
 
-        self.logger.debug("_opt_user_positions_status:{}".format(pids))
         ret = yield self.thrift_searchcondition_ds.get_user_position_status(user_id, pids)
         if ret.positionStatus:
             for item in hot_positions:
-                self.logger.debug("_opt_user_positions_status pid:{}".format(item.get("id")))
                 for key, value in ret.positionStatus.items():
                     if item.get("id") == key:
-                        self.logger.debug("_opt_user_positions_status user_status:{}".format(key))
                         item["user_status"] = value
-                        self.logger.debug("_opt_user_positions_status item:{}".format(item))
 
         return hot_positions
