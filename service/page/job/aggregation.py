@@ -87,7 +87,7 @@ class AggregationPageService(PageService):
             es_res_sorted = sorted(es_res.hits.hits, key=lambda x:x["_source"]["weight"], reverse = True)
             self.logger.debug("aaaaaaaaaaaaaaa:{}".format(es_res_sorted))
             self.logger.debug("aaaaaaaaaaaaaaa: type: {}".format(type(es_res_sorted)))
-            es_res = es_res_sorted[page_from, page_block]
+            es_res = es_res_sorted[page_from:page_block]
             self.logger.debug("bbbbbbbbbbbbb:{}".format(es_res))
 
         return es_res
@@ -118,9 +118,8 @@ class AggregationPageService(PageService):
         city_list = split(city, [","]) if city else list()
 
         hot_positons = ObjectDict()
-        if es_res.hits:
-            hits = es_res.hits.hits[:page_size]
-            for item in hits:
+        if es_res:
+            for item in es_res:
                 id = int(item.get("_source").get("position").get("id"))
                 team_img, job_img, company_img = yield self.opt_jd_home_img(item)
 
@@ -196,8 +195,8 @@ class AggregationPageService(PageService):
         """
 
         results = ObjectDict()
-        if es_res.hits:
-            for item in es_res.hits.hits:
+        if es_res:
+            for item in es_res:
                 if item.get("_source").get("position").get("status") != 0 \
                     or not item.get("_source").get("company").get("logo") \
                     or not item.get("_source").get("company").get("banner"):
