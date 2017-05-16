@@ -13,7 +13,7 @@
 from util.common import ObjectDict
 
 # ++++++++++业务常量+++++++++++
-HOTCITY = [{"name":"郑州"},
+HOTCITY = [{"name":"上海"},
            {"name":"北京"},
            {"name":"深圳"},
            {"name":"广州"},
