@@ -88,6 +88,7 @@ class TeamDetailHandler(BaseHandler):
             if template.get("type", 0) == 3:
                 # 不需要团队在招职位
                 del template
+                continue
             if template.get("type", 0) == 4:
                 # 其他团队,调整链接
                 for item in template["data"]:
