@@ -318,7 +318,7 @@ class PositionRecommendHandler(BaseHandler):
         :return:
         """
 
-        ret = yield self.team_ps.get_gamma_team_positions(team_id, page_no)
+        ret = yield self.team_ps.get_gamma_team_positions(team_id, int(page_no))
 
         default = ObjectDict(
             title="团队在招职位",
