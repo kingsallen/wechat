@@ -85,10 +85,10 @@ class TeamDetailHandler(BaseHandler):
 
         for template in templates:
             self.logger.debug("template:{}".format(template))
-            if template['type'] == 3:
+            if template.get("type", 0) == 3:
                 # 不需要团队在招职位
                 del template
-            if template['type'] == 4:
+            if template.get("type", 0) == 4:
                 # 其他团队,调整链接
                 for item in template["data"]:
                     team_id = re.match(r"\/m\/company\/team\/(\d+)", item.get("link"))
