@@ -248,7 +248,7 @@ class TeamPageService(PageService):
         :param team_ids:
         :return: [object_of_hr_team, ...]
         """
-        if team_ids is None:
+        if not team_ids:
             publishers = yield self.hr_company_account_ds.get_company_accounts_list(
                 conds={'company_id': company_id}, fields=None)
             publisher_id_tuple = tuple([p.account_id for p in publishers])
