@@ -72,6 +72,7 @@ def init_gamma_basic(query, city, industry, salary_bottom, salary_top, salary_ne
                 })
             })
         }),
+        "_source": ["weight", "position.id", "position.title"],
 
         "from": page_from,
         "size": page_size

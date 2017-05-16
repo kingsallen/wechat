@@ -81,7 +81,7 @@ class AggregationPageService(PageService):
         self.logger.debug("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
         self.logger.debug("es_res:{}".format(es_res))
         if es_res.hits.hits:
-            es_res = sorted(es_res.hits.hits, key=lambda x:x["_source"]["weight"], reverse = True)
+            es_res = sorted(es_res.hits.hits, key=lambda x:x.get("_source").get("weight"), reverse = True)
             self.logger.debug("+++++++++++++++++++++++++")
             self.logger.debug("es_res 2:{}".format(es_res))
 
