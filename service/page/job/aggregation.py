@@ -161,9 +161,6 @@ class AggregationPageService(PageService):
         if item.get("_source", {}).get("company", {}).get("industry_type", None):
             industry_type = item.get("_source", {}).get("company", {}).get("industry_type")
 
-        self.logger.debug("opt_jd_home_img item:{}".format(item))
-        self.logger.debug("opt_jd_home_img:{}".format(industry_type))
-
         team_img = qx_const.JD_BACKGROUND_IMG.get(industry_type).get("team_img")
         job_img = qx_const.JD_BACKGROUND_IMG.get(industry_type).get("job_img")
         company_img = qx_const.JD_BACKGROUND_IMG.get(industry_type).get("company_img")

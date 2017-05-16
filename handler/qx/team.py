@@ -23,7 +23,7 @@ class TeamDetailHandler(BaseHandler):
             return
 
         current_company = yield self.company_ps.get_company(conds={"id": team.company_id}, need_conf=True)
-        if not current_company.conf_show_in_qx:
+        if current_company.conf_show_in_qx == 0:
             self.send_json_error()
             return
 
