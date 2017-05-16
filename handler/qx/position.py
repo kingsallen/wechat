@@ -118,7 +118,7 @@ class PositionHandler(BaseHandler):
             appid=application.id or 0,
             is_collected=star,
             can_apply=not can_apply,
-            hr_chat=int(company_info.conf_hr_chat),
+            hr_chat=bool(company_info.conf_hr_chat),
         )
 
         return position, cover
