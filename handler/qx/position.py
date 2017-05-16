@@ -275,7 +275,7 @@ class PositionRecommendHandler(BaseHandler):
             hot_positions = yield self._make_cmp_positions(id, page_no)
 
         elif self.params.is_team:
-            hot_positions = yield self._make_cmp_positions(id, page_no)
+            hot_positions = yield self._make_team_positions(id, page_no)
 
         self.send_json_success(data=hot_positions)
 
