@@ -22,7 +22,7 @@ class SearchconditionPageService(PageService):
                 'id': i.id,
                 'name': i.name,
                 'keywords': json.loads(i.keywords) if i.keywords else [],
-                'city_name': i.cityName,
+                'city_name': json.loads(i.cityName) if i.cityName else [],
                 'salary_top': i.salaryTop,
                 'salary_bottom': i.salaryBottom,
                 'salary_negotiable': i.salaryNegotiable,
