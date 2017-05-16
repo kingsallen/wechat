@@ -77,9 +77,13 @@ class AggregationPageService(PageService):
 
         # 由于需要按人工设置的 weight进行排序，es 不支持先按关键词搜索，再按 weight 排序
         # 因此由 python 实现排序，并分页
-        es_res = yield self.es_ds.get_es_positions(params, 0, 300)
+        es_res = yield self.es_ds.get_es_positions(params, 0, 20)
+        self.logger.debug("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        self.logger.debug("es_res:{}".format(es_res))
         if es_res.hits.hits:
             es_res = sorted(es_res.hits.hits, key=lambda x:x["_source"]["weight"], reverse = True)
+            self.logger.debug("+++++++++++++++++++++++++")
+            self.logger.debug("es_res 2:{}".format(es_res))
 
         return es_res
 
@@ -112,9 +116,13 @@ class AggregationPageService(PageService):
         page_from = (page_no - 1) * page_size
         page_block = page_no * page_size
 
+        self.logger.debug("page_from:{}".format(page_from))
+        self.logger.debug("page_block:{}".format(page_block))
+
         hot_positons = ObjectDict()
         if es_res:
             es_res = es_res[page_from:page_block]
+            self.logger.debug("es_res 3:{}".format(es_res))
             for item in es_res:
                 id = int(item.get("_source").get("position").get("id"))
                 team_img, job_img, company_img = yield self.opt_jd_home_img(item)

@@ -293,7 +293,6 @@ class TeamPageService(PageService):
         :return:
         """
 
-
         teams = yield self.hr_team_ds.get_team_list(
             conds={'company_id': company_id, 'is_show': 1, 'disable': 0})
         teams.sort(key=lambda t: t.show_order)
@@ -328,7 +327,6 @@ class TeamPageService(PageService):
         )
 
         res_list = list()
-
         for item in team_positions:
             pos = ObjectDict()
             pos.title=item.title
