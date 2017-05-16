@@ -93,6 +93,6 @@ class TeamDetailHandler(BaseHandler):
 
             if template.get("type", 0) == 3:
                 # 不需要团队在招职位
-                template.clear()
+                template.pop()
 
         return templates, share_cover
