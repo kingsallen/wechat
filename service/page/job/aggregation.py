@@ -104,12 +104,11 @@ class AggregationPageService(PageService):
         return es_res
 
     @gen.coroutine
-    def opt_agg_positions(self, es_res, page_size, user_id, city):
+    def opt_agg_positions(self, es_res, user_id, city):
 
         """
         处理搜索职位结果
         :param es_res:
-        :param page_size:
         :param user_id:
         :param city: 如果用户在搜索条件里面输入了选择的城市，那么不管该职位实际在哪些城市发布，在显示在列表页的时候，只显示用户选择的地址
         :return:
