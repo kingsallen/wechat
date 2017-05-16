@@ -77,7 +77,7 @@ class AggregationPageService(PageService):
 
         # 由于需要按人工设置的 weight进行排序，es 不支持先按关键词搜索，再按 weight 排序
         # 因此由 python 实现排序，并分页
-        es_res = yield self.es_ds.get_es_positions(params, 0, 20)
+        es_res = yield self.es_ds.get_es_positions(params, 0, 300)
         self.logger.debug("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
         self.logger.debug("es_res:{}".format(es_res))
         if es_res.hits.hits:
