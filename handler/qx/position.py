@@ -294,6 +294,7 @@ class PositionRecommendHandler(BaseHandler):
         """
         构造该企业热招职位
         :param company_id:
+        :param page_no
         :return:
         """
 
@@ -307,14 +308,15 @@ class PositionRecommendHandler(BaseHandler):
         return default
 
     @gen.coroutine
-    def _make_team_positions(self, company_id, page_no):
+    def _make_team_positions(self, team_id, page_no):
         """
         构造团队在招职位
-        :param company_id:
+        :param team_id:
+        :param page_no
         :return:
         """
 
-        ret = yield self.company_ps.get_company_positions(company_id, page_no)
+        ret = yield self.team_ps.get_gamma_team_positions(team_id, page_no)
 
         default = ObjectDict(
             title="团队在招职位",

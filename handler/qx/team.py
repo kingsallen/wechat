@@ -74,7 +74,7 @@ class TeamDetailHandler(BaseHandler):
     def _make_team_template(self, current_company, team):
 
         data = yield self.team_ps.get_team_detail(
-            self.current_user, current_company, team, self.params, 3, True)
+            self.current_user, current_company, team, self.params)
 
         templates = data.templates
         share_cover_url = templates[0].data[0].get('media_url') or \

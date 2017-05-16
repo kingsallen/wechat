@@ -11,7 +11,8 @@ from conf import path
 from service.page.base import PageService
 from util.common import ObjectDict
 from util.tool import temp_data_tool
-from util.tool.url_tool import make_url
+from util.tool.url_tool import make_url, make_static_url
+from util.tool.str_tool import gen_salary, split
 
 from tests.dev_data.user_company_config import COMPANY_CONFIG
 
@@ -92,7 +93,7 @@ class TeamPageService(PageService):
         raise gen.Return(data)
 
     @gen.coroutine
-    def get_team_detail(self, user, company, team, handler_param, position_num=3, is_gamma=False):
+    def get_team_detail(self, user, company, team, handler_param, position_num=3):
         """
 
         :param user: handler中的current_user
@@ -112,7 +113,7 @@ class TeamPageService(PageService):
         position_fields = 'id title status city team_id \
                            salary_bottom salary_top department'.split()
 
-        if company.id != user.company.id and not is_gamma:
+        if company.id != user.company.id:
             # 子公司 -> 子公司所属hr(pulishers) -> positions -> teams
             company_positions = yield self._get_sub_company_positions(
                 company.id, position_fields)
@@ -304,3 +305,31 @@ class TeamPageService(PageService):
             team_list.append(item)
 
         return team_list
+
+    @gen.coroutine
+    def get_gamma_team_positions(self, team_id, page_no, page_size=5):
+        # gamma 团队页获得团队在招职位
+
+        page_from = (page_no - 1) * page_size
+
+        team_positions = yield self.job_position_ds.get_positions_list(
+            conds={
+                'status': 0,
+                'team_id': team_id
+            },
+            appends=["ORDER BY update_time desc", "LIMIT %d, %d" % (page_from, page_size)]
+        )
+
+        res_list = list()
+
+        for item in team_positions:
+            pos = ObjectDict()
+            pos.title=item.title
+            pos.id=item.id
+            pos.salary=gen_salary(item.salary_top, item.salary_bottom)
+            pos.image_url=make_static_url("")
+            pos.city=split(item.city, [",","，"])
+            pos.team_name=""
+            res_list.append(pos)
+
+        return res_list
