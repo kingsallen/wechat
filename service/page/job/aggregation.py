@@ -319,11 +319,11 @@ class AggregationPageService(PageService):
         ret = yield self.thrift_searchcondition_ds.get_user_position_status(user_id, pids)
         if ret.positionStatus:
             for item in hot_positions:
-                pid = item.get("id")
-                self.logger.debug("_opt_user_positions_status pid:{}".format(pid))
-                if pid == ret.positionStatus.get(pid):
-                    self.logger.debug("_opt_user_positions_status user_status:{}".format(ret.positionStatus.get(pid)))
-                    item["user_status"] = ret.positionStatus.get(pid)
-                    self.logger.debug("_opt_user_positions_status item:{}".format(item))
+                self.logger.debug("_opt_user_positions_status pid:{}".format(item.get("id")))
+                for key, value in ret.positionStatus.items():
+                    if item.get("id") == key:
+                        self.logger.debug("_opt_user_positions_status user_status:{}".format(key))
+                        item["user_status"] = value
+                        self.logger.debug("_opt_user_positions_status item:{}".format(item))
 
         return hot_positions
