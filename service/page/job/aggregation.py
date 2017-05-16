@@ -115,7 +115,8 @@ class AggregationPageService(PageService):
         self.logger.debug("page_from:{}".format(page_from))
         self.logger.debug("page_block:{}".format(page_block))
 
-        hot_positons = ObjectDict()
+        hot_positons = list()
+        pos_pids = list()
         if es_res:
             es_res = es_res[page_from:page_block]
             self.logger.debug("es_res 3:{}".format(es_res))
@@ -139,7 +140,7 @@ class AggregationPageService(PageService):
                 else:
                     city = city_ori
 
-                hot_positons[id] = ObjectDict({
+                hot_positon = ObjectDict({
                     "id": item.get("_source").get("position").get("id"),
                     "title": item.get("_source").get("position").get("title"),
                     "salary": gen_salary(item.get("_source").get("position").get("salary_top"), item.get("_source").get("position").get("salary_bottom")),
@@ -155,14 +156,15 @@ class AggregationPageService(PageService):
                     "city": city,
                     "company": company,
                 })
+                pos_pids.append(item.get("_source").get("position").get("id"))
+                hot_positons.append(hot_positon)
 
         self.logger.debug("hot_positons:{}".format(hot_positons))
 
         # 处理 0: 未阅，1：已阅，2：已收藏，3：已投递
-        positions = yield self._opt_user_positions_status(hot_positons, user_id)
+        positions = yield self._opt_user_positions_status(pos_pids, user_id)
         self.logger.debug("positions:{}".format(positions))
-        self.logger.debug("list positions:{}".format(list(positions.values())))
-        return list(positions.values())
+        return positions
 
     @gen.coroutine
     def opt_jd_home_img(self, item):
@@ -300,21 +302,23 @@ class AggregationPageService(PageService):
         return res_resource
 
     @gen.coroutine
-    def _opt_user_positions_status(self, hot_positons, user_id):
+    def _opt_user_positions_status(self, hot_positions, pids, user_id):
         """
         处理 0: 未阅，1：已阅，2：已收藏，3：已投递
-        :param hot_positons:
+        :param pids:
+        :param hot_positions:
         :param user_id:
         :return:
         """
 
-        if not user_id or not hot_positons:
-            return hot_positons
+        if not user_id or not pids:
+            return hot_positions
 
-        position_ids = hot_positons.keys()
-        ret = yield self.thrift_searchcondition_ds.get_user_position_status(user_id, position_ids)
+        ret = yield self.thrift_searchcondition_ds.get_user_position_status(user_id, pids)
         if ret.positionStatus:
-            for key, value in hot_positons.items():
-                value["user_status"] = ret.positionStatus.get(key)
+            for item in hot_positions:
+                pid = item.get("id")
+                if pid == ret.positionStatus.get(pid):
+                    item["user_status"] = ret.positionStatus.get(pid)
 
-        return hot_positons
+        return hot_positions
