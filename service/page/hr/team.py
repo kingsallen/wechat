@@ -5,6 +5,8 @@
 :date 2016.11.18
 
 """
+import itertools
+
 from tornado import gen
 
 from conf import path
@@ -118,7 +120,12 @@ class TeamPageService(PageService):
             company_positions = yield self._get_sub_company_positions(
                 company.id, position_fields)
 
-            team_positions = company_positions[:position_num]
+            # 朴素版本
+            # team_positions = [p for p in company_positions if p.team_id == team.id][:position_num]
+            # 高端版本, let me show you some Python skill...
+            team_positions = list(
+                itertools.islice(filter(lambda p: p.team_id == team.id, company_positions), position_num))
+
             team_id_list = list(set([p.team_id for p in company_positions
                                      if p.team_id != team.id]))
             other_teams = yield self._get_sub_company_teams(
