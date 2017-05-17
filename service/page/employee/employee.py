@@ -289,7 +289,7 @@ class EmployeePageService(PageService):
     def activate_email(self, activation_code):
         """通过邮箱激活员工"""
         ret = yield self.thrift_employee_ds.activate_email(activation_code)
-        return ret.success, ret.message
+        return ret.success, ret.message, ret.employeeId
 
     @gen.coroutine
     def get_recommend_records(self, user_id, req_type, page_no, page_size):
