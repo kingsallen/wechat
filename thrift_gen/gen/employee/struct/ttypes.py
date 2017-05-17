@@ -582,17 +582,20 @@ class Result(object):
     Attributes:
      - success
      - message
+     - employeeId
     """
 
     thrift_spec = (
         None,  # 0
         (1, TType.BOOL, 'success', None, None, ),  # 1
         (2, TType.STRING, 'message', 'UTF8', None, ),  # 2
+        (3, TType.I32, 'employeeId', None, None, ),  # 3
     )
 
-    def __init__(self, success=None, message=None,):
+    def __init__(self, success=None, message=None, employeeId=None,):
         self.success = success
         self.message = message
+        self.employeeId = employeeId
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -613,6 +616,11 @@ class Result(object):
                     self.message = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.I32:
+                    self.employeeId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -630,6 +638,10 @@ class Result(object):
         if self.message is not None:
             oprot.writeFieldBegin('message', TType.STRING, 2)
             oprot.writeString(self.message.encode('utf-8') if sys.version_info[0] == 2 else self.message)
+            oprot.writeFieldEnd()
+        if self.employeeId is not None:
+            oprot.writeFieldBegin('employeeId', TType.I32, 3)
+            oprot.writeI32(self.employeeId)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()

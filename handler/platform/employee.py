@@ -196,7 +196,7 @@ class EmployeeBindEmailHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         activation_code = self.params.activation_code
-        result, message = yield self.employee_ps.activate_email(
+        result, message, employee_id = yield self.employee_ps.activate_email(
             activation_code)
 
         tparams = dict(
@@ -208,7 +208,11 @@ class EmployeeBindEmailHandler(BaseHandler):
         self.render(template_name='employee/certification-%s.html' % tname,
                     **tparams)
 
-        employee = yield self.employee_ps.get_valid_employee_record_by_activation_code(activation_code)
+        self.logger.debug("[EV]params: %s" % self.params)
+        employee = yield self.user_ps.get_employee_by_id(employee_id)
+
+        self.logger.debug("[EV]result: %s" % result)
+        self.logger.debug("[EV]employee: %s" % employee)
 
         if result and employee:
             # 处理员工认证红包开始
