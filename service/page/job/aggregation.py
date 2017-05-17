@@ -112,6 +112,11 @@ class AggregationPageService(PageService):
         page_from = (page_no - 1) * page_size
         page_block = page_no * page_size
 
+        self.logger.debug("opt_agg_positions page_from:{}".format(page_from))
+        self.logger.debug("opt_agg_positions page_block:{}".format(page_block))
+        self.logger.debug("opt_agg_positions length:{}".format(len(es_res)))
+        self.logger.debug("opt_agg_positions type:{}".format(type(es_res)))
+
         hot_positons = list()
         pos_pids = list()
         if es_res:
