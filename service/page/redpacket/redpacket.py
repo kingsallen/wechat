@@ -960,7 +960,7 @@ class RedpacketPageService(PageService):
         else:
             position_ids = [b.position_id for b in binding_list]
 
-        position_list = yield self.job_position_ds.get_position_list(
+        position_list = yield self.job_position_ds.get_positions_list(
             conds="id in %s" % set_literl(position_ids))
         position_list = filter(lambda x: x.hb_status > 0, position_list)
 
