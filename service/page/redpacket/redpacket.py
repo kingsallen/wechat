@@ -1009,7 +1009,7 @@ class RedpacketPageService(PageService):
 
         card_url = make_url(
             path.RED_PACKET_CARD, {},
-            host="platform.moseeker.com",
+            host=settings['m_host'],
             m="new",
             cardno=card.cardno)
 
