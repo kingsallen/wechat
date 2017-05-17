@@ -48,6 +48,7 @@ class TeamDetailHandler(BaseHandler):
             "link": self.make_url(path.GAMMA_POSITION_TEAM.format(team_id),
                                   recom=self.position_ps._make_recom(self.current_user.sysuser.id),
                                   fr="recruit",
+                                  tid=str(team_id),
                                   did=str(company.id))
         })
 
