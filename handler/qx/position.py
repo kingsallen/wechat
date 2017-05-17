@@ -84,7 +84,7 @@ class PositionHandler(BaseHandler):
 
         team_img, job_img, company_img = yield self.aggregation_ps.opt_jd_home_img(pos_item)
 
-        team = yield self.team_ps.get_team_by_id(int(position_info.team_id))
+        team = yield self.team_ps.get_team(conds={'id': position_info.team_id})
 
         self.logger.debug("[JD]构建收藏信息")
         star = yield self.position_ps.is_position_stared_by(self.current_user.sysuser.id, position_info.id)
@@ -109,7 +109,7 @@ class PositionHandler(BaseHandler):
             status=position_info.status,
             salary=position_info.salary,
             team=team.name,
-            team_id=team.id,
+            team_id=team.id if team.disable == 0 else "",
             city=split(position_info.city, [",","，"]),
             degree=position_info.degree,
             experience=position_info.experience,
