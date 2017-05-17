@@ -9,6 +9,7 @@
 from dao.base import BaseDao
 
 class HrChatUnreadCountDao(BaseDao):
+
     def __init__(self):
         super(HrChatUnreadCountDao, self).__init__()
         self.table = "hr_chat_unread_count"
@@ -16,6 +17,9 @@ class HrChatUnreadCountDao(BaseDao):
             "room_id":              self.constant.TYPE_INT,
             "hr_id":                self.constant.TYPE_INT,
             "user_id":              self.constant.TYPE_INT,
-            "hr_unread_count":      self.constant.TYPE_INT,
-            "user_unread_count":    self.constant.TYPE_INT,
+            "wx_chat_time":         self.constant.TYPE_TIMESTAMP,
+            "hr_chat_time":         self.constant.TYPE_TIMESTAMP,
+            "hr_have_unread_msg":   self.constant.TYPE_INT,
+            "user_have_unread_msg": self.constant.TYPE_INT,
+
         }

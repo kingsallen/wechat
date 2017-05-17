@@ -144,16 +144,16 @@ class ChatPageService(PageService):
             raise gen.Return(1)
 
         """返回JD 页，求职者与 HR 之间的未读消息数"""
-        chatroom_unread_count = yield self.hr_chat_unread_count_ds.get_chat_unread_count(conds={
-            "user_id": user_id,
-            "hr_id": hr_id
+        chatroom = yield self.hr_wx_hr_chat_list_ds.get_chatroom(conds={
+            "hraccount_id": hr_id,
+            "sysuser_id": user_id
         })
 
         # 若无聊天，则默认显示1条未读消息
-        if not chatroom_unread_count:
+        if not chatroom:
             raise gen.Return(1)
 
-        raise gen.Return(chatroom_unread_count.user_unread_count)
+        raise gen.Return(chatroom.user_unread_count)
 
     @gen.coroutine
     def get_all_unread_chat_num(self, user_id):
@@ -164,7 +164,7 @@ class ChatPageService(PageService):
             raise gen.Return(0)
 
         """返回求职者所有的未读消息数"""
-        unread_count_total = yield self.hr_chat_unread_count_ds.get_chat_unread_count_cnt(conds={
+        unread_count_total = yield self.hr_wx_hr_chat_list_ds.get_chat_unread_count_cnt(conds={
             "user_id": user_id,
         }, fields=["user_unread_count"])
 
