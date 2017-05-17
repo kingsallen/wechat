@@ -304,6 +304,10 @@ class TeamPageService(PageService):
                 "status": 0
             }, fields=["id"])
 
+            # 职位数为0不显示
+            if position_cnt.get("count_id", 0) == 0:
+                continue
+
             item = ObjectDict()
             item["name"] = team.name
             item["id"] = team.id
