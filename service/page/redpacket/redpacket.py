@@ -962,7 +962,8 @@ class RedpacketPageService(PageService):
 
         position_list = yield self.job_position_ds.get_positions_list(
             conds="id in %s" % set_literl(position_ids))
-        position_list = filter(lambda x: x.hb_status > 0, position_list)
+
+        position_list = [x for x in position_list if x.hb_stauts > 0]
 
         raise gen.Return(position_list)
 
