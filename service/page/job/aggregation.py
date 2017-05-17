@@ -78,13 +78,14 @@ class AggregationPageService(PageService):
         # 由于需要按人工设置的 weight进行排序，es 不支持先按关键词搜索，再按 weight 排序
         # 因此由 python 实现排序，并分页
         es_res = yield self.es_ds.get_es_positions(params, 0, 300)
+        es_result = list()
         if es_res.hits.hits:
             self.logger.debug("es!!!!!!!!!!!!!!!!!!!!!!!!!")
-            es_res = sorted(es_res.hits.hits, key=lambda x:x.get("_source").get("weight"), reverse = True)
+            es_result = sorted(es_res.hits.hits, key=lambda x:x.get("_source").get("weight"), reverse = True)
 
         self.logger.debug("opt_agg_positions es_res 1111111:{}".format(es_res))
 
-        return es_res
+        return es_result
 
     @gen.coroutine
     def opt_es_position(self, position_id):
