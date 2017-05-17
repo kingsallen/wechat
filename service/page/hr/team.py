@@ -95,7 +95,7 @@ class TeamPageService(PageService):
         raise gen.Return(data)
 
     @gen.coroutine
-    def get_team_detail(self, user, company, team, handler_param, position_num=3):
+    def get_team_detail(self, user, company, team, handler_param, position_num=3, is_gamma=False):
         """
 
         :param user: handler中的current_user
@@ -115,7 +115,7 @@ class TeamPageService(PageService):
         position_fields = 'id title status city team_id \
                            salary_bottom salary_top department'.split()
 
-        if company.id != user.company.id:
+        if company.id != user.company.id and not is_gamma:
             # 子公司 -> 子公司所属hr(pulishers) -> positions -> teams
             company_positions = yield self._get_sub_company_positions(
                 company.id, position_fields)
