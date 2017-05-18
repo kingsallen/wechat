@@ -677,8 +677,7 @@ class PositionListHandler(BaseHandler):
                     else:
                         position.is_rp_reward = False
 
-            yield self._make_share_info(
-                self.current_user.company.id, self.params.did)
+            yield self._make_share_info(self.current_user.company.id, self.params.did)
 
         # 只渲染必要的公司信息
         yield self.make_company_info()
@@ -743,24 +742,30 @@ class PositionListHandler(BaseHandler):
 
         company_info = yield self.company_ps.get_company(
             conds={"id": did or company_id}, need_conf=True)
+
+        if not rp_share_info:
+            escape = []
+            cover = self.static_url(company_info.logo)
+            title = "%s热招职位" % company_info.abbreviation
+            description = msg.SHARE_DES_DEFAULT
+
+        else:
+            escape = [
+                "pid", "keywords", "cities", "candidate_source",
+                "employment_type", "salary", "department", "occupations",
+                "custom", "degree", "page_from", "page_size"
+            ]
+            cover = rp_share_info.cover
+            title = rp_share_info.title
+            description = rp_share_info.description
+
         link = make_url(
             path.POSITION_LIST,
             self.params,
             host=self.request.host,
             protocol=self.request.protocol,
             recom=self.position_ps._make_recom(self.current_user.sysuser.id),
-            escape=["pid", "keywords", "cities", "candidate_source",
-                    "employment_type", "salary", "department", "occupations",
-                    "custom", "degree", "page_from", "page_size"])
-
-        if not rp_share_info:
-            cover = self.static_url(company_info.logo)
-            title = "%s热招职位" % company_info.abbreviation
-            description = msg.SHARE_DES_DEFAULT
-        else:
-            cover = rp_share_info.cover
-            title = rp_share_info.title
-            description = rp_share_info.description
+            escape=escape)
 
         self.params.share = ObjectDict({
             "cover": cover,
