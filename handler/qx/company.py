@@ -43,7 +43,8 @@ class CompanyHandler(BaseHandler):
             basic_tem = self._make_basicinfo_template(company_info)
             impression_tem = self._make_impression_template(company_info)
             team_tem = yield self._make_team_template(company_info)
-            templates.append(intro_tem)
+            if intro_tem:
+                templates.append(intro_tem)
             templates.append(basic_tem)
             if impression_tem:
                 templates.append(impression_tem)
@@ -83,6 +84,9 @@ class CompanyHandler(BaseHandler):
         :param company_info:
         :return:
         """
+
+        if not company_info.introduction:
+            return None
 
         default = ObjectDict(
             type=7,
