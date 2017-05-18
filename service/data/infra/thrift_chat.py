@@ -53,6 +53,7 @@ class ThriftChatDataService(DataService):
         :param hr_id:
         :param position_id:
         :param room_id
+        :param is_gamma:
         :return:
         """
 

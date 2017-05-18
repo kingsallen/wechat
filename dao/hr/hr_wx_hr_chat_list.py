@@ -19,7 +19,6 @@ class HrWxHrChatListDao(BaseDao):
             "id":                self.constant.TYPE_INT,
             "sysuser_id":        self.constant.TYPE_INT,
             "hraccount_id":      self.constant.TYPE_INT,
-            "status":            self.constant.TYPE_INT,
             "create_time":       self.constant.TYPE_TIMESTAMP,
             "wx_chat_time":      self.constant.TYPE_TIMESTAMP,
             "hr_chat_time":      self.constant.TYPE_TIMESTAMP,
