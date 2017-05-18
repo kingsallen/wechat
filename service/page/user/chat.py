@@ -165,7 +165,7 @@ class ChatPageService(PageService):
 
         """返回求职者所有的未读消息数"""
         unread_count_total = yield self.hr_wx_hr_chat_list_ds.get_chat_unread_count_cnt(conds={
-            "user_id": user_id,
+            "sysuser_id": user_id,
         }, fields=["user_unread_count"])
 
         raise gen.Return(unread_count_total.count_user_unread_count)
