@@ -414,6 +414,8 @@ class PositionHandler(BaseHandler):
             "custom_name": position_info.job_custom,
         })
 
+        self.logger.debug("_make_json_job_department: %s" % data)
+
         return data
 
     def _make_json_job_attr(self, position_info):
