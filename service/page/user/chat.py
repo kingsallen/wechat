@@ -59,10 +59,10 @@ class ChatPageService(PageService):
         raise gen.Return(obj_list)
 
     @gen.coroutine
-    def get_chatroom(self, user_id, hr_id, position_id, room_id, qxuser):
+    def get_chatroom(self, user_id, hr_id, position_id, room_id, qxuser, is_gamma):
         """进入聊天室"""
 
-        ret = yield self.thrift_chat_ds.enter_chatroom(user_id, hr_id, position_id, room_id)
+        ret = yield self.thrift_chat_ds.enter_chatroom(user_id, hr_id, position_id, room_id, is_gamma)
 
         hr_info = ObjectDict()
         if ret.hr:

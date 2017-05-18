@@ -46,18 +46,18 @@ class ThriftChatDataService(DataService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def enter_chatroom(self, user_id, hr_id, position_id, room_id):
+    def enter_chatroom(self, user_id, hr_id, position_id, room_id, is_gamma=False):
         """
         进入聊天室，调用 thrift 接口
         :param user_id:
         :param hr_id:
         :param position_id:
         :param room_id
-        :param is_gamma:
+        :param is_gamma: 是否为 gamma，欢迎语不同
         :return:
         """
 
-        ret = yield self.chat_service_cilent.enterRoom(int(user_id), int(hr_id), int(position_id), int(room_id))
+        ret = yield self.chat_service_cilent.enterRoom(int(user_id), int(hr_id), int(position_id), int(room_id), is_gamma)
         self.logger.debug("[thrift]enter_chatroom: %s" % ret)
         raise gen.Return(ret)
 
