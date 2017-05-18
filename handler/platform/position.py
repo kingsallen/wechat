@@ -34,6 +34,8 @@ class PositionHandler(BaseHandler):
             team = yield self.team_ps.get_team_by_id(position_info.team_id)
             position_info.team = team
 
+            self.logger.debug("[JD]position_info: %s" % position_info)
+
             self.logger.debug("[JD]构建收藏信息")
             star = yield self.position_ps.is_position_stared_by(position_id, self.current_user.sysuser.id)
 
