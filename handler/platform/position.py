@@ -32,6 +32,7 @@ class PositionHandler(BaseHandler):
                 return
 
             team = yield self.team_ps.get_team_by_id(position_info.team_id)
+            position_info.team = team
 
             self.logger.debug("[JD]构建收藏信息")
             star = yield self.position_ps.is_position_stared_by(position_id, self.current_user.sysuser.id)
@@ -408,9 +409,9 @@ class PositionHandler(BaseHandler):
     def _make_json_job_department(self, position_info):
         """构造老微信的所属部门，自定义职能，自定义属性"""
         data = ObjectDict({
-            "department_name": position_info.department,
-            "occupation_name": position_info.employment_type,
-            "custom_name": position_info.job_occupation,
+            "department_name": position_info.team.name,
+            "occupation_name": position_info.job_occupation,
+            "custom_name": position_info.job_custom,
         })
 
         return data
