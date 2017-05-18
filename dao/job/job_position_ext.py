@@ -18,6 +18,7 @@ class JobPositionExtDao(BaseDao):
         self.fields_map = {
             "pid":            self.constant.TYPE_INT,
             "job_custom_id":  self.constant.TYPE_INT,
+            "job_occupation_id": self.constant.TYPE_INT,
             "update_time":    self.constant.TYPE_TIMESTAMP,
             "create_time":    self.constant.TYPE_TIMESTAMP,
         }

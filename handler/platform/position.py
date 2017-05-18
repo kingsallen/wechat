@@ -33,6 +33,9 @@ class PositionHandler(BaseHandler):
                 return
 
             team = yield self.team_ps.get_team_by_id(position_info.team_id)
+            position_info.team = team
+
+            self.logger.debug("[JD]position_info: %s" % position_info)
 
             self.logger.debug("[JD]构建收藏信息")
             star = yield self.position_ps.is_position_stared_by(self.current_user.sysuser.id, position_id)
@@ -408,10 +411,12 @@ class PositionHandler(BaseHandler):
     def _make_json_job_department(self, position_info):
         """构造老微信的所属部门，自定义职能，自定义属性"""
         data = ObjectDict({
-            "department_name": position_info.department,
-            "occupation_name": position_info.employment_type,
-            "custom_name": position_info.job_occupation,
+            "department_name": position_info.team.name,
+            "occupation_name": position_info.job_occupation,
+            "custom_name": position_info.job_custom,
         })
+
+        self.logger.debug("_make_json_job_department: %s" % data)
 
         return data
 
@@ -669,8 +674,7 @@ class PositionListHandler(BaseHandler):
                     else:
                         position.is_rp_reward = False
 
-            yield self._make_share_info(
-                self.current_user.company.id, self.params.did)
+            yield self._make_share_info(self.current_user.company.id, self.params.did)
 
         # 只渲染必要的公司信息
         yield self.make_company_info()
@@ -735,22 +739,28 @@ class PositionListHandler(BaseHandler):
 
         company_info = yield self.company_ps.get_company(
             conds={"id": did or company_id}, need_conf=True)
+
+        if not rp_share_info:
+            escape = []
+            cover = self.static_url(company_info.logo)
+            title = "%s热招职位" % company_info.abbreviation
+            description = msg.SHARE_DES_DEFAULT
+
+        else:
+            cover = self.static_url(rp_share_info.cover)
+            escape = [
+                "pid", "keywords", "cities", "candidate_source",
+                "employment_type", "salary", "department", "occupations",
+                "custom", "degree", "page_from", "page_size"
+            ]
+            title = rp_share_info.title
+            description = rp_share_info.description
+
         link = self.make_url(
             path.POSITION_LIST,
             self.params,
             recom=self.position_ps._make_recom(self.current_user.sysuser.id),
-            escape=["pid", "keywords", "cities", "candidate_source",
-                    "employment_type", "salary", "department", "occupations",
-                    "custom", "degree", "page_from", "page_size"])
-
-        if not rp_share_info:
-            cover = self.static_url(company_info.logo)
-            title = "%s热招职位" % company_info.abbreviation
-            description = msg.SHARE_DES_DEFAULT
-        else:
-            cover = self.static_url(rp_share_info.cover)
-            title = rp_share_info.title
-            description = rp_share_info.description
+            escape=escape)
 
         self.params.share = ObjectDict({
             "cover": cover,
