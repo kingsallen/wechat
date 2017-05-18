@@ -276,10 +276,14 @@ class AggregationPageService(PageService):
         if company.get("type", None) != 0 or len(pic_list) == 0:
             return res_resource
 
+        self.logger.debug("_gen_resources pic_list:{}".format(pic_list))
+
         if len(pic_list) > 3:
             res_resource = random.sample(pic_list, 3)
         else:
             res_resource = pic_list
+
+        self.logger.debug("_gen_resources res_resource 2:{}".format(res_resource))
 
         for item in res_resource:
             item["type"] = item["res_type"]
@@ -288,6 +292,8 @@ class AggregationPageService(PageService):
             item.pop("res_type", None)
             item.pop("res_url", None)
             item.pop("title", None)
+
+        self.logger.debug("_gen_resources res_resource 3:{}".format(res_resource))
 
         return res_resource
 
