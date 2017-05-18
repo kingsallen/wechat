@@ -10,7 +10,6 @@ from util.common import ObjectDict
 
 class UserEmployeeDataService(DataService):
 
-    @cache(ttl=60)
     @gen.coroutine
     def get_employee(self, conds, fields=None):
 
