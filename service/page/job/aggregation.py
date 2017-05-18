@@ -262,8 +262,6 @@ class AggregationPageService(PageService):
         :return:
         """
 
-        self.logger.debug("_gen_resources jd_pic:{}".format(jd_pic))
-
         pic_list = list()
         if jd_pic.get("position_pic"):
             pic_list += jd_pic.get("position_pic").get("other_pic")
@@ -276,10 +274,6 @@ class AggregationPageService(PageService):
         if company.get("banner"):
             pic_list += [ObjectDict(res_type=0, res_url=item) for item in ujson.decode(company.get("banner")).values()]
 
-        self.logger.debug("_gen_resources company type:{}".format(company.get("type", None)))
-        self.logger.debug("_gen_resources pic_list:{}".format(pic_list))
-        self.logger.debug("_gen_resources pic_list type:{}".format(type(pic_list)))
-
         res_resource = list()
         if company.get("type", None) != 0 or len(pic_list) == 0:
             return res_resource
@@ -289,8 +283,6 @@ class AggregationPageService(PageService):
         else:
             res_resource = pic_list
 
-        self.logger.debug("_gen_resources res_resource 2:{}".format(res_resource))
-
         for item in res_resource:
             item["type"] = item["res_type"]
             item["url"] = make_static_url(item['res_url'])
@@ -298,8 +290,6 @@ class AggregationPageService(PageService):
             item.pop("res_type", None)
             item.pop("res_url", None)
             item.pop("title", None)
-
-        self.logger.debug("_gen_resources res_resource 3:{}".format(res_resource))
 
         return res_resource
 
