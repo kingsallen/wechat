@@ -685,13 +685,12 @@ class EventPageService(PageService):
             #         "sysuser_id": user_id,
             #     })
             # self.logger.debug("[__user_bind_wx] res 2: {0}".format(res))
-            # res = yield self.user_user_ds.update_user(
-            #     conds={"id": user_id},
-            #     fields={
-            #         "unionid": wxuser.unionid,
-            #         "nickname": wxuser.nickname,
-            #     })
-            self.logger.debug("[__user_bind_wx] res 3")
+            res = yield self.user_user_ds.update_user(
+                conds={"id": user_id},
+                fields={
+                    "nickname": wxuser.nickname,
+                })
+            self.logger.debug("[__user_bind_wx] res 3:{}".format(res))
             raise gen.Return(True)
         raise gen.Return(False)
 

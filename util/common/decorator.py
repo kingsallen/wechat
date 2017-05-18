@@ -355,10 +355,10 @@ def gamma_welcome(func):
         self.logger.debug("gamma_welcome self.params: {}".format(self.params))
         self.logger.debug("gamma_welcome self.params.fr: {}".format(self.params.fr))
         self.logger.debug("gamma_welcome uri:{}".format(self.request.uri))
-        self.logger.debug("gamma_welcome match:{}".format(re.match(r"^\/recruit\/position[\?]?[\w&=]*$", self.request.uri)))
+        self.logger.debug("gamma_welcome match:{}".format(re.match(r"^\/recruit\/position[\?]?[\w&=%]*$", self.request.uri)))
 
         if not search_keywords and self.params.fr != "recruit" \
-            and re.match(r"^\/recruit\/position[\?]?[\w&=]*$", self.request.uri):
+            and re.match(r"^\/recruit\/position[\?]?[\w&=%]*$", self.request.uri):
             gender = "unkonwn"
             if self.current_user.qxuser.sex == 1:
                 gender = "male"
