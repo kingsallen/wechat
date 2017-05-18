@@ -269,6 +269,8 @@ class AggregationPageService(PageService):
             pic_list += jd_pic.get("position_pic").get("other_pic")
         if jd_pic.get("team_pic"):
             pic_list += jd_pic.get("team_pic").get("other_pic")
+        if jd_pic.get("company_pic"):
+            pic_list += jd_pic.get("company_pic").get("other_pic")
         if company.get("impression"):
             pic_list += [ObjectDict(res_type=0, res_url=item) for item in ujson.decode(company.get("impression")).values()]
         if company.get("banner"):
