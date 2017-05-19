@@ -162,7 +162,6 @@ def position_view_five_notice_tpl(wechat_id, openid, link, title,
 
     raise gen.Return(ret)
 
-
 @gen.coroutine
 def application_notice_to_applier_tpl(wechat_id, openid, link, job,
     company_name, sys_template_id=const.TEMPLATES.APPLY_NOTICE_TPL):

@@ -121,6 +121,7 @@ class PositionHandler(BaseHandler):
             is_collected=star,
             can_apply=not can_apply,
             hr_chat=bool(company_info.conf_hr_chat),
+            hr_id=position_info.publisher,
         )
 
         return position, cover
