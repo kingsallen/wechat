@@ -62,7 +62,8 @@ class EmployeePageService(PageService):
         elif thrift_bind_status == BindStatus.PENDING:
             fe_bind_status = fe.FE_EMPLOYEE_BIND_STATUS_PENDING
         else:
-            assert False  # should not be here
+            pass
+            # assert False  # should not be here
 
         return fe_bind_status
 
