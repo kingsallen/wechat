@@ -6,7 +6,6 @@ import conf.common as const
 import conf.path as path
 from handler.base import BaseHandler
 from util.common.decorator import handle_response, authenticated
-from util.tool.url_tool import make_url
 
 
 class PositionStarHandler(BaseHandler):
@@ -51,7 +50,7 @@ class PositionFavHandler(BaseHandler):
             self.current_user.wxuser.id,
             self.current_user.recom.id if self.current_user.recom else 0)
 
-        application_url = make_url(
+        application_url = self.make_url(
             path.APPLICATION,
             self.params,
             pid=position_id,
