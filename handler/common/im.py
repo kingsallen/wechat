@@ -44,13 +44,17 @@ class UnreadCountHandler(BaseHandler):
         """
 
         chat_num = yield self.chat_ps.get_unread_chat_num(self.current_user.sysuser.id, publisher)
-        g_event, company_info = yield self._get_ga_event(publisher)
-        self.send_json_success(data={
-            "unread": chat_num,
-            "is_subscribe": self.current_user.qxuser.is_subscribe == 1,
-            "event": g_event,
-            "is_chat_on": company_info.conf_hr_chat == 1
-        })
+        if self.is_platform:
+            self.send_json_success(data={
+                "unread": chat_num,
+            })
+        else:
+            g_event = yield self._get_ga_event(publisher)
+            self.send_json_success(data={
+                "unread": chat_num,
+                "is_subscribe": self.current_user.qxuser.is_subscribe == 1,
+                "event": g_event,
+            })
 
     @handle_response
     @authenticated
@@ -62,12 +66,17 @@ class UnreadCountHandler(BaseHandler):
         """
 
         chat_num = yield self.chat_ps.get_all_unread_chat_num(self.current_user.sysuser.id)
-        g_event, company_info = yield self._get_ga_event()
-        self.send_json_success(data={
-            "unread": chat_num,
-            "is_subscribe": self.current_user.qxuser.is_subscribe == 1,
-            "event": g_event,
-        })
+        if self.is_platform:
+            self.send_json_success(data={
+                "unread": chat_num,
+            })
+        else:
+            g_event = yield self._get_ga_event()
+            self.send_json_success(data={
+                "unread": chat_num,
+                "is_subscribe": self.current_user.qxuser.is_subscribe == 1,
+                "event": g_event,
+            })
 
     @gen.coroutine
     def _get_ga_event(self, publisher=None):
@@ -97,7 +106,7 @@ class UnreadCountHandler(BaseHandler):
         elif self.current_user.qxuser.is_subscribe == 1 and company_info.conf_hr_chat:
             g_event = 5
 
-        return g_event, company_info
+        return g_event
 
 class ChatWebSocketHandler(websocket.WebSocketHandler):
 
@@ -267,14 +276,20 @@ class ChatHandler(BaseHandler):
     def get_room(self):
         """进入聊天室"""
 
-        if not self.params.hr_id:
+        if self.is_platform and not self.params.hr_id:
             self.send_json_error(message=msg.REQUEST_PARAM_ERROR)
             return
+
+        hr_id = self.params.hr_id
+        if self.is_qx:
+            hr_id = self.current_user.company.hraccount_id
+
+
         pid = self.params.pid or 0
         room_id = self.params.room_id or 0
 
         res = yield self.chat_ps.get_chatroom(self.current_user.sysuser.id,
-                                              self.params.hr_id,
+                                              hr_id,
                                               pid, room_id,
                                               self.current_user.qxuser,
                                               self.is_qx)

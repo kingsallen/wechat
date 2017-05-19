@@ -72,7 +72,7 @@ class PositionHandler(BaseHandler):
             # 获取公司配置信息
             teamname_custom = self.current_user.company.conf_teamname_custom
 
-            header = self._make_json_header(
+            header = yield self._make_json_header(
                 position_info, company_info, star, application, endorse,
                 can_apply, team.id if team else 0, did, teamname_custom)
             module_job_description = self._make_json_job_description(position_info)
@@ -288,9 +288,14 @@ class PositionHandler(BaseHandler):
 
         return res
 
+    @gen.coroutine
     def _make_json_header(self, position_info, company_info, star, application,
                           endorse, can_apply, team_id, did, teamname_custom):
         """构造头部 header 信息"""
+
+        # 获得母公司配置信息
+        parent_company_info = yield self._make_parent_company_info()
+
         data = ObjectDict({
             "id": position_info.id,
             "title": position_info.title,
@@ -307,12 +312,21 @@ class PositionHandler(BaseHandler):
             "team": team_id,
             "did": did if did != self.current_user.company.id else "",  # 主公司不需要提供 did
             "salary": position_info.salary,
-            "hr_chat": int(company_info.conf_hr_chat),
+            "hr_chat": int(parent_company_info.conf_hr_chat),
             "teamname_custom": teamname_custom["teamname_custom"]
             # "team": position_info.department.lower() if position_info.department else ""
         })
 
         return data
+
+    @gen.coroutine
+    def _make_parent_company_info(self):
+        """获得母公司的配置信息，部分逻辑由母公司控制，例如开启 IM 聊天，开启新微信"""
+        parent_company_info = yield self.company_ps.get_company(conds={
+            "id": self.current_user.wechat.company_id
+        }, need_conf=True)
+
+        return parent_company_info
 
     def _make_json_job_description(self, position_info):
         """构造职位描述"""

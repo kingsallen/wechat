@@ -97,7 +97,10 @@ class PositionHandler(BaseHandler):
         can_apply = yield self.application_ps.is_allowed_apply_position(
             self.current_user.sysuser.id, company_info.id)
 
-        if company_info.conf_newjd_status != 2:
+        # 获得母公司信息，新 JD 开关，IM 聊天开关，由母公司控制
+        parent_cmp_info = yield self._make_parent_company_info(position_info.company_id)
+
+        if parent_cmp_info.conf_newjd_status != 2:
             # 未采用新 JD
             cover = company_info.banner[0] if company_info.banner else job_img
         else:
@@ -120,7 +123,7 @@ class PositionHandler(BaseHandler):
             appid=application.id or 0,
             is_collected=star,
             can_apply=not can_apply,
-            hr_chat=bool(company_info.conf_hr_chat),
+            hr_chat=bool(parent_cmp_info.conf_hr_chat),
             hr_id=position_info.publisher,
         )
 
@@ -146,6 +149,15 @@ class PositionHandler(BaseHandler):
         add_item(position_temp, "module_job_require", module_job_require)
 
         return position_temp
+
+    @gen.coroutine
+    def _make_parent_company_info(self, company_id):
+        """获得母公司的配置信息，部分逻辑由母公司控制，例如开启 IM 聊天"""
+        parent_company_info = yield self.company_ps.get_company(conds={
+            "id": company_id
+        }, need_conf=True)
+
+        return parent_company_info
 
     def __make_json_job_description(self, position_info):
         """构造职位描述"""
