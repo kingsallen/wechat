@@ -31,6 +31,7 @@ import handler.common.resume
 import handler.common.suggest
 import handler.common.usercenter
 import handler.common.dictionary
+import handler.common.logcollector
 
 import handler.help.passport
 import handler.help.releasedposition
@@ -99,6 +100,7 @@ common_routes = [
     (r"/api/chat[\/]*([a-z]+)*",                     handler.common.im.ChatHandler,                             {"event": "chat_"}),
     (r"/api/application",                            handler.common.application.ApplicationHandler,             {"event": "application_profile"}),
     (r"/api/JSSDKError",                             handler.common.jssdkerror.JSSDKErrorHandler,               {"event": "frontend_jssdkerror"}),
+    (r"/api/collectlog",                             handler.common.logcollector.LogCollectorHandler,           {"event": "collect_log"}),
 ]
 
 # 企业号的单独 routes，域名 platform.moseeker.com/m
