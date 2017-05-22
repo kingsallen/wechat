@@ -1,13 +1,9 @@
 # coding=utf-8
 
-
-import re
-from urllib.parse import urlparse, quote
+from urllib.parse import quote
 import tornado.gen as gen
 
-import conf.common as const
 import conf.wechat as wx_const
-import conf.path as path
 
 from util.common import ObjectDict
 from util.common.sign import Sign
@@ -47,10 +43,6 @@ class WeChatOauth2Service(object):
     def get_oauth_code_userinfo_url(self):
         """正常授权获取 code"""
         return self._get_oauth_code_url(is_base=0)
-
-    # @property
-    # def handling_qx(self):
-    #     return self.wechat.id == settings['qx_wechat_id']
 
     @gen.coroutine
     def get_openid_unionid_by_code(self, code):
@@ -184,32 +176,6 @@ class WeChatOauth2Service(object):
         """
         ret = yield http_get(wx_const.WX_OAUTH_GET_USERINFO % (self._access_token, openid), infra=False)
         raise gen.Return(ret)
-
-    # def __adjust_url(self, is_base):
-    #     """必要时调整 redirect_uri 的二级域名
-    #
-    #     '必要时'指： 1.静默授权
-    #                 2. wechat 实例变量是聚合号
-    #                 3. redirect_url 是 platform 开头
-    #
-    #     将 redirect_url 改为 qx 域名，并使用跳转 url，
-    #     将现有 redirect_url 填充 next_url 参数
-    #     """
-    #
-    #     if not is_base and self.handling_qx and self.__is_platform_url(
-    #             self.redirect_url):
-    #         next_url = quote(self.redirect_url)
-    #         up = urlparse(self.redirect_url)
-    #         netloc = up.netloc.replace(const.ENV_PLATFORM, const.ENV_QX, 1)
-    #         self.redirect_url = "{}?next_url={}".format(
-    #             up.scheme + "://" + netloc + path.GAMMA_OAUTH_QX,
-    #             next_url)
-
-    # @staticmethod
-    # def __is_platform_url(string):
-    #     """判断是否是 platform 的 url"""
-    #     regex = r'^http(s)?:\/\/platform'
-    #     return re.match(regex, string)
 
 
 class JsApi(object):

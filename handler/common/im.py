@@ -54,6 +54,7 @@ class UnreadCountHandler(BaseHandler):
                 "unread": chat_num,
                 "is_subscribe": self.current_user.qxuser.is_subscribe == 1,
                 "event": g_event,
+                "qrcode": self.current_user.wechat.qrcode
             })
 
     @handle_response
@@ -76,6 +77,7 @@ class UnreadCountHandler(BaseHandler):
                 "unread": chat_num,
                 "is_subscribe": self.current_user.qxuser.is_subscribe == 1,
                 "event": g_event,
+                "qrcode": self.current_user.wechat.qrcode
             })
 
     @gen.coroutine
