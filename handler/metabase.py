@@ -64,6 +64,7 @@ class MetaBaseHandler(AtomHandler):
         self._in_wechat, self._client_type = self._depend_wechat()
         # 日志信息
         self._log_info = None
+        self._log_customs = ObjectDict()
         # page service 初始化
 
     def initialize(self, event):
@@ -376,9 +377,9 @@ class MetaBaseHandler(AtomHandler):
         # 简历导入 post 请求 _password 参数需要剔除
         req_params.pop('_password', None)
 
-        customs = ObjectDict(
-            type_wechat=self._in_wechat,
-            type_mobile=self._client_type)
+        customs = self._log_customs or ObjectDict()
+        customs.update(
+            type_wechat=self._in_wechat, type_mobile=self._client_type)
 
         if self.current_user:
             customs.update(
@@ -386,6 +387,7 @@ class MetaBaseHandler(AtomHandler):
                 qxuser_id=self.current_user.get("qxuser", {}).get("id", 0),
                 wxuser_id=self.current_user.get("wxuser", {}).get("id", 0),
                 wechat_id=self.current_user.get("wechat", {}).get("id", 0))
+
             user_id = self.current_user.get("sysuser", {}).get("id", 0)
         else:
             user_id = 0
@@ -415,6 +417,8 @@ class MetaBaseHandler(AtomHandler):
         )
 
         log_params.update(log_info_common)
+
+        self._log_customs = None
         return log_params
 
     def _depend_wechat(self):

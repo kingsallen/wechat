@@ -70,14 +70,14 @@ common_routes = [
     (r"/m/resume/import",                              handler.common.resume.ResumeImportHandler,                 {"event": "resume_auth"}),
     (r"/m/resume/linkedin",                            handler.common.resume.LinkedinImportHandler,               {"event": "resume_linkedin"}),
 
-    (r"/m/profile[\/]?",                               handler.common.profile.ProfileHandler,                   {"event": "profile_profile"}),
-    (r"/m/profile/preview[\/]?",                       handler.common.profile.ProfilePreviewHandler,            {"event": "profile_preview"}),
-    (r"/m/profile/custom[\/]?",                        handler.common.profile.ProfileCustomHandler,             {"event": "profile_customcv"}),
-    (r"/m/api/dict/city[\/]?",                         handler.common.dictionary.DictCityHandler,               {"event": "dict_city"}),
-    (r"/m/api/dict/industry[\/]?",                     handler.common.dictionary.DictIndustryHandler,           {"event": "dict_industry"}),
-    (r"/m/api/dict/function[\/]?",                     handler.common.dictionary.DictFunctionHandler,           {"event": "dict_function"}),
-    (r"/m/api/profile/edit[\/]?",                      handler.common.profile.ProfileSectionHandler,            {"event": "profile_section"}),
-    (r"/m/api/profile/new[\/]?",                       handler.common.profile.ProfileNewHandler,                {"event": "profile_new"}),
+    (r"/m/profile[\/]?",                               handler.common.profile.ProfileHandler,                     {"event": "profile_profile"}),
+    (r"/m/profile/preview[\/]?",                       handler.common.profile.ProfilePreviewHandler,              {"event": "profile_preview"}),
+    (r"/m/profile/custom[\/]?",                        handler.common.profile.ProfileCustomHandler,               {"event": "profile_customcv"}),
+    (r"/m/api/dict/city[\/]?",                         handler.common.dictionary.DictCityHandler,                 {"event": "dict_city"}),
+    (r"/m/api/dict/industry[\/]?",                     handler.common.dictionary.DictIndustryHandler,             {"event": "dict_industry"}),
+    (r"/m/api/dict/function[\/]?",                     handler.common.dictionary.DictFunctionHandler,             {"event": "dict_function"}),
+    (r"/m/api/profile/edit[\/]?",                      handler.common.profile.ProfileSectionHandler,              {"event": "profile_section"}),
+    (r"/m/api/profile/new[\/]?",                       handler.common.profile.ProfileNewHandler,                  {"event": "profile_new"}),
 
     # websocket
     (r"/m/websocket/([A-Za-z0-9_]{1,32})",             handler.common.im.ChatWebSocketHandler),
