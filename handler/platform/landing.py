@@ -8,8 +8,6 @@ import conf.path as path
 from handler.base import BaseHandler
 from util.common import ObjectDict
 from util.common.decorator import handle_response
-from util.tool.url_tool import make_url
-
 
 class LandingHandler(BaseHandler):
     """

@@ -278,12 +278,20 @@ def authenticated(func):
     @functools.wraps(func)
     @gen.coroutine
     def wrapper(self, *args, **kwargs):
+
+        self.logger.debug("authenticated user_id:{}".format(self.current_user.sysuser.id))
+        self.logger.debug("authenticated in_wechat:{}".format(self.in_wechat))
+        self.logger.debug("authenticated wechat_type:{}".format(self._authable(self.current_user.wechat.type)))
+        self.logger.debug("authenticated wxuser:{}".format(self.current_user.wxuser))
+        self.logger.debug("authenticated uri:{}".format(self.request.uri))
+
         if self.current_user.sysuser.id and self.in_wechat:
             if self._authable(self.current_user.wechat.type) and not self.current_user.wxuser \
                 and self.request.method in ("GET", "HEAD") \
-                and not self.request.uri.startswith("/m/api/"):
+                and not self.request.uri.startswith("/api/"):
                 # 该企业号是服务号，静默授权
                 # api 类接口，不适合做302静默授权，微信服务器不会跳转
+                self.logger.debug("authenticated 1")
                 self._oauth_service.wechat = self.current_user.wechat
                 self._oauth_service.state = to_hex(self.current_user.qxuser.unionid)
                 url = self._oauth_service.get_oauth_code_base_url()
@@ -292,12 +300,14 @@ def authenticated(func):
 
         elif not self.current_user.sysuser.id:
             if self.request.method in ("GET", "HEAD"):
+                self.logger.debug("authenticated 2")
                 redirect_url = self.make_url(path.USER_LOGIN, self.params, escape=['next_url'])
                 redirect_url += "&" + urlencode(
                     dict(next_url=self.fullurl()))
                 self.redirect(redirect_url)
                 return
             else:
+                self.logger.debug("authenticated 3")
                 self.send_json_error(message=msg.NOT_AUTHORIZED)
                 return
 
