@@ -2,6 +2,8 @@
 
 import logging
 import os
+
+from util.common.singleton import Singleton
 from logging.handlers import TimedRotatingFileHandler
 
 from tornado.log import gen_log
@@ -35,7 +37,7 @@ LOG_LEVELS = {
 # --------------------------------------------------------------------------
 
 
-class ExactLogLevelFilter(logging.Filter):
+class ExactLogLevelFilter(logging.Filter, metaclass=Singleton):
     """The filter appended to handlers"""
     def __init__(self, level):
         self.__level = level
@@ -44,7 +46,7 @@ class ExactLogLevelFilter(logging.Filter):
         return log_record.levelno == self.__level
 
 
-class Logger(object):
+class Logger(object, metaclass=Singleton):
     """3rd-party package independent logger root class"""
 
     def __init__(self, logpath='/tmp/', log_backcount=0,
