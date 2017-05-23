@@ -235,8 +235,6 @@ class BaseHandler(MetaBaseHandler):
                 self.logger.error("wechat_signature missing")
                 raise NoSignatureError()
 
-
-
         wechat = yield self.wechat_ps.get_wechat(conds={
             "signature": signature
         })
@@ -547,6 +545,14 @@ class BaseHandler(MetaBaseHandler):
 
         if sysuser:
             sysuser.headimg = self.static_url(sysuser.headimg or const.SYSUSER_HEADIMG)
+
+        # 对于非微信环境，用户登录后，如果帐号已经绑定微信，则同时获取微信用户信息
+        self.logger.debug("_add_sysuser_to_session unionid:{}".format(sysuser.unionid))
+        self.logger.debug("_add_sysuser_to_session qxuser:{}".format(session.qxuser))
+
+        if sysuser.unionid and not session.qxuser:
+            session.qxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
+                unionid=sysuser.unionid, wechat_id=self.settings['qx_wechat_id'])
 
         session.sysuser = sysuser
 
