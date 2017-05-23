@@ -25,8 +25,7 @@ class PositionHandler(BaseHandler):
         """
         position_info = yield self.position_ps.get_position(position_id)
 
-        if position_info.id and \
-                position_info.company_id == self.current_user.company.id:
+        if position_info.id and position_info.company_id == self.current_user.company.id:
             yield self._redirect_when_recom_is_openid(position_info)
             if self.request.connection.stream.closed():
                 return
@@ -48,10 +47,8 @@ class PositionHandler(BaseHandler):
 
             # 刷新链路
             self.logger.debug("[JD]刷新链路")
-            last_employee_user_id = yield self._make_refresh_share_chain(
-                position_info)
-            self.logger.debug(
-                "[JD]last_employee_user_id: %s" % (last_employee_user_id))
+            last_employee_user_id = yield self._make_refresh_share_chain(position_info)
+            self.logger.debug("[JD]last_employee_user_id: %s" % (last_employee_user_id))
 
             self.logger.debug("[JD]构建转发信息")
             yield self._make_share_info(position_info, company_info)
@@ -137,12 +134,14 @@ class PositionHandler(BaseHandler):
             self.flush()
 
             # 后置操作
-            if self.is_platform:
-                self.logger.debug("[JD]转发积分操作")
-                yield self._make_add_reward_click(position_info, last_employee_user_id)
-
-            # 红包处理
             if self.is_platform and self.current_user.recom:
+                # 转发积分
+                if last_employee_user_id:
+                    self.logger.debug("[JD]转发积分操作")
+                    yield self._make_add_reward_click(
+                        position_info, last_employee_user_id)
+
+                # 红包处理
                 self.logger.debug("[JD]红包处理")
                 yield self.redpacket_ps.handle_red_packet_position_related(
                     self.current_user,
@@ -556,27 +555,38 @@ class PositionHandler(BaseHandler):
 
     @gen.coroutine
     def _make_add_reward_click(self, position_info, recom_employee_user_id):
-        """给员工加积分"""
+        """给员工加积分
+        :param position_info:
+            职位信息，用户提取公司信息
+        :param recom_employee_user_id: 
+            最近员工 user_id ，如果为0，说明没有最近员工 user_id ，不执行添加积分操作
+        """
 
-        if (not self.current_user.employee and
-                    recom_employee_user_id != self.current_user.sysuser.id):
+        # 链路最近员工不存在，不会加积分
+        if not recom_employee_user_id:
+            return
 
-            recom_employee = yield self.user_ps.get_valid_employee_by_user_id(
-                recom_employee_user_id, self.current_user.company.id)
+        # 点击人为员工，则不会给其他员工再加积分
+        if self.current_user.employee:
+            return
 
-            if recom_employee and recom_employee.sysuser_id:
-                res = yield self.position_ps.add_reward_for_recom_click(
-                    employee=recom_employee,
-                    company_id=self.current_user.company.id,
-                    berecom_wxuser_id=self.current_user.wxuser.id or 0,
-                    berecom_user_id=self.current_user.sysuser.id,
-                    position_id=position_info.id)
+        # 最近员工就是当前用户，是自己点击自己的转发，不应该加积分
+        if recom_employee_user_id == self.current_user.sysuser.id:
+            return
 
-                self.logger.debug("[JD]给员工加积分： %s" % res)
-            else:
-                self.logger.warning(
-                    "[JD]给员工加积分异常：员工不存在或员工 sysuser_id 不存在: %s" %
-                    recom_employee)
+        recom_employee = yield self.user_ps.get_valid_employee_by_user_id(
+            recom_employee_user_id, self.current_user.company.id)
+
+        if recom_employee and recom_employee.sysuser_id:
+            res = yield self.position_ps.add_reward_for_recom_click(
+                employee=recom_employee,
+                company_id=self.current_user.company.id,
+                berecom_user_id=self.current_user.sysuser.id,
+                position_id=position_info.id)
+
+            self.logger.debug("[JD]给员工加积分： %s" % res)
+        else:
+            self.logger.warning("[JD]给员工加积分异常：员工不存在或员工 sysuser_id 不存在: %s" % recom_employee)
 
     @gen.coroutine
     def _make_send_publish_template(self, position_info):
