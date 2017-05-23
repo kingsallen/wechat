@@ -95,7 +95,8 @@ class UnreadCountHandler(BaseHandler):
             company_info = yield self.company_ps.get_company(conds={
                 "id": hr_info.company_id
             }, need_conf=True)
-
+        else:
+            company_info = self.current_user.company
 
         self.logger.debug("_get_ga_event in_wechat: {}".format(self.in_wechat))
         self.logger.debug("_get_ga_event self.current_user.sysuser: {}".format(self.current_user.sysuser))
