@@ -673,7 +673,7 @@ class ApplicationPageService(PageService):
             employee_id=recom_employee.id,
             company_id=current_user.company.id,
             position_id=application.position_id,
-            be_recom_wxuser=current_user.wxuser,
+            berecom_user_id=current_user.sysuser.id,
             award_type=const.EMPLOYEE_AWARD_TYPE_SHARE_APPLY,
             application_id=application.id
         )

@@ -504,8 +504,13 @@ class UserPageService(PageService):
         return http_tool.unboxing(res)
 
     @gen.coroutine
-    def employee_add_reward(self, employee_id, company_id, position_id,
-                            be_recom_wxuser, award_type=const.EMPLOYEE_AWARD_TYPE_DEFAULT_ERROR, **kw):
+    def employee_add_reward(self,
+                            employee_id,
+                            company_id,
+                            position_id,
+                            berecom_user_id,
+                            award_type=const.EMPLOYEE_AWARD_TYPE_DEFAULT_ERROR,
+                            **kw):
         """给员工添加积分的公共方法
         所有给员工添加积分的动作，都要走这个方法！
         """
@@ -530,10 +535,16 @@ class UserPageService(PageService):
 
         # 获取积分模版对应的所需增加积分数 award_points
         type_templateid_mapping = {
-            const.EMPLOYEE_AWARD_TYPE_SHARE_CLICK: const.RECRUIT_STATUS_RECOMCLICK_ID,
-            const.EMPLOYEE_AWARD_TYPE_SHARE_APPLY: const.RECRUIT_STATUS_APPLY_ID,
-            const.EMPLOYEE_AWARD_TYPE_RECOM: const.RECRUIT_STATUS_FULL_RECOM_INFO_ID
+            const.EMPLOYEE_AWARD_TYPE_SHARE_CLICK:
+                const.RECRUIT_STATUS_RECOMCLICK_ID,
+
+            const.EMPLOYEE_AWARD_TYPE_SHARE_APPLY:
+                const.RECRUIT_STATUS_APPLY_ID,
+
+            const.EMPLOYEE_AWARD_TYPE_RECOM:
+                const.RECRUIT_STATUS_FULL_RECOM_INFO_ID
         }
+
         template_id = type_templateid_mapping.get(award_type)
         if not template_id:
             raise ValueError("invalid employee_award_type: %s" % award_type)
@@ -554,9 +565,9 @@ class UserPageService(PageService):
             "award_config_id":   points_conf.id,
             "recom_wxuser":      employee.wxuser_id,
             "recom_user_id":     employee.sysuser_id,
-            "berecom_user_id":   be_recom_wxuser.sysuser_id,
-            "berecom_wxuser_id": be_recom_wxuser.id
+            "berecom_user_id":   berecom_user_id
         }
+
         yield self.user_employee_points_record_ds.create_user_employee_points_record(
             fields=fields
         )
