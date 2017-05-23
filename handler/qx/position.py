@@ -224,7 +224,7 @@ class PositionHandler(BaseHandler):
                                                                 position_info.title)
 
         link = self.make_url(
-            path.GAMMA_POSITION_JD.format(position_info.id),
+            path.GAMMA_POSITION_HOME.format(position_info.id),
             self.params,
             recom=self.position_ps._make_recom(self.current_user.sysuser.id),
             fr="recruit",

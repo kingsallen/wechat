@@ -599,7 +599,7 @@ class PositionHandler(BaseHandler):
                         path.POSITION_PATH.format(position_info.id),
                         wechat_signature=self.current_user.wechat.signature)
                 else:
-                    link = self.make_url(path.GAMMA_POSITION_JD.format(position_info.id))
+                    link = self.make_url(path.GAMMA_POSITION_HOME.format(position_info.id))
 
                 yield position_view_five_notice_tpl(help_wechat.id, hr_wx_user.openid,
                                                     link, position_info.title,

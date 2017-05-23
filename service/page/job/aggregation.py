@@ -79,10 +79,12 @@ class AggregationPageService(PageService):
         # 因此由 python 实现排序，并分页
         es_res = yield self.es_ds.get_es_positions(params, 0, 300)
         es_result = list()
+        # 搜索结果总数
+        total = es_res.get("hits", {}).get("total", 0)
         if es_res.hits.hits:
             es_result = sorted(es_res.hits.hits, key=lambda x:x.get("_source").get("weight"), reverse = True)
 
-        return es_result
+        return es_result, total
 
     @gen.coroutine
     def opt_es_position(self, position_id):
@@ -154,6 +156,7 @@ class AggregationPageService(PageService):
 
         # 处理 0: 未阅，1：已阅，2：已收藏，3：已投递
         positions = yield self._opt_user_positions_status(hot_positons, pos_pids, user_id)
+
         return positions
 
     @gen.coroutine

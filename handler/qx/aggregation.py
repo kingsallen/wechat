@@ -50,7 +50,7 @@ class AggregationHandler(BaseHandler):
         self.logger.debug("page_no:{}".format(page_no))
         self.logger.debug("page_size:{}".format(page_size))
 
-        es_res = yield self.aggregation_ps.opt_es(salary_top,
+        es_res, total = yield self.aggregation_ps.opt_es(salary_top,
                                                   salary_bottom,
                                                   salary_negotiable,
                                                   keywords,
@@ -64,6 +64,7 @@ class AggregationHandler(BaseHandler):
             "page_no": int(page_no),
             "page_size": int(page_size),
             "positions": positions,
+            "total": total
         })
 
         if int(page_no) == 1:
@@ -80,16 +81,26 @@ class AggregationHandler(BaseHandler):
             # 自定义分享
             share = self._make_share_info(hot_company, keywords)
 
+            # 构造搜索参数回显
+            search_params = ObjectDict(
+                salary_top=salary_top,
+                salary_bottom=salary_bottom,
+                salary_negotiable=salary_negotiable,
+                keywords=keywords,
+                city=city,
+                industry=industry
+            )
+
             result.update({
                 "is_hr_ads": is_show_ads,
                 "banner": banner,
                 "hot_company": hot_company,
                 "share": share,
+                "search_params": search_params,
             })
 
-            # 来自初次进入页面，则设置搜索词 cookie
-            if self.params.fr_wel:
-                self._set_welcome_cookie()
+            # 设置搜索词 cookie
+            self._set_welcome_cookie()
 
         self.send_json_success(data=result)
 

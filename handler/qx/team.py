@@ -87,10 +87,12 @@ class TeamDetailHandler(BaseHandler):
         for index, template in enumerate(templates):
             self.logger.debug("template:{}".format(template))
             if template.get("type", 0) == 4:
+                del templates[index]
+                # 其他团队，暂时不需要
                 # 其他团队,调整链接
-                for item in template["data"]:
-                    team_id = re.match(r"\/m\/company\/team\/(\d+)", item.get("link"))
-                    item['link'] = self.make_url(path.GAMMA_POSITION_TEAM.format(int(team_id.group(1))))
+                # for item in template["data"]:
+                #     team_id = re.match(r"\/m\/company\/team\/(\d+)", item.get("link"))
+                #     item['link'] = self.make_url(path.GAMMA_POSITION_TEAM.format(int(team_id.group(1))))
 
             if template.get("type", 0) == 3:
                 # 不需要团队在招职位

@@ -64,7 +64,7 @@ class PositionFavHandler(BaseHandler):
                 escape=['next_url', 'name', 'company', 'position'])
         else:
             position_info_url = self.make_url(
-                path.GAMMA_POSITION_JD.format(position_id),
+                path.GAMMA_POSITION_HOME.format(position_id),
                 self.params,
                 escape=['next_url', 'name', 'company', 'position'])
 

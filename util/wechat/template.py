@@ -218,7 +218,7 @@ def application_notice_to_hr_tpl(wechat_id, openid, hr_name, title,
     """求职者发送求职成功后，向HR发送消息通知"""
 
     json_data = _make_json_data(
-        first="{0}，您好：\\n您刚发布的{1}职位收到了一份新简历，请及时登录hr.moseeker.com查阅并处理".format(
+        first="{0}，您好：\n您刚发布的{1}职位收到了一份新简历，请及时登录hr.moseeker.com查阅并处理".format(
             hr_name, title),
         remark="",
         job=title,

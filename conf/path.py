@@ -21,7 +21,6 @@ PROFILE_CUSTOM_CV = '/profile/custom'
 # 聚合号单独链接
 GAMMA_HOME = '/enter'
 GAMMA_POSITION = '/position'
-GAMMA_POSITION_JD = '/position/{}'
 GAMMA_POSITION_HOME = '/position/{}/home'
 GAMMA_POSITION_TEAM = '/team/{}'
 GAMMA_POSITION_COMPANY = '/company/{}'
