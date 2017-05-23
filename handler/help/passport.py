@@ -65,7 +65,7 @@ class RegisterHandler(BaseHandler):
             'company_id': int(res_company),
             'password': passwd,
             'wxuser_id': self.current_user.wxuser.id,
-            'source': int(self.params.source),
+            'source': int(self.params.source or 4),
             'last_login_ip': self.request.remote_ip,
             'register_ip': self.request.remote_ip,
             'login_count': 0
