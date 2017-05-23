@@ -299,7 +299,7 @@ def authenticated(func):
                 return
 
         elif not self.current_user.sysuser.id:
-            if self.request.method in ("GET", "HEAD"):
+            if self.request.method in ("GET", "HEAD") and not self.request.uri.startswith("/api/"):
                 self.logger.debug("authenticated 2")
                 redirect_url = self.make_url(path.USER_LOGIN, self.params, escape=['next_url'])
                 redirect_url += "&" + urlencode(
@@ -365,10 +365,10 @@ def gamma_welcome(func):
         self.logger.debug("gamma_welcome self.params: {}".format(self.params))
         self.logger.debug("gamma_welcome self.params.fr: {}".format(self.params.fr))
         self.logger.debug("gamma_welcome uri:{}".format(self.request.uri))
-        self.logger.debug("gamma_welcome match:{}".format(re.match(r"^\/recruit\/position[\?]?[\w&=%]*$", self.request.uri)))
+        self.logger.debug("gamma_welcome match:{}".format(re.match(r"^\/position[\?]?[\w&=%]*$", self.request.uri)))
 
         if not search_keywords and self.params.fr != "recruit" and not self.params.fr_wel \
-            and re.match(r"^\/recruit\/position[\?]?[\w&=%]*$", self.request.uri):
+            and re.match(r"^\/position[\?]?[\w&=%]*$", self.request.uri):
             gender = "unknown"
             if self.current_user.qxuser.sex == 1:
                 gender = "male"
