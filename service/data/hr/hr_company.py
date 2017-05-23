@@ -44,3 +44,10 @@ class HrCompanyDataService(DataService):
 
         response = yield self.hr_company_dao.get_list_by_conds(conds, fields, options, appends, index, params)
         raise gen.Return(response)
+
+    @gen.coroutine
+    def create_company(self, fields, options=None):
+        options = options or []
+
+        response = yield self.hr_company_dao.insert_record(fields, options)
+        raise gen.Return(response)
