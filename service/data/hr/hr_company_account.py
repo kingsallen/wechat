@@ -1,7 +1,5 @@
 # coding=utf-8
 
-# Copyright 2016 MoSeeker
-
 from tornado import gen
 from service.data.base import DataService
 from util.common.decorator import cache
@@ -43,4 +41,11 @@ class HrCompanyAccountDataService(DataService):
             fields = list(self.hr_company_account_dao.fields_map.keys())
 
         response = yield self.hr_company_account_dao.get_list_by_conds(conds, fields, options, appends, index, params)
+        raise gen.Return(response)
+
+    @gen.coroutine
+    def create_company_accounts(self, fields, options=None):
+        options = options or []
+
+        response = yield self.hr_company_account_dao.insert_record(fields, options)
         raise gen.Return(response)
