@@ -246,3 +246,30 @@ class CompanyPageService(PageService):
             res_list.append(pos)
 
         return res_list
+
+    @gen.coroutine
+    def create_company(self, params):
+        """我也要招人，创建公司信息，同时必须要创建 hr 与 company 对应关系，否则 hr 平台会报错"""
+
+        company_id = yield self.hr_company_ds.create_company({
+            "type":         1,
+            "name":         params.name,
+            "abbreviation": params.abbreviation,
+            "source":       params.source,
+            "scale":        params.scale,
+            "industry":     params.industry,
+            "logo":         params.logo
+        })
+
+        return company_id
+
+    @gen.coroutine
+    def create_company_accounts(self, company_id, hr_id):
+        """我也要招人，创建公司信息，同时必须要创建 hr 与 company 对应关系，否则 hr 平台会报错"""
+
+        yield self.hr_company_account_ds.create_company_accounts({
+            "company_id":  company_id,
+            "account_id":  hr_id,
+        })
+
+        return True

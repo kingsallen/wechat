@@ -12,6 +12,7 @@ from dao.base import BaseDao
 class HrCompanyAccountDao(BaseDao):
 
     def __init__(self):
+
         super(HrCompanyAccountDao, self).__init__()
         self.table = "hr_company_account"
         self.fields_map = {

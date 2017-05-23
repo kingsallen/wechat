@@ -54,18 +54,18 @@ class RegisterHandler(BaseHandler):
             source=8 if self.in_wechat else 6,
         )
 
-        is_ok, res_company = yield self.company_ps.create_company_on_wechat(params)
-        if not is_ok:
-            self.send_json_error(message=res_company.message)
+        company_id = yield self.company_ps.create_company(params)
+        if not company_id:
+            self.send_json_error(message=msg.HELPER_HR_REGISTERED_FAILED)
             return
 
         code, passwd = password_crypt()
         data = ObjectDict({
             'mobile': self.params.mobile,
-            'company_id': int(res_company),
+            'company_id': int(company_id),
             'password': passwd,
             'wxuser_id': self.current_user.wxuser.id,
-            'source': int(self.params.source),
+            'source': int(self.params.source or 4),
             'last_login_ip': self.request.remote_ip,
             'register_ip': self.request.remote_ip,
             'login_count': 0
@@ -75,6 +75,9 @@ class RegisterHandler(BaseHandler):
         if not hr_id:
             self.send_json_error(message=msg.HELPER_HR_REGISTERED)
             return
+
+        # 必须创建 hr_company_accounts 对应关系表，否则 hr 平台会报错
+        yield self.company_ps.create_company_accounts(company_id, hr_id)
 
         self.send_json_success(data={
             "hr_id": hr_id
