@@ -96,6 +96,12 @@ class UnreadCountHandler(BaseHandler):
                 "id": hr_info.company_id
             }, need_conf=False)
 
+
+        self.logger.debug("_get_ga_event in_wechat: {}".format(self.in_wechat))
+        self.logger.debug("_get_ga_event self.current_user.sysuser: {}".format(self.self.current_user.sysuser))
+        self.logger.debug("_get_ga_event self.current_user.qxuser.is_subscribe: {}".format(self.current_user.qxuser.is_subscribe))
+        self.logger.debug("_get_ga_event company_info.conf_hr_chat: {}".format(company_info.conf_hr_chat))
+
         g_event = 0
         if not self.in_wechat and not self.current_user.sysuser:
             g_event = 1
