@@ -76,6 +76,9 @@ class CompanyPageService(PageService):
                 "conf_show_in_qx": company_conf_res.get("show_in_qx"),  # 公司信息、团队信息、职位信息等只在仟寻展示
             })
 
+            self.logger.debug("company_conf_res:{}".format(company_conf_res))
+            self.logger.debug("company_conf:{}".format(company_conf))
+
             # 处理公司自定义团队名称
             conf_teamname_custom = company_conf.get("conf_teamname_custom")
             if conf_teamname_custom and conf_teamname_custom.strip():

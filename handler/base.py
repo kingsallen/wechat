@@ -474,6 +474,9 @@ class BaseHandler(MetaBaseHandler):
         """
 
         session.company = yield self._get_current_company(session.wechat.company_id)
+
+        self.logger.debug("_add_company_info_to_session:{}".format(session.company))
+
         if session.sysuser.id and self.is_platform:
             employee = yield self.user_ps.get_valid_employee_by_user_id(
                 user_id=session.sysuser.id, company_id=session.company.id)

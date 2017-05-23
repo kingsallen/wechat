@@ -94,7 +94,7 @@ class UnreadCountHandler(BaseHandler):
             # 是否关闭 IM 聊天，由母公司决定
             company_info = yield self.company_ps.get_company(conds={
                 "id": hr_info.company_id
-            }, need_conf=False)
+            }, need_conf=True)
 
 
         self.logger.debug("_get_ga_event in_wechat: {}".format(self.in_wechat))
