@@ -369,7 +369,7 @@ def gamma_welcome(func):
 
         if not search_keywords and self.params.fr != "recruit" and not self.params.fr_wel \
             and re.match(r"^\/recruit\/position[\?]?[\w&=%]*$", self.request.uri):
-            gender = "unkonwn"
+            gender = "unknown"
             if self.current_user.qxuser.sex == 1:
                 gender = "male"
             elif self.current_user.qxuser.sex == 2:
