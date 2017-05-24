@@ -272,3 +272,10 @@ class CompanyPageService(PageService):
         })
 
         return True
+
+    @gen.coroutine
+    def update_company(self, conds, fields):
+
+        yield self.hr_company_ds.update_company(conds, fields)
+
+        return True

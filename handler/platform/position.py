@@ -827,9 +827,9 @@ class PositionListHandler(BaseHandler):
 
         if self.params.employment_type:
             infra_params.employment_type = const.EMPLOYMENT_TYPE.get(
-                self.params.employement_type)
+                self.params.employment_type)
         else:
-            infra_params.employement_type = ""
+            infra_params.employment_type = ""
 
         infra_params.update(
             keywords=self.params.keyword or "",

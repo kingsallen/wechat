@@ -78,6 +78,12 @@ class RegisterHandler(BaseHandler):
 
         # 必须创建 hr_company_accounts 对应关系表，否则 hr 平台会报错
         yield self.company_ps.create_company_accounts(company_id, hr_id)
+        # hr_company 必须绑定 hr_id
+        yield self.company_ps.update_company(conds={
+            "id": company_id
+        }, fields={
+            "hraccount_id": hr_id
+        })
 
         self.send_json_success(data={
             "hr_id": hr_id

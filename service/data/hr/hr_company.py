@@ -1,7 +1,5 @@
 # coding=utf-8
 
-# Copyright 2016 MoSeeker
-
 from tornado import gen
 from service.data.base import DataService
 from util.common.decorator import cache
@@ -47,7 +45,22 @@ class HrCompanyDataService(DataService):
 
     @gen.coroutine
     def create_company(self, fields, options=None):
+
         options = options or []
 
         response = yield self.hr_company_dao.insert_record(fields, options)
         raise gen.Return(response)
+
+    @gen.coroutine
+    def update_company(self, conds=None, fields=None):
+
+        if not conds or not fields:
+            self.logger.warning("Warning:[update_company][invalid parameters], "
+                                "Detail:[conds: {0}, fields: {1}]".format(conds, fields))
+            raise gen.Return(False)
+
+        ret = yield self.hr_company_dao.update_by_conds(
+            conds=conds,
+            fields=fields)
+
+        raise gen.Return(ret)
