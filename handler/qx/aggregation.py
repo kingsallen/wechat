@@ -97,7 +97,6 @@ class AggregationHandler(BaseHandler):
                 "hot_company": hot_company,
                 "share": share,
                 "search_params": search_params,
-                "hr_id": self.current_user.company.hraccount_id,
             })
 
             # 设置搜索词 cookie
