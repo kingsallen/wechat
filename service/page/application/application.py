@@ -691,10 +691,16 @@ class ApplicationPageService(PageService):
 
         self.logger.debug("[opt_send_applier_msg]start")
         # 发送消息模板，先发企业号，再发仟寻
-        link = make_url(
-            path.USERCENTER_APPLYRECORD.format(apply_id),
-            host=self.settings.platform_host,
-            wechat_signature=current_user.wechat.signature)
+        if is_platform:
+            link = make_url(
+                path.USERCENTER_APPLYRECORD.format(apply_id),
+                host=self.settings.platform_host,
+                wechat_signature=current_user.wechat.signature)
+        else:
+            link = make_url(
+                path.USERCENTER_APPLYRECORD.format(apply_id),
+                host=self.settings.qx_host,
+                wechat_signature=current_user.wechat.signature)
 
         self.logger.debug("[opt_send_applier_msg]link:{}".format(link))
 
