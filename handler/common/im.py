@@ -292,7 +292,12 @@ class ChatHandler(BaseHandler):
         pid = self.params.pid or 0
         room_id = self.params.room_id or 0
 
-        self.logger.debug("get_room pid:{} room_id:{} hr_id:{} is_qx:{}".format(pid, room_id, self.params.hr_id, self.is_qx))
+        # gamma 项目 hr 欢迎导语不同
+        is_gamma = False
+        if int(self.params.hr_id) == int(self.current_user.company.hraccount_id):
+            is_gamma = True
+
+        self.logger.debug("get_room pid:{} room_id:{} hr_id:{} is_qx:{}".format(pid, room_id, self.params.hr_id, is_gamma))
 
         res = yield self.chat_ps.get_chatroom(self.current_user.sysuser.id,
                                               self.params.hr_id,
