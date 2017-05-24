@@ -91,7 +91,7 @@ common_routes = [
     (r"/m/api/user/currentinfo",                       handler.common.interest.UserCurrentInfoHandler,            {"event": "user_currentinfo"}),
     (r"/m/api/upload/([a-z_]*)",                       handler.common.usercenter.UploadHandler,                   {"event": "image_"}),
     (r"/m/api/usercenter/favpositions",                handler.common.usercenter.FavPositionHandler,              {"event": "usercenter_favpositions"}),
-    (r"/m/api/usercenter/applyrecords[\/]*([0-9]+)*",  handler.common.usercenter.ApplyRecordsHandler,             {"event": "usercenter_applyredords"}),
+    (r"/m/api/usercenter/applyrecords[\/]*([0-9]+)*",  handler.common.usercenter.ApplyRecordsHandler,             {"event": "usercenter_applyrecords"}),
     (r"/m/api/usercenter",                             handler.common.usercenter.UsercenterHandler,               {"event": "usercenter_"}),
     (r"/m/api/resume/import",                          handler.common.resume.ResumeImportHandler,                 {"event": "resume_import"}),
     (r"/m/api/sug/company",                            handler.common.suggest.SuggestCompanyHandler,              {"event": "sug_company"}),
