@@ -112,7 +112,7 @@ class PositionHandler(BaseHandler):
             status=position_info.status,
             salary=position_info.salary,
             team=team.name,
-            team_id=team.id if team.disable == 0 else "",
+            team_id=team.id if team.res_id else 0,
             city=split(position_info.city, [",","，"]),
             degree=position_info.degree,
             experience=position_info.experience,

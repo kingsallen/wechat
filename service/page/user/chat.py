@@ -145,7 +145,7 @@ class ChatPageService(PageService):
 
         """返回JD 页，求职者与 HR 之间的未读消息数"""
         chatroom = yield self.hr_wx_hr_chat_list_ds.get_chatroom(conds={
-            "hraccount_id": hr_id,
+            "hraccount_id": int(hr_id),
             "sysuser_id": user_id
         })
 

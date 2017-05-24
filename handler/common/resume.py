@@ -63,7 +63,8 @@ class ResumeImportHandler(BaseHandler):
     def get(self):
 
         self.params.headimg = self.current_user.sysuser.headimg
-        self.render(template_name='refer/neo_weixin/sysuser/importresume-auth.html', message='')
+        auth_api_url = "/{}/api/resume/import".format("m" if self.is_platform else "recruit")
+        self.render(template_name='refer/neo_weixin/sysuser/importresume-auth.html', message='', auth_api_url=auth_api_url)
 
     @handle_response
     @authenticated
