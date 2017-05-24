@@ -290,12 +290,14 @@ class ChatHandler(BaseHandler):
             return
 
         hr_id = self.params.hr_id
-        if self.is_qx:
+        if self.is_qx and not hr_id:
             hr_id = self.current_user.company.hraccount_id
 
 
         pid = self.params.pid or 0
         room_id = self.params.room_id or 0
+
+        self.logger.debug("get_room pid:{} room_id:{} hr_id:{} is_qx:{}".format(pid, room_id, hr_id, self.is_qx))
 
         res = yield self.chat_ps.get_chatroom(self.current_user.sysuser.id,
                                               hr_id,
