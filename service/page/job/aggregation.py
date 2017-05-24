@@ -55,7 +55,7 @@ class AggregationPageService(PageService):
 
         # 查询范围 1-30页
         if page_no < 0 or page_no > 30:
-            return ObjectDict()
+            return ObjectDict(), 0
 
         # 处理 salley_top, salley_bottom
         salary_top = int(int(salary_top)/1000) if salary_top else None

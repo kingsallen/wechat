@@ -45,7 +45,7 @@ class PositionHandler(BaseHandler):
             res_cmp = self._make_company(company_info)
 
             self.logger.debug("[JD]构建转发信息")
-            res_share = yield self._make_share_info(position_info, company_info, position_es)
+            res_share = yield self._make_share_info(position_info, company_info, position_es, res_position)
 
             self.send_json_success(data=ObjectDict(
                 position=res_position,
@@ -213,14 +213,14 @@ class PositionHandler(BaseHandler):
         return data
 
     @gen.coroutine
-    def _make_share_info(self, position_info, company_info, pos_item):
+    def _make_share_info(self, position_info, company_info, pos_item, res_position):
         """构建 share 内容"""
 
         cover = self.__make_share_info_cover(pos_item, company_info)
         title = "【{}】-{}正在寻求你的加入".format(position_info.title, company_info.abbreviation)
         description = "微信好友{}推荐，{}{}正在寻找{}的合适人选，等的就是你！".format(self.current_user.qxuser.nickname,
                                                                 company_info.abbreviation,
-                                                                "的{}".format(pos_item.get("_source", {}).get("team",{}).get("name", "")) if pos_item.get("_source", {}).get("team",{}) else "",
+                                                                "的{}".format(res_position.team) if res_position.team else "",
                                                                 position_info.title)
 
         link = self.make_url(
