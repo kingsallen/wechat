@@ -1,8 +1,7 @@
 # coding=utf-8
 
-import ujson
+import json
 from functools import partial
-from pprint import pprint
 
 from tornado.testing import AsyncTestCase, gen_test, main
 
@@ -45,7 +44,7 @@ class DictDataServiceTestCase(AsyncTestCase):
 
     def test_get_function_result_level12(self):
         http_response = self.dict_functions_http_response
-        res_data = ObjectDict(ujson.loads(http_response)).data
+        res_data = ObjectDict(json.loads(http_response)).data
         result = self.service.get_function_result_level12(res_data)
         #pprint(result)
         self.assertIsInstance(result, list)
@@ -63,7 +62,7 @@ class DictDataServiceTestCase(AsyncTestCase):
 
     def test_get_function_result_level23(self):
         http_response = self.dict_functions_http_response
-        res_data = ObjectDict(ujson.loads(http_response)).data
+        res_data = ObjectDict(json.loads(http_response)).data
         result = self.service.get_function_result_level23(res_data,
                                                           code=110100)
         #pprint(result)
@@ -87,14 +86,14 @@ class DictDataServiceTestCase(AsyncTestCase):
     def test_cities_all(self):
         # level1
         http_response = ObjectDict(
-            ujson.loads(self.dict_level1_cities_http_response))
+            json.loads(self.dict_level1_cities_http_response))
         c1 = self.service._make_level_1_cities_result(http_response)
         #pprint(c1)
         self.assertIsInstance(c1, list)
 
         # level2
         http_response = ObjectDict(
-            ujson.loads(self.dict_level2_cities_http_response))
+            json.loads(self.dict_level2_cities_http_response))
         c2 = self.service._make_level_2_cities_result(http_response)
         #pprint(c2)
         self.assertIsInstance(c2, list)
@@ -169,10 +168,8 @@ class DictDataServiceTestCase(AsyncTestCase):
 
     @gen_test
     def test_get_college_list(self):
-        http_response = ObjectDict(
-            ujson.loads(self.dict_college_http_response))
+        http_response = ObjectDict(json.loads(self.dict_college_http_response))
         colleges = self.service.make_college_list_result(http_response)
-        #pprint(colleges)
         self.assertIsInstance(colleges, list)
         self.assertIn({
             'code': 10056, 'logo': 'upload/college/logo/10056.jpg',
@@ -182,22 +179,26 @@ class DictDataServiceTestCase(AsyncTestCase):
         # get code by name
         code = self.service.get_code_by_name_from(
             colleges, school_name="天津大学")
-        #pprint(code)
+
         self.assertIsInstance(code, int)
         self.assertEqual(code, 10056)
 
     @gen_test
     def test_make_const_dict_result(self):
-        http_response = ObjectDict(
-            ujson.loads(self.dict_const_degree_http_response))
-        ret = self.service.make_const_dict_result(
-            http_response, parent_code=3104)
-        pprint(ret)
+        http_response = ObjectDict(json.loads(self.dict_const_degree_http_response))
+        ret = self.service.make_const_dict_result(http_response, parent_code=3104)
         self.assertIsInstance(ret, dict)
         self.assertEqual(ret.get('1'), '初中及以下')
         with self.assertRaises(ValueError) as cm:
-            yield self.service.get_const_dict(parent_code=None)
+            get_const_dict = self.unload_decorator(self.service.get_const_dict)
+            yield get_const_dict(self, parent_code=None)
         self.assertEqual(cm.exception.args[0], 'invalid parent_code')
+
+    @staticmethod
+    def unload_decorator(f):
+        while hasattr(f, '__wrapped__'):
+            f = f.__wrapped__
+        return f
 
 if __name__ == '__main__':
     main()

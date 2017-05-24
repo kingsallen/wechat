@@ -564,7 +564,7 @@ class ApplicationPageService(PageService):
 
     @gen.coroutine
     def create_application(self, position, current_user,
-                           is_platform=True, psc=None):
+                           is_platform=True, psc=None, has_recom=False):
 
         # 1.初始化
         check_status, message = yield self.check_position(position, current_user)
@@ -576,8 +576,11 @@ class ApplicationPageService(PageService):
             return False, message, None
 
         # 2.创建申请
-        recommender_user_id, recommender_wxuser_id, recom_employee = \
-            yield self.get_recommend_user(current_user, position, is_platform)
+        if has_recom:
+            recommender_user_id, recommender_wxuser_id, recom_employee = \
+                yield self.get_recommend_user(current_user, position, is_platform)
+        else:
+            recommender_user_id, recommender_wxuser_id, recom_employee = 0, 0, None
 
         params_for_application = ObjectDict(
             position_id=position.id,
@@ -607,11 +610,11 @@ class ApplicationPageService(PageService):
         #2. 向求职者发送消息通知（消息模板，短信）
         yield self.opt_send_applier_msg(apply_id, current_user, position, is_platform)
 
-        #3. 向推荐人发送消息模板
-        yield self.opt_send_recommender_msg(recommender_user_id, current_user, position)
-
-        #4. 更新挖掘被动求职者信息
-        yield self.opt_update_candidate_recom_records(apply_id, current_user, recommender_user_id, position)
+        if recommender_user_id:
+            #3. 向推荐人发送消息模板
+            yield self.opt_send_recommender_msg(recommender_user_id, current_user, position)
+            #4. 更新挖掘被动求职者信息
+            yield self.opt_update_candidate_recom_records(apply_id, current_user, recommender_user_id, position)
 
         #5. 向 HR 发送消息通知（消息模板，短信，邮件）
         yield self.opt_hr_msg(apply_id, current_user, position, is_platform)
@@ -670,7 +673,7 @@ class ApplicationPageService(PageService):
             employee_id=recom_employee.id,
             company_id=current_user.company.id,
             position_id=application.position_id,
-            be_recom_wxuser=current_user.wxuser,
+            berecom_user_id=current_user.sysuser.id,
             award_type=const.EMPLOYEE_AWARD_TYPE_SHARE_APPLY,
             application_id=application.id
         )

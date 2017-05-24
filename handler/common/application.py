@@ -99,7 +99,8 @@ class ApplicationHandler(BaseHandler):
                 return
 
         is_applied, message, apply_id = yield self.application_ps.create_application(
-            position, self.current_user)
+            position, self.current_user, has_recom='recom' in self.params)
+
         self.logger.debug("[post_apply]is_applied:{}, message:{}, appid:{}".format(is_applied, message, apply_id))
 
         if is_applied:
