@@ -2,6 +2,7 @@
 
 from functools import partialmethod
 import time
+import datetime
 from util.common.cipher import decode_id
 
 from handler.base import BaseHandler
@@ -43,6 +44,7 @@ class LogCollectorHandler(BaseHandler):
             "action": self.params.action,
             "target": self.params.target,
             "timestamp": time.time(),
+            "datetime": str(datetime.datetime.today()),
             "user": {
                 'id': self.current_user.sysuser.id
             }
