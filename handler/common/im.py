@@ -67,29 +67,18 @@ class UnreadCountHandler(BaseHandler):
         """
 
         chat_num = yield self.chat_ps.get_all_unread_chat_num(self.current_user.sysuser.id)
-        self.send_json_success(data={
-            "unread": chat_num,
-        })
-
-    @handle_response
-    @gen.coroutine
-    def get_gamma(self):
-        """
-        获得gamma 列表页的仟寻 HR
-        :return:
-        """
-
-        hr_id = self.current_user.company.hraccount_id
-
-        chat_num = yield self.chat_ps.get_unread_chat_num(self.current_user.sysuser.id, hr_id)
-        g_event = yield self._get_ga_event(hr_id)
-        self.send_json_success(data={
-            "unread": chat_num,
-            "is_subscribe": self.current_user.qxuser.is_subscribe == 1,
-            "event": g_event,
-            "qrcode": self.current_user.wechat.qrcode,
-            "hr_id": hr_id,
-        })
+        if self.is_platform:
+            self.send_json_success(data={
+                "unread": chat_num,
+            })
+        else:
+            g_event = yield self._get_ga_event()
+            self.send_json_success(data={
+                "unread": chat_num,
+                "is_subscribe": self.current_user.qxuser.is_subscribe == 1,
+                "event": g_event,
+                "qrcode": self.current_user.wechat.qrcode
+            })
 
     @gen.coroutine
     def _get_ga_event(self, publisher=None):
@@ -99,6 +88,7 @@ class UnreadCountHandler(BaseHandler):
         :return:
         """
 
+        company_info = ObjectDict()
         if publisher:
             hr_info = yield self.chat_ps.get_hr_info(publisher)
             # 是否关闭 IM 聊天，由母公司决定
