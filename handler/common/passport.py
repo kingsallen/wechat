@@ -10,7 +10,6 @@ from handler.base import BaseHandler
 from cache.user.passport_session import PassportCache
 from util.common.decorator import handle_response, authenticated
 from util.tool.str_tool import to_str, password_validate
-from util.tool.url_tool import make_url
 from util.common.cipher import encode_id
 
 
