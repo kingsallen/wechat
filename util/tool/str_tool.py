@@ -29,7 +29,7 @@ def password_crypt(code=None):
 
     try:
         temp_password = hashlib.md5(code.strip().encode("utf-8")).hexdigest()
-        password = hashlib.sha1(temp_password.strip()).hexdigest()
+        password = hashlib.sha1(temp_password.strip().encode("utf-8")).hexdigest()
         return code, password
     except Exception as e:
         raise e
