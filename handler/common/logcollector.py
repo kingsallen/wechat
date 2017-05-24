@@ -2,6 +2,7 @@
 
 from functools import partialmethod
 import time
+from util.common.cipher import decode_id
 
 from handler.base import BaseHandler
 
@@ -37,15 +38,24 @@ class LogCollectorHandler(BaseHandler):
         return log
 
     def _gen_basic_log(self):
-        return {
+        basic_log = {
             "for": "persona",
             "action": self.params.action,
             "target": self.params.target,
-            "time_stamp": time.time(),
+            "timestamp": time.time(),
             "user": {
                 'id': self.current_user.sysuser.id
             }
         }
+        if "recom" in self.params:
+            basic_log.update({
+                "recom": {
+                    "id": decode_id(self.params.recom)
+                },
+                "from": self.params.get("from", "")
+            })
+
+        return basic_log
 
     def method_missing(self):
         self.logger.error(
@@ -75,5 +85,3 @@ class LogCollectorHandler(BaseHandler):
         share_timeline_position_list = \
         share_friends_position_list = search_position_list = partialmethod(log_it, "search_conditions")
 
-    # 访问profile
-    visit_profile = partialmethod(log_it)
