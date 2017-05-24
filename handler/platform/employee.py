@@ -162,9 +162,11 @@ class EmployeeBindHandler(BaseHandler):
             self.current_user.company.id)
 
         if refine_info_way == const.EMPLOYEE_CUSTOM_FIELD_REFINE_REDIRECT:
-            next_url = make_url(path.EMPLOYEE_CUSTOMINFO,
-                                self.params,
-                                from_wx_template='x')
+            custom_fields = yield self.employee_ps.get_employee_custom_fields(self.current_user.company.id)
+            if custom_fields:
+                next_url = make_url(path.EMPLOYEE_CUSTOMINFO, self.params, from_wx_template='x')
+            else:
+                next_url = make_url(path.EMPLOYEE_BINDED, self.params)
 
         elif refine_info_way == const.EMPLOYEE_CUSTOM_FIELD_REFINE_TEMPLATE_MSG:
             yield self.employee_ps.send_emp_custom_info_template(
