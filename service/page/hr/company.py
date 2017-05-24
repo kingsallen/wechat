@@ -225,11 +225,7 @@ class CompanyPageService(PageService):
         company_id = yield self.hr_company_ds.create_company({
             "type":         1,
             "name":         params.name,
-            "abbreviation": params.abbreviation,
             "source":       params.source,
-            "scale":        params.scale,
-            "industry":     params.industry,
-            "logo":         params.logo
         })
 
         return company_id
