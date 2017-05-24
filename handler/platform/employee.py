@@ -351,17 +351,26 @@ class BindedHandler(BaseHandler):
             self.current_user.sysuser.id,
             self.current_user.company.id
         )
+
         # unbinded users may not need to know this page
-        if (self.employee_ps.convert_bind_status_from_thrift_to_fe(
-            binding_status) !=
-                fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS):
+
+        fe_bind_status = self.employee_ps.convert_bind_status_from_thrift_to_fe(
+            binding_status)
+
+        if (fe_bind_status not in [fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS, fe.FE_EMPLOYEE_BIND_STATUS_PENDING]):
             self.write_error(404)
 
         else:
+            if fe_bind_status == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS:
+
+                message = messages.EMPLOYEE_BINDING_SUCCESS
+            else:
+                message = messages.EMPLOYEE_BINDING_EMAIL_DONE
+
             self.render(
                 template_name='refer/weixin/employee/employee_binding_tip_v2.html',
                 result=0,
-                messages=messages.EMPLOYEE_BINDING_SUCCESS,
+                messages=message,
                 nexturl=make_url(path.POSITION_LIST, self.params,
                                  noemprecom=str(const.YES)),
                 button_text=messages.EMPLOYEE_BINDING_DEFAULT_BTN_TEXT
