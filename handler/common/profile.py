@@ -197,6 +197,8 @@ class ProfileViewHandler(BaseHandler):
             return
 
         profile_tpl = yield self.profile_ps.profile_to_tempalte(profile)
+        # 游客页不应该显示 other 信息
+        profile_tpl.other = ObjectDict()
 
         tparams = {
             "profile": profile_tpl,
