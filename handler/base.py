@@ -170,6 +170,9 @@ class BaseHandler(MetaBaseHandler):
             remote_ip=self.request.remote_ip,
             source=source)
 
+        if user_id:
+            self._log_customs.update(new_user=const.YES)
+
         self.logger.debug("[_handle_user_info]user_id: {}".format(user_id))
 
         # 创建 qx 的 user_wx_user

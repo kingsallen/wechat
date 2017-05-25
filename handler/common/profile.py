@@ -79,6 +79,7 @@ class ProfileNewHandler(BaseHandler):
             profile_id = data
             profile_ok = True
             self.logger.debug("profile_profile created with id: %s" % profile_id)
+            self._log_customs.update(new_profile=const.YES)
         else:
             self.logger.error("profile_profile creation failed. res:{}".format(data))
             self.send_json_error()
@@ -355,7 +356,7 @@ class ProfileCustomHandler(BaseHandler):
                                      k in custom_fields}
 
                 self.logger.debug('cv_profile_values: %s' % cv_profile_values)
-
+                self._log_customs.update(new_profile=const.YES)
                 # BASIC INFO
                 result, data = yield self.profile_ps.create_profile_basic(
                     cv_profile_values, profile_id, mode='c')
@@ -435,6 +436,8 @@ class ProfileSectionHandler(BaseHandler):
     def get(self):
         # 根据 route 跳转到不同的子方法
         yield getattr(self, "get_" + self.params.route)()
+        self._log_customs.update(get_profile=const.YES,
+                                 section=self.params.route)
 
     @handle_response
     @check_and_apply_profile
@@ -444,6 +447,8 @@ class ProfileSectionHandler(BaseHandler):
         # 根据 route 跳转到不同的子方法
         self.guarantee('route', 'model')
         yield getattr(self, "post_" + self.params.route)()
+        self._log_customs.update(update_profile=const.YES,
+                                 section=self.params.route)
 
     def _get_profile_id(self):
         try:

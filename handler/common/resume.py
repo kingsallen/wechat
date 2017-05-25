@@ -129,8 +129,11 @@ class ResumeImportHandler(BaseHandler):
                     status=0,
                     url=self.params.way
                 )
+
+                self._log_customs.update(new_profile=const.YES)
                 self.send_json_success(message=msg.RESUME_IMPORT_SUCCESS,
                                        data={ "url": next_url })
+
                 return
             else:
                 if result.status == 32001:
