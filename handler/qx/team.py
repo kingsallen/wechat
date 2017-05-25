@@ -1,6 +1,5 @@
 # coding=utf-8
 
-import re
 from tornado import gen
 
 import conf.path as path
@@ -23,9 +22,6 @@ class TeamDetailHandler(BaseHandler):
             return
 
         current_company = yield self.company_ps.get_company(conds={"id": team.company_id}, need_conf=True)
-        if current_company.conf_show_in_qx == 0:
-            self.send_json_error()
-            return
 
         templates, share_cover = yield self._make_team_template(current_company, team)
         share = self._share(team_id, current_company, team.name, share_cover)

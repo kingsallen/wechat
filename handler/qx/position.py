@@ -30,7 +30,7 @@ class PositionHandler(BaseHandler):
         self.logger.debug("position:{}".format(position_info))
         self.logger.debug("company:{}".format(company_info))
 
-        if position_info.id and company_info.conf_show_in_qx != 0:
+        if position_info.id:
             self.logger.debug("[JD]构建职位默认图")
             position_es = yield self.aggregation_ps.opt_es_position(position_info.id)
             pos_item = position_es.hits.hits[0] if position_es.hits.hits else ObjectDict()
