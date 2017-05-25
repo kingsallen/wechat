@@ -409,6 +409,7 @@ class MetaBaseHandler(AtomHandler):
 
         log_info_common = ObjectDict(
             req_time=curr_now(),
+            timestamp=time.time(),
             hostname=socket.gethostname(),
             appid=self.app_id,
             http_code=self.get_status(),
