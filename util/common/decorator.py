@@ -302,6 +302,10 @@ def authenticated(func):
             if self.request.method in ("GET", "HEAD") and not self.request.uri.startswith("/api/"):
                 self.logger.debug("authenticated 2")
                 redirect_url = self.make_url(path.USER_LOGIN, self.params, escape=['next_url'])
+
+                if redirect_url.find('?') == -1:
+                    redirect_url += '?'
+
                 redirect_url += "&" + urlencode(
                     dict(next_url=self.fullurl()))
                 self.redirect(redirect_url)
