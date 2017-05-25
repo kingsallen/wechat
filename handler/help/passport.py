@@ -18,8 +18,8 @@ from thrift_gen.gen.mq.struct.ttypes import SmsType
 
 class RegisterQrcodeHandler(BaseHandler):
 
-    @handle_response
-    @authenticated
+    # @handle_response
+    # @authenticated
     @gen.coroutine
     def get(self):
 
