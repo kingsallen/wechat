@@ -138,6 +138,16 @@ class ChatPageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
+    def get_chatroom_info(self, room_id):
+
+        """返回JD 页，求职者与 HR 之间的未读消息数"""
+        chatroom = yield self.hr_wx_hr_chat_list_ds.get_chatroom(conds={
+            "id": int(room_id),
+        })
+
+        raise gen.Return(chatroom)
+
+    @gen.coroutine
     def get_unread_chat_num(self, user_id, hr_id):
 
         if user_id is None or not hr_id:
