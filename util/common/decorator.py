@@ -305,8 +305,11 @@ def authenticated(func):
 
                 if redirect_url.find('?') == -1:
                     redirect_url += '?'
+                else:
+                    # 带有query字符串
+                    redirect_url += '&'
 
-                redirect_url += "&" + urlencode(
+                redirect_url += urlencode(
                     dict(next_url=self.fullurl()))
                 self.redirect(redirect_url)
                 return
