@@ -18,7 +18,6 @@ from util.tool.str_tool import gen_salary, split
 
 from tests.dev_data.user_company_config import COMPANY_CONFIG
 
-
 class TeamPageService(PageService):
 
     def __init__(self):
