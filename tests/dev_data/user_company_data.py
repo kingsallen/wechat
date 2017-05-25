@@ -5,6 +5,8 @@
 :author 马超（machao@moseeker.com）
 :date 2016.10.12
 
+已废弃 by 煜昕 2017.5.25
+
 """
 from util.common import ObjectDict
 from util.tool.url_tool import make_url

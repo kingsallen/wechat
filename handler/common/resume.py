@@ -10,7 +10,6 @@ from handler.base import BaseHandler
 from handler.metabase import MetaBaseHandler
 from util.common import ObjectDict
 from util.common.decorator import handle_response, authenticated
-from util.tool.url_tool import make_url
 from util.tool.str_tool import to_str, match_session_id
 
 

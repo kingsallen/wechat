@@ -6,8 +6,6 @@ import conf.path as path
 from handler.base import BaseHandler
 from util.common.decorator import handle_response, authenticated, \
     check_and_apply_profile
-from util.tool.url_tool import make_url
-
 
 class ApplicationHandler(BaseHandler):
 
@@ -27,7 +25,7 @@ class ApplicationHandler(BaseHandler):
             self.render(
                 template_name='refer/weixin/systemmessage/successapply.html',
                 message=message,
-                nexturl=make_url(path.POSITION_LIST, self.params, escape=['next_url', 'pid']))
+                nexturl=self.make_url(path.POSITION_LIST, self.params, escape=['next_url', 'pid']))
             return
 
         # 如果是自定义简历职位
@@ -94,7 +92,7 @@ class ApplicationHandler(BaseHandler):
 
             if not result:
                 self.send_json_error(
-                    data=dict(next_url=make_url(path.PROFILE_CUSTOM_CV, pid=pid, wechat_signature=self.params.wechat_signature)),
+                    data=dict(next_url=self.make_url(path.PROFILE_CUSTOM_CV, pid=pid, wechat_signature=self.params.wechat_signature)),
                     message='')
                 return
 

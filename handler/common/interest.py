@@ -8,7 +8,6 @@ from handler.base import BaseHandler
 from util.common import ObjectDict
 from util.common.decorator import handle_response, authenticated
 from util.wechat.template import favposition_notice_to_applier_tpl, favposition_notice_to_hr_tpl
-from util.tool.url_tool import make_url
 
 
 class UserCurrentInfoHandler(BaseHandler):

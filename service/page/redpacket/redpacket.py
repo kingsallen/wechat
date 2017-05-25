@@ -33,8 +33,6 @@ from util.wechat.template import (
     rp_transfer_click_success_notice_tpl
 )
 
-from thrift_gen.gen.employee.struct.ttypes import Employee, BindStatus
-
 from util.common import ObjectDict
 
 
