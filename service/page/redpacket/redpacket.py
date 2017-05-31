@@ -519,7 +519,6 @@ class RedpacketPageService(PageService):
 
         # 红包发送对象是否符合配置要求
 
-
         matches = yield self.__recom_matches(
             red_packet_config, recom_user, recom_wechat, **kwargs)
 

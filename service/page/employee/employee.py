@@ -98,6 +98,12 @@ class EmployeePageService(PageService):
                 'switch':        'email',
             }
         """
+        company_conf = yield self.hr_company_conf_ds.get_company_conf(
+            conds={'company_id': current_user.company.id },
+            fields=['employee_binding']
+        )
+        # 员工认证自定义文案
+        binding_message = company_conf.employee_binding if company_conf else ''
 
         data = ObjectDict()
         data.name = current_user.sysuser.name
@@ -174,6 +180,8 @@ class EmployeePageService(PageService):
 
         # 未绑定的员工， 根据 conf.authMode 来渲染
         else:
+            data.binding_message = binding_message
+
             if conf.authMode in [const.EMPLOYEE_BIND_AUTH_MODE.EMAIL,
                                  const.EMPLOYEE_BIND_AUTH_MODE.EMAIL_OR_CUSTOM,
                                  const.EMPLOYEE_BIND_AUTH_MODE.EMAIL_OR_QUESTION]:
