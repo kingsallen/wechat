@@ -182,6 +182,8 @@ class AggregationPageService(PageService):
         if item.get("_source", {}).get("jd_pic",{}).get("position_pic",{}).get("first_pic",{}):
             job_img = item.get("_source").get("jd_pic",{}).get("position_pic",{}).get("first_pic",{}).get("res_url")
 
+        self.logger.debug("!!!!!!!!!!!!!!!!")
+        self.logger.debug("banner company:{}".format(item.get("_source", {}).get("company", {})))
         self.logger.debug("banner:{}".format(item.get("_source", {}).get("company", {}).get("banner", None)))
 
         if item.get("_source", {}).get("company", {}).get("banner", None):
@@ -251,6 +253,8 @@ class AggregationPageService(PageService):
             agg_company["id"] = item[1].company.id
             agg_company["logo"] = make_static_url(item[1].company.logo or const.COMPANY_HEADIMG)
             banner = ujson.loads(item[1].company.banner).get("banner0") if item[1].company.banner else ""
+            self.logger.debug("+++++++++++++++")
+            self.logger.debug("hot_company banner 111:{}".format(item[1].company))
             self.logger.debug("hot_company banner:{}".format(banner))
             agg_company["banner"] = make_static_url(banner)
             agg_company["abbreviation"] = item[1].company.abbreviation
