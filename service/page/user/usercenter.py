@@ -85,7 +85,7 @@ class UsercenterPageService(PageService):
     def get_collect_positions(self, user_id):
         """获得职位收藏"""
 
-        ret = yield self.thrift_useraccounts_ds.get_collect_positions(user_id)
+        ret = yield self.thrift_searchcondition_ds.get_collect_positions(user_id)
         obj_list = list()
         for e in ret:
             fav_pos = ObjectDict()

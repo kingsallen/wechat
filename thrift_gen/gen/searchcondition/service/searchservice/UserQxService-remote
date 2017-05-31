@@ -29,6 +29,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('  UserSearchConditionVO delUserSearchCondition(i32 userId, i32 id)')
     print('  UserCollectPositionVO getUserCollectPosition(i32 userId, i32 positionId)')
     print('  UserCollectPositionVO postUserCollectPosition(i32 userId, i32 positionId)')
+    print('  UserCollectPositionListVO getUserCollectPositions(i32 userId)')
     print('  UserCollectPositionVO delUserCollectPosition(i32 userId, i32 positionId)')
     print('  UserPositionStatusVO getUserPositionStatus(i32 userId,  positionIds)')
     print('  UserViewedPositionVO userViewedPosition(i32 userId, i32 positionId)')
@@ -140,6 +141,12 @@ elif cmd == 'postUserCollectPosition':
         print('postUserCollectPosition requires 2 args')
         sys.exit(1)
     pp.pprint(client.postUserCollectPosition(eval(args[0]), eval(args[1]),))
+
+elif cmd == 'getUserCollectPositions':
+    if len(args) != 1:
+        print('getUserCollectPositions requires 1 args')
+        sys.exit(1)
+    pp.pprint(client.getUserCollectPositions(eval(args[0]),))
 
 elif cmd == 'delUserCollectPosition':
     if len(args) != 2:

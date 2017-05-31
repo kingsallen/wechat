@@ -193,6 +193,99 @@ class UserSearchConditionVO(object):
         return not (self == other)
 
 
+class UserCollectPositionListVO(object):
+    """
+    Attributes:
+     - status
+     - userCollectPosition
+     - message
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'status', None, None, ),  # 1
+        (2, TType.LIST, 'userCollectPosition', (TType.STRUCT, (thrift_gen.gen.searchcondition.struct.usercollect.ttypes.UserCollectPositionDO, thrift_gen.gen.searchcondition.struct.usercollect.ttypes.UserCollectPositionDO.thrift_spec), False), None, ),  # 2
+        (3, TType.STRING, 'message', 'UTF8', None, ),  # 3
+    )
+
+    def __init__(self, status=None, userCollectPosition=None, message=None,):
+        self.status = status
+        self.userCollectPosition = userCollectPosition
+        self.message = message
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.status = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.LIST:
+                    self.userCollectPosition = []
+                    (_etype10, _size7) = iprot.readListBegin()
+                    for _i11 in range(_size7):
+                        _elem12 = thrift_gen.gen.searchcondition.struct.usercollect.ttypes.UserCollectPositionDO()
+                        _elem12.read(iprot)
+                        self.userCollectPosition.append(_elem12)
+                    iprot.readListEnd()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.STRING:
+                    self.message = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('UserCollectPositionListVO')
+        if self.status is not None:
+            oprot.writeFieldBegin('status', TType.I32, 1)
+            oprot.writeI32(self.status)
+            oprot.writeFieldEnd()
+        if self.userCollectPosition is not None:
+            oprot.writeFieldBegin('userCollectPosition', TType.LIST, 2)
+            oprot.writeListBegin(TType.STRUCT, len(self.userCollectPosition))
+            for iter13 in self.userCollectPosition:
+                iter13.write(oprot)
+            oprot.writeListEnd()
+            oprot.writeFieldEnd()
+        if self.message is not None:
+            oprot.writeFieldBegin('message', TType.STRING, 3)
+            oprot.writeString(self.message.encode('utf-8') if sys.version_info[0] == 2 else self.message)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
 class UserCollectPositionVO(object):
     """
     Attributes:
@@ -315,11 +408,11 @@ class UserPositionStatusVO(object):
             elif fid == 2:
                 if ftype == TType.MAP:
                     self.positionStatus = {}
-                    (_ktype8, _vtype9, _size7) = iprot.readMapBegin()
-                    for _i11 in range(_size7):
-                        _key12 = iprot.readI32()
-                        _val13 = iprot.readI32()
-                        self.positionStatus[_key12] = _val13
+                    (_ktype15, _vtype16, _size14) = iprot.readMapBegin()
+                    for _i18 in range(_size14):
+                        _key19 = iprot.readI32()
+                        _val20 = iprot.readI32()
+                        self.positionStatus[_key19] = _val20
                     iprot.readMapEnd()
                 else:
                     iprot.skip(ftype)
@@ -345,9 +438,9 @@ class UserPositionStatusVO(object):
         if self.positionStatus is not None:
             oprot.writeFieldBegin('positionStatus', TType.MAP, 2)
             oprot.writeMapBegin(TType.I32, TType.I32, len(self.positionStatus))
-            for kiter14, viter15 in self.positionStatus.items():
-                oprot.writeI32(kiter14)
-                oprot.writeI32(viter15)
+            for kiter21, viter22 in self.positionStatus.items():
+                oprot.writeI32(kiter21)
+                oprot.writeI32(viter22)
             oprot.writeMapEnd()
             oprot.writeFieldEnd()
         if self.message is not None:

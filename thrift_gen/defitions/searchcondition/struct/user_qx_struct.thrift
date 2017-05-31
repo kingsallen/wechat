@@ -16,6 +16,12 @@ struct UserSearchConditionVO {
     3: optional string message
 }
 
+struct UserCollectPositionListVO {
+    1: optional i32 status,
+    2: optional list<user_collect_position_struct.UserCollectPositionDO> userCollectPosition,
+    3: optional string message
+}
+
 struct UserCollectPositionVO {
     1: optional i32 status,
     2: optional user_collect_position_struct.UserCollectPositionDO userCollectPosition,
