@@ -223,7 +223,7 @@ def check_and_apply_profile(func):
                 client_id=self.settings.linkedin_client_id,
                 scope="r_basicprofile r_emailaddress",
                 redirect_uri=redirect_uri
-            ))
+            ), host="www.linkedin.com")
             # 由于 make_url 会过滤 state，但 linkedin 必须传 state，故此处手动添加
             linkedin_url = "{}&state={}".format(linkedin_url, encode_id(self.current_user.sysuser.id))
 

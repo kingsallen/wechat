@@ -115,4 +115,4 @@ MESSAGE_TEMPLATE = "message/template"
 # 其他外部服务
 HR_WX_IMAGE_URL = "https://www.moseeker.com/common/image?url="
 LINKEDIN_ACCESSTOKEN = "https://www.linkedin.com/uas/oauth2/accessToken"
-LINKEDIN_AUTH = "https://www.linkedin.com/uas/oauth2/authorization"
+LINKEDIN_AUTH = "/uas/oauth2/authorization"
