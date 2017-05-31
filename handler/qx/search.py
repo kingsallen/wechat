@@ -17,7 +17,7 @@ class SearchConditionHandler(BaseHandler):
     def get(self):
 
         res = yield self.searchcondition_ps.get_condition_list(self.current_user.sysuser.id)
-        self.send_json_success({'conditionlist': res})
+        self.send_json_success({'conditionlist': res[:3]})
 
     @handle_response
     @authenticated
@@ -28,7 +28,10 @@ class SearchConditionHandler(BaseHandler):
 
         name = condition.get('name', None)
         keywords = condition.get('keywords', None)
-        if not (name and keywords and self.current_user.sysuser.id):
+        conditions = yield self.searchcondition_ps.get_condition_list(self.current_user.sysuser.id)
+        if len(conditions)>=3:
+            pass
+        elif not (name and keywords and self.current_user.sysuser.id):
             self.send_json_error(message='Invalid argument')
         else:
             cityNameData = condition.get('city_name', None)
