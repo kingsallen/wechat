@@ -11,6 +11,7 @@ from handler.metabase import MetaBaseHandler
 from util.common import ObjectDict
 from util.common.decorator import handle_response, authenticated
 from util.tool.str_tool import to_str, match_session_id
+from util.tool.url_tool import make_url
 
 
 class LinkedinImportHandler(MetaBaseHandler):
@@ -30,10 +31,12 @@ class LinkedinImportHandler(MetaBaseHandler):
 
         user_id = match_session_id(to_str(self.get_secure_cookie(const.COOKIE_SESSIONID)))
 
-        redirect_url = self.make_url(path.RESUME_LINKEDIN,
+        redirect_url = make_url(path.RESUME_LINKEDIN,
+                                host=self.host,
                                 recom=self.params.recom,
                                 pid=self.params.pid,
                                 wechat_signature=self.params.wechat_signature)
+        self.logger.debug("resume linkedin:{}".format(redirect_url))
 
         response = yield self.profile_ps.get_linkedin_token(code=code, redirect_url=redirect_url)
         response = json.loads(to_str(response))
