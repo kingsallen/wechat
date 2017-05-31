@@ -47,9 +47,9 @@ class LinkedinImportHandler(MetaBaseHandler):
         self.logger.debug("is_ok:{} result:{}".format(is_ok, result))
         if is_ok:
             if self.params.pid:
-                next_url = self.make_url(path.PROFILE_VIEW, params=self.params, apply='1')
+                next_url = make_url(path.PROFILE_VIEW, params=self.params, host=self.host, apply='1')
             else:
-                next_url = self.make_url(path.PROFILE_VIEW, params=self.params)
+                next_url = make_url(path.PROFILE_VIEW, params=self.params, host=self.host)
 
             self.redirect(next_url)
             return
