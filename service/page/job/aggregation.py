@@ -182,8 +182,8 @@ class AggregationPageService(PageService):
         if item.get("_source", {}).get("jd_pic",{}).get("position_pic",{}).get("first_pic",{}):
             job_img = item.get("_source").get("jd_pic",{}).get("position_pic",{}).get("first_pic",{}).get("res_url")
 
-        if item.get("_source", {}).get("jd_pic",{}).get("company_pic",{}).get("first_pic",{}):
-            company_img = item.get("_source").get("jd_pic",{}).get("company_pic",{}).get("first_pic",{}).get("res_url")
+        if item.get("_source", {}).get("company", {}).get("banner", None):
+            company_img = ujson.loads(item.get("_source", {}).get("company", {}).get("banner", None)).get("banner0")
 
         return make_static_url(team_img), make_static_url(job_img), make_static_url(company_img)
 
