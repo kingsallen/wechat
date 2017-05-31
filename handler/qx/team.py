@@ -80,11 +80,10 @@ class TeamDetailHandler(BaseHandler):
 
         self.logger.debug("templates:{}".format(templates))
 
-        for index, template in enumerate(templates):
-            self.logger.debug("index:{}".format(index))
+        templates_opt = list()
+        for template in templates:
             self.logger.debug("template:{}".format(template))
             if template.get("type", 0) == 4:
-                del templates[index]
                 self.logger.debug("del 4")
                 continue
                 # 其他团队，暂时不需要
@@ -95,10 +94,12 @@ class TeamDetailHandler(BaseHandler):
 
             if template.get("type", 0) == 3:
                 # 不需要团队在招职位
-                del templates[index]
                 self.logger.debug("del 3")
+                continue
+
+            templates_opt.append(template)
             self.logger.debug("tinue")
 
-        self.logger.debug("templates:{}".format(templates))
+        self.logger.debug("templates:{}".format(templates_opt))
 
-        return templates, share_cover
+        return templates_opt, share_cover
