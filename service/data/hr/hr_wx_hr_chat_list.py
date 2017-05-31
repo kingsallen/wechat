@@ -51,7 +51,7 @@ class HrWxHrChatListDataService(DataService):
         raise gen.Return(response)
 
     @gen.coroutine
-    def get_chat_unread_count_cnt(self, conds, fields, appends=None, index=''):
+    def get_chat_unread_count_sum(self, conds, fields, appends=None, index=''):
 
         appends = appends or []
 
@@ -63,5 +63,5 @@ class HrWxHrChatListDataService(DataService):
         if not fields:
             fields = list(self.hr_wx_hr_chat_list_dao.fields_map.keys())
 
-        response = yield self.hr_wx_hr_chat_list_dao.get_cnt_by_conds(conds, fields, appends, index)
+        response = yield self.hr_wx_hr_chat_list_dao.get_sum_by_conds(conds, fields, appends, index)
         raise gen.Return(response)
