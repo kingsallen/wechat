@@ -340,6 +340,14 @@ class UserPageService(PageService):
         raise gen.Return(hr_account)
 
     @gen.coroutine
+    def get_employee_by_id(self, employee_id):
+        """获取user_employee"""
+        employee = yield self.user_employee_ds.get_employee(
+            {'id': employee_id})
+
+        raise gen.Return(employee)
+
+    @gen.coroutine
     def favorite_position(self, current_user, pid):
         """用户收藏职位的粒子操作
         :param current_user: user session 信息
