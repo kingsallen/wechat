@@ -190,6 +190,7 @@ class RedpacketPageService(PageService):
             'disable':    const.OLD_YES,
             'is_rp_sent': const.NO
         })
+
         if not employee:
             self.logger.debug('[RP]员工绑定状态不正确或红包已经发送过, user_id: %s, company_id: %s' % (user_id, company_id))
             return
