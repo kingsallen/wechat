@@ -3,7 +3,7 @@
 #
 # DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 #
-#  options string: py:tornado
+#  options string: py
 #
 
 from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
@@ -13,8 +13,6 @@ import logging
 from .ttypes import *
 from thrift.Thrift import TProcessor
 from thrift.transport import TTransport
-from tornado import gen
-from tornado import concurrent
 
 
 class Iface(object):
@@ -88,39 +86,11 @@ class Iface(object):
 
 
 class Client(Iface):
-    def __init__(self, transport, iprot_factory, oprot_factory=None):
-        self._transport = transport
-        self._iprot_factory = iprot_factory
-        self._oprot_factory = (oprot_factory if oprot_factory is not None
-                               else iprot_factory)
+    def __init__(self, iprot, oprot=None):
+        self._iprot = self._oprot = iprot
+        if oprot is not None:
+            self._oprot = oprot
         self._seqid = 0
-        self._reqs = {}
-        self._transport.io_loop.spawn_callback(self._start_receiving)
-
-    @gen.engine
-    def _start_receiving(self):
-        while True:
-            try:
-                frame = yield self._transport.readFrame()
-            except TTransport.TTransportException as e:
-                for future in self._reqs.values():
-                    future.set_exception(e)
-                self._reqs = {}
-                return
-            tr = TTransport.TMemoryBuffer(frame)
-            iprot = self._iprot_factory.getProtocol(tr)
-            (fname, mtype, rseqid) = iprot.readMessageBegin()
-            method = getattr(self, 'recv_' + fname)
-            future = self._reqs.pop(rseqid, None)
-            if not future:
-                # future has already been discarded
-                continue
-            try:
-                result = method(iprot, mtype, rseqid)
-            except Exception as e:
-                future.set_exception(e)
-            else:
-                future.set_result(result)
 
     def getEmployee(self, userId, companyId):
         """
@@ -128,22 +98,21 @@ class Client(Iface):
          - userId
          - companyId
         """
-        self._seqid += 1
-        future = self._reqs[self._seqid] = concurrent.Future()
         self.send_getEmployee(userId, companyId)
-        return future
+        return self.recv_getEmployee()
 
     def send_getEmployee(self, userId, companyId):
-        oprot = self._oprot_factory.getProtocol(self._transport)
-        oprot.writeMessageBegin('getEmployee', TMessageType.CALL, self._seqid)
+        self._oprot.writeMessageBegin('getEmployee', TMessageType.CALL, self._seqid)
         args = getEmployee_args()
         args.userId = userId
         args.companyId = companyId
-        args.write(oprot)
-        oprot.writeMessageEnd()
-        oprot.trans.flush()
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
 
-    def recv_getEmployee(self, iprot, mtype, rseqid):
+    def recv_getEmployee(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -161,21 +130,20 @@ class Client(Iface):
         Parameters:
          - companyId
         """
-        self._seqid += 1
-        future = self._reqs[self._seqid] = concurrent.Future()
         self.send_getEmployeeVerificationConf(companyId)
-        return future
+        return self.recv_getEmployeeVerificationConf()
 
     def send_getEmployeeVerificationConf(self, companyId):
-        oprot = self._oprot_factory.getProtocol(self._transport)
-        oprot.writeMessageBegin('getEmployeeVerificationConf', TMessageType.CALL, self._seqid)
+        self._oprot.writeMessageBegin('getEmployeeVerificationConf', TMessageType.CALL, self._seqid)
         args = getEmployeeVerificationConf_args()
         args.companyId = companyId
-        args.write(oprot)
-        oprot.writeMessageEnd()
-        oprot.trans.flush()
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
 
-    def recv_getEmployeeVerificationConf(self, iprot, mtype, rseqid):
+    def recv_getEmployeeVerificationConf(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -193,21 +161,20 @@ class Client(Iface):
         Parameters:
          - bindingParams
         """
-        self._seqid += 1
-        future = self._reqs[self._seqid] = concurrent.Future()
         self.send_bind(bindingParams)
-        return future
+        return self.recv_bind()
 
     def send_bind(self, bindingParams):
-        oprot = self._oprot_factory.getProtocol(self._transport)
-        oprot.writeMessageBegin('bind', TMessageType.CALL, self._seqid)
+        self._oprot.writeMessageBegin('bind', TMessageType.CALL, self._seqid)
         args = bind_args()
         args.bindingParams = bindingParams
-        args.write(oprot)
-        oprot.writeMessageEnd()
-        oprot.trans.flush()
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
 
-    def recv_bind(self, iprot, mtype, rseqid):
+    def recv_bind(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -227,23 +194,22 @@ class Client(Iface):
          - companyId
          - userId
         """
-        self._seqid += 1
-        future = self._reqs[self._seqid] = concurrent.Future()
         self.send_unbind(employeeId, companyId, userId)
-        return future
+        return self.recv_unbind()
 
     def send_unbind(self, employeeId, companyId, userId):
-        oprot = self._oprot_factory.getProtocol(self._transport)
-        oprot.writeMessageBegin('unbind', TMessageType.CALL, self._seqid)
+        self._oprot.writeMessageBegin('unbind', TMessageType.CALL, self._seqid)
         args = unbind_args()
         args.employeeId = employeeId
         args.companyId = companyId
         args.userId = userId
-        args.write(oprot)
-        oprot.writeMessageEnd()
-        oprot.trans.flush()
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
 
-    def recv_unbind(self, iprot, mtype, rseqid):
+    def recv_unbind(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -261,21 +227,20 @@ class Client(Iface):
         Parameters:
          - companyId
         """
-        self._seqid += 1
-        future = self._reqs[self._seqid] = concurrent.Future()
         self.send_getEmployeeCustomFieldsConf(companyId)
-        return future
+        return self.recv_getEmployeeCustomFieldsConf()
 
     def send_getEmployeeCustomFieldsConf(self, companyId):
-        oprot = self._oprot_factory.getProtocol(self._transport)
-        oprot.writeMessageBegin('getEmployeeCustomFieldsConf', TMessageType.CALL, self._seqid)
+        self._oprot.writeMessageBegin('getEmployeeCustomFieldsConf', TMessageType.CALL, self._seqid)
         args = getEmployeeCustomFieldsConf_args()
         args.companyId = companyId
-        args.write(oprot)
-        oprot.writeMessageEnd()
-        oprot.trans.flush()
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
 
-    def recv_getEmployeeCustomFieldsConf(self, iprot, mtype, rseqid):
+    def recv_getEmployeeCustomFieldsConf(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -294,22 +259,21 @@ class Client(Iface):
          - employeeId
          - customValues
         """
-        self._seqid += 1
-        future = self._reqs[self._seqid] = concurrent.Future()
         self.send_setEmployeeCustomInfo(employeeId, customValues)
-        return future
+        return self.recv_setEmployeeCustomInfo()
 
     def send_setEmployeeCustomInfo(self, employeeId, customValues):
-        oprot = self._oprot_factory.getProtocol(self._transport)
-        oprot.writeMessageBegin('setEmployeeCustomInfo', TMessageType.CALL, self._seqid)
+        self._oprot.writeMessageBegin('setEmployeeCustomInfo', TMessageType.CALL, self._seqid)
         args = setEmployeeCustomInfo_args()
         args.employeeId = employeeId
         args.customValues = customValues
-        args.write(oprot)
-        oprot.writeMessageEnd()
-        oprot.trans.flush()
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
 
-    def recv_setEmployeeCustomInfo(self, iprot, mtype, rseqid):
+    def recv_setEmployeeCustomInfo(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -328,22 +292,21 @@ class Client(Iface):
          - employeeId
          - companyId
         """
-        self._seqid += 1
-        future = self._reqs[self._seqid] = concurrent.Future()
         self.send_getEmployeeRewards(employeeId, companyId)
-        return future
+        return self.recv_getEmployeeRewards()
 
     def send_getEmployeeRewards(self, employeeId, companyId):
-        oprot = self._oprot_factory.getProtocol(self._transport)
-        oprot.writeMessageBegin('getEmployeeRewards', TMessageType.CALL, self._seqid)
+        self._oprot.writeMessageBegin('getEmployeeRewards', TMessageType.CALL, self._seqid)
         args = getEmployeeRewards_args()
         args.employeeId = employeeId
         args.companyId = companyId
-        args.write(oprot)
-        oprot.writeMessageEnd()
-        oprot.trans.flush()
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
 
-    def recv_getEmployeeRewards(self, iprot, mtype, rseqid):
+    def recv_getEmployeeRewards(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -361,21 +324,20 @@ class Client(Iface):
         Parameters:
          - recomId
         """
-        self._seqid += 1
-        future = self._reqs[self._seqid] = concurrent.Future()
         self.send_getEmployeeRecoms(recomId)
-        return future
+        return self.recv_getEmployeeRecoms()
 
     def send_getEmployeeRecoms(self, recomId):
-        oprot = self._oprot_factory.getProtocol(self._transport)
-        oprot.writeMessageBegin('getEmployeeRecoms', TMessageType.CALL, self._seqid)
+        self._oprot.writeMessageBegin('getEmployeeRecoms', TMessageType.CALL, self._seqid)
         args = getEmployeeRecoms_args()
         args.recomId = recomId
-        args.write(oprot)
-        oprot.writeMessageEnd()
-        oprot.trans.flush()
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
 
-    def recv_getEmployeeRecoms(self, iprot, mtype, rseqid):
+    def recv_getEmployeeRecoms(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -393,21 +355,20 @@ class Client(Iface):
         Parameters:
          - activationCodee
         """
-        self._seqid += 1
-        future = self._reqs[self._seqid] = concurrent.Future()
         self.send_emailActivation(activationCodee)
-        return future
+        return self.recv_emailActivation()
 
     def send_emailActivation(self, activationCodee):
-        oprot = self._oprot_factory.getProtocol(self._transport)
-        oprot.writeMessageBegin('emailActivation', TMessageType.CALL, self._seqid)
+        self._oprot.writeMessageBegin('emailActivation', TMessageType.CALL, self._seqid)
         args = emailActivation_args()
         args.activationCodee = activationCodee
-        args.write(oprot)
-        oprot.writeMessageEnd()
-        oprot.trans.flush()
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
 
-    def recv_emailActivation(self, iprot, mtype, rseqid):
+    def recv_emailActivation(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
             x = TApplicationException()
             x.read(iprot)
@@ -447,112 +408,176 @@ class Processor(Iface, TProcessor):
             oprot.trans.flush()
             return
         else:
-            return self._processMap[name](self, seqid, iprot, oprot)
+            self._processMap[name](self, seqid, iprot, oprot)
+        return True
 
-    @gen.coroutine
     def process_getEmployee(self, seqid, iprot, oprot):
         args = getEmployee_args()
         args.read(iprot)
         iprot.readMessageEnd()
         result = getEmployee_result()
-        result.success = yield gen.maybe_future(self._handler.getEmployee(args.userId, args.companyId))
-        oprot.writeMessageBegin("getEmployee", TMessageType.REPLY, seqid)
+        try:
+            result.success = self._handler.getEmployee(args.userId, args.companyId)
+            msg_type = TMessageType.REPLY
+        except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
+            raise
+        except Exception as ex:
+            msg_type = TMessageType.EXCEPTION
+            logging.exception(ex)
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("getEmployee", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-    @gen.coroutine
     def process_getEmployeeVerificationConf(self, seqid, iprot, oprot):
         args = getEmployeeVerificationConf_args()
         args.read(iprot)
         iprot.readMessageEnd()
         result = getEmployeeVerificationConf_result()
-        result.success = yield gen.maybe_future(self._handler.getEmployeeVerificationConf(args.companyId))
-        oprot.writeMessageBegin("getEmployeeVerificationConf", TMessageType.REPLY, seqid)
+        try:
+            result.success = self._handler.getEmployeeVerificationConf(args.companyId)
+            msg_type = TMessageType.REPLY
+        except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
+            raise
+        except Exception as ex:
+            msg_type = TMessageType.EXCEPTION
+            logging.exception(ex)
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("getEmployeeVerificationConf", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-    @gen.coroutine
     def process_bind(self, seqid, iprot, oprot):
         args = bind_args()
         args.read(iprot)
         iprot.readMessageEnd()
         result = bind_result()
-        result.success = yield gen.maybe_future(self._handler.bind(args.bindingParams))
-        oprot.writeMessageBegin("bind", TMessageType.REPLY, seqid)
+        try:
+            result.success = self._handler.bind(args.bindingParams)
+            msg_type = TMessageType.REPLY
+        except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
+            raise
+        except Exception as ex:
+            msg_type = TMessageType.EXCEPTION
+            logging.exception(ex)
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("bind", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-    @gen.coroutine
     def process_unbind(self, seqid, iprot, oprot):
         args = unbind_args()
         args.read(iprot)
         iprot.readMessageEnd()
         result = unbind_result()
-        result.success = yield gen.maybe_future(self._handler.unbind(args.employeeId, args.companyId, args.userId))
-        oprot.writeMessageBegin("unbind", TMessageType.REPLY, seqid)
+        try:
+            result.success = self._handler.unbind(args.employeeId, args.companyId, args.userId)
+            msg_type = TMessageType.REPLY
+        except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
+            raise
+        except Exception as ex:
+            msg_type = TMessageType.EXCEPTION
+            logging.exception(ex)
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("unbind", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-    @gen.coroutine
     def process_getEmployeeCustomFieldsConf(self, seqid, iprot, oprot):
         args = getEmployeeCustomFieldsConf_args()
         args.read(iprot)
         iprot.readMessageEnd()
         result = getEmployeeCustomFieldsConf_result()
-        result.success = yield gen.maybe_future(self._handler.getEmployeeCustomFieldsConf(args.companyId))
-        oprot.writeMessageBegin("getEmployeeCustomFieldsConf", TMessageType.REPLY, seqid)
+        try:
+            result.success = self._handler.getEmployeeCustomFieldsConf(args.companyId)
+            msg_type = TMessageType.REPLY
+        except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
+            raise
+        except Exception as ex:
+            msg_type = TMessageType.EXCEPTION
+            logging.exception(ex)
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("getEmployeeCustomFieldsConf", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-    @gen.coroutine
     def process_setEmployeeCustomInfo(self, seqid, iprot, oprot):
         args = setEmployeeCustomInfo_args()
         args.read(iprot)
         iprot.readMessageEnd()
         result = setEmployeeCustomInfo_result()
-        result.success = yield gen.maybe_future(self._handler.setEmployeeCustomInfo(args.employeeId, args.customValues))
-        oprot.writeMessageBegin("setEmployeeCustomInfo", TMessageType.REPLY, seqid)
+        try:
+            result.success = self._handler.setEmployeeCustomInfo(args.employeeId, args.customValues)
+            msg_type = TMessageType.REPLY
+        except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
+            raise
+        except Exception as ex:
+            msg_type = TMessageType.EXCEPTION
+            logging.exception(ex)
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("setEmployeeCustomInfo", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-    @gen.coroutine
     def process_getEmployeeRewards(self, seqid, iprot, oprot):
         args = getEmployeeRewards_args()
         args.read(iprot)
         iprot.readMessageEnd()
         result = getEmployeeRewards_result()
-        result.success = yield gen.maybe_future(self._handler.getEmployeeRewards(args.employeeId, args.companyId))
-        oprot.writeMessageBegin("getEmployeeRewards", TMessageType.REPLY, seqid)
+        try:
+            result.success = self._handler.getEmployeeRewards(args.employeeId, args.companyId)
+            msg_type = TMessageType.REPLY
+        except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
+            raise
+        except Exception as ex:
+            msg_type = TMessageType.EXCEPTION
+            logging.exception(ex)
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("getEmployeeRewards", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-    @gen.coroutine
     def process_getEmployeeRecoms(self, seqid, iprot, oprot):
         args = getEmployeeRecoms_args()
         args.read(iprot)
         iprot.readMessageEnd()
         result = getEmployeeRecoms_result()
-        result.success = yield gen.maybe_future(self._handler.getEmployeeRecoms(args.recomId))
-        oprot.writeMessageBegin("getEmployeeRecoms", TMessageType.REPLY, seqid)
+        try:
+            result.success = self._handler.getEmployeeRecoms(args.recomId)
+            msg_type = TMessageType.REPLY
+        except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
+            raise
+        except Exception as ex:
+            msg_type = TMessageType.EXCEPTION
+            logging.exception(ex)
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("getEmployeeRecoms", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-    @gen.coroutine
     def process_emailActivation(self, seqid, iprot, oprot):
         args = emailActivation_args()
         args.read(iprot)
         iprot.readMessageEnd()
         result = emailActivation_result()
-        result.success = yield gen.maybe_future(self._handler.emailActivation(args.activationCodee))
-        oprot.writeMessageBegin("emailActivation", TMessageType.REPLY, seqid)
+        try:
+            result.success = self._handler.emailActivation(args.activationCodee)
+            msg_type = TMessageType.REPLY
+        except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
+            raise
+        except Exception as ex:
+            msg_type = TMessageType.EXCEPTION
+            logging.exception(ex)
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("emailActivation", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
