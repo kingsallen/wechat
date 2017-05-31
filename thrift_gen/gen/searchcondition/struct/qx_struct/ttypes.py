@@ -15,6 +15,162 @@ import thrift_gen.gen.searchcondition.struct.usercollect.ttypes
 from thrift.transport import TTransport
 
 
+class CollectPositionForm(object):
+    """
+    Attributes:
+     - id
+     - title
+     - department
+     - time
+     - city
+     - salary_top
+     - salary_bottom
+     - status
+     - update_time
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'id', None, None, ),  # 1
+        (2, TType.STRING, 'title', 'UTF8', None, ),  # 2
+        (3, TType.STRING, 'department', 'UTF8', None, ),  # 3
+        (4, TType.STRING, 'time', 'UTF8', None, ),  # 4
+        (5, TType.STRING, 'city', 'UTF8', None, ),  # 5
+        (6, TType.I32, 'salary_top', None, None, ),  # 6
+        (7, TType.I32, 'salary_bottom', None, None, ),  # 7
+        (8, TType.BYTE, 'status', None, None, ),  # 8
+        (9, TType.STRING, 'update_time', 'UTF8', None, ),  # 9
+    )
+
+    def __init__(self, id=None, title=None, department=None, time=None, city=None, salary_top=None, salary_bottom=None, status=None, update_time=None,):
+        self.id = id
+        self.title = title
+        self.department = department
+        self.time = time
+        self.city = city
+        self.salary_top = salary_top
+        self.salary_bottom = salary_bottom
+        self.status = status
+        self.update_time = update_time
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.id = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRING:
+                    self.title = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.STRING:
+                    self.department = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.STRING:
+                    self.time = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 5:
+                if ftype == TType.STRING:
+                    self.city = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 6:
+                if ftype == TType.I32:
+                    self.salary_top = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 7:
+                if ftype == TType.I32:
+                    self.salary_bottom = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 8:
+                if ftype == TType.BYTE:
+                    self.status = iprot.readByte()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 9:
+                if ftype == TType.STRING:
+                    self.update_time = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('CollectPositionForm')
+        if self.id is not None:
+            oprot.writeFieldBegin('id', TType.I32, 1)
+            oprot.writeI32(self.id)
+            oprot.writeFieldEnd()
+        if self.title is not None:
+            oprot.writeFieldBegin('title', TType.STRING, 2)
+            oprot.writeString(self.title.encode('utf-8') if sys.version_info[0] == 2 else self.title)
+            oprot.writeFieldEnd()
+        if self.department is not None:
+            oprot.writeFieldBegin('department', TType.STRING, 3)
+            oprot.writeString(self.department.encode('utf-8') if sys.version_info[0] == 2 else self.department)
+            oprot.writeFieldEnd()
+        if self.time is not None:
+            oprot.writeFieldBegin('time', TType.STRING, 4)
+            oprot.writeString(self.time.encode('utf-8') if sys.version_info[0] == 2 else self.time)
+            oprot.writeFieldEnd()
+        if self.city is not None:
+            oprot.writeFieldBegin('city', TType.STRING, 5)
+            oprot.writeString(self.city.encode('utf-8') if sys.version_info[0] == 2 else self.city)
+            oprot.writeFieldEnd()
+        if self.salary_top is not None:
+            oprot.writeFieldBegin('salary_top', TType.I32, 6)
+            oprot.writeI32(self.salary_top)
+            oprot.writeFieldEnd()
+        if self.salary_bottom is not None:
+            oprot.writeFieldBegin('salary_bottom', TType.I32, 7)
+            oprot.writeI32(self.salary_bottom)
+            oprot.writeFieldEnd()
+        if self.status is not None:
+            oprot.writeFieldBegin('status', TType.BYTE, 8)
+            oprot.writeByte(self.status)
+            oprot.writeFieldEnd()
+        if self.update_time is not None:
+            oprot.writeFieldBegin('update_time', TType.STRING, 9)
+            oprot.writeString(self.update_time.encode('utf-8') if sys.version_info[0] == 2 else self.update_time)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
 class UserSearchConditionListVO(object):
     """
     Attributes:
@@ -193,6 +349,91 @@ class UserSearchConditionVO(object):
         return not (self == other)
 
 
+class UserCollectPositionVO(object):
+    """
+    Attributes:
+     - status
+     - userCollectPosition
+     - message
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'status', None, None, ),  # 1
+        (2, TType.STRUCT, 'userCollectPosition', (thrift_gen.gen.searchcondition.struct.usercollect.ttypes.UserCollectPositionDO, thrift_gen.gen.searchcondition.struct.usercollect.ttypes.UserCollectPositionDO.thrift_spec), None, ),  # 2
+        (3, TType.STRING, 'message', 'UTF8', None, ),  # 3
+    )
+
+    def __init__(self, status=None, userCollectPosition=None, message=None,):
+        self.status = status
+        self.userCollectPosition = userCollectPosition
+        self.message = message
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.status = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRUCT:
+                    self.userCollectPosition = thrift_gen.gen.searchcondition.struct.usercollect.ttypes.UserCollectPositionDO()
+                    self.userCollectPosition.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.STRING:
+                    self.message = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('UserCollectPositionVO')
+        if self.status is not None:
+            oprot.writeFieldBegin('status', TType.I32, 1)
+            oprot.writeI32(self.status)
+            oprot.writeFieldEnd()
+        if self.userCollectPosition is not None:
+            oprot.writeFieldBegin('userCollectPosition', TType.STRUCT, 2)
+            self.userCollectPosition.write(oprot)
+            oprot.writeFieldEnd()
+        if self.message is not None:
+            oprot.writeFieldBegin('message', TType.STRING, 3)
+            oprot.writeString(self.message.encode('utf-8') if sys.version_info[0] == 2 else self.message)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
 class UserCollectPositionListVO(object):
     """
     Attributes:
@@ -263,91 +504,6 @@ class UserCollectPositionListVO(object):
             for iter13 in self.userCollectPosition:
                 iter13.write(oprot)
             oprot.writeListEnd()
-            oprot.writeFieldEnd()
-        if self.message is not None:
-            oprot.writeFieldBegin('message', TType.STRING, 3)
-            oprot.writeString(self.message.encode('utf-8') if sys.version_info[0] == 2 else self.message)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-
-
-class UserCollectPositionVO(object):
-    """
-    Attributes:
-     - status
-     - userCollectPosition
-     - message
-    """
-
-    thrift_spec = (
-        None,  # 0
-        (1, TType.I32, 'status', None, None, ),  # 1
-        (2, TType.STRUCT, 'userCollectPosition', (thrift_gen.gen.searchcondition.struct.usercollect.ttypes.UserCollectPositionDO, thrift_gen.gen.searchcondition.struct.usercollect.ttypes.UserCollectPositionDO.thrift_spec), None, ),  # 2
-        (3, TType.STRING, 'message', 'UTF8', None, ),  # 3
-    )
-
-    def __init__(self, status=None, userCollectPosition=None, message=None,):
-        self.status = status
-        self.userCollectPosition = userCollectPosition
-        self.message = message
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 1:
-                if ftype == TType.I32:
-                    self.status = iprot.readI32()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 2:
-                if ftype == TType.STRUCT:
-                    self.userCollectPosition = thrift_gen.gen.searchcondition.struct.usercollect.ttypes.UserCollectPositionDO()
-                    self.userCollectPosition.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            elif fid == 3:
-                if ftype == TType.STRING:
-                    self.message = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
-            return
-        oprot.writeStructBegin('UserCollectPositionVO')
-        if self.status is not None:
-            oprot.writeFieldBegin('status', TType.I32, 1)
-            oprot.writeI32(self.status)
-            oprot.writeFieldEnd()
-        if self.userCollectPosition is not None:
-            oprot.writeFieldBegin('userCollectPosition', TType.STRUCT, 2)
-            self.userCollectPosition.write(oprot)
             oprot.writeFieldEnd()
         if self.message is not None:
             oprot.writeFieldBegin('message', TType.STRING, 3)
@@ -518,162 +674,6 @@ class UserViewedPositionVO(object):
         if self.message is not None:
             oprot.writeFieldBegin('message', TType.STRING, 2)
             oprot.writeString(self.message.encode('utf-8') if sys.version_info[0] == 2 else self.message)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-
-
-class CollectPositionForm(object):
-    """
-    Attributes:
-     - id
-     - title
-     - department
-     - time
-     - city
-     - salary_top
-     - salary_bottom
-     - status
-     - update_time
-    """
-
-    thrift_spec = (
-        None,  # 0
-        (1, TType.I32, 'id', None, None, ),  # 1
-        (2, TType.STRING, 'title', 'UTF8', None, ),  # 2
-        (3, TType.STRING, 'department', 'UTF8', None, ),  # 3
-        (4, TType.STRING, 'time', 'UTF8', None, ),  # 4
-        (5, TType.STRING, 'city', 'UTF8', None, ),  # 5
-        (6, TType.I32, 'salary_top', None, None, ),  # 6
-        (7, TType.I32, 'salary_bottom', None, None, ),  # 7
-        (8, TType.BYTE, 'status', None, None, ),  # 8
-        (9, TType.STRING, 'update_time', 'UTF8', None, ),  # 9
-    )
-
-    def __init__(self, id=None, title=None, department=None, time=None, city=None, salary_top=None, salary_bottom=None, status=None, update_time=None,):
-        self.id = id
-        self.title = title
-        self.department = department
-        self.time = time
-        self.city = city
-        self.salary_top = salary_top
-        self.salary_bottom = salary_bottom
-        self.status = status
-        self.update_time = update_time
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 1:
-                if ftype == TType.I32:
-                    self.id = iprot.readI32()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 2:
-                if ftype == TType.STRING:
-                    self.title = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 3:
-                if ftype == TType.STRING:
-                    self.department = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 4:
-                if ftype == TType.STRING:
-                    self.time = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 5:
-                if ftype == TType.STRING:
-                    self.city = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 6:
-                if ftype == TType.I32:
-                    self.salary_top = iprot.readI32()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 7:
-                if ftype == TType.I32:
-                    self.salary_bottom = iprot.readI32()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 8:
-                if ftype == TType.BYTE:
-                    self.status = iprot.readByte()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 9:
-                if ftype == TType.STRING:
-                    self.update_time = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
-            return
-        oprot.writeStructBegin('CollectPositionForm')
-        if self.id is not None:
-            oprot.writeFieldBegin('id', TType.I32, 1)
-            oprot.writeI32(self.id)
-            oprot.writeFieldEnd()
-        if self.title is not None:
-            oprot.writeFieldBegin('title', TType.STRING, 2)
-            oprot.writeString(self.title.encode('utf-8') if sys.version_info[0] == 2 else self.title)
-            oprot.writeFieldEnd()
-        if self.department is not None:
-            oprot.writeFieldBegin('department', TType.STRING, 3)
-            oprot.writeString(self.department.encode('utf-8') if sys.version_info[0] == 2 else self.department)
-            oprot.writeFieldEnd()
-        if self.time is not None:
-            oprot.writeFieldBegin('time', TType.STRING, 4)
-            oprot.writeString(self.time.encode('utf-8') if sys.version_info[0] == 2 else self.time)
-            oprot.writeFieldEnd()
-        if self.city is not None:
-            oprot.writeFieldBegin('city', TType.STRING, 5)
-            oprot.writeString(self.city.encode('utf-8') if sys.version_info[0] == 2 else self.city)
-            oprot.writeFieldEnd()
-        if self.salary_top is not None:
-            oprot.writeFieldBegin('salary_top', TType.I32, 6)
-            oprot.writeI32(self.salary_top)
-            oprot.writeFieldEnd()
-        if self.salary_bottom is not None:
-            oprot.writeFieldBegin('salary_bottom', TType.I32, 7)
-            oprot.writeI32(self.salary_bottom)
-            oprot.writeFieldEnd()
-        if self.status is not None:
-            oprot.writeFieldBegin('status', TType.BYTE, 8)
-            oprot.writeByte(self.status)
-            oprot.writeFieldEnd()
-        if self.update_time is not None:
-            oprot.writeFieldBegin('update_time', TType.STRING, 9)
-            oprot.writeString(self.update_time.encode('utf-8') if sys.version_info[0] == 2 else self.update_time)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
