@@ -324,8 +324,6 @@ class BaseHandler(MetaBaseHandler):
 
         if self.current_user.sysuser:
             result, profile = yield self.profile_ps.has_profile(self.current_user.sysuser.id)
-            self.logger.debug("+++++++++++!!!")
-            self.logger.debug("has_profile result:{} profile:{}".format(result, profile))
             self.current_user.has_profile = result
 
     @gen.coroutine
