@@ -87,7 +87,7 @@ class UsercenterPageService(PageService):
 
         ret = yield self.thrift_searchcondition_ds.get_collect_positions(user_id)
         obj_list = list()
-        for e in ret:
+        for e in ret.userCollectPosition:
             fav_pos = ObjectDict()
             fav_pos['id'] = e.id
             fav_pos['title'] = e.title
