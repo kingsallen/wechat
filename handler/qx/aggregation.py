@@ -79,7 +79,7 @@ class AggregationHandler(BaseHandler):
             hot_company = yield self.aggregation_ps.opt_agg_company(es_res)
 
             # 自定义分享
-            share = self._make_share_info(hot_company, keywords)
+            share = self._make_share_info(hot_company, keywords, self.current_user.company)
 
             # 构造搜索参数回显
             search_params = ObjectDict(
@@ -169,7 +169,7 @@ class AggregationHandler(BaseHandler):
             return False
         return True
 
-    def _make_share_info(self, hot_company, keywords):
+    def _make_share_info(self, hot_company, keywords, company_info):
         """构建 share 内容"""
 
         link = self.make_url(
@@ -181,7 +181,7 @@ class AggregationHandler(BaseHandler):
         if len(hot_company) == 1:
             logo = hot_company[0].get("logo")
         else:
-            logo = const.COMPANY_HEADIMG
+            logo = company_info.logo
 
         cover = self.static_url(logo)
         keywords_title = "【{}】".format(keywords) if keywords else ""
