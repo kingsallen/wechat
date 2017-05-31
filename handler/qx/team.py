@@ -86,6 +86,7 @@ class TeamDetailHandler(BaseHandler):
             if template.get("type", 0) == 4:
                 del templates[index]
                 self.logger.debug("del 4")
+                continue
                 # 其他团队，暂时不需要
                 # 其他团队,调整链接
                 # for item in template["data"]:
@@ -96,6 +97,7 @@ class TeamDetailHandler(BaseHandler):
                 # 不需要团队在招职位
                 del templates[index]
                 self.logger.debug("del 3")
+            self.logger.debug("tinue")
 
         self.logger.debug("templates:{}".format(templates))
 
