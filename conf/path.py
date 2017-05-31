@@ -43,7 +43,7 @@ MOBILE_VERIFY = '/app/validate_mobile'
 
 PROFILE_VIEW = '/profile'
 PROFILE_PREVIEW = '/profile/preview'
-PROFILE_VISITOR_EVIEW = '/profile/view/{}'
+PROFILE_VISITOR_VIEW = '/profile/view/{}'
 PROFILE_NEW = '/app/profile/new'
 
 # ============================ 微信端Path结束 ============================

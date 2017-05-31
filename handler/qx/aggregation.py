@@ -126,8 +126,7 @@ class AggregationHandler(BaseHandler):
             )
             self.set_secure_cookie(
                 qx_const.COOKIE_WELCOME_SEARCH,
-                json_dumps(params),
-                httponly=True)
+                json_dumps(params))
 
     def _get_welcome_cookie(self):
         """获得 cookie 中的搜索记录，作为用户打开列表页的默认搜索条件"""

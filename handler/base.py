@@ -321,10 +321,9 @@ class BaseHandler(MetaBaseHandler):
         # ga('set', 'dimension2', 'YYYYY’);
         # ga('set', 'dimension3', 'ZZZZZZ’);
 
-        # TODO 方便测试，暂时注释
-        # if self.current_user.sysuser:
-        #     self.current_user.has_profile = yield self.profile_ps.has_profile(
-        #         self.current_user.sysuser.id)
+        if self.current_user.sysuser:
+            self.current_user.has_profile = yield self.profile_ps.has_profile(
+                self.current_user.sysuser.id)
 
     @gen.coroutine
     def _build_session(self):

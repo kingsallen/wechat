@@ -197,6 +197,15 @@ class ProfileViewHandler(BaseHandler):
             self.write_error(404)
             return
 
+        self.logger.debug("profle user_id:{}".format(profile.profile.user_id))
+
+        # 如果是用户本人，则跳转到用户可以编辑的个人档案页
+        if profile.profile.user_id == self.current_user.sysuser.id:
+            self.logger.debug("profle redirect")
+            redirect_url = self.make_url(path=path.PROFILE_VIEW)
+            self.redirect(redirect_url)
+            return
+
         profile_tpl = yield self.profile_ps.profile_to_tempalte(profile)
         # 游客页不应该显示 other信息，求职意愿
         profile_tpl.other = ObjectDict()
@@ -217,7 +226,7 @@ class ProfileViewHandler(BaseHandler):
             'cover': self.static_url(profile_tpl.avatar_url),
             'title': '【{}】的个人职场档案'.format(profile_tpl.username),
             'description': '点击查看{}的个人职场档案'.format(profile_tpl.username),
-            'link': self.make_url(path.PROFILE_VISITOR_EVIEW.format(uuid), self.params)
+            'link': self.make_url(path.PROFILE_VISITOR_VIEW.format(uuid), self.params)
         })
 
         return default
@@ -248,7 +257,7 @@ class ProfileHandler(BaseHandler):
             'cover': self.static_url(profile_tpl.avatar_url),
             'title': '【{}】的个人职场档案'.format(profile_tpl.username),
             'description': '点击查看{}的个人职场档案'.format(profile_tpl.username),
-            'link': self.make_url(path.PROFILE_VISITOR_EVIEW.format(uuid), self.params)
+            'link': self.make_url(path.PROFILE_VISITOR_VIEW.format(uuid), self.params)
         })
 
         return default
