@@ -111,7 +111,7 @@ def template3(title, resource_list, handler_params):
         'title': title,
         'data': [{
                      'title': position.title,  # '文案'
-                     'link': make_url(POSITION_PATH.format(position.id), handler_params,
+                     'link': make_url("/m/position/{}".format(position.id), handler_params,
                                       escape=['recom']),  # JD连接
                      'location': position.city,  # '上海
                      'salary': gen_salary(position.salary_top, position.salary_bottom)  # '5k-8k'
