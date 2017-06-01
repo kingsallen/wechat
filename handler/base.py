@@ -132,6 +132,7 @@ class BaseHandler(MetaBaseHandler):
         self._qxuser = None
         self._session_id = None
 
+        self.logger.debug("current_user:{}".format(self.current_user))
         self.logger.debug("+++++++++++++++++PREPARE OVER+++++++++++++++++++++")
 
     # PROTECTED
