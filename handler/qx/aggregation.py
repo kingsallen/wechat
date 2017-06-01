@@ -36,6 +36,7 @@ class AggregationHandler(BaseHandler):
         keywords = self.params.keywords or search_dict.get("keywords", None)
         city = self.params.city or search_dict.get("city", None)
         industry = self.params.industry or search_dict.get("industry", None)
+        did = self.params.did or search_dict.get("did", None)
         page_no = self.params.page_no or 1
         page_size = self.params.page_size or 10
 
@@ -45,6 +46,7 @@ class AggregationHandler(BaseHandler):
                                                   keywords,
                                                   city,
                                                   industry,
+                                                  did,
                                                   int(page_no))
 
         positions = yield self.aggregation_ps.opt_agg_positions(es_res, int(page_no), int(page_size), self.current_user.sysuser.id, city)
@@ -111,7 +113,8 @@ class AggregationHandler(BaseHandler):
                 salary_negotiable=self.params.salary_negotiable,
                 keywords=self.params.keywords,
                 city=self.params.city,
-                industry=self.params.industry
+                industry=self.params.industry,
+                did=self.params.did,
             )
             self.set_secure_cookie(
                 qx_const.COOKIE_WELCOME_SEARCH,

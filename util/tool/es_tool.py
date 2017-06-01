@@ -30,7 +30,7 @@ def rule_gamma_filters(params):
 
     return params
 
-def init_gamma_basic(query, city, industry, salary_bottom, salary_top, salary_negotiable, page_from, page_size):
+def init_gamma_basic(query, city, industry, salary_bottom, salary_top, salary_negotiable, did, page_from, page_size):
 
     """
     初始化 Gamma 项目列表页搜索
@@ -138,6 +138,14 @@ def init_gamma_basic(query, city, industry, salary_bottom, salary_top, salary_ne
         init_es_query['query']['bool']['must'].append(ObjectDict({
             "terms": {
                 "company.industry_type_name": industry,
+            }
+        }))
+
+    if did:
+        # 存在公司筛选
+        init_es_query['query']['bool']['must'].append(ObjectDict({
+            "term": {
+                "company.id": did,
             }
         }))
 

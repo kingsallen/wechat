@@ -28,6 +28,7 @@ class EsDataService(DataService):
                                 params.salary_bottom,
                                 params.salary_top,
                                 params.salary_negotiable,
+                                params.did,
                                 page_from,
                                 page_size)
 

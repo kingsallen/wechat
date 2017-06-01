@@ -39,7 +39,7 @@ class AggregationPageService(PageService):
         raise gen.Return(banner)
 
     @gen.coroutine
-    def opt_es(self, salary_top, salary_bottom, salary_negotiable, keywords, city, industry, page_no):
+    def opt_es(self, salary_top, salary_bottom, salary_negotiable, keywords, city, industry, did, page_no):
         """
         拼接 ES 搜索职位
         :param salary_top:
@@ -48,8 +48,8 @@ class AggregationPageService(PageService):
         :param keywords:
         :param city:
         :param industry:
+        :param did:
         :param page_no:
-        :param page_size:
         :return:
         """
 
@@ -72,7 +72,8 @@ class AggregationPageService(PageService):
             "salary_negotiable": salary_negotiable,
             "keywords": keywords,
             "city": city,
-            "industry": industry
+            "industry": industry,
+            "did": did
         })
 
         # 由于需要按人工设置的 weight进行排序，es 不支持先按关键词搜索，再按 weight 排序
