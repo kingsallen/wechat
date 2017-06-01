@@ -594,6 +594,9 @@ class ProfileSectionHandler(BaseHandler):
         if hasattr(model, "__status") and getattr(model, "__status") == 'x':
             verb = "delete"
         else:
+            if model.description and len(model.description) > 1000:
+                self.send_json_error(message=msg.PROFILE_OVERLENGTH % "工作描述")
+                return
             verb = 'update' if model.id else 'create'
 
         result, res = yield getattr(
@@ -659,6 +662,9 @@ class ProfileSectionHandler(BaseHandler):
         if hasattr(model, "__status") and getattr(model, "__status") == 'x':
             verb = "delete"
         else:
+            if model.description and len(model.description) > 1000:
+                self.send_json_error(message=msg.PROFILE_OVERLENGTH % "教育描述")
+                return
             verb = 'update' if model.id else 'create'
 
         result, res = yield getattr(
@@ -704,6 +710,9 @@ class ProfileSectionHandler(BaseHandler):
         if hasattr(model, "__status") and getattr(model, "__status") == 'x':
             verb = "delete"
         else:
+            if model.description and len(model.description) > 1000:
+                self.send_json_error(message=msg.PROFILE_OVERLENGTH % "项目描述")
+                return
             verb = 'update' if model.id else 'create'
 
         result, res = yield getattr(
