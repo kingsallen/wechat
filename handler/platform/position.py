@@ -34,8 +34,6 @@ class PositionHandler(BaseHandler):
             team = yield self.team_ps.get_team_by_id(position_info.team_id)
             position_info.team = team
 
-            self.logger.debug("[JD]position_info: %s" % position_info)
-
             self.logger.debug("[JD]构建收藏信息")
             star = yield self.position_ps.is_position_stared_by(self.current_user.sysuser.id, position_id)
 
@@ -86,7 +84,6 @@ class PositionHandler(BaseHandler):
 
             # 构建老微信样式所需要的数据
             self.logger.debug("[JD]是否显示新样式: {}".format(self.current_user.company.conf_newjd_status))
-            self.logger.debug("[wechat]:{}".format(self.current_user.wechat))
             if self.current_user.company.conf_newjd_status != 2:
                 # 0是未开启，1是用户申请开启，2是审核通过（使用新jd），3撤销（返回基础版）
                 # 老样式
@@ -210,8 +207,6 @@ class PositionHandler(BaseHandler):
             "link": link,
             "pid": position_info.id,
         })
-
-        self.logger.debug("_make_share_info:{}".format(self.params.share))
 
     @gen.coroutine
     def _make_hr_info(self, publisher):
@@ -429,8 +424,6 @@ class PositionHandler(BaseHandler):
             "custom_name": position_info.job_custom,
         })
 
-        self.logger.debug("_make_json_job_department: %s" % data)
-
         return data
 
     def _make_json_job_attr(self, position_info):
@@ -481,9 +474,6 @@ class PositionHandler(BaseHandler):
                 self.current_user.sysuser.id, position_info.id)
 
         if self.current_user.sysuser.id:
-            self.logger.debug("_make_refresh_share_chain user_id:{}".format(self.current_user.sysuser.id))
-            self.logger.debug("_make_refresh_share_chain position_id:{}".format(position_info.id))
-            self.logger.debug("_make_refresh_share_chain sharechain_id:{}".format(inserted_share_chain_id))
             yield self.candidate_ps.send_candidate_view_position(
                 user_id=self.current_user.sysuser.id,
                 position_id=position_info.id,
@@ -559,7 +549,7 @@ class PositionHandler(BaseHandler):
         """给员工加积分
         :param position_info:
             职位信息，用户提取公司信息
-        :param recom_employee_user_id: 
+        :param recom_employee_user_id:
             最近员工 user_id ，如果为0，说明没有最近员工 user_id ，不执行添加积分操作
         """
 
@@ -702,8 +692,6 @@ class PositionListHandler(BaseHandler):
 
         # 只渲染必要的公司信息
         yield self.make_company_info()
-
-        self.logger.debug("[PositionListHandler]params:{}".format(self.params))
 
         # 如果是下拉刷新请求的职位, 返回新增职位的页面
         if self.params.restype == "json":

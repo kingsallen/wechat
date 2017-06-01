@@ -171,7 +171,6 @@ def check_and_apply_profile(func):
         has_profile, profile = yield self.profile_ps.has_profile(user_id)
         if has_profile:
             self.current_user['profile'] = profile
-            self.logger.debug(profile)
             yield func(self, *args, **kwargs)
         else:
             # render new profile entry 页面
@@ -227,12 +226,8 @@ def check_and_apply_profile(func):
             # 由于 make_url 会过滤 state，但 linkedin 必须传 state，故此处手动添加
             linkedin_url = "{}&state={}".format(linkedin_url, encode_id(self.current_user.sysuser.id))
 
-            self.logger.debug("linkedin:{}".format(redirect_uri))
-            self.logger.debug("linkedin 2:{}".format(linkedin_url))
             redirect_params.update(linkedin_url=linkedin_url)
             # ========== LINKEDIN OAUTH ==============
-
-            self.logger.warn(redirect_params)
 
             self.render(template_name='refer/neo_weixin/sysuser_v2/importresume.html',
                         **redirect_params)
@@ -279,19 +274,12 @@ def authenticated(func):
     @gen.coroutine
     def wrapper(self, *args, **kwargs):
 
-        self.logger.debug("authenticated user_id:{}".format(self.current_user.sysuser.id))
-        self.logger.debug("authenticated in_wechat:{}".format(self.in_wechat))
-        self.logger.debug("authenticated wechat_type:{}".format(self._authable(self.current_user.wechat.type)))
-        self.logger.debug("authenticated wxuser:{}".format(self.current_user.wxuser))
-        self.logger.debug("authenticated uri:{}".format(self.request.uri))
-
         if self.current_user.sysuser.id and self.in_wechat:
             if self._authable(self.current_user.wechat.type) and not self.current_user.wxuser \
                 and self.request.method in ("GET", "HEAD") \
                 and not self.request.uri.startswith("/api/"):
                 # 该企业号是服务号，静默授权
                 # api 类接口，不适合做302静默授权，微信服务器不会跳转
-                self.logger.debug("authenticated 1")
                 self._oauth_service.wechat = self.current_user.wechat
                 self._oauth_service.state = to_hex(self.current_user.qxuser.unionid)
                 url = self._oauth_service.get_oauth_code_base_url()
@@ -300,7 +288,6 @@ def authenticated(func):
 
         elif not self.current_user.sysuser.id:
             if self.request.method in ("GET", "HEAD") and not self.request.uri.startswith("/api/"):
-                self.logger.debug("authenticated 2")
                 redirect_url = self.make_url(path.USER_LOGIN, self.params, escape=['next_url'])
 
                 if redirect_url.find('?') == -1:
@@ -314,7 +301,6 @@ def authenticated(func):
                 self.redirect(redirect_url)
                 return
             else:
-                self.logger.debug("authenticated 3")
                 self.send_json_error(message=msg.NOT_AUTHORIZED)
                 return
 
@@ -368,12 +354,6 @@ def gamma_welcome(func):
 
         search_keywords = self.get_secure_cookie(qx_const.COOKIE_WELCOME_SEARCH)
 
-        self.logger.debug("gamma_welcome search_keywords: {}".format(search_keywords))
-        self.logger.debug("gamma_welcome self.params: {}".format(self.params))
-        self.logger.debug("gamma_welcome self.params.fr: {}".format(self.params.fr))
-        self.logger.debug("gamma_welcome uri:{}".format(self.request.uri))
-        self.logger.debug("gamma_welcome match:{}".format(re.match(r"^\/position[\?]?[\w&=%]*$", self.request.uri)))
-
         if not search_keywords and self.params.fr != "recruit" and not self.params.fr_wel \
             and re.match(r"^\/position[\?]?[\w&=%]*$", self.request.uri):
             gender = "unknown"
@@ -382,7 +362,6 @@ def gamma_welcome(func):
             elif self.current_user.qxuser.sex == 2:
                 gender = "female"
 
-            self.logger.debug("gamma_welcome gender: {}".format(gender))
             self.render_page(template_name='qx/home/welcome.html',
                         data={"gender": gender})
             return
@@ -430,7 +409,4 @@ class NewJDStatusChecker404(BaseNewJDStatusChecker):
 
     def fail_action(self, *args, **kwargs):
         handler = self._handler
-        handler.logger.debug(
-            'NewJD status check fail, uri: {}, wechat_id: {}'.format(handler.request.uri,
-                                                                     handler.current_user.wechat.id))
         handler.write_error(404)

@@ -328,28 +328,17 @@ class ProfilePageService(PageService):
 
     @gen.coroutine
     def create_profile_education(self, record, profile_id, mode='m'):
-        self.logger.debug("create_profile_education start")
         if mode == 'm':  # 老六步
             pass
 
         else:
-            self.logger.debug("create_profile_education else")
             raise ValueError('invalid mode')
-
-        self.logger.debug("create_profile_education")
-        self.logger.debug("create_profile_education record:{}".format(record))
-        self.logger.debug("create_profile_education record.college_name:{}".format(record.college_name))
 
         college_code = yield self.infra_dict_ds.get_college_code_by_name(
             record.college_name)
 
-        self.logger.debug("create_profile_education college_code:{}".format(college_code))
-
         result, data = yield self.infra_profile_ds.create_profile_education(
             record, profile_id, college_code)
-
-        self.logger.debug("create_profile_education result:{}".format(result))
-        self.logger.debug("create_profile_education data:{}".format(data))
 
         return result, data
 

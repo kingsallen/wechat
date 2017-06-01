@@ -165,7 +165,6 @@ class EmployeePageService(PageService):
                 # 随后根据员工的 email 填写数据
                 data.conf.email_name = ''
                 data.conf.email_suffix = ''
-                self.logger.debug(employee.email)
                 if isinstance(employee.email, str) and '@' in employee.email:
                     data.conf.email_name = employee.email.split('@')[0]
                     data.conf.email_suffix = employee.email.split('@')[1]
@@ -220,7 +219,6 @@ class EmployeePageService(PageService):
             else:
                 raise ValueError('invalid authMode')
 
-        self.logger.debug('binding_render_data: %s' % data)
         return data
 
     def make_bind_params(self, user_id, company_id, json_args):

@@ -26,7 +26,6 @@ class ThriftPositionDataService(DataService):
         """
 
         ret = yield self.position_service_cilent.headImage()
-        self.logger.debug("[thrift]get_aggregation_banner: %s" % ret)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -36,11 +35,7 @@ class ThriftPositionDataService(DataService):
         :return:
         """
 
-        self.logger.debug("[thrift]get_company_positions company_id: %s" % company_id)
-        self.logger.debug("[thrift]get_company_positions page_no: %s" % page_no)
-        self.logger.debug("[thrift]get_company_positions page_size: %s" % page_size)
         ret = yield self.position_service_cilent.companyHotPositionDetailsList(int(company_id), int(page_no), int(page_size))
-        self.logger.debug("[thrift]get_company_positions: %s" % ret)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -50,9 +45,5 @@ class ThriftPositionDataService(DataService):
         :return:
         """
 
-        self.logger.debug("[thrift]get_position_positions position_id: %s" % position_id)
-        self.logger.debug("[thrift]get_position_positions page_no: %s" % page_no)
-        self.logger.debug("[thrift]get_position_positions page_size: %s" % page_size)
         ret = yield self.position_service_cilent.similarityPositionDetailsList(int(position_id), int(page_no), int(page_size))
-        self.logger.debug("[thrift]get_position_positions: %s" % ret)
         raise gen.Return(ret)

@@ -15,7 +15,6 @@ class CandidatePageService(PageService):
         """刷新候选人链路信息，调用基础服务"""
 
         ret = yield self.thrift_candidate_ds.send_candidate_view_position(user_id, position_id, sharechain_id)
-        self.logger.debug("send_candidate_view_position: %s" % ret)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -23,7 +22,6 @@ class CandidatePageService(PageService):
         """刷新候选人感兴趣，调用基础服务"""
 
         ret = yield self.thrift_candidate_ds.send_candidate_interested(user_id, position_id, is_interested)
-        self.logger.debug("send_candidate_interested: %s" % ret)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -31,8 +29,6 @@ class CandidatePageService(PageService):
         """获取候选人（要推荐的人）列表"""
 
         ret = yield self.thrift_candidate_ds.get_candidate_list(post_user_id, click_time, is_recom, company_id)
-
-        self.logger.debug("get_candidate_list: %s" % ret)
         return ret
 
     @gen.coroutine
@@ -43,7 +39,6 @@ class CandidatePageService(PageService):
             post_user_id, click_time, recom_record_id, realname, company,
             position, mobile, recom_reason, company_id)
 
-        self.logger.debug("recommend_result: %s" % ret)
         return ret
 
     @gen.coroutine
@@ -51,8 +46,6 @@ class CandidatePageService(PageService):
                     click_time):
         ret = yield self.thrift_candidate_ds.ignore(
             recom_record_id, company_id, post_user_id,  click_time)
-
-        self.logger.debug("ignore_result: %s" % ret)
         return ret
 
     @gen.coroutine
@@ -67,7 +60,6 @@ class CandidatePageService(PageService):
                 'hongbao': infra_ret.hongbao
             })
 
-            self.logger.debug("sorting: %s" % ret)
             return ret
 
     @gen.coroutine
@@ -86,15 +78,12 @@ class CandidatePageService(PageService):
         ret.recom_ignore = thrift_res.recomIgnore
         ret.click_time = thrift_res.clickTime
 
-        self.logger.debug("get_recommendations: %s" % ret)
         return ret
 
     @gen.coroutine
     def get_recommendation(self, recom_record_id, post_user_id):
         infra_ret = yield self.thrift_candidate_ds.get_recommendation(
             recom_record_id, post_user_id)
-        self.logger.debug('infra_ret: %s' % infra_ret)
-
         ret = ObjectDict(
             position_name=infra_ret.title,
             recom=infra_ret.recom,
@@ -102,6 +91,4 @@ class CandidatePageService(PageService):
             id=infra_ret.id,
             presentee_name=infra_ret.presenteeName
         )
-
-        self.logger.debug("get_recommendation: %s" % ret)
         return ret

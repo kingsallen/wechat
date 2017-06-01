@@ -21,8 +21,6 @@ class ReleasedPositionHandler(BaseHandler):
         # 招聘助手用户
         hr_info = yield self.position_ps.get_hr_info_by_wxuser_id(self.current_user.wxuser.id)
 
-        self.logger.debug("ReleasedPositionHandler current_user:{}".format(self.current_user))
-
         # 暂未注册雇主平台
         if not hr_info or hr_info.company_id == 0:
             self.render(template_name="refer/weixin/wx_published_position_list/wx_published_position_list.html", positions='')

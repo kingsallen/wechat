@@ -30,8 +30,6 @@ class AggregationHandler(BaseHandler):
 
         search_dict = self._get_welcome_cookie()
 
-        self.logger.debug("search_dict:{}".format(search_dict))
-
         salary_top = self.params.salary_top or search_dict.get("salary_top", None)
         salary_bottom = self.params.salary_bottom or search_dict.get("salary_bottom", None)
         salary_negotiable = self.params.salary_negotiable or search_dict.get("salary_negotiable", None)
@@ -40,15 +38,6 @@ class AggregationHandler(BaseHandler):
         industry = self.params.industry or search_dict.get("industry", None)
         page_no = self.params.page_no or 1
         page_size = self.params.page_size or 10
-
-        self.logger.debug("salary_top:{}".format(salary_top))
-        self.logger.debug("salary_bottom:{}".format(salary_bottom))
-        self.logger.debug("salary_negotiable:{}".format(salary_negotiable))
-        self.logger.debug("keywords:{}".format(keywords))
-        self.logger.debug("city:{}".format(city))
-        self.logger.debug("industry:{}".format(industry))
-        self.logger.debug("page_no:{}".format(page_no))
-        self.logger.debug("page_size:{}".format(page_size))
 
         es_res, total = yield self.aggregation_ps.opt_es(salary_top,
                                                   salary_bottom,
@@ -146,9 +135,6 @@ class AggregationHandler(BaseHandler):
         """
         session_ads = self.get_cookie(qx_const.COOKIE_HRADS_SESSIONS) or 0
         session_ads_total = self.get_cookie(qx_const.COOKIE_HRADS_TOTAL) or 0
-
-        self.logger.debug("session_ads:{}".format(session_ads))
-        self.logger.debug("session_ads_total:{}".format(session_ads_total))
 
         if session_ads:
             return False

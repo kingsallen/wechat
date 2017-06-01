@@ -118,7 +118,6 @@ class RecomIgnoreHandler(RecomCustomVariableMixIn, BaseHandler):
                 self.current_user.sysuser.id,
                 self.current_user.company.id)
 
-            self.logger.debug("sort: %s" % sort)
             if not sort:
                 self.render(
                     template_name="refer/weixin/passive-seeker_v2/passive-wanting_no-more.html")
@@ -207,14 +206,10 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
         else:
             pass
 
-        self.logger.debug("ids: %s, type: %s" % (ids, type(ids)))
-
         list_of_ids = [int(id) for id in ids]
 
         next_passive_seeker = yield self.candidate_ps.get_recommendations(
             self.current_user.company.id, list_of_ids)
-
-        self.logger.debug("next_passive_seeker: %s" % next_passive_seeker)
 
         # 返回第一个推荐的被动求职者
         self.render(
@@ -302,8 +297,6 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
                 click_time, recom_record_id, realname, company,
                 position, mobile, recom_reason,
                 self.current_user.company.id)
-
-            self.logger.debug("post_recom_passive_seeker passive_seeker: %s" % recom_result)
 
         except BIZException as e:
             self.render(

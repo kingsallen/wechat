@@ -121,11 +121,6 @@ class UserPageService(PageService):
         qx_wxuser = yield self.get_wxuser_unionid_wechat_id(
             unionid=unionid, wechat_id=settings['qx_wechat_id'])
 
-        self.logger.debug("create_user_wx_user_ent, wxuser openid:{} wechat_id:{}".format(openid, wechat_id))
-        self.logger.debug("create_user_wx_user_ent, wxuser:{}".format(wxuser))
-        self.logger.debug("create_user_wx_user_ent, qx_wxuser unionid:{} wechat_id:{}".format(unionid, wechat_id))
-        self.logger.debug("create_user_wx_user_ent, qx_wxuser:{}".format(qx_wxuser))
-
         if wxuser:
             wxuser_id = wxuser.id
             yield self.user_wx_user_ds.update_wxuser(
@@ -176,8 +171,6 @@ class UserPageService(PageService):
 
         qx_wxuser = yield self.get_wxuser_openid_wechat_id(
             openid=openid, wechat_id=qx_wechat_id)
-
-        self.logger.debug("create_qx_wxuser_by_userinfo, qx_wxuser:{}".format(qx_wxuser))
 
         # 如果 qx_wxuser.sysuser_id = 0 表示只关注过，但是没有打开过页面
         if qx_wxuser and (qx_wxuser.sysuser_id == 0 or qx_wxuser.sysuser_id == user_id):

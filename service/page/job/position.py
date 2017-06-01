@@ -83,7 +83,6 @@ class PositionPageService(PageService):
         # 自定义分享模板
         if position_res.share_tpl_id:
             share_conf = yield self.__get_share_conf(position_res.share_tpl_id)
-            self.logger.debug("")
             position.share_title = share_conf.title
             position.share_description = share_conf.description
 
@@ -351,7 +350,6 @@ class PositionPageService(PageService):
             fields=['id', 'name']
         )
         team_name_dict = {e.id: e.name for e in res_team_names}
-        self.logger.debug('team_name_dict: %s' % team_name_dict)
         return team_name_dict
 
     @gen.coroutine
@@ -386,8 +384,6 @@ class PositionPageService(PageService):
         ret = yield self.thrift_position_ds.get_position_positions(position_id, page_no, page_size)
         if not ret.data:
             return res_list
-
-        self.logger.debug("get_position_positions:{}".format(ret))
 
         for item in ret.data:
             pos = ObjectDict()

@@ -36,7 +36,6 @@ class LinkedinImportHandler(MetaBaseHandler):
                                 recom=self.params.recom,
                                 pid=self.params.pid,
                                 wechat_signature=self.params.wechat_signature)
-        self.logger.debug("resume linkedin:{}".format(redirect_url))
 
         response = yield self.profile_ps.get_linkedin_token(code=code, redirect_url=redirect_url)
         response = json.loads(to_str(response))

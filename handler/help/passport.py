@@ -28,13 +28,8 @@ class RegisterQrcodeHandler(BaseHandler):
         :return:
         """
 
-        self.logger.debug("RegisterQrcodeHandler")
-
         scene_str = "{0}_{1}_0".format(self.params.hr_id, self.current_user.wxuser.id)
         qrcode = yield WechatUtil.get_qrcode(self.current_user.wechat.access_token, scene_str)
-
-        self.logger.debug("RegisterQrcodeHandler scene_str:{}".format(scene_str))
-        self.logger.debug("RegisterQrcodeHandler qrcode:{}".format(qrcode))
 
         self.render(template_name="refer/weixin/sysuser/wx_recruit_success.html", qrcodeurl=qrcode)
 

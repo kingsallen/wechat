@@ -98,11 +98,6 @@ class UnreadCountHandler(BaseHandler):
         else:
             company_info = self.current_user.company
 
-        self.logger.debug("_get_ga_event in_wechat: {}".format(self.in_wechat))
-        self.logger.debug("_get_ga_event self.current_user.sysuser: {}".format(self.current_user.sysuser))
-        self.logger.debug("_get_ga_event self.current_user.qxuser.is_subscribe: {}".format(self.current_user.qxuser.is_subscribe))
-        self.logger.debug("_get_ga_event company_info.conf_hr_chat: {}".format(company_info.conf_hr_chat))
-
         g_event = 0
         if not self.in_wechat and not self.current_user.sysuser:
             g_event = 1
@@ -275,7 +270,6 @@ class ChatHandler(BaseHandler):
         page_size = self.params.page_size or 10
 
         res = yield self.chat_ps.get_chats(self.params.room_id, page_no, page_size)
-        self.logger.debug("[chat]get_messages:{}".format(res))
         self.send_json_success(data=ObjectDict(
             records = res
         ))
@@ -298,8 +292,6 @@ class ChatHandler(BaseHandler):
         if int(self.params.hr_id) == int(self.current_user.company.hraccount_id):
             is_gamma = True
 
-        self.logger.debug("get_room pid:{} room_id:{} hr_id:{} is_qx:{}".format(pid, room_id, self.params.hr_id, is_gamma))
-
         res = yield self.chat_ps.get_chatroom(self.current_user.sysuser.id,
                                               self.params.hr_id,
                                               pid, room_id,
@@ -310,5 +302,4 @@ class ChatHandler(BaseHandler):
             self.send_json_error(message=msg.NOT_AUTHORIZED)
             return
 
-        self.logger.debug("[chat]get_room:{}".format(res))
         self.send_json_success(data=res)

@@ -39,9 +39,7 @@ class LandingHandler(BaseHandler):
             "search_seq": search_seq
         })
 
-        self.logger.debug("[LANDING]构建转发信息")
         yield self._make_share_info(self.current_user.company)
-        self.logger.debug("share: {}".format(self.params.share))
 
         self.render(template_name="company/search.html", company=company)
 

@@ -126,10 +126,6 @@ class UsercenterPageService(PageService):
         """
         ret = yield self.thrift_useraccounts_ds.get_applied_progress(user_id, app_id)
 
-        self.logger.debug("[get_applied_progress]user_id:{}".format(user_id))
-        self.logger.debug("[get_applied_progress]app_id:{}".format(app_id))
-        self.logger.debug("[get_applied_progress]ret:{}".format(ret))
-
         time_lines = list()
         if ret.status_timeline:
             for e in ret.status_timeline:

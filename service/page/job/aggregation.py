@@ -77,6 +77,7 @@ class AggregationPageService(PageService):
 
         # 由于需要按人工设置的 weight进行排序，es 不支持先按关键词搜索，再按 weight 排序
         # 因此由 python 实现排序，并分页
+        # TODO 泽腾正在研究 ES 排序，待成熟可用后，替换成 ES 排序 by 煜昕 2017.6.1
         es_res = yield self.es_ds.get_es_positions(params, 0, 300)
         es_result = list()
         # 搜索结果总数
@@ -182,13 +183,8 @@ class AggregationPageService(PageService):
         if item.get("_source", {}).get("jd_pic",{}).get("position_pic",{}).get("first_pic",{}):
             job_img = item.get("_source").get("jd_pic",{}).get("position_pic",{}).get("first_pic",{}).get("res_url")
 
-        self.logger.debug("!!!!!!!!!!!!!!!!")
-        self.logger.debug("banner company:{}".format(item.get("_source", {}).get("company", {})))
-        self.logger.debug("banner:{}".format(item.get("_source", {}).get("company", {}).get("banner", None)))
-
         if item.get("_source", {}).get("company", {}).get("banner", None):
             company_img = ujson.loads(item.get("_source", {}).get("company", {}).get("banner", None)).get("banner0")
-            self.logger.debug("banner company_img:{}".format(company_img))
 
         return make_static_url(team_img), make_static_url(job_img), make_static_url(company_img)
 
@@ -253,16 +249,11 @@ class AggregationPageService(PageService):
             agg_company["id"] = item[1].company.id
             agg_company["logo"] = make_static_url(item[1].company.logo or const.COMPANY_HEADIMG)
             banner = ujson.loads(item[1].company.banner).get("banner0") if item[1].company.banner else ""
-            self.logger.debug("+++++++++++++++")
-            self.logger.debug("hot_company banner 111:{}".format(item[1].company))
-            self.logger.debug("hot_company banner:{}".format(banner))
             agg_company["banner"] = make_static_url(banner)
             agg_company["abbreviation"] = item[1].company.abbreviation
             agg_company["position_count"] = item[1].position_cnt
             agg_company["city"] = item[1].city
             hot_company.append(agg_company)
-
-        self.logger.debug("hot_company:{}".format(hot_company))
 
         return hot_company[:9]
 

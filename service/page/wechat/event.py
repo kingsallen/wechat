@@ -191,8 +191,6 @@ class EventPageService(PageService):
         if wechat.third_oauth == 1:
             text_info = self.__encryMsg(text_info, nonce)
 
-        self.logger.debug("text_info: %s" % text_info)
-
         raise gen.Return(text_info)
 
     @gen.coroutine
@@ -205,9 +203,6 @@ class EventPageService(PageService):
         :return:
         """
 
-        self.logger.debug("[opt_event_subscribe] msg: {}".format(msg))
-        self.logger.debug("[opt_event_subscribe] current_user: {}".format(current_user))
-
         openid = msg.FromUserName
         is_newbie = False
         if not current_user.wxuser:
@@ -215,13 +210,11 @@ class EventPageService(PageService):
             is_newbie = True
             wxuser_id = yield self._create_wxuser(openid, current_user)
 
-            self.logger.debug("[opt_event_subscribe] create new wxuser_id: {}".format(wxuser_id))
             yield self.__opt_help_wxuser(wxuser_id, current_user, msg)
 
         else:
             # 老微信用户
             yield self._update_wxuser(openid, current_user, msg)
-            self.logger.debug("[opt_event_subscribe] update")
 
         # 处理临时二维码，目前主要在 PC 上创建帐号、绑定账号时使用
         if current_user.wechat.id == self.settings.qx_wechat_id and msg.EventKey:
@@ -244,8 +237,6 @@ class EventPageService(PageService):
         wechat_util_obj = WechatUtil()
         wechat_userinfo = yield wechat_util_obj.get_wxuser(current_user.wechat.access_token, openid)
 
-        self.logger.debug("[_create_wxuser] wechat_userinfo: {}".format(wechat_userinfo))
-
         if not wechat_userinfo or openid is None:
             self.logger.error("[wechat_oauth][create_wxuser]wechat_userinfo is None."
                               "wechat_userinfo:{0}, openid:{1}".format(wechat_userinfo, openid))
@@ -254,7 +245,6 @@ class EventPageService(PageService):
         # 已授权给仟寻，或者 HR 雇主平台的用户，已经创建了 wxuser，故不需要再创建 wxuser
         if (current_user.wechat.id == self.settings.helper_wechat_id
             or current_user.wechat.id == self.settings.qx_wechat_id) and current_user.wxuser:
-            self.logger.debug("[_create_wxuser] update")
             res = yield self.user_wx_user_ds.update_wxuser(
                 conds={"id": current_user.wxuser.id},
                 fields={
@@ -271,10 +261,8 @@ class EventPageService(PageService):
                     "unsubscibe_time": None,
                     "source":          const.WX_USER_SOURCE_UPDATE_SHORT
                 })
-            self.logger.debug("[_create_wxuser] update res: {}".format(res))
 
         if not current_user.wxuser:
-            self.logger.debug("[_create_wxuser] create")
             wxuser_id = yield self.user_wx_user_ds.create_wxuser({
                 "is_subscribe":    const.WX_USER_SUBSCRIBED,
                 "openid":          openid,
@@ -291,8 +279,6 @@ class EventPageService(PageService):
                 "unsubscibe_time": None,
                 "source":          const.WX_USER_SOURCE_SUBSCRIBE
             })
-            self.logger.debug("[_create_wxuser] create res: {}".format(wxuser_id))
-
         raise gen.Return(wxuser_id)
 
     @gen.coroutine
@@ -307,8 +293,6 @@ class EventPageService(PageService):
 
         wechat_util_obj = WechatUtil()
         wechat_userinfo = yield wechat_util_obj.get_wxuser(current_user.wechat.access_token, openid)
-
-        self.logger.debug("[_update_wxuser] wechat_userinfo: {}".format(wechat_userinfo))
 
         if not wechat_userinfo or openid is None:
             self.logger.error("[wechat_oauth][create_wxuser]wechat_userinfo is None."
@@ -331,7 +315,6 @@ class EventPageService(PageService):
                 "unsubscibe_time": None,
                 "source":          const.WX_USER_SOURCE_UPDATE_ALL
             })
-        self.logger.debug("[_update_wxuser] res: {}".format(res))
 
         yield self.__opt_help_wxuser(current_user.wxuser.id, current_user.wechat, msg)
 
@@ -348,8 +331,6 @@ class EventPageService(PageService):
         :return:
         """
 
-        self.logger.debug("[opt_event_unsubscribe] current_user: {0}".format(current_user))
-
         if current_user.wxuser:
             res = yield self.user_wx_user_ds.update_wxuser(
                 conds={"id": current_user.wxuser.id},
@@ -359,14 +340,12 @@ class EventPageService(PageService):
                     "subscribe_time":  None,
                     "source":          const.WX_USER_SOURCE_UNSUBSCRIBE
                 })
-            self.logger.debug("[opt_event_unsubscribe] res: {0}".format(res))
             # 取消关注仟寻招聘助手时，将user_hr_account.wxuser_id与user_wx_user.id 解绑
             if current_user.wechat.id == self.settings.helper_wechat_id:
                 user_hr_account = yield self.user_hr_account_ds.get_hr_account(conds={
                     "wxuser_id": current_user.wxuser.id
                 })
 
-                self.logger.debug("[opt_event_unsubscribe] user_hr_account: {0}".format(user_hr_account))
                 if user_hr_account:
                     yield self.user_hr_account_ds.update_hr_account(
                         conds={
@@ -381,9 +360,6 @@ class EventPageService(PageService):
                             wxuser_id = 0,
                             wxuser = ObjectDict()
                         ))
-                    self.logger.debug("[opt_event_unsubscribe] get_user_hr_account_session: {0}".format(
-                        user_hr_account_cache.get_user_hr_account_session(user_hr_account.id)))
-
 
         raise gen.Return()
 
@@ -396,29 +372,13 @@ class EventPageService(PageService):
         :return:
         """
 
-        self.logger.debug("[opt_event_scan] current_user: {0} msg:{1}".format(current_user, msg))
         if current_user.wechat.id == self.settings.helper_wechat_id and msg.EventKey:
             scan_info = re.match(r"([0-9]*)_([0-9]*)_([0-9]*)", msg.EventKey)
-            self.logger.debug("[opt_event_scan] scan_info: {0}".format(scan_info))
-            # 更新仟寻招聘助手公众号下的用户openid
-            # 暂时没找到作用，先注释 by 煜昕 02.14
-            # res = yield self.user_wx_user_ds.update_wxuser(
-            #     conds={
-            #         "id": scan_info.group(2),
-            #         "wechat_id": current_user.wechat.id,
-            #     },
-            #     fields={
-            #         "openid": msg.FromUserName, # 重置 openid，因为 openid 可能为 HR 雇主平台的网页 openid
-            #         "source": const.WX_USER_SOURCE_UPDATE_SHORT
-            #     })
-            #
-            # self.logger.debug("[opt_event_scan] res: {0}".format(res))
 
             # 已绑定过的微信号，不能再绑定第二个hr_account账号，否则微信扫码登录会出错
             user_hr_account = yield self.user_hr_account_ds.get_hr_account(conds={
                 "wxuser_id": current_user.wxuser.id
             })
-            self.logger.debug("[opt_event_scan] user_hr_account res: {0}".format(user_hr_account))
 
             if user_hr_account:
                 user_hr_account_cache = UserHrAccountCache()
@@ -453,8 +413,6 @@ class EventPageService(PageService):
                 scan_info = re.match(r"qrscene_([0-9]*)_([0-9]*)_([0-9]*)", msg.EventKey)
                 if not scan_info:
                     scan_info = re.match(r"([0-9]*)_([0-9]*)_([0-9]*)", msg.EventKey)
-                self.logger.debug(
-                    "[__opt_help_wxuser] scan_info: {0}".format(scan_info))
                 # 扫码换绑
                 if scan_info.group(1) and int(scan_info.group(3)) == 1:
                     res = yield self.user_hr_account_ds.update_hr_account(
@@ -463,7 +421,6 @@ class EventPageService(PageService):
                         }, fields={
                             "wxuser_id": wxuser_id
                         })
-                    self.logger.debug("[__opt_help_wxuser] res 1: {0}".format(res))
                 # 普通扫码绑定
                 elif scan_info.group(1):
                     res = yield self.user_hr_account_ds.update_hr_account(
@@ -473,7 +430,6 @@ class EventPageService(PageService):
                         }, fields={
                             "wxuser_id": wxuser_id
                         })
-                    self.logger.debug("[__opt_help_wxuser] res 2: {0}".format(res))
 
                 if res:
                     # 更新 user_hr_account 和 user_wx_user 的关系成功后,
@@ -482,16 +438,12 @@ class EventPageService(PageService):
                         "id": wxuser_id,
                     })
 
-                    self.logger.debug("[__opt_help_wxuser] wxuser: {0}".format(wxuser))
                     user_hr_account_cache.update_user_hr_account_session(
                         scan_info.group(1),
                         value = ObjectDict(
                             wxuser_id = int(wxuser_id),
                             wxuser = wxuser
                         ))
-
-                    self.logger.debug("[__opt_help_wxuser] get_user_hr_account_session: {0}".format(
-                        user_hr_account_cache.get_user_hr_account_session(scan_info.group(1))))
 
                     # HR招聘管理平台对于HR 帐号绑定微信长轮训机制，需要实时的将状态返回给 HR 平台
                     user_hr_account_cache.pub_wx_binding(scan_info.group(1))
@@ -525,8 +477,6 @@ class EventPageService(PageService):
             "wechat_id": wechat.id
         })
 
-        self.logger.debug("[_do_weixin_qrcode] wxuser:{0}".format(wxuser))
-
         # 临时二维码处理逻辑, 5位type+27为自定义id
         if wechat.id == self.settings.qx_wechat_id and int_scene_id:
             int_scene_id = int_scene_id.group(1)
@@ -536,8 +486,6 @@ class EventPageService(PageService):
               type: "11000" = 24 pc端用户解绑, "11001" = 25 pc端用户绑定, 11010=26 注册用二维码. 10000=16, 10001=17,
               见 https://wiki.moseeker.com/weixin.md
             """
-
-            self.logger.debug("[_do_weixin_qrcode] int_scene_id:{0}, type:{1}, real_user_id:{2}".format(int_scene_id, type, real_user_id))
 
             if type == 26:
                 # 注册用二维码
@@ -553,7 +501,6 @@ class EventPageService(PageService):
                         }
                     })
                 }
-                self.logger.debug("[_do_weixin_qrcode] params 26:{0}".format(params))
 
                 yield self.infra_user_ds.post_scanresult(params)
                 raise gen.Return()
@@ -565,7 +512,6 @@ class EventPageService(PageService):
                         "unionid": wxuser.unionid,
                         "parentid": 0  # 保证查找正常的 user record
                     })
-                    self.logger.debug("[_do_weixin_qrcode] user_record 25:{0}".format(user_record))
                     if user_record.id != real_user_id and mobile_validate(user_record.username):
                         params = {
                                 "wechatid": wechat.id,
@@ -575,7 +521,6 @@ class EventPageService(PageService):
                                     "message": message.WECHAT_SCAN_HAD_BINDED
                                 })
                             }
-                        self.logger.debug("[_do_weixin_qrcode] params 25 1:{0}".format(params))
                         yield self.infra_user_ds.post_scanresult(params)
                         raise gen.Return()
 
@@ -589,7 +534,6 @@ class EventPageService(PageService):
                                 "data": wxuser.unionid,
                             })
                         }
-                    self.logger.debug("[_do_weixin_qrcode] params 25 2:{0}".format(params))
                     yield self.infra_user_ds.post_scanresult(params)
                     raise gen.Return()
                 else:
@@ -601,7 +545,6 @@ class EventPageService(PageService):
                                 "message": message.WECHAT_SCAN_FAILED
                             })
                         }
-                    self.logger.debug("[_do_weixin_qrcode] params 25 3:{0}".format(params))
                     yield self.infra_user_ds.post_scanresult(params)
                     raise gen.Return()
 
@@ -619,7 +562,6 @@ class EventPageService(PageService):
                                     "message": message.RESPONSE_SUCCESS
                                 })
                             }
-                        self.logger.debug("[_do_weixin_qrcode] params 24 0:{0}".format(params))
                         yield self.infra_user_ds.post_scanresult(params)
                         raise gen.Return()
                     else:
@@ -631,7 +573,6 @@ class EventPageService(PageService):
                                     "message": message.WECHAT_SCAN_CHANGE_WECHAT
                                 })
                             }
-                        self.logger.debug("[_do_weixin_qrcode] params 24 1:{0}".format(params))
                         yield self.infra_user_ds.post_scanresult(params)
                         raise gen.Return()
 
@@ -645,15 +586,12 @@ class EventPageService(PageService):
                                 "message": message.WECHAT_SCAN_CHANGE_WECHAT
                             })
                         }
-                    self.logger.debug("[_do_weixin_qrcode] params 24 2:{0}".format(params))
                     yield self.infra_user_ds.post_scanresult(params)
                     raise gen.Return()
 
             elif type == 16:
-                self.logger.debug("[_do_weixin_qrcode] type 16")
                 pass
             elif type == 17:
-                self.logger.debug("[_do_weixin_qrcode] type 17")
                 pass
 
         raise gen.Return()
@@ -667,33 +605,14 @@ class EventPageService(PageService):
         :param user_id:
         :return:
         """
-        self.logger.debug("[__user_bind_wx] wxuser:{0}, user_id:{1}".format(wxuser, user_id))
-
         if wxuser.unionid:
-            # 先解绑
-            # 绑定动作,由本函数返回true后由PC端调用  /user/wxbindmobile 绑定.
-            # res = yield self.user_wx_user_ds.update_wxuser(
-            #     conds={"unionid": wxuser.unionid},
-            #     fields={
-            #         "sysuser_id": 0,
-            #     })
-            # self.logger.debug("[__user_bind_wx] res 1: {0}".format(res))
-            # # 再更新
-            # res = yield self.user_wx_user_ds.update_wxuser(
-            #     conds={"unionid": wxuser.unionid},
-            #     fields={
-            #         "sysuser_id": user_id,
-            #     })
-            # self.logger.debug("[__user_bind_wx] res 2: {0}".format(res))
             res = yield self.user_user_ds.update_user(
                 conds={"id": user_id},
                 fields={
                     "nickname": wxuser.nickname,
                 })
-            self.logger.debug("[__user_bind_wx] res 3:{}".format(res))
             raise gen.Return(True)
         raise gen.Return(False)
-
 
     def __encryMsg(self, uncrypt_xml, nonce):
         """

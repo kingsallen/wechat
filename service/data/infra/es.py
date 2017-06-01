@@ -21,7 +21,6 @@ class EsDataService(DataService):
         """
 
         params = rule_gamma_filters(params)
-        self.logger.debug("rule_gamma_filters:{}".format(params))
 
         body = init_gamma_basic(params.keywords,
                                 params.city,
@@ -31,8 +30,6 @@ class EsDataService(DataService):
                                 params.salary_negotiable,
                                 page_from,
                                 page_size)
-
-        self.logger.debug("init_gamma_basic:{}".format(body))
 
         res = self.es.search(index="positions", body=body)
         raise gen.Return(res)

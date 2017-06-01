@@ -132,7 +132,6 @@ class BaseHandler(MetaBaseHandler):
         self._qxuser = None
         self._session_id = None
 
-        self.logger.debug("current_user:{}".format(self.current_user))
         self.logger.debug("+++++++++++++++++PREPARE OVER+++++++++++++++++++++")
 
     # PROTECTED
@@ -156,8 +155,6 @@ class BaseHandler(MetaBaseHandler):
         "unionid": "o6_bmasdasdsad6_2sgVt7hMZOPfL"
         )
         """
-        self.logger.debug("[_handle_user_info]userinfo: {}".format(userinfo))
-
         self._unionid = userinfo.unionid
         if self.is_platform:
             source = const.WECHAT_REGISTER_SOURCE_PLATFORM
@@ -190,7 +187,6 @@ class BaseHandler(MetaBaseHandler):
         if self.is_platform or self.is_help:
             wxuser = yield self.user_ps.create_user_wx_user_ent(
                 openid, unionid, self._wechat.id)
-            self.logger.debug("_handle_ent_openid, wxuser:{}".format(wxuser))
         raise gen.Return(wxuser)
 
     def _authable(self, wechat_type):
@@ -201,13 +197,6 @@ class BaseHandler(MetaBaseHandler):
         https://mp.weixin.qq.com/wiki/7/2d301d4b757dedc333b9a9854b457b47.html
         """
 
-        self.logger.debug("_authable _wechat type: {}".format(wechat_type))
-        self.logger.debug(
-            "_authable const.WECHAT_TYPE_SERVICE: {}".format(
-                const.WECHAT_TYPE_SERVICE))
-        self.logger.debug("_authable res: {}".format(
-            wechat_type is const.WECHAT_TYPE_SERVICE))
-
         if wechat_type is None:
             return False
         return wechat_type is const.WECHAT_TYPE_SERVICE
@@ -216,8 +205,6 @@ class BaseHandler(MetaBaseHandler):
         """检查 code 是不是之前使用过的"""
 
         old = self.get_cookie(const.COOKIE_CODE)
-        self.logger.debug("[_verify_code]old code: {}".format(old))
-        self.logger.debug("[_verify_code]new code: {}".format(code))
 
         if not old:
             return True
@@ -281,11 +268,9 @@ class BaseHandler(MetaBaseHandler):
         self._session_id = to_str(
             self.get_secure_cookie(
                 const.COOKIE_SESSIONID))
-        self.logger.debug("_fetch_session session_id: %s" % self._session_id)
 
         if self._session_id:
             if self.is_platform or self.is_help:
-                self.logger.debug("is_platform _fetch_session session_id: {}".format(self._session_id))
                 # 判断是否可以通过 session，直接获得用户信息，这样就不用跳授权页面
                 ok = yield self._get_session_by_wechat_id(self._session_id, self._wechat.id)
                 if not ok:
@@ -301,17 +286,12 @@ class BaseHandler(MetaBaseHandler):
         if need_oauth:
             if self.in_wechat and not self._unionid:
                 # unionid 不存在，则进行仟寻授权
-                self.logger.debug("start oauth!!!!")
-
                 self._oauth_service.wechat = self._qx_wechat
                 url = self._oauth_service.get_oauth_code_userinfo_url()
-                self.logger.debug("get_oauth_code_userinfo_url: url:{}".format(url))
                 self.redirect(url)
                 return
             else:
-                self.logger.debug("beyond wechat start!!!")
                 yield self._build_session()
-                self.logger.debug("_build_session: %s" % self.current_user)
 
         # GA 需求：
         # 在 current_user 中添加 has_profile flag
@@ -351,10 +331,6 @@ class BaseHandler(MetaBaseHandler):
                 const.COOKIE_SESSIONID,
                 self._session_id,
                 httponly=True)
-            self.logger.debug(
-                "_build_session get_secure_cookie: {}".format(
-                    self.get_secure_cookie(
-                        const.COOKIE_SESSIONID)))
 
         # 重置 wxuser，qxuser，构建完整的 session
         self._wxuser = ObjectDict()
@@ -387,50 +363,22 @@ class BaseHandler(MetaBaseHandler):
 
         session = ObjectDict()
         # session_id = to_str(self.get_secure_cookie(const.COOKIE_SESSIONID))
-        self.logger.debug("_build_session_by_unionid")
-        self.logger.debug(
-            "_build_session_by_unionid unionid: {}".format(unionid))
-        self.logger.debug(
-            "_build_session_by_unionid session_id: {}".format(
-                self._session_id))
-
         if not unionid:
             # 非微信环境, 忽略 wxuser, qxuser
-            self.logger.debug("_build_session_by_unionid not unionid")
             session.wxuser = ObjectDict()
             session.qxuser = ObjectDict()
         else:
-            self.logger.debug("_build_session_by_unionid unionid")
-            self.logger.debug(
-                "_build_session_by_unionid _wxuser:{}".format(
-                    self._wxuser))
-            self.logger.debug(
-                "_build_session_by_unionid _qxuser:{}".format(
-                    self._qxuser))
-            self.logger.debug(
-                "_build_session_by_unionid _wechat:{}".format(
-                    self._wechat))
-
             if self._wxuser:
                 session.wxuser = self._wxuser
             else:
                 session.wxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
                     unionid=unionid, wechat_id=self._wechat.id)
-                self.logger.debug(
-                    "_build_session_by_unionid wxuser:{}".format(
-                        session.wxuser))
 
             if self._qxuser and self.is_platform:
                 session.qxuser = self._qxuser
             else:
                 session.qxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
                     unionid=unionid, wechat_id=self.settings['qx_wechat_id'])
-                self.logger.debug(
-                    "_build_session_by_unionid qxuser:{}".format(
-                        session.qxuser))
-
-            self.logger.debug(
-                "_build_session_by_unionid session 1: {}".format(session))
 
         if not self._session_id:
             self._session_id = self._make_new_session_id(
@@ -449,25 +397,11 @@ class BaseHandler(MetaBaseHandler):
         session.wechat = self._wechat
         self._add_jsapi_to_wechat(session.wechat)
 
-        self.logger.debug(
-            "_build_session_by_unionid session 2: {}".format(session))
-        self.logger.debug(
-            "_build_session_by_unionid params: {}".format(
-                self.params))
-        self.logger.debug("_build_session_by_unionid start company")
         yield self._add_company_info_to_session(session)
-        self.logger.debug(
-            "_build_session_by_unionid company: {}".format(session))
         if self.is_platform and self.params.recom:
-            self.logger.debug("_build_session_by_unionid start recom")
             yield self._add_recom_to_session(session)
-            self.logger.debug(
-                "_build_session_by_unionid recom: {}".format(
-                    session.recom))
 
         self.current_user = session
-
-        self.logger.debug("current_user:{}".format(self.current_user))
 
     @gen.coroutine
     def _add_company_info_to_session(self, session):
@@ -475,8 +409,6 @@ class BaseHandler(MetaBaseHandler):
         """
 
         session.company = yield self._get_current_company(session.wechat.company_id)
-
-        self.logger.debug("_add_company_info_to_session:{}".format(session.company))
 
         if session.sysuser.id and self.is_platform:
             employee = yield self.user_ps.get_valid_employee_by_user_id(
@@ -534,24 +466,16 @@ class BaseHandler(MetaBaseHandler):
             "id": user_id
         })
 
-        self.logger.debug("_add_sysuser_to_session user_id:{}".format(user_id))
-        self.logger.debug("_add_sysuser_to_session sysuser:{}".format(sysuser))
-
         if sysuser.parentid and sysuser.parentid > 0:
-            self.logger.debug("帐号已经被合并")
-            self.logger.debug("_add_sysuser_to_session sysuser.parentid:{}".format(sysuser.parentid))
             sysuser = yield self.user_ps.get_user_user({
                 "id": sysuser.parentid
             })
-            self.logger.debug("_add_sysuser_to_session sysuser:{}".format(sysuser))
             self.clear_cookie(name=const.COOKIE_SESSIONID)
 
         if sysuser:
             sysuser.headimg = self.static_url(sysuser.headimg or const.SYSUSER_HEADIMG)
 
         # 对于非微信环境，用户登录后，如果帐号已经绑定微信，则同时获取微信用户信息
-        self.logger.debug("_add_sysuser_to_session unionid:{}".format(sysuser.unionid))
-        self.logger.debug("_add_sysuser_to_session qxuser:{}".format(session.qxuser))
 
         if sysuser.unionid and not session.qxuser:
             session.qxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
@@ -657,11 +581,9 @@ class BaseHandler(MetaBaseHandler):
         """
 
         full_url = to_str(self.request.full_url())
-        self.logger.debug("fullurl 1:{}".format(full_url))
 
         if not self.host in self.request.full_url():
             full_url = full_url.replace(self.settings.m_host, self.host)
-            self.logger.debug("full_url 2:{}".format(full_url))
 
         if not encode:
             return full_url

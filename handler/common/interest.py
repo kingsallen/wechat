@@ -110,9 +110,6 @@ class UserCurrentUpdateHandler(BaseHandler):
             self.send_json_error()
             return
 
-        self.logger.debug("UserCurrentInfoHandler sysuser_id:{}".format(self.current_user.sysuser.id))
-        self.logger.debug("UserCurrentInfoHandler params:{}".format(self.params))
-
         yield self.user_ps.update_user_user_current_info(
             sysuser_id=self.current_user.sysuser.id,
             data=self.params

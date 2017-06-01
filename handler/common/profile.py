@@ -176,7 +176,6 @@ class ProfilePreviewHandler(BaseHandler):
             'current_mobile':       current_mobile
         }
 
-        self.logger.debug('tparams: %s' % tparams)
         self.render_page(template_name='profile/preview.html', data=tparams, meta_title=const.PROFILE_PREVIEW)
 
 class ProfileViewHandler(BaseHandler):
@@ -189,19 +188,12 @@ class ProfileViewHandler(BaseHandler):
 
         has_profile, profile = yield self.profile_ps.has_profile_by_uuid(uuid=uuid)
 
-        self.logger.debug("uuid:{}".format(uuid))
-        self.logger.debug("profile:{}".format(profile))
-        self.logger.debug("has_profile:{}".format(has_profile))
-
         if not uuid or not has_profile:
             self.write_error(404)
             return
 
-        self.logger.debug("profle user_id:{}".format(profile.profile.user_id))
-
         # 如果是用户本人，则跳转到用户可以编辑的个人档案页
         if profile.profile.user_id == self.current_user.sysuser.id:
-            self.logger.debug("profle redirect")
             redirect_url = self.make_url(path=path.PROFILE_VIEW)
             self.redirect(redirect_url)
             return
@@ -217,8 +209,6 @@ class ProfileViewHandler(BaseHandler):
         }
 
         self.params.share = self._share(uuid, profile_tpl)
-        self.logger.debug('tparams: %s' % tparams)
-        self.logger.debug('params: %s' % self.params)
         self.render_page(template_name='profile/preview.html', data=tparams, meta_title=const.PROFIEL_VIEW)
 
     def _share(self, uuid, profile_tpl):
@@ -272,7 +262,6 @@ class ProfileCustomHandler(BaseHandler):
     def get(self):
         pid = int(self.params.pid)
         position = yield self.position_ps.get_position(pid)
-        self.logger.debug("position: %s" % position)
         if not position.app_cv_config_id:
             self.write_error(404)
             return
@@ -322,7 +311,6 @@ class ProfileCustomHandler(BaseHandler):
 
     @tornado.gen.coroutine
     def _save_custom_cv(self, custom_cv):
-        self.logger.debug("custom_cv: %s" % custom_cv)
 
         # 更新 user 信息（非 profile 信息）
         yield self.user_ps.update_user(

@@ -27,9 +27,6 @@ class PositionHandler(BaseHandler):
         did = yield self.company_ps.get_real_company_id(position_info.publisher, position_info.company_id)
         company_info = yield self.company_ps.get_company(conds={"id": did}, need_conf=True)
 
-        self.logger.debug("position:{}".format(position_info))
-        self.logger.debug("company:{}".format(company_info))
-
         if position_info.id:
             self.logger.debug("[JD]构建职位默认图")
             position_es = yield self.aggregation_ps.opt_es_position(position_info.id)

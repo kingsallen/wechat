@@ -92,8 +92,6 @@ class EmployeeUnbindHandler(BaseHandler):
                 self.current_user.company.id,
                 self.current_user.sysuser.id
             )
-            self.logger.debug('unbind result: %s' % result)
-            self.logger.debug('unbind message: %s' % message)
             if result:
                 self.send_json_success()
             else:
@@ -121,7 +119,6 @@ class EmployeeBindHandler(BaseHandler):
         # 根据 conf 来构建 api 的返回 data
         data = yield self.employee_ps.make_binding_render_data(
             self.current_user, conf_response.employeeVerificationConf)
-        self.logger.debug(data)
         self.send_json_success(data=data)
 
     @handle_response
@@ -148,8 +145,6 @@ class EmployeeBindHandler(BaseHandler):
             return
 
         result, result_message = yield self.employee_ps.bind(binding_params)
-        self.logger.debug("bind_result: %s" % result)
-        self.logger.debug("result_message: %s" % result_message)
 
         # early return 2
         if not result:
@@ -175,8 +170,6 @@ class EmployeeBindHandler(BaseHandler):
         else:
             assert False  # should not be here
 
-        self.logger.debug(next_url)
-        self.logger.debug(message)
         self.send_json_success(
             data={'next_url': next_url},
             message=message
@@ -209,11 +202,7 @@ class EmployeeBindEmailHandler(BaseHandler):
         self.render(template_name='employee/certification-%s.html' % tname,
                     **tparams)
 
-        self.logger.debug("[EV]params: %s" % self.params)
         employee = yield self.user_ps.get_employee_by_id(employee_id)
-
-        self.logger.debug("[EV]result: %s" % result)
-        self.logger.debug("[EV]employee: %s" % employee)
 
         if result and employee:
             # 处理员工认证红包开始
@@ -262,9 +251,6 @@ class CustomInfoHandler(BaseHandler):
 
         fe_binding_status = self.employee_ps.convert_bind_status_from_thrift_to_fe(
             binding_status)
-
-        self.logger.debug('binding_status: %s' % binding_status)
-        self.logger.debug('fe_binding_status: %s' % fe_binding_status)
 
         # unbinded users may not need to know this page
         if (fe_binding_status not in [fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS,

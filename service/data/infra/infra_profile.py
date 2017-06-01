@@ -97,8 +97,6 @@ class InfraProfileDataService(DataService):
         if profile.email and profile.email.strip():
             params.update(email=profile.email.strip())
 
-        self.logger.debug("params:{}".format(params))
-
         res = yield self.handle_profile_section(
             params, method="create", section="basic")
         return http_tool.unboxing(res)

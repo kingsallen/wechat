@@ -236,11 +236,6 @@ class MetaBaseHandler(AtomHandler):
         self.logger.stats(
             ujson.dumps(self._get_info_header(info), ensure_ascii=0))
 
-        self.logger.debug(
-            "mviewer_id: {}".format(self.get_secure_cookie(const.COOKIE_MVIEWERID)))
-        self.logger.debug(
-            "session_id: {}".format(self.get_secure_cookie(const.COOKIE_SESSIONID)))
-
     def write_error(self, http_code, **kwargs):
         """错误页
         403（用户未被授权请求） Forbidden: Request failed because user does not have authorization to access a specific resource
@@ -350,7 +345,6 @@ class MetaBaseHandler(AtomHandler):
             data = ""
 
         self.log_info = {"res_type": "xml"}
-        self.logger.debug("Wechat MSG: %s" % data)
         self.write(data)
 
     def send_json_success(self, data=None, message=msg_const.RESPONSE_SUCCESS,

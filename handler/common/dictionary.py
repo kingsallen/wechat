@@ -12,7 +12,6 @@ class DictCityHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         cities = yield self.dictionary_ps.get_cities()
-        self.logger.debug("cities:{}".format(cities))
         self.send_json_success(cities)
 
 

@@ -10,7 +10,6 @@ class DictionaryPageService(PageService):
     @tornado.gen.coroutine
     def get_cities(self):
         ret = yield self.infra_dict_ds.get_cities()
-        self.logger.debug("get_cities ret:{}".format(ret))
         return ret
 
     @tornado.gen.coroutine

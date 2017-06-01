@@ -53,7 +53,6 @@ class ThriftSearchconditionDataService(DataService):
         """
 
         ret = yield self.searchcondition_service_cilent.getUserPositionStatus(int(user_id), position_ids)
-        self.logger.debug("[thrift]get_user_position_status: %s" % ret)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -66,7 +65,6 @@ class ThriftSearchconditionDataService(DataService):
         """
 
         ret = yield self.searchcondition_service_cilent.getUserCollectPosition(int(user_id), int(position_id))
-        self.logger.debug("[thrift]get_collect_position: %s" % ret)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -74,7 +72,6 @@ class ThriftSearchconditionDataService(DataService):
         """添加职位收藏，调用 thrift 接口"""
 
         ret = yield self.searchcondition_service_cilent.postUserCollectPosition(int(user_id), int(position_id))
-        self.logger.debug("[thrift]create_collect_position: %s" % ret)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -82,7 +79,6 @@ class ThriftSearchconditionDataService(DataService):
         """删除职位收藏，调用 thrift 接口"""
 
         ret = yield self.searchcondition_service_cilent.delUserCollectPosition(int(user_id), int(position_id))
-        self.logger.debug("[thrift]delete_collect_position: %s" % ret)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -90,15 +86,11 @@ class ThriftSearchconditionDataService(DataService):
         """添加用户已阅读职位，调用 thrift 接口"""
 
         ret = yield self.searchcondition_service_cilent.userViewedPosition(int(user_id), int(position_id))
-        self.logger.debug("[thrift]add_user_viewed_position: %s" % ret)
         raise gen.Return(ret)
 
     @gen.coroutine
     def get_collect_positions(self, user_id):
         """获得职位收藏列表，调用 thrift 接口"""
 
-        self.logger.debug(
-            "[ThriftUseraccountsDataService] get_collect_positions user_id:{}".format(user_id))
         ret = yield self.searchcondition_service_cilent.getUserCollectPositions(user_id)
-        self.logger.debug("[ThriftUseraccountsDataService] get_collect_positions:{}".format(ret))
         raise gen.Return(ret)
