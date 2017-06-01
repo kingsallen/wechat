@@ -9,7 +9,6 @@ from util.common import ObjectDict
 
 class HrHbConfigDataService(DataService):
 
-    @cache(ttl=60)
     @gen.coroutine
     def get_hr_hb_config(self, conds, fields=None):
 
@@ -27,7 +26,6 @@ class HrHbConfigDataService(DataService):
 
         raise gen.Return(response)
 
-    @cache(ttl=60)
     @gen.coroutine
     def get_hr_hb_config_list(self, conds, fields=None, options=None,
                               appends=None, index='', params=None):

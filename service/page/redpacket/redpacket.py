@@ -172,8 +172,12 @@ class RedpacketPageService(PageService):
             {'company_id': company_id,
              'type':       const.RED_PACKET_TYPE_EMPLOYEE_BINDING,
              'status':     const.HB_CONFIG_RUNNING})
+
+        self.logger.debug("rp_config: %s" % rp_config)
+
         if not rp_config:
-            self.logger.debug('[RP]员工认证红包活动不存在, company_id: %s' % company_id)
+            self.logger.debug(
+                '[RP]员工认证红包活动不存在, company_id: %s' % company_id)
             return
 
         # 校验员工信息
@@ -185,7 +189,6 @@ class RedpacketPageService(PageService):
             'disable':    const.OLD_YES,
             'is_rp_sent': const.NO
         })
-        self.logger.debug("employee: %s" % employee)
         if not employee:
             self.logger.debug('[RP]员工绑定状态不正确或红包已经发送过, user_id: %s, company_id: %s' % (user_id, company_id))
             return
