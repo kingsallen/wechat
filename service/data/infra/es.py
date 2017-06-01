@@ -32,6 +32,8 @@ class EsDataService(DataService):
                                 page_from,
                                 page_size)
 
+        self.logger.debug("get_es_positions:{}".format(body))
+
         res = self.es.search(index="positions", body=body)
         raise gen.Return(res)
 
