@@ -273,6 +273,16 @@ class PositionHandler(BaseHandler):
 
         return cover_str
 
+    @gen.coroutine
+    def _make_position_visitnum(self, position_info):
+        """更新职位浏览量"""
+        yield self.position_ps.update_position(conds={
+            "id": position_info.id
+        }, fields={
+            "visitnum": position_info.visitnum + 1,
+            "update_time": position_info.update_time_ori,
+        })
+
 class PositionRecommendHandler(BaseHandler):
     """JD页，公司主页职位推荐"""
 
@@ -342,13 +352,3 @@ class PositionRecommendHandler(BaseHandler):
         )
 
         return default
-
-    @gen.coroutine
-    def _make_position_visitnum(self, position_info):
-        """更新职位浏览量"""
-        yield self.position_ps.update_position(conds={
-            "id": position_info.id
-        }, fields={
-            "visitnum": position_info.visitnum + 1,
-            "update_time": position_info.update_time_ori,
-        })
