@@ -79,6 +79,7 @@ class AggregationPageService(PageService):
         # 由于需要按人工设置的 weight进行排序，es 不支持先按关键词搜索，再按 weight 排序
         # 因此由 python 实现排序，并分页
         # TODO 泽腾正在研究 ES 排序，待成熟可用后，替换成 ES 排序 by 煜昕 2017.6.1
+        self.logger.debug("opt_es:{}".format(params))
         es_res = yield self.es_ds.get_es_positions(params, 0, 300)
         es_result = list()
         # 搜索结果总数
