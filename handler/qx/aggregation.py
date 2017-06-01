@@ -36,7 +36,7 @@ class AggregationHandler(BaseHandler):
         keywords = self.params.keywords or search_dict.get("keywords", None)
         city = self.params.city or search_dict.get("city", None)
         industry = self.params.industry or search_dict.get("industry", None)
-        did = self.params.did or search_dict.get("did", None)
+        did = self.params.did
         page_no = self.params.page_no or 1
         page_size = self.params.page_size or 10
 
