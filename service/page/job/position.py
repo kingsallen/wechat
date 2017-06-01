@@ -298,7 +298,6 @@ class PositionPageService(PageService):
                     str_2_date(position.publish_date, self.constant.TIME_FORMAT))
                 position.team_name = team_name_dict.get(pid_teamid_dict.get(position.id, 0), '')
 
-            self.logger.debug('position_list: %s' % position_list)
             return position_list
         return res
 

@@ -55,6 +55,9 @@ class PositionHandler(BaseHandler):
             # 标记用户已阅读职位
             self.logger.debug("[JD]标记用户已阅读职位")
             yield self.user_ps.add_user_viewed_position(self.current_user.sysuser.id, position_info.id)
+
+            self.logger.debug("[JD]更新职位浏览量")
+            yield self._make_position_visitnum(position_info)
         else:
             self.send_json_error()
             return
@@ -339,3 +342,13 @@ class PositionRecommendHandler(BaseHandler):
         )
 
         return default
+
+    @gen.coroutine
+    def _make_position_visitnum(self, position_info):
+        """更新职位浏览量"""
+        yield self.position_ps.update_position(conds={
+            "id": position_info.id
+        }, fields={
+            "visitnum": position_info.visitnum + 1,
+            "update_time": position_info.update_time_ori,
+        })
