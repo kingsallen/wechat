@@ -248,17 +248,6 @@ class ProfileCustomHandler(BaseHandler):
 
         p = dict()
         p.update(is_skip=(self.current_user.company.id in self.customize_ps._DIRECT_APPLY))
-        # if self.current_user.company.id == const.CUSTOM_C_ID.EsteeLauder:
-        #     pid = self.params.get("pid", 0)
-        #     if not pid and self.get_cookie("dq_pid", 0):
-        #         pid = int(self.get_cookie("dq_pid"))
-        #     if pid:
-        #         pos_ser = positionService(self.db)
-        #         position = pos_ser.get_position_info(pid)
-        #         if position.app_cv_config_id:
-        #             self.logger.debug("雅诗兰黛特殊处理: 直接投递")
-        #             p.update(is_skip='1')
-
         self.redirect(make_url(path.PROFILE_PREVIEW, self.params, **p))
 
     @tornado.gen.coroutine
@@ -450,6 +439,9 @@ class ProfileSectionHandler(BaseHandler):
 
         if model:
             if self_intro:
+                if len(model.self_introduction) > 1000:
+                    self.send_json_error(message=msg.PROFILE_OVERLENGTH % "自我介绍")
+                    return
                 model.update(
                     self_introduction=model.self_introduction)
             else:
