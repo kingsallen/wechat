@@ -29,13 +29,25 @@ class AggregationHandler(BaseHandler):
 
         search_dict = self._get_welcome_cookie()
 
-        salary_top = self.params.salary_top or search_dict.get("salary_top", None)
-        salary_bottom = self.params.salary_bottom or search_dict.get("salary_bottom", None)
-        salary_negotiable = self.params.salary_negotiable or search_dict.get("salary_negotiable", None)
-        keywords = self.params.keywords or search_dict.get("keywords", None)
-        city = self.params.city or search_dict.get("city", None)
-        industry = self.params.industry or search_dict.get("industry", None)
-        did = self.params.did
+        if self.params.keywords:
+            # 带有keywords为主动搜索，不使用 cookie 缓存
+            salary_top = self.params.salary_top
+            salary_bottom = self.params.salary_bottom
+            salary_negotiable = self.params.salary_negotiable
+            keywords = self.params.keywords
+            city = self.params.city
+            industry = self.params.industry
+            did = self.params.did
+        else:
+            # 使用缓存的搜索条件
+            salary_top = search_dict.get("salary_top", None)
+            salary_bottom = search_dict.get("salary_bottom", None)
+            salary_negotiable = search_dict.get("salary_negotiable", None)
+            keywords = search_dict.get("keywords", None)
+            city = search_dict.get("city", None)
+            industry = search_dict.get("industry", None)
+            did = search_dict.get("did", None)
+
         page_no = self.params.page_no or 1
         page_size = self.params.page_size or 10
 
