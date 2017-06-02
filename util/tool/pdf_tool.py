@@ -88,7 +88,7 @@ def generate_resume_for_hr(profile,template_others,dict_conf):
     import datetime
     year=datetime.date.today().year
     loader = template.Loader(resume_tpath)
-    body=loader.load("resume_inform_hr.html").generate(esume=profile,
+    body=loader.load("resume_inform_hr.html").generate(resume=profile,
         template_others=template_others,
         const=dict_conf,
         year=year)
