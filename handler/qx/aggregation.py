@@ -39,8 +39,6 @@ class AggregationHandler(BaseHandler):
         page_no = self.params.page_no or 1
         page_size = self.params.page_size or 10
 
-        self.logger.debug("did:{}".format(did))
-
         es_res, total = yield self.aggregation_ps.opt_es(salary_top,
                                                   salary_bottom,
                                                   salary_negotiable,
