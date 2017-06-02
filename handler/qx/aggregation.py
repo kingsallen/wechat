@@ -8,7 +8,6 @@
 import ujson
 from tornado import gen
 
-import conf.common as const
 import conf.path as path
 import conf.qx as qx_const
 from handler.base import BaseHandler
