@@ -9,10 +9,10 @@
 from tornado import gen
 from pypinyin import lazy_pinyin
 from service.page.base import PageService
-from util.tool.str_tool import split
+from util.tool.str_tool import split, set_literl
+
 
 class LandingPageService(PageService):
-
     def __init__(self):
         super().__init__()
 
@@ -45,7 +45,8 @@ class LandingPageService(PageService):
             elif index == self.plat_constant.LANDING_INDEX_SALARY:
                 salary = {}
                 salary['name'] = self.plat_constant.LANDING.get(index).get("chpe")
-                salary['values'] = [{"value": k, "text": v.get("name")} for k, v in sorted(self.plat_constant.SALARY.items())]
+                salary['values'] = [{"value": k, "text": v.get("name")} for k, v in
+                                    sorted(self.plat_constant.SALARY.items())]
                 salary['key'] = "salary"
                 salary['selected'] = selected.get("salary")
                 res.append(salary)
@@ -53,7 +54,11 @@ class LandingPageService(PageService):
             # 职位职能
             elif index == self.plat_constant.LANDING_INDEX_OCCUPATION:
                 occupation = {}
-                occupation['name'] = self.plat_constant.LANDING.get(index).get("chpe")
+                if company.conf_job_occupation:
+                    occupation['name'] = company.conf_job_occupation
+                else:
+                    occupation['name'] = self.plat_constant.LANDING.get(index).get("chpe")
+
                 occupation['values'] = result.get("occupations")
                 occupation['key'] = "occupation"
                 occupation['selected'] = selected.get("occupation")
@@ -61,7 +66,8 @@ class LandingPageService(PageService):
 
             # 所属部门
             elif index == self.plat_constant.LANDING_INDEX_DEPARTMENT:
-                enabled_departments = yield self.hr_team_ds.get_team_list(conds={"disable": 0, "company_id": company_id}, fields=["id", "name"])
+                enabled_departments = yield self.hr_team_ds.get_team_list(
+                    conds={"disable": 0, "company_id": company_id}, fields=["id", "name"])
                 department = {}
                 department['name'] = company.conf_teamname_custom.get("teamname_custom", "")
                 department['values'] = [dep.get("name", "") for dep in enabled_departments]
@@ -73,7 +79,8 @@ class LandingPageService(PageService):
             elif index == self.plat_constant.LANDING_INDEX_CANDIDATE:
                 candidate_source = {}
                 candidate_source['name'] = self.plat_constant.LANDING.get(index).get("chpe")
-                candidate_source['values'] = [{"value": k, "text": v} for k, v in sorted(self.constant.CANDIDATE_SOURCE.items())]
+                candidate_source['values'] = [{"value": k, "text": v} for k, v in
+                                              sorted(self.constant.CANDIDATE_SOURCE.items())]
                 candidate_source['key'] = "candidate_source"
                 candidate_source['selected'] = selected.get("candidate_source")
                 res.append(candidate_source)
@@ -82,7 +89,8 @@ class LandingPageService(PageService):
             elif index == self.plat_constant.LANDING_INDEX_EMPLOYMENT:
                 employment_type = {}
                 employment_type['name'] = self.plat_constant.LANDING.get(index).get("chpe")
-                employment_type['values'] = [{"value": k, "text": v} for k, v in sorted(self.constant.EMPLOYMENT_TYPE.items())]
+                employment_type['values'] = [{"value": k, "text": v} for k, v in
+                                             sorted(self.constant.EMPLOYMENT_TYPE.items())]
                 employment_type['key'] = "employment_type"
                 employment_type['selected'] = selected.get("employment_type")
                 res.append(employment_type)
@@ -149,21 +157,18 @@ class LandingPageService(PageService):
             "status": 0,
         }
 
-        fields = ["city", "occupation", "department"]
+        fields = ["id", "city", "occupation", "department"]
 
         positions_list = yield self.job_position_ds.get_positions_list(conds, fields)
         cities = {}
-        occupations = []
+        occupations = yield self.get_occupations(positions_list)
         departments = []
         for item in positions_list:
-            cities_tmp = split(item.get("city"), ['，',','])
+            cities_tmp = split(item.get("city"), ['，', ','])
             for city in cities_tmp:
                 if not city:
                     continue
                 cities[city] = lazy_pinyin(city)[0].upper()
-
-            if item.get("occupation") and not item.get("occupation") in occupations:
-                occupations.append(item.get("occupation"))
 
             if item.get("department"):
                 departments_tmp = split(item.get("department"), ['，', ','])
@@ -173,7 +178,7 @@ class LandingPageService(PageService):
                     departments.append(department)
 
         # 根据拼音首字母排序
-        cities = sorted(cities.items(), key = lambda x:x[1])
+        cities = sorted(cities.items(), key=lambda x: x[1])
         cities = [city[0] for city in cities]
 
         res = {
@@ -198,3 +203,32 @@ class LandingPageService(PageService):
         customs_list_res = yield self.job_custom_ds.get_customs_list(conds, fields, options, appends)
         customs_list = [item.get("name") for item in customs_list_res]
         raise gen.Return(customs_list)
+
+    @gen.coroutine
+    def get_occupations(self, positions):
+
+        """
+        获取职位对应的occupations
+        :param positions:
+        :return:
+        """
+        if not positions:
+            return []
+
+        # 根据pid查job_occupation_id
+        position_ids = [p.id for p in positions]
+        position_exts = yield self.job_position_ext_ds.get_position_ext_list(
+            conds="pid in %s" % set_literl(position_ids),
+            fields=["pid", "job_occupation_id"])
+        position_exts_job_occupation_ids = list(set([p_ext["job_occupation_id"] for p_ext in position_exts]))
+
+        # 根据job_occupation_id获得job_occupation的名字
+        if not position_exts_job_occupation_ids:
+            occupations = []
+        else:
+            job_occupations = yield self.job_occupation_ds.get_occupations_list(
+                conds={"status": self.constant.STATUS_INUSE},
+                fields=["id", "name"],
+                appends=["and id in %s" % set_literl(position_exts_job_occupation_ids)])
+            occupations = [jo.name for jo in job_occupations]
+        return occupations
