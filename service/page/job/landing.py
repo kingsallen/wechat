@@ -54,7 +54,11 @@ class LandingPageService(PageService):
             # 职位职能
             elif index == self.plat_constant.LANDING_INDEX_OCCUPATION:
                 occupation = {}
-                occupation['name'] = self.plat_constant.LANDING.get(index).get("chpe")
+                if company.conf_job_occupation:
+                    occupation['name'] = company.conf_job_occupation
+                else:
+                    occupation['name'] = self.plat_constant.LANDING.get(index).get("chpe")
+
                 occupation['values'] = result.get("occupations")
                 occupation['key'] = "occupation"
                 occupation['selected'] = selected.get("occupation")

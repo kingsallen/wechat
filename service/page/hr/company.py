@@ -69,6 +69,7 @@ class CompanyPageService(PageService):
                 "conf_job_custom_title": company_conf_res.get("job_custom_title"),
                 "conf_search_seq": search_seq,
                 "conf_search_img": company_conf_res.get("search_img"),
+                "conf_job_occupation": company_conf_res.get("job_occupation"),
                 "conf_newjd_status": company_conf_res.get("newjd_status"),
                 "conf_teamname_custom": company_conf_res.get("teamname_custom"),  # 职位部门字段名称
                 "conf_application_time": company_conf_res.get("application_time"),  # 新JD开通申请时间
