@@ -22,8 +22,8 @@ from util.common import ObjectDict
 from util.common.subprocesswrapper import SubProcessWrapper
 from util.tool.dict_tool import objectdictify, purify
 from util.tool.json_tool import json_dumps
-from util.tool.mail_tool import send_mail_notice_hr
-from util.tool.pdf_tool import save_application_file, get_create_pdf_by_html_cmd
+from util.tool.mail_tool import send_mail_notice_hr,send_mail
+from util.tool.pdf_tool import save_application_file, get_create_pdf_by_html_cmd,generate_resume_for_hr
 from util.tool.str_tool import trunc
 from util.tool.url_tool import make_url
 from util.wechat.template import application_notice_to_applier_tpl, application_notice_to_recommender_tpl, application_notice_to_hr_tpl
@@ -828,6 +828,130 @@ class ApplicationPageService(PageService):
             # 发送邮件
             yield self.opt_send_hr_email(app_id, current_user, position)
 
+    # @gen.coroutine
+    # def opt_send_hr_email(self, apply_id, current_user, position):
+    #
+    #     profile_ps = ProfilePageService()
+    #     self.logger.debug("[opt_send_hr_email]start")
+    #
+    #     html_fname = "{aid}.html".format(aid=apply_id)
+    #     pdf_fname = "{aid}.pdf".format(aid=apply_id)
+    #
+    #     hr_info = yield self.user_hr_account_ds.get_hr_account(conds={
+    #         "id": position.publisher
+    #     })
+    #     profile = current_user.profile
+    #     cmd = get_create_pdf_by_html_cmd(html_fname, pdf_fname)
+    #
+    #     other_json = ObjectDict()
+    #     if profile.get("others"):
+    #         other_json = json.loads(profile.get("others", [])[0].get("other"))
+    #
+    #     template_others = yield self.custom_kvmapping(other_json)
+    #
+    #     self.logger.debug("[send_mail_hr]html_fname:{}".format(html_fname))
+    #     self.logger.debug("[send_mail_hr]pdf_fname:{}".format(pdf_fname))
+    #     self.logger.debug("[send_mail_hr]cmd:{}".format(cmd))
+    #     self.logger.debug("[send_mail_hr]profile:{}".format(profile))
+    #     self.logger.debug("[send_mail_hr]template_others:{}".format(template_others))
+    #     self.logger.debug("[send_mail_hr]resume_path:{}".format(self.settings.resume_path))
+    #
+    #     # 常量字段
+    #     res_degree = yield self.infra_dict_ds.get_const_dict(parent_code=const.CONSTANT_PARENT_CODE.DEGREE_USER)
+    #     res_language = yield self.infra_dict_ds.get_const_dict(parent_code=const.CONSTANT_PARENT_CODE.LANGUAGE_FRUENCY)
+    #     dict_conf = ObjectDict(
+    #         degree=res_degree,
+    #         language=res_language,
+    #         email_basicinfo=profile_ps.EMAIL_BASICINFO.keys(),
+    #         profile_basicinfo=profile_ps.EMAIL_BASICINFO,
+    #         intention=profile_ps.EMAIL_INTENTION.keys(),
+    #         profile_intention=profile_ps.EMAIL_INTENTION,
+    #     )
+    #
+    #     work_exp_years = profile_ps.calculate_workyears(
+    #         profile.get("workexps", []))
+    #     # add work_exp_years attribute manually
+    #     # pdf generating will use this attribute
+    #     profile.work_exp_years = work_exp_years
+    #
+    #     save_application_file(
+    #         profile,
+    #         html_fname,
+    #         template_others,
+    #         self.settings.resume_path,
+    #         dict_conf,
+    #     )
+    #
+    #     def send(data):
+    #         self.logger.info("[opt_send_hr_email][send]Finish creating pdf resume : {}".format(pdf_fname))
+    #         self.logger.info("[opt_send_hr_email][send]response data: " + str(data))
+    #
+    #     @gen.coroutine
+    #     def send_mail_hr():
+    #         self.logger.debug("send_mail_hr start start start!!!")
+    #
+    #         send_email = position.hr_email or hr_info.email
+    #
+    #         self.logger.debug("[send_mail_hr]send_email:{}".format(send_email))
+    #
+    #         if position.email_resume_conf == const.OLD_YES and send_email:
+    #             employee = current_user.employee
+    #             employee_cert_conf = yield self.hr_employee_cert_conf_ds.get_employee_cert_conf({
+    #                 "company_id": current_user.company.id
+    #             })
+    #             conf = employee_cert_conf.custom or "自定义字段"
+    #
+    #             self.logger.debug("[send_mail_hr]employee:{}".format(employee))
+    #             self.logger.debug("[send_mail_hr]employee_cert_conf:{}".format(employee_cert_conf))
+    #             self.logger.debug("[send_mail_hr]conf:{}".format(conf))
+    #
+    #             send_mail_notice_hr(
+    #                 position, employee, conf, profile, send_email,
+    #                 template_others, dict_conf, work_exp_years, pdf_fname)
+    #
+    #             self.logger.debug("[send_mail_hr]position:{}".format(position))
+    #             self.logger.debug("[send_mail_hr]employee:{}".format(employee))
+    #             self.logger.debug("[send_mail_hr]conf:{}".format(conf))
+    #             self.logger.debug("[send_mail_hr]current_user.sysuser.id:{}".format(current_user.sysuser.id))
+    #             self.logger.debug("[send_mail_hr]profile:{}".format(profile))
+    #             self.logger.debug("[send_mail_hr]send_email:{}".format(send_email))
+    #             self.logger.debug("[send_mail_hr]template_others:{}".format(template_others))
+    #             self.logger.debug("[send_mail_hr]pdf_fname:{}".format(pdf_fname))
+    #
+    #             self.logger.info(
+    #                 "[opt_send_hr_email]Send application to HR success:sysuser id:{sid},"
+    #                 "aid:{aid},pid:{pid},email:{email}"
+    #                     .format(sid=current_user.sysuser.id,
+    #                             aid=apply_id,
+    #                             pid=position.id,
+    #                             email=send_email))
+    #         else:
+    #             self.logger.info("[opt_send_hr_email]not send email。"
+    #                              "email_notice:{}, email:{}".format(position.email_notice, send_email))
+    #
+    #     profile_ps = None
+    #
+    #     self.logger.debug("[send_mail_hr]html_fname:{}".format(html_fname))
+    #     self.logger.debug("[send_mail_hr]pdf_fname:{}".format(pdf_fname))
+    #
+    #     self.logger.debug("[send_mail_hr]cmd:{}".format(cmd))
+    #     self.logger.debug("[send_mail_hr]resume_path:{}".format(self.settings.resume_path))
+    #
+    #     try:
+    #         SubProcessWrapper.run(cmd, self.settings.resume_path, send, send_mail_hr)
+    #         # import subprocess
+    #         # completed_process = subprocess.run(cmd, check=True, shell=True,
+    #         #                                    stdout=subprocess.PIPE)
+    #         # if completed_process.returncode == 0:
+    #         #     self.logger.debug(completed_process.stdout)
+    #         #     send_mail_hr()
+    #         # else:
+    #         #     self.logger.error('generate pdf error:%s' % completed_process.stderr)
+    #
+    #         self.logger.debug("[opt_send_hr_email]end")
+    #     except Exception as e:
+    #         self.logger.error(traceback.format_exc())
+
     @gen.coroutine
     def opt_send_hr_email(self, apply_id, current_user, position):
 
@@ -881,6 +1005,7 @@ class ApplicationPageService(PageService):
             self.settings.resume_path,
             dict_conf,
         )
+        body=generate_resume_for_hr(profile,template_others,dict_conf)
 
         def send(data):
             self.logger.info("[opt_send_hr_email][send]Finish creating pdf resume : {}".format(pdf_fname))
@@ -905,6 +1030,11 @@ class ApplicationPageService(PageService):
                 self.logger.debug("[send_mail_hr]employee_cert_conf:{}".format(employee_cert_conf))
                 self.logger.debug("[send_mail_hr]conf:{}".format(conf))
 
+                if position.jobnumber:
+                    title = "{}:{}-职位申请通知".format(position.jobnumber, position.title)
+                else:
+                    title = "{}-职位申请通知".format(position.title)
+                send_mail(to = send_email.replace("；", ";").split(";"),subject = title,text = body)   #发送email
                 send_mail_notice_hr(
                     position, employee, conf, profile, send_email,
                     template_others, dict_conf, work_exp_years, pdf_fname)
