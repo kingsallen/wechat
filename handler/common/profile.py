@@ -188,6 +188,9 @@ class ProfileViewHandler(BaseHandler):
 
         has_profile, profile = yield self.profile_ps.has_profile_by_uuid(uuid=uuid)
 
+        self.logger.debug("ProfileViewHandler has_profile:{}".format(has_profile))
+        self.logger.debug("ProfileViewHandler profile:{}".format(profile))
+
         if not uuid or not has_profile:
             self.write_error(404)
             return
