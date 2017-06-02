@@ -679,8 +679,7 @@ class ApplicationPageService(PageService):
         else:
             link = make_url(
                 path.USERCENTER_APPLYRECORD.format(apply_id),
-                host=self.settings.qx_host,
-                wechat_signature=current_user.wechat.signature)
+                host=self.settings.qx_host)
 
         self.logger.debug("[opt_send_applier_msg]link:{}".format(link))
 

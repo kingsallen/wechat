@@ -96,7 +96,7 @@ class ApplicationHandler(BaseHandler):
                 return
 
         is_applied, message, apply_id = yield self.application_ps.create_application(
-            position, self.current_user, has_recom='recom' in self.params)
+            position, self.current_user, is_platform=self.is_platform, has_recom='recom' in self.params)
 
         if is_applied:
             # 如果是自定义职位，入库 job_resume_other
