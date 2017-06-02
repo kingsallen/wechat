@@ -26,7 +26,6 @@ class JobOccupationDataService(DataService):
         response = yield self.job_occupation_dao.get_record_by_conds(conds, fields)
         raise gen.Return(response)
 
-    @cache(ttl=60)
     @gen.coroutine
     def get_occupations_list(self, conds, fields, options=None, appends=None, index='', params=None):
 
