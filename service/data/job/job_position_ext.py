@@ -31,6 +31,7 @@ class JobPositionExtDataService(DataService):
         response = yield self.job_position_ext_dao.get_record_by_conds(conds, fields)
         raise gen.Return(response)
 
+    @cache(ttl=60)
     @gen.coroutine
     def get_position_ext_list(self, conds, fields=None, options=None, appends=None, index='', params=None):
 

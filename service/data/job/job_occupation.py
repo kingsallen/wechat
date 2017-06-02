@@ -7,8 +7,8 @@ from service.data.base import DataService
 from util.common.decorator import cache
 from util.common import ObjectDict
 
-class JobOccupationDataService(DataService):
 
+class JobOccupationDataService(DataService):
     @cache(ttl=60)
     @gen.coroutine
     def get_occupation(self, conds, fields=None):
@@ -17,7 +17,7 @@ class JobOccupationDataService(DataService):
 
         if conds is None or not (isinstance(conds, (dict, str))):
             self.logger.warning("Warning:[get_occupation][invalid parameters], Detail:[conds: {0}, "
-                        "type: {1}]".format(conds, type(conds)))
+                                "type: {1}]".format(conds, type(conds)))
             raise gen.Return(ObjectDict())
 
         if not fields:
@@ -26,6 +26,7 @@ class JobOccupationDataService(DataService):
         response = yield self.job_occupation_dao.get_record_by_conds(conds, fields)
         raise gen.Return(response)
 
+    @cache(ttl=60)
     @gen.coroutine
     def get_occupations_list(self, conds, fields, options=None, appends=None, index='', params=None):
 
@@ -35,7 +36,7 @@ class JobOccupationDataService(DataService):
 
         if conds is None or not (isinstance(conds, (dict, str))):
             self.logger.warning("Warning:[get_occupations_list][invalid parameters], Detail:[conds: {0}, "
-                        "type: {1}]".format(conds, type(conds)))
+                                "type: {1}]".format(conds, type(conds)))
             raise gen.Return(list())
 
         if not fields:
