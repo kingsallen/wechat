@@ -77,19 +77,20 @@ class CandidatePageService(PageService):
     def get_recommendations(self, company_id, list_of_recom_ids):
         thrift_res = yield self.thrift_candidate_ds.get_recommendations(
             company_id, list_of_recom_ids)
-
-        # 转换一下属性的命名
-        ret = ObjectDict()
-        ret.presentee_name = thrift_res.presenteeName
-        ret.recom_total = thrift_res.recomTotal
-        ret.id = thrift_res.id
-        ret.recom_index = thrift_res.recomIndex
-        ret.next_one = thrift_res.nextOne
-        ret.position_name = thrift_res.positionName
-        ret.recom_ignore = thrift_res.recomIgnore
-        ret.click_time = thrift_res.clickTime
-
-        return ret
+        if thrift_res:
+            # 转换一下属性的命名
+            ret = ObjectDict()
+            ret.presentee_name = thrift_res.presenteeName
+            ret.recom_total = thrift_res.recomTotal
+            ret.id = thrift_res.id
+            ret.recom_index = thrift_res.recomIndex
+            ret.next_one = thrift_res.nextOne
+            ret.position_name = thrift_res.positionName
+            ret.recom_ignore = thrift_res.recomIgnore
+            ret.click_time = thrift_res.clickTime
+            return ret
+        else:
+            return None
 
     @gen.coroutine
     def get_recommendation(self, recom_record_id, post_user_id):

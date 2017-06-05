@@ -185,8 +185,6 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
             is_recom,
             company_id)
 
-        self.logger.debug("get_passive_seekers: %s" % passive_seekers)
-
         self.render(
             template_name="refer/weixin/passive-seeker_v2/passive-wanting_recom.html",
             passive_seekers=passive_seekers,
@@ -211,15 +209,23 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
         next_passive_seeker = yield self.candidate_ps.get_recommendations(
             self.current_user.company.id, list_of_ids)
 
-        self.logger.debug("next_passive_seeker: %s" % next_passive_seeker)
+        if next_passive_seeker:
+            # 返回第一个推荐的被动求职者
+            self.render(
+                template_name="refer/weixin/passive-seeker_v2/passive-wanting_form.html",
+                passive_seeker=next_passive_seeker,
+                recommend_presentee=self.recommend_presentee,
+                message=""
+            )
+            return
+        else:
+            stats = yield self.candidate_ps.sorting(
+                self.current_user.sysuser.id, self.current_user.company.id)
 
-        # 返回第一个推荐的被动求职者
-        self.render(
-            template_name="refer/weixin/passive-seeker_v2/passive-wanting_form.html",
-            passive_seeker=next_passive_seeker,
-            recommend_presentee=self.recommend_presentee,
-            message=""
-        )
+            self.render(
+                template_name="refer/weixin/passive-seeker_v2/passive-wanting_finished.html",
+                stats=stats,
+                recommend_success=self.recommend_success)
 
     @tornado.gen.coroutine
     def _get_recom_candidate(self, id):
@@ -227,8 +233,6 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
 
         passive_seeker = yield self.candidate_ps.get_recommendation(
             id, self.current_user.sysuser.id)
-
-        self.logger.debug("passive_seeker: %s" % passive_seeker)
 
         if passive_seeker:
             # 由于是从 "推荐TA" 进入的，所以没有循环推荐的逻辑，hardcode 以下值
@@ -331,7 +335,6 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
                 stats = yield self.candidate_ps.sorting(
                     self.current_user.sysuser.id, self.current_user.company.id)
 
-                self.logger.debug("_post_recom_candidate stats: %s" % stats)
                 self.render(
                     template_name="refer/weixin/passive-seeker_v2/passive-wanting_finished.html",
                     stats=stats,
@@ -339,7 +342,6 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
 
             # 还有未推荐的
             else:
-                self.logger.debug("passive_seeker: %s" % recom_result)
                 self.render(
                     template_name="refer/weixin/passive-seeker_v2/passive-wanting_form.html",
                     passive_seeker=recom_result,
