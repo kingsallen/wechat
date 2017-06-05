@@ -124,8 +124,6 @@ class ApplicationPageService(PageService):
         fields = self.make_fields_list(cv_conf)
         fields_to_check = [f for f in objectdictify(fields) if f.required == const.OLD_YES]
 
-        self.logger.debug("fields_to_check: %s" % fields_to_check)
-
         # 对于 fileds_to_check 进行逐个检查
         # 校验失败条件:
         # field_name 在 profile 对应字端中,但是 profile 中这个字段为空值
@@ -139,9 +137,7 @@ class ApplicationPageService(PageService):
             passed = yield self._check(profile, field_name, user, mapping)
 
             if not passed:
-                self.logger.debug("自定义字段必填校验错误, field_name: %s" % field_name)
                 resume_dict = yield self._generate_resume_cv(profile)
-                self.logger.debug("resume_dict: %s" % resume_dict)
                 return (False, resume_dict, objectdictify(json_decode(cv_conf.field_value)))
         return True, None, None
 
@@ -178,10 +174,6 @@ class ApplicationPageService(PageService):
         assert False  # should not be here
 
     def _check_profile_fields(self, profile, field_name, user, mapping):
-        self.logger.debug("field_name: %s" % field_name)
-        self.logger.debug("mapping: %s" % mapping)
-        self.logger.debug("user: %s" % user)
-        self.logger.debug("profile: %s" % profile)
 
         if mapping.startswith("user_user"):
             sysuser_id = profile.get("profile", {}).get("user_id", None)
@@ -189,8 +181,6 @@ class ApplicationPageService(PageService):
                 return False
 
             column_name = mapping.split(".")[1]
-            self.logger.debug(
-                "sysuser_id: %s, column_name: %s" % (sysuser_id, column_name))
 
             if column_name not in ['email', 'name', 'mobile', 'headimg']:
                 return False
@@ -402,7 +392,6 @@ class ApplicationPageService(PageService):
                     resume_other.update({custom_field: p_other.get(custom_field)})
 
             resume_other_to_insert = json_dumps(resume_other)
-            self.logger.debug('resume_other_to_insert: %s' % resume_other_to_insert)
 
             yield self.job_resume_other_ds.insert_job_resume_other({
                 'app_id': app_id,
@@ -432,8 +421,6 @@ class ApplicationPageService(PageService):
         # 获取推荐人信息
         recommender_user_id, recommender_wxuser_id, recom_employee = yield self.get_recommend_user(
             current_user, position, is_platform)
-
-        self.logger.debug("[create_email_reply]recommender_user_id:{}, recommender_wxuser_id:{}".format(recommender_user_id, recommender_wxuser_id))
 
         params_for_application = ObjectDict(
             wechat_id=current_user.wechat.id,
@@ -484,12 +471,8 @@ class ApplicationPageService(PageService):
             reply_email_info=email_params
         )
 
-        self.logger.debug(
-            "[create_email_reply]value_dict:{}".format(value_dict))
-
         self.email_apply_session.save_email_apply_sessions(uuidcode, value_dict)
         rst = yield self.opt_send_email_create_application_notice(email_params)
-        self.logger.debug("[create_email_reply]Send Email to creator " + str(rst))
 
         raise gen.Return((True, None))
 
@@ -569,9 +552,6 @@ class ApplicationPageService(PageService):
 
         # 1.初始化
         check_status, message = yield self.check_position(position, current_user)
-        self.logger.debug(
-            "[create_reply]check_status:{}, message:{}"
-            .format(check_status, message))
 
         if not check_status:
             return False, message, None
@@ -692,10 +672,15 @@ class ApplicationPageService(PageService):
 
         self.logger.debug("[opt_send_applier_msg]start")
         # 发送消息模板，先发企业号，再发仟寻
-        link = make_url(
-            path.USERCENTER_APPLYRECORD.format(apply_id),
-            host=self.settings.platform_host,
-            wechat_signature=current_user.wechat.signature)
+        if is_platform:
+            link = make_url(
+                path.USERCENTER_APPLYRECORD.format(apply_id),
+                host=self.settings.platform_host,
+                wechat_signature=current_user.wechat.signature)
+        else:
+            link = make_url(
+                path.USERCENTER_APPLYRECORD.format(apply_id),
+                host=self.settings.qx_host)
 
         self.logger.debug("[opt_send_applier_msg]link:{}".format(link))
 
@@ -858,12 +843,14 @@ class ApplicationPageService(PageService):
 
         template_others = yield self.custom_kvmapping(other_json)
 
+
         self.logger.debug("[send_mail_hr]html_fname:{}".format(html_fname))
         self.logger.debug("[send_mail_hr]pdf_fname:{}".format(pdf_fname))
         # self.logger.debug("[send_mail_hr]cmd:{}".format(cmd))    #不在记录cmd的log
         self.logger.debug("[send_mail_hr]profile:{}".format(profile))
         self.logger.debug("[send_mail_hr]template_others:{}".format(template_others))
         self.logger.debug("[send_mail_hr]resume_path:{}".format(self.settings.resume_path))
+
 
         # 常量字段
         res_degree = yield self.infra_dict_ds.get_const_dict(parent_code=const.CONSTANT_PARENT_CODE.DEGREE_USER)
@@ -901,14 +888,13 @@ class ApplicationPageService(PageService):
 
             send_email = position.hr_email or hr_info.email
 
-            self.logger.debug("[send_mail_hr]send_email:{}".format(send_email))
-
             if position.email_resume_conf == const.OLD_YES and send_email:
                 employee = current_user.employee
                 employee_cert_conf = yield self.hr_employee_cert_conf_ds.get_employee_cert_conf({
                     "company_id": current_user.company.id
                 })
                 conf = employee_cert_conf.custom or "自定义字段"
+
 
                 self.logger.debug("[send_mail_hr]employee:{}".format(employee))
                 self.logger.debug("[send_mail_hr]employee_cert_conf:{}".format(employee_cert_conf))
@@ -923,14 +909,6 @@ class ApplicationPageService(PageService):
                 #     position, employee, conf, profile, send_email,
                 #     template_others, dict_conf, work_exp_years, pdf_fname)
 
-                self.logger.debug("[send_mail_hr]position:{}".format(position))
-                self.logger.debug("[send_mail_hr]employee:{}".format(employee))
-                self.logger.debug("[send_mail_hr]conf:{}".format(conf))
-                self.logger.debug("[send_mail_hr]current_user.sysuser.id:{}".format(current_user.sysuser.id))
-                self.logger.debug("[send_mail_hr]profile:{}".format(profile))
-                self.logger.debug("[send_mail_hr]send_email:{}".format(send_email))
-                self.logger.debug("[send_mail_hr]template_others:{}".format(template_others))
-                self.logger.debug("[send_mail_hr]pdf_fname:{}".format(pdf_fname))
 
                 self.logger.info(
                     "[opt_send_hr_email]Send application to HR success:sysuser id:{sid},"
@@ -944,6 +922,7 @@ class ApplicationPageService(PageService):
                                  "email_notice:{}, email:{}".format(position.email_notice, send_email))
 
         profile_ps = None
+
 
         self.logger.debug("[send_mail_hr]html_fname:{}".format(html_fname))
         self.logger.debug("[send_mail_hr]pdf_fname:{}".format(pdf_fname))
@@ -966,6 +945,7 @@ class ApplicationPageService(PageService):
         #     self.logger.debug("[opt_send_hr_email]end")
         # except Exception as e:
         #     self.logger.error(traceback.format_exc())
+
 
     @gen.coroutine
     def opt_send_email_create_application_notice(self, email_params):
@@ -1286,17 +1266,11 @@ class ApplicationPageService(PageService):
         # 先找出那哪些自定义字段需要做 kvmapping
         kvmap = yield self.custom_fields_need_kvmapping(config_cv_tpls)
 
-        # self.logger.debug("config_cv_tpls: %s" % config_cv_tpls)
-        # self.logger.debug("display_name_mapping: %s" % display_name_mapping )
-        # self.logger.debug("kvmap: %s" % kvmap)
-
         others = ObjectDict()
         iter_others = []
         special_others = {}
 
         for key, value in purify(others_json).items():
-            # self.logger.debug("key: %s" % key)
-            # self.logger.debug("value: %s" % value)
 
             if key == "picUrl":
                 # because we already have IDPhoto as key

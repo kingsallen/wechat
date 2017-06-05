@@ -26,13 +26,12 @@ from service.page.user.user import UserPageService
 from service.page.hr.wechat import WechatPageService
 from util.tool.str_tool import set_literl, trunc, generate_nonce_str, to_bytes
 from util.tool.url_tool import make_url
-from util.wechat.template import \
-    rp_binding_success_notice_tpl, \
-    rp_recom_success_notice_tpl, \
-    rp_transfer_apply_success_notice_tpl, \
+from util.wechat.template import (
+    rp_binding_success_notice_tpl,
+    rp_recom_success_notice_tpl,
+    rp_transfer_apply_success_notice_tpl,
     rp_transfer_click_success_notice_tpl
-
-from thrift_gen.gen.employee.struct.ttypes import Employee, BindStatus
+)
 
 from util.common import ObjectDict
 
@@ -190,7 +189,6 @@ class RedpacketPageService(PageService):
             'disable':    const.OLD_YES,
             'is_rp_sent': const.NO
         })
-
         if not employee:
             self.logger.debug('[RP]员工绑定状态不正确或红包已经发送过, user_id: %s, company_id: %s' % (user_id, company_id))
             return
@@ -348,7 +346,6 @@ class RedpacketPageService(PageService):
                 "[RP]触发红包锁，该红包逻辑正在处理中， rplock_key: %s" % rplock_key)
 
         self.logger.debug("[RP]推荐红包发送成功")
-
 
     @gen.coroutine
     def handle_red_packet_position_related(self,
@@ -810,7 +807,7 @@ class RedpacketPageService(PageService):
         self.logger.debug("[RP]将发送模版消息")
         # 发送消息模板
         result = yield self.__send_message_template_with_card_url(
-            settings['qx_host'], red_packet_config, card,
+            red_packet_config, card,
             recom_openid, recom_wechat, **kwargs)
 
         if result == const.YES:
@@ -905,7 +902,7 @@ class RedpacketPageService(PageService):
         self.logger.debug("[RP]将发送模版消息")
         # 发送消息模板
         result = yield self.__send_message_template_with_card_url(
-            settings['qx_host'], red_packet_config, card,
+            red_packet_config, card,
             recom_openid, recom_wechat, **kwargs)
 
         # 放弃不发(因为本来就没有金额)
@@ -964,9 +961,10 @@ class RedpacketPageService(PageService):
         else:
             position_ids = [b.position_id for b in binding_list]
 
-        position_list = yield self.job_position_ds.get_position_list(
+        position_list = yield self.job_position_ds.get_positions_list(
             conds="id in %s" % set_literl(position_ids))
-        position_list = filter(lambda x: x.hb_status > 0, position_list)
+
+        position_list = [x for x in position_list if x.hb_stauts > 0]
 
         raise gen.Return(position_list)
 
@@ -1002,7 +1000,7 @@ class RedpacketPageService(PageService):
 
     @gen.coroutine
     def __send_message_template_with_card_url(
-            self, url_host, red_packet_config, card, openid, wechat, **kwargs):
+            self, red_packet_config, card, openid, wechat, **kwargs):
         """发送红包的消息模板，根据红包活动的类型发送不同的模板
 
         模板填充内容在 kwargs 里面，
@@ -1011,8 +1009,11 @@ class RedpacketPageService(PageService):
 
         config_type = red_packet_config.type
 
-        card_url = make_url(path.RED_PACKET_CARD, {}, host=url_host, m="new",
-                            cardno=card.cardno)
+        card_url = make_url(
+            path.RED_PACKET_CARD, {},
+            host=settings['m_host'],
+            m="new",
+            cardno=card.cardno)
 
         wechat_id1 = wechat.get("id", None)
         wechat_id2 = wechat.get("wechat_id", None)

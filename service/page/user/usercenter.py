@@ -82,12 +82,12 @@ class UsercenterPageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def get_fav_positions(self, user_id):
+    def get_collect_positions(self, user_id):
         """获得职位收藏"""
 
-        ret = yield self.thrift_useraccounts_ds.get_fav_positions(user_id)
+        ret = yield self.thrift_searchcondition_ds.get_collect_positions(user_id)
         obj_list = list()
-        for e in ret:
+        for e in ret.userCollectPosition:
             fav_pos = ObjectDict()
             fav_pos['id'] = e.id
             fav_pos['title'] = e.title
@@ -125,10 +125,6 @@ class UsercenterPageService(PageService):
         :return:
         """
         ret = yield self.thrift_useraccounts_ds.get_applied_progress(user_id, app_id)
-
-        self.logger.debug("[get_applied_progress]user_id:{}".format(user_id))
-        self.logger.debug("[get_applied_progress]app_id:{}".format(app_id))
-        self.logger.debug("[get_applied_progress]ret:{}".format(ret))
 
         time_lines = list()
         if ret.status_timeline:

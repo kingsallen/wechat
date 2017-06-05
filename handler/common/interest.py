@@ -8,7 +8,6 @@ from handler.base import BaseHandler
 from util.common import ObjectDict
 from util.common.decorator import handle_response, authenticated
 from util.wechat.template import favposition_notice_to_applier_tpl, favposition_notice_to_hr_tpl
-from util.tool.url_tool import make_url
 
 
 class UserCurrentInfoHandler(BaseHandler):
@@ -65,11 +64,10 @@ class UserCurrentInfoHandler(BaseHandler):
             company_info = yield self.company_ps.get_company(
                 conds={"id": real_company_id}, need_conf=False)
 
-            link = make_url(path.COLLECT_USERINFO,
+            link = self.make_url(path.COLLECT_USERINFO,
                             pid=self.params.pid,
                             source="wx", # 用户前端判断来源
-                            wechat_signature=self.current_user.wechat.signature,
-                            host=self.request.host)
+                            wechat_signature=self.current_user.wechat.signature)
 
             if not has_info:
                 yield favposition_notice_to_applier_tpl(self.current_user.wechat.company_id,
@@ -111,9 +109,6 @@ class UserCurrentUpdateHandler(BaseHandler):
         if not self.params.name or not self.params.company or not self.params.position:
             self.send_json_error()
             return
-
-        self.logger.debug("UserCurrentInfoHandler sysuser_id:{}".format(self.current_user.sysuser.id))
-        self.logger.debug("UserCurrentInfoHandler params:{}".format(self.params))
 
         yield self.user_ps.update_user_user_current_info(
             sysuser_id=self.current_user.sysuser.id,

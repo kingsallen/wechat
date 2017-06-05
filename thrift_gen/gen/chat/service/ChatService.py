@@ -55,13 +55,14 @@ class Iface(object):
         """
         pass
 
-    def enterRoom(self, userId, hrId, positionId, roomId):
+    def enterRoom(self, userId, hrId, positionId, roomId, is_gamma):
         """
         Parameters:
          - userId
          - hrId
          - positionId
          - roomId
+         - is_gamma
         """
         pass
 
@@ -269,20 +270,21 @@ class Client(Iface):
             raise result.e
         return
 
-    def enterRoom(self, userId, hrId, positionId, roomId):
+    def enterRoom(self, userId, hrId, positionId, roomId, is_gamma):
         """
         Parameters:
          - userId
          - hrId
          - positionId
          - roomId
+         - is_gamma
         """
         self._seqid += 1
         future = self._reqs[self._seqid] = concurrent.Future()
-        self.send_enterRoom(userId, hrId, positionId, roomId)
+        self.send_enterRoom(userId, hrId, positionId, roomId, is_gamma)
         return future
 
-    def send_enterRoom(self, userId, hrId, positionId, roomId):
+    def send_enterRoom(self, userId, hrId, positionId, roomId, is_gamma):
         oprot = self._oprot_factory.getProtocol(self._transport)
         oprot.writeMessageBegin('enterRoom', TMessageType.CALL, self._seqid)
         args = enterRoom_args()
@@ -290,6 +292,7 @@ class Client(Iface):
         args.hrId = hrId
         args.positionId = positionId
         args.roomId = roomId
+        args.is_gamma = is_gamma
         args.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -471,7 +474,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = enterRoom_result()
         try:
-            result.success = yield gen.maybe_future(self._handler.enterRoom(args.userId, args.hrId, args.positionId, args.roomId))
+            result.success = yield gen.maybe_future(self._handler.enterRoom(args.userId, args.hrId, args.positionId, args.roomId, args.is_gamma))
         except thrift_gen.gen.common.struct.ttypes.CURDException as e:
             result.e = e
         oprot.writeMessageBegin("enterRoom", TMessageType.REPLY, seqid)
@@ -1144,6 +1147,7 @@ class enterRoom_args(object):
      - hrId
      - positionId
      - roomId
+     - is_gamma
     """
 
     thrift_spec = (
@@ -1152,13 +1156,15 @@ class enterRoom_args(object):
         (2, TType.I32, 'hrId', None, None, ),  # 2
         (3, TType.I32, 'positionId', None, None, ),  # 3
         (4, TType.I32, 'roomId', None, None, ),  # 4
+        (5, TType.BOOL, 'is_gamma', None, None, ),  # 5
     )
 
-    def __init__(self, userId=None, hrId=None, positionId=None, roomId=None,):
+    def __init__(self, userId=None, hrId=None, positionId=None, roomId=None, is_gamma=None,):
         self.userId = userId
         self.hrId = hrId
         self.positionId = positionId
         self.roomId = roomId
+        self.is_gamma = is_gamma
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -1189,6 +1195,11 @@ class enterRoom_args(object):
                     self.roomId = iprot.readI32()
                 else:
                     iprot.skip(ftype)
+            elif fid == 5:
+                if ftype == TType.BOOL:
+                    self.is_gamma = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -1214,6 +1225,10 @@ class enterRoom_args(object):
         if self.roomId is not None:
             oprot.writeFieldBegin('roomId', TType.I32, 4)
             oprot.writeI32(self.roomId)
+            oprot.writeFieldEnd()
+        if self.is_gamma is not None:
+            oprot.writeFieldBegin('is_gamma', TType.BOOL, 5)
+            oprot.writeBool(self.is_gamma)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()

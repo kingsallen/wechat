@@ -37,7 +37,6 @@ class ChatPageService(PageService):
                 room['unread_num'] = e.unReadNum
                 obj_list.append(room)
 
-        self.logger.debug("[get_chatrooms]ret:{}".format(obj_list))
         raise gen.Return(obj_list)
 
     @gen.coroutine
@@ -55,14 +54,13 @@ class ChatPageService(PageService):
                 room['speaker'] = e.speaker # 0：求职者，1：HR
                 obj_list.append(room)
 
-        self.logger.debug("[get_chats]ret:{}".format(obj_list))
         raise gen.Return(obj_list)
 
     @gen.coroutine
-    def get_chatroom(self, user_id, hr_id, position_id, room_id, qxuser):
+    def get_chatroom(self, user_id, hr_id, position_id, room_id, qxuser, is_gamma):
         """进入聊天室"""
 
-        ret = yield self.thrift_chat_ds.enter_chatroom(user_id, hr_id, position_id, room_id)
+        ret = yield self.thrift_chat_ds.enter_chatroom(user_id, hr_id, position_id, room_id, is_gamma)
 
         hr_info = ObjectDict()
         if ret.hr:
@@ -99,8 +97,6 @@ class ChatPageService(PageService):
             room_id = ret.roomId,
         )
 
-        self.logger.debug("[get_chatroom]ret:{}".format(res))
-
         raise gen.Return(res)
 
     @gen.coroutine
@@ -113,7 +109,6 @@ class ChatPageService(PageService):
         """
 
         ret = yield self.thrift_chat_ds.leave_chatroom(room_id, speaker)
-        self.logger.debug("[leave_chatroom]ret:{}".format(ret))
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -127,12 +122,57 @@ class ChatPageService(PageService):
         :return:
         """
 
-        self.logger.debug("save_chat_ps start")
-        self.logger.debug("save_chat_ps room_id:{}".format(room_id))
-        self.logger.debug("save_chat_ps content:{}".format(content))
-        self.logger.debug("save_chat_ps position_id:{}".format(position_id))
-        self.logger.debug("save_chat_ps speaker:{}".format(speaker))
-
         ret = yield self.thrift_chat_ds.save_chat(room_id, content, position_id, speaker)
-        self.logger.debug("[save_chat]ret:{}".format(ret))
         raise gen.Return(ret)
+
+    @gen.coroutine
+    def get_chatroom_info(self, room_id):
+
+        """返回JD 页，求职者与 HR 之间的未读消息数"""
+        chatroom = yield self.hr_wx_hr_chat_list_ds.get_chatroom(conds={
+            "id": int(room_id),
+        })
+
+        raise gen.Return(chatroom)
+
+    @gen.coroutine
+    def get_unread_chat_num(self, user_id, hr_id):
+
+        if user_id is None or not hr_id:
+            raise gen.Return(1)
+
+        """返回JD 页，求职者与 HR 之间的未读消息数"""
+        chatroom = yield self.hr_wx_hr_chat_list_ds.get_chatroom(conds={
+            "hraccount_id": int(hr_id),
+            "sysuser_id": user_id
+        })
+
+        # 若无聊天，则默认显示1条未读消息
+        if not chatroom:
+            raise gen.Return(1)
+
+        raise gen.Return(chatroom.user_unread_count)
+
+    @gen.coroutine
+    def get_all_unread_chat_num(self, user_id):
+
+        """返回求职者所有的未读消息数，供侧边栏我的消息未读消息提示"""
+
+        if user_id is None:
+            raise gen.Return(0)
+
+        """返回求职者所有的未读消息数"""
+        unread_count_total = yield self.hr_wx_hr_chat_list_ds.get_chat_unread_count_sum(conds={
+            "sysuser_id": user_id,
+        }, fields=["user_unread_count"])
+
+        raise gen.Return(unread_count_total.sum_user_unread_count)
+
+    @gen.coroutine
+    def get_hr_info(self, publisher):
+        """获取 hr 信息"""
+        hr_account = yield self.user_hr_account_ds.get_hr_account({
+            "id": publisher
+        })
+
+        raise gen.Return(hr_account)

@@ -35,7 +35,6 @@ class HrWxWechatDao(BaseDao):
             "third_oauth":     self.constant.TYPE_INT, # 授权大岂第三方平台0：未授权 1：授权了
             "passive_seeker":  self.constant.TYPE_INT, # 被动求职者开关，0：开启，1：不开启
             "hr_register":     self.constant.TYPE_INT, # 是否启用免费雇主注册，0：不启用，1：启用
-            "hr_chat":         self.constant.TYPE_INT, # IM聊天开关，0：不开启，1：开启
             # "access_token_create_time": self.constant.TYPE_INT, # access_token最新更新时间
             # "access_token_expired": self.constant.TYPE_INT, # access_token过期时间
             "access_token":    self.constant.TYPE_STRING, # access_token

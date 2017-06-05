@@ -18,8 +18,8 @@ from thrift_gen.gen.mq.struct.ttypes import SmsType
 
 class RegisterQrcodeHandler(BaseHandler):
 
-    @handle_response
-    @authenticated
+    # @handle_response
+    # @authenticated
     @gen.coroutine
     def get(self):
 
@@ -30,6 +30,7 @@ class RegisterQrcodeHandler(BaseHandler):
 
         scene_str = "{0}_{1}_0".format(self.params.hr_id, self.current_user.wxuser.id)
         qrcode = yield WechatUtil.get_qrcode(self.current_user.wechat.access_token, scene_str)
+
         self.render(template_name="refer/weixin/sysuser/wx_recruit_success.html", qrcodeurl=qrcode)
 
 class RegisterHandler(BaseHandler):
@@ -85,10 +86,6 @@ class RegisterHandler(BaseHandler):
             "hraccount_id": hr_id
         })
 
-        self.send_json_success(data={
-            "hr_id": hr_id
-        })
-
         # 发送短信
         params = {
             "mobile": self.params.mobile,
@@ -96,3 +93,7 @@ class RegisterHandler(BaseHandler):
         }
         yield self.cellphone_ps.send_sms(SmsType.EMPLOYEE_MERGE_ACCOUNT_SMS, self.params.mobile,
                                                           params, ip=self.request.headers.get('Remoteip'))
+
+        self.send_json_success(data={
+            "hr_id": hr_id
+        })

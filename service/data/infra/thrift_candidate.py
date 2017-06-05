@@ -23,7 +23,6 @@ class ThriftCandidateDataService(DataService):
         """刷新候选人链路信息，调用基础服务"""
 
         ret = yield self.candidate_service_cilent.glancePosition(int(user_id), int(position_id), int(sharechain_id))
-        self.logger.debug("[thrift]send_candidate_view_position: %s" % ret)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -31,7 +30,6 @@ class ThriftCandidateDataService(DataService):
         """刷新候选人感兴趣，调用基础服务"""
 
         ret = yield self.candidate_service_cilent.changeInteresting(int(user_id), int(position_id), int(is_interested))
-        self.logger.debug("[thrift]send_candidate_interested: %s" % ret)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -44,37 +42,34 @@ class ThriftCandidateDataService(DataService):
         params.recoms = is_recom  # -> [int]
         params.companyId = int(company_id)
 
+        ret = []
         try:
             ret_list = yield self.candidate_service_cilent.candidateList(params)
+        except BIZException as BizE:
+            self.logger.warn("%s - %s" % (BizE.code, BizE.message))
+        else:
             self.logger.debug("[thrift]get_candidate_list: %s" % ret_list)
-
-            ret = []
 
             for el in ret_list:
                 recom_group = ObjectDict()
                 recom_group.position_id = el.positionId
-                recom_group.position_title = el.positionName
+                recom_group.position_name = el.positionName
                 recom_group.candidates = []
 
                 for c in el.candidates:
                     c_info = ObjectDict()
-                    c_info.recom_record_id = c.id
-                    c_info.presentee_user_id = c.presenteeUserId  # 被动求职者编号
-                    c_info.presentee_name = c.presenteeName  # 被动求职者称呼
-                    c_info.presentee_friend_id = c.presenteeFriendId  # 一度朋友编号
+                    c_info.id = c.id
+                    c_info.presentee_user_id = c.presenteeUserId          # 被动求职者编号
+                    c_info.presentee_name = c.presenteeName               # 被动求职者称呼
+                    c_info.presentee_friend_id = c.presenteeFriendId      # 一度朋友编号
                     c_info.presentee_friend_name = c.presenteeFriendName  # 一度朋友称呼
-                    c_info.presentee_logo = c.presenteeLogo  # 头像
-                    c_info.is_recom = c.isRecom  # 推荐状态
-                    c_info.is_interested = c.insterested
-                    c_info.view_num = c.viewNumber
+                    c_info.presentee_logo = c.presenteeLogo               # 头像
+                    c_info.is_recom = c.isRecom                           # 推荐状态
+                    c_info.is_interested = c.insterested or 1
+                    c_info.view_number = c.viewNumber or 0
                     recom_group.candidates.append(c_info)
 
                 ret.append(recom_group)
-
-        except BIZException as BizE:
-            self.logger.warn("%s - %s" % (BizE.code, BizE.message))
-            raise BizE
-
         return ret
 
     @gen.coroutine
@@ -139,12 +134,11 @@ class ThriftCandidateDataService(DataService):
         try:
             recommend_result = yield self.candidate_service_cilent.ignore(
                 int(id), int(company_id), int(post_user_id), str(click_time))
-
         except BIZException as BizE:
             self.logger.warn("%s - %s" % (BizE.code, BizE.message))
-            raise BizE
-
-        return recommend_result
+            return None
+        else:
+            return recommend_result
 
     @gen.coroutine
     def sort(self, post_user_id, company_id):
@@ -154,6 +148,6 @@ class ThriftCandidateDataService(DataService):
 
         except BIZException as BizE:
             self.logger.warn("%s - %s" % (BizE.code, BizE.message))
-            raise BizE
-
-        return sort_result
+            return None
+        else:
+            return sort_result

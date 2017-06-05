@@ -111,7 +111,7 @@ def template3(title, resource_list, handler_params):
         'title': title,
         'data': [{
                      'title': position.title,  # '文案'
-                     'link': make_url(POSITION_PATH.format(position.id), handler_params,
+                     'link': make_url("/m/position/{}".format(position.id), handler_params,
                                       escape=['recom']),  # JD连接
                      'location': position.city,  # '上海
                      'salary': gen_salary(position.salary_top, position.salary_bottom)  # '5k-8k'
@@ -185,7 +185,7 @@ def make_header(company, team_index=False, team=None, **extra):
         'name': name,
         'description': description,
         'icon': make_static_url(company.logo),
-        'banner': make_static_url(company.banner[0] if company.banner else "")
+        'banner': company.banner[0] if company.banner else ""
         if company.banner else None,
     })
 

@@ -5,8 +5,6 @@
 # @File    : passport_session.py
 # @DES     :
 
-# Copyright 2016 MoSeeker
-
 from globals import redis
 from globals import logger
 import conf.common as const

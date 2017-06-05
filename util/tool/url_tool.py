@@ -57,6 +57,7 @@ def url_subtract_query(url, exclude):
     """削减 url 的 query 中指定的键值"""
     p = urlparse(url)
     query = p.query
+
     parsed_query = {k: v for k, v in parse_qs(query).items()
                     if k not in exclude}
 
@@ -69,7 +70,7 @@ def url_subtract_query(url, exclude):
 
 def url_append_query(url, *args, **kwargs):
     """为url添加query
-    :example: url_append_query('/m/app', "sjdf","lsdkjf", a=2)
+    :example: url_append_query('/app', "sjdf","lsdkjf", a=2)
     """
     url_parts = list(urlparse(url))
     query = dict(parse_qsl(url_parts[4]))
@@ -102,11 +103,20 @@ def url_append_query(url, *args, **kwargs):
 
 
 def make_static_url(path, protocol='https'):
+
     if not path:
         return None
+
     if not path.startswith("http"):
         path = urljoin(settings['static_domain'], path)
 
     if not path.startswith("http") and protocol is not None:
         path = protocol + ":" + path
     return path
+
+if __name__ == "__main__":
+
+    url = "https://platform2.dqprism.com/position?wechat_signature=YzVmNzU2NWU4MmZkZDEzZTRkYzAwNTlkYzFjMGRmN2MxYWE2ZDZkMg=="
+
+    a = url_subtract_query(url, ['code', 'state'])
+    print(a)

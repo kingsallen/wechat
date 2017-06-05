@@ -127,6 +127,7 @@ class InfraDictDataService(DataService):
         """
         level1_cities = yield self._get_level_1_cities()
         level2_cities = yield self._get_level_2_cities()
+
         return self.make_cities_result(level1_cities, level2_cities, hot)
 
     def make_cities_result(self, level1_cities, level2_cities, hot=False):
@@ -225,13 +226,14 @@ class InfraDictDataService(DataService):
 
     @cache(ttl=60*60*5)
     @gen.coroutine
-    def get_industries(self):
+    def get_industries(self, level=2):
         """获取行业
         industries
         level1 + level2
         """
-        response = yield http_get(path.DICT_INDUSTRY, dict(parent=0))
-        ret = yield self.make_industries_result(response)
+        ret = yield http_get(path.DICT_INDUSTRY, dict(parent=0))
+        if level == 2:
+            ret = yield self.make_industries_result(ret)
         return ret
 
     @staticmethod
@@ -291,4 +293,3 @@ class InfraDictDataService(DataService):
                   if f['parent'] == level2.code and f['level'] == 3]
 
         return level3
-

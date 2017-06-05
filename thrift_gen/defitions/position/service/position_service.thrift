@@ -2,6 +2,8 @@ include "../struct/position_struct.thrift"
 include "../../common/struct/common_struct.thrift"
 include "../../apps/struct/appbs_struct.thrift"
 include "../../dao/struct/dao_struct.thrift"
+include "../../dao/struct/campaignrvo_struct.thrift"
+
 
 namespace java com.moseeker.thrift.gen.position.service
 namespace py thrift_gen.gen.position.service
@@ -35,6 +37,16 @@ service PositionServices {
 
     //微信获取红包转发信息
     position_struct.WechatShareData getShareInfo(1: i32 hb_config_id);
+
+    /**Gamma 0.9 接口**/
+    // 获取职位列表页头图信息
+    campaignrvo_struct.CampaignHeadImageVO headImage();
+    // 查询单个职位详情
+    position_struct.PositionDetailsVO positionDetails(1:i32 positionId);
+    // 查询公司热招职位的详细信息
+    position_struct.PositionDetailsListVO companyHotPositionDetailsList(1:i32 companyId, 2:i32 page, 3:i32 per_age);
+    // 职位相关职位接口
+    position_struct.PositionDetailsListVO similarityPositionDetailsList(1:i32 pid, 2:i32 page, 3:i32 per_age);
 }
 /*
     查询第三方自定义职能

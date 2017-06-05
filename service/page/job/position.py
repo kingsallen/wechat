@@ -2,17 +2,18 @@
 
 from tornado import gen
 
-from service.page.base import PageService
 import conf.common as const
+from service.page.base import PageService
 from service.page.user.user import UserPageService
 from util.common import ObjectDict
 from util.common.cipher import encode_id
 from util.tool.date_tool import jd_update_date, str_2_date
-from util.tool.str_tool import gen_salary, split, set_literl
+from util.tool.str_tool import gen_salary, split, set_literl, gen_degree, gen_experience
+from util.tool.url_tool import make_static_url
 from util.tool.temp_data_tool import make_position_detail_cms, make_team, template3
 
-
 class PositionPageService(PageService):
+
     def __init__(self):
         super().__init__()
 
@@ -49,13 +50,10 @@ class PositionPageService(PageService):
             "salary": salary,
             "city": position_res.city,
             "occupation": position_res.occupation,
-            "experience": position_res.experience + (
-                self.constant.EXPERIENCE_UNIT if position_res.experience else '') + (
-                              self.constant.POSITION_ABOVE if position_res.experience_above else ''),
+            "experience": gen_experience(position_res.experience, position_res.experience_above),
             "language": position_res.language,
             "count": position_res.count,
-            "degree": self.constant.DEGREE.get(str(position_res.degree)) + (
-                self.constant.POSITION_ABOVE if position_res.degree_above else ''),
+            "degree": gen_degree(position_res.degree, position_res.degree_above),
             "management": position_res.management,
             "visitnum": position_res.visitnum,
             "accountabilities": position_res.accountabilities,
@@ -85,7 +83,6 @@ class PositionPageService(PageService):
         # 自定义分享模板
         if position_res.share_tpl_id:
             share_conf = yield self.__get_share_conf(position_res.share_tpl_id)
-            self.logger.debug("")
             position.share_title = share_conf.title
             position.share_description = share_conf.description
 
@@ -130,19 +127,18 @@ class PositionPageService(PageService):
         raise gen.Return(positions_list)
 
     @gen.coroutine
-    def is_position_stared_by(self, position_id, user_id):
+    def is_position_stared_by(self, user_id, position_id):
         """返回用户是否收藏了职位"""
 
         if user_id is None or not position_id:
             raise gen.Return(self.constant.NO)
 
-        fav = yield self.user_fav_position_ds.get_user_fav_position({
-            "position_id": position_id,
-            "sysuser_id": user_id,
-            "favorite": self.constant.FAV_YES
-        })
+        ret = yield self.thrift_searchcondition_ds.get_collect_position(user_id, position_id)
 
-        raise gen.Return(self.constant.YES if fav else self.constant.NO)
+        if ret.userCollectPosition and ret.userCollectPosition.status == 0:
+            raise gen.Return(self.constant.YES)
+        else:
+            raise gen.Return(self.constant.NO)
 
     @gen.coroutine
     def get_hr_info(self, publisher):
@@ -302,7 +298,6 @@ class PositionPageService(PageService):
                     str_2_date(position.publish_date, self.constant.TIME_FORMAT))
                 position.team_name = team_name_dict.get(pid_teamid_dict.get(position.id, 0), '')
 
-            self.logger.debug('position_list: %s' % position_list)
             return position_list
         return res
 
@@ -354,7 +349,6 @@ class PositionPageService(PageService):
             fields=['id', 'name']
         )
         team_name_dict = {e.id: e.name for e in res_team_names}
-        self.logger.debug('team_name_dict: %s' % team_name_dict)
         return team_name_dict
 
     @gen.coroutine
@@ -374,3 +368,30 @@ class PositionPageService(PageService):
         pid_teamid_dict = {e.id: e.team_id for e in pid_teamid_list}
         self.logger.debug('pid_teamid_dict: %s' % pid_teamid_dict)
         return pid_teamid_dict
+
+    @gen.coroutine
+    def get_position_positions(self, position_id, page_no=1, page_size=5):
+        """
+        gamma JD页，职位相似职位
+        :param company_id:
+        :param page_no:
+        :param page_size:
+        :return:
+        """
+
+        res_list = list()
+        ret = yield self.thrift_position_ds.get_position_positions(position_id, page_no, page_size)
+        if not ret.data:
+            return res_list
+
+        for item in ret.data:
+            pos = ObjectDict()
+            pos.title=item.title
+            pos.id=item.id
+            pos.salary=gen_salary(item.salaryTop, item.salaryBottom)
+            pos.image_url=make_static_url(item.resUrl)
+            pos.city=item.city
+            pos.team_name=item.teamName
+            res_list.append(pos)
+
+        return res_list

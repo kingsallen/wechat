@@ -13,5 +13,6 @@ import thrift_gen.gen.position.struct.ttypes
 import thrift_gen.gen.common.struct.ttypes
 import thrift_gen.gen.apps.positionbs.struct.ttypes
 import thrift_gen.gen.dao.struct.dao.ttypes
+import thrift_gen.gen.dao.struct.candidatedb.ttypes
 
 from thrift.transport import TTransport

@@ -43,10 +43,19 @@ class UnreadCountHandler(BaseHandler):
         :return:
         """
 
-        chat_num = yield self.im_ps.get_unread_chat_num(self.current_user.sysuser.id, publisher)
-        self.send_json_success(data={
-            "unread": chat_num
-        })
+        chat_num = yield self.chat_ps.get_unread_chat_num(self.current_user.sysuser.id, publisher)
+        if self.is_platform:
+            self.send_json_success(data={
+                "unread": chat_num,
+            })
+        else:
+            g_event = yield self._get_ga_event(publisher)
+            self.send_json_success(data={
+                "unread": chat_num,
+                "is_subscribe": self.current_user.qxuser.is_subscribe == 1,
+                "event": g_event,
+                "qrcode": self.current_user.wechat.qrcode
+            })
 
     @handle_response
     @authenticated
@@ -57,11 +66,51 @@ class UnreadCountHandler(BaseHandler):
         :return:
         """
 
-        chat_num = yield self.im_ps.get_all_unread_chat_num(self.current_user.sysuser.id)
-        self.send_json_success(data={
-            "unread": chat_num
-        })
+        chat_num = yield self.chat_ps.get_all_unread_chat_num(self.current_user.sysuser.id)
+        if self.is_platform:
+            self.send_json_success(data={
+                "unread": chat_num,
+            })
+        else:
+            g_event = yield self._get_ga_event()
+            self.send_json_success(data={
+                "unread": chat_num,
+                "is_subscribe": self.current_user.qxuser.is_subscribe == 1,
+                "event": g_event,
+                "qrcode": self.current_user.wechat.qrcode
+            })
 
+    @gen.coroutine
+    def _get_ga_event(self, publisher=None):
+        """
+        点击消息按钮类型
+        :param publisher:
+        :return:
+        """
+
+        company_info = ObjectDict()
+        if publisher:
+            hr_info = yield self.chat_ps.get_hr_info(publisher)
+            # 是否关闭 IM 聊天，由母公司决定
+            company_info = yield self.company_ps.get_company(conds={
+                "id": hr_info.company_id
+            }, need_conf=True)
+        else:
+            company_info = self.current_user.company
+
+        g_event = 0
+        if not self.in_wechat and not self.current_user.sysuser:
+            g_event = 1
+        elif not self.in_wechat and self.current_user.sysuser and self.current_user.qxuser.is_subscribe != 1:
+            g_event = 2
+        elif self.in_wechat and self.current_user.qxuser.is_subscribe != 1:
+            g_event = 3
+        elif self.current_user.qxuser.is_subscribe == 1 and not company_info.conf_hr_chat:
+            g_event = 4
+        elif self.current_user.qxuser.is_subscribe == 1 and company_info.conf_hr_chat:
+            g_event = 5
+
+        return g_event
 
 class ChatWebSocketHandler(websocket.WebSocketHandler):
 
@@ -209,9 +258,11 @@ class ChatHandler(BaseHandler):
             self.send_json_error(message=msg.REQUEST_PARAM_ERROR)
             return
 
-        res = yield self.chat_ps.get_chatroom(self.current_user.sysuser.id, 0, 0, self.params.room_id, self.current_user.qxuser)
+
+        room_info = yield self.chat_ps.get_chatroom_info(self.params.room_id)
+
         # 需要判断用户是否进入自己的聊天室
-        if res.user.user_id != self.current_user.sysuser.id:
+        if not room_info or room_info.sysuser_id != self.current_user.sysuser.id:
             self.send_json_error(message=msg.NOT_AUTHORIZED)
             return
 
@@ -219,7 +270,6 @@ class ChatHandler(BaseHandler):
         page_size = self.params.page_size or 10
 
         res = yield self.chat_ps.get_chats(self.params.room_id, page_no, page_size)
-        self.logger.debug("[chat]get_messages:{}".format(res))
         self.send_json_success(data=ObjectDict(
             records = res
         ))
@@ -233,14 +283,23 @@ class ChatHandler(BaseHandler):
         if not self.params.hr_id:
             self.send_json_error(message=msg.REQUEST_PARAM_ERROR)
             return
+
         pid = self.params.pid or 0
         room_id = self.params.room_id or 0
 
-        res = yield self.chat_ps.get_chatroom(self.current_user.sysuser.id, self.params.hr_id, pid, room_id, self.current_user.qxuser)
+        # gamma 项目 hr 欢迎导语不同
+        is_gamma = False
+        if int(self.params.hr_id) == int(self.current_user.company.hraccount_id):
+            is_gamma = True
+
+        res = yield self.chat_ps.get_chatroom(self.current_user.sysuser.id,
+                                              self.params.hr_id,
+                                              pid, room_id,
+                                              self.current_user.qxuser,
+                                              is_gamma)
         # 需要判断用户是否进入自己的聊天室
         if res.user.user_id != self.current_user.sysuser.id:
             self.send_json_error(message=msg.NOT_AUTHORIZED)
             return
 
-        self.logger.debug("[chat]get_room:{}".format(res))
         self.send_json_success(data=res)

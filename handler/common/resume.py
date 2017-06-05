@@ -10,8 +10,8 @@ from handler.base import BaseHandler
 from handler.metabase import MetaBaseHandler
 from util.common import ObjectDict
 from util.common.decorator import handle_response, authenticated
-from util.tool.url_tool import make_url
 from util.tool.str_tool import to_str, match_session_id
+from util.tool.url_tool import make_url
 
 
 class LinkedinImportHandler(MetaBaseHandler):
@@ -32,7 +32,7 @@ class LinkedinImportHandler(MetaBaseHandler):
         user_id = match_session_id(to_str(self.get_secure_cookie(const.COOKIE_SESSIONID)))
 
         redirect_url = make_url(path.RESUME_LINKEDIN,
-                                host=self.request.host,
+                                host=self.host,
                                 recom=self.params.recom,
                                 pid=self.params.pid,
                                 wechat_signature=self.params.wechat_signature)
@@ -46,9 +46,9 @@ class LinkedinImportHandler(MetaBaseHandler):
         self.logger.debug("is_ok:{} result:{}".format(is_ok, result))
         if is_ok:
             if self.params.pid:
-                next_url = make_url(path.PROFILE_VIEW, params=self.params, apply='1')
+                next_url = make_url(path.PROFILE_VIEW, params=self.params, host=self.host, apply='1')
             else:
-                next_url = make_url(path.PROFILE_VIEW, params=self.params)
+                next_url = make_url(path.PROFILE_VIEW, params=self.params, host=self.host)
 
             self.redirect(next_url)
             return
@@ -64,7 +64,8 @@ class ResumeImportHandler(BaseHandler):
     def get(self):
 
         self.params.headimg = self.current_user.sysuser.headimg
-        self.render(template_name='refer/neo_weixin/sysuser/importresume-auth.html', message='')
+        auth_api_url = "/{}/api/resume/import".format("m" if self.is_platform else "recruit")
+        self.render(template_name='refer/neo_weixin/sysuser/importresume-auth.html', message='', auth_api_url=auth_api_url)
 
     @handle_response
     @authenticated
@@ -121,17 +122,20 @@ class ResumeImportHandler(BaseHandler):
             )
 
             if self.params.pid:
-                next_url = make_url(path.PROFILE_PREVIEW, self.params)
+                next_url = self.make_url(path.PROFILE_PREVIEW, self.params)
             else:
-                next_url = make_url(path.PROFILE_VIEW, self.params)
+                next_url = self.make_url(path.PROFILE_VIEW, self.params)
 
             if is_ok:
                 self.log_info = ObjectDict(
                     status=0,
                     url=self.params.way
                 )
+
+                self._log_customs.update(new_profile=const.YES)
                 self.send_json_success(message=msg.RESUME_IMPORT_SUCCESS,
                                        data={ "url": next_url })
+
                 return
             else:
                 if result.status == 32001:

@@ -13,11 +13,12 @@ from util.common import ObjectDict
 from util.common.cipher import encode_id
 from util.common.decorator import handle_response, check_employee
 from util.tool.str_tool import gen_salary, add_item, split
-from util.tool.url_tool import make_url, url_append_query
+from util.tool.url_tool import url_append_query
 from util.wechat.template import position_view_five_notice_tpl, position_share_notice_employee_tpl
 
 
 class PositionHandler(BaseHandler):
+
     @handle_response
     @gen.coroutine
     def get(self, position_id):
@@ -33,10 +34,8 @@ class PositionHandler(BaseHandler):
             team = yield self.team_ps.get_team_by_id(position_info.team_id)
             position_info.team = team
 
-            self.logger.debug("[JD]position_info: %s" % position_info)
-
             self.logger.debug("[JD]构建收藏信息")
-            star = yield self.position_ps.is_position_stared_by(position_id, self.current_user.sysuser.id)
+            star = yield self.position_ps.is_position_stared_by(self.current_user.sysuser.id, position_id)
 
             self.logger.debug("[JD]构建申请信息")
             application = yield self.application_ps.get_application(position_id, self.current_user.sysuser.id)
@@ -68,7 +67,7 @@ class PositionHandler(BaseHandler):
             # 获取公司配置信息
             teamname_custom = self.current_user.company.conf_teamname_custom
 
-            header = self._make_json_header(
+            header = yield self._make_json_header(
                 position_info, company_info, star, application, endorse,
                 can_apply, team.id if team else 0, did, teamname_custom)
             module_job_description = self._make_json_job_description(position_info)
@@ -85,7 +84,6 @@ class PositionHandler(BaseHandler):
 
             # 构建老微信样式所需要的数据
             self.logger.debug("[JD]是否显示新样式: {}".format(self.current_user.company.conf_newjd_status))
-            self.logger.debug("[wechat]:{}".format(self.current_user.wechat))
             if self.current_user.company.conf_newjd_status != 2:
                 # 0是未开启，1是用户申请开启，2是审核通过（使用新jd），3撤销（返回基础版）
                 # 老样式
@@ -177,15 +175,10 @@ class PositionHandler(BaseHandler):
         # 如果有红包，则取红包的分享文案
         red_packet = yield self.redpacket_ps.get_last_running_hongbao_config_by_position(position_info)
 
-        self.logger.debug("自定义分享：%s" % red_packet)
         if red_packet:
             cover = self.static_url(red_packet.share_img)
             title = "{} {}".format(position_info.title, red_packet.share_title)
             description = "".join(split(red_packet.share_desc))
-
-            self.logger.debug("自定义分享 red_packet cover：%s" % cover)
-            self.logger.debug("自定义分享 red_packet title：%s" % title)
-            self.logger.debug("自定义分享 red_packet description：%s" % description)
         else:
             cover = self.static_url(company_info.logo)
             title = position_info.title
@@ -195,21 +188,12 @@ class PositionHandler(BaseHandler):
                 title = str(position_info.share_title).format(
                     company=company_info.abbreviation,
                     position=position_info.title)
-                self.logger.debug("自定义分享 cover 1：%s" % title)
             if position_info.share_description:
-                self.logger.debug("自定义分享 description 1：%s" % position_info.share_description)
                 description = "".join(split(position_info.share_description))
-                self.logger.debug("自定义分享 description 1：%s" % description)
 
-            self.logger.debug("自定义分享 cover：%s" % cover)
-            self.logger.debug("自定义分享 title：%s" % title)
-            self.logger.debug("自定义分享 description：%s" % description)
-
-        link = make_url(
+        link = self.make_url(
             path.POSITION_PATH.format(position_info.id),
             self.params,
-            host=self.request.host,
-            protocol=self.request.protocol,
             recom=self.position_ps._make_recom(self.current_user.sysuser.id),
             escape=["pid", "keywords", "cities", "candidate_source",
                     "employment_type", "salary", "department", "occupations",
@@ -223,8 +207,6 @@ class PositionHandler(BaseHandler):
             "link": link,
             "pid": position_info.id,
         })
-
-        self.logger.debug("_make_share_info:{}".format(self.params.share))
 
     @gen.coroutine
     def _make_hr_info(self, publisher):
@@ -273,7 +255,7 @@ class PositionHandler(BaseHandler):
             pos.salary = gen_salary(
                 item.get("salary_top"),
                 item.get("salary_bottom"))
-            pos.link = make_url(
+            pos.link = self.make_url(
                 path.POSITION_PATH.format(
                     item.get("pid")),
                 self.params,
@@ -300,9 +282,14 @@ class PositionHandler(BaseHandler):
 
         return res
 
+    @gen.coroutine
     def _make_json_header(self, position_info, company_info, star, application,
                           endorse, can_apply, team_id, did, teamname_custom):
         """构造头部 header 信息"""
+
+        # 获得母公司配置信息
+        parent_company_info = yield self._make_parent_company_info()
+
         data = ObjectDict({
             "id": position_info.id,
             "title": position_info.title,
@@ -319,12 +306,21 @@ class PositionHandler(BaseHandler):
             "team": team_id,
             "did": did if did != self.current_user.company.id else "",  # 主公司不需要提供 did
             "salary": position_info.salary,
-            "hr_chat": int(self.current_user.wechat.hr_chat),
+            "hr_chat": bool(parent_company_info.conf_hr_chat),
             "teamname_custom": teamname_custom["teamname_custom"]
             # "team": position_info.department.lower() if position_info.department else ""
         })
 
         return data
+
+    @gen.coroutine
+    def _make_parent_company_info(self):
+        """获得母公司的配置信息，部分逻辑由母公司控制，例如开启 IM 聊天，开启新微信"""
+        parent_company_info = yield self.company_ps.get_company(conds={
+            "id": self.current_user.wechat.company_id
+        }, need_conf=True)
+
+        return parent_company_info
 
     def _make_json_job_description(self, position_info):
         """构造职位描述"""
@@ -428,8 +424,6 @@ class PositionHandler(BaseHandler):
             "custom_name": position_info.job_custom,
         })
 
-        self.logger.debug("_make_json_job_department: %s" % data)
-
         return data
 
     def _make_json_job_attr(self, position_info):
@@ -480,9 +474,6 @@ class PositionHandler(BaseHandler):
                 self.current_user.sysuser.id, position_info.id)
 
         if self.current_user.sysuser.id:
-            self.logger.debug("_make_refresh_share_chain user_id:{}".format(self.current_user.sysuser.id))
-            self.logger.debug("_make_refresh_share_chain position_id:{}".format(position_info.id))
-            self.logger.debug("_make_refresh_share_chain sharechain_id:{}".format(inserted_share_chain_id))
             yield self.candidate_ps.send_candidate_view_position(
                 user_id=self.current_user.sysuser.id,
                 position_id=position_info.id,
@@ -549,7 +540,7 @@ class PositionHandler(BaseHandler):
             if psc:
                 replace_query.update(psc=psc)
 
-            redirect_url = url_append_query(self.fullurl, **replace_query)
+            redirect_url = url_append_query(self.fullurl(), **replace_query)
             self.redirect(redirect_url)
             return
 
@@ -558,7 +549,7 @@ class PositionHandler(BaseHandler):
         """给员工加积分
         :param position_info:
             职位信息，用户提取公司信息
-        :param recom_employee_user_id: 
+        :param recom_employee_user_id:
             最近员工 user_id ，如果为0，说明没有最近员工 user_id ，不执行添加积分操作
         """
 
@@ -604,14 +595,11 @@ class PositionHandler(BaseHandler):
             if hr_wx_user.openid:
                 # 如果企业有公众号，发企业链接，若无，发聚合号链接
                 if self.current_user.wechat:
-                    link = make_url(
+                    link = self.make_url(
                         path.POSITION_PATH.format(position_info.id),
-                        host=self.settings.platform_host,
                         wechat_signature=self.current_user.wechat.signature)
                 else:
-                    link = make_url(path.OLD_POSITION_PATH,
-                                    host=self.settings.qx_host, m="info",
-                                    pid=position_info.id)
+                    link = self.make_url(path.GAMMA_POSITION_HOME.format(position_info.id))
 
                 yield position_view_five_notice_tpl(help_wechat.id, hr_wx_user.openid,
                                                     link, position_info.title,
@@ -653,7 +641,7 @@ class PositionHandler(BaseHandler):
     @gen.coroutine
     def _make_team(self, team, teamname_custom):
         """所属团队，构造数据"""
-        more_link = make_url(path.TEAM_PATH.format(team.id), self.params),
+        more_link = self.make_url(path.TEAM_PATH.format(team.id), self.params),
         res = yield self.position_ps.get_team_data(team, more_link, teamname_custom)
         raise gen.Return(res)
 
@@ -704,8 +692,6 @@ class PositionListHandler(BaseHandler):
 
         # 只渲染必要的公司信息
         yield self.make_company_info()
-
-        self.logger.debug("[PositionListHandler]params:{}".format(self.params))
 
         # 如果是下拉刷新请求的职位, 返回新增职位的页面
         if self.params.restype == "json":
@@ -773,20 +759,18 @@ class PositionListHandler(BaseHandler):
             description = msg.SHARE_DES_DEFAULT
 
         else:
+            cover = self.static_url(rp_share_info.cover)
             escape = [
                 "pid", "keywords", "cities", "candidate_source",
                 "employment_type", "salary", "department", "occupations",
                 "custom", "degree", "page_from", "page_size"
             ]
-            cover = rp_share_info.cover
             title = rp_share_info.title
             description = rp_share_info.description
 
-        link = make_url(
+        link = self.make_url(
             path.POSITION_LIST,
             self.params,
-            host=self.request.host,
-            protocol=self.request.protocol,
             recom=self.position_ps._make_recom(self.current_user.sysuser.id),
             escape=escape)
 
@@ -862,8 +846,8 @@ class PositionEmpNoticeHandler(BaseHandler):
 
         position = yield self.position_ps.get_position(self.params.pid)
 
-        link = make_url(path.EMPLOYEE_RECOMMENDS, host=self.request.host,
-                        wechat_signature=self.current_user.wechat.signature)
+        link = self.make_url(path.EMPLOYEE_RECOMMENDS, wechat_signature=self.current_user.wechat.signature)
+
 
         if self.current_user.wechat.passive_seeker == const.OLD_YES:
             yield position_share_notice_employee_tpl(self.current_user.company.id,

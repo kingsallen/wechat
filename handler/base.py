@@ -1,7 +1,5 @@
 # coding=utf-8
 
-# Copyright 2016 MoSeeker
-
 import os
 from hashlib import sha1
 from tornado import gen
@@ -49,14 +47,6 @@ class BaseHandler(MetaBaseHandler):
         self._pass_session = None
 
     @property
-    def fullurl(self):
-        """获取当前 url， 默认删除 query 中的 code 和 state。
-
-        和 oauth 有关的 参数会影响 prepare 方法
-        """
-        return url_subtract_query(self.request.full_url(), ['code', 'state'])
-
-    @property
     def component_access_token(self):
         """第三方平台 component_access_token"""
         ret = self.redis.get("component_access_token", prefix=False)
@@ -81,7 +71,7 @@ class BaseHandler(MetaBaseHandler):
 
         # 初始化 oauth service
         self._oauth_service = WeChatOauth2Service(
-            self._wechat, self.fullurl, self.component_access_token)
+            self._wechat, self.fullurl(), self.component_access_token)
 
         self._pass_session = PassportCache()
 
@@ -128,27 +118,8 @@ class BaseHandler(MetaBaseHandler):
         # 构造并拼装 session
         yield self._fetch_session()
 
-        # ========== GA 需求 ==========
-        # 在 current_user 中添加 has_profile flag
-        # 在企业微信端页面，现有代码的  ga('send', 'pageview’) 前，
-        # 判断如果该页是用户该session登陆后（主动或者被动都可以）访问的第一个页面的话，
-        # 插入以下语句：
-        # ga('set', 'userId', ‘XXXXXX’);
-        # ga('set', 'dimension2', 'YYYYY’);
-        # ga('set', 'dimension3', 'ZZZZZZ’);
-        cookie_name = '_ac'
-        if not self.get_cookie(cookie_name):
-            unix_time_stamp = str(int(time.time()))
-            self.set_cookie(cookie_name, unix_time_stamp)
-            self.logger.debug("set cookie _ac: %s" % unix_time_stamp)
-
-            if self.current_user:
-                self.current_user.has_profile = False
-                if self.current_user.sysuser and self.current_user.sysuser.id:
-                    self.current_user.has_profile = yield self.profile_ps.has_profile_lite(
-                        self.current_user.sysuser.id)
-
-        # ========== GA 需求结束 ==========
+        # 构造 access_time cookie
+        self._set_access_time_cookie()
 
         # 构造 mviewer_id
         self._make_moseeker_viewer_id()
@@ -161,6 +132,7 @@ class BaseHandler(MetaBaseHandler):
         self._qxuser = None
         self._session_id = None
 
+        self.logger.debug("current_user:{}".format(self.current_user))
         self.logger.debug("+++++++++++++++++PREPARE OVER+++++++++++++++++++++")
 
     # PROTECTED
@@ -184,8 +156,6 @@ class BaseHandler(MetaBaseHandler):
         "unionid": "o6_bmasdasdsad6_2sgVt7hMZOPfL"
         )
         """
-        self.logger.debug("[_handle_user_info]userinfo: {}".format(userinfo))
-
         self._unionid = userinfo.unionid
         if self.is_platform:
             source = const.WECHAT_REGISTER_SOURCE_PLATFORM
@@ -198,6 +168,9 @@ class BaseHandler(MetaBaseHandler):
             wechat_id=self._wechat.id,
             remote_ip=self.request.remote_ip,
             source=source)
+
+        if user_id:
+            self._log_customs.update(new_user=const.YES)
 
         self.logger.debug("[_handle_user_info]user_id: {}".format(user_id))
 
@@ -215,7 +188,6 @@ class BaseHandler(MetaBaseHandler):
         if self.is_platform or self.is_help:
             wxuser = yield self.user_ps.create_user_wx_user_ent(
                 openid, unionid, self._wechat.id)
-            self.logger.debug("_handle_ent_openid, wxuser:{}".format(wxuser))
         raise gen.Return(wxuser)
 
     def _authable(self, wechat_type):
@@ -226,13 +198,6 @@ class BaseHandler(MetaBaseHandler):
         https://mp.weixin.qq.com/wiki/7/2d301d4b757dedc333b9a9854b457b47.html
         """
 
-        self.logger.debug("_authable _wechat type: {}".format(wechat_type))
-        self.logger.debug(
-            "_authable const.WECHAT_TYPE_SERVICE: {}".format(
-                const.WECHAT_TYPE_SERVICE))
-        self.logger.debug("_authable res: {}".format(
-            wechat_type is const.WECHAT_TYPE_SERVICE))
-
         if wechat_type is None:
             return False
         return wechat_type is const.WECHAT_TYPE_SERVICE
@@ -241,8 +206,6 @@ class BaseHandler(MetaBaseHandler):
         """检查 code 是不是之前使用过的"""
 
         old = self.get_cookie(const.COOKIE_CODE)
-        self.logger.debug("[_verify_code]old code: {}".format(old))
-        self.logger.debug("[_verify_code]new code: {}".format(code))
 
         if not old:
             return True
@@ -250,6 +213,7 @@ class BaseHandler(MetaBaseHandler):
 
     @gen.coroutine
     def _get_current_wechat(self, qx=False):
+
         if qx:
             signature = self.settings['qx_signature']
         else:
@@ -305,11 +269,9 @@ class BaseHandler(MetaBaseHandler):
         self._session_id = to_str(
             self.get_secure_cookie(
                 const.COOKIE_SESSIONID))
-        self.logger.debug("_fetch_session session_id: %s" % self._session_id)
 
         if self._session_id:
             if self.is_platform or self.is_help:
-                self.logger.debug("is_platform _fetch_session session_id: {}".format(self._session_id))
                 # 判断是否可以通过 session，直接获得用户信息，这样就不用跳授权页面
                 ok = yield self._get_session_by_wechat_id(self._session_id, self._wechat.id)
                 if not ok:
@@ -325,17 +287,25 @@ class BaseHandler(MetaBaseHandler):
         if need_oauth:
             if self.in_wechat and not self._unionid:
                 # unionid 不存在，则进行仟寻授权
-                self.logger.debug("start oauth!!!!")
-
                 self._oauth_service.wechat = self._qx_wechat
                 url = self._oauth_service.get_oauth_code_userinfo_url()
-                self.logger.debug("get_oauth_code_userinfo_url: url:{}".format(url))
                 self.redirect(url)
                 return
             else:
-                self.logger.debug("beyond wechat start!!!")
                 yield self._build_session()
-                self.logger.debug("_build_session: %s" % self.current_user)
+
+        # GA 需求：
+        # 在 current_user 中添加 has_profile flag
+        # 在企业微信端页面，现有代码的  ga('send', 'pageview’) 前，
+        # 判断如果该页是用户该session登陆后（主动或者被动都可以）访问的第一个页面的话，
+        # 插入以下语句：
+        # ga('set', 'userId', ‘XXXXXX’);
+        # ga('set', 'dimension2', 'YYYYY’);
+        # ga('set', 'dimension3', 'ZZZZZZ’);
+
+        if self.current_user.sysuser:
+            result, profile = yield self.profile_ps.has_profile(self.current_user.sysuser.id)
+            self.current_user.has_profile = result
 
     @gen.coroutine
     def _build_session(self):
@@ -346,7 +316,6 @@ class BaseHandler(MetaBaseHandler):
         session = ObjectDict()
         session.wechat = self._wechat
 
-        # qx session 中，只需要存储 id，unioid 即可，且俩变量一旦生成不会改变，不会影响 session 一致性
         # 该 session 只做首次仟寻登录查找各关联帐号所用(微信环境内)
         if self._unionid:
             # 只对微信 oauth 用户创建qx session
@@ -363,10 +332,6 @@ class BaseHandler(MetaBaseHandler):
                 const.COOKIE_SESSIONID,
                 self._session_id,
                 httponly=True)
-            self.logger.debug(
-                "_build_session get_secure_cookie: {}".format(
-                    self.get_secure_cookie(
-                        const.COOKIE_SESSIONID)))
 
         # 重置 wxuser，qxuser，构建完整的 session
         self._wxuser = ObjectDict()
@@ -399,50 +364,22 @@ class BaseHandler(MetaBaseHandler):
 
         session = ObjectDict()
         # session_id = to_str(self.get_secure_cookie(const.COOKIE_SESSIONID))
-        self.logger.debug("_build_session_by_unionid")
-        self.logger.debug(
-            "_build_session_by_unionid unionid: {}".format(unionid))
-        self.logger.debug(
-            "_build_session_by_unionid session_id: {}".format(
-                self._session_id))
-
         if not unionid:
             # 非微信环境, 忽略 wxuser, qxuser
-            self.logger.debug("_build_session_by_unionid not unionid")
             session.wxuser = ObjectDict()
             session.qxuser = ObjectDict()
         else:
-            self.logger.debug("_build_session_by_unionid unionid")
-            self.logger.debug(
-                "_build_session_by_unionid _wxuser:{}".format(
-                    self._wxuser))
-            self.logger.debug(
-                "_build_session_by_unionid _qxuser:{}".format(
-                    self._qxuser))
-            self.logger.debug(
-                "_build_session_by_unionid _wechat:{}".format(
-                    self._wechat))
-
             if self._wxuser:
                 session.wxuser = self._wxuser
             else:
                 session.wxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
                     unionid=unionid, wechat_id=self._wechat.id)
-                self.logger.debug(
-                    "_build_session_by_unionid wxuser:{}".format(
-                        session.wxuser))
 
-            if self._qxuser:
+            if self._qxuser and self.is_platform:
                 session.qxuser = self._qxuser
             else:
                 session.qxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
                     unionid=unionid, wechat_id=self.settings['qx_wechat_id'])
-                self.logger.debug(
-                    "_build_session_by_unionid qxuser:{}".format(
-                        session.qxuser))
-
-            self.logger.debug(
-                "_build_session_by_unionid session 1: {}".format(session))
 
         if not self._session_id:
             self._session_id = self._make_new_session_id(
@@ -452,30 +389,18 @@ class BaseHandler(MetaBaseHandler):
                 self._session_id,
                 httponly=True)
 
-        self._pass_session.save_ent_sessions(
-            self._session_id, session, self._wechat.id)
+        if self.is_platform:
+            self._pass_session.save_ent_sessions(
+                self._session_id, session, self._wechat.id)
 
         yield self._add_sysuser_to_session(session, self._session_id)
 
         session.wechat = self._wechat
         self._add_jsapi_to_wechat(session.wechat)
 
-        self.logger.debug(
-            "_build_session_by_unionid session 2: {}".format(session))
-        self.logger.debug(
-            "_build_session_by_unionid params: {}".format(
-                self.params))
-        if self.is_platform:
-            self.logger.debug("_build_session_by_unionid start company")
-            yield self._add_company_info_to_session(session)
-            self.logger.debug(
-                "_build_session_by_unionid company: {}".format(session))
-        if self.params.recom:
-            self.logger.debug("_build_session_by_unionid start recom")
+        yield self._add_company_info_to_session(session)
+        if self.is_platform and self.params.recom:
             yield self._add_recom_to_session(session)
-            self.logger.debug(
-                "_build_session_by_unionid recom: {}".format(
-                    session.recom))
 
         self.current_user = session
 
@@ -485,7 +410,8 @@ class BaseHandler(MetaBaseHandler):
         """
 
         session.company = yield self._get_current_company(session.wechat.company_id)
-        if session.sysuser.id:
+
+        if session.sysuser.id and self.is_platform:
             employee = yield self.user_ps.get_valid_employee_by_user_id(
                 user_id=session.sysuser.id, company_id=session.company.id)
             session.employee = employee
@@ -499,7 +425,7 @@ class BaseHandler(MetaBaseHandler):
 
         # 配色处理，如果theme_id为5表示公司使用默认配置，不需要将原始配色信息传给前端
         # 如果将theme_id为5的传给前端，会导致前端颜色无法正常显示默认颜色
-        if company.conf_theme_id != 5:
+        if company.conf_theme_id != 5 and company.conf_theme_id:
             theme = yield self.wechat_ps.get_wechat_theme(
                 {'id': company.conf_theme_id, 'disable': 0})
             if theme:
@@ -541,20 +467,20 @@ class BaseHandler(MetaBaseHandler):
             "id": user_id
         })
 
-        self.logger.debug("_add_sysuser_to_session user_id:{}".format(user_id))
-        self.logger.debug("_add_sysuser_to_session sysuser:{}".format(sysuser))
-
         if sysuser.parentid and sysuser.parentid > 0:
-            self.logger.debug("帐号已经被合并")
-            self.logger.debug("_add_sysuser_to_session sysuser.parentid:{}".format(sysuser.parentid))
             sysuser = yield self.user_ps.get_user_user({
                 "id": sysuser.parentid
             })
-            self.logger.debug("_add_sysuser_to_session sysuser:{}".format(sysuser))
             self.clear_cookie(name=const.COOKIE_SESSIONID)
 
         if sysuser:
             sysuser.headimg = self.static_url(sysuser.headimg or const.SYSUSER_HEADIMG)
+
+        # 对于非微信环境，用户登录后，如果帐号已经绑定微信，则同时获取微信用户信息
+
+        if sysuser.unionid and not session.qxuser:
+            session.qxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
+                unionid=sysuser.unionid, wechat_id=self.settings['qx_wechat_id'])
 
         session.sysuser = sysuser
 
@@ -562,7 +488,7 @@ class BaseHandler(MetaBaseHandler):
         """拼装 jsapi"""
         wechat.jsapi = JsApi(
             jsapi_ticket=wechat.jsapi_ticket,
-            url=self.request.full_url())
+            url=self.fullurl(encode=False))
 
     def _make_new_session_id(self, user_id):
         """创建新的 session_id
@@ -611,7 +537,7 @@ class BaseHandler(MetaBaseHandler):
         add_namespace = ObjectDict(
             env=self.env,
             params=self.params,
-            make_url=make_url,
+            make_url=self.make_url,
             const=const,
             path=path,
             static_url=self.static_url,
@@ -619,3 +545,48 @@ class BaseHandler(MetaBaseHandler):
             settings=self.settings)
         namespace.update(add_namespace)
         return namespace
+
+
+    def _set_access_time_cookie(self):
+        """设置 _ac cookie 表示该session首次访问页面时间
+        使用 unix 时间戳
+        https://timanovsky.wordpress.com/2009/04/09/get-unix-timestamp-in-java-python-erlang/
+        """
+        cookie_name = '_ac'
+        if not self.get_cookie(cookie_name):
+            unix_time_stamp = str(int(time.time()))
+            self.set_cookie(cookie_name, unix_time_stamp)
+
+    def make_url(self, path, params=None, host="", protocol="https", escape=None, **kwargs):
+        """
+        host 环境不能直接从 request 中获取，需要根据环境确定
+        :param path:
+        :param host:
+        :param params:
+        :param protocol:
+        :param escape:
+        :param kwargs:
+        :return:
+        """
+        if not host:
+            host = self.host
+        return make_url(path, params, host, protocol, escape, **kwargs)
+
+    def fullurl(self, encode=True):
+        """
+        获取当前 url， 默认删除 query 中的 code 和 state。
+
+        和 oauth 有关的 参数会影响 prepare 方法
+        :param encode: False，不会 Encode，主要用在生成 jdsdk signature 时使用
+        :return:
+        """
+
+        full_url = to_str(self.request.full_url())
+
+        if not self.host in self.request.full_url():
+            full_url = full_url.replace(self.settings.m_host, self.host)
+
+        if not encode:
+            return full_url
+        return url_subtract_query(full_url, ['code', 'state'])
+

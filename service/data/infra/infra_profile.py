@@ -17,6 +17,12 @@ class InfraProfileDataService(DataService):
         return http_tool.unboxing(res)
 
     @gen.coroutine
+    def get_profile_by_uuid(self, uuid):
+        params = ObjectDict(uuid=uuid)
+        res = yield http_tool.http_get(path.PROFILE, params)
+        return http_tool.unboxing(res)
+
+    @gen.coroutine
     def import_profile(self, type, username, password, user_id, ua=1, token=None):
         """
         从第三方导入 profile
@@ -90,8 +96,6 @@ class InfraProfileDataService(DataService):
 
         if profile.email and profile.email.strip():
             params.update(email=profile.email.strip())
-
-        self.logger.debug("params:{}".format(params))
 
         res = yield self.handle_profile_section(
             params, method="create", section="basic")

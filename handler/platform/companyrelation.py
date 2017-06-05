@@ -1,5 +1,4 @@
 # coding=utf-8
-# Copyright 2016 MoSeeker
 
 """
 :author 马超（machao@moseeker.com）
@@ -15,7 +14,7 @@ from handler.base import BaseHandler
 from tests.dev_data.user_company_config import COMPANY_CONFIG
 from util.common import ObjectDict
 from util.common.decorator import check_sub_company, handle_response, \
-    authenticated, NewJDStatusCheckerRedirect
+    authenticated
 from util.tool.str_tool import add_item
 
 
@@ -41,6 +40,7 @@ class CompanyVisitReqHandler(BaseHandler):
 
 
 class CompanyFollowHandler(BaseHandler):
+
     @handle_response
     @check_sub_company
     @authenticated
@@ -63,7 +63,6 @@ class CompanyFollowHandler(BaseHandler):
 class CompanyHandler(BaseHandler):
     """公司详情页新样式"""
 
-    @NewJDStatusCheckerRedirect()
     @handle_response
     @check_sub_company
     @gen.coroutine
@@ -83,7 +82,7 @@ class CompanyHandler(BaseHandler):
             'cover': self.static_url(company.get('logo', '')),
             'title': '关于{}, 你想知道的都在这里'.format(company_name),
             'description': '这可能是你人生的下一站! 看清企业全局, 然后定位自己',
-            'link': self.fullurl
+            'link': self.fullurl()
         })
         # 玛氏定制
         config = COMPANY_CONFIG.get(company.id)

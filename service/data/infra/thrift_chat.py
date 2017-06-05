@@ -27,9 +27,7 @@ class ThriftChatDataService(DataService):
         :param page_size:
         :return:
         """
-
         ret = yield self.chat_service_cilent.listUserChatRoom(int(user_id), int(page_no), int(page_size))
-        self.logger.debug("[thrift]get_chatrooms_list: %s" % ret)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -42,22 +40,21 @@ class ThriftChatDataService(DataService):
         :return:
         """
         ret = yield self.chat_service_cilent.listChatLogs(int(room_id), int(page_no), int(page_size))
-        self.logger.debug("[thrift]get_chats: %s" % ret)
         raise gen.Return(ret)
 
     @gen.coroutine
-    def enter_chatroom(self, user_id, hr_id, position_id, room_id):
+    def enter_chatroom(self, user_id, hr_id, position_id, room_id, is_gamma=False):
         """
         进入聊天室，调用 thrift 接口
         :param user_id:
         :param hr_id:
         :param position_id:
         :param room_id
+        :param is_gamma: 是否为 gamma，欢迎语不同
         :return:
         """
 
-        ret = yield self.chat_service_cilent.enterRoom(int(user_id), int(hr_id), int(position_id), int(room_id))
-        self.logger.debug("[thrift]enter_chatroom: %s" % ret)
+        ret = yield self.chat_service_cilent.enterRoom(int(user_id), int(hr_id), int(position_id), int(room_id), is_gamma)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -70,7 +67,6 @@ class ThriftChatDataService(DataService):
         """
 
         ret = yield self.chat_service_cilent.leaveChatRoom(int(room_id), int(speaker))
-        self.logger.debug("[thrift]leave_chatroom: %s" % ret)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -84,13 +80,5 @@ class ThriftChatDataService(DataService):
         :return:
         """
 
-        self.logger.debug("save_chat start")
-        self.logger.debug("[save_chat]room_id:{}".format(int(room_id)))
-        self.logger.debug("[save_chat]content:{}".format(str(content)))
-        self.logger.debug("[save_chat]position_id:{}".format(position_id))
-        self.logger.debug("[save_chat]speaker:{}".format(speaker))
-        self.logger.debug("save_chat end")
-
         ret = yield self.chat_service_cilent.saveChat(int(room_id), str(content), int(position_id), int(speaker))
-        self.logger.debug("[thrift]save_chat: %s" % ret)
         raise gen.Return(ret)

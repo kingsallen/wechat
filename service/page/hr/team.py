@@ -1,5 +1,4 @@
 # coding=utf-8
-# Copyright 2016 MoSeeker
 
 """
 :author 马超（machao@moseeker.com）
@@ -12,13 +11,15 @@ from tornado import gen
 
 from conf import path
 from service.page.base import PageService
-from tests.dev_data.user_company_config import COMPANY_CONFIG
 from util.common import ObjectDict
 from util.tool import temp_data_tool
-from util.tool.url_tool import make_url
+from util.tool.url_tool import make_url, make_static_url
+from util.tool.str_tool import gen_salary, split
 
+from tests.dev_data.user_company_config import COMPANY_CONFIG
 
 class TeamPageService(PageService):
+
     def __init__(self):
         super().__init__()
 
@@ -36,6 +37,12 @@ class TeamPageService(PageService):
         raise gen.Return(team)
 
     @gen.coroutine
+    def get_team(self, conds):
+        team = yield self.hr_team_ds.get_team(conds=conds)
+
+        raise gen.Return(team)
+
+    @gen.coroutine
     def get_team_by_name(self, department, company_id):
         team = yield self.hr_team_ds.get_team(
             conds={'company_id': company_id, 'name': department, 'disable': 0})
@@ -48,7 +55,7 @@ class TeamPageService(PageService):
 
         :param company: 当前需要获取数据的公司
         :param handler_param: 请求中参数
-        :param sub_flag: 区分母公司和子公司标识， 用以明确团队资源获取方式
+        :param sub_flag: 区分母公司和子公司标识，用以明确团队资源获取方式
         :param parent_company: 当sub_flag为True时, 表示母公司信息
         :return:
         """
@@ -79,7 +86,7 @@ class TeamPageService(PageService):
             temp_data_tool.make_team_index_template(
                 team=t,
                 team_resource=team_resource_dict.get(t.res_id),
-                more_link=make_url(path.TEAM_PATH.format(t.id), handler_param),
+                more_link=make_url(path.TEAM_PATH.format(t.id), handler_param, self.settings.platform_host),
                 member_list=[
                     temp_data_tool.make_team_member(
                         member=m,
@@ -93,7 +100,7 @@ class TeamPageService(PageService):
         raise gen.Return(data)
 
     @gen.coroutine
-    def get_team_detail(self, user, company, team, handler_param, position_num=3):
+    def get_team_detail(self, user, company, team, handler_param, position_num=3, is_gamma=False):
         """
 
         :param user: handler中的current_user
@@ -101,6 +108,7 @@ class TeamPageService(PageService):
         :param team: 当前需要获取详情的team
         :param handler_param: 请求中参数
         :param position_num: 该团队在招职位的展示数量
+        :param is_gamma: 是否来自 gamma 需求
         :return:
         """
         data = ObjectDict()
@@ -111,7 +119,8 @@ class TeamPageService(PageService):
         # 根据母公司，子公司区分对待，获取对应的职位信息，其他团队信息
         position_fields = 'id title status city team_id \
                            salary_bottom salary_top department'.split()
-        if company.id != user.company.id:
+
+        if company.id != user.company.id and not is_gamma:
             # 子公司 -> 子公司所属hr(pulishers) -> positions -> teams
             company_positions = yield self._get_sub_company_positions(
                 company.id, position_fields)
@@ -272,9 +281,68 @@ class TeamPageService(PageService):
             team_id_tuple = tuple(team_ids)
 
         if not team_id_tuple:
-            gen.Return([])
+            raise gen.Return([])
+
         teams = yield self.hr_team_ds.get_team_list(
             conds='id in {} and is_show=1 and disable=0'.format(
                 team_id_tuple).replace(',)', ')'))
 
         raise gen.Return(teams)
+
+    @gen.coroutine
+    def get_gamma_company_team(self, company_id):
+        """
+        获得团队在招职位数
+        :param company_id:
+        :return:
+        """
+
+        teams = yield self.hr_team_ds.get_team_list(
+            conds={'company_id': company_id, 'is_show': 1, 'disable': 0})
+        teams.sort(key=lambda t: t.show_order)
+
+        team_list = list()
+        for team in teams:
+            position_cnt = yield self.job_position_ds.get_position_cnt(conds={
+                "team_id": team.id,
+                "status": 0
+            }, fields=["id"])
+
+            # 职位数为0不显示
+            if position_cnt.get("count_id", 0) == 0:
+                continue
+
+            item = ObjectDict()
+            item["name"] = team.name
+            item["id"] = team.id
+            item["count"] = position_cnt.get("count_id", 0)
+            team_list.append(item)
+
+        return team_list
+
+    @gen.coroutine
+    def get_gamma_team_positions(self, team_id, page_no, page_size=5):
+        # gamma 团队页获得团队在招职位
+
+        page_from = (page_no - 1) * page_size
+
+        team_positions = yield self.job_position_ds.get_positions_list(
+            conds={
+                'status': 0,
+                'team_id': team_id
+            },
+            appends=["ORDER BY update_time desc", "LIMIT %d, %d" % (page_from, page_size)]
+        )
+
+        res_list = list()
+        for item in team_positions:
+            pos = ObjectDict()
+            pos.title=item.title
+            pos.id=item.id
+            pos.salary=gen_salary(item.salary_top, item.salary_bottom)
+            pos.image_url=make_static_url("")
+            pos.city=split(item.city, [",","，"])
+            pos.team_name=""
+            res_list.append(pos)
+
+        return res_list

@@ -8,7 +8,6 @@ from tornado.escape import json_decode
 import conf.common as const
 from service.page.base import PageService
 from util.common import ObjectDict
-from util.common.decorator import cache
 from util.tool.date_tool import curr_datetime_now
 
 
@@ -96,7 +95,8 @@ class ProfilePageService(PageService):
 
     @gen.coroutine
     def has_profile(self, user_id):
-        """判断 user_user 是否有 profile
+        """
+        判断 user_user 是否有 profile (profile_profile 表数据)
         :param user_id:
         :return: tuple (bool, profile or None)
 
@@ -105,6 +105,20 @@ class ProfilePageService(PageService):
         """
 
         result, profile = yield self.infra_profile_ds.get_profile(user_id)
+        return result, profile
+
+    @gen.coroutine
+    def has_profile_by_uuid(self, uuid):
+        """
+        判断 user_user 是否有 profile (profile_profile 表数据)
+        :param uuid:
+        :return: tuple (bool, profile or None)
+
+        调用方式:
+        profile = has_profile[1]
+        """
+
+        result, profile = yield self.infra_profile_ds.get_profile_by_uuid(uuid)
         return result, profile
 
     @gen.coroutine
@@ -314,28 +328,17 @@ class ProfilePageService(PageService):
 
     @gen.coroutine
     def create_profile_education(self, record, profile_id, mode='m'):
-        self.logger.debug("create_profile_education start")
         if mode == 'm':  # 老六步
             pass
 
         else:
-            self.logger.debug("create_profile_education else")
             raise ValueError('invalid mode')
-
-        self.logger.debug("create_profile_education")
-        self.logger.debug("create_profile_education record:{}".format(record))
-        self.logger.debug("create_profile_education record.college_name:{}".format(record.college_name))
 
         college_code = yield self.infra_dict_ds.get_college_code_by_name(
             record.college_name)
 
-        self.logger.debug("create_profile_education college_code:{}".format(college_code))
-
         result, data = yield self.infra_profile_ds.create_profile_education(
             record, profile_id, college_code)
-
-        self.logger.debug("create_profile_education result:{}".format(result))
-        self.logger.debug("create_profile_education data:{}".format(data))
 
         return result, data
 
@@ -719,8 +722,7 @@ class ProfilePageService(PageService):
             intention = p_intentions[0]
             position = u""
             if intention.get("positions", []):
-                position = intention.get("positions")[0].get('position_name',
-                                                             '')
+                position = intention.get("positions")[0].get('position_name','')
 
             worktype_name = intention.get("worktype_name", "未选择")
 

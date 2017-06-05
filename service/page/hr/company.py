@@ -10,7 +10,7 @@ from tornado import gen
 from service.page.base import PageService
 from util.tool.url_tool import make_static_url
 from util.tool.dict_tool import sub_dict
-from util.tool.str_tool import is_odd
+from util.tool.str_tool import is_odd, split, gen_salary
 
 cached_company_sug_wechat = None
 
@@ -69,9 +69,12 @@ class CompanyPageService(PageService):
                 "conf_job_custom_title": company_conf_res.get("job_custom_title"),
                 "conf_search_seq": search_seq,
                 "conf_search_img": company_conf_res.get("search_img"),
+                "conf_job_occupation": company_conf_res.get("job_occupation"),
                 "conf_newjd_status": company_conf_res.get("newjd_status"),
                 "conf_teamname_custom": company_conf_res.get("teamname_custom"),  # 职位部门字段名称
                 "conf_application_time": company_conf_res.get("application_time"),  # 新JD开通申请时间
+                "conf_hr_chat": company_conf_res.get("hr_chat"),  # IM 聊天开关
+                "conf_show_in_qx": company_conf_res.get("show_in_qx"),  # 公司信息、团队信息、职位信息等只在仟寻展示
             })
 
             # 处理公司自定义团队名称
@@ -217,6 +220,33 @@ class CompanyPageService(PageService):
             return res.reward
 
         return 0
+
+    @gen.coroutine
+    def get_company_positions(self, company_id, page_no=1, page_size=5):
+        """
+        gamma 公司主页，企业热招职位
+        :param company_id:
+        :param page_no:
+        :param page_size:
+        :return:
+        """
+
+        res_list = list()
+        ret = yield self.thrift_position_ds.get_company_positions(company_id, page_no, page_size)
+        if not ret.data:
+            return res_list
+
+        for item in ret.data:
+            pos = ObjectDict()
+            pos.title=item.title
+            pos.id=item.id
+            pos.salary=gen_salary(item.salaryTop, item.salaryBottom)
+            pos.image_url=make_static_url(item.resUrl)
+            pos.city=split(item.city, [",","，"])
+            pos.team_name=item.teamName
+            res_list.append(pos)
+
+        return res_list
 
     @gen.coroutine
     def create_company(self, params):

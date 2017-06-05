@@ -9,7 +9,6 @@ import conf.message as messages
 from handler.base import BaseHandler
 from util.common import ObjectDict
 from util.common.decorator import handle_response, authenticated
-from util.tool.url_tool import make_url
 from util.tool.json_tool import json_dumps
 from util.tool.str_tool import to_str
 
@@ -93,8 +92,6 @@ class EmployeeUnbindHandler(BaseHandler):
                 self.current_user.company.id,
                 self.current_user.sysuser.id
             )
-            self.logger.debug('unbind result: %s' % result)
-            self.logger.debug('unbind message: %s' % message)
             if result:
                 self.send_json_success()
             else:
@@ -105,7 +102,7 @@ class EmployeeUnbindHandler(BaseHandler):
 
 class EmployeeBindHandler(BaseHandler):
     """员工绑定 API
-    /m/api/employee/binding"""
+    /api/employee/binding"""
 
     @handle_response
     @authenticated
@@ -122,7 +119,6 @@ class EmployeeBindHandler(BaseHandler):
         # 根据 conf 来构建 api 的返回 data
         data = yield self.employee_ps.make_binding_render_data(
             self.current_user, conf_response.employeeVerificationConf)
-        self.logger.debug(data)
         self.send_json_success(data=data)
 
     @handle_response
@@ -149,8 +145,6 @@ class EmployeeBindHandler(BaseHandler):
             return
 
         result, result_message = yield self.employee_ps.bind(binding_params)
-        self.logger.debug("bind_result: %s" % result)
-        self.logger.debug("result_message: %s" % result_message)
 
         # early return 2
         if not result:
@@ -164,20 +158,18 @@ class EmployeeBindHandler(BaseHandler):
         if refine_info_way == const.EMPLOYEE_CUSTOM_FIELD_REFINE_REDIRECT:
             custom_fields = yield self.employee_ps.get_employee_custom_fields(self.current_user.company.id)
             if custom_fields:
-                next_url = make_url(path.EMPLOYEE_CUSTOMINFO, self.params, from_wx_template='x')
+                next_url = self.make_url(path.EMPLOYEE_CUSTOMINFO, self.params, from_wx_template='x')
             else:
-                next_url = make_url(path.EMPLOYEE_BINDED, self.params)
+                next_url = self.make_url(path.EMPLOYEE_BINDED, self.params)
 
         elif refine_info_way == const.EMPLOYEE_CUSTOM_FIELD_REFINE_TEMPLATE_MSG:
             yield self.employee_ps.send_emp_custom_info_template(
                 self.current_user)
 
-            next_url = make_url(path.EMPLOYEE_BINDED, self.params)
+            next_url = self.make_url(path.EMPLOYEE_BINDED, self.params)
         else:
             assert False  # should not be here
 
-        self.logger.debug(next_url)
-        self.logger.debug(message)
         self.send_json_success(
             data={'next_url': next_url},
             message=message
@@ -210,11 +202,7 @@ class EmployeeBindEmailHandler(BaseHandler):
         self.render(template_name='employee/certification-%s.html' % tname,
                     **tparams)
 
-        self.logger.debug("[EV]params: %s" % self.params)
         employee = yield self.user_ps.get_employee_by_id(employee_id)
-
-        self.logger.debug("[EV]result: %s" % result)
-        self.logger.debug("[EV]employee: %s" % employee)
 
         if result and employee:
             # 处理员工认证红包开始
@@ -264,9 +252,6 @@ class CustomInfoHandler(BaseHandler):
         fe_binding_status = self.employee_ps.convert_bind_status_from_thrift_to_fe(
             binding_status)
 
-        self.logger.debug('binding_status: %s' % binding_status)
-        self.logger.debug('fe_binding_status: %s' % fe_binding_status)
-
         # unbinded users may not need to know this page
         if (fe_binding_status not in [fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS,
                                       fe.FE_EMPLOYEE_BIND_STATUS_PENDING]):
@@ -278,11 +263,13 @@ class CustomInfoHandler(BaseHandler):
         selects = yield self.employee_ps.get_employee_custom_fields(
             self.current_user.company.id)
 
+        # 因为要传给前端使用， 添加 /m 路由，代表企业号链接
+        action_url = '/m' + path.EMPLOYEE_CUSTOMINFO
         data = ObjectDict(
             selects=selects,
             from_wx_template=self.params.from_wx_template or "x",
             employee_id=employee.id,
-            action_url=path.EMPLOYEE_CUSTOMINFO
+            action_url=action_url
         )
 
         self.render_page(
@@ -325,8 +312,7 @@ class CustomInfoHandler(BaseHandler):
         # 判断与跳转
         self.params.pop('next_url', None)
         self.params.pop('headimg', None)
-        next_url = make_url(path.POSITION_LIST, self.params, escape=escape,
-                            noemprecom=str(const.YES))
+        next_url = self.make_url(path.POSITION_LIST, self.params, noemprecom=str(const.YES), escape=escape)
 
         if self.params.from_wx_template == "o":
             message = messages.EMPLOYEE_BINDING_CUSTOM_FIELDS_DONE
@@ -359,7 +345,6 @@ class BindedHandler(BaseHandler):
         )
 
         # unbinded users may not need to know this page
-
         fe_bind_status = self.employee_ps.convert_bind_status_from_thrift_to_fe(
             binding_status)
 
@@ -377,7 +362,7 @@ class BindedHandler(BaseHandler):
                 template_name='refer/weixin/employee/employee_binding_tip_v2.html',
                 result=0,
                 messages=message,
-                nexturl=make_url(path.POSITION_LIST, self.params,
+                nexturl=self.make_url(path.POSITION_LIST, self.params,
                                  noemprecom=str(const.YES)),
                 button_text=messages.EMPLOYEE_BINDING_DEFAULT_BTN_TEXT
             )
