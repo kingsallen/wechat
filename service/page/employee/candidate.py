@@ -35,9 +35,20 @@ class CandidatePageService(PageService):
     def post_recommend(self, post_user_id, click_time, recom_record_id,
                        realname, company, position, mobile, recom_reason,
                        company_id):
-        ret = yield self.thrift_candidate_ds.recommend(
+        infra_ret = yield self.thrift_candidate_ds.recommend(
             post_user_id, click_time, recom_record_id, realname, company,
             position, mobile, recom_reason, company_id)
+
+        ret = ObjectDict(
+            next_one=infra_ret.nextOne,
+            position_name=infra_ret.positionName,
+            recom_index=infra_ret.recomIndex,
+            id=infra_ret.id,
+            click_time=infra_ret.clickTime,
+            recom_ignore=infra_ret.recomIgnore,
+            recom_total=infra_ret.recomTotal,
+            presentee_name=infra_ret.presenteeName
+        )
 
         return ret
 

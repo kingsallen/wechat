@@ -190,7 +190,7 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
         self.render(
             template_name="refer/weixin/passive-seeker_v2/passive-wanting_recom.html",
             passive_seekers=passive_seekers,
-            message=message,
+            message=message
         )
 
     @tornado.gen.coroutine
@@ -211,6 +211,8 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
         next_passive_seeker = yield self.candidate_ps.get_recommendations(
             self.current_user.company.id, list_of_ids)
 
+        self.logger.debug("next_passive_seeker: %s" % next_passive_seeker)
+
         # 返回第一个推荐的被动求职者
         self.render(
             template_name="refer/weixin/passive-seeker_v2/passive-wanting_form.html",
@@ -225,6 +227,8 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
 
         passive_seeker = yield self.candidate_ps.get_recommendation(
             id, self.current_user.sysuser.id)
+
+        self.logger.debug("passive_seeker: %s" % passive_seeker)
 
         if passive_seeker:
             # 由于是从 "推荐TA" 进入的，所以没有循环推荐的逻辑，hardcode 以下值
@@ -262,7 +266,7 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
         self.logger.debug("post_recom_passive_seeker form_items: %s" % form_items)
 
         # 如果校验失败返回原页面并附加 message
-        message = None
+        message = ''
         if any([(x == '') for x in form_items]):
             message = '有必填项未填写'
 
@@ -322,7 +326,7 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
             )
 
             # 已经全部推荐了
-            if recom_result.recomTotal == recom_result.recomIndex + recom_result.recomIgnore:
+            if recom_result.recom_total == recom_result.recom_index + recom_result.recom_ignore:
 
                 stats = yield self.candidate_ps.sorting(
                     self.current_user.sysuser.id, self.current_user.company.id)
@@ -335,7 +339,10 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
 
             # 还有未推荐的
             else:
+                self.logger.debug("passive_seeker: %s" % recom_result)
                 self.render(
                     template_name="refer/weixin/passive-seeker_v2/passive-wanting_form.html",
                     passive_seeker=recom_result,
-                    recommend_presentee=self.recommend_presentee)
+                    recommend_presentee=self.recommend_presentee,
+                    message=message
+                )

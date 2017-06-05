@@ -8,6 +8,7 @@ from thrift_gen.gen.candidate.service.CandidateService import Client as Candidat
 from thrift_gen.gen.candidate.struct.ttypes import CandidateListParam, RecommmendParam
 from thrift_gen.gen.common.struct.ttypes import BIZException
 from util.common import ObjectDict
+import conf.common as const
 
 
 class ThriftCandidateDataService(DataService):
@@ -65,8 +66,8 @@ class ThriftCandidateDataService(DataService):
                     c_info.presentee_friend_name = c.presenteeFriendName  # 一度朋友称呼
                     c_info.presentee_logo = c.presenteeLogo               # 头像
                     c_info.is_recom = c.isRecom                           # 推荐状态
-                    c_info.is_interested = c.insterested or 1
-                    c_info.view_number = c.viewNumber or 0
+                    c_info.is_interested = const.YES if c.insterested else const.NO
+                    c_info.view_number = c.viewNumber
                     recom_group.candidates.append(c_info)
 
                 ret.append(recom_group)
