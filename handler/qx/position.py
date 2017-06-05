@@ -9,6 +9,7 @@ import random
 from tornado import gen
 
 import conf.path as path
+import conf.common as const
 from handler.base import BaseHandler
 from util.common.decorator import handle_response
 from util.common import ObjectDict
@@ -106,6 +107,8 @@ class PositionHandler(BaseHandler):
         else:
             cover = job_img
 
+        hr_image = yield self._make_hr_info(position_info.publisher, company_info)
+
         position = ObjectDict(
             id=position_info.id,
             title=position_info.title,
@@ -124,11 +127,22 @@ class PositionHandler(BaseHandler):
             appid=application.id or 0,
             is_collected=star,
             can_apply=not can_apply,
-            hr_chat=bool(parent_cmp_info.conf_hr_chat),
+            hr_chat=parent_cmp_info.conf_hr_chat != 0,
             hr_id=position_info.publisher,
+            hr_icon=self.static_url(hr_image)
         )
 
         return position, cover
+
+    @gen.coroutine
+    def _make_hr_info(self, publisher, company_info):
+        """根据职位 publisher 返回 hr 的相关信息 tuple"""
+        hr_account, hr_wx_user = yield self.position_ps.get_hr_info(publisher)
+        hrheadimgurl = (
+            hr_account.headimgurl or hr_wx_user.headimgurl or
+            company_info.logo or const.HR_HEADIMG
+        )
+        raise gen.Return(hrheadimgurl)
 
     @gen.coroutine
     def _make_jd_detail(self, position_info, pos_item):
