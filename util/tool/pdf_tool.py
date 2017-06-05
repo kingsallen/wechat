@@ -84,7 +84,7 @@ def generate_html_template_resume(employee, conf, profile, template_others, posi
         static_url=make_static_url,
         pc=settings.pc_host)
 
-def generate_resume_for_hr(profile,template_others,dict_conf,position,real_company_info):
+def generate_resume_for_hr(profile,template_others,dict_conf,position,real_company_info,profile_full_url):
     import datetime
     year=datetime.date.today().year
     loader = template.Loader(resume_tpath)
@@ -93,6 +93,7 @@ def generate_resume_for_hr(profile,template_others,dict_conf,position,real_compa
         const=dict_conf,
         position=position,
         real_company_info=real_company_info,
+        profile_full_url=profile_full_url,
         year=year)
     return body
 

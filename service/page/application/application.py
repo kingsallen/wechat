@@ -890,8 +890,8 @@ class ApplicationPageService(PageService):
         #                 self.settings.resume_path,
         #                 dict_conf,
         #     )
-
-        body=generate_resume_for_hr(profile,template_others,dict_conf,position,real_company_info)
+        profile_full_url="https://hr.moseeker.com/admin/application/%s/view&pos_title/" % current_user.sysuser.id
+        body=generate_resume_for_hr(profile,template_others,dict_conf,position,real_company_info,profile_full_url)
 
 
 
