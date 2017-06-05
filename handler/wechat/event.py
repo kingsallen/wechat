@@ -74,13 +74,6 @@ class WechatOauthHandler(MetaBaseHandler):
     @gen.coroutine
     def _post(self):
 
-        self.logger.debug("oauth: %s" % self.request.uri)
-        self.logger.debug("oauth msg: %s" % self.msg)
-        self.logger.debug("oauth params: %s" % self.params)
-        self.logger.debug("oauth current_user: %s" % self.current_user)
-        self.logger.debug(
-            "++++++WECHAT START++++++++++++++++++++++++++++++++++++++\n")
-
         try:
             msg_type = self.msg['MsgType']
             if self.verification():

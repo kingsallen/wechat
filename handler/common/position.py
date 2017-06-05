@@ -6,7 +6,6 @@ import conf.common as const
 import conf.path as path
 from handler.base import BaseHandler
 from util.common.decorator import handle_response, authenticated
-from util.tool.url_tool import make_url
 
 
 class PositionStarHandler(BaseHandler):
@@ -24,12 +23,12 @@ class PositionStarHandler(BaseHandler):
         # 收藏操作
         if self.params.star:
             ret = yield self.user_ps.favorite_position(
-                self.current_user, self.params.pid)
+                self.current_user.sysuser.id, self.params.pid)
         else:
             ret = yield self.user_ps.unfavorite_position(
-                self.current_user, self.params.pid)
+                self.current_user.sysuser.id, self.params.pid)
 
-        if ret:
+        if ret == 0:
             self.send_json_success()
         else:
             self.send_json_error()
@@ -51,16 +50,23 @@ class PositionFavHandler(BaseHandler):
             self.current_user.wxuser.id,
             self.current_user.recom.id if self.current_user.recom else 0)
 
-        application_url = make_url(
+        application_url = self.make_url(
             path.APPLICATION,
             self.params,
             pid=position_id,
             escape=['next_url', 'name', 'company', 'position'])
 
-        position_info_url = make_url(
-            path.POSITION_PATH.format(position_id),
-            self.params,
-            escape=['next_url', 'name', 'company', 'position'])
+        # 企业号，聚合号职位详情页链接不同
+        if self.is_platform:
+            position_info_url = self.make_url(
+                path.POSITION_PATH.format(position_id),
+                self.params,
+                escape=['next_url', 'name', 'company', 'position'])
+        else:
+            position_info_url = self.make_url(
+                path.GAMMA_POSITION_HOME.format(position_id),
+                self.params,
+                escape=['next_url', 'name', 'company', 'position'])
 
         self.render(template_name="refer/weixin/sysuser/interest-success.html",
                     application_url=application_url,

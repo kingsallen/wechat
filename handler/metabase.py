@@ -22,11 +22,12 @@ from tornado import web, gen
 
 import conf.message as msg_const
 import conf.common as const
+import conf.path as path
 from util.common import ObjectDict
 from util.tool.dict_tool import objectdictify
 from util.tool.date_tool import curr_now
 from util.tool.str_tool import to_str
-from util.tool.url_tool import make_static_url
+from util.tool.url_tool import make_static_url, make_url
 from util.tool.json_tool import encode_json_dumps, json_dumps
 
 # 动态加载所有 PageService
@@ -64,6 +65,7 @@ class MetaBaseHandler(AtomHandler):
         self._in_wechat, self._client_type = self._depend_wechat()
         # 日志信息
         self._log_info = None
+        self._log_customs = ObjectDict()
         # page service 初始化
 
     def initialize(self, event):
@@ -110,6 +112,18 @@ class MetaBaseHandler(AtomHandler):
     @property
     def in_wechat_android(self):
         return self.in_wechat and self._client_type == const.CLIENT_TYPE_ANDROID
+
+    @property
+    def host(self):
+        """判断当前 host，不能简单的从 request.host获得"""
+        if self.is_platform:
+            host = self.settings.platform_host
+        elif self.is_qx:
+            host = self.settings.qx_host
+        else:
+            host = self.settings.helper_host
+
+        return host
 
     @property
     def app_id(self):
@@ -222,17 +236,16 @@ class MetaBaseHandler(AtomHandler):
         self.logger.stats(
             ujson.dumps(self._get_info_header(info), ensure_ascii=0))
 
-        self.logger.debug(
-            "mviewer_id: {}".format(self.get_secure_cookie(const.COOKIE_MVIEWERID)))
-        self.logger.debug(
-            "session_id: {}".format(self.get_secure_cookie(const.COOKIE_SESSIONID)))
-
     def write_error(self, http_code, **kwargs):
         """错误页
         403（用户未被授权请求） Forbidden: Request failed because user does not have authorization to access a specific resource
         404（资源不存在）      Resource not found
         500（服务器错误）      Internal Server Error: Something went wrong on the server, check status site and/or report the issue
         """
+
+        if self.is_qx:
+            self.redirect(make_url(path.GAMMA_404, host=self.host))
+            return
 
         template = 'system/info.html'
 
@@ -332,7 +345,6 @@ class MetaBaseHandler(AtomHandler):
             data = ""
 
         self.log_info = {"res_type": "xml"}
-        self.logger.debug("Wechat MSG: %s" % data)
         self.write(data)
 
     def send_json_success(self, data=None, message=msg_const.RESPONSE_SUCCESS,
@@ -376,9 +388,9 @@ class MetaBaseHandler(AtomHandler):
         # 简历导入 post 请求 _password 参数需要剔除
         req_params.pop('_password', None)
 
-        customs = ObjectDict(
-            type_wechat=self._in_wechat,
-            type_mobile=self._client_type)
+        customs = self._log_customs or ObjectDict()
+        customs.update(
+            type_wechat=self._in_wechat, type_mobile=self._client_type)
 
         if self.current_user:
             customs.update(
@@ -386,12 +398,14 @@ class MetaBaseHandler(AtomHandler):
                 qxuser_id=self.current_user.get("qxuser", {}).get("id", 0),
                 wxuser_id=self.current_user.get("wxuser", {}).get("id", 0),
                 wechat_id=self.current_user.get("wechat", {}).get("id", 0))
+
             user_id = self.current_user.get("sysuser", {}).get("id", 0)
         else:
             user_id = 0
 
         log_info_common = ObjectDict(
             req_time=curr_now(),
+            timestamp=time.time(),
             hostname=socket.gethostname(),
             appid=self.app_id,
             http_code=self.get_status(),
@@ -415,6 +429,8 @@ class MetaBaseHandler(AtomHandler):
         )
 
         log_params.update(log_info_common)
+
+        self._log_customs = None
         return log_params
 
     def _depend_wechat(self):

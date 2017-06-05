@@ -8,8 +8,6 @@ import conf.path as path
 from handler.base import BaseHandler
 from util.common import ObjectDict
 from util.common.decorator import handle_response
-from util.tool.url_tool import make_url
-
 
 class LandingHandler(BaseHandler):
     """
@@ -41,9 +39,7 @@ class LandingHandler(BaseHandler):
             "search_seq": search_seq
         })
 
-        self.logger.debug("[LANDING]构建转发信息")
         yield self._make_share_info(self.current_user.company)
-        self.logger.debug("share: {}".format(self.params.share))
 
         self.render(template_name="company/search.html", company=company)
 
@@ -55,11 +51,9 @@ class LandingHandler(BaseHandler):
         title = "{}高级搜索".format(company_info.abbreviation)
         description = ""
 
-        link = make_url(
+        link = self.make_url(
             path.SEARCH_FILITER,
             self.params,
-            host=self.request.host,
-            protocol=self.request.protocol,
             recom=self.position_ps._make_recom(self.current_user.sysuser.id),
             escape=["pid"]
         )

@@ -33,7 +33,6 @@ class ThriftMqDataService(DataService):
 
         sys = 2 if isqx else 1
         ret = yield self.mq_service_cilent.sendSMS(sms_type, str(mobile), params, str(sys), str(ip))
-        self.logger.debug("[thrift]send_sms: %s" % ret)
         result = bool(ret.status == self.constant.API_SUCCESS)
         return result, ret.message
 
@@ -59,15 +58,5 @@ class ThriftMqDataService(DataService):
                                            str(from_name),
                                            str(subject))
 
-        self.logger.debug("template_name:{}".format(template_name))
-        self.logger.debug("to_email:{}".format(to_email))
-        self.logger.debug("to_name:{}".format(to_name))
-        self.logger.debug("merge_vars:{}".format(merge_vars))
-        self.logger.debug("from_email:{}".format(from_email))
-        self.logger.debug("from_name:{}".format(from_name))
-        self.logger.debug("subject:{}".format(subject))
-
-
         ret = yield self.mq_service_cilent.sendMandrilEmail(mandrill_obj)
-        self.logger.debug("[thrift]send_mandrill_email: %s" % ret)
         raise gen.Return(ret)

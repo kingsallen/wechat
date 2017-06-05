@@ -51,10 +51,8 @@ class UsercenterHandler(BaseHandler):
             self.current_user.sysuser.id,
             self.current_user.company.id
         )
-        self.logger.debug('bind_status: %s' % bind_status)
         fe_bind_status = self.employee_ps.convert_bind_status_from_thrift_to_fe(
             bind_status)
-        self.logger.debug('fe_bind_status: %s' % fe_bind_status)
 
         self.send_json_success(data=ObjectDict(
             headimg=self.static_url(res.data.headimg or const.SYSUSER_HEADIMG),
@@ -151,7 +149,7 @@ class FavPositionHandler(BaseHandler):
         :return:
         """
 
-        res = yield self.usercenter_ps.get_fav_positions(self.current_user.sysuser.id)
+        res = yield self.usercenter_ps.get_collect_positions(self.current_user.sysuser.id)
         self.send_json_success(data=ObjectDict(records=res))
 
 
@@ -170,13 +168,11 @@ class ApplyRecordsHandler(BaseHandler):
         if apply_id:
             # 查看具体申请记录的进度
             res = yield self.usercenter_ps.get_applied_progress(self.current_user.sysuser.id, apply_id)
-            self.logger.debug("get_applied_progress: %s" % res)
             self.send_json_success(data=res)
 
         else:
             # 查看申请记录列表
             res = yield self.usercenter_ps.get_applied_applications(self.current_user.sysuser.id)
-            self.logger.debug("get_applied_applications: %s" % res)
             self.send_json_success(data=ObjectDict(
                 records=res
             ))

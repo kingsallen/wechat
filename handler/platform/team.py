@@ -13,6 +13,7 @@ from util.tool.url_tool import url_append_query
 
 
 class TeamIndexHandler(BaseHandler):
+
     @NewJDStatusChecker404()
     @handle_response
     @check_sub_company
@@ -40,7 +41,7 @@ class TeamIndexHandler(BaseHandler):
             "cover": self.static_url(company.logo),
             "title": company_name + "的核心团队点此查看",
             "description": "这可能是你人生的下一站! 不先了解一下未来同事吗?",
-            "link": self.fullurl
+            "link": self.fullurl()
         })
         config = COMPANY_CONFIG.get(company.id)
         if config and config.get('transfer', False) and config.transfer.get('tl', False):
@@ -50,6 +51,7 @@ class TeamIndexHandler(BaseHandler):
 
 
 class TeamDetailHandler(BaseHandler):
+
     @NewJDStatusChecker404()
     @handle_response
     @check_sub_company
@@ -79,7 +81,7 @@ class TeamDetailHandler(BaseHandler):
             "cover": url_append_query(share_cover_url, "imageMogr2/thumbnail/!300x300r"),
             "title": team_name.upper() + "-" + company_name,
             "description": '通常你在点击“加入我们”之类的按钮之前并不了解我们, 现在给你个机会!',
-            "link": self.fullurl
+            "link": self.fullurl()
         })
         config = COMPANY_CONFIG.get(company.id)
         if config and config.get('transfer', False) and config.transfer.get('td', False):

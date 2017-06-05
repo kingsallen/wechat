@@ -45,7 +45,7 @@ class TestMakeUrl(unittest.TestCase):
 class TestUrlSubstractQuery(unittest.TestCase):
 
     def setUp(self):
-        self.ORIGIN = "http://path/to/test?arg1=v1&arg2=v2&code=code123&status=st"
+        self.ORIGIN = "https://platform2.dqprism.com/position/2?arg1=v1&arg2=v2&code=code123&status=st"
 
     def test_normal_case(self):
         out = url_subtract_query(self.ORIGIN, ['code', 'status'])

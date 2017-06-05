@@ -1,5 +1,4 @@
 # coding=utf-8
-# Copyright 2016 MoSeeker
 
 """
 :author 马超（machao@moseeker.com）
@@ -7,8 +6,11 @@
 
 """
 
+import re
+import operator
 from tornado import gen
 
+import conf.path as path
 from service.page.base import PageService
 from util.common import ObjectDict
 from util.tool.url_tool import make_url
@@ -16,19 +18,17 @@ from util.tool import temp_data_tool
 from util.tool import iterable_tool
 from util.tool.temp_data_tool import make_up_for_missing_res
 from tests.dev_data.user_company_config import COMPANY_CONFIG
-import conf.path as path
-import re
-import operator
 
 
 class UserCompanyPageService(PageService):
+
     def __init__(self):
         super().__init__()
 
     @gen.coroutine
     def get_company_data(self, handler_params, company, user):
         """
-
+        构造企业主页，供企业号，gamma 使用
         :param handler_params:
         :param company: 当前公司
         :param user: current_user
@@ -42,7 +42,7 @@ class UserCompanyPageService(PageService):
             conds = {'user_id': user.sysuser.id, 'company_id': company.id}
             vst_cmpy = yield self.user_company_visit_req_ds.get_visit_cmpy(
                 conds=conds, fields=['id', 'company_id'])
-        team_index_url = make_url(path.COMPANY_TEAM, handler_params)
+        team_index_url = make_url(path.COMPANY_TEAM, handler_params, self.settings.platform_host)
 
         # 拼装模板数据
         data.header = temp_data_tool.make_header(company)
@@ -61,7 +61,6 @@ class UserCompanyPageService(PageService):
             data.relation.custom_visit_recipe = []
 
         data.templates = yield self._get_company_cms_page(company.id, user, team_index_url)
-
         data.template_total = len(data.templates)
 
         # 自定义团队文案
@@ -72,6 +71,7 @@ class UserCompanyPageService(PageService):
 
     @staticmethod
     def _make_qrcode(qrcode_url):
+
         link_head = 'https://www.moseeker.com/common/image?url={}'
         if qrcode_url and \
             not re.match(

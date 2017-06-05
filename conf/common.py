@@ -48,7 +48,7 @@ WX_USER_UNSUBSCRIBED = 0
 ENV = "new_wechat"
 ENV_PLATFORM = "platform"
 ENV_QX = "qx"
-ENV_HELP = "help"
+ENV_HELP = "helper"
 
 """appid for infra"""
 APPID = {
@@ -95,7 +95,8 @@ PAGE_POSITION_INFO = "职位详情"
 PAGE_COMPANY_INFO = "公司详情"
 PAGE_REGISTER = "注册"
 PAGE_FORGET_PASSWORD = "忘记密码"
-
+PROFILE_PREVIEW = "预览个人档案"
+PROFIEL_VIEW = "个人信息"
 
 # ++++++++++REDIS KEYS++++++++
 SESSION_USER = "SESSION_USER_{0}_{1}"
@@ -142,8 +143,6 @@ OLD_YES = 0
 OLD_NO = 1
 
 # 我感兴趣状态常量
-FAV_YES = 0
-FAV_NO = 1
 FAV_INTEREST = 2
 
 # 职位相关，主要涉及到职位，职位列表，搜索页

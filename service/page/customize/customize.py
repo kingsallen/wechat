@@ -63,7 +63,7 @@ class CustomizePageService(PageService):
     def get_delegate_drop(self, current_wechat, current_employee, params):
         return ObjectDict({
             'is_delegate_drop': self._is_edx_wechat(current_wechat, current_employee),
-            'delegate_drop_url': make_url(path.CUSTOMIZE_EDX, params, recom_friend=1)
+            'delegate_drop_url': make_url(path.CUSTOMIZE_EDX, params, self.settings.platform_host, recom_friend=1)
         })
 
     @gen.coroutine

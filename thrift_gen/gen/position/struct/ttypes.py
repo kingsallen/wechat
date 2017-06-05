@@ -2075,3 +2075,1047 @@ class ThirdPartyPositionForSynchronizationWithAccount(object):
 
     def __ne__(self, other):
         return not (self == other)
+
+
+class PositionDetails(object):
+    """
+    Attributes:
+     - id
+     - jobnumber
+     - companyId
+     - title
+     - city
+     - department
+     - lJobid
+     - publishDate
+     - stopDate
+     - accountabilities
+     - experience
+     - requirement
+     - salary
+     - language
+     - jobGrade
+     - status
+     - visitnum
+     - lastvisit
+     - source_id
+     - updateTime
+     - businessGroup
+     - employmentType
+     - hrEmail
+     - benefits
+     - degree
+     - feature
+     - emailNotice
+     - candidateSource
+     - occupation
+     - isRecom
+     - industry
+     - hongbaoConfigId
+     - hongbaoConfigRecomId
+     - hongbaoConfigAppId
+     - emailResumeConf
+     - lPostingTargetId
+     - priority
+     - shareTplId
+     - district
+     - count
+     - salaryTop
+     - salaryBottom
+     - experienceAbove
+     - degreeAbove
+     - managementExperience
+     - gender
+     - publisher
+     - appCvConfigId
+     - source
+     - hbStatus
+     - childCompanyId
+     - age
+     - majorRequired
+     - workAddress
+     - keyword
+     - reportingTo
+     - isHiring
+     - underlings
+     - languageRequired
+     - targetIndustry
+     - currentStatus
+     - positionCode
+     - resUrl
+     - teamId
+     - teamName
+     - teamDescription
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'id', None, None, ),  # 1
+        (2, TType.STRING, 'jobnumber', 'UTF8', None, ),  # 2
+        (3, TType.I32, 'companyId', None, None, ),  # 3
+        (4, TType.STRING, 'title', 'UTF8', None, ),  # 4
+        (5, TType.STRING, 'city', 'UTF8', None, ),  # 5
+        (6, TType.STRING, 'department', 'UTF8', None, ),  # 6
+        (7, TType.I32, 'lJobid', None, None, ),  # 7
+        (8, TType.STRING, 'publishDate', 'UTF8', None, ),  # 8
+        (9, TType.STRING, 'stopDate', 'UTF8', None, ),  # 9
+        (10, TType.STRING, 'accountabilities', 'UTF8', None, ),  # 10
+        (11, TType.STRING, 'experience', 'UTF8', None, ),  # 11
+        (12, TType.STRING, 'requirement', 'UTF8', None, ),  # 12
+        (13, TType.STRING, 'salary', 'UTF8', None, ),  # 13
+        (14, TType.STRING, 'language', 'UTF8', None, ),  # 14
+        (15, TType.STRING, 'jobGrade', 'UTF8', None, ),  # 15
+        (16, TType.I32, 'status', None, None, ),  # 16
+        (17, TType.I32, 'visitnum', None, None, ),  # 17
+        (18, TType.STRING, 'lastvisit', 'UTF8', None, ),  # 18
+        (19, TType.I32, 'source_id', None, None, ),  # 19
+        (20, TType.STRING, 'updateTime', 'UTF8', None, ),  # 20
+        (21, TType.STRING, 'businessGroup', 'UTF8', None, ),  # 21
+        (22, TType.BYTE, 'employmentType', None, None, ),  # 22
+        (23, TType.STRING, 'hrEmail', 'UTF8', None, ),  # 23
+        (24, TType.STRING, 'benefits', 'UTF8', None, ),  # 24
+        (25, TType.BYTE, 'degree', None, None, ),  # 25
+        (26, TType.STRING, 'feature', 'UTF8', None, ),  # 26
+        (27, TType.BOOL, 'emailNotice', None, None, ),  # 27
+        (28, TType.BYTE, 'candidateSource', None, None, ),  # 28
+        (29, TType.STRING, 'occupation', 'UTF8', None, ),  # 29
+        (30, TType.BOOL, 'isRecom', None, None, ),  # 30
+        (31, TType.STRING, 'industry', 'UTF8', None, ),  # 31
+        (32, TType.I32, 'hongbaoConfigId', None, None, ),  # 32
+        (33, TType.I32, 'hongbaoConfigRecomId', None, None, ),  # 33
+        (34, TType.I32, 'hongbaoConfigAppId', None, None, ),  # 34
+        (35, TType.BOOL, 'emailResumeConf', None, None, ),  # 35
+        (36, TType.I32, 'lPostingTargetId', None, None, ),  # 36
+        (37, TType.BYTE, 'priority', None, None, ),  # 37
+        (38, TType.I32, 'shareTplId', None, None, ),  # 38
+        (39, TType.STRING, 'district', 'UTF8', None, ),  # 39
+        (40, TType.I16, 'count', None, None, ),  # 40
+        (41, TType.I32, 'salaryTop', None, None, ),  # 41
+        (42, TType.I32, 'salaryBottom', None, None, ),  # 42
+        (43, TType.BOOL, 'experienceAbove', None, None, ),  # 43
+        (44, TType.BOOL, 'degreeAbove', None, None, ),  # 44
+        (45, TType.BOOL, 'managementExperience', None, None, ),  # 45
+        (46, TType.BYTE, 'gender', None, None, ),  # 46
+        (47, TType.I32, 'publisher', None, None, ),  # 47
+        (48, TType.I32, 'appCvConfigId', None, None, ),  # 48
+        (49, TType.I16, 'source', None, None, ),  # 49
+        (50, TType.BYTE, 'hbStatus', None, None, ),  # 50
+        None,  # 51
+        (52, TType.I32, 'childCompanyId', None, None, ),  # 52
+        (53, TType.BYTE, 'age', None, None, ),  # 53
+        (54, TType.STRING, 'majorRequired', 'UTF8', None, ),  # 54
+        (55, TType.STRING, 'workAddress', 'UTF8', None, ),  # 55
+        (56, TType.STRING, 'keyword', 'UTF8', None, ),  # 56
+        (57, TType.STRING, 'reportingTo', 'UTF8', None, ),  # 57
+        (58, TType.BOOL, 'isHiring', None, None, ),  # 58
+        (59, TType.I16, 'underlings', None, None, ),  # 59
+        (60, TType.BOOL, 'languageRequired', None, None, ),  # 60
+        (61, TType.I32, 'targetIndustry', None, None, ),  # 61
+        (62, TType.BYTE, 'currentStatus', None, None, ),  # 62
+        (63, TType.I16, 'positionCode', None, None, ),  # 63
+        (64, TType.STRING, 'resUrl', 'UTF8', None, ),  # 64
+        (65, TType.I32, 'teamId', None, None, ),  # 65
+        (66, TType.STRING, 'teamName', 'UTF8', None, ),  # 66
+        (67, TType.STRING, 'teamDescription', 'UTF8', None, ),  # 67
+    )
+
+    def __init__(self, id=None, jobnumber=None, companyId=None, title=None, city=None, department=None, lJobid=None, publishDate=None, stopDate=None, accountabilities=None, experience=None, requirement=None, salary=None, language=None, jobGrade=None, status=None, visitnum=None, lastvisit=None, source_id=None, updateTime=None, businessGroup=None, employmentType=None, hrEmail=None, benefits=None, degree=None, feature=None, emailNotice=None, candidateSource=None, occupation=None, isRecom=None, industry=None, hongbaoConfigId=None, hongbaoConfigRecomId=None, hongbaoConfigAppId=None, emailResumeConf=None, lPostingTargetId=None, priority=None, shareTplId=None, district=None, count=None, salaryTop=None, salaryBottom=None, experienceAbove=None, degreeAbove=None, managementExperience=None, gender=None, publisher=None, appCvConfigId=None, source=None, hbStatus=None, childCompanyId=None, age=None, majorRequired=None, workAddress=None, keyword=None, reportingTo=None, isHiring=None, underlings=None, languageRequired=None, targetIndustry=None, currentStatus=None, positionCode=None, resUrl=None, teamId=None, teamName=None, teamDescription=None,):
+        self.id = id
+        self.jobnumber = jobnumber
+        self.companyId = companyId
+        self.title = title
+        self.city = city
+        self.department = department
+        self.lJobid = lJobid
+        self.publishDate = publishDate
+        self.stopDate = stopDate
+        self.accountabilities = accountabilities
+        self.experience = experience
+        self.requirement = requirement
+        self.salary = salary
+        self.language = language
+        self.jobGrade = jobGrade
+        self.status = status
+        self.visitnum = visitnum
+        self.lastvisit = lastvisit
+        self.source_id = source_id
+        self.updateTime = updateTime
+        self.businessGroup = businessGroup
+        self.employmentType = employmentType
+        self.hrEmail = hrEmail
+        self.benefits = benefits
+        self.degree = degree
+        self.feature = feature
+        self.emailNotice = emailNotice
+        self.candidateSource = candidateSource
+        self.occupation = occupation
+        self.isRecom = isRecom
+        self.industry = industry
+        self.hongbaoConfigId = hongbaoConfigId
+        self.hongbaoConfigRecomId = hongbaoConfigRecomId
+        self.hongbaoConfigAppId = hongbaoConfigAppId
+        self.emailResumeConf = emailResumeConf
+        self.lPostingTargetId = lPostingTargetId
+        self.priority = priority
+        self.shareTplId = shareTplId
+        self.district = district
+        self.count = count
+        self.salaryTop = salaryTop
+        self.salaryBottom = salaryBottom
+        self.experienceAbove = experienceAbove
+        self.degreeAbove = degreeAbove
+        self.managementExperience = managementExperience
+        self.gender = gender
+        self.publisher = publisher
+        self.appCvConfigId = appCvConfigId
+        self.source = source
+        self.hbStatus = hbStatus
+        self.childCompanyId = childCompanyId
+        self.age = age
+        self.majorRequired = majorRequired
+        self.workAddress = workAddress
+        self.keyword = keyword
+        self.reportingTo = reportingTo
+        self.isHiring = isHiring
+        self.underlings = underlings
+        self.languageRequired = languageRequired
+        self.targetIndustry = targetIndustry
+        self.currentStatus = currentStatus
+        self.positionCode = positionCode
+        self.resUrl = resUrl
+        self.teamId = teamId
+        self.teamName = teamName
+        self.teamDescription = teamDescription
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.id = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRING:
+                    self.jobnumber = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.I32:
+                    self.companyId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.STRING:
+                    self.title = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 5:
+                if ftype == TType.STRING:
+                    self.city = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 6:
+                if ftype == TType.STRING:
+                    self.department = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 7:
+                if ftype == TType.I32:
+                    self.lJobid = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 8:
+                if ftype == TType.STRING:
+                    self.publishDate = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 9:
+                if ftype == TType.STRING:
+                    self.stopDate = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 10:
+                if ftype == TType.STRING:
+                    self.accountabilities = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 11:
+                if ftype == TType.STRING:
+                    self.experience = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 12:
+                if ftype == TType.STRING:
+                    self.requirement = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 13:
+                if ftype == TType.STRING:
+                    self.salary = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 14:
+                if ftype == TType.STRING:
+                    self.language = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 15:
+                if ftype == TType.STRING:
+                    self.jobGrade = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 16:
+                if ftype == TType.I32:
+                    self.status = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 17:
+                if ftype == TType.I32:
+                    self.visitnum = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 18:
+                if ftype == TType.STRING:
+                    self.lastvisit = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 19:
+                if ftype == TType.I32:
+                    self.source_id = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 20:
+                if ftype == TType.STRING:
+                    self.updateTime = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 21:
+                if ftype == TType.STRING:
+                    self.businessGroup = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 22:
+                if ftype == TType.BYTE:
+                    self.employmentType = iprot.readByte()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 23:
+                if ftype == TType.STRING:
+                    self.hrEmail = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 24:
+                if ftype == TType.STRING:
+                    self.benefits = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 25:
+                if ftype == TType.BYTE:
+                    self.degree = iprot.readByte()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 26:
+                if ftype == TType.STRING:
+                    self.feature = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 27:
+                if ftype == TType.BOOL:
+                    self.emailNotice = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 28:
+                if ftype == TType.BYTE:
+                    self.candidateSource = iprot.readByte()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 29:
+                if ftype == TType.STRING:
+                    self.occupation = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 30:
+                if ftype == TType.BOOL:
+                    self.isRecom = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 31:
+                if ftype == TType.STRING:
+                    self.industry = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 32:
+                if ftype == TType.I32:
+                    self.hongbaoConfigId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 33:
+                if ftype == TType.I32:
+                    self.hongbaoConfigRecomId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 34:
+                if ftype == TType.I32:
+                    self.hongbaoConfigAppId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 35:
+                if ftype == TType.BOOL:
+                    self.emailResumeConf = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 36:
+                if ftype == TType.I32:
+                    self.lPostingTargetId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 37:
+                if ftype == TType.BYTE:
+                    self.priority = iprot.readByte()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 38:
+                if ftype == TType.I32:
+                    self.shareTplId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 39:
+                if ftype == TType.STRING:
+                    self.district = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 40:
+                if ftype == TType.I16:
+                    self.count = iprot.readI16()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 41:
+                if ftype == TType.I32:
+                    self.salaryTop = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 42:
+                if ftype == TType.I32:
+                    self.salaryBottom = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 43:
+                if ftype == TType.BOOL:
+                    self.experienceAbove = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 44:
+                if ftype == TType.BOOL:
+                    self.degreeAbove = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 45:
+                if ftype == TType.BOOL:
+                    self.managementExperience = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 46:
+                if ftype == TType.BYTE:
+                    self.gender = iprot.readByte()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 47:
+                if ftype == TType.I32:
+                    self.publisher = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 48:
+                if ftype == TType.I32:
+                    self.appCvConfigId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 49:
+                if ftype == TType.I16:
+                    self.source = iprot.readI16()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 50:
+                if ftype == TType.BYTE:
+                    self.hbStatus = iprot.readByte()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 52:
+                if ftype == TType.I32:
+                    self.childCompanyId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 53:
+                if ftype == TType.BYTE:
+                    self.age = iprot.readByte()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 54:
+                if ftype == TType.STRING:
+                    self.majorRequired = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 55:
+                if ftype == TType.STRING:
+                    self.workAddress = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 56:
+                if ftype == TType.STRING:
+                    self.keyword = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 57:
+                if ftype == TType.STRING:
+                    self.reportingTo = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 58:
+                if ftype == TType.BOOL:
+                    self.isHiring = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 59:
+                if ftype == TType.I16:
+                    self.underlings = iprot.readI16()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 60:
+                if ftype == TType.BOOL:
+                    self.languageRequired = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 61:
+                if ftype == TType.I32:
+                    self.targetIndustry = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 62:
+                if ftype == TType.BYTE:
+                    self.currentStatus = iprot.readByte()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 63:
+                if ftype == TType.I16:
+                    self.positionCode = iprot.readI16()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 64:
+                if ftype == TType.STRING:
+                    self.resUrl = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 65:
+                if ftype == TType.I32:
+                    self.teamId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 66:
+                if ftype == TType.STRING:
+                    self.teamName = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 67:
+                if ftype == TType.STRING:
+                    self.teamDescription = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('PositionDetails')
+        if self.id is not None:
+            oprot.writeFieldBegin('id', TType.I32, 1)
+            oprot.writeI32(self.id)
+            oprot.writeFieldEnd()
+        if self.jobnumber is not None:
+            oprot.writeFieldBegin('jobnumber', TType.STRING, 2)
+            oprot.writeString(self.jobnumber.encode('utf-8') if sys.version_info[0] == 2 else self.jobnumber)
+            oprot.writeFieldEnd()
+        if self.companyId is not None:
+            oprot.writeFieldBegin('companyId', TType.I32, 3)
+            oprot.writeI32(self.companyId)
+            oprot.writeFieldEnd()
+        if self.title is not None:
+            oprot.writeFieldBegin('title', TType.STRING, 4)
+            oprot.writeString(self.title.encode('utf-8') if sys.version_info[0] == 2 else self.title)
+            oprot.writeFieldEnd()
+        if self.city is not None:
+            oprot.writeFieldBegin('city', TType.STRING, 5)
+            oprot.writeString(self.city.encode('utf-8') if sys.version_info[0] == 2 else self.city)
+            oprot.writeFieldEnd()
+        if self.department is not None:
+            oprot.writeFieldBegin('department', TType.STRING, 6)
+            oprot.writeString(self.department.encode('utf-8') if sys.version_info[0] == 2 else self.department)
+            oprot.writeFieldEnd()
+        if self.lJobid is not None:
+            oprot.writeFieldBegin('lJobid', TType.I32, 7)
+            oprot.writeI32(self.lJobid)
+            oprot.writeFieldEnd()
+        if self.publishDate is not None:
+            oprot.writeFieldBegin('publishDate', TType.STRING, 8)
+            oprot.writeString(self.publishDate.encode('utf-8') if sys.version_info[0] == 2 else self.publishDate)
+            oprot.writeFieldEnd()
+        if self.stopDate is not None:
+            oprot.writeFieldBegin('stopDate', TType.STRING, 9)
+            oprot.writeString(self.stopDate.encode('utf-8') if sys.version_info[0] == 2 else self.stopDate)
+            oprot.writeFieldEnd()
+        if self.accountabilities is not None:
+            oprot.writeFieldBegin('accountabilities', TType.STRING, 10)
+            oprot.writeString(self.accountabilities.encode('utf-8') if sys.version_info[0] == 2 else self.accountabilities)
+            oprot.writeFieldEnd()
+        if self.experience is not None:
+            oprot.writeFieldBegin('experience', TType.STRING, 11)
+            oprot.writeString(self.experience.encode('utf-8') if sys.version_info[0] == 2 else self.experience)
+            oprot.writeFieldEnd()
+        if self.requirement is not None:
+            oprot.writeFieldBegin('requirement', TType.STRING, 12)
+            oprot.writeString(self.requirement.encode('utf-8') if sys.version_info[0] == 2 else self.requirement)
+            oprot.writeFieldEnd()
+        if self.salary is not None:
+            oprot.writeFieldBegin('salary', TType.STRING, 13)
+            oprot.writeString(self.salary.encode('utf-8') if sys.version_info[0] == 2 else self.salary)
+            oprot.writeFieldEnd()
+        if self.language is not None:
+            oprot.writeFieldBegin('language', TType.STRING, 14)
+            oprot.writeString(self.language.encode('utf-8') if sys.version_info[0] == 2 else self.language)
+            oprot.writeFieldEnd()
+        if self.jobGrade is not None:
+            oprot.writeFieldBegin('jobGrade', TType.STRING, 15)
+            oprot.writeString(self.jobGrade.encode('utf-8') if sys.version_info[0] == 2 else self.jobGrade)
+            oprot.writeFieldEnd()
+        if self.status is not None:
+            oprot.writeFieldBegin('status', TType.I32, 16)
+            oprot.writeI32(self.status)
+            oprot.writeFieldEnd()
+        if self.visitnum is not None:
+            oprot.writeFieldBegin('visitnum', TType.I32, 17)
+            oprot.writeI32(self.visitnum)
+            oprot.writeFieldEnd()
+        if self.lastvisit is not None:
+            oprot.writeFieldBegin('lastvisit', TType.STRING, 18)
+            oprot.writeString(self.lastvisit.encode('utf-8') if sys.version_info[0] == 2 else self.lastvisit)
+            oprot.writeFieldEnd()
+        if self.source_id is not None:
+            oprot.writeFieldBegin('source_id', TType.I32, 19)
+            oprot.writeI32(self.source_id)
+            oprot.writeFieldEnd()
+        if self.updateTime is not None:
+            oprot.writeFieldBegin('updateTime', TType.STRING, 20)
+            oprot.writeString(self.updateTime.encode('utf-8') if sys.version_info[0] == 2 else self.updateTime)
+            oprot.writeFieldEnd()
+        if self.businessGroup is not None:
+            oprot.writeFieldBegin('businessGroup', TType.STRING, 21)
+            oprot.writeString(self.businessGroup.encode('utf-8') if sys.version_info[0] == 2 else self.businessGroup)
+            oprot.writeFieldEnd()
+        if self.employmentType is not None:
+            oprot.writeFieldBegin('employmentType', TType.BYTE, 22)
+            oprot.writeByte(self.employmentType)
+            oprot.writeFieldEnd()
+        if self.hrEmail is not None:
+            oprot.writeFieldBegin('hrEmail', TType.STRING, 23)
+            oprot.writeString(self.hrEmail.encode('utf-8') if sys.version_info[0] == 2 else self.hrEmail)
+            oprot.writeFieldEnd()
+        if self.benefits is not None:
+            oprot.writeFieldBegin('benefits', TType.STRING, 24)
+            oprot.writeString(self.benefits.encode('utf-8') if sys.version_info[0] == 2 else self.benefits)
+            oprot.writeFieldEnd()
+        if self.degree is not None:
+            oprot.writeFieldBegin('degree', TType.BYTE, 25)
+            oprot.writeByte(self.degree)
+            oprot.writeFieldEnd()
+        if self.feature is not None:
+            oprot.writeFieldBegin('feature', TType.STRING, 26)
+            oprot.writeString(self.feature.encode('utf-8') if sys.version_info[0] == 2 else self.feature)
+            oprot.writeFieldEnd()
+        if self.emailNotice is not None:
+            oprot.writeFieldBegin('emailNotice', TType.BOOL, 27)
+            oprot.writeBool(self.emailNotice)
+            oprot.writeFieldEnd()
+        if self.candidateSource is not None:
+            oprot.writeFieldBegin('candidateSource', TType.BYTE, 28)
+            oprot.writeByte(self.candidateSource)
+            oprot.writeFieldEnd()
+        if self.occupation is not None:
+            oprot.writeFieldBegin('occupation', TType.STRING, 29)
+            oprot.writeString(self.occupation.encode('utf-8') if sys.version_info[0] == 2 else self.occupation)
+            oprot.writeFieldEnd()
+        if self.isRecom is not None:
+            oprot.writeFieldBegin('isRecom', TType.BOOL, 30)
+            oprot.writeBool(self.isRecom)
+            oprot.writeFieldEnd()
+        if self.industry is not None:
+            oprot.writeFieldBegin('industry', TType.STRING, 31)
+            oprot.writeString(self.industry.encode('utf-8') if sys.version_info[0] == 2 else self.industry)
+            oprot.writeFieldEnd()
+        if self.hongbaoConfigId is not None:
+            oprot.writeFieldBegin('hongbaoConfigId', TType.I32, 32)
+            oprot.writeI32(self.hongbaoConfigId)
+            oprot.writeFieldEnd()
+        if self.hongbaoConfigRecomId is not None:
+            oprot.writeFieldBegin('hongbaoConfigRecomId', TType.I32, 33)
+            oprot.writeI32(self.hongbaoConfigRecomId)
+            oprot.writeFieldEnd()
+        if self.hongbaoConfigAppId is not None:
+            oprot.writeFieldBegin('hongbaoConfigAppId', TType.I32, 34)
+            oprot.writeI32(self.hongbaoConfigAppId)
+            oprot.writeFieldEnd()
+        if self.emailResumeConf is not None:
+            oprot.writeFieldBegin('emailResumeConf', TType.BOOL, 35)
+            oprot.writeBool(self.emailResumeConf)
+            oprot.writeFieldEnd()
+        if self.lPostingTargetId is not None:
+            oprot.writeFieldBegin('lPostingTargetId', TType.I32, 36)
+            oprot.writeI32(self.lPostingTargetId)
+            oprot.writeFieldEnd()
+        if self.priority is not None:
+            oprot.writeFieldBegin('priority', TType.BYTE, 37)
+            oprot.writeByte(self.priority)
+            oprot.writeFieldEnd()
+        if self.shareTplId is not None:
+            oprot.writeFieldBegin('shareTplId', TType.I32, 38)
+            oprot.writeI32(self.shareTplId)
+            oprot.writeFieldEnd()
+        if self.district is not None:
+            oprot.writeFieldBegin('district', TType.STRING, 39)
+            oprot.writeString(self.district.encode('utf-8') if sys.version_info[0] == 2 else self.district)
+            oprot.writeFieldEnd()
+        if self.count is not None:
+            oprot.writeFieldBegin('count', TType.I16, 40)
+            oprot.writeI16(self.count)
+            oprot.writeFieldEnd()
+        if self.salaryTop is not None:
+            oprot.writeFieldBegin('salaryTop', TType.I32, 41)
+            oprot.writeI32(self.salaryTop)
+            oprot.writeFieldEnd()
+        if self.salaryBottom is not None:
+            oprot.writeFieldBegin('salaryBottom', TType.I32, 42)
+            oprot.writeI32(self.salaryBottom)
+            oprot.writeFieldEnd()
+        if self.experienceAbove is not None:
+            oprot.writeFieldBegin('experienceAbove', TType.BOOL, 43)
+            oprot.writeBool(self.experienceAbove)
+            oprot.writeFieldEnd()
+        if self.degreeAbove is not None:
+            oprot.writeFieldBegin('degreeAbove', TType.BOOL, 44)
+            oprot.writeBool(self.degreeAbove)
+            oprot.writeFieldEnd()
+        if self.managementExperience is not None:
+            oprot.writeFieldBegin('managementExperience', TType.BOOL, 45)
+            oprot.writeBool(self.managementExperience)
+            oprot.writeFieldEnd()
+        if self.gender is not None:
+            oprot.writeFieldBegin('gender', TType.BYTE, 46)
+            oprot.writeByte(self.gender)
+            oprot.writeFieldEnd()
+        if self.publisher is not None:
+            oprot.writeFieldBegin('publisher', TType.I32, 47)
+            oprot.writeI32(self.publisher)
+            oprot.writeFieldEnd()
+        if self.appCvConfigId is not None:
+            oprot.writeFieldBegin('appCvConfigId', TType.I32, 48)
+            oprot.writeI32(self.appCvConfigId)
+            oprot.writeFieldEnd()
+        if self.source is not None:
+            oprot.writeFieldBegin('source', TType.I16, 49)
+            oprot.writeI16(self.source)
+            oprot.writeFieldEnd()
+        if self.hbStatus is not None:
+            oprot.writeFieldBegin('hbStatus', TType.BYTE, 50)
+            oprot.writeByte(self.hbStatus)
+            oprot.writeFieldEnd()
+        if self.childCompanyId is not None:
+            oprot.writeFieldBegin('childCompanyId', TType.I32, 52)
+            oprot.writeI32(self.childCompanyId)
+            oprot.writeFieldEnd()
+        if self.age is not None:
+            oprot.writeFieldBegin('age', TType.BYTE, 53)
+            oprot.writeByte(self.age)
+            oprot.writeFieldEnd()
+        if self.majorRequired is not None:
+            oprot.writeFieldBegin('majorRequired', TType.STRING, 54)
+            oprot.writeString(self.majorRequired.encode('utf-8') if sys.version_info[0] == 2 else self.majorRequired)
+            oprot.writeFieldEnd()
+        if self.workAddress is not None:
+            oprot.writeFieldBegin('workAddress', TType.STRING, 55)
+            oprot.writeString(self.workAddress.encode('utf-8') if sys.version_info[0] == 2 else self.workAddress)
+            oprot.writeFieldEnd()
+        if self.keyword is not None:
+            oprot.writeFieldBegin('keyword', TType.STRING, 56)
+            oprot.writeString(self.keyword.encode('utf-8') if sys.version_info[0] == 2 else self.keyword)
+            oprot.writeFieldEnd()
+        if self.reportingTo is not None:
+            oprot.writeFieldBegin('reportingTo', TType.STRING, 57)
+            oprot.writeString(self.reportingTo.encode('utf-8') if sys.version_info[0] == 2 else self.reportingTo)
+            oprot.writeFieldEnd()
+        if self.isHiring is not None:
+            oprot.writeFieldBegin('isHiring', TType.BOOL, 58)
+            oprot.writeBool(self.isHiring)
+            oprot.writeFieldEnd()
+        if self.underlings is not None:
+            oprot.writeFieldBegin('underlings', TType.I16, 59)
+            oprot.writeI16(self.underlings)
+            oprot.writeFieldEnd()
+        if self.languageRequired is not None:
+            oprot.writeFieldBegin('languageRequired', TType.BOOL, 60)
+            oprot.writeBool(self.languageRequired)
+            oprot.writeFieldEnd()
+        if self.targetIndustry is not None:
+            oprot.writeFieldBegin('targetIndustry', TType.I32, 61)
+            oprot.writeI32(self.targetIndustry)
+            oprot.writeFieldEnd()
+        if self.currentStatus is not None:
+            oprot.writeFieldBegin('currentStatus', TType.BYTE, 62)
+            oprot.writeByte(self.currentStatus)
+            oprot.writeFieldEnd()
+        if self.positionCode is not None:
+            oprot.writeFieldBegin('positionCode', TType.I16, 63)
+            oprot.writeI16(self.positionCode)
+            oprot.writeFieldEnd()
+        if self.resUrl is not None:
+            oprot.writeFieldBegin('resUrl', TType.STRING, 64)
+            oprot.writeString(self.resUrl.encode('utf-8') if sys.version_info[0] == 2 else self.resUrl)
+            oprot.writeFieldEnd()
+        if self.teamId is not None:
+            oprot.writeFieldBegin('teamId', TType.I32, 65)
+            oprot.writeI32(self.teamId)
+            oprot.writeFieldEnd()
+        if self.teamName is not None:
+            oprot.writeFieldBegin('teamName', TType.STRING, 66)
+            oprot.writeString(self.teamName.encode('utf-8') if sys.version_info[0] == 2 else self.teamName)
+            oprot.writeFieldEnd()
+        if self.teamDescription is not None:
+            oprot.writeFieldBegin('teamDescription', TType.STRING, 67)
+            oprot.writeString(self.teamDescription.encode('utf-8') if sys.version_info[0] == 2 else self.teamDescription)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class PositionDetailsVO(object):
+    """
+    Attributes:
+     - status
+     - data
+     - message
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'status', None, None, ),  # 1
+        (2, TType.STRUCT, 'data', (PositionDetails, PositionDetails.thrift_spec), None, ),  # 2
+        (3, TType.STRING, 'message', 'UTF8', None, ),  # 3
+    )
+
+    def __init__(self, status=None, data=None, message=None,):
+        self.status = status
+        self.data = data
+        self.message = message
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.status = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRUCT:
+                    self.data = PositionDetails()
+                    self.data.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.STRING:
+                    self.message = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('PositionDetailsVO')
+        if self.status is not None:
+            oprot.writeFieldBegin('status', TType.I32, 1)
+            oprot.writeI32(self.status)
+            oprot.writeFieldEnd()
+        if self.data is not None:
+            oprot.writeFieldBegin('data', TType.STRUCT, 2)
+            self.data.write(oprot)
+            oprot.writeFieldEnd()
+        if self.message is not None:
+            oprot.writeFieldBegin('message', TType.STRING, 3)
+            oprot.writeString(self.message.encode('utf-8') if sys.version_info[0] == 2 else self.message)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class PositionDetailsListVO(object):
+    """
+    Attributes:
+     - status
+     - data
+     - message
+     - per_age
+     - page
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'status', None, None, ),  # 1
+        (2, TType.LIST, 'data', (TType.STRUCT, (PositionDetails, PositionDetails.thrift_spec), False), None, ),  # 2
+        (3, TType.STRING, 'message', 'UTF8', None, ),  # 3
+        (4, TType.I32, 'per_age', None, None, ),  # 4
+        None,  # 5
+        (6, TType.I32, 'page', None, None, ),  # 6
+    )
+
+    def __init__(self, status=None, data=None, message=None, per_age=None, page=None,):
+        self.status = status
+        self.data = data
+        self.message = message
+        self.per_age = per_age
+        self.page = page
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.status = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.LIST:
+                    self.data = []
+                    (_etype12, _size9) = iprot.readListBegin()
+                    for _i13 in range(_size9):
+                        _elem14 = PositionDetails()
+                        _elem14.read(iprot)
+                        self.data.append(_elem14)
+                    iprot.readListEnd()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.STRING:
+                    self.message = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.I32:
+                    self.per_age = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 6:
+                if ftype == TType.I32:
+                    self.page = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('PositionDetailsListVO')
+        if self.status is not None:
+            oprot.writeFieldBegin('status', TType.I32, 1)
+            oprot.writeI32(self.status)
+            oprot.writeFieldEnd()
+        if self.data is not None:
+            oprot.writeFieldBegin('data', TType.LIST, 2)
+            oprot.writeListBegin(TType.STRUCT, len(self.data))
+            for iter15 in self.data:
+                iter15.write(oprot)
+            oprot.writeListEnd()
+            oprot.writeFieldEnd()
+        if self.message is not None:
+            oprot.writeFieldBegin('message', TType.STRING, 3)
+            oprot.writeString(self.message.encode('utf-8') if sys.version_info[0] == 2 else self.message)
+            oprot.writeFieldEnd()
+        if self.per_age is not None:
+            oprot.writeFieldBegin('per_age', TType.I32, 4)
+            oprot.writeI32(self.per_age)
+            oprot.writeFieldEnd()
+        if self.page is not None:
+            oprot.writeFieldBegin('page', TType.I32, 6)
+            oprot.writeI32(self.page)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)

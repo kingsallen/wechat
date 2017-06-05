@@ -6,8 +6,6 @@ import conf.path as path
 from handler.base import BaseHandler
 from util.common.decorator import handle_response, authenticated, \
     check_and_apply_profile
-from util.tool.url_tool import make_url
-
 
 class ApplicationHandler(BaseHandler):
 
@@ -21,13 +19,12 @@ class ApplicationHandler(BaseHandler):
         position = yield self.position_ps.get_position(self.params.pid)
         check_status, message = yield self.application_ps.check_position(
             position, self.current_user)
-        self.logger.debug("[create_reply]check_status:{}, message:{}".format(check_status, message))
 
         if not check_status:
             self.render(
                 template_name='refer/weixin/systemmessage/successapply.html',
                 message=message,
-                nexturl=make_url(path.POSITION_LIST, self.params, escape=['next_url', 'pid']))
+                nexturl=self.make_url(path.POSITION_LIST, self.params, escape=['next_url', 'pid']))
             return
 
         # 如果是自定义简历职位
@@ -43,7 +40,7 @@ class ApplicationHandler(BaseHandler):
                     self.current_user, position, custom_cv_tpls)
 
             if not result:
-                self.redirect(make_url(path.PROFILE_CUSTOM_CV,
+                self.redirect(self.make_url(path.PROFILE_CUSTOM_CV,
                               pid=self.params.pid,
                               wechat_signature=self.params.wechat_signature))
                 return
@@ -54,7 +51,7 @@ class ApplicationHandler(BaseHandler):
             position.company_id, position.app_cv_config_id)
 
         # 跳转到 profile get_view, 传递 apply 和 pid
-        self.redirect(make_url(path.PROFILE_PREVIEW,
+        self.redirect(self.make_url(path.PROFILE_PREVIEW,
                                self.params,
                                is_skip="1" if is_esteelauder else "0"))
 
@@ -94,14 +91,12 @@ class ApplicationHandler(BaseHandler):
 
             if not result:
                 self.send_json_error(
-                    data=dict(next_url=make_url(path.PROFILE_CUSTOM_CV, pid=pid, wechat_signature=self.params.wechat_signature)),
+                    data=dict(next_url=self.make_url(path.PROFILE_CUSTOM_CV, pid=pid, wechat_signature=self.params.wechat_signature)),
                     message='')
                 return
 
         is_applied, message, apply_id = yield self.application_ps.create_application(
-            position, self.current_user, has_recom='recom' in self.params)
-
-        self.logger.debug("[post_apply]is_applied:{}, message:{}, appid:{}".format(is_applied, message, apply_id))
+            position, self.current_user, is_platform=self.is_platform, has_recom='recom' in self.params)
 
         if is_applied:
             # 如果是自定义职位，入库 job_resume_other
@@ -165,14 +160,10 @@ class ApplicationEmailHandler(BaseHandler):
         # 候选人信息更新
         res = yield self.application_ps.update_candidate_company(self.params.name, self.current_user.sysuser.id)
 
-        self.logger.debug("update_candidate_company:{}".format(res))
-
         position = yield self.position_ps.get_position(self.params.pid)
         if self.params.pid and position.email_resume_conf == 0:
             # 职位必须能接受Email投递 而且params含有pid
-            self.logger.debug("[post_create_email]Start to create email application..")
             create_status, message = yield self.application_ps.create_email_apply(self.params, position, self.current_user, self.is_platform)
-            self.logger.debug("[post_create_email]create_status:{}, message:{}".format(create_status, message))
             if not create_status:
                 # 职位不能申请, 直接返回不能再次redirect
                 self.send_json_error(message=message)
@@ -184,4 +175,4 @@ class ApplicationEmailHandler(BaseHandler):
         # 置空不必要参数，避免在 make_url 中被用到
         self.params.pop("name", None)
 
-        self.redirect(make_url(path.APPLICATION_EMAIL, self.params, confirm="1"))
+        self.redirect(self.make_url(path.APPLICATION_EMAIL, self.params, confirm="1"))

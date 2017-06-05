@@ -1,39 +1,52 @@
 # coding=utf-8
 
+# ============================ 微信端Path开始 ============================
 # url path
-WX_OAUTH_QX_PATH = '/m/wxoauth2'
-POSITION_PATH = '/m/position/{}'
-POSITION_LIST = '/m/position'
+# 企业号单独链接
+POSITION_PATH = '/position/{}'
+POSITION_LIST = '/position'
 RED_PACKET_CARD = '/mobile/redpack'
-TEAM_PATH = '/m/company/team/{}'
-COMPANY_TEAM = '/m/company/team'
-USER_LOGIN = '/m/login'
-USER_LOGOUT = '/m/logout'
-SEARCH_FILITER = '/m/start'
-CUSTOMIZE_EDX = '/m/custom/emailapply'
-RESUME_URL = '/m/resume/import'
-RESUME_LINKEDIN = '/m/resume/linkedin'
-APPLICATION = '/m/application'
-APPLICATION_EMAIL = '/m/application/email'
-COLLECT_USERINFO = '/m/app/asist/collect_userinfo/positionfav'
-USER_CENTER = '/m/app/usercenter'
-USERCENTER_APPLYRECORD = '/m/app/usercenter/applyrecords/{}'
+TEAM_PATH = '/company/team/{}'
+COMPANY_TEAM = '/company/team'
+SEARCH_FILITER = '/start'
+CUSTOMIZE_EDX = '/custom/emailapply'
 
-MOBILE_VERIFY = '/m/app/validate_mobile'
+EMPLOYEE_VERIFY = '/app/employee/binding'
+EMPLOYEE_RECOMMENDS = '/app/employee/recommends'
+EMPLOYEE_CUSTOMINFO = '/employee/custominfo'
+EMPLOYEE_BINDED = '/employee/binded'
 
-EMPLOYEE_VERIFY = '/m/app/employee/binding'
-EMPLOYEE_RECOMMENDS = '/m/app/employee/recommends'
-EMPLOYEE_CUSTOMINFO = '/m/employee/custominfo'
-EMPLOYEE_BINDED = '/m/employee/binded'
+PROFILE_CUSTOM_CV = '/profile/custom'
 
-PROFILE_VIEW = '/m/profile'
-PROFILE_PREVIEW = '/m/profile/preview'
-PROFILE_NEW = '/m/app/profile/new'
-PROFILE_CUSTOM_CV = '/m/profile/custom'
+# 聚合号单独链接
+GAMMA_HOME = '/enter'
+GAMMA_POSITION = '/position'
+GAMMA_POSITION_HOME = '/position/{}/home'
+GAMMA_POSITION_TEAM = '/team/{}'
+GAMMA_POSITION_COMPANY = '/company/{}'
+GAMMA_SEARCH = '/search'
+GAMMA_404 = '/404'
 
-# 老微信 QX
-# TODO 聚合号改版后要调整
-OLD_POSITION_PATH = '/mobile/position'
+
+# 企业号、聚合号公共链接
+USER_LOGIN = '/login'
+USER_LOGOUT = '/logout'
+RESUME_URL = '/resume/import'
+RESUME_LINKEDIN = '/resume/linkedin'
+APPLICATION = '/application'
+APPLICATION_EMAIL = '/application/email'
+COLLECT_USERINFO = '/app/asist/collect_userinfo/positionfav'
+USER_CENTER = '/app/usercenter'
+USERCENTER_APPLYRECORD = '/app/usercenter/applyrecords/{}'
+
+MOBILE_VERIFY = '/app/validate_mobile'
+
+PROFILE_VIEW = '/profile'
+PROFILE_PREVIEW = '/profile/preview'
+PROFILE_VISITOR_VIEW = '/profile/view/{}'
+PROFILE_NEW = '/app/profile/new'
+
+# ============================ 微信端Path结束 ============================
 
 
 # ============================ 基础服务开始 ============================
@@ -102,4 +115,4 @@ MESSAGE_TEMPLATE = "message/template"
 # 其他外部服务
 HR_WX_IMAGE_URL = "https://www.moseeker.com/common/image?url="
 LINKEDIN_ACCESSTOKEN = "https://www.linkedin.com/uas/oauth2/accessToken"
-LINKEDIN_AUTH = "https://www.linkedin.com/uas/oauth2/authorization"
+LINKEDIN_AUTH = "/uas/oauth2/authorization"

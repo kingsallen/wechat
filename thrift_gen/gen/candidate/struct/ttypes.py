@@ -376,6 +376,7 @@ class RecommendResult(object):
      - recomTotal
      - recomIndex
      - recomIgnore
+     - clickTime
     """
 
     thrift_spec = (
@@ -387,9 +388,10 @@ class RecommendResult(object):
         (5, TType.I32, 'recomTotal', None, None, ),  # 5
         (6, TType.I32, 'recomIndex', None, None, ),  # 6
         (7, TType.I32, 'recomIgnore', None, None, ),  # 7
+        (8, TType.STRING, 'clickTime', 'UTF8', None, ),  # 8
     )
 
-    def __init__(self, id=None, positionName=None, presenteeName=None, nextOne=None, recomTotal=None, recomIndex=None, recomIgnore=None,):
+    def __init__(self, id=None, positionName=None, presenteeName=None, nextOne=None, recomTotal=None, recomIndex=None, recomIgnore=None, clickTime=None,):
         self.id = id
         self.positionName = positionName
         self.presenteeName = presenteeName
@@ -397,6 +399,7 @@ class RecommendResult(object):
         self.recomTotal = recomTotal
         self.recomIndex = recomIndex
         self.recomIgnore = recomIgnore
+        self.clickTime = clickTime
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -442,6 +445,11 @@ class RecommendResult(object):
                     self.recomIgnore = iprot.readI32()
                 else:
                     iprot.skip(ftype)
+            elif fid == 8:
+                if ftype == TType.STRING:
+                    self.clickTime = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -479,6 +487,10 @@ class RecommendResult(object):
         if self.recomIgnore is not None:
             oprot.writeFieldBegin('recomIgnore', TType.I32, 7)
             oprot.writeI32(self.recomIgnore)
+            oprot.writeFieldEnd()
+        if self.clickTime is not None:
+            oprot.writeFieldBegin('clickTime', TType.STRING, 8)
+            oprot.writeString(self.clickTime.encode('utf-8') if sys.version_info[0] == 2 else self.clickTime)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()

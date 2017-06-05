@@ -98,9 +98,6 @@ def send_mail_notice_hr(position, employee, conf, profile, email, template_other
         profile_email = parse_profile_for_email(profile)
         resume_html = generate_html_template_resume(employee, conf, profile_email, template_other, position, dict_conf)
 
-        logger.debug("[send_mail_notice_hr]profile_email:{}".format(profile_email))
-        logger.debug("[send_mail_notice_hr]resume_html:{}".format(resume_html))
-
         attachments = []
         part = ObjectDict()
         part.filename = html_to_pdf

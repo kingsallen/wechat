@@ -13,8 +13,6 @@ from util.common.decorator import handle_response, check_and_apply_profile, \
     authenticated
 from util.tool.dict_tool import sub_dict, objectdictify
 from util.tool.str_tool import mobile_validate
-from util.tool.url_tool import make_url
-
 
 class ProfileNewHandler(BaseHandler):
 
@@ -81,6 +79,7 @@ class ProfileNewHandler(BaseHandler):
             profile_id = data
             profile_ok = True
             self.logger.debug("profile_profile created with id: %s" % profile_id)
+            self._log_customs.update(new_profile=const.YES)
         else:
             self.logger.error("profile_profile creation failed. res:{}".format(data))
             self.send_json_error()
@@ -129,9 +128,9 @@ class ProfileNewHandler(BaseHandler):
             dqpid = self.get_cookie('dqpid')
             self.logger.debug('dqpid: %s' % dqpid)
             if dqpid:
-                next_url = make_url(path.PROFILE_PREVIEW, self.params, pid=str(dqpid))
+                next_url = self.make_url(path.PROFILE_PREVIEW, self.params, pid=str(dqpid))
             else:
-                next_url = make_url(path.PROFILE_VIEW, self.params)
+                next_url = self.make_url(path.PROFILE_VIEW, self.params)
             self.logger.debug('next_url: %s' % next_url)
             self.clear_cookie(name='dqpid')
             self.send_json_success(data=ObjectDict(next_url=next_url))
@@ -147,7 +146,7 @@ class ProfilePreviewHandler(BaseHandler):
     @tornado.gen.coroutine
     def get(self):
         if not self.params.pid:
-            url = make_url(path.PROFILE_VIEW, self.params)
+            url = self.make_url(path.PROFILE_VIEW, self.params)
             self.redirect(url)
             return
 
@@ -177,10 +176,53 @@ class ProfilePreviewHandler(BaseHandler):
             'current_mobile':       current_mobile
         }
 
-        self.logger.debug('tparams: %s' % tparams)
+        self.render_page(template_name='profile/preview.html', data=tparams, meta_title=const.PROFILE_PREVIEW)
 
-        self.render_page(template_name='profile/preview.html', data=tparams)
+class ProfileViewHandler(BaseHandler):
 
+    """Profile 游客页"""
+
+    @handle_response
+    @tornado.gen.coroutine
+    def get(self, uuid):
+
+        has_profile, profile = yield self.profile_ps.has_profile_by_uuid(uuid=uuid)
+
+        self.logger.debug("ProfileViewHandler has_profile:{}".format(has_profile))
+        self.logger.debug("ProfileViewHandler profile:{}".format(profile))
+
+        if not uuid or not has_profile:
+            self.write_error(404)
+            return
+
+        # 如果是用户本人，则跳转到用户可以编辑的个人档案页
+        if profile.profile.user_id == self.current_user.sysuser.id:
+            redirect_url = self.make_url(path=path.PROFILE_VIEW)
+            self.redirect(redirect_url)
+            return
+
+        profile_tpl = yield self.profile_ps.profile_to_tempalte(profile)
+        # 游客页不应该显示 other信息，求职意愿
+        profile_tpl.other = ObjectDict()
+        profile_tpl.job_apply = ObjectDict()
+
+        tparams = {
+            "profile": profile_tpl,
+            "is_self": False,
+        }
+
+        self.params.share = self._share(uuid, profile_tpl)
+        self.render_page(template_name='profile/preview.html', data=tparams, meta_title=const.PROFIEL_VIEW)
+
+    def _share(self, uuid, profile_tpl):
+        default = ObjectDict({
+            'cover': self.static_url(profile_tpl.avatar_url),
+            'title': '【{}】的个人职场档案'.format(profile_tpl.username),
+            'description': '点击查看{}的个人职场档案'.format(profile_tpl.username),
+            'link': self.make_url(path.PROFILE_VISITOR_VIEW.format(uuid), self.params)
+        })
+
+        return default
 
 class ProfileHandler(BaseHandler):
     """ProfileHandler
@@ -200,8 +242,18 @@ class ProfileHandler(BaseHandler):
 
         profile_tpl = yield self.profile_ps.profile_to_tempalte(
             self.current_user.profile)
-
+        self.params.share = self._share(self.current_user.profile.profile.get("uuid"), profile_tpl)
         self.render_page(template_name='profile/main.html', data=profile_tpl)
+
+    def _share(self, uuid, profile_tpl):
+        default = ObjectDict({
+            'cover': self.static_url(profile_tpl.avatar_url),
+            'title': '【{}】的个人职场档案'.format(profile_tpl.username),
+            'description': '点击查看{}的个人职场档案'.format(profile_tpl.username),
+            'link': self.make_url(path.PROFILE_VISITOR_VIEW.format(uuid), self.params)
+        })
+
+        return default
 
 
 class ProfileCustomHandler(BaseHandler):
@@ -213,7 +265,6 @@ class ProfileCustomHandler(BaseHandler):
     def get(self):
         pid = int(self.params.pid)
         position = yield self.position_ps.get_position(pid)
-        self.logger.debug("position: %s" % position)
         if not position.app_cv_config_id:
             self.write_error(404)
             return
@@ -248,11 +299,10 @@ class ProfileCustomHandler(BaseHandler):
 
         p = dict()
         p.update(is_skip=(self.current_user.company.id in self.customize_ps._DIRECT_APPLY))
-        self.redirect(make_url(path.PROFILE_PREVIEW, self.params, **p))
+        self.redirect(self.make_url(path.PROFILE_PREVIEW, self.params, **p))
 
     @tornado.gen.coroutine
     def _save_custom_cv(self, custom_cv):
-        self.logger.debug("custom_cv: %s" % custom_cv)
 
         # 更新 user 信息（非 profile 信息）
         yield self.user_ps.update_user(
@@ -295,7 +345,7 @@ class ProfileCustomHandler(BaseHandler):
                                      k in custom_fields}
 
                 self.logger.debug('cv_profile_values: %s' % cv_profile_values)
-
+                self._log_customs.update(new_profile=const.YES)
                 # BASIC INFO
                 result, data = yield self.profile_ps.create_profile_basic(
                     cv_profile_values, profile_id, mode='c')
@@ -375,6 +425,8 @@ class ProfileSectionHandler(BaseHandler):
     def get(self):
         # 根据 route 跳转到不同的子方法
         yield getattr(self, "get_" + self.params.route)()
+        self._log_customs.update(get_profile=const.YES,
+                                 section=self.params.route)
 
     @handle_response
     @check_and_apply_profile
@@ -384,6 +436,8 @@ class ProfileSectionHandler(BaseHandler):
         # 根据 route 跳转到不同的子方法
         self.guarantee('route', 'model')
         yield getattr(self, "post_" + self.params.route)()
+        self._log_customs.update(update_profile=const.YES,
+                                 section=self.params.route)
 
     def _get_profile_id(self):
         try:
