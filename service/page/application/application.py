@@ -966,7 +966,7 @@ class ApplicationPageService(PageService):
         })
         profile = current_user.profile
         # cmd = get_create_pdf_by_html_cmd(html_fname, pdf_fname)   #html转换pdf命令
-
+        profile.educations.sort(key=lambda x:x['degree'],reverse = True)
         other_json = ObjectDict()
         if profile.get("others"):
             other_json = json.loads(profile.get("others", [])[0].get("other"))

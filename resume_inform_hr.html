@@ -81,7 +81,7 @@
 													</tr>
 													<tr>
 														<td align="center" class="mobile" style="-ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; color: #66A4F9; font-family: arial, sans-serif; font-size: 18px; line-height: 20px; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
-															亲爱的{{company}}公司HR，
+															亲爱的company公司HR，
 														</td>
 													</tr>
 													<tr>
@@ -89,7 +89,7 @@
 													</tr>
 													<tr>
 														<td align="center" class="mobile" style="-ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; color: #4B525C; font-family: arial, sans-serif; font-size: 14px; line-height: 20px; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
-															“{{position}}”职位，有一个新的申请，
+															“position”职位，有一个新的申请，
 														</td>
 													</tr>
 													<tr>
@@ -109,7 +109,7 @@
 
 													<tr>
 														<td align="center">
-															<img src="http://chuantu.biz/t5/97/1496222656x1729546359.jpg" width="80" height="80" alt="仟寻招聘" style="-ms-interpolation-mode: bicubic; border: none; line-height: 100%; margin: 0; outline: none; padding: 0; text-decoration: none; border-radius: 40px;" border="0">
+															<img src="{{ resume.basic.get('headimg', '') }}" width="80" height="80" alt="仟寻招聘" style="-ms-interpolation-mode: bicubic; border: none; line-height: 100%; margin: 0; outline: none; padding: 0; text-decoration: none; border-radius: 40px;" border="0">
 														</td>
 													</tr>
 
@@ -129,7 +129,7 @@
 
 													<tr>
 														<td align="center" class="mobile" style="-ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; color: #4B525C; font-family: arial, sans-serif; font-size: 14px; line-height: 20px; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
-															{{ resume.basic.get("gender_name", "") }}&nbsp;&nbsp;&nbsp;&nbsp;{{ resume.basic.get("city_name", "") }}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ const.degree.get(str((resume.educations[-1]).get("degree", "0")), "") }}&nbsp;&nbsp;&nbsp;&nbsp;{{ resume.basic.get("birth", "")[:4] }}岁
+															{{ resume.basic.get("gender_name", "") }}&nbsp;&nbsp;&nbsp;&nbsp;{{ resume.basic.get("city_name", "") }}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ const.degree.get(str((resume.educations[0]).get("degree", "0")), "") }}&nbsp;&nbsp;&nbsp;&nbsp;{{ year - int(resume.basic.get("birth", "")[:4]) }}岁
 														</td>
 													</tr>
 
@@ -181,12 +181,7 @@
                                                                 {% for edu_exp in resume.educations[:2] %}
 																<tr>
 																	<td width="100%" style="-ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; font-size: 14px; color:#ABB4C3; line-height: 20px; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
-																	{{ edu_exp.get("start_date")[:7] }}至{{ edu_exp.get("end_date", "")[:7] if edu_exp.get("end_until_now") !=1 else "至今" }}&nbsp;&nbsp;&nbsp;&nbsp;{{ edu_exp.get("college_name") }} &nbsp;&nbsp;|&nbsp;&nbsp;硕士&nbsp;&nbsp;&nbsp;&nbsp;{{ edu_exp.get("major_name") }}
-																	</td>
-																</tr>
-																<tr>
-																	<td width="100%" style="-ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; font-size: 14px; color:#ABB4C3; line-height: 20px; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
-																	2012.7至2014.9&nbsp;&nbsp;&nbsp;&nbsp;同济大学&nbsp;&nbsp;|&nbsp;&nbsp;硕士&nbsp;&nbsp;&nbsp;&nbsp;艺术设计学
+																	{{ edu_exp.get("start_date")[:7] }}至{{ edu_exp.get("end_date", "")[:7] if edu_exp.get("end_until_now") !=1 else "今" }}&nbsp;&nbsp;&nbsp;&nbsp;{{ edu_exp.get("college_name") }} &nbsp;&nbsp;|&nbsp;&nbsp;{{ const.degree.get(str(edu_exp.get("degree", "0")), "") }}&nbsp;&nbsp;&nbsp;&nbsp;{{ edu_exp.get("major_name") }}
 																	</td>
 																</tr>
                                                                 {% end %}
@@ -220,12 +215,7 @@
                                                                 {% for work_exp in resume.workexps[:3] %}
 																<tr>
 																	<td width="100%" style="-ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; font-size: 14px; color:#ABB4C3; line-height: 20px; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
-																	{{ work_exp.get("start_date", "")[:7] }}至work_exp.get("end_date", "")[:7] if work_exp.get("end_until_now") !=1 else "至今" }}&nbsp;&nbsp;&nbsp;&nbsp;{{ work_exp.get("job", "") }}&nbsp;&nbsp;&nbsp;&nbsp;{{ work_exp.get("company_name", "") }}&nbsp;&nbsp;&nbsp;&nbsp;
-																	</td>
-																</tr>
-																<tr>
-																	<td width="100%" style="-ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; font-size: 14px; color:#ABB4C3; line-height: 20px; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
-																	2012.7至2014.9&nbsp;&nbsp;&nbsp;&nbsp;同济大学&nbsp;&nbsp;|&nbsp;&nbsp;硕士&nbsp;&nbsp;&nbsp;&nbsp;艺术设计学
+																	{{ work_exp.get("start_date", "")[:7] }}至{{work_exp.get("end_date", "")[:7] if work_exp.get("end_until_now") !=1 else "今" }}&nbsp;&nbsp;&nbsp;&nbsp;{{ work_exp.get("job", "") }}&nbsp;&nbsp;&nbsp;&nbsp;{{ work_exp.get("company_name", "") }}&nbsp;&nbsp;&nbsp;&nbsp;
 																	</td>
 																</tr>
                                                                 {% end %}
