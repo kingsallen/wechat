@@ -113,7 +113,7 @@ class RecomIgnoreHandler(RecomCustomVariableMixIn, BaseHandler):
             self.current_user.sysuser.id, click_time)
 
         # recom_total 推荐总数， recom_index ： 已推荐人数
-        if recom_result.recomTotal == (recom_result.recomIndex + recom_result.recomIgnore):
+        if recom_result.recom_total == (recom_result.recom_index + recom_result.recom_ignore):
             sort = yield self.candidate_ps.sorting(
                 self.current_user.sysuser.id,
                 self.current_user.company.id)
@@ -132,7 +132,9 @@ class RecomIgnoreHandler(RecomCustomVariableMixIn, BaseHandler):
 
         self.render(template_name="refer/weixin/passive-seeker_v2/passive-wanting_form.html",
                     passive_seeker=recom_result,
-                    recommend_presentee=self.recommend_presentee)
+                    recommend_presentee=self.recommend_presentee,
+                    message=''
+                    )
 
 
 class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):

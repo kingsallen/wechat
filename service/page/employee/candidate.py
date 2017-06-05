@@ -55,8 +55,20 @@ class CandidatePageService(PageService):
     @gen.coroutine
     def post_ignore(self, recom_record_id, company_id, post_user_id,
                     click_time):
-        ret = yield self.thrift_candidate_ds.ignore(
+        infra_ret = yield self.thrift_candidate_ds.ignore(
             recom_record_id, company_id, post_user_id,  click_time)
+
+        ret = ObjectDict(
+            next_one=infra_ret.nextOne,
+            position_name=infra_ret.positionName,
+            recom_index=infra_ret.recomIndex,
+            id=infra_ret.id,
+            click_time=infra_ret.clickTime,
+            recom_ignore=infra_ret.recomIgnore,
+            recom_total=infra_ret.recomTotal,
+            presentee_name=infra_ret.presenteeName
+        )
+
         return ret
 
     @gen.coroutine
