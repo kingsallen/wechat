@@ -57,7 +57,7 @@ class CompanyPageService(PageService):
                     landing["name"] = company_conf_res.get("job_custom_title")
                 search_seq.append(landing)
 
-            # 避免副表字段与主表重复
+            # 避免副表字段与主表重复，设置默认值。副表hr_company_conf 不一定没个主表都有
             company_conf = ObjectDict({
                 "conf_theme_id": company_conf_res.get("theme_id", 5),
                 "conf_hb_throttle": company_conf_res.get("hb_throttle", 10),
