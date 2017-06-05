@@ -127,7 +127,7 @@ class PositionHandler(BaseHandler):
             appid=application.id or 0,
             is_collected=star,
             can_apply=not can_apply,
-            hr_chat=parent_cmp_info.conf_hr_chat != 0,
+            hr_chat=bool(parent_cmp_info.conf_hr_chat),
             hr_id=position_info.publisher,
             hr_icon=self.static_url(hr_image)
         )
