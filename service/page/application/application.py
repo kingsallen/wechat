@@ -1006,7 +1006,7 @@ class ApplicationPageService(PageService):
         #                 dict_conf,
         #     )
 
-        body=generate_resume_for_hr(profile,template_others,dict_conf)
+        body=generate_resume_for_hr(profile,template_others,dict_conf,position)
 
 
 
