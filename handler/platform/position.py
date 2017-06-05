@@ -304,7 +304,7 @@ class PositionHandler(BaseHandler):
             "can_apply": not can_apply,
             "forword_message": company_info.conf_forward_message or msg.POSITION_FORWARD_MESSAGE,
             "team": team_id,
-            "did": did if did != self.current_user.company.id else "",  # 主公司不需要提供 did
+            "did": did,
             "salary": position_info.salary,
             "hr_chat": bool(parent_company_info.conf_hr_chat),
             "teamname_custom": teamname_custom["teamname_custom"]
