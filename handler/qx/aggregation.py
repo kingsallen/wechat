@@ -175,7 +175,7 @@ class AggregationHandler(BaseHandler):
             params=self.params,
             fr="recruit",
             recom=self.position_ps._make_recom(self.current_user.sysuser.id),
-            escape=["page_no", "page_size"])
+            escape=["page_no", "page_size", "fr_wel"])
 
         if len(hot_company) == 1:
             logo = hot_company[0].get("logo")

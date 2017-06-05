@@ -116,7 +116,7 @@ class CompanyHandler(BaseHandler):
         if company_info.scale:
             data.append({
                 "name": "企业规模",
-                "value": "{}人".format(company_info.scale_name),
+                "value": company_info.scale_name,
             })
         if company_info.homepage:
             data.append({
