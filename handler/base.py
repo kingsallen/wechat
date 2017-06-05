@@ -322,7 +322,7 @@ class BaseHandler(MetaBaseHandler):
             session.qxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
                 unionid=self._unionid,
                 wechat_id=self.settings['qx_wechat_id'],
-                fields=['id', 'unionid', 'sysuser_id', 'is_subscribe']
+                fields=['id', 'unionid', 'sysuser_id']
             )
             self._session_id = self._make_new_session_id(
                 session.qxuser.sysuser_id)
@@ -375,11 +375,8 @@ class BaseHandler(MetaBaseHandler):
                 session.wxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
                     unionid=unionid, wechat_id=self._wechat.id)
 
-            if self._qxuser and self.is_platform:
-                session.qxuser = self._qxuser
-            else:
-                session.qxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
-                    unionid=unionid, wechat_id=self.settings['qx_wechat_id'])
+            session.qxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
+                unionid=unionid, wechat_id=self.settings['qx_wechat_id'])
 
         if not self._session_id:
             self._session_id = self._make_new_session_id(
