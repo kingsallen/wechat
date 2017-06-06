@@ -129,7 +129,7 @@
 
 													<tr>
 														<td align="center" class="mobile" style="-ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; color: #4B525C; font-family: arial, sans-serif; font-size: 14px; line-height: 20px; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
-															{{ resume.basic.get("gender_name", "") }}&nbsp;&nbsp;&nbsp;&nbsp;{{ resume.basic.get("city_name", "") }}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ const.degree.get(str((resume.educations[0]).get("degree", "0")), "") }}&nbsp;&nbsp;&nbsp;&nbsp;{{ year - int(resume.basic.get("birth", "")[:4]) }}岁
+															{{ resume.basic.get("gender_name", "") }}&nbsp;&nbsp;&nbsp;&nbsp;{{ resume.basic.get("city_name", "") }}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ const.degree.get(str((resume.educations[0]).get("degree", "0")), "") }}&nbsp;&nbsp;&nbsp;&nbsp;{{ str(year - int(resume.basic.get("birth", "")[:4]))+"岁" if resume.basic.get("birth", "") else "" }}
 														</td>
 													</tr>
 
