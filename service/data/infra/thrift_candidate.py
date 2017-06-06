@@ -59,7 +59,7 @@ class ThriftCandidateDataService(DataService):
         except BIZException as BizE:
             self.logger.warn("%s - %s" % (BizE.code, BizE.message))
         else:
-            self.logger.debug("[thrift]get_candidate_list: %s" % ret_list)
+            self.logger.debug("[thrift] get_candidate_list: %s" % ret_list)
 
             for el in ret_list:
                 recom_group = ObjectDict()
@@ -113,6 +113,7 @@ class ThriftCandidateDataService(DataService):
         try:
             recommend_result = yield self.candidate_service_cilent.recommend(
                 recom_params)
+            self.logger.debug("[recommend_result]: %s" % recommend_result)
 
         except BIZException as BizE:
             self.logger.warn("%s - %s" % (BizE.code, BizE.message))
@@ -168,7 +169,7 @@ class ThriftCandidateDataService(DataService):
     def sort(self, post_user_id, company_id):
 
         self.logger.debug("[thfirt] sort params: %s" % dict(post_user_id=post_user_id, company_id=company_id))
-        
+
         try:
             sort_result = yield self.candidate_service_cilent.getRecommendatorySorting(
                 int(post_user_id), int(company_id))
