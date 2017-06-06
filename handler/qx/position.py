@@ -59,6 +59,8 @@ class PositionHandler(BaseHandler):
 
             self.logger.debug("[JD]更新职位浏览量")
             yield self._make_position_visitnum(position_info)
+            self.logger.debug("[JD]更新链路信息")
+            yield self._make_refresh_share_chain(position_info)
         else:
             self.send_json_error()
             return
@@ -296,6 +298,16 @@ class PositionHandler(BaseHandler):
             "visitnum": position_info.visitnum + 1,
             "update_time": position_info.update_time_ori,
         })
+
+    @gen.coroutine
+    def _make_refresh_share_chain(self, position_info):
+        """更新链路关系，HR平台 候选人管理需要"""
+        if self.current_user.sysuser.id:
+            yield self.candidate_ps.send_candidate_view_position(
+                user_id=self.current_user.sysuser.id,
+                position_id=position_info.id,
+                sharechain_id=0,
+            )
 
 class PositionRecommendHandler(BaseHandler):
     """JD页，公司主页职位推荐"""
