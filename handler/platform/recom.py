@@ -113,7 +113,7 @@ class RecomIgnoreHandler(RecomCustomVariableMixIn, BaseHandler):
             self.current_user.sysuser.id, click_time)
 
         # recom_total 推荐总数， recom_index ： 已推荐人数
-        if recom_result.recomTotal == (recom_result.recomIndex + recom_result.recomIgnore):
+        if recom_result.recom_total == (recom_result.recom_index + recom_result.recom_ignore):
             sort = yield self.candidate_ps.sorting(
                 self.current_user.sysuser.id,
                 self.current_user.company.id)
@@ -132,7 +132,9 @@ class RecomIgnoreHandler(RecomCustomVariableMixIn, BaseHandler):
 
         self.render(template_name="refer/weixin/passive-seeker_v2/passive-wanting_form.html",
                     passive_seeker=recom_result,
-                    recommend_presentee=self.recommend_presentee)
+                    recommend_presentee=self.recommend_presentee,
+                    message=''
+                    )
 
 
 class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
@@ -185,12 +187,10 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
             is_recom,
             company_id)
 
-        self.logger.debug("get_passive_seekers: %s" % passive_seekers)
-
         self.render(
             template_name="refer/weixin/passive-seeker_v2/passive-wanting_recom.html",
             passive_seekers=passive_seekers,
-            message=message,
+            message=message
         )
 
     @tornado.gen.coroutine
@@ -211,13 +211,23 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
         next_passive_seeker = yield self.candidate_ps.get_recommendations(
             self.current_user.company.id, list_of_ids)
 
-        # 返回第一个推荐的被动求职者
-        self.render(
-            template_name="refer/weixin/passive-seeker_v2/passive-wanting_form.html",
-            passive_seeker=next_passive_seeker,
-            recommend_presentee=self.recommend_presentee,
-            message=""
-        )
+        if next_passive_seeker:
+            # 返回第一个推荐的被动求职者
+            self.render(
+                template_name="refer/weixin/passive-seeker_v2/passive-wanting_form.html",
+                passive_seeker=next_passive_seeker,
+                recommend_presentee=self.recommend_presentee,
+                message=""
+            )
+            return
+        else:
+            stats = yield self.candidate_ps.sorting(
+                self.current_user.sysuser.id, self.current_user.company.id)
+
+            self.render(
+                template_name="refer/weixin/passive-seeker_v2/passive-wanting_finished.html",
+                stats=stats,
+                recommend_success=self.recommend_success)
 
     @tornado.gen.coroutine
     def _get_recom_candidate(self, id):
@@ -262,7 +272,7 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
         self.logger.debug("post_recom_passive_seeker form_items: %s" % form_items)
 
         # 如果校验失败返回原页面并附加 message
-        message = None
+        message = ''
         if any([(x == '') for x in form_items]):
             message = '有必填项未填写'
 
@@ -322,12 +332,11 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
             )
 
             # 已经全部推荐了
-            if recom_result.recomTotal == recom_result.recomIndex + recom_result.recomIgnore:
+            if recom_result.recom_total == recom_result.recom_index + recom_result.recom_ignore:
 
                 stats = yield self.candidate_ps.sorting(
                     self.current_user.sysuser.id, self.current_user.company.id)
 
-                self.logger.debug("_post_recom_candidate stats: %s" % stats)
                 self.render(
                     template_name="refer/weixin/passive-seeker_v2/passive-wanting_finished.html",
                     stats=stats,
@@ -338,4 +347,6 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
                 self.render(
                     template_name="refer/weixin/passive-seeker_v2/passive-wanting_form.html",
                     passive_seeker=recom_result,
-                    recommend_presentee=self.recommend_presentee)
+                    recommend_presentee=self.recommend_presentee,
+                    message=message
+                )
