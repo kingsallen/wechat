@@ -65,7 +65,7 @@ class LandingPageService(PageService):
             # 使用 key_list 来筛选 source
             source = ObjectDict(sub_dict(source, key_list))
 
-            if 'salayr_top' in key_list:
+            if 'salary_top' in key_list:
                 # 对 salary 做特殊处理 (salary_top, salary_bottom) -> salary
                 salary = [
                     v.get("name") for v in platform_const.SALARY.values()
@@ -81,7 +81,8 @@ class LandingPageService(PageService):
 
         return ret
 
-    def split_cities(self, data, delimiter=None):
+    @staticmethod
+    def split_cities(data, delimiter=None):
         """如果一条数据中包含多个城市，应该分裂成多条数据"""
         ret = []
         key_to_split = 'city'
@@ -128,12 +129,14 @@ class LandingPageService(PageService):
         生成高级搜索功能中前端需要的数据
         :param company:
         :return: {"field_name": ['地点', '子公司', '部门'],
+                  "field_form_name": ['city', '...', 'team_name']
                   "values": [['上海', '寻仟', '研发部'],
                              ['上海', '寻仟', '设计部'],
                              ...]
                  }
         """
         conf_search_seq = tuple([int(e.index) for e in company.get("conf_search_seq")])
+
         if not conf_search_seq:
             conf_search_seq = (
                 platform_const.LANDING_INDEX_CITY,
@@ -143,12 +146,15 @@ class LandingPageService(PageService):
             )
 
         positions_data = yield self.get_positions_data(conf_search_seq, company.id)
-        positions_data = self.split_cities(positions_data)
+
+        if platform_const.LANDING_INDEX_CITY in conf_search_seq:
+            positions_data = self.split_cities(positions_data)
 
         if platform_const.LANDING_INDEX_CHILD_COMPANY in conf_search_seq:
             positions_data = yield self.append_child_company_name(positions_data)
 
         self.logger.debug(conf_search_seq)
+
         key_order = [platform_const.LANDING[kn].get("display_key") for kn in conf_search_seq]
 
         positions_data_values = []
@@ -159,7 +165,10 @@ class LandingPageService(PageService):
 
             positions_data_values.append(to_append)
 
+        dedupped_position_data_values = list_dedup_list(positions_data_values)
+
         return ObjectDict({
             "field_name": [platform_const.LANDING[e].get("name") for e in conf_search_seq],
-            "values": list_dedup_list(positions_data_values)
+            "field_form_name": [platform_const.LANDING[e].get("form_name") for e in conf_search_seq],
+            "values": dedupped_position_data_values
         })
