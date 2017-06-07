@@ -240,7 +240,7 @@ def make_other_team_data(team, res, handler_params):
         'sub_title': team.name,
         'link': make_url('/m/company/team/{}'.format(team.id), handler_params),
         'description': team.slogan,
-        'media_url': make_static_url(res.res_url),
+        'media_url': make_static_url(res.res_url if MEDIA_TYPE[res.res_type] == "image" else res.cover),
         'media_type': MEDIA_TYPE[res.res_type]
     }
 

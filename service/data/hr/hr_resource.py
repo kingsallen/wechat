@@ -63,7 +63,7 @@ class HrResourceDataService(DataService):
         else:
             resource_list = yield self.get_resource_list(
                 conds='id in {}'.format(tuple(id_list)).replace(',)', ')'),
-                fields=['id', 'res_url', 'res_type']
+                fields=['id', 'res_url', 'res_type', 'cover']
             )
 
         resource_dict = {r.id: r for r in resource_list}
