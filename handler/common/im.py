@@ -243,7 +243,6 @@ class ChatHandler(BaseHandler):
         page_no = self.params.page_no or 1
         page_size = self.params.page_size or 10
         res = yield self.chat_ps.get_chatrooms(self.current_user.sysuser.id, page_no, page_size)
-        self.logger.debug("[chat]get_chatrooms:{}".format(res))
         self.send_json_success(data=ObjectDict(
             records = res
         ))
@@ -257,7 +256,6 @@ class ChatHandler(BaseHandler):
         if not self.params.room_id:
             self.send_json_error(message=msg.REQUEST_PARAM_ERROR)
             return
-
 
         room_info = yield self.chat_ps.get_chatroom_info(self.params.room_id)
 
@@ -289,7 +287,7 @@ class ChatHandler(BaseHandler):
 
         # gamma 项目 hr 欢迎导语不同
         is_gamma = False
-        if int(self.params.hr_id) == int(self.current_user.company.hraccount_id):
+        if self.is_qx and int(self.params.hr_id) == int(self.current_user.company.hraccount_id):
             is_gamma = True
 
         res = yield self.chat_ps.get_chatroom(self.current_user.sysuser.id,
