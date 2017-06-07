@@ -27,16 +27,36 @@ LANDING_INDEX_CUSTOM = 9
 
 # 栏目设置
 LANDING = ObjectDict({
-    LANDING_INDEX_CITY:          {"name": "工作地点", "chpe": "地区", "key": "city"},
-    LANDING_INDEX_SALARY:        {"name": "薪资范围", "chpe": "薪资", "key": ["salary_top", "salary_bottom"]},
-    LANDING_INDEX_OCCUPATION:    {"name": "职位职能", "chpe": "职能", "key": "occupation"},
-    LANDING_INDEX_DEPARTMENT:    {"name": "所属部门", "chpe": "部门", "key": "team_name"},
-    LANDING_INDEX_CANDIDATE:     {"name": "招聘类型", "chpe": "类型", "key": "candidate_source_name"},
-    LANDING_INDEX_EMPLOYMENT:    {"name": "工作性质", "chpe": "性质", "key": "employment_type_name"},
-    LANDING_INDEX_DEGREE:        {"name": "学历要求", "chpe": "学历", "key": "degree_name"},
-    LANDING_INDEX_CHILD_COMPANY: {"name": "子公司名称", "chpe": "公司", "key": "publisher_company_id"},
-    LANDING_INDEX_CUSTOM:        {"name": "企业自定义字段", "chpe": "自定义", "key": "custom"} #
+    LANDING_INDEX_CITY:          {"name":        "工作地点", "chpe": "地区",
+                                  "key":         "city",
+                                  "display_key": "city"},
+    LANDING_INDEX_SALARY:        {"name":        "薪资范围", "chpe": "薪资",
+                                  "key":         ["salary_top",
+                                                  "salary_bottom"],
+                                  "display_key": "salary"},
+    LANDING_INDEX_OCCUPATION:    {"name":        "职位职能", "chpe": "职能",
+                                  "key":         "occupation",
+                                  "display_key": "occupation"},
+    LANDING_INDEX_DEPARTMENT:    {"name":        "所属部门", "chpe": "部门",
+                                  "key":         "team_name",
+                                  "display_key": "team_name"},
+    LANDING_INDEX_CANDIDATE:     {"name":        "招聘类型", "chpe": "类型",
+                                  "key":         "candidate_source_name",
+                                  "display_key": "candidate_source_name"},
+    LANDING_INDEX_EMPLOYMENT:    {"name":        "工作性质", "chpe": "性质",
+                                  "key":         "employment_type_name",
+                                  "display_key": "employment_type_name"},
+    LANDING_INDEX_DEGREE:        {"name":        "学历要求", "chpe": "学历",
+                                  "key":         "degree_name",
+                                  "display_key": "degree_name"},
+    LANDING_INDEX_CHILD_COMPANY: {"name":        "子公司名称", "chpe": "公司",
+                                  "key":         "publisher_company_id",
+                                  "display_key": "publisher_company_id"},
+    LANDING_INDEX_CUSTOM:        {"name":        "企业自定义字段", "chpe": "自定义",
+                                  "key":         "custom",
+                                  "display_key": "custom"}
 })
+
 
 
 # 薪资范围搜索项

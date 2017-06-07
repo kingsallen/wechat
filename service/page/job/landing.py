@@ -20,14 +20,13 @@ class LandingPageService(PageService):
     def __init__(self):
         super().__init__()
 
-
     def make_key_list(self, conf_search_seq):
         """ 根据 conf_search_seq 来生成 key list
         :param conf_search_seq: 
         :return: key_list
         """
-        key_list = ["id"]
 
+        key_list = []
         for key in conf_search_seq:
             to_append = platform_const.LANDING.get(key)
             if to_append:
@@ -36,25 +35,28 @@ class LandingPageService(PageService):
                     key_list = key_list + to_append
                 else:
                     key_list.append(to_append)
-        self.logger.debug("key_list: %s" % key_list)
+
         return key_list
 
     @gen.coroutine
-    def get_positions_data(self, conf_search_seq, company_id=39978):
+    def get_positions_data(self, conf_search_seq, company_id):
         """ 从 ES 获取全部职位信息
         可以正确解析 salary
         """
         ret = []
         query_size = 5000
 
-        url = settings.es + "/index/_search?company_id:%s+AND+status:0&size:%s" % (company_id, query_size)
+        url = settings.es + "/index/_search?company_id:%s+AND+status:0&size=%s" % (company_id, query_size)
         response = yield httpclient.AsyncHTTPClient().fetch(url)
 
         body = ObjectDict(json.loads(to_str(response.body)))
         result_list = body.hits.hits
 
+
+
         # 获取筛选项
         key_list = self.make_key_list(conf_search_seq)
+        self.logger.debug("key_list: %s" % key_list)
 
         for e in result_list:
             source = e.get("_source")
@@ -62,17 +64,17 @@ class LandingPageService(PageService):
             # 使用 key_list 来筛选 source
             source = ObjectDict(sub_dict(source, key_list))
 
-            print(source)
-            # 对 salary 做特殊处理 (salary_top, salary_bottom) -> salary
-            salary = [
-                v.get("name") for v in platform_const.SALARY.values()
-                if v.salary_bottom == source.salary_bottom and
-                   v.salary_top == source.salary_top
-            ]
+            if 'salayr_top' in key_list:
+                # 对 salary 做特殊处理 (salary_top, salary_bottom) -> salary
+                salary = [
+                    v.get("name") for v in platform_const.SALARY.values()
+                    if v.salary_bottom == source.salary_bottom and
+                       v.salary_top == source.salary_top
+                ]
 
-            source.salary = salary[0] if salary else ''
-            source.pop("salary_top", None)
-            source.pop("salary_bottom", None)
+                source.salary = salary[0] if salary else ''
+                source.pop("salary_top", None)
+                source.pop("salary_bottom", None)
 
             ret.append(source)
 
@@ -101,7 +103,7 @@ class LandingPageService(PageService):
         return ret
 
     @gen.coroutine
-    def append_child_company_name_to(self, data):
+    def append_child_company_name(self, data):
         child_company_ids = [v.publisher_company_id for v in data]
 
         child_company_id_abbr_list = yield self.hr_company_ds.get_companys_list(
@@ -129,15 +131,14 @@ class LandingPageService(PageService):
                              ...]
                  }
         """
-        conf_search_seq = company.get(
-            "conf_search_seq",
-            (
+        conf_search_seq = tuple([int(e.index) for e in company.get("conf_search_seq")])
+        if not conf_search_seq:
+            conf_search_seq = (
                 platform_const.LANDING_INDEX_CITY,
                 platform_const.LANDING_INDEX_SALARY,
                 platform_const.LANDING_INDEX_CHILD_COMPANY,
                 platform_const.LANDING_INDEX_DEPARTMENT
             )
-        )
 
         positions_data = yield self.get_positions_data(conf_search_seq, company.id)
         positions_data = self.split_cities(positions_data)
@@ -145,9 +146,23 @@ class LandingPageService(PageService):
         if platform_const.LANDING_INDEX_CHILD_COMPANY in conf_search_seq:
             positions_data = yield self.append_child_company_name(positions_data)
 
+        self.logger.debug(conf_search_seq)
+        key_order = [platform_const.LANDING[kn].get("display_key") for kn in conf_search_seq]
+        print("key_order: %s" % key_order)
+
+        positions_data_values = []
+        for e in positions_data:
+            to_append = []
+            for k in key_order:
+                to_append.append(e.get(k) or '')
+
+            print(to_append)
+            positions_data_values.append(to_append)
+
+
         return ObjectDict({
             "field_name": [platform_const.LANDING[e].get("name") for e in conf_search_seq],
-            "values": positions_data
+            "values": positions_data_values
         })
 
     # @gen.coroutine
