@@ -20,6 +20,7 @@ class LandingHandler(BaseHandler):
 
         search_seq = yield self.landing_ps.make_search_seq(self.current_user.company)
 
+        self.logger.debug("[landing] search_seq: %s" % search_seq)
 
         # selected = ObjectDict({
         #     "city":             self.params.city,
@@ -42,7 +43,6 @@ class LandingHandler(BaseHandler):
             "image": self.static_url(self.current_user.company.conf_search_img),
             "search_seq": search_seq
         })
-        self.logger.debug("[landing] company: %s" % company)
 
         yield self._make_share_info(self.current_user.company)
 
