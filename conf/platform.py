@@ -15,6 +15,8 @@ from util.common import ObjectDict
 
 LANDING_SEQ = "1#2#3#4"
 
+LANDING_QUERY_SIZE = 5000
+
 LANDING_INDEX_CITY = 1
 LANDING_INDEX_SALARY = 2
 LANDING_INDEX_OCCUPATION = 3
@@ -51,7 +53,7 @@ LANDING = ObjectDict({
                                   "display_key": "degree_name"},
     LANDING_INDEX_CHILD_COMPANY: {"name":        "子公司名称", "chpe": "公司",
                                   "key":         "publisher_company_id",
-                                  "display_key": "publisher_company_id"},
+                                  "display_key": "child_company_abbr"},
     LANDING_INDEX_CUSTOM:        {"name":        "企业自定义字段", "chpe": "自定义",
                                   "key":         "custom",
                                   "display_key": "custom"}

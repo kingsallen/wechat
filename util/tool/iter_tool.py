@@ -233,3 +233,12 @@ def random_combination_with_replacement(iterable, r):
     n = len(pool)
     indices = sorted(random.randrange(n) for _ in range(r))
     return tuple(pool[i] for i in indices)
+
+
+def list_dedup_list(data):
+    """deduplicate a list of list"""
+    ret = []
+    for e in data:
+        if e not in ret:
+            ret.append(e)
+    return ret
