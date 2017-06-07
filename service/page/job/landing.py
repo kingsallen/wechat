@@ -107,19 +107,24 @@ class LandingPageService(PageService):
     @gen.coroutine
     def append_child_company_name(self, data):
         """ 对position_data 添加子公司简称 """
-        child_company_ids = [v.publisher_company_id for v in data]
+        child_company_ids = set([v.publisher_company_id for v in data])
 
         child_company_id_abbr_list = yield self.hr_company_ds.get_companys_list(
             conds="id in " + set_literl(child_company_ids),
             fields=["id", "abbreviation"]
         )
-        child_company_id_abbr_dict = {e.id:e.abbreviation for e in child_company_id_abbr_list}
+        child_company_id_abbr_dict = {
+            e.id: e.abbreviation for e in child_company_id_abbr_list
+        }
 
         for d in data:
             if d.publisher_company_id:
-                d.child_company_abbr = child_company_id_abbr_dict.get(d.publisher_company_id, "")
+                d.child_company_abbr = {
+                    "text": child_company_id_abbr_dict.get(d.publisher_company_id, ""),
+                    "value": d.publisher_company_id
+                }
             else:
-                d.child_company_abbr = ""
+                d.child_company_abbr = {}
 
         return data
 
@@ -130,8 +135,8 @@ class LandingPageService(PageService):
         :param company:
         :return: {"field_name": ['地点', '子公司', '部门'],
                   "field_form_name": ['city', '...', 'team_name']
-                  "values": [['上海', '寻仟', '研发部'],
-                             ['上海', '寻仟', '设计部'],
+                  "values": [[{"text": '上海', "value": "上海"}, ...],
+                             [...],
                              ...]
                  }
         """
@@ -161,7 +166,10 @@ class LandingPageService(PageService):
         for e in positions_data:
             to_append = []
             for k in key_order:
-                to_append.append(e.get(k) or '')
+                if k == 'child_company_abbr':
+                    to_append.append(e.get(k))
+                else:
+                    to_append.append({"text": e.get(k), "value": e.get(k)})
 
             positions_data_values.append(to_append)
 
