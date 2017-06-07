@@ -6,6 +6,7 @@ import datetime
 from util.common.cipher import decode_id
 
 from handler.base import BaseHandler
+from util.tool.json_tool import json_dumps
 
 
 class LogCollectorHandler(BaseHandler):
@@ -27,7 +28,7 @@ class LogCollectorHandler(BaseHandler):
 
     def log_it(self, *fields):
         log = self.gen_log(*fields)
-        self.logger.stats(log)
+        self.logger.stats(json_dumps(log))
 
     def gen_log(self, *fields):
         self.guarantee(*fields)
