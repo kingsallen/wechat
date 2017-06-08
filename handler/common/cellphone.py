@@ -53,7 +53,9 @@ class CellphoneBindHandler(BaseHandler):
     @gen.coroutine
     def get_register(self):
         """空帐号补填手机号"""
-        yield self._opt_get_cellphone_code(const.MOBILE_CODE_OPT_TYPE.code_register)
+        self.send_json_error(http_code=404)
+        return
+        # yield self._opt_get_cellphone_code(const.MOBILE_CODE_OPT_TYPE.code_register)
 
     @handle_response
     @gen.coroutine
@@ -103,9 +105,12 @@ class CellphoneBindHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def post_register(self):
-        res = yield self._opt_post_cellphone_code(const.MOBILE_CODE_OPT_TYPE.code_register)
-        if res:
-            yield self._opt_post_user_account()
+        self.send_json_error(http_code=404)
+        return
+        
+        # res = yield self._opt_post_cellphone_code(const.MOBILE_CODE_OPT_TYPE.code_register)
+        # if res:
+        #     yield self._opt_post_user_account()
 
     @handle_response
     @gen.coroutine
