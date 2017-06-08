@@ -15,11 +15,15 @@ from handler.base import BaseHandler
 from util.common.decorator import handle_response
 from util.common import ObjectDict
 from util.common.cipher import encode_id
-from util.tool.str_tool import password_crypt
+
+from util.tool.str_tool import password_crypt, to_str
+
+from handler.common.captcha import CaptchaMixin
+
 from thrift_gen.gen.mq.struct.ttypes import SmsType
 
 
-class CellphoneBindHandler(BaseHandler):
+class CellphoneBindHandler(CaptchaMixin, BaseHandler):
     """ 发送短信验证码的共通方法
     Referenced Document: https://wiki.moseeker.com/user_account_api.md
                          Point 32, 33
@@ -34,6 +38,7 @@ class CellphoneBindHandler(BaseHandler):
         try:
             # 重置 event，准确描述
             self._event = self._event + method
+            self.vcode = self.params.vcode
             yield getattr(self, 'get_' + method)()
         except Exception as e:
             self.send_json_error()
@@ -84,6 +89,21 @@ class CellphoneBindHandler(BaseHandler):
 
     @gen.coroutine
     def _opt_get_cellphone_code(self, type):
+
+        if not self.vcode:
+            self.send_json_error(message=msg.VCODE_NOT_EXIST)
+            return
+
+        session_id = to_str(
+            self.get_secure_cookie(const.COOKIE_SESSIONID) or
+            self.get_secure_cookie(const.COOKIE_MVIEWERID) or ''
+        )
+
+        result = self.captcha_check(session_id, self.current_user.user_id, self.vcode)
+
+        if not result:
+            self.send_json_error(message=msg.VCODE_INVALID)
+            return
 
         # 注册时，不需要判断是否为当前用户手机号
         if type != const.MOBILE_CODE_OPT_TYPE.code_register:

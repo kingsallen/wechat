@@ -15,6 +15,7 @@ from util.common import ObjectDict
 from util.tool.json_tool import json_dumps
 from util.tool.str_tool import to_str
 
+from json import JSONDecodeError
 
 class BaseRedis(object):
 
@@ -47,30 +48,46 @@ class BaseRedis(object):
 
     def _get(self, key, default=None):
         value = to_str(self._redis.get(key))
+        ret = None
+
         if value is None:
             return default
+
         try:
             ret = json.loads(value)
+
+        except JSONDecodeError as e:
+            # 如果 value 不符合 JSON 格式，则直接返回
+            ret = value
+
         except TypeError as e:
             print(e)
             print('key: %s, value: %s' % (key, value))
             raise e
-        else:
+        finally:
             return ret
 
     def get(self, key, default=None, prefix=True):
+
         key = self.key_name(key, prefix)
         value = self._get(key, default)
+
         if isinstance(value, dict):
             return ObjectDict(value)
+
         elif isinstance(value, list):
             return [ObjectDict(item) for item in value]
-        else:
-            return default
+
+        elif isinstance(value, str):
+            return value
+
+        return default
 
     def set(self, key, value, ttl=None, prefix=True):
         key = self.key_name(key, prefix)
-        value = json_dumps(value)
+        if isinstance(value, dict):
+            value = json_dumps(value)
+
         self._redis.set(key, value, ex=ttl)
 
     def update(self, key, value, ttl=None, prefix=False):
