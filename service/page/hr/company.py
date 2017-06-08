@@ -57,24 +57,24 @@ class CompanyPageService(PageService):
                     landing["name"] = company_conf_res.get("job_custom_title")
                 search_seq.append(landing)
 
-            # 避免副表字段与主表重复
+            # 避免副表字段与主表重复，设置默认值。副表hr_company_conf 不一定没个主表都有
             company_conf = ObjectDict({
-                "conf_theme_id": company_conf_res.get("theme_id"),
-                "conf_hb_throttle": company_conf_res.get("hb_throttle"),
-                "conf_app_reply": company_conf_res.get("app_reply"),
-                "conf_employee_binding": company_conf_res.get("employee_binding"),
-                "conf_recommend_presentee": company_conf_res.get("recommend_presentee"),
-                "conf_recommend_success": company_conf_res.get("recommend_success"),
-                "conf_forward_message": company_conf_res.get("forward_message"),
-                "conf_job_custom_title": company_conf_res.get("job_custom_title"),
+                "conf_theme_id": company_conf_res.get("theme_id", 5),
+                "conf_hb_throttle": company_conf_res.get("hb_throttle", 10),
+                "conf_app_reply": company_conf_res.get("app_reply", ""),
+                "conf_employee_binding": company_conf_res.get("employee_binding", ""),
+                "conf_recommend_presentee": company_conf_res.get("recommend_presentee", ""),
+                "conf_recommend_success": company_conf_res.get("recommend_success", ""),
+                "conf_forward_message": company_conf_res.get("forward_message", ""),
+                "conf_job_custom_title": company_conf_res.get("job_custom_title", ""),
                 "conf_search_seq": search_seq,
-                "conf_search_img": company_conf_res.get("search_img"),
-                "conf_job_occupation": company_conf_res.get("job_occupation"),
-                "conf_newjd_status": company_conf_res.get("newjd_status"),
-                "conf_teamname_custom": company_conf_res.get("teamname_custom"),  # 职位部门字段名称
-                "conf_application_time": company_conf_res.get("application_time"),  # 新JD开通申请时间
-                "conf_hr_chat": company_conf_res.get("hr_chat"),  # IM 聊天开关
-                "conf_show_in_qx": company_conf_res.get("show_in_qx"),  # 公司信息、团队信息、职位信息等只在仟寻展示
+                "conf_search_img": company_conf_res.get("search_img", ""),
+                "conf_job_occupation": company_conf_res.get("job_occupation", ""),
+                "conf_newjd_status": company_conf_res.get("newjd_status", 0),
+                "conf_teamname_custom": company_conf_res.get("teamname_custom", ""),  # 职位部门字段名称
+                "conf_application_time": company_conf_res.get("application_time", ""),  # 新JD开通申请时间
+                "conf_hr_chat": company_conf_res.get("hr_chat", 1),  # IM 聊天开关
+                "conf_show_in_qx": company_conf_res.get("show_in_qx", 1),  # 公司信息、团队信息、职位信息等只在仟寻展示
             })
 
             # 处理公司自定义团队名称

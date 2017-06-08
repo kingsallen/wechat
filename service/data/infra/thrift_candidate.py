@@ -8,6 +8,7 @@ from thrift_gen.gen.candidate.service.CandidateService import Client as Candidat
 from thrift_gen.gen.candidate.struct.ttypes import CandidateListParam, RecommmendParam
 from thrift_gen.gen.common.struct.ttypes import BIZException
 from util.common import ObjectDict
+import conf.common as const
 
 
 class ThriftCandidateDataService(DataService):
@@ -22,6 +23,9 @@ class ThriftCandidateDataService(DataService):
     def send_candidate_view_position(self, user_id, position_id, sharechain_id):
         """刷新候选人链路信息，调用基础服务"""
 
+        self.logger.debug("[thfirt] send_candidate_view_position params: %s" % dict(
+            user_id=user_id, position_id=position_id, sharechain_id=sharechain_id))
+
         ret = yield self.candidate_service_cilent.glancePosition(int(user_id), int(position_id), int(sharechain_id))
         raise gen.Return(ret)
 
@@ -29,12 +33,19 @@ class ThriftCandidateDataService(DataService):
     def send_candidate_interested(self, user_id, position_id, is_interested):
         """刷新候选人感兴趣，调用基础服务"""
 
+        self.logger.debug(
+            "[thfirt] send_candidate_interested params: %s" % dict(
+                user_id=user_id, position_id=position_id, is_interested=is_interested))
+
         ret = yield self.candidate_service_cilent.changeInteresting(int(user_id), int(position_id), int(is_interested))
         raise gen.Return(ret)
 
     @gen.coroutine
     def get_candidate_list(self, post_user_id, click_time, is_recom, company_id):
         """获取候选人（要推荐的人）列表"""
+
+        self.logger.debug("[thfirt] get_candidate_list params: %s" % dict(
+            post_user_id=post_user_id, click_time=click_time, is_recom=is_recom, company_id=company_id))
 
         params = CandidateListParam()
         params.postUserId = int(post_user_id)
@@ -48,7 +59,7 @@ class ThriftCandidateDataService(DataService):
         except BIZException as BizE:
             self.logger.warn("%s - %s" % (BizE.code, BizE.message))
         else:
-            self.logger.debug("[thrift]get_candidate_list: %s" % ret_list)
+            self.logger.debug("[thrift] get_candidate_list: %s" % ret_list)
 
             for el in ret_list:
                 recom_group = ObjectDict()
@@ -65,8 +76,8 @@ class ThriftCandidateDataService(DataService):
                     c_info.presentee_friend_name = c.presenteeFriendName  # 一度朋友称呼
                     c_info.presentee_logo = c.presenteeLogo               # 头像
                     c_info.is_recom = c.isRecom                           # 推荐状态
-                    c_info.is_interested = c.insterested or 1
-                    c_info.view_number = c.viewNumber or 0
+                    c_info.is_interested = const.YES if c.insterested else const.NO
+                    c_info.view_number = c.viewNumber
                     recom_group.candidates.append(c_info)
 
                 ret.append(recom_group)
@@ -83,6 +94,10 @@ class ThriftCandidateDataService(DataService):
 
         """
 
+        self.logger.debug("[thfirt] recommend params: %s" % dict(
+            post_user_id=post_user_id, click_time=click_time, recom_record_id=recom_record_id, realname=realname,
+            company=company, position=position, mobile=mobile, recom_reason=recom_reason, company_id=company_id))
+
         recom_params = RecommmendParam()
 
         recom_params.id = int(recom_record_id)
@@ -98,6 +113,7 @@ class ThriftCandidateDataService(DataService):
         try:
             recommend_result = yield self.candidate_service_cilent.recommend(
                 recom_params)
+            self.logger.debug("[recommend_result]: %s" % recommend_result)
 
         except BIZException as BizE:
             self.logger.warn("%s - %s" % (BizE.code, BizE.message))
@@ -107,6 +123,9 @@ class ThriftCandidateDataService(DataService):
 
     @gen.coroutine
     def get_recommendations(self, company_id, list_of_recom_ids):
+
+        self.logger.debug("[thfirt] get_recommendations params: %s" % dict(company_id=company_id, list_of_recom_ids=list_of_recom_ids))
+
         try:
             recom_result = yield self.candidate_service_cilent.getRecomendations(
                 int(company_id), list_of_recom_ids)
@@ -119,6 +138,9 @@ class ThriftCandidateDataService(DataService):
 
     @gen.coroutine
     def get_recommendation(self, recom_id, post_user_id):
+
+        self.logger.debug("[thfirt] get_recommendation params: %s" % dict(recom_id=recom_id, post_user_id=post_user_id))
+
         try:
             recom_record_result = yield self.candidate_service_cilent.getRecommendation(
                 int(recom_id), int(post_user_id))
@@ -131,6 +153,9 @@ class ThriftCandidateDataService(DataService):
 
     @gen.coroutine
     def ignore(self, id, company_id, post_user_id,  click_time):
+
+        self.logger.debug("[thfirt] ignore params: %s" % dict(id=id, company_id=company_id, post_user_id=post_user_id, click_time=click_time))
+
         try:
             recommend_result = yield self.candidate_service_cilent.ignore(
                 int(id), int(company_id), int(post_user_id), str(click_time))
@@ -142,6 +167,9 @@ class ThriftCandidateDataService(DataService):
 
     @gen.coroutine
     def sort(self, post_user_id, company_id):
+
+        self.logger.debug("[thfirt] sort params: %s" % dict(post_user_id=post_user_id, company_id=company_id))
+
         try:
             sort_result = yield self.candidate_service_cilent.getRecommendatorySorting(
                 int(post_user_id), int(company_id))

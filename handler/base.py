@@ -303,9 +303,9 @@ class BaseHandler(MetaBaseHandler):
         # ga('set', 'dimension2', 'YYYYY’);
         # ga('set', 'dimension3', 'ZZZZZZ’);
 
-        if self.current_user.sysuser:
-            result, profile = yield self.profile_ps.has_profile(self.current_user.sysuser.id)
-            self.current_user.has_profile = result
+        # if self.current_user.sysuser:
+        #     result, profile = yield self.profile_ps.has_profile(self.current_user.sysuser.id)
+        #     self.current_user.has_profile = result
 
     @gen.coroutine
     def _build_session(self):
@@ -375,11 +375,8 @@ class BaseHandler(MetaBaseHandler):
                 session.wxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
                     unionid=unionid, wechat_id=self._wechat.id)
 
-            if self._qxuser and self.is_platform:
-                session.qxuser = self._qxuser
-            else:
-                session.qxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
-                    unionid=unionid, wechat_id=self.settings['qx_wechat_id'])
+            session.qxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
+                unionid=unionid, wechat_id=self.settings['qx_wechat_id'])
 
         if not self._session_id:
             self._session_id = self._make_new_session_id(

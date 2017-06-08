@@ -354,14 +354,8 @@ def gamma_welcome(func):
 
         search_keywords = self.get_secure_cookie(qx_const.COOKIE_WELCOME_SEARCH)
 
-        self.logger.debug("gamma_welcome search_keywords:{}".format(search_keywords))
-        self.logger.debug("gamma_welcome self.params.fr:{}".format(self.params.fr))
-        self.logger.debug("gamma_welcome uri:{}".format(self.request.uri))
-        self.logger.debug("gamma_welcome match:{}".format(re.match(r"^\/position[\?]?[\w&=%]*$", self.request.uri)))
-
         if not search_keywords and self.params.fr != "recruit" and not self.params.fr_wel \
             and re.match(r"^\/position[\?]?[\w&=%]*$", self.request.uri):
-            self.logger.debug("1")
             gender = "unknown"
             if self.current_user.qxuser.sex == 1:
                 gender = "male"
@@ -371,7 +365,6 @@ def gamma_welcome(func):
             self.render_page(template_name='qx/home/welcome.html',
                         data={"gender": gender})
             return
-        self.logger.debug("2")
 
         yield func(self, *args, **kwargs)
 
@@ -401,7 +394,6 @@ class BaseNewJDStatusChecker(metaclass=ABCMeta):
                 self.fail_action(*args, **kwargs)
                 return
 
-            handler.logger.debug('NewJD status check successful: {}'.format(handler.current_user.wechat.id))
             yield func(handler, *args, **kwargs)
 
         return wrapper

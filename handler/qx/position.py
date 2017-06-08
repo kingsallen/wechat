@@ -9,6 +9,7 @@ import random
 from tornado import gen
 
 import conf.path as path
+import conf.common as const
 from handler.base import BaseHandler
 from util.common.decorator import handle_response
 from util.common import ObjectDict
@@ -58,6 +59,8 @@ class PositionHandler(BaseHandler):
 
             self.logger.debug("[JD]更新职位浏览量")
             yield self._make_position_visitnum(position_info)
+            self.logger.debug("[JD]更新链路信息")
+            yield self._make_refresh_share_chain(position_info)
         else:
             self.send_json_error()
             return
@@ -106,6 +109,8 @@ class PositionHandler(BaseHandler):
         else:
             cover = job_img
 
+        hr_image = yield self._make_hr_info(position_info.publisher, company_info)
+
         position = ObjectDict(
             id=position_info.id,
             title=position_info.title,
@@ -126,9 +131,20 @@ class PositionHandler(BaseHandler):
             can_apply=not can_apply,
             hr_chat=bool(parent_cmp_info.conf_hr_chat),
             hr_id=position_info.publisher,
+            hr_icon=self.static_url(hr_image)
         )
 
         return position, cover
+
+    @gen.coroutine
+    def _make_hr_info(self, publisher, company_info):
+        """根据职位 publisher 返回 hr 的相关信息 tuple"""
+        hr_account, hr_wx_user = yield self.position_ps.get_hr_info(publisher)
+        hrheadimgurl = (
+            hr_account.headimgurl or hr_wx_user.headimgurl or
+            company_info.logo or const.HR_HEADIMG
+        )
+        raise gen.Return(hrheadimgurl)
 
     @gen.coroutine
     def _make_jd_detail(self, position_info, pos_item):
@@ -282,6 +298,16 @@ class PositionHandler(BaseHandler):
             "visitnum": position_info.visitnum + 1,
             "update_time": position_info.update_time_ori,
         })
+
+    @gen.coroutine
+    def _make_refresh_share_chain(self, position_info):
+        """更新链路关系，HR平台 候选人管理需要"""
+        if self.current_user.sysuser.id:
+            yield self.candidate_ps.send_candidate_view_position(
+                user_id=self.current_user.sysuser.id,
+                position_id=position_info.id,
+                sharechain_id=0,
+            )
 
 class PositionRecommendHandler(BaseHandler):
     """JD页，公司主页职位推荐"""
