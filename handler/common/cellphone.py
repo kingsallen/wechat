@@ -89,8 +89,8 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
 
     @gen.coroutine
     def _opt_get_cellphone_code(self, type):
-
-        if not self.vcode:
+        self.logger.debug("vcode: %s" % self.params.vcode)
+        if not self.params.vcode:
             self.send_json_error(message=msg.VCODE_NOT_EXIST)
             return
 
