@@ -89,8 +89,10 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
 
     @gen.coroutine
     def _opt_get_cellphone_code(self, type):
+
         self.logger.debug("vcode: %s" % self.params.vcode)
-        if not self.params.vcode:
+
+        if not self.vcode:
             self.send_json_error(message=msg.VCODE_NOT_EXIST)
             return
 
@@ -99,7 +101,7 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
             self.get_secure_cookie(const.COOKIE_MVIEWERID) or ''
         )
 
-        result = self.captcha_check(session_id, self.current_user.user_id, self.vcode)
+        result = self.captcha_check(session_id, self.current_user.sysuser.id, self.vcode)
 
         if not result:
             self.send_json_error(message=msg.VCODE_INVALID)

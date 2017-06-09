@@ -42,8 +42,7 @@ class CaptchaMixin(object):
     # 去除比较难辨认的字母数字，节省公司的短信开销
     CHARS = set(string.ascii_letters + string.digits) - set('Oo0i1l2zZ')
 
-    _image_captcha = ImageCaptcha(width=WIDTH, height=HEIGHT,
-                                  font_sizes=FONT_SIZE)
+    _image_captcha = ImageCaptcha(width=WIDTH, height=HEIGHT, font_sizes=FONT_SIZE)
 
     def captcha_generate(self):
         """随机生成验证码图片和字符串
@@ -58,7 +57,6 @@ class CaptchaMixin(object):
             return False
 
         code = "".join(code)
-        self.logger.debug("session_id: %s, code: %s" % (self.make_key(session_id, user_id), code))
         # 验证码存入 WECHAT_VCODE_:SESSION_ID_:USER_ID, TTL 60
         redis.set(self.make_key(session_id, user_id), code, ttl=60)
         return True
