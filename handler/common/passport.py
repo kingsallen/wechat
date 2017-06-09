@@ -57,7 +57,7 @@ class LoginHandler(BaseHandler):
             self.send_json_error(message=res.message)
 
 
-class LogoutHandler(CaptchaMixin, BaseHandler):
+class LogoutHandler(BaseHandler):
     """
     用户登出.
     """
@@ -85,7 +85,7 @@ class LogoutHandler(CaptchaMixin, BaseHandler):
             redirect_url = self.make_url(path.GAMMA_POSITION, params=self.params, escape=['next_url', 'pid'])
         self.redirect(redirect_url)
 
-class RegisterHandler(BaseHandler):
+class RegisterHandler(CaptchaMixin, BaseHandler):
     """用户注册"""
 
     @handle_response
