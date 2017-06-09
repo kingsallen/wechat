@@ -12,7 +12,7 @@ import conf.common as const
 import conf.message as msg
 
 from handler.base import BaseHandler
-from util.common.decorator import handle_response
+from util.common.decorator import handle_response, common_handler
 from util.common import ObjectDict
 from util.common.cipher import encode_id
 
@@ -22,7 +22,7 @@ from handler.common.captcha import CaptchaMixin
 
 from thrift_gen.gen.mq.struct.ttypes import SmsType
 
-
+@common_handler
 class CellphoneBindHandler(CaptchaMixin, BaseHandler):
     """ 发送短信验证码的共通方法
     Referenced Document: https://wiki.moseeker.com/user_account_api.md
