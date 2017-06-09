@@ -57,6 +57,8 @@ class CaptchaMixin(object):
         if not any([session_id, user_id, code]):
             return False
 
+        code = "".join(code)
+        self.logger.debug("session_id: %s, code: %s" % (self.make_key(session_id, user_id), code))
         # 验证码存入 WECHAT_VCODE_:SESSION_ID_:USER_ID, TTL 60
         redis.set(self.make_key(session_id, user_id), code, ttl=60)
         return True
