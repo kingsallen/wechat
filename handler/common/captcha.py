@@ -29,20 +29,21 @@ class CaptchaMixin(object):
     FONT_SIZE= (60, 70, 80)
 
     # 似乎用多一点的字体可以更难破解，但是会消耗更多内存
-    FONTS = [
-        os.path.join(settings['fonts_path'], 'DejaVuSans - Bold.ttf'),
-        os.path.join(settings['fonts_path'], 'DejaVuSansMono - Bold.ttf'),
-        os.path.join(settings['fonts_path'], 'DejaVuSansMono.ttf'),
-        os.path.join(settings['fonts_path'], 'DejaVuSans.ttf'),
-        os.path.join(settings['fonts_path'], 'DejaVuSerif - Bold.ttf'),
-        os.path.join(settings['fonts_path'], 'DejaVuSerif.ttf')
-    ]
+    # 先使用内建字体， 需要研究一下 Font 的 load 方式
+    # FONTS = [
+    #     os.path.join(settings['fonts_path'], 'DejaVuSans - Bold.ttf'),
+    #     os.path.join(settings['fonts_path'], 'DejaVuSansMono - Bold.ttf'),
+    #     os.path.join(settings['fonts_path'], 'DejaVuSansMono.ttf'),
+    #     os.path.join(settings['fonts_path'], 'DejaVuSans.ttf'),
+    #     os.path.join(settings['fonts_path'], 'DejaVuSerif - Bold.ttf'),
+    #     os.path.join(settings['fonts_path'], 'DejaVuSerif.ttf')
+    # ]
 
     # 去除比较难辨认的字母数字，节省公司的短信开销
     CHARS = set(string.ascii_letters + string.digits) - set('Oo0i1l2zZ')
 
     _image_captcha = ImageCaptcha(width=WIDTH, height=HEIGHT,
-                                  fonts=FONTS, font_sizes=FONT_SIZE)
+                                  font_sizes=FONT_SIZE)
 
     def captcha_generate(self):
         """随机生成验证码图片和字符串
