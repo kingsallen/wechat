@@ -131,7 +131,11 @@ def check_signature(func):
     @functools.wraps(func)
     @gen.coroutine
     def wrapper(self, *args, **kwargs):
-        if self.is_platform and not self.is_common:
+        is_common = False
+        if hasattr(self, 'is_common'):
+            is_common = self.is_common
+
+        if self.is_platform and not is_common:
             key = "wechat_signature"
             try:
                 self.get_argument(key, strip=True)

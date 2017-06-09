@@ -3,6 +3,7 @@
 import string
 import random
 import io
+import os
 
 import tornado.gen
 
@@ -13,6 +14,7 @@ from util.tool.str_tool import to_str
 from globals import redis
 
 import conf.common as const
+from setting import settings
 
 
 class CaptchaMixin(object):
@@ -28,12 +30,12 @@ class CaptchaMixin(object):
 
     # 似乎用多一点的字体可以更难破解，但是会消耗更多内存
     FONTS = [
-        'DejaVuSans - Bold.ttf',
-        'DejaVuSansMono - Bold.ttf',
-        'DejaVuSansMono.ttf',
-        'DejaVuSans.ttf',
-        'DejaVuSerif - Bold.ttf',
-        'DejaVuSerif.ttf'
+        os.path.join(settings['static_path'], 'DejaVuSans - Bold.ttf'),
+        os.path.join(settings['static_path'], 'DejaVuSansMono - Bold.ttf'),
+        os.path.join(settings['static_path'], 'DejaVuSansMono.ttf'),
+        os.path.join(settings['static_path'], 'DejaVuSans.ttf'),
+        os.path.join(settings['static_path'], 'DejaVuSerif - Bold.ttf'),
+        os.path.join(settings['static_path'], 'DejaVuSerif.ttf')
     ]
 
     # 去除比较难辨认的字母数字，节省公司的短信开销
