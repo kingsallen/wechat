@@ -85,7 +85,7 @@ class BaseRedis(object):
 
     def set(self, key, value, ttl=None, prefix=True):
         key = self.key_name(key, prefix)
-        if isinstance(value, dict):
+        if isinstance(value, (dict, list)):
             value = json_dumps(value)
 
         self._redis.set(key, value, ex=ttl)
