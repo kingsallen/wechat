@@ -58,9 +58,7 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
     @gen.coroutine
     def get_register(self):
         """空帐号补填手机号"""
-        self.send_json_error(http_code=404)
-        return
-        # yield self._opt_get_cellphone_code(const.MOBILE_CODE_OPT_TYPE.code_register)
+        yield self._opt_get_cellphone_code(const.MOBILE_CODE_OPT_TYPE.code_register)
 
     @handle_response
     @gen.coroutine
@@ -127,12 +125,9 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
     @handle_response
     @gen.coroutine
     def post_register(self):
-        self.send_json_error(http_code=404)
-        return
-        
-        # res = yield self._opt_post_cellphone_code(const.MOBILE_CODE_OPT_TYPE.code_register)
-        # if res:
-        #     yield self._opt_post_user_account()
+        res = yield self._opt_post_cellphone_code(const.MOBILE_CODE_OPT_TYPE.code_register)
+        if res:
+            yield self._opt_post_user_account()
 
     @handle_response
     @gen.coroutine
