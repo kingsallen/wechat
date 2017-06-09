@@ -8,7 +8,7 @@ import tornado.gen
 
 from captcha.image import ImageCaptcha
 from handler.base import BaseHandler
-from util.common.decorator import handle_response
+from util.common.decorator import handle_response, common_handler
 from util.tool.str_tool import to_str
 from globals import redis
 
@@ -80,6 +80,7 @@ class CaptchaMixin(object):
         return "VCODE_{}_{}".format(session_id, user_id)
 
 
+@common_handler
 class CaptchaHandler(CaptchaMixin, BaseHandler):
     """ 生成 captcha
     """

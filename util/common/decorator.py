@@ -115,6 +115,12 @@ def cache(prefix=None, key=None, ttl=60, hash=True, lock=True, separator=":"):
     return cache_inner
 
 
+def common_handler(cls):
+    """标记 common handler"""
+    cls.is_common = True
+    return cls
+
+
 def check_signature(func):
     """如果当前环境是企业号但是url query 没有 wechat_signature, 返回 404
 
@@ -125,7 +131,7 @@ def check_signature(func):
     @functools.wraps(func)
     @gen.coroutine
     def wrapper(self, *args, **kwargs):
-        if self.is_platform:
+        if self.is_platform and not self.is_common:
             key = "wechat_signature"
             try:
                 self.get_argument(key, strip=True)
