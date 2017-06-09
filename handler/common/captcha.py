@@ -56,9 +56,13 @@ class CaptchaMixin(object):
         if not any([session_id, user_id, code]):
             return False
 
+        key = self.make_key(session_id, user_id)
+
+        print("captcha_save key: %s, code: %s" % (key, code))
+
         code = "".join(code)
         # 验证码存入 WECHAT_VCODE_:SESSION_ID_:USER_ID, TTL 60
-        redis.set(self.make_key(session_id, user_id), code, ttl=60)
+        redis.set(key, code, ttl=60)
         return True
 
     def captcha_check(self, session_id, user_id, code):
@@ -69,6 +73,9 @@ class CaptchaMixin(object):
 
         key = self.make_key(session_id, user_id)
         cached_code = redis.get(key)
+
+        print("captcha_check key: %s, cached_code: %s, code: %s" % (
+            key, cached_code, code))
 
         if not cached_code:
             return False
