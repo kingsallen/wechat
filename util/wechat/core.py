@@ -7,11 +7,11 @@ import tornado.gen as gen
 import conf.path as path
 import conf.common as const
 import conf.wechat as wx
-from setting import settings
+
 from util.common import ObjectDict
 from util.common.singleton import Singleton
 from util.tool.date_tool import curr_datetime_now
-from util.tool.http_tool import http_post
+from util.tool.http_tool import http_post, http_get
 
 from globals import logger
 from service.data.hr.hr_wx_wechat import HrWxWechatDataService
@@ -21,6 +21,8 @@ from service.data.hr.hr_wx_template_message import \
 from service.data.user.user_wx_user import UserWxUserDataService
 from service.data.log.log_wx_message_record import \
     LogWxMessageRecordDataService
+
+from setting import settings
 
 
 class WechatException(Exception):
@@ -248,3 +250,54 @@ class WechatTemplateMessager(object):
         raise gen.Return(res)
 
 messager = WechatTemplateMessager()
+
+
+# 与微信 API 之间的交互的工具方法
+@gen.coroutine
+def get_wxuser(self, access_token, openid):
+    """用 openid 拉取用户信息
+    https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140839&t=0.8130415470934214
+    :return ObjectDict
+    when success
+    {
+       "subscribe": 1,
+       "openid": "o6_bmjrPTlm6_2sgVt7hMZOPfL2M",
+       "nickname": "Band",
+       "sex": 1,
+       "language": "zh_CN",
+       "city": "广州",
+       "province": "广东",
+       "country": "中国",
+       "headimgurl":  "http://wx.qlogo.cn/mmopen/g3MonUZtNHkdmzicIlibx6iaFqAc56vxLSUfpb6n5WKSYVY0ChQKkiaJSgQ1dZuTOgvLLrhJbERQQ4
+    eMsv84eavHiaiceqxibJxCfHe/0",
+      "subscribe_time": 1382694957,
+      "unionid": " o6_bmasdasdsad6_2sgVt7hMZOPfL"
+      "remark": "",
+      "groupid": 0,
+      "tagid_list":[128,2]
+    }
+
+    when error
+    {"errcode":40003,"errmsg":" invalid openid"}
+    """
+    ret = yield http_get(wx_const.WX_INFO_USER_API % (access_token, openid), infra=False)
+    raise gen.Return(ret)
+
+@gen.coroutine
+def get_qrcode(self, access_token, scene_str, action_name="QR_LIMIT_STR_SCENE"):
+    """获得专属二维码
+    :return url
+    """
+    params = ObjectDict(
+        action_name=action_name,
+        action_info=ObjectDict(
+            scene=ObjectDict(
+                scene_str=scene_str
+            )
+        )
+    )
+
+    ret = yield http_post(wx.WX_CREATE_QRCODE_API % access_token, params, infra=False)
+    if ret:
+        raise gen.Return(wx.WX_SHOWQRCODE_API % (ret.get("ticket")))
+    raise gen.Return(None)
