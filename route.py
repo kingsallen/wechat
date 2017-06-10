@@ -160,7 +160,7 @@ qx_routes = common_routes + qx_routes
 # 招聘助手的单独 routes, 域名 platform.moseeker.com/h
 help_routes = [
     (r"/position",                                   handler.help.releasedposition.ReleasedPositionHandler,     {"event": "helper_positions"}),
-    (r"/register/qrcode",                            handler.help.passport.RegisterQrcodeHandler,               {"event": "helper_qrcode"}),
+    (r"/hrregister/qrcode",                          handler.help.passport.RegisterQrcodeHandler,               {"event": "helper_qrcode"}),
     # 我也要招人
     (r"/api/register",                               handler.help.passport.RegisterHandler,                     {"event": "helper_register"}),
 
