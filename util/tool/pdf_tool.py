@@ -6,13 +6,17 @@
 # @DES     :
 
 import os
-from tornado import template
+import datetime
 
-from setting import settings
+from tornado import template
 from util.tool.url_tool import make_static_url
 from util.tool.str_tool import to_str
 
+from setting import settings
+
+
 resume_tpath = os.path.join(settings.template_path, 'refer/weixin/application/')
+
 
 def save_file(spath, sname, content):
     """
@@ -83,3 +87,17 @@ def generate_html_template_resume(employee, conf, profile, template_others, posi
         const=dict_conf,
         static_url=make_static_url,
         pc=settings.pc_host)
+
+def generate_resume_for_hr(profile,template_others,dict_conf,position,real_company_info,profile_full_url):
+
+    year=datetime.date.today().year
+    loader = template.Loader(resume_tpath)
+    body=loader.load("resume_inform_hr.html").generate(resume=profile,
+        template_others=template_others,
+        const=dict_conf,
+        position=position,
+        real_company_info=real_company_info,
+        profile_full_url=profile_full_url,
+        year=year)
+    return body
+
