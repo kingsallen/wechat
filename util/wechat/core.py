@@ -254,7 +254,7 @@ messager = WechatTemplateMessager()
 
 # 与微信 API 之间的交互的工具方法
 @gen.coroutine
-def get_wxuser(self, access_token, openid):
+def get_wxuser(access_token, openid):
     """用 openid 拉取用户信息
     https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140839&t=0.8130415470934214
     :return ObjectDict
@@ -280,11 +280,12 @@ def get_wxuser(self, access_token, openid):
     when error
     {"errcode":40003,"errmsg":" invalid openid"}
     """
-    ret = yield http_get(wx_const.WX_INFO_USER_API % (access_token, openid), infra=False)
+    ret = yield http_get(wx.WX_INFO_USER_API % (access_token, openid), infra=False)
     raise gen.Return(ret)
 
+
 @gen.coroutine
-def get_qrcode(self, access_token, scene_str, action_name="QR_LIMIT_STR_SCENE"):
+def get_qrcode(access_token, scene_str, action_name="QR_LIMIT_STR_SCENE"):
     """获得专属二维码
     :return url
     """
