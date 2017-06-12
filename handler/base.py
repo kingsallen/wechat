@@ -1,17 +1,17 @@
 # coding=utf-8
 
 import os
-from hashlib import sha1
-from tornado import gen
 import time
+from hashlib import sha1
+
+from tornado import gen
 
 import conf.common as const
-import conf.wechat as wx_const
 import conf.path as path
-
+import conf.wechat as wx_const
+from cache.user.passport_session import PassportCache
 from handler.metabase import MetaBaseHandler
 from oauth.wechat import WeChatOauth2Service, WeChatOauthError, JsApi
-from cache.user.passport_session import PassportCache
 from util.common import ObjectDict
 from util.common.cipher import decode_id
 from util.common.decorator import check_signature
@@ -294,18 +294,18 @@ class BaseHandler(MetaBaseHandler):
             else:
                 yield self._build_session()
 
-        # GA 需求：
-        # 在 current_user 中添加 has_profile flag
-        # 在企业微信端页面，现有代码的  ga('send', 'pageview’) 前，
-        # 判断如果该页是用户该session登陆后（主动或者被动都可以）访问的第一个页面的话，
-        # 插入以下语句：
-        # ga('set', 'userId', ‘XXXXXX’);
-        # ga('set', 'dimension2', 'YYYYY’);
-        # ga('set', 'dimension3', 'ZZZZZZ’);
+                # GA 需求：
+                # 在 current_user 中添加 has_profile flag
+                # 在企业微信端页面，现有代码的  ga('send', 'pageview’) 前，
+                # 判断如果该页是用户该session登陆后（主动或者被动都可以）访问的第一个页面的话，
+                # 插入以下语句：
+                # ga('set', 'userId', ‘XXXXXX’);
+                # ga('set', 'dimension2', 'YYYYY’);
+                # ga('set', 'dimension3', 'ZZZZZZ’);
 
-        # if self.current_user.sysuser:
-        #     result, profile = yield self.profile_ps.has_profile(self.current_user.sysuser.id)
-        #     self.current_user.has_profile = result
+                # if self.current_user.sysuser:
+                #     result, profile = yield self.profile_ps.has_profile(self.current_user.sysuser.id)
+                #     self.current_user.has_profile = result
 
     @gen.coroutine
     def _build_session(self):
@@ -449,7 +449,7 @@ class BaseHandler(MetaBaseHandler):
         })
         if recom:
             recom_wxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
-                        unionid=recom.unionid, wechat_id=self._wechat.id)
+                unionid=recom.unionid, wechat_id=self._wechat.id)
             recom.openid = recom_wxuser.openid
             recom.wxuser_id = recom_wxuser.id
 
@@ -511,6 +511,7 @@ class BaseHandler(MetaBaseHandler):
         不论是登录，或非登录用户，都会有唯一的 mviewer_id，标识独立的用户。
         主要用于日志统计中 UV 的统计
         """
+
         def _make_new_moseeker_viewer_id():
 
             while True:
@@ -542,7 +543,6 @@ class BaseHandler(MetaBaseHandler):
             settings=self.settings)
         namespace.update(add_namespace)
         return namespace
-
 
     def _set_access_time_cookie(self):
         """设置 _ac cookie 表示该session首次访问页面时间
@@ -587,3 +587,7 @@ class BaseHandler(MetaBaseHandler):
             return full_url
         return url_subtract_query(full_url, ['code', 'state'])
 
+    def redirect_to_route(self, route_name, params, *args):
+        route_url = self.reverse_url(route_name, *args)
+        to = self.make_url(route_url, params)
+        self.redirect(to)

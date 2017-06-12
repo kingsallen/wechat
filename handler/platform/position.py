@@ -11,7 +11,7 @@ from handler.base import BaseHandler
 from tests.dev_data.user_company_config import COMPANY_CONFIG
 from util.common import ObjectDict
 from util.common.cipher import encode_id
-from util.common.decorator import handle_response, check_employee
+from util.common.decorator import handle_response, check_employee, NewJDStatusCheckerAddFlag
 from util.tool.str_tool import gen_salary, add_item, split
 from util.tool.url_tool import url_append_query
 from util.wechat.template import position_view_five_notice_tpl, position_share_notice_employee_tpl
@@ -19,6 +19,7 @@ from util.wechat.template import position_view_five_notice_tpl, position_share_n
 
 class PositionHandler(BaseHandler):
 
+    @NewJDStatusCheckerAddFlag()
     @handle_response
     @gen.coroutine
     def get(self, position_id):
@@ -84,8 +85,24 @@ class PositionHandler(BaseHandler):
 
             # 构建老微信样式所需要的数据
             self.logger.debug("[JD]是否显示新样式: {}".format(self.current_user.company.conf_newjd_status))
-            if self.current_user.company.conf_newjd_status != 2:
-                # 0是未开启，1是用户申请开启，2是审核通过（使用新jd），3撤销（返回基础版）
+            # 0是未开启，1是用户申请开启，2是审核通过（使用新jd），3撤销（返回基础版）
+            # added in NewJDStatusCheckerAddFlag
+            if self.flag_should_display_newjd:
+                # 正常开启或预览
+                # [JD]职位所属团队及相关信息拼装
+                module_job_require = self._make_json_job_require(position_info)
+                module_company_info = self._make_json_job_company_info(company_info, did)
+                self.logger.debug("[JD]构建团队相关信息")
+                yield self._add_team_data(position_data, team,
+                                          position_info.company_id, position_id, teamname_custom)
+
+                add_item(position_data, "module_company_info", module_company_info)
+                add_item(position_data, "module_job_require", module_job_require)
+                self.render_page(
+                    "position/info.html",
+                    data=position_data,
+                    meta_title=const.PAGE_POSITION_INFO)
+            else:
                 # 老样式
                 module_job_require_old = self._make_json_job_require_old(position_info)
                 module_department_old = self._make_json_job_department(position_info)
@@ -112,20 +129,6 @@ class PositionHandler(BaseHandler):
 
                 self.render_page(
                     "position/info_old.html",
-                    data=position_data,
-                    meta_title=const.PAGE_POSITION_INFO)
-            else:
-                # [JD]职位所属团队及相关信息拼装
-                module_job_require = self._make_json_job_require(position_info)
-                module_company_info = self._make_json_job_company_info(company_info, did)
-                self.logger.debug("[JD]构建团队相关信息")
-                yield self._add_team_data(position_data, team,
-                                          position_info.company_id, position_id, teamname_custom)
-
-                add_item(position_data, "module_company_info", module_company_info)
-                add_item(position_data, "module_job_require", module_job_require)
-                self.render_page(
-                    "position/info.html",
                     data=position_data,
                     meta_title=const.PAGE_POSITION_INFO)
 
@@ -847,7 +850,6 @@ class PositionEmpNoticeHandler(BaseHandler):
         position = yield self.position_ps.get_position(self.params.pid)
 
         link = self.make_url(path.EMPLOYEE_RECOMMENDS, wechat_signature=self.current_user.wechat.signature)
-
 
         if self.current_user.wechat.passive_seeker == const.OLD_YES:
             yield position_share_notice_employee_tpl(self.current_user.company.id,

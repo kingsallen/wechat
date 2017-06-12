@@ -50,6 +50,12 @@ ENV_PLATFORM = "platform"
 ENV_QX = "qx"
 ENV_HELP = "helper"
 
+ROUTE_PREFIX = {
+    ENV_PLATFORM: "/m",
+    ENV_QX: "/recruit",
+    ENV_HELP: "/h"
+}
+
 """appid for infra"""
 APPID = {
     ENV_QX: "5",
