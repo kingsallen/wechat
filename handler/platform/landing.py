@@ -32,7 +32,7 @@ class LandingHandler(BaseHandler):
 
         yield self._make_share_info(self.current_user.company)
 
-        self.render(template_name="company/dynamic_search.html", company=company)
+        self.render_page(template_name="company/dynamic_search.html", data=company)
 
     @gen.coroutine
     def _make_share_info(self, company_info):
