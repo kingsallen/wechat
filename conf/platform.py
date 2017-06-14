@@ -82,6 +82,8 @@ SALARY = ObjectDict({
     "6": {"name": "25k及以上", "salary_bottom": 25, "salary_top": 999},
 })
 
+SALARY_NAME_TO_INDEX = {v.get("name"):k for k, v in SALARY.items()}
+
 # 学历搜索项
 DEGREE = {
     "1": "高中及以下",

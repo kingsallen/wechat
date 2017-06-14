@@ -800,8 +800,8 @@ class PositionListHandler(BaseHandler):
         if self.params.salary:
             k = str(self.params.salary)
             infra_params.salary = "%d,%d" % (
-                const_platorm.SALARY.get(k).salary_bottom,
-                const_platorm.SALARY.get(k).salary_top)
+                const_platorm.SALARY.get(const_platorm.SALARY_NAME_TO_INDEX.get(k)).salary_bottom,
+                const_platorm.SALARY.get(const_platorm.SALARY_NAME_TO_INDEX.get(k)).salary_top)
 
         if self.params.degree:
             k = str(self.params.degree)
