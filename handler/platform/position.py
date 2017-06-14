@@ -19,8 +19,8 @@ from util.wechat.template import position_view_five_notice_tpl, position_share_n
 
 class PositionHandler(BaseHandler):
 
-    @NewJDStatusCheckerAddFlag()
     @handle_response
+    @NewJDStatusCheckerAddFlag()
     @gen.coroutine
     def get(self, position_id):
         """显示 JD 页

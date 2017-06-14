@@ -59,9 +59,8 @@ class CompanyFollowHandler(BaseHandler):
 
 
 class CompanyHandler(BaseHandler):
-
-    @NewJDStatusCheckerAddFlag()
     @handle_response
+    @NewJDStatusCheckerAddFlag()
     @check_sub_company
     @gen.coroutine
     def get(self):
@@ -109,39 +108,29 @@ class CompanyHandler(BaseHandler):
         return default
 
 
-class CompanyInfoHandler(BaseHandler):
+class CompanyInfoRedirectHandler(BaseHandler):
     """公司详情页老样式"""
 
-    @NewJDStatusCheckerAddFlag()
     @handle_response
     @gen.coroutine
     def get(self, did):
-        if self.flag_should_display_newjd:
-            params = self.params
-            if int(did) != self.current_user.company.id:
+        params = self.params
+        did = int(did)
+        current_company_id = self.current_user.company.id
+        if did != current_company_id:
+            # did不是当前公司, 那么只给看子公司
+            maybe_sub_company = yield self.team_ps.get_sub_company(did)
+            if maybe_sub_company and maybe_sub_company.parent_id == current_company_id:
+                # 是子公司
                 params.update({"did": did})
-            self.redirect_to_route("new_company_info_page", params)
+            else:
+                # 不是子公司 或 公司不存在, 不给看
+                self.write_error(404)
+                return
         else:
-            company_info = yield self.company_ps.get_company(
-                conds={"id": did}, need_conf=True)
-
-            company_data = ObjectDict()
-            company = ObjectDict({
-                "abbreviation": company_info.abbreviation,
-                "name": company_info.name,
-                "logo": self.static_url(company_info.logo),
-                "industry": company_info.industry,
-                "scale_name": company_info.scale_name,
-                "homepage": company_info.homepage,
-                "introduction": company_info.introduction,
-                "impression": company_info.impression_processed
-            })
-
-            add_item(company_data, "company", company)
-            self.render_page(
-                template_name='company/info_old.html',
-                data=company_data,
-                meta_title=const.PAGE_COMPANY_INFO)
+            # 正常访问本公司信息
+            pass
+        self.redirect_to_route("new_company_info_page", params)
 
 
 class CompanySurveyHandler(BaseHandler):

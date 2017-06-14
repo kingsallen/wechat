@@ -110,7 +110,7 @@ platform_routes = [
     (r"/position/(?P<position_id>\d+)",              handler.platform.position.PositionHandler,                 {"event": "position_info"}),
     (r"/position",                                   handler.platform.position.PositionListHandler,             {"event": "position_list"}),
     (r"/start",                                      handler.platform.landing.LandingHandler,                   {"event": "start_landing"}),
-    (r"/company/(\d+)",                              handler.platform.companyrelation.CompanyInfoHandler,       {"event": "company_old_info"}, "old_company_info_page"),
+    (r"/company/(\d+)",                              handler.platform.companyrelation.CompanyInfoRedirectHandler, {"event": "company_old_info"}, "old_company_info_page"),
     (r"/company",                                    handler.platform.companyrelation.CompanyHandler,           {"event": "company_info"},     "new_company_info_page"),
     (r"/company/team/(\d+)",                         handler.platform.team.TeamDetailHandler,                   {"event": "team_detail"}),
     (r"/company/team",                               handler.platform.team.TeamIndexHandler,                    {"event": "team_info"}),
