@@ -51,7 +51,7 @@ class LandingPageService(PageService):
         query_size = platform_const.LANDING_QUERY_SIZE
 
         # 在此调用 ES 的 HTTP GET 搜索接口
-        url = settings.es + "/index/_search?company_id:%s+AND+status:%s+AND+size=%s" % (company_id, const.OLD_YES, query_size)
+        url = settings.es + "/index/_search?company_id:%s+AND+status:%s&size=%s" % (company_id, const.OLD_YES, query_size)
         response = yield httpclient.AsyncHTTPClient().fetch(url)
 
         body = ObjectDict(json.loads(to_str(response.body)))
