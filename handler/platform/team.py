@@ -14,8 +14,8 @@ from util.tool.url_tool import url_append_query
 
 class TeamIndexHandler(BaseHandler):
 
-    @NewJDStatusChecker404()
     @handle_response
+    @NewJDStatusChecker404()
     @check_sub_company
     @gen.coroutine
     def get(self):
@@ -52,8 +52,8 @@ class TeamIndexHandler(BaseHandler):
 
 class TeamDetailHandler(BaseHandler):
 
-    @NewJDStatusChecker404()
     @handle_response
+    @NewJDStatusChecker404()
     @check_sub_company
     @gen.coroutine
     def get(self, team_id):

@@ -27,6 +27,9 @@ CELLPHONE_NOT_MATCH = "输入的手机号与原绑定手机号不一致"
 CELLPHONE_NAME_EMAIL = "姓名或者邮箱格式错误"
 CELLPHONE_MOBILE_INVALID = "手机号未提供或未验证"
 
+VCODE_NOT_EXIST = "验证码不存在"
+VCODE_INVALID = "验证码错误"
+
 RESUME_IMPORT_NAME_PASSWD_ERROR = "用户名和密码必须填写"
 RESUME_IMPORT_SUCCESS = "导入成功"
 RESUME_IMPORT_FAILED = "导入失败"
@@ -56,9 +59,9 @@ DUPLICATE_APPLICATION = "您已申请过该职位，请在个人中心查询您�
 CREATE_APPLICATION_FAILED = "您的申请失败了，请稍候再试"
 
 PROFILE_COMPANY_NAME_EXISTED = "该企业已存在，可返回选择"
-
 PROFILE_REQUIRED_HINT_HEAD = "请完善个人简历，其中"
 PROFILE_REQUIRED_HINT_TAIL = "为必填项"
+PROFILE_OVERLENGTH = "%s内容长度过长"
 
 # 招聘助手
 HELPER_HR_REGISTERED = "您的账户已存在，请联系管理员"

@@ -188,9 +188,6 @@ class ProfileViewHandler(BaseHandler):
 
         has_profile, profile = yield self.profile_ps.has_profile_by_uuid(uuid=uuid)
 
-        self.logger.debug("ProfileViewHandler has_profile:{}".format(has_profile))
-        self.logger.debug("ProfileViewHandler profile:{}".format(profile))
-
         if not uuid or not has_profile:
             self.write_error(404)
             return
@@ -299,17 +296,6 @@ class ProfileCustomHandler(BaseHandler):
 
         p = dict()
         p.update(is_skip=(self.current_user.company.id in self.customize_ps._DIRECT_APPLY))
-        # if self.current_user.company.id == const.CUSTOM_C_ID.EsteeLauder:
-        #     pid = self.params.get("pid", 0)
-        #     if not pid and self.get_cookie("dq_pid", 0):
-        #         pid = int(self.get_cookie("dq_pid"))
-        #     if pid:
-        #         pos_ser = positionService(self.db)
-        #         position = pos_ser.get_position_info(pid)
-        #         if position.app_cv_config_id:
-        #             self.logger.debug("雅诗兰黛特殊处理: 直接投递")
-        #             p.update(is_skip='1')
-
         self.redirect(self.make_url(path.PROFILE_PREVIEW, self.params, **p))
 
     @tornado.gen.coroutine
@@ -504,6 +490,9 @@ class ProfileSectionHandler(BaseHandler):
 
         if model:
             if self_intro:
+                if len(model.self_introduction) > 1000:
+                    self.send_json_error(message=msg.PROFILE_OVERLENGTH % "自我介绍")
+                    return
                 model.update(
                     self_introduction=model.self_introduction)
             else:
@@ -656,6 +645,9 @@ class ProfileSectionHandler(BaseHandler):
         if hasattr(model, "__status") and getattr(model, "__status") == 'x':
             verb = "delete"
         else:
+            if model.description and len(model.description) > 1000:
+                self.send_json_error(message=msg.PROFILE_OVERLENGTH % "工作描述")
+                return
             verb = 'update' if model.id else 'create'
 
         result, res = yield getattr(
@@ -721,6 +713,9 @@ class ProfileSectionHandler(BaseHandler):
         if hasattr(model, "__status") and getattr(model, "__status") == 'x':
             verb = "delete"
         else:
+            if model.description and len(model.description) > 1000:
+                self.send_json_error(message=msg.PROFILE_OVERLENGTH % "教育描述")
+                return
             verb = 'update' if model.id else 'create'
 
         result, res = yield getattr(
@@ -766,6 +761,9 @@ class ProfileSectionHandler(BaseHandler):
         if hasattr(model, "__status") and getattr(model, "__status") == 'x':
             verb = "delete"
         else:
+            if model.description and len(model.description) > 1000:
+                self.send_json_error(message=msg.PROFILE_OVERLENGTH % "项目描述")
+                return
             verb = 'update' if model.id else 'create'
 
         result, res = yield getattr(

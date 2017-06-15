@@ -29,7 +29,8 @@ class RegisterQrcodeHandler(BaseHandler):
         """
 
         scene_str = "{0}_{1}_0".format(self.params.hr_id, self.current_user.wxuser.id)
-        qrcode = yield WechatUtil.get_qrcode(self.current_user.wechat.access_token, scene_str)
+        wechat_util = WechatUtil()
+        qrcode = yield wechat_util.get_qrcode(self.current_user.wechat.access_token, scene_str)
 
         self.render(template_name="refer/weixin/sysuser/wx_recruit_success.html", qrcodeurl=qrcode)
 

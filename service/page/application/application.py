@@ -23,9 +23,10 @@ from util.common.subprocesswrapper import SubProcessWrapper
 from util.tool.dict_tool import objectdictify, purify
 from util.tool.json_tool import json_dumps
 from util.tool.mail_tool import send_mail_notice_hr
-from util.tool.pdf_tool import save_application_file, get_create_pdf_by_html_cmd
+from util.tool.mail_tool import send_mail as send_email_service
+from util.tool.pdf_tool import save_application_file, get_create_pdf_by_html_cmd,generate_resume_for_hr
 from util.tool.str_tool import trunc
-from util.tool.url_tool import make_url
+from util.tool.url_tool import make_url,make_static_url
 from util.wechat.template import application_notice_to_applier_tpl, application_notice_to_recommender_tpl, application_notice_to_hr_tpl
 
 
@@ -813,6 +814,7 @@ class ApplicationPageService(PageService):
             # 发送邮件
             yield self.opt_send_hr_email(app_id, current_user, position)
 
+
     @gen.coroutine
     def opt_send_hr_email(self, apply_id, current_user, position):
 
@@ -825,14 +827,31 @@ class ApplicationPageService(PageService):
         hr_info = yield self.user_hr_account_ds.get_hr_account(conds={
             "id": position.publisher
         })
+        company_info=yield self.hr_company_account_ds.get_company_account(conds={
+            "account_id": position.publisher
+        })
+        company_id=company_info.company_id if company_info else hr_info.company_id
+        real_company_info=yield self.hr_company_ds.get_company(conds={
+            "id":company_id
+        })
         profile = current_user.profile
-        cmd = get_create_pdf_by_html_cmd(html_fname, pdf_fname)
-
+        # cmd = get_create_pdf_by_html_cmd(html_fname, pdf_fname)   #html转换pdf命令
+        profile.educations.sort(key=lambda x:x['degree'],reverse = True)
+        profile.basic['headimg']=make_static_url(profile.basic['headimg'])
         other_json = ObjectDict()
         if profile.get("others"):
             other_json = json.loads(profile.get("others", [])[0].get("other"))
 
         template_others = yield self.custom_kvmapping(other_json)
+
+
+        self.logger.debug("[send_mail_hr]html_fname:{}".format(html_fname))
+        self.logger.debug("[send_mail_hr]pdf_fname:{}".format(pdf_fname))
+        # self.logger.debug("[send_mail_hr]cmd:{}".format(cmd))    #不在记录cmd的log
+        self.logger.debug("[send_mail_hr]profile:{}".format(profile))
+        self.logger.debug("[send_mail_hr]template_others:{}".format(template_others))
+        self.logger.debug("[send_mail_hr]resume_path:{}".format(self.settings.resume_path))
+
 
         # 常量字段
         res_degree = yield self.infra_dict_ds.get_const_dict(parent_code=const.CONSTANT_PARENT_CODE.DEGREE_USER)
@@ -851,18 +870,18 @@ class ApplicationPageService(PageService):
         # add work_exp_years attribute manually
         # pdf generating will use this attribute
         profile.work_exp_years = work_exp_years
+        # 模板生成
+        # save_application_file(
+        #                 profile,
+        #                 html_fname,
+        #                 template_others,
+        #                 self.settings.resume_path,
+        #                 dict_conf,
+        #     )
+        profile_full_url="https://hr.moseeker.com/admin/application/%s/view&pos_title/" % current_user.sysuser.id
+        body=generate_resume_for_hr(profile,template_others,dict_conf,position,real_company_info,profile_full_url)
 
-        save_application_file(
-            profile,
-            html_fname,
-            template_others,
-            self.settings.resume_path,
-            dict_conf,
-        )
 
-        def send(data):
-            self.logger.info("[opt_send_hr_email][send]Finish creating pdf resume : {}".format(pdf_fname))
-            self.logger.info("[opt_send_hr_email][send]response data: " + str(data))
 
         @gen.coroutine
         def send_mail_hr():
@@ -877,9 +896,20 @@ class ApplicationPageService(PageService):
                 })
                 conf = employee_cert_conf.custom or "自定义字段"
 
-                send_mail_notice_hr(
-                    position, employee, conf, profile, send_email,
-                    template_others, dict_conf, work_exp_years, pdf_fname)
+
+                self.logger.debug("[send_mail_hr]employee:{}".format(employee))
+                self.logger.debug("[send_mail_hr]employee_cert_conf:{}".format(employee_cert_conf))
+                self.logger.debug("[send_mail_hr]conf:{}".format(conf))
+
+                if position.jobnumber:
+                    title = "{}:{}-职位申请通知".format(position.jobnumber, position.title)
+                else:
+                    title = "{}-职位申请通知".format(position.title)
+                send_email_service(to = send_email.replace("；", ";").split(";"),subject = title,text = body)   #发送email
+                # send_mail_notice_hr(      #使用send_mail 函数替代
+                #     position, employee, conf, profile, send_email,
+                #     template_others, dict_conf, work_exp_years, pdf_fname)
+
 
                 self.logger.info(
                     "[opt_send_hr_email]Send application to HR success:sysuser id:{sid},"
@@ -894,20 +924,29 @@ class ApplicationPageService(PageService):
 
         profile_ps = None
 
-        try:
-            SubProcessWrapper.run(cmd, self.settings.resume_path, send, send_mail_hr)
-            # import subprocess
-            # completed_process = subprocess.run(cmd, check=True, shell=True,
-            #                                    stdout=subprocess.PIPE)
-            # if completed_process.returncode == 0:
-            #     self.logger.debug(completed_process.stdout)
-            #     send_mail_hr()
-            # else:
-            #     self.logger.error('generate pdf error:%s' % completed_process.stderr)
 
-            self.logger.debug("[opt_send_hr_email]end")
-        except Exception as e:
-            self.logger.error(traceback.format_exc())
+        self.logger.debug("[send_mail_hr]html_fname:{}".format(html_fname))
+        self.logger.debug("[send_mail_hr]pdf_fname:{}".format(pdf_fname))
+
+        # self.logger.debug("[send_mail_hr]cmd:{}".format(cmd))     #不在记录cmd的log
+        self.logger.debug("[send_mail_hr]resume_path:{}".format(self.settings.resume_path))
+        send_mail_hr()
+
+        # try:    #不在转换pdf
+        #     SubProcessWrapper.run(cmd, self.settings.resume_path, send, send_mail_hr)
+        #     # import subprocess
+        #     # completed_process = subprocess.run(cmd, check=True, shell=True,
+        #     #                                    stdout=subprocess.PIPE)
+        #     # if completed_process.returncode == 0:
+        #     #     self.logger.debug(completed_process.stdout)
+        #     #     send_mail_hr()
+        #     # else:
+        #     #     self.logger.error('generate pdf error:%s' % completed_process.stderr)
+        #
+        #     self.logger.debug("[opt_send_hr_email]end")
+        # except Exception as e:
+        #     self.logger.error(traceback.format_exc())
+
 
     @gen.coroutine
     def opt_send_email_create_application_notice(self, email_params):

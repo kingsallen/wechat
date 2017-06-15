@@ -14,12 +14,11 @@ from handler.base import BaseHandler
 from tests.dev_data.user_company_config import COMPANY_CONFIG
 from util.common import ObjectDict
 from util.common.decorator import check_sub_company, handle_response, \
-    authenticated
+    authenticated, NewJDStatusCheckerAddFlag
 from util.tool.str_tool import add_item
 
 
 class CompanyVisitReqHandler(BaseHandler):
-
     @handle_response
     @check_sub_company
     @authenticated
@@ -40,7 +39,6 @@ class CompanyVisitReqHandler(BaseHandler):
 
 
 class CompanyFollowHandler(BaseHandler):
-
     @handle_response
     @check_sub_company
     @authenticated
@@ -61,20 +59,38 @@ class CompanyFollowHandler(BaseHandler):
 
 
 class CompanyHandler(BaseHandler):
-    """公司详情页新样式"""
-
     @handle_response
+    @NewJDStatusCheckerAddFlag()
     @check_sub_company
     @gen.coroutine
     def get(self):
         company = self.params.pop('sub_company') if self.params.sub_company \
             else self.current_user.company
 
-        data = yield self.user_company_ps.get_company_data(
-            self.params, company, self.current_user)
+        if self.flag_should_display_newjd:
+            data = yield self.user_company_ps.get_company_data(
+                self.params, company, self.current_user)
 
-        self.params.share = self._share(company)
-        self.render_page(template_name='company/profile.html', data=data)
+            self.params.share = self._share(company)
+            self.render_page(template_name='company/profile.html', data=data)
+        else:
+            company_data = ObjectDict()
+            company = ObjectDict({
+                "abbreviation": company.abbreviation,
+                "name": company.name,
+                "logo": self.static_url(company.logo),
+                "industry": company.industry,
+                "scale_name": company.scale_name,
+                "homepage": company.homepage,
+                "introduction": company.introduction,
+                "impression": company.impression_processed
+            })
+
+            add_item(company_data, "company", company)
+            self.render_page(
+                template_name='company/info_old.html',
+                data=company_data,
+                meta_title=const.PAGE_COMPANY_INFO)
 
     def _share(self, company):
         company_name = company.abbreviation or company.name
@@ -92,33 +108,29 @@ class CompanyHandler(BaseHandler):
         return default
 
 
-class CompanyInfoHandler(BaseHandler):
+class CompanyInfoRedirectHandler(BaseHandler):
     """公司详情页老样式"""
 
     @handle_response
     @gen.coroutine
     def get(self, did):
-
-        company_info = yield self.company_ps.get_company(
-            conds={"id": did}, need_conf=True)
-
-        company_data = ObjectDict()
-        company = ObjectDict({
-            "abbreviation": company_info.abbreviation,
-            "name": company_info.name,
-            "logo": self.static_url(company_info.logo),
-            "industry": company_info.industry,
-            "scale_name": company_info.scale_name,
-            "homepage": company_info.homepage,
-            "introduction": company_info.introduction,
-            "impression": company_info.impression_processed
-        })
-
-        add_item(company_data, "company", company)
-        self.render_page(
-            template_name='company/info_old.html',
-            data=company_data,
-            meta_title=const.PAGE_COMPANY_INFO)
+        params = self.params
+        did = int(did)
+        current_company_id = self.current_user.company.id
+        if did != current_company_id:
+            # did不是当前公司, 那么只给看子公司
+            maybe_sub_company = yield self.team_ps.get_sub_company(did)
+            if maybe_sub_company and maybe_sub_company.parent_id == current_company_id:
+                # 是子公司
+                params.update({"did": did})
+            else:
+                # 不是子公司 或 公司不存在, 不给看
+                self.write_error(404)
+                return
+        else:
+            # 正常访问本公司信息
+            pass
+        self.redirect_to_route("new_company_info_page", params)
 
 
 class CompanySurveyHandler(BaseHandler):

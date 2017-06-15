@@ -18,8 +18,8 @@ from util.tool.str_tool import gen_salary, split
 
 from tests.dev_data.user_company_config import COMPANY_CONFIG
 
-class TeamPageService(PageService):
 
+class TeamPageService(PageService):
     def __init__(self):
         super().__init__()
 
@@ -245,9 +245,11 @@ class TeamPageService(PageService):
         if not publishers:
             company_positions = []
         else:
+            cond1 = "status = {}".format(self.constant.POSITION_STATUS_RECRUITING)
+            cond2 = 'publisher in {}'.format(tuple(
+                [p.account_id for p in publishers])).replace(',)', ')')
             company_positions = yield self.job_position_ds.get_positions_list(
-                conds='publisher in {}'.format(tuple(
-                    [p.account_id for p in publishers])).replace(',)', ')'),
+                conds=" and ".join([cond1, cond2]),
                 fields=fields)
 
         raise gen.Return(company_positions)
@@ -337,12 +339,12 @@ class TeamPageService(PageService):
         res_list = list()
         for item in team_positions:
             pos = ObjectDict()
-            pos.title=item.title
-            pos.id=item.id
-            pos.salary=gen_salary(item.salary_top, item.salary_bottom)
-            pos.image_url=make_static_url("")
-            pos.city=split(item.city, [",","，"])
-            pos.team_name=""
+            pos.title = item.title
+            pos.id = item.id
+            pos.salary = gen_salary(item.salary_top, item.salary_bottom)
+            pos.image_url = make_static_url("")
+            pos.city = split(item.city, [",", "，"])
+            pos.team_name = ""
             res_list.append(pos)
 
         return res_list

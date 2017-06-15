@@ -37,7 +37,6 @@ class AggregationHandler(BaseHandler):
             keywords = self.params.keywords
             city = self.params.city
             industry = self.params.industry
-            did = self.params.did
         else:
             # 使用缓存的搜索条件
             salary_top = search_dict.get("salary_top", None)
@@ -46,8 +45,8 @@ class AggregationHandler(BaseHandler):
             keywords = search_dict.get("keywords", None)
             city = search_dict.get("city", None)
             industry = search_dict.get("industry", None)
-            did = search_dict.get("did", None)
 
+        did = self.params.did
         page_no = self.params.page_no or 1
         page_size = self.params.page_size or 10
 
@@ -125,7 +124,6 @@ class AggregationHandler(BaseHandler):
                 keywords=self.params.keywords,
                 city=self.params.city,
                 industry=self.params.industry,
-                did=self.params.did,
             )
             self.set_secure_cookie(
                 qx_const.COOKIE_WELCOME_SEARCH,
@@ -174,9 +172,10 @@ class AggregationHandler(BaseHandler):
 
         link = self.make_url(
             path.GAMMA_POSITION,
+            params=self.params,
             fr="recruit",
             recom=self.position_ps._make_recom(self.current_user.sysuser.id),
-            escape=["page_no", "page_size"])
+            escape=["page_no", "page_size", "fr_wel"])
 
         if len(hot_company) == 1:
             logo = hot_company[0].get("logo")

@@ -12,6 +12,8 @@ from util.common.decorator import handle_response, authenticated
 from util.tool.str_tool import to_str, password_validate
 from util.common.cipher import encode_id
 
+from handler.common.captcha import CaptchaMixin
+
 
 class LoginHandler(BaseHandler):
     """用户登录"""
@@ -83,7 +85,7 @@ class LogoutHandler(BaseHandler):
             redirect_url = self.make_url(path.GAMMA_POSITION, params=self.params, escape=['next_url', 'pid'])
         self.redirect(redirect_url)
 
-class RegisterHandler(BaseHandler):
+class RegisterHandler(CaptchaMixin, BaseHandler):
     """用户注册"""
 
     @handle_response
@@ -182,8 +184,26 @@ class RegisterHandler(BaseHandler):
         """提交手机号，获得验证码"""
 
         try:
-            self.guarantee("mobile", "code_type", "national_code")
+            self.guarantee("mobile", "code_type", "national_code", "vcode")
         except AttributeError:
+            return
+
+        self.logger.debug("vcode: %s" % self.params.vcode)
+
+        if not self.params.vcode:
+            self.send_json_error(message=msg.VCODE_NOT_EXIST)
+            return
+
+        session_id = to_str(
+            self.get_secure_cookie(const.COOKIE_SESSIONID) or
+            self.get_secure_cookie(const.COOKIE_MVIEWERID) or ''
+        )
+
+        result = self.captcha_check(session_id, self.current_user.sysuser.id,
+                                    self.params.vcode)
+
+        if not result:
+            self.send_json_error(message=msg.VCODE_INVALID)
             return
 
         ret = yield self.usercenter_ps.post_ismobileregistered(self.params.mobile)

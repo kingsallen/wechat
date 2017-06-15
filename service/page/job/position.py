@@ -41,6 +41,7 @@ class PositionPageService(PageService):
         position = ObjectDict({
             'id': position_res.id,
             'title': position_res.title,
+            'jobnumber': position_res.jobnumber,
             'company_id': position_res.company_id,
             'department': position_res.department,
             'candidate_source': self.constant.CANDIDATE_SOURCE.get(str(position_res.candidate_source)),

@@ -37,11 +37,13 @@ def handle_response(func):
             else:
                 self.write_error(500)
                 return
+
     return wrapper
 
 
 base_cache = BaseRedis()
 sem = Semaphore(1)
+
 
 def cache(prefix=None, key=None, ttl=60, hash=True, lock=True, separator=":"):
     """
@@ -115,6 +117,12 @@ def cache(prefix=None, key=None, ttl=60, hash=True, lock=True, separator=":"):
     return cache_inner
 
 
+def common_handler(cls):
+    """标记 common handler"""
+    cls.is_common = True
+    return cls
+
+
 def check_signature(func):
     """如果当前环境是企业号但是url query 没有 wechat_signature, 返回 404
 
@@ -125,7 +133,11 @@ def check_signature(func):
     @functools.wraps(func)
     @gen.coroutine
     def wrapper(self, *args, **kwargs):
-        if self.is_platform:
+        is_common = False
+        if hasattr(self, 'is_common'):
+            is_common = self.is_common
+
+        if self.is_platform and not is_common:
             key = "wechat_signature"
             try:
                 self.get_argument(key, strip=True)
@@ -144,6 +156,7 @@ def check_employee(func):
     如果是员工，这正常进入 handler 的对应方法，如果不是员工，跳转到认证员工页面
     用于我要推荐
     """
+
     @functools.wraps(func)
     @gen.coroutine
     def wrapper(self, *args, **kwargs):
@@ -213,9 +226,9 @@ def check_and_apply_profile(func):
             # ========== LINKEDIN OAUTH ==============
             # 拼装 linkedin oauth 路由
             redirect_uri = self.make_url(path.RESUME_LINKEDIN,
-                                    recom=self.params.recom,
-                                    pid=self.params.pid,
-                                    wechat_signature=self.current_user.wechat.signature)
+                                         recom=self.params.recom,
+                                         pid=self.params.pid,
+                                         wechat_signature=self.current_user.wechat.signature)
 
             linkedin_url = self.make_url(path.LINKEDIN_AUTH, params=ObjectDict(
                 response_type="code",
@@ -254,7 +267,7 @@ def check_sub_company(func):
             else:
                 self.logger.debug(
                     'Sub_company: {}'.format(sub_company))
-                sub_company.banner = self.current_user.company.banner # 子公司采用母公司的banner
+                sub_company.banner = self.current_user.company.banner  # 子公司采用母公司的banner
                 self.params.sub_company = sub_company
 
         yield func(self, *args, **kwargs)
@@ -308,8 +321,8 @@ def authenticated(func):
 
     return wrapper
 
-def verified_mobile_oneself(func):
 
+def verified_mobile_oneself(func):
     """重要的操作前，如修改密码，修改邮箱等，需要先用手机验证是否是本人操作
     方法：
         1.获得 cookie 中的验证码 code
@@ -340,8 +353,8 @@ def verified_mobile_oneself(func):
 
     return wrapper
 
-def gamma_welcome(func):
 
+def gamma_welcome(func):
     """
     聚合号 gamma 的欢迎页，对于 C 端用户不同性别展现不同的皮肤
     :param func:
@@ -354,14 +367,8 @@ def gamma_welcome(func):
 
         search_keywords = self.get_secure_cookie(qx_const.COOKIE_WELCOME_SEARCH)
 
-        self.logger.debug("gamma_welcome search_keywords:{}".format(search_keywords))
-        self.logger.debug("gamma_welcome self.params.fr:{}".format(self.params.fr))
-        self.logger.debug("gamma_welcome uri:{}".format(self.request.uri))
-        self.logger.debug("gamma_welcome match:{}".format(re.match(r"^\/position[\?]?[\w&=%]*$", self.request.uri)))
-
         if not search_keywords and self.params.fr != "recruit" and not self.params.fr_wel \
             and re.match(r"^\/position[\?]?[\w&=%]*$", self.request.uri):
-            self.logger.debug("1")
             gender = "unknown"
             if self.current_user.qxuser.sex == 1:
                 gender = "male"
@@ -369,13 +376,13 @@ def gamma_welcome(func):
                 gender = "female"
 
             self.render_page(template_name='qx/home/welcome.html',
-                        data={"gender": gender})
+                             data={"gender": gender})
             return
-        self.logger.debug("2")
 
         yield func(self, *args, **kwargs)
 
     return wrapper
+
 
 # 检查新JD状态, 如果不是启用状态, 当前业务规则:
 # 1. JD --> 跳老页面
@@ -383,7 +390,6 @@ def gamma_welcome(func):
 # 3. TeamIndex --> 404
 # 4. TeamDetail --> 404
 class BaseNewJDStatusChecker(metaclass=ABCMeta):
-
     def __init__(self):
         self._handler = None
 
@@ -392,28 +398,39 @@ class BaseNewJDStatusChecker(metaclass=ABCMeta):
         @gen.coroutine
         def wrapper(handler, *args, **kwargs):
             self._handler = handler
-            # 新JD开启状态
-            is_newjs_status_on = handler.current_user.company.conf_newjd_status == const.NEWJD_STATUS_ON
-            # 预览状态
-            is_preview = handler.current_user.company.conf_newjd_status == const.NEWJD_STATUS_WAITING \
-                         and handler.params.preview != None
-            if not (is_newjs_status_on or is_preview):
-                self.fail_action(*args, **kwargs)
-                return
-
-            handler.logger.debug('NewJD status check successful: {}'.format(handler.current_user.wechat.id))
-            yield func(handler, *args, **kwargs)
+            handler.flag_should_display_newjd = self.should_display_newjd(handler)
+            if self.should_display_newjd(handler):
+                yield func(handler, *args, **kwargs)
+            else:
+                yield self.fail_action(func, *args, **kwargs)
 
         return wrapper
 
+    @staticmethod
+    def should_display_newjd(handler):
+        is_newjd_status_on = handler.current_user.company.conf_newjd_status == const.NEWJD_STATUS_ON
+        # 预览状态
+        is_preview = (handler.current_user.company.conf_newjd_status == const.NEWJD_STATUS_WAITING
+                      and handler.params.preview != None)
+        return is_newjd_status_on or is_preview
+
     @abstractmethod
-    def fail_action(self, *args, **kwargs):
+    def fail_action(self, func, *args, **kwargs):
         raise NotImplemented
 
 
 class NewJDStatusChecker404(BaseNewJDStatusChecker):
     """ JD status不对应, 直接404 """
 
-    def fail_action(self, *args, **kwargs):
+    @gen.coroutine
+    def fail_action(self, func, *args, **kwargs):
         handler = self._handler
         handler.write_error(404)
+
+
+class NewJDStatusCheckerAddFlag(BaseNewJDStatusChecker):
+    """检查一下, 放置一个标志位, 仍然执行原func"""
+
+    @gen.coroutine
+    def fail_action(self, func, *args, **kwargs):
+        yield func(self._handler, *args, **kwargs)

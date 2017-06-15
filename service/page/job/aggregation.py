@@ -149,7 +149,7 @@ class AggregationPageService(PageService):
                     "team_img": team_img,
                     "job_img": job_img,
                     "company_img": company_img,
-                    "resources": self._gen_resources(item.get("_source").get("jd_pic",{}), item.get("_source").get("company",{})),
+                    "resources": self._gen_resources(item.get("_source").get("jd_pic",{}), item.get("_source").get("company",{}), item.get("_source").get("newjd_status",0)),
                     "user_status": 0,
                     "city": city,
                     "company": company,
@@ -259,26 +259,30 @@ class AggregationPageService(PageService):
 
         return hot_company[:9]
 
-    def _gen_resources(self, jd_pic, company):
+    def _gen_resources(self, jd_pic, company, newjd_status):
 
         """
         处理图片逻辑
         :param jd_pic:
         :param company_type:
+        :param newjd_status: 是否新 JD，2：新 JD 其他非新 JD
         :return:
         """
 
         pic_list = list()
-        if jd_pic.get("position_pic"):
-            pic_list += jd_pic.get("position_pic").get("other_pic")
-        if jd_pic.get("team_pic"):
-            pic_list += jd_pic.get("team_pic").get("other_pic")
-        if jd_pic.get("company_pic"):
-            pic_list += jd_pic.get("company_pic").get("other_pic")
-        if company.get("impression"):
-            pic_list += [ObjectDict(res_type=0, res_url=item) for item in ujson.decode(company.get("impression")).values()]
-        if company.get("banner"):
-            pic_list += [ObjectDict(res_type=0, res_url=item) for item in ujson.decode(company.get("banner")).values()]
+        if newjd_status == 2:
+            # 新 JD
+            if jd_pic.get("position_pic"):
+                pic_list += jd_pic.get("position_pic").get("other_pic")
+            if jd_pic.get("team_pic"):
+                pic_list += jd_pic.get("team_pic").get("other_pic")
+            if jd_pic.get("company_pic"):
+                pic_list += jd_pic.get("company_pic").get("other_pic")
+        else:
+            if company.get("impression"):
+                pic_list += [ObjectDict(res_type=0, res_url=item) for item in ujson.decode(company.get("impression")).values()]
+            if company.get("banner"):
+                pic_list += [ObjectDict(res_type=0, res_url=item) for item in ujson.decode(company.get("banner")).values()]
 
         res_resource = list()
         if company.get("type", None) != 0 or len(pic_list) == 0:

@@ -17,7 +17,6 @@ help_routes: 继承自common_routes, 供help单独使用，一般 handler 在 he
 )
 
 """
-
 import handler.common.app
 import handler.common.application
 import handler.common.cellphone
@@ -32,6 +31,7 @@ import handler.common.suggest
 import handler.common.usercenter
 import handler.common.dictionary
 import handler.common.logcollector
+import handler.common.captcha
 
 import handler.help.passport
 import handler.help.releasedposition
@@ -101,6 +101,7 @@ common_routes = [
     (r"/api/application",                            handler.common.application.ApplicationHandler,             {"event": "application_profile"}),
     (r"/api/JSSDKError",                             handler.common.jssdkerror.JSSDKErrorHandler,               {"event": "frontend_jssdkerror"}),
     (r"/api/collectlog",                             handler.common.logcollector.LogCollectorHandler,           {"event": "collect_log"}),
+    (r"/api/captcha",                                handler.common.captcha.CaptchaHandler,                     {"event": "captcha"})
 ]
 
 # 企业号的单独 routes，域名 platform.moseeker.com/m
@@ -109,8 +110,8 @@ platform_routes = [
     (r"/position/(?P<position_id>\d+)",              handler.platform.position.PositionHandler,                 {"event": "position_info"}),
     (r"/position",                                   handler.platform.position.PositionListHandler,             {"event": "position_list"}),
     (r"/start",                                      handler.platform.landing.LandingHandler,                   {"event": "start_landing"}),
-    (r"/company/(\d+)",                              handler.platform.companyrelation.CompanyInfoHandler,       {"event": "company_old_info"}),
-    (r"/company",                                    handler.platform.companyrelation.CompanyHandler,           {"event": "company_info"}),
+    (r"/company/(\d+)",                              handler.platform.companyrelation.CompanyInfoRedirectHandler, {"event": "company_old_info"}, "old_company_info_page"),
+    (r"/company",                                    handler.platform.companyrelation.CompanyHandler,           {"event": "company_info"},     "new_company_info_page"),
     (r"/company/team/(\d+)",                         handler.platform.team.TeamDetailHandler,                   {"event": "team_detail"}),
     (r"/company/team",                               handler.platform.team.TeamIndexHandler,                    {"event": "team_info"}),
     (r"/employee/bindemail[\/]?",                    handler.platform.employee.EmployeeBindEmailHandler,        {"event": "employee_bindemail"}),
@@ -158,7 +159,7 @@ qx_routes = common_routes + qx_routes
 # 招聘助手的单独 routes, 域名 platform.moseeker.com/h
 help_routes = [
     (r"/position",                                   handler.help.releasedposition.ReleasedPositionHandler,     {"event": "helper_positions"}),
-    (r"/register/qrcode",                            handler.help.passport.RegisterQrcodeHandler,               {"event": "helper_qrcode"}),
+    (r"/hrregister/qrcode",                          handler.help.passport.RegisterQrcodeHandler,               {"event": "helper_qrcode"}),
     # 我也要招人
     (r"/api/register",                               handler.help.passport.RegisterHandler,                     {"event": "helper_register"}),
 
