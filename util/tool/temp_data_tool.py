@@ -492,7 +492,7 @@ def make_team(team, resources, more_link, team_members, teamname_custom):
         title='所属' + teamname_custom["teamname_custom"],
         data=[{
             'sub_title': team.name,
-            'longtext': team.summary,
+            'longtext': team.description,
             'media_url': make_static_url(team_res.res_url),
             'media_type': MEDIA_TYPE[team_res.res_type],
             'member_list': [make_team_member(m, resources.get(m.res_id))

@@ -17,6 +17,7 @@ from util.tool.url_tool import make_url, make_static_url
 from util.tool.str_tool import gen_salary, split
 
 from tests.dev_data.user_company_config import COMPANY_CONFIG
+from service.page.customize.customize import CustomizePageService
 
 
 class TeamPageService(PageService):
@@ -81,6 +82,11 @@ class TeamPageService(PageService):
         teamname_custom = parent_company.conf_teamname_custom
         data.bottombar = teamname_custom
         data.header = temp_data_tool.make_header(company, team_index=True, **teamname_custom)
+
+        # 蓝色光标做定制化需求
+        customize_ps = CustomizePageService()
+        customize_ps.blue_focus_team_index_show_summary_not_description(parent_company, teams)
+
         # 解析生成团队列表页中每个团队信息子模块
         data.templates = [
             temp_data_tool.make_team_index_template(
