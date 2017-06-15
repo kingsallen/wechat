@@ -21,7 +21,6 @@ from tests.dev_data.user_company_config import COMPANY_CONFIG
 
 
 class UserCompanyPageService(PageService):
-
     def __init__(self):
         super().__init__()
 
@@ -163,25 +162,6 @@ class UserCompanyPageService(PageService):
                 team_id_tuple).replace(',)', ')'))
 
         raise gen.Return(teams)
-
-    @gen.coroutine
-    def _get_team_resource(self, team_list):
-        resource_dict = yield self.hr_resource_ds.get_resource_by_ids(
-            [t.res_id for t in team_list])
-
-        team_resource = []
-        for team in team_list:
-            team_res = make_up_for_missing_res(resource_dict.get(team.res_id))
-            team_resource.append(ObjectDict({
-                'id': team.id,
-                'title': '我们的团队',
-                'sub_title': team.name,
-                'longtext': team.summary,
-                'media_url': team_res.res_url,
-                'media_type': team_res.res_type,
-            }))
-
-        raise gen.Return(team_resource)
 
     @gen.coroutine
     def set_company_follow(self, current_user, param):
