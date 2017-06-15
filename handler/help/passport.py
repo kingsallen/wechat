@@ -12,9 +12,10 @@ import conf.message as msg
 from handler.base import BaseHandler
 from util.common import ObjectDict
 from util.tool.str_tool import password_crypt
+from util.wechat.core import get_qrcode
 from util.common.decorator import handle_response, authenticated
-from oauth.wechat import WechatUtil
 from thrift_gen.gen.mq.struct.ttypes import SmsType
+
 
 class RegisterQrcodeHandler(BaseHandler):
 
@@ -29,8 +30,7 @@ class RegisterQrcodeHandler(BaseHandler):
         """
 
         scene_str = "{0}_{1}_0".format(self.params.hr_id, self.current_user.wxuser.id)
-        wechat_util = WechatUtil()
-        qrcode = yield wechat_util.get_qrcode(self.current_user.wechat.access_token, scene_str)
+        qrcode = yield get_qrcode(self.current_user.wechat.access_token, scene_str)
 
         self.render(template_name="refer/weixin/sysuser/wx_recruit_success.html", qrcodeurl=qrcode)
 

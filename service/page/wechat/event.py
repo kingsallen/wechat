@@ -16,7 +16,6 @@ import conf.common as const
 import conf.wechat as wx_const
 import conf.message as message
 from cache.user.user_hr_account import UserHrAccountCache
-from oauth.wechat import WechatUtil
 from service.page.base import PageService
 from util.wechat.msgcrypt import WXBizMsgCrypt
 from util.tool.url_tool import make_static_url
@@ -24,6 +23,7 @@ from util.tool.date_tool import curr_now
 from util.tool.str_tool import mobile_validate
 from util.common import ObjectDict
 from util.tool.json_tool import json_dumps
+from util.wechat.core import get_wxuser
 
 
 class EventPageService(PageService):
@@ -234,8 +234,7 @@ class EventPageService(PageService):
         """
         wxuser_id = current_user.wxuser.id
 
-        wechat_util_obj = WechatUtil()
-        wechat_userinfo = yield wechat_util_obj.get_wxuser(current_user.wechat.access_token, openid)
+        wechat_userinfo = yield get_wxuser(current_user.wechat.access_token, openid)
 
         if not wechat_userinfo or openid is None:
             self.logger.error("[wechat_oauth][create_wxuser]wechat_userinfo is None."
@@ -291,8 +290,7 @@ class EventPageService(PageService):
         :return:
         """
 
-        wechat_util_obj = WechatUtil()
-        wechat_userinfo = yield wechat_util_obj.get_wxuser(current_user.wechat.access_token, openid)
+        wechat_userinfo = yield get_wxuser(current_user.wechat.access_token, openid)
 
         if not wechat_userinfo or openid is None:
             self.logger.error("[wechat_oauth][create_wxuser]wechat_userinfo is None."
