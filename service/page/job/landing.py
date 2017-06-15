@@ -11,6 +11,7 @@ from util.tool.str_tool import to_str
 from util.tool.dict_tool import sub_dict
 from util.tool.str_tool import split, set_literl
 from util.tool.iter_tool import list_dedup_list
+import conf.common as const
 
 from setting import settings
 
@@ -49,7 +50,8 @@ class LandingPageService(PageService):
         ret = []
         query_size = platform_const.LANDING_QUERY_SIZE
 
-        url = settings.es + "/index/_search?company_id:%s+AND+status:0&size=%s" % (company_id, query_size)
+        # 在此调用 ES 的 HTTP GET 搜索接口
+        url = settings.es + "/index/_search?company_id:%s+AND+status:%s+AND+size=%s" % (company_id, const.OLD_YES, query_size)
         response = yield httpclient.AsyncHTTPClient().fetch(url)
 
         body = ObjectDict(json.loads(to_str(response.body)))
@@ -90,6 +92,7 @@ class LandingPageService(PageService):
             delimiter = [",", "，"]
 
         for e in data:
+            e = ObjectDict(e)
             value_to_split = e.get(key_to_split)
             if value_to_split:
                 splitted_items = split(value_to_split, delimiter)
@@ -97,7 +100,7 @@ class LandingPageService(PageService):
                     for item in splitted_items:
                         new_e = e.copy()
                         new_e[key_to_split] = item
-                        ret.append(new_e)
+                        ret.append(ObjectDict(new_e))
                 else:
                     ret.append(e)
             else:
@@ -107,6 +110,7 @@ class LandingPageService(PageService):
     @gen.coroutine
     def append_child_company_name(self, data):
         """ 对position_data 添加子公司简称 """
+
         child_company_ids = list(set([v.publisher_company_id for v in data]))
 
         child_company_id_abbr_list = yield self.hr_company_ds.get_companys_list(
