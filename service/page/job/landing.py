@@ -107,7 +107,7 @@ class LandingPageService(PageService):
     @gen.coroutine
     def append_child_company_name(self, data):
         """ 对position_data 添加子公司简称 """
-        child_company_ids = set([v.publisher_company_id for v in data])
+        child_company_ids = list(set([v.publisher_company_id for v in data]))
 
         child_company_id_abbr_list = yield self.hr_company_ds.get_companys_list(
             conds="id in " + set_literl(child_company_ids),
