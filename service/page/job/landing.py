@@ -146,6 +146,7 @@ class LandingPageService(PageService):
         """
         conf_search_seq = tuple([int(e.index) for e in company.get("conf_search_seq")])
 
+        # 默认 conf_search_seq
         if not conf_search_seq:
             conf_search_seq = (
                 platform_const.LANDING_INDEX_CITY,
@@ -166,6 +167,7 @@ class LandingPageService(PageService):
 
         key_order = [platform_const.LANDING[kn].get("display_key") for kn in conf_search_seq]
 
+        # 构建 [{"text": XXX, "value": XXX}, ...] 的形式
         positions_data_values = []
         for e in positions_data:
             to_append = []
@@ -173,16 +175,17 @@ class LandingPageService(PageService):
                 if k == 'child_company_abbr':
                     to_append.append(e.get(k))
 
-                elif k == 'candidate_source':
+                elif k == 'candidate_source_name':
                     to_append.append({"text":  e.get(k), "value": const.CANDIDATE_SOURCE_REVERSE.get(e.get(k))})
 
-                elif k == 'employment_type':
+                elif k == 'employment_type_name':
                     to_append.append({"text":  e.get(k), "value": const.EMPLOYMENT_TYPE_REVERSE.get(e.get(k))})
                 else:
                     to_append.append({"text": e.get(k), "value": e.get(k)})
 
             positions_data_values.append(to_append)
 
+        # 将构建出来的结果去重，作为返回中的 values 属性
         dedupped_position_data_values = list_dedup_list(positions_data_values)
 
         return ObjectDict({
