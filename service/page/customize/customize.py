@@ -6,8 +6,8 @@ from service.page.base import PageService
 from util.common import ObjectDict
 from util.tool.url_tool import make_url
 
-class CustomizePageService(PageService):
 
+class CustomizePageService(PageService):
     """企业定制化相关内容"""
 
     # 诺华集团招聘
@@ -117,3 +117,15 @@ class CustomizePageService(PageService):
 
         raise gen.Return(message)
 
+    def blue_focus_team_index_show_summary_not_description(self, company, teams):
+        """
+        蓝色光标的定制, 在团队列表页面, 显示团队简介, 而不是团队详情
+        :param company:
+        :param teams:
+        :return:
+        """
+        if company.id == self.constant.BLUE_FOCUS_COMPANY_ID:
+            for team in teams:
+                team.description = team.summary
+        else:
+            pass
