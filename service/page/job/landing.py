@@ -172,6 +172,12 @@ class LandingPageService(PageService):
             for k in key_order:
                 if k == 'child_company_abbr':
                     to_append.append(e.get(k))
+
+                elif k == 'candidate_source':
+                    to_append.append({"text":  e.get(k), "value": const.CANDIDATE_SOURCE_REVERSE.get(e.get(k))})
+
+                elif k == 'employment_type':
+                    to_append.append({"text":  e.get(k), "value": const.EMPLOYMENT_TYPE_REVERSE.get(e.get(k))})
                 else:
                     to_append.append({"text": e.get(k), "value": e.get(k)})
 
