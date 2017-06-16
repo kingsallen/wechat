@@ -84,7 +84,7 @@ class LandingPageService(PageService):
         return ret
 
     @staticmethod
-    def split_cities(data, delimiter=None):
+    def split_cities(data, *, delimiter=None):
         """如果一条数据中包含多个城市，应该分裂成多条数据"""
         ret = []
         key_to_split = 'city'
@@ -128,7 +128,7 @@ class LandingPageService(PageService):
                     "value": d.publisher_company_id
                 }
             else:
-                d.child_company_abbr = {}
+                d.child_company_abbr = ObjectDict()
 
         return data
 
