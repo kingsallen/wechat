@@ -159,6 +159,7 @@ CANDIDATE_SOURCE = {
     "0": "社招",
     "1": "校招"
 }
+CANDIDATE_SOURCE_REVERSE = {v: k for k, v in CANDIDATE_SOURCE.items()}
 
 # 工作性质
 EMPLOYMENT_TYPE = {
@@ -167,6 +168,7 @@ EMPLOYMENT_TYPE = {
     "2": "合同工",
     "3": "实习",
 }
+EMPLOYMENT_TYPE_REVERSE = {v: k for k, v in EMPLOYMENT_TYPE.items()}
 
 # 学历
 DEGREE = {

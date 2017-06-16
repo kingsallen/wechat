@@ -802,32 +802,37 @@ class PositionListHandler(BaseHandler):
 
         if self.params.salary:
             k = str(self.params.salary)
-            infra_params.salary = "%d,%d" % (
-                const_platorm.SALARY.get(k).salary_bottom,
-                const_platorm.SALARY.get(k).salary_top)
+            try:
+                infra_params.salary = "%d,%d" % (
+                    const_platorm.SALARY[const_platorm.SALARY_NAME_TO_INDEX[k]].salary_bottom,
+                    const_platorm.SALARY[const_platorm.SALARY_NAME_TO_INDEX[k]].salary_top)
+            except KeyError:  # 如果用户自行修改了 GET 参数，不至于报错
+                infra_params.salary = ""
 
         if self.params.degree:
-            k = str(self.params.degree)
-            infra_params.degree = const_platorm.SEARCH_DEGREE.get(k) or ""
+            infra_params.degree = self.params.degree
+        else:
+            infra_params.degree = ""
 
+        # 招聘类型和职位性质接受兼容 数字编号 中文
         if self.params.candidate_source:
-            infra_params.candidate_source = const.CANDIDATE_SOURCE.get(
-                self.params.candidate_source)
+            infra_params.candidate_source = const.CANDIDATE_SOURCE.get(self.params.candidate_source, "") \
+                if self.params.candidate_source.isdigit() else self.params.candidate_source
         else:
             infra_params.candidate_source = ""
 
         if self.params.employment_type:
-            infra_params.employment_type = const.EMPLOYMENT_TYPE.get(
-                self.params.employment_type)
+            infra_params.employment_type = const.EMPLOYMENT_TYPE.get(self.params.employment_type, "") \
+                if self.params.employment_type.isdigit() else self.params.employment_type
         else:
             infra_params.employment_type = ""
 
         infra_params.update(
-            keywords=self.params.keyword or "",
-            cities=self.params.city or "",
-            department=self.params.team_name or "",
-            occupations=self.params.occupation or "",
-            custom=self.params.custom or "",
+            keywords=self.params.keyword if self.params.keyword else "",
+            cities=self.params.city if self.params.city else "",
+            department=self.params.team_name if self.params.team_name else "",
+            occupations=self.params.occupation if self.params.occupation else "",
+            custom=self.params.custom if self.params.custom else "",
             order_by_priority=True)
 
         self.logger.debug("[position_list_infra_params]: %s" % infra_params)

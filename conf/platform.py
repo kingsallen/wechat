@@ -1,47 +1,77 @@
 # coding=utf-8
 
-# Copyright 2016 MoSeeker
-
 """
 只适合企业号使用的常量配置
 
 常量使用大写字母，字符串需要时标注为unicode编码
 例如 SUCCESS = "成功"
-
 """
 from util.common import ObjectDict
 
-## 企业号搜索页设置
+# 企业号搜索页设置
 
-### 栏目设置
-### 默认栏目设置
+# 栏目设置
+# 默认栏目设置
 
 LANDING_SEQ = "1#2#3#4"
+
+LANDING_QUERY_SIZE = 5000
 
 LANDING_INDEX_CITY = 1
 LANDING_INDEX_SALARY = 2
 LANDING_INDEX_OCCUPATION = 3
 LANDING_INDEX_DEPARTMENT = 4
-LANDING_INDEX_CANDIDATE = 5 # 招聘类型
-LANDING_INDEX_EMPLOYMENT = 6 # 工作性质
+LANDING_INDEX_CANDIDATE = 5  # 招聘类型
+LANDING_INDEX_EMPLOYMENT = 6  # 工作性质
 LANDING_INDEX_DEGREE = 7
 LANDING_INDEX_CHILD_COMPANY = 8
 LANDING_INDEX_CUSTOM = 9
 
-#### 栏目设置
-LANDING = {
-    LANDING_INDEX_CITY : {"name": "工作地点", "chpe": "地区"},
-    LANDING_INDEX_SALARY : {"name": "薪资范围", "chpe": "薪资"},
-    LANDING_INDEX_OCCUPATION : {"name": "职位职能", "chpe": "职能"},
-    LANDING_INDEX_DEPARTMENT : {"name": "所属部门", "chpe": "部门"},
-    LANDING_INDEX_CANDIDATE : {"name": "招聘类型", "chpe": "类型"},
-    LANDING_INDEX_EMPLOYMENT : {"name": "工作性质", "chpe": "性质"},
-    LANDING_INDEX_DEGREE : {"name": "学历要求", "chpe": "学历"},
-    LANDING_INDEX_CHILD_COMPANY : {"name": "子公司名称", "chpe": "公司"},
-    LANDING_INDEX_CUSTOM : {"name": "企业自定义字段", "chpe": "自定义"},
-}
+# 栏目设置
+LANDING = ObjectDict({
+    LANDING_INDEX_CITY:          {"name":        "工作地点", "chpe": "地区",
+                                  "key":         "city",
+                                  "display_key": "city",
+                                  "form_name":   "city"},
+    LANDING_INDEX_SALARY:        {"name":        "薪资范围", "chpe": "薪资",
+                                  "key":         ["salary_top",
+                                                  "salary_bottom"],
+                                  "display_key": "salary",
+                                  "form_name":   "salary"},
+    LANDING_INDEX_OCCUPATION:    {"name":        "职位职能", "chpe": "职能",
+                                  "key":         "occupation",
+                                  "display_key": "occupation",
+                                  "form_name":   "occupation"},
+    LANDING_INDEX_DEPARTMENT:    {"name":        "所属部门", "chpe": "部门",
+                                  "key":         "team_name",
+                                  "display_key": "team_name",
+                                  "form_name":   "team_name"},
+    LANDING_INDEX_CANDIDATE:     {"name":        "招聘类型", "chpe": "类型",
+                                  "key":         "candidate_source_name",
+                                  "display_key": "candidate_source_name",
+                                  "form_name":   "candidate_source"},
+    LANDING_INDEX_EMPLOYMENT:    {"name":        "工作性质", "chpe": "性质",
+                                  "key":         "employment_type_name",
+                                  "display_key": "employment_type_name",
+                                  "form_name":   "employment_type"
+                                  },
+    LANDING_INDEX_DEGREE:        {"name":        "学历要求", "chpe": "学历",
+                                  "key":         "degree_name",
+                                  "display_key": "degree_name",
+                                  "form_name":   "degree"},
+    LANDING_INDEX_CHILD_COMPANY: {"name":        "子公司名称", "chpe": "公司",
+                                  "key":         "publisher_company_id",
+                                  "display_key": "child_company_abbr",
+                                  "form_name":   "did"},
+    LANDING_INDEX_CUSTOM:        {"name":        "企业自定义字段", "chpe": "自定义",
+                                  "key":         "custom",
+                                  "display_key": "custom",
+                                  "form_name":   "custom"}
+})
 
-#### 薪资范围搜索项
+
+
+# 薪资范围搜索项
 SALARY = ObjectDict({
     "0": {"name": "4k及以下", "salary_bottom": 1, "salary_top": 4},
     "1": {"name": "4k-6k", "salary_bottom": 4, "salary_top": 6},
@@ -52,7 +82,9 @@ SALARY = ObjectDict({
     "6": {"name": "25k及以上", "salary_bottom": 25, "salary_top": 999},
 })
 
-### 学历搜索项
+SALARY_NAME_TO_INDEX = {v.get("name"):k for k, v in SALARY.items()}
+
+# 学历搜索项
 DEGREE = {
     "1": "高中及以下",
     "2": "大专",
@@ -61,7 +93,6 @@ DEGREE = {
     "5": "MBA",
     "6": "博士",
 }
-
 
 # 媒体类型
 MEDIA_TYPE = ('image', 'video')

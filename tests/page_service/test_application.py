@@ -2,7 +2,7 @@
 
 import unittest
 import functools
-from util.tool.dict_tool  import objectdictify
+from util.tool.dict_tool import objectdictify
 import conf.common as const
 
 class ApplicationPSTest(unittest.TestCase):

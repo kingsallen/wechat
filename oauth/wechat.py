@@ -5,9 +5,8 @@ import tornado.gen as gen
 
 import conf.wechat as wx_const
 
-from util.common import ObjectDict
 from util.common.sign import Sign
-from util.tool.http_tool import http_get, http_post
+from util.tool.http_tool import http_get
 
 from globals import logger
 from setting import settings
@@ -184,55 +183,3 @@ class JsApi(object):
         self.sign = Sign(jsapi_ticket=jsapi_ticket)
         self.__dict__.update(self.sign.sign(url=url))
 
-class WechatUtil(object):
-
-    """微信工具类，可用户与微信 API 之间的交互"""
-
-    @gen.coroutine
-    def get_wxuser(self, access_token, openid):
-        """用 openid 拉取用户信息
-        https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140839&t=0.8130415470934214
-        :return ObjectDict
-        when success
-        {
-           "subscribe": 1,
-           "openid": "o6_bmjrPTlm6_2sgVt7hMZOPfL2M",
-           "nickname": "Band",
-           "sex": 1,
-           "language": "zh_CN",
-           "city": "广州",
-           "province": "广东",
-           "country": "中国",
-           "headimgurl":  "http://wx.qlogo.cn/mmopen/g3MonUZtNHkdmzicIlibx6iaFqAc56vxLSUfpb6n5WKSYVY0ChQKkiaJSgQ1dZuTOgvLLrhJbERQQ4
-        eMsv84eavHiaiceqxibJxCfHe/0",
-          "subscribe_time": 1382694957,
-          "unionid": " o6_bmasdasdsad6_2sgVt7hMZOPfL"
-          "remark": "",
-          "groupid": 0,
-          "tagid_list":[128,2]
-        }
-
-        when error
-        {"errcode":40003,"errmsg":" invalid openid"}
-        """
-        ret = yield http_get(wx_const.WX_INFO_USER_API % (access_token, openid), infra=False)
-        raise gen.Return(ret)
-
-    @gen.coroutine
-    def get_qrcode(self, access_token, scene_str, action_name="QR_LIMIT_STR_SCENE"):
-        """获得专属二维码
-        :return url
-        """
-        params = ObjectDict(
-            action_name=action_name,
-            action_info=ObjectDict(
-                scene=ObjectDict(
-                    scene_str=scene_str
-                )
-            )
-        )
-
-        ret = yield http_post(wx_const.WX_CREATE_QRCODE_API % access_token, params, infra=False)
-        if ret:
-            raise gen.Return(wx_const.WX_SHOWQRCODE_API % (ret.get("ticket")))
-        raise gen.Return(None)

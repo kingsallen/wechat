@@ -138,27 +138,22 @@ class ResumeImportHandler(BaseHandler):
 
                 return
             else:
-                if result.status == 32001:
-                    # 埋点密码错误
+                if result.status == 32001:    # 埋点密码错误
                     status_log = 1
-                elif result.status == 32002:
-                    # 埋点导入失败
+                elif result.status == 32002:  # 埋点导入失败
                     status_log = 2
-                elif result.status == 32003:
-                    # 埋点登陆失败
+                elif result.status == 32003:  # 埋点登陆失败
                     status_log = 3
-                elif result.status == 32004:
-                    # 埋点参数不正确
+                elif result.status == 32004:  # 埋点参数不正确
                     status_log = -5
-                elif result.status == 32005:
-                    # 埋点登陆失败
+                elif result.status == 32005:  # 埋点登陆失败
                     status_log = 4
-                elif result.status == 32006:
-                    # 埋点基础服务请求爬虫超时
+                elif result.status == 32006:  # 埋点基础服务请求爬虫超时
                     status_log = -3
-                elif result.status == 32007:
-                    # 爬虫校验参数发现错误, 由于都是参数校验放一起
+                elif result.status == 32007:  # 爬虫校验参数发现错误, 由于都是参数校验放一起
                     status_log = -5
+                elif result.status == 32008:  # 简历导入次数超过每日次数限制
+                    status_log = 5
                 else:
                     # 埋点基础服务返回未识别异常
                     status_log = -2

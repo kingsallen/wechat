@@ -9,6 +9,7 @@ from handler.base import BaseHandler
 from util.common import ObjectDict
 from util.common.decorator import handle_response
 
+
 class LandingHandler(BaseHandler):
     """
     企业搜索页
@@ -17,20 +18,10 @@ class LandingHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def get(self):
-        selected = ObjectDict({
-            "city":             self.params.city,
-            "salary":           self.params.salary,
-            "occupation":       self.params.occupation,
-            "team_name":        self.params.team_name,
-            "candidate_source": self.params.candidate_source,
-            "employment_type":  self.params.employment_type,
-            "degree":           self.params.degree,
-            "did":              int(self.params.did) if self.params.did else 0,
-            "custom":           self.params.custom
-        })
 
-        search_seq = yield self.landing_ps.get_landing_item(self.current_user.company,
-                                                            self.current_user.wechat.company_id, selected)
+        search_seq = yield self.landing_ps.make_search_seq(self.current_user.company)
+
+        self.logger.debug("[landing] search_seq: %s" % search_seq)
 
         company = ObjectDict({
             "logo": self.static_url(self.current_user.company.logo),
@@ -41,7 +32,7 @@ class LandingHandler(BaseHandler):
 
         yield self._make_share_info(self.current_user.company)
 
-        self.render(template_name="company/search.html", company=company)
+        self.render_page(template_name="company/dynamic_search.html", data=company)
 
     @gen.coroutine
     def _make_share_info(self, company_info):
