@@ -791,7 +791,7 @@ class PositionListHandler(BaseHandler):
 
         infra_params.company_id = self.current_user.company.id
 
-        if self.params.did and int(self.params.did) != -1:
+        if self.params.did:
             infra_params.did = self.params.did
 
         start_count = (int(self.params.get("count", 0)) *
@@ -809,27 +809,30 @@ class PositionListHandler(BaseHandler):
             except KeyError:  # 如果用户自行修改了 GET 参数，不至于报错
                 infra_params.salary = ""
 
-        if self.params.degree and self.params.degree != '-1':
+        if self.params.degree:
             infra_params.degree = self.params.degree
         else:
             infra_params.degree = ""
 
-        if self.params.candidate_source and self.params.candidate_source != '-1':
-            infra_params.candidate_source = self.params.candidate_source
+        # 招聘类型和职位性质接受兼容 数字编号 中文
+        if self.params.candidate_source:
+            infra_params.candidate_source = const.CANDIDATE_SOURCE.get(self.params.candidate_source, "") \
+                if self.params.candidate_source.isdigit() else self.params.candidate_source
         else:
             infra_params.candidate_source = ""
 
-        if self.params.employment_type and self.params.employment_type != '-1':
-            infra_params.employment_type = self.params.employment_type
+        if self.params.employment_type:
+            infra_params.employment_type = const.EMPLOYMENT_TYPE.get(self.params.employment_type, "") \
+                if self.params.employment_type.isdigit() else self.params.employment_type
         else:
             infra_params.employment_type = ""
 
         infra_params.update(
-            keywords=self.params.keyword if self.params.keyword and self.params.keyword != '-1' else "",
-            cities=self.params.city if self.params.city and self.params.city != '-1' else"",
-            department=self.params.team_name if self.params.team_name and self.params.team_name != '-1' else "",
-            occupations=self.params.occupation if self.params.occupation and self.params.occupation != '-1' else "",
-            custom=self.params.custom if self.params.custom and self.params.custom != '-1' else "",
+            keywords=self.params.keyword if self.params.keyword else "",
+            cities=self.params.city if self.params.city else "",
+            department=self.params.team_name if self.params.team_name else "",
+            occupations=self.params.occupation if self.params.occupation else "",
+            custom=self.params.custom if self.params.custom else "",
             order_by_priority=True)
 
         self.logger.debug("[position_list_infra_params]: %s" % infra_params)
