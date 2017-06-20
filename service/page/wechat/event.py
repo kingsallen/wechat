@@ -423,8 +423,9 @@ class EventPageService(PageService):
                 elif scan_info.group(1):
                     res = yield self.user_hr_account_ds.update_hr_account(
                         conds={
-                            "id": int(scan_info.group(1)),
-                            "wxuser_id": [None, "is"]
+                            "id": int(scan_info.group(1))
+                            # tangyiliang 在 2017-06-20 注释，以观后效
+                            #"wxuser_id": [None, "is"]
                         }, fields={
                             "wxuser_id": wxuser_id
                         })
