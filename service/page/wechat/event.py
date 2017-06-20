@@ -318,7 +318,6 @@ class EventPageService(PageService):
 
         raise gen.Return()
 
-
     @gen.coroutine
     def opt_event_unsubscribe(self, current_user):
         """
@@ -455,7 +454,6 @@ class EventPageService(PageService):
                 user_hr_account_cache.pub_wx_binding(scan_info.group(1), msg="-1")
 
         raise gen.Return()
-
 
     @gen.coroutine
     def _do_weixin_qrcode(self, wechat, msg, is_newbie=False):
@@ -594,7 +592,6 @@ class EventPageService(PageService):
                 pass
 
         raise gen.Return()
-
 
     @gen.coroutine
     def __user_bind_wx(self, wxuser, user_id):

@@ -11,10 +11,15 @@ import traceback
 from tornado import gen
 
 from handler.metabase import MetaBaseHandler
+
 from util.common import ObjectDict
 from util.tool.xml_tool import parse_msg
+from util.tool.date_tool import curr_now
+
+from util.wechat import core as wechat_core
 from util.wechat.msgcrypt import WXBizMsgCrypt, SHA1
 
+import conf.common as const
 
 class WechatOauthHandler(MetaBaseHandler):
 
@@ -54,6 +59,28 @@ class WechatOauthHandler(MetaBaseHandler):
 
         openid = self.msg.get('FromUserName', '')
         wxuser = yield self.user_ps.get_wxuser_openid_wechat_id(openid, self.wechat.id)
+
+        if not wxuser:
+            wechat_userinfo = wechat_core.get_wxuser(self.wechat.access_token, openid)
+            wxuser_id = yield self.user_wx_user_ds.create_wxuser({
+                "is_subscribe":    1,
+                "openid":          openid,
+                "nickname":        wechat_userinfo.nickname or "",
+                "sex":             wechat_userinfo.sex or 0,
+                "city":            wechat_userinfo.city or "",
+                "country":         wechat_userinfo.country or "",
+                "province":        wechat_userinfo.province or "",
+                "language":        wechat_userinfo.language or "",
+                "headimgurl":      wechat_userinfo.headimgurl or "",
+                "wechat_id":       self.wechat.id,
+                "unionid":         wechat_userinfo.unionid or "",
+                "subscribe_time":  curr_now(),
+                "unsubscibe_time": None,
+                "source":          const.WX_USER_SOURCE_IWANTYOU
+            })
+
+            # 插入之后重新获取一次插入的 wxuser
+            wxuser = yield self.user_wx_user_ds.get_wxuser(id=wxuser_id)
 
         user.wechat = self.wechat
         user.wxuser = wxuser

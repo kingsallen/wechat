@@ -280,6 +280,7 @@ def get_wxuser(access_token, openid):
     when error
     {"errcode":40003,"errmsg":" invalid openid"}
     """
+    assert access_token and openid
     ret = yield http_get(wx.WX_INFO_USER_API % (access_token, openid), infra=False)
     raise gen.Return(ret)
 
