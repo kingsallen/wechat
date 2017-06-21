@@ -60,8 +60,11 @@ class WechatOauthHandler(MetaBaseHandler):
         openid = self.msg.get('FromUserName', '')
         wxuser = yield self.user_ps.get_wxuser_openid_wechat_id(openid, self.wechat.id)
 
+        from service.data.user.user_wx_user import UserWxUserDataService
+        self.user_wx_user_ds = UserWxUserDataService()
+
         if not wxuser:
-            wechat_userinfo = wechat_core.get_wxuser(self.wechat.access_token, openid)
+            wechat_userinfo = yield wechat_core.get_wxuser(self.wechat.access_token, openid)
             wxuser_id = yield self.user_wx_user_ds.create_wxuser({
                 "is_subscribe":    1,
                 "openid":          openid,
@@ -80,7 +83,7 @@ class WechatOauthHandler(MetaBaseHandler):
             })
 
             # 插入之后重新获取一次插入的 wxuser
-            wxuser = yield self.user_wx_user_ds.get_wxuser(id=wxuser_id)
+            wxuser = yield self.user_wx_user_ds.get_wxuser({"id":wxuser_id})
 
         user.wechat = self.wechat
         user.wxuser = wxuser
