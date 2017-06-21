@@ -176,8 +176,7 @@ class RedpacketPageService(PageService):
         self.logger.debug("rp_config: %s" % rp_config)
 
         if not rp_config:
-            self.logger.debug(
-                '[RP]员工认证红包活动不存在, company_id: %s' % company_id)
+            self.logger.debug('[RP]员工认证红包活动不存在, company_id: %s' % company_id)
             return
 
         # 校验员工信息
@@ -204,9 +203,18 @@ class RedpacketPageService(PageService):
             qxuser = yield self.user_wx_user_ds.get_wxuser({
                 'sysuser_id': user_id, 'wechat_id': settings['qx_wechat_id']
             })
-            recom_wxuser = yield self.user_wx_user_ds.get_wxuser({
-                'sysuser_id': user_id, 'wechat_id': wechat.id
-            })
+
+            # 如果是订阅号，那么无法获取 recom_wxuser
+            # 将 openid = 0 传递到 __send_red_packet_card， 跳过使用企业号发送消息模版
+            recom_wxuser = ObjectDict()
+            if wechat.type == const.WECHAT_TYPE_SUBSCRIPTION: # 如果 wechat 是订阅号
+                recom_wxuser.openid = 0
+            elif wechat.type == const.WECHAT_TYPE_SERVICE:  # 如果 wechat 是服务号
+                recom_wxuser = yield self.user_wx_user_ds.get_wxuser({
+                    'sysuser_id': user_id, 'wechat_id': wechat.id
+                })
+            else:
+                assert False # should not be here
 
             try:
                 if self.__hit_red_packet(rp_config.probability):
@@ -289,6 +297,13 @@ class RedpacketPageService(PageService):
         recom_wechat = recom_current_user.wechat
         recom_wxuser = recom_current_user.wxuser
         recom_qxuser = recom_current_user.qxuser
+
+        # 如果是订阅号，那么无法获取 recom_wxuser
+        # 将 openid = 0 传递到 __send_red_packet_card， 跳过使用企业号发送消息模版
+        if not recom_wxuser:
+            recom_wxuser = ObjectDict()
+            recom_wxuser.openid = 0
+
 
         self.logger.debug('[RP] company_id: %s' % company_id)
         self.logger.debug('[RP] user_id: %s' % user_id)
@@ -749,14 +764,15 @@ class RedpacketPageService(PageService):
         :param position: 职位信息
         :return:
         """
-        recom_wx_user = yield self.user_wx_user_ds.get_wxuser({
-            "openid": recom_openid,
-            "wechat_id": recom_wechat_id
-        })
-        recom_qx_wxuser = yield self.user_wx_user_ds.get_wxuser({
-            "unionid": recom_wx_user.unionid,
-            "wechat_id": settings['qx_wechat_id']
-        })
+
+        # recom_wx_user = None
+        # if recom_openid:
+        #     recom_wx_user = yield self.user_wx_user_ds.get_wxuser({
+        #         "openid": recom_openid,
+        #         "wechat_id": recom_wechat_id
+        #     })
+
+        recom_qx_wxuser = yield self.user_wx_user_ds.get_wxuser(id=current_qxuser_id)
 
         # 依赖对仟寻授权
         qx_openid = recom_qx_wxuser.openid
@@ -771,6 +787,7 @@ class RedpacketPageService(PageService):
                 red_packet_config.id, red_packet_config.type)
 
         self.logger.debug("[RP]next rp item: {}".format(rp_item))
+
         if not rp_item:
             if position:
                 self.logger.debug("[RP]该职位红包已经发完")
@@ -791,6 +808,7 @@ class RedpacketPageService(PageService):
             else:
                 self.logger.debug("[RP]该活动红包已经发完,准备结束活动")
                 yield self.__finish_hb_config(red_packet_config.id)
+
             return
 
         card = yield self.__create_new_card(
@@ -1006,6 +1024,9 @@ class RedpacketPageService(PageService):
         模板填充内容在 kwargs 里面，
         先发企业号，失败了就发聚合号
         """
+        # 如果 openid 为 0, 不发送, 返回发送失败
+        if not openid:
+            return const.NO
 
         config_type = red_packet_config.type
 
