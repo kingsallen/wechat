@@ -13,6 +13,7 @@ import conf.message as msg
 from handler.base import BaseHandler
 from thrift_gen.gen.common.struct.ttypes import BIZException
 from util.common import ObjectDict
+from util.common.decorator import authenticated
 from util.tool.date_tool import curr_now_dateonly
 
 
@@ -153,6 +154,7 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
         else:
             yield self._get_recom_candidates()
 
+    @authenticated
     @tornado.gen.coroutine
     def post(self):
         if not self.current_user.employee:

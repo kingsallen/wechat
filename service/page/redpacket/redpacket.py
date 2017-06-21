@@ -24,7 +24,7 @@ from setting import settings
 from service.page.user.sharechain import SharechainPageService
 from service.page.user.user import UserPageService
 from service.page.hr.wechat import WechatPageService
-from util.tool.str_tool import set_literl, trunc, generate_nonce_str, to_bytes
+from util.tool.str_tool import set_literl, trunc, generate_nonce_str, to_bytes, to_str
 from util.tool.url_tool import make_url
 from util.wechat.template import (
     rp_binding_success_notice_tpl,
@@ -176,8 +176,7 @@ class RedpacketPageService(PageService):
         self.logger.debug("rp_config: %s" % rp_config)
 
         if not rp_config:
-            self.logger.debug(
-                '[RP]员工认证红包活动不存在, company_id: %s' % company_id)
+            self.logger.debug('[RP]员工认证红包活动不存在, company_id: %s' % company_id)
             return
 
         # 校验员工信息
@@ -204,25 +203,35 @@ class RedpacketPageService(PageService):
             qxuser = yield self.user_wx_user_ds.get_wxuser({
                 'sysuser_id': user_id, 'wechat_id': settings['qx_wechat_id']
             })
-            recom_wxuser = yield self.user_wx_user_ds.get_wxuser({
-                'sysuser_id': user_id, 'wechat_id': wechat.id
-            })
+
+            # 如果是订阅号，那么无法获取 recom_wxuser
+            # 将 openid = 0 传递到 __send_red_packet_card， 跳过使用企业号发送消息模版
+            recom_wxuser = ObjectDict()
+            if wechat.type == const.WECHAT_TYPE_SUBSCRIPTION: # 如果 wechat 是订阅号
+                recom_wxuser.openid = 0
+            elif wechat.type == const.WECHAT_TYPE_SERVICE:  # 如果 wechat 是服务号
+                recom_wxuser = yield self.user_wx_user_ds.get_wxuser({
+                    'sysuser_id': user_id, 'wechat_id': wechat.id
+                })
+            else:
+                assert False # should not be here
 
             try:
                 if self.__hit_red_packet(rp_config.probability):
                     self.logger.debug("[RP]掷骰子通过,准备发送红包信封(有金额)")
 
                     # 发送红包消息模版(有金额)
-                    self.__send_red_packet_card(
+                    yield self.__send_red_packet_card(
                         recom_wxuser.openid,
                         wechat.id,
                         rp_config,
                         qxuser.id,
+                        current_qxuser_id=qxuser.id,
                         company_name=company.name)
                 else:
                     # 发送红包消息模版(抽不中)
                     self.logger.debug("[RP]掷骰子不通过,准备发送红包信封(无金额)")
-                    self.__send_zero_amount_card(
+                    yield self.__send_zero_amount_card(
                         recom_wxuser.openid,
                         wechat.id,
                         rp_config,
@@ -290,6 +299,13 @@ class RedpacketPageService(PageService):
         recom_wxuser = recom_current_user.wxuser
         recom_qxuser = recom_current_user.qxuser
 
+        # 如果是订阅号，那么无法获取 recom_wxuser
+        # 将 openid = 0 传递到 __send_red_packet_card， 跳过使用企业号发送消息模版
+        if not recom_wxuser:
+            recom_wxuser = ObjectDict()
+            recom_wxuser.openid = 0
+
+
         self.logger.debug('[RP] company_id: %s' % company_id)
         self.logger.debug('[RP] user_id: %s' % user_id)
         self.logger.debug('[RP] recom_wechat: %s' % recom_wechat)
@@ -310,11 +326,12 @@ class RedpacketPageService(PageService):
                     self.logger.debug("[RP]掷骰子通过,准备发送红包信封(有金额)")
 
                     # 发送红包消息模版(有金额)
-                    self.__send_red_packet_card(
+                    yield self.__send_red_packet_card(
                         recom_wxuser.openid,
                         recom_wechat.id,
                         rp_config,
                         recom_qxuser.id,
+                        current_qxuser_id=recom_qxuser.id,
                         position=None,
                         company_name=recom_current_user.company.name,
                         recomee_name=realname,
@@ -324,7 +341,7 @@ class RedpacketPageService(PageService):
                 else:
                     # 发送红包消息模版(抽不中)
                     self.logger.debug("[RP]掷骰子不通过,准备发送红包信封(无金额)")
-                    self.__send_zero_amount_card(
+                    yield self.__send_zero_amount_card(
                         recom_wxuser.openid,
                         recom_wechat.id,
                         rp_config,
@@ -541,23 +558,24 @@ class RedpacketPageService(PageService):
                 self.logger.debug("[RP]掷骰子通过,准备发送红包信封(有金额)")
 
                 # 发送红包消息模版(有金额)
-                self.__send_red_packet_card(
-                    recom_wxuser.openid,
-                    recom_wechat.id,
-                    red_packet_config,
-                    current_user.qxuser.id,
-                    position,
+                yield self.__send_red_packet_card(
+                    recom_openid=recom_wxuser.openid,
+                    recom_wechat_id=recom_wechat.id,
+                    red_packet_config=red_packet_config,
+                    recom_qxuser_id=recom_qx_wxuser.id,
+                    current_qxuser_id=current_user.qxuser.id,
+                    position=position,
                     nickname=nickname,
                     position_title=position.title,
                     send_to_employee=send_to_employee)
             else:
                 # 发送红包消息模版(抽不中)
                 self.logger.debug("[RP]掷骰子不通过,准备发送红包信封(无金额)")
-                self.__send_zero_amount_card(
+                yield self.__send_zero_amount_card(
                     recom_wxuser.openid,
                     recom_wechat.id,
                     red_packet_config,
-                    current_user.qxuser.id,
+                    recom_qx_wxuser.id,
                     nickname=nickname,
                     position_title=position.title,
                     send_to_employee=send_to_employee)
@@ -738,28 +756,32 @@ class RedpacketPageService(PageService):
         return probability == 100 or random.uniform(0, 100) < probability
 
     @gen.coroutine
-    def __send_red_packet_card(self, recom_openid, recom_wechat_id, red_packet_config,
-                               current_qxuser_id, position=None, **kwargs):
-        """
-        发送红包模版消息(有真实金额)
+    def __send_red_packet_card(self,
+                               recom_openid,
+                               recom_wechat_id,
+                               red_packet_config,
+                               recom_qxuser_id,
+                               current_qxuser_id,
+                               position=None,
+                               **kwargs):
+        """发送红包模版消息(有真实金额)
         :param recom_openid:
         :param recom_wechat_id:
         :param red_packet_config:
-        :param current_qxuser_id: 当前点击用户的 qxwxuser_id
+        :param recom_qxuser_id: 
+        :param current_qxuser_id:
         :param position: 职位信息
         :return:
         """
-        recom_wx_user = yield self.user_wx_user_ds.get_wxuser({
-            "openid": recom_openid,
-            "wechat_id": recom_wechat_id
-        })
-        recom_qx_wxuser = yield self.user_wx_user_ds.get_wxuser({
-            "unionid": recom_wx_user.unionid,
-            "wechat_id": settings['qx_wechat_id']
-        })
+        self.logger.debug("*" * 80)
 
-        # 依赖对仟寻授权
-        qx_openid = recom_qx_wxuser.openid
+        recom_qx_wxuser = yield self.user_wx_user_ds.get_wxuser(
+            conds={'id': recom_qxuser_id})
+        recom_qxuser_openid = recom_qx_wxuser.openid
+
+        current_qxuser = yield self.user_wx_user_ds.get_wxuser(
+            conds={'id': current_qxuser_id})
+        current_qxuser_openid = current_qxuser.openid
 
         # 获取下一个待发红包信息
         if position:
@@ -771,6 +793,7 @@ class RedpacketPageService(PageService):
                 red_packet_config.id, red_packet_config.type)
 
         self.logger.debug("[RP]next rp item: {}".format(rp_item))
+
         if not rp_item:
             if position:
                 self.logger.debug("[RP]该职位红包已经发完")
@@ -791,10 +814,18 @@ class RedpacketPageService(PageService):
             else:
                 self.logger.debug("[RP]该活动红包已经发完,准备结束活动")
                 yield self.__finish_hb_config(red_packet_config.id)
+
             return
 
+        if red_packet_config.type in [0, 1]:
+            bagging_openid = current_qxuser_openid
+        elif red_packet_config.type in [2, 3]:
+            bagging_openid = recom_qxuser_openid
+        else:
+            assert False  # should not be here
+
         card = yield self.__create_new_card(
-            recom_wechat_id, qx_openid, red_packet_config.id,
+            recom_wechat_id, bagging_openid, red_packet_config.id,
             rp_item.id, rp_item.amount)
 
         self.logger.debug("[RP]红包信封入库成功!")
@@ -807,8 +838,10 @@ class RedpacketPageService(PageService):
         self.logger.debug("[RP]将发送模版消息")
         # 发送消息模板
         result = yield self.__send_message_template_with_card_url(
-            red_packet_config, card,
-            recom_openid, recom_wechat, **kwargs)
+            red_packet_config,
+            card,
+            recom_openid,
+            recom_wechat, **kwargs)
 
         if result == const.YES:
             # 如果模版消息发送成功
@@ -828,9 +861,10 @@ class RedpacketPageService(PageService):
                 to=const.RP_ITEM_STATUS_SENT_WX_MSG_FAILURE)
 
             self.logger.debug("[RP]使用聚合号发送模版消息失败, 直接发红包")
+
             rp_sent_ret = yield self.__send_red_packet(
                 red_packet_config, recom_wechat.id,
-                qx_openid, card.amount, rp_item.id)
+                bagging_openid, card.amount, rp_item.id)
 
             if rp_sent_ret:
                 self.logger.debug("[RP]直接发送红包成功!")
@@ -855,7 +889,7 @@ class RedpacketPageService(PageService):
         # 不管用户是否点击拆开了红包
         # 记录当前用户 wxuser_id 和红包获得者 wxuser_id
         yield self.__update_wxuser_id_into_hb_items(
-            qx_openid, current_qxuser_id, rp_item.id)
+            bagging_openid, current_qxuser_id, rp_item.id)
 
         raise gen.Return(result)
 
@@ -1006,6 +1040,8 @@ class RedpacketPageService(PageService):
         模板填充内容在 kwargs 里面，
         先发企业号，失败了就发聚合号
         """
+        if not openid or wechat.type == const.WECHAT_TYPE_SUBSCRIPTION:
+            return const.NO
 
         config_type = red_packet_config.type
 
@@ -1131,7 +1167,7 @@ class RedpacketPageService(PageService):
 
             self.logger.debug("[RP]qx_wechat_pay:{}".format(qx_wechat_pay))
 
-            rp_req_dict = yield self.__generate_red_packet_dict(
+            rp_req_dict = self.__generate_red_packet_dict(
                 qx_wechat_pay, qx_openid, amount, send_name=company_abb,
                 remark=remark, act_name=act_name, apikey=apikey)
 
@@ -1144,6 +1180,7 @@ class RedpacketPageService(PageService):
             res = self.__upload_to_server(
                 rp_req_xml, cert_file_path, key_file_path)
 
+            res = to_str(res)
             self.logger.debug("[RP]发送红包结果 res: {}".format(res))
 
             # 记录红包发送结果
@@ -1199,7 +1236,7 @@ class RedpacketPageService(PageService):
         """
         pre_sign = '&'.join(["{}={}".format(k, d[k]) for k in sorted(d) if
                              k != "key"]) + "&key={}".format(d.get('key'))
-        return md5(bytes(pre_sign)).hexdigest().upper()
+        return md5(to_bytes(pre_sign)).hexdigest().upper()
 
     @staticmethod
     def __to_xml(d):
@@ -1266,7 +1303,7 @@ class RedpacketPageService(PageService):
             "mch_id":       args_dict.get('mch_id', ''),
             "wxappid":      args_dict.get('wxappid', ''),
             "re_openid":    args_dict.get('re_openid', ''),
-            "total_amount": args_dict.get('total_amount', ''),
+            "total_amount": int(args_dict.get('total_amount', '0')),
             "send_time":    args_dict.get('send_time', ''),
             "send_listid":  args_dict.get('send_listid', ''),
             "hb_item_id":   hb_item_id
