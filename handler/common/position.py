@@ -47,7 +47,6 @@ class PositionFavHandler(BaseHandler):
             self.current_user.sysuser.id,
             const.FAV_INTEREST,
             self.current_user.sysuser.mobile,
-            self.current_user.wxuser.id,
             self.current_user.recom.id if self.current_user.recom else 0)
 
         application_url = self.make_url(
