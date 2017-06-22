@@ -234,7 +234,7 @@ class ApplicationPageService(PageService):
         :param profile: 基础服务提供的 profile
         :return: resume_dict
         """
-        profile_basic = ObjectDict(profile.get("basic", None))
+        profile_basic = ObjectDict(profile.get("basic", {}))
         if profile_basic and not profile_basic.get("mobile"):
             profile_basic.mobile = ""
         profile_basic.name = ""
