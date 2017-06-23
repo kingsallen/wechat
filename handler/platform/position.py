@@ -11,7 +11,7 @@ from handler.base import BaseHandler
 from tests.dev_data.user_company_config import COMPANY_CONFIG
 from util.common import ObjectDict
 from util.common.cipher import encode_id
-from util.common.decorator import handle_response, check_employee, NewJDStatusCheckerAddFlag
+from util.common.decorator import handle_response, check_employee, NewJDStatusCheckerAddFlag, authenticated
 from util.tool.str_tool import gen_salary, add_item, split
 from util.tool.url_tool import url_append_query
 from util.wechat.template import position_view_five_notice_tpl, position_share_notice_employee_tpl
@@ -21,6 +21,7 @@ class PositionHandler(BaseHandler):
 
     @handle_response
     @NewJDStatusCheckerAddFlag()
+    @authenticated
     @gen.coroutine
     def get(self, position_id):
         """显示 JD 页
