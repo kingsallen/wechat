@@ -226,7 +226,7 @@ class PositionHandler(BaseHandler):
             company_info.logo or const.HR_HEADIMG
         )
 
-        hr_name = hr_account.name or hr_wx_user.nickname or ''
+        hr_name = hr_account.username or hr_wx_user.nickname or ''
         company_name = company_info.abbreviation or company_info.company_name or ''
 
         is_hr = (self.current_user.qxuser.unionid is not None
