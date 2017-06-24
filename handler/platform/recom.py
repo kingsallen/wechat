@@ -98,7 +98,7 @@ class RecomCustomVariableMixIn(BaseHandler):
 class RecomIgnoreHandler(RecomCustomVariableMixIn, BaseHandler):
     """跳过推荐该被动求职者
     """
-
+    @authenticated
     @tornado.gen.coroutine
     def post(self):
         if not self.current_user.employee:
@@ -141,6 +141,7 @@ class RecomIgnoreHandler(RecomCustomVariableMixIn, BaseHandler):
 class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
     """处理 recom 相关的各种 GET POST 请求"""
 
+    @authenticated
     @tornado.gen.coroutine
     def get(self):
         if not self.current_user.employee:
