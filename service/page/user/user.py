@@ -369,40 +369,39 @@ class UserPageService(PageService):
         raise gen.Return(ret.status)
 
     @gen.coroutine
-    def add_user_fav_position(self, position_id, user_id, favorite, mobile, wxuser_id, recom_user_id):
+    def add_user_fav_position(self, position_id, user_id, favorite, mobile, recom_user_id):
         """
         增加用户感兴趣记录
         :param position_id:
         :param user_id:
         :param favorite: 2:感兴趣
         :param mobile:
-        :param wxuser_id:
         :param recom_user_id:
         :return: (result, fav_id or None)
         """
 
         fav = yield self.user_fav_position_ds.get_user_fav_position({
             "position_id": position_id,
-            "sysuser_id": user_id,
-            "favorite": favorite,
+            "sysuser_id":  user_id,
+            "favorite":    favorite,
         })
 
         if fav:
             yield self.user_fav_position_ds.update_user_fav_position(
-                conds={ "id": fav.id },
-                fields={ "mobile":  fav.mobile or mobile }
+                conds={"id": fav.id},
+                fields={"mobile": fav.mobile or mobile}
             )
             return False, None
 
         else:
-            fav_id = yield self.user_fav_position_ds.insert_user_fav_position(fields=ObjectDict(
-                sysuser_id=user_id,
-                position_id=position_id,
-                mobile=mobile,
-                favorite=favorite,
-                wxuser_id=wxuser_id,
-                recom_user_id=recom_user_id
-            ))
+            fav_id = yield self.user_fav_position_ds.insert_user_fav_position(
+                fields=ObjectDict(
+                    sysuser_id=user_id,
+                    position_id=position_id,
+                    mobile=mobile,
+                    favorite=favorite,
+                    recom_user_id=recom_user_id
+                ))
             return True, fav_id
 
     @gen.coroutine
