@@ -66,7 +66,7 @@ class WechatOauthHandler(MetaBaseHandler):
         if not wxuser:
             wechat_userinfo = yield wechat_core.get_wxuser(self.wechat.access_token, openid)
             wxuser_id = yield self.user_wx_user_ds.create_wxuser({
-                "is_subscribe":    1,
+                "is_subscribe":    0, # 由于没有 wxuser 才会进入这个逻辑，所以一定未关注
                 "openid":          openid,
                 "nickname":        wechat_userinfo.nickname or "",
                 "sex":             wechat_userinfo.sex or 0,
