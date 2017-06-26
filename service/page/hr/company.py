@@ -11,12 +11,12 @@ from service.page.base import PageService
 from util.tool.url_tool import make_static_url
 from util.tool.dict_tool import sub_dict
 from util.tool.str_tool import is_odd, split, gen_salary
+from conf import platform
 
 cached_company_sug_wechat = None
 
 
 class CompanyPageService(PageService):
-
     def __init__(self):
         super(CompanyPageService, self).__init__()
 
@@ -148,13 +148,13 @@ class CompanyPageService(PageService):
     @gen.coroutine
     def create_company_on_wechat(self, record):
         result, data = yield self.infra_company_ds.create_company_on_wechat({
-            "type":         1,
-            "name":         record.name,
+            "type": 1,
+            "name": record.name,
             "abbreviation": record.abbreviation,
-            "source":       8,  # 微信端添加
-            "scale":        record.scale,
-            "industry":     record.industry,
-            "logo":         record.logo
+            "source": 8,  # 微信端添加
+            "scale": record.scale,
+            "industry": record.industry,
+            "logo": record.logo
         })
         return result, data
 
@@ -169,7 +169,6 @@ class CompanyPageService(PageService):
 
         else:
             return const.EMPLOYEE_CUSTOM_FIELD_REFINE_REDIRECT
-
 
     @gen.coroutine
     def get_cp_for_sug_wechat(self, name=None):
@@ -238,12 +237,12 @@ class CompanyPageService(PageService):
 
         for item in ret.data:
             pos = ObjectDict()
-            pos.title=item.title
-            pos.id=item.id
-            pos.salary=gen_salary(item.salaryTop, item.salaryBottom)
-            pos.image_url=make_static_url(item.resUrl)
-            pos.city=split(item.city, [",","，"])
-            pos.team_name=item.teamName
+            pos.title = item.title
+            pos.id = item.id
+            pos.salary = gen_salary(item.salaryTop, item.salaryBottom)
+            pos.image_url = make_static_url(item.resUrl)
+            pos.city = split(item.city, [",", "，"])
+            pos.team_name = item.teamName
             res_list.append(pos)
 
         return res_list
@@ -253,9 +252,9 @@ class CompanyPageService(PageService):
         """我也要招人，创建公司信息，同时必须要创建 hr 与 company 对应关系，否则 hr 平台会报错"""
 
         company_id = yield self.hr_company_ds.create_company({
-            "type":         1,
-            "name":         params.name,
-            "source":       params.source,
+            "type": 1,
+            "name": params.name,
+            "source": params.source,
         })
 
         return company_id
@@ -265,8 +264,8 @@ class CompanyPageService(PageService):
         """我也要招人，创建公司信息，同时必须要创建 hr 与 company 对应关系，否则 hr 平台会报错"""
 
         yield self.hr_company_account_ds.create_company_accounts({
-            "company_id":  company_id,
-            "account_id":  hr_id,
+            "company_id": company_id,
+            "account_id": hr_id,
         })
 
         return True

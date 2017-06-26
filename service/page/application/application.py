@@ -234,7 +234,7 @@ class ApplicationPageService(PageService):
         :param profile: 基础服务提供的 profile
         :return: resume_dict
         """
-        profile_basic = ObjectDict(profile.get("basic", None))
+        profile_basic = ObjectDict(profile.get("basic", {}))
         if profile_basic and not profile_basic.get("mobile"):
             profile_basic.mobile = ""
         profile_basic.name = ""
@@ -242,7 +242,7 @@ class ApplicationPageService(PageService):
             const.CONSTANT_PARENT_CODE.DEGREE_USER)
 
         education = []
-        for e in profile.get('educations'):
+        for e in profile.get('educations', []):
             __end = '至今' if e.get('end_until_now', False) \
                 else e.get('end_date', '')
             end = __end
@@ -267,7 +267,7 @@ class ApplicationPageService(PageService):
             education.append(el)
 
         workexp = []
-        for w in profile.get('workexps'):
+        for w in profile.get('workexps', []):
             __end = '至今' if w.get('end_until_now', False) \
                 else w.get('end_date', '')
             end = __end
@@ -291,7 +291,7 @@ class ApplicationPageService(PageService):
             workexp.append(el)
 
         projectexp = []
-        for p in profile.get('projectexps'):
+        for p in profile.get('projectexps', []):
             __end = '至今' if p.get('end_until_now', False) \
                 else p.get('end_date', '')
             end = __end

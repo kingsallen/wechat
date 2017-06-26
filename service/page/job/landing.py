@@ -19,14 +19,13 @@ import conf.platform as platform_const
 
 
 class LandingPageService(PageService):
-
     def __init__(self):
         super().__init__()
 
     @staticmethod
     def make_key_list(conf_search_seq):
         """ 根据 conf_search_seq 来生成 key list
-        :param conf_search_seq: 
+        :param conf_search_seq:
         :return: key_list
         """
 
@@ -51,7 +50,8 @@ class LandingPageService(PageService):
         query_size = platform_const.LANDING_QUERY_SIZE
 
         # 在此调用 ES 的 HTTP GET 搜索接口
-        url = settings.es + "/index/_search?q=company_id:%s+AND+status:%s&size=%s" % (company_id, const.OLD_YES, query_size)
+        url = settings.es + "/index/_search?q=company_id:%s+AND+status:%s&size=%s" % (
+            company_id, const.OLD_YES, query_size)
         response = yield httpclient.AsyncHTTPClient().fetch(url)
 
         body = ObjectDict(json.loads(to_str(response.body)))
@@ -72,8 +72,8 @@ class LandingPageService(PageService):
                 salary = [
                     v.get("name") for v in platform_const.SALARY.values()
                     if v.salary_bottom == source.salary_bottom and
-                       v.salary_top == source.salary_top
-                ]
+                    v.salary_top == source.salary_top
+                    ]
 
                 source.salary = salary[0] if salary else ''
                 source.pop("salary_top", None)
@@ -119,7 +119,7 @@ class LandingPageService(PageService):
         )
         child_company_id_abbr_dict = {
             e.id: e.abbreviation for e in child_company_id_abbr_list
-        }
+            }
 
         for d in data:
             if d.publisher_company_id:
@@ -176,10 +176,10 @@ class LandingPageService(PageService):
                     to_append.append(e.get(k))
 
                 elif k == 'candidate_source_name':
-                    to_append.append({"text":  e.get(k), "value": const.CANDIDATE_SOURCE_REVERSE.get(e.get(k))})
+                    to_append.append({"text": e.get(k), "value": const.CANDIDATE_SOURCE_REVERSE.get(e.get(k))})
 
                 elif k == 'employment_type_name':
-                    to_append.append({"text":  e.get(k), "value": const.EMPLOYMENT_TYPE_REVERSE.get(e.get(k))})
+                    to_append.append({"text": e.get(k), "value": const.EMPLOYMENT_TYPE_REVERSE.get(e.get(k))})
                 else:
                     to_append.append({"text": e.get(k), "value": e.get(k)})
 
@@ -188,8 +188,19 @@ class LandingPageService(PageService):
         # 将构建出来的结果去重，作为返回中的 values 属性
         dedupped_position_data_values = list_dedup_list(positions_data_values)
 
+        # 职位自定义字段/部门自定义/职位职能自定义
+        def custom_field(search_item):
+            if search_item == platform_const.LANDING_INDEX_OCCUPATION and company.conf_job_occupation:
+                return company.conf_job_occupation
+            if search_item == platform_const.LANDING_INDEX_CUSTOM and company.conf_job_custom_title:
+                return company.conf_job_custom_title
+            if search_item == platform_const.LANDING_INDEX_DEPARTMENT and company.conf_teamname_custom.teamname_custom:
+                return company.conf_teamname_custom.teamname_custom
+
+            return platform_const.LANDING[search_item].get("chpe")
+
         return ObjectDict({
-            "field_name": [platform_const.LANDING[e].get("name") for e in conf_search_seq],
+            "field_name": [custom_field(e) for e in conf_search_seq],
             "field_form_name": [platform_const.LANDING[e].get("form_name") for e in conf_search_seq],
             "values": dedupped_position_data_values
         })

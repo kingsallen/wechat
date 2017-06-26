@@ -129,9 +129,7 @@ class MessageLogger(Logger):
 
     def error(self, message):
         super(MessageLogger, self).error(message)
-        # error 及时报警
-        # Alarm.biu(message)
-        # Alarm.biu(traceback.format_exc())
+        self.impl.send_message("error", message)
 
     def stats(self, message):
         super(MessageLogger, self).stats(message)

@@ -26,8 +26,14 @@ class ThriftCandidateDataService(DataService):
         self.logger.debug("[thfirt] send_candidate_view_position params: %s" % dict(
             user_id=user_id, position_id=position_id, sharechain_id=sharechain_id))
 
-        ret = yield self.candidate_service_cilent.glancePosition(int(user_id), int(position_id), int(sharechain_id))
-        raise gen.Return(ret)
+        ret = None
+        try:
+            ret = yield self.candidate_service_cilent.glancePosition(
+                int(user_id), int(position_id), int(sharechain_id))
+        except:
+            pass
+        finally:
+            return ret
 
     @gen.coroutine
     def send_candidate_interested(self, user_id, position_id, is_interested):

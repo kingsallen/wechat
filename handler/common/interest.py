@@ -54,7 +54,7 @@ class UserCurrentInfoHandler(BaseHandler):
                 self.current_user.sysuser.id,
                 const.FAV_INTEREST,
                 self.current_user.sysuser.mobile,
-                self.current_user.wxuser.id,
+                self.current_user.wxuser.id if self.current_user.wxuser else 0,
                 self.current_user.recom.id if self.params.recom else 0)
 
             # 2.添加定时任务，若2小时候，没有完善则发送消息模板

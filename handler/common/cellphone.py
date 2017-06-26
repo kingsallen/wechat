@@ -119,6 +119,7 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
         )
         if result.status != const.API_SUCCESS:
             self.send_json_error(message=result.message)
+            return
         else:
             self.send_json_success()
 
