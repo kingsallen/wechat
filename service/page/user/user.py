@@ -3,12 +3,15 @@
 from datetime import datetime
 
 import tornado.gen as gen
-from util.tool import http_tool, str_tool
-import conf.common as const
-from service.page.base import PageService
-from setting import settings
-from util.common import ObjectDict
 
+import conf.common as const
+
+from service.page.base import PageService
+
+from util.common import ObjectDict
+from util.tool import http_tool, str_tool
+
+from setting import settings
 
 class UserPageService(PageService):
 
