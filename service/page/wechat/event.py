@@ -377,7 +377,7 @@ class EventPageService(PageService):
                 "wxuser_id": current_user.wxuser.id
             })
 
-            if user_hr_account:
+            if user_hr_account and user_hr_account.wxuser_id != current_user.wxuser.id:
                 user_hr_account_cache = UserHrAccountCache()
                 user_hr_account_cache.pub_wx_binding(user_hr_account.id, msg="-1")
                 raise gen.Return()
@@ -406,47 +406,48 @@ class EventPageService(PageService):
         # 关注仟寻招聘助手时，将 user_hr_account.wxuser_id 与 wxuser 绑定
         if wechat.id == self.settings.helper_wechat_id and msg.EventKey:
             user_hr_account_cache = UserHrAccountCache()
+
+            res = None
+            scan_info = None
+
             try:
                 scan_info = re.match(r"qrscene_([0-9]*)_([0-9]*)_([0-9]*)", msg.EventKey)
                 if not scan_info:
                     scan_info = re.match(r"([0-9]*)_([0-9]*)_([0-9]*)", msg.EventKey)
+
+                hr_account_id = int(scan_info.group(1))
+                scan_type = int(scan_info.group(3))
+
+                # from yiliang: 不清楚这两种区别是什么，为什么要这么写，以及是否还有其他情况
                 # 扫码换绑
-                if scan_info.group(1) and int(scan_info.group(3)) == 1:
+                if hr_account_id and scan_type == 1:
                     res = yield self.user_hr_account_ds.update_hr_account(
-                        conds={
-                            "id": int(scan_info.group(1))
-                        }, fields={
-                            "wxuser_id": wxuser_id
-                        })
+                        conds={ "id": hr_account_id },
+                        fields={ "wxuser_id": wxuser_id })
+
                 # 普通扫码绑定
-                elif scan_info.group(1):
+                elif hr_account_id:
                     res = yield self.user_hr_account_ds.update_hr_account(
-                        conds={
-                            "id": int(scan_info.group(1))
-                            # tangyiliang 在 2017-06-20 注释，以观后效
-                            #"wxuser_id": [None, "is"]
-                        }, fields={
-                            "wxuser_id": wxuser_id
-                        })
+                        conds={ "id": hr_account_id },
+                        fields={ "wxuser_id": wxuser_id })
 
-                if res:
-                    # 更新 user_hr_account 和 user_wx_user 的关系成功后,
-                    # 更新 user_hr_account 的缓存, HR招聘管理平台使用, 需同时更新 wxuser_id 和 wxuser
-                    wxuser = yield self.user_wx_user_ds.get_wxuser({
-                        "id": wxuser_id,
-                    })
+                # from yiliang: 是否可以这样：
+                # else:
+                #     assert False # should not be here
+                #     user_hr_account_cache.pub_wx_binding(scan_info.group(1), msg="-1")
 
-                    user_hr_account_cache.update_user_hr_account_session(
-                        scan_info.group(1),
-                        value = ObjectDict(
-                            wxuser_id = int(wxuser_id),
-                            wxuser = wxuser
-                        ))
+                # 更新 user_hr_account 和 user_wx_user 的关系成功后, 更新 user_hr_account 的缓存, HR招聘管理平台使用, 需同时更新 wxuser_id 和 wxuser
+                wxuser = yield self.user_wx_user_ds.get_wxuser({"id": wxuser_id})
 
-                    # HR招聘管理平台对于HR 帐号绑定微信长轮训机制，需要实时的将状态返回给 HR 平台
-                    user_hr_account_cache.pub_wx_binding(scan_info.group(1))
-                else:
-                    user_hr_account_cache.pub_wx_binding(scan_info.group(1), msg="-1")
+                user_hr_account_cache.update_user_hr_account_session(
+                    hr_id=hr_account_id,
+                    value=ObjectDict(
+                        wxuser_id=wxuser_id,
+                        wxuser=wxuser
+                    ))
+
+                # HR招聘管理平台对于HR 帐号绑定微信长轮训机制，需要实时的将状态返回给 HR 平台
+                user_hr_account_cache.pub_wx_binding(scan_info.group(1))
 
             except Exception as e:
                 self.logger.error("[wechat][opt_event_subscribe]binding user_hr_account "

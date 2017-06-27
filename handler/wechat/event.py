@@ -59,14 +59,18 @@ class WechatOauthHandler(MetaBaseHandler):
 
         openid = self.msg.get('FromUserName', '')
         wxuser = yield self.user_ps.get_wxuser_openid_wechat_id(openid, self.wechat.id)
+        # 可以拿到用户信息的话，该用户一定关注了公众号
+        if not wxuser.is_subscribe:
+            yield self.user_ps.set_wxuser_is_subscribe(wxuser)
 
         from service.data.user.user_wx_user import UserWxUserDataService
         self.user_wx_user_ds = UserWxUserDataService()
 
         if not wxuser:
             wechat_userinfo = yield wechat_core.get_wxuser(self.wechat.access_token, openid)
+
             wxuser_id = yield self.user_wx_user_ds.create_wxuser({
-                "is_subscribe":    0, # 由于没有 wxuser 才会进入这个逻辑，所以一定未关注
+                "is_subscribe":    const.WX_USER_SUBSCRIBED,
                 "openid":          openid,
                 "nickname":        wechat_userinfo.nickname or "",
                 "sex":             wechat_userinfo.sex or 0,
