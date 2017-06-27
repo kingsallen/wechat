@@ -116,6 +116,12 @@ class UserPageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
+    def set_wxuser_is_subscribe(self, wxuser):
+        ret = yield self.user_wx_user_ds.update_wxuser(
+            conds={'id': wxuser.id}, fields={'is_subscribe': const.YES})
+        return ret
+
+    @gen.coroutine
     def create_user_wx_user_ent(self, openid, unionid, wechat_id):
         """根据 unionid 创建 企业号微信用户信息"""
 
