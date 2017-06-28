@@ -272,7 +272,7 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
 
         form_items = [recom_record_id, self.current_user.sysuser.id, click_time, realname, company, position, recom_reason]
 
-        self.debug("post_recom_passive_seeker form_items: %s" % form_items)
+        self.logger.debug("post_recom_passive_seeker form_items: %s" % form_items)
 
         # 如果校验失败返回原页面并附加 message
         message = ''

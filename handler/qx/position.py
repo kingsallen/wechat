@@ -24,25 +24,25 @@ class PositionHandler(BaseHandler):
 
         position_info = yield self.position_ps.get_position(position_id)
 
-        self.debug("[JD]构建职位所属公司信息")
+        self.logger.debug("[JD]构建职位所属公司信息")
         did = yield self.company_ps.get_real_company_id(position_info.publisher, position_info.company_id)
         company_info = yield self.company_ps.get_company(conds={"id": did}, need_conf=True)
 
         if position_info.id:
-            self.debug("[JD]构建职位默认图")
+            self.logger.debug("[JD]构建职位默认图")
             position_es = yield self.aggregation_ps.opt_es_position(position_info.id)
             pos_item = position_es.hits.hits[0] if position_es.hits.hits else ObjectDict()
 
-            self.debug("[JD]构建职位基础信息")
+            self.logger.debug("[JD]构建职位基础信息")
             res_position, cover = yield self._make_jd_info(position_info, company_info, pos_item)
 
-            self.debug("[JD]构建职位详情信息")
+            self.logger.debug("[JD]构建职位详情信息")
             jd_detail = yield self._make_jd_detail(position_info, pos_item)
 
-            self.debug("[JD]构建公司信息")
+            self.logger.debug("[JD]构建公司信息")
             res_cmp = self._make_company(company_info)
 
-            self.debug("[JD]构建转发信息")
+            self.logger.debug("[JD]构建转发信息")
             res_share = yield self._make_share_info(position_info, company_info, position_es, res_position)
 
             self.send_json_success(data=ObjectDict(
@@ -54,12 +54,12 @@ class PositionHandler(BaseHandler):
             ))
 
             # 标记用户已阅读职位
-            self.debug("[JD]标记用户已阅读职位")
+            self.logger.debug("[JD]标记用户已阅读职位")
             yield self.user_ps.add_user_viewed_position(self.current_user.sysuser.id, position_info.id)
 
-            self.debug("[JD]更新职位浏览量")
+            self.logger.debug("[JD]更新职位浏览量")
             yield self._make_position_visitnum(position_info)
-            self.debug("[JD]更新链路信息")
+            self.logger.debug("[JD]更新链路信息")
             yield self._make_refresh_share_chain(position_info)
         else:
             self.send_json_error()
@@ -89,14 +89,14 @@ class PositionHandler(BaseHandler):
 
         team = yield self.team_ps.get_team(conds={'id': position_info.team_id})
 
-        self.debug("[JD]构建收藏信息")
+        self.logger.debug("[JD]构建收藏信息")
         star = yield self.position_ps.is_position_stared_by(self.current_user.sysuser.id, position_info.id)
 
-        self.debug("[JD]构建申请信息")
+        self.logger.debug("[JD]构建申请信息")
         application = yield self.application_ps.get_application(position_info.id, self.current_user.sysuser.id)
 
         # 是否超出投递上限。每月每家公司一个人只能申请3次
-        self.debug("[JD]处理投递上限")
+        self.logger.debug("[JD]处理投递上限")
         can_apply = yield self.application_ps.is_allowed_apply_position(
             self.current_user.sysuser.id, company_info.id)
 

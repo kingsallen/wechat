@@ -15,7 +15,7 @@ class IndexHandler(BaseHandler):
     @gamma_welcome
     @gen.coroutine
     def get(self):
-        self.debug("qx IndexHandler")
+        self.logger.debug("qx IndexHandler")
 
         self.render(template_name="qx/qx.html")
 

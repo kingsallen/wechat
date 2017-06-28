@@ -21,7 +21,7 @@ class LandingHandler(BaseHandler):
 
         search_seq = yield self.landing_ps.make_search_seq(self.current_user.company)
 
-        self.debug("[landing] search_seq: %s" % search_seq)
+        self.logger.debug("[landing] search_seq: %s" % search_seq)
 
         company = ObjectDict({
             "logo": self.static_url(self.current_user.company.logo),

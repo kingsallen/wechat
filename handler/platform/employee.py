@@ -129,7 +129,7 @@ class EmployeeBindHandler(BaseHandler):
             self.current_user.sysuser.id,
             self.current_user.company.id,
             self.json_args)
-        self.debug(binding_params)
+        self.logger.debug(binding_params)
 
         thrift_bind_status = yield self.employee_ps.get_employee_bind_status(
             self.current_user.sysuser.id,
@@ -234,7 +234,7 @@ class RecommendRecordsHandler(BaseHandler):
         req_type = self.params.type or 1
         res = yield self.employee_ps.get_recommend_records(
             self.current_user.sysuser.id, req_type, page_no, page_size)
-        self.debug("RecommendrecordsHandler:{}".format(res))
+        self.logger.debug("RecommendrecordsHandler:{}".format(res))
         self.send_json_success(data=res)
 
 
@@ -304,7 +304,7 @@ class CustomInfoHandler(BaseHandler):
                 confid = int(k[4:])
                 keys.append({confid: [to_str(v[0])]})
 
-        self.debug("keys: %s" % keys)
+        self.logger.debug("keys: %s" % keys)
         custom_fields = json_dumps(keys)
 
         yield self.employee_ps.update_employee_custom_fields(employee.id, custom_fields)

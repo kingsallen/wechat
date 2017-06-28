@@ -7,7 +7,6 @@ from handler.base import BaseHandler
 from util.common.decorator import handle_response, authenticated, \
     check_and_apply_profile
 
-
 class ApplicationHandler(BaseHandler):
 
     @handle_response
@@ -52,9 +51,9 @@ class ApplicationHandler(BaseHandler):
             position.company_id, position.app_cv_config_id)
 
         # 跳转到 profile get_view, 传递 apply 和 pid
-        self.redirect(self.make_url(
-            path.PROFILE_PREVIEW, self.params,
-            is_skip="1" if is_esteelauder else "0"))
+        self.redirect(self.make_url(path.PROFILE_PREVIEW,
+                               self.params,
+                               is_skip="1" if is_esteelauder else "0"))
 
     @handle_response
     @check_and_apply_profile
@@ -63,17 +62,22 @@ class ApplicationHandler(BaseHandler):
     def post(self):
         """ 处理普通申请 """
 
+        self.logger.warn("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& post application api begin &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
         pid = self.json_args.pid
         position = yield self.position_ps.get_position(pid)
 
-        check_status, message = yield self.application_ps.check_position(position, self.current_user)
-        self.debug("[create_reply]check_status:{}, message:{}".format(check_status, message))
+        self.logger.warn(pid)
+        self.logger.warn(position)
+
+        check_status, message = yield self.application_ps.check_position(
+            position, self.current_user)
+        self.logger.debug("[create_reply]check_status:{}, message:{}".format(check_status, message))
         if not check_status:
             self.send_json_error(message=message)
             return
 
         if position.app_cv_config_id:
-            self.debug("position.app_cv_config_id: %s" % position.app_cv_config_id)
+            self.logger.warn("position.app_cv_config_id: %s" % position.app_cv_config_id)
 
             # 读取自定义字段 meta 信息
             custom_cv_tpls = yield self.profile_ps.get_custom_tpl_all()
@@ -83,7 +87,7 @@ class ApplicationHandler(BaseHandler):
             result, _, _ = yield self.application_ps.check_custom_cv(
                     self.current_user, position, custom_cv_tpls)
 
-            self.debug("result: %s" % result)
+            self.logger.warn("result: %s" % result)
 
             if not result:
                 self.send_json_error(
@@ -151,7 +155,7 @@ class ApplicationEmailHandler(BaseHandler):
             "email": self.current_user.sysuser.email or self.params.email.strip()
         })
 
-        self.debug("update_user:{}".format(res))
+        self.logger.debug("update_user:{}".format(res))
 
         # 候选人信息更新
         res = yield self.application_ps.update_candidate_company(self.params.name, self.current_user.sysuser.id)
@@ -165,7 +169,7 @@ class ApplicationEmailHandler(BaseHandler):
                 self.send_json_error(message=message)
                 return
         else:
-            self.debug("Start to create email profile..")
+            self.logger.debug("Start to create email profile..")
             yield self.application_ps.create_email_profile(self.params, self.current_user, self.is_platform)
 
         # 置空不必要参数，避免在 make_url 中被用到

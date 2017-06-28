@@ -188,7 +188,7 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
         except AttributeError:
             return
 
-        self.debug("vcode: %s" % self.params.vcode)
+        self.logger.debug("vcode: %s" % self.params.vcode)
 
         if not self.params.vcode:
             self.send_json_error(message=msg.VCODE_NOT_EXIST)

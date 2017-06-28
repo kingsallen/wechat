@@ -36,34 +36,34 @@ class PositionHandler(BaseHandler):
             team = yield self.team_ps.get_team_by_id(position_info.team_id)
             position_info.team = team
 
-            self.debug("[JD]构建收藏信息")
+            self.logger.debug("[JD]构建收藏信息")
             star = yield self.position_ps.is_position_stared_by(self.current_user.sysuser.id, position_id)
 
-            self.debug("[JD]构建申请信息")
+            self.logger.debug("[JD]构建申请信息")
             application = yield self.application_ps.get_application(position_id, self.current_user.sysuser.id)
 
-            self.debug("[JD]构建职位所属公司信息")
+            self.logger.debug("[JD]构建职位所属公司信息")
             did = yield self.company_ps.get_real_company_id(position_info.publisher, position_info.company_id)
             company_info = yield self.company_ps.get_company(conds={"id": did}, need_conf=True)
 
             # 刷新链路
-            self.debug("[JD]刷新链路")
+            self.logger.debug("[JD]刷新链路")
             last_employee_user_id = yield self._make_refresh_share_chain(position_info)
-            self.debug("[JD]last_employee_user_id: %s" % (last_employee_user_id))
+            self.logger.debug("[JD]last_employee_user_id: %s" % (last_employee_user_id))
 
-            self.debug("[JD]构建转发信息")
+            self.logger.debug("[JD]构建转发信息")
             yield self._make_share_info(position_info, company_info)
 
-            self.debug("[JD]构建HR头像及底部转发文案")
+            self.logger.debug("[JD]构建HR头像及底部转发文案")
             endorse = yield self._make_endorse_info(position_info, company_info)
 
             # 是否超出投递上限。每月每家公司一个人只能申请3次
-            self.debug("[JD]处理投递上限")
+            self.logger.debug("[JD]处理投递上限")
             can_apply = yield self.application_ps.is_allowed_apply_position(
                 self.current_user.sysuser.id, company_info.id)
 
             # 相似职位推荐
-            self.debug("[JD]构建相似职位推荐")
+            self.logger.debug("[JD]构建相似职位推荐")
             recomment_positions_res = yield self.position_ps.get_recommend_positions(position_id)
 
             # 获取公司配置信息
@@ -85,7 +85,7 @@ class PositionHandler(BaseHandler):
             add_item(position_data, "module_position_recommend", module_position_recommend)
 
             # 构建老微信样式所需要的数据
-            self.debug("[JD]是否显示新样式: {}".format(self.current_user.company.conf_newjd_status))
+            self.logger.debug("[JD]是否显示新样式: {}".format(self.current_user.company.conf_newjd_status))
             # 0是未开启，1是用户申请开启，2是审核通过（使用新jd），3撤销（返回基础版）
             # added in NewJDStatusCheckerAddFlag
             if self.flag_should_display_newjd:
@@ -93,7 +93,7 @@ class PositionHandler(BaseHandler):
                 # [JD]职位所属团队及相关信息拼装
                 module_job_require = self._make_json_job_require(position_info)
                 module_company_info = self._make_json_job_company_info(company_info, did)
-                self.debug("[JD]构建团队相关信息")
+                self.logger.debug("[JD]构建团队相关信息")
                 yield self._add_team_data(position_data, team,
                                           position_info.company_id, position_id, teamname_custom)
 
@@ -139,12 +139,12 @@ class PositionHandler(BaseHandler):
             if self.is_platform and self.current_user.recom:
                 # 转发积分
                 if last_employee_user_id:
-                    self.debug("[JD]转发积分操作")
+                    self.logger.debug("[JD]转发积分操作")
                     yield self._make_add_reward_click(
                         position_info, last_employee_user_id)
 
                 # 红包处理
-                self.debug("[JD]红包处理")
+                self.logger.debug("[JD]红包处理")
                 yield self.redpacket_ps.handle_red_packet_position_related(
                     self.current_user,
                     position_info,
@@ -152,7 +152,7 @@ class PositionHandler(BaseHandler):
                     is_click=True,
                     psc=self.params.psc)
 
-            self.debug("[JD]更新职位浏览量")
+            self.logger.debug("[JD]更新职位浏览量")
             yield self._make_position_visitnum(position_info)
 
             # 浏览量达到5次后，向 HR 发布模板消息
@@ -242,7 +242,7 @@ class PositionHandler(BaseHandler):
             "department": position_info.department
         })
 
-        self.debug("_make_endorse_info: {}".format(endorse))
+        self.logger.debug("_make_endorse_info: {}".format(endorse))
 
         raise gen.Return(endorse)
 
@@ -467,7 +467,7 @@ class PositionHandler(BaseHandler):
                     presentee_user_id=self.current_user.sysuser.id,
                     position_id=position_info.id,
                     last_psc=get_psc())
-                self.debug(
+                self.logger.debug(
                     "[JD]inserted_share_chain_id: %s" %
                     inserted_share_chain_id)
 
@@ -579,7 +579,7 @@ class PositionHandler(BaseHandler):
                 berecom_user_id=self.current_user.sysuser.id,
                 position_id=position_info.id)
 
-            self.debug("[JD]给员工加积分： %s" % res)
+            self.logger.debug("[JD]给员工加积分： %s" % res)
         else:
             self.logger.warning("[JD]给员工加积分异常：员工不存在或员工 sysuser_id 不存在: %s" % recom_employee)
 
@@ -836,7 +836,7 @@ class PositionListHandler(BaseHandler):
             custom=self.params.custom if self.params.custom else "",
             order_by_priority=True)
 
-        self.debug("[position_list_infra_params]: %s" % infra_params)
+        self.logger.debug("[position_list_infra_params]: %s" % infra_params)
 
         return infra_params
 
