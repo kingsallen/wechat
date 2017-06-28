@@ -602,4 +602,5 @@ class BaseHandler(MetaBaseHandler):
         if self.current_user.sysuser:
             user_id = self.current_user.sysuser.id
 
-        self.debug(json_dumps({'user_id': user_id, 'message': obj.__repr__()}))
+        self.logger.debug(json_dumps(
+            {'user_id': user_id, 'message': obj.__repr__()}))
