@@ -80,10 +80,8 @@ class BaseHandler(MetaBaseHandler):
         code = self.params.get("code")
         state = self.params.get("state")
 
-        self.debug("+++++++++++++++++START OAUTH+++++++++++++++++++++")
-        self.debug(
-            "[prepare]code:{}, state:{}, request_url:{} ".format(
-                code, state, self.request.uri))
+        self.debug("[prepare]code:{}, state:{}, request_url:{} ".format(
+            code, state, self.request.uri))
 
         if self.in_wechat:
             # 用户同意授权
@@ -97,7 +95,6 @@ class BaseHandler(MetaBaseHandler):
 
                 # 来自 qx 的授权, 获得 userinfo
                 if state == wx_const.WX_OAUTH_DEFAULT_STATE:
-                    self.debug("来自 qx 的授权, 获得 userinfo")
                     userinfo = yield self._get_user_info(code)
                     self.debug(
                         "来自 qx 的授权, 获得 userinfo:{}".format(userinfo))
@@ -105,7 +102,6 @@ class BaseHandler(MetaBaseHandler):
 
                 # 来自企业号，招聘助手的静默授权
                 else:
-                    self.debug("来自企业号的静默授权")
                     self._unionid = from_hex(state)
                     openid = yield self._get_user_openid(code)
                     self.debug("来自企业号的静默授权, openid:{}".format(openid))
@@ -134,7 +130,6 @@ class BaseHandler(MetaBaseHandler):
         self._session_id = None
 
         self.debug("current_user:{}".format(self.current_user))
-        self.debug("+++++++++++++++++PREPARE OVER+++++++++++++++++++++")
 
     # PROTECTED
     @gen.coroutine
@@ -311,8 +306,6 @@ class BaseHandler(MetaBaseHandler):
     @gen.coroutine
     def _build_session(self):
         """用户确认向仟寻授权后的处理，构建 session"""
-
-        self.debug("_build_session start")
 
         session = ObjectDict()
         session.wechat = self._wechat
