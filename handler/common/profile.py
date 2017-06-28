@@ -78,60 +78,60 @@ class ProfileNewHandler(BaseHandler):
         if result:
             profile_id = data
             profile_ok = True
-            self.logger.debug("profile_profile created with id: %s" % profile_id)
+            self.debug("profile_profile created with id: %s" % profile_id)
             self._log_customs.update(new_profile=const.YES)
         else:
             self.logger.error("profile_profile creation failed. res:{}".format(data))
             self.send_json_error()
             return
 
-        self.logger.debug("[profile post]profile:{}".format(profile))
+        self.debug("[profile post]profile:{}".format(profile))
 
         result, data = yield self.profile_ps.create_profile_basic(profile, profile_id)
         if result:
             basic_info_ok = True
-            self.logger.debug("profile_basic created, id: %s" % data)
+            self.debug("profile_basic created, id: %s" % data)
         else:
             self.logger.error("profile_basic creation failed. res: %s" % data)
 
-        self.logger.debug("[profile post]create_profile_basic result:{}".format(result))
-        self.logger.debug("[profile post]create_profile_basic data:{}".format(data))
+        self.debug("[profile post]create_profile_basic result:{}".format(result))
+        self.debug("[profile post]create_profile_basic data:{}".format(data))
 
         for edu in profile.education:
-            self.logger.debug("[profile post]profile.education edu:{}".format(edu))
+            self.debug("[profile post]profile.education edu:{}".format(edu))
             result, data = yield self.profile_ps.create_profile_education(ObjectDict(edu), profile_id)
             if result:
-                self.logger.debug("profile_education creation passed. New record num: %s" % data)
+                self.debug("profile_education creation passed. New record num: %s" % data)
             else:
                 education_ok = False
                 self.logger.error("profile_education creation failed. res: %s" % data)
                 break
 
-        self.logger.debug("[profile post]create_profile_education result:{}".format(result))
-        self.logger.debug("[profile post]create_profile_education data:{}".format(data))
+        self.debug("[profile post]create_profile_education result:{}".format(result))
+        self.debug("[profile post]create_profile_education data:{}".format(data))
 
         for wxp in profile.workexp:
-            self.logger.debug("[profile post]profile.workexp wxp:{}".format(wxp))
+            self.debug("[profile post]profile.workexp wxp:{}".format(wxp))
             result, data = yield self.profile_ps.create_profile_workexp(ObjectDict(wxp), profile_id)
             if result:
-                self.logger.debug("profile_work_exp creation passed. New record num: %s" % data)
+                self.debug("profile_work_exp creation passed. New record num: %s" % data)
             else:
                 workexp_ok = False
                 self.logger.error("profile_work_exp creation failed. res: %s" % data)
                 break
 
-        self.logger.debug("[profile post]create_profile_workexp result:{}".format(result))
-        self.logger.debug("[profile post]create_profile_workexp data:{}".format(data))
+        self.debug("[profile post]create_profile_workexp result:{}".format(result))
+        self.debug("[profile post]create_profile_workexp data:{}".format(data))
 
         # 只有全部 ok 后才可以跳转
         if profile_ok and basic_info_ok and education_ok and workexp_ok:
             dqpid = self.get_cookie('dqpid')
-            self.logger.debug('dqpid: %s' % dqpid)
+            self.debug('dqpid: %s' % dqpid)
             if dqpid:
                 next_url = self.make_url(path.PROFILE_PREVIEW, self.params, pid=str(dqpid))
             else:
                 next_url = self.make_url(path.PROFILE_VIEW, self.params)
-            self.logger.debug('next_url: %s' % next_url)
+            self.debug('next_url: %s' % next_url)
             self.clear_cookie(name='dqpid')
             self.send_json_success(data=ObjectDict(next_url=next_url))
         else:
@@ -341,14 +341,14 @@ class ProfileCustomHandler(BaseHandler):
                 cv_profile_values = {k: v for k, v in custom_cv.items() if
                                      k in custom_fields}
 
-                self.logger.debug('cv_profile_values: %s' % cv_profile_values)
+                self.debug('cv_profile_values: %s' % cv_profile_values)
                 self._log_customs.update(new_profile=const.YES)
                 # BASIC INFO
                 result, data = yield self.profile_ps.create_profile_basic(
                     cv_profile_values, profile_id, mode='c')
 
                 if result:
-                    self.logger.debug(
+                    self.debug(
                         "profile_basic creation passed. Got basic info id: %s" % data)
                 else:
                     self.logger.error("profile_basic creation failed. res: %s" % data)

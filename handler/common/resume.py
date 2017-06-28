@@ -43,7 +43,7 @@ class LinkedinImportHandler(MetaBaseHandler):
         # 判断是否在微信端
         ua = 1 if self.in_wechat else 2
         is_ok, result = yield self.profile_ps.import_profile(4, "", "", user_id, ua, access_token)
-        self.logger.debug("is_ok:{} result:{}".format(is_ok, result))
+        self.debug("is_ok:{} result:{}".format(is_ok, result))
         if is_ok:
             if self.params.pid:
                 next_url = make_url(path.PROFILE_VIEW, params=self.params, host=self.host, apply='1')

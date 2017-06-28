@@ -30,8 +30,8 @@ class DictIndustryHandler(BaseHandler):
     # @handle_response
     @gen.coroutine
     def get(self):
-        self.logger.debug("DictIndustryHandler")
+        self.debug("DictIndustryHandler")
 
         industries = yield self.dictionary_ps.get_industries()
-        self.logger.debug("DictIndustryHandler indurstries:{}".format(industries))
+        self.debug("DictIndustryHandler indurstries:{}".format(industries))
         self.send_json_success(industries)

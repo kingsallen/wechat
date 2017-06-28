@@ -22,7 +22,7 @@ class IndexHandler(BaseHandler):
 
         self._save_dqpid_cookie()
 
-        self.logger.debug("common IndexHandler")
+        self.debug("common IndexHandler")
 
         try:
             if method in self._NEED_AUTH_PATHS:

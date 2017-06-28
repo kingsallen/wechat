@@ -117,9 +117,11 @@ class MessageLogger(Logger):
 
     def debug(self, message):
         super(MessageLogger, self).debug(message)
+        self.impl.send_message("debug", message)
 
     def info(self, message):
         super(MessageLogger, self).info(message)
+        self.impl.send_message("info", message)
 
     def warning(self, message):
         super(MessageLogger, self).warning(message)

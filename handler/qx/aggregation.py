@@ -157,7 +157,7 @@ class AggregationHandler(BaseHandler):
                 str(1),
                 httponly=True)
             session_ads_total = int(session_ads_total) + 1
-            self.logger.debug("session_ads_total 2:{}".format(session_ads_total))
+            self.debug("session_ads_total 2:{}".format(session_ads_total))
             self.set_cookie(
                 qx_const.COOKIE_HRADS_TOTAL,
                 str(session_ads_total),

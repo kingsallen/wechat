@@ -17,6 +17,7 @@ from util.common.cipher import decode_id
 from util.common.decorator import check_signature
 from util.tool.str_tool import to_str, from_hex, match_session_id
 from util.tool.url_tool import url_subtract_query, make_url
+from util.tool.json_tool import json_dumps
 
 
 class NoSignatureError(Exception):
@@ -79,8 +80,8 @@ class BaseHandler(MetaBaseHandler):
         code = self.params.get("code")
         state = self.params.get("state")
 
-        self.logger.debug("+++++++++++++++++START OAUTH+++++++++++++++++++++")
-        self.logger.debug(
+        self.debug("+++++++++++++++++START OAUTH+++++++++++++++++++++")
+        self.debug(
             "[prepare]code:{}, state:{}, request_url:{} ".format(
                 code, state, self.request.uri))
 
@@ -96,18 +97,18 @@ class BaseHandler(MetaBaseHandler):
 
                 # 来自 qx 的授权, 获得 userinfo
                 if state == wx_const.WX_OAUTH_DEFAULT_STATE:
-                    self.logger.debug("来自 qx 的授权, 获得 userinfo")
+                    self.debug("来自 qx 的授权, 获得 userinfo")
                     userinfo = yield self._get_user_info(code)
-                    self.logger.debug(
+                    self.debug(
                         "来自 qx 的授权, 获得 userinfo:{}".format(userinfo))
                     yield self._handle_user_info(userinfo)
 
                 # 来自企业号，招聘助手的静默授权
                 else:
-                    self.logger.debug("来自企业号的静默授权")
+                    self.debug("来自企业号的静默授权")
                     self._unionid = from_hex(state)
                     openid = yield self._get_user_openid(code)
-                    self.logger.debug("来自企业号的静默授权, openid:{}".format(openid))
+                    self.debug("来自企业号的静默授权, openid:{}".format(openid))
                     self._wxuser = yield self._handle_ent_openid(
                         openid, self._unionid)
 
@@ -132,8 +133,8 @@ class BaseHandler(MetaBaseHandler):
         self._qxuser = None
         self._session_id = None
 
-        self.logger.debug("current_user:{}".format(self.current_user))
-        self.logger.debug("+++++++++++++++++PREPARE OVER+++++++++++++++++++++")
+        self.debug("current_user:{}".format(self.current_user))
+        self.debug("+++++++++++++++++PREPARE OVER+++++++++++++++++++++")
 
     # PROTECTED
     @gen.coroutine
@@ -172,7 +173,7 @@ class BaseHandler(MetaBaseHandler):
         if user_id:
             self._log_customs.update(new_user=const.YES)
 
-        self.logger.debug("[_handle_user_info]user_id: {}".format(user_id))
+        self.debug("[_handle_user_info]user_id: {}".format(user_id))
 
         # 创建 qx 的 user_wx_user
         yield self.user_ps.create_qx_wxuser_by_userinfo(userinfo, user_id)
@@ -311,7 +312,7 @@ class BaseHandler(MetaBaseHandler):
     def _build_session(self):
         """用户确认向仟寻授权后的处理，构建 session"""
 
-        self.logger.debug("_build_session start")
+        self.debug("_build_session start")
 
         session = ObjectDict()
         session.wechat = self._wechat
@@ -344,7 +345,7 @@ class BaseHandler(MetaBaseHandler):
 
         key = const.SESSION_USER.format(session_id, wechat_id)
         value = self.redis.get(key)
-        self.logger.debug(
+        self.debug(
             "_get_session_by_wechat_id redis wechat_id:{} session: {}, key: {}".format(
                 wechat_id, value, key))
         if value:
@@ -591,3 +592,14 @@ class BaseHandler(MetaBaseHandler):
         route_url = self.reverse_url(route_name, *args)
         to = self.make_url(route_url, params)
         self.redirect(to)
+
+    def debug(self, obj):
+        """Handler 的 debug log，打印 user_id 
+        """
+        # TODO (yiliang) 考虑非 handler 中如何在 debug log 中打印 user_id
+
+        user_id = 0
+        if self.current_user.sysuser:
+            user_id = self.current_user.sysuser.id
+
+        self.debug(json_dumps({'user_id': user_id, 'message': obj.__repr__()}))

@@ -88,7 +88,7 @@ class UsercenterHandler(BaseHandler):
                 self.send_json_error(message=msg.INPUT_DISORDER)
                 return
         else:
-            self.logger.debug(3)
+            self.debug(3)
             self.send_json_error(message=msg.OPERATE_FAILURE)
 
     @handle_response
@@ -341,7 +341,7 @@ class UploadHandler(BaseHandler):
         body = vfile[0].get("body")
         result = uploader.upload_bytes(body)
 
-        self.logger.debug("[_upload]reusult:{}".format(result))
+        self.debug("[_upload]reusult:{}".format(result))
 
         if result.status != const.API_SUCCESS:
             self.send_json_error(message=result.message)
