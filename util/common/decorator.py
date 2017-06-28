@@ -19,7 +19,8 @@ from util.common import ObjectDict
 from util.common.cache import BaseRedis
 from util.common.cipher import encode_id
 from util.tool.dict_tool import sub_dict
-from util.tool.str_tool import to_hex, to_str
+from util.tool.str_tool import to_hex
+from util.tool.json_tool import json_dumps
 
 
 def handle_response(func):
@@ -30,7 +31,13 @@ def handle_response(func):
         try:
             yield func(self, *args, **kwargs)
         except Exception as e:
-            self.logger.error(traceback.format_exc())
+            user_id = 0
+            if self.current_user.sysuser:
+                user_id = self.current_user.sysuser.id
+            error_log_content = {'user_id': user_id, 'message': traceback.format_exc()}
+
+            self.logger.error(json_dumps(error_log_content))
+
             if self.request.headers.get("Content-Type", "").startswith("application/json") \
                 or self.request.method in ("PUT", "POST", "DELETE"):
                 self.send_json_error()
