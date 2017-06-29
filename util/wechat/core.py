@@ -219,12 +219,12 @@ class WechatTemplateMessager(object):
         :param openid:
         :return:
         """
-        wxuser = yield self.user_wx_user_ds.get_wxuser({
+        wxuser = yield self.user_wx_user_ds.get_wxuser(conds={
             "openid": openid,
             "wechat_id": wechat_id
         })
 
-        qx_wxuser = yield self.user_wx_user_ds.get_wxuser({
+        qx_wxuser = yield self.user_wx_user_ds.get_wxuser(conds={
             "unionid": wxuser.unionid,
             "wechat_id": settings['qx_wechat_id']
         })

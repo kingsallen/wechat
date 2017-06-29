@@ -148,7 +148,7 @@ class PositionPageService(PageService):
             "id": publisher
         })
         if hr_account.wxuser_id:
-            hr_wx_user = yield self.user_wx_user_ds.get_wxuser({
+            hr_wx_user = yield self.user_wx_user_ds.get_wxuser(conds={
                 "id": hr_account.wxuser_id
             })
         else:

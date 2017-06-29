@@ -13,8 +13,8 @@ from util.tool import http_tool, str_tool
 
 from setting import settings
 
-class UserPageService(PageService):
 
+class UserPageService(PageService):
     def __init__(self):
         super().__init__()
 
@@ -83,7 +83,7 @@ class UserPageService(PageService):
     @gen.coroutine
     def get_wxuser_openid_wechat_id(self, openid, wechat_id):
         """根据 openid 和 wechat_id 获取 wxuser"""
-        ret = yield self.user_wx_user_ds.get_wxuser({
+        ret = yield self.user_wx_user_ds.get_wxuser(conds={
             "wechat_id": wechat_id,
             "openid":    openid
         })
@@ -92,7 +92,7 @@ class UserPageService(PageService):
     @gen.coroutine
     def get_wxuser_sysuser_id_wechat_id(self, sysuser_id, wechat_id):
         """根据 sysuer_id 和 wechat_id 获取 wxuser"""
-        ret = yield self.user_wx_user_ds.get_wxuser({
+        ret = yield self.user_wx_user_ds.get_wxuser(conds={
             "wechat_id":  wechat_id,
             "sysuser_id": sysuser_id
         })
@@ -101,7 +101,7 @@ class UserPageService(PageService):
     @gen.coroutine
     def get_wxuser_unionid_wechat_id(self, unionid, wechat_id, fields=None):
         """根据 unionid 和 wechat_id 获取 wxuser"""
-        ret = yield self.user_wx_user_ds.get_wxuser({
+        ret = yield self.user_wx_user_ds.get_wxuser(conds={
             "wechat_id": wechat_id,
             "unionid":   unionid
         }, fields=fields)
@@ -110,7 +110,7 @@ class UserPageService(PageService):
     @gen.coroutine
     def get_wxuser_id(self, wxuser_id):
         """根据 id 获取 wxuser """
-        ret = yield self.user_wx_user_ds.get_wxuser({
+        ret = yield self.user_wx_user_ds.get_wxuser(conds={
             "id": wxuser_id
         })
         raise gen.Return(ret)
@@ -300,7 +300,7 @@ class UserPageService(PageService):
         hb_config_ids = [e.id for e in hb_config_list]
 
         hb_items_sum = yield self.hr_hb_items_ds.get_hb_items_amount_sum(
-            conds={ "wxuser_id": qx_wxuserid },
+            conds={"wxuser_id": qx_wxuserid},
             fields=['amount'],
             appends=[" and hb_config_id in %s" % str_tool.set_literl(hb_config_ids)]
         )
