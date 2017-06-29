@@ -7,6 +7,7 @@ import tornado.gen as gen
 import conf.common as const
 from util.tool.json_tool import json_dumps
 from util.wechat.core import messager
+from util.tool.dict_tool import ObjectDict
 
 
 def _make_json_data(first, remark=None, colors=None, encode=True, **kwargs):
@@ -262,6 +263,12 @@ def favposition_notice_to_applier_tpl(company_id, title, company_name, city,
     validators = 'mtp.scripts.consumer.validators.user_basic_info_not_complete'
     type = 0
 
+    validators_params_dict = ObjectDict()
+    validators_params_dict.user_id = user_id,
+    validators_params_dict.company_id = company_id
+    validators_params_dict.url = url
+    validators_params = json_dumps(validators_params_dict)
+
     data = _make_json_data(
         first="您好，我们对您的职业经历十分感兴趣，希望能更了解您",
         remark="点击完善个人职业信息",
@@ -270,10 +277,17 @@ def favposition_notice_to_applier_tpl(company_id, title, company_name, city,
         keyword2=company_name,
         keyword3=city)
 
-    ret = yield messager.send_template_infra(delay, validators,
-                                             sys_template_id, user_id,
-                                             type, company_id, url, data,
-                                             enable_qx_retry=1)
+    ret = yield messager.send_template_infra(
+        delay=delay,
+        validators=validators,
+        validators_params=validators_params,
+        sys_template_id=sys_template_id,
+        user_id=user_id,
+        type=type,
+        company_id=company_id,
+        url=url,
+        data=data,
+        enable_qx_retry=1)
 
     raise gen.Return(ret)
 
@@ -288,6 +302,12 @@ def position_share_notice_employee_tpl(company_id, title, salary, user_id, pid,
     # 延迟消息队列消费者
     validators = 'mtp.scripts.consumer.validators.send_viewed_template_to_employee'
     type = 0
+    validators_params_dict = ObjectDict()
+    validators_params_dict.user_id = user_id,
+    validators_params_dict.company_id = company_id
+    validators_params_dict.url = url
+    validators_params_dict.pid = pid
+    validators_params = json_dumps(validators_params_dict)
 
     # 十分钟后的时间
     d = datetime.now() + timedelta(minutes=10)
@@ -298,14 +318,20 @@ def position_share_notice_employee_tpl(company_id, title, salary, user_id, pid,
         keyword1="没有人浏览该职位",
         keyword2=title,
         keyword3=salary,
-        keyword4="{}年{}月{}日{:0>2}:{:0>2} ".format(d.year, d.month, d.day,
-                                                  d.hour, d.minute),
-        keyword5=pid  # 作为附加字段，业务逻辑需要，微信消息模板不需要
+        keyword4="{}年{}月{}日{:0>2}:{:0>2} ".format(
+            d.year, d.month, d.day, d.hour, d.minute),
     )
 
-    ret = yield messager.send_template_infra(delay, validators,
-                                             sys_template_id, user_id,
-                                             type, company_id, url, data,
-                                             enable_qx_retry=1)
+    ret = yield messager.send_template_infra(
+        delay=delay,
+        validators=validators,
+        validators_params=validators_params,
+        sys_template_id=sys_template_id,
+        user_id=user_id,
+        type=type,
+        company_id=company_id,
+        url=url,
+        data=data,
+        enable_qx_retry=1)
 
     raise gen.Return(ret)
