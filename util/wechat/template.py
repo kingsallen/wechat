@@ -253,7 +253,7 @@ def favposition_notice_to_hr_tpl(wechat_id, openid, title, candidate_name,
 
 
 @gen.coroutine
-def favposition_notice_to_applier_tpl(company_id, title, company_name, city,
+def favposition_notice_to_applier_tpl(company_id, position_info, company_name,
     user_id, url, sys_template_id=const.TEMPLATES.FAVPOSITION):
     """用户感兴趣某职位后，向用户发送消息模板"""
 
@@ -267,15 +267,16 @@ def favposition_notice_to_applier_tpl(company_id, title, company_name, city,
     validators_params_dict.user_id = user_id,
     validators_params_dict.company_id = company_id
     validators_params_dict.url = url
+    validators_params_dict.pid = position_info.id
     validators_params = json_dumps(validators_params_dict)
 
     data = _make_json_data(
         first="您好，我们对您的职业经历十分感兴趣，希望能更了解您",
         remark="点击完善个人职业信息",
         encode=False,
-        keyword1=title,
+        keyword1=position_info.title,
         keyword2=company_name,
-        keyword3=city)
+        keyword3=position_info.city)
 
     ret = yield messager.send_template_infra(
         delay=delay,
