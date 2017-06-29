@@ -37,6 +37,7 @@ import handler.help.passport
 import handler.help.releasedposition
 
 import handler.platform.companyrelation
+import handler.platform.groupcompany
 import handler.platform.customize
 import handler.platform.employee
 import handler.platform.landing
@@ -111,7 +112,7 @@ platform_routes = [
     (r"/position",                                   handler.platform.position.PositionListHandler,             {"event": "position_list"}),
     (r"/start",                                      handler.platform.landing.LandingHandler,                   {"event": "start_landing"}),
     (r"/company/(\d+)",                              handler.platform.companyrelation.CompanyInfoRedirectHandler, {"event": "company_old_info"}, "old_company_info_page"),
-    (r"/company",                                    handler.platform.companyrelation.CompanyHandler,           {"event": "company_info"},     "new_company_info_page"),
+    (r"/company",                                    handler.platform.companyrelation.CompanyHandler,           {"event": "company_info"},       "new_company_info_page"),
     (r"/company/team/(\d+)",                         handler.platform.team.TeamDetailHandler,                   {"event": "team_detail"}),
     (r"/company/team",                               handler.platform.team.TeamIndexHandler,                    {"event": "team_info"}),
     (r"/employee/bindemail[\/]?",                    handler.platform.employee.EmployeeBindEmailHandler,        {"event": "employee_bindemail"}),
@@ -121,10 +122,10 @@ platform_routes = [
     (r"/employee/recom[\/]?",                        handler.platform.recom.RecomCandidateHandler,              {"event": "recom_normal"}),
     # 各大公司的自定义配置
     (r"/custom/emailapply[\/]?",                     handler.platform.customize.CustomizeEmailApplyHandler,     {"event": "customize_emailapply"}),
-
     (r"/api/company/visitreq[\/]?",                  handler.platform.companyrelation.CompanyVisitReqHandler,   {"event": "company_visitreq"}),
     (r"/api/company/survey[\/]?",                    handler.platform.companyrelation.CompanySurveyHandler,     {"event": "company_survey"}),
     (r"/api/company/follow[\/]?",                    handler.platform.companyrelation.CompanyFollowHandler,     {"event": "company_follow"}),
+    (r"/api/groupcompany/check[\/?]",                handler.platform.groupcompany.GroupCompanyCheckHandler,    {"event": "groupcompany_check"}),
     (r"/api/employee/bind[\/]?",                     handler.platform.employee.EmployeeBindHandler,             {"event": "employee_bind"}),
     (r"/api/employee/unbind[\/]?",                   handler.platform.employee.EmployeeUnbindHandler,           {"event": "employee_unbind"}),
     (r"/api/employee/recommendrecords[\/]?",         handler.platform.employee.RecommendRecordsHandler,         {"event": "employee_recommendrecords"}),

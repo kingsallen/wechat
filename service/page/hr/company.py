@@ -276,3 +276,24 @@ class CompanyPageService(PageService):
         yield self.hr_company_ds.update_company(conds, fields)
 
         return True
+
+    @gen.coroutine
+    def belongs_to_group_company(self, company_id):
+        """https://git.moseeker.com/hr/hr354docs/blob/master/alphadog.md"""
+        # todo
+        return True
+
+    @gen.coroutine
+    def get_group_company_list(self, company_id):
+        """https://git.moseeker.com/hr/hr354docs/blob/master/alphadog.md"""
+        # todo
+
+        mock_result = []
+        from util.tool.str_tool import generate_nonce_str
+        for i in range(5):
+            r = ObjectDict(id=i, name="name%s" % i,
+                           abbreviation="abbreviation%s" % i,
+                           signature='signature%s' % generate_nonce_str(upper=1))
+            mock_result.append(r)
+
+        return mock_result
