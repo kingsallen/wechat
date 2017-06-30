@@ -264,7 +264,7 @@ def favposition_notice_to_applier_tpl(company_id, position_info, company_name,
     type = 0
 
     validators_params_dict = ObjectDict()
-    validators_params_dict.user_id = user_id,
+    validators_params_dict.user_id = user_id
     validators_params_dict.company_id = company_id
     validators_params_dict.url = url
     validators_params_dict.pid = position_info.id
@@ -304,7 +304,7 @@ def position_share_notice_employee_tpl(company_id, title, salary, user_id, pid,
     validators = 'mtp.scripts.consumer.validators.SendViewedTemplateToEmployeeValidator'
     type = 0
     validators_params_dict = ObjectDict()
-    validators_params_dict.user_id = user_id,
+    validators_params_dict.user_id = user_id
     validators_params_dict.company_id = company_id
     validators_params_dict.url = url
     validators_params_dict.pid = pid
