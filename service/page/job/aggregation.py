@@ -39,7 +39,7 @@ class AggregationPageService(PageService):
         raise gen.Return(banner)
 
     @gen.coroutine
-    def opt_es(self, salary_top, salary_bottom, salary_negotiable, keywords, city, industry, did, page_no):
+    def opt_es(self, salary_top, salary_bottom, salary_negotiable, keywords, city, industry, did, page_from=0, page_size=10):
         """
         拼接 ES 搜索职位
         :param salary_top:
@@ -49,13 +49,10 @@ class AggregationPageService(PageService):
         :param city:
         :param industry:
         :param did:
-        :param page_no:
+        :param page_from:
+        :param page_size:
         :return:
         """
-
-        # 查询范围 1-30页
-        if page_no < 0 or page_no > 30:
-            return ObjectDict(), 0
 
         # 处理 salley_top, salley_bottom
         salary_top = int(int(salary_top)/1000) if salary_top else None
@@ -76,16 +73,11 @@ class AggregationPageService(PageService):
             "did": did
         })
 
-        # 由于需要按人工设置的 weight进行排序，es 不支持先按关键词搜索，再按 weight 排序
-        # 因此由 python 实现排序，并分页
-        # TODO 泽腾正在研究 ES 排序，待成熟可用后，替换成 ES 排序 by 煜昕 2017.6.1
-        self.logger.debug("opt_es:{}".format(params))
-        es_res = yield self.es_ds.get_es_positions(params, 0, 300)
-        es_result = list()
-        # 搜索结果总数
+        self.logger.debug("opt_es: {}".format(params))
+
+        es_res = yield self.es_ds.get_es_positions(params, page_from, page_size)
+        es_result = es_res.hits.hits
         total = es_res.get("hits", {}).get("total", 0)
-        if es_res.hits.hits:
-            es_result = sorted(es_res.hits.hits, key=lambda x:x.get("_source").get("weight"), reverse = True)
 
         return es_result, total
 
@@ -102,11 +94,10 @@ class AggregationPageService(PageService):
 
     @gen.coroutine
     def opt_agg_positions(self, es_res, page_no, page_size, user_id, city):
-
         """
         处理搜索职位结果
         :param es_res:
-        :param page_from:
+        :param page_no:
         :param page_size:
         :param user_id:
         :param city: 如果用户在搜索条件里面输入了选择的城市，那么不管该职位实际在哪些城市发布，在显示在列表页的时候，只显示用户选择的地址
