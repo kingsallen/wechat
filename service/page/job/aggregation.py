@@ -1,19 +1,17 @@
 # coding=utf-8
 
-# @Time    : 4/18/17 11:57
-# @Author  : panda (panyuxin@moseeker.com)
-# @File    : aggregation.py
-# @DES     : 聚合号列表页
-
 import random
 import ujson
+
 from tornado import gen
+
 import conf.common as const
 import conf.qx as qx_const
 from service.page.base import PageService
 from util.common import ObjectDict
 from util.tool.str_tool import split, gen_salary, gen_degree, gen_experience
 from util.tool.url_tool import make_static_url
+
 
 class AggregationPageService(PageService):
 
@@ -40,8 +38,7 @@ class AggregationPageService(PageService):
 
     @gen.coroutine
     def opt_es(self, salary_top, salary_bottom, salary_negotiable, keywords, city, industry, did, page_from=0, page_size=10):
-        """
-        拼接 ES 搜索职位
+        """ 拼接 ES 搜索职位
         :param salary_top:
         :param salary_bottom:
         :param salary_negotiable:
@@ -83,10 +80,8 @@ class AggregationPageService(PageService):
 
     @gen.coroutine
     def opt_es_position(self, position_id):
-        """
-        搜索职位
+        """ 搜索职位
         :param position_id:
-        :return:
         """
 
         es_res = yield self.es_ds.get_es_position(position_id)
@@ -94,13 +89,11 @@ class AggregationPageService(PageService):
 
     @gen.coroutine
     def opt_agg_positions(self, es_res, user_id, city):
-        """
-        处理搜索职位结果
+        """ 处理搜索职位结果
         :param es_res: 
         :param user_id:
         :param city: 如果用户在搜索条件里面输入了选择的城市，
         那么不管该职位实际在哪些城市发布，在显示在列表页的时候，只显示用户选择的地址
-        :return:
         """
 
         city_list = split(city, [","]) if city else list()
@@ -150,10 +143,8 @@ class AggregationPageService(PageService):
 
     @gen.coroutine
     def opt_jd_home_img(self, item):
-        """
-        处理JD首页行业默认图
+        """ 处理JD首页行业默认图
         :param item:
-        :return:
         """
 
         industry_type = 0
@@ -178,11 +169,8 @@ class AggregationPageService(PageService):
 
     @gen.coroutine
     def opt_agg_company(self, es_res):
-
-        """
-        处理热招企业，包括企业信息，搜索结果中的城市合集，在招企业职位数
+        """ 处理热招企业，包括企业信息，搜索结果中的城市合集，在招企业职位数
         :param es_res:
-        :return:
         """
 
         results = ObjectDict()
@@ -246,13 +234,10 @@ class AggregationPageService(PageService):
         return hot_company[:9]
 
     def _gen_resources(self, jd_pic, company, newjd_status):
-
-        """
-        处理图片逻辑
+        """ 处理图片逻辑
         :param jd_pic:
         :param company_type:
         :param newjd_status: 是否新 JD，2：新 JD 其他非新 JD
-        :return:
         """
 
         pic_list = list()
