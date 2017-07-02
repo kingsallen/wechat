@@ -73,9 +73,9 @@ class AggregationPageService(PageService):
             "did": did
         })
 
-        self.logger.debug("opt_es: {}".format(params))
-
+        self.logger.debug("get_es_positions_params: %s" % params)
         es_res = yield self.es_ds.get_es_positions(params, page_from, page_size)
+
         es_result = es_res.hits.hits
         total = es_res.get("hits", {}).get("total", 0)
 
@@ -93,26 +93,21 @@ class AggregationPageService(PageService):
         return es_res
 
     @gen.coroutine
-    def opt_agg_positions(self, es_res, page_no, page_size, user_id, city):
+    def opt_agg_positions(self, es_res, user_id, city):
         """
         处理搜索职位结果
-        :param es_res:
-        :param page_no:
-        :param page_size:
+        :param es_res: 
         :param user_id:
-        :param city: 如果用户在搜索条件里面输入了选择的城市，那么不管该职位实际在哪些城市发布，在显示在列表页的时候，只显示用户选择的地址
+        :param city: 如果用户在搜索条件里面输入了选择的城市，
+        那么不管该职位实际在哪些城市发布，在显示在列表页的时候，只显示用户选择的地址
         :return:
         """
 
         city_list = split(city, [","]) if city else list()
 
-        page_from = (page_no - 1) * page_size
-        page_block = page_no * page_size
-
         hot_positons = list()
         pos_pids = list()
         if es_res:
-            es_res = es_res[page_from:page_block]
             for item in es_res:
                 team_img, job_img, company_img = yield self.opt_jd_home_img(item)
 
