@@ -260,7 +260,7 @@ def favposition_notice_to_applier_tpl(company_id, position_info, company_name,
     # 延迟2小时发送
     delay = 7200
     # 延迟消息队列消费者
-    validators = 'mtp.scripts.consumer.validators.UserBasicInfoNotCompleteValidator'
+    validators = 'UserBasicInfoNotCompleteValidator'
     type = 0
 
     validators_params_dict = ObjectDict()
@@ -301,7 +301,7 @@ def position_share_notice_employee_tpl(company_id, title, salary, user_id, pid,
     # 延迟10分钟发送
     delay = 600
     # 延迟消息队列消费者
-    validators = 'mtp.scripts.consumer.validators.SendViewedTemplateToEmployeeValidator'
+    validators = 'SendViewedTemplateToEmployeeValidator'
     type = 0
     validators_params_dict = ObjectDict()
     validators_params_dict.user_id = user_id
