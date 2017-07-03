@@ -28,3 +28,9 @@ struct Hrcompany {
    19: optional i32 source
 }
 
+struct CompanyForVerifyEmployee{
+    1: optional i32 id,                 //公司编号
+    2: optional string name,            //公司名称
+    3: optional string abbreviation,    //公司简称
+    4: optional string signature        //公司简称
+}
