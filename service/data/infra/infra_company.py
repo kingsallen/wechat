@@ -32,12 +32,8 @@ class InfraCompanyDataService(DataService):
         try:
             res = yield self.company_services_client.isGroupCompanies(int(company_id))
         except BIZException as e:
-            res = False
-            if e.code == 90010:
-                self.logger.debug("[infra belongs_to_group_company]: company_id: %s does not exist!" % company_id)
-            else: raise
-        except Exception:
-            raise
+            self.logger.debug("%s - %s" % (e.code, e.message))
+            return False
         else:
             return res
 
@@ -53,12 +49,8 @@ class InfraCompanyDataService(DataService):
         try:
             res = yield self.company_services_client.getGroupCompanies(int(company_id))
         except BIZException as e:
-            res = []
-            if e.code == 32010:
-                self.logger.debug( "[infra get_group_company_list]: company_id: %s does not belong to a group company!" % company_id)
-            else: raise
-        except Exception:
-            raise
+            self.logger.debug("%s - %s" % (e.code, e.message))
+            return []
         else:
             return list(self._thrift_companys_to_dict(res))
 

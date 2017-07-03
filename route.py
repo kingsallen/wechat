@@ -125,7 +125,7 @@ platform_routes = [
     (r"/api/company/visitreq[\/]?",                  handler.platform.companyrelation.CompanyVisitReqHandler,   {"event": "company_visitreq"}),
     (r"/api/company/survey[\/]?",                    handler.platform.companyrelation.CompanySurveyHandler,     {"event": "company_survey"}),
     (r"/api/company/follow[\/]?",                    handler.platform.companyrelation.CompanyFollowHandler,     {"event": "company_follow"}),
-    (r"/api/groupcompany/check[\/?]",                handler.platform.groupcompany.GroupCompanyCheckHandler,    {"event": "groupcompany_check"}),
+    (r"/api/groupcompany/check[\/]?",                handler.platform.groupcompany.GroupCompanyCheckHandler,    {"event": "groupcompany_check"}),
     (r"/api/employee/bind[\/]?",                     handler.platform.employee.EmployeeBindHandler,             {"event": "employee_bind"}),
     (r"/api/employee/unbind[\/]?",                   handler.platform.employee.EmployeeUnbindHandler,           {"event": "employee_unbind"}),
     (r"/api/employee/recommendrecords[\/]?",         handler.platform.employee.RecommendRecordsHandler,         {"event": "employee_recommendrecords"}),

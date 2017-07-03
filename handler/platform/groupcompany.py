@@ -20,12 +20,9 @@ class GroupCompanyCheckHandler(BaseHandler):
         company_id = self.current_user.company.id
 
         result = ObjectDict()
-        result.belongs_to_group = yield \
-            self.company_ps.belongs_to_group_company(company_id)
+        result.belongs_to_group = yield self.company_ps.belongs_to_group_company(company_id)
 
         if need_list and result.belongs_to_group:
-            result.company_list = \
-                yield self.company_ps.get_group_company_list(company_id)
+            result.company_list = yield self.company_ps.get_group_company_list(company_id)
 
         self.send_json_success(data=result)
-
