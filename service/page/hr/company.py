@@ -285,4 +285,5 @@ class CompanyPageService(PageService):
     @gen.coroutine
     def get_group_company_list(self, company_id) -> list:
         res = yield self.infra_company_ds.get_group_company_list(company_id)
+
         return res

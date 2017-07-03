@@ -28,7 +28,6 @@ class InfraCompanyDataService(DataService):
 
     @gen.coroutine
     def belongs_to_group_company(self, company_id) -> bool:
-        res = False
         try:
             res = yield self.company_services_client.isGroupCompanies(int(company_id))
         except BIZException as e:
@@ -39,18 +38,23 @@ class InfraCompanyDataService(DataService):
 
     @staticmethod
     def _thrift_companys_to_dict(thrift_companys):
+        """将基础服务返回的对象转换成 ObjecitDict，
+        会过滤掉没有 signature 的元素
+        （这种情况在数据正常的时候很难发生，但是为了预防 bug，先下手为强）
+        """
         for c in thrift_companys:
-            dc = ObjectDict(name=c.name, id=c.id, abbreviation=c.abbreviation, signature=c.signature)
-            yield dc
+            if c.signature:
+                yield ObjectDict(id=c.id, name=c.name,
+                                 abbreviation=c.abbreviation,
+                                 signature=c.signature)
 
     @gen.coroutine
     def get_group_company_list(self, company_id) -> list:
-        res = []
         try:
-            res = yield self.company_services_client.getGroupCompanies(int(company_id))
+            res = yield self.company_services_client.getGroupCompanies(
+                int(company_id))
         except BIZException as e:
             self.logger.debug("%s - %s" % (e.code, e.message))
             return []
         else:
             return list(self._thrift_companys_to_dict(res))
-
