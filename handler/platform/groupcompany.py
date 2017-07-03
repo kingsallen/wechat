@@ -22,7 +22,8 @@ class GroupCompanyCheckHandler(BaseHandler):
         result = ObjectDict()
         result.belongs_to_group = yield \
             self.company_ps.belongs_to_group_company(company_id)
-        if need_list:
+
+        if need_list and result.belongs_to_group:
             result.company_list = \
                 yield self.company_ps.get_group_company_list(company_id)
 
