@@ -69,12 +69,12 @@ class UserCurrentInfoHandler(BaseHandler):
                             wechat_signature=self.current_user.wechat.signature)
 
             if not has_info:
-                yield favposition_notice_to_applier_tpl(self.current_user.wechat.company_id,
-                                             position_info.title,
-                                             company_info.name,
-                                             position_info.city,
-                                             self.current_user.sysuser.id,
-                                             link)
+                yield favposition_notice_to_applier_tpl(
+                    self.current_user.wechat.company_id,
+                    position_info,
+                    company_info.name,
+                    self.current_user.sysuser.id,
+                    link)
 
             # 3.添加候选人相关记录
             yield self.candidate_ps.send_candidate_interested(self.current_user.sysuser.id, self.params.pid, 1)

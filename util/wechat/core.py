@@ -90,7 +90,7 @@ class WechatTemplateMessager(object):
             raise gen.Return(const.NO)
 
     @gen.coroutine
-    def send_template_infra(self, delay, validators, sys_template_id, user_id,
+    def send_template_infra(self, delay, validators, validators_params, sys_template_id, user_id,
                             type, company_id, url, data, enable_qx_retry=0):
         """
         通过基础服务，发送消息模板到用户
@@ -100,6 +100,7 @@ class WechatTemplateMessager(object):
 
         :param delay: int，必填，延迟时间，单位秒
         :param validators: string，非必填，处理前的校验器, 用;分开多个, 每个校验器均返回 true 才能继续处理, 否则放弃处理
+        :param validators_params: validators 需要的参数，一个 json 字符串。 validator 会对其进行解析后获取这个对象
         :param sys_template_id: int，必填，需要发送的消息模板ID，config_sys_template_message_library.id
         :param user_id: string, 必填，user_user.id
         :param type: int，非必填，用户类型，默认（包括不传递任何值）为C端用户。0 或 不传递表示C端帐号，1表示B端帐号。如果type=1是，company_id和enable_qx_retry将无效
@@ -111,15 +112,16 @@ class WechatTemplateMessager(object):
         """
 
         jdata = ObjectDict(
-            delay = delay,
-            validators = validators,
-            sys_template_id = sys_template_id,
-            user_id = user_id,
-            type = type,
-            company_id = company_id,
-            url = url,
-            data = data,
-            enable_qx_retry = enable_qx_retry
+            delay=delay,
+            validators=validators,
+            validators_params=validators_params,
+            sys_template_id=sys_template_id,
+            user_id=user_id,
+            type=type,
+            company_id=company_id,
+            url=url,
+            data=data,
+            enable_qx_retry=enable_qx_retry
         )
 
         res = yield http_post(path.MESSAGE_TEMPLATE, jdata)
