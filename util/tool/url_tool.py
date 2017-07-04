@@ -45,10 +45,14 @@ def make_url(path, params=None, host="", protocol="https", escape=None,
     def valid(k, v):
         return v and isinstance(k, str) and isinstance(v, str) and not k.startswith("_")
 
-    query = [(k, v) for k, v in pairs.items() if valid(k, v)]
+    def query_params_generator(pairs):
+        for k, v in pairs.items():
+            if valid(k, v):
+                yield (k, v)
 
-    ret = (((protocol + "://" + host) if host else "") + path + "?" +
-           quote_plus(urlencode(query)))
+    query = list(query_params_generator(pairs))
+
+    ret = (((protocol + "://" + host) if host else "") + path + "?" + urlencode(query))
 
     return ret[:-1] if ret[-1] == '?' else ret
 
@@ -125,4 +129,3 @@ def is_urlquoted(input):
     requoted = quote_plus(unquoted)
 
     return unquoted != input and input == requoted
-

@@ -1,7 +1,7 @@
 # coding=utf-8
 
 import unittest
-from util.tool.url_tool import make_url, url_subtract_query
+from util.tool.url_tool import make_url, url_subtract_query, is_urlquoted
 from urllib.parse import urlparse, parse_qs
 
 
@@ -58,3 +58,12 @@ class TestUrlSubstractQuery(unittest.TestCase):
         parsed_qs = parse_qs(urlparse(out).query)
         self.assertNotIn('code1', parsed_qs)
         self.assertNotIn('status2', parsed_qs)
+
+
+class TestUrlQuote(unittest.TestCase):
+
+    def test_check_quote(self):
+        self.assertTrue(is_urlquoted('%2FEl+Ni%C3%B1o%2F'))
+        self.assertFalse(is_urlquoted('/El Niño/'))
+        with self.assertRaises(ValueError):
+            is_urlquoted(123)
