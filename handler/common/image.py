@@ -1,5 +1,6 @@
 # coding=utf-8
 
+import urllib.parse
 
 from tornado import gen, httpclient
 
@@ -19,6 +20,8 @@ class ImageFetchHandler(BaseHandler):
         if not url:
             self.write_error(http_code=404)
             return
+
+        url = urllib.parse.unquote_plus(url)
 
         headers = {"Referer": ""}
         data = yield httpclient.AsyncHTTPClient().fetch(url, headers=headers)
