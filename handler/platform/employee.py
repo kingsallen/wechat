@@ -194,7 +194,7 @@ class EmployeeBindEmailHandler(BaseHandler):
             activation_code)
 
         tparams = dict(
-            qrcode_url=path.HR_WX_IMAGE_URL + self.static_url(self.current_user.wechat.qrcode),
+            qrcode_url=self.make_url(path.IMAGE_URL, self.params, url=self.static_url(self.current_user.wechat.qrcode)),
             wechat_name=self.current_user.wechat.name
         )
         tname = 'success' if result else 'failure'

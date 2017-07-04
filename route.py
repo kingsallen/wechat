@@ -32,6 +32,7 @@ import handler.common.usercenter
 import handler.common.dictionary
 import handler.common.logcollector
 import handler.common.captcha
+import handler.common.image
 
 import handler.help.passport
 import handler.help.releasedposition
@@ -75,6 +76,7 @@ common_routes = [
     (r"/profile/view/([A-Z0-9a-z_\-]+)*",            handler.common.profile.ProfileViewHandler,                 {"event": "profile_view"}),
     (r"/profile/preview[\/]?",                       handler.common.profile.ProfilePreviewHandler,              {"event": "profile_preview"}),
     (r"/profile/custom[\/]?",                        handler.common.profile.ProfileCustomHandler,               {"event": "profile_customcv"}),
+    (r"/image[\/]?",                                 handler.common.image.ImageFetchHandler,                    {"event": "image_fetch"}),
 
     # websocket
     (r"/websocket/([A-Za-z0-9_]{1,32})",             handler.common.im.ChatWebSocketHandler),

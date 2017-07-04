@@ -46,6 +46,8 @@ PROFILE_PREVIEW = '/profile/preview'
 PROFILE_VISITOR_VIEW = '/profile/view/{}'
 PROFILE_NEW = '/app/profile/new'
 
+IMAGE_URL = '/image'
+
 # ============================ 微信端Path结束 ============================
 
 
@@ -113,6 +115,5 @@ MESSAGE_TEMPLATE = "message/template"
 # ============================ 基础服务结束 ============================
 
 # 其他外部服务
-HR_WX_IMAGE_URL = "https://www.moseeker.com/common/image?url="
 LINKEDIN_ACCESSTOKEN = "https://www.linkedin.com/uas/oauth2/accessToken"
 LINKEDIN_AUTH = "/uas/oauth2/authorization"
