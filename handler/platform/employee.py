@@ -198,7 +198,7 @@ class EmployeeBindEmailHandler(BaseHandler):
             qrcode_url=self.make_url(
                 path.IMAGE_URL,
                 self.params,
-                url=urllib.parse.quote_plus(self.static_url(self.current_user.wechat.qrcode))),
+                url=self.static_url(self.current_user.wechat.qrcode)),
             wechat_name=self.current_user.wechat.name
         )
         tname = 'success' if result else 'failure'
