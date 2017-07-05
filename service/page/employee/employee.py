@@ -50,8 +50,8 @@ class EmployeePageService(PageService):
             user_id, company_id)
         return employee_response.bindStatus, employee_response.employee
 
-
-    def convert_bind_status_from_thrift_to_fe(self, thrift_bind_status):
+    @staticmethod
+    def convert_bind_status_from_thrift_to_fe(thrift_bind_status):
         """convert bind status value to FE format"""
         fe_bind_status = fe.FE_EMPLOYEE_BIND_STATUS_DEFAULT_INVALID
 

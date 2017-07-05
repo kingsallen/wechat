@@ -193,3 +193,14 @@ class InfraUserDataService(DataService):
 
         ret = yield http_post(path.INFRA_USER_SETTINGS,params)
         return ret
+
+    @gen.coroutine
+    def is_valid_employee(self, user_id, company_id):
+        params = {
+            "user_id": int(user_id),
+            "company_id": int(company_id)
+        }
+
+        ret = yield http_get(path.INFRA_USER_EMPLOYEE_CHECK, params)
+
+        return ret.result or False

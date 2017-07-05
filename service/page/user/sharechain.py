@@ -123,14 +123,8 @@ class SharechainPageService(PageService):
         })
         company_id = position.company_id
 
-        employee = yield self.user_employee_ds.get_employee({
-            "sysuser_id": user_id,
-            "company_id": company_id,
-            "activation": const.OLD_YES,
-            "disable": const.OLD_YES,
-            "status": const.OLD_YES
-        })
-        raise gen.Return(bool(employee))
+        is_valid_employee = yield self.infra_user_ds.is_valid_employee(user_id, company_id)
+        return is_valid_employee
 
     @gen.coroutine
     def _no_existed_record(self, share_record):
