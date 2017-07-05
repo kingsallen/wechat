@@ -60,7 +60,7 @@ class WechatOauthHandler(MetaBaseHandler):
         openid = self.msg.get('FromUserName', '')
         wxuser = yield self.user_ps.get_wxuser_openid_wechat_id(openid, self.wechat.id)
         # 可以拿到用户信息的话，该用户一定关注了公众号
-        if not wxuser.is_subscribe:
+        if wxuser and not wxuser.is_subscribe:
             yield self.user_ps.set_wxuser_is_subscribe(wxuser)
 
         from service.data.user.user_wx_user import UserWxUserDataService
@@ -69,7 +69,7 @@ class WechatOauthHandler(MetaBaseHandler):
         if not wxuser:
             wechat_userinfo = yield wechat_core.get_wxuser(self.wechat.access_token, openid)
 
-            wxuser_id = yield self.user_wx_user_ds.create_wxuser({
+            inserted_id = yield self.user_wx_user_ds.create_wxuser({
                 "is_subscribe":    const.WX_USER_SUBSCRIBED,
                 "openid":          openid,
                 "nickname":        wechat_userinfo.nickname or "",
@@ -87,7 +87,9 @@ class WechatOauthHandler(MetaBaseHandler):
             })
 
             # 插入之后重新获取一次插入的 wxuser
-            wxuser = yield self.user_wx_user_ds.get_wxuser({"id":wxuser_id})
+            if inserted_id:
+                wxuser = yield self.user_wx_user_ds.get_wxuser(conds=
+                    {"id": inserted_id})
 
         user.wechat = self.wechat
         user.wxuser = wxuser
@@ -107,15 +109,12 @@ class WechatOauthHandler(MetaBaseHandler):
 
     @gen.coroutine
     def _post(self):
-
         try:
             msg_type = self.msg['MsgType']
             if self.verification():
                 yield getattr(self, 'post_' + msg_type)()
             else:
-                self.logger.error(
-                    "[wechat_oauth]verification failed:{}".format(
-                        self.msg))
+                self.logger.error("[wechat_oauth]verification failed:{}".format(self.msg))
         except Exception as e:
             self.send_xml()
             self.logger.error(traceback.format_exc())
@@ -323,9 +322,7 @@ class WechatThirdOauthHandler(WechatOauthHandler):
             self.send_xml()
 
     def get_msg(self):
-
         self.logger.debug("oauth request body: {}".format(self.request.body))
-
         try:
             decrypt = WXBizMsgCrypt(
                 self.component_token,
@@ -335,7 +332,7 @@ class WechatThirdOauthHandler(WechatOauthHandler):
                                                  self.params.msg_signature,
                                                  self.params.timestamp,
                                                  self.params.nonce)
-        except Exception as e:
+        except Exception:
             self.logger.error(traceback.format_exc())
-
-        return parse_msg(decryp_xml)
+        else:
+            return parse_msg(decryp_xml)

@@ -7,7 +7,7 @@
 
 
 from urllib.parse import (
-    urlparse, parse_qs, urlencode, parse_qsl, urlunparse, urljoin)
+    urlparse, parse_qs, urlencode, parse_qsl, urlunparse, urljoin, unquote_plus, quote_plus)
 from setting import settings
 
 # 默认 query 黑名单：m, state, code, _xsrf , appid, tjtoken不传递
@@ -45,10 +45,14 @@ def make_url(path, params=None, host="", protocol="https", escape=None,
     def valid(k, v):
         return v and isinstance(k, str) and isinstance(v, str) and not k.startswith("_")
 
-    query = [(k, v) for k, v in pairs.items() if valid(k, v)]
+    def query_params_generator(pairs):
+        for k, v in pairs.items():
+            if valid(k, v):
+                yield (k, v)
 
-    ret = (((protocol + "://" + host) if host else "") + path + "?" +
-           urlencode(query))
+    query = list(query_params_generator(pairs))
+
+    ret = (((protocol + "://" + host) if host else "") + path + "?" + urlencode(query))
 
     return ret[:-1] if ret[-1] == '?' else ret
 
@@ -114,9 +118,14 @@ def make_static_url(path, protocol='https'):
         path = protocol + ":" + path
     return path
 
-if __name__ == "__main__":
 
-    url = "https://platform2.dqprism.com/position?wechat_signature=YzVmNzU2NWU4MmZkZDEzZTRkYzAwNTlkYzFjMGRmN2MxYWE2ZDZkMg=="
+def is_urlquoted(input):
+    """ 工具方法，判断是否被 urlquote 了
+    """
+    if not isinstance(input, str):
+        raise ValueError
 
-    a = url_subtract_query(url, ['code', 'state'])
-    print(a)
+    unquoted = unquote_plus(input)
+    requoted = quote_plus(unquoted)
+
+    return unquoted != input and input == requoted

@@ -50,16 +50,12 @@ class AggregationHandler(BaseHandler):
         page_no = self.params.page_no or 1
         page_size = self.params.page_size or 10
 
-        es_res, total = yield self.aggregation_ps.opt_es(salary_top,
-                                                  salary_bottom,
-                                                  salary_negotiable,
-                                                  keywords,
-                                                  city,
-                                                  industry,
-                                                  did,
-                                                  int(page_no))
+        es_res, total = yield self.aggregation_ps.opt_es(
+            salary_top, salary_bottom, salary_negotiable, keywords, city,
+            industry, did, page_from=int(page_no), page_size=int(page_size))
 
-        positions = yield self.aggregation_ps.opt_agg_positions(es_res, int(page_no), int(page_size), self.current_user.sysuser.id, city)
+        positions = yield self.aggregation_ps.opt_agg_positions(
+            es_res, self.current_user.sysuser.id, city)
 
         result = ObjectDict({
             "page_no": int(page_no),

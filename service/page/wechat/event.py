@@ -437,7 +437,7 @@ class EventPageService(PageService):
                 #     user_hr_account_cache.pub_wx_binding(scan_info.group(1), msg="-1")
 
                 # 更新 user_hr_account 和 user_wx_user 的关系成功后, 更新 user_hr_account 的缓存, HR招聘管理平台使用, 需同时更新 wxuser_id 和 wxuser
-                wxuser = yield self.user_wx_user_ds.get_wxuser({"id": wxuser_id})
+                wxuser = yield self.user_wx_user_ds.get_wxuser(conds={"id": wxuser_id})
 
                 user_hr_account_cache.update_user_hr_account_session(
                     hr_id=hr_account_id,
@@ -470,7 +470,7 @@ class EventPageService(PageService):
                 int_scene_id = re.match(r"qrscene_(\d+)", msg.EventKey)
 
         # 取最新的微信用户信息
-        wxuser = yield self.user_wx_user_ds.get_wxuser({
+        wxuser = yield self.user_wx_user_ds.get_wxuser(conds={
             "openid": msg.FromUserName,
             "wechat_id": wechat.id
         })
