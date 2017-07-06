@@ -514,25 +514,26 @@ class UserPageService(PageService):
             "berecom_user_id":   berecom_user_id
         }
 
-        yield self.user_employee_points_record_ds.create_user_employee_points_record(
-            fields=fields
-        )
+        send_record_inserted_id = yield self.user_employee_points_record_ds.create_user_employee_points_record(fields=fields)
 
-        # 修改 user_employee.award
+        # 更新 user_employee.award
         yield self.user_employee_ds.update_employee(
             conds={'id': employee_id},
             fields={'award': int(employee.award + award_points)}
         )
+
+        # 插入积分公司关系表
+        if send_record_inserted_id:
+            fields = {
+                "company_id":                company_id,
+                "employee_points_record_id": send_record_inserted_id
+            }
+            yield self.user_employee_points_record_company_rel_ds.create_user_employee_points_record_company_rel(fields=fields)
         return
 
     @gen.coroutine
     def add_user_viewed_position(self, user_id, position_id):
-        """
-        添加用户已阅读职位，Gamma 使用
-        :param user_id:
-        :param position_id:
-        :return:
-        """
+        """ 添加用户已阅读职位，Gamma 使用 """
 
         if not user_id or not position_id:
             return False

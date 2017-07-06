@@ -41,7 +41,7 @@ class UserEmployeePointsRecordCompanyRelDataService(DataService):
         raise gen.Return(response)
 
     @gen.coroutine
-    def create_user_employee_points_record(self, fields, options=None):
+    def create_user_employee_points_record_company_rel(self, fields, options=None):
         options = options or []
         response = yield self.user_employee_points_record_company_rel_dao.insert_record(fields, options)
         raise gen.Return(response)
