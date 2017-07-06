@@ -10,7 +10,7 @@ from util.common import ObjectDict
 class HrHbConfigDataService(DataService):
 
     @gen.coroutine
-    def get_hr_hb_config(self, conds, fields=None):
+    def get_hr_hb_config(self, conds, fields=None, appends=None):
 
         fields = fields or []
 
@@ -22,7 +22,7 @@ class HrHbConfigDataService(DataService):
             fields = list(self.hr_hb_config_dao.fields_map.keys())
 
         response = yield self.hr_hb_config_dao.get_record_by_conds(
-            conds, fields)
+            conds, fields, appends)
 
         raise gen.Return(response)
 
