@@ -6,6 +6,7 @@ from service.data.base import DataService
 import conf.path as path
 from util.common import ObjectDict
 from util.tool.http_tool import http_get, http_post, http_put
+from util.common.decorator import cache
 
 
 class InfraUserDataService(DataService):
@@ -197,8 +198,8 @@ class InfraUserDataService(DataService):
     @gen.coroutine
     def is_valid_employee(self, user_id, company_id):
         params = {
-            "user_id": int(user_id),
-            "company_id": int(company_id)
+            "userId": int(user_id),
+            "companyId": int(company_id)
         }
 
         ret = yield http_get(path.INFRA_USER_EMPLOYEE_CHECK, params)

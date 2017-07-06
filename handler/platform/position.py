@@ -511,10 +511,7 @@ class PositionHandler(BaseHandler):
         yield self.sharechain_ps.create_share_record(params)
 
     @gen.coroutine
-    def _refresh_share_chain(self,
-                             presentee_user_id,
-                             position_id,
-                             last_psc=None):
+    def _refresh_share_chain(self, presentee_user_id, position_id, last_psc=None):
         """刷新链路的原子操作"""
         inserted_share_chain_id = yield self.sharechain_ps.refresh_share_chain(
             presentee_user_id=presentee_user_id,

@@ -13,9 +13,7 @@ class SharechainPageService(PageService):
         super().__init__()
 
     @gen.coroutine
-    def refresh_share_chain(self,
-                            presentee_user_id=None,
-                            position_id=None,
+    def refresh_share_chain(self, presentee_user_id=None, position_id=None,
                             share_chain_parent_id=None):
         """
         对给定的 presentee_user_id 和 position_id 做链路原数据的入库操作
@@ -191,8 +189,7 @@ class SharechainPageService(PageService):
         if not no_existed_record:
             return ret
 
-        self.logger.debug(
-            "[SC]last_share_record: %s" % last_share_record)
+        self.logger.debug("[SC]last_share_record: %s" % last_share_record)
 
         position_id = last_share_record.position_id
 

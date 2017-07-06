@@ -263,13 +263,18 @@ class UserPageService(PageService):
 
     @gen.coroutine
     def get_valid_employee_by_user_id(self, user_id, company_id):
-        ret = yield self.user_employee_ds.get_employee({
-            "sysuser_id": user_id,
-            "disable":    const.OLD_YES,
-            "activation": const.OLD_YES,
-            "company_id": company_id
-        })
-        raise gen.Return(ret)
+        check_group_passed = yield self.infra_user_ds.is_valid_employee(user_id, company_id)
+        if not check_group_passed:
+            return ObjectDict()
+
+        else:
+            ret = yield self.user_employee_ds.get_employee(
+                conds={
+                    "sysuser_id": user_id,
+                    "disable":    const.OLD_YES,
+                    "activation": const.OLD_YES
+                })
+            return ret
 
     @gen.coroutine
     def get_employee_total_points(self, employee_id):
