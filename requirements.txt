@@ -36,6 +36,7 @@ qiniu==7.1.4
 redis==2.10.5
 requests==2.17.3
 retrying==1.3.3
+schematics==2.0.1
 simplegeneric==0.8.1
 six==1.10.0
 thrift==0.10.0
