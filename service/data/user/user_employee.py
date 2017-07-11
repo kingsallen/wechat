@@ -20,7 +20,8 @@ class UserEmployeeDataService(DataService):
         if not fields:
             fields = list(self.user_employee_dao.fields_map.keys())
 
-        response = yield self.user_employee_dao.get_record_by_conds(conds, fields, appends)
+        response = yield self.user_employee_dao.get_record_by_conds(
+            conds=conds, fields=fields, appends=appends)
         raise gen.Return(response)
 
     @gen.coroutine
@@ -36,4 +37,3 @@ class UserEmployeeDataService(DataService):
             fields=fields)
 
         raise gen.Return(ret)
-

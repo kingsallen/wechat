@@ -22,7 +22,7 @@ class HrHbConfigDataService(DataService):
             fields = list(self.hr_hb_config_dao.fields_map.keys())
 
         response = yield self.hr_hb_config_dao.get_record_by_conds(
-            conds, fields, appends)
+            conds=conds, fields=fields, appends=appends)
 
         raise gen.Return(response)
 
