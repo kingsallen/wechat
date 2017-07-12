@@ -57,13 +57,30 @@ class TeamDetailHandler(BaseHandler):
     @check_sub_company
     @gen.coroutine
     def get(self, team_id):
+
+        # 校验 pid
+        pid = self.params.pid
+        if not pid.isdigit() or not pid:
+            self.write_error(404)
+            raise gen.Return()
+
         current_company = self.params.pop('sub_company') if \
             self.params.sub_company else self.current_user.company
 
         team = yield self.team_ps.get_team_by_id(team_id)
+
+        # 如果查不到 Team 或者
+        # 查到 team 但是该 Team 不属于当前公司，
+        # 跳转到 team 不存在页面
         if team.company_id != self.current_user.company.id:
-            self.write_error(404)
-            raise gen.Return()
+            teamname = self.current_user.company.conf_teamname_custom.\
+                teamname_custom
+            data = {
+                "pid": int(pid),
+                "teamName": teamname
+            }
+            self.render_page(template_name='company/team_404.html', data=data)
+            return
 
         data = yield self.team_ps.get_team_detail(
             self.current_user, current_company, team, self.params)
