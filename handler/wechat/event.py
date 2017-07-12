@@ -21,6 +21,7 @@ from util.wechat.msgcrypt import WXBizMsgCrypt, SHA1
 
 import conf.common as const
 
+
 class WechatOauthHandler(MetaBaseHandler):
 
     """开发者模式"""
@@ -51,48 +52,52 @@ class WechatOauthHandler(MetaBaseHandler):
         })
 
         self.wechat = wechat
+
         yield self._get_current_user()
 
     @gen.coroutine
     def _get_current_user(self):
         user = ObjectDict()
 
-        openid = self.msg.get('FromUserName', '')
-        wxuser = yield self.user_ps.get_wxuser_openid_wechat_id(openid, self.wechat.id)
-        # 可以拿到用户信息的话，该用户一定关注了公众号
-        if wxuser and not wxuser.is_subscribe:
-            yield self.user_ps.set_wxuser_is_subscribe(wxuser)
+        openid = self.msg.get('FromUserName')
 
-        from service.data.user.user_wx_user import UserWxUserDataService
-        self.user_wx_user_ds = UserWxUserDataService()
+        if openid:
+            wxuser = yield self.user_ps.get_wxuser_openid_wechat_id(openid, self.wechat.id)
+            # 可以拿到用户信息的话，该用户一定关注了公众号
+            if wxuser and not wxuser.is_subscribe:
+                yield self.user_ps.set_wxuser_is_subscribe(wxuser)
 
-        if not wxuser:
-            wechat_userinfo = yield wechat_core.get_wxuser(self.wechat.access_token, openid)
+            from service.data.user.user_wx_user import UserWxUserDataService
+            self.user_wx_user_ds = UserWxUserDataService()
 
-            inserted_id = yield self.user_wx_user_ds.create_wxuser({
-                "is_subscribe":    const.WX_USER_SUBSCRIBED,
-                "openid":          openid,
-                "nickname":        wechat_userinfo.nickname or "",
-                "sex":             wechat_userinfo.sex or 0,
-                "city":            wechat_userinfo.city or "",
-                "country":         wechat_userinfo.country or "",
-                "province":        wechat_userinfo.province or "",
-                "language":        wechat_userinfo.language or "",
-                "headimgurl":      wechat_userinfo.headimgurl or "",
-                "wechat_id":       self.wechat.id,
-                "unionid":         wechat_userinfo.unionid or "",
-                "subscribe_time":  curr_now(),
-                "unsubscibe_time": None,
-                "source":          const.WX_USER_SOURCE_IWANTYOU
-            })
+            if not wxuser:
+                wechat_userinfo = yield wechat_core.get_wxuser(self.wechat.access_token, openid)
 
-            # 插入之后重新获取一次插入的 wxuser
-            if inserted_id:
-                wxuser = yield self.user_wx_user_ds.get_wxuser(conds=
-                    {"id": inserted_id})
+                inserted_id = yield self.user_wx_user_ds.create_wxuser({
+                    "is_subscribe":    const.WX_USER_SUBSCRIBED,
+                    "openid":          openid,
+                    "nickname":        wechat_userinfo.nickname or "",
+                    "sex":             wechat_userinfo.sex or 0,
+                    "city":            wechat_userinfo.city or "",
+                    "country":         wechat_userinfo.country or "",
+                    "province":        wechat_userinfo.province or "",
+                    "language":        wechat_userinfo.language or "",
+                    "headimgurl":      wechat_userinfo.headimgurl or "",
+                    "wechat_id":       self.wechat.id,
+                    "unionid":         wechat_userinfo.unionid or "",
+                    "subscribe_time":  curr_now(),
+                    "unsubscibe_time": None,
+                    "source":          const.WX_USER_SOURCE_IWANTYOU
+                })
 
-        user.wechat = self.wechat
-        user.wxuser = wxuser
+                # 插入之后重新获取一次插入的 wxuser
+                if inserted_id:
+                    wxuser = yield self.user_wx_user_ds.get_wxuser(conds=
+                        {"id": inserted_id})
+
+            user.wechat = self.wechat
+            user.wxuser = wxuser
+
         self.current_user = user
 
     @gen.coroutine
