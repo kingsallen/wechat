@@ -1,6 +1,7 @@
 # coding=utf-8
 
 import json
+
 from tornado import gen
 
 import conf.path as path
@@ -19,6 +20,13 @@ class LinkedinImportHandler(MetaBaseHandler):
     linkedin 导入，由于 linkedin 为 oauth2.0导入，
     与微信 oauth2.0授权冲突（code问题），
     故直接继承 MetaBaseHandler"""
+
+    def get_template_namespace(self):
+        """copyed from BaseHandler"""
+        namespace = super().get_template_namespace()
+        add_namespace = ObjectDict(env=self.env)
+        namespace.update(add_namespace)
+        return namespace
 
     @handle_response
     @gen.coroutine
@@ -53,7 +61,7 @@ class LinkedinImportHandler(MetaBaseHandler):
             self.redirect(next_url)
             return
         else:
-            self.write_error(500)
+            self.write_error(http_code=500, message=result.message)
 
 
 class ResumeImportHandler(BaseHandler):
