@@ -178,12 +178,17 @@ class RedpacketPageService(PageService):
         # 构建一个 SQL where-in 子句
         appends = [" and company_id in %s" % set_literl(company_ids)]
 
+        # 8<------8<------8<------8<------8<------8<------8<------8<------8<---
+        # 现在兄弟公司的员工认证红包／推荐红包可以在不同的兄弟公司之间同时开多个（但是每个公司中的该类红包活动同时进行依然只有一个）
+        # 集团公司员工拿哪个兄弟公司红包活动的红包 取决于 当前的兄弟公司公司（即当前的微信公众号）
         # 校验红包活动
         rp_config = yield self.hr_hb_config_ds.get_hr_hb_config(
             conds={
                 'type':       const.RED_PACKET_TYPE_EMPLOYEE_BINDING,
-                'status':     const.HB_CONFIG_RUNNING
-            }, appends=appends)
+                'status':     const.HB_CONFIG_RUNNING,
+                'company_id': company_id
+            })
+        # 8<------8<------8<------8<------8<------8<------8<------8<------8<---
 
         self.logger.debug("rp_config: %s" % rp_config)
 
@@ -291,12 +296,17 @@ class RedpacketPageService(PageService):
         # 构建一个 SQL where-in 子句
         appends = [" and company_id in %s" % set_literl(company_ids)]
 
+        # 8<------8<------8<------8<------8<------8<------8<------8<------8<---
+        # 现在兄弟公司的员工认证红包／推荐红包可以在不同的兄弟公司之间同时开多个（但是每个公司中的该类红包活动同时进行依然只有一个）
+        # 集团公司员工拿哪个兄弟公司红包活动的红包 取决于 当前的兄弟公司公司（即当前的微信公众号）
         # 校验红包活动
         rp_config = yield self.hr_hb_config_ds.get_hr_hb_config(
             conds={
                 'type':   const.RED_PACKET_TYPE_RECOM,
-                'status': const.HB_CONFIG_RUNNING
-            }, appends=appends)
+                'status': const.HB_CONFIG_RUNNING,
+                'company_id': company_id
+            })
+        # 8<------8<------8<------8<------8<------8<------8<------8<------8<---
 
         self.logger.debug("rp_config: %s" % rp_config)
 
@@ -794,7 +804,7 @@ class RedpacketPageService(PageService):
         :param recom_openid:
         :param recom_wechat_id:
         :param red_packet_config:
-        :param recom_qxuser_id: 
+        :param recom_qxuser_id:
         :param current_qxuser_id:
         :param position: 职位信息
         :return:
