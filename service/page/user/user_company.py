@@ -1,19 +1,16 @@
 # coding=utf-8
 
-"""
-:author 马超（machao@moseeker.com）
-:date 2016.10.11
-
-"""
-
 import re
 import operator
+
+from urllib.parse import quote
+
 from tornado import gen
 
 import conf.path as path
 from service.page.base import PageService
 from util.common import ObjectDict
-from util.tool.url_tool import make_url
+from util.tool.url_tool import make_url, make_static_url
 from util.tool import temp_data_tool
 from util.tool import iterable_tool
 from util.tool.temp_data_tool import make_up_for_missing_res
@@ -71,12 +68,12 @@ class UserCompanyPageService(PageService):
     @staticmethod
     def _make_qrcode(qrcode_url):
 
-        link_head = 'https://www.moseeker.com/common/image?url={}'
+        link_head = 'https://platform.moseeker.com/recruit/image?url={}'
         if qrcode_url and \
             not re.match(
-                r'^https://www.moseeker.com/common/image?url=',
+                r'^https://platform.moseeker.com/recruit/image?url=',
                 qrcode_url):
-            return link_head.format(qrcode_url)
+            return link_head.format(quote(make_static_url(qrcode_url)))
         return qrcode_url
 
     @gen.coroutine
