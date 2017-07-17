@@ -98,11 +98,31 @@ class ApplicationHandler(BaseHandler):
         is_applied, message, apply_id = yield self.application_ps.create_application(
             position, self.current_user, is_platform=self.is_platform, has_recom='recom' in self.params)
 
+        # TODO (tangyiliang) 申请后操作，以下操作全部可以走消息队列
         if is_applied:
-            # 如果是自定义职位，入库 job_resume_other
-            # 暂时不接其返回值
-            yield self.application_ps.save_job_resume_other(
-                self.current_user.profile, apply_id, position)
+
+            # 1. 添加积分
+            yield self.application_ps.opt_add_reward(apply_id, self.current_user)
+
+            # 2. 向求职者发送消息通知（消息模板，短信）
+            yield self.application_ps.opt_send_applier_msg(
+                apply_id, self.current_user, position, self.is_platform)
+
+            # 3. 向推荐人发送消息模板
+            recommender_user_id = self.application_ps.get_recommend_user(
+                self.current_user, position, self.is_platform)
+            if recommender_user_id:
+
+                yield self.application_ps.opt_send_recommender_msg(
+                    recommender_user_id, self.current_user, position)
+
+                # 4. 更新挖掘被动求职者信息
+                yield self.application_ps.opt_update_candidate_recom_records(
+                    apply_id, self.current_user, recommender_user_id, position)
+
+            # 5. 向 HR 发送消息通知（消息模板，短信，邮件）
+            yield self.application_ps.opt_hr_msg(
+                apply_id, self.current_user, position, self.is_platform)
 
             # 定制化
             # 宝洁投递后，跳转到指定页面

@@ -171,7 +171,6 @@ class ApplicationPageService(PageService):
             ret = yield self._check_custom_fields(profile, field_name, mapping)
             return ret
 
-        assert False  # should not be here
 
     def _check_profile_fields(self, profile, field_name, user, mapping):
 
@@ -582,23 +581,10 @@ class ApplicationPageService(PageService):
 
         apply_id = ret.data.jobApplicationId
 
-        # 申请的后续处理
-        self.logger.debug("[post_apply]投递后续处理")
-
-        #1. 添加积分
-        yield self.opt_add_reward(apply_id, current_user)
-
-        #2. 向求职者发送消息通知（消息模板，短信）
-        yield self.opt_send_applier_msg(apply_id, current_user, position, is_platform)
-
-        if recommender_user_id:
-            #3. 向推荐人发送消息模板
-            yield self.opt_send_recommender_msg(recommender_user_id, current_user, position)
-            #4. 更新挖掘被动求职者信息
-            yield self.opt_update_candidate_recom_records(apply_id, current_user, recommender_user_id, position)
-
-        #5. 向 HR 发送消息通知（消息模板，短信，邮件）
-        yield self.opt_hr_msg(apply_id, current_user, position, is_platform)
+        # 如果是自定义职位，入库 job_resume_other
+        # 暂时不接其返回值
+        if position.app_cv_config_id > 0:
+            yield self.save_job_resume_other(current_user.profile, apply_id, position)
 
         return True, msg.RESPONSE_SUCCESS, apply_id
 
@@ -835,15 +821,19 @@ class ApplicationPageService(PageService):
             "id":company_id
         })
         profile = current_user.profile
-        # cmd = get_create_pdf_by_html_cmd(html_fname, pdf_fname)   #html转换pdf命令
-        profile.educations.sort(key=lambda x:x['degree'],reverse = True)
-        profile.basic['headimg']=make_static_url(profile.basic['headimg'])
+
+        profile.educations.sort(key=lambda x: x['degree'], reverse=True)
+
+        if profile.basic.get('headimg'):
+            profile.basic['headimg'] = make_static_url(profile.basic['headimg'])
+        else:
+            profile.basic['headimg'] = make_static_url(const.SYSUSER_HEADIMG)
+
         other_json = ObjectDict()
         if profile.get("others"):
             other_json = json.loads(profile.get("others", [])[0].get("other"))
 
         template_others = yield self.custom_kvmapping(other_json)
-
 
         self.logger.debug("[send_mail_hr]html_fname:{}".format(html_fname))
         self.logger.debug("[send_mail_hr]pdf_fname:{}".format(pdf_fname))
@@ -851,7 +841,6 @@ class ApplicationPageService(PageService):
         self.logger.debug("[send_mail_hr]profile:{}".format(profile))
         self.logger.debug("[send_mail_hr]template_others:{}".format(template_others))
         self.logger.debug("[send_mail_hr]resume_path:{}".format(self.settings.resume_path))
-
 
         # 常量字段
         res_degree = yield self.infra_dict_ds.get_const_dict(parent_code=const.CONSTANT_PARENT_CODE.DEGREE_USER)
@@ -880,7 +869,6 @@ class ApplicationPageService(PageService):
         #     )
         profile_full_url="https://hr.moseeker.com/admin/application/%s/view&pos_title/" % current_user.sysuser.id
         body=generate_resume_for_hr(profile,template_others,dict_conf,position,real_company_info,profile_full_url)
-
 
 
         @gen.coroutine
@@ -924,7 +912,6 @@ class ApplicationPageService(PageService):
 
         profile_ps = None
 
-
         self.logger.debug("[send_mail_hr]html_fname:{}".format(html_fname))
         self.logger.debug("[send_mail_hr]pdf_fname:{}".format(pdf_fname))
 
@@ -946,7 +933,6 @@ class ApplicationPageService(PageService):
         #     self.logger.debug("[opt_send_hr_email]end")
         # except Exception as e:
         #     self.logger.error(traceback.format_exc())
-
 
     @gen.coroutine
     def opt_send_email_create_application_notice(self, email_params):
