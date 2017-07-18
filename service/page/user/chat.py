@@ -1,18 +1,16 @@
 # coding=utf-8
 
-# @Time    : 3/10/17 15:15
-# @Author  : panda (panyuxin@moseeker.com)
-# @File    : chat.py
-# @DES     :
-
 from tornado import gen
 
 import conf.common as const
 from service.page.base import PageService
+from setting import settings
 from util.common import ObjectDict
-from util.tool.url_tool import make_static_url
 from util.tool.date_tool import str_2_date
+from util.tool.http_tool import http_post
 from util.tool.str_tool import gen_salary
+from util.tool.url_tool import make_static_url
+
 
 class ChatPageService(PageService):
 
@@ -118,7 +116,7 @@ class ChatPageService(PageService):
         :param room_id:
         :param content:
         :param position_id:
-        :param speaker: 0：求职者，1：HR
+        :param speaker: 0：求职者，1：HR， 2：chatbot
         :return:
         """
 
@@ -137,11 +135,11 @@ class ChatPageService(PageService):
 
     @gen.coroutine
     def get_unread_chat_num(self, user_id, hr_id):
+        """返回JD 页，求职者与 HR 之间的未读消息数"""
 
         if user_id is None or not hr_id:
             raise gen.Return(1)
 
-        """返回JD 页，求职者与 HR 之间的未读消息数"""
         chatroom = yield self.hr_wx_hr_chat_list_ds.get_chatroom(conds={
             "hraccount_id": int(hr_id),
             "sysuser_id": user_id
@@ -161,7 +159,6 @@ class ChatPageService(PageService):
         if user_id is None:
             raise gen.Return(0)
 
-        """返回求职者所有的未读消息数"""
         unread_count_total = yield self.hr_wx_hr_chat_list_ds.get_chat_unread_count_sum(conds={
             "sysuser_id": user_id,
         }, fields=["user_unread_count"])
@@ -176,3 +173,31 @@ class ChatPageService(PageService):
         })
 
         raise gen.Return(hr_account)
+
+    @gen.coroutine
+    def get_chatbot_reply(self, message, user_id, hr_id):
+        """ 调用 chatbot 返回机器人的回复信息
+               https://wiki.moseeker.com/chatbot.md
+        :param message: 用户发送到文本内容
+        :param user_id: 当前用户id
+        :param hr_id: 聊天对象hrid
+        """
+        ret = ""
+
+        params = ObjectDict(
+            question=message,
+            user_id=user_id,
+            hr_id=hr_id
+        )
+
+        try:
+            res = yield http_post(route=settings, jdata=params, infra=False)
+            self.logger.debug("[get_chatbot_reply]ret: %s" % res)
+
+            ret = ret['results'][0]['values']['text']
+
+        except Exception as e:
+            self.logger.error(e)
+            return ""
+        else:
+            return ret

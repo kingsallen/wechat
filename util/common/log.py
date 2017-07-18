@@ -101,7 +101,7 @@ class Logger(object, metaclass=Singleton):
         self.warning(message)
 
     def error(self, message):
-        self.__logger.error(message, exc_info=0)
+        self.__logger.error(message, exc_info=1)
 
     def stats(self, message):
         self.__logger.log(

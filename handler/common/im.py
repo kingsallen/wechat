@@ -6,6 +6,7 @@ from tornado import gen, websocket, ioloop
 
 import conf.common as const
 import conf.message as msg
+from conf.protocol import WebSocketCloseCode
 from handler.base import BaseHandler
 from cache.user.chat_session import ChatCache
 from util.common.decorator import handle_response, authenticated
@@ -112,16 +113,15 @@ class UnreadCountHandler(BaseHandler):
 
         return g_event
 
+
 class ChatWebSocketHandler(websocket.WebSocketHandler):
+    """处理 Chat 的各种 webSocket 传输，直接继承 tornado 的 WebSocketHandler
+    """
 
     def __init__(self, application, request, **kwargs):
         super(ChatWebSocketHandler, self).__init__(application, request, **kwargs)
         self.redis_client = self.application.redis.get_raw_redis_client()
         self.io_loop = ioloop.IOLoop.current()
-
-        # self.ping_interval = 2
-        # self.ping_message = b'p'
-        # self.ping_timeout = None
 
         self.chat_session = ChatCache()
         self.chatroom_channel = ''
@@ -132,46 +132,19 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
         self.position_id = 0
         self.chat_ps = ChatPageService()
 
-    # TODO
-    # def _send_ping(self):
-    #     self.ping(self.ping_message)
-    #     self.ping_timeout = self.io_loop.call_later(
-    #         delay=self.ping_interval,
-    #         callback=self._connection_timeout
-    #     )
-    # def on_pong(self, data):
-    #     print (3)
-    #
-    #     if hasattr(self, 'ping_timeout'):
-    #         # clear timeout set by for ping pong (heartbeat) messages
-    #         self.io_loop.remove_timeout(self.ping_timeout)
-    #
-    #         # send new ping message after `get_ping_timeout` time
-    #     self.ping_timeout = self.io_loop.call_later(
-    #         delay=self.get_ping_timeout(),
-    #         callback=self._send_ping,
-    #     )
-    #
-    # def _connection_timeout(self):
-    #     """ If no pong message is received within the timeout
-    #     then close the connection """
-    #     self.close(1001, 'ping-pong timeout')
-
     def open(self, room_id, *args, **kwargs):
-
-        # self.ping_timeout = self.io_loop.call_later(
-        #     delay=self.get_ping_timeout(initial=True),
-        #     callback=self._send_ping,
-        # )
-        self.set_nodelay(True)
 
         self.room_id = room_id
         self.user_id = match_session_id(to_str(self.get_secure_cookie(const.COOKIE_SESSIONID)))
         self.hr_id = self.get_argument("hr_id")
         self.position_id = self.get_argument("pid", 0) or 0
 
-        if not (self.user_id and self.hr_id and self.room_id):
-            self.close(1000, "not authorized")
+        try:
+            assert self.user_id and self.hr_id and self.room_id
+        except AssertionError:
+            self.close(WebSocketCloseCode.normal.value, "not authorized")
+
+        self.set_nodelay(True)
 
         self.chatroom_channel = const.CHAT_CHATROOM_CHANNEL.format(self.hr_id, self.user_id)
         self.hr_channel = const.CHAT_HR_CHANNEL.format(self.hr_id)
@@ -190,11 +163,14 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
                     )))
             except websocket.WebSocketClosedError:
                 self.logger.error(traceback.format_exc())
-                self.close(1002)
+                self.close(WebSocketCloseCode.internal_error.value)
                 raise
 
-        self.subscriber = Subscriber(self.redis_client, channel=self.chatroom_channel,
-                                     message_handler=message_handler)
+        self.subscriber = Subscriber(
+            self.redis_client,
+            channel=self.chatroom_channel,
+            message_handler=message_handler)
+
         self.subscriber.start_run_in_thread()
 
     @gen.coroutine
@@ -207,17 +183,56 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
 
     @gen.coroutine
     def on_message(self, message):
-        # 处理通过 websocket 发送的消息
+        """
+        处理通过 websocket 发送的消息
+        :param message:
+        :return:
+        """
+
         message = ujson.loads(message)
+        user_message = message.get("content")
         message_body = json_dumps(ObjectDict(
-            content = message.get("content"),
-            speaker = 0,
-            cid = int(self.room_id),
-            pid = int(self.position_id),
-            create_time = curr_now_minute()
+            content=user_message,
+            speaker=const.CHAT_SPEAKER_USER,
+            cid=int(self.room_id),
+            pid=int(self.position_id),
+            create_time=curr_now_minute()
         ))
+
         self.redis_client.publish(self.hr_channel, message_body)
-        yield self.chat_ps.save_chat(self.room_id, message.get("content"), self.position_id)
+
+        yield self.chat_ps.save_chat(
+            self.room_id, user_message, self.position_id)
+
+        yield self._handle_chatbot_message(user_message)
+
+    @gen.coroutine
+    def _handle_chatbot_message(self, user_message):
+        """处理 chatbot message
+        获取消息 -> pub消息 -> 入库
+        """
+        # TODO (tangyiliang) need a chatbot companywide switch :<
+        bot_message = yield self.chat_ps.get_chatbot_reply(
+            message=user_message,
+            user_id=self.user_id,
+            hr_id=self.hr_id
+        )
+        if bot_message:
+            message_body = json_dumps(ObjectDict(
+                content=bot_message,
+                speaker=const.CHAT_SPEAKER_BOT,
+                cid=int(self.room_id),
+                pid=int(self.position_id),
+                create_time=curr_now_minute()
+            ))
+
+            self.redis_client.publish(self.hr_channel, message_body)
+
+            yield self.chat_ps.save_chat(
+                self.room_id,
+                bot_message,
+                self.position_id,
+                speaker=const.CHAT_SPEAKER_BOT)
 
 
 class ChatHandler(BaseHandler):

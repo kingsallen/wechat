@@ -1,9 +1,5 @@
 # coding=utf-8
 
-# @Time    : 2/16/17 15:43
-# @Author  : panda (panyuxin@moseeker.com)
-# @File    : chat_session.py
-# @DES     :
 
 from globals import redis
 from globals import logger
