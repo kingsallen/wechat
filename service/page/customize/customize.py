@@ -23,6 +23,10 @@ class CustomizePageService(PageService):
     # 宝洁投递成功提示页面
     _APPLY_SUCCESS = [1753]
 
+    # 蓝色光标定制：
+    # 在团队列表页面, 显示团队简介, 而不是团队详情
+    _BLUE_FOCUS_COMPANY_ID = 52813
+
     def __init__(self):
         super().__init__()
 
@@ -124,7 +128,7 @@ class CustomizePageService(PageService):
         :param teams:
         :return:
         """
-        if company.id == self.constant.BLUE_FOCUS_COMPANY_ID:
+        if company.id == self._BLUE_FOCUS_COMPANY_ID:
             for team in teams:
                 team.description = team.summary
         else:
