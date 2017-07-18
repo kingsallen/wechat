@@ -111,16 +111,18 @@ def make_static_url(path, protocol='https'):
     if not path:
         return None
 
-    # //cdn.moseeker.com
-    # let the browser decide the protocol.
     if path.startswith("//"):
-        return path
+        if path.startswith(settings['static_domain']):
+            return path
+        else:
+            return None
 
     if not path.startswith("http"):
         path = urljoin(settings['static_domain'], path)
 
-    if not path.startswith("http") and protocol is not None:
-        path = protocol + ":" + path
+        if protocol:
+            path = protocol + ":" + path
+
     return path
 
 
