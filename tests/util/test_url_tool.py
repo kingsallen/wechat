@@ -1,8 +1,10 @@
 # coding=utf-8
 
 import unittest
-from util.tool.url_tool import make_url, url_subtract_query, is_urlquoted
+from util.tool.url_tool import *
 from urllib.parse import urlparse, parse_qs
+
+from setting import settings
 
 
 class TestMakeUrl(unittest.TestCase):
@@ -67,3 +69,34 @@ class TestUrlQuote(unittest.TestCase):
         self.assertFalse(is_urlquoted('/El Niño/'))
         with self.assertRaises(ValueError):
             is_urlquoted(123)
+
+
+class TestMakeStaticUrl(unittest.TestCase):
+
+    domain = settings['static_domain']
+    fake_domain = "//fake.domain"
+
+    path_dummy = '/i/am/a/path'
+    path_dummy2 = settings['static_domain'] + path_dummy
+
+    def testPath(self):
+
+        self.assertEqual(
+            make_static_url(self.path_dummy, protocol='http'),
+            'http:' + self.domain + self.path_dummy)
+
+        self.assertEqual(
+            make_static_url(self.path_dummy),
+            'https:' + self.domain + self.path_dummy)
+
+        self.assertEqual(
+            make_static_url(self.path_dummy, protocol='https'),
+            'https:' + self.domain + self.path_dummy)
+
+    def testUndefinedProtocol(self):
+        self.assertEqual(make_static_url(self.path_dummy2), self.path_dummy2)
+        self.assertIsNone(make_static_url(self.fake_domain))
+
+
+if __name__ == "__main__":
+    unittest.main()
