@@ -539,7 +539,7 @@ class PositionHandler(BaseHandler):
                 position_id=position_info.id,
                 presentee_user_id=recom_wxuser.sysuser_id)
             if psc:
-                replace_query.update(psc=psc)
+                replace_query.update({'psc': psc})
 
             redirect_url = url_append_query(self.fullurl(), **replace_query)
             self.redirect(redirect_url)

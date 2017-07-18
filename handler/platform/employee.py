@@ -140,6 +140,10 @@ class EmployeeBindHandler(BaseHandler):
         fe_bind_status = self.employee_ps.convert_bind_status_from_thrift_to_fe(
             thrift_bind_status)
 
+        self.logger.debug(
+            "thrift_bind_status: %s, fe_bind_status: %s" %
+            (thrift_bind_status,fe_bind_status ))
+
         # early return 1
         if fe_bind_status == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS:
             self.send_json_error(message=messages.EMPLOYEE_BINDED_WARNING)

@@ -339,7 +339,7 @@ class SharechainPageService(PageService):
                     position_id, root_recom_user_id, click_time)
 
             if share_chain_of_root and share_chain_of_root.depth == 0:
-                return share_chain_of_root
+                return share_chain_of_root.recom_user_id
 
             # 如果查不到最初联系人, 说明这条链路没有被员工截断过
             # 并且 recom_id 这个人是自己点 JD 页访问的

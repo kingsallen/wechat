@@ -323,10 +323,8 @@ class RedpacketPageService(PageService):
         employee = yield self.user_employee_ds.get_employee(
             conds={
                 'sysuser_id': recom_current_user.sysuser.id,
-                'company_id': company_id,
                 'activation': const.OLD_YES,
-                'disable':    const.OLD_YES,
-                'is_rp_sent': const.NO
+                'disable':    const.OLD_YES
             }, appends=appends)
 
         if not employee:

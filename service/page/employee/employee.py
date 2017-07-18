@@ -122,6 +122,11 @@ class EmployeePageService(PageService):
             data.employeeid = employee.id
             data.name = employee.cname
 
+        # 当前是 pending 状态
+        if bind_status == BindStatus.PENDING:
+            data.name = employee.cname
+
+
         # 当前是未绑定状态
         else:
             # 否则，调用基础服务判断当前用户的认证状态：没有认证还是 pending 中
@@ -132,7 +137,6 @@ class EmployeePageService(PageService):
 
             elif bind_status == const.EMPLOYEE_BIND_STATUS_EMAIL_PENDING:
                 data.binding_status = fe.FE_EMPLOYEE_BIND_STATUS_PENDING
-
             else:
                 data.binding_status = fe.FE_EMPLOYEE_BIND_STATUS_DEFAULT_INVALID
 
