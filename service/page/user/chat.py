@@ -10,6 +10,7 @@ from util.tool.date_tool import str_2_date
 from util.tool.http_tool import http_post
 from util.tool.str_tool import gen_salary
 from util.tool.url_tool import make_static_url
+import json
 
 
 class ChatPageService(PageService):
@@ -191,10 +192,16 @@ class ChatPageService(PageService):
         )
 
         try:
-            res = yield http_post(route=settings, jdata=params, infra=False)
-            self.logger.debug("[get_chatbot_reply]ret: %s" % res)
+            res = yield http_post(
+                route=settings['chatbot_api'], jdata=params, infra=False)
 
-            ret = ret['results'][0]['values']['text']
+            self.logger.debug("[get_chatbot_reply]ret: %s, type: %s" % (res, type(res)))
+
+            self.logger.debug(res.results)
+            results = res.results
+            r = results[0]
+
+            ret = r.get("values", {}).get("text", "")
 
         except Exception as e:
             self.logger.error(e)

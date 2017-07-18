@@ -226,7 +226,11 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
                 create_time=curr_now_minute()
             ))
 
+            # hr 端广播
             self.redis_client.publish(self.hr_channel, message_body)
+
+            # 聊天室广播
+            self.redis_client.publish(self.chatroom_channel, message_body)
 
             yield self.chat_ps.save_chat(
                 self.room_id,
