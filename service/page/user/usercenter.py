@@ -65,8 +65,7 @@ class UsercenterPageService(PageService):
             'username':    user_creation_form.username,
             'mobile':      user_creation_form.mobile,
             'password':    user_creation_form.password,
-            'register_ip': user_creation_form.register_ip,
-            'headimg':     user_creation_form.headimg
+            'register_ip': user_creation_form.register_ip
         })
 
         ret = yield self.infra_user_ds.post_register(params)
