@@ -109,10 +109,10 @@ class ApplicationHandler(BaseHandler):
                 apply_id, self.current_user, position, self.is_platform)
 
             # 3. 向推荐人发送消息模板
-            recommender_user_id = self.application_ps.get_recommend_user(
+            recommender_user_id, _, _ = yield self.application_ps.get_recommend_user(
                 self.current_user, position, self.is_platform)
-            if recommender_user_id:
 
+            if recommender_user_id:
                 yield self.application_ps.opt_send_recommender_msg(
                     recommender_user_id, self.current_user, position)
 
