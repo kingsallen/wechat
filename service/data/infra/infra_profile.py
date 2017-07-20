@@ -152,16 +152,26 @@ class InfraProfileDataService(DataService):
         if birth:
             params.update(birth=birth)
 
-        # 自定义简历模版中的字段
-        if basic.nationality and basic.nationality.strip():
-            params.update(nationality_name=basic.nationality.strip())
+        # 自定义简历模版中的国籍
+        if basic.nationality:
+            if hasattr(basic.nationality, 'strip') and basic.nationality.strip():
+                params.update(nationality_name=basic.nationality.strip())
+
+        # profile 编辑中的国籍
+        if basic.nationality_name:
+            if hasattr(basic.nationality_name, 'strip') and basic.nationality_name.strip():
+                params.update(nationality_name=basic.nationality_name.strip())
+
+            if basic.nationality_code:
+                if isinstance(basic.nationality_code, int):
+                    params.update(nationality_code=basic.nationality_code)
+
         if basic.email and basic.email.strip():
             params.update(email=basic.email.strip())
         if basic.weixin and basic.weixin.strip():
             params.update(weixin=basic.weixin.strip())
         if basic.qq and basic.qq.strip():
             params.update(qq=basic.qq.strip())
-
         if basic.location:
             basic.city_name = basic.location
             basic.pop('location')

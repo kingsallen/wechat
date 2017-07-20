@@ -325,7 +325,7 @@ class ProfileCustomHandler(BaseHandler):
             yield self.profile_ps.update_profile_basic(profile_id, basic)
             # 更新 education, workexp, projectext
             yield self.profile_ps.update_profile_embedded_info_from_cv(
-                profile_id, custom_cv)
+                profile, custom_cv)
 
         else:
             # 还不存在 profile， 创建 profile
@@ -355,7 +355,7 @@ class ProfileCustomHandler(BaseHandler):
 
                 yield self.profile_ps.update_profile_basic(profile_id, custom_cv)
                 yield self.profile_ps.update_profile_embedded_info_from_cv(
-                    profile_id, custom_cv)
+                    profile, custom_cv)
             else:
                 raise ValueError('profile creation error')
 
