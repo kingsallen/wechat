@@ -125,7 +125,8 @@ class EmployeePageService(PageService):
         # 当前是 pending 状态
         if bind_status == BindStatus.PENDING:
             data.name = employee.cname
-
+            data.mobile = employee.mobile
+            data.binding_status = fe.FE_EMPLOYEE_BIND_STATUS_PENDING
 
         # 当前是未绑定状态
         else:
