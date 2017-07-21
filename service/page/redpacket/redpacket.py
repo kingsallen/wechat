@@ -358,11 +358,6 @@ class RedpacketPageService(PageService):
         self.logger.debug('[RP] recom_wxuser: %s' % recom_wxuser)
         self.logger.debug('[RP] recom_qxuser: %s' % recom_qxuser)
 
-        throttle_passed = yield self.__check_throttle_passed(rp_config, recom_qxuser.id)
-        if not throttle_passed:
-            self.logger.debug('[RP]throttle上限校验失败, company_id: %s， user_id: %s' % (company_id, user_id))
-            return
-
         rplock_key = const.RP_RECOM_LOCK_FMT % (rp_config.id, user_id)
         if redislocker.incr(rplock_key) is FIRST_LOCK:
             self.logger.debug("[RP]红包锁创建成功， rplock_key: %s" % rplock_key)
@@ -591,14 +586,7 @@ class RedpacketPageService(PageService):
         if send_to_employee or matches:
             self.logger.debug("[RP]用户是发送红包对象,准备掷骰子")
 
-            throttle_passed = yield self.__check_throttle_passed(
-                red_packet_config, recom_qx_wxuser.id, position=position)
 
-            if not throttle_passed:
-                self.logger.debug("[RP]全局上限验证不通过, 暂停发送")
-                raise gen.Return(None)
-
-            self.logger.debug("[RP]全局上限验证通过")
 
             if self.__hit_red_packet(red_packet_config.probability):
                 self.logger.debug("[RP]掷骰子通过,准备发送红包信封(有金额)")
@@ -707,31 +695,23 @@ class RedpacketPageService(PageService):
                     raise gen.Return(is_1degree)
 
     @gen.coroutine
-    def __check_throttle_passed(self, red_packet_config, wxuser_id, position=None):
+    def __check_throttle_passed(self, red_packet_config, wxuser_id,
+                                next_rp_item):
         """该用户目前拿到的红包的总金额加上下个红包金额是否超过该公司单次活动金额上限
+        员工认证红包跳过此检查
         """
         if not wxuser_id:
-            raise gen.Return(False)
+            return False
+
+        if red_packet_config.type == const.RED_PACKET_TYPE_EMPLOYEE_BINDING:
+            return True
 
         # 现在到手的红包总金额
         amount = yield self.__get_amount_sum_config_id_and_wxuser_id(
             red_packet_config.id, wxuser_id)
         current_amount_sum = amount if amount else 0
 
-        # 下一个红包金额
-        if position:
-            next_red_packet = yield self.__get_next_rp_item(
-                red_packet_config.id, red_packet_config.type,
-                position_id=position.id)
-        else:
-            next_red_packet = yield self.__get_next_rp_item(
-                red_packet_config.id, red_packet_config.type)
-
-        if not next_red_packet:
-            # 直接返回 True 这样可以在后续发送消息模版之前判断并结束活动
-            return True
-
-        next_amount = next_red_packet.amount
+        next_amount = next_rp_item.amount
         company_conf = yield self.hr_company_conf_ds.get_company_conf({
             "company_id": red_packet_config.company_id
         })
@@ -850,6 +830,15 @@ class RedpacketPageService(PageService):
                 yield self.__finish_hb_config(red_packet_config.id)
 
             return
+
+        throttle_passed = yield self.__check_throttle_passed(
+            red_packet_config, recom_qxuser_id, rp_item)
+
+        if not throttle_passed:
+            self.logger.debug('[RP]throttle上限校验失败, hb_config_id: %s， recom_qxuser_id: %s' % (red_packet_config.id, recom_qxuser_id))
+            return
+        else:
+            self.logger.debug("[RP]全局上限验证通过")
 
         if red_packet_config.type in [0, 1]:
             bagging_openid = current_qxuser_openid
