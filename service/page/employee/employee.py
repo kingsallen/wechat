@@ -123,7 +123,7 @@ class EmployeePageService(PageService):
             data.name = employee.cname
 
         # 当前是 pending 状态
-        if bind_status == BindStatus.PENDING:
+        elif bind_status == BindStatus.PENDING:
             data.name = employee.cname
             data.mobile = employee.mobile
             data.binding_status = fe.FE_EMPLOYEE_BIND_STATUS_PENDING
