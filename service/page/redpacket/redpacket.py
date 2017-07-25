@@ -1019,12 +1019,13 @@ class RedpacketPageService(PageService):
             position_ids = [b.position_id for b in binding_list]
 
         position_list = yield self.job_position_ds.get_positions_list(
-            conds=["1=1"],
-            appends=[" and id in %s" % set_literl(position_ids)])
+            conds=" id in %s" % set_literl(position_ids))
 
-        position_list = [x for x in position_list if x.hb_stauts > 0]
-
-        raise gen.Return(position_list)
+        if position_list:
+            position_list = [x for x in position_list if x.hb_status > 0]
+            raise gen.Return(position_list)
+        else:
+            return None
 
     @gen.coroutine
     def __finish_hb_config(self, hb_config_id):
