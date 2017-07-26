@@ -76,7 +76,11 @@ def http_fetch(route, data=None, timeout=5):
             route,
             method='POST',
             body=urlencode(data),
-            request_timeout=timeout)
+            request_timeout=timeout,
+            headers=HTTPHeaders(
+                {"Content-Type": "application/x-www-form-urlencoded"}
+            ),
+        )
 
         response = yield http_client.fetch(http_request)
         return response.body
