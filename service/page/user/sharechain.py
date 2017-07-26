@@ -370,26 +370,32 @@ class SharechainPageService(PageService):
             "id": share_chain_id
         })
 
-        if not share_chain or not share_chain.parent_id:
+        if not share_chain:
             return False
 
-        parent_share_chain = yield self.candidate_share_chain_ds.get_share_chain({
-            "id": share_chain.parent_id
-        })
+        if share_chain.parent_id:
+            parent_share_chain = yield self.candidate_share_chain_ds.get_share_chain({
+                "id": share_chain.parent_id
+            })
 
-        valid_employee = yield self._is_valid_employee(
-            parent_share_chain.position_id,
-            parent_share_chain.recom_user_id)
+            valid_employee = yield self._is_valid_employee(
+                parent_share_chain.position_id,
+                parent_share_chain.recom_user_id)
 
-        raise gen.Return(
-            parent_share_chain and
-            (
-                parent_share_chain.depth == 0 or
-                parent_share_chain.depth == 1 and
-                valid_employee and
-                parent_share_chain.parent_id == 0
+            raise gen.Return(
+                parent_share_chain and
+                (
+                    parent_share_chain.depth == 0 or
+                    parent_share_chain.depth == 1 and
+                    valid_employee and
+                    parent_share_chain.parent_id == 0
+                )
             )
-        )
+        else:
+            valid_employee = yield self._is_valid_employee(
+                share_chain.position_id,
+                share_chain.recom_user_id)
+            return valid_employee
 
     @gen.coroutine
     def find_last_psc(self, position_id, presentee_user_id):
