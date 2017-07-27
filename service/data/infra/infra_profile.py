@@ -162,15 +162,12 @@ class InfraProfileDataService(DataService):
         if basic.qq and basic.qq.strip():
             params.update(qq=basic.qq.strip())
 
-        if basic.location:
-            basic.city_name = basic.location
-            basic.pop('location')
         if basic.city_name is not None:
             params.update(city_name=basic.city_name)
 
         if basic.remarks:
             basic.self_introduction = basic.remarks
-            basic.pop('remarks')
+
         if basic.self_introduction is not None:
             if basic.self_introduction.strip() == "":
                 params.update(self_introduction="")
