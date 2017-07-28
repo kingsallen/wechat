@@ -204,7 +204,8 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
         yield self.chat_ps.save_chat(
             self.room_id, user_message, self.position_id)
 
-        yield self._handle_chatbot_message(user_message)
+        if self.current_user.company.conf_hr_chat == const.COMPANY_CONF_CHAT_ON_WITH_CHATBOT:
+            yield self._handle_chatbot_message(user_message)
 
     @gen.coroutine
     def _handle_chatbot_message(self, user_message):
