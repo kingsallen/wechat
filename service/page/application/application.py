@@ -205,6 +205,17 @@ class ApplicationPageService(PageService):
             else:
                 return False
 
+        if mapping.startswith("profile_intention.position"):
+            intentions = profile.get('intentions')
+            if not intentions:
+                return False
+            intention = intentions[0]
+            positions = intention.get('positions')
+            if not positions:
+                return False
+            position = positions[0]
+            return bool(position.get('position_name'))
+
         assert False  # should not be here
 
     @staticmethod
@@ -238,6 +249,19 @@ class ApplicationPageService(PageService):
         if profile_basic and not profile_basic.get("mobile"):
             profile_basic.mobile = ""
         profile_basic.name = ""
+
+        if profile_basic and profile_basic.get("nationality_name"):
+            profile_basic.nationality = profile_basic.get("nationality_name")
+
+        intentions = profile.get('intentions')
+        if intentions:
+            intention = intentions[0]
+            positions = intention.get('positions')
+            if positions:
+                position = positions[0]
+                if position and profile_basic:
+                    profile_basic.position = position.get('position_name', '')
+
         degree_list = yield self.infra_dict_ds.get_const_dict(
             const.CONSTANT_PARENT_CODE.DEGREE_USER)
 
