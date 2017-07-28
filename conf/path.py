@@ -56,6 +56,7 @@ IMAGE_URL = '/image'
 # Ref: https://wiki.moseeker.com/user_account_api.md
 INFRA_USER_INFO = 'user'
 INFRA_USER_VALID = 'user/sendCode'
+INFRA_USER_VOICE_VALID = 'user/sendsignupcode/voice'
 INFRA_USER_VERIFY = 'user/verifyCode'
 INFRA_USER_COMBINE = 'user/wxbindmobile'
 INFRA_USER_LOGIN = 'user/login'
