@@ -47,7 +47,6 @@ class InfraDictDataService(DataService):
         response = yield http_get(path.DICT_CONSTANT, params)
         return self.make_const_dict_result(response, parent_code)
 
-    @cache(ttl=60*60*5)
     @gen.coroutine
     def get_countries(self):
         """获取国家列表"""
