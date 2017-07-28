@@ -137,6 +137,7 @@ class ApplicationPageService(PageService):
             passed = yield self._check(profile, field_name, user, mapping)
 
             if not passed:
+                self.logger.error("custom cv check not passed, profile: %s, field_name: %s, user: %s, mapping: %s" % (profile, field_name, user, mapping))
                 resume_dict = yield self._generate_resume_cv(profile)
                 return (False, resume_dict, objectdictify(json_decode(cv_conf.field_value)))
         return True, None, None
