@@ -16,7 +16,8 @@ from util.common import ObjectDict
 from util.tool.str_tool import to_str, match_session_id
 from util.tool.date_tool import curr_now_minute
 from service.page.user.chat import ChatPageService
-
+from service.data.user.user_hr_account import UserHrAccountDataService
+from service.data.hr.hr_company_conf import HrCompanyConfDataService
 
 class UnreadCountHandler(BaseHandler):
 
@@ -131,6 +132,28 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
         self.hr_id = 0
         self.position_id = 0
         self.chat_ps = ChatPageService()
+        self.user_hr_account_ds = UserHrAccountDataService()
+        self.hr_company_conf_ds = HrCompanyConfDataService()
+        self.bot_enabled = False
+
+    @gen.coroutine
+    def get_bot_enabled(self):
+
+        if not self.hr_id:
+            return
+
+        user_hr_account = yield self.user_hr_account_ds.get_hr_account(
+                conds={'id': self.hr_id})
+
+        company_id = user_hr_account.company_id
+
+        if not company_id:
+            return
+
+        company_conf = yield self.hr_company_conf_ds.get_company_conf(
+            conds={'company_id': company_id})
+
+        self.bot_enabled = company_conf.hr_chat == const.COMPANY_CONF_CHAT_ON_WITH_CHATBOT
 
     def open(self, room_id, *args, **kwargs):
 
@@ -189,6 +212,9 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
         :return:
         """
 
+        if not self.bot_enabled:
+            yield self.get_bot_enabled()
+
         message = ujson.loads(message)
         user_message = message.get("content")
         message_body = json_dumps(ObjectDict(
@@ -204,7 +230,7 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
         yield self.chat_ps.save_chat(
             self.room_id, user_message, self.position_id)
 
-        if self.current_user.company.conf_hr_chat == const.COMPANY_CONF_CHAT_ON_WITH_CHATBOT:
+        if self.bot_enabled:
             yield self._handle_chatbot_message(user_message)
 
     @gen.coroutine
