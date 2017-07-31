@@ -108,6 +108,7 @@ COMPANY = 'company'
 DICT_CONSTANT = "dict/constant"
 DICT_CITIES = "dict/cities"
 DICT_COLLEGE = "dict/college"
+DICT_COUNTRY = "dict/country"
 DICT_INDUSTRY = "dict/industry"
 DICT_POSITION = "dict/position"
 

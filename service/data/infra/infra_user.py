@@ -9,7 +9,6 @@ from util.tool.http_tool import http_get, http_post, http_put, unboxing
 
 
 class InfraUserDataService(DataService):
-
     """对接 User服务
     referer: https://wiki.moseeker.com/user_account_api.md"""
 
@@ -25,11 +24,10 @@ class InfraUserDataService(DataService):
 
     @gen.coroutine
     def post_user_wxbindmobile(self, **kwargs):
-
         params = ObjectDict({
             "unionid": kwargs["unionid"],
-            "mobile": kwargs["mobile"],
-            "code": kwargs.get("code" "")
+            "mobile":  kwargs["mobile"],
+            "code":    kwargs.get("code" "")
         })
 
         ret = yield http_post(path.INFRA_USER_COMBINE, params)
@@ -41,7 +39,7 @@ class InfraUserDataService(DataService):
         """手机号和微信号绑定接口"""
 
         params = ObjectDict({
-            'mobile': mobile,
+            'mobile':  mobile,
             'unionid': unionid,
         })
 
@@ -57,7 +55,7 @@ class InfraUserDataService(DataService):
         """
         params = ObjectDict({
             'mobile': mobile,
-            'type': int(type)
+            'type':   int(type)
         })
         ret = yield http_post(path.INFRA_USER_VALID, params)
         raise gen.Return(ret)
@@ -73,8 +71,8 @@ class InfraUserDataService(DataService):
         """
         params = ObjectDict({
             'mobile': mobile,
-            'code': code,
-            'type': int(type),
+            'code':   code,
+            'type':   int(type),
         })
 
         ret = yield http_post(path.INFRA_USER_VERIFY, params)
@@ -106,16 +104,8 @@ class InfraUserDataService(DataService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def post_register(self, mobile, password):
-        """用户注册
-        :param mobile: 手机号
-        :param password: 密码
-        """
-        params = ObjectDict(
-            username=mobile,
-            mobile=mobile,
-            password=password,
-        )
+    def post_register(self, params):
+        """用户注册 """
 
         ret = yield http_post(path.INFRA_USER_REGISTER, params)
         raise gen.Return(ret)
@@ -149,7 +139,7 @@ class InfraUserDataService(DataService):
         """重置密码"""
 
         params = ObjectDict({
-            "mobile": mobile,
+            "mobile":   mobile,
             "password": password
         })
 
@@ -191,7 +181,7 @@ class InfraUserDataService(DataService):
             'privacy_policy': privacy_policy
         }
 
-        ret = yield http_post(path.INFRA_USER_SETTINGS,params)
+        ret = yield http_post(path.INFRA_USER_SETTINGS, params)
         return ret
 
     @gen.coroutine

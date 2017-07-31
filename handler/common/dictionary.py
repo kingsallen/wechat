@@ -27,7 +27,7 @@ class DictFunctionHandler(BaseHandler):
 
 class DictIndustryHandler(BaseHandler):
 
-    # @handle_response
+    @handle_response
     @gen.coroutine
     def get(self):
         self.logger.debug("DictIndustryHandler")
@@ -35,3 +35,12 @@ class DictIndustryHandler(BaseHandler):
         industries = yield self.dictionary_ps.get_industries()
         self.logger.debug("DictIndustryHandler indurstries:{}".format(industries))
         self.send_json_success(industries)
+
+
+class DictCountryHandler(BaseHandler):
+
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        countries = yield self.dictionary_ps.get_counries()
+        self.send_json_success(countries)

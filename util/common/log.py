@@ -2,6 +2,7 @@
 
 import logging
 import os
+import traceback
 
 from util.common.singleton import Singleton
 from logging.handlers import TimedRotatingFileHandler
@@ -129,6 +130,7 @@ class MessageLogger(Logger):
 
     def error(self, message):
         super(MessageLogger, self).error(message)
+        print(traceback.format_exc())
         self.impl.send_message("error", message)
 
     def stats(self, message):

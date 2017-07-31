@@ -112,5 +112,5 @@ SEARCH_DEGREE = ObjectDict({
     "6": "博士,初中及以上,中专及以上,高中及以上,大专及以上,本科及以上,硕士及以上,MBA及以上,博士及以上",
 })
 
-POSITION_LIST_TITLE_DEFAULT = "我要求职"
+POSITION_LIST_TITLE_DEFAULT = "热招职位"
 POSITION_LIST_TITLE_RECOMLIST = "我要推荐"

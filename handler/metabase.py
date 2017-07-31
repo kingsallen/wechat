@@ -143,6 +143,15 @@ class MetaBaseHandler(AtomHandler):
 
         self._log_info.update(dict(value))
 
+    @property
+    def remote_ip(self):
+        ret = (self.request.headers.get('Remoteip') or
+               self.request.headers.get('X-Real-Ip') or
+               self.request.remote_ip or
+               '')
+
+        return ret
+
     # noinspection PyTypeChecker
     def _get_params(self):
         """To get all GET or POST arguments from http request
@@ -414,11 +423,7 @@ class MetaBaseHandler(AtomHandler):
             opt_time="%.2f" % ((time.time() - self._start_time) * 1000),
             useragent=request.headers.get('User-Agent'),
             referer=request.headers.get('Referer'),
-            remote_ip=(
-                request.headers.get('Remoteip') or
-                request.headers.get('X-Real-Ip') or
-                request.remote_ip
-            ),
+            remote_ip=self.remote_ip,
             event="{}_{}".format(self._event, request.method),
             cookie=_readable_cookies(),
             user_id=user_id,

@@ -1,11 +1,5 @@
 # coding=utf-8
 
-# @Time    : 1/22/17 11:06
-# @Author  : panda (panyuxin@moseeker.com)
-# @File    : usercenter.py
-# @DES     :
-
-# Copyright 2016 MoSeeker
 
 from tornado import gen
 
@@ -13,6 +7,7 @@ from service.page.base import PageService
 from util.common import ObjectDict
 from util.tool.str_tool import gen_salary
 from util.tool.date_tool import jd_update_date, str_2_date
+
 
 class UsercenterPageService(PageService):
 
@@ -63,13 +58,17 @@ class UsercenterPageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def post_register(self, mobile, password):
-        """用户注册
-        :param mobile: 手机号
-        :param password: 密码
-        """
+    def post_register(self, user_creation_form):
+        """用户注册"""
 
-        ret = yield self.infra_user_ds.post_register(mobile, password)
+        params = ObjectDict({
+            'username':    user_creation_form.username,
+            'mobile':      user_creation_form.mobile,
+            'password':    user_creation_form.password,
+            'register_ip': user_creation_form.register_ip
+        })
+
+        ret = yield self.infra_user_ds.post_register(params)
         raise gen.Return(ret)
 
     @gen.coroutine
