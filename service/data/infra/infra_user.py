@@ -5,7 +5,7 @@ import tornado.gen as gen
 from service.data.base import DataService
 import conf.path as path
 from util.common import ObjectDict
-from util.tool.http_tool import http_get, http_post, http_put
+from util.tool.http_tool import http_get, http_post, http_put, unboxing
 
 
 class InfraUserDataService(DataService):
@@ -183,3 +183,15 @@ class InfraUserDataService(DataService):
 
         ret = yield http_post(path.INFRA_USER_SETTINGS, params)
         return ret
+
+    @gen.coroutine
+    def is_valid_employee(self, user_id, company_id):
+        params = {
+            "userId": int(user_id),
+            "companyId": int(company_id)
+        }
+
+        res = yield http_get(path.INFRA_USER_EMPLOYEE_CHECK, params)
+        ret, data = unboxing(res)
+
+        return data.result if ret else False
