@@ -11,7 +11,7 @@ from util.common import ObjectDict
 class JobPositionDataService(DataService):
 
     @gen.coroutine
-    def get_position(self, conds, fields=None, appends=None):
+    def get_position(self, conds, fields=None):
 
         fields = fields or []
 
@@ -23,7 +23,7 @@ class JobPositionDataService(DataService):
         if not fields:
             fields = list(self.job_position_dao.fields_map.keys())
 
-        response = yield self.job_position_dao.get_record_by_conds(conds, fields, appends)
+        response = yield self.job_position_dao.get_record_by_conds(conds, fields)
         raise gen.Return(response)
 
     @cache(ttl=60)

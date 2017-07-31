@@ -10,16 +10,13 @@ import conf.common as const
 import conf.path as path
 import conf.wechat as wx_const
 from cache.user.passport_session import PassportCache
-
 from handler.metabase import MetaBaseHandler
-
+from oauth.wechat import WeChatOauth2Service, WeChatOauthError, JsApi
 from util.common import ObjectDict
 from util.common.cipher import decode_id
 from util.common.decorator import check_signature
 from util.tool.str_tool import to_str, from_hex, match_session_id
 from util.tool.url_tool import url_subtract_query, make_url
-
-from oauth.wechat import WeChatOauth2Service, WeChatOauthError, JsApi
 
 
 class NoSignatureError(Exception):

@@ -171,11 +171,7 @@ class WechatTemplateMessager(object):
         """
         # 获取模板id
         template = yield self.hr_wx_template_message_ds.get_wx_template(
-            conds={
-                "wechat_id":       wechat_id,
-                "sys_template_id": sys_template_id,
-                "disable":         const.NO
-            })
+            conds={"wechat_id": wechat_id, "sys_template_id": sys_template_id})
         if not template:
             raise WechatNoTemplateError()
         raise gen.Return(template)

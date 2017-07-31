@@ -13,7 +13,9 @@ class SharechainPageService(PageService):
         super().__init__()
 
     @gen.coroutine
-    def refresh_share_chain(self, presentee_user_id=None, position_id=None,
+    def refresh_share_chain(self,
+                            presentee_user_id=None,
+                            position_id=None,
                             share_chain_parent_id=None):
         """
         对给定的 presentee_user_id 和 position_id 做链路原数据的入库操作
@@ -121,8 +123,14 @@ class SharechainPageService(PageService):
         })
         company_id = position.company_id
 
-        is_valid_employee = yield self.infra_user_ds.is_valid_employee(user_id, company_id)
-        return is_valid_employee
+        employee = yield self.user_employee_ds.get_employee({
+            "sysuser_id": user_id,
+            "company_id": company_id,
+            "activation": const.OLD_YES,
+            "disable": const.OLD_YES,
+            "status": const.OLD_YES
+        })
+        raise gen.Return(bool(employee))
 
     @gen.coroutine
     def _no_existed_record(self, share_record):
@@ -189,7 +197,8 @@ class SharechainPageService(PageService):
         if not no_existed_record:
             return ret
 
-        self.logger.debug("[SC]last_share_record: %s" % last_share_record)
+        self.logger.debug(
+            "[SC]last_share_record: %s" % last_share_record)
 
         position_id = last_share_record.position_id
 
@@ -370,32 +379,26 @@ class SharechainPageService(PageService):
             "id": share_chain_id
         })
 
-        if not share_chain:
+        if not share_chain or not share_chain.parent_id:
             return False
 
-        if share_chain.parent_id:
-            parent_share_chain = yield self.candidate_share_chain_ds.get_share_chain({
-                "id": share_chain.parent_id
-            })
+        parent_share_chain = yield self.candidate_share_chain_ds.get_share_chain({
+            "id": share_chain.parent_id
+        })
 
-            valid_employee = yield self._is_valid_employee(
-                parent_share_chain.position_id,
-                parent_share_chain.recom_user_id)
+        valid_employee = yield self._is_valid_employee(
+            parent_share_chain.position_id,
+            parent_share_chain.recom_user_id)
 
-            raise gen.Return(
-                parent_share_chain and
-                (
-                    parent_share_chain.depth == 0 or
-                    parent_share_chain.depth == 1 and
-                    valid_employee and
-                    parent_share_chain.parent_id == 0
-                )
+        raise gen.Return(
+            parent_share_chain and
+            (
+                parent_share_chain.depth == 0 or
+                parent_share_chain.depth == 1 and
+                valid_employee and
+                parent_share_chain.parent_id == 0
             )
-        else:
-            valid_employee = yield self._is_valid_employee(
-                share_chain.position_id,
-                share_chain.recom_user_id)
-            return valid_employee
+        )
 
     @gen.coroutine
     def find_last_psc(self, position_id, presentee_user_id):

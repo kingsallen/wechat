@@ -50,8 +50,8 @@ class EmployeePageService(PageService):
             user_id, company_id)
         return employee_response.bindStatus, employee_response.employee
 
-    @staticmethod
-    def convert_bind_status_from_thrift_to_fe(thrift_bind_status):
+
+    def convert_bind_status_from_thrift_to_fe(self, thrift_bind_status):
         """convert bind status value to FE format"""
         fe_bind_status = fe.FE_EMPLOYEE_BIND_STATUS_DEFAULT_INVALID
 
@@ -122,12 +122,6 @@ class EmployeePageService(PageService):
             data.employeeid = employee.id
             data.name = employee.cname
 
-        # 当前是 pending 状态
-        elif bind_status == BindStatus.PENDING:
-            data.name = employee.cname
-            data.mobile = employee.mobile
-            data.binding_status = fe.FE_EMPLOYEE_BIND_STATUS_PENDING
-
         # 当前是未绑定状态
         else:
             # 否则，调用基础服务判断当前用户的认证状态：没有认证还是 pending 中
@@ -138,6 +132,7 @@ class EmployeePageService(PageService):
 
             elif bind_status == const.EMPLOYEE_BIND_STATUS_EMAIL_PENDING:
                 data.binding_status = fe.FE_EMPLOYEE_BIND_STATUS_PENDING
+
             else:
                 data.binding_status = fe.FE_EMPLOYEE_BIND_STATUS_DEFAULT_INVALID
 

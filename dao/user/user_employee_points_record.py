@@ -1,5 +1,6 @@
 # coding=utf-8
 
+# Copyright 2016 MoSeeker
 
 from dao.base import BaseDao
 

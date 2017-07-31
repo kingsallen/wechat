@@ -125,7 +125,9 @@ class RedpacketPageService(PageService):
 
         # 校验当前职位是否是属于当前公众号的公司
         if current_user.wechat.company_id != position.company_id:
-            self.logger.debug("[RP] position not belong to the wechat.company_id, return False")
+            self.logger.debug(
+                "[RP] position not belong to the wechat.company_id, "
+                "return False")
             return False
 
         check_hb_status_passed = False
@@ -165,30 +167,11 @@ class RedpacketPageService(PageService):
         """对于 user_id, company_id
         发送员工认证红包
         """
-
-        # 先确认公司是否属于集团公司
-        belongs_to_group = yield self.infra_company_ds.belongs_to_group_company(company_id)
-        if belongs_to_group:
-            # 获取集团公司 id 后构建 company_id
-            company_list = yield self.infra_company_ds.get_group_company_list(company_id)
-            company_ids = [c.id for c in company_list]
-        else:
-            company_ids = [company_id]
-
-        # 构建一个 SQL where-in 子句
-        appends = [" and company_id in %s" % set_literl(company_ids)]
-
-        # 8<------8<------8<------8<------8<------8<------8<------8<------8<---
-        # 现在兄弟公司的员工认证红包／推荐红包可以在不同的兄弟公司之间同时开多个（但是每个公司中的该类红包活动同时进行依然只有一个）
-        # 集团公司员工拿哪个兄弟公司红包活动的红包 取决于 当前的兄弟公司公司（即当前的微信公众号）
         # 校验红包活动
         rp_config = yield self.hr_hb_config_ds.get_hr_hb_config(
-            conds={
-                'type':       const.RED_PACKET_TYPE_EMPLOYEE_BINDING,
-                'status':     const.HB_CONFIG_RUNNING,
-                'company_id': company_id
-            })
-        # 8<------8<------8<------8<------8<------8<------8<------8<------8<---
+            {'company_id': company_id,
+             'type':       const.RED_PACKET_TYPE_EMPLOYEE_BINDING,
+             'status':     const.HB_CONFIG_RUNNING})
 
         self.logger.debug("rp_config: %s" % rp_config)
 
@@ -196,23 +179,17 @@ class RedpacketPageService(PageService):
             self.logger.debug('[RP]员工认证红包活动不存在, company_id: %s' % company_id)
             return
 
-        # 复写 company_id 为红包活动的 company_id
-        # 因为有可能兄弟公司使用了集团公司内的其他公司的正在进行的红包活动
-        company_id = rp_config.company_id
-
         # 校验员工信息
-        employee = yield self.user_employee_ds.get_employee(
-            conds={
-                'sysuser_id': user_id,
-                'company_id': company_id,
-                'activation': const.OLD_YES,
-                'disable':    const.OLD_YES,
-                'is_rp_sent': const.NO
-            }, appends=appends)
-
+        employee = yield self.user_employee_ds.get_employee({
+            'sysuser_id': user_id,
+            'company_id': company_id,
+            'activation': const.OLD_YES,
+            'status':     const.OLD_YES,
+            'disable':    const.OLD_YES,
+            'is_rp_sent': const.NO
+        })
         if not employee:
-            self.logger.debug(
-                '[RP]员工绑定状态不正确或红包已经发送过, user_id: %s' % user_id)
+            self.logger.debug('[RP]员工绑定状态不正确或红包已经发送过, user_id: %s, company_id: %s' % (user_id, company_id))
             return
 
         # 员工认证红包不需要校验上限
@@ -280,56 +257,31 @@ class RedpacketPageService(PageService):
                                 realname, position_title):
         """推荐类红包入口"""
 
-        company_id = recom_current_user.company.id
-
-        # 先确认公司是否属于集团公司
-        belongs_to_group = yield self.infra_company_ds.belongs_to_group_company(
-            company_id)
-        if belongs_to_group:
-            # 获取集团公司 id 后构建 company_id
-            company_list = yield self.infra_company_ds.get_group_company_list(
-                company_id)
-            company_ids = [c.id for c in company_list]
-        else:
-            company_ids = [company_id]
-
-        # 构建一个 SQL where-in 子句
-        appends = [" and company_id in %s" % set_literl(company_ids)]
-
-        # 8<------8<------8<------8<------8<------8<------8<------8<------8<---
-        # 现在兄弟公司的员工认证红包／推荐红包可以在不同的兄弟公司之间同时开多个（但是每个公司中的该类红包活动同时进行依然只有一个）
-        # 集团公司员工拿哪个兄弟公司红包活动的红包 取决于 当前的兄弟公司公司（即当前的微信公众号）
         # 校验红包活动
-        rp_config = yield self.hr_hb_config_ds.get_hr_hb_config(
-            conds={
-                'type':   const.RED_PACKET_TYPE_RECOM,
-                'status': const.HB_CONFIG_RUNNING,
-                'company_id': company_id
-            })
-        # 8<------8<------8<------8<------8<------8<------8<------8<------8<---
-
-        self.logger.debug("rp_config: %s" % rp_config)
+        rp_config = yield self.hr_hb_config_ds.get_hr_hb_config({
+            'company_id': recom_current_user.company.id,
+            'type':       const.RED_PACKET_TYPE_RECOM,
+            'status':     const.HB_CONFIG_RUNNING
+        })
 
         if not rp_config:
             self.logger.debug('[RP]推荐红包活动不存在, company_id: %s' %
                               recom_current_user.company.id)
             return
 
-        # 复写 company_id 为红包活动的 company_id
-        # 因为有可能兄弟公司使用了集团公司内的其他公司的正在进行的红包活动
-        company_id = rp_config.company_id
-
         # 校验员工信息
-        employee = yield self.user_employee_ds.get_employee(
-            conds={
-                'sysuser_id': recom_current_user.sysuser.id,
-                'activation': const.OLD_YES,
-                'disable':    const.OLD_YES
-            }, appends=appends)
-
+        employee = yield self.user_employee_ds.get_employee({
+            'sysuser_id': recom_current_user.sysuser.id,
+            'company_id': recom_current_user.company.id,
+            'activation': const.OLD_YES,
+            'status':     const.OLD_YES,
+            'disable':    const.OLD_YES
+        })
         if not employee:
             self.logger.debug(
-                '[RP]员工绑定状态不正确, user_id: %s' % recom_current_user.sysuser.id)
+                '[RP]员工绑定状态不正确, user_id: %s, company_id: %s' % (
+                    recom_current_user.sysuser.id,
+                    recom_current_user.company.id))
             return
 
         recom_record = yield self.candidate_recom_record_ds.get_candidate_recom_record(
@@ -341,6 +293,7 @@ class RedpacketPageService(PageService):
 
         self.logger.debug("[RP]推荐红包开始")
 
+        company_id = recom_current_user.company.id
         user_id = recom_current_user.sysuser.id
         recom_wechat = recom_current_user.wechat
         recom_wxuser = recom_current_user.wxuser
@@ -352,11 +305,17 @@ class RedpacketPageService(PageService):
             recom_wxuser = ObjectDict()
             recom_wxuser.openid = 0
 
+
         self.logger.debug('[RP] company_id: %s' % company_id)
         self.logger.debug('[RP] user_id: %s' % user_id)
         self.logger.debug('[RP] recom_wechat: %s' % recom_wechat)
         self.logger.debug('[RP] recom_wxuser: %s' % recom_wxuser)
         self.logger.debug('[RP] recom_qxuser: %s' % recom_qxuser)
+
+        throttle_passed = yield self.__check_throttle_passed(rp_config, recom_qxuser.id)
+        if not throttle_passed:
+            self.logger.debug('[RP]throttle上限校验失败, company_id: %s， user_id: %s' % (company_id, user_id))
+            return
 
         rplock_key = const.RP_RECOM_LOCK_FMT % (rp_config.id, user_id)
         if redislocker.incr(rplock_key) is FIRST_LOCK:
@@ -586,7 +545,14 @@ class RedpacketPageService(PageService):
         if send_to_employee or matches:
             self.logger.debug("[RP]用户是发送红包对象,准备掷骰子")
 
+            throttle_passed = yield self.__check_throttle_passed(
+                red_packet_config, recom_qx_wxuser.id, position=position)
 
+            if not throttle_passed:
+                self.logger.debug("[RP]全局上限验证不通过, 暂停发送")
+                raise gen.Return(None)
+
+            self.logger.debug("[RP]全局上限验证通过")
 
             if self.__hit_red_packet(red_packet_config.probability):
                 self.logger.debug("[RP]掷骰子通过,准备发送红包信封(有金额)")
@@ -634,7 +600,7 @@ class RedpacketPageService(PageService):
         非员工且以前没领过红包返回 True
         非员工且以前领过红包返回 False
         """
-        is_employee = yield self.infra_user_ds.is_valid_employee(
+        is_employee = yield self.__is_wxuser_employee_of_wechat(
             recom_user_id, hb_config.company_id)
         if is_employee:
             self.logger.debug("[RP]当前红包发送对象是员工,跳过非员工红包检查")
@@ -649,6 +615,18 @@ class RedpacketPageService(PageService):
                 self.logger.debug("[RP]当前非员工没有拿过红包")
 
             raise gen.Return(not item)
+
+    @gen.coroutine
+    def __is_wxuser_employee_of_wechat(self, user_id, company_id):
+        """判断 user_id 是否是该公司的员工"""
+        employee = yield self.user_employee_ds.get_employee({
+            "sysuser_id": user_id,
+            "company_id": company_id,
+            "activation": const.OLD_YES,
+            "disable": const.NO,
+            "status": const.OLD_YES
+        })
+        raise gen.Return(bool(employee))
 
     @gen.coroutine
     def __get_sent_item_by_qx_wxuser_id(self, hb_config_id, wxuser_id):
@@ -677,7 +655,7 @@ class RedpacketPageService(PageService):
             raise gen.Return(wxuser and wxuser.is_subscribe)
 
         else:
-            is_employee = yield self.infra_user_ds.is_valid_employee(
+            is_employee = yield self.__is_wxuser_employee_of_wechat(
                 recom_user.id, rp_config.company_id)
 
             if rp_config.target == const.RED_PACKET_CONFIG_TARGET_EMPLOYEE:
@@ -695,23 +673,31 @@ class RedpacketPageService(PageService):
                     raise gen.Return(is_1degree)
 
     @gen.coroutine
-    def __check_throttle_passed(self, red_packet_config, wxuser_id,
-                                next_rp_item):
+    def __check_throttle_passed(self, red_packet_config, wxuser_id, position=None):
         """该用户目前拿到的红包的总金额加上下个红包金额是否超过该公司单次活动金额上限
-        员工认证红包跳过此检查
         """
         if not wxuser_id:
-            return False
-
-        if red_packet_config.type == const.RED_PACKET_TYPE_EMPLOYEE_BINDING:
-            return True
+            raise gen.Return(False)
 
         # 现在到手的红包总金额
         amount = yield self.__get_amount_sum_config_id_and_wxuser_id(
             red_packet_config.id, wxuser_id)
         current_amount_sum = amount if amount else 0
 
-        next_amount = next_rp_item.amount
+        # 下一个红包金额
+        if position:
+            next_red_packet = yield self.__get_next_rp_item(
+                red_packet_config.id, red_packet_config.type,
+                position_id=position.id)
+        else:
+            next_red_packet = yield self.__get_next_rp_item(
+                red_packet_config.id, red_packet_config.type)
+
+        if not next_red_packet:
+            # 直接返回 True 这样可以在后续发送消息模版之前判断并结束活动
+            return True
+
+        next_amount = next_red_packet.amount
         company_conf = yield self.hr_company_conf_ds.get_company_conf({
             "company_id": red_packet_config.company_id
         })
@@ -782,7 +768,7 @@ class RedpacketPageService(PageService):
         :param recom_openid:
         :param recom_wechat_id:
         :param red_packet_config:
-        :param recom_qxuser_id:
+        :param recom_qxuser_id: 
         :param current_qxuser_id:
         :param position: 职位信息
         :return:
@@ -830,15 +816,6 @@ class RedpacketPageService(PageService):
                 yield self.__finish_hb_config(red_packet_config.id)
 
             return
-
-        throttle_passed = yield self.__check_throttle_passed(
-            red_packet_config, recom_qxuser_id, rp_item)
-
-        if not throttle_passed:
-            self.logger.debug('[RP]throttle上限校验失败, hb_config_id: %s， recom_qxuser_id: %s' % (red_packet_config.id, recom_qxuser_id))
-            return
-        else:
-            self.logger.debug("[RP]全局上限验证通过")
 
         if red_packet_config.type in [0, 1]:
             bagging_openid = current_qxuser_openid
@@ -1019,13 +996,11 @@ class RedpacketPageService(PageService):
             position_ids = [b.position_id for b in binding_list]
 
         position_list = yield self.job_position_ds.get_positions_list(
-            conds=" id in %s" % set_literl(position_ids))
+            conds="id in %s" % set_literl(position_ids))
 
-        if position_list:
-            position_list = [x for x in position_list if x.hb_status > 0]
-            raise gen.Return(position_list)
-        else:
-            return None
+        position_list = [x for x in position_list if x.hb_stauts > 0]
+
+        raise gen.Return(position_list)
 
     @gen.coroutine
     def __finish_hb_config(self, hb_config_id):

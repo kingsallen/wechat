@@ -291,3 +291,8 @@ def is_odd(obj):
     """
     test = int(obj)
     return test & 1 == 1
+
+if __name__ == "__main__":
+
+    res = trunc("新东方教育科技集团厦门学院", 50)
+    print(res)

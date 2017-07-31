@@ -1,7 +1,13 @@
 # coding=utf-8
 
-from tornado import gen
+"""
+:author 马超（machao@moseeker.com）
+:date 2016.10.11
+
+"""
 import ujson
+
+from tornado import gen
 
 import conf.common as const
 from handler.base import BaseHandler
@@ -13,7 +19,6 @@ from util.tool.str_tool import add_item
 
 
 class CompanyVisitReqHandler(BaseHandler):
-
     @handle_response
     @check_sub_company
     @authenticated
@@ -34,7 +39,6 @@ class CompanyVisitReqHandler(BaseHandler):
 
 
 class CompanyFollowHandler(BaseHandler):
-
     @handle_response
     @check_sub_company
     @authenticated
@@ -55,7 +59,6 @@ class CompanyFollowHandler(BaseHandler):
 
 
 class CompanyHandler(BaseHandler):
-
     @handle_response
     @NewJDStatusCheckerAddFlag()
     @check_sub_company
@@ -131,7 +134,6 @@ class CompanyInfoRedirectHandler(BaseHandler):
 
 
 class CompanySurveyHandler(BaseHandler):
-
     @handle_response
     @authenticated
     @gen.coroutine
