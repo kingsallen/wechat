@@ -276,3 +276,14 @@ class CompanyPageService(PageService):
         yield self.hr_company_ds.update_company(conds, fields)
 
         return True
+
+    @gen.coroutine
+    def belongs_to_group_company(self, company_id) -> bool:
+        res = yield self.infra_company_ds.belongs_to_group_company(company_id)
+        return res
+
+    @gen.coroutine
+    def get_group_company_list(self, company_id) -> list:
+        res = yield self.infra_company_ds.get_group_company_list(company_id)
+
+        return res

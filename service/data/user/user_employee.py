@@ -11,7 +11,7 @@ from util.common import ObjectDict
 class UserEmployeeDataService(DataService):
 
     @gen.coroutine
-    def get_employee(self, conds, fields=None):
+    def get_employee(self, conds, fields=None, appends=None):
 
         if not self._valid_conds(conds):
             self.logger.warning("Warning:[get_employee][invalid parameters], Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
@@ -20,7 +20,8 @@ class UserEmployeeDataService(DataService):
         if not fields:
             fields = list(self.user_employee_dao.fields_map.keys())
 
-        response = yield self.user_employee_dao.get_record_by_conds(conds, fields)
+        response = yield self.user_employee_dao.get_record_by_conds(
+            conds=conds, fields=fields, appends=appends)
         raise gen.Return(response)
 
     @gen.coroutine
@@ -36,4 +37,3 @@ class UserEmployeeDataService(DataService):
             fields=fields)
 
         raise gen.Return(ret)
-

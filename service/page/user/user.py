@@ -263,13 +263,38 @@ class UserPageService(PageService):
 
     @gen.coroutine
     def get_valid_employee_by_user_id(self, user_id, company_id):
-        ret = yield self.user_employee_ds.get_employee({
-            "sysuser_id": user_id,
-            "disable":    const.OLD_YES,
-            "activation": const.OLD_YES,
-            "company_id": company_id
-        })
-        raise gen.Return(ret)
+        """ 根据 user_id, company_id 找到合法的员工数据
+        
+        在 company_id 属于集团公司时，
+        获取到的员工的 company_id 属性可能和参数中的 company_id 不同
+        此时员工数据会带着 group_company_id 属性
+        :param user_id: 当前用户id
+        :param company_id: 当前公众号的 company_id
+        """
+
+        check_group_passed = yield self.infra_user_ds.is_valid_employee(
+            user_id, company_id)
+
+        if not check_group_passed:
+            return ObjectDict()
+
+        ret = yield self.user_employee_ds.get_employee(
+            conds={
+                "sysuser_id": user_id,
+                "disable":    const.OLD_YES,
+                "activation": const.OLD_YES
+            })
+
+        # 可能查到多条关系记录，但是他们的 group_company_id 应该是一样的
+        # 在此不做过多校验
+        if ret and ret.company_id != company_id:
+            group_company_rel = yield self.hr_group_company_rel_ds.get_hr_group_company_rel(
+                conds={"company_id": company_id}
+            )
+
+            ret.group_company_id = group_company_rel.group_id
+
+        return ret
 
     @gen.coroutine
     def get_employee_total_points(self, employee_id):
@@ -433,11 +458,7 @@ class UserPageService(PageService):
         return http_tool.unboxing(res)
 
     @gen.coroutine
-    def employee_add_reward(self,
-                            employee_id,
-                            company_id,
-                            position_id,
-                            berecom_user_id,
+    def employee_add_reward(self, employee_id, company_id, position_id, berecom_user_id,
                             award_type=const.EMPLOYEE_AWARD_TYPE_DEFAULT_ERROR,
                             **kw):
         """给员工添加积分的公共方法
@@ -460,18 +481,14 @@ class UserPageService(PageService):
             'disable':    const.OLD_YES
         })
         if not employee:
+            self.logger.warning("Cannot find employee by id: %s" % employee_id)
             return
 
         # 获取积分模版对应的所需增加积分数 award_points
         type_templateid_mapping = {
-            const.EMPLOYEE_AWARD_TYPE_SHARE_CLICK:
-                const.RECRUIT_STATUS_RECOMCLICK_ID,
-
-            const.EMPLOYEE_AWARD_TYPE_SHARE_APPLY:
-                const.RECRUIT_STATUS_APPLY_ID,
-
-            const.EMPLOYEE_AWARD_TYPE_RECOM:
-                const.RECRUIT_STATUS_FULL_RECOM_INFO_ID
+            const.EMPLOYEE_AWARD_TYPE_SHARE_CLICK: const.RECRUIT_STATUS_RECOMCLICK_ID,
+            const.EMPLOYEE_AWARD_TYPE_SHARE_APPLY: const.RECRUIT_STATUS_APPLY_ID,
+            const.EMPLOYEE_AWARD_TYPE_RECOM: const.RECRUIT_STATUS_FULL_RECOM_INFO_ID
         }
 
         template_id = type_templateid_mapping.get(award_type)
@@ -497,25 +514,26 @@ class UserPageService(PageService):
             "berecom_user_id":   berecom_user_id
         }
 
-        yield self.user_employee_points_record_ds.create_user_employee_points_record(
-            fields=fields
-        )
+        send_record_inserted_id = yield self.user_employee_points_record_ds.create_user_employee_points_record(fields=fields)
 
-        # 修改 user_employee.award
+        # 更新 user_employee.award
         yield self.user_employee_ds.update_employee(
             conds={'id': employee_id},
             fields={'award': int(employee.award + award_points)}
         )
+
+        # 插入积分公司关系表
+        if send_record_inserted_id:
+            fields = {
+                "company_id":                company_id,
+                "employee_points_record_id": send_record_inserted_id
+            }
+            yield self.user_employee_points_record_company_rel_ds.create_user_employee_points_record_company_rel(fields=fields)
         return
 
     @gen.coroutine
     def add_user_viewed_position(self, user_id, position_id):
-        """
-        添加用户已阅读职位，Gamma 使用
-        :param user_id:
-        :param position_id:
-        :return:
-        """
+        """ 添加用户已阅读职位，Gamma 使用 """
 
         if not user_id or not position_id:
             return False
