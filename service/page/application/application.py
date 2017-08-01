@@ -629,7 +629,6 @@ class ApplicationPageService(PageService):
             if recommender_user_id:
                 recom_employee = yield self.user_employee_ds.get_employee(conds={
                     "sysuser_id": current_user.sysuser.id,
-                    "status":     const.NO,
                     "disable":    const.NO,
                     "activation": const.NO,
                 })
