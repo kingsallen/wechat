@@ -56,5 +56,19 @@ class ReleasedPositionHandler(BaseHandler):
 
             item['resume_num'] = count.get("count_id", 0)
 
+        # ---8<---8<--- KA 用户跳转到企业号 start ---8<---8<---8<---8<---
+        signature = None
+        company_id = hr_info.company_id
+        company_info = yield self.company_ps.get_company(
+            conds={'id': company_id})
+        company_type = company_info.type
+
+        if company_type == 0:
+            wechat_info = yield self.wechat_ps.get_wechat(
+                conds={'company_id': company_id})
+            if wechat_info:
+                signature = wechat_info.signature
+        # ---8<---8<--- KA 用户跳转到企业号 end ---8<---8<---8<---8<---
+
         self.render(template_name="refer/weixin/wx_published_position_list/wx_published_position_list.html",
-                    positions = positions_list)
+                    positions = positions_list, signature=signature)
