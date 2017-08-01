@@ -115,11 +115,6 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
     @gen.coroutine
     def _opt_get_voice_register_code(self):
 
-        check_pass, message = self._check_vocde()
-        if not check_pass and message:
-            self.send_json_error(message=message)
-            return
-
         result = yield self.cellphone_ps.send_voice_code_for_register(
             self.params.get('mobile')
         )
