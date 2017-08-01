@@ -220,7 +220,6 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
                 self.send_json_error(message=msg.CELLPHONE_INVALID_MOBILE)
                 raise gen.Return()
 
-            valid_type = const.MOBILE_CODE_OPT_TYPE.code_register
         else:
             # 普通注册
             if ret.status != const.API_SUCCESS or ret.data.exist:
@@ -228,7 +227,7 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
                 self.send_json_error(message=msg.CELLPHONE_MOBILE_HAD_REGISTERED)
                 raise gen.Return()
 
-            valid_type = const.MOBILE_CODE_OPT_TYPE.forget_password
+        valid_type = const.MOBILE_CODE_OPT_TYPE.forget_password
 
         result = yield self.cellphone_ps.send_valid_code(
             self.params.mobile,
