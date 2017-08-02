@@ -91,7 +91,7 @@ common_routes = [
     (r"/api/position/star/?",                        handler.common.position.PositionStarHandler,               {"event": "position_star"}),
     (r"/api/chat/unread[\/]*([0-9]+)*",              handler.common.im.UnreadCountHandler,                      {"event": "chat_"}),
     (r"/api/mobilebinded",                           handler.common.usercenter.UserMobileBindedHandler,         {"event": "user_usermobilebinded"}),
-    (r"/api/cellphone[\/]*([a-z]+)*",                handler.common.cellphone.CellphoneBindHandler,             {"event": "cellphone_"}),
+    (r"/api/cellphone[\/]*([a-z_]+)*",               handler.common.cellphone.CellphoneBindHandler,             {"event": "cellphone_"}),
     (r"/api/user/currentinfo/update",                handler.common.interest.UserCurrentUpdateHandler,          {"event": "user_currentupdate"}),
     (r"/api/user/currentinfo",                       handler.common.interest.UserCurrentInfoHandler,            {"event": "user_currentinfo"}),
     (r"/api/upload/([a-z_]*)",                       handler.common.usercenter.UploadHandler,                   {"event": "image_"}),
