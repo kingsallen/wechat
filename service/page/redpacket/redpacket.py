@@ -1154,7 +1154,7 @@ class RedpacketPageService(PageService):
         })
 
         company = yield self.hr_company_ds.get_company({
-            "id": wechat.company_id
+            "id": rp_config.company_id
         })
 
         company_abb = company.abbreviation
