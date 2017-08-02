@@ -119,7 +119,7 @@ class CompanyInfoRedirectHandler(BaseHandler):
             maybe_sub_company = yield self.team_ps.get_sub_company(did)
             if maybe_sub_company and maybe_sub_company.parent_id == current_company_id:
                 # 是子公司
-                params.update({"did": did})
+                params.update({"did": str(did)})
             else:
                 # 不是子公司 或 公司不存在, 不给看
                 self.write_error(404)
