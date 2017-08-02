@@ -255,10 +255,10 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
 
         if self.params.code_type == 1:
             # 忘记密码
-            valid_type = const.MOBILE_CODE_OPT_TYPE.code_register
+            valid_type = const.MOBILE_CODE_OPT_TYPE.forget_password
         else:
             # 普通注册
-            valid_type = const.MOBILE_CODE_OPT_TYPE.forget_password
+            valid_type = const.MOBILE_CODE_OPT_TYPE.code_register
 
         # 验证验证码
         verify_response = yield self.cellphone_ps.verify_mobile(
