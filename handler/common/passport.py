@@ -219,6 +219,7 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
                 # 手机号不存在，无法修改密码
                 self.send_json_error(message=msg.CELLPHONE_INVALID_MOBILE)
                 raise gen.Return()
+            valid_type = const.MOBILE_CODE_OPT_TYPE.forget_password
 
         else:
             # 普通注册
@@ -227,7 +228,7 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
                 self.send_json_error(message=msg.CELLPHONE_MOBILE_HAD_REGISTERED)
                 raise gen.Return()
 
-        valid_type = const.MOBILE_CODE_OPT_TYPE.forget_password
+            valid_type = const.MOBILE_CODE_OPT_TYPE.code_register
 
         result = yield self.cellphone_ps.send_valid_code(
             self.params.mobile,
