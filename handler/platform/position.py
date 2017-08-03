@@ -15,7 +15,7 @@ from util.common.decorator import handle_response, check_employee, NewJDStatusCh
 from util.tool.str_tool import gen_salary, add_item, split
 from util.tool.url_tool import url_append_query
 from util.wechat.template import position_view_five_notice_tpl, position_share_notice_employee_tpl
-
+from globals import award_publisher
 
 class PositionHandler(BaseHandler):
 
@@ -140,8 +140,12 @@ class PositionHandler(BaseHandler):
                 # 转发积分
                 if last_employee_user_id:
                     self.logger.debug("[JD]转发积分操作")
-                    yield self._make_add_reward_click(
-                        position_info, last_employee_user_id)
+                    award_publisher.add_awards_click_jd(
+                        company_id=position_info.company_id,
+                        position_id=position_id,
+                        recomUserId=last_employee_user_id,
+                        berecomUserId=self.current_user.sysuser.id
+                    )
 
                 # 红包处理
                 self.logger.debug("[JD]红包处理")

@@ -3,7 +3,6 @@
 import functools
 import json
 import re
-import traceback
 import uuid
 
 from tornado import gen
@@ -28,7 +27,7 @@ from util.tool.pdf_tool import save_application_file, get_create_pdf_by_html_cmd
 from util.tool.str_tool import trunc
 from util.tool.url_tool import make_url,make_static_url
 from util.wechat.template import application_notice_to_applier_tpl, application_notice_to_recommender_tpl, application_notice_to_hr_tpl
-
+from globals import award_publisher
 
 class ApplicationPageService(PageService):
 
@@ -641,6 +640,7 @@ class ApplicationPageService(PageService):
     @gen.coroutine
     def opt_add_reward(self, apply_id, current_user):
         """ 申请添加积分 """
+
         self.logger.debug("[opt_add_reward]start")
 
         application = yield self.get_application_by_id(apply_id)
@@ -649,25 +649,14 @@ class ApplicationPageService(PageService):
 
         recommender_user_id = application.recommender_user_id
 
-        recom_employee = yield self.user_employee_ds.get_employee(
-            conds={
-                'sysuser_id': recommender_user_id,
-                'company_id': current_user.company.id,
-                'activation': const.OLD_YES,
-                'disable': const.OLD_YES
-            }, fields=['id'])
-        if not recom_employee:
-            return
+        if recommender_user_id:
+            award_publisher.add_awards_apply(
+                company_id=application.company_id,
+                position_id=application.position_id,
+                recom_user_id=recommender_user_id,
+                be_recom_user_id=current_user.sysuser.id
+            )
 
-        user_ps = UserPageService()
-        yield user_ps.employee_add_reward(
-            employee_id=recom_employee.id,
-            company_id=current_user.company.id,
-            position_id=application.position_id,
-            berecom_user_id=current_user.sysuser.id,
-            award_type=const.EMPLOYEE_AWARD_TYPE_SHARE_APPLY,
-            application_id=application.id
-        )
         self.logger.debug("[opt_add_reward]end")
 
     @gen.coroutine
