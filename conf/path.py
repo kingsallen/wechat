@@ -118,5 +118,5 @@ MESSAGE_TEMPLATE = "message/template"
 # ============================ 基础服务结束 ============================
 
 # 其他外部服务
-LINKEDIN_ACCESSTOKEN = "https://www.linkedin.com/uas/oauth2/accessToken"
-LINKEDIN_AUTH = "/uas/oauth2/authorization"
+LINKEDIN_ACCESSTOKEN = "https://www.linkedin.com/oauth/v2/accessToken"
+LINKEDIN_AUTH = "/oauth/v2/authorization"
