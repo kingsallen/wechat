@@ -33,6 +33,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('  RewardsResponse getEmployeeRewards(i32 employeeId, i32 companyId)')
     print('   getEmployeeRecoms(i32 recomId)')
     print('  Result emailActivation(string activationCodee)')
+    print('   awardRanking(i32 employeeId, i32 companyId, Timespan timespan)')
     print('')
     sys.exit(0)
 
@@ -165,6 +166,12 @@ elif cmd == 'emailActivation':
         print('emailActivation requires 1 args')
         sys.exit(1)
     pp.pprint(client.emailActivation(args[0],))
+
+elif cmd == 'awardRanking':
+    if len(args) != 3:
+        print('awardRanking requires 3 args')
+        sys.exit(1)
+    pp.pprint(client.awardRanking(eval(args[0]), eval(args[1]), eval(args[2]),))
 
 else:
     print('Unrecognized method %s' % cmd)
