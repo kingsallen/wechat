@@ -1,6 +1,5 @@
 # coding=utf-8
 
-import urllib.parse
 from tornado import gen
 
 import conf.path as path
@@ -12,6 +11,45 @@ from util.common import ObjectDict
 from util.common.decorator import handle_response, authenticated
 from util.tool.json_tool import json_dumps
 from util.tool.str_tool import to_str
+
+
+class AwardsLadderHandler(BaseHandler):
+
+    TIMESPAN = ObjectDict(
+        month='month',
+        quarter='quarter',
+        year='year'
+    )
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        """
+        返回员工积分排行榜数据
+        """
+        if self.parms.type not in self.TIMESPAN:
+            self.send_json_error()
+
+        # 判断是否已经绑定员工
+        binded = const.YES if self.current_user.employee else const.NO
+        if not binded:
+            self.send_json_error()
+
+        user_id = self.current_user.employee.sysuser_id
+        company_id = self.current_user.company.id
+        employee_id = self.current_user.employee.id
+        req_type = self.params.type  # year/month/quarter
+
+        res = yield self.employee_ps.get_award_ladder_info(
+            employee_id=employee_id,
+            company_id=company_id,
+            type=self.TIMESPAN[req_type])
+
+        self.send_json_success(data={
+            'userId': user_id,
+            'rankList': res
+        })
 
 
 class AwardsHandler(BaseHandler):

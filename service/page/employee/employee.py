@@ -304,6 +304,24 @@ class EmployeePageService(PageService):
         return ret.success, ret.message, ret.employeeId
 
     @gen.coroutine
+    def get_award_ladder_info(self, employee_id, company_id, type):
+        """获取员工积分榜数据"""
+        ret = yield self.thrift_employee_ds.get_award_ranking(
+            employee_id, company_id, type)
+
+        def gen_make_element(employee_award_list):
+            for e in employee_award_list:
+                yield ObjectDict({
+                    'username': e.name,
+                    'id': e.employeeId,
+                    'point': e.awardTotal,
+                    'icon': make_static_url(e.headimgurl),
+                    'level': e.ranking
+                })
+
+        return list(gen_make_element(ret))
+
+    @gen.coroutine
     def get_recommend_records(self, user_id, req_type, page_no, page_size):
         """
         推荐历史记录
