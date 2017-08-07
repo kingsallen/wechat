@@ -354,6 +354,7 @@ class ProfileCustomHandler(BaseHandler):
                     self.logger.error("profile_basic creation failed. res: %s" % data)
 
                 yield self.profile_ps.update_profile_basic(profile_id, custom_cv)
+                _, profile = yield self.profile_ps.has_profile(self.current_user.sysuser.id)
                 yield self.profile_ps.update_profile_embedded_info_from_cv(
                     profile, custom_cv)
             else:
