@@ -11,11 +11,12 @@ from handler.base import BaseHandler
 from tests.dev_data.user_company_config import COMPANY_CONFIG
 from util.common import ObjectDict
 from util.common.cipher import encode_id
+from util.common.mq import award_publisher
 from util.common.decorator import handle_response, check_employee, NewJDStatusCheckerAddFlag, authenticated
 from util.tool.str_tool import gen_salary, add_item, split
 from util.tool.url_tool import url_append_query
 from util.wechat.template import position_view_five_notice_tpl, position_share_notice_employee_tpl
-from globals import award_publisher
+
 
 class PositionHandler(BaseHandler):
 
@@ -48,7 +49,7 @@ class PositionHandler(BaseHandler):
 
             # 刷新链路
             self.logger.debug("[JD]刷新链路")
-            last_employee_user_id = yield self._make_refresh_share_chain(position_info)
+            last_employee_user_id, last_employee_id = yield self._make_refresh_share_chain(position_info)
             self.logger.debug("[JD]last_employee_user_id: %s" % (last_employee_user_id))
 
             self.logger.debug("[JD]构建转发信息")
@@ -140,11 +141,13 @@ class PositionHandler(BaseHandler):
                 # 转发积分
                 if last_employee_user_id:
                     self.logger.debug("[JD]转发积分操作")
+
                     award_publisher.add_awards_click_jd(
                         company_id=position_info.company_id,
                         position_id=position_id,
-                        recomUserId=last_employee_user_id,
-                        berecomUserId=self.current_user.sysuser.id
+                        employee_id=last_employee_id,
+                        recom_user_id=last_employee_user_id,
+                        be_recom_user_id=self.current_user.sysuser.id
                     )
 
                 # 红包处理
@@ -448,6 +451,7 @@ class PositionHandler(BaseHandler):
         """构造刷新链路"""
 
         last_employee_user_id = 0
+        last_employee_id = 0
         inserted_share_chain_id = 0
 
         if self.current_user.recom and self.current_user.sysuser:
@@ -481,6 +485,14 @@ class PositionHandler(BaseHandler):
             last_employee_user_id = yield self.sharechain_ps.get_referral_employee_user_id(
                 self.current_user.sysuser.id, position_info.id)
 
+            if last_employee_user_id:
+                _, employee_info = yield self.employee_ps.get_employee_info(
+                    user_id=last_employee_user_id,
+                    company_id=self.current_user.company.id
+                )
+                if employee_info:
+                    last_employee_id = employee_info.id
+
         if self.current_user.sysuser.id:
             yield self.candidate_ps.send_candidate_view_position(
                 user_id=self.current_user.sysuser.id,
@@ -488,7 +500,7 @@ class PositionHandler(BaseHandler):
                 sharechain_id=inserted_share_chain_id,
             )
 
-        raise gen.Return(last_employee_user_id)
+        return last_employee_user_id, last_employee_id
 
     @gen.coroutine
     def _make_share_record(self, position_info, recom_user_id):

@@ -14,20 +14,19 @@ import conf.path as path
 from cache.application.email_apply import EmailApplyCache
 from service.page.base import PageService
 from service.page.user.profile import ProfilePageService
-from service.page.user.user import UserPageService
 from service.page.user.sharechain import SharechainPageService
+from service.page.employee.employee import EmployeePageService
 from thrift_gen.gen.mq.struct.ttypes import SmsType
 from util.common import ObjectDict
-from util.common.subprocesswrapper import SubProcessWrapper
 from util.tool.dict_tool import objectdictify, purify
 from util.tool.json_tool import json_dumps
-from util.tool.mail_tool import send_mail_notice_hr
 from util.tool.mail_tool import send_mail as send_email_service
 from util.tool.pdf_tool import save_application_file, get_create_pdf_by_html_cmd,generate_resume_for_hr
 from util.tool.str_tool import trunc
 from util.tool.url_tool import make_url,make_static_url
 from util.wechat.template import application_notice_to_applier_tpl, application_notice_to_recommender_tpl, application_notice_to_hr_tpl
-from globals import award_publisher
+from util.common.mq import award_publisher
+
 
 class ApplicationPageService(PageService):
 
@@ -650,11 +649,21 @@ class ApplicationPageService(PageService):
         recommender_user_id = application.recommender_user_id
 
         if recommender_user_id:
+            recommender_employee_id = 0
+            employee_ps = EmployeePageService()
+            _, employee_info = yield employee_ps.get_employee_info(
+                user_id=recommender_user_id,
+                company_id=current_user.company.id
+            )
+            if employee_info:
+                recommender_employee_id = employee_info.id
+
             award_publisher.add_awards_apply(
                 company_id=application.company_id,
                 position_id=application.position_id,
+                employee_id=recommender_employee_id,
                 recom_user_id=recommender_user_id,
-                be_recom_user_id=current_user.sysuser.id
+                be_recom_user_id=current_user.sysuser.id,
             )
 
         self.logger.debug("[opt_add_reward]end")
