@@ -562,41 +562,6 @@ class PositionHandler(BaseHandler):
             return
 
     @gen.coroutine
-    def _make_add_reward_click(self, position_info, recom_employee_user_id):
-        """给员工加积分
-        :param position_info:
-            职位信息，用户提取公司信息
-        :param recom_employee_user_id:
-            最近员工 user_id ，如果为0，说明没有最近员工 user_id ，不执行添加积分操作
-        """
-
-        # 链路最近员工不存在，不会加积分
-        if not recom_employee_user_id:
-            return
-
-        # 点击人为员工，则不会给其他员工再加积分
-        if self.current_user.employee:
-            return
-
-        # 最近员工就是当前用户，是自己点击自己的转发，不应该加积分
-        if recom_employee_user_id == self.current_user.sysuser.id:
-            return
-
-        recom_employee = yield self.user_ps.get_valid_employee_by_user_id(
-            recom_employee_user_id, self.current_user.company.id)
-
-        if recom_employee and recom_employee.sysuser_id:
-            res = yield self.position_ps.add_reward_for_recom_click(
-                employee=recom_employee,
-                company_id=self.current_user.company.id,
-                berecom_user_id=self.current_user.sysuser.id,
-                position_id=position_info.id)
-
-            self.logger.debug("[JD]给员工加积分： %s" % res)
-        else:
-            self.logger.warning("[JD]给员工加积分异常：员工不存在或员工 sysuser_id 不存在: %s" % recom_employee)
-
-    @gen.coroutine
     def _make_send_publish_template(self, position_info):
         """浏览量达到5次后，向 HR 发布模板消息
         注：只向 HR 平台发布的职位发送模板消息，ATS 同步的职位不发送"""
