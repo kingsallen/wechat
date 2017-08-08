@@ -13,6 +13,7 @@ from util.tool.json_tool import json_dumps
 from util.tool.str_tool import to_str
 
 
+
 class AwardsLadderPageHandler(BaseHandler):
     """Render page to employee/reward-rank.html
     包含转发信息
@@ -21,15 +22,16 @@ class AwardsLadderPageHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def get(self):
+
         cover = self.static_url(self.current_user.company.logo)
         share_title = messages.EMPLOYEE_AWARDS_LADDER_SHARE_TEXT.format(
             self.current_user.company.abbreviation or ""),
 
         self.params.share = ObjectDict({
             "cover":       cover,
-            "title":    share_title,
+            "title":       share_title,
             "description": "",
-            "link": self.request_url
+            "link":        self.fullurl()
         })
 
         self.render_page(template_name="employee/reward-rank.html", data={})
@@ -38,11 +40,7 @@ class AwardsLadderPageHandler(BaseHandler):
 class AwardsLadderHandler(BaseHandler):
     """API for AwardsLadder data"""
 
-    TIMESPAN = ObjectDict(
-        month='month',
-        quarter='quarter',
-        year='year'
-    )
+    TIMESPAN = ('month', 'year', 'quarter')
 
     @handle_response
     @authenticated
@@ -51,7 +49,7 @@ class AwardsLadderHandler(BaseHandler):
         """
         返回员工积分排行榜数据
         """
-        if self.parms.type not in self.TIMESPAN:
+        if self.params.rankType not in self.TIMESPAN:
             self.send_json_error()
 
         # 判断是否已经绑定员工
@@ -62,12 +60,12 @@ class AwardsLadderHandler(BaseHandler):
         user_id = self.current_user.employee.sysuser_id
         company_id = self.current_user.company.id
         employee_id = self.current_user.employee.id
-        req_type = self.params.type  # year/month/quarter
+        rankType = self.params.rankType  # year/month/quarter
 
         res = yield self.employee_ps.get_award_ladder_info(
             employee_id=employee_id,
             company_id=company_id,
-            type=self.TIMESPAN[req_type])
+            type=rankType)
 
         self.send_json_success(data={
             'userId': user_id,

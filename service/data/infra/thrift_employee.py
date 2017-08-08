@@ -63,6 +63,7 @@ class ThriftEmployeeDataService(DataService):
             'quarter': Timespan.quarter,
             'year': Timespan.year
         }
+
         ret = yield self.employee_service_cilent.awardRanking(
             int(employee_id), int(company_id), type_conversion[type]
         )

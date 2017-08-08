@@ -122,6 +122,7 @@ platform_routes = [
     (r"/employee/binded/?",                          handler.platform.employee.BindedHandler,                   {"event": "employee_binded"}),
     (r"/employee/recom/ignore/?",                    handler.platform.recom.RecomIgnoreHandler,                 {"event": "recom_ignore"}),
     (r"/employee/recom/?",                           handler.platform.recom.RecomCandidateHandler,              {"event": "recom_normal"}),
+    (r"/employee/ladder/?",                          handler.platform.employee.AwardsLadderPageHandler,         {"event": "awards_ladder_page"}),
 
     # 各大公司的自定义配置
     (r"/custom/emailapply/?",                        handler.platform.customize.CustomizeEmailApplyHandler,     {"event": "customize_emailapply"}),
@@ -135,7 +136,7 @@ platform_routes = [
     (r"/api/employee/recommendrecords/?",            handler.platform.employee.RecommendRecordsHandler,         {"event": "employee_recommendrecords"}),
     (r"/api/employee/rewards/?",                     handler.platform.employee.AwardsHandler,                   {"event": "employee_awards"}),
     (r"/api/position/empnotice/?",                   handler.platform.position.PositionEmpNoticeHandler,        {"event": "position_empnotice"}),
-    (r"/api/employee/rewards/rank/?",                handler.platform.employee.AwardsLadderHandler,             {"event": "employee_awards_ladder"}),
+    (r"/api/employee/rewards/rank/?",                handler.platform.employee.AwardsLadderHandler,             {"event": "awards_ladder_api"}),
     # 兼容老微信 url，进行302跳转
     (r"/.*",                                         handler.platform.compatible.CompatibleHandler,             {"event": "compatible"})
 
