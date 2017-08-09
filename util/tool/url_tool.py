@@ -43,7 +43,10 @@ def make_url(path, params=None, host="", protocol="https", escape=None,
     pairs = {k: v for k, v in d.items() if k not in escape}
 
     def valid(k, v):
-        return v and isinstance(k, str) and isinstance(v, str) and not k.startswith("_")
+        return bool(
+            isinstance(k, str) and not k.startswith("_") and
+            ((isinstance(v, str)) and str(v) or (isinstance(v, int) and str(v)))
+        )
 
     def query_params_generator(pairs):
         for k, v in pairs.items():

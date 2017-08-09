@@ -394,7 +394,7 @@ class MetaBaseHandler(AtomHandler):
             return None
 
         request = self.request
-        req_params = request.arguments
+        req_params = self.params
 
         # 简历导入 post 请求 _password 参数需要剔除
         req_params.pop('_password', None)
@@ -431,8 +431,10 @@ class MetaBaseHandler(AtomHandler):
             req_uri=request.uri,
             req_params=req_params,
             customs=customs,
-            session_id=to_str(self.get_secure_cookie(const.COOKIE_SESSIONID)
-                              or to_str(self.get_secure_cookie(const.COOKIE_MVIEWERID)))
+            session_id=to_str(
+                self.get_secure_cookie(const.COOKIE_SESSIONID) or
+                to_str(self.get_secure_cookie(const.COOKIE_MVIEWERID))
+            )
         )
 
         log_params.update(log_info_common)
