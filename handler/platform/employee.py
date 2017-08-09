@@ -67,10 +67,10 @@ class AwardsLadderHandler(BaseHandler):
             company_id=company_id,
             type=rankType)
 
-        self.send_json_success(data={
-            'userId': user_id,
-            'rankList': res
-        })
+        data = ObjectDict(userId=user_id, rankList=res)
+        self.logger.debug("awards ladder data: %s" % data)
+
+        self.send_json_success(data=data)
 
 
 class AwardsHandler(BaseHandler):
