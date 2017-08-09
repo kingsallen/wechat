@@ -281,7 +281,8 @@ class SharechainPageService(PageService):
                 "presentee_user_id": user_id,
                 "click_time": [fixed_now, "<="]
             },
-            appends=['ORDER BY click_time DESC']
+            appends=['ORDER BY click_time DESC',
+                     'LIMIT 1']
         )
         raise gen.Return(record)
 
