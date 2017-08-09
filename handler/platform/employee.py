@@ -62,12 +62,14 @@ class AwardsLadderHandler(BaseHandler):
         employee_id = self.current_user.employee.id
         rankType = self.params.rankType  # year/month/quarter
 
-        res = yield self.employee_ps.get_award_ladder_info(
+        rank_list = yield self.employee_ps.get_award_ladder_info(
             employee_id=employee_id,
             company_id=company_id,
             type=rankType)
 
-        data = ObjectDict(userId=user_id, rankList=res)
+        rank_list = sorted(rank_list, key=lambda x: x.level)
+
+        data = ObjectDict(userId=user_id, rankList=rank_list)
         self.logger.debug("awards ladder data: %s" % data)
 
         self.send_json_success(data=data)
