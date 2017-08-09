@@ -43,6 +43,12 @@ class TestMakeUrl(unittest.TestCase):
         parsed_qs = parse_qs(urlparse(out).query)
         self.assertDictEqual(parsed_qs, {"arg1": ["v1"], "arg2": ["v2"], "arg3": ["v3"]})
 
+    def test_arg_is_int(self):
+        out = make_url(self.PATH, {"arg1": "v1", "arg2": 2})
+        parsed_qs = parse_qs(urlparse(out).query)
+        self.assertDictEqual(parsed_qs,
+                             {"arg1": ["v1"], "arg2": ['2']})
+
 
 class TestUrlSubstractQuery(unittest.TestCase):
 
