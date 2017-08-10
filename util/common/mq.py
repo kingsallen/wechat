@@ -117,10 +117,10 @@ class AwardsMQPublisher(MQPublisher):
 
         if type == self.TYPE_CLICK_JD:
             params.update({'templateId': const.RECRUIT_STATUS_RECOMCLICK_ID})
-            routing_key = "award.jd_click"
+            routing_key = "sharejd.jd_clicked"
         elif type == self.TYPE_APPLY:
             params.update({'templateId': const.RECRUIT_STATUS_APPLY_ID})
-            routing_key = "award.job_application"
+            routing_key = "sharejd.job_applied"
 
         else:
             assert False  # should not be here
@@ -138,7 +138,7 @@ amqp_url = 'amqp://{}:{}@{}:{}/%2F?connection_attempts={}&heartbeat_interval={}'
 
 award_publisher = AwardsMQPublisher(
     amqp_url=amqp_url,
-    exchange="employee_awards_exchange",
+    exchange="user_action_topic_exchange",
     exchange_type="topic",
     appid=6
 )
