@@ -152,6 +152,8 @@ class EmployeeBindHandler(BaseHandler):
 
         # early return 2
         if not result:
+            if result_message == messages.EMPLOYEE_BINDING_FAILURE_INFRA:
+                result_message = messages.EMPLOYEE_BINDING_FAILURE.format(self.current_user.company.conf_employee_slug)
             self.send_json_error(message=result_message)
             return
 
