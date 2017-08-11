@@ -114,17 +114,15 @@ def make_static_url(path, protocol='https'):
     if not path:
         return None
 
-    if path.startswith("//"):
-        if path.startswith(settings['static_domain']):
-            return path
-        else:
-            return None
+    if path.startswith("//") or path.startswith("http://") or path.startswith("https://"):
+        return path
 
-    if not path.startswith("http"):
-        path = urljoin(settings['static_domain'], path)
+    path = urljoin(settings['static_domain'], path)
 
-        if protocol:
-            path = protocol + ":" + path
+    if path.startswith("//") or path.startswith("http://") or path.startswith("https://"):
+        return path
+    elif protocol:
+        path = protocol + ":" + path
 
     return path
 
