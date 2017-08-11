@@ -152,8 +152,12 @@ class EmployeeBindHandler(BaseHandler):
 
         # early return 2
         if not result:
-            if result_message == messages.EMPLOYEE_BINDING_FAILURE_INFRA:
-                result_message = messages.EMPLOYEE_BINDING_FAILURE.format(self.current_user.company.conf_employee_slug)
+            # 需要将员工两字改成员工自定义称谓
+            if result_message == messages.EMPLOYEE_BINDING_FAILURE_INFRA and \
+                self.current_user.company.conf_employee_slug:
+                result_message = messages.EMPLOYEE_BINDING_FAILURE.format(
+                    self.current_user.company.conf_employee_slug)
+
             self.send_json_error(message=result_message)
             return
 
