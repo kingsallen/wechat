@@ -222,6 +222,8 @@ class RedpacketPageService(PageService):
         if redislocker.incr(rplock_key) is FIRST_LOCK:
             self.logger.debug("[RP]红包锁创建成功， rplock_key: %s" % rplock_key)
             company = yield self.hr_company_ds.get_company({'id': company_id})
+            company_conf = yield self.hr_company_conf_ds.get_company_conf({'company_id': company_id})
+            employee_slug = company_conf.employee_slug or '员工'
             wechat = yield self.hr_wx_wechat_ds.get_wechat({'company_id': company_id})
             qxuser = yield self.user_wx_user_ds.get_wxuser({
                 'sysuser_id': user_id, 'wechat_id': settings['qx_wechat_id']
@@ -250,7 +252,9 @@ class RedpacketPageService(PageService):
                         rp_config,
                         qxuser.id,
                         current_qxuser_id=qxuser.id,
-                        company_name=company.name)
+                        company_name=company.name,
+                        employee_slug=employee_slug
+                    )
                 else:
                     # 发送红包消息模版(抽不中)
                     self.logger.debug("[RP]掷骰子不通过,准备发送红包信封(无金额)")
@@ -259,7 +263,9 @@ class RedpacketPageService(PageService):
                         wechat.id,
                         rp_config,
                         qxuser.id,
-                        company_name=company.name)
+                        company_name=company.name,
+                        employee_slug=employee_slug
+                    )
 
             except Exception as e:
                 self.logger.error(e)
@@ -1083,11 +1089,14 @@ class RedpacketPageService(PageService):
 
         if config_type == const.RED_PACKET_TYPE_EMPLOYEE_BINDING:
             assert kwargs.get("company_name") is not None
+            assert kwargs.get("employee_slug") is not None
+
             res = yield rp_binding_success_notice_tpl(
                 wechat_id=wechat_id,
                 openid=openid,
                 link=card_url,
-                company_name=kwargs.get("company_name", "")
+                company_name=kwargs.get("company_name", ""),
+                employee_slug=kwargs.get("employee_slug")
             )
 
         elif config_type == const.RED_PACKET_TYPE_RECOM:
