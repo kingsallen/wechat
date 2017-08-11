@@ -1014,10 +1014,8 @@ class ApplicationPageService(PageService):
 
         yield self.thrift_mq_ds.send_mandrill_email(template_name, to_email, "", from_email, "", "", merge_vars)
 
-    @gen.coroutine
     def custom_fields_need_kvmapping(self, config_cv_tpls):
-        """
-        工具方法，
+        """ 工具方法，
         查找 config_cv_tpls 表中值为字典值的数据，
         然后组合成如下数据结构：(截止至 2017-03-24)
         {
@@ -1217,26 +1215,25 @@ class ApplicationPageService(PageService):
             value = {}
             if record.field_value:
                 value_list = re.split(',|:', record.field_value)
-                index = 0
-                while True:
-                    try:
-                        if value_list[index] and value_list[index + 1]:
-                            value.update(
-                                {value_list[index + 1]: value_list[index]})
-                            index += 2
-                    except Exception:
-                        break
+
+                len_value_list = len(value_list)
+                for i in range(int(len_value_list / 2)):
+                    i_value = i * 2
+                    i_key = i_value + 1
+
+                    if value_list[i_value] and value_list[i_key]:
+                        value.update({value_list[i_key]: value_list[i_value]})
+
                 value.update({'0': ''})
-            else:
-                pass
 
             kvmappinp_ret.update({
                 record.field_name: {
                     "title": record.field_title,
                     "value": value}
             })
-            self.logger.warn(kvmappinp_ret)
-            return kvmappinp_ret
+
+        self.logger.info(kvmappinp_ret)
+        return kvmappinp_ret
 
     @gen.coroutine
     def custom_kvmapping(self, others_json):
@@ -1275,7 +1272,7 @@ class ApplicationPageService(PageService):
                                 for e in config_cv_tpls}
 
         # 先找出那哪些自定义字段需要做 kvmapping
-        kvmap = yield self.custom_fields_need_kvmapping(config_cv_tpls)
+        kvmap = self.custom_fields_need_kvmapping(config_cv_tpls)
 
         others = ObjectDict()
         iter_others = []
