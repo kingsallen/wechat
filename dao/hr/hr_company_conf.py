@@ -36,4 +36,5 @@ class HrCompanyConfDao(BaseDao):
             "application_time":     self.constant.TYPE_TIMESTAMP,  # 新JD开通申请时间
             "hr_chat":              self.constant.TYPE_INT,  # IM聊天开关，0：不开启，1：开启
             "show_in_qx":           self.constant.TYPE_INT,  # 公司信息、团队信息、职位信息在仟寻展示，0: 否， 1: 是
+            "employee_slug":        self.constant.TYPE_STRING # 自定义员工称谓
         }

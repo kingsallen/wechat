@@ -45,15 +45,16 @@ def _make_json_data(first, remark=None, colors=None, encode=True, **kwargs):
 
 
 @gen.coroutine
-def rp_binding_success_notice_tpl(wechat_id, openid, link, company_name,
+def rp_binding_success_notice_tpl(
+    wechat_id, openid, link, company_name, employee_slug,
     sys_template_id=const.TEMPLATES.RP_EMPLOYEE_BINDING):
 
     d = datetime.now()
     json_data = _make_json_data(
-        first="您好！您的员工认证申请已有结果",
+        first="您好！您的{}认证申请已有结果".format(employee_slug),
         remark="欢迎您成为我们的一员！请点击查看详情",
         keyword1="已通过",
-        keyword2="员工认证",
+        keyword2="{}认证".format(employee_slug),
         keyword3=company_name,
         keyword4="{}年{}月{}日{:0>2}:{:0>2} ".format(d.year, d.month, d.day,
                                                   d.hour, d.minute))
