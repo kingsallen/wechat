@@ -122,23 +122,27 @@ def make_static_url(path, protocol="https", ensure_protocol=False):
     if not bool(path_parts.netloc):
         # Add net location from setting.
         path = urljoin(settings['static_domain'], path)
+
     if bool(path_parts.scheme):
         # Complete url
         return path
 
     # Add scheme
-    if path.startswith("//") and not ensure_protocol:
-        # valid url starts with "//"
-        return path
-    elif ensure_protocol:
-        protocol = protocol or "https"
-        # Add https
-        return protocol + ":" + path
+    if path.startswith("//"):
+        if not ensure_protocol:
+            # valid url starts with "//"
+            return path
+        else:
+            protocol = protocol or "https"
+            # Add https
+            return protocol + ":" + path
 
     if protocol:
         # Add protocol if provided
         return protocol + ":" + path
-    return path
+    else:
+        return path
+
 
 def is_urlquoted(input):
     """ 工具方法，判断是否被 urlquote 了

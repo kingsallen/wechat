@@ -180,11 +180,11 @@ class PositionHandler(BaseHandler):
         red_packet = yield self.redpacket_ps.get_last_running_hongbao_config_by_position(position_info)
 
         if red_packet:
-            cover = self.static_url(red_packet.share_img)
+            cover = self.share_url(red_packet.share_img)
             title = "{} {}".format(position_info.title, red_packet.share_title)
             description = "".join(split(red_packet.share_desc))
         else:
-            cover = self.static_url(company_info.logo)
+            cover = self.share_url(company_info.logo)
             title = position_info.title
             description = msg.SHARE_DES_DEFAULT
 
@@ -761,7 +761,7 @@ class PositionListHandler(BaseHandler):
 
         if not rp_share_info:
             escape = []
-            cover = self.static_url(company_info.logo)
+            cover = self.share_url(company_info.logo)
             title = "%s热招职位" % company_info.abbreviation
             description = msg.SHARE_DES_DEFAULT
 

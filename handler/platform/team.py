@@ -34,11 +34,10 @@ class TeamIndexHandler(BaseHandler):
 
         self.render_page('company/team.html', data, meta_title=data.bottombar.teamname_custom)
 
-
     def _share(self, company):
         company_name = company.abbreviation or company.name
         default = ObjectDict({
-            "cover": self.static_url(company.logo),
+            "cover": self.share_url(company.logo),
             "title": company_name + "的核心团队点此查看",
             "description": "这可能是你人生的下一站! 不先了解一下未来同事吗?",
             "link": self.fullurl()
@@ -85,7 +84,7 @@ class TeamDetailHandler(BaseHandler):
     def _share(self, company, team_name, share_cover_url):
         company_name = company.abbreviation or company.name
         default = ObjectDict({
-            "cover": url_append_query(share_cover_url, "imageMogr2/thumbnail/!300x300r"),
+            "cover": self.share_url(url_append_query(share_cover_url, "imageMogr2/thumbnail/!300x300r")),
             "title": team_name.upper() + "-" + company_name,
             "description": '通常你在点击“加入我们”之类的按钮之前并不了解我们, 现在给你个机会!',
             "link": self.fullurl()
