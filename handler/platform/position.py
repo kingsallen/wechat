@@ -766,7 +766,7 @@ class PositionListHandler(BaseHandler):
             description = msg.SHARE_DES_DEFAULT
 
         else:
-            cover = self.static_url(rp_share_info.cover)
+            cover = self.share_url(rp_share_info.cover)
             escape = [
                 "pid", "keywords", "cities", "candidate_source",
                 "employment_type", "salary", "department", "occupations",

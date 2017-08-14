@@ -6,6 +6,7 @@
 # @DES     : url 拼接
 
 
+import re
 from urllib.parse import (
     urlparse, parse_qs, urlencode, parse_qsl, urlunparse, urljoin, unquote_plus, quote_plus)
 from setting import settings
@@ -109,23 +110,35 @@ def url_append_query(url, *args, **kwargs):
     return urlunparse(url_parts)
 
 
-def make_static_url(path, protocol='https'):
+def make_static_url(path, protocol="https", ensure_protocol=False):
+    """
+    微信的分享图片使用到了这个方法，微信规定分享中的资源链接必须加上protocol，否则视为无效链接.
+    """
 
     if not path:
         return None
 
-    if path.startswith("//") or path.startswith("http://") or path.startswith("https://"):
+    path_parts = urlparse(path)
+    if not bool(path_parts.netloc):
+        # Add net location from setting.
+        path = urljoin(settings['static_domain'], path)
+    if bool(path_parts.scheme):
+        # Complete url
         return path
 
-    path = urljoin(settings['static_domain'], path)
-
-    if path.startswith("//") or path.startswith("http://") or path.startswith("https://"):
+    # Add scheme
+    if path.startswith("//") and not ensure_protocol:
+        # valid url starts with "//"
         return path
-    elif protocol:
-        path = protocol + ":" + path
+    elif ensure_protocol:
+        protocol = protocol or "https"
+        # Add https
+        return protocol + ":" + path
 
+    if protocol:
+        # Add protocol if provided
+        return protocol + ":" + path
     return path
-
 
 def is_urlquoted(input):
     """ 工具方法，判断是否被 urlquote 了
