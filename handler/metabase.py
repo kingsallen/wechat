@@ -229,6 +229,10 @@ class MetaBaseHandler(AtomHandler):
         """获取 static_url"""
         return make_static_url(path, protocol)
 
+    def share_url(self, path):
+        """拼接分享中的链接，必须加上protocol"""
+        return make_static_url(path, protocol="https", ensure_protocol=True)
+
     def on_finish(self):
         """on_finish 时处理传输日志"""
         info = ObjectDict(

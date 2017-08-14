@@ -38,7 +38,7 @@ class LandingHandler(BaseHandler):
     def _make_share_info(self, company_info):
         """构建 share 内容"""
 
-        cover = self.static_url(company_info.logo)
+        cover = self.share_url(company_info.logo)
         title = "{}高级搜索".format(company_info.abbreviation)
         description = ""
 
