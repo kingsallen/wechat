@@ -13,7 +13,6 @@ from util.tool.json_tool import json_dumps
 from util.tool.str_tool import to_str
 
 
-
 class AwardsLadderPageHandler(BaseHandler):
     """Render page to employee/reward-rank.html
     包含转发信息
@@ -23,18 +22,22 @@ class AwardsLadderPageHandler(BaseHandler):
     @gen.coroutine
     def get(self):
 
-        cover = self.static_url(self.current_user.company.logo)
-        share_title = messages.EMPLOYEE_AWARDS_LADDER_SHARE_TEXT.format(
-            self.current_user.company.abbreviation or ""),
+        if self.current_user.employee:
+            cover = self.static_url(self.current_user.company.logo)
+            share_title = messages.EMPLOYEE_AWARDS_LADDER_SHARE_TEXT.format(
+                self.current_user.company.abbreviation or ""),
 
-        self.params.share = ObjectDict({
-            "cover":       cover,
-            "title":       share_title,
-            "description": "",
-            "link":        self.fullurl()
-        })
+            self.params.share = ObjectDict({
+                "cover":       cover,
+                "title":       share_title,
+                "description": "",
+                "link":        self.fullurl()
+            })
 
-        self.render_page(template_name="employee/reward-rank.html", data={})
+            self.render_page(template_name="employee/reward-rank.html", data={})
+            return
+        else:
+            self.redirect(path.EMPLOYEE_VERIFY)
 
 
 class AwardsLadderHandler(BaseHandler):
