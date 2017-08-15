@@ -281,6 +281,15 @@ class EmployeePageService(PageService):
     def get_employee_rewards(self, employee_id, company_id, page_number=1, page_size=10):
         """获取员工积分信息"""
 
+        reason_txt_fmt_map = {
+            const.RECRUIT_STATUS_RECOMCLICK_ID:      "{}查看了职位",
+            const.RECRUIT_STATUS_APPLY_ID:           "{}投递了简历",
+            const.RECRUIT_STATUS_CVPASSED_ID:        "{}的简历通过了评审",
+            const.RECRUIT_STATUS_OFFERED_ID:         "{}通过了面试",
+            const.RECRUIT_STATUS_FULL_RECOM_INFO_ID: "完善了{}的信息",
+            const.RECRUIT_STATUS_HIRED_ID:           "{}成功入职",
+        }
+
         res_award_rules = []
         res_rewards = []
 
@@ -300,12 +309,13 @@ class EmployeePageService(PageService):
                 res_award_rules.append(e)
 
         if rewards:
-            for rc in rewards:
+            for reward_vo in rewards:
                 e = ObjectDict()
-                e.reason = rc.reason
-                e.hptitle = rc.title
+                if reward_vo.type in reason_txt_fmt_map and reward_vo.berecomName:
+                    e.reason = reason_txt_fmt_map[reward_vo.type].format(reward_vo.berecomName)
+                else:
+                    e.reason = ""
                 e.title = rc.positionName
-                e.create_time = rc.updateTime
                 e.point = rc.points
                 res_rewards.append(e)
 
