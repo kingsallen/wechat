@@ -213,7 +213,7 @@ class ProfileViewHandler(BaseHandler):
 
     def _share(self, uuid, profile_tpl):
         default = ObjectDict({
-            'cover': self.static_url(profile_tpl.avatar_url),
+            'cover': self.share_url(profile_tpl.avatar_url),
             'title': '【{}】的个人职场档案'.format(profile_tpl.username),
             'description': '点击查看{}的个人职场档案'.format(profile_tpl.username),
             'link': self.make_url(path.PROFILE_VISITOR_VIEW.format(uuid), self.params)
@@ -244,7 +244,7 @@ class ProfileHandler(BaseHandler):
 
     def _share(self, uuid, profile_tpl):
         default = ObjectDict({
-            'cover': self.static_url(profile_tpl.avatar_url),
+            'cover': self.share_url(profile_tpl.avatar_url),
             'title': '【{}】的个人职场档案'.format(profile_tpl.username),
             'description': '点击查看{}的个人职场档案'.format(profile_tpl.username),
             'link': self.make_url(path.PROFILE_VISITOR_VIEW.format(uuid), self.params)
@@ -354,6 +354,7 @@ class ProfileCustomHandler(BaseHandler):
                     self.logger.error("profile_basic creation failed. res: %s" % data)
 
                 yield self.profile_ps.update_profile_basic(profile_id, custom_cv)
+                _, profile = yield self.profile_ps.has_profile(self.current_user.sysuser.id)
                 yield self.profile_ps.update_profile_embedded_info_from_cv(
                     profile, custom_cv)
             else:

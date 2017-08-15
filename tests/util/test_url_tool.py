@@ -43,6 +43,12 @@ class TestMakeUrl(unittest.TestCase):
         parsed_qs = parse_qs(urlparse(out).query)
         self.assertDictEqual(parsed_qs, {"arg1": ["v1"], "arg2": ["v2"], "arg3": ["v3"]})
 
+    def test_arg_is_int(self):
+        out = make_url(self.PATH, {"arg1": "v1", "arg2": 2})
+        parsed_qs = parse_qs(urlparse(out).query)
+        self.assertDictEqual(parsed_qs,
+                             {"arg1": ["v1"], "arg2": ['2']})
+
 
 class TestUrlSubstractQuery(unittest.TestCase):
 
@@ -74,28 +80,28 @@ class TestUrlQuote(unittest.TestCase):
 class TestMakeStaticUrl(unittest.TestCase):
 
     domain = settings['static_domain']
-    fake_domain = "//fake.domain"
-
     path_dummy = '/i/am/a/path'
     path_dummy2 = settings['static_domain'] + path_dummy
 
     def testPath(self):
+        self.assertEqual(make_static_url(self.path_dummy, protocol='http'), self.domain + self.path_dummy)
 
-        self.assertEqual(
-            make_static_url(self.path_dummy, protocol='http'),
-            'http:' + self.domain + self.path_dummy)
+        self.assertEqual(make_static_url(self.path_dummy, protocol='http', ensure_protocol=True), 'http:' + self.domain + self.path_dummy)
 
-        self.assertEqual(
-            make_static_url(self.path_dummy),
-            'https:' + self.domain + self.path_dummy)
+        self.assertEqual(make_static_url(self.path_dummy, protocol='https:'),  self.domain + self.path_dummy)
 
-        self.assertEqual(
-            make_static_url(self.path_dummy, protocol='https'),
-            'https:' + self.domain + self.path_dummy)
+        self.assertEqual(make_static_url(self.path_dummy, protocol='https',ensure_protocol=True), 'https:' + self.domain + self.path_dummy)
+
+        self.assertEqual(make_static_url('https://a/b/c?d=1', protocol='https', ensure_protocol=True),
+                         'https://a/b/c?d=1')
+        self.assertEqual(make_static_url(make_static_url('https://a/b/c?d=1', protocol='https', ensure_protocol=True),
+                                         protocol='https', ensure_protocol=True),
+                         'https://a/b/c?d=1')
 
     def testUndefinedProtocol(self):
         self.assertEqual(make_static_url(self.path_dummy2), self.path_dummy2)
-        self.assertIsNone(make_static_url(self.fake_domain))
+
+        self.assertIsNone(make_static_url(None))
 
 
 if __name__ == "__main__":
