@@ -10,7 +10,7 @@ import re
 import importlib
 import glob
 import time
-import json
+import ujson
 import socket
 import urllib.parse
 
@@ -171,7 +171,7 @@ class MetaBaseHandler(AtomHandler):
 
         if (headers.get('Content-Type') and
                 'application/json' in headers.get('Content-Type') and body):
-            json_args = json.loads(to_str(body))
+            json_args = ujson.loads(to_str(body))
 
         return objectdictify(json_args)
 
@@ -229,6 +229,10 @@ class MetaBaseHandler(AtomHandler):
         """获取 static_url"""
         return make_static_url(path, protocol)
 
+    def share_url(self, path):
+        """拼接分享中的链接，必须加上protocol"""
+        return make_static_url(path, protocol="https", ensure_protocol=True)
+
     def on_finish(self):
         """on_finish 时处理传输日志"""
         info = ObjectDict(
@@ -239,7 +243,7 @@ class MetaBaseHandler(AtomHandler):
         if self.log_info:
             info.update(self.log_info)
 
-        self.logger.stats(json_dumps(self._get_info_header(info)))
+        self.logger.stats(ujson.dumps(self._get_info_header(info), ensure_ascii=0))
 
     def write_error(self, http_code, **kwargs):
         """错误页
@@ -431,8 +435,10 @@ class MetaBaseHandler(AtomHandler):
             req_uri=request.uri,
             req_params=req_params,
             customs=customs,
-            session_id=to_str(self.get_secure_cookie(const.COOKIE_SESSIONID)
-                              or to_str(self.get_secure_cookie(const.COOKIE_MVIEWERID)))
+            session_id=to_str(
+                self.get_secure_cookie(const.COOKIE_SESSIONID) or
+                to_str(self.get_secure_cookie(const.COOKIE_MVIEWERID))
+            )
         )
 
         log_params.update(log_info_common)

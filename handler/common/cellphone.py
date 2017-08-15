@@ -56,6 +56,12 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
 
     @handle_response
     @gen.coroutine
+    def get_voice_register(self):
+        """语音验证码(限注册)"""
+        yield self._opt_get_voice_register_code()
+
+    @handle_response
+    @gen.coroutine
     def get_register(self):
         """空帐号补填手机号"""
         yield self._opt_get_cellphone_code(const.MOBILE_CODE_OPT_TYPE.code_register)
@@ -87,24 +93,44 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
         """部分操作，需要先确定是否为本人操作。要求验证本人手机号"""
         yield self._opt_get_cellphone_code(const.MOBILE_CODE_OPT_TYPE.valid_old_mobile)
 
-    @gen.coroutine
-    def _opt_get_cellphone_code(self, type):
-
+    def _check_vocde(self):
         self.logger.debug("vcode: %s" % self.params.vcode)
 
         if not self.vcode:
-            self.send_json_error(message=msg.VCODE_NOT_EXIST)
-            return
+            return False, msg.VCODE_NOT_EXIST
 
         session_id = to_str(
             self.get_secure_cookie(const.COOKIE_SESSIONID) or
             self.get_secure_cookie(const.COOKIE_MVIEWERID) or ''
         )
 
-        result = self.captcha_check(session_id, self.current_user.sysuser.id, self.vcode)
+        result = self.captcha_check(session_id, self.current_user.sysuser.id,
+                                    self.vcode)
 
         if not result:
-            self.send_json_error(message=msg.VCODE_INVALID)
+            return False, msg.VCODE_INVALID
+
+        return True, None
+
+    @gen.coroutine
+    def _opt_get_voice_register_code(self):
+
+        result = yield self.cellphone_ps.send_voice_code_for_register(
+            self.params.get('mobile')
+        )
+
+        if result.status != const.API_SUCCESS:
+            self.send_json_error(message=result.message)
+            return
+        else:
+            self.send_json_success()
+
+    @gen.coroutine
+    def _opt_get_cellphone_code(self, type):
+
+        check_pass, message = self._check_vocde()
+        if not check_pass:
+            self.send_json_error(message=message)
             return
 
         # 注册时，不需要判断是否为当前用户手机号

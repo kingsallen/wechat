@@ -210,13 +210,19 @@ class EmployeeBindHandler(BaseHandler):
 
         # early return 1
         if fe_bind_status == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS:
-            self.send_json_error(message=messages.EMPLOYEE_BINDED_WARNING)
+            self.send_json_error(message=messages.EMPLOYEE_BINDED_WARNING.format(self.current_user.company.conf_employee_slug))
             return
 
         result, result_message = yield self.employee_ps.bind(binding_params)
 
         # early return 2
         if not result:
+            # 需要将员工两字改成员工自定义称谓
+            if result_message == messages.EMPLOYEE_BINDING_FAILURE_INFRA and \
+                self.current_user.company.conf_employee_slug:
+                result_message = messages.EMPLOYEE_BINDING_FAILURE.format(
+                    self.current_user.company.conf_employee_slug)
+
             self.send_json_error(message=result_message)
             return
 
@@ -387,12 +393,12 @@ class CustomInfoHandler(BaseHandler):
         next_url = self.make_url(path.POSITION_LIST, self.params, noemprecom=str(const.YES), escape=escape)
 
         if self.params.from_wx_template == "o":
-            message = messages.EMPLOYEE_BINDING_CUSTOM_FIELDS_DONE
+            message = messages.EMPLOYEE_BINDING_CUSTOM_FIELDS_DONE.format(self.current_user.company.conf_employee_slug)
         else:
             if employee.authMethod == const.USER_EMPLOYEE_AUTH_METHOD.EMAIL:
                 message = messages.EMPLOYEE_BINDING_EMAIL_DONE
             else:
-                message = messages.EMPLOYEE_BINDING_SUCCESS
+                message = messages.EMPLOYEE_BINDING_SUCCESS.format(self.current_user.company.conf_employee_slug)
 
         self.render(
             template_name='refer/weixin/employee/employee_binding_tip_v2.html',
@@ -425,8 +431,7 @@ class BindedHandler(BaseHandler):
 
         else:
             if fe_bind_status == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS:
-
-                message = messages.EMPLOYEE_BINDING_SUCCESS
+                message = messages.EMPLOYEE_BINDING_SUCCESS.format(self.current_user.company.conf_employee_slug)
             else:
                 message = messages.EMPLOYEE_BINDING_EMAIL_DONE
 

@@ -56,6 +56,7 @@ IMAGE_URL = '/image'
 # Ref: https://wiki.moseeker.com/user_account_api.md
 INFRA_USER_INFO = 'user'
 INFRA_USER_VALID = 'user/sendCode'
+INFRA_USER_VOICE_VALID = 'user/sendsignupcode/voice'
 INFRA_USER_VERIFY = 'user/verifyCode'
 INFRA_USER_COMBINE = 'user/wxbindmobile'
 INFRA_USER_LOGIN = 'user/login'
@@ -117,5 +118,5 @@ MESSAGE_TEMPLATE = "message/template"
 # ============================ 基础服务结束 ============================
 
 # 其他外部服务
-LINKEDIN_ACCESSTOKEN = "https://www.linkedin.com/uas/oauth2/accessToken"
-LINKEDIN_AUTH = "/uas/oauth2/authorization"
+LINKEDIN_ACCESSTOKEN = "https://www.linkedin.com/oauth/v2/accessToken"
+LINKEDIN_AUTH = "/oauth/v2/authorization"

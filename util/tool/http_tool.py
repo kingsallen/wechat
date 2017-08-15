@@ -72,7 +72,7 @@ def http_fetch(route, data=None, timeout=5):
     http_client = tornado.httpclient.AsyncHTTPClient()
 
     try:
-        http_request = tornado.httpclient.HTTPRequest(
+        request = tornado.httpclient.HTTPRequest(
             route,
             method='POST',
             body=urlencode(data),
@@ -82,15 +82,15 @@ def http_fetch(route, data=None, timeout=5):
             ),
         )
 
-        response = yield http_client.fetch(http_request)
-        return response.body
+        logger.info("[http_fetch][uri: {}][req_body: {}]".format(route, request.body))
+        response = yield http_client.fetch(request)
+        logger.info("[http_fetch][uri: {}][res_body: {}]".format(route, response.body))
 
     except tornado.httpclient.HTTPError as e:
-        logger.warning("[http_fetch][url: {}][body: {}]".format(
-            route, ujson.encode(data)))
-        logger.warning("http_fetch httperror: {}".format(e))
-
-    return ObjectDict()
+        logger.warning("[http_fetch][uri: {}] httperror: {}".format(route, e))
+        raise e
+    else:
+        return response.body
 
 
 def unboxing(http_response):

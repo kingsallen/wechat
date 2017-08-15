@@ -1,15 +1,15 @@
 # coding=utf-8
 
-# Copyright 2016 MoSeeker
 
 from tornado import gen
 from service.data.base import DataService
 from util.common.decorator import cache
 from util.common import ObjectDict
 
+
 class HrCompanyConfDataService(DataService):
 
-    @cache(ttl=300)
+    @cache(ttl=60)
     @gen.coroutine
     def get_company_conf(self, conds, fields=None):
 

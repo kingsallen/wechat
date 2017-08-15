@@ -1,6 +1,7 @@
 # coding=utf-8
 
 import json
+import urllib.parse
 
 from tornado import gen
 
@@ -39,11 +40,12 @@ class LinkedinImportHandler(MetaBaseHandler):
 
         user_id = match_session_id(to_str(self.get_secure_cookie(const.COOKIE_SESSIONID)))
 
-        redirect_url = make_url(path.RESUME_LINKEDIN,
-                                host=self.host,
-                                recom=self.params.recom,
-                                pid=self.params.pid,
-                                wechat_signature=self.params.wechat_signature)
+        redirect_url = make_url(
+            path.RESUME_LINKEDIN,
+            host=self.host,
+            recom=self.params.recom,
+            pid=self.params.pid,
+            wechat_signature=urllib.parse.unquote(self.params.wechat_signature) if self.params.wechat_signature else None)
 
         response = yield self.profile_ps.get_linkedin_token(code=code, redirect_url=redirect_url)
         response = json.loads(to_str(response))
