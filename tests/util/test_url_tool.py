@@ -98,6 +98,9 @@ class TestMakeStaticUrl(unittest.TestCase):
                                          protocol='https', ensure_protocol=True),
                          'https://a/b/c?d=1')
 
+        self.assertEquals(make_static_url(self.path_dummy, protocol='https', ensure_protocol=True, netloc="http://www.g.com"),
+                          'http://www.g.com' + self.path_dummy)
+
     def testUndefinedProtocol(self):
         self.assertEqual(make_static_url(self.path_dummy2), self.path_dummy2)
 
