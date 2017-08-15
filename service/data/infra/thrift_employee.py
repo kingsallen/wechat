@@ -24,8 +24,7 @@ class ThriftEmployeeDataService(DataService):
     @gen.coroutine
     def get_employee_rewards(self, employee_id, company_id, page_number, page_size):
         ret = yield self.employee_service_cilent.getEmployeeRewards(
-            employeeId=employee_id, companyId=company_id,
-            pageNumber=page_number, pageSize=page_size)
+            employee_id, company_id, page_number, page_size)
         return ret
 
     @gen.coroutine

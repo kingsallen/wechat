@@ -311,12 +311,18 @@ class EmployeePageService(PageService):
         if rewards:
             for reward_vo in rewards:
                 e = ObjectDict()
+
+                # 根据申请进度由系统自动追加的积分
                 if reward_vo.type in reason_txt_fmt_map and reward_vo.berecomName:
                     e.reason = reason_txt_fmt_map[reward_vo.type].format(reward_vo.berecomName)
+                # HR 手动增减积分添加的原因
+                elif reward_vo.type == 0:
+                    e.reason = reward_vo.reason
                 else:
                     e.reason = ""
-                e.title = rc.positionName
-                e.point = rc.points
+                e.title = reward_vo.positionName
+                e.point = reward_vo.points
+                e.create_time = reward_vo.updateTime
                 res_rewards.append(e)
 
         return ObjectDict({
