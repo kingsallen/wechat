@@ -111,6 +111,21 @@ def make_static_url(path, protocol='https'):
     if not path:
         return None
 
+<<<<<<< Updated upstream
+=======
+    path_parts = urlparse(path)
+    if not bool(path_parts.netloc):
+        # Add net location from setting.
+        path = urljoin(settings['static_domain'], path)
+    # parse changed path.
+    path_parts = urlparse(path)
+
+    if bool(path_parts.scheme):
+        # Complete url
+        return path
+
+    # Add scheme
+>>>>>>> Stashed changes
     if path.startswith("//"):
         if path.startswith(settings['static_domain']):
             return path
