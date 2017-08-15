@@ -23,7 +23,7 @@ class AwardsLadderPageHandler(BaseHandler):
     def get(self):
 
         if self.current_user.employee:
-            cover = self.static_url(self.current_user.company.logo)
+            cover = self.share_url(self.current_user.company.logo)
             share_title = messages.EMPLOYEE_AWARDS_LADDER_SHARE_TEXT.format(
                 self.current_user.company.abbreviation or ""),
 
@@ -34,10 +34,11 @@ class AwardsLadderPageHandler(BaseHandler):
                 "link":        self.fullurl()
             })
 
-            self.render_page(template_name="employee/reward-rank.html", data={})
+            self.render_page(template_name="employee/reward-rank.html",
+                             data={})
             return
         else:
-            self.redirect(path.EMPLOYEE_VERIFY)
+            self.redirect(self.make_url(path.EMPLOYEE_VERIFY, self.params))
 
 
 class AwardsLadderHandler(BaseHandler):
