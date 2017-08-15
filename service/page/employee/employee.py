@@ -278,11 +278,43 @@ class EmployeePageService(PageService):
         return ret
 
     @gen.coroutine
-    def get_employee_rewards(self, employee_id, company_id):
+    def get_employee_rewards(self, employee_id, company_id, page_number=1, page_size=10):
         """获取员工积分信息"""
-        ret = yield self.thrift_employee_ds.get_employee_rewards(
-            employee_id, company_id)
-        return ret
+
+        res_award_rules = []
+        res_rewards = []
+
+        rewards_thrift_res = yield self.thrift_employee_ds.get_employee_rewards(
+            employee_id, company_id, page_number, page_size)
+
+        rewards = rewards_thrift_res.rewards
+        reward_configs = rewards_thrift_res.rewardConfigs
+        total = rewards_thrift_res.total
+
+        # 构建输出数据格式
+        if reward_configs:
+            for rc in reward_configs:
+                e = ObjectDict()
+                e.name = rc.statusName
+                e.point = rc.points
+                res_award_rules.append(e)
+
+        if rewards:
+            for rc in rewards:
+                e = ObjectDict()
+                e.reason = rc.reason
+                e.hptitle = rc.title
+                e.title = rc.positionName
+                e.create_time = rc.updateTime
+                e.point = rc.points
+                res_rewards.append(e)
+
+        return ObjectDict({
+            'rewards':                res_rewards,
+            'award_rules':            res_award_rules,
+            'point_total':            total
+        })
+
 
     @gen.coroutine
     def unbind(self, employee_id, company_id, user_id):

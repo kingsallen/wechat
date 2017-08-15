@@ -22,9 +22,10 @@ class ThriftEmployeeDataService(DataService):
         return ret
 
     @gen.coroutine
-    def get_employee_rewards(self, employee_id, company_id):
+    def get_employee_rewards(self, employee_id, company_id, page_number, page_size):
         ret = yield self.employee_service_cilent.getEmployeeRewards(
-            employee_id, company_id)
+            employeeId=employee_id, companyId=company_id,
+            pageNumber=page_number, pageSize=page_size)
         return ret
 
     @gen.coroutine

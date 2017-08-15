@@ -21,8 +21,12 @@ class AwardsLadderPageHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def get(self):
-
-        if self.current_user.employee:
+        # 判断是否已经绑定员工
+        binded = const.YES if self.current_user.employee else const.NO
+        if not binded:
+            self.redirect(self.make_url(path.EMPLOYEE_VERIFY, self.params))
+            return
+        else:
             cover = self.share_url(self.current_user.company.logo)
             share_title = messages.EMPLOYEE_AWARDS_LADDER_SHARE_TEXT.format(
                 self.current_user.company.abbreviation or ""),
@@ -36,9 +40,6 @@ class AwardsLadderPageHandler(BaseHandler):
 
             self.render_page(template_name="employee/reward-rank.html",
                              data={})
-            return
-        else:
-            self.redirect(self.make_url(path.EMPLOYEE_VERIFY, self.params))
 
 
 class AwardsLadderHandler(BaseHandler):
@@ -85,56 +86,30 @@ class AwardsHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def get(self):
-        # 一些初始化的工作
-        rewards = []
-        reward_configs = []
-        total = 0
 
         # 判断是否已经绑定员工
         binded = const.YES if self.current_user.employee else const.NO
+        email_activation_state = const.OLD_YES if binded else self.current_user.employee.activation
 
         if binded:
             # 获取绑定员工
             rewards_response = yield self.employee_ps.get_employee_rewards(
-                self.current_user.employee.id,
-                self.current_user.company.id)
-            rewards = rewards_response.rewards
-            reward_configs = rewards_response.rewardConfigs
-            total = rewards_response.total
+                employee_id=self.current_user.employee.id,
+                company_id=self.current_user.company.id,
+                page_number=self.params.page_number,
+                page_size=self.params.page_size
+            )
+
+            rewards_response.update({
+                'binded': binded,
+                'email_activation_state': email_activation_state
+            })
+
+            self.send_json_success(rewards_response)
+            return
+
         else:
-            pass  # 使用初始化数据
-
-        # 构建输出数据格式
-        res_award_rules = []
-        if reward_configs:
-            for rc in reward_configs:
-                e = ObjectDict()
-                e.name = rc.statusName
-                e.point = rc.points
-                res_award_rules.append(e)
-
-        email_activation_state = const.OLD_YES if binded \
-            else self.current_user.employee.activation
-
-        res_rewards = []
-        if rewards:
-            for rc in rewards:
-                e = ObjectDict()
-                e.reason = rc.reason
-                e.hptitle = rc.title
-                e.title = rc.title
-                e.create_time = rc.updateTime
-                e.point = rc.points
-                res_rewards.append(e)
-
-        # 构建输出数据格式完成
-        self.send_json_success({
-            'rewards':                res_rewards,
-            'award_rules':            res_award_rules,
-            'point_total':            total,
-            'binded':                 binded,
-            'email_activation_state': email_activation_state
-        })
+            self.send_json_error()
 
 
 class EmployeeUnbindHandler(BaseHandler):

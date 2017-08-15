@@ -64,11 +64,13 @@ class Iface(object):
         """
         pass
 
-    def getEmployeeRewards(self, employeeId, companyId):
+    def getEmployeeRewards(self, employeeId, companyId, pageNumber, pageSize):
         """
         Parameters:
          - employeeId
          - companyId
+         - pageNumber
+         - pageSize
         """
         pass
 
@@ -331,23 +333,27 @@ class Client(Iface):
             return result.success
         raise TApplicationException(TApplicationException.MISSING_RESULT, "setEmployeeCustomInfo failed: unknown result")
 
-    def getEmployeeRewards(self, employeeId, companyId):
+    def getEmployeeRewards(self, employeeId, companyId, pageNumber, pageSize):
         """
         Parameters:
          - employeeId
          - companyId
+         - pageNumber
+         - pageSize
         """
         self._seqid += 1
         future = self._reqs[self._seqid] = concurrent.Future()
-        self.send_getEmployeeRewards(employeeId, companyId)
+        self.send_getEmployeeRewards(employeeId, companyId, pageNumber, pageSize)
         return future
 
-    def send_getEmployeeRewards(self, employeeId, companyId):
+    def send_getEmployeeRewards(self, employeeId, companyId, pageNumber, pageSize):
         oprot = self._oprot_factory.getProtocol(self._transport)
         oprot.writeMessageBegin('getEmployeeRewards', TMessageType.CALL, self._seqid)
         args = getEmployeeRewards_args()
         args.employeeId = employeeId
         args.companyId = companyId
+        args.pageNumber = pageNumber
+        args.pageSize = pageSize
         args.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -573,7 +579,7 @@ class Processor(Iface, TProcessor):
         args.read(iprot)
         iprot.readMessageEnd()
         result = getEmployeeRewards_result()
-        result.success = yield gen.maybe_future(self._handler.getEmployeeRewards(args.employeeId, args.companyId))
+        result.success = yield gen.maybe_future(self._handler.getEmployeeRewards(args.employeeId, args.companyId, args.pageNumber, args.pageSize))
         oprot.writeMessageBegin("getEmployeeRewards", TMessageType.REPLY, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
@@ -1400,17 +1406,23 @@ class getEmployeeRewards_args(object):
     Attributes:
      - employeeId
      - companyId
+     - pageNumber
+     - pageSize
     """
 
     thrift_spec = (
         None,  # 0
         (1, TType.I32, 'employeeId', None, None, ),  # 1
         (2, TType.I32, 'companyId', None, None, ),  # 2
+        (3, TType.I32, 'pageNumber', None, None, ),  # 3
+        (4, TType.I32, 'pageSize', None, None, ),  # 4
     )
 
-    def __init__(self, employeeId=None, companyId=None,):
+    def __init__(self, employeeId=None, companyId=None, pageNumber=None, pageSize=None,):
         self.employeeId = employeeId
         self.companyId = companyId
+        self.pageNumber = pageNumber
+        self.pageSize = pageSize
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -1431,6 +1443,16 @@ class getEmployeeRewards_args(object):
                     self.companyId = iprot.readI32()
                 else:
                     iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.I32:
+                    self.pageNumber = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.I32:
+                    self.pageSize = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -1448,6 +1470,14 @@ class getEmployeeRewards_args(object):
         if self.companyId is not None:
             oprot.writeFieldBegin('companyId', TType.I32, 2)
             oprot.writeI32(self.companyId)
+            oprot.writeFieldEnd()
+        if self.pageNumber is not None:
+            oprot.writeFieldBegin('pageNumber', TType.I32, 3)
+            oprot.writeI32(self.pageNumber)
+            oprot.writeFieldEnd()
+        if self.pageSize is not None:
+            oprot.writeFieldBegin('pageSize', TType.I32, 4)
+            oprot.writeI32(self.pageSize)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()

@@ -26,7 +26,7 @@ service EmployeeService {
     employee_struct.Result setEmployeeCustomInfo(1: i32 employeeId, 2: string customValues);
 
     // 获取员工积分
-    employee_struct.RewardsResponse getEmployeeRewards(1: i32 employeeId, 2: i32 companyId);
+    employee_struct.RewardsResponse getEmployeeRewards(1: i32 employeeId, 2: i32 companyId, 3: i32 pageNumber, 4: i32 pageSize);
 
     // 推荐记录
     list<employee_struct.RecomInfo> getEmployeeRecoms(1: i32 recomId);
