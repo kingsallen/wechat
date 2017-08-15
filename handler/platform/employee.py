@@ -96,8 +96,8 @@ class AwardsHandler(BaseHandler):
             rewards_response = yield self.employee_ps.get_employee_rewards(
                 employee_id=self.current_user.employee.id,
                 company_id=self.current_user.company.id,
-                page_number=self.params.page_number,
-                page_size=self.params.page_size
+                page_number=int(self.params.page_number),
+                page_size=int(self.params.page_size)
             )
 
             rewards_response.update({
