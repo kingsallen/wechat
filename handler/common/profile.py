@@ -13,6 +13,8 @@ from util.common.decorator import handle_response, check_and_apply_profile, \
     authenticated
 from util.tool.dict_tool import sub_dict, objectdictify
 from util.tool.str_tool import mobile_validate
+from util.tool.json_tool import json_dumps
+
 
 class ProfileNewHandler(BaseHandler):
 
@@ -380,8 +382,10 @@ class ProfileCustomHandler(BaseHandler):
             cv_pure_custom = {k: v for k, v in custom_cv.items() if
                               k in custom_fields}
 
-            other_string = json_encode(cv_pure_custom)
+            other_string = json_dumps(cv_pure_custom)
+
             record = ObjectDict(other=other_string)
+
             yield self.application_ps.update_profile_other(record, profile_id)
 
 
