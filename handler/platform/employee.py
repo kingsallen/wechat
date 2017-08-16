@@ -62,7 +62,6 @@ class AwardsLadderHandler(BaseHandler):
         if not binded:
             self.send_json_error()
 
-        user_id = self.current_user.employee.sysuser_id
         company_id = self.current_user.company.id
         employee_id = self.current_user.employee.id
         rankType = self.params.rankType  # year/month/quarter
@@ -74,7 +73,7 @@ class AwardsLadderHandler(BaseHandler):
 
         rank_list = sorted(rank_list, key=lambda x: x.level)
 
-        data = ObjectDict(userId=user_id, rankList=rank_list)
+        data = ObjectDict(employeeId=employee_id, rankList=rank_list)
         self.logger.debug("awards ladder data: %s" % data)
 
         self.send_json_success(data=data)
