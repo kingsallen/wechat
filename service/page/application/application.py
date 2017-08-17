@@ -356,25 +356,44 @@ class ApplicationPageService(PageService):
 
     @gen.coroutine
     def update_profile_other(self, new_record, profile_id):
-        old_other = yield self.get_profile_other(profile_id)
 
-        # Sample:
-        # new_record: {'other': '{"nationality": "\\u4e2d\\u56fd 123", "height": "177"}'}
-        # old_other: {'nationality': '中国', 'height': '177'}
+        self.logger.debug("[profile_other]")
+        old_profile_other_record = yield self.profile_other_ds.get_profile_other(conds={
+            'profile_id': profile_id
+        })
 
-        if old_other:
+        self.logger.debug("[profile_other] old_profile_other_record: %s" % old_profile_other_record)
+
+        if old_profile_other_record:
+            old_other = old_profile_other_record.other
+            old_other_dict = json_decode(old_other)
+
+            self.logger.debug("[profile_other] old_other_dict: %s" % old_other_dict)
+
             new_other_dict = json_decode(new_record.other)
+
+            self.logger.debug("[profile_other] new_other_dict: %s" % new_other_dict)
+
             # 需对 picUrl 做特殊处理
             new_other_dict.pop('picUrl', None)
-            old_other.update(new_other_dict)
-            other_dict_to_update = old_other
+
+            old_other_dict.update(new_other_dict)
+            other_dict_to_update = old_other_dict
+
+            self.logger.debug("[profile_other] other_dict_to_update: %s" % other_dict_to_update)
+
             params = {
-                'other': json_dumps(other_dict_to_update),
+                'other':      json_dumps(other_dict_to_update),
                 'profile_id': profile_id
             }
-            result, data = yield self.infra_profile_ds.update_profile_other(params)
+            print("params: %s" % params)
+
+            result, data = yield self.infra_profile_ds.update_profile_other(
+                params)
 
         else:
+            self.logger.debug("[profile_other] new_record: %s" % new_record)
+
             # 转换一下 new_record 中 utf-8 char
             new_record = ObjectDict(new_record)
             other_str = new_record.other
@@ -383,10 +402,10 @@ class ApplicationPageService(PageService):
             other_dict.pop('picUrl', None)
 
             new_record.other = json_dumps(other_dict)
-            record_to_update = new_record
+            params = new_record
 
             result, data = yield self.infra_profile_ds.create_profile_other(
-                record_to_update, profile_id)
+                params, profile_id)
 
         return result
 
