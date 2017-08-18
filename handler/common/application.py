@@ -40,9 +40,14 @@ class ApplicationHandler(BaseHandler):
                     self.current_user, position, custom_cv_tpls)
 
             if not result:
-                self.redirect(self.make_url(path.PROFILE_CUSTOM_CV,
-                              pid=self.params.pid,
-                              wechat_signature=self.params.wechat_signature))
+                p = {
+                    'pid':self.params.pid,
+                    'wechat_signature': self.params.wechat_signature
+                }
+                if self.params.recom:
+                    p['recom'] = self.params.recom
+                self.redirect(self.make_url(path.PROFILE_CUSTOM_CV, **p))
+
                 return
 
         # 定制化需求
