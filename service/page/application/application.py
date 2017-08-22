@@ -591,7 +591,7 @@ class ApplicationPageService(PageService):
             recommender_user_id=recommender_user_id,
             applier_id=current_user.sysuser.id,
             company_id=position.company_id,
-            routine=0 if is_platform else 1
+            origin=2 if is_platform else 4  # 2 -> 企业号申请， 4 -> 聚合号申请
         )
         self.logger.debug("params_for_application: {}".format(
             params_for_application))
