@@ -278,11 +278,59 @@ class EmployeePageService(PageService):
         return ret
 
     @gen.coroutine
-    def get_employee_rewards(self, employee_id, company_id):
+    def get_employee_rewards(self, employee_id, company_id, page_number=1, page_size=10):
         """获取员工积分信息"""
-        ret = yield self.thrift_employee_ds.get_employee_rewards(
-            employee_id, company_id)
-        return ret
+
+        reason_txt_fmt_map = {
+            const.RECRUIT_STATUS_RECOMCLICK_ID:      "{}查看了职位",
+            const.RECRUIT_STATUS_APPLY_ID:           "{}投递了简历",
+            const.RECRUIT_STATUS_CVPASSED_ID:        "{}的简历通过了评审",
+            const.RECRUIT_STATUS_OFFERED_ID:         "{}通过了面试",
+            const.RECRUIT_STATUS_FULL_RECOM_INFO_ID: "完善了{}的信息",
+            const.RECRUIT_STATUS_HIRED_ID:           "{}成功入职",
+        }
+
+        res_award_rules = []
+        res_rewards = []
+
+        rewards_thrift_res = yield self.thrift_employee_ds.get_employee_rewards(
+            employee_id, company_id, page_number, page_size)
+
+        rewards = rewards_thrift_res.rewards
+        reward_configs = rewards_thrift_res.rewardConfigs
+        total = rewards_thrift_res.total
+
+        # 构建输出数据格式
+        if reward_configs:
+            for rc in reward_configs:
+                e = ObjectDict()
+                e.name = rc.statusName
+                e.point = rc.points
+                res_award_rules.append(e)
+
+        if rewards:
+            for reward_vo in rewards:
+                e = ObjectDict()
+
+                # 根据申请进度由系统自动追加的积分
+                if reward_vo.type in reason_txt_fmt_map and reward_vo.berecomName:
+                    e.reason = reason_txt_fmt_map[reward_vo.type].format(reward_vo.berecomName)
+                # HR 手动增减积分添加的原因
+                elif reward_vo.type == 0:
+                    e.reason = reward_vo.reason
+                else:
+                    e.reason = ""
+                e.title = reward_vo.positionName
+                e.point = reward_vo.points
+                e.create_time = reward_vo.updateTime
+                res_rewards.append(e)
+
+        return ObjectDict({
+            'rewards':                res_rewards,
+            'award_rules':            res_award_rules,
+            'point_total':            total
+        })
+
 
     @gen.coroutine
     def unbind(self, employee_id, company_id, user_id):
@@ -302,6 +350,24 @@ class EmployeePageService(PageService):
         """通过邮箱激活员工"""
         ret = yield self.thrift_employee_ds.activate_email(activation_code)
         return ret.success, ret.message, ret.employeeId
+
+    @gen.coroutine
+    def get_award_ladder_info(self, employee_id, company_id, type):
+        """获取员工积分榜数据"""
+        ret = yield self.thrift_employee_ds.get_award_ranking(
+            employee_id, company_id, type)
+
+        def gen_make_element(employee_award_list):
+            for e in employee_award_list:
+                yield ObjectDict({
+                    'username': e.name,
+                    'id': e.employeeId,
+                    'point': e.awardTotal,
+                    'icon': make_static_url(e.headimgurl),
+                    'level': e.ranking
+                })
+
+        return list(gen_make_element(ret))
 
     @gen.coroutine
     def get_recommend_records(self, user_id, req_type, page_no, page_size):

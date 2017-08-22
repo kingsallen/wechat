@@ -110,7 +110,7 @@ def url_append_query(url, *args, **kwargs):
     return urlunparse(url_parts)
 
 
-def make_static_url(path, protocol="https", ensure_protocol=False):
+def make_static_url(path, protocol="https", ensure_protocol=False, netloc=None):
     """
     微信的分享图片使用到了这个方法，微信规定分享中的资源链接必须加上protocol，否则视为无效链接.
     """
@@ -118,10 +118,14 @@ def make_static_url(path, protocol="https", ensure_protocol=False):
     if not path:
         return None
 
+    netloc = netloc or settings['static_domain']
+
     path_parts = urlparse(path)
     if not bool(path_parts.netloc):
         # Add net location from setting.
-        path = urljoin(settings['static_domain'], path)
+        path = urljoin(netloc, path)
+    # parse changed path.
+    path_parts = urlparse(path)
 
     if bool(path_parts.scheme):
         # Complete url

@@ -59,6 +59,14 @@ settings['elk_cluster'] = {
     'redis_port': 6379,
 }
 
+settings['rabbitmq_host'] = "rabbitmq1.dqprism.com"
+settings['rabbitmq_port'] = 5672
+settings['rabbitmq_username'] = "daqi"
+settings['rabbitmq_password'] = "2U3sanQJ"
+settings['rabbitmq_connection_attempts'] = 3
+settings['rabbitmq_heartbeat_interval'] = 3600
+
+
 # qiniu账号
 settings['qiniu_ak'] = 'rMkcbmVYotu9Zxi0MqjmP5EFy6a9sZ5-h78Qt5GV'
 settings['qiniu_sk'] = 'n8qRg0VJBsGyHlZJh1W887LDn2Z-2gbavg9xgoRP'

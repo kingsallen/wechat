@@ -11,6 +11,7 @@ from handler.base import BaseHandler
 from tests.dev_data.user_company_config import COMPANY_CONFIG
 from util.common import ObjectDict
 from util.common.cipher import encode_id
+from util.common.mq import award_publisher
 from util.common.decorator import handle_response, check_employee, NewJDStatusCheckerAddFlag, authenticated
 from util.tool.str_tool import gen_salary, add_item, split
 from util.tool.url_tool import url_append_query
@@ -48,7 +49,7 @@ class PositionHandler(BaseHandler):
 
             # 刷新链路
             self.logger.debug("[JD]刷新链路")
-            last_employee_user_id = yield self._make_refresh_share_chain(position_info)
+            last_employee_user_id, last_employee_id = yield self._make_refresh_share_chain(position_info)
             self.logger.debug("[JD]last_employee_user_id: %s" % (last_employee_user_id))
 
             self.logger.debug("[JD]构建转发信息")
@@ -140,8 +141,14 @@ class PositionHandler(BaseHandler):
                 # 转发积分
                 if last_employee_user_id:
                     self.logger.debug("[JD]转发积分操作")
-                    yield self._make_add_reward_click(
-                        position_info, last_employee_user_id)
+
+                    award_publisher.add_awards_click_jd(
+                        company_id=position_info.company_id,
+                        position_id=position_id,
+                        employee_id=last_employee_id,
+                        recom_user_id=last_employee_user_id,
+                        be_recom_user_id=self.current_user.sysuser.id
+                    )
 
                 # 红包处理
                 self.logger.debug("[JD]红包处理")
@@ -444,6 +451,7 @@ class PositionHandler(BaseHandler):
         """构造刷新链路"""
 
         last_employee_user_id = 0
+        last_employee_id = 0
         inserted_share_chain_id = 0
 
         if self.current_user.recom and self.current_user.sysuser:
@@ -477,6 +485,14 @@ class PositionHandler(BaseHandler):
             last_employee_user_id = yield self.sharechain_ps.get_referral_employee_user_id(
                 self.current_user.sysuser.id, position_info.id)
 
+            if last_employee_user_id:
+                _, employee_info = yield self.employee_ps.get_employee_info(
+                    user_id=last_employee_user_id,
+                    company_id=self.current_user.company.id
+                )
+                if employee_info:
+                    last_employee_id = employee_info.id
+
         if self.current_user.sysuser.id:
             yield self.candidate_ps.send_candidate_view_position(
                 user_id=self.current_user.sysuser.id,
@@ -484,7 +500,7 @@ class PositionHandler(BaseHandler):
                 sharechain_id=inserted_share_chain_id,
             )
 
-        raise gen.Return(last_employee_user_id)
+        return last_employee_user_id, last_employee_id
 
     @gen.coroutine
     def _make_share_record(self, position_info, recom_user_id):
@@ -544,41 +560,6 @@ class PositionHandler(BaseHandler):
             redirect_url = url_append_query(self.fullurl(), **replace_query)
             self.redirect(redirect_url)
             return
-
-    @gen.coroutine
-    def _make_add_reward_click(self, position_info, recom_employee_user_id):
-        """给员工加积分
-        :param position_info:
-            职位信息，用户提取公司信息
-        :param recom_employee_user_id:
-            最近员工 user_id ，如果为0，说明没有最近员工 user_id ，不执行添加积分操作
-        """
-
-        # 链路最近员工不存在，不会加积分
-        if not recom_employee_user_id:
-            return
-
-        # 点击人为员工，则不会给其他员工再加积分
-        if self.current_user.employee:
-            return
-
-        # 最近员工就是当前用户，是自己点击自己的转发，不应该加积分
-        if recom_employee_user_id == self.current_user.sysuser.id:
-            return
-
-        recom_employee = yield self.user_ps.get_valid_employee_by_user_id(
-            recom_employee_user_id, self.current_user.company.id)
-
-        if recom_employee and recom_employee.sysuser_id:
-            res = yield self.position_ps.add_reward_for_recom_click(
-                employee=recom_employee,
-                company_id=self.current_user.company.id,
-                berecom_user_id=self.current_user.sysuser.id,
-                position_id=position_info.id)
-
-            self.logger.debug("[JD]给员工加积分： %s" % res)
-        else:
-            self.logger.warning("[JD]给员工加积分异常：员工不存在或员工 sysuser_id 不存在: %s" % recom_employee)
 
     @gen.coroutine
     def _make_send_publish_template(self, position_info):

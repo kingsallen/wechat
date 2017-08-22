@@ -13,62 +13,102 @@ from util.tool.json_tool import json_dumps
 from util.tool.str_tool import to_str
 
 
+class AwardsLadderPageHandler(BaseHandler):
+    """Render page to employee/reward-rank.html
+    包含转发信息
+    """
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        # 判断是否已经绑定员工
+        binded = const.YES if self.current_user.employee else const.NO
+        if not binded:
+            self.redirect(self.make_url(path.EMPLOYEE_VERIFY, self.params))
+            return
+        else:
+            cover = self.share_url(self.current_user.company.logo)
+            share_title = messages.EMPLOYEE_AWARDS_LADDER_SHARE_TEXT.format(
+                self.current_user.company.abbreviation or ""),
+
+            self.params.share = ObjectDict({
+                "cover":       cover,
+                "title":       share_title,
+                "description": "",
+                "link":        self.fullurl()
+            })
+
+            self.render_page(template_name="employee/reward-rank.html",
+                             data={})
+
+
+class AwardsLadderHandler(BaseHandler):
+    """API for AwardsLadder data"""
+
+    TIMESPAN = ('month', 'year', 'quarter')
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        """
+        返回员工积分排行榜数据
+        """
+        if self.params.rankType not in self.TIMESPAN:
+            self.send_json_error()
+
+        # 判断是否已经绑定员工
+        binded = const.YES if self.current_user.employee else const.NO
+        if not binded:
+            self.send_json_error()
+
+        company_id = self.current_user.company.id
+        employee_id = self.current_user.employee.id
+        rankType = self.params.rankType  # year/month/quarter
+
+        rank_list = yield self.employee_ps.get_award_ladder_info(
+            employee_id=employee_id,
+            company_id=company_id,
+            type=rankType)
+
+        rank_list = sorted(rank_list, key=lambda x: x.level)
+
+        data = ObjectDict(employeeId=employee_id, rankList=rank_list)
+        self.logger.debug("awards ladder data: %s" % data)
+
+        self.send_json_success(data=data)
+
+
 class AwardsHandler(BaseHandler):
 
     @handle_response
     @authenticated
     @gen.coroutine
     def get(self):
-        # 一些初始化的工作
-        rewards = []
-        reward_configs = []
-        total = 0
 
         # 判断是否已经绑定员工
         binded = const.YES if self.current_user.employee else const.NO
+        email_activation_state = const.OLD_YES if binded else self.current_user.employee.activation
 
         if binded:
             # 获取绑定员工
             rewards_response = yield self.employee_ps.get_employee_rewards(
-                self.current_user.employee.id,
-                self.current_user.company.id)
-            rewards = rewards_response.rewards
-            reward_configs = rewards_response.rewardConfigs
-            total = rewards_response.total
+                employee_id=self.current_user.employee.id,
+                company_id=self.current_user.company.id,
+                page_number=int(self.params.page_number),
+                page_size=int(self.params.page_size)
+            )
+
+            rewards_response.update({
+                'binded': binded,
+                'email_activation_state': email_activation_state
+            })
+
+            self.send_json_success(rewards_response)
+            return
+
         else:
-            pass  # 使用初始化数据
-
-        # 构建输出数据格式
-        res_award_rules = []
-        if reward_configs:
-            for rc in reward_configs:
-                e = ObjectDict()
-                e.name = rc.statusName
-                e.point = rc.points
-                res_award_rules.append(e)
-
-        email_activation_state = const.OLD_YES if binded \
-            else self.current_user.employee.activation
-
-        res_rewards = []
-        if rewards:
-            for rc in rewards:
-                e = ObjectDict()
-                e.reason = rc.reason
-                e.hptitle = rc.title
-                e.title = rc.title
-                e.create_time = rc.updateTime
-                e.point = rc.points
-                res_rewards.append(e)
-
-        # 构建输出数据格式完成
-        self.send_json_success({
-            'rewards':                res_rewards,
-            'award_rules':            res_award_rules,
-            'point_total':            total,
-            'binded':                 binded,
-            'email_activation_state': email_activation_state
-        })
+            self.send_json_error()
 
 
 class EmployeeUnbindHandler(BaseHandler):

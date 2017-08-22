@@ -3,7 +3,6 @@
 import functools
 import json
 import re
-import traceback
 import uuid
 
 from tornado import gen
@@ -15,19 +14,18 @@ import conf.path as path
 from cache.application.email_apply import EmailApplyCache
 from service.page.base import PageService
 from service.page.user.profile import ProfilePageService
-from service.page.user.user import UserPageService
 from service.page.user.sharechain import SharechainPageService
+from service.page.employee.employee import EmployeePageService
 from thrift_gen.gen.mq.struct.ttypes import SmsType
 from util.common import ObjectDict
-from util.common.subprocesswrapper import SubProcessWrapper
 from util.tool.dict_tool import objectdictify, purify
 from util.tool.json_tool import json_dumps
-from util.tool.mail_tool import send_mail_notice_hr
 from util.tool.mail_tool import send_mail as send_email_service
 from util.tool.pdf_tool import save_application_file, get_create_pdf_by_html_cmd,generate_resume_for_hr
 from util.tool.str_tool import trunc
 from util.tool.url_tool import make_url,make_static_url
 from util.wechat.template import application_notice_to_applier_tpl, application_notice_to_recommender_tpl, application_notice_to_hr_tpl
+from util.common.mq import award_publisher
 
 
 class ApplicationPageService(PageService):
@@ -660,6 +658,7 @@ class ApplicationPageService(PageService):
     @gen.coroutine
     def opt_add_reward(self, apply_id, current_user):
         """ 申请添加积分 """
+
         self.logger.debug("[opt_add_reward]start")
 
         application = yield self.get_application_by_id(apply_id)
@@ -668,25 +667,24 @@ class ApplicationPageService(PageService):
 
         recommender_user_id = application.recommender_user_id
 
-        recom_employee = yield self.user_employee_ds.get_employee(
-            conds={
-                'sysuser_id': recommender_user_id,
-                'company_id': current_user.company.id,
-                'activation': const.OLD_YES,
-                'disable': const.OLD_YES
-            }, fields=['id'])
-        if not recom_employee:
-            return
+        if recommender_user_id:
+            recommender_employee_id = 0
+            employee_ps = EmployeePageService()
+            _, employee_info = yield employee_ps.get_employee_info(
+                user_id=recommender_user_id,
+                company_id=current_user.company.id
+            )
+            if employee_info:
+                recommender_employee_id = employee_info.id
 
-        user_ps = UserPageService()
-        yield user_ps.employee_add_reward(
-            employee_id=recom_employee.id,
-            company_id=current_user.company.id,
-            position_id=application.position_id,
-            berecom_user_id=current_user.sysuser.id,
-            award_type=const.EMPLOYEE_AWARD_TYPE_SHARE_APPLY,
-            application_id=application.id
-        )
+            award_publisher.add_awards_apply(
+                company_id=application.company_id,
+                position_id=application.position_id,
+                employee_id=recommender_employee_id,
+                recom_user_id=recommender_user_id,
+                be_recom_user_id=current_user.sysuser.id,
+            )
+
         self.logger.debug("[opt_add_reward]end")
 
     @gen.coroutine
