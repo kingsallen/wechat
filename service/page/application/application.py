@@ -683,6 +683,7 @@ class ApplicationPageService(PageService):
                 employee_id=recommender_employee_id,
                 recom_user_id=recommender_user_id,
                 be_recom_user_id=current_user.sysuser.id,
+                application_id=apply_id
             )
 
         self.logger.debug("[opt_add_reward]end")
