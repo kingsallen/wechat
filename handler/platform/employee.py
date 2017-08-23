@@ -29,7 +29,7 @@ class AwardsLadderPageHandler(BaseHandler):
         else:
             cover = self.share_url(self.current_user.company.logo)
             share_title = messages.EMPLOYEE_AWARDS_LADDER_SHARE_TEXT.format(
-                self.current_user.company.abbreviation or ""),
+                self.current_user.company.abbreviation or "")
 
             self.params.share = ObjectDict({
                 "cover":       cover,
