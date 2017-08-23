@@ -89,24 +89,13 @@ class AwardsMQPublisher(MQPublisher):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def add_awards_click_jd(self, company_id, position_id, employee_id,
-                            be_recom_user_id,
-                            recom_user_id):
-        self._add_awards(
-            company_id, position_id, employee_id, be_recom_user_id,
-            recom_user_id,
-            type=self.TYPE_CLICK_JD)
+    def add_awards_click_jd(self, company_id, position_id, employee_id, be_recom_user_id, recom_user_id):
+        self._add_awards(company_id, position_id, employee_id, be_recom_user_id, recom_user_id, type=self.TYPE_CLICK_JD)
 
-    def add_awards_apply(self, company_id, position_id, employee_id,
-                         be_recom_user_id,
-                         recom_user_id):
-        self._add_awards(
-            company_id, position_id, employee_id, be_recom_user_id,
-            recom_user_id,
-            type=self.TYPE_APPLY)
+    def add_awards_apply(self, company_id, position_id, employee_id, be_recom_user_id, recom_user_id, application_id):
+        self._add_awards(company_id, position_id, employee_id, be_recom_user_id, recom_user_id, type=self.TYPE_APPLY, application_id=application_id)
 
-    def _add_awards(self, company_id, position_id, employee_id,
-                    be_recom_user_id, recom_user_id, type):
+    def _add_awards(self, company_id, position_id, employee_id, be_recom_user_id, recom_user_id, type, **kwargs):
         params = {
             'companyId':     company_id,
             'positionId':    position_id,
@@ -119,7 +108,8 @@ class AwardsMQPublisher(MQPublisher):
             params.update({'templateId': const.RECRUIT_STATUS_RECOMCLICK_ID})
             routing_key = "sharejd.jd_clicked"
         elif type == self.TYPE_APPLY:
-            params.update({'templateId': const.RECRUIT_STATUS_APPLY_ID})
+            params.update({'templateId': const.RECRUIT_STATUS_APPLY_ID,
+                           'applicationId': kwargs['application_id']})
             routing_key = "sharejd.job_applied"
 
         else:
