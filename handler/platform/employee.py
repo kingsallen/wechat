@@ -108,7 +108,7 @@ class AwardsHandler(BaseHandler):
             return
 
         else:
-            self.send_json_error()
+            self.send_json_error(message=messages.EMPLOYEE_NOT_BINDED_WARNING.format(self.current_user.company.conf_employee_slug))
 
 
 class EmployeeUnbindHandler(BaseHandler):
