@@ -34,7 +34,7 @@ class AwardsLadderPageHandler(BaseHandler):
             self.params.share = ObjectDict({
                 "cover":       cover,
                 "title":       share_title,
-                "description": "",
+                "description": messages.EMPLOYEE_AWARDS_LADDER_DESC_TEXT,
                 "link":        self.fullurl()
             })
 
