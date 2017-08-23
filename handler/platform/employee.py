@@ -60,7 +60,7 @@ class AwardsLadderHandler(BaseHandler):
         # 判断是否已经绑定员工
         binded = const.YES if self.current_user.employee else const.NO
         if not binded:
-            self.send_json_error()
+            self.send_json_error(message=messages.EMPLOYEE_NOT_BINDED_WARNING.format(self.current_user.company.conf_employee_slug))
 
         company_id = self.current_user.company.id
         employee_id = self.current_user.employee.id
