@@ -165,11 +165,17 @@ class EmployeeBindHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def post(self):
-        binding_params = self.employee_ps.make_bind_params(
+        result, payload = self.employee_ps.make_bind_params(
             self.current_user.sysuser.id,
             self.current_user.company.id,
             self.json_args)
-        self.logger.debug(binding_params)
+
+        self.logger.debug(result)
+        self.logger.debug(payload)
+
+        if not result:
+            self.send_json_error(message=payload)
+            return
 
         thrift_bind_status = yield self.employee_ps.get_employee_bind_status(
             self.current_user.sysuser.id,
@@ -188,7 +194,7 @@ class EmployeeBindHandler(BaseHandler):
             self.send_json_error(message=messages.EMPLOYEE_BINDED_WARNING.format(self.current_user.company.conf_employee_slug))
             return
 
-        result, result_message = yield self.employee_ps.bind(binding_params)
+        result, result_message = yield self.employee_ps.bind(payload)
 
         # early return 2
         if not result:
