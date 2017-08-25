@@ -6,11 +6,13 @@ from tornado import gen
 import conf.common as const
 import conf.fe as fe
 import conf.path as path
+import conf.message as msg
 from setting import settings
 
 from service.page.base import PageService
 from thrift_gen.gen.employee.struct.ttypes import BindingParams, BindStatus
 from util.common import ObjectDict
+from util.tool.re_checker import revalidator
 from util.tool.dict_tool import sub_dict
 from util.tool.url_tool import make_static_url, make_url
 from util.wechat.template import employee_refine_custom_fields_tpl
@@ -249,6 +251,10 @@ class EmployeePageService(PageService):
         param_dict = sub_dict(json_args, needed_keys)
 
         if type == self.FE_BIND_TYPE_EMAIL:
+            passed = revalidator.check_email_local(param_dict.email_name)
+            if not passed:
+                return False, msg.EMAIL_FMT_FAILURE
+
             param_dict.email = '%s@%s' % (param_dict.email_name, param_dict.email_suffix)
         if type == self.FE_BIND_TYPE_QUESTION:
             param_dict.answer1 = param_dict.answers[0]
@@ -268,7 +274,7 @@ class EmployeePageService(PageService):
             answer1=param_dict.answer1,
             answer2=param_dict.answer2)
 
-        return binding_params
+        return True, binding_params
 
     @gen.coroutine
     def get_employee_conf(self, company_id):

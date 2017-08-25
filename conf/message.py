@@ -84,3 +84,5 @@ EMPLOYEE_BINDED_WARNING = "该{}已经绑定"
 
 DEFAULT_RECOMMEND_PRESENTEE = "请帮您的好友们做个推荐吧！\n他们很希望能成为您的同事"
 DEFAULT_RECOMMEND_SUCCESS = "感谢您对公司人才库的贡献"
+
+EMAIL_FMT_FAILURE = "Email格式不正确"
