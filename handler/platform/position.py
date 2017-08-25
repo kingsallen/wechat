@@ -664,9 +664,9 @@ class PositionListHandler(BaseHandler):
                 for position in position_list:
                     pext = [e for e in rpext_list if e.pid == position.id]
                     if pext:
-                        position.is_rp_reward = True
                         position.remain = pext[0].remain
                         position.employee_only = pext[0].employee_only
+                        position.is_rp_reward = position.remain > 0
                     else:
                         position.is_rp_reward = False
 
