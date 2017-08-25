@@ -828,15 +828,16 @@ class ApplicationPageService(PageService):
                         work_exp_years,
                         recent_job)
 
-            if not is_ok:
-                # 消息模板发送失败时，向 HR 发送短信
-                if hr_info.mobile and hr_info.account_type == 2:
-                    params = ObjectDict({
-                        "position": position.title
-                    })
-                    yield self.thrift_mq_ds.send_sms(SmsType.NEW_APPLICATION_TO_HR_SMS,
-                                                     hr_info.mobile,
-                                                     params, isqx=not is_platform)
+            # 2017-08-25  不再向 hr 发送短信
+            # if not is_ok:
+            #     # 消息模板发送失败时，向 HR 发送短信
+            #     if hr_info.mobile and hr_info.account_type == 2:
+            #         params = ObjectDict({
+            #             "position": position.title
+            #         })
+            #         yield self.thrift_mq_ds.send_sms(SmsType.NEW_APPLICATION_TO_HR_SMS,
+            #                                          hr_info.mobile,
+            #                                          params, isqx=not is_platform)
             profile_ps = None
 
             # 发送邮件
