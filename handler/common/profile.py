@@ -375,9 +375,7 @@ class ProfileCustomHandler(BaseHandler):
             # 这样可以做到和老六步兼容
             #  *const.CUSTOM_FIELD_NAME_TO_PROFILE_FIELD 需要微信后端自行维护
 
-            # 自定义简历模版提交的 picUrl 作为 IDPhoto 使用
-            if custom_cv.get('picUrl'):
-                custom_cv['IDPhoto'] = custom_cv.get('picUrl')
+            custom_cv = self._preprocess_custom_cv(custom_cv)
 
             cv_pure_custom = {k: v for k, v in custom_cv.items() if
                               k in custom_fields}
@@ -387,6 +385,18 @@ class ProfileCustomHandler(BaseHandler):
             record = ObjectDict(other=other_string)
 
             yield self.application_ps.update_profile_other(record, profile_id)
+
+    @staticmethod
+    def _preprocess_custom_cv(custom_cv):
+        # 自定义简历模版提交的 picUrl 作为 IDPhoto 使用
+        if custom_cv.get('picUrl'):
+            custom_cv['IDPhoto'] = custom_cv.get('picUrl')
+
+        # 前端 rocketmajor_value 保存应该入库的 rocketmajor 字段内容
+        if custom_cv.get('rocketmajor_value'):
+            custom_cv['rocketmajor'] = custom_cv.get(
+                'rocketmajor_value')
+        return custom_cv
 
 
 class ProfileSectionHandler(BaseHandler):

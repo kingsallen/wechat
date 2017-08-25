@@ -404,6 +404,7 @@ CONSTANT_PARENT_CODE = ObjectDict(
     PROFILE_SOURCE=3119,  # Profile创建来源
     REGISTER_SOURCE=4101,  # 用户注册来源(source)
     CONTINENT=9103,  # 大洲
+    ROCKETMAJOR_L1=990000  # 火箭一级专业
 )
 
 # hr_employee_cert_conf.auth_mode 的数据库枚举值
