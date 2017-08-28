@@ -22,22 +22,10 @@ class LinkedinImportHandler(MetaBaseHandler):
     与微信 oauth2.0授权冲突（code问题），
     故直接继承 MetaBaseHandler"""
 
-    def make_url(self, path, params=None, host="", protocol="https", escape=None, **kwargs):
-        if not host:
-            host = self.host
-        return make_url(path, params, host, protocol, escape, **kwargs)
-
     def get_template_namespace(self):
         """copyed from BaseHandler"""
         namespace = super().get_template_namespace()
-        add_namespace = ObjectDict(
-            env=self.env,
-            make_url=self.make_url,
-            const=const,
-            path=path,
-            params={'wechat_signature': self.get_argument('wechat_signature')},
-            static_url=self.static_url
-        )
+        add_namespace = ObjectDict(env=self.env)
         namespace.update(add_namespace)
         return namespace
 
@@ -66,7 +54,6 @@ class LinkedinImportHandler(MetaBaseHandler):
         ua = 1 if self.in_wechat else 2
         is_ok, result = yield self.profile_ps.import_profile(4, "", "", user_id, ua, access_token)
         self.logger.debug("is_ok:{} result:{}".format(is_ok, result))
-
         if is_ok:
             if self.params.pid:
                 next_url = make_url(path.PROFILE_PREVIEW, params=self.params, host=self.host)
@@ -76,25 +63,7 @@ class LinkedinImportHandler(MetaBaseHandler):
             self.redirect(next_url)
             return
         else:
-            if result.message == '导入次数过多！':
-                messages = msg.PROFILE_IMPORT_LIMITED
-            else:
-                messages = result.message
-
-            next_url = make_url(path.PROFILE, self.params)
-
-            self.render(
-                template_name='refer/weixin/employee/employee_binding_tip_v2.html',
-                result=3,
-                messages=messages,
-                button_text=msg.BACK_CN,
-                button_url=next_url,
-
-                auto_next=False,
-                nexturl=next_url
-            )
-            return
-
+            self.write_error(http_code=500, message=result.message)
 
 
 class ResumeImportHandler(BaseHandler):
