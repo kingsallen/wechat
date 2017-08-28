@@ -82,7 +82,7 @@ class LinkedinImportHandler(MetaBaseHandler):
                 kind=1, #  // {0: success, 1: failure, 10: email}
                 messages=messages, # ['hello world', 'abjsldjf']
                 button_text=msg.BACK_CN,
-                button_link=self.make_url(path.PROFILE,
+                button_link=self.make_url(path.PROFILE_VIEW,
                                           wechat_signature=self.get_argument('wechat_signature'),
                                           host=self.host),
                 jump_link=None # // 如果有会自动，没有就不自动跳转
