@@ -22,10 +22,20 @@ class LinkedinImportHandler(MetaBaseHandler):
     与微信 oauth2.0授权冲突（code问题），
     故直接继承 MetaBaseHandler"""
 
+    def make_url(self, path, params=None, host="", protocol="https", escape=None, **kwargs):
+        if not host:
+            host = self.host
+        return make_url(path, params, host, protocol, escape, **kwargs)
+
     def get_template_namespace(self):
         """copyed from BaseHandler"""
         namespace = super().get_template_namespace()
-        add_namespace = ObjectDict(env=self.env)
+        add_namespace = ObjectDict(
+            env=self.env,
+            make_url=self.make_url,
+            const=const,
+            path=path
+        )
         namespace.update(add_namespace)
         return namespace
 
@@ -63,7 +73,23 @@ class LinkedinImportHandler(MetaBaseHandler):
             self.redirect(next_url)
             return
         else:
-            self.write_error(http_code=500, message=result.message)
+            if result.status == 32008:
+                messages = msg.PROFILE_IMPORT_LIMIT
+            else:
+                messages = result.message
+
+            data = ObjectDict(
+                kind=1,
+                messages=messages,
+                button_text=msg.BACK_CN,
+                button_link=self.make_url(path.PROFILE, wechat_signature=self.get_argument('wechat_signature')),
+                jump_link=None
+            )
+
+            self.render_page(template_name="system/user-info.html",
+                             data=data)
+            return
+
 
 
 class ResumeImportHandler(BaseHandler):
