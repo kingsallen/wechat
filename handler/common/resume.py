@@ -148,7 +148,7 @@ class ResumeImportHandler(BaseHandler):
             return
 
         # 微信端用户只能导入一次简历，故不需要做导入频率限制
-        if self.params.way in const.RESUME_WAY_SPIDER.keys():
+        if str(self.params.way) in const.RESUME_WAY_SPIDER:
             # 判断是否在微信端
             ua = 1 if self.in_wechat else 2
             is_ok, result = yield self.profile_ps.import_profile(
