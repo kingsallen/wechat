@@ -79,11 +79,13 @@ class LinkedinImportHandler(MetaBaseHandler):
                 messages = result.message
 
             data = ObjectDict(
-                kind=1,
-                messages=messages,
+                kind=1, #  // {0: success, 1: failure, 10: email}
+                messages=messages, # ['hello world', 'abjsldjf']
                 button_text=msg.BACK_CN,
-                button_link=self.make_url(path.PROFILE, wechat_signature=self.get_argument('wechat_signature')),
-                jump_link=None
+                button_link=self.make_url(path.PROFILE,
+                                          wechat_signature=self.get_argument('wechat_signature'),
+                                          host=self.host),
+                jump_link=None # // 如果有会自动，没有就不自动跳转
             )
 
             self.render_page(template_name="system/user-info.html",
