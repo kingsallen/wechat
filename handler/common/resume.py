@@ -54,6 +54,7 @@ class LinkedinImportHandler(MetaBaseHandler):
         ua = 1 if self.in_wechat else 2
         is_ok, result = yield self.profile_ps.import_profile(4, "", "", user_id, ua, access_token)
         self.logger.debug("is_ok:{} result:{}".format(is_ok, result))
+
         if is_ok:
             if self.params.pid:
                 next_url = make_url(path.PROFILE_PREVIEW, params=self.params, host=self.host)
@@ -63,7 +64,20 @@ class LinkedinImportHandler(MetaBaseHandler):
             self.redirect(next_url)
             return
         else:
-            self.write_error(http_code=500, message=result.message)
+            if result.message == '导入次数过多！':
+                messages = msg.PROFILE_IMPORT_LIMITED
+            else:
+                messages = result.message
+
+            self.render(
+                template_name='refer/weixin/employee/employee_binding_tip_v2.html',
+                result=3,
+                messages=messages,
+                nexturl=make_url(path.PROFILE, self.params),
+                button_text=msg.BACK_CN
+            )
+            return
+
 
 
 class ResumeImportHandler(BaseHandler):
