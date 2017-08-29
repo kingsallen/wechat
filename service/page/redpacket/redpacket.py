@@ -592,8 +592,6 @@ class RedpacketPageService(PageService):
         if send_to_employee or matches:
             self.logger.debug("[RP]用户是发送红包对象,准备掷骰子")
 
-
-
             if self.__hit_red_packet(red_packet_config.probability):
                 self.logger.debug("[RP]掷骰子通过,准备发送红包信封(有金额)")
 

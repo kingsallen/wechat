@@ -101,7 +101,10 @@ class ApplicationHandler(BaseHandler):
                 return
 
         is_applied, message, apply_id = yield self.application_ps.create_application(
-            position, self.current_user, is_platform=self.is_platform, has_recom='recom' in self.params)
+            position,
+            self.current_user,
+            is_platform=self.is_platform,
+            has_recom='recom' in self.params)
 
         # TODO (tangyiliang) 申请后操作，以下操作全部可以走消息队列
         if is_applied:

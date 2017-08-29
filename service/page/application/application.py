@@ -619,7 +619,7 @@ class ApplicationPageService(PageService):
             params_for_application)
 
         if ret.status != const.API_SUCCESS:
-            return False, msg.CREATE_APPLICATION_FAILED
+            return False, ret.message, 0
 
         apply_id = ret.data.jobApplicationId
 
