@@ -206,7 +206,7 @@ class SharechainPageService(PageService):
                 "root2_recom_user_id": 0,
                 "click_time":          last_share_record.create_time,
                 "depth":               0,
-                "parent_id":           0
+                "parent_id":           share_chain_parent_id  if share_chain_parent_id else 0
             })
 
         # 如果看的人不是员工，
@@ -281,7 +281,8 @@ class SharechainPageService(PageService):
                 "presentee_user_id": user_id,
                 "click_time": [fixed_now, "<="]
             },
-            appends=['ORDER BY click_time DESC']
+            appends=['ORDER BY click_time DESC',
+                     'LIMIT 1']
         )
         raise gen.Return(record)
 
