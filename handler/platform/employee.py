@@ -337,16 +337,15 @@ class CustomInfoHandler(BaseHandler):
             self.current_user.sysuser.id,
             self.current_user.company.id
         )
+
+        fe_binding_stauts = self.employee_ps.convert_bind_status_from_thrift_to_fe(
+            binding_status)
+
         # unbinded users may not need to know this page
-        if (self.employee_ps.convert_bind_status_from_thrift_to_fe(
-            binding_status) not in [fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS,
-                                    fe.FE_EMPLOYEE_BIND_STATUS_PENDING]):
+        if (fe_binding_stauts not in [fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS, fe.FE_EMPLOYEE_BIND_STATUS_PENDING]):
             self.write_error(404)
-        elif (str(employee.id) != self.params._employeeid or
-                not self.params._employeeid):
+        elif (str(employee.id) != self.params._employeeid or not self.params._employeeid):
             self.write_error(416)
-        else:
-            pass
 
         # 构建跳转 make_url 的 escape
         escape = ['headimg', 'next_url']
@@ -360,7 +359,16 @@ class CustomInfoHandler(BaseHandler):
         self.logger.debug("keys: %s" % keys)
         custom_fields = json_dumps(keys)
 
-        yield self.employee_ps.update_employee_custom_fields(employee.id, custom_fields)
+        # 利用基础服务更新员工自定义补填字段，
+        # 注意：对于email 认证 pending 状态的（待认证）员工，需要调用不同的基础服务接口
+        if fe_binding_stauts == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS:
+            yield self.employee_ps.update_employee_custom_fields(employee.id, custom_fields)
+
+        elif fe_binding_stauts == fe.FE_EMPLOYEE_BIND_STATUS_PENDING:
+            yield self.employee_ps.update_employee_custom_fields_for_email_pending(
+                self.current_user.sysuser.id, self.current_user.company.id, custom_fields)
+        else:
+            assert False
 
         # 判断与跳转
         self.params.pop('next_url', None)

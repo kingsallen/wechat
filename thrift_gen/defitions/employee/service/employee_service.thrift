@@ -25,6 +25,9 @@ service EmployeeService {
     // 员工填写认证自定义字段
     employee_struct.Result setEmployeeCustomInfo(1: i32 employeeId, 2: string customValues);
 
+    // 员工填写认证自定义字段（email 认证 pending 时）
+    employee_struct.Result setCacheEmployeeCustomInfo(1: i32 userId, 2: i32 companyId, 3: string customValues);
+
     // 获取员工积分
     employee_struct.RewardsResponse getEmployeeRewards(1: i32 employeeId, 2: i32 companyId, 3: i32 pageNumber, 4: i32 pageSize);
 
