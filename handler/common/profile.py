@@ -13,6 +13,8 @@ from util.common.decorator import handle_response, check_and_apply_profile, \
     authenticated
 from util.tool.dict_tool import sub_dict, objectdictify
 from util.tool.str_tool import mobile_validate
+from util.tool.json_tool import json_dumps
+
 
 class ProfileNewHandler(BaseHandler):
 
@@ -213,7 +215,7 @@ class ProfileViewHandler(BaseHandler):
 
     def _share(self, uuid, profile_tpl):
         default = ObjectDict({
-            'cover': self.static_url(profile_tpl.avatar_url),
+            'cover': self.share_url(profile_tpl.avatar_url),
             'title': '【{}】的个人职场档案'.format(profile_tpl.username),
             'description': '点击查看{}的个人职场档案'.format(profile_tpl.username),
             'link': self.make_url(path.PROFILE_VISITOR_VIEW.format(uuid), self.params)
@@ -244,7 +246,7 @@ class ProfileHandler(BaseHandler):
 
     def _share(self, uuid, profile_tpl):
         default = ObjectDict({
-            'cover': self.static_url(profile_tpl.avatar_url),
+            'cover': self.share_url(profile_tpl.avatar_url),
             'title': '【{}】的个人职场档案'.format(profile_tpl.username),
             'description': '点击查看{}的个人职场档案'.format(profile_tpl.username),
             'link': self.make_url(path.PROFILE_VISITOR_VIEW.format(uuid), self.params)
@@ -325,7 +327,7 @@ class ProfileCustomHandler(BaseHandler):
             yield self.profile_ps.update_profile_basic(profile_id, basic)
             # 更新 education, workexp, projectext
             yield self.profile_ps.update_profile_embedded_info_from_cv(
-                profile_id, custom_cv)
+                profile, custom_cv)
 
         else:
             # 还不存在 profile， 创建 profile
@@ -354,8 +356,9 @@ class ProfileCustomHandler(BaseHandler):
                     self.logger.error("profile_basic creation failed. res: %s" % data)
 
                 yield self.profile_ps.update_profile_basic(profile_id, custom_cv)
+                _, profile = yield self.profile_ps.has_profile(self.current_user.sysuser.id)
                 yield self.profile_ps.update_profile_embedded_info_from_cv(
-                    profile_id, custom_cv)
+                    profile, custom_cv)
             else:
                 raise ValueError('profile creation error')
 
@@ -372,16 +375,28 @@ class ProfileCustomHandler(BaseHandler):
             # 这样可以做到和老六步兼容
             #  *const.CUSTOM_FIELD_NAME_TO_PROFILE_FIELD 需要微信后端自行维护
 
-            # 自定义简历模版提交的 picUrl 作为 IDPhoto 使用
-            if custom_cv.get('picUrl'):
-                custom_cv['IDPhoto'] = custom_cv.get('picUrl')
+            custom_cv = self._preprocess_custom_cv(custom_cv)
 
             cv_pure_custom = {k: v for k, v in custom_cv.items() if
                               k in custom_fields}
 
-            other_string = json_encode(cv_pure_custom)
+            other_string = json_dumps(cv_pure_custom)
+
             record = ObjectDict(other=other_string)
+
             yield self.application_ps.update_profile_other(record, profile_id)
+
+    @staticmethod
+    def _preprocess_custom_cv(custom_cv):
+        # 自定义简历模版提交的 picUrl 作为 IDPhoto 使用
+        if custom_cv.get('picUrl'):
+            custom_cv['IDPhoto'] = custom_cv.get('picUrl')
+
+        # 前端 rocketmajor_value 保存应该入库的 rocketmajor 字段内容
+        if custom_cv.get('rocketmajor_value'):
+            custom_cv['rocketmajor'] = custom_cv.get(
+                'rocketmajor_value')
+        return custom_cv
 
 
 class ProfileSectionHandler(BaseHandler):

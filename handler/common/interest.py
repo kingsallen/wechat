@@ -22,7 +22,10 @@ class UserCurrentInfoHandler(BaseHandler):
         full 参数用以判断只要返回 bool 就好了还是需要详细的数据
         """
 
-        full = const.YES if self.params.full else const.NO
+        full = const.NO
+        if self.params.full:
+            params_full = int(self.params.full)
+            full = const.YES if params_full else const.NO
 
         if self.current_user.sysuser:
             if full:

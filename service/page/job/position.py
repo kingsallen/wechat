@@ -182,33 +182,6 @@ class PositionPageService(PageService):
         raise gen.Return(pos_recommends)
 
     @gen.coroutine
-    def add_reward_for_recom_click(self, employee, company_id, berecom_user_id, position_id):
-        """转发被点击添加积分"""
-
-        points_conf = yield self.hr_points_conf_ds.get_points_conf(conds={
-            "company_id": company_id,
-            "template_id": self.constant.RECRUIT_STATUS_RECOMCLICK_ID,
-        }, appends=["ORDER BY id DESC", "LIMIT 1"])
-
-        click_record = yield self.user_employee_points_record_ds.get_user_employee_points_record(conds={
-            "berecom_user_id": berecom_user_id,
-            "position_id": position_id,
-            "award_config_id": points_conf.id,
-            "employee_id": employee.id
-        }, fields=["id"])
-
-        # 转发被点击添加积分，同一个职位，相同的人点击多次不加积分
-        if not click_record:
-            user_ps = UserPageService()
-            yield user_ps.employee_add_reward(
-                employee_id=employee.id,
-                company_id=company_id,
-                position_id=position_id,
-                berecom_user_id=berecom_user_id,
-                award_type=const.EMPLOYEE_AWARD_TYPE_SHARE_CLICK
-            )
-
-    @gen.coroutine
     def get_cms_page(self, team_id):
         res = None
         cms_page = yield self.hr_cms_pages_ds.get_page(conds={

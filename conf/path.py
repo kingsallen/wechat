@@ -56,6 +56,7 @@ IMAGE_URL = '/image'
 # Ref: https://wiki.moseeker.com/user_account_api.md
 INFRA_USER_INFO = 'user'
 INFRA_USER_VALID = 'user/sendCode'
+INFRA_USER_VOICE_VALID = 'user/sendsignupcode/voice'
 INFRA_USER_VERIFY = 'user/verifyCode'
 INFRA_USER_COMBINE = 'user/wxbindmobile'
 INFRA_USER_LOGIN = 'user/login'
@@ -68,6 +69,7 @@ INFRA_USER_FAV_POSITION = 'user/{}/fav-position'
 INFRA_USER_SETTINGS = 'user/settings'
 INFRA_WXUSER_QRCODE_SCANRESULT = 'weixin/qrcode/scanresult'
 INFRA_HRUSER = 'hraccount'
+INFRA_USER_EMPLOYEE_CHECK = 'user/employee/check'
 
 # 申请服务
 # Ref: https://wiki.moseeker.com/application-api.md
@@ -107,6 +109,7 @@ COMPANY = 'company'
 DICT_CONSTANT = "dict/constant"
 DICT_CITIES = "dict/cities"
 DICT_COLLEGE = "dict/college"
+DICT_COUNTRY = "dict/country"
 DICT_INDUSTRY = "dict/industry"
 DICT_POSITION = "dict/position"
 
@@ -115,5 +118,5 @@ MESSAGE_TEMPLATE = "message/template"
 # ============================ 基础服务结束 ============================
 
 # 其他外部服务
-LINKEDIN_ACCESSTOKEN = "https://www.linkedin.com/uas/oauth2/accessToken"
-LINKEDIN_AUTH = "/uas/oauth2/authorization"
+LINKEDIN_ACCESSTOKEN = "https://www.linkedin.com/oauth/v2/accessToken"
+LINKEDIN_AUTH = "/oauth/v2/authorization"

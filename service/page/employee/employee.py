@@ -6,11 +6,13 @@ from tornado import gen
 import conf.common as const
 import conf.fe as fe
 import conf.path as path
+import conf.message as msg
 from setting import settings
 
 from service.page.base import PageService
 from thrift_gen.gen.employee.struct.ttypes import BindingParams, BindStatus
 from util.common import ObjectDict
+from util.tool.re_checker import revalidator
 from util.tool.dict_tool import sub_dict
 from util.tool.url_tool import make_static_url, make_url
 from util.wechat.template import employee_refine_custom_fields_tpl
@@ -50,8 +52,8 @@ class EmployeePageService(PageService):
             user_id, company_id)
         return employee_response.bindStatus, employee_response.employee
 
-
-    def convert_bind_status_from_thrift_to_fe(self, thrift_bind_status):
+    @staticmethod
+    def convert_bind_status_from_thrift_to_fe(thrift_bind_status):
         """convert bind status value to FE format"""
         fe_bind_status = fe.FE_EMPLOYEE_BIND_STATUS_DEFAULT_INVALID
 
@@ -122,6 +124,12 @@ class EmployeePageService(PageService):
             data.employeeid = employee.id
             data.name = employee.cname
 
+        # 当前是 pending 状态
+        elif bind_status == BindStatus.PENDING:
+            data.name = employee.cname
+            data.mobile = employee.mobile
+            data.binding_status = fe.FE_EMPLOYEE_BIND_STATUS_PENDING
+
         # 当前是未绑定状态
         else:
             # 否则，调用基础服务判断当前用户的认证状态：没有认证还是 pending 中
@@ -132,7 +140,6 @@ class EmployeePageService(PageService):
 
             elif bind_status == const.EMPLOYEE_BIND_STATUS_EMAIL_PENDING:
                 data.binding_status = fe.FE_EMPLOYEE_BIND_STATUS_PENDING
-
             else:
                 data.binding_status = fe.FE_EMPLOYEE_BIND_STATUS_DEFAULT_INVALID
 
@@ -244,6 +251,10 @@ class EmployeePageService(PageService):
         param_dict = sub_dict(json_args, needed_keys)
 
         if type == self.FE_BIND_TYPE_EMAIL:
+            passed = revalidator.check_email_local(param_dict.email_name)
+            if not passed:
+                return False, msg.EMAIL_FMT_FAILURE
+
             param_dict.email = '%s@%s' % (param_dict.email_name, param_dict.email_suffix)
         if type == self.FE_BIND_TYPE_QUESTION:
             param_dict.answer1 = param_dict.answers[0]
@@ -263,7 +274,7 @@ class EmployeePageService(PageService):
             answer1=param_dict.answer1,
             answer2=param_dict.answer2)
 
-        return binding_params
+        return True, binding_params
 
     @gen.coroutine
     def get_employee_conf(self, company_id):
@@ -273,11 +284,59 @@ class EmployeePageService(PageService):
         return ret
 
     @gen.coroutine
-    def get_employee_rewards(self, employee_id, company_id):
+    def get_employee_rewards(self, employee_id, company_id, page_number=1, page_size=10):
         """获取员工积分信息"""
-        ret = yield self.thrift_employee_ds.get_employee_rewards(
-            employee_id, company_id)
-        return ret
+
+        reason_txt_fmt_map = {
+            const.RECRUIT_STATUS_RECOMCLICK_ID:      "{}查看了职位",
+            const.RECRUIT_STATUS_APPLY_ID:           "{}投递了简历",
+            const.RECRUIT_STATUS_CVPASSED_ID:        "{}的简历通过了评审",
+            const.RECRUIT_STATUS_OFFERED_ID:         "{}通过了面试",
+            const.RECRUIT_STATUS_FULL_RECOM_INFO_ID: "完善了{}的信息",
+            const.RECRUIT_STATUS_HIRED_ID:           "{}成功入职",
+        }
+
+        res_award_rules = []
+        res_rewards = []
+
+        rewards_thrift_res = yield self.thrift_employee_ds.get_employee_rewards(
+            employee_id, company_id, page_number, page_size)
+
+        rewards = rewards_thrift_res.rewards
+        reward_configs = rewards_thrift_res.rewardConfigs
+        total = rewards_thrift_res.total
+
+        # 构建输出数据格式
+        if reward_configs:
+            for rc in reward_configs:
+                e = ObjectDict()
+                e.name = rc.statusName
+                e.point = rc.points
+                res_award_rules.append(e)
+
+        if rewards:
+            for reward_vo in rewards:
+                e = ObjectDict()
+
+                # 根据申请进度由系统自动追加的积分
+                if reward_vo.type in reason_txt_fmt_map and reward_vo.berecomName:
+                    e.reason = reason_txt_fmt_map[reward_vo.type].format(reward_vo.berecomName)
+                # HR 手动增减积分添加的原因
+                elif reward_vo.type == 0:
+                    e.reason = reward_vo.reason
+                else:
+                    e.reason = ""
+                e.title = reward_vo.positionName
+                e.point = reward_vo.points
+                e.create_time = reward_vo.updateTime
+                res_rewards.append(e)
+
+        return ObjectDict({
+            'rewards':                res_rewards,
+            'award_rules':            res_award_rules,
+            'point_total':            total
+        })
+
 
     @gen.coroutine
     def unbind(self, employee_id, company_id, user_id):
@@ -297,6 +356,24 @@ class EmployeePageService(PageService):
         """通过邮箱激活员工"""
         ret = yield self.thrift_employee_ds.activate_email(activation_code)
         return ret.success, ret.message, ret.employeeId
+
+    @gen.coroutine
+    def get_award_ladder_info(self, employee_id, company_id, type):
+        """获取员工积分榜数据"""
+        ret = yield self.thrift_employee_ds.get_award_ranking(
+            employee_id, company_id, type)
+
+        def gen_make_element(employee_award_list):
+            for e in employee_award_list:
+                yield ObjectDict({
+                    'username': e.name,
+                    'id': e.employeeId,
+                    'point': e.awardTotal,
+                    'icon': make_static_url(e.headimgurl),
+                    'level': e.ranking
+                })
+
+        return list(gen_make_element(ret))
 
     @gen.coroutine
     def get_recommend_records(self, user_id, req_type, page_no, page_size):

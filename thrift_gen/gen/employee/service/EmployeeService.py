@@ -64,11 +64,13 @@ class Iface(object):
         """
         pass
 
-    def getEmployeeRewards(self, employeeId, companyId):
+    def getEmployeeRewards(self, employeeId, companyId, pageNumber, pageSize):
         """
         Parameters:
          - employeeId
          - companyId
+         - pageNumber
+         - pageSize
         """
         pass
 
@@ -83,6 +85,15 @@ class Iface(object):
         """
         Parameters:
          - activationCodee
+        """
+        pass
+
+    def awardRanking(self, employeeId, companyId, timespan):
+        """
+        Parameters:
+         - employeeId
+         - companyId
+         - timespan
         """
         pass
 
@@ -322,23 +333,27 @@ class Client(Iface):
             return result.success
         raise TApplicationException(TApplicationException.MISSING_RESULT, "setEmployeeCustomInfo failed: unknown result")
 
-    def getEmployeeRewards(self, employeeId, companyId):
+    def getEmployeeRewards(self, employeeId, companyId, pageNumber, pageSize):
         """
         Parameters:
          - employeeId
          - companyId
+         - pageNumber
+         - pageSize
         """
         self._seqid += 1
         future = self._reqs[self._seqid] = concurrent.Future()
-        self.send_getEmployeeRewards(employeeId, companyId)
+        self.send_getEmployeeRewards(employeeId, companyId, pageNumber, pageSize)
         return future
 
-    def send_getEmployeeRewards(self, employeeId, companyId):
+    def send_getEmployeeRewards(self, employeeId, companyId, pageNumber, pageSize):
         oprot = self._oprot_factory.getProtocol(self._transport)
         oprot.writeMessageBegin('getEmployeeRewards', TMessageType.CALL, self._seqid)
         args = getEmployeeRewards_args()
         args.employeeId = employeeId
         args.companyId = companyId
+        args.pageNumber = pageNumber
+        args.pageSize = pageSize
         args.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -420,6 +435,42 @@ class Client(Iface):
             return result.success
         raise TApplicationException(TApplicationException.MISSING_RESULT, "emailActivation failed: unknown result")
 
+    def awardRanking(self, employeeId, companyId, timespan):
+        """
+        Parameters:
+         - employeeId
+         - companyId
+         - timespan
+        """
+        self._seqid += 1
+        future = self._reqs[self._seqid] = concurrent.Future()
+        self.send_awardRanking(employeeId, companyId, timespan)
+        return future
+
+    def send_awardRanking(self, employeeId, companyId, timespan):
+        oprot = self._oprot_factory.getProtocol(self._transport)
+        oprot.writeMessageBegin('awardRanking', TMessageType.CALL, self._seqid)
+        args = awardRanking_args()
+        args.employeeId = employeeId
+        args.companyId = companyId
+        args.timespan = timespan
+        args.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def recv_awardRanking(self, iprot, mtype, rseqid):
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = awardRanking_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "awardRanking failed: unknown result")
+
 
 class Processor(Iface, TProcessor):
     def __init__(self, handler):
@@ -434,6 +485,7 @@ class Processor(Iface, TProcessor):
         self._processMap["getEmployeeRewards"] = Processor.process_getEmployeeRewards
         self._processMap["getEmployeeRecoms"] = Processor.process_getEmployeeRecoms
         self._processMap["emailActivation"] = Processor.process_emailActivation
+        self._processMap["awardRanking"] = Processor.process_awardRanking
 
     def process(self, iprot, oprot):
         (name, type, seqid) = iprot.readMessageBegin()
@@ -527,7 +579,7 @@ class Processor(Iface, TProcessor):
         args.read(iprot)
         iprot.readMessageEnd()
         result = getEmployeeRewards_result()
-        result.success = yield gen.maybe_future(self._handler.getEmployeeRewards(args.employeeId, args.companyId))
+        result.success = yield gen.maybe_future(self._handler.getEmployeeRewards(args.employeeId, args.companyId, args.pageNumber, args.pageSize))
         oprot.writeMessageBegin("getEmployeeRewards", TMessageType.REPLY, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
@@ -553,6 +605,18 @@ class Processor(Iface, TProcessor):
         result = emailActivation_result()
         result.success = yield gen.maybe_future(self._handler.emailActivation(args.activationCodee))
         oprot.writeMessageBegin("emailActivation", TMessageType.REPLY, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    @gen.coroutine
+    def process_awardRanking(self, seqid, iprot, oprot):
+        args = awardRanking_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = awardRanking_result()
+        result.success = yield gen.maybe_future(self._handler.awardRanking(args.employeeId, args.companyId, args.timespan))
+        oprot.writeMessageBegin("awardRanking", TMessageType.REPLY, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -1342,17 +1406,23 @@ class getEmployeeRewards_args(object):
     Attributes:
      - employeeId
      - companyId
+     - pageNumber
+     - pageSize
     """
 
     thrift_spec = (
         None,  # 0
         (1, TType.I32, 'employeeId', None, None, ),  # 1
         (2, TType.I32, 'companyId', None, None, ),  # 2
+        (3, TType.I32, 'pageNumber', None, None, ),  # 3
+        (4, TType.I32, 'pageSize', None, None, ),  # 4
     )
 
-    def __init__(self, employeeId=None, companyId=None,):
+    def __init__(self, employeeId=None, companyId=None, pageNumber=None, pageSize=None,):
         self.employeeId = employeeId
         self.companyId = companyId
+        self.pageNumber = pageNumber
+        self.pageSize = pageSize
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -1373,6 +1443,16 @@ class getEmployeeRewards_args(object):
                     self.companyId = iprot.readI32()
                 else:
                     iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.I32:
+                    self.pageNumber = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.I32:
+                    self.pageSize = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -1390,6 +1470,14 @@ class getEmployeeRewards_args(object):
         if self.companyId is not None:
             oprot.writeFieldBegin('companyId', TType.I32, 2)
             oprot.writeI32(self.companyId)
+            oprot.writeFieldEnd()
+        if self.pageNumber is not None:
+            oprot.writeFieldBegin('pageNumber', TType.I32, 3)
+            oprot.writeI32(self.pageNumber)
+            oprot.writeFieldEnd()
+        if self.pageSize is not None:
+            oprot.writeFieldBegin('pageSize', TType.I32, 4)
+            oprot.writeI32(self.pageSize)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -1698,6 +1786,158 @@ class emailActivation_result(object):
         if self.success is not None:
             oprot.writeFieldBegin('success', TType.STRUCT, 0)
             self.success.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class awardRanking_args(object):
+    """
+    Attributes:
+     - employeeId
+     - companyId
+     - timespan
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'employeeId', None, None, ),  # 1
+        (2, TType.I32, 'companyId', None, None, ),  # 2
+        (3, TType.I32, 'timespan', None, None, ),  # 3
+    )
+
+    def __init__(self, employeeId=None, companyId=None, timespan=None,):
+        self.employeeId = employeeId
+        self.companyId = companyId
+        self.timespan = timespan
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.employeeId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.I32:
+                    self.companyId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.I32:
+                    self.timespan = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('awardRanking_args')
+        if self.employeeId is not None:
+            oprot.writeFieldBegin('employeeId', TType.I32, 1)
+            oprot.writeI32(self.employeeId)
+            oprot.writeFieldEnd()
+        if self.companyId is not None:
+            oprot.writeFieldBegin('companyId', TType.I32, 2)
+            oprot.writeI32(self.companyId)
+            oprot.writeFieldEnd()
+        if self.timespan is not None:
+            oprot.writeFieldBegin('timespan', TType.I32, 3)
+            oprot.writeI32(self.timespan)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class awardRanking_result(object):
+    """
+    Attributes:
+     - success
+    """
+
+    thrift_spec = (
+        (0, TType.LIST, 'success', (TType.STRUCT, (thrift_gen.gen.employee.struct.ttypes.EmployeeAward, thrift_gen.gen.employee.struct.ttypes.EmployeeAward.thrift_spec), False), None, ),  # 0
+    )
+
+    def __init__(self, success=None,):
+        self.success = success
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.LIST:
+                    self.success = []
+                    (_etype17, _size14) = iprot.readListBegin()
+                    for _i18 in range(_size14):
+                        _elem19 = thrift_gen.gen.employee.struct.ttypes.EmployeeAward()
+                        _elem19.read(iprot)
+                        self.success.append(_elem19)
+                    iprot.readListEnd()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('awardRanking_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.LIST, 0)
+            oprot.writeListBegin(TType.STRUCT, len(self.success))
+            for iter20 in self.success:
+                iter20.write(oprot)
+            oprot.writeListEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()

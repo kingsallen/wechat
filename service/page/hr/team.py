@@ -6,18 +6,18 @@
 
 """
 import itertools
+import operator
 
 from tornado import gen
 
 from conf import path
 from service.page.base import PageService
+from service.page.customize.customize import CustomizePageService
+from tests.dev_data.user_company_config import COMPANY_CONFIG
 from util.common import ObjectDict
 from util.tool import temp_data_tool
-from util.tool.url_tool import make_url, make_static_url
 from util.tool.str_tool import gen_salary, split
-
-from tests.dev_data.user_company_config import COMPANY_CONFIG
-from service.page.customize.customize import CustomizePageService
+from util.tool.url_tool import make_url, make_static_url
 
 
 class TeamPageService(PageService):
@@ -163,6 +163,7 @@ class TeamPageService(PageService):
             conds={'team_id': team.id, 'disable': 0})
 
         modulename, detail_media_list = yield self._get_team_detail_cms(team.id)
+        detail_media_list.sort(key=operator.itemgetter("orders"))
         res_id_list = [m.res_id for m in team_members] + \
                       [m.res_id for m in detail_media_list] + \
                       [t.res_id for t in other_teams]

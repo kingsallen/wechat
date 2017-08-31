@@ -1,12 +1,9 @@
-# coding=utf-8
+# coding:utf-8
 
-# @Time    : 2/6/17 15:24
-# @Author  : panda (panyuxin@moseeker.com)
-# @File    : metabase.py
-# @DES     : 基础 Base，只包含一些公共方法，不涉及到业务逻辑，
-#            仅供 BaseHandler 调用，或与 BaseHandler 不同业务逻辑时调用
-
-# Copyright 2016 MoSeeker
+"""
+基础 Base，只包含一些公共方法，不涉及到业务逻辑，
+仅供 BaseHandler 调用，或与 BaseHandler 不同业务逻辑时调用
+"""
 
 import os
 import re
@@ -16,19 +13,20 @@ import time
 import ujson
 import socket
 import urllib.parse
-import tornado.httpclient
 
+import tornado.httpclient
 from tornado import web, gen
 
-import conf.message as msg_const
-import conf.common as const
-import conf.path as path
 from util.common import ObjectDict
 from util.tool.dict_tool import objectdictify
 from util.tool.date_tool import curr_now
 from util.tool.str_tool import to_str
 from util.tool.url_tool import make_static_url, make_url
 from util.tool.json_tool import encode_json_dumps, json_dumps
+
+import conf.message as msg_const
+import conf.common as const
+import conf.path as path
 
 # 动态加载所有 PageService
 obDict = {}
@@ -49,7 +47,6 @@ AtomHandler = type("AtomHandler", (web.RequestHandler,), obDict)
 
 
 class MetaBaseHandler(AtomHandler):
-
     """baseHandler 基类，不能被业务 hander 直接调用。除非是不能继承 BaseHandler"""
 
     def __init__(self, application, request, **kwargs):
@@ -69,7 +66,7 @@ class MetaBaseHandler(AtomHandler):
         # page service 初始化
 
     def initialize(self, event):
-        # 日志需要，由 route 定义
+        """ 日志需要，由 route 定义 """
         self._event = event
 
     # PROPERTIES
@@ -145,6 +142,15 @@ class MetaBaseHandler(AtomHandler):
             self._log_info = ObjectDict()
 
         self._log_info.update(dict(value))
+
+    @property
+    def remote_ip(self):
+        ret = (self.request.headers.get('Remoteip') or
+               self.request.headers.get('X-Real-Ip') or
+               self.request.remote_ip or
+               '')
+
+        return ret
 
     # noinspection PyTypeChecker
     def _get_params(self):
@@ -223,6 +229,10 @@ class MetaBaseHandler(AtomHandler):
         """获取 static_url"""
         return make_static_url(path, protocol)
 
+    def share_url(self, path):
+        """拼接分享中的链接，必须加上protocol"""
+        return make_static_url(path, protocol="https", ensure_protocol=True)
+
     def on_finish(self):
         """on_finish 时处理传输日志"""
         info = ObjectDict(
@@ -233,8 +243,7 @@ class MetaBaseHandler(AtomHandler):
         if self.log_info:
             info.update(self.log_info)
 
-        self.logger.stats(
-            ujson.dumps(self._get_info_header(info), ensure_ascii=0))
+        self.logger.stats(ujson.dumps(self._get_info_header(info), ensure_ascii=0))
 
     def write_error(self, http_code, **kwargs):
         """错误页
@@ -250,20 +259,26 @@ class MetaBaseHandler(AtomHandler):
         template = 'system/info.html'
 
         if http_code == 403:
-            self.render_page(template, data={
+            self.render_page(
+                template,
+                data={
                     'code': http_code,
                     'css': 'warning',
                     'message': msg_const.NOT_AUTHORIZED
                 })
 
         elif http_code == 404:
-            self.render_page(template, data={
+            self.render_page(
+                template,
+                data={
                     'code': http_code,
                     'message': msg_const.NO_DATA
                 })
         else:
             message = kwargs.get('message') or msg_const.UNKNOWN_DEFAULT
-            self.render_page(template, data={
+            self.render_page(
+                template,
+                data={
                     'code': http_code,
                     'message':message
                 })
@@ -412,11 +427,7 @@ class MetaBaseHandler(AtomHandler):
             opt_time="%.2f" % ((time.time() - self._start_time) * 1000),
             useragent=request.headers.get('User-Agent'),
             referer=request.headers.get('Referer'),
-            remote_ip=(
-                request.headers.get('Remoteip') or
-                request.headers.get('X-Real-Ip') or
-                request.remote_ip
-            ),
+            remote_ip=self.remote_ip,
             event="{}_{}".format(self._event, request.method),
             cookie=_readable_cookies(),
             user_id=user_id,
@@ -424,8 +435,10 @@ class MetaBaseHandler(AtomHandler):
             req_uri=request.uri,
             req_params=req_params,
             customs=customs,
-            session_id=to_str(self.get_secure_cookie(const.COOKIE_SESSIONID)
-                              or to_str(self.get_secure_cookie(const.COOKIE_MVIEWERID)))
+            session_id=to_str(
+                self.get_secure_cookie(const.COOKIE_SESSIONID) or
+                to_str(self.get_secure_cookie(const.COOKIE_MVIEWERID))
+            )
         )
 
         log_params.update(log_info_common)

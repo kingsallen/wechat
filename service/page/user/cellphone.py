@@ -30,6 +30,15 @@ class CellphonePageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
+    def send_voice_code_for_register(self, mobile):
+        """Request basic service to send voice code for register
+        :param mobile:
+        :return:
+        """
+        ret = yield self.infra_user_ds.post_send_voice_code_for_register(mobile)
+        raise gen.Return(ret)
+
+    @gen.coroutine
     def verify_mobile(self, mobile, code, type):
         """
         Send code submitted by user to basic service.

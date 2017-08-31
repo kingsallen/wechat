@@ -107,7 +107,7 @@ class EventPageService(PageService):
             item = wx_const.WX_NEWS_REPLY_ITEM_TPL % (
                 replie.title,
                 replie.description,
-                make_static_url(replie.thumb),
+                make_static_url(replie.thumb, ensure_protocol=True),
                 replie.url
             )
             news += item

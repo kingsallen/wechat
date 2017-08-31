@@ -206,11 +206,14 @@ def check_and_apply_profile(func):
             }
 
             # 如果是申请中跳转到这个页面，需要做详细检查
-            self.logger.warn(self.request.uri.split('?')[0])
+            current_path = self.request.uri.split('?')[0]
+            paths_for_application = [path.APPLICATION, path.PROFILE_PREVIEW]
+
+            self.logger.warn(current_path)
             self.logger.warn(self.params)
 
-            if self.request.uri.split('?')[0] == path.APPLICATION and \
-                self.params.pid and self.params.pid.isdigit():
+            if (current_path in paths_for_application and
+                self.params.pid and self.params.pid.isdigit()):
 
                 pid = int(self.params.pid)
                 position = yield self.position_ps.get_position(pid)

@@ -1,6 +1,5 @@
 # coding=utf-8
 
-import urllib.parse
 from tornado import gen
 
 import conf.path as path
@@ -14,62 +13,102 @@ from util.tool.json_tool import json_dumps
 from util.tool.str_tool import to_str
 
 
+class AwardsLadderPageHandler(BaseHandler):
+    """Render page to employee/reward-rank.html
+    包含转发信息
+    """
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        # 判断是否已经绑定员工
+        binded = const.YES if self.current_user.employee else const.NO
+        if not binded:
+            self.redirect(self.make_url(path.EMPLOYEE_VERIFY, self.params))
+            return
+        else:
+            cover = self.share_url(self.current_user.company.logo)
+            share_title = messages.EMPLOYEE_AWARDS_LADDER_SHARE_TEXT.format(
+                self.current_user.company.abbreviation or "")
+
+            self.params.share = ObjectDict({
+                "cover":       cover,
+                "title":       share_title,
+                "description": messages.EMPLOYEE_AWARDS_LADDER_DESC_TEXT,
+                "link":        self.fullurl()
+            })
+
+            self.render_page(template_name="employee/reward-rank.html",
+                             data={})
+
+
+class AwardsLadderHandler(BaseHandler):
+    """API for AwardsLadder data"""
+
+    TIMESPAN = ('month', 'year', 'quarter')
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        """
+        返回员工积分排行榜数据
+        """
+        if self.params.rankType not in self.TIMESPAN:
+            self.send_json_error()
+
+        # 判断是否已经绑定员工
+        binded = const.YES if self.current_user.employee else const.NO
+        if not binded:
+            self.send_json_error(message=messages.EMPLOYEE_NOT_BINDED_WARNING.format(self.current_user.company.conf_employee_slug))
+
+        company_id = self.current_user.company.id
+        employee_id = self.current_user.employee.id
+        rankType = self.params.rankType  # year/month/quarter
+
+        rank_list = yield self.employee_ps.get_award_ladder_info(
+            employee_id=employee_id,
+            company_id=company_id,
+            type=rankType)
+
+        rank_list = sorted(rank_list, key=lambda x: x.level)
+
+        data = ObjectDict(employeeId=employee_id, rankList=rank_list)
+        self.logger.debug("awards ladder data: %s" % data)
+
+        self.send_json_success(data=data)
+
+
 class AwardsHandler(BaseHandler):
 
     @handle_response
     @authenticated
     @gen.coroutine
     def get(self):
-        # 一些初始化的工作
-        rewards = []
-        reward_configs = []
-        total = 0
 
         # 判断是否已经绑定员工
         binded = const.YES if self.current_user.employee else const.NO
+        email_activation_state = const.OLD_YES if binded else self.current_user.employee.activation
 
         if binded:
             # 获取绑定员工
             rewards_response = yield self.employee_ps.get_employee_rewards(
-                self.current_user.employee.id,
-                self.current_user.company.id)
-            rewards = rewards_response.rewards
-            reward_configs = rewards_response.rewardConfigs
-            total = rewards_response.total
+                employee_id=self.current_user.employee.id,
+                company_id=self.current_user.company.id,
+                page_number=int(self.params.page_number),
+                page_size=int(self.params.page_size)
+            )
+
+            rewards_response.update({
+                'binded': binded,
+                'email_activation_state': email_activation_state
+            })
+
+            self.send_json_success(rewards_response)
+            return
+
         else:
-            pass  # 使用初始化数据
-
-        # 构建输出数据格式
-        res_award_rules = []
-        if reward_configs:
-            for rc in reward_configs:
-                e = ObjectDict()
-                e.name = rc.statusName
-                e.point = rc.points
-                res_award_rules.append(e)
-
-        email_activation_state = const.OLD_YES if binded \
-            else self.current_user.employee.activation
-
-        res_rewards = []
-        if rewards:
-            for rc in rewards:
-                e = ObjectDict()
-                e.reason = rc.reason
-                e.hptitle = rc.title
-                e.title = rc.title
-                e.create_time = rc.updateTime
-                e.point = rc.points
-                res_rewards.append(e)
-
-        # 构建输出数据格式完成
-        self.send_json_success({
-            'rewards':                res_rewards,
-            'award_rules':            res_award_rules,
-            'point_total':            total,
-            'binded':                 binded,
-            'email_activation_state': email_activation_state
-        })
+            self.send_json_error(message=messages.EMPLOYEE_NOT_BINDED_WARNING.format(self.current_user.company.conf_employee_slug))
 
 
 class EmployeeUnbindHandler(BaseHandler):
@@ -126,11 +165,17 @@ class EmployeeBindHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def post(self):
-        binding_params = self.employee_ps.make_bind_params(
+        result, payload = self.employee_ps.make_bind_params(
             self.current_user.sysuser.id,
             self.current_user.company.id,
             self.json_args)
-        self.logger.debug(binding_params)
+
+        self.logger.debug(result)
+        self.logger.debug(payload)
+
+        if not result:
+            self.send_json_error(message=payload)
+            return
 
         thrift_bind_status = yield self.employee_ps.get_employee_bind_status(
             self.current_user.sysuser.id,
@@ -140,15 +185,25 @@ class EmployeeBindHandler(BaseHandler):
         fe_bind_status = self.employee_ps.convert_bind_status_from_thrift_to_fe(
             thrift_bind_status)
 
+        self.logger.debug(
+            "thrift_bind_status: %s, fe_bind_status: %s" %
+            (thrift_bind_status,fe_bind_status ))
+
         # early return 1
         if fe_bind_status == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS:
-            self.send_json_error(message=messages.EMPLOYEE_BINDED_WARNING)
+            self.send_json_error(message=messages.EMPLOYEE_BINDED_WARNING.format(self.current_user.company.conf_employee_slug))
             return
 
-        result, result_message = yield self.employee_ps.bind(binding_params)
+        result, result_message = yield self.employee_ps.bind(payload)
 
         # early return 2
         if not result:
+            # 需要将员工两字改成员工自定义称谓
+            if result_message == messages.EMPLOYEE_BINDING_FAILURE_INFRA and \
+                self.current_user.company.conf_employee_slug:
+                result_message = messages.EMPLOYEE_BINDING_FAILURE.format(
+                    self.current_user.company.conf_employee_slug)
+
             self.send_json_error(message=result_message)
             return
 
@@ -319,12 +374,12 @@ class CustomInfoHandler(BaseHandler):
         next_url = self.make_url(path.POSITION_LIST, self.params, noemprecom=str(const.YES), escape=escape)
 
         if self.params.from_wx_template == "o":
-            message = messages.EMPLOYEE_BINDING_CUSTOM_FIELDS_DONE
+            message = messages.EMPLOYEE_BINDING_CUSTOM_FIELDS_DONE.format(self.current_user.company.conf_employee_slug)
         else:
             if employee.authMethod == const.USER_EMPLOYEE_AUTH_METHOD.EMAIL:
                 message = messages.EMPLOYEE_BINDING_EMAIL_DONE
             else:
-                message = messages.EMPLOYEE_BINDING_SUCCESS
+                message = messages.EMPLOYEE_BINDING_SUCCESS.format(self.current_user.company.conf_employee_slug)
 
         self.render(
             template_name='refer/weixin/employee/employee_binding_tip_v2.html',
@@ -357,8 +412,7 @@ class BindedHandler(BaseHandler):
 
         else:
             if fe_bind_status == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS:
-
-                message = messages.EMPLOYEE_BINDING_SUCCESS
+                message = messages.EMPLOYEE_BINDING_SUCCESS.format(self.current_user.company.conf_employee_slug)
             else:
                 message = messages.EMPLOYEE_BINDING_EMAIL_DONE
 

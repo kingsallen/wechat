@@ -17,6 +17,7 @@ from util.tool.http_tool import http_get
 
 
 class InfraDictDataService(DataService):
+    cached_rocket_major = None
 
     # 热门城市编号列表
     _HOT_CITY_CODES_WECHAT = [
@@ -38,7 +39,7 @@ class InfraDictDataService(DataService):
         """根据 parent_code 获取常量字典
         :param parent_code: 常量的 parent_code
         """
-        # 参数校验
+
         if (parent_code is None or
             parent_code not in const.CONSTANT_PARENT_CODE.values()):
             raise ValueError('invalid parent_code')
@@ -46,6 +47,47 @@ class InfraDictDataService(DataService):
         params = ObjectDict(parent_code=parent_code)
         response = yield http_get(path.DICT_CONSTANT, params)
         return self.make_const_dict_result(response, parent_code)
+
+    @gen.coroutine
+    def get_countries(self):
+        """获取国家列表"""
+
+        countries_res = yield http_get(path.DICT_COUNTRY)
+        continent_res = yield self.get_const_dict(
+            parent_code=const.CONSTANT_PARENT_CODE.CONTINENT)
+
+        return self.make_countries_result(countries_res, continent_res)
+
+    @staticmethod
+    def make_countries_result(countries_res, continent_res):
+        """获取国籍列表，按大洲分割 """
+
+        filter_keys = ['id', 'name', 'continent_code']
+        countries = countries_res.data
+
+        def countries_gen(countries):
+            for c in countries:
+                d = sub_dict(c, filter_keys)
+                d.code = d.id
+                d.pop('id', None)
+                yield d
+
+        def filter_countries_gen(countries, continent):
+            for c in countries:
+                if c.continent_code == int(continent[0]):
+                    c.pop('continent_code', None)
+                    yield c
+
+        res = []
+        for continent in continent_res.items():
+            res.append(
+                ObjectDict(
+                    text=continent[1],
+                    list=list(filter_countries_gen(
+                             list(countries_gen(countries)), continent))
+            ))
+
+        return res
 
     @staticmethod
     def make_const_dict_result(http_response, parent_code):
@@ -293,3 +335,37 @@ class InfraDictDataService(DataService):
                   if f['parent'] == level2.code and f['level'] == 3]
 
         return level3
+
+    @gen.coroutine
+    def get_rocketmajors(self):
+
+        if self.cached_rocket_major:
+            return self.cached_rocket_major
+        else:
+
+            L1_res = yield http_get(path.DICT_CONSTANT,
+                jdata=dict(parent_code=const.CONSTANT_PARENT_CODE.ROCKETMAJOR_L1))
+
+            L1_res_data = L1_res.data.get(str(const.CONSTANT_PARENT_CODE.ROCKETMAJOR_L1))
+
+            res = []
+
+            for e in L1_res_data:
+                e['text'] = e['name']
+                e = sub_dict(e, ['code', 'text'])
+                L2_res = yield http_get(path.DICT_CONSTANT,
+                                        jdata=dict(parent_code=e['code']))
+                L2_res_data = L2_res.data.get(str(e['code'])) #-> list
+                L2_text_list = []
+                for e2 in L2_res_data:
+                    e2['text'] = e2['name']
+                    e2 = sub_dict(e2, ['text'])
+                    L2_text_list.append(e2)
+
+                e['list'] = L2_text_list
+                del e['code']
+                res.append(e)
+
+
+            self.cached_rocket_major = res
+            return res

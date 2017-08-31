@@ -11,6 +11,7 @@ from handler.base import BaseHandler
 from tests.dev_data.user_company_config import COMPANY_CONFIG
 from util.common import ObjectDict
 from util.common.cipher import encode_id
+from util.common.mq import award_publisher
 from util.common.decorator import handle_response, check_employee, NewJDStatusCheckerAddFlag, authenticated
 from util.tool.str_tool import gen_salary, add_item, split
 from util.tool.url_tool import url_append_query
@@ -48,7 +49,7 @@ class PositionHandler(BaseHandler):
 
             # 刷新链路
             self.logger.debug("[JD]刷新链路")
-            last_employee_user_id = yield self._make_refresh_share_chain(position_info)
+            last_employee_user_id, last_employee_id = yield self._make_refresh_share_chain(position_info)
             self.logger.debug("[JD]last_employee_user_id: %s" % (last_employee_user_id))
 
             self.logger.debug("[JD]构建转发信息")
@@ -140,8 +141,14 @@ class PositionHandler(BaseHandler):
                 # 转发积分
                 if last_employee_user_id:
                     self.logger.debug("[JD]转发积分操作")
-                    yield self._make_add_reward_click(
-                        position_info, last_employee_user_id)
+
+                    award_publisher.add_awards_click_jd(
+                        company_id=position_info.company_id,
+                        position_id=position_id,
+                        employee_id=last_employee_id,
+                        recom_user_id=last_employee_user_id,
+                        be_recom_user_id=self.current_user.sysuser.id
+                    )
 
                 # 红包处理
                 self.logger.debug("[JD]红包处理")
@@ -180,11 +187,11 @@ class PositionHandler(BaseHandler):
         red_packet = yield self.redpacket_ps.get_last_running_hongbao_config_by_position(position_info)
 
         if red_packet:
-            cover = self.static_url(red_packet.share_img)
+            cover = self.share_url(red_packet.share_img)
             title = "{} {}".format(position_info.title, red_packet.share_title)
             description = "".join(split(red_packet.share_desc))
         else:
-            cover = self.static_url(company_info.logo)
+            cover = self.share_url(company_info.logo)
             title = position_info.title
             description = msg.SHARE_DES_DEFAULT
 
@@ -444,6 +451,7 @@ class PositionHandler(BaseHandler):
         """构造刷新链路"""
 
         last_employee_user_id = 0
+        last_employee_id = 0
         inserted_share_chain_id = 0
 
         if self.current_user.recom and self.current_user.sysuser:
@@ -477,6 +485,14 @@ class PositionHandler(BaseHandler):
             last_employee_user_id = yield self.sharechain_ps.get_referral_employee_user_id(
                 self.current_user.sysuser.id, position_info.id)
 
+            if last_employee_user_id:
+                _, employee_info = yield self.employee_ps.get_employee_info(
+                    user_id=last_employee_user_id,
+                    company_id=self.current_user.company.id
+                )
+                if employee_info:
+                    last_employee_id = employee_info.id
+
         if self.current_user.sysuser.id:
             yield self.candidate_ps.send_candidate_view_position(
                 user_id=self.current_user.sysuser.id,
@@ -484,7 +500,7 @@ class PositionHandler(BaseHandler):
                 sharechain_id=inserted_share_chain_id,
             )
 
-        raise gen.Return(last_employee_user_id)
+        return last_employee_user_id, last_employee_id
 
     @gen.coroutine
     def _make_share_record(self, position_info, recom_user_id):
@@ -511,10 +527,7 @@ class PositionHandler(BaseHandler):
         yield self.sharechain_ps.create_share_record(params)
 
     @gen.coroutine
-    def _refresh_share_chain(self,
-                             presentee_user_id,
-                             position_id,
-                             last_psc=None):
+    def _refresh_share_chain(self, presentee_user_id, position_id, last_psc=None):
         """刷新链路的原子操作"""
         inserted_share_chain_id = yield self.sharechain_ps.refresh_share_chain(
             presentee_user_id=presentee_user_id,
@@ -542,46 +555,11 @@ class PositionHandler(BaseHandler):
                 position_id=position_info.id,
                 presentee_user_id=recom_wxuser.sysuser_id)
             if psc:
-                replace_query.update(psc=psc)
+                replace_query.update({'psc': psc})
 
             redirect_url = url_append_query(self.fullurl(), **replace_query)
             self.redirect(redirect_url)
             return
-
-    @gen.coroutine
-    def _make_add_reward_click(self, position_info, recom_employee_user_id):
-        """给员工加积分
-        :param position_info:
-            职位信息，用户提取公司信息
-        :param recom_employee_user_id:
-            最近员工 user_id ，如果为0，说明没有最近员工 user_id ，不执行添加积分操作
-        """
-
-        # 链路最近员工不存在，不会加积分
-        if not recom_employee_user_id:
-            return
-
-        # 点击人为员工，则不会给其他员工再加积分
-        if self.current_user.employee:
-            return
-
-        # 最近员工就是当前用户，是自己点击自己的转发，不应该加积分
-        if recom_employee_user_id == self.current_user.sysuser.id:
-            return
-
-        recom_employee = yield self.user_ps.get_valid_employee_by_user_id(
-            recom_employee_user_id, self.current_user.company.id)
-
-        if recom_employee and recom_employee.sysuser_id:
-            res = yield self.position_ps.add_reward_for_recom_click(
-                employee=recom_employee,
-                company_id=self.current_user.company.id,
-                berecom_user_id=self.current_user.sysuser.id,
-                position_id=position_info.id)
-
-            self.logger.debug("[JD]给员工加积分： %s" % res)
-        else:
-            self.logger.warning("[JD]给员工加积分异常：员工不存在或员工 sysuser_id 不存在: %s" % recom_employee)
 
     @gen.coroutine
     def _make_send_publish_template(self, position_info):
@@ -678,7 +656,7 @@ class PositionListHandler(BaseHandler):
             position_list = yield self.position_ps.infra_get_position_list(infra_params)
 
             # 获取获取到普通职位列表，则根据获取的数据查找其中红包职位的红包相关信息
-            rp_position_list = [position for position in position_list if isinstance(position, dict) and position.in_hb]
+            rp_position_list = list(self.__rp_position_generator(position_list))
 
             if position_list and rp_position_list:
                 rpext_list = yield self.position_ps.infra_get_position_list_rp_ext(rp_position_list)
@@ -686,9 +664,9 @@ class PositionListHandler(BaseHandler):
                 for position in position_list:
                     pext = [e for e in rpext_list if e.pid == position.id]
                     if pext:
-                        position.is_rp_reward = True
                         position.remain = pext[0].remain
                         position.employee_only = pext[0].employee_only
+                        position.is_rp_reward = position.remain > 0
                     else:
                         position.is_rp_reward = False
 
@@ -725,6 +703,12 @@ class PositionListHandler(BaseHandler):
                 teamname_custom=teamname_custom
             )
 
+    @staticmethod
+    def __rp_position_generator(position_list):
+        for position in position_list:
+            if isinstance(position, dict) and position.in_hb:
+                yield position
+
     @gen.coroutine
     def make_company_info(self):
         """只提取必要的company信息用于渲染"""
@@ -758,12 +742,12 @@ class PositionListHandler(BaseHandler):
 
         if not rp_share_info:
             escape = []
-            cover = self.static_url(company_info.logo)
+            cover = self.share_url(company_info.logo)
             title = "%s热招职位" % company_info.abbreviation
             description = msg.SHARE_DES_DEFAULT
 
         else:
-            cover = self.static_url(rp_share_info.cover)
+            cover = self.share_url(rp_share_info.cover)
             escape = [
                 "pid", "keywords", "cities", "candidate_source",
                 "employment_type", "salary", "department", "occupations",

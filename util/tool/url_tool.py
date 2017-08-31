@@ -6,6 +6,7 @@
 # @DES     : url 拼接
 
 
+import re
 from urllib.parse import (
     urlparse, parse_qs, urlencode, parse_qsl, urlunparse, urljoin, unquote_plus, quote_plus)
 from setting import settings
@@ -43,7 +44,10 @@ def make_url(path, params=None, host="", protocol="https", escape=None,
     pairs = {k: v for k, v in d.items() if k not in escape}
 
     def valid(k, v):
-        return v and isinstance(k, str) and isinstance(v, str) and not k.startswith("_")
+        return bool(
+            isinstance(k, str) and not k.startswith("_") and
+            ((isinstance(v, str)) and str(v) or (isinstance(v, int) and str(v)))
+        )
 
     def query_params_generator(pairs):
         for k, v in pairs.items():
@@ -106,17 +110,42 @@ def url_append_query(url, *args, **kwargs):
     return urlunparse(url_parts)
 
 
-def make_static_url(path, protocol='https'):
+def make_static_url(path, protocol="https", ensure_protocol=False, netloc=None):
+    """
+    微信的分享图片使用到了这个方法，微信规定分享中的资源链接必须加上protocol，否则视为无效链接.
+    """
 
     if not path:
         return None
 
-    if not path.startswith("http"):
-        path = urljoin(settings['static_domain'], path)
+    netloc = netloc or settings['static_domain']
 
-    if not path.startswith("http") and protocol is not None:
-        path = protocol + ":" + path
-    return path
+    path_parts = urlparse(path)
+    if not bool(path_parts.netloc):
+        # Add net location from setting.
+        path = urljoin(netloc, path)
+    # parse changed path.
+    path_parts = urlparse(path)
+
+    if bool(path_parts.scheme):
+        # Complete url
+        return path
+
+    # Add scheme
+    if path.startswith("//"):
+        if not ensure_protocol:
+            # valid url starts with "//"
+            return path
+        else:
+            protocol = protocol or "https"
+            # Add https
+            return protocol + ":" + path
+
+    if protocol:
+        # Add protocol if provided
+        return protocol + ":" + path
+    else:
+        return path
 
 
 def is_urlquoted(input):

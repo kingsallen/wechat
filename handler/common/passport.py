@@ -1,11 +1,15 @@
 # coding=utf-8
 
 from tornado import gen
+
+from schematics.validate import DataError
+
 from util.common import ObjectDict
 
 import conf.message as msg
 import conf.path as path
 import conf.common as const
+
 from handler.base import BaseHandler
 from cache.user.passport_session import PassportCache
 from util.common.decorator import handle_response, authenticated
@@ -13,6 +17,7 @@ from util.tool.str_tool import to_str, password_validate
 from util.common.cipher import encode_id
 
 from handler.common.captcha import CaptchaMixin
+from model.user import UserCreationForm
 
 
 class LoginHandler(BaseHandler):
@@ -214,8 +219,8 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
                 # 手机号不存在，无法修改密码
                 self.send_json_error(message=msg.CELLPHONE_INVALID_MOBILE)
                 raise gen.Return()
+            valid_type = const.MOBILE_CODE_OPT_TYPE.forget_password
 
-            valid_type = const.MOBILE_CODE_OPT_TYPE.code_register
         else:
             # 普通注册
             if ret.status != const.API_SUCCESS or ret.data.exist:
@@ -223,7 +228,7 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
                 self.send_json_error(message=msg.CELLPHONE_MOBILE_HAD_REGISTERED)
                 raise gen.Return()
 
-            valid_type = const.MOBILE_CODE_OPT_TYPE.forget_password
+            valid_type = const.MOBILE_CODE_OPT_TYPE.code_register
 
         result = yield self.cellphone_ps.send_valid_code(
             self.params.mobile,
@@ -250,10 +255,10 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
 
         if self.params.code_type == 1:
             # 忘记密码
-            valid_type = const.MOBILE_CODE_OPT_TYPE.code_register
+            valid_type = const.MOBILE_CODE_OPT_TYPE.forget_password
         else:
             # 普通注册
-            valid_type = const.MOBILE_CODE_OPT_TYPE.forget_password
+            valid_type = const.MOBILE_CODE_OPT_TYPE.code_register
 
         # 验证验证码
         verify_response = yield self.cellphone_ps.verify_mobile(
@@ -305,10 +310,26 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
                 self.send_json_error(message=res.message)
                 raise gen.Return()
         else:
-            res = yield self.usercenter_ps.post_register(mobile, self.params.password)
+            # 开始创建 user 对象
+            user_form = UserCreationForm({
+                'password': self.params.password,
+                'mobile':   int(mobile),
+                'username': mobile,
+                'register_ip': self.remote_ip
+            })
+            try:
+                user_form.validate()
+            except DataError:
+                self.send_json_error(message=msg.CELLPHONE_REGISTER_FAILED)
+                return
+
+            self.logger.debug("[user creation] user_form: %s" % user_form.to_primitive())
+
+            res = yield self.usercenter_ps.post_register(user_form)
             if res.status != const.API_SUCCESS:
                 self.send_json_error(message=msg.CELLPHONE_REGISTER_FAILED)
-                raise gen.Return()
+                return
+
             # 设置登录cookie
             session_id = self._make_new_session_id(res.data.user_id)
             self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True)

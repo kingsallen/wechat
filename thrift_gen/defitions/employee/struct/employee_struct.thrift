@@ -1,4 +1,3 @@
-namespace java com.moseeker.thrift.gen.employee.struct
 namespace py thrift_gen.gen.employee.struct
 
 struct Employee {
@@ -94,10 +93,28 @@ struct RewardConfig {
     3: optional string statusName
 }
 
+// 积分来源详情
+struct RewardVO{
+    1: optional string reason, // 说明
+    2: optional i32 points, // 积分
+    3: optional string updateTime, // 操作时间
+    4: optional i32 type, // 积分类型
+    5: optional i32 positionId, // 职位ID
+    6: optional string positionName, // 职位名称
+    7: optional i32 publisherId, // 发布者ID
+    8: optional string publisherName, // 发布者名称
+    9:optional i32 employeId, // 员工ID
+    10:optional string employeName, // 员工名称
+    11:optional i32 recommendId, // 推荐人Id
+    12:optional string recommendName, // 推荐人名称
+    13:optional i32 berecomId,// 被推荐人Id
+    14:optional string berecomName // 被推荐人姓名
+}
+
 
 struct RewardsResponse {
     1: optional i32 total,
-    2: optional list<Reward> rewards,
+    2: optional list<RewardVO> rewards,
     3: optional list<RewardConfig> rewardConfigs
 }
 
@@ -119,4 +136,18 @@ struct RecomInfo {
 	14: required bool isInterested = false;		// false: 没有求推荐, true: 求推荐
 	15: required i32 view_number = 0;          	// 点击次数
 	16: required string headimgurl = "";        // 微信头像
+}
+
+// 时间跨度（月、季、年）
+enum Timespan {
+    month, quarter, year
+}
+
+// reponse
+struct EmployeeAward {
+    1: optional i32 employeeId,
+    2: optional string name,
+    3: optional i32 ranking,
+    4: optional i32 awardTotal,
+    5: optional string headimgurl
 }

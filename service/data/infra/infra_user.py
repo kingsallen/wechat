@@ -5,11 +5,10 @@ import tornado.gen as gen
 from service.data.base import DataService
 import conf.path as path
 from util.common import ObjectDict
-from util.tool.http_tool import http_get, http_post, http_put
+from util.tool.http_tool import http_get, http_post, http_put, unboxing
 
 
 class InfraUserDataService(DataService):
-
     """对接 User服务
     referer: https://wiki.moseeker.com/user_account_api.md"""
 
@@ -25,11 +24,10 @@ class InfraUserDataService(DataService):
 
     @gen.coroutine
     def post_user_wxbindmobile(self, **kwargs):
-
         params = ObjectDict({
             "unionid": kwargs["unionid"],
-            "mobile": kwargs["mobile"],
-            "code": kwargs.get("code" "")
+            "mobile":  kwargs["mobile"],
+            "code":    kwargs.get("code" "")
         })
 
         ret = yield http_post(path.INFRA_USER_COMBINE, params)
@@ -41,7 +39,7 @@ class InfraUserDataService(DataService):
         """手机号和微信号绑定接口"""
 
         params = ObjectDict({
-            'mobile': mobile,
+            'mobile':  mobile,
             'unionid': unionid,
         })
 
@@ -57,9 +55,21 @@ class InfraUserDataService(DataService):
         """
         params = ObjectDict({
             'mobile': mobile,
-            'type': int(type)
+            'type':   int(type)
         })
         ret = yield http_post(path.INFRA_USER_VALID, params)
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def post_send_voice_code_for_register(self, mobile):
+        """Request basic service send valid voice code to target mobile (only for register)
+        :param mobile: target mobile number
+        :return:
+        """
+        params = ObjectDict({
+            'mobile': mobile
+        })
+        ret = yield http_post(path.INFRA_USER_VOICE_VALID, params)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -73,8 +83,8 @@ class InfraUserDataService(DataService):
         """
         params = ObjectDict({
             'mobile': mobile,
-            'code': code,
-            'type': int(type),
+            'code':   code,
+            'type':   int(type),
         })
 
         ret = yield http_post(path.INFRA_USER_VERIFY, params)
@@ -106,16 +116,8 @@ class InfraUserDataService(DataService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def post_register(self, mobile, password):
-        """用户注册
-        :param mobile: 手机号
-        :param password: 密码
-        """
-        params = ObjectDict(
-            username=mobile,
-            mobile=mobile,
-            password=password,
-        )
+    def post_register(self, params):
+        """用户注册 """
 
         ret = yield http_post(path.INFRA_USER_REGISTER, params)
         raise gen.Return(ret)
@@ -149,7 +151,7 @@ class InfraUserDataService(DataService):
         """重置密码"""
 
         params = ObjectDict({
-            "mobile": mobile,
+            "mobile":   mobile,
             "password": password
         })
 
@@ -191,5 +193,17 @@ class InfraUserDataService(DataService):
             'privacy_policy': privacy_policy
         }
 
-        ret = yield http_post(path.INFRA_USER_SETTINGS,params)
+        ret = yield http_post(path.INFRA_USER_SETTINGS, params)
         return ret
+
+    @gen.coroutine
+    def is_valid_employee(self, user_id, company_id):
+        params = {
+            "userId": int(user_id),
+            "companyId": int(company_id)
+        }
+
+        res = yield http_get(path.INFRA_USER_EMPLOYEE_CHECK, params)
+        ret, data = unboxing(res)
+
+        return data.result if ret else False

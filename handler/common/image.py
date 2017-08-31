@@ -6,12 +6,12 @@ from tornado import gen, httpclient
 
 from handler.base import BaseHandler
 from util.common.decorator import handle_response
+from util.tool.url_tool import make_static_url
 
 
 class ImageFetchHandler(BaseHandler):
     """GET 请求获取 一个 image 并返回，主要用来清除 header 中的 referrer，
     目的是逃过防盗链检查
-    
     """
     @handle_response
     @gen.coroutine
@@ -21,7 +21,7 @@ class ImageFetchHandler(BaseHandler):
             self.write_error(http_code=404)
             return
 
-        url = urllib.parse.unquote_plus(url)
+        url = make_static_url(urllib.parse.unquote_plus(url), ensure_protocol=True)
 
         headers = {"Referer": ""}
         data = yield httpclient.AsyncHTTPClient().fetch(url, headers=headers)

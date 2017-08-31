@@ -177,8 +177,8 @@ class ApplyRecordsHandler(BaseHandler):
                 records=res
             ))
 
-class UserMobileBindedHandler(BaseHandler):
 
+class UserMobileBindedHandler(BaseHandler):
     """是否绑定了手机号"""
     @handle_response
     @authenticated

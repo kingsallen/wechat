@@ -34,7 +34,7 @@ class ProfilePageService(PageService):
 
     BASIC_KEYS = [
         'name', 'birth', 'city_name', 'gender', 'motto', 'self_introduction',
-        'profile_id'
+        'profile_id', 'nationality_name', 'nationality_code'
     ]
 
     LANGUAGE_KEYS = [
@@ -440,16 +440,40 @@ class ProfilePageService(PageService):
         return result, data
 
     @gen.coroutine
-    def update_profile_embedded_info_from_cv(self, profile_id, custom_cv):
+    def update_profile_embedded_info_from_cv(self, profile, custom_cv):
         """使用 custom_cv 更新 profile 的复合字段 (education, workexp, projectext)
-        :param profile_id: profile_id
+        :param profile: profile
         :param custom_cv: 自定义简历模版输出 (dict)
         """
+
+        profile_id = profile.get("profile", {}).get("id", None)
+        if not profile_id:
+            return
+
         custom_cv = ObjectDict(custom_cv)
         education = custom_cv.get("education", [])
         workexp = custom_cv.get("workexp", [])
         projectexp = custom_cv.get("projectexp", [])
+        position_name = custom_cv.get('position_name')
 
+        # 处理期望职能 ---------------------
+        if position_name:
+            has_intention = bool(profile.get("intentions"))
+            if has_intention:
+                intention_id = profile.get("intentions")[0].get('id')
+                yield self.update_profile_intention(
+                    record=ObjectDict(position_name=position_name,
+                                      id=intention_id),
+                    profile_id=profile_id)
+
+            else:
+                yield self.create_profile_intention(
+                    record=ObjectDict(position_name=position_name),
+                    profile_id=profile_id)
+        # 处理期望职能 ---------------------
+
+
+        # 处理教育经历 ---------------------
         for e in education:
             status = e.get('__status', None)
             college_name = e.get('school')
@@ -477,7 +501,9 @@ class ProfilePageService(PageService):
                 elif status == 'e':
                     params['id'] = params.eid
                     yield self.update_profile_education(params, profile_id)
+        # 处理教育经历 ---------------------
 
+        # 处理工作经历 ---------------------
         for w in workexp:
             status = w.get('__status', None)
             if status:
@@ -501,7 +527,9 @@ class ProfilePageService(PageService):
                 elif status == 'e':
                     params['id'] = params.wid
                     yield self.update_profile_workexp(params, profile_id)
+        # 处理工作经历 ---------------------
 
+        # 处理项目经历 ---------------------
         for p in projectexp:
             status = p.get('__status', None)
             if status:
@@ -525,6 +553,7 @@ class ProfilePageService(PageService):
                 elif status == 'e':
                     params['id'] = params.pid
                     yield self.update_profile_projectexp(params, profile_id)
+        # 处理项目经历 ---------------------
 
     @staticmethod
     def get_zodiac(date_string):

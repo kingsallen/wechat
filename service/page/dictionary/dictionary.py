@@ -36,3 +36,13 @@ class DictionaryPageService(PageService):
     def get_colleges(self):
         ret = yield self.infra_dict_ds.get_colleges()
         return ret
+
+    @tornado.gen.coroutine
+    def get_counries(self):
+        countries = yield self.infra_dict_ds.get_countries()
+        return countries
+
+    @tornado.gen.coroutine
+    def get_rocketmajors(self):
+        rocketmajors = yield self.infra_dict_ds.get_rocketmajors()
+        return rocketmajors

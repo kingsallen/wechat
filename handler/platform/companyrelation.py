@@ -1,13 +1,7 @@
 # coding=utf-8
 
-"""
-:author 马超（machao@moseeker.com）
-:date 2016.10.11
-
-"""
-import ujson
-
 from tornado import gen
+import ujson
 
 import conf.common as const
 from handler.base import BaseHandler
@@ -19,6 +13,7 @@ from util.tool.str_tool import add_item
 
 
 class CompanyVisitReqHandler(BaseHandler):
+
     @handle_response
     @check_sub_company
     @authenticated
@@ -39,6 +34,7 @@ class CompanyVisitReqHandler(BaseHandler):
 
 
 class CompanyFollowHandler(BaseHandler):
+
     @handle_response
     @check_sub_company
     @authenticated
@@ -59,6 +55,7 @@ class CompanyFollowHandler(BaseHandler):
 
 
 class CompanyHandler(BaseHandler):
+
     @handle_response
     @NewJDStatusCheckerAddFlag()
     @check_sub_company
@@ -95,7 +92,7 @@ class CompanyHandler(BaseHandler):
     def _share(self, company):
         company_name = company.abbreviation or company.name
         default = ObjectDict({
-            'cover': self.static_url(company.get('logo', '')),
+            'cover': self.share_url(company.get('logo')),
             'title': '关于{}, 你想知道的都在这里'.format(company_name),
             'description': '这可能是你人生的下一站! 看清企业全局, 然后定位自己',
             'link': self.fullurl()
@@ -122,7 +119,7 @@ class CompanyInfoRedirectHandler(BaseHandler):
             maybe_sub_company = yield self.team_ps.get_sub_company(did)
             if maybe_sub_company and maybe_sub_company.parent_id == current_company_id:
                 # 是子公司
-                params.update({"did": did})
+                params.update({"did": str(did)})
             else:
                 # 不是子公司 或 公司不存在, 不给看
                 self.write_error(404)
@@ -134,6 +131,7 @@ class CompanyInfoRedirectHandler(BaseHandler):
 
 
 class CompanySurveyHandler(BaseHandler):
+
     @handle_response
     @authenticated
     @gen.coroutine
