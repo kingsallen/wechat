@@ -613,7 +613,7 @@ class RedpacketPageService(PageService):
                     recom_wxuser.openid,
                     recom_wechat.id,
                     red_packet_config,
-                    recom_qx_wxuser.id,
+                    current_user.qxuser.id,
                     nickname=nickname,
                     position_title=position.title,
                     send_to_employee=send_to_employee)
@@ -1131,23 +1131,23 @@ class RedpacketPageService(PageService):
         raise gen.Return(res)
 
     @gen.coroutine
-    def __insert_0_amount_sent_history(self, hb_config_id, qx_openid,
-                                       current_wxuser_id):
+    def __insert_0_amount_sent_history(self, hb_config_id, recom_qx_openid,
+                                       trigger_qx_user_id):
         """
         插入 0 元已经发送的红包数据, 主要用户后期查询存在重复的发送记录,
         而不发送新红包
         """
 
-        wxuser = yield self.user_wx_user_ds.get_wxuser({
-            "openid": qx_openid,
+        recom_qx_user = yield self.user_wx_user_ds.get_wxuser({
+            "openid": recom_qx_openid,
             "wechat_id": settings['qx_wechat_id']
         })
         yield self.hr_hb_items_ds.create_hb_items(fields={
             "hb_config_id": hb_config_id,
             "binding_id": 0,
             "status": const.RP_ITEM_STATUS_ZERO_AMOUNT_WX_MSG_SENT,
-            "wxuser_id": wxuser.id,
-            "trigger_wxuser_id": current_wxuser_id
+            "wxuser_id": recom_qx_user.id,
+            "trigger_wxuser_id": trigger_qx_user_id
         })
 
     @gen.coroutine
