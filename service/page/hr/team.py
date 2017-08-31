@@ -167,7 +167,7 @@ class TeamPageService(PageService):
         res_id_list = [m.res_id for m in team_members] + \
                       [m.res_id for m in detail_media_list] + \
                       [t.res_id for t in other_teams]
-        res_id_list += [team.res_id] if team.is_show else []
+        res_id_list += [team.res_id]
         res_dict = yield self.hr_resource_ds.get_resource_by_ids(res_id_list)
 
         # 拼装模板数据
