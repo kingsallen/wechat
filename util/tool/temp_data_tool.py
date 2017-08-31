@@ -251,7 +251,7 @@ def make_team_detail_template(team, members, modulename, detail_media_list, posi
     teamname_field = teamname_custom["teamname_custom"] if teamname_custom else '团队'
 
     # 无素材不显示团队
-    if team.is_show:
+    if team.res_id:
         team_res = make_up_for_missing_res(res_dic.get(team.res_id))
         template.append(
             template1(
