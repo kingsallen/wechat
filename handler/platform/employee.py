@@ -344,8 +344,12 @@ class CustomInfoHandler(BaseHandler):
         # unbinded users may not need to know this page
         if (fe_binding_stauts not in [fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS, fe.FE_EMPLOYEE_BIND_STATUS_PENDING]):
             self.write_error(404)
-        elif (str(employee.id) != self.params._employeeid or not self.params._employeeid):
+            return
+
+        if fe_binding_stauts == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS and \
+            (str(employee.id) != self.params._employeeid or not self.params._employeeid):
             self.write_error(416)
+            return
 
         # 构建跳转 make_url 的 escape
         escape = ['headimg', 'next_url']
