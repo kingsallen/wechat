@@ -22,10 +22,20 @@ class LinkedinImportHandler(MetaBaseHandler):
     与微信 oauth2.0授权冲突（code问题），
     故直接继承 MetaBaseHandler"""
 
+    def make_url(self, path, params=None, host="", protocol="https", escape=None, **kwargs):
+        if not host:
+            host = self.host
+        return make_url(path, params, host, protocol, escape, **kwargs)
+
     def get_template_namespace(self):
         """copyed from BaseHandler"""
         namespace = super().get_template_namespace()
-        add_namespace = ObjectDict(env=self.env)
+        add_namespace = ObjectDict(
+            env=self.env,
+            make_url=self.make_url,
+            const=const,
+            path=path
+        )
         namespace.update(add_namespace)
         return namespace
 
@@ -63,7 +73,25 @@ class LinkedinImportHandler(MetaBaseHandler):
             self.redirect(next_url)
             return
         else:
-            self.write_error(http_code=500, message=result.message)
+            if result.status == 32008:
+                messages = msg.PROFILE_IMPORT_LIMIT
+            else:
+                messages = result.message
+
+            data = ObjectDict(
+                kind=1, #  // {0: success, 1: failure, 10: email}
+                messages=messages, # ['hello world', 'abjsldjf']
+                button_text=msg.BACK_CN,
+                button_link=self.make_url(path.PROFILE_VIEW,
+                                          wechat_signature=self.get_argument('wechat_signature'),
+                                          host=self.host),
+                jump_link=None # // 如果有会自动，没有就不自动跳转
+            )
+
+            self.render_page(template_name="system/user-info.html",
+                             data=data)
+            return
+
 
 
 class ResumeImportHandler(BaseHandler):
@@ -120,7 +148,7 @@ class ResumeImportHandler(BaseHandler):
             return
 
         # 微信端用户只能导入一次简历，故不需要做导入频率限制
-        if self.params.way in const.RESUME_WAY_SPIDER.keys():
+        if str(self.params.way) in const.RESUME_WAY_SPIDER:
             # 判断是否在微信端
             ua = 1 if self.in_wechat else 2
             is_ok, result = yield self.profile_ps.import_profile(
