@@ -443,19 +443,14 @@ class EmployeePageService(PageService):
 
     @gen.coroutine
     def update_employee_custom_fields(self, employee_id, custom_fields_json):
-        """
-        更新员工记录 custom_fields
-        :param employee_id:
-        :param custom_fields_json:
-        :return:
-        """
+        yield self.thrift_employee_ds.set_employee_custom_info(
+            employee_id, custom_fields_json)
 
-        ret = yield self.user_employee_ds.update_employee(
-            conds={ 'id': employee_id },
-            fields={'custom_field_values': custom_fields_json}
-        )
-
-        return ret
+    @gen.coroutine
+    def update_employee_custom_fields_for_email_pending(
+        self, user_id, company_id, custom_fields_json):
+        yield self.thrift_employee_ds.set_employee_custom_info_email_pending(
+            user_id, company_id, custom_fields_json)
 
     @gen.coroutine
     def send_emp_custom_info_template(self, current_user):

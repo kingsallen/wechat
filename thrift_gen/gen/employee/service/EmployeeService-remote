@@ -30,6 +30,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('  Result unbind(i32 employeeId, i32 companyId, i32 userId)')
     print('   getEmployeeCustomFieldsConf(i32 companyId)')
     print('  Result setEmployeeCustomInfo(i32 employeeId, string customValues)')
+    print('  Result setCacheEmployeeCustomInfo(i32 userId, i32 companyId, string customValues)')
     print('  RewardsResponse getEmployeeRewards(i32 employeeId, i32 companyId, i32 pageNumber, i32 pageSize)')
     print('   getEmployeeRecoms(i32 recomId)')
     print('  Result emailActivation(string activationCodee)')
@@ -148,6 +149,12 @@ elif cmd == 'setEmployeeCustomInfo':
         print('setEmployeeCustomInfo requires 2 args')
         sys.exit(1)
     pp.pprint(client.setEmployeeCustomInfo(eval(args[0]), args[1],))
+
+elif cmd == 'setCacheEmployeeCustomInfo':
+    if len(args) != 3:
+        print('setCacheEmployeeCustomInfo requires 3 args')
+        sys.exit(1)
+    pp.pprint(client.setCacheEmployeeCustomInfo(eval(args[0]), eval(args[1]), args[2],))
 
 elif cmd == 'getEmployeeRewards':
     if len(args) != 4:

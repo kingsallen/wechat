@@ -5,24 +5,39 @@ import tornado.gen as gen
 from service.data.base import DataService
 from tornado.testing import AsyncTestCase, gen_test
 
-from thrift_gen.gen.employee.service.EmployeeService import Client as EmployeeServiceClient
+from thrift_gen.gen.employee.service.EmployeeService import \
+    Client as EmployeeServiceClient
 from service.data.infra.framework.client.client import ServiceClientFactory
 
 from thrift_gen.gen.employee.struct.ttypes import Timespan
 
 
 class ThriftEmployeeDataService(DataService):
-
     employee_service_cilent = ServiceClientFactory.get_service(
         EmployeeServiceClient)
 
     @gen.coroutine
     def get_employee_verification_conf(self, company_id):
-        ret = yield self.employee_service_cilent.getEmployeeVerificationConf(company_id)
+        ret = yield self.employee_service_cilent.getEmployeeVerificationConf(
+            company_id)
         return ret
 
     @gen.coroutine
-    def get_employee_rewards(self, employee_id, company_id, page_number, page_size):
+    def set_employee_custom_info_email_pending(self, user_id, company_id,
+                                               custom_values):
+        ret = yield self.employee_service_cilent.setCacheEmployeeCustomInfo(
+            int(user_id), int(company_id), str(custom_values))
+        return ret
+
+    @gen.coroutine
+    def set_employee_custom_info(self, employee_id, custom_values):
+        ret = yield self.employee_service_cilent.setEmployeeCustomInfo(
+            int(employee_id), str(custom_values))
+        return ret
+
+    @gen.coroutine
+    def get_employee_rewards(self, employee_id, company_id, page_number,
+                             page_size):
         ret = yield self.employee_service_cilent.getEmployeeRewards(
             employee_id, company_id, page_number, page_size)
         return ret
@@ -46,7 +61,8 @@ class ThriftEmployeeDataService(DataService):
 
     @gen.coroutine
     def get_employee(self, user_id, company_id):
-        ret = yield self.employee_service_cilent.getEmployee(user_id, company_id)
+        ret = yield self.employee_service_cilent.getEmployee(user_id,
+                                                             company_id)
         return ret
 
     @gen.coroutine
@@ -59,9 +75,9 @@ class ThriftEmployeeDataService(DataService):
         :return:
         """
         type_conversion = {
-            'month': Timespan.month,
+            'month':   Timespan.month,
             'quarter': Timespan.quarter,
-            'year': Timespan.year
+            'year':    Timespan.year
         }
 
         ret = yield self.employee_service_cilent.awardRanking(
@@ -72,6 +88,7 @@ class ThriftEmployeeDataService(DataService):
 
 class TestEmployeeService(AsyncTestCase):
     """Just for test(or try results) during development :)"""
+
     def setUp(self):
         self.employee_service_cilent = ServiceClientFactory.get_service(
             EmployeeServiceClient)

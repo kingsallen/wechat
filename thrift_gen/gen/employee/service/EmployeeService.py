@@ -64,6 +64,15 @@ class Iface(object):
         """
         pass
 
+    def setCacheEmployeeCustomInfo(self, userId, companyId, customValues):
+        """
+        Parameters:
+         - userId
+         - companyId
+         - customValues
+        """
+        pass
+
     def getEmployeeRewards(self, employeeId, companyId, pageNumber, pageSize):
         """
         Parameters:
@@ -333,6 +342,42 @@ class Client(Iface):
             return result.success
         raise TApplicationException(TApplicationException.MISSING_RESULT, "setEmployeeCustomInfo failed: unknown result")
 
+    def setCacheEmployeeCustomInfo(self, userId, companyId, customValues):
+        """
+        Parameters:
+         - userId
+         - companyId
+         - customValues
+        """
+        self._seqid += 1
+        future = self._reqs[self._seqid] = concurrent.Future()
+        self.send_setCacheEmployeeCustomInfo(userId, companyId, customValues)
+        return future
+
+    def send_setCacheEmployeeCustomInfo(self, userId, companyId, customValues):
+        oprot = self._oprot_factory.getProtocol(self._transport)
+        oprot.writeMessageBegin('setCacheEmployeeCustomInfo', TMessageType.CALL, self._seqid)
+        args = setCacheEmployeeCustomInfo_args()
+        args.userId = userId
+        args.companyId = companyId
+        args.customValues = customValues
+        args.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def recv_setCacheEmployeeCustomInfo(self, iprot, mtype, rseqid):
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = setCacheEmployeeCustomInfo_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "setCacheEmployeeCustomInfo failed: unknown result")
+
     def getEmployeeRewards(self, employeeId, companyId, pageNumber, pageSize):
         """
         Parameters:
@@ -482,6 +527,7 @@ class Processor(Iface, TProcessor):
         self._processMap["unbind"] = Processor.process_unbind
         self._processMap["getEmployeeCustomFieldsConf"] = Processor.process_getEmployeeCustomFieldsConf
         self._processMap["setEmployeeCustomInfo"] = Processor.process_setEmployeeCustomInfo
+        self._processMap["setCacheEmployeeCustomInfo"] = Processor.process_setCacheEmployeeCustomInfo
         self._processMap["getEmployeeRewards"] = Processor.process_getEmployeeRewards
         self._processMap["getEmployeeRecoms"] = Processor.process_getEmployeeRecoms
         self._processMap["emailActivation"] = Processor.process_emailActivation
@@ -569,6 +615,18 @@ class Processor(Iface, TProcessor):
         result = setEmployeeCustomInfo_result()
         result.success = yield gen.maybe_future(self._handler.setEmployeeCustomInfo(args.employeeId, args.customValues))
         oprot.writeMessageBegin("setEmployeeCustomInfo", TMessageType.REPLY, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    @gen.coroutine
+    def process_setCacheEmployeeCustomInfo(self, seqid, iprot, oprot):
+        args = setCacheEmployeeCustomInfo_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = setCacheEmployeeCustomInfo_result()
+        result.success = yield gen.maybe_future(self._handler.setCacheEmployeeCustomInfo(args.userId, args.companyId, args.customValues))
+        oprot.writeMessageBegin("setCacheEmployeeCustomInfo", TMessageType.REPLY, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -1379,6 +1437,150 @@ class setEmployeeCustomInfo_result(object):
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
         oprot.writeStructBegin('setEmployeeCustomInfo_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.STRUCT, 0)
+            self.success.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class setCacheEmployeeCustomInfo_args(object):
+    """
+    Attributes:
+     - userId
+     - companyId
+     - customValues
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'userId', None, None, ),  # 1
+        (2, TType.I32, 'companyId', None, None, ),  # 2
+        (3, TType.STRING, 'customValues', 'UTF8', None, ),  # 3
+    )
+
+    def __init__(self, userId=None, companyId=None, customValues=None,):
+        self.userId = userId
+        self.companyId = companyId
+        self.customValues = customValues
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.userId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.I32:
+                    self.companyId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.STRING:
+                    self.customValues = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('setCacheEmployeeCustomInfo_args')
+        if self.userId is not None:
+            oprot.writeFieldBegin('userId', TType.I32, 1)
+            oprot.writeI32(self.userId)
+            oprot.writeFieldEnd()
+        if self.companyId is not None:
+            oprot.writeFieldBegin('companyId', TType.I32, 2)
+            oprot.writeI32(self.companyId)
+            oprot.writeFieldEnd()
+        if self.customValues is not None:
+            oprot.writeFieldBegin('customValues', TType.STRING, 3)
+            oprot.writeString(self.customValues.encode('utf-8') if sys.version_info[0] == 2 else self.customValues)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class setCacheEmployeeCustomInfo_result(object):
+    """
+    Attributes:
+     - success
+    """
+
+    thrift_spec = (
+        (0, TType.STRUCT, 'success', (thrift_gen.gen.employee.struct.ttypes.Result, thrift_gen.gen.employee.struct.ttypes.Result.thrift_spec), None, ),  # 0
+    )
+
+    def __init__(self, success=None,):
+        self.success = success
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRUCT:
+                    self.success = thrift_gen.gen.employee.struct.ttypes.Result()
+                    self.success.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('setCacheEmployeeCustomInfo_result')
         if self.success is not None:
             oprot.writeFieldBegin('success', TType.STRUCT, 0)
             self.success.write(oprot)
