@@ -226,9 +226,21 @@ def check_and_apply_profile(func):
 
                 # 判断是否是自定义职位
                 if position.app_cv_config_id:
-                    redirect_params.update(goto_custom_url=self.make_url(
+
+                    goto_custom_url = self.make_url(
                         path.PROFILE_CUSTOM_CV,
-                        sub_dict(self.params, ['pid', 'wechat_signature'])))
+                        sub_dict(self.params, ['pid', 'wechat_signature']))
+
+                    # 如果是自定义职位，且没有 profile，且是直接投递定制的公司
+                    # 直接跳转到自定义填写页面
+                    if self.customize_ps.create_direct_apply(self.current_user.company.id,position.app_cv_config_id):
+                        self.redirect(goto_custom_url)
+
+                        self.finish()
+                        return
+                    else:
+                        redirect_params.update(goto_custom_url=goto_custom_url)
+
             else:
                 # 从侧边栏直接进入，允许使用 email 创建 profile
                 redirect_params.update(use_email=True)
@@ -252,6 +264,7 @@ def check_and_apply_profile(func):
             redirect_params.update(linkedin_url=linkedin_url)
             # ========== LINKEDIN OAUTH ==============
 
+            print("redirect_params: %s" % redirect_params)
             self.render(template_name='refer/neo_weixin/sysuser_v2/importresume.html',
                         **redirect_params)
 

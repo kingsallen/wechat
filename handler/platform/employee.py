@@ -195,6 +195,7 @@ class EmployeeBindHandler(BaseHandler):
             return
 
         result, result_message = yield self.employee_ps.bind(payload)
+        self.logger.debug("绑定成功")
 
         # early return 2
         if not result:
@@ -419,8 +420,12 @@ class BindedHandler(BaseHandler):
         fe_bind_status = self.employee_ps.convert_bind_status_from_thrift_to_fe(
             binding_status)
 
-        if (fe_bind_status not in [fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS, fe.FE_EMPLOYEE_BIND_STATUS_PENDING]):
+        if (fe_bind_status not in [fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS,
+                                   fe.FE_EMPLOYEE_BIND_STATUS_PENDING]):
+            self.logger.debug("sysuser_id: %s, company_id: %s" % (self.current_user.sysuser.id, self.current_user.company.id))
+            self.logger.debug("该员工未绑定，也不是pending状态")
             self.write_error(404)
+            return
 
         else:
             if fe_bind_status == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS:

@@ -15,7 +15,6 @@ from util.common import ObjectDict
 
 class HrEmployeeCertConfDataService(DataService):
 
-    @cache(ttl=60)
     @gen.coroutine
     def get_employee_cert_conf(self, conds, fields=None, options=None, appends=None):
 

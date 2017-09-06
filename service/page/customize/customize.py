@@ -17,8 +17,8 @@ class CustomizePageService(PageService):
     # e袋洗
     _AGENT_APPLY_CIDS = [926]
 
-    # 雅诗兰黛直接投递
-    _DIRECT_APPLY = [82, 167558]
+    #直接投递
+    _DIRECT_APPLY = [82, 167558, 40034]
 
     # 宝洁投递成功提示页面
     _APPLY_SUCCESS = [1753]
