@@ -53,3 +53,12 @@ class DictRocketMajorHandler(BaseHandler):
     def get(self):
         rocketmajors = yield self.dictionary_ps.get_rocketmajors()
         self.send_json_success(rocketmajors)
+
+
+class DictSmsCountryCodeHandler(BaseHandler):
+
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        sms_country_codes = yield self.dictionary_ps.get_sms_country_codes()
+        self.send_json_success(sms_country_codes)

@@ -41,7 +41,7 @@ class LoginHandler(BaseHandler):
         """登录操作， api 请求"""
 
         try:
-            self.guarantee("mobile", "password", "national_code")
+            self.guarantee("mobile", "password", "country_code")
         except AttributeError:
             return
 
@@ -189,7 +189,7 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
         """提交手机号，获得验证码"""
 
         try:
-            self.guarantee("mobile", "code_type", "national_code", "vcode")
+            self.guarantee("mobile", "code_type", "country_code", "vcode")
         except AttributeError:
             return
 
@@ -211,7 +211,8 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
             self.send_json_error(message=msg.VCODE_INVALID)
             return
 
-        ret = yield self.usercenter_ps.post_ismobileregistered(self.params.mobile)
+        ret = yield self.usercenter_ps.post_ismobileregistered(
+            country_code=self.params.country_code, mobile=self.params.mobile)
 
         if self.params.code_type == 1:
             # 忘记密码

@@ -21,7 +21,7 @@ class CellphonePageService(PageService):
         super().__init__()
 
     @gen.coroutine
-    def send_valid_code(self, mobile, type):
+    def send_valid_code(self, country_code, mobile, type):
         """Request basic service send valid code to target mobile
         :param mobile: target mobile number
         :return:
@@ -39,21 +39,25 @@ class CellphonePageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def verify_mobile(self, mobile, code, type):
+    def verify_mobile(self, country_code, mobile, code, type):
         """
         Send code submitted by user to basic service.
+        :param country_code: 国家编号
         :param mobile: target mobile number
         :param code:
         :param type
         :return:
         """
-        ret = yield self.infra_user_ds.post_verify_mobile(mobile, code, type)
+        ret = yield self.infra_user_ds.post_verify_mobile(country_code, mobile, code, type)
         raise gen.Return(ret)
 
     @gen.coroutine
-    def wx_pc_combine(self, mobile, unionid):
+    def wx_pc_combine(self, country_code, mobile, unionid):
         """调用账号绑定接口"""
-        ret = yield self.infra_user_ds.post_wx_pc_combine(mobile, unionid)
+        ret = yield self.infra_user_ds.post_wx_pc_combine(
+            country_code=country_code,
+            mobile=mobile,
+            unionid=unionid)
         raise gen.Return(ret)
 
     @gen.coroutine

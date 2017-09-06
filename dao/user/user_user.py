@@ -9,6 +9,7 @@ class UserUserDao(BaseDao):
         self.table = "user_user"
         self.fields_map = {
             "id"              :self.constant.TYPE_INT,
+            "country_code"    :self.constant.TYPE_STRING,
             "username"        :self.constant.TYPE_STRING,
             "password"        :self.constant.TYPE_STRING,
             "is_disable"      :self.constant.TYPE_INT,

@@ -35,26 +35,29 @@ class InfraUserDataService(DataService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def post_wx_pc_combine(self, mobile, unionid):
+    def post_wx_pc_combine(self, country_code, mobile, unionid):
         """手机号和微信号绑定接口"""
 
         params = ObjectDict({
-            'mobile':  mobile,
-            'unionid': unionid,
+            'countryCode': str(country_code),
+            'mobile':  str(mobile),
+            'unionid': str(unionid),
         })
 
         ret = yield http_post(path.INFRA_USER_COMBINE, params)
         raise gen.Return(ret)
 
     @gen.coroutine
-    def post_send_valid_code(self, mobile, type):
+    def post_send_valid_code(self, country_code, mobile, type):
         """Request basic service send valid code to target mobile
+        :param country_code: 国家代码
         :param mobile: target mobile number
         :param type:
         :return:
         """
         params = ObjectDict({
-            'mobile': mobile,
+            'countryCode': str(country_code),
+            'mobile': str(mobile),
             'type':   int(type)
         })
         ret = yield http_post(path.INFRA_USER_VALID, params)
@@ -73,17 +76,19 @@ class InfraUserDataService(DataService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def post_verify_mobile(self, mobile, code, type):
+    def post_verify_mobile(self, country_code, mobile, code, type):
         """
         Send code submitted by user to basic service.
+        :param country_code: 国家代码
         :param mobile: target mobile number
         :param code:
         :param type
         :return:
         """
         params = ObjectDict({
-            'mobile': mobile,
-            'code':   code,
+            'countryCode': str(country_code),
+            'mobile': str(mobile),
+            'code':   str(code),
             'type':   int(type),
         })
 
@@ -123,12 +128,14 @@ class InfraUserDataService(DataService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def post_ismobileregistered(self, mobile):
+    def post_ismobileregistered(self, country_code, mobile):
         """判断手机号是否已经注册
+        :param country_code: 国家号
         :param mobile: 手机号
         """
         params = ObjectDict(
-            mobile=mobile,
+            countryCode=str(country_code),
+            mobile=str(mobile),
         )
 
         ret = yield http_post(path.INFRA_USER_ISMOBILEREGISTERED, params)

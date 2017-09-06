@@ -1,11 +1,6 @@
 # coding=utf-8
-# Copyright 2016 MoSeeker
 
-"""
-:author 马超（machao@moseeker.com）
-:date 2016.10.13
 
-"""
 from tornado import gen
 
 import conf.common as const
@@ -28,7 +23,10 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
     Referenced Document: https://wiki.moseeker.com/user_account_api.md
                          Point 32, 33
     不同的业务场景，会有不同的业务逻辑处理
-    method 类型: register(type=1), forgetpasswd(type=2), setpassed(type=3), changemobile(type=4)
+    method 类型: register(type=1),
+                forgetpasswd(type=2),
+                setpassed(type=3),
+                changemobile(type=4)
     """
 
     @handle_response
@@ -133,15 +131,25 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
             self.send_json_error(message=message)
             return
 
+        mobile = self.params.get('mobile')
+        country_code = self.params.get('country_code')
+
+        if not mobile or not country_code:
+            self.send_json_error(msg.CELLPHONE_MOBILE_INVALID)
+            return
+
         # 注册时，不需要判断是否为当前用户手机号
         if type != const.MOBILE_CODE_OPT_TYPE.code_register:
-            if self.params.mobile != self.current_user.sysuser.username:
+            if self.params.mobile != self.current_user.sysuser.username and \
+                self.params.country_code != self.current_user.sysuser.country_code:
+
                 self.send_json_error(message=msg.CELLPHONE_NOT_MATCH)
                 raise gen.Return()
 
         result = yield self.cellphone_ps.send_valid_code(
-            self.params.get('mobile', None),
-            type
+            country_code=country_code,
+            mobile=mobile,
+            type=type
         )
         if result.status != const.API_SUCCESS:
             self.send_json_error(message=result.message)
@@ -188,17 +196,22 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
     def _opt_post_cellphone_code(self, type):
         """处理验证码是否有效，正确"""
         try:
-            self.guarantee('mobile', 'code')
+            self.guarantee('mobile', 'code', 'country_code')
         except:
             raise gen.Return(False)
 
         # 验证验证码
         verify_response = yield self.cellphone_ps.verify_mobile(
-            self.params.mobile, self.params.code, type
+            country_code=self.params.country_code,
+            mobile=self.params.mobile,
+            code=self.params.code,
+            type=type
         )
+
         if verify_response.status != const.API_SUCCESS:
             self.send_json_error(message=verify_response.message)
             raise gen.Return(False)
+
         elif verify_response.data == const.NO:
             self.send_json_error(message=msg.CELLPHONE_INVALID_CODE)
             raise gen.Return(False)
@@ -220,17 +233,20 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
     def _opt_post_user_account(self):
 
         # 检查是否需要合并 pc 账号
-        if self.current_user.sysuser and str(
-                self.current_user.sysuser.mobile) != str(
-                self.current_user.sysuser.username):
+        if self.current_user.sysuser and \
+            str(self.current_user.sysuser.mobile) != str(self.current_user.sysuser.username):
+
             response = yield self.cellphone_ps.wx_pc_combine(
+                country_code=self.params.country_code,
                 mobile=self.params.mobile,
                 unionid=self.current_user.sysuser.unionid
             )
+
             if response.status != const.API_SUCCESS:
                 return
 
             ret_user_id = response.data.id
+
             if str(ret_user_id) != str(self.current_user.sysuser.id):
                 self.logger.warn("触发帐号合并成功 合并前 user_id:{} 合并后 user_id:{}".format(self.current_user.sysuser.id, ret_user_id))
                 # 由于在 baseHandler 中已经有对合并帐号的处理，此处不手动删除 cookie
