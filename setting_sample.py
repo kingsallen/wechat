@@ -96,6 +96,8 @@ settings['zookeeper'] = {
     'connection_pool': 10,
     'retry': 3
 }
+# chatbot API
+settings['chatbot_api'] = 'http://rylai1.dqprism.com:9999/qa.api'
 
 # wechat host
 settings['m_host'] = 'platform2.dqprism.com'
