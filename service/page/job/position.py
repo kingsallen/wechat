@@ -1,6 +1,7 @@
 # coding=utf-8
 
-from tornado import gen
+from tornado import gen, httpclient
+import json
 
 import conf.common as const
 from service.page.base import PageService
@@ -8,9 +9,10 @@ from service.page.user.user import UserPageService
 from util.common import ObjectDict
 from util.common.cipher import encode_id
 from util.tool.date_tool import jd_update_date, str_2_date
-from util.tool.str_tool import gen_salary, split, set_literl, gen_degree, gen_experience
+from util.tool.str_tool import gen_salary, split, set_literl, gen_degree, gen_experience, to_str
 from util.tool.url_tool import make_static_url
 from util.tool.temp_data_tool import make_position_detail_cms, make_team, template3
+from setting import settings
 
 class PositionPageService(PageService):
 
@@ -97,6 +99,18 @@ class PositionPageService(PageService):
         if position_ext_res.job_custom_id:
             job_custom_res = yield self.job_custom_ds.get_custom(conds={"id": position_ext_res.job_custom_id})
             position.job_custom = job_custom_res.name
+
+        # 从 ES 中拉取职位的城市信息 （以后全部放到基础服务获取）
+        url = settings.es + "/index/_search?q=id:%s" % position_id
+        response = yield httpclient.AsyncHTTPClient().fetch(url)
+
+        body = ObjectDict(json.loads(to_str(response.body)))
+        result_list = body.hits.hits
+        if result_list:
+            result = result_list[0]
+            source = ObjectDict(result.get("_source"))
+            city = source.city
+            position.city = city
 
         raise gen.Return(position)
 
