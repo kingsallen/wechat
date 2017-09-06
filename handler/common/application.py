@@ -52,13 +52,15 @@ class ApplicationHandler(BaseHandler):
 
         # 定制化需求
         # 雅诗兰黛直接投递
-        is_esteelauder = yield self.customize_ps.create_esteelauder_apply(
+        is_direct_apply = yield self.customize_ps.create_direct_apply(
             position.company_id, position.app_cv_config_id)
 
         # 跳转到 profile get_view, 传递 apply 和 pid
-        self.redirect(self.make_url(path.PROFILE_PREVIEW,
-                               self.params,
-                               is_skip="1" if is_esteelauder else "0"))
+        self.redirect(
+            self.make_url(path.PROFILE_PREVIEW,
+            self.params,
+            is_skip="1" if is_direct_apply else "0")
+        )
 
     @handle_response
     @check_and_apply_profile
