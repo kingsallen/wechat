@@ -224,22 +224,38 @@ def check_and_apply_profile(func):
                 redirect_params.update(
                     use_email=(position.email_resume_conf == const.OLD_YES))
 
-                # 判断是否是自定义职位
+                # 自定义职位
                 if position.app_cv_config_id:
-
                     goto_custom_url = self.make_url(
                         path.PROFILE_CUSTOM_CV,
                         sub_dict(self.params, ['pid', 'wechat_signature']))
 
                     # 如果是自定义职位，且没有 profile，且是直接投递定制的公司
                     # 直接跳转到自定义填写页面
-                    if self.customize_ps.create_direct_apply(self.current_user.company.id,position.app_cv_config_id):
+
+                    is_direct_apply = yield self.customize_ps.create_direct_apply(self.current_user.company.id, position.app_cv_config_id)
+
+                    if is_direct_apply:
+
                         self.redirect(goto_custom_url)
 
                         self.finish()
                         return
                     else:
                         redirect_params.update(goto_custom_url=goto_custom_url)
+
+                # 非自定义职位
+                else:
+                    # 直接跳转的公司
+                    is_direct_apply = yield self.customize_ps.create_direct_apply(
+                        self.current_user.company.id, True)
+
+                    if is_direct_apply:
+                        goto_url = self.make_url(path.PROFILE_NEW, sub_dict(
+                            self.params, ['pid', 'wechat_signature']))
+                        self.redirect(goto_url)
+                        self.finish()
+                        return
 
             else:
                 # 从侧边栏直接进入，允许使用 email 创建 profile
