@@ -26,7 +26,7 @@ class CellphonePageService(PageService):
         :param mobile: target mobile number
         :return:
         """
-        ret = yield self.infra_user_ds.post_send_valid_code(mobile, type)
+        ret = yield self.infra_user_ds.post_send_valid_code(country_code, mobile, type)
         raise gen.Return(ret)
 
     @gen.coroutine
