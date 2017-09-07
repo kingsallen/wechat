@@ -29,9 +29,7 @@ class LoginHandler(BaseHandler):
         """渲染 login 页面模板"""
 
         data = ObjectDict(
-            mobile="",
-            national_code_tpl=const.NATIONAL_CODE,
-            national_code=1 # 目前只支持中国大陆手机号注册
+            mobile=""
         )
         self.render_page("system/login.html", data=data)
 
@@ -46,6 +44,7 @@ class LoginHandler(BaseHandler):
             return
 
         res = yield self.usercenter_ps.post_login(params={
+            "countryCode": self.params.country_code,
             "mobile": self.params.mobile,
             "password": self.params.password,
         })
@@ -123,7 +122,7 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
         data = ObjectDict(
             headimg="",
             national_code_tpl=const.NATIONAL_CODE,
-            national_code=1, # 目前只支持中国大陆手机号注册
+            national_code=1,
             code_type=1 # 指定为忘记密码类型，提交手机号时需要
         )
         self.render_page("system/auth_check_mobile.html",
@@ -136,9 +135,7 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
 
         data = ObjectDict(
             headimg="",
-            national_code_tpl=const.NATIONAL_CODE,
-            national_code=1, # 目前只支持中国大陆手机号注册
-            code_type=0 # 指定为正常注册类型，提交手机号时需要
+            code_type=0  # 指定为正常注册类型，提交手机号时需要
         )
         self.render_page("system/auth_check_mobile.html",
                          data=data, meta_title=const.PAGE_REGISTER)
@@ -157,8 +154,7 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
             site_title = const.PAGE_FORGET_PASSWORD
 
         data = ObjectDict(
-            national_code_tpl=const.NATIONAL_CODE,
-            national_code=1,
+            country_code=self.params.country_code,
             mobile=mobile,
             code_type=code_type
         )
@@ -232,6 +228,7 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
             valid_type = const.MOBILE_CODE_OPT_TYPE.code_register
 
         result = yield self.cellphone_ps.send_valid_code(
+            self.params.country_code,
             self.params.mobile,
             valid_type
         )
@@ -250,7 +247,7 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
         """提交验证码，检查手机号是否有效"""
 
         try:
-            self.guarantee("mobile", "code", "code_type")
+            self.guarantee("mobile", "code", "code_type", "country_code")
         except AttributeError:
             return
 
@@ -263,6 +260,7 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
 
         # 验证验证码
         verify_response = yield self.cellphone_ps.verify_mobile(
+            self.params.country_code,
             self.params.mobile, self.params.code, valid_type
         )
         if verify_response.status != const.API_SUCCESS:
