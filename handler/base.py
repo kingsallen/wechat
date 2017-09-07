@@ -101,18 +101,23 @@ class BaseHandler(MetaBaseHandler):
                 if state == wx_const.WX_OAUTH_DEFAULT_STATE:
                     self.logger.debug("来自 qx 的授权, 获得 userinfo")
                     userinfo = yield self._get_user_info(code)
-                    self.logger.debug(
-                        "来自 qx 的授权, 获得 userinfo:{}".format(userinfo))
-                    yield self._handle_user_info(userinfo)
+                    if userinfo:
+                        self.logger.debug("来自 qx 的授权, 获得 userinfo:{}".format(userinfo))
+                        yield self._handle_user_info(userinfo)
+                    else:
+                        self.logger.debug("来自 qx 的 code 无效")
 
                 # 来自企业号，招聘助手的静默授权
                 else:
                     self.logger.debug("来自企业号的静默授权")
                     self._unionid = from_hex(state)
                     openid = yield self._get_user_openid(code)
-                    self.logger.debug("来自企业号的静默授权, openid:{}".format(openid))
-                    self._wxuser = yield self._handle_ent_openid(
-                        openid, self._unionid)
+                    if openid:
+                        self.logger.debug("来自企业号的静默授权, openid:{}".format(openid))
+                        self._wxuser = yield self._handle_ent_openid(
+                            openid, self._unionid)
+                    else:
+                        self.logger.debug("来自企业号的 code 无效")
 
             elif state:  # 用户拒绝授权
                 # TODO 拒绝授权用户，是否让其继续操作? or return
@@ -251,8 +256,7 @@ class BaseHandler(MetaBaseHandler):
             userinfo = yield self._oauth_service.get_userinfo_by_code(code)
             raise gen.Return(userinfo)
         except WeChatOauthError as e:
-            self.write_error(500)
-            self.logger.error(e)
+            raise gen.Return(None)
 
     @gen.coroutine
     def _get_user_openid(self, code):
@@ -262,8 +266,7 @@ class BaseHandler(MetaBaseHandler):
                 code)
             raise gen.Return(openid)
         except WeChatOauthError as e:
-            self.write_error(500)
-            self.logger.error(e)
+            raise gen.Return(None)
 
     @gen.coroutine
     def _fetch_session(self):
