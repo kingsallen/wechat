@@ -213,7 +213,7 @@ def mobile_validate(mobile):
     """
     if isinstance(mobile, int):
         mobile = str(mobile)
-    p = re.compile(r'(?:1)\d{10}$')
+    p = re.compile(r'\d+')
     return p.match(mobile) is not None
 
 
