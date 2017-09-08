@@ -240,6 +240,7 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
                 "code_type": self.params.code_type
             })
             self.set_secure_cookie(const.COOKIE_MOBILE_REGISTER, self.params.mobile, expires_days=0.1, httponly=True)
+            self.set_secure_cookie(const.COOKIE_COUNTRY_CODE_REGISTER, self.params.country_code, expires_days=0.1, httponly=True)
 
     @handle_response
     @gen.coroutine
@@ -282,7 +283,7 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
         """提交设置的密码"""
 
         try:
-            self.guarantee("password", "repassword", "code_type", "country_code")
+            self.guarantee("password", "repassword", "code_type")
         except AttributeError:
             raise gen.Return()
 
@@ -291,10 +292,12 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
             raise gen.Return()
 
         mobile = self.get_secure_cookie(const.COOKIE_MOBILE_REGISTER)
+        country_code = self.get_secure_cookie(const.COOKIE_COUNTRY_CODE_REGISTER)
+
         url_mobile = self.params._mmc
 
         if mobile is None or url_mobile is None \
-            or encode_id(int(mobile), 8) != url_mobile:
+            or encode_id(int(mobile), 8) != url_mobile or country_code is None:
             self.send_json_error(message=msg.CELLPHONE_MOBILE_SET_PASSWD_FAILED)
             raise gen.Return()
 
@@ -311,7 +314,7 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
         else:
             # 开始创建 user 对象
             user_form = UserCreationForm({
-                'country_code': self.params.country_code,
+                'country_code': country_code,
                 'password': self.params.password,
                 'mobile':   int(mobile),
                 'username': mobile,
