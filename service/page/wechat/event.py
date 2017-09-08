@@ -377,7 +377,7 @@ class EventPageService(PageService):
                 "wxuser_id": current_user.wxuser.id
             })
 
-            if user_hr_account and user_hr_account.wxuser_id != current_user.wxuser.id:
+            if user_hr_account:
                 user_hr_account_cache = UserHrAccountCache()
                 user_hr_account_cache.pub_wx_binding(user_hr_account.id, msg="-1")
                 raise gen.Return()
