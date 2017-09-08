@@ -149,7 +149,7 @@ def _async_http_post(route, jdata=None, timeout=5, method='POST', infra=True):
 
     if infra:
         jdata.update({"appid": constant.APPID[env]})
-        url = "{0}/{1}".format(settings['infra'], route)
+        url = "{0}/{1}?appid={2}".format(settings['infra'], route, constant.APPID[env])
     else:
         url = route
 
