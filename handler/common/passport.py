@@ -282,7 +282,7 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
         """提交设置的密码"""
 
         try:
-            self.guarantee("password", "repassword", "code_type")
+            self.guarantee("password", "repassword", "code_type", "country_code")
         except AttributeError:
             raise gen.Return()
 
@@ -311,6 +311,7 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
         else:
             # 开始创建 user 对象
             user_form = UserCreationForm({
+                'country_code': self.params.country_code,
                 'password': self.params.password,
                 'mobile':   int(mobile),
                 'username': mobile,

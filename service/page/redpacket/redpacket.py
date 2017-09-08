@@ -747,9 +747,8 @@ class RedpacketPageService(PageService):
     @gen.coroutine
     def __get_next_rp_item(self, hb_config_id, hb_config_type, position_id=None):
         """获取下个待发红包信息"""
-        if ((hb_config_type == const.RED_PACKET_TYPE_SHARE_CLICK or
-             hb_config_type == const.RED_PACKET_TYPE_SHARE_APPLY) and
-             position_id is not None):
+        if (hb_config_type in [const.RED_PACKET_TYPE_SHARE_CLICK, hb_config_type == const.RED_PACKET_TYPE_SHARE_APPLY] and
+             position_id):
 
             binding = yield self.hr_hb_position_binding_ds.get_hr_hb_position_binding({
                 "hb_config_id": hb_config_id,
@@ -989,18 +988,23 @@ class RedpacketPageService(PageService):
         # 0=未参加  1=正参加点击红包活动  2=正参加被申请红包活动  3=正参加1+2红包活动
 
         if current_hb_status == const.HB_STATUS_BOTH:
+
             if hb_config_type == const.RED_PACKET_TYPE_SHARE_CLICK:
                 next_status = const.HB_STATUS_APPLY
+
             elif hb_config_type == const.RED_PACKET_TYPE_SHARE_APPLY:
                 next_status = const.HB_STATUS_CLICK
+
             else:
                 raise ValueError(msg.RED_PACKET_TYPE_VALUE_ERROR)
-        elif ((current_hb_status == const.HB_STATUS_CLICK and
-               hb_config_type == const.RED_PACKET_TYPE_SHARE_CLICK) or
-              (current_hb_status == const.HB_STATUS_APPLY and
-               hb_config_type == const.RED_PACKET_TYPE_SHARE_APPLY)):
+
+        elif ((current_hb_status == const.HB_STATUS_CLICK and hb_config_type == const.RED_PACKET_TYPE_SHARE_CLICK) or
+              (current_hb_status == const.HB_STATUS_APPLY and hb_config_type == const.RED_PACKET_TYPE_SHARE_APPLY)):
+
             next_status = const.HB_STATUS_NONE
+
         else:
+
             raise ValueError(msg.RED_PACKET_TYPE_VALUE_ERROR)
 
         yield self.job_position_ds.update_position(conds={
