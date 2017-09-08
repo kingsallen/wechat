@@ -235,12 +235,13 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
         if result.status != const.API_SUCCESS:
             self.send_json_error(message=result.message)
         else:
+            self.set_secure_cookie(const.COOKIE_MOBILE_REGISTER, self.params.mobile, expires_days=0.1, httponly=True)
+            self.set_secure_cookie(const.COOKIE_COUNTRY_CODE_REGISTER, self.params.country_code, expires_days=0.1, httponly=True)
+
             self.send_json_success(data={
                 "mobile": self.params.mobile,
                 "code_type": self.params.code_type
             })
-            self.set_secure_cookie(const.COOKIE_MOBILE_REGISTER, self.params.mobile, expires_days=0.1, httponly=True)
-            self.set_secure_cookie(const.COOKIE_COUNTRY_CODE_REGISTER, self.params.country_code, expires_days=0.1, httponly=True)
 
     @handle_response
     @gen.coroutine
