@@ -154,10 +154,11 @@ class InfraUserDataService(DataService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def post_resetpassword(self, mobile, password):
+    def post_resetpassword(self, country_code, mobile, password):
         """重置密码"""
 
         params = ObjectDict({
+            "countryCode": country_code,
             "mobile":   mobile,
             "password": password
         })

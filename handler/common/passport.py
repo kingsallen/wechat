@@ -307,7 +307,7 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
 
         if self.params.code_type == 1:
             # 忘记密码
-            res = yield self.usercenter_ps.post_resetpassword(mobile, self.params.password)
+            res = yield self.usercenter_ps.post_resetpassword(country_code, mobile, self.params.password)
             if res.status != const.API_SUCCESS:
                 self.send_json_error(message=res.message)
                 raise gen.Return()
