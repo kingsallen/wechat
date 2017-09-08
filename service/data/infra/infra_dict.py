@@ -13,11 +13,12 @@ import conf.path as path
 from service.data.base import DataService
 from util.common.decorator import cache
 from util.tool.dict_tool import sub_dict
-from util.tool.http_tool import http_get
+from util.tool.http_tool import http_get, unboxing
 
 
 class InfraDictDataService(DataService):
     cached_rocket_major = None
+    cached_sms_country_codes = None
 
     # 热门城市编号列表
     _HOT_CITY_CODES_WECHAT = [
@@ -57,6 +58,29 @@ class InfraDictDataService(DataService):
             parent_code=const.CONSTANT_PARENT_CODE.CONTINENT)
 
         return self.make_countries_result(countries_res, continent_res)
+
+    @gen.coroutine
+    def get_sms_country_codes(self):
+        """获取国家电话区号"""
+
+        if self.cached_sms_country_codes:
+            return self.cached_sms_country_codes
+
+        countries_res = yield http_get(path.DICT_COUNTRY)
+
+        result, data = unboxing(countries_res)
+
+        res = []
+        for country in data:
+            if country['sms_enabled']:
+                to_append = ObjectDict()
+                to_append.text = str(country['name'])
+                to_append.code_text = str(country['code'])
+                res.append(to_append)
+
+        self.cached_sms_country_codes = res
+
+        return res
 
     @staticmethod
     def make_countries_result(countries_res, continent_res):

@@ -29,10 +29,10 @@ class UsercenterPageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def post_resetpassword(self, mobile, password):
+    def post_resetpassword(self, country_code, mobile, password):
         """重置密码"""
 
-        ret = yield self.infra_user_ds.post_resetpassword(mobile, password)
+        ret = yield self.infra_user_ds.post_resetpassword(country_code, mobile, password)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -65,19 +65,21 @@ class UsercenterPageService(PageService):
             'username':    user_creation_form.username,
             'mobile':      user_creation_form.mobile,
             'password':    user_creation_form.password,
-            'register_ip': user_creation_form.register_ip
+            'register_ip': user_creation_form.register_ip,
+            'countryCode': user_creation_form.country_code
         })
 
         ret = yield self.infra_user_ds.post_register(params)
         raise gen.Return(ret)
 
     @gen.coroutine
-    def post_ismobileregistered(self, mobile):
+    def post_ismobileregistered(self, country_code, mobile):
         """判断手机号是否已经注册
+        :param country_code
         :param mobile: 手机号
         """
 
-        ret = yield self.infra_user_ds.post_ismobileregistered(mobile)
+        ret = yield self.infra_user_ds.post_ismobileregistered(country_code, mobile)
         raise gen.Return(ret)
 
     @gen.coroutine

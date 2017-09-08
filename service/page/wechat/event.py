@@ -372,14 +372,15 @@ class EventPageService(PageService):
         if current_user.wechat.id == self.settings.helper_wechat_id and msg.EventKey:
             scan_info = re.match(r"([0-9]*)_([0-9]*)_([0-9]*)", msg.EventKey)
 
+
             # 已绑定过的微信号，不能再绑定第二个hr_account账号，否则微信扫码登录会出错
             user_hr_account = yield self.user_hr_account_ds.get_hr_account(conds={
                 "wxuser_id": current_user.wxuser.id
             })
 
-            if user_hr_account and user_hr_account.wxuser_id != current_user.wxuser.id:
+            if user_hr_account:
                 user_hr_account_cache = UserHrAccountCache()
-                user_hr_account_cache.pub_wx_binding(user_hr_account.id, msg="-1")
+                user_hr_account_cache.pub_wx_binding(int(scan_info.group(1)), msg="-1")
                 raise gen.Return()
 
             yield self.__opt_help_wxuser(current_user.wxuser.id, current_user.wechat, msg)

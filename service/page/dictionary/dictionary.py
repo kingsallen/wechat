@@ -46,3 +46,8 @@ class DictionaryPageService(PageService):
     def get_rocketmajors(self):
         rocketmajors = yield self.infra_dict_ds.get_rocketmajors()
         return rocketmajors
+
+    @tornado.gen.coroutine
+    def get_sms_country_codes(self):
+        ret = yield self.infra_dict_ds.get_sms_country_codes()
+        return ret

@@ -14,6 +14,7 @@ class UserCreationForm(Model):
 
     username = StringType(required=True)
     password = StringType(required=True)
+    country_code = StringType(required=True)
     mobile = IntType(required=True)
     email = StringType(default='')
     register_ip = StringType(required=True)

@@ -40,6 +40,7 @@ class UserPageService(PageService):
             # 如果不存在，创建 user_user 记录，返回 user_id
             user_id = yield self.user_user_ds.create_user({
                 "username":         userinfo.unionid,
+                "country_code":     "",
                 "password":         "",
                 "register_time":    datetime.now(),
                 "register_ip":      remote_ip,

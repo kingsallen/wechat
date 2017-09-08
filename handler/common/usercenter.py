@@ -129,7 +129,9 @@ class UsercenterHandler(BaseHandler):
             self.send_json_error(message=msg.CELLPHONE_PASSWORD_ERROR)
             raise gen.Return()
 
-        res = yield self.usercenter_ps.post_resetpassword(self.current_user.sysuser.username, self.params.password)
+        res = yield self.usercenter_ps.post_resetpassword(self.current_user.sysuser.country_code,
+                                                          self.current_user.sysuser.username,
+                                                          self.params.password)
         if res.status != const.API_SUCCESS:
             self.send_json_error(message=res.message)
             raise gen.Return()
