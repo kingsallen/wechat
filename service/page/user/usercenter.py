@@ -29,10 +29,10 @@ class UsercenterPageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def post_resetpassword(self, mobile, password):
+    def post_resetpassword(self, country_code, mobile, password):
         """重置密码"""
 
-        ret = yield self.infra_user_ds.post_resetpassword(mobile, password)
+        ret = yield self.infra_user_ds.post_resetpassword(country_code, mobile, password)
         raise gen.Return(ret)
 
     @gen.coroutine
