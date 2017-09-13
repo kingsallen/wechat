@@ -237,10 +237,7 @@ def check_and_apply_profile(func):
                         position.company_id, position.app_cv_config_id)
 
                     if is_direct_apply:
-
                         self.redirect(goto_custom_url)
-
-                        self.finish()
                         return
                     else:
                         redirect_params.update(goto_custom_url=goto_custom_url)
