@@ -265,7 +265,9 @@ class MetaBaseHandler(AtomHandler):
                     'code': http_code,
                     'css': 'warning',
                     'message': msg_const.NOT_AUTHORIZED
-                })
+                },
+                http_code=http_code
+            )
 
         elif http_code == 404:
             self.render_page(
@@ -273,7 +275,9 @@ class MetaBaseHandler(AtomHandler):
                 data={
                     'code': http_code,
                     'message': msg_const.NO_DATA
-                })
+                },
+                http_code=http_code
+            )
         else:
             message = kwargs.get('message') or msg_const.UNKNOWN_DEFAULT
             self.render_page(
@@ -281,7 +285,9 @@ class MetaBaseHandler(AtomHandler):
                 data={
                     'code': http_code,
                     'message':message
-                })
+                },
+                http_code=http_code
+            )
 
     def render(self, status_code=const.API_SUCCESS, http_code=200, *args, **kwargs):
         """override RequestHandler.render()"""
