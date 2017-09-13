@@ -42,7 +42,7 @@ schematics==2.0.1
 simplegeneric==0.8.1
 six==1.10.0
 thrift==0.10.0
-tornado==4.5.1
+tornado==4.5.2
 Tornado-MySQL==0.5.1
 traitlets==4.3.2
 ujson==1.35
