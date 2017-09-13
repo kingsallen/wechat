@@ -1,11 +1,5 @@
 # coding=utf-8
 
-# @Time    : 10/28/16 10:08
-# @Author  : panda (panyuxin@moseeker.com)
-# @File    : hr_app_cv_conf.py
-# @DES     :
-
-# Copyright 2016 MoSeeker
 
 from tornado import gen
 from service.data.base import DataService
@@ -15,7 +9,7 @@ from util.common import ObjectDict
 
 class HrAppCvConfDataService(DataService):
 
-    @cache(ttl=60)
+    #@cache(ttl=60)
     @gen.coroutine
     def get_app_cv_conf(self, conds, fields=None, options=None, appends=None):
 

@@ -1,8 +1,11 @@
 # coding=utf-8
 
+import copy
+import json
+
 import tornado
 import tornado.gen
-from tornado.escape import json_decode, json_encode
+from tornado.escape import json_decode
 
 import conf.common as const
 import conf.message as msg
@@ -147,7 +150,10 @@ class ProfilePreviewHandler(BaseHandler):
     @authenticated
     @tornado.gen.coroutine
     def get(self):
-        if not self.params.pid:
+
+        pid = self.params.pid
+
+        if not pid or not pid.isdigit():
             url = self.make_url(path.PROFILE_VIEW, self.params)
             self.redirect(url)
             return
@@ -155,30 +161,40 @@ class ProfilePreviewHandler(BaseHandler):
         profile_tpl = yield self.profile_ps.profile_to_tempalte(
             self.current_user.profile)
 
+        current_mobile = ''
         if self.current_user.sysuser.mobile:
             current_mobile = str(self.current_user.sysuser.mobile)
-        else:
-            current_mobile = ''
 
+        # -8<---8<---8<---8<---8<---8<---8<---8<---8<---8<---8<---8<---8<---
+        # 只有存在 is_skip 且值为 '1' 时才跳过 preview
         try:
-            # 只有存在 is_skip 且值为 '1' 时才跳过 preview
             is_skip = int(self.params.is_skip) == const.YES
         except Exception:
             is_skip = False
+        # -8<---8<---8<---8<---8<---8<---8<---8<---8<---8<---8<---8<---8<---
 
-        need_mobile_validate = str(self.current_user.sysuser.mobile) != \
-                               str(self.current_user.sysuser.username)
+        need_mobile_validate = (
+            str(self.current_user.sysuser.mobile) != str(self.current_user.sysuser.username)
+        )
+
+        other_key_name_mapping = yield self.profile_ps.get_others_key_name_mapping()
+
+        no_name = not bool(self.current_user.sysuser.name)
 
         tparams = {
-            'profile':              profile_tpl,
-            'pid':                  self.params.pid,
-            'is_skip':              is_skip,
-            'need_mobile_validate': need_mobile_validate,
-            'no_name':              not bool(self.current_user.sysuser.name),
-            'current_mobile':       current_mobile
+            'profile':                profile_tpl,
+            'other_key_name_mapping': other_key_name_mapping,
+            'pid':                    pid,
+            'is_skip':                is_skip,
+            'need_mobile_validate':   need_mobile_validate,
+            'no_name':                no_name,
+            'current_mobile':         current_mobile
         }
 
-        self.render_page(template_name='profile/preview.html', data=tparams, meta_title=const.PROFILE_PREVIEW)
+        self.render_page(template_name='profile/preview.html',
+                         data=tparams,
+                         meta_title=const.PROFILE_PREVIEW)
+
 
 class ProfileViewHandler(BaseHandler):
 
@@ -201,11 +217,15 @@ class ProfileViewHandler(BaseHandler):
             return
 
         profile_tpl = yield self.profile_ps.profile_to_tempalte(profile)
+
+        other_key_name_mapping = yield self.profile_ps.get_others_key_name_mapping()
+
         # 游客页不应该显示 other信息，求职意愿
         profile_tpl.other = ObjectDict()
         profile_tpl.job_apply = ObjectDict()
 
         tparams = {
+            "other_key_name_mapping": other_key_name_mapping,
             "profile": profile_tpl,
             "is_self": False,
         }
@@ -222,6 +242,7 @@ class ProfileViewHandler(BaseHandler):
         })
 
         return default
+
 
 class ProfileHandler(BaseHandler):
     """ProfileHandler
@@ -241,8 +262,13 @@ class ProfileHandler(BaseHandler):
 
         profile_tpl = yield self.profile_ps.profile_to_tempalte(
             self.current_user.profile)
+
+        other_key_name_mapping = yield self.profile_ps.get_others_key_name_mapping()
+
         self.params.share = self._share(self.current_user.profile.profile.get("uuid"), profile_tpl)
-        self.render_page(template_name='profile/main.html', data=profile_tpl)
+        self.render_page(
+            template_name='profile/main.html',
+            data=ObjectDict(profile=profile_tpl, other_key_name_mapping=other_key_name_mapping))
 
     def _share(self, uuid, profile_tpl):
         default = ObjectDict({
@@ -262,17 +288,23 @@ class ProfileCustomHandler(BaseHandler):
     @authenticated
     @tornado.gen.coroutine
     def get(self):
+        if not self.params.pid or not self.params.pid.isdigit():
+            self.write_error(404)
+            return
+
         pid = int(self.params.pid)
         position = yield self.position_ps.get_position(pid)
+
         if not position.app_cv_config_id:
             self.write_error(404)
             return
 
         has_profile, profile = yield self.profile_ps.has_profile(
             self.current_user.sysuser.id)
+        custom_tpl = yield self.profile_ps.get_custom_tpl_all()
+
         if has_profile:
-            resume_dict = yield self.application_ps._generate_resume_cv(
-                profile)
+            resume_dict = yield self.application_ps._generate_resume_cv(profile, custom_tpl)
         else:
             resume_dict = {}
 
@@ -280,123 +312,146 @@ class ProfileCustomHandler(BaseHandler):
             position.app_cv_config_id)
         cv_conf = json_config.field_value
 
-        self.render(
-            template_name='refer/weixin/application/app_cv_conf.html',
-            resume=json_encode(json_encode(resume_dict)),
-            cv_conf=json_encode(cv_conf))
+        self.render_page(
+            template_name='profile/custom.html',
+            data=dict(resume=resume_dict,
+                      config=json.loads(cv_conf)))
+
+
+class ProfileAPICustomCVHandler(BaseHandler):
 
     @handle_response
     @authenticated
     @tornado.gen.coroutine
     def post(self):
 
-        custom_cv = ObjectDict(json_decode(self.get_argument("_cv", "")))
-        if not custom_cv:
-            raise Exception("get custom_cv failed")
+        if 'custom_cv' not in self.json_args:
+            raise ValueError("Failed to get custom_cv")
+        if 'pid' not in self.json_args:
+            raise ValueError('Failed to get pid')
+
+        custom_cv = self.json_args.custom_cv
+        pid = self.json_args.pid
+
+        self.logger.debug("custom_cv: %s" % custom_cv)
 
         yield self._save_custom_cv(custom_cv)
 
-        p = dict()
-        p.update(is_skip=(self.current_user.company.id in self.customize_ps._DIRECT_APPLY))
-        self.redirect(self.make_url(path.PROFILE_PREVIEW, self.params, **p))
+        p = dict(is_skip='1' if self.current_user.company.id in self.customize_ps._DIRECT_APPLY else '0',
+                 pid=pid)
+
+        self.send_json_success(data={
+            'next_url': self.make_url(path.PROFILE_PREVIEW, self.params, **p)
+        })
 
     @tornado.gen.coroutine
     def _save_custom_cv(self, custom_cv):
 
-        # 更新 user 信息（非 profile 信息）
-        yield self.user_ps.update_user(
-            user_id=self.current_user.sysuser.id,
-            mobile=custom_cv.get('mobile'),
-            name=custom_cv.get('name'),
-            email=custom_cv.get('email'))
+        # --8<-- 初始化 --8<-----8<-----8<-----8<-----8<-----8<-----8<-----8<--
+        profile_id = None
+        custom_cv_tpls = yield self.profile_ps.get_custom_tpl_all()
 
+        custom_cv_user_user = self.profile_ps.convert_customcv(custom_cv, custom_cv_tpls, target='user_user')
+        custom_cv_profile_basic = self.profile_ps.convert_customcv(custom_cv, custom_cv_tpls, target='profile_basic')
+        custom_cv_other_raw = self.profile_ps.convert_customcv(custom_cv, custom_cv_tpls, target='other')
+
+        self.logger.debug("custom_cv_user_user: %s" % custom_cv_user_user)
+        self.logger.debug("custom_cv_profile_basic: %s" % custom_cv_profile_basic)
+        self.logger.debug("custom_cv_other_raw: %s" % custom_cv_other_raw)
+
+        # --8<-- 更新 user_user --8<-----8<-----8<-----8<-----8<-----8<------
+        if custom_cv_user_user:
+            result = yield self.user_ps.update_user(self.current_user.sysuser.id, **custom_cv_user_user)
+            self.logger.debug("update_user result: %s" % result)
+
+        # --8<-- 检查profile --8<-----8<-----8<-----8<-----8<-----8<-----8<---
         has_profile, profile = yield self.profile_ps.has_profile(
             self.current_user.sysuser.id)
 
-        custom_cv_tpls = yield self.profile_ps.get_custom_tpl_all()
-        custom_fields = [c.field_name for c in custom_cv_tpls if not c.map]
-
-        profile_id = 0
-
-        # 已经有 profile，更新和自定义简历联动的 profile 信息
         if has_profile:
-            profile_id = profile.get("profile", {}).get("id", None)
-            basic = profile.get("basic")
-            basic.update(custom_cv)
-            # 更新 profile_basic 表的对应字段
-            yield self.profile_ps.update_profile_basic(profile_id, basic)
-            # 更新 education, workexp, projectext
-            yield self.profile_ps.update_profile_embedded_info_from_cv(
-                profile, custom_cv)
+            profile_id = profile.get("profile", {}).get("id")
 
-        else:
-            # 还不存在 profile， 创建 profile
-            # 进入自定义简历创建 profile 逻辑的话，来源必定是企业号（我要投递）
-            result, data = yield self.profile_ps.create_profile(
-                self.current_user.sysuser.id,
-                source=const.PROFILE_SOURCE_PLATFORM_APPLY)
+        if custom_cv_profile_basic:
+            # 已经有 profile，
+            if has_profile:
+                basic = profile.get("basic")
 
-            # 创建 profile 成功
-            if result:
+                basic.update(custom_cv_profile_basic)
+                self.logger.debug("updated basic: %s" % basic)
+
+                # 更新 profile_basic 表的对应字段
+                yield self.profile_ps.update_profile_basic(profile_id, basic)
+
+            else:
+                # 还不存在 profile， 创建 profile
+                # 进入自定义简历创建 profile 逻辑的话，来源必定是企业号（我要投递）
+                result, data = yield self.profile_ps.create_profile(
+                    self.current_user.sysuser.id,
+                    source=const.PROFILE_SOURCE_PLATFORM_APPLY)
+
+                # 创建 profile 成功
+                if not result:
+                    raise RuntimeError('profile creation error')
+
                 profile_id = data
 
-                cv_profile_values = {k: v for k, v in custom_cv.items() if
-                                     k in custom_fields}
-
-                self.logger.debug('cv_profile_values: %s' % cv_profile_values)
                 self._log_customs.update(new_profile=const.YES)
-                # BASIC INFO
+
+                # 创建 profile_basic
                 result, data = yield self.profile_ps.create_profile_basic(
-                    cv_profile_values, profile_id, mode='c')
+                    custom_cv_profile_basic, profile_id, mode='c')
 
                 if result:
-                    self.logger.debug(
-                        "profile_basic creation passed. Got basic info id: %s" % data)
+                    self.logger.debug("profile basic created, id: %s" % data)
                 else:
-                    self.logger.error("profile_basic creation failed. res: %s" % data)
+                    self.logger.error("profile_basic creation failed, res: %s" % data)
 
-                yield self.profile_ps.update_profile_basic(profile_id, custom_cv)
-                _, profile = yield self.profile_ps.has_profile(self.current_user.sysuser.id)
-                yield self.profile_ps.update_profile_embedded_info_from_cv(
-                    profile, custom_cv)
-            else:
-                raise ValueError('profile creation error')
+        # 更新多条 education, workexp, projectexp, language, awards,
+        # 更新单条 intention, works
+        yield self.profile_ps.update_profile_embedded_info_from_cv(
+            profile, custom_cv)
 
-        if profile_id:
-            # profile = ObjectDict()
-            # basicInfo = ObjectDict()
-
-            # const.CUSTOM_FIELD_NAME_TO_PROFILE_FIELD
-            # 为自定义字段到 profile 字段的对应
-
-            # 如果 value 为 "",表明没有对应的 profile 字段,
-            # 应该存入 profile_others
-            # 因为 profile 对应字段都是属于 basic 的,所以都加入 basicInfo 中
-            # 这样可以做到和老六步兼容
-            #  *const.CUSTOM_FIELD_NAME_TO_PROFILE_FIELD 需要微信后端自行维护
-
-            custom_cv = self._preprocess_custom_cv(custom_cv)
-
-            cv_pure_custom = {k: v for k, v in custom_cv.items() if
-                              k in custom_fields}
-
-            other_string = json_dumps(cv_pure_custom)
-
-            record = ObjectDict(other=other_string)
-
-            yield self.application_ps.update_profile_other(record, profile_id)
+        # 更新 other
+        if custom_cv_other_raw:
+            yield self.update_profile_other(profile_id, custom_cv_other_raw)
 
     @staticmethod
-    def _preprocess_custom_cv(custom_cv):
-        # 自定义简历模版提交的 picUrl 作为 IDPhoto 使用
-        if custom_cv.get('picUrl'):
-            custom_cv['IDPhoto'] = custom_cv.get('picUrl')
+    def _preprocess_custom_cv(custom_cv_other_raw):
+        """对于纯 profile 字段的预处理
+        可以在此加入公司自定义逻辑"""
+        ret = copy.deepcopy(custom_cv_other_raw)
 
         # 前端 rocketmajor_value 保存应该入库的 rocketmajor 字段内容
-        if custom_cv.get('rocketmajor_value'):
-            custom_cv['rocketmajor'] = custom_cv.get(
-                'rocketmajor_value')
-        return custom_cv
+        if ret.get('rocketmajor_value'):
+            ret['rocketmajor'] = ret.get('rocketmajor_value')
+            del ret['rocketmajor_value']
+
+        # 确保保存正确的 schooljob 和 internship
+        def _filter_elements_in(name):
+            new_list = []
+            for e in ret.get(name):
+                if e.get('__status') and not e.get('__status') == 'x':
+                    e.pop('__status', None)
+                    new_list.append(e)
+            return new_list
+
+        if ret.get('internship'):
+            ret['internship'] = _filter_elements_in('internship')
+
+        if ret.get('schooljob'):
+            ret['schooljob'] = _filter_elements_in('schooljob')
+
+        return ret
+
+    @tornado.gen.coroutine
+    def update_profile_other(self, profile_id, custom_cv_other_raw):
+        """智能地更新 profile_other 内容"""
+        custom_cv_ready = self._preprocess_custom_cv(custom_cv_other_raw)
+
+        other_string = json_dumps(custom_cv_ready)
+        record = ObjectDict(other=other_string)
+
+        yield self.application_ps.update_profile_other(record, profile_id)
 
 
 class ProfileSectionHandler(BaseHandler):

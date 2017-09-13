@@ -103,39 +103,18 @@ class InfraProfileDataService(DataService):
 
     @gen.coroutine
     def create_profile_basic_custom(self, custom_cv, profile_id):
-        """从自定义简历创建 basic_info 数据
-        """
+        """从自定义简历创建 basic_info 数据 """
 
         params = ObjectDict(
             profile_id=profile_id,
             gender=custom_cv.get("gender", 0),
-            name=custom_cv.get('name', ""),
             # 微信上没有修改国籍的方式, 默认为中国(43)
             nationality_code=43)
 
-        if custom_cv.get('birth', ""):
-            params.update(birth=custom_cv.get('birth'))
-
-        if custom_cv.get("nationality", ""):
-            params.update(nationality_name=custom_cv.get("nationality"))
-
-        if custom_cv.get("email", ""):
-            params.update(email=custom_cv.get("email"))
-
-        if custom_cv.get("weixin", ""):
-            params.update(weixin=custom_cv.get("weixin"))
-
-        if custom_cv.get("qq", ""):
-            params.update(qq=custom_cv.get("qq"))
-
-        if custom_cv.get("location", ""):
-            params.update(city_name=custom_cv.get("location"))
-
-        if custom_cv.get("remarks", ""):
-            params.update(self_introduction=custom_cv.get("remarks"))
+        params.update(custom_cv)
 
         res = yield self.handle_profile_section(
-            params, method="create", section="basic")
+            custom_cv, method="create", section="basic")
 
         return http_tool.unboxing(res)
 
@@ -718,3 +697,11 @@ class InfraProfileDataService(DataService):
 
         response = yield http_tool.http_fetch(path.LINKEDIN_ACCESSTOKEN, params, timeout=20)
         return response
+
+    @gen.coroutine
+    def get_custom_metadata(self) -> list:
+        """获取自定义字段元表数据"""
+        resposne = yield http_tool.http_get(path.PROFILE_OTHER_METADATA)
+        _, data = http_tool.unboxing(resposne)
+
+        return sorted(data, key=lambda x: x['id'])

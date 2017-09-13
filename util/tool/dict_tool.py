@@ -14,6 +14,15 @@ def sub_dict(somedict, somekeys, default=None):
     return ObjectDict(ret)
 
 
+def rename_keys(somedict, mapping):
+    """rename dict keys with an old-new name mapping"""
+    for old_key, new_key in mapping.items():
+        if old_key in somedict and old_key != new_key:
+            somedict[new_key] = somedict[old_key]
+            del somedict[old_key]
+    return somedict
+
+
 def objectdictify(result):
     """将结果 ObjectDict 化"""
     ret = result

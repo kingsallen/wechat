@@ -97,6 +97,7 @@ class UserCurrentInfoHandler(BaseHandler):
 
         return False
 
+
 class UserCurrentUpdateHandler(BaseHandler):
 
     @handle_response

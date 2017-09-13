@@ -9,6 +9,8 @@ import re
 import string
 import uuid
 
+from util.tool.iter_tool import first
+
 import pypinyin
 from pypinyin import lazy_pinyin
 
@@ -268,6 +270,12 @@ def is_alphabet(uchar):
 def is_other(uchar):
     """判断是否非汉字，数字和英文字符"""
     return not (is_chinese(uchar) or is_number(uchar) or is_alphabet(uchar))
+
+
+def phone_number_without_country_code(phone_number):
+    """从国家编号-电话号码中分离出电话号码"""
+    assert re.match(r'^(\d{1,4}-)?(\d{8,11})$', phone_number)
+    return first(phone_number.split("-")[-1:])
 
 
 def get_uucode(lenth=36):

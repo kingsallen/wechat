@@ -354,10 +354,10 @@ class UserPageService(PageService):
         if kwargs.email:
             fields.update(email=str(kwargs.email))
         if kwargs.mobile:
-            fields.update(mobile=int(kwargs.mobile))
+            phone_number = str_tool.phone_number_without_country_code(str(kwargs.mobile))
+            fields.update(mobile=int(phone_number))
         if kwargs.name:
             fields.update(name=str(kwargs.name))
-        self.logger.debug(fields)
 
         ret = 0
         if fields:

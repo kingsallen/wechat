@@ -1,6 +1,7 @@
 # coding=utf-8
 
 from datetime import datetime
+import re
 
 import tornado.gen as gen
 from tornado.escape import json_decode
@@ -9,7 +10,8 @@ import conf.common as const
 from service.page.base import PageService
 from util.common import ObjectDict
 from util.tool.date_tool import curr_datetime_now
-
+from util.tool.iter_tool import first
+from util.tool.dict_tool import sub_dict, rename_keys
 
 
 class ProfilePageService(PageService):
@@ -145,12 +147,8 @@ class ProfilePageService(PageService):
         profile = import_profile[1,"ab","123",2]
         """
 
-        is_ok, result = yield self.infra_profile_ds.import_profile(int(type_source),
-                                                                   username,
-                                                                   password,
-                                                                   user_id,
-                                                                   int(ua),
-                                                                   token)
+        is_ok, result = yield self.infra_profile_ds.import_profile(
+            int(type_source), username, password, user_id, int(ua), token)
         return is_ok, result
 
     @gen.coroutine
@@ -327,13 +325,7 @@ class ProfilePageService(PageService):
         return result, data
 
     @gen.coroutine
-    def create_profile_education(self, record, profile_id, mode='m'):
-        if mode == 'm':  # 老六步
-            pass
-
-        else:
-            raise ValueError('invalid mode')
-
+    def create_profile_education(self, record, profile_id):
         college_code = yield self.infra_dict_ds.get_college_code_by_name(
             record.college_name)
 
@@ -440,43 +432,15 @@ class ProfilePageService(PageService):
         return result, data
 
     @gen.coroutine
-    def update_profile_embedded_info_from_cv(self, profile, custom_cv):
-        """使用 custom_cv 更新 profile 的复合字段 (education, workexp, projectext)
-        :param profile: profile
-        :param custom_cv: 自定义简历模版输出 (dict)
-        """
+    def custom_cv_update_profile_education(self, profile_id, custom_cv):
+        educations = custom_cv.get("education", [])
 
-        profile_id = profile.get("profile", {}).get("id", None)
-        if not profile_id:
+        if not educations:
             return
 
-        custom_cv = ObjectDict(custom_cv)
-        education = custom_cv.get("education", [])
-        workexp = custom_cv.get("workexp", [])
-        projectexp = custom_cv.get("projectexp", [])
-        position_name = custom_cv.get('position_name')
-
-        # 处理期望职能 ---------------------
-        if position_name:
-            has_intention = bool(profile.get("intentions"))
-            if has_intention:
-                intention_id = profile.get("intentions")[0].get('id')
-                yield self.update_profile_intention(
-                    record=ObjectDict(position_name=position_name,
-                                      id=intention_id),
-                    profile_id=profile_id)
-
-            else:
-                yield self.create_profile_intention(
-                    record=ObjectDict(position_name=position_name),
-                    profile_id=profile_id)
-        # 处理期望职能 ---------------------
-
-
-        # 处理教育经历 ---------------------
-        for e in education:
+        for e in educations:
             status = e.get('__status', None)
-            college_name = e.get('school')
+            college_name = e.get('education_college_name')
             college_code = yield self.infra_dict_ds.get_college_code_by_name(
                 college_name)
 
@@ -484,76 +448,210 @@ class ProfilePageService(PageService):
                 params = ObjectDict(
                     eid=e.get('id'),
                     profile_id=profile_id,
-                    start_date=e.get('start'),
-                    end_date=e.get('end'),
-                    end_until_now=1 if e.get('end') == "至今" else 0,
+                    start_date=e.get('education_start'),
+                    end_date=e.get('education_end'),
+                    end_until_now=int(e.get('education_end_until_now', '0')),
                     college_name=college_name,
                     college_code=college_code,
-                    major_name=e.get('major'),
-                    degree=int(e.get('degree', '0'))
+                    major_name=e.get('education_major_name'),
+                    degree=int(e.get('education_degree_hidden', '0')),
+                    description=e.get('education_description_hidden')
                 )
+
                 if status == 'o':
                     yield self.create_profile_education(params, profile_id)
 
                 elif status == 'x':
-                    yield self.delete_profile_education({"id": params.eid}, profile_id=None)
+                    yield self.delete_profile_education(
+                        {"id": params.eid}, profile_id=None)
 
                 elif status == 'e':
                     params['id'] = params.eid
                     yield self.update_profile_education(params, profile_id)
-        # 处理教育经历 ---------------------
 
-        # 处理工作经历 ---------------------
-        for w in workexp:
+    @gen.coroutine
+    def custom_cv_update_profile_workexp(self, profile_id, custom_cv):
+        workexps = custom_cv.get("workexp", [])
+
+        if not workexps:
+            return
+
+        for w in workexps:
             status = w.get('__status', None)
             if status:
                 params = ObjectDict(
                     wid=w.get('id'),
                     profile_id=profile_id,
-                    start_date=w.get('start'),
-                    end_date=w.get('end'),
-                    end_until_now=1 if w.get('end') == "至今" else 0,
-                    company_name=w.get('company'),
-                    department_name=w.get('department'),
-                    job=w.get('position'),
-                    description=w.get('describe')
+                    start_date=w.get('workexp_start'),
+                    end_date=w.get('workexp_end'),
+                    end_until_now=int(w.get('projectexp_end_until_now', '0')),
+                    company_name=w.get('workexp_company_name'),
+                    department_name=w.get('workexp_department_name'),
+                    job=w.get('workexp_job'),
+                    description=w.get('workexp_description_hidden')
                 )
                 if status == 'o':
-                    yield self.create_profile_workexp(params, profile_id, mode='c')
+                    yield self.create_profile_workexp(
+                        params, profile_id, mode='c')
 
                 elif status == 'x':
-                    yield self.delete_profile_workexp({"id": params.wid}, profile_id=None)
+                    yield self.delete_profile_workexp(
+                        {"id": params.wid}, profile_id=None)
 
                 elif status == 'e':
                     params['id'] = params.wid
                     yield self.update_profile_workexp(params, profile_id)
-        # 处理工作经历 ---------------------
 
-        # 处理项目经历 ---------------------
-        for p in projectexp:
+    @gen.coroutine
+    def custom_cv_update_profile_projectexp(self, profile_id, custom_cv):
+        projectexps = custom_cv.get("projectexp", [])
+
+        if not projectexps:
+            return
+
+        for p in projectexps:
+
             status = p.get('__status', None)
             if status:
                 params = ObjectDict(
-                    pid=p.get('id'),
+                    id=p.get('id'),
                     profile_id=profile_id,
-                    start_date=p.get('start'),
-                    end_date=p.get('end'),
-                    end_until_now=1 if p.get('end') == "至今" else 0,
-                    name=p.get('name'),
-                    role=p.get('position'),
-                    description=p.get('introduce'),
-                    responsibility=p.get("describe")
+                    start_date=p.get('projectexp_start'),
+                    end_date=p.get('projectexp_end'),
+                    end_until_now=int(p.get('projectexp_end_until_now', '0')),
+                    name=p.get('projectexp_name'),
+                    role=p.get('projectexp_role'),
+                    company_name=p.get('projectexp_company_name'),
+                    description=p.get('projectexp_description_hidden'),
+                    #responsibility=p.get("projectexp_responsibility")
                 )
                 if status == 'o':
                     yield self.create_profile_projectexp(params, profile_id)
 
                 elif status == 'x':
-                    yield self.delete_profile_projectexp({"id": params.pid}, profile_id=None)
+                    yield self.delete_profile_projectexp(
+                        {"id": params.id}, profile_id=None)
+
+                elif status == 'e':
+                    yield self.update_profile_projectexp(params, profile_id)
+
+    @gen.coroutine
+    def custom_cv_update_profile_language(self, profile_id, custom_cv):
+        languages = custom_cv.get("language", [])
+
+        if not languages:
+            return
+
+        for p in languages:
+            status = p.get('__status', None)
+            if status:
+                params = ObjectDict(
+                    pid=p.get('id'),
+                    profile_id=profile_id,
+                    language=p.get('language_name'),
+                    level=p.get('language_level')
+                )
+                if status == 'o':
+                    yield self.create_profile_language(params, profile_id)
+
+                elif status == 'x':
+                    yield self.delete_profile_language(
+                        {"id": params.pid}, profile_id=None)
 
                 elif status == 'e':
                     params['id'] = params.pid
-                    yield self.update_profile_projectexp(params, profile_id)
-        # 处理项目经历 ---------------------
+                    yield self.delete_profile_language(params, profile_id)
+
+    @gen.coroutine
+    def custom_cv_update_profile_awards(self, profile_id, custom_cv):
+        awards = custom_cv.get("awards", [])
+
+        if not awards:
+            return
+
+        for p in awards:
+            status = p.get('__status', None)
+            if status:
+                params = ObjectDict(
+                    pid=p.get('id'),
+                    profile_id=profile_id,
+                    name=p.get('awards_name'),
+                    reward_date=p.get('awards_reward_date')
+                )
+                if status == 'o':
+                    yield self.create_profile_awards(params, profile_id)
+
+                elif status == 'x':
+                    yield self.delete_profile_awards(
+                        {"id": params.pid}, profile_id=None)
+
+                elif status == 'e':
+                    params['id'] = params.pid
+                    yield self.delete_profile_awards(params, profile_id)
+
+    @gen.coroutine
+    def custom_cv_update_profile_intention(self, profile, custom_cv):
+        profile_id = profile['profile']['id']
+        position_name = custom_cv.get('position')
+
+        if position_name:
+            has_intention = bool(profile.get("intentions"))
+            if has_intention:
+                intention_id = first(profile.get("intentions")).get('id')
+                yield self.update_profile_intention(
+                    record=ObjectDict(position_name=position_name,
+                                      id=intention_id),
+                    profile_id=profile_id)
+            else:
+                yield self.create_profile_intention(
+                    record=ObjectDict(position_name=position_name),
+                    profile_id=profile_id)
+
+    @gen.coroutine
+    def custom_cv_update_profile_works(self, profile, custom_cv):
+        profile_id = profile['profile']['id']
+        works = custom_cv.get('works')
+
+        if works:
+            has_works = bool(profile.get("works"))
+            if has_works:
+                works_id = first(profile.get("works")).get('id')
+
+                works.update(id=works_id)
+                yield self.update_profile_works(
+                    record=ObjectDict(works), profile_id=profile_id)
+
+            else:
+                yield self.create_profile_works(
+                    record=ObjectDict(works), profile_id=profile_id)
+
+    @gen.coroutine
+    def update_profile_embedded_info_from_cv(self, profile, custom_cv):
+        """使用 custom_cv 更新 profile 的复合字段
+            (education, workexp, projectexp, )
+        :param profile: profile
+        :param custom_cv: 自定义简历模版输出 (dict)
+        """
+
+        profile_id = profile.get('profile',{}).get('id')
+        if not profile_id:
+            return
+
+        # 多条复合字段
+        yield self.custom_cv_update_profile_education(profile_id, custom_cv)
+
+        yield self.custom_cv_update_profile_workexp(profile_id, custom_cv)
+
+        yield self.custom_cv_update_profile_projectexp(profile_id, custom_cv)
+
+        yield self.custom_cv_update_profile_language(profile_id, custom_cv)
+
+        yield self.custom_cv_update_profile_awards(profile_id, custom_cv)
+
+        # 单条复合字段
+        yield self.custom_cv_update_profile_intention(profile, custom_cv)
+
+        yield self.custom_cv_update_profile_works(profile, custom_cv)
 
     @staticmethod
     def get_zodiac(date_string):
@@ -597,19 +695,20 @@ class ProfilePageService(PageService):
 
     @gen.coroutine
     def get_custom_tpl_all(self):
+        """自定义简历模板原表数据获取"""
         ret = yield self.config_sys_cv_tpl_ds.get_config_sys_cv_tpls(
             conds={'disable': const.OLD_YES},
-            fields=['field_name', 'field_title', 'map']
+            fields=['field_name', 'field_title', 'map', 'validate_re']
         )
         return ret
 
     @gen.coroutine
-    def profile_to_tempalte(self, p_profile, other_json=None):
-        """将从基础服务获得的 profile dict 转换成模版格式
+    def profile_to_tempalte(self, p_profile):
+        """ 将从基础服务获得的 profile dict 转换成模版格式
         :param p_profile: 从基础服务获得的 profile dict
-        :param other_json: "其它"数据
         """
         assert isinstance(p_profile, dict)
+
         p_profile = ObjectDict(p_profile)
 
         p_basic = ObjectDict(p_profile.get("basic"))
@@ -661,8 +760,7 @@ class ProfilePageService(PageService):
         profile.experiences = experiences
 
         # education
-        degree_list = yield self.infra_dict_ds.get_const_dict(
-            parent_code=const.CONSTANT_PARENT_CODE.DEGREE_USER)
+        degree_list = yield self.infra_dict_ds.get_const_dict(parent_code=const.CONSTANT_PARENT_CODE.DEGREE_USER)
         educations = list()
         for e in p_education:
             education_item = ObjectDict()
@@ -749,7 +847,7 @@ class ProfilePageService(PageService):
         job_apply = {}
         if p_intentions:
             intention = p_intentions[0]
-            position = u""
+            position = ""
             if intention.get("positions", []):
                 position = intention.get("positions")[0].get('position_name','')
 
@@ -781,29 +879,8 @@ class ProfilePageService(PageService):
             profile.attachment = attachment
 
         if p_others:
-            other_json = ObjectDict(json_decode(p_others[0].get('other')))
-            sys_cv_tpls = yield self.get_custom_tpl_all()
-            other = ObjectDict()
-            other.keyvalues = []
-
-            for k, v in other_json.items():
-                if v:
-                    if isinstance(v, list):
-                        setattr(other, k, v)
-                        continue
-                    if k == "IDPhoto":
-                        setattr(other, "id_photo", v)
-                        continue
-                    try:
-                        lvm = {
-                            "label": [e.field_title for e in sys_cv_tpls if e.field_name == k][0],
-                            "value": v
-                        }
-                    except (KeyError, IndexError):
-                        continue
-                    other.keyvalues.append(lvm)
-            profile.other = other
-
+            profile.other = ObjectDict(
+                json_decode(first(p_others).get('other')))
         return profile
 
     @staticmethod
@@ -878,3 +955,46 @@ class ProfilePageService(PageService):
         wexps = profile.get('workexps', [])
         return (sorted(wexps, key=lambda x: x.get('start_date', ""),
                        reverse=True)[0])
+
+    @gen.coroutine
+    def get_others_key_name_mapping(self):
+        """获取自定义字段 name 和 title 的键值对，供前端在展示 profile 的时候使用"""
+        metadatas = yield self.infra_profile_ds.get_custom_metadata()
+
+        return metadatas
+
+    @staticmethod
+    def convert_customcv(custom_cv, custom_cv_tpls, target=None):
+        if not target:
+            raise TypeError('target cannot be None')
+
+        if not re.match(r'^other|user_user|(profile_[a-z]+)$', target):
+            # possible values:
+            # user_user
+            # profile_basic
+            # profile_education
+            # profile_workexp
+            # profile_projectexp
+            # profile_awards
+            # profile_works
+            # other
+            raise ValueError('incorrect target value')
+
+        key_mapping = None
+        if target is not 'other':
+            target_keys = [c.field_name for c in custom_cv_tpls
+                           if c.map and c.map.startswith(target)]
+
+            key_mapping = {c.field_name: c.map.split('.')[1] for c in custom_cv_tpls
+                           if c.map and c.map.startswith(target)}
+
+        else:
+            target_keys = [c.field_name for c in custom_cv_tpls
+                           if not c.map]
+
+        target = sub_dict(custom_cv, target_keys)
+
+        if key_mapping:
+            target = rename_keys(target, key_mapping)
+
+        return {k:v for k,v in target.items() if v is not None}

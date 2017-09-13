@@ -7,6 +7,7 @@ from handler.base import BaseHandler
 from util.common.decorator import handle_response, authenticated, \
     check_and_apply_profile
 
+
 class ApplicationHandler(BaseHandler):
 
     @handle_response
@@ -36,30 +37,29 @@ class ApplicationHandler(BaseHandler):
             # -> formats of custom_cv_tpls is like:
             # [{"field_name1": "map1"}, {"field_name2": "map2"}]
 
-            result, _, _ = yield self.application_ps.check_custom_cv(
-                    self.current_user, position, custom_cv_tpls)
+            result = yield self.application_ps.check_custom_cv_v2(
+                    self.current_user.sysuser.id, position.id)
 
             if not result:
                 p = {
-                    'pid':self.params.pid,
+                    'pid': self.params.pid,
                     'wechat_signature': self.params.wechat_signature
                 }
                 if self.params.recom:
                     p['recom'] = self.params.recom
+
                 self.redirect(self.make_url(path.PROFILE_CUSTOM_CV, **p))
 
                 return
 
         # 定制化需求
-        # 雅诗兰黛直接投递
+        # 直接投递
         is_direct_apply = yield self.customize_ps.create_direct_apply(
             position.company_id, position.app_cv_config_id)
 
         # 跳转到 profile get_view, 传递 apply 和 pid
         self.redirect(
-            self.make_url(path.PROFILE_PREVIEW,
-            self.params,
-            is_skip="1" if is_direct_apply else "0")
+            self.make_url(path.PROFILE_PREVIEW, self.params, is_skip="1" if is_direct_apply else "0")
         )
 
     @handle_response
@@ -91,10 +91,8 @@ class ApplicationHandler(BaseHandler):
             # -> formats of custom_cv_tpls is like:
             # [{"field_name1": "map1"}, {"field_name2": "map2"}]
 
-            result, _, _ = yield self.application_ps.check_custom_cv(
-                    self.current_user, position, custom_cv_tpls)
-
-            self.logger.warn("result: %s" % result)
+            result = yield self.application_ps.check_custom_cv_v2(
+                    self.current_user.sysuser.id, position.id)
 
             if not result:
                 self.send_json_error(

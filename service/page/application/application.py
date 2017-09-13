@@ -13,19 +13,21 @@ import conf.message as msg
 import conf.path as path
 from cache.application.email_apply import EmailApplyCache
 from service.page.base import PageService
+from service.page.employee.employee import EmployeePageService
 from service.page.user.profile import ProfilePageService
 from service.page.user.sharechain import SharechainPageService
-from service.page.employee.employee import EmployeePageService
 from thrift_gen.gen.mq.struct.ttypes import SmsType
 from util.common import ObjectDict
-from util.tool.dict_tool import objectdictify, purify
-from util.tool.json_tool import json_dumps
-from util.tool.mail_tool import send_mail as send_email_service
-from util.tool.pdf_tool import save_application_file, get_create_pdf_by_html_cmd,generate_resume_for_hr
-from util.tool.str_tool import trunc
-from util.tool.url_tool import make_url,make_static_url
-from util.wechat.template import application_notice_to_applier_tpl, application_notice_to_recommender_tpl, application_notice_to_hr_tpl
 from util.common.mq import award_publisher
+from util.tool.dict_tool import objectdictify, purify, rename_keys
+from util.tool.json_tool import json_dumps
+from util.tool.iter_tool import first
+from util.tool.mail_tool import send_mail as send_email_service
+from util.tool.pdf_tool import generate_resume_for_hr
+from util.tool.str_tool import trunc
+from util.tool.url_tool import make_url, make_static_url
+from util.wechat.template import application_notice_to_applier_tpl, \
+    application_notice_to_recommender_tpl, application_notice_to_hr_tpl
 
 
 class ApplicationPageService(PageService):
@@ -111,34 +113,23 @@ class ApplicationPageService(PageService):
         return ret
 
     @gen.coroutine
-    def check_custom_cv(self, current_user, position, custom_tpls):
-        """ 处理自定义简历校验和失败后的跳转
-        如果校验失败，handler（调用方）需要立即 return
-        """
-        profile = current_user.profile
-        user = current_user.sysuser
+    def check_custom_cv_v2(self, user_id, position_id):
+        """基础服务检查改用户的简历是否符合职位的自定义简历要求"""
+        params = {
+            'userId': user_id,
+            'positionId': position_id
+        }
+        result, data = yield self.infra_application_ds.custom_cv_check_v2(
+            params)
 
-        cv_conf = yield self.get_hr_app_cv_conf(position.app_cv_config_id)
-        fields = self.make_fields_list(cv_conf)
-        fields_to_check = [f for f in objectdictify(fields) if f.required == const.OLD_YES]
+        if not result:
+            return False
 
-        # 对于 fileds_to_check 进行逐个检查
-        # 校验失败条件:
-        # field_name 在 profile 对应字端中,但是 profile 中这个字段为空值
-        # or
-        # field_name 是纯自定义字段,但是在 custom_others 中没有这个值
-        for field in fields_to_check:
-            field_name = field.field_name
-            if field_name == 'picUrl':
-                continue
-            mapping = field.map
-            passed = yield self._check(profile, field_name, user, mapping)
+        if data.get('resultMsg'):
+            self.logger.warn(data.get('resultMsg'))
 
-            if not passed:
-                self.logger.error("custom cv check not passed, profile: %s, field_name: %s, user: %s, mapping: %s" % (profile, field_name, user, mapping))
-                resume_dict = yield self._generate_resume_cv(profile)
-                return (False, resume_dict, objectdictify(json_decode(cv_conf.field_value)))
-        return True, None, None
+        return data.get('result', False)
+
 
     @staticmethod
     def make_fields_list(cv_conf):
@@ -158,84 +149,7 @@ class ApplicationPageService(PageService):
         return cv_conf
 
     @gen.coroutine
-    def _check(self, profile, field_name, user, mapping):
-        """检查自定义字段必填项"""
-
-        # 如果 filed 是 profile 字段
-        if mapping:
-            return self._check_profile_fields(profile, field_name, user, mapping)
-
-        # 如果 field 是纯自定义字段
-        else:
-            ret = yield self._check_custom_fields(profile, field_name, mapping)
-            return ret
-
-
-    def _check_profile_fields(self, profile, field_name, user, mapping):
-
-        if mapping.startswith("user_user"):
-            sysuser_id = profile.get("profile", {}).get("user_id", None)
-            if not sysuser_id:
-                return False
-
-            column_name = mapping.split(".")[1]
-
-            if column_name not in ['email', 'name', 'mobile', 'headimg']:
-                return False
-            else:
-                return bool(getattr(user, column_name))
-
-        if mapping.startswith("profile_education"):
-            return bool(profile.get('educations', []))
-
-        if mapping.startswith("profile_workexp"):
-            return bool(profile.get('workexps', []))
-
-        if mapping.startswith("profile_projectexp"):
-            return bool(profile.get('projectexps', []))
-
-        if mapping.startswith("profile_basic"):
-            table_name, column_name = self._split_dot(mapping)
-            if table_name:
-                key_1 = table_name.split("_")[1]  # should be "basic"
-                key_2 = column_name
-                return bool(profile.get(key_1, {}).get(key_2, None))
-            else:
-                return False
-
-        if mapping.startswith("profile_intention.position"):
-            intentions = profile.get('intentions')
-            if not intentions:
-                return False
-            intention = intentions[0]
-            positions = intention.get('positions')
-            if not positions:
-                return False
-            position = positions[0]
-            return bool(position.get('position_name'))
-
-        assert False  # should not be here
-
-    @staticmethod
-    def _split_dot(p_str):
-        if p_str.find(".") > 0:
-            r_ret = p_str.split(".")
-            return r_ret[0], r_ret[1]
-        return None, None
-
-    @gen.coroutine
-    def _check_custom_fields(self, profile, field_name, mapping):
-        profile_id = profile.profile.id
-        other = yield self.get_profile_other(profile_id)
-
-        if not other:
-            return False
-        else:
-            self.logger.debug("other: %s" % other)
-            return bool(getattr(other, field_name))
-
-    @gen.coroutine
-    def _generate_resume_cv(self, profile):
+    def _generate_resume_cv(self, profile, custom_tpl):
         """
         生成需要需要展示在自定义简历模版的信息:
         user_user.name 不显示,让用户自己填,
@@ -243,13 +157,35 @@ class ApplicationPageService(PageService):
         :param profile: 基础服务提供的 profile
         :return: resume_dict
         """
+
+        basic_other_key_mapping = {
+            e.map.split('.')[1]:e.field_name for e in custom_tpl
+            if e.map and e.map.startswith('profile_basic')
+        }
+
         profile_basic = ObjectDict(profile.get("basic", {}))
+
+        # 手机号开始
+        # 没有手机号的话，mobile 为空，否则显示国家code+手机号，国家code为 86 的话不显示
         if profile_basic and not profile_basic.get("mobile"):
             profile_basic.mobile = ""
+        else:
+            country_code = profile_basic.get('country_code')
+
+            if country_code and country_code != '86':
+                profile_basic.mobile = "%s-%s" % (
+                    profile_basic.get(country_code),
+                    profile_basic.get("mobile")
+                )
+            else:
+                profile_basic.mobile = profile_basic.get("mobile")
+        # 手机号结束
+
+        # 强制将姓名设为空
         profile_basic.name = ""
 
-        if profile_basic and profile_basic.get("nationality_name"):
-            profile_basic.nationality = profile_basic.get("nationality_name")
+        # 对于 profile basic 字段自定义字段名 mapping
+        rename_keys(profile_basic, basic_other_key_mapping)
 
         intentions = profile.get('intentions')
         if intentions:
@@ -260,86 +196,72 @@ class ApplicationPageService(PageService):
                 if position and profile_basic:
                     profile_basic.position = position.get('position_name', '')
 
-        degree_list = yield self.infra_dict_ds.get_const_dict(
-            const.CONSTANT_PARENT_CODE.DEGREE_USER)
-
         education = []
         for e in profile.get('educations', []):
-            __end = '至今' if e.get('end_until_now', False) \
-                else e.get('end_date', '')
-            end = __end
-            __start = e.get('start_date', '')
-            start = __start
-            degree = e.get('degree')
-            _degree = degree_list.get(str(degree))
-            major = e.get('major_name')
-            school = e.get('college_name')
-
             el = ObjectDict(
                 id=e.get('id'),
-                __end=__end,
-                end=end,
-                __start=__start,
-                start=start,
-                end_until_now=1 if end == "至今" else 0,
-                _degree=_degree,
-                degree=degree,
-                major=major,
-                school=school)
+                education_start=e['start_date'],
+                education_end=e.get('end_date'),  # 可能为空
+                education_end_until_now=e['end_until_now'],
+                education_degree_hidden=e['degree'],
+                education_major_name=e['major_name'],
+                education_college_name=e['college_name'],
+                education_description_hidden=e['description']
+            )
             education.append(el)
 
         workexp = []
         for w in profile.get('workexps', []):
-            __end = '至今' if w.get('end_until_now', False) \
-                else w.get('end_date', '')
-            end = __end
-            __start = w.get('start_date', '')
-            start = __start
-            company = w.get('company_name')
-            department = w.get('department_name')
-            describe = w.get('description')
-            position = w.get('position_name')
             el = ObjectDict(
                 id=w.get('id'),
-                __end=__end,
-                end=end,
-                __start=__start,
-                start=start,
-                end_until_now=1 if end == "至今" else 0,
-                company=company,
-                department=department,
-                describe=describe,
-                position=position)
+                workexp_start=w['start_date'],
+                workexp_end=w.get('end_date'),
+                workexp_end_until_now=w['end_until_now'],
+                workexp_company_name=w['company_name'],
+                workexp_department_name=w['department_name'],
+                workexp_description_hidden=w['description'],
+                workexp_job=w['job'])
             workexp.append(el)
 
         projectexp = []
         for p in profile.get('projectexps', []):
-            __end = '至今' if p.get('end_until_now', False) \
-                else p.get('end_date', '')
-            end = __end
-            __start = p.get('start_date', '')
-            start = __start
-            name = p.get('name')
-            introduce = p.get('description')
-            role = p.get('responsibility')
-            position = p.get('role')
             el = ObjectDict(
                 id=p.get('id'),
-                __end=__end,
-                end=end,
-                __start=__start,
-                start=start,
-                end_until_now=1 if __end == "至今" else 0,
-                name=name,
-                introduce=introduce,
-                role=role,
-                position=position)
+                projectexp_start=p['start_date'],
+                projectexp_end=p.get('end_date'),
+                projectexp_end_until_now=p['end_until_now'],
+                projectexp_name=p['name'],
+                projectexp_description_hidden=p['description'],
+                projectexp_role=p['role'])
             projectexp.append(el)
+
+        awards = []
+        for a in profile.get('awards', []):
+            el = ObjectDict(
+                id=a.get('id'),
+                awards_reward_date=a['reward_date'],
+                awards_name=a['name'])
+            awards.append(el)
+
+        works = []
+        for w in profile.get('works', []):
+            el = ObjectDict(
+                id=w.get('id'),
+                works_url=w['url'],
+                works_description=w['description'])
+            works.append(el)
 
         resume_dict = ObjectDict(profile_basic)
         resume_dict.education = education
         resume_dict.workexp = workexp
         resume_dict.projectexp = projectexp
+        resume_dict.awards = awards
+        resume_dict.works = works
+
+        ### profile other
+        if profile.get('others', []):
+            other_string = first(profile.get('others')).get('other', '{}')
+            resume_dict.update(json.loads(other_string))
 
         return resume_dict
 
@@ -354,8 +276,10 @@ class ApplicationPageService(PageService):
 
     @gen.coroutine
     def update_profile_other(self, new_record, profile_id):
+        """智能地更新 profile.other 表
+        会主动 merge 已经有的自定义字段
+        """
 
-        self.logger.debug("[profile_other]")
         old_profile_other_record = yield self.profile_other_ds.get_profile_other(conds={
             'profile_id': profile_id
         })
@@ -384,7 +308,6 @@ class ApplicationPageService(PageService):
                 'other':      json_dumps(other_dict_to_update),
                 'profile_id': profile_id
             }
-            print("params: %s" % params)
 
             result, data = yield self.infra_profile_ds.update_profile_other(
                 params)
@@ -406,41 +329,6 @@ class ApplicationPageService(PageService):
                 params, profile_id)
 
         return result
-
-    @gen.coroutine
-    def save_job_resume_other(self, profile, app_id, position):
-        """申请成功后将 profile other 的对应字段保存到 job_resume_other
-        :param profile: 全 profile
-        :param app_id:  申请id
-        :param position: 申请职位
-        :return: (result, message)
-        """
-        if not position.app_cv_config_id:
-            return True, None
-
-        resume_other = ObjectDict()
-
-        cv_conf = yield self.get_hr_app_cv_conf(position.app_cv_config_id)
-        fields = self.make_fields_list(cv_conf)
-        custom_fields = [e.get('field_name') for e in fields
-                         if not e.get('map')]
-
-        if profile.others:
-            p_other = json.loads(profile.others[0].get('other'))
-
-            for custom_field in custom_fields:
-                if p_other.get(custom_field):
-                    resume_other.update({custom_field: p_other.get(custom_field)})
-
-            resume_other_to_insert = json_dumps(resume_other)
-
-            yield self.job_resume_other_ds.insert_job_resume_other({
-                'app_id': app_id,
-                'other': resume_other_to_insert
-            })
-            return True, None
-        else:
-            raise ValueError('profile has no other field')
 
     @gen.coroutine
     def create_email_apply(self, params, position, current_user, is_platform=True):
@@ -622,11 +510,6 @@ class ApplicationPageService(PageService):
             return False, ret.message, 0
 
         apply_id = ret.data.jobApplicationId
-
-        # 如果是自定义职位，入库 job_resume_other
-        # 暂时不接其返回值
-        if position.app_cv_config_id > 0:
-            yield self.save_job_resume_other(current_user.profile, apply_id, position)
 
         return True, msg.RESPONSE_SUCCESS, apply_id
 
