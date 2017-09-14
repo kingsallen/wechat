@@ -496,7 +496,7 @@ class ProfilePageService(PageService):
                     yield self.create_profile_education(params, profile_id)
 
                 elif status == 'x':
-                    yield self.delete_profile_education({"id": params.eid})
+                    yield self.delete_profile_education({"id": params.eid}, profile_id=None)
 
                 elif status == 'e':
                     params['id'] = params.eid
@@ -522,7 +522,7 @@ class ProfilePageService(PageService):
                     yield self.create_profile_workexp(params, profile_id, mode='c')
 
                 elif status == 'x':
-                    yield self.delete_profile_workexp({"id": params.wid})
+                    yield self.delete_profile_workexp({"id": params.wid}, profile_id=None)
 
                 elif status == 'e':
                     params['id'] = params.wid
@@ -548,7 +548,7 @@ class ProfilePageService(PageService):
                     yield self.create_profile_projectexp(params, profile_id)
 
                 elif status == 'x':
-                    yield self.delete_profile_projectexp({"id": params.pid})
+                    yield self.delete_profile_projectexp({"id": params.pid}, profile_id=None)
 
                 elif status == 'e':
                     params['id'] = params.pid
