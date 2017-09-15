@@ -92,12 +92,14 @@ class PositionHandler(BaseHandler):
             if self.flag_should_display_newjd:
                 # 正常开启或预览
                 # [JD]职位所属团队及相关信息拼装
+                module_job_attr_v2 = self._make_json_job_attr_v2(position_info)
                 module_job_require = self._make_json_job_require(position_info)
                 module_company_info = self._make_json_job_company_info(company_info, did)
                 self.logger.debug("[JD]构建团队相关信息")
                 yield self._add_team_data(position_data, team,
                                           position_info.company_id, position_id, teamname_custom)
 
+                add_item(position_data, "module_job_attr", module_job_attr_v2)
                 add_item(position_data, "module_company_info", module_company_info)
                 add_item(position_data, "module_job_require", module_job_require)
                 self.render_page(
@@ -361,6 +363,29 @@ class PositionHandler(BaseHandler):
             data = ObjectDict({
                 "data": require
             })
+        return data
+
+    def _make_json_job_attr_v2(self, position_info):
+        """构造新JD的职位属性"""
+
+        attr = []
+
+        if position_info.degree:
+            attr.append("招聘类型 {}".format(position_info.degree))
+        if position_info.experience:
+            attr.append("工作性质 {}".format(position_info.experience))
+        if position_info.job_occupation:
+            attr.append("{} {}".format(self.current_user.company.conf_job_occupation, position_info.job_occupation))
+        if position_info.custom:
+            attr.append("{} {}".format(self.current_user.company.conf_job_custom_title, self.position_info.custom))
+
+        if not attr:
+            data = None
+        else:
+            data = ObjectDict({
+                "data": attr
+            })
+
         return data
 
     def _make_json_job_need(self, position_info):
