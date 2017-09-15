@@ -21,7 +21,7 @@ from util.tool.dict_tool import objectdictify
 
 
 @gen.coroutine
-def http_get(route, jdata=None, timeout=5, infra=True):
+def http_get(route, jdata=None, timeout=8, infra=True):
     ret = yield _async_http_get(route, jdata, timeout=timeout, method='GET',
                                 infra=infra)
     return ret
