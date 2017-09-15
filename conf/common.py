@@ -171,6 +171,11 @@ EMPLOYMENT_TYPE = {
 }
 EMPLOYMENT_TYPE_REVERSE = {v: k for k, v in EMPLOYMENT_TYPE.items()}
 
+MANAGEMENT_EXP = {
+    "0": "需要",
+    "1": "不需要"
+}
+
 # 学历
 DEGREE = {
     "0": "",
