@@ -376,9 +376,9 @@ class PositionHandler(BaseHandler):
             attr.append("招聘类型 {}".format(position_info.candidate_source))
         if position_info.employment_type:
             attr.append("工作性质 {}".format(position_info.employment_type))
-        if position_info.job_occupation:
+        if self.current_user.company.conf_job_occupation and position_info.job_occupation:
             attr.append("{} {}".format(self.current_user.company.conf_job_occupation, position_info.job_occupation))
-        if position_info.job_custom:
+        if self.current_user.company.conf_job_custom_title and position_info.job_custom:
             attr.append("{} {}".format(self.current_user.company.conf_job_custom_title, position_info.job_custom))
 
         if not attr:
