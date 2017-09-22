@@ -130,7 +130,6 @@ class ApplicationPageService(PageService):
 
         return data.get('result', False)
 
-
     @staticmethod
     def make_fields_list(cv_conf):
         # 先将每一页的 fields 列表合并在一起，并从中剔除非必填项
