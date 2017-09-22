@@ -17,7 +17,7 @@ from util.tool.str_tool import to_str, password_validate
 from util.common.cipher import encode_id
 
 from handler.common.captcha import CaptchaMixin
-from model.user import UserCreationForm
+from domain.user import UserCreationForm
 
 
 class LoginHandler(BaseHandler):
