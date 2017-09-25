@@ -960,7 +960,8 @@ class ProfilePageService(PageService):
     def get_others_key_name_mapping(self):
         """获取自定义字段 name 和 title 的键值对，供前端在展示 profile 的时候使用"""
         metadatas = yield self.infra_profile_ds.get_custom_metadata()
-        return [sub_dict(m, ['field_name', 'field_title']) for m in metadatas if not m.map]
+        return metadatas
+        # return [sub_dict(m, ['field_name', 'field_title', 'field_type']) for m in metadatas if not m.map]
 
     @staticmethod
     def convert_customcv(custom_cv, custom_cv_tpls, target=None):
