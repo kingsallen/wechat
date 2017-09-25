@@ -4,6 +4,7 @@ import tornado.gen as gen
 
 import conf.path as path
 from service.data.base import DataService
+from service.data.infra.infra_dict import InfraDictDataService
 from util.common import ObjectDict
 import util.tool.http_tool as http_tool
 
@@ -113,6 +114,13 @@ class InfraProfileDataService(DataService):
 
         params.update(custom_cv)
 
+        if custom_cv.nationality:
+            if not custom_cv.nationality_code:
+                dict_ds = InfraDictDataService()
+                code = yield dict_ds.get_country_code_by(
+                    params.nationality_name)
+                custom_cv.nationality_code = code
+
         res = yield self.handle_profile_section(
             custom_cv, method="create", section="basic")
 
@@ -140,6 +148,11 @@ class InfraProfileDataService(DataService):
         if basic.nationality_name:
             if hasattr(basic.nationality_name, 'strip') and basic.nationality_name.strip():
                 params.update(nationality_name=basic.nationality_name.strip())
+
+                if not basic.nationality_code:
+                    dict_ds = InfraDictDataService()
+                    code = yield dict_ds.get_country_code_by(params.nationality_name)
+                    basic.nationality_code = code
 
             if basic.nationality_code:
                 if isinstance(basic.nationality_code, int):

@@ -432,6 +432,10 @@ class ProfileAPICustomCVHandler(BaseHandler):
             for e in ret.get(name):
                 if e.get('__status') and not e.get('__status') == 'x':
                     e.pop('__status', None)
+                    until_now_key = name + 'end_until_now'
+                    until_now = int(e.get(until_now_key, '0'))
+                    if until_now:
+                        e['end_date'] = None
                     new_list.append(e)
             return new_list
 

@@ -60,6 +60,21 @@ class InfraDictDataService(DataService):
         return self.make_countries_result(countries_res, continent_res)
 
     @gen.coroutine
+    def get_country_code_by(self, name=None):
+        """从国家名字拿 code，找不到就返回 0"""
+        ret = 0
+        if not name:
+            raise ValueError('name')
+
+        countries_res = yield http_get(path.DICT_COUNTRY, jdata={'name': name})
+        result, data = countries_res.status == 0, countries_res.data
+
+        if result and data:
+            ret = data[0].get('id')
+
+        return ret
+
+    @gen.coroutine
     def get_sms_country_codes(self):
         """获取国家电话区号"""
 
@@ -389,7 +404,6 @@ class InfraDictDataService(DataService):
                 e['list'] = L2_text_list
                 del e['code']
                 res.append(e)
-
 
             self.cached_rocket_major = res
             return res

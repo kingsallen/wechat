@@ -444,19 +444,22 @@ class ProfilePageService(PageService):
             college_code = yield self.infra_dict_ds.get_college_code_by_name(
                 college_name)
 
+            end_until_now = int(e.get('education_end_until_now', '0'))
+
             if status:
                 params = ObjectDict(
                     eid=e.get('id'),
                     profile_id=profile_id,
                     start_date=e.get('education_start'),
-                    end_date=e.get('education_end'),
-                    end_until_now=int(e.get('education_end_until_now', '0')),
+                    end_until_now=end_until_now,
                     college_name=college_name,
                     college_code=college_code,
                     major_name=e.get('education_major_name'),
                     degree=int(e.get('education_degree_hidden', '0')),
                     description=e.get('education_description_hidden')
                 )
+                if not end_until_now:
+                    params.update(end_date=e.get('education_end'))
 
                 if status == 'o':
                     yield self.create_profile_education(params, profile_id)
@@ -479,17 +482,21 @@ class ProfilePageService(PageService):
         for w in workexps:
             status = w.get('__status', None)
             if status:
+                end_until_now = int(w.get('projectexp_end_until_now', '0'))
+
                 params = ObjectDict(
                     wid=w.get('id'),
                     profile_id=profile_id,
                     start_date=w.get('workexp_start'),
-                    end_date=w.get('workexp_end'),
-                    end_until_now=int(w.get('projectexp_end_until_now', '0')),
+                    end_until_now=end_until_now,
                     company_name=w.get('workexp_company_name'),
                     department_name=w.get('workexp_department_name'),
                     job=w.get('workexp_job'),
                     description=w.get('workexp_description_hidden')
                 )
+                if not end_until_now:
+                    params.update(end_date=w.get('workexp_end'))
+
                 if status == 'o':
                     yield self.create_profile_workexp(
                         params, profile_id, mode='c')
@@ -513,18 +520,22 @@ class ProfilePageService(PageService):
 
             status = p.get('__status', None)
             if status:
+                end_until_now = int(p.get('projectexp_end_until_now', '0'))
+
                 params = ObjectDict(
                     id=p.get('id'),
                     profile_id=profile_id,
                     start_date=p.get('projectexp_start'),
-                    end_date=p.get('projectexp_end'),
-                    end_until_now=int(p.get('projectexp_end_until_now', '0')),
+                    end_until_now=end_until_now,
                     name=p.get('projectexp_name'),
                     role=p.get('projectexp_role'),
                     company_name=p.get('projectexp_company_name'),
                     description=p.get('projectexp_description_hidden'),
                     #responsibility=p.get("projectexp_responsibility")
                 )
+                if not end_until_now:
+                    params.update(end_date=p.get('projectexp_end'))
+
                 if status == 'o':
                     yield self.create_profile_projectexp(params, profile_id)
 
@@ -610,20 +621,25 @@ class ProfilePageService(PageService):
     @gen.coroutine
     def custom_cv_update_profile_works(self, profile, custom_cv):
         profile_id = profile['profile']['id']
+
         works = custom_cv.get('works')
 
         if works:
+            record = ObjectDict()
+            record.cover = first(works).get('works_cover')
+            record.description = first(works).get('works_description')
+            record.url = first(works).get('works_url')
+
             has_works = bool(profile.get("works"))
             if has_works:
-                works_id = first(profile.get("works")).get('id')
-
-                works.update(id=works_id)
+                current_work = ObjectDict(first(profile.get("works")))
+                record.id = current_work.id
                 yield self.update_profile_works(
-                    record=ObjectDict(works), profile_id=profile_id)
+                    record=record, profile_id=profile_id)
 
             else:
                 yield self.create_profile_works(
-                    record=ObjectDict(works), profile_id=profile_id)
+                    record=record, profile_id=profile_id)
 
     @gen.coroutine
     def update_profile_embedded_info_from_cv(self, profile, custom_cv):
