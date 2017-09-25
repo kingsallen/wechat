@@ -19,8 +19,7 @@ class UserCurrentInfoHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def get(self):
-        """
-        返回用户填写的现在公司和现在职位接口
+        """ 返回用户填写的现在公司和现在职位接口
 
         此接口有两个用处：
         1. full参数为1，返回用户填写过的[ 姓名, 公司, 职位 ]信息给前端用.
@@ -28,30 +27,22 @@ class UserCurrentInfoHandler(BaseHandler):
 
         full 参数用以判断只要返回 bool 就好了还是需要详细的数据
         """
+        has_current_work = False
 
-        full = const.NO
-        if self.params.full:
-            params_full = int(self.params.full)
-            full = const.YES if params_full else const.NO
+        has_profile, profile = yield self.profile_ps.has_profile(
+            self.current_user.sysuser.id)
 
-        if self.current_user.sysuser:
-            if full:
-                self.send_json_success(data=ObjectDict(
-                    name=self.current_user.sysuser.name,
-                    company=self.current_user.sysuser.company,
-                    position=self.current_user.sysuser.position
-                ))
-            else:
-                has_info = self.current_user.sysuser.company or self.current_user.sysuser.position
-                # 处理感兴趣
-                if self.params.isfav:
-                    yield self._opt_fav_position(has_info)
-
-                self.send_json_success(
-                    data=const.YES if has_info else const.NO)
-            return
-        else:
+        if not has_profile:
             self.send_json_success(data=const.NO)
+        else:
+            educations = profile.educations
+            has_current_work = bool([e for e in educations if e.get('end_until_now') == 1])
+            self.send_json_success(
+                    data=const.YES if has_current_work else const.NO)
+
+        # 处理感兴趣
+        if self.params.isfav:
+            yield self._opt_fav_position(has_current_work)
 
     @gen.coroutine
     def _opt_fav_position(self, has_info):
@@ -73,10 +64,9 @@ class UserCurrentInfoHandler(BaseHandler):
             company_info = yield self.company_ps.get_company(
                 conds={"id": real_company_id}, need_conf=False)
 
-            link = self.make_url(path.COLLECT_USERINFO,
-                            pid=self.params.pid,
-                            source="wx", # 用户前端判断来源
-                            wechat_signature=self.current_user.wechat.signature)
+            link = self.make_url(
+                path.COLLECT_USERINFO, pid=self.params.pid, source="wx", # 用户前端判断来源
+                wechat_signature=self.current_user.wechat.signature)
 
             if not has_info:
                 yield favposition_notice_to_applier_tpl(
@@ -91,15 +81,17 @@ class UserCurrentInfoHandler(BaseHandler):
 
             # 4.向 HR 发送消息模板提示
             if position_info.publisher and result and self.current_user.sysuser.mobile:
-                hr_account, hr_wx_user = yield self.position_ps.get_hr_info(position_info.publisher)
+                hr_account, hr_wx_user = yield self.position_ps.get_hr_info(
+                    position_info.publisher)
 
                 if hr_wx_user:
                     # 4. 向 HR 发送消息模板
-                    yield favposition_notice_to_hr_tpl(self.settings.helper_wechat_id,
-                                                       hr_wx_user.openid,
-                                                       position_info.title,
-                                                       self.current_user.sysuser.name or self.current_user.sysuser.nickname,
-                                                       self.current_user.sysuser.mobile)
+                    yield favposition_notice_to_hr_tpl(
+                        self.settings.helper_wechat_id,
+                        hr_wx_user.openid,
+                        position_info.title,
+                        self.current_user.sysuser.name or self.current_user.sysuser.nickname,
+                        self.current_user.sysuser.mobile)
                     return True
 
         return False
@@ -125,7 +117,7 @@ class UserCurrentUpdateHandler(BaseHandler):
             'name': self.params.name,
             'company': self.params.company,
             'position': self.params.position,
-            'start': self.params.position
+            'start_date': self.params.start_date
         })
         try:
             form.validate()
@@ -176,7 +168,7 @@ class UserCurrentUpdateHandler(BaseHandler):
         record = ObjectDict({
             'profile_id': profile_id,
             'company_name': form.company,
-            'start_date': form.start,
+            'start_date': form.start_date,
             'job': form.position,
             'end_until_now': 1
         })
