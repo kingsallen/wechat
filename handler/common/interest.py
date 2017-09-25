@@ -22,6 +22,10 @@ class UserCurrentInfoHandler(BaseHandler):
         """
         返回用户填写的现在公司和现在职位接口
 
+        此接口有两个用处：
+        1. full参数为1，返回用户填写过的[ 姓名, 公司, 职位 ]信息给前端用.
+        2. full参数为0，返回一个Boolean值，判断用户先前是否填过这些信息.
+
         full 参数用以判断只要返回 bool 就好了还是需要详细的数据
         """
 
