@@ -107,7 +107,7 @@ class InfraProfileDataService(DataService):
 
         params = ObjectDict(
             profile_id=profile_id,
-            gender=custom_cv.get("gender", 0),
+            gender=custom_cv.get("gender", 3),
             # 微信上没有修改国籍的方式, 默认为中国(43)
             nationality_code=43)
 

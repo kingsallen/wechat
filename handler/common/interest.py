@@ -1,6 +1,7 @@
 # coding=utf-8
 
 from tornado import gen
+from schematics.validate import DataError
 
 import conf.path as path
 import conf.common as const
@@ -8,6 +9,8 @@ from handler.base import BaseHandler
 from util.common import ObjectDict
 from util.common.decorator import handle_response, authenticated
 from util.wechat.template import favposition_notice_to_applier_tpl, favposition_notice_to_hr_tpl
+
+from model.user import InterestCurrentInfoForm
 
 
 class UserCurrentInfoHandler(BaseHandler):
@@ -109,13 +112,70 @@ class UserCurrentUpdateHandler(BaseHandler):
         此时可能会触发帐号合并，合并完帐号后，需要重新微信 oauth，post 请求无法 oauth
         """
 
-        if not self.params.name or not self.params.company or not self.params.position:
-            self.send_json_error()
+        if not (self.params.name and not self.params.company and
+                self.params.position and self.params.start):
+            self.send_json_error(message="输入不正确，请重新输入")
             return
 
-        yield self.user_ps.update_user_user_current_info(
-            sysuser_id=self.current_user.sysuser.id,
-            data=self.params
-        )
+        form = InterestCurrentInfoForm({
+            'name': self.params.name,
+            'company': self.params.company,
+            'position': self.params.position,
+            'start': self.params.position
+        })
+        try:
+            form.validate()
+        except DataError:
+            self.send_json_error(message="输入不正确，请重新输入")
+            return
 
+        has_profile, profile = yield self.profile_ps.has_profile(
+            self.current_user.sysuser.id)
+
+        # 初始化 profile_id
+        profile_id = None
+        if has_profile:
+            profile_id = profile.get("profile", {}).get("id")
+
+        else:
+            # 还不存在 profile， 创建 profile
+            # 进入自定义简历创建 profile 逻辑的话，来源必定是企业号（我要投递）
+
+            source = None
+            if self.is_platform:
+                source = const.PROFILE_SOURCE_PLATFORM_INTEREST
+            elif self.is_qx:
+                source = const.PROFILE_SOURCE_QX_INTEREST
+
+            assert source
+
+            result, data = yield self.profile_ps.create_profile(
+                self.current_user.sysuser.id,
+                source=source)
+
+            if not result:
+                raise RuntimeError('profile creation error')
+            profile_id = data
+            self._log_customs.update(new_profile=const.YES)
+
+            # 创建 profile_basic
+            result, data = yield self.profile_ps.create_profile_basic({}, profile_id, mode='c')
+
+            if result:
+                self.logger.debug("profile basic created, id: %s" % data)
+            else:
+                self.logger.error(
+                    "profile_basic creation failed, res: %s" % data)
+
+        # 创建一条工作信息
+        assert profile_id
+        record = ObjectDict({
+            'profile_id': profile_id,
+            'company_name': form.company,
+            'start_date': form.start,
+            'job': form.position,
+            'end_until_now': 1
+        })
+
+        yield self.profile_ps.create_profile_workexp(record, profile_id)
         self.send_json_success()
