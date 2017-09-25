@@ -266,13 +266,13 @@ class PositionHandler(BaseHandler):
         :return:
         """
         pic_list = list()
-        cover_str = self.static_url(company_info.logo)
+        cover_str = self.share_url(company_info.logo)
         if company_info.conf_newjd_status != 2:
-            # 为采用新 JD
+            # 未采用新 JD
             if company_info.impression:
-                pic_list += company_info.impression
+                pic_list += [self.share_url(e) for e in company_info.impression]
             if company_info.banner:
-                pic_list += company_info.banner
+                pic_list += [self.share_url(e) for e in company_info.banner]
         else:
             pic_list_res = list()
             if pos_item.get("_source", {}).get("jd_pic",{}).get("position_pic"):
@@ -281,7 +281,7 @@ class PositionHandler(BaseHandler):
                 pic_list_res += pos_item.get("_source", {}).get("jd_pic",{}).get("team_pic")
 
             for item in pic_list_res:
-                pic_list.append(self.static_url(item['res_url']))
+                pic_list.append(self.share_url(item['res_url']))
 
         if len(pic_list) > 0:
             res_resource = random.sample(pic_list, 1)

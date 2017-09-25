@@ -140,8 +140,10 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
 
         # 注册时，不需要判断是否为当前用户手机号
         if type != const.MOBILE_CODE_OPT_TYPE.code_register:
-            if self.params.mobile != self.current_user.sysuser.username and \
-                self.params.country_code != self.current_user.sysuser.country_code:
+
+            if self.current_user.sysuser.username.isdigit() and \
+               self.params.mobile != self.current_user.sysuser.username and \
+               self.params.country_code != self.current_user.sysuser.country_code:
 
                 self.send_json_error(message=msg.CELLPHONE_NOT_MATCH)
                 raise gen.Return()

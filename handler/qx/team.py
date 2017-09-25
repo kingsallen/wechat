@@ -76,7 +76,7 @@ class TeamDetailHandler(BaseHandler):
         templates = data.templates
         share_cover_url = templates[0].data[0].get('media_url') or \
                           self.static_url(self.current_user.company.logo)
-        share_cover = url_append_query(share_cover_url, "imageMogr2/thumbnail/!300x300r")
+        share_cover = self.share_url(url_append_query(share_cover_url, "imageMogr2/thumbnail/!300x300r"))
 
         templates_opt = list()
         for template in templates:
