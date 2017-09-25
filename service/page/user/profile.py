@@ -965,7 +965,7 @@ class ProfilePageService(PageService):
 
         def _gen(metadatas):
             for m in metadatas:
-                if not m.map:
+                if not m.get('map'):
                     target = sub_dict(m, ['fieldName', 'fieldTitle'])
                     yield rename_keys(target, rename_mapping)
 
