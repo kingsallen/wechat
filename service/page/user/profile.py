@@ -984,12 +984,16 @@ class ProfilePageService(PageService):
         """获取自定义字段 name 和 title 的键值对，供前端在展示 profile 的时候使用"""
         metadatas = yield self.infra_profile_ds.get_custom_metadata()
 
-        rename_mapping = {'fieldName': 'field_name', 'fieldTitle': 'field_title'}
+        rename_mapping = {
+            'fieldName': 'field_name',
+            'fieldTitle': 'field_title',
+            'fieldType': 'field_type'
+        }
 
         def _gen(metadatas):
             for m in metadatas:
                 if not m.get('map'):
-                    target = sub_dict(m, ['fieldName', 'fieldTitle'])
+                    target = sub_dict(m, ['fieldName', 'fieldTitle', 'fieldType'])
                     yield rename_keys(target, rename_mapping)
 
         return list(_gen(metadatas))
