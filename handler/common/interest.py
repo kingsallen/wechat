@@ -115,27 +115,24 @@ class UserCurrentUpdateHandler(BaseHandler):
         此时可能会触发帐号合并，合并完帐号后，需要重新微信 oauth，post 请求无法 oauth
         """
 
-        print("&" * 80)
-
         if not (self.params.name and self.params.company and
                 self.params.position and self.params.start_date):
             self.send_json_error(message="输入不正确，请重新输入")
             return
 
-        print(self.params)
         form = InterestCurrentInfoForm({
             'name': self.params.name,
             'company': self.params.company,
             'position': self.params.position,
             'start_date': self.params.start_date
         })
-        # try:
-        print(form)
-        form.validate()
-        # except DataError:
-        #     self.logger.warn(traceback.format_exc())
-        #     self.send_json_error(message="输入不正确，请重新输入")
-        #     return
+
+        try:
+            form.validate()
+        except DataError:
+            self.logger.warn(traceback.format_exc())
+            self.send_json_error(message="输入不正确，请重新输入")
+            return
 
         has_profile, profile = yield self.profile_ps.has_profile(
             self.current_user.sysuser.id)
@@ -185,8 +182,6 @@ class UserCurrentUpdateHandler(BaseHandler):
             'end_until_now': 1
         })
 
-        print("record: %s" % record)
-        ret = yield self.profile_ps.create_profile_workexp(record, profile_id)
-        print("ret: %s" % ret)
+        ret = yield self.profile_ps.create_profile_workexp(record, profile_id, mode='p')
 
         self.send_json_success()
