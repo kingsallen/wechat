@@ -234,6 +234,15 @@ class ApplicationPageService(PageService):
                 projectexp_role=p['role'])
             projectexp.append(el)
 
+        language = []
+        for l in profile.get('languages', []):
+            el = ObjectDict(
+                id=l.get('id'),
+                language_name=l.get('name'),
+                language_level=l.get('level')
+            )
+            language.append(el)
+
         awards = []
         for a in profile.get('awards', []):
             el = ObjectDict(
@@ -257,7 +266,7 @@ class ApplicationPageService(PageService):
         resume_dict.awards = awards
         resume_dict.works = works
 
-        ### profile other
+        # profile other
         if profile.get('others', []):
             other_string = first(profile.get('others')).get('other', '{}')
             resume_dict.update(json.loads(other_string))
