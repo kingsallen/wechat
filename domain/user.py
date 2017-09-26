@@ -38,4 +38,4 @@ class InterestCurrentInfoForm(Model):
     name = StringType(required=True)
     company = StringType(required=True)
     position = StringType(required=True)
-    start = DateStringType(required=True)
+    start_date = DateStringType(required=True)
