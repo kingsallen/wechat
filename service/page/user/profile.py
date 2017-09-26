@@ -604,9 +604,11 @@ class ProfilePageService(PageService):
     def custom_cv_update_profile_intention(self, profile, custom_cv):
         profile_id = profile['profile']['id']
         position_name = custom_cv.get('position')
+        expectedlocation = custom_cv.get('expectedlocation')
+
+        has_intention = bool(profile.get("intentions"))
 
         if position_name:
-            has_intention = bool(profile.get("intentions"))
             if has_intention:
                 intention_id = first(profile.get("intentions")).get('id')
                 yield self.update_profile_intention(
@@ -616,6 +618,18 @@ class ProfilePageService(PageService):
             else:
                 yield self.create_profile_intention(
                     record=ObjectDict(position_name=position_name),
+                    profile_id=profile_id)
+
+        if expectedlocation:
+            if has_intention:
+                intention_id = first(profile.get("intentions")).get('id')
+                yield self.update_profile_intention(
+                    record=ObjectDict(city_name=expectedlocation,
+                                      id=intention_id),
+                    profile_id=profile_id)
+            else:
+                yield self.create_profile_intention(
+                    record=ObjectDict(city_name=expectedlocation),
                     profile_id=profile_id)
 
     @gen.coroutine
