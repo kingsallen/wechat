@@ -10,7 +10,7 @@ from util.common import ObjectDict
 from util.common.decorator import handle_response, authenticated
 from util.wechat.template import favposition_notice_to_applier_tpl, favposition_notice_to_hr_tpl
 
-from model.user import InterestCurrentInfoForm
+from domain.user import InterestCurrentInfoForm
 
 
 class UserCurrentInfoHandler(BaseHandler):
@@ -27,19 +27,25 @@ class UserCurrentInfoHandler(BaseHandler):
 
         full 参数用以判断只要返回 bool 就好了还是需要详细的数据
         """
+
         has_current_work = False
 
         has_profile, profile = yield self.profile_ps.has_profile(
             self.current_user.sysuser.id)
 
         if not has_profile:
-            self.send_json_success(data=const.NO)
-        else:
-            educations = profile.educations
-            has_current_work = bool([e for e in educations if e.get('end_until_now') == 1])
-            self.send_json_success(
-                    data=const.YES if has_current_work else const.NO)
+            data = const.NO
+            self.send_json_success(data=data)
 
+        else:
+            workexps = profile.workexps
+            has_current_work = bool([w for w in workexps if w.get('end_until_now')])
+
+            data = const.YES if has_current_work else const.NO
+            print(data)
+            self.send_json_success(data=data)
+
+        print("*" * 80)
         # 处理感兴趣
         if self.params.isfav:
             yield self._opt_fav_position(has_current_work)
