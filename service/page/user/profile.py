@@ -911,15 +911,12 @@ class ProfilePageService(PageService):
         if p_others:
             # 为某些自定义字段添加单位
             other = ObjectDict(json_decode(first(p_others).get('other')))
-            for k in other.items():
-                if k in ('height'):
-                    other[k] = other[k] + 'cm'
-                elif k in ('weight'):
-                    other[k] = other[k] + 'kg'
-                elif k == 'workyears':
-                    other[k] = other[k] + '年'
+
+            if other.workyears:
+                other.workyears = other.workyears + '年'
 
             profile.other = other
+
         return profile
 
     @staticmethod
