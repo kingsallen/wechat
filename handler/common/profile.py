@@ -374,6 +374,9 @@ class ProfileAPICustomCVHandler(BaseHandler):
         if custom_cv_profile_basic:
             # 已经有 profile，
             if has_profile:
+
+                #result, data = yield self.profile_ps.get_profile_basic(profile_id)
+
                 basic = profile.get("basic")
 
                 basic.update(custom_cv_profile_basic)

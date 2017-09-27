@@ -46,7 +46,6 @@ class UserCurrentInfoHandler(BaseHandler):
             print(data)
             self.send_json_success(data=data)
 
-        print("*" * 80)
         # 处理感兴趣
         if self.params.isfav:
             yield self._opt_fav_position(has_current_work)
@@ -64,24 +63,25 @@ class UserCurrentInfoHandler(BaseHandler):
                 self.current_user.sysuser.mobile,
                 self.current_user.recom.id if self.params.recom else 0)
 
-            # 2.添加定时任务，若2小时候，没有完善则发送消息模板
             position_info = yield self.position_ps.get_position(self.params.pid)
-            real_company_id = yield self.company_ps.get_real_company_id(
-                position_info.publisher, position_info.company_id)
-            company_info = yield self.company_ps.get_company(
-                conds={"id": real_company_id}, need_conf=False)
 
-            link = self.make_url(
-                path.COLLECT_USERINFO, pid=self.params.pid, source="wx", # 用户前端判断来源
-                wechat_signature=self.current_user.wechat.signature)
-
-            if not has_info:
-                yield favposition_notice_to_applier_tpl(
-                    self.current_user.wechat.company_id,
-                    position_info,
-                    company_info.name,
-                    self.current_user.sysuser.id,
-                    link)
+            # 2.添加定时任务，若2小时候，没有完善则发送消息模板
+            # real_company_id = yield self.company_ps.get_real_company_id(
+            #     position_info.publisher, position_info.company_id)
+            # company_info = yield self.company_ps.get_company(
+            #     conds={"id": real_company_id}, need_conf=False)
+            #
+            # link = self.make_url(
+            #     path.COLLECT_USERINFO, pid=self.params.pid, source="wx", # 用户前端判断来源
+            #     wechat_signature=self.current_user.wechat.signature)
+            #
+            # if not has_info:
+            #     yield favposition_notice_to_applier_tpl(
+            #         self.current_user.wechat.company_id,
+            #         position_info,
+            #         company_info.name,
+            #         self.current_user.sysuser.id,
+            #         link)
 
             # 3.添加候选人相关记录
             yield self.candidate_ps.send_candidate_interested(self.current_user.sysuser.id, self.params.pid, 1)
