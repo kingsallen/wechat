@@ -114,7 +114,7 @@ class InfraProfileDataService(DataService):
 
         params.update(custom_cv)
 
-        if custom_cv.nationality:
+        if custom_cv.get('nationality'):
             if not custom_cv.nationality_code:
                 dict_ds = InfraDictDataService()
                 code = yield dict_ds.get_country_code_by(
