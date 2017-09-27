@@ -376,9 +376,19 @@ class ProfileAPICustomCVHandler(BaseHandler):
             if has_profile:
                 basic = profile.get("basic")
 
+                result, data = yield self.profile_ps.get_profile_basic(profile_id = profile_id)
+
+                has_no_basic =  not result and data.status == 90010
+
                 basic.update(custom_cv_profile_basic)
                 self.logger.debug("updated basic: %s" % basic)
-                yield self.profile_ps.update_profile_basic(profile_id, basic)
+
+                if has_no_basic:
+                    basic.update({'profile_id': profile_id})
+                    yield self.profile_ps.create_profile_basic(
+                        basic, profile_id, mode='c')
+                else:
+                    yield self.profile_ps.update_profile_basic(profile_id, basic)
 
             else:
                 # 还不存在 profile， 创建 profile
