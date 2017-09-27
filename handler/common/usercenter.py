@@ -226,6 +226,9 @@ class UploadHandler(BaseHandler):
             }
 
             result = self._upload(upload_settings)
+            if result is None:
+                return
+
             res = yield self.usercenter_ps.update_user(self.current_user.sysuser.id, params={
                 "headimg": result.data,
             })
@@ -255,6 +258,9 @@ class UploadHandler(BaseHandler):
         }
 
         result = self._upload(upload_settings)
+        if result is None:
+            return
+
         self.send_json_success(data={
             "url": result.data
         })
@@ -274,6 +280,8 @@ class UploadHandler(BaseHandler):
         }
 
         result = self._upload(upload_settings)
+        if result is None:
+            return
         self.send_json_success(data={
             "url": result.data
         })
@@ -299,6 +307,8 @@ class UploadHandler(BaseHandler):
         }
 
         result = self._upload(upload_settings)
+        if result is None:
+            return
         self.send_json_success(data={
             "url": result.data
         })
@@ -320,6 +330,8 @@ class UploadHandler(BaseHandler):
         }
 
         result = self._upload(upload_settings)
+        if result is None:
+            return
         self.send_json_success(data={
             "url": result.data
         })
@@ -329,8 +341,8 @@ class UploadHandler(BaseHandler):
         vfile = self.request.files.get("vfile", None)
 
         if vfile is None:
-            self.send_json_error()
-            return
+            self.send_json_error(message="上传参数错误")
+            return None
 
         upload_settings.update({
             "filename": vfile[0].get("filename"),

@@ -221,7 +221,6 @@ class BaseHandler(MetaBaseHandler):
 
     @gen.coroutine
     def _get_current_wechat(self, qx=False):
-
         if qx:
             signature = self.settings['qx_signature']
         else:

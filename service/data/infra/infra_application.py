@@ -4,7 +4,7 @@ import tornado.gen as gen
 
 import conf.path as path
 from service.data.base import DataService
-from util.tool.http_tool import http_get, http_post, http_put
+from util.tool.http_tool import http_get, http_post, http_put, unboxing
 
 
 class InfraApplicationDataService(DataService):
@@ -32,3 +32,9 @@ class InfraApplicationDataService(DataService):
         """
         ret = yield http_put(path.INFRA_APPLICATION, params)
         raise gen.Return(ret)
+
+    @gen.coroutine
+    def custom_cv_check_v2(self, params):
+        """基础服务检查改用户的简历是否符合职位的自定义简历要求"""
+        ret = yield http_post(path.PROFILE_CUSTOMCV_CHECK, params)
+        return unboxing(ret)

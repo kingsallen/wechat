@@ -42,6 +42,11 @@ def nth(iterable, n, default=None):
     return next(islice(iterable, n, None), default)
 
 
+def first(iterable):
+    """Returns the first item"""
+    return nth(iterable, 0)
+
+
 def all_equal(iterable):
     """Returns True if all the elements are equal to each other"""
     g = groupby(iterable)

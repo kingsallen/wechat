@@ -665,18 +665,23 @@ class PositionListHandler(BaseHandler):
 
         infra_params = self._make_position_list_infra_params()
 
-        if self.params.hb_c:
-            int(self.params.hb_c)
+        # 校验一下可能出现的参数：
+        # hb_c: 红包活动id
+        # did: 子公司id
+        hb_c = 0
+        if self.params.hb_c and self.params.hb_c.isdigit():
+            hb_c = int(self.params.hb_c)
 
-        if self.params.did:
-            int(self.params.did)
+        did = 0
+        if self.params.did and self.params.did.isdigit():
+            did = int(self.params.did)
 
-        if self.params.hb_c:
+        if hb_c:
             # 红包职位列表
-            infra_params.update(hb_config_id=int(self.params.hb_c))
+            infra_params.update(hb_config_id=hb_c)
             position_list = yield self.position_ps.infra_get_rp_position_list(infra_params)
             rp_share_info = yield self.position_ps.infra_get_rp_share_info(infra_params)
-            yield self._make_share_info(self.current_user.company.id, self.params.did, rp_share_info)
+            yield self._make_share_info(self.current_user.company.id, did, rp_share_info)
 
         else:
             # 普通职位列表
@@ -697,7 +702,7 @@ class PositionListHandler(BaseHandler):
                     else:
                         position.is_rp_reward = False
 
-            yield self._make_share_info(self.current_user.company.id, self.params.did)
+            yield self._make_share_info(self.current_user.company.id, did)
 
         # 只渲染必要的公司信息
         yield self.make_company_info()
