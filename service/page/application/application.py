@@ -199,7 +199,7 @@ class ApplicationPageService(PageService):
         for e in profile.get('educations', []):
             el = ObjectDict(
                 id=e.get('id'),
-                education_start=e('start_date', ''),
+                education_start=e.get('start_date', ''),
                 education_end=e.get('end_date', ''),  # 可能为空
                 education_end_until_now=e['end_until_now'],
                 education_degree_hidden=e['degree'],
