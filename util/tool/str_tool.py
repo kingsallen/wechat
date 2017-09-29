@@ -274,7 +274,7 @@ def is_other(uchar):
 
 def phone_number_without_country_code(phone_number):
     """从国家编号-电话号码中分离出电话号码"""
-    assert re.match(r'^(\d{1,4}-)?(\d{8,11})$', phone_number)
+    assert re.match(r'^(\d+-)?(\d+)$', phone_number)
     return first(phone_number.split("-")[-1:])
 
 
