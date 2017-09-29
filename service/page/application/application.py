@@ -172,7 +172,7 @@ class ApplicationPageService(PageService):
             country_code = profile_basic.get('country_code')
 
             if country_code and country_code != '86':
-                profile_basic.mobile = "%s%s" % (
+                profile_basic.mobile = "%s-%s" % (
                     profile_basic.get("country_code"),
                     profile_basic.get("mobile")
                 )
