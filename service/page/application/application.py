@@ -199,13 +199,13 @@ class ApplicationPageService(PageService):
         for e in profile.get('educations', []):
             el = ObjectDict(
                 id=e.get('id'),
-                education_start=e['start_date'],
-                education_end=e.get('end_date'),  # 可能为空
+                education_start=e('start_date', ''),
+                education_end=e.get('end_date', ''),  # 可能为空
                 education_end_until_now=e['end_until_now'],
                 education_degree_hidden=e['degree'],
-                education_major_name=e['major_name'],
-                education_college_name=e['college_name'],
-                education_description_hidden=e['description']
+                education_major_name=e.get('major_name', ''),
+                education_college_name=e.get('college_name', ''),
+                education_description_hidden=e.get('description', '')
             )
             education.append(el)
 
@@ -213,32 +213,32 @@ class ApplicationPageService(PageService):
         for w in profile.get('workexps', []):
             el = ObjectDict(
                 id=w.get('id'),
-                workexp_start=w['start_date'],
-                workexp_end=w.get('end_date'),
+                workexp_start=w.get('start_date', ''),
+                workexp_end=w.get('end_date', ''),
                 workexp_end_until_now=w['end_until_now'],
-                workexp_company_name=w['company_name'],
-                workexp_department_name=w['department_name'],
-                workexp_description_hidden=w['description'],
-                workexp_job=w['job'])
+                workexp_company_name=w.get('company_name', ''),
+                workexp_department_name=w.get('department_name', ''),
+                workexp_description_hidden=w.get('description', ''),
+                workexp_job=w.get('job', ''))
             workexp.append(el)
 
         projectexp = []
         for p in profile.get('projectexps', []):
             el = ObjectDict(
                 id=p.get('id'),
-                projectexp_start=p['start_date'],
-                projectexp_end=p.get('end_date'),
+                projectexp_start=p.get('start_date', ''),
+                projectexp_end=p.get('end_date', ''),
                 projectexp_end_until_now=p['end_until_now'],
-                projectexp_name=p['name'],
-                projectexp_description_hidden=p['description'],
-                projectexp_role=p['role'])
+                projectexp_name=p.get('name', ''),
+                projectexp_description_hidden=p.get('description', ''),
+                projectexp_role=p.get('role', ''))
             projectexp.append(el)
 
         language = []
         for l in profile.get('languages', []):
             el = ObjectDict(
                 id=l.get('id'),
-                language_name=l.get('name'),
+                language_name=l.get('name', ''),
                 language_level=l.get('level')
             )
             language.append(el)
@@ -247,16 +247,16 @@ class ApplicationPageService(PageService):
         for a in profile.get('awards', []):
             el = ObjectDict(
                 id=a.get('id'),
-                awards_reward_date=a['reward_date'],
-                awards_name=a['name'])
+                awards_reward_date=a.get('reward_date', ''),
+                awards_name=a.get('name', ''))
             awards.append(el)
 
         works = []
         for w in profile.get('works', []):
             el = ObjectDict(
                 id=w.get('id'),
-                works_url=w['url'],
-                works_description=w['description'])
+                works_url=w.get('url', ''),
+                works_description=w.get('description', ''))
             works.append(el)
 
         resume_dict = ObjectDict(profile_basic)
