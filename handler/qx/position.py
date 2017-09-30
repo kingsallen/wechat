@@ -114,8 +114,7 @@ class PositionHandler(BaseHandler):
         position = ObjectDict(
             id=position_info.id,
             title=position_info.title,
-            # 不在仟寻展示的公司职位，status 标记为下架
-            status=1 if company_info.conf_show_in_qx == 0 else position_info.status,
+            status=position_info.status,
             salary=position_info.salary,
             team=team.name,
             team_id=team.id if team.res_id else 0,
