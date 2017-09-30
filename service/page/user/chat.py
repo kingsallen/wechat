@@ -176,19 +176,21 @@ class ChatPageService(PageService):
         raise gen.Return(hr_account)
 
     @gen.coroutine
-    def get_chatbot_reply(self, message, user_id, hr_id):
+    def get_chatbot_reply(self, message, user_id, hr_id, position_id):
         """ 调用 chatbot 返回机器人的回复信息
                https://wiki.moseeker.com/chatbot.md
         :param message: 用户发送到文本内容
         :param user_id: 当前用户id
         :param hr_id: 聊天对象hrid
+        :param position_id 当前职位id，不存在则为0
         """
         ret = ""
 
         params = ObjectDict(
             question=message,
             user_id=user_id,
-            hr_id=hr_id
+            hr_id=hr_id,
+            position_id=position_id
         )
 
         try:

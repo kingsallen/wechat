@@ -238,11 +238,11 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
         """处理 chatbot message
         获取消息 -> pub消息 -> 入库
         """
-        # TODO (tangyiliang) need a chatbot companywide switch :<
         bot_message = yield self.chat_ps.get_chatbot_reply(
             message=user_message,
             user_id=self.user_id,
-            hr_id=self.hr_id
+            hr_id=self.hr_id,
+            position_id=self.position_id
         )
         if bot_message:
             message_body = json_dumps(ObjectDict(
