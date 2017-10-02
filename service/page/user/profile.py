@@ -7,6 +7,7 @@ import tornado.gen as gen
 from tornado.escape import json_decode
 
 import conf.common as const
+import conf.infra as infra_const
 from service.page.base import PageService
 from util.common import ObjectDict
 from util.tool.date_tool import curr_datetime_now
@@ -108,6 +109,16 @@ class ProfilePageService(PageService):
 
         result, profile = yield self.infra_profile_ds.get_profile(user_id)
         return result, profile
+
+    @gen.coroutine
+    def has_profile_basic(self, profile_id):
+        """判断 profile_id 是否有 profile_basic 数据
+        因为 has_profile 接口中的 basic 数据存在并不能确定 profile_basic 表中，
+        对应该 profile_id 的数据一定存在
+        """
+
+        result, data = yield self.get_profile_basic(profile_id)
+        return result and data.status is not infra_const.InfraStatusCode.not_exists
 
     @gen.coroutine
     def has_profile_by_uuid(self, uuid):

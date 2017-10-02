@@ -550,17 +550,15 @@ class ProfileSectionHandler(BaseHandler):
         profile_id = self._get_profile_id()
         result, profile_basic = yield self.profile_ps.get_profile_basic(
             profile_id)
-        if not result:
-            raise ValueError('cannot get profile_basic')
-        else:
-            pass
-
         route = self.params.route
 
-        if self_intro:
-            model = sub_dict(profile_basic[0], 'self_introduction')
+        if not result:
+            model = ObjectDict()
         else:
-            model = sub_dict(profile_basic[0], self.profile_ps.BASIC_KEYS)
+            if self_intro:
+                model = sub_dict(profile_basic[0], 'self_introduction')
+            else:
+                model = sub_dict(profile_basic[0], self.profile_ps.BASIC_KEYS)
 
         self.send_json_success(
             data=self._make_json_data(route, model))
@@ -582,10 +580,15 @@ class ProfileSectionHandler(BaseHandler):
                 model.pop('self_introduction')
 
                 if model.city_name == "未知" or model.city_name is None:
-                    model.pop('city_name')
+                    model.pop('city_name', None)
 
-            result, data = yield self.profile_ps.update_profile_basic(
-                profile_id, model)
+            has_basic = yield self.profile_ps.has_profile_basic(profile_id)
+            if has_basic:
+                result, data = yield self.profile_ps.update_profile_basic(
+                    profile_id, model)
+            else:
+                result, data = yield self.profile_ps.create_profile_basic(
+                    model, profile_id, mode='c')
 
             if result:
                 self.send_json_success()

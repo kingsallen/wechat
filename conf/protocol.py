@@ -3,6 +3,7 @@
 
 import enum
 
+
 @enum.unique
 class WebSocketCloseCode(enum.IntEnum):
     """
