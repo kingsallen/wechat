@@ -104,7 +104,7 @@ class ProfilePageService(PageService):
         :return: tuple (bool, profile or None)
 
         调用方式:
-        profserile = has_profile[1]
+        profile = has_profile[1]
         """
 
         result, profile = yield self.infra_profile_ds.get_profile(user_id)
