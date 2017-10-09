@@ -260,7 +260,12 @@ def check_and_apply_profile(func):
                 redirect_uri=redirect_uri
             ), host="www.linkedin.com")
             # 由于 make_url 会过滤 state，但 linkedin 必须传 state，故此处手动添加
-            linkedin_url = "{}&state={}".format(linkedin_url, encode_id(self.current_user.sysuser.id))
+
+            state = encode_id(0)
+            if self.current_user.sysuser:
+                state = encode_id(self.current_user.sysuser.id)
+
+            linkedin_url = "{}&state={}".format(linkedin_url, state)
 
             redirect_params.update(linkedin_url=linkedin_url)
             # ========== LINKEDIN OAUTH ==============
