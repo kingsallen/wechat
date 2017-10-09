@@ -356,7 +356,8 @@ class PositionHandler(BaseHandler):
             require.append("工作经验 {}".format(position_info.experience))
         if position_info.language:
             require.append("语言要求 {}".format(position_info.language))
-        if position_info.management_experience:
+        if position_info.management_experience and \
+                position_info.management_experience == '需要':
             require.append("管理经验 {}".format(position_info.management_experience))
 
         if len(require) == 0:
