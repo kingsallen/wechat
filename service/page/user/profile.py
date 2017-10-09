@@ -104,7 +104,7 @@ class ProfilePageService(PageService):
         :return: tuple (bool, profile or None)
 
         调用方式:
-        profile = has_profile[1]
+        profserile = has_profile[1]
         """
 
         result, profile = yield self.infra_profile_ds.get_profile(user_id)
@@ -118,7 +118,8 @@ class ProfilePageService(PageService):
         """
 
         result, data = yield self.get_profile_basic(profile_id)
-        return result and data.status is not infra_const.InfraStatusCode.not_exists
+        return bool(result) or (data.status is not infra_const.InfraStatusCode.not_exists)
+
 
     @gen.coroutine
     def has_profile_by_uuid(self, uuid):
