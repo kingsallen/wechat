@@ -480,6 +480,9 @@ class BaseHandler(MetaBaseHandler):
 
         if sysuser:
             sysuser.headimg = self.static_url(sysuser.headimg or const.SYSUSER_HEADIMG)
+            sysuser.mobileverified = bool(sysuser.username.isdigit())
+            if sysuser.mobileverified:
+                sysuser.mobile = int(sysuser.username)
 
         # 对于非微信环境，用户登录后，如果帐号已经绑定微信，则同时获取微信用户信息
 

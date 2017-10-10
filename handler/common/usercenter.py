@@ -186,9 +186,8 @@ class UserMobileBindedHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def post(self):
-        res = self.current_user.sysuser.usernae.isdigit()
 
-        if res:
+        if self.current_user.sysuser.mobileverified:
             self.send_json_success(data=const.YES)
         else:
             self.send_json_success(data=const.NO)
