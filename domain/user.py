@@ -30,6 +30,7 @@ class UserCreationForm(Model):
     mobile = IntType(required=True)
     email = StringType(default='')
     register_ip = StringType(required=True)
+    register_time = StringType(required=True)
 
 
 class InterestCurrentInfoForm(Model):

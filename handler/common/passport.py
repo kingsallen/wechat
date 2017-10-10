@@ -14,6 +14,7 @@ from handler.base import BaseHandler
 from cache.user.passport_session import PassportCache
 from util.common.decorator import handle_response, authenticated
 from util.tool.str_tool import to_str, password_validate
+from util.tool.date_tool import curr_now
 from util.common.cipher import encode_id
 
 from handler.common.captcha import CaptchaMixin
@@ -281,12 +282,17 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
     @handle_response
     @gen.coroutine
     def post_setpasswd(self):
-        """提交设置的密码"""
+        """提交设置的密码
+
+        code_type: 0 -> 手机浏览器创建用户
+                   1 -> 微信中或手机浏览器中重置密码
+        """
 
         try:
             self.guarantee("password", "repassword", "code_type")
         except AttributeError:
             raise gen.Return()
+
 
         if self.params.password != self.params.repassword:
             self.send_json_error(message=msg.CELLPHONE_REGISTER_PASSWD_NOT_MATCH)
@@ -297,17 +303,22 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
 
         url_mobile = self.params._mmc
 
-        if mobile is None or url_mobile is None \
-            or encode_id(int(mobile), 8) != url_mobile or country_code is None:
+        # 判断前后的mobile相等且包含 country_code
+        if (not mobile or
+            not url_mobile or
+            encode_id(int(mobile), 8) != url_mobile or
+            not country_code):
+
             self.send_json_error(message=msg.CELLPHONE_MOBILE_SET_PASSWD_FAILED)
             raise gen.Return()
 
         if not password_validate(self.params.password):
+
             self.send_json_error(message=msg.CELLPHONE_PASSWORD_ERROR)
             raise gen.Return()
 
+        # 忘记密码
         if self.params.code_type == 1:
-            # 忘记密码
             res = yield self.usercenter_ps.post_resetpassword(country_code, mobile, self.params.password)
             if res.status != const.API_SUCCESS:
                 self.send_json_error(message=res.message)
@@ -319,7 +330,8 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
                 'password': self.params.password,
                 'mobile':   int(mobile),
                 'username': mobile,
-                'register_ip': self.remote_ip
+                'register_ip': self.remote_ip,
+                'register_time': curr_now()
             })
             try:
                 user_form.validate()

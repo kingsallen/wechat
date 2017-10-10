@@ -577,7 +577,7 @@ class ProfileSectionHandler(BaseHandler):
                     self_introduction=model.self_introduction)
             else:
                 model.update(sub_dict(model, self.profile_ps.BASIC_KEYS))
-                model.pop('self_introduction')
+                model.pop('self_introduction', None)
 
                 if model.city_name == "未知" or model.city_name is None:
                     model.pop('city_name', None)

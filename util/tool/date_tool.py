@@ -15,7 +15,7 @@ def curr_datetime_now():
     return datetime.now()
 
 
-def curr_now():
+def curr_now() -> str:
     return datetime.now().strftime(constant.TIME_FORMAT)
 
 
