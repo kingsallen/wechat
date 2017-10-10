@@ -28,9 +28,22 @@ class ProfileNewHandler(BaseHandler):
         """初始化新建 profile 页面"""
 
         data = ObjectDict()
-        data.email = self.current_user.sysuser.email or ''
-        data.mobile = self.current_user.sysuser.mobile or ''
         data.degreeList = yield self.dictionary_ps.get_degrees()
+        data.email = ''
+        data.mobile = ''
+        data.mobileeditable = True
+
+        sysuser = self.current_user.sysuser
+        if sysuser:
+            data.email = self.current_user.sysuser.email
+
+            if sysuser.username.isdigit():  # 展示无法修改的认证过的手机号
+                data.mobile = sysuser.username
+                data.mobileeditable = False
+
+            elif sysuser.mobile:  # 展示可以修改的未认证的手机号
+                data.mobile = sysuser.mobile
+
         self.send_json_success(data=data)
 
     @handle_response
