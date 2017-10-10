@@ -35,14 +35,9 @@ class ProfileNewHandler(BaseHandler):
 
         sysuser = self.current_user.sysuser
         if sysuser:
-            data.email = self.current_user.sysuser.email
-
-            if sysuser.username.isdigit():  # 展示无法修改的认证过的手机号
-                data.mobile = sysuser.username
-                data.mobileeditable = False
-
-            elif sysuser.mobile:  # 展示可以修改的未认证的手机号
-                data.mobile = sysuser.mobile
+            data.email = sysuser.email
+            data.mobile = str(sysuser.mobile)
+            data.mobileeditable = not sysuser.mobileverified
 
         self.send_json_success(data=data)
 
