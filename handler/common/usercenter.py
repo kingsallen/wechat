@@ -186,7 +186,7 @@ class UserMobileBindedHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def post(self):
-        res = str(self.current_user.sysuser.mobile) == self.current_user.sysuser.username
+        res = self.current_user.sysuser.usernae.isdigit()
 
         if res:
             self.send_json_success(data=const.YES)

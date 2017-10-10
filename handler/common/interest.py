@@ -43,7 +43,6 @@ class UserCurrentInfoHandler(BaseHandler):
             has_current_work = bool([w for w in workexps if w.get('end_until_now')])
 
             data = const.YES if has_current_work else const.NO
-            print(data)
             self.send_json_success(data=data)
 
         # 处理感兴趣
