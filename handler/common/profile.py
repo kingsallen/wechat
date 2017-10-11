@@ -28,9 +28,17 @@ class ProfileNewHandler(BaseHandler):
         """初始化新建 profile 页面"""
 
         data = ObjectDict()
-        data.email = self.current_user.sysuser.email or ''
-        data.mobile = self.current_user.sysuser.mobile or ''
         data.degreeList = yield self.dictionary_ps.get_degrees()
+        data.email = ''
+        data.mobile = ''
+        data.mobileeditable = True
+
+        sysuser = self.current_user.sysuser
+        if sysuser:
+            data.email = sysuser.email
+            data.mobile = str(sysuser.mobile)
+            data.mobileeditable = not sysuser.mobileverified
+
         self.send_json_success(data=data)
 
     @handle_response
@@ -577,7 +585,7 @@ class ProfileSectionHandler(BaseHandler):
                     self_introduction=model.self_introduction)
             else:
                 model.update(sub_dict(model, self.profile_ps.BASIC_KEYS))
-                model.pop('self_introduction')
+                model.pop('self_introduction', None)
 
                 if model.city_name == "未知" or model.city_name is None:
                     model.pop('city_name', None)

@@ -23,18 +23,6 @@ class InfraUserDataService(DataService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def post_user_wxbindmobile(self, **kwargs):
-        params = ObjectDict({
-            "unionid": kwargs["unionid"],
-            "mobile":  kwargs["mobile"],
-            "code":    kwargs.get("code" "")
-        })
-
-        ret = yield http_post(path.INFRA_USER_COMBINE, params)
-
-        raise gen.Return(ret)
-
-    @gen.coroutine
     def post_wx_pc_combine(self, country_code, mobile, unionid):
         """手机号和微信号绑定接口"""
 
