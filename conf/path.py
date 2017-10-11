@@ -27,7 +27,6 @@ GAMMA_POSITION_COMPANY = '/company/{}'
 GAMMA_SEARCH = '/search'
 GAMMA_404 = '/404'
 
-
 # 企业号、聚合号公共链接
 USER_LOGIN = '/login'
 USER_LOGOUT = '/logout'
@@ -47,6 +46,9 @@ PROFILE_VISITOR_VIEW = '/profile/view/{}'
 PROFILE_NEW = '/app/profile/new'
 
 IMAGE_URL = '/image'
+
+CAMPAIGN_COMPANY_PATH = "/alipaycampaign/{}/company"
+CAMPAIGN_POSITION_PATH = "/alipaycampaign/{}/position"
 
 # ============================ 微信端Path结束 ============================
 
@@ -83,6 +85,7 @@ INFRA_POSITION_LIST = 'position/list'
 INFRA_POSITION_LIST_RP_EXT = 'position/rpext'
 INFRA_RP_POSITION_LIST = 'position/rplist'
 INFRA_RP_POSITION_LIST_SHARE_INFO = 'position/list/hb_share_info'
+INFRA_THIRD_PARTY_SYNCED_POSITIONS = '/positions/thirdpartysyncedpositions'
 
 # Profile 服务
 # Ref: https://wiki.moseeker.com/profile-api.md

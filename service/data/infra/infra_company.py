@@ -17,6 +17,11 @@ class InfraCompanyDataService(DataService):
     company_services_client = ServiceClientFactory.get_service(CompanyServicesClient)
 
     @gen.coroutine
+    def get_company_by_id(self, params):
+        res = yield http_get(path.COMPANY, params)
+        return unboxing(res)
+
+    @gen.coroutine
     def get_company_all(self, params):
         res = yield http_get(path.COMPANY_ALL, params)
         return unboxing(res)

@@ -2,13 +2,13 @@
 
 import tornado.gen as gen
 from tornado.testing import AsyncTestCase, gen_test
-from thrift_gen.gen.position.service.PositionServices import Client as PositionServiceClient
-from service.data.infra.framework.client.client import ServiceClientFactory
 
 import conf.path as path
 from service.data.base import DataService
-from util.tool.http_tool import http_get
+from service.data.infra.framework.client.client import ServiceClientFactory
+from thrift_gen.gen.position.service.PositionServices import Client as PositionServiceClient
 from util.common import ObjectDict
+from util.tool.http_tool import http_get
 
 
 class InfraPositionDataService(DataService):
@@ -60,9 +60,30 @@ class InfraPositionDataService(DataService):
 
         return response
 
+    @gen.coroutine
+    def get_third_party_synced_positions(self, company_id):
+        """
+        :param company_id: int, 公司id
+        :return: list, position数据
+        """
+        req = ObjectDict({
+            "companyId": company_id,
+            "candidatesource": 1
+        })
+        response = {}
+        try:
+            ret = yield http_get(path.INFRA_THIRD_PARTY_SYNCED_POSITIONS, req)
+            if ret.status == 0:
+                response = ret.data or {}
+        except Exception as error:
+            self.logger.warning(error)
+
+        return response
+
 
 class TestEmployeeService(AsyncTestCase):
     """Just for test(or try results) during development :)"""
+
     def setUp(self):
         super().setUp()
         self.service = ServiceClientFactory.get_service(
@@ -70,6 +91,5 @@ class TestEmployeeService(AsyncTestCase):
 
     @gen_test
     def testPositionList(self):
-
         ret = yield self.service.getPositionList()
         print(ret)
