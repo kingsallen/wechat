@@ -587,6 +587,7 @@ class ProfileSectionHandler(BaseHandler):
                 result, data = yield self.profile_ps.update_profile_basic(
                     profile_id, model)
             else:
+                model.update(profile_id=profile_id)
                 result, data = yield self.profile_ps.create_profile_basic(
                     model, profile_id, mode='c')
 

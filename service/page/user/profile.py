@@ -118,7 +118,7 @@ class ProfilePageService(PageService):
         """
 
         result, data = yield self.get_profile_basic(profile_id)
-        return bool(result) or (data.status is not infra_const.InfraStatusCode.not_exists)
+        return bool(result) or not (data.status == infra_const.InfraStatusCode.not_exist)
 
 
     @gen.coroutine
