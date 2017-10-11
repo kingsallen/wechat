@@ -336,6 +336,11 @@ class ChatHandler(BaseHandler):
         if self.is_qx and int(self.params.hr_id) == int(self.current_user.company.hraccount_id):
             is_gamma = True
 
+        self.logger.debug(
+                '[IM]user_id: %s, hr_id: %s, position_id: %s, room_id: %s, qxuser: %s, is_gamma: %s' %
+                (self.current_user.sysuser.id, self.params.hr_id, pid, room_id, self.current_user.qxuser, is_gamma)
+        )
+
         res = yield self.chat_ps.get_chatroom(self.current_user.sysuser.id,
                                               self.params.hr_id,
                                               pid, room_id,

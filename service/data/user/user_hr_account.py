@@ -11,7 +11,7 @@ class UserHrAccountDataService(DataService):
 
     @cache(ttl=60)
     @gen.coroutine
-    def get_hr_account(self, conds, fields=None):
+    def get_hr_account(self, conds, fields=None, appends=None):
 
         if not self._valid_conds(conds):
             self.logger.warning("Warning:[get_hr_account][invalid parameters], Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
@@ -20,7 +20,8 @@ class UserHrAccountDataService(DataService):
         if not fields:
             fields = list(self.user_hr_account_dao.fields_map.keys())
 
-        response = yield self.user_hr_account_dao.get_record_by_conds(conds, fields)
+        response = yield self.user_hr_account_dao.get_record_by_conds(
+            conds, fields, appends)
         raise gen.Return(response)
 
     @gen.coroutine
