@@ -15,7 +15,7 @@ from util.common import ObjectDict
 from util.common.decorator import handle_response, check_and_apply_profile, \
     authenticated
 from util.tool.dict_tool import sub_dict, objectdictify
-from util.tool.str_tool import mobile_validate
+from util.tool.str_tool import mobile_validate, split_phone_number
 from util.tool.json_tool import json_dumps
 
 
@@ -27,16 +27,21 @@ class ProfileNewHandler(BaseHandler):
     def get(self):
         """初始化新建 profile 页面"""
 
-        data = ObjectDict()
-        data.degreeList = yield self.dictionary_ps.get_degrees()
-        data.email = ''
-        data.mobile = ''
-        data.mobileeditable = True
+        # yield from ps
+        data = yield dict(
+            degreeList=self.dictionary_ps.get_degrees(),
+            countryCodeList=self.dictionary_ps.get_sms_country_codes())
 
+        # update other initial values
+        data.update(
+            email='', mobile='', country_code='86', mobileeditable=True)
+
+        data = ObjectDict(data)
         sysuser = self.current_user.sysuser
         if sysuser:
             data.email = sysuser.email
-            data.mobile = str(sysuser.mobile)
+            data.mobile = str(sysuser.mobile) if sysuser.mobile else ''
+            data.country_code = sysuser.country_code
             data.mobileeditable = not sysuser.mobileverified
 
         self.send_json_success(data=data)
@@ -66,11 +71,15 @@ class ProfileNewHandler(BaseHandler):
             self.send_json_error(message=message)
             return
 
+        phone_number = profile.contacts.get('mobile')
+        country_code = profile.contacts.get('country_code')
+
         yield self.user_ps.update_user(
             self.current_user.sysuser.id,
             name=profile.basicInfo['name'],
             email=profile.contacts['email'],
-            mobile=profile.contacts['mobile'])
+            mobile="{}-{}".format(country_code, phone_number)
+        )
 
         basic_info_ok = False
         education_ok = True
@@ -169,9 +178,7 @@ class ProfilePreviewHandler(BaseHandler):
         profile_tpl = yield self.profile_ps.profile_to_tempalte(
             self.current_user.profile)
 
-        current_mobile = ''
-        if self.current_user.sysuser.mobile:
-            current_mobile = str(self.current_user.sysuser.mobile)
+
 
         # -8<---8<---8<---8<---8<---8<---8<---8<---8<---8<---8<---8<---8<---
         # 只有存在 is_skip 且值为 '1' 时才跳过 preview
@@ -181,13 +188,14 @@ class ProfilePreviewHandler(BaseHandler):
             is_skip = False
         # -8<---8<---8<---8<---8<---8<---8<---8<---8<---8<---8<---8<---8<---
 
-        need_mobile_validate = (
-            str(self.current_user.sysuser.mobile) != str(self.current_user.sysuser.username)
-        )
-
         other_key_name_mapping = yield self.profile_ps.get_others_key_name_mapping()
 
         no_name = not bool(self.current_user.sysuser.name)
+        need_mobile_validate = not bool(self.current_user.sysuser.mobileverified)
+
+        current_mobile = ''
+        if self.current_user.sysuser.mobile:
+            current_mobile = str(self.current_user.sysuser.mobile)
 
         tparams = {
             'profile':                profile_tpl,
@@ -196,7 +204,8 @@ class ProfilePreviewHandler(BaseHandler):
             'is_skip':                is_skip,
             'need_mobile_validate':   need_mobile_validate,
             'no_name':                no_name,
-            'current_mobile':         current_mobile
+            'country_code':           self.current_user.sysuser.country_code,
+            'current_mobile':         current_mobile,
         }
 
         self.render_page(template_name='profile/preview.html',
@@ -369,7 +378,10 @@ class ProfileAPICustomCVHandler(BaseHandler):
 
         # --8<-- 更新 user_user --8<-----8<-----8<-----8<-----8<-----8<------
         if custom_cv_user_user:
-            result = yield self.user_ps.update_user(self.current_user.sysuser.id, **custom_cv_user_user)
+            result = yield self.user_ps.update_user(
+                self.current_user.sysuser.id,
+                **custom_cv_user_user)
+
             self.logger.debug("update_user result: %s" % result)
 
         # --8<-- 检查profile --8<-----8<-----8<-----8<-----8<-----8<-----8<---

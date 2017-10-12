@@ -51,3 +51,8 @@ class DictionaryPageService(PageService):
     def get_sms_country_codes(self):
         ret = yield self.infra_dict_ds.get_sms_country_codes()
         return ret
+
+    @tornado.gen.coroutine
+    def get_sms_country_code_list(self):
+        ret = yield self.infra_dict_ds.get_sms_country_code_list()
+        return ret
