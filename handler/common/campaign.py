@@ -1,7 +1,5 @@
 # coding=utf-8
 
-from collections import namedtuple
-
 from tornado import gen
 
 import conf.common as const
@@ -11,8 +9,6 @@ from util.common import ObjectDict
 from util.common.decorator import cache
 from util.common.decorator import handle_response
 from util.tool.url_tool import make_url
-
-CacheConfig = namedtuple("CacheConfig", ["use", "ttl", "cache_key"])
 
 
 class AlipayCampaignCompanyHandler(MetaBaseHandler):
@@ -32,7 +28,7 @@ class AlipayCampaignCompanyHandler(MetaBaseHandler):
         namespace.update(add_namespace)
         return namespace
 
-    @cache(ttl=60*60)
+    # @cache(ttl=60 * 60)
     @gen.coroutine
     def _get(self, campaign_id):
         """
@@ -73,7 +69,7 @@ class AlipayCampaignPositionHandler(MetaBaseHandler):
         namespace.update(add_namespace)
         return namespace
 
-    @cache(ttl=60*60)
+    # @cache(ttl=60*60)
     @gen.coroutine
     def _get(self, campaign_id):
         """
