@@ -17,31 +17,44 @@ CacheConfig = namedtuple("CacheConfig", ["use", "ttl", "cache_key"])
 
 class CacheRenderMixin:
     def cache_render(self, template_name, cache_config, **kwargs):
-        self.config(cache_config)
+        self.config_cache(cache_config)
         if self.cache_config.use:
             cached_html = self.get_page()
             if cached_html:
-                self.logger.debug("got_page: {}".format(self.cache_config.cache_key))
+                self.logger.debug("got page from cache, key: {}".format(self.cache_config.cache_key))
                 html = cached_html
             else:
                 html = self.render_string(template_name, **kwargs)
                 self.save_page(html)
             self.finish(html)
         else:
-            self.render(template_name=template_name, **kwargs)
+            self.render(template_name, **kwargs)
 
     def save_page(self, html):
-        self.logger.debug("save_page: {}".format(self.cache_config.cache_key))
-        redis.set(key=self.cache_config.cache_key, value=html, ttl=self.cache_config.ttl)
+        self.logger.debug("save page to cache, key: {}".format(self.cache_config.cache_key))
+        try:
+            redis.set(key=self.cache_config.cache_key, value=html, ttl=self.cache_config.ttl)
+        except Exception as e:
+            self.logger.error(e)
 
     def get_page(self):
-        cached_html = redis.get(self.cache_config.cache_key)
-        return cached_html
+        try:
+            cached_html = redis.get(self.cache_config.cache_key)
+        except Exception as e:
+            self.logger.error(e)
+            return None
+        else:
+            return cached_html
 
     def get_cache_render(self):
         return self
 
-    def config(self, conf):
+    def config_cache(self, conf: CacheConfig):
+        """
+        设置缓存配置, 不直接放在self下, 用一个属性来存防止命名冲突
+        :param conf:
+        :return: None
+        """
         self.cache_config = conf
 
 

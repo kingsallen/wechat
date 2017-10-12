@@ -289,13 +289,13 @@ class MetaBaseHandler(AtomHandler):
                 http_code=http_code
             )
 
-    def render(self, status_code=const.API_SUCCESS, http_code=200, *args, **kwargs):
+    def render(self, template_name, status_code=const.API_SUCCESS, http_code=200, **kwargs):
         """override RequestHandler.render()"""
 
         self.log_info = {"res_type": "html", "status_code": status_code}
         self.set_status(http_code)
 
-        super().render(*args, **kwargs)
+        super().render(template_name, **kwargs)
 
     def render_page(
             self,
