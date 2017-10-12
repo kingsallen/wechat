@@ -1,16 +1,51 @@
 # coding=utf-8
 
+from collections import namedtuple
+
 from tornado import gen
 
 import conf.common as const
 import conf.path as path
+from globals import redis
 from handler.metabase import MetaBaseHandler
 from util.common import ObjectDict
 from util.common.decorator import handle_response
 from util.tool.url_tool import make_url
 
+CacheConfig = namedtuple("CacheConfig", ["use", "ttl", "cache_key"])
 
-class AlipayCampaignCompanyHandler(MetaBaseHandler):
+
+class CacheRenderMixin:
+    def cache_render(self, template_name, cache_config, **kwargs):
+        self.config(cache_config)
+        if self.cache_config.use:
+            cached_html = self.get_page()
+            if cached_html:
+                self.logger.debug("got_page: {}".format(self.cache_config.cache_key))
+                html = cached_html
+            else:
+                html = self.render_string(template_name, **kwargs)
+                self.save_page(html)
+            self.finish(html)
+        else:
+            self.render(template_name, **kwargs)
+
+    def save_page(self, html):
+        self.logger.debug("save_page: {}".format(self.cache_config.cache_key))
+        redis.set(key=self.cache_config.cache_key, value=html, ttl=self.cache_config.ttl)
+
+    def get_page(self):
+        cached_html = redis.get(self.cache_config.cache_key)
+        return cached_html
+
+    def get_cache_render(self):
+        return self
+
+    def config(self, conf):
+        self.cache_config = conf
+
+
+class AlipayCampaignCompanyHandler(MetaBaseHandler, CacheRenderMixin):
     def make_url(self, path, params=None, host="", protocol="https", escape=None, **kwargs):
         if not host:
             host = self.host
@@ -39,10 +74,13 @@ class AlipayCampaignCompanyHandler(MetaBaseHandler):
         if not campaign:
             self.write_error(http_code=404)
         else:
-            self.render(template_name="h5/alipay/index.html", campaign=campaign)
+            cache_config = CacheConfig(use=True,
+                                       ttl=60 * 60,
+                                       cache_key="alipay_campaign_company:{}".format(campaign_id))
+            self.cache_render(template_name="h5/alipay/index.html", cache_config=cache_config, campaign=campaign)
 
 
-class AlipayCampaignPositionHandler(MetaBaseHandler):
+class AlipayCampaignPositionHandler(MetaBaseHandler, CacheRenderMixin):
     def make_url(self, path, params=None, host="", protocol="https", escape=None, **kwargs):
         if not host:
             host = self.host
@@ -71,4 +109,7 @@ class AlipayCampaignPositionHandler(MetaBaseHandler):
         if not campaign:
             self.write_error(http_code=404)
         else:
-            self.render(template_name="h5/alipay/list.html", campaign=campaign)
+            cache_config = CacheConfig(use=True,
+                                       ttl=60 * 60,
+                                       cache_key="alipay_campaign_position:{}".format(campaign_id))
+            self.cache_render(template_name="h5/alipay/list.html", cache_config=cache_config, campaign=campaign)
