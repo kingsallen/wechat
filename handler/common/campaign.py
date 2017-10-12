@@ -28,7 +28,7 @@ class CacheRenderMixin:
                 self.save_page(html)
             self.finish(html)
         else:
-            self.render(template_name, **kwargs)
+            self.render(template_name=template_name, **kwargs)
 
     def save_page(self, html):
         self.logger.debug("save_page: {}".format(self.cache_config.cache_key))
@@ -74,7 +74,7 @@ class AlipayCampaignCompanyHandler(MetaBaseHandler, CacheRenderMixin):
         if not campaign:
             self.write_error(http_code=404)
         else:
-            cache_config = CacheConfig(use=True,
+            cache_config = CacheConfig(use=False,
                                        ttl=60 * 60,
                                        cache_key="alipay_campaign_company:{}".format(campaign_id))
             self.cache_render(template_name="h5/alipay/index.html", cache_config=cache_config, campaign=campaign)
@@ -109,7 +109,7 @@ class AlipayCampaignPositionHandler(MetaBaseHandler, CacheRenderMixin):
         if not campaign:
             self.write_error(http_code=404)
         else:
-            cache_config = CacheConfig(use=True,
+            cache_config = CacheConfig(use=False,
                                        ttl=60 * 60,
                                        cache_key="alipay_campaign_position:{}".format(campaign_id))
             self.cache_render(template_name="h5/alipay/list.html", cache_config=cache_config, campaign=campaign)
