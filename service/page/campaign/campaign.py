@@ -1,5 +1,6 @@
 # coding=utf-8
 
+import re
 import urllib
 
 from tornado import gen
@@ -35,7 +36,10 @@ class AlipayCampaignCompany:
         :param position: AlipayCampaignPosition
         :return:
         """
-        self.positions.append(position)  # TODO 去重
+        if self.filter_position(position):
+            self.positions.append(position)
+        else:
+            pass
 
     @property
     def positions_num(self):
@@ -50,6 +54,29 @@ class AlipayCampaignCompany:
     def cities(self):
         all_cities = set(position.city for position in self.positions if bool(position.city))
         return " | ".join(list(all_cities)[:3])
+
+    def filter_position(self, position):
+        return True
+
+
+class AlipayCampaignCompanyWalmart(AlipayCampaignCompany):
+    def filter_position(self, position):
+        return bool(re.match(r".*管理培训生.*", position.title))
+
+
+class AlipayCampaignCompanyPhillips(AlipayCampaignCompany):
+    def filter_position(self, position):
+        return bool(re.match(r".*[(（]校园招聘[)）].*", position.title))
+
+
+class AlipayCampaignCompanyTE(AlipayCampaignCompany):
+    def filter_position(self, position):
+        return bool(re.match(r".*【Campus Hire】.*", position.title))
+
+
+class AlipayCampaignCompanyHF(AlipayCampaignCompany):
+    def filter_position(self, position):
+        return bool(re.match(r".*管培生.*", position.title))
 
 
 class AlipayCampaignPosition:
@@ -78,10 +105,10 @@ class CampaignNotFoundError(Exception): pass
 class CampaignPageService(PageService):
     # 写死的几个公司
     campaigns = {
-        "123": [ObjectDict({"id": 1, "name": "哈1"}),
-                ObjectDict({"id": 5, "name": "哈5"}),
-                ObjectDict({"id": 3, "name": "哈3"}),
-                ObjectDict({"id": 4, "name": "哈4"})]
+        "1": [ObjectDict({"id": 76, "name": "沃尔玛", "klass": AlipayCampaignCompanyWalmart}),
+              ObjectDict({"id": 1291, "name": "飞利浦", "klass": AlipayCampaignCompanyPhillips}),
+              ObjectDict({"id": 89816, "name": "泰科电子", "klass": AlipayCampaignCompanyTE}),
+              ObjectDict({"id": 813, "name": "合富辉煌", "klass": AlipayCampaignCompanyHF})]
     }
 
     @gen.coroutine
@@ -94,8 +121,9 @@ class CampaignPageService(PageService):
         try:
             companies = yield self.get_alipay_campaign_companies(campaign_id)
             alipay_campaign = AlipayCampaign(campaign_id)
-            campaign_companies = yield [self._get_alipay_campaign_company(campaign_id, company.id, company.name)
-                                        for company in companies]
+            campaign_companies = yield [
+                self._get_alipay_campaign_company(campaign_id, company.id, company.name, company.klass)
+                for company in companies]
             for company in campaign_companies:
                 alipay_campaign.add_company(company)
         except CampaignNotFoundError:
@@ -118,7 +146,7 @@ class CampaignPageService(PageService):
             return companies
 
     @gen.coroutine
-    def _get_alipay_campaign_company(self, campaign_id, company_id, company_name):
+    def _get_alipay_campaign_company(self, campaign_id, company_id, company_name, company_klass):
         """
         获取参与参与campaign的公司
         :param campaign_id:
@@ -129,7 +157,7 @@ class CampaignPageService(PageService):
         # 公司
         result, infra_company = yield self.infra_company_ds.get_company_by_id({"id": company_id})
         assert (len(infra_company) == 1)
-        alipay_campaign_company = AlipayCampaignCompany(ObjectDict(infra_company[0]), company_name)
+        alipay_campaign_company = company_klass(ObjectDict(infra_company[0]), company_name)
 
         # 公司下参与活动的职位
         alipay_campaign_positions = yield self._get_alipay_campaign_company_positions(campaign_id, company_id)
