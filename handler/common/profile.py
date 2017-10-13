@@ -338,6 +338,10 @@ class ProfileAPICustomCVHandler(BaseHandler):
         if 'pid' not in self.json_args:
             raise ValueError('Failed to get pid')
 
+        recom = ''
+        if 'recom' in self.json_args:
+            recom = self.json_args.recom
+
         custom_cv = self.json_args.custom_cv
         pid = self.json_args.pid
 
@@ -347,6 +351,8 @@ class ProfileAPICustomCVHandler(BaseHandler):
 
         p = dict(is_skip='1' if self.current_user.company.id in self.customize_ps._DIRECT_APPLY else '0',
                  pid=pid)
+        if recom:
+            p.update(recom=recom)
 
         self.send_json_success(data={
             'next_url': self.make_url(path.PROFILE_PREVIEW, self.params, **p)
