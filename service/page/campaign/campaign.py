@@ -74,9 +74,9 @@ class AlipayCampaignCompanyTE(AlipayCampaignCompany):
         return bool(re.match(r".*【Campus Hire】.*", position.title))
 
 
-class AlipayCampaignCompanyHF(AlipayCampaignCompany):
+class AlipayCampaignCompanyLiepin(AlipayCampaignCompany):
     def filter_position(self, position):
-        return bool(re.match(r".*管培生.*", position.title))
+        return True
 
 
 class AlipayCampaignPosition:
@@ -108,7 +108,7 @@ class CampaignPageService(PageService):
         "1": [ObjectDict({"id": 76, "name": "沃尔玛", "klass": AlipayCampaignCompanyWalmart}),
               ObjectDict({"id": 1291, "name": "飞利浦", "klass": AlipayCampaignCompanyPhillips}),
               ObjectDict({"id": 89816, "name": "泰科电子", "klass": AlipayCampaignCompanyTE}),
-              ObjectDict({"id": 813, "name": "合富辉煌", "klass": AlipayCampaignCompanyHF})]
+              ObjectDict({"id": 203536, "name": "猎聘网", "klass": AlipayCampaignCompanyLiepin})]
     }
 
     @gen.coroutine
