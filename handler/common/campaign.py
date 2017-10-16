@@ -2,32 +2,11 @@
 
 from tornado import gen
 
-import conf.common as const
-import conf.path as path
 from handler.metabase import MetaBaseHandler
-from util.common import ObjectDict
-from util.common.decorator import cache
 from util.common.decorator import handle_response
-from util.tool.url_tool import make_url
 
 
 class AlipayCampaignCompanyHandler(MetaBaseHandler):
-    def make_url(self, path, params=None, host="", protocol="https", escape=None, **kwargs):
-        if not host:
-            host = self.host
-        return make_url(path, params, host, protocol, escape, **kwargs)
-
-    def get_template_namespace(self):
-        namespace = super().get_template_namespace()
-        add_namespace = ObjectDict(
-            env=self.env,
-            make_url=self.make_url,
-            const=const,
-            path=path
-        )
-        namespace.update(add_namespace)
-        return namespace
-
     # @cache(ttl=60 * 60)
     @gen.coroutine
     def _get(self, campaign_id):
@@ -53,22 +32,6 @@ class AlipayCampaignCompanyHandler(MetaBaseHandler):
 
 
 class AlipayCampaignPositionHandler(MetaBaseHandler):
-    def make_url(self, path, params=None, host="", protocol="https", escape=None, **kwargs):
-        if not host:
-            host = self.host
-        return make_url(path, params, host, protocol, escape, **kwargs)
-
-    def get_template_namespace(self):
-        namespace = super().get_template_namespace()
-        add_namespace = ObjectDict(
-            env=self.env,
-            make_url=self.make_url,
-            const=const,
-            path=path
-        )
-        namespace.update(add_namespace)
-        return namespace
-
     # @cache(ttl=60*60)
     @gen.coroutine
     def _get(self, campaign_id):

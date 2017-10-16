@@ -5,28 +5,27 @@
 仅供 BaseHandler 调用，或与 BaseHandler 不同业务逻辑时调用
 """
 
+import glob
+import importlib
 import os
 import re
-import importlib
-import glob
+import socket
 import time
 import ujson
-import socket
 import urllib.parse
 
 import tornado.httpclient
 from tornado import web, gen
 
+import conf.common as const
+import conf.message as msg_const
+import conf.path as path
 from util.common import ObjectDict
-from util.tool.dict_tool import objectdictify
 from util.tool.date_tool import curr_now
+from util.tool.dict_tool import objectdictify
+from util.tool.json_tool import encode_json_dumps, json_dumps
 from util.tool.str_tool import to_str
 from util.tool.url_tool import make_static_url, make_url
-from util.tool.json_tool import encode_json_dumps, json_dumps
-
-import conf.message as msg_const
-import conf.common as const
-import conf.path as path
 
 # 动态加载所有 PageService
 obDict = {}
@@ -170,7 +169,7 @@ class MetaBaseHandler(AtomHandler):
         body = self.request.body
 
         if (headers.get('Content-Type') and
-                'application/json' in headers.get('Content-Type') and body):
+                    'application/json' in headers.get('Content-Type') and body):
             json_args = ujson.loads(to_str(body))
 
         return objectdictify(json_args)
@@ -224,6 +223,22 @@ class MetaBaseHandler(AtomHandler):
     @gen.coroutine
     def delete(self, *args, **kwargs):
         pass
+
+    def make_url(self, path, params=None, host="", protocol="https", escape=None, **kwargs):
+        if not host:
+            host = self.host
+        return make_url(path, params, host, protocol, escape, **kwargs)
+
+    def get_template_namespace(self):
+        namespace = super().get_template_namespace()
+        add_namespace = ObjectDict(
+            env=self.env,
+            make_url=self.make_url,
+            const=const,
+            path=path
+        )
+        namespace.update(add_namespace)
+        return namespace
 
     def static_url(self, path, protocol='https'):
         """获取 static_url"""
@@ -284,7 +299,7 @@ class MetaBaseHandler(AtomHandler):
                 template,
                 data={
                     'code': http_code,
-                    'message':message
+                    'message': message
                 },
                 http_code=http_code
             )
@@ -298,13 +313,13 @@ class MetaBaseHandler(AtomHandler):
         super().render(template_name, **kwargs)
 
     def render_page(
-            self,
-            template_name,
-            data,
-            status_code=const.API_SUCCESS,
-            message=msg_const.RESPONSE_SUCCESS,
-            meta_title=const.PAGE_META_TITLE,
-            http_code=200):
+        self,
+        template_name,
+        data,
+        status_code=const.API_SUCCESS,
+        message=msg_const.RESPONSE_SUCCESS,
+        meta_title=const.PAGE_META_TITLE,
+        http_code=200):
         """render 页面"""
         self.log_info = {"res_type": "html", "status_code": status_code}
         self.set_status(http_code)

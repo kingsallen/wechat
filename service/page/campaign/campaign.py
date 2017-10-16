@@ -5,9 +5,11 @@ import urllib
 
 from tornado import gen
 
+from conf import common
 from service.page.base import PageService
 from setting import settings
 from util.common import ObjectDict
+from util.tool import str_tool
 
 
 class AlipayCampaign:
@@ -20,7 +22,7 @@ class AlipayCampaign:
 
 
 class AlipayCampaignCompany:
-    DEFAULT_COMPANY_LOGO = "common/images/default-company-logo.jpg"
+    DEFAULT_COMPANY_LOGO = common.COMPANY_HEADIMG
 
     def __init__(self, infra_company, company_name):
         # use
@@ -92,7 +94,7 @@ class AlipayCampaignPosition:
 
     @property
     def salary(self):
-        return " - ".join([str(self.salary_bottom) + "k", str(self.salary_top) + "k"])
+        return str_tool.gen_salary(self.salary_top, self.salary_bottom)
 
     @property
     def url(self):
@@ -180,16 +182,3 @@ class CampaignPageService(PageService):
         alipay_positions = [AlipayCampaignPosition(ObjectDict(infra_position)) for infra_position in infra_positions]
         return alipay_positions
 
-
-if __name__ == "__main__":
-    from tornado.ioloop import IOLoop
-
-    alipay_campaign_ps = AlipayCampaignPageService()
-
-
-    @gen.coroutine
-    def run():
-        yield alipay_campaign_ps.get_alipay_campaign_by_id("aslfdkj")
-
-
-    IOLoop.run_sync(run)
