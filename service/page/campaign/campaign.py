@@ -24,11 +24,11 @@ class AlipayCampaign:
 class AlipayCampaignCompany:
     DEFAULT_COMPANY_LOGO = common.COMPANY_HEADIMG
 
-    def __init__(self, infra_company, company_name):
+    def __init__(self, infra_company, company_name, company_industry):
         # use
         self.id = infra_company.id
         self.abbreviation = company_name
-        self.industry = infra_company.industry
+        self.industry = company_industry
         self.logo_path = infra_company.logo
         self.positions = []
 
@@ -107,10 +107,10 @@ class CampaignNotFoundError(Exception): pass
 class CampaignPageService(PageService):
     # 写死的几个公司
     campaigns = {
-        "1": [ObjectDict({"id": 76, "name": "沃尔玛", "klass": AlipayCampaignCompanyWalmart}),
-              ObjectDict({"id": 1291, "name": "飞利浦", "klass": AlipayCampaignCompanyPhillips}),
-              ObjectDict({"id": 89816, "name": "泰科电子", "klass": AlipayCampaignCompanyTE}),
-              ObjectDict({"id": 203536, "name": "猎聘网", "klass": AlipayCampaignCompanyLiepin})]
+        "1": [ObjectDict({"id": 76, "name": "沃尔玛", "industry": "快速消费品", "klass": AlipayCampaignCompanyWalmart}),
+              ObjectDict({"id": 1291, "name": "飞利浦", "industry": "多元化集团", "klass": AlipayCampaignCompanyPhillips}),
+              ObjectDict({"id": 89816, "name": "泰科电子", "industry": "电子技术", "klass": AlipayCampaignCompanyTE}),
+              ObjectDict({"id": 203536, "name": "猎聘网", "industry": "互联网", "klass": AlipayCampaignCompanyLiepin})]
     }
 
     @gen.coroutine
@@ -124,7 +124,7 @@ class CampaignPageService(PageService):
             companies = yield self.get_alipay_campaign_companies(campaign_id)
             alipay_campaign = AlipayCampaign(campaign_id)
             campaign_companies = yield [
-                self._get_alipay_campaign_company(campaign_id, company.id, company.name, company.klass)
+                self._get_alipay_campaign_company(campaign_id, company.id, company.name, company.industry, company.klass)
                 for company in companies]
             for company in campaign_companies:
                 alipay_campaign.add_company(company)
@@ -148,7 +148,7 @@ class CampaignPageService(PageService):
             return companies
 
     @gen.coroutine
-    def _get_alipay_campaign_company(self, campaign_id, company_id, company_name, company_klass):
+    def _get_alipay_campaign_company(self, campaign_id, company_id, company_name, company_industry, company_klass):
         """
         获取参与参与campaign的公司
         :param campaign_id:
@@ -159,7 +159,7 @@ class CampaignPageService(PageService):
         # 公司
         result, infra_company = yield self.infra_company_ds.get_company_by_id({"id": company_id})
         assert (len(infra_company) == 1)
-        alipay_campaign_company = company_klass(ObjectDict(infra_company[0]), company_name)
+        alipay_campaign_company = company_klass(ObjectDict(infra_company[0]), company_name, company_industry)
 
         # 公司下参与活动的职位
         alipay_campaign_positions = yield self._get_alipay_campaign_company_positions(campaign_id, company_id)
@@ -181,4 +181,3 @@ class CampaignPageService(PageService):
         # infra_positions_num = infra_positions_info.get("positionNum", 0)
         alipay_positions = [AlipayCampaignPosition(ObjectDict(infra_position)) for infra_position in infra_positions]
         return alipay_positions
-
