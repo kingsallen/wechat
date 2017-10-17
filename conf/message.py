@@ -44,7 +44,7 @@ NO_DATA = "404!Ta在地球上消失了"
 UNKNOWN_DEFAULT = "正在努力处理您的问题"
 
 POSITION_FORWARD_MESSAGE = "点击右上角\n将职位推送给朋友,\n或者直接分享到朋友圈吧!"
-SHARE_DES_DEFAULT = "点击即可快速申请！"
+SHARE_DES_DEFAULT = "share_des_default"
 
 RED_PACKET_TYPE_VALUE_ERROR = "红包配置类型错误!"
 RED_PACKET_CONFIG_TARGET_VALUE_ERROR = "红包配置对象错误!"
@@ -71,12 +71,18 @@ HELPER_COMPANY_REGISTERED = "该公司名称已注册"
 HELPER_HR_REGISTERED_FAILED = "注册失败"
 HELPER_HR_HAD_REGISTERED = "手机号已经注册，请勿重复注册"
 
-EMPLOYEE_BINDING_SUCCESS = "{}认证成功!"
+EMPLOYEE_BINDING_SUCCESS = "employee_verification_success"
 EMPLOYEE_BINDING_FAILURE_INFRA = "员工认证信息不正确"
-EMPLOYEE_BINDING_FAILURE = "{}认证信息不正确"
+EMPLOYEE_BINDING_FAILURE = "employee_incorrect_info"
 EMPLOYEE_BINDING_CUSTOM_FIELDS_DONE = "{}信息提交成功!"
-EMPLOYEE_BINDING_EMAIL_DONE = ["请在24小时内验证邮箱完成认证", "若未收到邮件，请检查垃圾邮箱"]
-EMPLOYEE_BINDING_EMAIL_BTN_TEXT = "我知道了!"
+
+EMPLOYEE_BINDING_FAILURE_EMAIL_OCCUPIED_INFRA = "该邮箱已被认证"
+EMPLOYEE_BINDING_FAILURE_EMAIL_OCCUPIED = "employee_binding_failure_email_occupied"
+
+EMPLOYEE_BINDING_EMAIL_DONE0 = "employee_revification_email_done0"
+EMPLOYEE_BINDING_EMAIL_DONE1 = "employee_revification_email_done1"
+
+EMPLOYEE_BINDING_EMAIL_BTN_TEXT = "employee_revification_i_see"
 EMPLOYEE_BINDING_DEFAULT_BTN_TEXT = "去转发职位"
 EMPLOYEE_AWARDS_LADDER_SHARE_TEXT = "{}的伯乐排行榜放榜啦！"
 EMPLOYEE_AWARDS_LADDER_DESC_TEXT = "快来看看你在人脉圈的地位"

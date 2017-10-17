@@ -22,7 +22,7 @@ class UserCompanyPageService(PageService):
         super().__init__()
 
     @gen.coroutine
-    def get_company_data(self, handler_params, company, user):
+    def get_company_data(self, locale, handler_params, company, user):
         """
         构造企业主页，供企业号，gamma 使用
         :param handler_params:
@@ -41,7 +41,7 @@ class UserCompanyPageService(PageService):
         team_index_url = make_url(path.COMPANY_TEAM, handler_params, self.settings.platform_host)
 
         # 拼装模板数据
-        data.header = temp_data_tool.make_header(company)
+        data.header = temp_data_tool.make_header(locale, company)
         data.relation = ObjectDict({
             'want_visit': self.constant.YES if vst_cmpy else self.constant.NO,
             'qrcode': self._make_qrcode(user.wechat.qrcode),

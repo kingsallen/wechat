@@ -5,7 +5,7 @@ from tornado import gen
 import conf.common as const
 import conf.message as msg
 import conf.path as path
-import conf.platform as const_platorm
+import conf.platform as const_platform
 import conf.wechat as wx
 from handler.base import BaseHandler
 from tests.dev_data.user_company_config import COMPANY_CONFIG
@@ -13,7 +13,7 @@ from util.common import ObjectDict
 from util.common.cipher import encode_id
 from util.common.mq import award_publisher
 from util.common.decorator import handle_response, check_employee, NewJDStatusCheckerAddFlag, authenticated
-from util.tool.str_tool import gen_salary, add_item, split
+from util.tool.str_tool import gen_salary, add_item, split, gen_degree_v2, gen_experience_v2
 from util.tool.url_tool import url_append_query
 from util.wechat.template import position_view_five_notice_tpl, position_share_notice_employee_tpl
 
@@ -195,14 +195,18 @@ class PositionHandler(BaseHandler):
         else:
             cover = self.share_url(company_info.logo)
             title = position_info.title
-            description = msg.SHARE_DES_DEFAULT
+            description = self.locale.translate(msg.SHARE_DES_DEFAULT)
 
-            if position_info.share_title:
-                title = str(position_info.share_title).format(
-                    company=company_info.abbreviation,
-                    position=position_info.title)
-            if position_info.share_description:
-                description = "".join(split(position_info.share_description))
+            if position_info.share_tpl_id:
+                if position_info.share_tpl_id > 3:
+                    if position_info.share_title:
+                        title = position_info.share_title
+                    if position_info.share_description:
+                        description = position_info.share_description
+                else:
+                    share_tpl_id = position_info.share_tpl_id
+                    title = self.locale.translate('share_tpl_title%s' % share_tpl_id).format(company_info.abbreviation, position_info.title)
+                    description = self.locale.translate('share_tpl_description%s' % share_tpl_id)
 
         link = self.make_url(
             path.POSITION_PATH.format(position_info.id),
@@ -351,21 +355,35 @@ class PositionHandler(BaseHandler):
         require = []
 
         if position_info.degree:
-            require.append("学历 {}".format(position_info.degree))
+            require.append("{0} {1}".format(
+                self.locale.translate('jd_degree'),
+                gen_degree_v2(position_info.raw_degree,
+                              position_info.raw_degree_above, self.locale)
+            ))
+
         if position_info.experience:
-            require.append("工作经验 {}".format(position_info.experience))
+            require.append("{0} {1}".format(
+                self.locale.translate('jd_work_exp'),
+                gen_experience_v2(position_info.raw_experience,
+                                  position_info.raw_experience_above,
+                                  self.locale)))
+
         if position_info.language:
-            require.append("语言要求 {}".format(position_info.language))
-        if position_info.management_experience and \
-                position_info.management_experience == '需要':
-            require.append("管理经验 {}".format(position_info.management_experience))
+            require.append("{0} {1}".format(
+                self.locale.translate('jd_language'),
+                position_info.language))
+
+        if (position_info.management_experience and
+            position_info.management_experience == 'common_need'):
+            require.append("{0} {1}".format(
+                self.locale.translate('jd_management_exp'),
+                self.locale.translate(position_info.management_experience)))
 
         if len(require) == 0:
             data = None
         else:
-            data = ObjectDict({
-                "data": require
-            })
+            data = ObjectDict({"data": require})
+
         return data
 
     def _make_json_job_attr_v2(self, position_info):
@@ -374,11 +392,18 @@ class PositionHandler(BaseHandler):
         attr = []
 
         if position_info.candidate_source:
-            attr.append("招聘类型 {}".format(position_info.candidate_source))
+            attr.append("{0} {1}".format(
+                self.locale.translate('jd_candidate_source'),
+                self.locale.translate(position_info.candidate_source)))
+
         if position_info.employment_type:
-            attr.append("工作性质 {}".format(position_info.employment_type))
+            attr.append("{0} {1}".format(
+                self.locale.translate('jd_employment_type'),
+                self.locale.translate(position_info.employment_type)))
+
         if self.current_user.company.conf_job_occupation and position_info.job_occupation:
             attr.append("{} {}".format(self.current_user.company.conf_job_occupation, position_info.job_occupation))
+
         if self.current_user.company.conf_job_custom_title and position_info.job_custom:
             attr.append("{} {}".format(self.current_user.company.conf_job_custom_title, position_info.job_custom))
 
@@ -430,11 +455,14 @@ class PositionHandler(BaseHandler):
         require = []
 
         if position_info.degree:
-            require.append(["学历", position_info.degree])
+            require.append([self.locale.translate('jd_degree'),
+                            gen_degree_v2(position_info.raw_degree, position_info.raw_degree_above, self.locale)])
+
         if position_info.experience:
-            require.append(["工作经验", position_info.experience])
+            require.append([self.locale.translate('jd_work_exp'), position_info.experience])
+
         if position_info.language:
-            require.append(["语言要求", position_info.language])
+            require.append([self.locale.translate('jd_language'), position_info.language])
 
         if len(require) == 0:
             data = None
@@ -468,8 +496,8 @@ class PositionHandler(BaseHandler):
     def _make_json_job_attr(self, position_info):
         """构造老微信的职位属性"""
         data = ObjectDict({
-            "job_type": position_info.candidate_source,
-            "work_type": position_info.employment_type,
+            "job_type": self.locale.translate(position_info.candidate_source),
+            "work_type": self.locale.translate(position_info.employment_type)
         })
 
         return data
@@ -640,7 +668,8 @@ class PositionHandler(BaseHandler):
     def _make_team_position(self, team, position_id, company_id, teamname_custom):
         """团队职位，构造数据"""
         res = yield self.position_ps.get_team_position(
-            team.id, self.params, position_id, company_id, teamname_custom)
+            self.locale, team.id, self.params, position_id, company_id,
+            teamname_custom)
         raise gen.Return(res)
 
     @gen.coroutine
@@ -719,9 +748,9 @@ class PositionListHandler(BaseHandler):
 
         # 直接请求页面返回
         else:
-            position_title = const_platorm.POSITION_LIST_TITLE_DEFAULT
+            position_title = self.locale.translate(const_platform.POSITION_LIST_TITLE_DEFAULT)
             if self.params.recomlist or self.params.noemprecom:
-                position_title = const_platorm.POSITION_LIST_TITLE_RECOMLIST
+                position_title = self.locale.translate(const_platform.POSITION_LIST_TITLE_RECOMLIST)
 
             teamname_custom = self.current_user.company.conf_teamname_custom.teamname_custom
 
@@ -776,8 +805,8 @@ class PositionListHandler(BaseHandler):
         if not rp_share_info:
             escape = []
             cover = self.share_url(company_info.logo)
-            title = "%s热招职位" % company_info.abbreviation
-            description = msg.SHARE_DES_DEFAULT
+            title = company_info.abbreviation + self.locale.translate('job_hotjobs')
+            description = self.locale.translate(msg.SHARE_DES_DEFAULT)
 
         else:
             cover = self.share_url(rp_share_info.cover)
@@ -813,17 +842,17 @@ class PositionListHandler(BaseHandler):
             infra_params.did = self.params.did
 
         start_count = (int(self.params.get("count", 0)) *
-                       const_platorm.POSITION_LIST_PAGE_COUNT)
+                       const_platform.POSITION_LIST_PAGE_COUNT)
 
         infra_params.page_from = start_count
-        infra_params.page_size = const_platorm.POSITION_LIST_PAGE_COUNT
+        infra_params.page_size = const_platform.POSITION_LIST_PAGE_COUNT
 
         if self.params.salary:
             k = str(self.params.salary)
             try:
                 infra_params.salary = "%d,%d" % (
-                    const_platorm.SALARY[const_platorm.SALARY_NAME_TO_INDEX[k]].salary_bottom,
-                    const_platorm.SALARY[const_platorm.SALARY_NAME_TO_INDEX[k]].salary_top)
+                    const_platform.SALARY[const_platform.SALARY_NAME_TO_INDEX[k]].salary_bottom,
+                    const_platform.SALARY[const_platform.SALARY_NAME_TO_INDEX[k]].salary_top)
             except KeyError:  # 如果用户自行修改了 GET 参数，不至于报错
                 infra_params.salary = ""
 

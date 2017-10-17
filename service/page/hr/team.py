@@ -51,7 +51,7 @@ class TeamPageService(PageService):
         raise gen.Return(team)
 
     @gen.coroutine
-    def get_team_index(self, company, handler_param, sub_flag=False, parent_company=None):
+    def get_team_index(self, locale, company, handler_param, sub_flag=False, parent_company=None):
         """
 
         :param company: 当前需要获取数据的公司
@@ -81,7 +81,7 @@ class TeamPageService(PageService):
         # 拼装模板数据
         teamname_custom = parent_company.conf_teamname_custom
         data.bottombar = teamname_custom
-        data.header = temp_data_tool.make_header(company, team_index=True, **teamname_custom)
+        data.header = temp_data_tool.make_header(locale, company, team_index=True, **teamname_custom)
 
         # 蓝色光标做定制化需求
         customize_ps = CustomizePageService()
@@ -106,7 +106,7 @@ class TeamPageService(PageService):
         raise gen.Return(data)
 
     @gen.coroutine
-    def get_team_detail(self, user, company, team, handler_param, position_num=3, is_gamma=False):
+    def get_team_detail(self, locale, user, company, team, handler_param, position_num=3, is_gamma=False):
         """
 
         :param user: handler中的current_user
@@ -173,7 +173,7 @@ class TeamPageService(PageService):
         # 拼装模板数据
         teamname_custom = user.company.conf_teamname_custom
         data.bottombar = teamname_custom
-        data.header = temp_data_tool.make_header(company, True, team)
+        data.header = temp_data_tool.make_header(locale, company, True, team)
         data.relation = ObjectDict({
             'want_visit': self.constant.YES if visit else self.constant.NO})
 
@@ -185,6 +185,7 @@ class TeamPageService(PageService):
             data.relation.custom_visit_recipe = []
 
         data.templates = temp_data_tool.make_team_detail_template(
+            locale,
             team, team_members, modulename, detail_media_list, team_positions[0:3],
             other_teams, res_dict, handler_param, teamname_custom=teamname_custom, vst=bool(visit))
         data.templates_total = len(data.templates)
