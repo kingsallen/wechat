@@ -95,7 +95,7 @@ class AlipayCampaignPosition:
         self.id = infra_position.id
         self.title = infra_position.title
         self.city = infra_position.city
-        self.lJobid = infra_position.lJobid
+        self.alipay_job_id = infra_position.alipayJobId
         self.salary_top = infra_position.salaryTop
         self.salary_bottom = infra_position.salaryBottom
 
@@ -105,7 +105,7 @@ class AlipayCampaignPosition:
 
     @property
     def url(self):
-        return self.alipay_url_formatter.format(self.lJobid)
+        return self.alipay_url_formatter.format(self.alipay_job_id)
 
 
 class CampaignNotFoundError(Exception): pass
