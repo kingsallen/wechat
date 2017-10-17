@@ -420,6 +420,7 @@ class ProfileAPICustomCVHandler(BaseHandler):
                 self._log_customs.update(new_profile=const.YES)
 
                 # 创建 profile_basic
+                custom_cv_profile_basic.update({'profile_id': profile_id})
                 result, data = yield self.profile_ps.create_profile_basic(
                     custom_cv_profile_basic, profile_id, mode='c')
 
@@ -431,7 +432,7 @@ class ProfileAPICustomCVHandler(BaseHandler):
         # 更新多条 education, workexp, projectexp, language, awards,
         # 更新单条 intention, works
         yield self.profile_ps.update_profile_embedded_info_from_cv(
-            profile, custom_cv)
+            profile_id, custom_cv)
 
         # 更新 other
         if custom_cv_other_raw:
