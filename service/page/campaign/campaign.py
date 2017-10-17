@@ -39,9 +39,13 @@ class AlipayCampaignCompany:
         :return:
         """
         if self.filter_position(position):
+            self.modify_position_title(position)
             self.positions.append(position)
         else:
             pass
+
+    def modify_position_title(self, position):
+        pass
 
     @property
     def positions_num(self):
@@ -74,6 +78,9 @@ class AlipayCampaignCompanyPhillips(AlipayCampaignCompany):
 class AlipayCampaignCompanyTE(AlipayCampaignCompany):
     def filter_position(self, position):
         return bool(re.match(r".*【Campus Hire】.*", position.title))
+
+    def modify_position_title(self, position):
+        position.title = position.title.replace("【Campus Hire】", "")
 
 
 class AlipayCampaignCompanyLiepin(AlipayCampaignCompany):
