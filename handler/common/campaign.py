@@ -34,7 +34,7 @@ class AlipayCampaignCompanyHandler(MetaBaseHandler):
 class AlipayCampaignPositionHandler(MetaBaseHandler):
     # @cache(ttl=60*60)
     @gen.coroutine
-    def _get(self, campaign_id):
+    def _get(self, campaign_id, company_id):
         """
         支付宝活动的多个公司的职位列表页面
         :param campaign_id: 活动id
@@ -44,12 +44,14 @@ class AlipayCampaignPositionHandler(MetaBaseHandler):
         if not campaign:
             return None
         else:
-            return self.render_string(template_name="h5/alipay/list.html", campaign=campaign)
+            selected_company = campaign.get_company(company_id)
+            return self.render_string(template_name="h5/alipay/list.html", campaign=campaign, company=selected_company)
 
     @handle_response
     @gen.coroutine
-    def get(self, campaign_id):
-        page_content = yield self._get(campaign_id)
+    def get(self, campaign_id, company_id):
+        company_id = int(company_id)
+        page_content = yield self._get(campaign_id, company_id)
         if not page_content:
             self.write_error(404)
         else:

@@ -152,7 +152,7 @@ platform_routes = common_routes + platform_routes
 qx_routes = [
 
     (r"/alipaycampaign/([A-Za-z0-9_]{1,32})/company/?",    handler.common.campaign.AlipayCampaignCompanyHandler,         {"event": "alipaycampaign/company"}),
-    (r"/alipaycampaign/([A-Za-z0-9_]{1,32})/position/?",   handler.common.campaign.AlipayCampaignPositionHandler,        {"event": "alipaycampaign/position"}),
+    (r"/alipaycampaign/([A-Za-z0-9_]{1,32})/company/(\d+)/position/?",   handler.common.campaign.AlipayCampaignPositionHandler,        {"event": "alipaycampaign/position"}),
 
     (r"/api/position/(?P<position_id>\d+)",          handler.qx.position.PositionHandler,                       {"event": "position_info"}),
     (r"/api/positions[\/]?",                         handler.qx.aggregation.AggregationHandler,                 {"event": "position_aggregation"}),
