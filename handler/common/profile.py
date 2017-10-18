@@ -381,58 +381,49 @@ class ProfileAPICustomCVHandler(BaseHandler):
         # --8<-- 检查profile --8<-----8<-----8<-----8<-----8<-----8<-----8<---
         has_profile, profile = yield self.profile_ps.has_profile(
             self.current_user.sysuser.id)
-
         if has_profile:
             profile_id = profile.get("profile", {}).get("id")
+        else:
+            # 还不存在 profile， 创建 profile
+            # 进入自定义简历创建 profile 逻辑的话，来源必定是企业号（我要投递）
+            result, data = yield self.profile_ps.create_profile(
+                self.current_user.sysuser.id,
+                source=const.PROFILE_SOURCE_PLATFORM_APPLY)
+
+            # 创建 profile 成功
+            if not result:
+                raise RuntimeError('profile creation error')
+
+            profile_id = data
+
+            self._log_customs.update(new_profile=const.YES)
+
+        # 创建完 profile 后再次获取 profile
+        has_profile, profile = yield self.profile_ps.has_profile(
+            self.current_user.sysuser.id)
 
         if custom_cv_profile_basic:
             # 已经有 profile，
-            if has_profile:
-                basic = profile.get("basic")
+            basic = profile.get("basic")
 
-                result, data = yield self.profile_ps.get_profile_basic(profile_id = profile_id)
+            result, data = yield self.profile_ps.get_profile_basic(profile_id = profile_id)
 
-                has_no_basic =  not result and data.status == 90010
+            has_no_basic =  not result and data.status == 90010
 
-                basic.update(custom_cv_profile_basic)
-                self.logger.debug("updated basic: %s" % basic)
+            basic.update(custom_cv_profile_basic)
+            self.logger.debug("updated basic: %s" % basic)
 
-                if has_no_basic:
-                    basic.update({'profile_id': profile_id})
-                    yield self.profile_ps.create_profile_basic(
-                        basic, profile_id, mode='c')
-                else:
-                    yield self.profile_ps.update_profile_basic(profile_id, basic)
-
+            if has_no_basic:
+                basic.update({'profile_id': profile_id})
+                yield self.profile_ps.create_profile_basic(
+                    basic, profile_id, mode='c')
             else:
-                # 还不存在 profile， 创建 profile
-                # 进入自定义简历创建 profile 逻辑的话，来源必定是企业号（我要投递）
-                result, data = yield self.profile_ps.create_profile(
-                    self.current_user.sysuser.id,
-                    source=const.PROFILE_SOURCE_PLATFORM_APPLY)
-
-                # 创建 profile 成功
-                if not result:
-                    raise RuntimeError('profile creation error')
-
-                profile_id = data
-
-                self._log_customs.update(new_profile=const.YES)
-
-                # 创建 profile_basic
-                custom_cv_profile_basic.update({'profile_id': profile_id})
-                result, data = yield self.profile_ps.create_profile_basic(
-                    custom_cv_profile_basic, profile_id, mode='c')
-
-                if result:
-                    self.logger.debug("profile basic created, id: %s" % data)
-                else:
-                    self.logger.error("profile_basic creation failed, res: %s" % data)
+                yield self.profile_ps.update_profile_basic(profile_id, basic)
 
         # 更新多条 education, workexp, projectexp, language, awards,
         # 更新单条 intention, works
         yield self.profile_ps.update_profile_embedded_info_from_cv(
-            profile_id, custom_cv)
+            profile_id, profile, custom_cv)
 
         # 更新 other
         if custom_cv_other_raw:
