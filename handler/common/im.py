@@ -3,7 +3,7 @@
 import ujson
 import traceback
 from tornado import gen, websocket, ioloop
-
+import functools
 import conf.common as const
 import conf.message as msg
 from conf.protocol import WebSocketCloseCode
@@ -231,7 +231,10 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
             self.room_id, user_message, self.position_id)
 
         if self.bot_enabled:
-            yield self._handle_chatbot_message(user_message)
+            # 由于没有延迟的发送导致hr端轮训无法订阅到publish到redis的消息　所以这里做下延迟处理
+            delay_robot = functools.partial(self._handle_chatbot_message, user_message)
+            ioloop.IOLoop.current().call_later(1, delay_robot)
+            # yield self._handle_chatbot_message(user_message) # 直接调用方式
 
     @gen.coroutine
     def _handle_chatbot_message(self, user_message):
