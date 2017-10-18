@@ -48,7 +48,7 @@ PROFILE_NEW = '/app/profile/new'
 IMAGE_URL = '/image'
 
 CAMPAIGN_COMPANY_PATH = "/alipaycampaign/{}/company"
-CAMPAIGN_POSITION_PATH = "/alipaycampaign/{}/position"
+CAMPAIGN_POSITION_PATH = "/alipaycampaign/{}/company/{}/position"
 
 # ============================ 微信端Path结束 ============================
 

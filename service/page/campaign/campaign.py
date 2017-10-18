@@ -18,7 +18,14 @@ class AlipayCampaign:
         self.companies = []
 
     def add_company(self, alipay_campaign_company):
-        self.companies.append(alipay_campaign_company)  # TODO: 去重
+        self.companies.append(alipay_campaign_company)
+
+    def get_company(self, company_id):
+        selected_companies = [company for company in self.companies if company.id == company_id]
+        if selected_companies:
+            return selected_companies[0]
+        else:
+            return None
 
 
 class AlipayCampaignCompany:
