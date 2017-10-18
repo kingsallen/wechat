@@ -662,9 +662,10 @@ class ProfilePageService(PageService):
                     record=record, profile_id=profile_id)
 
     @gen.coroutine
-    def update_profile_embedded_info_from_cv(self, profile_id, custom_cv):
+    def update_profile_embedded_info_from_cv(self, profile_id, profile, custom_cv):
         """使用 custom_cv 更新 profile 的复合字段
-            (education, workexp, projectexp, )
+            (education, workexp, projectexp, intention, works )
+        :param profile_id: profile_id
         :param profile: profile
         :param custom_cv: 自定义简历模版输出 (dict)
         """
@@ -680,8 +681,6 @@ class ProfilePageService(PageService):
 
         yield self.custom_cv_update_profile_awards(profile_id, custom_cv)
 
-        has_profile, profile = yield self.infra_profile_ds.get_profile_by_profile_id(
-            profile_id)
         # 单条复合字段
         yield self.custom_cv_update_profile_intention(profile, custom_cv)
 
