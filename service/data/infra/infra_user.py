@@ -7,6 +7,8 @@ import conf.path as path
 from util.common import ObjectDict
 from util.tool.http_tool import http_get, http_post, http_put, unboxing
 
+from util.common.decorator import cache
+
 
 class InfraUserDataService(DataService):
     """对接 User服务
@@ -20,18 +22,6 @@ class InfraUserDataService(DataService):
         })
 
         ret = yield http_get(path.INFRA_USER_INFO, params)
-        raise gen.Return(ret)
-
-    @gen.coroutine
-    def post_user_wxbindmobile(self, **kwargs):
-        params = ObjectDict({
-            "unionid": kwargs["unionid"],
-            "mobile":  kwargs["mobile"],
-            "code":    kwargs.get("code" "")
-        })
-
-        ret = yield http_post(path.INFRA_USER_COMBINE, params)
-
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -204,6 +194,7 @@ class InfraUserDataService(DataService):
         ret = yield http_post(path.INFRA_USER_SETTINGS, params)
         return ret
 
+    @cache(ttl=60)
     @gen.coroutine
     def is_valid_employee(self, user_id, company_id):
         params = {

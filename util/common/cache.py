@@ -79,7 +79,11 @@ class BaseRedis(object):
             return [ObjectDict(item) for item in value]
 
         elif isinstance(value, str):
-            return value
+            mapping = {'True': True, 'False': False}
+            if value in mapping:
+                return mapping[value]
+            else:
+                return value
 
         return default
 

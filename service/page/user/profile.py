@@ -118,7 +118,7 @@ class ProfilePageService(PageService):
         """
 
         result, data = yield self.get_profile_basic(profile_id)
-        return bool(result) or (data.status is not infra_const.InfraStatusCode.not_exists)
+        return bool(result) or not (data.status == infra_const.InfraStatusCode.not_exist)
 
 
     @gen.coroutine
@@ -638,7 +638,6 @@ class ProfilePageService(PageService):
                 record=record,
                 profile_id=profile_id)
 
-
     @gen.coroutine
     def custom_cv_update_profile_works(self, profile, custom_cv):
         profile_id = profile['profile']['id']
@@ -663,16 +662,13 @@ class ProfilePageService(PageService):
                     record=record, profile_id=profile_id)
 
     @gen.coroutine
-    def update_profile_embedded_info_from_cv(self, profile, custom_cv):
+    def update_profile_embedded_info_from_cv(self, profile_id, profile, custom_cv):
         """使用 custom_cv 更新 profile 的复合字段
-            (education, workexp, projectexp, )
+            (education, workexp, projectexp, intention, works )
+        :param profile_id: profile_id
         :param profile: profile
         :param custom_cv: 自定义简历模版输出 (dict)
         """
-
-        profile_id = profile.get('profile',{}).get('id')
-        if not profile_id:
-            return
 
         # 多条复合字段
         yield self.custom_cv_update_profile_education(profile_id, custom_cv)
