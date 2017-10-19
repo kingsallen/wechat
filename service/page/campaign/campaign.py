@@ -66,7 +66,7 @@ class AlipayCampaignCompany:
     @property
     def cities(self):
         all_cities = set(position.city for position in self.positions if bool(position.city))
-        return " | ".join(list(all_cities)[:3])
+        return " | ".join(list(all_cities)[:3]) + ("等" if len(all_cities) > 3 else "")
 
     def filter_position(self, position):
         return True
