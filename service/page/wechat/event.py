@@ -482,7 +482,14 @@ class EventPageService(PageService):
             type = int(bin(int(int_scene_id))[:7],base=2)
             real_user_id = int(bin(int(int_scene_id))[7:],base=2)
             """
-              type: "11000" = 24 pc端用户解绑, "11001" = 25 pc端用户绑定, 11010=26 注册用二维码. 10000=16, 10001=17,
+              type: 
+              "11000" = 24 pc端用户解绑,
+              "11001" = 25 pc端用户绑定,
+               11010=26 pc注册用二维码，
+               11011 =27 pc扫码修改手机。 
+               
+              hr 端 10000=16, 10001=17,
+              
               见 https://wiki.moseeker.com/weixin.md
             """
 
@@ -547,8 +554,8 @@ class EventPageService(PageService):
                     yield self.infra_user_ds.post_scanresult(params)
                     raise gen.Return()
 
-            elif type == 24:
-                # pc端用户解绑
+            elif type == 24 or type == 27:
+                # pc端用户解绑,pc扫码修改手机
                 if wxuser:
                     # 验证扫描者的openid(FromUserName)是否与EventKey里面隐含的user_id匹配
                     # 不匹配, 表示被其他帐号扫描了, 提示非本人扫描的提示
