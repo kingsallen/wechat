@@ -1,9 +1,5 @@
 # coding=utf-8
 
-# @Time    : 4/13/17 11:42
-# @Author  : panda (panyuxin@moseeker.com)
-# @File    : position.py
-# @DES     : 聚合号职位详情页
 
 import random
 from tornado import gen
@@ -139,11 +135,10 @@ class PositionHandler(BaseHandler):
     def _make_hr_info(self, publisher, company_info):
         """根据职位 publisher 返回 hr 的相关信息 tuple"""
         hr_account, hr_wx_user = yield self.position_ps.get_hr_info(publisher)
-        hrheadimgurl = (
-            hr_account.headimgurl or hr_wx_user.headimgurl or
-            company_info.logo or const.HR_HEADIMG
-        )
-        raise gen.Return(hrheadimgurl)
+
+        hrheadimgurl = hr_account.headimgurl or hr_wx_user.headimgurl or \
+                       const.HR_HEADIMG
+        return hrheadimgurl
 
     @gen.coroutine
     def _make_jd_detail(self, position_info, pos_item):

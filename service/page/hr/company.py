@@ -11,7 +11,6 @@ from service.page.base import PageService
 from util.tool.url_tool import make_static_url
 from util.tool.dict_tool import sub_dict
 from util.tool.str_tool import is_odd, split, gen_salary
-from conf import platform
 
 cached_company_sug_wechat = None
 
@@ -232,7 +231,8 @@ class CompanyPageService(PageService):
         """
 
         res_list = list()
-        ret = yield self.thrift_position_ds.get_company_positions(company_id, page_no, page_size)
+        ret = yield self.thrift_position_ds.get_company_positions(
+                company_id, page_no, page_size)
         if not ret.data:
             return res_list
 
@@ -288,3 +288,38 @@ class CompanyPageService(PageService):
         res = yield self.infra_company_ds.get_group_company_list(company_id)
 
         return res
+
+    @gen.coroutine
+    def get_main_hr_info(self, company_id: int) -> dict:
+        """根据company_id获取该公司主hr信息，
+        如果该公司有超级账号，返回超级账号hr信息，
+        如果该公司有普通账号，返回普通账号hr信息，
+        如果该公司没有hr信息，返回默认信息
+        :param company_id: 公司id
+        :return a dict with hr_info, including hr_id and hr_logo
+                e.g. {'hr_id': 123, 'hr_logo': '/path/to/hr/logo.png'}
+        """
+        ret = dict(hr_id=0, hr_logo=make_static_url(const.HR_HEADIMG))
+
+        main_hr_account = yield self.user_hr_account_ds.get_hr_account(
+            conds={'company_id': company_id, 'disable': 1, 'account_type': 0}
+        )
+
+        if not main_hr_account:
+            main_hr_account = yield self.user_hr_account_ds.get_hr_account(
+                conds={'company_id':   company_id, 'disable': 1,
+                       'account_type': 2}
+            )
+
+        assert main_hr_account
+        ret.update(hr_id=main_hr_account.id)
+        if main_hr_account.headimgurl:
+            ret.update(hr_logo=make_static_url(main_hr_account.headimgurl))
+
+        elif main_hr_account.wxuser_id:
+            hr_wxuser = yield self.user_wx_user_ds.get_wxuser(
+                id=main_hr_account.wxuser_id)
+            if hr_wxuser:
+                ret.update(hr_logo=make_static_url(hr_wxuser.headimgurl))
+
+        return ret
