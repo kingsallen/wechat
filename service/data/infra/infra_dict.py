@@ -97,6 +97,22 @@ class InfraDictDataService(DataService):
 
         return res
 
+    @gen.coroutine
+    def get_sms_country_code_list(self):
+        """仅获取国家区号列表
+        将 86 放在第一个
+        """
+        countries_res = yield http_get(path.DICT_COUNTRY)
+
+        result, data = unboxing(countries_res)
+
+        code_list = [str(country['code']) for country in data
+                     if country['sms_enabled']]
+
+        code_list.insert(0, code_list.pop(code_list.index('86')))
+
+        return code_list
+
     @staticmethod
     def make_countries_result(countries_res, continent_res):
         """获取国籍列表，按大洲分割 """

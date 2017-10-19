@@ -215,7 +215,8 @@ def mobile_validate(mobile):
     """
     if isinstance(mobile, int):
         mobile = str(mobile)
-    p = re.compile(r'\d+')
+
+    p = re.compile(r'^(\d+-)?(\d+)$')
     return p.match(mobile) is not None
 
 
@@ -272,10 +273,21 @@ def is_other(uchar):
     return not (is_chinese(uchar) or is_number(uchar) or is_alphabet(uchar))
 
 
+def split_phone_number(phone_number):
+    assert re.match(r'^(\d+-)?(\d+)$', phone_number)
+
+    numbers = phone_number.split("-")
+    if len(numbers) == 1:
+        return '', numbers[0]
+    elif len(numbers) == 2:
+        return tuple(numbers)
+    else:
+        raise ValueError('phone_number(%s) format is incorrect' % phone_number)
+
+
 def phone_number_without_country_code(phone_number):
     """从国家编号-电话号码中分离出电话号码"""
-    assert re.match(r'^(\d+-)?(\d+)$', phone_number)
-    return first(phone_number.split("-")[-1:])
+    return split_phone_number(phone_number)[1]
 
 
 def get_uucode(lenth=36):
