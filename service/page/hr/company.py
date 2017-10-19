@@ -318,7 +318,7 @@ class CompanyPageService(PageService):
 
         elif main_hr_account.wxuser_id:
             hr_wxuser = yield self.user_wx_user_ds.get_wxuser(
-                id=main_hr_account.wxuser_id)
+                conds={'id': main_hr_account.wxuser_id })
             if hr_wxuser:
                 ret.update(hr_logo=make_static_url(hr_wxuser.headimgurl))
 
