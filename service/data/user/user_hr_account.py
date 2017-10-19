@@ -21,7 +21,7 @@ class UserHrAccountDataService(DataService):
             fields = list(self.user_hr_account_dao.fields_map.keys())
 
         response = yield self.user_hr_account_dao.get_record_by_conds(
-            conds, fields, appends)
+            conds, fields, appends=appends)
 
         raise gen.Return(response)
 

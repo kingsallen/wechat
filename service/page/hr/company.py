@@ -302,15 +302,24 @@ class CompanyPageService(PageService):
         ret = dict(hr_id=0, hr_logo=make_static_url(const.HR_HEADIMG))
 
         main_hr_account = yield self.user_hr_account_ds.get_hr_account(
-            conds={'company_id': company_id, 'disable': 1})
+            conds={'company_id': company_id, 'disable': 1, 'account_type': 0}
+        )
 
-        if main_hr_account:
-            ret.update(hr_id=main_hr_account.id)
+        if not main_hr_account:
+            main_hr_account = yield self.user_hr_account_ds.get_hr_account(
+                conds={'company_id':   company_id, 'disable': 1,
+                       'account_type': 2}
+            )
 
-            if not main_hr_account.headimgurl and main_hr_account.wxuser_id:
-                hr_wxuser = yield self.user_wx_user_ds.get_wxuser(
-                    id=main_hr_account.wxuser_id)
-                if hr_wxuser:
-                    ret.update(hr_logo=make_static_url(hr_wxuser.headimgurl))
+        assert main_hr_account
+        ret.update(hr_id=main_hr_account.id)
+        if main_hr_account.headimgurl:
+            ret.update(hr_logo=make_static_url(main_hr_account.headimgurl))
+
+        elif main_hr_account.wxuser_id:
+            hr_wxuser = yield self.user_wx_user_ds.get_wxuser(
+                id=main_hr_account.wxuser_id)
+            if hr_wxuser:
+                ret.update(hr_logo=make_static_url(hr_wxuser.headimgurl))
 
         return ret
