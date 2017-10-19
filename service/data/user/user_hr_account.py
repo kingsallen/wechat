@@ -22,6 +22,7 @@ class UserHrAccountDataService(DataService):
 
         response = yield self.user_hr_account_dao.get_record_by_conds(
             conds, fields, appends)
+
         raise gen.Return(response)
 
     @gen.coroutine

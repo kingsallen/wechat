@@ -302,9 +302,7 @@ class CompanyPageService(PageService):
         ret = dict(hr_id=0, hr_logo=make_static_url(const.HR_HEADIMG))
 
         main_hr_account = yield self.user_hr_account_ds.get_hr_account(
-            conds={'company_id': company_id, 'disable': 1},
-            fields=['id', 'wxuser_id', 'headimgurl'],
-            appends=['order by account_type', 'limit 1'])
+            conds={'company_id': company_id, 'disable': 1})
 
         if main_hr_account:
             ret.update(hr_id=main_hr_account.id)
