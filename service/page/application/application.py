@@ -171,13 +171,10 @@ class ApplicationPageService(PageService):
         else:
             country_code = profile_basic.get('country_code')
 
-            if country_code and country_code != '86':
-                profile_basic.mobile = "%s-%s" % (
-                    profile_basic.get("country_code"),
-                    profile_basic.get("mobile")
-                )
-            else:
-                profile_basic.mobile = profile_basic.get("mobile")
+            profile_basic.mobile = "%s-%s" % (
+                country_code or '86',
+                profile_basic.get("mobile")
+            )
         # 手机号结束
 
         # 强制将姓名设为空
