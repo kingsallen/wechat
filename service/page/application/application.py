@@ -252,6 +252,7 @@ class ApplicationPageService(PageService):
         for w in profile.get('works', []):
             el = ObjectDict(
                 id=w.get('id'),
+                works_cover=make_static_url(w.get('cover')) if w.get('cover') else None,
                 works_url=w.get('url', ''),
                 works_description=w.get('description', ''))
             works.append(el)
