@@ -42,11 +42,19 @@ class UserCompanyPageService(PageService):
 
         # 拼装模板数据
         data.header = temp_data_tool.make_header(company)
+
+        # 实时检查用户对于公众号的关注情况
+        follow = self.constant.NO
+        check_follow_ret = yield self.user_wx_user_ds.get_wxuser(
+            conds={'id': user.wxuser.id}, fields=['is_subscribe'])
+        if check_follow_ret and check_follow_ret.is_subscribe:
+            follow = self.constant.YES
+        # 检查关注情况结束
+
         data.relation = ObjectDict({
             'want_visit': self.constant.YES if vst_cmpy else self.constant.NO,
             'qrcode': self._make_qrcode(user.wechat.qrcode),
-            'follow': self.constant.YES if user.wxuser.is_subscribe
-            else self.constant.NO,
+            'follow': follow
         })
 
         # 玛氏定制需求
