@@ -651,7 +651,7 @@ class ApplicationPageService(PageService):
 
             self.logger.debug("[opt_send_recommender_msg]link:{}".format(link))
 
-            application_notice_to_recommender_tpl(current_user.wechat.id,
+            yield application_notice_to_recommender_tpl(current_user.wechat.id,
                                                   current_user.recom.openid,
                                                   link,
                                                   current_user.sysuser.name or current_user.sysuser.nickname,
@@ -709,7 +709,7 @@ class ApplicationPageService(PageService):
                     "wechat_id": self.settings.helper_wechat_id,
                 })
                 if hr_wxuser.openid:
-                    is_ok = application_notice_to_hr_tpl(
+                    is_ok = yield application_notice_to_hr_tpl(
                         self.settings.helper_wechat_id,
                         hr_wxuser.openid,
                         hr_info.name or hr_wxuser.nickname,
