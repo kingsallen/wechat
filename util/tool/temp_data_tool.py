@@ -283,7 +283,7 @@ def make_team_detail_template(locale, team, members, modulename, detail_media_li
         template.append(template3(
             locale.translate("team_team_is_hiring").format(teamname_field),
             positions, handler_params))
-        
+
     if not vst and team.is_show:
         template.append(template5())
     if other_teams:
