@@ -284,16 +284,16 @@ class EmployeePageService(PageService):
         return ret
 
     @gen.coroutine
-    def get_employee_rewards(self, employee_id, company_id, page_number=1, page_size=10):
+    def get_employee_rewards(self, employee_id, company_id, locale, page_number=1, page_size=10):
         """获取员工积分信息"""
 
         reason_txt_fmt_map = {
-            const.RECRUIT_STATUS_RECOMCLICK_ID:      "{}查看了职位",
-            const.RECRUIT_STATUS_APPLY_ID:           "{}投递了简历",
-            const.RECRUIT_STATUS_CVPASSED_ID:        "{}的简历通过了评审",
-            const.RECRUIT_STATUS_OFFERED_ID:         "{}通过了面试",
-            const.RECRUIT_STATUS_FULL_RECOM_INFO_ID: "完善了{}的信息",
-            const.RECRUIT_STATUS_HIRED_ID:           "{}成功入职",
+            const.RECRUIT_STATUS_RECOMCLICK_ID:      "awards_reason_saw_profile",
+            const.RECRUIT_STATUS_APPLY_ID:           "awards_reason_aplied",
+            const.RECRUIT_STATUS_CVPASSED_ID:        "awards_reason_review_passed",
+            const.RECRUIT_STATUS_OFFERED_ID:         "awards_reason_passed_interview",
+            const.RECRUIT_STATUS_FULL_RECOM_INFO_ID: "awards_reason_fullfil_info",
+            const.RECRUIT_STATUS_HIRED_ID:           "awards_reason_on_board"
         }
 
         res_award_rules = []
@@ -310,7 +310,7 @@ class EmployeePageService(PageService):
         if reward_configs:
             for rc in reward_configs:
                 e = ObjectDict()
-                e.name = rc.statusName
+                e.name = locale.translate(rc.statusName)
                 e.point = rc.points
                 res_award_rules.append(e)
 
@@ -320,7 +320,7 @@ class EmployeePageService(PageService):
 
                 # 根据申请进度由系统自动追加的积分
                 if reward_vo.type in reason_txt_fmt_map and reward_vo.berecomName:
-                    e.reason = reason_txt_fmt_map[reward_vo.type].format(reward_vo.berecomName)
+                    e.reason = locale.translate(reason_txt_fmt_map[reward_vo.type]).format(reward_vo.berecomName)
                 # HR 手动增减积分添加的原因
                 elif reward_vo.type == 0:
                     e.reason = reward_vo.reason

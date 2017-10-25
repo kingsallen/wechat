@@ -66,7 +66,7 @@ class CompanyHandler(BaseHandler):
 
         if self.flag_should_display_newjd:
             data = yield self.user_company_ps.get_company_data(
-                self.params, company, self.current_user)
+                self.locale, self.params, company, self.current_user)
 
             self.params.share = self._share(company)
             self.render_page(template_name='company/profile.html', data=data)

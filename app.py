@@ -27,6 +27,7 @@ import tornado.httpserver
 import tornado.web
 import tornado.ioloop
 import tornado.concurrent
+import tornado.locale
 from tornado.options import options
 
 from setting import settings
@@ -35,6 +36,7 @@ from route import platform_routes, qx_routes, help_routes
 from handler.common.navmenu import NavMenuModule
 
 from globals import env, logger, redis, es
+
 
 class Application(tornado.web.Application):
 
@@ -67,19 +69,26 @@ def make_app():
 
 def main():
     application = make_app()
-
     try:
-        logger.info('Wechat server starting on port: {0}'.format(options.port))
-        http_server = tornado.httpserver.HTTPServer(application, xheaders=True)
-        http_server.listen(options.port)
+        logger.info('Wechat server starting on port: {}'.format(options.port))
+
+        tornado.locale.load_translations(settings.locale_path)
+        tornado.locale.set_default_locale(settings.default_locale)
+        logger.info("Supported locales: {}".format(', '.join(tornado.locale.get_supported_locales())))
 
         tornado.ioloop.IOLoop.instance().set_blocking_log_threshold(
-            settings['blocking_log_threshold'])
+            settings.blocking_log_threshold)
+
+        http_server = tornado.httpserver.HTTPServer(application, xheaders=True)
+        http_server.listen(options.port)
         tornado.ioloop.IOLoop.instance().start()
+
     except Exception as e:
         logger.error(e)
+
     finally:
         logger.info('Wechat server closing on port: {0}'.format(options.port))
+
 
 if __name__ == "__main__":
     main()

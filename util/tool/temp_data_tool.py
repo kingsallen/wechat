@@ -169,13 +169,13 @@ def template51(resource):
     })
 
 
-def make_header(company, team_index=False, team=None, **extra):
+def make_header(locale, company, team_index=False, team=None, **extra):
     if team:
         name = team.name
         description = team.slogan
     else:
         if team_index:
-            name = '我们的' + extra.get("teamname_custom")
+            name = locale.translate("company_our_teams").format(extra.get("teamname_custom"))
         else:
             name = company.abbreviation or company.name
         description = '' if team_index else company.slogan
@@ -245,7 +245,7 @@ def make_other_team_data(team, res, handler_params):
     }
 
 
-def make_team_detail_template(team, members, modulename, detail_media_list, positions,
+def make_team_detail_template(locale, team, members, modulename, detail_media_list, positions,
                               other_teams, res_dic, handler_params, teamname_custom=None, vst=False):
     template = []
     teamname_field = teamname_custom["teamname_custom"] if teamname_custom else '团队'
@@ -256,7 +256,7 @@ def make_team_detail_template(team, members, modulename, detail_media_list, posi
         template.append(
             template1(
                 sub_type='full',
-                title=teamname_field + '介绍',
+                title=locale.translate('company_team_intro'.format(teamname_field)),
                 data=[{
                     'sub_title': '',
                     'longtext': team.description,
@@ -286,7 +286,7 @@ def make_team_detail_template(team, members, modulename, detail_media_list, posi
     if other_teams:
         template.append(template4(
             sub_type=0,
-            title='其他' + teamname_field,
+            title=locale.translate('company_other_text').format(teamname_field),
             data=[
                 make_other_team_data(
                     team=t,

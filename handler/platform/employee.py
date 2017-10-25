@@ -95,8 +95,9 @@ class AwardsHandler(BaseHandler):
             rewards_response = yield self.employee_ps.get_employee_rewards(
                 employee_id=self.current_user.employee.id,
                 company_id=self.current_user.company.id,
+                locale=self.locale,
                 page_number=int(self.params.page_number),
-                page_size=int(self.params.page_size)
+                page_size=int(self.params.page_size),
             )
 
             rewards_response.update({
@@ -202,8 +203,11 @@ class EmployeeBindHandler(BaseHandler):
             # 需要将员工两字改成员工自定义称谓
             if result_message == messages.EMPLOYEE_BINDING_FAILURE_INFRA and \
                 self.current_user.company.conf_employee_slug:
-                result_message = messages.EMPLOYEE_BINDING_FAILURE.format(
-                    self.current_user.company.conf_employee_slug)
+                result_message = self.current_user.company.conf_employee_slug + \
+                                 self.locale.translate(messages.EMPLOYEE_BINDING_FAILURE)
+            elif result_message.startswith(messages.EMPLOYEE_BINDING_FAILURE_EMAIL_OCCUPIED_INFRA):
+                result_message = self.locale.translate(
+                    messages.EMPLOYEE_BINDING_FAILURE_EMAIL_OCCUPIED)
 
             self.send_json_error(message=result_message)
             return
@@ -390,9 +394,10 @@ class CustomInfoHandler(BaseHandler):
             message = messages.EMPLOYEE_BINDING_CUSTOM_FIELDS_DONE.format(self.current_user.company.conf_employee_slug)
         else:
             if employee.authMethod == const.USER_EMPLOYEE_AUTH_METHOD.EMAIL:
-                message = messages.EMPLOYEE_BINDING_EMAIL_DONE
+                message = [self.locale.translate(messages.EMPLOYEE_BINDING_EMAIL_DONE0),
+                           self.locale.translate(messages.EMPLOYEE_BINDING_EMAIL_DONE1)]
             else:
-                message = messages.EMPLOYEE_BINDING_SUCCESS.format(self.current_user.company.conf_employee_slug)
+                message = self.current_user.company.conf_employee_slug + self.locale.translate(messages.EMPLOYEE_BINDING_SUCCESS)
 
         self.render(
             template_name='refer/weixin/employee/employee_binding_tip_v2.html',
@@ -400,7 +405,7 @@ class CustomInfoHandler(BaseHandler):
             messages=message,
             nexturl=next_url,
             source=1,
-            button_text=messages.EMPLOYEE_BINDING_EMAIL_BTN_TEXT
+            button_text=self.locale.translate(messages.EMPLOYEE_BINDING_EMAIL_BTN_TEXT)
         )
 
 
@@ -429,9 +434,10 @@ class BindedHandler(BaseHandler):
 
         else:
             if fe_bind_status == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS:
-                message = messages.EMPLOYEE_BINDING_SUCCESS.format(self.current_user.company.conf_employee_slug)
+                message = self.current_user.company.conf_employee_slug + self.locale.translate(messages.EMPLOYEE_BINDING_SUCCESS)
             else:
-                message = messages.EMPLOYEE_BINDING_EMAIL_DONE
+                message = [self.locale.translate(messages.EMPLOYEE_BINDING_EMAIL_DONE0),
+                           self.locale.translate(messages.EMPLOYEE_BINDING_EMAIL_DONE1)]
 
             self.render(
                 template_name='refer/weixin/employee/employee_binding_tip_v2.html',

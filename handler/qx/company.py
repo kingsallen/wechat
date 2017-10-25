@@ -57,7 +57,7 @@ class CompanyHandler(BaseHandler):
         else:
             # 构造公司企业新主页
             company_data = yield self.user_company_ps.get_company_data(
-                self.params, company_info, self.current_user)
+                self.locale, self.params, company_info, self.current_user)
             templates = company_data.templates
             cover = company_data.header.banner
 

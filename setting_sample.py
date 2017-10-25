@@ -23,6 +23,8 @@ settings['xsrf_cookies'] = True
 settings['cookie_secret'] = 'EAB1D2AB05EEF04D35BA5FDF789DD6A3'
 settings['debug'] = True
 settings['log_level'] = 'DEBUG'
+settings['lang'] = 'zh_CN'
+
 settings['static_domain'] = '//static2.dqprism.com'
 # 和前端工程师远程调试时可以开启此项,并配置remote_debug_ip选项
 settings['remote_debug'] = False
@@ -30,6 +32,7 @@ settings['remote_debug'] = False
 settings['remote_debug_ip'] = 'http://0.0.0.0:3003'
 
 settings['root_path'] = os.path.join(os.path.dirname(__file__), '')
+settings['locale_path'] = os.path.join(settings['root_path'], 'locale')
 settings['template_path'] = os.path.join(settings['root_path'], 'template')
 settings['static_path'] = os.path.join(settings['root_path'], 'static')
 settings['fonts_path'] = os.path.join(settings['root_path'], 'fonts')
