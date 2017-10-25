@@ -9,7 +9,7 @@ import conf.common as const
 import conf.qx as qx_const
 from service.page.base import PageService
 from util.common import ObjectDict
-from util.tool.str_tool import split, gen_salary, gen_degree, gen_experience
+from util.tool.str_tool import split, gen_salary, gen_degree_v2, gen_experience_v2
 from util.tool.url_tool import make_static_url
 
 
@@ -88,9 +88,9 @@ class AggregationPageService(PageService):
         return es_res
 
     @gen.coroutine
-    def opt_agg_positions(self, es_res, user_id, city):
+    def opt_agg_positions(self, locale, es_res, user_id, city):
         """ 处理搜索职位结果
-        :param es_res: 
+        :param es_res:
         :param user_id:
         :param city: 如果用户在搜索条件里面输入了选择的城市，
         那么不管该职位实际在哪些城市发布，在显示在列表页的时候，只显示用户选择的地址
@@ -122,8 +122,8 @@ class AggregationPageService(PageService):
                     "title": item.get("_source").get("position").get("title"),
                     "salary": gen_salary(item.get("_source").get("position").get("salary_top"), item.get("_source").get("position").get("salary_bottom")),
                     "team": item.get("_source").get("team", {}).get("name",""),
-                    "degree": gen_degree(int(item.get("_source").get("position").get("degree")), item.get("_source").get("position").get("degree_above")),
-                    "experience":  gen_experience(item.get("_source").get("position").get("experience"), item.get("_source").get("position").get("experience_above")),
+                    "degree": gen_degree_v2(int(item.get("_source").get("position").get("degree")), item.get("_source").get("position").get("degree_above"), locale),
+                    "experience":  gen_experience_v2(item.get("_source").get("position").get("experience"), item.get("_source").get("position").get("experience_above"), locale),
                     "has_team": True if item.get("_source").get("team", {}) else False,
                     "team_img": team_img,
                     "job_img": job_img,

@@ -280,7 +280,10 @@ def make_team_detail_template(locale, team, members, modulename, detail_media_li
 
     # 适应没有数据不显示模板块
     if positions:
-        template.append(template3(teamname_field + '在招职位', positions, handler_params))
+        template.append(template3(
+            locale.translate("team_team_is_hiring").format(teamname_field),
+            positions, handler_params))
+        
     if not vst and team.is_show:
         template.append(template5())
     if other_teams:
