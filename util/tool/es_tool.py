@@ -65,8 +65,10 @@ def init_gamma_basic(query, city, industry, salary_bottom, salary_top, salary_ne
             "all_count": ObjectDict({
                 "scripted_metric": ObjectDict({
                     "init_script": "_agg['transactions'] = []",
-                    "map_script": "banner=_source.company.banner;impression=_source.company.impression;company_id = _source.position.company_id; "
-                                  "if(banner!=''&&impression!=''&&company_id  in _agg['transactions'] ){}else{_agg['transactions'].add(company_id)};",
+                    "map_script": "company=_source.company;if(company){"
+                                  "banner=company['banner'];impression=company['impression'];company_id = _source.position.company_id; "
+                                  "if(banner!=''&&impression!=''&&company_id  in _agg['transactions'] ){}else{"
+                                  "_agg['transactions'].add(company_id)}};",
                     "reduce_script": "jsay=[];for(a in _aggs){for(ss in a){if(ss in jsay){}else{jsay.add(ss);}}};return jsay",
                     "combine_script": "jsay=[];for(a in _agg['transactions']){for(ss in a){jsay.add(ss)}};return jsay"
                 })

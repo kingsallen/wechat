@@ -19,6 +19,7 @@ from util.tool.str_tool import to_str, from_hex, match_session_id, \
     languge_code_from_ua
 from util.tool.url_tool import url_subtract_query, make_url
 
+
 from setting import settings
 
 
@@ -479,13 +480,9 @@ class BaseHandler(MetaBaseHandler):
             self.clear_cookie(name=const.COOKIE_SESSIONID)
 
         if sysuser:
-            sysuser.headimg = self.static_url(sysuser.headimg or const.SYSUSER_HEADIMG)
-            sysuser.mobileverified = bool(sysuser.username.isdigit())
-            if sysuser.mobileverified:
-                sysuser.mobile = int(sysuser.username)
+            sysuser = self.user_ps.adjust_sysuser(sysuser)
 
         # 对于非微信环境，用户登录后，如果帐号已经绑定微信，则同时获取微信用户信息
-
         if sysuser.unionid and not session.qxuser:
             session.qxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
                 unionid=sysuser.unionid, wechat_id=self.settings['qx_wechat_id'])

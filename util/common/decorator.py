@@ -22,6 +22,7 @@ from util.common.cipher import encode_id
 from util.tool.dict_tool import sub_dict
 from util.tool.str_tool import to_hex
 from util.tool.json_tool import json_dumps
+from globals import logger
 
 
 def handle_response(func):
@@ -76,7 +77,7 @@ def cache(prefix=None, key=None, ttl=60, hash=True, lock=True, separator=":"):
 
         key, ttl, hash, lock, prefix, separator = key_, ttl_, hash_, lock_, prefix_, separator_
 
-        prefix = prefix if prefix else "{0}:{1}".format(func.__module__.split(".")[-1], func.__name__)
+        prefix = prefix if prefix else "{0}:{1}".format(func.__module__.split(".")[-1], func.__qualname__)
 
         @functools.wraps(func)
         @gen.coroutine
@@ -108,11 +109,17 @@ def cache(prefix=None, key=None, ttl=60, hash=True, lock=True, separator=":"):
                                                                     redis_key=redis_key)
 
                 if base_cache.exists(redis_key):
-                    cache_data = base_cache.get(redis_key)
+                    try:
+                        cache_data = base_cache.get(redis_key)
+                    except Exception as e:
+                        logger.error(e)
                 else:
                     cache_data = yield func(*args, **kwargs)
                     if cache_data is not None:
-                        base_cache.set(redis_key, cache_data, ttl)
+                        try:
+                            base_cache.set(redis_key, cache_data, ttl)
+                        except Exception as e:
+                            logger.error(e)
 
                 raise gen.Return(cache_data)
 

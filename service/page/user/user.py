@@ -9,7 +9,7 @@ import conf.common as const
 from service.page.base import PageService
 
 from util.common import ObjectDict
-from util.tool import http_tool, str_tool
+from util.tool import http_tool, str_tool, url_tool
 
 from setting import settings
 
@@ -348,15 +348,18 @@ class UserPageService(PageService):
         return ret
 
     @gen.coroutine
-    def update_user(self, user_id, **kwargs):
+    def update_user(self, user_id, escape_mobile=False, **kwargs):
         kwargs = ObjectDict(kwargs)
         fields = {}
-        if kwargs.email:
+        if 'email' in kwargs:
             fields.update(email=str(kwargs.email))
-        if kwargs.mobile:
-            phone_number = str_tool.phone_number_without_country_code(str(kwargs.mobile))
+
+        if not escape_mobile and 'mobile' in kwargs:
+            country_code, phone_number = str_tool.split_phone_number(str(kwargs.mobile))
             fields.update(mobile=int(phone_number))
-        if kwargs.name:
+            fields.update(country_code=country_code)
+
+        if 'name' in kwargs:
             fields.update(name=str(kwargs.name))
 
         ret = 0
@@ -466,4 +469,26 @@ class UserPageService(PageService):
             return False
 
         ret = yield self.thrift_searchcondition_ds.add_user_viewed_position(user_id, position_id)
+        return ret
+
+    @staticmethod
+    def adjust_sysuser(sysuser):
+        """此方法将 sysuser 修改成适合微信端使用的结构，
+        以后可以转换成domain对象"""
+
+        ret = sysuser
+
+        ret.headimg = url_tool.make_static_url(ret.headimg or const.SYSUSER_HEADIMG)
+        ret.mobileverified = bool(ret.username.isdigit())
+
+        if ret.mobileverified:
+            ret.mobile = int(ret.username)
+
+        ret.mobile_display = ''
+        if ret.mobile:
+            ret.mobile_display = str(ret.mobile)
+
+        if ret.country_code and ret.country_code != '86':
+            ret.mobile_display = '+{}-{}'.format(ret.country_code, ret.mobile_display)
+
         return ret

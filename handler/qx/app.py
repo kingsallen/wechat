@@ -50,3 +50,14 @@ class ConfigHandler(BaseHandler):
                           "showAllNonBaseMenuItem"]
         })
         self.send_json_success(data=config)
+
+
+class NotFoundHandler(BaseHandler):
+
+    @handle_response
+    def get(self):
+        self.send_json_error(message="not found", http_code=404)
+
+    @handle_response
+    def post(self):
+        self.send_json_error(message="not found", http_code=404)

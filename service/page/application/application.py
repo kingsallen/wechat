@@ -171,13 +171,10 @@ class ApplicationPageService(PageService):
         else:
             country_code = profile_basic.get('country_code')
 
-            if country_code and country_code != '86':
-                profile_basic.mobile = "%s-%s" % (
-                    profile_basic.get("country_code"),
-                    profile_basic.get("mobile")
-                )
-            else:
-                profile_basic.mobile = profile_basic.get("mobile")
+            profile_basic.mobile = "%s-%s" % (
+                country_code or '86',
+                profile_basic.get("mobile")
+            )
         # 手机号结束
 
         # 强制将姓名设为空
@@ -255,6 +252,7 @@ class ApplicationPageService(PageService):
         for w in profile.get('works', []):
             el = ObjectDict(
                 id=w.get('id'),
+                works_cover=make_static_url(w.get('cover')) if w.get('cover') else None,
                 works_url=w.get('url', ''),
                 works_description=w.get('description', ''))
             works.append(el)
@@ -653,7 +651,7 @@ class ApplicationPageService(PageService):
 
             self.logger.debug("[opt_send_recommender_msg]link:{}".format(link))
 
-            application_notice_to_recommender_tpl(current_user.wechat.id,
+            yield application_notice_to_recommender_tpl(current_user.wechat.id,
                                                   current_user.recom.openid,
                                                   link,
                                                   current_user.sysuser.name or current_user.sysuser.nickname,
@@ -711,7 +709,7 @@ class ApplicationPageService(PageService):
                     "wechat_id": self.settings.helper_wechat_id,
                 })
                 if hr_wxuser.openid:
-                    is_ok = application_notice_to_hr_tpl(
+                    is_ok = yield application_notice_to_hr_tpl(
                         self.settings.helper_wechat_id,
                         hr_wxuser.openid,
                         hr_info.name or hr_wxuser.nickname,

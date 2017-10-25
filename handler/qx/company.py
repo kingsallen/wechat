@@ -21,17 +21,21 @@ class CompanyHandler(BaseHandler):
             self.send_json_error()
             return
 
+        main_hr_info = yield self.company_ps.get_main_hr_info(company_info.id)
+
         share = self._share(company_info)
         company = ObjectDict(
             id=company_info.id,
+            hr_chat=bool(company_info.conf_hr_chat),
             logo=self.static_url(company_info.logo),
             name=company_info.name,
             abbreviation=company_info.abbreviation,
-            description=company_info.introduction,
+            description=company_info.introduction
         )
 
         data = ObjectDict(
             company=company,
+            main_hr_info=main_hr_info,
             share=share,
         )
 

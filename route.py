@@ -33,6 +33,7 @@ import handler.common.dictionary
 import handler.common.logcollector
 import handler.common.captcha
 import handler.common.image
+import handler.common.campaign
 
 import handler.help.passport
 import handler.help.releasedposition
@@ -150,6 +151,9 @@ platform_routes = common_routes + platform_routes
 # 聚合号的单独 routes, 域名 platform.moseeker.com/recruit
 qx_routes = [
 
+    (r"/alipaycampaign/([A-Za-z0-9_]{1,32})/company/?",    handler.common.campaign.AlipayCampaignCompanyHandler,         {"event": "alipaycampaign/company"}),
+    (r"/alipaycampaign/([A-Za-z0-9_]{1,32})/company/(\d+)/position/?",   handler.common.campaign.AlipayCampaignPositionHandler,        {"event": "alipaycampaign/position"}),
+
     (r"/api/position/(?P<position_id>\d+)",          handler.qx.position.PositionHandler,                       {"event": "position_info"}),
     (r"/api/positions[\/]?",                         handler.qx.aggregation.AggregationHandler,                 {"event": "position_aggregation"}),
     (r"/api/positions/recommend/(\d+)*",             handler.qx.position.PositionRecommendHandler,              {"event": "position_recommend"}),
@@ -159,7 +163,7 @@ qx_routes = [
     (r"/api/search/([a-z_]+)",                       handler.qx.search.SearchCityHandler,                       {"event": "search_condition"}),
     (r"/api/team/(\d+)",                             handler.qx.team.TeamDetailHandler,                         {"event": "team_detail"}),
     (r"/api/company/(\d+)",                          handler.qx.company.CompanyHandler,                         {"event": "company_detail"}),
-
+    (r"/api/.*",                                      handler.qx.app.NotFoundHandler,                            {"event": "wechat_notfound"}),
     # App 路由
     (r"/.*",                                         handler.qx.app.IndexHandler,                               {"event": "app_app"}),
 ]
