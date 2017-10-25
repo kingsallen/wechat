@@ -76,7 +76,7 @@ class PositionHandler(BaseHandler):
             module_job_description = self._make_json_job_description(position_info)
             module_job_need = self._make_json_job_need(position_info)
             module_feature = self._make_json_job_feature(position_info)
-            module_position_recommend = self._make_recommend_positions(recomment_positions_res)
+            module_position_recommend = self._make_recommend_positions(self.locale, recomment_positions_res)
 
             position_data = ObjectDict()
             add_item(position_data, "header", header)
