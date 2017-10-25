@@ -259,7 +259,7 @@ class PositionHandler(BaseHandler):
 
         raise gen.Return(endorse)
 
-    def _make_recommend_positions(self, positions):
+    def _make_recommend_positions(self, locale, positions):
         """处理相似职位推荐"""
         if not positions:
             return None
@@ -295,7 +295,7 @@ class PositionHandler(BaseHandler):
             if len(data) > 2:
                 break
 
-        res = ObjectDict({"title": "相关职位推荐", "data": data}) if data else None
+        res = ObjectDict({"title": locale.translate("jd_more_jobs"), "data": data}) if data else None
 
         return res
 
