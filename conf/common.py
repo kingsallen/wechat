@@ -160,6 +160,10 @@ CANDIDATE_SOURCE = {
     "0": "common_experienced",
     "1": "common_graduate"
 }
+CANDIDATE_SOURCE_SEARCH = {
+    "0": "社招",
+    "1": "校招"
+}
 CANDIDATE_SOURCE_REVERSE = {v: k for k, v in CANDIDATE_SOURCE.items()}
 
 # 工作性质
@@ -168,6 +172,12 @@ EMPLOYMENT_TYPE = {
     "1": "common_parttime",
     "2": "common_contractor",
     "3": "common_intern",
+}
+EMPLOYMENT_TYPE_SEARCH = {
+    "0": "全职",
+    "1": "兼职",
+    "2": "合同工",
+    "3": "实习",
 }
 EMPLOYMENT_TYPE_REVERSE = {v: k for k, v in EMPLOYMENT_TYPE.items()}
 

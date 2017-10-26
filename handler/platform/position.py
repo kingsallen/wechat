@@ -863,13 +863,13 @@ class PositionListHandler(BaseHandler):
 
         # 招聘类型和职位性质接受兼容 数字编号 中文
         if self.params.candidate_source:
-            infra_params.candidate_source = const.CANDIDATE_SOURCE.get(self.params.candidate_source, "") \
+            infra_params.candidate_source = const.CANDIDATE_SOURCE_SEARCH.get(self.params.candidate_source, "") \
                 if self.params.candidate_source.isdigit() else self.params.candidate_source
         else:
             infra_params.candidate_source = ""
 
         if self.params.employment_type:
-            infra_params.employment_type = const.EMPLOYMENT_TYPE.get(self.params.employment_type, "") \
+            infra_params.employment_type = const.EMPLOYMENT_TYPE_SEARCH.get(self.params.employment_type, "") \
                 if self.params.employment_type.isdigit() else self.params.employment_type
         else:
             infra_params.employment_type = ""
