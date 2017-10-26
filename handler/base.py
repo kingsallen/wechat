@@ -613,5 +613,5 @@ class BaseHandler(MetaBaseHandler):
             useragent = self.request.headers.get('User-Agent')
             lang_from_ua = languge_code_from_ua(useragent)
 
-            lang = lang_from_ua or settings['lang']
+            lang = lang_from_ua or settings['default_locale']
             return locale.get(lang)
