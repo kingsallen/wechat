@@ -256,7 +256,7 @@ def make_team_detail_template(locale, team, members, modulename, detail_media_li
         template.append(
             template1(
                 sub_type='full',
-                title=locale.translate('company_team_intro'.format(teamname_field)),
+                title=locale.translate('company_team_intro').format(teamname_field),
                 data=[{
                     'sub_title': '',
                     'longtext': team.description,
