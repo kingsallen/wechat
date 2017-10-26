@@ -762,7 +762,9 @@ class PositionListHandler(BaseHandler):
                 use_neowx=bool(self.current_user.company.conf_newjd_status == 2),
                 is_employee=bool(self.current_user.employee),
                 searchFilterNum=self.get_search_filter_num(),
-                teamname_custom=teamname_custom
+                teamname_custom=self.locale.translate(teamname_custom,
+                                                      plural_message=teamname_custom,
+                                                      count=2)
             )
 
     @staticmethod

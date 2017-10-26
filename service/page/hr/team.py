@@ -1,10 +1,5 @@
 # coding=utf-8
 
-"""
-:author 马超（machao@moseeker.com）
-:date 2016.11.18
-
-"""
 import itertools
 import operator
 
@@ -80,7 +75,9 @@ class TeamPageService(PageService):
 
         # 拼装模板数据
         teamname_custom = parent_company.conf_teamname_custom
-        data.bottombar = teamname_custom
+        data.bottombar = locale.translate(teamname_custom,
+                                          plural_message=teamname_custom,
+                                          count=2)
         data.header = temp_data_tool.make_header(locale, company, team_index=True, **teamname_custom)
 
         # 蓝色光标做定制化需求
