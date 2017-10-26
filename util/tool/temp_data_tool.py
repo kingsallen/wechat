@@ -246,7 +246,7 @@ def make_other_team_data(team, res, handler_params):
 
 
 def make_team_detail_template(locale, team, members, modulename, detail_media_list, positions,
-                              other_teams, res_dic, handler_params, teamname_custom=None, vst=False):
+                              other_teams, res_dic, handler_params, teamname_custom=None):
     template = []
     teamname_field = teamname_custom["teamname_custom"] if teamname_custom else '团队'
 
@@ -284,8 +284,6 @@ def make_team_detail_template(locale, team, members, modulename, detail_media_li
             locale.translate("team_team_is_hiring").format(teamname_field),
             positions, handler_params))
 
-    if not vst and team.is_show:
-        template.append(template5())
     if other_teams:
         template.append(template4(
             sub_type=0,
