@@ -118,9 +118,6 @@ class TeamPageService(PageService):
         :return:
         """
         data = ObjectDict()
-        visit = yield self.user_company_visit_req_ds.get_visit_cmpy(
-            conds={'user_id': user.sysuser.id, 'company_id': company.id},
-            fields=['id', 'company_id'])
 
         # 根据母公司，子公司区分对待，获取对应的职位信息，其他团队信息
         position_fields = 'id title status city team_id \
@@ -174,8 +171,8 @@ class TeamPageService(PageService):
         teamname_custom = user.company.conf_teamname_custom
         data.bottombar = teamname_custom
         data.header = temp_data_tool.make_header(locale, company, True, team)
-        data.relation = ObjectDict({
-            'want_visit': self.constant.YES if visit else self.constant.NO})
+
+        data.relation = ObjectDict()
 
         # 玛氏定制
         company_config = COMPANY_CONFIG.get(company.id)
@@ -186,8 +183,16 @@ class TeamPageService(PageService):
 
         data.templates = temp_data_tool.make_team_detail_template(
             locale,
-            team, team_members, modulename, detail_media_list, team_positions[0:3],
-            other_teams, res_dict, handler_param, teamname_custom=teamname_custom, vst=bool(visit))
+            team,
+            team_members,
+            modulename,
+            detail_media_list,
+            team_positions[0:3],
+            other_teams,
+            res_dict,
+            handler_param,
+            teamname_custom=teamname_custom
+        )
         data.templates_total = len(data.templates)
 
         raise gen.Return(data)
