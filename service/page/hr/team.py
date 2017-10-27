@@ -1,10 +1,5 @@
 # coding=utf-8
 
-"""
-:author 马超（machao@moseeker.com）
-:date 2016.11.18
-
-"""
 import itertools
 import operator
 

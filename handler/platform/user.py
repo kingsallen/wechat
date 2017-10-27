@@ -1,5 +1,8 @@
 # coding=utf-8
 
+"""这个模块主要是给数据组 AI 项目收集数据使用的
+"""
+
 from handler.base import BaseHandler
 import util.common.decorator as decorator
 from util.common import ObjectDict
@@ -8,6 +11,7 @@ from tornado import gen
 
 
 class UserSurveyHandler(BaseHandler):
+
     @decorator.handle_response
     @decorator.authenticated
     @gen.coroutine
@@ -50,8 +54,29 @@ class UserSurveyHandler(BaseHandler):
 
         self.render_page('adjunctuser-survey.html', data=data)
 
+
+class APIUserSurveyHandler(BaseHandler):
     @decorator.handle_response
     @decorator.authenticated
     @gen.coroutine
     def post(self):
-        pass
+        """获取前端传过来的数据，POST json string格式"""
+
+        # model: {
+        #     job_grade: 3,
+        #     industry:  2,
+        #     birth:     '2017-10-10',
+        #     degree:    3,
+        #     work_age:  1,
+        #     city:      '上海',
+        #     salary:    3,
+        # }
+
+        model = self.json_args.model
+
+        self.logger.debug("model: %s" % model)
+        # todo tangyiliang
+        # push the message to rabbitmq
+        self.logger.debug('pushed to rebbitmq')
+
+        self.redirect_to_route('position_list', self.params)
