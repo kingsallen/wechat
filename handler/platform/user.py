@@ -52,7 +52,7 @@ class UserSurveyHandler(BaseHandler):
 
         data.constant = constant
 
-        self.render_page('adjunctuser-survey.html', data=data)
+        self.render_page('adjunct/user-survey.html', data=data)
 
 
 class APIUserSurveyHandler(BaseHandler):
