@@ -167,7 +167,7 @@ qx_routes = [
     (r"/api/search/([a-z_]+)",                       handler.qx.search.SearchCityHandler,                       {"event": "search_condition"}),
     (r"/api/team/(\d+)",                             handler.qx.team.TeamDetailHandler,                         {"event": "team_detail"}),
     (r"/api/company/(\d+)",                          handler.qx.company.CompanyHandler,                         {"event": "company_detail"}),
-    (r"/api/.*",                                      handler.qx.app.NotFoundHandler,                            {"event": "wechat_notfound"}),
+    (r"/api/.*",                                     handler.qx.app.NotFoundHandler,                            {"event": "wechat_notfound"}),
     # App 路由
     (r"/.*",                                         handler.qx.app.IndexHandler,                               {"event": "app_app"}),
 ]
