@@ -164,7 +164,9 @@ CANDIDATE_SOURCE_SEARCH = {
     "0": "社招",
     "1": "校招"
 }
-CANDIDATE_SOURCE_REVERSE = {v: k for k, v in CANDIDATE_SOURCE.items()}
+CANDIDATE_SOURCE_SEARCH_REVERSE = {
+    v: k for k, v in CANDIDATE_SOURCE_SEARCH.items()
+}
 
 # 工作性质
 EMPLOYMENT_TYPE = {
@@ -179,7 +181,9 @@ EMPLOYMENT_TYPE_SEARCH = {
     "2": "合同工",
     "3": "实习",
 }
-EMPLOYMENT_TYPE_REVERSE = {v: k for k, v in EMPLOYMENT_TYPE.items()}
+EMPLOYMENT_TYPE_SEARCH_REVERSE = {
+    v: k for k, v in EMPLOYMENT_TYPE_SEARCH.items()
+}
 
 MANAGEMENT_EXP = {
     "0": "common_need",
