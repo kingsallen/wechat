@@ -392,13 +392,11 @@ class PositionHandler(BaseHandler):
         attr = []
 
         if position_info.candidate_source:
-            attr.append("{0} {1}".format(
-                self.locale.translate('jd_candidate_source'),
+            attr.append("{0}".format(
                 self.locale.translate(position_info.candidate_source)))
 
         if position_info.employment_type:
-            attr.append("{0} {1}".format(
-                self.locale.translate('jd_employment_type'),
+            attr.append("{0}".format(
                 self.locale.translate(position_info.employment_type)))
 
         if self.current_user.company.conf_job_occupation and position_info.job_occupation:

@@ -69,9 +69,14 @@ class UserCompanyPageService(PageService):
 
         # 自定义团队文案
         teamname_custom = user.company.conf_teamname_custom
-        data.bottombar = locale.translate(teamname_custom,
-                                          plural_message=teamname_custom,
-                                          count=2)
+        teamname_custom.update(
+            teamname_custom=locale.translate(
+                teamname_custom.teamname_custom,
+                plural_message=teamname_custom.teamname_custom, count=2
+            )
+        )
+
+        data.bottombar = teamname_custom
 
         raise gen.Return(data)
 
