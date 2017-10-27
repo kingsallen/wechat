@@ -111,7 +111,7 @@ class APIUserSurveyHandler(UserSurveyConstantMixin, BaseHandler):
         self.logger.debug('pushed to rebbitmq')
 
         self.send_json_success(data={
-            'next_url': self.make_url(path.PROFILE, self.params)
+            'next_url': self.make_url(path.PROFILE_VIEW, self.params)
         })
 
     def process_model_raw(self, model_raw):
