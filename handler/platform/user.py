@@ -6,7 +6,6 @@
 from handler.base import BaseHandler
 import util.common.decorator as decorator
 from util.common import ObjectDict
-from util.tool.url_tool import make_url
 import conf.path as path
 from tornado import gen
 
@@ -112,7 +111,7 @@ class APIUserSurveyHandler(UserSurveyConstantMixin, BaseHandler):
         self.logger.debug('pushed to rebbitmq')
 
         self.send_json_success(data={
-            'next_url': make_url(path.PROFILE, self.params)
+            'next_url': self.make_url(path.PROFILE, self.params)
         })
 
     def process_model_raw(self, model_raw):
