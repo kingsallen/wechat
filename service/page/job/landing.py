@@ -176,10 +176,10 @@ class LandingPageService(PageService):
                     to_append.append(e.get(k))
 
                 elif k == 'candidate_source_name':
-                    to_append.append({"text": e.get(k), "value": const.CANDIDATE_SOURCE_REVERSE.get(e.get(k))})
+                    to_append.append({"text": e.get(k), "value": const.CANDIDATE_SOURCE_SEARCH_REVERSE.get(e.get(k))})
 
                 elif k == 'employment_type_name':
-                    to_append.append({"text": e.get(k), "value": const.EMPLOYMENT_TYPE_REVERSE.get(e.get(k))})
+                    to_append.append({"text": e.get(k), "value": const.EMPLOYMENT_TYPE_SEARCH_REVERSE.get(e.get(k))})
                 else:
                     to_append.append({"text": e.get(k), "value": e.get(k)})
 
