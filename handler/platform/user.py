@@ -6,7 +6,8 @@
 from handler.base import BaseHandler
 import util.common.decorator as decorator
 from util.common import ObjectDict
-
+from util.tool.url_tool import make_url
+import conf.path as path
 from tornado import gen
 
 
@@ -104,8 +105,19 @@ class APIUserSurveyHandler(UserSurveyConstantMixin, BaseHandler):
         model_raw = self.json_args.model
         self.logger.debug("model_raw: %s" % model_raw)
 
-        # TODO (tangyiliang)
-        # push the message to rabbitmq
+        model = self.process_model_raw(model_raw)
+        self.logger.debug("model: %s" % model)
+
+        # TODO (tangyiliang) push the message to rabbitmq
         self.logger.debug('pushed to rebbitmq')
 
-        self.redirect_to_route('position_list', self.params)
+        self.send_json_success(data={
+            'next_url': make_url(path.PROFILE, self.params)
+        })
+
+    def process_model_raw(self, model_raw):
+        model = model_raw
+        for key in model:
+            if key in self.constant:
+                model[key] = getattr(self.constant, key).get(model[key])
+        return model
