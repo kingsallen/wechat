@@ -134,7 +134,7 @@ award_publisher = AwardsMQPublisher(
     appid=6
 )
 
-data_userprofile_publisher = AwardsMQPublisher(
+data_userprofile_publisher = MQPublisher(
     amqp_url=amqp_url,
     exchange="data.user_profile",
     exchange_type="direct",

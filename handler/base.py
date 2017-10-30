@@ -605,10 +605,13 @@ class BaseHandler(MetaBaseHandler):
         否则判断ua的language，
         最后fallback到setting中的默认配置"""
 
+        # 如果没有当前公司，那么使用默认locale
+        if not self.current_user or not self.current_user.company:
+            return None
+
         display_locale = self.current_user.company.conf_display_locale
         if display_locale:
             return locale.get(display_locale)
-
         else:
             useragent = self.request.headers.get('User-Agent')
             lang_from_ua = languge_code_from_ua(useragent)
