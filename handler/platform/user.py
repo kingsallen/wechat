@@ -107,6 +107,7 @@ class APIUserSurveyHandler(UserSurveyConstantMixin, BaseHandler):
         self.logger.debug("model_raw: %s" % model_raw)
 
         model = self.process_model_raw(model_raw)
+        model.update(user_id=self.current_user.sysuser.id)
         self.logger.debug("model: %s" % model)
 
         self.logger.debug('pushed to rebbitmq')
