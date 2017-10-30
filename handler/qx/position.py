@@ -9,7 +9,7 @@ import conf.common as const
 from handler.base import BaseHandler
 from util.common.decorator import handle_response
 from util.common import ObjectDict
-from util.tool.str_tool import split, add_item
+from util.tool.str_tool import split, add_item, gen_experience_v2, gen_degree_v2
 
 
 class PositionHandler(BaseHandler):
@@ -30,7 +30,7 @@ class PositionHandler(BaseHandler):
             pos_item = position_es.hits.hits[0] if position_es.hits.hits else ObjectDict()
 
             self.logger.debug("[JD]构建职位基础信息")
-            res_position, cover = yield self._make_jd_info(position_info, company_info, pos_item)
+            res_position, cover = yield self._make_jd_info(self.locale, position_info, company_info, pos_item)
 
             self.logger.debug("[JD]构建职位详情信息")
             jd_detail = yield self._make_jd_detail(position_info, pos_item)
@@ -79,7 +79,7 @@ class PositionHandler(BaseHandler):
         return default
 
     @gen.coroutine
-    def _make_jd_info(self, position_info, company_info, pos_item):
+    def _make_jd_info(self, locale, position_info, company_info, pos_item):
 
         team_img, job_img, company_img = yield self.aggregation_ps.opt_jd_home_img(pos_item)
 
@@ -115,8 +115,8 @@ class PositionHandler(BaseHandler):
             team=team.name,
             team_id=team.id if team.res_id else 0,
             city=split(position_info.city, [",","，"]),
-            degree=position_info.degree,
-            experience=position_info.experience,
+            degree=gen_degree_v2(position_info.raw_degree, position_info.raw_degree_above, locale),
+            experience=gen_experience_v2(position_info.raw_experience, position_info.raw_experience_above, locale),
             team_img=team_img,
             job_img=job_img,
             company_img=company_img,

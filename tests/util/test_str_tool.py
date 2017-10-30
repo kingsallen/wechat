@@ -38,6 +38,16 @@ class StrToolTestCase(unittest.TestCase):
         # with self.assertRaises(TypeError):
         #     phone_number_without_country_code(131229231293)
 
+    def test_ua_parser(self):
+        ua1 = 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_1 like Mac OS X) AppleWebKit/604.3.1 (KHTML, like Gecko) Mobile/15B5066f MicroMessenger/6.5.18 NetType/WIFI Language/zh_CN'
+        ua2 = 'aaabbb'
+        ua3 = 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_1 like Mac OS X) AppleWebKit/604.3.1 (KHTML, like Gecko) Mobile/15B5066f MicroMessenger/6.5.18 NetType/WIFI'
+
+        self.assertEqual(languge_code_from_ua(ua1), 'zh_CN' )
+        self.assertIsNone(languge_code_from_ua(ua2))
+        self.assertIsNone(languge_code_from_ua(ua3))
+
+
 
 if __name__ == '__main__':
     unittest.main()

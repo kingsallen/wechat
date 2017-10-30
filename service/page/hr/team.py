@@ -46,7 +46,7 @@ class TeamPageService(PageService):
         raise gen.Return(team)
 
     @gen.coroutine
-    def get_team_index(self, company, handler_param, sub_flag=False, parent_company=None):
+    def get_team_index(self, locale, company, handler_param, sub_flag=False, parent_company=None):
         """
 
         :param company: 当前需要获取数据的公司
@@ -75,8 +75,28 @@ class TeamPageService(PageService):
 
         # 拼装模板数据
         teamname_custom = parent_company.conf_teamname_custom
+        # 如果是中文，使用中文"团队"，或者使用用户自定义的团队名称。
+        if locale.code == 'zh_CN':
+            teamname_custom.update(
+                teamname_custom=locale.translate(
+                    teamname_custom.teamname_custom,
+                    plural_message=teamname_custom.teamname_custom, count=2
+                )
+            )
+        # 如果是英文， 默认使用 "Teams"
+        elif locale.code == 'en_US':
+            teamname_custom.update(
+                teamname_custom=locale.translate(
+                    '团队',
+                    plural_message='团队',
+                    count=2
+                )
+            )
+        else:
+            assert False  # should not be here as we just support 2 above locales
+
         data.bottombar = teamname_custom
-        data.header = temp_data_tool.make_header(company, team_index=True, **teamname_custom)
+        data.header = temp_data_tool.make_header(locale, company, team_index=True, **teamname_custom)
 
         # 蓝色光标做定制化需求
         customize_ps = CustomizePageService()
@@ -101,7 +121,7 @@ class TeamPageService(PageService):
         raise gen.Return(data)
 
     @gen.coroutine
-    def get_team_detail(self, user, company, team, handler_param, position_num=3, is_gamma=False):
+    def get_team_detail(self, locale, user, company, team, handler_param, position_num=3, is_gamma=False):
         """
 
         :param user: handler中的current_user
@@ -113,9 +133,6 @@ class TeamPageService(PageService):
         :return:
         """
         data = ObjectDict()
-        visit = yield self.user_company_visit_req_ds.get_visit_cmpy(
-            conds={'user_id': user.sysuser.id, 'company_id': company.id},
-            fields=['id', 'company_id'])
 
         # 根据母公司，子公司区分对待，获取对应的职位信息，其他团队信息
         position_fields = 'id title status city team_id \
@@ -167,10 +184,29 @@ class TeamPageService(PageService):
 
         # 拼装模板数据
         teamname_custom = user.company.conf_teamname_custom
+        # 如果是中文，使用中文"团队"，或者使用用户自定义的团队名称。
+        if locale.code == 'zh_CN':
+            teamname_custom.update(
+                teamname_custom=locale.translate(
+                    teamname_custom.teamname_custom,
+                    plural_message=teamname_custom.teamname_custom, count=2
+                )
+            )
+        # 如果是英文， 默认使用 "Teams"
+        elif locale.code == 'en_US':
+            teamname_custom.update(
+                teamname_custom=locale.translate(
+                    '团队',
+                    plural_message='团队',
+                    count=2
+                )
+            )
+        else:
+            assert False  # should not be here as we just support 2 above locales
         data.bottombar = teamname_custom
-        data.header = temp_data_tool.make_header(company, True, team)
-        data.relation = ObjectDict({
-            'want_visit': self.constant.YES if visit else self.constant.NO})
+        data.header = temp_data_tool.make_header(locale, company, True, team)
+
+        data.relation = ObjectDict()
 
         # 玛氏定制
         company_config = COMPANY_CONFIG.get(company.id)
@@ -180,8 +216,17 @@ class TeamPageService(PageService):
             data.relation.custom_visit_recipe = []
 
         data.templates = temp_data_tool.make_team_detail_template(
-            team, team_members, modulename, detail_media_list, team_positions[0:3],
-            other_teams, res_dict, handler_param, teamname_custom=teamname_custom, vst=bool(visit))
+            locale,
+            team,
+            team_members,
+            modulename,
+            detail_media_list,
+            team_positions[0:3],
+            other_teams,
+            res_dict,
+            handler_param,
+            teamname_custom=teamname_custom
+        )
         data.templates_total = len(data.templates)
 
         raise gen.Return(data)

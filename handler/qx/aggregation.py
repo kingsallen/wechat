@@ -54,7 +54,7 @@ class AggregationHandler(BaseHandler):
             salary_top, salary_bottom, salary_negotiable, keywords, city,
             industry, did, page_from=int(page_no), page_size=int(page_size))
 
-        positions = yield self.aggregation_ps.opt_agg_positions(
+        positions = yield self.aggregation_ps.opt_agg_positions(self.locale,
             es_res, self.current_user.sysuser.id, city)
 
         result = ObjectDict({

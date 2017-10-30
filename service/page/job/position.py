@@ -5,7 +5,6 @@ import json
 
 import conf.common as const
 from service.page.base import PageService
-from service.page.user.user import UserPageService
 from util.common import ObjectDict
 from util.common.cipher import encode_id
 from util.tool.date_tool import jd_update_date, str_2_date
@@ -13,6 +12,7 @@ from util.tool.str_tool import gen_salary, split, set_literl, gen_degree, gen_ex
 from util.tool.url_tool import make_static_url
 from util.tool.temp_data_tool import make_position_detail_cms, make_team, template3
 from setting import settings
+
 
 class PositionPageService(PageService):
 
@@ -55,9 +55,13 @@ class PositionPageService(PageService):
             "city": position_res.city,
             "occupation": position_res.occupation,
             "experience": gen_experience(position_res.experience, position_res.experience_above),
+            "raw_experience": position_res.experience,
+            "raw_experience_above": position_res.experience_above,
             "language": position_res.language,
             "count": position_res.count,
             "degree": gen_degree(position_res.degree, position_res.degree_above),
+            "raw_degree": position_res.degree,
+            "raw_degree_above": position_res.degree_above,
             "management": position_res.management,
             "visitnum": position_res.visitnum,
             "accountabilities": position_res.accountabilities,
@@ -86,9 +90,13 @@ class PositionPageService(PageService):
 
         # 自定义分享模板
         if position_res.share_tpl_id:
+            position.share_title = ""
+            position.share_description = ""
+
             share_conf = yield self.__get_share_conf(position_res.share_tpl_id)
-            position.share_title = share_conf.title
-            position.share_description = share_conf.description
+            if share_conf.id > 3: # 隐藏逻辑， id为1-3的话，说明是写死在数据库中的模版, 需要做国际化处理
+                position.share_title = share_conf.title
+                position.share_description = share_conf.description
 
         # 职能自定义字段（自定义字段 job_occupation）
         if position_ext_res.job_occupation_id:
@@ -235,7 +243,7 @@ class PositionPageService(PageService):
         raise gen.Return(res)
 
     @gen.coroutine
-    def get_team_position(self, team_id, handler_params, current_position_id, company_id, teamname_custom):
+    def get_team_position(self, locale, team_id, handler_params, current_position_id, company_id, teamname_custom):
         positions = yield self.job_position_ds.get_positions_list(
             conds={
                 'id': [current_position_id, '<>'],
@@ -249,8 +257,10 @@ class PositionPageService(PageService):
         if not positions:
             raise gen.Return(None)
 
-        res = template3(title='我们' + teamname_custom['teamname_custom'] + '还需要', resource_list=positions,
-                        handler_params=handler_params)
+        res = template3(
+            title=locale.translate("company_our_team_need").format(teamname_custom['teamname_custom']),
+            resource_list=positions,
+            handler_params=handler_params)
 
         raise gen.Return(res)
 

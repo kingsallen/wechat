@@ -157,42 +157,58 @@ TEAMNAME_CUSTOM_DEFAULT = "团队"
 
 # 招聘类型
 CANDIDATE_SOURCE = {
+    "0": "common_experienced",
+    "1": "common_graduate"
+}
+CANDIDATE_SOURCE_SEARCH = {
     "0": "社招",
     "1": "校招"
 }
-CANDIDATE_SOURCE_REVERSE = {v: k for k, v in CANDIDATE_SOURCE.items()}
+CANDIDATE_SOURCE_SEARCH_REVERSE = {
+    v: k for k, v in CANDIDATE_SOURCE_SEARCH.items()
+}
 
 # 工作性质
 EMPLOYMENT_TYPE = {
+    "0": "common_fulltime",
+    "1": "common_parttime",
+    "2": "common_contractor",
+    "3": "common_intern",
+}
+EMPLOYMENT_TYPE_SEARCH = {
     "0": "全职",
     "1": "兼职",
     "2": "合同工",
     "3": "实习",
 }
-EMPLOYMENT_TYPE_REVERSE = {v: k for k, v in EMPLOYMENT_TYPE.items()}
+EMPLOYMENT_TYPE_SEARCH_REVERSE = {
+    v: k for k, v in EMPLOYMENT_TYPE_SEARCH.items()
+}
 
 MANAGEMENT_EXP = {
-    "0": "需要",
-    "1": "不需要"
+    "0": "common_need",
+    "1": "common_no_need"
 }
 
 # 学历
 DEGREE = {
     "0": "",
-    "1": "大专",
-    "2": "本科",
-    "3": "硕士",
-    "4": "MBA",
-    "5": "博士",
+    "1": "common_degree_college",
+    "2": "common_degree_university",
+    "3": "common_degree_master",
+    "4": "common_degree_mba",
+    "5": "common_degree_doctor",
     "6": "中专",
-    "7": "高中",
-    "8": "博士后",
-    "9": "初中"
+    "7": "common_degree_highschool",
+    "8": "common_degree_doctor_above",
+    "9": "common_degree_middleschool"
 }
 
 # 及以上 工作经验、学历中使用
-POSITION_ABOVE = "及以上"
-EXPERIENCE_UNIT = "年"
+POSITION_ABOVE = "common_degree_above"
+
+EXPERIENCE_UNIT = "common_year"
+EXPERIENCE_UNIT_PLURAL = "common_years"
 
 # 公司相关
 SCALE = {

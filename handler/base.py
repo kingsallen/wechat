@@ -4,22 +4,23 @@ import os
 import time
 from hashlib import sha1
 
-from tornado import gen
+from tornado import gen, locale
 
 import conf.common as const
 import conf.path as path
 import conf.wechat as wx_const
 from cache.user.passport_session import PassportCache
-
 from handler.metabase import MetaBaseHandler
-
+from oauth.wechat import WeChatOauth2Service, WeChatOauthError, JsApi
 from util.common import ObjectDict
 from util.common.cipher import decode_id
 from util.common.decorator import check_signature
-from util.tool.str_tool import to_str, from_hex, match_session_id
-from util.tool.url_tool import url_subtract_query, make_url, make_static_url
+from util.tool.str_tool import to_str, from_hex, match_session_id, \
+    languge_code_from_ua
+from util.tool.url_tool import url_subtract_query, make_url
 
-from oauth.wechat import WeChatOauth2Service, WeChatOauthError, JsApi
+
+from setting import settings
 
 
 class NoSignatureError(Exception):
@@ -598,3 +599,19 @@ class BaseHandler(MetaBaseHandler):
         route_url = self.reverse_url(route_name, *args)
         to = self.make_url(route_url, params)
         self.redirect(to)
+
+    def get_user_locale(self):
+        """如果公司设置了语言，以公司设置为准，
+        否则判断ua的language，
+        最后fallback到setting中的默认配置"""
+
+        display_locale = self.current_user.company.conf_display_locale
+        if display_locale:
+            return locale.get(display_locale)
+
+        else:
+            useragent = self.request.headers.get('User-Agent')
+            lang_from_ua = languge_code_from_ua(useragent)
+
+            lang = lang_from_ua or settings['default_locale']
+            return locale.get(lang)

@@ -333,6 +333,12 @@ class InfraDictDataService(DataService):
             ret = yield self.make_industries_result(ret)
         return ret
 
+    @gen.coroutine
+    def get_industries_raw(self):
+        """获取行业raw数据"""
+        ret = yield http_get(path.DICT_INDUSTRY)
+        return ret
+
     @staticmethod
     @gen.coroutine
     def make_industries_result(http_response):

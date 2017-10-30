@@ -6,6 +6,8 @@ import conf.path as path
 from handler.base import BaseHandler
 from util.common import ObjectDict
 from util.common.decorator import handle_response
+from conf.qx import JD_BACKGROUND_IMG
+from util.tool.url_tool import make_static_url
 
 class CompanyHandler(BaseHandler):
     """Gamma公司详情页新样式"""
@@ -57,9 +59,16 @@ class CompanyHandler(BaseHandler):
         else:
             # 构造公司企业新主页
             company_data = yield self.user_company_ps.get_company_data(
-                self.params, company_info, self.current_user)
+                self.locale, self.params, company_info, self.current_user)
             templates = company_data.templates
             cover = company_data.header.banner
+
+        # hack if no cover is provided, try to get the default industry img
+        if not cover:
+            industry_name = company_info.industry
+            industry_type = yield self.dictionary_ps.get_industry_type_by_name(industry_name)
+            cover = JD_BACKGROUND_IMG.get(industry_type, {}).get('company_img')
+            cover = make_static_url(cover)
 
         data.update({
             "cover": cover,

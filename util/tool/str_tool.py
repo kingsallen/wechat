@@ -53,6 +53,7 @@ def gen_salary(salary_top, salary_bottom):
 
     return salary_res
 
+
 def gen_degree(degree, degree_above):
     """
     处理学历
@@ -60,13 +61,23 @@ def gen_degree(degree, degree_above):
     :param degree_above:
     :return:
     """
-
     if degree and degree_above:
         return const.DEGREE.get(str(degree)) + const.POSITION_ABOVE
     elif degree:
         return const.DEGREE.get(str(degree))
     else:
         return ""
+
+
+def gen_degree_v2(raw_degree, raw_degree_above, locale):
+    """根据locale来拼装学历字符串"""
+    degree_str = locale.translate(const.DEGREE.get(str(raw_degree)))
+    above_str = ' '
+    if raw_degree_above:
+        above_str += locale.translate(const.POSITION_ABOVE)
+
+    return degree_str + above_str
+
 
 def gen_experience(experience, experience_above):
     """
@@ -82,6 +93,27 @@ def gen_experience(experience, experience_above):
         return experience + const.EXPERIENCE_UNIT
     else:
         return ""
+
+
+def gen_experience_v2(experience, experience_above, locale):
+    """
+    处理学历要求
+    :param experience:
+    :param experience_above:
+    :param locale
+    :return:
+    """
+    ret = ''
+
+    if experience:
+        ret = experience + " " + locale.translate(
+            const.EXPERIENCE_UNIT, plural_message=const.EXPERIENCE_UNIT_PLURAL, count=experience)
+
+    if experience_above:
+        ret += " " + locale.translate(const.POSITION_ABOVE)
+
+    return ret
+
 
 def to_str(bytes_or_str):
     """to Python 3 str type"""
@@ -288,6 +320,21 @@ def split_phone_number(phone_number):
 def phone_number_without_country_code(phone_number):
     """从国家编号-电话号码中分离出电话号码"""
     return split_phone_number(phone_number)[1]
+
+
+def languge_code_from_ua(useragent):
+    match_obj = re.search(r'Language/(.+)', useragent)
+
+    if match_obj:
+        match = match_obj.groups()[0]
+
+        if match.startswith('en'):
+            return 'en_US'
+        else:
+            return 'zh_CN'
+
+    else:
+        return None
 
 
 def get_uucode(lenth=36):

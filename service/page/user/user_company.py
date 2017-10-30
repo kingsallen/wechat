@@ -22,7 +22,7 @@ class UserCompanyPageService(PageService):
         super().__init__()
 
     @gen.coroutine
-    def get_company_data(self, handler_params, company, user):
+    def get_company_data(self, locale, handler_params, company, user):
         """
         构造企业主页，供企业号，gamma 使用
         :param handler_params:
@@ -41,7 +41,7 @@ class UserCompanyPageService(PageService):
         team_index_url = make_url(path.COMPANY_TEAM, handler_params, self.settings.platform_host)
 
         # 拼装模板数据
-        data.header = temp_data_tool.make_header(company)
+        data.header = temp_data_tool.make_header(locale, company)
 
         # 实时检查用户对于公众号的关注情况
         follow = self.constant.NO
@@ -69,6 +69,28 @@ class UserCompanyPageService(PageService):
 
         # 自定义团队文案
         teamname_custom = user.company.conf_teamname_custom
+
+        # 如果是中文，使用中文"团队"，或者使用用户自定义的团队名称。
+        if locale.code == 'zh_CN':
+            teamname_custom.update(
+                teamname_custom=locale.translate(
+                    teamname_custom.teamname_custom,
+                    plural_message=teamname_custom.teamname_custom,
+                    count=2
+                )
+            )
+        # 如果是英文， 默认使用 "Teams"
+        elif locale.code == 'en_US':
+            teamname_custom.update(
+                teamname_custom=locale.translate(
+                    '团队',
+                    plural_message='团队',
+                    count=2
+                )
+            )
+        else:
+            assert False # should not be here as we just support 2 above locales
+
         data.bottombar = teamname_custom
 
         raise gen.Return(data)

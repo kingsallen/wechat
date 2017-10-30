@@ -8,6 +8,7 @@ from abc import ABCMeta, abstractmethod
 from urllib.parse import urlencode
 
 from tornado import gen
+import tornado.locale
 from tornado.locks import Semaphore
 from tornado.web import MissingArgumentError
 

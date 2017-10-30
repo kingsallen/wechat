@@ -56,3 +56,14 @@ class DictionaryPageService(PageService):
     def get_sms_country_code_list(self):
         ret = yield self.infra_dict_ds.get_sms_country_code_list()
         return ret
+
+    @tornado.gen.coroutine
+    def get_industry_type_by_name(self, name):
+        industry_raw_res = yield self.infra_dict_ds.get_industries_raw()
+
+        if industry_raw_res.status == 0:
+            for industry in industry_raw_res.data:
+                if industry['name'] == name:
+                    return industry['type']
+
+        return 0

@@ -28,7 +28,7 @@ class TeamIndexHandler(BaseHandler):
             current_company = self.current_user.company
 
         data = yield self.team_ps.get_team_index(
-            current_company, self.params, sub_company_flag, self.current_user.company)
+            self.locale, current_company, self.params, sub_company_flag, self.current_user.company)
 
         self.params.share = self._share(current_company)
 
@@ -72,7 +72,7 @@ class TeamDetailHandler(BaseHandler):
             return
 
         data = yield self.team_ps.get_team_detail(
-            self.current_user, current_company, team, self.params)
+            self.locale, self.current_user, current_company, team, self.params)
 
         share_cover_url = data.templates[0].data[0].get('media_url') or \
                           self.static_url(self.current_user.company.logo)
