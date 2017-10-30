@@ -107,7 +107,8 @@
 "简历评审合格","简历评审合格"
 "面试通过","面试通过"
 "入职","入职"
-
+"团队","团队","singular"
+"团队","团队","plural"
 
 "employee_binding_failure_email_occupied","该邮箱已被认证\n请使用其他邮箱"
 
@@ -115,3 +116,4 @@
 "company_other_text","其他{}"
 "company_team_intro","{}介绍"
 "company_our_teams","我们的{}"
+"company_page_title","企业首页"
