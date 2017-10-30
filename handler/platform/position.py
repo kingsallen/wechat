@@ -752,6 +752,17 @@ class PositionListHandler(BaseHandler):
 
             teamname_custom = self.current_user.company.conf_teamname_custom.teamname_custom
 
+            if self.locale.code == 'zh_CN':
+                teamname_custom = self.locale.translate(
+                    teamname_custom, plural_message=teamname_custom, count=2)
+
+            elif self.locale.code == 'en_US':
+                teamname_custom = self.locale.translate(
+                    '团队', plural_message='团队', count=2)
+
+            else:
+                assert False
+
             self.render(
                 template_name="refer/neo_weixin/position_v2/position_list.html",
                 positions=position_list,
@@ -760,9 +771,7 @@ class PositionListHandler(BaseHandler):
                 use_neowx=bool(self.current_user.company.conf_newjd_status == 2),
                 is_employee=bool(self.current_user.employee),
                 searchFilterNum=self.get_search_filter_num(),
-                teamname_custom=self.locale.translate(teamname_custom,
-                                                      plural_message=teamname_custom,
-                                                      count=2)
+                teamname_custom=teamname_custom
             )
 
     @staticmethod

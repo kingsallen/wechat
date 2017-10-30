@@ -88,7 +88,7 @@ class TeamPageService(PageService):
             teamname_custom.update(
                 teamname_custom=locale.translate(
                     '团队',
-                    plural_message=teamname_custom.teamname_custom,
+                    plural_message='团队',
                     count=2
                 )
             )
@@ -197,7 +197,7 @@ class TeamPageService(PageService):
             teamname_custom.update(
                 teamname_custom=locale.translate(
                     '团队',
-                    plural_message=teamname_custom.teamname_custom,
+                    plural_message='团队',
                     count=2
                 )
             )
