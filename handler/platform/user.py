@@ -3,11 +3,13 @@
 """这个模块主要是给数据组 AI 项目收集数据使用的
 """
 
-from handler.base import BaseHandler
-import util.common.decorator as decorator
-from util.common import ObjectDict
-import conf.path as path
 from tornado import gen
+
+import conf.path as path
+import util.common.decorator as decorator
+from handler.base import BaseHandler
+from util.common import ObjectDict
+from util.common.mq import data_userprofile_publisher
 
 
 class UserSurveyConstantMixin(object):
@@ -107,8 +109,9 @@ class APIUserSurveyHandler(UserSurveyConstantMixin, BaseHandler):
         model = self.process_model_raw(model_raw)
         self.logger.debug("model: %s" % model)
 
-        # TODO (tangyiliang) push the message to rabbitmq
         self.logger.debug('pushed to rebbitmq')
+
+        data_userprofile_publisher.publish_message(message=model)
 
         self.send_json_success(data={
             'next_url': self.make_url(path.PROFILE_VIEW, self.params)
