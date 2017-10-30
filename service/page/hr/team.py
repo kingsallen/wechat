@@ -75,12 +75,25 @@ class TeamPageService(PageService):
 
         # 拼装模板数据
         teamname_custom = parent_company.conf_teamname_custom
-        teamname_custom.update(
-            teamname_custom=locale.translate(
-                teamname_custom.teamname_custom,
-                plural_message=teamname_custom.teamname_custom, count=2
+        # 如果是中文，使用中文"团队"，或者使用用户自定义的团队名称。
+        if locale.code == 'zh_CN':
+            teamname_custom.update(
+                teamname_custom=locale.translate(
+                    teamname_custom.teamname_custom,
+                    plural_message=teamname_custom.teamname_custom, count=2
+                )
             )
-        )
+        # 如果是英文， 默认使用 "Teams"
+        elif locale.code == 'en_US':
+            teamname_custom.update(
+                teamname_custom=locale.translate(
+                    '团队',
+                    plural_message=teamname_custom.teamname_custom,
+                    count=2
+                )
+            )
+        else:
+            assert False  # should not be here as we just support 2 above locales
 
         data.bottombar = teamname_custom
         data.header = temp_data_tool.make_header(locale, company, team_index=True, **teamname_custom)
@@ -171,12 +184,25 @@ class TeamPageService(PageService):
 
         # 拼装模板数据
         teamname_custom = user.company.conf_teamname_custom
-        teamname_custom.update(
-            teamname_custom=locale.translate(
-                teamname_custom.teamname_custom,
-                plural_message=teamname_custom.teamname_custom, count=2
+        # 如果是中文，使用中文"团队"，或者使用用户自定义的团队名称。
+        if locale.code == 'zh_CN':
+            teamname_custom.update(
+                teamname_custom=locale.translate(
+                    teamname_custom.teamname_custom,
+                    plural_message=teamname_custom.teamname_custom, count=2
+                )
             )
-        )
+        # 如果是英文， 默认使用 "Teams"
+        elif locale.code == 'en_US':
+            teamname_custom.update(
+                teamname_custom=locale.translate(
+                    '团队',
+                    plural_message=teamname_custom.teamname_custom,
+                    count=2
+                )
+            )
+        else:
+            assert False  # should not be here as we just support 2 above locales
         data.bottombar = teamname_custom
         data.header = temp_data_tool.make_header(locale, company, True, team)
 
