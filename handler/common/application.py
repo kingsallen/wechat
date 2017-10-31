@@ -2,14 +2,15 @@
 
 from tornado import gen
 
+import conf.common as const
 import conf.path as path
 from handler.base import BaseHandler
 from util.common.decorator import handle_response, authenticated, \
     check_and_apply_profile
+from util.wechat.core import WechatNoTemplateError
 
 
 class ApplicationHandler(BaseHandler):
-
     @handle_response
     @check_and_apply_profile
     @authenticated
@@ -38,7 +39,7 @@ class ApplicationHandler(BaseHandler):
             # [{"field_name1": "map1"}, {"field_name2": "map2"}]
 
             result = yield self.application_ps.check_custom_cv_v2(
-                    self.current_user.sysuser.id, position.id)
+                self.current_user.sysuser.id, position.id)
 
             if not result:
                 p = {
@@ -69,7 +70,8 @@ class ApplicationHandler(BaseHandler):
     def post(self):
         """ 处理普通申请 """
 
-        self.logger.warn("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& post application api begin &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
+        self.logger.warn(
+            "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& post application api begin &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
         pid = self.json_args.pid
         position = yield self.position_ps.get_position(pid)
 
@@ -92,11 +94,12 @@ class ApplicationHandler(BaseHandler):
             # [{"field_name1": "map1"}, {"field_name2": "map2"}]
 
             result = yield self.application_ps.check_custom_cv_v2(
-                    self.current_user.sysuser.id, position.id)
+                self.current_user.sysuser.id, position.id)
 
             if not result:
                 self.send_json_error(
-                    data=dict(next_url=self.make_url(path.PROFILE_CUSTOM_CV, pid=pid, wechat_signature=self.params.wechat_signature)),
+                    data=dict(next_url=self.make_url(path.PROFILE_CUSTOM_CV, pid=pid,
+                                                     wechat_signature=self.params.wechat_signature)),
                     message='')
                 return
 
@@ -121,8 +124,14 @@ class ApplicationHandler(BaseHandler):
                 self.current_user, position, self.is_platform)
 
             if recommender_user_id:
-                yield self.application_ps.opt_send_recommender_msg(
-                    recommender_user_id, self.current_user, position)
+                try:
+                    yield self.application_ps.opt_send_recommender_msg(
+                        recommender_user_id, self.current_user, position)
+                except WechatNoTemplateError:
+                    if self.current_user.wechat.type == const.WECHAT_TYPE_SUBSCRIPTION:
+                        self.logger.warn("正在尝试使用订阅号发消息模板, 错误将被忽略")
+                    else:
+                        raise
 
                 # 4. 更新挖掘被动求职者信息
                 yield self.application_ps.opt_update_candidate_recom_records(
@@ -154,7 +163,6 @@ class ApplicationHandler(BaseHandler):
 
 
 class ApplicationEmailHandler(BaseHandler):
-
     @handle_response
     @authenticated
     @gen.coroutine
@@ -191,7 +199,8 @@ class ApplicationEmailHandler(BaseHandler):
         position = yield self.position_ps.get_position(self.params.pid)
         if self.params.pid and position.email_resume_conf == 0:
             # 职位必须能接受Email投递 而且params含有pid
-            create_status, message = yield self.application_ps.create_email_apply(self.params, position, self.current_user, self.is_platform)
+            create_status, message = yield self.application_ps.create_email_apply(self.params, position,
+                                                                                  self.current_user, self.is_platform)
             if not create_status:
                 # 职位不能申请, 直接返回不能再次redirect
                 self.send_json_error(message=message)
