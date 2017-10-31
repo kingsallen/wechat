@@ -17,11 +17,12 @@ class UserSurveyConstantMixin(object):
     constant = ObjectDict()
 
     constant.job_grade = {
-        1: "总监",
-        2: "经理",
-        3: "主管",
-        4: "支援",
-        5: "实习生"
+        1: "副总裁及以上",
+        2: "总监",
+        3: "经理",
+        4: "主管",
+        5: "职员",
+        6: "应届生/学生"
     }
 
     constant.industry = {
