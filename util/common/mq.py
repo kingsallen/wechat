@@ -117,6 +117,7 @@ class AwardsMQPublisher(MQPublisher):
 
         self.publish_message(message=params, routing_key=routing_key)
 
+
 amqp_url = 'amqp://{}:{}@{}:{}/%2F?connection_attempts={}&heartbeat_interval={}'.format(
     settings['rabbitmq_username'],
     settings['rabbitmq_password'],
@@ -133,6 +134,14 @@ award_publisher = AwardsMQPublisher(
     appid=6
 )
 
+data_userprofile_publisher = MQPublisher(
+    amqp_url=amqp_url,
+    exchange="data.user_profile",
+    exchange_type="direct",
+    appid=6
+)
+
+
 def main():
     award_publisher = AwardsMQPublisher(
         amqp_url='amqp://guest:guest@localhost:5672/%2F?connection_attempts=3&heartbeat_interval=3600',
@@ -141,6 +150,7 @@ def main():
         routing_key="reward.add",
         appid=6
     )
+
     award_publisher.publish_message({"hello": "world123"})
 
 if __name__ == '__main__':
