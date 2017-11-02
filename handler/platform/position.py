@@ -738,7 +738,7 @@ class PositionListHandler(BaseHandler):
         # 如果是下拉刷新请求的职位, 返回新增职位的页面
         if self.params.restype == "json":
             self.render(
-                template_name="refer/neo_weixin/position_v2/position_list_items.html",
+                template_name="position/list_items.html",
                 positions=position_list,
                 is_employee=bool(self.current_user.employee),
                 use_neowx=bool(self.current_user.company.conf_newjd_status == 2))
@@ -764,7 +764,7 @@ class PositionListHandler(BaseHandler):
                 assert False
 
             self.render(
-                template_name="refer/neo_weixin/position_v2/position_list.html",
+                template_name="position/list.html",
                 positions=position_list,
                 position_title=position_title,
                 url='',
