@@ -392,13 +392,11 @@ class PositionHandler(BaseHandler):
         attr = []
 
         if position_info.candidate_source:
-            attr.append("{0} {1}".format(
-                self.locale.translate('jd_candidate_source'),
+            attr.append("{0}".format(
                 self.locale.translate(position_info.candidate_source)))
 
         if position_info.employment_type:
-            attr.append("{0} {1}".format(
-                self.locale.translate('jd_employment_type'),
+            attr.append("{0}".format(
                 self.locale.translate(position_info.employment_type)))
 
         if self.current_user.company.conf_job_occupation and position_info.job_occupation:
@@ -753,6 +751,17 @@ class PositionListHandler(BaseHandler):
                 position_title = self.locale.translate(const_platform.POSITION_LIST_TITLE_RECOMLIST)
 
             teamname_custom = self.current_user.company.conf_teamname_custom.teamname_custom
+
+            if self.locale.code == 'zh_CN':
+                teamname_custom = self.locale.translate(
+                    teamname_custom, plural_message=teamname_custom, count=2)
+
+            elif self.locale.code == 'en_US':
+                teamname_custom = self.locale.translate(
+                    '团队', plural_message='团队', count=2)
+
+            else:
+                assert False
 
             self.render(
                 template_name="refer/neo_weixin/position_v2/position_list.html",

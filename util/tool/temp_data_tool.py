@@ -175,7 +175,11 @@ def make_header(locale, company, team_index=False, team=None, **extra):
         description = team.slogan
     else:
         if team_index:
-            name = locale.translate("company_our_teams").format(extra.get("teamname_custom"))
+            name = locale.translate("company_our_teams").format(
+                locale.translate(
+                    extra.get("teamname_custom"),
+                    plural_message=extra.get("teamname_custom"),
+                    count=2))
         else:
             name = company.abbreviation or company.name
         description = '' if team_index else company.slogan
@@ -287,7 +291,10 @@ def make_team_detail_template(locale, team, members, modulename, detail_media_li
     if other_teams:
         template.append(template4(
             sub_type=0,
-            title=locale.translate('company_other_text').format(teamname_field),
+            title=locale.translate('company_other_text').format(
+                locale.translate(teamname_field,
+                                 plural_message=teamname_field,
+                                 count=2)),
             data=[
                 make_other_team_data(
                     team=t,
