@@ -49,8 +49,19 @@ class DictionaryPageService(PageService):
 
     @tornado.gen.coroutine
     def get_sms_country_codes(self):
+
         ret = yield self.infra_dict_ds.get_sms_country_codes()
-        return ret
+
+        china = {'text': '中国', 'code_text': '86'}
+
+        try:
+            ret.remove(china)
+        except ValueError:
+            pass
+
+        finally:
+            ret.insert(0, china)
+            return ret
 
     @tornado.gen.coroutine
     def get_sms_country_code_list(self):
