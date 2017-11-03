@@ -96,11 +96,20 @@ class ApplicationHandler(BaseHandler):
             result = yield self.application_ps.check_custom_cv_v2(
                 self.current_user.sysuser.id, position.id)
 
+
+            p = {
+                'pid': pid,
+                'wechat_signature': self.params.wechat_signature
+            }
+            if self.params.recom:
+                p.update({
+                    'recom': self.params.recom
+                })
+
             if not result:
                 self.send_json_error(
-                    data=dict(next_url=self.make_url(path.PROFILE_CUSTOM_CV, pid=pid,
-                                                     wechat_signature=self.params.wechat_signature)),
-                    message='')
+                    data=dict(next_url=self.make_url(path.PROFILE_CUSTOM_CV, **p),
+                    message=''))
                 return
 
         is_applied, message, apply_id = yield self.application_ps.create_application(
