@@ -125,3 +125,52 @@ class APIUserSurveyHandler(UserSurveyConstantMixin, BaseHandler):
             if key in self.constant:
                 model[key] = getattr(self.constant, key).get(model[key])
         return model
+
+
+class AIRecomHandler(BaseHandler):
+    RECOM_AUDIENCE_COMMON = 1
+    RECOM_AUDIENCE_EMPLOYEE = 2
+
+    @decorator.handle_response
+    @decorator.authenticated
+    @gen.coroutine
+    def get(self):
+        recom_audience = self.RECOM_AUDIENCE_COMMON
+
+        if self.param.recom_audience and self.param.recom_audience.isdigit():
+            recom_audience = int(self.param.recom_audience)
+
+        self.render_page('adjunct/job-recom-list.html',
+                         data={'recomAudience': recom_audience})
+
+
+class APIPositionRecomListHandler(BaseHandler):
+
+    @decorator.handle_response
+    @decorator.authenticated
+    @gen.coroutine
+    def get(self):
+        # mock request:
+        # {
+        #     audience: 1, // 1, or 2.
+        #       pageSize: 10,
+        #       pageNo: 1,
+        # }
+
+        # 参考 这个方法构建 position list
+        # position_ps.infra_get_rp_position_list(infra_params)
+
+        # 同时 删除以下字段： is_rp_reward， employee_only
+        # 因为
+
+        data = {
+            'positions': [
+                {
+                    'id': 1,
+                    'name': 'xxx'
+                }
+            ]
+        }
+
+        self.send_json_success(data=data)
+
