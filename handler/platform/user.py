@@ -150,26 +150,18 @@ class APIPositionRecomListHandler(BaseHandler):
     @decorator.authenticated
     @gen.coroutine
     def get(self):
-        # mock request:
-        # {
-        #     audience: 1, // 1, or 2.
-        #       pageSize: 10,
-        #       pageNo: 1,
-        # }
 
-        # 参考 这个方法构建 position list
-        # position_ps.infra_get_rp_position_list(infra_params)
+        infra_params = {
+            'pageNum': 1,
+            'pageSize': 20,
+            'userId': self.current_user.sysuser.id
+        }
 
-        # 同时 删除以下字段： is_rp_reward， employee_only
-        # 因为
+        position_list = yield self.position_ps.infra_get_position_personarecom(
+            infra_params)
 
         data = {
-            'positions': [
-                {
-                    'id': 1,
-                    'name': 'xxx'
-                }
-            ]
+            'positions': position_list
         }
 
         self.send_json_success(data=data)

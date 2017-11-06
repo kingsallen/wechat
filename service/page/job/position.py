@@ -315,6 +315,7 @@ class PositionPageService(PageService):
     def infra_get_rp_position_list(self, params):
         """红包职位列表"""
         res = yield self.infra_position_ds.get_rp_position_list(params)
+
         team_name_dict = yield self.get_teamid_names_dict(params.company_id)
 
         if res.status == 0:
@@ -338,6 +339,26 @@ class PositionPageService(PageService):
         if res.status == 0:
             raise gen.Return(res.data)
         raise gen.Return(res)
+
+    @gen.coroutine
+    def infra_get_position_personarecom(self, params):
+        """"""
+        res = yield self.infra_position_ds.get_position_personarecom(params)
+
+        team_name_dict = yield self.get_teamid_names_dict(params.company_id)
+
+        if res.status == 0:
+            position_list = [ObjectDict(e) for e in res.data]
+            pids = [e.id for e in position_list]
+            pid_teamid_dict = yield self.get_pid_teamid_dict(params.company_id, pids)
+
+            for position in position_list:
+                position.salary = gen_salary(position.salary_top, position.salary_bottom)
+                position.publish_date = jd_update_date(str_2_date(position.publish_date, self.constant.TIME_FORMAT))
+                position.team_name = team_name_dict.get(pid_teamid_dict.get(position.id, 0), '')
+
+            return position_list
+        return res
 
     @gen.coroutine
     def get_teamid_names_dict(self, company_id):
