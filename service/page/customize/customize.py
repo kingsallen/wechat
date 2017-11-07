@@ -14,8 +14,8 @@ class CustomizePageService(PageService):
     _SUPPRESS_APPLY_CIDS = [61153]
 
     # 开启代理投递
-    # e袋洗
-    _AGENT_APPLY_CIDS = [926]
+    # e袋洗 & 仟寻测试
+    _AGENT_APPLY_CIDS = [926, 160140]
 
     #直接投递
     _DIRECT_APPLY = [82, 176558, 193498]
