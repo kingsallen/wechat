@@ -194,7 +194,6 @@ class InfraUserDataService(DataService):
         ret = yield http_post(path.INFRA_USER_SETTINGS, params)
         return ret
 
-    @cache(ttl=60)
     @gen.coroutine
     def is_valid_employee(self, user_id, company_id):
         params = {
