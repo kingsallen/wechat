@@ -137,8 +137,8 @@ class AIRecomHandler(BaseHandler):
     def get(self):
         recom_audience = self.RECOM_AUDIENCE_COMMON
 
-        if self.param.recom_audience and self.param.recom_audience.isdigit():
-            recom_audience = int(self.param.recom_audience)
+        if self.params.recom_audience and self.params.recom_audience.isdigit():
+            recom_audience = int(self.params.recom_audience)
 
         self.render_page('adjunct/job-recom-list.html',
                          data={'recomAudience': recom_audience})
@@ -151,14 +151,16 @@ class APIPositionRecomListHandler(BaseHandler):
     @gen.coroutine
     def get(self):
 
-        infra_params = {
-            'pageNum': 1,
-            'pageSize': 20,
+        infra_params = ObjectDict({
+            'pageNum': self.params.pageNo,
+            'pageSize': self.params.pageSize,
             'userId': self.current_user.sysuser.id
-        }
+        })
+
+        company_id = self.current_user.company.id
 
         position_list = yield self.position_ps.infra_get_position_personarecom(
-            infra_params)
+            infra_params, company_id)
 
         data = {
             'positions': position_list

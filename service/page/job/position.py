@@ -341,16 +341,25 @@ class PositionPageService(PageService):
         raise gen.Return(res)
 
     @gen.coroutine
-    def infra_get_position_personarecom(self, params):
+    def infra_get_position_personarecom(self, infra_params, company_id):
         """"""
-        res = yield self.infra_position_ds.get_position_personarecom(params)
+        self.logger.debug("*"*100)
+        res = yield self.infra_position_ds.get_position_personarecom(infra_params)
+        self.logger.debug(res)
+        self.logger.debug("*"*100)
 
-        team_name_dict = yield self.get_teamid_names_dict(params.company_id)
+        team_name_dict = yield self.get_teamid_names_dict(company_id)
+        self.logger.debug("team_name_dict:")
+        self.logger.debug(team_name_dict)
+        self.logger.debug("="*100)
 
         if res.status == 0:
             position_list = [ObjectDict(e) for e in res.data]
             pids = [e.id for e in position_list]
-            pid_teamid_dict = yield self.get_pid_teamid_dict(params.company_id, pids)
+            pid_teamid_dict = yield self.get_pid_teamid_dict(company_id, pids)
+            self.logger.debug("pid_teamid_dict:")
+            self.logger.debug(pid_teamid_dict)
+            self.logger.debug("="*100)
 
             for position in position_list:
                 position.salary = gen_salary(position.salary_top, position.salary_bottom)
