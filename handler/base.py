@@ -68,7 +68,7 @@ class BaseHandler(MetaBaseHandler):
         ge_new0 = "wechat_signature=OGJiMmNlNDZmODlmMzVjOGJkNGVkODgyZDg3Zjc0NTk2OTg4OGNiMw=="
         uri = self.request.uri
         if uri.find(ge_old0) > 0:
-            to_uri = uri.replace(ge_old0, ge_new0)
+            to_uri = "/m" + uri.replace(ge_old0, ge_new0)
             self.redirect(to_uri)
             return
 
@@ -76,7 +76,7 @@ class BaseHandler(MetaBaseHandler):
         ge_new1 = "wechat_signature=OGJiMmNlNDZmODlmMzVjOGJkNGVkODgyZDg3Zjc0NTk2OTg4OGNiMw=="
         uri = self.request.uri
         if uri.find(ge_old1) > 0:
-            to_uri = uri.replace(ge_old1, ge_new1)
+            to_uri = "/m" + uri.replace(ge_old1, ge_new1)
             self.redirect(to_uri)
             return
 
@@ -84,7 +84,7 @@ class BaseHandler(MetaBaseHandler):
         ge_new2 = "wechat_signature=OGJiMmNlNDZmODlmMzVjOGJkNGVkODgyZDg3Zjc0NTk2OTg4OGNiMw=="
         uri = self.request.uri
         if uri.find(ge_old2) > 0:
-            to_uri = uri.replace(ge_old2, ge_new2)
+            to_uri = "/m" + uri.replace(ge_old2, ge_new2)
             self.redirect(to_uri)
             return
 
