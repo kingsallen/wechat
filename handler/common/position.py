@@ -35,7 +35,6 @@ class PositionStarHandler(BaseHandler):
 
 
 class PositionFavHandler(BaseHandler):
-
     @handle_response
     @authenticated
     @gen.coroutine
@@ -67,6 +66,11 @@ class PositionFavHandler(BaseHandler):
                 self.params,
                 escape=['next_url', 'name', 'company', 'position'])
 
-        self.render(template_name="refer/weixin/sysuser/interest-success.html",
+        # 诺华定制
+        position_info = yield self.position_ps.get_position(position_id)
+        suppress_apply = yield self.customize_ps.get_suppress_apply(position_info)
+
+        self.render(template_name="adjunct/interest-success.html",
                     application_url=application_url,
-                    position_info_url=position_info_url)
+                    position_info_url=position_info_url,
+                    suppress_apply=suppress_apply)
