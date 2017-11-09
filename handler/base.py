@@ -12,15 +12,13 @@ import conf.wechat as wx_const
 from cache.user.passport_session import PassportCache
 from handler.metabase import MetaBaseHandler
 from oauth.wechat import WeChatOauth2Service, WeChatOauthError, JsApi
+from setting import settings
 from util.common import ObjectDict
 from util.common.cipher import decode_id
 from util.common.decorator import check_signature
 from util.tool.str_tool import to_str, from_hex, match_session_id, \
     languge_code_from_ua
 from util.tool.url_tool import url_subtract_query, make_url
-
-
-from setting import settings
 
 
 class NoSignatureError(Exception):
@@ -66,6 +64,29 @@ class BaseHandler(MetaBaseHandler):
         """用于生成 current_user"""
 
         yield gen.sleep(0.001)  # be nice to cpu
+        ge_old0 = "wechat_signature=NmY0YWY2ZmFjMmY3OGY5M2U0YmE0MDgwZWMzMDEyZjRkNGM0YmU3OA=="
+        ge_new0 = "wechat_signature=OGJiMmNlNDZmODlmMzVjOGJkNGVkODgyZDg3Zjc0NTk2OTg4OGNiMw=="
+        uri = self.request.uri
+        if uri.find(ge_old0) > 0:
+            to_uri = uri.replace(ge_old0, ge_new0)
+            self.redirect(to_uri)
+            return
+
+        ge_old1 = "wechat_signature=NmY0YWY2ZmFjMmY3OGY5M2U0YmE0MDgwZWMzMDEyZjRkNGM0YmU3OA%3D%3D"
+        ge_new1 = "wechat_signature=OGJiMmNlNDZmODlmMzVjOGJkNGVkODgyZDg3Zjc0NTk2OTg4OGNiMw=="
+        uri = self.request.uri
+        if uri.find(ge_old1) > 0:
+            to_uri = uri.replace(ge_old1, ge_new1)
+            self.redirect(to_uri)
+            return
+
+        ge_old2 = "wechat_signature=NmY0YWY2ZmFjMmY3OGY5M2U0YmE0MDgwZWMzMDEyZjRkNGM0YmU3OA%3d%3d"
+        ge_new2 = "wechat_signature=OGJiMmNlNDZmODlmMzVjOGJkNGVkODgyZDg3Zjc0NTk2OTg4OGNiMw=="
+        uri = self.request.uri
+        if uri.find(ge_old2) > 0:
+            to_uri = uri.replace(ge_old2, ge_new2)
+            self.redirect(to_uri)
+            return
 
         # 构建 session 之前先缓存一份 wechat
         self._wechat = yield self._get_current_wechat()
