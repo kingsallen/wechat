@@ -82,6 +82,7 @@ INFRA_APPLICATION_APPLY_COUNT = 'application/count/check'
 # REF: https://wiki.moseeker.com/position-api.md
 INFRA_POSITION_RECOMMEND = 'positions/recommended'
 INFRA_POSITION_LIST = 'position/list'
+INFRA_POSITION_PERSONARECOM = 'position/personarecom'
 INFRA_POSITION_LIST_RP_EXT = 'position/rpext'
 INFRA_RP_POSITION_LIST = 'position/rplist'
 INFRA_RP_POSITION_LIST_SHARE_INFO = 'position/list/hb_share_info'

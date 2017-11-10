@@ -40,6 +40,12 @@ class InfraPositionDataService(DataService):
         return ret
 
     @gen.coroutine
+    def get_position_personarecom(self, params):
+        """获取推荐职位列表接口（ai项目第二期）"""
+        ret = yield http_get(path.INFRA_POSITION_PERSONARECOM, params)
+        return ret
+
+    @gen.coroutine
     def get_recommend_positions(self, position_id):
         """获得 JD 页推荐职位
         reference: https://wiki.moseeker.com/position-api.md#recommended

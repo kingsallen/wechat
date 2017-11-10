@@ -125,3 +125,46 @@ class APIUserSurveyHandler(UserSurveyConstantMixin, BaseHandler):
             if key in self.constant:
                 model[key] = getattr(self.constant, key).get(model[key])
         return model
+
+
+class AIRecomHandler(BaseHandler):
+    RECOM_AUDIENCE_COMMON = 1
+    RECOM_AUDIENCE_EMPLOYEE = 2
+
+    @decorator.handle_response
+    @decorator.authenticated
+    @gen.coroutine
+    def get(self):
+        recom_audience = self.RECOM_AUDIENCE_COMMON
+
+        if self.params.recom_audience and self.params.recom_audience.isdigit():
+            recom_audience = int(self.params.recom_audience)
+
+        self.render_page('adjunct/job-recom-list.html',
+                         data={'recomAudience': recom_audience})
+
+
+class APIPositionRecomListHandler(BaseHandler):
+
+    @decorator.handle_response
+    @decorator.authenticated
+    @gen.coroutine
+    def get(self):
+
+        infra_params = ObjectDict({
+            'pageNum': self.params.pageNo,
+            'pageSize': self.params.pageSize,
+            'userId': self.current_user.sysuser.id
+        })
+
+        company_id = self.current_user.company.id
+
+        position_list = yield self.position_ps.infra_get_position_personarecom(
+            infra_params, company_id)
+
+        data = {
+            'positions': position_list
+        }
+
+        self.send_json_success(data=data)
+
