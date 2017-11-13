@@ -7,13 +7,13 @@
 
 # Copyright 2016 MoSeeker
 
-import redis
-
 from abc import ABCMeta, abstractmethod
+
+import redis
 from tornado.options import options
 
-from setting import settings
 import conf.common as constant
+from setting import settings
 
 
 class IMessageSendable(object):
@@ -33,7 +33,6 @@ class RedisELK(IMessageSendable):
     redis = redis.StrictRedis(connection_pool=pool)
 
     _KEY_PREFIX = "log"  # elk只能接受小写的 key
-    _APPID = constant.APPID[options.env]
 
     def __new__(cls, *args):
         if not hasattr(cls, '_instance'):
@@ -42,6 +41,7 @@ class RedisELK(IMessageSendable):
         return cls._instance
 
     def __init__(self, methods=('send_message')):
+        self._APPID = constant.APPID[options.env]
         try:
             for method_name in methods:
                 assert hasattr(self, method_name)
