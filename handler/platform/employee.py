@@ -2,11 +2,12 @@
 
 from tornado import gen
 
-import conf.path as path
 import conf.common as const
 import conf.fe as fe
 import conf.message as messages
+import conf.path as path
 from handler.base import BaseHandler
+from handler.platform.user import UserSurveyConstantMixin
 from util.common import ObjectDict
 from util.common.decorator import handle_response, authenticated
 from util.tool.json_tool import json_dumps
@@ -17,6 +18,7 @@ class AwardsLadderPageHandler(BaseHandler):
     """Render page to employee/reward-rank.html
     包含转发信息
     """
+
     @handle_response
     @authenticated
     @gen.coroutine
@@ -32,10 +34,10 @@ class AwardsLadderPageHandler(BaseHandler):
                 self.current_user.company.abbreviation or "")
 
             self.params.share = ObjectDict({
-                "cover":       cover,
-                "title":       share_title,
+                "cover": cover,
+                "title": share_title,
                 "description": messages.EMPLOYEE_AWARDS_LADDER_DESC_TEXT,
-                "link":        self.fullurl()
+                "link": self.fullurl()
             })
 
             self.render_page(template_name="employee/reward-rank.html",
@@ -60,7 +62,8 @@ class AwardsLadderHandler(BaseHandler):
         # 判断是否已经绑定员工
         binded = const.YES if self.current_user.employee else const.NO
         if not binded:
-            self.send_json_error(message=messages.EMPLOYEE_NOT_BINDED_WARNING.format(self.current_user.company.conf_employee_slug))
+            self.send_json_error(
+                message=messages.EMPLOYEE_NOT_BINDED_WARNING.format(self.current_user.company.conf_employee_slug))
 
         company_id = self.current_user.company.id
         employee_id = self.current_user.employee.id
@@ -80,7 +83,6 @@ class AwardsLadderHandler(BaseHandler):
 
 
 class AwardsHandler(BaseHandler):
-
     @handle_response
     @authenticated
     @gen.coroutine
@@ -109,7 +111,8 @@ class AwardsHandler(BaseHandler):
             return
 
         else:
-            self.send_json_error(message=messages.EMPLOYEE_NOT_BINDED_WARNING.format(self.current_user.company.conf_employee_slug))
+            self.send_json_error(
+                message=messages.EMPLOYEE_NOT_BINDED_WARNING.format(self.current_user.company.conf_employee_slug))
 
 
 class EmployeeUnbindHandler(BaseHandler):
@@ -188,11 +191,12 @@ class EmployeeBindHandler(BaseHandler):
 
         self.logger.debug(
             "thrift_bind_status: %s, fe_bind_status: %s" %
-            (thrift_bind_status,fe_bind_status ))
+            (thrift_bind_status, fe_bind_status))
 
         # early return 1
         if fe_bind_status == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS:
-            self.send_json_error(message=messages.EMPLOYEE_BINDED_WARNING.format(self.current_user.company.conf_employee_slug))
+            self.send_json_error(
+                message=messages.EMPLOYEE_BINDED_WARNING.format(self.current_user.company.conf_employee_slug))
             return
 
         result, result_message = yield self.employee_ps.bind(payload)
@@ -246,7 +250,6 @@ class EmployeeBindHandler(BaseHandler):
 
 
 class EmployeeBindEmailHandler(BaseHandler):
-
     @handle_response
     @gen.coroutine
     def get(self):
@@ -303,7 +306,6 @@ class RecommendRecordsHandler(BaseHandler):
 
 
 class CustomInfoHandler(BaseHandler):
-
     @handle_response
     @authenticated
     @gen.coroutine
@@ -397,7 +399,8 @@ class CustomInfoHandler(BaseHandler):
                 message = [self.locale.translate(messages.EMPLOYEE_BINDING_EMAIL_DONE0),
                            self.locale.translate(messages.EMPLOYEE_BINDING_EMAIL_DONE1)]
             else:
-                message = self.current_user.company.conf_employee_slug + self.locale.translate(messages.EMPLOYEE_BINDING_SUCCESS)
+                message = self.current_user.company.conf_employee_slug + self.locale.translate(
+                    messages.EMPLOYEE_BINDING_SUCCESS)
 
         self.render(
             template_name='refer/weixin/employee/employee_binding_tip_v2.html',
@@ -410,7 +413,6 @@ class CustomInfoHandler(BaseHandler):
 
 
 class BindedHandler(BaseHandler):
-
     @handle_response
     @authenticated
     @gen.coroutine
@@ -427,14 +429,16 @@ class BindedHandler(BaseHandler):
 
         if (fe_bind_status not in [fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS,
                                    fe.FE_EMPLOYEE_BIND_STATUS_PENDING]):
-            self.logger.debug("sysuser_id: %s, company_id: %s" % (self.current_user.sysuser.id, self.current_user.company.id))
+            self.logger.debug(
+                "sysuser_id: %s, company_id: %s" % (self.current_user.sysuser.id, self.current_user.company.id))
             self.logger.debug("该员工未绑定，也不是pending状态")
             self.write_error(404)
             return
 
         else:
             if fe_bind_status == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS:
-                message = self.current_user.company.conf_employee_slug + self.locale.translate(messages.EMPLOYEE_BINDING_SUCCESS)
+                message = self.current_user.company.conf_employee_slug + self.locale.translate(
+                    messages.EMPLOYEE_BINDING_SUCCESS)
             else:
                 message = [self.locale.translate(messages.EMPLOYEE_BINDING_EMAIL_DONE0),
                            self.locale.translate(messages.EMPLOYEE_BINDING_EMAIL_DONE1)]
@@ -444,6 +448,113 @@ class BindedHandler(BaseHandler):
                 result=0,
                 messages=message,
                 nexturl=self.make_url(path.POSITION_LIST, self.params,
-                                 noemprecom=str(const.YES)),
+                                      noemprecom=str(const.YES)),
                 button_text=messages.EMPLOYEE_BINDING_DEFAULT_BTN_TEXT
             )
+
+
+class EmployeeSurveyHandler(UserSurveyConstantMixin, BaseHandler):
+    """
+    AI推荐项目, 员工认证调查问卷
+    """
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        """
+        前端需要的数据结构
+        {
+          data: {
+            constant: {
+              // 部门
+              department: [
+                // 第一个元素是显示的文本，第二个元素是值.
+                // 如果后端认为值的格式应该是“前端”这样的，可以直接改，前端都可以。
+                [ "前端", 1 ],
+                [ "产品", 2 ],
+              ],
+              // 职级
+              job_grade: [
+                [ "总监", 1 ],
+                [ "经理", 2 ],
+                // ...
+              ],
+              // 学历
+              degree: [
+                [ "小学", 1 ],
+                [ "高中", 2 ],
+              ]
+            },
+
+            // 用于回显表单。
+            model: {
+              department: 1,
+              job_grade: 2,
+              degree: 1,
+              city: "上海",
+              city_code: 112,
+              position: "前端开发"
+            }
+          }
+        }
+        :return:
+        """
+        teams = yield self._get_teams() # 获取公司下部门
+        job_grade = self._get_job_grade() # 获取职级
+        degree = yield self._get_degree() # 获取学历
+        survey_info = yield self._get_employee_survey_info()
+
+        page_data = {
+            "data": {
+                "constant": {
+                    "department": teams,
+                    "job_grade": job_grade,
+                    "degree": degree
+                },
+                "model": survey_info
+            }
+        }
+
+        self.render_page(
+            template_name="adjunct/employee-survey.html",
+            data=page_data,
+            meta_title=const.PAGE_AI_EMPLOYEE_SURVEY)
+
+    @gen.coroutine
+    def _get_teams(self):
+        teams = yield self.employee_ps.get_employee_company_teams(self.current_user.employee)
+        return [[t["id"], t["name"]] for t in teams]
+
+    def _get_job_grade(self):
+        return self.listify_dict(self.constant.job_grade)
+
+    @gen.coroutine
+    def _get_degree(self):
+        degree_dict = yield self.dictionary_ps.get_degrees()
+        return [[name, int(str_code)] for str_code, name in degree_dict.items()]
+
+    @gen.coroutine
+    def _get_employee_survey_info(self):
+        """
+        获取更改员工(用户)提交过的调查问卷填写数据
+        :return:
+        """
+        employee_survey_info = yield self.employee_ps.get_employee_survey_info(self.current_user.employee)
+        return employee_survey_info
+
+
+class APIEmployeeSurveyHandler(BaseHandler):
+    """
+    AI推荐项目, 员工认证调差问卷
+    """
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def post(self):
+        pass
+
+
+class EmployeeAiRecomHandler(BaseHandler):
+    pass

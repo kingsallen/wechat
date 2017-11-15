@@ -2,12 +2,11 @@
 
 import tornado.gen as gen
 
-from service.data.base import DataService
+import conf.common as const
 import conf.path as path
+from service.data.base import DataService
 from util.common import ObjectDict
 from util.tool.http_tool import http_get, http_post, http_put, unboxing
-
-from util.common.decorator import cache
 
 
 class InfraUserDataService(DataService):
@@ -30,7 +29,7 @@ class InfraUserDataService(DataService):
 
         params = ObjectDict({
             'countryCode': str(country_code),
-            'mobile':  str(mobile),
+            'mobile': str(mobile),
             'unionid': str(unionid),
         })
 
@@ -48,7 +47,7 @@ class InfraUserDataService(DataService):
         params = ObjectDict({
             'countryCode': str(country_code),
             'mobile': str(mobile),
-            'type':   int(type)
+            'type': int(type)
         })
         ret = yield http_post(path.INFRA_USER_VALID, params)
         raise gen.Return(ret)
@@ -78,8 +77,8 @@ class InfraUserDataService(DataService):
         params = ObjectDict({
             'countryCode': str(country_code),
             'mobile': str(mobile),
-            'code':   str(code),
-            'type':   int(type),
+            'code': str(code),
+            'type': int(type),
         })
 
         ret = yield http_post(path.INFRA_USER_VERIFY, params)
@@ -149,7 +148,7 @@ class InfraUserDataService(DataService):
 
         params = ObjectDict({
             "countryCode": country_code,
-            "mobile":   mobile,
+            "mobile": mobile,
             "password": password
         })
 
@@ -186,8 +185,8 @@ class InfraUserDataService(DataService):
         :return: list of dict
         """
         params = {
-            'user_id':        user_id,
-            'banner_url':     banner_url,
+            'user_id': user_id,
+            'banner_url': banner_url,
             'privacy_policy': privacy_policy
         }
 
@@ -205,3 +204,13 @@ class InfraUserDataService(DataService):
         ret, data = unboxing(res)
 
         return data.result if ret else False
+
+    @gen.coroutine
+    def get_employee_survey_info(self, employee_id):
+        params = {
+            "id": employee_id,
+            'activation': const.OLD_YES,
+            'disable': const.OLD_YES
+        }
+        res = yield http_get(path.INFRA_USER_EMPLOYEE, params)
+        return unboxing(res)
