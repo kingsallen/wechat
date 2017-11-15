@@ -505,6 +505,16 @@ class EmployeePageService(PageService):
             employee_survey_info = {}
         return employee_survey_info
 
+    @gen.coroutine
+    def post_employee_survey_info(self, employee, survey):
+        """
+        提交员工问卷调查, 一律使用POST, 不区分新增/更新
+        :param employee:
+        :param survey:
+        :return:
+        """
+        res = yield self.infra_user_ds.post_employee_survey_info(employee.id, survey)
+        return res
 
     @gen.coroutine
     def get_employee_company_teams(self, employee):

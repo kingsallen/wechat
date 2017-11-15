@@ -500,9 +500,9 @@ class EmployeeSurveyHandler(UserSurveyConstantMixin, BaseHandler):
         }
         :return:
         """
-        teams = yield self._get_teams() # 获取公司下部门
-        job_grade = self._get_job_grade() # 获取职级
-        degree = yield self._get_degree() # 获取学历
+        teams = yield self._get_teams()  # 获取公司下部门
+        job_grade = self._get_job_grade()  # 获取职级
+        degree = yield self._get_degree()  # 获取学历
         survey_info = yield self._get_employee_survey_info()
 
         page_data = {
@@ -546,14 +546,23 @@ class EmployeeSurveyHandler(UserSurveyConstantMixin, BaseHandler):
 
 class APIEmployeeSurveyHandler(BaseHandler):
     """
-    AI推荐项目, 员工认证调差问卷
+    AI推荐项目, 员工认证调查问卷
     """
 
     @handle_response
     @authenticated
     @gen.coroutine
     def post(self):
-        pass
+        survey = ObjectDict(self.params.model)
+
+        must_have = {"department", "job_grade", "degree", "city", "city_code", "position"}
+        assert must_have.issubset(survey.keys())
+
+        res = yield self.employee_ps.post_employee_survey_info(self.current_user.employee, survey)
+        if res.status == const.API_SUCCESS:
+            self.send_json_success()
+        else:
+            self.send_json_error()
 
 
 class EmployeeAiRecomHandler(BaseHandler):

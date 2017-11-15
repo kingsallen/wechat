@@ -214,3 +214,16 @@ class InfraUserDataService(DataService):
         }
         res = yield http_get(path.INFRA_USER_EMPLOYEE, params)
         return unboxing(res)
+
+    @gen.coroutine
+    def post_employee_survey_info(self, employee_id, survey):
+        params = {
+            "id": employee_id,
+            "position": survey["position"],
+            "team_id": survey["department"],
+            "job_grade": survey["job_grade"],
+            "city_code": survey["city_code"],
+            "degree": survey["degree"]
+        }
+        res = yield http_post(path.INFRA_USER_EMPLOYEE, params)
+        return res
