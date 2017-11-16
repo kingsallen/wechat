@@ -206,7 +206,7 @@ class InfraUserDataService(DataService):
         return data.result if ret else False
 
     @gen.coroutine
-    def get_employee_survey_info(self, employee_id, sysuser_id):
+    def get_employee_survey_info(self, sysuser_id, employee_id):
         params = {
             "id": employee_id,
             "sysuser_id": sysuser_id,
@@ -214,7 +214,12 @@ class InfraUserDataService(DataService):
             'disable': const.OLD_YES
         }
         res = yield http_get(path.INFRA_USER_EMPLOYEE, params)
-        return unboxing(res)
+        result, data = unboxing(res)
+        if len(data) > 0:
+            d = data[0]
+        else:
+            d = {}
+        return result, d
 
     @gen.coroutine
     def post_employee_survey_info(self, employee_id, survey):
@@ -226,5 +231,5 @@ class InfraUserDataService(DataService):
             "city_code": survey["city_code"],
             "degree": survey["degree"]
         }
-        res = yield http_post(path.INFRA_USER_EMPLOYEE, params)
+        res = yield http_put(path.INFRA_USER_EMPLOYEE, params)
         return res

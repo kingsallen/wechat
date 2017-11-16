@@ -506,14 +506,12 @@ class EmployeeSurveyHandler(UserSurveyConstantMixin, BaseHandler):
         survey_info = yield self._get_employee_survey_info()
 
         page_data = {
-            "data": {
-                "constant": {
-                    "department": teams,
-                    "job_grade": job_grade,
-                    "degree": degree
-                },
-                "model": survey_info
-            }
+            "constant": {
+                "department": teams,
+                "job_grade": job_grade,
+                "degree": degree
+            },
+            "model": survey_info
         }
 
         self.render_page(
@@ -523,8 +521,8 @@ class EmployeeSurveyHandler(UserSurveyConstantMixin, BaseHandler):
 
     @gen.coroutine
     def _get_teams(self):
-        teams = yield self.employee_ps.get_employee_company_teams(self.current_user.employee)
-        return [[t["id"], t["name"]] for t in teams]
+        teams = yield self.employee_ps.get_employee_company_teams(self.current_user.company.id)
+        return [[t["name"], t["id"]] for t in teams]
 
     def _get_job_grade(self):
         return self.listify_dict(self.constant.job_grade)
@@ -553,7 +551,7 @@ class APIEmployeeSurveyHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def post(self):
-        survey = ObjectDict(self.params.model)
+        survey = ObjectDict(self.json_args.model)
 
         must_have = {"department", "job_grade", "degree", "city", "city_code", "position"}
         assert must_have.issubset(survey.keys())

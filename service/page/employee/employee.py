@@ -490,9 +490,12 @@ class EmployeePageService(PageService):
           position: "前端开发"
         """
         result, data = yield self.infra_user_ds.get_employee_survey_info(user.sysuser.id, user.employee.id)
+        self.logger.debug("*"*100)
+        self.logger.debug(data)
+        self.logger.debug("*"*100)
         if result:
             city_code = data["city_code"]
-            city_name = self.infra_dict_ds.get_city_name_by(city_code)
+            city_name = yield self.infra_dict_ds.get_city_name_by(city_code)
             employee_survey_info = {
                 "position": data["position"],
                 "department": data["team_id"],
@@ -517,13 +520,12 @@ class EmployeePageService(PageService):
         return res
 
     @gen.coroutine
-    def get_employee_company_teams(self, employee):
+    def get_employee_company_teams(self, company_id):
         """
         获取员工所在公司的所有团队
         :param employee:
         :return:
         """
-        company_id = employee.company.id
         fields = ["id", "name"]
         teams = yield self.hr_team_ds.get_team_list(
             conds={'company_id': company_id, 'is_show': 1, 'disable': 0, 'res_id': [0, '>']}, fields=fields)
