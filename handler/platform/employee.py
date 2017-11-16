@@ -500,6 +500,12 @@ class EmployeeSurveyHandler(UserSurveyConstantMixin, BaseHandler):
         }
         :return:
         """
+        is_employee = yield self.infra_user_ds.is_valid_employee(self.current_user.sysuser.id,
+                                                                 self.current_user.company.id)
+        if not is_employee:
+            self.send_json_error(message="您不是员工")
+            return
+
         teams = yield self._get_teams()  # 获取公司下部门
         job_grade = self._get_job_grade()  # 获取职级
         degree = yield self._get_degree()  # 获取学历

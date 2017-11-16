@@ -490,9 +490,6 @@ class EmployeePageService(PageService):
           position: "前端开发"
         """
         result, data = yield self.infra_user_ds.get_employee_survey_info(user.sysuser.id, user.employee.id)
-        self.logger.debug("*"*100)
-        self.logger.debug(data)
-        self.logger.debug("*"*100)
         if result:
             city_code = data["city_code"]
             city_name = yield self.infra_dict_ds.get_city_name_by(city_code)
