@@ -500,10 +500,8 @@ class EmployeeSurveyHandler(UserSurveyConstantMixin, BaseHandler):
         }
         :return:
         """
-        is_employee = yield self.infra_user_ds.is_valid_employee(self.current_user.sysuser.id,
-                                                                 self.current_user.company.id)
-        if not is_employee:
-            self.send_json_error(message="您不是员工")
+        if not self.current_user.employee:
+            self.write_error(http_code=401, message="您不是员工")
             return
 
         teams = yield self._get_teams()  # 获取公司下部门

@@ -310,7 +310,9 @@ class InfraDictDataService(DataService):
         except ValueError:
             raise ValueError('invalid city_code')
 
-        http_response = yield self._get_level_2_cities()
+        http_response1 = yield self._get_level_1_cities()
+        http_response2 = yield self._get_level_2_cities()
+        http_response = http_response1 + http_response2
         return self.make_city_name_by_code_result(http_response, city_code)
 
     @staticmethod

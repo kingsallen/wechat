@@ -525,5 +525,10 @@ class EmployeePageService(PageService):
         """
         fields = ["id", "name"]
         teams = yield self.hr_team_ds.get_team_list(
-            conds={'company_id': company_id, 'is_show': 1, 'disable': 0, 'res_id': [0, '>']}, fields=fields)
+            conds={'company_id': company_id, 'is_show': 1, 'disable': 0}, fields=fields)
         return teams
+
+    @gen.coroutine
+    def is_valid_employee(self, user_id, company_id):
+        is_employee = yield self.infra_user_ds.is_valid_employee(user_id, company_id)
+        return is_employee
