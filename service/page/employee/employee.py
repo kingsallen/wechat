@@ -477,7 +477,7 @@ class EmployeePageService(PageService):
             )
 
     @gen.coroutine
-    def get_employee_survey_info(self, employee):
+    def get_employee_survey_info(self, user):
         """
         获取员工AI调查问卷填写的信息
         :param employee:
@@ -489,7 +489,7 @@ class EmployeePageService(PageService):
           city_code: 112,
           position: "前端开发"
         """
-        result, data = yield self.infra_user_ds.get_employee_survey_info(employee.id)
+        result, data = yield self.infra_user_ds.get_employee_survey_info(user.sysuser.id, user.employee.id)
         if result:
             city_code = data["city_code"]
             city_name = self.infra_dict_ds.get_city_name_by(city_code)

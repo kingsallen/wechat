@@ -540,7 +540,7 @@ class EmployeeSurveyHandler(UserSurveyConstantMixin, BaseHandler):
         获取更改员工(用户)提交过的调查问卷填写数据
         :return:
         """
-        employee_survey_info = yield self.employee_ps.get_employee_survey_info(self.current_user.employee)
+        employee_survey_info = yield self.employee_ps.get_employee_survey_info(self.current_user)
         return employee_survey_info
 
 

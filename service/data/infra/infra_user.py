@@ -206,9 +206,10 @@ class InfraUserDataService(DataService):
         return data.result if ret else False
 
     @gen.coroutine
-    def get_employee_survey_info(self, employee_id):
+    def get_employee_survey_info(self, employee_id, sysuser_id):
         params = {
             "id": employee_id,
+            "sysuser_id": sysuser_id,
             'activation': const.OLD_YES,
             'disable': const.OLD_YES
         }
