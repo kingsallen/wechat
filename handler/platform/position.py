@@ -457,7 +457,12 @@ class PositionHandler(BaseHandler):
                             gen_degree_v2(position_info.raw_degree, position_info.raw_degree_above, self.locale)])
 
         if position_info.experience:
-            require.append([self.locale.translate('jd_work_exp'), position_info.experience])
+            require.append([
+                self.locale.translate('jd_work_exp'),
+                gen_experience_v2(position_info.raw_experience,
+                    position_info.raw_experience_above,
+                    self.locale)
+                ])
 
         if position_info.language:
             require.append([self.locale.translate('jd_language'), position_info.language])
