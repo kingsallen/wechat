@@ -151,13 +151,14 @@ class APIPositionRecomListHandler(BaseHandler):
     @gen.coroutine
     def get(self):
 
+        company_id = self.current_user.company.id
+
         infra_params = ObjectDict({
             'pageNum': self.params.pageNo,
             'pageSize': self.params.pageSize,
-            'userId': self.current_user.sysuser.id
+            'userId': self.current_user.sysuser.id,
+            "companyId": company_id
         })
-
-        company_id = self.current_user.company.id
 
         position_list = yield self.position_ps.infra_get_position_personarecom(
             infra_params, company_id)

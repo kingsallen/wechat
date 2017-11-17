@@ -1,32 +1,31 @@
 # coding=utf-8
 
 import json
+
 from tornado import gen
 
 import conf.common as const
 import conf.fe as fe
-import conf.path as path
 import conf.message as msg
-from setting import settings
-
+import conf.path as path
 from service.page.base import PageService
+from setting import settings
 from thrift_gen.gen.employee.struct.ttypes import BindingParams, BindStatus
 from util.common import ObjectDict
-from util.tool.re_checker import revalidator
 from util.tool.dict_tool import sub_dict
+from util.tool.re_checker import revalidator
 from util.tool.url_tool import make_static_url, make_url
 from util.wechat.template import employee_refine_custom_fields_tpl
 
 
 class EmployeePageService(PageService):
-
     FE_BIND_TYPE_CUSTOM = 'custom'
     FE_BIND_TYPE_EMAIL = 'email'
     FE_BIND_TYPE_QUESTION = 'question'
 
     BIND_AUTH_MODE = ObjectDict({
-        FE_BIND_TYPE_EMAIL:    0,
-        FE_BIND_TYPE_CUSTOM:   1,
+        FE_BIND_TYPE_EMAIL: 0,
+        FE_BIND_TYPE_CUSTOM: 1,
         FE_BIND_TYPE_QUESTION: 2
     })
 
@@ -39,9 +38,9 @@ class EmployeePageService(PageService):
         用于email员工绑定点击链接后"""
         record = yield self.user_employee_ds.get_employee({
             'activation_code': code,
-            'activation':      const.OLD_YES,
-            'disable':         const.OLD_YES,
-            'status':          const.OLD_YES
+            'activation': const.OLD_YES,
+            'disable': const.OLD_YES,
+            'status': const.OLD_YES
         })
         return record
 
@@ -101,7 +100,7 @@ class EmployeePageService(PageService):
             }
         """
         company_conf = yield self.hr_company_conf_ds.get_company_conf(
-            conds={'company_id': current_user.company.id },
+            conds={'company_id': current_user.company.id},
             fields=['employee_binding']
         )
         # 员工认证自定义文案
@@ -182,7 +181,7 @@ class EmployeePageService(PageService):
                 data.type = self.FE_BIND_TYPE_QUESTION
                 _make_questions_conf()
             else:
-                assert False # should not be here
+                assert False  # should not be here
 
         # 未绑定的员工， 根据 conf.authMode 来渲染
         else:
@@ -288,12 +287,12 @@ class EmployeePageService(PageService):
         """获取员工积分信息"""
 
         reason_txt_fmt_map = {
-            const.RECRUIT_STATUS_RECOMCLICK_ID:      "awards_reason_saw_profile",
-            const.RECRUIT_STATUS_APPLY_ID:           "awards_reason_aplied",
-            const.RECRUIT_STATUS_CVPASSED_ID:        "awards_reason_review_passed",
-            const.RECRUIT_STATUS_OFFERED_ID:         "awards_reason_passed_interview",
+            const.RECRUIT_STATUS_RECOMCLICK_ID: "awards_reason_saw_profile",
+            const.RECRUIT_STATUS_APPLY_ID: "awards_reason_aplied",
+            const.RECRUIT_STATUS_CVPASSED_ID: "awards_reason_review_passed",
+            const.RECRUIT_STATUS_OFFERED_ID: "awards_reason_passed_interview",
             const.RECRUIT_STATUS_FULL_RECOM_INFO_ID: "awards_reason_fullfil_info",
-            const.RECRUIT_STATUS_HIRED_ID:           "awards_reason_on_board"
+            const.RECRUIT_STATUS_HIRED_ID: "awards_reason_on_board"
         }
 
         res_award_rules = []
@@ -332,11 +331,10 @@ class EmployeePageService(PageService):
                 res_rewards.append(e)
 
         return ObjectDict({
-            'rewards':                res_rewards,
-            'award_rules':            res_award_rules,
-            'point_total':            total
+            'rewards': res_rewards,
+            'award_rules': res_award_rules,
+            'point_total': total
         })
-
 
     @gen.coroutine
     def unbind(self, employee_id, company_id, user_id):
@@ -392,31 +390,31 @@ class EmployeePageService(PageService):
         if ret.score:
             score = ObjectDict({
                 "link_viewed_count": ret.score.link_viewed_count,
-                "interested_count":  ret.score.interested_count,
-                "applied_count":     ret.score.applied_count
+                "interested_count": ret.score.interested_count,
+                "applied_count": ret.score.applied_count
             })
         recommends = list()
         if ret.recommends:
             for e in ret.recommends:
                 recom = ObjectDict({
-                    "status":        e.status,
-                    "headimgurl":    make_static_url(
+                    "status": e.status,
+                    "headimgurl": make_static_url(
                         e.headimgurl or const.SYSUSER_HEADIMG),
                     "is_interested": e.is_interested,
-                    "applier_name":  e.applier_name,
-                    "applier_rel":   e.applier_rel,
-                    "view_number":   e.view_number,
-                    "position":      e.position,
-                    "click_time":    e.click_time,
-                    "recom_status":  e.recom_status,
+                    "applier_name": e.applier_name,
+                    "applier_rel": e.applier_rel,
+                    "view_number": e.view_number,
+                    "position": e.position,
+                    "click_time": e.click_time,
+                    "recom_status": e.recom_status,
                     "id": e.id
                 })
                 recommends.append(recom)
 
         res = ObjectDict({
             "has_recommends": ret.hasRecommends if ret.hasRecommends else False,
-            "score":          score,
-            "recommends":     recommends
+            "score": score,
+            "recommends": recommends
         })
 
         raise gen.Return(res)
@@ -427,12 +425,12 @@ class EmployeePageService(PageService):
         根据公司 id 返回员工认证自定义字段配置 -> list
         并按照 forder 字段排序返回
         """
-        selects_from_ds = yield self.hr_employee_custom_fields_ds.\
+        selects_from_ds = yield self.hr_employee_custom_fields_ds. \
             get_employee_custom_field_records({
-                "company_id": company_id,
-                "status": const.OLD_YES,
-                "disable": const.NO
-            })
+            "company_id": company_id,
+            "status": const.OLD_YES,
+            "disable": const.NO
+        })
 
         selects = sorted(selects_from_ds, key=lambda x: x.forder)
 
@@ -477,3 +475,60 @@ class EmployeePageService(PageService):
                 link=link,
                 company_name=current_user.company.name
             )
+
+    @gen.coroutine
+    def get_employee_survey_info(self, user):
+        """
+        获取员工AI调查问卷填写的信息
+        :param employee:
+        :return:
+        department: 1,
+          job_grade: 2,
+          degree: 1,
+          city: "上海",
+          city_code: 112,
+          position: "前端开发"
+        """
+        result, data = yield self.infra_user_ds.get_employee_survey_info(user.sysuser.id, user.employee.id)
+        if result:
+            city_code = data["city_code"]
+            city_name = yield self.infra_dict_ds.get_city_name_by(city_code)
+            employee_survey_info = {
+                "position": data["position"],
+                "department": data["team_id"],
+                "job_grade": data["job_grade"],
+                "city": city_name,
+                "city_code": data["city_code"],
+                "degree": data["degree"]
+            }
+        else:
+            employee_survey_info = {}
+        return employee_survey_info
+
+    @gen.coroutine
+    def post_employee_survey_info(self, employee, survey):
+        """
+        提交员工问卷调查, 一律使用POST, 不区分新增/更新
+        :param employee:
+        :param survey:
+        :return:
+        """
+        res = yield self.infra_user_ds.post_employee_survey_info(employee.id, survey)
+        return res
+
+    @gen.coroutine
+    def get_employee_company_teams(self, company_id):
+        """
+        获取员工所在公司的所有团队
+        :param employee:
+        :return:
+        """
+        fields = ["id", "name"]
+        teams = yield self.hr_team_ds.get_team_list(
+            conds={'company_id': company_id, 'is_show': 1, 'disable': 0}, fields=fields)
+        return teams
+
+    @gen.coroutine
+    def is_valid_employee(self, user_id, company_id):
+        is_employee = yield self.infra_user_ds.is_valid_employee(user_id, company_id)
+        return is_employee
