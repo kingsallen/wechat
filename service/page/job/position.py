@@ -1,21 +1,21 @@
 # coding=utf-8
 
-from tornado import gen, httpclient
 import json
+
+from tornado import gen, httpclient
 
 import conf.common as const
 from service.page.base import PageService
+from setting import settings
 from util.common import ObjectDict
 from util.common.cipher import encode_id
 from util.tool.date_tool import jd_update_date, str_2_date
 from util.tool.str_tool import gen_salary, split, set_literl, gen_degree, gen_experience, to_str
-from util.tool.url_tool import make_static_url
 from util.tool.temp_data_tool import make_position_detail_cms, make_team, template3
-from setting import settings
+from util.tool.url_tool import make_static_url
 
 
 class PositionPageService(PageService):
-
     def __init__(self):
         super().__init__()
 
@@ -94,7 +94,7 @@ class PositionPageService(PageService):
             position.share_description = ""
 
             share_conf = yield self.__get_share_conf(position_res.share_tpl_id)
-            if share_conf.id > 3: # 隐藏逻辑， id为1-3的话，说明是写死在数据库中的模版, 需要做国际化处理
+            if share_conf.id > 3:  # 隐藏逻辑， id为1-3的话，说明是写死在数据库中的模版, 需要做国际化处理
                 position.share_title = share_conf.title
                 position.share_description = share_conf.description
 
@@ -341,25 +341,68 @@ class PositionPageService(PageService):
         raise gen.Return(res)
 
     @gen.coroutine
+    def infra_get_position_employeerecom(self, infra_params, company_id):
+        """
+        请求基础服务, 获取员工推荐职位列表
+        :param infra_params: ObjectDict({
+                                'pageNum': self.params.pageNo,
+                                'pageSize': self.params.pageSize,
+                                'userId': self.current_user.sysuser.id,
+                                "companyId": company_id,
+                                "recomPushId": self.params.recomPushId
+                            })
+        :param company_id:
+        :return:
+        """
+        res = yield self.infra_position_ds.get_position_employeerecom(infra_params, company_id)
+
+        if res.status == 0:
+            # 获取获取到普通职位列表，则根据获取的数据查找其中红包职位的红包相关信息
+            position_list = [ObjectDict(e) for e in res.data]
+
+            # 团队信息 #
+            # 逻辑和infra_get_position_personarecom一样, 代码有重复, TODO: 优化
+            pids = [e.id for e in position_list]
+            pid_teamid_dict = yield self.get_pid_teamid_dict(company_id, pids)
+            team_name_dict = yield self.get_teamid_names_dict(company_id)
+            for position in position_list:
+                position.salary = gen_salary(position.salary_top, position.salary_bottom)
+                position.publish_date = jd_update_date(str_2_date(position.publish_date, self.constant.TIME_FORMAT))
+                position.team_name = team_name_dict.get(pid_teamid_dict.get(position.id, 0), '')
+
+            # 职位红包 #
+            # 逻辑和职位列表页一样, 代码有重复, TODO: 优化
+            rp_position_list = [p for p in position_list if p.in_hb]
+            if position_list and rp_position_list:
+                rpext_list = yield self.infra_get_position_list_rp_ext(rp_position_list)
+
+                for position in position_list:
+                    pext = [e for e in rpext_list if e.pid == position.id]
+                    if pext:
+                        position.remain = pext[0].remain
+                        position.employee_only = pext[0].employee_only
+                        position.is_rp_reward = position.remain > 0
+                    else:
+                        position.is_rp_reward = False
+            return position_list
+        return res
+
+    @gen.coroutine
     def infra_get_position_personarecom(self, infra_params, company_id):
-        """"""
-        self.logger.debug("*"*100)
+        """
+        TODO: 补充文档
+        :param infra_params:
+        :param company_id:
+        :return:
+        """
         res = yield self.infra_position_ds.get_position_personarecom(infra_params)
-        self.logger.debug(res)
-        self.logger.debug("*"*100)
 
         team_name_dict = yield self.get_teamid_names_dict(company_id)
-        self.logger.debug("team_name_dict:")
-        self.logger.debug(team_name_dict)
-        self.logger.debug("="*100)
 
         if res.status == 0:
             position_list = [ObjectDict(e) for e in res.data]
             pids = [e.id for e in position_list]
             pid_teamid_dict = yield self.get_pid_teamid_dict(company_id, pids)
-            self.logger.debug("pid_teamid_dict:")
-            self.logger.debug(pid_teamid_dict)
-            self.logger.debug("="*100)
 
             for position in position_list:
                 position.salary = gen_salary(position.salary_top, position.salary_bottom)
@@ -415,12 +458,12 @@ class PositionPageService(PageService):
 
         for item in ret.data:
             pos = ObjectDict()
-            pos.title=item.title
-            pos.id=item.id
-            pos.salary=gen_salary(item.salaryTop, item.salaryBottom)
-            pos.image_url=make_static_url(item.resUrl)
-            pos.city=item.city
-            pos.team_name=item.teamName
+            pos.title = item.title
+            pos.id = item.id
+            pos.salary = gen_salary(item.salaryTop, item.salaryBottom)
+            pos.image_url = make_static_url(item.resUrl)
+            pos.city = item.city
+            pos.team_name = item.teamName
             res_list.append(pos)
 
         return res_list

@@ -584,7 +584,39 @@ class EmployeeAiRecomHandler(BaseHandler):
     @gen.coroutine
     def get(self, recom_push_id):
         recom_audience = self.RECOM_AUDIENCE_EMPLOYEE
+        share_info = self.get_employee_recom_share_info()
 
         self.render_page("adjunct/job-recom-list.html",
                          data={"recomAudience": recom_audience,
-                               "recomPushId": recom_push_id})
+                               "recomPushId": recom_push_id,
+                               "share": share_info})
+
+    def get_employee_recom_share_info(self):
+        """
+        !重要!
+        分享信息
+        """
+        escape = [
+            "pid", "keywords", "cities", "candidate_source",
+            "employment_type", "salary", "department", "occupations",
+            "custom", "degree", "page_from", "page_size"
+        ]
+
+        link = self.make_url(
+            path.POSITION_LIST,
+            self.params,
+            recom=self.position_ps._make_recom(self.current_user.sysuser.id),
+            escape=escape)
+
+        cover = ""
+        title = ""
+        description = ""
+
+        share_info = ObjectDict({
+            "cover": cover,
+            "title": title,
+            "description": description,
+            "link": link
+        })
+
+        return share_info

@@ -153,24 +153,15 @@ class APIPositionRecomListHandler(BaseHandler):
     @gen.coroutine
     def get(self):
 
-        try:
-            assert hasattr(self.params, "audience")
-        except:
-            self.send_json_error("参数错误")
+        assert hasattr(self.params, "audience")
 
         if self._fans():
             position_list = yield self.get_fans_position_list()
-            self.send_json_success(data={
-                "positions": position_list
-            })
+            self.send_json_success(data={"positions": position_list})
 
         elif self._employee():
             position_list = yield self.get_employee_position_list()
-            share_info = yield self.get_employee_recom_share_info()
-            self.send_json_success(data={
-                "positions": position_list,
-                "share_info": share_info
-            })
+            self.send_json_success(data={"positions": position_list})
 
         else:
             self.send_json_error("参数错误")
@@ -195,8 +186,7 @@ class APIPositionRecomListHandler(BaseHandler):
             "companyId": company_id
         })
 
-        position_list = yield self.position_ps.infra_get_position_personarecom(
-            infra_params, company_id)
+        position_list = yield self.position_ps.infra_get_position_personarecom(infra_params, company_id)
         return position_list
 
     @gen.coroutine
@@ -205,3 +195,15 @@ class APIPositionRecomListHandler(BaseHandler):
         获取员工推荐职位列表, 希望你能转发
         :return:
         """
+        company_id = self.current_user.company.id
+
+        infra_params = ObjectDict({
+            'pageNum': self.params.pageNo,
+            'pageSize': self.params.pageSize,
+            'userId': self.current_user.sysuser.id,
+            "companyId": company_id,
+            "recomPushId": self.params.recomPushId
+        })
+
+        position_list = yield self.position_ps.infra_get_position_employeerecom(infra_params, company_id)
+        return position_list
