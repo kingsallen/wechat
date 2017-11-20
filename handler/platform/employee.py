@@ -568,4 +568,23 @@ class APIEmployeeSurveyHandler(BaseHandler):
 
 
 class EmployeeAiRecomHandler(BaseHandler):
-    pass
+    """
+    AI推荐项目, 员工推荐职位列表, 功能:
+    1. 展示本次员工推荐职位
+    2. 带红包功能
+        1) 红包样式
+        2) 转发功能
+    3. 需要对职位列表做出改造
+    """
+
+    RECOM_AUDIENCE_EMPLOYEE = 2
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self, recom_push_id):
+        recom_audience = self.RECOM_AUDIENCE_EMPLOYEE
+
+        self.render_page("adjunct/job-recom-list.html",
+                         data={"recomAudience": recom_audience,
+                               "recomPushId": recom_push_id})

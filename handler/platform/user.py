@@ -13,7 +13,6 @@ from util.common.mq import data_userprofile_publisher
 
 
 class UserSurveyConstantMixin(object):
-
     constant = ObjectDict()
 
     constant.job_grade = {
@@ -26,15 +25,15 @@ class UserSurveyConstantMixin(object):
     }
 
     constant.industry = {
-        1:  "计算机/互联网/通信/电子",
-        2:  "会计/金融/银行/保险",
-        3:  "贸易/消费/制造/营运",
-        4:  "制药/医疗",
-        5:  "生产/加工/制造",
-        6:  "广告/媒体",
-        7:  "房地产/建筑",
-        8:  "专业服务/教育/培训",
-        9:  "服务业",
+        1: "计算机/互联网/通信/电子",
+        2: "会计/金融/银行/保险",
+        3: "贸易/消费/制造/营运",
+        4: "制药/医疗",
+        5: "生产/加工/制造",
+        6: "广告/媒体",
+        7: "房地产/建筑",
+        8: "专业服务/教育/培训",
+        9: "服务业",
         10: "物流/运输",
         11: "能源/原材料",
         12: "政府/非赢利机构/其他"
@@ -77,7 +76,6 @@ class UserSurveyConstantMixin(object):
 
 
 class UserSurveyHandler(UserSurveyConstantMixin, BaseHandler):
-
     @decorator.handle_response
     @decorator.authenticated
     @gen.coroutine
@@ -88,16 +86,15 @@ class UserSurveyHandler(UserSurveyConstantMixin, BaseHandler):
 
         data.constant = {
             'job_grade': self.listify_dict(self.constant.job_grade),
-            'industry':  self.listify_dict(self.constant.industry),
-            'work_age':  self.listify_dict(self.constant.work_age),
-            'salary':    self.listify_dict(self.constant.salary),
-            'degree':    self.listify_dict(self.constant.degree)
+            'industry': self.listify_dict(self.constant.industry),
+            'work_age': self.listify_dict(self.constant.work_age),
+            'salary': self.listify_dict(self.constant.salary),
+            'degree': self.listify_dict(self.constant.degree)
         }
         self.render_page('adjunct/user-survey.html', data=data)
 
 
 class APIUserSurveyHandler(UserSurveyConstantMixin, BaseHandler):
-
     @decorator.handle_response
     @decorator.authenticated
     @gen.coroutine
@@ -129,7 +126,6 @@ class APIUserSurveyHandler(UserSurveyConstantMixin, BaseHandler):
 
 class AIRecomHandler(BaseHandler):
     RECOM_AUDIENCE_COMMON = 1
-    RECOM_AUDIENCE_EMPLOYEE = 2
 
     @decorator.handle_response
     @decorator.authenticated
@@ -145,12 +141,51 @@ class AIRecomHandler(BaseHandler):
 
 
 class APIPositionRecomListHandler(BaseHandler):
+    """
+    AI推荐项目, 粉丝推荐职位/员工推荐职位接口,
+    通过一个参数audience来区分粉丝和员工, 1表示粉丝 2表示员工
+    """
+    RECOM_AUDIENCE_COMMON = 1
+    RECOM_AUDIENCE_EMPLOYEE = 2
 
     @decorator.handle_response
     @decorator.authenticated
     @gen.coroutine
     def get(self):
 
+        try:
+            assert hasattr(self.params, "audience")
+        except:
+            self.send_json_error("参数错误")
+
+        if self._fans():
+            position_list = yield self.get_fans_position_list()
+            self.send_json_success(data={
+                "positions": position_list
+            })
+
+        elif self._employee():
+            position_list = yield self.get_employee_position_list()
+            share_info = yield self.get_employee_recom_share_info()
+            self.send_json_success(data={
+                "positions": position_list,
+                "share_info": share_info
+            })
+
+        else:
+            self.send_json_error("参数错误")
+
+    def _fans(self):
+        return self.params.audience == self.RECOM_AUDIENCE_COMMON
+
+    def _employee(self):
+        return self.params.audience == self.RECOM_AUDIENCE_EMPLOYEE
+
+    @gen.coroutine
+    def get_fans_position_list(self):
+        """
+        获取粉丝职位列表
+        """
         company_id = self.current_user.company.id
 
         infra_params = ObjectDict({
@@ -162,10 +197,11 @@ class APIPositionRecomListHandler(BaseHandler):
 
         position_list = yield self.position_ps.infra_get_position_personarecom(
             infra_params, company_id)
+        return position_list
 
-        data = {
-            'positions': position_list
-        }
-
-        self.send_json_success(data=data)
-
+    @gen.coroutine
+    def get_employee_position_list(self):
+        """
+        获取员工推荐职位列表, 希望你能转发
+        :return:
+        """
