@@ -3,6 +3,7 @@
 from tornado import gen
 
 import conf.common as const
+import conf.message as msg
 import conf.fe as fe
 import conf.message as messages
 import conf.path as path
@@ -584,14 +585,15 @@ class EmployeeAiRecomHandler(BaseHandler):
     @gen.coroutine
     def get(self, recom_push_id):
         recom_audience = self.RECOM_AUDIENCE_EMPLOYEE
-        share_info = self.get_employee_recom_share_info()
+        share_info = yield self.get_employee_recom_share_info(recom_push_id)
 
         self.render_page("adjunct/job-recom-list.html",
                          data={"recomAudience": recom_audience,
                                "recomPushId": recom_push_id,
                                "share": share_info})
 
-    def get_employee_recom_share_info(self):
+    @gen.coroutine
+    def get_employee_recom_share_info(self, recom_push_id):
         """
         !重要!
         分享信息
@@ -606,11 +608,15 @@ class EmployeeAiRecomHandler(BaseHandler):
             path.POSITION_LIST,
             self.params,
             recom=self.position_ps._make_recom(self.current_user.sysuser.id),
+            recom_push_id=recom_push_id,
             escape=escape)
 
-        cover = ""
-        title = ""
-        description = ""
+        company_info = yield self.company_ps.get_company(
+            conds={"id": self.current_user.company.id}, need_conf=True)
+
+        cover = self.share_url(company_info.logo)
+        title = company_info.abbreviation + self.locale.translate('job_hotjobs')
+        description = self.locale.translate(msg.SHARE_DES_DEFAULT)
 
         share_info = ObjectDict({
             "cover": cover,
