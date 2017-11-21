@@ -196,13 +196,16 @@ class APIPositionRecomListHandler(BaseHandler):
         获取员工推荐职位列表, 希望你能转发
         :return:
         """
-        company_id = self.current_user.company.id
+        if self.params.pageNo == 1:  # 不分页
+            company_id = self.current_user.company.id
+            infra_params = ObjectDict({
+                "companyId": company_id,
+                "recomPushId": self.params.recomPushId,
+                "type": 1  # hard code, 1表示员工
+            })
 
-        infra_params = ObjectDict({
-            "companyId": company_id,
-            "recomPushId": self.params.recomPushId,
-            "type": 1  # hard code, 1表示员工
-        })
+            position_list = yield self.position_ps.infra_get_position_employeerecom(infra_params, company_id)
+        else:
+            position_list = []
 
-        position_list = yield self.position_ps.infra_get_position_employeerecom(infra_params, company_id)
         return position_list

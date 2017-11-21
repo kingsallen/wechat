@@ -11,15 +11,14 @@ from handler.base import BaseHandler
 from tests.dev_data.user_company_config import COMPANY_CONFIG
 from util.common import ObjectDict
 from util.common.cipher import encode_id
-from util.common.mq import award_publisher
 from util.common.decorator import handle_response, check_employee, NewJDStatusCheckerAddFlag, authenticated
+from util.common.mq import award_publisher
 from util.tool.str_tool import gen_salary, add_item, split, gen_degree_v2, gen_experience_v2
 from util.tool.url_tool import url_append_query
 from util.wechat.template import position_view_five_notice_tpl, position_share_notice_employee_tpl
 
 
 class PositionHandler(BaseHandler):
-
     @handle_response
     @NewJDStatusCheckerAddFlag()
     @authenticated
@@ -205,7 +204,8 @@ class PositionHandler(BaseHandler):
                         description = position_info.share_description
                 else:
                     share_tpl_id = position_info.share_tpl_id
-                    title = self.locale.translate('share_tpl_title%s' % share_tpl_id).format(company_info.abbreviation, position_info.title)
+                    title = self.locale.translate('share_tpl_title%s' % share_tpl_id).format(company_info.abbreviation,
+                                                                                             position_info.title)
                     description = self.locale.translate('share_tpl_description%s' % share_tpl_id)
 
         link = self.make_url(
@@ -374,7 +374,7 @@ class PositionHandler(BaseHandler):
                 position_info.language))
 
         if (position_info.management_experience and
-            position_info.management_experience == 'common_need'):
+                    position_info.management_experience == 'common_need'):
             require.append("{0} {1}".format(
                 self.locale.translate('jd_management_exp'),
                 self.locale.translate(position_info.management_experience)))
@@ -460,9 +460,9 @@ class PositionHandler(BaseHandler):
             require.append([
                 self.locale.translate('jd_work_exp'),
                 gen_experience_v2(position_info.raw_experience,
-                    position_info.raw_experience_above,
-                    self.locale)
-                ])
+                                  position_info.raw_experience_above,
+                                  self.locale)
+            ])
 
         if position_info.language:
             require.append([self.locale.translate('jd_language'), position_info.language])
@@ -709,12 +709,27 @@ class PositionListHandler(BaseHandler):
         if self.params.did and self.params.did.isdigit():
             did = int(self.params.did)
 
+        recom_push_id = 0
+        if self.params.recom_push_id and self.params.isdigit():
+            recom_push_id = int(self.params.recom_push_id)
+
+        if recom_push_id and hb_c:
+            raise Exception("错误的链接")
+
         if hb_c:
             # 红包职位列表
             infra_params.update(hb_config_id=hb_c)
             position_list = yield self.position_ps.infra_get_rp_position_list(infra_params)
             rp_share_info = yield self.position_ps.infra_get_rp_share_info(infra_params)
             yield self._make_share_info(self.current_user.company.id, did, rp_share_info)
+
+        elif recom_push_id:
+            # 员工推荐列表
+            if int(self.params.get("count", 0)) == 0:
+                position_list = yield self.get_employee_position_list(recom_push_id)
+            else:
+                position_list = []
+            yield self._make_share_info(self.current_user.company.id, did)
 
         else:
             # 普通职位列表
@@ -784,6 +799,23 @@ class PositionListHandler(BaseHandler):
         for position in position_list:
             if isinstance(position, dict) and position.in_hb:
                 yield position
+
+    @gen.coroutine
+    def get_employee_position_list(self, recom_push_id):
+        """
+        获取员工推荐职位列表
+        :return:
+        """
+        company_id = self.current_user.company.id
+
+        infra_params = ObjectDict({
+            "companyId": company_id,
+            "recomPushId": recom_push_id,
+            "type": 1  # hard code, 1表示员工
+        })
+
+        position_list = yield self.position_ps.infra_get_position_employeerecom(infra_params, company_id)
+        return position_list
 
     @gen.coroutine
     def make_company_info(self):
