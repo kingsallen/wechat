@@ -584,16 +584,18 @@ class EmployeeAiRecomHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def get(self, recom_push_id):
+        recom_push_id = int(recom_push_id)
         recom_audience = self.RECOM_AUDIENCE_EMPLOYEE
-        share_info = yield self.get_employee_recom_share_info(recom_push_id)
+        recom=self.position_ps._make_recom(self.current_user.sysuser.id)
+        self.params.share = yield self.get_employee_recom_share_info(recom_push_id, recom)
 
         self.render_page("adjunct/job-recom-list.html",
                          data={"recomAudience": recom_audience,
                                "recomPushId": recom_push_id,
-                               "share": share_info})
+                               "recom":recom})
 
     @gen.coroutine
-    def get_employee_recom_share_info(self, recom_push_id):
+    def get_employee_recom_share_info(self, recom_push_id, recom):
         """
         !重要!
         分享信息
@@ -607,7 +609,7 @@ class EmployeeAiRecomHandler(BaseHandler):
         link = self.make_url(
             path.POSITION_LIST,
             self.params,
-            recom=self.position_ps._make_recom(self.current_user.sysuser.id),
+            recom=recom,
             recom_push_id=recom_push_id,
             escape=escape)
 

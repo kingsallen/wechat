@@ -131,7 +131,7 @@ platform_routes = [
     (r'/user/survey/?',                              handler.platform.user.UserSurveyHandler,                   {'event': 'user_survey'}),
     (r'/user/ai-recom/?',                            handler.platform.user.AIRecomHandler,                      {'event': 'user_ai-recom'}),
     (r'/employee/survey/?',                          handler.platform.employee.EmployeeSurveyHandler,               {'event': 'employee_survey'}),
-    (r'/employee/ai-recom/(\d+)',                        handler.platform.employee.EmployeeAiRecomHandler,              {'event': 'employee_ai-recom'}),
+    (r'/employee/ai-recom/(\d+)',                    handler.platform.employee.EmployeeAiRecomHandler,              {'event': 'employee_ai-recom'}),
 
     # 各大公司的自定义配置
     (r"/custom/emailapply/?",                        handler.platform.customize.CustomizeEmailApplyHandler,     {"event": "customize_emailapply"}),

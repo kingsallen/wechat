@@ -10,6 +10,7 @@ import conf.wechat as wx
 from handler.base import BaseHandler
 from tests.dev_data.user_company_config import COMPANY_CONFIG
 from util.common import ObjectDict
+from util.common.exception import MyException
 from util.common.cipher import encode_id
 from util.common.decorator import handle_response, check_employee, NewJDStatusCheckerAddFlag, authenticated
 from util.common.mq import award_publisher
@@ -710,11 +711,11 @@ class PositionListHandler(BaseHandler):
             did = int(self.params.did)
 
         recom_push_id = 0
-        if self.params.recom_push_id and self.params.isdigit():
+        if self.params.recom_push_id and self.params.recom_push_id.isdigit():
             recom_push_id = int(self.params.recom_push_id)
 
         if recom_push_id and hb_c:
-            raise Exception("错误的链接")
+            raise MyException("错误的链接")
 
         if hb_c:
             # 红包职位列表

@@ -9,6 +9,7 @@ import conf.path as path
 import util.common.decorator as decorator
 from handler.base import BaseHandler
 from util.common import ObjectDict
+from util.common.exception import MyException
 from util.common.mq import data_userprofile_publisher
 
 
@@ -153,7 +154,10 @@ class APIPositionRecomListHandler(BaseHandler):
     @gen.coroutine
     def get(self):
 
-        assert hasattr(self.params, "audience")
+        if hasattr(self.params, "audience") and self.params.audience.isdigit():
+            self.params.audience = int(self.params.audience)
+        else:
+            raise MyException("参数错误")
 
         if self._fans():
             position_list = yield self.get_fans_position_list()
@@ -196,11 +200,11 @@ class APIPositionRecomListHandler(BaseHandler):
         获取员工推荐职位列表, 希望你能转发
         :return:
         """
-        if self.params.pageNo == 1:  # 不分页
+        if int(self.params.pageNo) == 1:  # 不分页
             company_id = self.current_user.company.id
             infra_params = ObjectDict({
                 "companyId": company_id,
-                "recomPushId": self.params.recomPushId,
+                "recomPushId": int(self.params.recomPushId),
                 "type": 1  # hard code, 1表示员工
             })
 

@@ -354,7 +354,11 @@ class PositionPageService(PageService):
         :param company_id:
         :return:
         """
-        res = yield self.infra_position_ds.get_position_employeerecom(infra_params)
+        try:
+            res = yield self.infra_position_ds.get_position_employeerecom(infra_params)
+        except Exception as e:
+            self.logger.warn(e)
+            return []
 
         if res.status == 0:
             # 获取获取到普通职位列表，则根据获取的数据查找其中红包职位的红包相关信息
@@ -385,7 +389,9 @@ class PositionPageService(PageService):
                     else:
                         position.is_rp_reward = False
             return position_list
-        return res
+        else:
+            self.logger.warn(res)
+            return []
 
     @gen.coroutine
     def infra_get_position_personarecom(self, infra_params, company_id):
