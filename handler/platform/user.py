@@ -183,7 +183,8 @@ class APIPositionRecomListHandler(BaseHandler):
             'pageNum': self.params.pageNo,
             'pageSize': self.params.pageSize,
             'userId': self.current_user.sysuser.id,
-            "companyId": company_id
+            "companyId": company_id,
+            "type": 0  # hard code, 0表示粉丝
         })
 
         position_list = yield self.position_ps.infra_get_position_personarecom(infra_params, company_id)
@@ -198,11 +199,9 @@ class APIPositionRecomListHandler(BaseHandler):
         company_id = self.current_user.company.id
 
         infra_params = ObjectDict({
-            'pageNum': self.params.pageNo,
-            'pageSize': self.params.pageSize,
-            'userId': self.current_user.sysuser.id,
             "companyId": company_id,
-            "recomPushId": self.params.recomPushId
+            "recomPushId": self.params.recomPushId,
+            "type": 1  # hard code, 1表示员工
         })
 
         position_list = yield self.position_ps.infra_get_position_employeerecom(infra_params, company_id)

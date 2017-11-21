@@ -354,7 +354,7 @@ class PositionPageService(PageService):
         :param company_id:
         :return:
         """
-        res = yield self.infra_position_ds.get_position_employeerecom(infra_params, company_id)
+        res = yield self.infra_position_ds.get_position_employeerecom(infra_params)
 
         if res.status == 0:
             # 获取获取到普通职位列表，则根据获取的数据查找其中红包职位的红包相关信息
