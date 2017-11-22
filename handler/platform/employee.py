@@ -3,6 +3,7 @@
 from tornado import gen
 
 import conf.common as const
+import conf.message as msg
 import conf.fe as fe
 import conf.message as messages
 import conf.path as path
@@ -568,4 +569,62 @@ class APIEmployeeSurveyHandler(BaseHandler):
 
 
 class EmployeeAiRecomHandler(BaseHandler):
-    pass
+    """
+    AI推荐项目, 员工推荐职位列表, 功能:
+    1. 展示本次员工推荐职位
+    2. 带红包功能
+        1) 红包样式
+        2) 转发功能
+    3. 需要对职位列表做出改造
+    """
+
+    RECOM_AUDIENCE_EMPLOYEE = 2
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self, recom_push_id):
+        recom_push_id = int(recom_push_id)
+        recom_audience = self.RECOM_AUDIENCE_EMPLOYEE
+        recom=self.position_ps._make_recom(self.current_user.sysuser.id)
+        self.params.share = yield self.get_employee_recom_share_info(recom_push_id, recom)
+
+        self.render_page("adjunct/job-recom-list.html",
+                         data={"recomAudience": recom_audience,
+                               "recomPushId": recom_push_id,
+                               "recom":recom})
+
+    @gen.coroutine
+    def get_employee_recom_share_info(self, recom_push_id, recom):
+        """
+        !重要!
+        分享信息
+        """
+        escape = [
+            "pid", "keywords", "cities", "candidate_source",
+            "employment_type", "salary", "department", "occupations",
+            "custom", "degree", "page_from", "page_size"
+        ]
+
+        link = self.make_url(
+            path.POSITION_LIST,
+            self.params,
+            recom=recom,
+            recom_push_id=recom_push_id,
+            escape=escape)
+
+        company_info = yield self.company_ps.get_company(
+            conds={"id": self.current_user.company.id}, need_conf=True)
+
+        cover = self.share_url(company_info.logo)
+        title = company_info.abbreviation + self.locale.translate('job_hotjobs')
+        description = self.locale.translate(msg.SHARE_DES_DEFAULT)
+
+        share_info = ObjectDict({
+            "cover": cover,
+            "title": title,
+            "description": description,
+            "link": link
+        })
+
+        return share_info

@@ -44,7 +44,7 @@ def handle_response(func):
                 or self.request.method in ("PUT", "POST", "DELETE"):
                 self.send_json_error()
             else:
-                self.write_error(500)
+                self.write_error(500, message=getattr(e, "message", None))
                 return
 
     return wrapper

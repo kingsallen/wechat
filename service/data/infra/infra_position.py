@@ -39,10 +39,17 @@ class InfraPositionDataService(DataService):
         ret = yield http_get(path.INFRA_RP_POSITION_LIST_SHARE_INFO, params)
         return ret
 
+
     @gen.coroutine
     def get_position_personarecom(self, params):
         """获取推荐职位列表接口（ai项目第二期）"""
         ret = yield http_get(path.INFRA_POSITION_PERSONARECOM, params)
+        return ret
+
+    @gen.coroutine
+    def get_position_employeerecom(self, params):
+        """获取推荐职位列表接口（ai项目第四期）"""
+        ret = yield http_get(path.INFRA_POSITION_EMPLOYEERECOM, params)
         return ret
 
     @gen.coroutine
