@@ -2,20 +2,22 @@
 
 
 from tornado import gen
+
 from service.data.base import DataService
-from util.common.decorator import cache
 from util.common import ObjectDict
+from util.common.decorator import log_time
 
 
 class HrHbConfigDataService(DataService):
-
     @gen.coroutine
     def get_hr_hb_config(self, conds, fields=None, appends=None):
 
         fields = fields or []
 
         if not self._valid_conds(conds):
-            self.logger.warning("Warning:[get_hr_hb_config][invalid parameters], Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
+            self.logger.warning(
+                "Warning:[get_hr_hb_config][invalid parameters], Detail:[conds: {0}, type: {1}]".format(conds,
+                                                                                                        type(conds)))
             raise gen.Return(ObjectDict())
 
         if not fields:
@@ -26,6 +28,7 @@ class HrHbConfigDataService(DataService):
 
         raise gen.Return(response)
 
+    @log_time
     @gen.coroutine
     def get_hr_hb_config_list(self, conds, fields=None, options=None,
                               appends=None, index='', params=None):

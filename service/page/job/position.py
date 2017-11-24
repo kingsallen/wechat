@@ -13,12 +13,14 @@ from util.tool.date_tool import jd_update_date, str_2_date
 from util.tool.str_tool import gen_salary, split, set_literl, gen_degree, gen_experience, to_str
 from util.tool.temp_data_tool import make_position_detail_cms, make_team, template3
 from util.tool.url_tool import make_static_url
+from util.common.decorator import log_time
 
 
 class PositionPageService(PageService):
     def __init__(self):
         super().__init__()
 
+    @log_time
     @gen.coroutine
     def get_position(self, position_id):
         position = ObjectDict()
@@ -150,6 +152,7 @@ class PositionPageService(PageService):
         positions_list = yield self.job_position_ds.get_positions_list(conds, fields, options, appends)
         raise gen.Return(positions_list)
 
+    @log_time
     @gen.coroutine
     def is_position_stared_by(self, user_id, position_id):
         """返回用户是否收藏了职位"""
@@ -195,6 +198,7 @@ class PositionPageService(PageService):
         })
         raise gen.Return(ret)
 
+    @log_time
     @gen.coroutine
     def get_recommend_positions(self, position_id):
         """获得 JD 页推荐职位

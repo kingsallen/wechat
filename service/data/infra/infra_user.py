@@ -7,6 +7,7 @@ import conf.path as path
 from service.data.base import DataService
 from util.common import ObjectDict
 from util.tool.http_tool import http_get, http_post, http_put, unboxing
+from util.common.decorator import log_time
 
 
 class InfraUserDataService(DataService):
@@ -193,6 +194,7 @@ class InfraUserDataService(DataService):
         ret = yield http_post(path.INFRA_USER_SETTINGS, params)
         return ret
 
+    @log_time
     @gen.coroutine
     def is_valid_employee(self, user_id, company_id):
         params = {

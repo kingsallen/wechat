@@ -4,6 +4,7 @@
 from tornado import gen
 from service.data.base import DataService
 from util.common import ObjectDict
+from util.common.decorator import log_time
 
 
 class HrHbItemsDataService(DataService):
@@ -44,6 +45,7 @@ class HrHbItemsDataService(DataService):
 
         raise gen.Return(response)
 
+    @log_time
     @gen.coroutine
     def update_hb_items(self, conds=None, fields=None):
         if not conds or not fields:

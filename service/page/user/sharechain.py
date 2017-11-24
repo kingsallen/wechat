@@ -5,13 +5,14 @@ import tornado.gen as gen
 import conf.common as const
 from service.page.base import PageService
 from util.tool.date_tool import curr_now
-
+from util.common.decorator import log_time
 
 class SharechainPageService(PageService):
 
     def __init__(self):
         super().__init__()
 
+    @log_time
     @gen.coroutine
     def refresh_share_chain(self, presentee_user_id=None, position_id=None,
                             share_chain_parent_id=None):
@@ -45,6 +46,7 @@ class SharechainPageService(PageService):
 
         raise gen.Return(inserted_share_chain_id)
 
+    @log_time
     @gen.coroutine
     def create_share_record(self, params):
         """创建分享链路"""
@@ -65,6 +67,7 @@ class SharechainPageService(PageService):
         assert record_id
         raise gen.Return(record_id)
 
+    @log_time
     @gen.coroutine
     def _select_recom_record(self, position_id, user_id):
         # 现在无论是否开启挖掘被动求职者，都要放到链路表中
@@ -78,6 +81,7 @@ class SharechainPageService(PageService):
         )
         raise gen.Return(record)
 
+    @log_time
     @gen.coroutine
     def _copy_to_candidate_recom_record(self, rec):
         yield self.candidate_recom_record_ds.insert_candidate_recom_record({
@@ -89,6 +93,7 @@ class SharechainPageService(PageService):
             "post_user_id":      rec.root_recom_user_id
         })
 
+    @log_time
     @gen.coroutine
     def _get_latest_share_record(self, user_id, position_id):
         """获得最新的转发触发数据"""
@@ -112,6 +117,7 @@ class SharechainPageService(PageService):
         )
         raise gen.Return(ret)
 
+    @log_time
     @gen.coroutine
     def _is_valid_employee(self, position_id, user_id):
         """返回 user 是否是 position 所在企业的员工"""
@@ -124,6 +130,7 @@ class SharechainPageService(PageService):
         is_valid_employee = yield self.infra_user_ds.is_valid_employee(user_id, company_id)
         return is_valid_employee
 
+    @log_time
     @gen.coroutine
     def _no_existed_record(self, share_record):
         """检查原始链路数据中是否有该数据"""
@@ -135,6 +142,7 @@ class SharechainPageService(PageService):
         })
         raise gen.Return(not bool(record))
 
+    @log_time
     @gen.coroutine
     def _hr_remark_ignored_record(self, share_record):
         """检查这个候选人是否曾今被 hr 设置为 ignore"""
@@ -170,6 +178,7 @@ class SharechainPageService(PageService):
 
         raise gen.Return(ret)
 
+    @log_time
     @gen.coroutine
     def _save_recom(self, last_share_record, share_chain_parent_id):
         """ 入库链路数据 candidate_share_chain
@@ -265,6 +274,7 @@ class SharechainPageService(PageService):
 
         raise gen.Return(ret)
 
+    @log_time
     @gen.coroutine
     def _get_latest_recom_record(self, position_id, user_id, fixed_now):
         """
@@ -286,6 +296,7 @@ class SharechainPageService(PageService):
         )
         raise gen.Return(record)
 
+    @log_time
     @gen.coroutine
     def get_referral_employee_user_id(self, user_id=None, position_id=None):
         """返回 user_id 申请职位时,是否经过了员工内推
@@ -352,6 +363,7 @@ class SharechainPageService(PageService):
 
         return 0
 
+    @log_time
     @gen.coroutine
     def is_employee_presentee(self, share_chain_id):
         """返回 share_chain_id 所指向的 share chain record 是不是员工一度点击
@@ -398,6 +410,7 @@ class SharechainPageService(PageService):
                 share_chain.recom_user_id)
             return valid_employee
 
+    @log_time
     @gen.coroutine
     def find_last_psc(self, position_id, presentee_user_id):
         """根据职位和查看者寻找最近的链路记录"""
