@@ -2,13 +2,14 @@
 
 
 from tornado import gen
+
 from service.data.base import DataService
-from util.common.decorator import cache
 from util.common import ObjectDict
+from util.common.decorator import cache
+from util.common.decorator import log_time
 
 
 class HrHbPositionBindingDataService(DataService):
-
     @cache(ttl=60)
     @gen.coroutine
     def get_hr_hb_position_binding(self, conds, fields=None):
@@ -28,6 +29,7 @@ class HrHbPositionBindingDataService(DataService):
 
         raise gen.Return(response)
 
+    @log_time
     @gen.coroutine
     def get_hr_hb_position_binding_list(self, conds, fields=None, options=None,
                                         appends=None, index='', params=None):

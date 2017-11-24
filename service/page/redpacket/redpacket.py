@@ -4,26 +4,28 @@ import os
 import random
 import socket
 import time
+import traceback
 import uuid
 import xml.dom.minidom as minidom
 from datetime import datetime
-from hashlib import sha1,md5
-import traceback
+from hashlib import sha1, md5
 
 import requests
 import tornado.gen as gen
 
-import conf.wechat as const_wechat
 import conf.common as const
-from conf.common import RP_LOCKED as FIRST_LOCK
 import conf.message as msg
 import conf.path as path
+import conf.wechat as const_wechat
 import conf.wechat as wx
+from conf.common import RP_LOCKED as FIRST_LOCK
 from service.page.base import PageService
-from setting import settings
+from service.page.hr.wechat import WechatPageService
 from service.page.user.sharechain import SharechainPageService
 from service.page.user.user import UserPageService
-from service.page.hr.wechat import WechatPageService
+from setting import settings
+from util.common import ObjectDict
+from util.common.decorator import log_time
 from util.tool.str_tool import set_literl, trunc, generate_nonce_str, to_bytes, to_str
 from util.tool.url_tool import make_url
 from util.wechat.template import (
@@ -33,14 +35,12 @@ from util.wechat.template import (
     rp_transfer_click_success_notice_tpl
 )
 
-from util.common import ObjectDict
-
 
 class RedpacketPageService(PageService):
-
     def __init__(self):
         super().__init__()
 
+    @log_time
     @gen.coroutine
     def __get_card_by_cardno(self, cardno):
         """根据 cardno 获取 scratch card"""
@@ -49,11 +49,14 @@ class RedpacketPageService(PageService):
         })
         raise gen.Return(ret)
 
+    @log_time
     @gen.coroutine
     def __make_card_no(self):
         """创建新的 scratch card no"""
+
         def make_new():
             return sha1(to_bytes('%s%s' % (os.urandom(16), time.time()))).hexdigest()
+
         while True:
             cardno = make_new()
             ret = yield self.__get_card_by_cardno(cardno)
@@ -62,6 +65,7 @@ class RedpacketPageService(PageService):
             else:
                 raise gen.Return(cardno)
 
+    @log_time
     @gen.coroutine
     def __create_new_card(self, wechat_id, qx_openid, hb_config_id,
                           hb_item_id=0, amount=0.0):
@@ -69,12 +73,12 @@ class RedpacketPageService(PageService):
         cardno = yield self.__make_card_no()
 
         yield self.hr_hb_scratch_card_ds.create_scratch_card({
-            "cardno":         cardno,
-            "wechat_id":      wechat_id,
+            "cardno": cardno,
+            "wechat_id": wechat_id,
             "bagging_openid": qx_openid,
-            "hb_item_id":     hb_item_id,
-            "amount":         amount,
-            "hb_config_id":   hb_config_id
+            "hb_item_id": hb_item_id,
+            "amount": amount,
+            "hb_config_id": hb_config_id
         })
 
         ret = yield self.hr_hb_scratch_card_ds.get_scratch_card(conds={
@@ -83,6 +87,7 @@ class RedpacketPageService(PageService):
 
         raise gen.Return(ret)
 
+    @log_time
     @gen.coroutine
     def __get_hb_config_by_position(self, position, share_click=False, share_apply=False):
         """获取红包配置"""
@@ -184,8 +189,8 @@ class RedpacketPageService(PageService):
         # 校验红包活动
         rp_config = yield self.hr_hb_config_ds.get_hr_hb_config(
             conds={
-                'type':       const.RED_PACKET_TYPE_EMPLOYEE_BINDING,
-                'status':     const.HB_CONFIG_RUNNING,
+                'type': const.RED_PACKET_TYPE_EMPLOYEE_BINDING,
+                'status': const.HB_CONFIG_RUNNING,
                 'company_id': company_id
             })
         # 8<------8<------8<------8<------8<------8<------8<------8<------8<---
@@ -206,7 +211,7 @@ class RedpacketPageService(PageService):
                 'sysuser_id': user_id,
                 'company_id': company_id,
                 'activation': const.OLD_YES,
-                'disable':    const.OLD_YES,
+                'disable': const.OLD_YES,
                 'is_rp_sent': const.NO
             }, appends=appends)
 
@@ -232,14 +237,14 @@ class RedpacketPageService(PageService):
             # 如果是订阅号，那么无法获取 recom_wxuser
             # 将 openid = 0 传递到 __send_red_packet_card， 跳过使用企业号发送消息模版
             recom_wxuser = ObjectDict()
-            if wechat.type == const.WECHAT_TYPE_SUBSCRIPTION: # 如果 wechat 是订阅号
+            if wechat.type == const.WECHAT_TYPE_SUBSCRIPTION:  # 如果 wechat 是订阅号
                 recom_wxuser.openid = 0
             elif wechat.type == const.WECHAT_TYPE_SERVICE:  # 如果 wechat 是服务号
                 recom_wxuser = yield self.user_wx_user_ds.get_wxuser({
                     'sysuser_id': user_id, 'wechat_id': wechat.id
                 })
             else:
-                assert False # should not be here
+                assert False  # should not be here
 
             try:
                 if self.__hit_red_packet(rp_config.probability):
@@ -281,6 +286,7 @@ class RedpacketPageService(PageService):
         )
         self.logger.debug("[RP]员工认证红包发送成功")
 
+    @log_time
     @gen.coroutine
     def handle_red_packet_recom(self, recom_current_user, recom_record_id, redislocker,
                                 realname, position_title):
@@ -308,7 +314,7 @@ class RedpacketPageService(PageService):
         # 校验红包活动
         rp_config = yield self.hr_hb_config_ds.get_hr_hb_config(
             conds={
-                'type':   const.RED_PACKET_TYPE_RECOM,
+                'type': const.RED_PACKET_TYPE_RECOM,
                 'status': const.HB_CONFIG_RUNNING,
                 'company_id': company_id
             })
@@ -330,7 +336,7 @@ class RedpacketPageService(PageService):
             conds={
                 'sysuser_id': recom_current_user.sysuser.id,
                 'activation': const.OLD_YES,
-                'disable':    const.OLD_YES
+                'disable': const.OLD_YES
             }, appends=appends)
 
         if not employee:
@@ -411,6 +417,7 @@ class RedpacketPageService(PageService):
 
         self.logger.debug("[RP]推荐红包发送成功")
 
+    @log_time
     @gen.coroutine
     def handle_red_packet_position_related(self,
                                            current_user,
@@ -537,6 +544,7 @@ class RedpacketPageService(PageService):
         except Exception as e:
             self.logger.error(traceback.format_exc())
 
+    @log_time
     @gen.coroutine
     def handle_red_packet_card_sending(self,
                                        current_user,
@@ -571,17 +579,17 @@ class RedpacketPageService(PageService):
         if not malicious_passed:
             self.logger.debug(
                 "[RP]用户刷单, 红包暂停发送: rp_config_id: %s,recom_qx_wxuser: %s, trigger_wxuser_id: %s"
-                %(red_packet_config.id, recom_qx_wxuser.id, current_user.qxuser.id))
+                % (red_packet_config.id, recom_qx_wxuser.id, current_user.qxuser.id))
             raise gen.Return(None)
 
         # 非员工只能领取一个红包的检查, check 不通过暂停发红包
         non_employee_single_rp_passed = yield self.__non_employee_rp_check_passed(
-                red_packet_config, recom_user.id, recom_qx_wxuser.id)
+            red_packet_config, recom_user.id, recom_qx_wxuser.id)
 
         if not non_employee_single_rp_passed:
             self.logger.debug(
                 "[RP]非员工已经领取过红包, 此红包暂停发送: rp_config_id: %s, recom_user.id: %s"
-                %(red_packet_config.id,  recom_user.id))
+                % (red_packet_config.id, recom_user.id))
             raise gen.Return(None)
 
         # 红包发送对象是否符合配置要求
@@ -618,9 +626,10 @@ class RedpacketPageService(PageService):
                     position_title=position.title,
                     send_to_employee=send_to_employee)
 
+    @log_time
     @gen.coroutine
     def __checked_maliciousness_passed(self, hb_config_id, recom_wxuser_id,
-                                     trigger_wxuser_id):
+                                       trigger_wxuser_id):
         """查询是否在刷红包 (wxuser_id 配对查重)
         """
         item = yield self.hr_hb_items_ds.get_hb_items({
@@ -630,6 +639,7 @@ class RedpacketPageService(PageService):
         })
         return not item
 
+    @log_time
     @gen.coroutine
     def __non_employee_rp_check_passed(
         self, hb_config, recom_user_id, recom_qx_wxuser_id):
@@ -654,6 +664,7 @@ class RedpacketPageService(PageService):
 
             raise gen.Return(not item)
 
+    @log_time
     @gen.coroutine
     def __get_sent_item_by_qx_wxuser_id(self, hb_config_id, wxuser_id):
         """获取 item"""
@@ -663,6 +674,7 @@ class RedpacketPageService(PageService):
         })
         raise gen.Return(item)
 
+    @log_time
     @gen.coroutine
     def __recom_matches(self, rp_config, recom_user, wechat, **kwargs):
         """返回 recom 是否符合发送红包对象的要求
@@ -675,7 +687,7 @@ class RedpacketPageService(PageService):
                 wechat_ps = None
 
             wxuser = yield self.user_wx_user_ds.get_wxuser({
-                "unionid":   recom_user.unionid,
+                "unionid": recom_user.unionid,
                 "wechat_id": wechat.id
             })
             raise gen.Return(wxuser and wxuser.is_subscribe)
@@ -698,6 +710,7 @@ class RedpacketPageService(PageService):
                     sharechain_ps = None
                     raise gen.Return(is_1degree)
 
+    @log_time
     @gen.coroutine
     def __check_throttle_passed(self, red_packet_config, wxuser_id,
                                 next_rp_item):
@@ -728,6 +741,7 @@ class RedpacketPageService(PageService):
 
         return ret
 
+    @log_time
     @gen.coroutine
     def __get_amount_sum_config_id_and_wxuser_id(self, hb_config_id, wxuser_id):
         """返回某人已经在某次活动中获得的金额总数"""
@@ -744,11 +758,13 @@ class RedpacketPageService(PageService):
 
             raise gen.Return(ret)
 
+    @log_time
     @gen.coroutine
     def __get_next_rp_item(self, hb_config_id, hb_config_type, position_id=None):
         """获取下个待发红包信息"""
-        if (hb_config_type in [const.RED_PACKET_TYPE_SHARE_CLICK, hb_config_type == const.RED_PACKET_TYPE_SHARE_APPLY] and
-             position_id):
+        if (hb_config_type in [const.RED_PACKET_TYPE_SHARE_CLICK,
+                               hb_config_type == const.RED_PACKET_TYPE_SHARE_APPLY] and
+                position_id):
 
             binding = yield self.hr_hb_position_binding_ds.get_hr_hb_position_binding({
                 "hb_config_id": hb_config_id,
@@ -763,7 +779,7 @@ class RedpacketPageService(PageService):
         else:
             next_item = yield self.hr_hb_items_ds.get_hb_items({
                 "hb_config_id": hb_config_id,
-                "wxuser_id":  0
+                "wxuser_id": 0
             }, appends=["order by rand()", "limit 1"])
 
         raise gen.Return(next_item)
@@ -772,6 +788,7 @@ class RedpacketPageService(PageService):
     def __hit_red_packet(probability):
         return probability == 100 or random.uniform(0, 100) < probability
 
+    @log_time
     @gen.coroutine
     def __send_red_packet_card(self,
                                recom_openid,
@@ -838,7 +855,8 @@ class RedpacketPageService(PageService):
             red_packet_config, recom_qxuser_id, rp_item)
 
         if not throttle_passed:
-            self.logger.debug('[RP]throttle上限校验失败, hb_config_id: %s， recom_qxuser_id: %s' % (red_packet_config.id, recom_qxuser_id))
+            self.logger.debug(
+                '[RP]throttle上限校验失败, hb_config_id: %s， recom_qxuser_id: %s' % (red_packet_config.id, recom_qxuser_id))
             return
         else:
             self.logger.debug("[RP]全局上限验证通过")
@@ -919,6 +937,7 @@ class RedpacketPageService(PageService):
 
         raise gen.Return(result)
 
+    @log_time
     @gen.coroutine
     def __update_hb_item_status_with_id(self, hb_item_id, to, refresh_open_time=False):
         conds = {"id": hb_item_id}
@@ -927,6 +946,7 @@ class RedpacketPageService(PageService):
             fields.update(open_time=datetime.now())
         yield self.hr_hb_items_ds.update_hb_items(conds=conds, fields=fields)
 
+    @log_time
     @gen.coroutine
     def __send_zero_amount_card(
         self, recom_openid, recom_wechat_id, red_packet_config,
@@ -938,18 +958,18 @@ class RedpacketPageService(PageService):
         })
 
         recom_wx_user = yield self.user_wx_user_ds.get_wxuser({
-            "openid":    recom_openid,
+            "openid": recom_openid,
             "wechat_id": recom_wechat_id
         })
         recom_qx_wxuser = yield self.user_wx_user_ds.get_wxuser({
-            "unionid":           recom_wx_user.unionid,
+            "unionid": recom_wx_user.unionid,
             "wechat_id": settings['qx_wechat_id']
         })
 
         # 依赖对仟寻授权
         qx_openid = recom_qx_wxuser.openid
 
-        card = yield self.__create_new_card(recom_wechat_id,  qx_openid,
+        card = yield self.__create_new_card(recom_wechat_id, qx_openid,
                                             red_packet_config.id)
 
         self.logger.debug("[RP]红包信封入库成功!")
@@ -976,6 +996,7 @@ class RedpacketPageService(PageService):
 
         raise gen.Return(result)
 
+    @log_time
     @gen.coroutine
     def __update_position_hb_status(self, position_id, current_hb_status, hb_config_type):
         """更新 hb_status 至没有参加当前类型红包活动的状态
@@ -999,7 +1020,7 @@ class RedpacketPageService(PageService):
                 raise ValueError(msg.RED_PACKET_TYPE_VALUE_ERROR)
 
         elif ((current_hb_status == const.HB_STATUS_CLICK and hb_config_type == const.RED_PACKET_TYPE_SHARE_CLICK) or
-              (current_hb_status == const.HB_STATUS_APPLY and hb_config_type == const.RED_PACKET_TYPE_SHARE_APPLY)):
+                  (current_hb_status == const.HB_STATUS_APPLY and hb_config_type == const.RED_PACKET_TYPE_SHARE_APPLY)):
 
             next_status = const.HB_STATUS_NONE
 
@@ -1013,6 +1034,7 @@ class RedpacketPageService(PageService):
             "hb_status": next_status
         })
 
+    @log_time
     @gen.coroutine
     def __get_running_positions_by_config_id(self, config_id):
         """查询这个红包活动中还有没发完红包的职位
@@ -1035,6 +1057,7 @@ class RedpacketPageService(PageService):
         else:
             return None
 
+    @log_time
     @gen.coroutine
     def __finish_hb_config(self, hb_config_id):
         """
@@ -1048,6 +1071,7 @@ class RedpacketPageService(PageService):
             fields={"status": const.HB_CONFIG_FINISHED}
         )
 
+    @log_time
     @gen.coroutine
     def __update_wxuser_id_into_hb_items(self, qx_openid, current_wxuser_id, rp_item_id):
         """更新 hb items 写入发送信息"""
@@ -1065,9 +1089,10 @@ class RedpacketPageService(PageService):
                 "trigger_wxuser_id": current_wxuser_id
             })
 
+    @log_time
     @gen.coroutine
     def __send_message_template_with_card_url(
-            self, red_packet_config, card, openid, wechat, **kwargs):
+        self, red_packet_config, card, openid, wechat, **kwargs):
         """发送红包的消息模板，根据红包活动的类型发送不同的模板
 
         模板填充内容在 kwargs 里面，
@@ -1134,6 +1159,7 @@ class RedpacketPageService(PageService):
 
         raise gen.Return(res)
 
+    @log_time
     @gen.coroutine
     def __insert_0_amount_sent_history(self, hb_config_id, recom_qx_openid,
                                        trigger_qx_user_id):
@@ -1154,6 +1180,7 @@ class RedpacketPageService(PageService):
             "trigger_wxuser_id": trigger_qx_user_id
         })
 
+    @log_time
     @gen.coroutine
     def __send_red_packet(self, rp_config, wechat_id, openid, amount, hb_item_id):
         """
@@ -1241,19 +1268,19 @@ class RedpacketPageService(PageService):
         red_packet_dict = {}
 
         red_packet_dict.update({
-            'nonce_str':            generate_nonce_str(),
-            'wxappid':              qx_wechat_pay['appid'],
-            'mch_id':               qx_wechat_pay['mch_id'],
-            'act_name':             kwargs.get("act_name", '仟寻'),
-            'send_name':            kwargs.get("send_name", '仟寻'),
-            'wishing':              msg.RED_PACKET_WISHING,
-            'remark':               kwargs.get("remark", '仟寻红包活动'),
-            'mch_billno':           self.__make_billno(qx_wechat_pay['mch_id']),
-            'total_amount':         total_amount,
-            'total_num':            kwargs.get("total_num", 1),
-            'client_ip':            socket.gethostbyname(kwargs.get("host", "qx.moseeker.com")),
-            're_openid':            openid,
-            'key':                  kwargs.get("apikey"),
+            'nonce_str': generate_nonce_str(),
+            'wxappid': qx_wechat_pay['appid'],
+            'mch_id': qx_wechat_pay['mch_id'],
+            'act_name': kwargs.get("act_name", '仟寻'),
+            'send_name': kwargs.get("send_name", '仟寻'),
+            'wishing': msg.RED_PACKET_WISHING,
+            'remark': kwargs.get("remark", '仟寻红包活动'),
+            'mch_billno': self.__make_billno(qx_wechat_pay['mch_id']),
+            'total_amount': total_amount,
+            'total_num': kwargs.get("total_num", 1),
+            'client_ip': socket.gethostbyname(kwargs.get("host", "qx.moseeker.com")),
+            're_openid': openid,
+            'key': kwargs.get("apikey"),
         })
 
         siganature = self.__generate_sign(red_packet_dict)
@@ -1325,26 +1352,28 @@ class RedpacketPageService(PageService):
                 ret.update({node.tagName: node.childNodes[0].data})
         return ret
 
+    @log_time
     @gen.coroutine
     def __insert_red_packet_sent_record(self, args_dict, hb_item_id):
         """插入红包发送记录"""
         yield self.hr_hb_send_record_ds.insert_record({
-            "return_code":  args_dict.get('return_code', ''),
-            "return_msg":   args_dict.get('return_msg', ''),
-            "sign":         args_dict.get('sign', ''),
-            "result_code":  args_dict.get('result_code', ''),
-            "err_code":     args_dict.get('err_code', ''),
+            "return_code": args_dict.get('return_code', ''),
+            "return_msg": args_dict.get('return_msg', ''),
+            "sign": args_dict.get('sign', ''),
+            "result_code": args_dict.get('result_code', ''),
+            "err_code": args_dict.get('err_code', ''),
             "err_code_des": args_dict.get('err_code_res', ''),
-            "mch_billno":   args_dict.get('mch_billno', ''),
-            "mch_id":       args_dict.get('mch_id', ''),
-            "wxappid":      args_dict.get('wxappid', ''),
-            "re_openid":    args_dict.get('re_openid', ''),
+            "mch_billno": args_dict.get('mch_billno', ''),
+            "mch_id": args_dict.get('mch_id', ''),
+            "wxappid": args_dict.get('wxappid', ''),
+            "re_openid": args_dict.get('re_openid', ''),
             "total_amount": int(args_dict.get('total_amount', '0')),
-            "send_time":    args_dict.get('send_time', ''),
-            "send_listid":  args_dict.get('send_listid', ''),
-            "hb_item_id":   hb_item_id
+            "send_time": args_dict.get('send_time', ''),
+            "send_listid": args_dict.get('send_listid', ''),
+            "hb_item_id": hb_item_id
         })
 
+    @log_time
     @gen.coroutine
     def get_last_running_hongbao_config_by_position(self, position):
         """
@@ -1382,6 +1411,7 @@ class RedpacketPageService(PageService):
 
         raise gen.Return(ret)
 
+    @log_time
     @gen.coroutine
     def get_position_title_by_recom_record_id(self, recom_record_id):
         ret = ''

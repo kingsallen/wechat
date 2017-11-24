@@ -1,14 +1,14 @@
 # coding=utf-8
 
-import re
 import functools
 import hashlib
+import re
 import traceback
 from abc import ABCMeta, abstractmethod
+import time
 from urllib.parse import urlencode
 
 from tornado import gen
-import tornado.locale
 from tornado.locks import Semaphore
 from tornado.web import MissingArgumentError
 
@@ -16,13 +16,13 @@ import conf.common as const
 import conf.message as msg
 import conf.path as path
 import conf.qx as qx_const
+from globals import logger
 from util.common import ObjectDict
 from util.common.cache import BaseRedis
 from util.common.cipher import encode_id
 from util.tool.dict_tool import sub_dict
-from util.tool.str_tool import to_hex
 from util.tool.json_tool import json_dumps
-from globals import logger
+from util.tool.str_tool import to_hex
 
 
 def handle_response(func):
@@ -221,7 +221,7 @@ def check_and_apply_profile(func):
             self.logger.warn(self.params)
 
             if (current_path in paths_for_application and
-                self.params.pid and self.params.pid.isdigit()):
+                    self.params.pid and self.params.pid.isdigit()):
 
                 pid = int(self.params.pid)
                 position = yield self.position_ps.get_position(pid)
@@ -471,3 +471,22 @@ class NewJDStatusCheckerAddFlag(BaseNewJDStatusChecker):
     @gen.coroutine
     def fail_action(self, func, *args, **kwargs):
         yield func(self._handler, *args, **kwargs)
+
+
+def log_time(func):
+
+    @functools.wraps(func)
+    @gen.coroutine
+    def wrapper(self, *args, **kwargs):
+        start = time.time()
+        r = yield func(self, *args, **kwargs)
+        end = time.time()
+        c = {
+            "for": "[hb_debug]",
+            "func_name": func.__qualname__,
+            "time": (end-start)*1000
+        }
+        self.logger.stats(json_dumps(c))
+        return r
+
+    return wrapper

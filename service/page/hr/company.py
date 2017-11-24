@@ -11,6 +11,7 @@ from service.page.base import PageService
 from util.tool.url_tool import make_static_url
 from util.tool.dict_tool import sub_dict
 from util.tool.str_tool import is_odd, split, gen_salary
+from util.common.decorator import log_time
 
 cached_company_sug_wechat = None
 
@@ -124,6 +125,7 @@ class CompanyPageService(PageService):
         positions_list = yield self.hr_company_ds.get_companys_list(conds, fields, options, appends)
         raise gen.Return(positions_list)
 
+    @log_time
     @gen.coroutine
     def get_real_company_id(self, publisher, company_id):
         """获得职位所属公司id

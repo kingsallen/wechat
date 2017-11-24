@@ -12,14 +12,16 @@ from tests.dev_data.user_company_config import COMPANY_CONFIG
 from util.common import ObjectDict
 from util.common.exception import MyException
 from util.common.cipher import encode_id
-from util.common.decorator import handle_response, check_employee, NewJDStatusCheckerAddFlag, authenticated
+from util.common.decorator import handle_response, check_employee, NewJDStatusCheckerAddFlag, authenticated, log_time
 from util.common.mq import award_publisher
 from util.tool.str_tool import gen_salary, add_item, split, gen_degree_v2, gen_experience_v2
 from util.tool.url_tool import url_append_query
 from util.wechat.template import position_view_five_notice_tpl, position_share_notice_employee_tpl
+from util.common.decorator import log_time
 
 
 class PositionHandler(BaseHandler):
+    @log_time
     @handle_response
     @NewJDStatusCheckerAddFlag()
     @authenticated
@@ -171,6 +173,7 @@ class PositionHandler(BaseHandler):
             self.write_error(404)
             return
 
+    @log_time
     @gen.coroutine
     def _make_position_visitnum(self, position_info):
         """更新职位浏览量"""
@@ -300,6 +303,7 @@ class PositionHandler(BaseHandler):
 
         return res
 
+    @log_time
     @gen.coroutine
     def _make_json_header(self, position_info, company_info, star, application,
                           endorse, can_apply, team_id, did, teamname_custom):
@@ -506,6 +510,8 @@ class PositionHandler(BaseHandler):
 
         return data
 
+
+    @log_time
     @gen.coroutine
     def _make_refresh_share_chain(self, position_info):
         """构造刷新链路"""
@@ -621,6 +627,7 @@ class PositionHandler(BaseHandler):
             self.redirect(redirect_url)
             return
 
+    @log_time
     @gen.coroutine
     def _make_send_publish_template(self, position_info):
         """浏览量达到5次后，向 HR 发布模板消息

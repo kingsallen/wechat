@@ -28,6 +28,7 @@ from util.tool.str_tool import trunc
 from util.tool.url_tool import make_url, make_static_url
 from util.wechat.template import application_notice_to_applier_tpl, \
     application_notice_to_recommender_tpl, application_notice_to_hr_tpl
+from util.common.decorator import log_time
 
 
 class ApplicationPageService(PageService):
@@ -36,6 +37,7 @@ class ApplicationPageService(PageService):
         super().__init__()
         self.email_apply_session = EmailApplyCache()
 
+    @log_time
     @gen.coroutine
     def get_application(self, position_id, user_id):
         """返回用户申请的职位"""
@@ -65,6 +67,7 @@ class ApplicationPageService(PageService):
 
         raise gen.Return(response)
 
+    @log_time
     @gen.coroutine
     def is_allowed_apply_position(self, user_id, company_id):
         """获取一个月内该用户的申请数量
