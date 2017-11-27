@@ -48,6 +48,9 @@ settings['mysql_database'] = 'dqv4'
 settings['mysql_user'] = 'daqi'
 settings['mysql_password'] = '5F51692091B4031640E18E7C27430E071BC878C8'
 
+# tornado的async_http_client的max_clients参数设置, 最大的可以同时发出请求的数量
+settings["async_http_client_max_clients"] = 1000
+
 # session配置
 settings['store_options'] = {
     'redis_host': '127.0.0.1',

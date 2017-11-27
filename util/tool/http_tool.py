@@ -12,8 +12,8 @@ from tornado import gen
 from tornado.httputil import url_concat, HTTPHeaders
 
 import conf.common as constant
-from globals import env, logger
 from conf.common import INFRA_ERROR_CODES
+from globals import env, logger
 from setting import settings
 from util.common import ObjectDict
 from util.common.exception import InfraOperationError
@@ -55,6 +55,10 @@ def http_patch(route, jdata=None, timeout=30, infra=True):
     return ret
 
 
+tornado.httpclient.AsyncHTTPClient.configure(
+    "tornado.curl_httpclient.CurlAsyncHTTPClient", max_clients=settings["async_http_client_max_clients"])
+
+
 @gen.coroutine
 def http_fetch(route, data=None, timeout=30):
     """使用 www-form 形式 HTTP 异步 POST 请求
@@ -65,9 +69,6 @@ def http_fetch(route, data=None, timeout=30):
 
     if data is None:
         data = ObjectDict()
-
-    tornado.httpclient.AsyncHTTPClient.configure(
-        "tornado.curl_httpclient.CurlAsyncHTTPClient", max_clients=1000)
 
     http_client = tornado.httpclient.AsyncHTTPClient()
 
@@ -120,8 +121,6 @@ def _async_http_get(route, jdata=None, timeout=5, method='GET', infra=True):
     else:
         url = url_concat(route, jdata)
 
-    tornado.httpclient.AsyncHTTPClient.configure(
-        "tornado.curl_httpclient.CurlAsyncHTTPClient", max_clients=1000)
     http_client = tornado.httpclient.AsyncHTTPClient()
     response = yield http_client.fetch(
         url,
@@ -155,8 +154,6 @@ def _async_http_post(route, jdata=None, timeout=5, method='POST', infra=True):
     else:
         url = route
 
-    tornado.httpclient.AsyncHTTPClient.configure(
-        "tornado.curl_httpclient.CurlAsyncHTTPClient", max_clients=1000)
     http_client = tornado.httpclient.AsyncHTTPClient()
     response = yield http_client.fetch(
         url,
@@ -168,8 +165,8 @@ def _async_http_post(route, jdata=None, timeout=5, method='POST', infra=True):
 
     logger.debug(
         "[infra][http_{}][url: {}][body: {}][ret: {}] "
-        .format(method.lower(), url, ujson.encode(jdata),
-                ujson.decode(response.body)))
+            .format(method.lower(), url, ujson.encode(jdata),
+                    ujson.decode(response.body)))
 
     body = objectdictify(ujson.decode(response.body))
     if infra and body.status in INFRA_ERROR_CODES:
