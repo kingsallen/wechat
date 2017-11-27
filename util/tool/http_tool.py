@@ -12,8 +12,8 @@ from tornado import gen
 from tornado.httputil import url_concat, HTTPHeaders
 
 import conf.common as constant
-from globals import env, logger
 from conf.common import INFRA_ERROR_CODES
+from globals import env, logger
 from setting import settings
 from util.common import ObjectDict
 from util.common.exception import InfraOperationError
@@ -21,42 +21,46 @@ from util.tool.dict_tool import objectdictify
 
 
 @gen.coroutine
-def http_get(route, jdata=None, timeout=8, infra=True):
+def http_get(route, jdata=None, timeout=30, infra=True):
     ret = yield _async_http_get(route, jdata, timeout=timeout, method='GET',
                                 infra=infra)
     return ret
 
 
 @gen.coroutine
-def http_delete(route, jdata=None, timeout=5, infra=True):
+def http_delete(route, jdata=None, timeout=30, infra=True):
     ret = yield _async_http_get(route, jdata, timeout=timeout, method='DELETE',
                                 infra=infra)
     return ret
 
 
 @gen.coroutine
-def http_post(route, jdata=None, timeout=5, infra=True):
+def http_post(route, jdata=None, timeout=30, infra=True):
     ret = yield _async_http_post(route, jdata, timeout=timeout, method='POST',
                                  infra=infra)
     return ret
 
 
 @gen.coroutine
-def http_put(route, jdata=None, timeout=5, infra=True):
+def http_put(route, jdata=None, timeout=30, infra=True):
     ret = yield _async_http_post(route, jdata, timeout=timeout, method='PUT',
                                  infra=infra)
     return ret
 
 
 @gen.coroutine
-def http_patch(route, jdata=None, timeout=5, infra=True):
+def http_patch(route, jdata=None, timeout=30, infra=True):
     ret = yield _async_http_post(route, jdata, timeout=timeout, method='PATCH',
                                  infra=infra)
     return ret
 
 
+tornado.httpclient.AsyncHTTPClient.configure(
+    "tornado.curl_httpclient.CurlAsyncHTTPClient", max_clients=settings["async_http_client_max_clients"])
+
+
 @gen.coroutine
-def http_fetch(route, data=None, timeout=5):
+def http_fetch(route, data=None, timeout=30):
     """使用 www-form 形式 HTTP 异步 POST 请求
     :param route:
     :param data:
@@ -65,9 +69,6 @@ def http_fetch(route, data=None, timeout=5):
 
     if data is None:
         data = ObjectDict()
-
-    tornado.httpclient.AsyncHTTPClient.configure(
-        "tornado.curl_httpclient.CurlAsyncHTTPClient")
 
     http_client = tornado.httpclient.AsyncHTTPClient()
 
@@ -164,8 +165,8 @@ def _async_http_post(route, jdata=None, timeout=5, method='POST', infra=True):
 
     logger.debug(
         "[infra][http_{}][url: {}][body: {}][ret: {}] "
-        .format(method.lower(), url, ujson.encode(jdata),
-                ujson.decode(response.body)))
+            .format(method.lower(), url, ujson.encode(jdata),
+                    ujson.decode(response.body)))
 
     body = objectdictify(ujson.decode(response.body))
     if infra and body.status in INFRA_ERROR_CODES:
