@@ -21,42 +21,42 @@ from util.tool.dict_tool import objectdictify
 
 
 @gen.coroutine
-def http_get(route, jdata=None, timeout=8, infra=True):
+def http_get(route, jdata=None, timeout=30, infra=True):
     ret = yield _async_http_get(route, jdata, timeout=timeout, method='GET',
                                 infra=infra)
     return ret
 
 
 @gen.coroutine
-def http_delete(route, jdata=None, timeout=5, infra=True):
+def http_delete(route, jdata=None, timeout=30, infra=True):
     ret = yield _async_http_get(route, jdata, timeout=timeout, method='DELETE',
                                 infra=infra)
     return ret
 
 
 @gen.coroutine
-def http_post(route, jdata=None, timeout=5, infra=True):
+def http_post(route, jdata=None, timeout=30, infra=True):
     ret = yield _async_http_post(route, jdata, timeout=timeout, method='POST',
                                  infra=infra)
     return ret
 
 
 @gen.coroutine
-def http_put(route, jdata=None, timeout=5, infra=True):
+def http_put(route, jdata=None, timeout=30, infra=True):
     ret = yield _async_http_post(route, jdata, timeout=timeout, method='PUT',
                                  infra=infra)
     return ret
 
 
 @gen.coroutine
-def http_patch(route, jdata=None, timeout=5, infra=True):
+def http_patch(route, jdata=None, timeout=30, infra=True):
     ret = yield _async_http_post(route, jdata, timeout=timeout, method='PATCH',
                                  infra=infra)
     return ret
 
 
 @gen.coroutine
-def http_fetch(route, data=None, timeout=5):
+def http_fetch(route, data=None, timeout=30):
     """使用 www-form 形式 HTTP 异步 POST 请求
     :param route:
     :param data:
@@ -67,7 +67,7 @@ def http_fetch(route, data=None, timeout=5):
         data = ObjectDict()
 
     tornado.httpclient.AsyncHTTPClient.configure(
-        "tornado.curl_httpclient.CurlAsyncHTTPClient")
+        "tornado.curl_httpclient.CurlAsyncHTTPClient", max_clients=1000)
 
     http_client = tornado.httpclient.AsyncHTTPClient()
 
@@ -120,6 +120,8 @@ def _async_http_get(route, jdata=None, timeout=5, method='GET', infra=True):
     else:
         url = url_concat(route, jdata)
 
+    tornado.httpclient.AsyncHTTPClient.configure(
+        "tornado.curl_httpclient.CurlAsyncHTTPClient", max_clients=1000)
     http_client = tornado.httpclient.AsyncHTTPClient()
     response = yield http_client.fetch(
         url,
@@ -153,6 +155,8 @@ def _async_http_post(route, jdata=None, timeout=5, method='POST', infra=True):
     else:
         url = route
 
+    tornado.httpclient.AsyncHTTPClient.configure(
+        "tornado.curl_httpclient.CurlAsyncHTTPClient", max_clients=1000)
     http_client = tornado.httpclient.AsyncHTTPClient()
     response = yield http_client.fetch(
         url,
