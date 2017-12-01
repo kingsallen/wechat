@@ -15,7 +15,7 @@ class ReleasedPositionHandler(BaseHandler):
     def get(self):
 
         # 选择正确的user用户
-        hr_wx_user = yield self.position_ps.get_hr_wx_user(self.current_user.wxuser.unionid, self.current_user.wxuser.wechat_id)
+        hr_wx_user = yield self.position_ps.get_hr_wx_user(self.current_user.sysuser.unionid, self.current_user.wechat.id)
 
         if not self.current_user.wxuser.unionid:
             self.write_error(403)

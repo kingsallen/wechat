@@ -190,10 +190,10 @@ class PositionPageService(PageService):
     @gen.coroutine
     def get_hr_wx_user(self, unionid, wechat_id):
         """获取已关注hr用户"""
-        hr_account = yield self.user_hr_accounts_ds.get_hr_account_is_subscribe({
+        hr_account = yield self.user_wx_user_ds.get_wxuser({
             "unionid": unionid,
             "wechat_id": wechat_id,
-            "is_subscribe": [1, "="],
+            "is_subscribe": [const.WX_USER_SUBSCRIBED, "="],
         })
 
         raise gen.Return(hr_account)
