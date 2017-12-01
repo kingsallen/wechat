@@ -94,7 +94,7 @@ class PositionPageService(PageService):
             position.share_description = ""
 
             share_conf = yield self.__get_share_conf(position_res.share_tpl_id)
-            if share_conf.id > 3: # 隐藏逻辑， id为1-3的话，说明是写死在数据库中的模版, 需要做国际化处理
+            if share_conf.id > 3:  # 隐藏逻辑， id为1-3的话，说明是写死在数据库中的模版, 需要做国际化处理
                 position.share_title = share_conf.title
                 position.share_description = share_conf.description
 
@@ -183,6 +183,17 @@ class PositionPageService(PageService):
         """获取 hr 信息"""
         hr_account = yield self.user_hr_account_ds.get_hr_account({
             "wxuser_id": wxuser_id
+        })
+
+        raise gen.Return(hr_account)
+
+    @gen.coroutine
+    def get_hr_wx_user(self, unionid, wechat_id):
+        """获取已关注hr用户"""
+        hr_account = yield self.user_hr_accounts_ds.get_hr_account_is_subscribe({
+            "unionid": unionid,
+            "wechat_id": wechat_id,
+            "is_subscribe": [1, "="],
         })
 
         raise gen.Return(hr_account)
