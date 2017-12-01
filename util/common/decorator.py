@@ -486,7 +486,7 @@ def log_time(func):
             "func_name": func.__qualname__,
             "time": (end-start)*1000
         }
-        self.logger.stats(json_dumps(c))
+        self.logger.info(json_dumps(c))
         return r
 
     return wrapper
