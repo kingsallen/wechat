@@ -229,7 +229,7 @@ class ProfileViewHandler(BaseHandler):
 
         # 如果是用户本人，则跳转到用户可以编辑的个人档案页
         if profile.profile.user_id == self.current_user.sysuser.id:
-            redirect_url = self.make_url(path=path.PROFILE_VIEW)
+            redirect_url = self.make_url(path=path.PROFILE_VIEW, params=self.params)
             self.redirect(redirect_url)
             return
 
