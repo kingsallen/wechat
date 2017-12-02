@@ -857,7 +857,7 @@ class PositionListHandler(BaseHandler):
             conds={"id": did or company_id}, need_conf=True)
 
         if not rp_share_info:
-            escape = []
+            escape = ["recomlist"]
             cover = self.share_url(company_info.logo)
             title = company_info.abbreviation + self.locale.translate('job_hotjobs')
             description = self.locale.translate(msg.SHARE_DES_DEFAULT)
