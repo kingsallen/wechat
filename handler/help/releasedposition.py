@@ -14,12 +14,15 @@ class ReleasedPositionHandler(BaseHandler):
     @gen.coroutine
     def get(self):
 
+        # 选择正确的user用户
+        hr_wx_user = yield self.position_ps.get_hr_wx_user(self.current_user.sysuser.unionid, self.current_user.wechat.id)
+
         if not self.current_user.wxuser.unionid:
             self.write_error(403)
             return
 
         # 招聘助手用户
-        hr_info = yield self.position_ps.get_hr_info_by_wxuser_id(self.current_user.wxuser.id)
+        hr_info = yield self.position_ps.get_hr_info_by_wxuser_id(hr_wx_user.id)
 
         # 暂未注册雇主平台
         if not hr_info or hr_info.company_id == 0:

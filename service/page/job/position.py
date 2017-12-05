@@ -191,6 +191,17 @@ class PositionPageService(PageService):
         raise gen.Return(hr_account)
 
     @gen.coroutine
+    def get_hr_wx_user(self, unionid, wechat_id):
+        """获取已关注hr用户"""
+        hr_account = yield self.user_wx_user_ds.get_wxuser({
+            "unionid": unionid,
+            "wechat_id": wechat_id,
+            "is_subscribe": [const.WX_USER_SUBSCRIBED, "="],
+        })
+
+        raise gen.Return(hr_account)
+
+    @gen.coroutine
     def __get_share_conf(self, conf_id):
         """获取职位自定义分享模板"""
         ret = yield self.job_position_share_tpl_conf_ds.get_share_conf({
