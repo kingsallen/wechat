@@ -56,7 +56,7 @@ def http_patch(route, jdata=None, timeout=30, infra=True):
 
 
 tornado.httpclient.AsyncHTTPClient.configure(
-    "tornado.curl_httpclient.CurlAsyncHTTPClient", max_clients=settings["async_http_client_max_clients"])
+    "tornado.simple_httpclient.SimpleAsyncHTTPClient", max_clients=settings["async_http_client_max_clients"])
 
 
 @gen.coroutine
