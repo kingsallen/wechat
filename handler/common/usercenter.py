@@ -170,6 +170,9 @@ class ApplyRecordsHandler(BaseHandler):
         if apply_id:
             # 查看具体申请记录的进度
             res = yield self.usercenter_ps.get_applied_progress(self.current_user.sysuser.id, apply_id)
+            if res == 99997:
+                self.write_error(http_code=404)
+                return
             self.send_json_success(data=res)
 
         else:
