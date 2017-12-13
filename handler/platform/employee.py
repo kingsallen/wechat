@@ -218,23 +218,12 @@ class EmployeeBindHandler(BaseHandler):
             return
 
         message = result_message
-        refine_info_way = self.company_ps.emp_custom_field_refine_way(
-            self.current_user.company.id)
 
-        if refine_info_way == const.EMPLOYEE_CUSTOM_FIELD_REFINE_REDIRECT:
-            custom_fields = yield self.employee_ps.get_employee_custom_fields(self.current_user.company.id)
-            if custom_fields:
-                next_url = self.make_url(path.EMPLOYEE_CUSTOMINFO, self.params, from_wx_template='x')
-            else:
-                next_url = self.make_url(path.EMPLOYEE_BINDED, self.params)
-
-        elif refine_info_way == const.EMPLOYEE_CUSTOM_FIELD_REFINE_TEMPLATE_MSG:
-            yield self.employee_ps.send_emp_custom_info_template(
-                self.current_user)
-
-            next_url = self.make_url(path.EMPLOYEE_BINDED, self.params)
+        custom_fields = yield self.employee_ps.get_employee_custom_fields(self.current_user.company.id)
+        if custom_fields:
+            next_url = self.make_url(path.EMPLOYEE_CUSTOMINFO, self.params, from_wx_template='x')
         else:
-            assert False  # should not be here
+            next_url = self.make_url(path.EMPLOYEE_BINDED, self.params)
 
         self.send_json_success(
             data={'next_url': next_url},
@@ -280,14 +269,6 @@ class EmployeeBindEmailHandler(BaseHandler):
                 redislocker=self.redis
             )
             # 处理员工认证红包结束
-
-            # 员工认证信息填写消息模板
-            refine_info_way = self.company_ps.emp_custom_field_refine_way(
-                self.current_user.company.id)
-
-            if refine_info_way == const.EMPLOYEE_CUSTOM_FIELD_REFINE_TEMPLATE_MSG:
-                yield self.employee_ps.send_emp_custom_info_template(
-                    self.current_user)
 
 
 class RecommendRecordsHandler(BaseHandler):
