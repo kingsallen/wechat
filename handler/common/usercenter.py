@@ -10,6 +10,7 @@ from util.common.decorator import handle_response, verified_mobile_oneself, auth
 from util.tool.str_tool import email_validate, is_alphabet, is_chinese, password_crypt, password_validate
 from util.image.upload import QiniuUpload
 from util.common import ObjectDict
+from thrift.Thrift import TException
 
 
 class UsercenterHandler(BaseHandler):
@@ -171,10 +172,9 @@ class ApplyRecordsHandler(BaseHandler):
             # 查看具体申请记录的进度
             try:
                 res = yield self.usercenter_ps.get_applied_progress(self.current_user.sysuser.id, apply_id)
-            except Exception:
-                self.write_error(http_code=404)
-                return
-            self.send_json_success(data=res)
+                self.send_json_success(data=res)
+            except TException:
+                self.send_json_error()
 
         else:
             # 查看申请记录列表
