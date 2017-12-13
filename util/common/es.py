@@ -17,7 +17,11 @@ from util.tool.es_tool import init_gamma_basic, rule_gamma_filters
 
 class BaseES(object):
 
-    _es = Elasticsearch(settings.es)
+    _es = Elasticsearch([settings['es1'], settings['es2']],
+                        sniff_on_start=True,
+                        sniff_on_connection_fail=True,
+                        sniffer_timeout=60
+                        )
 
     def __new__(cls, *args, **kwargs):
         if not hasattr(cls, '_instance'):
