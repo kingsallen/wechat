@@ -169,8 +169,12 @@ class ApplyRecordsHandler(BaseHandler):
 
         if apply_id:
             # 查看具体申请记录的进度
-            res = yield self.usercenter_ps.get_applied_progress(self.current_user.sysuser.id, apply_id)
-            self.send_json_success(data=res)
+            try:
+                res = yield self.usercenter_ps.get_applied_progress(self.current_user.sysuser.id, apply_id)
+                self.send_json_success(data=res)
+            except Exception as e:
+                self.send_json_error()
+                self.logger.error('get apply record in detail failed. error_msg{}'.format(e))
 
         else:
             # 查看申请记录列表
