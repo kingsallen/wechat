@@ -10,7 +10,6 @@ from util.common.decorator import handle_response, verified_mobile_oneself, auth
 from util.tool.str_tool import email_validate, is_alphabet, is_chinese, password_crypt, password_validate
 from util.image.upload import QiniuUpload
 from util.common import ObjectDict
-from thrift.Thrift import TException
 
 
 class UsercenterHandler(BaseHandler):
@@ -173,8 +172,9 @@ class ApplyRecordsHandler(BaseHandler):
             try:
                 res = yield self.usercenter_ps.get_applied_progress(self.current_user.sysuser.id, apply_id)
                 self.send_json_success(data=res)
-            except TException:
+            except Exception as e:
                 self.send_json_error()
+                self.logger.error('get apply record in detail failed. error_msg{}'.format(e))
 
         else:
             # 查看申请记录列表
