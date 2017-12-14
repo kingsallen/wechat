@@ -61,7 +61,7 @@ settings['elk_cluster'] = {
     'redis_port': 6388,
 }
 # elasticsearch host
-settings['es1'] = 'http://es-t.dqprism.com'
+settings['es'] = 'http://es-t.dqprism.com'
 settings['es2'] = 'http://es2-t.dqprism.com'
 
 # qiniu账号
