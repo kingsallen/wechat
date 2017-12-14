@@ -16,7 +16,7 @@ from util.tool.es_tool import init_gamma_basic, rule_gamma_filters
 
 
 class BaseES(object):
-
+    # es客户端设置为嗅探模式
     _es = Elasticsearch([settings['es1'], settings['es2']],
                         sniff_on_start=True,
                         sniff_on_connection_fail=True,
