@@ -16,9 +16,13 @@ import conf.common as const
 from setting import settings
 
 import conf.platform as platform_const
+from util.common.es import BaseES
 
 
 class LandingPageService(PageService):
+
+    es = BaseES()
+
     def __init__(self):
         super().__init__()
 
@@ -49,10 +53,22 @@ class LandingPageService(PageService):
         ret = []
         query_size = platform_const.LANDING_QUERY_SIZE
 
-        # 在此调用 ES 的 HTTP GET 搜索接口
-        url = settings.es + "/index/_search?q=company_id:%s+AND+status:%s&size=%s" % (
-            company_id, const.OLD_YES, query_size)
-        response = yield httpclient.AsyncHTTPClient().fetch(url)
+        # # 在此调用 ES 的 HTTP GET 搜索接口
+        # url = settings.es + "/index/_search?q=company_id:%s+AND+status:%s&size=%s" % (
+        #     company_id, const.OLD_YES, query_size)
+        # response = yield httpclient.AsyncHTTPClient().fetch(url)
+        data = {
+            "size": query_size,
+            "query": {
+                "bool": {
+                    "must": [
+                        {"match": {"company_id": company_id}},
+                        {"match": {"status": const.OLD_YES}}
+                        ]
+                    }
+                }
+            }
+        response = self.es.search(index='index', body=data)
 
         body = ObjectDict(json.loads(to_str(response.body)))
         result_list = body.hits.hits
