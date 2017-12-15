@@ -1989,6 +1989,7 @@ class ApplicationRecordsForm(object):
      - company_name
      - status_name
      - time
+     - signature
     """
 
     thrift_spec = (
@@ -1998,14 +1999,16 @@ class ApplicationRecordsForm(object):
         (3, TType.STRING, 'company_name', 'UTF8', None, ),  # 3
         (4, TType.STRING, 'status_name', 'UTF8', None, ),  # 4
         (5, TType.STRING, 'time', 'UTF8', None, ),  # 5
+        (6, TType.STRING, 'signature', 'UTF8', None, ),  # 6
     )
 
-    def __init__(self, id=None, position_title=None, company_name=None, status_name=None, time=None,):
+    def __init__(self, id=None, position_title=None, company_name=None, status_name=None, time=None, signature=None,):
         self.id = id
         self.position_title = position_title
         self.company_name = company_name
         self.status_name = status_name
         self.time = time
+        self.signature = signature
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -2041,6 +2044,11 @@ class ApplicationRecordsForm(object):
                     self.time = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
+            elif fid == 6:
+                if ftype == TType.STRING:
+                    self.signature = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -2070,6 +2078,10 @@ class ApplicationRecordsForm(object):
         if self.time is not None:
             oprot.writeFieldBegin('time', TType.STRING, 5)
             oprot.writeString(self.time.encode('utf-8') if sys.version_info[0] == 2 else self.time)
+            oprot.writeFieldEnd()
+        if self.signature is not None:
+            oprot.writeFieldBegin('signature', TType.STRING, 6)
+            oprot.writeString(self.signature.encode('utf-8') if sys.version_info[0] == 2 else self.signature)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()

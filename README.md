@@ -86,3 +86,6 @@ http://wiki.moseeker.com/python-code-comments.md
     dataservice    原子服务类，主要负责与dao进行原子类的处理、轻业务逻辑；一个dao对应一个dataservice，dataservice之间不能相互调用；
     |||
     dao    负责与数据库表结构交互，一张数据表对应一个dao
+
+## thrift
+thrift -r --gen py:tornado xxxxx.thrift
