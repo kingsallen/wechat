@@ -222,7 +222,8 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
             speaker=const.CHAT_SPEAKER_USER,
             cid=int(self.room_id),
             pid=int(self.position_id),
-            create_time=curr_now_minute()
+            create_time=curr_now_minute(),
+            origin=const.ORIGIN_USER_OR_HR
         ))
 
         self.redis_client.publish(self.hr_channel, message_body)
@@ -253,7 +254,8 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
                 speaker=const.CHAT_SPEAKER_BOT,
                 cid=int(self.room_id),
                 pid=int(self.position_id),
-                create_time=curr_now_minute()
+                create_time=curr_now_minute(),
+                origin=const.ORIGIN_CHATBOT
             ))
 
             # hr 端广播
