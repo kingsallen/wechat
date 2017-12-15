@@ -16,7 +16,8 @@ struct CollectPositionForm {
     6: optional i32 salary_top,          //薪资上限
     7: optional i32 salary_bottom,       //薪资下限
     8: optional i8 status,              //薪资下限
-    9: optional string update_time    //职位的更新时间
+    9: optional string update_time,    //职位的更新时间
+    10: optional string signature        //公众号
 }
 
 struct UserSearchConditionListVO {

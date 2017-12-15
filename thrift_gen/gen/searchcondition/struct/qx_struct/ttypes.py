@@ -27,6 +27,7 @@ class CollectPositionForm(object):
      - salary_bottom
      - status
      - update_time
+     - signature
     """
 
     thrift_spec = (
@@ -40,9 +41,10 @@ class CollectPositionForm(object):
         (7, TType.I32, 'salary_bottom', None, None, ),  # 7
         (8, TType.BYTE, 'status', None, None, ),  # 8
         (9, TType.STRING, 'update_time', 'UTF8', None, ),  # 9
+        (10, TType.STRING, 'signature', 'UTF8', None, ),  # 10
     )
 
-    def __init__(self, id=None, title=None, department=None, time=None, city=None, salary_top=None, salary_bottom=None, status=None, update_time=None,):
+    def __init__(self, id=None, title=None, department=None, time=None, city=None, salary_top=None, salary_bottom=None, status=None, update_time=None, signature=None,):
         self.id = id
         self.title = title
         self.department = department
@@ -52,6 +54,7 @@ class CollectPositionForm(object):
         self.salary_bottom = salary_bottom
         self.status = status
         self.update_time = update_time
+        self.signature = signature
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -107,6 +110,11 @@ class CollectPositionForm(object):
                     self.update_time = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
+            elif fid == 10:
+                if ftype == TType.STRING:
+                    self.signature = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -152,6 +160,10 @@ class CollectPositionForm(object):
         if self.update_time is not None:
             oprot.writeFieldBegin('update_time', TType.STRING, 9)
             oprot.writeString(self.update_time.encode('utf-8') if sys.version_info[0] == 2 else self.update_time)
+            oprot.writeFieldEnd()
+        if self.signature is not None:
+            oprot.writeFieldBegin('signature', TType.STRING, 10)
+            oprot.writeString(self.signature.encode('utf-8') if sys.version_info[0] == 2 else self.signature)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()

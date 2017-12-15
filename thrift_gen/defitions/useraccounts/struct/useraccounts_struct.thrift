@@ -179,7 +179,8 @@ struct ApplicationRecordsForm {
     2: optional string position_title,
     3: optional string company_name,
     4: optional string status_name,
-    5: optional Timestamp time
+    5: optional Timestamp time,
+    6: optional string signature
 }
 /*
  * 个人中心职位收藏列表
