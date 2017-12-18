@@ -58,7 +58,9 @@ settings['store_options'] = {
 # elk配置
 settings['elk_cluster'] = {
     'redis_host': 'logredis-t.dqprism.com',
-    'redis_port': 6388,
+    'redis_port':  6388,
+    'redis_socket_timeout': 3,
+    'redis_pool_max_connections': 500
 }
 # elasticsearch host
 settings['es'] = 'http://es-t.dqprism.com'
