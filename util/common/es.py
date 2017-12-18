@@ -16,8 +16,14 @@ from util.tool.es_tool import init_gamma_basic, rule_gamma_filters
 
 
 class BaseES(object):
-
-    _es = Elasticsearch(settings.es)
+    """es客户端设置为嗅探模式,保证程序的可用性,sniff 来进行集群探测。
+    创建对象的时候，引入n个节点，如果一个节点挂掉，对于程序没有影响。
+    http://elasticsearch-py.readthedocs.io/en/master/"""
+    _es = Elasticsearch(settings['es_client'],
+                        sniff_on_start=True,
+                        sniff_on_connection_fail=True,
+                        sniffer_timeout=60
+                        )
 
     def __new__(cls, *args, **kwargs):
         if not hasattr(cls, '_instance'):

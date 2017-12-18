@@ -112,11 +112,17 @@ class PositionPageService(PageService):
             position.job_custom = job_custom_res.name
 
         # 从 ES 中拉取职位的城市信息 （以后全部放到基础服务获取）
-        url = settings.es + "/index/_search?q=id:%s" % position_id
-        response = yield httpclient.AsyncHTTPClient().fetch(url)
-
-        body = ObjectDict(json.loads(to_str(response.body)))
-        result_list = body.hits.hits
+        data = {
+            "query": {
+                "bool": {
+                    "must": [
+                        {"match": {"id": position_id}}
+                    ]
+                }
+            }
+        }
+        response = self.es.search(index='index', body=data)
+        result_list = response.hits.hits
         if result_list:
             result = result_list[0]
             source = ObjectDict(result.get("_source"))
