@@ -268,7 +268,9 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
                 self.room_id,
                 bot_message,
                 self.position_id,
-                speaker=const.CHAT_SPEAKER_BOT)
+                speaker=const.CHAT_SPEAKER_BOT,
+                origin=const.ORIGIN_CHATBOT
+            )
 
 
 class ChatHandler(BaseHandler):
