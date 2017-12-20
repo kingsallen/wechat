@@ -17,7 +17,7 @@ from threading import Thread
 import redis
 from redis import ConnectionError, TimeoutError
 from tornado.options import options
-
+from util.common import send_mail
 import conf.common as constant
 from setting import settings
 
@@ -85,11 +85,20 @@ class RedisELK(IMessageSendable):
                 self._send_message(key, value)
             except (ConnectionError, TimeoutError) as e:
                 self.guard.handle_error(e)
+                self.send_alert_mail(e)
         else:
             pass
 
     def switch_to(self, on):
         self.on = on
+
+    def send_alert_mail(self, e):
+        email_address = settings['log_exception_alarm_emails'] or ['g_dev@moseeker.com']
+
+        if not self.on:
+            for add in email_address:
+                content = e
+                send_mail.send_mail(add, 'log 诊断报警', content)
 
     @staticmethod
     def reconnect():
