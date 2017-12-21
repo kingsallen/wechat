@@ -149,10 +149,16 @@ class ProfileNewHandler(BaseHandler):
         if profile_ok and basic_info_ok and education_ok and workexp_ok:
             dqpid = self.get_cookie('dqpid')
             self.logger.debug('dqpid: %s' % dqpid)
+            recom = ''
+            if 'recom' in self.json_args:
+                recom = self.json_args.recom
+            p = dict()
+            if recom:
+                p.update(recom=recom)
             if dqpid:
-                next_url = self.make_url(path.PROFILE_PREVIEW, self.params, pid=str(dqpid))
+                next_url = self.make_url(path.PROFILE_PREVIEW, self.params, pid=str(dqpid), **p)
             else:
-                next_url = self.make_url(path.PROFILE_VIEW, self.params)
+                next_url = self.make_url(path.PROFILE_VIEW, self.params, **p)
             self.logger.debug('next_url: %s' % next_url)
             self.clear_cookie(name='dqpid')
             self.send_json_success(data=ObjectDict(next_url=next_url))
