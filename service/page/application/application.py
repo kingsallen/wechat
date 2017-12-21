@@ -26,8 +26,6 @@ from util.tool.mail_tool import send_mail as send_email_service
 from util.tool.pdf_tool import generate_resume_for_hr
 from util.tool.str_tool import trunc
 from util.tool.url_tool import make_url, make_static_url
-from util.wechat.template import application_notice_to_applier_tpl, \
-    application_notice_to_recommender_tpl, application_notice_to_hr_tpl
 from util.common.decorator import log_time
 
 
