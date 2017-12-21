@@ -119,31 +119,12 @@ class ApplicationHandler(BaseHandler):
             # 1. 添加积分
             yield self.application_ps.opt_add_reward(apply_id, self.current_user)
 
-            # 2. 向求职者发送消息通知（消息模板，短信）
-            yield self.application_ps.opt_send_applier_msg(
-                apply_id, self.current_user, position, self.is_platform)
-
-            # 3. 向推荐人发送消息模板
+            # 2. 更新挖掘被动求职者信息
             recommender_user_id, _, _ = yield self.application_ps.get_recommend_user(
                 self.current_user, position, self.is_platform)
 
-            if recommender_user_id:
-                try:
-                    yield self.application_ps.opt_send_recommender_msg(
-                        recommender_user_id, self.current_user, position)
-                except WechatNoTemplateError:
-                    if self.current_user.wechat.type == const.WECHAT_TYPE_SUBSCRIPTION:
-                        self.logger.warn("正在尝试使用订阅号发消息模板, 错误将被忽略")
-                    else:
-                        raise
-
-                # 4. 更新挖掘被动求职者信息
-                yield self.application_ps.opt_update_candidate_recom_records(
+            yield self.application_ps.opt_update_candidate_recom_records(
                     apply_id, self.current_user, recommender_user_id, position)
-
-            # 5. 向 HR 发送消息通知（消息模板，短信，邮件）
-            yield self.application_ps.opt_hr_msg(
-                apply_id, self.current_user, position, self.is_platform)
 
             # 定制化
             # 宝洁投递后，跳转到指定页面
