@@ -123,8 +123,9 @@ class ApplicationHandler(BaseHandler):
             recommender_user_id, _, _ = yield self.application_ps.get_recommend_user(
                 self.current_user, position, self.is_platform)
 
-            yield self.application_ps.opt_update_candidate_recom_records(
-                    apply_id, self.current_user, recommender_user_id, position)
+            if recommender_user_id:
+                yield self.application_ps.opt_update_candidate_recom_records(
+                        apply_id, self.current_user, recommender_user_id, position)
 
             # 定制化
             # 宝洁投递后，跳转到指定页面
