@@ -63,7 +63,7 @@ class PositionHandler(BaseHandler):
             # 是否超出投递上限。每月每家公司一个人只能申请3次
             self.logger.debug("[JD]处理投递上限")
             can_apply = yield self.application_ps.is_allowed_apply_position(
-                self.current_user.sysuser.id, company_info.id)
+                self.current_user.sysuser.id, company_info.id, position_id)
 
             # 相似职位推荐
             self.logger.debug("[JD]构建相似职位推荐")
