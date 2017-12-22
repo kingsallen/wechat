@@ -399,12 +399,8 @@ class BaseHandler(MetaBaseHandler):
             session.wxuser = ObjectDict()
             session.qxuser = ObjectDict()
         else:
-            if self._wxuser:
-                session.wxuser = self._wxuser
-            else:
-                session.wxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
-                    unionid=unionid, wechat_id=self._wechat.id)
-
+            session.wxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
+                unionid=unionid, wechat_id=self._wechat.id)
             session.qxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
                 unionid=unionid, wechat_id=self.settings['qx_wechat_id'])
 
