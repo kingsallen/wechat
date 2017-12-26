@@ -17,7 +17,7 @@ from threading import Thread
 import redis
 from redis import ConnectionError, TimeoutError
 from tornado.options import options
-from util.common import send_mail
+from util.tool import mail_tool
 import conf.common as constant
 from setting import settings
 
@@ -98,7 +98,7 @@ class RedisELK(IMessageSendable):
         if not self.on:
             for add in email_address:
                 content = e
-                send_mail.send_mail(add, 'log 诊断报警', content)
+                mail_tool.send_mail(add, 'log 诊断报警', content)
 
     @staticmethod
     def reconnect():
