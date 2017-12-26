@@ -222,13 +222,14 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
             speaker=const.CHAT_SPEAKER_USER,
             cid=int(self.room_id),
             pid=int(self.position_id),
-            create_time=curr_now_minute()
+            create_time=curr_now_minute(),
+            origin=const.ORIGIN_USER_OR_HR
         ))
 
         self.redis_client.publish(self.hr_channel, message_body)
 
         yield self.chat_ps.save_chat(
-            self.room_id, user_message, self.position_id)
+            self.room_id, user_message, self.position_id, origin=const.ORIGIN_USER_OR_HR)
 
         if self.bot_enabled:
             # 由于没有延迟的发送导致hr端轮训无法订阅到publish到redis的消息　所以这里做下延迟处理
@@ -253,7 +254,8 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
                 speaker=const.CHAT_SPEAKER_BOT,
                 cid=int(self.room_id),
                 pid=int(self.position_id),
-                create_time=curr_now_minute()
+                create_time=curr_now_minute(),
+                origin=const.ORIGIN_CHATBOT
             ))
 
             # hr 端广播
@@ -266,7 +268,9 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
                 self.room_id,
                 bot_message,
                 self.position_id,
-                speaker=const.CHAT_SPEAKER_BOT)
+                speaker=const.CHAT_SPEAKER_BOT,
+                origin=const.ORIGIN_CHATBOT
+            )
 
 
 class ChatHandler(BaseHandler):

@@ -40,14 +40,6 @@ class UserSurveyConstantMixin(object):
         12: "政府/非赢利机构/其他"
     }
 
-    constant.work_age = {
-        1: "应届毕业生",
-        2: "1-3年",
-        3: "4-6年",
-        4: "7-10年",
-        5: "10年以上"
-    }
-
     constant.salary = {
         1: "2K以下",
         2: "2k-4k",
@@ -88,7 +80,6 @@ class UserSurveyHandler(UserSurveyConstantMixin, BaseHandler):
         data.constant = {
             'job_grade': self.listify_dict(self.constant.job_grade),
             'industry': self.listify_dict(self.constant.industry),
-            'work_age': self.listify_dict(self.constant.work_age),
             'salary': self.listify_dict(self.constant.salary),
             'degree': self.listify_dict(self.constant.degree)
         }

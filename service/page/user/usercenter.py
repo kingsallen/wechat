@@ -7,6 +7,7 @@ from service.page.base import PageService
 from util.common import ObjectDict
 from util.tool.str_tool import gen_salary
 from util.tool.date_tool import jd_update_date, str_2_date
+import conf.common as const
 
 
 class UsercenterPageService(PageService):
@@ -98,7 +99,7 @@ class UsercenterPageService(PageService):
             fav_pos['city'] = e.city
             fav_pos['salary'] = gen_salary(e.salary_top, e.salary_bottom)
             fav_pos['update_time'] = jd_update_date(str_2_date(e.update_time, self.constant.TIME_FORMAT))
-            fav_pos['states'] = "已过期" if e.status == 2 else ""
+            fav_pos['states'] = "已过期" if e.status in [const.POSITION_STATUS_DELETED, const.POSITION_STATUS_WITHDRAWN] else ""
             fav_pos['signature'] = e.signature
             obj_list.append(fav_pos)
         raise gen.Return(obj_list)
