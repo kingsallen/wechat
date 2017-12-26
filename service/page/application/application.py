@@ -367,7 +367,7 @@ class ApplicationPageService(PageService):
             company_id=position.company_id,
             routine=0 if is_platform else 1,
             apply_type=1,  # 投递区分， 0：profile投递， 1：email投递
-            email_status=1,
+            email_status=0,
             # email解析状态: 0，有效；1,未收到回复邮件；2，文件格式不支持；3，附件超过10M；9，提取邮件失败
             origin=1024
         )
