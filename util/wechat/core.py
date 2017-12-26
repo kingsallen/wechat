@@ -239,25 +239,6 @@ class WechatTemplateMessager(object):
 
         raise gen.Return(qx_wxuser.openid)
 
-    @gen.coroutine
-    def get_send_switch(self, wechat_id, notice_id):
-        """
-        获取企业号消息模板发送开关
-        :param wechat_id:
-        :param notice_id:
-        :return:
-        """
-        send_switch = yield self.hr_wx_notice_message_ds.get_wx_notice_message({
-            "wechat_id": wechat_id,
-            "notice_id": notice_id,
-            "status": 1,
-        })
-
-        res = False if not send_switch else True
-
-        raise gen.Return(res)
-
-
 messager = WechatTemplateMessager()
 
 
