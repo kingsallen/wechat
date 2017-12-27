@@ -696,8 +696,8 @@ class PositionHandler(BaseHandler):
         raise gen.Return(res)
 
 
-class PositionListHandler(BaseHandler):
-    """职位列表"""
+class PositionListDetailHandler(BaseHandler):
+    """获取职位列表"""
 
     @handle_response
     @check_employee
@@ -760,47 +760,94 @@ class PositionListHandler(BaseHandler):
 
             yield self._make_share_info(self.current_user.company.id, did)
 
-        # 只渲染必要的公司信息
-        yield self.make_company_info()
+        position_id_list = list()
+        for e in position_list:
+            position_id_list.append(e.id)
 
-        # 如果是下拉刷新请求的职位, 返回新增职位的页面
-        if self.params.restype == "json":
-            self.render(
-                template_name="position/list_items.html",
-                positions=position_list,
-                is_employee=bool(self.current_user.employee),
-                use_neowx=bool(self.current_user.company.conf_newjd_status == 2))
-            return
+        # 获取当前职位列表中用户已收藏职位列表
+        fav_position_id_list = self.position_ps.get_user_position_stared_list(
+            self.current_user.sysuser.id, position_id_list
+        )
+
+        # 获取用户已申请职位列表
+        applied_application_list = self.usercenter_ps.get_applied_applications(self.current_user.sysuser.id)
+        applied_application_id_list = list()
+        for app in applied_application_list:
+            applied_application_id_list.append(app.position_id)
+
+        # 职位信息
+        position_ex_list = list()
+        for pos in position_list:
+            position_ex = ObjectDict()
+            position_ex["id"] = pos.id
+            position_ex["priority"] = pos.priority,
+            position_ex["title"] = pos.title,
+            position_ex["visitnum"] = pos.visitnum,
+            position_ex["abbreviation"] = pos.abbreviation,
+            position_ex["department"] = pos.department,
+            position_ex["province"] = pos.province,
+            position_ex["city"] = pos.city,
+            position_ex["salary"] = pos.salary,
+            position_ex["logo"] = pos.logo,
+            position_ex["company_name"] = pos.company_name,
+            position_ex["salary_top"] = pos.salary_top,
+            position_ex["salary_bottom"] = pos.salary_bottom,
+            position_ex["update_time"] = pos.update_time,
+            position_ex["rp_reward_amount"] = pos.rp_reward_amount,
+            position_ex["rp_reward_target"] = pos.rp_reward_target,
+            position_ex["company_abbr"] = pos.company_abbr,
+            position_ex["remain"] = pos.remain,
+            position_ex["publish_date"] = pos.publish_date,
+            position_ex["team_name"] = pos.team_name,
+            position_ex["job_description"] = pos.accountabilities
+
+            # 判断职位收藏状态, 默认为false
+            position_ex['is_stared'] = False
+            if pos.id in fav_position_id_list:
+                position_ex["is_stared"] = True
+
+            # 判断职位申请状态，默认为false
+            position_ex['is_applied'] = False
+            if pos.id in applied_application_id_list:
+                position_ex['is_applied'] = True
+
+            # 判断是否显示红包, 默认为false
+            is_employee = bool(self.current_user.employee)
+            position_ex['has_reward'] = False
+            if pos.is_rp_reward and (is_employee and position.employee_only or not position.employee_only):
+                position_ex['has_reward'] = True
+
+            position_ex_list.append(position_ex)
 
         # 直接请求页面返回
+
+        position_title = self.locale.translate(const_platform.POSITION_LIST_TITLE_DEFAULT)
+        if self.params.recomlist or self.params.noemprecom:
+            position_title = self.locale.translate(const_platform.POSITION_LIST_TITLE_RECOMLIST)
+
+        teamname_custom = self.current_user.company.conf_teamname_custom.teamname_custom
+
+        if self.locale.code == 'zh_CN':
+            teamname_custom = self.locale.translate(
+                teamname_custom, plural_message=teamname_custom, count=2)
+
+        elif self.locale.code == 'en_US':
+            teamname_custom = self.locale.translate(
+                '团队', plural_message='团队', count=2)
+
         else:
-            position_title = self.locale.translate(const_platform.POSITION_LIST_TITLE_DEFAULT)
-            if self.params.recomlist or self.params.noemprecom:
-                position_title = self.locale.translate(const_platform.POSITION_LIST_TITLE_RECOMLIST)
+            assert False
 
-            teamname_custom = self.current_user.company.conf_teamname_custom.teamname_custom
-
-            if self.locale.code == 'zh_CN':
-                teamname_custom = self.locale.translate(
-                    teamname_custom, plural_message=teamname_custom, count=2)
-
-            elif self.locale.code == 'en_US':
-                teamname_custom = self.locale.translate(
-                    '团队', plural_message='团队', count=2)
-
-            else:
-                assert False
-
-            self.render(
-                template_name="position/list.html",
-                positions=position_list,
+        self.send_json_success(
+            data=ObjectDict(
+                position=position_ex_list,
                 position_title=position_title,
                 url='',
                 use_neowx=bool(self.current_user.company.conf_newjd_status == 2),
                 is_employee=bool(self.current_user.employee),
                 searchFilterNum=self.get_search_filter_num(),
-                teamname_custom=teamname_custom
-            )
+                teamname_custom=teamname_custom)
+        )
 
     @staticmethod
     def __rp_position_generator(position_list):
@@ -824,19 +871,6 @@ class PositionListHandler(BaseHandler):
 
         position_list = yield self.position_ps.infra_get_position_employeerecom(infra_params, company_id)
         return position_list
-
-    @gen.coroutine
-    def make_company_info(self):
-        """只提取必要的company信息用于渲染"""
-        if self.params.did:
-            company = yield self.company_ps.get_company(
-                conds={'id': self.params.did}, need_conf=True)
-            if not company.banner:
-                parent_company = self.current_user.company
-                company.banner = parent_company.banner
-        else:
-            company = self.current_user.company
-        self.params.company = self.position_ps.limited_company_info(company)
 
     def get_search_filter_num(self):
         """get search filter number for statistics"""
@@ -966,3 +1000,46 @@ class PositionEmpNoticeHandler(BaseHandler):
                                                      link)
 
         self.send_json_success()
+
+
+class PositionListHandler(BaseHandler):
+
+    @handle_response
+    @check_employee
+    @gen.coroutine
+    def get(self):
+        """获取职位列表页"""
+
+        # 只渲染必要的公司信息
+        yield self.make_company_info()
+
+        teamname_custom = self.current_user.company.conf_teamname_custom.teamname_custom
+
+        if self.locale.code == 'zh_CN':
+            teamname_custom = self.locale.translate(
+                teamname_custom, plural_message=teamname_custom, count=2)
+
+        elif self.locale.code == 'en_US':
+            teamname_custom = self.locale.translate(
+                '团队', plural_message='团队', count=2)
+
+        self.render(
+            template_name="position/index.html",
+            data=ObjectDict(
+                company=self.params.company,
+                use_neowx=bool(self.current_user.company.conf_newjd_status == 2),
+                teamname_custom=teamname_custom)
+        )
+
+    @gen.coroutine
+    def make_company_info(self):
+        """只提取必要的company信息用于渲染"""
+        if self.params.did:
+            company = yield self.company_ps.get_company(
+                conds={'id': self.params.did}, need_conf=True)
+            if not company.banner:
+                parent_company = self.current_user.company
+                company.banner = parent_company.banner
+        else:
+            company = self.current_user.company
+        self.params.company = self.position_ps.limited_company_info(company)
