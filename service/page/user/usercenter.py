@@ -5,7 +5,7 @@ from tornado import gen
 
 from service.page.base import PageService
 from util.common import ObjectDict
-from util.tool.str_tool import gen_salary
+from util.tool.str_tool import gen_salary, set_literl
 from util.tool.date_tool import jd_update_date, str_2_date
 
 
@@ -102,6 +102,21 @@ class UsercenterPageService(PageService):
             fav_pos['signature'] = e.signature
             obj_list.append(fav_pos)
         raise gen.Return(obj_list)
+
+    @gen.coroutine
+    def get_user_position_stared_list(self, user_id, position_id_list):
+        """返回用户收藏职位列表"""
+        fav_position_id_list = []
+        if user_id is None or position_id_list is None:
+            return fav_position_id_list
+        param = dict(conds={'sysuser_id': user_id},
+                     fields=['id'])
+        if position_id_list and isinstance(position_id_list, list):
+            param.update(appends=["and position_id in %s" % set_literl(position_id_list)])
+        fav_position_list = yield self.user_fav_position_ds.get_user_fav_position_list(**param)
+        if fav_position_list:
+            fav_position_id_list = [e.id for e in fav_position_list]
+        return fav_position_id_list
 
     @gen.coroutine
     def get_applied_applications(self, user_id):

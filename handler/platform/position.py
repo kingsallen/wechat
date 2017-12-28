@@ -772,8 +772,12 @@ class PositionListDetailHandler(BaseHandler):
         # 获取用户已申请职位列表
         applied_application_list = self.usercenter_ps.get_applied_applications(self.current_user.sysuser.id)
         applied_application_id_list = list()
-        for app in applied_application_list:
-            applied_application_id_list.append(app.position_id)
+        if applied_application_list:
+            for app in applied_application_list:
+                applied_application_id_list.append(app.position_id)
+
+        # 诺华定制
+        suppress_apply = yield self.customize_ps.is_suppress_apply_company(infra_params.company_id)
 
         # 职位信息
         position_ex_list = list()
@@ -800,22 +804,13 @@ class PositionListDetailHandler(BaseHandler):
             position_ex["publish_date"] = pos.publish_date,
             position_ex["team_name"] = pos.team_name,
             position_ex["job_description"] = pos.accountabilities
+            position_ex['is_suppress_apply'] = suppress_apply
+            position_ex["is_stared"] = pos.id in fav_position_id_list  # 判断职位收藏状态
+            position_ex['is_applied'] = pos.id in applied_application_id_list  # 判断职位申请状态
 
-            # 判断职位收藏状态, 默认为false
-            position_ex['is_stared'] = False
-            if pos.id in fav_position_id_list:
-                position_ex["is_stared"] = True
-
-            # 判断职位申请状态，默认为false
-            position_ex['is_applied'] = False
-            if pos.id in applied_application_id_list:
-                position_ex['is_applied'] = True
-
-            # 判断是否显示红包, 默认为false
+            # 判断是否显示红包
             is_employee = bool(self.current_user.employee)
-            position_ex['has_reward'] = False
-            if pos.is_rp_reward and (is_employee and position.employee_only or not position.employee_only):
-                position_ex['has_reward'] = True
+            position_ex['has_reward'] = pos.is_rp_reward and (is_employee and position.employee_only or not position.employee_only)
 
             position_ex_list.append(position_ex)
 
@@ -1026,7 +1021,6 @@ class PositionListHandler(BaseHandler):
         self.render(
             template_name="position/index.html",
             data=ObjectDict(
-                company=self.params.company,
                 use_neowx=bool(self.current_user.company.conf_newjd_status == 2),
                 teamname_custom=teamname_custom)
         )
