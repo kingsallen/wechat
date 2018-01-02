@@ -1064,7 +1064,5 @@ class PositionListSugHandler(BaseHandler):
                     "你好啊",
                     "按道理讲"
                     ])
-        return self.send_json_success({
-                    test
-        })
+        return self.send_json_success(test)
 

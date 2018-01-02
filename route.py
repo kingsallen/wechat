@@ -95,7 +95,7 @@ common_routes = [
     (r"/api/customcv/?",                             handler.common.profile.ProfileAPICustomCVHandler,          {"event": "profile_customcv"}),
     (r"/api/position/star/?",                        handler.common.position.PositionStarHandler,               {"event": "position_star"}),
     (r"/api/position/list/?",                        handler.platform.position.PositionListDetailHandler,       {"event": "position_list"}),
-    (r"api/position/list/sug", handler.platform.position.PositionListSugHandler, {"event": "position_list_sug"}),
+    (r"/api/position/list/sug",                      handler.platform.position.PositionListSugHandler,          {"event": "position_list_sug"}),
     (r"/api/chat/unread[\/]*([0-9]+)*",              handler.common.im.UnreadCountHandler,                      {"event": "chat_"}),
     (r"/api/mobilebinded",                           handler.common.usercenter.UserMobileBindedHandler,         {"event": "user_usermobilebinded"}),
     (r"/api/cellphone[\/]*([a-z_]+)*",               handler.common.cellphone.CellphoneBindHandler,             {"event": "cellphone_"}),
