@@ -728,8 +728,6 @@ class PositionListDetailHandler(BaseHandler):
             # 红包职位列表
             infra_params.update(hb_config_id=hb_c)
             position_list = yield self.position_ps.infra_get_rp_position_list(infra_params)
-            rp_share_info = yield self.position_ps.infra_get_rp_share_info(infra_params)
-            yield self._make_share_info(self.current_user.company.id, did, rp_share_info)
 
         elif recom_push_id:
             # 员工推荐列表
@@ -874,42 +872,6 @@ class PositionListDetailHandler(BaseHandler):
                 if v:
                     ret += 1
 
-    @gen.coroutine
-    def _make_share_info(self, company_id, did=None, rp_share_info=None):
-        """构建 share 内容"""
-
-        company_info = yield self.company_ps.get_company(
-            conds={"id": did or company_id}, need_conf=True)
-
-        if not rp_share_info:
-            escape = ["recomlist"]
-            cover = self.share_url(company_info.logo)
-            title = company_info.abbreviation + self.locale.translate('job_hotjobs')
-            description = self.locale.translate(msg.SHARE_DES_DEFAULT)
-
-        else:
-            cover = self.share_url(rp_share_info.cover)
-            escape = [
-                "pid", "keywords", "cities", "candidate_source",
-                "employment_type", "salary", "department", "occupations",
-                "custom", "degree", "page_from", "page_size"
-            ]
-            title = rp_share_info.title
-            description = rp_share_info.description
-
-        link = self.make_url(
-            path.POSITION_LIST,
-            self.params,
-            recom=self.position_ps._make_recom(self.current_user.sysuser.id),
-            escape=escape)
-
-        self.params.share = ObjectDict({
-            "cover": cover,
-            "title": title,
-            "description": description,
-            "link": link
-        })
-
     def _make_position_list_infra_params(self):
         """构建调用基础服务职位列表的 params"""
 
@@ -1001,6 +963,33 @@ class PositionListHandler(BaseHandler):
     def get(self):
         """获取职位列表页"""
 
+        infra_params = self._make_position_list_infra_params()
+
+        # 校验一下可能出现的参数：
+        # hb_c: 红包活动id
+        # did: 子公司id
+        hb_c = 0
+        if self.params.hb_c and self.params.hb_c.isdigit():
+            hb_c = int(self.params.hb_c)
+
+        did = 0
+        if self.params.did and self.params.did.isdigit():
+            did = int(self.params.did)
+
+        recom_push_id = 0
+        if self.params.recom_push_id and self.params.recom_push_id.isdigit():
+            recom_push_id = int(self.params.recom_push_id)
+
+        if recom_push_id and hb_c:
+            raise MyException("错误的链接")
+
+        if hb_c:
+            # 红包职位分享
+            rp_share_info = yield self.position_ps.infra_get_rp_share_info(infra_params)
+            yield self._make_share_info(self.current_user.company.id, did, rp_share_info)
+        else:
+            yield self._make_share_info(self.current_user.company.id, did)
+
         # 只渲染必要的公司信息
         yield self.make_company_info()
 
@@ -1046,6 +1035,97 @@ class PositionListHandler(BaseHandler):
         else:
             company = self.current_user.company
         self.params.company = self.position_ps.limited_company_info(company)
+
+    @gen.coroutine
+    def _make_share_info(self, company_id, did=None, rp_share_info=None):
+        """构建 share 内容"""
+
+        company_info = yield self.company_ps.get_company(
+            conds={"id": did or company_id}, need_conf=True)
+
+        if not rp_share_info:
+            escape = ["recomlist"]
+            cover = self.share_url(company_info.logo)
+            title = company_info.abbreviation + self.locale.translate('job_hotjobs')
+            description = self.locale.translate(msg.SHARE_DES_DEFAULT)
+
+        else:
+            cover = self.share_url(rp_share_info.cover)
+            escape = [
+                "pid", "keywords", "cities", "candidate_source",
+                "employment_type", "salary", "department", "occupations",
+                "custom", "degree", "page_from", "page_size"
+            ]
+            title = rp_share_info.title
+            description = rp_share_info.description
+
+        link = self.make_url(
+            path.POSITION_LIST,
+            self.params,
+            recom=self.position_ps._make_recom(self.current_user.sysuser.id),
+            escape=escape)
+
+        self.params.share = ObjectDict({
+            "cover": cover,
+            "title": title,
+            "description": description,
+            "link": link
+        })
+
+    def _make_position_list_infra_params(self):
+        """构建调用基础服务职位列表的 params"""
+
+        infra_params = ObjectDict()
+
+        infra_params.company_id = self.current_user.company.id
+
+        if self.params.did:
+            infra_params.did = self.params.did
+
+        start_count = (int(self.params.get("count", 0)) *
+                       const_platform.POSITION_LIST_PAGE_COUNT)
+
+        infra_params.page_from = start_count
+        infra_params.page_size = const_platform.POSITION_LIST_PAGE_COUNT
+
+        if self.params.salary:
+            k = str(self.params.salary)
+            try:
+                infra_params.salary = "%d,%d" % (
+                    const_platform.SALARY[const_platform.SALARY_NAME_TO_INDEX[k]].salary_bottom,
+                    const_platform.SALARY[const_platform.SALARY_NAME_TO_INDEX[k]].salary_top)
+            except KeyError:  # 如果用户自行修改了 GET 参数，不至于报错
+                infra_params.salary = ""
+
+        if self.params.degree:
+            infra_params.degree = self.params.degree
+        else:
+            infra_params.degree = ""
+
+        # 招聘类型和职位性质接受兼容 数字编号 中文
+        if self.params.candidate_source:
+            infra_params.candidate_source = const.CANDIDATE_SOURCE_SEARCH.get(self.params.candidate_source, "") \
+                if self.params.candidate_source.isdigit() else self.params.candidate_source
+        else:
+            infra_params.candidate_source = ""
+
+        if self.params.employment_type:
+            infra_params.employment_type = const.EMPLOYMENT_TYPE_SEARCH.get(self.params.employment_type, "") \
+                if self.params.employment_type.isdigit() else self.params.employment_type
+        else:
+            infra_params.employment_type = ""
+
+        infra_params.update(
+            keywords=self.params.keyword if self.params.keyword else "",
+            cities=self.params.city if self.params.city else "",
+            department=self.params.team_name if self.params.team_name else "",
+            occupations=self.params.occupation if self.params.occupation else "",
+            custom=self.params.custom if self.params.custom else "",
+            order_by_priority=True)
+
+        self.logger.debug("[position_list_infra_params]: %s" % infra_params)
+
+        return infra_params
 
 
 class PositionListSugHandler(BaseHandler):
