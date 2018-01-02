@@ -765,12 +765,12 @@ class PositionListDetailHandler(BaseHandler):
             position_id_list.append(e.id)
 
         # 获取当前职位列表中用户已收藏职位列表
-        fav_position_id_list = self.usercenter_ps.get_user_position_stared_list(
+        fav_position_id_list = yield self.usercenter_ps.get_user_position_stared_list(
             self.current_user.sysuser.id, position_id_list
         )
 
         # 获取用户已申请职位列表
-        applied_application_list = self.usercenter_ps.get_applied_applications(self.current_user.sysuser.id)
+        applied_application_list = yield self.usercenter_ps.get_applied_applications(self.current_user.sysuser.id)
         applied_application_id_list = list()
         if applied_application_list:
             for app in applied_application_list:
@@ -779,6 +779,8 @@ class PositionListDetailHandler(BaseHandler):
         # 诺华定制
         suppress_apply = yield self.customize_ps.is_suppress_apply_company(infra_params.company_id)
 
+        position_custom_list = []
+        position_custom_id_list = []
         if suppress_apply:
             position_custom_list, position_custom_id_list = self.position_ps.get_position_custom_list(position_id_list)
 
@@ -827,8 +829,6 @@ class PositionListDetailHandler(BaseHandler):
 
             position_ex_list.append(position_ex)
 
-        # 直接请求页面返回
-
         position_title = self.locale.translate(const_platform.POSITION_LIST_TITLE_DEFAULT)
         if self.params.recomlist or self.params.noemprecom:
             position_title = self.locale.translate(const_platform.POSITION_LIST_TITLE_RECOMLIST)
@@ -847,14 +847,7 @@ class PositionListDetailHandler(BaseHandler):
             assert False
 
         self.send_json_success(
-            data=ObjectDict(
-                position=position_ex_list,
-                position_title=position_title,
-                url='',
-                use_neowx=bool(self.current_user.company.conf_newjd_status == 2),
-                is_employee=bool(self.current_user.employee),
-                searchFilterNum=self.get_search_filter_num(),
-                teamname_custom=teamname_custom)
+            data=ObjectDict(list=position_ex_list)
         )
 
     @staticmethod
@@ -1035,8 +1028,16 @@ class PositionListHandler(BaseHandler):
             teamname_custom = self.locale.translate(
                 '团队', plural_message='团队', count=2)
 
+        company = ObjectDict()
+        company['id'] = self.params.company.id
+        company['logo'] = self.params.company.logo
+        company['abbreviation'] = self.params.company.abbreviation
+        company['industry'] = self.params.company.industry
+        company['scale_name'] = self.params.company.scale_name
+
         self.render_page(
             template_name="position/index.html",
+            company=company,
             meta_title=position_title,
             data=ObjectDict(
                 use_neowx=bool(self.current_user.company.conf_newjd_status == 2),
