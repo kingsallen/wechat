@@ -366,8 +366,8 @@ class PositionPageService(PageService):
         """
         请求基础服务, 获取员工推荐职位列表
         :param infra_params: ObjectDict({
-                                'pageNum': self.params.pageNo,
-                                'pageSize': self.params.pageSize,
+                                'page_from': self.params.pageNo,
+                                'page_size': self.params.pageSize,
                                 'userId': self.current_user.sysuser.id,
                                 "companyId": company_id,
                                 "recomPushId": self.params.recomPushId
