@@ -1037,9 +1037,9 @@ class PositionListHandler(BaseHandler):
 
         self.render_page(
             template_name="position/index.html",
-            company=company,
             meta_title=position_title,
             data=ObjectDict(
+                company=company,
                 use_neowx=bool(self.current_user.company.conf_newjd_status == 2),
                 teamname_custom=teamname_custom)
         )
