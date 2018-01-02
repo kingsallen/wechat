@@ -834,25 +834,10 @@ class PositionListDetailHandler(BaseHandler):
 
             position_ex_list.append(position_ex)
 
-        position_title = self.locale.translate(const_platform.POSITION_LIST_TITLE_DEFAULT)
-        if self.params.recomlist or self.params.noemprecom:
-            position_title = self.locale.translate(const_platform.POSITION_LIST_TITLE_RECOMLIST)
-
-        teamname_custom = self.current_user.company.conf_teamname_custom.teamname_custom
-
-        if self.locale.code == 'zh_CN':
-            teamname_custom = self.locale.translate(
-                teamname_custom, plural_message=teamname_custom, count=2)
-
-        elif self.locale.code == 'en_US':
-            teamname_custom = self.locale.translate(
-                '团队', plural_message='团队', count=2)
-
-        else:
-            assert False
-
         self.send_json_success(
-            data=ObjectDict(list=position_ex_list)
+            data=ObjectDict(list=position_ex_list,
+                            total_count=123)  # todo 基础服务获取total_count
+
         )
 
     @staticmethod
@@ -1073,6 +1058,7 @@ class PositionListSugHandler(BaseHandler):
         sug搜索
         :return:
         """
+        # todo 基础服务获取sug接口
         test = ObjectDict(list=[
                     "abc",
                     "你好啊",
