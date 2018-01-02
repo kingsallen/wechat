@@ -335,7 +335,8 @@ class PositionPageService(PageService):
     @gen.coroutine
     def infra_get_rp_position_list(self, params):
         """红包职位列表"""
-        params.update(page_from=int(self.params.get("count", 0))+1)
+        params.update(page_from=int(params.page_from/10)+1)
+
         res = yield self.infra_position_ds.get_rp_position_list(params)
 
         team_name_dict = yield self.get_teamid_names_dict(params.company_id)
