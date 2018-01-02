@@ -735,7 +735,6 @@ class PositionListDetailHandler(BaseHandler):
                 position_list = yield self.get_employee_position_list(recom_push_id)
             else:
                 position_list = []
-            yield self._make_share_info(self.current_user.company.id, did)
 
         else:
             # 普通职位列表
@@ -755,8 +754,6 @@ class PositionListDetailHandler(BaseHandler):
                         position.is_rp_reward = position.remain > 0
                     else:
                         position.is_rp_reward = False
-
-            yield self._make_share_info(self.current_user.company.id, did)
 
         position_id_list = list()
         for e in position_list:
