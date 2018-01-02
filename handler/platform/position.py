@@ -1021,6 +1021,10 @@ class PositionListHandler(BaseHandler):
         # 只渲染必要的公司信息
         yield self.make_company_info()
 
+        position_title = self.locale.translate(const_platform.POSITION_LIST_TITLE_DEFAULT)
+        if self.params.recomlist or self.params.noemprecom:
+            position_title = self.locale.translate(const_platform.POSITION_LIST_TITLE_RECOMLIST)
+
         teamname_custom = self.current_user.company.conf_teamname_custom.teamname_custom
 
         if self.locale.code == 'zh_CN':
@@ -1031,8 +1035,9 @@ class PositionListHandler(BaseHandler):
             teamname_custom = self.locale.translate(
                 '团队', plural_message='团队', count=2)
 
-        self.render(
+        self.render_page(
             template_name="position/index.html",
+            meta_title=position_title,
             data=ObjectDict(
                 use_neowx=bool(self.current_user.company.conf_newjd_status == 2),
                 teamname_custom=teamname_custom)
@@ -1062,11 +1067,12 @@ class PositionListSugHandler(BaseHandler):
         sug搜索
         :return:
         """
-        return {
-                    list: [
+        test = ObjectDict(list=[
                     "abc",
                     "你好啊",
                     "按道理讲"
-                    ]
-                }
+                    ])
+        return self.send_json_success({
+                    test
+        })
 
