@@ -779,38 +779,51 @@ class PositionListDetailHandler(BaseHandler):
         # 诺华定制
         suppress_apply = yield self.customize_ps.is_suppress_apply_company(infra_params.company_id)
 
+        if suppress_apply:
+            position_custom_list, position_custom_id_list = self.position_ps.get_position_custom_list(position_id_list)
+
         # 职位信息
         position_ex_list = list()
         for pos in position_list:
             position_ex = ObjectDict()
             position_ex["id"] = pos.id
-            position_ex["priority"] = pos.priority,
-            position_ex["title"] = pos.title,
-            position_ex["visitnum"] = pos.visitnum,
-            position_ex["abbreviation"] = pos.abbreviation,
-            position_ex["department"] = pos.department,
-            position_ex["province"] = pos.province,
-            position_ex["city"] = pos.city,
-            position_ex["salary"] = pos.salary,
-            position_ex["logo"] = pos.logo,
-            position_ex["company_name"] = pos.company_name,
-            position_ex["salary_top"] = pos.salary_top,
-            position_ex["salary_bottom"] = pos.salary_bottom,
-            position_ex["update_time"] = pos.update_time,
-            position_ex["rp_reward_amount"] = pos.rp_reward_amount,
-            position_ex["rp_reward_target"] = pos.rp_reward_target,
-            position_ex["company_abbr"] = pos.company_abbr,
-            position_ex["remain"] = pos.remain,
-            position_ex["publish_date"] = pos.publish_date,
-            position_ex["team_name"] = pos.team_name,
+            position_ex["priority"] = pos.priority
+            position_ex["title"] = pos.title
+            position_ex["visitnum"] = pos.visitnum
+            position_ex["abbreviation"] = pos.abbreviation
+            position_ex["department"] = pos.department
+            position_ex["province"] = pos.province
+            position_ex["city"] = pos.city
+            position_ex["salary"] = pos.salary
+            position_ex["logo"] = pos.logo
+            position_ex["company_name"] = pos.company_name
+            position_ex["salary_top"] = pos.salary_top
+            position_ex["salary_bottom"] = pos.salary_bottom
+            position_ex["update_time"] = pos.update_time
+            position_ex["rp_reward_amount"] = pos.rp_reward_amount
+            position_ex["rp_reward_target"] = pos.rp_reward_target
+            position_ex["company_abbr"] = pos.company_abbr
+            position_ex["remain"] = pos.remain
+            position_ex["publish_date"] = pos.publish_date
+            position_ex["team_name"] = pos.team_name
             position_ex["job_description"] = pos.accountabilities
-            position_ex['is_suppress_apply'] = suppress_apply
-            position_ex["is_stared"] = pos.id in fav_position_id_list  # 判断职位收藏状态
+            position_ex["is_starred"] = pos.id in fav_position_id_list  # 判断职位收藏状态
             position_ex['is_applied'] = pos.id in applied_application_id_list  # 判断职位申请状态
 
             # 判断是否显示红包
             is_employee = bool(self.current_user.employee)
             position_ex['has_reward'] = pos.is_rp_reward and (is_employee and position.employee_only or not position.employee_only)
+
+            # 诺华定制
+            position_ex['suppress_apply'] = ObjectDict()
+            position_ex['suppress_apply']['is_suppress_apply'] = suppress_apply
+            position_ex['suppress_apply']['job_number'] = pos.jobnumber
+            if position_custom_list and position_custom_id_list and pos.id in position_custom_id_list:
+                for custom in position_custom_list:
+                    if pos.id == custom.id and custom.custom_field:
+                        position_ex['suppress_apply']['custom_field'] = custom.custom_field
+                    else:
+                        position_ex['suppress_apply']['custom_field'] = ''
 
             position_ex_list.append(position_ex)
 
@@ -1037,3 +1050,23 @@ class PositionListHandler(BaseHandler):
         else:
             company = self.current_user.company
         self.params.company = self.position_ps.limited_company_info(company)
+
+
+class PositionListSugHandler(BaseHandler):
+
+    @handle_response
+    @check_employee
+    @gen.coroutine
+    def get(self):
+        """
+        sug搜索
+        :return:
+        """
+        return {
+                    list: [
+                    "abc",
+                    "你好啊",
+                    "按道理讲"
+                    ]
+                }
+
