@@ -765,7 +765,7 @@ class PositionListDetailHandler(BaseHandler):
             position_id_list.append(e.id)
 
         # 获取当前职位列表中用户已收藏职位列表
-        fav_position_id_list = self.position_ps.get_user_position_stared_list(
+        fav_position_id_list = self.usercenter_ps.get_user_position_stared_list(
             self.current_user.sysuser.id, position_id_list
         )
 
