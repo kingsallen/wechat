@@ -266,10 +266,10 @@ class LandingPageService(PageService):
 
         positions_data = yield self.get_positions_data(conf_search_seq_plus, company.id, form_name_dict)
 
-        if platform_const.LANDING_INDEX_CITY in conf_search_seq_plus:
+        if platform_const.LANDING_INDEX_CITY in conf_search_seq and platform_const.LANDING_INDEX_CITY in conf_search_seq_plus:
             positions_data = self.split_cities(positions_data)
 
-        if platform_const.LANDING_INDEX_CHILD_COMPANY in conf_search_seq_plus:
+        if platform_const.LANDING_INDEX_CHILD_COMPANY in conf_search_seq and platform_const.LANDING_INDEX_CHILD_COMPANY in conf_search_seq_plus:
             positions_data = yield self.append_child_company_name(positions_data)
 
         self.logger.debug(conf_search_seq_plus)
