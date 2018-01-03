@@ -128,10 +128,11 @@ class LandingPageService(PageService):
                         "must": [
                             {"match": {"company_id": company_id}},
                             {"match": {"status": const.OLD_YES}}
-                            ]
-                        }
+                        ]
                     }
                 }
+            }
+
         response = self.es.search(index='index', body=data)
 
         result_list = response.hits.hits
@@ -226,32 +227,52 @@ class LandingPageService(PageService):
         conf_search_seq = tuple([int(e.index) for e in company.get("conf_search_seq")])
 
         key_order = [platform_const.LANDING[kn].get("display_key") for kn in conf_search_seq]
-
+        form_name = [platform_const.LANDING[kn].get("form_name") for kn in conf_search_seq]
         # 获取链接上配置的筛选参数
-        search_condition_dict = dict()
-        all_key_order = [platform_const.LANDING[e].get('form_name') for e in range(0, 9)]
+        display_key_dict = dict()
+        form_name_dict = dict()
+        all_form_name = [platform_const.LANDING[e].get('form_name') for e in range(1, 10)]
+        all_key_order = [[platform_const.LANDING[e].get("display_key"), platform_const.LANDING[e].get('form_name')] for e in range(1, 10)]
+        self.logger.debug('key_order: %s,form_name: %s,all_key_order: %s,all_form_name: %s' % (key_order, form_name, all_key_order, all_form_name))
         for key, value in params.items():
-            if value and key in all_key_order and key not in key_order:
-                search_condition_dict.update(key=value)
+            if value and key in all_form_name and key not in form_name:
+                for k in all_key_order:
+                    # 将链接参数转换为过滤搜索结果参数
+                    if key == k[1]:
+                        key = k[0]
+                        s_key = k[1]
+                form_name_dict[s_key] = value
+                display_key_dict[key] = value
+        self.logger.debug(display_key_dict)
+
+        # 链接所带参数
+        conf_search_seq_append = []
+        for index in range(1, 10):
+            for s in display_key_dict:
+                if platform_const.LANDING[index].get("display_key") == s:
+                    conf_search_seq_append.append(index)
+
+        # 重新整理查询条件
+        conf_search_seq_plus = tuple([int(e.index) for e in company.get("conf_search_seq")] + conf_search_seq_append)
 
         # 默认 conf_search_seq
-        if not conf_search_seq:
-            conf_search_seq = (
+        if not conf_search_seq_plus:
+            conf_search_seq_plus = (
                 platform_const.LANDING_INDEX_CITY,
                 platform_const.LANDING_INDEX_SALARY,
                 platform_const.LANDING_INDEX_CHILD_COMPANY,
                 platform_const.LANDING_INDEX_DEPARTMENT
             )
 
-        positions_data = yield self.get_positions_data(conf_search_seq, company.id, search_condition_dict)
+        positions_data = yield self.get_positions_data(conf_search_seq_plus, company.id, form_name_dict)
 
-        if platform_const.LANDING_INDEX_CITY in conf_search_seq:
+        if platform_const.LANDING_INDEX_CITY in conf_search_seq_plus:
             positions_data = self.split_cities(positions_data)
 
-        if platform_const.LANDING_INDEX_CHILD_COMPANY in conf_search_seq:
+        if platform_const.LANDING_INDEX_CHILD_COMPANY in conf_search_seq_plus:
             positions_data = yield self.append_child_company_name(positions_data)
 
-        self.logger.debug(conf_search_seq)
+        self.logger.debug(conf_search_seq_plus)
 
         # 构建 [{"text": XXX, "value": XXX}, ...] 的形式
         positions_data_values = []
@@ -268,7 +289,8 @@ class LandingPageService(PageService):
                     to_append.append({"text": e.get(k), "value": const.EMPLOYMENT_TYPE_SEARCH_REVERSE.get(e.get(k))})
                 else:
                     to_append.append({"text": e.get(k), "value": e.get(k)})
-            for s in search_condition_dict:
+            # 将链接参数拼接进筛选条件列表
+            for s in display_key_dict:
                 if s == 'child_company_abbr':
                     to_append.append(e.get(s))
 
@@ -296,7 +318,7 @@ class LandingPageService(PageService):
             return platform_const.LANDING[search_item].get("chpe")
 
         return ObjectDict({
-            "field_name": [custom_field(e) for e in conf_search_seq],
+            "field_name": [custom_field(e) for e in conf_search_seq_plus],
             "field_form_name": [platform_const.LANDING[e].get("form_name") for e in conf_search_seq],
             "values": dedupped_position_data_values
         })
