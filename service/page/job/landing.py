@@ -1,7 +1,7 @@
 # coding=utf-8
 
 import json
-
+import re
 from tornado import gen, httpclient
 
 from service.page.base import PageService
@@ -46,7 +46,7 @@ class LandingPageService(PageService):
         return key_list
 
     @gen.coroutine
-    def get_positions_data(self, conf_search_seq, company_id, search_condition_dict):
+    def get_positions_data(self, conf_search_seq, company_id, search_condition_dict, salary_dict):
         """ 从 ES 获取全部职位信息
         可以正确解析 salary
         """
@@ -68,7 +68,7 @@ class LandingPageService(PageService):
             }
         }
         # 默认最多可以附带三个链接筛选条件
-        if search_condition_dict:
+        if search_condition_dict and not salary_dict:
             for key, value in search_condition_dict.items():
                 key_list.append(key)
                 value_list.append(value)
@@ -108,7 +108,7 @@ class LandingPageService(PageService):
                 key_a, value_a = key_list[0], value_list[0]
                 key_b, value_b = key_list[1], value_list[1]
                 key_c, value_c = key_list[2], value_list[2]
-                
+
                 data = {
                     "size": query_size,
                     "query": {
@@ -123,6 +123,61 @@ class LandingPageService(PageService):
                         }
                     }
                 }
+        elif search_condition_dict and salary_dict:
+            for key, value in search_condition_dict.items():
+                key_list.append(key)
+                value_list.append(value)
+            if len(key_list) == 1:
+                key_a, value_a = key_list[0], value_list[0]
+
+                data = {
+                    "size": query_size,
+                    "query": {
+                        "bool": {
+                            "must": [
+                                {"match": {"company_id": company_id}},
+                                {"match": {"status": const.OLD_YES}},
+                                {"match": {key_a: value_a}},
+                                {"range": {"salary_top": {"lt": salary_dict.get('salary_top')}}},
+                                {"range": {"salary_bottom": {"gt": salary_dict.get('salary_bottom')}}}
+                            ]
+                        }
+                    }
+                }
+            elif len(key_list) == 2:
+                key_a, value_a = key_list[0], value_list[0]
+                key_b, value_b = key_list[1], value_list[1]
+
+                data = {
+                    "size": query_size,
+                    "query": {
+                        "bool": {
+                            "must": [
+                                {"match": {"company_id": company_id}},
+                                {"match": {"status": const.OLD_YES}},
+                                {"match": {key_a: value_a}},
+                                {"match": {key_b: value_b}},
+                                {"range": {"salary_top": {"lt": salary_dict.get('salary_top')}}},
+                                {"range": {"salary_bottom": {"gt": salary_dict.get('salary_bottom')}}}
+                            ]
+                        }
+                    }
+                }
+        elif salary_dict and not search_condition_dict:
+            data = {
+                "size": query_size,
+                "query": {
+                    "bool": {
+                        "must": [
+                            {"match": {"company_id": company_id}},
+                            {"match": {"status": const.OLD_YES}},
+                            {"range": {"salary_top": {"lt": salary_dict.get('salary_top')}}},
+                            {"range": {"salary_bottom": {"gt": salary_dict.get('salary_bottom')}}}
+                        ]
+                    }
+                }
+            }
+
         self.logger.debug(data)
         response = self.es.search(index='index', body=data)
 
@@ -221,6 +276,7 @@ class LandingPageService(PageService):
         form_name = [platform_const.LANDING[kn].get("form_name") for kn in conf_search_seq]
         # 获取链接上配置的筛选参数
         display_key_dict = dict()
+        salary_dict = dict()
         all_form_name = [platform_const.LANDING[e].get('form_name') for e in range(1, 10)]
         all_key_order = [[platform_const.LANDING[e].get("key"), platform_const.LANDING[e].get('form_name')] for e in range(1, 10)]
         self.logger.debug('key_order: %s,form_name: %s,all_key_order: %s,all_form_name: %s' % (key_order, form_name, all_key_order, all_form_name))
@@ -229,7 +285,8 @@ class LandingPageService(PageService):
                 for k in all_key_order:
                     # 将链接参数转换为过滤搜索结果参数
                     if key == 'salary':
-                        pass
+                        salary_dict['salary_bottom'] = re.search('(^[1-9]\d*)k-([1-9]\d*)k', value).group(1) if re.search('(^[1-9]\d*)k-([1-9]\d*)k', value).group(1) else 0
+                        salary_dict['salary_top'] = re.search('(^[1-9]\d*)k-([1-9]\d*)k', value).group(2) if re.search('(^[1-9]\d*)k-([1-9]\d*)k', value).group(2) else 150
                     if key == k[1]:
                         key = k[0]
                 display_key_dict[key] = value
@@ -241,6 +298,8 @@ class LandingPageService(PageService):
             for s in display_key_dict:
                 if platform_const.LANDING[index].get("key") == s:
                     conf_search_seq_append.append(index)
+                if s == 'salary':
+                    display_key_dict.pop('salary')
 
         # 重新整理查询条件
         conf_search_seq_plus = tuple([int(e.index) for e in company.get("conf_search_seq")] + conf_search_seq_append)
@@ -255,11 +314,15 @@ class LandingPageService(PageService):
             )
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         positions_data = yield self.get_positions_data(conf_search_seq_plus, company.id, form_name_dict)
 
         if platform_const.LANDING_INDEX_CITY in conf_search_seq and platform_const.LANDING_INDEX_CITY in conf_search_seq_plus:
 =======
         positions_data = yield self.get_positions_data(conf_search_seq_plus, company.id, display_key_dict)
+=======
+        positions_data = yield self.get_positions_data(conf_search_seq_plus, company.id, display_key_dict, salary_dict)
+>>>>>>> Stashed changes
 
         if platform_const.LANDING_INDEX_CITY in conf_search_seq_plus:
 >>>>>>> Stashed changes
