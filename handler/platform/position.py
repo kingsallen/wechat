@@ -483,12 +483,16 @@ class PositionHandler(BaseHandler):
     def _make_json_company_impression(self, company_info):
         """构造老微信样式的企业印象"""
 
-        if len(company_info.impression) == 0:
-            data = None
+        if company_info.impression:
+            if len(company_info.impression) == 0:
+                data = None
+            else:
+                data = ObjectDict({
+                    "data": company_info.impression
+                })
         else:
-            data = ObjectDict({
-                "data": company_info.impression
-            })
+            data = None
+            self.logger.warning("Warning: don't have company_info.impression")
         return data
 
     def _make_json_job_department(self, position_info):
