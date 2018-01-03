@@ -55,6 +55,18 @@ class LandingPageService(PageService):
 
         key_list = []
         value_list = []
+
+        data = {
+            "size": query_size,
+            "query": {
+                "bool": {
+                    "must": [
+                        {"match": {"company_id": company_id}},
+                        {"match": {"status": const.OLD_YES}}
+                    ]
+                }
+            }
+        }
         # 默认最多可以附带三个链接筛选条件
         if search_condition_dict:
             for key, value in search_condition_dict.items():
@@ -62,76 +74,135 @@ class LandingPageService(PageService):
                 value_list.append(value)
             if len(key_list) == 1:
                 key_a, value_a = key_list[0], value_list[0]
-                data = {
-                    "size": query_size,
-                    "query": {
-                        "bool": {
-                            "must": [
-                                {"match": {"company_id": company_id}},
-                                {"match": {"status": const.OLD_YES}},
-                                {"match": {key_a: value_a}}
-                            ]
+                if key_a == 'child_company_abbr':
+                    data = {
+                        "size": query_size,
+                        "query": {
+                            "bool": {
+                                "must": [
+                                    {"match": {"company_id": value_a}},
+                                    {"match": {"status": const.OLD_YES}}
+                                ]
+                            }
                         }
                     }
-                }
+                else:
+                    data = {
+                        "size": query_size,
+                        "query": {
+                            "bool": {
+                                "must": [
+                                    {"match": {"company_id": company_id}},
+                                    {"match": {"status": const.OLD_YES}},
+                                    {"match": {key_a: value_a}}
+                                ]
+                            }
+                        }
+                    }
             elif len(key_list) == 2:
                 key_a, value_a = key_list[0], value_list[0]
                 key_b, value_b = key_list[1], value_list[1]
-                data = {
-                    "size": query_size,
-                    "query": {
-                        "bool": {
-                            "must": [
-                                {"match": {"company_id": company_id}},
-                                {"match": {"status": const.OLD_YES}},
-                                {"match": {key_a: value_a}},
-                                {"match": {key_b: value_b}}
-                            ]
+                if key_a == 'child_company_abbr':
+                    data = {
+                        "size": query_size,
+                        "query": {
+                            "bool": {
+                                "must": [
+                                    {"match": {"company_id": value_a}},
+                                    {"match": {"status": const.OLD_YES}},
+                                    {"match": {key_b: value_b}}
+                                ]
+                            }
                         }
                     }
-                }
+                elif key_b == 'child_company_abbr':
+                    data = {
+                        "size": query_size,
+                        "query": {
+                            "bool": {
+                                "must": [
+                                    {"match": {"company_id": value_b}},
+                                    {"match": {"status": const.OLD_YES}},
+                                    {"match": {key_a: value_a}}
+                                ]
+                            }
+                        }
+                    }
+                else:
+                    data = {
+                        "size": query_size,
+                        "query": {
+                            "bool": {
+                                "must": [
+                                    {"match": {"company_id": company_id}},
+                                    {"match": {"status": const.OLD_YES}},
+                                    {"match": {key_a: value_a}},
+                                    {"match": {key_b: value_b}}
+                                ]
+                            }
+                        }
+                    }
             elif len(key_list) == 3:
                 key_a, value_a = key_list[0], value_list[0]
                 key_b, value_b = key_list[1], value_list[1]
                 key_c, value_c = key_list[2], value_list[2]
-                data = {
-                    "size": query_size,
-                    "query": {
-                        "bool": {
-                            "must": [
-                                {"match": {"company_id": company_id}},
-                                {"match": {"status": const.OLD_YES}},
-                                {"match": {key_a: value_a}},
-                                {"match": {key_b: value_b}},
-                                {"match": {key_c: value_c}}
-                            ]
+                if key_a == 'child_company_abbr':
+                    data = {
+                        "size": query_size,
+                        "query": {
+                            "bool": {
+                                "must": [
+                                    {"match": {"company_id": value_a}},
+                                    {"match": {"status": const.OLD_YES}},
+                                    {"match": {key_b: value_b}},
+                                    {"match": {key_c: value_c}}
+                                ]
+                            }
                         }
                     }
-                }
-            else:
-                data = {
-                    "size": query_size,
-                    "query": {
-                        "bool": {
-                            "must": [
-                                {"match": {"company_id": company_id}},
-                                {"match": {"status": const.OLD_YES}}
-                            ]
+                elif key_b == 'child_company_abbr':
+                    data = {
+                        "size": query_size,
+                        "query": {
+                            "bool": {
+                                "must": [
+                                    {"match": {"company_id": value_b}},
+                                    {"match": {"status": const.OLD_YES}},
+                                    {"match": {key_a: value_a}},
+                                    {"match": {key_c: value_c}}
+                                ]
+                            }
                         }
                     }
-                }
-        else:
-            data = {
-                "size": query_size,
-                "query": {
-                    "bool": {
-                        "must": [
-                            {"match": {"company_id": company_id}},
-                            {"match": {"status": const.OLD_YES}}
-                        ]
+                elif key_c == 'child_company_abbr':
+                    data = {
+                        "size": query_size,
+                        "query": {
+                            "bool": {
+                                "must": [
+                                    {"match": {"company_id": value_c}},
+                                    {"match": {"status": const.OLD_YES}},
+                                    {"match": {key_a: value_a}},
+                                    {"match": {key_b: value_b}}
+                                ]
+                            }
+                        }
                     }
-                }
-            }
+                else:
+                    data = {
+                        "size": query_size,
+                        "query": {
+                            "bool": {
+                                "must": [
+                                    {"match": {"company_id": company_id}},
+                                    {"match": {"status": const.OLD_YES}},
+                                    {"match": {key_a: value_a}},
+                                    {"match": {key_b: value_b}},
+                                    {"match": {key_c: value_c}}
+                                ]
+                            }
+                        }
+                    }
 
         response = self.es.search(index='index', body=data)
 
@@ -264,9 +335,15 @@ class LandingPageService(PageService):
                 platform_const.LANDING_INDEX_DEPARTMENT
             )
 
+<<<<<<< Updated upstream
         positions_data = yield self.get_positions_data(conf_search_seq_plus, company.id, form_name_dict)
 
         if platform_const.LANDING_INDEX_CITY in conf_search_seq and platform_const.LANDING_INDEX_CITY in conf_search_seq_plus:
+=======
+        positions_data = yield self.get_positions_data(conf_search_seq_plus, company.id, display_key_dict)
+
+        if platform_const.LANDING_INDEX_CITY in conf_search_seq_plus:
+>>>>>>> Stashed changes
             positions_data = self.split_cities(positions_data)
 
         if platform_const.LANDING_INDEX_CHILD_COMPANY in conf_search_seq and platform_const.LANDING_INDEX_CHILD_COMPANY in conf_search_seq_plus:
