@@ -12,7 +12,7 @@ from util.tool.dict_tool import sub_dict
 from util.tool.str_tool import split, set_literl
 from util.tool.iter_tool import list_dedup_list
 import conf.common as const
-
+import re
 from setting import settings
 
 import conf.platform as platform_const
@@ -74,136 +74,56 @@ class LandingPageService(PageService):
                 value_list.append(value)
             if len(key_list) == 1:
                 key_a, value_a = key_list[0], value_list[0]
-                if key_a == 'child_company_abbr':
-                    data = {
-                        "size": query_size,
-                        "query": {
-                            "bool": {
-                                "must": [
-                                    {"match": {"company_id": value_a}},
-                                    {"match": {"status": const.OLD_YES}}
-                                ]
-                            }
+
+                data = {
+                    "size": query_size,
+                    "query": {
+                        "bool": {
+                            "must": [
+                                {"match": {"company_id": company_id}},
+                                {"match": {"status": const.OLD_YES}},
+                                {"match": {key_a: value_a}}
+                            ]
                         }
                     }
-                else:
-                    data = {
-                        "size": query_size,
-                        "query": {
-                            "bool": {
-                                "must": [
-                                    {"match": {"company_id": company_id}},
-                                    {"match": {"status": const.OLD_YES}},
-                                    {"match": {key_a: value_a}}
-                                ]
-                            }
-                        }
-                    }
+                }
             elif len(key_list) == 2:
                 key_a, value_a = key_list[0], value_list[0]
                 key_b, value_b = key_list[1], value_list[1]
-                if key_a == 'child_company_abbr':
-                    data = {
-                        "size": query_size,
-                        "query": {
-                            "bool": {
-                                "must": [
-                                    {"match": {"company_id": value_a}},
-                                    {"match": {"status": const.OLD_YES}},
-                                    {"match": {key_b: value_b}}
-                                ]
-                            }
+
+                data = {
+                    "size": query_size,
+                    "query": {
+                        "bool": {
+                            "must": [
+                                {"match": {"company_id": company_id}},
+                                {"match": {"status": const.OLD_YES}},
+                                {"match": {key_a: value_a}},
+                                {"match": {key_b: value_b}}
+                            ]
                         }
                     }
-                elif key_b == 'child_company_abbr':
-                    data = {
-                        "size": query_size,
-                        "query": {
-                            "bool": {
-                                "must": [
-                                    {"match": {"company_id": value_b}},
-                                    {"match": {"status": const.OLD_YES}},
-                                    {"match": {key_a: value_a}}
-                                ]
-                            }
-                        }
-                    }
-                else:
-                    data = {
-                        "size": query_size,
-                        "query": {
-                            "bool": {
-                                "must": [
-                                    {"match": {"company_id": company_id}},
-                                    {"match": {"status": const.OLD_YES}},
-                                    {"match": {key_a: value_a}},
-                                    {"match": {key_b: value_b}}
-                                ]
-                            }
-                        }
-                    }
+                }
             elif len(key_list) == 3:
                 key_a, value_a = key_list[0], value_list[0]
                 key_b, value_b = key_list[1], value_list[1]
                 key_c, value_c = key_list[2], value_list[2]
-                if key_a == 'child_company_abbr':
-                    data = {
-                        "size": query_size,
-                        "query": {
-                            "bool": {
-                                "must": [
-                                    {"match": {"company_id": value_a}},
-                                    {"match": {"status": const.OLD_YES}},
-                                    {"match": {key_b: value_b}},
-                                    {"match": {key_c: value_c}}
-                                ]
-                            }
+                
+                data = {
+                    "size": query_size,
+                    "query": {
+                        "bool": {
+                            "must": [
+                                {"match": {"company_id": company_id}},
+                                {"match": {"status": const.OLD_YES}},
+                                {"match": {key_a: value_a}},
+                                {"match": {key_b: value_b}},
+                                {"match": {key_c: value_c}}
+                            ]
                         }
                     }
-                elif key_b == 'child_company_abbr':
-                    data = {
-                        "size": query_size,
-                        "query": {
-                            "bool": {
-                                "must": [
-                                    {"match": {"company_id": value_b}},
-                                    {"match": {"status": const.OLD_YES}},
-                                    {"match": {key_a: value_a}},
-                                    {"match": {key_c: value_c}}
-                                ]
-                            }
-                        }
-                    }
-                elif key_c == 'child_company_abbr':
-                    data = {
-                        "size": query_size,
-                        "query": {
-                            "bool": {
-                                "must": [
-                                    {"match": {"company_id": value_c}},
-                                    {"match": {"status": const.OLD_YES}},
-                                    {"match": {key_a: value_a}},
-                                    {"match": {key_b: value_b}}
-                                ]
-                            }
-                        }
-                    }
-                else:
-                    data = {
-                        "size": query_size,
-                        "query": {
-                            "bool": {
-                                "must": [
-                                    {"match": {"company_id": company_id}},
-                                    {"match": {"status": const.OLD_YES}},
-                                    {"match": {key_a: value_a}},
-                                    {"match": {key_b: value_b}},
-                                    {"match": {key_c: value_c}}
-                                ]
-                            }
-                        }
-                    }
-
+                }
+        self.logger.debug(data)
         response = self.es.search(index='index', body=data)
 
         result_list = response.hits.hits
@@ -301,18 +221,17 @@ class LandingPageService(PageService):
         form_name = [platform_const.LANDING[kn].get("form_name") for kn in conf_search_seq]
         # 获取链接上配置的筛选参数
         display_key_dict = dict()
-        form_name_dict = dict()
         all_form_name = [platform_const.LANDING[e].get('form_name') for e in range(1, 10)]
-        all_key_order = [[platform_const.LANDING[e].get("display_key"), platform_const.LANDING[e].get('form_name')] for e in range(1, 10)]
+        all_key_order = [[platform_const.LANDING[e].get("key"), platform_const.LANDING[e].get('form_name')] for e in range(1, 10)]
         self.logger.debug('key_order: %s,form_name: %s,all_key_order: %s,all_form_name: %s' % (key_order, form_name, all_key_order, all_form_name))
         for key, value in params.items():
             if value and key in all_form_name and key not in form_name:
                 for k in all_key_order:
                     # 将链接参数转换为过滤搜索结果参数
+                    if key == 'salary':
+                        pass
                     if key == k[1]:
                         key = k[0]
-                        s_key = k[1]
-                form_name_dict[s_key] = value
                 display_key_dict[key] = value
         self.logger.debug(display_key_dict)
 
@@ -320,7 +239,7 @@ class LandingPageService(PageService):
         conf_search_seq_append = []
         for index in range(1, 10):
             for s in display_key_dict:
-                if platform_const.LANDING[index].get("display_key") == s:
+                if platform_const.LANDING[index].get("key") == s:
                     conf_search_seq_append.append(index)
 
         # 重新整理查询条件
