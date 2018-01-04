@@ -292,7 +292,7 @@ class LandingPageService(PageService):
                 if key == 'salary':
                     salary_dict['salary_bottom'] = re.search('(^[1-9]\d*)k-([1-9]\d*)k', value).group(1) if re.search('(^[1-9]\d*)k-([1-9]\d*)k', value).group(1) else 0
                     salary_dict['salary_top'] = re.search('(^[1-9]\d*)k-([1-9]\d*)k', value).group(2) if re.search('(^[1-9]\d*)k-([1-9]\d*)k', value).group(2) else 150
-                elif key == 'child_company_abbr':
+                elif key == 'did':
                     key = 'publisher_company_id'
                 display_key_dict[key] = value
         self.logger.debug(display_key_dict)
