@@ -137,9 +137,11 @@ class LandingPageService(PageService):
                             "must": [
                                 {"match": {"company_id": company_id}},
                                 {"match": {"status": const.OLD_YES}},
-                                {"match": {key_a: value_a}},
-                                {"range": {"salary_top": {"lt": salary_dict.get('salary_top')}}},
-                                {"range": {"salary_bottom": {"gt": salary_dict.get('salary_bottom')}}}
+                                {"match": {key_a: value_a}}
+                            ],
+                            "should": [
+                                {"range": {"salary_top": {"gte": salary_dict.get('salary_bottom')}}},
+                                {"range": {"salary_bottom": {"lte": salary_dict.get('salary_top')}}}
                             ]
                         }
                     }
@@ -156,9 +158,11 @@ class LandingPageService(PageService):
                                 {"match": {"company_id": company_id}},
                                 {"match": {"status": const.OLD_YES}},
                                 {"match": {key_a: value_a}},
-                                {"match": {key_b: value_b}},
-                                {"range": {"salary_top": {"lt": salary_dict.get('salary_top')}}},
-                                {"range": {"salary_bottom": {"gt": salary_dict.get('salary_bottom')}}}
+                                {"match": {key_b: value_b}}
+                            ],
+                            "should": [
+                                {"range": {"salary_top": {"gte": salary_dict.get('salary_bottom')}}},
+                                {"range": {"salary_bottom": {"lte": salary_dict.get('salary_top')}}}
                             ]
                         }
                     }
@@ -170,9 +174,11 @@ class LandingPageService(PageService):
                     "bool": {
                         "must": [
                             {"match": {"company_id": company_id}},
-                            {"match": {"status": const.OLD_YES}},
-                            {"range": {"salary_top": {"lt": salary_dict.get('salary_top')}}},
-                            {"range": {"salary_bottom": {"gt": salary_dict.get('salary_bottom')}}}
+                            {"match": {"status": const.OLD_YES}}
+                        ],
+                        "should": [
+                            {"range": {"salary_top": {"gte": salary_dict.get('salary_bottom')}}},
+                            {"range": {"salary_bottom": {"lte": salary_dict.get('salary_top')}}}
                         ]
                     }
                 }
@@ -278,7 +284,7 @@ class LandingPageService(PageService):
         display_key_dict = dict()
         salary_dict = dict()
         all_form_name = [platform_const.LANDING[e].get('form_name') for e in range(1, 10)]
-        all_key_order = [[platform_const.LANDING[e].get("key"), platform_const.LANDING[e].get('form_name')] for e in range(1, 10)]
+        all_key_order = [[platform_const.LANDING[e].get("display_key"), platform_const.LANDING[e].get('form_name')] for e in range(1, 10)]
         self.logger.debug('key_order: %s,form_name: %s,all_key_order: %s,all_form_name: %s' % (key_order, form_name, all_key_order, all_form_name))
         for key, value in params.items():
             if value and key in all_form_name and key not in form_name:
@@ -287,6 +293,8 @@ class LandingPageService(PageService):
                     if key == 'salary':
                         salary_dict['salary_bottom'] = re.search('(^[1-9]\d*)k-([1-9]\d*)k', value).group(1) if re.search('(^[1-9]\d*)k-([1-9]\d*)k', value).group(1) else 0
                         salary_dict['salary_top'] = re.search('(^[1-9]\d*)k-([1-9]\d*)k', value).group(2) if re.search('(^[1-9]\d*)k-([1-9]\d*)k', value).group(2) else 150
+                    elif key == 'child_company_abbr':
+                        key = 'publisher_company_id'
                     elif key == k[1]:
                         key = k[0]
                 display_key_dict[key] = value
@@ -314,19 +322,9 @@ class LandingPageService(PageService):
                 platform_const.LANDING_INDEX_DEPARTMENT
             )
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-        positions_data = yield self.get_positions_data(conf_search_seq_plus, company.id, form_name_dict)
-
-        if platform_const.LANDING_INDEX_CITY in conf_search_seq and platform_const.LANDING_INDEX_CITY in conf_search_seq_plus:
-=======
-        positions_data = yield self.get_positions_data(conf_search_seq_plus, company.id, display_key_dict)
-=======
         positions_data = yield self.get_positions_data(conf_search_seq_plus, company.id, display_key_dict, salary_dict)
->>>>>>> Stashed changes
 
         if platform_const.LANDING_INDEX_CITY in conf_search_seq_plus:
->>>>>>> Stashed changes
             positions_data = self.split_cities(positions_data)
 
         if platform_const.LANDING_INDEX_CHILD_COMPANY in conf_search_seq and platform_const.LANDING_INDEX_CHILD_COMPANY in conf_search_seq_plus:
