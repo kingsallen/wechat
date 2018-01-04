@@ -238,23 +238,23 @@ class LandingPageService(PageService):
         """ 对position_data 添加子公司简称 """
 
         child_company_ids = list(set([v.publisher_company_id for v in data]))
-
-        child_company_id_abbr_list = yield self.hr_company_ds.get_companys_list(
-            conds="id in " + set_literl(child_company_ids),
-            fields=["id", "abbreviation"]
-        )
-        child_company_id_abbr_dict = {
-            e.id: e.abbreviation for e in child_company_id_abbr_list
-            }
-
-        for d in data:
-            if d.publisher_company_id:
-                d.child_company_abbr = {
-                    "text": child_company_id_abbr_dict.get(d.publisher_company_id, ""),
-                    "value": d.publisher_company_id
+        if child_company_ids:
+            child_company_id_abbr_list = yield self.hr_company_ds.get_companys_list(
+                conds="id in " + set_literl(child_company_ids),
+                fields=["id", "abbreviation"]
+            )
+            child_company_id_abbr_dict = {
+                e.id: e.abbreviation for e in child_company_id_abbr_list
                 }
-            else:
-                d.child_company_abbr = ObjectDict()
+
+            for d in data:
+                if d.publisher_company_id:
+                    d.child_company_abbr = {
+                        "text": child_company_id_abbr_dict.get(d.publisher_company_id, ""),
+                        "value": d.publisher_company_id
+                    }
+                else:
+                    d.child_company_abbr = ObjectDict()
 
         return data
 
@@ -287,7 +287,7 @@ class LandingPageService(PageService):
                     if key == 'salary':
                         salary_dict['salary_bottom'] = re.search('(^[1-9]\d*)k-([1-9]\d*)k', value).group(1) if re.search('(^[1-9]\d*)k-([1-9]\d*)k', value).group(1) else 0
                         salary_dict['salary_top'] = re.search('(^[1-9]\d*)k-([1-9]\d*)k', value).group(2) if re.search('(^[1-9]\d*)k-([1-9]\d*)k', value).group(2) else 150
-                    if key == k[1]:
+                    elif key == k[1]:
                         key = k[0]
                 display_key_dict[key] = value
         self.logger.debug(display_key_dict)
@@ -295,11 +295,12 @@ class LandingPageService(PageService):
         # 链接所带参数
         conf_search_seq_append = []
         for index in range(1, 10):
-            for s in display_key_dict:
+            for s in display_key_dict.keys():
                 if platform_const.LANDING[index].get("key") == s:
                     conf_search_seq_append.append(index)
-                if s == 'salary':
-                    display_key_dict.pop('salary')
+
+        if 'salary' in display_key_dict:
+            display_key_dict.pop('salary')
 
         # 重新整理查询条件
         conf_search_seq_plus = tuple([int(e.index) for e in company.get("conf_search_seq")] + conf_search_seq_append)
