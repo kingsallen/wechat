@@ -19,7 +19,7 @@ class LandingHandler(BaseHandler):
     @gen.coroutine
     def get(self):
 
-        search_seq = yield self.landing_ps.make_search_seq(self.current_user.company)
+        search_seq = yield self.landing_ps.make_search_seq(self.current_user.company, self.params)
 
         self.logger.debug("[landing] search_seq: %s" % search_seq)
 
