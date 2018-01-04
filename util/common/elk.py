@@ -130,7 +130,7 @@ class Guard:
 
     def send_alert_mail(self, error_queue):
         """发生异常时发送报警邮件"""
-        email_address = settings['log_exception_alarm_emails'] or ['g_dev@moseeker.com']
+        email_address = settings['log_exception_alarm_emails'] or []
         for add in email_address:
             content = error_queue
             mail_tool.send_mail(add, 'log 诊断报警', content)
