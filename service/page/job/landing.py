@@ -140,8 +140,8 @@ class LandingPageService(PageService):
                                 {"match": {key_a: value_a}}
                             ],
                             "should": [
-                                {"range": {"salary_top": {"gte": salary_dict.get('salary_bottom')}}},
-                                {"range": {"salary_bottom": {"lte": salary_dict.get('salary_top')}}}
+                                {"range": {"salary_top": {"lte": salary_dict.get('salary_bottom')}}},
+                                {"range": {"salary_bottom": {"gte": salary_dict.get('salary_top')}}}
                             ]
                         }
                     }
@@ -161,8 +161,8 @@ class LandingPageService(PageService):
                                 {"match": {key_b: value_b}}
                             ],
                             "should": [
-                                {"range": {"salary_top": {"gte": salary_dict.get('salary_bottom')}}},
-                                {"range": {"salary_bottom": {"lte": salary_dict.get('salary_top')}}}
+                                {"range": {"salary_top": {"lte": salary_dict.get('salary_bottom')}}},
+                                {"range": {"salary_bottom": {"gte": salary_dict.get('salary_top')}}}
                             ]
                         }
                     }
@@ -177,8 +177,8 @@ class LandingPageService(PageService):
                             {"match": {"status": const.OLD_YES}}
                         ],
                         "should": [
-                            {"range": {"salary_top": {"gte": salary_dict.get('salary_bottom')}}},
-                            {"range": {"salary_bottom": {"lte": salary_dict.get('salary_top')}}}
+                            {"range": {"salary_top": {"lte": salary_dict.get('salary_bottom')}}},
+                            {"range": {"salary_bottom": {"gte": salary_dict.get('salary_top')}}}
                         ]
                     }
                 }
