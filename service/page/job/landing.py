@@ -61,8 +61,8 @@ class LandingPageService(PageService):
             "query": {
                 "bool": {
                     "must": [
-                        {"match": {"company_id": company_id}},
-                        {"match": {"status": const.OLD_YES}}
+                        {"term": {"company_id": company_id}},
+                        {"term": {"status": const.OLD_YES}}
                     ]
                 }
             }
@@ -80,9 +80,9 @@ class LandingPageService(PageService):
                     "query": {
                         "bool": {
                             "must": [
-                                {"match": {"company_id": company_id}},
-                                {"match": {"status": const.OLD_YES}},
-                                {"match": {key_a: value_a}}
+                                {"term": {"company_id": company_id}},
+                                {"term": {"status": const.OLD_YES}},
+                                {"term": {key_a: value_a}}
                             ]
                         }
                     }
@@ -96,10 +96,10 @@ class LandingPageService(PageService):
                     "query": {
                         "bool": {
                             "must": [
-                                {"match": {"company_id": company_id}},
-                                {"match": {"status": const.OLD_YES}},
-                                {"match": {key_a: value_a}},
-                                {"match": {key_b: value_b}}
+                                {"term": {"company_id": company_id}},
+                                {"term": {"status": const.OLD_YES}},
+                                {"term": {key_a: value_a}},
+                                {"term": {key_b: value_b}}
                             ]
                         }
                     }
@@ -114,11 +114,11 @@ class LandingPageService(PageService):
                     "query": {
                         "bool": {
                             "must": [
-                                {"match": {"company_id": company_id}},
-                                {"match": {"status": const.OLD_YES}},
-                                {"match": {key_a: value_a}},
-                                {"match": {key_b: value_b}},
-                                {"match": {key_c: value_c}}
+                                {"term": {"company_id": company_id}},
+                                {"term": {"status": const.OLD_YES}},
+                                {"term": {key_a: value_a}},
+                                {"term": {key_b: value_b}},
+                                {"term": {key_c: value_c}}
                             ]
                         }
                     }
@@ -135,9 +135,9 @@ class LandingPageService(PageService):
                     "query": {
                         "bool": {
                             "must": [
-                                {"match": {"company_id": company_id}},
-                                {"match": {"status": const.OLD_YES}},
-                                {"match": {key_a: value_a}}
+                                {"term": {"company_id": company_id}},
+                                {"term": {"status": const.OLD_YES}},
+                                {"term": {key_a: value_a}}
                             ],
                             "should": [
                                 {"range": {"salary_top": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}},
@@ -156,10 +156,10 @@ class LandingPageService(PageService):
                     "query": {
                         "bool": {
                             "must": [
-                                {"match": {"company_id": company_id}},
-                                {"match": {"status": const.OLD_YES}},
-                                {"match": {key_a: value_a}},
-                                {"match": {key_b: value_b}}
+                                {"term": {"company_id": company_id}},
+                                {"term": {"status": const.OLD_YES}},
+                                {"term": {key_a: value_a}},
+                                {"term": {key_b: value_b}}
                             ],
                             "should": [
                                 {"range": {"salary_top": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}},
@@ -175,8 +175,8 @@ class LandingPageService(PageService):
                 "query": {
                     "bool": {
                         "must": [
-                            {"match": {"company_id": company_id}},
-                            {"match": {"status": const.OLD_YES}}
+                            {"term": {"company_id": company_id}},
+                            {"term": {"status": const.OLD_YES}}
                         ],
                         "should": [
                             {"range": {"salary_top": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}},
@@ -298,7 +298,9 @@ class LandingPageService(PageService):
                 elif key == 'did':
                     key = 'publisher_company_id'
                 elif key == 'degree':
-                    value =
+                    for d in platform_const.DEGREE:
+                        if platform_const.DEGREE.get(d) == value:
+                            value = d
                 display_key_dict[key] = value
         self.logger.debug(display_key_dict)
 
