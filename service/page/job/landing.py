@@ -288,15 +288,12 @@ class LandingPageService(PageService):
         self.logger.debug('key_order: %s,form_name: %s,all_key_order: %s,all_form_name: %s' % (key_order, form_name, all_key_order, all_form_name))
         for key, value in params.items():
             if value and key in all_form_name and key not in form_name:
-                for k in all_key_order:
-                    # 将链接参数转换为过滤搜索结果参数
-                    if key == 'salary':
-                        salary_dict['salary_bottom'] = re.search('(^[1-9]\d*)k-([1-9]\d*)k', value).group(1) if re.search('(^[1-9]\d*)k-([1-9]\d*)k', value).group(1) else 0
-                        salary_dict['salary_top'] = re.search('(^[1-9]\d*)k-([1-9]\d*)k', value).group(2) if re.search('(^[1-9]\d*)k-([1-9]\d*)k', value).group(2) else 150
-                    elif key == 'child_company_abbr':
-                        key = 'publisher_company_id'
-                    elif key == k[1]:
-                        key = k[0]
+                # 将链接参数转换为过滤搜索结果参数
+                if key == 'salary':
+                    salary_dict['salary_bottom'] = re.search('(^[1-9]\d*)k-([1-9]\d*)k', value).group(1) if re.search('(^[1-9]\d*)k-([1-9]\d*)k', value).group(1) else 0
+                    salary_dict['salary_top'] = re.search('(^[1-9]\d*)k-([1-9]\d*)k', value).group(2) if re.search('(^[1-9]\d*)k-([1-9]\d*)k', value).group(2) else 150
+                elif key == 'child_company_abbr':
+                    key = 'publisher_company_id'
                 display_key_dict[key] = value
         self.logger.debug(display_key_dict)
 
