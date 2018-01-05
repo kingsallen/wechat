@@ -734,7 +734,7 @@ class PositionListHandler(BaseHandler):
         elif recom_push_id:
             # 员工推荐列表
             if int(self.params.get("count", 0)) == 0:
-                position_list = yield self.get_employee_position_list(recom_push_id)
+                position_list = yield self.get_employee_position_list(recom_push_id, infra_params)
             else:
                 position_list = []
             yield self._make_share_info(self.current_user.company.id, did)
@@ -809,7 +809,7 @@ class PositionListHandler(BaseHandler):
                 yield position
 
     @gen.coroutine
-    def get_employee_position_list(self, recom_push_id):
+    def get_employee_position_list(self, recom_push_id, params):
         """
         获取员工推荐职位列表
         :return:
@@ -819,7 +819,9 @@ class PositionListHandler(BaseHandler):
         infra_params = ObjectDict({
             "companyId": company_id,
             "recomPushId": recom_push_id,
-            "type": 1  # hard code, 1表示员工
+            "type": 1,  # hard code, 1表示员工
+            "page_from": int(self.params.get("count", 0))+1,
+            "page_size": params.page_size
         })
 
         position_list = yield self.position_ps.infra_get_position_employeerecom(infra_params, company_id)
