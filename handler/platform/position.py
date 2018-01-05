@@ -835,7 +835,7 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
         # 是否达到投递上线
         can_apply = yield self.application_ps.is_allowed_apply_position(
             self.current_user.sysuser.id, self.current_user.company.id)
-
+        total_count = 0
         # 职位信息
         position_ex_list = list()
         for pos in position_list:
@@ -864,6 +864,8 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
             position_ex["is_starred"] = pos.id in fav_position_id_list  # 判断职位收藏状态
             position_ex['is_applied'] = pos.id in applied_application_id_list  # 判断职位申请状态
             position_ex['can_apply'] = not can_apply
+            position_ex['candidate_source'] = pos.candidate_source
+            total_count = pos.TotalNum
 
             # 判断是否显示红包
             is_employee = bool(self.current_user.employee)
@@ -885,7 +887,7 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
 
         self.send_json_success(
             data=ObjectDict(list=position_ex_list,
-                            total_count=123)  # todo 基础服务获取total_count
+                            total_count=total_count)
 
         )
 
@@ -1078,7 +1080,12 @@ class PositionListSugHandler(PositionListInfraParamsMixin, BaseHandler):
         :return:
         """
         infra_params = self.make_position_list_infra_params()
+
+        # 获取五条sug数据
+        infra_params.update(page_size=const_platform.SUG_LIST_COUNT,
+                            keyWord=self.params.keyword if self.params.keyword else "")
         res_data = self.position_ps.infra_get_sug_list(infra_params)
-        sug_list = [e.title for e in res_data]
+        sug_list = [e.get('title') for e in res_data]
 
         return self.send_json_success(sug_list)
+
