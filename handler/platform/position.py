@@ -1088,7 +1088,9 @@ class PositionListSugHandler(PositionListInfraParamsMixin, BaseHandler):
                             keyWord=self.params.keyword if self.params.keyword else "",
                             page_from=int(self.params.get("count", 0)/10) + 1)
         res_data = yield self.position_ps.infra_obtain_sug_list(infra_params)
-        sug_list = [e.get('title') for e in res_data.get('suggest')]
-        sug.list = sug_list
+        suggest = res_data.get('suggest') if res_data else ''
+        if suggest:
+            sug.list = [e.get('title') for e in suggest]
+
         return self.send_json_success(sug)
 
