@@ -1082,13 +1082,13 @@ class PositionListSugHandler(PositionListInfraParamsMixin, BaseHandler):
         :return:
         """
         infra_params = self.make_position_list_infra_params()
-
+        sug = ObjectDict()
         # 获取五条sug数据
         infra_params.update(page_size=const_platform.SUG_LIST_COUNT,
                             keyWord=self.params.keyword if self.params.keyword else "",
                             page_from=int(self.params.get("count", 0)/10) + 1)
         res_data = yield self.position_ps.infra_obtain_sug_list(infra_params)
         sug_list = [e.get('title') for e in res_data.get('suggest')]
-
-        return self.send_json_success(sug_list)
+        sug.list = sug_list
+        return self.send_json_success(sug)
 
