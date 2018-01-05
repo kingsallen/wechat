@@ -39,6 +39,10 @@ class InfraPositionDataService(DataService):
         ret = yield http_get(path.INFRA_RP_POSITION_LIST_SHARE_INFO, params)
         return ret
 
+    @gen.coroutine
+    def get_sug_list(self, params):
+        ret = yield http_get(path.INFRA_SUG_LIST, params)
+        return ret
 
     @gen.coroutine
     def get_position_personarecom(self, params):

@@ -469,6 +469,13 @@ class PositionPageService(PageService):
             return []
 
     @gen.coroutine
+    def infra_get_sug_list(self, params):
+        """获取sug"""
+        res = yield self.infra_position_ds.get_sug_list(params)
+        return res
+
+
+    @gen.coroutine
     def infra_get_position_personarecom(self, infra_params, company_id):
         """
         TODO: 补充文档

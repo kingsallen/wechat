@@ -510,7 +510,6 @@ class PositionHandler(BaseHandler):
 
         return data
 
-
     @log_time
     @gen.coroutine
     def _make_refresh_share_chain(self, position_info):
@@ -696,7 +695,65 @@ class PositionHandler(BaseHandler):
         raise gen.Return(res)
 
 
-class PositionListDetailHandler(BaseHandler):
+class PositionListInfraParamsMixin(BaseHandler):
+
+    def make_position_list_infra_params(self):
+        """构建调用基础服务职位列表的 params"""
+
+        infra_params = ObjectDict()
+
+        infra_params.company_id = self.current_user.company.id
+
+        if self.params.did:
+            infra_params.did = self.params.did
+
+        start_count = (int(self.params.get("count", 0)) *
+                       const_platform.POSITION_LIST_PAGE_COUNT)
+
+        infra_params.page_from = start_count
+        infra_params.page_size = const_platform.POSITION_LIST_PAGE_COUNT
+
+        if self.params.salary:
+            k = str(self.params.salary)
+            try:
+                infra_params.salary = "%d,%d" % (
+                    const_platform.SALARY[const_platform.SALARY_NAME_TO_INDEX[k]].salary_bottom,
+                    const_platform.SALARY[const_platform.SALARY_NAME_TO_INDEX[k]].salary_top)
+            except KeyError:  # 如果用户自行修改了 GET 参数，不至于报错
+                infra_params.salary = ""
+
+        if self.params.degree:
+            infra_params.degree = self.params.degree
+        else:
+            infra_params.degree = ""
+
+        # 招聘类型和职位性质接受兼容 数字编号 中文
+        if self.params.candidate_source:
+            infra_params.candidate_source = const.CANDIDATE_SOURCE_SEARCH.get(self.params.candidate_source, "") \
+                if self.params.candidate_source.isdigit() else self.params.candidate_source
+        else:
+            infra_params.candidate_source = ""
+
+        if self.params.employment_type:
+            infra_params.employment_type = const.EMPLOYMENT_TYPE_SEARCH.get(self.params.employment_type, "") \
+                if self.params.employment_type.isdigit() else self.params.employment_type
+        else:
+            infra_params.employment_type = ""
+
+        infra_params.update(
+            keywords=self.params.keyword if self.params.keyword else "",
+            cities=self.params.city if self.params.city else "",
+            department=self.params.team_name if self.params.team_name else "",
+            occupations=self.params.occupation if self.params.occupation else "",
+            custom=self.params.custom if self.params.custom else "",
+            order_by_priority=True)
+
+        self.logger.debug("[position_list_infra_params]: %s" % infra_params)
+
+        return infra_params
+
+
+class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
     """获取职位列表"""
 
     @handle_response
@@ -704,7 +761,7 @@ class PositionListDetailHandler(BaseHandler):
     @gen.coroutine
     def get(self):
 
-        infra_params = self._make_position_list_infra_params()
+        infra_params = self.make_position_list_infra_params()
 
         # 校验一下可能出现的参数：
         # hb_c: 红包活动id
@@ -712,10 +769,6 @@ class PositionListDetailHandler(BaseHandler):
         hb_c = 0
         if self.params.hb_c and self.params.hb_c.isdigit():
             hb_c = int(self.params.hb_c)
-
-        did = 0
-        if self.params.did and self.params.did.isdigit():
-            did = int(self.params.did)
 
         recom_push_id = 0
         if self.params.recom_push_id and self.params.recom_push_id.isdigit():
@@ -814,7 +867,8 @@ class PositionListDetailHandler(BaseHandler):
 
             # 判断是否显示红包
             is_employee = bool(self.current_user.employee)
-            position_ex['has_reward'] = pos.is_rp_reward and (is_employee and position.employee_only or not position.employee_only)
+            position_ex['has_reward'] = pos.is_rp_reward and (
+                is_employee and position.employee_only or not position.employee_only)
 
             # 诺华定制
             position_ex['suppress_apply'] = ObjectDict()
@@ -869,61 +923,6 @@ class PositionListDetailHandler(BaseHandler):
                 if v:
                     ret += 1
 
-    def _make_position_list_infra_params(self):
-        """构建调用基础服务职位列表的 params"""
-
-        infra_params = ObjectDict()
-
-        infra_params.company_id = self.current_user.company.id
-
-        if self.params.did:
-            infra_params.did = self.params.did
-
-        start_count = (int(self.params.get("count", 0)) *
-                       const_platform.POSITION_LIST_PAGE_COUNT)
-
-        infra_params.page_from = start_count
-        infra_params.page_size = const_platform.POSITION_LIST_PAGE_COUNT
-
-        if self.params.salary:
-            k = str(self.params.salary)
-            try:
-                infra_params.salary = "%d,%d" % (
-                    const_platform.SALARY[const_platform.SALARY_NAME_TO_INDEX[k]].salary_bottom,
-                    const_platform.SALARY[const_platform.SALARY_NAME_TO_INDEX[k]].salary_top)
-            except KeyError:  # 如果用户自行修改了 GET 参数，不至于报错
-                infra_params.salary = ""
-
-        if self.params.degree:
-            infra_params.degree = self.params.degree
-        else:
-            infra_params.degree = ""
-
-        # 招聘类型和职位性质接受兼容 数字编号 中文
-        if self.params.candidate_source:
-            infra_params.candidate_source = const.CANDIDATE_SOURCE_SEARCH.get(self.params.candidate_source, "") \
-                if self.params.candidate_source.isdigit() else self.params.candidate_source
-        else:
-            infra_params.candidate_source = ""
-
-        if self.params.employment_type:
-            infra_params.employment_type = const.EMPLOYMENT_TYPE_SEARCH.get(self.params.employment_type, "") \
-                if self.params.employment_type.isdigit() else self.params.employment_type
-        else:
-            infra_params.employment_type = ""
-
-        infra_params.update(
-            keywords=self.params.keyword if self.params.keyword else "",
-            cities=self.params.city if self.params.city else "",
-            department=self.params.team_name if self.params.team_name else "",
-            occupations=self.params.occupation if self.params.occupation else "",
-            custom=self.params.custom if self.params.custom else "",
-            order_by_priority=True)
-
-        self.logger.debug("[position_list_infra_params]: %s" % infra_params)
-
-        return infra_params
-
 
 class PositionEmpNoticeHandler(BaseHandler):
     @handle_response
@@ -952,15 +951,14 @@ class PositionEmpNoticeHandler(BaseHandler):
         self.send_json_success()
 
 
-class PositionListHandler(BaseHandler):
-
+class PositionListHandler(PositionListInfraParamsMixin, BaseHandler):
     @handle_response
     @check_employee
     @gen.coroutine
     def get(self):
         """获取职位列表页"""
 
-        infra_params = self._make_position_list_infra_params()
+        infra_params = self.make_position_list_infra_params()
 
         # 校验一下可能出现的参数：
         # hb_c: 红包活动id
@@ -1069,64 +1067,8 @@ class PositionListHandler(BaseHandler):
             "link": link
         })
 
-    def _make_position_list_infra_params(self):
-        """构建调用基础服务职位列表的 params"""
 
-        infra_params = ObjectDict()
-
-        infra_params.company_id = self.current_user.company.id
-
-        if self.params.did:
-            infra_params.did = self.params.did
-
-        start_count = (int(self.params.get("count", 0)) *
-                       const_platform.POSITION_LIST_PAGE_COUNT)
-
-        infra_params.page_from = start_count
-        infra_params.page_size = const_platform.POSITION_LIST_PAGE_COUNT
-
-        if self.params.salary:
-            k = str(self.params.salary)
-            try:
-                infra_params.salary = "%d,%d" % (
-                    const_platform.SALARY[const_platform.SALARY_NAME_TO_INDEX[k]].salary_bottom,
-                    const_platform.SALARY[const_platform.SALARY_NAME_TO_INDEX[k]].salary_top)
-            except KeyError:  # 如果用户自行修改了 GET 参数，不至于报错
-                infra_params.salary = ""
-
-        if self.params.degree:
-            infra_params.degree = self.params.degree
-        else:
-            infra_params.degree = ""
-
-        # 招聘类型和职位性质接受兼容 数字编号 中文
-        if self.params.candidate_source:
-            infra_params.candidate_source = const.CANDIDATE_SOURCE_SEARCH.get(self.params.candidate_source, "") \
-                if self.params.candidate_source.isdigit() else self.params.candidate_source
-        else:
-            infra_params.candidate_source = ""
-
-        if self.params.employment_type:
-            infra_params.employment_type = const.EMPLOYMENT_TYPE_SEARCH.get(self.params.employment_type, "") \
-                if self.params.employment_type.isdigit() else self.params.employment_type
-        else:
-            infra_params.employment_type = ""
-
-        infra_params.update(
-            keywords=self.params.keyword if self.params.keyword else "",
-            cities=self.params.city if self.params.city else "",
-            department=self.params.team_name if self.params.team_name else "",
-            occupations=self.params.occupation if self.params.occupation else "",
-            custom=self.params.custom if self.params.custom else "",
-            order_by_priority=True)
-
-        self.logger.debug("[position_list_infra_params]: %s" % infra_params)
-
-        return infra_params
-
-
-class PositionListSugHandler(BaseHandler):
-
+class PositionListSugHandler(PositionListInfraParamsMixin, BaseHandler):
     @handle_response
     @check_employee
     @gen.coroutine
@@ -1135,11 +1077,8 @@ class PositionListSugHandler(BaseHandler):
         sug搜索
         :return:
         """
-        # todo 基础服务获取sug接口
-        test = ObjectDict(list=[
-                    "abc",
-                    "你好啊",
-                    "按道理讲"
-                    ])
-        return self.send_json_success(test)
+        infra_params = self.make_position_list_infra_params()
+        res_data = self.position_ps.infra_get_sug_list(infra_params)
+        sug_list = [e.title for e in res_data]
 
+        return self.send_json_success(sug_list)
