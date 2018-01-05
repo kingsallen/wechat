@@ -1012,6 +1012,7 @@ class PositionListHandler(PositionListInfraParamsMixin, BaseHandler):
         company['abbreviation'] = self.params.company.abbreviation
         company['industry'] = self.params.company.industry
         company['scale_name'] = self.params.company.scale_name
+        company['banner'] = self.params.company.banner
 
         self.render_page(
             template_name="position/index.html",
