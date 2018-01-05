@@ -471,9 +471,9 @@ class PositionPageService(PageService):
             return []
 
     @gen.coroutine
-    def infra_post_sug_list(self, params):
+    def infra_obtain_sug_list(self, params):
         """获取sug"""
-        res = yield self.infra_position_ds.post_sug_list(params)
+        result, res = yield self.infra_position_ds.post_sug_list(params)
         return res
 
     @gen.coroutine

@@ -9,6 +9,7 @@ from service.data.infra.framework.client.client import ServiceClientFactory
 from thrift_gen.gen.position.service.PositionServices import Client as PositionServiceClient
 from util.common import ObjectDict
 from util.tool.http_tool import http_get, http_post
+from util.tool import http_tool
 
 
 class InfraPositionDataService(DataService):
@@ -42,7 +43,7 @@ class InfraPositionDataService(DataService):
     @gen.coroutine
     def post_sug_list(self, params):
         ret = yield http_post(path.INFRA_SUG_LIST, params)
-        return ret
+        return http_tool.unboxing(ret)
 
     @gen.coroutine
     def get_position_personarecom(self, params):

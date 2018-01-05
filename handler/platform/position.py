@@ -909,7 +909,7 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
             "companyId": company_id,
             "recomPushId": recom_push_id,
             "type": 1,  # hard code, 1表示员工
-            "page_from": int(self.params.get("count", 0)) + 1,
+            "page_from": int(self.params.get("count", 0)/10) + 1,
             "page_size": params.page_size
         })
 
@@ -1076,7 +1076,7 @@ class PositionListSugHandler(PositionListInfraParamsMixin, BaseHandler):
     @handle_response
     @check_employee
     @gen.coroutine
-    def post(self):
+    def get(self):
         """
         sug搜索
         :return:
@@ -1085,9 +1085,10 @@ class PositionListSugHandler(PositionListInfraParamsMixin, BaseHandler):
 
         # 获取五条sug数据
         infra_params.update(page_size=const_platform.SUG_LIST_COUNT,
-                            keyWord=self.params.keyword if self.params.keyword else "")
-        res_data = yield self.position_ps.infra_post_sug_list(infra_params)
-        sug_list = [e.get('title') for e in res_data]
+                            keyWord=self.params.keyword if self.params.keyword else "",
+                            page_from=int(self.params.get("count", 0)/10) + 1)
+        res_data = yield self.position_ps.infra_obtain_sug_list(infra_params)
+        sug_list = [e.get('title') for e in res_data.get('suggest')]
 
         return self.send_json_success(sug_list)
 
