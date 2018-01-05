@@ -40,7 +40,7 @@ class InfraPositionDataService(DataService):
         return ret
 
     @gen.coroutine
-    def get_sug_list(self, params):
+    def post_sug_list(self, params):
         ret = yield http_post(path.INFRA_SUG_LIST, params)
         return ret
 

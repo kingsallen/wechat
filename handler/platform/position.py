@@ -785,7 +785,7 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
         elif recom_push_id:
             # 员工推荐列表
             if int(self.params.get("count", 0)) == 0:
-                position_list = yield self.get_employee_position_list(recom_push_id)
+                position_list = yield self.get_employee_position_list(recom_push_id, infra_params)
             else:
                 position_list = []
 
@@ -898,7 +898,7 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
                 yield position
 
     @gen.coroutine
-    def get_employee_position_list(self, recom_push_id):
+    def get_employee_position_list(self, recom_push_id, params):
         """
         获取员工推荐职位列表
         :return:
@@ -908,7 +908,9 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
         infra_params = ObjectDict({
             "companyId": company_id,
             "recomPushId": recom_push_id,
-            "type": 1  # hard code, 1表示员工
+            "type": 1,  # hard code, 1表示员工
+            "page_from": int(self.params.get("count", 0)) + 1,
+            "page_size": params.page_size
         })
 
         position_list = yield self.position_ps.infra_get_position_employeerecom(infra_params, company_id)
@@ -1074,7 +1076,7 @@ class PositionListSugHandler(PositionListInfraParamsMixin, BaseHandler):
     @handle_response
     @check_employee
     @gen.coroutine
-    def get(self):
+    def post(self):
         """
         sug搜索
         :return:
@@ -1084,7 +1086,7 @@ class PositionListSugHandler(PositionListInfraParamsMixin, BaseHandler):
         # 获取五条sug数据
         infra_params.update(page_size=const_platform.SUG_LIST_COUNT,
                             keyWord=self.params.keyword if self.params.keyword else "")
-        res_data = self.position_ps.infra_get_sug_list(infra_params)
+        res_data = yield self.position_ps.infra_post_sug_list(infra_params)
         sug_list = [e.get('title') for e in res_data]
 
         return self.send_json_success(sug_list)
