@@ -49,6 +49,7 @@ class PositionPageService(PageService):
             'company_id': position_res.company_id,
             'department': position_res.department,
             'candidate_source': self.constant.CANDIDATE_SOURCE.get(str(position_res.candidate_source)),
+            'candidate_source_num': position_res.candidate_source,
             'employment_type': self.constant.EMPLOYMENT_TYPE.get(str(position_res.employment_type)),
             'management_experience': self.constant.MANAGEMENT_EXP.get(str(position_res.management_experience)),
             'update_time': update_time,
@@ -335,6 +336,8 @@ class PositionPageService(PageService):
     @gen.coroutine
     def infra_get_rp_position_list(self, params):
         """红包职位列表"""
+        params.update(page_from=int(params.page_from/10)+1)
+
         res = yield self.infra_position_ds.get_rp_position_list(params)
 
         team_name_dict = yield self.get_teamid_names_dict(params.company_id)
@@ -366,8 +369,8 @@ class PositionPageService(PageService):
         """
         请求基础服务, 获取员工推荐职位列表
         :param infra_params: ObjectDict({
-                                'pageNum': self.params.pageNo,
-                                'pageSize': self.params.pageSize,
+                                'page_from': self.params.pageNo,
+                                'page_size': self.params.pageSize,
                                 'userId': self.current_user.sysuser.id,
                                 "companyId": company_id,
                                 "recomPushId": self.params.recomPushId

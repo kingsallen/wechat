@@ -542,6 +542,8 @@ class ChatVO(object):
      - content
      - create_time
      - speaker
+     - origin
+     - origin_str
     """
 
     thrift_spec = (
@@ -550,13 +552,17 @@ class ChatVO(object):
         (2, TType.STRING, 'content', 'UTF8', None, ),  # 2
         (3, TType.STRING, 'create_time', 'UTF8', None, ),  # 3
         (4, TType.BYTE, 'speaker', None, None, ),  # 4
+        (5, TType.BYTE, 'origin', None, None, ),  # 5
+        (6, TType.STRING, 'origin_str', 'UTF8', None, ),  # 6
     )
 
-    def __init__(self, id=None, content=None, create_time=None, speaker=None,):
+    def __init__(self, id=None, content=None, create_time=None, speaker=None, origin=None, origin_str=None,):
         self.id = id
         self.content = content
         self.create_time = create_time
         self.speaker = speaker
+        self.origin = origin
+        self.origin_str = origin_str
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -587,6 +593,16 @@ class ChatVO(object):
                     self.speaker = iprot.readByte()
                 else:
                     iprot.skip(ftype)
+            elif fid == 5:
+                if ftype == TType.BYTE:
+                    self.origin = iprot.readByte()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 6:
+                if ftype == TType.STRING:
+                    self.origin_str = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -612,6 +628,14 @@ class ChatVO(object):
         if self.speaker is not None:
             oprot.writeFieldBegin('speaker', TType.BYTE, 4)
             oprot.writeByte(self.speaker)
+            oprot.writeFieldEnd()
+        if self.origin is not None:
+            oprot.writeFieldBegin('origin', TType.BYTE, 5)
+            oprot.writeByte(self.origin)
+            oprot.writeFieldEnd()
+        if self.origin_str is not None:
+            oprot.writeFieldBegin('origin_str', TType.STRING, 6)
+            oprot.writeString(self.origin_str.encode('utf-8') if sys.version_info[0] == 2 else self.origin_str)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
