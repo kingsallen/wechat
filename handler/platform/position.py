@@ -329,7 +329,8 @@ class PositionHandler(BaseHandler):
             "did": did,
             "salary": position_info.salary,
             "hr_chat": bool(parent_company_info.conf_hr_chat),
-            "teamname_custom": teamname_custom["teamname_custom"]
+            "teamname_custom": teamname_custom["teamname_custom"],
+            "candidate_source": position_info.candidate_source_num
             # "team": position_info.department.lower() if position_info.department else ""
         })
 
