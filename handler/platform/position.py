@@ -63,7 +63,7 @@ class PositionHandler(BaseHandler):
             # 是否超出投递上限。每月每家公司一个人只能申请3次
             self.logger.debug("[JD]处理投递上限")
             can_apply = yield self.application_ps.is_allowed_apply_position(
-                self.current_user.sysuser.id, company_info.id)
+                self.current_user.sysuser.id, company_info.id, position_id)
 
             # 相似职位推荐
             self.logger.debug("[JD]构建相似职位推荐")
@@ -329,7 +329,8 @@ class PositionHandler(BaseHandler):
             "did": did,
             "salary": position_info.salary,
             "hr_chat": bool(parent_company_info.conf_hr_chat),
-            "teamname_custom": teamname_custom["teamname_custom"]
+            "teamname_custom": teamname_custom["teamname_custom"],
+            "candidate_source": position_info.candidate_source_num
             # "team": position_info.department.lower() if position_info.department else ""
         })
 
@@ -483,12 +484,16 @@ class PositionHandler(BaseHandler):
     def _make_json_company_impression(self, company_info):
         """构造老微信样式的企业印象"""
 
-        if len(company_info.impression) == 0:
-            data = None
+        if company_info.impression:
+            if len(company_info.impression) == 0:
+                data = None
+            else:
+                data = ObjectDict({
+                    "data": company_info.impression
+                })
         else:
-            data = ObjectDict({
-                "data": company_info.impression
-            })
+            data = None
+            self.logger.warning("Warning: don't have company_info.impression")
         return data
 
     def _make_json_job_department(self, position_info):

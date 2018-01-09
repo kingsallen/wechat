@@ -49,6 +49,7 @@ class PositionPageService(PageService):
             'company_id': position_res.company_id,
             'department': position_res.department,
             'candidate_source': self.constant.CANDIDATE_SOURCE.get(str(position_res.candidate_source)),
+            'candidate_source_num': position_res.candidate_source,
             'employment_type': self.constant.EMPLOYMENT_TYPE.get(str(position_res.employment_type)),
             'management_experience': self.constant.MANAGEMENT_EXP.get(str(position_res.management_experience)),
             'update_time': update_time,
