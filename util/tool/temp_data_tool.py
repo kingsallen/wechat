@@ -213,6 +213,7 @@ def make_team_index_template(team, team_resource, more_link, member_list):
         'media_url': make_static_url(team_resource.res_url),
         'media_type': MEDIA_TYPE[team_resource.res_type],
         'member_list': member_list,
+        'clip_attrs': team.res_attrs,
     }]
 
     return template1(sub_type='middle', title=team.name,
@@ -234,7 +235,8 @@ def make_interview(media, res):
         'sub_title': media.sub_title,
         'longtext': '{}\n'.format(media.longtexts),
         'media_url': make_static_url(res.res_url) if res else '',
-        'media_type': MEDIA_TYPE[res.res_type if res else 0]
+        'media_type': MEDIA_TYPE[res.res_type if res else 0],
+        'clip_attrs': media.res_attrs
     }
 
 
@@ -245,7 +247,8 @@ def make_other_team_data(team, res, handler_params):
         'link': make_url('/m/company/team/{}'.format(team.id), handler_params),
         'description': team.slogan,
         'media_url': make_static_url(res.res_url if MEDIA_TYPE[res.res_type] == "image" else res.cover),
-        'media_type': MEDIA_TYPE[res.res_type]
+        'media_type': MEDIA_TYPE[res.res_type],
+        'clip_attrs': team.res_attrs
     }
 
 
@@ -268,6 +271,7 @@ def make_team_detail_template(locale, team, members, modulename, detail_media_li
                     'media_type': MEDIA_TYPE[team_res.res_type],
                     'member_list': [make_introduction(m, res_dic.get(m.res_id))
                                     for m in members],
+                    'clip_attrs': team.res_attrs
                 }]
             )
         )
@@ -487,6 +491,7 @@ def make_position_detail_cms(media_list, res_dict, module_name):
         data=[{
                   'sub_title': m.sub_title,
                   'longtext': '{}\n'.format(m.longtexts),
+                  'clip_attrs': m.res_attrs,
                   'media_url': make_static_url(res_dict.get(m.res_id).res_url),
                   'media_type': MEDIA_TYPE[res_dict.get(m.res_id).res_type]
               } for m in media_list]
@@ -502,6 +507,7 @@ def make_team(team, resources, more_link, team_members, teamname_custom):
             'sub_title': team.name,
             'longtext': team.description,
             'media_url': make_static_url(team_res.res_url),
+            'clip_attrs': team.res_attrs,
             'media_type': MEDIA_TYPE[team_res.res_type],
             'member_list': [make_team_member(m, resources.get(m.res_id))
                             for m in team_members],
