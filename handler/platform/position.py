@@ -835,6 +835,7 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
         # 是否达到投递上线
         can_apply = yield self.application_ps.is_allowed_apply_position(
             self.current_user.sysuser.id, self.current_user.company.id)
+        social_res, school_res = yield self.application_ps.get_application_apply_status(self.current_user.sysuser.id, self.current_user.company.id)
         total_count = 0
         # 职位信息
         position_ex_list = list()

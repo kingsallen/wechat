@@ -20,6 +20,15 @@ class InfraApplicationDataService(DataService):
         raise gen.Return(ret)
 
     @gen.coroutine
+    def get_application_apply_status(self, params):
+        """
+        获取求职者该公司社招社招职位是否达到投递上限
+        """
+        # todo
+        social_res, school_res = yield http_post(path, params)
+        pass
+
+    @gen.coroutine
     def create_application(self, params):
         """创建申请
         """

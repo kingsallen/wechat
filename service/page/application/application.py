@@ -96,6 +96,21 @@ class ApplicationPageService(PageService):
         raise gen.Return(bool_res)
 
     @gen.coroutine
+    def get_application_apply_status(self, user_id, company_id):
+        """
+        获取求职者该公司社招校招职位是否达到投递上限
+        :param user_id:
+        :param company_id:
+        :return: social_res:true/false, school_res:true/false  # ture 表示命中限制，不能投递，false 表示可以投递
+        """
+        req = ObjectDict({
+            'user_id': user_id,
+            'company_id': company_id,
+        })
+        social_res, school_res = yield self.infra_application_ds.get_application_apply_status(req)
+        return social_res, school_res
+
+    @gen.coroutine
     def update_candidate_company(self, name, user_id):
         """
         更新candidate_company表中的name
