@@ -25,7 +25,7 @@ class InfraApplicationDataService(DataService):
         获取求职者该公司社招社招职位是否达到投递上限
         """
         # todo
-        social_res, school_res = yield http_post(path, params)
+        # social_res, school_res = yield http_post(path, params)
         pass
 
     @gen.coroutine

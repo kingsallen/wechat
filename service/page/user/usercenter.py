@@ -105,18 +105,33 @@ class UsercenterPageService(PageService):
 
     @gen.coroutine
     def get_user_position_stared_list(self, user_id, position_id_list):
-        """返回用户收藏职位列表"""
+        """返回用户感兴趣职位列表"""
         fav_position_id_list = []
         if user_id is None or position_id_list is None:
             return fav_position_id_list
         param = dict(conds={'sysuser_id': user_id},
-                     fields=['id'])
+                     fields=['position_id'])
         if position_id_list and isinstance(position_id_list, list):
             param.update(appends=["and position_id in %s" % set_literl(position_id_list)])
         fav_position_list = yield self.user_fav_position_ds.get_user_fav_position_list(**param)
         if fav_position_list:
-            fav_position_id_list = [e.id for e in fav_position_list]
+            fav_position_id_list = [e.position_id for e in fav_position_list]
         return fav_position_id_list
+
+    @gen.coroutine
+    def get_applied_applications_list(self, user_id, position_id_list):
+        """返回用户求职记录列表"""
+        applied_applications_id_list = []
+        if user_id is None or position_id_list is None:
+            return applied_applications_id_list
+        param = dict(conds={'sysuser_id': user_id},
+                     fields=['position_id'])
+        if position_id_list and isinstance(position_id_list, list):
+            param.update(appends=["and position_id in %s" % set_literl(position_id_list)])
+        applied_applications_list = yield self.job_application_ds.get_applied_applications_list(**param)
+        if applied_applications_list:
+            applied_applications_id_list = [e.position_id for e in applied_applications_list]
+        return applied_applications_id_list
 
     @gen.coroutine
     def get_applied_applications(self, user_id):

@@ -812,13 +812,13 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
         for e in position_list:
             position_id_list.append(e.id)
 
-        # 获取当前职位列表中用户已收藏职位列表
+        # 获取当前职位列表中用户已感兴趣职位列表
         fav_position_id_list = yield self.usercenter_ps.get_user_position_stared_list(
             self.current_user.sysuser.id, position_id_list
         )
 
         # 获取用户已申请职位列表
-        applied_application_list = yield self.usercenter_ps.get_applied_applications(self.current_user.sysuser.id)
+        applied_application_list = yield self.usercenter_ps.get_applied_applications_list(self.current_user.sysuser.id, position_id_list)
         applied_application_id_list = list()
         if applied_application_list:
             for app in applied_application_list:
@@ -831,11 +831,11 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
         position_custom_id_list = []
         if suppress_apply:
             position_custom_list, position_custom_id_list = self.position_ps.get_position_custom_list(position_id_list)
-
+        can_apply = False
         # 是否达到投递上线
-        can_apply = yield self.application_ps.is_allowed_apply_position(
-            self.current_user.sysuser.id, self.current_user.company.id)
-        social_res, school_res = yield self.application_ps.get_application_apply_status(self.current_user.sysuser.id, self.current_user.company.id)
+        # can_apply = yield self.application_ps.is_allowed_apply_position(
+            # self.current_user.sysuser.id, self.current_user.company.id)
+        # social_res, school_res = yield self.application_ps.get_application_apply_status(self.current_user.sysuser.id, self.current_user.company.id)
         total_count = 0
         # 职位信息
         position_ex_list = list()
