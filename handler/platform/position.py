@@ -673,6 +673,10 @@ class PositionHandler(BaseHandler):
             cms_page = yield self._make_cms_page(team.id)
             if cms_page:
                 add_item(position_data, "module_mate_day", cms_page)
+            else:
+                module_team = yield self._make_team_instead_cms(team, teamname_custom)
+                if module_team:
+                    add_item(position_data, "module_mate_day", module_team)
 
             # 玛氏定制
             company_config = COMPANY_CONFIG.get(company_id)
@@ -699,6 +703,70 @@ class PositionHandler(BaseHandler):
         more_link = self.make_url(path.TEAM_PATH.format(team.id), self.params),
         res = yield self.position_ps.get_team_data(team, more_link, teamname_custom)
         raise gen.Return(res)
+
+    @gen.coroutine
+    def _make_team_instead_cms(self, team, teamname_custom):
+        """所属团队，构造数据"""
+        res = yield self.position_ps.get_team_data_instead_cms(team, teamname_custom)
+        raise gen.Return(res)
+
+
+class PositionListInfraParamsMixin(BaseHandler):
+
+    def make_position_list_infra_params(self):
+        """构建调用基础服务职位列表的 params"""
+
+        infra_params = ObjectDict()
+
+        infra_params.company_id = self.current_user.company.id
+
+        if self.params.did:
+            infra_params.did = self.params.did
+
+        start_count = (int(self.params.get("count", 0)) *
+                       const_platform.POSITION_LIST_PAGE_COUNT)
+
+        infra_params.page_from = start_count
+        infra_params.page_size = const_platform.POSITION_LIST_PAGE_COUNT
+
+        if self.params.salary:
+            k = str(self.params.salary)
+            try:
+                infra_params.salary = "%d,%d" % (
+                    const_platform.SALARY[const_platform.SALARY_NAME_TO_INDEX[k]].salary_bottom,
+                    const_platform.SALARY[const_platform.SALARY_NAME_TO_INDEX[k]].salary_top)
+            except KeyError:  # 如果用户自行修改了 GET 参数，不至于报错
+                infra_params.salary = ""
+
+        if self.params.degree:
+            infra_params.degree = self.params.degree
+        else:
+            infra_params.degree = ""
+
+        # 招聘类型和职位性质接受兼容 数字编号 中文
+        if self.params.candidate_source:
+            infra_params.candidate_source = const.CANDIDATE_SOURCE_SEARCH.get(self.params.candidate_source, "") \
+                if self.params.candidate_source.isdigit() else self.params.candidate_source
+        else:
+            infra_params.candidate_source = ""
+
+        if self.params.employment_type:
+            infra_params.employment_type = const.EMPLOYMENT_TYPE_SEARCH.get(self.params.employment_type, "") \
+                if self.params.employment_type.isdigit() else self.params.employment_type
+        else:
+            infra_params.employment_type = ""
+
+        infra_params.update(
+            keywords=self.params.keyword if self.params.keyword else "",
+            cities=self.params.city if self.params.city else "",
+            department=self.params.team_name if self.params.team_name else "",
+            occupations=self.params.occupation if self.params.occupation else "",
+            custom=self.params.custom if self.params.custom else "",
+            order_by_priority=True)
+
+        self.logger.debug("[position_list_infra_params]: %s" % infra_params)
+
+        return infra_params
 
 
 class PositionListHandler(BaseHandler):
