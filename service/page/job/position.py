@@ -260,7 +260,8 @@ class PositionPageService(PageService):
         resources = yield self.hr_resource_ds.get_resource_by_ids(
             id_list=[m.res_id for m in team_members] + [team.res_id]
         )
-        res = make_team(team, resources, more_link, team_members, teamname_custom)
+        if resources:
+            res = make_team(team, resources, more_link, team_members, teamname_custom)
 
         raise gen.Return(res)
 
