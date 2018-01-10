@@ -866,7 +866,9 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
             position_ex['is_applied'] = pos.id in applied_application_id_list  # 判断职位申请状态
             position_ex['can_apply'] = not can_apply
             position_ex['candidate_source'] = pos.candidate_source
-            total_count = pos.TotalNum
+            position_ex['job_need'] = pos.requirement
+
+            total_count = pos.totalNum
 
             # 判断是否显示红包
             is_employee = bool(self.current_user.employee)
