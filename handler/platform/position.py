@@ -818,11 +818,7 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
         )
 
         # 获取用户已申请职位列表
-        applied_application_list = yield self.usercenter_ps.get_applied_applications_list(self.current_user.sysuser.id, position_id_list)
-        applied_application_id_list = list()
-        if applied_application_list:
-            for app in applied_application_list:
-                applied_application_id_list.append(app.position_id)
+        applied_application_id_list = yield self.usercenter_ps.get_applied_applications_list(self.current_user.sysuser.id, position_id_list)
 
         # 诺华定制
         suppress_apply = yield self.customize_ps.is_suppress_apply_company(infra_params.company_id)
