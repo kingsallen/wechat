@@ -38,6 +38,8 @@ class CompanyPageService(PageService):
 
         # 公司主表
         company = yield self.hr_company_ds.get_company(conds, fields)
+        if not company:
+            self.logger.error('get_company.conds:%s, get_company.company:%s', (conds, company))
 
         # 公司副表
         if need_conf:
@@ -45,6 +47,8 @@ class CompanyPageService(PageService):
                 "company_id": company.get("id"),
             }
             company_conf_res = yield self.hr_company_conf_ds.get_company_conf(conds)
+            if not company_conf_res:
+                self.logger.error('get_company_conf.conds:%s, get_company_conf.company_conf_res:%s', (conds, company_conf_res))
 
             # 搜索页页面栏目排序
             search_seq = []
@@ -135,6 +139,8 @@ class CompanyPageService(PageService):
         2.如果1取不到，则直接取职位中的 company_id"""
 
         hr_company_account = yield self.hr_company_account_ds.get_company_account(conds={"account_id": publisher})
+        if not hr_company_account:
+            self.logger.error('get_real_company_id.publisher:%s, hr_company_account.company_id:%s, get_real_company_id.hr_company_account:%s' % (publisher, company_id, hr_company_account))
         real_company_id = hr_company_account.company_id or company_id
 
         raise gen.Return(real_company_id)
