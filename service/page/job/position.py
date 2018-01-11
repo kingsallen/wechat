@@ -466,6 +466,8 @@ class PositionPageService(PageService):
                    'disable': const.OLD_YES},
             fields=['id', 'name']
         )
+        if not res_team_names:
+            self.logger.error('get_teamid_names_dict.company_id:%s, get_teamid_names_dict.res_team_name:%s' % (company_id, res_team_names))
         team_name_dict = {e.id: e.name for e in res_team_names}
         return team_name_dict
 
@@ -483,6 +485,8 @@ class PositionPageService(PageService):
             param.update(appends=["and id in %s" % set_literl(list_of_pid)])
 
         pid_teamid_list = yield self.job_position_ds.get_positions_list(**param)
+        if not pid_teamid_list:
+            self.logger.error('get_pid_teamid_dict.company_id:%s, get_pid_teamid_dict.pid_teamid_list:%s' % (company_id, pid_teamid_list))
         pid_teamid_dict = {e.id: e.team_id for e in pid_teamid_list}
         self.logger.debug('pid_teamid_dict: %s' % pid_teamid_dict)
         return pid_teamid_dict
