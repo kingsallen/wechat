@@ -107,7 +107,12 @@ class ApplicationPageService(PageService):
             'user_id': user_id,
             'company_id': company_id,
         })
-        social_res, school_res = yield self.infra_application_ds.get_application_apply_status(req)
+        result, data = yield self.infra_application_ds.get_application_apply_status(req)
+        if not result:
+            self.logger.error('get application apply status happened some error')
+            return False, False
+        social_res = data.get('socialApply')
+        school_res = data.get('schoolApply')
         return social_res, school_res
 
     @gen.coroutine

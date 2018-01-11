@@ -827,11 +827,9 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
         position_custom_id_list = []
         if suppress_apply:
             position_custom_list, position_custom_id_list = self.position_ps.get_position_custom_list(position_id_list)
-        can_apply = False
+
         # 是否达到投递上线
-        # can_apply = yield self.application_ps.is_allowed_apply_position(
-            # self.current_user.sysuser.id, self.current_user.company.id)
-        # social_res, school_res = yield self.application_ps.get_application_apply_status(self.current_user.sysuser.id, self.current_user.company.id)
+        social_res, school_res = yield self.application_ps.get_application_apply_status(self.current_user.sysuser.id, self.current_user.company.id)
         total_count = 0
         # 职位信息
         position_ex_list = list()
@@ -860,12 +858,19 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
             position_ex["job_description"] = pos.accountabilities
             position_ex["is_starred"] = pos.id in fav_position_id_list  # 判断职位收藏状态
             position_ex['is_applied'] = pos.id in applied_application_id_list  # 判断职位申请状态
-            position_ex['can_apply'] = not can_apply
+
             position_ex['candidate_source'] = pos.candidate_source
             position_ex['job_need'] = pos.requirement
 
             total_count = pos.totalNum
+            # 判断职位投递是否达到上限
+            can_apply = False
+            if pos.candidate_source:
+                can_apply = school_res
+            elif pos.candidate_source == 0:
+                can_apply = social_res
 
+            position_ex['can_apply'] = not can_apply
             # 判断是否显示红包
             is_employee = bool(self.current_user.employee)
             position_ex['has_reward'] = pos.is_rp_reward and (
