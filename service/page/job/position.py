@@ -254,6 +254,7 @@ class PositionPageService(PageService):
 
     @gen.coroutine
     def get_team_data(self, team, more_link, teamname_custom):
+        res = None
         team_members = yield self.hr_team_member_ds.get_team_member_list(
             conds={'team_id': team.id, 'disable': 0}
         )
