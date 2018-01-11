@@ -124,7 +124,7 @@ class UsercenterPageService(PageService):
         applied_applications_id_list = []
         if user_id is None or position_id_list is None:
             return applied_applications_id_list
-        param = dict(conds={'sysuser_id': user_id},
+        param = dict(conds={'applier_id': user_id},
                      fields=['position_id'])
         if position_id_list and isinstance(position_id_list, list):
             param.update(appends=["and position_id in %s" % set_literl(position_id_list)])

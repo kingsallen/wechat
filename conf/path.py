@@ -78,7 +78,7 @@ INFRA_USER_EMPLOYEE = 'user/employee'
 # Ref: https://wiki.moseeker.com/application-api.md
 INFRA_APPLICATION = 'application'
 INFRA_APPLICATION_APPLY_COUNT = 'application/count/check'
-INFRA_APPLICATION_TYPE_APPLY_COUNT = '/application/type/count/check'
+INFRA_APPLICATION_TYPE_APPLY_COUNT = 'application/type/count/check'
 
 # 职位服务
 # REF: https://wiki.moseeker.com/position-api.md
