@@ -111,6 +111,8 @@ def cache(prefix=None, key=None, ttl=60, hash=True, lock=True, separator=":"):
                 if base_cache.exists(redis_key):
                     try:
                         cache_data = base_cache.get(redis_key)
+                        if cache_data is None:
+                            logger.error('redis_key:{}, redis_key_is_alive:{}'.format(redis_key, base_cache.exists(redis_key)))
                     except Exception as e:
                         logger.error(e)
                 else:
