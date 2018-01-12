@@ -39,7 +39,7 @@ class CompanyPageService(PageService):
         # 公司主表
         company = yield self.hr_company_ds.get_company(conds, fields)
         if not company:
-            self.logger.error('get_company.conds:%s, get_company.company:%s', (conds, company))
+            self.logger.error('get_company.conds:%s, get_company.company:%s' % (conds, company))
 
         # 公司副表
         if need_conf:
@@ -48,7 +48,7 @@ class CompanyPageService(PageService):
             }
             company_conf_res = yield self.hr_company_conf_ds.get_company_conf(conds)
             if not company_conf_res:
-                self.logger.error('get_company_conf.conds:%s, get_company_conf.company_conf_res:%s', (conds, company_conf_res))
+                self.logger.error('get_company_conf.conds:%s, get_company_conf.company_conf_res:%s' % (conds, company_conf_res))
 
             # 搜索页页面栏目排序
             search_seq = []
