@@ -48,7 +48,7 @@ def _make_json_data(first, remark=None, colors=None, encode=True, **kwargs):
 @gen.coroutine
 def rp_binding_success_notice_tpl(
     wechat_id, openid, link, company_name, employee_slug,
-    sys_template_id=const.TEMPLATES.RP_EMPLOYEE_BINDING_RED):
+    sys_template_id=const.TEMPLATES.RP_EMPLOYEE_BINDING):
     d = datetime.now()
     json_data = _make_json_data(
         first="您好！您的{}认证申请已有结果".format(employee_slug),
@@ -67,7 +67,7 @@ def rp_binding_success_notice_tpl(
 
 @gen.coroutine
 def rp_recom_success_notice_tpl(wechat_id, openid, link, company_name,
-                                recomee_name, position_title, sys_template_id=const.TEMPLATES.RP_RECOM_RED):
+                                recomee_name, position_title, sys_template_id=const.TEMPLATES.RP_RECOM):
     json_data = _make_json_data(
         first="您已成功推荐{}！感谢您对公司人才招聘的支持！".format(recomee_name),
         remark="请点击查看详情",
