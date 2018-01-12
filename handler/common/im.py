@@ -179,11 +179,22 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
             try:
                 data = ujson.loads(message.get("data"))
                 if data:
-                    self.write_message(json_dumps(ObjectDict(
-                        content=data.get("content"),
-                        chat_time=data.get("create_time"),
-                        speaker=data.get("speaker"),
-                    )))
+                    if data.get("msgType") == "button":
+                        self.write_message(json_dumps(ObjectDict(
+                            content=data.get("content"),
+                            chat_time=data.get("create_time"),
+                            speaker=data.get("speaker"),
+                            btnContent=data.get("ret_ext"),
+                            msgType=data.get("msgType"),
+                        )))
+                    else:
+                        self.write_message(json_dumps(ObjectDict(
+                            content=data.get("content"),
+                            chat_time=data.get("create_time"),
+                            speaker=data.get("speaker"),
+                            picUrl=data.get("ret_ext"),
+                            msgType=data.get("msgType"),
+                        )))
             except websocket.WebSocketClosedError:
                 self.logger.error(traceback.format_exc())
                 self.close(WebSocketCloseCode.internal_error.value)
@@ -249,15 +260,17 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
             position_id=self.position_id
         )
         if bot_message:
+
             message_body = json_dumps(ObjectDict(
-                content=bot_message,
+                content=bot_message.content,
+                ret_ext=bot_message.ret_ext,
+                msgType=bot_message.msg_type,
                 speaker=const.CHAT_SPEAKER_BOT,
                 cid=int(self.room_id),
                 pid=int(self.position_id),
                 create_time=curr_now_minute(),
                 origin=const.ORIGIN_CHATBOT
             ))
-
             # hr 端广播
             self.redis_client.publish(self.hr_channel, message_body)
 

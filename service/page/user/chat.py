@@ -202,9 +202,33 @@ class ChatPageService(PageService):
             self.logger.debug(res.results)
             results = res.results
             r = results[0]
+            res_type = r.get("resultType", "")
+            ret = r.get("values", {})
 
-            ret = r.get("values", {}).get("text", "")
-
+            if res_type == "text":
+                content = ret.get("text", "")
+                ret_ext = ret.get("picUri", "")
+                msg_type = "html"
+            elif res_type == "image":
+                content = ret.get("text", "")
+                ret_ext = ret.get("picUri", "")
+                msg_type = "image"
+            elif res_type == "qrcode":
+                content = ret.get("text", "")
+                ret_ext = ret.get("picUri", "")
+                msg_type = "qrcode"
+            elif res_type == "button":
+                content = ret.get("text", "")
+                ret_ext = ret.get("btnContent", [])
+                msg_type = "button"
+            else:
+                content = ''
+                ret_ext = ''
+                msg_type = ''
+            ret_message = ObjectDict()
+            ret_message['content'] = content
+            ret_message['ret_ext'] = ret_ext
+            ret_message['msg_type'] = msg_type
         except Exception as e:
             self.logger.error(e)
             return ""
