@@ -30,7 +30,7 @@ class UserFavPositionDataService(DataService):
         params = params or []
 
         if not self._valid_conds(conds):
-            self.logger.warning("Warning:[get_hr_hb_position_binding_list][invalid parameters], Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
+            self.logger.warning("Warning:[get_user_fav_position_list][invalid parameters], Detail:[conds: {0}, type: {1}]".format(conds, type(conds)))
             raise gen.Return(list())
 
         if not fields:

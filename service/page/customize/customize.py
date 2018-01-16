@@ -32,6 +32,14 @@ class CustomizePageService(PageService):
         super().__init__()
 
     @gen.coroutine
+    def is_suppress_apply_company(self, company_id):
+        """诺华集团定制"""
+        if company_id not in self._SUPPRESS_APPLY_CIDS:
+            return False
+        else:
+            return True
+
+    @gen.coroutine
     def _is_suppress_apply(self, position_info):
         if position_info.company_id not in self._SUPPRESS_APPLY_CIDS:
             return False, None

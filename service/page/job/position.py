@@ -11,7 +11,7 @@ from util.common import ObjectDict
 from util.common.cipher import encode_id
 from util.tool.date_tool import jd_update_date, str_2_date
 from util.tool.str_tool import gen_salary, split, set_literl, gen_degree, gen_experience, to_str
-from util.tool.temp_data_tool import make_position_detail_cms, make_team, template3
+from util.tool.temp_data_tool import make_position_detail_cms, make_team, template3, make_team_instead_cms
 from util.tool.url_tool import make_static_url
 from util.common.decorator import log_time
 
@@ -49,6 +49,7 @@ class PositionPageService(PageService):
             'company_id': position_res.company_id,
             'department': position_res.department,
             'candidate_source': self.constant.CANDIDATE_SOURCE.get(str(position_res.candidate_source)),
+            'candidate_source_num': position_res.candidate_source,
             'employment_type': self.constant.EMPLOYMENT_TYPE.get(str(position_res.employment_type)),
             'management_experience': self.constant.MANAGEMENT_EXP.get(str(position_res.management_experience)),
             'update_time': update_time,
@@ -132,9 +133,64 @@ class PositionPageService(PageService):
         raise gen.Return(position)
 
     @gen.coroutine
+    def get_position_custom_list(self, position_id_list):
+        # 获取职位信息扩展信息列表
+        position_ext_list, position_ext_id_list = self.get_position_ext_list(
+            position_id_list)
+
+        # 获取职位自定义字段列表
+        customs_list, customs_id_list = self.get_customs_list(position_ext_id_list)
+
+        position_custom_list = []
+        position_custom = ObjectDict()
+        for custom in customs_list:
+            for ext in position_ext_list:
+                if custom.id == ext.job_custom_id:
+                    position_custom.id = ext.pid
+                    position_custom.custom_field = custom.name
+            position_custom_list.append(position_custom)
+        return position_custom_list, customs_id_list
+
+    @gen.coroutine
     def update_position(self, conds, fields):
         response = yield self.job_position_ds.update_position(conds, fields)
         raise gen.Return(response)
+
+    @gen.coroutine
+    def get_position_ext_list(self, position_id_list):
+        """
+        获得职位扩展信息
+        :param position_id_list
+        :return:
+        """
+        params = dict()
+        if position_id_list and isinstance(position_id_list, list):
+            params.update(conds=["pid in %s" % set_literl(position_id_list)])
+        position_ext_list = yield self.job_position_ext_ds.get_position_ext_list(**params)
+        position_ext_id_list = []
+        position_custom_id_list = []
+        if position_ext_list:
+            for e in position_ext_list:
+                position_ext_id_list.append(e.pid)
+        return position_ext_list, position_ext_id_list
+
+    @gen.coroutine
+    def get_customs_list(self, position_ext_id_list):
+        """
+        获得职位自定义字段配置信息
+        :param position_ext_id_list:
+        :return:
+        """
+        params = dict()
+        if position_ext_id_list and isinstance(position_ext_id_list, list):
+            params.update(conds=["id in %s" % set_literl(position_ext_id_list)])
+        customs_list = yield self.job_custom_ds.get_customs_list(**params)
+        customs_id_list = []
+        if customs_list:
+            for e in customs_list:
+                customs_id_list.append(e.id)
+        return customs_list, customs_id_list
+
 
     @staticmethod
     def _make_recom(user_id):
@@ -145,7 +201,6 @@ class PositionPageService(PageService):
 
     @gen.coroutine
     def get_positions_list(self, conds, fields, options=[], appends=[]):
-
         """
         获得职位列表
         :param conds:
@@ -253,13 +308,29 @@ class PositionPageService(PageService):
 
     @gen.coroutine
     def get_team_data(self, team, more_link, teamname_custom):
+        res = None
         team_members = yield self.hr_team_member_ds.get_team_member_list(
             conds={'team_id': team.id, 'disable': 0}
         )
         resources = yield self.hr_resource_ds.get_resource_by_ids(
             id_list=[m.res_id for m in team_members] + [team.res_id]
         )
-        res = make_team(team, resources, more_link, team_members, teamname_custom)
+        if resources:
+            res = make_team(team, resources, more_link, team_members, teamname_custom)
+
+        raise gen.Return(res)
+
+    @gen.coroutine
+    def get_team_data_instead_cms(self, team, teamname_custom):
+        res = None
+        team_members = yield self.hr_team_member_ds.get_team_member_list(
+            conds={'team_id': team.id, 'disable': 0}
+        )
+        resources = yield self.hr_resource_ds.get_resource_by_ids(
+            id_list=[m.res_id for m in team_members] + [team.res_id]
+        )
+        if resources:
+            res = make_team_instead_cms(team, resources, teamname_custom)
 
         raise gen.Return(res)
 
@@ -335,7 +406,7 @@ class PositionPageService(PageService):
     @gen.coroutine
     def infra_get_rp_position_list(self, params):
         """红包职位列表"""
-        params.update(page_from=int(params.page_from/10)+1)
+        params.update(page_from=int(params.page_from / 10) + 1)
 
         res = yield self.infra_position_ds.get_rp_position_list(params)
 
@@ -417,6 +488,12 @@ class PositionPageService(PageService):
             return []
 
     @gen.coroutine
+    def infra_obtain_sug_list(self, params):
+        """获取sug"""
+        result, res = yield self.infra_position_ds.post_sug_list(params)
+        return res
+
+    @gen.coroutine
     def infra_get_position_personarecom(self, infra_params, company_id):
         """
         TODO: 补充文档
@@ -449,6 +526,8 @@ class PositionPageService(PageService):
                    'disable': const.OLD_YES},
             fields=['id', 'name']
         )
+        if res_team_names is None:
+            self.logger.error('get_teamid_names_dict.company_id:%s, get_teamid_names_dict.res_team_name:%s' % (company_id, res_team_names))
         team_name_dict = {e.id: e.name for e in res_team_names}
         return team_name_dict
 
@@ -466,6 +545,8 @@ class PositionPageService(PageService):
             param.update(appends=["and id in %s" % set_literl(list_of_pid)])
 
         pid_teamid_list = yield self.job_position_ds.get_positions_list(**param)
+        if pid_teamid_list is None:
+            self.logger.error('get_pid_teamid_dict.company_id:%s, get_pid_teamid_dict.pid_teamid_list:%s' % (company_id, pid_teamid_list))
         pid_teamid_dict = {e.id: e.team_id for e in pid_teamid_list}
         self.logger.debug('pid_teamid_dict: %s' % pid_teamid_dict)
         return pid_teamid_dict

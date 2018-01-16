@@ -78,6 +78,7 @@ INFRA_USER_EMPLOYEE = 'user/employee'
 # Ref: https://wiki.moseeker.com/application-api.md
 INFRA_APPLICATION = 'application'
 INFRA_APPLICATION_APPLY_COUNT = 'application/count/check'
+INFRA_APPLICATION_TYPE_APPLY_COUNT = 'application/type/count/check'
 
 # 职位服务
 # REF: https://wiki.moseeker.com/position-api.md
@@ -89,6 +90,7 @@ INFRA_POSITION_LIST_RP_EXT = 'position/rpext'
 INFRA_RP_POSITION_LIST = 'position/rplist'
 INFRA_RP_POSITION_LIST_SHARE_INFO = 'position/list/hb_share_info'
 INFRA_THIRD_PARTY_SYNCED_POSITIONS = 'positions/thirdpartysyncedpositions'
+INFRA_SUG_LIST = 'api/position/suggest'
 
 # Profile 服务
 # Ref: https://wiki.moseeker.com/profile-api.md
