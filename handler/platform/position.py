@@ -841,7 +841,7 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
         position_custom_list = []
         position_custom_id_list = []
         if suppress_apply:
-            position_custom_list, position_custom_id_list = self.position_ps.get_position_custom_list(position_id_list)
+            position_custom_list, position_custom_id_list = yield self.position_ps.get_position_custom_list(position_id_list)
 
         # 是否达到投递上线
         social_res, school_res = yield self.application_ps.get_application_apply_status(self.current_user.sysuser.id, self.current_user.company.id)
@@ -907,7 +907,6 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
         self.send_json_success(
             data=ObjectDict(list=position_ex_list,
                             total_count=total_count)
-
         )
 
     @staticmethod
