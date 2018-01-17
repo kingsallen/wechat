@@ -135,11 +135,11 @@ class PositionPageService(PageService):
     @gen.coroutine
     def get_position_custom_list(self, position_id_list):
         # 获取职位信息扩展信息列表
-        position_ext_list, position_ext_id_list = self.get_position_ext_list(
+        position_ext_list, position_ext_id_list = yield self.get_position_ext_list(
             position_id_list)
 
         # 获取职位自定义字段列表
-        customs_list, customs_id_list = self.get_customs_list(position_ext_id_list)
+        customs_list, customs_id_list = yield self.get_customs_list(position_ext_id_list)
 
         position_custom_list = []
         position_custom = ObjectDict()
@@ -168,7 +168,6 @@ class PositionPageService(PageService):
             params.update(conds=["pid in %s" % set_literl(position_id_list)])
         position_ext_list = yield self.job_position_ext_ds.get_position_ext_list(**params)
         position_ext_id_list = []
-        position_custom_id_list = []
         if position_ext_list:
             for e in position_ext_list:
                 position_ext_id_list.append(e.pid)
