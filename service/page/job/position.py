@@ -164,9 +164,11 @@ class PositionPageService(PageService):
         :return:
         """
         params = dict()
+        position_ext_list = []
         if position_id_list and isinstance(position_id_list, list):
             params.update(conds=["pid in %s" % set_literl(position_id_list)])
-        position_ext_list = yield self.job_position_ext_ds.get_position_ext_list(**params)
+            position_ext_list = yield self.job_position_ext_ds.get_position_ext_list(**params)
+
         position_ext_id_list = []
         if position_ext_list:
             for e in position_ext_list:
@@ -181,15 +183,15 @@ class PositionPageService(PageService):
         :return:
         """
         params = dict()
+        customs_list = []
         if position_ext_id_list and isinstance(position_ext_id_list, list):
             params.update(conds=["id in %s" % set_literl(position_ext_id_list)])
-        customs_list = yield self.job_custom_ds.get_customs_list(**params)
+            customs_list = yield self.job_custom_ds.get_customs_list(**params)
         customs_id_list = []
         if customs_list:
             for e in customs_list:
                 customs_id_list.append(e.id)
         return customs_list, customs_id_list
-
 
     @staticmethod
     def _make_recom(user_id):
