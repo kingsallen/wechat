@@ -135,11 +135,11 @@ class PositionPageService(PageService):
     @gen.coroutine
     def get_position_custom_list(self, position_id_list):
         # 获取职位信息扩展信息列表
-        position_ext_list, position_ext_id_list = self.get_position_ext_list(
+        position_ext_list, position_ext_id_list = yield self.get_position_ext_list(
             position_id_list)
 
         # 获取职位自定义字段列表
-        customs_list, customs_id_list = self.get_customs_list(position_ext_id_list)
+        customs_list, customs_id_list = yield self.get_customs_list(position_ext_id_list)
 
         position_custom_list = []
         position_custom = ObjectDict()
@@ -164,11 +164,12 @@ class PositionPageService(PageService):
         :return:
         """
         params = dict()
+        position_ext_list = []
         if position_id_list and isinstance(position_id_list, list):
             params.update(conds=["pid in %s" % set_literl(position_id_list)])
-        position_ext_list = yield self.job_position_ext_ds.get_position_ext_list(**params)
+            position_ext_list = yield self.job_position_ext_ds.get_position_ext_list(**params)
+
         position_ext_id_list = []
-        position_custom_id_list = []
         if position_ext_list:
             for e in position_ext_list:
                 position_ext_id_list.append(e.pid)
@@ -182,15 +183,15 @@ class PositionPageService(PageService):
         :return:
         """
         params = dict()
+        customs_list = []
         if position_ext_id_list and isinstance(position_ext_id_list, list):
             params.update(conds=["id in %s" % set_literl(position_ext_id_list)])
-        customs_list = yield self.job_custom_ds.get_customs_list(**params)
+            customs_list = yield self.job_custom_ds.get_customs_list(**params)
         customs_id_list = []
         if customs_list:
             for e in customs_list:
                 customs_id_list.append(e.id)
         return customs_list, customs_id_list
-
 
     @staticmethod
     def _make_recom(user_id):
@@ -423,6 +424,7 @@ class PositionPageService(PageService):
                     position.salary_top, position.salary_bottom)
                 position.publish_date = jd_update_date(str_2_date(position.publish_date, self.constant.TIME_FORMAT))
                 position.team_name = team_name_dict.get(pid_teamid_dict.get(position.id, 0), '')
+                position.employee_only = True
             return rp_position_list
         return res
 

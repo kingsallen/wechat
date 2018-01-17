@@ -841,7 +841,7 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
         position_custom_list = []
         position_custom_id_list = []
         if suppress_apply:
-            position_custom_list, position_custom_id_list = self.position_ps.get_position_custom_list(position_id_list)
+            position_custom_list, position_custom_id_list = yield self.position_ps.get_position_custom_list(position_id_list)
 
         # 是否达到投递上线
         social_res, school_res = yield self.application_ps.get_application_apply_status(self.current_user.sysuser.id, self.current_user.company.id)
@@ -889,7 +889,7 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
             # 判断是否显示红包
             is_employee = bool(self.current_user.employee)
             position_ex['has_reward'] = pos.is_rp_reward and (
-                is_employee and position.employee_only or not position.employee_only)
+                is_employee and pos.employee_only or not pos.employee_only)
 
             # 诺华定制
             position_ex['suppress_apply'] = ObjectDict()
@@ -907,7 +907,6 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
         self.send_json_success(
             data=ObjectDict(list=position_ex_list,
                             total_count=total_count)
-
         )
 
     @staticmethod
@@ -1003,6 +1002,7 @@ class PositionListHandler(PositionListInfraParamsMixin, BaseHandler):
 
         if hb_c:
             # 红包职位分享
+            infra_params.update(hb_config_id=hb_c)
             rp_share_info = yield self.position_ps.infra_get_rp_share_info(infra_params)
             yield self._make_share_info(self.current_user.company.id, did, rp_share_info)
         else:

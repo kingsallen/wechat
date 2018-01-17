@@ -146,7 +146,7 @@ def employee_refine_custom_fields_tpl(wechat_id, openid, link, company_name,
 
 @gen.coroutine
 def position_view_five_notice_tpl(wechat_id, openid, link, title,
-                                  salary, sys_template_id=const.TEMPLATES.POSITION_VIEWED):
+                                  salary, sys_template_id=const.TEMPLATES.POSITION_VIEWED_FIVE_TIMES):
     """职位浏览5次，向 HR 发送消息模板"""
 
     d = datetime.now()
@@ -226,7 +226,7 @@ def favposition_notice_to_applier_tpl(company_id, position_info, company_name,
 
 @gen.coroutine
 def position_share_notice_employee_tpl(company_id, title, salary, user_id, pid,
-                                       url, sys_template_id=const.TEMPLATES.POSITION_VIEWED):
+                                       url, sys_template_id=const.TEMPLATES.POSITION_VIEWED_SHARED):
     """认证员工转发职位后，向员工发送转发结果消息模板"""
 
     # 延迟10分钟发送
