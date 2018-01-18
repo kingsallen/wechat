@@ -344,13 +344,6 @@ class UserPageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def get_employee_by_id(self, employee_id):
-        ret = yield self.user_employee_ds.get_employee({
-            "id": employee_id
-        })
-        return ret
-
-    @gen.coroutine
     def update_user(self, user_id, escape_mobile=False, **kwargs):
         kwargs = ObjectDict(kwargs)
         fields = {}

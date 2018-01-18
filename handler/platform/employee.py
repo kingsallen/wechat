@@ -258,7 +258,8 @@ class EmployeeBindEmailHandler(BaseHandler):
 
         self.render(template_name='employee/certification-%s.html' % tname,
                     **tparams)
-
+        if employee_id is None:
+            self.logger.error('employee_log_id_None   current_user:{}, result:{}, message:{}, params:{}'.format(self.current_user, result, message, self.params))
         employee = yield self.user_ps.get_employee_by_id(employee_id)
 
         if result and employee:
