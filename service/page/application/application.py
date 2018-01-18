@@ -104,6 +104,8 @@ class ApplicationPageService(PageService):
         :param company_id:
         :return: social_res:true/false, school_res:true/false  # ture 表示命中限制，不能投递，false 表示可以投递
         """
+        if user_id is None or company_id is None:
+            return False, False
         req = ObjectDict({
             'user_id': user_id,
             'company_id': company_id,
