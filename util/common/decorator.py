@@ -108,14 +108,13 @@ def cache(prefix=None, key=None, ttl=60, hash=True, lock=True, separator=":"):
                 redis_key = "{prefix}{separator}{redis_key}".format(prefix=prefix, separator=separator,
                                                                     redis_key=redis_key)
 
-                if base_cache.exists(redis_key):
-                    try:
-                        cache_data = base_cache.get(redis_key)
-                        if cache_data is None:
-                            logger.error('redis_key:{}, redis_key_is_alive:{}'.format(redis_key, base_cache.exists(redis_key)))
-                    except Exception as e:
-                        logger.error(e)
-                else:
+                cache_data = None
+                try:
+                    cache_data = base_cache.get(redis_key)
+                except Exception as e:
+                    logger.error(e)
+                    
+                if cache_data is None:
                     cache_data = yield func(*args, **kwargs)
                     if cache_data is not None:
                         try:
