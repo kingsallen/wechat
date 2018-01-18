@@ -29,4 +29,5 @@ class HrCmsMediaDao(BaseDao):
             "disable": self.constant.TYPE_INT,  # 0:无效 1:有效
             "create_time": self.constant.TYPE_TIMESTAMP,  # 创建时间
             "update_time": self.constant.TYPE_TIMESTAMP,  # 更新时间
+            "res_attrs": self.constant.TYPE_STRING  # 图片裁剪
         }
