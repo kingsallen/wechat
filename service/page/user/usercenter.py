@@ -5,8 +5,9 @@ from tornado import gen
 
 from service.page.base import PageService
 from util.common import ObjectDict
-from util.tool.str_tool import gen_salary
+from util.tool.str_tool import gen_salary, set_literl
 from util.tool.date_tool import jd_update_date, str_2_date
+import conf.common as const
 
 
 class UsercenterPageService(PageService):
@@ -98,10 +99,40 @@ class UsercenterPageService(PageService):
             fav_pos['city'] = e.city
             fav_pos['salary'] = gen_salary(e.salary_top, e.salary_bottom)
             fav_pos['update_time'] = jd_update_date(str_2_date(e.update_time, self.constant.TIME_FORMAT))
-            fav_pos['states'] = "已过期" if e.status == 2 else ""
+            fav_pos['states'] = "已过期" if e.status in [const.POSITION_STATUS_DELETED, const.POSITION_STATUS_WITHDRAWN] else ""
             fav_pos['signature'] = e.signature
             obj_list.append(fav_pos)
         raise gen.Return(obj_list)
+
+    @gen.coroutine
+    def get_user_position_stared_list(self, user_id, position_id_list):
+        """返回用户感兴趣职位列表"""
+        fav_position_id_list = []
+        if user_id is None or position_id_list is None:
+            return fav_position_id_list
+        param = dict(conds={'sysuser_id': user_id},
+                     fields=['position_id'])
+        if position_id_list and isinstance(position_id_list, list):
+            param.update(appends=["and position_id in %s" % set_literl(position_id_list)])
+        fav_position_list = yield self.user_fav_position_ds.get_user_fav_position_list(**param)
+        if fav_position_list:
+            fav_position_id_list = [e.position_id for e in fav_position_list]
+        return fav_position_id_list
+
+    @gen.coroutine
+    def get_applied_applications_list(self, user_id, position_id_list):
+        """返回用户求职记录列表"""
+        applied_applications_id_list = []
+        if user_id is None or position_id_list is None:
+            return applied_applications_id_list
+        param = dict(conds={'applier_id': user_id},
+                     fields=['position_id'])
+        if position_id_list and isinstance(position_id_list, list):
+            param.update(appends=["and position_id in %s" % set_literl(position_id_list)])
+        applied_applications_list = yield self.job_application_ds.get_applied_applications_list(**param)
+        if applied_applications_list:
+            applied_applications_id_list = [e.position_id for e in applied_applications_list]
+        return applied_applications_id_list
 
     @gen.coroutine
     def get_applied_applications(self, user_id):

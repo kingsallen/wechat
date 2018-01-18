@@ -101,6 +101,9 @@ MEDIA_TYPE = ('image', 'video')
 # 职位列表页设置
 POSITION_LIST_PAGE_COUNT = 10
 
+# sug数设置
+SUG_LIST_COUNT = 5
+
 # 职位列表调用基础服务使用的学历查询字符串
 
 SEARCH_DEGREE = ObjectDict({

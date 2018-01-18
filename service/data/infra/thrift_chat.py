@@ -70,7 +70,7 @@ class ThriftChatDataService(DataService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def save_chat(self, room_id, content, position_id, speaker):
+    def save_chat(self, room_id, content, position_id, speaker, origin):
         """
         记录聊天内容
         :param room_id:
@@ -80,5 +80,5 @@ class ThriftChatDataService(DataService):
         :return:
         """
 
-        ret = yield self.chat_service_cilent.saveChat(int(room_id), str(content), int(position_id), int(speaker))
+        ret = yield self.chat_service_cilent.saveChat(int(room_id), str(content), int(position_id), int(speaker), int(origin))
         raise gen.Return(ret)

@@ -111,7 +111,7 @@ class ChatPageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def save_chat(self, room_id, content, position_id, speaker=0):
+    def save_chat(self, room_id, content, position_id, origin, speaker=0):
         """
         记录聊天内容
         :param room_id:
@@ -121,7 +121,7 @@ class ChatPageService(PageService):
         :return:
         """
 
-        ret = yield self.thrift_chat_ds.save_chat(room_id, content, position_id, speaker)
+        ret = yield self.thrift_chat_ds.save_chat(room_id, content, position_id, speaker, origin)
         raise gen.Return(ret)
 
     @gen.coroutine

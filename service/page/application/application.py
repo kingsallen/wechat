@@ -67,7 +67,7 @@ class ApplicationPageService(PageService):
 
     @log_time
     @gen.coroutine
-    def is_allowed_apply_position(self, user_id, company_id):
+    def is_allowed_apply_position(self, user_id, company_id, position_id):
         """获取一个月内该用户的申请数量
         返回该用户是否可申请该职位
         reference: https://wiki.moseeker.com/application-api.md
@@ -82,18 +82,41 @@ class ApplicationPageService(PageService):
 
         """
 
-        if user_id is None or company_id is None:
+        if user_id is None or company_id is None or position_id is None:
             raise gen.Return(True)
 
         req = ObjectDict({
             'user_id':    user_id,
             'company_id': company_id,
+            'position_id': position_id,
         })
 
         ret = yield self.infra_application_ds.get_application_apply_count(req)
         bool_res = ret.data if ret.status == 0 else True
 
         raise gen.Return(bool_res)
+
+    @gen.coroutine
+    def get_application_apply_status(self, user_id, company_id):
+        """
+        获取求职者该公司社招校招职位是否达到投递上限
+        :param user_id:
+        :param company_id:
+        :return: social_res:true/false, school_res:true/false  # ture 表示命中限制，不能投递，false 表示可以投递
+        """
+        if user_id is None or company_id is None:
+            return False, False
+        req = ObjectDict({
+            'user_id': user_id,
+            'company_id': company_id,
+        })
+        result, data = yield self.infra_application_ds.get_application_apply_status(req)
+        if not result:
+            self.logger.error('get application apply status happened some error')
+            return False, False
+        social_res = data.get('socialApply')
+        school_res = data.get('schoolApply')
+        return social_res, school_res
 
     @gen.coroutine
     def update_candidate_company(self, name, user_id):

@@ -30,7 +30,7 @@ class PositionHandler(BaseHandler):
             pos_item = position_es.hits.hits[0] if position_es.hits.hits else ObjectDict()
 
             self.logger.debug("[JD]构建职位基础信息")
-            res_position, cover = yield self._make_jd_info(self.locale, position_info, company_info, pos_item)
+            res_position, cover = yield self._make_jd_info(self.locale, position_info, company_info, pos_item, position_id)
 
             self.logger.debug("[JD]构建职位详情信息")
             jd_detail = yield self._make_jd_detail(position_info, pos_item)
@@ -79,7 +79,7 @@ class PositionHandler(BaseHandler):
         return default
 
     @gen.coroutine
-    def _make_jd_info(self, locale, position_info, company_info, pos_item):
+    def _make_jd_info(self, locale, position_info, company_info, pos_item, position_id):
 
         team_img, job_img, company_img = yield self.aggregation_ps.opt_jd_home_img(pos_item)
 
@@ -94,7 +94,7 @@ class PositionHandler(BaseHandler):
         # 是否超出投递上限。每月每家公司一个人只能申请3次
         self.logger.debug("[JD]处理投递上限")
         can_apply = yield self.application_ps.is_allowed_apply_position(
-            self.current_user.sysuser.id, company_info.id)
+            self.current_user.sysuser.id, company_info.id, position_id)
 
         # 获得母公司信息，新 JD 开关，IM 聊天开关，由母公司控制
         parent_cmp_info = yield self._make_parent_company_info(position_info.company_id)
