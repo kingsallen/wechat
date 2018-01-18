@@ -72,6 +72,7 @@ def template1_data(resource, member_list=None):
     return {
         'sub_title': resource.sub_title,
         'longtext': resource.longtexts,
+        'clip_attrs': resource.res_attrs,
         'media_url': make_static_url(resource.media_url),
         'media_type': MEDIA_TYPE[resource.media_type],
         'member_list': member_list
@@ -100,6 +101,7 @@ def template2_data(resource_list):
                 'title': resource.title,
                 'sub_title': resource.sub_title,
                 'description': resource.longtexts,
+                'clip_attrs': resource.res_attrs,
                 'media_url': make_static_url(resource.media_url),
                 'media_type': MEDIA_TYPE[resource.media_type]
             } for resource in resource_list]
@@ -135,6 +137,7 @@ def template4_data(resource_list, sub_type):
         data = [{
                     'sub_title': resource.sub_title,
                     'media_url': make_static_url(resource.media_url),
+                    'clip_attrs': resource.res_attrs,
                     'link': resource.link
                 } for resource in resource_list]
     else:
@@ -393,6 +396,7 @@ def make_company_module_type_2(media_list, module_name, more_link=""):
     data = [{
         'sub_title': big_one.sub_title,
         'longtext': big_one.longtexts,
+        'clip_attrs': big_one.res_attrs,
         'media_url': make_static_url(big_one.media_url),
         'media_type': MEDIA_TYPE[big_one.media_type],
         'member_list': member_list
@@ -421,6 +425,7 @@ def make_company_module_type_3(media_list, module_name, more_link=""):
     data = [{
         'sub_title': big_one.sub_title,
         'longtext': big_one.longtexts,
+        'clip_attrs': big_one.res_attrs,
         'media_url': make_static_url(big_one.media_url),
         'media_type': MEDIA_TYPE[big_one.media_type],
         'member_list': member_list
