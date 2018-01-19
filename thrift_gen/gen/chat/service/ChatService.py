@@ -45,14 +45,10 @@ class Iface(object):
         """
         pass
 
-    def saveChat(self, roomId, content, positionId, speaker, origin):
+    def saveChat(self, chat):
         """
         Parameters:
-         - roomId
-         - content
-         - positionId
-         - speaker
-         - origin
+         - chat
         """
         pass
 
@@ -233,29 +229,21 @@ class Client(Iface):
             raise result.e
         raise TApplicationException(TApplicationException.MISSING_RESULT, "listChatLogs failed: unknown result")
 
-    def saveChat(self, roomId, content, positionId, speaker, origin):
+    def saveChat(self, chat):
         """
         Parameters:
-         - roomId
-         - content
-         - positionId
-         - speaker
-         - origin
+         - chat
         """
         self._seqid += 1
         future = self._reqs[self._seqid] = concurrent.Future()
-        self.send_saveChat(roomId, content, positionId, speaker, origin)
+        self.send_saveChat(chat)
         return future
 
-    def send_saveChat(self, roomId, content, positionId, speaker, origin):
+    def send_saveChat(self, chat):
         oprot = self._oprot_factory.getProtocol(self._transport)
         oprot.writeMessageBegin('saveChat', TMessageType.CALL, self._seqid)
         args = saveChat_args()
-        args.roomId = roomId
-        args.content = content
-        args.positionId = positionId
-        args.speaker = speaker
-        args.origin = origin
+        args.chat = chat
         args.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -462,7 +450,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = saveChat_result()
         try:
-            yield gen.maybe_future(self._handler.saveChat(args.roomId, args.content, args.positionId, args.speaker, args.origin))
+            yield gen.maybe_future(self._handler.saveChat(args.chat))
         except thrift_gen.gen.common.struct.ttypes.CURDException as e:
             result.e = e
         oprot.writeMessageBegin("saveChat", TMessageType.REPLY, seqid)
@@ -989,28 +977,16 @@ class listChatLogs_result(object):
 class saveChat_args(object):
     """
     Attributes:
-     - roomId
-     - content
-     - positionId
-     - speaker
-     - origin
+     - chat
     """
 
     thrift_spec = (
         None,  # 0
-        (1, TType.I32, 'roomId', None, None, ),  # 1
-        (2, TType.STRING, 'content', 'UTF8', None, ),  # 2
-        (3, TType.I32, 'positionId', None, None, ),  # 3
-        (4, TType.BYTE, 'speaker', None, None, ),  # 4
-        (5, TType.BYTE, 'origin', None, None, ),  # 5
+        (1, TType.STRUCT, 'chat', (thrift_gen.gen.chat.struct.ttypes.ChatVO, thrift_gen.gen.chat.struct.ttypes.ChatVO.thrift_spec), None, ),  # 1
     )
 
-    def __init__(self, roomId=None, content=None, positionId=None, speaker=None, origin=None,):
-        self.roomId = roomId
-        self.content = content
-        self.positionId = positionId
-        self.speaker = speaker
-        self.origin = origin
+    def __init__(self, chat=None,):
+        self.chat = chat
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -1022,28 +998,9 @@ class saveChat_args(object):
             if ftype == TType.STOP:
                 break
             if fid == 1:
-                if ftype == TType.I32:
-                    self.roomId = iprot.readI32()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 2:
-                if ftype == TType.STRING:
-                    self.content = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 3:
-                if ftype == TType.I32:
-                    self.positionId = iprot.readI32()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 4:
-                if ftype == TType.BYTE:
-                    self.speaker = iprot.readByte()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 5:
-                if ftype == TType.BYTE:
-                    self.origin = iprot.readByte()
+                if ftype == TType.STRUCT:
+                    self.chat = thrift_gen.gen.chat.struct.ttypes.ChatVO()
+                    self.chat.read(iprot)
                 else:
                     iprot.skip(ftype)
             else:
@@ -1056,25 +1013,9 @@ class saveChat_args(object):
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
         oprot.writeStructBegin('saveChat_args')
-        if self.roomId is not None:
-            oprot.writeFieldBegin('roomId', TType.I32, 1)
-            oprot.writeI32(self.roomId)
-            oprot.writeFieldEnd()
-        if self.content is not None:
-            oprot.writeFieldBegin('content', TType.STRING, 2)
-            oprot.writeString(self.content.encode('utf-8') if sys.version_info[0] == 2 else self.content)
-            oprot.writeFieldEnd()
-        if self.positionId is not None:
-            oprot.writeFieldBegin('positionId', TType.I32, 3)
-            oprot.writeI32(self.positionId)
-            oprot.writeFieldEnd()
-        if self.speaker is not None:
-            oprot.writeFieldBegin('speaker', TType.BYTE, 4)
-            oprot.writeByte(self.speaker)
-            oprot.writeFieldEnd()
-        if self.origin is not None:
-            oprot.writeFieldBegin('origin', TType.BYTE, 5)
-            oprot.writeByte(self.origin)
+        if self.chat is not None:
+            oprot.writeFieldBegin('chat', TType.STRUCT, 1)
+            self.chat.write(oprot)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()

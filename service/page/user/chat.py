@@ -14,7 +14,6 @@ import json
 
 
 class ChatPageService(PageService):
-
     def __init__(self):
         super().__init__()
 
@@ -50,7 +49,10 @@ class ChatPageService(PageService):
                 room['id'] = e.id
                 room['content'] = e.content
                 room['chat_time'] = str_2_date(e.create_time, const.TIME_FORMAT_MINUTE)
-                room['speaker'] = e.speaker # 0：求职者，1：HR
+                room['speaker'] = e.speaker,  # 0：求职者，1：HR
+                room['picUrl'] = e.picUrl,
+                room['btnContent'] = e.btnContent,
+                room['msgType'] = e.msgType
                 obj_list.append(room)
 
         raise gen.Return(obj_list)
@@ -64,36 +66,36 @@ class ChatPageService(PageService):
         hr_info = ObjectDict()
         if ret.hr:
             hr_info = ObjectDict(
-                hr_id = ret.hr.hrId,
-                hr_name = ret.hr.hrName or "HR",
-                hr_headimg = make_static_url(ret.hr.hrHeadImg or const.HR_HEADIMG)
+                hr_id=ret.hr.hrId,
+                hr_name=ret.hr.hrName or "HR",
+                hr_headimg=make_static_url(ret.hr.hrHeadImg or const.HR_HEADIMG)
             )
 
         user_info = ObjectDict()
         if ret.user:
             user_info = ObjectDict(
-                user_id = ret.user.userId,
-                user_name = ret.user.userName,
-                user_headimg = make_static_url(ret.user.userHeadImg or const.SYSUSER_HEADIMG)
+                user_id=ret.user.userId,
+                user_name=ret.user.userName,
+                user_headimg=make_static_url(ret.user.userHeadImg or const.SYSUSER_HEADIMG)
             )
 
         position_info = ObjectDict()
         if ret.position:
             position_info = ObjectDict(
-                pid = ret.position.positionId,
-                title = ret.position.positionTitle,
-                company_name = ret.position.companyName,
-                city = ret.position.city,
-                salary = gen_salary(ret.position.salaryTop, ret.position.salaryBottom),
-                update_time = str_2_date(ret.position.updateTime, const.TIME_FORMAT_MINUTE)
+                pid=ret.position.positionId,
+                title=ret.position.positionTitle,
+                company_name=ret.position.companyName,
+                city=ret.position.city,
+                salary=gen_salary(ret.position.salaryTop, ret.position.salaryBottom),
+                update_time=str_2_date(ret.position.updateTime, const.TIME_FORMAT_MINUTE)
             )
         res = ObjectDict(
-            hr = hr_info,
-            user = user_info,
-            position = position_info,
-            chat_debut = ret.chatDebut,
-            follow_qx = qxuser.is_subscribe == 1,
-            room_id = ret.roomId,
+            hr=hr_info,
+            user=user_info,
+            position=position_info,
+            chat_debut=ret.chatDebut,
+            follow_qx=qxuser.is_subscribe == 1,
+            room_id=ret.roomId,
         )
 
         raise gen.Return(res)
@@ -111,17 +113,14 @@ class ChatPageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def save_chat(self, room_id, content, position_id, origin, speaker=0):
+    def save_chat(self, params):
         """
         记录聊天内容
-        :param room_id:
-        :param content:
-        :param position_id:
-        :param speaker: 0：求职者，1：HR， 2：chatbot
+        :param params:
         :return:
         """
 
-        ret = yield self.thrift_chat_ds.save_chat(room_id, content, position_id, speaker, origin)
+        ret = yield self.thrift_chat_ds.save_chat(params)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -207,30 +206,36 @@ class ChatPageService(PageService):
 
             if res_type == "text":
                 content = ret.get("text", "")
-                ret_ext = ret.get("picUri", "")
+                pic_url = ret.get("picUri", "")
                 msg_type = "html"
+                btn_content = []
             elif res_type == "image":
                 content = ret.get("text", "")
-                ret_ext = ret.get("picUri", "")
+                pic_url = ret.get("picUri", "")
                 msg_type = "image"
+                btn_content = []
             elif res_type == "qrcode":
                 content = ret.get("text", "")
-                ret_ext = ret.get("picUri", "")
+                pic_url = ret.get("picUri", "")
                 msg_type = "qrcode"
+                btn_content = []
             elif res_type == "button":
                 content = ret.get("text", "")
-                ret_ext = ret.get("btnContent", [])
+                btn_content = ret.get("btnContent", [])
+                pic_url = ""
                 msg_type = "button"
             else:
                 content = ''
-                ret_ext = ''
+                pic_url = ''
                 msg_type = ''
+                btn_content = []
             ret_message = ObjectDict()
             ret_message['content'] = content
-            ret_message['ret_ext'] = ret_ext
+            ret_message['pic_url'] = pic_url
+            ret_message['btn_content'] = btn_content
             ret_message['msg_type'] = msg_type
         except Exception as e:
             self.logger.error(e)
             return ""
         else:
-            return ret
+            return ret_message

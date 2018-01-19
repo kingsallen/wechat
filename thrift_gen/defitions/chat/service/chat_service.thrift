@@ -9,7 +9,7 @@ service ChatService {
     chat_struct.HRChatRoomsVO listHRChatRoom(1: i32 hrId, 2: i32 pageNo, 3: i32 pageSize) throws (1: common_struct.CURDException e)
     chat_struct.UserChatRoomsVO listUserChatRoom(1: i32 userId, 2: i32 pageNo, 3: i32 pageSize) throws (1: common_struct.CURDException e)
     chat_struct.ChatsVO listChatLogs(1: i32 roomId, 2: i32 pageNo, 3: i32 pageSize) throws (1: common_struct.CURDException e)
-    void saveChat(1: i32 roomId, 2: string content, 3: i32 positionId, 4: i8 speaker, 5: i8 origin) throws (1: common_struct.CURDException e)
+    void saveChat(1: chat_struct.ChatVO chat) throws (1: common_struct.CURDException e)
     chat_struct.ResultOfSaveRoomVO enterRoom(1: i32 userId, 2: i32 hrId, 3: i32 positionId, 4: i32 roomId, 5: bool is_gamma) throws (1: common_struct.CURDException e)
     chat_struct.ChatVO getChat(1: i32 roomId, 2: i8 speaker) throws (1: common_struct.CURDException e)
     void leaveChatRoom(1: i32 roomId, 2: i8 speaker)

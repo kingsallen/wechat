@@ -544,6 +544,11 @@ class ChatVO(object):
      - speaker
      - origin
      - origin_str
+     - msgType
+     - picUrl
+     - btnContent
+     - roomId
+     - positionId
     """
 
     thrift_spec = (
@@ -554,15 +559,25 @@ class ChatVO(object):
         (4, TType.BYTE, 'speaker', None, None, ),  # 4
         (5, TType.BYTE, 'origin', None, None, ),  # 5
         (6, TType.STRING, 'origin_str', 'UTF8', None, ),  # 6
+        (7, TType.STRING, 'msgType', 'UTF8', None, ),  # 7
+        (8, TType.STRING, 'picUrl', 'UTF8', None, ),  # 8
+        (9, TType.LIST, 'btnContent', (TType.STRUCT, (BtnContent, BtnContent.thrift_spec), False), None, ),  # 9
+        (10, TType.I32, 'roomId', None, None, ),  # 10
+        (11, TType.I32, 'positionId', None, None, ),  # 11
     )
 
-    def __init__(self, id=None, content=None, create_time=None, speaker=None, origin=None, origin_str=None,):
+    def __init__(self, id=None, content=None, create_time=None, speaker=None, origin=None, origin_str=None, msgType=None, picUrl=None, btnContent=None, roomId=None, positionId=None,):
         self.id = id
         self.content = content
         self.create_time = create_time
         self.speaker = speaker
         self.origin = origin
         self.origin_str = origin_str
+        self.msgType = msgType
+        self.picUrl = picUrl
+        self.btnContent = btnContent
+        self.roomId = roomId
+        self.positionId = positionId
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -603,6 +618,37 @@ class ChatVO(object):
                     self.origin_str = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
+            elif fid == 7:
+                if ftype == TType.STRING:
+                    self.msgType = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 8:
+                if ftype == TType.STRING:
+                    self.picUrl = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 9:
+                if ftype == TType.LIST:
+                    self.btnContent = []
+                    (_etype17, _size14) = iprot.readListBegin()
+                    for _i18 in range(_size14):
+                        _elem19 = BtnContent()
+                        _elem19.read(iprot)
+                        self.btnContent.append(_elem19)
+                    iprot.readListEnd()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 10:
+                if ftype == TType.I32:
+                    self.roomId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 11:
+                if ftype == TType.I32:
+                    self.positionId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -636,6 +682,89 @@ class ChatVO(object):
         if self.origin_str is not None:
             oprot.writeFieldBegin('origin_str', TType.STRING, 6)
             oprot.writeString(self.origin_str.encode('utf-8') if sys.version_info[0] == 2 else self.origin_str)
+            oprot.writeFieldEnd()
+        if self.msgType is not None:
+            oprot.writeFieldBegin('msgType', TType.STRING, 7)
+            oprot.writeString(self.msgType.encode('utf-8') if sys.version_info[0] == 2 else self.msgType)
+            oprot.writeFieldEnd()
+        if self.picUrl is not None:
+            oprot.writeFieldBegin('picUrl', TType.STRING, 8)
+            oprot.writeString(self.picUrl.encode('utf-8') if sys.version_info[0] == 2 else self.picUrl)
+            oprot.writeFieldEnd()
+        if self.btnContent is not None:
+            oprot.writeFieldBegin('btnContent', TType.LIST, 9)
+            oprot.writeListBegin(TType.STRUCT, len(self.btnContent))
+            for iter20 in self.btnContent:
+                iter20.write(oprot)
+            oprot.writeListEnd()
+            oprot.writeFieldEnd()
+        if self.roomId is not None:
+            oprot.writeFieldBegin('roomId', TType.I32, 10)
+            oprot.writeI32(self.roomId)
+            oprot.writeFieldEnd()
+        if self.positionId is not None:
+            oprot.writeFieldBegin('positionId', TType.I32, 11)
+            oprot.writeI32(self.positionId)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class BtnContent(object):
+    """
+    Attributes:
+     - content
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.STRING, 'content', 'UTF8', None, ),  # 1
+    )
+
+    def __init__(self, content=None,):
+        self.content = content
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.content = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('BtnContent')
+        if self.content is not None:
+            oprot.writeFieldBegin('content', TType.STRING, 1)
+            oprot.writeString(self.content.encode('utf-8') if sys.version_info[0] == 2 else self.content)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -713,11 +842,11 @@ class ChatsVO(object):
             elif fid == 5:
                 if ftype == TType.LIST:
                     self.chatLogs = []
-                    (_etype17, _size14) = iprot.readListBegin()
-                    for _i18 in range(_size14):
-                        _elem19 = ChatVO()
-                        _elem19.read(iprot)
-                        self.chatLogs.append(_elem19)
+                    (_etype24, _size21) = iprot.readListBegin()
+                    for _i25 in range(_size21):
+                        _elem26 = ChatVO()
+                        _elem26.read(iprot)
+                        self.chatLogs.append(_elem26)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
@@ -750,8 +879,8 @@ class ChatsVO(object):
         if self.chatLogs is not None:
             oprot.writeFieldBegin('chatLogs', TType.LIST, 5)
             oprot.writeListBegin(TType.STRUCT, len(self.chatLogs))
-            for iter20 in self.chatLogs:
-                iter20.write(oprot)
+            for iter27 in self.chatLogs:
+                iter27.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
