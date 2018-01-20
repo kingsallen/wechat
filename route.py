@@ -48,6 +48,7 @@ import handler.platform.team
 import handler.platform.recom
 import handler.platform.compatible
 import handler.platform.user
+import handler.platform.captcha
 
 import handler.qx.app
 import handler.qx.aggregation
@@ -120,6 +121,7 @@ platform_routes = [
     (r"/position/(?P<position_id>\d+)",              handler.platform.position.PositionHandler,                 {"event": "position_info"}),
     (r"/position/?",                                 handler.platform.position.PositionListHandler,             {"event": "position_list"},      'position_list'),
     (r"/start/?",                                    handler.platform.landing.LandingHandler,                   {"event": "start_landing"}),
+    (r"/captcha/?",                                 handler.platform.captcha.CaptchaHandler,                   {"event": "captcha_info"}),
     (r"/company/(\d+)",                              handler.platform.companyrelation.CompanyInfoRedirectHandler, {"event": "company_old_info"}, "old_company_info_page"),
     (r"/company",                                    handler.platform.companyrelation.CompanyHandler,           {"event": "company_info"},       "new_company_info_page"),
     (r"/company/team/(\d+)",                         handler.platform.team.TeamDetailHandler,                   {"event": "team_detail"}),

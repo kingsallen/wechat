@@ -104,6 +104,7 @@ PAGE_FORGET_PASSWORD = "忘记密码"
 PROFILE_PREVIEW = "预览个人档案"
 PROFIEL_VIEW = "个人信息"
 PAGE_AI_EMPLOYEE_SURVEY = "填写信息"
+PAGE_CAPTCHA = "验证码"
 
 # ++++++++++REDIS KEYS++++++++
 SESSION_USER = "SESSION_USER_{0}_{1}"
