@@ -12,6 +12,12 @@ class CaptchaPageService(PageService):
 
     @gen.coroutine
     def post_verification(self, captcha, channel, account_id):
+        """
+        :param captcha: 回流的平台编号。1 前程无忧，2 猎聘，3 智联， 6 最佳东方， 7 一览英才
+        :param channel: 验证码
+        :param account_id: 第三方渠道账号ID
+        :return:
+        """
 
         req = ObjectDict({
             'info': captcha,

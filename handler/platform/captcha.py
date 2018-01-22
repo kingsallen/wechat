@@ -8,7 +8,9 @@ from util.common import ObjectDict
 
 
 class CaptchaHandler(BaseHandler):
-
+    """
+    处理验证码
+    """
     @handle_response
     @authenticated
     @gen.coroutine
@@ -33,10 +35,18 @@ class CaptchaHandler(BaseHandler):
         account_id = self.params.accountId
         captcha = self.json_args.captcha
         status, message = yield self.captcha_ps.post_verification(captcha, channel, account_id)
-        data = ObjectDict({'message': message})
+
         if status == 0:
+            data = ObjectDict({
+                'status': True,
+                'message': message
+            })
             self.send_json_success(data=data)
         else:
+            data = ObjectDict({
+                'status': False,
+                'message': message
+            })
             self.send_json_error(data=data)
 
 
