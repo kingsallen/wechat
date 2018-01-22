@@ -607,6 +607,8 @@ class ChatVO(object):
      - msgType
      - picUrl
      - btnContent
+     - roomId
+     - positionId
     """
 
     thrift_spec = (
@@ -620,9 +622,11 @@ class ChatVO(object):
         (7, TType.STRING, 'msgType', 'UTF8', None, ),  # 7
         (8, TType.STRING, 'picUrl', 'UTF8', None, ),  # 8
         (9, TType.LIST, 'btnContent', (TType.STRUCT, (BtnContent, BtnContent.thrift_spec), False), None, ),  # 9
+        (10, TType.I32, 'roomId', None, None, ),  # 10
+        (11, TType.I32, 'positionId', None, None, ),  # 11
     )
 
-    def __init__(self, id=None, content=None, create_time=None, speaker=None, origin=None, origin_str=None, msgType=None, picUrl=None, btnContent=None,):
+    def __init__(self, id=None, content=None, create_time=None, speaker=None, origin=None, origin_str=None, msgType=None, picUrl=None, btnContent=None, roomId=None, positionId=None,):
         self.id = id
         self.content = content
         self.create_time = create_time
@@ -632,6 +636,8 @@ class ChatVO(object):
         self.msgType = msgType
         self.picUrl = picUrl
         self.btnContent = btnContent
+        self.roomId = roomId
+        self.positionId = positionId
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -693,6 +699,16 @@ class ChatVO(object):
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
+            elif fid == 10:
+                if ftype == TType.I32:
+                    self.roomId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 11:
+                if ftype == TType.I32:
+                    self.positionId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -741,6 +757,14 @@ class ChatVO(object):
             for iter20 in self.btnContent:
                 iter20.write(oprot)
             oprot.writeListEnd()
+            oprot.writeFieldEnd()
+        if self.roomId is not None:
+            oprot.writeFieldBegin('roomId', TType.I32, 10)
+            oprot.writeI32(self.roomId)
+            oprot.writeFieldEnd()
+        if self.positionId is not None:
+            oprot.writeFieldBegin('positionId', TType.I32, 11)
+            oprot.writeI32(self.positionId)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
