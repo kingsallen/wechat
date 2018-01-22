@@ -11,6 +11,8 @@ COMPANY_TEAM = '/company/team'
 SEARCH_FILITER = '/start'
 CUSTOMIZE_EDX = '/custom/emailapply'
 
+CAPTCHA_CHECKED = '/captcha/checked'
+
 EMPLOYEE_VERIFY = '/app/employee/binding'
 EMPLOYEE_RECOMMENDS = '/app/employee/recommends'
 EMPLOYEE_CUSTOMINFO = '/employee/custominfo'
