@@ -11,7 +11,7 @@ from util.common import ObjectDict
 from util.common.cipher import encode_id
 from util.tool.date_tool import jd_update_date, str_2_date
 from util.tool.str_tool import gen_salary, split, set_literl, gen_degree, gen_experience, to_str
-from util.tool.temp_data_tool import make_position_detail_cms, make_team, template3, make_team_instead_cms
+from util.tool.temp_data_tool import make_position_detail_cms, make_team, template3
 from util.tool.url_tool import make_static_url
 from util.common.decorator import log_time
 
