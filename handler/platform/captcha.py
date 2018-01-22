@@ -13,17 +13,18 @@ class CaptchaHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def get(self):
-        data = 'captcha'
-        self.render_page(
-            template_name='',
-            data=data,
-            meta_title=const.PAGE_CAPTCHA
+        self.render(
+            template_name=''
         )
 
     @handle_response
     @authenticated
     @gen.coroutine
     def post(self):
+        try:
+            self.guarantee('captcha')
+        except AttributeError:
+            return
         captcha = self.params.captcha
         status, message = yield self.captcha_ps.get_verification(captcha)
         data = ObjectDict({'message': message})
