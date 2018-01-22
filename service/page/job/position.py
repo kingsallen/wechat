@@ -321,19 +321,6 @@ class PositionPageService(PageService):
 
         raise gen.Return(res)
 
-    @gen.coroutine
-    def get_team_data_instead_cms(self, team, teamname_custom):
-        res = None
-        team_members = yield self.hr_team_member_ds.get_team_member_list(
-            conds={'team_id': team.id, 'disable': 0}
-        )
-        resources = yield self.hr_resource_ds.get_resource_by_ids(
-            id_list=[m.res_id for m in team_members] + [team.res_id]
-        )
-        if resources:
-            res = make_team_instead_cms(team, resources, teamname_custom)
-
-        raise gen.Return(res)
 
     @gen.coroutine
     def get_team_position(self, locale, team_id, handler_params, current_position_id, company_id, teamname_custom):
