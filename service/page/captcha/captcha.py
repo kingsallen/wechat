@@ -11,11 +11,13 @@ class CaptchaPageService(PageService):
         super().__init__()
 
     @gen.coroutine
-    def get_verification(self, captcha):
+    def post_verification(self, captcha, channel, account_id):
 
         req = ObjectDict({
-            'captcha': captcha
+            'info': captcha,
+            'channel': channel,
+            'accountId': account_id
         })
-        res = yield self.infra_captcha_ds.get_verification(req)
+        res = yield self.infra_captcha_ds.post_verification(req)
         status, message = res.status, res.message
         return status, message

@@ -13,8 +13,12 @@ class CaptchaHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def get(self):
+        channel = self.params.channel
+        accountId = self.params.accountId
         self.render(
-            template_name=''
+            template_name='',
+            channel=channel,
+            accountId=accountId
         )
 
     @handle_response
@@ -22,11 +26,13 @@ class CaptchaHandler(BaseHandler):
     @gen.coroutine
     def post(self):
         try:
-            self.guarantee('captcha')
+            self.guarantee('captcha', 'channel')
         except AttributeError:
             return
-        captcha = self.params.captcha
-        status, message = yield self.captcha_ps.get_verification(captcha)
+        channel = self.params.channel
+        account_id = self.params.accountId
+        captcha = self.json_args.captcha
+        status, message = yield self.captcha_ps.post_verification(captcha, channel, account_id)
         data = ObjectDict({'message': message})
         if status == 0:
             self.send_json_success(data=data)
