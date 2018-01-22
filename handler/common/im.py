@@ -275,8 +275,6 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
             self.redis_client.publish(self.chatroom_channel, message_body)
 
             chat_params = ChatVO(
-                roomId=self.room_id,
-                positionId=self.position_id,
                 content=bot_message.content,
                 speaker=const.CHAT_SPEAKER_BOT,
                 origin=const.ORIGIN_CHATBOT,
