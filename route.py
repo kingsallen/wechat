@@ -121,7 +121,6 @@ platform_routes = [
     (r"/position/(?P<position_id>\d+)",              handler.platform.position.PositionHandler,                 {"event": "position_info"}),
     (r"/position/?",                                 handler.platform.position.PositionListHandler,             {"event": "position_list"},      'position_list'),
     (r"/start/?",                                    handler.platform.landing.LandingHandler,                   {"event": "start_landing"}),
-    (r"/captcha/?",                                  handler.platform.captcha.CaptchaHandler,                   {"event": "captcha_info"}),
     (r"/company/(\d+)",                              handler.platform.companyrelation.CompanyInfoRedirectHandler, {"event": "company_old_info"}, "old_company_info_page"),
     (r"/company",                                    handler.platform.companyrelation.CompanyHandler,           {"event": "company_info"},       "new_company_info_page"),
     (r"/company/team/(\d+)",                         handler.platform.team.TeamDetailHandler,                   {"event": "team_detail"}),
@@ -134,12 +133,13 @@ platform_routes = [
     (r"/employee/ladder/?",                          handler.platform.employee.AwardsLadderPageHandler,         {"event": "awards_ladder_page"}),
     (r'/user/survey/?',                              handler.platform.user.UserSurveyHandler,                   {'event': 'user_survey'}),
     (r'/user/ai-recom/?',                            handler.platform.user.AIRecomHandler,                      {'event': 'user_ai-recom'}),
-    (r'/employee/survey/?',                          handler.platform.employee.EmployeeSurveyHandler,               {'event': 'employee_survey'}),
-    (r'/employee/ai-recom/(\d+)',                    handler.platform.employee.EmployeeAiRecomHandler,              {'event': 'employee_ai-recom'}),
+    (r'/employee/survey/?',                          handler.platform.employee.EmployeeSurveyHandler,           {'event': 'employee_survey'}),
+    (r'/employee/ai-recom/(\d+)',                    handler.platform.employee.EmployeeAiRecomHandler,          {'event': 'employee_ai-recom'}),
 
     # 各大公司的自定义配置
     (r"/custom/emailapply/?",                        handler.platform.customize.CustomizeEmailApplyHandler,     {"event": "customize_emailapply"}),
 
+    (r"/api/captcha/?",                              handler.platform.captcha.CaptchaHandler,                   {"event": "captcha_info"}),
     (r"/api/company/visitreq/?",                     handler.platform.companyrelation.CompanyVisitReqHandler,   {"event": "company_visitreq"}),
     (r"/api/company/survey/?",                       handler.platform.companyrelation.CompanySurveyHandler,     {"event": "company_survey"}),
     (r"/api/company/follow/?",                       handler.platform.companyrelation.CompanyFollowHandler,     {"event": "company_follow"}),
@@ -163,7 +163,7 @@ platform_routes = common_routes + platform_routes
 # 聚合号的单独 routes, 域名 platform.moseeker.com/recruit
 qx_routes = [
 
-    (r"/alipaycampaign/([A-Za-z0-9_]{1,32})/company/?",    handler.common.campaign.AlipayCampaignCompanyHandler,         {"event": "alipaycampaign/company"}),
+    (r"/alipaycampaign/([A-Za-z0-9_]{1,32})/company/?", handler.common.campaign.AlipayCampaignCompanyHandler,   {"event": "alipaycampaign/company"}),
     (r"/alipaycampaign/([A-Za-z0-9_]{1,32})/company/(\d+)/position/?",   handler.common.campaign.AlipayCampaignPositionHandler,        {"event": "alipaycampaign/position"}),
 
     (r"/api/position/(?P<position_id>\d+)",          handler.qx.position.PositionHandler,                       {"event": "position_info"}),
