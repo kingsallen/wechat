@@ -219,11 +219,11 @@ class ChatPageService(PageService):
                 pic_url = ret.get("picUri", "")
                 msg_type = "qrcode"
                 btn_content = []
-            elif res_type == "button":
+            elif res_type == "button_radio":
                 content = ret.get("text", "")
                 btn_content = ret.get("btnContent", [])
                 pic_url = ""
-                msg_type = "button"
+                msg_type = "button_radio"
             else:
                 content = ''
                 pic_url = ''
