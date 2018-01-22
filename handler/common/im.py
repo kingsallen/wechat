@@ -233,7 +233,9 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
         self.redis_client.publish(self.hr_channel, message_body)
         chat_params = ChatVO(
             content=user_message,
-            origin=const.ORIGIN_USER_OR_HR
+            origin=const.ORIGIN_USER_OR_HR,
+            roomId=int(self.room_id),
+            positionId=int(self.position_id)
         )
         yield self.chat_ps.save_chat(chat_params)
 
@@ -278,7 +280,9 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
                 origin=const.ORIGIN_CHATBOT,
                 picUrl=bot_message.ret_ext,
                 btnContent=bot_message.btn_content,
-                msgType=bot_message.msg_type
+                msgType=bot_message.msg_type,
+                roomId=int(self.room_id),
+                positionId=int(self.position_id)
             )
 
             yield self.chat_ps.save_chat(chat_params)

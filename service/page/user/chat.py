@@ -49,9 +49,9 @@ class ChatPageService(PageService):
                 room['id'] = e.id
                 room['content'] = e.content
                 room['chat_time'] = str_2_date(e.create_time, const.TIME_FORMAT_MINUTE)
-                room['speaker'] = e.speaker,  # 0：求职者，1：HR
-                room['picUrl'] = e.picUrl,
-                room['btnContent'] = e.btnContent,
+                room['speaker'] = e.speaker  # 0：求职者，1：HR
+                room['picUrl'] = e.picUrl
+                room['btnContent'] = e.btnContent
                 room['msgType'] = e.msgType
                 obj_list.append(room)
 
