@@ -41,6 +41,9 @@ struct UserChatRoomsVO {
     5:  optional list<UserChatRoomVO> rooms   //HR聊天室信息集合
 }
 
+struct BtnContent{
+    1:  optional string content
+}
 struct ChatVO {
     1:  optional i32 id,                    //页码
     2:  optional string content,            //聊天内容
@@ -53,10 +56,6 @@ struct ChatVO {
     9:  optional list<BtnContent> btnContent,         //按钮信息
     10: optional i32 roomId,                //聊天室Id
     11: optional i32 positionId             //职位Id
-}
-
-struct BtnContent{
-    1:  optional string content
 }
 
 struct ChatsVO {
