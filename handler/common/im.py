@@ -232,9 +232,7 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
 
         self.redis_client.publish(self.hr_channel, message_body)
         chat_params = ChatVO(
-            roomId=self.room_id,
             content=user_message,
-            positionId=self.position_id,
             origin=const.ORIGIN_USER_OR_HR
         )
         yield self.chat_ps.save_chat(chat_params)
