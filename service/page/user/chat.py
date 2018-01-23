@@ -42,6 +42,7 @@ class ChatPageService(PageService):
         """获得聊天历史记录"""
 
         ret = yield self.thrift_chat_ds.get_chats(room_id, page_no, page_size)
+        self.logger.debug(ret)
         obj_list = list()
         if ret.chatLogs:
             for e in ret.chatLogs:
@@ -234,6 +235,7 @@ class ChatPageService(PageService):
             ret_message['pic_url'] = pic_url
             ret_message['btn_content'] = btn_content
             ret_message['msg_type'] = msg_type
+            self.logger.debug(ret_message)
         except Exception as e:
             self.logger.error(e)
             return

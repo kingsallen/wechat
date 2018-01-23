@@ -9,6 +9,7 @@
 from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
 from thrift.protocol.TProtocol import TProtocolException
 import sys
+from globals import logger
 
 from thrift.transport import TTransport
 
@@ -701,6 +702,7 @@ class ChatVO(object):
             oprot.writeListBegin(TType.MAP, len(self.btnContent))
             for iter27 in self.btnContent:
                 oprot.writeMapBegin(TType.STRING, TType.STRING, len(iter27))
+                logger.debug('iter27:{}'.format(iter27))
                 for kiter28, viter29 in iter27.items():
                     oprot.writeString(kiter28.encode('utf-8') if sys.version_info[0] == 2 else kiter28)
                     oprot.writeString(viter29.encode('utf-8') if sys.version_info[0] == 2 else viter29)
