@@ -101,8 +101,8 @@ class TeamPageService(PageService):
         data.header = temp_data_tool.make_header(locale, company, team_index=True, **teamname_custom)
 
         # 蓝色光标做定制化需求
-        customize_ps = CustomizePageService()
-        customize_ps.blue_focus_team_index_show_summary_not_description(parent_company, teams)
+        # customize_ps = CustomizePageService()
+        # customize_ps.blue_focus_team_index_show_summary_not_description(parent_company, teams)
 
         # 解析生成团队列表页中每个团队信息子模块
         data.templates = [
