@@ -18,13 +18,15 @@ class CaptchaHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def get(self):
-        channel = self.params.channel
-        accountId = self.params.accountId
-        self.render(
-            template_name='template/adjunct/validate-captcha.html',
-            channel=channel,
-            accountId=accountId
-        )
+        param_id = self.params.paramId
+        data = yield self.captcha_ps.get_verification_params(param_id)
+        if not data:
+            self.write_error(500, message="请求失败，请重试")
+        else:
+            self.render(
+                template_name='template/adjunct/validate-captcha.html',
+                data=data
+            )
 
     @handle_response
     @authenticated
@@ -42,7 +44,8 @@ class CaptchaHandler(BaseHandler):
         if status == 0:
             data = ObjectDict({
                 'status': True,
-                'message': message
+                'message': message,
+                'next_url': next_url
             })
             self.send_json_success(data=data)
         else:

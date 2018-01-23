@@ -27,3 +27,13 @@ class CaptchaPageService(PageService):
         res = yield self.infra_captcha_ds.post_verification(req)
         status, message = res.status, res.message
         return status, message
+
+    @gen.coroutine
+    def get_verification_params(self, param_id):
+        """
+        获取生成验证页面的相关参数
+        :param param_id:
+        :return:
+        """
+        data = yield self.infra_captcha_ds.get_verification_params(param_id)
+
