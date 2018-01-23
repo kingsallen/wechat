@@ -41,7 +41,9 @@ struct UserChatRoomsVO {
     5:  optional list<UserChatRoomVO> rooms   //HR聊天室信息集合
 }
 
-typedef map<string, string> Content;
+struct BtnContent{
+    1:  optional string content
+}
 
 struct ChatVO {
     1:  optional i32 id,                    //页码
@@ -52,7 +54,7 @@ struct ChatVO {
     6:  optional string origin_str,          // 0 人工输入，1 欢迎语，2 AI输入
     7:  optional string msgType,            //消息类型
     8:  optional string picUrl,             //照片路径
-    9:  optional list<Content> btnContent,         //按钮信息
+    9:  optional list<BtnContent> btnContent,         //按钮信息
     10: optional i32 roomId,                //聊天室Id
     11: optional i32 positionId             //职位Id
 }

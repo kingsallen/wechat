@@ -209,19 +209,25 @@ class ChatPageService(PageService):
                 pic_url = ret.get("picUri", "")
                 msg_type = "html"
                 btn_content = []
+                btn_content_thrift = []
             elif res_type == "image":
                 content = ret.get("text", "")
                 pic_url = ret.get("picUri", "")
                 msg_type = "image"
                 btn_content = []
+                btn_content_thrift = []
             elif res_type == "qrcode":
                 content = ret.get("text", "")
                 pic_url = ret.get("picUri", "")
                 msg_type = "qrcode"
                 btn_content = []
+                btn_content_thrift = []
             elif res_type == "button_radio":
                 content = ret.get("text", "")
                 btn_content = ret.get("btnContent", [])
+                btn_content_thrift = []
+                for i in btn_content:
+                    btn_content_thrift.append(i.get('content'))
                 pic_url = ""
                 msg_type = "button_radio"
             else:
@@ -229,11 +235,13 @@ class ChatPageService(PageService):
                 pic_url = ''
                 msg_type = ''
                 btn_content = []
+                btn_content_thrift = []
             ret_message = ObjectDict()
             ret_message['content'] = content
             ret_message['pic_url'] = pic_url
             ret_message['btn_content'] = btn_content
             ret_message['msg_type'] = msg_type
+            ret_message['btn_content_thrift'] = btn_content_thrift
         except Exception as e:
             self.logger.error(e)
             return
