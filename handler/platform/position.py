@@ -672,16 +672,16 @@ class PositionHandler(BaseHandler):
             cms_page = yield self._make_cms_page(team.id)
             if cms_page:
                 add_item(position_data, "module_mate_day", cms_page)
+                # 玛氏定制
+                company_config = COMPANY_CONFIG.get(company_id)
+                if (
+                    company_config and not company_config.no_jd_team) or not company_config:  # 不在职位详情页展示所属团队, 目前只有Mars有这个需求,
+                    module_team = yield self._make_team(team, teamname_custom)
+                    add_item(position_data, "module_team", module_team)
             else:
-                module_team = yield self._make_team_instead_cms(team, teamname_custom)
+                module_team = yield self._make_team(team, teamname_custom)
                 if module_team:
                     add_item(position_data, "module_mate_day", module_team)
-
-            # 玛氏定制
-            company_config = COMPANY_CONFIG.get(company_id)
-            if (company_config and not company_config.no_jd_team) or not company_config:  # 不在职位详情页展示所属团队, 目前只有Mars有这个需求,
-                module_team = yield self._make_team(team, teamname_custom)
-                add_item(position_data, "module_team", module_team)
 
     @gen.coroutine
     def _make_team_position(self, team, position_id, company_id, teamname_custom):
@@ -701,12 +701,6 @@ class PositionHandler(BaseHandler):
         """所属团队，构造数据"""
         more_link = self.make_url(path.TEAM_PATH.format(team.id), self.params),
         res = yield self.position_ps.get_team_data(team, more_link, teamname_custom)
-        raise gen.Return(res)
-
-    @gen.coroutine
-    def _make_team_instead_cms(self, team, teamname_custom):
-        """所属团队，构造数据"""
-        res = yield self.position_ps.get_team_data_instead_cms(team, teamname_custom)
         raise gen.Return(res)
 
 
