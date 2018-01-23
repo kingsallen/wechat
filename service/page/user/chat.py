@@ -11,7 +11,6 @@ from util.tool.http_tool import http_post
 from util.tool.str_tool import gen_salary
 from util.tool.url_tool import make_static_url
 import json
-from thrift_gen.gen.chat.struct.ttypes import BtnContent
 
 
 class ChatPageService(PageService):
