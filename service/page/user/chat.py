@@ -53,6 +53,8 @@ class ChatPageService(PageService):
                 room['speaker'] = e.speaker  # 0：求职者，1：HR
                 room['picUrl'] = e.picUrl
                 room['btnContent'] = json.loads(e.btnContent)
+                if room['btnContent'] and type(room['btnContent']) == str:
+                    room['btnContent'] = json.loads(room['btnContent'])
                 room['msgType'] = e.msgType
                 obj_list.append(room)
 
