@@ -9,7 +9,6 @@
 from thrift.Thrift import TType, TMessageType, TFrozenDict, TException, TApplicationException
 from thrift.protocol.TProtocol import TProtocolException
 import sys
-from globals import logger
 
 from thrift.transport import TTransport
 
@@ -562,7 +561,7 @@ class ChatVO(object):
         (6, TType.STRING, 'origin_str', 'UTF8', None, ),  # 6
         (7, TType.STRING, 'msgType', 'UTF8', None, ),  # 7
         (8, TType.STRING, 'picUrl', 'UTF8', None, ),  # 8
-        (9, TType.LIST, 'btnContent', (TType.MAP, (TType.STRING, 'UTF8', TType.STRING, 'UTF8', False), False), None, ),  # 9
+        (9, TType.STRING, 'btnContent', 'UTF8', None, ),  # 9
         (10, TType.I32, 'roomId', None, None, ),  # 10
         (11, TType.I32, 'positionId', None, None, ),  # 11
     )
@@ -630,19 +629,8 @@ class ChatVO(object):
                 else:
                     iprot.skip(ftype)
             elif fid == 9:
-                if ftype == TType.LIST:
-                    self.btnContent = []
-                    (_etype17, _size14) = iprot.readListBegin()
-                    for _i18 in range(_size14):
-                        _elem19 = {}
-                        (_ktype21, _vtype22, _size20) = iprot.readMapBegin()
-                        for _i24 in range(_size20):
-                            _key25 = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                            _val26 = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                            _elem19[_key25] = _val26
-                        iprot.readMapEnd()
-                        self.btnContent.append(_elem19)
-                    iprot.readListEnd()
+                if ftype == TType.STRING:
+                    self.btnContent = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
             elif fid == 10:
@@ -698,16 +686,8 @@ class ChatVO(object):
             oprot.writeString(self.picUrl.encode('utf-8') if sys.version_info[0] == 2 else self.picUrl)
             oprot.writeFieldEnd()
         if self.btnContent is not None:
-            oprot.writeFieldBegin('btnContent', TType.LIST, 9)
-            oprot.writeListBegin(TType.MAP, len(self.btnContent))
-            for iter27 in self.btnContent:
-                oprot.writeMapBegin(TType.STRING, TType.STRING, len(iter27))
-                logger.debug('iter27:{}'.format(iter27))
-                for kiter28, viter29 in iter27.items():
-                    oprot.writeString(kiter28.encode('utf-8') if sys.version_info[0] == 2 else kiter28)
-                    oprot.writeString(viter29.encode('utf-8') if sys.version_info[0] == 2 else viter29)
-                oprot.writeMapEnd()
-            oprot.writeListEnd()
+            oprot.writeFieldBegin('btnContent', TType.STRING, 9)
+            oprot.writeString(self.btnContent.encode('utf-8') if sys.version_info[0] == 2 else self.btnContent)
             oprot.writeFieldEnd()
         if self.roomId is not None:
             oprot.writeFieldBegin('roomId', TType.I32, 10)
@@ -793,11 +773,11 @@ class ChatsVO(object):
             elif fid == 5:
                 if ftype == TType.LIST:
                     self.chatLogs = []
-                    (_etype33, _size30) = iprot.readListBegin()
-                    for _i34 in range(_size30):
-                        _elem35 = ChatVO()
-                        _elem35.read(iprot)
-                        self.chatLogs.append(_elem35)
+                    (_etype17, _size14) = iprot.readListBegin()
+                    for _i18 in range(_size14):
+                        _elem19 = ChatVO()
+                        _elem19.read(iprot)
+                        self.chatLogs.append(_elem19)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
@@ -830,8 +810,8 @@ class ChatsVO(object):
         if self.chatLogs is not None:
             oprot.writeFieldBegin('chatLogs', TType.LIST, 5)
             oprot.writeListBegin(TType.STRUCT, len(self.chatLogs))
-            for iter36 in self.chatLogs:
-                iter36.write(oprot)
+            for iter20 in self.chatLogs:
+                iter20.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()

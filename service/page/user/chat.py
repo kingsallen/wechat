@@ -52,7 +52,7 @@ class ChatPageService(PageService):
                 room['chat_time'] = str_2_date(e.create_time, const.TIME_FORMAT_MINUTE)
                 room['speaker'] = e.speaker  # 0：求职者，1：HR
                 room['picUrl'] = e.picUrl
-                room['btnContent'] = e.btnContent
+                room['btnContent'] = json.loads(e.btnContent)
                 room['msgType'] = e.msgType
                 obj_list.append(room)
 
@@ -210,18 +210,22 @@ class ChatPageService(PageService):
                 pic_url = ret.get("picUri", "")
                 msg_type = "html"
                 btn_content = []
+                btn_content_json = ''
             elif res_type == "image":
                 content = ret.get("text", "")
                 pic_url = ret.get("picUri", "")
                 msg_type = "image"
                 btn_content = []
+                btn_content_json = ''
             elif res_type == "qrcode":
                 content = ret.get("text", "")
                 pic_url = ret.get("picUri", "")
                 msg_type = "qrcode"
                 btn_content = []
+                btn_content_json = ''
             elif res_type == "button_radio":
                 content = ret.get("text", "")
+                btn_content_json = json.dumps(ret.get("btnContent", []))
                 btn_content = ret.get("btnContent", [])
                 pic_url = ""
                 msg_type = "button_radio"
@@ -230,11 +234,13 @@ class ChatPageService(PageService):
                 pic_url = ''
                 msg_type = ''
                 btn_content = []
+                btn_content_json = ''
             ret_message = ObjectDict()
             ret_message['content'] = content
             ret_message['pic_url'] = pic_url
             ret_message['btn_content'] = btn_content
             ret_message['msg_type'] = msg_type
+            ret_message['btn_content_json'] = btn_content_json
             self.logger.debug(ret_message)
         except Exception as e:
             self.logger.error(e)
