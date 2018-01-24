@@ -187,7 +187,8 @@ help_routes = [
     # 我也要招人
     (r"/api/register",                               handler.help.passport.RegisterHandler,                     {"event": "helper_register"}),
     (r"/captcha/check/?",                            handler.help.captcha.CaptchaHandler,                       {"event": "captcha_info"}),
-    (r'/captcha/checked/?',                          handler.help.captcha.CaptchaChecked,                       {'event': 'captcha_checked'}),
+    (r"/api/captcha/check",                          handler.help.captcha.CaptchaCheckHandler,                  {"event": "captcha_check"}),
+    (r"/captcha/checked/?",                          handler.help.captcha.CaptchaChecked,                       {'event': 'captcha_checked'}),
 
 ]
 help_routes = common_routes + help_routes

@@ -12,7 +12,7 @@ import conf.message as msg
 
 class CaptchaHandler(BaseHandler):
     """
-    处理验证码
+    生成验证码页面
     """
     @handle_response
     @authenticated
@@ -28,6 +28,11 @@ class CaptchaHandler(BaseHandler):
                 data=data
             )
 
+
+class CaptchaCheckHandler(BaseHandler):
+    """
+    校验验证码
+    """
     @handle_response
     @authenticated
     @gen.coroutine
