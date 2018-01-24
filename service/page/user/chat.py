@@ -209,19 +209,19 @@ class ChatPageService(PageService):
 
             if res_type == "text":
                 content = ret.get("text", "")
-                pic_url = ret.get("picUri", "")
+                pic_url = ret.get("picUrl", "")
                 msg_type = "html"
                 btn_content = []
                 btn_content_json = ''
             elif res_type == "image":
                 content = ret.get("text", "")
-                pic_url = ret.get("picUri", "")
+                pic_url = ret.get("picUrl", "")
                 msg_type = "image"
                 btn_content = []
                 btn_content_json = ''
             elif res_type == "qrcode":
                 content = ret.get("text", "")
-                pic_url = ret.get("picUri", "")
+                pic_url = ret.get("picUrl", "")
                 msg_type = "qrcode"
                 btn_content = []
                 btn_content_json = ''
