@@ -48,7 +48,7 @@ import handler.platform.team
 import handler.platform.recom
 import handler.platform.compatible
 import handler.platform.user
-import handler.platform.captcha
+import handler.help.captcha
 
 import handler.qx.app
 import handler.qx.aggregation
@@ -135,12 +135,10 @@ platform_routes = [
     (r'/user/ai-recom/?',                            handler.platform.user.AIRecomHandler,                      {'event': 'user_ai-recom'}),
     (r'/employee/survey/?',                          handler.platform.employee.EmployeeSurveyHandler,           {'event': 'employee_survey'}),
     (r'/employee/ai-recom/(\d+)',                    handler.platform.employee.EmployeeAiRecomHandler,          {'event': 'employee_ai-recom'}),
-    (r'/captcha/checked/?',                          handler.platform.captcha.CaptchaChecked,                   {'event': 'captcha_checked'}),
 
     # 各大公司的自定义配置
     (r"/custom/emailapply/?",                        handler.platform.customize.CustomizeEmailApplyHandler,     {"event": "customize_emailapply"}),
 
-    (r"/api/captcha/check?",                         handler.platform.captcha.CaptchaHandler,                   {"event": "captcha_info"}),
     (r"/api/company/visitreq/?",                     handler.platform.companyrelation.CompanyVisitReqHandler,   {"event": "company_visitreq"}),
     (r"/api/company/survey/?",                       handler.platform.companyrelation.CompanySurveyHandler,     {"event": "company_survey"}),
     (r"/api/company/follow/?",                       handler.platform.companyrelation.CompanyFollowHandler,     {"event": "company_follow"}),
@@ -188,6 +186,8 @@ help_routes = [
     (r"/hrregister/qrcode",                          handler.help.passport.RegisterQrcodeHandler,               {"event": "helper_qrcode"}),
     # 我也要招人
     (r"/api/register",                               handler.help.passport.RegisterHandler,                     {"event": "helper_register"}),
+    (r"/captcha/check/?",                            handler.help.captcha.CaptchaHandler,                       {"event": "captcha_info"}),
+    (r'/captcha/checked/?',                          handler.help.captcha.CaptchaChecked,                       {'event': 'captcha_checked'}),
 
 ]
 help_routes = common_routes + help_routes
