@@ -140,7 +140,7 @@ platform_routes = [
     # 各大公司的自定义配置
     (r"/custom/emailapply/?",                        handler.platform.customize.CustomizeEmailApplyHandler,     {"event": "customize_emailapply"}),
 
-    (r"/api/captcha/?",                              handler.platform.captcha.CaptchaHandler,                   {"event": "captcha_info"}),
+    (r"/api/captcha/check?",                         handler.platform.captcha.CaptchaHandler,                   {"event": "captcha_info"}),
     (r"/api/company/visitreq/?",                     handler.platform.companyrelation.CompanyVisitReqHandler,   {"event": "company_visitreq"}),
     (r"/api/company/survey/?",                       handler.platform.companyrelation.CompanySurveyHandler,     {"event": "company_survey"}),
     (r"/api/company/follow/?",                       handler.platform.companyrelation.CompanyFollowHandler,     {"event": "company_follow"}),
