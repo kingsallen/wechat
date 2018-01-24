@@ -135,7 +135,7 @@ platform_routes = [
     (r'/user/ai-recom/?',                            handler.platform.user.AIRecomHandler,                      {'event': 'user_ai-recom'}),
     (r'/employee/survey/?',                          handler.platform.employee.EmployeeSurveyHandler,           {'event': 'employee_survey'}),
     (r'/employee/ai-recom/(\d+)',                    handler.platform.employee.EmployeeAiRecomHandler,          {'event': 'employee_ai-recom'}),
-    (r'/captcha/checked/?',                          handler.platform.captcha.),
+    (r'/captcha/checked/?',                          handler.platform.captcha.CaptchaChecked,                   {'event': 'captcha_checked'}),
 
     # 各大公司的自定义配置
     (r"/custom/emailapply/?",                        handler.platform.customize.CustomizeEmailApplyHandler,     {"event": "customize_emailapply"}),

@@ -19,11 +19,11 @@ class CaptchaHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         param_id = self.params.paramId
-        data = yield self.captcha_ps.get_verification_params(param_id)
+        message, data = yield self.captcha_ps.get_verification_params(param_id)
         if not data:
-            self.write_error(500, message="请求失败，请重试")
+                self.write_error(500, message=message)
         else:
-            self.render(
+            self.render_page(
                 template_name='template/adjunct/validate-captcha.html',
                 data=data
             )

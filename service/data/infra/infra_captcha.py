@@ -14,6 +14,6 @@ class InfraCaptchaDataService(DataService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def get_verification_params(self, param_id):
-        ret = yield http_get(path.INFRA_VERIFY_PARAMS, param_id)
+    def get_verification_params(self, params):
+        ret = yield http_get(path.INFRA_VERIFY_PARAMS, params)
         raise gen.Return(ret)

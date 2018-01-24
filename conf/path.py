@@ -84,7 +84,7 @@ INFRA_APPLICATION_TYPE_APPLY_COUNT = 'application/type/count/check'
 
 # 验证码拂去
 INFRA_CAPTCHA = 'position/syncVerifyInfo'
-INFRA_VERIFY_PARAMS = ''
+INFRA_VERIFY_PARAMS = 'position/getSyncVerifyParam'
 
 # 职位服务
 # REF: https://wiki.moseeker.com/position-api.md

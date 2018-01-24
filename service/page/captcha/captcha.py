@@ -35,5 +35,13 @@ class CaptchaPageService(PageService):
         :param param_id:
         :return:
         """
-        data = yield self.infra_captcha_ds.get_verification_params(param_id)
+        req = ObjectDict({'paramId': param_id})
+        res = yield self.infra_captcha_ds.get_verification_params(req)
+        message, data = res.message, res.data
+        ret = ObjectDict()
+        ret['channel'] = data.channel
+        ret['accountId'] = data.accounrId
+        ret['mobile'] = data.mobile
+        return message, ret
+
 
