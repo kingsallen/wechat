@@ -188,7 +188,7 @@ class LandingPageService(PageService):
             }
 
         self.logger.debug(data)
-        response = self.es.search(index='index', body=data)
+        response = self.es.search(index='index1', body=data)
 
         result_list = response.hits.hits
 
