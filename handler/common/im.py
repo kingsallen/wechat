@@ -278,7 +278,7 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
                 content=bot_message.content,
                 speaker=const.CHAT_SPEAKER_BOT,
                 origin=const.ORIGIN_CHATBOT,
-                picUrl=bot_message.ret_ext,
+                picUrl=bot_message.pic_url,
                 btnContent=bot_message.btn_content_json,
                 msgType=bot_message.msg_type,
                 roomId=int(self.room_id),
