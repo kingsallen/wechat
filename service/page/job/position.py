@@ -122,7 +122,7 @@ class PositionPageService(PageService):
                 }
             }
         }
-        response = self.es.search(index='index1', body=data)
+        response = self.es.search(index='index', body=data)
         result_list = response.hits.hits
         if result_list:
             result = result_list[0]
