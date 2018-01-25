@@ -45,7 +45,8 @@ class CaptchaCheckHandler(BaseHandler):
         account_id = self.json_args.accountId
         captcha = self.params.captcha
         position_id = self.json_args.positionId
-        status, message = yield self.captcha_ps.post_verification(captcha, channel, account_id, position_id)
+        param_id = self.json_args.paramId
+        status, message = yield self.captcha_ps.post_verification(captcha, channel, account_id, position_id, param_id)
         next_url = make_url(path.CAPTCHA_CHECKED, host=self.host)
         if status == 0:
             data = ObjectDict({

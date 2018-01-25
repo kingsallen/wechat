@@ -11,12 +11,13 @@ class CaptchaPageService(PageService):
         super().__init__()
 
     @gen.coroutine
-    def post_verification(self, captcha, channel, account_id, position_id):
+    def post_verification(self, captcha, channel, account_id, position_id, param_id):
         """
         :param captcha: 回流的平台编号。1 前程无忧，2 猎聘，3 智联， 6 最佳东方， 7 一览英才
         :param channel: 验证码
         :param account_id: 第三方渠道账号ID
         :param position_id:职位ID
+        :param param_id:
         :return:
         """
 
@@ -24,7 +25,8 @@ class CaptchaPageService(PageService):
             'info': captcha,
             'channel': channel,
             'accountId': account_id,
-            'positionId': position_id
+            'positionId': position_id,
+            'paramId': param_id
         })
         res = yield self.infra_captcha_ds.post_verification(req)
         status, message = res.status, res.message
