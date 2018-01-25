@@ -26,11 +26,11 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('Functions:')
     print('  HRChatRoomsVO listHRChatRoom(i32 hrId, i32 pageNo, i32 pageSize)')
     print('  UserChatRoomsVO listUserChatRoom(i32 userId, i32 pageNo, i32 pageSize)')
-    print('  ChatsVO listChatLogs(i32 roomId, i32 pageNo, i32 pageSize)')
-    print('  void saveChat(i32 roomId, string content, i32 positionId, i8 speaker, i8 origin)')
     print('  ResultOfSaveRoomVO enterRoom(i32 userId, i32 hrId, i32 positionId, i32 roomId, bool is_gamma)')
-    print('  ChatVO getChat(i32 roomId, i8 speaker)')
     print('  void leaveChatRoom(i32 roomId, i8 speaker)')
+    print('  ChatsVO listChatLogs(i32 roomId, i32 pageNo, i32 pageSize)')
+    print('  i32 saveChat(ChatVO chat)')
+    print('  ChatVO getChat(i32 roomId, i8 speaker)')
     print('')
     sys.exit(0)
 
@@ -122,6 +122,18 @@ elif cmd == 'listUserChatRoom':
         sys.exit(1)
     pp.pprint(client.listUserChatRoom(eval(args[0]), eval(args[1]), eval(args[2]),))
 
+elif cmd == 'enterRoom':
+    if len(args) != 5:
+        print('enterRoom requires 5 args')
+        sys.exit(1)
+    pp.pprint(client.enterRoom(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]), eval(args[4]),))
+
+elif cmd == 'leaveChatRoom':
+    if len(args) != 2:
+        print('leaveChatRoom requires 2 args')
+        sys.exit(1)
+    pp.pprint(client.leaveChatRoom(eval(args[0]), eval(args[1]),))
+
 elif cmd == 'listChatLogs':
     if len(args) != 3:
         print('listChatLogs requires 3 args')
@@ -129,28 +141,16 @@ elif cmd == 'listChatLogs':
     pp.pprint(client.listChatLogs(eval(args[0]), eval(args[1]), eval(args[2]),))
 
 elif cmd == 'saveChat':
-    if len(args) != 5:
-        print('saveChat requires 5 args')
+    if len(args) != 1:
+        print('saveChat requires 1 args')
         sys.exit(1)
-    pp.pprint(client.saveChat(eval(args[0]), args[1], eval(args[2]), eval(args[3]), eval(args[4]),))
-
-elif cmd == 'enterRoom':
-    if len(args) != 5:
-        print('enterRoom requires 5 args')
-        sys.exit(1)
-    pp.pprint(client.enterRoom(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]), eval(args[4]),))
+    pp.pprint(client.saveChat(eval(args[0]),))
 
 elif cmd == 'getChat':
     if len(args) != 2:
         print('getChat requires 2 args')
         sys.exit(1)
     pp.pprint(client.getChat(eval(args[0]), eval(args[1]),))
-
-elif cmd == 'leaveChatRoom':
-    if len(args) != 2:
-        print('leaveChatRoom requires 2 args')
-        sys.exit(1)
-    pp.pprint(client.leaveChatRoom(eval(args[0]), eval(args[1]),))
 
 else:
     print('Unrecognized method %s' % cmd)

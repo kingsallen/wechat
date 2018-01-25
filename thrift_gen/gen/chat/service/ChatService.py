@@ -36,26 +36,6 @@ class Iface(object):
         """
         pass
 
-    def listChatLogs(self, roomId, pageNo, pageSize):
-        """
-        Parameters:
-         - roomId
-         - pageNo
-         - pageSize
-        """
-        pass
-
-    def saveChat(self, roomId, content, positionId, speaker, origin):
-        """
-        Parameters:
-         - roomId
-         - content
-         - positionId
-         - speaker
-         - origin
-        """
-        pass
-
     def enterRoom(self, userId, hrId, positionId, roomId, is_gamma):
         """
         Parameters:
@@ -67,7 +47,7 @@ class Iface(object):
         """
         pass
 
-    def getChat(self, roomId, speaker):
+    def leaveChatRoom(self, roomId, speaker):
         """
         Parameters:
          - roomId
@@ -75,7 +55,23 @@ class Iface(object):
         """
         pass
 
-    def leaveChatRoom(self, roomId, speaker):
+    def listChatLogs(self, roomId, pageNo, pageSize):
+        """
+        Parameters:
+         - roomId
+         - pageNo
+         - pageSize
+        """
+        pass
+
+    def saveChat(self, chat):
+        """
+        Parameters:
+         - chat
+        """
+        pass
+
+    def getChat(self, roomId, speaker):
         """
         Parameters:
          - roomId
@@ -195,84 +191,6 @@ class Client(Iface):
             raise result.e
         raise TApplicationException(TApplicationException.MISSING_RESULT, "listUserChatRoom failed: unknown result")
 
-    def listChatLogs(self, roomId, pageNo, pageSize):
-        """
-        Parameters:
-         - roomId
-         - pageNo
-         - pageSize
-        """
-        self._seqid += 1
-        future = self._reqs[self._seqid] = concurrent.Future()
-        self.send_listChatLogs(roomId, pageNo, pageSize)
-        return future
-
-    def send_listChatLogs(self, roomId, pageNo, pageSize):
-        oprot = self._oprot_factory.getProtocol(self._transport)
-        oprot.writeMessageBegin('listChatLogs', TMessageType.CALL, self._seqid)
-        args = listChatLogs_args()
-        args.roomId = roomId
-        args.pageNo = pageNo
-        args.pageSize = pageSize
-        args.write(oprot)
-        oprot.writeMessageEnd()
-        oprot.trans.flush()
-
-    def recv_listChatLogs(self, iprot, mtype, rseqid):
-        if mtype == TMessageType.EXCEPTION:
-            x = TApplicationException()
-            x.read(iprot)
-            iprot.readMessageEnd()
-            raise x
-        result = listChatLogs_result()
-        result.read(iprot)
-        iprot.readMessageEnd()
-        if result.success is not None:
-            return result.success
-        if result.e is not None:
-            raise result.e
-        raise TApplicationException(TApplicationException.MISSING_RESULT, "listChatLogs failed: unknown result")
-
-    def saveChat(self, roomId, content, positionId, speaker, origin):
-        """
-        Parameters:
-         - roomId
-         - content
-         - positionId
-         - speaker
-         - origin
-        """
-        self._seqid += 1
-        future = self._reqs[self._seqid] = concurrent.Future()
-        self.send_saveChat(roomId, content, positionId, speaker, origin)
-        return future
-
-    def send_saveChat(self, roomId, content, positionId, speaker, origin):
-        oprot = self._oprot_factory.getProtocol(self._transport)
-        oprot.writeMessageBegin('saveChat', TMessageType.CALL, self._seqid)
-        args = saveChat_args()
-        args.roomId = roomId
-        args.content = content
-        args.positionId = positionId
-        args.speaker = speaker
-        args.origin = origin
-        args.write(oprot)
-        oprot.writeMessageEnd()
-        oprot.trans.flush()
-
-    def recv_saveChat(self, iprot, mtype, rseqid):
-        if mtype == TMessageType.EXCEPTION:
-            x = TApplicationException()
-            x.read(iprot)
-            iprot.readMessageEnd()
-            raise x
-        result = saveChat_result()
-        result.read(iprot)
-        iprot.readMessageEnd()
-        if result.e is not None:
-            raise result.e
-        return
-
     def enterRoom(self, userId, hrId, positionId, roomId, is_gamma):
         """
         Parameters:
@@ -315,6 +233,110 @@ class Client(Iface):
             raise result.e
         raise TApplicationException(TApplicationException.MISSING_RESULT, "enterRoom failed: unknown result")
 
+    def leaveChatRoom(self, roomId, speaker):
+        """
+        Parameters:
+         - roomId
+         - speaker
+        """
+        self._seqid += 1
+        future = self._reqs[self._seqid] = concurrent.Future()
+        self.send_leaveChatRoom(roomId, speaker)
+        return future
+
+    def send_leaveChatRoom(self, roomId, speaker):
+        oprot = self._oprot_factory.getProtocol(self._transport)
+        oprot.writeMessageBegin('leaveChatRoom', TMessageType.CALL, self._seqid)
+        args = leaveChatRoom_args()
+        args.roomId = roomId
+        args.speaker = speaker
+        args.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def recv_leaveChatRoom(self, iprot, mtype, rseqid):
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = leaveChatRoom_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        return
+
+    def listChatLogs(self, roomId, pageNo, pageSize):
+        """
+        Parameters:
+         - roomId
+         - pageNo
+         - pageSize
+        """
+        self._seqid += 1
+        future = self._reqs[self._seqid] = concurrent.Future()
+        self.send_listChatLogs(roomId, pageNo, pageSize)
+        return future
+
+    def send_listChatLogs(self, roomId, pageNo, pageSize):
+        oprot = self._oprot_factory.getProtocol(self._transport)
+        oprot.writeMessageBegin('listChatLogs', TMessageType.CALL, self._seqid)
+        args = listChatLogs_args()
+        args.roomId = roomId
+        args.pageNo = pageNo
+        args.pageSize = pageSize
+        args.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def recv_listChatLogs(self, iprot, mtype, rseqid):
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = listChatLogs_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        if result.e is not None:
+            raise result.e
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "listChatLogs failed: unknown result")
+
+    def saveChat(self, chat):
+        """
+        Parameters:
+         - chat
+        """
+        self._seqid += 1
+        future = self._reqs[self._seqid] = concurrent.Future()
+        self.send_saveChat(chat)
+        return future
+
+    def send_saveChat(self, chat):
+        oprot = self._oprot_factory.getProtocol(self._transport)
+        oprot.writeMessageBegin('saveChat', TMessageType.CALL, self._seqid)
+        args = saveChat_args()
+        args.chat = chat
+        args.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def recv_saveChat(self, iprot, mtype, rseqid):
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = saveChat_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        if result.e is not None:
+            raise result.e
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "saveChat failed: unknown result")
+
     def getChat(self, roomId, speaker):
         """
         Parameters:
@@ -351,38 +373,6 @@ class Client(Iface):
             raise result.e
         raise TApplicationException(TApplicationException.MISSING_RESULT, "getChat failed: unknown result")
 
-    def leaveChatRoom(self, roomId, speaker):
-        """
-        Parameters:
-         - roomId
-         - speaker
-        """
-        self._seqid += 1
-        future = self._reqs[self._seqid] = concurrent.Future()
-        self.send_leaveChatRoom(roomId, speaker)
-        return future
-
-    def send_leaveChatRoom(self, roomId, speaker):
-        oprot = self._oprot_factory.getProtocol(self._transport)
-        oprot.writeMessageBegin('leaveChatRoom', TMessageType.CALL, self._seqid)
-        args = leaveChatRoom_args()
-        args.roomId = roomId
-        args.speaker = speaker
-        args.write(oprot)
-        oprot.writeMessageEnd()
-        oprot.trans.flush()
-
-    def recv_leaveChatRoom(self, iprot, mtype, rseqid):
-        if mtype == TMessageType.EXCEPTION:
-            x = TApplicationException()
-            x.read(iprot)
-            iprot.readMessageEnd()
-            raise x
-        result = leaveChatRoom_result()
-        result.read(iprot)
-        iprot.readMessageEnd()
-        return
-
 
 class Processor(Iface, TProcessor):
     def __init__(self, handler):
@@ -390,11 +380,11 @@ class Processor(Iface, TProcessor):
         self._processMap = {}
         self._processMap["listHRChatRoom"] = Processor.process_listHRChatRoom
         self._processMap["listUserChatRoom"] = Processor.process_listUserChatRoom
+        self._processMap["enterRoom"] = Processor.process_enterRoom
+        self._processMap["leaveChatRoom"] = Processor.process_leaveChatRoom
         self._processMap["listChatLogs"] = Processor.process_listChatLogs
         self._processMap["saveChat"] = Processor.process_saveChat
-        self._processMap["enterRoom"] = Processor.process_enterRoom
         self._processMap["getChat"] = Processor.process_getChat
-        self._processMap["leaveChatRoom"] = Processor.process_leaveChatRoom
 
     def process(self, iprot, oprot):
         (name, type, seqid) = iprot.readMessageBegin()
@@ -441,6 +431,33 @@ class Processor(Iface, TProcessor):
         oprot.trans.flush()
 
     @gen.coroutine
+    def process_enterRoom(self, seqid, iprot, oprot):
+        args = enterRoom_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = enterRoom_result()
+        try:
+            result.success = yield gen.maybe_future(self._handler.enterRoom(args.userId, args.hrId, args.positionId, args.roomId, args.is_gamma))
+        except thrift_gen.gen.common.struct.ttypes.CURDException as e:
+            result.e = e
+        oprot.writeMessageBegin("enterRoom", TMessageType.REPLY, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    @gen.coroutine
+    def process_leaveChatRoom(self, seqid, iprot, oprot):
+        args = leaveChatRoom_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = leaveChatRoom_result()
+        yield gen.maybe_future(self._handler.leaveChatRoom(args.roomId, args.speaker))
+        oprot.writeMessageBegin("leaveChatRoom", TMessageType.REPLY, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    @gen.coroutine
     def process_listChatLogs(self, seqid, iprot, oprot):
         args = listChatLogs_args()
         args.read(iprot)
@@ -462,25 +479,10 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = saveChat_result()
         try:
-            yield gen.maybe_future(self._handler.saveChat(args.roomId, args.content, args.positionId, args.speaker, args.origin))
+            result.success = yield gen.maybe_future(self._handler.saveChat(args.chat))
         except thrift_gen.gen.common.struct.ttypes.CURDException as e:
             result.e = e
         oprot.writeMessageBegin("saveChat", TMessageType.REPLY, seqid)
-        result.write(oprot)
-        oprot.writeMessageEnd()
-        oprot.trans.flush()
-
-    @gen.coroutine
-    def process_enterRoom(self, seqid, iprot, oprot):
-        args = enterRoom_args()
-        args.read(iprot)
-        iprot.readMessageEnd()
-        result = enterRoom_result()
-        try:
-            result.success = yield gen.maybe_future(self._handler.enterRoom(args.userId, args.hrId, args.positionId, args.roomId, args.is_gamma))
-        except thrift_gen.gen.common.struct.ttypes.CURDException as e:
-            result.e = e
-        oprot.writeMessageBegin("enterRoom", TMessageType.REPLY, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -496,18 +498,6 @@ class Processor(Iface, TProcessor):
         except thrift_gen.gen.common.struct.ttypes.CURDException as e:
             result.e = e
         oprot.writeMessageBegin("getChat", TMessageType.REPLY, seqid)
-        result.write(oprot)
-        oprot.writeMessageEnd()
-        oprot.trans.flush()
-
-    @gen.coroutine
-    def process_leaveChatRoom(self, seqid, iprot, oprot):
-        args = leaveChatRoom_args()
-        args.read(iprot)
-        iprot.readMessageEnd()
-        result = leaveChatRoom_result()
-        yield gen.maybe_future(self._handler.leaveChatRoom(args.roomId, args.speaker))
-        oprot.writeMessageBegin("leaveChatRoom", TMessageType.REPLY, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -829,332 +819,6 @@ class listUserChatRoom_result(object):
         return not (self == other)
 
 
-class listChatLogs_args(object):
-    """
-    Attributes:
-     - roomId
-     - pageNo
-     - pageSize
-    """
-
-    thrift_spec = (
-        None,  # 0
-        (1, TType.I32, 'roomId', None, None, ),  # 1
-        (2, TType.I32, 'pageNo', None, None, ),  # 2
-        (3, TType.I32, 'pageSize', None, None, ),  # 3
-    )
-
-    def __init__(self, roomId=None, pageNo=None, pageSize=None,):
-        self.roomId = roomId
-        self.pageNo = pageNo
-        self.pageSize = pageSize
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 1:
-                if ftype == TType.I32:
-                    self.roomId = iprot.readI32()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 2:
-                if ftype == TType.I32:
-                    self.pageNo = iprot.readI32()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 3:
-                if ftype == TType.I32:
-                    self.pageSize = iprot.readI32()
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
-            return
-        oprot.writeStructBegin('listChatLogs_args')
-        if self.roomId is not None:
-            oprot.writeFieldBegin('roomId', TType.I32, 1)
-            oprot.writeI32(self.roomId)
-            oprot.writeFieldEnd()
-        if self.pageNo is not None:
-            oprot.writeFieldBegin('pageNo', TType.I32, 2)
-            oprot.writeI32(self.pageNo)
-            oprot.writeFieldEnd()
-        if self.pageSize is not None:
-            oprot.writeFieldBegin('pageSize', TType.I32, 3)
-            oprot.writeI32(self.pageSize)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-
-
-class listChatLogs_result(object):
-    """
-    Attributes:
-     - success
-     - e
-    """
-
-    thrift_spec = (
-        (0, TType.STRUCT, 'success', (thrift_gen.gen.chat.struct.ttypes.ChatsVO, thrift_gen.gen.chat.struct.ttypes.ChatsVO.thrift_spec), None, ),  # 0
-        (1, TType.STRUCT, 'e', (thrift_gen.gen.common.struct.ttypes.CURDException, thrift_gen.gen.common.struct.ttypes.CURDException.thrift_spec), None, ),  # 1
-    )
-
-    def __init__(self, success=None, e=None,):
-        self.success = success
-        self.e = e
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 0:
-                if ftype == TType.STRUCT:
-                    self.success = thrift_gen.gen.chat.struct.ttypes.ChatsVO()
-                    self.success.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            elif fid == 1:
-                if ftype == TType.STRUCT:
-                    self.e = thrift_gen.gen.common.struct.ttypes.CURDException()
-                    self.e.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
-            return
-        oprot.writeStructBegin('listChatLogs_result')
-        if self.success is not None:
-            oprot.writeFieldBegin('success', TType.STRUCT, 0)
-            self.success.write(oprot)
-            oprot.writeFieldEnd()
-        if self.e is not None:
-            oprot.writeFieldBegin('e', TType.STRUCT, 1)
-            self.e.write(oprot)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-
-
-class saveChat_args(object):
-    """
-    Attributes:
-     - roomId
-     - content
-     - positionId
-     - speaker
-     - origin
-    """
-
-    thrift_spec = (
-        None,  # 0
-        (1, TType.I32, 'roomId', None, None, ),  # 1
-        (2, TType.STRING, 'content', 'UTF8', None, ),  # 2
-        (3, TType.I32, 'positionId', None, None, ),  # 3
-        (4, TType.BYTE, 'speaker', None, None, ),  # 4
-        (5, TType.BYTE, 'origin', None, None, ),  # 5
-    )
-
-    def __init__(self, roomId=None, content=None, positionId=None, speaker=None, origin=None,):
-        self.roomId = roomId
-        self.content = content
-        self.positionId = positionId
-        self.speaker = speaker
-        self.origin = origin
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 1:
-                if ftype == TType.I32:
-                    self.roomId = iprot.readI32()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 2:
-                if ftype == TType.STRING:
-                    self.content = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 3:
-                if ftype == TType.I32:
-                    self.positionId = iprot.readI32()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 4:
-                if ftype == TType.BYTE:
-                    self.speaker = iprot.readByte()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 5:
-                if ftype == TType.BYTE:
-                    self.origin = iprot.readByte()
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
-            return
-        oprot.writeStructBegin('saveChat_args')
-        if self.roomId is not None:
-            oprot.writeFieldBegin('roomId', TType.I32, 1)
-            oprot.writeI32(self.roomId)
-            oprot.writeFieldEnd()
-        if self.content is not None:
-            oprot.writeFieldBegin('content', TType.STRING, 2)
-            oprot.writeString(self.content.encode('utf-8') if sys.version_info[0] == 2 else self.content)
-            oprot.writeFieldEnd()
-        if self.positionId is not None:
-            oprot.writeFieldBegin('positionId', TType.I32, 3)
-            oprot.writeI32(self.positionId)
-            oprot.writeFieldEnd()
-        if self.speaker is not None:
-            oprot.writeFieldBegin('speaker', TType.BYTE, 4)
-            oprot.writeByte(self.speaker)
-            oprot.writeFieldEnd()
-        if self.origin is not None:
-            oprot.writeFieldBegin('origin', TType.BYTE, 5)
-            oprot.writeByte(self.origin)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-
-
-class saveChat_result(object):
-    """
-    Attributes:
-     - e
-    """
-
-    thrift_spec = (
-        None,  # 0
-        (1, TType.STRUCT, 'e', (thrift_gen.gen.common.struct.ttypes.CURDException, thrift_gen.gen.common.struct.ttypes.CURDException.thrift_spec), None, ),  # 1
-    )
-
-    def __init__(self, e=None,):
-        self.e = e
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 1:
-                if ftype == TType.STRUCT:
-                    self.e = thrift_gen.gen.common.struct.ttypes.CURDException()
-                    self.e.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
-            return
-        oprot.writeStructBegin('saveChat_result')
-        if self.e is not None:
-            oprot.writeFieldBegin('e', TType.STRUCT, 1)
-            self.e.write(oprot)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-
-
 class enterRoom_args(object):
     """
     Attributes:
@@ -1336,6 +1000,410 @@ class enterRoom_result(object):
         return not (self == other)
 
 
+class leaveChatRoom_args(object):
+    """
+    Attributes:
+     - roomId
+     - speaker
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'roomId', None, None, ),  # 1
+        (2, TType.BYTE, 'speaker', None, None, ),  # 2
+    )
+
+    def __init__(self, roomId=None, speaker=None,):
+        self.roomId = roomId
+        self.speaker = speaker
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.roomId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.BYTE:
+                    self.speaker = iprot.readByte()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('leaveChatRoom_args')
+        if self.roomId is not None:
+            oprot.writeFieldBegin('roomId', TType.I32, 1)
+            oprot.writeI32(self.roomId)
+            oprot.writeFieldEnd()
+        if self.speaker is not None:
+            oprot.writeFieldBegin('speaker', TType.BYTE, 2)
+            oprot.writeByte(self.speaker)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class leaveChatRoom_result(object):
+
+    thrift_spec = (
+    )
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('leaveChatRoom_result')
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class listChatLogs_args(object):
+    """
+    Attributes:
+     - roomId
+     - pageNo
+     - pageSize
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'roomId', None, None, ),  # 1
+        (2, TType.I32, 'pageNo', None, None, ),  # 2
+        (3, TType.I32, 'pageSize', None, None, ),  # 3
+    )
+
+    def __init__(self, roomId=None, pageNo=None, pageSize=None,):
+        self.roomId = roomId
+        self.pageNo = pageNo
+        self.pageSize = pageSize
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.roomId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.I32:
+                    self.pageNo = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.I32:
+                    self.pageSize = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('listChatLogs_args')
+        if self.roomId is not None:
+            oprot.writeFieldBegin('roomId', TType.I32, 1)
+            oprot.writeI32(self.roomId)
+            oprot.writeFieldEnd()
+        if self.pageNo is not None:
+            oprot.writeFieldBegin('pageNo', TType.I32, 2)
+            oprot.writeI32(self.pageNo)
+            oprot.writeFieldEnd()
+        if self.pageSize is not None:
+            oprot.writeFieldBegin('pageSize', TType.I32, 3)
+            oprot.writeI32(self.pageSize)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class listChatLogs_result(object):
+    """
+    Attributes:
+     - success
+     - e
+    """
+
+    thrift_spec = (
+        (0, TType.STRUCT, 'success', (thrift_gen.gen.chat.struct.ttypes.ChatsVO, thrift_gen.gen.chat.struct.ttypes.ChatsVO.thrift_spec), None, ),  # 0
+        (1, TType.STRUCT, 'e', (thrift_gen.gen.common.struct.ttypes.CURDException, thrift_gen.gen.common.struct.ttypes.CURDException.thrift_spec), None, ),  # 1
+    )
+
+    def __init__(self, success=None, e=None,):
+        self.success = success
+        self.e = e
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRUCT:
+                    self.success = thrift_gen.gen.chat.struct.ttypes.ChatsVO()
+                    self.success.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.e = thrift_gen.gen.common.struct.ttypes.CURDException()
+                    self.e.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('listChatLogs_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.STRUCT, 0)
+            self.success.write(oprot)
+            oprot.writeFieldEnd()
+        if self.e is not None:
+            oprot.writeFieldBegin('e', TType.STRUCT, 1)
+            self.e.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class saveChat_args(object):
+    """
+    Attributes:
+     - chat
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.STRUCT, 'chat', (thrift_gen.gen.chat.struct.ttypes.ChatVO, thrift_gen.gen.chat.struct.ttypes.ChatVO.thrift_spec), None, ),  # 1
+    )
+
+    def __init__(self, chat=None,):
+        self.chat = chat
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.chat = thrift_gen.gen.chat.struct.ttypes.ChatVO()
+                    self.chat.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('saveChat_args')
+        if self.chat is not None:
+            oprot.writeFieldBegin('chat', TType.STRUCT, 1)
+            self.chat.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class saveChat_result(object):
+    """
+    Attributes:
+     - success
+     - e
+    """
+
+    thrift_spec = (
+        (0, TType.I32, 'success', None, None, ),  # 0
+        (1, TType.STRUCT, 'e', (thrift_gen.gen.common.struct.ttypes.CURDException, thrift_gen.gen.common.struct.ttypes.CURDException.thrift_spec), None, ),  # 1
+    )
+
+    def __init__(self, success=None, e=None,):
+        self.success = success
+        self.e = e
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.I32:
+                    self.success = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.e = thrift_gen.gen.common.struct.ttypes.CURDException()
+                    self.e.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('saveChat_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.I32, 0)
+            oprot.writeI32(self.success)
+            oprot.writeFieldEnd()
+        if self.e is not None:
+            oprot.writeFieldBegin('e', TType.STRUCT, 1)
+            self.e.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
 class getChat_args(object):
     """
     Attributes:
@@ -1463,120 +1531,6 @@ class getChat_result(object):
             oprot.writeFieldBegin('e', TType.STRUCT, 1)
             self.e.write(oprot)
             oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-
-
-class leaveChatRoom_args(object):
-    """
-    Attributes:
-     - roomId
-     - speaker
-    """
-
-    thrift_spec = (
-        None,  # 0
-        (1, TType.I32, 'roomId', None, None, ),  # 1
-        (2, TType.BYTE, 'speaker', None, None, ),  # 2
-    )
-
-    def __init__(self, roomId=None, speaker=None,):
-        self.roomId = roomId
-        self.speaker = speaker
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 1:
-                if ftype == TType.I32:
-                    self.roomId = iprot.readI32()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 2:
-                if ftype == TType.BYTE:
-                    self.speaker = iprot.readByte()
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
-            return
-        oprot.writeStructBegin('leaveChatRoom_args')
-        if self.roomId is not None:
-            oprot.writeFieldBegin('roomId', TType.I32, 1)
-            oprot.writeI32(self.roomId)
-            oprot.writeFieldEnd()
-        if self.speaker is not None:
-            oprot.writeFieldBegin('speaker', TType.BYTE, 2)
-            oprot.writeByte(self.speaker)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-
-
-class leaveChatRoom_result(object):
-
-    thrift_spec = (
-    )
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
-            return
-        oprot.writeStructBegin('leaveChatRoom_result')
         oprot.writeFieldStop()
         oprot.writeStructEnd()
 
