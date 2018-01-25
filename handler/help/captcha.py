@@ -24,7 +24,7 @@ class CaptchaHandler(BaseHandler):
                 self.write_error(500, message=message)
         else:
             self.render_page(
-                template_name='template/adjunct/validate-captcha.html',
+                template_name='adjunct/validate-captcha.html',
                 data=data
             )
 
