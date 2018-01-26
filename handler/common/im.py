@@ -221,7 +221,9 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
 
         message = ujson.loads(message)
         user_message = message.get("content")
+        msg_type = message.get("msgType")
         message_body = json_dumps(ObjectDict(
+            msgType=msg_type,
             content=user_message,
             speaker=const.CHAT_SPEAKER_USER,
             cid=int(self.room_id),
@@ -232,6 +234,7 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
 
         self.redis_client.publish(self.hr_channel, message_body)
         chat_params = ChatVO(
+            msgType=msg_type,
             content=user_message,
             origin=const.ORIGIN_USER_OR_HR,
             roomId=int(self.room_id),
