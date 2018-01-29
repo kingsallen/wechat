@@ -23,7 +23,7 @@ class CaptchaHandler(BaseHandler):
         if status == 61010:
             data = ObjectDict(
                 kind=0,  # // {0: success, 1: failure, 10: email}
-                massages=msg.CAPTCHA_SUCCESS,  # ['hello world', 'abjsldjf']
+                messages=msg.CAPTCHA_SUCCESS,  # ['hello world', 'abjsldjf']
                 jump_link=None  # // 如果有会自动，没有就不自动跳转
             )
             self.render_page(template_name="system/user-info.html",
@@ -36,7 +36,7 @@ class CaptchaHandler(BaseHandler):
             messages.append("请登录hr.moseeker.com重新同步职位")
             data = ObjectDict(
                 kind=1,  # // {0: success, 1: failure, 10: email}
-                massages=messages,  # ['hello world', 'abjsldjf']
+                messages=messages,  # ['hello world', 'abjsldjf']
                 jump_link=None  # // 如果有会自动，没有就不自动跳转
             )
 
@@ -91,7 +91,7 @@ class CaptchaChecked(BaseHandler):
 
         data = ObjectDict(
             kind=0,  # // {0: success, 1: failure, 10: email}
-            massages=msg.CAPTCHA_SUCCESS,  # ['hello world', 'abjsldjf']
+            messages=msg.CAPTCHA_SUCCESS,  # ['hello world', 'abjsldjf']
             jump_link=None  # // 如果有会自动，没有就不自动跳转
         )
 
