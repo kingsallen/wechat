@@ -11,6 +11,8 @@ COMPANY_TEAM = '/company/team'
 SEARCH_FILITER = '/start'
 CUSTOMIZE_EDX = '/custom/emailapply'
 
+CAPTCHA_CHECKED = '/captcha/checked'
+
 EMPLOYEE_VERIFY = '/app/employee/binding'
 EMPLOYEE_RECOMMENDS = '/app/employee/recommends'
 EMPLOYEE_CUSTOMINFO = '/employee/custominfo'
@@ -79,6 +81,10 @@ INFRA_USER_EMPLOYEE = 'user/employee'
 INFRA_APPLICATION = 'application'
 INFRA_APPLICATION_APPLY_COUNT = 'application/count/check'
 INFRA_APPLICATION_TYPE_APPLY_COUNT = 'application/type/count/check'
+
+# 验证码服务
+INFRA_CAPTCHA = 'position/syncVerifyInfo'
+INFRA_VERIFY_PARAMS = 'position/getSyncVerifyParam'
 
 # 职位服务
 # REF: https://wiki.moseeker.com/position-api.md
