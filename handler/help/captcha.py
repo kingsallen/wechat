@@ -19,8 +19,8 @@ class CaptchaHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         param_id = self.params.paramId
-        message, data = yield self.captcha_ps.get_verification_params(param_id)
-        if message == 'success':
+        message, body, status = yield self.captcha_ps.get_verification_params(param_id)
+        if status == 61010:
             data = ObjectDict(
                 kind=0,  # // {0: success, 1: failure, 10: email}
                 massages=msg.CAPTCHA_SUCCESS,  # ['hello world', 'abjsldjf']
@@ -31,7 +31,7 @@ class CaptchaHandler(BaseHandler):
             return
 
         messages = []
-        if not data:
+        if not body:
             messages.append(message)
             messages.append("请登录hr.moseeker.com重新同步职位")
             data = ObjectDict(
@@ -45,7 +45,7 @@ class CaptchaHandler(BaseHandler):
         else:
             self.render_page(
                 template_name='adjunct/validate-captcha.html',
-                data=data
+                data=body
             )
 
 

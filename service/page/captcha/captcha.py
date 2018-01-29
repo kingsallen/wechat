@@ -41,13 +41,13 @@ class CaptchaPageService(PageService):
         """
         req = ObjectDict({'paramId': param_id})
         res = yield self.infra_captcha_ds.get_verification_params(req)
-        message, data = res.message, res.data
+        message, data, status = res.message, res.data, res.status
         ret = ObjectDict()
         if data:
             ret['channel'] = data.channel
             ret['accountId'] = data.accountId
             ret['mobile'] = data.mobile
             ret['positionId'] = data.positionId
-        return message, ret
+        return message, ret, status
 
 
