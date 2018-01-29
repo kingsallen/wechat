@@ -20,11 +20,28 @@ class CaptchaHandler(BaseHandler):
     def get(self):
         param_id = self.params.paramId
         message, data = yield self.captcha_ps.get_verification_params(param_id)
+        if message == 'success':
+            data = ObjectDict(
+                kind=0,  # // {0: success, 1: failure, 10: email}
+                massages=msg.CAPTCHA_SUCCESS,  # ['hello world', 'abjsldjf']
+                jump_link=None  # // 如果有会自动，没有就不自动跳转
+            )
+            self.render_page(template_name="system/user-info.html",
+                             data=data)
+            return
+
         messages = []
         if not data:
             messages.append(message)
             messages.append("请登录hr.moseeker.com重新同步职位")
-            self.write_error(500, message=messages)
+            data = ObjectDict(
+                kind=1,  # // {0: success, 1: failure, 10: email}
+                massages=messages,  # ['hello world', 'abjsldjf']
+                jump_link=None  # // 如果有会自动，没有就不自动跳转
+            )
+
+            self.render_page(template_name="system/user-info.html",
+                             data=data)
         else:
             self.render_page(
                 template_name='adjunct/validate-captcha.html',
