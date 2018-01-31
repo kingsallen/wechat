@@ -134,13 +134,12 @@ class Guard:
         email_address = settings['log_guard_warning_email'] or []
         subject = 'log 诊断报警'
         content = error_queue
-        for add in email_address:
-            Process(
-                target=mail_tool.send_mail,
-                args=(add,
-                      subject,
-                      content)
-            ).start()
+        Process(
+            target=mail_tool.send_mail,
+            args=(email_address,
+                  subject,
+                  content)
+        ).start()
 
     def redis_is_error(self):
         """
