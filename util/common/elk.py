@@ -20,6 +20,7 @@ from tornado.options import options
 from util.tool import mail_tool
 import conf.common as constant
 from setting import settings
+from multiprocessing import Process
 
 
 def connect(host, port, timeout, pool_size):
@@ -131,9 +132,15 @@ class Guard:
     def send_alert_mail(self, error_queue):
         """发生异常时发送报警邮件"""
         email_address = settings['log_guard_warning_email'] or []
+        subject = 'log 诊断报警'
+        content = error_queue
         for add in email_address:
-            content = error_queue
-            mail_tool.send_mail(add, 'log 诊断报警', content)
+            Process(
+                target=mail_tool.send_mail,
+                args=(add,
+                      subject,
+                      content)
+            ).start()
 
     def redis_is_error(self):
         """
