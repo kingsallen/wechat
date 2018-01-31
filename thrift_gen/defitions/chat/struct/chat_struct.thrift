@@ -45,7 +45,14 @@ struct ChatVO {
     1:  optional i32 id,                    //页码
     2:  optional string content,            //聊天内容
     3:  optional string create_time,        //创建时间
-    4:  optional i8 speaker                 //0：求职者，1：HR
+    4:  optional i8 speaker,                 //0：求职者，1：HR
+    5:  optional i8 origin,                 // 0 人工输入，1 欢迎语，2 AI输入
+    6:  optional string origin_str,          // 0 人工输入，1 欢迎语，2 AI输入
+    7:  optional string msgType,            //消息类型
+    8:  optional string picUrl,             //照片路径
+    9:  optional string btnContent,         //按钮信息
+    10: optional i32 roomId,                //聊天室Id
+    11: optional i32 positionId             //职位Id
 }
 
 struct ChatsVO {

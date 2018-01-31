@@ -4,25 +4,22 @@ import ujson
 
 import tornado.gen as gen
 
-import conf.path as path
 import conf.common as const
+import conf.path as path
 import conf.wechat as wx
-
+from globals import logger
+from service.data.hr.hr_wx_notice_message import HrWxNoticeMessageDataService
+from service.data.hr.hr_wx_template_message import \
+    HrWxTemplateMessageDataService
+from service.data.hr.hr_wx_wechat import HrWxWechatDataService
+from service.data.log.log_wx_message_record import \
+    LogWxMessageRecordDataService
+from service.data.user.user_wx_user import UserWxUserDataService
+from setting import settings
 from util.common import ObjectDict
 from util.common.singleton import Singleton
 from util.tool.date_tool import curr_datetime_now
 from util.tool.http_tool import http_post, http_get
-
-from globals import logger
-from service.data.hr.hr_wx_wechat import HrWxWechatDataService
-from service.data.hr.hr_wx_notice_message import HrWxNoticeMessageDataService
-from service.data.hr.hr_wx_template_message import \
-    HrWxTemplateMessageDataService
-from service.data.user.user_wx_user import UserWxUserDataService
-from service.data.log.log_wx_message_record import \
-    LogWxMessageRecordDataService
-
-from setting import settings
 
 
 class WechatException(Exception):
@@ -34,7 +31,6 @@ class WechatNoTemplateError(WechatException):
 
 
 class WechatTemplateMessager(object):
-
     __metaclass__ = Singleton
 
     def __init__(self):
@@ -79,6 +75,7 @@ class WechatTemplateMessager(object):
         if qx_retry:
             # 如果需要用聚合号重试，则重复调用本方法
             qx_openid = yield self._get_qx_openid(wechat_id, openid)
+            self.logger.info("qx_retry: {} {} {}".format(wechat_id, openid, qx_openid))
             ret = yield self.send_template(settings['qx_wechat_id'],
                                            qx_openid,
                                            sys_template_id,
@@ -133,13 +130,13 @@ class WechatTemplateMessager(object):
 
     @gen.coroutine
     def _send(
-            self,
-            access_token,
-            openid,
-            template_id,
-            link,
-            topcolor,
-            json_data):
+        self,
+        access_token,
+        openid,
+        template_id,
+        link,
+        topcolor,
+        json_data):
         """发送模板消息例子操作
 
         :param access_token: 公众号的 access_token
@@ -172,9 +169,9 @@ class WechatTemplateMessager(object):
         # 获取模板id
         template = yield self.hr_wx_template_message_ds.get_wx_template(
             conds={
-                "wechat_id":       wechat_id,
+                "wechat_id": wechat_id,
                 "sys_template_id": sys_template_id,
-                "disable":         const.NO
+                "disable": const.NO
             })
         if not template:
             raise WechatNoTemplateError()
@@ -186,6 +183,9 @@ class WechatTemplateMessager(object):
         """
         保存模板消息发送结果记录
         """
+        self.logger.info(
+            "_save_sending_log: {}, {}, {}, {}, {}, {}, {}".format(wechat, openid, template_id, link, json_data,
+                                                                   topcolor, res))
         now = curr_datetime_now()
 
         yield self.log_wx_message_record_ds.create_wx_message_log_record(
@@ -208,9 +208,11 @@ class WechatTemplateMessager(object):
     @gen.coroutine
     def _send_and_log(self, wechat, openid, template, link, json_data):
         """发送消息模板， 记录发送log"""
+        self.logger.info("发送消息模板: {}, {}, {}, {}, {}".format(wechat, openid, template, link, json_data))
         ret, res = yield self._send(
             wechat.access_token, openid, template.wx_template_id, link, template.topcolor,
             json_data)
+        self.logger.info("发送消息模板记录: {}, {}".format(ret, res))
 
         yield self._save_sending_log(
             wechat, openid, template.sys_template_id, link, json_data,
@@ -236,24 +238,6 @@ class WechatTemplateMessager(object):
         })
 
         raise gen.Return(qx_wxuser.openid)
-
-    @gen.coroutine
-    def get_send_switch(self, wechat_id, notice_id):
-        """
-        获取企业号消息模板发送开关
-        :param wechat_id:
-        :param notice_id:
-        :return:
-        """
-        send_switch = yield self.hr_wx_notice_message_ds.get_wx_notice_message({
-            "wechat_id": wechat_id,
-            "notice_id": notice_id,
-            "status": 1,
-        })
-
-        res = False if not send_switch else True
-
-        raise gen.Return(res)
 
 messager = WechatTemplateMessager()
 

@@ -48,6 +48,7 @@ import handler.platform.team
 import handler.platform.recom
 import handler.platform.compatible
 import handler.platform.user
+import handler.help.captcha
 
 import handler.qx.app
 import handler.qx.aggregation
@@ -94,6 +95,8 @@ common_routes = [
     (r"/api/profile/new/?",                          handler.common.profile.ProfileNewHandler,                  {"event": "profile_new"}),
     (r"/api/customcv/?",                             handler.common.profile.ProfileAPICustomCVHandler,          {"event": "profile_customcv"}),
     (r"/api/position/star/?",                        handler.common.position.PositionStarHandler,               {"event": "position_star"}),
+    (r"/api/position/list/?",                        handler.platform.position.PositionListDetailHandler,       {"event": "position_list"}),
+    (r"/api/position/list/sug",                      handler.platform.position.PositionListSugHandler,          {"event": "position_list_sug"}),
     (r"/api/chat/unread[\/]*([0-9]+)*",              handler.common.im.UnreadCountHandler,                      {"event": "chat_"}),
     (r"/api/mobilebinded",                           handler.common.usercenter.UserMobileBindedHandler,         {"event": "user_usermobilebinded"}),
     (r"/api/cellphone[\/]*([a-z_]+)*",               handler.common.cellphone.CellphoneBindHandler,             {"event": "cellphone_"}),
@@ -130,8 +133,8 @@ platform_routes = [
     (r"/employee/ladder/?",                          handler.platform.employee.AwardsLadderPageHandler,         {"event": "awards_ladder_page"}),
     (r'/user/survey/?',                              handler.platform.user.UserSurveyHandler,                   {'event': 'user_survey'}),
     (r'/user/ai-recom/?',                            handler.platform.user.AIRecomHandler,                      {'event': 'user_ai-recom'}),
-    (r'/employee/survey/?',                          handler.platform.employee.EmployeeSurveyHandler,               {'event': 'employee_survey'}),
-    (r'/employee/ai-recom/(\d+)',                    handler.platform.employee.EmployeeAiRecomHandler,              {'event': 'employee_ai-recom'}),
+    (r'/employee/survey/?',                          handler.platform.employee.EmployeeSurveyHandler,           {'event': 'employee_survey'}),
+    (r'/employee/ai-recom/(\d+)',                    handler.platform.employee.EmployeeAiRecomHandler,          {'event': 'employee_ai-recom'}),
 
     # 各大公司的自定义配置
     (r"/custom/emailapply/?",                        handler.platform.customize.CustomizeEmailApplyHandler,     {"event": "customize_emailapply"}),
@@ -159,7 +162,7 @@ platform_routes = common_routes + platform_routes
 # 聚合号的单独 routes, 域名 platform.moseeker.com/recruit
 qx_routes = [
 
-    (r"/alipaycampaign/([A-Za-z0-9_]{1,32})/company/?",    handler.common.campaign.AlipayCampaignCompanyHandler,         {"event": "alipaycampaign/company"}),
+    (r"/alipaycampaign/([A-Za-z0-9_]{1,32})/company/?", handler.common.campaign.AlipayCampaignCompanyHandler,   {"event": "alipaycampaign/company"}),
     (r"/alipaycampaign/([A-Za-z0-9_]{1,32})/company/(\d+)/position/?",   handler.common.campaign.AlipayCampaignPositionHandler,        {"event": "alipaycampaign/position"}),
 
     (r"/api/position/(?P<position_id>\d+)",          handler.qx.position.PositionHandler,                       {"event": "position_info"}),
@@ -183,6 +186,9 @@ help_routes = [
     (r"/hrregister/qrcode",                          handler.help.passport.RegisterQrcodeHandler,               {"event": "helper_qrcode"}),
     # 我也要招人
     (r"/api/register",                               handler.help.passport.RegisterHandler,                     {"event": "helper_register"}),
+    (r"/captcha/check/?",                            handler.help.captcha.CaptchaHandler,                       {"event": "captcha_info"}),
+    (r"/api/captcha/check",                          handler.help.captcha.CaptchaCheckHandler,                  {"event": "captcha_check"}),
+    (r"/captcha/checked/?",                          handler.help.captcha.CaptchaChecked,                       {'event': 'captcha_checked'}),
 
 ]
 help_routes = common_routes + help_routes

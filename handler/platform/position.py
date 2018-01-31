@@ -63,7 +63,7 @@ class PositionHandler(BaseHandler):
             # 是否超出投递上限。每月每家公司一个人只能申请3次
             self.logger.debug("[JD]处理投递上限")
             can_apply = yield self.application_ps.is_allowed_apply_position(
-                self.current_user.sysuser.id, company_info.id)
+                self.current_user.sysuser.id, company_info.id, position_id)
 
             # 相似职位推荐
             self.logger.debug("[JD]构建相似职位推荐")
@@ -329,7 +329,8 @@ class PositionHandler(BaseHandler):
             "did": did,
             "salary": position_info.salary,
             "hr_chat": bool(parent_company_info.conf_hr_chat),
-            "teamname_custom": teamname_custom["teamname_custom"]
+            "teamname_custom": teamname_custom["teamname_custom"],
+            "candidate_source": position_info.candidate_source_num
             # "team": position_info.department.lower() if position_info.department else ""
         })
 
@@ -483,12 +484,16 @@ class PositionHandler(BaseHandler):
     def _make_json_company_impression(self, company_info):
         """构造老微信样式的企业印象"""
 
-        if len(company_info.impression) == 0:
-            data = None
+        if company_info.impression:
+            if len(company_info.impression) == 0:
+                data = None
+            else:
+                data = ObjectDict({
+                    "data": company_info.impression
+                })
         else:
-            data = ObjectDict({
-                "data": company_info.impression
-            })
+            data = None
+            self.logger.warning("Warning: don't have company_info.impression")
         return data
 
     def _make_json_job_department(self, position_info):
@@ -509,7 +514,6 @@ class PositionHandler(BaseHandler):
         })
 
         return data
-
 
     @log_time
     @gen.coroutine
@@ -668,12 +672,16 @@ class PositionHandler(BaseHandler):
             cms_page = yield self._make_cms_page(team.id)
             if cms_page:
                 add_item(position_data, "module_mate_day", cms_page)
-
-            # 玛氏定制
-            company_config = COMPANY_CONFIG.get(company_id)
-            if company_config and not company_config.no_jd_team:  # 不在职位详情页展示所属团队, 目前只有Mars有这个需求,
+                # 玛氏定制
+                company_config = COMPANY_CONFIG.get(company_id)
+                if (
+                    company_config and not company_config.no_jd_team) or not company_config:  # 不在职位详情页展示所属团队, 目前只有Mars有这个需求,
+                    module_team = yield self._make_team(team, teamname_custom)
+                    add_item(position_data, "module_team", module_team)
+            else:
                 module_team = yield self._make_team(team, teamname_custom)
-                add_item(position_data, "module_team", module_team)
+                if module_team:
+                    add_item(position_data, "module_mate_day", module_team)
 
     @gen.coroutine
     def _make_team_position(self, team, position_id, company_id, teamname_custom):
@@ -696,196 +704,9 @@ class PositionHandler(BaseHandler):
         raise gen.Return(res)
 
 
-class PositionListHandler(BaseHandler):
-    """职位列表"""
+class PositionListInfraParamsMixin(BaseHandler):
 
-    @handle_response
-    @check_employee
-    @gen.coroutine
-    def get(self):
-
-        infra_params = self._make_position_list_infra_params()
-
-        # 校验一下可能出现的参数：
-        # hb_c: 红包活动id
-        # did: 子公司id
-        hb_c = 0
-        if self.params.hb_c and self.params.hb_c.isdigit():
-            hb_c = int(self.params.hb_c)
-
-        did = 0
-        if self.params.did and self.params.did.isdigit():
-            did = int(self.params.did)
-
-        recom_push_id = 0
-        if self.params.recom_push_id and self.params.recom_push_id.isdigit():
-            recom_push_id = int(self.params.recom_push_id)
-
-        if recom_push_id and hb_c:
-            raise MyException("错误的链接")
-
-        if hb_c:
-            # 红包职位列表
-            infra_params.update(hb_config_id=hb_c)
-            position_list = yield self.position_ps.infra_get_rp_position_list(infra_params)
-            rp_share_info = yield self.position_ps.infra_get_rp_share_info(infra_params)
-            yield self._make_share_info(self.current_user.company.id, did, rp_share_info)
-
-        elif recom_push_id:
-            # 员工推荐列表
-            if int(self.params.get("count", 0)) == 0:
-                position_list = yield self.get_employee_position_list(recom_push_id)
-            else:
-                position_list = []
-            yield self._make_share_info(self.current_user.company.id, did)
-
-        else:
-            # 普通职位列表
-            position_list = yield self.position_ps.infra_get_position_list(infra_params)
-
-            # 获取获取到普通职位列表，则根据获取的数据查找其中红包职位的红包相关信息
-            rp_position_list = list(self.__rp_position_generator(position_list))
-
-            if position_list and rp_position_list:
-                rpext_list = yield self.position_ps.infra_get_position_list_rp_ext(rp_position_list)
-
-                for position in position_list:
-                    pext = [e for e in rpext_list if e.pid == position.id]
-                    if pext:
-                        position.remain = pext[0].remain
-                        position.employee_only = pext[0].employee_only
-                        position.is_rp_reward = position.remain > 0
-                    else:
-                        position.is_rp_reward = False
-
-            yield self._make_share_info(self.current_user.company.id, did)
-
-        # 只渲染必要的公司信息
-        yield self.make_company_info()
-
-        # 如果是下拉刷新请求的职位, 返回新增职位的页面
-        if self.params.restype == "json":
-            self.render(
-                template_name="position/list_items.html",
-                positions=position_list,
-                is_employee=bool(self.current_user.employee),
-                use_neowx=bool(self.current_user.company.conf_newjd_status == 2))
-            return
-
-        # 直接请求页面返回
-        else:
-            position_title = self.locale.translate(const_platform.POSITION_LIST_TITLE_DEFAULT)
-            if self.params.recomlist or self.params.noemprecom:
-                position_title = self.locale.translate(const_platform.POSITION_LIST_TITLE_RECOMLIST)
-
-            teamname_custom = self.current_user.company.conf_teamname_custom.teamname_custom
-
-            if self.locale.code == 'zh_CN':
-                teamname_custom = self.locale.translate(
-                    teamname_custom, plural_message=teamname_custom, count=2)
-
-            elif self.locale.code == 'en_US':
-                teamname_custom = self.locale.translate(
-                    '团队', plural_message='团队', count=2)
-
-            else:
-                assert False
-
-            self.render(
-                template_name="position/list.html",
-                positions=position_list,
-                position_title=position_title,
-                url='',
-                use_neowx=bool(self.current_user.company.conf_newjd_status == 2),
-                is_employee=bool(self.current_user.employee),
-                searchFilterNum=self.get_search_filter_num(),
-                teamname_custom=teamname_custom
-            )
-
-    @staticmethod
-    def __rp_position_generator(position_list):
-        for position in position_list:
-            if isinstance(position, dict) and position.in_hb:
-                yield position
-
-    @gen.coroutine
-    def get_employee_position_list(self, recom_push_id):
-        """
-        获取员工推荐职位列表
-        :return:
-        """
-        company_id = self.current_user.company.id
-
-        infra_params = ObjectDict({
-            "companyId": company_id,
-            "recomPushId": recom_push_id,
-            "type": 1  # hard code, 1表示员工
-        })
-
-        position_list = yield self.position_ps.infra_get_position_employeerecom(infra_params, company_id)
-        return position_list
-
-    @gen.coroutine
-    def make_company_info(self):
-        """只提取必要的company信息用于渲染"""
-        if self.params.did:
-            company = yield self.company_ps.get_company(
-                conds={'id': self.params.did}, need_conf=True)
-            if not company.banner:
-                parent_company = self.current_user.company
-                company.banner = parent_company.banner
-        else:
-            company = self.current_user.company
-        self.params.company = self.position_ps.limited_company_info(company)
-
-    def get_search_filter_num(self):
-        """get search filter number for statistics"""
-        ret = 0
-        if self.is_platform:
-            self.params.pop("page_from", None)
-            self.params.pop("page_size", None)
-            self.params.pop("order_by_priority", None)
-            for k, v in self.params.items():
-                if v:
-                    ret += 1
-
-    @gen.coroutine
-    def _make_share_info(self, company_id, did=None, rp_share_info=None):
-        """构建 share 内容"""
-
-        company_info = yield self.company_ps.get_company(
-            conds={"id": did or company_id}, need_conf=True)
-
-        if not rp_share_info:
-            escape = ["recomlist"]
-            cover = self.share_url(company_info.logo)
-            title = company_info.abbreviation + self.locale.translate('job_hotjobs')
-            description = self.locale.translate(msg.SHARE_DES_DEFAULT)
-
-        else:
-            cover = self.share_url(rp_share_info.cover)
-            escape = [
-                "pid", "keywords", "cities", "candidate_source",
-                "employment_type", "salary", "department", "occupations",
-                "custom", "degree", "page_from", "page_size"
-            ]
-            title = rp_share_info.title
-            description = rp_share_info.description
-
-        link = self.make_url(
-            path.POSITION_LIST,
-            self.params,
-            recom=self.position_ps._make_recom(self.current_user.sysuser.id),
-            escape=escape)
-
-        self.params.share = ObjectDict({
-            "cover": cover,
-            "title": title,
-            "description": description,
-            "link": link
-        })
-
-    def _make_position_list_infra_params(self):
+    def make_position_list_infra_params(self):
         """构建调用基础服务职位列表的 params"""
 
         infra_params = ObjectDict()
@@ -941,6 +762,184 @@ class PositionListHandler(BaseHandler):
         return infra_params
 
 
+class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
+    """获取职位列表"""
+
+    @handle_response
+    @check_employee
+    @gen.coroutine
+    def get(self):
+
+        infra_params = self.make_position_list_infra_params()
+
+        # 校验一下可能出现的参数：
+        # hb_c: 红包活动id
+        # did: 子公司id
+        hb_c = 0
+        if self.params.hb_c and self.params.hb_c.isdigit():
+            hb_c = int(self.params.hb_c)
+
+        recom_push_id = 0
+        if self.params.recom_push_id and self.params.recom_push_id.isdigit():
+            recom_push_id = int(self.params.recom_push_id)
+
+        if recom_push_id and hb_c:
+            raise MyException("错误的链接")
+
+        if hb_c:
+            # 红包职位列表
+            infra_params.update(hb_config_id=hb_c)
+            position_list = yield self.position_ps.infra_get_rp_position_list(infra_params)
+
+        elif recom_push_id:
+            # 员工推荐列表
+            if int(self.params.get("count", 0)) == 0:
+                position_list = yield self.get_employee_position_list(recom_push_id, infra_params)
+            else:
+                position_list = []
+
+        else:
+            # 普通职位列表
+            position_list = yield self.position_ps.infra_get_position_list(infra_params)
+
+            # 获取获取到普通职位列表，则根据获取的数据查找其中红包职位的红包相关信息
+            rp_position_list = list(self.__rp_position_generator(position_list))
+
+            if position_list and rp_position_list:
+                rpext_list = yield self.position_ps.infra_get_position_list_rp_ext(rp_position_list)
+
+                for position in position_list:
+                    pext = [e for e in rpext_list if e.pid == position.id]
+                    if pext:
+                        position.remain = pext[0].remain
+                        position.employee_only = pext[0].employee_only
+                        position.is_rp_reward = position.remain > 0
+                    else:
+                        position.is_rp_reward = False
+
+        position_id_list = list()
+        for e in position_list:
+            position_id_list.append(e.id)
+
+        # 获取当前职位列表中用户已感兴趣职位列表
+        fav_position_id_list = yield self.usercenter_ps.get_user_position_stared_list(
+            self.current_user.sysuser.id, position_id_list
+        )
+
+        # 获取用户已申请职位列表
+        applied_application_id_list = yield self.usercenter_ps.get_applied_applications_list(self.current_user.sysuser.id, position_id_list)
+
+        # 诺华定制
+        suppress_apply = yield self.customize_ps.is_suppress_apply_company(infra_params.company_id)
+
+        position_custom_list = []
+        position_custom_id_list = []
+        if suppress_apply:
+            position_custom_list, position_custom_id_list = yield self.position_ps.get_position_custom_list(position_id_list)
+
+        # 是否达到投递上线
+        social_res, school_res = yield self.application_ps.get_application_apply_status(self.current_user.sysuser.id, self.current_user.company.id)
+        total_count = 0
+        # 职位信息
+        position_ex_list = list()
+        for pos in position_list:
+            position_ex = ObjectDict()
+            position_ex["id"] = pos.id
+            position_ex["priority"] = pos.priority
+            position_ex["title"] = pos.title
+            position_ex["visitnum"] = pos.visitnum
+            position_ex["abbreviation"] = pos.abbreviation
+            position_ex["department"] = pos.department
+            position_ex["province"] = pos.province
+            position_ex["city"] = pos.city
+            position_ex["salary"] = pos.salary
+            position_ex["logo"] = pos.logo
+            position_ex["company_name"] = pos.company_name
+            position_ex["salary_top"] = pos.salary_top
+            position_ex["salary_bottom"] = pos.salary_bottom
+            position_ex["update_time"] = pos.update_time
+            position_ex["rp_reward_amount"] = pos.rp_reward_amount
+            position_ex["rp_reward_target"] = pos.rp_reward_target
+            position_ex["company_abbr"] = pos.company_abbr
+            position_ex["remain"] = pos.remain
+            position_ex["publish_date"] = pos.publish_date
+            position_ex["team_name"] = pos.team_name
+            position_ex["job_description"] = pos.accountabilities
+            position_ex["is_starred"] = pos.id in fav_position_id_list  # 判断职位收藏状态
+            position_ex['is_applied'] = pos.id in applied_application_id_list  # 判断职位申请状态
+
+            position_ex['candidate_source'] = pos.candidate_source
+            position_ex['job_need'] = pos.requirement
+
+            total_count = pos.totalNum
+            # 判断职位投递是否达到上限
+            can_apply = False
+            if pos.candidate_source:
+                can_apply = school_res
+            elif pos.candidate_source == 0:
+                can_apply = social_res
+
+            position_ex['can_apply'] = not can_apply
+            # 判断是否显示红包
+            is_employee = bool(self.current_user.employee)
+            position_ex['has_reward'] = pos.is_rp_reward and (
+                is_employee and pos.employee_only or not pos.employee_only)
+
+            # 诺华定制
+            position_ex['suppress_apply'] = ObjectDict()
+            position_ex['suppress_apply']['is_suppress_apply'] = suppress_apply
+            position_ex['suppress_apply']['job_number'] = pos.jobnumber
+            if position_custom_list and position_custom_id_list and pos.id in position_custom_id_list:
+                for custom in position_custom_list:
+                    if pos.id == custom.id and custom.custom_field:
+                        position_ex['suppress_apply']['custom_field'] = custom.custom_field
+                    else:
+                        position_ex['suppress_apply']['custom_field'] = ''
+
+            position_ex_list.append(position_ex)
+
+        self.send_json_success(
+            data=ObjectDict(list=position_ex_list,
+                            total_count=total_count)
+        )
+
+    @staticmethod
+    def __rp_position_generator(position_list):
+        for position in position_list:
+            if isinstance(position, dict) and position.in_hb:
+                yield position
+
+    @gen.coroutine
+    def get_employee_position_list(self, recom_push_id, params):
+        """
+        获取员工推荐职位列表
+        :return:
+        """
+        company_id = self.current_user.company.id
+
+        infra_params = ObjectDict({
+            "companyId": company_id,
+            "recomPushId": recom_push_id,
+            "type": 1,  # hard code, 1表示员工
+            "page_from": int(self.params.get("count", 0)/10) + 1,
+            "page_size": params.page_size
+        })
+
+        position_list = yield self.position_ps.infra_get_position_employeerecom(infra_params, company_id)
+        return position_list
+
+    def get_search_filter_num(self):
+        """get search filter number for statistics"""
+        ret = 0
+        if self.is_platform:
+            self.params.pop("page_from", None)
+            self.params.pop("page_size", None)
+            self.params.pop("order_by_priority", None)
+            for k, v in self.params.items():
+                if v:
+                    ret += 1
+
+
 class PositionEmpNoticeHandler(BaseHandler):
     @handle_response
     @gen.coroutine
@@ -966,3 +965,146 @@ class PositionEmpNoticeHandler(BaseHandler):
                                                      link)
 
         self.send_json_success()
+
+
+class PositionListHandler(PositionListInfraParamsMixin, BaseHandler):
+    @handle_response
+    @check_employee
+    @gen.coroutine
+    def get(self):
+        """获取职位列表页"""
+
+        infra_params = self.make_position_list_infra_params()
+
+        # 校验一下可能出现的参数：
+        # hb_c: 红包活动id
+        # did: 子公司id
+        hb_c = 0
+        if self.params.hb_c and self.params.hb_c.isdigit():
+            hb_c = int(self.params.hb_c)
+
+        did = 0
+        if self.params.did and self.params.did.isdigit():
+            did = int(self.params.did)
+
+        recom_push_id = 0
+        if self.params.recom_push_id and self.params.recom_push_id.isdigit():
+            recom_push_id = int(self.params.recom_push_id)
+
+        if recom_push_id and hb_c:
+            raise MyException("错误的链接")
+
+        if hb_c:
+            # 红包职位分享
+            infra_params.update(hb_config_id=hb_c)
+            rp_share_info = yield self.position_ps.infra_get_rp_share_info(infra_params)
+            yield self._make_share_info(self.current_user.company.id, did, rp_share_info)
+        else:
+            yield self._make_share_info(self.current_user.company.id, did)
+
+        # 只渲染必要的公司信息
+        yield self.make_company_info()
+
+        position_title = self.locale.translate(const_platform.POSITION_LIST_TITLE_DEFAULT)
+        if self.params.recomlist or self.params.noemprecom:
+            position_title = self.locale.translate(const_platform.POSITION_LIST_TITLE_RECOMLIST)
+
+        teamname_custom = self.current_user.company.conf_teamname_custom.teamname_custom
+
+        if self.locale.code == 'zh_CN':
+            teamname_custom = self.locale.translate(
+                teamname_custom, plural_message=teamname_custom, count=2)
+
+        elif self.locale.code == 'en_US':
+            teamname_custom = self.locale.translate(
+                '团队', plural_message='团队', count=2)
+
+        company = ObjectDict()
+        company['id'] = self.params.company.id
+        company['logo'] = self.params.company.logo
+        company['abbreviation'] = self.params.company.abbreviation
+        company['industry'] = self.params.company.industry
+        company['scale_name'] = self.params.company.scale_name
+        company['banner'] = self.params.company.banner
+
+        self.render_page(
+            template_name="position/index.html",
+            meta_title=position_title,
+            data=ObjectDict(
+                company=company,
+                use_neowx=bool(self.current_user.company.conf_newjd_status == 2),
+                teamname_custom=teamname_custom)
+        )
+
+    @gen.coroutine
+    def make_company_info(self):
+        """只提取必要的company信息用于渲染"""
+        if self.params.did:
+            company = yield self.company_ps.get_company(
+                conds={'id': self.params.did}, need_conf=True)
+            if not company.banner:
+                parent_company = self.current_user.company
+                company.banner = parent_company.banner
+        else:
+            company = self.current_user.company
+        self.params.company = self.position_ps.limited_company_info(company)
+
+    @gen.coroutine
+    def _make_share_info(self, company_id, did=None, rp_share_info=None):
+        """构建 share 内容"""
+
+        company_info = yield self.company_ps.get_company(
+            conds={"id": did or company_id}, need_conf=True)
+
+        if not rp_share_info:
+            escape = ["recomlist"]
+            cover = self.share_url(company_info.logo)
+            title = company_info.abbreviation + self.locale.translate('job_hotjobs')
+            description = self.locale.translate(msg.SHARE_DES_DEFAULT)
+
+        else:
+            cover = self.share_url(rp_share_info.cover)
+            escape = [
+                "pid", "keywords", "cities", "candidate_source",
+                "employment_type", "salary", "department", "occupations",
+                "custom", "degree", "page_from", "page_size"
+            ]
+            title = rp_share_info.title
+            description = rp_share_info.description
+
+        link = self.make_url(
+            path.POSITION_LIST,
+            self.params,
+            recom=self.position_ps._make_recom(self.current_user.sysuser.id),
+            escape=escape)
+
+        self.params.share = ObjectDict({
+            "cover": cover,
+            "title": title,
+            "description": description,
+            "link": link
+        })
+
+
+class PositionListSugHandler(PositionListInfraParamsMixin, BaseHandler):
+    @handle_response
+    @check_employee
+    @gen.coroutine
+    def get(self):
+        """
+        sug搜索
+        :return:
+        """
+        infra_params = self.make_position_list_infra_params()
+        sug = ObjectDict()
+        # 获取五条sug数据
+        infra_params.update(page_size=const_platform.SUG_LIST_COUNT,
+                            keyWord=self.params.keyword if self.params.keyword else "",
+                            page_from=int(self.params.get("count", 0)/10) + 1)
+        res_data = yield self.position_ps.infra_obtain_sug_list(infra_params)
+        suggest = res_data.get('suggest') if res_data else ''
+        if suggest:
+            sug.list = [e.get('title') for e in suggest]
+
+        return self.send_json_success(sug)
+

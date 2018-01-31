@@ -14,7 +14,6 @@ import json
 
 
 class ChatPageService(PageService):
-
     def __init__(self):
         super().__init__()
 
@@ -43,6 +42,7 @@ class ChatPageService(PageService):
         """获得聊天历史记录"""
 
         ret = yield self.thrift_chat_ds.get_chats(room_id, page_no, page_size)
+        self.logger.debug(ret)
         obj_list = list()
         if ret.chatLogs:
             for e in ret.chatLogs:
@@ -50,7 +50,12 @@ class ChatPageService(PageService):
                 room['id'] = e.id
                 room['content'] = e.content
                 room['chat_time'] = str_2_date(e.create_time, const.TIME_FORMAT_MINUTE)
-                room['speaker'] = e.speaker # 0：求职者，1：HR
+                room['speaker'] = e.speaker  # 0：求职者，1：HR
+                room['picUrl'] = e.picUrl
+                room['btnContent'] = json.loads(e.btnContent) if e.btnContent is not None else e.btnContent
+                if room['btnContent'] and type(room['btnContent']) == str:
+                    room['btnContent'] = json.loads(room['btnContent'])
+                room['msgType'] = e.msgType
                 obj_list.append(room)
 
         raise gen.Return(obj_list)
@@ -64,36 +69,36 @@ class ChatPageService(PageService):
         hr_info = ObjectDict()
         if ret.hr:
             hr_info = ObjectDict(
-                hr_id = ret.hr.hrId,
-                hr_name = ret.hr.hrName or "HR",
-                hr_headimg = make_static_url(ret.hr.hrHeadImg or const.HR_HEADIMG)
+                hr_id=ret.hr.hrId,
+                hr_name=ret.hr.hrName or "HR",
+                hr_headimg=make_static_url(ret.hr.hrHeadImg or const.HR_HEADIMG)
             )
 
         user_info = ObjectDict()
         if ret.user:
             user_info = ObjectDict(
-                user_id = ret.user.userId,
-                user_name = ret.user.userName,
-                user_headimg = make_static_url(ret.user.userHeadImg or const.SYSUSER_HEADIMG)
+                user_id=ret.user.userId,
+                user_name=ret.user.userName,
+                user_headimg=make_static_url(ret.user.userHeadImg or const.SYSUSER_HEADIMG)
             )
 
         position_info = ObjectDict()
         if ret.position:
             position_info = ObjectDict(
-                pid = ret.position.positionId,
-                title = ret.position.positionTitle,
-                company_name = ret.position.companyName,
-                city = ret.position.city,
-                salary = gen_salary(ret.position.salaryTop, ret.position.salaryBottom),
-                update_time = str_2_date(ret.position.updateTime, const.TIME_FORMAT_MINUTE)
+                pid=ret.position.positionId,
+                title=ret.position.positionTitle,
+                company_name=ret.position.companyName,
+                city=ret.position.city,
+                salary=gen_salary(ret.position.salaryTop, ret.position.salaryBottom),
+                update_time=str_2_date(ret.position.updateTime, const.TIME_FORMAT_MINUTE)
             )
         res = ObjectDict(
-            hr = hr_info,
-            user = user_info,
-            position = position_info,
-            chat_debut = ret.chatDebut,
-            follow_qx = qxuser.is_subscribe == 1,
-            room_id = ret.roomId,
+            hr=hr_info,
+            user=user_info,
+            position=position_info,
+            chat_debut=ret.chatDebut,
+            follow_qx=qxuser.is_subscribe == 1,
+            room_id=ret.roomId,
         )
 
         raise gen.Return(res)
@@ -111,17 +116,14 @@ class ChatPageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def save_chat(self, room_id, content, position_id, speaker=0):
+    def save_chat(self, params):
         """
         记录聊天内容
-        :param room_id:
-        :param content:
-        :param position_id:
-        :param speaker: 0：求职者，1：HR， 2：chatbot
+        :param params:
         :return:
         """
 
-        ret = yield self.thrift_chat_ds.save_chat(room_id, content, position_id, speaker)
+        ret = yield self.thrift_chat_ds.save_chat(params)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -202,11 +204,48 @@ class ChatPageService(PageService):
             self.logger.debug(res.results)
             results = res.results
             r = results[0]
+            res_type = r.get("resultType", "")
+            ret = r.get("values", {})
 
-            ret = r.get("values", {}).get("text", "")
-
+            if res_type == "text":
+                content = ret.get("text", "")
+                pic_url = ret.get("picUrl", "")
+                msg_type = "html"
+                btn_content = []
+                btn_content_json = ''
+            elif res_type == "image":
+                content = ret.get("text", "")
+                pic_url = ret.get("picUrl", "")
+                msg_type = "image"
+                btn_content = []
+                btn_content_json = ''
+            elif res_type == "qrcode":
+                content = ret.get("text", "")
+                pic_url = ret.get("picUrl", "")
+                msg_type = "qrcode"
+                btn_content = []
+                btn_content_json = ''
+            elif res_type == "button_radio":
+                content = ret.get("text", "")
+                btn_content_json = json.dumps(ret.get("btnContent", []))
+                btn_content = ret.get("btnContent", [])
+                pic_url = ""
+                msg_type = "button_radio"
+            else:
+                content = ''
+                pic_url = ''
+                msg_type = ''
+                btn_content = []
+                btn_content_json = ''
+            ret_message = ObjectDict()
+            ret_message['content'] = content
+            ret_message['pic_url'] = pic_url
+            ret_message['btn_content'] = btn_content
+            ret_message['msg_type'] = msg_type
+            ret_message['btn_content_json'] = btn_content_json
+            self.logger.debug(ret_message)
         except Exception as e:
             self.logger.error(e)
-            return ""
+            return
         else:
-            return ret
+            return ret_message

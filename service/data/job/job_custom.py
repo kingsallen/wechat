@@ -29,7 +29,7 @@ class JobCustomDataService(DataService):
 
     @cache(ttl=60)
     @gen.coroutine
-    def get_customs_list(self, conds, fields, options=None, appends=None, index='', params=None):
+    def get_customs_list(self, conds, fields=None, options=None, appends=None, index='', params=None):
 
         fields = fields or []
         options = options or []

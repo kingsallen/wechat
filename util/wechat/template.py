@@ -5,9 +5,10 @@ from datetime import datetime, timedelta
 import tornado.gen as gen
 
 import conf.common as const
+from globals import logger
+from util.tool.dict_tool import ObjectDict
 from util.tool.json_tool import json_dumps
 from util.wechat.core import messager
-from util.tool.dict_tool import ObjectDict
 
 
 def _make_json_data(first, remark=None, colors=None, encode=True, **kwargs):
@@ -48,7 +49,6 @@ def _make_json_data(first, remark=None, colors=None, encode=True, **kwargs):
 def rp_binding_success_notice_tpl(
     wechat_id, openid, link, company_name, employee_slug,
     sys_template_id=const.TEMPLATES.RP_EMPLOYEE_BINDING):
-
     d = datetime.now()
     json_data = _make_json_data(
         first="您好！您的{}认证申请已有结果".format(employee_slug),
@@ -67,7 +67,7 @@ def rp_binding_success_notice_tpl(
 
 @gen.coroutine
 def rp_recom_success_notice_tpl(wechat_id, openid, link, company_name,
-    recomee_name, position_title, sys_template_id=const.TEMPLATES.RP_RECOM):
+                                recomee_name, position_title, sys_template_id=const.TEMPLATES.RP_RECOM):
     json_data = _make_json_data(
         first="您已成功推荐{}！感谢您对公司人才招聘的支持！".format(recomee_name),
         remark="请点击查看详情",
@@ -83,7 +83,7 @@ def rp_recom_success_notice_tpl(wechat_id, openid, link, company_name,
 
 @gen.coroutine
 def rp_transfer_click_success_notice_tpl(wechat_id, openid, link, nickname,
-    position_title, sys_template_id=const.TEMPLATES.RP_SHARE):
+                                         position_title, sys_template_id=const.TEMPLATES.RP_SHARE):
     d = datetime.now()
     json_data = _make_json_data(
         first="您好，您转发的职位已被您的好友浏览",
@@ -102,7 +102,7 @@ def rp_transfer_click_success_notice_tpl(wechat_id, openid, link, nickname,
 
 @gen.coroutine
 def rp_transfer_apply_success_notice_tpl(wechat_id, openid, link, nickname,
-    position_title, sys_template_id=const.TEMPLATES.RP_SHARE):
+                                         position_title, sys_template_id=const.TEMPLATES.RP_SHARE):
     d = datetime.now()
     json_data = _make_json_data(
         first="您好，你转发的职位有人投递啦！",
@@ -121,7 +121,7 @@ def rp_transfer_apply_success_notice_tpl(wechat_id, openid, link, nickname,
 
 @gen.coroutine
 def employee_refine_custom_fields_tpl(wechat_id, openid, link, company_name,
-    sys_template_id=const.TEMPLATES.REFINE_EMPLOYEE_INFO_TPL):
+                                      sys_template_id=const.TEMPLATES.REFINE_EMPLOYEE_INFO_TPL):
     """员工认证自定义字段填写通知模版"""
 
     send_switch = yield messager.get_send_switch(
@@ -146,7 +146,7 @@ def employee_refine_custom_fields_tpl(wechat_id, openid, link, company_name,
 
 @gen.coroutine
 def position_view_five_notice_tpl(wechat_id, openid, link, title,
-    salary, sys_template_id=const.TEMPLATES.POSITION_VIEWED):
+                                  salary, sys_template_id=const.TEMPLATES.POSITION_VIEWED_FIVE_TIMES):
     """职位浏览5次，向 HR 发送消息模板"""
 
     d = datetime.now()
@@ -164,80 +164,10 @@ def position_view_five_notice_tpl(wechat_id, openid, link, title,
 
     raise gen.Return(ret)
 
-@gen.coroutine
-def application_notice_to_applier_tpl(wechat_id, openid, link, job,
-    company_name, sys_template_id=const.TEMPLATES.APPLY_NOTICE_TPL):
-    """向求职者发送求职成功消息通知"""
-
-    d = datetime.now()
-    json_data = _make_json_data(
-        first="感谢您抽出时间申请该职位，我们将尽快查阅您的简历",
-        remark="",
-        job=job,
-        company=company_name,
-        time="{}年{}月{}日{:0>2}:{:0>2} ".format(d.year, d.month, d.day,
-                                              d.hour, d.minute))
-
-    send_switch = yield messager.get_send_switch(
-        wechat_id, const.TEMPLATES_SWITCH.APPLY_NOTICE_TPL)
-
-    ret = yield messager.send_template(
-        wechat_id, openid, sys_template_id, link, json_data, qx_retry=True,
-        platform_switch=send_switch)
-
-    raise gen.Return(ret)
-
-
-@gen.coroutine
-def application_notice_to_recommender_tpl(wechat_id, openid, link,
-    applier_name, title, work_exp_years, lastjob,
-    sys_template_id=const.TEMPLATES.NEW_RESUME_TPL):
-    """求职者发送求职成功后，向推荐人发送消息通知"""
-
-    json_data = _make_json_data(
-        first="您好，你推荐的{}投递了简历".format(applier_name),
-        remark="",
-        job=title,
-        resuname=applier_name,
-        realname=applier_name,
-        exp=work_exp_years,
-        lastjob=lastjob)
-
-    send_switch = yield messager.get_send_switch(
-        wechat_id, const.TEMPLATES_SWITCH.NEW_RESUME_TPL)
-
-    ret = yield messager.send_template(
-        wechat_id, openid, sys_template_id, link, json_data, qx_retry=False,
-        platform_switch=send_switch)
-
-    raise gen.Return(ret)
-
-
-@gen.coroutine
-def application_notice_to_hr_tpl(wechat_id, openid, hr_name, title,
-    applier_name, work_exp_years, lastjob,
-    sys_template_id=const.TEMPLATES.NEW_RESUME_TPL):
-    """求职者发送求职成功后，向HR发送消息通知"""
-
-    json_data = _make_json_data(
-        first="{0}，您好：\n您刚发布的{1}职位收到了一份新简历，请及时登录hr.moseeker.com查阅并处理".format(
-            hr_name, title),
-        remark="",
-        job=title,
-        resuname="仟寻简历",
-        realname=applier_name,
-        exp=work_exp_years,
-        lastjob=lastjob)
-
-    ret = yield messager.send_template(
-        wechat_id, openid, sys_template_id, "", json_data, qx_retry=False)
-
-    raise gen.Return(ret)
-
 
 @gen.coroutine
 def favposition_notice_to_hr_tpl(wechat_id, openid, title, candidate_name,
-    mobile, sys_template_id=const.TEMPLATES.RECOM_NOTICE_TPL):
+                                 mobile, sys_template_id=const.TEMPLATES.RECOM_NOTICE_TPL):
     """用户感兴趣某职位后，向HR发送消息通知"""
 
     json_data = _make_json_data(
@@ -255,7 +185,7 @@ def favposition_notice_to_hr_tpl(wechat_id, openid, title, candidate_name,
 
 @gen.coroutine
 def favposition_notice_to_applier_tpl(company_id, position_info, company_name,
-    user_id, url, sys_template_id=const.TEMPLATES.FAVPOSITION):
+                                      user_id, url, sys_template_id=const.TEMPLATES.FAVPOSITION):
     """用户感兴趣某职位后，向用户发送消息模板"""
 
     # 延迟2小时发送
@@ -296,7 +226,7 @@ def favposition_notice_to_applier_tpl(company_id, position_info, company_name,
 
 @gen.coroutine
 def position_share_notice_employee_tpl(company_id, title, salary, user_id, pid,
-    url, sys_template_id=const.TEMPLATES.POSITION_VIEWED):
+                                       url, sys_template_id=const.TEMPLATES.POSITION_VIEWED_SHARED):
     """认证员工转发职位后，向员工发送转发结果消息模板"""
 
     # 延迟10分钟发送
