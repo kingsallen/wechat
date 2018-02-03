@@ -18,6 +18,12 @@ from setting import settings
 from util.common import ObjectDict
 from util.common.exception import InfraOperationError
 from util.tool.dict_tool import objectdictify
+import json
+import requests
+
+
+class HttpError(Exception):
+    pass
 
 
 @gen.coroutine
@@ -84,7 +90,15 @@ def http_fetch(route, data=None, timeout=30):
         )
 
         logger.info("[http_fetch][uri: {}][req_body: {}]".format(route, request.body))
-        response = yield http_client.fetch(request)
+        if route == "https://www.linkedin.com/oauth/v2/accessToken":
+            response = yield http_client.fetch(request, raise_error=False)
+            if response.error:
+                logger.error("[http_fetch][uri: {}][httperror: {}][res_body: {}]".format(route, response.error, response.body))
+                raise HttpError
+            else:
+                return response.body
+        else:
+            response = yield http_client.fetch(request)
         logger.info("[http_fetch][uri: {}][res_body: {}]".format(route, response.body))
 
     except tornado.httpclient.HTTPError as e:
