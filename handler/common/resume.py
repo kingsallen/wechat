@@ -60,6 +60,21 @@ class LinkedinImportHandler(MetaBaseHandler):
 
         response = yield self.profile_ps.get_linkedin_token(code=code, redirect_url=redirect_url)
         response = json.loads(to_str(response))
+        if "error" in response:
+            self.logger.error("[http_fetch][response: {}]".format(response))
+            data = ObjectDict(
+                kind=1,  # // {0: success, 1: failure, 10: email}
+                messages=['导入失败，请重试'],  # ['hello world', 'abjsldjf']
+                button_text=msg.BACK_CN,
+                button_link=self.make_url(path.PROFILE_VIEW,
+                                          wechat_signature=self.get_argument('wechat_signature'),
+                                          host=self.host),
+                jump_link=None  # // 如果有会自动，没有就不自动跳转
+            )
+
+            self.render_page(template_name="system/user-info.html",
+                             data=data)
+            return
         access_token = response.get("access_token")
         # 判断是否在微信端
         ua = 1 if self.in_wechat else 2
