@@ -61,6 +61,7 @@ class LinkedinImportHandler(MetaBaseHandler):
         response = yield self.profile_ps.get_linkedin_token(code=code, redirect_url=redirect_url)
         response = json.loads(to_str(response))
         if "error" in response:
+            self.logger.error("[http_fetch][response: {}]".format(response))
             data = ObjectDict(
                 kind=1,  # // {0: success, 1: failure, 10: email}
                 messages=['导入失败，请重试'],  # ['hello world', 'abjsldjf']
