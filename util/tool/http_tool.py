@@ -18,12 +18,6 @@ from setting import settings
 from util.common import ObjectDict
 from util.common.exception import InfraOperationError
 from util.tool.dict_tool import objectdictify
-import json
-import requests
-
-
-class HttpError(Exception):
-    pass
 
 
 @gen.coroutine
@@ -91,7 +85,7 @@ def http_fetch(route, data=None, timeout=30, raise_error=True):
         )
 
         logger.info("[http_fetch][uri: {}][req_body: {}]".format(route, request.body))
-        response = yield http_client.fetch(request, raise_error)
+        response = yield http_client.fetch(request, raise_error=raise_error)
         logger.info("[http_fetch][uri: {}][res_body: {}]".format(route, response.body))
 
     except tornado.httpclient.HTTPError as e:
