@@ -50,10 +50,11 @@ def make_url(path, params=None, host="", protocol="https", escape=None,
         )
 
     def query_params_generator(pairs):
-        for k, v in pairs:
+        for k in sorted(pairs.keys()):
+            v = pairs[k]
             if valid(k, v):
                 yield (k, v)
-    pairs = sorted(pairs.items(), key=lambda pairs : pairs[0])
+
     query = list(query_params_generator(pairs))
 
     ret = (((protocol + "://" + host) if host else "") + path + "?" + urlencode(query))
