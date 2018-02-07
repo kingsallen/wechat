@@ -99,7 +99,9 @@ class UserCompanyPageService(PageService):
     def _make_qrcode(qrcode_url):
 
         link_head = 'https://platform.moseeker.com/recruit/image?url={}'
-        if qrcode_url and \
+        if qrcode_url and not re.match(r'^http', qrcode_url):
+            return quote(make_static_url(qrcode_url))
+        elif qrcode_url and \
             not re.match(
                 r'^https://platform.moseeker.com/recruit/image?url=',
                 qrcode_url):
