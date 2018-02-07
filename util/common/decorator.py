@@ -261,7 +261,7 @@ def check_and_apply_profile(func):
                                          recom=self.params.recom,
                                          pid=self.params.pid,
                                          wechat_signature=self.current_user.wechat.signature)
-            self.logger.info("[redirect_url_fetch_code: {}}".format(redirect_uri))
+            self.logger.info("[redirect_url_fetch_code: {}]".format(redirect_uri))
             linkedin_url = self.make_url(path.LINKEDIN_AUTH, params=ObjectDict(
                 response_type="code",
                 client_id=self.settings.linkedin_client_id,
