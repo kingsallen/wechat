@@ -38,6 +38,7 @@ def make_url(path, params=None, host="", protocol="https", escape=None,
 
     d = params.copy()
     d.update(kwargs)
+    d = sorted(d.keys())
 
     escape = set((escape or []) + list(_ESCAPE_DEFAULT))
 
