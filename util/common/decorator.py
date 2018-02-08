@@ -113,7 +113,7 @@ def cache(prefix=None, key=None, ttl=60, hash=True, lock=True, separator=":"):
                     cache_data = base_cache.get(redis_key)
                 except Exception as e:
                     logger.error(e)
-                    
+
                 if cache_data is None:
                     cache_data = yield func(*args, **kwargs)
                     if cache_data is not None:
@@ -261,7 +261,7 @@ def check_and_apply_profile(func):
                                          recom=self.params.recom,
                                          pid=self.params.pid,
                                          wechat_signature=self.current_user.wechat.signature)
-
+            self.logger.info("[redirect_url_fetch_code: {}]".format(redirect_uri))
             linkedin_url = self.make_url(path.LINKEDIN_AUTH, params=ObjectDict(
                 response_type="code",
                 client_id=self.settings.linkedin_client_id,

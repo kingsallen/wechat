@@ -57,7 +57,7 @@ class LinkedinImportHandler(MetaBaseHandler):
             pid=self.params.pid,
             wechat_signature=urllib.parse.unquote(
                 self.params.wechat_signature) if self.params.wechat_signature else None)
-
+        self.logger.info("[redirect_url_access_token: {}]".format(redirect_url))
         response = yield self.profile_ps.get_linkedin_token(code=code, redirect_url=redirect_url)
         response = json.loads(to_str(response))
         if "error" in response:
