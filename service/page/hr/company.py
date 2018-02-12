@@ -10,7 +10,7 @@ from tornado import gen
 from service.page.base import PageService
 from util.tool.url_tool import make_static_url
 from util.tool.dict_tool import sub_dict
-from util.tool.str_tool import is_odd, split, gen_salary
+from util.tool.str_tool import is_odd, split, gen_salary, set_literl
 from util.common.decorator import log_time
 
 cached_company_sug_wechat = None
@@ -298,13 +298,27 @@ class CompanyPageService(PageService):
         """
         ret = dict(hr_id=0, hr_logo=make_static_url(const.HR_HEADIMG))
 
-        hr_account = yield self.hr_company_account_ds.get_company_account(
-            conds={'company_id': company_id}
-        )
-        hr_account_id = hr_account.id
         main_hr_account = yield self.user_hr_account_ds.get_hr_account(
-            conds={'id': hr_account_id}
+            conds={'company_id': company_id, 'disable': 1, 'account_type': 0}
         )
+
+        if not main_hr_account:
+            main_hr_account = yield self.user_hr_account_ds.get_hr_account(
+                conds={'company_id': company_id, 'disable': 1,
+                       'account_type': 2}
+            )
+        if not main_hr_account:
+            hr_account = yield self.hr_company_account_ds.get_company_accounts_list(
+                conds={'company_id': company_id},
+                fields=['account_id']
+            )
+            hr_account_id = []
+            for hr in hr_account:
+                hr_account_id.append(hr.get('account_id'))
+            main_hr_account = yield self.user_hr_account_ds.get_hr_account(
+                conds={'disable': 1},
+                appends=['and id in %s' % set_literl(hr_account_id)]
+            )
 
         assert main_hr_account
         ret.update(hr_id=main_hr_account.id)
