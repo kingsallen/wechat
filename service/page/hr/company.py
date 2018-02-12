@@ -291,6 +291,7 @@ class CompanyPageService(PageService):
         """根据company_id获取该公司主hr信息，
         如果该公司有超级账号，返回超级账号hr信息，
         如果该公司有普通账号，返回普通账号hr信息，
+        如果是子公司，返回子账号HR信息，
         如果该公司没有hr信息，返回默认信息
         :param company_id: 公司id
         :return a dict with hr_info, including hr_id and hr_logo
