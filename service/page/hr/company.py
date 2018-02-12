@@ -318,7 +318,7 @@ class CompanyPageService(PageService):
                 hr_account_id.append(hr.get('account_id'))
             main_hr_account = yield self.user_hr_account_ds.get_hr_account(
                 conds={'disable': 1},
-                appends=['and id in %s' % set_literl(hr_account_id)]
+                appends=['and id in %s order by id asc' % set_literl(hr_account_id)]
             )
 
         assert main_hr_account
