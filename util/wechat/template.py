@@ -51,8 +51,8 @@ def rp_binding_success_notice_tpl(
     sys_template_id=const.TEMPLATES.RP_EMPLOYEE_BINDING):
     d = datetime.now()
     json_data = _make_json_data(
-        first="您好！您的{}认证申请已有结果".format(employee_slug),
-        remark="欢迎您成为我们的一员！请点击查看详情",
+        first="恭喜你获得员工认证奖励",
+        remark="请点击领取奖励",
         keyword1="已通过",
         keyword2="{}认证".format(employee_slug),
         keyword3=company_name,
@@ -69,8 +69,8 @@ def rp_binding_success_notice_tpl(
 def rp_recom_success_notice_tpl(wechat_id, openid, link, company_name,
                                 recomee_name, position_title, sys_template_id=const.TEMPLATES.RP_RECOM):
     json_data = _make_json_data(
-        first="您已成功推荐{}！感谢您对公司人才招聘的支持！".format(recomee_name),
-        remark="请点击查看详情",
+        first="恭喜你获得员工推荐奖励",
+        remark="请点击领取奖励",
         keyword1=company_name,
         keyword2=position_title,
         keyword3="已推荐")
@@ -86,8 +86,8 @@ def rp_transfer_click_success_notice_tpl(wechat_id, openid, link, nickname,
                                          position_title, sys_template_id=const.TEMPLATES.RP_SHARE):
     d = datetime.now()
     json_data = _make_json_data(
-        first="您好，您转发的职位已被您的好友浏览",
-        remark="请点击查看详情",
+        first="恭喜您获得转发奖励",
+        remark="请点击领取奖励",
         keyword1=nickname,
         keyword2=position_title,
         keyword3="面议",
@@ -105,8 +105,8 @@ def rp_transfer_apply_success_notice_tpl(wechat_id, openid, link, nickname,
                                          position_title, sys_template_id=const.TEMPLATES.RP_SHARE):
     d = datetime.now()
     json_data = _make_json_data(
-        first="您好，你转发的职位有人投递啦！",
-        remark="请点击查看详情",
+        first="恭喜您获得转发奖励",
+        remark="请点击领取奖励",
         keyword1=nickname,
         keyword2=position_title,
         keyword3="面议",
@@ -129,8 +129,8 @@ def employee_refine_custom_fields_tpl(wechat_id, openid, link, company_name,
 
     d = datetime.now()
     json_data = _make_json_data(
-        first="您已完成员工认证",
-        remark="点击填写详细信息",
+        first="你已通过身份认证",
+        remark="",
         keyword1="已认证",
         keyword2="员工认证",
         keyword3=company_name,
@@ -151,8 +151,8 @@ def position_view_five_notice_tpl(wechat_id, openid, link, title,
 
     d = datetime.now()
     json_data = _make_json_data(
-        first="您好，您发布的职位已被浏览5次",
-        remark="请点击查看详情",
+        first="您好，有求职者查看了你的职位",
+        remark="请及时登录hr.moseeker.com查看",
         keyword1="已有5人次浏览该职位",
         keyword2=title,
         keyword3=salary,
@@ -171,7 +171,7 @@ def favposition_notice_to_hr_tpl(wechat_id, openid, title, candidate_name,
     """用户感兴趣某职位后，向HR发送消息通知"""
 
     json_data = _make_json_data(
-        first="您发布的“{0}”职位有了一位新候选人，请及时与TA联系".format(title),
+        first="您的简历已成功投递，坐等好消息吧！",
         remark="",
         keyword1=title,
         keyword2=candidate_name,
@@ -244,8 +244,8 @@ def position_share_notice_employee_tpl(company_id, title, salary, user_id, pid,
     # 十分钟后的时间
     d = datetime.now() + timedelta(minutes=10)
     data = _make_json_data(
-        first="您好，您转发的职位还没有人浏览",
-        remark="多转发几个朋友或许就有浏览量了哟",
+        first="您好，您转发的职位在过去10分钟内已被N人浏览",
+        remark="请点击领取奖励",
         encode=False,
         keyword1="没有人浏览该职位",
         keyword2=title,
