@@ -10,7 +10,7 @@ from tornado import gen
 from service.page.base import PageService
 from util.tool.url_tool import make_static_url
 from util.tool.dict_tool import sub_dict
-from util.tool.str_tool import is_odd, split, gen_salary
+from util.tool.str_tool import is_odd, split, gen_salary, set_literl
 from util.common.decorator import log_time
 
 cached_company_sug_wechat = None
@@ -291,6 +291,7 @@ class CompanyPageService(PageService):
         """根据company_id获取该公司主hr信息，
         如果该公司有超级账号，返回超级账号hr信息，
         如果该公司有普通账号，返回普通账号hr信息，
+        如果是子公司，返回子账号HR信息，
         如果该公司没有hr信息，返回默认信息
         :param company_id: 公司id
         :return a dict with hr_info, including hr_id and hr_logo
@@ -304,8 +305,20 @@ class CompanyPageService(PageService):
 
         if not main_hr_account:
             main_hr_account = yield self.user_hr_account_ds.get_hr_account(
-                conds={'company_id':   company_id, 'disable': 1,
+                conds={'company_id': company_id, 'disable': 1,
                        'account_type': 2}
+            )
+        if not main_hr_account:
+            hr_account = yield self.hr_company_account_ds.get_company_accounts_list(
+                conds={'company_id': company_id},
+                fields=['account_id']
+            )
+            hr_account_id = []
+            for hr in hr_account:
+                hr_account_id.append(hr.get('account_id'))
+            main_hr_account = yield self.user_hr_account_ds.get_hr_account(
+                conds={'disable': 1},
+                appends=['and id in %s order by id asc' % set_literl(hr_account_id)]
             )
 
         assert main_hr_account
