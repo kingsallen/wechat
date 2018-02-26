@@ -171,7 +171,7 @@ def favposition_notice_to_hr_tpl(wechat_id, openid, title, candidate_name,
     """用户感兴趣某职位后，向HR发送消息通知"""
 
     json_data = _make_json_data(
-        first="您的简历已成功投递，坐等好消息吧！",
+        first="您发布的“{0}”职位有了一位新候选人，请及时与TA联系".format(title),
         remark="",
         keyword1=title,
         keyword2=candidate_name,
