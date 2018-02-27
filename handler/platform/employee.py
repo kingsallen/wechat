@@ -315,7 +315,7 @@ class CustomInfoHandler(BaseHandler):
         # 因为要传给前端使用， 添加 /m 路由，代表企业号链接
         action_url = '/m' + path.EMPLOYEE_CUSTOMINFO
         data = ObjectDict(
-            selects=selects,
+            fields=selects,
             from_wx_template=self.params.from_wx_template or "x",
             employee_id=employee.id,
             action_url=action_url
