@@ -489,10 +489,11 @@ def make_company_module_type_10(media_list, module_name, module_link=""):
 
 
 # JD page
-def make_position_detail_cms(media_list, res_dict, module_name):
+def make_position_detail_cms(media_list, res_dict, module_name, module_link):
     return template1(
         sub_type='less',
         title=module_name,
+        more_link=module_link,
         data=[{
                   'sub_title': m.sub_title,
                   'longtext': '{}\n'.format(m.longtexts),

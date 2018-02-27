@@ -298,13 +298,14 @@ class PositionPageService(PageService):
             if cms_module:
                 module_id = cms_module.id
                 module_name = cms_module.module_name
+                module_link = cms_module.link
                 cms_media = yield self.hr_cms_media_ds.get_media_list(conds={
                     "disable": 0,
                     "module_id": module_id
                 })
                 res_ids = [m.res_id for m in cms_media]
                 res_dict = yield self.hr_resource_ds.get_resource_by_ids(res_ids)
-                res = make_position_detail_cms(cms_media, res_dict, module_name)
+                res = make_position_detail_cms(cms_media, res_dict, module_name, module_link)
         return res
 
     @gen.coroutine
