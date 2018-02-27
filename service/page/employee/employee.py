@@ -452,7 +452,7 @@ class EmployeePageService(PageService):
             selects = ObjectDict({
                 'field_title': s.fname,
                 'field_type': input_type,
-                'field_name': '',
+                'field_name': 'key_' + str(s.id),
                 'required': 0 if s.mandatory == 1 else 1,  # 0为必须
                 'field_value': value_list
             })

@@ -312,18 +312,36 @@ class CustomInfoHandler(BaseHandler):
         selects = yield self.employee_ps.get_employee_custom_fields(
             self.current_user.company.id)
 
-        # 因为要传给前端使用， 添加 /m 路由，代表企业号链接
-        action_url = '/m' + path.EMPLOYEE_CUSTOMINFO
         data = ObjectDict(
             fields=selects,
             from_wx_template=self.params.from_wx_template or "x",
             employee_id=employee.id,
-            action_url=action_url
+            model={}
         )
 
         self.render_page(
             template_name="employee/bind_success_info.html",
             data=data)
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def post(self):
+
+        message = self.json_args.message
+        next_url = self.json_args.redirect_url
+
+        self.render(
+            template_name='refer/weixin/employee/employee_binding_tip_v2.html',
+            result=0,
+            messages=message,
+            nexturl=next_url,
+            source=1,
+            button_text=self.locale.translate(messages.EMPLOYEE_BINDING_EMAIL_BTN_TEXT)
+        )
+
+
+class BindInfoHandler(BaseHandler):
 
     @handle_response
     @authenticated
@@ -350,7 +368,7 @@ class CustomInfoHandler(BaseHandler):
         # 构建跳转 make_url 的 escape
         escape = ['headimg', 'next_url']
         keys = []
-        for k, v in self.request.arguments.items():
+        for k, v in self.params.model.items():
             if k.startswith("key_"):
                 escape.append(k)
                 confid = int(k[4:])
@@ -373,7 +391,7 @@ class CustomInfoHandler(BaseHandler):
         # 判断与跳转
         self.params.pop('next_url', None)
         self.params.pop('headimg', None)
-        next_url = self.make_url(path.POSITION_LIST, self.params, noemprecom=str(const.YES), escape=escape)
+        redirect_url = self.make_url(path.POSITION_LIST, self.params, noemprecom=str(const.YES), escape=escape)
 
         if self.params.from_wx_template == "o":
             message = messages.EMPLOYEE_BINDING_CUSTOM_FIELDS_DONE.format(self.current_user.company.conf_employee_slug)
@@ -385,14 +403,13 @@ class CustomInfoHandler(BaseHandler):
                 message = self.current_user.company.conf_employee_slug + self.locale.translate(
                     messages.EMPLOYEE_BINDING_SUCCESS)
 
-        self.render(
-            template_name='refer/weixin/employee/employee_binding_tip_v2.html',
-            result=0,
-            messages=message,
-            nexturl=next_url,
-            source=1,
-            button_text=self.locale.translate(messages.EMPLOYEE_BINDING_EMAIL_BTN_TEXT)
-        )
+        next_url = self.make_url(path.EMPLOYEE_CUSTOMINFO, self.params)
+        self.send_json_success(
+            data=ObjectDict(
+                messages=message,
+                redirect_url=redirect_url,
+                next_url=next_url
+            ))
 
 
 class BindedHandler(BaseHandler):
@@ -574,7 +591,7 @@ class EmployeeAiRecomHandler(BaseHandler):
         self.render_page("adjunct/job-recom-list.html",
                          data={"recomAudience": recom_audience,
                                "recomPushId": recom_push_id,
-                               "recom":recom})
+                               "recom": recom})
 
     @gen.coroutine
     def get_employee_recom_share_info(self, recom_push_id, recom):
