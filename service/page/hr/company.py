@@ -249,11 +249,7 @@ class CompanyPageService(PageService):
     def create_company(self, params):
         """我也要招人，创建公司信息，同时必须要创建 hr 与 company 对应关系，否则 hr 平台会报错"""
 
-        company_id = yield self.hr_company_ds.create_company({
-            "type": 1,
-            "name": params.name,
-            "source": params.source,
-        })
+        company_id = yield self.hr_company_ds.create_company(params)
 
         return company_id
 

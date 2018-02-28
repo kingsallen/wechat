@@ -32,6 +32,9 @@ class InfraCompanyDataService(DataService):
         return unboxing(res)
 
     @gen.coroutine
+    def create_company(self, params):
+
+    @gen.coroutine
     def belongs_to_group_company(self, company_id) -> bool:
         try:
             res = yield self.company_services_client.isGroupCompanies(int(company_id))
