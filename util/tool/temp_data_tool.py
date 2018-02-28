@@ -256,7 +256,7 @@ def make_other_team_data(team, res, handler_params):
 
 
 def make_team_detail_template(locale, team, members, modulename, detail_media_list, positions,
-                              other_teams, res_dic, handler_params, teamname_custom=None):
+                              other_teams, res_dic, handler_params, more_link, teamname_custom=None):
     template = []
     teamname_field = teamname_custom["teamname_custom"] if teamname_custom else '团队'
 
@@ -267,6 +267,7 @@ def make_team_detail_template(locale, team, members, modulename, detail_media_li
             template1(
                 sub_type='full',
                 title=locale.translate('company_team_intro').format(teamname_field),
+                more_link=more_link,
                 data=[{
                     'sub_title': '',
                     'longtext': team.description,
@@ -284,6 +285,7 @@ def make_team_detail_template(locale, team, members, modulename, detail_media_li
                 template1(
                     sub_type='less',
                     title=modulename,
+                    more_link=more_link,
                     data=[make_interview(m, res_dic.get(m.res_id))
                           for m in detail_media_list]
                 )
