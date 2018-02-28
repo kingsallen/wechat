@@ -323,13 +323,16 @@ class CustomInfoHandler(BaseHandler):
             template_name="employee/bind_success_info.html",
             data=data)
 
+
+class BindCustomInfoHandler(BaseHandler):
+
     @handle_response
     @authenticated
     @gen.coroutine
-    def post(self):
+    def get(self):
 
-        message = self.json_args.message
-        next_url = self.json_args.redirect_url
+        message = self.params.message
+        next_url = self.params.redirect_url
 
         self.render(
             template_name='refer/weixin/employee/employee_binding_tip_v2.html',
@@ -361,14 +364,14 @@ class BindInfoHandler(BaseHandler):
             return
 
         if fe_binding_stauts == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS and \
-            (str(employee.id) != self.params._employeeid or not self.params._employeeid):
+            (str(employee.id) != self.json_args._employeeid or not self.json_args._employeeid):
             self.write_error(416)
             return
 
         # 构建跳转 make_url 的 escape
         escape = ['headimg', 'next_url']
         keys = []
-        for k, v in self.params.model.items():
+        for k, v in self.json_args.model.items():
             if k.startswith("key_"):
                 escape.append(k)
                 confid = int(k[4:])
@@ -393,7 +396,7 @@ class BindInfoHandler(BaseHandler):
         self.params.pop('headimg', None)
         redirect_url = self.make_url(path.POSITION_LIST, self.params, noemprecom=str(const.YES), escape=escape)
 
-        if self.params.from_wx_template == "o":
+        if self.json_args.from_wx_template == "o":
             message = messages.EMPLOYEE_BINDING_CUSTOM_FIELDS_DONE.format(self.current_user.company.conf_employee_slug)
         else:
             if employee.authMethod == const.USER_EMPLOYEE_AUTH_METHOD.EMAIL:
@@ -403,7 +406,7 @@ class BindInfoHandler(BaseHandler):
                 message = self.current_user.company.conf_employee_slug + self.locale.translate(
                     messages.EMPLOYEE_BINDING_SUCCESS)
 
-        next_url = self.make_url(path.EMPLOYEE_CUSTOMINFO, self.params)
+        next_url = self.make_url(path.EMPLOYEE_CUSTOMINFO_BINDED, self.params)
         self.send_json_success(
             data=ObjectDict(
                 messages=message,

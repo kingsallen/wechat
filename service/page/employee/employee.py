@@ -436,9 +436,9 @@ class EmployeePageService(PageService):
         selects_from_ds = sorted(selects_from_ds, key=lambda x: x.forder)
 
         selects_list = list()
-        value_list = list()
 
         for s in selects_from_ds:
+            value_list = list()
             fvalues = json.loads(s.fvalues)
             indexs = len(fvalues) - 1
             i = 0
@@ -448,7 +448,7 @@ class EmployeePageService(PageService):
                 values.append(i)
                 i += 1
                 value_list.append(values)
-            input_type = const.FRONT_TYPE_FIELD_TEXT if s.option == 0 else const.FRONT_TYPE_FIELD_SELCET_POPUP
+            input_type = const.FRONT_TYPE_FIELD_TEXT if s.option_type == 1 else const.FRONT_TYPE_FIELD_SELCET_POPUP
             selects = ObjectDict({
                 'field_title': s.fname,
                 'field_type': input_type,

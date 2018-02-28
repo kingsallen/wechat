@@ -127,6 +127,7 @@ platform_routes = [
     (r"/company/team",                               handler.platform.team.TeamIndexHandler,                    {"event": "team_info"}),
     (r"/employee/bindemail/?",                       handler.platform.employee.EmployeeBindEmailHandler,        {"event": "employee_bindemail"}),
     (r"/employee/custominfo/?",                      handler.platform.employee.CustomInfoHandler,               {"event": "employee_custominfo"}),
+    (r"/employee/binded-custominfo/?",               handler.platform.employee.BindCustomInfoHandler,           {"event": "employee_custominfo_binded"}),
     (r"/employee/binded/?",                          handler.platform.employee.BindedHandler,                   {"event": "employee_binded"}),
     (r"/employee/recom/ignore/?",                    handler.platform.recom.RecomIgnoreHandler,                 {"event": "recom_ignore"}),
     (r"/employee/recom/?",                           handler.platform.recom.RecomCandidateHandler,              {"event": "recom_normal"}),
