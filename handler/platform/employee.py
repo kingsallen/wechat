@@ -331,8 +331,26 @@ class BindCustomInfoHandler(BaseHandler):
     @gen.coroutine
     def get(self):
 
-        message = self.params.message
-        next_url = self.params.redirect_url
+        binding_status, employee = yield self.employee_ps.get_employee_info(
+            self.current_user.sysuser.id,
+            self.current_user.company.id
+        )
+
+        # 判断与跳转
+        self.params.pop('next_url', None)
+        self.params.pop('headimg', None)
+        self.params.pop('from_wx_template', None)
+        next_url = self.make_url(path.POSITION_LIST, self.params, noemprecom=str(const.YES))
+
+        if self.params.from_wx_template == "o":
+            message = messages.EMPLOYEE_BINDING_CUSTOM_FIELDS_DONE.format(self.current_user.company.conf_employee_slug)
+        else:
+            if employee.authMethod == const.USER_EMPLOYEE_AUTH_METHOD.EMAIL:
+                message = [self.locale.translate(messages.EMPLOYEE_BINDING_EMAIL_DONE0),
+                           self.locale.translate(messages.EMPLOYEE_BINDING_EMAIL_DONE1)]
+            else:
+                message = self.current_user.company.conf_employee_slug + self.locale.translate(
+                    messages.EMPLOYEE_BINDING_SUCCESS)
 
         self.render(
             template_name='refer/weixin/employee/employee_binding_tip_v2.html',
@@ -359,7 +377,7 @@ class BindInfoHandler(BaseHandler):
             binding_status)
 
         # unbinded users may not need to know this page
-        if (fe_binding_stauts not in [fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS, fe.FE_EMPLOYEE_BIND_STATUS_PENDING]):
+        if fe_binding_stauts not in [fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS, fe.FE_EMPLOYEE_BIND_STATUS_PENDING]:
             self.write_error(404)
             return
 
@@ -368,12 +386,9 @@ class BindInfoHandler(BaseHandler):
             self.write_error(416)
             return
 
-        # 构建跳转 make_url 的 escape
-        escape = ['headimg', 'next_url']
         keys = []
         for k, v in self.json_args.model.items():
             if k.startswith("key_"):
-                escape.append(k)
                 confid = int(k[4:])
                 keys.append({confid: [to_str(v[0])]})
 
@@ -391,26 +406,10 @@ class BindInfoHandler(BaseHandler):
         else:
             assert False
 
-        # 判断与跳转
-        self.params.pop('next_url', None)
-        self.params.pop('headimg', None)
-        redirect_url = self.make_url(path.POSITION_LIST, self.params, noemprecom=str(const.YES), escape=escape)
-
-        if self.json_args.from_wx_template == "o":
-            message = messages.EMPLOYEE_BINDING_CUSTOM_FIELDS_DONE.format(self.current_user.company.conf_employee_slug)
-        else:
-            if employee.authMethod == const.USER_EMPLOYEE_AUTH_METHOD.EMAIL:
-                message = [self.locale.translate(messages.EMPLOYEE_BINDING_EMAIL_DONE0),
-                           self.locale.translate(messages.EMPLOYEE_BINDING_EMAIL_DONE1)]
-            else:
-                message = self.current_user.company.conf_employee_slug + self.locale.translate(
-                    messages.EMPLOYEE_BINDING_SUCCESS)
-
         next_url = self.make_url(path.EMPLOYEE_CUSTOMINFO_BINDED, self.params)
+        self.params.from_wx_template = self.json_args.from_wx_template
         self.send_json_success(
             data=ObjectDict(
-                messages=message,
-                redirect_url=redirect_url,
                 next_url=next_url
             ))
 
