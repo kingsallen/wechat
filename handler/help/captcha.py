@@ -34,6 +34,7 @@ class CaptchaHandler(BaseHandler):
         if not body:
             messages.append(message)
             messages.append("请登录hr.moseeker.com重新同步职位")
+            messages.append("或联系您的客户成功专员解决")
             data = ObjectDict(
                 kind=1,  # // {0: success, 1: failure, 10: email}
                 messages=messages,  # ['hello world', 'abjsldjf']
