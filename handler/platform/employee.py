@@ -388,7 +388,7 @@ class BindInfoHandler(BaseHandler):
 
         keys = []
         for k, v in self.json_args.model.items():
-            if k.startswith("key_"):
+            if k.startswith("key_") and v:
                 confid = int(k[4:])
                 keys.append({confid: [to_str(v[0])]})
 
