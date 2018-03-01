@@ -61,7 +61,9 @@ class RegisterHandler(BaseHandler):
             data = ObjectDict({
                 'hr_id': body.hr_id
             })
-            self.send_json_success(data=data, message=message)
+            self.send_json_success(data=data)
+        elif status == 33001:
+            self.send_json_error(message="名称重复，请换个公司名试试")
         else:
             self.send_json_error(message=message)
 

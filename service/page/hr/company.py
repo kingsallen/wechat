@@ -250,8 +250,8 @@ class CompanyPageService(PageService):
         """我也要招人，创建公司信息，同时必须要创建 hr 与 company 对应关系，否则 hr 平台会报错"""
 
         ret = yield self.infra_company_ds.create_company(params)
-        status, body, message = ret.status, ret.body, ret.message
-        return status, message, body
+        status, data, message = ret.status, ret.data, ret.message
+        return status, message, data
 
     @gen.coroutine
     def update_company(self, conds, fields):
