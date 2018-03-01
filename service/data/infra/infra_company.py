@@ -33,6 +33,8 @@ class InfraCompanyDataService(DataService):
 
     @gen.coroutine
     def create_company(self, params):
+        res = yield http_post(path.CREATE_COMPANY, params)
+        raise gen.Return(res)
 
     @gen.coroutine
     def belongs_to_group_company(self, company_id) -> bool:

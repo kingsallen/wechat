@@ -55,10 +55,14 @@ class RegisterHandler(BaseHandler):
             remote_id=self.request.remote_ip
         )
 
-        message, status = yield self.company_ps.create_company(params)
+        status, message, body = yield self.company_ps.create_company(params)
 
-        self.send_json_success(data={
-            "hr_id": hr_id
-        })
+        if status == 0:
+            data = ObjectDict({
+                'hr_id': body.hr_id
+            })
+            self.send_json_success(data=data, message=message)
+        else:
+            self.send_json_error(message=message)
 
 
