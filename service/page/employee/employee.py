@@ -454,7 +454,8 @@ class EmployeePageService(PageService):
                 'field_type': input_type,
                 'field_name': 'key_' + str(s.id),
                 'required': 0 if s.mandatory == 1 else 1,  # 0为必须
-                'field_value': value_list
+                'field_value': value_list,
+                'validate_re': '^.{20}$'
             })
             selects_list.append(selects)
         return selects_list
