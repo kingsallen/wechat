@@ -455,7 +455,7 @@ class EmployeePageService(PageService):
                 'field_name': 'key_' + str(s.id),
                 'required': 0 if s.mandatory == 1 else 1,  # 0为必须
                 'field_value': value_list,
-                "validate_error": "长度过长",  # 字段不符合验证时的提示信息
+                "validate_error": "文本长度不能超过50个字符",  # 字段不符合验证时的提示信息
                 'validate_re': '^.{1,50}$' if s.mandatory == 1 else '^.{0,50}$'  # 对字段做验证的正则
             })
             selects_list.append(selects)
