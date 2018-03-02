@@ -390,7 +390,7 @@ class BindInfoHandler(BaseHandler):
         for k, v in self.json_args.model.items():
             if k.startswith("key_") and v:
                 confid = int(k[4:])
-                keys.append({confid: [to_str(v[0])]})
+                keys.append({confid: [to_str(v[0: 50])]})
 
         self.logger.debug("keys: %s" % keys)
         custom_fields = json_dumps(keys)
