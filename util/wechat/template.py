@@ -56,8 +56,7 @@ def rp_binding_success_notice_tpl(
         keyword1="已通过",
         keyword2="{}认证".format(employee_slug),
         keyword3=company_name,
-        keyword4="{}年{}月{}日{:0>2}:{:0>2} ".format(d.year, d.month, d.day,
-                                                  d.hour, d.minute))
+        keyword4="{}年{}月{}日{:0>2}:{:0>2} ".format(d.year, d.month, d.day, d.hour, d.minute))
 
     ret = yield messager.send_template(
         wechat_id, openid, sys_template_id, link, json_data, qx_retry=True)
@@ -115,31 +114,6 @@ def rp_transfer_apply_success_notice_tpl(wechat_id, openid, link, nickname,
 
     ret = yield messager.send_template(
         wechat_id, openid, sys_template_id, link, json_data, qx_retry=True)
-
-    raise gen.Return(ret)
-
-
-@gen.coroutine
-def employee_refine_custom_fields_tpl(wechat_id, openid, link, company_name,
-                                      sys_template_id=const.TEMPLATES.REFINE_EMPLOYEE_INFO_TPL):
-    """员工认证自定义字段填写通知模版"""
-
-    send_switch = yield messager.get_send_switch(
-        wechat_id, const.TEMPLATES_SWITCH.REFINE_EMPLOYEE_INFO_TPL)
-
-    d = datetime.now()
-    json_data = _make_json_data(
-        first="你已通过身份认证",
-        remark="",
-        keyword1="已认证",
-        keyword2="员工认证",
-        keyword3=company_name,
-        keyword4="{}年{}月{}日{:0>2}:{:0>2} ".format(
-            d.year, d.month, d.day, d.hour, d.minute)
-    )
-    ret = yield messager.send_template(
-        wechat_id, openid, sys_template_id, link, json_data,
-        qx_retry=True, platform_switch=send_switch)
 
     raise gen.Return(ret)
 
