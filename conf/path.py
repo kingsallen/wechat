@@ -121,6 +121,7 @@ PROFILE_CUSTOMCV_CHECK = 'profile/check/other'
 # 公司服务
 COMPANY_ALL = 'company/all'
 COMPANY = 'company'
+CREATE_COMPANY = 'api/hrcompany/add'
 
 # 字典服务
 DICT_CONSTANT = "dict/constant"
