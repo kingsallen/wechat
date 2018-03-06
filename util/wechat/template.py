@@ -146,7 +146,7 @@ def favposition_notice_to_hr_tpl(wechat_id, openid, title, candidate_name,
 
     json_data = _make_json_data(
         first="您发布的“{0}”职位有了一位新候选人，请及时与TA联系".format(title),
-        remark="",
+        remark="请及时登录hr.moseeker.com查看",
         keyword1=title,
         keyword2=candidate_name,
         keyword3=mobile)
