@@ -15,7 +15,6 @@ from util.common import ObjectDict
 from util.tool.dict_tool import sub_dict
 from util.tool.re_checker import revalidator
 from util.tool.url_tool import make_static_url, make_url
-from util.wechat.template import employee_refine_custom_fields_tpl
 
 
 class EmployeePageService(PageService):
