@@ -312,68 +312,35 @@ class CustomInfoHandler(BaseHandler):
         selects = yield self.employee_ps.get_employee_custom_fields(
             self.current_user.company.id)
 
-        # 因为要传给前端使用， 添加 /m 路由，代表企业号链接
-        action_url = '/m' + path.EMPLOYEE_CUSTOMINFO
         data = ObjectDict(
-            selects=selects,
+            fields=selects,
             from_wx_template=self.params.from_wx_template or "x",
             employee_id=employee.id,
-            action_url=action_url
+            model={}
         )
 
         self.render_page(
             template_name="employee/bind_success_info.html",
             data=data)
 
+
+class BindCustomInfoHandler(BaseHandler):
+
     @handle_response
     @authenticated
     @gen.coroutine
-    def post(self):
+    def get(self):
+
         binding_status, employee = yield self.employee_ps.get_employee_info(
             self.current_user.sysuser.id,
             self.current_user.company.id
         )
 
-        fe_binding_stauts = self.employee_ps.convert_bind_status_from_thrift_to_fe(
-            binding_status)
-
-        # unbinded users may not need to know this page
-        if (fe_binding_stauts not in [fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS, fe.FE_EMPLOYEE_BIND_STATUS_PENDING]):
-            self.write_error(404)
-            return
-
-        if fe_binding_stauts == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS and \
-            (str(employee.id) != self.params._employeeid or not self.params._employeeid):
-            self.write_error(416)
-            return
-
-        # 构建跳转 make_url 的 escape
-        escape = ['headimg', 'next_url']
-        keys = []
-        for k, v in self.request.arguments.items():
-            if k.startswith("key_"):
-                escape.append(k)
-                confid = int(k[4:])
-                keys.append({confid: [to_str(v[0])]})
-
-        self.logger.debug("keys: %s" % keys)
-        custom_fields = json_dumps(keys)
-
-        # 利用基础服务更新员工自定义补填字段，
-        # 注意：对于email 认证 pending 状态的（待认证）员工，需要调用不同的基础服务接口
-        if fe_binding_stauts == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS:
-            yield self.employee_ps.update_employee_custom_fields(employee.id, custom_fields)
-
-        elif fe_binding_stauts == fe.FE_EMPLOYEE_BIND_STATUS_PENDING:
-            yield self.employee_ps.update_employee_custom_fields_for_email_pending(
-                self.current_user.sysuser.id, self.current_user.company.id, custom_fields)
-        else:
-            assert False
-
         # 判断与跳转
         self.params.pop('next_url', None)
         self.params.pop('headimg', None)
-        next_url = self.make_url(path.POSITION_LIST, self.params, noemprecom=str(const.YES), escape=escape)
+        self.params.pop('from_wx_template', None)
+        next_url = self.make_url(path.POSITION_LIST, self.params, noemprecom=str(const.YES))
 
         if self.params.from_wx_template == "o":
             message = messages.EMPLOYEE_BINDING_CUSTOM_FIELDS_DONE.format(self.current_user.company.conf_employee_slug)
@@ -393,6 +360,58 @@ class CustomInfoHandler(BaseHandler):
             source=1,
             button_text=self.locale.translate(messages.EMPLOYEE_BINDING_EMAIL_BTN_TEXT)
         )
+
+
+class BindInfoHandler(BaseHandler):
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def post(self):
+        binding_status, employee = yield self.employee_ps.get_employee_info(
+            self.current_user.sysuser.id,
+            self.current_user.company.id
+        )
+
+        fe_binding_stauts = self.employee_ps.convert_bind_status_from_thrift_to_fe(
+            binding_status)
+
+        # unbinded users may not need to know this page
+        if fe_binding_stauts not in [fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS, fe.FE_EMPLOYEE_BIND_STATUS_PENDING]:
+            self.write_error(404)
+            return
+
+        if fe_binding_stauts == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS and \
+            (str(employee.id) != self.json_args._employeeid or not self.json_args._employeeid):
+            self.write_error(416)
+            return
+
+        keys = []
+        for k, v in self.json_args.model.items():
+            if k.startswith("key_") and v:
+                confid = int(k[4:])
+                keys.append({confid: [to_str(v[0: 50])]})
+
+        self.logger.debug("keys: %s" % keys)
+        custom_fields = json_dumps(keys)
+
+        # 利用基础服务更新员工自定义补填字段，
+        # 注意：对于email 认证 pending 状态的（待认证）员工，需要调用不同的基础服务接口
+        if fe_binding_stauts == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS:
+            yield self.employee_ps.update_employee_custom_fields(employee.id, custom_fields)
+
+        elif fe_binding_stauts == fe.FE_EMPLOYEE_BIND_STATUS_PENDING:
+            yield self.employee_ps.update_employee_custom_fields_for_email_pending(
+                self.current_user.sysuser.id, self.current_user.company.id, custom_fields)
+        else:
+            assert False
+
+        next_url = self.make_url(path.EMPLOYEE_CUSTOMINFO_BINDED, self.params)
+        self.params.from_wx_template = self.json_args.from_wx_template
+        self.send_json_success(
+            data=ObjectDict(
+                next_url=next_url
+            ))
 
 
 class BindedHandler(BaseHandler):
@@ -574,7 +593,7 @@ class EmployeeAiRecomHandler(BaseHandler):
         self.render_page("adjunct/job-recom-list.html",
                          data={"recomAudience": recom_audience,
                                "recomPushId": recom_push_id,
-                               "recom":recom})
+                               "recom": recom})
 
     @gen.coroutine
     def get_employee_recom_share_info(self, recom_push_id, recom):
