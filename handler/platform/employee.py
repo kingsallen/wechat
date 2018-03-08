@@ -382,7 +382,7 @@ class BindInfoHandler(BaseHandler):
             return
 
         if fe_binding_stauts == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS and \
-            (str(employee.id) != self.json_args._employeeid or not self.json_args._employeeid):
+            (employee.id != self.json_args._employeeid or not self.json_args._employeeid):
             self.write_error(416)
             return
 
