@@ -286,7 +286,7 @@ class ProfileHandler(BaseHandler):
         profile_tpl = yield self.profile_ps.profile_to_tempalte(
             self.current_user.profile)
 
-        other_key_name_mapping = yield self.profile_ps.get_others_key_name_mapping()
+        other_key_name_mapping = yield self.profile_ps.get_others_key_name_mapping(select_all=True)
 
         self.params.share = self._share(self.current_user.profile.profile.get("uuid"), profile_tpl)
         self.render_page(
