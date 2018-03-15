@@ -176,12 +176,14 @@ EMPLOYMENT_TYPE = {
     "1": "common_parttime",
     "2": "common_contractor",
     "3": "common_intern",
+    "9": "other"
 }
 EMPLOYMENT_TYPE_SEARCH = {
     "0": "全职",
     "1": "兼职",
     "2": "合同工",
     "3": "实习",
+    "9": "其他"
 }
 EMPLOYMENT_TYPE_SEARCH_REVERSE = {
     v: k for k, v in EMPLOYMENT_TYPE_SEARCH.items()
