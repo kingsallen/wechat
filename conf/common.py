@@ -176,7 +176,7 @@ EMPLOYMENT_TYPE = {
     "1": "common_parttime",
     "2": "common_contractor",
     "3": "common_intern",
-    "9": "other"
+    "9": "common_other"
 }
 EMPLOYMENT_TYPE_SEARCH = {
     "0": "全职",
