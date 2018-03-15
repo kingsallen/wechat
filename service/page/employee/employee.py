@@ -15,7 +15,6 @@ from util.common import ObjectDict
 from util.tool.dict_tool import sub_dict
 from util.tool.re_checker import revalidator
 from util.tool.url_tool import make_static_url, make_url
-from util.wechat.template import employee_refine_custom_fields_tpl
 
 
 class EmployeePageService(PageService):
@@ -470,32 +469,6 @@ class EmployeePageService(PageService):
         self, user_id, company_id, custom_fields_json):
         yield self.thrift_employee_ds.set_employee_custom_info_email_pending(
             user_id, company_id, custom_fields_json)
-
-    @gen.coroutine
-    def send_emp_custom_info_template(self, current_user):
-        """发送员工认证自定义字段填写template
-        """
-
-        if current_user.wxuser:
-            company_id = current_user.company.id
-            custom_fields = yield self.get_employee_custom_fields(company_id)
-
-            self.logger.debug("custom_fields: %s" % custom_fields)
-
-            if not custom_fields:
-                return
-
-            link = make_url(path.EMPLOYEE_CUSTOMINFO,
-                            host=settings['platform_host'],
-                            wechat_signature=current_user.wechat.signature,
-                            from_wx_template='o')
-
-            yield employee_refine_custom_fields_tpl(
-                wechat_id=current_user.wechat.id,
-                openid=current_user.wxuser.openid,
-                link=link,
-                company_name=current_user.company.name
-            )
 
     @gen.coroutine
     def get_employee_survey_info(self, user):

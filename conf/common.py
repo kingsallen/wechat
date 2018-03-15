@@ -39,7 +39,7 @@ WX_USER_SOURCE_SCAN = 8
 WX_USER_SOURCE_UPDATE_UNIONID = 9
 WX_USER_SOURCE_UPDATE_SYSUSER = 10
 WX_USER_SOURCE_UPDATE = 11
-WX_USER_SOURCE_IWANTYOU = 12 # 微信端我也要招人注册
+WX_USER_SOURCE_IWANTYOU = 12  # 微信端我也要招人注册
 
 WX_USER_SUBSCRIBED = 1
 WX_USER_UNSUBSCRIBED = 0
@@ -168,7 +168,7 @@ CANDIDATE_SOURCE_SEARCH = {
 }
 CANDIDATE_SOURCE_SEARCH_REVERSE = {
     v: k for k, v in CANDIDATE_SOURCE_SEARCH.items()
-}
+    }
 
 # 工作性质
 EMPLOYMENT_TYPE = {
@@ -185,7 +185,7 @@ EMPLOYMENT_TYPE_SEARCH = {
 }
 EMPLOYMENT_TYPE_SEARCH_REVERSE = {
     v: k for k, v in EMPLOYMENT_TYPE_SEARCH.items()
-}
+    }
 
 MANAGEMENT_EXP = {
     "0": "common_need",
@@ -222,7 +222,7 @@ SCALE = {
     "5": "500-1000人",
     "6": "1000-5000人",
     "7": "5000-10000人",  # 似乎数据库中没有？ from yiliang
-    "8": "10000人以上",   # 似乎数据库中没有？ from yiliang
+    "8": "10000人以上",  # 似乎数据库中没有？ from yiliang
 }
 
 # 默认图标
@@ -233,19 +233,19 @@ COMPANY_HEADIMG = "common/images/default-company-logo.jpg"
 # 招聘进度全状态 （tangyiliang）
 # cofnigdb.config_sys_points_conf_tpl.id
 # (对应hrdb.hr_points_conf 中 template_id)      ** 表示这是牵涉到加积分的操作
-RECRUIT_STATUS_APPLY_ID = 1                   #** 提交简历成功
-RECRUIT_STATUS_INTERVIEW_ID = 2               #   HR安排面试
-RECRUIT_STATUS_HIRED_ID = 3                   #** 入职
-RECRUIT_STATUS_REJECT_ID = 4                  #   拒绝
-RECRUIT_STATUS_INTERVIEWPENDING_ID = 5        #   MGR面试后表示先等待
-RECRUIT_STATUS_CVCHECKED_ID = 6               #   简历被查看
-RECRUIT_STATUS_RECOMCLICK_ID = 7              #** 转发被点击
-RECRUIT_STATUS_CVFORWARDED_ID = 8             #   转发简历MGR评审
-RECRUIT_STATUS_CVPENDING_ID = 9               #   MGR评审后表示先等待
-RECRUIT_STATUS_CVPASSED_ID = 10               #   评审通过要求面试
-RECRUIT_STATUS_OFFERACCEPTED_ID = 11          #   接受录取通知
-RECRUIT_STATUS_OFFERED_ID = 12                #** 发出录取通知
-RECRUIT_STATUS_FULL_RECOM_INFO_ID = 13        #** 完善被推荐人
+RECRUIT_STATUS_APPLY_ID = 1  # ** 提交简历成功
+RECRUIT_STATUS_INTERVIEW_ID = 2  # HR安排面试
+RECRUIT_STATUS_HIRED_ID = 3  # ** 入职
+RECRUIT_STATUS_REJECT_ID = 4  # 拒绝
+RECRUIT_STATUS_INTERVIEWPENDING_ID = 5  # MGR面试后表示先等待
+RECRUIT_STATUS_CVCHECKED_ID = 6  # 简历被查看
+RECRUIT_STATUS_RECOMCLICK_ID = 7  # ** 转发被点击
+RECRUIT_STATUS_CVFORWARDED_ID = 8  # 转发简历MGR评审
+RECRUIT_STATUS_CVPENDING_ID = 9  # MGR评审后表示先等待
+RECRUIT_STATUS_CVPASSED_ID = 10  # 评审通过要求面试
+RECRUIT_STATUS_OFFERACCEPTED_ID = 11  # 接受录取通知
+RECRUIT_STATUS_OFFERED_ID = 12  # ** 发出录取通知
+RECRUIT_STATUS_FULL_RECOM_INFO_ID = 13  # ** 完善被推荐人
 
 # 职位在招状态
 POSITION_STATUS_RECRUITING = 0  # 有效
@@ -387,13 +387,9 @@ TEMPLATES.REFINE_EMPLOYEE_INFO_TPL = 44  # 员工认证自定义字段填写通�
 TEMPLATES.POSITION_VIEWED_SHARED = 39
 TEMPLATES.POSITION_VIEWED_FIVE_TIMES = 63
 
-
 # 消息模板开关，控制企业号是否开启某种类型的消息模板发送，与TEMPLATES强对应
 TEMPLATES_SWITCH = ObjectDict()
-TEMPLATES_SWITCH.APPLY_NOTICE_TPL = 29 # 申请成功时 的消息通知ID
-TEMPLATES_SWITCH.NEW_RESUME_TPL = 41 # 认证员工转发之后后有人投递简历 的消息通知ID
-TEMPLATES_SWITCH.POSITION_VIEWED = 39  # 认证员工转发职位 10 分钟后有人查看 的消息通知ID
-TEMPLATES_SWITCH.REFINE_EMPLOYEE_INFO_TPL = 49  # 员工认证自定义字段填写通知
+TEMPLATES_SWITCH.REFINE_EMPLOYEE_INFO_TPL = 44  # 员工认证自定义字段填写通知
 
 WX_MESSAGE_TEMPLATE_SEND_TYPE_WEIXIN = 0
 WX_MESSAGE_TEMPLATE_SEND_TYPE_EMAIL = 1
@@ -487,7 +483,6 @@ NON_KA_EMAIL_APPLICATION_INVITATION = "non-ka-email-application-invitation"
 
 EMPLOYEE_CUSTOM_FIELD_REFINE_REDIRECT = 1
 EMPLOYEE_CUSTOM_FIELD_REFINE_TEMPLATE_MSG = 2
-
 
 # chatbot
 CHAT_SPEAKER_USER = 0
