@@ -714,7 +714,7 @@ class InfraProfileDataService(DataService):
         :return:
         """
 
-        response = yield http_tool.http_fetch(path.LINKEDIN_ACCESSTOKEN, params, timeout=20)
+        response = yield http_tool.http_fetch(path.LINKEDIN_ACCESSTOKEN, params, timeout=20, raise_error=False)
         return response
 
     @gen.coroutine

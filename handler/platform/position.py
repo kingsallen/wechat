@@ -699,7 +699,7 @@ class PositionHandler(BaseHandler):
     @gen.coroutine
     def _make_team(self, team, teamname_custom):
         """所属团队，构造数据"""
-        more_link = self.make_url(path.TEAM_PATH.format(team.id), self.params),
+        more_link = team.link if team.link else self.make_url(path.TEAM_PATH.format(team.id), self.params)
         res = yield self.position_ps.get_team_data(team, more_link, teamname_custom)
         raise gen.Return(res)
 
@@ -1095,6 +1095,11 @@ class PositionListSugHandler(PositionListInfraParamsMixin, BaseHandler):
         sug搜索
         :return:
         """
+        # todo:注释
+        # sug = ObjectDict()
+        # sug.list = []
+        # return self.send_json_success(sug)
+
         infra_params = self.make_position_list_infra_params()
         sug = ObjectDict()
         # 获取五条sug数据

@@ -50,7 +50,8 @@ def make_url(path, params=None, host="", protocol="https", escape=None,
         )
 
     def query_params_generator(pairs):
-        for k, v in pairs.items():
+        for k in sorted(pairs.keys()):
+            v = pairs[k]
             if valid(k, v):
                 yield (k, v)
 

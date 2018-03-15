@@ -48,6 +48,7 @@ import handler.platform.team
 import handler.platform.recom
 import handler.platform.compatible
 import handler.platform.user
+import handler.help.captcha
 
 import handler.qx.app
 import handler.qx.aggregation
@@ -126,14 +127,15 @@ platform_routes = [
     (r"/company/team",                               handler.platform.team.TeamIndexHandler,                    {"event": "team_info"}),
     (r"/employee/bindemail/?",                       handler.platform.employee.EmployeeBindEmailHandler,        {"event": "employee_bindemail"}),
     (r"/employee/custominfo/?",                      handler.platform.employee.CustomInfoHandler,               {"event": "employee_custominfo"}),
+    (r"/employee/binded-custominfo/?",               handler.platform.employee.BindCustomInfoHandler,           {"event": "employee_custominfo_binded"}),
     (r"/employee/binded/?",                          handler.platform.employee.BindedHandler,                   {"event": "employee_binded"}),
     (r"/employee/recom/ignore/?",                    handler.platform.recom.RecomIgnoreHandler,                 {"event": "recom_ignore"}),
     (r"/employee/recom/?",                           handler.platform.recom.RecomCandidateHandler,              {"event": "recom_normal"}),
     (r"/employee/ladder/?",                          handler.platform.employee.AwardsLadderPageHandler,         {"event": "awards_ladder_page"}),
     (r'/user/survey/?',                              handler.platform.user.UserSurveyHandler,                   {'event': 'user_survey'}),
     (r'/user/ai-recom/?',                            handler.platform.user.AIRecomHandler,                      {'event': 'user_ai-recom'}),
-    (r'/employee/survey/?',                          handler.platform.employee.EmployeeSurveyHandler,               {'event': 'employee_survey'}),
-    (r'/employee/ai-recom/(\d+)',                    handler.platform.employee.EmployeeAiRecomHandler,              {'event': 'employee_ai-recom'}),
+    (r'/employee/survey/?',                          handler.platform.employee.EmployeeSurveyHandler,           {'event': 'employee_survey'}),
+    (r'/employee/ai-recom/(\d+)',                    handler.platform.employee.EmployeeAiRecomHandler,          {'event': 'employee_ai-recom'}),
 
     # 各大公司的自定义配置
     (r"/custom/emailapply/?",                        handler.platform.customize.CustomizeEmailApplyHandler,     {"event": "customize_emailapply"}),
@@ -144,6 +146,7 @@ platform_routes = [
     (r"/api/groupcompany/check/?",                   handler.platform.groupcompany.GroupCompanyCheckHandler,    {"event": "groupcompany_check"}),
     (r"/api/employee/bind/?",                        handler.platform.employee.EmployeeBindHandler,             {"event": "employee_bind"}),
     (r"/api/employee/unbind/?",                      handler.platform.employee.EmployeeUnbindHandler,           {"event": "employee_unbind"}),
+    (r"/api/employee/bind-info/?",                   handler.platform.employee.BindInfoHandler,                 {"event": "employee_bind_info"}),
     (r"/api/employee/recommendrecords/?",            handler.platform.employee.RecommendRecordsHandler,         {"event": "employee_recommendrecords"}),
     (r"/api/employee/rewards/?",                     handler.platform.employee.AwardsHandler,                   {"event": "employee_awards"}),
     (r"/api/position/empnotice/?",                   handler.platform.position.PositionEmpNoticeHandler,        {"event": "position_empnotice"}),
@@ -161,7 +164,7 @@ platform_routes = common_routes + platform_routes
 # 聚合号的单独 routes, 域名 platform.moseeker.com/recruit
 qx_routes = [
 
-    (r"/alipaycampaign/([A-Za-z0-9_]{1,32})/company/?",    handler.common.campaign.AlipayCampaignCompanyHandler,         {"event": "alipaycampaign/company"}),
+    (r"/alipaycampaign/([A-Za-z0-9_]{1,32})/company/?", handler.common.campaign.AlipayCampaignCompanyHandler,   {"event": "alipaycampaign/company"}),
     (r"/alipaycampaign/([A-Za-z0-9_]{1,32})/company/(\d+)/position/?",   handler.common.campaign.AlipayCampaignPositionHandler,        {"event": "alipaycampaign/position"}),
 
     (r"/api/position/(?P<position_id>\d+)",          handler.qx.position.PositionHandler,                       {"event": "position_info"}),
@@ -185,6 +188,9 @@ help_routes = [
     (r"/hrregister/qrcode",                          handler.help.passport.RegisterQrcodeHandler,               {"event": "helper_qrcode"}),
     # 我也要招人
     (r"/api/register",                               handler.help.passport.RegisterHandler,                     {"event": "helper_register"}),
+    (r"/captcha/check/?",                            handler.help.captcha.CaptchaHandler,                       {"event": "captcha_info"}),
+    (r"/api/captcha/check",                          handler.help.captcha.CaptchaCheckHandler,                  {"event": "captcha_check"}),
+    (r"/captcha/checked/?",                          handler.help.captcha.CaptchaChecked,                       {'event': 'captcha_checked'}),
 
 ]
 help_routes = common_routes + help_routes

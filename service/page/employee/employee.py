@@ -423,20 +423,41 @@ class EmployeePageService(PageService):
         """
         根据公司 id 返回员工认证自定义字段配置 -> list
         并按照 forder 字段排序返回
+        将数据整理为前端需要的json格式
         """
         selects_from_ds = yield self.hr_employee_custom_fields_ds. \
             get_employee_custom_field_records({
-            "company_id": company_id,
-            "status": const.OLD_YES,
-            "disable": const.NO
-        })
+                "company_id": company_id,
+                "status": const.OLD_YES,
+                "disable": const.NO
+            })
 
-        selects = sorted(selects_from_ds, key=lambda x: x.forder)
+        selects_from_ds = sorted(selects_from_ds, key=lambda x: x.forder)
 
-        for s in selects:
-            s.fvalues = json.loads(s.fvalues)
-            s.required = s.mandatory == const.YES
-        return selects
+        selects_list = list()
+
+        for s in selects_from_ds:
+            value_list = list()
+            fvalues = json.loads(s.fvalues)
+            indexs = len(fvalues) - 1
+            i = 0
+            while indexs >= i:
+                values = list()
+                values.append(fvalues[i])
+                values.append(i)
+                i += 1
+                value_list.append(values)
+            input_type = const.FRONT_TYPE_FIELD_TEXT if s.option_type == 1 else const.FRONT_TYPE_FIELD_SELCET_POPUP
+            selects = ObjectDict({
+                'field_title': s.fname,
+                'field_type': input_type,
+                'field_name': 'key_' + str(s.id),
+                'required': 0 if s.mandatory == 1 else 1,  # 0为必须
+                'field_value': value_list,
+                "validate_error": "文本长度不能超过50个字符（汉字不超过25）"  # 字段不符合验证时的提示信息
+            })
+            selects_list.append(selects)
+        return selects_list
 
     @gen.coroutine
     def update_employee_custom_fields(self, employee_id, custom_fields_json):

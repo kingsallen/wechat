@@ -55,10 +55,26 @@ class LinkedinImportHandler(MetaBaseHandler):
             host=self.host,
             recom=self.params.recom,
             pid=self.params.pid,
-            wechat_signature=urllib.parse.unquote(self.params.wechat_signature) if self.params.wechat_signature else None)
-
+            wechat_signature=urllib.parse.unquote(
+                self.params.wechat_signature) if self.params.wechat_signature else None)
+        self.logger.info("[redirect_url_access_token: {}]".format(redirect_url))
         response = yield self.profile_ps.get_linkedin_token(code=code, redirect_url=redirect_url)
         response = json.loads(to_str(response))
+        if "error" in response:
+            self.logger.error("[http_fetch][response: {}]".format(response))
+            data = ObjectDict(
+                kind=1,  # // {0: success, 1: failure, 10: email}
+                messages=['导入失败，请重试'],  # ['hello world', 'abjsldjf']
+                button_text=msg.BACK_CN,
+                button_link=self.make_url(path.PROFILE_VIEW,
+                                          wechat_signature=self.get_argument('wechat_signature'),
+                                          host=self.host),
+                jump_link=None  # // 如果有会自动，没有就不自动跳转
+            )
+
+            self.render_page(template_name="system/user-info.html",
+                             data=data)
+            return
         access_token = response.get("access_token")
         # 判断是否在微信端
         ua = 1 if self.in_wechat else 2
@@ -79,13 +95,13 @@ class LinkedinImportHandler(MetaBaseHandler):
                 messages = result.message
 
             data = ObjectDict(
-                kind=1, #  // {0: success, 1: failure, 10: email}
-                messages=messages, # ['hello world', 'abjsldjf']
+                kind=1,  # // {0: success, 1: failure, 10: email}
+                messages=messages,  # ['hello world', 'abjsldjf']
                 button_text=msg.BACK_CN,
                 button_link=self.make_url(path.PROFILE_VIEW,
                                           wechat_signature=self.get_argument('wechat_signature'),
                                           host=self.host),
-                jump_link=None # // 如果有会自动，没有就不自动跳转
+                jump_link=None  # // 如果有会自动，没有就不自动跳转
             )
 
             self.render_page(template_name="system/user-info.html",
@@ -93,9 +109,7 @@ class LinkedinImportHandler(MetaBaseHandler):
             return
 
 
-
 class ResumeImportHandler(BaseHandler):
-
     @handle_response
     @authenticated
     @gen.coroutine
@@ -103,7 +117,8 @@ class ResumeImportHandler(BaseHandler):
 
         self.params.headimg = self.current_user.sysuser.headimg
         auth_api_url = "/{}/api/resume/import".format("m" if self.is_platform else "recruit")
-        self.render(template_name='refer/neo_weixin/sysuser/importresume-auth.html', message='', auth_api_url=auth_api_url)
+        self.render(template_name='refer/neo_weixin/sysuser/importresume-auth.html', message='',
+                    auth_api_url=auth_api_url)
 
     @handle_response
     @authenticated
@@ -172,11 +187,11 @@ class ResumeImportHandler(BaseHandler):
 
                 self._log_customs.update(new_profile=const.YES)
                 self.send_json_success(message=msg.RESUME_IMPORT_SUCCESS,
-                                       data={ "url": next_url })
+                                       data={"url": next_url})
 
                 return
             else:
-                if result.status == 32001:    # 埋点密码错误
+                if result.status == 32001:  # 埋点密码错误
                     status_log = 1
                 elif result.status == 32002:  # 埋点导入失败
                     status_log = 2
