@@ -494,7 +494,7 @@ class ProfilePageService(PageService):
         for w in workexps:
             status = w.get('__status', None)
             if status:
-                end_until_now = int(w.get('projectexp_end_until_now', '0'))
+                end_until_now = int(w.get('workexp_end_until_now', '0'))
 
                 params = ObjectDict(
                     wid=w.get('id'),
