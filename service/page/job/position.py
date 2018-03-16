@@ -69,7 +69,6 @@ class PositionPageService(PageService):
             "visitnum": position_res.visitnum,
             "accountabilities": position_res.accountabilities,
             "requirement": position_res.requirement,
-            "feature": position_res.feature,
             "status": position_res.status,
             "publisher": position_res.publisher,
             "source": position_res.source,
@@ -81,10 +80,6 @@ class PositionPageService(PageService):
         })
 
         # 后置处理：
-        # 福利特色 需要分割
-        if position_res.feature:
-            position.feature = split(position_res.feature, ["#"])
-
         # 需要折行
         if position_res.accountabilities:
             position.accountabilities = split(position_res.accountabilities)

@@ -203,11 +203,13 @@ class PositionHandler(BaseHandler):
     def __make_json_job_feature(self, position_id):
         """构造职位福利特色"""
         position_feature = yield self.position_ps.get_position_feature(position_id)
+        feature = []
         if not position_feature:
-            data = None
+            feature = None
         else:
-            data = position_feature[0]
-        return data
+            for f in position_feature:
+                feature.append(f['feature'])
+        return feature
 
     def __make_json_job_need(self, position_info):
         """构造职位要求"""
