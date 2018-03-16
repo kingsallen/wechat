@@ -406,10 +406,10 @@ class PositionHandler(BaseHandler):
                 self.locale.translate(position_info.employment_type)))
 
         if self.current_user.company.conf_job_occupation and position_info.job_occupation:
-            attr.append("职位职能 {} {}".format(self.current_user.company.conf_job_occupation, position_info.job_occupation))
+            attr.append("{} {}".format(self.current_user.company.conf_job_occupation, position_info.job_occupation))
 
         if self.current_user.company.conf_job_custom_title and position_info.job_custom:
-            attr.append("职位性质 {} {}".format(self.current_user.company.conf_job_custom_title, position_info.job_custom))
+            attr.append("{} {}".format(self.current_user.company.conf_job_custom_title, position_info.job_custom))
 
         if not attr:
             data = None
