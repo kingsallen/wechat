@@ -567,3 +567,8 @@ class PositionPageService(PageService):
             res_list.append(pos)
 
         return res_list
+
+    @gen.coroutine
+    def get_position_feature(self, position_id):
+        result, data = yield self.infra_position_ds.get_position_feature(position_id)
+        return data

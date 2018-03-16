@@ -98,6 +98,15 @@ class InfraPositionDataService(DataService):
 
         return response
 
+    @gen.coroutine
+    def get_position_feature(self, position_id):
+        """
+        :param position_id:
+        :return:
+        """
+        ret = yield http_get(path.INFRA_POSITION_FEATURE.format(position_id))
+        return http_tool.unboxing(ret)
+
 
 class TestEmployeeService(AsyncTestCase):
     """Just for test(or try results) during development :)"""

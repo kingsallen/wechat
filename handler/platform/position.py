@@ -77,7 +77,7 @@ class PositionHandler(BaseHandler):
                 can_apply, team.id if team else 0, did, teamname_custom)
             module_job_description = self._make_json_job_description(position_info)
             module_job_need = self._make_json_job_need(position_info)
-            module_feature = self._make_json_job_feature(position_info)
+            module_feature = self._make_json_job_feature(position_id)
             module_position_recommend = self._make_recommend_positions(self.locale, recomment_positions_res)
 
             position_data = ObjectDict()
@@ -432,15 +432,13 @@ class PositionHandler(BaseHandler):
 
         return data
 
-    def _make_json_job_feature(self, position_info):
+    def _make_json_job_feature(self, position_id):
         """构造职位福利特色"""
-        if not position_info.feature:
+        position_feature = yield self.position_ps.get_position_feature(position_id)
+        if not position_feature:
             data = None
         else:
-            data = ObjectDict({
-                "data": position_info.feature,
-            })
-
+            data = position_feature[0]
         return data
 
     def _make_json_job_company_info(self, company_info, did):
