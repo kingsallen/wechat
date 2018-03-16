@@ -72,7 +72,7 @@ class ChatPageService(PageService):
                 hr_id=ret.hr.hrId,
                 hr_name=ret.hr.hrName or "HR",
                 hr_headimg=make_static_url(ret.hr.hrHeadImg or const.HR_HEADIMG),
-                deleted=ret.hr.deleted
+                deleted=ret.hr.isDelete
             )
 
         user_info = ObjectDict()
