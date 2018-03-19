@@ -494,7 +494,7 @@ class ProfilePageService(PageService):
         for w in workexps:
             status = w.get('__status', None)
             if status:
-                end_until_now = int(w.get('projectexp_end_until_now', '0'))
+                end_until_now = int(w.get('workexp_end_until_now', '0'))
 
                 params = ObjectDict(
                     wid=w.get('id'),
@@ -949,9 +949,9 @@ class ProfilePageService(PageService):
                        reverse=True)[0])
 
     @gen.coroutine
-    def get_others_key_name_mapping(self):
+    def get_others_key_name_mapping(self, company_id=0, select_all=False):
         """获取自定义字段 name 和 title 的键值对，供前端在展示 profile 的时候使用"""
-        metadatas = yield self.infra_profile_ds.get_custom_metadata()
+        metadatas = yield self.infra_profile_ds.get_custom_metadata(company_id, select_all)
 
         rename_mapping = {
             'fieldName': 'field_name',
