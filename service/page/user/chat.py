@@ -208,22 +208,16 @@ class ChatPageService(PageService):
             res_type = r.get("resultType", "")
             ret = r.get("values", {})
 
-            if res_type == "text":
+            if res_type == "text" and ret.get("text").strip():
                 content = ret.get("text", "")
                 pic_url = ret.get("picUrl", "")
                 msg_type = "html"
                 btn_content = []
                 btn_content_json = ''
-            elif res_type == "image":
+            elif (res_type == "image" or res_type == "qrcode") and ret.get("picUrl").strip():
                 content = ret.get("text", "")
                 pic_url = ret.get("picUrl", "")
-                msg_type = "image"
-                btn_content = []
-                btn_content_json = ''
-            elif res_type == "qrcode":
-                content = ret.get("text", "")
-                pic_url = ret.get("picUrl", "")
-                msg_type = "qrcode"
+                msg_type = res_type
                 btn_content = []
                 btn_content_json = ''
             elif res_type == "button_radio":
