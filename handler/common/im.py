@@ -223,7 +223,7 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
         user_message = message.get("content")
         msg_type = message.get("msgType")
         if not user_message.strip():
-            return 
+            return
         chat_params = ChatVO(
             msgType=msg_type,
             content=user_message,

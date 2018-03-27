@@ -220,7 +220,7 @@ class ChatPageService(PageService):
                 msg_type = res_type
                 btn_content = []
                 btn_content_json = ''
-            elif res_type == "button_radio":
+            elif res_type == "button_radio" and ret.get("btnContent"):
                 content = ret.get("text", "")
                 btn_content_json = json.dumps(ret.get("btnContent", []))
                 btn_content = ret.get("btnContent", [])
