@@ -33,7 +33,7 @@ class PositionHandler(BaseHandler):
             res_position, cover = yield self._make_jd_info(self.locale, position_info, company_info, pos_item, position_id)
 
             self.logger.debug("[JD]构建职位详情信息")
-            jd_detail = yield self._make_jd_detail(position_info, pos_item)
+            jd_detail = yield self._make_jd_detail(position_info, pos_item, position_id)
 
             self.logger.debug("[JD]构建公司信息")
             res_cmp = self._make_company(company_info)
@@ -141,7 +141,7 @@ class PositionHandler(BaseHandler):
         return hrheadimgurl
 
     @gen.coroutine
-    def _make_jd_detail(self, position_info, pos_item):
+    def _make_jd_detail(self, position_info, pos_item, position_id):
         """
         构造职位的 module 信息
         :param position_info:
@@ -151,7 +151,8 @@ class PositionHandler(BaseHandler):
         position_temp = ObjectDict()
         module_job_description = self.__make_json_job_description(position_info)
         module_job_need = self.__make_json_job_need(position_info)
-        module_feature = self.__make_json_job_feature(position_info)
+        position_feature = yield self.position_ps.get_position_feature(position_id)
+        module_feature = self.__make_json_job_feature(position_feature)
         module_job_require = self.__make_json_job_require(position_info, pos_item)
 
         add_item(position_temp, "module_job_description", module_job_description)
@@ -200,15 +201,17 @@ class PositionHandler(BaseHandler):
             })
         return data
 
-    def __make_json_job_feature(self, position_info):
+    def __make_json_job_feature(self, position_feature):
         """构造职位福利特色"""
-        if not position_info.feature:
+        feature = []
+        if not position_feature:
             data = None
         else:
+            for f in position_feature:
+                feature.append(f['feature'])
             data = ObjectDict({
-                "data": position_info.feature,
+                "data": feature
             })
-
         return data
 
     def __make_json_job_need(self, position_info):
