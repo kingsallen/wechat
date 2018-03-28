@@ -222,7 +222,8 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
         message = ujson.loads(message)
         user_message = message.get("content")
         msg_type = message.get("msgType")
-
+        if not user_message.strip():
+            return
         chat_params = ChatVO(
             msgType=msg_type,
             content=user_message,
@@ -262,6 +263,8 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
             hr_id=self.hr_id,
             position_id=self.position_id
         )
+        if bot_message.msg_type == '':
+            return
         chat_params = ChatVO(
             content=bot_message.content,
             speaker=const.CHAT_SPEAKER_BOT,

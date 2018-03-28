@@ -838,6 +838,7 @@ class HrVO(object):
      - hrId
      - hrName
      - hrHeadImg
+     - isDelete
     """
 
     thrift_spec = (
@@ -845,12 +846,14 @@ class HrVO(object):
         (1, TType.I32, 'hrId', None, None, ),  # 1
         (2, TType.STRING, 'hrName', 'UTF8', None, ),  # 2
         (3, TType.STRING, 'hrHeadImg', 'UTF8', None, ),  # 3
+        (4, TType.BOOL, 'isDelete', None, None, ),  # 4
     )
 
-    def __init__(self, hrId=None, hrName=None, hrHeadImg=None,):
+    def __init__(self, hrId=None, hrName=None, hrHeadImg=None, isDelete=None,):
         self.hrId = hrId
         self.hrName = hrName
         self.hrHeadImg = hrHeadImg
+        self.isDelete = isDelete
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -876,6 +879,11 @@ class HrVO(object):
                     self.hrHeadImg = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.BOOL:
+                    self.isDelete = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -897,6 +905,10 @@ class HrVO(object):
         if self.hrHeadImg is not None:
             oprot.writeFieldBegin('hrHeadImg', TType.STRING, 3)
             oprot.writeString(self.hrHeadImg.encode('utf-8') if sys.version_info[0] == 2 else self.hrHeadImg)
+            oprot.writeFieldEnd()
+        if self.isDelete is not None:
+            oprot.writeFieldBegin('isDelete', TType.BOOL, 4)
+            oprot.writeBool(self.isDelete)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()

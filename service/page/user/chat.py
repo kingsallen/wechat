@@ -71,7 +71,8 @@ class ChatPageService(PageService):
             hr_info = ObjectDict(
                 hr_id=ret.hr.hrId,
                 hr_name=ret.hr.hrName or "HR",
-                hr_headimg=make_static_url(ret.hr.hrHeadImg or const.HR_HEADIMG)
+                hr_headimg=make_static_url(ret.hr.hrHeadImg or const.HR_HEADIMG),
+                deleted=ret.hr.isDelete
             )
 
         user_info = ObjectDict()
@@ -207,25 +208,19 @@ class ChatPageService(PageService):
             res_type = r.get("resultType", "")
             ret = r.get("values", {})
 
-            if res_type == "text":
+            if res_type == "text" and ret.get("text").strip():
                 content = ret.get("text", "")
                 pic_url = ret.get("picUrl", "")
                 msg_type = "html"
                 btn_content = []
                 btn_content_json = ''
-            elif res_type == "image":
+            elif (res_type == "image" or res_type == "qrcode") and ret.get("picUrl").strip():
                 content = ret.get("text", "")
                 pic_url = ret.get("picUrl", "")
-                msg_type = "image"
+                msg_type = res_type
                 btn_content = []
                 btn_content_json = ''
-            elif res_type == "qrcode":
-                content = ret.get("text", "")
-                pic_url = ret.get("picUrl", "")
-                msg_type = "qrcode"
-                btn_content = []
-                btn_content_json = ''
-            elif res_type == "button_radio":
+            elif res_type == "button_radio" and ret.get("btnContent"):
                 content = ret.get("text", "")
                 btn_content_json = json.dumps(ret.get("btnContent", []))
                 btn_content = ret.get("btnContent", [])
