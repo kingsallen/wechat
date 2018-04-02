@@ -11,9 +11,12 @@ COMPANY_TEAM = '/company/team'
 SEARCH_FILITER = '/start'
 CUSTOMIZE_EDX = '/custom/emailapply'
 
+CAPTCHA_CHECKED = '/captcha/checked'
+
 EMPLOYEE_VERIFY = '/app/employee/binding'
 EMPLOYEE_RECOMMENDS = '/app/employee/recommends'
 EMPLOYEE_CUSTOMINFO = '/employee/custominfo'
+EMPLOYEE_CUSTOMINFO_BINDED = '/employee/binded-custominfo'
 EMPLOYEE_BINDED = '/employee/binded'
 
 PROFILE_CUSTOM_CV = '/profile/custom'
@@ -78,6 +81,11 @@ INFRA_USER_EMPLOYEE = 'user/employee'
 # Ref: https://wiki.moseeker.com/application-api.md
 INFRA_APPLICATION = 'application'
 INFRA_APPLICATION_APPLY_COUNT = 'application/count/check'
+INFRA_APPLICATION_TYPE_APPLY_COUNT = 'application/type/count/check'
+
+# 验证码服务
+INFRA_CAPTCHA = 'position/syncVerifyInfo'
+INFRA_VERIFY_PARAMS = 'position/getSyncVerifyParam'
 
 # 职位服务
 # REF: https://wiki.moseeker.com/position-api.md
@@ -89,6 +97,8 @@ INFRA_POSITION_LIST_RP_EXT = 'position/rpext'
 INFRA_RP_POSITION_LIST = 'position/rplist'
 INFRA_RP_POSITION_LIST_SHARE_INFO = 'position/list/hb_share_info'
 INFRA_THIRD_PARTY_SYNCED_POSITIONS = 'positions/thirdpartysyncedpositions'
+INFRA_SUG_LIST = 'api/position/suggest'
+INFRA_POSITION_FEATURE = '/api/position/feature/{}'
 
 # Profile 服务
 # Ref: https://wiki.moseeker.com/profile-api.md
@@ -112,6 +122,7 @@ PROFILE_CUSTOMCV_CHECK = 'profile/check/other'
 # 公司服务
 COMPANY_ALL = 'company/all'
 COMPANY = 'company'
+CREATE_COMPANY = 'api/hrcompany/add'
 
 # 字典服务
 DICT_CONSTANT = "dict/constant"

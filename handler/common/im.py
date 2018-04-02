@@ -18,9 +18,10 @@ from util.tool.date_tool import curr_now_minute
 from service.page.user.chat import ChatPageService
 from service.data.user.user_hr_account import UserHrAccountDataService
 from service.data.hr.hr_company_conf import HrCompanyConfDataService
+from thrift_gen.gen.chat.struct.ttypes import ChatVO
+
 
 class UnreadCountHandler(BaseHandler):
-
     @handle_response
     @gen.coroutine
     def get(self, publisher):
@@ -143,7 +144,7 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
             return
 
         user_hr_account = yield self.user_hr_account_ds.get_hr_account(
-                conds={'id': self.hr_id})
+            conds={'id': self.hr_id})
 
         company_id = user_hr_account.company_id
 
@@ -183,6 +184,9 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
                         content=data.get("content"),
                         chat_time=data.get("create_time"),
                         speaker=data.get("speaker"),
+                        picUrl=data.get("picUrl"),
+                        btnContent=data.get("btnContent"),
+                        msgType=data.get("msgType"),
                     )))
             except websocket.WebSocketClosedError:
                 self.logger.error(traceback.format_exc())
@@ -217,18 +221,30 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
 
         message = ujson.loads(message)
         user_message = message.get("content")
+        msg_type = message.get("msgType")
+        if not user_message.strip():
+            return
+        chat_params = ChatVO(
+            msgType=msg_type,
+            content=user_message,
+            origin=const.ORIGIN_USER_OR_HR,
+            roomId=int(self.room_id),
+            positionId=int(self.position_id)
+        )
+        chat_id = yield self.chat_ps.save_chat(chat_params)
+
         message_body = json_dumps(ObjectDict(
+            msgType=msg_type,
             content=user_message,
             speaker=const.CHAT_SPEAKER_USER,
             cid=int(self.room_id),
             pid=int(self.position_id),
-            create_time=curr_now_minute()
+            create_time=curr_now_minute(),
+            origin=const.ORIGIN_USER_OR_HR,
+            id=chat_id
         ))
 
         self.redis_client.publish(self.hr_channel, message_body)
-
-        yield self.chat_ps.save_chat(
-            self.room_id, user_message, self.position_id)
 
         if self.bot_enabled:
             # 由于没有延迟的发送导致hr端轮训无法订阅到publish到redis的消息　所以这里做下延迟处理
@@ -247,26 +263,38 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
             hr_id=self.hr_id,
             position_id=self.position_id
         )
+        if bot_message.msg_type == '':
+            return
+        chat_params = ChatVO(
+            content=bot_message.content,
+            speaker=const.CHAT_SPEAKER_BOT,
+            origin=const.ORIGIN_CHATBOT,
+            picUrl=bot_message.pic_url,
+            btnContent=bot_message.btn_content_json,
+            msgType=bot_message.msg_type,
+            roomId=int(self.room_id),
+            positionId=int(self.position_id)
+        )
+
+        chat_id = yield self.chat_ps.save_chat(chat_params)
         if bot_message:
             message_body = json_dumps(ObjectDict(
-                content=bot_message,
+                content=bot_message.content,
+                picUrl=bot_message.pic_url,
+                btnContent=bot_message.btn_content,
+                msgType=bot_message.msg_type,
                 speaker=const.CHAT_SPEAKER_BOT,
                 cid=int(self.room_id),
                 pid=int(self.position_id),
-                create_time=curr_now_minute()
+                create_time=curr_now_minute(),
+                origin=const.ORIGIN_CHATBOT,
+                id=chat_id
             ))
-
             # hr 端广播
             self.redis_client.publish(self.hr_channel, message_body)
 
             # 聊天室广播
             self.redis_client.publish(self.chatroom_channel, message_body)
-
-            yield self.chat_ps.save_chat(
-                self.room_id,
-                bot_message,
-                self.position_id,
-                speaker=const.CHAT_SPEAKER_BOT)
 
 
 class ChatHandler(BaseHandler):
@@ -293,7 +321,7 @@ class ChatHandler(BaseHandler):
         page_size = self.params.page_size or 10
         res = yield self.chat_ps.get_chatrooms(self.current_user.sysuser.id, page_no, page_size)
         self.send_json_success(data=ObjectDict(
-            records = res
+            records=res
         ))
 
     @handle_response
@@ -318,7 +346,7 @@ class ChatHandler(BaseHandler):
 
         res = yield self.chat_ps.get_chats(self.params.room_id, page_no, page_size)
         self.send_json_success(data=ObjectDict(
-            records = res
+            records=res
         ))
 
     @handle_response
@@ -340,8 +368,8 @@ class ChatHandler(BaseHandler):
             is_gamma = True
 
         self.logger.debug(
-                '[IM]user_id: %s, hr_id: %s, position_id: %s, room_id: %s, qxuser: %s, is_gamma: %s' %
-                (self.current_user.sysuser.id, self.params.hr_id, pid, room_id, self.current_user.qxuser, is_gamma)
+            '[IM]user_id: %s, hr_id: %s, position_id: %s, room_id: %s, qxuser: %s, is_gamma: %s' %
+            (self.current_user.sysuser.id, self.params.hr_id, pid, room_id, self.current_user.qxuser, is_gamma)
         )
 
         res = yield self.chat_ps.get_chatroom(self.current_user.sysuser.id,

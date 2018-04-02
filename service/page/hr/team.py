@@ -101,8 +101,8 @@ class TeamPageService(PageService):
         data.header = temp_data_tool.make_header(locale, company, team_index=True, **teamname_custom)
 
         # 蓝色光标做定制化需求
-        customize_ps = CustomizePageService()
-        customize_ps.blue_focus_team_index_show_summary_not_description(parent_company, teams)
+        # customize_ps = CustomizePageService()
+        # customize_ps.blue_focus_team_index_show_summary_not_description(parent_company, teams)
 
         # 解析生成团队列表页中每个团队信息子模块
         data.templates = [
@@ -176,7 +176,7 @@ class TeamPageService(PageService):
         team_members = yield self.hr_team_member_ds.get_team_member_list(
             conds={'team_id': team.id, 'disable': 0})
 
-        modulename, detail_media_list = yield self._get_team_detail_cms(team.id)
+        more_link, modulename, detail_media_list = yield self._get_team_detail_cms(team.id)
         detail_media_list.sort(key=operator.itemgetter("orders"))
         res_id_list = [m.res_id for m in team_members] + \
                       [m.res_id for m in detail_media_list] + \
@@ -227,6 +227,7 @@ class TeamPageService(PageService):
             other_teams,
             res_dict,
             handler_param,
+            more_link=more_link,
             teamname_custom=teamname_custom
         )
         data.templates_total = len(data.templates)
@@ -239,6 +240,7 @@ class TeamPageService(PageService):
         # 从业务要求来看, 这里有数据完整性的要求, 有cms_page, 必须有cms_module, 必须有cms_media
         # 所以, 这里还是兼容了存在脏数据的情况
         module_name = ""
+        more_link = ""
         cms_media = []
         # hr_cms_pages拿团队详情页的配置信息
         cms_page = yield self.hr_cms_pages_ds.get_page(conds={
@@ -255,11 +257,12 @@ class TeamPageService(PageService):
             if cms_module:
                 module_id = cms_module.id
                 module_name = cms_module.module_name
+                more_link = cms_module.link
                 cms_media = yield self.hr_cms_media_ds.get_media_list(conds={
                     "disable": 0,
                     "module_id": module_id
                 })
-        return module_name, cms_media
+        return more_link, module_name, cms_media
 
     @gen.coroutine
     def _get_all_team_members(self, team_id_list):

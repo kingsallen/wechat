@@ -494,7 +494,7 @@ class ProfilePageService(PageService):
         for w in workexps:
             status = w.get('__status', None)
             if status:
-                end_until_now = int(w.get('projectexp_end_until_now', '0'))
+                end_until_now = int(w.get('workexp_end_until_now', '0'))
 
                 params = ObjectDict(
                     wid=w.get('id'),
@@ -923,53 +923,6 @@ class ProfilePageService(PageService):
         return profile
 
     @staticmethod
-    def calculate_workyears(p_workexps):
-        """ 计算工作年份 """
-        min_start_date = None
-        max_end_date = None
-        until_now = False
-        workyears = 0
-
-        if not p_workexps:
-            return workyears
-
-        try:
-            for workexp in p_workexps:
-                if (min_start_date is None or
-                    min_start_date > workexp.get("start_date")):
-
-                    min_start_date = workexp.get("start_date")
-
-                if (max_end_date is None or
-                    max_end_date < workexp.get("end_date")):
-
-                    max_end_date = workexp.get("end_date")
-
-                if not until_now and workexp.get("end_until_now"):
-                    until_now = workexp.get("end_until_now")
-
-            if until_now:
-                max_end_date = curr_datetime_now().year
-            else:
-                max_end_date = max_end_date[:4]
-
-            workyears = int(max_end_date) - int(min_start_date[:4])
-        except Exception:
-            workyears = 0
-        finally:
-            return workyears
-
-    def get_job_for_application(self, profile):
-        """ 获取最新的工作经历用以申请 """
-        if not profile.get("workexps", []):
-            return ObjectDict()
-
-        if self.has_current_job(profile):
-            return self.get_current_job(profile)
-
-        return self.get_latest_job(profile)
-
-    @staticmethod
     def has_current_job(profile):
         """ 判断 profile 是否包含"含有至今"的工作信息 """
         wexps = profile.get('workexps', [])
@@ -996,9 +949,9 @@ class ProfilePageService(PageService):
                        reverse=True)[0])
 
     @gen.coroutine
-    def get_others_key_name_mapping(self):
+    def get_others_key_name_mapping(self, company_id=0, select_all=False):
         """获取自定义字段 name 和 title 的键值对，供前端在展示 profile 的时候使用"""
-        metadatas = yield self.infra_profile_ds.get_custom_metadata()
+        metadatas = yield self.infra_profile_ds.get_custom_metadata(company_id, select_all)
 
         rename_mapping = {
             'fieldName': 'field_name',

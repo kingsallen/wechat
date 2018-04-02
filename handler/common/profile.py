@@ -51,6 +51,12 @@ class ProfileNewHandler(BaseHandler):
     @tornado.gen.coroutine
     def post(self):
 
+        has_profile, profile = yield self.profile_ps.has_profile(self.current_user.sysuser.id)
+        if has_profile:
+            message = "简历已存在，请返回个人档案页刷新"
+            self.send_json_error(message=message)
+            return
+
         profile = ObjectDict(json_decode(self.request.body)).profile
 
         # 姓名必填
@@ -149,10 +155,16 @@ class ProfileNewHandler(BaseHandler):
         if profile_ok and basic_info_ok and education_ok and workexp_ok:
             dqpid = self.get_cookie('dqpid')
             self.logger.debug('dqpid: %s' % dqpid)
+            recom = ''
+            if 'recom' in self.json_args:
+                recom = self.json_args.recom
+            p = dict()
+            if recom:
+                p.update(recom=recom)
             if dqpid:
-                next_url = self.make_url(path.PROFILE_PREVIEW, self.params, pid=str(dqpid))
+                next_url = self.make_url(path.PROFILE_PREVIEW, self.params, pid=str(dqpid), **p)
             else:
-                next_url = self.make_url(path.PROFILE_VIEW, self.params)
+                next_url = self.make_url(path.PROFILE_VIEW, self.params, **p)
             self.logger.debug('next_url: %s' % next_url)
             self.clear_cookie(name='dqpid')
             self.send_json_success(data=ObjectDict(next_url=next_url))
@@ -188,7 +200,7 @@ class ProfilePreviewHandler(BaseHandler):
             is_skip = False
         # -8<---8<---8<---8<---8<---8<---8<---8<---8<---8<---8<---8<---8<---
 
-        other_key_name_mapping = yield self.profile_ps.get_others_key_name_mapping()
+        other_key_name_mapping = yield self.profile_ps.get_others_key_name_mapping(company_id=self.current_user.company.id)
 
         no_name = not bool(self.current_user.sysuser.name)
         need_mobile_validate = not bool(self.current_user.sysuser.mobileverified)
@@ -280,7 +292,7 @@ class ProfileHandler(BaseHandler):
         profile_tpl = yield self.profile_ps.profile_to_tempalte(
             self.current_user.profile)
 
-        other_key_name_mapping = yield self.profile_ps.get_others_key_name_mapping()
+        other_key_name_mapping = yield self.profile_ps.get_others_key_name_mapping(select_all=True)
 
         self.params.share = self._share(self.current_user.profile.profile.get("uuid"), profile_tpl)
         self.render_page(

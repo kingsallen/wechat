@@ -17,5 +17,6 @@ class HrEmployeeCustomFieldsDao(BaseDao):
             "forder":      self.constant.TYPE_INT,
             "disable":     self.constant.TYPE_INT,
             "mandatory":   self.constant.TYPE_INT,
-            "status":      self.constant.TYPE_INT
+            "status":      self.constant.TYPE_INT,
+            "option_type": self.constant.TYPE_INT
         }

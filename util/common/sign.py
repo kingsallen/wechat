@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import time
+import hashlib
 import random
 import string
-import hashlib
+import time
 
 
 class Sign(object):
@@ -26,7 +26,9 @@ class Sign(object):
              if key != "_default" and key != 'key' and self.ret[key]])
         if "key" in self.ret:
             temp_str = temp_str + "&key=" + self.ret["key"]
+        self.ret["_debug_temp_str_1"] = temp_str  # for debug purpose
         temp_str = temp_str.encode("utf-8")
+        self.ret["_debug_temp_str_2"] = temp_str  # for debug purpose
         self.ret[keyname] = hashlib.sha1(temp_str).hexdigest()
         return self.ret
 
