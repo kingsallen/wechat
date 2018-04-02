@@ -93,9 +93,9 @@ class ApplicationHandler(BaseHandler):
             # -> formats of custom_cv_tpls is like:
             # [{"field_name1": "map1"}, {"field_name2": "map2"}]
 
-            # result = yield self.application_ps.check_custom_cv_v2(
-            #     self.current_user.sysuser.id, position.id)
-            result = True
+            result = yield self.application_ps.check_custom_cv_v2(
+                self.current_user.sysuser.id, position.id)
+
             p = {'pid': pid, 'wechat_signature': self.params.wechat_signature}
 
             if self.params.recom:
