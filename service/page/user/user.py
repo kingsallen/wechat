@@ -304,8 +304,11 @@ class UserPageService(PageService):
     def get_employee_total_points(self, employee_id):
         """获取员工总积分"""
         employee_sum = yield self.user_employee_points_record_ds.get_user_employee_points_record_sum(
-            conds={ "employee_id": employee_id }, fields=["award"])
+            conds={"employee_id": employee_id}, fields=["award"])
 
+        # 查询sum的SQL可能返回None，这里做下校验
+        if employee_sum is None:
+            return 0
         if employee_sum.sum_award:
             return employee_sum.sum_award
         return 0
@@ -333,6 +336,8 @@ class UserPageService(PageService):
             fields=['amount'],
             appends=[" and hb_config_id in %s" % str_tool.set_literl(hb_config_ids)]
         )
+        if hb_items_sum is None:
+            return 0
 
         return hb_items_sum.sum_amount if hb_items_sum.sum_amount else 0
 
