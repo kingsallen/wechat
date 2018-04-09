@@ -158,6 +158,7 @@ class EmployeeBindHandler(BaseHandler):
             self.current_user.company.id)
         if not conf_response.exists:
             self.send_json_error("no employee conf")
+            return
         else:
             pass
 
