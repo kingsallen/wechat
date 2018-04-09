@@ -159,7 +159,7 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
     @tornado.gen.coroutine
     def post(self):
         if not self.current_user.employee:
-            self.write_error(416, message=msg.EMPLOYEE_NOT_BINDED_WARNING.format(self.current_user.company.conf_employee_slug))
+            self.write_error(404, message=msg.EMPLOYEE_NOT_BINDED_WARNING.format(self.current_user.company.conf_employee_slug))
             return
 
         id = self.params.get('_id')
