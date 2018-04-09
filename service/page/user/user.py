@@ -336,6 +336,8 @@ class UserPageService(PageService):
             fields=['amount'],
             appends=[" and hb_config_id in %s" % str_tool.set_literl(hb_config_ids)]
         )
+        if hb_items_sum is None:
+            return 0
 
         return hb_items_sum.sum_amount if hb_items_sum.sum_amount else 0
 

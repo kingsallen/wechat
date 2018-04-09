@@ -166,7 +166,8 @@ class ChatPageService(PageService):
         unread_count_total = yield self.hr_wx_hr_chat_list_ds.get_chat_unread_count_sum(conds={
             "sysuser_id": user_id,
         }, fields=["user_unread_count"])
-
+        if unread_count_total is None:
+            return gen.Return(0)
         raise gen.Return(unread_count_total.sum_user_unread_count)
 
     @gen.coroutine
