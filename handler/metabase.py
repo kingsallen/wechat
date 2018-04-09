@@ -285,11 +285,12 @@ class MetaBaseHandler(AtomHandler):
             )
 
         elif http_code == 404:
+            message = kwargs.get('message') or msg_const.NO_DATA
             self.render_page(
                 template,
                 data={
                     'code': http_code,
-                    'message': msg_const.NO_DATA
+                    'message': message
                 },
                 http_code=http_code
             )
