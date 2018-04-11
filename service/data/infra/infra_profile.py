@@ -32,7 +32,7 @@ class InfraProfileDataService(DataService):
     def import_profile(self, type, username, password, user_id, ua=1, token=None):
         """
         从第三方导入 profile
-        :param source: 必填 来源, 0:无法识别 1:51Job 2:Liepin 3:zhilian 4:linkedin
+        :param source: 必填 来源, 0:无法识别 1:51Job 2:Liepin 3:zhilian 4:linkedin 5:veryeast
         :param username: 选填（除了选择linkedin导入方式，其余都是必填） 帐号
         :param password: 选填（除了选择linkedin导入方式，其余都是必填） 密码
         :param user_id: 必填 登录用户的编号
