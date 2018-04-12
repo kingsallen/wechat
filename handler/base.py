@@ -141,6 +141,7 @@ class BaseHandler(MetaBaseHandler):
                         self.logger.debug("来自企业号的静默授权, openid:{}".format(openid))
                         self._wxuser = yield self._handle_ent_openid(
                             openid, self._unionid)
+                        self.logger.info("来自企业号的静默授权, openid:{}, _unionid:{}".format(openid, self._unionid))
                     else:
                         self.logger.debug("来自企业号的 code 无效")
 
