@@ -1219,7 +1219,7 @@ class RedpacketPageService(PageService):
         else:
             raise ValueError
 
-        amount = int(amount * 100)  # 发送单位为分
+        amount = int(amount * 1000 / 10)  # 发送单位为分, int类型可能会出错，做一次运算消除误差
         if amount > 1 and act_name is not None and remark is not None:
             qx_openid = openid
 

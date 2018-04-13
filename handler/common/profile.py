@@ -51,6 +51,12 @@ class ProfileNewHandler(BaseHandler):
     @tornado.gen.coroutine
     def post(self):
 
+        has_profile, profile = yield self.profile_ps.has_profile(self.current_user.sysuser.id)
+        if has_profile:
+            message = "简历已存在，请返回个人档案页刷新"
+            self.send_json_error(message=message)
+            return
+
         profile = ObjectDict(json_decode(self.request.body)).profile
 
         # 姓名必填

@@ -66,7 +66,8 @@ struct ChatsVO {
 struct HrVO {
     1:  optional i32 hrId,                  //HR编号
     2:  optional string hrName,             //HR名称
-    3:  optional string hrHeadImg           //HR头像
+    3:  optional string hrHeadImg,           //HR头像
+    4:  optional bool isDelete              //HR是否存在
 }
 
 struct UserVO {

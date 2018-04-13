@@ -98,6 +98,7 @@ INFRA_RP_POSITION_LIST = 'position/rplist'
 INFRA_RP_POSITION_LIST_SHARE_INFO = 'position/list/hb_share_info'
 INFRA_THIRD_PARTY_SYNCED_POSITIONS = 'positions/thirdpartysyncedpositions'
 INFRA_SUG_LIST = 'api/position/suggest'
+INFRA_POSITION_FEATURE = '/api/position/feature/{}'
 
 # Profile 服务
 # Ref: https://wiki.moseeker.com/profile-api.md

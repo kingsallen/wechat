@@ -19,6 +19,8 @@ from service.page.user.chat import ChatPageService
 from service.data.user.user_hr_account import UserHrAccountDataService
 from service.data.hr.hr_company_conf import HrCompanyConfDataService
 from thrift_gen.gen.chat.struct.ttypes import ChatVO
+import redis
+from setting import settings
 
 
 class UnreadCountHandler(BaseHandler):
@@ -119,10 +121,16 @@ class UnreadCountHandler(BaseHandler):
 class ChatWebSocketHandler(websocket.WebSocketHandler):
     """处理 Chat 的各种 webSocket 传输，直接继承 tornado 的 WebSocketHandler
     """
+    _pool = redis.ConnectionPool(
+        host=settings["store_options"]["redis_host"],
+        port=settings["store_options"]["redis_port"],
+        max_connections=settings["store_options"]["max_connections"])
+
+    _redis = redis.StrictRedis(connection_pool=_pool)
 
     def __init__(self, application, request, **kwargs):
         super(ChatWebSocketHandler, self).__init__(application, request, **kwargs)
-        self.redis_client = self.application.redis.get_raw_redis_client()
+        self.redis_client = self._redis
         self.io_loop = ioloop.IOLoop.current()
 
         self.chat_session = ChatCache()
@@ -222,17 +230,8 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
         message = ujson.loads(message)
         user_message = message.get("content")
         msg_type = message.get("msgType")
-        message_body = json_dumps(ObjectDict(
-            msgType=msg_type,
-            content=user_message,
-            speaker=const.CHAT_SPEAKER_USER,
-            cid=int(self.room_id),
-            pid=int(self.position_id),
-            create_time=curr_now_minute(),
-            origin=const.ORIGIN_USER_OR_HR
-        ))
-
-        self.redis_client.publish(self.hr_channel, message_body)
+        if not user_message.strip():
+            return
         chat_params = ChatVO(
             msgType=msg_type,
             content=user_message,
@@ -240,7 +239,20 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
             roomId=int(self.room_id),
             positionId=int(self.position_id)
         )
-        yield self.chat_ps.save_chat(chat_params)
+        chat_id = yield self.chat_ps.save_chat(chat_params)
+
+        message_body = json_dumps(ObjectDict(
+            msgType=msg_type,
+            content=user_message,
+            speaker=const.CHAT_SPEAKER_USER,
+            cid=int(self.room_id),
+            pid=int(self.position_id),
+            create_time=curr_now_minute(),
+            origin=const.ORIGIN_USER_OR_HR,
+            id=chat_id
+        ))
+
+        self.redis_client.publish(self.hr_channel, message_body)
 
         if self.bot_enabled:
             # 由于没有延迟的发送导致hr端轮训无法订阅到publish到redis的消息　所以这里做下延迟处理
@@ -259,6 +271,20 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
             hr_id=self.hr_id,
             position_id=self.position_id
         )
+        if bot_message.msg_type == '':
+            return
+        chat_params = ChatVO(
+            content=bot_message.content,
+            speaker=const.CHAT_SPEAKER_HR,
+            origin=const.ORIGIN_CHATBOT,
+            picUrl=bot_message.pic_url,
+            btnContent=bot_message.btn_content_json,
+            msgType=bot_message.msg_type,
+            roomId=int(self.room_id),
+            positionId=int(self.position_id)
+        )
+
+        chat_id = yield self.chat_ps.save_chat(chat_params)
         if bot_message:
             message_body = json_dumps(ObjectDict(
                 content=bot_message.content,
@@ -269,26 +295,14 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
                 cid=int(self.room_id),
                 pid=int(self.position_id),
                 create_time=curr_now_minute(),
-                origin=const.ORIGIN_CHATBOT
+                origin=const.ORIGIN_CHATBOT,
+                id=chat_id
             ))
             # hr 端广播
             self.redis_client.publish(self.hr_channel, message_body)
 
             # 聊天室广播
             self.redis_client.publish(self.chatroom_channel, message_body)
-
-            chat_params = ChatVO(
-                content=bot_message.content,
-                speaker=const.CHAT_SPEAKER_HR,
-                origin=const.ORIGIN_CHATBOT,
-                picUrl=bot_message.pic_url,
-                btnContent=bot_message.btn_content_json,
-                msgType=bot_message.msg_type,
-                roomId=int(self.room_id),
-                positionId=int(self.position_id)
-            )
-
-            yield self.chat_ps.save_chat(chat_params)
 
 
 class ChatHandler(BaseHandler):
