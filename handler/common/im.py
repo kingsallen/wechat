@@ -275,7 +275,7 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
             return
         chat_params = ChatVO(
             content=bot_message.content,
-            speaker=const.CHAT_SPEAKER_BOT,
+            speaker=const.CHAT_SPEAKER_HR,
             origin=const.ORIGIN_CHATBOT,
             picUrl=bot_message.pic_url,
             btnContent=bot_message.btn_content_json,
@@ -291,7 +291,7 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
                 picUrl=bot_message.pic_url,
                 btnContent=bot_message.btn_content,
                 msgType=bot_message.msg_type,
-                speaker=const.CHAT_SPEAKER_BOT,
+                speaker=const.CHAT_SPEAKER_HR,
                 cid=int(self.room_id),
                 pid=int(self.position_id),
                 create_time=curr_now_minute(),
