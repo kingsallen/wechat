@@ -14,7 +14,7 @@ from util.common.exception import MyException
 from util.common.cipher import encode_id
 from util.common.decorator import handle_response, check_employee, NewJDStatusCheckerAddFlag, authenticated, log_time
 from util.common.mq import award_publisher
-from util.tool.str_tool import gen_salary, add_item, split, gen_degree_v2, gen_experience_v2
+from util.tool.str_tool import gen_salary, add_item, split, gen_degree_v2, gen_experience_v2, languge_code_from_ua
 from util.tool.url_tool import url_append_query
 from util.wechat.template import position_view_five_notice_tpl, position_share_notice_employee_tpl
 from util.common.decorator import log_time
@@ -776,6 +776,8 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
 
         infra_params = self.make_position_list_infra_params()
 
+        useragent = self.request.headers.get('User-Agent')
+        lang_from_ua = languge_code_from_ua(useragent)
         # 校验一下可能出现的参数：
         # hb_c: 红包活动id
         # did: 子公司id
@@ -855,7 +857,6 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
             position_ex["abbreviation"] = pos.abbreviation
             position_ex["department"] = pos.department
             position_ex["province"] = pos.province
-            position_ex["city"] = pos.city
             position_ex["salary"] = pos.salary
             position_ex["logo"] = pos.logo
             position_ex["company_name"] = pos.company_name
@@ -875,6 +876,12 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
             position_ex['candidate_source'] = pos.candidate_source
             position_ex['job_need'] = pos.requirement
 
+            if lang_from_ua == "en_US":
+                position_ex["city"] = pos.city_ename
+                position_ex["salary"] = "Salary negotiable" if pos.salary == "薪资面议" else pos.salary
+            else:
+                position_ex["city"] = pos.city
+                position_ex["salary"] = pos.salary
             total_count = pos.totalNum
             # 判断职位投递是否达到上限
             can_apply = False
