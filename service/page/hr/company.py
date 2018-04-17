@@ -48,7 +48,8 @@ class CompanyPageService(PageService):
             }
             company_conf_res = yield self.hr_company_conf_ds.get_company_conf(conds)
             if company_conf_res is None:
-                self.logger.error('get_company_conf.conds:%s, get_company_conf.company_conf_res:%s' % (conds, company_conf_res))
+                self.logger.error(
+                    'get_company_conf.conds:%s, get_company_conf.company_conf_res:%s' % (conds, company_conf_res))
 
             # 搜索页页面栏目排序
             search_seq = []
@@ -79,8 +80,9 @@ class CompanyPageService(PageService):
                 "conf_application_time": company_conf_res.get("application_time", ""),  # 新JD开通申请时间
                 "conf_hr_chat": company_conf_res.get("hr_chat", 1),  # IM 聊天开关
                 "conf_show_in_qx": company_conf_res.get("show_in_qx", 1),  # 公司信息、团队信息、职位信息等只在仟寻展示
-                "conf_employee_slug": company_conf_res.get("employee_slug", "员工"), # 自定义员工称谓
-                "conf_display_locale": company_conf_res.get("display_locale", "")
+                "conf_employee_slug": company_conf_res.get("employee_slug", "员工"),  # 自定义员工称谓
+                "conf_display_locale": company_conf_res.get("display_locale", ""),
+                "conf_veryeast_switch": company_conf_res.get("veryeast_switch", 0)  # 最佳东方简历导入开关
             })
 
             # 处理公司自定义团队名称
@@ -140,7 +142,9 @@ class CompanyPageService(PageService):
 
         hr_company_account = yield self.hr_company_account_ds.get_company_account(conds={"account_id": publisher})
         if hr_company_account is None:
-            self.logger.error('get_real_company_id.publisher:%s, hr_company_account.company_id:%s, get_real_company_id.hr_company_account:%s' % (publisher, company_id, hr_company_account))
+            self.logger.error(
+                'get_real_company_id.publisher:%s, hr_company_account.company_id:%s, get_real_company_id.hr_company_account:%s' % (
+                publisher, company_id, hr_company_account))
         real_company_id = hr_company_account.company_id or company_id
 
         raise gen.Return(real_company_id)
@@ -229,7 +233,7 @@ class CompanyPageService(PageService):
 
         res_list = list()
         ret = yield self.thrift_position_ds.get_company_positions(
-                company_id, page_no, page_size)
+            company_id, page_no, page_size)
         if not ret.data:
             return res_list
 
@@ -313,7 +317,7 @@ class CompanyPageService(PageService):
 
         elif main_hr_account.wxuser_id:
             hr_wxuser = yield self.user_wx_user_ds.get_wxuser(
-                conds={'id': main_hr_account.wxuser_id })
+                conds={'id': main_hr_account.wxuser_id})
             if hr_wxuser:
                 ret.update(hr_logo=make_static_url(hr_wxuser.headimgurl))
 
