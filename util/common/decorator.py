@@ -214,12 +214,12 @@ def check_and_apply_profile(func):
                 "goto_custom_url": '',
             }
             # 获取最佳东方导入开关
-            company = yield self.company_ps.get_company(self.current_user.wechat.company_id)
-            importer = {"profile_import_51job": True,
-                        "profile_import_zhilian": True,
-                        "profile_import_liepin": True,
-                        "profile_import_linkedin": True,
-                        "profile_import_veryeast": False}
+            company = yield self.company_ps.get_company({'id': self.current_user.wechat.company_id}, need_conf=True)
+            importer = ObjectDict(profile_import_51job=True,
+                                  profile_import_zhilian=True,
+                                  profile_import_liepin=True,
+                                  profile_import_linkedin=True,
+                                  profile_import_veryeast=False)
             if company.conf_veryeast_switch == 1:
                 importer.update(profile_import_veryeast=True)
 
@@ -484,7 +484,6 @@ class NewJDStatusCheckerAddFlag(BaseNewJDStatusChecker):
 
 
 def log_time(func):
-
     @functools.wraps(func)
     @gen.coroutine
     def wrapper(self, *args, **kwargs):
@@ -494,7 +493,7 @@ def log_time(func):
         c = {
             "for": "[hb_debug]",
             "func_name": func.__qualname__,
-            "time": (end-start)*1000
+            "time": (end - start) * 1000
         }
         self.logger.info(json_dumps(c))
         return r
