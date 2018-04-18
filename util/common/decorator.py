@@ -213,6 +213,15 @@ def check_and_apply_profile(func):
                 "use_email": False,
                 "goto_custom_url": '',
             }
+            # 获取最佳东方导入开关
+            company = self.company_ps.get_company(self.current_user.wechat.company_id)
+            importer = {"profile_import_51job": True,
+                        "profile_import_zhilian": True,
+                        "profile_import_liepin": True,
+                        "profile_import_linkedin": True,
+                        "profile_import_veryeast": False}
+            if company.conf_veryeast_switch == 1:
+                importer.update(profile_import_veryeast=True)
 
             # 如果是申请中跳转到这个页面，需要做详细检查
             current_path = self.request.uri.split('?')[0]
@@ -281,7 +290,7 @@ def check_and_apply_profile(func):
 
             print("redirect_params: %s" % redirect_params)
             self.render(template_name='refer/neo_weixin/sysuser_v2/importresume.html',
-                        **redirect_params)
+                        **redirect_params, importer=importer)
 
     return wrapper
 

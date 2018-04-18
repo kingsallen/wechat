@@ -117,17 +117,8 @@ class ResumeImportHandler(BaseHandler):
 
         self.params.headimg = self.current_user.sysuser.headimg
         auth_api_url = "/{}/api/resume/import".format("m" if self.is_platform else "recruit")
-        # 获取最佳东方导入开关
-        company = self.company_ps.get_company(self.current_user.wechat.company_id)
-        importer = {"profile_import_51job": True,
-                    "profile_import_zhilian": True,
-                    "profile_import_liepin": True,
-                    "profile_import_linkedin": True,
-                    "profile_import_veryeast": False}
-        if company.conf_veryeast_switch == 1:
-            importer.update(profile_import_veryeast=True)
         self.render(template_name='refer/neo_weixin/sysuser/importresume-auth.html', message='',
-                    auth_api_url=auth_api_url, importer=importer)
+                    auth_api_url=auth_api_url)
 
     @handle_response
     @authenticated
