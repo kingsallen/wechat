@@ -357,6 +357,7 @@ class BaseHandler(MetaBaseHandler):
             )
             self._session_id = self._make_new_session_id(
                 session.qxuser.sysuser_id)
+            self.logger.info("session_id:{}-----unionid:{}".format(self._session_id, self._unionid))
             self._pass_session.save_qx_sessions(
                 self._session_id, session.qxuser)
             self.set_secure_cookie(
