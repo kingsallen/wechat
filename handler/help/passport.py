@@ -52,7 +52,8 @@ class RegisterHandler(BaseHandler):
             mobile=self.params.mobile,
             source=8 if self.in_wechat else 6,
             wxuser_id=self.current_user.wxuser.id,
-            remote_id=self.request.remote_ip
+            remote_id=self.request.remote_ip,
+            hr_source=int(self.params.source or 4)
         )
 
         status, message, body = yield self.company_ps.create_company(params)
