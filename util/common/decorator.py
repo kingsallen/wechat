@@ -214,7 +214,7 @@ def check_and_apply_profile(func):
                 "goto_custom_url": '',
             }
             # 获取最佳东方导入开关
-            company = self.company_ps.get_company(self.current_user.wechat.company_id)
+            company = yield self.company_ps.get_company(self.current_user.wechat.company_id)
             importer = {"profile_import_51job": True,
                         "profile_import_zhilian": True,
                         "profile_import_liepin": True,
