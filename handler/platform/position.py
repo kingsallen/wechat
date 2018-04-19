@@ -877,7 +877,7 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
             position_ex['job_need'] = pos.requirement
 
             if lang_from_ua == "en_US":
-                position_ex["city"] = pos.city_ename
+                position_ex["city"] = pos.city_ename if pos.city_ename else pos.city
                 position_ex["salary"] = "Salary negotiable" if pos.salary == "薪资面议" else pos.salary
             else:
                 position_ex["city"] = pos.city
