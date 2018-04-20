@@ -15,7 +15,7 @@ from handler.metabase import MetaBaseHandler
 from util.common import ObjectDict
 from util.tool.xml_tool import parse_msg
 from util.tool.date_tool import curr_now
-
+from util.common.decorator import handle_response
 from util.wechat import core as wechat_core
 from util.wechat.msgcrypt import WXBizMsgCrypt, SHA1
 
@@ -306,6 +306,7 @@ class WechatThirdOauthHandler(WechatOauthHandler):
     def prepare(self):
         pass
 
+    @handle_response
     @gen.coroutine
     def post(self, app_id):
 

@@ -144,7 +144,7 @@ class ProfilePageService(PageService):
         return result
 
     @gen.coroutine
-    def import_profile(self, type_source, username, password, user_id, ua, token=None):
+    def import_profile(self, type_source, username, password, user_id, ua, company_id, token=None):
         """
         导入第三方简历（51job, 智联招聘，linkedin，猎聘）
         :param type_source: int 来源, 0:无法识别 1:51Job 2:Liepin 3:zhilian 4:linkedin
@@ -160,7 +160,7 @@ class ProfilePageService(PageService):
         """
 
         is_ok, result = yield self.infra_profile_ds.import_profile(
-            int(type_source), username, password, user_id, int(ua), token)
+            int(type_source), username, password, user_id, company_id, int(ua), token)
         return is_ok, result
 
     @gen.coroutine

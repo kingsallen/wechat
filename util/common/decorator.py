@@ -213,6 +213,15 @@ def check_and_apply_profile(func):
                 "use_email": False,
                 "goto_custom_url": '',
             }
+            # 获取最佳东方导入开关
+            company = yield self.company_ps.get_company({'id': self.current_user.wechat.company_id}, need_conf=True)
+            importer = ObjectDict(profile_import_51job=True,
+                                  profile_import_zhilian=True,
+                                  profile_import_liepin=True,
+                                  profile_import_linkedin=True,
+                                  profile_import_veryeast=False)
+            if company.conf_veryeast_switch == 1:
+                importer.update(profile_import_veryeast=True)
 
             # 如果是申请中跳转到这个页面，需要做详细检查
             current_path = self.request.uri.split('?')[0]
@@ -281,7 +290,7 @@ def check_and_apply_profile(func):
 
             print("redirect_params: %s" % redirect_params)
             self.render(template_name='refer/neo_weixin/sysuser_v2/importresume.html',
-                        **redirect_params)
+                        **redirect_params, importer=importer)
 
     return wrapper
 
@@ -333,6 +342,7 @@ def authenticated(func):
                 # api 类接口，不适合做302静默授权，微信服务器不会跳转
                 self._oauth_service.wechat = self.current_user.wechat
                 self._oauth_service.state = to_hex(self.current_user.qxuser.unionid)
+                self.logger.info("静默授权：state:{}-----unionid:{}".format(self._oauth_service.state, self.current_user.qxuser.unionid))
                 url = self._oauth_service.get_oauth_code_base_url()
                 self.redirect(url)
                 return
@@ -475,7 +485,6 @@ class NewJDStatusCheckerAddFlag(BaseNewJDStatusChecker):
 
 
 def log_time(func):
-
     @functools.wraps(func)
     @gen.coroutine
     def wrapper(self, *args, **kwargs):
@@ -485,7 +494,7 @@ def log_time(func):
         c = {
             "for": "[hb_debug]",
             "func_name": func.__qualname__,
-            "time": (end-start)*1000
+            "time": (end - start) * 1000
         }
         self.logger.info(json_dumps(c))
         return r

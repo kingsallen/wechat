@@ -171,7 +171,8 @@ class ResumeImportHandler(BaseHandler):
                 username,
                 password,
                 self.current_user.sysuser.id,
-                ua
+                ua,
+                self.current_user.wechat.company_id
             )
 
             if self.params.pid:
