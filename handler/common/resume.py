@@ -78,7 +78,7 @@ class LinkedinImportHandler(MetaBaseHandler):
         access_token = response.get("access_token")
         # 判断是否在微信端
         ua = 1 if self.in_wechat else 2
-        is_ok, result = yield self.profile_ps.import_profile(4, "", "", user_id, ua, access_token)
+        is_ok, result = yield self.profile_ps.import_profile(4, "", "", user_id, ua, token=access_token, company_id=0)
         self.logger.debug("is_ok:{} result:{}".format(is_ok, result))
         if is_ok:
             if self.params.pid:
