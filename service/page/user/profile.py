@@ -144,7 +144,7 @@ class ProfilePageService(PageService):
         return result
 
     @gen.coroutine
-    def import_profile(self, type_source, username, password, user_id, ua, company_id, token=None):
+    def import_profile(self, type_source, username, password, user_id, ua, company_id=None, token=None):
         """
         导入第三方简历（51job, 智联招聘，linkedin，猎聘）
         :param type_source: int 来源, 0:无法识别 1:51Job 2:Liepin 3:zhilian 4:linkedin
@@ -153,6 +153,7 @@ class ProfilePageService(PageService):
         :param user_id: int
         :param ua: int UA来源, 0:无法识别 1:微信端 2:移动浏览器 3:PC端
         :param token: string linkedin 网站的access_token
+        :param company_id:
         :return: tuple (bool, result or None)
 
         调用方式:
