@@ -775,9 +775,10 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
     def get(self):
 
         infra_params = self.make_position_list_infra_params()
-
-        useragent = self.request.headers.get('User-Agent')
-        lang_from_ua = languge_code_from_ua(useragent)
+        display_locale = self.current_user.company.conf_display_locale
+        if not display_locale:
+            useragent = self.request.headers.get('User-Agent')
+            display_locale = languge_code_from_ua(useragent)
         # 校验一下可能出现的参数：
         # hb_c: 红包活动id
         # did: 子公司id
@@ -876,7 +877,7 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
             position_ex['candidate_source'] = pos.candidate_source
             position_ex['job_need'] = pos.requirement
 
-            if lang_from_ua == "en_US":
+            if display_locale == "en_US":
                 position_ex["city"] = pos.city_ename if pos.city_ename else pos.city
                 position_ex["salary"] = "Salary negotiable" if pos.salary == "薪资面议" else pos.salary
             else:
