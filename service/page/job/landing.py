@@ -372,20 +372,20 @@ class LandingPageService(PageService):
                     en = ""
 
                 elif s == 'candidate_source_name':
-                    if e.get(k):
+                    if e.get(s):
                         en = lazy_pinyin(e.get(s), style=pypinyin.INITIALS, strict=False)
                     to_append.append({"text": e.get(s), "value": const.CANDIDATE_SOURCE_SEARCH_REVERSE.get(e.get(s)),
                                       "en": en[0] if en else ""})
                     en = ""
 
                 elif s == 'employment_type_name':
-                    if e.get(k):
+                    if e.get(s):
                         en = lazy_pinyin(e.get(s), style=pypinyin.INITIALS, strict=False)
                     to_append.append({"text": e.get(s), "value": const.EMPLOYMENT_TYPE_SEARCH_REVERSE.get(e.get(s)),
                                       "en": en[0] if en else ""})
                     en = ""
                 else:
-                    if e.get(k):
+                    if e.get(s):
                         en = lazy_pinyin(e.get(s), style=pypinyin.INITIALS, strict=False)
                     to_append.append({"text": e.get(s), "value": e.get(s),
                                       "en": en[0] if en else ""})
