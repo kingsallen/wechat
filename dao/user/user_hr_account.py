@@ -28,4 +28,5 @@ class UserHrAccountDao(BaseDao):
             "create_time":     self.constant.TYPE_TIMESTAMP,
             "update_time":     self.constant.TYPE_TIMESTAMP,
             "headimgurl":      self.constant.TYPE_STRING,
+            "leave_to_mobot":  self.constant.TYPE_INT,
         }

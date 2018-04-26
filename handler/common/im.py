@@ -162,7 +162,7 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
         company_conf = yield self.hr_company_conf_ds.get_company_conf(
             conds={'company_id': company_id})
 
-        self.bot_enabled = company_conf.hr_chat == const.COMPANY_CONF_CHAT_ON_WITH_CHATBOT
+        self.bot_enabled = company_conf.hr_chat == const.COMPANY_CONF_CHAT_ON_WITH_CHATBOT and user_hr_account.leave_to_mobot
 
     def open(self, room_id, *args, **kwargs):
 
