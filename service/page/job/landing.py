@@ -336,41 +336,49 @@ class LandingPageService(PageService):
             for k in key_order:
                 if k == 'child_company_abbr':
                     c_com = e.get(k)
-                    en = lazy_pinyin(c_com.get("text"), style=pypinyin.INITIALS, strict=False)
-                    c_com.update(en=en[0] if en else "")
+                    if c_com.get("text"):
+                        en = lazy_pinyin(c_com.get("text"), style=pypinyin.INITIALS, strict=False)
+                        c_com.update(en=en[0] if en else "")
                     to_append.append(c_com)
 
                 elif k == 'candidate_source_name':
-                    en = lazy_pinyin(e.get(k), style=pypinyin.INITIALS, strict=False)
+                    if e.get(k):
+                        en = lazy_pinyin(e.get(k), style=pypinyin.INITIALS, strict=False)
                     to_append.append({"text": e.get(k), "value": const.CANDIDATE_SOURCE_SEARCH_REVERSE.get(e.get(k)),
                                       "en": en[0] if en else ""})
 
                 elif k == 'employment_type_name':
-                    en = lazy_pinyin(e.get(k), style=pypinyin.INITIALS, strict=False)
+                    if e.get(k):
+                        en = lazy_pinyin(e.get(k), style=pypinyin.INITIALS, strict=False)
                     to_append.append({"text": e.get(k), "value": const.EMPLOYMENT_TYPE_SEARCH_REVERSE.get(e.get(k)),
                                       "en": en[0] if en else ""})
                 else:
-                    en = lazy_pinyin(e.get(k), style=pypinyin.INITIALS, strict=False)
+                    if e.get(k):
+                        en = lazy_pinyin(e.get(k), style=pypinyin.INITIALS, strict=False)
                     to_append.append({"text": e.get(k), "value": e.get(k), "en": en[0] if en else ""})
             # 将链接参数拼接进筛选条件列表
             for s in display_key_dict:
                 if s == 'child_company_abbr':
                     c_com = e.get(s)
-                    en = lazy_pinyin(c_com.get("text"), style=pypinyin.INITIALS, strict=False)
-                    c_com.update(en=en[0] if en else "")
+                    if c_com.get("text"):
+                        en = lazy_pinyin(c_com.get("text"), style=pypinyin.INITIALS, strict=False)
+                        c_com.update(en=en[0] if en else "")
                     to_append.append(c_com)
 
                 elif s == 'candidate_source_name':
-                    en = lazy_pinyin(e.get(s), style=pypinyin.INITIALS, strict=False)
+                    if e.get(k):
+                        en = lazy_pinyin(e.get(s), style=pypinyin.INITIALS, strict=False)
                     to_append.append({"text": e.get(s), "value": const.CANDIDATE_SOURCE_SEARCH_REVERSE.get(e.get(s)),
                                       "en": en[0] if en else ""})
 
                 elif s == 'employment_type_name':
-                    en = lazy_pinyin(e.get(s), style=pypinyin.INITIALS, strict=False)
+                    if e.get(k):
+                        en = lazy_pinyin(e.get(s), style=pypinyin.INITIALS, strict=False)
                     to_append.append({"text": e.get(s), "value": const.EMPLOYMENT_TYPE_SEARCH_REVERSE.get(e.get(s)),
                                       "en": en[0] if en else ""})
                 else:
-                    en = lazy_pinyin(e.get(s), style=pypinyin.INITIALS, strict=False)
+                    if e.get(k):
+                        en = lazy_pinyin(e.get(s), style=pypinyin.INITIALS, strict=False)
                     to_append.append({"text": e.get(s), "value": e.get(s),
                                       "en": en[0] if en else ""})
             positions_data_values.append(to_append)
