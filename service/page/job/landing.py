@@ -329,64 +329,53 @@ class LandingPageService(PageService):
 
         self.logger.debug(conf_search_seq_plus)
 
+        def pinyin_initials(field):
+            en = ""
+            if field and type(field) != int:
+                en = lazy_pinyin(field, style=pypinyin.INITIALS, strict=False)
+            return en
         # 构建 [{"text": XXX, "value": XXX}, ...] 的形式
         positions_data_values = []
         for e in positions_data:
             to_append = []
-            en = ""
             for k in key_order:
                 if k == 'child_company_abbr':
                     c_com = e.get(k)
-                    if c_com.get("text"):
-                        en = lazy_pinyin(c_com.get("text"), style=pypinyin.INITIALS, strict=False)
-                        c_com.update(en=en[0] if en else "")
+                    en = pinyin_initials(c_com.get("text"))
+                    c_com.update(en=en[0] if en else "")
                     to_append.append(c_com)
-                    en = ""
 
                 elif k == 'candidate_source_name':
-                    if e.get(k):
-                        en = lazy_pinyin(e.get(k), style=pypinyin.INITIALS, strict=False)
+                    en = pinyin_initials(e.get(k))
                     to_append.append({"text": e.get(k), "value": const.CANDIDATE_SOURCE_SEARCH_REVERSE.get(e.get(k)),
                                       "en": en[0] if en else ""})
-                    en = ""
 
                 elif k == 'employment_type_name':
-                    if e.get(k):
-                        en = lazy_pinyin(e.get(k), style=pypinyin.INITIALS, strict=False)
+                    en = pinyin_initials(e.get(k))
                     to_append.append({"text": e.get(k), "value": const.EMPLOYMENT_TYPE_SEARCH_REVERSE.get(e.get(k)),
                                       "en": en[0] if en else ""})
-                    en = ""
                 else:
-                    if e.get(k):
-                        en = lazy_pinyin(e.get(k), style=pypinyin.INITIALS, strict=False)
+                    en = pinyin_initials(e.get(k))
                     to_append.append({"text": e.get(k), "value": e.get(k), "en": en[0] if en else ""})
-                    en = ""
             # 将链接参数拼接进筛选条件列表
             for s in display_key_dict:
                 if s == 'child_company_abbr':
                     c_com = e.get(s)
-                    if c_com.get("text"):
-                        en = lazy_pinyin(c_com.get("text"), style=pypinyin.INITIALS, strict=False)
-                        c_com.update(en=en[0] if en else "")
+                    en = pinyin_initials(c_com.get("text"))
+                    c_com.update(en=en[0] if en else "")
                     to_append.append(c_com)
-                    en = ""
 
                 elif s == 'candidate_source_name':
-                    if e.get(s):
-                        en = lazy_pinyin(e.get(s), style=pypinyin.INITIALS, strict=False)
+                    en = pinyin_initials(e.get(s))
                     to_append.append({"text": e.get(s), "value": const.CANDIDATE_SOURCE_SEARCH_REVERSE.get(e.get(s)),
                                       "en": en[0] if en else ""})
-                    en = ""
 
                 elif s == 'employment_type_name':
-                    if e.get(s):
-                        en = lazy_pinyin(e.get(s), style=pypinyin.INITIALS, strict=False)
+                    en = pinyin_initials(e.get(s))
                     to_append.append({"text": e.get(s), "value": const.EMPLOYMENT_TYPE_SEARCH_REVERSE.get(e.get(s)),
                                       "en": en[0] if en else ""})
-                    en = ""
                 else:
-                    if e.get(s):
-                        en = lazy_pinyin(e.get(s), style=pypinyin.INITIALS, strict=False)
+                    en = pinyin_initials(e.get(s))
                     to_append.append({"text": e.get(s), "value": e.get(s),
                                       "en": en[0] if en else ""})
             positions_data_values.append(to_append)
