@@ -23,6 +23,7 @@ import handler.common.cellphone
 import handler.common.im
 import handler.common.interest
 import handler.common.jssdkerror
+import handler.common.jslog
 import handler.common.passport
 import handler.common.position
 import handler.common.profile
