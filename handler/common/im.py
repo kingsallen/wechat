@@ -121,6 +121,7 @@ class UnreadCountHandler(BaseHandler):
 class ChatWebSocketHandler(websocket.WebSocketHandler):
     """处理 Chat 的各种 webSocket 传输，直接继承 tornado 的 WebSocketHandler
     """
+    # todo:这个类下面的方法参数的写法混乱了，使用了小驼峰和下划线两种，以后重构时最好统一一下。
     _pool = redis.ConnectionPool(
         host=settings["store_options"]["redis_host"],
         port=settings["store_options"]["redis_port"],
@@ -230,6 +231,7 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
         message = ujson.loads(message)
         user_message = message.get("content")
         msg_type = message.get("msgType")
+        server_id = message.get("serverId")
         if not user_message.strip():
             return
         chat_params = ChatVO(
@@ -237,7 +239,8 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
             content=user_message,
             origin=const.ORIGIN_USER_OR_HR,
             roomId=int(self.room_id),
-            positionId=int(self.position_id)
+            positionId=int(self.position_id),
+            serverId=server_id
         )
         chat_id = yield self.chat_ps.save_chat(chat_params)
 
@@ -249,7 +252,8 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
             pid=int(self.position_id),
             create_time=curr_now_minute(),
             origin=const.ORIGIN_USER_OR_HR,
-            id=chat_id
+            id=chat_id,
+            serverId=server_id
         ))
 
         self.redis_client.publish(self.hr_channel, message_body)
@@ -281,7 +285,8 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
             btnContent=bot_message.btn_content_json,
             msgType=bot_message.msg_type,
             roomId=int(self.room_id),
-            positionId=int(self.position_id)
+            positionId=int(self.position_id),
+            serverId=0
         )
 
         chat_id = yield self.chat_ps.save_chat(chat_params)
@@ -296,7 +301,8 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
                 pid=int(self.position_id),
                 create_time=curr_now_minute(),
                 origin=const.ORIGIN_CHATBOT,
-                id=chat_id
+                id=chat_id,
+                serverId=0
             ))
             # hr 端广播
             self.redis_client.publish(self.hr_channel, message_body)
