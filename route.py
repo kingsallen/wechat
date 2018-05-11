@@ -23,6 +23,7 @@ import handler.common.cellphone
 import handler.common.im
 import handler.common.interest
 import handler.common.jssdkerror
+import handler.common.jslog
 import handler.common.passport
 import handler.common.position
 import handler.common.profile
@@ -112,6 +113,7 @@ common_routes = [
     (r"/api/chat[\/]*([a-z]+)*",                     handler.common.im.ChatHandler,                             {"event": "chat_"}),
     (r"/api/application",                            handler.common.application.ApplicationHandler,             {"event": "application_profile"}),
     (r"/api/JSSDKError",                             handler.common.jssdkerror.JSSDKErrorHandler,               {"event": "frontend_jssdkerror"}),
+    (r"/api/jslog",                                  handler.common.jslog.JSLogHandler,                         {"event": "frontend_jslog"}),
     (r"/api/collectlog",                             handler.common.logcollector.LogCollectorHandler,           {"event": "collect_log"}),
     (r"/api/captcha",                                handler.common.captcha.CaptchaHandler,                     {"event": "captcha"})
 ]
