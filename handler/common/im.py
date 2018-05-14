@@ -157,7 +157,7 @@ class ChatMixin(object):
 class ChatWebSocketHandler(ChatMixin, websocket.WebSocketHandler):
     """处理 Chat 的各种 webSocket 传输，直接继承 tornado 的 WebSocketHandler
     """
-    # todo:这个类下面的方法参数的写法混乱了，使用了小驼峰和下划线两种，以后重构时最好统一一下。
+    # todo:这个类下面的方法参数的写法混乱了，使用了小驼峰和下划线两种，以后最好统一一下。
 
     def __init__(self, application, request, **kwargs):
         super(ChatWebSocketHandler, self).__init__(application, request, **kwargs)
@@ -219,99 +219,6 @@ class ChatWebSocketHandler(ChatMixin, websocket.WebSocketHandler):
 
         self.chat_session.mark_leave_chatroom(self.room_id)
         yield self.chat_ps.leave_chatroom(self.room_id)
-
-    @gen.coroutine
-    def on_message(self, message):
-        """
-        处理通过 websocket 发送的消息
-        :param message:
-        :return:
-        """
-
-        if not self.bot_enabled:
-            yield self.get_bot_enabled()
-
-        message = ujson.loads(message)
-        user_message = message.get("content")
-        msg_type = message.get("msgType")
-        server_id = message.get("serverId")
-        if not user_message.strip():
-            return
-        chat_params = ChatVO(
-            msgType=msg_type,
-            content=user_message,
-            origin=const.ORIGIN_USER_OR_HR,
-            roomId=int(self.room_id),
-            positionId=int(self.position_id),
-            serverId=server_id
-        )
-        chat_id = yield self.chat_ps.save_chat(chat_params)
-
-        message_body = json_dumps(ObjectDict(
-            msgType=msg_type,
-            content=user_message,
-            speaker=const.CHAT_SPEAKER_USER,
-            cid=int(self.room_id),
-            pid=int(self.position_id),
-            create_time=curr_now_minute(),
-            origin=const.ORIGIN_USER_OR_HR,
-            id=chat_id,
-            serverId=server_id
-        ))
-
-        self.redis_client.publish(self.hr_channel, message_body)
-
-        if self.bot_enabled:
-            # 由于没有延迟的发送导致hr端轮训无法订阅到publish到redis的消息　所以这里做下延迟处理
-            delay_robot = functools.partial(self._handle_chatbot_message, user_message)
-            ioloop.IOLoop.current().call_later(1, delay_robot)
-            # yield self._handle_chatbot_message(user_message) # 直接调用方式
-
-    @gen.coroutine
-    def _handle_chatbot_message(self, user_message):
-        """处理 chatbot message
-        获取消息 -> pub消息 -> 入库
-        """
-        bot_message = yield self.chat_ps.get_chatbot_reply(
-            message=user_message,
-            user_id=self.user_id,
-            hr_id=self.hr_id,
-            position_id=self.position_id
-        )
-        if bot_message.msg_type == '':
-            return
-        chat_params = ChatVO(
-            content=bot_message.content,
-            speaker=const.CHAT_SPEAKER_HR,
-            origin=const.ORIGIN_CHATBOT,
-            picUrl=bot_message.pic_url,
-            btnContent=bot_message.btn_content_json,
-            msgType=bot_message.msg_type,
-            roomId=int(self.room_id),
-            positionId=int(self.position_id),
-            serverId=0
-        )
-
-        chat_id = yield self.chat_ps.save_chat(chat_params)
-        if bot_message:
-            message_body = json_dumps(ObjectDict(
-                content=bot_message.content,
-                picUrl=bot_message.pic_url,
-                btnContent=bot_message.btn_content,
-                msgType=bot_message.msg_type,
-                speaker=const.CHAT_SPEAKER_HR,
-                cid=int(self.room_id),
-                pid=int(self.position_id),
-                create_time=curr_now_minute(),
-                origin=const.ORIGIN_CHATBOT,
-                id=chat_id,
-                serverId=0
-            ))
-            # hr 端广播
-            self.redis_client.publish(self.hr_channel, message_body)
-
-            # 聊天室广播
-            self.redis_client.publish(self.chatroom_channel, message_body)
 
 
 class ChatHandler(ChatMixin, BaseHandler):
@@ -411,7 +318,7 @@ class ChatHandler(ChatMixin, BaseHandler):
         message = self.json_args
         user_message = message.get("content")
         msg_type = message.get("msgType")
-        server_id = message.get("serverId")
+        server_id = message.get("serverId") or 0
         duration = message.get("duration") or 0
         if not user_message.strip():
             return
@@ -424,7 +331,8 @@ class ChatHandler(ChatMixin, BaseHandler):
             serverId=server_id,
             duration=duration
         )
-        chat_id = yield self.chat_ps.save_chat(chat_params)
+        res = yield self.chat_ps.save_chat(chat_params)
+
         message_body = json_dumps(ObjectDict(
             msgType=msg_type,
             content=user_message,
@@ -433,7 +341,7 @@ class ChatHandler(ChatMixin, BaseHandler):
             pid=int(self.position_id),
             create_time=curr_now_minute(),
             origin=const.ORIGIN_USER_OR_HR,
-            id=chat_id,
+            id=res.get('chatId'),
             serverId=server_id,
             duration=duration
         ))
@@ -446,7 +354,7 @@ class ChatHandler(ChatMixin, BaseHandler):
             # ioloop.IOLoop.current().call_later(1, delay_robot)
             yield self._handle_chatbot_message(user_message)  # 直接调用方式
 
-        return
+        return res
 
     @gen.coroutine
     def _handle_chatbot_message(self, user_message):
@@ -469,10 +377,10 @@ class ChatHandler(ChatMixin, BaseHandler):
             btnContent=bot_message.btn_content_json,
             msgType=bot_message.msg_type,
             roomId=int(self.room_id),
-            positionId=int(self.position_id),
+            positionId=int(self.position_id)
         )
 
-        chat_id = yield self.chat_ps.save_chat(chat_params)
+        res = yield self.chat_ps.save_chat(chat_params)
         if bot_message:
             message_body = json_dumps(ObjectDict(
                 content=bot_message.content,
@@ -484,7 +392,7 @@ class ChatHandler(ChatMixin, BaseHandler):
                 pid=int(self.position_id),
                 create_time=curr_now_minute(),
                 origin=const.ORIGIN_CHATBOT,
-                id=chat_id
+                id=res.get('chatId')
             ))
             # hr 端广播
             self.redis_client.publish(self.hr_channel, message_body)
