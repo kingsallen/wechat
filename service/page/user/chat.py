@@ -49,13 +49,14 @@ class ChatPageService(PageService):
                 room = ObjectDict()
                 room['id'] = e.id
                 room['content'] = e.content
-                room['chat_time'] = str_2_date(e.create_time, const.TIME_FORMAT_MINUTE)
+                room['chatTime'] = str_2_date(e.createTime, const.TIME_FORMAT_MINUTE)
                 room['speaker'] = e.speaker  # 0：求职者，1：HR
-                room['picUrl'] = e.picUrl
+                room['assetUrl'] = e.assetUrl
                 room['btnContent'] = json.loads(e.btnContent) if e.btnContent is not None else e.btnContent
                 if room['btnContent'] and type(room['btnContent']) == str:
                     room['btnContent'] = json.loads(room['btnContent'])
                 room['msgType'] = e.msgType
+                room['duration'] = e.duration
                 obj_list.append(room)
 
         raise gen.Return(obj_list)

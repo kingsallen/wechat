@@ -157,7 +157,6 @@ class ChatMixin(object):
 class ChatWebSocketHandler(ChatMixin, websocket.WebSocketHandler):
     """处理 Chat 的各种 webSocket 传输，直接继承 tornado 的 WebSocketHandler
     """
-    # todo:这个类下面的方法参数的写法混乱了，使用了小驼峰和下划线两种，以后最好统一一下。
 
     def __init__(self, application, request, **kwargs):
         super(ChatWebSocketHandler, self).__init__(application, request, **kwargs)
@@ -192,9 +191,9 @@ class ChatWebSocketHandler(ChatMixin, websocket.WebSocketHandler):
                 if data:
                     self.write_message(json_dumps(ObjectDict(
                         content=data.get("content"),
-                        chat_time=data.get("create_time"),
+                        chatTime=data.get("createTime"),
                         speaker=data.get("speaker"),
-                        picUrl=data.get("picUrl"),
+                        assetUrl=data.get("assetUrl"),
                         btnContent=data.get("btnContent"),
                         msgType=data.get("msgType"),
                         duration=data.get("duration") or 0,
@@ -339,7 +338,7 @@ class ChatHandler(ChatMixin, BaseHandler):
             speaker=const.CHAT_SPEAKER_USER,
             cid=int(self.room_id),
             pid=int(self.position_id),
-            create_time=curr_now_minute(),
+            createTime=curr_now_minute(),
             origin=const.ORIGIN_USER_OR_HR,
             id=res.get('chatId'),
             serverId=server_id,
@@ -373,7 +372,7 @@ class ChatHandler(ChatMixin, BaseHandler):
             content=bot_message.content,
             speaker=const.CHAT_SPEAKER_HR,
             origin=const.ORIGIN_CHATBOT,
-            picUrl=bot_message.pic_url,
+            assetUrl=bot_message.pic_url,
             btnContent=bot_message.btn_content_json,
             msgType=bot_message.msg_type,
             roomId=int(self.room_id),
@@ -384,13 +383,13 @@ class ChatHandler(ChatMixin, BaseHandler):
         if bot_message:
             message_body = json_dumps(ObjectDict(
                 content=bot_message.content,
-                picUrl=bot_message.pic_url,
+                assetUrl=bot_message.pic_url,
                 btnContent=bot_message.btn_content,
                 msgType=bot_message.msg_type,
                 speaker=const.CHAT_SPEAKER_HR,
                 cid=int(self.room_id),
                 pid=int(self.position_id),
-                create_time=curr_now_minute(),
+                createTime=curr_now_minute(),
                 origin=const.ORIGIN_CHATBOT,
                 id=res.get('chatId')
             ))
