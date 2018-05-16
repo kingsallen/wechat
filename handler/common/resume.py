@@ -2,8 +2,9 @@
 
 import json
 import urllib.parse
+import re
 
-from tornado import gen
+from tornado import gen, httpclient
 
 import conf.path as path
 import conf.message as msg
@@ -14,6 +15,58 @@ from util.common import ObjectDict
 from util.common.decorator import handle_response, authenticated
 from util.tool.str_tool import to_str, match_session_id
 from util.tool.url_tool import make_url
+
+
+class ThirdpartyImportHandler(MetaBaseHandler):
+    """
+    外部接口导入简历时，当参数需要特殊处理时，先调用该handler处理,
+    因为BaseHandler会处理signature，第三方网站回调时可能没有signature，
+    因此直接继承MetaBaseHandler
+    """
+
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        params = urllib.parse.unquote(self.params.cusdata)
+        way = re.search(r'way=([0-9]*)&', params).group(1)
+
+        if int(way) == const.FROM_MAIMAI:
+            token = self.params.t
+            unionid = self.params.u
+            params = '{}&token={}&unionid={}'.format(str(params), token, unionid)
+            redirect_url = path.RESUME_MAIMAI.format(self.host, params)
+        else:
+            wechat_signature = re.search(r'signature=(.*?)&', params).group(1)
+            data = ObjectDict(
+                kind=1,  # // {0: success, 1: failure, 10: email}
+                messages=['该网站出现异常，请换个渠道重试'],  # ['hello world', 'abjsldjf']
+                button_text=msg.BACK_CN,
+                button_link=self.make_url(path.PROFILE_VIEW,
+                                          wechat_signature=wechat_signature,
+                                          host=self.host),
+                jump_link=None  # // 如果有会自动，没有就不自动跳转
+            )
+
+            self.render_page(template_name="system/user-info.html",
+                             data=data)
+            return
+
+        yield httpclient.AsyncHTTPClient().fetch(redirect_url)
+
+
+class MaimaiImportHandler(BaseHandler):
+    """
+    脉脉导入
+    """
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        token = self.params.token
+        unionid = self.params.unionid
+        redirect_url = "https://open.taou.com/maimai/api/qianxun/get_user?u={}&access_token={}&appid={}&version={}".format(unionid, token, self.settings.maimai_appid, 1.0)
+        data = yield httpclient.AsyncHTTPClient().fetch(redirect_url)
+        self.logger.debug('maimai_profile:{}'.format(data))
+        return
 
 
 class LinkedinImportHandler(MetaBaseHandler):
