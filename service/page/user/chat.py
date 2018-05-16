@@ -246,3 +246,16 @@ class ChatPageService(PageService):
             return
         else:
             return ret_message
+
+    @gen.coroutine
+    def chat_limit(self, hr_id):
+        """
+        对聊天方式做限制
+        """
+        params = ObjectDict({
+            "hr_id": hr_id
+        })
+        ret = yield self.chat_ds.chat_limit(params)
+        status = ret.get("status")
+        msg = ret.get("message")
+        return status, msg

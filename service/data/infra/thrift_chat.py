@@ -7,6 +7,9 @@ from util.common import ObjectDict
 from util.common.decorator import cache
 from thrift_gen.gen.chat.service.ChatService import Client as ChatServiceClient
 from service.data.infra.framework.client.client import ServiceClientFactory
+from util.tool.http_tool import http_post
+import conf.path as path
+from service.data.base import DataService
 
 
 class ThriftChatDataService(DataService):
@@ -82,3 +85,11 @@ class ThriftChatDataService(DataService):
 
         ret = yield self.chat_service_cilent.saveChat(params)
         raise gen.Return(ret)
+
+    @gen.coroutine
+    def chat_limit(self, params):
+        """
+        对聊天方式做限制
+        """
+        ret = yield http_post(path.CHAT_LIMIT, params)
+        return ret

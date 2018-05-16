@@ -311,6 +311,28 @@ class ChatHandler(ChatMixin, BaseHandler):
     @authenticated
     @gen.coroutine
     def post(self, method):
+        try:
+            # 重置 event，准确描述
+            self._event = self._event + method
+            yield getattr(self, "post_" + method)()
+        except Exception as e:
+            self.write_error(404)
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def post_limit(self):
+        hr_id = self.json_args.hrId
+        status, message = yield self.chat_ps.chat_limit(hr_id)
+        if status == 0:
+            self.send_json_success(message=message)
+        else:
+            self.send_json_error(message=message)
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def post_message(self):
         if not self.bot_enabled:
             yield self.get_bot_enabled()
 
