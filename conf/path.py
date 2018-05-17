@@ -134,6 +134,9 @@ DICT_POSITION = "dict/position"
 
 # 消息通知服务
 MESSAGE_TEMPLATE = "message/template"
+
+# chat服务
+CHAT_LIMIT = "/api/v1/chat/voice/sendWarnEmail"
 # ============================ 基础服务结束 ============================
 
 # 其他外部服务

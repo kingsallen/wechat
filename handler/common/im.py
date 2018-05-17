@@ -335,10 +335,10 @@ class ChatHandler(ChatMixin, BaseHandler):
         if not self.bot_enabled:
             yield self.get_bot_enabled()
 
-        self.room_id = self.json_args.room_id
+        self.room_id = self.params.roomId
         self.user_id = match_session_id(to_str(self.get_secure_cookie(const.COOKIE_SESSIONID)))
-        self.hr_id = self.json_args.hr_id
-        self.position_id = self.json_args.get("pid") or 0
+        self.hr_id = self.params.hrId
+        self.position_id = self.params.get("pid") or 0
 
         user_message = self.json_args.get("content")
         msg_type = self.json_args.get("msgType")
