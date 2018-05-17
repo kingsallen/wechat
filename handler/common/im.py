@@ -91,7 +91,6 @@ class UnreadCountHandler(BaseHandler):
         :return:
         """
 
-        company_info = ObjectDict()
         if publisher:
             hr_info = yield self.chat_ps.get_hr_info(publisher)
             # 是否关闭 IM 聊天，由母公司决定
@@ -336,11 +335,15 @@ class ChatHandler(ChatMixin, BaseHandler):
         if not self.bot_enabled:
             yield self.get_bot_enabled()
 
-        message = self.json_args
-        user_message = message.get("content")
-        msg_type = message.get("msgType")
-        server_id = message.get("serverId") or 0
-        duration = message.get("duration") or 0
+        self.room_id = self.json_args.room_id
+        self.user_id = match_session_id(to_str(self.get_secure_cookie(const.COOKIE_SESSIONID)))
+        self.hr_id = self.json_args.hr_id
+        self.position_id = self.json_args.get("pid") or 0
+
+        user_message = self.json_args.get("content")
+        msg_type = self.json_args.get("msgType")
+        server_id = self.json_args.get("serverId") or 0
+        duration = self.json_args.get("duration") or 0
         if not user_message.strip():
             return
         chat_params = ChatVO(
