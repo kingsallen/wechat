@@ -94,7 +94,7 @@ class ConfigHandler(BaseHandler):
                           "stopVoice",
                           "onVoicePlayEnd",
                           "uploadVoice",
-                          "translateVoice"
+                          "translateVoice",
                           "hideMenuItems",
                           "showMenuItems",
                           "hideAllNonBaseMenuItem",
