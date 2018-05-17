@@ -115,16 +115,21 @@ class UnreadCountHandler(BaseHandler):
         return g_event
 
 
-class ChatMixin(object):
-    _pool = redis.ConnectionPool(
+_pool = redis.ConnectionPool(
         host=settings["store_options"]["redis_host"],
         port=settings["store_options"]["redis_port"],
         max_connections=settings["store_options"]["max_connections"])
 
-    _redis = redis.StrictRedis(connection_pool=_pool)
+_redis = redis.StrictRedis(connection_pool=_pool)
 
-    def __init__(self):
-        self.redis_client = self._redis
+
+class ChatWebSocketHandler(websocket.WebSocketHandler):
+    """处理 Chat 的各种 webSocket 传输，直接继承 tornado 的 WebSocketHandler
+    """
+
+    def __init__(self, application, request, **kwargs):
+        super(ChatWebSocketHandler, self).__init__(application, request, **kwargs)
+        self.redis_client = _redis
         self.chatroom_channel = ''
         self.hr_channel = ''
         self.hr_id = 0
@@ -132,33 +137,6 @@ class ChatMixin(object):
         self.user_id = 0
         self.position_id = 0
         self.bot_enabled = False
-
-    @gen.coroutine
-    def get_bot_enabled(self):
-
-        if not self.hr_id:
-            return
-
-        user_hr_account = yield self.user_hr_account_ds.get_hr_account(
-            conds={'id': self.hr_id})
-
-        company_id = user_hr_account.company_id
-
-        if not company_id:
-            return
-
-        company_conf = yield self.hr_company_conf_ds.get_company_conf(
-            conds={'company_id': company_id})
-
-        self.bot_enabled = company_conf.hr_chat == const.COMPANY_CONF_CHAT_ON_WITH_CHATBOT and user_hr_account.leave_to_mobot
-
-
-class ChatWebSocketHandler(ChatMixin, websocket.WebSocketHandler):
-    """处理 Chat 的各种 webSocket 传输，直接继承 tornado 的 WebSocketHandler
-    """
-
-    def __init__(self, application, request, **kwargs):
-        super(ChatWebSocketHandler, self).__init__(application, request, **kwargs)
         self.io_loop = ioloop.IOLoop.current()
 
         self.chat_session = ChatCache()
@@ -219,8 +197,18 @@ class ChatWebSocketHandler(ChatMixin, websocket.WebSocketHandler):
         yield self.chat_ps.leave_chatroom(self.room_id)
 
 
-class ChatHandler(ChatMixin, BaseHandler):
+class ChatHandler(BaseHandler):
     """聊天相关处理"""
+    def __init__(self, application, request, **kwargs):
+        super(ChatHandler, self).__init__(application, request, **kwargs)
+        self.redis_client = _redis
+        self.chatroom_channel = ''
+        self.hr_channel = ''
+        self.hr_id = 0
+        self.room_id = 0
+        self.user_id = 0
+        self.position_id = 0
+        self.bot_enabled = False
 
     @handle_response
     @gen.coroutine
@@ -423,4 +411,25 @@ class ChatHandler(ChatMixin, BaseHandler):
 
             # 聊天室广播
             self.redis_client.publish(self.chatroom_channel, message_body)
+
+    @gen.coroutine
+    def get_bot_enabled(self):
+
+        if not self.hr_id:
+            return
+
+        user_hr_account = yield self.user_hr_account_ds.get_hr_account(
+            conds={'id': self.hr_id})
+
+        company_id = user_hr_account.company_id
+
+        if not company_id:
+            return
+
+        company_conf = yield self.hr_company_conf_ds.get_company_conf(
+            conds={'company_id': company_id})
+
+        self.bot_enabled = company_conf.hr_chat == const.COMPANY_CONF_CHAT_ON_WITH_CHATBOT and user_hr_account.leave_to_mobot
+
+
 
