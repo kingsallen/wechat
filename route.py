@@ -23,6 +23,7 @@ import handler.common.cellphone
 import handler.common.im
 import handler.common.interest
 import handler.common.jssdkerror
+import handler.common.jslog
 import handler.common.passport
 import handler.common.position
 import handler.common.profile
@@ -85,6 +86,7 @@ common_routes = [
     # websocket
     (r"/websocket/([A-Za-z0-9_]{1,32})",             handler.common.im.ChatWebSocketHandler),
 
+    (r"/api/config[\/]?",                            handler.common.app.ConfigHandler,                              {"event": "wechat_config"}),
     (r"/api/dict/city/?",                            handler.common.dictionary.DictCityHandler,                 {"event": "dict_city"}),
     (r"/api/dict/industry/?",                        handler.common.dictionary.DictIndustryHandler,             {"event": "dict_industry"}),
     (r"/api/dict/function/?",                        handler.common.dictionary.DictFunctionHandler,             {"event": "dict_function"}),
@@ -112,6 +114,7 @@ common_routes = [
     (r"/api/chat[\/]*([a-z]+)*",                     handler.common.im.ChatHandler,                             {"event": "chat_"}),
     (r"/api/application",                            handler.common.application.ApplicationHandler,             {"event": "application_profile"}),
     (r"/api/JSSDKError",                             handler.common.jssdkerror.JSSDKErrorHandler,               {"event": "frontend_jssdkerror"}),
+    (r"/api/jslog",                                  handler.common.jslog.JSLogHandler,                         {"event": "frontend_jslog"}),
     (r"/api/collectlog",                             handler.common.logcollector.LogCollectorHandler,           {"event": "collect_log"}),
     (r"/api/captcha",                                handler.common.captcha.CaptchaHandler,                     {"event": "captcha"})
 ]
@@ -170,7 +173,6 @@ qx_routes = [
     (r"/api/position/(?P<position_id>\d+)",          handler.qx.position.PositionHandler,                       {"event": "position_info"}),
     (r"/api/positions[\/]?",                         handler.qx.aggregation.AggregationHandler,                 {"event": "position_aggregation"}),
     (r"/api/positions/recommend/(\d+)*",             handler.qx.position.PositionRecommendHandler,              {"event": "position_recommend"}),
-    (r"/api/config[\/]?",                            handler.qx.app.ConfigHandler,                              {"event": "wechat_config"}),
     (r"/api/search/condition/*",                     handler.qx.search.SearchConditionHandler,                  {"event": "search_condition" }),
     (r"/api/search/condition/(\d+)*",                handler.qx.search.SearchConditionHandler,                  {"event": "search_condition" }),
     (r"/api/search/([a-z_]+)",                       handler.qx.search.SearchCityHandler,                       {"event": "search_condition"}),
