@@ -294,11 +294,13 @@ def check_and_apply_profile(func):
             cusdata = re.search(r'linkedin?(.*)', redirect_uri).group(1)
             # 加上渠道
             cusdata = "{}&way={}".format(cusdata, const.FROM_MAIMAI)
+            # 脉脉cusdata中不允许出现 '&' ，考虑我们公司目前的使用的参数中不会出现 '$$' , 将 '&' 转为 '$$' 使用
+            cusdata = cusdata.replace("&", "$$")
             self.logger.info("[maimai_url_cusdata: {}]".format(cusdata))
 
             cusdata = urlencode(dict(cusdata=cusdata))
             # appid = self.settings.maimai_appid
-            appid=25220512
+            appid = 25220512
             maimai_url = path.MAIMAI_ACCESSTOKEN.format(appid=appid, cusdata=cusdata)
 
             redirect_params.update(maimai_url)

@@ -28,7 +28,9 @@ class ThirdpartyImportHandler(MetaBaseHandler):
     @gen.coroutine
     def get(self):
         params = urllib.parse.unquote(self.params.cusdata)
-        way = re.search(r'way=([0-9]*)&', params).group(1)
+        params = params.replace("$$", "&")
+        self.logger.info("[maimai_url_params: {}]".format(params))
+        way = re.search(r'way=([0-9]*)', params).group(1)
 
         if int(way) == const.FROM_MAIMAI:
             token = self.params.t
@@ -50,8 +52,9 @@ class ThirdpartyImportHandler(MetaBaseHandler):
             self.render_page(template_name="system/user-info.html",
                              data=data)
             return
-
-        yield httpclient.AsyncHTTPClient().fetch(redirect_url)
+        headers = {"User-Agent": self.request.headers.get('User-Agent'),
+                   "Content-Type": "application/json"}
+        yield httpclient.AsyncHTTPClient().fetch(redirect_url, headers=headers)
 
 
 class MaimaiImportHandler(BaseHandler):
@@ -63,9 +66,10 @@ class MaimaiImportHandler(BaseHandler):
     def get(self):
         token = self.params.token
         unionid = self.params.unionid
-        redirect_url = "https://open.taou.com/maimai/api/qianxun/get_user?u={}&access_token={}&appid={}&version={}".format(unionid, token, self.settings.maimai_appid, 1.0)
+        appid = self.settings.maimai_appid or 25220512
+        redirect_url = "https://open.taou.com/maimai/api/qianxun/get_user?u={}&access_token={}&appid={}&version={}".format(unionid, token, appid, 1.0)
         data = yield httpclient.AsyncHTTPClient().fetch(redirect_url)
-        self.logger.debug('maimai_profile:{}'.format(data))
+        self.logger.debug('maimai_profile:{}'.format(data.body))
         return
 
 
