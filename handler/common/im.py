@@ -136,7 +136,6 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
         self.room_id = 0
         self.user_id = 0
         self.position_id = 0
-        self.bot_enabled = False
         self.io_loop = ioloop.IOLoop.current()
 
         self.chat_session = ChatCache()
@@ -332,6 +331,10 @@ class ChatHandler(BaseHandler):
         msg_type = self.json_args.get("msgType")
         server_id = self.json_args.get("serverId") or 0
         duration = self.json_args.get("duration") or 0
+
+        self.chatroom_channel = const.CHAT_CHATROOM_CHANNEL.format(self.hr_id, self.user_id)
+        self.hr_channel = const.CHAT_HR_CHANNEL.format(self.hr_id)
+
         if not user_message.strip():
             return
         chat_params = ChatVO(
