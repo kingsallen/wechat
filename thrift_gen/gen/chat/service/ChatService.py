@@ -1080,7 +1080,7 @@ class Processor(Iface, TProcessor):
         result = saveChat_result()
         try:
             result.success = yield gen.maybe_future(self._handler.saveChat(args.chat))
-        except thrift_gen.gen.common.struct.ttypes.CURDException as e:
+        except thrift_gen.gen.common.struct.ttypes.BIZException as e:
             result.e = e
         oprot.writeMessageBegin("saveChat", TMessageType.REPLY, seqid)
         result.write(oprot)
@@ -2401,7 +2401,7 @@ class saveChat_result(object):
 
     thrift_spec = (
         (0, TType.I32, 'success', None, None, ),  # 0
-        (1, TType.STRUCT, 'e', (thrift_gen.gen.common.struct.ttypes.CURDException, thrift_gen.gen.common.struct.ttypes.CURDException.thrift_spec), None, ),  # 1
+        (1, TType.STRUCT, 'e', (thrift_gen.gen.common.struct.ttypes.BIZException, thrift_gen.gen.common.struct.ttypes.BIZException.thrift_spec), None, ),  # 1
     )
 
     def __init__(self, success=None, e=None,):
@@ -2424,7 +2424,7 @@ class saveChat_result(object):
                     iprot.skip(ftype)
             elif fid == 1:
                 if ftype == TType.STRUCT:
-                    self.e = thrift_gen.gen.common.struct.ttypes.CURDException()
+                    self.e = thrift_gen.gen.common.struct.ttypes.BIZException()
                     self.e.read(iprot)
                 else:
                     iprot.skip(ftype)
