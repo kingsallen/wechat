@@ -329,13 +329,14 @@ class ChatHandler(BaseHandler):
 
         user_message = self.json_args.get("content")
         msg_type = self.json_args.get("msgType")
-        server_id = self.json_args.get("serverId") or 0
+        server_id = self.json_args.get("serverId") or ""
         duration = self.json_args.get("duration") or 0
 
         self.chatroom_channel = const.CHAT_CHATROOM_CHANNEL.format(self.hr_id, self.user_id)
         self.hr_channel = const.CHAT_HR_CHANNEL.format(self.hr_id)
 
-        if not user_message.strip():
+        if msg_type == 'html' and not user_message.strip():
+            self.send_json_error()
             return
         chat_params = ChatVO(
             msgType=msg_type,
@@ -344,9 +345,9 @@ class ChatHandler(BaseHandler):
             roomId=int(self.room_id),
             positionId=int(self.position_id),
             serverId=server_id,
-            duration=duration
+            duration=int(duration)
         )
-        res = yield self.chat_ps.save_chat(chat_params)
+        chat_id = yield self.chat_ps.save_chat(chat_params)
 
         message_body = json_dumps(ObjectDict(
             msgType=msg_type,
@@ -356,7 +357,7 @@ class ChatHandler(BaseHandler):
             pid=int(self.position_id),
             createTime=curr_now_minute(),
             origin=const.ORIGIN_USER_OR_HR,
-            id=res.get('chatId'),
+            id=chat_id,
             serverId=server_id,
             duration=duration
         ))
@@ -369,7 +370,7 @@ class ChatHandler(BaseHandler):
             # ioloop.IOLoop.current().call_later(1, delay_robot)
             yield self._handle_chatbot_message(user_message)  # 直接调用方式
 
-        return res
+        return
 
     @gen.coroutine
     def _handle_chatbot_message(self, user_message):

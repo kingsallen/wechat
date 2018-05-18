@@ -57,6 +57,7 @@ class ChatPageService(PageService):
                     room['btnContent'] = json.loads(room['btnContent'])
                 room['msgType'] = e.msgType
                 room['duration'] = e.duration
+                room['serverId'] = e.serverId
                 obj_list.append(room)
 
         raise gen.Return(obj_list)
@@ -255,7 +256,7 @@ class ChatPageService(PageService):
         params = ObjectDict({
             "hr_id": hr_id
         })
-        ret = yield self.chat_ds.chat_limit(params)
+        ret = yield self.thrift_chat_ds.chat_limit(params)
         status = ret.get("status")
         msg = ret.get("message")
         return status, msg
