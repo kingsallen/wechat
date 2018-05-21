@@ -17,6 +17,39 @@ from util.tool.str_tool import to_str, match_session_id
 from util.tool.url_tool import make_url
 
 
+class ResumeImportMixin(MetaBaseHandler):
+    def handle_profile(self, is_ok, result):
+
+        self.logger.debug("is_ok:{} result:{}".format(is_ok, result))
+        if is_ok:
+            if self.params.pid:
+                next_url = make_url(path.PROFILE_PREVIEW, params=self.params, host=self.host)
+            else:
+                next_url = make_url(path.PROFILE_VIEW, params=self.params, host=self.host)
+
+            self.redirect(next_url)
+            return
+        else:
+            if result.status == 32008:
+                messages = msg.PROFILE_IMPORT_LIMIT
+            else:
+                messages = result.message
+
+            data = ObjectDict(
+                kind=1,  # // {0: success, 1: failure, 10: email}
+                messages=messages,  # ['hello world', 'abjsldjf']
+                button_text=msg.BACK_CN,
+                button_link=self.make_url(path.PROFILE_VIEW,
+                                          wechat_signature=self.get_argument('wechat_signature'),
+                                          host=self.host),
+                jump_link=None  # // 如果有会自动，没有就不自动跳转
+            )
+
+            self.render_page(template_name="system/user-info.html",
+                             data=data)
+            return
+
+
 class ThirdpartyImportHandler(MetaBaseHandler):
     """
     外部接口导入简历时，当参数需要特殊处理时，先调用该handler处理,
@@ -57,7 +90,7 @@ class ThirdpartyImportHandler(MetaBaseHandler):
         yield httpclient.AsyncHTTPClient().fetch(redirect_url, headers=headers)
 
 
-class MaimaiImportHandler(BaseHandler):
+class MaimaiImportHandler(BaseHandler, ResumeImportMixin):
     """
     脉脉导入
     """
@@ -66,14 +99,19 @@ class MaimaiImportHandler(BaseHandler):
     def get(self):
         token = self.params.token
         unionid = self.params.unionid
-        appid = self.settings.maimai_appid or 25220512
-        redirect_url = "https://open.taou.com/maimai/api/qianxun/get_user?u={}&access_token={}&appid={}&version={}".format(unionid, token, appid, 1.0)
-        data = yield httpclient.AsyncHTTPClient().fetch(redirect_url)
-        self.logger.debug('maimai_profile:{}'.format(data.body))
-        return
+
+        if not token and unionid:
+            self.write_error(404)
+            return
+
+        appid = self.settings.maimai_appid
+        user_id = match_session_id(to_str(self.get_secure_cookie(const.COOKIE_SESSIONID)))
+        ua = 1 if self.in_wechat else 2
+        is_ok, result = yield self.profile_ps.import_profile(6, "", "", user_id, ua, token=token, unionid=unionid, appid=appid, version=1.0)
+        self.handle_profile(is_ok=is_ok, result=result)
 
 
-class LinkedinImportHandler(MetaBaseHandler):
+class LinkedinImportHandler(MetaBaseHandler, ResumeImportMixin):
     """
     linkedin 导入，由于 linkedin 为 oauth2.0导入，
     与微信 oauth2.0授权冲突（code问题），
@@ -136,34 +174,7 @@ class LinkedinImportHandler(MetaBaseHandler):
         # 判断是否在微信端
         ua = 1 if self.in_wechat else 2
         is_ok, result = yield self.profile_ps.import_profile(4, "", "", user_id, ua, token=access_token)
-        self.logger.debug("is_ok:{} result:{}".format(is_ok, result))
-        if is_ok:
-            if self.params.pid:
-                next_url = make_url(path.PROFILE_PREVIEW, params=self.params, host=self.host)
-            else:
-                next_url = make_url(path.PROFILE_VIEW, params=self.params, host=self.host)
-
-            self.redirect(next_url)
-            return
-        else:
-            if result.status == 32008:
-                messages = msg.PROFILE_IMPORT_LIMIT
-            else:
-                messages = result.message
-
-            data = ObjectDict(
-                kind=1,  # // {0: success, 1: failure, 10: email}
-                messages=messages,  # ['hello world', 'abjsldjf']
-                button_text=msg.BACK_CN,
-                button_link=self.make_url(path.PROFILE_VIEW,
-                                          wechat_signature=self.get_argument('wechat_signature'),
-                                          host=self.host),
-                jump_link=None  # // 如果有会自动，没有就不自动跳转
-            )
-
-            self.render_page(template_name="system/user-info.html",
-                             data=data)
-            return
+        self.handle_profile(is_ok=is_ok, result=result)
 
 
 class ResumeImportHandler(BaseHandler):

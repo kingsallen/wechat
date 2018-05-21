@@ -299,11 +299,10 @@ def check_and_apply_profile(func):
             self.logger.info("[maimai_url_cusdata: {}]".format(cusdata))
 
             cusdata = urlencode(dict(cusdata=cusdata))
-            # appid = self.settings.maimai_appid
-            appid = 25220512
+            appid = self.settings.maimai_appid
             maimai_url = path.MAIMAI_ACCESSTOKEN.format(appid=appid, cusdata=cusdata)
 
-            redirect_params.update(maimai_url)
+            redirect_params.update(maimai_url=maimai_url)
             print("redirect_params: %s" % redirect_params)
             self.render(template_name='refer/neo_weixin/sysuser_v2/importresume.html',
                         **redirect_params, importer=importer)
