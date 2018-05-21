@@ -296,6 +296,25 @@ class ChatHandler(BaseHandler):
     @handle_response
     @authenticated
     @gen.coroutine
+    def get_voice(self):
+        user_id = self.current_user.sysuser.id
+        server_id = self.params.serverId
+        room_id = self.params.roomId
+        hr_id = self.hrId
+        ret = yield self.chat_ps.get_voice(user_id=user_id, server_id=server_id, room_id=room_id, hr_id=hr_id)
+        voice_file = ret.get("data").get("fileBytes")
+        voice_size = ret.get("data").get("fileLength")
+        self.set_header("Content-Type", "audio/mpeg")
+        self.set_header("Content-Length", voice_size)
+        voice_body = ''
+        for i in voice_file:
+            voice_body += i
+        self.write(voice_body)
+        self.finish()
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
     def post(self, method):
         try:
             # 重置 event，准确描述

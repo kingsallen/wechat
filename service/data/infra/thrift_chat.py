@@ -2,12 +2,9 @@
 
 import tornado.gen as gen
 
-from service.data.base import DataService
-from util.common import ObjectDict
-from util.common.decorator import cache
 from thrift_gen.gen.chat.service.ChatService import Client as ChatServiceClient
 from service.data.infra.framework.client.client import ServiceClientFactory
-from util.tool.http_tool import http_post
+from util.tool.http_tool import http_post, http_get
 import conf.path as path
 from service.data.base import DataService
 
@@ -93,3 +90,12 @@ class ThriftChatDataService(DataService):
         """
         ret = yield http_post(path.CHAT_LIMIT, params)
         return ret
+
+    @gen.coroutine
+    def get_voice(self, params):
+        """
+        获取语音文件
+        :param params:
+        :return:
+        """
+        ret = yield http_get(path.VOICE, params)

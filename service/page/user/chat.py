@@ -51,7 +51,6 @@ class ChatPageService(PageService):
                 room['content'] = e.content
                 room['chatTime'] = str_2_date(e.createTime, const.TIME_FORMAT_MINUTE)
                 room['speaker'] = e.speaker  # 0：求职者，1：HR
-                room['assetUrl'] = e.assetUrl
                 room['btnContent'] = json.loads(e.btnContent) if e.btnContent is not None else e.btnContent
                 if room['btnContent'] and type(room['btnContent']) == str:
                     room['btnContent'] = json.loads(room['btnContent'])
@@ -260,3 +259,25 @@ class ChatPageService(PageService):
         status = ret.get("status")
         msg = ret.get("message")
         return status, msg
+
+    @gen.coroutine
+    def get_voice(self, user_id, hr_id, room_id, server_id):
+        """
+        获取语音文件
+        :param user_id:
+        :param hr_id:
+        :param room_id:
+        :param server_id:
+        :return:
+        """
+        params = ObjectDict({
+            "userId": user_id,
+            "hrId": hr_id,
+            "roomId": room_id,
+            "serverId": server_id
+        })
+        ret = yield self.thrift_chat_ds.get_voice(params)
+        return ret
+
+
+
