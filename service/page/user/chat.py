@@ -51,7 +51,7 @@ class ChatPageService(PageService):
                 room['content'] = e.content
                 room['chatTime'] = str_2_date(e.createTime, const.TIME_FORMAT_MINUTE)
                 room['speaker'] = e.speaker  # 0：求职者，1：HR
-                room['btnContent'] = json.loads(e.btnContent) if e.btnContent is not None else e.btnContent
+                room['btnContent'] = json.loads(e.btnContent) if e.btnContent else e.btnContent
                 if room['btnContent'] and type(room['btnContent']) == str:
                     room['btnContent'] = json.loads(room['btnContent'])
                 room['msgType'] = e.msgType
