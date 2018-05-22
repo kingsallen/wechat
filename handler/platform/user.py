@@ -11,6 +11,7 @@ from handler.base import BaseHandler
 from util.common import ObjectDict
 from util.common.exception import MyException
 from util.common.mq import data_userprofile_publisher
+import conf.common as const
 
 
 class UserSurveyConstantMixin(object):
@@ -68,41 +69,433 @@ class UserSurveyConstantMixin(object):
         return [[v, k] for k, v in input_dict.items()]
 
 
-class UserSurveyHandler(UserSurveyConstantMixin, BaseHandler):
+class UserSurveyHandler(BaseHandler):
     @decorator.handle_response
     @decorator.authenticated
     @gen.coroutine
     def get(self):
         """直接给数据组提供数据来源，数据字典写死就好，似乎没有必要存到 dict_constant 里去
         """
-        data = ObjectDict()
+        data = [{
+            "fields": [{
+                "map": "",
+                "error_msg": "",
+                "field_type": 10,
+                "company_id": 0,
+                "field_name": "degree",
+                "required": 0,
+                "id": 17,
+                "priority": 17,
+                "parent_id": 0,
+                "is_basic": 0,
+                "constant_parent_code": 3104,
+                "field_value": [
+                    [
+                        "初中及以下",
+                        "1"
+                    ],
+                    [
+                        "中专",
+                        "2"
+                    ],
+                    [
+                        "高中",
+                        "3"
+                    ],
+                    [
+                        "大专",
+                        "4"
+                    ],
+                    [
+                        "本科",
+                        "5"
+                    ],
+                    [
+                        "硕士",
+                        "6"
+                    ],
+                    [
+                        "博士",
+                        "7"
+                    ],
+                    [
+                        "博士以上",
+                        "8"
+                    ],
+                    [
+                        "其他",
+                        "9"
+                    ]
+                ],
+                "field_title": "最高学历",
+                "field_description": "请选择最高学历",
+                "validate_re": "[\\s\\S]+"
+            },
+                {
+                    "map": "",
+                    "error_msg": "从业年数最多只允许输入2位数字",
+                    "field_type": 0,
+                    "company_id": 0,
+                    "field_name": "workyears",
+                    "required": 0,
+                    "id": 32,
+                    "priority": 32,
+                    "parent_id": 0,
+                    "is_basic": 2,
+                    "constant_parent_code": 0,
+                    "field_value": [
+                        [
+                            ""
+                        ]
+                    ],
+                    "field_title": "从业年数",
+                    "field_description": "请填写从业年数",
+                    "validate_re": "^\\d{1,2}$"
+                },
+                {
+                    "map": "profile_basic.city_name",
+                    "error_msg": "",
+                    "field_type": 101,
+                    "company_id": 0,
+                    "field_name": "location",
+                    "required": 0,
+                    "id": 16,
+                    "priority": 16,
+                    "parent_id": 0,
+                    "is_basic": 0,
+                    "constant_parent_code": 0,
+                    "field_value": [
+                        [
+                            ""
+                        ]
+                    ],
+                    "field_title": "现居住地",
+                    "field_description": "请选择现居住地",
+                    "validate_re": "[\\s\\S]+"
+                },
+                {
+                    "map": "",
+                    "error_msg": "最近工作的公司/品牌最多只允许输入100个字符",
+                    "field_type": 0,
+                    "company_id": 0,
+                    "field_name": "companyBrand",
+                    "required": 0,
+                    "id": 50,
+                    "priority": 50,
+                    "parent_id": 0,
+                    "is_basic": 0,
+                    "constant_parent_code": 0,
+                    "field_value": [
+                        [
+                            ""
+                        ]
+                    ],
+                    "field_title": "最近工作的公司/品牌",
+                    "field_description": "请填写公司/品牌",
+                    "validate_re": "[\\s\\S]{1,100}"
+                },
+                {
+                    "map": "",
+                    "error_msg": "最近工作职位最多只允许输入100个字符",
+                    "field_type": 10,
+                    "company_id": 0,
+                    "field_name": "icanstart",
+                    "required": 0,
+                    "id": 0,
+                    "priority": 0,
+                    "parent_id": 0,
+                    "is_basic": 0,
+                    "constant_parent_code": 0,
+                    "field_value": [
+                        [
+                            ""
+                        ]
+                    ],
+                    "field_title": "最近职位",
+                    "field_description": "请填写职位",
+                    "validate_re": "[\\s\\S]{1,100}"
+                },
+                {
+                    "map": "",
+                    "error_msg": "",
+                    "field_type": 10,
+                    "company_id": 0,
+                    "field_name": "industry",
+                    "required": 0,
+                    "id": 48,
+                    "priority": 48,
+                    "parent_id": 0,
+                    "is_basic": 0,
+                    "constant_parent_code": 3124,
+                    "field_value": [
+                        [
+                            "计算机/通信/电子/互联网",
+                            "1"
+                        ],
+                        [
+                            "会计/金融/银行/保险",
+                            "2"
+                        ],
+                        [
+                            "房地产/建筑业",
+                            "3"
+                        ],
+                        [
+                            "商业服务/教育/培训",
+                            "4"
+                        ],
+                        [
+                            "贸易/批发/零售/租赁业",
+                            "5"
+                        ],
+                        [
+                            "制药/医疗",
+                            "6"
+                        ],
+                        [
+                            "广告/媒体",
+                            "7"
+                        ],
+                        [
+                            "生产/加工/制造",
+                            "8"
+                        ],
+                        [
+                            "交通/运输/物流/仓储",
+                            "9"
+                        ],
+                        [
+                            "服务业",
+                            "10"
+                        ],
+                        [
+                            "文化/传媒/娱乐/体育",
+                            "11"
+                        ],
+                        [
+                            "能源/矿产/环保",
+                            "12"
+                        ],
+                        [
+                            "政府/非盈利机构/其他",
+                            "13"
+                        ]
+                    ],
+                    "field_title": "期望行业",
+                    "field_description": "请选择期望行业",
+                    "validate_re": "[\\s\\S]+"
+                }, {
+                    "map": "",
+                    "error_msg": "",
+                    "field_type": 10,
+                    "company_id": 0,
+                    "field_name": "icanstart",
+                    "required": 0,
+                    "id": 0,
+                    "priority": 0,
+                    "parent_id": 0,
+                    "is_basic": 0,
+                    "constant_parent_code": 3105,
+                    "field_value": [
+                        [
+                            "没选择",
+                            "0"
+                        ],
+                        [
+                            "全职",
+                            "1"
+                        ],
+                        [
+                            "兼职",
+                            "2"
+                        ],
+                        [
+                            "实习",
+                            "3"
+                        ]
+                    ],
+                    "field_title": "工作类型",
+                    "field_description": "请选择工作类型",
+                    "validate_re": "[\\s\\S]+"
+                },
+                {
+                    "map": "",
+                    "error_msg": "",
+                    "field_type": 10,
+                    "company_id": 0,
+                    "field_name": "icanstart",
+                    "required": 0,
+                    "id": 0,
+                    "priority": 0,
+                    "parent_id": 0,
+                    "is_basic": 0,
+                    "constant_parent_code": 3114,
+                    "field_value": [
+                        [
+                            "未填写",
+                            "0"
+                        ],
+                        [
+                            "2k以下",
+                            "1"
+                        ],
+                        [
+                            "2k-4k",
+                            "2"
+                        ],
+                        [
+                            "4k-6k",
+                            "3"
+                        ],
+                        [
+                            "6k-8k ",
+                            "4"
+                        ],
+                        [
+                            "8k-10k",
+                            "5"
+                        ],
+                        [
+                            "10k-15k",
+                            "6"
+                        ],
+                        [
+                            "15k-25k",
+                            "7"
+                        ],
+                        [
+                            "25k及以上",
+                            "8"
+                        ]
+                    ],
+                    "field_title": "期望月薪",
+                    "field_description": "请选择期望月薪",
+                    "validate_re": "[\\s\\S]+"
+                },
 
-        data.constant = {
-            'job_grade': self.listify_dict(self.constant.job_grade),
-            'industry': self.listify_dict(self.constant.industry),
-            'salary': self.listify_dict(self.constant.salary),
-            'degree': self.listify_dict(self.constant.degree)
-        }
+                {
+                    "fields": [{
+                        "map": "profile_intention.id&profile_intention_city.city_name",
+                        "error_msg": "",
+                        "field_type": 101,
+                        "company_id": 0,
+                        "field_name": "expectedlocation",
+                        "required": 0,
+                        "id": 37,
+                        "priority": 36,
+                        "parent_id": 0,
+                        "is_basic": 0,
+                        "constant_parent_code": 0,
+                        "field_value": [
+                            [
+                                ""
+                            ]
+                        ],
+                        "field_title": "期望工作城市",
+                        "field_description": "请填写城市名",
+                        "validate_re": "[\\s\\S]+"
+                    },
+                        {
+                            "map": "",
+                            "error_msg": "",
+                            "field_type": 10,
+                            "company_id": 0,
+                            "field_name": "workstate",
+                            "required": 0,
+                            "id": 47,
+                            "priority": 47,
+                            "parent_id": 0,
+                            "is_basic": 0,
+                            "constant_parent_code": 3102,
+                            "field_value": [
+                                [
+                                    "在职，看看新机会",
+                                    "1"
+                                ],
+                                [
+                                    "在职，急寻新工作",
+                                    "2"
+                                ],
+                                [
+                                    "在职，暂无跳槽打算",
+                                    "3"
+                                ],
+                                [
+                                    "离职，正在找工作",
+                                    "4"
+                                ],
+                                [
+                                    "应届毕业生",
+                                    "5"
+                                ]
+                            ],
+                            "field_title": "工作状态",
+                            "field_description": "请选择工作状态",
+                            "validate_re": "[\\s\\S]+"
+                        },
+                        {
+                            "map": "",
+                            "error_msg": "",
+                            "field_type": 10,
+                            "company_id": 0,
+                            "field_name": "icanstart",
+                            "required": 0,
+                            "id": 40,
+                            "priority": 40,
+                            "parent_id": 0,
+                            "is_basic": 0,
+                            "constant_parent_code": 3106,
+                            "field_value": [
+                                [
+                                    "随时",
+                                    "1"
+                                ],
+                                [
+                                    "2周",
+                                    "2"
+                                ],
+                                [
+                                    "一个月",
+                                    "3"
+                                ],
+                                [
+                                    "一个月以上",
+                                    "4"
+                                ]
+                            ],
+                            "field_title": "到岗时间",
+                            "field_description": "请选择到岗时间",
+                            "validate_re": "[\\s\\S]+"
+                        }
+                    ],
+                    "title": "基本信息"
+                }
+            ]
+        }]
         self.render_page('adjunct/user-survey.html', data=data)
 
 
-class APIUserSurveyHandler(UserSurveyConstantMixin, BaseHandler):
+class APIUserSurveyHandler(BaseHandler):
     @decorator.handle_response
     @decorator.authenticated
     @gen.coroutine
     def post(self):
         """获取前端传过来的数据，POST json string格式"""
 
-        model_raw = self.json_args.model
-        self.logger.debug("model_raw: %s" % model_raw)
+        model = self.json_args.model
+        self.logger.debug("model_raw: %s" % model)
 
-        model = self.process_model_raw(model_raw)
+        # model = self.process_model_raw(model_raw)
         model.update(user_id=self.current_user.sysuser.id)
         self.logger.debug("model: %s" % model)
+        # {'job_grade': '副总裁及以上', 'birth': '2018-05-10', 'salary': '2K以下', 'industry': '计算机/互联网/通信/电子', 'expected_position': '传达室', 'degree': '初中及以下', 'user_id': 5279773, 'city': '查实的'}
 
         self.logger.debug('pushed to rebbitmq')
 
         data_userprofile_publisher.publish_message(message=model)
+
+        # 粉丝问卷调查入库
+        yield self._save_model(model)
 
         self.send_json_success(data={
             'next_url': self.make_url(path.PROFILE_VIEW, self.params)
@@ -114,6 +507,79 @@ class APIUserSurveyHandler(UserSurveyConstantMixin, BaseHandler):
             if key in self.constant:
                 model[key] = getattr(self.constant, key).get(model[key])
         return model
+
+    @gen.coroutine
+    def _save_model(self, custom_cv):
+
+        # --8<-- 初始化 --8<-----8<-----8<-----8<-----8<-----8<-----8<-----8<--
+        custom_cv_tpls = yield self.profile_ps.get_custom_tpl_all()
+
+        custom_cv_user_user = self.profile_ps.convert_customcv(custom_cv, custom_cv_tpls, target='user_user')
+        custom_cv_profile_basic = self.profile_ps.convert_customcv(custom_cv, custom_cv_tpls, target='profile_basic')
+        custom_cv_other_raw = self.profile_ps.convert_customcv(custom_cv, custom_cv_tpls, target='other')
+
+        self.logger.debug("custom_cv_user_user: %s" % custom_cv_user_user)
+        self.logger.debug("custom_cv_profile_basic: %s" % custom_cv_profile_basic)
+        self.logger.debug("custom_cv_other_raw: %s" % custom_cv_other_raw)
+
+        # --8<-- 更新 user_user --8<-----8<-----8<-----8<-----8<-----8<------
+        if custom_cv_user_user:
+            result = yield self.user_ps.update_user(
+                self.current_user.sysuser.id,
+                **custom_cv_user_user)
+
+            self.logger.debug("update_user result: %s" % result)
+
+        # --8<-- 检查profile --8<-----8<-----8<-----8<-----8<-----8<-----8<---
+        has_profile, profile = yield self.profile_ps.has_profile(
+            self.current_user.sysuser.id)
+        if has_profile:
+            profile_id = profile.get("profile", {}).get("id")
+        else:
+            # 还不存在 profile， 创建 profile
+            # 进入自定义简历创建 profile 逻辑的话，来源必定是企业号（我要投递）
+            result, data = yield self.profile_ps.create_profile(
+                self.current_user.sysuser.id,
+                source=const.PROFILE_SOURCE_PLATFORM_APPLY)
+
+            # 创建 profile 成功
+            if not result:
+                raise RuntimeError('profile creation error')
+
+            profile_id = data
+
+            self._log_customs.update(new_profile=const.YES)
+
+        # 创建完 profile 后再次获取 profile
+        has_profile, profile = yield self.profile_ps.has_profile(
+            self.current_user.sysuser.id)
+
+        if custom_cv_profile_basic:
+            # 已经有 profile，
+            basic = profile.get("basic")
+
+            result, data = yield self.profile_ps.get_profile_basic(profile_id = profile_id)
+
+            has_no_basic = not result and data.status == 90010
+
+            basic.update(custom_cv_profile_basic)
+            self.logger.debug("updated basic: %s" % basic)
+
+            if has_no_basic:
+                basic.update({'profile_id': profile_id})
+                yield self.profile_ps.create_profile_basic(
+                    basic, profile_id, mode='c')
+            else:
+                yield self.profile_ps.update_profile_basic(profile_id, basic)
+
+        # 更新多条 education, workexp, projectexp, language, awards,
+        # 更新单条 intention, works
+        yield self.profile_ps.update_profile_embedded_info_from_cv(
+            profile_id, profile, custom_cv)
+
+        # 更新 other
+        if custom_cv_other_raw:
+            yield self.update_profile_other(profile_id, custom_cv_other_raw)
 
 
 class AIRecomHandler(BaseHandler):
