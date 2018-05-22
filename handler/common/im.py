@@ -297,11 +297,11 @@ class ChatHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def get_voice(self):
-        user_id = self.current_user.sysuser.id
+        self.user_id = self.current_user.sysuser.id
         server_id = self.params.serverId
-        room_id = self.params.roomId
-        hr_id = self.hrId
-        ret = yield self.chat_ps.get_voice(user_id=user_id, server_id=server_id, room_id=room_id, hr_id=hr_id)
+        self.room_id = self.params.roomId
+        self.hr_id = self.params.hrId
+        ret = yield self.chat_ps.get_voice(user_id=self.user_id, server_id=server_id, room_id=self.room_id, hr_id=self.hr_id)
         voice_file = ret.get("data").get("fileBytes")
         voice_size = ret.get("data").get("fileLength")
         self.set_header("Content-Type", "audio/mpeg")
