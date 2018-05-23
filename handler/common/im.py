@@ -326,7 +326,7 @@ class ChatHandler(BaseHandler):
     @handle_response
     @authenticated
     @gen.coroutine
-    def post_limit(self):
+    def get_limit(self):
         hr_id = self.json_args.hrId
         status, message = yield self.chat_ps.chat_limit(hr_id)
         if status == 0:

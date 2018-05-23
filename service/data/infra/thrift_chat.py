@@ -88,7 +88,7 @@ class ThriftChatDataService(DataService):
         """
         对聊天方式做限制
         """
-        ret = yield http_post(path.CHAT_LIMIT, params)
+        ret = yield http_get(path.CHAT_LIMIT, params)
         return ret
 
     @gen.coroutine
