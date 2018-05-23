@@ -305,12 +305,16 @@ class ChatHandler(BaseHandler):
         voice_file = ret.get("data").get("fileBytes")
         voice_size = ret.get("data").get("fileLength")
         self.set_header("Content-Type", "audio/mp3")
+        result = bytes(map(self.twoscomplement_to_unsigned, voice_file))
+        if len(result) > voice_size:
+            voice_size = len(result)
         self.set_header("Content-Length", voice_size)
-        # voice_body = ''
-        # for i in voice_file:
-        #     voice_body += i
-        self.write(voice_file)
+        self.write(result)
         self.finish()
+
+    @gen.coroutine
+    def twoscomplement_to_unsigned(self, i):
+        return i % 256
 
     @handle_response
     @authenticated
