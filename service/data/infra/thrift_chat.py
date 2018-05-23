@@ -99,3 +99,4 @@ class ThriftChatDataService(DataService):
         :return:
         """
         ret = yield http_get(path.VOICE, params)
+        return ret

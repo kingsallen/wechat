@@ -304,12 +304,12 @@ class ChatHandler(BaseHandler):
         ret = yield self.chat_ps.get_voice(user_id=self.user_id, server_id=server_id, room_id=self.room_id, hr_id=self.hr_id)
         voice_file = ret.get("data").get("fileBytes")
         voice_size = ret.get("data").get("fileLength")
-        self.set_header("Content-Type", "audio/mpeg")
+        self.set_header("Content-Type", "audio/mp3")
         self.set_header("Content-Length", voice_size)
-        voice_body = ''
-        for i in voice_file:
-            voice_body += i
-        self.write(voice_body)
+        # voice_body = ''
+        # for i in voice_file:
+        #     voice_body += i
+        self.write(voice_file)
         self.finish()
 
     @handle_response
