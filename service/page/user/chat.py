@@ -253,7 +253,7 @@ class ChatPageService(PageService):
         对聊天方式做限制
         """
         params = ObjectDict({
-            "hr_id": hr_id
+            "hrId": hr_id
         })
         ret = yield self.thrift_chat_ds.chat_limit(params)
         status = ret.get("status")
