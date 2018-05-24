@@ -416,7 +416,7 @@ class ChatHandler(BaseHandler):
             positionId=int(self.position_id)
         )
 
-        res = yield self.chat_ps.save_chat(chat_params)
+        chat_id = yield self.chat_ps.save_chat(chat_params)
         if bot_message:
             message_body = json_dumps(ObjectDict(
                 content=bot_message.content,
@@ -428,7 +428,7 @@ class ChatHandler(BaseHandler):
                 pid=int(self.position_id),
                 createTime=curr_now_minute(),
                 origin=const.ORIGIN_CHATBOT,
-                id=res.get('chatId')
+                id=chat_id
             ))
             # hr 端广播
             self.redis_client.publish(self.hr_channel, message_body)
