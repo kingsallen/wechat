@@ -181,6 +181,14 @@ class ChatPageService(PageService):
         raise gen.Return(hr_account)
 
     @gen.coroutine
+    def get_company_conf(self, company_id):
+        """获取公司信息"""
+        company_conf = yield self.hr_company_conf_ds.get_company_conf(
+            conds={'company_id': company_id})
+
+        raise gen.Return(company_conf)
+
+    @gen.coroutine
     def get_chatbot_reply(self, message, user_id, hr_id, position_id):
         """ 调用 chatbot 返回机器人的回复信息
                https://wiki.moseeker.com/chatbot.md

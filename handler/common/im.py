@@ -442,16 +442,14 @@ class ChatHandler(BaseHandler):
         if not self.hr_id:
             return
 
-        user_hr_account = yield self.user_hr_account_ds.get_hr_account(
-            conds={'id': self.hr_id})
+        user_hr_account = yield self.chat_ps.get_hr_info(self.hr_id)
 
         company_id = user_hr_account.company_id
 
         if not company_id:
             return
 
-        company_conf = yield self.hr_company_conf_ds.get_company_conf(
-            conds={'company_id': company_id})
+        company_conf = yield self.chat_ps.get_company_conf(company_id)
 
         self.bot_enabled = company_conf.hr_chat == const.COMPANY_CONF_CHAT_ON_WITH_CHATBOT and user_hr_account.leave_to_mobot
 
