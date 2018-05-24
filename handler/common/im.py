@@ -19,6 +19,7 @@ from service.page.user.chat import ChatPageService
 from thrift_gen.gen.chat.struct.ttypes import ChatVO
 import redis
 from setting import settings
+from globals import logger
 
 
 class UnreadCountHandler(BaseHandler):
@@ -189,8 +190,12 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
 
     @gen.coroutine
     def on_close(self):
+        logger.debug("&=! {}".format("on_close, before stop_run_in_thread"))
         self.subscriber.stop_run_in_thread()
+        logger.debug("&=! {}".format("on_close, after stop_run_in_thread"))
+        logger.debug("&=! {}".format("on_close, before cleanup"))
         self.subscriber.cleanup()
+        logger.debug("&=! {}".format("on_close, after cleanup"))
 
         self.chat_session.mark_leave_chatroom(self.room_id)
         yield self.chat_ps.leave_chatroom(self.room_id)
@@ -390,7 +395,7 @@ class ChatHandler(BaseHandler):
             # ioloop.IOLoop.current().call_later(1, delay_robot)
             yield self._handle_chatbot_message(user_message)  # 直接调用方式
 
-        return
+        self.send_json_success()
 
     @gen.coroutine
     def _handle_chatbot_message(self, user_message):
