@@ -338,8 +338,6 @@ class ChatHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def post_message(self):
-        if not self.bot_enabled:
-            yield self.get_bot_enabled()
 
         self.room_id = self.params.roomId
         self.user_id = match_session_id(to_str(self.get_secure_cookie(const.COOKIE_SESSIONID)))
@@ -350,6 +348,9 @@ class ChatHandler(BaseHandler):
         msg_type = self.json_args.get("msgType")
         server_id = self.json_args.get("serverId") or ""
         duration = self.json_args.get("duration") or 0
+
+        if not self.bot_enabled:
+            yield self.get_bot_enabled()
 
         self.chatroom_channel = const.CHAT_CHATROOM_CHANNEL.format(self.hr_id, self.user_id)
         self.hr_channel = const.CHAT_HR_CHANNEL.format(self.hr_id)
