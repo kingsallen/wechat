@@ -76,10 +76,8 @@ class UserSurveyHandler(BaseHandler):
     def get(self):
         """直接给数据组提供数据来源，数据字典写死就好，似乎没有必要存到 dict_constant 里去
         """
-        data = {"config":
-            [
-                {
-                    "fields": [{
+        data = {
+                    "config": [{
                         "map": "",
                         "error_msg": "",
                         "field_type": 10,
@@ -473,8 +471,7 @@ class UserSurveyHandler(BaseHandler):
                             "title": "基本信息"
                         }
                     ]
-                }
-            ]}
+        }
         self.render_page('adjunct/user-survey.html', data=data)
 
 
