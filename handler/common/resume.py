@@ -37,6 +37,7 @@ class ThirdpartyImportHandler(MetaBaseHandler):
             unionid = self.params.u
             params = '{}&token={}&unionid={}'.format(str(params), token, unionid)
             redirect_url = path.RESUME_MAIMAI.format(self.host, params)
+            self.redirect(redirect_url)
         else:
             wechat_signature = re.search(r'signature=(.*?)&', params).group(1)
             data = ObjectDict(
@@ -52,9 +53,6 @@ class ThirdpartyImportHandler(MetaBaseHandler):
             self.render_page(template_name="system/user-info.html",
                              data=data)
             return
-        headers = {"User-Agent": self.request.headers.get('User-Agent'),
-                   "Content-Type": "application/json"}
-        yield httpclient.AsyncHTTPClient().fetch(redirect_url, headers=headers)
 
 
 class MaimaiImportHandler(BaseHandler):
@@ -74,7 +72,7 @@ class MaimaiImportHandler(BaseHandler):
         appid = self.settings.maimai_appid
         user_id = match_session_id(to_str(self.get_secure_cookie(const.COOKIE_SESSIONID)))
         ua = 1 if self.in_wechat else 2
-        is_ok, result = yield self.profile_ps.import_profile(6, "", "", user_id, ua, token=token, unionid=unionid, appid=appid, version=1.0)
+        is_ok, result = yield self.profile_ps.import_profile(10, "", "", user_id, ua, token=token, unionid=unionid, appid=appid, version=1.0)
         self.handle_profile(is_ok=is_ok, result=result)
 
     def handle_profile(self, is_ok, result):

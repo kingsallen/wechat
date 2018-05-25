@@ -49,7 +49,7 @@ class InfraProfileDataService(DataService):
             ua=int(ua),
             token=token,
             company_id=company_id,
-            appid=appid,
+            maimai_appid=appid,
             unionid=unionid,
             version=version
         )
