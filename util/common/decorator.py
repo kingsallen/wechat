@@ -264,30 +264,6 @@ def check_and_apply_profile(func):
                 # 从侧边栏直接进入，允许使用 email 创建 profile
                 redirect_params.update(use_email=True)
 
-            # ========== LINKEDIN OAUTH ==============
-            # 拼装 linkedin oauth 路由
-            redirect_uri = self.make_url(path.RESUME_LINKEDIN,
-                                         recom=self.params.recom,
-                                         pid=self.params.pid,
-                                         wechat_signature=self.current_user.wechat.signature)
-            self.logger.info("[redirect_url_fetch_code: {}]".format(redirect_uri))
-            linkedin_url = self.make_url(path.LINKEDIN_AUTH, params=ObjectDict(
-                response_type="code",
-                client_id=self.settings.linkedin_client_id,
-                scope="r_basicprofile r_emailaddress",
-                redirect_uri=redirect_uri
-            ), host="www.linkedin.com")
-            # 由于 make_url 会过滤 state，但 linkedin 必须传 state，故此处手动添加
-
-            state = encode_id(0)
-            if self.current_user.sysuser:
-                state = encode_id(self.current_user.sysuser.id)
-
-            linkedin_url = "{}&state={}".format(linkedin_url, state)
-
-            redirect_params.update(linkedin_url=linkedin_url)
-            # ========== LINKEDIN OAUTH ==============
-
             print("redirect_params: %s" % redirect_params)
             self.render(template_name='refer/neo_weixin/sysuser_v2/importresume.html',
                         **redirect_params, importer=importer)
