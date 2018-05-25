@@ -77,304 +77,314 @@ class UserSurveyHandler(BaseHandler):
         """直接给数据组提供数据来源，数据字典写死就好，似乎没有必要存到 dict_constant 里去
         """
         data = {
-                    "config": [{
-                        "map": "",
-                        "error_msg": "",
-                        "field_type": 10,
-                        "company_id": 0,
-                        "field_name": "degree",
-                        "required": 0,
-                        "id": 17,
-                        "priority": 17,
-                        "parent_id": 0,
-                        "is_basic": 0,
-                        "constant_parent_code": 3104,
-                        "field_value": [
-                            [
-                                "初中及以下",
-                                "1"
-                            ],
-                            [
-                                "中专",
-                                "2"
-                            ],
-                            [
-                                "高中",
-                                "3"
-                            ],
-                            [
-                                "大专",
-                                "4"
-                            ],
-                            [
-                                "本科",
-                                "5"
-                            ],
-                            [
-                                "硕士",
-                                "6"
-                            ],
-                            [
-                                "博士",
-                                "7"
-                            ],
-                            [
-                                "博士以上",
-                                "8"
-                            ],
-                            [
-                                "其他",
-                                "9"
-                            ]
-                        ],
-                        "field_title": "最高学历",
-                        "field_description": "请选择最高学历",
-                        "validate_re": "[\\s\\S]+"
-                    },
-                        {
-                            "map": "",
-                            "error_msg": "从业年数最多只允许输入2位数字",
-                            "field_type": 0,
-                            "company_id": 0,
-                            "field_name": "workyears",
-                            "required": 0,
-                            "id": 32,
-                            "priority": 32,
-                            "parent_id": 0,
-                            "is_basic": 2,
-                            "constant_parent_code": 0,
-                            "field_value": [
-                                [
-                                    ""
-                                ]
-                            ],
-                            "field_title": "从业年数",
-                            "field_description": "请填写从业年数",
-                            "validate_re": "^\\d{1,2}$"
-                        },
-                        {
-                            "map": "profile_basic.city_name",
-                            "error_msg": "",
-                            "field_type": 101,
-                            "company_id": 0,
-                            "field_name": "location",
-                            "required": 0,
-                            "id": 16,
-                            "priority": 16,
-                            "parent_id": 0,
-                            "is_basic": 0,
-                            "constant_parent_code": 0,
-                            "field_value": [
-                                [
-                                    ""
-                                ]
-                            ],
-                            "field_title": "现居住地",
-                            "field_description": "请选择现居住地",
-                            "validate_re": "[\\s\\S]+"
-                        },
-                        {
-                            "map": "",
-                            "error_msg": "最近工作的公司/品牌最多只允许输入100个字符",
-                            "field_type": 0,
-                            "company_id": 0,
-                            "field_name": "companyBrand",
-                            "required": 0,
-                            "id": 50,
-                            "priority": 50,
-                            "parent_id": 0,
-                            "is_basic": 0,
-                            "constant_parent_code": 0,
-                            "field_value": [
-                                [
-                                    ""
-                                ]
-                            ],
-                            "field_title": "最近工作的公司/品牌",
-                            "field_description": "请填写公司/品牌",
-                            "validate_re": "[\\s\\S]{1,100}"
-                        },
-                        {
-                            "map": "",
-                            "error_msg": "最近工作职位最多只允许输入100个字符",
-                            "field_type": 10,
-                            "company_id": 0,
-                            "field_name": "icanstart",
-                            "required": 0,
-                            "id": 0,
-                            "priority": 0,
-                            "parent_id": 0,
-                            "is_basic": 0,
-                            "constant_parent_code": 0,
-                            "field_value": [
-                                [
-                                    ""
-                                ]
-                            ],
-                            "field_title": "最近职位",
-                            "field_description": "请填写职位",
-                            "validate_re": "[\\s\\S]{1,100}"
-                        },
-                        {
-                            "map": "",
-                            "error_msg": "",
-                            "field_type": 10,
-                            "company_id": 0,
-                            "field_name": "industry",
-                            "required": 0,
-                            "id": 48,
-                            "priority": 48,
-                            "parent_id": 0,
-                            "is_basic": 0,
-                            "constant_parent_code": 3124,
-                            "field_value": [
-                                [
-                                    "计算机/通信/电子/互联网",
-                                    "1"
+            "config":
+            [
+                {
+                    "fields":
+                        [
+                            {
+                                "map": "",
+                                "error_msg": "",
+                                "field_type": 10,
+                                "company_id": 0,
+                                "field_name": "degree",
+                                "required": 0,
+                                "id": 17,
+                                "priority": 17,
+                                "parent_id": 0,
+                                "is_basic": 0,
+                                "constant_parent_code": 3104,
+                                "field_value": [
+                                    [
+                                        "初中及以下",
+                                        "1"
+                                    ],
+                                    [
+                                        "中专",
+                                        "2"
+                                    ],
+                                    [
+                                        "高中",
+                                        "3"
+                                    ],
+                                    [
+                                        "大专",
+                                        "4"
+                                    ],
+                                    [
+                                        "本科",
+                                        "5"
+                                    ],
+                                    [
+                                        "硕士",
+                                        "6"
+                                    ],
+                                    [
+                                        "博士",
+                                        "7"
+                                    ],
+                                    [
+                                        "博士以上",
+                                        "8"
+                                    ],
+                                    [
+                                        "其他",
+                                        "9"
+                                    ]
                                 ],
-                                [
-                                    "会计/金融/银行/保险",
-                                    "2"
+                                "field_title": "最高学历",
+                                "field_description": "请选择最高学历",
+                                "validate_re": "[\\s\\S]+"
+                            },
+                            {
+                                "map": "",
+                                "error_msg": "从业年数最多只允许输入2位数字",
+                                "field_type": 0,
+                                "company_id": 0,
+                                "field_name": "workyears",
+                                "required": 0,
+                                "id": 32,
+                                "priority": 32,
+                                "parent_id": 0,
+                                "is_basic": 2,
+                                "constant_parent_code": 0,
+                                "field_value": [
+                                    [
+                                        ""
+                                    ]
                                 ],
-                                [
-                                    "房地产/建筑业",
-                                    "3"
+                                "field_title": "从业年数",
+                                "field_description": "请填写从业年数",
+                                "validate_re": "^\\d{1,2}$"
+                            },
+                            {
+                                "map": "profile_basic.city_name",
+                                "error_msg": "",
+                                "field_type": 101,
+                                "company_id": 0,
+                                "field_name": "location",
+                                "required": 0,
+                                "id": 16,
+                                "priority": 16,
+                                "parent_id": 0,
+                                "is_basic": 0,
+                                "constant_parent_code": 0,
+                                "field_value": [
+                                    [
+                                        ""
+                                    ]
                                 ],
-                                [
-                                    "商业服务/教育/培训",
-                                    "4"
+                                "field_title": "现居住地",
+                                "field_description": "请选择现居住地",
+                                "validate_re": "[\\s\\S]+"
+                            },
+                            {
+                                "map": "",
+                                "error_msg": "最近工作的公司/品牌最多只允许输入100个字符",
+                                "field_type": 0,
+                                "company_id": 0,
+                                "field_name": "companyBrand",
+                                "required": 0,
+                                "id": 50,
+                                "priority": 50,
+                                "parent_id": 0,
+                                "is_basic": 0,
+                                "constant_parent_code": 0,
+                                "field_value": [
+                                    [
+                                        ""
+                                    ]
                                 ],
-                                [
-                                    "贸易/批发/零售/租赁业",
-                                    "5"
+                                "field_title": "最近工作的公司/品牌",
+                                "field_description": "请填写公司/品牌",
+                                "validate_re": "[\\s\\S]{1,100}"
+                            },
+                            {
+                                "map": "",
+                                "error_msg": "最近工作职位最多只允许输入100个字符",
+                                "field_type": 10,
+                                "company_id": 0,
+                                "field_name": "icanstart",
+                                "required": 0,
+                                "id": 0,
+                                "priority": 0,
+                                "parent_id": 0,
+                                "is_basic": 0,
+                                "constant_parent_code": 0,
+                                "field_value": [
+                                    [
+                                        ""
+                                    ]
                                 ],
-                                [
-                                    "制药/医疗",
-                                    "6"
-                                ],
-                                [
-                                    "广告/媒体",
-                                    "7"
-                                ],
-                                [
-                                    "生产/加工/制造",
-                                    "8"
-                                ],
-                                [
-                                    "交通/运输/物流/仓储",
-                                    "9"
-                                ],
-                                [
-                                    "服务业",
-                                    "10"
-                                ],
-                                [
-                                    "文化/传媒/娱乐/体育",
-                                    "11"
-                                ],
-                                [
-                                    "能源/矿产/环保",
-                                    "12"
-                                ],
-                                [
-                                    "政府/非盈利机构/其他",
-                                    "13"
-                                ]
-                            ],
-                            "field_title": "期望行业",
-                            "field_description": "请选择期望行业",
-                            "validate_re": "[\\s\\S]+"
-                        }, {
-                            "map": "",
-                            "error_msg": "",
-                            "field_type": 10,
-                            "company_id": 0,
-                            "field_name": "icanstart",
-                            "required": 0,
-                            "id": 0,
-                            "priority": 0,
-                            "parent_id": 0,
-                            "is_basic": 0,
-                            "constant_parent_code": 3105,
-                            "field_value": [
-                                [
-                                    "没选择",
-                                    "0"
-                                ],
-                                [
-                                    "全职",
-                                    "1"
-                                ],
-                                [
-                                    "兼职",
-                                    "2"
-                                ],
-                                [
-                                    "实习",
-                                    "3"
-                                ]
-                            ],
-                            "field_title": "工作类型",
-                            "field_description": "请选择工作类型",
-                            "validate_re": "[\\s\\S]+"
-                        },
-                        {
-                            "map": "",
-                            "error_msg": "",
-                            "field_type": 10,
-                            "company_id": 0,
-                            "field_name": "icanstart",
-                            "required": 0,
-                            "id": 0,
-                            "priority": 0,
-                            "parent_id": 0,
-                            "is_basic": 0,
-                            "constant_parent_code": 3114,
-                            "field_value": [
-                                [
-                                    "未填写",
-                                    "0"
-                                ],
-                                [
-                                    "2k以下",
-                                    "1"
-                                ],
-                                [
-                                    "2k-4k",
-                                    "2"
-                                ],
-                                [
-                                    "4k-6k",
-                                    "3"
-                                ],
-                                [
-                                    "6k-8k ",
-                                    "4"
-                                ],
-                                [
-                                    "8k-10k",
-                                    "5"
-                                ],
-                                [
-                                    "10k-15k",
-                                    "6"
-                                ],
-                                [
-                                    "15k-25k",
-                                    "7"
-                                ],
-                                [
-                                    "25k及以上",
-                                    "8"
-                                ]
-                            ],
-                            "field_title": "期望月薪",
-                            "field_description": "请选择期望月薪",
-                            "validate_re": "[\\s\\S]+"
-                        },
+                                "field_title": "最近职位",
+                                "field_description": "请填写职位",
+                                "validate_re": "[\\s\\S]{1,100}"
+                            }
 
-                        {
-                            "fields": [{
+                        ]
+                },
+                {
+                    "fields":
+                        [
+                            {
+                                "map": "",
+                                "error_msg": "",
+                                "field_type": 10,
+                                "company_id": 0,
+                                "field_name": "industry",
+                                "required": 0,
+                                "id": 48,
+                                "priority": 48,
+                                "parent_id": 0,
+                                "is_basic": 0,
+                                "constant_parent_code": 3124,
+                                "field_value": [
+                                    [
+                                        "计算机/通信/电子/互联网",
+                                        "1"
+                                    ],
+                                    [
+                                        "会计/金融/银行/保险",
+                                        "2"
+                                    ],
+                                    [
+                                        "房地产/建筑业",
+                                        "3"
+                                    ],
+                                    [
+                                        "商业服务/教育/培训",
+                                        "4"
+                                    ],
+                                    [
+                                        "贸易/批发/零售/租赁业",
+                                        "5"
+                                    ],
+                                    [
+                                        "制药/医疗",
+                                        "6"
+                                    ],
+                                    [
+                                        "广告/媒体",
+                                        "7"
+                                    ],
+                                    [
+                                        "生产/加工/制造",
+                                        "8"
+                                    ],
+                                    [
+                                        "交通/运输/物流/仓储",
+                                        "9"
+                                    ],
+                                    [
+                                        "服务业",
+                                        "10"
+                                    ],
+                                    [
+                                        "文化/传媒/娱乐/体育",
+                                        "11"
+                                    ],
+                                    [
+                                        "能源/矿产/环保",
+                                        "12"
+                                    ],
+                                    [
+                                        "政府/非盈利机构/其他",
+                                        "13"
+                                    ]
+                                ],
+                                "field_title": "期望行业",
+                                "field_description": "请选择期望行业",
+                                "validate_re": "[\\s\\S]+"
+                            },
+                            {
+                                "map": "",
+                                "error_msg": "",
+                                "field_type": 10,
+                                "company_id": 0,
+                                "field_name": "icanstart",
+                                "required": 0,
+                                "id": 0,
+                                "priority": 0,
+                                "parent_id": 0,
+                                "is_basic": 0,
+                                "constant_parent_code": 3105,
+                                "field_value": [
+                                    [
+                                        "没选择",
+                                        "0"
+                                    ],
+                                    [
+                                        "全职",
+                                        "1"
+                                    ],
+                                    [
+                                        "兼职",
+                                        "2"
+                                    ],
+                                    [
+                                        "实习",
+                                        "3"
+                                    ]
+                                ],
+                                "field_title": "工作类型",
+                                "field_description": "请选择工作类型",
+                                "validate_re": "[\\s\\S]+"
+                            },
+                            {
+                                "map": "",
+                                "error_msg": "",
+                                "field_type": 10,
+                                "company_id": 0,
+                                "field_name": "icanstart",
+                                "required": 0,
+                                "id": 0,
+                                "priority": 0,
+                                "parent_id": 0,
+                                "is_basic": 0,
+                                "constant_parent_code": 3114,
+                                "field_value": [
+                                    [
+                                        "未填写",
+                                        "0"
+                                    ],
+                                    [
+                                        "2k以下",
+                                        "1"
+                                    ],
+                                    [
+                                        "2k-4k",
+                                        "2"
+                                    ],
+                                    [
+                                        "4k-6k",
+                                        "3"
+                                    ],
+                                    [
+                                        "6k-8k ",
+                                        "4"
+                                    ],
+                                    [
+                                        "8k-10k",
+                                        "5"
+                                    ],
+                                    [
+                                        "10k-15k",
+                                        "6"
+                                    ],
+                                    [
+                                        "15k-25k",
+                                        "7"
+                                    ],
+                                    [
+                                        "25k及以上",
+                                        "8"
+                                    ]
+                                ],
+                                "field_title": "期望月薪",
+                                "field_description": "请选择期望月薪",
+                                "validate_re": "[\\s\\S]+"
+                            },
+                            {
                                 "map": "profile_intention.id&profile_intention_city.city_name",
                                 "error_msg": "",
                                 "field_type": 101,
@@ -395,83 +405,82 @@ class UserSurveyHandler(BaseHandler):
                                 "field_description": "请填写城市名",
                                 "validate_re": "[\\s\\S]+"
                             },
-                                {
-                                    "map": "",
-                                    "error_msg": "",
-                                    "field_type": 10,
-                                    "company_id": 0,
-                                    "field_name": "workstate",
-                                    "required": 0,
-                                    "id": 47,
-                                    "priority": 47,
-                                    "parent_id": 0,
-                                    "is_basic": 0,
-                                    "constant_parent_code": 3102,
-                                    "field_value": [
-                                        [
-                                            "在职，看看新机会",
-                                            "1"
-                                        ],
-                                        [
-                                            "在职，急寻新工作",
-                                            "2"
-                                        ],
-                                        [
-                                            "在职，暂无跳槽打算",
-                                            "3"
-                                        ],
-                                        [
-                                            "离职，正在找工作",
-                                            "4"
-                                        ],
-                                        [
-                                            "应届毕业生",
-                                            "5"
-                                        ]
+                            {
+                                "map": "",
+                                "error_msg": "",
+                                "field_type": 10,
+                                "company_id": 0,
+                                "field_name": "workstate",
+                                "required": 0,
+                                "id": 47,
+                                "priority": 47,
+                                "parent_id": 0,
+                                "is_basic": 0,
+                                "constant_parent_code": 3102,
+                                "field_value": [
+                                    [
+                                        "在职，看看新机会",
+                                        "1"
                                     ],
-                                    "field_title": "工作状态",
-                                    "field_description": "请选择工作状态",
-                                    "validate_re": "[\\s\\S]+"
-                                },
-                                {
-                                    "map": "",
-                                    "error_msg": "",
-                                    "field_type": 10,
-                                    "company_id": 0,
-                                    "field_name": "icanstart",
-                                    "required": 0,
-                                    "id": 40,
-                                    "priority": 40,
-                                    "parent_id": 0,
-                                    "is_basic": 0,
-                                    "constant_parent_code": 3106,
-                                    "field_value": [
-                                        [
-                                            "随时",
-                                            "1"
-                                        ],
-                                        [
-                                            "2周",
-                                            "2"
-                                        ],
-                                        [
-                                            "一个月",
-                                            "3"
-                                        ],
-                                        [
-                                            "一个月以上",
-                                            "4"
-                                        ]
+                                    [
+                                        "在职，急寻新工作",
+                                        "2"
                                     ],
-                                    "field_title": "到岗时间",
-                                    "field_description": "请选择到岗时间",
-                                    "validate_re": "[\\s\\S]+"
-                                }
-                            ],
-                            "title": "基本信息"
-                        }
-                    ]
-        }
+                                    [
+                                        "在职，暂无跳槽打算",
+                                        "3"
+                                    ],
+                                    [
+                                        "离职，正在找工作",
+                                        "4"
+                                    ],
+                                    [
+                                        "应届毕业生",
+                                        "5"
+                                    ]
+                                ],
+                                "field_title": "工作状态",
+                                "field_description": "请选择工作状态",
+                                "validate_re": "[\\s\\S]+"
+                            },
+                            {
+                                "map": "",
+                                "error_msg": "",
+                                "field_type": 10,
+                                "company_id": 0,
+                                "field_name": "icanstart",
+                                "required": 0,
+                                "id": 40,
+                                "priority": 40,
+                                "parent_id": 0,
+                                "is_basic": 0,
+                                "constant_parent_code": 3106,
+                                "field_value": [
+                                    [
+                                        "随时",
+                                        "1"
+                                    ],
+                                    [
+                                        "2周",
+                                        "2"
+                                    ],
+                                    [
+                                        "一个月",
+                                        "3"
+                                    ],
+                                    [
+                                        "一个月以上",
+                                        "4"
+                                    ]
+                                ],
+                                "field_title": "到岗时间",
+                                "field_description": "请选择到岗时间",
+                                "validate_re": "[\\s\\S]+"
+                            }
+                        ]
+                    }
+                ]
+            }
         self.render_page('adjunct/user-survey.html', data=data)
 
 
