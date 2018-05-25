@@ -12,6 +12,8 @@ from util.common import ObjectDict
 from util.common.exception import MyException
 from util.common.mq import data_userprofile_publisher
 import conf.common as const
+from util.tool.json_tool import json_dumps
+import copy
 
 
 class UserSurveyConstantMixin(object):
@@ -202,7 +204,7 @@ class UserSurveyHandler(BaseHandler):
                             {
                                 "map": "",
                                 "error_msg": "最近工作职位最多只允许输入100个字符",
-                                "field_type": 10,
+                                "field_type": 0,
                                 "company_id": 0,
                                 "field_name": "icanstart",
                                 "required": 0,
@@ -589,6 +591,49 @@ class APIUserSurveyHandler(BaseHandler):
         # 更新 other
         if custom_cv_other_raw:
             yield self.update_profile_other(profile_id, custom_cv_other_raw)
+
+    @gen.coroutine
+    def update_profile_other(self, profile_id, custom_cv_other_raw):
+        """智能地更新 profile_other 内容"""
+        custom_cv_ready = self._preprocess_custom_cv(custom_cv_other_raw)
+
+        other_string = json_dumps(custom_cv_ready)
+        record = ObjectDict(other=other_string)
+
+        yield self.application_ps.update_profile_other(record, profile_id)
+
+
+    @staticmethod
+    def _preprocess_custom_cv(custom_cv_other_raw):
+        """对于纯 profile 字段的预处理
+        可以在此加入公司自定义逻辑"""
+        ret = copy.deepcopy(custom_cv_other_raw)
+
+        # 前端 rocketmajor_value 保存应该入库的 rocketmajor 字段内容
+        if ret.get('rocketmajor_value'):
+            ret['rocketmajor'] = ret.get('rocketmajor_value')
+            del ret['rocketmajor_value']
+
+        # 确保保存正确的 schooljob 和 internship
+        def _filter_elements_in(name):
+            new_list = []
+            for e in ret.get(name):
+                if e.get('__status') and not e.get('__status') == 'x':
+                    e.pop('__status', None)
+                    until_now_key = name + 'end_until_now'
+                    until_now = int(e.get(until_now_key, '0'))
+                    if until_now:
+                        e['end_date'] = None
+                    new_list.append(e)
+            return new_list
+
+        if ret.get('internship'):
+            ret['internship'] = _filter_elements_in('internship')
+
+        if ret.get('schooljob'):
+            ret['schooljob'] = _filter_elements_in('schooljob')
+
+        return ret
 
 
 class AIRecomHandler(BaseHandler):
