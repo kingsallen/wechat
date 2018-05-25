@@ -389,13 +389,14 @@ class ChatHandler(BaseHandler):
 
         self.redis_client.publish(self.hr_channel, message_body)
 
+        self.send_json_success()
+
         if self.bot_enabled:
             # 由于没有延迟的发送导致hr端轮训无法订阅到publish到redis的消息　所以这里做下延迟处理
             # delay_robot = functools.partial(self._handle_chatbot_message, user_message)
             # ioloop.IOLoop.current().call_later(1, delay_robot)
             yield self._handle_chatbot_message(user_message)  # 直接调用方式
 
-        self.send_json_success()
 
     @gen.coroutine
     def _handle_chatbot_message(self, user_message):
