@@ -49,13 +49,14 @@ class ChatPageService(PageService):
                 room = ObjectDict()
                 room['id'] = e.id
                 room['content'] = e.content
-                room['chat_time'] = str_2_date(e.create_time, const.TIME_FORMAT_MINUTE)
+                room['chatTime'] = str_2_date(e.createTime, const.TIME_FORMAT_MINUTE)
                 room['speaker'] = e.speaker  # 0：求职者，1：HR
-                room['picUrl'] = e.picUrl
-                room['btnContent'] = json.loads(e.btnContent) if e.btnContent is not None else e.btnContent
+                room['btnContent'] = json.loads(e.btnContent) if e.btnContent else e.btnContent
                 if room['btnContent'] and type(room['btnContent']) == str:
                     room['btnContent'] = json.loads(room['btnContent'])
                 room['msgType'] = e.msgType
+                room['duration'] = e.duration
+                room['serverId'] = e.serverId
                 obj_list.append(room)
 
         raise gen.Return(obj_list)
@@ -180,6 +181,14 @@ class ChatPageService(PageService):
         raise gen.Return(hr_account)
 
     @gen.coroutine
+    def get_company_conf(self, company_id):
+        """获取公司信息"""
+        company_conf = yield self.hr_company_conf_ds.get_company_conf(
+            conds={'company_id': company_id})
+
+        raise gen.Return(company_conf)
+
+    @gen.coroutine
     def get_chatbot_reply(self, message, user_id, hr_id, position_id):
         """ 调用 chatbot 返回机器人的回复信息
                https://wiki.moseeker.com/chatbot.md
@@ -245,3 +254,38 @@ class ChatPageService(PageService):
             return
         else:
             return ret_message
+
+    @gen.coroutine
+    def chat_limit(self, hr_id):
+        """
+        对聊天方式做限制
+        """
+        params = ObjectDict({
+            "hrId": hr_id
+        })
+        ret = yield self.thrift_chat_ds.chat_limit(params)
+        status = ret.get("status")
+        msg = ret.get("message")
+        return status, msg
+
+    @gen.coroutine
+    def get_voice(self, user_id, hr_id, room_id, server_id):
+        """
+        获取语音文件
+        :param user_id:
+        :param hr_id:
+        :param room_id:
+        :param server_id:
+        :return:
+        """
+        params = ObjectDict({
+            "userId": user_id,
+            "hrId": hr_id,
+            "roomId": room_id,
+            "serverId": server_id
+        })
+        ret = yield self.thrift_chat_ds.get_voice(params)
+        return ret
+
+
+
