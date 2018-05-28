@@ -4,8 +4,7 @@ import json
 import urllib.parse
 import re
 
-from tornado import gen, httpclient
-
+from tornado import gen
 import conf.path as path
 import conf.message as msg
 import conf.common as const
@@ -73,103 +72,6 @@ class MaimaiImportHandler(BaseHandler):
         user_id = match_session_id(to_str(self.get_secure_cookie(const.COOKIE_SESSIONID)))
         ua = 1 if self.in_wechat else 2
         is_ok, result = yield self.profile_ps.import_profile(10, "", "", user_id, ua, token=token, unionid=unionid, appid=appid, version=1.0)
-        self.handle_profile(is_ok=is_ok, result=result)
-
-    def handle_profile(self, is_ok, result):
-
-        self.logger.debug("is_ok:{} result:{}".format(is_ok, result))
-        if is_ok:
-            if self.params.pid:
-                next_url = make_url(path.PROFILE_PREVIEW, params=self.params, host=self.host)
-            else:
-                next_url = make_url(path.PROFILE_VIEW, params=self.params, host=self.host)
-
-            self.redirect(next_url)
-            return
-        else:
-            if result.status == 32008:
-                messages = msg.PROFILE_IMPORT_LIMIT
-            else:
-                messages = result.message
-
-            data = ObjectDict(
-                kind=1,  # // {0: success, 1: failure, 10: email}
-                messages=messages,  # ['hello world', 'abjsldjf']
-                button_text=msg.BACK_CN,
-                button_link=self.make_url(path.PROFILE_VIEW,
-                                          wechat_signature=self.get_argument('wechat_signature'),
-                                          host=self.host),
-                jump_link=None  # // 如果有会自动，没有就不自动跳转
-            )
-
-            self.render_page(template_name="system/user-info.html",
-                             data=data)
-            return
-
-
-class LinkedinImportHandler(MetaBaseHandler):
-    """
-    linkedin 导入，由于 linkedin 为 oauth2.0导入，
-    与微信 oauth2.0授权冲突（code问题），
-    故直接继承 MetaBaseHandler"""
-
-    def make_url(self, path, params=None, host="", protocol="https", escape=None, **kwargs):
-        if not host:
-            host = self.host
-        return make_url(path, params, host, protocol, escape, **kwargs)
-
-    def get_template_namespace(self):
-        """copyed from BaseHandler"""
-        namespace = super().get_template_namespace()
-        add_namespace = ObjectDict(
-            env=self.env,
-            make_url=self.make_url,
-            const=const,
-            path=path
-        )
-        namespace.update(add_namespace)
-        return namespace
-
-    @handle_response
-    @gen.coroutine
-    def get(self):
-
-        code = self.params.code
-        if not code:
-            self.write_error(404)
-            return
-
-        user_id = match_session_id(to_str(self.get_secure_cookie(const.COOKIE_SESSIONID)))
-
-        redirect_url = make_url(
-            path.RESUME_LINKEDIN,
-            host=self.host,
-            recom=self.params.recom,
-            pid=self.params.pid,
-            wechat_signature=urllib.parse.unquote(
-                self.params.wechat_signature) if self.params.wechat_signature else None)
-        self.logger.info("[redirect_url_access_token: {}]".format(redirect_url))
-        response = yield self.profile_ps.get_linkedin_token(code=code, redirect_url=redirect_url)
-        response = json.loads(to_str(response))
-        if "error" in response:
-            self.logger.error("[http_fetch][response: {}]".format(response))
-            data = ObjectDict(
-                kind=1,  # // {0: success, 1: failure, 10: email}
-                messages=['导入失败，请重试'],  # ['hello world', 'abjsldjf']
-                button_text=msg.BACK_CN,
-                button_link=self.make_url(path.PROFILE_VIEW,
-                                          wechat_signature=self.get_argument('wechat_signature'),
-                                          host=self.host),
-                jump_link=None  # // 如果有会自动，没有就不自动跳转
-            )
-
-            self.render_page(template_name="system/user-info.html",
-                             data=data)
-            return
-        access_token = response.get("access_token")
-        # 判断是否在微信端
-        ua = 1 if self.in_wechat else 2
-        is_ok, result = yield self.profile_ps.import_profile(4, "", "", user_id, ua, token=access_token)
         self.handle_profile(is_ok=is_ok, result=result)
 
     def handle_profile(self, is_ok, result):
