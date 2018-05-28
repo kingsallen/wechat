@@ -285,7 +285,8 @@ RESUME_WAY_SPIDER = {
     RESUME_WAY_51JOB: "51job.html",
     RESUME_WAY_ZHILIAN: "zhaopin.html",
     RESUME_WAY_LIEPIN: "liepin.html",
-    RESUME_WAY_VERYEAST: "veryeast.html"
+    RESUME_WAY_VERYEAST: "veryeast.html",
+    RESUME_WAY_LINKEDIN: "linkedin.html"
 }
 
 RESUME_WAY_TO_INFRA = {
