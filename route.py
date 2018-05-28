@@ -77,6 +77,8 @@ common_routes = [
     (r"/positionfav/([0-9]+)",                       handler.common.position.PositionFavHandler,                {"event": "position_fav"}),
     (r"/resume/import",                              handler.common.resume.ResumeImportHandler,                 {"event": "resume_auth"}),
     (r"/resume/linkedin",                            handler.common.resume.LinkedinImportHandler,               {"event": "resume_linkedin"}),
+    (r"/resume/thirdparty",                          handler.common.resume.ThirdpartyImportHandler,             {"event": "resume_thirdparty"}),
+    (r"/resume/maimai",                              handler.common.resume.MaimaiImportHandler,                 {"event": "resume_maimai"}),
     (r"/profile/?",                                  handler.common.profile.ProfileHandler,                     {"event": "profile_profile"}),
     (r"/profile/view/([A-Z0-9a-z_\-]+)*",            handler.common.profile.ProfileViewHandler,                 {"event": "profile_view"}),
     (r"/profile/preview/?",                          handler.common.profile.ProfilePreviewHandler,              {"event": "profile_preview"}),

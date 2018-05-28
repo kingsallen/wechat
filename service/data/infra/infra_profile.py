@@ -29,10 +29,10 @@ class InfraProfileDataService(DataService):
         return http_tool.unboxing(res)
 
     @gen.coroutine
-    def import_profile(self, type, username, password, user_id, company_id, ua=1, token=None):
+    def import_profile(self, type, username, password, user_id, company_id, ua=1, token=None, appid=None, unionid=None, version=None):
         """
         从第三方导入 profile
-        :param source: 必填 来源, 0:无法识别 1:51Job 2:Liepin 3:zhilian 4:linkedin 5:veryeast
+        :param type: 必填 来源, 0:无法识别 1:51Job 2:Liepin 3:zhilian 4:linkedin 5:veryeast
         :param username: 选填（除了选择linkedin导入方式，其余都是必填） 帐号
         :param password: 选填（除了选择linkedin导入方式，其余都是必填） 密码
         :param user_id: 必填 登录用户的编号
@@ -49,6 +49,9 @@ class InfraProfileDataService(DataService):
             ua=int(ua),
             token=token,
             company_id=company_id,
+            maimai_appid=appid,
+            unionid=unionid,
+            version=version
         )
         res = yield http_tool.http_post(path.PROFILE_IMPORT, params, timeout=60)
         return http_tool.unboxing(res)
