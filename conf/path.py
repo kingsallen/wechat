@@ -141,4 +141,4 @@ MESSAGE_TEMPLATE = "message/template"
 # 其他外部服务
 LINKEDIN_ACCESSTOKEN = "https://www.linkedin.com/oauth/v2/accessToken"
 LINKEDIN_AUTH = "/oauth/v2/authorization"
-MAIMAI_ACCESSTOKEN = "https://maimai.cn/oauth_login?appid={appid}&{cusdata}"
+MAIMAI_ACCESSTOKEN = "https://maimai.cn/oauth_login?appid={appid}&{cusdata}&login=1"
