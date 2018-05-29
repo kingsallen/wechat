@@ -224,7 +224,7 @@ class ChatRoomHandler(BaseHandler):
 
         config = ObjectDict({
             "debug": False,
-            "appId": appid,
+            "appid": appid,
             "timestamp": jsapi.timestamp,
             "nonceStr": jsapi.nonceStr,
             "signature": jsapi.signature,
