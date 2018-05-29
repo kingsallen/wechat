@@ -82,7 +82,7 @@ common_routes = [
     (r"/profile/preview/?",                          handler.common.profile.ProfilePreviewHandler,              {"event": "profile_preview"}),
     (r"/profile/custom/?",                           handler.common.profile.ProfileCustomHandler,               {"event": "profile_customcv"}),
     (r"/image/?",                                    handler.common.image.ImageFetchHandler,                    {"event": "image_fetch"}),
-    (r"/chat/room/([0-9]*)",                         handler.common.im.ChatRoomHandler,                         {"event": "im_room"}),
+    (r"/chat/room[\/]*([0-9]+)*",                    handler.common.im.ChatRoomHandler,                         {"event": "im_room"}),
     # websocket
     (r"/websocket/([A-Za-z0-9_]{1,32})",             handler.common.im.ChatWebSocketHandler),
 
