@@ -3,14 +3,12 @@
 import ujson
 import traceback
 from tornado import gen, websocket, ioloop
-import functools
 import conf.common as const
 import conf.message as msg
 from conf.protocol import WebSocketCloseCode
 from handler.base import BaseHandler
 from cache.user.chat_session import ChatCache
 from util.common.decorator import handle_response, authenticated
-from util.tool.json_tool import json_dumps
 from util.tool.pubsub_tool import Subscriber
 from util.common import ObjectDict
 from util.tool.str_tool import to_str, match_session_id
@@ -20,6 +18,9 @@ from thrift_gen.gen.chat.struct.ttypes import ChatVO
 import redis
 from setting import settings
 from globals import logger
+from oauth.wechat import JsApi
+from util.tool.json_tool import encode_json_dumps, json_dumps
+import conf.message as msg_const
 
 
 class UnreadCountHandler(BaseHandler):
@@ -117,9 +118,9 @@ class UnreadCountHandler(BaseHandler):
 
 
 _pool = redis.ConnectionPool(
-        host=settings["store_options"]["redis_host"],
-        port=settings["store_options"]["redis_port"],
-        max_connections=settings["store_options"]["max_connections"])
+    host=settings["store_options"]["redis_host"],
+    port=settings["store_options"]["redis_port"],
+    max_connections=settings["store_options"]["max_connections"])
 
 _redis = redis.StrictRedis(connection_pool=_pool)
 
@@ -201,8 +202,94 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
         yield self.chat_ps.leave_chatroom(self.room_id)
 
 
+class ChatRoomHandler(BaseHandler):
+    """聊天页面"""
+
+    def get(self, room_id):
+        hr_id = self.params.hr_id or 0
+        if hr_id:
+            company_id = yield self.company_ps.get_real_company_id(hr_id, self.current_user.company.id)
+            wechat = yield self.wechat_ps.get_wechat(conds={
+                "company_id": company_id
+            })
+            jsapi_ticket = wechat.jsapi_ticket
+            appid = wechat.appid
+        else:
+            jsapi_ticket = self.current_user.wechat.jsapi_ticket
+            appid = self.current_user.wechat.appid
+
+        jsapi = JsApi(
+            jsapi_ticket=jsapi_ticket, url=self.fullurl(encode=False))
+
+        config = ObjectDict({
+            "debug": False,
+            "appId": appid,
+            "timestamp": jsapi.timestamp,
+            "nonceStr": jsapi.nonceStr,
+            "signature": jsapi.signature,
+            "jsApiList": ["onMenuShareTimeline",
+                          "onMenuShareAppMessage",
+                          "onMenuShareQQ",
+                          "onMenuShareWeibo",
+                          "hideOptionMenu",
+                          "showOptionMenu",
+                          "startRecord",
+                          "stopRecord",
+                          "onVoiceRecordEnd",
+                          "playVoice",
+                          "pauseVoice",
+                          "stopVoice",
+                          "onVoicePlayEnd",
+                          "uploadVoice",
+                          "translateVoice",
+                          "downloadVoice",
+                          "hideMenuItems",
+                          "showMenuItems",
+                          "hideAllNonBaseMenuItem",
+                          "showAllNonBaseMenuItem"]
+        })
+        self._render(
+            template_name="chat/room.html",
+            data={"room_id": room_id},
+            config=config
+        )
+
+    @gen.coroutine
+    def _render(self, template_name,
+                data,
+                status_code=const.API_SUCCESS,
+                message=msg_const.RESPONSE_SUCCESS,
+                meta_title=const.PAGE_META_TITLE,
+                http_code=200,
+                config=None):
+        """render 页面"""
+        self.log_info = {"res_type": "html", "status_code": status_code}
+        self.set_status(http_code)
+
+        try:
+            render_json = encode_json_dumps({
+                "status": status_code,
+                "message": message,
+                "data": data
+            })
+        except TypeError as e:
+            self.logger.error(e)
+            render_json = encode_json_dumps({
+                "status": const.API_FAILURE,
+                "message": msg_const.RESPONSE_FAILURE,
+                "data": None
+            })
+        super().render(
+            template_name=template_name,
+            render_json=render_json,
+            meta_title=meta_title,
+            jsapi=config)
+        return
+
+
 class ChatHandler(BaseHandler):
     """聊天相关处理"""
+
     def __init__(self, application, request, **kwargs):
         super(ChatHandler, self).__init__(application, request, **kwargs)
         self.redis_client = _redis
@@ -306,7 +393,8 @@ class ChatHandler(BaseHandler):
         server_id = self.params.serverId
         self.room_id = self.params.roomId
         self.hr_id = self.params.hrId
-        ret = yield self.chat_ps.get_voice(user_id=self.user_id, server_id=server_id, room_id=self.room_id, hr_id=self.hr_id)
+        ret = yield self.chat_ps.get_voice(user_id=self.user_id, server_id=server_id, room_id=self.room_id,
+                                           hr_id=self.hr_id)
         voice_file = ret.get("data").get("fileBytes")
         voice_size = ret.get("data").get("fileLength")
         self.set_header("Content-Type", "audio/mp3")
@@ -394,9 +482,8 @@ class ChatHandler(BaseHandler):
             # delay_robot = functools.partial(self._handle_chatbot_message, user_message)
             # ioloop.IOLoop.current().call_later(1, delay_robot)
             yield self._handle_chatbot_message(user_message)  # 直接调用方式
-            
-        self.send_json_success()
 
+        self.send_json_success()
 
     @gen.coroutine
     def _handle_chatbot_message(self, user_message):
@@ -458,6 +545,3 @@ class ChatHandler(BaseHandler):
         company_conf = yield self.chat_ps.get_company_conf(company_id)
 
         self.bot_enabled = company_conf.hr_chat == const.COMPANY_CONF_CHAT_ON_WITH_CHATBOT and user_hr_account.leave_to_mobot
-
-
-
