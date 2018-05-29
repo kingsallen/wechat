@@ -219,6 +219,7 @@ def check_and_apply_profile(func):
                                   profile_import_zhilian=True,
                                   profile_import_liepin=True,
                                   profile_import_linkedin=True,
+                                  profile_import_maimai=True,
                                   profile_import_veryeast=False)
             if company.conf_veryeast_switch == 1:
                 importer.update(profile_import_veryeast=True)
@@ -288,6 +289,20 @@ def check_and_apply_profile(func):
             redirect_params.update(linkedin_url=linkedin_url)
             # ========== LINKEDIN OAUTH ==============
 
+            # ========== MAIMAI OAUTH ===============
+            # 拼装脉脉 oauth 路由
+            cusdata = re.search(r'linkedin?(.*)', redirect_uri).group(1)
+            # 加上渠道
+            cusdata = "{}&way={}".format(cusdata, const.FROM_MAIMAI)
+            # 脉脉cusdata中不允许出现 '&' ，考虑我们公司目前的使用的参数中不会出现 '$$' , 将 '&' 转为 '$$' 使用
+            cusdata = cusdata.replace("&", "$$")
+            self.logger.info("[maimai_url_cusdata: {}]".format(cusdata))
+
+            cusdata = urlencode(dict(cusdata=cusdata))
+            appid = self.settings.maimai_appid
+            maimai_url = path.MAIMAI_ACCESSTOKEN.format(appid=appid, cusdata=cusdata)
+
+            redirect_params.update(maimai_url=maimai_url)
             print("redirect_params: %s" % redirect_params)
             self.render(template_name='refer/neo_weixin/sysuser_v2/importresume.html',
                         **redirect_params, importer=importer)
