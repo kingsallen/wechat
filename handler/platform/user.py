@@ -206,7 +206,7 @@ class UserSurveyHandler(BaseHandler):
                                 "error_msg": "最近工作职位最多只允许输入100个字符",
                                 "field_type": 0,
                                 "company_id": 0,
-                                "field_name": "icanstart",
+                                "field_name": "current_parent",
                                 "required": 0,
                                 "id": 0,
                                 "priority": 0,
@@ -299,11 +299,11 @@ class UserSurveyHandler(BaseHandler):
                                 "validate_re": "[\\s\\S]+"
                             },
                             {
-                                "map": "",
+                                "map": "profile_intention.worktype",
                                 "error_msg": "",
                                 "field_type": 10,
                                 "company_id": 0,
-                                "field_name": "icanstart",
+                                "field_name": "worktype",
                                 "required": 0,
                                 "id": 0,
                                 "priority": 0,
@@ -333,11 +333,11 @@ class UserSurveyHandler(BaseHandler):
                                 "validate_re": "[\\s\\S]+"
                             },
                             {
-                                "map": "",
+                                "map": "profile_intention.salary_code",
                                 "error_msg": "",
                                 "field_type": 10,
                                 "company_id": 0,
-                                "field_name": "icanstart",
+                                "field_name": "salary_code",
                                 "required": 0,
                                 "id": 0,
                                 "priority": 0,
