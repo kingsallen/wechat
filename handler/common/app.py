@@ -69,9 +69,19 @@ class ConfigHandler(BaseHandler):
     def get(self):
 
         target_url = self.params.target
+        # 对聊天做下兼容
+        hr_id = self.params.hr_id or 0
+        if hr_id:
+            company_id = yield self.company_ps.get_real_company_id(hr_id, self.current_user.company.id)
+            wechat = yield self.wechat_ps.get_wechat(conds={
+                "company_id": company_id
+            })
+            jsapi_ticket = wechat.jsapi_ticket
+        else:
+            jsapi_ticket = self.current_user.wechat.jsapi_ticket
 
         jsapi = JsApi(
-            jsapi_ticket=self.current_user.wechat.jsapi_ticket,
+            jsapi_ticket=jsapi_ticket,
             url=target_url)
 
         config = ObjectDict({
