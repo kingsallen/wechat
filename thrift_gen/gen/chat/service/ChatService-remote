@@ -25,12 +25,25 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('')
     print('Functions:')
     print('  HRChatRoomsVO listHRChatRoom(i32 hrId, i32 pageNo, i32 pageSize)')
+    print('  HRChatRoomsIndexVO listHRChatRoomByIndex(i32 hrId, string keyword, i32 roomId, bool apply, i32 pageSize)')
     print('  UserChatRoomsVO listUserChatRoom(i32 userId, i32 pageNo, i32 pageSize)')
     print('  ResultOfSaveRoomVO enterRoom(i32 userId, i32 hrId, i32 positionId, i32 roomId, bool is_gamma)')
     print('  void leaveChatRoom(i32 roomId, i8 speaker)')
+    print('  void roleLeaveChatRoom(i32 roleId, i8 speaker)')
     print('  ChatsVO listChatLogs(i32 roomId, i32 pageNo, i32 pageSize)')
     print('  i32 saveChat(ChatVO chat)')
     print('  ChatVO getChat(i32 roomId, i8 speaker)')
+    print('   listLastMessage( roomIdList)')
+    print('  ChatHistory listMessage(i32 roomId, i32 chatId, i32 pageSize)')
+    print('  HRChatRoomVO getChatRoom(i32 roomId, i32 hrId)')
+    print('   getChatSug(i32 hrId, bool applied, string keyword)')
+    print('  i32 getHRUnreadCount(i32 hrId)')
+    print('  HrVO getHrInfo(i32 roomId)')
+    print('  void updateApplyStatus(i32 userId, i32 positionId)')
+    print('  Response pullVoiceFile(string serverId)')
+    print('  Response clearVoiceLimitFrequency(i32 companyId)')
+    print('  Response queryVoiceLimitFrequency(i32 companyId)')
+    print('  Response sendWarnEmail(i32 hrId)')
     print('')
     sys.exit(0)
 
@@ -116,6 +129,12 @@ if cmd == 'listHRChatRoom':
         sys.exit(1)
     pp.pprint(client.listHRChatRoom(eval(args[0]), eval(args[1]), eval(args[2]),))
 
+elif cmd == 'listHRChatRoomByIndex':
+    if len(args) != 5:
+        print('listHRChatRoomByIndex requires 5 args')
+        sys.exit(1)
+    pp.pprint(client.listHRChatRoomByIndex(eval(args[0]), args[1], eval(args[2]), eval(args[3]), eval(args[4]),))
+
 elif cmd == 'listUserChatRoom':
     if len(args) != 3:
         print('listUserChatRoom requires 3 args')
@@ -134,6 +153,12 @@ elif cmd == 'leaveChatRoom':
         sys.exit(1)
     pp.pprint(client.leaveChatRoom(eval(args[0]), eval(args[1]),))
 
+elif cmd == 'roleLeaveChatRoom':
+    if len(args) != 2:
+        print('roleLeaveChatRoom requires 2 args')
+        sys.exit(1)
+    pp.pprint(client.roleLeaveChatRoom(eval(args[0]), eval(args[1]),))
+
 elif cmd == 'listChatLogs':
     if len(args) != 3:
         print('listChatLogs requires 3 args')
@@ -151,6 +176,72 @@ elif cmd == 'getChat':
         print('getChat requires 2 args')
         sys.exit(1)
     pp.pprint(client.getChat(eval(args[0]), eval(args[1]),))
+
+elif cmd == 'listLastMessage':
+    if len(args) != 1:
+        print('listLastMessage requires 1 args')
+        sys.exit(1)
+    pp.pprint(client.listLastMessage(eval(args[0]),))
+
+elif cmd == 'listMessage':
+    if len(args) != 3:
+        print('listMessage requires 3 args')
+        sys.exit(1)
+    pp.pprint(client.listMessage(eval(args[0]), eval(args[1]), eval(args[2]),))
+
+elif cmd == 'getChatRoom':
+    if len(args) != 2:
+        print('getChatRoom requires 2 args')
+        sys.exit(1)
+    pp.pprint(client.getChatRoom(eval(args[0]), eval(args[1]),))
+
+elif cmd == 'getChatSug':
+    if len(args) != 3:
+        print('getChatSug requires 3 args')
+        sys.exit(1)
+    pp.pprint(client.getChatSug(eval(args[0]), eval(args[1]), args[2],))
+
+elif cmd == 'getHRUnreadCount':
+    if len(args) != 1:
+        print('getHRUnreadCount requires 1 args')
+        sys.exit(1)
+    pp.pprint(client.getHRUnreadCount(eval(args[0]),))
+
+elif cmd == 'getHrInfo':
+    if len(args) != 1:
+        print('getHrInfo requires 1 args')
+        sys.exit(1)
+    pp.pprint(client.getHrInfo(eval(args[0]),))
+
+elif cmd == 'updateApplyStatus':
+    if len(args) != 2:
+        print('updateApplyStatus requires 2 args')
+        sys.exit(1)
+    pp.pprint(client.updateApplyStatus(eval(args[0]), eval(args[1]),))
+
+elif cmd == 'pullVoiceFile':
+    if len(args) != 1:
+        print('pullVoiceFile requires 1 args')
+        sys.exit(1)
+    pp.pprint(client.pullVoiceFile(args[0],))
+
+elif cmd == 'clearVoiceLimitFrequency':
+    if len(args) != 1:
+        print('clearVoiceLimitFrequency requires 1 args')
+        sys.exit(1)
+    pp.pprint(client.clearVoiceLimitFrequency(eval(args[0]),))
+
+elif cmd == 'queryVoiceLimitFrequency':
+    if len(args) != 1:
+        print('queryVoiceLimitFrequency requires 1 args')
+        sys.exit(1)
+    pp.pprint(client.queryVoiceLimitFrequency(eval(args[0]),))
+
+elif cmd == 'sendWarnEmail':
+    if len(args) != 1:
+        print('sendWarnEmail requires 1 args')
+        sys.exit(1)
+    pp.pprint(client.sendWarnEmail(eval(args[0]),))
 
 else:
     print('Unrecognized method %s' % cmd)
