@@ -205,6 +205,7 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
 class ChatRoomHandler(BaseHandler):
     """聊天页面"""
 
+    @gen.coroutine
     def get(self, room_id):
         hr_id = self.params.hr_id or 0
         if hr_id:
