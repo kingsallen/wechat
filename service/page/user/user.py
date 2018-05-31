@@ -182,9 +182,6 @@ class UserPageService(PageService):
         qx_wechat_id = settings['qx_wechat_id']
         openid = userinfo.openid
 
-        qx_wxuser = yield self.get_wxuser_openid_wechat_id(
-            openid=openid, wechat_id=qx_wechat_id)
-
         # 如果获取到了 unionid，将所有该 unionid 的 wxuser 的 sysuser_id 设置为当前用户 id
         if userinfo.unionid:
             yield self.user_wx_user_ds.update_wxuser(
@@ -192,8 +189,11 @@ class UserPageService(PageService):
                 fields={"sysuser_id": user_id}
             )
 
+        qx_wxuser = yield self.get_wxuser_openid_wechat_id(
+            openid=openid, wechat_id=qx_wechat_id)
+
         # 如果 qx_wxuser.sysuser_id = 0 表示只关注过，但是没有打开过页面
-        if qx_wxuser and (qx_wxuser.sysuser_id == 0 or qx_wxuser.sysuser_id == user_id):
+        if qx_wxuser:
             yield self.user_wx_user_ds.update_wxuser(
                 conds={"id": qx_wxuser.id},
                 fields={
