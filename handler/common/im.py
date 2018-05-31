@@ -117,21 +117,20 @@ class UnreadCountHandler(BaseHandler):
         return g_event
 
 
-_pool = redis.ConnectionPool(
-    host=settings["store_options"]["redis_host"],
-    port=settings["store_options"]["redis_port"],
-    max_connections=settings["store_options"]["max_connections"])
-
-_redis = redis.StrictRedis(connection_pool=_pool)
-
-
 class ChatWebSocketHandler(websocket.WebSocketHandler):
     """处理 Chat 的各种 webSocket 传输，直接继承 tornado 的 WebSocketHandler
     """
 
+    _pool = redis.ConnectionPool(
+        host=settings["store_options"]["redis_host"],
+        port=settings["store_options"]["redis_port"],
+        max_connections=settings["store_options"]["max_connections"])
+
+    _redis = redis.StrictRedis(connection_pool=_pool)
+
     def __init__(self, application, request, **kwargs):
         super(ChatWebSocketHandler, self).__init__(application, request, **kwargs)
-        self.redis_client = _redis
+        self.redis_client = self._redis
         self.chatroom_channel = ''
         self.hr_channel = ''
         self.hr_id = 0
@@ -292,9 +291,16 @@ class ChatRoomHandler(BaseHandler):
 class ChatHandler(BaseHandler):
     """聊天相关处理"""
 
+    _pool = redis.ConnectionPool(
+        host=settings["store_options"]["redis_host"],
+        port=settings["store_options"]["redis_port"],
+        max_connections=settings["store_options"]["max_connections"])
+
+    _redis = redis.StrictRedis(connection_pool=_pool)
+
     def __init__(self, application, request, **kwargs):
         super(ChatHandler, self).__init__(application, request, **kwargs)
-        self.redis_client = _redis
+        self.redis_client = self._redis
         self.chatroom_channel = ''
         self.hr_channel = ''
         self.hr_id = 0
