@@ -218,7 +218,7 @@ class UserSurveyHandler(BaseHandler):
                                         ""
                                     ]
                                 ],
-                                "field_title": "最近职位",
+                                "field_title": "当前/最近职位",
                                 "field_description": "请填写职位",
                                 "validate_re": "[\\s\\S]{1,100}"
                             }
