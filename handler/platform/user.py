@@ -206,7 +206,7 @@ class UserSurveyHandler(BaseHandler):
                                 "error_msg": "最近工作职位最多只允许输入100个字符",
                                 "field_type": 0,
                                 "company_id": 0,
-                                "field_name": "current_parent",
+                                "field_name": "current_position",
                                 "required": 0,
                                 "id": 0,
                                 "priority": 0,
