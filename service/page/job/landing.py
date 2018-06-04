@@ -1,22 +1,17 @@
 # coding=utf-8
 
-import json
-import re
-from tornado import gen, httpclient
-
+from tornado import gen
 from service.page.base import PageService
-
 from util.common import ObjectDict
-from util.tool.str_tool import to_str
 from util.tool.dict_tool import sub_dict
 from util.tool.str_tool import split, set_literl
 from util.tool.iter_tool import list_dedup_list
 import conf.common as const
 import re
-from setting import settings
-
 import conf.platform as platform_const
 from util.common.es import BaseES
+from pypinyin import lazy_pinyin
+import pypinyin
 
 
 class LandingPageService(PageService):
@@ -334,33 +329,55 @@ class LandingPageService(PageService):
 
         self.logger.debug(conf_search_seq_plus)
 
+        def pinyin_initials(field):
+            en = ""
+            if field and type(field) != int:
+                en = lazy_pinyin(field, style=pypinyin.INITIALS, strict=False)
+            return en
         # 构建 [{"text": XXX, "value": XXX}, ...] 的形式
         positions_data_values = []
         for e in positions_data:
             to_append = []
             for k in key_order:
                 if k == 'child_company_abbr':
-                    to_append.append(e.get(k))
+                    c_com = e.get(k)
+                    en = pinyin_initials(c_com.get("text"))
+                    c_com.update(en=en[0] if en else "")
+                    to_append.append(c_com)
 
                 elif k == 'candidate_source_name':
-                    to_append.append({"text": e.get(k), "value": const.CANDIDATE_SOURCE_SEARCH_REVERSE.get(e.get(k))})
+                    en = pinyin_initials(e.get(k))
+                    to_append.append({"text": e.get(k), "value": const.CANDIDATE_SOURCE_SEARCH_REVERSE.get(e.get(k)),
+                                      "en": en[0] if en else ""})
 
                 elif k == 'employment_type_name':
-                    to_append.append({"text": e.get(k), "value": const.EMPLOYMENT_TYPE_SEARCH_REVERSE.get(e.get(k))})
+                    en = pinyin_initials(e.get(k))
+                    to_append.append({"text": e.get(k), "value": const.EMPLOYMENT_TYPE_SEARCH_REVERSE.get(e.get(k)),
+                                      "en": en[0] if en else ""})
                 else:
-                    to_append.append({"text": e.get(k), "value": e.get(k)})
+                    en = pinyin_initials(e.get(k))
+                    to_append.append({"text": e.get(k), "value": e.get(k), "en": en[0] if en else ""})
             # 将链接参数拼接进筛选条件列表
             for s in display_key_dict:
                 if s == 'child_company_abbr':
-                    to_append.append(e.get(s))
+                    c_com = e.get(s)
+                    en = pinyin_initials(c_com.get("text"))
+                    c_com.update(en=en[0] if en else "")
+                    to_append.append(c_com)
 
                 elif s == 'candidate_source_name':
-                    to_append.append({"text": e.get(s), "value": const.CANDIDATE_SOURCE_SEARCH_REVERSE.get(e.get(s))})
+                    en = pinyin_initials(e.get(s))
+                    to_append.append({"text": e.get(s), "value": const.CANDIDATE_SOURCE_SEARCH_REVERSE.get(e.get(s)),
+                                      "en": en[0] if en else ""})
 
                 elif s == 'employment_type_name':
-                    to_append.append({"text": e.get(s), "value": const.EMPLOYMENT_TYPE_SEARCH_REVERSE.get(e.get(s))})
+                    en = pinyin_initials(e.get(s))
+                    to_append.append({"text": e.get(s), "value": const.EMPLOYMENT_TYPE_SEARCH_REVERSE.get(e.get(s)),
+                                      "en": en[0] if en else ""})
                 else:
-                    to_append.append({"text": e.get(s), "value": e.get(s)})
+                    en = pinyin_initials(e.get(s))
+                    to_append.append({"text": e.get(s), "value": e.get(s),
+                                      "en": en[0] if en else ""})
             positions_data_values.append(to_append)
 
         # 将构建出来的结果去重，作为返回中的 values 属性

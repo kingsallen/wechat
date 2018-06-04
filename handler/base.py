@@ -141,6 +141,7 @@ class BaseHandler(MetaBaseHandler):
                         self.logger.debug("来自企业号的静默授权, openid:{}".format(openid))
                         self._wxuser = yield self._handle_ent_openid(
                             openid, self._unionid)
+                        self.logger.info("来自企业号的静默授权, openid:{}, _unionid:{}".format(openid, self._unionid))
                     else:
                         self.logger.debug("来自企业号的 code 无效")
 
@@ -356,6 +357,7 @@ class BaseHandler(MetaBaseHandler):
             )
             self._session_id = self._make_new_session_id(
                 session.qxuser.sysuser_id)
+            self.logger.info("session_id:{}-----unionid:{}".format(self._session_id, self._unionid))
             self._pass_session.save_qx_sessions(
                 self._session_id, session.qxuser)
             self.set_secure_cookie(

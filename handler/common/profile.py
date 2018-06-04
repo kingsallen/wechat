@@ -51,6 +51,12 @@ class ProfileNewHandler(BaseHandler):
     @tornado.gen.coroutine
     def post(self):
 
+        has_profile, profile = yield self.profile_ps.has_profile(self.current_user.sysuser.id)
+        if has_profile:
+            message = "简历已存在，请返回个人档案页刷新"
+            self.send_json_error(message=message)
+            return
+
         profile = ObjectDict(json_decode(self.request.body)).profile
 
         # 姓名必填
@@ -194,7 +200,7 @@ class ProfilePreviewHandler(BaseHandler):
             is_skip = False
         # -8<---8<---8<---8<---8<---8<---8<---8<---8<---8<---8<---8<---8<---
 
-        other_key_name_mapping = yield self.profile_ps.get_others_key_name_mapping()
+        other_key_name_mapping = yield self.profile_ps.get_others_key_name_mapping(company_id=self.current_user.company.id)
 
         no_name = not bool(self.current_user.sysuser.name)
         need_mobile_validate = not bool(self.current_user.sysuser.mobileverified)
@@ -286,7 +292,7 @@ class ProfileHandler(BaseHandler):
         profile_tpl = yield self.profile_ps.profile_to_tempalte(
             self.current_user.profile)
 
-        other_key_name_mapping = yield self.profile_ps.get_others_key_name_mapping()
+        other_key_name_mapping = yield self.profile_ps.get_others_key_name_mapping(select_all=True)
 
         self.params.share = self._share(self.current_user.profile.profile.get("uuid"), profile_tpl)
         self.render_page(
@@ -755,7 +761,7 @@ class ProfileSectionHandler(BaseHandler):
         if hasattr(model, "__status") and getattr(model, "__status") == 'x':
             verb = "delete"
         else:
-            if model.description and len(model.description) > 1000:
+            if model.description and len(model.description) > 5000:
                 self.send_json_error(message=msg.PROFILE_OVERLENGTH % "工作描述")
                 return
             verb = 'update' if model.id else 'create'

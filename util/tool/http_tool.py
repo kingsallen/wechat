@@ -60,11 +60,12 @@ tornado.httpclient.AsyncHTTPClient.configure(
 
 
 @gen.coroutine
-def http_fetch(route, data=None, timeout=30):
+def http_fetch(route, data=None, timeout=30, raise_error=True):
     """使用 www-form 形式 HTTP 异步 POST 请求
     :param route:
     :param data:
     :param timeout:
+    :param raise_error:
     """
 
     if data is None:
@@ -84,7 +85,7 @@ def http_fetch(route, data=None, timeout=30):
         )
 
         logger.info("[http_fetch][uri: {}][req_body: {}]".format(route, request.body))
-        response = yield http_client.fetch(request)
+        response = yield http_client.fetch(request, raise_error=raise_error)
         logger.info("[http_fetch][uri: {}][res_body: {}]".format(route, response.body))
 
     except tornado.httpclient.HTTPError as e:

@@ -23,6 +23,7 @@ import handler.common.cellphone
 import handler.common.im
 import handler.common.interest
 import handler.common.jssdkerror
+import handler.common.jslog
 import handler.common.passport
 import handler.common.position
 import handler.common.profile
@@ -75,16 +76,18 @@ common_routes = [
     (r"/application/email",                          handler.common.application.ApplicationEmailHandler,        {"event": "application_email"}),
     (r"/positionfav/([0-9]+)",                       handler.common.position.PositionFavHandler,                {"event": "position_fav"}),
     (r"/resume/import",                              handler.common.resume.ResumeImportHandler,                 {"event": "resume_auth"}),
-    (r"/resume/linkedin",                            handler.common.resume.LinkedinImportHandler,               {"event": "resume_linkedin"}),
+    (r"/resume/thirdparty",                          handler.common.resume.ThirdpartyImportHandler,             {"event": "resume_thirdparty"}),
+    (r"/resume/maimai",                              handler.common.resume.MaimaiImportHandler,                 {"event": "resume_maimai"}),
     (r"/profile/?",                                  handler.common.profile.ProfileHandler,                     {"event": "profile_profile"}),
     (r"/profile/view/([A-Z0-9a-z_\-]+)*",            handler.common.profile.ProfileViewHandler,                 {"event": "profile_view"}),
     (r"/profile/preview/?",                          handler.common.profile.ProfilePreviewHandler,              {"event": "profile_preview"}),
     (r"/profile/custom/?",                           handler.common.profile.ProfileCustomHandler,               {"event": "profile_customcv"}),
     (r"/image/?",                                    handler.common.image.ImageFetchHandler,                    {"event": "image_fetch"}),
-
+    (r"/chat/room[\/]*([0-9]+)*",                    handler.common.im.ChatRoomHandler,                         {"event": "im_room"}),
     # websocket
     (r"/websocket/([A-Za-z0-9_]{1,32})",             handler.common.im.ChatWebSocketHandler),
 
+    (r"/api/config[\/]?",                            handler.common.app.ConfigHandler,                              {"event": "wechat_config"}),
     (r"/api/dict/city/?",                            handler.common.dictionary.DictCityHandler,                 {"event": "dict_city"}),
     (r"/api/dict/industry/?",                        handler.common.dictionary.DictIndustryHandler,             {"event": "dict_industry"}),
     (r"/api/dict/function/?",                        handler.common.dictionary.DictFunctionHandler,             {"event": "dict_function"}),
@@ -112,6 +115,7 @@ common_routes = [
     (r"/api/chat[\/]*([a-z]+)*",                     handler.common.im.ChatHandler,                             {"event": "chat_"}),
     (r"/api/application",                            handler.common.application.ApplicationHandler,             {"event": "application_profile"}),
     (r"/api/JSSDKError",                             handler.common.jssdkerror.JSSDKErrorHandler,               {"event": "frontend_jssdkerror"}),
+    (r"/api/jslog",                                  handler.common.jslog.JSLogHandler,                         {"event": "frontend_jslog"}),
     (r"/api/collectlog",                             handler.common.logcollector.LogCollectorHandler,           {"event": "collect_log"}),
     (r"/api/captcha",                                handler.common.captcha.CaptchaHandler,                     {"event": "captcha"})
 ]
@@ -127,6 +131,7 @@ platform_routes = [
     (r"/company/team",                               handler.platform.team.TeamIndexHandler,                    {"event": "team_info"}),
     (r"/employee/bindemail/?",                       handler.platform.employee.EmployeeBindEmailHandler,        {"event": "employee_bindemail"}),
     (r"/employee/custominfo/?",                      handler.platform.employee.CustomInfoHandler,               {"event": "employee_custominfo"}),
+    (r"/employee/binded-custominfo/?",               handler.platform.employee.BindCustomInfoHandler,           {"event": "employee_custominfo_binded"}),
     (r"/employee/binded/?",                          handler.platform.employee.BindedHandler,                   {"event": "employee_binded"}),
     (r"/employee/recom/ignore/?",                    handler.platform.recom.RecomIgnoreHandler,                 {"event": "recom_ignore"}),
     (r"/employee/recom/?",                           handler.platform.recom.RecomCandidateHandler,              {"event": "recom_normal"}),
@@ -145,6 +150,7 @@ platform_routes = [
     (r"/api/groupcompany/check/?",                   handler.platform.groupcompany.GroupCompanyCheckHandler,    {"event": "groupcompany_check"}),
     (r"/api/employee/bind/?",                        handler.platform.employee.EmployeeBindHandler,             {"event": "employee_bind"}),
     (r"/api/employee/unbind/?",                      handler.platform.employee.EmployeeUnbindHandler,           {"event": "employee_unbind"}),
+    (r"/api/employee/bind-info/?",                   handler.platform.employee.BindInfoHandler,                 {"event": "employee_bind_info"}),
     (r"/api/employee/recommendrecords/?",            handler.platform.employee.RecommendRecordsHandler,         {"event": "employee_recommendrecords"}),
     (r"/api/employee/rewards/?",                     handler.platform.employee.AwardsHandler,                   {"event": "employee_awards"}),
     (r"/api/position/empnotice/?",                   handler.platform.position.PositionEmpNoticeHandler,        {"event": "position_empnotice"}),
@@ -168,7 +174,6 @@ qx_routes = [
     (r"/api/position/(?P<position_id>\d+)",          handler.qx.position.PositionHandler,                       {"event": "position_info"}),
     (r"/api/positions[\/]?",                         handler.qx.aggregation.AggregationHandler,                 {"event": "position_aggregation"}),
     (r"/api/positions/recommend/(\d+)*",             handler.qx.position.PositionRecommendHandler,              {"event": "position_recommend"}),
-    (r"/api/config[\/]?",                            handler.qx.app.ConfigHandler,                              {"event": "wechat_config"}),
     (r"/api/search/condition/*",                     handler.qx.search.SearchConditionHandler,                  {"event": "search_condition" }),
     (r"/api/search/condition/(\d+)*",                handler.qx.search.SearchConditionHandler,                  {"event": "search_condition" }),
     (r"/api/search/([a-z_]+)",                       handler.qx.search.SearchCityHandler,                       {"event": "search_condition"}),

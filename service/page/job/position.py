@@ -69,7 +69,6 @@ class PositionPageService(PageService):
             "visitnum": position_res.visitnum,
             "accountabilities": position_res.accountabilities,
             "requirement": position_res.requirement,
-            "feature": position_res.feature,
             "status": position_res.status,
             "publisher": position_res.publisher,
             "source": position_res.source,
@@ -81,10 +80,6 @@ class PositionPageService(PageService):
         })
 
         # 后置处理：
-        # 福利特色 需要分割
-        if position_res.feature:
-            position.feature = split(position_res.feature, ["#"])
-
         # 需要折行
         if position_res.accountabilities:
             position.accountabilities = split(position_res.accountabilities)
@@ -298,13 +293,14 @@ class PositionPageService(PageService):
             if cms_module:
                 module_id = cms_module.id
                 module_name = cms_module.module_name
+                module_link = cms_module.link
                 cms_media = yield self.hr_cms_media_ds.get_media_list(conds={
                     "disable": 0,
                     "module_id": module_id
                 })
                 res_ids = [m.res_id for m in cms_media]
                 res_dict = yield self.hr_resource_ds.get_resource_by_ids(res_ids)
-                res = make_position_detail_cms(cms_media, res_dict, module_name)
+                res = make_position_detail_cms(cms_media, res_dict, module_name, module_link)
         return res
 
     @gen.coroutine
@@ -566,3 +562,8 @@ class PositionPageService(PageService):
             res_list.append(pos)
 
         return res_list
+
+    @gen.coroutine
+    def get_position_feature(self, position_id):
+        result, data = yield self.infra_position_ds.get_position_feature(position_id)
+        return data

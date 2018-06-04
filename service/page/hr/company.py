@@ -10,7 +10,7 @@ from tornado import gen
 from service.page.base import PageService
 from util.tool.url_tool import make_static_url
 from util.tool.dict_tool import sub_dict
-from util.tool.str_tool import is_odd, split, gen_salary
+from util.tool.str_tool import is_odd, split, gen_salary, set_literl
 from util.common.decorator import log_time
 
 cached_company_sug_wechat = None
@@ -48,7 +48,8 @@ class CompanyPageService(PageService):
             }
             company_conf_res = yield self.hr_company_conf_ds.get_company_conf(conds)
             if company_conf_res is None:
-                self.logger.error('get_company_conf.conds:%s, get_company_conf.company_conf_res:%s' % (conds, company_conf_res))
+                self.logger.error(
+                    'get_company_conf.conds:%s, get_company_conf.company_conf_res:%s' % (conds, company_conf_res))
 
             # 搜索页页面栏目排序
             search_seq = []
@@ -79,8 +80,9 @@ class CompanyPageService(PageService):
                 "conf_application_time": company_conf_res.get("application_time", ""),  # 新JD开通申请时间
                 "conf_hr_chat": company_conf_res.get("hr_chat", 1),  # IM 聊天开关
                 "conf_show_in_qx": company_conf_res.get("show_in_qx", 1),  # 公司信息、团队信息、职位信息等只在仟寻展示
-                "conf_employee_slug": company_conf_res.get("employee_slug", "员工"), # 自定义员工称谓
-                "conf_display_locale": company_conf_res.get("display_locale", "")
+                "conf_employee_slug": company_conf_res.get("employee_slug", "员工"),  # 自定义员工称谓
+                "conf_display_locale": company_conf_res.get("display_locale", ""),
+                "conf_veryeast_switch": company_conf_res.get("veryeast_switch", 0)  # 最佳东方简历导入开关
             })
 
             # 处理公司自定义团队名称
@@ -140,7 +142,9 @@ class CompanyPageService(PageService):
 
         hr_company_account = yield self.hr_company_account_ds.get_company_account(conds={"account_id": publisher})
         if hr_company_account is None:
-            self.logger.error('get_real_company_id.publisher:%s, hr_company_account.company_id:%s, get_real_company_id.hr_company_account:%s' % (publisher, company_id, hr_company_account))
+            self.logger.error(
+                'get_real_company_id.publisher:%s, hr_company_account.company_id:%s, get_real_company_id.hr_company_account:%s' % (
+                publisher, company_id, hr_company_account))
         real_company_id = hr_company_account.company_id or company_id
 
         raise gen.Return(real_company_id)
@@ -229,7 +233,7 @@ class CompanyPageService(PageService):
 
         res_list = list()
         ret = yield self.thrift_position_ds.get_company_positions(
-                company_id, page_no, page_size)
+            company_id, page_no, page_size)
         if not ret.data:
             return res_list
 
@@ -249,24 +253,9 @@ class CompanyPageService(PageService):
     def create_company(self, params):
         """我也要招人，创建公司信息，同时必须要创建 hr 与 company 对应关系，否则 hr 平台会报错"""
 
-        company_id = yield self.hr_company_ds.create_company({
-            "type": 1,
-            "name": params.name,
-            "source": params.source,
-        })
-
-        return company_id
-
-    @gen.coroutine
-    def create_company_accounts(self, company_id, hr_id):
-        """我也要招人，创建公司信息，同时必须要创建 hr 与 company 对应关系，否则 hr 平台会报错"""
-
-        yield self.hr_company_account_ds.create_company_accounts({
-            "company_id": company_id,
-            "account_id": hr_id,
-        })
-
-        return True
+        ret = yield self.infra_company_ds.create_company(params)
+        status, data, message = ret.status, ret.data, ret.message
+        return status, message, data
 
     @gen.coroutine
     def update_company(self, conds, fields):
@@ -291,6 +280,7 @@ class CompanyPageService(PageService):
         """根据company_id获取该公司主hr信息，
         如果该公司有超级账号，返回超级账号hr信息，
         如果该公司有普通账号，返回普通账号hr信息，
+        如果是子公司，返回子账号HR信息，
         如果该公司没有hr信息，返回默认信息
         :param company_id: 公司id
         :return a dict with hr_info, including hr_id and hr_logo
@@ -304,8 +294,20 @@ class CompanyPageService(PageService):
 
         if not main_hr_account:
             main_hr_account = yield self.user_hr_account_ds.get_hr_account(
-                conds={'company_id':   company_id, 'disable': 1,
+                conds={'company_id': company_id, 'disable': 1,
                        'account_type': 2}
+            )
+        if not main_hr_account:
+            hr_account = yield self.hr_company_account_ds.get_company_accounts_list(
+                conds={'company_id': company_id},
+                fields=['account_id']
+            )
+            hr_account_id = []
+            for hr in hr_account:
+                hr_account_id.append(hr.get('account_id'))
+            main_hr_account = yield self.user_hr_account_ds.get_hr_account(
+                conds={'disable': 1},
+                appends=['and id in %s order by id asc' % set_literl(hr_account_id)]
             )
 
         assert main_hr_account
@@ -315,7 +317,7 @@ class CompanyPageService(PageService):
 
         elif main_hr_account.wxuser_id:
             hr_wxuser = yield self.user_wx_user_ds.get_wxuser(
-                conds={'id': main_hr_account.wxuser_id })
+                conds={'id': main_hr_account.wxuser_id})
             if hr_wxuser:
                 ret.update(hr_logo=make_static_url(hr_wxuser.headimgurl))
 

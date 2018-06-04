@@ -15,7 +15,6 @@ from util.common import ObjectDict
 from util.tool.dict_tool import sub_dict
 from util.tool.re_checker import revalidator
 from util.tool.url_tool import make_static_url, make_url
-from util.wechat.template import employee_refine_custom_fields_tpl
 
 
 class EmployeePageService(PageService):
@@ -424,20 +423,41 @@ class EmployeePageService(PageService):
         """
         根据公司 id 返回员工认证自定义字段配置 -> list
         并按照 forder 字段排序返回
+        将数据整理为前端需要的json格式
         """
         selects_from_ds = yield self.hr_employee_custom_fields_ds. \
             get_employee_custom_field_records({
-            "company_id": company_id,
-            "status": const.OLD_YES,
-            "disable": const.NO
-        })
+                "company_id": company_id,
+                "status": const.OLD_YES,
+                "disable": const.NO
+            })
 
-        selects = sorted(selects_from_ds, key=lambda x: x.forder)
+        selects_from_ds = sorted(selects_from_ds, key=lambda x: x.forder)
 
-        for s in selects:
-            s.fvalues = json.loads(s.fvalues)
-            s.required = s.mandatory == const.YES
-        return selects
+        selects_list = list()
+
+        for s in selects_from_ds:
+            value_list = list()
+            fvalues = json.loads(s.fvalues)
+            indexs = len(fvalues) - 1
+            i = 0
+            while indexs >= i:
+                values = list()
+                values.append(fvalues[i])
+                values.append(i)
+                i += 1
+                value_list.append(values)
+            input_type = const.FRONT_TYPE_FIELD_TEXT if s.option_type == 1 else const.FRONT_TYPE_FIELD_SELCET_POPUP
+            selects = ObjectDict({
+                'field_title': s.fname,
+                'field_type': input_type,
+                'field_name': 'key_' + str(s.id),
+                'required': 0 if s.mandatory == 1 else 1,  # 0为必须
+                'field_value': value_list,
+                "validate_error": "文本长度不能超过50个字符（汉字不超过25）"  # 字段不符合验证时的提示信息
+            })
+            selects_list.append(selects)
+        return selects_list
 
     @gen.coroutine
     def update_employee_custom_fields(self, employee_id, custom_fields_json):
@@ -449,32 +469,6 @@ class EmployeePageService(PageService):
         self, user_id, company_id, custom_fields_json):
         yield self.thrift_employee_ds.set_employee_custom_info_email_pending(
             user_id, company_id, custom_fields_json)
-
-    @gen.coroutine
-    def send_emp_custom_info_template(self, current_user):
-        """发送员工认证自定义字段填写template
-        """
-
-        if current_user.wxuser:
-            company_id = current_user.company.id
-            custom_fields = yield self.get_employee_custom_fields(company_id)
-
-            self.logger.debug("custom_fields: %s" % custom_fields)
-
-            if not custom_fields:
-                return
-
-            link = make_url(path.EMPLOYEE_CUSTOMINFO,
-                            host=settings['platform_host'],
-                            wechat_signature=current_user.wechat.signature,
-                            from_wx_template='o')
-
-            yield employee_refine_custom_fields_tpl(
-                wechat_id=current_user.wechat.id,
-                openid=current_user.wxuser.openid,
-                link=link,
-                company_name=current_user.company.name
-            )
 
     @gen.coroutine
     def get_employee_survey_info(self, user):

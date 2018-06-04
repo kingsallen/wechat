@@ -14,7 +14,7 @@ from util.common.exception import MyException
 from util.common.cipher import encode_id
 from util.common.decorator import handle_response, check_employee, NewJDStatusCheckerAddFlag, authenticated, log_time
 from util.common.mq import award_publisher
-from util.tool.str_tool import gen_salary, add_item, split, gen_degree_v2, gen_experience_v2
+from util.tool.str_tool import gen_salary, add_item, split, gen_degree_v2, gen_experience_v2, languge_code_from_ua
 from util.tool.url_tool import url_append_query
 from util.wechat.template import position_view_five_notice_tpl, position_share_notice_employee_tpl
 from util.common.decorator import log_time
@@ -77,7 +77,9 @@ class PositionHandler(BaseHandler):
                 can_apply, team.id if team else 0, did, teamname_custom)
             module_job_description = self._make_json_job_description(position_info)
             module_job_need = self._make_json_job_need(position_info)
-            module_feature = self._make_json_job_feature(position_info)
+            position_feature = yield self.position_ps.get_position_feature(position_id)
+            module_feature = self._make_json_job_feature(position_feature)
+
             module_position_recommend = self._make_recommend_positions(self.locale, recomment_positions_res)
 
             position_data = ObjectDict()
@@ -398,11 +400,11 @@ class PositionHandler(BaseHandler):
         attr = []
 
         if position_info.candidate_source:
-            attr.append("{0}".format(
+            attr.append("招聘类型 {0}".format(
                 self.locale.translate(position_info.candidate_source)))
 
         if position_info.employment_type:
-            attr.append("{0}".format(
+            attr.append("工作性质 {0}".format(
                 self.locale.translate(position_info.employment_type)))
 
         if self.current_user.company.conf_job_occupation and position_info.job_occupation:
@@ -432,15 +434,17 @@ class PositionHandler(BaseHandler):
 
         return data
 
-    def _make_json_job_feature(self, position_info):
+    def _make_json_job_feature(self, position_feature):
         """构造职位福利特色"""
-        if not position_info.feature:
+        feature = []
+        if not position_feature:
             data = None
         else:
+            for f in position_feature:
+                feature.append(f['feature'])
             data = ObjectDict({
-                "data": position_info.feature,
+                "data": feature
             })
-
         return data
 
     def _make_json_job_company_info(self, company_info, did):
@@ -699,7 +703,7 @@ class PositionHandler(BaseHandler):
     @gen.coroutine
     def _make_team(self, team, teamname_custom):
         """所属团队，构造数据"""
-        more_link = self.make_url(path.TEAM_PATH.format(team.id), self.params),
+        more_link = team.link if team.link else self.make_url(path.TEAM_PATH.format(team.id), self.params)
         res = yield self.position_ps.get_team_data(team, more_link, teamname_custom)
         raise gen.Return(res)
 
@@ -771,7 +775,10 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
     def get(self):
 
         infra_params = self.make_position_list_infra_params()
-
+        display_locale = self.current_user.company.conf_display_locale
+        if not display_locale:
+            useragent = self.request.headers.get('User-Agent')
+            display_locale = languge_code_from_ua(useragent)
         # 校验一下可能出现的参数：
         # hb_c: 红包活动id
         # did: 子公司id
@@ -851,7 +858,6 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
             position_ex["abbreviation"] = pos.abbreviation
             position_ex["department"] = pos.department
             position_ex["province"] = pos.province
-            position_ex["city"] = pos.city
             position_ex["salary"] = pos.salary
             position_ex["logo"] = pos.logo
             position_ex["company_name"] = pos.company_name
@@ -871,6 +877,12 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
             position_ex['candidate_source'] = pos.candidate_source
             position_ex['job_need'] = pos.requirement
 
+            if display_locale == "en_US":
+                position_ex["city"] = pos.city_ename if pos.city_ename else pos.city
+                position_ex["salary"] = "Salary negotiable" if pos.salary == "薪资面议" else pos.salary
+            else:
+                position_ex["city"] = pos.city
+                position_ex["salary"] = pos.salary
             total_count = pos.totalNum
             # 判断职位投递是否达到上限
             can_apply = False
@@ -1095,6 +1107,11 @@ class PositionListSugHandler(PositionListInfraParamsMixin, BaseHandler):
         sug搜索
         :return:
         """
+        # todo:注释
+        # sug = ObjectDict()
+        # sug.list = []
+        # return self.send_json_success(sug)
+
         infra_params = self.make_position_list_infra_params()
         sug = ObjectDict()
         # 获取五条sug数据

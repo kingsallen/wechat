@@ -113,7 +113,7 @@ def cache(prefix=None, key=None, ttl=60, hash=True, lock=True, separator=":"):
                     cache_data = base_cache.get(redis_key)
                 except Exception as e:
                     logger.error(e)
-                    
+
                 if cache_data is None:
                     cache_data = yield func(*args, **kwargs)
                     if cache_data is not None:
@@ -213,6 +213,16 @@ def check_and_apply_profile(func):
                 "use_email": False,
                 "goto_custom_url": '',
             }
+            # 获取最佳东方导入开关
+            company = yield self.company_ps.get_company({'id': self.current_user.wechat.company_id}, need_conf=True)
+            importer = ObjectDict(profile_import_51job=True,
+                                  profile_import_zhilian=True,
+                                  profile_import_liepin=True,
+                                  profile_import_linkedin=True,
+                                  profile_import_maimai=True,
+                                  profile_import_veryeast=False)
+            if company.conf_veryeast_switch == 1:
+                importer.update(profile_import_veryeast=True)
 
             # 如果是申请中跳转到这个页面，需要做详细检查
             current_path = self.request.uri.split('?')[0]
@@ -255,33 +265,24 @@ def check_and_apply_profile(func):
                 # 从侧边栏直接进入，允许使用 email 创建 profile
                 redirect_params.update(use_email=True)
 
-            # ========== LINKEDIN OAUTH ==============
-            # 拼装 linkedin oauth 路由
-            redirect_uri = self.make_url(path.RESUME_LINKEDIN,
-                                         recom=self.params.recom,
-                                         pid=self.params.pid,
-                                         wechat_signature=self.current_user.wechat.signature)
+            # ========== MAIMAI OAUTH ===============
+            # 拼装脉脉 oauth 路由
+            cusdata = "?recom={}&pid={}&wechat_signature={}".format(self.params.recom, self.params.pid,
+                                                                    self.current_user.wechat.signature)
+            # 加上渠道
+            cusdata = "{}&way={}".format(cusdata, const.FROM_MAIMAI)
+            # 脉脉cusdata中不允许出现 '&' ，考虑我们公司目前的使用的参数中不会出现 '$$' , 将 '&' 转为 '$$' 使用
+            cusdata = cusdata.replace("&", "$$")
+            self.logger.info("[maimai_url_cusdata: {}]".format(cusdata))
 
-            linkedin_url = self.make_url(path.LINKEDIN_AUTH, params=ObjectDict(
-                response_type="code",
-                client_id=self.settings.linkedin_client_id,
-                scope="r_basicprofile r_emailaddress",
-                redirect_uri=redirect_uri
-            ), host="www.linkedin.com")
-            # 由于 make_url 会过滤 state，但 linkedin 必须传 state，故此处手动添加
+            cusdata = urlencode(dict(cusdata=cusdata))
+            appid = self.settings.maimai_appid
+            maimai_url = path.MAIMAI_ACCESSTOKEN.format(appid=appid, cusdata=cusdata)
 
-            state = encode_id(0)
-            if self.current_user.sysuser:
-                state = encode_id(self.current_user.sysuser.id)
-
-            linkedin_url = "{}&state={}".format(linkedin_url, state)
-
-            redirect_params.update(linkedin_url=linkedin_url)
-            # ========== LINKEDIN OAUTH ==============
-
+            redirect_params.update(maimai_url=maimai_url)
             print("redirect_params: %s" % redirect_params)
             self.render(template_name='refer/neo_weixin/sysuser_v2/importresume.html',
-                        **redirect_params)
+                        **redirect_params, importer=importer)
 
     return wrapper
 
@@ -333,6 +334,8 @@ def authenticated(func):
                 # api 类接口，不适合做302静默授权，微信服务器不会跳转
                 self._oauth_service.wechat = self.current_user.wechat
                 self._oauth_service.state = to_hex(self.current_user.qxuser.unionid)
+                self.logger.info(
+                    "静默授权：state:{}-----unionid:{}".format(self._oauth_service.state, self.current_user.qxuser.unionid))
                 url = self._oauth_service.get_oauth_code_base_url()
                 self.redirect(url)
                 return
@@ -475,7 +478,6 @@ class NewJDStatusCheckerAddFlag(BaseNewJDStatusChecker):
 
 
 def log_time(func):
-
     @functools.wraps(func)
     @gen.coroutine
     def wrapper(self, *args, **kwargs):
@@ -485,7 +487,7 @@ def log_time(func):
         c = {
             "for": "[hb_debug]",
             "func_name": func.__qualname__,
-            "time": (end-start)*1000
+            "time": (end - start) * 1000
         }
         self.logger.info(json_dumps(c))
         return r

@@ -23,6 +23,7 @@ class HRChatRoomVO(object):
      - createTime
      - status
      - unReadNum
+     - apply
     """
 
     thrift_spec = (
@@ -34,9 +35,10 @@ class HRChatRoomVO(object):
         (5, TType.STRING, 'createTime', 'UTF8', None, ),  # 5
         (6, TType.I32, 'status', None, None, ),  # 6
         (7, TType.I32, 'unReadNum', None, None, ),  # 7
+        (8, TType.BOOL, 'apply', None, None, ),  # 8
     )
 
-    def __init__(self, id=None, userId=None, name=None, headImgUrl=None, createTime=None, status=None, unReadNum=None,):
+    def __init__(self, id=None, userId=None, name=None, headImgUrl=None, createTime=None, status=None, unReadNum=None, apply=None,):
         self.id = id
         self.userId = userId
         self.name = name
@@ -44,6 +46,7 @@ class HRChatRoomVO(object):
         self.createTime = createTime
         self.status = status
         self.unReadNum = unReadNum
+        self.apply = apply
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -89,6 +92,11 @@ class HRChatRoomVO(object):
                     self.unReadNum = iprot.readI32()
                 else:
                     iprot.skip(ftype)
+            elif fid == 8:
+                if ftype == TType.BOOL:
+                    self.apply = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -126,6 +134,10 @@ class HRChatRoomVO(object):
         if self.unReadNum is not None:
             oprot.writeFieldBegin('unReadNum', TType.I32, 7)
             oprot.writeI32(self.unReadNum)
+            oprot.writeFieldEnd()
+        if self.apply is not None:
+            oprot.writeFieldBegin('apply', TType.BOOL, 8)
+            oprot.writeBool(self.apply)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -242,6 +254,111 @@ class HRChatRoomsVO(object):
             oprot.writeListBegin(TType.STRUCT, len(self.rooms))
             for iter6 in self.rooms:
                 iter6.write(oprot)
+            oprot.writeListEnd()
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class HRChatRoomsIndexVO(object):
+    """
+    Attributes:
+     - userId
+     - pageSize
+     - totalRow
+     - rooms
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'userId', None, None, ),  # 1
+        (2, TType.I32, 'pageSize', None, None, ),  # 2
+        (3, TType.I32, 'totalRow', None, None, ),  # 3
+        (4, TType.LIST, 'rooms', (TType.STRUCT, (HRChatRoomVO, HRChatRoomVO.thrift_spec), False), None, ),  # 4
+    )
+
+    def __init__(self, userId=None, pageSize=None, totalRow=None, rooms=None,):
+        self.userId = userId
+        self.pageSize = pageSize
+        self.totalRow = totalRow
+        self.rooms = rooms
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.userId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.I32:
+                    self.pageSize = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.I32:
+                    self.totalRow = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.LIST:
+                    self.rooms = []
+                    (_etype10, _size7) = iprot.readListBegin()
+                    for _i11 in range(_size7):
+                        _elem12 = HRChatRoomVO()
+                        _elem12.read(iprot)
+                        self.rooms.append(_elem12)
+                    iprot.readListEnd()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('HRChatRoomsIndexVO')
+        if self.userId is not None:
+            oprot.writeFieldBegin('userId', TType.I32, 1)
+            oprot.writeI32(self.userId)
+            oprot.writeFieldEnd()
+        if self.pageSize is not None:
+            oprot.writeFieldBegin('pageSize', TType.I32, 2)
+            oprot.writeI32(self.pageSize)
+            oprot.writeFieldEnd()
+        if self.totalRow is not None:
+            oprot.writeFieldBegin('totalRow', TType.I32, 3)
+            oprot.writeI32(self.totalRow)
+            oprot.writeFieldEnd()
+        if self.rooms is not None:
+            oprot.writeFieldBegin('rooms', TType.LIST, 4)
+            oprot.writeListBegin(TType.STRUCT, len(self.rooms))
+            for iter13 in self.rooms:
+                iter13.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -476,11 +593,11 @@ class UserChatRoomsVO(object):
             elif fid == 5:
                 if ftype == TType.LIST:
                     self.rooms = []
-                    (_etype10, _size7) = iprot.readListBegin()
-                    for _i11 in range(_size7):
-                        _elem12 = UserChatRoomVO()
-                        _elem12.read(iprot)
-                        self.rooms.append(_elem12)
+                    (_etype17, _size14) = iprot.readListBegin()
+                    for _i18 in range(_size14):
+                        _elem19 = UserChatRoomVO()
+                        _elem19.read(iprot)
+                        self.rooms.append(_elem19)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
@@ -513,8 +630,8 @@ class UserChatRoomsVO(object):
         if self.rooms is not None:
             oprot.writeFieldBegin('rooms', TType.LIST, 5)
             oprot.writeListBegin(TType.STRUCT, len(self.rooms))
-            for iter13 in self.rooms:
-                iter13.write(oprot)
+            for iter20 in self.rooms:
+                iter20.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -538,46 +655,52 @@ class UserChatRoomsVO(object):
 class ChatVO(object):
     """
     Attributes:
-     - id
+     - serverId
      - content
-     - create_time
      - speaker
      - origin
      - origin_str
      - msgType
-     - picUrl
+     - assetUrl
      - btnContent
      - roomId
      - positionId
+     - duration
+     - id
+     - createTime
     """
 
     thrift_spec = (
         None,  # 0
-        (1, TType.I32, 'id', None, None, ),  # 1
+        (1, TType.STRING, 'serverId', 'UTF8', None, ),  # 1
         (2, TType.STRING, 'content', 'UTF8', None, ),  # 2
-        (3, TType.STRING, 'create_time', 'UTF8', None, ),  # 3
-        (4, TType.BYTE, 'speaker', None, None, ),  # 4
-        (5, TType.BYTE, 'origin', None, None, ),  # 5
-        (6, TType.STRING, 'origin_str', 'UTF8', None, ),  # 6
-        (7, TType.STRING, 'msgType', 'UTF8', None, ),  # 7
-        (8, TType.STRING, 'picUrl', 'UTF8', None, ),  # 8
-        (9, TType.STRING, 'btnContent', 'UTF8', None, ),  # 9
-        (10, TType.I32, 'roomId', None, None, ),  # 10
-        (11, TType.I32, 'positionId', None, None, ),  # 11
+        (3, TType.BYTE, 'speaker', None, None, ),  # 3
+        (4, TType.BYTE, 'origin', None, None, ),  # 4
+        (5, TType.STRING, 'origin_str', 'UTF8', None, ),  # 5
+        (6, TType.STRING, 'msgType', 'UTF8', None, ),  # 6
+        (7, TType.STRING, 'assetUrl', 'UTF8', None, ),  # 7
+        (8, TType.STRING, 'btnContent', 'UTF8', None, ),  # 8
+        (9, TType.I32, 'roomId', None, None, ),  # 9
+        (10, TType.I32, 'positionId', None, None, ),  # 10
+        (11, TType.BYTE, 'duration', None, None, ),  # 11
+        (12, TType.I32, 'id', None, None, ),  # 12
+        (13, TType.STRING, 'createTime', 'UTF8', None, ),  # 13
     )
 
-    def __init__(self, id=None, content=None, create_time=None, speaker=None, origin=None, origin_str=None, msgType=None, picUrl=None, btnContent=None, roomId=None, positionId=None,):
-        self.id = id
+    def __init__(self, serverId=None, content=None, speaker=None, origin=None, origin_str=None, msgType=None, assetUrl=None, btnContent=None, roomId=None, positionId=None, duration=None, id=None, createTime=None,):
+        self.serverId = serverId
         self.content = content
-        self.create_time = create_time
         self.speaker = speaker
         self.origin = origin
         self.origin_str = origin_str
         self.msgType = msgType
-        self.picUrl = picUrl
+        self.assetUrl = assetUrl
         self.btnContent = btnContent
         self.roomId = roomId
         self.positionId = positionId
+        self.duration = duration
+        self.id = id
+        self.createTime = createTime
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -589,8 +712,8 @@ class ChatVO(object):
             if ftype == TType.STOP:
                 break
             if fid == 1:
-                if ftype == TType.I32:
-                    self.id = iprot.readI32()
+                if ftype == TType.STRING:
+                    self.serverId = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
@@ -599,48 +722,58 @@ class ChatVO(object):
                 else:
                     iprot.skip(ftype)
             elif fid == 3:
-                if ftype == TType.STRING:
-                    self.create_time = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 4:
                 if ftype == TType.BYTE:
                     self.speaker = iprot.readByte()
                 else:
                     iprot.skip(ftype)
-            elif fid == 5:
+            elif fid == 4:
                 if ftype == TType.BYTE:
                     self.origin = iprot.readByte()
                 else:
                     iprot.skip(ftype)
-            elif fid == 6:
+            elif fid == 5:
                 if ftype == TType.STRING:
                     self.origin_str = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
-            elif fid == 7:
+            elif fid == 6:
                 if ftype == TType.STRING:
                     self.msgType = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
-            elif fid == 8:
+            elif fid == 7:
                 if ftype == TType.STRING:
-                    self.picUrl = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                    self.assetUrl = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
-            elif fid == 9:
+            elif fid == 8:
                 if ftype == TType.STRING:
                     self.btnContent = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
-            elif fid == 10:
+            elif fid == 9:
                 if ftype == TType.I32:
                     self.roomId = iprot.readI32()
                 else:
                     iprot.skip(ftype)
-            elif fid == 11:
+            elif fid == 10:
                 if ftype == TType.I32:
                     self.positionId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 11:
+                if ftype == TType.BYTE:
+                    self.duration = iprot.readByte()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 12:
+                if ftype == TType.I32:
+                    self.id = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 13:
+                if ftype == TType.STRING:
+                    self.createTime = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
             else:
@@ -653,49 +786,186 @@ class ChatVO(object):
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
         oprot.writeStructBegin('ChatVO')
-        if self.id is not None:
-            oprot.writeFieldBegin('id', TType.I32, 1)
-            oprot.writeI32(self.id)
+        if self.serverId is not None:
+            oprot.writeFieldBegin('serverId', TType.STRING, 1)
+            oprot.writeString(self.serverId.encode('utf-8') if sys.version_info[0] == 2 else self.serverId)
             oprot.writeFieldEnd()
         if self.content is not None:
             oprot.writeFieldBegin('content', TType.STRING, 2)
             oprot.writeString(self.content.encode('utf-8') if sys.version_info[0] == 2 else self.content)
             oprot.writeFieldEnd()
-        if self.create_time is not None:
-            oprot.writeFieldBegin('create_time', TType.STRING, 3)
-            oprot.writeString(self.create_time.encode('utf-8') if sys.version_info[0] == 2 else self.create_time)
-            oprot.writeFieldEnd()
         if self.speaker is not None:
-            oprot.writeFieldBegin('speaker', TType.BYTE, 4)
+            oprot.writeFieldBegin('speaker', TType.BYTE, 3)
             oprot.writeByte(self.speaker)
             oprot.writeFieldEnd()
         if self.origin is not None:
-            oprot.writeFieldBegin('origin', TType.BYTE, 5)
+            oprot.writeFieldBegin('origin', TType.BYTE, 4)
             oprot.writeByte(self.origin)
             oprot.writeFieldEnd()
         if self.origin_str is not None:
-            oprot.writeFieldBegin('origin_str', TType.STRING, 6)
+            oprot.writeFieldBegin('origin_str', TType.STRING, 5)
             oprot.writeString(self.origin_str.encode('utf-8') if sys.version_info[0] == 2 else self.origin_str)
             oprot.writeFieldEnd()
         if self.msgType is not None:
-            oprot.writeFieldBegin('msgType', TType.STRING, 7)
+            oprot.writeFieldBegin('msgType', TType.STRING, 6)
             oprot.writeString(self.msgType.encode('utf-8') if sys.version_info[0] == 2 else self.msgType)
             oprot.writeFieldEnd()
-        if self.picUrl is not None:
-            oprot.writeFieldBegin('picUrl', TType.STRING, 8)
-            oprot.writeString(self.picUrl.encode('utf-8') if sys.version_info[0] == 2 else self.picUrl)
+        if self.assetUrl is not None:
+            oprot.writeFieldBegin('assetUrl', TType.STRING, 7)
+            oprot.writeString(self.assetUrl.encode('utf-8') if sys.version_info[0] == 2 else self.assetUrl)
             oprot.writeFieldEnd()
         if self.btnContent is not None:
-            oprot.writeFieldBegin('btnContent', TType.STRING, 9)
+            oprot.writeFieldBegin('btnContent', TType.STRING, 8)
             oprot.writeString(self.btnContent.encode('utf-8') if sys.version_info[0] == 2 else self.btnContent)
             oprot.writeFieldEnd()
         if self.roomId is not None:
-            oprot.writeFieldBegin('roomId', TType.I32, 10)
+            oprot.writeFieldBegin('roomId', TType.I32, 9)
             oprot.writeI32(self.roomId)
             oprot.writeFieldEnd()
         if self.positionId is not None:
-            oprot.writeFieldBegin('positionId', TType.I32, 11)
+            oprot.writeFieldBegin('positionId', TType.I32, 10)
             oprot.writeI32(self.positionId)
+            oprot.writeFieldEnd()
+        if self.duration is not None:
+            oprot.writeFieldBegin('duration', TType.BYTE, 11)
+            oprot.writeByte(self.duration)
+            oprot.writeFieldEnd()
+        if self.id is not None:
+            oprot.writeFieldBegin('id', TType.I32, 12)
+            oprot.writeI32(self.id)
+            oprot.writeFieldEnd()
+        if self.createTime is not None:
+            oprot.writeFieldBegin('createTime', TType.STRING, 13)
+            oprot.writeString(self.createTime.encode('utf-8') if sys.version_info[0] == 2 else self.createTime)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class ChatHistory(object):
+    """
+    Attributes:
+     - conversationId
+     - hasMore
+     - chatList
+     - hrLeaveTime
+     - userId
+     - name
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'conversationId', None, None, ),  # 1
+        (2, TType.BOOL, 'hasMore', None, None, ),  # 2
+        (3, TType.LIST, 'chatList', (TType.STRUCT, (ChatVO, ChatVO.thrift_spec), False), None, ),  # 3
+        (4, TType.STRING, 'hrLeaveTime', 'UTF8', None, ),  # 4
+        (5, TType.I32, 'userId', None, None, ),  # 5
+        (6, TType.STRING, 'name', 'UTF8', None, ),  # 6
+    )
+
+    def __init__(self, conversationId=None, hasMore=None, chatList=None, hrLeaveTime=None, userId=None, name=None,):
+        self.conversationId = conversationId
+        self.hasMore = hasMore
+        self.chatList = chatList
+        self.hrLeaveTime = hrLeaveTime
+        self.userId = userId
+        self.name = name
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.conversationId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.BOOL:
+                    self.hasMore = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.LIST:
+                    self.chatList = []
+                    (_etype24, _size21) = iprot.readListBegin()
+                    for _i25 in range(_size21):
+                        _elem26 = ChatVO()
+                        _elem26.read(iprot)
+                        self.chatList.append(_elem26)
+                    iprot.readListEnd()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.STRING:
+                    self.hrLeaveTime = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 5:
+                if ftype == TType.I32:
+                    self.userId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 6:
+                if ftype == TType.STRING:
+                    self.name = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('ChatHistory')
+        if self.conversationId is not None:
+            oprot.writeFieldBegin('conversationId', TType.I32, 1)
+            oprot.writeI32(self.conversationId)
+            oprot.writeFieldEnd()
+        if self.hasMore is not None:
+            oprot.writeFieldBegin('hasMore', TType.BOOL, 2)
+            oprot.writeBool(self.hasMore)
+            oprot.writeFieldEnd()
+        if self.chatList is not None:
+            oprot.writeFieldBegin('chatList', TType.LIST, 3)
+            oprot.writeListBegin(TType.STRUCT, len(self.chatList))
+            for iter27 in self.chatList:
+                iter27.write(oprot)
+            oprot.writeListEnd()
+            oprot.writeFieldEnd()
+        if self.hrLeaveTime is not None:
+            oprot.writeFieldBegin('hrLeaveTime', TType.STRING, 4)
+            oprot.writeString(self.hrLeaveTime.encode('utf-8') if sys.version_info[0] == 2 else self.hrLeaveTime)
+            oprot.writeFieldEnd()
+        if self.userId is not None:
+            oprot.writeFieldBegin('userId', TType.I32, 5)
+            oprot.writeI32(self.userId)
+            oprot.writeFieldEnd()
+        if self.name is not None:
+            oprot.writeFieldBegin('name', TType.STRING, 6)
+            oprot.writeString(self.name.encode('utf-8') if sys.version_info[0] == 2 else self.name)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -773,11 +1043,11 @@ class ChatsVO(object):
             elif fid == 5:
                 if ftype == TType.LIST:
                     self.chatLogs = []
-                    (_etype17, _size14) = iprot.readListBegin()
-                    for _i18 in range(_size14):
-                        _elem19 = ChatVO()
-                        _elem19.read(iprot)
-                        self.chatLogs.append(_elem19)
+                    (_etype31, _size28) = iprot.readListBegin()
+                    for _i32 in range(_size28):
+                        _elem33 = ChatVO()
+                        _elem33.read(iprot)
+                        self.chatLogs.append(_elem33)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
@@ -810,8 +1080,8 @@ class ChatsVO(object):
         if self.chatLogs is not None:
             oprot.writeFieldBegin('chatLogs', TType.LIST, 5)
             oprot.writeListBegin(TType.STRUCT, len(self.chatLogs))
-            for iter20 in self.chatLogs:
-                iter20.write(oprot)
+            for iter34 in self.chatLogs:
+                iter34.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -838,6 +1108,7 @@ class HrVO(object):
      - hrId
      - hrName
      - hrHeadImg
+     - isDelete
     """
 
     thrift_spec = (
@@ -845,12 +1116,14 @@ class HrVO(object):
         (1, TType.I32, 'hrId', None, None, ),  # 1
         (2, TType.STRING, 'hrName', 'UTF8', None, ),  # 2
         (3, TType.STRING, 'hrHeadImg', 'UTF8', None, ),  # 3
+        (4, TType.BOOL, 'isDelete', None, None, ),  # 4
     )
 
-    def __init__(self, hrId=None, hrName=None, hrHeadImg=None,):
+    def __init__(self, hrId=None, hrName=None, hrHeadImg=None, isDelete=None,):
         self.hrId = hrId
         self.hrName = hrName
         self.hrHeadImg = hrHeadImg
+        self.isDelete = isDelete
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -876,6 +1149,11 @@ class HrVO(object):
                     self.hrHeadImg = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.BOOL:
+                    self.isDelete = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -897,6 +1175,10 @@ class HrVO(object):
         if self.hrHeadImg is not None:
             oprot.writeFieldBegin('hrHeadImg', TType.STRING, 3)
             oprot.writeString(self.hrHeadImg.encode('utf-8') if sys.version_info[0] == 2 else self.hrHeadImg)
+            oprot.writeFieldEnd()
+        if self.isDelete is not None:
+            oprot.writeFieldBegin('isDelete', TType.BOOL, 4)
+            oprot.writeBool(self.isDelete)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()

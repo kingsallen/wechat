@@ -5,6 +5,8 @@ from handler.base import BaseHandler
 
 from tornado import gen
 from util.common.decorator import handle_response, authenticated
+from util.common import ObjectDict
+from oauth.wechat import JsApi
 
 
 class IndexHandler(BaseHandler):
@@ -57,3 +59,46 @@ class IndexHandler(BaseHandler):
         if re.match(r"/app/profile/new", self.request.uri):
             if self.params.pid:
                 self.set_cookie('dqpid', self.params.pid)
+
+
+class ConfigHandler(BaseHandler):
+    """微信 config 配置"""
+
+    @handle_response
+    @gen.coroutine
+    def get(self):
+
+        target_url = self.params.target
+
+        jsapi = JsApi(
+            jsapi_ticket=self.current_user.wechat.jsapi_ticket,
+            url=target_url)
+
+        config = ObjectDict({
+            "debug": False,
+            "appId": self.current_user.wechat.appid,
+            "timestamp": jsapi.timestamp,
+            "nonceStr": jsapi.nonceStr,
+            "signature": jsapi.signature,
+            "jsApiList": ["onMenuShareTimeline",
+                          "onMenuShareAppMessage",
+                          "onMenuShareQQ",
+                          "onMenuShareWeibo",
+                          "hideOptionMenu",
+                          "showOptionMenu",
+                          "startRecord",
+                          "stopRecord",
+                          "onVoiceRecordEnd",
+                          "playVoice",
+                          "pauseVoice",
+                          "stopVoice",
+                          "onVoicePlayEnd",
+                          "uploadVoice",
+                          "translateVoice",
+                          "downloadVoice",
+                          "hideMenuItems",
+                          "showMenuItems",
+                          "hideAllNonBaseMenuItem",
+                          "showAllNonBaseMenuItem"]
+        })
+        self.send_json_success(data=config)

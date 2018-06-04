@@ -150,10 +150,13 @@ class AggregationPageService(PageService):
         industry_type = 0
         if item.get("_source", {}).get("company", {}).get("industry_type", None):
             industry_type = item.get("_source", {}).get("company", {}).get("industry_type")
-
-        team_img = qx_const.JD_BACKGROUND_IMG.get(industry_type).get("team_img")
-        job_img = qx_const.JD_BACKGROUND_IMG.get(industry_type).get("job_img")
-        company_img = qx_const.JD_BACKGROUND_IMG.get(industry_type).get("company_img")
+            
+        team_img = qx_const.JD_BACKGROUND_IMG.get(industry_type).get("team_img") if \
+            qx_const.JD_BACKGROUND_IMG.get(industry_type) else qx_const.JD_BACKGROUND_IMG.get(0).get("team_img")
+        job_img = qx_const.JD_BACKGROUND_IMG.get(industry_type).get("job_img") if \
+            qx_const.JD_BACKGROUND_IMG.get(industry_type) else qx_const.JD_BACKGROUND_IMG.get(0).get("job_img")
+        company_img = qx_const.JD_BACKGROUND_IMG.get(industry_type).get("company_img") if \
+            qx_const.JD_BACKGROUND_IMG.get(industry_type) else qx_const.JD_BACKGROUND_IMG.get(0).get("company_img")
 
         if item.get("_source", {}).get("team",{}).get("resource", {}) \
             and item.get("_source", {}).get("team",{}).get("resource", {}).get("res_type", 0) == 0:

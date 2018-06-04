@@ -3,14 +3,13 @@
 import tornado.gen as gen
 
 import conf.path as path
+import util.tool.http_tool as http_tool
 from service.data.base import DataService
 from service.data.infra.infra_dict import InfraDictDataService
 from util.common import ObjectDict
-import util.tool.http_tool as http_tool
 
 
 class InfraProfileDataService(DataService):
-
     @gen.coroutine
     def get_profile(self, user_id):
         params = ObjectDict(user_id=user_id)
@@ -30,15 +29,16 @@ class InfraProfileDataService(DataService):
         return http_tool.unboxing(res)
 
     @gen.coroutine
-    def import_profile(self, type, username, password, user_id, ua=1, token=None):
+    def import_profile(self, type, username, password, user_id, company_id, ua=1, token=None, appid=None, unionid=None, version=None):
         """
         从第三方导入 profile
-        :param source: 必填 来源, 0:无法识别 1:51Job 2:Liepin 3:zhilian 4:linkedin
+        :param type: 必填 来源, 0:无法识别 1:51Job 2:Liepin 3:zhilian 4:linkedin 5:veryeast
         :param username: 选填（除了选择linkedin导入方式，其余都是必填） 帐号
         :param password: 选填（除了选择linkedin导入方式，其余都是必填） 密码
         :param user_id: 必填 登录用户的编号
         :param ua: 必填 UA来源, 0:无法识别 1:微信端 2:移动浏览器 3:PC端
         :param token: 选填（除了选择linkedin导入方式是必填，其余都是选填）linkedin 网站的access_token
+        :param company_id:
         :return:
         """
         params = ObjectDict(
@@ -48,6 +48,10 @@ class InfraProfileDataService(DataService):
             user_id=user_id,
             ua=int(ua),
             token=token,
+            company_id=company_id,
+            maimai_appid=appid,
+            unionid=unionid,
+            version=version
         )
         res = yield http_tool.http_post(path.PROFILE_IMPORT, params, timeout=60)
         return http_tool.unboxing(res)
@@ -206,19 +210,19 @@ class InfraProfileDataService(DataService):
     def create_profile_language(self, record, profile_id):
         res = yield self.handle_profile_section({
             "profile_id": profile_id,
-            "level":      record.level,
-            "name":       record.language.strip()},
+            "level": record.level,
+            "name": record.language.strip()},
             method="create", section="language")
         return http_tool.unboxing(res)
 
     @gen.coroutine
     def update_profile_language(self, record, profile_id):
         res = yield self.handle_profile_section({
-                "id":         record.id,
-                "profile_id": profile_id,
-                "level":      record.level,
-                "name":       record.language.strip()
-            }, method="update", section="language")
+            "id": record.id,
+            "profile_id": profile_id,
+            "level": record.level,
+            "name": record.language.strip()
+        }, method="update", section="language")
         return http_tool.unboxing(res)
 
     # noinspection PyUnusedLocal
@@ -237,18 +241,18 @@ class InfraProfileDataService(DataService):
     @gen.coroutine
     def create_profile_skill(self, record, profile_id):
         res = yield self.handle_profile_section({
-                "profile_id": profile_id,
-                "name":       record.name.strip()
-            }, method="create", section="skill")
+            "profile_id": profile_id,
+            "name": record.name.strip()
+        }, method="create", section="skill")
         return http_tool.unboxing(res)
 
     @gen.coroutine
     def update_profile_skill(self, record, profile_id):
         res = yield self.handle_profile_section({
-                "id":         record.id,
-                "profile_id": profile_id,
-                "name":       record.name.strip()
-            }, method="update", section="skill")
+            "id": record.id,
+            "profile_id": profile_id,
+            "name": record.name.strip()
+        }, method="update", section="skill")
         return http_tool.unboxing(res)
 
     # noinspection PyUnusedLocal
@@ -269,7 +273,7 @@ class InfraProfileDataService(DataService):
         res = yield self.handle_profile_section(
             {
                 "profile_id": profile_id,
-                "name":       record.name.strip()
+                "name": record.name.strip()
             }, method="create", section="credentials")
         return http_tool.unboxing(res)
 
@@ -277,9 +281,9 @@ class InfraProfileDataService(DataService):
     def update_profile_cert(self, record, profile_id):
         res = yield self.handle_profile_section(
             {
-                "id":         record.id,
+                "id": record.id,
                 "profile_id": profile_id,
-                "name":       record.name.strip()
+                "name": record.name.strip()
             }, method="update", section="credentials")
         return http_tool.unboxing(res)
 
@@ -300,10 +304,10 @@ class InfraProfileDataService(DataService):
     def create_profile_workexp(self, record, profile_id):
         # 必填项和选填项分开处理
         params = {
-            "profile_id":    profile_id,
-            "company_name":  record.company_name,
-            "start_date":    record.start_date,
-            "end_date":      "" if record.end_until_now else record.end_date,
+            "profile_id": profile_id,
+            "company_name": record.company_name,
+            "start_date": record.start_date,
+            "end_date": "" if record.end_until_now else record.end_date,
             "end_until_now": record.end_until_now
         }
 
@@ -329,11 +333,11 @@ class InfraProfileDataService(DataService):
     def update_profile_workexp(self, record, profile_id):
         # 必填项和选填项分开处理
         params = {
-            "id":            record.id,
-            "profile_id":    profile_id,
-            "company_name":  record.company_name,
-            "start_date":    record.start_date,
-            "end_date":      None if record.end_until_now else record.end_date,
+            "id": record.id,
+            "profile_id": profile_id,
+            "company_name": record.company_name,
+            "start_date": record.start_date,
+            "end_date": None if record.end_until_now else record.end_date,
             "end_until_now": record.end_until_now
         }
         if record.get('department_name') is None or \
@@ -375,12 +379,12 @@ class InfraProfileDataService(DataService):
     def create_profile_education(self, record, profile_id, college_code):
         # 必填项和选填项分开处理
         params = {
-            "profile_id":    profile_id,
-            "college_name":  record.college_name,
-            "college_code":  college_code,
-            "degree":        record.degree,
-            "start_date":    record.start_date,
-            "end_date":      "" if record.end_until_now else record.end_date,
+            "profile_id": profile_id,
+            "college_name": record.college_name,
+            "college_code": college_code,
+            "degree": record.degree,
+            "start_date": record.start_date,
+            "end_date": "" if record.end_until_now else record.end_date,
             "end_until_now": record.end_until_now,
         }
 
@@ -410,13 +414,13 @@ class InfraProfileDataService(DataService):
     def update_profile_education(self, record, profile_id, college_code):
         # 必填项和选填项分开处理
         params = {
-            "id":            record.id,
-            "profile_id":    profile_id,
-            "college_name":  record.college_name,
-            "college_code":  college_code,
-            "degree":        record.degree,
-            "start_date":    record.start_date,
-            "end_date":      None if record.end_until_now else record.end_date,
+            "id": record.id,
+            "profile_id": profile_id,
+            "college_name": record.college_name,
+            "college_code": college_code,
+            "degree": record.degree,
+            "start_date": record.start_date,
+            "end_date": None if record.end_until_now else record.end_date,
             "end_until_now": record.end_until_now,
         }
 
@@ -458,10 +462,10 @@ class InfraProfileDataService(DataService):
     @gen.coroutine
     def create_profile_projectexp(self, record, profile_id):
         params = {
-            "profile_id":    profile_id,
-            "name":          record.name,
-            "start_date":    record.start_date,
-            "end_date":      None if record.end_until_now else record.end_date,
+            "profile_id": profile_id,
+            "name": record.name,
+            "start_date": record.start_date,
+            "end_date": None if record.end_until_now else record.end_date,
             "end_until_now": record.end_until_now
         }
 
@@ -478,11 +482,11 @@ class InfraProfileDataService(DataService):
     @gen.coroutine
     def update_profile_projectexp(self, record, profile_id):
         params = {
-            "id":            record.id,
-            "profile_id":    profile_id,
-            "name":          record.name,
-            "start_date":    record.start_date,
-            "end_date":      None if record.end_until_now else record.end_date,
+            "id": record.id,
+            "profile_id": profile_id,
+            "name": record.name,
+            "start_date": record.start_date,
+            "end_date": None if record.end_until_now else record.end_date,
             "end_until_now": record.end_until_now
         }
 
@@ -511,20 +515,20 @@ class InfraProfileDataService(DataService):
     @gen.coroutine
     def create_profile_awards(self, record, profile_id):
         res = yield self.handle_profile_section({
-                "profile_id":  profile_id,
-                "name":        record.name.strip(),
-                "reward_date": record.reward_date,
-            }, method="create", section="awards")
+            "profile_id": profile_id,
+            "name": record.name.strip(),
+            "reward_date": record.reward_date,
+        }, method="create", section="awards")
         return http_tool.unboxing(res)
 
     @gen.coroutine
     def update_profile_awards(self, record, profile_id):
         res = yield self.handle_profile_section({
-                "id":          record.id,
-                "profile_id":  profile_id,
-                "name":        record.name.strip(),
-                "reward_date": record.reward_date,
-            }, method="update", section="awards")
+            "id": record.id,
+            "profile_id": profile_id,
+            "name": record.name.strip(),
+            "reward_date": record.reward_date,
+        }, method="update", section="awards")
         return http_tool.unboxing(res)
 
     @gen.coroutine
@@ -565,7 +569,7 @@ class InfraProfileDataService(DataService):
         # 然而 works 没有必填项
 
         params = {
-            "id":         record.id,
+            "id": record.id,
             "profile_id": profile_id,
         }
 
@@ -620,7 +624,7 @@ class InfraProfileDataService(DataService):
     @gen.coroutine
     def update_profile_intention(self, record, profile_id):
         params = {
-            "id":         record.id,
+            "id": record.id,
             "profile_id": profile_id
         }
         if record.get('city_name'):
@@ -714,13 +718,14 @@ class InfraProfileDataService(DataService):
         :return:
         """
 
-        response = yield http_tool.http_fetch(path.LINKEDIN_ACCESSTOKEN, params, timeout=20)
+        response = yield http_tool.http_fetch(path.LINKEDIN_ACCESSTOKEN, params, timeout=20, raise_error=False)
         return response
 
     @gen.coroutine
-    def get_custom_metadata(self) -> list:
+    def get_custom_metadata(self, company_id=0, select_all=False) -> list:
         """获取自定义字段元表数据"""
-        resposne = yield http_tool.http_get(path.PROFILE_OTHER_METADATA)
+        resposne = yield http_tool.http_get(path.PROFILE_OTHER_METADATA,
+                                            {"companyId": company_id, "selectAll": select_all})
         _, data = http_tool.unboxing(resposne)
 
         return sorted(data, key=lambda x: x['id'])

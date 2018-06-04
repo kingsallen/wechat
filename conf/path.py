@@ -16,6 +16,7 @@ CAPTCHA_CHECKED = '/captcha/checked'
 EMPLOYEE_VERIFY = '/app/employee/binding'
 EMPLOYEE_RECOMMENDS = '/app/employee/recommends'
 EMPLOYEE_CUSTOMINFO = '/employee/custominfo'
+EMPLOYEE_CUSTOMINFO_BINDED = '/employee/binded-custominfo'
 EMPLOYEE_BINDED = '/employee/binded'
 
 PROFILE_CUSTOM_CV = '/profile/custom'
@@ -34,6 +35,8 @@ USER_LOGIN = '/login'
 USER_LOGOUT = '/logout'
 RESUME_URL = '/resume/import'
 RESUME_LINKEDIN = '/resume/linkedin'
+RESUME_MAIMAI = 'https://{}/resume/maimai{}'
+RESUME_THIRDPARTY = '/resume/thirdparty'
 APPLICATION = '/application'
 APPLICATION_EMAIL = '/application/email'
 COLLECT_USERINFO = '/app/asist/collect_userinfo/positionfav'
@@ -97,6 +100,7 @@ INFRA_RP_POSITION_LIST = 'position/rplist'
 INFRA_RP_POSITION_LIST_SHARE_INFO = 'position/list/hb_share_info'
 INFRA_THIRD_PARTY_SYNCED_POSITIONS = 'positions/thirdpartysyncedpositions'
 INFRA_SUG_LIST = 'api/position/suggest'
+INFRA_POSITION_FEATURE = '/api/position/feature/{}'
 
 # Profile 服务
 # Ref: https://wiki.moseeker.com/profile-api.md
@@ -120,6 +124,7 @@ PROFILE_CUSTOMCV_CHECK = 'profile/check/other'
 # 公司服务
 COMPANY_ALL = 'company/all'
 COMPANY = 'company'
+CREATE_COMPANY = 'api/hrcompany/add'
 
 # 字典服务
 DICT_CONSTANT = "dict/constant"
@@ -131,8 +136,13 @@ DICT_POSITION = "dict/position"
 
 # 消息通知服务
 MESSAGE_TEMPLATE = "message/template"
+
+# chat服务
+CHAT_LIMIT = "/api/v1/chat/voice/sendWarnEmail"
+VOICE = "/api/v1/chat/voice/pullVoiceFile"
 # ============================ 基础服务结束 ============================
 
 # 其他外部服务
 LINKEDIN_ACCESSTOKEN = "https://www.linkedin.com/oauth/v2/accessToken"
 LINKEDIN_AUTH = "/oauth/v2/authorization"
+MAIMAI_ACCESSTOKEN = "https://maimai.cn/oauth_login?appid={appid}&{cusdata}&login=1"

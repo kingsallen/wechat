@@ -19,7 +19,7 @@ class CustomizePageService(PageService):
     _AGENT_APPLY_CIDS = [926, 160140]
 
     #直接投递
-    _DIRECT_APPLY = [82, 176558, 193498]
+    _DIRECT_APPLY = [82, 176558]
 
     # 宝洁投递成功提示页面
     _APPLY_SUCCESS = [1753]

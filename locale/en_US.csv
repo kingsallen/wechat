@@ -12,6 +12,8 @@
 "profile_import_zhilian","Zhaopin"
 "profile_import_51job","51job"
 "profile_import_linkedin","LinkedIn"
+"profile_import_veryeast","Veryeast"
+"profile_import_maimai","Maimai"
 "jd_title_dull","Job"
 "jd_degree","Degree"
 "jd_work_exp","Work experience"
@@ -43,6 +45,7 @@
 "common_parttime","Part-time"
 "common_contractor","Contractor"
 "common_intern","Intern"
+"common_other","Other"
 "common_bottom_mark","Certified by ISO/IEC 27001:2013"
 
 "common_year","year","singular"

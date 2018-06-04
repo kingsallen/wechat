@@ -144,7 +144,7 @@ class ProfilePageService(PageService):
         return result
 
     @gen.coroutine
-    def import_profile(self, type_source, username, password, user_id, ua, token=None):
+    def import_profile(self, type_source, username, password, user_id, ua, company_id=None, token=None, appid=None, unionid=None, version=None):
         """
         导入第三方简历（51job, 智联招聘，linkedin，猎聘）
         :param type_source: int 来源, 0:无法识别 1:51Job 2:Liepin 3:zhilian 4:linkedin
@@ -153,6 +153,7 @@ class ProfilePageService(PageService):
         :param user_id: int
         :param ua: int UA来源, 0:无法识别 1:微信端 2:移动浏览器 3:PC端
         :param token: string linkedin 网站的access_token
+        :param company_id:
         :return: tuple (bool, result or None)
 
         调用方式:
@@ -160,7 +161,7 @@ class ProfilePageService(PageService):
         """
 
         is_ok, result = yield self.infra_profile_ds.import_profile(
-            int(type_source), username, password, user_id, int(ua), token)
+            int(type_source), username, password, user_id, company_id, int(ua), token, appid=appid, unionid=unionid,  version=version)
         return is_ok, result
 
     @gen.coroutine
@@ -494,7 +495,7 @@ class ProfilePageService(PageService):
         for w in workexps:
             status = w.get('__status', None)
             if status:
-                end_until_now = int(w.get('projectexp_end_until_now', '0'))
+                end_until_now = int(w.get('workexp_end_until_now', '0'))
 
                 params = ObjectDict(
                     wid=w.get('id'),
@@ -949,9 +950,9 @@ class ProfilePageService(PageService):
                        reverse=True)[0])
 
     @gen.coroutine
-    def get_others_key_name_mapping(self):
+    def get_others_key_name_mapping(self, company_id=0, select_all=False):
         """获取自定义字段 name 和 title 的键值对，供前端在展示 profile 的时候使用"""
-        metadatas = yield self.infra_profile_ds.get_custom_metadata()
+        metadatas = yield self.infra_profile_ds.get_custom_metadata(company_id, select_all)
 
         rename_mapping = {
             'fieldName': 'field_name',
