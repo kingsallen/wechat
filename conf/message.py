@@ -10,6 +10,7 @@ LOGIN_FAILURE = "登录失败"
 OPERATE_FAILURE = "操作失败"
 MOBILE_VERIFY = "请先验证手机号"
 INPUT_DISORDER = "请按规范输入"
+PREVIEW_PROFILE = "继续填写个人档案"
 
 BASIC_SERVER_DISCONNECTION = "基础服务器连接不上"
 BASIC_SERVER_BUSY = "基础服务器忙碌"
