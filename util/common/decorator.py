@@ -265,33 +265,10 @@ def check_and_apply_profile(func):
                 # 从侧边栏直接进入，允许使用 email 创建 profile
                 redirect_params.update(use_email=True)
 
-            # ========== LINKEDIN OAUTH ==============
-            # 拼装 linkedin oauth 路由
-            redirect_uri = self.make_url(path.RESUME_LINKEDIN,
-                                         recom=self.params.recom,
-                                         pid=self.params.pid,
-                                         wechat_signature=self.current_user.wechat.signature)
-            self.logger.info("[redirect_url_fetch_code: {}]".format(redirect_uri))
-            linkedin_url = self.make_url(path.LINKEDIN_AUTH, params=ObjectDict(
-                response_type="code",
-                client_id=self.settings.linkedin_client_id,
-                scope="r_basicprofile r_emailaddress",
-                redirect_uri=redirect_uri
-            ), host="www.linkedin.com")
-            # 由于 make_url 会过滤 state，但 linkedin 必须传 state，故此处手动添加
-
-            state = encode_id(0)
-            if self.current_user.sysuser:
-                state = encode_id(self.current_user.sysuser.id)
-
-            linkedin_url = "{}&state={}".format(linkedin_url, state)
-
-            redirect_params.update(linkedin_url=linkedin_url)
-            # ========== LINKEDIN OAUTH ==============
-
             # ========== MAIMAI OAUTH ===============
             # 拼装脉脉 oauth 路由
-            cusdata = re.search(r'linkedin?(.*)', redirect_uri).group(1)
+            cusdata = "?recom={}&pid={}&wechat_signature={}".format(self.params.recom, self.params.pid,
+                                                                    self.current_user.wechat.signature)
             # 加上渠道
             cusdata = "{}&way={}".format(cusdata, const.FROM_MAIMAI)
             # 脉脉cusdata中不允许出现 '&' ，考虑我们公司目前的使用的参数中不会出现 '$$' , 将 '&' 转为 '$$' 使用
@@ -357,7 +334,8 @@ def authenticated(func):
                 # api 类接口，不适合做302静默授权，微信服务器不会跳转
                 self._oauth_service.wechat = self.current_user.wechat
                 self._oauth_service.state = to_hex(self.current_user.qxuser.unionid)
-                self.logger.info("静默授权：state:{}-----unionid:{}".format(self._oauth_service.state, self.current_user.qxuser.unionid))
+                self.logger.info(
+                    "静默授权：state:{}-----unionid:{}".format(self._oauth_service.state, self.current_user.qxuser.unionid))
                 url = self._oauth_service.get_oauth_code_base_url()
                 self.redirect(url)
                 return
