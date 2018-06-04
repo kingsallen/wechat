@@ -8,7 +8,8 @@ from tornado import gen
 import conf.path as path
 import conf.message as msg
 import conf.common as const
-from handler.base import BaseHandler, MetaBaseHandler
+from handler.base import BaseHandler
+from handler.metabase import MetaBaseHandler
 from util.common import ObjectDict
 from util.common.decorator import handle_response, authenticated
 
