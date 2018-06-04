@@ -219,6 +219,7 @@ def check_and_apply_profile(func):
                                   profile_import_zhilian=True,
                                   profile_import_liepin=True,
                                   profile_import_linkedin=True,
+                                  profile_import_maimai=True,
                                   profile_import_veryeast=False)
             if company.conf_veryeast_switch == 1:
                 importer.update(profile_import_veryeast=True)
@@ -264,6 +265,21 @@ def check_and_apply_profile(func):
                 # 从侧边栏直接进入，允许使用 email 创建 profile
                 redirect_params.update(use_email=True)
 
+            # ========== MAIMAI OAUTH ===============
+            # 拼装脉脉 oauth 路由
+            cusdata = "?recom={}&pid={}&wechat_signature={}".format(self.params.recom, self.params.pid,
+                                                                    self.current_user.wechat.signature)
+            # 加上渠道
+            cusdata = "{}&way={}".format(cusdata, const.FROM_MAIMAI)
+            # 脉脉cusdata中不允许出现 '&' ，考虑我们公司目前的使用的参数中不会出现 '$$' , 将 '&' 转为 '$$' 使用
+            cusdata = cusdata.replace("&", "$$")
+            self.logger.info("[maimai_url_cusdata: {}]".format(cusdata))
+
+            cusdata = urlencode(dict(cusdata=cusdata))
+            appid = self.settings.maimai_appid
+            maimai_url = path.MAIMAI_ACCESSTOKEN.format(appid=appid, cusdata=cusdata)
+
+            redirect_params.update(maimai_url=maimai_url)
             print("redirect_params: %s" % redirect_params)
             self.render(template_name='refer/neo_weixin/sysuser_v2/importresume.html',
                         **redirect_params, importer=importer)
@@ -318,7 +334,8 @@ def authenticated(func):
                 # api 类接口，不适合做302静默授权，微信服务器不会跳转
                 self._oauth_service.wechat = self.current_user.wechat
                 self._oauth_service.state = to_hex(self.current_user.qxuser.unionid)
-                self.logger.info("静默授权：state:{}-----unionid:{}".format(self._oauth_service.state, self.current_user.qxuser.unionid))
+                self.logger.info(
+                    "静默授权：state:{}-----unionid:{}".format(self._oauth_service.state, self.current_user.qxuser.unionid))
                 url = self._oauth_service.get_oauth_code_base_url()
                 self.redirect(url)
                 return

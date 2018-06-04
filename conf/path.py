@@ -35,6 +35,8 @@ USER_LOGIN = '/login'
 USER_LOGOUT = '/logout'
 RESUME_URL = '/resume/import'
 RESUME_LINKEDIN = '/resume/linkedin'
+RESUME_MAIMAI = 'https://{}/resume/maimai{}'
+RESUME_THIRDPARTY = '/resume/thirdparty'
 APPLICATION = '/application'
 APPLICATION_EMAIL = '/application/email'
 COLLECT_USERINFO = '/app/asist/collect_userinfo/positionfav'
@@ -134,8 +136,13 @@ DICT_POSITION = "dict/position"
 
 # 消息通知服务
 MESSAGE_TEMPLATE = "message/template"
+
+# chat服务
+CHAT_LIMIT = "/api/v1/chat/voice/sendWarnEmail"
+VOICE = "/api/v1/chat/voice/pullVoiceFile"
 # ============================ 基础服务结束 ============================
 
 # 其他外部服务
 LINKEDIN_ACCESSTOKEN = "https://www.linkedin.com/oauth/v2/accessToken"
 LINKEDIN_AUTH = "/oauth/v2/authorization"
+MAIMAI_ACCESSTOKEN = "https://maimai.cn/oauth_login?appid={appid}&{cusdata}&login=1"
