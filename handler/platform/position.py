@@ -928,12 +928,11 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
         :return:
         """
         company_id = self.current_user.company.id
-
         infra_params = ObjectDict({
             "companyId": company_id,
             "recomPushId": recom_push_id,
             "type": 1,  # hard code, 1表示员工
-            "page_from": int(self.params.get("count", 0)/10) + 1,
+            "page_from": int(params.page_from / 10) + 1,
             "page_size": params.page_size
         })
 
