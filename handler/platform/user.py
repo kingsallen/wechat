@@ -404,7 +404,7 @@ class UserSurveyHandler(BaseHandler):
                                         ]
                                     ],
                                     "field_title": "期望工作城市",
-                                    "field_description": "请填写城市名",
+                                    "field_description": "请选择城市",
                                     "validate_re": "[\\s\\S]+"
                                 },
                                 {
