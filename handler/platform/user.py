@@ -507,22 +507,7 @@ class APIUserSurveyHandler(BaseHandler):
 
         # 粉丝问卷调查入库
         yield self._save_model(model)
-        data = ObjectDict(
-            kind=0,  # // {0: success, 1: failure, 10: email}
-            messages=['信息提交成功'],  # ['hello world', 'abjsldjf']
-            button_text=msg.PREVIEW_PROFILE,
-            button_link=self.make_url(path.PROFILE_VIEW,
-                                      wechat_signature=self.get_argument('wechat_signature'),
-                                      host=self.host,
-                                      params=self.params),
-            jump_link=self.make_url(path.PROFILE_VIEW,
-                                    wechat_signature=self.get_argument('wechat_signature'),
-                                    host=self.host,
-                                    params=self.params)  # // 如果有会自动，没有就不自动跳转
-        )
-
-        self.render_page(template_name="system/user-info.html",
-                         data=data)
+        self.send_json_success()
         return
 
     def process_model_raw(self, model_raw):
