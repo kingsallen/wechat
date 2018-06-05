@@ -265,8 +265,10 @@ def check_and_apply_profile(func):
                 # 从侧边栏直接进入，允许使用 email 创建 profile
                 redirect_params.update(use_email=True)
 
+            # ========== MAIMAI OAUTH ===============
             # 拼装脉脉 oauth 路由
-            cusdata = "?recom={}&pid={}&wechat_signature={}".format(self.params.recom, self.params.pid, self.current_user.wechat.signature)
+            cusdata = "?recom={}&pid={}&wechat_signature={}".format(self.params.recom, self.params.pid,
+                                                                    self.current_user.wechat.signature)
             # 加上渠道
             cusdata = "{}&way={}".format(cusdata, const.FROM_MAIMAI)
             # 脉脉cusdata中不允许出现 '&' ，考虑我们公司目前的使用的参数中不会出现 '$$' , 将 '&' 转为 '$$' 使用
@@ -333,7 +335,8 @@ def authenticated(func):
                 # api 类接口，不适合做302静默授权，微信服务器不会跳转
                 self._oauth_service.wechat = self.current_user.wechat
                 self._oauth_service.state = to_hex(self.current_user.qxuser.unionid)
-                self.logger.info("静默授权：state:{}-----unionid:{}".format(self._oauth_service.state, self.current_user.qxuser.unionid))
+                self.logger.info(
+                    "静默授权：state:{}-----unionid:{}".format(self._oauth_service.state, self.current_user.qxuser.unionid))
                 url = self._oauth_service.get_oauth_code_base_url()
                 self.redirect(url)
                 return
