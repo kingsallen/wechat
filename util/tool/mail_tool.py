@@ -15,7 +15,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
 
-from globals import logger
+
 from setting import settings
 
 from util.tool.pdf_tool import generate_html_template_resume
@@ -23,7 +23,7 @@ from util.common import ObjectDict
 
 
 def send_mail_notice_hr(position, employee, conf, profile, email, template_other, dict_conf, workyears, html_to_pdf=''):
-
+    from globals import logger
     def parse_profile_for_email(profile):
         """
         处理 profile 数据, email模板中不需要未填写的数据
