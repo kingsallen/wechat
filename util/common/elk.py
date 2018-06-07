@@ -17,7 +17,7 @@ from threading import Thread
 import redis
 from redis import ConnectionError, TimeoutError
 from tornado.options import options
-from util.tool import mail_tool
+import util
 import conf.common as constant
 from setting import settings
 from multiprocessing import Process
@@ -135,7 +135,7 @@ class Guard:
         subject = 'log 诊断报警'
         content = error_queue
         Process(
-            target=mail_tool.send_mail,
+            target=util.tool.mail_tool.send_mail,
             args=(email_address,
                   subject,
                   content)
