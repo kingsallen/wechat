@@ -791,18 +791,17 @@ class RedpacketPageService(PageService):
             # 不管用户是否点击拆开了红包
             # 记录当前用户 wxuser_id 和红包获得者 wxuser_id
             result = yield self.__update_wxuser_id_into_hb_items(
-                qx_openid, current_wxuser_id, next_item, num)
+                qx_openid, current_wxuser_id, next_item)
 
             if result:
                 break
             num -= 1
-            self.logger.debug("测试记录次数:{}".format(num))
         self.logger.debug("用户{}获得红包为{}".format(qx_openid, next_item.id))
         raise gen.Return(next_item)
 
     @log_time
     @gen.coroutine
-    def __update_wxuser_id_into_hb_items(self, qx_openid, current_wxuser_id, rp_item, num):
+    def __update_wxuser_id_into_hb_items(self, qx_openid, current_wxuser_id, rp_item):
         """更新 hb items 写入发送信息"""
 
         # 此处用乐观锁，将wxuser与红包绑定，保证红包的唯一性
@@ -811,19 +810,6 @@ class RedpacketPageService(PageService):
             "wechat_id": settings['qx_wechat_id']
         })
         current_wxuser_id = current_wxuser_id or 0
-        # =================测试代码，请删除===================
-        if num > 5:
-            result = yield self.hr_hb_items_ds.update_hb_items(
-                conds={
-                    "id": rp_item.id
-                },
-                fields={
-                    "wxuser_id": 0,
-                    "trigger_wxuser_id": 0,
-                    "version": 1
-                })
-            self.logger.debug("------redpacket_upodate_result:{}".format(result))
-        # ===================测试代码结束=====================
         result = yield self.hr_hb_items_ds.update_hb_items(
             conds={
                 "id": rp_item.id,
