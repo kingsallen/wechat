@@ -19,5 +19,6 @@ class HrHbItemsDao(BaseDao):
             "open_time":         self.constant.TYPE_TIMESTAMP,
             "create_time":       self.constant.TYPE_TIMESTAMP,
             "update_time":       self.constant.TYPE_TIMESTAMP,
-            "trigger_wxuser_id": self.constant.TYPE_INT
+            "trigger_wxuser_id": self.constant.TYPE_INT,
+            "version":           self.constant.TYPE_INT
         }

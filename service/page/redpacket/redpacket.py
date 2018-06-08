@@ -819,18 +819,20 @@ class RedpacketPageService(PageService):
                 },
                 fields={
                     "wxuser_id": 0,
-                    "trigger_wxuser_id": 0
+                    "trigger_wxuser_id": 0,
+                    "version": 1
                 })
             self.logger.debug("------redpacket_upodate_result:{}".format(result))
         # ===================测试代码结束=====================
         result = yield self.hr_hb_items_ds.update_hb_items(
             conds={
                 "id": rp_item.id,
-                "update_time": rp_item.update_time
+                "version": 0
             },
             fields={
                 "wxuser_id": wxuser.id,
-                "trigger_wxuser_id": current_wxuser_id
+                "trigger_wxuser_id": current_wxuser_id,
+                "version": 1
             })
         self.logger.debug("+++++redpacket_upodate_result:{}".format(result))
         return result
