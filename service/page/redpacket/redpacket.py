@@ -813,12 +813,11 @@ class RedpacketPageService(PageService):
         result = yield self.hr_hb_items_ds.update_hb_items(
             conds={
                 "id": rp_item.id,
-                "version": 0
+                "wxuser_id": 0
             },
             fields={
                 "wxuser_id": wxuser.id,
-                "trigger_wxuser_id": current_wxuser_id,
-                "version": 1
+                "trigger_wxuser_id": current_wxuser_id
             })
         self.logger.debug("+++++redpacket_upodate_result:{}".format(result))
         return result
