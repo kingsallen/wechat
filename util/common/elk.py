@@ -17,9 +17,10 @@ from threading import Thread
 import redis
 from redis import ConnectionError, TimeoutError
 from tornado.options import options
-
+from util.tool import mail_tool
 import conf.common as constant
 from setting import settings
+from multiprocessing import Process
 
 
 def connect(host, port, timeout, pool_size):
@@ -124,8 +125,21 @@ class Guard:
         if self.redis_is_error():
             self.elk_client.switch_to(False)
             self.spawn_reset_task()
+            self.send_alert_mail(self.error_queue)
         else:
             pass
+
+    def send_alert_mail(self, error_queue):
+        """发生异常时发送报警邮件"""
+        email_address = settings['log_guard_warning_email'] or []
+        subject = 'log 诊断报警'
+        content = error_queue
+        Process(
+            target=mail_tool.send_mail,
+            args=(email_address,
+                  subject,
+                  content)
+        ).start()
 
     def redis_is_error(self):
         """

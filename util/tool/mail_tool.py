@@ -15,7 +15,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
 
-from globals import logger
+
 from setting import settings
 
 from util.tool.pdf_tool import generate_html_template_resume
@@ -23,6 +23,8 @@ from util.common import ObjectDict
 
 
 def send_mail_notice_hr(position, employee, conf, profile, email, template_other, dict_conf, workyears, html_to_pdf=''):
+    # todo(niuzhenya)因为有循环导入的问题，在函数内部导入logger模块，重构需要对这几个模块进行解耦
+    from globals import logger
 
     def parse_profile_for_email(profile):
         """
