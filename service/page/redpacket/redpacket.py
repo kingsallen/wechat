@@ -34,6 +34,7 @@ from util.wechat.template import (
     rp_transfer_apply_success_notice_tpl,
     rp_transfer_click_success_notice_tpl
 )
+from util.tool.date_tool import curr_now
 
 
 class RedpacketPageService(PageService):
@@ -760,29 +761,79 @@ class RedpacketPageService(PageService):
 
     @log_time
     @gen.coroutine
-    def __get_next_rp_item(self, hb_config_id, hb_config_type, position_id=None):
+    def __get_next_rp_item(self, qx_openid, current_wxuser_id, hb_config_id, hb_config_type, position_id=None):
         """获取下个待发红包信息"""
-        if (hb_config_type in [const.RED_PACKET_TYPE_SHARE_CLICK,
-                               hb_config_type == const.RED_PACKET_TYPE_SHARE_APPLY] and
-                position_id):
+        next_item = ObjectDict()
+        # 防止死循环，此处做次数限制，以现有业务来看，暂定10次已足够
+        # todo(niuzneya)10次失败后没有提示，用户依旧会拿不到红包，重构请避免此情况
+        num = 10
+        while num > 0:
+            if (hb_config_type in [const.RED_PACKET_TYPE_SHARE_CLICK,
+                                   hb_config_type == const.RED_PACKET_TYPE_SHARE_APPLY] and
+                    position_id):
 
-            binding = yield self.hr_hb_position_binding_ds.get_hr_hb_position_binding({
-                "hb_config_id": hb_config_id,
-                "position_id": position_id
-            })
+                binding = yield self.hr_hb_position_binding_ds.get_hr_hb_position_binding({
+                    "hb_config_id": hb_config_id,
+                    "position_id": position_id
+                })
 
-            next_item = yield self.hr_hb_items_ds.get_hb_items({
-                "binding_id": binding.id,
-                "wxuser_id": 0
-            }, appends=["order by rand()", "limit 1"])
+                next_item = yield self.hr_hb_items_ds.get_hb_items({
+                    "binding_id": binding.id,
+                    "wxuser_id": 0
+                }, appends=["order by rand()", "limit 1"])
 
-        else:
-            next_item = yield self.hr_hb_items_ds.get_hb_items({
-                "hb_config_id": hb_config_id,
-                "wxuser_id": 0
-            }, appends=["order by rand()", "limit 1"])
+            else:
+                next_item = yield self.hr_hb_items_ds.get_hb_items({
+                    "hb_config_id": hb_config_id,
+                    "wxuser_id": 0
+                }, appends=["order by rand()", "limit 1"])
 
+            # 不管用户是否点击拆开了红包
+            # 记录当前用户 wxuser_id 和红包获得者 wxuser_id
+            result = yield self.__update_wxuser_id_into_hb_items(
+                qx_openid, current_wxuser_id, next_item, num)
+
+            if result:
+                break
+            num -= 1
+            self.logger.debug("测试记录次数:{}".format(num))
+        self.logger.debug("用户{}获得红包为{}".format(qx_openid, next_item.id))
         raise gen.Return(next_item)
+
+    @log_time
+    @gen.coroutine
+    def __update_wxuser_id_into_hb_items(self, qx_openid, current_wxuser_id, rp_item, num):
+        """更新 hb items 写入发送信息"""
+
+        # 此处用乐观锁，将wxuser与红包绑定，保证红包的唯一性
+        wxuser = yield self.user_wx_user_ds.get_wxuser({
+            "openid": qx_openid,
+            "wechat_id": settings['qx_wechat_id']
+        })
+        current_wxuser_id = current_wxuser_id or 0
+        # =================测试代码，请删除===================
+        if num > 5:
+            result = yield self.hr_hb_items_ds.update_hb_items(
+                conds={
+                    "id": rp_item.id
+                },
+                fields={
+                    "wxuser_id": 0,
+                    "trigger_wxuser_id": 0
+                })
+            self.logger.debug("------redpacket_upodate_result:{}".format(result))
+        # ===================测试代码结束=====================
+        result = yield self.hr_hb_items_ds.update_hb_items(
+            conds={
+                "id": rp_item.id,
+                "update_time": rp_item.update_time
+            },
+            fields={
+                "wxuser_id": wxuser.id,
+                "trigger_wxuser_id": current_wxuser_id
+            })
+        self.logger.debug("+++++redpacket_upodate_result:{}".format(result))
+        return result
 
     @staticmethod
     def __hit_red_packet(probability):
@@ -817,14 +868,21 @@ class RedpacketPageService(PageService):
             conds={'id': current_qxuser_id})
         current_qxuser_openid = current_qxuser.openid
 
+        if red_packet_config.type in [0, 1]:
+            bagging_openid = current_qxuser_openid
+        elif red_packet_config.type in [2, 3]:
+            bagging_openid = recom_qxuser_openid
+        else:
+            assert False  # should not be here
+
         # 获取下一个待发红包信息
         if position:
-            rp_item = yield self.__get_next_rp_item(
-                red_packet_config.id, red_packet_config.type,
-                position.id)
+            rp_item = yield self.__get_next_rp_item(bagging_openid, current_qxuser_id,
+                                                    red_packet_config.id, red_packet_config.type,
+                                                    position.id)
         else:
-            rp_item = yield self.__get_next_rp_item(
-                red_packet_config.id, red_packet_config.type)
+            rp_item = yield self.__get_next_rp_item(bagging_openid, current_qxuser_id,
+                                                    red_packet_config.id, red_packet_config.type)
 
         self.logger.debug("[RP]next rp item: {}".format(rp_item))
 
@@ -860,13 +918,6 @@ class RedpacketPageService(PageService):
             return
         else:
             self.logger.debug("[RP]全局上限验证通过")
-
-        if red_packet_config.type in [0, 1]:
-            bagging_openid = current_qxuser_openid
-        elif red_packet_config.type in [2, 3]:
-            bagging_openid = recom_qxuser_openid
-        else:
-            assert False  # should not be here
 
         card = yield self.__create_new_card(
             recom_wechat_id, bagging_openid, red_packet_config.id,
@@ -929,11 +980,6 @@ class RedpacketPageService(PageService):
                 yield self.__update_hb_item_status_with_id(
                     rp_item.id,
                     to=const.RP_ITEM_STATUS_NO_WX_MSG_MONEY_SEND_FAILURE)
-
-        # 不管用户是否点击拆开了红包
-        # 记录当前用户 wxuser_id 和红包获得者 wxuser_id
-        yield self.__update_wxuser_id_into_hb_items(
-            bagging_openid, current_qxuser_id, rp_item.id)
 
         raise gen.Return(result)
 
@@ -1070,24 +1116,6 @@ class RedpacketPageService(PageService):
             conds={"id": hb_config_id},
             fields={"status": const.HB_CONFIG_FINISHED}
         )
-
-    @log_time
-    @gen.coroutine
-    def __update_wxuser_id_into_hb_items(self, qx_openid, current_wxuser_id, rp_item_id):
-        """更新 hb items 写入发送信息"""
-        wxuser = yield self.user_wx_user_ds.get_wxuser({
-            "openid": qx_openid,
-            "wechat_id": settings['qx_wechat_id']
-        })
-        current_wxuser_id = current_wxuser_id or 0
-        yield self.hr_hb_items_ds.update_hb_items(
-            conds={
-                "id": rp_item_id
-            },
-            fields={
-                "wxuser_id": wxuser.id,
-                "trigger_wxuser_id": current_wxuser_id
-            })
 
     @log_time
     @gen.coroutine
