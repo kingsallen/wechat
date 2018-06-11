@@ -853,7 +853,6 @@ class RedpacketPageService(PageService):
         # todo(niuzneya)10次失败后没有提示，用户依旧会拿不到红包，重构请避免此情况
         num = 10
         while num > 0:
-            yield gen.sleep(0.1)
             # 获取下一个待发红包信息
             if position:
                 rp_item = yield self.__get_next_rp_item(red_packet_config.id, red_packet_config.type,
@@ -920,6 +919,7 @@ class RedpacketPageService(PageService):
             if result:
                 break
             num -= 1
+            yield gen.sleep(0.1)
         self.logger.debug("用户{}获得红包为{}".format(bagging_openid, rp_item.id))
 
         card = yield self.__create_new_card(
