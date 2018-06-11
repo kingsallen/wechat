@@ -205,7 +205,7 @@ def position_share_notice_employee_tpl(company_id, title, salary, user_id, pid,
     """认证员工转发职位后，向员工发送转发结果消息模板"""
 
     # 延迟10分钟发送
-    delay = 60
+    delay = 3600
     # 延迟消息队列消费者
     validators = 'SendViewedTemplateToEmployeeValidator'
     type = 0
