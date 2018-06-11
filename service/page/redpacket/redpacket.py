@@ -761,43 +761,29 @@ class RedpacketPageService(PageService):
 
     @log_time
     @gen.coroutine
-    def __get_next_rp_item(self, qx_openid, current_wxuser_id, hb_config_id, hb_config_type, position_id=None):
+    def __get_next_rp_item(self, hb_config_id, hb_config_type, position_id=None):
         """获取下个待发红包信息"""
-        next_item = ObjectDict()
-        # 防止死循环，此处做次数限制，以现有业务来看，暂定10次已足够
-        # todo(niuzneya)10次失败后没有提示，用户依旧会拿不到红包，重构请避免此情况
-        num = 10
-        while num > 0:
-            if (hb_config_type in [const.RED_PACKET_TYPE_SHARE_CLICK,
-                                   hb_config_type == const.RED_PACKET_TYPE_SHARE_APPLY] and
-                    position_id):
 
-                binding = yield self.hr_hb_position_binding_ds.get_hr_hb_position_binding({
-                    "hb_config_id": hb_config_id,
-                    "position_id": position_id
-                })
+        if (hb_config_type in [const.RED_PACKET_TYPE_SHARE_CLICK,
+                               const.RED_PACKET_TYPE_SHARE_APPLY] and
+                position_id):
 
-                next_item = yield self.hr_hb_items_ds.get_hb_items({
-                    "binding_id": binding.id,
-                    "wxuser_id": 0
-                }, appends=["order by rand()", "limit 1"])
+            binding = yield self.hr_hb_position_binding_ds.get_hr_hb_position_binding({
+                "hb_config_id": hb_config_id,
+                "position_id": position_id
+            })
 
-            else:
-                next_item = yield self.hr_hb_items_ds.get_hb_items({
-                    "hb_config_id": hb_config_id,
-                    "wxuser_id": 0
-                }, appends=["order by rand()", "limit 1"])
+            next_item = yield self.hr_hb_items_ds.get_hb_items({
+                "binding_id": binding.id,
+                "wxuser_id": 0
+            }, appends=["order by rand()", "limit 1"])
 
-            # 不管用户是否点击拆开了红包
-            # 记录当前用户 wxuser_id 和红包获得者 wxuser_id
-            result = yield self.__update_wxuser_id_into_hb_items(
-                qx_openid, current_wxuser_id, next_item)
-
-            if result:
-                break
-            num -= 1
-        self.logger.debug("用户{}获得红包为{}".format(qx_openid, next_item.id))
-        raise gen.Return(next_item)
+        else:
+            next_item = yield self.hr_hb_items_ds.get_hb_items({
+                "hb_config_id": hb_config_id,
+                "wxuser_id": 0
+            }, appends=["order by rand()", "limit 1"])
+        return next_item
 
     @log_time
     @gen.coroutine
@@ -813,14 +799,13 @@ class RedpacketPageService(PageService):
         result = yield self.hr_hb_items_ds.update_hb_items(
             conds={
                 "id": rp_item.id,
-                "version": 0
+                "wxuser_id": 0
             },
             fields={
                 "wxuser_id": wxuser.id,
-                "trigger_wxuser_id": current_wxuser_id,
-                "version": 1
+                "trigger_wxuser_id": current_wxuser_id
             })
-        self.logger.debug("+++++redpacket_upodate_result:{}".format(result))
+        self.logger.debug("+++++redpacket_update_result:{}".format(result))
         return result
 
     @staticmethod
@@ -863,49 +848,79 @@ class RedpacketPageService(PageService):
         else:
             assert False  # should not be here
 
-        # 获取下一个待发红包信息
-        if position:
-            rp_item = yield self.__get_next_rp_item(bagging_openid, current_qxuser_id,
-                                                    red_packet_config.id, red_packet_config.type,
-                                                    position.id)
-        else:
-            rp_item = yield self.__get_next_rp_item(bagging_openid, current_qxuser_id,
-                                                    red_packet_config.id, red_packet_config.type)
-
-        self.logger.debug("[RP]next rp item: {}".format(rp_item))
-
-        if not rp_item:
+        rp_item = ObjectDict()
+        # 防止死循环，此处做次数限制，以现有业务来看，暂定10次已足够
+        # todo(niuzneya)10次失败后没有提示，用户依旧会拿不到红包，重构请避免此情况
+        num = 10
+        while num > 0:
+            yield gen.sleep(0.1)
+            # 获取下一个待发红包信息
             if position:
-                self.logger.debug("[RP]该职位红包已经发完")
+                rp_item = yield self.__get_next_rp_item(red_packet_config.id, red_packet_config.type,
+                                                        position.id)
+            else:
+                rp_item = yield self.__get_next_rp_item(red_packet_config.id, red_packet_config.type)
 
-                current_hb_status = position.hb_status
-                # 更新职位状态至未参与这种类型的红包活动
-                yield self.__update_position_hb_status(
-                    position.id, current_hb_status,
-                    red_packet_config.type)
+            self.logger.debug("[RP]next rp item: {}".format(rp_item))
 
-                remaining_positions = yield self.__get_running_positions_by_config_id(
-                    red_packet_config.id)
+            if not rp_item:
+                if position:
+                    self.logger.debug("[RP]该职位红包已经发完")
 
-                if not remaining_positions:
+                    current_hb_status = position.hb_status
+                    # 更新职位状态至未参与这种类型的红包活动
+                    yield self.__update_position_hb_status(
+                        position.id, current_hb_status,
+                        red_packet_config.type)
+
+                    remaining_positions = yield self.__get_running_positions_by_config_id(
+                        red_packet_config.id)
+
+                    if not remaining_positions:
+                        self.logger.debug("[RP]该活动红包已经发完,准备结束活动")
+                        yield self.__finish_hb_config(red_packet_config.id)
+
+                else:
                     self.logger.debug("[RP]该活动红包已经发完,准备结束活动")
                     yield self.__finish_hb_config(red_packet_config.id)
 
+                return
+
+            throttle_passed = yield self.__check_throttle_passed(
+                red_packet_config, recom_qxuser_id, rp_item)
+
+            if not throttle_passed:
+                self.logger.debug(
+                    '[RP]throttle上限校验失败, hb_config_id: %s， recom_qxuser_id: %s' % (red_packet_config.id, recom_qxuser_id))
+                return
             else:
-                self.logger.debug("[RP]该活动红包已经发完,准备结束活动")
-                yield self.__finish_hb_config(red_packet_config.id)
+                self.logger.debug("[RP]全局上限验证通过")
 
-            return
+            # ===================测试代码，忘记删除了，请删除=======================
+            if num > 5:
 
-        throttle_passed = yield self.__check_throttle_passed(
-            red_packet_config, recom_qxuser_id, rp_item)
+                self.logger.debug("=========在前五次中，有wxuser_id分别为10，9，8，7，6的用户和我并发获取了同一个红包，并在我之前抢注了该红包")
+                _result = yield self.hr_hb_items_ds.update_hb_items(
+                    conds={
+                        "id": rp_item.id,
+                        "wxuser_id": 0
+                    },
+                    fields={
+                        "wxuser_id": num,
+                        "trigger_wxuser_id": num
+                    })
+                self.logger.debug("-----redpacket_update_result:{}".format(_result))
+            # ==========================测试代码结束=============================
 
-        if not throttle_passed:
-            self.logger.debug(
-                '[RP]throttle上限校验失败, hb_config_id: %s， recom_qxuser_id: %s' % (red_packet_config.id, recom_qxuser_id))
-            return
-        else:
-            self.logger.debug("[RP]全局上限验证通过")
+            # 不管用户是否点击拆开了红包
+            # 记录当前用户 wxuser_id 和红包获得者 wxuser_id
+            result = yield self.__update_wxuser_id_into_hb_items(
+                bagging_openid, current_qxuser_id, rp_item)
+
+            if result:
+                break
+            num -= 1
+        self.logger.debug("用户{}获得红包为{}".format(bagging_openid, rp_item.id))
 
         card = yield self.__create_new_card(
             recom_wechat_id, bagging_openid, red_packet_config.id,
