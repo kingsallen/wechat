@@ -138,6 +138,7 @@ class ResumeImportHandler(BaseHandler):
 
         username = self.params.get("_username", "")
         password = self.params.get("_password", "")
+        captcha = self.params.get("_captcha", "")
 
         # 置空不必要参数，避免在 make_url 中被用到
         self.params.pop("recom_time", None)
@@ -170,7 +171,8 @@ class ResumeImportHandler(BaseHandler):
                 password,
                 self.current_user.sysuser.id,
                 ua,
-                self.current_user.wechat.company_id
+                self.current_user.wechat.company_id,
+                captcha=captcha
             )
 
             if self.params.pid:
@@ -206,6 +208,10 @@ class ResumeImportHandler(BaseHandler):
                     status_log = -5
                 elif result.status == 32008:  # 简历导入次数超过每日次数限制
                     status_log = 5
+                elif result.status == 32009:  # LinkedIn限制登录
+                    status_log = 6
+                elif result.status == 99999:  # 填写验证码
+                    status_log = 99
                 else:
                     # 埋点基础服务返回未识别异常
                     status_log = -2
