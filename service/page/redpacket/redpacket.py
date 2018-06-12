@@ -898,9 +898,10 @@ class RedpacketPageService(PageService):
             # 记录当前用户 wxuser_id 和红包获得者 wxuser_id
             result = yield self.__update_wxuser_id_into_hb_items(
                 bagging_openid, current_qxuser_id, rp_item)
-            self.logger.info("+++++redpacket_update_result:{}, num:{}".format(result, num))
             if result:
                 break
+            else:
+                self.logger.info("用户{}在第{}次获取红包{}失败".format(bagging_openid, 10-num, rp_item.id))
             num -= 1
             yield gen.sleep(0.5)
         self.logger.debug("用户{}获得红包为{}".format(bagging_openid, rp_item.id))
