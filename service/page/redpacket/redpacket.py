@@ -901,7 +901,7 @@ class RedpacketPageService(PageService):
             if result:
                 break
             else:
-                self.logger.info("用户{}在第{}次获取红包{}失败".format(bagging_openid, 10-num, rp_item.id))
+                self.logger.info("[hb]--用户{}在第{}次获取红包{}失败".format(bagging_openid, 10-num, rp_item.id))
             num -= 1
             yield gen.sleep(0.5)
         self.logger.debug("用户{}获得红包为{}".format(bagging_openid, rp_item.id))
