@@ -928,7 +928,6 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
         :return:
         """
         company_id = self.current_user.company.id
-
         infra_params = ObjectDict({
             "companyId": company_id,
             "recomPushId": recom_push_id,
