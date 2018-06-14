@@ -185,8 +185,6 @@ class ResumeImportHandler(BaseHandler):
                     url=self.params.way
                 )
                 data = ObjectDict(url=next_url)
-                if result.status == 99999:  # 需要输入LinkedIn验证码
-                    data.update(need_linkedin_verify=const.YES)
                 self._log_customs.update(new_profile=const.YES)
                 self.send_json_success(message=msg.RESUME_IMPORT_SUCCESS,
                                        data=data)
@@ -210,10 +208,16 @@ class ResumeImportHandler(BaseHandler):
                     status_log = -5
                 elif result.status == 32008:  # 简历导入次数超过每日次数限制
                     status_log = 5
-                elif result.status == 32009:  # LinkedIn限制登录
+                elif result.status == 32011:  # 需要输入LinkedIn验证码
                     status_log = 6
+                    data.update(need_linkedin_verify=const.YES)
+                    self.send_json_success(data=data)
+                elif result.status == 32012:  # LinkedIn限制登录
+                    status_log = 7
                     next_url = self.make_url(path.RESUME_IMPORT_FAIL, self.params)
                     data.update(url=next_url)
+                elif result.status == 32013:  # 验证码失败
+                    status_log = 8
                 else:
                     # 埋点基础服务返回未识别异常
                     status_log = -2
