@@ -29,7 +29,7 @@ class InfraProfileDataService(DataService):
         return http_tool.unboxing(res)
 
     @gen.coroutine
-    def import_profile(self, type, username, password, user_id, company_id, ua=1, token=None, appid=None, unionid=None, version=None):
+    def import_profile(self, type, username, password, user_id, company_id, ua=1, token=None, appid=None, unionid=None, version=None, captcha=None):
         """
         从第三方导入 profile
         :param type: 必填 来源, 0:无法识别 1:51Job 2:Liepin 3:zhilian 4:linkedin 5:veryeast
@@ -51,7 +51,8 @@ class InfraProfileDataService(DataService):
             company_id=company_id,
             maimai_appid=appid,
             unionid=unionid,
-            version=version
+            version=version,
+            code=captcha
         )
         res = yield http_tool.http_post(path.PROFILE_IMPORT, params, timeout=60)
         return http_tool.unboxing(res)

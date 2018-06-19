@@ -205,7 +205,7 @@ def position_share_notice_employee_tpl(company_id, title, salary, user_id, pid,
     """认证员工转发职位后，向员工发送转发结果消息模板"""
 
     # 延迟10分钟发送
-    delay = 600
+    delay = 3600
     # 延迟消息队列消费者
     validators = 'SendViewedTemplateToEmployeeValidator'
     type = 0
@@ -217,9 +217,9 @@ def position_share_notice_employee_tpl(company_id, title, salary, user_id, pid,
     validators_params = json_dumps(validators_params_dict)
 
     # 十分钟后的时间
-    d = datetime.now() + timedelta(minutes=10)
+    d = datetime.now() + timedelta(minutes=60)
     data = _make_json_data(
-        first="您好，您转发的职位在过去10分钟内已被N人浏览",
+        first="您好，您转发的职位在过去60分钟内已被N人浏览",
         remark="请点击领取奖励",
         encode=False,
         keyword1="没有人浏览该职位",

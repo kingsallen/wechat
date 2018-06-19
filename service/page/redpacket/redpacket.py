@@ -805,7 +805,6 @@ class RedpacketPageService(PageService):
                 "wxuser_id": wxuser.id,
                 "trigger_wxuser_id": current_wxuser_id
             })
-        self.logger.debug("+++++redpacket_update_result:{}".format(result))
         return result
 
     @staticmethod
@@ -853,7 +852,6 @@ class RedpacketPageService(PageService):
         # todo(niuzneya)10次失败后没有提示，用户依旧会拿不到红包，重构请避免此情况
         num = 10
         while num > 0:
-            yield gen.sleep(0.1)
             # 获取下一个待发红包信息
             if position:
                 rp_item = yield self.__get_next_rp_item(red_packet_config.id, red_packet_config.type,
@@ -896,30 +894,16 @@ class RedpacketPageService(PageService):
             else:
                 self.logger.debug("[RP]全局上限验证通过")
 
-            # ===================测试代码，忘记删除了，请删除=======================
-            if num > 5:
-
-                self.logger.debug("=========在前五次中，有wxuser_id分别为10，9，8，7，6的用户和我并发获取了同一个红包，并在我之前抢注了该红包")
-                _result = yield self.hr_hb_items_ds.update_hb_items(
-                    conds={
-                        "id": rp_item.id,
-                        "wxuser_id": 0
-                    },
-                    fields={
-                        "wxuser_id": num,
-                        "trigger_wxuser_id": num
-                    })
-                self.logger.debug("-----redpacket_update_result:{}".format(_result))
-            # ==========================测试代码结束=============================
-
             # 不管用户是否点击拆开了红包
             # 记录当前用户 wxuser_id 和红包获得者 wxuser_id
             result = yield self.__update_wxuser_id_into_hb_items(
                 bagging_openid, current_qxuser_id, rp_item)
-
             if result:
                 break
+            else:
+                self.logger.info("[hb]--用户{}在第{}次获取红包{}失败".format(bagging_openid, 10-num, rp_item.id))
             num -= 1
+            yield gen.sleep(0.5)
         self.logger.debug("用户{}获得红包为{}".format(bagging_openid, rp_item.id))
 
         card = yield self.__create_new_card(
