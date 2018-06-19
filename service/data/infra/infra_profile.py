@@ -52,7 +52,7 @@ class InfraProfileDataService(DataService):
             maimai_appid=appid,
             unionid=unionid,
             version=version,
-            captcha=captcha
+            code=captcha
         )
         res = yield http_tool.http_post(path.PROFILE_IMPORT, params, timeout=60)
         return http_tool.unboxing(res)

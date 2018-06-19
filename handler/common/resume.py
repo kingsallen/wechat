@@ -212,6 +212,7 @@ class ResumeImportHandler(BaseHandler):
                     status_log = 6
                     data.update(need_linkedin_verify=const.YES)
                     self.send_json_success(data=data)
+
                 elif result.status == 32012:  # LinkedIn限制登录
                     status_log = 7
                     next_url = self.make_url(path.RESUME_IMPORT_FAIL, self.params)
