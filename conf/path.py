@@ -55,6 +55,8 @@ IMAGE_URL = '/image'
 CAMPAIGN_COMPANY_PATH = "/alipaycampaign/{}/company"
 CAMPAIGN_POSITION_PATH = "/alipaycampaign/{}/company/{}/position"
 
+RESUME_IMPORT_FAIL = "/resume/import/limit"
+
 # ============================ 微信端Path结束 ============================
 
 
