@@ -22,7 +22,7 @@ class PositionPageService(PageService):
 
     @log_time
     @gen.coroutine
-    def get_position(self, position_id):
+    def get_position(self, position_id, display_locale):
         position = ObjectDict()
         position_res = yield self.job_position_ds.get_position({
             'id': position_id
@@ -119,11 +119,21 @@ class PositionPageService(PageService):
         }
         response = self.es.search(index='index', body=data)
         result_list = response.hits.hits
+        city = ""
+        city_ename = ""
         if result_list:
             result = result_list[0]
             source = ObjectDict(result.get("_source"))
             city = source.city
+            city_ename = source.city_ename
+
+        # 国际化
+        if display_locale == "en_US":
+            position.city = city_ename
+            position.salary = "Salary negotiable" if position.salary == "薪资面议" else position.salary
+        else:
             position.city = city
+            position.salary = position.salary
 
         raise gen.Return(position)
 

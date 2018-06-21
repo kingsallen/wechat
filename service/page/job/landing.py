@@ -263,9 +263,12 @@ class LandingPageService(PageService):
         return data
 
     @gen.coroutine
-    def make_search_seq(self, company, params):
+    def make_search_seq(self, company, params, locale, display_locale):
         """
         生成高级搜索功能中前端需要的数据
+        :param display_locale:
+        :param locale:
+        :param params:
         :param company:
         :return: {"field_name": ['地点', '子公司', '部门'],
                   "field_form_name": ['city', '...', 'team_name']
@@ -274,6 +277,9 @@ class LandingPageService(PageService):
                              ...]
                  }
         """
+        search_seq = company.get("conf_search_seq")
+        if "1" in search_seq and display_locale == "en_US":
+            company.conf_search_seq = search_seq.replace(str(platform_const.LANDING_INDEX_CITY), str(platform_const.LANDING_INDEX_ECITY))
         conf_search_seq = tuple([int(e.index) for e in company.get("conf_search_seq")])
 
         key_order = [platform_const.LANDING[kn].get("display_key") for kn in conf_search_seq]
@@ -281,8 +287,8 @@ class LandingPageService(PageService):
         # 获取链接上配置的筛选参数
         display_key_dict = dict()
         salary_dict = dict()
-        all_form_name = [platform_const.LANDING[e].get('form_name') for e in range(1, 10)]
-        all_key_order = [[platform_const.LANDING[e].get("display_key"), platform_const.LANDING[e].get('form_name')] for e in range(1, 10)]
+        all_form_name = [platform_const.LANDING[e].get('form_name') for e in range(1, 11)]
+        all_key_order = [[platform_const.LANDING[e].get("display_key"), platform_const.LANDING[e].get('form_name')] for e in range(1, 11)]
         self.logger.debug('key_order: %s,form_name: %s,all_key_order: %s,all_form_name: %s' % (key_order, form_name, all_key_order, all_form_name))
         for key, value in params.items():
             if value and key in all_form_name and key not in form_name:
@@ -313,7 +319,7 @@ class LandingPageService(PageService):
         # 默认 conf_search_seq
         if not conf_search_seq_plus:
             conf_search_seq_plus = (
-                platform_const.LANDING_INDEX_CITY,
+                platform_const.LANDING_INDEX_ECITY if display_locale == "en_US" else platform_const.LANDING_INDEX_CITY,
                 platform_const.LANDING_INDEX_SALARY,
                 platform_const.LANDING_INDEX_CHILD_COMPANY,
                 platform_const.LANDING_INDEX_DEPARTMENT
@@ -347,12 +353,22 @@ class LandingPageService(PageService):
 
                 elif k == 'candidate_source_name':
                     en = pinyin_initials(e.get(k))
-                    to_append.append({"text": e.get(k), "value": const.CANDIDATE_SOURCE_SEARCH_REVERSE.get(e.get(k)),
+                    text = locale.translate(const.CANDIDATE_SOURCE_SEARCH_LOCALE.get(e.get(k))) if e.get(k) else e.get(k)
+                    to_append.append({"text": text, "value": const.CANDIDATE_SOURCE_SEARCH_REVERSE.get(e.get(k)),
                                       "en": en[0] if en else ""})
 
                 elif k == 'employment_type_name':
                     en = pinyin_initials(e.get(k))
-                    to_append.append({"text": e.get(k), "value": const.EMPLOYMENT_TYPE_SEARCH_REVERSE.get(e.get(k)),
+                    text = locale.translate(const.EMPLOYMENT_TYPE_SEARCH_LOCALE.get(e.get(k))) if e.get(k) else e.get(
+                        k)
+                    to_append.append({"text": text, "value": const.EMPLOYMENT_TYPE_SEARCH_REVERSE.get(e.get(k)),
+                                      "en": en[0] if en else ""})
+
+                elif k == 'degree_name':
+                    en = pinyin_initials(e.get(k))
+                    text = locale.translate(const.DEGREE_SEARCH_LOCALE.get(e.get(k))) if e.get(k) else e.get(
+                        k)
+                    to_append.append({"text": text, "value": e.get(k),
                                       "en": en[0] if en else ""})
                 else:
                     en = pinyin_initials(e.get(k))
@@ -367,12 +383,22 @@ class LandingPageService(PageService):
 
                 elif s == 'candidate_source_name':
                     en = pinyin_initials(e.get(s))
-                    to_append.append({"text": e.get(s), "value": const.CANDIDATE_SOURCE_SEARCH_REVERSE.get(e.get(s)),
+                    text = locale.translate(const.CANDIDATE_SOURCE_SEARCH_LOCALE.get(e.get(s))) if e.get(s) else e.get(
+                        s)
+                    to_append.append({"text": text, "value": const.CANDIDATE_SOURCE_SEARCH_REVERSE.get(e.get(s)),
                                       "en": en[0] if en else ""})
 
                 elif s == 'employment_type_name':
                     en = pinyin_initials(e.get(s))
-                    to_append.append({"text": e.get(s), "value": const.EMPLOYMENT_TYPE_SEARCH_REVERSE.get(e.get(s)),
+                    text = locale.translate(const.CANDIDATE_SOURCE_SEARCH_LOCALE.get(e.get(s))) if e.get(s) else e.get(
+                        s)
+                    to_append.append({"text": text, "value": const.EMPLOYMENT_TYPE_SEARCH_REVERSE.get(e.get(s)),
+                                      "en": en[0] if en else ""})
+                elif s == 'degree_name':
+                    en = pinyin_initials(e.get(s))
+                    text = locale.translate(const.DEGREE_SEARCH_LOCALE.get(e.get(s))) if e.get(s) else e.get(
+                        s)
+                    to_append.append({"text": text, "value": e.get(s),
                                       "en": en[0] if en else ""})
                 else:
                     en = pinyin_initials(e.get(s))
@@ -392,7 +418,7 @@ class LandingPageService(PageService):
             if search_item == platform_const.LANDING_INDEX_DEPARTMENT and company.conf_teamname_custom.teamname_custom:
                 return company.conf_teamname_custom.teamname_custom
 
-            return platform_const.LANDING[search_item].get("chpe")
+            return locale.translate(const.SEARCH_CONDITION.get(str(search_item)))
 
         return ObjectDict({
             "field_name": [custom_field(e) for e in conf_search_seq_plus],

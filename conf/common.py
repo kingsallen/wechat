@@ -162,13 +162,17 @@ CANDIDATE_SOURCE = {
     "0": "common_experienced",
     "1": "common_graduate"
 }
+CANDIDATE_SOURCE_SEARCH_LOCALE = {
+    "社招": "common_experienced",
+    "校招": "common_graduate"
+}
 CANDIDATE_SOURCE_SEARCH = {
     "0": "社招",
     "1": "校招"
 }
 CANDIDATE_SOURCE_SEARCH_REVERSE = {
     v: k for k, v in CANDIDATE_SOURCE_SEARCH.items()
-    }
+}
 
 # 工作性质
 EMPLOYMENT_TYPE = {
@@ -177,6 +181,13 @@ EMPLOYMENT_TYPE = {
     "2": "common_contractor",
     "3": "common_intern",
     "9": "common_other"
+}
+EMPLOYMENT_TYPE_SEARCH_LOCALE = {
+    "全职": "common_fulltime",
+    "兼职": "common_parttime",
+    "合同工": "common_contractor",
+    "实习": "common_intern",
+    "其他": "common_other"
 }
 EMPLOYMENT_TYPE_SEARCH = {
     "0": "全职",
@@ -187,7 +198,7 @@ EMPLOYMENT_TYPE_SEARCH = {
 }
 EMPLOYMENT_TYPE_SEARCH_REVERSE = {
     v: k for k, v in EMPLOYMENT_TYPE_SEARCH.items()
-    }
+}
 
 MANAGEMENT_EXP = {
     "0": "common_need",
@@ -202,10 +213,32 @@ DEGREE = {
     "3": "common_degree_master",
     "4": "common_degree_mba",
     "5": "common_degree_doctor",
-    "6": "中专",
+    "6": "common_degree_technical_secondary_school",
     "7": "common_degree_highschool",
     "8": "common_degree_doctor_above",
     "9": "common_degree_middleschool"
+}
+DEGREE_SEARCH_LOCALE = {
+    "大专": "common_degree_college",
+    "本科": "common_degree_university",
+    "硕士": "common_degree_master",
+    "MBA": "common_degree_mba",
+    "博士": "common_degree_doctor",
+    "中专": "search_degree_technical_secondary_school",
+    "高中": "common_degree_highschool",
+    "博士后": "common_degree_doctor_above",
+    "初中": "common_degree_middleschool"
+}
+
+# 高级搜索筛选项
+SEARCH_CONDITION = {
+    "1": "search_location",
+    "2": "search_salary",
+    "4": "search_team",
+    "5": "search_recruitment_type",
+    "6": "search_job_type",
+    "7": "search_education level",
+    "8": "search_company"
 }
 
 # 及以上 工作经验、学历中使用

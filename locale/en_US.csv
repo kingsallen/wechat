@@ -27,6 +27,7 @@
 
 "common_need","Required"
 "common_no_need","Not required"
+"common_no_limit","No requirement"
 
 "common_degree_above"," and above"
 "common_degree_college","College Degree"
@@ -37,6 +38,8 @@
 "common_degree_highschool","High School"
 "common_degree_doctor_above","Doctor Degree and above"
 "common_degree_middleschool","Middle School"
+"common_degree_technical_secondary_school","Technical secondary school"
+"search_degree_technical_secondary_school","Middle School"
 
 "common_experienced","Experienced"
 "common_graduate","Graduate"
@@ -117,3 +120,11 @@
 "company_team_intro","The Team"
 "company_our_teams","Our {}"
 "company_page_title","About Us"
+
+"search_location","Location"
+"search_salary","Salary"
+"search_team","Recruitment type"
+"search_recruitment_type","Team"
+"search_job_type","Job type"
+"search_education level","Education level"
+"search_company","Company"

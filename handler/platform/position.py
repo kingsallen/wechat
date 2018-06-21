@@ -29,7 +29,8 @@ class PositionHandler(BaseHandler):
     def get(self, position_id):
         """显示 JD 页
         """
-        position_info = yield self.position_ps.get_position(position_id)
+        display_locale = self.get_current_locale()
+        position_info = yield self.position_ps.get_position(position_id, display_locale)
 
         if position_info.id and position_info.company_id == self.current_user.company.id:
             yield self._redirect_when_recom_is_openid(position_info)
@@ -382,7 +383,7 @@ class PositionHandler(BaseHandler):
                 position_info.language))
 
         if (position_info.management_experience and
-                    position_info.management_experience == 'common_need'):
+            position_info.management_experience == 'common_need'):
             require.append("{0} {1}".format(
                 self.locale.translate('jd_management_exp'),
                 self.locale.translate(position_info.management_experience)))
@@ -400,12 +401,12 @@ class PositionHandler(BaseHandler):
         attr = []
 
         if position_info.candidate_source:
-            attr.append("招聘类型 {0}".format(
-                self.locale.translate(position_info.candidate_source)))
+            attr.append("{0} {1}".format(self.locale.translate("jd_candidate_source"),
+                                         self.locale.translate(position_info.candidate_source)))
 
         if position_info.employment_type:
-            attr.append("工作性质 {0}".format(
-                self.locale.translate(position_info.employment_type)))
+            attr.append("{0} {1}".format(self.locale.translate("jd_employment_type"),
+                                         self.locale.translate(position_info.employment_type)))
 
         if self.current_user.company.conf_job_occupation and position_info.job_occupation:
             attr.append("{} {}".format(self.current_user.company.conf_job_occupation, position_info.job_occupation))
@@ -775,10 +776,7 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
     def get(self):
 
         infra_params = self.make_position_list_infra_params()
-        display_locale = self.current_user.company.conf_display_locale
-        if not display_locale:
-            useragent = self.request.headers.get('User-Agent')
-            display_locale = languge_code_from_ua(useragent)
+        display_locale = self.get_current_locale()
         # 校验一下可能出现的参数：
         # hb_c: 红包活动id
         # did: 子公司id
@@ -834,7 +832,8 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
         )
 
         # 获取用户已申请职位列表
-        applied_application_id_list = yield self.usercenter_ps.get_applied_applications_list(self.current_user.sysuser.id, position_id_list)
+        applied_application_id_list = yield self.usercenter_ps.get_applied_applications_list(
+            self.current_user.sysuser.id, position_id_list)
 
         # 诺华定制
         suppress_apply = yield self.customize_ps.is_suppress_apply_company(infra_params.company_id)
@@ -842,10 +841,12 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
         position_custom_list = []
         position_custom_id_list = []
         if suppress_apply:
-            position_custom_list, position_custom_id_list = yield self.position_ps.get_position_custom_list(position_id_list)
+            position_custom_list, position_custom_id_list = yield self.position_ps.get_position_custom_list(
+                position_id_list)
 
         # 是否达到投递上线
-        social_res, school_res = yield self.application_ps.get_application_apply_status(self.current_user.sysuser.id, self.current_user.company.id)
+        social_res, school_res = yield self.application_ps.get_application_apply_status(self.current_user.sysuser.id,
+                                                                                        self.current_user.company.id)
         total_count = 0
         # 职位信息
         position_ex_list = list()
@@ -1116,11 +1117,10 @@ class PositionListSugHandler(PositionListInfraParamsMixin, BaseHandler):
         # 获取五条sug数据
         infra_params.update(page_size=const_platform.SUG_LIST_COUNT,
                             keyWord=self.params.keyword if self.params.keyword else "",
-                            page_from=int(self.params.get("count", 0)/10) + 1)
+                            page_from=int(self.params.get("count", 0) / 10) + 1)
         res_data = yield self.position_ps.infra_obtain_sug_list(infra_params)
         suggest = res_data.get('suggest') if res_data else ''
         if suggest:
             sug.list = [e.get('title') for e in suggest]
 
         return self.send_json_success(sug)
-

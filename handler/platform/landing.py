@@ -18,8 +18,8 @@ class LandingHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def get(self):
-
-        search_seq = yield self.landing_ps.make_search_seq(self.current_user.company, self.params)
+        display_locale = self.get_current_locale()
+        search_seq = yield self.landing_ps.make_search_seq(self.current_user.company, self.params, self.locale, display_locale)
 
         self.logger.debug("[landing] search_seq: %s" % search_seq)
 
