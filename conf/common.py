@@ -229,6 +229,9 @@ DEGREE_SEARCH_LOCALE = {
     "博士后": "common_degree_doctor_above",
     "初中": "common_degree_middleschool"
 }
+DEGREE_SEARCH_REVERSE = {
+    v: k for k, v in DEGREE_SEARCH_LOCALE.items()
+}
 
 # 高级搜索筛选项
 SEARCH_CONDITION = {

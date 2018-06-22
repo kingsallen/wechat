@@ -277,9 +277,6 @@ class LandingPageService(PageService):
                              ...]
                  }
         """
-        search_seq = company.get("conf_search_seq")
-        if "1" in search_seq and display_locale == "en_US":
-            company.conf_search_seq = search_seq.replace(str(platform_const.LANDING_INDEX_CITY), str(platform_const.LANDING_INDEX_ECITY))
         conf_search_seq = tuple([int(e.index) for e in company.get("conf_search_seq")])
 
         key_order = [platform_const.LANDING[kn].get("display_key") for kn in conf_search_seq]
@@ -287,8 +284,8 @@ class LandingPageService(PageService):
         # 获取链接上配置的筛选参数
         display_key_dict = dict()
         salary_dict = dict()
-        all_form_name = [platform_const.LANDING[e].get('form_name') for e in range(1, 11)]
-        all_key_order = [[platform_const.LANDING[e].get("display_key"), platform_const.LANDING[e].get('form_name')] for e in range(1, 11)]
+        all_form_name = [platform_const.LANDING[e].get('form_name') for e in range(1, 10)]
+        all_key_order = [[platform_const.LANDING[e].get("display_key"), platform_const.LANDING[e].get('form_name')] for e in range(1, 10)]
         self.logger.debug('key_order: %s,form_name: %s,all_key_order: %s,all_form_name: %s' % (key_order, form_name, all_key_order, all_form_name))
         for key, value in params.items():
             if value and key in all_form_name and key not in form_name:
@@ -319,7 +316,7 @@ class LandingPageService(PageService):
         # 默认 conf_search_seq
         if not conf_search_seq_plus:
             conf_search_seq_plus = (
-                platform_const.LANDING_INDEX_ECITY if display_locale == "en_US" else platform_const.LANDING_INDEX_CITY,
+                platform_const.LANDING_INDEX_CITY,
                 platform_const.LANDING_INDEX_SALARY,
                 platform_const.LANDING_INDEX_CHILD_COMPANY,
                 platform_const.LANDING_INDEX_DEPARTMENT
@@ -370,6 +367,11 @@ class LandingPageService(PageService):
                         k)
                     to_append.append({"text": text, "value": e.get(k),
                                       "en": en[0] if en else ""})
+                elif k == 'city':
+                    en = pinyin_initials(e.get(k))
+                    text = e.get('city_ename') if display_locale == 'en_US' else e.get(k)
+                    to_append.append({"text": text, "value": e.get(k),
+                                      "en": en[0] if en else ""})
                 else:
                     en = pinyin_initials(e.get(k))
                     to_append.append({"text": e.get(k), "value": e.get(k), "en": en[0] if en else ""})
@@ -398,6 +400,11 @@ class LandingPageService(PageService):
                     en = pinyin_initials(e.get(s))
                     text = locale.translate(const.DEGREE_SEARCH_LOCALE.get(e.get(s))) if e.get(s) else e.get(
                         s)
+                    to_append.append({"text": text, "value": e.get(s),
+                                      "en": en[0] if en else ""})
+                elif s == 'city':
+                    en = pinyin_initials(e.get(s))
+                    text = e.get('city_ename') if display_locale == 'en_US' else e.get(s)
                     to_append.append({"text": text, "value": e.get(s),
                                       "en": en[0] if en else ""})
                 else:

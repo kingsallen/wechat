@@ -713,9 +713,11 @@ class PositionListInfraParamsMixin(BaseHandler):
 
     def make_position_list_infra_params(self):
         """构建调用基础服务职位列表的 params"""
-
+        display_locale = self.get_current_locale()
         infra_params = ObjectDict()
-
+        infra_params.degree = ""
+        infra_params.candidate_source = ""
+        infra_params.employment_type = ""
         infra_params.company_id = self.current_user.company.id
 
         if self.params.did:
@@ -733,30 +735,38 @@ class PositionListInfraParamsMixin(BaseHandler):
                 infra_params.salary = "%d,%d" % (
                     const_platform.SALARY[const_platform.SALARY_NAME_TO_INDEX[k]].salary_bottom,
                     const_platform.SALARY[const_platform.SALARY_NAME_TO_INDEX[k]].salary_top)
-            except KeyError:  # 如果用户自行修改了 GET 参数，不至于报错
+            except KeyError:
+                # 如果用户自行修改了 GET 参数，不至于报错
                 infra_params.salary = ""
 
-        if self.params.degree:
-            infra_params.degree = self.params.degree
-        else:
-            infra_params.degree = ""
+        # 微信国际化
+        if display_locale == "en_US":
+            if display_locale == "en_US":
+                infra_params.degree = self.en_translate_zh(const.DEGREE_SEARCH_REVERSE.get(self.params.degree))
+            # 招聘类型和职位性质接受兼容 数字编号 中文
+            if self.params.candidate_source:
+                infra_params.candidate_source = self.en_translate_zh(
+                    const.CANDIDATE_SOURCE.get(self.params.candidate_source, "")) \
+                    if self.params.candidate_source.isdigit() else self.en_translate_zh(self.params.candidate_source)
+            if self.params.employment_type:
+                infra_params.employment_type = self.en_translate_zh(
+                    const.EMPLOYMENT_TYPE.get(self.params.employment_type, "")) \
+                    if self.params.employment_type.isdigit() else self.en_translate_zh(self.params.employment_type)
 
-        # 招聘类型和职位性质接受兼容 数字编号 中文
-        if self.params.candidate_source:
-            infra_params.candidate_source = const.CANDIDATE_SOURCE_SEARCH.get(self.params.candidate_source, "") \
-                if self.params.candidate_source.isdigit() else self.params.candidate_source
+            infra_params.update(ecities=self.params.city if self.params.city else "")
         else:
-            infra_params.candidate_source = ""
-
-        if self.params.employment_type:
-            infra_params.employment_type = const.EMPLOYMENT_TYPE_SEARCH.get(self.params.employment_type, "") \
-                if self.params.employment_type.isdigit() else self.params.employment_type
-        else:
-            infra_params.employment_type = ""
+            if self.params.degree:
+                infra_params.degree = self.params.degree
+            if self.params.candidate_source:
+                infra_params.candidate_source = const.CANDIDATE_SOURCE_SEARCH.get(self.params.candidate_source, "") \
+                    if self.params.candidate_source.isdigit() else self.params.candidate_source
+            if self.params.employment_type:
+                infra_params.employment_type = const.EMPLOYMENT_TYPE_SEARCH.get(self.params.employment_type, "") \
+                    if self.params.employment_type.isdigit() else self.params.employment_type
+            infra_params.update(cities=self.params.city if self.params.city else "")
 
         infra_params.update(
             keywords=self.params.keyword if self.params.keyword else "",
-            cities=self.params.city if self.params.city else "",
             department=self.params.team_name if self.params.team_name else "",
             occupations=self.params.occupation if self.params.occupation else "",
             custom=self.params.custom if self.params.custom else "",
@@ -765,6 +775,12 @@ class PositionListInfraParamsMixin(BaseHandler):
         self.logger.debug("[position_list_infra_params]: %s" % infra_params)
 
         return infra_params
+
+    def en_translate_zh(self, param):
+        self.locale.get("zh_CN")
+        ret = self.locale.translate(param)
+        self.locale.get("en_US")
+        return ret
 
 
 class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
