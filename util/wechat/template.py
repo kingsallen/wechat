@@ -49,6 +49,7 @@ def _make_json_data(first, remark=None, colors=None, encode=True, **kwargs):
 def rp_binding_success_notice_tpl(
     wechat_id, openid, link, company_name, employee_slug,
     sys_template_id=const.TEMPLATES.RP_EMPLOYEE_BINDING):
+    link = link + const.TEMPLATE_URL_SUFFIX.format(sys_template_id)
     d = datetime.now()
     json_data = _make_json_data(
         first="恭喜你获得员工认证奖励",
@@ -67,6 +68,7 @@ def rp_binding_success_notice_tpl(
 @gen.coroutine
 def rp_recom_success_notice_tpl(wechat_id, openid, link, company_name,
                                 recomee_name, position_title, sys_template_id=const.TEMPLATES.RP_RECOM):
+    link = link + const.TEMPLATE_URL_SUFFIX.format(sys_template_id)
     d = datetime.now()
     json_data = _make_json_data(
         first="恭喜你获得员工推荐奖励",
@@ -84,6 +86,7 @@ def rp_recom_success_notice_tpl(wechat_id, openid, link, company_name,
 @gen.coroutine
 def rp_transfer_click_success_notice_tpl(wechat_id, openid, link, nickname,
                                          position_title, sys_template_id=const.TEMPLATES.RP_SHARE):
+    link = link + const.TEMPLATE_URL_SUFFIX.format(sys_template_id)
     d = datetime.now()
     json_data = _make_json_data(
         first="恭喜您获得转发奖励",
@@ -103,6 +106,7 @@ def rp_transfer_click_success_notice_tpl(wechat_id, openid, link, nickname,
 @gen.coroutine
 def rp_transfer_apply_success_notice_tpl(wechat_id, openid, link, nickname,
                                          position_title, sys_template_id=const.TEMPLATES.RP_SHARE):
+    link = link + const.TEMPLATE_URL_SUFFIX.format(sys_template_id)
     d = datetime.now()
     json_data = _make_json_data(
         first="恭喜您获得转发奖励",
@@ -123,7 +127,7 @@ def rp_transfer_apply_success_notice_tpl(wechat_id, openid, link, nickname,
 def position_view_five_notice_tpl(wechat_id, openid, link, title,
                                   salary, sys_template_id=const.TEMPLATES.POSITION_VIEWED_FIVE_TIMES):
     """职位浏览5次，向 HR 发送消息模板"""
-
+    link = link + const.TEMPLATE_URL_SUFFIX.format(sys_template_id)
     d = datetime.now()
     json_data = _make_json_data(
         first="您好，有求职者查看了你的职位",
@@ -162,7 +166,7 @@ def favposition_notice_to_hr_tpl(wechat_id, openid, title, candidate_name,
 def favposition_notice_to_applier_tpl(company_id, position_info, company_name,
                                       user_id, url, sys_template_id=const.TEMPLATES.FAVPOSITION):
     """用户感兴趣某职位后，向用户发送消息模板"""
-
+    url = url + const.TEMPLATE_URL_SUFFIX.format(sys_template_id)
     # 延迟2小时发送
     delay = 7200
     # 延迟消息队列消费者
@@ -203,7 +207,7 @@ def favposition_notice_to_applier_tpl(company_id, position_info, company_name,
 def position_share_notice_employee_tpl(company_id, title, salary, user_id, pid,
                                        url, sys_template_id=const.TEMPLATES.POSITION_VIEWED_SHARED):
     """认证员工转发职位后，向员工发送转发结果消息模板"""
-
+    url = url + const.TEMPLATE_URL_SUFFIX.format(sys_template_id)
     # 延迟10分钟发送
     delay = 3600
     # 延迟消息队列消费者
