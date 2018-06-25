@@ -13,7 +13,7 @@ from util.common import ObjectDict
 # 栏目设置
 # 默认栏目设置
 
-LANDING_SEQ = "1#2#3#4"
+LANDING_SEQ = "1#2#4"
 
 LANDING_QUERY_SIZE = 5000
 

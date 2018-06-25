@@ -315,7 +315,6 @@ class LandingPageService(PageService):
             conf_search_seq_plus = (
                 platform_const.LANDING_INDEX_CITY,
                 platform_const.LANDING_INDEX_SALARY,
-                platform_const.LANDING_INDEX_CHILD_COMPANY,
                 platform_const.LANDING_INDEX_DEPARTMENT
             )
 
