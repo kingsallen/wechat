@@ -27,7 +27,8 @@ class LandingHandler(BaseHandler):
             "logo": self.static_url(self.current_user.company.logo),
             "name": self.current_user.company.get("abbreviation"),
             "image": self.static_url(self.current_user.company.conf_search_img),
-            "search_seq": search_seq
+            "search_seq": search_seq,
+            "meta_title": self.locale.translate("search_title")
         })
 
         yield self._make_share_info(self.current_user.company)
