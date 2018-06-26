@@ -444,7 +444,7 @@ class ChatHandler(BaseHandler):
         self.hr_id = self.params.hrId
         self.position_id = self.params.get("pid") or 0
 
-        user_message = self.json_args.get("content")
+        user_message = ujson.dumps(self.json_args.get("content"))
         msg_type = self.json_args.get("msgType")
         server_id = self.json_args.get("serverId") or ""
         duration = self.json_args.get("duration") or 0
