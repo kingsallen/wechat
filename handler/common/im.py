@@ -445,7 +445,7 @@ class ChatHandler(BaseHandler):
         self.position_id = self.params.get("pid") or 0
 
         content = self.json_args.get("content")
-        user_message = ujson.dumps(content) if type(content) == dict else content
+        user_message = ujson.dumps(content) if type(content) != str else content
         msg_type = self.json_args.get("msgType")
         server_id = self.json_args.get("serverId") or ""
         duration = self.json_args.get("duration") or 0
