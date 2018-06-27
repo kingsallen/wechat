@@ -232,7 +232,7 @@ class ResumeImportHandler(BaseHandler):
                     url=self.params.way,
                 )
 
-                self.send_json_error(message=result.message, data=data)
+                self.send_json_error(message=result.message if result.status != 32012 else "", data=data)
 
         else:
             self.log_info = ObjectDict(

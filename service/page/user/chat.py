@@ -57,6 +57,7 @@ class ChatPageService(PageService):
                 room['msgType'] = e.msgType
                 room['duration'] = e.duration
                 room['serverId'] = e.serverId
+                room['assetUrl'] = e.assetUrl
                 obj_list.append(room)
 
         raise gen.Return(obj_list)
