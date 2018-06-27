@@ -102,7 +102,8 @@ struct PositionVO {
     4:  optional string city,               //职位的发布地区
     5:  optional i32 salaryTop,             //薪资上限
     6:  optional i32 salaryBottom,          //薪资下限
-    7:  optional string updateTime          //职位修改时间
+    7:  optional string updateTime,          //职位修改时间
+    8:  optional i32 status          //职位状态
 }
 
 struct ResultOfSaveRoomVO {

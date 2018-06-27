@@ -48,7 +48,7 @@ class ChatPageService(PageService):
             for e in ret.chatLogs:
                 room = ObjectDict()
                 room['id'] = e.id
-                room['content'] = e.content
+                room['content'] = json.loads(e.content) if e.msgType == "job" else e.content
                 room['chatTime'] = str_2_date(e.createTime, const.TIME_FORMAT_MINUTE)
                 room['speaker'] = e.speaker  # 0：求职者，1：HR
                 room['btnContent'] = json.loads(e.btnContent) if e.btnContent else e.btnContent
@@ -93,7 +93,8 @@ class ChatPageService(PageService):
                 company_name=ret.position.companyName,
                 city=ret.position.city,
                 salary=gen_salary(ret.position.salaryTop, ret.position.salaryBottom),
-                update_time=str_2_date(ret.position.updateTime, const.TIME_FORMAT_MINUTE)
+                update=str_2_date(ret.position.updateTime, const.TIME_FORMAT_MINUTE),
+                status=ret.position.status
             )
         res = ObjectDict(
             hr=hr_info,
