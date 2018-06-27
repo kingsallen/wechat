@@ -263,9 +263,12 @@ class LandingPageService(PageService):
         return data
 
     @gen.coroutine
-    def make_search_seq(self, company, params):
+    def make_search_seq(self, company, params, locale, display_locale):
         """
         生成高级搜索功能中前端需要的数据
+        :param display_locale:
+        :param locale:
+        :param params:
         :param company:
         :return: {"field_name": ['地点', '子公司', '部门'],
                   "field_form_name": ['city', '...', 'team_name']
@@ -346,12 +349,27 @@ class LandingPageService(PageService):
 
                 elif k == 'candidate_source_name':
                     en = pinyin_initials(e.get(k))
-                    to_append.append({"text": e.get(k), "value": const.CANDIDATE_SOURCE_SEARCH_REVERSE.get(e.get(k)),
+                    text = locale.translate(const.CANDIDATE_SOURCE_SEARCH_LOCALE.get(e.get(k))) if e.get(k) else e.get(k)
+                    to_append.append({"text": text, "value": const.CANDIDATE_SOURCE_SEARCH_REVERSE.get(e.get(k)),
                                       "en": en[0] if en else ""})
 
                 elif k == 'employment_type_name':
                     en = pinyin_initials(e.get(k))
-                    to_append.append({"text": e.get(k), "value": const.EMPLOYMENT_TYPE_SEARCH_REVERSE.get(e.get(k)),
+                    text = locale.translate(const.EMPLOYMENT_TYPE_SEARCH_LOCALE.get(e.get(k))) if e.get(k) else e.get(
+                        k)
+                    to_append.append({"text": text, "value": const.EMPLOYMENT_TYPE_SEARCH_REVERSE.get(e.get(k)),
+                                      "en": en[0] if en else ""})
+
+                elif k == 'degree_name':
+                    en = pinyin_initials(e.get(k))
+                    text = locale.translate(const.DEGREE_SEARCH_LOCALE.get(e.get(k))) if e.get(k) else e.get(
+                        k)
+                    to_append.append({"text": text, "value": e.get(k),
+                                      "en": en[0] if en else ""})
+                elif k == 'city':
+                    en = pinyin_initials(e.get(k))
+                    text = e.get('city_ename') if display_locale == 'en_US' else e.get(k)
+                    to_append.append({"text": text, "value": e.get(k),
                                       "en": en[0] if en else ""})
                 else:
                     en = pinyin_initials(e.get(k))
@@ -366,12 +384,27 @@ class LandingPageService(PageService):
 
                 elif s == 'candidate_source_name':
                     en = pinyin_initials(e.get(s))
-                    to_append.append({"text": e.get(s), "value": const.CANDIDATE_SOURCE_SEARCH_REVERSE.get(e.get(s)),
+                    text = locale.translate(const.CANDIDATE_SOURCE_SEARCH_LOCALE.get(e.get(s))) if e.get(s) else e.get(
+                        s)
+                    to_append.append({"text": text, "value": const.CANDIDATE_SOURCE_SEARCH_REVERSE.get(e.get(s)),
                                       "en": en[0] if en else ""})
 
                 elif s == 'employment_type_name':
                     en = pinyin_initials(e.get(s))
-                    to_append.append({"text": e.get(s), "value": const.EMPLOYMENT_TYPE_SEARCH_REVERSE.get(e.get(s)),
+                    text = locale.translate(const.CANDIDATE_SOURCE_SEARCH_LOCALE.get(e.get(s))) if e.get(s) else e.get(
+                        s)
+                    to_append.append({"text": text, "value": const.EMPLOYMENT_TYPE_SEARCH_REVERSE.get(e.get(s)),
+                                      "en": en[0] if en else ""})
+                elif s == 'degree_name':
+                    en = pinyin_initials(e.get(s))
+                    text = locale.translate(const.DEGREE_SEARCH_LOCALE.get(e.get(s))) if e.get(s) else e.get(
+                        s)
+                    to_append.append({"text": text, "value": e.get(s),
+                                      "en": en[0] if en else ""})
+                elif s == 'city':
+                    en = pinyin_initials(e.get(s))
+                    text = e.get('city_ename') if display_locale == 'en_US' else e.get(s)
+                    to_append.append({"text": text, "value": e.get(s),
                                       "en": en[0] if en else ""})
                 else:
                     en = pinyin_initials(e.get(s))
@@ -391,7 +424,7 @@ class LandingPageService(PageService):
             if search_item == platform_const.LANDING_INDEX_DEPARTMENT and company.conf_teamname_custom.teamname_custom:
                 return company.conf_teamname_custom.teamname_custom
 
-            return platform_const.LANDING[search_item].get("chpe")
+            return locale.translate(const.SEARCH_CONDITION.get(str(search_item)))
 
         return ObjectDict({
             "field_name": [custom_field(e) for e in conf_search_seq_plus],

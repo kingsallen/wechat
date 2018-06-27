@@ -18,8 +18,8 @@ class LandingHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def get(self):
-
-        search_seq = yield self.landing_ps.make_search_seq(self.current_user.company, self.params)
+        display_locale = self.get_current_locale()
+        search_seq = yield self.landing_ps.make_search_seq(self.current_user.company, self.params, self.locale, display_locale)
 
         self.logger.debug("[landing] search_seq: %s" % search_seq)
 
@@ -27,7 +27,8 @@ class LandingHandler(BaseHandler):
             "logo": self.static_url(self.current_user.company.logo),
             "name": self.current_user.company.get("abbreviation"),
             "image": self.static_url(self.current_user.company.conf_search_img),
-            "search_seq": search_seq
+            "search_seq": search_seq,
+            "meta_title": self.locale.translate("search_title")
         })
 
         yield self._make_share_info(self.current_user.company)

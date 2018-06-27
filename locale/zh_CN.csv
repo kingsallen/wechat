@@ -27,6 +27,7 @@
 
 "common_need","需要"
 "common_no_need","不需要"
+"common_no_limit","不限"
 
 "common_degree_above","及以上"
 "common_degree_college","大专"
@@ -37,6 +38,8 @@
 "common_degree_highschool","高中"
 "common_degree_doctor_above","博士后"
 "common_degree_middleschool","初中"
+"common_degree_technical_secondary_school","中专"
+"search_degree_technical_secondary_school","中专"
 
 
 "common_experienced","社招"
@@ -120,3 +123,17 @@
 "company_team_intro","{}介绍"
 "company_our_teams","我们的{}"
 "company_page_title","企业首页"
+
+"search_title", "高级搜索"
+"search_location","工作地点"
+"search_salary","薪资范围"
+"search_team","所属部门"
+"search_recruitment_type","招聘类型"
+"search_job_type","工作性质"
+"search_education level","学历要求"
+"search_company","所属公司"
+
+"fill_out_your_resume": "投个简历"
+"not_now": "不了，谢谢"
+"your_intention_has_been_informed_to_recruiters": "已将您的意愿告知HR"
+"please_fill_out_your_resume": "为了让HR了解您，填一份简历吧"
