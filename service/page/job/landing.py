@@ -351,27 +351,27 @@ class LandingPageService(PageService):
                     to_append.append(c_com)
 
                 elif k == 'candidate_source_name':
-                    en = pinyin_initials(e.get(k))
                     text = locale.translate(const.CANDIDATE_SOURCE_SEARCH_LOCALE.get(e.get(k))) if e.get(k) else e.get(k)
+                    en = pinyin_initials(text)
                     to_append.append({"text": text, "value": const.CANDIDATE_SOURCE_SEARCH_REVERSE.get(e.get(k)),
                                       "en": en[0] if en else ""})
 
                 elif k == 'employment_type_name':
-                    en = pinyin_initials(e.get(k))
                     text = locale.translate(const.EMPLOYMENT_TYPE_SEARCH_LOCALE.get(e.get(k))) if e.get(k) else e.get(
                         k)
+                    en = pinyin_initials(text)
                     to_append.append({"text": text, "value": const.EMPLOYMENT_TYPE_SEARCH_REVERSE.get(e.get(k)),
                                       "en": en[0] if en else ""})
 
                 elif k == 'degree_name':
-                    en = pinyin_initials(e.get(k))
                     text = locale.translate(const.DEGREE_SEARCH_LOCALE.get(e.get(k))) if e.get(k) else e.get(
                         k)
+                    en = pinyin_initials(text)
                     to_append.append({"text": text, "value": e.get(k),
                                       "en": en[0] if en else ""})
                 elif k == 'city':
-                    en = pinyin_initials(e.get(k))
                     text = e.get('city_ename') if display_locale == 'en_US' else e.get(k)
+                    en = pinyin_initials(text)
                     to_append.append({"text": text, "value": e.get(k),
                                       "en": en[0] if en else ""})
                 else:
@@ -386,27 +386,27 @@ class LandingPageService(PageService):
                     to_append.append(c_com)
 
                 elif s == 'candidate_source_name':
-                    en = pinyin_initials(e.get(s))
                     text = locale.translate(const.CANDIDATE_SOURCE_SEARCH_LOCALE.get(e.get(s))) if e.get(s) else e.get(
                         s)
+                    en = pinyin_initials(text)
                     to_append.append({"text": text, "value": const.CANDIDATE_SOURCE_SEARCH_REVERSE.get(e.get(s)),
                                       "en": en[0] if en else ""})
 
                 elif s == 'employment_type_name':
-                    en = pinyin_initials(e.get(s))
                     text = locale.translate(const.CANDIDATE_SOURCE_SEARCH_LOCALE.get(e.get(s))) if e.get(s) else e.get(
                         s)
+                    en = pinyin_initials(text)
                     to_append.append({"text": text, "value": const.EMPLOYMENT_TYPE_SEARCH_REVERSE.get(e.get(s)),
                                       "en": en[0] if en else ""})
                 elif s == 'degree_name':
-                    en = pinyin_initials(e.get(s))
                     text = locale.translate(const.DEGREE_SEARCH_LOCALE.get(e.get(s))) if e.get(s) else e.get(
                         s)
+                    en = pinyin_initials(text)
                     to_append.append({"text": text, "value": e.get(s),
                                       "en": en[0] if en else ""})
                 elif s == 'city':
-                    en = pinyin_initials(e.get(s))
                     text = e.get('city_ename') if display_locale == 'en_US' else e.get(s)
+                    en = pinyin_initials(text)
                     to_append.append({"text": text, "value": e.get(s),
                                       "en": en[0] if en else ""})
                 else:
