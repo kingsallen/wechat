@@ -41,7 +41,7 @@ class LandingPageService(PageService):
         return key_list
 
     @gen.coroutine
-    def get_positions_data(self, conf_search_seq, company_id, search_condition_dict, salary_dict):
+    def get_positions_data(self, conf_search_seq, company_id, search_condition_dict, salary_dict, display_locale):
         """ 从 ES 获取全部职位信息
         可以正确解析 salary
         """
@@ -189,6 +189,9 @@ class LandingPageService(PageService):
 
         # 获取筛选项
         key_list = self.make_key_list(conf_search_seq)
+        if display_locale == "en_US" and "city" in key_list:
+            key_list.remove("city")
+            key_list.append("city_ename")
         self.logger.debug("key_list: %s" % key_list)
 
         for e in result_list:
@@ -321,7 +324,7 @@ class LandingPageService(PageService):
                 platform_const.LANDING_INDEX_DEPARTMENT
             )
 
-        positions_data = yield self.get_positions_data(conf_search_seq_plus, company.id, display_key_dict, salary_dict)
+        positions_data = yield self.get_positions_data(conf_search_seq_plus, company.id, display_key_dict, salary_dict, display_locale)
 
         if platform_const.LANDING_INDEX_CITY in conf_search_seq_plus:
             positions_data = self.split_cities(positions_data)
