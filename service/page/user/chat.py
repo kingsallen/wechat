@@ -93,7 +93,8 @@ class ChatPageService(PageService):
                 city=ret.position.city,
                 salary=gen_salary(ret.position.salaryTop, ret.position.salaryBottom),
                 update=str_2_date(ret.position.updateTime, const.TIME_FORMAT_MINUTE),
-                status=ret.position.status
+                status=ret.position.status,
+                team=ret.position.team
             )
         res = ObjectDict(
             hr=hr_info,
