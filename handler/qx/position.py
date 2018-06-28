@@ -18,7 +18,7 @@ class PositionHandler(BaseHandler):
     @gen.coroutine
     def get(self, position_id):
 
-        position_info = yield self.position_ps.get_position(position_id)
+        position_info = yield self.position_ps.get_position(position_id, display_locale=self.get_current_locale())
 
         self.logger.debug("[JD]构建职位所属公司信息")
         did = yield self.company_ps.get_real_company_id(position_info.publisher, position_info.company_id)

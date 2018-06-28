@@ -62,7 +62,7 @@ class UserCurrentInfoHandler(BaseHandler):
                 self.current_user.sysuser.mobile,
                 self.current_user.recom.id if self.params.recom else 0)
 
-            position_info = yield self.position_ps.get_position(self.params.pid)
+            position_info = yield self.position_ps.get_position(self.params.pid, display_locale=self.get_current_locale())
 
             # 2.添加定时任务，若2小时候，没有完善则发送消息模板
             # real_company_id = yield self.company_ps.get_real_company_id(

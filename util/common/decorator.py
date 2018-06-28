@@ -235,7 +235,7 @@ def check_and_apply_profile(func):
                     self.params.pid and self.params.pid.isdigit()):
 
                 pid = int(self.params.pid)
-                position = yield self.position_ps.get_position(pid)
+                position = yield self.position_ps.get_position(pid, display_locale=self.get_current_locale())
 
                 self.logger.warn(position)
 
