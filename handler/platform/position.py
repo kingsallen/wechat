@@ -742,7 +742,7 @@ class PositionListInfraParamsMixin(BaseHandler):
         # 微信国际化
         if display_locale == "en_US":
             if display_locale == "en_US":
-                infra_params.degree = self.en_translate_zh(const.DEGREE_SEARCH_REVERSE.get(self.params.degree))
+                infra_params.degree = self.en_translate_zh(const.DEGREE_SEARCH_REVERSE.get(self.params.degree, ""))
             # 招聘类型和职位性质接受兼容 数字编号 中文
             if self.params.candidate_source:
                 infra_params.candidate_source = self.en_translate_zh(
