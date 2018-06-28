@@ -980,7 +980,7 @@ class PositionEmpNoticeHandler(BaseHandler):
             self.send_json_success()
             return
 
-        position = yield self.position_ps.get_position(self.params.pid)
+        position = yield self.position_ps.get_position(self.params.pid, display_locale=self.get_current_locale())
 
         link = self.make_url(path.EMPLOYEE_RECOMMENDS, wechat_signature=self.current_user.wechat.signature)
 
