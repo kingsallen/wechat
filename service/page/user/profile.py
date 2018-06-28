@@ -621,6 +621,8 @@ class ProfilePageService(PageService):
         expectedlocation = custom_cv.get('expectedlocation')
         salary_code = custom_cv.get("salary_code")
         worktype = custom_cv.get("worktype")
+        workstate = custom_cv.get("workstate")
+        industry = custom_cv.get("industry")
 
         has_intention = bool(profile.get("intentions"))
 
@@ -633,6 +635,10 @@ class ProfilePageService(PageService):
             record.salary_code = salary_code
         if worktype:
             record.worktype = worktype
+        if workstate:
+            record.workstate = workstate
+        if industry:
+            record.industry = industry
 
         if has_intention:
             intention_id = first(profile.get("intentions")).get('id')
