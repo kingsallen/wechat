@@ -739,31 +739,16 @@ class PositionListInfraParamsMixin(BaseHandler):
                 # 如果用户自行修改了 GET 参数，不至于报错
                 infra_params.salary = ""
 
-        # 微信国际化
-        if display_locale == "en_US":
-            if display_locale == "en_US":
-                infra_params.degree = self.en_translate_zh(const.DEGREE_SEARCH_REVERSE.get(self.params.degree, ""))
-            # 招聘类型和职位性质接受兼容 数字编号 中文
-            if self.params.candidate_source:
-                infra_params.candidate_source = self.en_translate_zh(
-                    const.CANDIDATE_SOURCE.get(self.params.candidate_source, "")) \
-                    if self.params.candidate_source.isdigit() else self.en_translate_zh(self.params.candidate_source)
-            if self.params.employment_type:
-                infra_params.employment_type = self.en_translate_zh(
-                    const.EMPLOYMENT_TYPE.get(self.params.employment_type, "")) \
-                    if self.params.employment_type.isdigit() else self.en_translate_zh(self.params.employment_type)
+        infra_params.update(cities=self.params.city if self.params.city else "")
 
-            infra_params.update(ecities=self.params.city if self.params.city else "")
-        else:
-            if self.params.degree:
-                infra_params.degree = self.params.degree
-            if self.params.candidate_source:
-                infra_params.candidate_source = const.CANDIDATE_SOURCE_SEARCH.get(self.params.candidate_source, "") \
-                    if self.params.candidate_source.isdigit() else self.params.candidate_source
-            if self.params.employment_type:
-                infra_params.employment_type = const.EMPLOYMENT_TYPE_SEARCH.get(self.params.employment_type, "") \
-                    if self.params.employment_type.isdigit() else self.params.employment_type
-            infra_params.update(cities=self.params.city if self.params.city else "")
+        if self.params.degree:
+            infra_params.degree = self.params.degree
+        if self.params.candidate_source:
+            infra_params.candidate_source = const.CANDIDATE_SOURCE_SEARCH.get(self.params.candidate_source, "") \
+                if self.params.candidate_source.isdigit() else self.params.candidate_source
+        if self.params.employment_type:
+            infra_params.employment_type = const.EMPLOYMENT_TYPE_SEARCH.get(self.params.employment_type, "") \
+                if self.params.employment_type.isdigit() else self.params.employment_type
 
         infra_params.update(
             keywords=self.params.keyword if self.params.keyword else "",
@@ -775,12 +760,6 @@ class PositionListInfraParamsMixin(BaseHandler):
         self.logger.debug("[position_list_infra_params]: %s" % infra_params)
 
         return infra_params
-
-    def en_translate_zh(self, param):
-        self.locale.get("zh_CN")
-        ret = self.locale.translate(param)
-        self.locale.get("en_US")
-        return ret
 
 
 class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
