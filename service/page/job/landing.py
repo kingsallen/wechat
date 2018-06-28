@@ -373,7 +373,7 @@ class LandingPageService(PageService):
                 elif k == 'city':
                     text = e.get('city_ename') if display_locale == 'en_US' else e.get(k)
                     en = pinyin_initials(text)
-                    to_append.append({"text": text, "value": e.get(k),
+                    to_append.append({"text": text, "value": text,
                                       "en": en[0] if en else ""})
                 else:
                     en = pinyin_initials(e.get(k))
@@ -408,7 +408,7 @@ class LandingPageService(PageService):
                 elif s == 'city':
                     text = e.get('city_ename') if display_locale == 'en_US' else e.get(s)
                     en = pinyin_initials(text)
-                    to_append.append({"text": text, "value": e.get(s),
+                    to_append.append({"text": text, "value": text,
                                       "en": en[0] if en else ""})
                 else:
                     en = pinyin_initials(e.get(s))
