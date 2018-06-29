@@ -217,10 +217,13 @@ class LandingPageService(PageService):
         return ret
 
     @staticmethod
-    def split_cities(data, *, delimiter=None):
+    def split_cities(data, *, delimiter=None, display_locale=None):
         """如果一条数据中包含多个城市，应该分裂成多条数据"""
         ret = []
-        key_to_split = 'city'
+        if display_locale == "en_US":
+            key_to_split = 'city_ename'
+        else:
+            key_to_split = 'city'
         if not delimiter:
             delimiter = [",", "，"]
 
@@ -327,7 +330,7 @@ class LandingPageService(PageService):
         positions_data = yield self.get_positions_data(conf_search_seq_plus, company.id, display_key_dict, salary_dict, display_locale)
 
         if platform_const.LANDING_INDEX_CITY in conf_search_seq_plus:
-            positions_data = self.split_cities(positions_data)
+            positions_data = self.split_cities(positions_data, display_locale=display_locale)
 
         if platform_const.LANDING_INDEX_CHILD_COMPANY in conf_search_seq and platform_const.LANDING_INDEX_CHILD_COMPANY in conf_search_seq_plus:
             positions_data = yield self.append_child_company_name(positions_data)
