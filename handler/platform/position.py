@@ -364,27 +364,27 @@ class PositionHandler(BaseHandler):
         require = []
 
         if position_info.degree:
-            require.append("{0} {1}".format(
+            require.append("{0}:{1}".format(
                 self.locale.translate('jd_degree'),
                 gen_degree_v2(position_info.raw_degree,
                               position_info.raw_degree_above, self.locale)
             ))
 
         if position_info.experience:
-            require.append("{0} {1}".format(
+            require.append("{0}:{1}".format(
                 self.locale.translate('jd_work_exp'),
                 gen_experience_v2(position_info.raw_experience,
                                   position_info.raw_experience_above,
                                   self.locale)))
 
         if position_info.language:
-            require.append("{0} {1}".format(
+            require.append("{0}:{1}".format(
                 self.locale.translate('jd_language'),
                 position_info.language))
 
         if (position_info.management_experience and
             position_info.management_experience == 'common_need'):
-            require.append("{0} {1}".format(
+            require.append("{0}:{1}".format(
                 self.locale.translate('jd_management_exp'),
                 self.locale.translate(position_info.management_experience)))
 
@@ -401,18 +401,18 @@ class PositionHandler(BaseHandler):
         attr = []
 
         if position_info.candidate_source:
-            attr.append("{0} {1}".format(self.locale.translate("jd_candidate_source"),
+            attr.append("{0}:{1}".format(self.locale.translate("jd_candidate_source"),
                                          self.locale.translate(position_info.candidate_source)))
 
         if position_info.employment_type:
-            attr.append("{0} {1}".format(self.locale.translate("jd_employment_type"),
+            attr.append("{0}:{1}".format(self.locale.translate("jd_employment_type"),
                                          self.locale.translate(position_info.employment_type)))
 
         if self.current_user.company.conf_job_occupation and position_info.job_occupation:
-            attr.append("{} {}".format(self.current_user.company.conf_job_occupation, position_info.job_occupation))
+            attr.append("{}:{}".format(self.current_user.company.conf_job_occupation, position_info.job_occupation))
 
         if self.current_user.company.conf_job_custom_title and position_info.job_custom:
-            attr.append("{} {}".format(self.current_user.company.conf_job_custom_title, position_info.job_custom))
+            attr.append("{}:{}".format(self.current_user.company.conf_job_custom_title, position_info.job_custom))
 
         if not attr:
             data = None
