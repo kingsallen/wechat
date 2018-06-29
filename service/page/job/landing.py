@@ -368,10 +368,15 @@ class LandingPageService(PageService):
                                       "en": en[0] if en else ""})
 
                 elif k == 'degree_name':
-                    text = locale.translate(const.DEGREE_SEARCH_LOCALE.get(e.get(k))) if e.get(k) else e.get(
-                        k)
+                    content = e.get(k)
+                    if "及以上" in content:
+                        content = content.rstrip("及以上")
+                        text = locale.translate(const.DEGREE_SEARCH_LOCALE.get(content.rstrip("及以上")))
+                    else:
+                        text = locale.translate(const.DEGREE_SEARCH_LOCALE.get(e.get(k))) if e.get(k) else e.get(
+                            k)
                     en = pinyin_initials(text)
-                    to_append.append({"text": text, "value": e.get(k),
+                    to_append.append({"text": text, "value": content,
                                       "en": en[0] if en else ""})
                 elif k == 'city':
                     text = e.get('city_ename') if display_locale == 'en_US' else e.get(k)
@@ -403,10 +408,15 @@ class LandingPageService(PageService):
                     to_append.append({"text": text, "value": const.EMPLOYMENT_TYPE_SEARCH_REVERSE.get(e.get(s)),
                                       "en": en[0] if en else ""})
                 elif s == 'degree_name':
-                    text = locale.translate(const.DEGREE_SEARCH_LOCALE.get(e.get(s))) if e.get(s) else e.get(
-                        s)
+                    content = e.get(s)
+                    if "及以上" in content:
+                        content = content.rstrip("及以上")
+                        text = locale.translate(const.DEGREE_SEARCH_LOCALE.get(content.rstrip("及以上")))
+                    else:
+                        text = locale.translate(const.DEGREE_SEARCH_LOCALE.get(e.get(s))) if e.get(s) else e.get(
+                            s)
                     en = pinyin_initials(text)
-                    to_append.append({"text": text, "value": e.get(s),
+                    to_append.append({"text": text, "value": content,
                                       "en": en[0] if en else ""})
                 elif s == 'city':
                     text = e.get('city_ename') if display_locale == 'en_US' else e.get(s)
