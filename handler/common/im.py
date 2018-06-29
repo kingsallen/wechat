@@ -444,7 +444,8 @@ class ChatHandler(BaseHandler):
         self.hr_id = self.params.hrId
         self.position_id = self.params.get("pid") or 0
 
-        user_message = self.json_args.get("content")
+        content = self.json_args.get("content")
+        user_message = ujson.dumps(content) if type(content) != str else content
         msg_type = self.json_args.get("msgType")
         server_id = self.json_args.get("serverId") or ""
         duration = self.json_args.get("duration") or 0
@@ -483,12 +484,14 @@ class ChatHandler(BaseHandler):
         ))
 
         self.redis_client.publish(self.hr_channel, message_body)
-
-        if self.bot_enabled:
-            # 由于没有延迟的发送导致hr端轮训无法订阅到publish到redis的消息　所以这里做下延迟处理
-            # delay_robot = functools.partial(self._handle_chatbot_message, user_message)
-            # ioloop.IOLoop.current().call_later(1, delay_robot)
-            yield self._handle_chatbot_message(user_message)  # 直接调用方式
+        try:
+            if self.bot_enabled and msg_type != "job":
+                # 由于没有延迟的发送导致hr端轮训无法订阅到publish到redis的消息　所以这里做下延迟处理
+                # delay_robot = functools.partial(self._handle_chatbot_message, user_message)
+                # ioloop.IOLoop.current().call_later(1, delay_robot)
+                yield self._handle_chatbot_message(user_message)  # 直接调用方式
+        except Exception as e:
+            self.logger.error(e)
 
         self.send_json_success()
 

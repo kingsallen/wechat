@@ -1292,6 +1292,8 @@ class PositionVO(object):
      - salaryTop
      - salaryBottom
      - updateTime
+     - status
+     - team
     """
 
     thrift_spec = (
@@ -1303,9 +1305,11 @@ class PositionVO(object):
         (5, TType.I32, 'salaryTop', None, None, ),  # 5
         (6, TType.I32, 'salaryBottom', None, None, ),  # 6
         (7, TType.STRING, 'updateTime', 'UTF8', None, ),  # 7
+        (8, TType.I32, 'status', None, None, ),  # 8
+        (9, TType.STRING, 'team', 'UTF8', None, ),  # 9
     )
 
-    def __init__(self, positionId=None, positionTitle=None, companyName=None, city=None, salaryTop=None, salaryBottom=None, updateTime=None,):
+    def __init__(self, positionId=None, positionTitle=None, companyName=None, city=None, salaryTop=None, salaryBottom=None, updateTime=None, status=None, team=None,):
         self.positionId = positionId
         self.positionTitle = positionTitle
         self.companyName = companyName
@@ -1313,6 +1317,8 @@ class PositionVO(object):
         self.salaryTop = salaryTop
         self.salaryBottom = salaryBottom
         self.updateTime = updateTime
+        self.status = status
+        self.team = team
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -1358,6 +1364,16 @@ class PositionVO(object):
                     self.updateTime = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
+            elif fid == 8:
+                if ftype == TType.I32:
+                    self.status = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 9:
+                if ftype == TType.STRING:
+                    self.team = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -1395,6 +1411,14 @@ class PositionVO(object):
         if self.updateTime is not None:
             oprot.writeFieldBegin('updateTime', TType.STRING, 7)
             oprot.writeString(self.updateTime.encode('utf-8') if sys.version_info[0] == 2 else self.updateTime)
+            oprot.writeFieldEnd()
+        if self.status is not None:
+            oprot.writeFieldBegin('status', TType.I32, 8)
+            oprot.writeI32(self.status)
+            oprot.writeFieldEnd()
+        if self.team is not None:
+            oprot.writeFieldBegin('team', TType.STRING, 9)
+            oprot.writeString(self.team.encode('utf-8') if sys.version_info[0] == 2 else self.team)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
