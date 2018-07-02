@@ -28,7 +28,7 @@ class ThirdpartyImportHandler(MetaBaseHandler):
     @gen.coroutine
     def get(self):
         params = urllib.parse.unquote(self.params.cusdata)
-        params = params.replace("$$", "&")
+        params = params.replace("$$", "&")  # 脉脉需要我们自己拼接redirect_url放入某个参数中，http链接中不能带&，因此替换成了$$,在这里换回来
         self.logger.info("[maimai_url_params: {}]".format(params))
         way = re.search(r'way=([0-9]*)', params).group(1)
 
@@ -138,6 +138,7 @@ class ResumeImportHandler(BaseHandler):
 
         username = self.params.get("_username", "")
         password = self.params.get("_password", "")
+        captcha = self.params.get("linkedin_code", "")
 
         # 置空不必要参数，避免在 make_url 中被用到
         self.params.pop("recom_time", None)
@@ -160,7 +161,7 @@ class ResumeImportHandler(BaseHandler):
             self.send_json_error(message=msg.RESUME_IMPORT_NAME_PASSWD_ERROR)
             return
 
-        # 微信端用户只能导入一次简历，故不需要做导入频率限制
+        # 微信端用户只能导入一次简历，故不需要做导入频率限制，LinkedIn验证验证码使用该接口，如果做频率限制，LinkedIn验证需要单独接口
         if str(self.params.way) in const.RESUME_WAY_SPIDER:
             # 判断是否在微信端
             ua = 1 if self.in_wechat else 2
@@ -170,9 +171,9 @@ class ResumeImportHandler(BaseHandler):
                 password,
                 self.current_user.sysuser.id,
                 ua,
-                self.current_user.wechat.company_id
+                self.current_user.wechat.company_id,
+                captcha=captcha
             )
-
             if self.params.pid:
                 next_url = self.make_url(path.PROFILE_PREVIEW, self.params)
             else:
@@ -183,13 +184,14 @@ class ResumeImportHandler(BaseHandler):
                     status=0,
                     url=self.params.way
                 )
-
+                data = ObjectDict(url=next_url)
                 self._log_customs.update(new_profile=const.YES)
                 self.send_json_success(message=msg.RESUME_IMPORT_SUCCESS,
-                                       data={"url": next_url})
+                                       data=data)
 
                 return
             else:
+                data = ObjectDict()
                 if result.status == 32001:  # 埋点密码错误
                     status_log = 1
                 elif result.status == 32002:  # 埋点导入失败
@@ -206,6 +208,21 @@ class ResumeImportHandler(BaseHandler):
                     status_log = -5
                 elif result.status == 32008:  # 简历导入次数超过每日次数限制
                     status_log = 5
+                elif result.status == 32011:  # 需要输入LinkedIn验证码
+                    status_log = 6
+                    data.update(need_linkedin_verify=const.YES)
+                    self.send_json_success(data=data)
+                    self.log_info = ObjectDict(
+                        status=status_log,
+                        url=self.params.way,
+                    )
+                    return
+                elif result.status == 32012:  # LinkedIn限制登录
+                    status_log = 7
+                    next_url = self.make_url(path.RESUME_IMPORT_FAIL, self.params)
+                    data.update(url=next_url)
+                elif result.status == 32013:  # 验证码失败
+                    status_log = 8
                 else:
                     # 埋点基础服务返回未识别异常
                     status_log = -2
@@ -215,7 +232,7 @@ class ResumeImportHandler(BaseHandler):
                     url=self.params.way,
                 )
 
-                self.send_json_error(message=result.message)
+                self.send_json_error(message=result.message if result.status != 32012 else "", data=data)
 
         else:
             self.log_info = ObjectDict(
@@ -224,3 +241,13 @@ class ResumeImportHandler(BaseHandler):
             )
 
             self.send_json_error(message=msg.RESUME_IMPORT_FAILED)
+
+
+class ResumeImportLimit(BaseHandler):
+    """简历导入被限制"""
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        self.render(template_name='adjunct/lock-alert.html')
+

@@ -144,7 +144,7 @@ class ProfilePageService(PageService):
         return result
 
     @gen.coroutine
-    def import_profile(self, type_source, username, password, user_id, ua, company_id=None, token=None, appid=None, unionid=None, version=None):
+    def import_profile(self, type_source, username, password, user_id, ua, company_id=None, token=None, appid=None, unionid=None, version=None, captcha=None):
         """
         导入第三方简历（51job, 智联招聘，linkedin，猎聘）
         :param type_source: int 来源, 0:无法识别 1:51Job 2:Liepin 3:zhilian 4:linkedin
@@ -154,6 +154,7 @@ class ProfilePageService(PageService):
         :param ua: int UA来源, 0:无法识别 1:微信端 2:移动浏览器 3:PC端
         :param token: string linkedin 网站的access_token
         :param company_id:
+        :param captcha
         :return: tuple (bool, result or None)
 
         调用方式:
@@ -161,7 +162,7 @@ class ProfilePageService(PageService):
         """
 
         is_ok, result = yield self.infra_profile_ds.import_profile(
-            int(type_source), username, password, user_id, company_id, int(ua), token, appid=appid, unionid=unionid,  version=version)
+            int(type_source), username, password, user_id, company_id, int(ua), token, appid=appid, unionid=unionid,  version=version, captcha=captcha)
         return is_ok, result
 
     @gen.coroutine
