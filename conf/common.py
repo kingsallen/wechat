@@ -224,7 +224,7 @@ DEGREE_SEARCH_LOCALE = {
     "硕士": "common_degree_master",
     "MBA": "common_degree_mba",
     "博士": "common_degree_doctor",
-    "中专": "search_degree_technical_secondary_school",
+    "中专": "common_degree_technical_secondary_school",
     "高中": "common_degree_highschool",
     "博士后": "common_degree_doctor_above",
     "初中": "common_degree_middleschool"
