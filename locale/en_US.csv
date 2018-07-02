@@ -15,7 +15,7 @@
 "profile_import_veryeast","Veryeast"
 "profile_import_maimai","Maimai"
 "jd_title_dull","Job"
-"jd_degree","Degree"
+"jd_degree","Education level"
 "jd_work_exp","Work experience"
 "jd_language","Language requirement"
 "jd_management_exp","Management experience"
@@ -38,8 +38,7 @@
 "common_degree_highschool","High School"
 "common_degree_doctor_above","Doctor Degree and above"
 "common_degree_middleschool","Middle School"
-"common_degree_technical_secondary_school","Technical secondary school"
-"search_degree_technical_secondary_school","Middle School"
+"common_degree_technical_secondary_school","Middle School"
 
 "common_experienced","Experienced"
 "common_graduate","Graduate"
