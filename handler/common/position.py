@@ -67,7 +67,7 @@ class PositionFavHandler(BaseHandler):
                 escape=['next_url', 'name', 'company', 'position'])
 
         # 诺华定制
-        position_info = yield self.position_ps.get_position(position_id)
+        position_info = yield self.position_ps.get_position(position_id, display_locale=self.get_current_locale())
         suppress_apply = yield self.customize_ps.get_suppress_apply(position_info)
 
         self.render(template_name="adjunct/interest-success.html",

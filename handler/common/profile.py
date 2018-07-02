@@ -322,7 +322,7 @@ class ProfileCustomHandler(BaseHandler):
             return
 
         pid = int(self.params.pid)
-        position = yield self.position_ps.get_position(pid)
+        position = yield self.position_ps.get_position(pid, display_locale=self.get_current_locale())
 
         if not position.app_cv_config_id:
             self.write_error(404)

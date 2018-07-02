@@ -637,3 +637,15 @@ class BaseHandler(MetaBaseHandler):
 
             lang = lang_from_ua or settings['default_locale']
             return locale.get(lang)
+
+    def get_current_locale(self):
+        """如果公司设置了语言，以公司设置为准，
+        否则判断ua的language，返回language"""
+        if not self.current_user or not self.current_user.company or not self.current_user.company.conf_display_locale:
+            useragent = self.request.headers.get('User-Agent')
+            display_locale = languge_code_from_ua(useragent)
+        elif self.current_user.company.conf_display_locale:
+            display_locale = self.current_user.company.conf_display_locale
+        else:
+            display_locale = None
+        return display_locale

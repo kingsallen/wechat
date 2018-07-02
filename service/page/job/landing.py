@@ -41,7 +41,7 @@ class LandingPageService(PageService):
         return key_list
 
     @gen.coroutine
-    def get_positions_data(self, conf_search_seq, company_id, search_condition_dict, salary_dict):
+    def get_positions_data(self, conf_search_seq, company_id, search_condition_dict, salary_dict, display_locale):
         """ 从 ES 获取全部职位信息
         可以正确解析 salary
         """
@@ -189,6 +189,9 @@ class LandingPageService(PageService):
 
         # 获取筛选项
         key_list = self.make_key_list(conf_search_seq)
+        if display_locale == "en_US" and "city" in key_list:
+            key_list.remove("city")
+            key_list.append("city_ename")
         self.logger.debug("key_list: %s" % key_list)
 
         for e in result_list:
@@ -214,10 +217,13 @@ class LandingPageService(PageService):
         return ret
 
     @staticmethod
-    def split_cities(data, *, delimiter=None):
+    def split_cities(data, *, delimiter=None, display_locale=None):
         """如果一条数据中包含多个城市，应该分裂成多条数据"""
         ret = []
-        key_to_split = 'city'
+        if display_locale == "en_US":
+            key_to_split = 'city_ename'
+        else:
+            key_to_split = 'city'
         if not delimiter:
             delimiter = [",", "，"]
 
@@ -263,9 +269,12 @@ class LandingPageService(PageService):
         return data
 
     @gen.coroutine
-    def make_search_seq(self, company, params):
+    def make_search_seq(self, company, params, locale, display_locale):
         """
         生成高级搜索功能中前端需要的数据
+        :param display_locale:
+        :param locale:
+        :param params:
         :param company:
         :return: {"field_name": ['地点', '子公司', '部门'],
                   "field_form_name": ['city', '...', 'team_name']
@@ -318,10 +327,10 @@ class LandingPageService(PageService):
                 platform_const.LANDING_INDEX_DEPARTMENT
             )
 
-        positions_data = yield self.get_positions_data(conf_search_seq_plus, company.id, display_key_dict, salary_dict)
+        positions_data = yield self.get_positions_data(conf_search_seq_plus, company.id, display_key_dict, salary_dict, display_locale)
 
         if platform_const.LANDING_INDEX_CITY in conf_search_seq_plus:
-            positions_data = self.split_cities(positions_data)
+            positions_data = self.split_cities(positions_data, display_locale=display_locale)
 
         if platform_const.LANDING_INDEX_CHILD_COMPANY in conf_search_seq and platform_const.LANDING_INDEX_CHILD_COMPANY in conf_search_seq_plus:
             positions_data = yield self.append_child_company_name(positions_data)
@@ -345,13 +354,33 @@ class LandingPageService(PageService):
                     to_append.append(c_com)
 
                 elif k == 'candidate_source_name':
-                    en = pinyin_initials(e.get(k))
-                    to_append.append({"text": e.get(k), "value": const.CANDIDATE_SOURCE_SEARCH_REVERSE.get(e.get(k)),
+                    text = locale.translate(const.CANDIDATE_SOURCE_SEARCH_LOCALE.get(e.get(k))) if e.get(k) else e.get(k)
+                    en = pinyin_initials(text)
+                    to_append.append({"text": text, "value": const.CANDIDATE_SOURCE_SEARCH_REVERSE.get(e.get(k)),
                                       "en": en[0] if en else ""})
 
                 elif k == 'employment_type_name':
-                    en = pinyin_initials(e.get(k))
-                    to_append.append({"text": e.get(k), "value": const.EMPLOYMENT_TYPE_SEARCH_REVERSE.get(e.get(k)),
+                    text = locale.translate(const.EMPLOYMENT_TYPE_SEARCH_LOCALE.get(e.get(k))) if e.get(k) else e.get(
+                        k)
+                    en = pinyin_initials(text)
+                    to_append.append({"text": text, "value": const.EMPLOYMENT_TYPE_SEARCH_REVERSE.get(e.get(k)),
+                                      "en": en[0] if en else ""})
+
+                elif k == 'degree_name':
+                    content = e.get(k)
+                    if "及以上" in content:
+                        content = content.rstrip("及以上")
+                        text = locale.translate(const.DEGREE_SEARCH_LOCALE.get(content.rstrip("及以上")))
+                    else:
+                        text = locale.translate(const.DEGREE_SEARCH_LOCALE.get(e.get(k))) if e.get(k) else e.get(
+                            k)
+                    en = pinyin_initials(text)
+                    to_append.append({"text": text, "value": content,
+                                      "en": en[0] if en else ""})
+                elif k == 'city':
+                    text = e.get('city_ename') if display_locale == 'en_US' else e.get(k)
+                    en = pinyin_initials(text)
+                    to_append.append({"text": text, "value": text,
                                       "en": en[0] if en else ""})
                 else:
                     en = pinyin_initials(e.get(k))
@@ -365,13 +394,33 @@ class LandingPageService(PageService):
                     to_append.append(c_com)
 
                 elif s == 'candidate_source_name':
-                    en = pinyin_initials(e.get(s))
-                    to_append.append({"text": e.get(s), "value": const.CANDIDATE_SOURCE_SEARCH_REVERSE.get(e.get(s)),
+                    text = locale.translate(const.CANDIDATE_SOURCE_SEARCH_LOCALE.get(e.get(s))) if e.get(s) else e.get(
+                        s)
+                    en = pinyin_initials(text)
+                    to_append.append({"text": text, "value": const.CANDIDATE_SOURCE_SEARCH_REVERSE.get(e.get(s)),
                                       "en": en[0] if en else ""})
 
                 elif s == 'employment_type_name':
-                    en = pinyin_initials(e.get(s))
-                    to_append.append({"text": e.get(s), "value": const.EMPLOYMENT_TYPE_SEARCH_REVERSE.get(e.get(s)),
+                    text = locale.translate(const.CANDIDATE_SOURCE_SEARCH_LOCALE.get(e.get(s))) if e.get(s) else e.get(
+                        s)
+                    en = pinyin_initials(text)
+                    to_append.append({"text": text, "value": const.EMPLOYMENT_TYPE_SEARCH_REVERSE.get(e.get(s)),
+                                      "en": en[0] if en else ""})
+                elif s == 'degree_name':
+                    content = e.get(s)
+                    if "及以上" in content:
+                        content = content.rstrip("及以上")
+                        text = locale.translate(const.DEGREE_SEARCH_LOCALE.get(content.rstrip("及以上")))
+                    else:
+                        text = locale.translate(const.DEGREE_SEARCH_LOCALE.get(e.get(s))) if e.get(s) else e.get(
+                            s)
+                    en = pinyin_initials(text)
+                    to_append.append({"text": text, "value": content,
+                                      "en": en[0] if en else ""})
+                elif s == 'city':
+                    text = e.get('city_ename') if display_locale == 'en_US' else e.get(s)
+                    en = pinyin_initials(text)
+                    to_append.append({"text": text, "value": text,
                                       "en": en[0] if en else ""})
                 else:
                     en = pinyin_initials(e.get(s))
@@ -391,7 +440,7 @@ class LandingPageService(PageService):
             if search_item == platform_const.LANDING_INDEX_DEPARTMENT and company.conf_teamname_custom.teamname_custom:
                 return company.conf_teamname_custom.teamname_custom
 
-            return platform_const.LANDING[search_item].get("chpe")
+            return locale.translate(const.SEARCH_CONDITION.get(str(search_item)))
 
         return ObjectDict({
             "field_name": [custom_field(e) for e in conf_search_seq_plus],

@@ -38,6 +38,7 @@ def curr_now_msec():
 def format_dateonly(time):
     return time.strftime(constant.TIME_FORMAT_DATEONLY)
 
+
 def is_time_valid(str_time, form):
     """
     判断时间格式是否符合要求
@@ -50,6 +51,7 @@ def is_time_valid(str_time, form):
         pass
     finally:
         return ret
+
 
 def str_2_date(str_time, format):
     """
@@ -78,33 +80,15 @@ def jd_update_date(update_time):
     update_date = constant.JD_TIME_FORMAT_DEFAULT
     try:
         if update_time:
-            datetime_now = datetime.now()
-            yesterday = datetime_now + timedelta(days=-1)
-
-            delta = datetime_now - update_time
-
-            if datetime_now.date() == update_time.date():
-                if delta.seconds <= 3600:
-                    # 刚刚（即一个小时内）
-                    update_date = constant.JD_TIME_FORMAT_JUST_NOW
-                else:
-                    # 今天 12：00
-                    update_date = constant.JD_TIME_FORMAT_TODAY.format(
-                        update_time.hour, update_time.minute)
-            elif yesterday.date() == update_time.date():
-                # 昨天 12：00
-                update_date = constant.JD_TIME_FORMAT_YESTERDAY.format(
-                    update_time.hour, update_time.minute)
-            else:
-                # 2016-11-23
-                update_date = constant.JD_TIME_FORMAT_FULL.format(
-                    update_time.year, update_time.month, update_time.day)
+            # 2016-11-23
+            update_date = constant.JD_TIME_FORMAT_FULL.format(
+                update_time.year, update_time.month, update_time.day)
 
     except Exception as e:
         pass
     finally:
         return update_date
 
-if __name__ == "__main__":
 
-    print (str_2_date("2017-03-13 16:39:35", "%Y-%m-%d %H:%M"))
+if __name__ == "__main__":
+    print(str_2_date("2017-03-13 16:39:35", "%Y-%m-%d %H:%M"))
