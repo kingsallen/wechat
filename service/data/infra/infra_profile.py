@@ -636,6 +636,10 @@ class InfraProfileDataService(DataService):
             params.update({"worktype": record.worktype})
         if record.get('salary_code'):
             params.update({"salary_code": record.salary_code})
+        if record.get('industry'):
+            params.update({"industries[0]industry_code": record.industry})
+        if record.get('workstate'):
+            params.update({"workstate": record.workstate})
 
         res = yield self.handle_profile_section(
             params, method="update", section="intention")
