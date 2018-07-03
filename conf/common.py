@@ -194,6 +194,16 @@ MANAGEMENT_EXP = {
     "1": "common_no_need"
 }
 
+# 工作状态
+WORKSTATE = {
+    "0": "未填写",
+    "1": "在职，看看新机会",
+    "2": "在职，急寻新工作",
+    "3": "在职，暂无跳槽打算",
+    "4": "离职，正在找工作",
+    "5": "应届毕业生"
+}
+
 # 学历
 DEGREE = {
     "0": "",
@@ -430,6 +440,7 @@ CONSTANT_PARENT_CODE = ObjectDict(
     WORK_ROTATION=3117,  # 选择班次
     PROFILE_IMPORT_SOURCE=3118,  # Profile来源
     PROFILE_SOURCE=3119,  # Profile创建来源
+    INDUSTRY=3124,  # 期望行业
     REGISTER_SOURCE=4101,  # 用户注册来源(source)
     CONTINENT=9103,  # 大洲
     ROCKETMAJOR_L1=990000  # 火箭一级专业
