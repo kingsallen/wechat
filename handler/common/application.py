@@ -48,6 +48,10 @@ class ApplicationHandler(BaseHandler):
                 }
                 if self.params.recom:
                     p['recom'] = self.params.recom
+                if self.params.ai_recom:
+                    p['ai_recom'] = self.params.ai_recom
+                if self.params.algorithm_name:
+                    p['algorithm_name'] = self.params.algorithm_name
 
                 self.redirect(self.make_url(path.PROFILE_CUSTOM_CV, **p))
 
