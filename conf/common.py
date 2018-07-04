@@ -416,6 +416,8 @@ HB_TRIGGER_WAY_CLICK = 1
 HB_TRIGGER_WAY_APPLY = 2
 
 # 发送消息模板的系统模板库常量
+TEMPLATE_URL_SUFFIX = "&from_template_message={}&send_time={}"
+TEMPLATE_URL_SUFFIX_ = "?from_template_message={}&send_time={}"
 TEMPLATES = ObjectDict()
 TEMPLATES.RP_EMPLOYEE_BINDING = 49
 TEMPLATES.RP_RECOM = 68
