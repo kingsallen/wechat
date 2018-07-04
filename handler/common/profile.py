@@ -961,13 +961,16 @@ class ProfileSectionHandler(BaseHandler):
             parent_code=const.CONSTANT_PARENT_CODE.CURRENT_SALARY_MONTH)
         workstate = yield self.dictionary_ps.get_constants(
             parent_code=const.CONSTANT_PARENT_CODE.WORK_STATUS)
-        industry = yield self.dictionary_ps.get_constants(
-            parent_code=const.CONSTANT_PARENT_CODE.INDUSTRY)
+        industries = yield self.dictionary_ps.get_industries(
+            level=None)
+        industry = ObjectDict()
+        for i in industries.data:
+            industry.update({i.get("code"): i.get("name")})
 
         constant = ObjectDict()
         constant.worktype_list = worktype_list
         constant.salary_list = salary_list
-        constant.workstate = workstate
+        constant.workstate_list = workstate
         constant.industry = industry
 
         model = ObjectDict()
@@ -991,9 +994,15 @@ class ProfileSectionHandler(BaseHandler):
                     model.position_name = position_name
 
                 cities = intention.cities
+                city = []
                 if cities:
-                    city_name = cities[0].get("city_name")
-                    model.city_name = city_name
+                    for c in cities:
+                        city.append(c.get("city_name"))
+                    model.city_name = city
+                industries = intention.industries
+                if industries:
+                    industry = industries[0].get("industry_code")
+                    model.industry = industry
             else:
                 self.send_json_error('cannot get intention')
 

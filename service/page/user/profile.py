@@ -72,7 +72,7 @@ class ProfilePageService(PageService):
     ]
 
     INTENTION_KEYS = [
-        "id", "city_name", "worktype", "position_name", "salary_code"
+        "id", "city_name", "worktype", "position_name", "salary_code", "workstate", "industry"
     ]
 
     EMAIL_BASICINFO = ObjectDict({
@@ -901,15 +901,14 @@ class ProfilePageService(PageService):
 
             worktype_name = intention.get("worktype_name", "未选择")
 
-            location = u""
+            location = ""
             if intention.get("cities", []):
                 for city in intention.get("cities"):
-                    location += city.get("city_name")
-                location = intention.get("cities")[0].get('city_name', '')
-
+                    location = location + city.get("city_name") + ","
+                location = location[0: len(location)-1]
             salary = intention.get('salary_code_name', "")
 
-            workstate = const.WORKSTATE.get(intention.get("workstate"), 0)
+            workstate = intention.get("workstate_name")
 
             industry = ""
             if intention.get("industries", []):
