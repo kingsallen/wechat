@@ -72,7 +72,7 @@ class ProfilePageService(PageService):
     ]
 
     INTENTION_KEYS = [
-        "id", "city_name", "worktype", "position_name", "salary_code"
+        "id", "city_name", "worktype", "position_name", "salary_code", "workstate", "industry"
     ]
 
     EMAIL_BASICINFO = ObjectDict({
@@ -586,7 +586,7 @@ class ProfilePageService(PageService):
 
                 elif status == 'e':
                     params['id'] = params.pid
-                    yield self.delete_profile_language(params, profile_id)
+                    yield self.update_profile_language(params, profile_id)
 
     @gen.coroutine
     def custom_cv_update_profile_awards(self, profile_id, custom_cv):
@@ -613,7 +613,60 @@ class ProfilePageService(PageService):
 
                 elif status == 'e':
                     params['id'] = params.pid
-                    yield self.delete_profile_awards(params, profile_id)
+                    yield self.update_profile_awards(params, profile_id)
+
+
+    @gen.coroutine
+    def custom_cv_update_profile_skills(self, profile_id, custom_cv):
+        skills = custom_cv.get("skills", [])
+
+        if not skills:
+            return
+
+        for s in skills:
+            status = s.get('__status', None)
+            if status:
+                params = ObjectDict(
+                    pid=s.get('id'),
+                    profile_id=profile_id,
+                    name=s.get('skills')
+                )
+            if status == 'o':
+                yield self.create_profile_skill(params, profile_id)
+
+            elif status == 'x':
+                yield self.delete_profile_skill(
+                    {"id": params.pid}, profile_id=None)
+
+            elif status == 'e':
+                params['id'] = params.pid
+                yield self.update_profile_skill(params, profile_id)
+
+    @gen.coroutine
+    def custom_cv_update_profile_credentials(self, profile_id, custom_cv):
+        credentials = custom_cv.get("credentials", [])
+
+        if not credentials:
+            return
+
+        for c in credentials:
+            status = c.get('__status', None)
+            if status:
+                params = ObjectDict(
+                    pid=c.get('id'),
+                    profile_id=profile_id,
+                    name=c.get('credentials')
+                )
+            if status == 'o':
+                yield self.create_profile_cert(params, profile_id)
+
+            elif status == 'x':
+                yield self.delete_profile_cert(
+                    {"id": params.pid}, profile_id=None)
+
+            elif status == 'e':
+                params['id'] = params.pid
+                yield self.update_profile_cert(params, profile_id)
 
     @gen.coroutine
     def custom_cv_update_profile_intention(self, profile, custom_cv):
@@ -695,6 +748,10 @@ class ProfilePageService(PageService):
         yield self.custom_cv_update_profile_language(profile_id, custom_cv)
 
         yield self.custom_cv_update_profile_awards(profile_id, custom_cv)
+
+        yield self.custom_cv_update_profile_skills(profile_id, custom_cv)
+
+        yield self.custom_cv_update_profile_credentials(profile_id, custom_cv)
 
         # 单条复合字段
         yield self.custom_cv_update_profile_intention(profile, custom_cv)
@@ -901,15 +958,14 @@ class ProfilePageService(PageService):
 
             worktype_name = intention.get("worktype_name", "未选择")
 
-            location = u""
+            location = ""
             if intention.get("cities", []):
                 for city in intention.get("cities"):
-                    location += city.get("city_name")
-                location = intention.get("cities")[0].get('city_name', '')
-
+                    location = location + city.get("city_name") + ","
+                location = location[0: len(location)-1]
             salary = intention.get('salary_code_name', "")
 
-            workstate = const.WORKSTATE.get(intention.get("workstate"), 0)
+            workstate = intention.get("workstate_name")
 
             industry = ""
             if intention.get("industries", []):
