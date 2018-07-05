@@ -629,7 +629,7 @@ class ProfilePageService(PageService):
                 params = ObjectDict(
                     pid=s.get('id'),
                     profile_id=profile_id,
-                    name=s.get('skills')
+                    name=s.get('skills_name')
                 )
             if status == 'o':
                 yield self.create_profile_skill(params, profile_id)
@@ -655,7 +655,7 @@ class ProfilePageService(PageService):
                 params = ObjectDict(
                     pid=c.get('id'),
                     profile_id=profile_id,
-                    name=c.get('credentials')
+                    name=c.get('credentials_name')
                 )
             if status == 'o':
                 yield self.create_profile_cert(params, profile_id)
