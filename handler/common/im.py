@@ -391,6 +391,14 @@ class ChatHandler(BaseHandler):
             self.send_json_error(message=msg.NOT_AUTHORIZED)
             return
 
+        # 如果已经开启chatbot聊天，不需要发送职位给hr
+        if not self.bot_enabled:
+            yield self.get_bot_enabled()
+
+        if self.bot_enabled:
+            res.update(show_position_info=False)
+        else:
+            res.update(show_position_info=True)
         self.send_json_success(data=res)
 
     @handle_response
