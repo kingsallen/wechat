@@ -366,7 +366,7 @@ class ChatHandler(BaseHandler):
         if not self.params.hr_id:
             self.send_json_error(message=msg.REQUEST_PARAM_ERROR)
             return
-
+        self.hr_id = self.params.hr_id
         pid = self.params.pid or 0
         room_id = self.params.room_id or 0
 
@@ -380,6 +380,10 @@ class ChatHandler(BaseHandler):
             (self.current_user.sysuser.id, self.params.hr_id, pid, room_id, self.current_user.qxuser, is_gamma)
         )
 
+        # 如果已经开启chatbot聊天，不需要发送职位给hr
+        if not self.bot_enabled:
+            yield self.get_bot_enabled()
+
         res = yield self.chat_ps.get_chatroom(self.current_user.sysuser.id,
                                               self.params.hr_id,
                                               pid, room_id,
@@ -390,6 +394,10 @@ class ChatHandler(BaseHandler):
             self.send_json_error(message=msg.NOT_AUTHORIZED)
             return
 
+        if self.bot_enabled:
+            res.update(show_position_info=False)
+        else:
+            res.update(show_position_info=True)
         self.send_json_success(data=res)
 
     @handle_response
