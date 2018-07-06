@@ -610,7 +610,7 @@ class InfraProfileDataService(DataService):
     def create_profile_intention(self, record, profile_id):
         params = {"profile_id": profile_id}
         if record.get('city_name'):
-            params.update({"cities[0]city_name": record.city_name})
+            params.update({"city": record.city_name})
         if record.get('position_name'):
             params.update({"positions[0]position_name": record.position_name})
         if record.get('worktype'):
@@ -633,7 +633,7 @@ class InfraProfileDataService(DataService):
             "profile_id": profile_id
         }
         if record.get('city_name'):
-            params.update({"cities[0]city_name": record.city_name})
+            params.update({"city": record.city_name})
         if record.get('position_name'):
             params.update({"positions[0]position_name": record.position_name})
         if record.get('worktype'):
@@ -650,7 +650,7 @@ class InfraProfileDataService(DataService):
         return http_tool.unboxing(res)
 
     @gen.coroutine
-    def delete_profile_intention(self, record, profile_id):
+    def delete_profile_intention(self, record):
         res = yield self.handle_profile_section(
             {"id": record.id}, method="delete", section="intention")
         return http_tool.unboxing(res)

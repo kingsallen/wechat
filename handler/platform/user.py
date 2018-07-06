@@ -229,7 +229,7 @@ class UserSurveyHandler(BaseHandler):
                         "fields":
                             [
                                 {
-                                    "map": "",
+                                    "map": "profile_intention.id&profile_intention_industry.industry_name",
                                     "error_msg": "",
                                     "field_type": 10,
                                     "company_id": 0,
@@ -389,7 +389,7 @@ class UserSurveyHandler(BaseHandler):
                                 {
                                     "map": "profile_intention.id&profile_intention_city.city_name",
                                     "error_msg": "",
-                                    "field_type": 101,
+                                    "field_type": 106,
                                     "company_id": 0,
                                     "field_name": "expectedlocation",
                                     "required": 0,
@@ -408,7 +408,7 @@ class UserSurveyHandler(BaseHandler):
                                     "validate_re": "[\\s\\S]+"
                                 },
                                 {
-                                    "map": "",
+                                    "map": "profile_intention.workstate",
                                     "error_msg": "",
                                     "field_type": 10,
                                     "company_id": 0,

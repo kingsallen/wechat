@@ -961,14 +961,11 @@ class ProfileSectionHandler(BaseHandler):
             parent_code=const.CONSTANT_PARENT_CODE.CURRENT_SALARY_MONTH)
         workstate = yield self.dictionary_ps.get_constants(
             parent_code=const.CONSTANT_PARENT_CODE.WORK_STATUS)
-        industries = yield self.dictionary_ps.get_constants(
-            parent_code=const.CONSTANT_PARENT_CODE.INDUSTRY)
 
         constant = ObjectDict()
         constant.worktype_list = worktype_list
         constant.salary_list = salary_list
         constant.workstate_list = workstate
-        constant.industry = industries
 
         model = ObjectDict()
         new = False
