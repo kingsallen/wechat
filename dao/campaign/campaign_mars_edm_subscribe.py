@@ -9,7 +9,7 @@ class CampaignMarsEdmSubscribeDao(BaseDao):
 
     def __init__(self):
         super(CampaignMarsEdmSubscribeDao, self).__init__()
-        self.table = "CampaignMarsEdmSubscribe"
+        self.table = "campaign_mars_edm_subscribe"
         self.fields_map = {
             "id":           self.constant.TYPE_INT,
             "name":         self.constant.TYPE_STRING,
