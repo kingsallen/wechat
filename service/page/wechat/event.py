@@ -489,7 +489,7 @@ class EventPageService(PageService):
                11011 =27 pc扫码修改手机。 
                
               hr 端 10000=16, 10001=17,
-              
+              11111=31  Mars EDM活动二维码
               见 https://wiki.moseeker.com/weixin.md
             """
 
@@ -594,6 +594,16 @@ class EventPageService(PageService):
                         }
                     yield self.infra_user_ds.post_scanresult(params)
                     raise gen.Return()
+            elif type == 31:
+                # Mars EDM活动的用户，与EDM数据表关联起来
+                user = yield self.campaign_mars_edm_subscribe_ds.get_mars_user({
+                    "id": real_user_id
+                })
+                if user:
+                    yield self.campaign_mars_edm_subscribe_ds.get_mars_user(
+                        conds={"id": real_user_id},
+                        fields={"wxuser_id": wxuser.id}
+                    )
 
             elif type == 16:
                 pass
