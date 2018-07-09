@@ -547,3 +547,6 @@ FRONT_TYPE_FIELD_SELCET_POPUP = 13
 
 # 简历导入渠道
 FROM_MAIMAI = 1
+
+# Mars公司id
+MARS_ID = 279

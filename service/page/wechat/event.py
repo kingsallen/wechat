@@ -216,8 +216,8 @@ class EventPageService(PageService):
             # 老微信用户
             yield self._update_wxuser(openid, current_user, msg)
 
-        # 处理临时二维码，目前主要在 PC 上创建帐号、绑定账号时使用
-        if current_user.wechat.id == self.settings.qx_wechat_id and msg.EventKey:
+        # 处理临时二维码，目前主要在 PC 上创建帐号、绑定账号时使用,以及Mars EDM活动
+        if current_user.wechat.id in (self.settings.qx_wechat_id, const.MARS_ID) and msg.EventKey:
             # 临时二维码处理逻辑, 5位type+27为自定义id
             yield self._do_weixin_qrcode(current_user.wechat, msg, is_newbie=is_newbie)
 
@@ -385,8 +385,8 @@ class EventPageService(PageService):
 
             yield self.__opt_help_wxuser(current_user.wxuser.id, current_user.wechat, msg)
 
-        # 处理临时二维码，目前主要在 PC 上创建帐号、绑定账号时使用
-        if current_user.wechat.id == self.settings.qx_wechat_id and msg.EventKey:
+        # 处理临时二维码，目前主要在 PC 上创建帐号、绑定账号时使用,以及Mars EDM活动
+        if current_user.wechat.id in (self.settings.qx_wechat_id, const.MARS_ID) and msg.EventKey:
             # 临时二维码处理逻辑, 5位type+27为自定义id
             yield self._do_weixin_qrcode(current_user.wechat, msg)
 
@@ -477,7 +477,7 @@ class EventPageService(PageService):
         })
 
         # 临时二维码处理逻辑, 5位type+27为自定义id
-        if wechat.id == self.settings.qx_wechat_id and int_scene_id:
+        if wechat.id in (self.settings.qx_wechat_id, const.MARS_ID) and int_scene_id:
             int_scene_id = int_scene_id.group(1)
             type = int(bin(int(int_scene_id))[:7],base=2)
             real_user_id = int(bin(int(int_scene_id))[7:],base=2)
@@ -489,7 +489,7 @@ class EventPageService(PageService):
                11011 =27 pc扫码修改手机。 
                
               hr 端 10000=16, 10001=17,
-              
+              11111=31  Mars EDM活动二维码
               见 https://wiki.moseeker.com/weixin.md
             """
 
@@ -594,6 +594,16 @@ class EventPageService(PageService):
                         }
                     yield self.infra_user_ds.post_scanresult(params)
                     raise gen.Return()
+            elif type == 31:
+                # Mars EDM活动的用户，与EDM数据表关联起来
+                user = yield self.campaign_mars_edm_subscribe_ds.get_mars_user({
+                    "id": real_user_id
+                })
+                if user:
+                    yield self.campaign_mars_edm_subscribe_ds.update_mars_user(
+                        conds={"id": real_user_id},
+                        fields={"wxuser_id": wxuser.id}
+                    )
 
             elif type == 16:
                 pass
