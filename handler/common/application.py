@@ -77,6 +77,7 @@ class ApplicationHandler(BaseHandler):
         self.logger.warn(
             "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& post application api begin &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
         pid = self.json_args.pid
+        self.log_info = {"position_id": pid}
         position = yield self.position_ps.get_position(pid, display_locale=self.get_current_locale())
 
         self.logger.warn(pid)
