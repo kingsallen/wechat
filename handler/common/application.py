@@ -77,10 +77,14 @@ class ApplicationHandler(BaseHandler):
         self.logger.warn(
             "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& post application api begin &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
         pid = self.json_args.pid
+        self.log_info = {"position_id": pid}
         position = yield self.position_ps.get_position(pid, display_locale=self.get_current_locale())
 
         self.logger.warn(pid)
         self.logger.warn(position)
+        suppress_apply = yield self.customize_ps.get_suppress_apply(position)
+        if suppress_apply.get("is_suppress_apply"):
+            self.send_json_error(message="请前往诺华集团官网进行投递")
 
         check_status, message = yield self.application_ps.check_position(
             position, self.current_user)
