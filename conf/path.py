@@ -36,6 +36,7 @@ USER_LOGOUT = '/logout'
 RESUME_URL = '/resume/import'
 RESUME_LINKEDIN = '/resume/linkedin'
 RESUME_MAIMAI = 'https://{}/resume/maimai{}'
+RESUME_LIEPIN = 'https://{}/resume/liepin{}'
 RESUME_THIRDPARTY = '/resume/thirdparty'
 APPLICATION = '/application'
 APPLICATION_EMAIL = '/application/email'
@@ -148,3 +149,4 @@ VOICE = "/api/v1/chat/voice/pullVoiceFile"
 LINKEDIN_ACCESSTOKEN = "https://www.linkedin.com/oauth/v2/accessToken"
 LINKEDIN_AUTH = "/oauth/v2/authorization"
 MAIMAI_ACCESSTOKEN = "https://maimai.cn/oauth_login?appid={appid}&{cusdata}&login=1"
+LIEPIN_ACCESSTOKEN = 'https://passport.liepin.com/mc/authlogin?state={}'
