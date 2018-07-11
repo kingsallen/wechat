@@ -94,6 +94,10 @@ class PositionHandler(BaseHandler):
             self.logger.debug("[JD]是否显示新样式: {}".format(self.current_user.company.conf_newjd_status))
             # 0是未开启，1是用户申请开启，2是审核通过（使用新jd），3撤销（返回基础版）
             # added in NewJDStatusCheckerAddFlag
+
+            # 诺华定制
+            suppress_apply = yield self.customize_ps.get_suppress_apply(position_info)
+            add_item(position_data, "suppress_apply", suppress_apply)
             if self.flag_should_display_newjd:
                 # 正常开启或预览
                 # [JD]职位所属团队及相关信息拼装
@@ -126,13 +130,10 @@ class PositionHandler(BaseHandler):
                 add_item(position_data, "module_company_impression", module_cmp_impression)
 
                 # 定制化 start
-                # 诺华定制
-                suppress_apply = yield self.customize_ps.get_suppress_apply(position_info)
                 # 代理投递
                 delegate_drop = yield self.customize_ps.get_delegate_drop(self.current_user.wechat,
                                                                           self.current_user.employee,
                                                                           self.params)
-                add_item(position_data, "suppress_apply", suppress_apply)
                 add_item(position_data, "delegate_drop", delegate_drop)
                 # 定制化 end
 
