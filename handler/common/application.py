@@ -85,6 +85,7 @@ class ApplicationHandler(BaseHandler):
         suppress_apply = yield self.customize_ps.get_suppress_apply(position)
         if suppress_apply.get("is_suppress_apply"):
             self.send_json_error(message="请前往诺华集团官网进行投递")
+            return
 
         check_status, message = yield self.application_ps.check_position(
             position, self.current_user)

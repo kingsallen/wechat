@@ -45,7 +45,8 @@ class PositionFavHandler(BaseHandler):
         position_info = yield self.position_ps.get_position(position_id, display_locale=self.get_current_locale())
         suppress_apply = yield self.customize_ps.get_suppress_apply(position_info)
         if suppress_apply.get("is_suppress_apply"):
-            self.send_json_error(message="请前往诺华集团官网进行投递")
+            self.write_error(404)
+            return
 
         yield self.user_ps.add_user_fav_position(
             position_id,
