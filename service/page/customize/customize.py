@@ -12,7 +12,7 @@ class CustomizePageService(PageService):
     """企业定制化相关内容"""
 
     # 诺华集团招聘
-    _SUPPRESS_APPLY_CIDS = [61153, 39978]
+    _SUPPRESS_APPLY_CIDS = [61153]
 
     # 开启代理投递
     # e袋洗 & 仟寻测试
