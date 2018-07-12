@@ -558,6 +558,11 @@ FRONT_TYPE_FIELD_SELCET_POPUP = 13
 
 # 简历导入渠道
 FROM_MAIMAI = 1
+FROM_LIEPIN = 2
+
+
+LIEPIN_SCENE_KEY_FMT = 'liepin_auth_scene_params:{sysuser_id}'
+LIEPIN_SCENE_KEY_TTL = 30 * 24 * 60 * 60
 
 # Mars公司id
-MARS_ID = 279
+MARS_ID = 345

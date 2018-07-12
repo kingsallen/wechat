@@ -460,7 +460,7 @@ class EventPageService(PageService):
     @gen.coroutine
     def _do_weixin_qrcode(self, wechat, msg, is_newbie=False):
 
-        self.logger.debug("[_do_weixin_qrcode] wechat:{0}, msg:{1}, is_newbie:{2}".format(wechat, msg, is_newbie))
+        self.logger.info("[_do_weixin_qrcode] wechat:{0}, msg:{1}, is_newbie:{2}".format(wechat, msg, is_newbie))
 
         # 处理临时二维码，目前主要在 PC 上创建帐号、绑定账号时使用
         int_scene_id = ""

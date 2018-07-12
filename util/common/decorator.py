@@ -1,5 +1,5 @@
 # coding=utf-8
-
+import json
 import functools
 import hashlib
 import re
@@ -279,11 +279,32 @@ def check_and_apply_profile(func):
             appid = self.settings.maimai_appid
             maimai_url = path.MAIMAI_ACCESSTOKEN.format(appid=appid, cusdata=cusdata)
 
-            redirect_params.update(maimai_url=maimai_url)
+            # 猎聘用户授权 现场数据缓存
+            base_cache.set(
+                const.LIEPIN_SCENE_KEY_FMT.format(
+                    sysuser_id=self.current_user.sysuser.id
+                ),
+                json.dumps(dict(
+                    recom=self.params.recom,
+                    pid=self.params.pid,
+                    wechat_signature=self.current_user.wechat.signature
+                )),
+                const.LIEPIN_SCENE_KEY_TTL
+            )
 
+            # 第三方简历导入对接回调地址配置
+            redirect_params.update(
+                maimai_url=maimai_url,
+                liepin_url=path.LIEPIN_ACCESSTOKEN.format(self.current_user.sysuser.id)
+            )
+
+            # todo: linjie 添加列聘的授权页面网址
             print("redirect_params: %s" % redirect_params)
-            self.render(template_name='refer/neo_weixin/sysuser_v2/importresume.html',
-                        **redirect_params, importer=importer)
+            self.render(
+                template_name='refer/neo_weixin/sysuser_v2/importresume.html',
+                **redirect_params,
+                importer=importer
+            )
 
     return wrapper
 
