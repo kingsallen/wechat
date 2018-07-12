@@ -276,7 +276,7 @@ class LiepinImportCallBackHandler(MetaBaseHandler):
 
         # 更新猎聘返回的openid,code
         scene_data.update(dict(
-            openid=self.params.openid,
+            open_id=self.params.open_id,
             code=self.params.code
         ))
 
