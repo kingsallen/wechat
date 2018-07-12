@@ -274,7 +274,6 @@ class LiepinImportCallBackHandler(MetaBaseHandler):
             self.write_error(404)
             return
 
-        scene_data = json.loads(scene_data)
         # 更新猎聘返回的openid,code
         scene_data.update(dict(
             openid=self.params.openid,
