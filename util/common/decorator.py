@@ -295,7 +295,7 @@ def check_and_apply_profile(func):
             # 第三方简历导入对接回调地址配置
             redirect_params.update(
                 maimai_url=maimai_url,
-                liepin_url=path.LIEPIN_ACCESSTOKEN
+                liepin_url=path.LIEPIN_ACCESSTOKEN.format(self.current_user.sysuser.id)
             )
 
             # todo: linjie 添加列聘的授权页面网址
