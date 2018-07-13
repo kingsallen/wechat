@@ -456,6 +456,19 @@ class BindedHandler(BaseHandler):
             )
 
 
+class EmployeeReferralPolicyHandler(BaseHandler):
+    """
+    员工内推政策
+    """
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        pass
+
+
+
 class EmployeeSurveyHandler(UserSurveyConstantMixin, BaseHandler):
     """
     AI推荐项目, 员工认证调查问卷
