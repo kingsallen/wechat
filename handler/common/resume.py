@@ -300,7 +300,7 @@ class LiepinImportHandler(BaseHandler):
 
         openid = self.params.openid
         code = self.params.code
-        if not openid and code:
+        if not code:
             self.write_error(404)
             return
 
