@@ -299,7 +299,7 @@ class LiepinImportHandler(BaseHandler):
         self.logger.info('%s, request params:%s' % (self.__class__.__name__, self.params))
 
         openid = self.params.openid
-        code = self.params.code
+        code = self.params.liepin_code
         if not code:
             self.write_error(404)
             return
