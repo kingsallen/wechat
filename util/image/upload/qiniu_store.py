@@ -99,7 +99,11 @@ class QiniuStore(Connector):
         """
         self._store[key] = ret
 
-    def get(self, key, default=dict()):
+    def get(self, key, default=None):
+        if default is None:
+            default = dict()
+        else:
+            default = default
         return self._store.get(key, default)
 
 
@@ -145,6 +149,7 @@ class QiniuBucket(object):
             raise QiniuStoreError("upload to qiniu failed, {0} != {1}".format(_key, key))
         self._store.put(key, ret)
         return _key
+
 
 class QiniuStoreError(Exception):
     """QiniuStore exception
