@@ -375,8 +375,13 @@ class EmployeePageService(PageService):
     @gen.coroutine
     def get_referral_policy(self, company_id):
         """获取公司内推政策"""
-        ret = yield self.infra_employee_ds.get_referral_policy(company_id)
-        return ret
+        result, data = yield self.infra_employee_ds.get_referral_policy(company_id)
+        return result, data
+
+    @gen.coroutine
+    def create_interest_policy_count(self, params):
+        """对公司内推政策感兴趣"""
+        yield self.infra_employee.create_interest_policy_count(params)
 
     @gen.coroutine
     def get_recommend_records(self, user_id, req_type, page_no, page_size):

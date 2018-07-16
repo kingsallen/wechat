@@ -18,6 +18,7 @@ EMPLOYEE_RECOMMENDS = '/app/employee/recommends'
 EMPLOYEE_CUSTOMINFO = '/employee/custominfo'
 EMPLOYEE_CUSTOMINFO_BINDED = '/employee/binded-custominfo'
 EMPLOYEE_BINDED = '/employee/binded'
+EMPLOYEE_REFERRAL_POLICY = "employee/referral/policy"
 
 PROFILE_CUSTOM_CV = '/profile/custom'
 
@@ -144,7 +145,8 @@ CHAT_LIMIT = "/api/v1/chat/voice/sendWarnEmail"
 VOICE = "/api/v1/chat/voice/pullVoiceFile"
 
 # 内推服务
-REFERRAL_POLICY = "v1.0/referral/conf"
+REFERRAL_POLICY = "/v1.0/referral/conf"
+INTEREST_REFERRAL_POLICY = "/v1.0/referral/conf/count"
 # ============================ 基础服务结束 ============================
 
 # 其他外部服务

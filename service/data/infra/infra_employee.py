@@ -19,6 +19,11 @@ class InfraEmployeeDataService(DataService):
             "company_id": company_id
         })
         ret = http_get(path.REFERRAL_POLICY, params)
-        return ret
+        return unboxing(ret)
+
+    @gen.coroutine
+    def create_interest_policy_count(self, params):
+        ret = http_post(path.INTEREST_REFERRAL_POLICY, params)
+        return unboxing(ret)
 
 
