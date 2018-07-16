@@ -465,8 +465,12 @@ class EmployeeReferralPolicyHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def get(self):
-        pass
-
+        ret = yield self.employee_ds.get_referral_policy()
+        if ret.result
+        data = ObjectDict({
+            "fulltext": ret.data
+        })
+        self.render(template_name="employee/referral-policy-article.html", )
 
 
 class EmployeeSurveyHandler(UserSurveyConstantMixin, BaseHandler):

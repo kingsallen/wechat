@@ -376,6 +376,7 @@ class EmployeePageService(PageService):
     def get_referral_policy(self, company_id):
         """获取公司内推政策"""
         ret = yield self.infra_employee_ds.get_referral_policy(company_id)
+        return ret
 
     @gen.coroutine
     def get_recommend_records(self, user_id, req_type, page_no, page_size):
