@@ -15,6 +15,7 @@ from util.common.mq import data_userprofile_publisher
 import conf.common as const
 from util.tool.json_tool import json_dumps
 import copy
+import json
 
 
 class UserSurveyConstantMixin(object):
@@ -593,6 +594,7 @@ class APIUserSurveyHandler(BaseHandler):
     @gen.coroutine
     def update_profile_other(self, profile_id, custom_cv_other_raw):
         """智能地更新 profile_other 内容"""
+
         custom_cv_ready = self._preprocess_custom_cv(custom_cv_other_raw)
 
         other_string = json_dumps(custom_cv_ready)
@@ -604,7 +606,8 @@ class APIUserSurveyHandler(BaseHandler):
     def _preprocess_custom_cv(custom_cv_other_raw):
         """对于纯 profile 字段的预处理
         可以在此加入公司自定义逻辑"""
-        ret = copy.deepcopy(custom_cv_other_raw)
+        ret = json.dumps(custom_cv_other_raw)
+        ret = json.loads(ret)
 
         # 前端 rocketmajor_value 保存应该入库的 rocketmajor 字段内容
         if ret.get('rocketmajor_value'):

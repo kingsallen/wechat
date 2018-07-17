@@ -457,7 +457,8 @@ class ProfileAPICustomCVHandler(BaseHandler):
     def _preprocess_custom_cv(custom_cv_other_raw):
         """对于纯 profile 字段的预处理
         可以在此加入公司自定义逻辑"""
-        ret = copy.deepcopy(custom_cv_other_raw)
+        ret = json.dumps(custom_cv_other_raw)
+        ret = json.loads(ret)
 
         # 前端 rocketmajor_value 保存应该入库的 rocketmajor 字段内容
         if ret.get('rocketmajor_value'):
