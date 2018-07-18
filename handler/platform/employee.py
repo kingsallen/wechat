@@ -467,7 +467,7 @@ class EmployeeReferralPolicyHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         result, data = yield self.employee_ps.get_referral_policy(self.current_user.company.id)
-        if result:
+        if result and data.get("priority"):
             link = data.get("link", "")
             if link:
                 self.redirect(link)
@@ -491,7 +491,7 @@ class EmployeeInterestReferralPolicyHandler(BaseHandler):
     def post(self):
         params = ObjectDict({
             "company_id": self.current_user.company.id,
-            "user_id": self.current_user.sususer_id
+            "user_id": self.current_user.sysuser.id
         })
         yield self.employee_ps.create_interest_policy_count(params)
         self.send_json_success()
