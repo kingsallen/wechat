@@ -476,6 +476,9 @@ class EmployeeReferralPolicyHandler(BaseHandler):
                 data = ObjectDict({
                     "fulltext": data.get("text")
                 })
+                data = ObjectDict({
+                    "fulltext": "1234567897531654685"
+                })
                 self.render_page(template_name="employee/referral-policy-article.html", data=data)
         else:
             self.render_page(template_name="employee/referral-no-article.html", data={})
