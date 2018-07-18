@@ -296,7 +296,7 @@ def check_and_apply_profile(func):
             redirect_params.update(
                 maimai_url=maimai_url,
                 liepin_url=path.LIEPIN_ACCESSTOKEN.format(
-                    hashlib.sha1(str(self.current_user.sysuser.id).hexdigest())
+                    hashlib.sha1(str(self.current_user.sysuser.id).encode('u8').hexdigest())
                 )
             )
 
