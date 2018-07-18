@@ -991,7 +991,7 @@ class ProfileSectionHandler(BaseHandler):
                 cities = intention.cities
                 model.city_name = cities
                 industries = intention.industries
-                model.industry = industries[0] if industries else {}
+                model.industry = {"code": industries[0].get("industry_code"), "name": industries[0].get("industry_name")} if industries else {}
             else:
                 self.send_json_error('cannot get intention')
 
