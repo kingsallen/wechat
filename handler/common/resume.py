@@ -1,5 +1,6 @@
 # coding=utf-8
-
+import hashlib
+import json
 import urllib.parse
 import re
 
@@ -59,6 +60,7 @@ class MaimaiImportHandler(BaseHandler):
     """
     脉脉导入
     """
+
     @handle_response
     @gen.coroutine
     def get(self):
@@ -72,7 +74,8 @@ class MaimaiImportHandler(BaseHandler):
         appid = self.settings.maimai_appid
         user_id = match_session_id(to_str(self.get_secure_cookie(const.COOKIE_SESSIONID)))
         ua = 1 if self.in_wechat else 2
-        is_ok, result = yield self.profile_ps.import_profile(10, "", "", user_id, ua, token=token, unionid=unionid, appid=appid, version=1.0)
+        is_ok, result = yield self.profile_ps.import_profile(10, "", "", user_id, ua, token=token, unionid=unionid,
+                                                             appid=appid, version=1.0)
         self.handle_profile(is_ok=is_ok, result=result)
 
     def handle_profile(self, is_ok, result):
@@ -245,9 +248,111 @@ class ResumeImportHandler(BaseHandler):
 
 class ResumeImportLimit(BaseHandler):
     """简历导入被限制"""
+
     @handle_response
     @authenticated
     @gen.coroutine
     def get(self):
         self.render(template_name='adjunct/lock-alert.html')
 
+
+class LiepinImportCallBackHandler(MetaBaseHandler):
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        """列聘授权回调接口"""
+        self.logger.info('%s, request params: %s' % (self.__class__.__name__, self.params))
+
+        user_id = match_session_id(
+            to_str(self.get_secure_cookie(const.COOKIE_SESSIONID))
+        )
+
+        k = const.LIEPIN_SCENE_KEY_FMT.format(sysuser_id=user_id)
+        scene_data = self.redis.get(k)
+
+        if not scene_data:
+            self.write_error(404)
+            return
+
+        # 更新猎聘返回的openid,code
+        scene_data.update(dict(
+            open_id=self.params.open_id,
+            liepin_code=self.params.code
+        ))
+
+        url = path.RESUME_LIEPIN.format(
+            self.host,
+            '?' + urllib.parse.urlencode(scene_data)
+        )
+
+        self.logger.info('%s, redirect url: %s' % (self.__class__.__name__, url))
+        self.redirect(url)
+
+
+class LiepinImportHandler(BaseHandler):
+    """猎聘导入简历
+    """
+
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        self.logger.info('%s, request params:%s' % (self.__class__.__name__, self.params))
+
+        openid = self.params.openid
+        code = self.params.liepin_code
+        if not code:
+            self.write_error(404)
+            return
+
+        user_id = match_session_id(
+            to_str(self.get_secure_cookie(const.COOKIE_SESSIONID))
+        )
+
+        ua = 1 if self.in_wechat else 2
+
+        # 通过基础服务　将 code openid appid　等参数发往 scraper项目去爬去简历
+        is_ok, result = yield self.profile_ps.import_profile(
+            const.FROM_LIEPIN,
+            "",
+            "",
+            user_id,
+            ua,
+            token=code,
+            unionid=openid,
+            appid=self.settings.liepin_appid,
+            version=1.0
+        )
+        if not is_ok:
+            self.logger.info('%s, get resume failed. result: %s' %
+                             (self.__class__.__name__, result))
+
+            self.error_page(messages=result.message)
+
+        else:
+            # 获取简历成功后清楚缓存的场景数据
+            self.redis.delete(const.LIEPIN_SCENE_KEY_FMT.format(sysuser_id=user_id))
+
+            self.redirect(
+                make_url(
+                    path=path.PROFILE_PREVIEW if self.params.pid else path.PROFILE_VIEW,
+                    params=self.params,
+                    host=self.host
+                )
+            )
+
+    def error_page(self, messages):
+        data = ObjectDict(
+            kind=1,  # // {0: success, 1: failure, 10: email}
+            messages=messages,  # ['hello world', 'abjsldjf']
+            button_text=msg.BACK_CN,
+            button_link=self.make_url(
+                path.PROFILE_VIEW,
+                wechat_signature=self.get_argument('wechat_signature'),
+                host=self.host
+            ),
+            jump_link=None  # // 如果有会自动，没有就不自动跳转
+        )
+        self.render_page(
+            template_name="system/user-info.html",
+            data=data
+        )
