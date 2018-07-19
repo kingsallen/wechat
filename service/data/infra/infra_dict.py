@@ -14,6 +14,7 @@ from service.data.base import DataService
 from util.common.decorator import cache
 from util.tool.dict_tool import sub_dict
 from util.tool.http_tool import http_get, unboxing
+from pypinyin import lazy_pinyin
 
 
 class InfraDictDataService(DataService):
@@ -50,14 +51,17 @@ class InfraDictDataService(DataService):
         return self.make_const_dict_result(response, parent_code)
 
     @gen.coroutine
-    def get_countries(self):
-        """获取国家列表"""
+    def get_countries(self, hot=False):
+        """
+        获取国家列表
+        hot为热门国家
+        """
 
         countries_res = yield http_get(path.DICT_COUNTRY)
         continent_res = yield self.get_const_dict(
             parent_code=const.CONSTANT_PARENT_CODE.CONTINENT)
 
-        return self.make_countries_result(countries_res, continent_res)
+        return self.make_countries_result(countries_res, continent_res, hot)
 
     @gen.coroutine
     def get_country_code_by(self, name=None):
@@ -114,11 +118,14 @@ class InfraDictDataService(DataService):
         return code_list
 
     @staticmethod
-    def make_countries_result(countries_res, continent_res):
+    def make_countries_result(countries_res, continent_res, hot=False):
         """获取国籍列表，按大洲分割 """
 
         filter_keys = ['id', 'name', 'continent_code']
         countries = countries_res.data
+
+        if hot:
+            pass
 
         def countries_gen(countries):
             for c in countries:
@@ -143,6 +150,13 @@ class InfraDictDataService(DataService):
             ))
 
         return res
+
+    @cache(ttl=60*60*5)
+    @gen.coroutine
+    def get_hot_countries(self):
+        """获取热门城市"""
+        ret = yield self.get_countries(hot=True)
+        return ret
 
     @staticmethod
     def make_const_dict_result(http_response, parent_code):
@@ -182,6 +196,23 @@ class InfraDictDataService(DataService):
         """获取学校列表"""
         response = yield http_get(path.DICT_COLLEGE)
         return self.make_college_list_result(response)
+
+    @cache(ttl=60*60*5)
+    @gen.coroutine
+    def get_mainland_colleges(self):
+        """获取国内所有院校列表"""
+        response = yield http_get()
+        return self.make_colleges_result(response)
+
+    @cache(ttl=60*60*5)
+    @gen.coroutine
+    def get_overseas_colleges(self):
+        """根据id获取国外院校列表"""
+        response = yield http_get()
+        return self.make_colleges_result(response)
+
+    def make_colleges_result(self, colleges):
+        pass
 
     @staticmethod
     def get_code_by_name_from(colleges, school_name):
@@ -244,7 +275,6 @@ class InfraDictDataService(DataService):
             return cities
 
         else:
-            from pypinyin import lazy_pinyin
             for el in ret:
                 is_gat = any(
                     map(lambda x: str(el.get('code')).startswith(str(x)),

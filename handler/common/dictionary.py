@@ -42,8 +42,33 @@ class DictCountryHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def get(self):
-        countries = yield self.dictionary_ps.get_counries()
+        countries = yield self.dictionary_ps.get_countries()
         self.send_json_success(countries)
+
+
+class DictHotCountryHandler(BaseHandler):
+
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        countries = yield self.dictionary_ps.get_hot_countries()
+        self.send_json_success(countries)
+
+
+class DictMainlandCollegeHandler(BaseHandler):
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        colleges = yield self.dictionary_ps.get_mainland_colleges()
+        self.send_json_success(colleges)
+
+
+class DictOverseasCollegeHandler(BaseHandler):
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        colleges = yield self.dictionary_ps.get_overseas_colleges()
+        self.send_json_success(colleges)
 
 
 class DictRocketMajorHandler(BaseHandler):

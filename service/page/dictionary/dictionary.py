@@ -38,8 +38,23 @@ class DictionaryPageService(PageService):
         return ret
 
     @tornado.gen.coroutine
-    def get_counries(self):
+    def get_mainland_colleges(self):
+        ret = yield self.infra_dict_ds.get_mainland_colleges()
+        return ret
+
+    @tornado.gen.coroutine
+    def get_overseas_colleges(self):
+        ret = yield self.infra_dict_ds.get_overseas_colleges()
+        return ret
+
+    @tornado.gen.coroutine
+    def get_countries(self):
         countries = yield self.infra_dict_ds.get_countries()
+        return countries
+
+    @tornado.gen.coroutine
+    def get_hot_countries(self):
+        countries = yield self.infra_dict_ds.get_hot_countries()
         return countries
 
     @tornado.gen.coroutine
