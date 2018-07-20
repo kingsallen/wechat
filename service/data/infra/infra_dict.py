@@ -35,7 +35,7 @@ class InfraDictDataService(DataService):
     # 港澳台城市编号前缀
     _GAT_PREFIX = [81, 82, 71]
 
-    @cache(ttl=60*60*5)
+    @cache(ttl=60 * 60 * 5)
     @gen.coroutine
     def get_const_dict(self, parent_code):
         """根据 parent_code 获取常量字典
@@ -51,7 +51,7 @@ class InfraDictDataService(DataService):
         return self.make_const_dict_result(response, parent_code)
 
     @gen.coroutine
-    def get_countries(self, hot=False):
+    def get_countries(self, order):
         """
         获取国家列表
         hot为热门国家
@@ -61,7 +61,7 @@ class InfraDictDataService(DataService):
         continent_res = yield self.get_const_dict(
             parent_code=const.CONSTANT_PARENT_CODE.CONTINENT)
 
-        return self.make_countries_result(countries_res, continent_res, hot)
+        return self.make_countries_result(countries_res, continent_res, order)
 
     @gen.coroutine
     def get_country_code_by(self, name=None):
@@ -117,19 +117,15 @@ class InfraDictDataService(DataService):
 
         return code_list
 
-    def make_countries_result(self, countries_res, continent_res, hot=False):
-        """获取国籍列表，按大洲分割 """
+    def make_countries_result(self, countries_res, continent_res, order=None):
+        """获取国籍列表，按某种排序方式整理 """
 
-        filter_keys = ['id', 'name', 'continent_code']
+        filter_keys = ['id', 'name', 'continent_code', 'ename']
         countries = countries_res.data
 
-        if hot:
-
-            if hot:
-                countries = list(filter(
-                    lambda x: x.get('hot_country') == 1,  # hot_country=1为热门国家
-                    countries))
-                return countries
+        hot_countries = list(filter(
+            lambda x: x.get('hot_country') == 1,  # hot_country=1为热门国家
+            countries))
 
         def countries_gen(countries):
             for c in countries:
@@ -144,22 +140,42 @@ class InfraDictDataService(DataService):
                     c.pop('continent_code', None)
                     yield c
 
-        res = []
-        for continent in continent_res.items():
-            res.append(
-                ObjectDict(
-                    text=continent[1],
-                    list=list(filter_countries_gen(
-                             list(countries_gen(countries)), continent))
-            ))
+        countries = list(countries_gen(countries))
 
-        return res
+        if order == "continent":
+            ret = []
+            for continent in continent_res.items():
+                ret.append(
+                    ObjectDict(
+                        text=continent[1],
+                        list=list(filter_countries_gen(
+                            countries, continent))
+                    ))
+        else:
+            ret = self.order_by_first_letter(countries)
+        data = ObjectDict({"hot": hot_countries,
+                           "list": ret})
+        return data
 
-    @cache(ttl=60*60*5)
-    @gen.coroutine
-    def get_hot_countries(self):
-        """获取热门城市"""
-        ret = yield self.get_countries(hot=True)
+    @staticmethod
+    def order_by_first_letter(content):
+        res, heads = [], []
+        for el in content:
+            h = lazy_pinyin(
+                el.get('name'),
+                style=pypinyin.STYLE_FIRST_LETTER)[0].upper()
+
+            if h not in heads:
+                cities_group = ObjectDict(text=h, list=[])
+                cities_group.list.append(ObjectDict(el))
+                res.append(cities_group)
+                heads.append(h)
+            else:
+                group = list(filter(lambda x: x.text == h, res))[0]
+                group.list.append(el)
+
+        ret = sorted(res, key=lambda x: x.text)
+
         return ret
 
     @staticmethod
@@ -194,47 +210,27 @@ class InfraDictDataService(DataService):
         colleges = yield self.get_colleges()
         return self.get_code_by_name_from(colleges, school_name)
 
-    @cache(ttl=60*60*5)
+    @cache(ttl=60 * 60 * 5)
     @gen.coroutine
     def get_colleges(self):
         """获取所有学校列表"""
         response = yield http_get(path.DICT_COLLEGE)
         return self.make_college_list_result(response)
 
-    @cache(ttl=60*60*5)
+    @cache(ttl=60 * 60 * 5)
     @gen.coroutine
     def get_mainland_colleges(self):
         """获取国内所有院校列表"""
         response = yield http_get()
         colleges = self.make_college_list_result(response)
-        return self.make_colleges_result(colleges)
+        return self.order_by_first_letter(colleges)
 
-    @cache(ttl=60*60*5)
+    @cache(ttl=60 * 60 * 5)
     @gen.coroutine
     def get_overseas_colleges(self):
         """根据id获取国外院校列表"""
         response = yield http_get()
-        return self.make_colleges_result(response.data)
-
-    def make_colleges_result(self, colleges):
-        res, heads = [], []
-        for el in colleges:
-            h = lazy_pinyin(
-                el.get('name'),
-                style=pypinyin.STYLE_FIRST_LETTER)[0].upper()
-
-            if h not in heads:
-                cities_group = ObjectDict(text=h, list=[])
-                cities_group.list.append(ObjectDict(el))
-                res.append(cities_group)
-                heads.append(h)
-            else:
-                group = list(filter(lambda x: x.text == h, res))[0]
-                group.list.append(el)
-
-        colleges = sorted(res, key=lambda x: x.text)
-        return colleges
-
+        return self.order_by_first_letter(response.data)
 
     @staticmethod
     def get_code_by_name_from(colleges, school_name):
@@ -269,7 +265,7 @@ class InfraDictDataService(DataService):
     def _make_level_2_cities_result(http_response):
         return http_response.data
 
-    @cache(ttl=60*60*5)
+    @cache(ttl=60 * 60 * 5)
     @gen.coroutine
     def get_cities(self, hot=False):
         """获取城市列表
@@ -320,14 +316,14 @@ class InfraDictDataService(DataService):
             ret = sorted(cities, key=lambda x: x.text)
             return ret
 
-    @cache(ttl=60*60*5)
+    @cache(ttl=60 * 60 * 5)
     @gen.coroutine
     def get_hot_cities(self):
         """Alias for get_cities(hot=False) :)"""
         cities = yield self.get_cities(hot=True)
         return cities
 
-    @cache(ttl=60*60*5)
+    @cache(ttl=60 * 60 * 5)
     @gen.coroutine
     def get_city_code_by(self, city_name):
         """city_name -> code
@@ -348,7 +344,7 @@ class InfraDictDataService(DataService):
         else:
             return 0
 
-    @cache(ttl=60*60*5)
+    @cache(ttl=60 * 60 * 5)
     @gen.coroutine
     def get_city_name_by(self, city_code):
         """code -> city name
@@ -375,7 +371,7 @@ class InfraDictDataService(DataService):
         else:
             return None
 
-    @cache(ttl=60*60*5)
+    @cache(ttl=60 * 60 * 5)
     @gen.coroutine
     def get_industries(self, level=2):
         """获取行业
@@ -407,7 +403,7 @@ class InfraDictDataService(DataService):
             industries.append(out)
         return industries
 
-    @cache(ttl=60*60*5)
+    @cache(ttl=60 * 60 * 5)
     @gen.coroutine
     def get_functions(self, code=0):
         """获取职能
@@ -433,7 +429,8 @@ class InfraDictDataService(DataService):
         ret = []
         for l in level1:
             list = []
-            level2 = [sub_dict(ObjectDict(f), ['code', 'name']) for f in res_data if f['parent'] == l.code and f['level'] == 2]
+            level2 = [sub_dict(ObjectDict(f), ['code', 'name']) for f in res_data if
+                      f['parent'] == l.code and f['level'] == 2]
             for l2 in level2:
                 list.append(l2)
             e = ObjectDict()
@@ -459,7 +456,7 @@ class InfraDictDataService(DataService):
         else:
 
             L1_res = yield http_get(path.DICT_CONSTANT,
-                jdata=dict(parent_code=const.CONSTANT_PARENT_CODE.ROCKETMAJOR_L1))
+                                    jdata=dict(parent_code=const.CONSTANT_PARENT_CODE.ROCKETMAJOR_L1))
 
             L1_res_data = L1_res.data.get(str(const.CONSTANT_PARENT_CODE.ROCKETMAJOR_L1))
 
@@ -470,7 +467,7 @@ class InfraDictDataService(DataService):
                 e = sub_dict(e, ['code', 'text'])
                 L2_res = yield http_get(path.DICT_CONSTANT,
                                         jdata=dict(parent_code=e['code']))
-                L2_res_data = L2_res.data.get(str(e['code'])) #-> list
+                L2_res_data = L2_res.data.get(str(e['code']))  # -> list
                 L2_text_list = []
                 for e2 in L2_res_data:
                     e2['text'] = e2['name']

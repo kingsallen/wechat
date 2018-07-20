@@ -42,16 +42,8 @@ class DictCountryHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def get(self):
-        countries = yield self.dictionary_ps.get_countries()
-        self.send_json_success(countries)
-
-
-class DictHotCountryHandler(BaseHandler):
-
-    @handle_response
-    @gen.coroutine
-    def get(self):
-        countries = yield self.dictionary_ps.get_hot_countries()
+        order = self.params.order
+        countries = yield self.dictionary_ps.get_countries(order=order)
         self.send_json_success(countries)
 
 
