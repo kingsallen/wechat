@@ -467,7 +467,7 @@ class EmployeeReferralPolicyHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         result, data = yield self.employee_ps.get_referral_policy(self.current_user.company.id)
-        if result and data.get("priority"):
+        if result and data and data.get("priority"):
             link = data.get("link", "")
             if link:
                 self.redirect(link)
