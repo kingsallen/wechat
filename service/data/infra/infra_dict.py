@@ -117,15 +117,19 @@ class InfraDictDataService(DataService):
 
         return code_list
 
-    @staticmethod
-    def make_countries_result(countries_res, continent_res, hot=False):
+    def make_countries_result(self, countries_res, continent_res, hot=False):
         """获取国籍列表，按大洲分割 """
 
         filter_keys = ['id', 'name', 'continent_code']
         countries = countries_res.data
 
         if hot:
-            pass
+
+            if hot:
+                countries = list(filter(
+                    lambda x: x.get('hot_country') == 1,  # hot_country=1为热门国家
+                    countries))
+                return countries
 
         def countries_gen(countries):
             for c in countries:
@@ -193,7 +197,7 @@ class InfraDictDataService(DataService):
     @cache(ttl=60*60*5)
     @gen.coroutine
     def get_colleges(self):
-        """获取学校列表"""
+        """获取所有学校列表"""
         response = yield http_get(path.DICT_COLLEGE)
         return self.make_college_list_result(response)
 
@@ -202,17 +206,35 @@ class InfraDictDataService(DataService):
     def get_mainland_colleges(self):
         """获取国内所有院校列表"""
         response = yield http_get()
-        return self.make_colleges_result(response)
+        colleges = self.make_college_list_result(response)
+        return self.make_colleges_result(colleges)
 
     @cache(ttl=60*60*5)
     @gen.coroutine
     def get_overseas_colleges(self):
         """根据id获取国外院校列表"""
         response = yield http_get()
-        return self.make_colleges_result(response)
+        return self.make_colleges_result(response.data)
 
     def make_colleges_result(self, colleges):
-        pass
+        res, heads = [], []
+        for el in colleges:
+            h = lazy_pinyin(
+                el.get('name'),
+                style=pypinyin.STYLE_FIRST_LETTER)[0].upper()
+
+            if h not in heads:
+                cities_group = ObjectDict(text=h, list=[])
+                cities_group.list.append(ObjectDict(el))
+                res.append(cities_group)
+                heads.append(h)
+            else:
+                group = list(filter(lambda x: x.text == h, res))[0]
+                group.list.append(el)
+
+        colleges = sorted(res, key=lambda x: x.text)
+        return colleges
+
 
     @staticmethod
     def get_code_by_name_from(colleges, school_name):
