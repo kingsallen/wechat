@@ -45,7 +45,7 @@ class ApplicationPageService(PageService):
 
         ret = yield self.job_application_ds.get_job_application(conds={
             "position_id": position_id,
-            "applier_id":  user_id
+            "applier_id": user_id
         })
         raise gen.Return(ret)
 
@@ -86,7 +86,7 @@ class ApplicationPageService(PageService):
             raise gen.Return(True)
 
         req = ObjectDict({
-            'user_id':    user_id,
+            'user_id': user_id,
             'company_id': company_id,
             'position_id': position_id,
         })
@@ -159,9 +159,11 @@ class ApplicationPageService(PageService):
         # 先将每一页的 fields 列表合并在一起，并从中剔除非必填项
         # (缩小被检查对象并将 fields 拉平成一维数组) -> fileds_to_check
         json_config = objectdictify(json_decode(cv_conf.field_value))
+
         def merge(x, y):
             x.extend(y)
             return x
+
         return functools.reduce(merge, [page.fields for page in json_config])
 
     @gen.coroutine
@@ -182,7 +184,7 @@ class ApplicationPageService(PageService):
         """
 
         basic_other_key_mapping = {
-            e.map.split('.')[1]:e.field_name for e in custom_tpl
+            e.map.split('.')[1]: e.field_name for e in custom_tpl
             if e.map and e.map.startswith('profile_basic')
         }
 
@@ -335,7 +337,7 @@ class ApplicationPageService(PageService):
             self.logger.debug("[profile_other] other_dict_to_update: %s" % other_dict_to_update)
 
             params = {
-                'other':      json_dumps(other_dict_to_update),
+                'other': json_dumps(other_dict_to_update),
                 'profile_id': profile_id
             }
 
@@ -399,7 +401,7 @@ class ApplicationPageService(PageService):
 
         # 申请创建失败,  跳转到申请失败页面
         if not ret.status == const.API_SUCCESS:
-            message = msg.CREATE_APPLICATION_FAILED
+            message = ret.message
             return False, message
 
         uuidcode = str(uuid.uuid4())
@@ -560,7 +562,7 @@ class ApplicationPageService(PageService):
             if recommender_user_id:
                 recom_employee = yield self.user_employee_ds.get_employee(conds={
                     "sysuser_id": current_user.sysuser.id,
-                    "disable":    const.NO,
+                    "disable": const.NO,
                     "activation": const.NO,
                 })
                 recommender_wxuser_id = recom_employee.wxuser_id or 0
@@ -617,8 +619,8 @@ class ApplicationPageService(PageService):
         if current_user.wechat.passive_seeker == const.OLD_YES and recommend_user_id:
             yield self.candidate_recom_record_ds.update_candidate_recom_record(
                 conds={
-                    "position_id":       position.id,
-                    "post_user_id":      recommend_user_id,
+                    "position_id": position.id,
+                    "post_user_id": recommend_user_id,
                     "presentee_user_id": current_user.sysuser.id,
                 }, fields={
                     "app_id": apply_id
@@ -641,11 +643,11 @@ class ApplicationPageService(PageService):
             template_name = const.NON_KA_EMAIL_APPLICATION_INVITATION
             from_email = self.settings.cv_mail_sender_email
             merge_vars = ObjectDict(
-                company_abbr =company_abbr,
-                header_company_abbr = trunc(company_abbr, const.MANDRILL_EMAIL_HEADER_LIMIT),
-                applier_name = applier_name,
-                header_applier_name = trunc(applier_name, const.MANDRILL_EMAIL_HEADER_LIMIT),
-                invitation_code = invitation_code
+                company_abbr=company_abbr,
+                header_company_abbr=trunc(company_abbr, const.MANDRILL_EMAIL_HEADER_LIMIT),
+                applier_name=applier_name,
+                header_applier_name=trunc(applier_name, const.MANDRILL_EMAIL_HEADER_LIMIT),
+                invitation_code=invitation_code
             )
         else:
             # 1是platform, 都是KA, 以公司的名义发送
