@@ -468,11 +468,8 @@ class EmployeeReferralPolicyHandler(BaseHandler):
         result, data = yield self.employee_ps.get_referral_policy(self.current_user.company.id)
         link = data.get("link", "")
         if result and data and data.get("priority"):
-            if link and "employee/referral/policy" not in link:
+            if link:
                 self.redirect(link)
-                return
-            elif "employee/referral/policy" in link:
-                self.render_page(template_name="employee/referral-no-article.html", data={})
                 return
             else:
                 data = ObjectDict({
