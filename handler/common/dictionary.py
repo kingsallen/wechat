@@ -59,7 +59,16 @@ class DictOverseasCollegeHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def get(self):
-        colleges = yield self.dictionary_ps.get_overseas_colleges()
+        country_id = self.params.country_id
+        colleges = yield self.dictionary_ps.get_overseas_colleges(country_id)
+        self.send_json_success(colleges)
+
+
+class DictHKMTCollegeHandler(BaseHandler):
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        colleges = yield self.dictionary_ps.get_hkmt_colleges()
         self.send_json_success(colleges)
 
 

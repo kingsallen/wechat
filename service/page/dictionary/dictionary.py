@@ -43,8 +43,13 @@ class DictionaryPageService(PageService):
         return ret
 
     @tornado.gen.coroutine
-    def get_overseas_colleges(self):
-        ret = yield self.infra_dict_ds.get_overseas_colleges()
+    def get_overseas_colleges(self, country_id):
+        ret = yield self.infra_dict_ds.get_overseas_colleges(country_id)
+        return ret
+
+    @tornado.gen.coroutine
+    def get_hkmt_colleges(self):
+        ret = yield self.infra_dict_ds.get_hkmt_colleges()
         return ret
 
     @tornado.gen.coroutine

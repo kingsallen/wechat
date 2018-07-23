@@ -221,15 +221,24 @@ class InfraDictDataService(DataService):
     @gen.coroutine
     def get_mainland_colleges(self):
         """获取国内所有院校列表"""
-        response = yield http_get()
+        response = yield http_get(path.DICT_MAINLAND_COLLEGE)
         colleges = self.make_college_list_result(response)
         return self.order_by_first_letter(colleges)
 
     @cache(ttl=60 * 60 * 5)
     @gen.coroutine
-    def get_overseas_colleges(self):
+    def get_overseas_colleges(self, country_id):
         """根据id获取国外院校列表"""
-        response = yield http_get()
+        data = ObjectDict({
+            "country_id": country_id
+        })
+        response = yield http_get(path.DICT_COLLEGE_BY_ID, jdata=data)
+        return self.order_by_first_letter(response.data)
+
+    @cache(ttl=60 * 60 * 5)
+    @gen.coroutine
+    def get_hkmt_colleges(self):
+        response = yield http_get(path.DICT_HKMT_COLLEGE)
         return self.order_by_first_letter(response.data)
 
     @staticmethod
