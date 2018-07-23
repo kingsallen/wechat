@@ -463,14 +463,16 @@ class EmployeeReferralPolicyHandler(BaseHandler):
     https://git.moseeker.com/doc/complete-guide/blob/feature/v0.1.0/develop_docs/referral/basic_service/%E5%86%85%E6%8E%A8v0.1.0-api.md
     """
     @handle_response
-    @authenticated
     @gen.coroutine
     def get(self):
         result, data = yield self.employee_ps.get_referral_policy(self.current_user.company.id)
+        link = data.get("link", "")
         if result and data and data.get("priority"):
-            link = data.get("link", "")
-            if link:
+            if link and "employee/referral/policy" not in link:
                 self.redirect(link)
+                return
+            elif "employee/referral/policy" in link:
+                self.render_page(template_name="employee/referral-no-article.html", data={})
                 return
             else:
                 data = ObjectDict({
