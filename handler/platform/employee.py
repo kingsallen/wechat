@@ -13,6 +13,7 @@ from util.common import ObjectDict
 from util.common.decorator import handle_response, authenticated
 from util.tool.json_tool import json_dumps
 from util.tool.str_tool import to_str
+from urllib import parse
 
 
 class AwardsLadderPageHandler(BaseHandler):
@@ -469,7 +470,7 @@ class EmployeeReferralPolicyHandler(BaseHandler):
         link = data.get("link", "")
         if result and data and data.get("priority"):
             if link:
-                self.redirect(link)
+                self.redirect(parse.unquote(link))
                 return
             else:
                 data = ObjectDict({
