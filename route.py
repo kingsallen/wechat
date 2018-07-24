@@ -100,7 +100,6 @@ common_routes = [
     (r"/api/dict/smscountrycode/?",                  handler.common.dictionary.DictSmsCountryCodeHandler,       {"event": "dict_smscountrycode"}),
     (r"/api/dict/mainland/college/?",                handler.common.dictionary.DictMainlandCollegeHandler,      {"event": "dict_mainland_college"}),
     (r"/api/dict/overseas/college/?",                handler.common.dictionary.DictOverseasCollegeHandler,      {"event": "dict_overseas_college"}),
-    (r"/api/dict/HKMT/colleges/?",                   handler.common.dictionary.DictHKMTCollegeHandler,          {"event": "dict_HKMT_colleges"}),
     (r"/api/profile/edit/?",                         handler.common.profile.ProfileSectionHandler,              {"event": "profile_section"}),
     (r"/api/profile/new/?",                          handler.common.profile.ProfileNewHandler,                  {"event": "profile_new"}),
     (r"/api/customcv/?",                             handler.common.profile.ProfileAPICustomCVHandler,          {"event": "profile_customcv"}),

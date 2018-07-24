@@ -235,12 +235,6 @@ class InfraDictDataService(DataService):
         response = yield http_get(path.DICT_COLLEGE_BY_ID, jdata=data)
         return self.order_by_first_letter(response.data)
 
-    @cache(ttl=60 * 60 * 5)
-    @gen.coroutine
-    def get_hkmt_colleges(self):
-        response = yield http_get(path.DICT_HKMT_COLLEGE)
-        return self.order_by_first_letter(response.data)
-
     @staticmethod
     def get_code_by_name_from(colleges, school_name):
         ret = list(filter(lambda x: x.get('name') == school_name, colleges))

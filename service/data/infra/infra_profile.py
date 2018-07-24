@@ -29,7 +29,8 @@ class InfraProfileDataService(DataService):
         return http_tool.unboxing(res)
 
     @gen.coroutine
-    def import_profile(self, type, username, password, user_id, company_id, ua=1, token=None, appid=None, unionid=None, version=None, captcha=None):
+    def import_profile(self, type, username, password, user_id, company_id, ua=1, token=None, appid=None, unionid=None,
+                       version=None, captcha=None):
         """
         从第三方导入 profile
         :param type: 必填 来源, 0:无法识别 1:51Job 2:Liepin 3:zhilian 4:linkedin 5:veryeast
@@ -387,6 +388,7 @@ class InfraProfileDataService(DataService):
             "start_date": record.start_date,
             "end_date": "" if record.end_until_now else record.end_date,
             "end_until_now": record.end_until_now,
+            "country_id": record.country_id
         }
 
         if record.get("major_name") is None or not record.get(
@@ -423,6 +425,7 @@ class InfraProfileDataService(DataService):
             "start_date": record.start_date,
             "end_date": None if record.end_until_now else record.end_date,
             "end_until_now": record.end_until_now,
+            "country_id": record.country_id,
         }
 
         if record.get("major_name") is None or not record.get(
@@ -585,7 +588,7 @@ class InfraProfileDataService(DataService):
             params.update(url=record.url)
 
         if record.get('description') is None or \
-                record.get('description').strip() == "":
+            record.get('description').strip() == "":
             params.update(description="")
         else:
             params.update(description=record.description)

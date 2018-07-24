@@ -132,13 +132,12 @@ CREATE_COMPANY = 'api/hrcompany/add'
 # 字典服务
 DICT_CONSTANT = "dict/constant"
 DICT_CITIES = "dict/cities"
-DICT_COLLEGE = "dict/college"
+DICT_COLLEGE = "dict/college/all"
 DICT_COUNTRY = "dict/country"
 DICT_INDUSTRY = "dict/industry"
 DICT_POSITION = "dict/position"
-DICT_MAINLAND_COLLEGE = "/api/dict/college/domestic"
+DICT_MAINLAND_COLLEGE = "/dict/college"
 DICT_COLLEGE_BY_ID = "/api/dict/college/abroad"
-DICT_HKMT_COLLEGE = "/api/dict/college/gat"
 
 # 消息通知服务
 MESSAGE_TEMPLATE = "message/template"

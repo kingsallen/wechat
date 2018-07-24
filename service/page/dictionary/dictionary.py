@@ -48,11 +48,6 @@ class DictionaryPageService(PageService):
         return ret
 
     @tornado.gen.coroutine
-    def get_hkmt_colleges(self):
-        ret = yield self.infra_dict_ds.get_hkmt_colleges()
-        return ret
-
-    @tornado.gen.coroutine
     def get_countries(self, order):
         countries = yield self.infra_dict_ds.get_countries(order=order)
         return countries
