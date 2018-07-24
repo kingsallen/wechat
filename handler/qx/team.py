@@ -42,6 +42,7 @@ class TeamDetailHandler(BaseHandler):
             "title": "【{}】-{}的团队介绍".format(team_name, company_name),
             "description": '微信好友{}推荐，点击查看团队介绍。打开有职位列表哦！'.format(self.current_user.qxuser.nickname),
             "link": self.make_url(path.GAMMA_POSITION_TEAM.format(team_id),
+                                  self.params,
                                   recom=self.position_ps._make_recom(self.current_user.sysuser.id),
                                   fr="recruit",
                                   tid=str(team_id),

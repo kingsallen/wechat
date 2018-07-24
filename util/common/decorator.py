@@ -247,7 +247,7 @@ def check_and_apply_profile(func):
                 if position.app_cv_config_id:
                     goto_custom_url = self.make_url(
                         path.PROFILE_CUSTOM_CV,
-                        sub_dict(self.params, ['pid', 'wechat_signature', 'recom', 'algorithm_name', 'ai_recom']))
+                        self.params)
 
                     # 如果是自定义职位，且没有 profile，且是直接投递定制的公司
                     # 直接跳转到自定义填写页面
