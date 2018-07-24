@@ -232,7 +232,7 @@ class UserSurveyHandler(BaseHandler):
                                 {
                                     "map": "profile_intention.id&profile_intention_industry.industry_name",
                                     "error_msg": "",
-                                    "field_type": 10,
+                                    "field_type": 107,
                                     "company_id": 0,
                                     "field_name": "industry",
                                     "required": 0,
@@ -241,60 +241,7 @@ class UserSurveyHandler(BaseHandler):
                                     "parent_id": 0,
                                     "is_basic": 0,
                                     "constant_parent_code": 3124,
-                                    "field_value": [
-                                        [
-                                            "计算机/通信/电子/互联网",
-                                            "1"
-                                        ],
-                                        [
-                                            "会计/金融/银行/保险",
-                                            "2"
-                                        ],
-                                        [
-                                            "房地产/建筑业",
-                                            "3"
-                                        ],
-                                        [
-                                            "商业服务/教育/培训",
-                                            "4"
-                                        ],
-                                        [
-                                            "贸易/批发/零售/租赁业",
-                                            "5"
-                                        ],
-                                        [
-                                            "制药/医疗",
-                                            "6"
-                                        ],
-                                        [
-                                            "广告/媒体",
-                                            "7"
-                                        ],
-                                        [
-                                            "生产/加工/制造",
-                                            "8"
-                                        ],
-                                        [
-                                            "交通/运输/物流/仓储",
-                                            "9"
-                                        ],
-                                        [
-                                            "服务业",
-                                            "10"
-                                        ],
-                                        [
-                                            "文化/传媒/娱乐/体育",
-                                            "11"
-                                        ],
-                                        [
-                                            "能源/矿产/环保",
-                                            "12"
-                                        ],
-                                        [
-                                            "政府/非盈利机构/其他",
-                                            "13"
-                                        ]
-                                    ],
+                                    "field_value": [],
                                     "field_title": "期望行业",
                                     "field_description": "请选择期望行业",
                                     "validate_re": "[\\s\\S]+"
