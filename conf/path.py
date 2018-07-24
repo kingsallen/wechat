@@ -136,8 +136,8 @@ DICT_COLLEGE = "dict/college/all"
 DICT_COUNTRY = "dict/country"
 DICT_INDUSTRY = "dict/industry"
 DICT_POSITION = "dict/position"
-DICT_MAINLAND_COLLEGE = "/dict/college"
-DICT_COLLEGE_BY_ID = "/api/dict/college/abroad"
+DICT_MAINLAND_COLLEGE = "dict/college"
+DICT_COLLEGE_BY_ID = "api/dict/college/abroad"
 
 # 消息通知服务
 MESSAGE_TEMPLATE = "message/template"
