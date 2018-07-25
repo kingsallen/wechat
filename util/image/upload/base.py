@@ -9,14 +9,19 @@
 
 from util.image import Connector
 
+
 class BaseUpload(Connector):
     """
     上传基类
     需要一个配置来进行上传
     """
-    def __init__(self, _init_params=dict()):
+
+    def __init__(self, _init_params=None):
         super(BaseUpload, self).__init__()
-        self._init_params = _init_params
+        if _init_params is None:
+            self._init_params = dict()
+        else:
+            self._init_params = _init_params
         self._image = None
 
     @property
@@ -44,7 +49,6 @@ class BaseUpload(Connector):
         """
         process the image before upload or save,
         you can pass ignored in the subclass to skip some process.
-        :param ignored:
         :return:
         """
         filters = self.params.get('before_upload', None)
@@ -62,13 +66,17 @@ class BaseUpload(Connector):
                 index += 1
                 self._apply_filter(filter, _setting)
 
-    def _apply_filter(self, filter, setting=dict()):
+    def _apply_filter(self, filter, setting=None):
         """
         Apply the filter function in image, to resize, or crop the image.
         :param filter: string
         :param setting: dict
         :return:
         """
+        if setting is None:
+            setting = dict()
+        else:
+            setting = setting
         filter_parent = self.image
 
         _attr = "filter_{}".format(filter)
@@ -77,6 +85,7 @@ class BaseUpload(Connector):
             raise NameError("apply filter failed, no such filter {}".format(_attr))
         self.logger.info("[apply filter] - use filter {}".format(_attr))
         m(setting)
+
 
 class UploadResult(object):
     def __init__(self, status=1, message=None, data=None, exception=None):
@@ -90,6 +99,7 @@ class UploadResult(object):
     @property
     def status(self):
         return self._status
+
     @property
     def message(self):
         return self._message

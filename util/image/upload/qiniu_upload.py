@@ -27,6 +27,7 @@ try:
 except NameError:
     basestring = str
 
+
 class QiniuUpload(BaseUpload):
     """
     params:
@@ -35,8 +36,12 @@ class QiniuUpload(BaseUpload):
     - max_size
     """
 
-    def __init__(self, _init_params = dict()):
-        super(QiniuUpload, self).__init__(_init_params)
+    def __init__(self, _init_params=None):
+        super(QiniuUpload, self).__init__()
+        if _init_params is None:
+            self._init_params = dict()
+        else:
+            self._init_params = _init_params
 
     def upload_bytes(self, content):
         import io
@@ -109,8 +114,9 @@ def _get_random_filename(filename, prefix=""):
 
 
 def _safe_filename(filename, max_length=20):
-    keepcharacters = ('-','.','_')
+    keepcharacters = ('-', '.', '_')
     return "".join(c for c in filename if c.isalnum() or c in keepcharacters).rstrip()
+
 
 def _id_generator(size=10, chars=string.ascii_lowercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
