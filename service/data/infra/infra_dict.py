@@ -152,13 +152,13 @@ class InfraDictDataService(DataService):
                             countries, continent))
                     ))
         else:
-            ret = self.order_by_first_letter(countries)
+            ret = self.order_country_by_first_letter(countries)
         data = ObjectDict({"hot": hot_countries,
                            "list": ret})
         return data
 
     @staticmethod
-    def order_by_first_letter(content):
+    def order_country_by_first_letter(content):
         res, heads = [], []
         for el in content:
             h = lazy_pinyin(
@@ -175,8 +175,8 @@ class InfraDictDataService(DataService):
                 group.list.append(el)
 
         ret = sorted(res, key=lambda x: x.text)
-        data = ObjectDict({"list": ret})
-        return data
+
+        return ret
 
     @staticmethod
     def make_const_dict_result(http_response, parent_code):
@@ -223,7 +223,9 @@ class InfraDictDataService(DataService):
         """获取国内所有院校列表"""
         response = yield http_get(path.DICT_MAINLAND_COLLEGE)
         colleges = self.make_college_list_result(response)
-        return self.order_by_first_letter(colleges)
+        ret = sorted(colleges, key=lambda x: lazy_pinyin(x.get('name'), style=pypinyin.STYLE_FIRST_LETTER)[0].upper())
+        data = ObjectDict({"list": ret})
+        return data
 
     @cache(ttl=60 * 60 * 5)
     @gen.coroutine
@@ -233,7 +235,9 @@ class InfraDictDataService(DataService):
             "country_id": country_id
         })
         response = yield http_get(path.DICT_COLLEGE_BY_ID, jdata=data)
-        return self.order_by_first_letter(response.data)
+        ret = sorted(response, key=lambda x: x['name'])
+        data = ObjectDict({"list": ret})
+        return data
 
     @staticmethod
     def get_code_by_name_from(colleges, school_name):
