@@ -175,8 +175,8 @@ class InfraDictDataService(DataService):
                 group.list.append(el)
 
         ret = sorted(res, key=lambda x: x.text)
-
-        return ret
+        data = ObjectDict({"list": ret})
+        return data
 
     @staticmethod
     def make_const_dict_result(http_response, parent_code):
