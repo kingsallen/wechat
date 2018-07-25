@@ -241,7 +241,11 @@ class UserSurveyHandler(BaseHandler):
                                     "parent_id": 0,
                                     "is_basic": 0,
                                     "constant_parent_code": 3124,
-                                    "field_value": [],
+                                    "field_value": [
+                                        [
+                                            ""
+                                        ]
+                                    ],
                                     "field_title": "期望行业",
                                     "field_description": "请选择期望行业",
                                     "validate_re": "[\\s\\S]+"
