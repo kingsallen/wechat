@@ -457,7 +457,8 @@ class ProfileAPICustomCVHandler(BaseHandler):
     def _preprocess_custom_cv(custom_cv_other_raw):
         """对于纯 profile 字段的预处理
         可以在此加入公司自定义逻辑"""
-        ret = copy.deepcopy(custom_cv_other_raw)
+        ret = json.dumps(custom_cv_other_raw)
+        ret = json.loads(ret)
 
         # 前端 rocketmajor_value 保存应该入库的 rocketmajor 字段内容
         if ret.get('rocketmajor_value'):
@@ -959,10 +960,13 @@ class ProfileSectionHandler(BaseHandler):
             parent_code=const.CONSTANT_PARENT_CODE.WORK_INTENTION)
         salary_list = yield self.dictionary_ps.get_constants(
             parent_code=const.CONSTANT_PARENT_CODE.CURRENT_SALARY_MONTH)
+        workstate = yield self.dictionary_ps.get_constants(
+            parent_code=const.CONSTANT_PARENT_CODE.WORK_STATUS)
 
         constant = ObjectDict()
         constant.worktype_list = worktype_list
         constant.salary_list = salary_list
+        constant.workstate_list = workstate
 
         model = ObjectDict()
         new = False
@@ -985,9 +989,9 @@ class ProfileSectionHandler(BaseHandler):
                     model.position_name = position_name
 
                 cities = intention.cities
-                if cities:
-                    city_name = cities[0].get("city_name")
-                    model.city_name = city_name
+                model.city_name = cities
+                industries = intention.industries
+                model.industry = {"code": industries[0].get("industry_code"), "name": industries[0].get("industry_name")} if industries else {}
             else:
                 self.send_json_error('cannot get intention')
 
