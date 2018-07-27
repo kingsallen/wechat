@@ -235,7 +235,8 @@ class InfraDictDataService(DataService):
             "country_id": country_id
         })
         response = yield http_get(path.DICT_COLLEGE_BY_ID, jdata=data)
-        ret = sorted(response, key=lambda x: x['name'])
+        colleges = response.data
+        ret = sorted(colleges, key=lambda x: lazy_pinyin(x.get('name'), style=pypinyin.STYLE_FIRST_LETTER)[0].upper())
         data = ObjectDict({"list": ret})
         return data
 
