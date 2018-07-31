@@ -266,6 +266,22 @@ class ApplicationPageService(PageService):
             )
             language.append(el)
 
+        skills = []
+        for s in profile.get("skills", []):
+            el = ObjectDict(
+                id=s.get('id'),
+                skills_name=s.get('name', '')
+            )
+            skills.append(el)
+
+        credentials = []
+        for c in profile.get("credentials", []):
+            el = ObjectDict(
+                id=c.get("id"),
+                credentials_name=c.get("name", "")
+            )
+            credentials.append(el)
+
         awards = []
         for a in profile.get('awards', []):
             el = ObjectDict(
@@ -289,6 +305,8 @@ class ApplicationPageService(PageService):
         resume_dict.projectexp = projectexp
         resume_dict.awards = awards
         resume_dict.works = works
+        resume_dict.skills = skills
+        resume_dict.credentials = credentials
 
         # profile other
         if profile.get('others', []):
