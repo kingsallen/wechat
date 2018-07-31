@@ -120,12 +120,8 @@ class InfraDictDataService(DataService):
     def make_countries_result(self, countries_res, continent_res, order=None):
         """获取国籍列表，按某种排序方式整理 """
 
-        filter_keys = ['id', 'name', 'continent_code', 'ename']
+        filter_keys = ['id', 'name', 'continent_code', 'ename', 'hot_country']
         countries = countries_res.data
-
-        hot_countries = list(filter(
-            lambda x: x.get('hot_country') == 1,  # hot_country=1为热门国家
-            countries))
 
         def countries_gen(countries):
             for c in countries:
@@ -141,6 +137,10 @@ class InfraDictDataService(DataService):
                     yield c
 
         countries = list(countries_gen(countries))
+
+        hot_countries = list(filter(
+            lambda x: x.get('hot_country') == 1 and x.get("code") != 43,  # hot_country=1为热门国家
+            countries))
 
         if order == "continent":
             ret = []
