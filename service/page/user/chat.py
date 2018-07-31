@@ -200,8 +200,7 @@ class ChatPageService(PageService):
         :param hr_id: 聊天对象hrid
         :param position_id 当前职位id，不存在则为0
         """
-        ret = ""
-
+        messages = []
         params = ObjectDict(
             question=message,
             user_id=user_id,
@@ -217,46 +216,47 @@ class ChatPageService(PageService):
 
             self.logger.debug(res.results)
             results = res.results
-            r = results[0]
-            res_type = r.get("resultType", "")
-            ret = r.get("values", {})
+            for r in results:
+                res_type = r.get("resultType", "")
+                ret = r.get("values", {})
 
-            if res_type == "text" and ret.get("text").strip():
-                content = ret.get("text", "")
-                pic_url = ret.get("picUrl", "")
-                msg_type = "html"
-                btn_content = []
-                btn_content_json = ''
-            elif (res_type == "image" or res_type == "qrcode") and ret.get("picUrl").strip():
-                content = ret.get("text", "")
-                pic_url = ret.get("picUrl", "")
-                msg_type = res_type
-                btn_content = []
-                btn_content_json = ''
-            elif res_type == "button_radio" and ret.get("btnContent"):
-                content = ret.get("text", "")
-                btn_content_json = json.dumps(ret.get("btnContent", []))
-                btn_content = ret.get("btnContent", [])
-                pic_url = ""
-                msg_type = "button_radio"
-            else:
-                content = ''
-                pic_url = ''
-                msg_type = ''
-                btn_content = []
-                btn_content_json = ''
-            ret_message = ObjectDict()
-            ret_message['content'] = content
-            ret_message['pic_url'] = pic_url
-            ret_message['btn_content'] = btn_content
-            ret_message['msg_type'] = msg_type
-            ret_message['btn_content_json'] = btn_content_json
-            self.logger.debug(ret_message)
+                if res_type == "text" and ret.get("text").strip():
+                    content = ret.get("text", "")
+                    pic_url = ret.get("picUrl", "")
+                    msg_type = "html"
+                    btn_content = []
+                    btn_content_json = ''
+                elif (res_type == "image" or res_type == "qrcode") and ret.get("picUrl").strip():
+                    content = ret.get("text", "")
+                    pic_url = ret.get("picUrl", "")
+                    msg_type = res_type
+                    btn_content = []
+                    btn_content_json = ''
+                elif res_type == "button_radio" and ret.get("btnContent"):
+                    content = ret.get("text", "")
+                    btn_content_json = json.dumps(ret.get("btnContent", []))
+                    btn_content = ret.get("btnContent", [])
+                    pic_url = ""
+                    msg_type = "button_radio"
+                else:
+                    content = ''
+                    pic_url = ''
+                    msg_type = ''
+                    btn_content = []
+                    btn_content_json = ''
+                ret_message = ObjectDict()
+                ret_message['content'] = content
+                ret_message['pic_url'] = pic_url
+                ret_message['btn_content'] = btn_content
+                ret_message['msg_type'] = msg_type
+                ret_message['btn_content_json'] = btn_content_json
+                messages.append(ret_message)
+            self.logger.debug(message)
         except Exception as e:
             self.logger.error(e)
             return
         else:
-            return ret_message
+            return message
 
     @gen.coroutine
     def chat_limit(self, hr_id):

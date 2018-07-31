@@ -452,11 +452,12 @@ class ChatHandler(BaseHandler):
         self.hr_id = self.params.hrId
         self.position_id = self.params.get("pid") or 0
 
+        text = self.json_args.get("text")
         content = self.json_args.get("content")
         user_message = ujson.dumps(content) if type(content) != str else content
         msg_type = self.json_args.get("msgType")
-        server_id = self.json_args.get("serverId") or ""
-        duration = self.json_args.get("duration") or 0
+        server_id = content.get("serverId") or ""
+        duration = content.get("duration") or 0
 
         if not self.bot_enabled:
             yield self.get_bot_enabled()
@@ -469,6 +470,7 @@ class ChatHandler(BaseHandler):
             return
         chat_params = ChatVO(
             msgType=msg_type,
+            text=text,
             content=user_message,
             origin=const.ORIGIN_USER_OR_HR,
             roomId=int(self.room_id),
@@ -487,8 +489,6 @@ class ChatHandler(BaseHandler):
             createTime=curr_now_minute(),
             origin=const.ORIGIN_USER_OR_HR,
             id=chat_id,
-            serverId=server_id,
-            duration=duration
         ))
 
         self.redis_client.publish(self.hr_channel, message_body)
@@ -542,44 +542,43 @@ class ChatHandler(BaseHandler):
         """处理 chatbot message
         获取消息 -> pub消息 -> 入库
         """
-        bot_message = yield self.chat_ps.get_chatbot_reply(
+        bot_messages = yield self.chat_ps.get_chatbot_reply(
             message=user_message,
             user_id=self.user_id,
             hr_id=self.hr_id,
             position_id=self.position_id
         )
-        if bot_message.msg_type == '':
-            return
-        chat_params = ChatVO(
-            content=bot_message.content,
-            speaker=const.CHAT_SPEAKER_HR,
-            origin=const.ORIGIN_CHATBOT,
-            assetUrl=bot_message.pic_url,
-            btnContent=bot_message.btn_content_json,
-            msgType=bot_message.msg_type,
-            roomId=int(self.room_id),
-            positionId=int(self.position_id)
-        )
-
-        chat_id = yield self.chat_ps.save_chat(chat_params)
-        if bot_message:
-            message_body = json_dumps(ObjectDict(
+        for bot_message in bot_messages:
+            if bot_message.msg_type == '':
+                continue
+            chat_params = ChatVO(
+                text=bot_message.text,
                 content=bot_message.content,
-                assetUrl=bot_message.pic_url,
-                btnContent=bot_message.btn_content,
-                msgType=bot_message.msg_type,
                 speaker=const.CHAT_SPEAKER_HR,
-                cid=int(self.room_id),
-                pid=int(self.position_id),
-                createTime=curr_now_minute(),
                 origin=const.ORIGIN_CHATBOT,
-                id=chat_id
-            ))
-            # hr 端广播
-            self.redis_client.publish(self.hr_channel, message_body)
+                msgType=bot_message.msg_type,
+                roomId=int(self.room_id),
+                positionId=int(self.position_id)
+            )
 
-            # 聊天室广播
-            self.redis_client.publish(self.chatroom_channel, message_body)
+            chat_id = yield self.chat_ps.save_chat(chat_params)
+            if bot_message:
+                message_body = json_dumps(ObjectDict(
+                    text=bot_message.text,
+                    content=bot_message.content,
+                    msgType=bot_message.msg_type,
+                    speaker=const.CHAT_SPEAKER_HR,
+                    cid=int(self.room_id),
+                    pid=int(self.position_id),
+                    createTime=curr_now_minute(),
+                    origin=const.ORIGIN_CHATBOT,
+                    id=chat_id
+                ))
+                # hr 端广播
+                self.redis_client.publish(self.hr_channel, message_body)
+
+                # 聊天室广播
+                self.redis_client.publish(self.chatroom_channel, message_body)
 
     @gen.coroutine
     def get_bot_enabled(self):
