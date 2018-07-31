@@ -452,8 +452,8 @@ class ChatHandler(BaseHandler):
         self.hr_id = self.params.hrId
         self.position_id = self.params.get("pid") or 0
 
-        text = self.json_args.get("text")
         content = self.json_args.get("content")
+        compoundContent = self.json_args.get("compoundContent")
         user_message = ujson.dumps(content) if type(content) != str else content
         msg_type = self.json_args.get("msgType")
         server_id = content.get("serverId") or ""
@@ -470,7 +470,7 @@ class ChatHandler(BaseHandler):
             return
         chat_params = ChatVO(
             msgType=msg_type,
-            text=text,
+            compoundContent=compoundContent,
             content=user_message,
             origin=const.ORIGIN_USER_OR_HR,
             roomId=int(self.room_id),
@@ -483,6 +483,7 @@ class ChatHandler(BaseHandler):
         message_body = json_dumps(ObjectDict(
             msgType=msg_type,
             content=user_message,
+            compoundContent=compoundContent,
             speaker=const.CHAT_SPEAKER_USER,
             cid=int(self.room_id),
             pid=int(self.position_id),
@@ -552,7 +553,7 @@ class ChatHandler(BaseHandler):
             if bot_message.msg_type == '':
                 continue
             chat_params = ChatVO(
-                text=bot_message.text,
+                compoundContent=bot_message.compoundContent,
                 content=bot_message.content,
                 speaker=const.CHAT_SPEAKER_HR,
                 origin=const.ORIGIN_CHATBOT,
@@ -564,7 +565,7 @@ class ChatHandler(BaseHandler):
             chat_id = yield self.chat_ps.save_chat(chat_params)
             if bot_message:
                 message_body = json_dumps(ObjectDict(
-                    text=bot_message.text,
+                    compoundContent=bot_message.compoundContent,
                     content=bot_message.content,
                     msgType=bot_message.msg_type,
                     speaker=const.CHAT_SPEAKER_HR,
