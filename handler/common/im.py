@@ -168,13 +168,10 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
                 if data:
                     self.write_message(json_dumps(ObjectDict(
                         content=data.get("content"),
+                        compoundContent=data.get("compoundContent"),
                         chatTime=data.get("createTime"),
                         speaker=data.get("speaker"),
-                        assetUrl=data.get("assetUrl"),
-                        btnContent=data.get("btnContent"),
-                        msgType=data.get("msgType"),
-                        duration=data.get("duration") or 0,
-                        serverId=data.get("serverId") or 0
+                        msgType=data.get("msgType")
                     )))
             except websocket.WebSocketClosedError:
                 self.logger.error(traceback.format_exc())
@@ -290,6 +287,7 @@ class ChatRoomHandler(BaseHandler):
 class ChatHandler(BaseHandler):
     """聊天相关处理"""
 
+    # 这里的聊天使用redis有问题，请不要在其他地方使用这个redis连接池
     _pool = redis.ConnectionPool(
         host=settings["store_options"]["redis_host"],
         port=settings["store_options"]["redis_port"],
@@ -452,9 +450,9 @@ class ChatHandler(BaseHandler):
         self.hr_id = self.params.hrId
         self.position_id = self.params.get("pid") or 0
 
-        content = self.json_args.get("content")
-        compoundContent = self.json_args.get("compoundContent")
-        user_message = ujson.dumps(content) if type(content) != str else content
+        content = self.json_args.get("content") or ""
+        compoundContent = self.json_args.get("compoundContent") or {}
+        user_message = content or compoundContent
         msg_type = self.json_args.get("msgType")
         server_id = content.get("serverId") or ""
         duration = content.get("duration") or 0
@@ -465,13 +463,13 @@ class ChatHandler(BaseHandler):
         self.chatroom_channel = const.CHAT_CHATROOM_CHANNEL.format(self.hr_id, self.user_id)
         self.hr_channel = const.CHAT_HR_CHANNEL.format(self.hr_id)
 
-        if msg_type == 'html' and not user_message.strip():
+        if msg_type == 'html' and not content.strip():
             self.send_json_error()
             return
         chat_params = ChatVO(
             msgType=msg_type,
             compoundContent=compoundContent,
-            content=user_message,
+            content=content,
             origin=const.ORIGIN_USER_OR_HR,
             roomId=int(self.room_id),
             positionId=int(self.position_id),
@@ -482,7 +480,7 @@ class ChatHandler(BaseHandler):
 
         message_body = json_dumps(ObjectDict(
             msgType=msg_type,
-            content=user_message,
+            content=content,
             compoundContent=compoundContent,
             speaker=const.CHAT_SPEAKER_USER,
             cid=int(self.room_id),

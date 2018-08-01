@@ -273,6 +273,19 @@ SCALE = {
     "8": "10000人以上",  # 似乎数据库中没有？ from yiliang
 }
 
+# 聊天相关
+MSG_TYPE = {
+    0: "html",
+    1: "button",
+    2: "cards",
+    3: "jobCard",
+    4: "citySelect",
+    5: "teamSelect",
+    6: "redirect",
+    7: "jobSelect",
+    8: "employeeBind"
+}
+
 # 默认图标
 SYSUSER_HEADIMG = "weixin/images/hr-avatar-default.png"
 HR_HEADIMG = "weixin/images/default-HR.png"

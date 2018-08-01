@@ -219,44 +219,20 @@ class ChatPageService(PageService):
             for r in results:
                 res_type = r.get("resultType", "")
                 ret = r.get("values", {})
-
-                if res_type == "text" and ret.get("text").strip():
-                    content = ret.get("text", "")
-                    pic_url = ret.get("picUrl", "")
-                    msg_type = "html"
-                    btn_content = []
-                    btn_content_json = ''
-                elif (res_type == "image" or res_type == "qrcode") and ret.get("picUrl").strip():
-                    content = ret.get("text", "")
-                    pic_url = ret.get("picUrl", "")
-                    msg_type = res_type
-                    btn_content = []
-                    btn_content_json = ''
-                elif res_type == "button_radio" and ret.get("btnContent"):
-                    content = ret.get("text", "")
-                    btn_content_json = json.dumps(ret.get("btnContent", []))
-                    btn_content = ret.get("btnContent", [])
-                    pic_url = ""
-                    msg_type = "button_radio"
-                else:
-                    content = ''
-                    pic_url = ''
-                    msg_type = ''
-                    btn_content = []
-                    btn_content_json = ''
+                content = ret.get("content", "")
+                compoundContent = ret.get("compoundContent", {})
+                msg_type = const.MSG_TYPE.get(res_type)
                 ret_message = ObjectDict()
                 ret_message['content'] = content
-                ret_message['pic_url'] = pic_url
-                ret_message['btn_content'] = btn_content
+                ret_message['compoundContent'] = compoundContent
                 ret_message['msg_type'] = msg_type
-                ret_message['btn_content_json'] = btn_content_json
                 messages.append(ret_message)
-            self.logger.debug(message)
+            self.logger.debug(messages)
         except Exception as e:
             self.logger.error(e)
             return
         else:
-            return message
+            return messages
 
     @gen.coroutine
     def chat_limit(self, hr_id):
