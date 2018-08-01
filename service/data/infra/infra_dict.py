@@ -139,7 +139,7 @@ class InfraDictDataService(DataService):
         countries = list(countries_gen(countries))
 
         hot_countries = list(filter(
-            lambda x: x.get('hot_country') == 1 and x.get("code") != 43,  # hot_country=1为热门国家
+            lambda x: x.get('hot_country') == 1,  # hot_country=1为热门国家
             countries))
 
         if order == "continent":
