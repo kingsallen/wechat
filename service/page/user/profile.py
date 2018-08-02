@@ -21,17 +21,17 @@ class ProfilePageService(PageService):
     """
 
     FE_ROUTES = ObjectDict({
-        "basic":          "basic",
-        "description":    "basic",
-        "jobexp":         "workexp",
-        "projectexp":     "projectexp",
-        "jobpref":        "intention",
-        "language":       "language",
-        "skill":          "skill",
-        "cert":           "credentials",
-        "link":           "works",
-        "prize":          "awards",
-        "eduexp":         "education",
+        "basic": "basic",
+        "description": "basic",
+        "jobexp": "workexp",
+        "projectexp": "projectexp",
+        "jobpref": "intention",
+        "language": "language",
+        "skill": "skill",
+        "cert": "credentials",
+        "link": "works",
+        "prize": "awards",
+        "eduexp": "education",
         "jobexp_company": "jobexp_company"
     })
 
@@ -72,7 +72,7 @@ class ProfilePageService(PageService):
     ]
 
     INTENTION_KEYS = [
-        "id", "city_name", "worktype", "position_name", "salary_code"
+        "id", "city_name", "worktype", "position_name", "salary_code", "workstate", "industry"
     ]
 
     EMAIL_BASICINFO = ObjectDict({
@@ -120,7 +120,6 @@ class ProfilePageService(PageService):
         result, data = yield self.get_profile_basic(profile_id)
         return bool(result) or not (data.status == infra_const.InfraStatusCode.not_exist)
 
-
     @gen.coroutine
     def has_profile_by_uuid(self, uuid):
         """
@@ -144,7 +143,8 @@ class ProfilePageService(PageService):
         return result
 
     @gen.coroutine
-    def import_profile(self, type_source, username, password, user_id, ua, company_id=None, token=None, appid=None, unionid=None, version=None, captcha=None):
+    def import_profile(self, type_source, username, password, user_id, ua, company_id=None, token=None, appid=None,
+                       unionid=None, version=None, captcha=None):
         """
         导入第三方简历（51job, 智联招聘，linkedin，猎聘）
         :param type_source: int 来源, 0:无法识别 1:51Job 2:Liepin 3:zhilian 4:linkedin
@@ -162,7 +162,8 @@ class ProfilePageService(PageService):
         """
 
         is_ok, result = yield self.infra_profile_ds.import_profile(
-            int(type_source), username, password, user_id, company_id, int(ua), token, appid=appid, unionid=unionid,  version=version, captcha=captcha)
+            int(type_source), username, password, user_id, company_id, int(ua), token, appid=appid, unionid=unionid,
+            version=version, captcha=captcha)
         return is_ok, result
 
     @gen.coroutine
@@ -546,7 +547,7 @@ class ProfilePageService(PageService):
                     role=p.get('projectexp_role'),
                     company_name=p.get('projectexp_company_name'),
                     description=p.get('projectexp_description_hidden'),
-                    #responsibility=p.get("projectexp_responsibility")
+                    # responsibility=p.get("projectexp_responsibility")
                 )
                 if not end_until_now:
                     params.update(end_date=p.get('projectexp_end'))
@@ -586,7 +587,7 @@ class ProfilePageService(PageService):
 
                 elif status == 'e':
                     params['id'] = params.pid
-                    yield self.delete_profile_language(params, profile_id)
+                    yield self.update_profile_language(params, profile_id)
 
     @gen.coroutine
     def custom_cv_update_profile_awards(self, profile_id, custom_cv):
@@ -613,7 +614,60 @@ class ProfilePageService(PageService):
 
                 elif status == 'e':
                     params['id'] = params.pid
-                    yield self.delete_profile_awards(params, profile_id)
+                    yield self.update_profile_awards(params, profile_id)
+
+
+    @gen.coroutine
+    def custom_cv_update_profile_skills(self, profile_id, custom_cv):
+        skills = custom_cv.get("skills", [])
+
+        if not skills:
+            return
+
+        for s in skills:
+            status = s.get('__status', None)
+            if status:
+                params = ObjectDict(
+                    pid=s.get('id'),
+                    profile_id=profile_id,
+                    name=s.get('skills_name')
+                )
+            if status == 'o':
+                yield self.create_profile_skill(params, profile_id)
+
+            elif status == 'x':
+                yield self.delete_profile_skill(
+                    {"id": params.pid}, profile_id=None)
+
+            elif status == 'e':
+                params['id'] = params.pid
+                yield self.update_profile_skill(params, profile_id)
+
+    @gen.coroutine
+    def custom_cv_update_profile_credentials(self, profile_id, custom_cv):
+        credentials = custom_cv.get("credentials", [])
+
+        if not credentials:
+            return
+
+        for c in credentials:
+            status = c.get('__status', None)
+            if status:
+                params = ObjectDict(
+                    pid=c.get('id'),
+                    profile_id=profile_id,
+                    name=c.get('credentials_name')
+                )
+            if status == 'o':
+                yield self.create_profile_cert(params, profile_id)
+
+            elif status == 'x':
+                yield self.delete_profile_cert(
+                    {"id": params.pid}, profile_id=None)
+
+            elif status == 'e':
+                params['id'] = params.pid
+                yield self.update_profile_cert(params, profile_id)
 
     @gen.coroutine
     def custom_cv_update_profile_intention(self, profile, custom_cv):
@@ -622,6 +676,8 @@ class ProfilePageService(PageService):
         expectedlocation = custom_cv.get('expectedlocation')
         salary_code = custom_cv.get("salary_code")
         worktype = custom_cv.get("worktype")
+        workstate = custom_cv.get("workstate")
+        industry = custom_cv.get("industry")
 
         has_intention = bool(profile.get("intentions"))
 
@@ -634,6 +690,10 @@ class ProfilePageService(PageService):
             record.salary_code = salary_code
         if worktype:
             record.worktype = worktype
+        if workstate:
+            record.workstate = workstate
+        if industry:
+            record.industry = industry
 
         if has_intention:
             intention_id = first(profile.get("intentions")).get('id')
@@ -689,6 +749,10 @@ class ProfilePageService(PageService):
         yield self.custom_cv_update_profile_language(profile_id, custom_cv)
 
         yield self.custom_cv_update_profile_awards(profile_id, custom_cv)
+
+        yield self.custom_cv_update_profile_skills(profile_id, custom_cv)
+
+        yield self.custom_cv_update_profile_credentials(profile_id, custom_cv)
 
         # 单条复合字段
         yield self.custom_cv_update_profile_intention(profile, custom_cv)
@@ -891,22 +955,31 @@ class ProfilePageService(PageService):
             intention = p_intentions[0]
             position = ""
             if intention.get("positions", []):
-                position = intention.get("positions")[0].get('position_name','')
+                position = intention.get("positions")[0].get('position_name', '')
 
             worktype_name = intention.get("worktype_name", "未选择")
 
-            location = u""
+            location = ""
             if intention.get("cities", []):
-                location = intention.get("cities")[0].get('city_name', '')
-
+                for city in intention.get("cities"):
+                    location = location + city.get("city_name") + ","
+                location = location[0: len(location)-1]
             salary = intention.get('salary_code_name', "")
 
+            workstate = intention.get("workstate_name")
+
+            industry = ""
+            if intention.get("industries", []):
+                industry = intention.get("industries")[0].get('industry_name', '')
+
             job_apply.update({
-                "id":       intention.get("id"),
-                "position": position,
-                "type":     worktype_name,
-                "location": location,
-                "salary":   salary
+                "id":        intention.get("id"),
+                "position":  position,
+                "type":      worktype_name,
+                "location":  location,
+                "salary":    salary,
+                "workstate": workstate,
+                "industry":  industry
             })
         profile.job_apply = job_apply
 
@@ -1010,4 +1083,4 @@ class ProfilePageService(PageService):
         if key_mapping:
             target = rename_keys(target, key_mapping)
 
-        return {k:v for k,v in target.items() if v is not None}
+        return {k: v for k, v in target.items() if v is not None}

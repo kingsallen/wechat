@@ -8,6 +8,8 @@ from handler.base import BaseHandler
 from util.common.decorator import handle_response, authenticated, \
     check_and_apply_profile
 from util.wechat.core import WechatNoTemplateError
+from util.common import ObjectDict
+import conf.message as msg
 
 
 class ApplicationHandler(BaseHandler):
@@ -198,11 +200,24 @@ class ApplicationEmailHandler(BaseHandler):
         position = yield self.position_ps.get_position(self.params.pid, display_locale=self.get_current_locale())
         if self.params.pid and position.email_resume_conf == 0:
             # 职位必须能接受Email投递 而且params含有pid
+            self.current_user.company.logo = self.static_url(self.current_user.company.logo)
             create_status, message = yield self.application_ps.create_email_apply(self.params, position,
                                                                                   self.current_user, self.is_platform)
             if not create_status:
                 # 职位不能申请, 直接返回不能再次redirect
-                self.send_json_error(message=message)
+                messages = message
+                data = ObjectDict(
+                    kind=1,  # // {0: success, 1: failure, 10: email}
+                    messages=[messages],  # ['hello world', 'abjsldjf']
+                    button_text=msg.BACK_CN,
+                    button_link=self.make_url(path.POSITION_LIST,
+                                              wechat_signature=self.get_argument('wechat_signature'),
+                                              host=self.host),
+                    jump_link=None  # // 如果有会自动，没有就不自动跳转
+                )
+
+                self.render_page(template_name="system/user-info.html",
+                                 data=data)
                 return
         else:
             self.logger.debug("Start to create email profile..")
