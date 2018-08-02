@@ -44,8 +44,10 @@ class SuggestCompanyHandler(BaseHandler):
 class SuggestCollegeHandler(BaseHandler):
     @gen.coroutine
     def get(self):
-        colleges = yield self.dictionary_ps.get_colleges()
         s = self.params.s
+        country_id = self.params.country_id
+        data = yield self.dictionary_ps.get_overseas_colleges(country_id)
+        colleges = data.get("list")
         if s:
             college_names = list(filter(partial(pinyin_match, search=s), map(lambda x: x.get("name"), colleges)))
             colleges = list(filter(lambda x: x.get("name") in college_names, colleges))
