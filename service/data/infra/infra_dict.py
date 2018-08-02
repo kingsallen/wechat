@@ -242,9 +242,9 @@ class InfraDictDataService(DataService):
 
     @staticmethod
     def get_code_by_name_from(colleges, school_name):
-        ret = list(filter(lambda x: x.get('college_name') == school_name, colleges))
+        ret = list(filter(lambda x: x.get('name') == school_name, colleges))
         if ret:
-            code = ret[0].get('college_code', 0)
+            code = ret[0].get('code', 0)
         else:
             code = 0
         return code
