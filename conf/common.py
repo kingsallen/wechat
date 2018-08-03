@@ -286,6 +286,9 @@ MSG_TYPE = {
     8: "employeeBind"
 }
 
+# 操作的聊天类型
+INTERACTIVE_MSG = ["employeeBind", "jobSelect", "teamSelect", "citySelect", "jobCard"]
+
 # 默认图标
 SYSUSER_HEADIMG = "weixin/images/hr-avatar-default.png"
 HR_HEADIMG = "weixin/images/default-HR.png"

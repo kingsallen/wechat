@@ -452,7 +452,7 @@ class ChatHandler(BaseHandler):
 
         content = self.json_args.get("content") or ""
         compoundContent = self.json_args.get("compoundContent") or {}
-        user_message = content or compoundContent
+        user_message = content or ujson.dumps(compoundContent)
         msg_type = self.json_args.get("msgType")
         server_id = content.get("serverId") or ""
         duration = content.get("duration") or 0
@@ -548,24 +548,29 @@ class ChatHandler(BaseHandler):
             position_id=self.position_id
         )
         for bot_message in bot_messages:
+            msg_type = bot_message.msg_type
+            compound_content = bot_message.compound_content
             if bot_message.msg_type == '':
                 continue
+            if msg_type in const.INTERACTIVE_MSG:
+                compound_content.disabled = True  # 可交互类型消息入库后自动标记为不可操作
             chat_params = ChatVO(
-                compoundContent=bot_message.compoundContent,
+                compoundContent=compound_content,
                 content=bot_message.content,
                 speaker=const.CHAT_SPEAKER_HR,
                 origin=const.ORIGIN_CHATBOT,
-                msgType=bot_message.msg_type,
+                msgType=msg_type,
                 roomId=int(self.room_id),
                 positionId=int(self.position_id)
             )
 
             chat_id = yield self.chat_ps.save_chat(chat_params)
             if bot_message:
+                compound_content.disabled = False  # 可交互类型消息发送给各端时需标记为可以操作
                 message_body = json_dumps(ObjectDict(
-                    compoundContent=bot_message.compoundContent,
+                    compoundContent=compound_content,
                     content=bot_message.content,
-                    msgType=bot_message.msg_type,
+                    msgType=msg_type,
                     speaker=const.CHAT_SPEAKER_HR,
                     cid=int(self.room_id),
                     pid=int(self.position_id),

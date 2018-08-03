@@ -1,12 +1,12 @@
 # coding=utf-8
-
+import datetime
 from tornado import gen
 
 import conf.common as const
 from service.page.base import PageService
 from setting import settings
 from util.common import ObjectDict
-from util.tool.date_tool import str_2_date
+from util.tool.date_tool import str_2_date, curr_now_minute
 from util.tool.http_tool import http_post
 from util.tool.str_tool import gen_salary
 from util.tool.url_tool import make_static_url
@@ -48,17 +48,23 @@ class ChatPageService(PageService):
             for e in ret.chatLogs:
                 room = ObjectDict()
                 room['id'] = e.id
-                room['content'] = json.loads(e.content) if e.msgType == "job" else e.content
+                room['content'] = '' if e.msgType == "job" else e.content  # 之前job类型用了content作为json存储了，现在兼容到compoundContent中去
                 room['chatTime'] = str_2_date(e.createTime, const.TIME_FORMAT_MINUTE)
                 room['speaker'] = e.speaker  # 0：求职者，1：HR
-                room['btnContent'] = json.loads(e.btnContent) if e.btnContent else e.btnContent
-                if room['btnContent'] and type(room['btnContent']) == str:
-                    room['btnContent'] = json.loads(room['btnContent'])
                 room['msgType'] = e.msgType
-                room['duration'] = e.duration
-                room['serverId'] = e.serverId
-                room['assetUrl'] = e.assetUrl
+                room['compoundContent'] = json.loads(e.content) if e.msgType == "job" and e.content else json.loads(e.compoundContent)
                 obj_list.append(room)
+            last_msg = obj_list[-1]
+            last_time = str_2_date(last_msg.chatTime, "%Y-%m-%d %H:%M:%S")
+
+            now = curr_now_minute()
+            delta = datetime.timedelta(minutes=14)  # chatbot15分钟会跳出流程，这里做下校验，给用户一分钟操作的时间
+            delta_data = now + delta
+            n = delta_data.strftime("%Y-%m-%d %H:%M:%S")
+            delta_time = str_2_date(n, "%Y-%m-%d %H:%M:%S")
+            is_expire = delta_time > last_time
+            if last_msg.msgType in const.INTERACTIVE_MSG and is_expire:
+                last_msg.compoundContent['disabled'] = False
 
         raise gen.Return(obj_list)
 
@@ -201,6 +207,7 @@ class ChatPageService(PageService):
         :param position_id 当前职位id，不存在则为0
         """
         messages = []
+
         params = ObjectDict(
             question=message,
             user_id=user_id,
@@ -217,15 +224,7 @@ class ChatPageService(PageService):
             self.logger.debug(res.results)
             results = res.results
             for r in results:
-                res_type = r.get("resultType", "")
-                ret = r.get("values", {})
-                content = ret.get("content", "")
-                compoundContent = ret.get("compoundContent", {})
-                msg_type = const.MSG_TYPE.get(res_type)
-                ret_message = ObjectDict()
-                ret_message['content'] = content
-                ret_message['compoundContent'] = compoundContent
-                ret_message['msg_type'] = msg_type
+                ret_message = self.make_response(r)
                 messages.append(ret_message)
             self.logger.debug(messages)
         except Exception as e:
@@ -233,6 +232,44 @@ class ChatPageService(PageService):
             return
         else:
             return messages
+
+    def make_response(self, message):
+        """
+        对chatbot的部分消息类型做整理
+        """
+        ids = []
+        res_type = message.get("resultType", "")
+        ret = message.get("values", {})
+        content = ret.get("content", "")
+        compoundContent = ret.get("compoundContent", {})
+        msg_type = const.MSG_TYPE.get(res_type)
+        ret_message = ObjectDict()
+        ret_message['content'] = content
+        ret_message['compound_content'] = compoundContent
+        ret_message['msg_type'] = msg_type
+        if msg_type == "jobCard":
+            ids = [p.get("id") for p in compoundContent]
+        if msg_type == "jobSelect":
+            ids = [p.get("id") for p in compoundContent.get("list")]
+        if ids:
+            max = ret_message['compoundContent'].get("max")
+            ret_message['compoundContent'] = ObjectDict()  # 置空compoundContent
+            position_list = []
+            position_info = ObjectDict()
+            positions = yield self.infra_position_ds.get_positions_by_ids(ids)
+            for p in positions:
+                position_info['jobTitle'] = p.title
+                position_info['company'] = p.title
+                position_info['team'] = p.title
+                position_info['location'] = p.title
+                position_info['salary'] = p.title
+                position_info['update'] = p.title
+                position_info['id'] = p.title
+                position_list.append(position_info)
+            ret_message['compoundContent']['list'] = position_list
+            if max:
+                ret_message['compoundContent']['max'] = max
+        return ret_message
 
     @gen.coroutine
     def chat_limit(self, hr_id):
