@@ -300,8 +300,6 @@ def check_and_apply_profile(func):
                 )
             )
 
-            # todo: linjie 添加列聘的授权页面网址
-            print("redirect_params: %s" % redirect_params)
             self.render(
                 template_name='refer/neo_weixin/sysuser_v2/importresume.html',
                 **redirect_params,

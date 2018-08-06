@@ -141,7 +141,7 @@ class ResumeImportHandler(BaseHandler):
 
         username = self.params.get("_username", "")
         password = self.params.get("_password", "")
-        captcha = self.params.get("linkedin_code", "")
+        captcha = self.params.get("linkedin_code", "") or self.params.get('zhaopin_code', "")
 
         # 置空不必要参数，避免在 make_url 中被用到
         self.params.pop("recom_time", None)
