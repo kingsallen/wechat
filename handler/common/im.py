@@ -597,6 +597,4 @@ class ChatHandler(BaseHandler):
         if not company_id:
             return
 
-        company_conf = yield self.chat_ps.get_company_conf(company_id)
-
-        self.bot_enabled = company_conf.hr_chat == const.COMPANY_CONF_CHAT_ON_WITH_CHATBOT and user_hr_account.leave_to_mobot
+        self.bot_enabled = user_hr_account.leave_to_mobot

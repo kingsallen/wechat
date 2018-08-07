@@ -11,6 +11,8 @@ from util.tool.http_tool import http_post
 from util.tool.str_tool import gen_salary
 from util.tool.url_tool import make_static_url
 import json
+import pypinyin
+from pypinyin import lazy_pinyin
 
 
 class ChatPageService(PageService):
@@ -71,7 +73,8 @@ class ChatPageService(PageService):
 
         raise gen.Return(obj_list)
 
-    def _compliant_chat_log(self, message, room):
+    @staticmethod
+    def _compliant_chat_log(message, room):
         """兼容老的聊天字段"""
         btn_content = json.loads(message.btnContent) if message.btnContent else message.btnContent
         if btn_content and type(btn_content) == str:
@@ -263,8 +266,13 @@ class ChatPageService(PageService):
         ret_message['compound_content'] = compoundContent
         ret_message['msg_type'] = msg_type
         if msg_type == "citySelect":
-            city = compoundContent.get("list")
-
+            max = ret_message['compoundContent'].get("max")
+            ret_message['compoundContent'] = ObjectDict()  # 置空compoundContent
+            cities = compoundContent.get("list")
+            hot, list = self.order_country_by_first_letter(cities)
+            ret_message['compoundContent']['list'] = list
+            ret_message['compoundContent']['hot'] = hot
+            ret_message['compoundContent']['max'] = max
         if msg_type == "jobCard":
             ids = [p.get("id") for p in compoundContent]
         if msg_type == "jobSelect":
@@ -288,6 +296,29 @@ class ChatPageService(PageService):
             if max:
                 ret_message['compoundContent']['max'] = max
         return ret_message
+
+    @staticmethod
+    def order_country_by_first_letter(cities):
+        hot_cities = list(filter(
+            lambda x: x.get('hot_city') is True, cities))
+        res, heads = [], []
+        for el in cities:
+            h = lazy_pinyin(
+                el.get('name'),
+                style=pypinyin.STYLE_FIRST_LETTER)[0].upper()
+
+            if h not in heads:
+                cities_group = ObjectDict(text=h, list=[])
+                cities_group.list.append(ObjectDict(el))
+                res.append(cities_group)
+                heads.append(h)
+            else:
+                group = list(filter(lambda x: x.text == h, res))[0]
+                group.list.append(el)
+
+        ret = sorted(res, key=lambda x: x.text)
+
+        return hot_cities, ret
 
     @gen.coroutine
     def chat_limit(self, hr_id):
