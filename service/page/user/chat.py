@@ -4,6 +4,9 @@ from tornado import gen
 
 import conf.common as const
 from service.page.base import PageService
+from service.page.job.position import PositionPageService
+from service.page.hr.team import TeamPageService
+from service.page.hr.company import CompanyPageService
 from setting import settings
 from util.common import ObjectDict
 from util.tool.date_tool import str_2_date, curr_now_minute
@@ -281,17 +284,23 @@ class ChatPageService(PageService):
             max = ret_message['compoundContent'].get("max")
             ret_message['compoundContent'] = ObjectDict()  # 置空compoundContent
             position_list = []
-            position_info = ObjectDict()
-            positions = yield self.infra_position_ds.get_positions_by_ids(ids)
-            for p in positions:
-                position_info['jobTitle'] = p.title
-                position_info['company'] = p.title
-                position_info['team'] = p.title
-                position_info['location'] = p.title
-                position_info['salary'] = p.title
-                position_info['update'] = p.title
-                position_info['id'] = p.title
-                position_list.append(position_info)
+            position_ps = PositionPageService()
+            team_ps = TeamPageService()
+            company_ps = CompanyPageService()
+            for id in ids:
+                position_info = yield position_ps.get_position(id)  # todo 这个方法并不适合批量拼装职位详情，现在chatbot最多十个职位，故暂时借用该方法。
+                team = yield team_ps.get_team_by_id(position_info.team_id)
+                did = yield company_ps.get_real_company_id(position_info.publisher, position_info.company_id)
+                company_info = yield company_ps.get_company(conds={"id": did}, need_conf=True)
+                position = ObjectDict()
+                position.jobTitle = position_info.title
+                position.company = company_info.abbreviation
+                position.team = team.name
+                position.salary = position_info.salary
+                position.location = position_info.city
+                position.update = position_info.update_time
+                position.id = id
+                position_list.append(position)
             ret_message['compoundContent']['list'] = position_list
             if max:
                 ret_message['compoundContent']['max'] = max
