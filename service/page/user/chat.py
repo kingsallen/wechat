@@ -48,12 +48,15 @@ class ChatPageService(PageService):
             for e in ret.chatLogs:
                 room = ObjectDict()
                 room['id'] = e.id
-                room['content'] = '' if e.msgType == "job" else e.content  # 之前job类型用了content作为json存储了，现在兼容到compoundContent中去
+                room['content'] = e.content or ''
                 room['chatTime'] = str_2_date(e.createTime, const.TIME_FORMAT_MINUTE)
                 room['speaker'] = e.speaker  # 0：求职者，1：HR
                 room['msgType'] = e.msgType
-                room['compoundContent'] = json.loads(e.content) if e.msgType == "job" and e.content else json.loads(e.compoundContent)
+                room['compoundContent'] = json.loads(e.compoundContent) or {}
+                self._compliant_chat_log(e, room)
                 obj_list.append(room)
+
+            # 最后一次聊天为chatbot回复的可操作类型的聊天内容时，如果距离最后一次聊天还在15分钟内，用户可以继续操作这个聊天内容。
             last_msg = obj_list[-1]
             last_time = str_2_date(last_msg.chatTime, "%Y-%m-%d %H:%M:%S")
 
@@ -67,6 +70,18 @@ class ChatPageService(PageService):
                 last_msg.compoundContent['disabled'] = False
 
         raise gen.Return(obj_list)
+
+    def _compliant_chat_log(self, message, room):
+        """兼容老的聊天字段"""
+        btn_content = json.loads(message.btnContent) if message.btnContent else message.btnContent
+        if btn_content and type(btn_content) == str:
+            btn_content = json.loads(btn_content)
+        duration = message.duration
+        server_id = message.serverId
+        asset_url = message.assetUrl
+        room['compoundContent'].update(duration=duration, server_id=server_id, asset_url=asset_url)
+        if message.msgType == 'button':
+            room['compoundContent'] = btn_content
 
     @gen.coroutine
     def get_chatroom(self, user_id, hr_id, position_id, room_id, qxuser, is_gamma):
@@ -247,6 +262,9 @@ class ChatPageService(PageService):
         ret_message['content'] = content
         ret_message['compound_content'] = compoundContent
         ret_message['msg_type'] = msg_type
+        if msg_type == "citySelect":
+            city = compoundContent.get("list")
+
         if msg_type == "jobCard":
             ids = [p.get("id") for p in compoundContent]
         if msg_type == "jobSelect":

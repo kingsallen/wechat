@@ -555,7 +555,7 @@ class ChatHandler(BaseHandler):
             if msg_type in const.INTERACTIVE_MSG:
                 compound_content.disabled = True  # 可交互类型消息入库后自动标记为不可操作
             chat_params = ChatVO(
-                compoundContent=compound_content,
+                compoundContent=ujson.dumps(compound_content),
                 content=bot_message.content,
                 speaker=const.CHAT_SPEAKER_HR,
                 origin=const.ORIGIN_CHATBOT,
