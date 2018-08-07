@@ -156,7 +156,7 @@ class ResumeImportHandler(BaseHandler):
             self.params.pop('pid', None)
 
         if not username or not password:
-            if self.params.way == 4 and username:  # 智联导入是短信登录没有密码不做密码
+            if self.params.way == '4' and username:  # 智联导入是短信登录没有密码不做密码
                 pass
             else:
                 # 日志打点返回用户名和密码没有填写
