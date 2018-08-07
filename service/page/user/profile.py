@@ -471,7 +471,8 @@ class ProfilePageService(PageService):
                     college_code=college_code,
                     major_name=e.get('education_major_name'),
                     degree=int(e.get('education_degree_hidden', '0')),
-                    description=e.get('education_description_hidden')
+                    description=e.get('education_description_hidden'),
+                    country_id=e.get("country_id")
                 )
                 if not end_until_now:
                     params.update(end_date=e.get('education_end'))
