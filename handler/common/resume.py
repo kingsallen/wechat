@@ -213,7 +213,7 @@ class ResumeImportHandler(BaseHandler):
                     status_log = 5
                 elif result.status == 32011:  # 需要输入LinkedIn验证码
                     status_log = 6
-                    data.update(need_linkedin_verify=const.YES)
+                    data.update(need_verify=const.YES)
                     self.send_json_success(data=data)
                     self.log_info = ObjectDict(
                         status=status_log,
