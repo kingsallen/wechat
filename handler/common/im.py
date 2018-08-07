@@ -452,10 +452,10 @@ class ChatHandler(BaseHandler):
 
         content = self.json_args.get("content") or ""
         compoundContent = self.json_args.get("compoundContent") or {}
-        user_message = content or ujson.dumps(compoundContent)
+        user_message = compoundContent or content
         msg_type = self.json_args.get("msgType")
-        server_id = content.get("serverId") or ""
-        duration = content.get("duration") or 0
+        server_id = self.json_args.get("serverId") or ""
+        duration = self.json_args.get("duration") or 0
 
         if not self.bot_enabled:
             yield self.get_bot_enabled()
@@ -463,12 +463,12 @@ class ChatHandler(BaseHandler):
         self.chatroom_channel = const.CHAT_CHATROOM_CHANNEL.format(self.hr_id, self.user_id)
         self.hr_channel = const.CHAT_HR_CHANNEL.format(self.hr_id)
 
-        if msg_type == 'html' and not content.strip():
+        if not msg_type or not user_message:
             self.send_json_error()
             return
         chat_params = ChatVO(
             msgType=msg_type,
-            compoundContent=compoundContent,
+            compoundContent=ujson.dumps(compoundContent),
             content=content,
             origin=const.ORIGIN_USER_OR_HR,
             roomId=int(self.room_id),
@@ -476,6 +476,7 @@ class ChatHandler(BaseHandler):
             serverId=server_id,
             duration=int(duration)
         )
+        self.logger.debug("save chat by alphadog chat_params:{}".format(chat_params))
         chat_id = yield self.chat_ps.save_chat(chat_params)
 
         message_body = json_dumps(ObjectDict(
@@ -489,7 +490,7 @@ class ChatHandler(BaseHandler):
             origin=const.ORIGIN_USER_OR_HR,
             id=chat_id,
         ))
-
+        self.logger.debug("publish chat by redis message_body:{}".format(message_body))
         self.redis_client.publish(self.hr_channel, message_body)
         try:
             if self.bot_enabled and msg_type != "job":
@@ -511,8 +512,9 @@ class ChatHandler(BaseHandler):
         self.hr_id = self.params.hrId
         self.position_id = self.params.get("pid") or 0
 
-        content = self.json_args.get("content")
-        user_message = ujson.dumps(content) if type(content) != str else content
+        content = self.json_args.get("content") or ""
+        compoundContent = self.json_args.get("compoundContent") or {}
+        user_message = compoundContent or content
         msg_type = self.json_args.get("msgType")
 
         if not self.bot_enabled:
@@ -521,7 +523,7 @@ class ChatHandler(BaseHandler):
         self.chatroom_channel = const.CHAT_CHATROOM_CHANNEL.format(self.hr_id, self.user_id)
         self.hr_channel = const.CHAT_HR_CHANNEL.format(self.hr_id)
 
-        if msg_type == 'html' and not user_message.strip():
+        if not msg_type or not user_message:
             self.send_json_error()
             return
 
@@ -553,7 +555,26 @@ class ChatHandler(BaseHandler):
             if bot_message.msg_type == '':
                 continue
             if msg_type in const.INTERACTIVE_MSG:
-                compound_content.disabled = True  # 可交互类型消息入库后自动标记为不可操作
+                compound_content.update(disabled=True)  # 可交互类型消息入库后自动标记为不可操作
+            if msg_type == "cards":
+                # 只在c端展示，并且不保存
+                if bot_message:
+                    if msg_type in const.INTERACTIVE_MSG:
+                        compound_content.update(disabled=False)  # 可交互类型消息发送给各端时需标记为可以操作
+                    message_body = json_dumps(ObjectDict(
+                        compoundContent=compound_content,
+                        content=bot_message.content,
+                        msgType=msg_type,
+                        speaker=const.CHAT_SPEAKER_HR,
+                        cid=int(self.room_id),
+                        pid=int(self.position_id),
+                        createTime=curr_now_minute(),
+                        origin=const.ORIGIN_CHATBOT
+                    ))
+                    # 聊天室广播
+                    self.redis_client.publish(self.chatroom_channel, message_body)
+                    return
+
             chat_params = ChatVO(
                 compoundContent=ujson.dumps(compound_content),
                 content=bot_message.content,
@@ -563,10 +584,11 @@ class ChatHandler(BaseHandler):
                 roomId=int(self.room_id),
                 positionId=int(self.position_id)
             )
-
+            self.logger.debug("save chat by alphadog chat_params:{}".format(chat_params))
             chat_id = yield self.chat_ps.save_chat(chat_params)
             if bot_message:
-                compound_content.disabled = False  # 可交互类型消息发送给各端时需标记为可以操作
+                if msg_type in const.INTERACTIVE_MSG:
+                    compound_content.update(disabled=False)  # 可交互类型消息发送给各端时需标记为可以操作
                 message_body = json_dumps(ObjectDict(
                     compoundContent=compound_content,
                     content=bot_message.content,
@@ -578,6 +600,7 @@ class ChatHandler(BaseHandler):
                     origin=const.ORIGIN_CHATBOT,
                     id=chat_id
                 ))
+                self.logger.debug("publish chat by redis message_body:{}".format(message_body))
                 # hr 端广播
                 self.redis_client.publish(self.hr_channel, message_body)
 
@@ -597,6 +620,4 @@ class ChatHandler(BaseHandler):
         if not company_id:
             return
 
-        company_conf = yield self.chat_ps.get_company_conf(company_id)
-
-        self.bot_enabled = company_conf.hr_chat == const.COMPANY_CONF_CHAT_ON_WITH_CHATBOT and user_hr_account.leave_to_mobot
+        self.bot_enabled = user_hr_account.leave_to_mobot

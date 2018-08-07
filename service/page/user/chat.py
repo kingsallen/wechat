@@ -4,6 +4,9 @@ from tornado import gen
 
 import conf.common as const
 from service.page.base import PageService
+from service.page.job.position import PositionPageService
+from service.page.hr.team import TeamPageService
+from service.page.hr.company import CompanyPageService
 from setting import settings
 from util.common import ObjectDict
 from util.tool.date_tool import str_2_date, curr_now_minute
@@ -11,6 +14,8 @@ from util.tool.http_tool import http_post
 from util.tool.str_tool import gen_salary
 from util.tool.url_tool import make_static_url
 import json
+import pypinyin
+from pypinyin import lazy_pinyin
 
 
 class ChatPageService(PageService):
@@ -49,29 +54,17 @@ class ChatPageService(PageService):
                 room = ObjectDict()
                 room['id'] = e.id
                 room['content'] = e.content or ''
-                room['chatTime'] = str_2_date(e.createTime, const.TIME_FORMAT_MINUTE)
+                room['chatTime'] = str_2_date(e.createTime, const.TIME_FORMAT)
                 room['speaker'] = e.speaker  # 0：求职者，1：HR
                 room['msgType'] = e.msgType
-                room['compoundContent'] = json.loads(e.compoundContent) or {}
+                room['compoundContent'] = json.loads(e.compoundContent if e.compoundContent else '{}') or {}
                 self._compliant_chat_log(e, room)
                 obj_list.append(room)
 
-            # 最后一次聊天为chatbot回复的可操作类型的聊天内容时，如果距离最后一次聊天还在15分钟内，用户可以继续操作这个聊天内容。
-            last_msg = obj_list[-1]
-            last_time = str_2_date(last_msg.chatTime, "%Y-%m-%d %H:%M:%S")
-
-            now = curr_now_minute()
-            delta = datetime.timedelta(minutes=14)  # chatbot15分钟会跳出流程，这里做下校验，给用户一分钟操作的时间
-            delta_data = now + delta
-            n = delta_data.strftime("%Y-%m-%d %H:%M:%S")
-            delta_time = str_2_date(n, "%Y-%m-%d %H:%M:%S")
-            is_expire = delta_time > last_time
-            if last_msg.msgType in const.INTERACTIVE_MSG and is_expire:
-                last_msg.compoundContent['disabled'] = False
-
         raise gen.Return(obj_list)
 
-    def _compliant_chat_log(self, message, room):
+    @staticmethod
+    def _compliant_chat_log(message, room):
         """兼容老的聊天字段"""
         btn_content = json.loads(message.btnContent) if message.btnContent else message.btnContent
         if btn_content and type(btn_content) == str:
@@ -79,7 +72,8 @@ class ChatPageService(PageService):
         duration = message.duration
         server_id = message.serverId
         asset_url = message.assetUrl
-        room['compoundContent'].update(duration=duration, server_id=server_id, asset_url=asset_url)
+        if type(room['compoundContent']) == dict:
+            room['compoundContent'].update(duration=duration, server_id=server_id, asset_url=asset_url)
         if message.msgType == 'button':
             room['compoundContent'] = btn_content
 
@@ -239,15 +233,16 @@ class ChatPageService(PageService):
             self.logger.debug(res.results)
             results = res.results
             for r in results:
-                ret_message = self.make_response(r)
+                ret_message = yield self.make_response(r)
                 messages.append(ret_message)
             self.logger.debug(messages)
         except Exception as e:
-            self.logger.error(e)
-            return
+            self.logger.error("[get_chatbot_reply_fail!!]reeor: %s, params: %s" % (e, params))
+            return []
         else:
             return messages
 
+    @gen.coroutine
     def make_response(self, message):
         """
         对chatbot的部分消息类型做整理
@@ -256,38 +251,72 @@ class ChatPageService(PageService):
         res_type = message.get("resultType", "")
         ret = message.get("values", {})
         content = ret.get("content", "")
-        compoundContent = ret.get("compoundContent", {})
+        compoundContent = ret.get("compoundContent") or {}
         msg_type = const.MSG_TYPE.get(res_type)
         ret_message = ObjectDict()
         ret_message['content'] = content
         ret_message['compound_content'] = compoundContent
         ret_message['msg_type'] = msg_type
         if msg_type == "citySelect":
-            city = compoundContent.get("list")
-
+            max = ret_message['compound_content'].get("max")
+            ret_message['compound_content'] = ObjectDict()  # 置空compoundContent
+            cities = compoundContent.get("list")
+            hot, list = self.order_country_by_first_letter(cities)
+            ret_message['compound_content']['list'] = list
+            ret_message['compound_content']['hot'] = hot
+            ret_message['compound_content']['max'] = max
         if msg_type == "jobCard":
             ids = [p.get("id") for p in compoundContent]
         if msg_type == "jobSelect":
             ids = [p.get("id") for p in compoundContent.get("list")]
-        if ids:
-            max = ret_message['compoundContent'].get("max")
-            ret_message['compoundContent'] = ObjectDict()  # 置空compoundContent
+        if ids and msg_type in ("jobCard", "jobSelect"):
+            max = ret_message['compound_content'].get("max") if msg_type == "jobSelect" else 0
+            ret_message['compound_content'] = ObjectDict()  # 置空compoundContent
             position_list = []
-            position_info = ObjectDict()
-            positions = yield self.infra_position_ds.get_positions_by_ids(ids)
-            for p in positions:
-                position_info['jobTitle'] = p.title
-                position_info['company'] = p.title
-                position_info['team'] = p.title
-                position_info['location'] = p.title
-                position_info['salary'] = p.title
-                position_info['update'] = p.title
-                position_info['id'] = p.title
-                position_list.append(position_info)
-            ret_message['compoundContent']['list'] = position_list
+            position_ps = PositionPageService()
+            team_ps = TeamPageService()
+            company_ps = CompanyPageService()
+            for id in ids:
+                position_info = yield position_ps.get_position(id)  # todo 这个方法并不适合批量拼装职位详情，现在chatbot最多十个职位，故暂时借用该方法。
+                team = yield team_ps.get_team_by_id(position_info.team_id)
+                did = yield company_ps.get_real_company_id(position_info.publisher, position_info.company_id)
+                company_info = yield company_ps.get_company(conds={"id": did}, need_conf=True)
+                position = ObjectDict()
+                position.jobTitle = position_info.title
+                position.company = company_info.abbreviation
+                position.team = team.name
+                position.salary = position_info.salary
+                position.location = position_info.city
+                position.update = position_info.update_time
+                position.id = position_info.id
+                position_list.append(position)
+            ret_message['compound_content']['list'] = position_list
             if max:
-                ret_message['compoundContent']['max'] = max
+                ret_message['compound_content']['max'] = max
         return ret_message
+
+    @staticmethod
+    def order_country_by_first_letter(cities):
+        hot_cities = list(filter(
+            lambda x: x.get('hot_city') is True, cities))
+        res, heads = [], []
+        for el in cities:
+            h = lazy_pinyin(
+                el.get('name'),
+                style=pypinyin.STYLE_FIRST_LETTER)[0].upper()
+
+            if h not in heads:
+                cities_group = ObjectDict(text=h, list=[])
+                cities_group.list.append(ObjectDict(el))
+                res.append(cities_group)
+                heads.append(h)
+            else:
+                group = list(filter(lambda x: x.text == h, res))[0]
+                group.list.append(el)
+
+        ret = sorted(res, key=lambda x: x.text)
+
+        return hot_cities, ret
 
     @gen.coroutine
     def chat_limit(self, hr_id):
