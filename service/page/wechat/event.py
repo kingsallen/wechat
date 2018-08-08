@@ -202,19 +202,39 @@ class EventPageService(PageService):
         :param nonce:
         :return:
         """
-
         openid = msg.FromUserName
+
+        if not openid:
+            self.logger.error("[wechat_oauth][opt_event_subscribe] openid is: (%s)." % openid)
+            raise gen.Return()
+
+        wxuser = yield get_wxuser(current_user.wechat.access_token, openid)
+
+        if not wxuser:
+            self.logger.error("[wechat_oauth][opt_event_subscribe] wxuser is: (%s)." % wxuser)
+            raise gen.Return()
+
+        if wxuser.get('qr_scene_str'): # 场景二维码处理
+            if 'wechat_permanent_qr-' in wxuser.get('qr_scene_str'):  # 永久二维码扫描关注标志字符串
+                _, wechat_id = wxuser.get('qr_scene_str').split('-')
+                self.logger.info(json_dumps(dict(
+                    wechat_id=wechat_id,
+                    openid=openid,
+                    qr_scene_str=wxuser.get('qr_scene_str'),
+                    is_permanent_qr_subscribe=1
+                )))
+
         is_newbie = False
         if not current_user.wxuser:
             # 新微信用户
             is_newbie = True
-            wxuser_id = yield self._create_wxuser(openid, current_user)
+            wxuser_id = yield self._create_wxuser(openid, current_user, wxuser)
 
             yield self.__opt_help_wxuser(wxuser_id, current_user, msg)
 
         else:
             # 老微信用户
-            yield self._update_wxuser(openid, current_user, msg)
+            yield self._update_wxuser(openid, current_user, msg, wxuser)
 
         # 处理临时二维码，目前主要在 PC 上创建帐号、绑定账号时使用,以及Mars EDM活动
         if current_user.wechat.id in (self.settings.qx_wechat_id, const.MARS_ID) and msg.EventKey:
@@ -225,7 +245,7 @@ class EventPageService(PageService):
         raise gen.Return(res)
 
     @gen.coroutine
-    def _create_wxuser(self, openid, current_user):
+    def _create_wxuser(self, openid, current_user, wechat_userinfo):
         """
         创建微信 wxuser 用户
         :param openid:
@@ -233,13 +253,6 @@ class EventPageService(PageService):
         :return:
         """
         wxuser_id = current_user.wxuser.id
-
-        wechat_userinfo = yield get_wxuser(current_user.wechat.access_token, openid)
-
-        if not wechat_userinfo or openid is None:
-            self.logger.error("[wechat_oauth][create_wxuser]wechat_userinfo is None."
-                              "wechat_userinfo:{0}, openid:{1}".format(wechat_userinfo, openid))
-            raise gen.Return(wxuser_id)
 
         # 已授权给仟寻，或者 HR 雇主平台的用户，已经创建了 wxuser，故不需要再创建 wxuser
         if (current_user.wechat.id == self.settings.helper_wechat_id
@@ -281,7 +294,7 @@ class EventPageService(PageService):
         raise gen.Return(wxuser_id)
 
     @gen.coroutine
-    def _update_wxuser(self, openid, current_user, msg):
+    def _update_wxuser(self, openid, current_user, msg, wechat_userinfo):
         """
         更新老微信 wxuser 信息
         :param openid:
@@ -289,13 +302,6 @@ class EventPageService(PageService):
         :param msg:
         :return:
         """
-
-        wechat_userinfo = yield get_wxuser(current_user.wechat.access_token, openid)
-
-        if not wechat_userinfo or openid is None:
-            self.logger.error("[wechat_oauth][create_wxuser]wechat_userinfo is None."
-                              "wechat_userinfo:{0}, openid:{1}".format(wechat_userinfo, openid))
-            raise gen.Return()
 
         res = yield self.user_wx_user_ds.update_wxuser(
             conds={"id": current_user.wxuser.id},
