@@ -63,7 +63,7 @@ class PermanentQRHandler(MetaBaseHandler):
 
         ticket_url = url_concat(self.GET_TICKET_API, dict(access_token=wechat.access_token))
         data = dict(
-            action_name="QR_LIMIT_SCENE",
+            action_name="QR_LIMIT_STR_SCENE",
             action_info={"scene": {"scene_str": self.SCENE_STR_FMT.format(wechat_id=wechat_id)}}
         )
         self.logger.debug('GET WECAHT PERMANENT TICKET URL: %s- %s' % (ticket_url, data))
