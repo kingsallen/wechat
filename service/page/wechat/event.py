@@ -368,6 +368,9 @@ class EventPageService(PageService):
         :param msg:
         :return:
         """
+        self.logger.debug('qr=> '* 30)
+        self.logger.debug('%s -- %s' %(current_user, msg))
+        self.logger.debug('qr=> '* 30)
 
         if current_user.wechat.id == self.settings.helper_wechat_id and msg.EventKey:
             scan_info = re.match(r"([0-9]*)_([0-9]*)_([0-9]*)", msg.EventKey)
