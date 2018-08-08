@@ -98,6 +98,8 @@ common_routes = [
     (r"/api/dict/country/?",                         handler.common.dictionary.DictCountryHandler,              {"event": "dict_country"}),
     (r"/api/dict/rocketmajor/?",                     handler.common.dictionary.DictRocketMajorHandler,          {"event": "dict_rocketmajor"}),
     (r"/api/dict/smscountrycode/?",                  handler.common.dictionary.DictSmsCountryCodeHandler,       {"event": "dict_smscountrycode"}),
+    (r"/api/dict/mainland/college/?",                handler.common.dictionary.DictMainlandCollegeHandler,      {"event": "dict_mainland_college"}),
+    (r"/api/dict/overseas/college/?",                handler.common.dictionary.DictOverseasCollegeHandler,      {"event": "dict_overseas_college"}),
     (r"/api/profile/edit/?",                         handler.common.profile.ProfileSectionHandler,              {"event": "profile_section"}),
     (r"/api/profile/new/?",                          handler.common.profile.ProfileNewHandler,                  {"event": "profile_new"}),
     (r"/api/customcv/?",                             handler.common.profile.ProfileAPICustomCVHandler,          {"event": "profile_customcv"}),
@@ -144,6 +146,7 @@ platform_routes = [
     (r'/user/ai-recom/?',                            handler.platform.user.AIRecomHandler,                      {'event': 'user_ai-recom'}),
     (r'/employee/survey/?',                          handler.platform.employee.EmployeeSurveyHandler,           {'event': 'employee_survey'}),
     (r'/employee/ai-recom/(\d+)',                    handler.platform.employee.EmployeeAiRecomHandler,          {'event': 'employee_ai-recom'}),
+    (r'/employee/referral/policy',                   handler.platform.employee.EmployeeReferralPolicyHandler,   {"event": "referral—policy"}),
 
     # 各大公司的自定义配置
     (r"/custom/emailapply/?",                        handler.platform.customize.CustomizeEmailApplyHandler,     {"event": "customize_emailapply"}),
@@ -157,6 +160,7 @@ platform_routes = [
     (r"/api/employee/bind-info/?",                   handler.platform.employee.BindInfoHandler,                 {"event": "employee_bind_info"}),
     (r"/api/employee/recommendrecords/?",            handler.platform.employee.RecommendRecordsHandler,         {"event": "employee_recommendrecords"}),
     (r"/api/employee/rewards/?",                     handler.platform.employee.AwardsHandler,                   {"event": "employee_awards"}),
+    (r"/api/employee/count-policy-want",             handler.platform.employee.EmployeeInterestReferralPolicyHandler, {"event": "count_interest_policy"}),
     (r"/api/position/empnotice/?",                   handler.platform.position.PositionEmpNoticeHandler,        {"event": "position_empnotice"}),
     (r"/api/employee/rewards/rank/?",                handler.platform.employee.AwardsLadderHandler,             {"event": "awards_ladder_api"}),
     (r"/api/employee/survey/?",                      handler.platform.employee.APIEmployeeSurveyHandler,        {"event": "employee_survey_api"}),

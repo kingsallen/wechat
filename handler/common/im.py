@@ -168,13 +168,10 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
                 if data:
                     self.write_message(json_dumps(ObjectDict(
                         content=data.get("content"),
+                        compoundContent=data.get("compoundContent"),
                         chatTime=data.get("createTime"),
                         speaker=data.get("speaker"),
-                        assetUrl=data.get("assetUrl"),
-                        btnContent=data.get("btnContent"),
-                        msgType=data.get("msgType"),
-                        duration=data.get("duration") or 0,
-                        serverId=data.get("serverId") or 0
+                        msgType=data.get("msgType")
                     )))
             except websocket.WebSocketClosedError:
                 self.logger.error(traceback.format_exc())
@@ -291,6 +288,7 @@ class ChatRoomHandler(BaseHandler):
 class ChatHandler(BaseHandler):
     """聊天相关处理"""
 
+    # 这里的聊天使用redis有问题，请不要在其他地方使用这个redis连接池
     _pool = redis.ConnectionPool(
         host=settings["store_options"]["redis_host"],
         port=settings["store_options"]["redis_port"],
@@ -453,11 +451,12 @@ class ChatHandler(BaseHandler):
         self.hr_id = self.params.hrId
         self.position_id = self.params.get("pid") or 0
 
-        content = self.json_args.get("content")
-        user_message = ujson.dumps(content) if type(content) != str else content
+        content = self.json_args.get("content") or ""
+        compoundContent = self.json_args.get("compoundContent") or {}
+        user_message = content or ujson.dumps(compoundContent)
         msg_type = self.json_args.get("msgType")
-        server_id = self.json_args.get("serverId") or ""
-        duration = self.json_args.get("duration") or 0
+        server_id = content.get("serverId") or ""
+        duration = content.get("duration") or 0
 
         if not self.bot_enabled:
             yield self.get_bot_enabled()
@@ -465,12 +464,13 @@ class ChatHandler(BaseHandler):
         self.chatroom_channel = const.CHAT_CHATROOM_CHANNEL.format(self.hr_id, self.user_id)
         self.hr_channel = const.CHAT_HR_CHANNEL.format(self.hr_id)
 
-        if msg_type == 'html' and not user_message.strip():
+        if msg_type == 'html' and not content.strip():
             self.send_json_error()
             return
         chat_params = ChatVO(
             msgType=msg_type,
-            content=user_message,
+            compoundContent=compoundContent,
+            content=content,
             origin=const.ORIGIN_USER_OR_HR,
             roomId=int(self.room_id),
             positionId=int(self.position_id),
@@ -481,18 +481,51 @@ class ChatHandler(BaseHandler):
 
         message_body = json_dumps(ObjectDict(
             msgType=msg_type,
-            content=user_message,
+            content=content,
+            compoundContent=compoundContent,
             speaker=const.CHAT_SPEAKER_USER,
             cid=int(self.room_id),
             pid=int(self.position_id),
             createTime=curr_now_minute(),
             origin=const.ORIGIN_USER_OR_HR,
             id=chat_id,
-            serverId=server_id,
-            duration=duration
         ))
 
         self.redis_client.publish(self.hr_channel, message_body)
+        try:
+            if self.bot_enabled and msg_type != "job":
+                # 由于没有延迟的发送导致hr端轮训无法订阅到publish到redis的消息　所以这里做下延迟处理
+                # delay_robot = functools.partial(self._handle_chatbot_message, user_message)
+                # ioloop.IOLoop.current().call_later(1, delay_robot)
+                yield self._handle_chatbot_message(user_message)  # 直接调用方式
+        except Exception as e:
+            self.logger.error(e)
+
+        self.send_json_success()
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def post_trigger(self):
+        self.room_id = self.params.roomId
+        self.user_id = match_session_id(to_str(self.get_secure_cookie(const.COOKIE_SESSIONID)))
+        self.hr_id = self.params.hrId
+        self.position_id = self.params.get("pid") or 0
+
+        content = self.json_args.get("content")
+        user_message = ujson.dumps(content) if type(content) != str else content
+        msg_type = self.json_args.get("msgType")
+
+        if not self.bot_enabled:
+            yield self.get_bot_enabled()
+
+        self.chatroom_channel = const.CHAT_CHATROOM_CHANNEL.format(self.hr_id, self.user_id)
+        self.hr_channel = const.CHAT_HR_CHANNEL.format(self.hr_id)
+
+        if msg_type == 'html' and not user_message.strip():
+            self.send_json_error()
+            return
+
         try:
             if self.bot_enabled and msg_type != "job":
                 # 由于没有延迟的发送导致hr端轮训无法订阅到publish到redis的消息　所以这里做下延迟处理
@@ -509,44 +542,48 @@ class ChatHandler(BaseHandler):
         """处理 chatbot message
         获取消息 -> pub消息 -> 入库
         """
-        bot_message = yield self.chat_ps.get_chatbot_reply(
+        bot_messages = yield self.chat_ps.get_chatbot_reply(
             message=user_message,
             user_id=self.user_id,
             hr_id=self.hr_id,
             position_id=self.position_id
         )
-        if bot_message.msg_type == '':
-            return
-        chat_params = ChatVO(
-            content=bot_message.content,
-            speaker=const.CHAT_SPEAKER_HR,
-            origin=const.ORIGIN_CHATBOT,
-            assetUrl=bot_message.pic_url,
-            btnContent=bot_message.btn_content_json,
-            msgType=bot_message.msg_type,
-            roomId=int(self.room_id),
-            positionId=int(self.position_id)
-        )
-
-        chat_id = yield self.chat_ps.save_chat(chat_params)
-        if bot_message:
-            message_body = json_dumps(ObjectDict(
+        for bot_message in bot_messages:
+            msg_type = bot_message.msg_type
+            compound_content = bot_message.compound_content
+            if bot_message.msg_type == '':
+                continue
+            if msg_type in const.INTERACTIVE_MSG:
+                compound_content.disabled = True  # 可交互类型消息入库后自动标记为不可操作
+            chat_params = ChatVO(
+                compoundContent=ujson.dumps(compound_content),
                 content=bot_message.content,
-                assetUrl=bot_message.pic_url,
-                btnContent=bot_message.btn_content,
-                msgType=bot_message.msg_type,
                 speaker=const.CHAT_SPEAKER_HR,
-                cid=int(self.room_id),
-                pid=int(self.position_id),
-                createTime=curr_now_minute(),
                 origin=const.ORIGIN_CHATBOT,
-                id=chat_id
-            ))
-            # hr 端广播
-            self.redis_client.publish(self.hr_channel, message_body)
+                msgType=msg_type,
+                roomId=int(self.room_id),
+                positionId=int(self.position_id)
+            )
 
-            # 聊天室广播
-            self.redis_client.publish(self.chatroom_channel, message_body)
+            chat_id = yield self.chat_ps.save_chat(chat_params)
+            if bot_message:
+                compound_content.disabled = False  # 可交互类型消息发送给各端时需标记为可以操作
+                message_body = json_dumps(ObjectDict(
+                    compoundContent=compound_content,
+                    content=bot_message.content,
+                    msgType=msg_type,
+                    speaker=const.CHAT_SPEAKER_HR,
+                    cid=int(self.room_id),
+                    pid=int(self.position_id),
+                    createTime=curr_now_minute(),
+                    origin=const.ORIGIN_CHATBOT,
+                    id=chat_id
+                ))
+                # hr 端广播
+                self.redis_client.publish(self.hr_channel, message_body)
+
+                # 聊天室广播
+                self.redis_client.publish(self.chatroom_channel, message_body)
 
     @gen.coroutine
     def get_bot_enabled(self):
@@ -561,6 +598,4 @@ class ChatHandler(BaseHandler):
         if not company_id:
             return
 
-        company_conf = yield self.chat_ps.get_company_conf(company_id)
-
-        self.bot_enabled = company_conf.hr_chat == const.COMPANY_CONF_CHAT_ON_WITH_CHATBOT and user_hr_account.leave_to_mobot
+        self.bot_enabled = user_hr_account.leave_to_mobot

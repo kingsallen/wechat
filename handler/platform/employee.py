@@ -13,6 +13,7 @@ from util.common import ObjectDict
 from util.common.decorator import handle_response, authenticated
 from util.tool.json_tool import json_dumps
 from util.tool.str_tool import to_str
+from urllib import parse
 
 
 class AwardsLadderPageHandler(BaseHandler):
@@ -40,9 +41,9 @@ class AwardsLadderPageHandler(BaseHandler):
                 "description": messages.EMPLOYEE_AWARDS_LADDER_DESC_TEXT,
                 "link": self.fullurl()
             })
-
+            policy_link = self.make_url(path.EMPLOYEE_REFERRAL_POLICY, self.params)
             self.render_page(template_name="employee/reward-rank.html",
-                             data={})
+                             data={"policy_link": policy_link})
 
 
 class AwardsLadderHandler(BaseHandler):
@@ -454,6 +455,46 @@ class BindedHandler(BaseHandler):
                                       noemprecom=str(const.YES)),
                 button_text=messages.EMPLOYEE_BINDING_DEFAULT_BTN_TEXT
             )
+
+
+class EmployeeReferralPolicyHandler(BaseHandler):
+    """
+    员工内推政策
+    https://git.moseeker.com/doc/complete-guide/blob/feature/v0.1.0/develop_docs/referral/frontend/wechat_v0.1.0.md
+    https://git.moseeker.com/doc/complete-guide/blob/feature/v0.1.0/develop_docs/referral/basic_service/%E5%86%85%E6%8E%A8v0.1.0-api.md
+    """
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        result, data = yield self.employee_ps.get_referral_policy(self.current_user.company.id)
+        if result and data and data.get("priority"):
+            link = data.get("link", "")
+            if link:
+                self.redirect(parse.unquote(link))
+                return
+            else:
+                data = ObjectDict({
+                    "fulltext": data.get("text")
+                })
+                self.render_page(template_name="employee/referral-policy-article.html", data=data)
+        else:
+            self.render_page(template_name="employee/referral-no-article.html", data={})
+
+
+class EmployeeInterestReferralPolicyHandler(BaseHandler):
+    """
+    员工感兴趣内推政策
+    """
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def post(self):
+        params = ObjectDict({
+            "company_id": self.current_user.company.id,
+            "user_id": self.current_user.sysuser.id
+        })
+        yield self.employee_ps.create_interest_policy_count(params)
+        self.send_json_success()
 
 
 class EmployeeSurveyHandler(UserSurveyConstantMixin, BaseHandler):

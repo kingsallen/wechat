@@ -15,6 +15,7 @@ from util.common.mq import data_userprofile_publisher
 import conf.common as const
 from util.tool.json_tool import json_dumps
 import copy
+import json
 
 
 class UserSurveyConstantMixin(object):
@@ -231,7 +232,7 @@ class UserSurveyHandler(BaseHandler):
                                 {
                                     "map": "profile_intention.id&profile_intention_industry.industry_name",
                                     "error_msg": "",
-                                    "field_type": 10,
+                                    "field_type": 107,
                                     "company_id": 0,
                                     "field_name": "industry",
                                     "required": 0,
@@ -242,56 +243,7 @@ class UserSurveyHandler(BaseHandler):
                                     "constant_parent_code": 3124,
                                     "field_value": [
                                         [
-                                            "计算机/通信/电子/互联网",
-                                            "1"
-                                        ],
-                                        [
-                                            "会计/金融/银行/保险",
-                                            "2"
-                                        ],
-                                        [
-                                            "房地产/建筑业",
-                                            "3"
-                                        ],
-                                        [
-                                            "商业服务/教育/培训",
-                                            "4"
-                                        ],
-                                        [
-                                            "贸易/批发/零售/租赁业",
-                                            "5"
-                                        ],
-                                        [
-                                            "制药/医疗",
-                                            "6"
-                                        ],
-                                        [
-                                            "广告/媒体",
-                                            "7"
-                                        ],
-                                        [
-                                            "生产/加工/制造",
-                                            "8"
-                                        ],
-                                        [
-                                            "交通/运输/物流/仓储",
-                                            "9"
-                                        ],
-                                        [
-                                            "服务业",
-                                            "10"
-                                        ],
-                                        [
-                                            "文化/传媒/娱乐/体育",
-                                            "11"
-                                        ],
-                                        [
-                                            "能源/矿产/环保",
-                                            "12"
-                                        ],
-                                        [
-                                            "政府/非盈利机构/其他",
-                                            "13"
+                                            ""
                                         ]
                                     ],
                                     "field_title": "期望行业",
@@ -593,6 +545,7 @@ class APIUserSurveyHandler(BaseHandler):
     @gen.coroutine
     def update_profile_other(self, profile_id, custom_cv_other_raw):
         """智能地更新 profile_other 内容"""
+
         custom_cv_ready = self._preprocess_custom_cv(custom_cv_other_raw)
 
         other_string = json_dumps(custom_cv_ready)
@@ -604,7 +557,8 @@ class APIUserSurveyHandler(BaseHandler):
     def _preprocess_custom_cv(custom_cv_other_raw):
         """对于纯 profile 字段的预处理
         可以在此加入公司自定义逻辑"""
-        ret = copy.deepcopy(custom_cv_other_raw)
+        ret = json.dumps(custom_cv_other_raw)
+        ret = json.loads(ret)
 
         # 前端 rocketmajor_value 保存应该入库的 rocketmajor 字段内容
         if ret.get('rocketmajor_value'):

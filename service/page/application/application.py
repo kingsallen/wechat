@@ -419,7 +419,7 @@ class ApplicationPageService(PageService):
 
         # 申请创建失败,  跳转到申请失败页面
         if not ret.status == const.API_SUCCESS:
-            message = msg.CREATE_APPLICATION_FAILED
+            message = ret.message
             return False, message
 
         uuidcode = str(uuid.uuid4())

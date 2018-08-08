@@ -22,7 +22,7 @@ class PositionPageService(PageService):
 
     @log_time
     @gen.coroutine
-    def get_position(self, position_id, display_locale):
+    def get_position(self, position_id, display_locale=None):
         position = ObjectDict()
         position_res = yield self.job_position_ds.get_position({
             'id': position_id
