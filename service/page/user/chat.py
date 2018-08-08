@@ -54,18 +54,18 @@ class ChatPageService(PageService):
                 room = ObjectDict()
                 room['id'] = e.id
                 room['content'] = e.content or ''
-                room['chatTime'] = str_2_date(e.createTime, const.TIME_FORMAT_MINUTE)
+                room['chatTime'] = str_2_date(e.createTime, const.TIME_FORMAT)
                 room['speaker'] = e.speaker  # 0：求职者，1：HR
                 room['msgType'] = e.msgType
-                room['compoundContent'] = json.loads(e.compoundContent) or {}
+                room['compoundContent'] = json.loads(e.compoundContent if e.compoundContent else '') or {}
                 self._compliant_chat_log(e, room)
                 obj_list.append(room)
 
             # 最后一次聊天为chatbot回复的可操作类型的聊天内容时，如果距离最后一次聊天还在15分钟内，用户可以继续操作这个聊天内容。
             last_msg = obj_list[-1]
-            last_time = str_2_date(last_msg.chatTime, "%Y-%m-%d %H:%M:%S")
+            last_time = last_msg.chatTime
 
-            now = curr_now_minute()
+            now = datetime.datetime.now()
             delta = datetime.timedelta(minutes=14)  # chatbot15分钟会跳出流程，这里做下校验，给用户一分钟操作的时间
             delta_data = now + delta
             n = delta_data.strftime("%Y-%m-%d %H:%M:%S")
@@ -250,7 +250,7 @@ class ChatPageService(PageService):
             self.logger.debug(messages)
         except Exception as e:
             self.logger.error(e)
-            return
+            return []
         else:
             return messages
 
