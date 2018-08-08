@@ -245,6 +245,7 @@ class ChatRoomHandler(BaseHandler):
                           "hideAllNonBaseMenuItem",
                           "showAllNonBaseMenuItem"]
         })
+        self.logger.debug("jsapi_config:{}".format(config))
         self._render(
             template_name="chat/room.html",
             data={"room_id": room_id},
