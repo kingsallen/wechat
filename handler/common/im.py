@@ -454,8 +454,8 @@ class ChatHandler(BaseHandler):
         compoundContent = self.json_args.get("compoundContent") or {}
         user_message = content or ujson.dumps(compoundContent)
         msg_type = self.json_args.get("msgType")
-        server_id = content.get("serverId") or ""
-        duration = content.get("duration") or 0
+        server_id = self.json_args.get("serverId") or ""
+        duration = self.json_args.get("duration") or 0
 
         if not self.bot_enabled:
             yield self.get_bot_enabled()
@@ -468,7 +468,7 @@ class ChatHandler(BaseHandler):
             return
         chat_params = ChatVO(
             msgType=msg_type,
-            compoundContent=compoundContent,
+            compoundContent=ujson.dumps(compoundContent),
             content=content,
             origin=const.ORIGIN_USER_OR_HR,
             roomId=int(self.room_id),
