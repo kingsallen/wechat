@@ -14,6 +14,7 @@ class PermanentQRHandler(MetaBaseHandler):
     GET_TICKET_API = 'https://api.weixin.qq.com/cgi-bin/qrcode/create'
     GET_QR_IMG_API = 'https://mp.weixin.qq.com/cgi-bin/showqrcode'
     CACHE_KEY_FMT = 'WECAHT_PERMANENTQR_{wechat_id}'
+    SCENE_STR_FMT = 'wechat_permanent_qr-{wechat_id}'
 
     def get_qr_img_url(self, ticket):
         qr_img_url = url_concat(self.GET_QR_IMG_API, dict(ticket=urlencode(ticket)))
@@ -64,7 +65,7 @@ class PermanentQRHandler(MetaBaseHandler):
         ticket_url = url_concat(self.GET_TICKET_API, dict(access_token=wechat.access_token))
         data = dict(
             action_name="QR_LIMIT_SCENE",
-            action_info={"scene": {"scene_id": wechat_id}}
+            action_info={"scene": {"scene_str": self.SCENE_STR_FMT.format(wechat_id=wechat_id)}}
         )
         self.logger.debug('GET WECAHT PERMANENT TICKET URL: %s- %s' % (ticket_url, data))
 
@@ -76,7 +77,7 @@ class PermanentQRHandler(MetaBaseHandler):
             request_timeout=10
         )
 
-        ticket = json.loads(get_ticket_response or "").get('ticket')  # 微信端这个ticket　60s有效
+        ticket = json.loads(get_ticket_response.body or "").get('ticket')  # 微信端这个ticket　60s有效
 
         if not ticket:
             self.write(dict(
