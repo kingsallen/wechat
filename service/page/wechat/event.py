@@ -202,6 +202,9 @@ class EventPageService(PageService):
         :param nonce:
         :return:
         """
+        self.logger.debug('\n'*3)
+        self.logger.debug('>>>>>> %s'% msg)
+        self.logger.debug('\n'*3)
 
         openid = msg.FromUserName
         is_newbie = False
@@ -368,9 +371,6 @@ class EventPageService(PageService):
         :param msg:
         :return:
         """
-        self.logger.debug('qr=> '* 30)
-        self.logger.debug('%s -- %s' %(current_user, msg))
-        self.logger.debug('qr=> '* 30)
 
         if current_user.wechat.id == self.settings.helper_wechat_id and msg.EventKey:
             scan_info = re.match(r"([0-9]*)_([0-9]*)_([0-9]*)", msg.EventKey)
