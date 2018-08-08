@@ -77,7 +77,7 @@ class PermanentQRHandler(MetaBaseHandler):
             request_timeout=10
         )
 
-        ticket = json.loads(get_ticket_response.body or "").get('ticket')  # 微信端这个ticket　60s有效
+        ticket = json.loads(get_ticket_response.body.decode('u8') or "").get('ticket')  # 微信端这个ticket　60s有效
 
         if not ticket:
             self.write(dict(
