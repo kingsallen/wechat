@@ -1,6 +1,5 @@
 # coding=utf-8
 import json
-from urllib.parse import urlencode
 
 from tornado import gen
 from tornado.httpclient import AsyncHTTPClient
@@ -17,7 +16,7 @@ class PermanentQRHandler(MetaBaseHandler):
     SCENE_STR_FMT = 'wechat_permanent_qr-{wechat_id}'
 
     def get_qr_img_url(self, ticket):
-        qr_img_url = url_concat(self.GET_QR_IMG_API, dict(ticket=urlencode(ticket)))
+        qr_img_url = url_concat(self.GET_QR_IMG_API, dict(ticket=ticket))
         self.logger.debug('GET WECAHT PERMANENT QRIMG URL: %s' % qr_img_url)
         return qr_img_url
 
