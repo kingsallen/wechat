@@ -452,7 +452,7 @@ class ChatHandler(BaseHandler):
 
         content = self.json_args.get("content") or ""
         compoundContent = self.json_args.get("compoundContent") or {}
-        user_message = content or ujson.dumps(compoundContent)
+        user_message = content or compoundContent
         msg_type = self.json_args.get("msgType")
         server_id = self.json_args.get("serverId") or ""
         duration = self.json_args.get("duration") or 0
@@ -476,6 +476,7 @@ class ChatHandler(BaseHandler):
             serverId=server_id,
             duration=int(duration)
         )
+        self.logger.debug("save chat by alphadog chat_params:{}".format(chat_params))
         chat_id = yield self.chat_ps.save_chat(chat_params)
 
         message_body = json_dumps(ObjectDict(
@@ -489,7 +490,7 @@ class ChatHandler(BaseHandler):
             origin=const.ORIGIN_USER_OR_HR,
             id=chat_id,
         ))
-
+        self.logger.debug("publish chat by redis message_body:{}".format(message_body))
         self.redis_client.publish(self.hr_channel, message_body)
         try:
             if self.bot_enabled and msg_type != "job":
@@ -513,7 +514,7 @@ class ChatHandler(BaseHandler):
 
         content = self.json_args.get("content") or ""
         compoundContent = self.json_args.get("compoundContent") or {}
-        user_message = content or ujson.dumps(compoundContent)
+        user_message = content or compoundContent
         msg_type = self.json_args.get("msgType")
 
         if not self.bot_enabled:
@@ -564,7 +565,7 @@ class ChatHandler(BaseHandler):
                 roomId=int(self.room_id),
                 positionId=int(self.position_id)
             )
-
+            self.logger.debug("save chat by alphadog chat_params:{}".format(chat_params))
             chat_id = yield self.chat_ps.save_chat(chat_params)
             if bot_message:
                 compound_content.update(disabled=False)  # 可交互类型消息发送给各端时需标记为可以操作
@@ -579,6 +580,7 @@ class ChatHandler(BaseHandler):
                     origin=const.ORIGIN_CHATBOT,
                     id=chat_id
                 ))
+                self.logger.debug("publish chat by redis message_body:{}".format(message_body))
                 # hr 端广播
                 self.redis_client.publish(self.hr_channel, message_body)
 
