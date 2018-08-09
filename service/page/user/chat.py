@@ -85,7 +85,8 @@ class ChatPageService(PageService):
         duration = message.duration
         server_id = message.serverId
         asset_url = message.assetUrl
-        room['compoundContent'].update(duration=duration, server_id=server_id, asset_url=asset_url)
+        if type(room['compoundContent']) == dict:
+            room['compoundContent'].update(duration=duration, server_id=server_id, asset_url=asset_url)
         if message.msgType == 'button':
             room['compoundContent'] = btn_content
 
