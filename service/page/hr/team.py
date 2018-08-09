@@ -110,12 +110,12 @@ class TeamPageService(PageService):
                 team=t,
                 team_resource=team_resource_dict.get(t.res_id),
                 more_link=make_url(path.TEAM_PATH.format(t.id), handler_param, self.settings.platform_host),
-                member_list=[
+                member_list=sorted([
                     temp_data_tool.make_team_member(
                         member=m,
                         head_img=member_head_img_dict.get(m.res_id)
                     ) for m in all_members_dict.get(t.id)
-                    ].sort(key=lambda x: x.orders)
+                    ], key=lambda x: x.get("orders") or x.get("name"))
             ) for t in teams
             ]
         data.template_total = len(data.templates)
