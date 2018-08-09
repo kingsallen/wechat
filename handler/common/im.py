@@ -568,7 +568,8 @@ class ChatHandler(BaseHandler):
             self.logger.debug("save chat by alphadog chat_params:{}".format(chat_params))
             chat_id = yield self.chat_ps.save_chat(chat_params)
             if bot_message:
-                compound_content.update(disabled=False)  # 可交互类型消息发送给各端时需标记为可以操作
+                if msg_type in const.INTERACTIVE_MSG:
+                    compound_content.update(disabled=False)  # 可交互类型消息发送给各端时需标记为可以操作
                 message_body = json_dumps(ObjectDict(
                     compoundContent=compound_content,
                     content=bot_message.content,
