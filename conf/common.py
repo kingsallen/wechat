@@ -276,7 +276,7 @@ SCALE = {
 # 聊天相关
 MSG_TYPE = {
     0: "html",
-    1: "button",
+    1: "button_radio",
     2: "cards",
     3: "jobCard",
     4: "citySelect",
