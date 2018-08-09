@@ -115,7 +115,7 @@ class TeamPageService(PageService):
                         member=m,
                         head_img=member_head_img_dict.get(m.res_id)
                     ) for m in all_members_dict.get(t.id)
-                    ].sort(key=lambda x: x.orders)
+                    ].sort(key=lambda x: x.orders if x.orders else x.name)
             ) for t in teams
             ]
         data.template_total = len(data.templates)
