@@ -301,7 +301,7 @@ class ChatPageService(PageService):
                 position.salary = position_info.salary
                 position.location = position_info.city
                 position.update = position_info.update_time
-                position.id = id
+                position.id = position_info.id
                 position_list.append(position)
             ret_message['compound_content']['list'] = position_list
             if max:
