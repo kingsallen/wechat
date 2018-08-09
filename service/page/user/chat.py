@@ -282,8 +282,8 @@ class ChatPageService(PageService):
             ids = [p.get("id") for p in compoundContent]
         if msg_type == "jobSelect":
             ids = [p.get("id") for p in compoundContent.get("list")]
-        if ids:
-            max = ret_message['compound_content'].get("max")
+        if ids and msg_type in ("jobCard", "jobSelect"):
+            max = ret_message['compound_content'].get("max") if msg_type == "jobSelect" else 0
             ret_message['compound_content'] = ObjectDict()  # 置空compoundContent
             position_list = []
             position_ps = PositionPageService()
