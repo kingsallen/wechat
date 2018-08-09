@@ -249,7 +249,7 @@ class ChatPageService(PageService):
                 messages.append(ret_message)
             self.logger.debug(messages)
         except Exception as e:
-            self.logger.error(e)
+            self.logger.error("[get_chatbot_reply_fail!!]reeor: %s, params: %s" % (e, params))
             return []
         else:
             return messages
