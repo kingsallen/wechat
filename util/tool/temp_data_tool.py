@@ -205,6 +205,7 @@ def make_team_member(member, head_img):
         'name': member.name,
         'title': member.title,
         'description': member.description,
+        'orders': member.orders
     })
 
 
@@ -229,7 +230,8 @@ def make_introduction(member, res):
         'icon': make_static_url(res.res_url) if res else '',
         'name': member.name,
         'title': member.title,
-        'description': member.description
+        'description': member.description,
+        'orders': member.orders
     }
 
 
@@ -273,7 +275,7 @@ def make_team_detail_template(locale, team, members, modulename, detail_media_li
                     'media_url': make_static_url(team_res.res_url),
                     'media_type': MEDIA_TYPE[team_res.res_type],
                     'member_list': [make_introduction(m, res_dic.get(m.res_id))
-                                    for m in members],
+                                    for m in members].sort(key=lambda x: x.orders),
                     'clip_attrs': team.res_attrs
                 }]
             )
@@ -517,7 +519,7 @@ def make_team(team, resources, more_link, team_members, teamname_custom):
             'clip_attrs': team.res_attrs,
             'media_type': MEDIA_TYPE[team_res.res_type],
             'member_list': [make_team_member(m, resources.get(m.res_id))
-                            for m in team_members],
+                            for m in team_members].sort(key=lambda x: x.orders),
         }],
         more_link=more_link
     )
