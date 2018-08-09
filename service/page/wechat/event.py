@@ -26,11 +26,23 @@ from util.tool.json_tool import json_dumps
 from util.wechat.core import get_wxuser
 
 
+def df_lg(f):
+    def x(self, *args, **kwargs):
+        self.logger.debug('\n\n' + '>>' * 100)
+
+        self.logger.debug('%s :  %s : %s' % (f.__name__, args, kwargs))
+        f()
+        self.logger.debug('\n\n' + '>>' * 100)
+
+    return x
+
+
 class EventPageService(PageService):
 
     def __init__(self):
         super().__init__()
 
+    @df_lg
     @gen.coroutine
     def opt_default(self, msg, nonce, wechat):
         """被动回复用户消息的总控处理
@@ -52,6 +64,7 @@ class EventPageService(PageService):
         else:
             raise gen.Return("")
 
+    @df_lg
     @gen.coroutine
     def rep_basic(self, msg, rule_id, nonce=None, wechat=None):
         """hr_wx_rule 中 module为 basic 的文字处理
