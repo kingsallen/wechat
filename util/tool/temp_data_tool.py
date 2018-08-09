@@ -81,11 +81,11 @@ def template1_data(resource, member_list=None):
 
 def template1_data_member(resource_list):
     return [{
-                "icon": make_static_url(resource.media_url),
-                "name": resource.name,
-                "title": resource.title,
-                "description": resource.description,
-            } for resource in resource_list]
+        "icon": make_static_url(resource.media_url),
+        "name": resource.name,
+        "title": resource.title,
+        "description": resource.description,
+    } for resource in resource_list]
 
 
 def template2(title, data):
@@ -98,13 +98,13 @@ def template2(title, data):
 
 def template2_data(resource_list):
     return [{
-                'title': resource.title,
-                'sub_title': resource.sub_title,
-                'description': resource.longtexts,
-                'clip_attrs': resource.res_attrs,
-                'media_url': make_static_url(resource.media_url),
-                'media_type': MEDIA_TYPE[resource.media_type]
-            } for resource in resource_list]
+        'title': resource.title,
+        'sub_title': resource.sub_title,
+        'description': resource.longtexts,
+        'clip_attrs': resource.res_attrs,
+        'media_url': make_static_url(resource.media_url),
+        'media_type': MEDIA_TYPE[resource.media_type]
+    } for resource in resource_list]
 
 
 def template3(title, resource_list, handler_params):
@@ -112,12 +112,12 @@ def template3(title, resource_list, handler_params):
         'type': 3,
         'title': title,
         'data': [{
-                     'title': position.title,  # '文案'
-                     'link': make_url("/m/position/{}".format(position.id), handler_params,
-                                      escape=['recom']),  # JD连接
-                     'location': position.city,  # '上海
-                     'salary': gen_salary(position.salary_top, position.salary_bottom)  # '5k-8k'
-                 } for position in resource_list]
+            'title': position.title,  # '文案'
+            'link': make_url("/m/position/{}".format(position.id), handler_params,
+                             escape=['recom']),  # JD连接
+            'location': position.city,  # '上海
+            'salary': gen_salary(position.salary_top, position.salary_bottom)  # '5k-8k'
+        } for position in resource_list]
     })
 
 
@@ -135,11 +135,11 @@ def template4_data(resource_list, sub_type):
         data = template2_data(resource_list)
     elif sub_type == 1:
         data = [{
-                    'sub_title': resource.sub_title,
-                    'media_url': make_static_url(resource.media_url),
-                    'clip_attrs': resource.res_attrs,
-                    'link': resource.link
-                } for resource in resource_list]
+            'sub_title': resource.sub_title,
+            'media_url': make_static_url(resource.media_url),
+            'clip_attrs': resource.res_attrs,
+            'link': resource.link
+        } for resource in resource_list]
     else:
         data = None
 
@@ -274,8 +274,8 @@ def make_team_detail_template(locale, team, members, modulename, detail_media_li
                     'longtext': team.description,
                     'media_url': make_static_url(team_res.res_url),
                     'media_type': MEDIA_TYPE[team_res.res_type],
-                    'member_list': [make_introduction(m, res_dic.get(m.res_id))
-                                    for m in members].sort(key=lambda x: x.orders if x.orders else x.name),
+                    'member_list': sorted([make_introduction(m, res_dic.get(m.res_id))
+                                           for m in members], key=lambda x: x.get("orders") or x.get("name")),
                     'clip_attrs': team.res_attrs
                 }]
             )
@@ -311,7 +311,7 @@ def make_team_detail_template(locale, team, members, modulename, detail_media_li
                     res=res_dic.get(t.res_id),
                     handler_params=handler_params
                 ) for t in other_teams
-                ])
+            ])
         )
 
     return template
@@ -498,12 +498,12 @@ def make_position_detail_cms(media_list, res_dict, module_name, module_link):
         title=module_name,
         more_link=module_link,
         data=[{
-                  'sub_title': m.sub_title,
-                  'longtext': '{}\n'.format(m.longtexts),
-                  'clip_attrs': m.res_attrs,
-                  'media_url': make_static_url(res_dict.get(m.res_id).res_url),
-                  'media_type': MEDIA_TYPE[res_dict.get(m.res_id).res_type]
-              } for m in media_list]
+            'sub_title': m.sub_title,
+            'longtext': '{}\n'.format(m.longtexts),
+            'clip_attrs': m.res_attrs,
+            'media_url': make_static_url(res_dict.get(m.res_id).res_url),
+            'media_type': MEDIA_TYPE[res_dict.get(m.res_id).res_type]
+        } for m in media_list]
     )
 
 
@@ -518,9 +518,8 @@ def make_team(team, resources, more_link, team_members, teamname_custom):
             'media_url': make_static_url(team_res.res_url),
             'clip_attrs': team.res_attrs,
             'media_type': MEDIA_TYPE[team_res.res_type],
-            'member_list': [make_team_member(m, resources.get(m.res_id))
-                            for m in team_members].sort(key=lambda x: x.orders if x.orders else x.name),
+            'member_list': sorted([make_team_member(m, resources.get(m.res_id))
+                                   for m in team_members], key=lambda x: x.orders or x.name),
         }],
         more_link=more_link
     )
-
