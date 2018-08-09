@@ -556,6 +556,25 @@ class ChatHandler(BaseHandler):
                 continue
             if msg_type in const.INTERACTIVE_MSG:
                 compound_content.update(disabled=True)  # 可交互类型消息入库后自动标记为不可操作
+            if msg_type == "cards":
+                # 只在c端展示，并且不保存
+                if bot_message:
+                    if msg_type in const.INTERACTIVE_MSG:
+                        compound_content.update(disabled=False)  # 可交互类型消息发送给各端时需标记为可以操作
+                    message_body = json_dumps(ObjectDict(
+                        compoundContent=compound_content,
+                        content=bot_message.content,
+                        msgType=msg_type,
+                        speaker=const.CHAT_SPEAKER_HR,
+                        cid=int(self.room_id),
+                        pid=int(self.position_id),
+                        createTime=curr_now_minute(),
+                        origin=const.ORIGIN_CHATBOT
+                    ))
+                    # 聊天室广播
+                    self.redis_client.publish(self.chatroom_channel, message_body)
+                    return
+
             chat_params = ChatVO(
                 compoundContent=ujson.dumps(compound_content),
                 content=bot_message.content,
