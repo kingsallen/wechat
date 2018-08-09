@@ -61,6 +61,9 @@ class EventPageService(PageService):
         :param wechat:
         :return:
         """
+        self.logger.debug('>\n' * 10)
+        self.logger.debug(msg, rule_id, nonce, wechat)
+        self.logger.debug('>\n' * 10)
 
         if rule_id is None:
             raise gen.Return("")
