@@ -271,20 +271,20 @@ class ChatPageService(PageService):
         ret_message['compound_content'] = compoundContent
         ret_message['msg_type'] = msg_type
         if msg_type == "citySelect":
-            max = ret_message['compoundContent'].get("max")
-            ret_message['compoundContent'] = ObjectDict()  # 置空compoundContent
+            max = ret_message['compound_content'].get("max")
+            ret_message['compound_content'] = ObjectDict()  # 置空compoundContent
             cities = compoundContent.get("list")
             hot, list = self.order_country_by_first_letter(cities)
-            ret_message['compoundContent']['list'] = list
-            ret_message['compoundContent']['hot'] = hot
-            ret_message['compoundContent']['max'] = max
+            ret_message['compound_content']['list'] = list
+            ret_message['compound_content']['hot'] = hot
+            ret_message['compound_content']['max'] = max
         if msg_type == "jobCard":
             ids = [p.get("id") for p in compoundContent]
         if msg_type == "jobSelect":
             ids = [p.get("id") for p in compoundContent.get("list")]
         if ids:
-            max = ret_message['compoundContent'].get("max")
-            ret_message['compoundContent'] = ObjectDict()  # 置空compoundContent
+            max = ret_message['compound_content'].get("max")
+            ret_message['compound_content'] = ObjectDict()  # 置空compoundContent
             position_list = []
             position_ps = PositionPageService()
             team_ps = TeamPageService()
@@ -303,9 +303,9 @@ class ChatPageService(PageService):
                 position.update = position_info.update_time
                 position.id = id
                 position_list.append(position)
-            ret_message['compoundContent']['list'] = position_list
+            ret_message['compound_content']['list'] = position_list
             if max:
-                ret_message['compoundContent']['max'] = max
+                ret_message['compound_content']['max'] = max
         return ret_message
 
     @staticmethod
