@@ -668,6 +668,7 @@ class ChatVO(object):
      - duration
      - id
      - createTime
+     - compoundContent
     """
 
     thrift_spec = (
@@ -685,9 +686,10 @@ class ChatVO(object):
         (11, TType.BYTE, 'duration', None, None, ),  # 11
         (12, TType.I32, 'id', None, None, ),  # 12
         (13, TType.STRING, 'createTime', 'UTF8', None, ),  # 13
+        (14, TType.STRING, 'compoundContent', 'UTF8', None, ),  # 14
     )
 
-    def __init__(self, serverId=None, content=None, speaker=None, origin=None, origin_str=None, msgType=None, assetUrl=None, btnContent=None, roomId=None, positionId=None, duration=None, id=None, createTime=None,):
+    def __init__(self, serverId=None, content=None, speaker=None, origin=None, origin_str=None, msgType=None, assetUrl=None, btnContent=None, roomId=None, positionId=None, duration=None, id=None, createTime=None, compoundContent=None,):
         self.serverId = serverId
         self.content = content
         self.speaker = speaker
@@ -701,6 +703,7 @@ class ChatVO(object):
         self.duration = duration
         self.id = id
         self.createTime = createTime
+        self.compoundContent = compoundContent
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -776,6 +779,11 @@ class ChatVO(object):
                     self.createTime = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
+            elif fid == 14:
+                if ftype == TType.STRING:
+                    self.compoundContent = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -837,6 +845,10 @@ class ChatVO(object):
         if self.createTime is not None:
             oprot.writeFieldBegin('createTime', TType.STRING, 13)
             oprot.writeString(self.createTime.encode('utf-8') if sys.version_info[0] == 2 else self.createTime)
+            oprot.writeFieldEnd()
+        if self.compoundContent is not None:
+            oprot.writeFieldBegin('compoundContent', TType.STRING, 14)
+            oprot.writeString(self.compoundContent.encode('utf-8') if sys.version_info[0] == 2 else self.compoundContent)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()

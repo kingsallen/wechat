@@ -110,7 +110,7 @@ class ApplicationHandler(BaseHandler):
             p = {'pid': pid, 'wechat_signature': self.params.wechat_signature}
 
             if self.params.recom:
-                p.update({ 'recom': self.params.recom })
+                p.update({'recom': self.params.recom})
             if self.params.ai_recom:
                 p['ai_recom'] = self.params.ai_recom
             if self.params.algorithm_name:
@@ -119,7 +119,7 @@ class ApplicationHandler(BaseHandler):
             if not result:
                 self.send_json_error(
                     data=dict(next_url=self.make_url(path.PROFILE_CUSTOM_CV, **p),
-                    message=''))
+                              message=''))
                 return
 
         is_applied, message, apply_id = yield self.application_ps.create_application(
@@ -140,7 +140,7 @@ class ApplicationHandler(BaseHandler):
 
             if recommender_user_id:
                 yield self.application_ps.opt_update_candidate_recom_records(
-                        apply_id, self.current_user, recommender_user_id, position)
+                    apply_id, self.current_user, recommender_user_id, position)
 
             # 定制化
             # 宝洁投递后，跳转到指定页面
