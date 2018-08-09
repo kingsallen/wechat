@@ -85,7 +85,8 @@ class ChatPageService(PageService):
         duration = message.duration
         server_id = message.serverId
         asset_url = message.assetUrl
-        room['compoundContent'].update(duration=duration, server_id=server_id, asset_url=asset_url)
+        if type(room['compoundContent']) == dict:
+            room['compoundContent'].update(duration=duration, server_id=server_id, asset_url=asset_url)
         if message.msgType == 'button':
             room['compoundContent'] = btn_content
 
@@ -245,15 +246,16 @@ class ChatPageService(PageService):
             self.logger.debug(res.results)
             results = res.results
             for r in results:
-                ret_message = self.make_response(r)
+                ret_message = yield self.make_response(r)
                 messages.append(ret_message)
             self.logger.debug(messages)
         except Exception as e:
-            self.logger.error(e)
+            self.logger.error("[get_chatbot_reply_fail!!]reeor: %s, params: %s" % (e, params))
             return []
         else:
             return messages
 
+    @gen.coroutine
     def make_response(self, message):
         """
         对chatbot的部分消息类型做整理
@@ -262,7 +264,7 @@ class ChatPageService(PageService):
         res_type = message.get("resultType", "")
         ret = message.get("values", {})
         content = ret.get("content", "")
-        compoundContent = ret.get("compoundContent", {})
+        compoundContent = ret.get("compoundContent") or {}
         msg_type = const.MSG_TYPE.get(res_type)
         ret_message = ObjectDict()
         ret_message['content'] = content
