@@ -656,9 +656,9 @@ class PositionHandler(BaseHandler):
                 if self.current_user.wechat:
                     link = self.make_url(
                         path.POSITION_PATH.format(position_info.id),
-                        wechat_signature=self.current_user.wechat.signature)
+                        self.params)
                 else:
-                    link = self.make_url(path.GAMMA_POSITION_HOME.format(position_info.id))
+                    link = self.make_url(path.GAMMA_POSITION_HOME.format(position_info.id), self.params)
 
                 yield position_view_five_notice_tpl(help_wechat.id, hr_wx_user.openid,
                                                     link, position_info.title,
@@ -962,7 +962,7 @@ class PositionEmpNoticeHandler(BaseHandler):
 
         position = yield self.position_ps.get_position(self.params.pid, display_locale=self.get_current_locale())
 
-        link = self.make_url(path.EMPLOYEE_RECOMMENDS, wechat_signature=self.current_user.wechat.signature)
+        link = self.make_url(path.EMPLOYEE_RECOMMENDS, self.params)
 
         if self.current_user.wechat.passive_seeker == const.OLD_YES:
             yield position_share_notice_employee_tpl(self.current_user.company.id,
