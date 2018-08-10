@@ -463,7 +463,7 @@ class ChatHandler(BaseHandler):
         self.chatroom_channel = const.CHAT_CHATROOM_CHANNEL.format(self.hr_id, self.user_id)
         self.hr_channel = const.CHAT_HR_CHANNEL.format(self.hr_id)
 
-        if msg_type == 'html' and not content.strip():
+        if msg_type == 'html' and content and not content.strip():
             self.send_json_error()
             return
         chat_params = ChatVO(
