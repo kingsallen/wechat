@@ -274,8 +274,8 @@ def make_team_detail_template(locale, team, members, modulename, detail_media_li
                     'longtext': team.description,
                     'media_url': make_static_url(team_res.res_url),
                     'media_type': MEDIA_TYPE[team_res.res_type],
-                    'member_list': sorted([make_introduction(m, res_dic.get(m.res_id))
-                                           for m in members], key=lambda x: x.get("orders") or x.get("name")),
+                    'member_list': [make_introduction(m, res_dic.get(m.res_id))
+                                    for m in members],
                     'clip_attrs': team.res_attrs
                 }]
             )
@@ -518,8 +518,8 @@ def make_team(team, resources, more_link, team_members, teamname_custom):
             'media_url': make_static_url(team_res.res_url),
             'clip_attrs': team.res_attrs,
             'media_type': MEDIA_TYPE[team_res.res_type],
-            'member_list': sorted([make_team_member(m, resources.get(m.res_id))
-                                   for m in team_members], key=lambda x: x.orders or x.name),
+            'member_list': [make_team_member(m, resources.get(m.res_id))
+                            for m in team_members],
         }],
         more_link=more_link
     )

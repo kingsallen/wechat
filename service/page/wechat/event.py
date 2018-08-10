@@ -231,7 +231,7 @@ class EventPageService(PageService):
             if 'wechat_permanent_qr-' in wxuser.get('qr_scene_str'):  # 永久二维码扫描关注标志字符串
 
                 _, wechat_id = wxuser.get('qr_scene_str').split('-')
-                self.logger.info(json_dumps(dict(
+                self.logger.stats(json_dumps(dict(
                     wechat_id=wechat_id,
                     openid=openid,
                     qr_scene_str=wxuser.get('qr_scene_str'),
