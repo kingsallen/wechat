@@ -299,6 +299,7 @@ def check_and_apply_profile(func):
                     hashlib.sha1(str(self.current_user.sysuser.id).encode('u8')).hexdigest()
                 )
             )
+            redirect_params = {**self.params, **redirect_params}
 
             # todo: linjie 添加列聘的授权页面网址
             print("redirect_params: %s" % redirect_params)
