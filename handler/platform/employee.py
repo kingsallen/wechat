@@ -1,4 +1,5 @@
 # coding=utf-8
+import functools
 
 from tornado import gen
 
@@ -241,6 +242,42 @@ class EmployeeBindHandler(BaseHandler):
         )
 
 
+def bind_emp_redirect(url):
+    def redirect(func):
+        @functools.wraps(func)
+        @gen.coroutine
+        def wrapper(handler, *args, **kwargs):
+            bind_status = yield handler.employee_ps.get_employee_bind_status(
+                user_id=handler.current_user.sysuser.id,
+                company_id=handler.current_user.company.id
+            )
+            if bind_status == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS:
+                handler.redirector(url)
+            else:
+                yield func(*args, **kwargs)
+
+        return wrapper
+
+    return redirect
+
+
+class CatesEmployeeBindHandler(EmployeeBindHandler):
+
+    @handle_response
+    @authenticated
+    @bind_emp_redirect(url='http://www.baidu.com')
+    @gen.coroutine
+    def get(self):
+        super(CatesEmployeeBindHandler, self).get()
+
+    @handle_response
+    @authenticated
+    @bind_emp_redirect(url='http://www.baidu.com')
+    @gen.coroutine
+    def post(self):
+        super(CatesEmployeeBindHandler, self).post()
+
+
 class EmployeeBindEmailHandler(BaseHandler):
     @handle_response
     @gen.coroutine
@@ -261,7 +298,10 @@ class EmployeeBindEmailHandler(BaseHandler):
         self.render(template_name='employee/certification-%s.html' % tname,
                     **tparams)
         if employee_id is None:
-            self.logger.error('employee_log_id_None   current_user:{}, result:{}, message:{}, params:{}'.format(self.current_user, result, message, self.params))
+            self.logger.error(
+                'employee_log_id_None   current_user:{}, result:{}, message:{}, params:{}'.format(self.current_user,
+                                                                                                  result, message,
+                                                                                                  self.params))
         employee = yield self.user_ps.get_employee_by_id(employee_id)
 
         if result and employee:
@@ -463,6 +503,7 @@ class EmployeeReferralPolicyHandler(BaseHandler):
     https://git.moseeker.com/doc/complete-guide/blob/feature/v0.1.0/develop_docs/referral/frontend/wechat_v0.1.0.md
     https://git.moseeker.com/doc/complete-guide/blob/feature/v0.1.0/develop_docs/referral/basic_service/%E5%86%85%E6%8E%A8v0.1.0-api.md
     """
+
     @handle_response
     @gen.coroutine
     def get(self):
@@ -485,6 +526,7 @@ class EmployeeInterestReferralPolicyHandler(BaseHandler):
     """
     员工感兴趣内推政策
     """
+
     @handle_response
     @authenticated
     @gen.coroutine
@@ -629,7 +671,7 @@ class EmployeeAiRecomHandler(BaseHandler):
     def get(self, recom_push_id):
         recom_push_id = int(recom_push_id)
         recom_audience = self.RECOM_AUDIENCE_EMPLOYEE
-        recom=self.position_ps._make_recom(self.current_user.sysuser.id)
+        recom = self.position_ps._make_recom(self.current_user.sysuser.id)
         self.params.share = yield self.get_employee_recom_share_info(recom_push_id, recom)
 
         self.render_page("adjunct/job-recom-list.html",
