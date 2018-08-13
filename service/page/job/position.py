@@ -417,7 +417,7 @@ class PositionPageService(PageService):
                     position.salary_top, position.salary_bottom)
                 position.publish_date = jd_update_date(str_2_date(position.publish_date, self.constant.TIME_FORMAT))
                 position.team_name = team_name_dict.get(pid_teamid_dict.get(position.id, 0), '')
-                position.employee_only = True
+                position.employee_only = position.employee_only
             return rp_position_list
         return res
 
