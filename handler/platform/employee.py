@@ -654,6 +654,7 @@ class EmployeeAiRecomHandler(BaseHandler):
             self.params,
             recom=recom,
             recom_push_id=recom_push_id,
+            from_employee_ai_recom=1,
             escape=escape)
 
         company_info = yield self.company_ps.get_company(
