@@ -270,9 +270,9 @@ class CatesEmployeeBindHandler(EmployeeBindHandler):
         else:
             self.redirect(
                 url_concat(
-                    '{}{}{}'.format(
-                        self.protcol,
-                        self.host,
+                    '{}://{}{}'.format(
+                        self.request.protocol,
+                        self.request.host,
                         '/app/employee/binding'
                     ),
                     dict(
