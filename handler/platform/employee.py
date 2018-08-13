@@ -1,6 +1,6 @@
 # coding=utf-8
-import functools
 
+from tornado.httputil import url_concat
 from tornado import gen
 
 import conf.common as const
@@ -242,40 +242,35 @@ class EmployeeBindHandler(BaseHandler):
         )
 
 
-def bind_emp_redirect(url):
-    def redirect(func):
-        @functools.wraps(func)
-        @gen.coroutine
-        def wrapper(handler, *args, **kwargs):
-            bind_status = yield handler.employee_ps.get_employee_bind_status(
-                user_id=handler.current_user.sysuser.id,
-                company_id=handler.current_user.company.id
-            )
-            if bind_status == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS:
-                handler.redirector(url)
-            else:
-                yield func(*args, **kwargs)
-
-        return wrapper
-
-    return redirect
-
-
 class CatesEmployeeBindHandler(EmployeeBindHandler):
 
     @handle_response
     @authenticated
-    @bind_emp_redirect(url='http://www.baidu.com')
     @gen.coroutine
     def get(self):
-        super(CatesEmployeeBindHandler, self).get()
 
-    @handle_response
-    @authenticated
-    @bind_emp_redirect(url='http://www.baidu.com')
-    @gen.coroutine
-    def post(self):
-        super(CatesEmployeeBindHandler, self).post()
+        bind_status = yield self.employee_ps.get_employee_bind_status(
+            user_id=self.current_user.sysuser.id,
+            company_id=self.current_user.company.id
+        )
+        if bind_status == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS:
+            url = self.get_argument('redirect', '')
+            if url:
+                self.redirect(
+                    url
+                )  # 员工已经认证了则直接跳转到来也页面
+        else:
+            # https://platform1.dqprism.com/m/app/employee/binding?wechat_signature=YWNkNmIyYWExOGViOTRkODMyMzk5N2MxM2NkZDZlOTUxNmRjYzJiYQ%3D%3D
+            self.redirect(
+                url_concat(
+                    '{}{}{}'.format(
+                        self.protcol,
+                        self.host,
+                        '/app/employee/binding'
+                    ),
+                    dict(wechat_signature=self.current_user.wechat.signature)
+                )
+            )  # 没有认证 跳转到 wechat的认证页面
 
 
 class EmployeeBindEmailHandler(BaseHandler):
