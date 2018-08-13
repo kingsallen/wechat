@@ -228,11 +228,14 @@ class EmployeeBindHandler(BaseHandler):
         else:
             next_url = self.make_url(path.EMPLOYEE_BINDED, self.params)
 
+        # CatesEmployeeBindHandler 生成本参数
+        if self.json_args.get('redirect_when_bind_success'):
+            next_url = self.json_args.get('redirect_when_bind_success')
+
         self.send_json_success(
             data={'next_url': next_url},
             message=message
         )
-        self.finish()
 
         # 处理员工认证红包
         yield self.redpacket_ps.handle_red_packet_employee_verification(
@@ -248,19 +251,23 @@ class CatesEmployeeBindHandler(EmployeeBindHandler):
     @authenticated
     @gen.coroutine
     def get(self):
+        """定制接口: gates客户要求已经认证的用户跳转到他们指定的页面
+        未认证的员工跳转到认证页面
+        待认证成功后再跳转到指定的页面
+        """
 
         bind_status = yield self.employee_ps.get_employee_bind_status(
             user_id=self.current_user.sysuser.id,
             company_id=self.current_user.company.id
         )
+        url = self.get_argument('redirect', '')
+
         if bind_status == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS:
-            url = self.get_argument('redirect', '')
             if url:
                 self.redirect(
                     url
                 )  # 员工已经认证了则直接跳转到来也页面
         else:
-            # https://platform1.dqprism.com/m/app/employee/binding?wechat_signature=YWNkNmIyYWExOGViOTRkODMyMzk5N2MxM2NkZDZlOTUxNmRjYzJiYQ%3D%3D
             self.redirect(
                 url_concat(
                     '{}{}{}'.format(
@@ -268,7 +275,10 @@ class CatesEmployeeBindHandler(EmployeeBindHandler):
                         self.host,
                         '/app/employee/binding'
                     ),
-                    dict(wechat_signature=self.current_user.wechat.signature)
+                    dict(
+                        wechat_signature=self.current_user.wechat.signature,
+                        redirect_when_bind_success=url
+                    )
                 )
             )  # 没有认证 跳转到 wechat的认证页面
 
