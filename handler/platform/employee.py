@@ -315,9 +315,7 @@ class EmployeeBindHandler(BaseHandler):
         else:
             next_url = self.make_url(path.POSITION_LIST, self.params)
             custom_fields = False
-
-
-            if self.params.get('redirect_when_bind_success') and self.json_args.get('type') == 'email':
+            if self.params.get('redirect_when_bind_success'):
                 next_url = self.make_url(path.GATES_EMPLOYEE, redirect=self.params.get('redirect_when_bind_success'))
 
         self.send_json_success(
@@ -510,7 +508,8 @@ class BindInfoHandler(BaseHandler):
             self.write_error(404)
             return
 
-        if fe_binding_stauts == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS and not employee.id:
+        if fe_binding_stauts == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS and \
+            (employee.id != self.json_args._employeeid or not self.json_args._employeeid):
             self.write_error(416)
             return
 
@@ -534,14 +533,13 @@ class BindInfoHandler(BaseHandler):
         else:
             assert False
 
+        next_url = self.make_url(path.POSITION_LIST, self.params)
         # 绑定成功回填自定义配置字段成功
         redirect_when_bind_success = self.json_args.get('redirect_when_bind_success') or self.get_argument(
             'redirect_when_bind_success', '')
 
         if binding_status == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS:
             next_url = redirect_when_bind_success
-        else:
-            next_url = self.make_url(path.EMPLOYEE_CUSTOMINFO_BINDED, self.params)
         self.params.from_wx_template = self.json_args.from_wx_template
         self.send_json_success(
             data=ObjectDict(
