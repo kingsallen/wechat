@@ -26,7 +26,12 @@ class ProfileNewHandler(BaseHandler):
     @tornado.gen.coroutine
     def get(self):
         """初始化新建 profile 页面"""
-
+        pid = self.params.pid
+        position = yield self.position_ps.get_position(pid)
+        if position.candidate_source == "common_graduate":
+            is_graduate = True
+        else:
+            is_graduate = False
         # yield from ps
         data = yield dict(
             degreeList=self.dictionary_ps.get_degrees(),
@@ -34,7 +39,7 @@ class ProfileNewHandler(BaseHandler):
 
         # update other initial values
         data.update(
-            email='', mobile='', country_code='86', mobileeditable=True)
+            email='', mobile='', country_code='86', mobileeditable=True, is_graduate=is_graduate)
 
         data = ObjectDict(data)
         sysuser = self.current_user.sysuser
