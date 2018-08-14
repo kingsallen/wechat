@@ -107,6 +107,24 @@ class InfraPositionDataService(DataService):
         ret = yield http_get(path.INFRA_POSITION_FEATURE.format(position_id))
         return http_tool.unboxing(ret)
 
+    @gen.coroutine
+    def get_recom_position_list_wx_tpl_receive(self, user_id):
+        res = yield http_get(
+            path.INFRA_POSITION_LIST_WX_TPL,
+            dict(
+                user_id=user_id
+            ))
+        return res
+
+    @gen.coroutine
+    def post_not_receive_recom_position_wx_tpl(self, user_id):
+        res = yield http_post(
+            path.INFRA_POSITION_LIST_WX_TPL,
+            dict(
+                user_id=user_id
+            ))
+        return res
+
 
 class TestEmployeeService(AsyncTestCase):
     """Just for test(or try results) during development :)"""
