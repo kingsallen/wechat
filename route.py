@@ -168,7 +168,7 @@ platform_routes = [
     (r"/api/employee/survey/?",                      handler.platform.employee.APIEmployeeSurveyHandler,        {"event": "employee_survey_api"}),
     (r'/api/user/survey/?',                          handler.platform.user.APIUserSurveyHandler,                {"event": "user_survey_api"}),
     (r'/api/position/recom/list/?',                  handler.platform.user.APIPositionRecomListHandler,         {"event": "position_ai-recomlist"}),
-    (r'/api/position/recom/list/close',              handler.platform.user.APIPositionRecomListCloseHandler,    {"event": "position_ai-recomlist-close"}),
+    (r'/api/wxtpl/recom_position/switch/',           handler.platform.user.APIPositionRecomListCloseHandler,    {"event": "position_ai-recomlist-wxtpl"}),
     # 兼容老微信 url，进行302跳转
     (r"/.*",                                         handler.platform.compatible.CompatibleHandler,             {"event": "compatible"})
 
