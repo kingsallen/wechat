@@ -1,5 +1,6 @@
 # coding=utf-8
 
+from tornado.httputil import url_concat
 from tornado import gen
 
 import conf.common as const
@@ -227,11 +228,14 @@ class EmployeeBindHandler(BaseHandler):
         else:
             next_url = self.make_url(path.EMPLOYEE_BINDED, self.params)
 
+        # CatesEmployeeBindHandler 生成本参数
+        if self.json_args.get('redirect_when_bind_success'):
+            next_url = self.json_args.get('redirect_when_bind_success')
+
         self.send_json_success(
             data={'next_url': next_url},
             message=message
         )
-        self.finish()
 
         # 处理员工认证红包
         yield self.redpacket_ps.handle_red_packet_employee_verification(
@@ -239,6 +243,44 @@ class EmployeeBindHandler(BaseHandler):
             company_id=self.current_user.company.id,
             redislocker=self.redis
         )
+
+
+class CatesEmployeeBindHandler(EmployeeBindHandler):
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        """定制接口: gates客户要求已经认证的用户跳转到他们指定的页面
+        未认证的员工跳转到认证页面
+        待认证成功后再跳转到指定的页面
+        """
+
+        bind_status = yield self.employee_ps.get_employee_bind_status(
+            user_id=self.current_user.sysuser.id,
+            company_id=self.current_user.company.id
+        )
+        url = self.get_argument('redirect', '')
+
+        if bind_status == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS:
+            if url:
+                self.redirect(
+                    url
+                )  # 员工已经认证了则直接跳转到来也页面
+        else:
+            self.redirect(
+                url_concat(
+                    '{}://{}{}'.format(
+                        self.request.protocol,
+                        self.request.host,
+                        '/app/employee/binding'
+                    ),
+                    dict(
+                        wechat_signature=self.current_user.wechat.signature,
+                        redirect_when_bind_success=url
+                    )
+                )
+            )  # 没有认证 跳转到 wechat的认证页面
 
 
 class EmployeeBindEmailHandler(BaseHandler):
@@ -261,7 +303,10 @@ class EmployeeBindEmailHandler(BaseHandler):
         self.render(template_name='employee/certification-%s.html' % tname,
                     **tparams)
         if employee_id is None:
-            self.logger.error('employee_log_id_None   current_user:{}, result:{}, message:{}, params:{}'.format(self.current_user, result, message, self.params))
+            self.logger.error(
+                'employee_log_id_None   current_user:{}, result:{}, message:{}, params:{}'.format(self.current_user,
+                                                                                                  result, message,
+                                                                                                  self.params))
         employee = yield self.user_ps.get_employee_by_id(employee_id)
 
         if result and employee:
@@ -463,6 +508,7 @@ class EmployeeReferralPolicyHandler(BaseHandler):
     https://git.moseeker.com/doc/complete-guide/blob/feature/v0.1.0/develop_docs/referral/frontend/wechat_v0.1.0.md
     https://git.moseeker.com/doc/complete-guide/blob/feature/v0.1.0/develop_docs/referral/basic_service/%E5%86%85%E6%8E%A8v0.1.0-api.md
     """
+
     @handle_response
     @gen.coroutine
     def get(self):
@@ -485,6 +531,7 @@ class EmployeeInterestReferralPolicyHandler(BaseHandler):
     """
     员工感兴趣内推政策
     """
+
     @handle_response
     @authenticated
     @gen.coroutine
@@ -629,7 +676,7 @@ class EmployeeAiRecomHandler(BaseHandler):
     def get(self, recom_push_id):
         recom_push_id = int(recom_push_id)
         recom_audience = self.RECOM_AUDIENCE_EMPLOYEE
-        recom=self.position_ps._make_recom(self.current_user.sysuser.id)
+        recom = self.position_ps._make_recom(self.current_user.sysuser.id)
         self.params.share = yield self.get_employee_recom_share_info(recom_push_id, recom)
 
         self.render_page("adjunct/job-recom-list.html",
