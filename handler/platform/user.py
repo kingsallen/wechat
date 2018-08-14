@@ -622,12 +622,12 @@ class APIPositionRecomListHandler(BaseHandler):
             raise MyException("参数错误")
 
         if self._fans():
-            position_list = yield self.get_fans_position_list()
-            self.send_json_success(data={"positions": position_list})
+            position_list, total_count = yield self.get_fans_position_list()
+            self.send_json_success(data={"positions": position_list, "total_count": total_count})
 
         elif self._employee():
-            position_list = yield self.get_employee_position_list()
-            self.send_json_success(data={"positions": position_list})
+            position_list, total_count = yield self.get_employee_position_list()
+            self.send_json_success(data={"positions": position_list, "total_count": total_count})
 
         else:
             self.send_json_error("参数错误")
@@ -653,8 +653,8 @@ class APIPositionRecomListHandler(BaseHandler):
             "type": 0  # hard code, 0表示粉丝
         })
 
-        position_list = yield self.position_ps.infra_get_position_personarecom(infra_params, company_id)
-        return position_list
+        position_list, total_count = yield self.position_ps.infra_get_position_personarecom(infra_params, company_id)
+        return position_list, total_count
 
     @gen.coroutine
     def get_employee_position_list(self):
@@ -670,8 +670,44 @@ class APIPositionRecomListHandler(BaseHandler):
                 "type": 1  # hard code, 1表示员工
             })
 
-            position_list = yield self.position_ps.infra_get_position_employeerecom(infra_params, company_id)
+            position_list, total_count = yield self.position_ps.infra_get_position_employeerecom(infra_params,
+                                                                                                 company_id)
         else:
             position_list = []
+            total_count = 0
 
-        return position_list
+        return position_list, total_count
+
+
+class APIPositionRecomListCloseHandler(BaseHandler):
+
+    @decorator.handle_response
+    @decorator.check_and_apply_profile
+    @decorator.authenticated
+    @gen.coroutine
+    def get(self):
+        res = yield self.position_ps.get_recom_position_list_wx_tpl_receive(
+            user_id=self.current_user.sysuser.id,
+            wechat_id=self.current_user.wechat.id
+        )
+        data = res.get('data') or {}
+
+        intention_id = None
+        self.logger.debug('\n\n\ndebug_intentions_id:%s\n\n\n' % self.current_user)
+        if self.current_user.profile and self.current_user.profile.intentions:
+            intention_id = self.current_user.profile.intentions[0].get('id')
+
+        data.update(dict(
+            intention_id=intention_id
+        ))
+        self.write(res)
+
+    @decorator.handle_response
+    @decorator.authenticated
+    @gen.coroutine
+    def post(self):
+        res = yield self.position_ps.not_receive_recom_position_wx_tpl(
+            user_id=self.current_user.sysuser.id,
+            wechat_id=self.current_user.wechat.id
+        )
+        self.write(res)

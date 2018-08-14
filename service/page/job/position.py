@@ -327,7 +327,6 @@ class PositionPageService(PageService):
 
         raise gen.Return(res)
 
-
     @gen.coroutine
     def get_team_position(self, locale, team_id, handler_params, current_position_id, company_id, teamname_custom):
         positions = yield self.job_position_ds.get_positions_list(
@@ -477,7 +476,7 @@ class PositionPageService(PageService):
                         position.is_rp_reward = position.remain > 0
                     else:
                         position.is_rp_reward = False
-            return position_list
+            return position_list, res.data[0]['totalNum'] if res.data else 0
         else:
             self.logger.warn(res)
             return []
@@ -510,7 +509,7 @@ class PositionPageService(PageService):
                 position.publish_date = jd_update_date(str_2_date(position.publish_date, self.constant.TIME_FORMAT))
                 position.team_name = team_name_dict.get(pid_teamid_dict.get(position.id, 0), '')
 
-            return position_list
+            return position_list, res.data[0]['totalNum'] if res.data else 0
         return res
 
     @gen.coroutine
@@ -522,7 +521,8 @@ class PositionPageService(PageService):
             fields=['id', 'name']
         )
         if res_team_names is None:
-            self.logger.error('get_teamid_names_dict.company_id:%s, get_teamid_names_dict.res_team_name:%s' % (company_id, res_team_names))
+            self.logger.error('get_teamid_names_dict.company_id:%s, get_teamid_names_dict.res_team_name:%s' % (
+                company_id, res_team_names))
         team_name_dict = {e.id: e.name for e in res_team_names}
         return team_name_dict
 
@@ -541,7 +541,8 @@ class PositionPageService(PageService):
 
         pid_teamid_list = yield self.job_position_ds.get_positions_list(**param)
         if pid_teamid_list is None:
-            self.logger.error('get_pid_teamid_dict.company_id:%s, get_pid_teamid_dict.pid_teamid_list:%s' % (company_id, pid_teamid_list))
+            self.logger.error('get_pid_teamid_dict.company_id:%s, get_pid_teamid_dict.pid_teamid_list:%s' % (
+                company_id, pid_teamid_list))
         pid_teamid_dict = {e.id: e.team_id for e in pid_teamid_list}
         self.logger.debug('pid_teamid_dict: %s' % pid_teamid_dict)
         return pid_teamid_dict
@@ -577,3 +578,16 @@ class PositionPageService(PageService):
     def get_position_feature(self, position_id):
         result, data = yield self.infra_position_ds.get_position_feature(position_id)
         return data
+
+    @gen.coroutine
+    def get_recom_position_list_wx_tpl_receive(self, user_id, wechat_id):
+        """获取推荐职位列表模板消息推送是否接收数据"""
+
+        ret = yield self.infra_position_ds.get_recom_position_list_wx_tpl_receive(user_id, wechat_id)
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def not_receive_recom_position_wx_tpl(self, user_id, wechat_id):
+        """暂不接收推荐职位列表消息模板"""
+        ret = yield self.infra_position_ds.post_not_receive_recom_position_wx_tpl(user_id, wechat_id)
+        raise gen.Return(ret)
