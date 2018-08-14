@@ -115,9 +115,9 @@ class TeamPageService(PageService):
                         member=m,
                         head_img=member_head_img_dict.get(m.res_id)
                     ) for m in all_members_dict.get(t.id)
-                    ]
+                ]
             ) for t in teams
-            ]
+        ]
         data.template_total = len(data.templates)
 
         raise gen.Return(data)
@@ -174,7 +174,7 @@ class TeamPageService(PageService):
         other_teams.sort(key=lambda t: t.show_order)
 
         team_members = yield self.hr_team_member_ds.get_team_member_list(
-            conds={'team_id': team.id, 'disable': 0})
+            conds='team_id = {} and disable=0 order by orders, id'.format(team.id))
 
         more_link, modulename, detail_media_list = yield self._get_team_detail_cms(team.id)
         detail_media_list.sort(key=operator.itemgetter("orders"))
@@ -280,7 +280,7 @@ class TeamPageService(PageService):
             member_list = []
         else:
             member_list = yield self.hr_team_member_ds.get_team_member_list(
-                conds='team_id in {} and disable=0'.format(tuple(team_id_list)).replace(',)', ')'))
+                conds='team_id in {} and disable=0 order by orders, id'.format(tuple(team_id_list)).replace(',)', ')'))
 
         result = {tid: [] for tid in team_id_list}
         result['all_head_img_list'] = []
