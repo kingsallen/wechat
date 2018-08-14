@@ -61,19 +61,6 @@ class ChatPageService(PageService):
                 self._compliant_chat_log(e, room)
                 obj_list.append(room)
 
-            # 最后一次聊天为chatbot回复的可操作类型的聊天内容时，如果距离最后一次聊天还在15分钟内，用户可以继续操作这个聊天内容。
-            last_msg = obj_list[-1]
-            last_time = last_msg.chatTime
-
-            now = datetime.datetime.now()
-            delta = datetime.timedelta(minutes=14)  # chatbot15分钟会跳出流程，这里做下校验，给用户一分钟操作的时间
-            delta_data = now + delta
-            n = delta_data.strftime("%Y-%m-%d %H:%M:%S")
-            delta_time = str_2_date(n, "%Y-%m-%d %H:%M:%S")
-            is_expire = delta_time > last_time
-            if last_msg.msgType in const.INTERACTIVE_MSG and is_expire:
-                last_msg.compoundContent['disabled'] = False
-
         raise gen.Return(obj_list)
 
     @staticmethod
