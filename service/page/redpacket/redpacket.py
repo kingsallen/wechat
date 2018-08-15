@@ -212,22 +212,21 @@ class RedpacketPageService(PageService):
                 'sysuser_id': user_id,
                 'company_id': company_id,
                 'activation': const.OLD_YES,
-                'disable': const.OLD_YES
+                'disable': const.OLD_YES,
+                'is_rp_sent': const.NO
             }, appends=appends)
         if not employee:
             self.logger.debug(
                 '[RP]员工绑定状态不正确, user_id: %s' % user_id)
             return
         # 检验员工是否领取过红包
-        employee = yield self.user_employee_ds.get_employee(
+        employee_ = yield self.user_employee_ds.get_employee(
             conds={
                 'sysuser_id': user_id,
                 'company_id': company_id,
-                'activation': const.OLD_YES,
-                'disable': const.OLD_YES,
                 'is_rp_sent': const.YES
             }, appends=appends)
-        if employee:
+        if employee_:
             self.logger.debug(
                 '[RP]员工已经领取过红包, user_id: %s' % user_id)
             return
