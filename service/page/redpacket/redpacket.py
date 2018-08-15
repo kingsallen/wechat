@@ -223,8 +223,6 @@ class RedpacketPageService(PageService):
             conds={
                 'sysuser_id': user_id,
                 'company_id': company_id,
-                'activation': const.OLD_YES,
-                'disable': const.OLD_YES,
                 'is_rp_sent': const.YES
             }, appends=appends)
         if employee:
