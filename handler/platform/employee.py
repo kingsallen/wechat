@@ -462,7 +462,7 @@ class BindInfoHandler(BaseHandler):
         # 绑定成功回填自定义配置字段成功
         redirect_when_bind_success = self.json_args.get('redirect_when_bind_success') or self.get_argument('redirect_when_bind_success', '')
         if redirect_when_bind_success:
-            self.redirect(self.json_args.get('redirect_when_bind_success'))
+            self.redirect(redirect_when_bind_success)
             return
 
         next_url = self.make_url(path.EMPLOYEE_CUSTOMINFO_BINDED, self.params)
