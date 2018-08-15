@@ -242,8 +242,7 @@ class EmployeeBindHandler(BaseHandler):
         else:
             next_url = self.make_url(path.EMPLOYEE_BINDED, self.params)
             if self.params.get('redirect_when_bind_success'):
-                self.redirect(self.params.get('redirect_when_bind_success'))
-                return
+                next_url = self.params.get('redirect_when_bind_success')
 
         self.send_json_success(
             data={'next_url': next_url},
