@@ -132,7 +132,7 @@ class UserCompanyPageService(PageService):
 
                 cms_modules_ids = [m.id for m in cms_modules]
                 cms_medias = yield self.hr_cms_media_ds.get_media_list(
-                    conds="module_id in {} and disable=0".format(tuple(cms_modules_ids)).replace(',)', ')')
+                    conds="module_id in {} and disable=0 order by orders, id".format(tuple(cms_modules_ids)).replace(',)', ')')
                 )
 
                 # 不需要价差cms_medias存不存在
