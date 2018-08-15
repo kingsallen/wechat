@@ -14,6 +14,7 @@ from util.common.decorator import handle_response, authenticated
 from util.tool.json_tool import json_dumps
 from util.tool.str_tool import to_str
 from urllib import parse
+import conf.platform as const_platform
 
 
 class AwardsLadderPageHandler(BaseHandler):
@@ -66,22 +67,33 @@ class AwardsLadderHandler(BaseHandler):
         if not binded:
             self.send_json_error(
                 message=messages.EMPLOYEE_NOT_BINDED_WARNING.format(self.current_user.company.conf_employee_slug))
-
+        list_only = self.params.list_only
         company_id = self.current_user.company.id
         employee_id = self.current_user.employee.id
         rankType = self.params.rankType  # year/month/quarter
 
+        page_from = (int(self.params.get("count", 0)) * const_platform.RANK_LIST_PAGE_COUNT)
+        page_size = const_platform.RANK_LIST_PAGE_COUNT
         rank_list = yield self.employee_ps.get_award_ladder_info(
             employee_id=employee_id,
             company_id=company_id,
             type=rankType)
-
+        current_user_rank = filter(lambda x: x.id == employee_id, rank_list)
         rank_list = sorted(rank_list, key=lambda x: x.level)
 
-        data = ObjectDict(employeeId=employee_id, rankList=rank_list)
+        data = ObjectDict(employeeId=employee_id, rankList=rank_list, current_user_rank=current_user_rank)
         self.logger.debug("awards ladder data: %s" % data)
 
         self.send_json_success(data=data)
+
+
+class PraiseHandler(BaseHandler):
+    """
+    点赞操作
+    """
+    def post(self):
+        praise_user_id = self.json_args.praise_user_id
+        result = yield self.employee_ps.vote_prasie(praise_user_id)
 
 
 class AwardsHandler(BaseHandler):
@@ -162,10 +174,11 @@ class EmployeeBindHandler(BaseHandler):
             return
         else:
             pass
+        mate_num = yield self.employee_ps.get_mate_num(self.current_user.company.id)
 
         # 根据 conf 来构建 api 的返回 data
         data = yield self.employee_ps.make_binding_render_data(
-            self.current_user, conf_response.employeeVerificationConf)
+            self.current_user, mate_num, conf_response.employeeVerificationConf)
         self.send_json_success(data=data)
 
     @handle_response
@@ -261,7 +274,10 @@ class EmployeeBindEmailHandler(BaseHandler):
         self.render(template_name='employee/certification-%s.html' % tname,
                     **tparams)
         if employee_id is None:
-            self.logger.error('employee_log_id_None   current_user:{}, result:{}, message:{}, params:{}'.format(self.current_user, result, message, self.params))
+            self.logger.error(
+                'employee_log_id_None   current_user:{}, result:{}, message:{}, params:{}'.format(self.current_user,
+                                                                                                  result, message,
+                                                                                                  self.params))
         employee = yield self.user_ps.get_employee_by_id(employee_id)
 
         if result and employee:
@@ -629,7 +645,7 @@ class EmployeeAiRecomHandler(BaseHandler):
     def get(self, recom_push_id):
         recom_push_id = int(recom_push_id)
         recom_audience = self.RECOM_AUDIENCE_EMPLOYEE
-        recom=self.position_ps._make_recom(self.current_user.sysuser.id)
+        recom = self.position_ps._make_recom(self.current_user.sysuser.id)
         self.params.share = yield self.get_employee_recom_share_info(recom_push_id, recom)
 
         self.render_page("adjunct/job-recom-list.html",

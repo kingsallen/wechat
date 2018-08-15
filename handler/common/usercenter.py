@@ -53,7 +53,7 @@ class UsercenterHandler(BaseHandler):
         )
         fe_bind_status = self.employee_ps.convert_bind_status_from_thrift_to_fe(
             bind_status)
-
+        unread_praise = self.lemployee_ps.get_unread_praise()
         self.send_json_success(data=ObjectDict(
             headimg=self.static_url(res.data.headimg or const.SYSUSER_HEADIMG),
             name=res.data.name or res.data.nickname,

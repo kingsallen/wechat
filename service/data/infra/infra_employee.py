@@ -26,4 +26,20 @@ class InfraEmployeeDataService(DataService):
         ret = yield http_post(path.INTEREST_REFERRAL_POLICY, params)
         return unboxing(ret)
 
+    @gen.coroutine
+    def get_mate_num(self, company_id):
+        params = ObjectDict({
+            "company_id": company_id
+        })
+        ret = yield http_get(path.MATE_NUM, params)
+        return unboxing(ret)
+
+    @gen.coroutine
+    def get_unread_praise(self, ):
+        params = ObjectDict({
+
+        })
+        ret = yield http_get(path.UNREAD_PRAISE, params)
+        return unboxing(ret)
+
 

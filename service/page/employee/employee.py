@@ -74,7 +74,7 @@ class EmployeePageService(PageService):
         return bind_status
 
     @gen.coroutine
-    def make_binding_render_data(self, current_user, conf):
+    def make_binding_render_data(self, current_user, mate_num, conf):
         """构建员工绑定页面的渲染数据
         :returns:
         {
@@ -106,12 +106,18 @@ class EmployeePageService(PageService):
         binding_message = company_conf.employee_binding if company_conf else ''
 
         data = ObjectDict()
+        data.wechat = ObjectDict()
         data.name = current_user.sysuser.name
         data.headimg = current_user.sysuser.headimg
         data.mobile = current_user.sysuser.mobile or ''
         data.send_hour = 24  # fixed 24 小时
         data.conf = ObjectDict()
         data.binding_success_message = conf.bindSuccessMessage or ''
+        data.wechat.subscribed = True if current_user.wxuser.is_subscribe else False
+        data.wechat.qrcode = ""
+        data.wechat.name = current_user.wechat.name
+        data.mate_num = mate_num
+        data.reward = conf.reward
 
         bind_status, employee = yield self.get_employee_info(
             user_id=current_user.sysuser.id, company_id=current_user.company.id)
@@ -367,16 +373,33 @@ class EmployeePageService(PageService):
                     'id': e.employeeId,
                     'point': e.awardTotal,
                     'icon': make_static_url(e.headimgurl),
-                    'level': e.ranking
+                    'level': e.ranking,
+                    'praise': e.praise,
+                    'praised': e.praised
                 })
 
         return list(gen_make_element(ret))
+
+    @gen.coroutine
+    def vote_prasie(self, praise_user_id):
+        pass
 
     @gen.coroutine
     def get_referral_policy(self, company_id):
         """获取公司内推政策"""
         result, data = yield self.infra_employee_ds.get_referral_policy(company_id)
         return result, data
+
+    @gen.coroutine
+    def get_mate_num(self, company_id):
+        """获取已验证员工数"""
+        result, data = yield self.infra_employee_ds.get_mate_num(company_id)
+        return data if result else 0
+
+    @gen.coroutine
+    def get_unread_praise(self, ):
+        result, data = yield self.infra_employee_ds.get_unread_praise()
+        return data if result else 0
 
     @gen.coroutine
     def create_interest_policy_count(self, params):
