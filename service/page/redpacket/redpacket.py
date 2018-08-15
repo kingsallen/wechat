@@ -206,19 +206,30 @@ class RedpacketPageService(PageService):
         # 因为有可能兄弟公司使用了集团公司内的其他公司的正在进行的红包活动
         company_id = rp_config.company_id
 
-        # 校验员工信息
+        # 校验员工认证信息
+        employee = yield self.user_employee_ds.get_employee(
+            conds={
+                'sysuser_id': user_id,
+                'company_id': company_id,
+                'activation': const.OLD_YES,
+                'disable': const.OLD_YES
+            }, appends=appends)
+        if not employee:
+            self.logger.debug(
+                '[RP]员工绑定状态不正确, user_id: %s' % user_id)
+            return
+        # 检验员工是否领取过红包
         employee = yield self.user_employee_ds.get_employee(
             conds={
                 'sysuser_id': user_id,
                 'company_id': company_id,
                 'activation': const.OLD_YES,
                 'disable': const.OLD_YES,
-                'is_rp_sent': const.NO
+                'is_rp_sent': const.YES
             }, appends=appends)
-
-        if not employee:
+        if employee:
             self.logger.debug(
-                '[RP]员工绑定状态不正确或红包已经发送过, user_id: %s' % user_id)
+                '[RP]员工已经领取过红包, user_id: %s' % user_id)
             return
 
         # 员工认证红包不需要校验上限
