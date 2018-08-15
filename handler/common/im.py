@@ -453,7 +453,7 @@ class ChatHandler(BaseHandler):
 
         content = self.json_args.get("content") or ""
         compoundContent = self.json_args.get("compoundContent") or {}
-        user_message = content or compoundContent
+        user_message = compoundContent or content
         msg_type = self.json_args.get("msgType")
         server_id = self.json_args.get("serverId") or ""
         duration = self.json_args.get("duration") or 0
@@ -464,7 +464,7 @@ class ChatHandler(BaseHandler):
         self.chatroom_channel = const.CHAT_CHATROOM_CHANNEL.format(self.hr_id, self.user_id)
         self.hr_channel = const.CHAT_HR_CHANNEL.format(self.hr_id)
 
-        if msg_type == 'html' and content and not content.strip():
+        if not msg_type or not user_message:
             self.send_json_error()
             return
         chat_params = ChatVO(
@@ -515,7 +515,7 @@ class ChatHandler(BaseHandler):
 
         content = self.json_args.get("content") or ""
         compoundContent = self.json_args.get("compoundContent") or {}
-        user_message = content or compoundContent
+        user_message = compoundContent or content
         msg_type = self.json_args.get("msgType")
 
         if not self.bot_enabled:
@@ -524,7 +524,7 @@ class ChatHandler(BaseHandler):
         self.chatroom_channel = const.CHAT_CHATROOM_CHANNEL.format(self.hr_id, self.user_id)
         self.hr_channel = const.CHAT_HR_CHANNEL.format(self.hr_id)
 
-        if msg_type == 'html' and not user_message:
+        if not msg_type or not user_message:
             self.send_json_error()
             return
 
