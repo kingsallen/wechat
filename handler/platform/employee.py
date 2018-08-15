@@ -460,7 +460,8 @@ class BindInfoHandler(BaseHandler):
             assert False
 
         # 绑定成功回填自定义配置字段成功
-        if self.json_args.get('redirect_when_bind_success'):
+        redirect_when_bind_success = self.json_args.get('redirect_when_bind_success') or self.get_argument('redirect_when_bind_success', '')
+        if redirect_when_bind_success:
             self.redirect(self.json_args.get('redirect_when_bind_success'))
             return
 
