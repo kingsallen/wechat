@@ -165,6 +165,7 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
             nonlocal self
             try:
                 data = ujson.loads(message.get("data"))
+                logger.debug("websocket data:{}".format(data))
                 if data:
                     self.write_message(json_dumps(ObjectDict(
                         content=data.get("content"),
@@ -173,6 +174,7 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
                         speaker=data.get("speaker"),
                         msgType=data.get("msgType")
                     )))
+                    logger.debug("----------websocket write finish----------")
             except websocket.WebSocketClosedError:
                 self.logger.error(traceback.format_exc())
                 self.close(WebSocketCloseCode.internal_error.value)
