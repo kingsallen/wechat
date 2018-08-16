@@ -141,6 +141,20 @@ data_userprofile_publisher = MQPublisher(
     appid=6
 )
 
+user_follow_wechat_publisher = MQPublisher(
+    amqp_url=amqp_url,
+    exchange="user_folow_wechat",
+    exchange_type="direct",
+    appid=6
+)
+
+user_unfollow_wechat_publisher = MQPublisher(
+    amqp_url=amqp_url,
+    exchange="user_unfollow_wechat",
+    exchange_type="direct",
+    appid=6
+)
+
 
 def main():
     award_publisher = AwardsMQPublisher(
@@ -152,6 +166,7 @@ def main():
     )
 
     award_publisher.publish_message({"hello": "world123"})
+
 
 if __name__ == '__main__':
     main()

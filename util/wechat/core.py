@@ -20,6 +20,7 @@ from util.common import ObjectDict
 from util.common.singleton import Singleton
 from util.tool.date_tool import curr_datetime_now
 from util.tool.http_tool import http_post, http_get
+from util.tool.url_tool import make_url
 
 
 class WechatException(Exception):
@@ -312,3 +313,56 @@ def get_qrcode(access_token, scene_str, action_name="QR_LIMIT_STR_SCENE"):
     if ret:
         raise gen.Return(wx.WX_SHOWQRCODE_API % (ret.get("ticket")))
     raise gen.Return(None)
+
+
+@gen.coroutine
+def get_temporary_qrcode(access_token, pattern_id, action_name="QR_SCENE"):
+    """
+    生成带场景值的临时二维码
+    :param pattern_id：场景id      1：员工认证  2：内推政策
+    :param access_token
+    :param action_name
+    :return:
+    """
+    scene_id = int('11110000000000000000000000000000', base=2) + pattern_id
+    params = ObjectDict({
+        "expire_seconds": wx.TEMPORARY_QRCODE_EXPIRE,
+        "action_name": action_name,
+        "action_info": {
+            "scene": {
+                "scene_id": scene_id
+            }
+        }
+    })
+    ret = yield http_post(wx.WX_CREATE_QRCODE_API % access_token, params, infra=False)
+    if ret:
+        raise gen.Return(wx.WX_SHOWQRCODE_API % (ret.get("ticket")))
+    raise gen.Return(None)
+
+
+@gen.coroutine
+def send_succession_message(wechat, open_id, pattern_id):
+    """
+    发送接续流程的信息给用户
+    :param wechat:
+    :param open_id:
+    :param pattern_id: 1：员工认证  2：内推政策
+    :return:
+    """
+    if pattern_id == 1:
+        url = make_url(path.EMPLOYEE_REFERRAL_POLICY, wechat_signature=wechat.get("wechat_signature"))
+        content = '点击完成<a href="{}">员工认证</a> <br> 更多积分奖励等你来~'.format(url)
+    elif pattern_id == 2:
+        url = make_url(path.EMPLOYEE_VERIFY, wechat_signature=wechat.get("wechat_signature"))
+        content = '点击查看<a href="{}">内推政策</a>'.format(url)
+    else:
+        content = "欢迎关注：{}, 点击菜单栏发现更多精彩~".format(wechat.get("name"))
+    jdata = ObjectDict({
+        "touser": open_id,
+        "msgtype": "text",
+        "text": {
+            "content": content
+        }
+    })
+    yield http_post(
+        wx.WX_CS_MESSAGE_API % wechat.get("access_token"), data=jdata, infra=False).json()

@@ -43,7 +43,44 @@ class AwardsLadderPageHandler(BaseHandler):
                 "link": self.fullurl()
             })
             policy_link = self.make_url(path.EMPLOYEE_REFERRAL_POLICY, self.params)
+            # todo 还有分页
+            rank_list = yield self.employee_ps.get_award_ladder_info(
+                employee_id=self.current_user.employee.id,
+                company_id=self.current_user.company.id,
+                type="month")
+            last_rank = yield self.employee_ps.get_last_rank_info()
             self.render_page(template_name="employee/reward-rank.html",
+                             data={"policy_link": policy_link,
+                                   "rank_list": rank_list,
+                                   "last_rank": last_rank})
+
+
+class AwardsFunLadderPageHandler(BaseHandler):
+    """
+    趣味积分排行榜，包含转发信息
+    """
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        # 判断是否是员工
+        binded = const.YES if self.current_user.employee else const.NO
+        if not binded:
+            self.redirect(self.make_url(path.EMPLOYEE_VERIFY, self.params))
+            return
+        else:
+            cover = self.share_url(self.current_user.company.logo)
+            share_title = messages.EMPLOYEE_AWARDS_LADDER_SHARE_TEXT.format(
+                self.current_user.company.abbreviation or "")
+
+            self.params.share = ObjectDict({
+                "cover": cover,
+                "title": share_title,
+                "description": messages.EMPLOYEE_AWARDS_LADDER_DESC_TEXT,
+                "link": self.fullurl()
+            })
+            policy_link = self.make_url(path.EMPLOYEE_REFERRAL_POLICY, self.params)
+            self.render_page(template_name="",
                              data={"policy_link": policy_link})
 
 
@@ -74,14 +111,18 @@ class AwardsLadderHandler(BaseHandler):
 
         page_from = (int(self.params.get("count", 0)) * const_platform.RANK_LIST_PAGE_COUNT)
         page_size = const_platform.RANK_LIST_PAGE_COUNT
+        # TODO 分页
         rank_list = yield self.employee_ps.get_award_ladder_info(
             employee_id=employee_id,
             company_id=company_id,
-            type=rankType)
+            type=rankType
+        )
         current_user_rank = filter(lambda x: x.id == employee_id, rank_list)
         rank_list = sorted(rank_list, key=lambda x: x.level)
-
-        data = ObjectDict(employeeId=employee_id, rankList=rank_list, current_user_rank=current_user_rank)
+        if list_only:
+            data = ObjectDict(rankList=rank_list)
+        else:
+            data = ObjectDict(employeeId=employee_id, rankList=rank_list, current_user_rank=current_user_rank)
         self.logger.debug("awards ladder data: %s" % data)
 
         self.send_json_success(data=data)
@@ -93,7 +134,19 @@ class PraiseHandler(BaseHandler):
     """
     def post(self):
         praise_user_id = self.json_args.praise_user_id
-        result = yield self.employee_ps.vote_prasie(praise_user_id)
+        result = yield self.employee_ps.vote_prasie(self.current_user.employee.id, praise_user_id)
+        if result:
+            self.send_json_success()
+        else:
+            self.send_json_error()
+
+    def delete(self):
+        praise_user_id = self.json_args.praise_user_id
+        result = yield self.employee_ps.cancel_prasie(self.current_user.employee.id, praise_user_id)
+        if result:
+            self.send_json_success()
+        else:
+            self.send_json_error()
 
 
 class AwardsHandler(BaseHandler):

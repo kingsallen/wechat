@@ -152,6 +152,7 @@ REFERRAL_POLICY = "/v1.0/referral/conf"
 INTEREST_REFERRAL_POLICY = "/v1.0/referral/policy"
 MATE_NUM = ""
 UNREAD_PRAISE = ""
+VOTE_PRAISE = "v1/employee/{}/upvote/{}"
 # ============================ 基础服务结束 ============================
 
 # 其他外部服务

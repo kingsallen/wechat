@@ -6,7 +6,7 @@ import conf.common as const
 import conf.path as path
 from service.data.base import DataService
 from util.common import ObjectDict
-from util.tool.http_tool import http_get, http_post, http_put, unboxing
+from util.tool.http_tool import http_get, http_post, http_put, unboxing, http_delete
 from util.common.decorator import log_time
 
 
@@ -40,6 +40,16 @@ class InfraEmployeeDataService(DataService):
 
         })
         ret = yield http_get(path.UNREAD_PRAISE, params)
+        return unboxing(ret)
+
+    @gen.coroutine
+    def vote_prasie(self, employee_id, praise_user_id):
+        ret = yield http_post(path.VOTE_PRAISE.format(employee_id, praise_user_id))
+        return unboxing(ret)
+
+    @gen.coroutine
+    def cancel_prasie(self, employee_id, praise_user_id):
+        ret = yield http_delete(path.VOTE_PRAISE.format(employee_id, praise_user_id))
         return unboxing(ret)
 
 

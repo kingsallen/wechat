@@ -15,6 +15,7 @@ from util.common import ObjectDict
 from util.tool.dict_tool import sub_dict
 from util.tool.re_checker import revalidator
 from util.tool.url_tool import make_static_url, make_url
+from util.wechat.core import get_temporary_qrcode
 
 
 class EmployeePageService(PageService):
@@ -114,7 +115,7 @@ class EmployeePageService(PageService):
         data.conf = ObjectDict()
         data.binding_success_message = conf.bindSuccessMessage or ''
         data.wechat.subscribed = True if current_user.wxuser.is_subscribe else False
-        data.wechat.qrcode = ""
+        data.wechat.qrcode = yield get_temporary_qrcode(current_user.wechat.access_token, pattern_id=1)
         data.wechat.name = current_user.wechat.name
         data.mate_num = mate_num
         data.reward = conf.reward
@@ -381,8 +382,16 @@ class EmployeePageService(PageService):
         return list(gen_make_element(ret))
 
     @gen.coroutine
-    def vote_prasie(self, praise_user_id):
-        pass
+    def vote_prasie(self, employee_id, praise_user_id):
+        """员工点赞"""
+        result, _ = yield self.infra_employee_ds.vote_prasie(employee_id, praise_user_id)
+        return result
+
+    @gen.coroutine
+    def cancel_prasie(self, employee_id, praise_user_id):
+        """员工取消点赞"""
+        result, _ = yield self.infra_employee_ds.cancel_prasie(employee_id, praise_user_id)
+        return result
 
     @gen.coroutine
     def get_referral_policy(self, company_id):

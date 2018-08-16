@@ -9,6 +9,7 @@ WX_OAUTH_GET_USERINFO = "https://api.weixin.qq.com/sns/userinfo?access_token=%s&
 WX_INFO_USER_API = "https://api.weixin.qq.com/cgi-bin/user/info?access_token=%s&openid=%s&lang=zh_CN"
 WX_CREATE_QRCODE_API = "https://api.weixin.qq.com/cgi-bin/qrcode/create?access_token=%s"
 WX_SHOWQRCODE_API = "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=%s"
+WX_CS_MESSAGE_API = "https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=%s"
 API_SEND_TEMPLATE_MESSAGE = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=%s"
 API_PAY_HONGBAO = "https://api.mch.weixin.qq.com/mmpaymkttransfers/sendredpack"
 
@@ -16,6 +17,9 @@ WX_OAUTH_DEFAULT_STATE = '0'
 
 SCOPE_BASE = "snsapi_base"
 SCOPE_USERINFO = "snsapi_userinfo"
+
+# 临时二维码过期时间
+TEMPORARY_QRCODE_EXPIRE = 2592000
 
 # wechat type
 WECHAT_TYPE_SUBSCRIPTION = 0

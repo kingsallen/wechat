@@ -23,7 +23,8 @@ from util.tool.date_tool import curr_now
 from util.tool.str_tool import mobile_validate
 from util.common import ObjectDict
 from util.tool.json_tool import json_dumps
-from util.wechat.core import get_wxuser
+from util.wechat.core import get_wxuser, send_succession_message
+from util.common.mq import user_follow_wechat_publisher, user_unfollow_wechat_publisher
 
 
 class EventPageService(PageService):
@@ -214,7 +215,7 @@ class EventPageService(PageService):
             self.logger.error("[wechat_oauth][opt_event_subscribe] wxuser is: (%s)." % wxuser)
             raise gen.Return()
 
-        if wxuser.get('qr_scene_str'): # 场景二维码处理
+        if wxuser.get('qr_scene_str'):  # 场景二维码处理
             if 'wechat_permanent_qr-' in wxuser.get('qr_scene_str'):  # 永久二维码扫描关注标志字符串
                 _, wechat_id = wxuser.get('qr_scene_str').split('-')
                 self.logger.stats(json_dumps(dict(
@@ -235,6 +236,14 @@ class EventPageService(PageService):
         else:
             # 老微信用户
             yield self._update_wxuser(openid, current_user, msg, wxuser)
+
+        data = ObjectDict({
+            "user_id": current_user.sysuser_id,
+            "wechat_id": current_user.wechat.id,
+            "subscribe_time": int(time.time() * 1000)
+        })
+        # 如果之前是员工，自动绑定员工身份
+        yield user_follow_wechat_publisher.publish_message(message=data)
 
         # 处理临时二维码，目前主要在 PC 上创建帐号、绑定账号时使用,以及Mars EDM活动
         if current_user.wechat.id in (self.settings.qx_wechat_id, const.MARS_ID) and msg.EventKey:
@@ -343,6 +352,13 @@ class EventPageService(PageService):
                     "subscribe_time":  None,
                     "source":          const.WX_USER_SOURCE_UNSUBSCRIBE
                 })
+            data = ObjectDict({
+                "user_id": current_user.sysuser_id,
+                "wechat_id": current_user.wechat.id,
+                "subscribe_time": int(time.time() * 1000)
+            })
+            # 如果是员工，取消用户员工身份
+            yield user_unfollow_wechat_publisher.publish_message(message=data)
             # 取消关注仟寻招聘助手时，将user_hr_account.wxuser_id与user_wx_user.id 解绑
             if current_user.wechat.id == self.settings.helper_wechat_id:
                 user_hr_account = yield self.user_hr_account_ds.get_hr_account(conds={
@@ -359,9 +375,9 @@ class EventPageService(PageService):
                     user_hr_account_cache = UserHrAccountCache()
                     user_hr_account_cache.update_user_hr_account_session(
                         user_hr_account.id,
-                        value = ObjectDict(
-                            wxuser_id = 0,
-                            wxuser = ObjectDict()
+                        value=ObjectDict(
+                            wxuser_id=0,
+                            wxuser=ObjectDict()
                         ))
 
         raise gen.Return()
@@ -485,8 +501,8 @@ class EventPageService(PageService):
         # 临时二维码处理逻辑, 5位type+27为自定义id
         if wechat.id in (self.settings.qx_wechat_id, const.MARS_ID) and int_scene_id:
             int_scene_id = int_scene_id.group(1)
-            type = int(bin(int(int_scene_id))[:7],base=2)
-            real_user_id = int(bin(int(int_scene_id))[7:],base=2)
+            type = int(bin(int(int_scene_id))[:7], base=2)
+            real_user_id = int(bin(int(int_scene_id))[7:], base=2)
             """
               type: 
               "11000" = 24 pc端用户解绑,
@@ -496,6 +512,10 @@ class EventPageService(PageService):
                
               hr 端 10000=16, 10001=17,
               11111=31  Mars EDM活动二维码
+              -----------------------------------------------------------
+              11110=30  携带各个场景值得临时二维码
+              需注意，在type=30时，real_user_id不再表示user_id或hr_id, 而是不同场景的场景值。
+              -----------------------------------------------------------
               见 https://wiki.moseeker.com/weixin.md
             """
 
@@ -610,6 +630,10 @@ class EventPageService(PageService):
                         conds={"id": real_user_id},
                         fields={"wxuser_id": wxuser.id}
                     )
+            elif type == 30:
+                # 根据携带不同场景值的临时二维码，接续之前用户未完成的流程。
+                pattern_id = real_user_id
+                yield send_succession_message(wechat=wechat, open_id=msg.FromUserName, pattern_id=pattern_id)
 
             elif type == 16:
                 pass
