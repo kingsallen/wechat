@@ -216,7 +216,7 @@ def check_and_apply_profile(func):
             # 获取最佳东方导入开关
             company = yield self.company_ps.get_company({'id': self.current_user.wechat.company_id}, need_conf=True)
             importer = ObjectDict(profile_import_51job=True,
-                                  profile_import_zhilian=False,
+                                  profile_import_zhilian=True,
                                   profile_import_liepin=True,
                                   profile_import_linkedin=True,
                                   profile_import_maimai=True,
@@ -301,8 +301,6 @@ def check_and_apply_profile(func):
             )
             redirect_params = {**self.params, **redirect_params}
 
-            # todo: linjie 添加列聘的授权页面网址
-            print("redirect_params: %s" % redirect_params)
             self.render(
                 template_name='refer/neo_weixin/sysuser_v2/importresume.html',
                 **redirect_params,
