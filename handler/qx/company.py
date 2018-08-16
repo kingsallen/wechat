@@ -84,6 +84,7 @@ class CompanyHandler(BaseHandler):
             'title': '{}的公司介绍'.format(company_name),
             'description': '微信好友{}推荐，点击查看公司介绍。打开有公司职位列表哦！'.format(self.current_user.qxuser.nickname),
             'link': self.make_url(path.GAMMA_POSITION_COMPANY.format(company.id),
+                                  self.params,
                                   recom=self.position_ps._make_recom(self.current_user.sysuser.id),
                                   fr="recruit",
                                   did=str(company.id))

@@ -46,7 +46,7 @@ class ThirdpartyImportHandler(MetaBaseHandler):
                 messages=['该网站出现异常，请换个渠道重试'],  # ['hello world', 'abjsldjf']
                 button_text=msg.BACK_CN,
                 button_link=self.make_url(path.PROFILE_VIEW,
-                                          wechat_signature=wechat_signature,
+                                          self.params,
                                           host=self.host),
                 jump_link=None  # // 如果有会自动，没有就不自动跳转
             )
@@ -100,7 +100,7 @@ class MaimaiImportHandler(BaseHandler):
                 messages=messages,  # ['hello world', 'abjsldjf']
                 button_text=msg.BACK_CN,
                 button_link=self.make_url(path.PROFILE_VIEW,
-                                          wechat_signature=self.get_argument('wechat_signature'),
+                                          self.params,
                                           host=self.host),
                 jump_link=None  # // 如果有会自动，没有就不自动跳转
             )
@@ -347,7 +347,7 @@ class LiepinImportHandler(BaseHandler):
             button_text=msg.BACK_CN,
             button_link=self.make_url(
                 path.PROFILE_VIEW,
-                wechat_signature=self.get_argument('wechat_signature'),
+                self.params,
                 host=self.host
             ),
             jump_link=None  # // 如果有会自动，没有就不自动跳转

@@ -26,5 +26,6 @@ class HrTeamMemberDao(BaseDao):
             "create_time": self.constant.TYPE_TIMESTAMP,  # 创建时间
             "update_time": self.constant.TYPE_TIMESTAMP,  # 更新时间
             "disable": self.constant.TYPE_INT,  # 0:无效 1:有效
-            "res_attrs": self.constant.TYPE_STRING  # 图片裁剪
+            "res_attrs": self.constant.TYPE_STRING,  # 图片裁剪
+            "orders": self.constant.TYPE_STRING  # 团队成员的顺序
         }

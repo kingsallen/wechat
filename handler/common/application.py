@@ -44,18 +44,7 @@ class ApplicationHandler(BaseHandler):
                 self.current_user.sysuser.id, position.id)
 
             if not result:
-                p = {
-                    'pid': self.params.pid,
-                    'wechat_signature': self.params.wechat_signature
-                }
-                if self.params.recom:
-                    p['recom'] = self.params.recom
-                if self.params.ai_recom:
-                    p['ai_recom'] = self.params.ai_recom
-                if self.params.algorithm_name:
-                    p['algorithm_name'] = self.params.algorithm_name
-
-                self.redirect(self.make_url(path.PROFILE_CUSTOM_CV, **p))
+                self.redirect(self.make_url(path.PROFILE_CUSTOM_CV, self.params))
 
                 return
 
@@ -107,18 +96,9 @@ class ApplicationHandler(BaseHandler):
             result = yield self.application_ps.check_custom_cv_v2(
                 self.current_user.sysuser.id, position.id)
 
-            p = {'pid': pid, 'wechat_signature': self.params.wechat_signature}
-
-            if self.params.recom:
-                p.update({'recom': self.params.recom})
-            if self.params.ai_recom:
-                p['ai_recom'] = self.params.ai_recom
-            if self.params.algorithm_name:
-                p['algorithm_name'] = self.params.algorithm_name
-
             if not result:
                 self.send_json_error(
-                    data=dict(next_url=self.make_url(path.PROFILE_CUSTOM_CV, **p),
+                    data=dict(next_url=self.make_url(path.PROFILE_CUSTOM_CV, self.params),
                               message=''))
                 return
 
@@ -211,7 +191,7 @@ class ApplicationEmailHandler(BaseHandler):
                     messages=[messages],  # ['hello world', 'abjsldjf']
                     button_text=msg.BACK_CN,
                     button_link=self.make_url(path.POSITION_LIST,
-                                              wechat_signature=self.get_argument('wechat_signature'),
+                                              self.params,
                                               host=self.host),
                     jump_link=None  # // 如果有会自动，没有就不自动跳转
                 )

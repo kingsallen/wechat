@@ -57,6 +57,7 @@ import handler.qx.search
 import handler.qx.position
 import handler.qx.team
 import handler.qx.company
+import handler.common.permanent_qr
 
 import handler.wechat.event
 
@@ -66,6 +67,7 @@ common_routes = [
     (r"/wechat",                                     handler.wechat.event.WechatOauthHandler,                   {"event": "wechat_oauth"}),
     # 第三方授权方式
     (r"/wechat[\/]*([0-9a-z]+)*",                    handler.wechat.event.WechatThirdOauthHandler,              {"event": "wechat_thirdoauth"}),
+    (r"/qr/permanent/([0-9]+)",                      handler.common.permanent_qr.PermanentQRHandler,            {"event": "permanent_qr"}),
 
     # app forward 给前端，展示纯前端渲染的 SPA
     (r"/app/.*",                                     handler.common.app.IndexHandler,                           {"event": "app_"}),
