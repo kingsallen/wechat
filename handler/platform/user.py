@@ -680,8 +680,23 @@ class APIPositionRecomListHandler(BaseHandler):
 
 
 class APIPositionRecomListCloseHandler(BaseHandler):
+
+    @decorator.handle_response
+    @decorator.authenticated
+    @gen.coroutine
+    def get(self):
+        res = yield self.position_ps.get_recom_position_list_wx_tpl_receive(
+            user_id=self.current_user.sysuser.id,
+            wechat_id=self.current_user.wechat.id
+        )
+        self.write(res)
+
     @decorator.handle_response
     @decorator.authenticated
     @gen.coroutine
     def post(self):
-        pass
+        res = yield self.position_ps.not_receive_recom_position_wx_tpl(
+            user_id=self.current_user.sysuser.id,
+            wechat_id=self.current_user.wechat.id
+        )
+        self.write(res)

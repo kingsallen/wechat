@@ -450,7 +450,7 @@ class PositionPageService(PageService):
 
         if res.status == 0:
             # 获取获取到普通职位列表，则根据获取的数据查找其中红包职位的红包相关信息
-            position_list = [ObjectDict(e) for e in res.data.positions]
+            position_list = [ObjectDict(e) for e in res.data]
 
             # 团队信息 #
             # 逻辑和infra_get_position_personarecom一样, 代码有重复, TODO: 优化
@@ -476,7 +476,7 @@ class PositionPageService(PageService):
                         position.is_rp_reward = position.remain > 0
                     else:
                         position.is_rp_reward = False
-            return position_list, res.data.total_count or 0
+            return position_list, res.data[0]['totalNum'] if res.data else 0
         else:
             self.logger.warn(res)
             return []
@@ -500,7 +500,7 @@ class PositionPageService(PageService):
         team_name_dict = yield self.get_teamid_names_dict(company_id)
 
         if res.status == 0:
-            position_list = [ObjectDict(e) for e in res.data.get('positions')]
+            position_list = [ObjectDict(e) for e in res.data]
             pids = [e.id for e in position_list]
             pid_teamid_dict = yield self.get_pid_teamid_dict(company_id, pids)
 
@@ -509,7 +509,7 @@ class PositionPageService(PageService):
                 position.publish_date = jd_update_date(str_2_date(position.publish_date, self.constant.TIME_FORMAT))
                 position.team_name = team_name_dict.get(pid_teamid_dict.get(position.id, 0), '')
 
-            return position_list, res.data.total_count or 0
+            return position_list, res.data[0]['totalNum'] if res.data else 0
         return res
 
     @gen.coroutine
@@ -580,14 +580,14 @@ class PositionPageService(PageService):
         return data
 
     @gen.coroutine
-    def get_recom_position_list_wx_tpl_receive(self, user_id):
+    def get_recom_position_list_wx_tpl_receive(self, user_id, wechat_id):
         """获取推荐职位列表模板消息推送是否接收数据"""
 
-        ret = yield self.infra_position_ds.get_recom_position_list_wx_tpl_receive(user_id)
+        ret = yield self.infra_position_ds.get_recom_position_list_wx_tpl_receive(user_id, wechat_id)
         raise gen.Return(ret)
 
     @gen.coroutine
-    def not_receive_recom_position_wx_tpl(self, user_id):
+    def not_receive_recom_position_wx_tpl(self, user_id, wechat_id):
         """暂不接收推荐职位列表消息模板"""
-        ret = yield self.infra_position_ds.post_not_receive_recom_position_wx_tpl(user_id)
+        ret = yield self.infra_position_ds.post_not_receive_recom_position_wx_tpl(user_id, wechat_id)
         raise gen.Return(ret)
