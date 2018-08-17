@@ -117,7 +117,7 @@ class AwardsLadderHandler(BaseHandler):
             company_id=company_id,
             type=rankType
         )
-        current_user_rank = filter(lambda x: x.id == employee_id, rank_list)
+        current_user_rank = yield self.employee_ps.get_current_user_rank_info(self.current_user.sysuser_id)
         rank_list = sorted(rank_list, key=lambda x: x.level)
         if list_only:
             data = ObjectDict(rankList=rank_list)

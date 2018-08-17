@@ -406,9 +406,28 @@ class EmployeePageService(PageService):
         return data if result else 0
 
     @gen.coroutine
-    def get_unread_praise(self, ):
-        result, data = yield self.infra_employee_ds.get_unread_praise()
+    def get_unread_praise(self, user_id):
+        """获取未读的赞的数量"""
+        result, data = yield self.infra_employee_ds.get_unread_praise(user_id)
         return data if result else 0
+
+    @gen.coroutine
+    def reset_unread_praise(self, user_id):
+        """阅读后，将未读的赞的数量清空"""
+        result, data = yield self.infra_employee_ds.reset_unread_praise(user_id)
+        return result
+
+    @gen.coroutine
+    def get_last_rank_info(self):
+        """获取该公司积分榜单最后一名员工的榜单信息"""
+        result, data = yield self.infra_employee_ds.get_last_rank_info()
+        return data
+
+    @gen.coroutine
+    def get_current_user_rank_info(self, user_id):
+        """获取当前用户榜单信息"""
+        result, data = yield self.infra_employee_ds.get_current_user_rank_info(user_id)
+        return data
 
     @gen.coroutine
     def create_interest_policy_count(self, params):

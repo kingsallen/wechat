@@ -21,6 +21,7 @@ from util.common.singleton import Singleton
 from util.tool.date_tool import curr_datetime_now
 from util.tool.http_tool import http_post, http_get
 from util.tool.url_tool import make_url
+from util.common.decorator import cache
 
 
 class WechatException(Exception):
@@ -315,6 +316,7 @@ def get_qrcode(access_token, scene_str, action_name="QR_LIMIT_STR_SCENE"):
     raise gen.Return(None)
 
 
+@cache(ttl=60*60*24*20)
 @gen.coroutine
 def get_temporary_qrcode(access_token, pattern_id, action_name="QR_SCENE"):
     """
