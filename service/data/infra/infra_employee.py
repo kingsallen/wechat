@@ -36,18 +36,7 @@ class InfraEmployeeDataService(DataService):
 
     @gen.coroutine
     def get_unread_praise(self, user_id):
-        params = ObjectDict({
-            "user_id": user_id
-        })
-        ret = yield http_get(path.UNREAD_PRAISE, params)
-        return unboxing(ret)
-
-    @gen.coroutine
-    def reset_unread_praise(self, user_id):
-        params = ObjectDict({
-            "user_id": user_id
-        })
-        ret = yield http_delete(path.UNREAD_PRAISE, params)
+        ret = yield http_get(path.UNREAD_PRAISE.format(user_id))
         return unboxing(ret)
 
     @gen.coroutine
@@ -61,16 +50,13 @@ class InfraEmployeeDataService(DataService):
         return unboxing(ret)
 
     @gen.coroutine
-    def get_last_rank_info(self):
-        ret = yield http_get(path.LAST_RANK_INFO)
+    def get_last_rank_info(self, employee_id):
+        ret = yield http_get(path.LAST_RANK_INFO.format(employee_id))
         return unboxing(ret)
 
     @gen.coroutine
     def get_current_user_rank_info(self, user_id):
-        params = ObjectDict({
-            "user_id": user_id
-        })
-        ret = yield http_get(path.USER_RANK_INFO, params)
+        ret = yield http_get(path.USER_RANK_INFO.format(user_id))
         return unboxing(ret)
 
 

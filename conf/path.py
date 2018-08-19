@@ -151,10 +151,10 @@ VOICE = "/api/v1/chat/voice/pullVoiceFile"
 REFERRAL_POLICY = "/v1.0/referral/conf"
 INTEREST_REFERRAL_POLICY = "/v1.0/referral/policy"
 MATE_NUM = ""
-UNREAD_PRAISE = ""
-VOTE_PRAISE = "v1/employee/{}/upvote/{}"
-LAST_RANK_INFO = ""
-USER_RANK_INFO = ""
+UNREAD_PRAISE = "/v1/employee/{}/recent-upvote"
+VOTE_PRAISE = "/v1/employee/{}/upvote/{}"
+LAST_RANK_INFO = "/v1/employee/{}/last-list-info"
+USER_RANK_INFO = "/v1/employee/{}/list-info"
 # ============================ 基础服务结束 ============================
 
 # 其他外部服务

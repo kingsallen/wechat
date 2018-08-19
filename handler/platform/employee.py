@@ -43,12 +43,16 @@ class AwardsLadderPageHandler(BaseHandler):
                 "link": self.fullurl()
             })
             policy_link = self.make_url(path.EMPLOYEE_REFERRAL_POLICY, self.params)
-            # todo 还有分页
+            page_from = const.PAGE_FROM_ONE
+            page_size = const.PAGE_SIZE_FIVE
             rank_list = yield self.employee_ps.get_award_ladder_info(
                 employee_id=self.current_user.employee.id,
                 company_id=self.current_user.company.id,
-                type="month")
-            last_rank = yield self.employee_ps.get_last_rank_info()
+                type="month",
+                page_from=page_from,
+                page_size=page_size
+            )
+            last_rank = yield self.employee_ps.get_last_rank_info(self.current_user.employee.id)
             self.render_page(template_name="employee/reward-rank.html",
                              data={"policy_link": policy_link,
                                    "rank_list": rank_list,
@@ -111,11 +115,12 @@ class AwardsLadderHandler(BaseHandler):
 
         page_from = (int(self.params.get("count", 0)) * const_platform.RANK_LIST_PAGE_COUNT)
         page_size = const_platform.RANK_LIST_PAGE_COUNT
-        # TODO 分页
         rank_list = yield self.employee_ps.get_award_ladder_info(
             employee_id=employee_id,
             company_id=company_id,
-            type=rankType
+            type=rankType,
+            page_from=page_from,
+            page_size=page_size
         )
         current_user_rank = yield self.employee_ps.get_current_user_rank_info(self.current_user.sysuser_id)
         rank_list = sorted(rank_list, key=lambda x: x.level)
@@ -168,7 +173,8 @@ class AwardsHandler(BaseHandler):
                 page_number=int(self.params.page_number),
                 page_size=int(self.params.page_size),
             )
-
+            # 清空未读赞的数量
+            yield self.employee_ps.reset_unread_praise(employee_id=self.current_user.employee.id)
             rewards_response.update({
                 'binded': binded,
                 'email_activation_state': email_activation_state

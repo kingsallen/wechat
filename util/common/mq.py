@@ -155,6 +155,13 @@ user_unfollow_wechat_publisher = MQPublisher(
     appid=6
 )
 
+unread_praise_publisher = MQPublisher(
+    amqp_url=amqp_url,
+    exchange="employee_view_leader_board",
+    exchange_type="direct",
+    appid=6
+)
+
 
 def main():
     award_publisher = AwardsMQPublisher(

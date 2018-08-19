@@ -3,7 +3,7 @@
 import json
 
 from tornado import gen
-
+import time
 import conf.common as const
 import conf.fe as fe
 import conf.message as msg
@@ -16,6 +16,7 @@ from util.tool.dict_tool import sub_dict
 from util.tool.re_checker import revalidator
 from util.tool.url_tool import make_static_url, make_url
 from util.wechat.core import get_temporary_qrcode
+from util.common.mq import unread_praise_publisher
 
 
 class EmployeePageService(PageService):
@@ -362,10 +363,10 @@ class EmployeePageService(PageService):
         return ret.success, ret.message, ret.employeeId
 
     @gen.coroutine
-    def get_award_ladder_info(self, employee_id, company_id, type):
+    def get_award_ladder_info(self, employee_id, company_id, type, page_from, page_size):
         """获取员工积分榜数据"""
         ret = yield self.thrift_employee_ds.get_award_ranking(
-            employee_id, company_id, type)
+            employee_id, company_id, type, page_from, page_size)
 
         def gen_make_element(employee_award_list):
             for e in employee_award_list:
@@ -379,7 +380,7 @@ class EmployeePageService(PageService):
                     'praised': e.praised
                 })
 
-        return list(gen_make_element(ret))
+        return list(gen_make_element(ret.EmployeeAward))
 
     @gen.coroutine
     def vote_prasie(self, employee_id, praise_user_id):
@@ -412,15 +413,18 @@ class EmployeePageService(PageService):
         return data if result else 0
 
     @gen.coroutine
-    def reset_unread_praise(self, user_id):
+    def reset_unread_praise(self, employee_id):
         """阅读后，将未读的赞的数量清空"""
-        result, data = yield self.infra_employee_ds.reset_unread_praise(user_id)
-        return result
+        data = ObjectDict({
+            "employee_id": employee_id,
+            "view_time": int(time.time() * 1000)
+        })
+        yield unread_praise_publisher.publish_message(message=data)
 
     @gen.coroutine
-    def get_last_rank_info(self):
+    def get_last_rank_info(self, employee_id):
         """获取该公司积分榜单最后一名员工的榜单信息"""
-        result, data = yield self.infra_employee_ds.get_last_rank_info()
+        result, data = yield self.infra_employee_ds.get_last_rank_info(employee_id)
         return data
 
     @gen.coroutine
