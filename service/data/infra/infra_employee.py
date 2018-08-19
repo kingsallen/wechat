@@ -28,10 +28,7 @@ class InfraEmployeeDataService(DataService):
 
     @gen.coroutine
     def get_mate_num(self, company_id):
-        params = ObjectDict({
-            "company_id": company_id
-        })
-        ret = yield http_get(path.MATE_NUM, params)
+        ret = yield http_get(path.MATE_NUM.format(company_id))
         return unboxing(ret)
 
     @gen.coroutine
