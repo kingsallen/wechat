@@ -689,6 +689,15 @@ class APIPositionRecomListCloseHandler(BaseHandler):
             user_id=self.current_user.sysuser.id,
             wechat_id=self.current_user.wechat.id
         )
+        data = res.get('data') or {}
+
+        intention_id = None
+        if self.current_user.profile and self.current_user.profile.intentions:
+            intention_id = self.current_user.profile.intentions[0].get('id')
+
+        data.update(dict(
+            intention_id=intention_id
+        ))
         self.write(res)
 
     @decorator.handle_response
