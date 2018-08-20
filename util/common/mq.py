@@ -157,7 +157,7 @@ user_unfollow_wechat_publisher = MQPublisher(
 
 unread_praise_publisher = MQPublisher(
     amqp_url=amqp_url,
-    exchange="employee_view_leader_board",
+    exchange="employee_view_leader_board_exchange",
     exchange_type="direct",
     appid=6
 )

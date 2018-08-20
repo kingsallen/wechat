@@ -37,17 +37,17 @@ class InfraEmployeeDataService(DataService):
         return unboxing(ret)
 
     @gen.coroutine
-    def vote_prasie(self, employee_id, praise_user_id):
-        ret = yield http_post(path.VOTE_PRAISE.format(employee_id, praise_user_id))
+    def vote_prasie(self, employee_id, praise_employee_id):
+        ret = yield http_post(path.VOTE_PRAISE.format(employee_id, praise_employee_id))
         return unboxing(ret)
 
     @gen.coroutine
-    def cancel_prasie(self, employee_id, praise_user_id):
-        ret = yield http_delete(path.VOTE_PRAISE.format(employee_id, praise_user_id))
+    def cancel_prasie(self, employee_id, praise_employee_id):
+        ret = yield http_delete(path.VOTE_PRAISE.format(employee_id, praise_employee_id))
         return unboxing(ret)
 
     @gen.coroutine
-    def get_last_rank_info(self, employee_id):
+    def get_last_rank_info(self, employee_id, type):
         params = ObjectDict({
             "type": type
         })
@@ -67,4 +67,11 @@ class InfraEmployeeDataService(DataService):
         ret = yield http_get(path.LADDER_TYPE.format(company_id))
         return unboxing(ret)
 
+    @gen.coroutine
+    def get_bind_reward(self, company_id):
+        params = ObjectDict({
+            "companyId": company_id
+        })
+        ret = yield http_get(path.BIND_REWARD, params)
+        return unboxing(ret)
 

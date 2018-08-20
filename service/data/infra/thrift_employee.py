@@ -66,7 +66,7 @@ class ThriftEmployeeDataService(DataService):
         return ret
 
     @gen.coroutine
-    def get_award_ranking(self, employee_id, company_id, type, page_from, page_size):
+    def get_award_ranking(self, employee_id, company_id, type, page_from=1, page_size=20):
         """
         调用基础服务 thrift 接口 获取员工积分榜数据
         :param employee_id:
