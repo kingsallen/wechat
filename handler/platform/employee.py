@@ -381,7 +381,7 @@ class EmployeeBindHandler(BaseHandler):
             next_url = self.make_url(path.EMPLOYEE_CUSTOMINFO, self.params, from_wx_template='x')
         else:
             next_url = self.make_url(path.EMPLOYEE_BINDED, self.params)
-            if self.params.get('redirect_when_bind_success'):
+            if self.params.get('redirect_when_bind_success') and self.json_args.get('type') != 'email':
                 next_url = self.params.get('redirect_when_bind_success')
 
         self.send_json_success(
@@ -599,7 +599,8 @@ class BindInfoHandler(BaseHandler):
             assert False
 
         # 绑定成功回填自定义配置字段成功
-        redirect_when_bind_success = self.json_args.get('redirect_when_bind_success') or self.get_argument('redirect_when_bind_success', '')
+        redirect_when_bind_success = self.json_args.get('redirect_when_bind_success') or self.get_argument(
+            'redirect_when_bind_success', '')
 
         next_url = redirect_when_bind_success or self.make_url(path.EMPLOYEE_CUSTOMINFO_BINDED, self.params)
         self.params.from_wx_template = self.json_args.from_wx_template
