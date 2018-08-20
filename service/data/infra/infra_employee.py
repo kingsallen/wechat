@@ -77,3 +77,11 @@ class InfraEmployeeDataService(DataService):
             "username": "jfcd",
             "icon": "http://thirdwx.qlogo.cn/mmopen/Q3auHgzwzM4WqiaoE7g1utu7ZdibzWm6CZwHdCK0iaGDHKlo4TnbmXXGg2DcJfAvwJVykrtT7dzwtywCEnutsic1iaA/132"
         }
+
+    @gen.coroutine
+    def get_award_ladder_type(self, company_id):
+        ret = yield http_get(path.LADDER_TYPE.format(company_id))
+        return unboxing(ret)
+
+
+

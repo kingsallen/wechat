@@ -119,7 +119,7 @@ class EmployeePageService(PageService):
         data.wechat.qrcode = yield get_temporary_qrcode(current_user.wechat.access_token, pattern_id=1)
         data.wechat.name = current_user.wechat.name
         data.mate_num = mate_num
-        data.reward = conf.reward
+        data.conf.reward = conf.reward
 
         bind_status, employee = yield self.get_employee_info(
             user_id=current_user.sysuser.id, company_id=current_user.company.id)
@@ -432,6 +432,16 @@ class EmployeePageService(PageService):
         """获取当前用户榜单信息"""
         result, data = yield self.infra_employee_ds.get_current_user_rank_info(user_id)
         return data
+
+    @gen.coroutine
+    def get_award_ladder_type(self, company_id):
+        """获取榜单类型"""
+        result, data = yield self.infra_employee_ds.get_award_ladder_type(company_id)
+        if result:
+            ladder_type = data.get("type")
+        else:
+            ladder_type = 2
+        return ladder_type
 
     @gen.coroutine
     def create_interest_policy_count(self, params):

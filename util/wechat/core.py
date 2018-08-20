@@ -316,7 +316,7 @@ def get_qrcode(access_token, scene_str, action_name="QR_LIMIT_STR_SCENE"):
     raise gen.Return(None)
 
 
-@cache(ttl=60*60*24*20)
+@cache(ttl=60 * 60 * 24 * 20)
 @gen.coroutine
 def get_temporary_qrcode(access_token, pattern_id, action_name="QR_SCENE"):
     """
@@ -364,7 +364,11 @@ def send_succession_message(wechat, open_id, pattern_id):
         "msgtype": "text",
         "text": {
             "content": content
-        }
+        },
+        "customservice":
+            {
+                "kf_account": "kf{}@{}".format(wechat.get("id"), wechat.get("alias"))
+            }
     })
     yield http_post(
         wx.WX_CS_MESSAGE_API % wechat.get("access_token"), data=jdata, infra=False).json()
