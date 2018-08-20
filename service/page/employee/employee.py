@@ -76,7 +76,7 @@ class EmployeePageService(PageService):
         return bind_status
 
     @gen.coroutine
-    def make_binding_render_data(self, current_user, mate_num, conf):
+    def make_binding_render_data(self, current_user, mate_num, reward, conf):
         """构建员工绑定页面的渲染数据
         :returns:
         {
@@ -119,7 +119,7 @@ class EmployeePageService(PageService):
         data.wechat.qrcode = yield get_temporary_qrcode(current_user.wechat.access_token, pattern_id=1)
         data.wechat.name = current_user.wechat.name
         data.mate_num = mate_num
-        data.conf.reward = conf.reward
+        data.conf.reward = reward
 
         bind_status, employee = yield self.get_employee_info(
             user_id=current_user.sysuser.id, company_id=current_user.company.id)
@@ -344,6 +344,12 @@ class EmployeePageService(PageService):
         })
 
     @gen.coroutine
+    def get_bind_rewards(self, company_id):
+        """获取积分配置"""
+        result, data = yield self.infra_employee_ds.get_bind_reward(company_id)
+        return data
+
+    @gen.coroutine
     def unbind(self, employee_id, company_id, user_id):
         """员工解绑"""
         ret = yield self.thrift_employee_ds.unbind(
@@ -383,15 +389,22 @@ class EmployeePageService(PageService):
         return list(gen_make_element(ret.data))
 
     @gen.coroutine
-    def vote_prasie(self, employee_id, praise_user_id):
+    def get_total_row_ladder_info(self, employee_id, company_id, type):
+        """获取员工积分榜数据总数"""
+        ret = yield self.thrift_employee_ds.get_award_ranking(
+            employee_id, company_id, type)
+        return ret.totalRow
+
+    @gen.coroutine
+    def vote_prasie(self, employee_id, praise_employee_id):
         """员工点赞"""
-        result, _ = yield self.infra_employee_ds.vote_prasie(employee_id, praise_user_id)
+        result, _ = yield self.infra_employee_ds.vote_prasie(employee_id, praise_employee_id)
         return result
 
     @gen.coroutine
-    def cancel_prasie(self, employee_id, praise_user_id):
+    def cancel_prasie(self, employee_id, praise_employee_id):
         """员工取消点赞"""
-        result, _ = yield self.infra_employee_ds.cancel_prasie(employee_id, praise_user_id)
+        result, _ = yield self.infra_employee_ds.cancel_prasie(employee_id, praise_employee_id)
         return result
 
     @gen.coroutine

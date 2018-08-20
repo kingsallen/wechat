@@ -29,10 +29,13 @@ class AwardsLadderPageHandler(BaseHandler):
     def get(self):
         # 判断是否已经绑定员工
         binded = const.YES if self.current_user.employee else const.NO
+
         if not binded:
             self.redirect(self.make_url(path.EMPLOYEE_VERIFY, self.params))
             return
         else:
+            # 清空未读赞的数量
+            yield self.employee_ps.reset_unread_praise(employee_id=self.current_user.employee.id)
             cover = self.share_url(self.current_user.company.logo)
             share_title = messages.EMPLOYEE_AWARDS_LADDER_SHARE_TEXT.format(
                 self.current_user.company.abbreviation or "")
@@ -45,41 +48,12 @@ class AwardsLadderPageHandler(BaseHandler):
             ladder_type = yield self.employee_ps.get_award_ladder_type(self.current_user.company.id)
             policy_link = self.make_url(path.EMPLOYEE_REFERRAL_POLICY, self.params)
             if ladder_type == 1:
+
                 self.render_page(template_name="employee/reward-rank.html",
                                  data={"policy_link": policy_link})
             else:
                 self.render_page(template_name="employee/reward-rank-dark.html",
                                  data={"policy_link": policy_link})
-
-
-class AwardsFunLadderPageHandler(BaseHandler):
-    """
-    趣味积分排行榜，包含转发信息
-    """
-
-    @handle_response
-    @authenticated
-    @gen.coroutine
-    def get(self):
-        # 判断是否是员工
-        binded = const.YES if self.current_user.employee else const.NO
-        if not binded:
-            self.redirect(self.make_url(path.EMPLOYEE_VERIFY, self.params))
-            return
-        else:
-            cover = self.share_url(self.current_user.company.logo)
-            share_title = messages.EMPLOYEE_AWARDS_LADDER_SHARE_TEXT.format(
-                self.current_user.company.abbreviation or "")
-
-            self.params.share = ObjectDict({
-                "cover": cover,
-                "title": share_title,
-                "description": messages.EMPLOYEE_AWARDS_LADDER_DESC_TEXT,
-                "link": self.fullurl()
-            })
-            policy_link = self.make_url(path.EMPLOYEE_REFERRAL_POLICY, self.params)
-            self.render_page(template_name="",
-                             data={"policy_link": policy_link})
 
 
 class AwardsLadderHandler(BaseHandler):
@@ -125,8 +99,14 @@ class AwardsLadderHandler(BaseHandler):
         current_user_rank = yield self.employee_ps.get_current_user_rank_info(self.current_user.employee.id, int(type))
         rank_list = sorted(rank_list, key=lambda x: x.level)
         if ladder_type == "normal":
-            last_rank = yield self.employee_ps.get_last_rank_info(self.current_user.employee.id, int(type))
-            rank_list.append(last_rank)
+            total_row = yield self.employee_ps.get_total_row_ladder_info(
+                employee_id=employee_id,
+                company_id=company_id,
+                type=rank_type,
+            )
+            if total_row > 5:
+                last_rank = yield self.employee_ps.get_last_rank_info(self.current_user.employee.id, int(type))
+                rank_list.append(last_rank)
         if list_only:
             data = ObjectDict(rank_list=rank_list)
         else:
@@ -145,19 +125,12 @@ class PraiseHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def post(self):
-        praise_user_id = self.json_args.praise_user_id
-        result = yield self.employee_ps.vote_prasie(self.current_user.employee.id, praise_user_id)
-        if result:
-            self.send_json_success()
+        praise_employee_id = self.json_args.praise_user_id
+        delete = self.json_args.delete
+        if delete:
+            result = yield self.employee_ps.cancel_prasie(self.current_user.employee.id, praise_employee_id)
         else:
-            self.send_json_error()
-
-    @handle_response
-    @authenticated
-    @gen.coroutine
-    def delete(self):
-        praise_user_id = self.json_args.praise_user_id
-        result = yield self.employee_ps.cancel_prasie(self.current_user.employee.id, praise_user_id)
+            result = yield self.employee_ps.vote_prasie(self.current_user.employee.id, praise_employee_id)
         if result:
             self.send_json_success()
         else:
@@ -183,8 +156,6 @@ class AwardsHandler(BaseHandler):
                 page_number=int(self.params.page_number),
                 page_size=int(self.params.page_size),
             )
-            # 清空未读赞的数量
-            yield self.employee_ps.reset_unread_praise(employee_id=self.current_user.employee.id)
             rewards_response.update({
                 'binded': binded,
                 'email_activation_state': email_activation_state
@@ -244,10 +215,15 @@ class EmployeeBindHandler(BaseHandler):
         else:
             pass
         mate_num = yield self.employee_ps.get_mate_num(self.current_user.company.id)
+        rewards_response = yield self.employee_ps.get_bind_rewards(self.current_user.company.id)
+        reward = 5
+        for r in rewards_response:
+            if r.get("statusName") == "完成员工认证":
+                reward = r.get("point")
 
         # 根据 conf 来构建 api 的返回 data
         data = yield self.employee_ps.make_binding_render_data(
-            self.current_user, mate_num, conf_response.employeeVerificationConf)
+            self.current_user, mate_num, reward, conf_response.employeeVerificationConf)
         self.send_json_success(data=data)
 
     @handle_response
