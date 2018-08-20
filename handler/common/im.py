@@ -143,7 +143,7 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
         self.chat_ps = ChatPageService()
 
     def open(self, room_id, *args, **kwargs):
-
+        logger.debug("------------ start open websocket --------------")
         self.room_id = room_id
         self.user_id = match_session_id(to_str(self.get_secure_cookie(const.COOKIE_SESSIONID)))
         self.hr_id = self.get_argument("hr_id")
@@ -165,6 +165,7 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
             nonlocal self
             try:
                 data = ujson.loads(message.get("data"))
+                logger.debug("websocket data:{}".format(data))
                 if data:
                     self.write_message(json_dumps(ObjectDict(
                         content=data.get("content"),
@@ -173,16 +174,17 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
                         speaker=data.get("speaker"),
                         msgType=data.get("msgType")
                     )))
+                    logger.debug("----------websocket write finish----------")
             except websocket.WebSocketClosedError:
                 self.logger.error(traceback.format_exc())
                 self.close(WebSocketCloseCode.internal_error.value)
                 raise
-
+        logger.debug("---------- ready to subscribe -----------")
         self.subscriber = Subscriber(
             self.redis_client,
             channel=self.chatroom_channel,
             message_handler=message_handler)
-
+        logger.debug("------------- subscribe finish ---------------")
         self.subscriber.start_run_in_thread()
 
     @gen.coroutine
