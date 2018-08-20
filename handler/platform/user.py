@@ -682,6 +682,7 @@ class APIPositionRecomListHandler(BaseHandler):
 class APIPositionRecomListCloseHandler(BaseHandler):
 
     @decorator.handle_response
+    @decorator.check_and_apply_profile
     @decorator.authenticated
     @gen.coroutine
     def get(self):
