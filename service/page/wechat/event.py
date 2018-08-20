@@ -257,7 +257,7 @@ class EventPageService(PageService):
             "subscribe_time": int(time.time() * 1000)
         })
         # 如果之前是员工，自动绑定员工身份
-        yield user_follow_wechat_publisher.publish_message(message=data)
+        yield user_follow_wechat_publisher.publish_message(message=data, routing_key="user_follow_wechat_check_employee_identity")
 
         # 处理临时二维码，目前主要在 PC 上创建帐号、绑定账号时使用,以及Mars EDM活动
         if current_user.wechat.id in (self.settings.qx_wechat_id, const.MARS_ID) and msg.EventKey:
@@ -372,7 +372,7 @@ class EventPageService(PageService):
                 "subscribe_time": int(time.time() * 1000)
             })
             # 如果是员工，取消用户员工身份
-            yield user_unfollow_wechat_publisher.publish_message(message=data)
+            yield user_unfollow_wechat_publisher.publish_message(message=data, routing_key="user_unfollow_wechat_check_employee_identity")
             # 取消关注仟寻招聘助手时，将user_hr_account.wxuser_id与user_wx_user.id 解绑
             if current_user.wechat.id == self.settings.helper_wechat_id:
                 user_hr_account = yield self.user_hr_account_ds.get_hr_account(conds={
