@@ -380,7 +380,7 @@ class EmployeePageService(PageService):
                     'praised': e.praised
                 })
 
-        return list(gen_make_element(ret.EmployeeAward))
+        return list(gen_make_element(ret.data))
 
     @gen.coroutine
     def vote_prasie(self, employee_id, praise_user_id):
@@ -428,9 +428,9 @@ class EmployeePageService(PageService):
         return data
 
     @gen.coroutine
-    def get_current_user_rank_info(self, user_id):
+    def get_current_user_rank_info(self, employee_id, type):
         """获取当前用户榜单信息"""
-        result, data = yield self.infra_employee_ds.get_current_user_rank_info(user_id)
+        result, data = yield self.infra_employee_ds.get_current_user_rank_info(employee_id, type)
         return data
 
     @gen.coroutine

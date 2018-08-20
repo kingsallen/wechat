@@ -571,3 +571,8 @@ MARS_ID = 345
 PAGE_FROM_ONE = 1
 PAGE_SIZE_FIVE = 5
 
+# 榜单类型
+LADDER_TYPE = {"month": "1",
+               "quarter": "2",
+               "year": "3"}
+

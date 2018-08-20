@@ -132,16 +132,16 @@ class AwardsLadderHandler(BaseHandler):
             page_from=page_from,
             page_size=page_size
         )
-
-        current_user_rank = yield self.employee_ps.get_current_user_rank_info(self.current_user.sysuser_id)
+        type = const.LADDER_TYPE.get(rank_type)
+        current_user_rank = yield self.employee_ps.get_current_user_rank_info(self.current_user.employee.id, int(type))
         rank_list = sorted(rank_list, key=lambda x: x.level)
         if ladder_type == "normal":
             last_rank = yield self.employee_ps.get_last_rank_info(self.current_user.employee.id)
             rank_list.append(last_rank)
         if list_only:
-            data = ObjectDict(rankList=rank_list)
+            data = ObjectDict(rank_list=rank_list)
         else:
-            data = ObjectDict(employeeId=employee_id, rankList=rank_list, current_user_rank=current_user_rank)
+            data = ObjectDict(employee_id=employee_id, rank_list=rank_list, current_user_rank=current_user_rank)
         self.logger.debug("awards ladder data: %s" % data)
 
         self.send_json_success(data=data)
@@ -151,6 +151,13 @@ class PraiseHandler(BaseHandler):
     """
     点赞操作
     """
+<<<<<<< Updated upstream
+=======
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+>>>>>>> Stashed changes
     def post(self):
         praise_user_id = self.json_args.praise_user_id
         result = yield self.employee_ps.vote_prasie(self.current_user.employee.id, praise_user_id)
@@ -159,6 +166,9 @@ class PraiseHandler(BaseHandler):
         else:
             self.send_json_error()
 
+    @handle_response
+    @authenticated
+    @gen.coroutine
     def delete(self):
         praise_user_id = self.json_args.praise_user_id
         result = yield self.employee_ps.cancel_prasie(self.current_user.employee.id, praise_user_id)
