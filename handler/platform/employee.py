@@ -136,7 +136,7 @@ class AwardsLadderHandler(BaseHandler):
         current_user_rank = yield self.employee_ps.get_current_user_rank_info(self.current_user.employee.id, int(type))
         rank_list = sorted(rank_list, key=lambda x: x.level)
         if ladder_type == "normal":
-            last_rank = yield self.employee_ps.get_last_rank_info(self.current_user.employee.id)
+            last_rank = yield self.employee_ps.get_last_rank_info(self.current_user.employee.id, int(type))
             rank_list.append(last_rank)
         if list_only:
             data = ObjectDict(rank_list=rank_list)
@@ -151,13 +151,10 @@ class PraiseHandler(BaseHandler):
     """
     点赞操作
     """
-<<<<<<< Updated upstream
-=======
 
     @handle_response
     @authenticated
     @gen.coroutine
->>>>>>> Stashed changes
     def post(self):
         praise_user_id = self.json_args.praise_user_id
         result = yield self.employee_ps.vote_prasie(self.current_user.employee.id, praise_user_id)

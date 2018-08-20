@@ -407,9 +407,9 @@ class EmployeePageService(PageService):
         return data if result else 0
 
     @gen.coroutine
-    def get_unread_praise(self, user_id):
+    def get_unread_praise(self, employee_id):
         """获取未读的赞的数量"""
-        result, data = yield self.infra_employee_ds.get_unread_praise(user_id)
+        result, data = yield self.infra_employee_ds.get_unread_praise(employee_id)
         return data if result else 0
 
     @gen.coroutine
@@ -422,9 +422,9 @@ class EmployeePageService(PageService):
         yield unread_praise_publisher.publish_message(message=data)
 
     @gen.coroutine
-    def get_last_rank_info(self, employee_id):
+    def get_last_rank_info(self, employee_id, type):
         """获取该公司积分榜单最后一名员工的榜单信息"""
-        result, data = yield self.infra_employee_ds.get_last_rank_info(employee_id)
+        result, data = yield self.infra_employee_ds.get_last_rank_info(employee_id, type)
         return data
 
     @gen.coroutine
