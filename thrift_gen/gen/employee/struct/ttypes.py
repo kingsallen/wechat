@@ -1163,6 +1163,222 @@ class RewardConfig(object):
         return not (self == other)
 
 
+class RewardVO(object):
+    """
+    Attributes:
+     - reason
+     - points
+     - updateTime
+     - type
+     - positionId
+     - positionName
+     - publisherId
+     - publisherName
+     - employeeId
+     - employeeName
+     - recommendId
+     - recommendName
+     - berecomId
+     - berecomName
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.STRING, 'reason', 'UTF8', None, ),  # 1
+        (2, TType.I32, 'points', None, None, ),  # 2
+        (3, TType.STRING, 'updateTime', 'UTF8', None, ),  # 3
+        (4, TType.I32, 'type', None, None, ),  # 4
+        (5, TType.I32, 'positionId', None, None, ),  # 5
+        (6, TType.STRING, 'positionName', 'UTF8', None, ),  # 6
+        (7, TType.I32, 'publisherId', None, None, ),  # 7
+        (8, TType.STRING, 'publisherName', 'UTF8', None, ),  # 8
+        (9, TType.I32, 'employeeId', None, None, ),  # 9
+        (10, TType.STRING, 'employeeName', 'UTF8', None, ),  # 10
+        (11, TType.I32, 'recommendId', None, None, ),  # 11
+        (12, TType.STRING, 'recommendName', 'UTF8', None, ),  # 12
+        (13, TType.I32, 'berecomId', None, None, ),  # 13
+        (14, TType.STRING, 'berecomName', 'UTF8', None, ),  # 14
+    )
+
+    def __init__(self, reason=None, points=None, updateTime=None, type=None, positionId=None, positionName=None, publisherId=None, publisherName=None, employeeId=None, employeeName=None, recommendId=None, recommendName=None, berecomId=None, berecomName=None,):
+        self.reason = reason
+        self.points = points
+        self.updateTime = updateTime
+        self.type = type
+        self.positionId = positionId
+        self.positionName = positionName
+        self.publisherId = publisherId
+        self.publisherName = publisherName
+        self.employeeId = employeeId
+        self.employeeName = employeeName
+        self.recommendId = recommendId
+        self.recommendName = recommendName
+        self.berecomId = berecomId
+        self.berecomName = berecomName
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.reason = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.I32:
+                    self.points = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.STRING:
+                    self.updateTime = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.I32:
+                    self.type = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 5:
+                if ftype == TType.I32:
+                    self.positionId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 6:
+                if ftype == TType.STRING:
+                    self.positionName = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 7:
+                if ftype == TType.I32:
+                    self.publisherId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 8:
+                if ftype == TType.STRING:
+                    self.publisherName = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 9:
+                if ftype == TType.I32:
+                    self.employeeId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 10:
+                if ftype == TType.STRING:
+                    self.employeeName = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 11:
+                if ftype == TType.I32:
+                    self.recommendId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 12:
+                if ftype == TType.STRING:
+                    self.recommendName = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 13:
+                if ftype == TType.I32:
+                    self.berecomId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 14:
+                if ftype == TType.STRING:
+                    self.berecomName = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('RewardVO')
+        if self.reason is not None:
+            oprot.writeFieldBegin('reason', TType.STRING, 1)
+            oprot.writeString(self.reason.encode('utf-8') if sys.version_info[0] == 2 else self.reason)
+            oprot.writeFieldEnd()
+        if self.points is not None:
+            oprot.writeFieldBegin('points', TType.I32, 2)
+            oprot.writeI32(self.points)
+            oprot.writeFieldEnd()
+        if self.updateTime is not None:
+            oprot.writeFieldBegin('updateTime', TType.STRING, 3)
+            oprot.writeString(self.updateTime.encode('utf-8') if sys.version_info[0] == 2 else self.updateTime)
+            oprot.writeFieldEnd()
+        if self.type is not None:
+            oprot.writeFieldBegin('type', TType.I32, 4)
+            oprot.writeI32(self.type)
+            oprot.writeFieldEnd()
+        if self.positionId is not None:
+            oprot.writeFieldBegin('positionId', TType.I32, 5)
+            oprot.writeI32(self.positionId)
+            oprot.writeFieldEnd()
+        if self.positionName is not None:
+            oprot.writeFieldBegin('positionName', TType.STRING, 6)
+            oprot.writeString(self.positionName.encode('utf-8') if sys.version_info[0] == 2 else self.positionName)
+            oprot.writeFieldEnd()
+        if self.publisherId is not None:
+            oprot.writeFieldBegin('publisherId', TType.I32, 7)
+            oprot.writeI32(self.publisherId)
+            oprot.writeFieldEnd()
+        if self.publisherName is not None:
+            oprot.writeFieldBegin('publisherName', TType.STRING, 8)
+            oprot.writeString(self.publisherName.encode('utf-8') if sys.version_info[0] == 2 else self.publisherName)
+            oprot.writeFieldEnd()
+        if self.employeeId is not None:
+            oprot.writeFieldBegin('employeeId', TType.I32, 9)
+            oprot.writeI32(self.employeeId)
+            oprot.writeFieldEnd()
+        if self.employeeName is not None:
+            oprot.writeFieldBegin('employeeName', TType.STRING, 10)
+            oprot.writeString(self.employeeName.encode('utf-8') if sys.version_info[0] == 2 else self.employeeName)
+            oprot.writeFieldEnd()
+        if self.recommendId is not None:
+            oprot.writeFieldBegin('recommendId', TType.I32, 11)
+            oprot.writeI32(self.recommendId)
+            oprot.writeFieldEnd()
+        if self.recommendName is not None:
+            oprot.writeFieldBegin('recommendName', TType.STRING, 12)
+            oprot.writeString(self.recommendName.encode('utf-8') if sys.version_info[0] == 2 else self.recommendName)
+            oprot.writeFieldEnd()
+        if self.berecomId is not None:
+            oprot.writeFieldBegin('berecomId', TType.I32, 13)
+            oprot.writeI32(self.berecomId)
+            oprot.writeFieldEnd()
+        if self.berecomName is not None:
+            oprot.writeFieldBegin('berecomName', TType.STRING, 14)
+            oprot.writeString(self.berecomName.encode('utf-8') if sys.version_info[0] == 2 else self.berecomName)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
 class RewardsResponse(object):
     """
     Attributes:
@@ -1638,222 +1854,6 @@ class EmployeeAward(object):
         if self.praised is not None:
             oprot.writeFieldBegin('praised', TType.BOOL, 6)
             oprot.writeBool(self.praised)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-
-
-class RewardVO(object):
-    """
-    Attributes:
-     - reason
-     - points
-     - updateTime
-     - type
-     - positionId
-     - positionName
-     - publisherId
-     - publisherName
-     - employeeId
-     - employeeName
-     - recommendId
-     - recommendName
-     - berecomId
-     - berecomName
-    """
-
-    thrift_spec = (
-        None,  # 0
-        (1, TType.STRING, 'reason', 'UTF8', None, ),  # 1
-        (2, TType.I32, 'points', None, None, ),  # 2
-        (3, TType.STRING, 'updateTime', 'UTF8', None, ),  # 3
-        (4, TType.I32, 'type', None, None, ),  # 4
-        (5, TType.I32, 'positionId', None, None, ),  # 5
-        (6, TType.STRING, 'positionName', 'UTF8', None, ),  # 6
-        (7, TType.I32, 'publisherId', None, None, ),  # 7
-        (8, TType.STRING, 'publisherName', 'UTF8', None, ),  # 8
-        (9, TType.I32, 'employeeId', None, None, ),  # 9
-        (10, TType.STRING, 'employeeName', 'UTF8', None, ),  # 10
-        (11, TType.I32, 'recommendId', None, None, ),  # 11
-        (12, TType.STRING, 'recommendName', 'UTF8', None, ),  # 12
-        (13, TType.I32, 'berecomId', None, None, ),  # 13
-        (14, TType.STRING, 'berecomName', 'UTF8', None, ),  # 14
-    )
-
-    def __init__(self, reason=None, points=None, updateTime=None, type=None, positionId=None, positionName=None, publisherId=None, publisherName=None, employeeId=None, employeeName=None, recommendId=None, recommendName=None, berecomId=None, berecomName=None,):
-        self.reason = reason
-        self.points = points
-        self.updateTime = updateTime
-        self.type = type
-        self.positionId = positionId
-        self.positionName = positionName
-        self.publisherId = publisherId
-        self.publisherName = publisherName
-        self.employeeId = employeeId
-        self.employeeName = employeeName
-        self.recommendId = recommendId
-        self.recommendName = recommendName
-        self.berecomId = berecomId
-        self.berecomName = berecomName
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 1:
-                if ftype == TType.STRING:
-                    self.reason = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 2:
-                if ftype == TType.I32:
-                    self.points = iprot.readI32()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 3:
-                if ftype == TType.STRING:
-                    self.updateTime = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 4:
-                if ftype == TType.I32:
-                    self.type = iprot.readI32()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 5:
-                if ftype == TType.I32:
-                    self.positionId = iprot.readI32()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 6:
-                if ftype == TType.STRING:
-                    self.positionName = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 7:
-                if ftype == TType.I32:
-                    self.publisherId = iprot.readI32()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 8:
-                if ftype == TType.STRING:
-                    self.publisherName = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 9:
-                if ftype == TType.I32:
-                    self.employeeId = iprot.readI32()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 10:
-                if ftype == TType.STRING:
-                    self.employeeName = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 11:
-                if ftype == TType.I32:
-                    self.recommendId = iprot.readI32()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 12:
-                if ftype == TType.STRING:
-                    self.recommendName = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 13:
-                if ftype == TType.I32:
-                    self.berecomId = iprot.readI32()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 14:
-                if ftype == TType.STRING:
-                    self.berecomName = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
-            return
-        oprot.writeStructBegin('RewardVO')
-        if self.reason is not None:
-            oprot.writeFieldBegin('reason', TType.STRING, 1)
-            oprot.writeString(self.reason.encode('utf-8') if sys.version_info[0] == 2 else self.reason)
-            oprot.writeFieldEnd()
-        if self.points is not None:
-            oprot.writeFieldBegin('points', TType.I32, 2)
-            oprot.writeI32(self.points)
-            oprot.writeFieldEnd()
-        if self.updateTime is not None:
-            oprot.writeFieldBegin('updateTime', TType.STRING, 3)
-            oprot.writeString(self.updateTime.encode('utf-8') if sys.version_info[0] == 2 else self.updateTime)
-            oprot.writeFieldEnd()
-        if self.type is not None:
-            oprot.writeFieldBegin('type', TType.I32, 4)
-            oprot.writeI32(self.type)
-            oprot.writeFieldEnd()
-        if self.positionId is not None:
-            oprot.writeFieldBegin('positionId', TType.I32, 5)
-            oprot.writeI32(self.positionId)
-            oprot.writeFieldEnd()
-        if self.positionName is not None:
-            oprot.writeFieldBegin('positionName', TType.STRING, 6)
-            oprot.writeString(self.positionName.encode('utf-8') if sys.version_info[0] == 2 else self.positionName)
-            oprot.writeFieldEnd()
-        if self.publisherId is not None:
-            oprot.writeFieldBegin('publisherId', TType.I32, 7)
-            oprot.writeI32(self.publisherId)
-            oprot.writeFieldEnd()
-        if self.publisherName is not None:
-            oprot.writeFieldBegin('publisherName', TType.STRING, 8)
-            oprot.writeString(self.publisherName.encode('utf-8') if sys.version_info[0] == 2 else self.publisherName)
-            oprot.writeFieldEnd()
-        if self.employeeId is not None:
-            oprot.writeFieldBegin('employeeId', TType.I32, 9)
-            oprot.writeI32(self.employeeId)
-            oprot.writeFieldEnd()
-        if self.employeeName is not None:
-            oprot.writeFieldBegin('employeeName', TType.STRING, 10)
-            oprot.writeString(self.employeeName.encode('utf-8') if sys.version_info[0] == 2 else self.employeeName)
-            oprot.writeFieldEnd()
-        if self.recommendId is not None:
-            oprot.writeFieldBegin('recommendId', TType.I32, 11)
-            oprot.writeI32(self.recommendId)
-            oprot.writeFieldEnd()
-        if self.recommendName is not None:
-            oprot.writeFieldBegin('recommendName', TType.STRING, 12)
-            oprot.writeString(self.recommendName.encode('utf-8') if sys.version_info[0] == 2 else self.recommendName)
-            oprot.writeFieldEnd()
-        if self.berecomId is not None:
-            oprot.writeFieldBegin('berecomId', TType.I32, 13)
-            oprot.writeI32(self.berecomId)
-            oprot.writeFieldEnd()
-        if self.berecomName is not None:
-            oprot.writeFieldBegin('berecomName', TType.STRING, 14)
-            oprot.writeString(self.berecomName.encode('utf-8') if sys.version_info[0] == 2 else self.berecomName)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
