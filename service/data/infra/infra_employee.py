@@ -52,8 +52,11 @@ class InfraEmployeeDataService(DataService):
         return unboxing(ret)
 
     @gen.coroutine
-    def get_current_user_rank_info(self, user_id):
-        ret = yield http_get(path.USER_RANK_INFO.format(user_id))
+    def get_current_user_rank_info(self, employee_id, type):
+        params = ObjectDict({
+            "type": type
+        })
+        ret = yield http_get(path.USER_RANK_INFO.format(employee_id), params)
         return unboxing(ret)
 
     @gen.coroutine
