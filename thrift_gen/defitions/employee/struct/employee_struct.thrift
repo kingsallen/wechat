@@ -1,5 +1,6 @@
 namespace py thrift_gen.gen.employee.struct
 
+
 struct Employee {
     1: optional i32 id,
     2: optional string employeeId,
@@ -15,7 +16,6 @@ struct Employee {
     12: optional string customField,
     13: optional i32 authMethod
 }
-
 
 enum BindStatus {
     BINDED,
@@ -93,24 +93,6 @@ struct RewardConfig {
     3: optional string statusName
 }
 
-// 积分来源详情
-struct RewardVO{
-    1: optional string reason, // 说明
-    2: optional i32 points, // 积分
-    3: optional string updateTime, // 操作时间
-    4: optional i32 type, // 积分类型
-    5: optional i32 positionId, // 职位ID
-    6: optional string positionName, // 职位名称
-    7: optional i32 publisherId, // 发布者ID
-    8: optional string publisherName, // 发布者名称
-    9:optional i32 employeId, // 员工ID
-    10:optional string employeName, // 员工名称
-    11:optional i32 recommendId, // 推荐人Id
-    12:optional string recommendName, // 推荐人名称
-    13:optional i32 berecomId,// 被推荐人Id
-    14:optional string berecomName // 被推荐人姓名
-}
-
 
 struct RewardsResponse {
     1: optional i32 total,
@@ -138,6 +120,7 @@ struct RecomInfo {
 	16: required string headimgurl = "";        // 微信头像
 }
 
+
 // 时间跨度（月、季、年）
 enum Timespan {
     month, quarter, year
@@ -149,5 +132,59 @@ struct EmployeeAward {
     2: optional string name,
     3: optional i32 ranking,
     4: optional i32 awardTotal,
-    5: optional string headimgurl
+    5: optional string headimgurl,
+    6: optional bool praised
 }
+
+struct RewardVO{
+    1: optional string reason, // 说明
+    2: optional i32 points, // 积分
+    3: optional string updateTime, // 操作时间
+    4: optional i32 type, // 积分类型
+    5: optional i32 positionId, // 职位ID
+    6: optional string positionName, // 职位名称
+    7: optional i32 publisherId, // 发布者ID
+    8: optional string publisherName, // 发布者名称
+    9: optional i32 employeeId, // 员工ID
+    10:optional string employeeName, // 员工名称
+    11:optional i32 recommendId, // 推荐人Id
+    12:optional string recommendName, // 推荐人名称
+    13:optional i32 berecomId,// 被推荐人Id
+    14:optional string berecomName // 被推荐人姓名
+}
+
+// 员工积分列表分页实体
+struct RewardVOPageVO{
+    1:optional i32 pageNumber, // 当前第几页
+    2:optional i32 pageSize,// 每页多少条
+    3:optional i32 totalRow,// 总共多少条
+    4:optional i32 totalPoints; // 积分总数
+    5:optional list<RewardVO> data,
+}
+
+
+//榜单信息
+struct LeaderBoardInfo {
+    1:optional i32 id,
+    2:optional string username,
+    3:optional i32 point,
+    4:optional string icon,
+    5:optional i32 level,
+    6:optional i32 praise,
+    7:optional bool praised
+}
+
+//榜单类型
+struct LeaderBoardType {
+    1:optional i32 id,
+    2:optional i32 company_id,
+    3:optional i8 type
+}
+
+struct Pagination {
+    1: optional i32 totalRow,
+    2: optional i32 pageNum,
+    3: optional i32 pageSize,
+    4: optional list<EmployeeAward> data
+}
+
