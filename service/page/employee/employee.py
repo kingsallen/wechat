@@ -432,7 +432,7 @@ class EmployeePageService(PageService):
             "employee_id": employee_id,
             "view_time": int(time.time() * 1000)
         })
-        yield unread_praise_publisher.publish_message(message=data)
+        yield unread_praise_publisher.publish_message(message=data, routing_key="employee_view_leader_board_routing_key")
 
     @gen.coroutine
     def get_last_rank_info(self, employee_id, type):
