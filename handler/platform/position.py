@@ -1034,8 +1034,8 @@ class PositionListHandler(PositionListInfraParamsMixin, BaseHandler):
         company['industry'] = self.params.company.industry
         company['scale_name'] = self.params.company.scale_name
         company['banner'] = self.params.company.banner
-        if self.in_wechat:
-            self.render(template_name="")
+        if not self.in_wechat:
+            self.render(template_name="adjunct/not-weixin.html")
         else:
             self.render_page(
                 template_name="position/index.html",
