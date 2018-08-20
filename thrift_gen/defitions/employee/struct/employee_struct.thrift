@@ -133,7 +133,8 @@ struct EmployeeAward {
     3: optional i32 ranking,
     4: optional i32 awardTotal,
     5: optional string headimgurl,
-    6: optional bool praised
+    6: optional bool praised,
+    7: optional i32 praise
 }
 
 struct RewardVO{
