@@ -45,13 +45,46 @@ class AwardsLadderPageHandler(BaseHandler):
             policy_link = self.make_url(path.EMPLOYEE_REFERRAL_POLICY, self.params)
             page_from = const.PAGE_FROM_ONE
             page_size = const.PAGE_SIZE_FIVE
-            rank_list = yield self.employee_ps.get_award_ladder_info(
-                employee_id=self.current_user.employee.id,
-                company_id=self.current_user.company.id,
-                type="month",
-                page_from=page_from,
-                page_size=page_size
-            )
+            # rank_list = yield self.employee_ps.get_award_ladder_info(
+            #     employee_id=self.current_user.employee.id,
+            #     company_id=self.current_user.company.id,
+            #     type="month",
+            #     page_from=page_from,
+            #     page_size=page_size
+            # )
+            rank_list = [{
+                "praised": False,
+                "praise": 423,
+                "level": 4,
+                "id": 883924,
+                "point": 303,
+                "username": "vf",
+                "icon": "http://thirdwx.qlogo.cn/mmopen/Q3auHgzwzM4WqiaoE7g1utu7ZdibzWm6CZwHdCK0iaGDHKlo4TnbmXXGg2DcJfAvwJVykrtT7dzwtywCEnutsic1iaA/132"
+            }, {
+                "praised": False,
+                "praise": 133,
+                "level": 2,
+                "id": 883924,
+                "point": 302,
+                "username": "2",
+                "icon": "http://thirdwx.qlogo.cn/mmopen/Q3auHgzwzM4WqiaoE7g1utu7ZdibzWm6CZwHdCK0iaGDHKlo4TnbmXXGg2DcJfAvwJVykrtT7dzwtywCEnutsic1iaA/132"
+            }, {
+                "praised": True,
+                "praise": 123,
+                "level": 3,
+                "id": 883924,
+                "point": 304,
+                "username": "3",
+                "icon": "http://thirdwx.qlogo.cn/mmopen/Q3auHgzwzM4WqiaoE7g1utu7ZdibzWm6CZwHdCK0iaGDHKlo4TnbmXXGg2DcJfAvwJVykrtT7dzwtywCEnutsic1iaA/132"
+            }, {
+                "praised": False,
+                "praise": 1233,
+                "level": 1,
+                "id": 883924,
+                "point": 305,
+                "username": "4",
+                "icon": "http://thirdwx.qlogo.cn/mmopen/Q3auHgzwzM4WqiaoE7g1utu7ZdibzWm6CZwHdCK0iaGDHKlo4TnbmXXGg2DcJfAvwJVykrtT7dzwtywCEnutsic1iaA/132"
+            }, ]
             last_rank = yield self.employee_ps.get_last_rank_info(self.current_user.employee.id)
             self.render_page(template_name="employee/reward-rank.html",
                              data={"policy_link": policy_link,
@@ -63,6 +96,7 @@ class AwardsFunLadderPageHandler(BaseHandler):
     """
     趣味积分排行榜，包含转发信息
     """
+
     @handle_response
     @authenticated
     @gen.coroutine
@@ -115,13 +149,46 @@ class AwardsLadderHandler(BaseHandler):
 
         page_from = (int(self.params.get("count", 0)) * const_platform.RANK_LIST_PAGE_COUNT)
         page_size = const_platform.RANK_LIST_PAGE_COUNT
-        rank_list = yield self.employee_ps.get_award_ladder_info(
-            employee_id=employee_id,
-            company_id=company_id,
-            type=rankType,
-            page_from=page_from,
-            page_size=page_size
-        )
+        # rank_list = yield self.employee_ps.get_award_ladder_info(
+        #     employee_id=employee_id,
+        #     company_id=company_id,
+        #     type=rankType,
+        #     page_from=page_from,
+        #     page_size=page_size
+        # )
+        rank_list = [{
+            "praised": False,
+            "praise": 423,
+            "level": 4,
+            "id": 883924,
+            "point": 303,
+            "username": "vf",
+            "icon": "http://thirdwx.qlogo.cn/mmopen/Q3auHgzwzM4WqiaoE7g1utu7ZdibzWm6CZwHdCK0iaGDHKlo4TnbmXXGg2DcJfAvwJVykrtT7dzwtywCEnutsic1iaA/132"
+        }, {
+            "praised": False,
+            "praise": 133,
+            "level": 2,
+            "id": 883924,
+            "point": 302,
+            "username": "2",
+            "icon": "http://thirdwx.qlogo.cn/mmopen/Q3auHgzwzM4WqiaoE7g1utu7ZdibzWm6CZwHdCK0iaGDHKlo4TnbmXXGg2DcJfAvwJVykrtT7dzwtywCEnutsic1iaA/132"
+        }, {
+            "praised": True,
+            "praise": 123,
+            "level": 3,
+            "id": 883924,
+            "point": 304,
+            "username": "3",
+            "icon": "http://thirdwx.qlogo.cn/mmopen/Q3auHgzwzM4WqiaoE7g1utu7ZdibzWm6CZwHdCK0iaGDHKlo4TnbmXXGg2DcJfAvwJVykrtT7dzwtywCEnutsic1iaA/132"
+        }, {
+            "praised": False,
+            "praise": 1233,
+            "level": 1,
+            "id": 883924,
+            "point": 305,
+            "username": "4",
+            "icon": "http://thirdwx.qlogo.cn/mmopen/Q3auHgzwzM4WqiaoE7g1utu7ZdibzWm6CZwHdCK0iaGDHKlo4TnbmXXGg2DcJfAvwJVykrtT7dzwtywCEnutsic1iaA/132"
+        }, ]
         current_user_rank = yield self.employee_ps.get_current_user_rank_info(self.current_user.sysuser_id)
         rank_list = sorted(rank_list, key=lambda x: x.level)
         if list_only:
@@ -137,6 +204,7 @@ class PraiseHandler(BaseHandler):
     """
     点赞操作
     """
+
     def post(self):
         praise_user_id = self.json_args.praise_user_id
         result = yield self.employee_ps.vote_prasie(self.current_user.employee.id, praise_user_id)
@@ -538,6 +606,7 @@ class EmployeeReferralPolicyHandler(BaseHandler):
     https://git.moseeker.com/doc/complete-guide/blob/feature/v0.1.0/develop_docs/referral/frontend/wechat_v0.1.0.md
     https://git.moseeker.com/doc/complete-guide/blob/feature/v0.1.0/develop_docs/referral/basic_service/%E5%86%85%E6%8E%A8v0.1.0-api.md
     """
+
     @handle_response
     @gen.coroutine
     def get(self):
@@ -560,6 +629,7 @@ class EmployeeInterestReferralPolicyHandler(BaseHandler):
     """
     员工感兴趣内推政策
     """
+
     @handle_response
     @authenticated
     @gen.coroutine
