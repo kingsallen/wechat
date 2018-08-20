@@ -63,6 +63,7 @@ struct ChatVO {
     11: optional i8 duration                //音频时长
 	12: optional i32 id                     //聊天记录id
     13: optional string createTime          //创建时间
+    14: optional string compoundContent     //聊天内容（表单等复合类型）
 }
 
 struct ChatHistory {
