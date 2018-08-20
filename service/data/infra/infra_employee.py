@@ -56,4 +56,9 @@ class InfraEmployeeDataService(DataService):
         ret = yield http_get(path.USER_RANK_INFO.format(user_id))
         return unboxing(ret)
 
+    @gen.coroutine
+    def get_award_ladder_type(self, company_id):
+        ret = yield http_get(path.LADDER_TYPE.format(company_id))
+        return unboxing(ret)
+
 

@@ -63,9 +63,9 @@ class CompanyHandler(BaseHandler):
     def get(self):
         company = self.params.pop('sub_company') if self.params.sub_company \
             else self.current_user.company
-        if self.in_wechat:
+        if not self.in_wechat:
             self.params.share = self._share(company)
-            self.render(template_name="")
+            self.render(template_name="adjunct/not-weixin.html")
             return
 
         if self.flag_should_display_newjd:

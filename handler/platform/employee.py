@@ -35,28 +35,32 @@ class AwardsLadderPageHandler(BaseHandler):
             cover = self.share_url(self.current_user.company.logo)
             share_title = messages.EMPLOYEE_AWARDS_LADDER_SHARE_TEXT.format(
                 self.current_user.company.abbreviation or "")
-
             self.params.share = ObjectDict({
                 "cover": cover,
                 "title": share_title,
                 "description": messages.EMPLOYEE_AWARDS_LADDER_DESC_TEXT,
                 "link": self.fullurl()
             })
+            ladder_type = yield self.employee_ps.get_award_ladder_type(self.current_user.company.id)
             policy_link = self.make_url(path.EMPLOYEE_REFERRAL_POLICY, self.params)
-            page_from = const.PAGE_FROM_ONE
-            page_size = const.PAGE_SIZE_FIVE
-            rank_list = yield self.employee_ps.get_award_ladder_info(
-                employee_id=self.current_user.employee.id,
-                company_id=self.current_user.company.id,
-                type="month",
-                page_from=page_from,
-                page_size=page_size
-            )
-            last_rank = yield self.employee_ps.get_last_rank_info(self.current_user.employee.id)
-            self.render_page(template_name="employee/reward-rank.html",
-                             data={"policy_link": policy_link,
-                                   "rank_list": rank_list,
-                                   "last_rank": last_rank})
+            if ladder_type == 1:
+                page_from = const.PAGE_FROM_ONE
+                page_size = const.PAGE_SIZE_FIVE
+                rank_list = yield self.employee_ps.get_award_ladder_info(
+                    employee_id=self.current_user.employee.id,
+                    company_id=self.current_user.company.id,
+                    type="month",
+                    page_from=page_from,
+                    page_size=page_size
+                )
+                last_rank = yield self.employee_ps.get_last_rank_info(self.current_user.employee.id)
+                self.render_page(template_name="employee/reward-rank.html",
+                                 data={"policy_link": policy_link,
+                                       "rank_list": rank_list,
+                                       "last_rank": last_rank})
+            else:
+                self.render_page(template_name="employee/reward-rank-dark.html",
+                                 data={"policy_link": policy_link})
 
 
 class AwardsFunLadderPageHandler(BaseHandler):
