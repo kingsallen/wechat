@@ -64,15 +64,6 @@ class Iface(object):
         """
         pass
 
-    def setCacheEmployeeCustomInfo(self, userId, companyId, customValues):
-        """
-        Parameters:
-         - userId
-         - companyId
-         - customValues
-        """
-        pass
-
     def getEmployeeRewards(self, employeeId, companyId, pageNumber, pageSize):
         """
         Parameters:
@@ -97,12 +88,106 @@ class Iface(object):
         """
         pass
 
-    def awardRanking(self, employeeId, companyId, timespan):
+    def awardRanking(self, employeeId, companyId, timespan, pageNum, pageSize):
         """
         Parameters:
          - employeeId
          - companyId
          - timespan
+         - pageNum
+         - pageSize
+        """
+        pass
+
+    def setCacheEmployeeCustomInfo(self, userId, companyId, customValues):
+        """
+        Parameters:
+         - userId
+         - companyId
+         - customValues
+        """
+        pass
+
+    def getCompanyReferralConf(self, companyId):
+        """
+        Parameters:
+         - companyId
+        """
+        pass
+
+    def updsertCompanyReferralPocily(self, companyId, userId):
+        """
+        Parameters:
+         - companyId
+         - userId
+        """
+        pass
+
+    def countUpVote(self, employeeId):
+        """
+        Parameters:
+         - employeeId
+        """
+        pass
+
+    def countRecentUpVote(self, employeeId):
+        """
+        Parameters:
+         - employeeId
+        """
+        pass
+
+    def upvote(self, employeeId, userId):
+        """
+        Parameters:
+         - employeeId
+         - userId
+        """
+        pass
+
+    def removeUpvote(self, employeeId, userId):
+        """
+        Parameters:
+         - employeeId
+         - userId
+        """
+        pass
+
+    def fetchLeaderBoardInfo(self, id, type):
+        """
+        Parameters:
+         - id
+         - type
+        """
+        pass
+
+    def fetchLastLeaderBoardInfo(self, id, type):
+        """
+        Parameters:
+         - id
+         - type
+        """
+        pass
+
+    def fetchLeaderBoardType(self, companyId):
+        """
+        Parameters:
+         - companyId
+        """
+        pass
+
+    def updateLeaderBoardType(self, companyId, type):
+        """
+        Parameters:
+         - companyId
+         - type
+        """
+        pass
+
+    def countEmplyee(self, companyId):
+        """
+        Parameters:
+         - companyId
         """
         pass
 
@@ -342,42 +427,6 @@ class Client(Iface):
             return result.success
         raise TApplicationException(TApplicationException.MISSING_RESULT, "setEmployeeCustomInfo failed: unknown result")
 
-    def setCacheEmployeeCustomInfo(self, userId, companyId, customValues):
-        """
-        Parameters:
-         - userId
-         - companyId
-         - customValues
-        """
-        self._seqid += 1
-        future = self._reqs[self._seqid] = concurrent.Future()
-        self.send_setCacheEmployeeCustomInfo(userId, companyId, customValues)
-        return future
-
-    def send_setCacheEmployeeCustomInfo(self, userId, companyId, customValues):
-        oprot = self._oprot_factory.getProtocol(self._transport)
-        oprot.writeMessageBegin('setCacheEmployeeCustomInfo', TMessageType.CALL, self._seqid)
-        args = setCacheEmployeeCustomInfo_args()
-        args.userId = userId
-        args.companyId = companyId
-        args.customValues = customValues
-        args.write(oprot)
-        oprot.writeMessageEnd()
-        oprot.trans.flush()
-
-    def recv_setCacheEmployeeCustomInfo(self, iprot, mtype, rseqid):
-        if mtype == TMessageType.EXCEPTION:
-            x = TApplicationException()
-            x.read(iprot)
-            iprot.readMessageEnd()
-            raise x
-        result = setCacheEmployeeCustomInfo_result()
-        result.read(iprot)
-        iprot.readMessageEnd()
-        if result.success is not None:
-            return result.success
-        raise TApplicationException(TApplicationException.MISSING_RESULT, "setCacheEmployeeCustomInfo failed: unknown result")
-
     def getEmployeeRewards(self, employeeId, companyId, pageNumber, pageSize):
         """
         Parameters:
@@ -480,25 +529,29 @@ class Client(Iface):
             return result.success
         raise TApplicationException(TApplicationException.MISSING_RESULT, "emailActivation failed: unknown result")
 
-    def awardRanking(self, employeeId, companyId, timespan):
+    def awardRanking(self, employeeId, companyId, timespan, pageNum, pageSize):
         """
         Parameters:
          - employeeId
          - companyId
          - timespan
+         - pageNum
+         - pageSize
         """
         self._seqid += 1
         future = self._reqs[self._seqid] = concurrent.Future()
-        self.send_awardRanking(employeeId, companyId, timespan)
+        self.send_awardRanking(employeeId, companyId, timespan, pageNum, pageSize)
         return future
 
-    def send_awardRanking(self, employeeId, companyId, timespan):
+    def send_awardRanking(self, employeeId, companyId, timespan, pageNum, pageSize):
         oprot = self._oprot_factory.getProtocol(self._transport)
         oprot.writeMessageBegin('awardRanking', TMessageType.CALL, self._seqid)
         args = awardRanking_args()
         args.employeeId = employeeId
         args.companyId = companyId
         args.timespan = timespan
+        args.pageNum = pageNum
+        args.pageSize = pageSize
         args.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -514,7 +567,425 @@ class Client(Iface):
         iprot.readMessageEnd()
         if result.success is not None:
             return result.success
+        if result.e is not None:
+            raise result.e
         raise TApplicationException(TApplicationException.MISSING_RESULT, "awardRanking failed: unknown result")
+
+    def setCacheEmployeeCustomInfo(self, userId, companyId, customValues):
+        """
+        Parameters:
+         - userId
+         - companyId
+         - customValues
+        """
+        self._seqid += 1
+        future = self._reqs[self._seqid] = concurrent.Future()
+        self.send_setCacheEmployeeCustomInfo(userId, companyId, customValues)
+        return future
+
+    def send_setCacheEmployeeCustomInfo(self, userId, companyId, customValues):
+        oprot = self._oprot_factory.getProtocol(self._transport)
+        oprot.writeMessageBegin('setCacheEmployeeCustomInfo', TMessageType.CALL, self._seqid)
+        args = setCacheEmployeeCustomInfo_args()
+        args.userId = userId
+        args.companyId = companyId
+        args.customValues = customValues
+        args.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def recv_setCacheEmployeeCustomInfo(self, iprot, mtype, rseqid):
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = setCacheEmployeeCustomInfo_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "setCacheEmployeeCustomInfo failed: unknown result")
+
+    def getCompanyReferralConf(self, companyId):
+        """
+        Parameters:
+         - companyId
+        """
+        self._seqid += 1
+        future = self._reqs[self._seqid] = concurrent.Future()
+        self.send_getCompanyReferralConf(companyId)
+        return future
+
+    def send_getCompanyReferralConf(self, companyId):
+        oprot = self._oprot_factory.getProtocol(self._transport)
+        oprot.writeMessageBegin('getCompanyReferralConf', TMessageType.CALL, self._seqid)
+        args = getCompanyReferralConf_args()
+        args.companyId = companyId
+        args.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def recv_getCompanyReferralConf(self, iprot, mtype, rseqid):
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = getCompanyReferralConf_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        if result.e is not None:
+            raise result.e
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "getCompanyReferralConf failed: unknown result")
+
+    def updsertCompanyReferralPocily(self, companyId, userId):
+        """
+        Parameters:
+         - companyId
+         - userId
+        """
+        self._seqid += 1
+        future = self._reqs[self._seqid] = concurrent.Future()
+        self.send_updsertCompanyReferralPocily(companyId, userId)
+        return future
+
+    def send_updsertCompanyReferralPocily(self, companyId, userId):
+        oprot = self._oprot_factory.getProtocol(self._transport)
+        oprot.writeMessageBegin('updsertCompanyReferralPocily', TMessageType.CALL, self._seqid)
+        args = updsertCompanyReferralPocily_args()
+        args.companyId = companyId
+        args.userId = userId
+        args.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def recv_updsertCompanyReferralPocily(self, iprot, mtype, rseqid):
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = updsertCompanyReferralPocily_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.e is not None:
+            raise result.e
+        return
+
+    def countUpVote(self, employeeId):
+        """
+        Parameters:
+         - employeeId
+        """
+        self._seqid += 1
+        future = self._reqs[self._seqid] = concurrent.Future()
+        self.send_countUpVote(employeeId)
+        return future
+
+    def send_countUpVote(self, employeeId):
+        oprot = self._oprot_factory.getProtocol(self._transport)
+        oprot.writeMessageBegin('countUpVote', TMessageType.CALL, self._seqid)
+        args = countUpVote_args()
+        args.employeeId = employeeId
+        args.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def recv_countUpVote(self, iprot, mtype, rseqid):
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = countUpVote_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        if result.e is not None:
+            raise result.e
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "countUpVote failed: unknown result")
+
+    def countRecentUpVote(self, employeeId):
+        """
+        Parameters:
+         - employeeId
+        """
+        self._seqid += 1
+        future = self._reqs[self._seqid] = concurrent.Future()
+        self.send_countRecentUpVote(employeeId)
+        return future
+
+    def send_countRecentUpVote(self, employeeId):
+        oprot = self._oprot_factory.getProtocol(self._transport)
+        oprot.writeMessageBegin('countRecentUpVote', TMessageType.CALL, self._seqid)
+        args = countRecentUpVote_args()
+        args.employeeId = employeeId
+        args.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def recv_countRecentUpVote(self, iprot, mtype, rseqid):
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = countRecentUpVote_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        if result.e is not None:
+            raise result.e
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "countRecentUpVote failed: unknown result")
+
+    def upvote(self, employeeId, userId):
+        """
+        Parameters:
+         - employeeId
+         - userId
+        """
+        self._seqid += 1
+        future = self._reqs[self._seqid] = concurrent.Future()
+        self.send_upvote(employeeId, userId)
+        return future
+
+    def send_upvote(self, employeeId, userId):
+        oprot = self._oprot_factory.getProtocol(self._transport)
+        oprot.writeMessageBegin('upvote', TMessageType.CALL, self._seqid)
+        args = upvote_args()
+        args.employeeId = employeeId
+        args.userId = userId
+        args.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def recv_upvote(self, iprot, mtype, rseqid):
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = upvote_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        if result.e is not None:
+            raise result.e
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "upvote failed: unknown result")
+
+    def removeUpvote(self, employeeId, userId):
+        """
+        Parameters:
+         - employeeId
+         - userId
+        """
+        self._seqid += 1
+        future = self._reqs[self._seqid] = concurrent.Future()
+        self.send_removeUpvote(employeeId, userId)
+        return future
+
+    def send_removeUpvote(self, employeeId, userId):
+        oprot = self._oprot_factory.getProtocol(self._transport)
+        oprot.writeMessageBegin('removeUpvote', TMessageType.CALL, self._seqid)
+        args = removeUpvote_args()
+        args.employeeId = employeeId
+        args.userId = userId
+        args.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def recv_removeUpvote(self, iprot, mtype, rseqid):
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = removeUpvote_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.e is not None:
+            raise result.e
+        return
+
+    def fetchLeaderBoardInfo(self, id, type):
+        """
+        Parameters:
+         - id
+         - type
+        """
+        self._seqid += 1
+        future = self._reqs[self._seqid] = concurrent.Future()
+        self.send_fetchLeaderBoardInfo(id, type)
+        return future
+
+    def send_fetchLeaderBoardInfo(self, id, type):
+        oprot = self._oprot_factory.getProtocol(self._transport)
+        oprot.writeMessageBegin('fetchLeaderBoardInfo', TMessageType.CALL, self._seqid)
+        args = fetchLeaderBoardInfo_args()
+        args.id = id
+        args.type = type
+        args.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def recv_fetchLeaderBoardInfo(self, iprot, mtype, rseqid):
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = fetchLeaderBoardInfo_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        if result.e is not None:
+            raise result.e
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "fetchLeaderBoardInfo failed: unknown result")
+
+    def fetchLastLeaderBoardInfo(self, id, type):
+        """
+        Parameters:
+         - id
+         - type
+        """
+        self._seqid += 1
+        future = self._reqs[self._seqid] = concurrent.Future()
+        self.send_fetchLastLeaderBoardInfo(id, type)
+        return future
+
+    def send_fetchLastLeaderBoardInfo(self, id, type):
+        oprot = self._oprot_factory.getProtocol(self._transport)
+        oprot.writeMessageBegin('fetchLastLeaderBoardInfo', TMessageType.CALL, self._seqid)
+        args = fetchLastLeaderBoardInfo_args()
+        args.id = id
+        args.type = type
+        args.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def recv_fetchLastLeaderBoardInfo(self, iprot, mtype, rseqid):
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = fetchLastLeaderBoardInfo_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        if result.e is not None:
+            raise result.e
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "fetchLastLeaderBoardInfo failed: unknown result")
+
+    def fetchLeaderBoardType(self, companyId):
+        """
+        Parameters:
+         - companyId
+        """
+        self._seqid += 1
+        future = self._reqs[self._seqid] = concurrent.Future()
+        self.send_fetchLeaderBoardType(companyId)
+        return future
+
+    def send_fetchLeaderBoardType(self, companyId):
+        oprot = self._oprot_factory.getProtocol(self._transport)
+        oprot.writeMessageBegin('fetchLeaderBoardType', TMessageType.CALL, self._seqid)
+        args = fetchLeaderBoardType_args()
+        args.companyId = companyId
+        args.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def recv_fetchLeaderBoardType(self, iprot, mtype, rseqid):
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = fetchLeaderBoardType_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        if result.e is not None:
+            raise result.e
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "fetchLeaderBoardType failed: unknown result")
+
+    def updateLeaderBoardType(self, companyId, type):
+        """
+        Parameters:
+         - companyId
+         - type
+        """
+        self._seqid += 1
+        future = self._reqs[self._seqid] = concurrent.Future()
+        self.send_updateLeaderBoardType(companyId, type)
+        return future
+
+    def send_updateLeaderBoardType(self, companyId, type):
+        oprot = self._oprot_factory.getProtocol(self._transport)
+        oprot.writeMessageBegin('updateLeaderBoardType', TMessageType.CALL, self._seqid)
+        args = updateLeaderBoardType_args()
+        args.companyId = companyId
+        args.type = type
+        args.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def recv_updateLeaderBoardType(self, iprot, mtype, rseqid):
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = updateLeaderBoardType_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.e is not None:
+            raise result.e
+        return
+
+    def countEmplyee(self, companyId):
+        """
+        Parameters:
+         - companyId
+        """
+        self._seqid += 1
+        future = self._reqs[self._seqid] = concurrent.Future()
+        self.send_countEmplyee(companyId)
+        return future
+
+    def send_countEmplyee(self, companyId):
+        oprot = self._oprot_factory.getProtocol(self._transport)
+        oprot.writeMessageBegin('countEmplyee', TMessageType.CALL, self._seqid)
+        args = countEmplyee_args()
+        args.companyId = companyId
+        args.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def recv_countEmplyee(self, iprot, mtype, rseqid):
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = countEmplyee_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        if result.e is not None:
+            raise result.e
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "countEmplyee failed: unknown result")
 
 
 class Processor(Iface, TProcessor):
@@ -527,11 +998,22 @@ class Processor(Iface, TProcessor):
         self._processMap["unbind"] = Processor.process_unbind
         self._processMap["getEmployeeCustomFieldsConf"] = Processor.process_getEmployeeCustomFieldsConf
         self._processMap["setEmployeeCustomInfo"] = Processor.process_setEmployeeCustomInfo
-        self._processMap["setCacheEmployeeCustomInfo"] = Processor.process_setCacheEmployeeCustomInfo
         self._processMap["getEmployeeRewards"] = Processor.process_getEmployeeRewards
         self._processMap["getEmployeeRecoms"] = Processor.process_getEmployeeRecoms
         self._processMap["emailActivation"] = Processor.process_emailActivation
         self._processMap["awardRanking"] = Processor.process_awardRanking
+        self._processMap["setCacheEmployeeCustomInfo"] = Processor.process_setCacheEmployeeCustomInfo
+        self._processMap["getCompanyReferralConf"] = Processor.process_getCompanyReferralConf
+        self._processMap["updsertCompanyReferralPocily"] = Processor.process_updsertCompanyReferralPocily
+        self._processMap["countUpVote"] = Processor.process_countUpVote
+        self._processMap["countRecentUpVote"] = Processor.process_countRecentUpVote
+        self._processMap["upvote"] = Processor.process_upvote
+        self._processMap["removeUpvote"] = Processor.process_removeUpvote
+        self._processMap["fetchLeaderBoardInfo"] = Processor.process_fetchLeaderBoardInfo
+        self._processMap["fetchLastLeaderBoardInfo"] = Processor.process_fetchLastLeaderBoardInfo
+        self._processMap["fetchLeaderBoardType"] = Processor.process_fetchLeaderBoardType
+        self._processMap["updateLeaderBoardType"] = Processor.process_updateLeaderBoardType
+        self._processMap["countEmplyee"] = Processor.process_countEmplyee
 
     def process(self, iprot, oprot):
         (name, type, seqid) = iprot.readMessageBegin()
@@ -620,18 +1102,6 @@ class Processor(Iface, TProcessor):
         oprot.trans.flush()
 
     @gen.coroutine
-    def process_setCacheEmployeeCustomInfo(self, seqid, iprot, oprot):
-        args = setCacheEmployeeCustomInfo_args()
-        args.read(iprot)
-        iprot.readMessageEnd()
-        result = setCacheEmployeeCustomInfo_result()
-        result.success = yield gen.maybe_future(self._handler.setCacheEmployeeCustomInfo(args.userId, args.companyId, args.customValues))
-        oprot.writeMessageBegin("setCacheEmployeeCustomInfo", TMessageType.REPLY, seqid)
-        result.write(oprot)
-        oprot.writeMessageEnd()
-        oprot.trans.flush()
-
-    @gen.coroutine
     def process_getEmployeeRewards(self, seqid, iprot, oprot):
         args = getEmployeeRewards_args()
         args.read(iprot)
@@ -673,8 +1143,188 @@ class Processor(Iface, TProcessor):
         args.read(iprot)
         iprot.readMessageEnd()
         result = awardRanking_result()
-        result.success = yield gen.maybe_future(self._handler.awardRanking(args.employeeId, args.companyId, args.timespan))
+        try:
+            result.success = yield gen.maybe_future(self._handler.awardRanking(args.employeeId, args.companyId, args.timespan, args.pageNum, args.pageSize))
+        except thrift_gen.gen.common.struct.ttypes.BIZException as e:
+            result.e = e
         oprot.writeMessageBegin("awardRanking", TMessageType.REPLY, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    @gen.coroutine
+    def process_setCacheEmployeeCustomInfo(self, seqid, iprot, oprot):
+        args = setCacheEmployeeCustomInfo_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = setCacheEmployeeCustomInfo_result()
+        result.success = yield gen.maybe_future(self._handler.setCacheEmployeeCustomInfo(args.userId, args.companyId, args.customValues))
+        oprot.writeMessageBegin("setCacheEmployeeCustomInfo", TMessageType.REPLY, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    @gen.coroutine
+    def process_getCompanyReferralConf(self, seqid, iprot, oprot):
+        args = getCompanyReferralConf_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = getCompanyReferralConf_result()
+        try:
+            result.success = yield gen.maybe_future(self._handler.getCompanyReferralConf(args.companyId))
+        except thrift_gen.gen.common.struct.ttypes.BIZException as e:
+            result.e = e
+        oprot.writeMessageBegin("getCompanyReferralConf", TMessageType.REPLY, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    @gen.coroutine
+    def process_updsertCompanyReferralPocily(self, seqid, iprot, oprot):
+        args = updsertCompanyReferralPocily_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = updsertCompanyReferralPocily_result()
+        try:
+            yield gen.maybe_future(self._handler.updsertCompanyReferralPocily(args.companyId, args.userId))
+        except thrift_gen.gen.common.struct.ttypes.BIZException as e:
+            result.e = e
+        oprot.writeMessageBegin("updsertCompanyReferralPocily", TMessageType.REPLY, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    @gen.coroutine
+    def process_countUpVote(self, seqid, iprot, oprot):
+        args = countUpVote_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = countUpVote_result()
+        try:
+            result.success = yield gen.maybe_future(self._handler.countUpVote(args.employeeId))
+        except thrift_gen.gen.common.struct.ttypes.BIZException as e:
+            result.e = e
+        oprot.writeMessageBegin("countUpVote", TMessageType.REPLY, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    @gen.coroutine
+    def process_countRecentUpVote(self, seqid, iprot, oprot):
+        args = countRecentUpVote_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = countRecentUpVote_result()
+        try:
+            result.success = yield gen.maybe_future(self._handler.countRecentUpVote(args.employeeId))
+        except thrift_gen.gen.common.struct.ttypes.BIZException as e:
+            result.e = e
+        oprot.writeMessageBegin("countRecentUpVote", TMessageType.REPLY, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    @gen.coroutine
+    def process_upvote(self, seqid, iprot, oprot):
+        args = upvote_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = upvote_result()
+        try:
+            result.success = yield gen.maybe_future(self._handler.upvote(args.employeeId, args.userId))
+        except thrift_gen.gen.common.struct.ttypes.BIZException as e:
+            result.e = e
+        oprot.writeMessageBegin("upvote", TMessageType.REPLY, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    @gen.coroutine
+    def process_removeUpvote(self, seqid, iprot, oprot):
+        args = removeUpvote_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = removeUpvote_result()
+        try:
+            yield gen.maybe_future(self._handler.removeUpvote(args.employeeId, args.userId))
+        except thrift_gen.gen.common.struct.ttypes.BIZException as e:
+            result.e = e
+        oprot.writeMessageBegin("removeUpvote", TMessageType.REPLY, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    @gen.coroutine
+    def process_fetchLeaderBoardInfo(self, seqid, iprot, oprot):
+        args = fetchLeaderBoardInfo_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = fetchLeaderBoardInfo_result()
+        try:
+            result.success = yield gen.maybe_future(self._handler.fetchLeaderBoardInfo(args.id, args.type))
+        except thrift_gen.gen.common.struct.ttypes.BIZException as e:
+            result.e = e
+        oprot.writeMessageBegin("fetchLeaderBoardInfo", TMessageType.REPLY, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    @gen.coroutine
+    def process_fetchLastLeaderBoardInfo(self, seqid, iprot, oprot):
+        args = fetchLastLeaderBoardInfo_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = fetchLastLeaderBoardInfo_result()
+        try:
+            result.success = yield gen.maybe_future(self._handler.fetchLastLeaderBoardInfo(args.id, args.type))
+        except thrift_gen.gen.common.struct.ttypes.BIZException as e:
+            result.e = e
+        oprot.writeMessageBegin("fetchLastLeaderBoardInfo", TMessageType.REPLY, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    @gen.coroutine
+    def process_fetchLeaderBoardType(self, seqid, iprot, oprot):
+        args = fetchLeaderBoardType_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = fetchLeaderBoardType_result()
+        try:
+            result.success = yield gen.maybe_future(self._handler.fetchLeaderBoardType(args.companyId))
+        except thrift_gen.gen.common.struct.ttypes.BIZException as e:
+            result.e = e
+        oprot.writeMessageBegin("fetchLeaderBoardType", TMessageType.REPLY, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    @gen.coroutine
+    def process_updateLeaderBoardType(self, seqid, iprot, oprot):
+        args = updateLeaderBoardType_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = updateLeaderBoardType_result()
+        try:
+            yield gen.maybe_future(self._handler.updateLeaderBoardType(args.companyId, args.type))
+        except thrift_gen.gen.common.struct.ttypes.BIZException as e:
+            result.e = e
+        oprot.writeMessageBegin("updateLeaderBoardType", TMessageType.REPLY, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    @gen.coroutine
+    def process_countEmplyee(self, seqid, iprot, oprot):
+        args = countEmplyee_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = countEmplyee_result()
+        try:
+            result.success = yield gen.maybe_future(self._handler.countEmplyee(args.companyId))
+        except thrift_gen.gen.common.struct.ttypes.BIZException as e:
+            result.e = e
+        oprot.writeMessageBegin("countEmplyee", TMessageType.REPLY, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -1459,150 +2109,6 @@ class setEmployeeCustomInfo_result(object):
         return not (self == other)
 
 
-class setCacheEmployeeCustomInfo_args(object):
-    """
-    Attributes:
-     - userId
-     - companyId
-     - customValues
-    """
-
-    thrift_spec = (
-        None,  # 0
-        (1, TType.I32, 'userId', None, None, ),  # 1
-        (2, TType.I32, 'companyId', None, None, ),  # 2
-        (3, TType.STRING, 'customValues', 'UTF8', None, ),  # 3
-    )
-
-    def __init__(self, userId=None, companyId=None, customValues=None,):
-        self.userId = userId
-        self.companyId = companyId
-        self.customValues = customValues
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 1:
-                if ftype == TType.I32:
-                    self.userId = iprot.readI32()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 2:
-                if ftype == TType.I32:
-                    self.companyId = iprot.readI32()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 3:
-                if ftype == TType.STRING:
-                    self.customValues = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
-            return
-        oprot.writeStructBegin('setCacheEmployeeCustomInfo_args')
-        if self.userId is not None:
-            oprot.writeFieldBegin('userId', TType.I32, 1)
-            oprot.writeI32(self.userId)
-            oprot.writeFieldEnd()
-        if self.companyId is not None:
-            oprot.writeFieldBegin('companyId', TType.I32, 2)
-            oprot.writeI32(self.companyId)
-            oprot.writeFieldEnd()
-        if self.customValues is not None:
-            oprot.writeFieldBegin('customValues', TType.STRING, 3)
-            oprot.writeString(self.customValues.encode('utf-8') if sys.version_info[0] == 2 else self.customValues)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-
-
-class setCacheEmployeeCustomInfo_result(object):
-    """
-    Attributes:
-     - success
-    """
-
-    thrift_spec = (
-        (0, TType.STRUCT, 'success', (thrift_gen.gen.employee.struct.ttypes.Result, thrift_gen.gen.employee.struct.ttypes.Result.thrift_spec), None, ),  # 0
-    )
-
-    def __init__(self, success=None,):
-        self.success = success
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 0:
-                if ftype == TType.STRUCT:
-                    self.success = thrift_gen.gen.employee.struct.ttypes.Result()
-                    self.success.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
-            return
-        oprot.writeStructBegin('setCacheEmployeeCustomInfo_result')
-        if self.success is not None:
-            oprot.writeFieldBegin('success', TType.STRUCT, 0)
-            self.success.write(oprot)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-
-
 class getEmployeeRewards_args(object):
     """
     Attributes:
@@ -2013,6 +2519,8 @@ class awardRanking_args(object):
      - employeeId
      - companyId
      - timespan
+     - pageNum
+     - pageSize
     """
 
     thrift_spec = (
@@ -2020,12 +2528,16 @@ class awardRanking_args(object):
         (1, TType.I32, 'employeeId', None, None, ),  # 1
         (2, TType.I32, 'companyId', None, None, ),  # 2
         (3, TType.I32, 'timespan', None, None, ),  # 3
+        (4, TType.I32, 'pageNum', None, None, ),  # 4
+        (5, TType.I32, 'pageSize', None, None, ),  # 5
     )
 
-    def __init__(self, employeeId=None, companyId=None, timespan=None,):
+    def __init__(self, employeeId=None, companyId=None, timespan=None, pageNum=None, pageSize=None,):
         self.employeeId = employeeId
         self.companyId = companyId
         self.timespan = timespan
+        self.pageNum = pageNum
+        self.pageSize = pageSize
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -2051,6 +2563,16 @@ class awardRanking_args(object):
                     self.timespan = iprot.readI32()
                 else:
                     iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.I32:
+                    self.pageNum = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 5:
+                if ftype == TType.I32:
+                    self.pageSize = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -2072,6 +2594,14 @@ class awardRanking_args(object):
         if self.timespan is not None:
             oprot.writeFieldBegin('timespan', TType.I32, 3)
             oprot.writeI32(self.timespan)
+            oprot.writeFieldEnd()
+        if self.pageNum is not None:
+            oprot.writeFieldBegin('pageNum', TType.I32, 4)
+            oprot.writeI32(self.pageNum)
+            oprot.writeFieldEnd()
+        if self.pageSize is not None:
+            oprot.writeFieldBegin('pageSize', TType.I32, 5)
+            oprot.writeI32(self.pageSize)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -2095,10 +2625,167 @@ class awardRanking_result(object):
     """
     Attributes:
      - success
+     - e
     """
 
     thrift_spec = (
-        (0, TType.LIST, 'success', (TType.STRUCT, (thrift_gen.gen.employee.struct.ttypes.EmployeeAward, thrift_gen.gen.employee.struct.ttypes.EmployeeAward.thrift_spec), False), None, ),  # 0
+        (0, TType.STRUCT, 'success', (thrift_gen.gen.employee.struct.ttypes.Pagination, thrift_gen.gen.employee.struct.ttypes.Pagination.thrift_spec), None, ),  # 0
+        (1, TType.STRUCT, 'e', (thrift_gen.gen.common.struct.ttypes.BIZException, thrift_gen.gen.common.struct.ttypes.BIZException.thrift_spec), None, ),  # 1
+    )
+
+    def __init__(self, success=None, e=None,):
+        self.success = success
+        self.e = e
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRUCT:
+                    self.success = thrift_gen.gen.employee.struct.ttypes.Pagination()
+                    self.success.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.e = thrift_gen.gen.common.struct.ttypes.BIZException()
+                    self.e.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('awardRanking_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.STRUCT, 0)
+            self.success.write(oprot)
+            oprot.writeFieldEnd()
+        if self.e is not None:
+            oprot.writeFieldBegin('e', TType.STRUCT, 1)
+            self.e.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class setCacheEmployeeCustomInfo_args(object):
+    """
+    Attributes:
+     - userId
+     - companyId
+     - customValues
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'userId', None, None, ),  # 1
+        (2, TType.I32, 'companyId', None, None, ),  # 2
+        (3, TType.STRING, 'customValues', 'UTF8', None, ),  # 3
+    )
+
+    def __init__(self, userId=None, companyId=None, customValues=None,):
+        self.userId = userId
+        self.companyId = companyId
+        self.customValues = customValues
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.userId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.I32:
+                    self.companyId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.STRING:
+                    self.customValues = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('setCacheEmployeeCustomInfo_args')
+        if self.userId is not None:
+            oprot.writeFieldBegin('userId', TType.I32, 1)
+            oprot.writeI32(self.userId)
+            oprot.writeFieldEnd()
+        if self.companyId is not None:
+            oprot.writeFieldBegin('companyId', TType.I32, 2)
+            oprot.writeI32(self.companyId)
+            oprot.writeFieldEnd()
+        if self.customValues is not None:
+            oprot.writeFieldBegin('customValues', TType.STRING, 3)
+            oprot.writeString(self.customValues.encode('utf-8') if sys.version_info[0] == 2 else self.customValues)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class setCacheEmployeeCustomInfo_result(object):
+    """
+    Attributes:
+     - success
+    """
+
+    thrift_spec = (
+        (0, TType.STRUCT, 'success', (thrift_gen.gen.employee.struct.ttypes.Result, thrift_gen.gen.employee.struct.ttypes.Result.thrift_spec), None, ),  # 0
     )
 
     def __init__(self, success=None,):
@@ -2114,14 +2801,9 @@ class awardRanking_result(object):
             if ftype == TType.STOP:
                 break
             if fid == 0:
-                if ftype == TType.LIST:
-                    self.success = []
-                    (_etype17, _size14) = iprot.readListBegin()
-                    for _i18 in range(_size14):
-                        _elem19 = thrift_gen.gen.employee.struct.ttypes.EmployeeAward()
-                        _elem19.read(iprot)
-                        self.success.append(_elem19)
-                    iprot.readListEnd()
+                if ftype == TType.STRUCT:
+                    self.success = thrift_gen.gen.employee.struct.ttypes.Result()
+                    self.success.read(iprot)
                 else:
                     iprot.skip(ftype)
             else:
@@ -2133,13 +2815,1505 @@ class awardRanking_result(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
-        oprot.writeStructBegin('awardRanking_result')
+        oprot.writeStructBegin('setCacheEmployeeCustomInfo_result')
         if self.success is not None:
-            oprot.writeFieldBegin('success', TType.LIST, 0)
-            oprot.writeListBegin(TType.STRUCT, len(self.success))
-            for iter20 in self.success:
-                iter20.write(oprot)
-            oprot.writeListEnd()
+            oprot.writeFieldBegin('success', TType.STRUCT, 0)
+            self.success.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class getCompanyReferralConf_args(object):
+    """
+    Attributes:
+     - companyId
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'companyId', None, None, ),  # 1
+    )
+
+    def __init__(self, companyId=None,):
+        self.companyId = companyId
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.companyId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('getCompanyReferralConf_args')
+        if self.companyId is not None:
+            oprot.writeFieldBegin('companyId', TType.I32, 1)
+            oprot.writeI32(self.companyId)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class getCompanyReferralConf_result(object):
+    """
+    Attributes:
+     - success
+     - e
+    """
+
+    thrift_spec = (
+        (0, TType.STRUCT, 'success', (thrift_gen.gen.common.struct.ttypes.Response, thrift_gen.gen.common.struct.ttypes.Response.thrift_spec), None, ),  # 0
+        (1, TType.STRUCT, 'e', (thrift_gen.gen.common.struct.ttypes.BIZException, thrift_gen.gen.common.struct.ttypes.BIZException.thrift_spec), None, ),  # 1
+    )
+
+    def __init__(self, success=None, e=None,):
+        self.success = success
+        self.e = e
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRUCT:
+                    self.success = thrift_gen.gen.common.struct.ttypes.Response()
+                    self.success.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.e = thrift_gen.gen.common.struct.ttypes.BIZException()
+                    self.e.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('getCompanyReferralConf_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.STRUCT, 0)
+            self.success.write(oprot)
+            oprot.writeFieldEnd()
+        if self.e is not None:
+            oprot.writeFieldBegin('e', TType.STRUCT, 1)
+            self.e.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class updsertCompanyReferralPocily_args(object):
+    """
+    Attributes:
+     - companyId
+     - userId
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'companyId', None, None, ),  # 1
+        (2, TType.I32, 'userId', None, None, ),  # 2
+    )
+
+    def __init__(self, companyId=None, userId=None,):
+        self.companyId = companyId
+        self.userId = userId
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.companyId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.I32:
+                    self.userId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('updsertCompanyReferralPocily_args')
+        if self.companyId is not None:
+            oprot.writeFieldBegin('companyId', TType.I32, 1)
+            oprot.writeI32(self.companyId)
+            oprot.writeFieldEnd()
+        if self.userId is not None:
+            oprot.writeFieldBegin('userId', TType.I32, 2)
+            oprot.writeI32(self.userId)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class updsertCompanyReferralPocily_result(object):
+    """
+    Attributes:
+     - e
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.STRUCT, 'e', (thrift_gen.gen.common.struct.ttypes.BIZException, thrift_gen.gen.common.struct.ttypes.BIZException.thrift_spec), None, ),  # 1
+    )
+
+    def __init__(self, e=None,):
+        self.e = e
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.e = thrift_gen.gen.common.struct.ttypes.BIZException()
+                    self.e.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('updsertCompanyReferralPocily_result')
+        if self.e is not None:
+            oprot.writeFieldBegin('e', TType.STRUCT, 1)
+            self.e.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class countUpVote_args(object):
+    """
+    Attributes:
+     - employeeId
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'employeeId', None, None, ),  # 1
+    )
+
+    def __init__(self, employeeId=None,):
+        self.employeeId = employeeId
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.employeeId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('countUpVote_args')
+        if self.employeeId is not None:
+            oprot.writeFieldBegin('employeeId', TType.I32, 1)
+            oprot.writeI32(self.employeeId)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class countUpVote_result(object):
+    """
+    Attributes:
+     - success
+     - e
+    """
+
+    thrift_spec = (
+        (0, TType.I32, 'success', None, None, ),  # 0
+        (1, TType.STRUCT, 'e', (thrift_gen.gen.common.struct.ttypes.BIZException, thrift_gen.gen.common.struct.ttypes.BIZException.thrift_spec), None, ),  # 1
+    )
+
+    def __init__(self, success=None, e=None,):
+        self.success = success
+        self.e = e
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.I32:
+                    self.success = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.e = thrift_gen.gen.common.struct.ttypes.BIZException()
+                    self.e.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('countUpVote_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.I32, 0)
+            oprot.writeI32(self.success)
+            oprot.writeFieldEnd()
+        if self.e is not None:
+            oprot.writeFieldBegin('e', TType.STRUCT, 1)
+            self.e.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class countRecentUpVote_args(object):
+    """
+    Attributes:
+     - employeeId
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'employeeId', None, None, ),  # 1
+    )
+
+    def __init__(self, employeeId=None,):
+        self.employeeId = employeeId
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.employeeId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('countRecentUpVote_args')
+        if self.employeeId is not None:
+            oprot.writeFieldBegin('employeeId', TType.I32, 1)
+            oprot.writeI32(self.employeeId)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class countRecentUpVote_result(object):
+    """
+    Attributes:
+     - success
+     - e
+    """
+
+    thrift_spec = (
+        (0, TType.I32, 'success', None, None, ),  # 0
+        (1, TType.STRUCT, 'e', (thrift_gen.gen.common.struct.ttypes.BIZException, thrift_gen.gen.common.struct.ttypes.BIZException.thrift_spec), None, ),  # 1
+    )
+
+    def __init__(self, success=None, e=None,):
+        self.success = success
+        self.e = e
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.I32:
+                    self.success = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.e = thrift_gen.gen.common.struct.ttypes.BIZException()
+                    self.e.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('countRecentUpVote_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.I32, 0)
+            oprot.writeI32(self.success)
+            oprot.writeFieldEnd()
+        if self.e is not None:
+            oprot.writeFieldBegin('e', TType.STRUCT, 1)
+            self.e.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class upvote_args(object):
+    """
+    Attributes:
+     - employeeId
+     - userId
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'employeeId', None, None, ),  # 1
+        (2, TType.I32, 'userId', None, None, ),  # 2
+    )
+
+    def __init__(self, employeeId=None, userId=None,):
+        self.employeeId = employeeId
+        self.userId = userId
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.employeeId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.I32:
+                    self.userId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('upvote_args')
+        if self.employeeId is not None:
+            oprot.writeFieldBegin('employeeId', TType.I32, 1)
+            oprot.writeI32(self.employeeId)
+            oprot.writeFieldEnd()
+        if self.userId is not None:
+            oprot.writeFieldBegin('userId', TType.I32, 2)
+            oprot.writeI32(self.userId)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class upvote_result(object):
+    """
+    Attributes:
+     - success
+     - e
+    """
+
+    thrift_spec = (
+        (0, TType.I32, 'success', None, None, ),  # 0
+        (1, TType.STRUCT, 'e', (thrift_gen.gen.common.struct.ttypes.BIZException, thrift_gen.gen.common.struct.ttypes.BIZException.thrift_spec), None, ),  # 1
+    )
+
+    def __init__(self, success=None, e=None,):
+        self.success = success
+        self.e = e
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.I32:
+                    self.success = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.e = thrift_gen.gen.common.struct.ttypes.BIZException()
+                    self.e.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('upvote_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.I32, 0)
+            oprot.writeI32(self.success)
+            oprot.writeFieldEnd()
+        if self.e is not None:
+            oprot.writeFieldBegin('e', TType.STRUCT, 1)
+            self.e.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class removeUpvote_args(object):
+    """
+    Attributes:
+     - employeeId
+     - userId
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'employeeId', None, None, ),  # 1
+        (2, TType.I32, 'userId', None, None, ),  # 2
+    )
+
+    def __init__(self, employeeId=None, userId=None,):
+        self.employeeId = employeeId
+        self.userId = userId
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.employeeId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.I32:
+                    self.userId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('removeUpvote_args')
+        if self.employeeId is not None:
+            oprot.writeFieldBegin('employeeId', TType.I32, 1)
+            oprot.writeI32(self.employeeId)
+            oprot.writeFieldEnd()
+        if self.userId is not None:
+            oprot.writeFieldBegin('userId', TType.I32, 2)
+            oprot.writeI32(self.userId)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class removeUpvote_result(object):
+    """
+    Attributes:
+     - e
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.STRUCT, 'e', (thrift_gen.gen.common.struct.ttypes.BIZException, thrift_gen.gen.common.struct.ttypes.BIZException.thrift_spec), None, ),  # 1
+    )
+
+    def __init__(self, e=None,):
+        self.e = e
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.e = thrift_gen.gen.common.struct.ttypes.BIZException()
+                    self.e.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('removeUpvote_result')
+        if self.e is not None:
+            oprot.writeFieldBegin('e', TType.STRUCT, 1)
+            self.e.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class fetchLeaderBoardInfo_args(object):
+    """
+    Attributes:
+     - id
+     - type
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'id', None, None, ),  # 1
+        (2, TType.I32, 'type', None, None, ),  # 2
+    )
+
+    def __init__(self, id=None, type=None,):
+        self.id = id
+        self.type = type
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.id = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.I32:
+                    self.type = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('fetchLeaderBoardInfo_args')
+        if self.id is not None:
+            oprot.writeFieldBegin('id', TType.I32, 1)
+            oprot.writeI32(self.id)
+            oprot.writeFieldEnd()
+        if self.type is not None:
+            oprot.writeFieldBegin('type', TType.I32, 2)
+            oprot.writeI32(self.type)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class fetchLeaderBoardInfo_result(object):
+    """
+    Attributes:
+     - success
+     - e
+    """
+
+    thrift_spec = (
+        (0, TType.STRUCT, 'success', (thrift_gen.gen.employee.struct.ttypes.LeaderBoardInfo, thrift_gen.gen.employee.struct.ttypes.LeaderBoardInfo.thrift_spec), None, ),  # 0
+        (1, TType.STRUCT, 'e', (thrift_gen.gen.common.struct.ttypes.BIZException, thrift_gen.gen.common.struct.ttypes.BIZException.thrift_spec), None, ),  # 1
+    )
+
+    def __init__(self, success=None, e=None,):
+        self.success = success
+        self.e = e
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRUCT:
+                    self.success = thrift_gen.gen.employee.struct.ttypes.LeaderBoardInfo()
+                    self.success.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.e = thrift_gen.gen.common.struct.ttypes.BIZException()
+                    self.e.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('fetchLeaderBoardInfo_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.STRUCT, 0)
+            self.success.write(oprot)
+            oprot.writeFieldEnd()
+        if self.e is not None:
+            oprot.writeFieldBegin('e', TType.STRUCT, 1)
+            self.e.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class fetchLastLeaderBoardInfo_args(object):
+    """
+    Attributes:
+     - id
+     - type
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'id', None, None, ),  # 1
+        (2, TType.I32, 'type', None, None, ),  # 2
+    )
+
+    def __init__(self, id=None, type=None,):
+        self.id = id
+        self.type = type
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.id = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.I32:
+                    self.type = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('fetchLastLeaderBoardInfo_args')
+        if self.id is not None:
+            oprot.writeFieldBegin('id', TType.I32, 1)
+            oprot.writeI32(self.id)
+            oprot.writeFieldEnd()
+        if self.type is not None:
+            oprot.writeFieldBegin('type', TType.I32, 2)
+            oprot.writeI32(self.type)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class fetchLastLeaderBoardInfo_result(object):
+    """
+    Attributes:
+     - success
+     - e
+    """
+
+    thrift_spec = (
+        (0, TType.STRUCT, 'success', (thrift_gen.gen.employee.struct.ttypes.LeaderBoardInfo, thrift_gen.gen.employee.struct.ttypes.LeaderBoardInfo.thrift_spec), None, ),  # 0
+        (1, TType.STRUCT, 'e', (thrift_gen.gen.common.struct.ttypes.BIZException, thrift_gen.gen.common.struct.ttypes.BIZException.thrift_spec), None, ),  # 1
+    )
+
+    def __init__(self, success=None, e=None,):
+        self.success = success
+        self.e = e
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRUCT:
+                    self.success = thrift_gen.gen.employee.struct.ttypes.LeaderBoardInfo()
+                    self.success.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.e = thrift_gen.gen.common.struct.ttypes.BIZException()
+                    self.e.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('fetchLastLeaderBoardInfo_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.STRUCT, 0)
+            self.success.write(oprot)
+            oprot.writeFieldEnd()
+        if self.e is not None:
+            oprot.writeFieldBegin('e', TType.STRUCT, 1)
+            self.e.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class fetchLeaderBoardType_args(object):
+    """
+    Attributes:
+     - companyId
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'companyId', None, None, ),  # 1
+    )
+
+    def __init__(self, companyId=None,):
+        self.companyId = companyId
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.companyId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('fetchLeaderBoardType_args')
+        if self.companyId is not None:
+            oprot.writeFieldBegin('companyId', TType.I32, 1)
+            oprot.writeI32(self.companyId)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class fetchLeaderBoardType_result(object):
+    """
+    Attributes:
+     - success
+     - e
+    """
+
+    thrift_spec = (
+        (0, TType.STRUCT, 'success', (thrift_gen.gen.employee.struct.ttypes.LeaderBoardType, thrift_gen.gen.employee.struct.ttypes.LeaderBoardType.thrift_spec), None, ),  # 0
+        (1, TType.STRUCT, 'e', (thrift_gen.gen.common.struct.ttypes.BIZException, thrift_gen.gen.common.struct.ttypes.BIZException.thrift_spec), None, ),  # 1
+    )
+
+    def __init__(self, success=None, e=None,):
+        self.success = success
+        self.e = e
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRUCT:
+                    self.success = thrift_gen.gen.employee.struct.ttypes.LeaderBoardType()
+                    self.success.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.e = thrift_gen.gen.common.struct.ttypes.BIZException()
+                    self.e.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('fetchLeaderBoardType_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.STRUCT, 0)
+            self.success.write(oprot)
+            oprot.writeFieldEnd()
+        if self.e is not None:
+            oprot.writeFieldBegin('e', TType.STRUCT, 1)
+            self.e.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class updateLeaderBoardType_args(object):
+    """
+    Attributes:
+     - companyId
+     - type
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'companyId', None, None, ),  # 1
+        (2, TType.BYTE, 'type', None, None, ),  # 2
+    )
+
+    def __init__(self, companyId=None, type=None,):
+        self.companyId = companyId
+        self.type = type
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.companyId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.BYTE:
+                    self.type = iprot.readByte()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('updateLeaderBoardType_args')
+        if self.companyId is not None:
+            oprot.writeFieldBegin('companyId', TType.I32, 1)
+            oprot.writeI32(self.companyId)
+            oprot.writeFieldEnd()
+        if self.type is not None:
+            oprot.writeFieldBegin('type', TType.BYTE, 2)
+            oprot.writeByte(self.type)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class updateLeaderBoardType_result(object):
+    """
+    Attributes:
+     - e
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.STRUCT, 'e', (thrift_gen.gen.common.struct.ttypes.BIZException, thrift_gen.gen.common.struct.ttypes.BIZException.thrift_spec), None, ),  # 1
+    )
+
+    def __init__(self, e=None,):
+        self.e = e
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.e = thrift_gen.gen.common.struct.ttypes.BIZException()
+                    self.e.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('updateLeaderBoardType_result')
+        if self.e is not None:
+            oprot.writeFieldBegin('e', TType.STRUCT, 1)
+            self.e.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class countEmplyee_args(object):
+    """
+    Attributes:
+     - companyId
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I32, 'companyId', None, None, ),  # 1
+    )
+
+    def __init__(self, companyId=None,):
+        self.companyId = companyId
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.companyId = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('countEmplyee_args')
+        if self.companyId is not None:
+            oprot.writeFieldBegin('companyId', TType.I32, 1)
+            oprot.writeI32(self.companyId)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class countEmplyee_result(object):
+    """
+    Attributes:
+     - success
+     - e
+    """
+
+    thrift_spec = (
+        (0, TType.I32, 'success', None, None, ),  # 0
+        (1, TType.STRUCT, 'e', (thrift_gen.gen.common.struct.ttypes.BIZException, thrift_gen.gen.common.struct.ttypes.BIZException.thrift_spec), None, ),  # 1
+    )
+
+    def __init__(self, success=None, e=None,):
+        self.success = success
+        self.e = e
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.I32:
+                    self.success = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.e = thrift_gen.gen.common.struct.ttypes.BIZException()
+                    self.e.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('countEmplyee_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.I32, 0)
+            oprot.writeI32(self.success)
+            oprot.writeFieldEnd()
+        if self.e is not None:
+            oprot.writeFieldBegin('e', TType.STRUCT, 1)
+            self.e.write(oprot)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()

@@ -3,7 +3,7 @@
 import json
 
 from tornado import gen
-
+import time
 import conf.common as const
 import conf.fe as fe
 import conf.message as msg
@@ -15,6 +15,8 @@ from util.common import ObjectDict
 from util.tool.dict_tool import sub_dict
 from util.tool.re_checker import revalidator
 from util.tool.url_tool import make_static_url, make_url
+from util.wechat.core import get_temporary_qrcode
+from util.common.mq import unread_praise_publisher
 
 
 class EmployeePageService(PageService):
@@ -74,7 +76,7 @@ class EmployeePageService(PageService):
         return bind_status
 
     @gen.coroutine
-    def make_binding_render_data(self, current_user, conf):
+    def make_binding_render_data(self, current_user, mate_num, conf):
         """构建员工绑定页面的渲染数据
         :returns:
         {
@@ -106,12 +108,18 @@ class EmployeePageService(PageService):
         binding_message = company_conf.employee_binding if company_conf else ''
 
         data = ObjectDict()
+        data.wechat = ObjectDict()
         data.name = current_user.sysuser.name
         data.headimg = current_user.sysuser.headimg
         data.mobile = current_user.sysuser.mobile or ''
         data.send_hour = 24  # fixed 24 小时
         data.conf = ObjectDict()
         data.binding_success_message = conf.bindSuccessMessage or ''
+        data.wechat.subscribed = True if current_user.wxuser.is_subscribe else False
+        data.wechat.qrcode = yield get_temporary_qrcode(current_user.wechat.access_token, pattern_id=1)
+        data.wechat.name = current_user.wechat.name
+        data.mate_num = mate_num
+        data.reward = conf.reward
 
         bind_status, employee = yield self.get_employee_info(
             user_id=current_user.sysuser.id, company_id=current_user.company.id)
@@ -355,10 +363,10 @@ class EmployeePageService(PageService):
         return ret.success, ret.message, ret.employeeId
 
     @gen.coroutine
-    def get_award_ladder_info(self, employee_id, company_id, type):
+    def get_award_ladder_info(self, employee_id, company_id, type, page_from, page_size):
         """获取员工积分榜数据"""
         ret = yield self.thrift_employee_ds.get_award_ranking(
-            employee_id, company_id, type)
+            employee_id, company_id, type, page_from, page_size)
 
         def gen_make_element(employee_award_list):
             for e in employee_award_list:
@@ -367,16 +375,63 @@ class EmployeePageService(PageService):
                     'id': e.employeeId,
                     'point': e.awardTotal,
                     'icon': make_static_url(e.headimgurl),
-                    'level': e.ranking
+                    'level': e.ranking,
+                    'praise': e.praise,
+                    'praised': e.praised
                 })
 
-        return list(gen_make_element(ret))
+        return list(gen_make_element(ret.EmployeeAward))
+
+    @gen.coroutine
+    def vote_prasie(self, employee_id, praise_user_id):
+        """员工点赞"""
+        result, _ = yield self.infra_employee_ds.vote_prasie(employee_id, praise_user_id)
+        return result
+
+    @gen.coroutine
+    def cancel_prasie(self, employee_id, praise_user_id):
+        """员工取消点赞"""
+        result, _ = yield self.infra_employee_ds.cancel_prasie(employee_id, praise_user_id)
+        return result
 
     @gen.coroutine
     def get_referral_policy(self, company_id):
         """获取公司内推政策"""
         result, data = yield self.infra_employee_ds.get_referral_policy(company_id)
         return result, data
+
+    @gen.coroutine
+    def get_mate_num(self, company_id):
+        """获取已验证员工数"""
+        result, data = yield self.infra_employee_ds.get_mate_num(company_id)
+        return data if result else 0
+
+    @gen.coroutine
+    def get_unread_praise(self, user_id):
+        """获取未读的赞的数量"""
+        result, data = yield self.infra_employee_ds.get_unread_praise(user_id)
+        return data if result else 0
+
+    @gen.coroutine
+    def reset_unread_praise(self, employee_id):
+        """阅读后，将未读的赞的数量清空"""
+        data = ObjectDict({
+            "employee_id": employee_id,
+            "view_time": int(time.time() * 1000)
+        })
+        yield unread_praise_publisher.publish_message(message=data)
+
+    @gen.coroutine
+    def get_last_rank_info(self, employee_id):
+        """获取该公司积分榜单最后一名员工的榜单信息"""
+        result, data = yield self.infra_employee_ds.get_last_rank_info(employee_id)
+        return data
+
+    @gen.coroutine
+    def get_current_user_rank_info(self, user_id):
+        """获取当前用户榜单信息"""
+        result, data = yield self.infra_employee_ds.get_current_user_rank_info(user_id)
+        return data
 
     @gen.coroutine
     def create_interest_policy_count(self, params):

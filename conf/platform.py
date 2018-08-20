@@ -101,6 +101,9 @@ MEDIA_TYPE = ('image', 'video')
 # 职位列表页设置
 POSITION_LIST_PAGE_COUNT = 10
 
+# 积分排行设置
+RANK_LIST_PAGE_COUNT = 10
+
 # sug数设置
 SUG_LIST_COUNT = 5
 

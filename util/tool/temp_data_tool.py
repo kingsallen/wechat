@@ -421,8 +421,8 @@ def make_company_module_type_3(media_list, module_name, more_link=""):
     if small_ones:
         member_list = [ObjectDict({
             "icon": make_static_url(m.media_url),
-            "name": m.title,
-            "title": m.sub_title,
+            "name": m.sub_title,
+            "title": m.title,
             "description": m.longtexts
         }) for m in small_ones]
     data = [{

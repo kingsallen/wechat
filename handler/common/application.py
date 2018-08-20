@@ -99,7 +99,6 @@ class ApplicationHandler(BaseHandler):
             if not result:
                 self.send_json_error(
                     data=dict(next_url=self.make_url(path.PROFILE_CUSTOM_CV, self.params),
-
                               message=''))
                 return
 
