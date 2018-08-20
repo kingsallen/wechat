@@ -53,11 +53,9 @@ class AwardsLadderPageHandler(BaseHandler):
                     page_from=page_from,
                     page_size=page_size
                 )
-                last_rank = yield self.employee_ps.get_last_rank_info(self.current_user.employee.id)
+
                 self.render_page(template_name="employee/reward-rank.html",
-                                 data={"policy_link": policy_link,
-                                       "rank_list": rank_list,
-                                       "last_rank": last_rank})
+                                 data={"policy_link": policy_link})
             else:
                 self.render_page(template_name="employee/reward-rank-dark.html",
                                  data={"policy_link": policy_link})
@@ -104,30 +102,42 @@ class AwardsLadderHandler(BaseHandler):
         """
         返回员工积分排行榜数据
         """
-        if self.params.rankType not in self.TIMESPAN:
+        if self.params.rank_type not in self.TIMESPAN:
             self.send_json_error()
+            return
 
         # 判断是否已经绑定员工
         binded = const.YES if self.current_user.employee else const.NO
         if not binded:
             self.send_json_error(
                 message=messages.EMPLOYEE_NOT_BINDED_WARNING.format(self.current_user.company.conf_employee_slug))
+            return
+
         list_only = self.params.list_only
         company_id = self.current_user.company.id
         employee_id = self.current_user.employee.id
-        rankType = self.params.rankType  # year/month/quarter
+        rank_type = self.params.rank_type  # year/month/quarter
+        ladder_type = self.params.ladder_type
 
         page_from = (int(self.params.get("count", 0)) * const_platform.RANK_LIST_PAGE_COUNT)
         page_size = const_platform.RANK_LIST_PAGE_COUNT
+        if ladder_type == 'fun':
+            page_from = page_from - 5 if page_from else 0
+            if page_from == 0:
+                page_size = 5
         rank_list = yield self.employee_ps.get_award_ladder_info(
             employee_id=employee_id,
             company_id=company_id,
-            type=rankType,
+            type=rank_type,
             page_from=page_from,
             page_size=page_size
         )
+
         current_user_rank = yield self.employee_ps.get_current_user_rank_info(self.current_user.sysuser_id)
         rank_list = sorted(rank_list, key=lambda x: x.level)
+        if ladder_type == "normal":
+            last_rank = yield self.employee_ps.get_last_rank_info(self.current_user.employee.id)
+            rank_list.append(last_rank)
         if list_only:
             data = ObjectDict(rankList=rank_list)
         else:
