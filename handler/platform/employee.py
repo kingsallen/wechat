@@ -125,7 +125,7 @@ class AwardsLadderHandler(BaseHandler):
         current_user_rank = yield self.employee_ps.get_current_user_rank_info(self.current_user.employee.id, int(type))
         rank_list = sorted(rank_list, key=lambda x: x.level)
         if ladder_type == "normal":
-            last_rank = yield self.employee_ps.get_last_rank_info(self.current_user.employee.id)
+            last_rank = yield self.employee_ps.get_last_rank_info(self.current_user.employee.id, int(type))
             rank_list.append(last_rank)
         if list_only:
             data = ObjectDict(rank_list=rank_list)
