@@ -114,46 +114,13 @@ class AwardsLadderHandler(BaseHandler):
         page_from = (int(self.params.get("count", 0)) * const_platform.RANK_LIST_PAGE_COUNT)
         page_size = const_platform.RANK_LIST_PAGE_COUNT
 
-        # rank_list = yield self.employee_ps.get_award_ladder_info(
-        #     employee_id=employee_id,
-        #     company_id=company_id,
-        #     type=rankType,
-        #     page_from=page_from,
-        #     page_size=page_size
-        # )
-        rank_list = [{
-            "praised": False,
-            "praise": 423,
-            "level": 4,
-            "id": 883924,
-            "point": 303,
-            "username": "vf",
-            "icon": "http://thirdwx.qlogo.cn/mmopen/Q3auHgzwzM4WqiaoE7g1utu7ZdibzWm6CZwHdCK0iaGDHKlo4TnbmXXGg2DcJfAvwJVykrtT7dzwtywCEnutsic1iaA/132"
-        }, {
-            "praised": False,
-            "praise": 133,
-            "level": 2,
-            "id": 883924,
-            "point": 302,
-            "username": "2",
-            "icon": "http://thirdwx.qlogo.cn/mmopen/Q3auHgzwzM4WqiaoE7g1utu7ZdibzWm6CZwHdCK0iaGDHKlo4TnbmXXGg2DcJfAvwJVykrtT7dzwtywCEnutsic1iaA/132"
-        }, {
-            "praised": True,
-            "praise": 123,
-            "level": 3,
-            "id": 883924,
-            "point": 304,
-            "username": "3",
-            "icon": "http://thirdwx.qlogo.cn/mmopen/Q3auHgzwzM4WqiaoE7g1utu7ZdibzWm6CZwHdCK0iaGDHKlo4TnbmXXGg2DcJfAvwJVykrtT7dzwtywCEnutsic1iaA/132"
-        }, {
-            "praised": False,
-            "praise": 1233,
-            "level": 1,
-            "id": 883924,
-            "point": 305,
-            "username": "4",
-            "icon": "http://thirdwx.qlogo.cn/mmopen/Q3auHgzwzM4WqiaoE7g1utu7ZdibzWm6CZwHdCK0iaGDHKlo4TnbmXXGg2DcJfAvwJVykrtT7dzwtywCEnutsic1iaA/132"
-        }, ]
+        rank_list = yield self.employee_ps.get_award_ladder_info(
+            employee_id=employee_id,
+            company_id=company_id,
+            type=rank_type,
+            page_from=page_from,
+            page_size=page_size
+        )
 
         current_user_rank = yield self.employee_ps.get_current_user_rank_info(self.current_user.sysuser_id)
         rank_list = sorted(rank_list, key=lambda x: x.level)
