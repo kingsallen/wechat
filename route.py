@@ -169,6 +169,7 @@ platform_routes = [
     (r"/api/position/empnotice/?",                   handler.platform.position.PositionEmpNoticeHandler,        {"event": "position_empnotice"}),
     (r"/api/employee/rewards/rank/?",                handler.platform.employee.AwardsLadderHandler,             {"event": "awards_ladder_api"}),
     (r"/api/employee/survey/?",                      handler.platform.employee.APIEmployeeSurveyHandler,        {"event": "employee_survey_api"}),
+    (r"/api/employee/praise/?",                      handler.platform.employee.PraiseHandler,                   {"event": "employee_praise"}),
     (r'/api/user/survey/?',                          handler.platform.user.APIUserSurveyHandler,                {"event": "user_survey_api"}),
     (r'/api/position/recom/list/?',                  handler.platform.user.APIPositionRecomListHandler,         {"event": "position_ai-recomlist"}),
     (r'/api/recom/position/switch',                 handler.platform.user.APIPositionRecomListCloseHandler,    {"event": "position_ai-recom-position"}),

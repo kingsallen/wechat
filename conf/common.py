@@ -582,3 +582,8 @@ LIEPIN_SCENE_KEY_TTL = 30 * 24 * 60 * 60
 
 # Mars公司id
 MARS_ID = 345
+
+# 积分排行榜
+PAGE_FROM_ONE = 1
+PAGE_SIZE_FIVE = 5
+
