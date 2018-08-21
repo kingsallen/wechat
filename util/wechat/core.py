@@ -19,7 +19,7 @@ from setting import settings
 from util.common import ObjectDict
 from util.common.singleton import Singleton
 from util.tool.date_tool import curr_datetime_now
-from util.tool.http_tool import http_post, http_get
+from util.tool.http_tool import http_post, http_get, http_post_cs_msg
 from util.tool.url_tool import make_url
 from util.common.decorator import cache
 
@@ -352,10 +352,10 @@ def send_succession_message(wechat, open_id, pattern_id):
     :return:
     """
     if pattern_id == 1:
-        url = make_url(path.EMPLOYEE_REFERRAL_POLICY, wechat_signature=wechat.get("signature"))
-        content = '点击完成<a href="{}">员工认证</a> <br> 更多积分奖励等你来~'.format(url)
+        url = make_url(path.EMPLOYEE_VERIFY, host=settings["platform_host"], wechat_signature=wechat.get("signature"))
+        content = '点击完成<a href="{}">员工认证</a>, 更多积分奖励等你来~'.format(url)
     elif pattern_id == 2:
-        url = make_url(path.EMPLOYEE_VERIFY, wechat_signature=wechat.get("signature"))
+        url = make_url(path.EMPLOYEE_REFERRAL_POLICY, host=settings["platform_host"], wechat_signature=wechat.get("signature"))
         content = '点击查看<a href="{}">内推政策</a>'.format(url)
     else:
         content = "欢迎关注：{}, 点击菜单栏发现更多精彩~".format(wechat.get("name"))
@@ -370,5 +370,5 @@ def send_succession_message(wechat, open_id, pattern_id):
                 "kf_account": "kf{}@{}".format(wechat.get("id"), wechat.get("alias"))
             }
     })
-    yield http_post(
-        wx.WX_CS_MESSAGE_API % wechat.get("access_token"), data=jdata, infra=False).json()
+    yield http_post_cs_msg(
+        wx.WX_CS_MESSAGE_API % wechat.get("access_token"), data=jdata)

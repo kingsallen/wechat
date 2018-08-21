@@ -95,6 +95,42 @@ def http_fetch(route, data=None, timeout=30, raise_error=True):
         return response.body
 
 
+@gen.coroutine
+def http_post_cs_msg(route, data=None, timeout=30, raise_error=True):
+    """使用 www-form 形式 HTTP 异步 POST 请求
+    :param route:
+    :param data:
+    :param timeout:
+    :param raise_error:
+    """
+
+    if data is None:
+        data = ObjectDict()
+
+    http_client = tornado.httpclient.AsyncHTTPClient()
+
+    try:
+        request = tornado.httpclient.HTTPRequest(
+            route,
+            method='POST',
+            body=ujson.dumps(data, ensure_ascii=False),
+            request_timeout=timeout,
+            headers=HTTPHeaders(
+                {"Content-Type": "application/x-www-form-urlencoded"}
+            ),
+        )
+
+        logger.info("[http_fetch][uri: {}][req_body: {}]".format(route, request.body))
+        response = yield http_client.fetch(request, raise_error=raise_error)
+        logger.info("[http_fetch][uri: {}][res_body: {}]".format(route, response.body))
+
+    except tornado.httpclient.HTTPError as e:
+        logger.warning("[http_fetch][uri: {}] httperror: {}".format(route, e))
+        raise e
+    else:
+        return response.body
+
+
 def unboxing(http_response):
     """标准 restful api 返回拆箱"""
 
