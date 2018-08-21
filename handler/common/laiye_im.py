@@ -18,12 +18,12 @@ class LaiyeImHandler(BaseHandler):
             template_name="adjunct/wulai-im.html",
             wulai_config=dict(
                 pubkey=pub_key,
-                fullScreen=True,
+                fullScreen='true',
                 minimize=0,
-                autoOpen=False,
-                userId=None,
+                autoOpen='false',
+                userId=0,
                 env='prod',
-                async=False,
+                async='false',
                 userinfo={}
             )
         )
