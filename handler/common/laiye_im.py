@@ -19,8 +19,8 @@ class LaiyeImHandler(BaseHandler):
             wulai_config=dict(
                 pubkey=pub_key,
                 fullScreen='true',
-                minimize=0,
-                autoOpen='false',
+                minimize=1,
+                autoOpen='true',
                 userId=0,
                 env='prod',
                 async='false',
