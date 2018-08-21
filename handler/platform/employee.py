@@ -15,6 +15,7 @@ from util.tool.json_tool import json_dumps
 from util.tool.str_tool import to_str
 from urllib import parse
 import conf.platform as const_platform
+from util.wechat.core import get_temporary_qrcode
 
 
 class AwardsLadderPageHandler(BaseHandler):
@@ -84,9 +85,9 @@ class AwardsLadderHandler(BaseHandler):
         rank_type = self.params.rank_type  # year/month/quarter
         ladder_type = self.params.ladder_type
 
-        page_from = (int(self.params.get("count", 0)) * const_platform.RANK_LIST_PAGE_COUNT)
+        page_from = (int(self.params.get("page_num", 0)) * const_platform.RANK_LIST_PAGE_COUNT)
         page_size = const_platform.RANK_LIST_PAGE_COUNT
-        if ladder_type == 'fun':
+        if ladder_type == 'normal':
             page_from = page_from - 5 if page_from else 0
             if page_from == 0:
                 page_size = 5
@@ -97,6 +98,9 @@ class AwardsLadderHandler(BaseHandler):
             page_from=page_from,
             page_size=page_size
         )
+        self.logger.debug("employee_id:{}, cpmpany_id: {},type:{}, page_from: {}, page_size{}, rank_list：{}".format(
+            employee_id, company_id, rank_type, page_from, page_size, rank_list))
+
         type = const.LADDER_TYPE.get(rank_type)
         current_user_rank = yield self.employee_ps.get_current_user_rank_info(self.current_user.employee.id, int(type))
         rank_list = sorted(rank_list, key=lambda x: x.level)
@@ -106,7 +110,8 @@ class AwardsLadderHandler(BaseHandler):
                 company_id=company_id,
                 type=rank_type,
             )
-            if total_row > 5:
+            self.logger.debug("total_row:{}".format(total_row))
+            if total_row > 5 and page_from == 0:
                 last_rank = yield self.employee_ps.get_last_rank_info(self.current_user.employee.id, int(type))
                 rank_list.append(last_rank)
         if list_only:
@@ -537,8 +542,13 @@ class EmployeeReferralPolicyHandler(BaseHandler):
                 self.redirect(parse.unquote(link))
                 return
             else:
+                wechat = ObjectDict()
+                wechat.subscribed = True if self.current_user.wxuser.is_subscribe else False
+                wechat.qrcode = yield get_temporary_qrcode(self.current_user.wechat.access_token, pattern_id=2)
+                wechat.name = self.current_user.wechat.name
                 data = ObjectDict({
-                    "fulltext": data.get("text")
+                    "fulltext": data.get("text"),
+                    "wechat": wechat
                 })
                 self.render_page(template_name="employee/referral-policy-article.html", data=data)
         else:

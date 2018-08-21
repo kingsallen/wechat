@@ -352,10 +352,10 @@ def send_succession_message(wechat, open_id, pattern_id):
     :return:
     """
     if pattern_id == 1:
-        url = make_url(path.EMPLOYEE_REFERRAL_POLICY, wechat_signature=wechat.get("wechat_signature"))
+        url = make_url(path.EMPLOYEE_REFERRAL_POLICY, wechat_signature=wechat.get("signature"))
         content = '点击完成<a href="{}">员工认证</a> <br> 更多积分奖励等你来~'.format(url)
     elif pattern_id == 2:
-        url = make_url(path.EMPLOYEE_VERIFY, wechat_signature=wechat.get("wechat_signature"))
+        url = make_url(path.EMPLOYEE_VERIFY, wechat_signature=wechat.get("signature"))
         content = '点击查看<a href="{}">内推政策</a>'.format(url)
     else:
         content = "欢迎关注：{}, 点击菜单栏发现更多精彩~".format(wechat.get("name"))
