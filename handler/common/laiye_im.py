@@ -14,7 +14,7 @@ class LaiyeImHandler(BaseHandler):
         """
         pub_key = self.params.pubkey
 
-        self.render_page(
+        self.render(
             template_name="adjunct/wulai-im.html",
             wulai_config=dict(
                 pubkey=pub_key,
