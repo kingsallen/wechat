@@ -16,16 +16,14 @@ class LaiyeImHandler(BaseHandler):
 
         self.render_page(
             template_name="adjunct/wulai-im.html",
-            data=dict(
-                wulai_config=dict(
-                    pubkey=pub_key,
-                    fullScreen=True,
-                    minimize=0,
-                    autoOpen=False,
-                    userId=None,
-                    env='prod',
-                    async=False,
-                    userinfo={}
-                )
+            wulai_config=dict(
+                pubkey=pub_key,
+                fullScreen=True,
+                minimize=0,
+                autoOpen=False,
+                userId=None,
+                env='prod',
+                async=False,
+                userinfo={}
             )
         )
