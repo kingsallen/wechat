@@ -213,7 +213,7 @@ class EmployeeBindHandler(BaseHandler):
         reward = 5
         for r in rewards_response:
             if r.get("statusName") == "完成员工认证":
-                reward = r.get("point")
+                reward = r.get("points")
 
         # 根据 conf 来构建 api 的返回 data
         data = yield self.employee_ps.make_binding_render_data(
@@ -290,13 +290,15 @@ class EmployeeBindHandler(BaseHandler):
 
         if custom_fields:
             next_url = self.make_url(path.EMPLOYEE_CUSTOMINFO, self.params, from_wx_template='x')
+            custom_fields = True
         else:
-            next_url = self.make_url(path.EMPLOYEE_BINDED, self.params)
-            if self.params.get('redirect_when_bind_success') and self.json_args.get('type') != 'email':
-                next_url = self.params.get('redirect_when_bind_success')
+            next_url = self.make_url(path.POSITION_LIST, self.params)
+            custom_fields = False
+
 
         self.send_json_success(
-            data={'next_url': next_url},
+            data={'next_url': next_url,
+                  'custom_fields': custom_fields},
             message=message
         )
 
