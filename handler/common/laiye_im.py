@@ -24,6 +24,6 @@ class LaiyeImHandler(BaseHandler):
                 userId=0,
                 env='prod',
                 async='false',
-                userinfo={}
+                userInfo={}
             )
         )
