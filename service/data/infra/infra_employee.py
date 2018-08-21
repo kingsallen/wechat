@@ -28,60 +28,51 @@ class InfraEmployeeDataService(DataService):
 
     @gen.coroutine
     def get_mate_num(self, company_id):
-        # ret = yield http_get(path.MATE_NUM.format(company_id))
-        # return unboxing(ret)
-        return True, 150
+        ret = yield http_get(path.MATE_NUM.format(company_id))
+        return unboxing(ret)
 
     @gen.coroutine
-    def get_unread_praise(self, user_id):
-        # ret = yield http_get(path.UNREAD_PRAISE.format(user_id))
-        # return unboxing(ret)
-        return True, 12
+    def get_unread_praise(self, employee_id):
+        ret = yield http_get(path.UNREAD_PRAISE.format(employee_id))
+        return unboxing(ret)
 
     @gen.coroutine
-    def vote_prasie(self, employee_id, praise_user_id):
-        # ret = yield http_post(path.VOTE_PRAISE.format(employee_id, praise_user_id))
-        # return unboxing(ret)
-        return True, 31
+    def vote_prasie(self, employee_id, praise_employee_id):
+        ret = yield http_post(path.VOTE_PRAISE.format(employee_id, praise_employee_id))
+        return unboxing(ret)
 
     @gen.coroutine
-    def cancel_prasie(self, employee_id, praise_user_id):
-        # ret = yield http_delete(path.VOTE_PRAISE.format(employee_id, praise_user_id))
-        # return unboxing(ret)
-        return True, 12
+    def cancel_prasie(self, employee_id, praise_employee_id):
+        ret = yield http_delete(path.VOTE_PRAISE.format(employee_id, praise_employee_id))
+        return unboxing(ret)
 
     @gen.coroutine
-    def get_last_rank_info(self, employee_id):
-        # ret = yield http_get(path.LAST_RANK_INFO.format(employee_id))
-        # return unboxing(ret)
-        return True, {
-            "praised": False,
-            "praise": 123,
-            "level": 3,
-            "id": 883924,
-            "point": 30,
-            "username": "cd",
-            "icon": "http://thirdwx.qlogo.cn/mmopen/Q3auHgzwzM4WqiaoE7g1utu7ZdibzWm6CZwHdCK0iaGDHKlo4TnbmXXGg2DcJfAvwJVykrtT7dzwtywCEnutsic1iaA/132"
-        }
+    def get_last_rank_info(self, employee_id, type):
+        params = ObjectDict({
+            "type": type
+        })
+        ret = yield http_get(path.LAST_RANK_INFO.format(employee_id), params)
+        return unboxing(ret)
 
     @gen.coroutine
-    def get_current_user_rank_info(self, user_id):
-        # ret = yield http_get(path.USER_RANK_INFO.format(user_id))
-        # return unboxing(ret)
-        return True, {
-            "praised": True,
-            "praise": 145,
-            "level": 2,
-            "id": 883925,
-            "point": 95,
-            "username": "jfcd",
-            "icon": "http://thirdwx.qlogo.cn/mmopen/Q3auHgzwzM4WqiaoE7g1utu7ZdibzWm6CZwHdCK0iaGDHKlo4TnbmXXGg2DcJfAvwJVykrtT7dzwtywCEnutsic1iaA/132"
-        }
+    def get_current_user_rank_info(self, employee_id, type):
+        params = ObjectDict({
+            "type": type
+        })
+        ret = yield http_get(path.USER_RANK_INFO.format(employee_id), params)
+        return unboxing(ret)
 
     @gen.coroutine
     def get_award_ladder_type(self, company_id):
         ret = yield http_get(path.LADDER_TYPE.format(company_id))
         return unboxing(ret)
 
+    @gen.coroutine
+    def get_bind_reward(self, company_id):
+        params = ObjectDict({
+            "companyId": company_id
+        })
+        ret = yield http_get(path.BIND_REWARD, params)
+        return unboxing(ret)
 
 

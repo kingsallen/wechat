@@ -257,10 +257,10 @@ class EventPageService(PageService):
             "subscribe_time": int(time.time() * 1000)
         })
         # 如果之前是员工，自动绑定员工身份
-        yield user_follow_wechat_publisher.publish_message(message=data)
+        yield user_follow_wechat_publisher.publish_message(message=data, routing_key="user_follow_wechat_check_employee_identity")
 
         # 处理临时二维码，目前主要在 PC 上创建帐号、绑定账号时使用,以及Mars EDM活动
-        if current_user.wechat.id in (self.settings.qx_wechat_id, const.MARS_ID) and msg.EventKey:
+        if msg.EventKey:
             # 临时二维码处理逻辑, 5位type+27为自定义id
             yield self._do_weixin_qrcode(current_user.wechat, msg, is_newbie=is_newbie)
 
@@ -372,7 +372,7 @@ class EventPageService(PageService):
                 "subscribe_time": int(time.time() * 1000)
             })
             # 如果是员工，取消用户员工身份
-            yield user_unfollow_wechat_publisher.publish_message(message=data)
+            yield user_unfollow_wechat_publisher.publish_message(message=data, routing_key="user_unfollow_wechat_check_employee_identity")
             # 取消关注仟寻招聘助手时，将user_hr_account.wxuser_id与user_wx_user.id 解绑
             if current_user.wechat.id == self.settings.helper_wechat_id:
                 user_hr_account = yield self.user_hr_account_ds.get_hr_account(conds={
@@ -408,7 +408,6 @@ class EventPageService(PageService):
         if current_user.wechat.id == self.settings.helper_wechat_id and msg.EventKey:
             scan_info = re.match(r"([0-9]*)_([0-9]*)_([0-9]*)", msg.EventKey)
 
-
             # 已绑定过的微信号，不能再绑定第二个hr_account账号，否则微信扫码登录会出错
             user_hr_account = yield self.user_hr_account_ds.get_hr_account(conds={
                 "wxuser_id": current_user.wxuser.id
@@ -422,7 +421,7 @@ class EventPageService(PageService):
             yield self.__opt_help_wxuser(current_user.wxuser.id, current_user.wechat, msg)
 
         # 处理临时二维码，目前主要在 PC 上创建帐号、绑定账号时使用,以及Mars EDM活动
-        if current_user.wechat.id in (self.settings.qx_wechat_id, const.MARS_ID) and msg.EventKey:
+        if msg.EventKey:
             # 临时二维码处理逻辑, 5位type+27为自定义id
             yield self._do_weixin_qrcode(current_user.wechat, msg)
 

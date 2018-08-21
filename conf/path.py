@@ -152,12 +152,13 @@ VOICE = "/api/v1/chat/voice/pullVoiceFile"
 # 内推服务
 REFERRAL_POLICY = "/v1.0/referral/conf"
 INTEREST_REFERRAL_POLICY = "/v1.0/referral/policy"
-MATE_NUM = "/v1/employee/{}/last-list-info"
+MATE_NUM = "/v1/company/{}/employees-count"
 UNREAD_PRAISE = "/v1/employee/{}/recent-upvote"
 VOTE_PRAISE = "/v1/employee/{}/upvote/{}"
 LAST_RANK_INFO = "/v1/employee/{}/last-list-info"
 USER_RANK_INFO = "/v1/employee/{}/list-info"
 LADDER_TYPE = "/v1/company/{}/leader-board"
+BIND_REWARD = "/hraccount/company/rewardconfig"
 # ============================ 基础服务结束 ============================
 
 # 其他外部服务

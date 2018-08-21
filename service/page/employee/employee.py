@@ -76,7 +76,7 @@ class EmployeePageService(PageService):
         return bind_status
 
     @gen.coroutine
-    def make_binding_render_data(self, current_user, mate_num, conf):
+    def make_binding_render_data(self, current_user, mate_num, reward, conf):
         """构建员工绑定页面的渲染数据
         :returns:
         {
@@ -116,10 +116,10 @@ class EmployeePageService(PageService):
         data.conf = ObjectDict()
         data.binding_success_message = conf.bindSuccessMessage or ''
         data.wechat.subscribed = True if current_user.wxuser.is_subscribe else False
-        data.wechat.qrcode = yield get_temporary_qrcode(current_user.wechat.access_token, pattern_id=1)
+        data.wechat.qrcode = yield get_temporary_qrcode(access_token=current_user.wechat.access_token, pattern_id=1)
         data.wechat.name = current_user.wechat.name
         data.mate_num = mate_num
-        data.conf.reward = conf.reward
+        data.conf.reward = reward
 
         bind_status, employee = yield self.get_employee_info(
             user_id=current_user.sysuser.id, company_id=current_user.company.id)
@@ -344,6 +344,12 @@ class EmployeePageService(PageService):
         })
 
     @gen.coroutine
+    def get_bind_rewards(self, company_id):
+        """获取积分配置"""
+        result, data = yield self.infra_employee_ds.get_bind_reward(company_id)
+        return data
+
+    @gen.coroutine
     def unbind(self, employee_id, company_id, user_id):
         """员工解绑"""
         ret = yield self.thrift_employee_ds.unbind(
@@ -380,18 +386,25 @@ class EmployeePageService(PageService):
                     'praised': e.praised
                 })
 
-        return list(gen_make_element(ret.EmployeeAward))
+        return list(gen_make_element(ret.data))
 
     @gen.coroutine
-    def vote_prasie(self, employee_id, praise_user_id):
+    def get_total_row_ladder_info(self, employee_id, company_id, type):
+        """获取员工积分榜数据总数"""
+        ret = yield self.thrift_employee_ds.get_award_ranking(
+            employee_id, company_id, type)
+        return ret.totalRow
+
+    @gen.coroutine
+    def vote_prasie(self, employee_id, praise_employee_id):
         """员工点赞"""
-        result, _ = yield self.infra_employee_ds.vote_prasie(employee_id, praise_user_id)
+        result, _ = yield self.infra_employee_ds.vote_prasie(employee_id, praise_employee_id)
         return result
 
     @gen.coroutine
-    def cancel_prasie(self, employee_id, praise_user_id):
+    def cancel_prasie(self, employee_id, praise_employee_id):
         """员工取消点赞"""
-        result, _ = yield self.infra_employee_ds.cancel_prasie(employee_id, praise_user_id)
+        result, _ = yield self.infra_employee_ds.cancel_prasie(employee_id, praise_employee_id)
         return result
 
     @gen.coroutine
@@ -407,9 +420,9 @@ class EmployeePageService(PageService):
         return data if result else 0
 
     @gen.coroutine
-    def get_unread_praise(self, user_id):
+    def get_unread_praise(self, employee_id):
         """获取未读的赞的数量"""
-        result, data = yield self.infra_employee_ds.get_unread_praise(user_id)
+        result, data = yield self.infra_employee_ds.get_unread_praise(employee_id)
         return data if result else 0
 
     @gen.coroutine
@@ -419,18 +432,18 @@ class EmployeePageService(PageService):
             "employee_id": employee_id,
             "view_time": int(time.time() * 1000)
         })
-        yield unread_praise_publisher.publish_message(message=data)
+        yield unread_praise_publisher.publish_message(message=data, routing_key="employee_view_leader_board_routing_key")
 
     @gen.coroutine
-    def get_last_rank_info(self, employee_id):
+    def get_last_rank_info(self, employee_id, type):
         """获取该公司积分榜单最后一名员工的榜单信息"""
-        result, data = yield self.infra_employee_ds.get_last_rank_info(employee_id)
+        result, data = yield self.infra_employee_ds.get_last_rank_info(employee_id, type)
         return data
 
     @gen.coroutine
-    def get_current_user_rank_info(self, user_id):
+    def get_current_user_rank_info(self, employee_id, type):
         """获取当前用户榜单信息"""
-        result, data = yield self.infra_employee_ds.get_current_user_rank_info(user_id)
+        result, data = yield self.infra_employee_ds.get_current_user_rank_info(employee_id, type)
         return data
 
     @gen.coroutine

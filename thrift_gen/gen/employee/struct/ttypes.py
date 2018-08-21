@@ -1762,6 +1762,7 @@ class EmployeeAward(object):
      - awardTotal
      - headimgurl
      - praised
+     - praise
     """
 
     thrift_spec = (
@@ -1772,15 +1773,17 @@ class EmployeeAward(object):
         (4, TType.I32, 'awardTotal', None, None, ),  # 4
         (5, TType.STRING, 'headimgurl', 'UTF8', None, ),  # 5
         (6, TType.BOOL, 'praised', None, None, ),  # 6
+        (7, TType.I32, 'praise', None, None, ),  # 7
     )
 
-    def __init__(self, employeeId=None, name=None, ranking=None, awardTotal=None, headimgurl=None, praised=None,):
+    def __init__(self, employeeId=None, name=None, ranking=None, awardTotal=None, headimgurl=None, praised=None, praise=None,):
         self.employeeId = employeeId
         self.name = name
         self.ranking = ranking
         self.awardTotal = awardTotal
         self.headimgurl = headimgurl
         self.praised = praised
+        self.praise = praise
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -1821,6 +1824,11 @@ class EmployeeAward(object):
                     self.praised = iprot.readBool()
                 else:
                     iprot.skip(ftype)
+            elif fid == 7:
+                if ftype == TType.I32:
+                    self.praise = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -1854,6 +1862,10 @@ class EmployeeAward(object):
         if self.praised is not None:
             oprot.writeFieldBegin('praised', TType.BOOL, 6)
             oprot.writeBool(self.praised)
+            oprot.writeFieldEnd()
+        if self.praise is not None:
+            oprot.writeFieldBegin('praise', TType.I32, 7)
+            oprot.writeI32(self.praise)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
