@@ -12,13 +12,20 @@ class LaiyeImHandler(BaseHandler):
     def get(self):
         """来也js sdk页面渲染
         """
-        user_id = self.params.user_id
-        pubkye = self.params.pubkey
+        pub_key = self.params.pubkey
 
         self.render_page(
             template_name="adjunct/wulai-im.html",
             data=dict(
-                user_id=user_id,
-                pubkye=pubkye
+                wulai_config=dict(
+                    pubkey=pub_key,
+                    fullScreen=True,
+                    minimize=0,
+                    autoOpen=False,
+                    userId=None,
+                    env='prod',
+                    async=False,
+                    userinfo={}
+                )
             )
         )
