@@ -15,6 +15,7 @@ from thrift_gen.gen.common.struct.ttypes import BIZException
 from util.common import ObjectDict
 from util.common.decorator import authenticated
 from util.tool.date_tool import curr_now_dateonly
+from util.wechat.core import get_temporary_qrcode
 
 
 # 基础服务 BizException 返回内容
@@ -189,11 +190,16 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
             click_time,
             is_recom,
             company_id)
-
+        wechat = ObjectDict()
+        wechat.subscribed = True if self.current_user.wxuser.is_subscribe else False
+        wechat.qrcode = yield get_temporary_qrcode(access_token=self.current_user.wechat.access_token,
+                                                   pattern_id=const.QRCODE_REFERRED_FRIENDS)
+        wechat.name = self.current_user.wechat.name
         self.render(
             template_name="refer/weixin/passive-seeker_v2/passive-wanting_recom.html",
             passive_seekers=passive_seekers,
-            message=message
+            message=message,
+            wechat=wechat
         )
 
     @tornado.gen.coroutine
