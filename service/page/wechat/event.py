@@ -238,7 +238,7 @@ class EventPageService(PageService):
             yield self._update_wxuser(openid, current_user, msg, wxuser)
 
         data = ObjectDict({
-            "user_id": current_user.sysuser_id,
+            "user_id": current_user.wxuser.sysuser_id,
             "wechat_id": current_user.wechat.id,
             "subscribe_time": int(time.time() * 1000)
         })
@@ -353,7 +353,7 @@ class EventPageService(PageService):
                     "source":          const.WX_USER_SOURCE_UNSUBSCRIBE
                 })
             data = ObjectDict({
-                "user_id": current_user.sysuser_id,
+                "user_id": current_user.wxuser.sysuser_id,
                 "wechat_id": current_user.wechat.id,
                 "subscribe_time": int(time.time() * 1000)
             })
