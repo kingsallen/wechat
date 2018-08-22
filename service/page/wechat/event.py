@@ -632,7 +632,8 @@ class EventPageService(PageService):
             elif type == 30:
                 # 根据携带不同场景值的临时二维码，接续之前用户未完成的流程。
                 pattern_id = real_user_id
-                yield send_succession_message(wxuser, wechat=wechat, open_id=msg.FromUserName, pattern_id=pattern_id)
+                if pattern_id == const.QRCODE_BIND and not wxuser.is_subscribe:
+                    yield send_succession_message(wxuser, wechat=wechat, open_id=msg.FromUserName, pattern_id=pattern_id)
 
             elif type == 16:
                 pass
