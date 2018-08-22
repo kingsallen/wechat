@@ -100,7 +100,7 @@ class AwardsLadderHandler(BaseHandler):
         type = const.LADDER_TYPE.get(rank_type)
         current_user_rank = yield self.employee_ps.get_current_user_rank_info(self.current_user.employee.id, int(type))
         rank_list = sorted(rank_list, key=lambda x: x.level)
-        rank_list = list(filter(lambda x: x.level != current_user_rank.level, rank_list))
+        rank_list = list(filter(lambda x: x if x.level <= 3 else x.level != current_user_rank.level, rank_list))
         if list_only:
             data = ObjectDict(rank_list=rank_list)
         else:
@@ -108,6 +108,24 @@ class AwardsLadderHandler(BaseHandler):
         self.logger.debug("awards ladder data: %s" % data)
 
         self.send_json_success(data=data)
+
+
+class WechatSubInfoHandler(BaseHandler):
+    """
+    获取微信信息
+    """
+
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        pattern_id = self.params.scene
+        data = ObjectDict()
+        data.subscribed = True if self.current_user.wxuser.is_subscribe else False
+        data.qrcode = yield get_temporary_qrcode(access_token=self.current_user.wechat.access_token,
+                                                 pattern_id=pattern_id)
+        data.name = self.current_user.wechat.name
+        self.send_json_success(data=data)
+        return
 
 
 class PraiseHandler(BaseHandler):
@@ -528,7 +546,8 @@ class EmployeeReferralPolicyHandler(BaseHandler):
         result, data = yield self.employee_ps.get_referral_policy(self.current_user.company.id)
         wechat = ObjectDict()
         wechat.subscribed = True if self.current_user.wxuser.is_subscribe else False
-        wechat.qrcode = yield get_temporary_qrcode(access_token=self.current_user.wechat.access_token, pattern_id=2)
+        wechat.qrcode = yield get_temporary_qrcode(access_token=self.current_user.wechat.access_token,
+                                                   pattern_id=const.QRCODE_POLICY)
         wechat.name = self.current_user.wechat.name
         if result and data and data.get("priority"):
             link = data.get("link", "")

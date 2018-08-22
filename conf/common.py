@@ -576,3 +576,11 @@ LADDER_TYPE = {"month": "1",
                "quarter": "2",
                "year": "3"}
 
+# 临时二维码场景值
+QRCODE_BIND = 1
+QRCODE_POLICY = 2
+QRCODE_LADDER = 3
+QRCODE_AWARD_RECORD = 4
+QRCODE_RECOM_RECORD = 5
+QRCODE_REFERRED_FRIENDS = 6
+QRCODE_USERCENTER = 7
