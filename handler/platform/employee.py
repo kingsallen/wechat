@@ -564,14 +564,15 @@ class EmployeeReferralPolicyHandler(BaseHandler):
             else:
                 data = ObjectDict({
                     "fulltext": data.get("text"),
-                    "wechat": wechat,
-                    "meta_title": self.locale.translate("company_referral_policy")
+                    "wechat": wechat
                 })
-                self.render_page(template_name="employee/referral-policy-article.html", data=data)
+                self.render_page(template_name="employee/referral-policy-article.html",
+                                 data=data,
+                                 meta_title=self.locale.translate("company_referral_policy"))
         else:
             self.render_page(template_name="employee/referral-no-article.html",
-                             data={"wechat": wechat,
-                                   "meta_title": self.locale.translate("company_referral_policy")})
+                             data={"wechat": wechat},
+                             meta_title=self.locale.translate("company_referral_policy"))
 
 
 class EmployeeInterestReferralPolicyHandler(BaseHandler):
