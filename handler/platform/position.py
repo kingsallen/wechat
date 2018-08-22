@@ -29,6 +29,9 @@ class PositionHandler(BaseHandler):
     def get(self, position_id):
         """显示 JD 页
         """
+        if not self.in_wechat:
+            self.render(template_name="adjunct/not-weixin.html")
+            return
         display_locale = self.get_current_locale()
         position_info = yield self.position_ps.get_position(position_id, display_locale)
 
