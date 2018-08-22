@@ -498,7 +498,7 @@ class EventPageService(PageService):
         })
 
         # 临时二维码处理逻辑, 5位type+27为自定义id
-        if wechat.id in (self.settings.qx_wechat_id, const.MARS_ID) and int_scene_id:
+        if int_scene_id:
             int_scene_id = int_scene_id.group(1)
             type = int(bin(int(int_scene_id))[:7], base=2)
             real_user_id = int(bin(int(int_scene_id))[7:], base=2)

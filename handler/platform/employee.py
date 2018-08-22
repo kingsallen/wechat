@@ -100,6 +100,7 @@ class AwardsLadderHandler(BaseHandler):
         type = const.LADDER_TYPE.get(rank_type)
         current_user_rank = yield self.employee_ps.get_current_user_rank_info(self.current_user.employee.id, int(type))
         rank_list = sorted(rank_list, key=lambda x: x.level)
+        rank_list = list(filter(lambda x: x.level != current_user_rank.level, rank_list))
         if list_only:
             data = ObjectDict(rank_list=rank_list)
         else:
