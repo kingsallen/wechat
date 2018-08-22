@@ -534,7 +534,8 @@ class BindInfoHandler(BaseHandler):
         redirect_when_bind_success = self.json_args.get('redirect_when_bind_success') or self.get_argument(
             'redirect_when_bind_success', '')
 
-        next_url = redirect_when_bind_success or self.make_url(path.EMPLOYEE_CUSTOMINFO_BINDED, self.params)
+        next_url = redirect_when_bind_success or self.make_url(path.POSITION_LIST, self.params)
+
         self.params.from_wx_template = self.json_args.from_wx_template
         self.send_json_success(
             data=ObjectDict(
@@ -614,11 +615,14 @@ class EmployeeReferralPolicyHandler(BaseHandler):
             else:
                 data = ObjectDict({
                     "fulltext": data.get("text"),
-                    "wechat": wechat
+                    "wechat": wechat,
+                    "meta_title": self.locale.translate("company_referral_policy")
                 })
                 self.render_page(template_name="employee/referral-policy-article.html", data=data)
         else:
-            self.render_page(template_name="employee/referral-no-article.html", data={"wechat": wechat})
+            self.render_page(template_name="employee/referral-no-article.html",
+                             data={"wechat": wechat,
+                                   "meta_title": self.locale.translate("company_referral_policy")})
 
 
 class EmployeeInterestReferralPolicyHandler(BaseHandler):
