@@ -123,7 +123,7 @@ class WechatSubInfoHandler(BaseHandler):
         data = ObjectDict()
         data.subscribed = True if self.current_user.wxuser.is_subscribe else False
         data.qrcode = yield get_temporary_qrcode(access_token=self.current_user.wechat.access_token,
-                                                 pattern_id=pattern_id)
+                                                 pattern_id=int(pattern_id))
         data.name = self.current_user.wechat.name
         self.send_json_success(data=data)
         return
@@ -590,9 +590,16 @@ class EmployeeReferralPolicyHandler(BaseHandler):
     https://git.moseeker.com/doc/complete-guide/blob/feature/v0.1.0/develop_docs/referral/basic_service/%E5%86%85%E6%8E%A8v0.1.0-api.md
     """
 
+    @authenticated
     @handle_response
     @gen.coroutine
     def get(self):
+        # 判断是否已经绑定员工
+        binded = const.YES if self.current_user.employee else const.NO
+
+        if not binded:
+            self.redirect(self.make_url(path.EMPLOYEE_VERIFY, self.params))
+            return
         result, data = yield self.employee_ps.get_referral_policy(self.current_user.company.id)
         wechat = ObjectDict()
         wechat.subscribed = True if self.current_user.wxuser.is_subscribe else False
