@@ -682,6 +682,7 @@ class APIPositionRecomListHandler(BaseHandler):
 class APIPositionRecomListCloseHandler(BaseHandler):
 
     @decorator.handle_response
+    @decorator.check_and_apply_profile
     @decorator.authenticated
     @gen.coroutine
     def get(self):
@@ -692,6 +693,7 @@ class APIPositionRecomListCloseHandler(BaseHandler):
         data = res.get('data') or {}
 
         intention_id = None
+        self.logger.debug('\n\n\ndebug_intentions_id:%s\n\n\n' % self.current_user)
         if self.current_user.profile and self.current_user.profile.intentions:
             intention_id = self.current_user.profile.intentions[0].get('id')
 
