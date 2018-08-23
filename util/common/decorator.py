@@ -188,6 +188,19 @@ def check_employee(func):
     return wrapper
 
 
+def cover_no_weixin(func):
+    """移动端非微信环境下，限制浏览"""
+    @functools.wraps(func)
+    @gen.coroutine
+    def wrapper(self, *args, **kwargs):
+        if not self.in_wechat:
+            self.render(template_name="adjunct/not-weixin.html")
+            return
+        else:
+            yield func(self, *args, **kwargs)
+    return wrapper
+
+
 def check_and_apply_profile(func):
     """前置判断当前用户是否有 profile
     如果没有， 跳转到新建 profile 页面
