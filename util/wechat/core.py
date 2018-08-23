@@ -379,11 +379,7 @@ def send_succession_message(wechat, open_id, pattern_id):
         "msgtype": "text",
         "text": {
             "content": content
-        },
-        "customservice":
-            {
-                "kf_account": "kf{}@{}".format(wechat.get("id"), wechat.get("alias"))
-            }
+        }
     })
     yield http_post_cs_msg(
         wx.WX_CS_MESSAGE_API % wechat.get("access_token"), data=jdata)
