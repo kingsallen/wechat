@@ -6,7 +6,7 @@ import conf.common as const
 import conf.path as path
 from service.data.base import DataService
 from util.common import ObjectDict
-from util.tool.http_tool import http_get, http_post, http_put, unboxing
+from util.tool.http_tool import http_get, http_post, http_put, unboxing, http_delete
 from util.common.decorator import log_time
 
 
@@ -26,4 +26,52 @@ class InfraEmployeeDataService(DataService):
         ret = yield http_post(path.INTEREST_REFERRAL_POLICY, params)
         return unboxing(ret)
 
+    @gen.coroutine
+    def get_mate_num(self, company_id):
+        ret = yield http_get(path.MATE_NUM.format(company_id))
+        return unboxing(ret)
+
+    @gen.coroutine
+    def get_unread_praise(self, employee_id):
+        ret = yield http_get(path.UNREAD_PRAISE.format(employee_id))
+        return unboxing(ret)
+
+    @gen.coroutine
+    def vote_prasie(self, employee_id, praise_employee_id):
+        ret = yield http_post(path.VOTE_PRAISE.format(employee_id, praise_employee_id))
+        return unboxing(ret)
+
+    @gen.coroutine
+    def cancel_prasie(self, employee_id, praise_employee_id):
+        ret = yield http_delete(path.VOTE_PRAISE.format(employee_id, praise_employee_id))
+        return unboxing(ret)
+
+    @gen.coroutine
+    def get_last_rank_info(self, employee_id, type):
+        params = ObjectDict({
+            "type": type
+        })
+        ret = yield http_get(path.LAST_RANK_INFO.format(employee_id), params)
+        return unboxing(ret)
+
+    @gen.coroutine
+    def get_current_user_rank_info(self, employee_id, type):
+        params = ObjectDict({
+            "type": type
+        })
+        ret = yield http_get(path.USER_RANK_INFO.format(employee_id), params)
+        return unboxing(ret)
+
+    @gen.coroutine
+    def get_award_ladder_type(self, company_id):
+        ret = yield http_get(path.LADDER_TYPE.format(company_id))
+        return unboxing(ret)
+
+    @gen.coroutine
+    def get_bind_reward(self, company_id):
+        params = ObjectDict({
+            "companyId": company_id
+        })
+        ret = yield http_get(path.BIND_REWARD, params)
+        return unboxing(ret)
 

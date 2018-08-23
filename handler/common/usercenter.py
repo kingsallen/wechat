@@ -53,7 +53,10 @@ class UsercenterHandler(BaseHandler):
         )
         fe_bind_status = self.employee_ps.convert_bind_status_from_thrift_to_fe(
             bind_status)
-
+        if fe_bind_status == 0:
+            unread_praise = yield self.employee_ps.get_unread_praise(self.current_user.employee.id)
+        else:
+            unread_praise = 0
         self.send_json_success(data=ObjectDict(
             headimg=self.static_url(res.data.headimg or const.SYSUSER_HEADIMG),
             name=res.data.name or res.data.nickname,
@@ -62,7 +65,8 @@ class UsercenterHandler(BaseHandler):
             # 该公司是否启用了认证
             bind_disable=employee_cert_conf.disable == const.OLD_NO,
             bind_status=fe_bind_status,
-            has_password=bool(res.data.password)
+            has_password=bool(res.data.password),
+            unread_praise=unread_praise
         ))
 
     @handle_response

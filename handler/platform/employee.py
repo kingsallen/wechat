@@ -14,6 +14,8 @@ from util.common.decorator import handle_response, authenticated
 from util.tool.json_tool import json_dumps
 from util.tool.str_tool import to_str
 from urllib import parse
+import conf.platform as const_platform
+from util.wechat.core import get_temporary_qrcode
 
 
 class AwardsLadderPageHandler(BaseHandler):
@@ -27,23 +29,31 @@ class AwardsLadderPageHandler(BaseHandler):
     def get(self):
         # 判断是否已经绑定员工
         binded = const.YES if self.current_user.employee else const.NO
+
         if not binded:
             self.redirect(self.make_url(path.EMPLOYEE_VERIFY, self.params))
             return
         else:
+            # 清空未读赞的数量
+            yield self.employee_ps.reset_unread_praise(employee_id=self.current_user.employee.id)
             cover = self.share_url(self.current_user.company.logo)
             share_title = messages.EMPLOYEE_AWARDS_LADDER_SHARE_TEXT.format(
                 self.current_user.company.abbreviation or "")
-
             self.params.share = ObjectDict({
                 "cover": cover,
                 "title": share_title,
                 "description": messages.EMPLOYEE_AWARDS_LADDER_DESC_TEXT,
                 "link": self.fullurl()
             })
+            ladder_type = yield self.employee_ps.get_award_ladder_type(self.current_user.company.id)
             policy_link = self.make_url(path.EMPLOYEE_REFERRAL_POLICY, self.params)
-            self.render_page(template_name="employee/reward-rank.html",
-                             data={"policy_link": policy_link})
+            if ladder_type == 1:
+
+                self.render_page(template_name="employee/reward-rank.html",
+                                 data={"policy_link": policy_link})
+            else:
+                self.render_page(template_name="employee/reward-rank-dark.html",
+                                 data={"policy_link": policy_link})
 
 
 class AwardsLadderHandler(BaseHandler):
@@ -58,30 +68,87 @@ class AwardsLadderHandler(BaseHandler):
         """
         返回员工积分排行榜数据
         """
-        if self.params.rankType not in self.TIMESPAN:
+        if self.params.rank_type not in self.TIMESPAN:
             self.send_json_error()
+            return
 
         # 判断是否已经绑定员工
         binded = const.YES if self.current_user.employee else const.NO
         if not binded:
             self.send_json_error(
                 message=messages.EMPLOYEE_NOT_BINDED_WARNING.format(self.current_user.company.conf_employee_slug))
+            return
 
+        list_only = self.params.list_only
         company_id = self.current_user.company.id
         employee_id = self.current_user.employee.id
-        rankType = self.params.rankType  # year/month/quarter
+        rank_type = self.params.rank_type  # year/month/quarter
+        ladder_type = self.params.ladder_type
+
+        page_from = (int(self.params.get("page_num", 0)) * const_platform.RANK_LIST_PAGE_COUNT)
+        page_size = const_platform.RANK_LIST_PAGE_COUNT
 
         rank_list = yield self.employee_ps.get_award_ladder_info(
             employee_id=employee_id,
             company_id=company_id,
-            type=rankType)
+            type=rank_type,
+            page_from=page_from,
+            page_size=page_size
+        )
+        self.logger.debug("employee_id:{}, cpmpany_id: {},type:{}, page_from: {}, page_size{}, rank_list：{}".format(
+            employee_id, company_id, rank_type, page_from, page_size, rank_list))
 
+        type = const.LADDER_TYPE.get(rank_type)
+        current_user_rank = yield self.employee_ps.get_current_user_rank_info(self.current_user.employee.id, int(type))
         rank_list = sorted(rank_list, key=lambda x: x.level)
-
-        data = ObjectDict(employeeId=employee_id, rankList=rank_list)
+        if ladder_type == 'normal':
+            rank_list = list(filter(lambda x: x if x.level <= 3 else x.level != current_user_rank.level, rank_list))
+        if list_only:
+            data = ObjectDict(rank_list=rank_list)
+        else:
+            data = ObjectDict(employee_id=employee_id, rank_list=rank_list, current_user_rank=current_user_rank)
         self.logger.debug("awards ladder data: %s" % data)
 
         self.send_json_success(data=data)
+
+
+class WechatSubInfoHandler(BaseHandler):
+    """
+    获取微信信息
+    """
+
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        pattern_id = self.params.scene
+        data = ObjectDict()
+        data.subscribed = True if self.current_user.wxuser.is_subscribe else False
+        data.qrcode = yield get_temporary_qrcode(access_token=self.current_user.wechat.access_token,
+                                                 pattern_id=int(pattern_id))
+        data.name = self.current_user.wechat.name
+        self.send_json_success(data=data)
+        return
+
+
+class PraiseHandler(BaseHandler):
+    """
+    点赞操作
+    """
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def post(self):
+        praise_employee_id = self.json_args.praise_user_id
+        delete = self.json_args.delete
+        if delete:
+            result = yield self.employee_ps.cancel_prasie(self.current_user.employee.id, praise_employee_id)
+        else:
+            result = yield self.employee_ps.vote_prasie(self.current_user.employee.id, praise_employee_id)
+        if result:
+            self.send_json_success()
+        else:
+            self.send_json_error()
 
 
 class AwardsHandler(BaseHandler):
@@ -103,7 +170,6 @@ class AwardsHandler(BaseHandler):
                 page_number=int(self.params.page_number),
                 page_size=int(self.params.page_size),
             )
-
             rewards_response.update({
                 'binded': binded,
                 'email_activation_state': email_activation_state
@@ -162,10 +228,16 @@ class EmployeeBindHandler(BaseHandler):
             return
         else:
             pass
+        mate_num = yield self.employee_ps.get_mate_num(self.current_user.company.id)
+        rewards_response = yield self.employee_ps.get_bind_rewards(self.current_user.company.id)
+        reward = 5
+        for r in rewards_response:
+            if r.get("statusName") == "完成员工认证":
+                reward = r.get("points")
 
         # 根据 conf 来构建 api 的返回 data
         data = yield self.employee_ps.make_binding_render_data(
-            self.current_user, conf_response.employeeVerificationConf)
+            self.current_user, mate_num, reward, conf_response.employeeVerificationConf)
         self.send_json_success(data=data)
 
     @handle_response
@@ -224,11 +296,14 @@ class EmployeeBindHandler(BaseHandler):
         custom_fields = yield self.employee_ps.get_employee_custom_fields(self.current_user.company.id)
         if custom_fields:
             next_url = self.make_url(path.EMPLOYEE_CUSTOMINFO, self.params, from_wx_template='x')
+            custom_fields = True
         else:
-            next_url = self.make_url(path.EMPLOYEE_BINDED, self.params)
+            next_url = self.make_url(path.POSITION_LIST, self.params)
+            custom_fields = False
 
         self.send_json_success(
-            data={'next_url': next_url},
+            data={'next_url': next_url,
+                  'custom_fields': custom_fields},
             message=message
         )
         self.finish()
@@ -261,7 +336,10 @@ class EmployeeBindEmailHandler(BaseHandler):
         self.render(template_name='employee/certification-%s.html' % tname,
                     **tparams)
         if employee_id is None:
-            self.logger.error('employee_log_id_None   current_user:{}, result:{}, message:{}, params:{}'.format(self.current_user, result, message, self.params))
+            self.logger.error(
+                'employee_log_id_None   current_user:{}, result:{}, message:{}, params:{}'.format(self.current_user,
+                                                                                                  result, message,
+                                                                                                  self.params))
         employee = yield self.user_ps.get_employee_by_id(employee_id)
 
         if result and employee:
@@ -408,7 +486,7 @@ class BindInfoHandler(BaseHandler):
         else:
             assert False
 
-        next_url = self.make_url(path.EMPLOYEE_CUSTOMINFO_BINDED, self.params)
+        next_url = self.make_url(path.POSITION_LIST, self.params)
         self.params.from_wx_template = self.json_args.from_wx_template
         self.send_json_success(
             data=ObjectDict(
@@ -463,10 +541,23 @@ class EmployeeReferralPolicyHandler(BaseHandler):
     https://git.moseeker.com/doc/complete-guide/blob/feature/v0.1.0/develop_docs/referral/frontend/wechat_v0.1.0.md
     https://git.moseeker.com/doc/complete-guide/blob/feature/v0.1.0/develop_docs/referral/basic_service/%E5%86%85%E6%8E%A8v0.1.0-api.md
     """
+
+    @authenticated
     @handle_response
     @gen.coroutine
     def get(self):
+        # 判断是否已经绑定员工
+        binded = const.YES if self.current_user.employee else const.NO
+
+        if not binded:
+            self.redirect(self.make_url(path.EMPLOYEE_VERIFY, self.params))
+            return
         result, data = yield self.employee_ps.get_referral_policy(self.current_user.company.id)
+        wechat = ObjectDict()
+        wechat.subscribed = True if self.current_user.wxuser.is_subscribe else False
+        wechat.qrcode = yield get_temporary_qrcode(access_token=self.current_user.wechat.access_token,
+                                                   pattern_id=const.QRCODE_POLICY)
+        wechat.name = self.current_user.wechat.name
         if result and data and data.get("priority"):
             link = data.get("link", "")
             if link:
@@ -474,17 +565,23 @@ class EmployeeReferralPolicyHandler(BaseHandler):
                 return
             else:
                 data = ObjectDict({
-                    "fulltext": data.get("text")
+                    "fulltext": data.get("text"),
+                    "wechat": wechat
                 })
-                self.render_page(template_name="employee/referral-policy-article.html", data=data)
+                self.render_page(template_name="employee/referral-policy-article.html",
+                                 data=data,
+                                 meta_title=self.locale.translate("company_referral_policy"))
         else:
-            self.render_page(template_name="employee/referral-no-article.html", data={})
+            self.render_page(template_name="employee/referral-no-article.html",
+                             data={"wechat": wechat},
+                             meta_title=self.locale.translate("company_referral_policy"))
 
 
 class EmployeeInterestReferralPolicyHandler(BaseHandler):
     """
     员工感兴趣内推政策
     """
+
     @handle_response
     @authenticated
     @gen.coroutine
@@ -629,7 +726,7 @@ class EmployeeAiRecomHandler(BaseHandler):
     def get(self, recom_push_id):
         recom_push_id = int(recom_push_id)
         recom_audience = self.RECOM_AUDIENCE_EMPLOYEE
-        recom=self.position_ps._make_recom(self.current_user.sysuser.id)
+        recom = self.position_ps._make_recom(self.current_user.sysuser.id)
         self.params.share = yield self.get_employee_recom_share_info(recom_push_id, recom)
 
         self.render_page("adjunct/job-recom-list.html",

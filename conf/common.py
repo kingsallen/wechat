@@ -582,3 +582,21 @@ LIEPIN_SCENE_KEY_TTL = 30 * 24 * 60 * 60
 
 # Mars公司id
 MARS_ID = 345
+
+# 积分排行榜
+PAGE_FROM_ONE = 1
+PAGE_SIZE_FIVE = 5
+
+# 榜单类型
+LADDER_TYPE = {"month": "1",
+               "quarter": "2",
+               "year": "3"}
+
+# 临时二维码场景值
+QRCODE_BIND = 1
+QRCODE_POLICY = 2
+QRCODE_LADDER = 3
+QRCODE_AWARD_RECORD = 4
+QRCODE_RECOM_RECORD = 5
+QRCODE_REFERRED_FRIENDS = 6
+QRCODE_USERCENTER = 7
