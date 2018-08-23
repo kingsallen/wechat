@@ -83,6 +83,7 @@ class AwardsLadderHandler(BaseHandler):
         company_id = self.current_user.company.id
         employee_id = self.current_user.employee.id
         rank_type = self.params.rank_type  # year/month/quarter
+        ladder_type = self.params.ladder_type
 
         page_from = (int(self.params.get("page_num", 0)) * const_platform.RANK_LIST_PAGE_COUNT)
         page_size = const_platform.RANK_LIST_PAGE_COUNT
@@ -100,7 +101,8 @@ class AwardsLadderHandler(BaseHandler):
         type = const.LADDER_TYPE.get(rank_type)
         current_user_rank = yield self.employee_ps.get_current_user_rank_info(self.current_user.employee.id, int(type))
         rank_list = sorted(rank_list, key=lambda x: x.level)
-        rank_list = list(filter(lambda x: x if x.level <= 3 else x.level != current_user_rank.level, rank_list))
+        if ladder_type == 'normal':
+            rank_list = list(filter(lambda x: x if x.level <= 3 else x.level != current_user_rank.level, rank_list))
         if list_only:
             data = ObjectDict(rank_list=rank_list)
         else:
