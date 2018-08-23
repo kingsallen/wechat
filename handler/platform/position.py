@@ -12,7 +12,7 @@ from tests.dev_data.user_company_config import COMPANY_CONFIG
 from util.common import ObjectDict
 from util.common.exception import MyException
 from util.common.cipher import encode_id
-from util.common.decorator import handle_response, check_employee, NewJDStatusCheckerAddFlag, authenticated, log_time
+from util.common.decorator import handle_response, check_employee, NewJDStatusCheckerAddFlag, authenticated, log_time, cover_no_weixin
 from util.common.mq import award_publisher
 from util.tool.str_tool import gen_salary, add_item, split, gen_degree_v2, gen_experience_v2, languge_code_from_ua
 from util.tool.url_tool import url_append_query
@@ -23,15 +23,13 @@ from util.common.decorator import log_time
 class PositionHandler(BaseHandler):
     @log_time
     @handle_response
+    @cover_no_weixin
     @NewJDStatusCheckerAddFlag()
     @authenticated
     @gen.coroutine
     def get(self, position_id):
         """显示 JD 页
         """
-        if not self.in_wechat:
-            self.render(template_name="adjunct/not-weixin.html")
-            return
         display_locale = self.get_current_locale()
         position_info = yield self.position_ps.get_position(position_id, display_locale)
 
