@@ -29,6 +29,9 @@ class PositionHandler(BaseHandler):
     def get(self, position_id):
         """显示 JD 页
         """
+        if not self.in_wechat:
+            self.render(template_name="adjunct/not-weixin.html")
+            return
         display_locale = self.get_current_locale()
         position_info = yield self.position_ps.get_position(position_id, display_locale)
 
@@ -1034,17 +1037,14 @@ class PositionListHandler(PositionListInfraParamsMixin, BaseHandler):
         company['industry'] = self.params.company.industry
         company['scale_name'] = self.params.company.scale_name
         company['banner'] = self.params.company.banner
-        if not self.in_wechat:
-            self.render(template_name="adjunct/not-weixin.html")
-        else:
-            self.render_page(
-                template_name="position/index.html",
-                meta_title=position_title,
-                data=ObjectDict(
-                    company=company,
-                    use_neowx=bool(self.current_user.company.conf_newjd_status == 2),
-                    teamname_custom=teamname_custom)
-            )
+        self.render_page(
+            template_name="position/index.html",
+            meta_title=position_title,
+            data=ObjectDict(
+                company=company,
+                use_neowx=bool(self.current_user.company.conf_newjd_status == 2),
+                teamname_custom=teamname_custom)
+        )
 
     @gen.coroutine
     def make_company_info(self):

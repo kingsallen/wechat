@@ -143,14 +143,14 @@ data_userprofile_publisher = MQPublisher(
 
 user_follow_wechat_publisher = MQPublisher(
     amqp_url=amqp_url,
-    exchange="user_folow_wechat",
+    exchange="user_follow_wechat_exchange",
     exchange_type="direct",
     appid=6
 )
 
 user_unfollow_wechat_publisher = MQPublisher(
     amqp_url=amqp_url,
-    exchange="user_unfollow_wechat",
+    exchange="user_unfollow_wechat_exchange",
     exchange_type="direct",
     appid=6
 )

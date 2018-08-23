@@ -31,10 +31,8 @@ class TeamIndexHandler(BaseHandler):
             self.locale, current_company, self.params, sub_company_flag, self.current_user.company)
 
         self.params.share = self._share(current_company)
-        if not self.in_wechat:
-            self.render(template_name="adjunct/not-weixin.html")
-        else:
-            self.render_page('company/team.html', data, meta_title=data.bottombar.teamname_custom)
+
+        self.render_page('company/team.html', data, meta_title=data.bottombar.teamname_custom)
 
     def _share(self, company):
         company_name = company.abbreviation or company.name

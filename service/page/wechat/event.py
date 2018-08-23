@@ -25,6 +25,7 @@ from util.common import ObjectDict
 from util.tool.json_tool import json_dumps
 from util.wechat.core import get_wxuser, send_succession_message
 from util.common.mq import user_follow_wechat_publisher, user_unfollow_wechat_publisher
+from service.page.user.user import UserPageService
 
 
 def df_lg(f):
@@ -252,7 +253,7 @@ class EventPageService(PageService):
             yield self._update_wxuser(openid, current_user, msg, wxuser)
 
         data = ObjectDict({
-            "user_id": current_user.sysuser_id,
+            "user_id": current_user.wxuser.sysuser_id,
             "wechat_id": current_user.wechat.id,
             "subscribe_time": int(time.time() * 1000)
         })
@@ -367,7 +368,7 @@ class EventPageService(PageService):
                     "source":          const.WX_USER_SOURCE_UNSUBSCRIBE
                 })
             data = ObjectDict({
-                "user_id": current_user.sysuser_id,
+                "user_id": current_user.wxuser.sysuser_id,
                 "wechat_id": current_user.wechat.id,
                 "subscribe_time": int(time.time() * 1000)
             })
@@ -512,7 +513,7 @@ class EventPageService(PageService):
         })
 
         # 临时二维码处理逻辑, 5位type+27为自定义id
-        if wechat.id in (self.settings.qx_wechat_id, const.MARS_ID) and int_scene_id:
+        if int_scene_id:
             int_scene_id = int_scene_id.group(1)
             type = int(bin(int(int_scene_id))[:7], base=2)
             real_user_id = int(bin(int(int_scene_id))[7:], base=2)
@@ -646,7 +647,15 @@ class EventPageService(PageService):
             elif type == 30:
                 # 根据携带不同场景值的临时二维码，接续之前用户未完成的流程。
                 pattern_id = real_user_id
-                yield send_succession_message(wechat=wechat, open_id=msg.FromUserName, pattern_id=pattern_id)
+                # 校验关注后是否自动恢复了员工身份。
+                user_ps = UserPageService()
+                if pattern_id == const.QRCODE_BIND and wxuser.sysuser_id and wechat.company_id:
+                    employee = yield user_ps.get_valid_employee_by_user_id(
+                        user_id=wxuser.sysuser_id, company_id=wechat.company_id)
+                else:
+                    employee = None
+                if not employee or pattern_id != const.QRCODE_BIND:
+                    yield send_succession_message(wechat=wechat, open_id=msg.FromUserName, pattern_id=pattern_id)
 
             elif type == 16:
                 pass

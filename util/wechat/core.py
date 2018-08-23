@@ -321,7 +321,7 @@ def get_qrcode(access_token, scene_str, action_name="QR_LIMIT_STR_SCENE"):
 def get_temporary_qrcode(access_token, pattern_id, action_name="QR_SCENE"):
     """
     生成带场景值的临时二维码
-    :param pattern_id：场景id      1：员工认证  2：内推政策
+    :param pattern_id：场景id      1：员工认证  2：内推政策  3：积分榜单  4：积分历史  5：推荐历史  6：候选人推荐  7：个人中心
     :param access_token
     :param action_name
     :return:
@@ -348,15 +348,30 @@ def send_succession_message(wechat, open_id, pattern_id):
     发送接续流程的信息给用户
     :param wechat:
     :param open_id:
-    :param pattern_id: 1：员工认证  2：内推政策
+    :param pattern_id: 1：员工认证  2：内推政策3  ：积分榜单  4：积分历史  5：推荐历史  6：候选人推荐  7：个人中心
     :return:
     """
-    if pattern_id == 1:
+    if pattern_id == const.QRCODE_BIND:
         url = make_url(path.EMPLOYEE_VERIFY, host=settings["platform_host"], wechat_signature=wechat.get("signature"))
-        content = '点击完成<a href="{}">员工认证</a>, 更多积分奖励等你来~'.format(url)
-    elif pattern_id == 2:
+        content = '点击完成   <a href="{}">员工认证</a> \n更多积分奖励等你来~'.format(url)
+    elif pattern_id == const.QRCODE_POLICY:
         url = make_url(path.EMPLOYEE_REFERRAL_POLICY, host=settings["platform_host"], wechat_signature=wechat.get("signature"))
         content = '点击查看<a href="{}">内推政策</a>'.format(url)
+    elif pattern_id == const.QRCODE_LADDER:
+        url = make_url(path.EMPOLYEE_LADDER, host=settings["platform_host"], wechat_signature=wechat.get("signature"))
+        content = '点击查看<a href="{}">积分榜单</a>'.format(url)
+    elif pattern_id == const.QRCODE_AWARD_RECORD:
+        url = make_url(path.EMPLOYEE_REWARDS_RECORD, host=settings["platform_host"], wechat_signature=wechat.get("signature"))
+        content = '点击查询<a href="{}">积分历史</a>'.format(url)
+    elif pattern_id == const.QRCODE_RECOM_RECORD:
+        url = make_url(path.EMPLOYEE_RECOMMENDS, host=settings["platform_host"], wechat_signature=wechat.get("signature"))
+        content = '点击查看<a href="{}">推荐历史</a>'.format(url)
+    elif pattern_id == const.QRCODE_REFERRED_FRIENDS:
+        url = make_url(path.EMPLOYEE_RECOM, host=settings["platform_host"], wechat_signature=wechat.get("signature"))
+        content = '点击完成<a href="{}">候选人推荐</a>'.format(url)
+    elif pattern_id == const.QRCODE_USERCENTER:
+        url = make_url(path.USER_CENTER, host=settings["platform_host"], wechat_signature=wechat.get("signature"))
+        content = '点击查看<a href="{}">个人中心</a>'.format(url)
     else:
         content = "欢迎关注：{}, 点击菜单栏发现更多精彩~".format(wechat.get("name"))
     jdata = ObjectDict({
