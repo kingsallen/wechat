@@ -25,6 +25,7 @@ from util.common import ObjectDict
 from util.tool.json_tool import json_dumps
 from util.wechat.core import get_wxuser, send_succession_message
 from util.common.mq import user_follow_wechat_publisher, user_unfollow_wechat_publisher
+from service.page.user.user import UserPageService
 
 
 def df_lg(f):
@@ -646,7 +647,14 @@ class EventPageService(PageService):
             elif type == 30:
                 # 根据携带不同场景值的临时二维码，接续之前用户未完成的流程。
                 pattern_id = real_user_id
-                if pattern_id == const.QRCODE_BIND and not wxuser.is_subscribe or pattern_id != const.QRCODE_BIND:
+                # 校验关注后是否自动恢复了员工身份。
+                user_ps = UserPageService()
+                if pattern_id == const.QRCODE_BIND and wxuser.sysuser_id and wechat.company_id:
+                    employee = yield user_ps.get_valid_employee_by_user_id(
+                        user_id=wxuser.sysuser_id, company_id=wechat.company_id)
+                else:
+                    employee = None
+                if not employee or pattern_id != const.QRCODE_BIND:
                     yield send_succession_message(wechat=wechat, open_id=msg.FromUserName, pattern_id=pattern_id)
 
             elif type == 16:
