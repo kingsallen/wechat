@@ -16,6 +16,7 @@ from util.common import ObjectDict
 from util.common.decorator import authenticated
 from util.tool.date_tool import curr_now_dateonly
 from util.wechat.core import get_temporary_qrcode
+import conf.path as path
 
 
 # 基础服务 BizException 返回内容
@@ -145,6 +146,12 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
     @authenticated
     @tornado.gen.coroutine
     def get(self):
+        # 判断是否已经绑定员工
+        binded = const.YES if self.current_user.employee else const.NO
+
+        if not binded:
+            self.redirect(self.make_url(path.EMPLOYEE_VERIFY, self.params))
+            return
         if not self.current_user.employee:
             self.write_error(404, message=msg.EMPLOYEE_NOT_BINDED_WARNING.format(self.current_user.company.conf_employee_slug))
             return
