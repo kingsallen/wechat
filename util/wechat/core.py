@@ -325,7 +325,7 @@ def get_temporary_qrcode(wechat, pattern_id, action_name="QR_SCENE"):
     :param action_name
     :return:
     """
-    ret = yield get_qrcode_ticket(wechat, pattern_id, action_name)
+    ret = yield get_qrcode_ticket(wechat=wechat, pattern_id=pattern_id, action_name=action_name)
     if ret:
         raise gen.Return(wx.WX_SHOWQRCODE_API % ret)
     else:
