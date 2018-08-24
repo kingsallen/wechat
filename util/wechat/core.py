@@ -316,13 +316,29 @@ def get_qrcode(access_token, scene_str, action_name="QR_LIMIT_STR_SCENE"):
     raise gen.Return(None)
 
 
-@cache(ttl=60 * 60 * 24 * 20)
 @gen.coroutine
-def get_temporary_qrcode(access_token, pattern_id, action_name="QR_SCENE"):
+def get_temporary_qrcode(wechat, pattern_id, action_name="QR_SCENE"):
     """
     生成带场景值的临时二维码
     :param pattern_id：场景id      1：员工认证  2：内推政策  3：积分榜单  4：积分历史  5：推荐历史  6：候选人推荐  7：个人中心
-    :param access_token
+    :param wechat
+    :param action_name
+    :return:
+    """
+    ret = yield get_qrcode_ticket(wechat=wechat, pattern_id=pattern_id, action_name=action_name)
+    if ret:
+        raise gen.Return(wx.WX_SHOWQRCODE_API % ret)
+    else:
+        raise gen.Return(wechat.qrcode)
+
+
+@cache(ttl=60 * 60 * 24 * 20)
+@gen.coroutine
+def get_qrcode_ticket(wechat, pattern_id, action_name="QR_SCENE"):
+    """
+    生成带场景值的临时二维码ticket
+    :param pattern_id：场景id      1：员工认证  2：内推政策  3：积分榜单  4：积分历史  5：推荐历史  6：候选人推荐  7：个人中心
+    :param wechat
     :param action_name
     :return:
     """
@@ -336,10 +352,12 @@ def get_temporary_qrcode(access_token, pattern_id, action_name="QR_SCENE"):
             }
         }
     })
-    ret = yield http_post(wx.WX_CREATE_QRCODE_API % access_token, params, infra=False)
-    if ret:
-        raise gen.Return(wx.WX_SHOWQRCODE_API % (ret.get("ticket")))
-    raise gen.Return(None)
+    ret = yield http_post(wx.WX_CREATE_QRCODE_API % wechat.access_token, params, infra=False)
+    if ret and ret.get("ticket"):
+        raise gen.Return(ret.get("ticket"))
+    else:
+        logger.warn("wechat_id:{} create temporary qrcode fail, err msg: {}".format(wechat.id, ret.get("errmsg")))
+        raise gen.Return(None)
 
 
 @gen.coroutine

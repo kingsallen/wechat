@@ -123,7 +123,7 @@ class WechatSubInfoHandler(BaseHandler):
         pattern_id = self.params.scene
         data = ObjectDict()
         data.subscribed = True if self.current_user.wxuser.is_subscribe else False
-        data.qrcode = yield get_temporary_qrcode(access_token=self.current_user.wechat.access_token,
+        data.qrcode = yield get_temporary_qrcode(wechat=self.current_user.wechat,
                                                  pattern_id=int(pattern_id))
         data.name = self.current_user.wechat.name
         self.send_json_success(data=data)
@@ -555,7 +555,7 @@ class EmployeeReferralPolicyHandler(BaseHandler):
         result, data = yield self.employee_ps.get_referral_policy(self.current_user.company.id)
         wechat = ObjectDict()
         wechat.subscribed = True if self.current_user.wxuser.is_subscribe else False
-        wechat.qrcode = yield get_temporary_qrcode(access_token=self.current_user.wechat.access_token,
+        wechat.qrcode = yield get_temporary_qrcode(wechat=self.current_user.wechat,
                                                    pattern_id=const.QRCODE_POLICY)
         wechat.name = self.current_user.wechat.name
         if result and data and data.get("priority"):
