@@ -199,7 +199,7 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
             company_id)
         wechat = ObjectDict()
         wechat.subscribed = True if self.current_user.wxuser.is_subscribe else False
-        wechat.qrcode = yield get_temporary_qrcode(access_token=self.current_user.wechat.access_token,
+        wechat.qrcode = yield get_temporary_qrcode(wechat=self.current_user.wechat,
                                                    pattern_id=const.QRCODE_REFERRED_FRIENDS)
         wechat.name = self.current_user.wechat.name
         self.render(
