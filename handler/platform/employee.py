@@ -339,7 +339,7 @@ class CatesEmployeeBindHandler(EmployeeBindHandler):
             user_id=self.current_user.sysuser.id,
             company_id=self.current_user.company.id
         )
-        url = self.get_argument('redirect', '')
+        url = parse.unquote(self.get_argument('redirect', ''))
 
         if bind_status == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS:
             if url:
