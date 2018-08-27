@@ -115,7 +115,7 @@ class EmployeePageService(PageService):
         data.send_hour = 24  # fixed 24 小时
         data.conf = ObjectDict()
         data.binding_success_message = conf.bindSuccessMessage or ''
-        data.wechat.subscribed = True if current_user.wxuser.is_subscribe else False
+        data.wechat.subscribed = True if current_user.wxuser.is_subscribe or current_user.wechat.type == 0 else False
         data.wechat.qrcode = yield get_temporary_qrcode(wechat=current_user.wechat, pattern_id=const.QRCODE_BIND)
         data.wechat.name = current_user.wechat.name
         data.mate_num = mate_num
