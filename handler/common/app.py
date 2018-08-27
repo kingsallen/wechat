@@ -102,3 +102,12 @@ class ConfigHandler(BaseHandler):
                           "showAllNonBaseMenuItem"]
         })
         self.send_json_success(data=config)
+
+
+class RedirectHandler(BaseHandler):
+
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        next_url = self.params.next_url
+        self.redirect(next_url)
