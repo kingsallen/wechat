@@ -223,7 +223,8 @@ class EmployeeBindHandler(BaseHandler):
         message = result_message
 
         # CatesEmployeeBindHandler 生成本参数
-        if self.json_args.get('redirect_when_bind_success'):
+        if self.json_args.get('redirect_when_bind_success') and payload.type != self.employee_ps.BIND_AUTH_MODE[
+            self.employee_ps.FE_BIND_TYPE_EMAIL]:
             self.params.update(dict(
                 redirect_when_bind_success=self.json_args.get('redirect_when_bind_success')
             ))
