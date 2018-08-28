@@ -35,6 +35,7 @@ import handler.common.logcollector
 import handler.common.captcha
 import handler.common.image
 import handler.common.campaign
+import handler.common.redirect
 
 import handler.help.passport
 import handler.help.releasedposition
@@ -90,11 +91,12 @@ common_routes = [
     (r"/image/?",                                    handler.common.image.ImageFetchHandler,                    {"event": "image_fetch"}),
     (r"/chat/room[\/]*([0-9]+)*",                    handler.common.im.ChatRoomHandler,                         {"event": "im_room"}),
     (r"/resume/import/limit",                        handler.common.resume.ResumeImportLimit,                   {"event": "resume_import_limit"}),
+    (r"/redirect",                                   handler.common.redirect.RedirectHandler,                   {"event:" "redirect"}),
 
     # websocket
     (r"/websocket/([A-Za-z0-9_]{1,32})",             handler.common.im.ChatWebSocketHandler),
 
-    (r"/api/config[\/]?",                            handler.common.app.ConfigHandler,                              {"event": "wechat_config"}),
+    (r"/api/config[\/]?",                            handler.common.app.ConfigHandler,                          {"event": "wechat_config"}),
     (r"/api/dict/city/?",                            handler.common.dictionary.DictCityHandler,                 {"event": "dict_city"}),
     (r"/api/dict/industry/?",                        handler.common.dictionary.DictIndustryHandler,             {"event": "dict_industry"}),
     (r"/api/dict/function/?",                        handler.common.dictionary.DictFunctionHandler,             {"event": "dict_function"}),
