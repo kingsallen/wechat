@@ -282,7 +282,7 @@ class CatesEmployeeBindHandler(EmployeeBindHandler):
                     ),
                     dict(
                         wechat_signature=self.current_user.wechat.signature,
-                        redirect_when_bind_success=url
+                        redirect_when_bind_success=parse.quote(url)
                     )
                 )
             )  # 没有认证 跳转到 wechat的认证页面
