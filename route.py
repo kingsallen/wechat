@@ -91,7 +91,7 @@ common_routes = [
     (r"/image/?",                                    handler.common.image.ImageFetchHandler,                    {"event": "image_fetch"}),
     (r"/chat/room[\/]*([0-9]+)*",                    handler.common.im.ChatRoomHandler,                         {"event": "im_room"}),
     (r"/resume/import/limit",                        handler.common.resume.ResumeImportLimit,                   {"event": "resume_import_limit"}),
-    (r"/redirect",                                   handler.common.redirect.RedirectHandler,                   {"event:" "redirect"}),
+    (r"/redirect",                                   handler.common.redirect.RedirectHandler,                   {"event": "redirect"}),
 
     # websocket
     (r"/websocket/([A-Za-z0-9_]{1,32})",             handler.common.im.ChatWebSocketHandler),
