@@ -295,8 +295,7 @@ class EmployeeBindHandler(BaseHandler):
         message = result_message
 
         # CatesEmployeeBindHandler 生成本参数
-        if self.json_args.get('redirect_when_bind_success') and payload.type != self.employee_ps.BIND_AUTH_MODE[
-            self.employee_ps.FE_BIND_TYPE_EMAIL]:
+        if self.json_args.get('redirect_when_bind_success'):
             self.params.update(dict(
                 redirect_when_bind_success=self.json_args.get('redirect_when_bind_success')
             ))
@@ -537,8 +536,10 @@ class BindInfoHandler(BaseHandler):
         redirect_when_bind_success = self.json_args.get('redirect_when_bind_success') or self.get_argument(
             'redirect_when_bind_success', '')
 
-        next_url = redirect_when_bind_success or self.make_url(path.POSITION_LIST, self.params)
-
+        if binding_status == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS:
+            next_url = redirect_when_bind_success
+        else:
+            next_url = self.make_url(path.EMPLOYEE_CUSTOMINFO_BINDED, self.params)
         self.params.from_wx_template = self.json_args.from_wx_template
         self.send_json_success(
             data=ObjectDict(
