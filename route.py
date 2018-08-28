@@ -173,6 +173,7 @@ platform_routes = [
     (r"/api/func/wechat/?",                          handler.platform.employee.WechatSubInfoHandler,            {"event": "wechat_sub_info"}),
     (r'/api/user/survey/?',                          handler.platform.user.APIUserSurveyHandler,                {"event": "user_survey_api"}),
     (r'/api/position/recom/list/?',                  handler.platform.user.APIPositionRecomListHandler,         {"event": "position_ai-recomlist"}),
+    (r'/api/recom/position/switch',                 handler.platform.user.APIPositionRecomListCloseHandler,    {"event": "position_ai-recom-position"}),
     # 兼容老微信 url，进行302跳转
     (r"/.*",                                         handler.platform.compatible.CompatibleHandler,             {"event": "compatible"})
 

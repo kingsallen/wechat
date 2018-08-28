@@ -934,7 +934,7 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
             "page_size": params.page_size
         })
 
-        position_list = yield self.position_ps.infra_get_position_employeerecom(infra_params, company_id)
+        position_list, _ = yield self.position_ps.infra_get_position_employeerecom(infra_params, company_id)
         return position_list
 
     def get_search_filter_num(self):
