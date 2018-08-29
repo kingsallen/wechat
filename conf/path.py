@@ -19,6 +19,7 @@ EMPLOYEE_RECOM = '/employee/recom'
 EMPLOYEE_CUSTOMINFO = '/employee/custominfo'
 EMPLOYEE_CUSTOMINFO_BINDED = '/employee/binded-custominfo'
 EMPLOYEE_BINDED = '/employee/binded'
+GATES_EMPLOYEE = '/api/employee/custom_bind/gates'
 EMPLOYEE_REFERRAL_POLICY = "/employee/referral/policy"
 EMPOLYEE_LADDER = "/employee/ladder"
 EMPLOYEE_REWARDS_RECORD = '/app/employee/binding/rewards'
