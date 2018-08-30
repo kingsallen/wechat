@@ -3,6 +3,7 @@
 from tornado import gen
 from handler.base import BaseHandler
 from util.common.decorator import handle_response
+from urllib.parse import unquote
 
 
 class RedirectHandler(BaseHandler):
@@ -12,6 +13,7 @@ class RedirectHandler(BaseHandler):
     def get(self):
         next_url = self.params.next_url
         if next_url:
+            next_url = unquote(next_url)
             self.redirect(next_url)
 
 
