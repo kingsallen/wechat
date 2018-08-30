@@ -461,11 +461,6 @@ class BindInfoHandler(BaseHandler):
             self.write_error(404)
             return
 
-        if fe_binding_stauts == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS and \
-            (employee.id != self.json_args._employeeid or not self.json_args._employeeid):
-            self.write_error(416)
-            return
-
         keys = []
         for k, v in self.json_args.model.items():
             if k.startswith("key_") and v:
