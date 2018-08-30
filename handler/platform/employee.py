@@ -313,11 +313,12 @@ class EmployeeBindHandler(BaseHandler):
             next_url = self.make_url(path.EMPLOYEE_CUSTOMINFO, self.params, from_wx_template='x')
             custom_fields = True
         else:
-
             next_url = self.make_url(path.POSITION_LIST, self.params)
             custom_fields = False
             if self.params.get('redirect_when_bind_success'):
                 next_url = self.make_url(path.GATES_EMPLOYEE, redirect=self.params.get('redirect_when_bind_success'))
+
+        self.logger.debug('gates_next_url: %s-%s' % (custom_fields, next_url))
 
         self.send_json_success(
             data={'next_url': next_url,
