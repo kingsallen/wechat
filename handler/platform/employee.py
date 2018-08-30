@@ -1,5 +1,6 @@
 # coding=utf-8
 
+from tornado.httputil import url_concat
 from tornado import gen
 
 import conf.common as const
@@ -293,20 +294,13 @@ class EmployeeBindHandler(BaseHandler):
 
         message = result_message
 
-        custom_fields = yield self.employee_ps.get_employee_custom_fields(self.current_user.company.id)
-        if custom_fields:
-            next_url = self.make_url(path.EMPLOYEE_CUSTOMINFO, self.params, from_wx_template='x')
-            custom_fields = True
-        else:
-            next_url = self.make_url(path.POSITION_LIST, self.params)
-            custom_fields = False
+        # CatesEmployeeBindHandler 生成本参数
+        if self.json_args.get('redirect_when_bind_success'):
+            self.params.update(dict(
+                redirect_when_bind_success=self.json_args.get('redirect_when_bind_success')
+            ))
 
-        self.send_json_success(
-            data={'next_url': next_url,
-                  'custom_fields': custom_fields},
-            message=message
-        )
-        self.finish()
+        custom_fields = yield self.employee_ps.get_employee_custom_fields(self.current_user.company.id)
 
         # 处理员工认证红包
         yield self.redpacket_ps.handle_red_packet_employee_verification(
@@ -314,6 +308,61 @@ class EmployeeBindHandler(BaseHandler):
             company_id=self.current_user.company.id,
             redislocker=self.redis
         )
+
+        if custom_fields:
+            next_url = self.make_url(path.EMPLOYEE_CUSTOMINFO, self.params, from_wx_template='x')
+            custom_fields = True
+        else:
+            next_url = self.make_url(path.POSITION_LIST, self.params)
+            custom_fields = False
+            if self.params.get('redirect_when_bind_success'):
+                next_url = self.make_url(path.GATES_EMPLOYEE, redirect=self.params.get('redirect_when_bind_success'))
+
+        self.logger.debug('gates_next_url: %s-%s' % (custom_fields, next_url))
+
+        self.send_json_success(
+            data={'next_url': next_url,
+                  'custom_fields': custom_fields},
+            message=message
+        )
+
+
+class CatesEmployeeBindHandler(EmployeeBindHandler):
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        """定制接口: gates客户要求已经认证的用户跳转到他们指定的页面
+        未认证的员工跳转到认证页面
+        待认证成功后再跳转到指定的页面
+        """
+
+        bind_status = yield self.employee_ps.get_employee_bind_status(
+            user_id=self.current_user.sysuser.id,
+            company_id=self.current_user.company.id
+        )
+        url = parse.unquote(self.get_argument('redirect', ''))
+
+        if bind_status == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS:
+            if url:
+                self.redirect(
+                    url
+                )  # 员工已经认证了则直接跳转到来也页面
+        else:
+            self.redirect(
+                url_concat(
+                    '{}://{}{}'.format(
+                        self.request.protocol,
+                        self.request.host,
+                        '/m/app/employee/binding'
+                    ),
+                    dict(
+                        wechat_signature=self.current_user.wechat.signature,
+                        redirect_when_bind_success=parse.quote(url)
+                    )
+                )
+            )  # 没有认证 跳转到 wechat的认证页面
 
 
 class EmployeeBindEmailHandler(BaseHandler):
@@ -486,6 +535,12 @@ class BindInfoHandler(BaseHandler):
             assert False
 
         next_url = self.make_url(path.POSITION_LIST, self.params)
+        # 绑定成功回填自定义配置字段成功
+        redirect_when_bind_success = self.json_args.get('redirect_when_bind_success') or self.get_argument(
+            'redirect_when_bind_success', '')
+
+        if binding_status == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS:
+            next_url = redirect_when_bind_success
         self.params.from_wx_template = self.json_args.from_wx_template
         self.send_json_success(
             data=ObjectDict(
