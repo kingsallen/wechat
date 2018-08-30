@@ -350,6 +350,16 @@ class EmployeePageService(PageService):
         return data
 
     @gen.coroutine
+    def get_bind_reward(self, company_id, type):
+        """获取指定规则的积分配置"""
+        result, data = yield self.infra_employee_ds.get_bind_reward(company_id)
+        reward = 0
+        for r in data:
+            if r.get("statusName") == type:
+                reward = r.get("points")
+        return reward
+
+    @gen.coroutine
     def unbind(self, employee_id, company_id, user_id):
         """员工解绑"""
         ret = yield self.thrift_employee_ds.unbind(
@@ -615,3 +625,14 @@ class EmployeePageService(PageService):
     def is_valid_employee(self, user_id, company_id):
         is_employee = yield self.infra_user_ds.is_valid_employee(user_id, company_id)
         return is_employee
+
+    @gen.coroutine
+    def update_recommend(self, name, mobile, recom_reason):
+        params = ObjectDict({
+            "name": name,
+            "mobile": mobile,
+            "recom_reason": recom_reason
+        })
+        res = yield self.infra_user_ds.update_recommend(params)
+        return res
+

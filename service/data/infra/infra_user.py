@@ -235,3 +235,8 @@ class InfraUserDataService(DataService):
         }
         res = yield http_put(path.INFRA_USER_EMPLOYEE, params)
         return res
+
+    @gen.coroutine
+    def update_recommend(self):
+        res = yield http_post(path.UPDATE_RECOMMEND)
+        return res

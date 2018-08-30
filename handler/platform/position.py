@@ -12,7 +12,8 @@ from tests.dev_data.user_company_config import COMPANY_CONFIG
 from util.common import ObjectDict
 from util.common.exception import MyException
 from util.common.cipher import encode_id
-from util.common.decorator import handle_response, check_employee, NewJDStatusCheckerAddFlag, authenticated, log_time, cover_no_weixin
+from util.common.decorator import handle_response, check_employee, NewJDStatusCheckerAddFlag, authenticated, log_time, \
+    cover_no_weixin, check_employee_common
 from util.common.mq import award_publisher
 from util.tool.str_tool import gen_salary, add_item, split, gen_degree_v2, gen_experience_v2, languge_code_from_ua
 from util.tool.url_tool import url_append_query
@@ -32,6 +33,10 @@ class PositionHandler(BaseHandler):
         """
         display_locale = self.get_current_locale()
         position_info = yield self.position_ps.get_position(position_id, display_locale)
+
+        # 数据组埋点
+        if position_info.status:
+            self.logger.info("[JD]在招职位")
 
         if position_info.id and position_info.company_id == self.current_user.company.id:
             yield self._redirect_when_recom_is_openid(position_info)
@@ -71,12 +76,16 @@ class PositionHandler(BaseHandler):
             self.logger.debug("[JD]构建相似职位推荐")
             recomment_positions_res = yield self.position_ps.get_recommend_positions(position_id)
 
+            # 职位推荐简历积分
+            self.logger.debug("[JD]构建职位推荐简历积分")
+            reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_UPLOAD_PROFILE)
+
             # 获取公司配置信息
             teamname_custom = self.current_user.company.conf_teamname_custom
 
             header = yield self._make_json_header(
                 position_info, company_info, star, application, endorse,
-                can_apply, team.id if team else 0, did, teamname_custom)
+                can_apply, team.id if team else 0, did, teamname_custom, reward)
             module_job_description = self._make_json_job_description(position_info)
             module_job_need = self._make_json_job_need(position_info)
             position_feature = yield self.position_ps.get_position_feature(position_id)
@@ -311,7 +320,7 @@ class PositionHandler(BaseHandler):
     @log_time
     @gen.coroutine
     def _make_json_header(self, position_info, company_info, star, application,
-                          endorse, can_apply, team_id, did, teamname_custom):
+                          endorse, can_apply, team_id, did, teamname_custom, reward):
         """构造头部 header 信息"""
 
         # 获得母公司配置信息
@@ -335,7 +344,9 @@ class PositionHandler(BaseHandler):
             "salary": position_info.salary,
             "hr_chat": bool(parent_company_info.conf_hr_chat),
             "teamname_custom": teamname_custom["teamname_custom"],
-            "candidate_source": position_info.candidate_source_num
+            "candidate_source": position_info.candidate_source_num,
+            "hb_status": bool(position_info.hb_status),
+            "reward": reward
             # "team": position_info.department.lower() if position_info.department else ""
         })
 
@@ -722,6 +733,10 @@ class PositionListInfraParamsMixin(BaseHandler):
         infra_params.employment_type = ""
         infra_params.company_id = self.current_user.company.id
 
+        is_recom = 0
+        if self.params.is_recom and self.params.is_recom.isdigit():
+            is_recom = int(self.params.is_recom)
+
         if self.params.did:
             infra_params.did = self.params.did
 
@@ -758,6 +773,9 @@ class PositionListInfraParamsMixin(BaseHandler):
             occupations=self.params.occupation if self.params.occupation else "",
             custom=self.params.custom if self.params.custom else "",
             order_by_priority=True)
+
+        if is_recom:
+            infra_params.update(referral=is_recom)
 
         self.logger.debug("[position_list_infra_params]: %s" % infra_params)
 
@@ -874,6 +892,7 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
 
             position_ex['candidate_source'] = pos.candidate_source
             position_ex['job_need'] = pos.requirement
+            position_ex['is_recom'] = pos.is_recom if pos.is_recom else 0
 
             if display_locale == "en_US":
                 position_ex["city"] = pos.city_ename if pos.city_ename else pos.city
@@ -1094,6 +1113,40 @@ class PositionListHandler(PositionListInfraParamsMixin, BaseHandler):
         })
 
 
+class PositionRecomListHandler(PositionListInfraParamsMixin, BaseHandler):
+    @handle_response
+    @check_employee_common
+    @gen.coroutine
+    def get(self):
+        """
+        内推职位列表页
+        :return:
+        """
+        self.params.share = yield self._make_share()
+        self.render(template_name="")
+
+    def _make_share(self):
+
+        link = self.make_url(
+            path.POSITION_LIST,
+            self.params,
+            recom=self.position_ps._make_recom(self.current_user.sysuser.id))
+        company_info = yield self.company_ps.get_company(
+            conds={"id": self.current_user.company.id}, need_conf=True)
+
+        cover = self.share_url(company_info.logo)
+        title = company_info.abbreviation + self.locale.translate('job_hotjobs')
+        description = self.locale.translate(msg.SHARE_DES_DEFAULT)
+
+        share_info = ObjectDict({
+            "cover": cover,
+            "title": title,
+            "description": description,
+            "link": link
+        })
+        return share_info
+
+
 class PositionListSugHandler(PositionListInfraParamsMixin, BaseHandler):
     @handle_response
     @check_employee
@@ -1103,10 +1156,6 @@ class PositionListSugHandler(PositionListInfraParamsMixin, BaseHandler):
         sug搜索
         :return:
         """
-        # todo:注释
-        # sug = ObjectDict()
-        # sug.list = []
-        # return self.send_json_success(sug)
 
         infra_params = self.make_position_list_infra_params()
         sug = ObjectDict()

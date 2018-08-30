@@ -286,6 +286,16 @@ MSG_TYPE = {
     8: "employeeBind"
 }
 
+# 积分配置类型
+REWARD_VERIFICATION = "完成员工认证"
+REWARD_CLICK_JOB = "转发职位被点击"
+REWARD_CONTACT_INFORMATION = "完善被推荐人信息"
+REWARD_SUBMIT_PROFILE = "被推荐人投递简历"
+REWARD_PASS_REVIEW = "简历评审合格"
+REWARD_PASS_INTERVIEW = "面试通过"
+REWARD_ON_BOARD = "入职"
+REWARD_UPLOAD_PROFILE = "员工上传人才简历"
+
 # 操作的聊天类型
 INTERACTIVE_MSG = ["employeeBind", "jobSelect", "teamSelect", "citySelect", "jobCard"]
 

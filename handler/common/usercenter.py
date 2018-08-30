@@ -6,7 +6,7 @@ from handler.base import BaseHandler
 import conf.common as const
 import conf.message as msg
 from thrift_gen.gen.employee.struct.ttypes import BindStatus
-from util.common.decorator import handle_response, verified_mobile_oneself, authenticated
+from util.common.decorator import handle_response, verified_mobile_oneself, authenticated, check_employee_common
 from util.tool.str_tool import email_validate, is_alphabet, is_chinese, password_crypt, password_validate
 from util.image.upload import QiniuUpload
 from util.common import ObjectDict
@@ -61,7 +61,7 @@ class UsercenterHandler(BaseHandler):
             headimg=self.static_url(res.data.headimg or const.SYSUSER_HEADIMG),
             name=res.data.name or res.data.nickname,
             email=res.data.email,
-            mobile_display=self.current_user.sysuser.mobile_display, # do not pass '0' to FE
+            mobile_display=self.current_user.sysuser.mobile_display,  # do not pass '0' to FE
             # 该公司是否启用了认证
             bind_disable=employee_cert_conf.disable == const.OLD_NO,
             bind_status=fe_bind_status,
@@ -143,6 +143,48 @@ class UsercenterHandler(BaseHandler):
         self.send_json_success()
 
 
+class UsercenterMineHandler(BaseHandler):
+    """认证员工个人中心-我的"""
+
+    @handle_response
+    @check_employee_common
+    @gen.coroutine
+    def get(self):
+        self.render(template_name="")
+
+
+class UsercenterMyInfoHandler(BaseHandler):
+    """认证员工个人中心-我的信息"""
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+
+        if not self.current_user.sysuser.id:
+            res = ObjectDict(data=ObjectDict)
+        else:
+            res = yield self.usercenter_ps.get_user(self.current_user.sysuser.id)
+
+        # 检查员工绑定状态
+        bind_status = yield self.employee_ps.get_employee_bind_status(
+            self.current_user.sysuser.id,
+            self.current_user.company.id
+        )
+        fe_bind_status = self.employee_ps.convert_bind_status_from_thrift_to_fe(
+            bind_status)
+        if fe_bind_status == 0:
+            unread_praise = yield self.employee_ps.get_unread_praise(self.current_user.employee.id)
+        else:
+            unread_praise = 0
+        self.send_json_success(data=ObjectDict(
+            headimg=self.static_url(res.data.headimg or const.SYSUSER_HEADIMG),
+            name=res.data.name or res.data.nickname,
+            bind_status=fe_bind_status,
+            unread_praise=unread_praise
+        ))
+
+
 class FavPositionHandler(BaseHandler):
     """个人中心-收藏职位"""
 
@@ -190,6 +232,7 @@ class ApplyRecordsHandler(BaseHandler):
 
 class UserMobileBindedHandler(BaseHandler):
     """是否绑定了手机号"""
+
     @handle_response
     @authenticated
     @gen.coroutine

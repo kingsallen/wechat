@@ -229,11 +229,7 @@ class EmployeeBindHandler(BaseHandler):
         else:
             pass
         mate_num = yield self.employee_ps.get_mate_num(self.current_user.company.id)
-        rewards_response = yield self.employee_ps.get_bind_rewards(self.current_user.company.id)
-        reward = 5
-        for r in rewards_response:
-            if r.get("statusName") == "完成员工认证":
-                reward = r.get("points")
+        reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_VERIFICATION)
 
         # 根据 conf 来构建 api 的返回 data
         data = yield self.employee_ps.make_binding_render_data(

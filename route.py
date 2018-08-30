@@ -153,6 +153,7 @@ platform_routes = [
     (r'/employee/ai-recom/(\d+)',                    handler.platform.employee.EmployeeAiRecomHandler,          {'event': 'employee_ai-recom'}),
     (r'/employee/referral/policy',                   handler.platform.employee.EmployeeReferralPolicyHandler,   {"event": "referral—policy"}),
     (r'/cover/no-weixin',                            handler.platform.cover.CoverHandler,                       {"event": "cover_no_weixin"}),
+    (r'/position/recom/?',                           handler.platform.position.PositionRecomListHandler,        {"event": "position_recom_list"}),
     # 各大公司的自定义配置
     (r"/custom/emailapply/?",                        handler.platform.customize.CustomizeEmailApplyHandler,     {"event": "customize_emailapply"}),
 
