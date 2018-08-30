@@ -60,6 +60,7 @@ import handler.qx.position
 import handler.qx.team
 import handler.qx.company
 import handler.common.permanent_qr
+import handler.common.laiye_im
 
 import handler.wechat.event
 
@@ -90,6 +91,7 @@ common_routes = [
     (r"/profile/custom/?",                           handler.common.profile.ProfileCustomHandler,               {"event": "profile_customcv"}),
     (r"/image/?",                                    handler.common.image.ImageFetchHandler,                    {"event": "image_fetch"}),
     (r"/chat/room[\/]*([0-9]+)*",                    handler.common.im.ChatRoomHandler,                         {"event": "im_room"}),
+    (r"/im/laiye",                                   handler.common.laiye_im.LaiyeImHandler,                    {"event": "im laiye"}),
     (r"/resume/import/limit",                        handler.common.resume.ResumeImportLimit,                   {"event": "resume_import_limit"}),
     (r"/redirect",                                   handler.common.redirect.RedirectHandler,                   {"event": "redirect"}),
 
@@ -160,6 +162,7 @@ platform_routes = [
     (r"/api/company/survey/?",                       handler.platform.companyrelation.CompanySurveyHandler,     {"event": "company_survey"}),
     (r"/api/company/follow/?",                       handler.platform.companyrelation.CompanyFollowHandler,     {"event": "company_follow"}),
     (r"/api/groupcompany/check/?",                   handler.platform.groupcompany.GroupCompanyCheckHandler,    {"event": "groupcompany_check"}),
+    (r"/api/employee/custom_bind/gates",             handler.platform.employee.CatesEmployeeBindHandler,        {"event": "gates employee_bind"}),
     (r"/api/employee/bind/?",                        handler.platform.employee.EmployeeBindHandler,             {"event": "employee_bind"}),
     (r"/api/employee/unbind/?",                      handler.platform.employee.EmployeeUnbindHandler,           {"event": "employee_unbind"}),
     (r"/api/employee/bind-info/?",                   handler.platform.employee.BindInfoHandler,                 {"event": "employee_bind_info"}),
