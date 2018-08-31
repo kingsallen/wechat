@@ -121,6 +121,8 @@ CHAT_CHATROOM_CHANNEL = "chatroom_{0}_{1}"
 CHAT_HR_CHANNEL = "chatroom_{0}"
 # 进入聊天室标志位
 CHAT_CHATROOM_ENTER = "chat_sysuser_{}"
+# 推荐上传简历
+UPLOAD_RECOM_PROFILE = "upload_recom_profile_{}_{}"
 
 # ++++++++++业务常量+++++++++++
 # Cookie name

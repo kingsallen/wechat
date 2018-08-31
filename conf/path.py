@@ -164,6 +164,8 @@ USER_RANK_INFO = "/v1/employee/{}/list-info"
 LADDER_TYPE = "/v1/company/{}/leader-board"
 BIND_REWARD = "/hraccount/company/rewardconfig"
 UPDATE_RECOMMEND = ""
+UPLOAD_RECOM_PROFILE = ""
+REFERRAL_INFO = ""
 # ============================ 基础服务结束 ============================
 
 # 其他外部服务

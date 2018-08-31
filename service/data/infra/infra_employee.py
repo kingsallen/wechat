@@ -75,3 +75,14 @@ class InfraEmployeeDataService(DataService):
         ret = yield http_get(path.BIND_REWARD, params)
         return unboxing(ret)
 
+    @gen.coroutine
+    def upload_recom_profile(self, pramas):
+        ret = yield http_post(path.UPLOAD_RECOM_PROFILE, pramas)
+        return ret
+
+    @gen.coroutine
+    def get_referral_info(self, params):
+        ret = yield http_get(path.REFERRAL_INFO, params)
+        return ret
+
+

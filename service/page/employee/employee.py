@@ -636,3 +636,20 @@ class EmployeePageService(PageService):
         res = yield self.infra_user_ds.update_recommend(params)
         return res
 
+    @gen.coroutine
+    def upload_recom_profile(self, file_name, file_data):
+        params = ObjectDict({
+            "file": file_data,
+            "file_name": file_name
+        })
+        res = yield self.employee_ds.upload_recom_profile(params)
+        return res
+
+    @gen.coroutine
+    def get_referral_info(self, key):
+        params = ObjectDict({
+            "key": key
+        })
+        res = yield self.employee_ds.get_referral_info(params)
+        return res
+
