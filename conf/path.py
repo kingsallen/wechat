@@ -24,7 +24,8 @@ EMPOLYEE_LADDER = "/employee/ladder"
 EMPLOYEE_REWARDS_RECORD = '/app/employee/binding/rewards'
 
 PROFILE_CUSTOM_CV = '/profile/custom'
-REFERRAL_COMFIRM = "/referral/confirm"
+REFERRAL_CONFIRM = "/referral/confirm"
+REFERRAL_UPLOAD_PC = "/upload/profile/pc"
 
 # 聚合号单独链接
 GAMMA_HOME = '/enter'
@@ -166,6 +167,8 @@ BIND_REWARD = "/hraccount/company/rewardconfig"
 UPDATE_RECOMMEND = ""
 UPLOAD_RECOM_PROFILE = ""
 REFERRAL_INFO = ""
+REFERRAL_ = ""
+REFERRAL_POSITION_INFO = ""
 # ============================ 基础服务结束 ============================
 
 # 其他外部服务

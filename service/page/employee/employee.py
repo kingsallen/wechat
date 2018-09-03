@@ -442,7 +442,8 @@ class EmployeePageService(PageService):
             "employee_id": employee_id,
             "view_time": int(time.time() * 1000)
         })
-        yield unread_praise_publisher.publish_message(message=data, routing_key="employee_view_leader_board_routing_key")
+        yield unread_praise_publisher.publish_message(message=data,
+                                                      routing_key="employee_view_leader_board_routing_key")
 
     @gen.coroutine
     def get_last_rank_info(self, employee_id, type):
@@ -526,10 +527,10 @@ class EmployeePageService(PageService):
         """
         selects_from_ds = yield self.hr_employee_custom_fields_ds. \
             get_employee_custom_field_records({
-                "company_id": company_id,
-                "status": const.OLD_YES,
-                "disable": const.NO
-            })
+            "company_id": company_id,
+            "status": const.OLD_YES,
+            "disable": const.NO
+        })
 
         selects_from_ds = sorted(selects_from_ds, key=lambda x: x.forder)
 
@@ -650,6 +651,28 @@ class EmployeePageService(PageService):
         params = ObjectDict({
             "key": key
         })
-        res = yield self.employee_ds.get_referral_info(params)
+        _, data = yield self.employee_ds.get_referral_info(params)
+        return data
+
+    @gen.coroutine
+    def update_referral_info(self, data):
+        res = yield self.employee_ds.update_referral_info(data)
         return res
 
+    @gen.coroutine
+    def get_referral_position_info(self, user_id):
+        res, data = yield self.employee_ds.get_referral_position_info(user_id)
+        if res.status == const.API_SUCCESS:
+            data = ObjectDict({
+                "title": data,
+                "city": data,
+                "company_abbr": data,
+                "id": data,
+                "job_need": data,
+                "salary": data,
+                "salary_bottom": data,
+                "salary_top": data,
+                "department": data,
+                "logo": data
+            })
+        return res, data

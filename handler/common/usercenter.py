@@ -150,7 +150,7 @@ class UsercenterMineHandler(BaseHandler):
     @check_employee_common
     @gen.coroutine
     def get(self):
-        self.render(template_name="")
+        self.render(template_name="/employee/me.html")
 
 
 class UsercenterMyInfoHandler(BaseHandler):

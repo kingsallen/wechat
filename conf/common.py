@@ -343,7 +343,8 @@ MOBILE_CODE_OPT_TYPE = ObjectDict({
     'code_register': 1,
     'forget_password': 2,
     'valid_old_mobile': 3,
-    'change_mobile': 4
+    'change_mobile': 4,
+    'referral_confirm': 5
 })
 
 # 简历导入
@@ -612,3 +613,9 @@ QRCODE_AWARD_RECORD = 4
 QRCODE_RECOM_RECORD = 5
 QRCODE_REFERRED_FRIENDS = 6
 QRCODE_USERCENTER = 7
+QRCODE_MINE = 8
+QRCODE_REFERRAL_PROFILE = 9
+QRCODE_REFERRAL_KETINFO = 10
+QRCODE_POSITION_INFO = 11
+QRCODE_REFERRAL_CONFIRM = 12
+
