@@ -164,11 +164,12 @@ LAST_RANK_INFO = "/v1/employee/{}/last-list-info"
 USER_RANK_INFO = "/v1/employee/{}/list-info"
 LADDER_TYPE = "/v1/company/{}/leader-board"
 BIND_REWARD = "/hraccount/company/rewardconfig"
-UPDATE_RECOMMEND = ""
-UPLOAD_RECOM_PROFILE = ""
-REFERRAL_INFO = ""
-REFERRAL_ = ""
-REFERRAL_POSITION_INFO = ""
+UPDATE_RECOMMEND = "/employee/{}/referral"
+UPLOAD_RECOM_PROFILE = "/v1/profile/file-parser"
+REFERRAL_INFO = "/referral-records/{}"
+INFRA_REFERRAL_CONFIRM = "/v1/referral/clain"
+REFERRAL_POSITION_INFO = "/employee/{}/referral-type"
+REFERRAL_CRUCIAL_INFO = "/v1/employee/{}/post-candidate-info"
 # ============================ 基础服务结束 ============================
 
 # 其他外部服务

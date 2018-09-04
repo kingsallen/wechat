@@ -15,6 +15,7 @@ from util.common import ObjectDict
 from util.tool.dict_tool import sub_dict
 from util.tool.re_checker import revalidator
 from util.tool.url_tool import make_static_url, make_url
+from util.tool.str_tool import gen_salary, gen_experience
 from util.wechat.core import get_temporary_qrcode
 from util.common.mq import unread_praise_publisher
 
@@ -628,51 +629,74 @@ class EmployeePageService(PageService):
         return is_employee
 
     @gen.coroutine
-    def update_recommend(self, name, mobile, recom_reason):
+    def update_recommend(self, employee_id, name, mobile, recom_reason, pid):
         params = ObjectDict({
             "name": name,
             "mobile": mobile,
-            "recom_reason": recom_reason
+            "referral_reasons": recom_reason,
+            "position": pid
         })
-        res = yield self.infra_user_ds.update_recommend(params)
+        res = yield self.infra_user_ds.update_recommend(params, employee_id)
         return res
 
     @gen.coroutine
-    def upload_recom_profile(self, file_name, file_data):
+    def upload_recom_profile(self, file_data, employee_id):
         params = ObjectDict({
             "file": file_data,
-            "file_name": file_name
+            "employee": employee_id
         })
-        res = yield self.employee_ds.upload_recom_profile(params)
+        res = yield self.infra_employee_ds.upload_recom_profile(params)
         return res
 
     @gen.coroutine
-    def get_referral_info(self, key):
-        params = ObjectDict({
-            "key": key
-        })
-        _, data = yield self.employee_ds.get_referral_info(params)
+    def get_referral_info(self, id):
+        _, data = yield self.infra_employee_ds.get_referral_info(id)
         return data
 
     @gen.coroutine
-    def update_referral_info(self, data):
-        res = yield self.employee_ds.update_referral_info(data)
+    def confirm_referral_info(self, data):
+        res = yield self.infra_employee_ds.update_referral_info(data)
         return res
 
     @gen.coroutine
-    def get_referral_position_info(self, user_id):
-        res, data = yield self.employee_ds.get_referral_position_info(user_id)
+    def get_referral_position_info(self, employee_id, pid):
+        res, data = yield self.infra_employee_ds.get_referral_position_info(employee_id, pid)
         if res.status == const.API_SUCCESS:
             data = ObjectDict({
-                "title": data,
-                "city": data,
-                "company_abbr": data,
-                "id": data,
+                "title": data.title,
+                "city": ",".join([c.get("name") for c in data.cities]),
+                "company_abbr": data.company_abbreviation,
+                "id": data.id,
                 "job_need": data,
-                "salary": data,
-                "salary_bottom": data,
-                "salary_top": data,
-                "department": data,
-                "logo": data
+                "salary": gen_salary(data.salary_top, data.salary_bottom),
+                "salary_bottom": data.salary_bottom,
+                "salary_top": data.salary_top,
+                "experience": gen_experience(data.experience, data.experience_above),
+                "logo": data.logo,
+                "team": data.team
             })
         return res, data
+
+    @gen.coroutine
+    def update_referral_position(self, employee_id, pid):
+        res = yield self.infra_employee_ds.update_referral_position(employee_id, pid)
+        return res
+
+    @gen.coroutine
+    def update_referral_crucial_info(self, employee_id, params):
+        data = ObjectDict({
+            "position": params.pid,
+            "name": params.realname,
+            "gender": params.gender,
+            "mobile": params.mobile,
+            "email": params.email,
+            "company": params.company_name,
+            "job": params.position_name,
+            "referral_reasons": params.recom_reason
+        })
+        res = yield self.infra_employee_ds.update_referral_crucial_info(employee_id, data)
+        return res
+
+    @gen.coroutine
+    def get_referral_qrcode(self, wechat_id):
+        pass

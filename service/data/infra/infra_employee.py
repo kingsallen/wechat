@@ -81,21 +81,30 @@ class InfraEmployeeDataService(DataService):
         return ret
 
     @gen.coroutine
-    def get_referral_info(self, params):
-        ret = yield http_get(path.REFERRAL_INFO, params)
+    def get_referral_info(self, id):
+        ret = yield http_get(path.REFERRAL_INFO.format(id))
         return unboxing(ret)
 
     @gen.coroutine
     def update_referral_info(self, params):
-        ret = yield http_post(path.REFERRAL_, params)
+        ret = yield http_post(path.INFRA_REFERRAL_CONFIRM, params)
         return ret
 
     @gen.coroutine
-    def get_referral_position_info(self, user_id):
-        params = ObjectDict({
-            "user_id": user_id
-        })
-        ret = yield http_get(path.REFERRAL_POSITION_INFO, params)
+    def get_referral_position_info(self, employee_id):
+        ret = yield http_get(path.REFERRAL_POSITION_INFO.format(employee_id))
         return unboxing(ret)
+
+    @gen.coroutine
+    def update_referral_position(self, employee_id, pid):
+        params = ObjectDict({
+            "position": pid
+        })
+        ret = yield http_post(path.REFERRAL_POSITION_INFO.format(employee_id), params)
+        return ret
+
+    @gen.coroutine
+    def update_referral_crucial_info(self, employee_id, params):
+        ret = yield http_post(path.REFERRAL_CRUCIAL_INFO.format(employee_id), params)
 
 

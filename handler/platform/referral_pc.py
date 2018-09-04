@@ -21,6 +21,7 @@ class ReferralQrcodeHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def get(self):
+        url = self.make_url(path)
         ret = yield self.employee_ps.get_referral_qrcode(self.current_user.wechat.id)
         if ret.status != const.API_SUCCESS:
             pass
@@ -42,7 +43,8 @@ class ReferralUploadHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def get(self):
-        res, data = yield self.employee_ps.get_referral_position_info(self.current_user.sysuser.id)
+        pid = self.redis.get(const.UPLOAD_RECOM_PROFILE.format(self.current_user.sysuser.id))
+        res, data = yield self.employee_ps.get_referral_position_info(self.current_user.employee.id, pid)
         if res.status != const.API_SUCCESS:
             self.logger.warning("[referral profile]get referral position info fail!")
             self.render(template_name="")
