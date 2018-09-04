@@ -36,6 +36,7 @@ import handler.common.captcha
 import handler.common.image
 import handler.common.campaign
 import handler.common.redirect
+import handler.common.pc
 
 import handler.help.passport
 import handler.help.releasedposition
@@ -94,6 +95,7 @@ common_routes = [
     (r"/im/laiye",                                   handler.common.laiye_im.LaiyeImHandler,                    {"event": "im laiye"}),
     (r"/resume/import/limit",                        handler.common.resume.ResumeImportLimit,                   {"event": "resume_import_limit"}),
     (r"/redirect",                                   handler.common.redirect.RedirectHandler,                   {"event": "redirect"}),
+    (r"/upload/profile/login",                       handler.common.pc.UploadLoginHandler,                      {"event": "pc_upload_login"}),
 
     # websocket
     (r"/websocket/([A-Za-z0-9_]{1,32})",             handler.common.im.ChatWebSocketHandler),
