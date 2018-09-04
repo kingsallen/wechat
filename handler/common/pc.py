@@ -13,9 +13,8 @@ class UploadLoginHandler(BaseHandler):
 
         wx_login_args = dict(
             redirect_uri="http://www.moseeker.com",
-            appid='',
-            scope='',
-            state='',
+            appid=self.current_user.wechat.appid,
+            scope="snsapi_login"
         )
 
         page_json = dict(
