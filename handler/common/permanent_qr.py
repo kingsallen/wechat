@@ -34,6 +34,8 @@ class PermanentQRHandler(MetaBaseHandler):
     def get(self, hr_wx_wecaht_id):
         """通过wecaht id 获取永久二维码
         微信文档地址: https://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1443433542
+
+        如果ticket没有获取到就使用wechat.qrcode的永久二维码
         """
         wechat_id = int(hr_wx_wecaht_id)
         self.logger.debug('GET WECAHT PERMANENT QR: %s' % wechat_id)
@@ -79,11 +81,19 @@ class PermanentQRHandler(MetaBaseHandler):
         ticket = json.loads(get_ticket_response.body.decode('u8') or "").get('ticket')  # 微信端这个ticket　60s有效
 
         if not ticket:
-            self.write(dict(
-                status=1,
-                message='GET TICKET FAILED'
-            ))
-            self.set_status(400)
+            self.logger.warn(
+                'WECHATID : %s, GET PERMANENT QR TICKET FAILED! REASON: %s' % (
+                    wechat_id,
+                    get_ticket_response.body
+                )
+            )
+            self.write(
+                dict(
+                    status=0,
+                    permanent_qr=wechat.qrcode,
+                    message='success'
+                )
+            )
             return
 
         self.set_ticket_cache(ticket, wechat_id)
