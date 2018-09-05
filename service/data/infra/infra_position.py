@@ -8,7 +8,7 @@ from service.data.base import DataService
 from service.data.infra.framework.client.client import ServiceClientFactory
 from thrift_gen.gen.position.service.PositionServices import Client as PositionServiceClient
 from util.common import ObjectDict
-from util.tool.http_tool import http_get, http_post
+from util.tool.http_tool import http_get, http_post, http_patch
 from util.tool import http_tool
 
 
@@ -124,6 +124,26 @@ class InfraPositionDataService(DataService):
             dict(
                 user_id=user_id,
                 wechat_id=wechat_id
+            ))
+        return res
+
+    @gen.coroutine
+    def get_position_search_history(self, user_id, app_id):
+        res = yield http_get(
+            path.INFRA_POSITION_SEARCH_HISTORY,
+            dict(
+                user_id=user_id,
+                app_id=app_id,
+            ))
+        return res
+
+    @gen.coroutine
+    def patch_position_search_history(self, user_id, app_id):
+        res = yield http_patch(
+            path.INFRA_POSITION_SEARCH_HISTORY_DEL,
+            dict(
+                user_id=user_id,
+                app_id=app_id
             ))
         return res
 
