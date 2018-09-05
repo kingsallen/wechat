@@ -75,3 +75,4 @@ class InfraEmployeeDataService(DataService):
         ret = yield http_get(path.BIND_REWARD, params)
         return unboxing(ret)
 
+

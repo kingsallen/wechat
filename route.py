@@ -36,6 +36,7 @@ import handler.common.captcha
 import handler.common.image
 import handler.common.campaign
 import handler.common.redirect
+import handler.common.pc
 
 import handler.help.passport
 import handler.help.releasedposition
@@ -94,6 +95,7 @@ common_routes = [
     (r"/im/laiye",                                   handler.common.laiye_im.LaiyeImHandler,                    {"event": "im laiye"}),
     (r"/resume/import/limit",                        handler.common.resume.ResumeImportLimit,                   {"event": "resume_import_limit"}),
     (r"/redirect",                                   handler.common.redirect.RedirectHandler,                   {"event": "redirect"}),
+    (r"/upload/profile/login",                       handler.common.pc.UploadLoginHandler,                      {"event": "pc_upload_login"}),
 
     # websocket
     (r"/websocket/([A-Za-z0-9_]{1,32})",             handler.common.im.ChatWebSocketHandler),
@@ -151,6 +153,9 @@ platform_routes = [
     (r"/employee/recom/?",                           handler.platform.recom.RecomCandidateHandler,              {"event": "recom_normal"}),
     (r"/employee/ladder/?",                          handler.platform.employee.AwardsLadderPageHandler,         {"event": "awards_ladder_page"}),
     (r"/employee/custom_bind/gates",                 handler.platform.employee.CatesEmployeeBindHandler,        {"event": "gates employee_bind"}),
+
+    (r"/employee/recom/profile/pc",                  handler.platform.recom.ScanQrcodeHandler,                  {"event": "recom_scan_qrcode"}),
+
     (r'/user/survey/?',                              handler.platform.user.UserSurveyHandler,                   {'event': 'user_survey'}),
     (r'/user/ai-recom/?',                            handler.platform.user.AIRecomHandler,                      {'event': 'user_ai-recom'}),
     (r'/employee/survey/?',                          handler.platform.employee.EmployeeSurveyHandler,           {'event': 'employee_survey'}),
@@ -164,7 +169,6 @@ platform_routes = [
     (r"/api/company/survey/?",                       handler.platform.companyrelation.CompanySurveyHandler,     {"event": "company_survey"}),
     (r"/api/company/follow/?",                       handler.platform.companyrelation.CompanyFollowHandler,     {"event": "company_follow"}),
     (r"/api/groupcompany/check/?",                   handler.platform.groupcompany.GroupCompanyCheckHandler,    {"event": "groupcompany_check"}),
-    (r"/api/employee/custom_bind/gates",             handler.platform.employee.CatesEmployeeBindHandler,        {"event": "gates employee_bind"}),
     (r"/api/employee/bind/?",                        handler.platform.employee.EmployeeBindHandler,             {"event": "employee_bind"}),
     (r"/api/employee/unbind/?",                      handler.platform.employee.EmployeeUnbindHandler,           {"event": "employee_unbind"}),
     (r"/api/employee/bind-info/?",                   handler.platform.employee.BindInfoHandler,                 {"event": "employee_bind_info"}),
