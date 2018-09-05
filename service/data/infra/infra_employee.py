@@ -106,5 +106,15 @@ class InfraEmployeeDataService(DataService):
     @gen.coroutine
     def update_referral_crucial_info(self, employee_id, params):
         ret = yield http_post(path.REFERRAL_CRUCIAL_INFO.format(employee_id), params)
+        return ret
+
+    @gen.coroutine
+    def get_referral_qrcode(self, url):
+        params = ObjectDict({
+            "url": url
+        })
+        ret = yield http_get(path.REFERRAL_QRCODE, params)
+        return ret
+
 
 

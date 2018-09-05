@@ -663,7 +663,7 @@ class EmployeePageService(PageService):
         res, data = yield self.infra_employee_ds.get_referral_position_info(employee_id, pid)
         if res.status == const.API_SUCCESS:
             data = ObjectDict({
-                "title": data.title,
+                "job_title": data.title,
                 "city": ",".join([c.get("name") for c in data.cities]),
                 "company_abbr": data.company_abbreviation,
                 "id": data.id,
@@ -698,5 +698,6 @@ class EmployeePageService(PageService):
         return res
 
     @gen.coroutine
-    def get_referral_qrcode(self, wechat_id):
-        pass
+    def get_referral_qrcode(self, url):
+        res = yield self.infra_employee_ps.get_referral_qrcode(url)
+        return res

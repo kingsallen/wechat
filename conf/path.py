@@ -26,6 +26,7 @@ EMPLOYEE_REWARDS_RECORD = '/app/employee/binding/rewards'
 PROFILE_CUSTOM_CV = '/profile/custom'
 REFERRAL_CONFIRM = "/referral/confirm"
 REFERRAL_UPLOAD_PC = "/upload/profile/pc"
+REFERRAL_PROFILE_PC = "/employee/recom/profile/pc"
 
 # 聚合号单独链接
 GAMMA_HOME = '/enter'
@@ -110,7 +111,7 @@ INFRA_RP_POSITION_LIST_SHARE_INFO = 'position/list/hb_share_info'
 INFRA_THIRD_PARTY_SYNCED_POSITIONS = 'positions/thirdpartysyncedpositions'
 INFRA_SUG_LIST = 'api/position/suggest'
 INFRA_POSITION_FEATURE = '/api/position/feature/{}'
-INFRA_POSITION_LATEST_REFUSAL_RECOM ='/user/lastest_recommend_refusal'
+INFRA_POSITION_LATEST_REFUSAL_RECOM = '/user/lastest_recommend_refusal'
 INFRA_POSITION_LIST_WX_TPL = '/user/refuse/recommend'
 
 # Profile 服务
@@ -170,6 +171,8 @@ REFERRAL_INFO = "/referral-records/{}"
 INFRA_REFERRAL_CONFIRM = "/v1/referral/clain"
 REFERRAL_POSITION_INFO = "/employee/{}/referral-type"
 REFERRAL_CRUCIAL_INFO = "/v1/employee/{}/post-candidate-info"
+REFERRAL_QRCODE = "/v1/referral/position/qrcode"
+REFERRAL_POSITION_LIST = "/v1/position/recom/list"
 # ============================ 基础服务结束 ============================
 
 # 其他外部服务

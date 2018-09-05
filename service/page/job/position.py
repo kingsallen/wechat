@@ -76,7 +76,8 @@ class PositionPageService(PageService):
             "hb_status": position_res.hb_status,
             "team_id": position_res.team_id,
             "app_cv_config_id": position_res.app_cv_config_id,
-            "email_resume_conf": position_res.email_resume_conf
+            "email_resume_conf": position_res.email_resume_conf,
+            "is_referral": bool(position_res.is_referral)
         })
 
         # 后置处理：
@@ -363,11 +364,13 @@ class PositionPageService(PageService):
         ))
 
     @gen.coroutine
-    def infra_get_position_list(self, params):
-        """普通职位列表"""
-
-        # get position ds
-        res = yield self.infra_position_ds.get_position_list(params)
+    def infra_get_position_list(self, params, is_referral=None):
+        """职位列表"""
+        if is_referral:
+            res = yield self.infra_position_ds.get_referral_position_list(params)
+        else:
+            # get position ds
+            res = yield self.infra_position_ds.get_position_list(params)
         # get team names
         team_name_dict = yield self.get_teamid_names_dict(params.company_id)
 

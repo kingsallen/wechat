@@ -21,10 +21,10 @@ class ReferralQrcodeHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def get(self):
-        url = self.make_url(path)
-        ret = yield self.employee_ps.get_referral_qrcode(self.current_user.wechat.id)
+        url = self.make_url(path.REFERRAL_PROFILE_PC, float=1)
+        ret = yield self.employee_ps.get_referral_qrcode(url)
         if ret.status != const.API_SUCCESS:
-            pass
+            self.send_json_error()
         else:
             self.send_json_success(ret.data)
 
@@ -34,7 +34,7 @@ class ReferralLoginHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         redirect_url = self.make_url(path.REFERRAL_UPLOAD_PC, self.params)
-        self.render_page(template_name="", data=ObjectDict({
+        self.render_page(template_name="employee/pc-qrcode-login.html", data=ObjectDict({
             "redirect_url": redirect_url
         }))
 
@@ -47,10 +47,12 @@ class ReferralUploadHandler(BaseHandler):
         res, data = yield self.employee_ps.get_referral_position_info(self.current_user.employee.id, pid)
         if res.status != const.API_SUCCESS:
             self.logger.warning("[referral profile]get referral position info fail!")
-            self.render(template_name="")
+            self.render(template_name="employee/pc-invalid-qrcode.html")
         else:
+            reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_UPLOAD_PROFILE)
             data = res.data
-            self.render_page(template_name="", data=data)
+            data.update(reward_point=reward)
+            self.render_page(template_name="employee/pc-upload-resume.html", data=data)
 
 
 

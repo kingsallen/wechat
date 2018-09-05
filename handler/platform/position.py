@@ -83,6 +83,16 @@ class PositionHandler(BaseHandler):
             # 获取公司配置信息
             teamname_custom = self.current_user.company.conf_teamname_custom
 
+            # 处理职位红包信息
+            rpext_list = yield self.position_ps.infra_get_position_list_rp_ext(position_info.id)
+            pext = [e for e in rpext_list if e.pid == position_info.id]
+            if pext:
+                position_info.remain = pext[0].remain
+                position_info.employee_only = pext[0].employee_only
+                position_info.is_rp_reward = position_info.remain > 0
+            else:
+                position_info.is_rp_reward = False
+
             header = yield self._make_json_header(
                 position_info, company_info, star, application, endorse,
                 can_apply, team.id if team else 0, did, teamname_custom, reward)
@@ -345,10 +355,15 @@ class PositionHandler(BaseHandler):
             "hr_chat": bool(parent_company_info.conf_hr_chat),
             "teamname_custom": teamname_custom["teamname_custom"],
             "candidate_source": position_info.candidate_source_num,
-            "hb_status": bool(position_info.hb_status),
-            "reward": reward
+            "reward": reward,
+            "is_referral": position_info.is_referral
             # "team": position_info.department.lower() if position_info.department else ""
         })
+
+        # 判断是否显示红包
+        is_employee = bool(self.current_user.employee)
+        data['hb_status'] = position_info.is_rp_reward and (
+            is_employee and position_info.employee_only or not position_info.employee_only)
 
         return data
 
@@ -733,10 +748,6 @@ class PositionListInfraParamsMixin(BaseHandler):
         infra_params.employment_type = ""
         infra_params.company_id = self.current_user.company.id
 
-        is_recom = 0
-        if self.params.is_recom and self.params.is_recom.isdigit():
-            is_recom = int(self.params.is_recom)
-
         if self.params.did:
             infra_params.did = self.params.did
 
@@ -774,9 +785,6 @@ class PositionListInfraParamsMixin(BaseHandler):
             custom=self.params.custom if self.params.custom else "",
             order_by_priority=True)
 
-        if is_recom:
-            infra_params.update(referral=is_recom)
-
         self.logger.debug("[position_list_infra_params]: %s" % infra_params)
 
         return infra_params
@@ -803,7 +811,11 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
         if self.params.recom_push_id and self.params.recom_push_id.isdigit():
             recom_push_id = int(self.params.recom_push_id)
 
-        if recom_push_id and hb_c:
+        is_referral = 0
+        if self.params.is_referral and self.params.is_referral.isdigit():
+            is_referral = int(self.params.is_referral)
+
+        if recom_push_id and hb_c and is_referral:
             raise MyException("错误的链接")
 
         if hb_c:
@@ -817,6 +829,9 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
                 position_list = yield self.get_employee_position_list(recom_push_id, infra_params)
             else:
                 position_list = []
+
+        elif is_referral:
+            position_list = yield self.position_ps.infra_get_position_list(infra_params, is_referral)
 
         else:
             # 普通职位列表
@@ -892,7 +907,7 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
 
             position_ex['candidate_source'] = pos.candidate_source
             position_ex['job_need'] = pos.requirement
-            position_ex['is_recom'] = pos.is_recom if pos.is_recom else 0
+            position_ex['is_referral'] = bool(pos.is_referral)
 
             if display_locale == "en_US":
                 position_ex["city"] = pos.city_ename if pos.city_ename else pos.city

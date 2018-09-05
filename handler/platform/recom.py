@@ -282,8 +282,10 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
         position = self.get_argument("_position")
         mobile = self.get_argument("_mobile")
         recom_reason = self.get_argument("_recom_reason")
+        gender = self.get_argument("_gender")
+        email = self.get_argument("_email")
 
-        form_items = [recom_record_id, self.current_user.sysuser.id, click_time, realname, company, position, recom_reason]
+        form_items = [recom_record_id, self.current_user.sysuser.id, click_time, realname, company, position, recom_reason, email]
 
         self.logger.debug("post_recom_passive_seeker form_items: %s" % form_items)
 
@@ -306,6 +308,8 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
             'presentee_name': self.get_argument("_presentee_name"),
             'position_name':  self.get_argument("_position_name"),
             'click_time':     self.get_argument("_click_time"),
+            'gender':         gender,
+            'email':          email,
             'next':           1,
         })
 
@@ -322,7 +326,7 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
                 self.current_user.sysuser.id,
                 click_time, recom_record_id, realname, company,
                 position, mobile, recom_reason,
-                self.current_user.company.id)
+                self.current_user.company.idm, gender, email)
 
         except BIZException as e:
             self.render(
