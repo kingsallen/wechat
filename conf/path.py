@@ -19,7 +19,7 @@ EMPLOYEE_RECOM = '/employee/recom'
 EMPLOYEE_CUSTOMINFO = '/employee/custominfo'
 EMPLOYEE_CUSTOMINFO_BINDED = '/employee/binded-custominfo'
 EMPLOYEE_BINDED = '/employee/binded'
-GATES_EMPLOYEE = '/api/employee/custom_bind/gates'
+GATES_EMPLOYEE = '/employee/custom_bind/gates'
 EMPLOYEE_REFERRAL_POLICY = "/employee/referral/policy"
 EMPOLYEE_LADDER = "/employee/ladder"
 EMPLOYEE_REWARDS_RECORD = '/app/employee/binding/rewards'
@@ -111,6 +111,8 @@ INFRA_SUG_LIST = 'api/position/suggest'
 INFRA_POSITION_FEATURE = '/api/position/feature/{}'
 INFRA_POSITION_LATEST_REFUSAL_RECOM ='/user/lastest_recommend_refusal'
 INFRA_POSITION_LIST_WX_TPL = '/user/refuse/recommend'
+INFRA_POSITION_SEARCH_HISTORY = '/position/search/history'
+INFRA_POSITION_SEARCH_HISTORY_DEL = '/position/search/history/delete'
 
 # Profile 服务
 # Ref: https://wiki.moseeker.com/profile-api.md
