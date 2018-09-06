@@ -1154,19 +1154,3 @@ class PositionSearchHistoryHandler(BaseHandler):
             self.send_json_success()
         else:
             self.send_json_error(message=res.message)
-
-
-class PositionSearchFuzzyHandler(PositionListInfraParamsMixin, BaseHandler):
-    @handle_response
-    @authenticated
-    @gen.coroutine
-    def get(self):
-        """
-        模糊搜索显示最多10条记录
-        :return: 
-        """
-        infra_params = self.make_position_list_infra_params()
-        infra_params.update(keywords=self.params.get('keywords', ''))
-        res_data = yield self.position_ps.infra_get_position_list(infra_params)
-        self.write(res_data)
-
