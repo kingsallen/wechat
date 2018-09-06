@@ -11,7 +11,7 @@ from service.page.base import PageService
 from service.page.customize.customize import CustomizePageService
 from tests.dev_data.user_company_config import COMPANY_CONFIG
 from util.common import ObjectDict
-from util.tool import temp_data_tool
+from util.tool import temp_data_tool, iterable_tool
 from util.tool.str_tool import gen_salary, split
 from util.tool.url_tool import make_url, make_static_url
 from util.common.decorator import log_time
@@ -177,10 +177,9 @@ class TeamPageService(PageService):
         team_members = yield self.hr_team_member_ds.get_team_member_list(
             conds='team_id = {} and disable=0 order by orders, id'.format(team.id))
 
-        # more_link, modulename, detail_media_list = yield self._get_team_detail_cms(team.id)
-        model_data = yield self._get_team_detail_cms(team.id)
-        detail_media_list = list(itertools.chain(*[md(2) for md in model_data]))
+        templates, medias = yield self._get_team_detail_cms(team.id)
 
+        detail_media_list = medias
         detail_media_list.sort(key=operator.itemgetter("orders"))
         res_id_list = [m.res_id for m in team_members] + \
                       [m.res_id for m in detail_media_list] + \
@@ -225,8 +224,7 @@ class TeamPageService(PageService):
             locale,
             team,
             team_members,
-            model_data,
-            detail_media_list,
+            templates,
             team_positions[0:3],
             other_teams,
             res_dict,
@@ -248,23 +246,39 @@ class TeamPageService(PageService):
             "type": self.constant.CMS_PAGES_TYPE_TEAM_DETAIL,
             "disable": 0
         })
-        data = []
-        if cms_page:
-            page_id = cms_page.id
-            cms_modules = yield self.hr_cms_module_ds.get_module_list(conds={
-                "page_id": page_id,
-                "disable": 0
-            })
-            for cms_module in cms_modules:
-                module_id = cms_module.id
-                module_name = cms_module.module_name
-                more_link = cms_module.link
-                cms_media = yield self.hr_cms_media_ds.get_media_list(conds={
-                    "disable": 0,
-                    "module_id": module_id
-                })
-                data.append((more_link, module_name, cms_media or [], cms_module.type))
-        return data
+        templates = []
+        if not cms_page:
+            return templates
+
+        page_id = cms_page.id
+        cms_modules = yield self.hr_cms_module_ds.get_module_list(conds={
+            "page_id": page_id,
+            "disable": 0
+        })
+        if not cms_modules:
+            return templates
+
+        cms_modules.sort(key=operator.itemgetter('orders'))
+        cms_modules_ids = [m.id for m in cms_modules]
+        cms_medias = yield self.hr_cms_media_ds.get_media_list(
+            conds="module_id in {} and disable=0 order by orders, id".format(tuple(cms_modules_ids)).replace(',)', ')')
+        )
+        cms_medias_res_ids = [m.res_id for m in cms_medias]
+        resources_dict = yield self.hr_resource_ds.get_resource_by_ids(cms_medias_res_ids)
+        for m in cms_medias:
+            res = resources_dict.get(m.res_id, False)
+            m.media_url = res.res_url if res else ''
+            m.media_type = res.res_type if res else 0
+
+        cms_medias = iterable_tool.group(cms_medias, "module_id")
+        templates = [
+            getattr(temp_data_tool, "make_company_module_type_{}".format(module.type))(
+                cms_medias.get(module.id, []),
+                module.module_name, module.link)
+            for module in cms_modules
+        ]
+        self.logger.debug('team_templates: %s' % templates)
+        return templates, cms_medias
 
     @gen.coroutine
     def _get_all_team_members(self, team_id_list):
