@@ -257,8 +257,8 @@ def make_other_team_data(team, res, handler_params):
     }
 
 
-def make_team_detail_template(locale, team, members, modulename, detail_media_list, positions,
-                              other_teams, res_dic, handler_params, more_link, teamname_custom=None):
+def make_team_detail_template(locale, team, members, model_data, detail_media_list, positions,
+                              other_teams, res_dic, handler_params, teamname_custom=None):
     template = []
     teamname_field = teamname_custom["teamname_custom"] if teamname_custom else '团队'
 
@@ -282,15 +282,35 @@ def make_team_detail_template(locale, team, members, modulename, detail_media_li
         )
 
         if detail_media_list:
-            template.append(
-                template1(
-                    sub_type='less',
-                    title=modulename,
-                    more_link=more_link,
-                    data=[make_interview(m, res_dic.get(m.res_id))
-                          for m in detail_media_list]
-                )
-            )
+            for model in model_data:
+                link, name, medias, md_type = model
+                if md_type == 1:
+                    template.append(
+                        template1(
+                            sub_type='less',
+                            title=name,
+                            more_link=link,
+                            data=[make_interview(m, res_dic.get(m.res_id))
+                                  for m in detail_media_list]
+                        )
+                    )
+                if md_type == 2:
+                    template.append(
+                        template2(
+                            title=name,
+                            data=medias
+                        )
+                    )
+                if md_type == 3:
+                    template.append(
+                        ObjectDict(dict(
+                            title=name,
+                            type=3,
+                            more_link=link,
+                            data=[make_interview(m, res_dic.get(m.res_id))
+                                  for m in medias]
+                        ))
+                    )
 
     # 适应没有数据不显示模板块
     if positions:

@@ -2,6 +2,7 @@
 
 import itertools
 import operator
+import functools
 
 from tornado import gen
 
@@ -176,7 +177,10 @@ class TeamPageService(PageService):
         team_members = yield self.hr_team_member_ds.get_team_member_list(
             conds='team_id = {} and disable=0 order by orders, id'.format(team.id))
 
-        more_link, modulename, detail_media_list = yield self._get_team_detail_cms(team.id)
+        # more_link, modulename, detail_media_list = yield self._get_team_detail_cms(team.id)
+        model_data = yield self._get_team_detail_cms(team.id)
+        detail_media_list = list(itertools.chain(*[md(2) for md in model_data]))
+
         detail_media_list.sort(key=operator.itemgetter("orders"))
         res_id_list = [m.res_id for m in team_members] + \
                       [m.res_id for m in detail_media_list] + \
@@ -221,13 +225,12 @@ class TeamPageService(PageService):
             locale,
             team,
             team_members,
-            modulename,
+            model_data,
             detail_media_list,
             team_positions[0:3],
             other_teams,
             res_dict,
             handler_param,
-            more_link=more_link,
             teamname_custom=teamname_custom
         )
         data.templates_total = len(data.templates)
@@ -239,22 +242,20 @@ class TeamPageService(PageService):
         # 默认的空值
         # 从业务要求来看, 这里有数据完整性的要求, 有cms_page, 必须有cms_module, 必须有cms_media
         # 所以, 这里还是兼容了存在脏数据的情况
-        module_name = ""
-        more_link = ""
-        cms_media = []
         # hr_cms_pages拿团队详情页的配置信息
         cms_page = yield self.hr_cms_pages_ds.get_page(conds={
             "config_id": team_id,
             "type": self.constant.CMS_PAGES_TYPE_TEAM_DETAIL,
             "disable": 0
         })
+        data = []
         if cms_page:
             page_id = cms_page.id
-            cms_module = yield self.hr_cms_module_ds.get_module(conds={
+            cms_modules = yield self.hr_cms_module_ds.get_module_list(conds={
                 "page_id": page_id,
                 "disable": 0
             })
-            if cms_module:
+            for cms_module in cms_modules:
                 module_id = cms_module.id
                 module_name = cms_module.module_name
                 more_link = cms_module.link
@@ -262,7 +263,8 @@ class TeamPageService(PageService):
                     "disable": 0,
                     "module_id": module_id
                 })
-        return more_link, module_name, cms_media
+                data.append((more_link, module_name, cms_media or [], cms_module.type))
+        return data
 
     @gen.coroutine
     def _get_all_team_members(self, team_id_list):
