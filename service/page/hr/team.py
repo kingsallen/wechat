@@ -248,7 +248,7 @@ class TeamPageService(PageService):
         })
         templates = []
         if not cms_page:
-            return templates
+            return templates, []
 
         page_id = cms_page.id
         cms_modules = yield self.hr_cms_module_ds.get_module_list(conds={
@@ -256,7 +256,7 @@ class TeamPageService(PageService):
             "disable": 0
         })
         if not cms_modules:
-            return templates
+            return templates, []
 
         cms_modules.sort(key=operator.itemgetter('orders'))
         cms_modules_ids = [m.id for m in cms_modules]
