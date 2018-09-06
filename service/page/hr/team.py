@@ -270,14 +270,13 @@ class TeamPageService(PageService):
             m.media_url = res.res_url if res else ''
             m.media_type = res.res_type if res else 0
 
-        cms_medias = iterable_tool.group(cms_medias, "module_id")
+        cms_medias_map = iterable_tool.group(cms_medias, "module_id")
         templates = [
             getattr(temp_data_tool, "make_company_module_type_{}".format(module.type))(
-                cms_medias.get(module.id, []),
+                cms_medias_map.get(module.id, []),
                 module.module_name, module.link)
             for module in cms_modules
         ]
-        self.logger.debug('team_templates: %s' % templates)
         return templates, cms_medias
 
     @gen.coroutine
