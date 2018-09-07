@@ -111,6 +111,8 @@ INFRA_SUG_LIST = 'api/position/suggest'
 INFRA_POSITION_FEATURE = '/api/position/feature/{}'
 INFRA_POSITION_LATEST_REFUSAL_RECOM ='/user/lastest_recommend_refusal'
 INFRA_POSITION_LIST_WX_TPL = '/user/refuse/recommend'
+INFRA_POSITION_SEARCH_HISTORY = '/position/search/history'
+INFRA_POSITION_SEARCH_HISTORY_DEL = '/position/search/history/delete'
 
 # Profile 服务
 # Ref: https://wiki.moseeker.com/profile-api.md
