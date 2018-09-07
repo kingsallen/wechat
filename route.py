@@ -52,6 +52,8 @@ import handler.platform.compatible
 import handler.platform.user
 import handler.platform.cover
 import handler.help.captcha
+import handler.platform.referral
+import handler.platform.referral_pc
 
 import handler.qx.app
 import handler.qx.aggregation
@@ -96,6 +98,8 @@ common_routes = [
     # websocket
     (r"/websocket/([A-Za-z0-9_]{1,32})",             handler.common.im.ChatWebSocketHandler),
 
+    (r"/api/send/vcode/?",                           handler.common.passport.SendValidCodeHandler,              {"event": "send_vcode"}),
+    (r"/api/upload/recomprofile/?",                  handler.platform.referral.EmployeeRecomProfileHandler,     {"event": "upload_referral_profile"}),
     (r"/api/config[\/]?",                            handler.common.app.ConfigHandler,                          {"event": "wechat_config"}),
     (r"/api/dict/city/?",                            handler.common.dictionary.DictCityHandler,                 {"event": "dict_city"}),
     (r"/api/dict/industry/?",                        handler.common.dictionary.DictIndustryHandler,             {"event": "dict_industry"}),
@@ -154,8 +158,18 @@ platform_routes = [
     (r'/employee/referral/policy',                   handler.platform.employee.EmployeeReferralPolicyHandler,   {"event": "referral—policy"}),
     (r'/cover/no-weixin',                            handler.platform.cover.CoverHandler,                       {"event": "cover_no_weixin"}),
     (r'/position/recom/?',                           handler.platform.position.PositionRecomListHandler,        {"event": "position_recom_list"}),
+    (r'/usercenter/mine/?',                          handler.common.usercenter.UsercenterMineHandler,           {"event": "usercenter_mine"}),
+    (r'/employee/recom/profile/?',                   handler.platform.referral.ReferralProfileHandler,          {"event": "referral_profile"}),
+    (r'/referral/confirm/?',                         handler.platform.referral.ReferralConfirmHandler,          {"event": "referral_confirm"}),
+    (r'/employee/recom/profile/pc/?',                handler.platform.referral.ReferralProfilePcHandler,        {"event": "referal_confirm_pc"}),
     # 各大公司的自定义配置
     (r"/custom/emailapply/?",                        handler.platform.customize.CustomizeEmailApplyHandler,     {"event": "customize_emailapply"}),
+    # pc端推荐相关
+    (r"/pc/referral/transfer/qrcode/?",              handler.platform.referral_pc.ReferralQrcodeHandler,        {"event": "referral_transfer_qrcode"}),
+    (r"/pc/upload/profile/login/?",                  handler.platform.referral_pc.ReferralLoginHandler,         {"event": "referral_pc_login"}),
+    (r"/pc/api/upload/profile/?",                    handler.platform.referral_pc.ReferralUploadHandler,        {"event": "referral_pc_upload"}),
+    (r"/pc/api/employee/recom/profile/?",            handler.platform.referral_pc.EmployeeRecomProfilePcHandler, {"event": "referral_pc_profile"}),
+    (r"/pc/api/upload/recomprofile/?",               handler.platform.referral_pc.ReferralProfileAPIPcHandler,  {"event": "referral_pc_upload_profile"}),
 
     (r"/api/company/visitreq/?",                     handler.platform.companyrelation.CompanyVisitReqHandler,   {"event": "company_visitreq"}),
     (r"/api/company/survey/?",                       handler.platform.companyrelation.CompanySurveyHandler,     {"event": "company_survey"}),
@@ -174,7 +188,10 @@ platform_routes = [
     (r"/api/func/wechat/?",                          handler.platform.employee.WechatSubInfoHandler,            {"event": "wechat_sub_info"}),
     (r'/api/user/survey/?',                          handler.platform.user.APIUserSurveyHandler,                {"event": "user_survey_api"}),
     (r'/api/position/recom/list/?',                  handler.platform.user.APIPositionRecomListHandler,         {"event": "position_ai-recomlist"}),
-    (r'/api/recom/position/switch',                 handler.platform.user.APIPositionRecomListCloseHandler,    {"event": "position_ai-recom-position"}),
+    (r'/api/recom/position/switch',                  handler.platform.user.APIPositionRecomListCloseHandler,    {"event": "position_ai-recom-position"}),
+    (r'/api/usercenter/mine/?',                      handler.common.usercenter.UsercenterMyInfoHandler,         {"event": "api_my_info"}),
+    (r'/api/employee/recom/profile/?',               handler.platform.referral.ReferralProfileAPIHandler,       {"event": "api_referral_profile"}),
+    (r'/api/referral/confirm/?',                     handler.platform.referral.ReferralConfirmApiHandler,       {"event": "api_referral_confirm"}),
     # 兼容老微信 url，进行302跳转
     (r"/.*",                                         handler.platform.compatible.CompatibleHandler,             {"event": "compatible"})
 

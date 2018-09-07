@@ -109,9 +109,10 @@ class InfraEmployeeDataService(DataService):
         return ret
 
     @gen.coroutine
-    def get_referral_qrcode(self, url):
+    def get_referral_qrcode(self, url, logo):
         params = ObjectDict({
-            "url": url
+            "url": url,
+            "logo": logo
         })
         ret = yield http_get(path.REFERRAL_QRCODE, params)
         return ret

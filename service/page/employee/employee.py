@@ -698,6 +698,6 @@ class EmployeePageService(PageService):
         return res
 
     @gen.coroutine
-    def get_referral_qrcode(self, url):
-        res = yield self.infra_employee_ps.get_referral_qrcode(url)
+    def get_referral_qrcode(self, url, logo):
+        res = yield self.infra_employee_ps.get_referral_qrcode(url, logo)
         return res

@@ -94,6 +94,7 @@ settings['m_host'] = 'platform-t.dqprism.com'
 settings['qx_host'] = settings['m_host'] + '/recruit'
 settings['platform_host'] = settings['m_host'] + '/m'
 settings['helper_host'] = settings['m_host'] + '/h'
+settings['referral_host'] = settings['m_host'] + '/r'
 settings['pc_host'] = 'www-t.dqprism.com'
 
 # 公众号 signatures

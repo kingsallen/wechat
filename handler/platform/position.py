@@ -355,8 +355,8 @@ class PositionHandler(BaseHandler):
             "hr_chat": bool(parent_company_info.conf_hr_chat),
             "teamname_custom": teamname_custom["teamname_custom"],
             "candidate_source": position_info.candidate_source_num,
-            "reward": reward,
-            "is_referral": position_info.is_referral
+            "reward_point": reward,
+            "is_referral": position_info.is_referral if self.current_user.employee else False
             # "team": position_info.department.lower() if position_info.department else ""
         })
 
@@ -907,7 +907,7 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
 
             position_ex['candidate_source'] = pos.candidate_source
             position_ex['job_need'] = pos.requirement
-            position_ex['is_referral'] = bool(pos.is_referral)
+            position_ex['is_referral'] = bool(pos.is_referral) if self.current_user.employee else False
 
             if display_locale == "en_US":
                 position_ex["city"] = pos.city_ename if pos.city_ename else pos.city

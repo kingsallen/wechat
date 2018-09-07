@@ -14,6 +14,7 @@ from util.tool.json_tool import json_dumps
 from util.tool.str_tool import to_str
 from urllib import parse
 import conf.platform as const_platform
+from handler.platform.referral import ReferralProfileAPIHandler, EmployeeRecomProfileHandler
 
 
 class ReferralQrcodeHandler(BaseHandler):
@@ -22,7 +23,8 @@ class ReferralQrcodeHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         url = self.make_url(path.REFERRAL_PROFILE_PC, float=1)
-        ret = yield self.employee_ps.get_referral_qrcode(url)
+        logo = self.current_user.company.logo
+        ret = yield self.employee_ps.get_referral_qrcode(url, logo)
         if ret.status != const.API_SUCCESS:
             self.send_json_error()
         else:
@@ -55,4 +57,17 @@ class ReferralUploadHandler(BaseHandler):
             self.render_page(template_name="employee/pc-upload-resume.html", data=data)
 
 
+class ReferralProfileAPIPcHandler(ReferralProfileAPIHandler):
+    @handle_response
+    @gen.coroutine
+    def post(self):
+        yield self._post()
 
+
+class EmployeeRecomProfilePcHandler(EmployeeRecomProfileHandler):
+    """pc端推荐上传简历"""
+
+    @handle_response
+    @gen.coroutine
+    def post(self):
+        self._post()

@@ -60,6 +60,11 @@ class ReferralProfileAPIHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def post(self):
+        yield self._post()
+
+    @handle_response
+    @gen.coroutine
+    def _post(self):
         name = self.json_args.name
         mobile = self.json_args.mobile
         recom_reason = self.json_args.recom_reason
@@ -79,6 +84,11 @@ class EmployeeRecomProfileHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def post(self):
+        yield self._post()
+
+    @handle_response
+    @gen.coroutine
+    def _post(self):
         if len(self.request.files) == 0:
             file_data = self.request.body
             file_name = self.get_argument("vfile")
