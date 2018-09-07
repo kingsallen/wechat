@@ -166,12 +166,14 @@ platform_routes = [
     (r'/employee/recom/profile/?',                   handler.platform.referral.ReferralProfileHandler,          {"event": "referral_profile"}),
     (r'/referral/confirm/?',                         handler.platform.referral.ReferralConfirmHandler,          {"event": "referral_confirm"}),
     (r'/employee/recom/profile/pc/?',                handler.platform.referral.ReferralProfilePcHandler,        {"event": "referal_confirm_pc"}),
+    (r'/referral/crucial/info/?',                    handler.platform.referral.ReferralCrucialInfoHandler,      {"event": "referral_crucial_info"}),
+
     # 各大公司的自定义配置
     (r"/custom/emailapply/?",                        handler.platform.customize.CustomizeEmailApplyHandler,     {"event": "customize_emailapply"}),
     # pc端推荐相关
     (r"/pc/referral/transfer/qrcode/?",              handler.platform.referral_pc.ReferralQrcodeHandler,        {"event": "referral_transfer_qrcode"}),
     (r"/pc/upload/profile/login/?",                  handler.platform.referral_pc.ReferralLoginHandler,         {"event": "referral_pc_login"}),
-    (r"/pc/api/upload/profile/?",                    handler.platform.referral_pc.ReferralUploadHandler,        {"event": "referral_pc_upload"}),
+    (r"/pc/upload/profile/?",                        handler.platform.referral_pc.ReferralUploadHandler,        {"event": "referral_pc_upload"}),
     (r"/pc/api/employee/recom/profile/?",            handler.platform.referral_pc.EmployeeRecomProfilePcHandler, {"event": "referral_pc_profile"}),
     (r"/pc/api/upload/recomprofile/?",               handler.platform.referral_pc.ReferralProfileAPIPcHandler,  {"event": "referral_pc_upload_profile"}),
 
@@ -196,6 +198,7 @@ platform_routes = [
     (r'/api/usercenter/mine/?',                      handler.common.usercenter.UsercenterMyInfoHandler,         {"event": "api_my_info"}),
     (r'/api/employee/recom/profile/?',               handler.platform.referral.ReferralProfileAPIHandler,       {"event": "api_referral_profile"}),
     (r'/api/referral/confirm/?',                     handler.platform.referral.ReferralConfirmApiHandler,       {"event": "api_referral_confirm"}),
+    (r'/api/referral/crucial/info/?',                handler.platform.referral.ReferralCrucialInfoApiHandler,   {"event": "api_referral_crucial_info"}),
     # 兼容老微信 url，进行302跳转
     (r"/.*",                                         handler.platform.compatible.CompatibleHandler,             {"event": "compatible"})
 

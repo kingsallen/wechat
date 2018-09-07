@@ -3,21 +3,15 @@
 from tornado import gen
 
 import conf.common as const
-import conf.message as msg
-import conf.fe as fe
-import conf.message as messages
 import conf.path as path
 from handler.base import BaseHandler
 from util.common import ObjectDict
-from util.common.decorator import handle_response, authenticated, check_employee_common
-from util.tool.json_tool import json_dumps
-from util.tool.str_tool import to_str
-from urllib import parse
-import conf.platform as const_platform
+from util.common.decorator import handle_response
 from handler.platform.referral import ReferralProfileAPIHandler, EmployeeRecomProfileHandler
 
 
 class ReferralQrcodeHandler(BaseHandler):
+    """pc端获取跳转二维码"""
 
     @handle_response
     @gen.coroutine
@@ -32,6 +26,7 @@ class ReferralQrcodeHandler(BaseHandler):
 
 
 class ReferralLoginHandler(BaseHandler):
+    """pc端推荐简历登录页"""
     @handle_response
     @gen.coroutine
     def get(self):
@@ -42,6 +37,7 @@ class ReferralLoginHandler(BaseHandler):
 
 
 class ReferralUploadHandler(BaseHandler):
+    """pc端推荐简历页面"""
     @handle_response
     @gen.coroutine
     def get(self):
@@ -58,6 +54,7 @@ class ReferralUploadHandler(BaseHandler):
 
 
 class ReferralProfileAPIPcHandler(ReferralProfileAPIHandler):
+    """pc端推荐简历提交推荐"""
     @handle_response
     @gen.coroutine
     def post(self):

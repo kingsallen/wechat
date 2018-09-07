@@ -3,19 +3,12 @@
 from tornado import gen
 
 import conf.common as const
-import conf.message as msg
-import conf.fe as fe
-import conf.message as messages
 import conf.path as path
 from handler.base import BaseHandler
 from util.common import ObjectDict
 from util.common.decorator import handle_response, authenticated, check_employee_common
-from util.tool.json_tool import json_dumps
-from util.tool.str_tool import to_str
-from urllib import parse
-import conf.platform as const_platform
+
 from util.wechat.core import get_temporary_qrcode
-import base64
 
 
 class ReferralProfileHandler(BaseHandler):
@@ -143,7 +136,7 @@ class ReferralConfirmHandler(BaseHandler):
                 "mobile": ret.mobile[0:3] + "****" + ret.mobile[-4:],
                 "wechat": wechat}
         })
-        self.render_page(template_name="", data=data)
+        self.render_page(template_name="employee/recom-presentee-confirm.html", data=data)
 
         return
 

@@ -26,8 +26,8 @@ EMPLOYEE_REWARDS_RECORD = '/app/employee/binding/rewards'
 
 PROFILE_CUSTOM_CV = '/profile/custom'
 REFERRAL_CONFIRM = "/referral/confirm"
-REFERRAL_UPLOAD_PC = "/upload/profile/pc"
-REFERRAL_PROFILE_PC = "/employee/recom/profile/pc"
+REFERRAL_UPLOAD_PC = "/pc/upload/profile"
+REFERRAL_PROFILE_PC = "/pc/api/employee/recom/profile"
 
 # 聚合号单独链接
 GAMMA_HOME = '/enter'
