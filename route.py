@@ -62,6 +62,7 @@ import handler.qx.position
 import handler.qx.team
 import handler.qx.company
 import handler.common.permanent_qr
+import handler.common.laiye_im
 
 import handler.wechat.event
 
@@ -92,6 +93,7 @@ common_routes = [
     (r"/profile/custom/?",                           handler.common.profile.ProfileCustomHandler,               {"event": "profile_customcv"}),
     (r"/image/?",                                    handler.common.image.ImageFetchHandler,                    {"event": "image_fetch"}),
     (r"/chat/room[\/]*([0-9]+)*",                    handler.common.im.ChatRoomHandler,                         {"event": "im_room"}),
+    (r"/im/laiye",                                   handler.common.laiye_im.LaiyeImHandler,                    {"event": "im laiye"}),
     (r"/resume/import/limit",                        handler.common.resume.ResumeImportLimit,                   {"event": "resume_import_limit"}),
     (r"/redirect",                                   handler.common.redirect.RedirectHandler,                   {"event": "redirect"}),
 
@@ -115,6 +117,7 @@ common_routes = [
     (r"/api/position/star/?",                        handler.common.position.PositionStarHandler,               {"event": "position_star"}),
     (r"/api/position/list/?",                        handler.platform.position.PositionListDetailHandler,       {"event": "position_list"}),
     (r"/api/position/list/sug",                      handler.platform.position.PositionListSugHandler,          {"event": "position_list_sug"}),
+    (r"/api/position/search/history",                handler.platform.position.PositionSearchHistoryHandler,    {"event": "position_search_history"}),
     (r"/api/chat/unread[\/]*([0-9]+)*",              handler.common.im.UnreadCountHandler,                      {"event": "chat_"}),
     (r"/api/mobilebinded",                           handler.common.usercenter.UserMobileBindedHandler,         {"event": "user_usermobilebinded"}),
     (r"/api/cellphone[\/]*([a-z_]+)*",               handler.common.cellphone.CellphoneBindHandler,             {"event": "cellphone_"}),
@@ -151,6 +154,7 @@ platform_routes = [
     (r"/employee/recom/ignore/?",                    handler.platform.recom.RecomIgnoreHandler,                 {"event": "recom_ignore"}),
     (r"/employee/recom/?",                           handler.platform.recom.RecomCandidateHandler,              {"event": "recom_normal"}),
     (r"/employee/ladder/?",                          handler.platform.employee.AwardsLadderPageHandler,         {"event": "awards_ladder_page"}),
+    (r"/employee/custom_bind/gates",                 handler.platform.employee.CatesEmployeeBindHandler,        {"event": "gates employee_bind"}),
     (r'/user/survey/?',                              handler.platform.user.UserSurveyHandler,                   {'event': 'user_survey'}),
     (r'/user/ai-recom/?',                            handler.platform.user.AIRecomHandler,                      {'event': 'user_ai-recom'}),
     (r'/employee/survey/?',                          handler.platform.employee.EmployeeSurveyHandler,           {'event': 'employee_survey'}),

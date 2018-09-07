@@ -621,16 +621,32 @@ class APIPositionRecomListHandler(BaseHandler):
         else:
             raise MyException("参数错误")
 
+        social_res, school_res = yield self.application_ps.get_application_apply_status(
+            self.current_user.sysuser.id,
+            self.current_user.company.id
+        )
+
         if self._fans():
             position_list, total_count = yield self.get_fans_position_list()
-            self.send_json_success(data={"positions": position_list, "total_count": total_count})
 
         elif self._employee():
             position_list, total_count = yield self.get_employee_position_list()
-            self.send_json_success(data={"positions": position_list, "total_count": total_count})
 
         else:
             self.send_json_error("参数错误")
+            return
+
+        for pos in position_list:
+            can_apply = False
+            if pos.candidate_source:
+                can_apply = school_res
+
+            elif pos.candidate_source == 0:
+                can_apply = social_res
+
+            pos['can_apply'] = can_apply
+
+        self.send_json_success(data={"positions": position_list, "total_count": total_count})
 
     def _fans(self):
         return self.params.audience == self.RECOM_AUDIENCE_COMMON

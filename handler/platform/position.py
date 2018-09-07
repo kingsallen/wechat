@@ -747,6 +747,7 @@ class PositionListInfraParamsMixin(BaseHandler):
         infra_params.candidate_source = ""
         infra_params.employment_type = ""
         infra_params.company_id = self.current_user.company.id
+        infra_params.user_id = self.current_user.sysuser.id
 
         if self.params.did:
             infra_params.did = self.params.did
@@ -1184,3 +1185,52 @@ class PositionListSugHandler(PositionListInfraParamsMixin, BaseHandler):
             sug.list = [e.get('title') for e in suggest]
 
         return self.send_json_success(sug)
+
+
+class PositionSearchHistoryHandler(BaseHandler):
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        """
+        搜索的历史记录
+        :return: 
+        """
+        res = yield self.position_ps.position_search_history(
+            user_id=self.current_user.sysuser.id,
+            app_id=self.app_id
+        )
+        self.write(res)
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def patch(self):
+        """
+        清空搜索记录列表
+        :return: 
+        """
+        res = yield self.position_ps.patch_position_search_history(
+            user_id=self.current_user.sysuser.id,
+            app_id=self.app_id
+        )
+        if res.status == 0:
+            self.send_json_success()
+        else:
+            self.send_json_error(message=res.message)
+
+
+class PositionSearchFuzzyHandler(PositionListInfraParamsMixin, BaseHandler):
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        """
+        模糊搜索显示最多10条记录
+        :return: 
+        """
+        infra_params = self.make_position_list_infra_params()
+        infra_params.update(keywords=self.params.get('keywords', ''))
+        res_data = yield self.position_ps.infra_get_position_list(infra_params)
+        self.write(res_data)
+

@@ -594,3 +594,15 @@ class PositionPageService(PageService):
         """暂不接收推荐职位列表消息模板"""
         ret = yield self.infra_position_ds.post_not_receive_recom_position_wx_tpl(user_id, wechat_id)
         raise gen.Return(ret)
+
+    @gen.coroutine
+    def position_search_history(self, user_id, app_id):
+        """搜索历史记录列表"""
+        ret = yield self.infra_position_ds.get_position_search_history(user_id, app_id)
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def patch_position_search_history(self, user_id, app_id):
+        """清楚历史记录列表"""
+        ret = yield self.infra_position_ds.patch_position_search_history(user_id, app_id)
+        raise gen.Return(ret)
