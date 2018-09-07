@@ -58,7 +58,7 @@ class ReferralProfileAPIPcHandler(ReferralProfileAPIHandler):
     @handle_response
     @gen.coroutine
     def post(self):
-        yield self._post()
+        yield self._post(type=2)
 
 
 class EmployeeRecomProfilePcHandler(EmployeeRecomProfileHandler):

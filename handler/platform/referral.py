@@ -53,16 +53,16 @@ class ReferralProfileAPIHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def post(self):
-        yield self._post()
+        yield self._post(type=1)
 
     @handle_response
     @gen.coroutine
-    def _post(self):
+    def _post(self, type=1):
         name = self.json_args.name
         mobile = self.json_args.mobile
         recom_reason = self.json_args.recom_reason
         pid = self.json_args.pid
-        res = yield self.employee_ps.update_recommend(self.current_user.employee.id, name, mobile, recom_reason, pid)
+        res = yield self.employee_ps.update_recommend(self.current_user.employee.id, name, mobile, recom_reason, pid, type)
         if res.status == const.API_SUCCESS:
             self.send_json_success(data=ObjectDict({
                 "rid": res.data

@@ -1174,11 +1174,16 @@ class PositionListSugHandler(PositionListInfraParamsMixin, BaseHandler):
         """
 
         infra_params = self.make_position_list_infra_params()
+
+        is_referral = 0
+        if self.params.is_referral and self.params.is_referral.isdigit():
+            is_referral = int(self.params.is_referral)
         sug = ObjectDict()
         # 获取五条sug数据
         infra_params.update(page_size=const_platform.SUG_LIST_COUNT,
                             keyWord=self.params.keyword if self.params.keyword else "",
-                            page_from=int(self.params.get("count", 0) / 10) + 1)
+                            page_from=int(self.params.get("count", 0) / 10) + 1,
+                            is_referral=is_referral)
         res_data = yield self.position_ps.infra_obtain_sug_list(infra_params)
         suggest = res_data.get('suggest') if res_data else ''
         if suggest:
@@ -1194,7 +1199,7 @@ class PositionSearchHistoryHandler(BaseHandler):
     def get(self):
         """
         搜索的历史记录
-        :return: 
+        :return:
         """
         res = yield self.position_ps.position_search_history(
             user_id=self.current_user.sysuser.id,
@@ -1208,7 +1213,7 @@ class PositionSearchHistoryHandler(BaseHandler):
     def patch(self):
         """
         清空搜索记录列表
-        :return: 
+        :return:
         """
         res = yield self.position_ps.patch_position_search_history(
             user_id=self.current_user.sysuser.id,
@@ -1218,19 +1223,4 @@ class PositionSearchHistoryHandler(BaseHandler):
             self.send_json_success()
         else:
             self.send_json_error(message=res.message)
-
-
-class PositionSearchFuzzyHandler(PositionListInfraParamsMixin, BaseHandler):
-    @handle_response
-    @authenticated
-    @gen.coroutine
-    def get(self):
-        """
-        模糊搜索显示最多10条记录
-        :return: 
-        """
-        infra_params = self.make_position_list_infra_params()
-        infra_params.update(keywords=self.params.get('keywords', ''))
-        res_data = yield self.position_ps.infra_get_position_list(infra_params)
-        self.write(res_data)
 

@@ -629,12 +629,13 @@ class EmployeePageService(PageService):
         return is_employee
 
     @gen.coroutine
-    def update_recommend(self, employee_id, name, mobile, recom_reason, pid):
+    def update_recommend(self, employee_id, name, mobile, recom_reason, pid, type):
         params = ObjectDict({
             "name": name,
             "mobile": mobile,
             "referral_reasons": recom_reason,
-            "position": pid
+            "position": pid,
+            "type": type
         })
         res = yield self.infra_user_ds.update_recommend(params, employee_id)
         return res
