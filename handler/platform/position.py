@@ -1137,20 +1137,3 @@ class PositionSearchHistoryHandler(BaseHandler):
             app_id=self.app_id
         )
         self.write(res)
-
-    @handle_response
-    @authenticated
-    @gen.coroutine
-    def patch(self):
-        """
-        清空搜索记录列表
-        :return: 
-        """
-        res = yield self.position_ps.patch_position_search_history(
-            user_id=self.current_user.sysuser.id,
-            app_id=self.app_id
-        )
-        if res.status == 0:
-            self.send_json_success()
-        else:
-            self.send_json_error(message=res.message)
