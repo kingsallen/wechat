@@ -199,6 +199,7 @@ platform_routes = [
     (r'/api/employee/recom/profile/?',               handler.platform.referral.ReferralProfileAPIHandler,       {"event": "api_referral_profile"}),
     (r'/api/referral/confirm/?',                     handler.platform.referral.ReferralConfirmApiHandler,       {"event": "api_referral_confirm"}),
     (r'/api/referral/crucial/info/?',                handler.platform.referral.ReferralCrucialInfoApiHandler,   {"event": "api_referral_crucial_info"}),
+    (r'/api/user/hr/?',                              handler.platform.companyrelation.CompanyHrInfoHandler,     {"event": "api_main_hr_info"}),
     # 兼容老微信 url，进行302跳转
     (r"/.*",                                         handler.platform.compatible.CompatibleHandler,             {"event": "compatible"})
 

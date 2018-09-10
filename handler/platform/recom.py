@@ -197,11 +197,7 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
             click_time,
             is_recom,
             company_id)
-        wechat = ObjectDict()
-        wechat.subscribed = True if self.current_user.wxuser.is_subscribe or self.current_user.wechat.type == 0 else False
-        wechat.qrcode = yield get_temporary_qrcode(wechat=self.current_user.wechat,
-                                                   pattern_id=const.QRCODE_REFERRED_FRIENDS)
-        wechat.name = self.current_user.wechat.name
+        wechat = yield self.wechat_ps.get_wechat_info(self.current_user, pattern_id=const.QRCODE_REFERRED_FRIENDS, in_wechat=self.in_wechat)
         self.render(
             template_name="refer/weixin/passive-seeker_v2/passive-wanting_recom.html",
             passive_seekers=passive_seekers,

@@ -77,7 +77,7 @@ class EmployeePageService(PageService):
         return bind_status
 
     @gen.coroutine
-    def make_binding_render_data(self, current_user, mate_num, reward, conf):
+    def make_binding_render_data(self, current_user, mate_num, reward, conf, in_wechat=None):
         """构建员工绑定页面的渲染数据
         :returns:
         {
@@ -116,7 +116,7 @@ class EmployeePageService(PageService):
         data.send_hour = 24  # fixed 24 小时
         data.conf = ObjectDict()
         data.binding_success_message = conf.bindSuccessMessage or ''
-        data.wechat.subscribed = True if current_user.wxuser.is_subscribe or current_user.wechat.type == 0 else False
+        data.wechat.subscribed = True if current_user.wxuser.is_subscribe or current_user.wechat.type == 0 or not in_wechat else False
         data.wechat.qrcode = yield get_temporary_qrcode(wechat=current_user.wechat, pattern_id=const.QRCODE_BIND)
         data.wechat.name = current_user.wechat.name
         data.mate_num = mate_num

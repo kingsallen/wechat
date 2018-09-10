@@ -116,11 +116,7 @@ class ReferralConfirmHandler(BaseHandler):
                 type = 2
             else:
                 type = 3
-        wechat = ObjectDict()
-        wechat.subscribed = True if self.current_user.wxuser.is_subscribe else False
-        wechat.qrcode = yield get_temporary_qrcode(wechat=self.current_user.wechat,
-                                                   pattern_id=const.QRCODE_REFERRAL_CONFIRM)
-        wechat.name = self.current_user.wechat.name
+        wechat = yield self.wechat_ps.get_wechat_info(self.current_user, pattern_id=const.QRCODE_REFERRAL_CONFIRM, in_wechat=self.in_wechat)
         rid = self.params.rid
         ret = yield self.employee_ps.get_referral_info(rid)
 

@@ -122,12 +122,8 @@ class WechatSubInfoHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         pattern_id = self.params.scene
-        data = ObjectDict()
-        data.subscribed = True if self.current_user.wxuser.is_subscribe or self.current_user.wechat.type == 0 else False
-        data.qrcode = yield get_temporary_qrcode(wechat=self.current_user.wechat,
-                                                 pattern_id=int(pattern_id))
-        data.name = self.current_user.wechat.name
-        self.send_json_success(data=data)
+        wechat = yield self.wechat_ps.get_wechat_info(self.current_user, pattern_id=int(pattern_id), in_wechat=self.in_wechat)
+        self.send_json_success(data=wechat)
         return
 
 
@@ -234,7 +230,7 @@ class EmployeeBindHandler(BaseHandler):
 
         # 根据 conf 来构建 api 的返回 data
         data = yield self.employee_ps.make_binding_render_data(
-            self.current_user, mate_num, reward, conf_response.employeeVerificationConf)
+            self.current_user, mate_num, reward, conf_response.employeeVerificationConf, in_wechat=self.in_wechat)
         self.send_json_success(data=data)
 
     @handle_response
@@ -603,11 +599,7 @@ class EmployeeReferralPolicyHandler(BaseHandler):
             self.redirect(self.make_url(path.EMPLOYEE_VERIFY, self.params))
             return
         result, data = yield self.employee_ps.get_referral_policy(self.current_user.company.id)
-        wechat = ObjectDict()
-        wechat.subscribed = True if self.current_user.wxuser.is_subscribe or self.current_user.wechat.type == 0 else False
-        wechat.qrcode = yield get_temporary_qrcode(wechat=self.current_user.wechat,
-                                                   pattern_id=const.QRCODE_POLICY)
-        wechat.name = self.current_user.wechat.name
+        wechat = yield self.wechat_ps.get_wechat_info(self.current_user, pattern_id=const.QRCODE_POLICY, in_wechat=self.in_wechat)
         if result and data and data.get("priority"):
             link = data.get("link", "")
             if link:
