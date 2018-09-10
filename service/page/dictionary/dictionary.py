@@ -72,9 +72,9 @@ class DictionaryPageService(PageService):
         finally:
             ret.insert(0, china)
             for item in [
-                dict(code_text='852', text='(中国香港)'),
-                dict(code_text='853', text='(中国澳门)'),
-                dict(code_text='886', text='(中国台湾)'),
+                dict(code_text='852', text='中国香港'),
+                dict(code_text='853', text='中国澳门'),
+                dict(code_text='886', text='中国台湾'),
             ]:
                 if item not in ret:
                     ret.append(item)
