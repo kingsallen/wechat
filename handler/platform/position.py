@@ -84,7 +84,7 @@ class PositionHandler(BaseHandler):
             teamname_custom = self.current_user.company.conf_teamname_custom
 
             # 处理职位红包信息
-            rpext_list = yield self.position_ps.infra_get_position_list_rp_ext(position_info.id)
+            rpext_list = yield self.position_ps.infra_get_position_list_rp_ext([position_info])
             pext = [e for e in rpext_list if e.pid == position_info.id]
             if pext:
                 position_info.remain = pext[0].remain
@@ -1140,8 +1140,12 @@ class PositionRecomListHandler(PositionListInfraParamsMixin, BaseHandler):
         :return:
         """
         self.params.share = yield self._make_share()
-        self.render(template_name="")
+        data = ObjectDict({
+            "referral_title": self.locale.translate("referral_position_title")
+        })
+        self.render_page(template_name="employee/recom-job-index.html", data=data)
 
+    @gen.coroutine
     def _make_share(self):
 
         link = self.make_url(

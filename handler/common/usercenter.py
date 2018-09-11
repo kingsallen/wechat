@@ -150,7 +150,10 @@ class UsercenterMineHandler(BaseHandler):
     @check_employee_common
     @gen.coroutine
     def get(self):
-        self.render(template_name="/employee/me.html")
+        data = ObjectDict({
+            "referral_me": self.locale.translate("referral_me")
+        })
+        self.render_page(template_name="employee/me.html", data=data)
 
 
 class UsercenterMyInfoHandler(BaseHandler):

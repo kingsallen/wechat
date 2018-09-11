@@ -45,7 +45,7 @@ class ReferralUploadHandler(BaseHandler):
         res, data = yield self.employee_ps.get_referral_position_info(self.current_user.employee.id, pid)
         if res.status != const.API_SUCCESS:
             self.logger.warning("[referral profile]get referral position info fail!")
-            self.render(template_name="employee/pc-invalid-qrcode.html")
+            self.render_page(template_name="employee/pc-invalid-qrcode.html", data=None)
         else:
             reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_UPLOAD_PROFILE)
             data = res.data

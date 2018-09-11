@@ -24,7 +24,7 @@ class ReferralProfileHandler(BaseHandler):
         position_info = yield self.position_ps.get_position(pid)
 
         self.params.share = yield self._make_share()
-        self.render_page(template_name="/employee/mobile-upload-resume.html", data=ObjectDict({"points": reward,
+        self.render_page(template_name="employee/mobile-upload-resume.html", data=ObjectDict({"points": reward,
                                                                                                "job_title": position_info.title}))
 
     def _make_share(self):
