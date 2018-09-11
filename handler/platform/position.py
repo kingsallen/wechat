@@ -356,6 +356,7 @@ class PositionHandler(BaseHandler):
             "teamname_custom": teamname_custom["teamname_custom"],
             "candidate_source": position_info.candidate_source_num,
             "reward_point": reward,
+            "company_name": company_info.abbreviation,
             "is_referral": position_info.is_referral if self.current_user.employee else False
             # "team": position_info.department.lower() if position_info.department else ""
         })
