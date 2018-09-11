@@ -94,8 +94,11 @@ settings['m_host'] = 'platform-t.dqprism.com'
 settings['qx_host'] = settings['m_host'] + '/recruit'
 settings['platform_host'] = settings['m_host'] + '/m'
 settings['helper_host'] = settings['m_host'] + '/h'
-settings['referral_host'] = settings['m_host'] + '/r'
+settings['referral_host'] = 'referral-t.dqprism.com'
 settings['pc_host'] = 'www-t.dqprism.com'
+
+# 开放平台网站应用
+settings['open_app_id'] = 'wxd004fae6e55bd042'
 
 # 公众号 signatures
 settings['qx_wechat_id'] = 276

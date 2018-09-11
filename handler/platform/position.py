@@ -833,6 +833,7 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
                 position_list = []
 
         elif is_referral:
+            infra_params.page_num = int(self.params.get("count", 0)) + 1
             position_list = yield self.position_ps.infra_get_position_list(infra_params, is_referral)
 
         else:
@@ -917,7 +918,7 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
             else:
                 position_ex["city"] = pos.city
                 position_ex["salary"] = pos.salary
-            total_count = pos.totalNum
+            total_count = pos.total_num
             # 判断职位投递是否达到上限
             can_apply = False
             if pos.candidate_source:

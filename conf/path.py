@@ -171,11 +171,11 @@ BIND_REWARD = "/hraccount/company/rewardconfig"
 UPDATE_RECOMMEND = "/v1/employee/{}/referral"
 UPLOAD_RECOM_PROFILE = "/v1/profile/file-parser"
 REFERRAL_INFO = "/v1/referral-records/{}"
-INFRA_REFERRAL_CONFIRM = "/v1/referral/clain"
+INFRA_REFERRAL_CONFIRM = "/v1/referral/claim"
 REFERRAL_POSITION_INFO = "/v1/employee/{}/referral-type"
 REFERRAL_CRUCIAL_INFO = "/v1/employee/{}/post-candidate-info"
 REFERRAL_QRCODE = "/v1/referral/position/qrcode"
-REFERRAL_POSITION_LIST = "/v1/position/recom/list"
+REFERRAL_POSITION_LIST = "/v1/referral/wechat/position/list"
 # ============================ 基础服务结束 ============================
 
 # 其他外部服务

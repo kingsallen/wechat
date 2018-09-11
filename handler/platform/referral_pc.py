@@ -30,7 +30,7 @@ class ReferralLoginHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def get(self):
-        redirect_url = self.make_url(path.REFERRAL_UPLOAD_PC, self.params)
+        redirect_url = self.make_url(path.REFERRAL_UPLOAD_PC, self.params, host="")
         self.render_page(template_name="employee/pc-qrcode-login.html", data=ObjectDict({
             "redirect_url": redirect_url
         }))

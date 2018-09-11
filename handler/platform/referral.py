@@ -25,7 +25,8 @@ class ReferralProfileHandler(BaseHandler):
 
         self.params.share = yield self._make_share()
         self.render_page(template_name="employee/mobile-upload-resume.html", data=ObjectDict({"points": reward,
-                                                                                               "job_title": position_info.title}))
+                                                                                              "job_title": position_info.title,
+                                                                                              "upload_resume": self.locale.translate("referral_upload")}))
 
     def _make_share(self):
         link = self.make_url(
@@ -122,6 +123,7 @@ class ReferralConfirmHandler(BaseHandler):
 
         data = ObjectDict({
             "type": type,
+            "successful_recommendation":self.locale.translate("referral_success"),
             "variants": {
                 "presentee_first_name": ret.employee_name,
                 "recom_name": ret.user_name[0:1] + "**",
