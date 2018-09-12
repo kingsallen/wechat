@@ -67,7 +67,7 @@ class ReferralProfileAPIHandler(BaseHandler):
         res = yield self.employee_ps.update_recommend(self.current_user.employee.id, name, mobile, recom_reason, pid, type)
         if res.status == const.API_SUCCESS:
             self.send_json_success(data=ObjectDict({
-                "rid": res.data
+                "rkey": res.data
             }))
         else:
             self.send_json_error()
@@ -120,7 +120,7 @@ class ReferralConfirmHandler(BaseHandler):
             else:
                 type = 3
         wechat = yield self.wechat_ps.get_wechat_info(self.current_user, pattern_id=const.QRCODE_REFERRAL_CONFIRM, in_wechat=self.in_wechat)
-        rid = self.params.rid
+        rid = self.params.rkey
         ret = yield self.employee_ps.get_referral_info(rid)
 
         data = ObjectDict({
@@ -236,13 +236,13 @@ class ReferralCrucialInfoApiHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def post(self):
-        ret = yield self.employee_ps.update_referral_crucial_info(self.current_user.employee.id, self.params)
+        ret = yield self.employee_ps.update_referral_crucial_info(self.current_user.employee.id, self.json_args)
         if ret.status != const.API_SUCCESS:
             self.send_json_error(message=ret.message)
             return
         else:
             self.send_json_success(data=ObjectDict({
-                "rid": ret.data
+                "rkey": ret.data
             }))
             return
 

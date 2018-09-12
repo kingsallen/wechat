@@ -635,7 +635,7 @@ class EmployeePageService(PageService):
             "mobile": mobile,
             "referral_reasons": recom_reason,
             "position": pid,
-            "type": type
+            "referral_type": type
         })
         res = yield self.infra_user_ds.update_recommend(params, employee_id)
         return res
