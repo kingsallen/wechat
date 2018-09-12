@@ -5,6 +5,7 @@
 # 企业号单独链接
 POSITION_PATH = '/position/{}'
 POSITION_LIST = '/position'
+POSITION_REFERRAL_LIST = '/position/recom'
 RED_PACKET_CARD = '/mobile/redpack'
 TEAM_PATH = '/company/team/{}'
 COMPANY_TEAM = '/company/team'
@@ -169,7 +170,7 @@ USER_RANK_INFO = "/v1/employee/{}/list-info"
 LADDER_TYPE = "/v1/company/{}/leader-board"
 BIND_REWARD = "/hraccount/company/rewardconfig"
 UPDATE_RECOMMEND = "/v1/employee/{}/referral"
-UPLOAD_RECOM_PROFILE = "/v1/profile/file-parser"
+UPLOAD_RECOM_PROFILE = "v1/referral/file-parser"
 REFERRAL_INFO = "/v1/referral-records/{}"
 INFRA_REFERRAL_CONFIRM = "/v1/referral/claim"
 REFERRAL_POSITION_INFO = "/v1/employee/{}/referral-type"

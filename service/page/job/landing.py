@@ -41,7 +41,7 @@ class LandingPageService(PageService):
         return key_list
 
     @gen.coroutine
-    def get_positions_data(self, conf_search_seq, company_id, search_condition_dict, salary_dict, display_locale):
+    def get_positions_data(self, conf_search_seq, company_id, search_condition_dict, salary_dict, display_locale, is_referral):
         """ 从 ES 获取全部职位信息
         可以正确解析 salary
         """
@@ -181,7 +181,8 @@ class LandingPageService(PageService):
                     }
                 }
             }
-
+        if is_referral:
+            data.get("query").get("bool").get("must").append({"match": {"is_referral": const.YES}})
         self.logger.debug(data)
         response = self.es.search(index='index', body=data)
 
@@ -269,7 +270,7 @@ class LandingPageService(PageService):
         return data
 
     @gen.coroutine
-    def make_search_seq(self, company, params, locale, display_locale):
+    def make_search_seq(self, company, params, locale, display_locale, is_referral):
         """
         生成高级搜索功能中前端需要的数据
         :param display_locale:
@@ -327,7 +328,7 @@ class LandingPageService(PageService):
                 platform_const.LANDING_INDEX_DEPARTMENT
             )
 
-        positions_data = yield self.get_positions_data(conf_search_seq_plus, company.id, display_key_dict, salary_dict, display_locale)
+        positions_data = yield self.get_positions_data(conf_search_seq_plus, company.id, display_key_dict, salary_dict, display_locale, is_referral)
 
         if platform_const.LANDING_INDEX_CITY in conf_search_seq_plus:
             positions_data = self.split_cities(positions_data, display_locale=display_locale)

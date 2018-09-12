@@ -6,12 +6,8 @@ import conf.common as const
 import conf.path as path
 from service.data.base import DataService
 from util.common import ObjectDict
-from util.tool.http_tool import http_get, http_post, http_put, unboxing, http_delete, http_post_multipart_form, MultiPartForm
-from util.common.decorator import log_time
-from tornado.httpclient import AsyncHTTPClient
-from tornado.httputil import url_concat, HTTPHeaders
-import json
-from util.tool.url_tool import make_url
+from util.tool.http_tool import http_get, http_post, http_put, unboxing, http_delete, http_post_multipart_form
+from requests.models import Request
 from setting import settings
 from globals import env
 
@@ -84,11 +80,19 @@ class InfraEmployeeDataService(DataService):
     @gen.coroutine
     def upload_recom_profile(self, file_name, file_data, employee_id):
         url = "{0}/{1}".format(settings['infra'], path.UPLOAD_RECOM_PROFILE)
-        form = MultiPartForm()
-        form.add_field("employee", employee_id)
-        form.add_field("appid", const.APPID[env])
-        form.add_file("profile", file_name, file_data)
-        ret = http_post_multipart_form(url, form)
+        request = Request(data={
+            "employee": employee_id,
+            "appid": const.APPID[env]},
+            files={
+                "file": (file_name, file_data)
+            },
+            url=url
+        )
+        p = request.prepare()
+        body = p.body
+        header = p.header
+
+        ret = http_post_multipart_form(url, body, header=header)
         return ret
 
     @gen.coroutine
@@ -127,6 +131,3 @@ class InfraEmployeeDataService(DataService):
         })
         ret = yield http_get(path.REFERRAL_QRCODE, params)
         return ret
-
-
-

@@ -201,12 +201,14 @@ class ReferralCrucialInfoHandler(BaseHandler):
     def get(self):
         pid = self.params.pid
         position_info = yield self.position_ps.get_position(pid)
+        reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_UPLOAD_PROFILE)
         title = position_info.title
         self.params.share = yield self._make_share()
         self.render_page(template_name="employee/recom-candidate-info.html", data=ObjectDict({
             "job_title": title
         }))
 
+    @gen.coroutine
     def _make_share(self):
         link = self.make_url(
             path.REFERRAL_CONFIRM,
