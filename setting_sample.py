@@ -94,7 +94,7 @@ settings['m_host'] = 'platform-t.dqprism.com'
 settings['qx_host'] = settings['m_host'] + '/recruit'
 settings['platform_host'] = settings['m_host'] + '/m'
 settings['helper_host'] = settings['m_host'] + '/h'
-settings['referral_host'] = 'referral-t.dqprism.com'
+settings['referral_host'] = 'referral-t.dqprism.com' + 'm'
 settings['pc_host'] = 'www-t.dqprism.com'
 
 # 开放平台网站应用

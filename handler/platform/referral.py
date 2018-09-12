@@ -174,7 +174,7 @@ class ReferralConfirmApiHandler(BaseHandler):
 
 
 class ReferralProfilePcHandler(BaseHandler):
-    """电脑扫码上传简历"""
+    """手机扫码pc上传简历"""
 
     @handle_response
     @authenticated
@@ -184,7 +184,10 @@ class ReferralProfilePcHandler(BaseHandler):
         pid = self.params.pid
         reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_UPLOAD_PROFILE)
         yield self.employee_ps.update_referral_position(self.current_user.employee.id, pid)
-        self.render_page(template_name="employee/recom-scan-qrcode.html", data=reward)
+        self.render_page(template_name="employee/recom-scan-qrcode.html", data=ObjectDict({
+            "points": reward,
+            "recommend_resume": self.locale.translate("referral_scan_upload")
+        }))
 
 
 class ReferralCrucialInfoHandler(BaseHandler):

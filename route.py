@@ -171,7 +171,6 @@ platform_routes = [
     # 各大公司的自定义配置
     (r"/custom/emailapply/?",                        handler.platform.customize.CustomizeEmailApplyHandler,     {"event": "customize_emailapply"}),
     # pc端推荐相关
-    (r"/pc/referral/transfer/qrcode/?",              handler.platform.referral_pc.ReferralQrcodeHandler,        {"event": "referral_transfer_qrcode"}),
     (r"/pc/upload/profile/login/?",                  handler.platform.referral_pc.ReferralLoginHandler,         {"event": "referral_pc_login"}),
     (r"/pc/upload/profile/?",                        handler.platform.referral_pc.ReferralUploadHandler,        {"event": "referral_pc_upload"}),
     (r"/pc/api/employee/recom/profile/?",            handler.platform.referral_pc.EmployeeRecomProfilePcHandler, {"event": "referral_pc_profile"}),

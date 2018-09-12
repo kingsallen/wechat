@@ -8,21 +8,7 @@ from handler.base import BaseHandler
 from util.common import ObjectDict
 from util.common.decorator import handle_response
 from handler.platform.referral import ReferralProfileAPIHandler, EmployeeRecomProfileHandler
-
-
-class ReferralQrcodeHandler(BaseHandler):
-    """pc端获取跳转二维码"""
-
-    @handle_response
-    @gen.coroutine
-    def get(self):
-        url = self.make_url(path.REFERRAL_PROFILE_PC, float=1)
-        logo = self.current_user.company.logo
-        ret = yield self.employee_ps.get_referral_qrcode(url, logo)
-        if ret.status != const.API_SUCCESS:
-            self.send_json_error()
-        else:
-            self.send_json_success(ret.data)
+from setting import settings
 
 
 class ReferralLoginHandler(BaseHandler):
@@ -30,9 +16,13 @@ class ReferralLoginHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def get(self):
-        redirect_url = self.make_url(path.REFERRAL_UPLOAD_PC, self.params, host="")
+        appid = settings['open_app_id']
+        scope = "snsapi_login"
+        redirect_url = self.make_url(path.REFERRAL_UPLOAD_PC, self.params, host=settings['referral_host'])
         self.render_page(template_name="employee/pc-qrcode-login.html", data=ObjectDict({
-            "redirect_url": redirect_url
+            "wx_login_args": ObjectDict(appid=appid,
+                                        scope=scope,
+                                        redirect_url=redirect_url)
         }))
 
 
@@ -49,7 +39,10 @@ class ReferralUploadHandler(BaseHandler):
         else:
             reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_UPLOAD_PROFILE)
             data = res.data
-            data.update(reward_point=reward)
+            url = self.make_url(path.REFERRAL_PROFILE_PC, float=1)
+            logo = self.current_user.company.logo
+            qrcode = yield self.employee_ps.get_referral_qrcode(url, logo)
+            data.update(reward_point=reward, wechat=ObjectDict({"qrcode": qrcode.data}))
             self.render_page(template_name="employee/pc-upload-resume.html", data=data)
 
 
