@@ -6,7 +6,7 @@ import conf.common as const
 import conf.path as path
 from handler.base import BaseHandler
 from util.common import ObjectDict
-from util.common.decorator import handle_response
+from util.common.decorator import handle_response, authenticated
 from handler.platform.referral import ReferralProfileAPIHandler, EmployeeRecomProfileHandler
 from setting import settings
 
@@ -22,13 +22,14 @@ class ReferralLoginHandler(BaseHandler):
         self.render_page(template_name="employee/pc-qrcode-login.html", data=ObjectDict({
             "wx_login_args": ObjectDict(appid=appid,
                                         scope=scope,
-                                        redirect_url=redirect_url)
+                                        redirect_uri=redirect_url)
         }))
 
 
 class ReferralUploadHandler(BaseHandler):
     """pc端推荐简历页面"""
     @handle_response
+    @authenticated
     @gen.coroutine
     def get(self):
         pid = self.redis.get(const.UPLOAD_RECOM_PROFILE.format(self.current_user.sysuser.id))

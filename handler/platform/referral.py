@@ -109,6 +109,7 @@ class ReferralConfirmHandler(BaseHandler):
     """推荐成功"""
 
     @handle_response
+    @authenticated
     @gen.coroutine
     def get(self):
         if self.current_user.sysuser.username.isdigit():
@@ -205,7 +206,8 @@ class ReferralCrucialInfoHandler(BaseHandler):
         title = position_info.title
         self.params.share = yield self._make_share()
         self.render_page(template_name="employee/recom-candidate-info.html", data=ObjectDict({
-            "job_title": title
+            "job_title": title,
+            "points": reward
         }))
 
     @gen.coroutine
