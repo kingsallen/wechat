@@ -131,7 +131,7 @@ def http_post_cs_msg(route, data=None, timeout=30, raise_error=True):
         return response.body
 
 
-def http_post_multipart_form(route, form, timeout=30, raise_error=True, header=None):
+def http_post_multipart_form(route, form, timeout=30, raise_error=True, headers=None):
     """使用multipart/form-data形式 HTTP 异步 POST 请求
     :param route:
     :param form:
@@ -149,7 +149,7 @@ def http_post_multipart_form(route, form, timeout=30, raise_error=True, header=N
             method='POST',
             body=form,
             request_timeout=timeout,
-            headers=header,
+            headers=headers,
         )
 
         logger.info("[http_post_multipart_form][uri: {}][req_body: {}]".format(route, request.body))

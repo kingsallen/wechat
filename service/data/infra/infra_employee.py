@@ -90,9 +90,9 @@ class InfraEmployeeDataService(DataService):
         )
         p = request.prepare()
         body = p.body
-        header = p.header
+        headers = p.headers
 
-        ret = http_post_multipart_form(url, body, header=header)
+        ret = http_post_multipart_form(url, body, headers=headers)
         return ret
 
     @gen.coroutine
