@@ -641,12 +641,8 @@ class EmployeePageService(PageService):
         return res
 
     @gen.coroutine
-    def upload_recom_profile(self, file_data, employee_id):
-        params = ObjectDict({
-            "file": file_data,
-            "employee": employee_id
-        })
-        res = yield self.infra_employee_ds.upload_recom_profile(params)
+    def upload_recom_profile(self, file_name, file_data, employee_id):
+        res = yield self.infra_employee_ds.upload_recom_profile(file_name, file_data, employee_id)
         return res
 
     @gen.coroutine

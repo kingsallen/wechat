@@ -18,6 +18,8 @@ from setting import settings
 from util.common import ObjectDict
 from util.common.exception import InfraOperationError
 from util.tool.dict_tool import objectdictify
+import mimetypes
+import itertools
 
 
 @gen.coroutine
@@ -131,6 +133,39 @@ def http_post_cs_msg(route, data=None, timeout=30, raise_error=True):
         return response.body
 
 
+def http_post_multipart_form(route, form, timeout=30, raise_error=True):
+    """使用multipart/form-data形式 HTTP 异步 POST 请求
+    :param route:
+    :param form:
+    :param timeout:
+    :param raise_error:
+    """
+    if form is None:
+        form = ObjectDict()
+    header = {'Content-type': form.get_content_type(), "Cache-Control": "no-cache", "Connection": "Keep-Alive"}
+
+    http_client = tornado.httpclient.AsyncHTTPClient()
+
+    try:
+        request = tornado.httpclient.HTTPRequest(
+            route,
+            method='POST',
+            body=str(form),
+            request_timeout=timeout,
+            headers=header,
+        )
+
+        logger.info("[http_post_multipart_form][uri: {}][req_body: {}]".format(route, request.body))
+        response = yield http_client.fetch(request, raise_error=raise_error)
+        logger.info("[http_post_multipart_form][uri: {}][res_body: {}]".format(route, response.body))
+
+    except tornado.httpclient.HTTPError as e:
+        logger.warning("[http_post_multipart_form][uri: {}] httperror: {}".format(route, e))
+        raise e
+    else:
+        return response.body
+
+
 def unboxing(http_response):
     """标准 restful api 返回拆箱"""
 
@@ -210,3 +245,68 @@ def _async_http_post(route, jdata=None, timeout=5, method='POST', infra=True):
         raise InfraOperationError(body.message)
 
     return body
+
+
+class MultiPartForm(object):
+    """Accumulate the data to be used when posting a form."""
+
+    def __init__(self):
+        self.form_fields = []
+        self.files = []
+        self.boundary = "PYTHON_SDK_BOUNDARY"
+        return
+
+    def get_content_type(self):
+        return 'multipart/form-data; boundary=%s' % self.boundary
+
+    def add_field(self, name, value):
+        """Add a simple field to the form data."""
+        self.form_fields.append((name, str(value)))
+        return
+
+    def add_file(self, fieldname, filename, filebody, mimetype=None):
+        """Add a file to be uploaded."""
+        if mimetype is None:
+            mimetype = mimetypes.guess_type(filename)[0] or 'application/octet-stream'
+        self.files.append((fieldname, filename, mimetype, filebody))
+        return
+
+    def __str__(self):
+        """Return a string representing the form data, including attached files."""
+        # Build a list of lists, each containing "lines" of the
+        # request.  Each part is separated by a boundary string.
+        # Once the list is built, return a string where each
+        # line is separated by '\r\n'.
+        parts = []
+        part_boundary = '--' + self.boundary
+
+        # Add the form fields
+        parts.extend(
+            [part_boundary,
+             'Content-Disposition: form-data; name="%s"' % name,
+             'Content-Type: text/plain; charset=UTF-8',
+             '',
+             value,
+             ]
+            for name, value in self.form_fields
+        )
+
+        # Add the files to upload
+        parts.extend(
+            [part_boundary,
+             'Content-Disposition: file; name="%s"; filename="%s"' % \
+             (field_name, filename),
+             'Content-Type: %s' % content_type,
+             'Content-Transfer-Encoding: binary',
+             '',
+             body,
+             ]
+            for field_name, filename, content_type, body in self.files
+        )
+
+        # Flatten the list and add closing boundary marker,
+        # then return CR+LF separated data
+        flattened = list(itertools.chain(*parts))
+        flattened.append('--' + self.boundary + '--')
+        flattened.append('')
+        return '\r\n'.join(flattened)

@@ -96,7 +96,7 @@ class EmployeeRecomProfileHandler(BaseHandler):
             self.send_json_error("请上传2M以下的文件")
             return
 
-        ret = yield self.employee_ps.upload_recom_profile(file_data, self.current_user.employee.id)
+        ret = yield self.employee_ps.upload_recom_profile(file_name, file_data, self.current_user.employee.id)
         if ret.status != const.API_SUCCESS:
             self.send_json_error(message=ret.message)
             return
