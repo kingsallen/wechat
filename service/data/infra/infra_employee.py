@@ -8,6 +8,12 @@ from service.data.base import DataService
 from util.common import ObjectDict
 from util.tool.http_tool import http_get, http_post, http_put, unboxing, http_delete
 from util.common.decorator import log_time
+from tornado.httpclient import AsyncHTTPClient
+from tornado.httputil import url_concat, HTTPHeaders
+import json
+from util.tool.url_tool import make_url
+from setting import settings
+import conf.common as constant
 
 
 class InfraEmployeeDataService(DataService):
@@ -76,8 +82,16 @@ class InfraEmployeeDataService(DataService):
         return unboxing(ret)
 
     @gen.coroutine
-    def upload_recom_profile(self, pramas):
-        ret = yield http_post(path.UPLOAD_RECOM_PROFILE, pramas)
+    def upload_recom_profile(self, params):
+        params.update({"appid": constant.APPID["ENV_PLATFORM"]})
+        url = "{0}/{1}".format(settings['infra'], path.UPLOAD_RECOM_PROFILE)
+        ret = yield AsyncHTTPClient().fetch(
+            url,
+            method="POST",
+            body=json.dumps(params),
+            headers=HTTPHeaders({"Content-Type": "application/json"}),
+            request_timeout=30
+        )
         return ret
 
     @gen.coroutine
