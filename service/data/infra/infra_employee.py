@@ -86,7 +86,8 @@ class InfraEmployeeDataService(DataService):
             files={
                 "file": (file_name, file_data)
             },
-            url=url
+            url=url,
+            method="POST"
         )
         p = request.prepare()
         body = p.body
