@@ -4,14 +4,14 @@ from tornado import gen
 
 import conf.common as const
 import conf.path as path
-from handler.base import BaseHandler
+from handler.base import BaseHandler, MetaBaseHandler
 from util.common import ObjectDict
 from util.common.decorator import handle_response, authenticated
 from handler.platform.referral import ReferralProfileAPIHandler, EmployeeRecomProfileHandler
 from setting import settings
 
 
-class ReferralLoginHandler(BaseHandler):
+class ReferralLoginHandler(MetaBaseHandler):
     """pc端推荐简历登录页"""
     @handle_response
     @gen.coroutine
