@@ -118,7 +118,7 @@ class InfraUserDataService(DataService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def post_ismobileregistered(self, country_code, mobile):
+    def post_ismobileregistered(self, mobile, country_code=86):
         """判断手机号是否已经注册
         :param country_code: 国家号
         :param mobile: 手机号
@@ -234,4 +234,9 @@ class InfraUserDataService(DataService):
             "degree": survey["degree"]
         }
         res = yield http_put(path.INFRA_USER_EMPLOYEE, params)
+        return res
+
+    @gen.coroutine
+    def update_recommend(self, params, employee_id):
+        res = yield http_post(path.UPDATE_RECOMMEND.format(employee_id), params)
         return res
