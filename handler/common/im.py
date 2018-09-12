@@ -306,6 +306,7 @@ class ChatHandler(BaseHandler):
         self.room_id = 0
         self.user_id = 0
         self.position_id = 0
+        self.flag = 0
         self.bot_enabled = False
 
     @handle_response
@@ -451,6 +452,7 @@ class ChatHandler(BaseHandler):
         self.user_id = match_session_id(to_str(self.get_secure_cookie(const.COOKIE_SESSIONID)))
         self.hr_id = self.params.hrId
         self.position_id = self.params.get("pid") or 0
+        self.flag = self.params.get("flag") or 0
 
         content = self.json_args.get("content") or ""
         compoundContent = self.json_args.get("compoundContent") or {}
@@ -513,6 +515,7 @@ class ChatHandler(BaseHandler):
         self.user_id = match_session_id(to_str(self.get_secure_cookie(const.COOKIE_SESSIONID)))
         self.hr_id = self.params.hrId
         self.position_id = self.params.get("pid") or 0
+        self.flag = self.params.get("flag") or 0
 
         content = self.json_args.get("content") or ""
         compoundContent = self.json_args.get("compoundContent") or {}
@@ -549,7 +552,8 @@ class ChatHandler(BaseHandler):
             message=user_message,
             user_id=self.user_id,
             hr_id=self.hr_id,
-            position_id=self.position_id
+            position_id=self.position_id,
+            flag=self.flag
         )
         for bot_message in bot_messages:
             msg_type = bot_message.msg_type
