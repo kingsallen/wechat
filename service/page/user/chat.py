@@ -207,14 +207,14 @@ class ChatPageService(PageService):
         raise gen.Return(company_conf)
 
     @gen.coroutine
-    def get_chatbot_reply(self, message, user_id, hr_id, position_id, flag_id):
+    def get_chatbot_reply(self, message, user_id, hr_id, position_id, flag):
         """ 调用 chatbot 返回机器人的回复信息
                https://wiki.moseeker.com/chatbot.md
         :param message: 用户发送到文本内容
         :param user_id: 当前用户id
         :param hr_id: 聊天对象hrid
         :param position_id 当前职位id，不存在则为0
-        :param flag_id: 0:社招 1:校招
+        :param flag: 0:社招 1:校招
         """
         messages = []
 
@@ -226,7 +226,7 @@ class ChatPageService(PageService):
         )
 
         try:
-            if flag_id == 1:
+            if flag == 1:
                 res = yield http_post(
                     route='{host}{uri}'.format(host=settings['chatbot_host'], uri='campus_qa.api'), jdata=params, infra=False)
             else:
