@@ -114,7 +114,7 @@ class ReferralConfirmHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def get(self):
-        if self.current_user.sysuser.username.isdigit():
+        if not self.current_user.sysuser.username.isdigit():
             type = 1
         else:
             if self.current_user.wxuser.is_subscribe or self.current_user.wechat.type == 0:
