@@ -223,11 +223,10 @@ class ChatPageService(PageService):
             user_id=user_id,
             hr_id=hr_id,
             position_id=position_id,
-            flag=flag
         )
 
         try:
-            if flag == 1:
+            if int(flag) == 1:
                 res = yield http_post(
                     route='{host}{uri}'.format(host=settings['chatbot_host'], uri='campus_qa.api'), jdata=params, infra=False)
             else:
