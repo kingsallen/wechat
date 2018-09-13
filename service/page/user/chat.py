@@ -223,7 +223,6 @@ class ChatPageService(PageService):
             user_id=user_id,
             hr_id=hr_id,
             position_id=position_id,
-            flag=flag
         )
         self.logger.debug('get_chatbot_reply  flag:{}'.format(flag))
         try:
