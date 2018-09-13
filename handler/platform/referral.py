@@ -26,7 +26,8 @@ class ReferralProfileHandler(BaseHandler):
         self.params.share = yield self._make_share()
         self.render_page(template_name="employee/mobile-upload-resume.html", data=ObjectDict({"points": reward,
                                                                                               "job_title": position_info.title,
-                                                                                              "upload_resume": self.locale.translate("referral_upload")}))
+                                                                                              "upload_resume": self.locale.translate(
+                                                                                                  "referral_upload")}))
 
     @gen.coroutine
     def _make_share(self):
@@ -64,7 +65,12 @@ class ReferralProfileAPIHandler(BaseHandler):
         mobile = self.json_args.mobile
         recom_reason = self.json_args.recom_reason
         pid = self.json_args.pid
-        res = yield self.employee_ps.update_recommend(self.current_user.employee.id, name, mobile, recom_reason, pid, type)
+        res = yield self.employee_ps.update_recommend(self.current_user.employee.id, name, mobile, recom_reason, pid,
+                                                      type)
+        self.send_json_success(data=ObjectDict({
+            "rkey": 11111
+        }))
+        return
         if res.status == const.API_SUCCESS:
             self.send_json_success(data=ObjectDict({
                 "rkey": res.data
@@ -119,13 +125,14 @@ class ReferralConfirmHandler(BaseHandler):
                 type = 2
             else:
                 type = 3
-        wechat = yield self.wechat_ps.get_wechat_info(self.current_user, pattern_id=const.QRCODE_REFERRAL_CONFIRM, in_wechat=self.in_wechat)
+        wechat = yield self.wechat_ps.get_wechat_info(self.current_user, pattern_id=const.QRCODE_REFERRAL_CONFIRM,
+                                                      in_wechat=self.in_wechat)
         rid = self.params.rkey
         ret = yield self.employee_ps.get_referral_info(rid)
 
         data = ObjectDict({
             "type": type,
-            "successful_recommendation":self.locale.translate("referral_success"),
+            "successful_recommendation": self.locale.translate("referral_success"),
             "variants": {
                 "presentee_first_name": ret.employee_name,
                 "recom_name": ret.user_name[0:1] + "**",
@@ -149,22 +156,26 @@ class ReferralConfirmApiHandler(BaseHandler):
     def post(self):
         if self.current_user.sysuser.username.isdigit():
             try:
-                self.guarantee("name")
+                self.guarantee("name", "rkey")
             except AttributeError:
                 raise gen.Return()
             data = ObjectDict({
-                "name": self.params.name
+                "name": self.params.name,
+                "referral_record_id": self.params.rkey,
+                "user": self.current_user.sysuser.id
             })
-            ret = yield self.update_referral_info(data)
+            ret = yield self.employee_ps.confirm_referral_info(data)
         else:
             try:
-                self.guarantee("mobile", "name", "vcode")
+                self.guarantee("mobile", "name", "vcode", "rkey")
             except AttributeError:
                 raise gen.Return()
             data = ObjectDict({
                 "name": self.params.name,
                 "mobile": self.params.mobile,
-                "valid_code": self.params.valid_code
+                "valid_code": self.params.valid_code,
+                "referral_record_id": self.params.rkey,
+                "user": self.current_user.sysuser.id
             })
             ret = yield self.employee_ps.confirm_referral_info(data)
         if ret.status != const.API_SUCCESS:
@@ -233,6 +244,7 @@ class ReferralCrucialInfoHandler(BaseHandler):
 
 class ReferralCrucialInfoApiHandler(BaseHandler):
     """提交关键信息"""
+
     @handle_response
     @gen.coroutine
     def post(self):
@@ -245,6 +257,3 @@ class ReferralCrucialInfoApiHandler(BaseHandler):
                 "rkey": ret.data
             }))
             return
-
-
-

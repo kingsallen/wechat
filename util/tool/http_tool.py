@@ -152,7 +152,7 @@ def http_post_multipart_form(route, form, timeout=30, raise_error=True, headers=
             headers=headers,
         )
 
-        logger.info("[http_post_multipart_form][uri: {}][req_body: {}]".format(route, request.body))
+        logger.info("[http_post_multipart_form][uri: {}]".format(route))
         response = yield http_client.fetch(request, raise_error=raise_error)
         logger.info("[http_post_multipart_form][uri: {}][res_body: {}]".format(route, response.body))
 
