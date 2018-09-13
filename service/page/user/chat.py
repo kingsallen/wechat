@@ -228,10 +228,10 @@ class ChatPageService(PageService):
         try:
             if flag_id == 1:
                 res = yield http_post(
-                    route=settings['chatbot_campus_api'], jdata=params, infra=False)
+                    route='{host}{uri}'.format(host=settings['chatbot_host'], uri='campus_qa.api'), jdata=params, infra=False)
             else:
                 res = yield http_post(
-                    route=settings['chatbot_api'], jdata=params, infra=False)
+                    route='{host}{uri}'.format(host=settings['chatbot_host'], uri='qa.api'), jdata=params, infra=False)
 
             self.logger.debug("[get_chatbot_reply]ret: %s, type: %s" % (res, type(res)))
 
