@@ -67,10 +67,6 @@ class ReferralProfileAPIHandler(BaseHandler):
         pid = self.json_args.pid
         res = yield self.employee_ps.update_recommend(self.current_user.employee.id, name, mobile, recom_reason, pid,
                                                       type)
-        self.send_json_success(data=ObjectDict({
-            "rkey": 11111
-        }))
-        return
         if res.status == const.API_SUCCESS:
             self.send_json_success(data=ObjectDict({
                 "rkey": res.data
@@ -130,7 +126,7 @@ class ReferralConfirmHandler(BaseHandler):
         rid = self.params.rkey
         ret = yield self.employee_ps.get_referral_info(rid)
         key = const.CONFIRM_REFERRAL_MOBILE.format(rid, self.current_user.sysuser.id)
-        self.redis.set(key, ret.mobile, ttl=60*60*24)
+        self.redis.set(key, ObjectDict(mobile=ret.mobile), ttl=60*60*24)
 
         data = ObjectDict({
             "type": type,
@@ -174,7 +170,7 @@ class ReferralConfirmApiHandler(BaseHandler):
                 raise gen.Return()
             mobile = self.json_args.mobile
             if not mobile:
-                mobile = self.redis.get(const.CONFIRM_REFERRAL_MOBILE.format(self.params.rkey, self.current_user.sysuser.id))
+                mobile = self.redis.get(const.CONFIRM_REFERRAL_MOBILE.format(self.params.rkey, self.current_user.sysuser.id)).get('mobile')
             data = ObjectDict({
                 "name": self.params.name,
                 "mobile": mobile,

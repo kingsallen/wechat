@@ -17,8 +17,8 @@ from util.tool.str_tool import to_str
 
 from json import JSONDecodeError
 
-class BaseRedis(object):
 
+class BaseRedis(object):
     _pool = redis.ConnectionPool(
         host=settings["store_options"]["redis_host"],
         port=settings["store_options"]["redis_port"],
@@ -119,8 +119,8 @@ class BaseRedis(object):
         channel = self.key_name(key, prefix)
         return self._redis.publish(channel, message)
 
-if __name__ == "__main__":
 
+if __name__ == "__main__":
     redis = BaseRedis()
 
     key = "aaa"
@@ -138,5 +138,5 @@ if __name__ == "__main__":
         }
     }
 
-    res = redis.update(key, value2, prefix=False)
-    print (redis.get(key, prefix=False))
+    redis.update(key, value2, prefix=False)
+    print(redis.get(key, prefix=False))
