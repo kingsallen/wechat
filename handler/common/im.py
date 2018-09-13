@@ -463,6 +463,8 @@ class ChatHandler(BaseHandler):
         server_id = self.json_args.get("serverId") or ""
         duration = self.json_args.get("duration") or 0
 
+        self.logger.debug('post_message  flag:{}'.format(self.flag))
+
         if not self.bot_enabled:
             yield self.get_bot_enabled()
 
@@ -557,6 +559,7 @@ class ChatHandler(BaseHandler):
             position_id=self.position_id,
             flag=self.flag
         )
+        self.logger.debug('_handle_chatbot_message  flag:{}'.format(self.flag))
         for bot_message in bot_messages:
             msg_type = bot_message.msg_type
             compound_content = bot_message.compound_content
