@@ -129,6 +129,8 @@ class ReferralConfirmHandler(BaseHandler):
                                                       in_wechat=self.in_wechat)
         rid = self.params.rkey
         ret = yield self.employee_ps.get_referral_info(rid)
+        key = const.CONFIRM_REFERRAL_MOBILE.format(rid, self.current_user.sysuser.id)
+        self.redis.set(key, ret.mobile, ttl=60*60*24)
 
         data = ObjectDict({
             "type": type,
@@ -139,7 +141,7 @@ class ReferralConfirmHandler(BaseHandler):
                 "company_name": ret.company_abbreviation,
                 "position_title": ret.position,
                 "new_user": ret.user_name[0:1] + "**",
-                "apply_id": ret,
+                "apply_id": ret.apply_id,
                 "mobile": ret.mobile[0:3] + "****" + ret.mobile[-4:],
                 "wechat": wechat}
         })
@@ -167,12 +169,15 @@ class ReferralConfirmApiHandler(BaseHandler):
             ret = yield self.employee_ps.confirm_referral_info(data)
         else:
             try:
-                self.guarantee("mobile", "name", "vcode", "rkey")
+                self.guarantee("name", "vcode", "rkey")
             except AttributeError:
                 raise gen.Return()
+            mobile = self.json_args.mobile
+            if not mobile:
+                mobile = self.redis.get(const.CONFIRM_REFERRAL_MOBILE.format(self.params.rkey, self.current_user.sysuser.id))
             data = ObjectDict({
                 "name": self.params.name,
-                "mobile": self.params.mobile,
+                "mobile": mobile,
                 "valid_code": self.params.valid_code,
                 "referral_record_id": self.params.rkey,
                 "user": self.current_user.sysuser.id

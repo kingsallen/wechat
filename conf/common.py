@@ -123,6 +123,8 @@ CHAT_HR_CHANNEL = "chatroom_{0}"
 CHAT_CHATROOM_ENTER = "chat_sysuser_{}"
 # 推荐上传简历
 UPLOAD_RECOM_PROFILE = "upload_recom_profile_{}"
+# 推荐成功页面手机号码
+CONFIRM_REFERRAL_MOBILE = "referral_mobile_{}_{}"
 
 # ++++++++++业务常量+++++++++++
 # Cookie name
