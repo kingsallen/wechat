@@ -226,7 +226,7 @@ class ChatPageService(PageService):
         )
         self.logger.debug('get_chatbot_reply  flag:{}'.format(flag))
         try:
-            if flag == 1:
+            if int(flag) == 1:
                 res = yield http_post(
                     route='{host}{uri}'.format(host=settings['chatbot_host'], uri='campus_qa.api'), jdata=params, infra=False)
             else:
