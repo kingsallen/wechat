@@ -222,7 +222,8 @@ class ChatPageService(PageService):
             question=message,
             user_id=user_id,
             hr_id=hr_id,
-            position_id=position_id
+            position_id=position_id,
+            flag=flag
         )
 
         try:
