@@ -131,6 +131,42 @@ def http_post_cs_msg(route, data=None, timeout=30, raise_error=True):
         return response.body
 
 
+def http_post_multipart_form(route, form, timeout=30, raise_error=True, headers=None):
+    """使用multipart/form-data形式 HTTP 异步 POST 请求
+    :param route:
+    :param form:
+    :param timeout:
+    :param raise_error:
+    """
+    if form is None:
+        form = ObjectDict()
+
+    http_client = tornado.httpclient.AsyncHTTPClient()
+
+    try:
+        request = tornado.httpclient.HTTPRequest(
+            route,
+            method='POST',
+            body=form,
+            request_timeout=timeout,
+            headers=headers,
+        )
+
+        logger.info("[http_post_multipart_form][uri: {}][req_body: {}]".format(route, request.body))
+        response = yield http_client.fetch(request, raise_error=raise_error)
+        logger.info("[http_post_multipart_form][uri: {}][res_body: {}]".format(route, response.body))
+
+    except tornado.httpclient.HTTPError as e:
+        logger.warning("[http_post_multipart_form][uri: {}] httperror: {}".format(route, e))
+        raise e
+    else:
+        body = objectdictify(ujson.decode(response.body))
+        if body.status in INFRA_ERROR_CODES:
+            raise InfraOperationError(body.message)
+
+        return body
+
+
 def unboxing(http_response):
     """标准 restful api 返回拆箱"""
 

@@ -11,6 +11,7 @@ from tornado import gen
 
 from service.page.base import PageService
 
+
 class CellphonePageService(PageService):
     """
     Referenced Document: https://wiki.moseeker.com/user_account_api.md
@@ -21,7 +22,7 @@ class CellphonePageService(PageService):
         super().__init__()
 
     @gen.coroutine
-    def send_valid_code(self, country_code, mobile, type):
+    def send_valid_code(self, mobile, type, country_code=86):
         """Request basic service send valid code to target mobile
         :param mobile: target mobile number
         :return:

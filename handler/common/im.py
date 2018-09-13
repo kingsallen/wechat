@@ -203,6 +203,7 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
 class ChatRoomHandler(BaseHandler):
     """聊天页面"""
 
+    @authenticated
     @gen.coroutine
     def get(self, room_id):
         hr_id = self.params.hr_id or 0
@@ -247,6 +248,7 @@ class ChatRoomHandler(BaseHandler):
                           "hideAllNonBaseMenuItem",
                           "showAllNonBaseMenuItem"]
         })
+        self.logger.debug("jsapi_config:{}".format(config))
         self._render(
             template_name="chat/room.html",
             data={"room_id": room_id},

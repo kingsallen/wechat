@@ -15,6 +15,7 @@ from util.common import ObjectDict
 from util.tool.dict_tool import sub_dict
 from util.tool.re_checker import revalidator
 from util.tool.url_tool import make_static_url, make_url
+from util.tool.str_tool import gen_salary, gen_experience
 from util.wechat.core import get_temporary_qrcode
 from util.common.mq import unread_praise_publisher
 
@@ -76,7 +77,7 @@ class EmployeePageService(PageService):
         return bind_status
 
     @gen.coroutine
-    def make_binding_render_data(self, current_user, mate_num, reward, conf):
+    def make_binding_render_data(self, current_user, mate_num, reward, conf, in_wechat=None):
         """构建员工绑定页面的渲染数据
         :returns:
         {
@@ -115,7 +116,7 @@ class EmployeePageService(PageService):
         data.send_hour = 24  # fixed 24 小时
         data.conf = ObjectDict()
         data.binding_success_message = conf.bindSuccessMessage or ''
-        data.wechat.subscribed = True if current_user.wxuser.is_subscribe or current_user.wechat.type == 0 else False
+        data.wechat.subscribed = True if current_user.wxuser.is_subscribe or current_user.wechat.type == 0 or not in_wechat else False
         data.wechat.qrcode = yield get_temporary_qrcode(wechat=current_user.wechat, pattern_id=const.QRCODE_BIND)
         data.wechat.name = current_user.wechat.name
         data.mate_num = mate_num
@@ -350,6 +351,16 @@ class EmployeePageService(PageService):
         return data
 
     @gen.coroutine
+    def get_bind_reward(self, company_id, type):
+        """获取指定规则的积分配置"""
+        result, data = yield self.infra_employee_ds.get_bind_reward(company_id)
+        reward = 0
+        for r in data:
+            if r.get("statusName") == type:
+                reward = r.get("points")
+        return reward
+
+    @gen.coroutine
     def unbind(self, employee_id, company_id, user_id):
         """员工解绑"""
         ret = yield self.thrift_employee_ds.unbind(
@@ -432,7 +443,8 @@ class EmployeePageService(PageService):
             "employee_id": employee_id,
             "view_time": int(time.time() * 1000)
         })
-        yield unread_praise_publisher.publish_message(message=data, routing_key="employee_view_leader_board_routing_key")
+        yield unread_praise_publisher.publish_message(message=data,
+                                                      routing_key="employee_view_leader_board_routing_key")
 
     @gen.coroutine
     def get_last_rank_info(self, employee_id, type):
@@ -516,10 +528,10 @@ class EmployeePageService(PageService):
         """
         selects_from_ds = yield self.hr_employee_custom_fields_ds. \
             get_employee_custom_field_records({
-                "company_id": company_id,
-                "status": const.OLD_YES,
-                "disable": const.NO
-            })
+            "company_id": company_id,
+            "status": const.OLD_YES,
+            "disable": const.NO
+        })
 
         selects_from_ds = sorted(selects_from_ds, key=lambda x: x.forder)
 
@@ -615,3 +627,74 @@ class EmployeePageService(PageService):
     def is_valid_employee(self, user_id, company_id):
         is_employee = yield self.infra_user_ds.is_valid_employee(user_id, company_id)
         return is_employee
+
+    @gen.coroutine
+    def update_recommend(self, employee_id, name, mobile, recom_reason, pid, type):
+        params = ObjectDict({
+            "name": name,
+            "mobile": mobile,
+            "referral_reasons": recom_reason,
+            "position": pid,
+            "type": type
+        })
+        res = yield self.infra_user_ds.update_recommend(params, employee_id)
+        return res
+
+    @gen.coroutine
+    def upload_recom_profile(self, file_name, file_data, employee_id):
+        res = yield self.infra_employee_ds.upload_recom_profile(file_name, file_data, employee_id)
+        return res
+
+    @gen.coroutine
+    def get_referral_info(self, id):
+        _, data = yield self.infra_employee_ds.get_referral_info(id)
+        return data
+
+    @gen.coroutine
+    def confirm_referral_info(self, data):
+        res = yield self.infra_employee_ds.update_referral_info(data)
+        return res
+
+    @gen.coroutine
+    def get_referral_position_info(self, employee_id, pid):
+        res, data = yield self.infra_employee_ds.get_referral_position_info(employee_id, pid)
+        if res.status == const.API_SUCCESS:
+            data = ObjectDict({
+                "job_title": data.title,
+                "city": ",".join([c.get("name") for c in data.cities]),
+                "company_abbr": data.company_abbreviation,
+                "id": data.id,
+                "job_need": data,
+                "salary": gen_salary(data.salary_top, data.salary_bottom),
+                "salary_bottom": data.salary_bottom,
+                "salary_top": data.salary_top,
+                "experience": gen_experience(data.experience, data.experience_above),
+                "logo": data.logo,
+                "team": data.team
+            })
+        return res, data
+
+    @gen.coroutine
+    def update_referral_position(self, employee_id, pid):
+        res = yield self.infra_employee_ds.update_referral_position(employee_id, pid)
+        return res
+
+    @gen.coroutine
+    def update_referral_crucial_info(self, employee_id, params):
+        data = ObjectDict({
+            "position": params.pid,
+            "name": params.realname,
+            "gender": params.gender,
+            "mobile": params.mobile,
+            "email": params.email,
+            "company": params.company_name,
+            "job": params.position_name,
+            "referral_reasons": params.recom_reason
+        })
+        res = yield self.infra_employee_ds.update_referral_crucial_info(employee_id, data)
+        return res
+
+    @gen.coroutine
+    def get_referral_qrcode(self, url, logo):
+        res = yield self.infra_employee_ps.get_referral_qrcode(url, logo)
+        return res

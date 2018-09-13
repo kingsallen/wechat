@@ -158,3 +158,13 @@ class CompanySurveyHandler(BaseHandler):
             self.send_json_success()
         else:
             self.send_json_error()
+
+
+class CompanyHrInfoHandler(BaseHandler):
+
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        """获取hr信息"""
+        hr_info = yield self.company_ps.get_main_hr_info(self.current_user.company.id)
+        self.send_json_success(data=hr_info)

@@ -5,6 +5,7 @@
 # 企业号单独链接
 POSITION_PATH = '/position/{}'
 POSITION_LIST = '/position'
+POSITION_REFERRAL_LIST = '/position/recom'
 RED_PACKET_CARD = '/mobile/redpack'
 TEAM_PATH = '/company/team/{}'
 COMPANY_TEAM = '/company/team'
@@ -25,6 +26,9 @@ EMPOLYEE_LADDER = "/employee/ladder"
 EMPLOYEE_REWARDS_RECORD = '/app/employee/binding/rewards'
 
 PROFILE_CUSTOM_CV = '/profile/custom'
+REFERRAL_CONFIRM = "/referral/confirm"
+REFERRAL_UPLOAD_PC = "/pc/upload/profile"
+REFERRAL_PROFILE_PC = "/pc/api/employee/recom/profile"
 
 # 聚合号单独链接
 GAMMA_HOME = '/enter'
@@ -109,7 +113,7 @@ INFRA_RP_POSITION_LIST_SHARE_INFO = 'position/list/hb_share_info'
 INFRA_THIRD_PARTY_SYNCED_POSITIONS = 'positions/thirdpartysyncedpositions'
 INFRA_SUG_LIST = 'api/position/suggest'
 INFRA_POSITION_FEATURE = '/api/position/feature/{}'
-INFRA_POSITION_LATEST_REFUSAL_RECOM ='/user/lastest_recommend_refusal'
+INFRA_POSITION_LATEST_REFUSAL_RECOM = '/user/lastest_recommend_refusal'
 INFRA_POSITION_LIST_WX_TPL = '/user/refuse/recommend'
 INFRA_POSITION_SEARCH_HISTORY = '/position/search/history'
 INFRA_POSITION_SEARCH_HISTORY_DEL = '/position/search/history/delete'
@@ -165,6 +169,14 @@ LAST_RANK_INFO = "/v1/employee/{}/last-list-info"
 USER_RANK_INFO = "/v1/employee/{}/list-info"
 LADDER_TYPE = "/v1/company/{}/leader-board"
 BIND_REWARD = "/hraccount/company/rewardconfig"
+UPDATE_RECOMMEND = "/v1/employee/{}/referral"
+UPLOAD_RECOM_PROFILE = "v1/referral/file-parser"
+REFERRAL_INFO = "/v1/referral-records/{}"
+INFRA_REFERRAL_CONFIRM = "/v1/referral/claim"
+REFERRAL_POSITION_INFO = "/v1/employee/{}/referral-type"
+REFERRAL_CRUCIAL_INFO = "/v1/employee/{}/post-candidate-info"
+REFERRAL_QRCODE = "/v1/referral/position/qrcode"
+REFERRAL_POSITION_LIST = "/v1/referral/wechat/position/list"
 # ============================ 基础服务结束 ============================
 
 # 其他外部服务

@@ -13,7 +13,7 @@ import conf.message as msg
 from handler.base import BaseHandler
 from thrift_gen.gen.common.struct.ttypes import BIZException
 from util.common import ObjectDict
-from util.common.decorator import authenticated
+from util.common.decorator import authenticated, handle_response
 from util.tool.date_tool import curr_now_dateonly
 from util.wechat.core import get_temporary_qrcode
 import conf.path as path
@@ -197,11 +197,7 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
             click_time,
             is_recom,
             company_id)
-        wechat = ObjectDict()
-        wechat.subscribed = True if self.current_user.wxuser.is_subscribe or self.current_user.wechat.type == 0 else False
-        wechat.qrcode = yield get_temporary_qrcode(wechat=self.current_user.wechat,
-                                                   pattern_id=const.QRCODE_REFERRED_FRIENDS)
-        wechat.name = self.current_user.wechat.name
+        wechat = yield self.wechat_ps.get_wechat_info(self.current_user, pattern_id=const.QRCODE_REFERRED_FRIENDS, in_wechat=self.in_wechat)
         self.render(
             template_name="refer/weixin/passive-seeker_v2/passive-wanting_recom.html",
             passive_seekers=passive_seekers,
@@ -282,8 +278,10 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
         position = self.get_argument("_position")
         mobile = self.get_argument("_mobile")
         recom_reason = self.get_argument("_recom_reason")
+        gender = self.get_argument("_gender")
+        email = self.get_argument("_email")
 
-        form_items = [recom_record_id, self.current_user.sysuser.id, click_time, realname, company, position, recom_reason]
+        form_items = [recom_record_id, self.current_user.sysuser.id, click_time, realname, company, position, recom_reason, email]
 
         self.logger.debug("post_recom_passive_seeker form_items: %s" % form_items)
 
@@ -306,6 +304,8 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
             'presentee_name': self.get_argument("_presentee_name"),
             'position_name':  self.get_argument("_position_name"),
             'click_time':     self.get_argument("_click_time"),
+            'gender':         gender,
+            'email':          email,
             'next':           1,
         })
 
@@ -322,7 +322,7 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
                 self.current_user.sysuser.id,
                 click_time, recom_record_id, realname, company,
                 position, mobile, recom_reason,
-                self.current_user.company.id)
+                self.current_user.company.idm, gender, email)
 
         except BIZException as e:
             self.render(
@@ -366,3 +366,17 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
                     recommend_presentee=self.recommend_presentee,
                     message=message
                 )
+
+
+class ScanQrcodeHandler(BaseHandler):
+
+    @handle_response
+    @tornado.gen.coroutine
+    def get(self):
+        page_json = dict(
+            points=20
+        )
+
+        self.render_page(
+            template_name='employee/recom-scan-qrcode.html',
+            data=page_json)
