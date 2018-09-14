@@ -240,3 +240,12 @@ class InfraUserDataService(DataService):
     def update_recommend(self, params, employee_id):
         res = yield http_post(path.UPDATE_RECOMMEND.format(employee_id), params)
         return res
+
+    @gen.coroutine
+    def get_applied_applications(self, user_id, company_id):
+        params = ObjectDict({
+            "user_id": user_id,
+            "company_id": company_id
+        })
+        res = yield http_post(path.INFRA_USER_APPLYRECORD, params)
+        return res

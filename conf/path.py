@@ -32,6 +32,7 @@ REFERRAL_PROFILE_PC = "/pc/api/employee/recom/profile"
 MINE = "/usercenter/mine"
 REFERRAL_PROFILE = "/employee/recom/profile"
 REFERRAL_CRUCIAL_INFO = "/referral/crucial/info"
+REFERRAL_SCAN = "/employee/recom/profile/pc"
 
 # 聚合号单独链接
 GAMMA_HOME = '/enter'
@@ -93,6 +94,7 @@ INFRA_WXUSER_QRCODE_SCANRESULT = 'weixin/qrcode/scanresult'
 INFRA_HRUSER = 'hraccount'
 INFRA_USER_EMPLOYEE_CHECK = 'user/employee/check'
 INFRA_USER_EMPLOYEE = 'user/employee'
+INFRA_USER_APPLYRECORD = "/v1/applications"
 
 # 申请服务
 # Ref: https://wiki.moseeker.com/application-api.md

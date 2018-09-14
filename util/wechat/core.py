@@ -405,6 +405,9 @@ def send_succession_message(wechat, open_id, pattern_id):
     elif pattern_id == const.QRCODE_REFERRAL_CONFIRM:
         url = make_url(path.USERCENTER_APPLYRECORD, host=settings["platform_host"], wechat_signature=wechat.get("signature"))
         content = '点击查阅<a href="{}">申请记录</a>'.format(url)
+    elif pattern_id == const.QRCODE_SCAN_REFERRAL:
+        url = make_url(path.REFERRAL_SCAN, host=settings["platform_host"], wechat_signature=wechat.get("signature"))
+        content = '点击查阅<a href="{}">候选人推荐</a>'.format(url)
     else:
         content = "欢迎关注：{}, 点击菜单栏发现更多精彩~".format(wechat.get("name"))
     jdata = ObjectDict({
