@@ -247,5 +247,5 @@ class InfraUserDataService(DataService):
             "user_id": user_id,
             "company_id": company_id
         })
-        res = yield http_post(path.INFRA_USER_APPLYRECORD, params)
+        res = yield http_get(path.INFRA_USER_APPLYRECORD, params)
         return res
