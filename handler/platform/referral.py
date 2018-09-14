@@ -130,17 +130,18 @@ class ReferralConfirmHandler(BaseHandler):
         key = const.CONFIRM_REFERRAL_MOBILE.format(rid, self.current_user.sysuser.id)
         self.redis.set(key, ObjectDict(mobile=ret.mobile), ttl=60 * 60 * 24)
         if ret.status == const.API_SUCCESS:
+            body = ret.data
             data = ObjectDict({
                 "type": type,
                 "successful_recommendation": self.locale.translate("referral_success"),
                 "variants": {
-                    "presentee_first_name": ret.employee_name,
-                    "recom_name": ret.user_name[0:1] + "**",
-                    "company_name": ret.company_abbreviation,
-                    "position_title": ret.position,
-                    "new_user": ret.user_name[0:1] + "**",
-                    "apply_id": ret.apply_id,
-                    "mobile": ret.mobile[0:3] + "****" + ret.mobile[-4:],
+                    "presentee_first_name": body.employee_name,
+                    "recom_name": body.user_name[0:1] + "**",
+                    "company_name": body.company_abbreviation,
+                    "position_title": body.position,
+                    "new_user": body.user_name[0:1] + "**",
+                    "apply_id": body.apply_id,
+                    "mobile": body.mobile[0:3] + "****" + body.mobile[-4:],
                     "wechat": wechat}
             })
             self.render_page(template_name="employee/recom-presentee-confirm.html", data=data)
