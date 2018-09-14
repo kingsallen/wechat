@@ -189,7 +189,7 @@ class ReferralConfirmApiHandler(BaseHandler):
             data = ObjectDict({
                 "name": self.params.name,
                 "mobile": mobile,
-                "valid_code": self.params.vcode,
+                "vcode": self.params.vcode,
                 "referral_record_id": self.params.rkey,
                 "user": self.current_user.sysuser.id
             })

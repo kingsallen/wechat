@@ -400,11 +400,11 @@ def send_succession_message(wechat, open_id, pattern_id):
         url = make_url(path.REFERRAL_CRUCIAL_INFO, host=settings["platform_host"], wechat_signature=wechat.get("signature"))
         content = '点击完成<a href="{}">候选人推荐</a>'.format(url)
     elif pattern_id == const.QRCODE_POSITION_INFO:
-        url = make_url(path.USERCENTER_APPLYRECORD, host=settings["platform_host"], wechat_signature=wechat.get("signature"))
-        content = '点击查阅<a href="{}">申请记录</a>'.format(url)
-    elif pattern_id == const.QRCODE_REFERRAL_CONFIRM:
         url = make_url(path.POSITION_LIST, host=settings["platform_host"], wechat_signature=wechat.get("signature"))
         content = '点击查阅<a href="{}">职位列表</a>'.format(url)
+    elif pattern_id == const.QRCODE_REFERRAL_CONFIRM:
+        url = make_url(path.USERCENTER_APPLYRECORD, host=settings["platform_host"], wechat_signature=wechat.get("signature"))
+        content = '点击查阅<a href="{}">申请记录</a>'.format(url)
     else:
         content = "欢迎关注：{}, 点击菜单栏发现更多精彩~".format(wechat.get("name"))
     jdata = ObjectDict({
