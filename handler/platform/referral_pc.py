@@ -32,19 +32,21 @@ class ReferralUploadHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def get(self):
-        pid = self.redis.get(const.UPLOAD_RECOM_PROFILE.format(self.current_user.sysuser.id)).get("pid")
-        res, data = yield self.employee_ps.get_referral_position_info(self.current_user.sysuser.id, pid)
-        if res.status != const.API_SUCCESS:
-            self.logger.warning("[referral profile]get referral position info fail!")
-            self.render_page(template_name="employee/pc-invalid-qrcode.html", data=None)
-        else:
-            reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_UPLOAD_PROFILE)
-            data = res.data
-            url = self.make_url(path.REFERRAL_PROFILE_PC, float=1)
-            logo = self.current_user.company.logo
-            qrcode = yield self.employee_ps.get_referral_qrcode(url, logo)
-            data.update(reward_point=reward, wechat=ObjectDict({"qrcode": qrcode.data}))
-            self.render_page(template_name="employee/pc-upload-resume.html", data=data)
+        ret = self.redis.get(const.UPLOAD_RECOM_PROFILE.format(self.current_user.sysuser.id))
+        if ret:
+            pid = ret.get("pid")
+            res, data = yield self.employee_ps.get_referral_position_info(self.current_user.sysuser.id, pid)
+            if res.status == const.API_SUCCESS:
+                reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_UPLOAD_PROFILE)
+                data = res.data
+                url = self.make_url(path.REFERRAL_PROFILE_PC, float=1)
+                logo = self.current_user.company.logo
+                qrcode = yield self.employee_ps.get_referral_qrcode(url, logo)
+                data.update(reward_point=reward, wechat=ObjectDict({"qrcode": qrcode.data}))
+                self.render_page(template_name="employee/pc-upload-resume.html", data=data)
+                return
+        self.logger.warning("[referral profile]get referral position info fail!")
+        self.render_page(template_name="employee/pc-invalid-qrcode.html", data=None)
 
 
 class ReferralProfileAPIPcHandler(ReferralProfileAPIHandler):
