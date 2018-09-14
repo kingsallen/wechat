@@ -831,14 +831,14 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
                 position_list = yield self.get_employee_position_list(recom_push_id, infra_params)
             else:
                 position_list = []
-
-        elif is_referral:
-            infra_params.page_num = int(self.params.get("count", 0)) + 1
-            position_list = yield self.position_ps.infra_get_position_list(infra_params, is_referral)
-
         else:
-            # 普通职位列表
-            position_list = yield self.position_ps.infra_get_position_list(infra_params)
+            # 内推职位列表
+            if is_referral:
+                infra_params.page_num = int(self.params.get("count", 0)) + 1
+                position_list = yield self.position_ps.infra_get_position_list(infra_params, is_referral)
+            else:
+                # 普通职位列表
+                position_list = yield self.position_ps.infra_get_position_list(infra_params)
 
             # 获取获取到普通职位列表，则根据获取的数据查找其中红包职位的红包相关信息
             rp_position_list = list(self.__rp_position_generator(position_list))
@@ -1150,7 +1150,6 @@ class PositionRecomListHandler(PositionListInfraParamsMixin, BaseHandler):
 
     @gen.coroutine
     def _make_share(self):
-
         link = self.make_url(
             path.POSITION_LIST,
             self.params,
@@ -1214,3 +1213,21 @@ class PositionSearchHistoryHandler(BaseHandler):
             app_id=self.app_id
         )
         self.write(res)
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def patch(self):
+        """
+        清空搜索记录列表
+        :return:
+        """
+        res = yield self.position_ps.patch_position_search_history(
+            user_id=self.current_user.sysuser.id,
+            app_id=self.app_id
+        )
+        if res.status == 0:
+            self.send_json_success()
+        else:
+            self.send_json_error(message=res.message)
+
