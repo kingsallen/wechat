@@ -211,6 +211,8 @@ class ReferralProfilePcHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         pid = self.params.pid
+        key = const.UPLOAD_RECOM_PROFILE.format(self.current_user.sysuser.id)
+        self.redis.set(key, ObjectDict(pid=pid), ttl=60 * 60 * 24)
         reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_UPLOAD_PROFILE)
         yield self.employee_ps.update_referral_position(self.current_user.employee.id, pid)
         self.render_page(template_name="employee/recom-scan-qrcode.html", data=ObjectDict({

@@ -18,7 +18,7 @@ class ReferralLoginHandler(MetaBaseHandler):
     def get(self):
         appid = settings['open_app_id']
         scope = "snsapi_login"
-        redirect_url = self.make_url(path.REFERRAL_UPLOAD_PC, self.params, host=settings['referral_host'])
+        redirect_url = self.make_url(path.REFERRAL_UPLOAD_PC, self.params, host=settings['referral_host'], wechat_signature=settings['qx_signature'])
         self.render_page(template_name="employee/pc-qrcode-login.html", data=ObjectDict({
             "wx_login_args": ObjectDict(appid=appid,
                                         scope=scope,
@@ -32,8 +32,8 @@ class ReferralUploadHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def get(self):
-        pid = self.redis.get(const.UPLOAD_RECOM_PROFILE.format(self.current_user.sysuser.id))
-        res, data = yield self.employee_ps.get_referral_position_info(self.current_user.employee.id, pid)
+        pid = self.redis.get(const.UPLOAD_RECOM_PROFILE.format(self.current_user.sysuser.id)).get("pid")
+        res, data = yield self.employee_ps.get_referral_position_info(self.current_user.sysuser.id, pid)
         if res.status != const.API_SUCCESS:
             self.logger.warning("[referral profile]get referral position info fail!")
             self.render_page(template_name="employee/pc-invalid-qrcode.html", data=None)

@@ -656,8 +656,8 @@ class EmployeePageService(PageService):
         return res
 
     @gen.coroutine
-    def get_referral_position_info(self, employee_id, pid):
-        res, data = yield self.infra_employee_ds.get_referral_position_info(employee_id, pid)
+    def get_referral_position_info(self, user_id, pid):
+        res, data = yield self.infra_employee_ds.get_referral_position_info(user_id, pid)
         if res.status == const.API_SUCCESS:
             data = ObjectDict({
                 "job_title": data.title,
