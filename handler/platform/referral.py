@@ -128,7 +128,7 @@ class ReferralConfirmHandler(BaseHandler):
         rid = self.params.rkey
         ret = yield self.employee_ps.get_referral_info(rid)
         key = const.CONFIRM_REFERRAL_MOBILE.format(rid, self.current_user.sysuser.id)
-        self.redis.set(key, ObjectDict(mobile=ret.mobile), ttl=60 * 60 * 24)
+        self.redis.set(key, ObjectDict(mobile=ret.data.mobile), ttl=60 * 60 * 24)
         if ret.status == const.API_SUCCESS:
             body = ret.data
             data = ObjectDict({
@@ -189,7 +189,7 @@ class ReferralConfirmApiHandler(BaseHandler):
             data = ObjectDict({
                 "name": self.params.name,
                 "mobile": mobile,
-                "valid_code": self.params.valid_code,
+                "valid_code": self.params.vcode,
                 "referral_record_id": self.params.rkey,
                 "user": self.current_user.sysuser.id
             })
