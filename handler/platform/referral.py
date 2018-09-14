@@ -7,8 +7,7 @@ import conf.path as path
 from handler.base import BaseHandler
 from util.common import ObjectDict
 from util.common.decorator import handle_response, authenticated, check_employee_common
-
-from util.wechat.core import get_temporary_qrcode
+import conf.message as msg
 
 
 class ReferralProfileHandler(BaseHandler):
@@ -24,10 +23,12 @@ class ReferralProfileHandler(BaseHandler):
         position_info = yield self.position_ps.get_position(pid)
 
         self.params.share = yield self._make_share()
-        self.render_page(template_name="employee/mobile-upload-resume.html", data=ObjectDict({"points": reward,
-                                                                                              "job_title": position_info.title,
-                                                                                              "upload_resume": self.locale.translate(
-                                                                                                  "referral_upload")}))
+        self.render_page(template_name="employee/mobile-upload-resume.html",
+                         data=ObjectDict({
+                             "points": reward,
+                             "job_title": position_info.title,
+                             "upload_resume": self.locale.translate("referral_upload")}
+                         ))
 
     @gen.coroutine
     def _make_share(self):
@@ -121,29 +122,41 @@ class ReferralConfirmHandler(BaseHandler):
                 type = 2
             else:
                 type = 3
-        wechat = yield self.wechat_ps.get_wechat_info(self.current_user, pattern_id=const.QRCODE_REFERRAL_CONFIRM,
+        wechat = yield self.wechat_ps.get_wechat_info(self.current_user,
+                                                      pattern_id=const.QRCODE_REFERRAL_CONFIRM if type == 1 else const.QRCODE_OTHER,
                                                       in_wechat=self.in_wechat)
         rid = self.params.rkey
         ret = yield self.employee_ps.get_referral_info(rid)
         key = const.CONFIRM_REFERRAL_MOBILE.format(rid, self.current_user.sysuser.id)
-        self.redis.set(key, ObjectDict(mobile=ret.mobile), ttl=60*60*24)
-
-        data = ObjectDict({
-            "type": type,
-            "successful_recommendation": self.locale.translate("referral_success"),
-            "variants": {
-                "presentee_first_name": ret.employee_name,
-                "recom_name": ret.user_name[0:1] + "**",
-                "company_name": ret.company_abbreviation,
-                "position_title": ret.position,
-                "new_user": ret.user_name[0:1] + "**",
-                "apply_id": ret.apply_id,
-                "mobile": ret.mobile[0:3] + "****" + ret.mobile[-4:],
-                "wechat": wechat}
-        })
-        self.render_page(template_name="employee/recom-presentee-confirm.html", data=data)
-
-        return
+        self.redis.set(key, ObjectDict(mobile=ret.mobile), ttl=60 * 60 * 24)
+        if ret.status == const.API_SUCCESS:
+            data = ObjectDict({
+                "type": type,
+                "successful_recommendation": self.locale.translate("referral_success"),
+                "variants": {
+                    "presentee_first_name": ret.employee_name,
+                    "recom_name": ret.user_name[0:1] + "**",
+                    "company_name": ret.company_abbreviation,
+                    "position_title": ret.position,
+                    "new_user": ret.user_name[0:1] + "**",
+                    "apply_id": ret.apply_id,
+                    "mobile": ret.mobile[0:3] + "****" + ret.mobile[-4:],
+                    "wechat": wechat}
+            })
+            self.render_page(template_name="employee/recom-presentee-confirm.html", data=data)
+        else:
+            data = ObjectDict(
+                kind=1,  # // {0: success, 1: failure, 10: email}
+                messages=["没有推荐信息，或该推荐已被认领"],  # ['hello world', 'abjsldjf']
+                button_text=msg.BACK_CN,
+                button_link=self.make_url(path.POSITION_LIST,
+                                          self.params,
+                                          host=self.host),
+                jump_link=None  # // 如果有会自动，没有就不自动跳转
+            )
+            self.render_page(template_name="system/user-info.html",
+                             data=data)
+            return
 
 
 class ReferralConfirmApiHandler(BaseHandler):
@@ -170,7 +183,8 @@ class ReferralConfirmApiHandler(BaseHandler):
                 raise gen.Return()
             mobile = self.json_args.mobile
             if not mobile:
-                mobile = self.redis.get(const.CONFIRM_REFERRAL_MOBILE.format(self.params.rkey, self.current_user.sysuser.id)).get('mobile')
+                mobile = self.redis.get(
+                    const.CONFIRM_REFERRAL_MOBILE.format(self.params.rkey, self.current_user.sysuser.id)).get('mobile')
             data = ObjectDict({
                 "name": self.params.name,
                 "mobile": mobile,

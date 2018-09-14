@@ -29,6 +29,9 @@ PROFILE_CUSTOM_CV = '/profile/custom'
 REFERRAL_CONFIRM = "/referral/confirm"
 REFERRAL_UPLOAD_PC = "/pc/upload/profile"
 REFERRAL_PROFILE_PC = "/pc/api/employee/recom/profile"
+MINE = "/usercenter/mine"
+REFERRAL_PROFILE = "/employee/recom/profile"
+REFERRAL_CRUCIAL_INFO = "/referral/crucial/info"
 
 # 聚合号单独链接
 GAMMA_HOME = '/enter'
@@ -51,7 +54,7 @@ APPLICATION = '/application'
 APPLICATION_EMAIL = '/application/email'
 COLLECT_USERINFO = '/app/asist/collect_userinfo/positionfav'
 USER_CENTER = '/app/usercenter'
-USERCENTER_APPLYRECORD = '/app/usercenter/applyrecords/{}'
+USERCENTER_APPLYRECORD = '/app/usercenter/applyrecords'
 
 MOBILE_VERIFY = '/app/validate_mobile'
 
@@ -174,7 +177,7 @@ UPLOAD_RECOM_PROFILE = "v1/referral/file-parser"
 REFERRAL_INFO = "/v1/referral-records/{}"
 INFRA_REFERRAL_CONFIRM = "/v1/referral/claim"
 REFERRAL_POSITION_INFO = "/v1/employee/{}/referral-type"
-REFERRAL_CRUCIAL_INFO = "/v1/employee/{}/post-candidate-info"
+INFRA_REFERRAL_CRUCIAL_INFO = "/v1/employee/{}/post-candidate-info"
 REFERRAL_QRCODE = "/v1/referral/position/qrcode"
 REFERRAL_POSITION_LIST = "/v1/referral/wechat/position/list"
 # ============================ 基础服务结束 ============================

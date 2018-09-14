@@ -121,7 +121,7 @@ class InfraEmployeeDataService(DataService):
 
     @gen.coroutine
     def update_referral_crucial_info(self, employee_id, params):
-        ret = yield http_post(path.REFERRAL_CRUCIAL_INFO.format(employee_id), params)
+        ret = yield http_post(path.INFRA_REFERRAL_CRUCIAL_INFO.format(employee_id), params)
         return ret
 
     @gen.coroutine
