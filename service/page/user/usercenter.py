@@ -135,10 +135,14 @@ class UsercenterPageService(PageService):
         return applied_applications_id_list
 
     @gen.coroutine
-    def get_applied_applications(self, user_id):
+    def get_applied_applications(self, user_id, company_id):
         """获得求职记录"""
 
-        ret = yield self.thrift_useraccounts_ds.get_applied_applications(user_id)
+        res = yield self.infra_user_ds.get_applied_applications(user_id, company_id)
+        if res.status != const.API_SUCCESS:
+            ret = []
+        else:
+            ret = res.data
         obj_list = list()
         for e in ret:
             app_rec = ObjectDict()
