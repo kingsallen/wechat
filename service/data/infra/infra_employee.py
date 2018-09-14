@@ -99,7 +99,7 @@ class InfraEmployeeDataService(DataService):
     @gen.coroutine
     def get_referral_info(self, id):
         ret = yield http_get(path.REFERRAL_INFO.format(id))
-        return unboxing(ret)
+        return ret
 
     @gen.coroutine
     def update_referral_info(self, params):

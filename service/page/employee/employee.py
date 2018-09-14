@@ -647,8 +647,8 @@ class EmployeePageService(PageService):
 
     @gen.coroutine
     def get_referral_info(self, id):
-        status, data = yield self.infra_employee_ds.get_referral_info(id)
-        return data
+        ret = yield self.infra_employee_ds.get_referral_info(id)
+        return ret
 
     @gen.coroutine
     def confirm_referral_info(self, data):
