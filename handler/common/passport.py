@@ -362,24 +362,22 @@ class SendValidCodeHandler(BaseHandler):
     @gen.coroutine
     def post(self):
 
-        try:
-            self.guarantee("mobile")
-        except AttributeError:
-            return
+        mobile = self.json_args.mobile
+        if not mobile:
+            mobile = self.redis.get(
+                const.CONFIRM_REFERRAL_MOBILE.format(self.json_args.rkey, self.current_user.sysuser.id)).get("mobile")
         # 校验手机号是否已经被注册
-        ret = yield self.usercenter_ps.post_ismobileregistered(mobile=self.params.mobile)
+        ret = yield self.usercenter_ps.post_ismobileregistered(mobile=mobile)
         if ret.status != const.API_SUCCESS or ret.data.exist:
             # 手机号已存在，不能再注册新用户
             self.send_json_error(message=msg.CELLPHONE_MOBILE_HAD_REGISTERED)
             return
         valid_type = const.MOBILE_CODE_OPT_TYPE.referral_confirm
         result = yield self.cellphone_ps.send_valid_code(
-            self.params.mobile,
+            mobile,
             valid_type
         )
         if result.status != const.API_SUCCESS:
             self.send_json_error(message=result.message)
         else:
-            self.send_json_success(data={
-                "mobile": self.params.mobile
-            })
+            self.send_json_success()

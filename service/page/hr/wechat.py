@@ -55,3 +55,4 @@ class WechatPageService(PageService):
         wechat.qrcode = yield get_temporary_qrcode(wechat=current_user.wechat,
                                                    pattern_id=pattern_id)
         wechat.name = current_user.wechat.name
+        return wechat

@@ -635,7 +635,7 @@ class EmployeePageService(PageService):
             "mobile": mobile,
             "referral_reasons": recom_reason,
             "position": pid,
-            "type": type
+            "referral_type": type
         })
         res = yield self.infra_user_ds.update_recommend(params, employee_id)
         return res
@@ -647,8 +647,8 @@ class EmployeePageService(PageService):
 
     @gen.coroutine
     def get_referral_info(self, id):
-        _, data = yield self.infra_employee_ds.get_referral_info(id)
-        return data
+        ret = yield self.infra_employee_ds.get_referral_info(id)
+        return ret
 
     @gen.coroutine
     def confirm_referral_info(self, data):
