@@ -657,22 +657,24 @@ class EmployeePageService(PageService):
 
     @gen.coroutine
     def get_referral_position_info(self, user_id, pid):
-        res, data = yield self.infra_employee_ds.get_referral_position_info(user_id, pid)
+        res = yield self.infra_employee_ds.get_referral_position_info(user_id, pid)
         if res.status == const.API_SUCCESS:
             data = ObjectDict({
-                "job_title": data.title,
-                "city": ",".join([c.get("name") for c in data.cities]),
-                "company_abbr": data.company_abbreviation,
-                "id": data.id,
-                "job_need": data,
-                "salary": gen_salary(data.salary_top, data.salary_bottom),
-                "salary_bottom": data.salary_bottom,
-                "salary_top": data.salary_top,
-                "experience": gen_experience(data.experience, data.experience_above),
-                "logo": data.logo,
-                "team": data.team
+                "job_title": res.data.title,
+                "city": ",".join([c.get("name") for c in res.data.cities]),
+                "company_abbr": res.data.company_abbreviation,
+                "id": res.data.id,
+                "job_need": res.data,
+                "salary": gen_salary(res.data.salary_top, res.data.salary_bottom),
+                "salary_bottom": res.data.salary_bottom,
+                "salary_top": res.data.salary_top,
+                "experience": gen_experience(res.data.experience, res.data.experience_above),
+                "logo": res.data.logo,
+                "team": res.data.team
             })
-        return res, data
+        else:
+            data = ObjectDict()
+        return data
 
     @gen.coroutine
     def update_referral_position(self, employee_id, pid):

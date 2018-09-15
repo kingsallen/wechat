@@ -35,10 +35,9 @@ class ReferralUploadHandler(BaseHandler):
         ret = self.redis.get(const.UPLOAD_RECOM_PROFILE.format(self.current_user.sysuser.id))
         if ret:
             pid = ret.get("pid")
-            res, data = yield self.employee_ps.get_referral_position_info(self.current_user.sysuser.id, pid)
-            if res.status == const.API_SUCCESS:
+            data = yield self.employee_ps.get_referral_position_info(self.current_user.sysuser.id, pid)
+            if data:
                 reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_UPLOAD_PROFILE)
-                data = res.data
                 url = self.make_url(path.REFERRAL_PROFILE_PC, float=1)
                 logo = self.current_user.company.logo
                 qrcode = yield self.employee_ps.get_referral_qrcode(url, logo)

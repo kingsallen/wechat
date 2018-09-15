@@ -780,8 +780,13 @@ class PositionListInfraParamsMixin(BaseHandler):
             infra_params.employment_type = const.EMPLOYMENT_TYPE_SEARCH.get(self.params.employment_type, "") \
                 if self.params.employment_type.isdigit() else self.params.employment_type
 
+        if self.params.is_referral:
+            infra_params.update(
+                keyWord=self.params.keyword if self.params.keyword else "")
+        else:
+            infra_params.update(
+                keywords=self.params.keyword if self.params.keyword else "")
         infra_params.update(
-            keywords=self.params.keyword if self.params.keyword else "",
             department=self.params.team_name if self.params.team_name else "",
             occupations=self.params.occupation if self.params.occupation else "",
             custom=self.params.custom if self.params.custom else "",

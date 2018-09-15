@@ -112,7 +112,7 @@ class InfraEmployeeDataService(DataService):
             "position": pid
         })
         ret = yield http_get(path.REFERRAL_POSITION_INFO.format(user_id), params)
-        return unboxing(ret)
+        return ret
 
     @gen.coroutine
     def update_referral_position(self, employee_id, pid):
