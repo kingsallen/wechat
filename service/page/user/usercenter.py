@@ -145,6 +145,7 @@ class UsercenterPageService(PageService):
             ret = res.data
         obj_list = list()
         for e in ret:
+            e = ObjectDict(e)
             app_rec = ObjectDict()
             app_rec['id'] = e.id
             app_rec['position_title'] = e.position_title
