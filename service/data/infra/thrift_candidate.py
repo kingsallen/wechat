@@ -91,7 +91,7 @@ class ThriftCandidateDataService(DataService):
 
     @gen.coroutine
     def recommend(self, post_user_id, click_time, recom_record_id, realname, company,
-                  position, mobile, recom_reason, company_id):
+                  position, mobile, recom_reason, company_id, gender, email):
         """ POST 推荐， 返回 recommend_result
 
         candidate_struct.RecommendResult recommend(
@@ -102,7 +102,8 @@ class ThriftCandidateDataService(DataService):
 
         self.logger.debug("[thfirt] recommend params: %s" % dict(
             post_user_id=post_user_id, click_time=click_time, recom_record_id=recom_record_id, realname=realname,
-            company=company, position=position, mobile=mobile, recom_reason=recom_reason, company_id=company_id))
+            company=company, position=position, mobile=mobile, recom_reason=recom_reason, company_id=company_id,
+            gender=gender, email=email))
 
         recom_params = RecommmendParam()
 
@@ -115,6 +116,9 @@ class ThriftCandidateDataService(DataService):
         recom_params.companyId = int(company_id)
         recom_params.postUserId = int(post_user_id)
         recom_params.clickTime = str(click_time)
+        recom_params.gender = int(gender)
+        recom_params.email = str(email)
+
 
         try:
             recommend_result = yield self.candidate_service_cilent.recommend(

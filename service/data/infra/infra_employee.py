@@ -107,11 +107,11 @@ class InfraEmployeeDataService(DataService):
         return ret
 
     @gen.coroutine
-    def get_referral_position_info(self, user_id, pid):
+    def get_referral_position_info(self, employee_id, pid):
         params = ObjectDict({
             "position": pid
         })
-        ret = yield http_get(path.REFERRAL_POSITION_INFO.format(user_id), params)
+        ret = yield http_get(path.REFERRAL_POSITION_INFO_EMPLOYEE.format(employee_id), params)
         return ret
 
     @gen.coroutine
@@ -133,5 +133,10 @@ class InfraEmployeeDataService(DataService):
             "url": url,
             "logo": logo
         })
-        ret = yield http_get(path.REFERRAL_QRCODE, params)
+        ret = yield http_post(path.REFERRAL_QRCODE, params)
+        return ret
+
+    @gen.coroutine
+    def get_employee_by_user_id(self, user_id):
+        ret = yield http_get(path.INFRA_USER_EMPLOYEE_REFERRAL.format(user_id))
         return ret

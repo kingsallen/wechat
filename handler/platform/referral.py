@@ -61,12 +61,13 @@ class ReferralProfileAPIHandler(BaseHandler):
 
     @handle_response
     @gen.coroutine
-    def _post(self, type=1):
+    def _post(self, type=1, employee_id=None):
         name = self.json_args.name
         mobile = self.json_args.mobile
         recom_reason = self.json_args.recom_reason
         pid = self.json_args.pid
-        res = yield self.employee_ps.update_recommend(self.current_user.employee.id, name, mobile, recom_reason, pid,
+        employee_id = self.current_user.employee.id if not employee_id else employee_id
+        res = yield self.employee_ps.update_recommend(employee_id, name, mobile, recom_reason, pid,
                                                       type)
         if res.status == const.API_SUCCESS:
             self.send_json_success(data=ObjectDict({
@@ -86,7 +87,7 @@ class EmployeeRecomProfileHandler(BaseHandler):
 
     @handle_response
     @gen.coroutine
-    def _post(self):
+    def _post(self, employee_id=None):
         if len(self.request.files) == 0:
             file_data = self.request.body
             file_name = self.get_argument("vfile")
@@ -98,8 +99,9 @@ class EmployeeRecomProfileHandler(BaseHandler):
         if len(file_data) > 2 * 1024 * 1024:
             self.send_json_error(message="请上传2M以下的文件")
             return
-
-        ret = yield self.employee_ps.upload_recom_profile(file_name, file_data, self.current_user.employee.id)
+        if not employee_id:
+            employee_id = self.current_user.employee.id
+        ret = yield self.employee_ps.upload_recom_profile(file_name, file_data, employee_id)
         if ret.status != const.API_SUCCESS:
             self.send_json_error(message=ret.message)
             return

@@ -77,9 +77,9 @@ class PositionHandler(BaseHandler):
             recomment_positions_res = yield self.position_ps.get_recommend_positions(position_id)
 
             # 职位推荐简历积分
-            self.logger.debug("[JD]构建职位推荐简历积分")
+            self.logger.debug("[JD]构建职位推荐简历积分,分享积分")
             reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_UPLOAD_PROFILE)
-
+            share_reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_CLICK_JOB)
             # 获取公司配置信息
             teamname_custom = self.current_user.company.conf_teamname_custom
 
@@ -95,7 +95,7 @@ class PositionHandler(BaseHandler):
 
             header = yield self._make_json_header(
                 position_info, company_info, star, application, endorse,
-                can_apply, team.id if team else 0, did, teamname_custom, reward)
+                can_apply, team.id if team else 0, did, teamname_custom, reward, share_reward)
             module_job_description = self._make_json_job_description(position_info)
             module_job_need = self._make_json_job_need(position_info)
             position_feature = yield self.position_ps.get_position_feature(position_id)
@@ -330,7 +330,7 @@ class PositionHandler(BaseHandler):
     @log_time
     @gen.coroutine
     def _make_json_header(self, position_info, company_info, star, application,
-                          endorse, can_apply, team_id, did, teamname_custom, reward):
+                          endorse, can_apply, team_id, did, teamname_custom, reward, share_reward):
         """构造头部 header 信息"""
 
         # 获得母公司配置信息
@@ -357,7 +357,8 @@ class PositionHandler(BaseHandler):
             "candidate_source": position_info.candidate_source_num,
             "reward_point": reward,
             "company_name": company_info.abbreviation,
-            "is_referral": position_info.is_referral if self.current_user.employee else False
+            "is_referral": position_info.is_referral if self.current_user.employee else False,
+            "share_reward": share_reward
             # "team": position_info.department.lower() if position_info.department else ""
         })
 

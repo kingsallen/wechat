@@ -53,6 +53,20 @@ class EmployeePageService(PageService):
             user_id, company_id)
         return employee_response.bindStatus, employee_response.employee
 
+    @gen.coroutine
+    def get_employee_info_by_user_id(self, user_id):
+        """通过user_id获取员工信息"""
+        res = yield self.infra_employee_ds.get_employee_by_user_id(user_id)
+        if res.status == const.API_SUCCESS:
+            data = ObjectDict({
+                "employee_id": res.data.id,
+                "wechat_signature": res.data.signature,
+                "company_id": res.data.company_id
+            })
+        else:
+            data = ObjectDict()
+        return data
+
     @staticmethod
     def convert_bind_status_from_thrift_to_fe(thrift_bind_status):
         """convert bind status value to FE format"""
@@ -656,8 +670,8 @@ class EmployeePageService(PageService):
         return res
 
     @gen.coroutine
-    def get_referral_position_info(self, user_id, pid):
-        res = yield self.infra_employee_ds.get_referral_position_info(user_id, pid)
+    def get_referral_position_info(self, employee_id, pid):
+        res = yield self.infra_employee_ds.get_referral_position_info(employee_id, pid)
         if res.status == const.API_SUCCESS:
             data = ObjectDict({
                 "job_title": res.data.title,
@@ -698,5 +712,5 @@ class EmployeePageService(PageService):
 
     @gen.coroutine
     def get_referral_qrcode(self, url, logo):
-        res = yield self.infra_employee_ps.get_referral_qrcode(url, logo)
+        res = yield self.infra_employee_ds.get_referral_qrcode(url, logo)
         return res
