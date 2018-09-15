@@ -23,6 +23,13 @@ class UsercenterPageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
+    def get_my_info(self, user_id):
+        """获得用户数据"""
+
+        ret = yield self.infra_user_ds.get_my_info(user_id)
+        raise gen.Return(ret)
+
+    @gen.coroutine
     def update_user(self, user_id, params):
         """更新用户数据"""
 

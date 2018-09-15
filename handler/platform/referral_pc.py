@@ -33,19 +33,22 @@ class ReferralUploadHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         ret = self.redis.get(const.UPLOAD_RECOM_PROFILE.format(self.current_user.sysuser.id))
-        if ret:
-            pid = ret.get("pid")
-            data = yield self.employee_ps.get_referral_position_info(self.current_user.sysuser.id, pid)
-            if data:
-                reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_UPLOAD_PROFILE)
-                url = self.make_url(path.REFERRAL_PROFILE_PC, float=1)
-                logo = self.current_user.company.logo
-                qrcode = yield self.employee_ps.get_referral_qrcode(url, logo)
-                data.update(reward_point=reward, wechat=ObjectDict({"qrcode": qrcode.data}))
-                self.render_page(template_name="employee/pc-upload-resume.html", data=data)
-                return
-        self.logger.warning("[referral profile]get referral position info fail!")
-        self.render_page(template_name="employee/pc-invalid-qrcode.html", data=None)
+        user_info = yield self.employee_ps.get_employee_info_by_user_id(self.current_user.sysuser.id)
+        pid = ret.get("pid") if ret else 0
+        if pid and user_info:
+            data = yield self.employee_ps.get_referral_position_info(user_info.employee_id, pid)
+        else:
+            data = ObjectDict()
+        if data and user_info:
+            reward = yield self.employee_ps.get_bind_reward(user_info.company.id, const.REWARD_UPLOAD_PROFILE)
+            url = self.make_url(path.REFERRAL_PROFILE_PC, float=1, wechat_signature=user_info.wechat_signature)
+            logo = self.current_user.company.logo
+            qrcode = yield self.employee_ps.get_referral_qrcode(url, logo)
+            data.update(reward_point=reward, wechat=ObjectDict({"qrcode": qrcode.data}))
+            self.render_page(template_name="employee/pc-upload-resume.html", data=data)
+        else:
+            self.logger.warning("[referral profile]get referral position info fail!")
+            self.render_page(template_name="employee/pc-invalid-qrcode.html", data=None)
 
 
 class ReferralProfileAPIPcHandler(ReferralProfileAPIHandler):
@@ -53,7 +56,8 @@ class ReferralProfileAPIPcHandler(ReferralProfileAPIHandler):
     @handle_response
     @gen.coroutine
     def post(self):
-        yield self._post(type=2)
+        user_info = yield self.employee_ps.get_employee_info_by_user_id(self.current_user.sysuser.id)
+        yield self._post(type=2, employee_id=user_info.employee_id)
 
 
 class EmployeeRecomProfilePcHandler(EmployeeRecomProfileHandler):
@@ -62,4 +66,5 @@ class EmployeeRecomProfilePcHandler(EmployeeRecomProfileHandler):
     @handle_response
     @gen.coroutine
     def post(self):
-        self._post()
+        user_info = yield self.employee_ps.get_employee_info_by_user_id(self.current_user.sysuser.id)
+        self._post(employee_id=user_info.employee_id)

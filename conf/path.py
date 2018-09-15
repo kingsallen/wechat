@@ -78,6 +78,7 @@ RESUME_IMPORT_FAIL = "/resume/import/limit"
 # 用户服务
 # Ref: https://wiki.moseeker.com/user_account_api.md
 INFRA_USER_INFO = 'user'
+INFRA_MY_INFO = "/v1/users/{}/center-info"
 INFRA_USER_VALID = 'user/sendCode'
 INFRA_USER_VOICE_VALID = 'user/sendsignupcode/voice'
 INFRA_USER_VERIFY = 'user/verifyCode'
@@ -95,6 +96,7 @@ INFRA_HRUSER = 'hraccount'
 INFRA_USER_EMPLOYEE_CHECK = 'user/employee/check'
 INFRA_USER_EMPLOYEE = 'user/employee'
 INFRA_USER_APPLYRECORD = "/v1/applications"
+INFRA_USER_EMPLOYEE_REFERRAL = "/v1/referral/users/{}/employee-info"
 
 # 申请服务
 # Ref: https://wiki.moseeker.com/application-api.md
@@ -178,7 +180,6 @@ UPDATE_RECOMMEND = "/v1/employee/{}/referral"
 UPLOAD_RECOM_PROFILE = "v1/referral/file-parser"
 REFERRAL_INFO = "/v1/referral-records/{}"
 INFRA_REFERRAL_CONFIRM = "/v1/referral/claim"
-REFERRAL_POSITION_INFO = "/v1/user/{}/referral-type"
 REFERRAL_POSITION_INFO_EMPLOYEE = "/v1/employee/{}/referral-type"
 INFRA_REFERRAL_CRUCIAL_INFO = "/v1/employee/{}/post-candidate-info"
 REFERRAL_QRCODE = "/v1/referral/position/qrcode"

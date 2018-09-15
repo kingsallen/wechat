@@ -25,6 +25,12 @@ class InfraUserDataService(DataService):
         raise gen.Return(ret)
 
     @gen.coroutine
+    def get_my_info(self, user_id):
+        """获得用户我的个人中心数据"""
+        ret = yield http_get(path.INFRA_USER_INFO.format(user_id))
+        raise gen.Return(ret)
+
+    @gen.coroutine
     def post_wx_pc_combine(self, country_code, mobile, unionid):
         """手机号和微信号绑定接口"""
 
