@@ -167,7 +167,7 @@ class UsercenterMyInfoHandler(BaseHandler):
         if not self.current_user.sysuser.id:
             res = ObjectDict(data=ObjectDict)
         else:
-            res = yield self.usercenter_ps.get_my_info(self.current_user.sysuser.id)
+            res = yield self.usercenter_ps.get_my_info(self.current_user.sysuser.id, self.current_user.company.id)
 
         # 检查员工绑定状态
         bind_status = yield self.employee_ps.get_employee_bind_status(

@@ -23,10 +23,12 @@ class UsercenterPageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def get_my_info(self, user_id):
+    def get_my_info(self, user_id, company_id):
         """获得用户数据"""
-
-        ret = yield self.infra_user_ds.get_my_info(user_id)
+        params = ObjectDict({
+            "company_id": company_id
+        })
+        ret = yield self.infra_user_ds.get_my_info(user_id, params)
         raise gen.Return(ret)
 
     @gen.coroutine
