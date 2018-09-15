@@ -40,7 +40,7 @@ class ReferralUploadHandler(BaseHandler):
         else:
             data = ObjectDict()
         if data and user_info:
-            reward = yield self.employee_ps.get_bind_reward(user_info.company.id, const.REWARD_UPLOAD_PROFILE)
+            reward = yield self.employee_ps.get_bind_reward(user_info.company_id, const.REWARD_UPLOAD_PROFILE)
             data.update(reward_point=reward)
             self.render_page(template_name="employee/pc-upload-resume.html", data=data)
         else:
