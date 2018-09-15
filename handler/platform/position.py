@@ -1159,7 +1159,8 @@ class PositionRecomListHandler(PositionListInfraParamsMixin, BaseHandler):
         link = self.make_url(
             path.POSITION_LIST,
             self.params,
-            recom=self.position_ps._make_recom(self.current_user.sysuser.id))
+            recom=self.position_ps._make_recom(self.current_user.sysuser.id),
+            is_referral=1)
         company_info = yield self.company_ps.get_company(
             conds={"id": self.current_user.company.id}, need_conf=True)
 
