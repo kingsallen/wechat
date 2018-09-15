@@ -41,10 +41,7 @@ class ReferralUploadHandler(BaseHandler):
             data = ObjectDict()
         if data and user_info:
             reward = yield self.employee_ps.get_bind_reward(user_info.company.id, const.REWARD_UPLOAD_PROFILE)
-            url = self.make_url(path.REFERRAL_SCAN, float=1, wechat_signature=user_info.wechat_signature, pid=pid)
-            logo = self.current_user.company.logo
-            qrcode = yield self.employee_ps.get_referral_qrcode(url, logo)
-            data.update(reward_point=reward, wechat=ObjectDict({"qrcode": qrcode.data}))
+            data.update(reward_point=reward)
             self.render_page(template_name="employee/pc-upload-resume.html", data=data)
         else:
             self.logger.warning("[referral profile]get referral position info fail!")
