@@ -179,8 +179,8 @@ platform_routes = [
     # pc端推荐相关
     (r"/pc/upload/profile/login/?",                  handler.platform.referral_pc.ReferralLoginHandler,         {"event": "referral_pc_login"}),
     (r"/pc/upload/profile/?",                        handler.platform.referral_pc.ReferralUploadHandler,        {"event": "referral_pc_upload"}),
-    (r"/pc/api/employee/recom/profile/?",            handler.platform.referral_pc.EmployeeRecomProfilePcHandler, {"event": "referral_pc_profile"}),
-    (r"/pc/api/upload/recomprofile/?",               handler.platform.referral_pc.ReferralProfileAPIPcHandler,  {"event": "referral_pc_upload_profile"}),
+    (r"/pc/api/upload/recomprofile/?",               handler.platform.referral_pc.EmployeeRecomProfilePcHandler, {"event": "referral_pc_upload_profile"}),
+    (r"/pc/api/employee/recom/profile/?",            handler.platform.referral_pc.ReferralProfileAPIPcHandler,  {"event": "referral_pc_profile"}),
 
     (r"/api/company/visitreq/?",                     handler.platform.companyrelation.CompanyVisitReqHandler,   {"event": "company_visitreq"}),
     (r"/api/company/survey/?",                       handler.platform.companyrelation.CompanySurveyHandler,     {"event": "company_survey"}),

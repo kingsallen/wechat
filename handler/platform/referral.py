@@ -131,35 +131,24 @@ class ReferralConfirmHandler(BaseHandler):
         ret = yield self.employee_ps.get_referral_info(rid)
         key = const.CONFIRM_REFERRAL_MOBILE.format(rid, self.current_user.sysuser.id)
         self.redis.set(key, ObjectDict(mobile=ret.data.mobile), ttl=60 * 60 * 24)
-        if ret.status == const.API_SUCCESS:
-            body = ret.data
-            data = ObjectDict({
-                "type": type,
-                "successful_recommendation": self.locale.translate("referral_success"),
-                "variants": {
-                    "presentee_first_name": body.employee_name,
-                    "recom_name": body.user_name[0:1] + "**",
-                    "company_name": body.company_abbreviation,
-                    "position_title": body.position,
-                    "new_user": body.user_name[0:1] + "**",
-                    "apply_id": body.apply_id,
-                    "mobile": body.mobile[0:3] + "****" + body.mobile[-4:],
-                    "wechat": wechat}
-            })
-            self.render_page(template_name="employee/recom-presentee-confirm.html", data=data)
-        else:
-            data = ObjectDict(
-                kind=1,  # // {0: success, 1: failure, 10: email}
-                messages=["没有推荐信息，或该推荐已被认领"],  # ['hello world', 'abjsldjf']
-                button_text=msg.BACK_CN,
-                button_link=self.make_url(path.POSITION_LIST,
-                                          self.params,
-                                          host=self.host),
-                jump_link=None  # // 如果有会自动，没有就不自动跳转
-            )
-            self.render_page(template_name="system/user-info.html",
-                             data=data)
-            return
+        body = ret.data
+        if ret.status != const.API_SUCCESS or body.get("claim") is not False:
+            type = 4
+            body = ObjectDict()
+        data = ObjectDict({
+            "type": type,
+            "successful_recommendation": self.locale.translate("referral_success"),
+            "variants": {
+                "presentee_first_name": body.employee_name,
+                "recom_name": body.user_name[0:1] + "**",
+                "company_name": body.company_abbreviation,
+                "position_title": body.position,
+                "new_user": body.user_name[0:1] + "**",
+                "apply_id": body.apply_id,
+                "mobile": body.mobile[0:3] + "****" + body.mobile[-4:],
+                "wechat": wechat}
+        })
+        self.render_page(template_name="employee/recom-presentee-confirm.html", data=data)
 
 
 class ReferralConfirmApiHandler(BaseHandler):

@@ -41,7 +41,7 @@ class ReferralUploadHandler(BaseHandler):
             data = ObjectDict()
         if data and user_info:
             reward = yield self.employee_ps.get_bind_reward(user_info.company.id, const.REWARD_UPLOAD_PROFILE)
-            url = self.make_url(path.REFERRAL_PROFILE_PC, float=1, wechat_signature=user_info.wechat_signature)
+            url = self.make_url(path.REFERRAL_SCAN, float=1, wechat_signature=user_info.wechat_signature, pid=pid)
             logo = self.current_user.company.logo
             qrcode = yield self.employee_ps.get_referral_qrcode(url, logo)
             data.update(reward_point=reward, wechat=ObjectDict({"qrcode": qrcode.data}))
@@ -67,4 +67,4 @@ class EmployeeRecomProfilePcHandler(EmployeeRecomProfileHandler):
     @gen.coroutine
     def post(self):
         user_info = yield self.employee_ps.get_employee_info_by_user_id(self.current_user.sysuser.id)
-        self._post(employee_id=user_info.employee_id)
+        yield self._post(employee_id=user_info.employee_id)
