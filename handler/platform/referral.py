@@ -61,18 +61,27 @@ class ReferralProfileAPIHandler(BaseHandler):
 
     @handle_response
     @gen.coroutine
-    def _post(self, type=1, employee_id=None):
+    def _post(self, type=1,):
         name = self.json_args.name
         mobile = self.json_args.mobile
         recom_reason = self.json_args.recom_reason
         pid = self.json_args.pid
-        employee_id = self.current_user.employee.id if not employee_id else employee_id
+        user_info = yield self.employee_ps.get_employee_info_by_user_id(self.current_user.sysuser.id)
+        employee_id = self.current_user.employee.id if not user_info.employee_id else user_info.employee_id
         res = yield self.employee_ps.update_recommend(employee_id, name, mobile, recom_reason, pid,
                                                       type)
         if res.status == const.API_SUCCESS:
-            self.send_json_success(data=ObjectDict({
-                "rkey": res.data
-            }))
+            if type == 1:
+                self.send_json_success(data=ObjectDict({
+                    "rkey": res.data
+                }))
+            elif type == 2:
+                url = self.make_url(path.REFERRAL_SCAN, float=1, wechat_signature=user_info.wechat_signature, pid=pid, rkey=res.data)
+                logo = self.current_user.company.logo
+                qrcode = yield self.employee_ps.get_referral_qrcode(url, logo)
+                self.send_json_success(data=ObjectDict({
+                    "wechat": {"qrcode": qrcode.data}
+                }))
         else:
             self.send_json_error()
 
@@ -202,14 +211,22 @@ class ReferralProfilePcHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         pid = self.params.pid
+        float = self.params.float
+        rkey = self.params.rkey
         key = const.UPLOAD_RECOM_PROFILE.format(self.current_user.sysuser.id)
         self.redis.set(key, ObjectDict(pid=pid), ttl=60 * 60 * 24)
         reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_UPLOAD_PROFILE)
         yield self.employee_ps.update_referral_position(self.current_user.employee.id, pid)
-        self.render_page(template_name="employee/recom-scan-qrcode.html", data=ObjectDict({
-            "points": reward,
-            "recommend_resume": self.locale.translate("referral_scan_upload")
-        }))
+        data = ObjectDict({
+            "points": reward
+        })
+        if float:
+            ret = yield self.employee_ps.get_referral_info(rkey)
+            data.update(float=1,
+                        username=ret.data.user_name,
+                        job_title=ret.data.position,
+                        rkey=rkey)
+        self.render_page(template_name="employee/recom-scan-qrcode.html", data=data)
 
 
 class ReferralCrucialInfoHandler(BaseHandler):
