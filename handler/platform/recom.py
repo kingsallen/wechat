@@ -322,7 +322,7 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
                 self.current_user.sysuser.id,
                 click_time, recom_record_id, realname, company,
                 position, mobile, recom_reason,
-                self.current_user.company.idm, gender, email)
+                self.current_user.company.id, gender, email)
 
         except BIZException as e:
             self.render(

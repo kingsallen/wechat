@@ -78,7 +78,10 @@ class PositionHandler(BaseHandler):
 
             # 职位推荐简历积分
             self.logger.debug("[JD]构建职位推荐简历积分,分享积分")
-            reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_UPLOAD_PROFILE)
+            if position_info.is_referral:
+                reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_UPLOAD_PROFILE)
+            else:
+                reward = 0
             share_reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_CLICK_JOB)
             # 获取公司配置信息
             teamname_custom = self.current_user.company.conf_teamname_custom
