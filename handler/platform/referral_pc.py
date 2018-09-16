@@ -54,7 +54,7 @@ class ReferralProfileAPIPcHandler(ReferralProfileAPIHandler):
     @gen.coroutine
     def post(self):
         user_info = yield self.employee_ps.get_employee_info_by_user_id(self.current_user.sysuser.id)
-        yield self._post(type=2, employee_id=user_info.employee_id)
+        yield self._post(type=2)
 
 
 class EmployeeRecomProfilePcHandler(EmployeeRecomProfileHandler):

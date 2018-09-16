@@ -61,7 +61,7 @@ class ReferralProfileAPIHandler(BaseHandler):
 
     @handle_response
     @gen.coroutine
-    def _post(self, type=1,):
+    def _post(self, type=1):
         name = self.json_args.name
         mobile = self.json_args.mobile
         recom_reason = self.json_args.recom_reason
