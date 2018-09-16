@@ -69,7 +69,7 @@ class WeChatOauth2Service(object):
             openid = access_token_info.get('openid')
             # 缓存 access_token
             self._access_token = access_token_info.get('access_token')
-        raise gen.Return((openid))
+        raise gen.Return(openid)
 
     @gen.coroutine
     def get_userinfo_by_code(self, code):
@@ -90,7 +90,7 @@ class WeChatOauth2Service(object):
         :param code:
         :return:
         """
-        openid, _ = yield self.get_openid_unionid_by_code_pc(code)
+        openid = yield self.get_openid_unionid_by_code_pc(code)
         userinfo = yield self._get_userinfo_by_openid(openid)
         if userinfo.errcode:
             raise WeChatOauthError("get_userinfo_by_code: {}".format(userinfo.errmsg))
