@@ -522,6 +522,8 @@ class RecommmendParam(object):
      - companyId
      - postUserId
      - clickTime
+     - gender
+     - email
     """
 
     thrift_spec = (
@@ -535,9 +537,11 @@ class RecommmendParam(object):
         (7, TType.I32, 'companyId', None, None, ),  # 7
         (8, TType.I32, 'postUserId', None, None, ),  # 8
         (9, TType.STRING, 'clickTime', 'UTF8', None, ),  # 9
+        (10, TType.BYTE, 'gender', None, None, ),  # 10
+        (11, TType.STRING, 'email', 'UTF8', None, ),  # 11
     )
 
-    def __init__(self, id=None, realName=None, company=None, position=None, mobile=None, recomReason=None, companyId=None, postUserId=None, clickTime=None,):
+    def __init__(self, id=None, realName=None, company=None, position=None, mobile=None, recomReason=None, companyId=None, postUserId=None, clickTime=None, gender=None, email=None,):
         self.id = id
         self.realName = realName
         self.company = company
@@ -547,6 +551,8 @@ class RecommmendParam(object):
         self.companyId = companyId
         self.postUserId = postUserId
         self.clickTime = clickTime
+        self.gender = gender
+        self.email = email
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -602,6 +608,16 @@ class RecommmendParam(object):
                     self.clickTime = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
+            elif fid == 10:
+                if ftype == TType.BYTE:
+                    self.gender = iprot.readByte()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 11:
+                if ftype == TType.STRING:
+                    self.email = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -647,6 +663,14 @@ class RecommmendParam(object):
         if self.clickTime is not None:
             oprot.writeFieldBegin('clickTime', TType.STRING, 9)
             oprot.writeString(self.clickTime.encode('utf-8') if sys.version_info[0] == 2 else self.clickTime)
+            oprot.writeFieldEnd()
+        if self.gender is not None:
+            oprot.writeFieldBegin('gender', TType.BYTE, 10)
+            oprot.writeByte(self.gender)
+            oprot.writeFieldEnd()
+        if self.email is not None:
+            oprot.writeFieldBegin('email', TType.STRING, 11)
+            oprot.writeString(self.email.encode('utf-8') if sys.version_info[0] == 2 else self.email)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
