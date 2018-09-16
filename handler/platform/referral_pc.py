@@ -53,7 +53,6 @@ class ReferralProfileAPIPcHandler(ReferralProfileAPIHandler):
     @handle_response
     @gen.coroutine
     def post(self):
-        user_info = yield self.employee_ps.get_employee_info_by_user_id(self.current_user.sysuser.id)
         yield self._post(type=2)
 
 
