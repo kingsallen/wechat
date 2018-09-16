@@ -148,6 +148,20 @@ class BaseHandler(MetaBaseHandler):
             elif state:  # 用户拒绝授权
                 # TODO 拒绝授权用户，是否让其继续操作? or return
                 pass
+        else:
+            # pc端授权
+            if code and self._verify_code(code):
+                self.set_cookie(
+                    const.COOKIE_CODE,
+                    to_str(code),
+                    expires_days=1,
+                    httponly=True)
+                userinfo = yield self._get_user_info_pc(code)
+                if userinfo:
+                    self.logger.debug("来自 pc 的授权, 获得 userinfo:{}".format(userinfo))
+                    yield self._handle_user_info(userinfo)
+                else:
+                    self.logger.debug("来自 pc 的 code 无效")
 
         # 构造并拼装 session
         yield self._fetch_session()
@@ -279,6 +293,14 @@ class BaseHandler(MetaBaseHandler):
         self._oauth_service.wechat = self._qx_wechat
         try:
             userinfo = yield self._oauth_service.get_userinfo_by_code(code)
+            raise gen.Return(userinfo)
+        except WeChatOauthError as e:
+            raise gen.Return(None)
+
+    @gen.coroutine
+    def _get_user_info_pc(self, code):
+        try:
+            userinfo = yield self._oauth_service.get_userinfo_by_code_pc(code)
             raise gen.Return(userinfo)
         except WeChatOauthError as e:
             raise gen.Return(None)
