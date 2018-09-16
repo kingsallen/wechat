@@ -1151,9 +1151,15 @@ class PositionRecomListHandler(PositionListInfraParamsMixin, BaseHandler):
         内推职位列表页
         :return:
         """
+        infra_params = self.make_position_list_infra_params()
         self.params.share = yield self._make_share()
+        position_list = yield self.position_ps.infra_get_position_list(infra_params, is_referral=1)
+        if position_list:
+            total = position_list[0].total_num
+        else:
+            total = 0
         data = ObjectDict({
-            "referral_title": self.locale.translate("referral_position_title")
+            "total": total
         })
         self.render_page(template_name="employee/recom-job-index.html", data=data)
 
