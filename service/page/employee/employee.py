@@ -15,7 +15,7 @@ from util.common import ObjectDict
 from util.tool.dict_tool import sub_dict
 from util.tool.re_checker import revalidator
 from util.tool.url_tool import make_static_url, make_url
-from util.tool.str_tool import gen_salary, gen_experience
+from util.tool.str_tool import gen_salary, gen_experience_v2
 from util.wechat.core import get_temporary_qrcode
 from util.common.mq import unread_praise_publisher
 
@@ -681,7 +681,7 @@ class EmployeePageService(PageService):
         return res
 
     @gen.coroutine
-    def get_referral_position_info(self, employee_id, pid):
+    def get_referral_position_info(self, employee_id, pid, locale=None):
         res = yield self.infra_employee_ds.get_referral_position_info(employee_id, pid)
         if res.status == const.API_SUCCESS:
             data = ObjectDict({
@@ -693,7 +693,7 @@ class EmployeePageService(PageService):
                 "salary": gen_salary(res.data.salary_top, res.data.salary_bottom),
                 "salary_bottom": res.data.salary_bottom,
                 "salary_top": res.data.salary_top,
-                "experience": gen_experience(str(res.data.experience) if res.data.experience != 0 else "", res.data.experience_above),
+                "experience": gen_experience_v2(str(res.data.experience) if res.data.experience != 0 else "", res.data.experience_above, locale),
                 "logo": res.data.logo,
                 "team": res.data.team
             })
