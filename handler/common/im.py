@@ -203,6 +203,7 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
 class ChatRoomHandler(BaseHandler):
     """聊天页面"""
 
+    @authenticated
     @gen.coroutine
     def get(self, room_id):
         hr_id = self.params.hr_id or 0
@@ -247,6 +248,7 @@ class ChatRoomHandler(BaseHandler):
                           "hideAllNonBaseMenuItem",
                           "showAllNonBaseMenuItem"]
         })
+        self.logger.debug("jsapi_config:{}".format(config))
         self._render(
             template_name="chat/room.html",
             data={"room_id": room_id},
@@ -461,6 +463,8 @@ class ChatHandler(BaseHandler):
         server_id = self.json_args.get("serverId") or ""
         duration = self.json_args.get("duration") or 0
 
+        self.logger.debug('post_message  flag:{}'.format(self.flag))
+
         if not self.bot_enabled:
             yield self.get_bot_enabled()
 
@@ -555,6 +559,7 @@ class ChatHandler(BaseHandler):
             position_id=self.position_id,
             flag=self.flag
         )
+        self.logger.debug('_handle_chatbot_message  flag:{}'.format(self.flag))
         for bot_message in bot_messages:
             msg_type = bot_message.msg_type
             compound_content = bot_message.compound_content

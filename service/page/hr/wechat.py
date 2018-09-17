@@ -4,6 +4,10 @@
 
 from tornado import gen
 from service.page.base import PageService
+from util.common import ObjectDict
+from util.wechat.core import get_temporary_qrcode
+import conf.common as const
+
 
 class WechatPageService(PageService):
 
@@ -40,3 +44,15 @@ class WechatPageService(PageService):
 
         theme = yield self.config_sys_theme_ds.get_theme(conds, fields)
         raise gen.Return(theme)
+
+    @gen.coroutine
+    def get_wechat_info(self, current_user, pattern_id, in_wechat):
+        """
+        获取公众号相关信息
+        """
+        wechat = ObjectDict()
+        wechat.subscribed = True if current_user.wxuser.is_subscribe or current_user.wechat.type == 0 or not in_wechat else False
+        wechat.qrcode = yield get_temporary_qrcode(wechat=current_user.wechat,
+                                                   pattern_id=pattern_id)
+        wechat.name = current_user.wechat.name
+        return wechat

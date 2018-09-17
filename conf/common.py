@@ -121,6 +121,10 @@ CHAT_CHATROOM_CHANNEL = "chatroom_{0}_{1}"
 CHAT_HR_CHANNEL = "chatroom_{0}"
 # 进入聊天室标志位
 CHAT_CHATROOM_ENTER = "chat_sysuser_{}"
+# 推荐上传简历
+UPLOAD_RECOM_PROFILE = "upload_recom_profile_{}"
+# 推荐成功页面手机号码
+CONFIRM_REFERRAL_MOBILE = "referral_mobile_{}_{}"
 
 # ++++++++++业务常量+++++++++++
 # Cookie name
@@ -286,6 +290,16 @@ MSG_TYPE = {
     8: "employeeBind"
 }
 
+# 积分配置类型
+REWARD_VERIFICATION = "完成员工认证"
+REWARD_CLICK_JOB = "转发职位被点击"
+REWARD_CONTACT_INFORMATION = "完善被推荐人信息"
+REWARD_SUBMIT_PROFILE = "被推荐人投递简历"
+REWARD_PASS_REVIEW = "简历评审合格"
+REWARD_PASS_INTERVIEW = "面试通过"
+REWARD_ON_BOARD = "入职"
+REWARD_UPLOAD_PROFILE = "员工上传人才简历"
+
 # 操作的聊天类型
 INTERACTIVE_MSG = ["employeeBind", "jobSelect", "teamSelect", "citySelect", "jobCard"]
 
@@ -331,7 +345,8 @@ MOBILE_CODE_OPT_TYPE = ObjectDict({
     'code_register': 1,
     'forget_password': 2,
     'valid_old_mobile': 3,
-    'change_mobile': 4
+    'change_mobile': 4,
+    'referral_confirm': 5
 })
 
 # 简历导入
@@ -600,3 +615,11 @@ QRCODE_AWARD_RECORD = 4
 QRCODE_RECOM_RECORD = 5
 QRCODE_REFERRED_FRIENDS = 6
 QRCODE_USERCENTER = 7
+QRCODE_MINE = 8
+QRCODE_REFERRAL_PROFILE = 9
+QRCODE_REFERRAL_KETINFO = 10
+QRCODE_POSITION_INFO = 11
+QRCODE_REFERRAL_CONFIRM = 12
+QRCODE_SCAN_REFERRAL = 13
+QRCODE_OTHER = 99
+

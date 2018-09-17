@@ -474,7 +474,7 @@ class MetaBaseHandler(AtomHandler):
         mobile = const.CLIENT_TYPE_UNKNOWN
 
         useragent = self.request.headers.get('User-Agent')
-        if "MicroMessenger" in useragent and 'wxwork' not in useragent:
+        if "MicroMessenger" in useragent and 'wxwork' not in useragent and 'moseeker' not in useragent:
             if "iPhone" in useragent:
                 mobile = const.CLIENT_TYPE_IOS
             elif "Android" in useragent:

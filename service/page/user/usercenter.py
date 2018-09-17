@@ -23,6 +23,15 @@ class UsercenterPageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
+    def get_my_info(self, user_id, company_id):
+        """获得用户数据"""
+        params = ObjectDict({
+            "company_id": company_id
+        })
+        ret = yield self.infra_user_ds.get_my_info(user_id, params)
+        raise gen.Return(ret)
+
+    @gen.coroutine
     def update_user(self, user_id, params):
         """更新用户数据"""
 
@@ -75,13 +84,13 @@ class UsercenterPageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def post_ismobileregistered(self, country_code, mobile):
+    def post_ismobileregistered(self, mobile, country_code=86):
         """判断手机号是否已经注册
         :param country_code
         :param mobile: 手机号
         """
 
-        ret = yield self.infra_user_ds.post_ismobileregistered(country_code, mobile)
+        ret = yield self.infra_user_ds.post_ismobileregistered(mobile, country_code)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -135,12 +144,17 @@ class UsercenterPageService(PageService):
         return applied_applications_id_list
 
     @gen.coroutine
-    def get_applied_applications(self, user_id):
+    def get_applied_applications(self, user_id, company_id):
         """获得求职记录"""
 
-        ret = yield self.thrift_useraccounts_ds.get_applied_applications(user_id)
+        res = yield self.infra_user_ds.get_applied_applications(user_id, company_id)
+        if res.status != const.API_SUCCESS:
+            ret = []
+        else:
+            ret = res.data
         obj_list = list()
         for e in ret:
+            e = ObjectDict(e)
             app_rec = ObjectDict()
             app_rec['id'] = e.id
             app_rec['position_title'] = e.position_title

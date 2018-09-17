@@ -12,7 +12,8 @@ from tests.dev_data.user_company_config import COMPANY_CONFIG
 from util.common import ObjectDict
 from util.common.exception import MyException
 from util.common.cipher import encode_id
-from util.common.decorator import handle_response, check_employee, NewJDStatusCheckerAddFlag, authenticated, log_time, cover_no_weixin
+from util.common.decorator import handle_response, check_employee, NewJDStatusCheckerAddFlag, authenticated, log_time, \
+    cover_no_weixin, check_employee_common
 from util.common.mq import award_publisher
 from util.tool.str_tool import gen_salary, add_item, split, gen_degree_v2, gen_experience_v2, languge_code_from_ua
 from util.tool.url_tool import url_append_query
@@ -32,6 +33,10 @@ class PositionHandler(BaseHandler):
         """
         display_locale = self.get_current_locale()
         position_info = yield self.position_ps.get_position(position_id, display_locale)
+
+        # 数据组埋点
+        if position_info.status:
+            self.logger.info("[JD]在招职位")
 
         if position_info.id and position_info.company_id == self.current_user.company.id:
             yield self._redirect_when_recom_is_openid(position_info)
@@ -71,12 +76,29 @@ class PositionHandler(BaseHandler):
             self.logger.debug("[JD]构建相似职位推荐")
             recomment_positions_res = yield self.position_ps.get_recommend_positions(position_id)
 
+            # 职位推荐简历积分
+            self.logger.debug("[JD]构建职位推荐简历积分,分享积分")
+            if position_info.is_referral:
+                reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_UPLOAD_PROFILE)
+            else:
+                reward = 0
+            share_reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_CLICK_JOB)
             # 获取公司配置信息
             teamname_custom = self.current_user.company.conf_teamname_custom
 
+            # 处理职位红包信息
+            rpext_list = yield self.position_ps.infra_get_position_list_rp_ext([position_info])
+            pext = [e for e in rpext_list if e.pid == position_info.id]
+            if pext:
+                position_info.remain = pext[0].remain
+                position_info.employee_only = pext[0].employee_only
+                position_info.is_rp_reward = position_info.remain > 0
+            else:
+                position_info.is_rp_reward = False
+
             header = yield self._make_json_header(
                 position_info, company_info, star, application, endorse,
-                can_apply, team.id if team else 0, did, teamname_custom)
+                can_apply, team.id if team else 0, did, teamname_custom, reward, share_reward)
             module_job_description = self._make_json_job_description(position_info)
             module_job_need = self._make_json_job_need(position_info)
             position_feature = yield self.position_ps.get_position_feature(position_id)
@@ -311,7 +333,7 @@ class PositionHandler(BaseHandler):
     @log_time
     @gen.coroutine
     def _make_json_header(self, position_info, company_info, star, application,
-                          endorse, can_apply, team_id, did, teamname_custom):
+                          endorse, can_apply, team_id, did, teamname_custom, reward, share_reward):
         """构造头部 header 信息"""
 
         # 获得母公司配置信息
@@ -335,9 +357,18 @@ class PositionHandler(BaseHandler):
             "salary": position_info.salary,
             "hr_chat": bool(parent_company_info.conf_hr_chat),
             "teamname_custom": teamname_custom["teamname_custom"],
-            "candidate_source": position_info.candidate_source_num
+            "candidate_source": position_info.candidate_source_num,
+            "reward_point": reward,
+            "company_name": company_info.abbreviation,
+            "is_referral": position_info.is_referral if self.current_user.employee else False,
+            "share_reward": share_reward
             # "team": position_info.department.lower() if position_info.department else ""
         })
+
+        # 判断是否显示红包
+        is_employee = bool(self.current_user.employee)
+        data['hb_status'] = position_info.is_rp_reward and (
+            is_employee and position_info.employee_only or not position_info.employee_only)
 
         return data
 
@@ -753,8 +784,13 @@ class PositionListInfraParamsMixin(BaseHandler):
             infra_params.employment_type = const.EMPLOYMENT_TYPE_SEARCH.get(self.params.employment_type, "") \
                 if self.params.employment_type.isdigit() else self.params.employment_type
 
+        if self.params.is_referral:
+            infra_params.update(
+                keyWord=self.params.keyword if self.params.keyword else "")
+        else:
+            infra_params.update(
+                keywords=self.params.keyword if self.params.keyword else "")
         infra_params.update(
-            keywords=self.params.keyword if self.params.keyword else "",
             department=self.params.team_name if self.params.team_name else "",
             occupations=self.params.occupation if self.params.occupation else "",
             custom=self.params.custom if self.params.custom else "",
@@ -786,7 +822,11 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
         if self.params.recom_push_id and self.params.recom_push_id.isdigit():
             recom_push_id = int(self.params.recom_push_id)
 
-        if recom_push_id and hb_c:
+        is_referral = 0
+        if self.params.is_referral and self.params.is_referral.isdigit():
+            is_referral = int(self.params.is_referral)
+
+        if recom_push_id and hb_c and is_referral:
             raise MyException("错误的链接")
 
         if hb_c:
@@ -800,10 +840,14 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
                 position_list = yield self.get_employee_position_list(recom_push_id, infra_params)
             else:
                 position_list = []
-
         else:
-            # 普通职位列表
-            position_list = yield self.position_ps.infra_get_position_list(infra_params)
+            # 内推职位列表
+            if is_referral:
+                infra_params.page_num = int(self.params.get("count", 0)) + 1
+                position_list = yield self.position_ps.infra_get_position_list(infra_params, is_referral)
+            else:
+                # 普通职位列表
+                position_list = yield self.position_ps.infra_get_position_list(infra_params)
 
             # 获取获取到普通职位列表，则根据获取的数据查找其中红包职位的红包相关信息
             rp_position_list = list(self.__rp_position_generator(position_list))
@@ -875,6 +919,9 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
 
             position_ex['candidate_source'] = pos.candidate_source
             position_ex['job_need'] = pos.requirement
+            position_ex['is_referral'] = bool(pos.is_referral) if self.current_user.employee else False
+            position_ex['experience'] = gen_experience_v2(pos.experience, pos.experience_above, self.locale)
+            position_ex['degree'] = gen_degree_v2(pos.degree, pos.degree_above, self.locale)
 
             if display_locale == "en_US":
                 position_ex["city"] = pos.city_ename if pos.city_ename else pos.city
@@ -882,7 +929,7 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
             else:
                 position_ex["city"] = pos.city
                 position_ex["salary"] = pos.salary
-            total_count = pos.totalNum
+            total_count = pos.total_num
             # 判断职位投递是否达到上限
             can_apply = False
             if pos.candidate_source:
@@ -1095,6 +1142,50 @@ class PositionListHandler(PositionListInfraParamsMixin, BaseHandler):
         })
 
 
+class PositionRecomListHandler(PositionListInfraParamsMixin, BaseHandler):
+    @handle_response
+    @check_employee_common
+    @gen.coroutine
+    def get(self):
+        """
+        内推职位列表页
+        :return:
+        """
+        infra_params = self.make_position_list_infra_params()
+        self.params.share = yield self._make_share()
+        position_list = yield self.position_ps.infra_get_position_list(infra_params, is_referral=1)
+        if position_list:
+            total = position_list[0].total_num
+        else:
+            total = 0
+        data = ObjectDict({
+            "total": total
+        })
+        self.render_page(template_name="employee/recom-job-index.html", data=data)
+
+    @gen.coroutine
+    def _make_share(self):
+        link = self.make_url(
+            path.POSITION_LIST,
+            self.params,
+            recom=self.position_ps._make_recom(self.current_user.sysuser.id),
+            is_referral=1)
+        company_info = yield self.company_ps.get_company(
+            conds={"id": self.current_user.company.id}, need_conf=True)
+
+        cover = self.share_url(company_info.logo)
+        title = company_info.abbreviation + self.locale.translate('job_hotjobs')
+        description = self.locale.translate(msg.SHARE_DES_DEFAULT)
+
+        share_info = ObjectDict({
+            "cover": cover,
+            "title": title,
+            "description": description,
+            "link": link
+        })
+        return share_info
+
+
 class PositionListSugHandler(PositionListInfraParamsMixin, BaseHandler):
     @handle_response
     @check_employee
@@ -1104,17 +1195,18 @@ class PositionListSugHandler(PositionListInfraParamsMixin, BaseHandler):
         sug搜索
         :return:
         """
-        # todo:注释
-        # sug = ObjectDict()
-        # sug.list = []
-        # return self.send_json_success(sug)
 
         infra_params = self.make_position_list_infra_params()
+
+        is_referral = 0
+        if self.params.is_referral and self.params.is_referral.isdigit():
+            is_referral = int(self.params.is_referral)
         sug = ObjectDict()
         # 获取五条sug数据
         infra_params.update(page_size=const_platform.SUG_LIST_COUNT,
                             keyWord=self.params.keyword if self.params.keyword else "",
-                            page_from=int(self.params.get("count", 0) / 10) + 1)
+                            page_from=int(self.params.get("count", 0) / 10) + 1,
+                            is_referral=is_referral)
         res_data = yield self.position_ps.infra_obtain_sug_list(infra_params)
         suggest = res_data.get('suggest') if res_data else ''
         if suggest:
@@ -1130,10 +1222,28 @@ class PositionSearchHistoryHandler(BaseHandler):
     def get(self):
         """
         搜索的历史记录
-        :return: 
+        :return:
         """
         res = yield self.position_ps.position_search_history(
             user_id=self.current_user.sysuser.id,
             app_id=self.app_id
         )
         self.write(res)
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def patch(self):
+        """
+        清空搜索记录列表
+        :return:
+        """
+        res = yield self.position_ps.patch_position_search_history(
+            user_id=self.current_user.sysuser.id,
+            app_id=self.app_id
+        )
+        if res.status == 0:
+            self.send_json_success()
+        else:
+            self.send_json_error(message=res.message)
+

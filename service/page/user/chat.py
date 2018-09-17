@@ -224,7 +224,7 @@ class ChatPageService(PageService):
             hr_id=hr_id,
             position_id=position_id,
         )
-
+        self.logger.debug('get_chatbot_reply  flag:{}'.format(flag))
         try:
             if int(flag) == 1:
                 res = yield http_post(

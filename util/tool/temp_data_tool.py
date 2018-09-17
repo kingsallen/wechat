@@ -18,6 +18,8 @@
 """
 
 import json
+import operator
+
 from conf.path import POSITION_PATH
 from conf.platform import MEDIA_TYPE
 from util.common import ObjectDict
@@ -257,8 +259,8 @@ def make_other_team_data(team, res, handler_params):
     }
 
 
-def make_team_detail_template(locale, team, members, modulename, detail_media_list, positions,
-                              other_teams, res_dic, handler_params, more_link, teamname_custom=None):
+def make_team_detail_template(locale, team, members, templates, positions,
+                              other_teams, res_dic, handler_params, teamname_custom=None):
     template = []
     teamname_field = teamname_custom["teamname_custom"] if teamname_custom else '团队'
 
@@ -280,17 +282,8 @@ def make_team_detail_template(locale, team, members, modulename, detail_media_li
                 }]
             )
         )
-
-        if detail_media_list:
-            template.append(
-                template1(
-                    sub_type='less',
-                    title=modulename,
-                    more_link=more_link,
-                    data=[make_interview(m, res_dic.get(m.res_id))
-                          for m in detail_media_list]
-                )
-            )
+    if templates:
+        template.extend(templates)
 
     # 适应没有数据不显示模板块
     if positions:

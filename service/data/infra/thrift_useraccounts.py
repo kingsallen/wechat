@@ -31,13 +31,6 @@ class ThriftUseraccountsDataService(DataService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def get_applied_applications(self, user_id):
-        """获得求职记录，调用 thrift 接口"""
-
-        ret = yield self.usercenter_service_cilent.getApplications(user_id)
-        raise gen.Return(ret)
-
-    @gen.coroutine
     def get_applied_progress(self, user_id, app_id):
         """
         求职记录中的求职详情进度，调用 thrift 接口

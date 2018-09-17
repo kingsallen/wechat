@@ -60,12 +60,37 @@ class WeChatOauth2Service(object):
         raise gen.Return((openid, unionid))
 
     @gen.coroutine
+    def get_openid_unionid_by_code_pc(self, code):
+        """根据code尝试获取openid"""
+        access_token_info = yield self._get_access_token_by_code(code, pc=True)
+        if access_token_info.errcode:
+            raise WeChatOauthError("get_openid_unionid_by_code: {}".format(access_token_info.errmsg))
+        else:
+            openid = access_token_info.get('openid')
+            # 缓存 access_token
+            self._access_token = access_token_info.get('access_token')
+        raise gen.Return(openid)
+
+    @gen.coroutine
     def get_userinfo_by_code(self, code):
         """根据 code 尝试获取 userinfo
         :param code:
         :return:
         """
         openid, _ = yield self.get_openid_unionid_by_code(code)
+        userinfo = yield self._get_userinfo_by_openid(openid)
+        if userinfo.errcode:
+            raise WeChatOauthError("get_userinfo_by_code: {}".format(userinfo.errmsg))
+        else:
+            raise gen.Return(userinfo)
+
+    @gen.coroutine
+    def get_userinfo_by_code_pc(self, code):
+        """根据 code 尝试获取 userinfo
+        :param code:
+        :return:
+        """
+        openid = yield self.get_openid_unionid_by_code_pc(code)
         userinfo = yield self._get_userinfo_by_openid(openid)
         if userinfo.errcode:
             raise WeChatOauthError("get_userinfo_by_code: {}".format(userinfo.errmsg))
@@ -114,9 +139,15 @@ class WeChatOauth2Service(object):
             self.state,
             settings['component_app_id'])
 
-    def _get_access_token_url(self, code):
+    def _get_access_token_url(self, code, pc=None):
         """生成获取 access_token 的 url"""
-        if self.wechat.third_oauth:
+        if pc is True:
+            url = (wx_const.WX_OAUTH_GET_ACCESS_TOKEN % (
+                settings['open_app_id'],
+                settings['open_secret'],
+                code
+            ))
+        elif self.wechat.third_oauth:
             url = (wx_const.WX_THIRD_OAUTH_GET_ACCESS_TOKEN % (
                     self.wechat.appid,
                     code,
@@ -131,7 +162,7 @@ class WeChatOauth2Service(object):
         return url
 
     @gen.coroutine
-    def _get_access_token_by_code(self, code):
+    def _get_access_token_by_code(self, code, pc=None):
         """调用微信 Oauth get access token 接口
         :return: ObjectDict
         when success
@@ -147,7 +178,7 @@ class WeChatOauth2Service(object):
         when error
         {"errcode":40029,"errmsg":"invalid code"}
         """
-        ret = yield http_get(self._get_access_token_url(code), infra=False)
+        ret = yield http_get(self._get_access_token_url(code, pc=pc), infra=False)
         raise gen.Return(ret)
 
     @gen.coroutine
