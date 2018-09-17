@@ -309,6 +309,8 @@ class EmployeeBindHandler(BaseHandler):
             custom_fields = False
             if self.params.get('redirect_when_bind_success'):
                 next_url = self.make_url(path.GATES_EMPLOYEE, redirect=self.params.get('redirect_when_bind_success'))
+        if self.params.next_url:
+            next_url = self.params.next_url
 
         self.logger.debug('gates_next_url: %s-%s' % (custom_fields, next_url))
 
@@ -527,13 +529,14 @@ class BindInfoHandler(BaseHandler):
         else:
             assert False
 
-        next_url = self.make_url(path.POSITION_LIST, self.params)
+        next_url = self.params.next_url if self.params.next_url else self.make_url(path.POSITION_LIST, self.params)
         # 绑定成功回填自定义配置字段成功
         redirect_when_bind_success = self.json_args.get('redirect_when_bind_success') or self.get_argument(
             'redirect_when_bind_success', '')
 
         if binding_status == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS:
             next_url = redirect_when_bind_success
+
         self.params.from_wx_template = self.json_args.from_wx_template
         self.send_json_success(
             data=ObjectDict(

@@ -21,6 +21,7 @@ class ReferralProfileHandler(BaseHandler):
         pid = self.params.pid
         reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_UPLOAD_PROFILE)
         position_info = yield self.position_ps.get_position(pid)
+        reward = reward if position_info.is_referral else 0
 
         self.params.share = yield self._make_share()
         self.render_page(template_name="employee/mobile-upload-resume.html",
@@ -83,7 +84,7 @@ class ReferralProfileAPIHandler(BaseHandler):
                     "wechat": {"qrcode": qrcode.data}
                 }))
         else:
-            self.send_json_error()
+            self.send_json_error(message=res.message)
 
 
 class EmployeeRecomProfileHandler(BaseHandler):
@@ -216,6 +217,8 @@ class ReferralProfilePcHandler(BaseHandler):
         key = const.UPLOAD_RECOM_PROFILE.format(self.current_user.sysuser.id)
         self.redis.set(key, ObjectDict(pid=pid), ttl=60 * 60 * 24)
         reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_UPLOAD_PROFILE)
+        position_info = yield self.position_ps.get_position(pid)
+        reward = reward if position_info.is_referral else 0
         yield self.employee_ps.update_referral_position(self.current_user.employee.id, pid)
         data = ObjectDict({
             "points": reward
@@ -240,6 +243,7 @@ class ReferralCrucialInfoHandler(BaseHandler):
         pid = self.params.pid
         position_info = yield self.position_ps.get_position(pid)
         reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_UPLOAD_PROFILE)
+        reward = reward if position_info.is_referral else 0
         title = position_info.title
         self.params.share = yield self._make_share()
         self.render_page(template_name="employee/recom-candidate-info.html", data=ObjectDict({
