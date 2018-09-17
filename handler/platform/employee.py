@@ -531,7 +531,7 @@ class BindInfoHandler(BaseHandler):
         redirect_when_bind_success = self.json_args.get('redirect_when_bind_success') or self.get_argument(
             'redirect_when_bind_success', '')
 
-        if binding_status == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS:
+        if binding_status == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS and redirect_when_bind_success:
             next_url = redirect_when_bind_success
 
         self.params.from_wx_template = self.json_args.from_wx_template
