@@ -144,13 +144,12 @@ class ReferralConfirmHandler(BaseHandler):
         body = ret.data
         if ret.status != const.API_SUCCESS or body.get("claim") is not False:
             type = 4
-            body = ObjectDict()
         data = ObjectDict({
             "type": type,
             "successful_recommendation": self.locale.translate("referral_success"),
             "variants": {
                 "presentee_first_name": body.employee_name,
-                "recom_name": body.user_name[0:1] + "**",
+                "recom_name": body.user_name.split('')[0][0:1] + "**" if not body.user_name.split('')[0].encode('UTF-8').isalpha() else body.user_name.split('')[0] + "**",
                 "company_name": body.company_abbreviation,
                 "position_title": body.position,
                 "new_user": body.user_name[0:1] + "**",
