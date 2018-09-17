@@ -920,6 +920,10 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
             position_ex['candidate_source'] = pos.candidate_source
             position_ex['job_need'] = pos.requirement
             position_ex['is_referral'] = bool(pos.is_referral) if self.current_user.employee else False
+            if pos.is_referral:
+                position_ex['reward_points'] = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_UPLOAD_PROFILE)
+            else:
+                position_ex['reward_points'] = 0
             position_ex['experience'] = gen_experience_v2(pos.experience, pos.experience_above, self.locale)
             position_ex['degree'] = gen_degree_v2(pos.degree, pos.degree_above, self.locale)
 

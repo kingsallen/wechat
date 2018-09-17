@@ -688,7 +688,7 @@ class EmployeePageService(PageService):
                 "salary": gen_salary(res.data.salary_top, res.data.salary_bottom),
                 "salary_bottom": res.data.salary_bottom,
                 "salary_top": res.data.salary_top,
-                "experience": gen_experience(str(res.data.experience), res.data.experience_above),
+                "experience": gen_experience(str(res.data.experience) if res.data.experience != 0 else "", res.data.experience_above),
                 "logo": res.data.logo,
                 "team": res.data.team
             })
