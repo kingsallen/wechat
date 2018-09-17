@@ -36,7 +36,7 @@ class ReferralUploadHandler(BaseHandler):
         user_info = yield self.employee_ps.get_employee_info_by_user_id(self.current_user.sysuser.id)
         pid = ret.get("pid") if ret else 0
         if pid and user_info:
-            data = yield self.employee_ps.get_referral_position_info(user_info.employee_id, pid, self.locole)
+            data = yield self.employee_ps.get_referral_position_info(user_info.employee_id, pid, self.locale)
         else:
             data = ObjectDict()
         if data and user_info:
