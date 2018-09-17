@@ -83,6 +83,7 @@ class PositionHandler(BaseHandler):
             else:
                 reward = 0
             share_reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_CLICK_JOB)
+            has_point_reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id)
             # 获取公司配置信息
             teamname_custom = self.current_user.company.conf_teamname_custom
 
@@ -98,7 +99,7 @@ class PositionHandler(BaseHandler):
 
             header = yield self._make_json_header(
                 position_info, company_info, star, application, endorse,
-                can_apply, team.id if team else 0, did, teamname_custom, reward, share_reward)
+                can_apply, team.id if team else 0, did, teamname_custom, reward, share_reward, has_point_reward)
             module_job_description = self._make_json_job_description(position_info)
             module_job_need = self._make_json_job_need(position_info)
             position_feature = yield self.position_ps.get_position_feature(position_id)
@@ -333,7 +334,7 @@ class PositionHandler(BaseHandler):
     @log_time
     @gen.coroutine
     def _make_json_header(self, position_info, company_info, star, application,
-                          endorse, can_apply, team_id, did, teamname_custom, reward, share_reward):
+                          endorse, can_apply, team_id, did, teamname_custom, reward, share_reward, has_point_reward):
         """构造头部 header 信息"""
 
         # 获得母公司配置信息
@@ -361,7 +362,8 @@ class PositionHandler(BaseHandler):
             "reward_point": reward,
             "company_name": company_info.abbreviation,
             "is_referral": position_info.is_referral if self.current_user.employee else False,
-            "share_reward": share_reward
+            "share_reward": share_reward,
+            "has_point_reward": has_point_reward
             # "team": position_info.department.lower() if position_info.department else ""
         })
 
@@ -920,10 +922,7 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
             position_ex['candidate_source'] = pos.candidate_source
             position_ex['job_need'] = pos.requirement
             position_ex['is_referral'] = bool(pos.is_referral) if self.current_user.employee else False
-            if pos.is_referral:
-                position_ex['reward_points'] = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_UPLOAD_PROFILE)
-            else:
-                position_ex['reward_points'] = 0
+            position_ex['has_point_reward'] = yield self.employee_ps.get_bind_reward(self.current_user.company.id)
             position_ex['experience'] = gen_experience_v2(pos.experience, pos.experience_above, self.locale)
             position_ex['degree'] = gen_degree_v2(pos.degree, pos.degree_above, self.locale)
 

@@ -371,13 +371,18 @@ class EmployeePageService(PageService):
         return data
 
     @gen.coroutine
-    def get_bind_reward(self, company_id, type):
-        """获取指定规则的积分配置"""
+    def get_bind_reward(self, company_id, type=None):
+        """获取指定规则的积分配置, 如果未指定规则，则获取该公司是否有带积分奖励的积分规则"""
         result, data = yield self.infra_employee_ds.get_bind_reward(company_id)
         reward = 0
-        for r in data:
-            if r.get("statusName") == type:
-                reward = r.get("points")
+        if type:
+            for r in data:
+                if r.get("statusName") == type:
+                    reward = r.get("points")
+        else:
+            for r in data:
+                if r.get("points"):
+                    return True
         return reward
 
     @gen.coroutine
