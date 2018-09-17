@@ -233,6 +233,7 @@ class ReferralProfilePcHandler(BaseHandler):
         float = self.params.float
         rkey = self.params.rkey
         key = const.UPLOAD_RECOM_PROFILE.format(self.current_user.sysuser.id)
+        self.params.share = yield self._make_share()
         self.redis.set(key, ObjectDict(pid=pid), ttl=60 * 60 * 24)
         reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_UPLOAD_PROFILE)
         position_info = yield self.position_ps.get_position(pid)
@@ -248,6 +249,26 @@ class ReferralProfilePcHandler(BaseHandler):
                         job_title=ret.data.position,
                         rkey=rkey)
         self.render_page(template_name="employee/recom-scan-qrcode.html", data=data)
+
+    @gen.coroutine
+    def _make_share(self):
+        link = self.make_url(
+            path.REFERRAL_CONFIRM,
+            self.params,
+            recom=self.position_ps._make_recom(self.current_user.sysuser.id))
+
+        company_info = yield self.company_ps.get_company(
+            conds={"id": self.current_user.company.id}, need_conf=True)
+
+        cover = self.share_url(company_info.logo)
+
+        share_info = ObjectDict({
+            "cover": cover,
+            "title": "【#name#】恭喜您已被内部员工推荐",
+            "description": "点击查看详情~",
+            "link": link
+        })
+        return share_info
 
 
 class ReferralCrucialInfoHandler(BaseHandler):
