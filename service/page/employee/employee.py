@@ -314,7 +314,11 @@ class EmployeePageService(PageService):
             const.RECRUIT_STATUS_CVPASSED_ID: "awards_reason_review_passed",
             const.RECRUIT_STATUS_OFFERED_ID: "awards_reason_passed_interview",
             const.RECRUIT_STATUS_FULL_RECOM_INFO_ID: "awards_reason_fullfil_info",
-            const.RECRUIT_STATUS_HIRED_ID: "awards_reason_on_board"
+            const.RECRUIT_STATUS_HIRED_ID: "awards_reason_on_board",
+        }
+        reason_no_format = {
+            const.RECRUIT_STATUS_VERIFICATION: "完成员工认证",
+            const.RECRUIT_STATUS_UPLOAD_RESUME: "员工上传人才简历"
         }
 
         res_award_rules = []
@@ -342,6 +346,8 @@ class EmployeePageService(PageService):
                 # 根据申请进度由系统自动追加的积分
                 if reward_vo.type in reason_txt_fmt_map and reward_vo.berecomName:
                     e.reason = locale.translate(reason_txt_fmt_map[reward_vo.type]).format(reward_vo.berecomName)
+                elif reward_vo.type in reason_no_format:
+                    e.reason = locale.translate(reason_no_format[reward_vo.type])
                 # HR 手动增减积分添加的原因
                 elif reward_vo.type == 0:
                     e.reason = reward_vo.reason
