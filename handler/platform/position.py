@@ -78,13 +78,17 @@ class PositionHandler(BaseHandler):
 
             # 职位推荐简历积分
             self.logger.debug("[JD]构建职位推荐简历积分,分享积分")
-            reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_UPLOAD_PROFILE)
-            share_reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_CLICK_JOB)
             data = yield self.company_ps.get_only_referral_reward(self.current_user.company.id)
             if not data.flag or (data.flag and position_info.is_referral):
                 has_point_reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id)
+                reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id,
+                                                                const.REWARD_UPLOAD_PROFILE)
+                share_reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id,
+                                                                      const.REWARD_CLICK_JOB)
             else:
                 has_point_reward = 0
+                reward = 0
+                share_reward = 0
 
             # 获取公司配置信息
             teamname_custom = self.current_user.company.conf_teamname_custom
