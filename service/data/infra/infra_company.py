@@ -68,3 +68,11 @@ class InfraCompanyDataService(DataService):
             return []
         else:
             return list(self._thrift_companys_to_dict(res))
+
+    @gen.coroutine
+    def get_only_referral_reward(self, company_id):
+        params = ObjectDict({
+            "company_id": company_id
+        })
+        res = yield http_get(path.ONLY_REFERRAL_REWARD, params)
+        return res

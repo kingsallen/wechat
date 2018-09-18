@@ -380,9 +380,17 @@ class EmployeePageService(PageService):
                 if r.get("statusName") == type:
                     reward = r.get("points")
         else:
-            for r in data:
-                if r.get("points"):
-                    return True
+            res = yield self.infra_company_ds.get_only_referral_reward(company_id)
+            if res.status == const.API_SUCCESS:
+                data = res.data
+            else:
+                data = ObjectDict()
+            if data.flag:
+                for r in data:
+                    if r.get("points"):
+                        return True
+            else:
+                return False
         return reward
 
     @gen.coroutine
