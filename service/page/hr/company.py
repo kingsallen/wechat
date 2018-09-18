@@ -131,6 +131,16 @@ class CompanyPageService(PageService):
         positions_list = yield self.hr_company_ds.get_companys_list(conds, fields, options, appends)
         raise gen.Return(positions_list)
 
+    @gen.coroutine
+    def get_only_referral_reward(self, company_id):
+        """获取公司是否开启只内推职位推荐产生积分"""
+        res = yield self.infra_company_ds.get_only_referral_reward(company_id)
+        if res.status == const.API_SUCCESS:
+            data = res.data
+        else:
+            data = ObjectDict()
+        return data
+
     @log_time
     @gen.coroutine
     def get_real_company_id(self, publisher, company_id):
