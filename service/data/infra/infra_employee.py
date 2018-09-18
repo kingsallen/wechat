@@ -82,9 +82,11 @@ class InfraEmployeeDataService(DataService):
         url = "{0}/{1}".format(settings['infra'], path.UPLOAD_RECOM_PROFILE)
         request = Request(data={
             "employee": employee_id,
-            "appid": const.APPID[env]},
+            "appid": const.APPID[env],
+            "file_name": file_name
+        },
             files={
-                "file": (file_name, file_data)
+                "file": ("", file_data)
             },
             url=url,
             method="POST"
@@ -93,7 +95,7 @@ class InfraEmployeeDataService(DataService):
         body = p.body
         headers = p.headers
 
-        ret = http_post_multipart_form(url, body, headers=headers)
+        ret = yield http_post_multipart_form(url, body, headers=headers)
         return ret
 
     @gen.coroutine

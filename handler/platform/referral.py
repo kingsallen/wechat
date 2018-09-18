@@ -21,7 +21,8 @@ class ReferralProfileHandler(BaseHandler):
         pid = self.params.pid
         reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_UPLOAD_PROFILE)
         position_info = yield self.position_ps.get_position(pid)
-        reward = reward if position_info.is_referral else 0
+        data = yield self.company_ps.get_only_referral_reward(self.current_user.company.id)
+        reward = reward if not data.flag or (data.flag and position_info.is_referral) else 0
 
         self.params.share = yield self._make_share()
         self.render_page(template_name="employee/mobile-upload-resume.html",
@@ -245,7 +246,8 @@ class ReferralProfilePcHandler(BaseHandler):
         self.redis.set(key, ObjectDict(pid=pid), ttl=60 * 60 * 24)
         reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_UPLOAD_PROFILE)
         position_info = yield self.position_ps.get_position(pid)
-        reward = reward if position_info.is_referral else 0
+        data = yield self.company_ps.get_only_referral_reward(self.current_user.company.id)
+        reward = reward if not data.flag or (data.flag and position_info.is_referral) else 0
         yield self.employee_ps.update_referral_position(self.current_user.employee.id, pid)
         data = ObjectDict({
             "points": reward
@@ -290,7 +292,8 @@ class ReferralCrucialInfoHandler(BaseHandler):
         pid = self.params.pid
         position_info = yield self.position_ps.get_position(pid)
         reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_CONTACT_INFORMATION)
-        reward = reward if position_info.is_referral else 0
+        data = yield self.company_ps.get_only_referral_reward(self.current_user.company.id)
+        reward = reward if not data.flag or (data.flag and position_info.is_referral) else 0
         title = position_info.title
         self.params.share = yield self._make_share()
         self.render_page(template_name="employee/recom-candidate-info.html", data=ObjectDict({
