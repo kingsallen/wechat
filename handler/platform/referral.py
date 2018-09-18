@@ -143,25 +143,8 @@ class ReferralConfirmHandler(BaseHandler):
         if ret.status == const.API_SUCCESS and body.get("claim") is False:
             key = const.CONFIRM_REFERRAL_MOBILE.format(rid, self.current_user.sysuser.id)
             self.redis.set(key, ObjectDict(mobile=ret.data.mobile), ttl=60 * 60 * 24)
-            data = ObjectDict({
-                "type": type,
-                "successful_recommendation": self.locale.translate("referral_success"),
-                "variants": {
-                    "presentee_first_name": body.employee_name,
-                    "recom_name": body.user_name.split()[0][0:1] + "**" if not body.user_name.split()[0].encode('UTF-8').isalpha() else body.user_name.split()[0] + "**",
-                    "company_name": body.company_abbreviation,
-                    "position_title": body.position,
-                    "new_user": body.user_name[0:1] + "**",
-                    "apply_id": body.apply_id,
-                    "mobile": body.mobile[0:3] + "****" + body.mobile[-4:],
-                    "wechat": wechat}
-            })
         elif ret.status == const.API_SUCCESS and body.get("claim") is True:
             type = 4
-            data = ObjectDict({
-                "type": type,
-                "successful_recommendation": self.locale.translate("referral_success")
-            })
         else:
             data = ObjectDict(
                 kind=1,  # // {0: success, 1: failure, 10: email}
@@ -176,6 +159,31 @@ class ReferralConfirmHandler(BaseHandler):
             self.render_page(template_name="system/user-info.html",
                              data=data)
             return
+        if self.current_user.employee and self.current_user.employee.id == body.employee_id:
+            in_person = True
+        else:
+            in_person = False
+
+        # 对姓名做隐藏处理
+        if len(body.user_name.split()) == 1 and body.user_name.split()[0].encode('UTF-8').isalpha():
+            presentee_first_name = body.user_name.split()[0][0:1] + "**"
+        else:
+            presentee_first_name = body.user_name.split()[0] + "**"
+
+        data = ObjectDict({
+            "type": type,
+            "successful_recommendation": self.locale.translate("referral_success"),
+            "variants": {
+                "presentee_first_name": presentee_first_name if not in_person else body.user_name,
+                "recom_name": body.user_name,
+                "company_name": body.company_abbreviation,
+                "position_title": body.position,
+                "new_user": body.user_name[0:1] + "**" if not in_person else body.user_name,
+                "apply_id": body.apply_id,
+                "mobile": body.mobile[0:3] + "****" + body.mobile[-4:],
+                "wechat": wechat,
+                "in_person": in_person}
+        })
         self.render_page(template_name="employee/recom-presentee-confirm.html", data=data)
 
 
