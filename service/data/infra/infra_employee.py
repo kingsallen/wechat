@@ -80,11 +80,14 @@ class InfraEmployeeDataService(DataService):
     @gen.coroutine
     def upload_recom_profile(self, file_name, file_data, employee_id):
         url = "{0}/{1}".format(settings['infra'], path.UPLOAD_RECOM_PROFILE)
+        # requests的包不支持中文名文件上传，因此file_name单独传个字段
         request = Request(data={
             "employee": employee_id,
-            "appid": const.APPID[env]},
+            "appid": const.APPID[env],
+            "file_name": file_name
+        },
             files={
-                "file": (file_name, file_data)
+                "file": ("", file_data)
             },
             url=url,
             method="POST"
@@ -93,7 +96,7 @@ class InfraEmployeeDataService(DataService):
         body = p.body
         headers = p.headers
 
-        ret = http_post_multipart_form(url, body, headers=headers)
+        ret = yield http_post_multipart_form(url, body, headers=headers)
         return ret
 
     @gen.coroutine
