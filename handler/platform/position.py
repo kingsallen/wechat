@@ -1271,3 +1271,4 @@ class PositionSearchHistoryHandler(BaseHandler):
             self.send_json_success()
         else:
             self.send_json_error(message=res.message)
+
