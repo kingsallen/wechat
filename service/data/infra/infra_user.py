@@ -25,6 +25,12 @@ class InfraUserDataService(DataService):
         raise gen.Return(ret)
 
     @gen.coroutine
+    def get_my_info(self, user_id, params):
+        """获得用户我的个人中心数据"""
+        ret = yield http_get(path.INFRA_MY_INFO.format(user_id), params)
+        raise gen.Return(ret)
+
+    @gen.coroutine
     def post_wx_pc_combine(self, country_code, mobile, unionid):
         """手机号和微信号绑定接口"""
 
@@ -118,7 +124,7 @@ class InfraUserDataService(DataService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def post_ismobileregistered(self, country_code, mobile):
+    def post_ismobileregistered(self, mobile, country_code=86):
         """判断手机号是否已经注册
         :param country_code: 国家号
         :param mobile: 手机号
@@ -234,4 +240,18 @@ class InfraUserDataService(DataService):
             "degree": survey["degree"]
         }
         res = yield http_put(path.INFRA_USER_EMPLOYEE, params)
+        return res
+
+    @gen.coroutine
+    def update_recommend(self, params, employee_id):
+        res = yield http_post(path.UPDATE_RECOMMEND.format(employee_id), params)
+        return res
+
+    @gen.coroutine
+    def get_applied_applications(self, user_id, company_id):
+        params = ObjectDict({
+            "user_id": user_id,
+            "company_id": company_id
+        })
+        res = yield http_get(path.INFRA_USER_APPLYRECORD, params)
         return res

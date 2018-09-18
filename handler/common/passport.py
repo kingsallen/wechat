@@ -90,6 +90,7 @@ class LogoutHandler(BaseHandler):
             redirect_url = self.make_url(path.GAMMA_POSITION, params=self.params, escape=['next_url', 'pid'])
         self.redirect(redirect_url)
 
+
 class RegisterHandler(CaptchaMixin, BaseHandler):
     """用户注册"""
 
@@ -124,7 +125,7 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
             headimg="",
             national_code_tpl=const.NATIONAL_CODE,
             national_code=1,
-            code_type=1 # 指定为忘记密码类型，提交手机号时需要
+            code_type=1  # 指定为忘记密码类型，提交手机号时需要
         )
         self.render_page("system/auth_check_mobile.html",
                          data=data, meta_title=const.PAGE_FORGET_PASSWORD)
@@ -175,7 +176,7 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
             site_title = const.PAGE_FORGET_PASSWORD
 
         data = ObjectDict(
-            code_type=code_type, # 指定为设置密码的类型
+            code_type=code_type,  # 指定为设置密码的类型
             _mmc=mmc
         )
         self.render_page("system/auth_set_passwd.html", data=data, meta_title=site_title)
@@ -237,7 +238,8 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
             self.send_json_error(message=result.message)
         else:
             self.set_secure_cookie(const.COOKIE_MOBILE_REGISTER, self.params.mobile, expires_days=0.1, httponly=True)
-            self.set_secure_cookie(const.COOKIE_COUNTRY_CODE_REGISTER, self.params.country_code, expires_days=0.1, httponly=True)
+            self.set_secure_cookie(const.COOKIE_COUNTRY_CODE_REGISTER, self.params.country_code, expires_days=0.1,
+                                   httponly=True)
 
             self.send_json_success(data={
                 "mobile": self.params.mobile,
@@ -293,7 +295,6 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
         except AttributeError:
             raise gen.Return()
 
-
         if self.params.password != self.params.repassword:
             self.send_json_error(message=msg.CELLPHONE_REGISTER_PASSWD_NOT_MATCH)
             raise gen.Return()
@@ -308,12 +309,10 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
             not url_mobile or
             encode_id(int(mobile), 8) != url_mobile or
             not country_code):
-
             self.send_json_error(message=msg.CELLPHONE_MOBILE_SET_PASSWD_FAILED)
             raise gen.Return()
 
         if not password_validate(self.params.password):
-
             self.send_json_error(message=msg.CELLPHONE_PASSWORD_ERROR)
             raise gen.Return()
 
@@ -328,7 +327,7 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
             user_form = UserCreationForm({
                 'country_code': country_code,
                 'password': self.params.password,
-                'mobile':   int(mobile),
+                'mobile': int(mobile),
                 'username': mobile,
                 'register_ip': self.remote_ip,
                 'register_time': curr_now()
@@ -354,3 +353,31 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
         self.send_json_success(data={
             "next_url": next_url
         })
+
+
+class SendValidCodeHandler(BaseHandler):
+    """发送手机验证码，不需要图片验证码的页面使用"""
+
+    @handle_response
+    @gen.coroutine
+    def post(self):
+
+        mobile = self.json_args.mobile
+        if not mobile:
+            mobile = self.redis.get(
+                const.CONFIRM_REFERRAL_MOBILE.format(self.json_args.rkey, self.current_user.sysuser.id)).get("mobile")
+        # 校验手机号是否已经被注册
+        ret = yield self.usercenter_ps.post_ismobileregistered(mobile=mobile)
+        if ret.status != const.API_SUCCESS or ret.data.exist:
+            # 手机号已存在，不能再注册新用户
+            self.send_json_error(message=msg.CELLPHONE_MOBILE_HAD_REGISTERED)
+            return
+        valid_type = const.MOBILE_CODE_OPT_TYPE.referral_confirm
+        result = yield self.cellphone_ps.send_valid_code(
+            mobile,
+            valid_type
+        )
+        if result.status != const.API_SUCCESS:
+            self.send_json_error(message=result.message)
+        else:
+            self.send_json_success()

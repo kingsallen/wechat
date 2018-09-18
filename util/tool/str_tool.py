@@ -76,7 +76,7 @@ def gen_degree_v2(raw_degree, raw_degree_above, locale):
     if raw_degree_above:
         above_str += locale.translate(const.POSITION_ABOVE)
 
-    return degree_str + above_str
+    return (degree_str + above_str).strip()
 
 
 def gen_experience(experience, experience_above):

@@ -19,21 +19,27 @@ class LandingHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         display_locale = self.get_current_locale()
-        search_seq = yield self.landing_ps.make_search_seq(self.current_user.company, self.params, self.locale, display_locale)
+        is_referral = self.params.is_referral
+        search_seq = yield self.landing_ps.make_search_seq(self.current_user.company, self.params, self.locale, display_locale, is_referral)
+        if is_referral:
+            next_url = "/m" + path.POSITION_REFERRAL_LIST
+        else:
+            next_url = "/m" + path.POSITION_LIST
 
         self.logger.debug("[landing] search_seq: %s" % search_seq)
 
-        company = ObjectDict({
+        data = ObjectDict({
             "logo": self.static_url(self.current_user.company.logo),
             "name": self.current_user.company.get("abbreviation"),
             "image": self.static_url(self.current_user.company.conf_search_img),
             "search_seq": search_seq,
-            "meta_title": self.locale.translate("search_title")
+            "meta_title": self.locale.translate("search_title"),
+            "next_url": next_url
         })
 
         yield self._make_share_info(self.current_user.company)
 
-        self.render_page(template_name="company/dynamic_search.html", data=company)
+        self.render_page(template_name="company/dynamic_search.html", data=data)
 
     @gen.coroutine
     def _make_share_info(self, company_info):

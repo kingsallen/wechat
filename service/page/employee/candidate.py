@@ -34,10 +34,10 @@ class CandidatePageService(PageService):
     @gen.coroutine
     def post_recommend(self, post_user_id, click_time, recom_record_id,
                        realname, company, position, mobile, recom_reason,
-                       company_id):
+                       company_id, gender, email):
         infra_ret = yield self.thrift_candidate_ds.recommend(
             post_user_id, click_time, recom_record_id, realname, company,
-            position, mobile, recom_reason, company_id)
+            position, mobile, recom_reason, company_id, gender, email)
 
         ret = ObjectDict(
             next_one=infra_ret.nextOne,

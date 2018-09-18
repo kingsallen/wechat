@@ -110,6 +110,7 @@
 "简历评审合格","An application that passes review"
 "面试通过","An application that passes interview"
 "入职","On-board"
+"员工上传人才简历","Upload Resume"
 "团队","Team","singular"
 "团队","Teams","plural"
 
@@ -137,3 +138,15 @@
 "please_fill_out_your_resume","Please fill out your resume."
 
 "my_chat","My Chat"
+
+"referral_position_title","Referral Post"
+"referral_me","Me"
+"usercenter_information","Information"
+"referral_upload","Upload Resume"
+"referral_scan_upload","Recommand Resume"
+
+
+"upload_resume","Upload Resume"
+"recommend_resume","Recommend Resume"
+"recommend_profile","Recommend Profile"
+"referral_success","Successful Recommendation"

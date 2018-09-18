@@ -122,12 +122,8 @@ class WechatSubInfoHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         pattern_id = self.params.scene
-        data = ObjectDict()
-        data.subscribed = True if self.current_user.wxuser.is_subscribe or self.current_user.wechat.type == 0 else False
-        data.qrcode = yield get_temporary_qrcode(wechat=self.current_user.wechat,
-                                                 pattern_id=int(pattern_id))
-        data.name = self.current_user.wechat.name
-        self.send_json_success(data=data)
+        wechat = yield self.wechat_ps.get_wechat_info(self.current_user, pattern_id=int(pattern_id), in_wechat=self.in_wechat)
+        self.send_json_success(data=wechat)
         return
 
 
@@ -230,15 +226,11 @@ class EmployeeBindHandler(BaseHandler):
         else:
             pass
         mate_num = yield self.employee_ps.get_mate_num(self.current_user.company.id)
-        rewards_response = yield self.employee_ps.get_bind_rewards(self.current_user.company.id)
-        reward = 5
-        for r in rewards_response:
-            if r.get("statusName") == "完成员工认证":
-                reward = r.get("points")
+        reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_VERIFICATION)
 
         # 根据 conf 来构建 api 的返回 data
         data = yield self.employee_ps.make_binding_render_data(
-            self.current_user, mate_num, reward, conf_response.employeeVerificationConf)
+            self.current_user, mate_num, reward, conf_response.employeeVerificationConf, in_wechat=self.in_wechat)
         self.send_json_success(data=data)
 
     @handle_response
@@ -313,7 +305,7 @@ class EmployeeBindHandler(BaseHandler):
             next_url = self.make_url(path.EMPLOYEE_CUSTOMINFO, self.params, from_wx_template='x')
             custom_fields = True
         else:
-            next_url = self.make_url(path.POSITION_LIST, self.params)
+            next_url = self.params.next_url if self.params.next_url else self.make_url(path.POSITION_LIST, self.params)
             custom_fields = False
             if self.params.get('redirect_when_bind_success'):
                 next_url = self.make_url(path.GATES_EMPLOYEE, redirect=self.params.get('redirect_when_bind_success'))
@@ -534,13 +526,14 @@ class BindInfoHandler(BaseHandler):
         else:
             assert False
 
-        next_url = self.make_url(path.POSITION_LIST, self.params)
+        next_url = self.params.next_url if self.params.next_url else self.make_url(path.POSITION_LIST, self.params)
         # 绑定成功回填自定义配置字段成功
         redirect_when_bind_success = self.json_args.get('redirect_when_bind_success') or self.get_argument(
             'redirect_when_bind_success', '')
 
-        if binding_status == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS:
+        if binding_status == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS and redirect_when_bind_success:
             next_url = redirect_when_bind_success
+
         self.params.from_wx_template = self.json_args.from_wx_template
         self.send_json_success(
             data=ObjectDict(
@@ -607,11 +600,7 @@ class EmployeeReferralPolicyHandler(BaseHandler):
             self.redirect(self.make_url(path.EMPLOYEE_VERIFY, self.params))
             return
         result, data = yield self.employee_ps.get_referral_policy(self.current_user.company.id)
-        wechat = ObjectDict()
-        wechat.subscribed = True if self.current_user.wxuser.is_subscribe or self.current_user.wechat.type == 0 else False
-        wechat.qrcode = yield get_temporary_qrcode(wechat=self.current_user.wechat,
-                                                   pattern_id=const.QRCODE_POLICY)
-        wechat.name = self.current_user.wechat.name
+        wechat = yield self.wechat_ps.get_wechat_info(self.current_user, pattern_id=const.QRCODE_POLICY, in_wechat=self.in_wechat)
         if result and data and data.get("priority"):
             link = data.get("link", "")
             if link:
