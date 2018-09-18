@@ -1155,7 +1155,18 @@ class PositionRecomListHandler(PositionListInfraParamsMixin, BaseHandler):
         内推职位列表页
         :return:
         """
-        infra_params = self.make_position_list_infra_params()
+        infra_params = ObjectDict()
+        infra_params.company_id = self.current_user.company.id
+        infra_params.user_id = self.current_user.sysuser.id
+
+        if self.params.did:
+            infra_params.did = self.params.did
+
+        start_count = (int(self.params.get("count", 0)) *
+                       const_platform.POSITION_LIST_PAGE_COUNT)
+
+        infra_params.page_from = start_count
+        infra_params.page_size = const_platform.POSITION_LIST_PAGE_COUNT
         self.params.share = yield self._make_share()
         position_list = yield self.position_ps.infra_get_position_list(infra_params, is_referral=1)
         if position_list:
