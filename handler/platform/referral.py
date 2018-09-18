@@ -166,7 +166,7 @@ class ReferralConfirmHandler(BaseHandler):
             in_person = False
 
         # 对姓名做隐藏处理
-        if len(body.user_name.split()) == 1 and body.user_name.split()[0].encode('UTF-8').isalpha():
+        if len(body.user_name.split()) == 1 and not body.user_name.split()[0].encode('UTF-8').isalpha():
             presentee_first_name = body.user_name.split()[0][0:1] + "**"
         else:
             presentee_first_name = body.user_name.split()[0] + "**"
