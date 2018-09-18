@@ -42,7 +42,8 @@ class ReferralUploadHandler(BaseHandler):
         if data and user_info:
             reward = yield self.employee_ps.get_bind_reward(user_info.company_id, const.REWARD_UPLOAD_PROFILE)
             position_info = yield self.position_ps.get_position(pid)
-            reward = reward if position_info.is_referral else 0
+            data = yield self.company_ps.get_only_referral_reward(self.current_user.company.id)
+            reward = reward if not data.flag or (data.flag and position_info.is_referral) else 0
             data.update(reward_point=reward)
             self.render_page(template_name="employee/pc-upload-resume.html", data=data)
         else:
