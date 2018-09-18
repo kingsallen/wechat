@@ -131,6 +131,7 @@ def http_post_cs_msg(route, data=None, timeout=30, raise_error=True):
         return response.body
 
 
+@gen.coroutine
 def http_post_multipart_form(route, form, timeout=30, raise_error=True, headers=None):
     """使用multipart/form-data形式 HTTP 异步 POST 请求
     :param route:
