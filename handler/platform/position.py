@@ -78,13 +78,14 @@ class PositionHandler(BaseHandler):
 
             # 职位推荐简历积分
             self.logger.debug("[JD]构建职位推荐简历积分,分享积分")
-            data = self.company_ps.get_only_referral_reward(self.current_user.company.id)
-            if data.flag:
-                reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_UPLOAD_PROFILE)
-            else:
-                reward = 0
+            reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_UPLOAD_PROFILE)
             share_reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_CLICK_JOB)
-            has_point_reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id)
+            data = yield self.company_ps.get_only_referral_reward(self.current_user.company.id)
+            if not data.flag or (data.flag and position_info.is_referral):
+                has_point_reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id)
+            else:
+                has_point_reward = 0
+
             # 获取公司配置信息
             teamname_custom = self.current_user.company.conf_teamname_custom
 
@@ -923,7 +924,12 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
             position_ex['candidate_source'] = pos.candidate_source
             position_ex['job_need'] = pos.requirement
             position_ex['is_referral'] = bool(pos.is_referral) if self.current_user.employee else False
-            position_ex['has_point_reward'] = yield self.employee_ps.get_bind_reward(self.current_user.company.id)
+            data = yield self.company_ps.get_only_referral_reward(self.current_user.company.id)
+            if not data.flag or (data.flag and pos.is_referral):
+                has_point_reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id)
+            else:
+                has_point_reward = 0
+            position_ex['has_point_reward'] = has_point_reward
             position_ex['experience'] = gen_experience_v2(pos.experience, pos.experience_above, self.locale)
             position_ex['degree'] = gen_degree_v2(pos.degree, pos.degree_above, self.locale)
 
