@@ -176,7 +176,7 @@ class ReferralConfirmHandler(BaseHandler):
             "successful_recommendation": self.locale.translate("referral_success"),
             "variants": {
                 "presentee_first_name": presentee_first_name if not in_person else body.user_name,
-                "recom_name": body.user_name,
+                "recom_name": body.employee_name,
                 "company_name": body.company_abbreviation,
                 "position_title": body.position,
                 "new_user": body.user_name[0:1] + "**" if not in_person else body.user_name,
