@@ -281,7 +281,7 @@ class ReferralCrucialInfoHandler(BaseHandler):
     def get(self):
         pid = self.params.pid
         position_info = yield self.position_ps.get_position(pid)
-        reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_UPLOAD_PROFILE)
+        reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_CONTACT_INFORMATION)
         reward = reward if position_info.is_referral else 0
         title = position_info.title
         self.params.share = yield self._make_share()
