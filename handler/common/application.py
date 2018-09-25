@@ -10,6 +10,7 @@ from util.common.decorator import handle_response, authenticated, \
 from util.wechat.core import WechatNoTemplateError
 from util.common import ObjectDict
 import conf.message as msg
+from util.tool.url_tool import make_static_url
 
 
 class ApplicationHandler(BaseHandler):
@@ -178,9 +179,9 @@ class ApplicationEmailHandler(BaseHandler):
         res = yield self.application_ps.update_candidate_company(self.params.name, self.current_user.sysuser.id)
 
         position = yield self.position_ps.get_position(self.params.pid, display_locale=self.get_current_locale())
+        # 职位必须能接受Email投递 而且params含有pid
+        self.current_user.company.logo = make_static_url(self.current_user.company.logo, protocol="https", ensure_protocol=True)
         if self.params.pid and position.email_resume_conf == 0:
-            # 职位必须能接受Email投递 而且params含有pid
-            self.current_user.company.logo = self.static_url(self.current_user.company.logo)
             create_status, message = yield self.application_ps.create_email_apply(self.params, position,
                                                                                   self.current_user, self.is_platform)
             if not create_status:
