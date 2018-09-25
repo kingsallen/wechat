@@ -90,6 +90,9 @@ class PositionHandler(BaseHandler):
                 reward = 0
                 share_reward = 0
 
+            # 获取职位奖金
+            bonus = yield self.position_ps.get_position_bonus(position_id)
+
             # 获取公司配置信息
             teamname_custom = self.current_user.company.conf_teamname_custom
 

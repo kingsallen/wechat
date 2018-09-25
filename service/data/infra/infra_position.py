@@ -47,6 +47,15 @@ class InfraPositionDataService(DataService):
         return ret
 
     @gen.coroutine
+    def get_position_bonus(self, pid):
+        """获取职位奖金"""
+        params = ObjectDict({
+            "pid": pid
+        })
+        ret = yield http_get(path, params)
+        return ret
+
+    @gen.coroutine
     def post_sug_list(self, params):
         ret = yield http_post(path.INFRA_SUG_LIST, params)
         return http_tool.unboxing(ret)
