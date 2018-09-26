@@ -208,11 +208,11 @@ def check_employee_common(func):
 
 
 def cover_no_weixin(func):
-    """移动端非微信环境下，限制浏览"""
+    """移动端非微信环境下，限制浏览，允许User-Agent中带有moseeker的请求访问，此为测试与开发在非微信移动端的后门"""
     @functools.wraps(func)
     @gen.coroutine
     def wrapper(self, *args, **kwargs):
-        if not self.in_wechat:
+        if not self.in_wechat and 'moseeker' not in self.request.headers.get('User-Agent'):
             self.render(template_name="adjunct/not-weixin.html")
             return
         else:

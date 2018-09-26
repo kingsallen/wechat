@@ -445,6 +445,38 @@ class UserPageService(PageService):
             return True, fav_id
 
     @gen.coroutine
+    def get_redpacket_list(self, user_id, params):
+        """
+        获取红包列表
+        :param user_id:
+        :param params:
+        :return:
+        """
+        ret = yield self.infra_user_ds.get_redpacket_list(user_id, params)
+        return ret
+
+    @gen.coroutine
+    def get_bonus_list(self, user_id, params):
+        """
+        获取奖金列表
+        :param user_id:
+        :param params:
+        :return:
+        """
+        ret = yield self.infra_user_ds.get_bonus_list(user_id, params)
+        return ret
+
+    @gen.coroutine
+    def claim_bonus(self, user_id):
+        """
+        领取奖金
+        :param user_id:
+        :return:
+        """
+        ret = yield self.infra_user_ds.claim_bonus(user_id)
+        return ret
+
+    @gen.coroutine
     def post_hr_register(self, params):
         """
         注册 HR 用户

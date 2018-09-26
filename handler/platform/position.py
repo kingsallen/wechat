@@ -108,7 +108,7 @@ class PositionHandler(BaseHandler):
 
             header = yield self._make_json_header(
                 position_info, company_info, star, application, endorse,
-                can_apply, team.id if team else 0, did, teamname_custom, reward, share_reward, has_point_reward)
+                can_apply, team.id if team else 0, did, teamname_custom, reward, share_reward, has_point_reward, bonus)
             module_job_description = self._make_json_job_description(position_info)
             module_job_need = self._make_json_job_need(position_info)
             position_feature = yield self.position_ps.get_position_feature(position_id)
@@ -343,7 +343,7 @@ class PositionHandler(BaseHandler):
     @log_time
     @gen.coroutine
     def _make_json_header(self, position_info, company_info, star, application,
-                          endorse, can_apply, team_id, did, teamname_custom, reward, share_reward, has_point_reward):
+                          endorse, can_apply, team_id, did, teamname_custom, reward, share_reward, has_point_reward, bonus):
         """构造头部 header 信息"""
 
         # 获得母公司配置信息
@@ -372,7 +372,8 @@ class PositionHandler(BaseHandler):
             "company_name": company_info.abbreviation,
             "is_referral": position_info.is_referral if self.current_user.employee else False,
             "share_reward": share_reward,
-            "has_point_reward": has_point_reward
+            "has_point_reward": has_point_reward,
+            "bonus": bonus
             # "team": position_info.department.lower() if position_info.department else ""
         })
 
@@ -927,7 +928,7 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
             position_ex["job_description"] = pos.accountabilities
             position_ex["is_starred"] = pos.id in fav_position_id_list  # 判断职位收藏状态
             position_ex['is_applied'] = pos.id in applied_application_id_list  # 判断职位申请状态
-
+            position_ex['bonus'] = pos.total_bonus
             position_ex['candidate_source'] = pos.candidate_source
             position_ex['job_need'] = pos.requirement
             position_ex['is_referral'] = bool(pos.is_referral) if self.current_user.employee else False

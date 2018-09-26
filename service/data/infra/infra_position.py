@@ -50,9 +50,9 @@ class InfraPositionDataService(DataService):
     def get_position_bonus(self, pid):
         """获取职位奖金"""
         params = ObjectDict({
-            "pid": pid
+            "position_id": pid
         })
-        ret = yield http_get(path, params)
+        ret = yield http_get(path.INFRA_POSITION_BONUS, params)
         return ret
 
     @gen.coroutine

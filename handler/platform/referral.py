@@ -3,11 +3,11 @@
 from tornado import gen
 
 import conf.common as const
+import conf.message as msg
 import conf.path as path
 from handler.base import BaseHandler
 from util.common import ObjectDict
 from util.common.decorator import handle_response, authenticated, check_employee_common
-import conf.message as msg
 
 
 class ReferralProfileHandler(BaseHandler):

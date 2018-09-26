@@ -611,4 +611,5 @@ class PositionPageService(PageService):
     def get_position_bonus(self, pid):
         """获取职位奖金"""
         ret = yield self.infra_position_ds.get_position_bonus(pid)
-        return ret.data
+        bonus = ret.data.position_bonus.get("total_bonus")
+        return bonus

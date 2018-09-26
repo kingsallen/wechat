@@ -97,6 +97,10 @@ INFRA_USER_EMPLOYEE_CHECK = 'user/employee/check'
 INFRA_USER_EMPLOYEE = 'user/employee'
 INFRA_USER_APPLYRECORD = "/v1/applications"
 INFRA_USER_EMPLOYEE_REFERRAL = "/v1/referral/users/{}/employee-info"
+INFRA_USER_REDPACKET_LIST = "/v1/referral/users/{}/redpackages"
+INFRA_USER_BONUS_LIST = "/v1/referral/users/{}/bonus"
+INFRA_USER_CLAIM_BONUS = "/v1/referral/wechat/employee/{}/bonus/claim"
+
 
 # 申请服务
 # Ref: https://wiki.moseeker.com/application-api.md
@@ -124,6 +128,7 @@ INFRA_POSITION_LATEST_REFUSAL_RECOM = '/user/lastest_recommend_refusal'
 INFRA_POSITION_LIST_WX_TPL = '/user/refuse/recommend'
 INFRA_POSITION_SEARCH_HISTORY = '/position/search/history'
 INFRA_POSITION_SEARCH_HISTORY_DEL = '/position/search/history/delete'
+INFRA_POSITION_BONUS = "/v1/referral/position/bonus"
 
 # Profile 服务
 # Ref: https://wiki.moseeker.com/profile-api.md
