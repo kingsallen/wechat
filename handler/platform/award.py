@@ -58,7 +58,8 @@ class BonusClaimHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def post(self):
-        ret = yield self.user_ps.claim_bonus(self.current_user.sysuser.id)
+        id = self.json_args.get("id")
+        ret = yield self.user_ps.claim_bonus(id)
         if ret.status == const.API_SUCCESS:
             self.send_json_success(ret.data)
         else:

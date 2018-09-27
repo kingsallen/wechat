@@ -467,13 +467,13 @@ class UserPageService(PageService):
         return ret
 
     @gen.coroutine
-    def claim_bonus(self, user_id):
+    def claim_bonus(self, bonus_id):
         """
         领取奖金
-        :param user_id:
+        :param bonus_id:
         :return:
         """
-        ret = yield self.infra_user_ds.claim_bonus(user_id)
+        ret = yield self.infra_user_ds.claim_bonus(bonus_id)
         return ret
 
     @gen.coroutine

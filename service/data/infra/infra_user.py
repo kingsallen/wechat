@@ -267,7 +267,7 @@ class InfraUserDataService(DataService):
         return res
 
     @gen.coroutine
-    def claim_bonus(self, user_id):
-        res = yield http_put(path.INFRA_USER_CLAIM_BONUS.format(user_id))
+    def claim_bonus(self, bonus_id):
+        res = yield http_put(path.INFRA_USER_CLAIM_BONUS.format(bonus_id))
         return res
 
