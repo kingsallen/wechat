@@ -78,11 +78,18 @@ class PositionHandler(BaseHandler):
 
             # 职位推荐简历积分
             self.logger.debug("[JD]构建职位推荐简历积分,分享积分")
-            if position_info.is_referral:
-                reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_UPLOAD_PROFILE)
+            data = yield self.company_ps.get_only_referral_reward(self.current_user.company.id)
+            if not data.flag or (data.flag and position_info.is_referral):
+                has_point_reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id)
+                reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id,
+                                                                const.REWARD_UPLOAD_PROFILE)
+                share_reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id,
+                                                                      const.REWARD_CLICK_JOB)
             else:
+                has_point_reward = 0
                 reward = 0
-            share_reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_CLICK_JOB)
+                share_reward = 0
+
             # 获取公司配置信息
             teamname_custom = self.current_user.company.conf_teamname_custom
 
@@ -98,7 +105,7 @@ class PositionHandler(BaseHandler):
 
             header = yield self._make_json_header(
                 position_info, company_info, star, application, endorse,
-                can_apply, team.id if team else 0, did, teamname_custom, reward, share_reward)
+                can_apply, team.id if team else 0, did, teamname_custom, reward, share_reward, has_point_reward)
             module_job_description = self._make_json_job_description(position_info)
             module_job_need = self._make_json_job_need(position_info)
             position_feature = yield self.position_ps.get_position_feature(position_id)
@@ -333,7 +340,7 @@ class PositionHandler(BaseHandler):
     @log_time
     @gen.coroutine
     def _make_json_header(self, position_info, company_info, star, application,
-                          endorse, can_apply, team_id, did, teamname_custom, reward, share_reward):
+                          endorse, can_apply, team_id, did, teamname_custom, reward, share_reward, has_point_reward):
         """构造头部 header 信息"""
 
         # 获得母公司配置信息
@@ -361,7 +368,8 @@ class PositionHandler(BaseHandler):
             "reward_point": reward,
             "company_name": company_info.abbreviation,
             "is_referral": position_info.is_referral if self.current_user.employee else False,
-            "share_reward": share_reward
+            "share_reward": share_reward,
+            "has_point_reward": has_point_reward
             # "team": position_info.department.lower() if position_info.department else ""
         })
 
@@ -920,6 +928,12 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
             position_ex['candidate_source'] = pos.candidate_source
             position_ex['job_need'] = pos.requirement
             position_ex['is_referral'] = bool(pos.is_referral) if self.current_user.employee else False
+            data = yield self.company_ps.get_only_referral_reward(self.current_user.company.id)
+            if not data.flag or (data.flag and pos.is_referral):
+                has_point_reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id)
+            else:
+                has_point_reward = 0
+            position_ex['has_point_reward'] = has_point_reward
             position_ex['experience'] = gen_experience_v2(pos.experience, pos.experience_above, self.locale)
             position_ex['degree'] = gen_degree_v2(pos.degree, pos.degree_above, self.locale)
 
@@ -1151,7 +1165,18 @@ class PositionRecomListHandler(PositionListInfraParamsMixin, BaseHandler):
         内推职位列表页
         :return:
         """
-        infra_params = self.make_position_list_infra_params()
+        infra_params = ObjectDict()
+        infra_params.company_id = self.current_user.company.id
+        infra_params.user_id = self.current_user.sysuser.id
+
+        if self.params.did:
+            infra_params.did = self.params.did
+
+        start_count = (int(self.params.get("count", 0)) *
+                       const_platform.POSITION_LIST_PAGE_COUNT)
+
+        infra_params.page_from = start_count
+        infra_params.page_size = const_platform.POSITION_LIST_PAGE_COUNT
         self.params.share = yield self._make_share()
         position_list = yield self.position_ps.infra_get_position_list(infra_params, is_referral=1)
         if position_list:

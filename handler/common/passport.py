@@ -230,9 +230,9 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
             valid_type = const.MOBILE_CODE_OPT_TYPE.code_register
 
         result = yield self.cellphone_ps.send_valid_code(
-            self.params.country_code,
-            self.params.mobile,
-            valid_type
+            country_code=self.params.country_code,
+            mobile=self.params.mobile,
+            type=valid_type
         )
         if result.status != const.API_SUCCESS:
             self.send_json_error(message=result.message)
@@ -374,8 +374,8 @@ class SendValidCodeHandler(BaseHandler):
             return
         valid_type = const.MOBILE_CODE_OPT_TYPE.referral_confirm
         result = yield self.cellphone_ps.send_valid_code(
-            mobile,
-            valid_type
+            mobile=mobile,
+            type=valid_type
         )
         if result.status != const.API_SUCCESS:
             self.send_json_error(message=result.message)

@@ -15,7 +15,7 @@ from util.common import ObjectDict
 from util.tool.dict_tool import sub_dict
 from util.tool.re_checker import revalidator
 from util.tool.url_tool import make_static_url, make_url
-from util.tool.str_tool import gen_salary, gen_experience
+from util.tool.str_tool import gen_salary, gen_experience_v2
 from util.wechat.core import get_temporary_qrcode
 from util.common.mq import unread_praise_publisher
 
@@ -314,7 +314,11 @@ class EmployeePageService(PageService):
             const.RECRUIT_STATUS_CVPASSED_ID: "awards_reason_review_passed",
             const.RECRUIT_STATUS_OFFERED_ID: "awards_reason_passed_interview",
             const.RECRUIT_STATUS_FULL_RECOM_INFO_ID: "awards_reason_fullfil_info",
-            const.RECRUIT_STATUS_HIRED_ID: "awards_reason_on_board"
+            const.RECRUIT_STATUS_HIRED_ID: "awards_reason_on_board",
+        }
+        reason_no_format = {
+            const.RECRUIT_STATUS_VERIFICATION: "完成员工认证",
+            const.RECRUIT_STATUS_UPLOAD_RESUME: "员工上传人才简历"
         }
 
         res_award_rules = []
@@ -342,6 +346,8 @@ class EmployeePageService(PageService):
                 # 根据申请进度由系统自动追加的积分
                 if reward_vo.type in reason_txt_fmt_map and reward_vo.berecomName:
                     e.reason = locale.translate(reason_txt_fmt_map[reward_vo.type]).format(reward_vo.berecomName)
+                elif reward_vo.type in reason_no_format:
+                    e.reason = locale.translate(reason_no_format[reward_vo.type])
                 # HR 手动增减积分添加的原因
                 elif reward_vo.type == 0:
                     e.reason = reward_vo.reason
@@ -365,13 +371,18 @@ class EmployeePageService(PageService):
         return data
 
     @gen.coroutine
-    def get_bind_reward(self, company_id, type):
-        """获取指定规则的积分配置"""
+    def get_bind_reward(self, company_id, type=None):
+        """获取指定规则的积分配置, 如果未指定规则，则获取该公司是否有带积分奖励的积分规则"""
         result, data = yield self.infra_employee_ds.get_bind_reward(company_id)
         reward = 0
-        for r in data:
-            if r.get("statusName") == type:
-                reward = r.get("points")
+        if type:
+            for r in data:
+                if r.get("statusName") == type:
+                    reward = r.get("points")
+        else:
+            for r in data:
+                if r.get("points"):
+                    return True
         return reward
 
     @gen.coroutine
@@ -670,7 +681,7 @@ class EmployeePageService(PageService):
         return res
 
     @gen.coroutine
-    def get_referral_position_info(self, employee_id, pid):
+    def get_referral_position_info(self, employee_id, pid, locale=None):
         res = yield self.infra_employee_ds.get_referral_position_info(employee_id, pid)
         if res.status == const.API_SUCCESS:
             data = ObjectDict({
@@ -682,7 +693,7 @@ class EmployeePageService(PageService):
                 "salary": gen_salary(res.data.salary_top, res.data.salary_bottom),
                 "salary_bottom": res.data.salary_bottom,
                 "salary_top": res.data.salary_top,
-                "experience": gen_experience(str(res.data.experience), res.data.experience_above),
+                "experience": gen_experience_v2(str(res.data.experience) if res.data.experience != 0 else "", res.data.experience_above, locale),
                 "logo": res.data.logo,
                 "team": res.data.team
             })

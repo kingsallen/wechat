@@ -60,6 +60,7 @@ class JobPositionDao(BaseDao):
             "source":                 self.constant.TYPE_INT, # 0:手动创建, 1:导入, 9:ATS导入
             "hb_status":              self.constant.TYPE_INT, # 是否正参加活动：0=未参加  1=正参加点击红包活动  2=正参加被申请红包活动  3=正参加1+2红包活动
             "age":                    self.constant.TYPE_INT, # 年龄要求, 0：无要求
+            "is_referral":            self.constant.TYPE_INT, # 是否内推职位， 1:是, 0:否
             # "major_required":         self.constant.TYPE_STRING, # 专业要求
             # "keyword":                self.constant.TYPE_STRING, # 职位关键词
             # "reporting_to":           self.constant.TYPE_STRING, # 汇报对象

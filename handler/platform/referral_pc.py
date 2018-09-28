@@ -36,11 +36,14 @@ class ReferralUploadHandler(BaseHandler):
         user_info = yield self.employee_ps.get_employee_info_by_user_id(self.current_user.sysuser.id)
         pid = ret.get("pid") if ret else 0
         if pid and user_info:
-            data = yield self.employee_ps.get_referral_position_info(user_info.employee_id, pid)
+            data = yield self.employee_ps.get_referral_position_info(user_info.employee_id, pid, self.locale)
         else:
             data = ObjectDict()
         if data and user_info:
             reward = yield self.employee_ps.get_bind_reward(user_info.company_id, const.REWARD_UPLOAD_PROFILE)
+            position_info = yield self.position_ps.get_position(pid)
+            res = yield self.company_ps.get_only_referral_reward(self.current_user.company.id)
+            reward = reward if not res.flag or (res.flag and position_info.is_referral) else 0
             data.update(reward_point=reward)
             self.render_page(template_name="employee/pc-upload-resume.html", data=data)
         else:

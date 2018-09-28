@@ -479,7 +479,7 @@ class PositionPageService(PageService):
                         position.is_rp_reward = position.remain > 0
                     else:
                         position.is_rp_reward = False
-            return position_list, res.data[0]['totalNum'] if res.data else 0
+            return position_list, res.data[0]['total_num'] if res.data else 0
         else:
             self.logger.warn(res)
             return []
@@ -512,7 +512,7 @@ class PositionPageService(PageService):
                 position.publish_date = jd_update_date(str_2_date(position.publish_date, self.constant.TIME_FORMAT))
                 position.team_name = team_name_dict.get(pid_teamid_dict.get(position.id, 0), '')
 
-            return position_list, res.data[0]['totalNum'] if res.data else 0
+            return position_list, res.data[0]['total_num'] if res.data else 0
         return res
 
     @gen.coroutine

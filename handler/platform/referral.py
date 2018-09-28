@@ -21,6 +21,8 @@ class ReferralProfileHandler(BaseHandler):
         pid = self.params.pid
         reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_UPLOAD_PROFILE)
         position_info = yield self.position_ps.get_position(pid)
+        data = yield self.company_ps.get_only_referral_reward(self.current_user.company.id)
+        reward = reward if not data.flag or (data.flag and position_info.is_referral) else 0
 
         self.params.share = yield self._make_share()
         self.render_page(template_name="employee/mobile-upload-resume.html",
@@ -83,7 +85,7 @@ class ReferralProfileAPIHandler(BaseHandler):
                     "wechat": {"qrcode": qrcode.data}
                 }))
         else:
-            self.send_json_error()
+            self.send_json_error(message=res.message)
 
 
 class EmployeeRecomProfileHandler(BaseHandler):
@@ -138,24 +140,50 @@ class ReferralConfirmHandler(BaseHandler):
                                                       in_wechat=self.in_wechat)
         rid = self.params.rkey
         ret = yield self.employee_ps.get_referral_info(rid)
-        key = const.CONFIRM_REFERRAL_MOBILE.format(rid, self.current_user.sysuser.id)
-        self.redis.set(key, ObjectDict(mobile=ret.data.mobile), ttl=60 * 60 * 24)
         body = ret.data
-        if ret.status != const.API_SUCCESS or body.get("claim") is not False:
+        if ret.status == const.API_SUCCESS and body.get("claim") is False:
+            key = const.CONFIRM_REFERRAL_MOBILE.format(rid, self.current_user.sysuser.id)
+            self.redis.set(key, ObjectDict(mobile=ret.data.mobile), ttl=60 * 60 * 24)
+        elif ret.status == const.API_SUCCESS and body.get("claim") is True:
             type = 4
-            body = ObjectDict()
+        else:
+            data = ObjectDict(
+                kind=1,  # // {0: success, 1: failure, 10: email}
+                messages=[ret.message],  # ['hello world', 'abjsldjf']
+                button_text=msg.BACK_CN,
+                button_link=self.make_url(path.POSITION_LIST,
+                                          self.params,
+                                          host=self.host),
+                jump_link=None  # // 如果有会自动，没有就不自动跳转
+            )
+
+            self.render_page(template_name="system/user-info.html",
+                             data=data)
+            return
+        if self.current_user.employee and self.current_user.employee.id == body.employee_id:
+            in_person = True
+        else:
+            in_person = False
+
+        # 对姓名做隐藏处理
+        if len(body.user_name.split()) == 1:
+            presentee_first_name = body.user_name.split()[0][0:1] + "**"
+        else:
+            presentee_first_name = body.user_name.split()[0] + "**"
+
         data = ObjectDict({
             "type": type,
             "successful_recommendation": self.locale.translate("referral_success"),
             "variants": {
-                "presentee_first_name": body.employee_name,
-                "recom_name": body.user_name[0:1] + "**",
+                "presentee_first_name": presentee_first_name if not in_person else body.user_name,
+                "recom_name": body.employee_name,
                 "company_name": body.company_abbreviation,
                 "position_title": body.position,
-                "new_user": body.user_name[0:1] + "**",
+                "new_user": body.user_name[0:1] + "**" if not in_person else body.user_name,
                 "apply_id": body.apply_id,
                 "mobile": body.mobile[0:3] + "****" + body.mobile[-4:],
-                "wechat": wechat}
+                "wechat": wechat,
+                "in_person": in_person}
         })
         self.render_page(template_name="employee/recom-presentee-confirm.html", data=data)
 
@@ -214,8 +242,12 @@ class ReferralProfilePcHandler(BaseHandler):
         float = self.params.float
         rkey = self.params.rkey
         key = const.UPLOAD_RECOM_PROFILE.format(self.current_user.sysuser.id)
+        self.params.share = yield self._make_share()
         self.redis.set(key, ObjectDict(pid=pid), ttl=60 * 60 * 24)
         reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_UPLOAD_PROFILE)
+        position_info = yield self.position_ps.get_position(pid)
+        data = yield self.company_ps.get_only_referral_reward(self.current_user.company.id)
+        reward = reward if not data.flag or (data.flag and position_info.is_referral) else 0
         yield self.employee_ps.update_referral_position(self.current_user.employee.id, pid)
         data = ObjectDict({
             "points": reward
@@ -228,6 +260,26 @@ class ReferralProfilePcHandler(BaseHandler):
                         rkey=rkey)
         self.render_page(template_name="employee/recom-scan-qrcode.html", data=data)
 
+    @gen.coroutine
+    def _make_share(self):
+        link = self.make_url(
+            path.REFERRAL_CONFIRM,
+            self.params,
+            recom=self.position_ps._make_recom(self.current_user.sysuser.id))
+
+        company_info = yield self.company_ps.get_company(
+            conds={"id": self.current_user.company.id}, need_conf=True)
+
+        cover = self.share_url(company_info.logo)
+
+        share_info = ObjectDict({
+            "cover": cover,
+            "title": "【#name#】恭喜您已被内部员工推荐",
+            "description": "点击查看详情~",
+            "link": link
+        })
+        return share_info
+
 
 class ReferralCrucialInfoHandler(BaseHandler):
     """关键信息推荐"""
@@ -239,7 +291,9 @@ class ReferralCrucialInfoHandler(BaseHandler):
     def get(self):
         pid = self.params.pid
         position_info = yield self.position_ps.get_position(pid)
-        reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_UPLOAD_PROFILE)
+        reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_CONTACT_INFORMATION)
+        data = yield self.company_ps.get_only_referral_reward(self.current_user.company.id)
+        reward = reward if not data.flag or (data.flag and position_info.is_referral) else 0
         title = position_info.title
         self.params.share = yield self._make_share()
         self.render_page(template_name="employee/recom-candidate-info.html", data=ObjectDict({
