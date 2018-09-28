@@ -13,6 +13,7 @@ from util.tool import http_tool, str_tool, url_tool
 
 from setting import settings
 from util.common.decorator import log_time
+import time
 
 
 class UserPageService(PageService):
@@ -453,7 +454,11 @@ class UserPageService(PageService):
         :return:
         """
         ret = yield self.infra_user_ds.get_redpacket_list(user_id, params)
-        return ret
+        if ret.status == const.API_SUCCESS:
+            data = ret.data
+        else:
+            data = ObjectDict()
+        return data
 
     @gen.coroutine
     def get_bonus_list(self, user_id, params):
@@ -464,7 +469,11 @@ class UserPageService(PageService):
         :return:
         """
         ret = yield self.infra_user_ds.get_bonus_list(user_id, params)
-        return ret
+        if ret.status == const.API_SUCCESS:
+            data = ret.data
+        else:
+            data = ObjectDict()
+        return data
 
     @gen.coroutine
     def claim_bonus(self, bonus_id):

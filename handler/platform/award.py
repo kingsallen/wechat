@@ -6,19 +6,32 @@ import conf.common as const
 from handler.base import BaseHandler
 from util.common import ObjectDict
 from util.common.decorator import handle_response, authenticated
+import time
 
 
 class ReferralRewardHandler(BaseHandler):
     """红包奖金"""
+
     @handle_response
     @authenticated
     @gen.coroutine
     def get(self):
-        self.render_page("", data=ObjectDict())
+        # 获取奖金与红包总数
+        params = ObjectDict({
+            'page_size': 10,
+            'page_no': 1
+        })
+        ret = yield self.user_ps.get_redpacket_list(self.current_user.sysuser.id, params)
+        total_redpacket = ret.total_redpacket
+        total_bonus = ret.total_bonus
+        self.render_page("employee/bonus-records.html",
+                         data=ObjectDict(total_redpacket=total_redpacket,
+                                         total_bonus=total_bonus))
 
 
 class ReferralRedpacketHandler(BaseHandler):
     """红包列表"""
+
     @handle_response
     @gen.coroutine
     def get(self):
@@ -29,14 +42,17 @@ class ReferralRedpacketHandler(BaseHandler):
             'page_no': page_num
         })
         ret = yield self.user_ps.get_redpacket_list(self.current_user.sysuser.id, params)
-        if ret.status == const.API_SUCCESS:
-            self.send_json_success(ret.data)
-        else:
-            self.send_json_error(ret.message)
+        list = ret.redpackets
+        for i in list:
+            open_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(i.get("open_time")))
+            i['open_time'] = open_time
+        data = ObjectDict(list=list)
+        self.send_json_success(data)
 
 
 class ReferralBonusHandler(BaseHandler):
-    """红包列表"""
+    """奖金列表"""
+
     @handle_response
     @gen.coroutine
     def get(self):
@@ -47,14 +63,18 @@ class ReferralBonusHandler(BaseHandler):
             'page_no': page_num
         })
         ret = yield self.user_ps.get_bonus_list(self.current_user.sysuser.id, params)
-        if ret.status == const.API_SUCCESS:
-            self.send_json_success(ret.data)
-        else:
-            self.send_json_error(ret.message)
+        list = ret.bonus
+        for i in list:
+            open_time = time.strftime('%Y-%m-%d', time.localtime(i.get("open_time")))
+            i['open_time'] = open_time
+            i['type'] = 3  # 目前只有入职奖金
+        data = ObjectDict(list=list)
+        self.send_json_success(data)
 
 
 class BonusClaimHandler(BaseHandler):
     """领取奖金"""
+
     @handle_response
     @gen.coroutine
     def post(self):
@@ -63,22 +83,4 @@ class BonusClaimHandler(BaseHandler):
         if ret.status == const.API_SUCCESS:
             self.send_json_success(ret.data)
         else:
-            self.send_json_error(ret.message)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            self.send_json_error(message=ret.message)
