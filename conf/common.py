@@ -287,7 +287,9 @@ MSG_TYPE = {
     5: "teamSelect",
     6: "redirect",
     7: "jobSelect",
-    8: "employeeBind"
+    8: "employeeBind",
+    10: "positionSelect",
+    11: "industrySelect"
 }
 
 # 积分配置类型
