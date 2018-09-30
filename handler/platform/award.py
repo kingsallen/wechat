@@ -46,6 +46,7 @@ class ReferralRedpacketHandler(BaseHandler):
         for i in list:
             open_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(i.get("open_time")))
             i['open_time'] = open_time
+            i['name'] = self.locale.translate(const.REDPACKET.get(i.get("type")))
         data = ObjectDict(list=list)
         self.send_json_success(data)
 
@@ -67,7 +68,10 @@ class ReferralBonusHandler(BaseHandler):
         for i in list:
             open_time = time.strftime('%Y-%m-%d', time.localtime(i.get("open_time")))
             i['open_time'] = open_time
-            i['type'] = 3  # 目前只有入职奖金
+            i['type'] = 3  # 入职奖金
+            if i.get("cancel"):
+                i['type'] = 103  # 取消入职奖金
+            i['name'] = self.locale.translate(const.BONUS.get(i.get("type")))
         data = ObjectDict(list=list)
         self.send_json_success(data)
 
