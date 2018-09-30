@@ -288,6 +288,7 @@ MSG_TYPE = {
     6: "redirect",
     7: "jobSelect",
     8: "employeeBind",
+    9: "textPlaceholder",
     10: "positionSelect",
     11: "industrySelect"
 }
