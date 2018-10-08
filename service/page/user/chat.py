@@ -214,7 +214,7 @@ class ChatPageService(PageService):
         :param user_id: 当前用户id
         :param hr_id: 聊天对象hrid
         :param position_id 当前职位id，不存在则为0
-        :param flag: 0:社招 1:校招
+        :param flag: 0:社招 1:校招 2:meet mobot
         """
         messages = []
 
@@ -224,14 +224,12 @@ class ChatPageService(PageService):
             hr_id=hr_id,
             position_id=position_id,
         )
-        self.logger.debug('get_chatbot_reply  flag:{}'.format(flag))
         try:
             if int(flag) == 1:
                 res = yield http_post(
                     route='{host}{uri}'.format(host=settings['chatbot_host'], uri='campus_qa.api'), jdata=params, infra=False)
             else:
                 res = yield http_post(
-
                     route='{host}{uri}'.format(host=settings['chatbot_host'], uri='qa.api'), jdata=params,
                     infra=False)
 
