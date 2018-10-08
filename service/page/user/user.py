@@ -13,6 +13,7 @@ from util.tool import http_tool, str_tool, url_tool
 
 from setting import settings
 from util.common.decorator import log_time
+import time
 
 
 class UserPageService(PageService):
@@ -443,6 +444,46 @@ class UserPageService(PageService):
                     recom_user_id=recom_user_id
                 ))
             return True, fav_id
+
+    @gen.coroutine
+    def get_redpacket_list(self, user_id, params):
+        """
+        获取红包列表
+        :param user_id:
+        :param params:
+        :return:
+        """
+        ret = yield self.infra_user_ds.get_redpacket_list(user_id, params)
+        if ret.status == const.API_SUCCESS:
+            data = ret.data
+        else:
+            data = ObjectDict()
+        return data
+
+    @gen.coroutine
+    def get_bonus_list(self, user_id, params):
+        """
+        获取奖金列表
+        :param user_id:
+        :param params:
+        :return:
+        """
+        ret = yield self.infra_user_ds.get_bonus_list(user_id, params)
+        if ret.status == const.API_SUCCESS:
+            data = ret.data
+        else:
+            data = ObjectDict()
+        return data
+
+    @gen.coroutine
+    def claim_bonus(self, bonus_id):
+        """
+        领取奖金
+        :param bonus_id:
+        :return:
+        """
+        ret = yield self.infra_user_ds.claim_bonus(bonus_id)
+        return ret
 
     @gen.coroutine
     def post_hr_register(self, params):
