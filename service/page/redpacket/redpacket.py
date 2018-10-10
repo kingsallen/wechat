@@ -941,8 +941,7 @@ class RedpacketPageService(PageService):
             # 发送了消息模成功
             yield self.__update_hb_item_status_with_id(
                 rp_item.id,
-                to=const.RP_ITEM_STATUS_SENT_WX_MSG_SUCCESS,
-                refresh_open_time=True)
+                to=const.RP_ITEM_STATUS_SENT_WX_MSG_SUCCESS)
 
         # 因为有金额, 如果没有发送成功，就直接发送红包
         else:
@@ -980,7 +979,8 @@ class RedpacketPageService(PageService):
                 # 跳过模版消息直接发送红包失败
                 yield self.__update_hb_item_status_with_id(
                     rp_item.id,
-                    to=const.RP_ITEM_STATUS_NO_WX_MSG_MONEY_SEND_FAILURE)
+                    to=const.RP_ITEM_STATUS_NO_WX_MSG_MONEY_SEND_FAILURE,
+                    refresh_open_time=True)
 
         raise gen.Return(result)
 
