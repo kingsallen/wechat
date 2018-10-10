@@ -214,7 +214,7 @@ class ChatPageService(PageService):
         :param user_id: 当前用户id
         :param hr_id: 聊天对象hrid
         :param position_id 当前职位id，不存在则为0
-        :param flag: 0:社招 1:校招 2:meet mobot
+        :param flag: 0:社招 1:校招 2:meet mobot 3:职能推荐
         """
         messages = []
 
