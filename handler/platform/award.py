@@ -47,6 +47,13 @@ class ReferralRedpacketHandler(BaseHandler):
             open_time = time.strftime('%Y-%m-%d', time.localtime(int(i.get("open_time", 0))/1000))
             i['open_time'] = open_time
             i['name'] = self.locale.translate(const.REDPACKET.get(i.get("type")))
+            # 认证红包不显示职位和姓名信息
+            if i.get("type") == const.RED_PACKET_TYPE_EMPLOYEE_BINDING:
+                i['candidate_name'] = ''
+                i['position_title'] = ''
+            # 转发被点击红包不显示姓名信息
+            if i.get("type") == const.RED_PACKET_TYPE_SHARE_CLICK:
+                i['position_title'] = ''
         data = ObjectDict(list=list)
         self.send_json_success(data)
 

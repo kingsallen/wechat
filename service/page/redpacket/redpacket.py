@@ -400,7 +400,8 @@ class RedpacketPageService(PageService):
                         company_name=recom_current_user.company.name,
                         recomee_name=realname,
                         position_title=position_title,
-                        recom_qx_user=recom_qxuser
+                        recom_qx_user=recom_qxuser,
+                        recom_record=recom_record
                     )
                 else:
                     # 发送红包消息模版(抽不中)
@@ -413,7 +414,8 @@ class RedpacketPageService(PageService):
                         company_name=recom_current_user.company.name,
                         recomee_name=realname,
                         position_title=position_title,
-                        recom_qx_user=recom_qxuser
+                        recom_qx_user=recom_qxuser,
+                        recom_record=recom_record
                     )
 
             except Exception as e:
@@ -916,6 +918,11 @@ class RedpacketPageService(PageService):
             yield gen.sleep(0.5)
         self.logger.debug("用户{}获得红包为{}".format(bagging_openid, rp_item.id))
 
+        recom_record = kwargs.get("recom_record", ObjectDict())
+        if recom_record:
+            yield self.__bind_recom_pid2redpacket(recom_record.get("position_id"), rp_item.id)
+            self.logger.debug("职位{}与推荐红包{}绑定".format(recom_record.get("position_id"), rp_item.id))
+
         card = yield self.__create_new_card(
             recom_wechat_id, bagging_openid, red_packet_config.id,
             rp_item.id, rp_item.amount)
@@ -999,6 +1006,10 @@ class RedpacketPageService(PageService):
         conds = ObjectDict(cardno=cardno)
         fields = ObjectDict(status=status)
         yield self.hr_hb_scratch_card_ds.update_scratch_card(conds=conds, fields=fields)
+
+    @gen.coroutine
+    def __bind_recom_pid2redpacket(self, pid, hb_item_id):
+        pass
 
     @log_time
     @gen.coroutine
