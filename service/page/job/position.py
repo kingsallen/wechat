@@ -603,6 +603,13 @@ class PositionPageService(PageService):
 
     @gen.coroutine
     def patch_position_search_history(self, user_id, app_id):
-        """清楚历史记录列表"""
+        """清除历史记录列表"""
         ret = yield self.infra_position_ds.patch_position_search_history(user_id, app_id)
         raise gen.Return(ret)
+
+    @gen.coroutine
+    def get_position_bonus(self, pid):
+        """获取职位奖金"""
+        ret = yield self.infra_position_ds.get_position_bonus(pid)
+        bonus = ret.data.position_bonus.get("total_bonus")
+        return bonus

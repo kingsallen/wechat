@@ -958,6 +958,10 @@ class RedpacketPageService(PageService):
                 red_packet_config, recom_wechat.id,
                 bagging_openid, card.amount, rp_item.id)
 
+            yield self.__update_hb_scratch_card_status(card.cardno, status=const.SRRATCH_CARD_OPENED)
+
+            self.logger.debug("[RP]直接发送红包后, 将刮刮卡状态置为已打开")
+
             if rp_sent_ret:
                 self.logger.debug("[RP]直接发送红包成功!")
 
@@ -988,6 +992,13 @@ class RedpacketPageService(PageService):
         if refresh_open_time:
             fields.update(open_time=datetime.now())
         yield self.hr_hb_items_ds.update_hb_items(conds=conds, fields=fields)
+
+    @log_time
+    @gen.coroutine
+    def __update_hb_scratch_card_status(self, cardno, status):
+        conds = ObjectDict(cardno=cardno)
+        fields = ObjectDict(status=status)
+        yield self.hr_hb_scratch_card_ds.update_scratch_card(conds=conds, fields=fields)
 
     @log_time
     @gen.coroutine

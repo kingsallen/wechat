@@ -255,3 +255,19 @@ class InfraUserDataService(DataService):
         })
         res = yield http_get(path.INFRA_USER_APPLYRECORD, params)
         return res
+
+    @gen.coroutine
+    def get_redpacket_list(self, user_id, params):
+        res = yield http_get(path.INFRA_USER_REDPACKET_LIST.format(user_id), params)
+        return res
+
+    @gen.coroutine
+    def get_bonus_list(self, user_id, params):
+        res = yield http_get(path.INFRA_USER_BONUS_LIST.format(user_id), params)
+        return res
+
+    @gen.coroutine
+    def claim_bonus(self, bonus_id):
+        res = yield http_put(path.INFRA_USER_CLAIM_BONUS.format(bonus_id))
+        return res
+

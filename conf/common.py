@@ -277,6 +277,20 @@ SCALE = {
     "8": "10000人以上",  # 似乎数据库中没有？ from yiliang
 }
 
+# 红包相关
+REDPACKET = {
+    0: "employee_verification",
+    1: "endorsement",
+    2: "share_position",
+    3: "referral_application"
+}
+
+# 奖金相关
+BONUS = {
+    3: "on_board",
+    103: "undo_on_board"
+}
+
 # 聊天相关
 MSG_TYPE = {
     0: "html",
@@ -447,6 +461,10 @@ RED_PACKET_TYPE_EMPLOYEE_BINDING = 0
 RED_PACKET_TYPE_RECOM = 1
 RED_PACKET_TYPE_SHARE_CLICK = 2
 RED_PACKET_TYPE_SHARE_APPLY = 3
+
+# 刮刮卡状态
+SRRATCH_CARD_INTACT = 0
+SRRATCH_CARD_OPENED = 1
 
 # 职位的红包活动状态
 HB_STATUS_NONE = 0
