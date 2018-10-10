@@ -22,7 +22,7 @@ class ReferralRewardHandler(BaseHandler):
             'page_no': 1
         })
         ret = yield self.user_ps.get_redpacket_list(self.current_user.sysuser.id, params)
-        total_redpacket = ret.total_redpacket
+        total_redpacket = ret.total_redpackets
         total_bonus = ret.total_bonus
         self.render_page("employee/bonus-records.html",
                          data=ObjectDict(total_redpacket=total_redpacket,
@@ -44,7 +44,7 @@ class ReferralRedpacketHandler(BaseHandler):
         ret = yield self.user_ps.get_redpacket_list(self.current_user.sysuser.id, params)
         list = ret.redpackets
         for i in list:
-            open_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(i.get("open_time", 0))/1000))
+            open_time = time.strftime('%Y-%m-%d', time.localtime(int(i.get("open_time", 0))/1000))
             i['open_time'] = open_time
             i['name'] = self.locale.translate(const.REDPACKET.get(i.get("type")))
         data = ObjectDict(list=list)

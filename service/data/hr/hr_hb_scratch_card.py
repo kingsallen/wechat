@@ -34,3 +34,16 @@ class HrHbScratchCardDataService(DataService):
 
         response = yield self.hr_hb_scratch_card_dao.insert_record(fields, options)
         raise gen.Return(response)
+
+    @log_time
+    @gen.coroutine
+    def update_scratch_card(self, conds=None, fields=None):
+        if not conds or not fields:
+            self.logger.warning(
+                "Warning:[update_scratch_card][invalid parameters], Detail:[conds: {0}, fields: {1}]".format(
+                    conds, fields))
+            raise gen.Return(None)
+
+        ret = yield self.hr_hb_scratch_card_dao.update_by_conds(conds=conds, fields=fields)
+
+        raise gen.Return(ret)
