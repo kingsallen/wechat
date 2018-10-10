@@ -66,7 +66,7 @@ class ReferralBonusHandler(BaseHandler):
         ret = yield self.user_ps.get_bonus_list(self.current_user.sysuser.id, params)
         list = ret.bonus
         for i in list:
-            open_time = time.strftime('%Y-%m-%d', time.localtime(int(i.get("open_time", 0))/1000))
+            open_time = time.strftime('%Y-%m-%d', time.localtime(int(i.get("employment_date", 0))/1000))
             i['open_time'] = open_time
             i['type'] = 3  # 入职奖金
             if i.get("cancel"):
