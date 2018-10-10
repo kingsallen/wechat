@@ -304,7 +304,8 @@ MSG_TYPE = {
     8: "employeeBind",
     9: "textPlaceholder",
     10: "positionSelect",
-    11: "industrySelect"
+    11: "industrySelect",
+    12: "satisfaction"
 }
 
 # 积分配置类型
