@@ -764,7 +764,7 @@ class PositionListInfraParamsMixin(BaseHandler):
         infra_params.candidate_source = ""
         infra_params.employment_type = ""
         infra_params.company_id = self.current_user.company.id
-        infra_params.user_id = self.current_user.sysuser.id
+        infra_params.user_id = self.current_user.sysuser.id or 0
 
         if self.params.did:
             infra_params.did = self.params.did
