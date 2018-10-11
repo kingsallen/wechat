@@ -310,6 +310,7 @@ class ChatHandler(BaseHandler):
         self.position_id = 0
         self.flag = 0
         self.bot_enabled = False
+        self.create_new_context = False
 
     @handle_response
     @gen.coroutine
@@ -462,6 +463,7 @@ class ChatHandler(BaseHandler):
         msg_type = self.json_args.get("msgType")
         server_id = self.json_args.get("serverId") or ""
         duration = self.json_args.get("duration") or 0
+        create_new_context = self.json_args.get("create_new_context")
 
         self.logger.debug('post_message  flag:{}'.format(self.flag))
 
@@ -557,7 +559,8 @@ class ChatHandler(BaseHandler):
             user_id=self.user_id,
             hr_id=self.hr_id,
             position_id=self.position_id,
-            flag=self.flag
+            flag=self.flag,
+            create_new_context=self.create_new_context
         )
         self.logger.debug('_handle_chatbot_message  flag:{}'.format(self.flag))
         for bot_message in bot_messages:

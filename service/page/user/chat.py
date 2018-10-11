@@ -207,7 +207,7 @@ class ChatPageService(PageService):
         raise gen.Return(company_conf)
 
     @gen.coroutine
-    def get_chatbot_reply(self, message, user_id, hr_id, position_id, flag):
+    def get_chatbot_reply(self, message, user_id, hr_id, position_id, flag, create_new_context):
         """ 调用 chatbot 返回机器人的回复信息
                https://wiki.moseeker.com/chatbot.md
         :param message: 用户发送到文本内容
@@ -215,6 +215,7 @@ class ChatPageService(PageService):
         :param hr_id: 聊天对象hrid
         :param position_id 当前职位id，不存在则为0
         :param flag: 0:社招 1:校招 2:meet mobot 3: 智能推荐
+        :param create_new_context: meet mobot标识
         """
         messages = []
 
@@ -223,6 +224,7 @@ class ChatPageService(PageService):
             user_id=user_id,
             hr_id=hr_id,
             position_id=position_id,
+            create_new_context=create_new_context
         )
         try:
             if int(flag) == 1:
