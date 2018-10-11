@@ -54,7 +54,12 @@ class ReferralRedpacketHandler(BaseHandler):
             # 转发被点击红包不显示姓名信息
             if i.get("type") == const.RED_PACKET_TYPE_SHARE_CLICK:
                 i['position_title'] = ''
-        data = ObjectDict(list=list)
+        total_redpacket = ret.total_redpackets
+        total_bonus = ret.total_bonus
+        data = ObjectDict(list=list,
+                          total_redpacket=total_redpacket,
+                          total_bonus=total_bonus
+                          )
         self.send_json_success(data)
 
 
@@ -79,7 +84,11 @@ class ReferralBonusHandler(BaseHandler):
             if i.get("cancel"):
                 i['type'] = 103  # 取消入职奖金
             i['name'] = self.locale.translate(const.BONUS.get(i.get("type")))
-        data = ObjectDict(list=list)
+        total_redpacket = ret.total_redpackets
+        total_bonus = ret.total_bonus
+        data = ObjectDict(list=list,
+                          total_redpacket=total_redpacket,
+                          total_bonus=total_bonus)
         self.send_json_success(data)
 
 

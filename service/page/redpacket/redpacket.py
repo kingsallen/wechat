@@ -1009,7 +1009,10 @@ class RedpacketPageService(PageService):
 
     @gen.coroutine
     def __bind_recom_pid2redpacket(self, pid, hb_item_id):
-        pass
+        yield self.referral_recom_hb_position_ds.create_recom_hb_position(fields={
+            "position_id": pid,
+            "hb_item_id": hb_item_id
+        })
 
     @log_time
     @gen.coroutine
@@ -1056,8 +1059,13 @@ class RedpacketPageService(PageService):
 
         # 将一个 0 元红包
         # 记录当前用户 wxuser_id 和红包获得者 wxuser_id
-        yield self.__insert_0_amount_sent_history(
+        hb_item_id = yield self.__insert_0_amount_sent_history(
             red_packet_config.id, qx_openid, current_qxuser_id)
+
+        recom_record = kwargs.get("recom_record", ObjectDict())
+        if recom_record:
+            yield self.__bind_recom_pid2redpacket(recom_record.get("position_id"), hb_item_id)
+            self.logger.debug("职位{}与推荐红包{}绑定".format(recom_record.get("position_id"), hb_item_id))
 
         raise gen.Return(result)
 
@@ -1219,13 +1227,14 @@ class RedpacketPageService(PageService):
             "openid": recom_qx_openid,
             "wechat_id": settings['qx_wechat_id']
         })
-        yield self.hr_hb_items_ds.create_hb_items(fields={
+        item_id = yield self.hr_hb_items_ds.create_hb_items(fields={
             "hb_config_id": hb_config_id,
             "binding_id": 0,
             "status": const.RP_ITEM_STATUS_ZERO_AMOUNT_WX_MSG_SENT,
             "wxuser_id": recom_qx_user.id,
             "trigger_wxuser_id": trigger_qx_user_id
         })
+        return item_id
 
     @log_time
     @gen.coroutine
