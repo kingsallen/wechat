@@ -920,8 +920,8 @@ class RedpacketPageService(PageService):
 
         recom_record = kwargs.get("recom_record", ObjectDict())
         if recom_record:
-            yield self.__bind_recom_pid2redpacket(recom_record.get("position_id"), rp_item.id)
-            self.logger.debug("职位{}与推荐红包{}绑定".format(recom_record.get("position_id"), rp_item.id))
+            yield self.__bind_recom_record_id2redpacket(recom_record.get("id"), rp_item.id)
+            self.logger.debug("职位{}与推荐红包{}绑定".format(recom_record.get("id"), rp_item.id))
 
         card = yield self.__create_new_card(
             recom_wechat_id, bagging_openid, red_packet_config.id,
@@ -1008,9 +1008,9 @@ class RedpacketPageService(PageService):
         yield self.hr_hb_scratch_card_ds.update_scratch_card(conds=conds, fields=fields)
 
     @gen.coroutine
-    def __bind_recom_pid2redpacket(self, pid, hb_item_id):
+    def __bind_recom_record_id2redpacket(self, cid, hb_item_id):
         yield self.referral_recom_hb_position_ds.create_recom_hb_position(fields={
-            "position_id": pid,
+            "recom_record_id": cid,
             "hb_item_id": hb_item_id
         })
 
@@ -1064,8 +1064,8 @@ class RedpacketPageService(PageService):
 
         recom_record = kwargs.get("recom_record", ObjectDict())
         if recom_record:
-            yield self.__bind_recom_pid2redpacket(recom_record.get("position_id"), hb_item_id)
-            self.logger.debug("职位{}与推荐红包{}绑定".format(recom_record.get("position_id"), hb_item_id))
+            yield self.__bind_recom_record_id2redpacket(recom_record.get("id"), hb_item_id)
+            self.logger.debug("职位{}与推荐红包{}绑定".format(recom_record.get("id"), hb_item_id))
 
         raise gen.Return(result)
 
