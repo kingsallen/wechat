@@ -47,7 +47,19 @@ class ReferralRedpacketHandler(BaseHandler):
             open_time = time.strftime('%Y-%m-%d', time.localtime(int(i.get("open_time", 0))/1000))
             i['open_time'] = open_time
             i['name'] = self.locale.translate(const.REDPACKET.get(i.get("type")))
-        data = ObjectDict(list=list)
+            # 认证红包不显示职位和姓名信息
+            if i.get("type") == const.RED_PACKET_TYPE_EMPLOYEE_BINDING:
+                i['candidate_name'] = ''
+                i['position_title'] = ''
+            # 转发被点击红包不显示姓名信息
+            if i.get("type") == const.RED_PACKET_TYPE_SHARE_CLICK:
+                i['position_title'] = ''
+        total_redpacket = ret.total_redpackets
+        total_bonus = ret.total_bonus
+        data = ObjectDict(list=list,
+                          total_redpacket=total_redpacket,
+                          total_bonus=total_bonus
+                          )
         self.send_json_success(data)
 
 
@@ -72,7 +84,11 @@ class ReferralBonusHandler(BaseHandler):
             if i.get("cancel"):
                 i['type'] = 103  # 取消入职奖金
             i['name'] = self.locale.translate(const.BONUS.get(i.get("type")))
-        data = ObjectDict(list=list)
+        total_redpacket = ret.total_redpackets
+        total_bonus = ret.total_bonus
+        data = ObjectDict(list=list,
+                          total_redpacket=total_redpacket,
+                          total_bonus=total_bonus)
         self.send_json_success(data)
 
 
