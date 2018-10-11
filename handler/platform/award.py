@@ -53,7 +53,7 @@ class ReferralRedpacketHandler(BaseHandler):
                 i['position_title'] = ''
             # 转发被点击红包不显示姓名信息
             if i.get("type") == const.RED_PACKET_TYPE_SHARE_CLICK:
-                i['position_title'] = ''
+                i['candidate_name'] = ''
         total_redpacket = ret.total_redpackets
         total_bonus = ret.total_bonus
         data = ObjectDict(list=list,
