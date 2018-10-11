@@ -226,6 +226,7 @@ class ChatPageService(PageService):
             position_id=position_id,
             create_new_context=create_new_context
         )
+        self.logger.debug("get_chatbot_reply==>create_new_context:{} ".format(create_new_context))
         try:
             if int(flag) == 1:
                 res = yield http_post(
