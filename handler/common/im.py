@@ -462,7 +462,7 @@ class ChatHandler(BaseHandler):
         msg_type = self.json_args.get("msgType")
         server_id = self.json_args.get("serverId") or ""
         duration = self.json_args.get("duration") or 0
-        create_new_context = self.json_args.get("create_new_context")
+        create_new_context = self.json_args.get("create_new_context") or False
 
         self.logger.debug('post_message  flag:{}'.format(self.flag))
         self.logger.debug('post_message  create_new_context:{}'.format(create_new_context))
@@ -527,7 +527,7 @@ class ChatHandler(BaseHandler):
         compoundContent = self.json_args.get("compoundContent") or {}
         user_message = compoundContent or content
         msg_type = self.json_args.get("msgType")
-        create_new_context = self.json_args.get("create_new_context")
+        create_new_context = self.json_args.get("create_new_context") or False
 
         if not self.bot_enabled:
             yield self.get_bot_enabled()
