@@ -310,7 +310,7 @@ class ChatHandler(BaseHandler):
         self.position_id = 0
         self.flag = 0
         self.bot_enabled = False
-        self.create_new_context = False
+        self.create_new_context = ''
 
     @handle_response
     @gen.coroutine
