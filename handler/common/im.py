@@ -463,7 +463,7 @@ class ChatHandler(BaseHandler):
         msg_type = self.json_args.get("msgType")
         server_id = self.json_args.get("serverId") or ""
         duration = self.json_args.get("duration") or 0
-        self.create_new_context = self.json_args.get("create_new_context")
+        self.create_new_context = self.params.get("create_new_context")
 
         self.logger.debug('post_message  flag:{}'.format(self.flag))
         self.logger.debug('post_message  create_new_context:{}'.format(self.create_new_context))
