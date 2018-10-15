@@ -172,7 +172,8 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
                         compoundContent=data.get("compoundContent"),
                         chatTime=data.get("createTime"),
                         speaker=data.get("speaker"),
-                        msgType=data.get("msgType")
+                        msgType=data.get("msgType"),
+                        stats=data.get("stats")
                     )))
                     logger.debug("----------websocket write finish----------")
             except websocket.WebSocketClosedError:
@@ -599,6 +600,7 @@ class ChatHandler(BaseHandler):
                 message_body = json_dumps(ObjectDict(
                     compoundContent=compound_content,
                     content=bot_message.content,
+                    stats=bot_message.stats,
                     msgType=msg_type,
                     speaker=const.CHAT_SPEAKER_HR,
                     cid=int(self.room_id),
