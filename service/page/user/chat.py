@@ -297,6 +297,14 @@ class ChatPageService(PageService):
                 position.location = position_info.city
                 position.update = position_info.update_time
                 position.id = position_info.id
+                if position_info.image:
+                    position.image = position_info.image
+                elif team.image:
+                    position.image = team.image
+                elif position_info.banner:
+                    position.image = position_info.banner[0]
+                else:
+                    position.image = company_info.banner[0]
                 position_list.append(position)
             ret_message['compound_content']['list'] = position_list
             if max:
