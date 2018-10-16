@@ -297,6 +297,14 @@ class ChatPageService(PageService):
                 position.location = position_info.city
                 position.update = position_info.update_time
                 position.id = position_info.id
+                if jd_position['data'].get('media_url') and jd_position['data'].get('media_type') == 'image':
+                    position.imgUrl = jd_position['data'].get('media_url')
+                elif team_des['data'].get('media_url') and team_des['data'].get('media_type') == 'image':
+                    position.imgUrl = team.image
+                elif position_info.banner:
+                    position.imgUrl = position_info.banner[0]
+                else:
+                    position.imgUrl = company_info.banner[0]
                 position_list.append(position)
             ret_message['compound_content']['list'] = position_list
             if max:
