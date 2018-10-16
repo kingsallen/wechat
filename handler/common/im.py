@@ -172,7 +172,8 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
                         compoundContent=data.get("compoundContent"),
                         chatTime=data.get("createTime"),
                         speaker=data.get("speaker"),
-                        msgType=data.get("msgType")
+                        msgType=data.get("msgType"),
+                        stats=data.get("stats")
                     )))
                     logger.debug("----------websocket write finish----------")
             except websocket.WebSocketClosedError:
@@ -600,7 +601,8 @@ class ChatHandler(BaseHandler):
                 origin=const.ORIGIN_CHATBOT,
                 msgType=msg_type,
                 roomId=int(self.room_id),
-                positionId=int(self.position_id)
+                positionId=int(self.position_id),
+                stats=ujson.dumps(bot_message.stats),
             )
             self.logger.debug("save chat by alphadog chat_params:{}".format(chat_params))
             chat_id = yield self.chat_ps.save_chat(chat_params)
@@ -611,6 +613,7 @@ class ChatHandler(BaseHandler):
                     compoundContent=compound_content,
                     content=bot_message.content,
                     msgType=msg_type,
+                    stats=bot_message.stats,
                     speaker=const.CHAT_SPEAKER_HR,
                     cid=int(self.room_id),
                     pid=int(self.position_id),

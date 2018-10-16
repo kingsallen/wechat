@@ -70,8 +70,8 @@
 "joblist_yuan"," Yuan"
 "joblist_load_more","Load more"
 "joblist_advance_tip","Advanced Search"
-"joblist_advance_tip2", "Refer a Friend"
-"joblist_empty", "Nothing found"
+"joblist_advance_tip2","Refer a Friend"
+"joblist_empty","Nothing found"
 "search_with_keywords","Search with keywords"
 
 "employee_incorrect_info","Verification failed"
@@ -123,7 +123,7 @@
 "company_page_title","About Us"
 "company_referral_policy","Internal Referral Rules"
 
-"search_title", "Filter"
+"search_title","Filter"
 "search_location","Location"
 "search_salary","Salary"
 "search_team","Team"
