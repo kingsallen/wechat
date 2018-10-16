@@ -190,6 +190,10 @@ REFERRAL_POSITION_INFO_EMPLOYEE = "/v1/employee/{}/referral-type"
 INFRA_REFERRAL_CRUCIAL_INFO = "/v1/employee/{}/post-candidate-info"
 REFERRAL_QRCODE = "/v1/referral/position/qrcode"
 REFERRAL_POSITION_LIST = "/v1/referral/wechat/position/list"
+
+# 积分商城服务
+MALL_SWITCH = '/api/mall/visit/switch'
+LEFT_CREDIT = '/api/user/employee/{}'
 # ============================ 基础服务结束 ============================
 
 # 其他外部服务
