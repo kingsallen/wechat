@@ -34,6 +34,7 @@ from setting import settings
 import conf.common as constant
 from route import platform_routes, qx_routes, help_routes
 from handler.common.navmenu import NavMenuModule
+from handler.platform.mq_receiver import ScreenRedPacketConsumer
 
 from globals import env, logger, redis, es
 
@@ -75,13 +76,17 @@ def main():
         tornado.locale.load_translations(settings.locale_path)
         tornado.locale.set_default_locale(settings.default_locale)
         logger.info("Supported locales: {}".format(', '.join(tornado.locale.get_supported_locales())))
-
-        tornado.ioloop.IOLoop.instance().set_blocking_log_threshold(
+        io_loop = tornado.ioloop.IOLoop.instance()
+        io_loop.set_blocking_log_threshold(
             settings.blocking_log_threshold)
 
         http_server = tornado.httpserver.HTTPServer(application, xheaders=True)
+        sc = ScreenRedPacketConsumer(io_loop)
+        application.sc = sc
+        application.sc.connect()
         http_server.listen(options.port)
-        tornado.ioloop.IOLoop.instance().start()
+
+        io_loop.start()
 
     except Exception as e:
         logger.error(e)
