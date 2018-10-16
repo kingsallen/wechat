@@ -19,7 +19,8 @@ class ReferralRewardHandler(BaseHandler):
         # 获取奖金与红包总数
         params = ObjectDict({
             'page_size': 10,
-            'page_no': 1
+            'page_no': 1,
+            'company_id': self.current_user.company.id
         })
         ret = yield self.user_ps.get_redpacket_list(self.current_user.sysuser.id, params)
         total_redpacket = ret.total_redpackets
@@ -39,7 +40,8 @@ class ReferralRedpacketHandler(BaseHandler):
         page_num = int(self.params.get("page_num", 0))
         params = ObjectDict({
             'page_size': page_size,
-            'page_no': page_num
+            'page_no': page_num,
+            'company_id': self.current_user.company.id
         })
         ret = yield self.user_ps.get_redpacket_list(self.current_user.sysuser.id, params)
         list = ret.redpackets
@@ -73,7 +75,8 @@ class ReferralBonusHandler(BaseHandler):
         page_num = int(self.params.get("page_num", 0))
         params = ObjectDict({
             'page_size': page_size,
-            'page_no': page_num
+            'page_no': page_num,
+            'company_id': self.current_user.company.id
         })
         ret = yield self.user_ps.get_bonus_list(self.current_user.sysuser.id, params)
         list = ret.bonus
