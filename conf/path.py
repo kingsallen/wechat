@@ -193,7 +193,7 @@ REFERRAL_POSITION_LIST = "/v1/referral/wechat/position/list"
 
 # 积分商城服务
 MALL_SWITCH = '/api/mall/visit/switch'
-LEFT_CREDIT = '/api/user/employee/{}'
+LEFT_CREDIT = '/user/employee/{}'
 # ============================ 基础服务结束 ============================
 
 # 其他外部服务
