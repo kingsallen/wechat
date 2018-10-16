@@ -160,7 +160,7 @@ class HRChatRoomVO(object):
 class HRChatRoomsVO(object):
     """
     Attributes:
-     - pageNo
+     - pageNum
      - pageSize
      - totalPage
      - totalRow
@@ -169,15 +169,15 @@ class HRChatRoomsVO(object):
 
     thrift_spec = (
         None,  # 0
-        (1, TType.I32, 'pageNo', None, None, ),  # 1
+        (1, TType.I32, 'pageNum', None, None, ),  # 1
         (2, TType.I32, 'pageSize', None, None, ),  # 2
         (3, TType.I32, 'totalPage', None, None, ),  # 3
         (4, TType.I32, 'totalRow', None, None, ),  # 4
         (5, TType.LIST, 'rooms', (TType.STRUCT, (HRChatRoomVO, HRChatRoomVO.thrift_spec), False), None, ),  # 5
     )
 
-    def __init__(self, pageNo=None, pageSize=None, totalPage=None, totalRow=None, rooms=None,):
-        self.pageNo = pageNo
+    def __init__(self, pageNum=None, pageSize=None, totalPage=None, totalRow=None, rooms=None,):
+        self.pageNum = pageNum
         self.pageSize = pageSize
         self.totalPage = totalPage
         self.totalRow = totalRow
@@ -194,7 +194,7 @@ class HRChatRoomsVO(object):
                 break
             if fid == 1:
                 if ftype == TType.I32:
-                    self.pageNo = iprot.readI32()
+                    self.pageNum = iprot.readI32()
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
@@ -233,9 +233,9 @@ class HRChatRoomsVO(object):
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
         oprot.writeStructBegin('HRChatRoomsVO')
-        if self.pageNo is not None:
-            oprot.writeFieldBegin('pageNo', TType.I32, 1)
-            oprot.writeI32(self.pageNo)
+        if self.pageNum is not None:
+            oprot.writeFieldBegin('pageNum', TType.I32, 1)
+            oprot.writeI32(self.pageNum)
             oprot.writeFieldEnd()
         if self.pageSize is not None:
             oprot.writeFieldBegin('pageSize', TType.I32, 2)
@@ -538,7 +538,7 @@ class UserChatRoomVO(object):
 class UserChatRoomsVO(object):
     """
     Attributes:
-     - pageNo
+     - pageNum
      - pageSize
      - totalPage
      - totalRow
@@ -547,15 +547,15 @@ class UserChatRoomsVO(object):
 
     thrift_spec = (
         None,  # 0
-        (1, TType.I32, 'pageNo', None, None, ),  # 1
+        (1, TType.I32, 'pageNum', None, None, ),  # 1
         (2, TType.I32, 'pageSize', None, None, ),  # 2
         (3, TType.I32, 'totalPage', None, None, ),  # 3
         (4, TType.I32, 'totalRow', None, None, ),  # 4
         (5, TType.LIST, 'rooms', (TType.STRUCT, (UserChatRoomVO, UserChatRoomVO.thrift_spec), False), None, ),  # 5
     )
 
-    def __init__(self, pageNo=None, pageSize=None, totalPage=None, totalRow=None, rooms=None,):
-        self.pageNo = pageNo
+    def __init__(self, pageNum=None, pageSize=None, totalPage=None, totalRow=None, rooms=None,):
+        self.pageNum = pageNum
         self.pageSize = pageSize
         self.totalPage = totalPage
         self.totalRow = totalRow
@@ -572,7 +572,7 @@ class UserChatRoomsVO(object):
                 break
             if fid == 1:
                 if ftype == TType.I32:
-                    self.pageNo = iprot.readI32()
+                    self.pageNum = iprot.readI32()
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
@@ -611,9 +611,9 @@ class UserChatRoomsVO(object):
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
         oprot.writeStructBegin('UserChatRoomsVO')
-        if self.pageNo is not None:
-            oprot.writeFieldBegin('pageNo', TType.I32, 1)
-            oprot.writeI32(self.pageNo)
+        if self.pageNum is not None:
+            oprot.writeFieldBegin('pageNum', TType.I32, 1)
+            oprot.writeI32(self.pageNum)
             oprot.writeFieldEnd()
         if self.pageSize is not None:
             oprot.writeFieldBegin('pageSize', TType.I32, 2)
@@ -669,6 +669,7 @@ class ChatVO(object):
      - id
      - createTime
      - compoundContent
+     - stats
     """
 
     thrift_spec = (
@@ -687,9 +688,10 @@ class ChatVO(object):
         (12, TType.I32, 'id', None, None, ),  # 12
         (13, TType.STRING, 'createTime', 'UTF8', None, ),  # 13
         (14, TType.STRING, 'compoundContent', 'UTF8', None, ),  # 14
+        (15, TType.STRING, 'stats', 'UTF8', None, ),  # 15
     )
 
-    def __init__(self, serverId=None, content=None, speaker=None, origin=None, origin_str=None, msgType=None, assetUrl=None, btnContent=None, roomId=None, positionId=None, duration=None, id=None, createTime=None, compoundContent=None,):
+    def __init__(self, serverId=None, content=None, speaker=None, origin=None, origin_str=None, msgType=None, assetUrl=None, btnContent=None, roomId=None, positionId=None, duration=None, id=None, createTime=None, compoundContent=None, stats=None,):
         self.serverId = serverId
         self.content = content
         self.speaker = speaker
@@ -704,6 +706,7 @@ class ChatVO(object):
         self.id = id
         self.createTime = createTime
         self.compoundContent = compoundContent
+        self.stats = stats
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -784,6 +787,11 @@ class ChatVO(object):
                     self.compoundContent = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
+            elif fid == 15:
+                if ftype == TType.STRING:
+                    self.stats = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -849,6 +857,10 @@ class ChatVO(object):
         if self.compoundContent is not None:
             oprot.writeFieldBegin('compoundContent', TType.STRING, 14)
             oprot.writeString(self.compoundContent.encode('utf-8') if sys.version_info[0] == 2 else self.compoundContent)
+            oprot.writeFieldEnd()
+        if self.stats is not None:
+            oprot.writeFieldBegin('stats', TType.STRING, 15)
+            oprot.writeString(self.stats.encode('utf-8') if sys.version_info[0] == 2 else self.stats)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -1000,7 +1012,7 @@ class ChatHistory(object):
 class ChatsVO(object):
     """
     Attributes:
-     - pageNo
+     - pageNum
      - pageSize
      - totalPage
      - totalRow
@@ -1009,15 +1021,15 @@ class ChatsVO(object):
 
     thrift_spec = (
         None,  # 0
-        (1, TType.I32, 'pageNo', None, None, ),  # 1
+        (1, TType.I32, 'pageNum', None, None, ),  # 1
         (2, TType.I32, 'pageSize', None, None, ),  # 2
         (3, TType.I32, 'totalPage', None, None, ),  # 3
         (4, TType.I32, 'totalRow', None, None, ),  # 4
         (5, TType.LIST, 'chatLogs', (TType.STRUCT, (ChatVO, ChatVO.thrift_spec), False), None, ),  # 5
     )
 
-    def __init__(self, pageNo=None, pageSize=None, totalPage=None, totalRow=None, chatLogs=None,):
-        self.pageNo = pageNo
+    def __init__(self, pageNum=None, pageSize=None, totalPage=None, totalRow=None, chatLogs=None,):
+        self.pageNum = pageNum
         self.pageSize = pageSize
         self.totalPage = totalPage
         self.totalRow = totalRow
@@ -1034,7 +1046,7 @@ class ChatsVO(object):
                 break
             if fid == 1:
                 if ftype == TType.I32:
-                    self.pageNo = iprot.readI32()
+                    self.pageNum = iprot.readI32()
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
@@ -1073,9 +1085,9 @@ class ChatsVO(object):
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
         oprot.writeStructBegin('ChatsVO')
-        if self.pageNo is not None:
-            oprot.writeFieldBegin('pageNo', TType.I32, 1)
-            oprot.writeI32(self.pageNo)
+        if self.pageNum is not None:
+            oprot.writeFieldBegin('pageNum', TType.I32, 1)
+            oprot.writeI32(self.pageNum)
             oprot.writeFieldEnd()
         if self.pageSize is not None:
             oprot.writeFieldBegin('pageSize', TType.I32, 2)
@@ -1121,6 +1133,7 @@ class HrVO(object):
      - hrName
      - hrHeadImg
      - isDelete
+     - companyName
     """
 
     thrift_spec = (
@@ -1129,13 +1142,15 @@ class HrVO(object):
         (2, TType.STRING, 'hrName', 'UTF8', None, ),  # 2
         (3, TType.STRING, 'hrHeadImg', 'UTF8', None, ),  # 3
         (4, TType.BOOL, 'isDelete', None, None, ),  # 4
+        (5, TType.STRING, 'companyName', 'UTF8', None, ),  # 5
     )
 
-    def __init__(self, hrId=None, hrName=None, hrHeadImg=None, isDelete=None,):
+    def __init__(self, hrId=None, hrName=None, hrHeadImg=None, isDelete=None, companyName=None,):
         self.hrId = hrId
         self.hrName = hrName
         self.hrHeadImg = hrHeadImg
         self.isDelete = isDelete
+        self.companyName = companyName
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -1166,6 +1181,11 @@ class HrVO(object):
                     self.isDelete = iprot.readBool()
                 else:
                     iprot.skip(ftype)
+            elif fid == 5:
+                if ftype == TType.STRING:
+                    self.companyName = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -1191,6 +1211,10 @@ class HrVO(object):
         if self.isDelete is not None:
             oprot.writeFieldBegin('isDelete', TType.BOOL, 4)
             oprot.writeBool(self.isDelete)
+            oprot.writeFieldEnd()
+        if self.companyName is not None:
+            oprot.writeFieldBegin('companyName', TType.STRING, 5)
+            oprot.writeString(self.companyName.encode('utf-8') if sys.version_info[0] == 2 else self.companyName)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()

@@ -590,7 +590,8 @@ class ChatHandler(BaseHandler):
                 origin=const.ORIGIN_CHATBOT,
                 msgType=msg_type,
                 roomId=int(self.room_id),
-                positionId=int(self.position_id)
+                positionId=int(self.position_id),
+                stats=bot_message.stats,
             )
             self.logger.debug("save chat by alphadog chat_params:{}".format(chat_params))
             chat_id = yield self.chat_ps.save_chat(chat_params)

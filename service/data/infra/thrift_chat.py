@@ -80,7 +80,7 @@ class ThriftChatDataService(DataService):
         :return:
         """
 
-        ret = yield self.chat_service_cilent.saveChat(params)
+        ret = yield self.chat_service_cilent.c(params)
         raise gen.Return(ret)
 
     @gen.coroutine
