@@ -73,14 +73,11 @@ class ThriftChatDataService(DataService):
     def save_chat(self, params):
         """
         记录聊天内容
-        :param room_id:
-        :param content:
-        :param position_id:
-        :param speaker: 0：求职者，1：HR
+        :param params:
         :return:
         """
 
-        ret = yield self.chat_service_cilent.c(params)
+        ret = yield self.chat_service_cilent.saveChat(params)
         raise gen.Return(ret)
 
     @gen.coroutine
