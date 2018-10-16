@@ -260,11 +260,13 @@ class ChatPageService(PageService):
         ret = message.get("values", {})
         content = ret.get("content", "")
         compoundContent = ret.get("compoundContent") or {}
+        stats = ret.get("stats") or {}
         msg_type = const.MSG_TYPE.get(res_type)
         ret_message = ObjectDict()
         ret_message['content'] = content
         ret_message['compound_content'] = compoundContent
         ret_message['msg_type'] = msg_type
+        ret_message['stats'] = stats
         if msg_type == "citySelect":
             max = ret_message['compound_content'].get("max")
             ret_message['compound_content'] = ObjectDict()  # 置空compoundContent
