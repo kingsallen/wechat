@@ -55,6 +55,7 @@ import handler.help.captcha
 import handler.platform.referral
 import handler.platform.referral_pc
 import handler.platform.award
+import handler.platform.mall
 
 import handler.qx.app
 import handler.qx.aggregation
@@ -157,6 +158,7 @@ platform_routes = [
     (r"/employee/ladder/?",                          handler.platform.employee.AwardsLadderPageHandler,         {"event": "awards_ladder_page"}),
     (r"/employee/custom_bind/gates",                 handler.platform.employee.CatesEmployeeBindHandler,        {"event": "gates employee_bind"}),
     (r"/employee/reward",                            handler.platform.award.ReferralRewardHandler,               {"event": "referral_reward"}),
+    (r"/employee/mall/index",                        handler.platform.mall.MallIndexHandler,                    {"event": "mall_index"}),
 
     (r'/user/survey/?',                              handler.platform.user.UserSurveyHandler,                   {'event': 'user_survey'}),
     (r'/user/ai-recom/?',                            handler.platform.user.AIRecomHandler,                      {'event': 'user_ai-recom'}),
