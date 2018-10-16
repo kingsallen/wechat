@@ -30,10 +30,9 @@ class MallPageService(PageService):
     def get_mall_state(self, company_id, employee_id):
         """获取商城状态：0 未开启 1 开启 2 已开启现在是停用状态
         """
-        result, data = yield self.infra_mall_ds.get_mall_state({
-            'company_id': company_id,
-            'employee_id': employee_id
-        })
+        result, data = yield self.infra_mall_ds.get_mall_state(
+            company_id, employee_id
+        )
         return result, data
 
     @gen.coroutine

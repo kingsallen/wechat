@@ -30,7 +30,6 @@ class MallIndexHandler(BaseHandler):
     def get(self):
         company_id = self.current_user.company.id
         employee_id = self.current_user.employee.id
-        self.logger.info('Company_id: %s, Employee_id: %s' % (company_id, employee_id))
 
         # 商城状态：是否开通
         result_state, data_state = self.mall_ps.get_mall_state(company_id, employee_id)
