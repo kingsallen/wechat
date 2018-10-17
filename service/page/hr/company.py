@@ -83,7 +83,6 @@ class CompanyPageService(PageService):
                 "conf_employee_slug": company_conf_res.get("employee_slug", "员工"),  # 自定义员工称谓
                 "conf_display_locale": company_conf_res.get("display_locale", ""),
                 "conf_veryeast_switch": company_conf_res.get("veryeast_switch", 0),  # 最佳东方简历导入开关
-                "conf_banner": company_conf_res.get("banner")
             })
 
             # 处理公司自定义团队名称
