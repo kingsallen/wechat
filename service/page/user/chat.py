@@ -288,8 +288,8 @@ class ChatPageService(PageService):
             company_ps = CompanyPageService()
             for id in ids:
                 position_info = yield position_ps.get_position(id)  # todo 这个方法并不适合批量拼装职位详情，现在chatbot最多十个职位，故暂时借用该方法。
-                self.logger.debug("make_response:position_info===>{}".format(position_info))
                 jd_position = yield position_ps.get_cms_page(position_info.team_id)
+                self.logger.debug("make_response:jd_position===>{}".format(jd_position))
                 team = yield team_ps.get_team_by_id(position_info.team_id)
                 did = yield company_ps.get_real_company_id(position_info.publisher, position_info.company_id)
                 company_info = yield company_ps.get_company(conds={"id": did}, need_conf=True)
@@ -301,8 +301,9 @@ class ChatPageService(PageService):
                 position.location = position_info.city
                 position.update = position_info.update_time
                 position.id = position_info.id
-                if jd_position['data'][0].get('media_url') and jd_position['data'][0].get('media_type') == 'image':
-                    position.imgUrl = jd_position['data'].get('media_url')
+                if jd_position:
+                    if jd_position['data'][0].get('media_url') and jd_position['data'][0].get('media_type') == 'image':
+                        position.imgUrl = jd_position['data'].get('media_url')
                 teamname_custom = current_user.company.conf_teamname_custom
                 more_link = team.link if team.link else make_url(path.TEAM_PATH.format(team.id))
                 team_des = yield position_ps.get_team_data(team, more_link, teamname_custom)
