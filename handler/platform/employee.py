@@ -362,7 +362,7 @@ class EmployeeBindEmailHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         activation_code = self.params.activation_code
-        bind_email_source = self.params.bind_email_source
+        bind_email_source = self.params.bind_email_source or 0
         result, message, employee_id = yield self.employee_ps.activate_email(
             activation_code, bind_email_source)
 
