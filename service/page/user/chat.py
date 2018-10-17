@@ -13,7 +13,7 @@ from util.common import ObjectDict
 from util.tool.date_tool import str_2_date, curr_now_minute
 from util.tool.http_tool import http_post
 from util.tool.str_tool import gen_salary
-from util.tool.url_tool import make_static_url
+from util.tool.url_tool import make_static_url, make_url
 import json
 import pypinyin
 from pypinyin import lazy_pinyin
@@ -291,7 +291,7 @@ class ChatPageService(PageService):
                 jd_position = yield position_ps.get_cms_page(position_info.team_id)
                 team = yield team_ps.get_team_by_id(position_info.team_id)
                 teamname_custom = current_user.company.conf_teamname_custom
-                more_link = team.link if team.link else make_static_url(path.TEAM_PATH.format(team.id))
+                more_link = team.link if team.link else make_url(path.TEAM_PATH.format(team.id))
                 team_des = yield position_ps.get_team_data(team, more_link, teamname_custom)
                 did = yield company_ps.get_real_company_id(position_info.publisher, position_info.company_id)
                 company_info = yield company_ps.get_company(conds={"id": did}, need_conf=True)
