@@ -73,7 +73,7 @@
 "joblist_load_more","加载更多职位"
 "joblist_advance_tip","使用<span class='highlight'>高级搜索</span>，找到更多好职位!"
 "joblist_advance_tip2","将职位列表转发给<span class='highlight'>相关部门</span>同事，请他们帮助传播"
-"joblist_empty", "未能找到任何相关搜索信息"
+"joblist_empty","未能找到任何相关搜索信息"
 "search_with_keywords","请输入关键词，如：上海，研发"
 
 "employee_incorrect_info","认证信息不正确"
@@ -127,7 +127,7 @@
 "company_page_title","企业首页"
 "company_referral_policy","内推政策"
 
-"search_title", "高级搜索"
+"search_title","高级搜索"
 "search_location","工作地点"
 "search_salary","薪资范围"
 "search_team","所属部门"

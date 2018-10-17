@@ -33,13 +33,12 @@ class LandingHandler(BaseHandler):
             "name": self.current_user.company.get("abbreviation"),
             "image": self.static_url(self.current_user.company.conf_search_img),
             "search_seq": search_seq,
-            "meta_title": self.locale.translate("search_title"),
             "next_url": next_url
         })
 
         yield self._make_share_info(self.current_user.company)
 
-        self.render_page(template_name="company/dynamic_search.html", data=data)
+        self.render_page(template_name="company/dynamic_search.html", data=data, meta_title=self.locale.translate("search_title"))
 
     @gen.coroutine
     def _make_share_info(self, company_info):
