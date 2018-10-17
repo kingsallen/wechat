@@ -304,13 +304,14 @@ class ChatPageService(PageService):
                 if jd_position:
                     if jd_position['data'][0].get('media_url') and jd_position['data'][0].get('media_type') == 'image':
                         position.imgUrl = jd_position['data'].get('media_url')
-                teamname_custom = current_user.company.conf_teamname_custom
-                more_link = team.link if team.link else make_url(path.TEAM_PATH.format(team.id))
-                team_des = yield position_ps.get_team_data(team, more_link, teamname_custom)
-                self.logger.debug("make_response:team_des===>{}".format(team_des))
-                if team_des:
-                    if team_des['data'][0].get('media_url') and team_des['data'][0].get('media_type') == 'image':
-                        position.imgUrl = team_des['data'].get('media_url')
+                if team:
+                    teamname_custom = current_user.company.conf_teamname_custom
+                    more_link = team.link if team.link else make_url(path.TEAM_PATH.format(team.id))
+                    team_des = yield position_ps.get_team_data(team, more_link, teamname_custom)
+                    self.logger.debug("make_response:team_des===>{}".format(team_des))
+                    if team_des:
+                        if team_des['data'][0].get('media_url') and team_des['data'][0].get('media_type') == 'image':
+                            position.imgUrl = team_des['data'].get('media_url')
                 else:
                     position.imgUrl = company_info["banner"]["banner0"]
                 self.logger.debug("make_response==>position-imgUrl:{}".format(position.imgUrl))
