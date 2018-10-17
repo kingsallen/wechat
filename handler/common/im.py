@@ -610,6 +610,7 @@ class ChatHandler(BaseHandler):
                 message_body = json_dumps(ObjectDict(
                     compoundContent=compound_content,
                     content=bot_message.content,
+                    stats=bot_message.stats,
                     msgType=msg_type,
                     stats=bot_message.stats,
                     speaker=const.CHAT_SPEAKER_HR,
