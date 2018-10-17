@@ -288,6 +288,7 @@ class ChatPageService(PageService):
             company_ps = CompanyPageService()
             for id in ids:
                 position_info = yield position_ps.get_position(id)  # todo 这个方法并不适合批量拼装职位详情，现在chatbot最多十个职位，故暂时借用该方法。
+                self.logger.debug("make_response:position_info===>{}".format(position_info))
                 jd_position = yield position_ps.get_cms_page(position_info.team_id)
                 team = yield team_ps.get_team_by_id(position_info.team_id)
                 self.logger.debug("make_response:team===>{}".format(team))
