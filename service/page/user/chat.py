@@ -293,6 +293,7 @@ class ChatPageService(PageService):
                 team = yield team_ps.get_team_by_id(position_info.team_id)
                 did = yield company_ps.get_real_company_id(position_info.publisher, position_info.company_id)
                 company_info = yield company_ps.get_company(conds={"id": did}, need_conf=True)
+                self.logger.debug("make_response:company_info===>{}".format(company_info))
                 position = ObjectDict()
                 position.jobTitle = position_info.title
                 position.company = company_info.abbreviation
@@ -314,6 +315,7 @@ class ChatPageService(PageService):
                             position.imgUrl = team_des['data'].get('media_url')
                 else:
                     position.imgUrl = company_info["banner"][0]["banner0"]
+                    self.logger.debug("make_response:position.imgUrl==>{}".format(position.imgUrl))
                 self.logger.debug("make_response==>position-imgUrl:{}".format(position.imgUrl))
                 position_list.append(position)
             ret_message['compound_content']['list'] = position_list
