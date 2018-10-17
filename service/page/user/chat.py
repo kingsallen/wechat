@@ -207,7 +207,7 @@ class ChatPageService(PageService):
         raise gen.Return(company_conf)
 
     @gen.coroutine
-    def get_chatbot_reply(self, message, user_id, hr_id, position_id, flag, create_new_context):
+    def get_chatbot_reply(self, message, user_id, hr_id, position_id, flag, create_new_context, current_user):
         """ 调用 chatbot 返回机器人的回复信息
                https://wiki.moseeker.com/chatbot.md
         :param message: 用户发送到文本内容
@@ -216,6 +216,7 @@ class ChatPageService(PageService):
         :param position_id 当前职位id，不存在则为0
         :param flag: 0:社招 1:校招 2:meet mobot 3: 智能推荐
         :param create_new_context: meet mobot标识
+        :param current_user:
         """
         messages = []
 
@@ -241,7 +242,7 @@ class ChatPageService(PageService):
             self.logger.debug(res.results)
             results = res.results
             for r in results:
-                ret_message = yield self.make_response(r, user_id)
+                ret_message = yield self.make_response(r, current_user)
                 messages.append(ret_message)
             self.logger.debug(messages)
         except Exception as e:
@@ -251,7 +252,7 @@ class ChatPageService(PageService):
             return messages
 
     @gen.coroutine
-    def make_response(self, message, user_id):
+    def make_response(self, message, current_user):
         """
         对chatbot的部分消息类型做整理
         """
@@ -288,7 +289,7 @@ class ChatPageService(PageService):
                 position_info = yield position_ps.get_position(id)  # todo 这个方法并不适合批量拼装职位详情，现在chatbot最多十个职位，故暂时借用该方法。
                 jd_position = yield position_ps.get_cms_page(position_info.team_id)
                 team = yield team_ps.get_team_by_id(position_info.team_id)
-                teamname_custom = user_id.company.conf_teamname_custom
+                teamname_custom = current_user.company.conf_teamname_custom
                 more_link = team.link if team.link else ""
                 team_des = yield position_ps.get_team_data(team, more_link, teamname_custom)
                 did = yield company_ps.get_real_company_id(position_info.publisher, position_info.company_id)
