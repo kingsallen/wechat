@@ -12,7 +12,7 @@ class ScreenRedPacketConsumer(object):
     """ The pika client the tornado will be part of """
 
     def __init__(self, io_loop):
-        print('PikaClient: __init__')
+        logger.debug('PikaClient: __init__')
         self.io_loop = io_loop
         self.connected = False
         self.connecting = False
@@ -27,7 +27,7 @@ class ScreenRedPacketConsumer(object):
             logger.debug('PikaClient: Already connecting to RabbitMQ')
             return
 
-        print('PikaClient: Connecting to RabbitMQ')
+        logger.debug('PikaClient: Connecting to RabbitMQ')
         self.connecting = True
 
         cred = pika.PlainCredentials(settings['rabbitmq_username'], settings['rabbitmq_password'])
@@ -54,17 +54,16 @@ class ScreenRedPacketConsumer(object):
         # declare exchanges, which in turn, declare
         # queues, and bind exchange to queues
         self.channel.exchange_declare(
-            exchange='someexchange',
+            exchange=const.MQ_SCREEN_REDPACKET_EXCHANGE,
             type='topic')
         self.channel.queue_declare(self.on_queue_declare, exclusive=True)
 
     def on_queue_declare(self, result):
-        queue_name = result.method.queue
         self.channel.queue_bind(
             self.on_queue_bind,
-            exchange='someexchange',
-            queue=queue_name,
-            routing_key='commands.*')
+            exchange=const.MQ_SCREEN_REDPACKET_EXCHANGE,
+            queue=const.MQ_SCREEN_REDPACKET_QUEUE,
+            routing_key=const.MQ_SCREEN_REDPACKET_ROUTING_KEY)
         self.channel.basic_consume(self.on_message)
 
     def on_queue_bind(self, is_ok):

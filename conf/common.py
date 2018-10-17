@@ -643,3 +643,8 @@ QRCODE_REFERRAL_CONFIRM = 12
 QRCODE_SCAN_REFERRAL = 13
 QRCODE_OTHER = 99
 
+# mq相关常量
+MQ_SCREEN_REDPACKET_EXCHANGE = "screen_redpacket_exchange"
+MQ_SCREEN_REDPACKET_QUEUE = "redpacket_queue"
+MQ_SCREEN_REDPACKET_ROUTING_KEY = "screen_redpacket_routing_key"
+
