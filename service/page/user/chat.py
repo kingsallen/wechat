@@ -291,7 +291,6 @@ class ChatPageService(PageService):
                 teamname_custom = user_id.company.conf_teamname_custom
                 more_link = team.link if team.link else ""
                 team_des = yield position_ps.get_team_data(team, more_link, teamname_custom)
-
                 did = yield company_ps.get_real_company_id(position_info.publisher, position_info.company_id)
                 company_info = yield company_ps.get_company(conds={"id": did}, need_conf=True)
                 position = ObjectDict()
@@ -308,6 +307,7 @@ class ChatPageService(PageService):
                     position.imgUrl = team.image
                 else:
                     position.imgUrl = company_info.banner[0]
+                self.logger.debug("make_response==>position-imgUrl:{}".format(position.imgUrl))
                 position_list.append(position)
             ret_message['compound_content']['list'] = position_list
             if max:
