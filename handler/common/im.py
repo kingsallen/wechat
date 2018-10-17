@@ -559,6 +559,7 @@ class ChatHandler(BaseHandler):
         获取消息 -> pub消息 -> 入库
         """
         bot_messages = yield self.chat_ps.get_chatbot_reply(
+            current_user=self.current_user,
             message=user_message,
             user_id=self.user_id,
             hr_id=self.hr_id,
