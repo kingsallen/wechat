@@ -291,11 +291,6 @@ class ChatPageService(PageService):
                 self.logger.debug("make_response:position_info===>{}".format(position_info))
                 jd_position = yield position_ps.get_cms_page(position_info.team_id)
                 team = yield team_ps.get_team_by_id(position_info.team_id)
-                self.logger.debug("make_response:team===>{}".format(team))
-                teamname_custom = current_user.company.conf_teamname_custom
-                more_link = team.link if team.link else make_url(path.TEAM_PATH.format(team.id))
-                team_des = yield position_ps.get_team_data(team, more_link, teamname_custom)
-                self.logger.debug("make_response:team_des===>{}".format(team_des))
                 did = yield company_ps.get_real_company_id(position_info.publisher, position_info.company_id)
                 company_info = yield company_ps.get_company(conds={"id": did}, need_conf=True)
                 position = ObjectDict()
@@ -308,8 +303,13 @@ class ChatPageService(PageService):
                 position.id = position_info.id
                 if jd_position['data'].get('media_url') and jd_position['data'].get('media_type') == 'image':
                     position.imgUrl = jd_position['data'].get('media_url')
-                elif team_des['data'].get('media_url') and team_des['data'].get('media_type') == 'image':
-                    position.imgUrl = team_des['data'].get('media_url')
+                teamname_custom = current_user.company.conf_teamname_custom
+                more_link = team.link if team.link else make_url(path.TEAM_PATH.format(team.id))
+                team_des = yield position_ps.get_team_data(team, more_link, teamname_custom)
+                self.logger.debug("make_response:team_des===>{}".format(team_des))
+                if team_des:
+                    if team_des['data'].get('media_url') and team_des['data'].get('media_type') == 'image':
+                        position.imgUrl = team_des['data'].get('media_url')
                 else:
                     position.imgUrl = company_info["banner"]["banner0"]
                 self.logger.debug("make_response==>position-imgUrl:{}".format(position.imgUrl))
