@@ -82,7 +82,8 @@ class CompanyPageService(PageService):
                 "conf_show_in_qx": company_conf_res.get("show_in_qx", 1),  # 公司信息、团队信息、职位信息等只在仟寻展示
                 "conf_employee_slug": company_conf_res.get("employee_slug", "员工"),  # 自定义员工称谓
                 "conf_display_locale": company_conf_res.get("display_locale", ""),
-                "conf_veryeast_switch": company_conf_res.get("veryeast_switch", 0)  # 最佳东方简历导入开关
+                "conf_veryeast_switch": company_conf_res.get("veryeast_switch", 0),  # 最佳东方简历导入开关
+                "conf_banner": company_conf_res.get("banner")
             })
 
             # 处理公司自定义团队名称
