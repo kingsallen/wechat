@@ -77,7 +77,8 @@ class PositionPageService(PageService):
             "team_id": position_res.team_id,
             "app_cv_config_id": position_res.app_cv_config_id,
             "email_resume_conf": position_res.email_resume_conf,
-            "is_referral": bool(position_res.is_referral)
+            "is_referral": bool(position_res.is_referral),
+            "image": position_res.image
         })
 
         # 后置处理：

@@ -242,7 +242,7 @@ class ChatPageService(PageService):
             self.logger.debug(res.results)
             results = res.results
             for r in results:
-                ret_message = yield self.make_response(r)
+                ret_message = yield self.make_response(r, user_id)
                 messages.append(ret_message)
             self.logger.debug(messages)
         except Exception as e:
@@ -252,7 +252,7 @@ class ChatPageService(PageService):
             return messages
 
     @gen.coroutine
-    def make_response(self, message):
+    def make_response(self, message, user_id):
         """
         对chatbot的部分消息类型做整理
         """
@@ -289,7 +289,11 @@ class ChatPageService(PageService):
             company_ps = CompanyPageService()
             for id in ids:
                 position_info = yield position_ps.get_position(id)  # todo 这个方法并不适合批量拼装职位详情，现在chatbot最多十个职位，故暂时借用该方法。
+                jd_position = yield position_ps.get_cms_page(position_info.team_id)
                 team = yield team_ps.get_team_by_id(position_info.team_id)
+                teamname_custom = user_id.company.conf_teamname_custom
+                more_link = team.link if team.link else ""
+                team_des = yield position_ps.get_team_data(team, more_link, teamname_custom)
                 did = yield company_ps.get_real_company_id(position_info.publisher, position_info.company_id)
                 company_info = yield company_ps.get_company(conds={"id": did}, need_conf=True)
                 position = ObjectDict()
@@ -300,6 +304,13 @@ class ChatPageService(PageService):
                 position.location = position_info.city
                 position.update = position_info.update_time
                 position.id = position_info.id
+                if jd_position['data'].get('media_url') and jd_position['data'].get('media_type') == 'image':
+                    position.imgUrl = jd_position['data'].get('media_url')
+                elif team_des['data'].get('media_url') and team_des['data'].get('media_type') == 'image':
+                    position.imgUrl = team.image
+                else:
+                    position.imgUrl = company_info.banner[0]
+                self.logger.debug("make_response==>position-imgUrl:{}".format(position.imgUrl))
                 position_list.append(position)
             ret_message['compound_content']['list'] = position_list
             if max:
