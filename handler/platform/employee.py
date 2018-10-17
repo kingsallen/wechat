@@ -362,8 +362,9 @@ class EmployeeBindEmailHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         activation_code = self.params.activation_code
+        bind_email_source = self.params.bind_email_source
         result, message, employee_id = yield self.employee_ps.activate_email(
-            activation_code)
+            activation_code, bind_email_source)
 
         tparams = dict(
             qrcode_url=self.make_url(

@@ -399,9 +399,9 @@ class EmployeePageService(PageService):
         return ret.success, ret.message
 
     @gen.coroutine
-    def activate_email(self, activation_code):
+    def activate_email(self, activation_code, bind_email_source):
         """通过邮箱激活员工"""
-        ret = yield self.thrift_employee_ds.activate_email(activation_code)
+        ret = yield self.thrift_employee_ds.activate_email(activation_code, bind_email_source)
         return ret.success, ret.message, ret.employeeId
 
     @gen.coroutine
