@@ -9,6 +9,7 @@ import uuid
 import xml.dom.minidom as minidom
 from datetime import datetime
 from hashlib import sha1, md5
+from util.common.cache import BaseRedis
 
 import requests
 import tornado.gen as gen
@@ -90,15 +91,10 @@ class RedpacketPageService(PageService):
 
     @log_time
     @gen.coroutine
-    def __get_hb_config_by_position(self, position, share_click=False, share_apply=False):
+    def __get_hb_config_by_position(self, position, trigger_way):
         """获取红包配置"""
-        if not share_click and not share_apply:
+        if not trigger_way:
             raise ValueError(msg.RED_PACKET_TYPE_VALUE_ERROR)
-
-        if share_click:
-            trigger_way = const.HB_TRIGGER_WAY_CLICK
-        else:
-            trigger_way = const.HB_TRIGGER_WAY_APPLY
 
         config_list = yield self.hr_hb_config_ds.get_hr_hb_config_list({
             "company_id": position.company_id,
@@ -118,16 +114,15 @@ class RedpacketPageService(PageService):
             raise gen.Return(ObjectDict())
 
     def __need_to_send(self, current_user, position,
-                       is_click=False, is_apply=False):
+                       trigger_way):
         """
         检查职位是否正在参与转发点击红包活动
         :param position: 相应职位
-        :param is_click: 红包活动类别: 转发点击红包活动
-        :param is_apply: 红包活动类别: 转发申请红包活动
+        :param trigger_way: 红包调用方式
         :return: bool
         """
         # 转发点击和转发申请红包无法同时为 False
-        assert is_click or is_apply
+        assert trigger_way
 
         # 校验当前职位是否是属于当前公众号的公司
         if current_user.wechat.company_id != position.company_id:
@@ -136,13 +131,17 @@ class RedpacketPageService(PageService):
 
         check_hb_status_passed = False
         self.logger.debug("[RP]position.hb_status: %s" % position.hb_status)
-        if is_click:
+        if trigger_way == const.HB_TRIGGER_WAY_CLICK:
             check_hb_status_passed = (
                 position.hb_status == const.RP_POSITION_STATUS_CLICK or
                 position.hb_status == const.RP_POSITION_STATUS_BOTH)
-        elif is_apply:
+        elif trigger_way == const.HB_TRIGGER_WAY_APPLY:
             check_hb_status_passed = (
                 position.hb_status == const.RP_POSITION_STATUS_APPLY or
+                position.hb_status == const.RP_POSITION_STATUS_BOTH)
+        elif trigger_way == const.HB_TRIGGER_WAY_SCREEN:
+            check_hb_status_passed = (
+                position.hb_status == const.RP_POSITION_STATUS_SCREEN or
                 position.hb_status == const.RP_POSITION_STATUS_BOTH)
         else:
             self.logger.debug("[RP]something goes wrong")
@@ -432,6 +431,125 @@ class RedpacketPageService(PageService):
 
     @log_time
     @gen.coroutine
+    def handle_red_packet_screen_profile(self,
+                                         sysuser_id,
+                                         position,
+                                         trigger_way,
+                                         be_recom_user_id):
+        """入职类红包触发总入口"""
+        try:
+            rp_config = yield self.__get_hb_config_by_position(position=position, trigger_way=trigger_way)
+            if not rp_config:
+                self.logger.debug("[RP]无红包活动")
+                return
+            # 如果当前用户非员工，不发送红包
+            if not current_user.employee:
+                self.logger.debug("[RP]当前用户不是员工，不触发红包")
+                return
+
+            application = yield self.job_application_ds.get_job_application(conds={
+                "position_id": position.id,
+                "applier_id": be_recom_user_id
+            })
+
+            recom_record = yield self.candidate_recom_record_ds.get_candidate_recom_record(
+                {'position': position.id,
+                 'app_id': application,
+                 'presentee_user_id': be_recom_user_id,
+                 'post_user_id': current_user.sysuser.id})
+
+            if not recom_record:
+                self.logger.debug('[RP]推荐数据不正确, position: %s, app_id: %s, presentee_user_id: %s, post_user_id: %s'
+                                  % (position.id, application, be_recom_user_id, current_user.sysuser.id))
+                return
+
+            need_to_send_card = self.__need_to_send(
+                current_user, position, trigger_way)
+
+            if need_to_send_card and rp_config:
+                self.logger.debug("[RP]初筛通过红包开始")
+
+            user_id = current_user.sysuser.id
+            recom_wechat = current_user.wechat
+            recom_qxuser = current_user.qxuser
+            recomee_name = current_user.sysuser.name or current_user.sysuser.nickname
+
+            # 如果是订阅号，那么无法获取 recom_wxuser
+            # 将 openid = 0 传递到 __send_red_packet_card， 跳过使用企业号发送消息模版
+
+            user_ps = UserPageService()
+            wechat_ps = WechatPageService()
+
+            is_service_wechat = recom_wechat.type == 1
+            if is_service_wechat:
+                recom_wxuser = yield user_ps.get_wxuser_sysuser_id_wechat_id(
+                    user_id, recom_wechat.id)
+
+            else:
+                recom_wxuser = yield user_ps.get_wxuser_sysuser_id_wechat_id(
+                    user_id, settings.qx_wechat_id)
+                recom_wechat = yield wechat_ps.get_wechat(
+                    {"id": settings.qx_wechat_id})
+
+            self.logger.debug('[RP] user_id: %s' % user_id)
+            self.logger.debug('[RP] recom_wechat: %s' % recom_wechat)
+            self.logger.debug('[RP] recom_wxuser: %s' % recom_wxuser)
+            self.logger.debug('[RP] recom_qxuser: %s' % recom_qxuser)
+            redislocker = BaseRedis()
+            rplock_key = const.ON_BOARD_LOCK_FMT % (rp_config.id, user_id)
+            if redislocker.incr(rplock_key) is FIRST_LOCK:
+                self.logger.debug("[RP]红包锁创建成功， rplock_key: %s" % rplock_key)
+
+                try:
+                    if self.__hit_red_packet(rp_config.probability):
+                        self.logger.debug("[RP]掷骰子通过,准备发送红包信封(有金额)")
+
+                        # 发送红包消息模版(有金额)
+                        yield self.__send_red_packet_card(
+                            recom_wxuser.openid,
+                            recom_wechat.id,
+                            rp_config,
+                            recom_qxuser.id,
+                            current_qxuser_id=recom_qxuser.id,
+                            position=None,
+                            company_name=current_user.company.name,
+                            recomee_name=recomee_name,
+                            position_title=position.title,
+                            recom_qx_user=recom_qxuser,
+                            recom_record=recom_record
+                        )
+                    else:
+                        # 发送红包消息模版(抽不中)
+                        self.logger.debug("[RP]掷骰子不通过,准备发送红包信封(无金额)")
+                        yield self.__send_zero_amount_card(
+                            recom_wxuser.openid,
+                            recom_wechat.id,
+                            rp_config,
+                            recom_qxuser.id,
+                            company_name=current_user.company.name,
+                            recomee_name=recomee_name,
+                            position_title=position.title,
+                            recom_qx_user=recom_qxuser,
+                            recom_record=recom_record
+                        )
+
+                except Exception as e:
+                    self.logger.error(e)
+                finally:
+                    # 释放红包锁
+                    redislocker.delete(rplock_key)
+                    self.logger.debug("[RP]红包锁释放成功， rplock_key: %s" % rplock_key)
+            else:
+                self.logger.debug(
+                    "[RP]触发红包锁，该红包逻辑正在处理中， rplock_key: %s" % rplock_key)
+
+            self.logger.debug("[RP]初筛红包发送成功")
+
+        except Exception as e:
+            self.logger.error(traceback.format_exc())
+
+    @log_time
+    @gen.coroutine
     def handle_red_packet_position_related(self,
                                            current_user,
                                            position,
@@ -444,8 +562,12 @@ class RedpacketPageService(PageService):
         assert is_click or is_apply
 
         try:
+            if is_click:
+                trigger_way = const.HB_TRIGGER_WAY_CLICK
+            else:
+                trigger_way = const.HB_TRIGGER_WAY_APPLY
             rp_config = yield self.__get_hb_config_by_position(
-                position, share_click=is_click, share_apply=is_apply)
+                position, trigger_way=trigger_way)
             if not rp_config:
                 self.logger.debug("[RP]无红包活动")
                 return
@@ -456,7 +578,7 @@ class RedpacketPageService(PageService):
                 return
 
             need_to_send_card = self.__need_to_send(
-                current_user, position, is_click=is_click, is_apply=is_apply)
+                current_user, position, trigger_way)
 
             if need_to_send_card and rp_config:
                 self.logger.debug("[RP]转发点击红包开始" if is_click
@@ -778,7 +900,7 @@ class RedpacketPageService(PageService):
 
         if (hb_config_type in [const.RED_PACKET_TYPE_SHARE_CLICK,
                                const.RED_PACKET_TYPE_SHARE_APPLY] and
-                position_id):
+            position_id):
 
             binding = yield self.hr_hb_position_binding_ds.get_hr_hb_position_binding({
                 "hb_config_id": hb_config_id,
@@ -901,7 +1023,8 @@ class RedpacketPageService(PageService):
 
             if not throttle_passed:
                 self.logger.debug(
-                    '[RP]throttle上限校验失败, hb_config_id: %s， recom_qxuser_id: %s' % (red_packet_config.id, recom_qxuser_id))
+                    '[RP]throttle上限校验失败, hb_config_id: %s， recom_qxuser_id: %s' % (
+                    red_packet_config.id, recom_qxuser_id))
                 return
             else:
                 self.logger.debug("[RP]全局上限验证通过")
@@ -913,7 +1036,7 @@ class RedpacketPageService(PageService):
             if result:
                 break
             else:
-                self.logger.info("[hb]--用户{}在第{}次获取红包{}失败".format(bagging_openid, 10-num, rp_item.id))
+                self.logger.info("[hb]--用户{}在第{}次获取红包{}失败".format(bagging_openid, 10 - num, rp_item.id))
             num -= 1
             yield gen.sleep(0.5)
         self.logger.debug("用户{}获得红包为{}".format(bagging_openid, rp_item.id))
@@ -1093,7 +1216,7 @@ class RedpacketPageService(PageService):
                 raise ValueError(msg.RED_PACKET_TYPE_VALUE_ERROR)
 
         elif ((current_hb_status == const.HB_STATUS_CLICK and hb_config_type == const.RED_PACKET_TYPE_SHARE_CLICK) or
-                  (current_hb_status == const.HB_STATUS_APPLY and hb_config_type == const.RED_PACKET_TYPE_SHARE_APPLY)):
+              (current_hb_status == const.HB_STATUS_APPLY and hb_config_type == const.RED_PACKET_TYPE_SHARE_APPLY)):
 
             next_status = const.HB_STATUS_NONE
 

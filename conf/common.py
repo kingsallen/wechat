@@ -351,6 +351,7 @@ RP_POSITION_STATUS_NONE = 0
 RP_POSITION_STATUS_CLICK = 1
 RP_POSITION_STATUS_APPLY = 2
 RP_POSITION_STATUS_BOTH = 3
+RP_POSITION_STATUS_SCREEN = 4
 
 # 国际编码列表
 NATIONAL_CODE = [
@@ -421,7 +422,9 @@ CMS_PAGES_RESOURCES_TYPE_VIDEO = 1
 RP_POS_LOCK_FMT = "rplock_pos:%s:%s:%s"
 RP_EMP_LOCK_FMT = "rplock_emp:%s:%s"
 RP_RECOM_LOCK_FMT = "rplock_recom:%s:%s"
+ON_BOARD_LOCK_FMT = "rplock_on_board:%s:%s"
 RP_LOCKED = 1
+
 
 # RP_ITEM 状态常量
 # 默认初始状态
@@ -475,6 +478,8 @@ HB_CONFIG_RUNNING = 3
 # 红包活动调用方式
 HB_TRIGGER_WAY_CLICK = 1
 HB_TRIGGER_WAY_APPLY = 2
+HB_TRIGGER_WAY_SCREEN = 3
+
 
 # 发送消息模板的系统模板库常量
 TEMPLATE_URL_SUFFIX = "&from_template_message={}&send_time={}"
