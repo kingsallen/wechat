@@ -290,9 +290,11 @@ class ChatPageService(PageService):
                 position_info = yield position_ps.get_position(id)  # todo 这个方法并不适合批量拼装职位详情，现在chatbot最多十个职位，故暂时借用该方法。
                 jd_position = yield position_ps.get_cms_page(position_info.team_id)
                 team = yield team_ps.get_team_by_id(position_info.team_id)
+                self.logger.debug("make_response:team===>{}".format(team))
                 teamname_custom = current_user.company.conf_teamname_custom
                 more_link = team.link if team.link else make_url(path.TEAM_PATH.format(team.id))
                 team_des = yield position_ps.get_team_data(team, more_link, teamname_custom)
+                self.logger.debug("make_response:team_des===>{}".format(team_des))
                 did = yield company_ps.get_real_company_id(position_info.publisher, position_info.company_id)
                 company_info = yield company_ps.get_company(conds={"id": did}, need_conf=True)
                 position = ObjectDict()
