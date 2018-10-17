@@ -614,7 +614,6 @@ class ChatHandler(BaseHandler):
                     content=bot_message.content,
                     stats=bot_message.stats,
                     msgType=msg_type,
-                    stats=bot_message.stats,
                     speaker=const.CHAT_SPEAKER_HR,
                     cid=int(self.room_id),
                     pid=int(self.position_id),
