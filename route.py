@@ -36,6 +36,7 @@ import handler.common.captcha
 import handler.common.image
 import handler.common.campaign
 import handler.common.redirect
+import handler.common.pc
 
 import handler.help.passport
 import handler.help.releasedposition
@@ -52,6 +53,7 @@ import handler.platform.compatible
 import handler.platform.user
 import handler.platform.cover
 import handler.help.captcha
+
 import handler.platform.referral
 import handler.platform.referral_pc
 
@@ -96,6 +98,7 @@ common_routes = [
     (r"/im/laiye",                                   handler.common.laiye_im.LaiyeImHandler,                    {"event": "im laiye"}),
     (r"/resume/import/limit",                        handler.common.resume.ResumeImportLimit,                   {"event": "resume_import_limit"}),
     (r"/redirect",                                   handler.common.redirect.RedirectHandler,                   {"event": "redirect"}),
+    (r"/upload/profile/login",                       handler.common.pc.UploadLoginHandler,                      {"event": "pc_upload_login"}),
 
     # websocket
     (r"/websocket/([A-Za-z0-9_]{1,32})",             handler.common.im.ChatWebSocketHandler),
@@ -161,7 +164,7 @@ platform_routes = [
     (r'/employee/survey/?',                          handler.platform.employee.EmployeeSurveyHandler,           {'event': 'employee_survey'}),
     (r'/employee/ai-recom/(\d+)',                    handler.platform.employee.EmployeeAiRecomHandler,          {'event': 'employee_ai-recom'}),
     (r'/employee/referral/policy',                   handler.platform.employee.EmployeeReferralPolicyHandler,   {"event": "referral—policy"}),
-    (r'/cover/no-weixin',                            handler.platform.cover.CoverHandler,                       {"event": "cover_no_weixin"}),
+
     (r'/position/recom/?',                           handler.platform.position.PositionRecomListHandler,        {"event": "position_recom_list"}),
     (r'/usercenter/mine/?',                          handler.common.usercenter.UsercenterMineHandler,           {"event": "usercenter_mine"}),
     (r'/employee/recom/profile/?',                   handler.platform.referral.ReferralProfileHandler,          {"event": "referral_profile"}),

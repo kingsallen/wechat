@@ -141,7 +141,7 @@ class ResumeImportHandler(BaseHandler):
 
         username = self.params.get("_username", "")
         password = self.params.get("_password", "")
-        captcha = self.params.get("linkedin_code", "") or self.params.get('zhaopin_code', "")
+        captcha = self.params.get("linkedin_code", "")
 
         # 置空不必要参数，避免在 make_url 中被用到
         self.params.pop("recom_time", None)
@@ -156,16 +156,13 @@ class ResumeImportHandler(BaseHandler):
             self.params.pop('pid', None)
 
         if not username or not password:
-            if self.params.way == '4' and username:  # 智联导入是短信登录没有密码不做密码
-                pass
-            else:
-                # 日志打点返回用户名和密码没有填写
-                self.log_info = ObjectDict(
-                    status=-5,
-                    url=self.params.way
-                )
-                self.send_json_error(message=msg.RESUME_IMPORT_NAME_PASSWD_ERROR)
-                return
+            # 日志打点返回用户名和密码没有填写
+            self.log_info = ObjectDict(
+                status=-5,
+                url=self.params.way
+            )
+            self.send_json_error(message=msg.RESUME_IMPORT_NAME_PASSWD_ERROR)
+            return
 
         # 微信端用户只能导入一次简历，故不需要做导入频率限制，LinkedIn验证验证码使用该接口，如果做频率限制，LinkedIn验证需要单独接口
         if str(self.params.way) in const.RESUME_WAY_SPIDER:
