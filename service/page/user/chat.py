@@ -3,6 +3,7 @@ import datetime
 from tornado import gen
 
 import conf.common as const
+import conf.path as path
 from service.page.base import PageService
 from service.page.job.position import PositionPageService
 from service.page.hr.team import TeamPageService
@@ -293,7 +294,7 @@ class ChatPageService(PageService):
                 jd_position = yield position_ps.get_cms_page(position_info.team_id)
                 team = yield team_ps.get_team_by_id(position_info.team_id)
                 teamname_custom = current_user.company.conf_teamname_custom
-                more_link = team.link if team.link else ""
+                more_link = team.link if team.link else make_static_url(path.TEAM_PATH.format(team.id))
                 team_des = yield position_ps.get_team_data(team, more_link, teamname_custom)
                 did = yield company_ps.get_real_company_id(position_info.publisher, position_info.company_id)
                 company_info = yield company_ps.get_company(conds={"id": did}, need_conf=True)
@@ -308,9 +309,9 @@ class ChatPageService(PageService):
                 if jd_position['data'].get('media_url') and jd_position['data'].get('media_type') == 'image':
                     position.imgUrl = jd_position['data'].get('media_url')
                 elif team_des['data'].get('media_url') and team_des['data'].get('media_type') == 'image':
-                    position.imgUrl = team.image
+                    position.imgUrl = team_des['data'].get('media_url')
                 else:
-                    position.imgUrl = company_info.banner[0]
+                    position.imgUrl = company_info["banner"]["banner0"]
                 self.logger.debug("make_response==>position-imgUrl:{}".format(position.imgUrl))
                 position_list.append(position)
             ret_message['compound_content']['list'] = position_list
