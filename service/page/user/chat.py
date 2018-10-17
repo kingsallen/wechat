@@ -313,7 +313,7 @@ class ChatPageService(PageService):
                         if team_des['data'][0].get('media_url') and team_des['data'][0].get('media_type') == 'image':
                             position.imgUrl = team_des['data'].get('media_url')
                 else:
-                    position.imgUrl = company_info["banner"]["banner0"]
+                    position.imgUrl = company_info["banner"][0]["banner0"]
                 self.logger.debug("make_response==>position-imgUrl:{}".format(position.imgUrl))
                 position_list.append(position)
             ret_message['compound_content']['list'] = position_list
