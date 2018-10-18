@@ -432,7 +432,7 @@ class RedpacketPageService(PageService):
     @log_time
     @gen.coroutine
     def handle_red_packet_screen_profile(self,
-                                         sysuser_id,
+                                         user_id,
                                          position,
                                          trigger_way,
                                          be_recom_user_id):
@@ -442,6 +442,7 @@ class RedpacketPageService(PageService):
             if not rp_config:
                 self.logger.debug("[RP]无红包活动")
                 return
+            current_user = yield __build_user_info(user_id)
             # 如果当前用户非员工，不发送红包
             if not current_user.employee:
                 self.logger.debug("[RP]当前用户不是员工，不触发红包")
@@ -1603,3 +1604,9 @@ class RedpacketPageService(PageService):
             self.logger.error(e)
         finally:
             return ret
+
+    @log_time
+    @gen.coroutine
+    def __build_user_info(self, user_id):
+        current_user = ObjectDict()
+        wxuser =

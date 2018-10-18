@@ -649,7 +649,9 @@ QRCODE_SCAN_REFERRAL = 13
 QRCODE_OTHER = 99
 
 # mq相关常量
-MQ_SCREEN_REDPACKET_EXCHANGE = "screen_redpacket_exchange"
-MQ_SCREEN_REDPACKET_QUEUE = "redpacket_queue"
-MQ_SCREEN_REDPACKET_ROUTING_KEY = "screen_redpacket_routing_key"
+EXCHANGE_TYPE = 'topic'
+DURABLE = True
+REDPACKET_EXCHANGE = "redpacket_exchange"
+REDPACKET_QUEUE = "redpacket_queue"
+MQ_SCREEN_REDPACKET_ROUTING_KEY = "screen.red_packet"
 
