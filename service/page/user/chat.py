@@ -59,6 +59,7 @@ class ChatPageService(PageService):
                 room['speaker'] = e.speaker  # 0：求职者，1：HR
                 room['msgType'] = e.msgType
                 room['compoundContent'] = json.loads(e.compoundContent if e.compoundContent else '{}') or {}
+                room['stats'] = json.loads(e.stats if e.stats else '{}') or {}
                 self._compliant_chat_log(e, room)
                 obj_list.append(room)
 
