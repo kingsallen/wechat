@@ -16,17 +16,15 @@ class InfraMallDataService(DataService):
     """积分商城服务"""
 
     @gen.coroutine
-    def get_mall_state(self, company_id, employee_id):
+    def get_mall_state(self, company_id):
         """
          获取积分商城开关状态
         :param company_id:
-        :param employee_id:
         :return:
 
         """
         params = ObjectDict({
             "company_id": company_id,
-            "employee_id": employee_id
         })
         ret = yield http_get(path.MALL_SWITCH, params)
         return unboxing(ret)
