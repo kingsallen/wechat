@@ -304,7 +304,8 @@ class ChatPageService(PageService):
                 position.id = position_info.id
                 if jd_position:
                     if jd_position['data'][0].get('media_url') and jd_position['data'][0].get('media_type') == 'image':
-                        position.imgUrl = jd_position['data'].get('media_url')
+                        # position.imgUrl = jd_position['data'].get('media_url')
+                        position.imgUrl = ""
                 if team:
                     teamname_custom = current_user.company.conf_teamname_custom
                     more_link = team.link if team.link else make_url(path.TEAM_PATH.format(team.id))
