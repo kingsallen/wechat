@@ -990,9 +990,6 @@ class ProfileSectionHandler(BaseHandler):
 
                 positions = intention.positions
                 if positions:
-                    # position = []
-                    # for item in positions.get('position_name'):
-                    #     position.append({"position_name": item.get("position_name"), "position_code": item.get("position_code")})
                     model.position_name = positions
 
                 cities = intention.cities
@@ -1000,9 +997,6 @@ class ProfileSectionHandler(BaseHandler):
 
                 industries = intention.industries
                 if industries:
-                    # industry = []
-                    # for item in industries.get('industry'):
-                    #     industry.append({"industry_name": item.get("industry_name"), "industry_code": item.get("industry_code")})
                     model.industry = industries
 
             else:
