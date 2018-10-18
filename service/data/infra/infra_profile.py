@@ -638,13 +638,13 @@ class InfraProfileDataService(DataService):
         if record.get('city_name'):
             params.update({"city": record.city_name})
         if record.get('position_name'):
-            params.update({"positions[0]position_name": record.position_name})
+            params.update({"positions": record.position_name})
         if record.get('worktype'):
             params.update({"worktype": record.worktype})
         if record.get('salary_code'):
             params.update({"salary_code": record.salary_code})
         if record.get('industry'):
-            params.update({"industries[0]industry_name": record.industry.get("name")})
+            params.update({"industries": record.industry})
         if record.get('workstate'):
             params.update({"workstate": record.workstate})
 
