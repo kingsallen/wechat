@@ -32,7 +32,7 @@ class MallIndexHandler(BaseHandler):
         employee_id = self.current_user.employee.id
 
         # 商城状态：是否开通
-        result_state, data_state = yield self.mall_ps.get_mall_state(company_id, employee_id)
+        result_state, data_state = yield self.mall_ps.get_mall_state(company_id)
         state = data_state.get('state') if result_state else 0
 
         result_credit, data_credit = yield self.mall_ps.get_employee_left_credit(employee_id)
