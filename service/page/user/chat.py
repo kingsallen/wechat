@@ -303,17 +303,17 @@ class ChatPageService(PageService):
                 position.update = position_info.update_time
                 position.id = position_info.id
                 if jd_position:
-                    if jd_position['data'][0].get('media_url') and jd_position['data'][0].get('media_type') == 'image':
-                        # position.imgUrl = jd_position['data'].get('media_url')
-                        position.imgUrl = ""
+                    for item in jd_position['data']:
+                        if item and item.get('media_url') and item.get('media_type') == 'image':
+                            position.imgUrl = item.get('media_url')
                 if team:
-                    teamname_custom = current_user.company.conf_teamname_custom
+                    teamname_custom = current_user.compamy.conf_teamname_custom
                     more_link = team.link if team.link else make_url(path.TEAM_PATH.format(team.id))
                     team_des = yield position_ps.get_team_data(team, more_link, teamname_custom)
-                    self.logger.debug("make_response:team_des===>{}".format(team_des))
                     if team_des:
-                        if team_des['data'][0].get('media_url') and team_des['data'][0].get('media_type') == 'image':
-                            position.imgUrl = team_des['data'].get('media_url')
+                        for item in team_des['data']:
+                            if item and item.get('media_url') and item.get('media_type') == 'image':
+                                position.imgUrl = item.get('media_url')
                 else:
                     position.imgUrl = company_info.banner
                     self.logger.debug("make_response:position.imgUrl==>{}".format(position.imgUrl))
