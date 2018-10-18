@@ -956,7 +956,7 @@ class ProfilePageService(PageService):
             position = ""
             if intention.get("positions", []):
                 for pst in intention.get("positions"):
-                    position = position + pst.get('positions_name') + ","
+                    position = position + pst.get('position_name') + ","
                 position = position[0: len(position)-1]
 
             worktype_name = intention.get("worktype_name", "未选择")
