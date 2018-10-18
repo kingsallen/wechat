@@ -648,7 +648,7 @@ class InfraProfileDataService(DataService):
         if record.get('workstate'):
             params.update({"workstate": record.workstate})
 
-        self.logger.debug("industry:{}<======>position_name:{}".format(record.industry, record.position_name))
+        self.logger.debug("industry:{}<======?>position_name:{}".format(record.industry, record.position_name))
 
         res = yield self.handle_profile_section(
             params, method="update", section="intention")
