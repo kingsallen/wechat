@@ -998,6 +998,8 @@ class ProfileSectionHandler(BaseHandler):
                 industry_name = intention.industries
                 model.industry = industry_name
 
+                self.logger.debug("model.industry:{}<======>position_name:{}".format(model.industry, position_name))
+
             else:
                 self.send_json_error('cannot get intention')
 
