@@ -990,13 +990,22 @@ class ProfileSectionHandler(BaseHandler):
 
                 positions = intention.positions
                 if positions:
-                    position_name = positions[0].get("position_name")
-                    model.position_name = position_name
+                    position = ObjectDict()
+                    for item in positions.get('position_name'):
+                        position.update({"position_name": item.get("position_name")})
+                        position.update({"position_code": item.get("position_code")})
+                    model.position_name = position
 
                 cities = intention.cities
                 model.city_name = cities
+
                 industries = intention.industries
-                model.industry = {"code": industries[0].get("industry_code"), "name": industries[0].get("industry_name")} if industries else {}
+                if industries:
+                    industry = ObjectDict()
+                    for item in industries.get('industry'):
+                        industry.update({"industry_name": item.get("industry_name")})
+                        industry.update({"industry_code": item.get("industry_code")})
+                    model.industry = industry
 
             else:
                 self.send_json_error('cannot get intention')
