@@ -57,6 +57,7 @@ import handler.help.captcha
 import handler.platform.referral
 import handler.platform.referral_pc
 import handler.platform.award
+import handler.platform.mall
 
 import handler.qx.app
 import handler.qx.aggregation
@@ -160,6 +161,7 @@ platform_routes = [
     (r"/employee/ladder/?",                          handler.platform.employee.AwardsLadderPageHandler,         {"event": "awards_ladder_page"}),
     (r"/employee/custom_bind/gates",                 handler.platform.employee.CatesEmployeeBindHandler,        {"event": "gates employee_bind"}),
     (r"/employee/reward",                            handler.platform.award.ReferralRewardHandler,               {"event": "referral_reward"}),
+    (r"/employee/mall/index",                        handler.platform.mall.MallIndexHandler,                    {"event": "mall_index"}),
 
     (r'/user/survey/?',                              handler.platform.user.UserSurveyHandler,                   {'event': 'user_survey'}),
     (r'/user/ai-recom/?',                            handler.platform.user.AIRecomHandler,                      {'event': 'user_ai-recom'}),
@@ -208,6 +210,8 @@ platform_routes = [
     (r'/api/user/redpacket/list/?',                  handler.platform.award.ReferralRedpacketHandler,           {"event": "api_redpacket_list"}),
     (r'/api/user/bonus/list/?',                      handler.platform.award.ReferralBonusHandler,               {"event": "api_bonus_list"}),
     (r'/api/bonus/claim/?',                          handler.platform.award.BonusClaimHandler,                  {"event": "api_bonus_cliam"}),
+    (r"/api/mall/goods",                             handler.platform.mall.MallGoodsHandler,                    {"event": "mall_goods_list"}),
+
     # 兼容老微信 url，进行302跳转
     (r"/.*",                                         handler.platform.compatible.CompatibleHandler,             {"event": "compatible"})
 
