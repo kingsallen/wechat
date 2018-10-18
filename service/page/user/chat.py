@@ -308,8 +308,8 @@ class ChatPageService(PageService):
                     for item in jd_position['data']:
                         if item and item.get('media_url') and item.get('media_type') == 'image':
                             position.imgUrl = item.get('media_url')
-                if team:
-                    teamname_custom = current_user.compamy.conf_teamname_custom
+                if team and current_user.company:
+                    teamname_custom = current_user.company.conf_teamname_custom
                     more_link = team.link if team.link else make_url(path.TEAM_PATH.format(team.id))
                     team_des = yield position_ps.get_team_data(team, more_link, teamname_custom)
                     if team_des:
