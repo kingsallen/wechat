@@ -40,3 +40,9 @@ class MallPageService(PageService):
         """获取员工剩余积分"""
         result, data = yield self.infra_mall_ds.get_left_credit(employee_id)
         return result, data
+
+    @gen.coroutine
+    def get_goods_list(self, employee_id, company_id, page_size, page_number):
+        """获取商品列表"""
+        result, data = yield self.infra_mall_ds.get_goods_list(employee_id, company_id, page_size, page_number)
+        return result, data
