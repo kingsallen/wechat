@@ -467,6 +467,8 @@ class ChatHandler(BaseHandler):
         self.logger.debug('post_message  flag:{}'.format(self.flag))
         self.logger.debug('post_message  create_new_context:{}'.format(create_new_context))
 
+        self.logger.debug("param:{}  {} {}".format(self.json_args, self.room_id, self.position_id))
+
         if not self.bot_enabled:
             yield self.get_bot_enabled()
 
