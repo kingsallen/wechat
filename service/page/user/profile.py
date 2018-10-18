@@ -695,6 +695,8 @@ class ProfilePageService(PageService):
         if industry:
             record.industry = industry
 
+        self.logger.debug("industry:{}<======>position_name:{}".format(record.industry, record.position_name))
+
         if has_intention:
             intention_id = first(profile.get("intentions")).get('id')
 
