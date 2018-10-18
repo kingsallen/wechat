@@ -644,7 +644,7 @@ class InfraProfileDataService(DataService):
         if record.get('salary_code'):
             params.update({"salary_code": record.salary_code})
         if record.get('industry'):
-            params.update({"industries[0]industry_name": record.industry.get("name")})
+            params.update({"industries[0]industry_name": record.industry})
         if record.get('workstate'):
             params.update({"workstate": record.workstate})
 
