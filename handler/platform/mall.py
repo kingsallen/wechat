@@ -41,7 +41,8 @@ class MallIndexHandler(BaseHandler):
         self.render_page(template_name="mall/goods_list.html",
                          data={
                              "remain_credit": left_credit,
-                             "mall_state": state
+                             "mall_state": state,
+                             "point_rewards": "积分商城"
                          })
 
 
