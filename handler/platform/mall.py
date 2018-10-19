@@ -38,6 +38,7 @@ class MallIndexHandler(BaseHandler):
         result_credit, data_credit = yield self.mall_ps.get_employee_left_credit(employee_id)
         left_credit = data_credit.get('award') if result_credit else 0
 
+        self.params.share = yield self._make_share()
         self.render_page(
             template_name="mall/goods_list.html",
             data={
@@ -46,6 +47,26 @@ class MallIndexHandler(BaseHandler):
             },
             meta_title='积分商城'
         )
+
+    @gen.coroutine
+    def _make_share(self):
+        link = self.make_url(
+            path.EMPLOYEE_MALL,
+            self.params)
+        company_info = yield self.company_ps.get_company(
+            conds={"id": self.current_user.company.id}, need_conf=True)
+
+        cover = self.share_url(company_info.logo)
+        title = self.locale.translate(msg.CREDIT_MALL_SHARE_TITLE.format(company_info.abbreviation))
+        description = self.locale.translate(msg.CREDIT_MALL_SHARE_TEXT)
+
+        share_info = ObjectDict({
+            "cover": cover,
+            "title": title,
+            "description": description,
+            "link": link
+        })
+        return share_info
 
 
 class MallGoodsHandler(BaseHandler):
@@ -96,8 +117,6 @@ class MallGoodsHandler(BaseHandler):
         company_id = self.current_user.company.id
         employee_id = self.current_user.employee.id
 
-        self.params.share = yield self._make_share()
-
         page_size = int(self.get_argument("page_size", "") or 10)
         page_number = int(self.get_argument("page_number", "") or 1)
         result, data = yield self.mall_ps.get_goods_list(employee_id, company_id, page_size, page_number)
@@ -106,26 +125,4 @@ class MallGoodsHandler(BaseHandler):
             self.send_json_success(data=data)
         else:
             self.send_json_error()
-
-    @gen.coroutine
-    def _make_share(self):
-        link = self.make_url(
-            path.EMPLOYEE_MALL,
-            self.params)
-        company_info = yield self.company_ps.get_company(
-            conds={"id": self.current_user.company.id}, need_conf=True)
-
-        cover = self.share_url(company_info.logo)
-        title = self.locale.translate(msg.CREDIT_MALL_SHARE_TITLE.format(company_info.abbreviation))
-        description = self.locale.translate(msg.CREDIT_MALL_SHARE_TEXT)
-
-        share_info = ObjectDict({
-            "cover": cover,
-            "title": title,
-            "description": description,
-            "link": link
-        })
-        self.logger.info('Share_info: %s' % share_info)
-        return share_info
-
 
