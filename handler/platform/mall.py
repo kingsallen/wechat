@@ -38,11 +38,14 @@ class MallIndexHandler(BaseHandler):
         result_credit, data_credit = yield self.mall_ps.get_employee_left_credit(employee_id)
         left_credit = data_credit.get('award') if result_credit else 0
 
-        self.render_page(template_name="mall/goods_list.html",
-                         data={
-                             "remain_credit": left_credit,
-                             "mall_state": state
-                         })
+        self.render_page(
+            template_name="mall/goods_list.html",
+            data={
+                "remain_credit": left_credit,
+                "mall_state": state,
+            },
+            meta_title='积分商城'
+        )
 
 
 class MallGoodsHandler(BaseHandler):
@@ -95,8 +98,8 @@ class MallGoodsHandler(BaseHandler):
 
         self.params.share = yield self._make_share()
 
-        page_size = self.json_args.page_size
-        page_number = self.json_args.page_number
+        page_size = int(self.get_argument("page_size", "") or 10)
+        page_number = int(self.get_argument("page_number", "") or 1)
         result, data = yield self.mall_ps.get_goods_list(employee_id, company_id, page_size, page_number)
 
         if result:
