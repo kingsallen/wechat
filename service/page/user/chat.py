@@ -291,6 +291,9 @@ class ChatPageService(PageService):
                 jd_position = yield position_ps.get_cms_page(position_info.team_id)
                 team = yield team_ps.get_team_by_id(position_info.team_id)
                 did = yield company_ps.get_real_company_id(position_info.publisher, position_info.company_id)
+                p_company_info = yield company_ps.get_company(conds={"id": current_user.company.id}, need_conf=True)
+                self.logger.debug("make_response:did===>{},pid===>{}".format(did, current_user.company.id))
+                self.logger.debug("make_response:p_company_info====>{}".format(p_company_info))
                 company_info = yield company_ps.get_company(conds={"id": did}, need_conf=True)
                 position = ObjectDict()
                 position.jobTitle = position_info.title
@@ -300,7 +303,8 @@ class ChatPageService(PageService):
                 position.location = position_info.city
                 position.update = position_info.update_time
                 position.id = position_info.id
-                position.imgUrl = company_info.banner
+                # position.imgUrl = company_info.banner
+                position.imgUrl = p_company_info.banner
                 if jd_position:
                     for item in jd_position['data']:
                         if item and item.get('media_url') and item.get('media_type') == 'image':
