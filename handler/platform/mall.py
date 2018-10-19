@@ -38,12 +38,14 @@ class MallIndexHandler(BaseHandler):
         result_credit, data_credit = yield self.mall_ps.get_employee_left_credit(employee_id)
         left_credit = data_credit.get('award') if result_credit else 0
 
-        self.render_page(template_name="mall/goods_list.html",
-                         data={
-                             "remain_credit": left_credit,
-                             "mall_state": state,
-                             "point_rewards": "积分商城"
-                         })
+        self.render_page(
+            template_name="mall/goods_list.html",
+            data={
+                "remain_credit": left_credit,
+                "mall_state": state,
+            },
+            meta_title='积分商城'
+        )
 
 
 class MallGoodsHandler(BaseHandler):
