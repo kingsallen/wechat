@@ -306,7 +306,7 @@ class ChatPageService(PageService):
                             position.imgUrl = item.get('media_url')
                             if position.imgUrl:
                                 break
-                if team:
+                elif team:
                     teamname_custom = current_user.company.conf_teamname_custom
                     more_link = team.link if team.link else make_url(path.TEAM_PATH.format(team.id), wechat_signature=current_user.wechat.signature)
                     team_des = yield position_ps.get_team_data(team, more_link, teamname_custom)
