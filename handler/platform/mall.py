@@ -125,6 +125,7 @@ class MallGoodsHandler(BaseHandler):
             "description": description,
             "link": link
         })
+        self.logger.info('Share_info: %s' % share_info)
         return share_info
 
 
