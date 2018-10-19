@@ -34,6 +34,7 @@ class Consumer(object):
 
     def on_connected(self, connection):
         logger.debug('PikaClient: connected to RabbitMQ')
+        self.connection = connection
         self.connection.add_on_close_callback(self.on_closed)
         self.connection.channel(self.on_channel_open)
 
@@ -78,14 +79,22 @@ class RedPacketConsumer(Consumer):
         self.channel.basic_consume(self.on_message, queue=const.REDPACKET_QUEUE)
 
     def on_message(self, channel, basic_deliver, properties, body):
-        logger.debug('PikaClient: Received message # %s from %s: %s',
-                     basic_deliver.delivery_tag, properties.app_id, body)
-        # important, since rmq needs to know that this msg is received by the
-        # consumer. Otherwise, it will be overwhelmed
-        data = json.loads(body)
-        data['rp_type'] = basic_deliver.routing_key.split('.')[0]
-        self.redpacket_ps.handle_red_packet_from_rabbitmq(data)
+        try:
+            logger.debug('PikaClient: Received message # %s from %s: %s' % (basic_deliver.delivery_tag, properties.app_id, body))
+            # important, since rmq needs to know that this msg is received by the
+            # consumer. Otherwise, it will be overwhelmed
+            data = json.loads(str(body, encoding="utf-8"))
+            data['rp_type'] = basic_deliver.routing_key.split('.')[0]
+            self.redpacket_ps.handle_red_packet_from_rabbitmq(data)
+        except Exception as e:
+            logger.error("PikaClient: handle message error:{}".format(e))
+            self.channel.add_on_close_callback(self.on_channel_closed)
         channel.basic_ack(delivery_tag=basic_deliver.delivery_tag)
+
+    def on_channel_closed(self, channel, reply_code, reply_text):
+        logger.warning('Channel closed, reopening in 1 seconds: (%s) %s',
+                       reply_code, reply_text)
+        self.channel.close()
 
 
 

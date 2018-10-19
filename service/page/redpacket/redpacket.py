@@ -178,7 +178,7 @@ class RedpacketPageService(PageService):
         company_id = data.get("company_id")
         wechat_id = data.get("wechat_id")
         rp_type = data.get("rp_type")
-        wechat = yield self.hr_wx_wechat_ds.get_wechat(const={
+        wechat = yield self.hr_wx_wechat_ds.get_wechat(conds={
             "company_id": company_id
         })
         wxuser = yield self.user_wx_user_ds.get_wxuser(conds={
