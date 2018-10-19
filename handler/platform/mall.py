@@ -98,8 +98,8 @@ class MallGoodsHandler(BaseHandler):
 
         self.params.share = yield self._make_share()
 
-        page_size = self.json_args.page_size
-        page_number = self.json_args.page_number
+        page_size = int(self.get_argument("page_size", "") or 10)
+        page_number = int(self.get_argument("page_number", "") or 1)
         result, data = yield self.mall_ps.get_goods_list(employee_id, company_id, page_size, page_number)
 
         if result:
