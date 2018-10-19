@@ -955,7 +955,9 @@ class ProfilePageService(PageService):
             intention = p_intentions[0]
             position = ""
             if intention.get("positions", []):
-                position = intention.get("positions")[0].get('position_name', '')
+                for p in intention.get("positions"):
+                    position = position + p.get("position_name") + ","
+                position = position[0: len(position)-1]
 
             worktype_name = intention.get("worktype_name", "未选择")
 
@@ -970,7 +972,9 @@ class ProfilePageService(PageService):
 
             industry = ""
             if intention.get("industries", []):
-                industry = intention.get("industries")[0].get('industry_name', '')
+                for i in intention.get("industries"):
+                    industry = industry + i.get("industry_name") + ","
+                industry = industry[0: len(industry)-1]
 
             job_apply.update({
                 "id":        intention.get("id"),
