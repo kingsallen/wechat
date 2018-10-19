@@ -118,7 +118,7 @@ class PositionPageService(PageService):
                 }
             }
         }
-        response = self.es.search(index='index', body=data)
+        response = self.es.search(index='new_index', body=data)
         result_list = response.hits.hits
         city = ""
         city_ename = ""

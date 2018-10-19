@@ -184,7 +184,7 @@ class LandingPageService(PageService):
         if is_referral:
             data.get("query").get("bool").get("must").append({"match": {"is_referral": const.YES}})
         self.logger.debug(data)
-        response = self.es.search(index='index', body=data)
+        response = self.es.search(index='new_index', body=data)
 
         result_list = response.hits.hits
 
