@@ -303,6 +303,7 @@ class ChatPageService(PageService):
                 position.location = position_info.city
                 position.update = position_info.update_time
                 position.id = position_info.id
+                position.imgUrl = company_info.banner
                 if jd_position:
                     for item in jd_position['data']:
                         if item and item.get('media_url') and item.get('media_type') == 'image':
@@ -319,8 +320,6 @@ class ChatPageService(PageService):
                                 position.imgUrl = item.get('media_url')
                                 if position.imgUrl:
                                     break
-                else:
-                    position.imgUrl = company_info.banner
                 position_list.append(position)
             ret_message['compound_content']['list'] = position_list
             if max:
