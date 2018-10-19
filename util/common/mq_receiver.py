@@ -17,6 +17,7 @@ class Consumer(object):
         self.connection = None
         self.channel = None
         self.event_listeners = {}
+        self.redpacket_ps = RedpacketPageService()
 
     def connect(self):
         """ Connect to the broker """
@@ -81,6 +82,9 @@ class ScreenRedPacketConsumer(Consumer):
                      basic_deliver.delivery_tag, properties.app_id, body)
         # important, since rmq needs to know that this msg is received by the
         # consumer. Otherwise, it will be overwhelmed
+        data = json.loads(body)
+        data['rp_type'] = basic_deliver.routing_key.split('.')[0]
+        self.redpacket_ps.handle_red_packet_from_rabbitmq(data)
         channel.basic_ack(delivery_tag=basic_deliver.delivery_tag)
 
 
