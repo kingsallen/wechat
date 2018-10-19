@@ -955,7 +955,7 @@ class ProfilePageService(PageService):
             intention = p_intentions[0]
             position = ""
             if intention.get("positions", []):
-                for p in intention.get("position"):
+                for p in intention.get("positions"):
                     position = position + p.get("position_name") + ","
                 position = position[0: len(position)-1]
                 # position = intention.get("positions")[0].get('position_name', '')
