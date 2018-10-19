@@ -15,7 +15,7 @@ struct HRChatRoomVO {
 }
 
 struct HRChatRoomsVO {
-    1:  optional i32 pageNo,                //页码
+    1:  optional i32 pageNum,                //页码
     2:  optional i32 pageSize,              //每页显示的数量
     3:  optional i32 totalPage,             //页数
     4:  optional i32 totalRow,              //聊天室总数
@@ -42,7 +42,7 @@ struct UserChatRoomVO {
 }
 
 struct UserChatRoomsVO {
-    1:  optional i32 pageNo,                //页码
+    1:  optional i32 pageNum,                //页码
     2:  optional i32 pageSize,              //每页显示的数量
     3:  optional i32 totalPage,             //页数
     4:  optional i32 totalRow,              //聊天室总数
@@ -56,7 +56,7 @@ struct ChatVO {
     4:  optional i8 origin,                 // 0 人工输入，1 欢迎语，2 AI输入
     5:  optional string origin_str,         // 0 人工输入，1 欢迎语，2 AI输入
     6:  optional string msgType,            //消息类型
-    7:  optional string assetUrl,           //照片路径
+    7:  optional string assetUrl,           //素材路径
     8:  optional string btnContent,         //按钮信息
     9:  optional i32 roomId,                //聊天室Id
     10: optional i32 positionId             //职位Id
@@ -64,6 +64,7 @@ struct ChatVO {
 	12: optional i32 id                     //聊天记录id
     13: optional string createTime          //创建时间
     14: optional string compoundContent     //聊天内容（表单等复合类型）
+    15: optional string stats               //数据统计时使用的参数
 }
 
 struct ChatHistory {
@@ -76,7 +77,7 @@ struct ChatHistory {
 }
 
 struct ChatsVO {
-    1:  optional i32 pageNo,                //页码
+    1:  optional i32 pageNum,                //页码
     2:  optional i32 pageSize,              //每页显示的数量
     3:  optional i32 totalPage,             //页数
     4:  optional i32 totalRow,              //聊天室总数
@@ -88,6 +89,7 @@ struct HrVO {
     2:  optional string hrName,             //HR名称
     3:  optional string hrHeadImg           //HR头像
     4:  optional bool isDelete              //HR是否存在
+    5:  optional string companyName         //HR对应的公司名称
 }
 
 struct UserVO {
@@ -103,9 +105,9 @@ struct PositionVO {
     4:  optional string city,               //职位的发布地区
     5:  optional i32 salaryTop,             //薪资上限
     6:  optional i32 salaryBottom,          //薪资下限
-    7:  optional string updateTime,         //职位修改时间
-    8:  optional i32 status,                //职位状态
-    9:  optional string team                //部门
+    7:  optional string updateTime,          //职位修改时间
+    8:  optional i32 status,          //职位状态
+    9:  optional string team          //部门
 }
 
 struct ResultOfSaveRoomVO {
