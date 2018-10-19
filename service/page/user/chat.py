@@ -300,7 +300,7 @@ class ChatPageService(PageService):
                 position.location = position_info.city
                 position.update = position_info.update_time
                 position.id = position_info.id
-                position.imgUrl = company_info.banner
+                position.imgUrl = company_info.banner[0]
                 if jd_position:
                     for item in jd_position['data']:
                         if item and item.get('media_url') and item.get('media_type') == 'image':
