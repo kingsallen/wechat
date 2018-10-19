@@ -59,7 +59,7 @@ class Consumer(object):
         logger.debug('Exchange declared')
 
 
-class ScreenRedPacketConsumer(Consumer):
+class RedPacketConsumer(Consumer):
 
     def on_exchange_declareok(self, unused_frame):
         logger.debug('Exchange declared')
@@ -71,7 +71,7 @@ class ScreenRedPacketConsumer(Consumer):
             self.on_queue_bind,
             exchange=const.REDPACKET_EXCHANGE,
             queue=const.REDPACKET_QUEUE,
-            routing_key=const.MQ_SCREEN_REDPACKET_ROUTING_KEY)
+            routing_key=const.MQ_REDPACKET_ROUTING_KEY)
 
     def on_queue_bind(self, is_ok):
         logger.debug('PikaClient: Exchanges and queue created/joined')

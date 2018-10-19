@@ -653,5 +653,8 @@ EXCHANGE_TYPE = 'topic'
 DURABLE = True
 REDPACKET_EXCHANGE = "redpacket_exchange"
 REDPACKET_QUEUE = "redpacket_queue"
-MQ_SCREEN_REDPACKET_ROUTING_KEY = "screen.red_packet"
+MQ_REDPACKET_ROUTING_KEY = "*.red_packet"
+
+SCREEN_RP_TYPE = "screen"
+EMPLOYEE_BIND_RP_TYPE = "employee_bind"
 

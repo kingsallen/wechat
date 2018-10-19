@@ -34,7 +34,7 @@ from setting import settings
 import conf.common as constant
 from route import platform_routes, qx_routes, help_routes
 from handler.common.navmenu import NavMenuModule
-from util.common.mq_receiver import ScreenRedPacketConsumer
+from util.common.mq_receiver import RedPacketConsumer
 
 from globals import env, logger, redis, es
 
@@ -81,7 +81,7 @@ def main():
             settings.blocking_log_threshold)
 
         http_server = tornado.httpserver.HTTPServer(application, xheaders=True)
-        sc = ScreenRedPacketConsumer()
+        sc = RedPacketConsumer()
         application.sc = sc
         application.sc.connect()
         http_server.listen(options.port)
