@@ -615,13 +615,13 @@ class InfraProfileDataService(DataService):
         if record.get('city_name'):
             params.update({"city": record.city_name})
         if record.get('position_name'):
-            params.update({"positions": record.position_name})
+            params.update({"positions[0]position_name": record.position_name})
         if record.get('worktype'):
             params.update({"worktype": record.worktype})
         if record.get('salary_code'):
             params.update({"salary_code": record.salary_code})
         if record.get('industry'):
-            params.update({"industries": record.industry})
+            params.update({"industries[0]industry_name": record.industry})
         if record.get('workstate'):
             params.update({"workstate": record.workstate})
 
@@ -638,17 +638,23 @@ class InfraProfileDataService(DataService):
         if record.get('city_name'):
             params.update({"city": record.city_name})
         if record.get('position_name'):
-            params.update({"positions": record.position_name})
+            for item in record.get('position_name'):
+                index = 0
+                params.update({"positions[{}]position_name".format(index) : item.get("position_name")})
+                params.update({"positions[{}]position_code".format(index) : item.get("position_code")})
+                index += 1
         if record.get('worktype'):
             params.update({"worktype": record.worktype})
         if record.get('salary_code'):
             params.update({"salary_code": record.salary_code})
         if record.get('industry'):
-            params.update({"industries": record.industry})
+            for item in record.get('industry'):
+                index = 0
+                params.update({"industries[{}]industry_name".format(index) : item.get("industry_name")})
+                params.update({"industries[{}]industry_code".format(index) : item.get("industry_code")})
+                index += 1
         if record.get('workstate'):
             params.update({"workstate": record.workstate})
-
-        self.logger.debug("industry:{}<======?>position_name:{}".format(record.industry, record.position_name))
 
         res = yield self.handle_profile_section(
             params, method="update", section="intention")

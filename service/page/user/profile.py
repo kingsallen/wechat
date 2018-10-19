@@ -695,8 +695,6 @@ class ProfilePageService(PageService):
         if industry:
             record.industry = industry
 
-        self.logger.debug("industry:{}<======!>position_name:{}".format(record.industry, record.position_name))
-
         if has_intention:
             intention_id = first(profile.get("intentions")).get('id')
 
@@ -957,9 +955,10 @@ class ProfilePageService(PageService):
             intention = p_intentions[0]
             position = ""
             if intention.get("positions", []):
-                for pst in intention.get("positions"):
-                    position = position + pst.get('position_name') + ","
+                for p in intention.get("position"):
+                    position = position + p.get("position_name") + ","
                 position = position[0: len(position)-1]
+                # position = intention.get("positions")[0].get('position_name', '')
 
             worktype_name = intention.get("worktype_name", "未选择")
 
@@ -974,9 +973,10 @@ class ProfilePageService(PageService):
 
             industry = ""
             if intention.get("industries", []):
-                for indus in intention.get("industries"):
-                    industry = industry + indus.get("industry_name")
+                for i in intention.get("industries"):
+                    industry = industry + i.get("industry_name") + ","
                 industry = industry[0: len(industry)-1]
+                # industry = intention.get("industries")[0].get('industry_name', '')
 
             job_apply.update({
                 "id":        intention.get("id"),
