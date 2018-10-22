@@ -609,19 +609,49 @@ class InfraProfileDataService(DataService):
             {"id": intention_id}, method="get", section="intention")
         return http_tool.unboxing(res)
 
+    # @gen.coroutine
+    # def create_profile_intention(self, record, profile_id):
+    #     params = {"profile_id": profile_id}
+    #     if record.get('city_name'):
+    #         params.update({"city": record.city_name})
+    #     if record.get('position_name'):
+    #         params.update({"positions[0]position_name": record.position_name})
+    #     if record.get('worktype'):
+    #         params.update({"worktype": record.worktype})
+    #     if record.get('salary_code'):
+    #         params.update({"salary_code": record.salary_code})
+    #     if record.get('industry'):
+    #         params.update({"industries[0]industry_name": record.industry})
+    #     if record.get('workstate'):
+    #         params.update({"workstate": record.workstate})
+    #
+    #     res = yield self.handle_profile_section(
+    #         params, method="create", section="intention")
+    #     return http_tool.unboxing(res)
+
     @gen.coroutine
     def create_profile_intention(self, record, profile_id):
         params = {"profile_id": profile_id}
         if record.get('city_name'):
             params.update({"city": record.city_name})
         if record.get('position_name'):
-            params.update({"positions[0]position_name": record.position_name})
+            for item in record.get('position_name'):
+                index = 0
+                params.update({"positions[{}]position_name".format(index): item.get("position_name")})
+                params.update({"positions[{}]position_code".format(index): item.get("position_code")})
+                index += 1
+                # params.update({"positions[0]position_name": record.position_name})
         if record.get('worktype'):
             params.update({"worktype": record.worktype})
         if record.get('salary_code'):
             params.update({"salary_code": record.salary_code})
         if record.get('industry'):
-            params.update({"industries[0]industry_name": record.industry})
+            for item in record.get('industry'):
+                index = 0
+                params.update({"industries[{}]industry_name".format(index): item.get("industry_name")})
+                params.update({"industries[{}]industry_code".format(index): item.get("industry_code")})
+                index += 1
+                # params.update({"industries[0]industry_name": record.industry})
         if record.get('workstate'):
             params.update({"workstate": record.workstate})
 
