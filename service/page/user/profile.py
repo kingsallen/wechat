@@ -999,12 +999,13 @@ class ProfilePageService(PageService):
 
         if p_others:
             # 为某些自定义字段添加单位
-            other = ObjectDict(json_decode(first(p_others).get('other')))
+            if first(p_others).get('other'):
+                other = ObjectDict(json_decode(first(p_others).get('other')))
 
-            if other.workyears:
-                other.workyears = other.workyears + '年'
+                if other.workyears:
+                    other.workyears = other.workyears + '年'
 
-            profile.other = other
+                profile.other = other
 
         return profile
 
