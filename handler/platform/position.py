@@ -804,7 +804,7 @@ class PositionListInfraParamsMixin(BaseHandler):
                 keywords=self.params.keyword if self.params.keyword else "")
         infra_params.update(
             department=self.params.team_name if self.params.team_name else "",
-            occupations=self.params.occupation if self.params.occupation else "",
+            occupations=self.params.occupation.replace("\r\n", "\n") if self.params.occupation else "",
             custom=self.params.custom if self.params.custom else "",
             order_by_priority=True)
 
