@@ -181,6 +181,7 @@ class RedpacketPageService(PageService):
         wechat_id = data.get("wechat_id")
         position_id = data.get("position_id", 0)
         be_recom_user_id = data.get("be_recom_user_id", 0)
+        psc = data.get("psc", 0)
 
         rp_type = data.get("rp_type")
         wechat = yield self.hr_wx_wechat_ds.get_wechat(conds={
@@ -218,7 +219,7 @@ class RedpacketPageService(PageService):
             yield self.handle_red_packet_employee_verification(user_id, company_id, redis)
         elif rp_type == const.EMPLOYEE_BIND_RP_TYPE:
             yield self.handle_red_packet_screen_profile(current_user, position, trigger_way=const.HB_TRIGGER_WAY_SCREEN,
-                                                        be_recom_user_id=be_recom_user_id)
+                                                        be_recom_user_id=be_recom_user_id, psc=psc)
 
     @gen.coroutine
     def handle_red_packet_employee_verification(self, user_id, company_id, redislocker):
@@ -490,7 +491,8 @@ class RedpacketPageService(PageService):
                                          current_user,
                                          position,
                                          trigger_way,
-                                         be_recom_user_id):
+                                         be_recom_user_id,
+                                         **kwargs):
         """入职类红包触发总入口"""
         try:
             rp_config = yield self.__get_hb_config_by_position(position=position, trigger_way=trigger_way)
@@ -527,10 +529,16 @@ class RedpacketPageService(PageService):
 
             if need_to_send_card and rp_config:
                 self.logger.debug("[RP]初筛通过红包开始")
+            else:
+                self.logger.debug("[RP]职位红包数据不正确, position: %s, app_id: %s, presentee_user_id: %s, post_user_id: %s"
+                                  % (position.id, application, be_recom_user_id, current_user.sysuser.id))
+                return
 
+            psc = kwargs.get("psc")
             user_id = current_user.sysuser.id
             recom_wechat = current_user.wechat
             recom_qxuser = current_user.qxuser
+            recom_user = current_user.sysuser
             recomee_name = current_user.sysuser.name or current_user.sysuser.nickname
 
             # 如果是订阅号，那么无法获取 recom_wxuser
@@ -554,6 +562,35 @@ class RedpacketPageService(PageService):
             self.logger.debug('[RP] recom_wechat: %s' % recom_wechat)
             self.logger.debug('[RP] recom_wxuser: %s' % recom_wxuser)
             self.logger.debug('[RP] recom_qxuser: %s' % recom_qxuser)
+
+            # 红包发送对象是否符合配置要求
+            sharechain_ps = SharechainPageService()
+            last_employee_user_id = yield sharechain_ps.get_referral_employee_user_id(
+                recom_user.id, position.id)
+
+            # 是否发给最近员工红包
+            send_to_employee = (
+                last_employee_user_id and
+                last_employee_user_id != current_user.recom.id and rp_config.target == const.RED_PACKET_CONFIG_TARGET_EMPLOYEE)
+
+            if send_to_employee:
+                last_employee_user = yield user_ps.get_user_user({
+                    "id": last_employee_user_id
+                })
+
+                if is_service_wechat:
+                    last_employee_wxuser = yield user_ps.get_wxuser_sysuser_id_wechat_id(
+                        last_employee_user_id, recom_wechat.id)
+                else:
+                    last_employee_wxuser = yield user_ps.get_wxuser_sysuser_id_wechat_id(
+                        last_employee_user_id, settings.qx_wechat_id)
+
+            matches = yield self.__recom_matches(
+                rp_config, recom_user, recom_wechat, **kwargs)
+
+            if send_to_employee or matches:
+                self.logger.debug("[RP]用户是发送红包对象,准备掷骰子")
+
             redislocker = BaseRedis()
             rplock_key = const.ON_BOARD_LOCK_FMT % (rp_config.id, user_id)
             if redislocker.incr(rplock_key) is FIRST_LOCK:
