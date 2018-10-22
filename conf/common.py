@@ -301,7 +301,11 @@ MSG_TYPE = {
     5: "teamSelect",
     6: "redirect",
     7: "jobSelect",
-    8: "employeeBind"
+    8: "employeeBind",
+    9: "textPlaceholder",
+    10: "positionSelect",
+    11: "industrySelect",
+    12: "satisfaction"
 }
 
 # 积分配置类型
@@ -315,7 +319,7 @@ REWARD_ON_BOARD = "入职"
 REWARD_UPLOAD_PROFILE = "员工上传人才简历"
 
 # 操作的聊天类型
-INTERACTIVE_MSG = ["employeeBind", "jobSelect", "teamSelect", "citySelect", "jobCard"]
+INTERACTIVE_MSG = ["employeeBind", "jobSelect", "teamSelect", "citySelect", "jobCard", "positionSelect", "industrySelect"]
 
 # 默认图标
 SYSUSER_HEADIMG = "weixin/images/hr-avatar-default.png"

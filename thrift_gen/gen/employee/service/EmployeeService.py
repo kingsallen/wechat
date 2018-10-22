@@ -81,10 +81,11 @@ class Iface(object):
         """
         pass
 
-    def emailActivation(self, activationCodee):
+    def emailActivation(self, activationCodee, bindEmailSource):
         """
         Parameters:
          - activationCodee
+         - bindEmailSource
         """
         pass
 
@@ -497,21 +498,23 @@ class Client(Iface):
             return result.success
         raise TApplicationException(TApplicationException.MISSING_RESULT, "getEmployeeRecoms failed: unknown result")
 
-    def emailActivation(self, activationCodee):
+    def emailActivation(self, activationCodee, bindEmailSource):
         """
         Parameters:
          - activationCodee
+         - bindEmailSource
         """
         self._seqid += 1
         future = self._reqs[self._seqid] = concurrent.Future()
-        self.send_emailActivation(activationCodee)
+        self.send_emailActivation(activationCodee, bindEmailSource)
         return future
 
-    def send_emailActivation(self, activationCodee):
+    def send_emailActivation(self, activationCodee, bindEmailSource):
         oprot = self._oprot_factory.getProtocol(self._transport)
         oprot.writeMessageBegin('emailActivation', TMessageType.CALL, self._seqid)
         args = emailActivation_args()
         args.activationCodee = activationCodee
+        args.bindEmailSource = bindEmailSource
         args.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -1131,7 +1134,7 @@ class Processor(Iface, TProcessor):
         args.read(iprot)
         iprot.readMessageEnd()
         result = emailActivation_result()
-        result.success = yield gen.maybe_future(self._handler.emailActivation(args.activationCodee))
+        result.success = yield gen.maybe_future(self._handler.emailActivation(args.activationCodee, args.bindEmailSource))
         oprot.writeMessageBegin("emailActivation", TMessageType.REPLY, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
@@ -2397,15 +2400,18 @@ class emailActivation_args(object):
     """
     Attributes:
      - activationCodee
+     - bindEmailSource
     """
 
     thrift_spec = (
         None,  # 0
         (1, TType.STRING, 'activationCodee', 'UTF8', None, ),  # 1
+        (2, TType.I32, 'bindEmailSource', None, None, ),  # 2
     )
 
-    def __init__(self, activationCodee=None,):
+    def __init__(self, activationCodee=None, bindEmailSource=None,):
         self.activationCodee = activationCodee
+        self.bindEmailSource = bindEmailSource
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -2421,6 +2427,11 @@ class emailActivation_args(object):
                     self.activationCodee = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.I32:
+                    self.bindEmailSource = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -2434,6 +2445,10 @@ class emailActivation_args(object):
         if self.activationCodee is not None:
             oprot.writeFieldBegin('activationCodee', TType.STRING, 1)
             oprot.writeString(self.activationCodee.encode('utf-8') if sys.version_info[0] == 2 else self.activationCodee)
+            oprot.writeFieldEnd()
+        if self.bindEmailSource is not None:
+            oprot.writeFieldBegin('bindEmailSource', TType.I32, 2)
+            oprot.writeI32(self.bindEmailSource)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
