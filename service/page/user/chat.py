@@ -294,6 +294,7 @@ class ChatPageService(PageService):
                 jd_position = yield position_ps.get_cms_page(position_info.team_id)
                 team = yield team_ps.get_team_by_id(position_info.team_id)
                 did = yield company_ps.get_real_company_id(position_info.publisher, position_info.company_id)
+                p_company_info = yield company_ps.get_company(conds={"id": current_user.company.id}, need_conf=True)
                 company_info = yield company_ps.get_company(conds={"id": did}, need_conf=True)
                 position = ObjectDict()
                 position.jobTitle = position_info.title
@@ -303,14 +304,8 @@ class ChatPageService(PageService):
                 position.location = position_info.city
                 position.update = position_info.update_time
                 position.id = position_info.id
-                position.imgUrl = company_info.banner
-                if jd_position:
-                    for item in jd_position['data']:
-                        if item and item.get('media_url') and item.get('media_type') == 'image':
-                            position.imgUrl = item.get('media_url')
-                            if position.imgUrl:
-                                break
-                elif team:
+                position.imgUrl = p_company_info.banner
+                if team:
                     teamname_custom = current_user.company.conf_teamname_custom
                     more_link = team.link if team.link else make_url(path.TEAM_PATH.format(team.id), wechat_signature=current_user.wechat.signature)
                     team_des = yield position_ps.get_team_data(team, more_link, teamname_custom)
@@ -320,6 +315,12 @@ class ChatPageService(PageService):
                                 position.imgUrl = item.get('media_url')
                                 if position.imgUrl:
                                     break
+                elif jd_position:
+                    for item in jd_position['data']:
+                        if item and item.get('media_url') and item.get('media_type') == 'image':
+                            position.imgUrl = item.get('media_url')
+                            if position.imgUrl:
+                                break
                 position_list.append(position)
             ret_message['compound_content']['list'] = position_list
             if max:
