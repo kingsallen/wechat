@@ -1,7 +1,7 @@
 # coding=utf-8
 
-from datetime import datetime
 import re
+from datetime import datetime
 
 import tornado.gen as gen
 from tornado.escape import json_decode
@@ -10,9 +10,8 @@ import conf.common as const
 import conf.infra as infra_const
 from service.page.base import PageService
 from util.common import ObjectDict
-from util.tool.date_tool import curr_datetime_now
-from util.tool.iter_tool import first
 from util.tool.dict_tool import sub_dict, rename_keys
+from util.tool.iter_tool import first
 
 
 class ProfilePageService(PageService):
@@ -616,7 +615,6 @@ class ProfilePageService(PageService):
                     params['id'] = params.pid
                     yield self.update_profile_awards(params, profile_id)
 
-
     @gen.coroutine
     def custom_cv_update_profile_skills(self, profile_id, custom_cv):
         skills = custom_cv.get("skills", [])
@@ -672,12 +670,20 @@ class ProfilePageService(PageService):
     @gen.coroutine
     def custom_cv_update_profile_intention(self, profile, custom_cv):
         profile_id = profile['profile']['id']
-        position_name = custom_cv.get('position')
+        # 打补丁 @yangsongsong
+        # position_name = custom_cv.get('position')
+        position_name = []
         expectedlocation = custom_cv.get('expectedlocation')
         salary_code = custom_cv.get("salary_code")
         worktype = custom_cv.get("worktype")
         workstate = custom_cv.get("workstate")
-        industry = custom_cv.get("industry")
+        # 打补丁 @yangsongsong
+        custom_cv_industry = custom_cv.get("industry")
+        if custom_cv_industry:
+            industry = [{"industry_code": custom_cv_industry.get("code"),
+                         "industry_name": custom_cv_industry.get("name")}]
+        else:
+            industry = []
 
         has_intention = bool(profile.get("intentions"))
 
@@ -957,7 +963,7 @@ class ProfilePageService(PageService):
             if intention.get("positions", []):
                 for p in intention.get("positions"):
                     position = position + p.get("position_name") + ","
-                position = position[0: len(position)-1]
+                position = position[0: len(position) - 1]
 
             worktype_name = intention.get("worktype_name", "未选择")
 
@@ -965,7 +971,7 @@ class ProfilePageService(PageService):
             if intention.get("cities", []):
                 for city in intention.get("cities"):
                     location = location + city.get("city_name") + ","
-                location = location[0: len(location)-1]
+                location = location[0: len(location) - 1]
             salary = intention.get('salary_code_name', "")
 
             workstate = intention.get("workstate_name")
@@ -974,16 +980,16 @@ class ProfilePageService(PageService):
             if intention.get("industries", []):
                 for i in intention.get("industries"):
                     industry = industry + i.get("industry_name") + ","
-                industry = industry[0: len(industry)-1]
+                industry = industry[0: len(industry) - 1]
 
             job_apply.update({
-                "id":        intention.get("id"),
-                "position":  position,
-                "type":      worktype_name,
-                "location":  location,
-                "salary":    salary,
+                "id": intention.get("id"),
+                "position": position,
+                "type": worktype_name,
+                "location": location,
+                "salary": salary,
                 "workstate": workstate,
-                "industry":  industry
+                "industry": industry
             })
         profile.job_apply = job_apply
 
