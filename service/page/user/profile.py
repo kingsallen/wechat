@@ -670,20 +670,12 @@ class ProfilePageService(PageService):
     @gen.coroutine
     def custom_cv_update_profile_intention(self, profile, custom_cv):
         profile_id = profile['profile']['id']
-        # 打补丁 @yangsongsong
-        # position_name = custom_cv.get('position')
-        position_name = []
+        position_name = custom_cv.get('position_name')
         expectedlocation = custom_cv.get('expectedlocation')
         salary_code = custom_cv.get("salary_code")
         worktype = custom_cv.get("worktype")
         workstate = custom_cv.get("workstate")
-        # 打补丁 @yangsongsong
-        custom_cv_industry = custom_cv.get("industry")
-        if custom_cv_industry:
-            industry = [{"industry_code": custom_cv_industry.get("code"),
-                         "industry_name": custom_cv_industry.get("name")}]
-        else:
-            industry = []
+        industry = custom_cv.get("industry")
 
         has_intention = bool(profile.get("intentions"))
 
