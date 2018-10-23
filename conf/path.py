@@ -63,6 +63,7 @@ PROFILE_VIEW = '/profile'
 PROFILE_PREVIEW = '/profile/preview'
 PROFILE_VISITOR_VIEW = '/profile/view/{}'
 PROFILE_NEW = '/app/profile/new'
+PROFILE_FILE_PARSER = '/profile/file-parser'
 
 IMAGE_URL = '/image'
 

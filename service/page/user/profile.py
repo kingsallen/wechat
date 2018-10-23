@@ -185,6 +185,13 @@ class ProfilePageService(PageService):
         return response
 
     @gen.coroutine
+    def resume_upload(self, file_name, file_data, current_user):
+        """手机上传简历
+        """
+        res = yield self.infra_profile_ds.resume_upload(file_name, file_data, current_user)
+        return res
+
+    @gen.coroutine
     def create_profile(self, user_id, source=const.PROFILE_SOURCE_PLATFORM):
         """ 创建 profile_profile 基础数据 """
         result, data = yield self.infra_profile_ds.create_profile(

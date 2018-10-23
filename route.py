@@ -88,6 +88,7 @@ common_routes = [
     (r"/resume/thirdparty/liepin",                   handler.common.resume.LiepinImportCallBackHandler,         {"event": "resume_thirdparty_liepin"}),
     (r"/resume/maimai",                              handler.common.resume.MaimaiImportHandler,                 {"event": "resume_maimai"}),
     (r"/resume/liepin",                              handler.common.resume.LiepinImportHandler,                 {"event": "resume_liepin"}),
+    (r"/resume/upload",                              handler.common.resume.ResumeUploadHandler,                 {"event": "resume_upload"}),
     (r"/profile/?",                                  handler.common.profile.ProfileHandler,                     {"event": "profile_profile"}),
     (r"/profile/view/([A-Z0-9a-z_\-]+)*",            handler.common.profile.ProfileViewHandler,                 {"event": "profile_view"}),
     (r"/profile/preview/?",                          handler.common.profile.ProfilePreviewHandler,              {"event": "profile_preview"}),
