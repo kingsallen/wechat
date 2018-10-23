@@ -990,7 +990,7 @@ class ProfileSectionHandler(BaseHandler):
 
                 positions = intention.positions
                 if positions:
-                    model.position_name = positions
+                    model.position = positions
 
                 cities = intention.cities
                 model.city_name = cities

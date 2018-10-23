@@ -148,6 +148,7 @@ PROFILE_OTHER = "profile/other"
 PROFILE_IMPORT = "crawler"
 PROFILE_OTHER_METADATA = "hraccount/custom/metadata"
 PROFILE_CUSTOMCV_CHECK = 'profile/check/other'
+PROFILE_UPLOAD = 'profile/file-parser'
 
 # 公司服务
 COMPANY_ALL = 'company/all'
