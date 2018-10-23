@@ -112,10 +112,13 @@ class ApplicationHandler(BaseHandler):
         # TODO (tangyiliang) 申请后操作，以下操作全部可以走消息队列
         if is_applied:
 
-            # 1. 添加积分
+            # 绑定application与pre_share_chain
+            yield self.application_ps.bind_app_psc(apply_id, self.json_args.psc)
+
+            # 添加积分
             yield self.application_ps.opt_add_reward(apply_id, self.current_user)
 
-            # 2. 更新挖掘被动求职者信息
+            # 更新挖掘被动求职者信息
             recommender_user_id, _, _ = yield self.application_ps.get_recommend_user(
                 self.current_user, position, self.is_platform)
 

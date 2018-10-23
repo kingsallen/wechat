@@ -35,7 +35,8 @@ from util.wechat.template import (
     rp_binding_success_notice_tpl,
     rp_recom_success_notice_tpl,
     rp_transfer_apply_success_notice_tpl,
-    rp_transfer_click_success_notice_tpl
+    rp_transfer_click_success_notice_tpl,
+    rp_recom_screen_success_notice_tpl
 )
 from util.tool.date_tool import curr_now
 
@@ -499,10 +500,6 @@ class RedpacketPageService(PageService):
             if not rp_config:
                 self.logger.debug("[RP]无红包活动")
                 return
-            # 如果当前用户非员工，不发送红包
-            if not current_user.employee:
-                self.logger.debug("[RP]当前用户不是员工，不触发红包")
-                return
 
             application = yield self.job_application_ds.get_job_application(conds={
                 "position_id": position.id,
@@ -534,12 +531,11 @@ class RedpacketPageService(PageService):
                                   % (position.id, application, be_recom_user_id, current_user.sysuser.id))
                 return
 
-            psc = kwargs.get("psc")
             user_id = current_user.sysuser.id
             recom_wechat = current_user.wechat
             recom_qxuser = current_user.qxuser
             recom_user = current_user.sysuser
-            recomee_name = current_user.sysuser.name or current_user.sysuser.nickname
+            nickname = current_user.sysuser.name or current_user.sysuser.nickname
 
             # 如果是订阅号，那么无法获取 recom_wxuser
             # 将 openid = 0 传递到 __send_red_packet_card， 跳过使用企业号发送消息模版
@@ -568,22 +564,25 @@ class RedpacketPageService(PageService):
             last_employee_user_id = yield sharechain_ps.get_referral_employee_user_id(
                 recom_user.id, position.id)
 
-            # 是否发给最近员工红包
+            # 判断红包是否发送给源头的员工（这里的逻辑与转发点击和转发申请不同）
             send_to_employee = (
                 last_employee_user_id and
                 last_employee_user_id != current_user.recom.id and rp_config.target == const.RED_PACKET_CONFIG_TARGET_EMPLOYEE)
 
             if send_to_employee:
-                last_employee_user = yield user_ps.get_user_user({
+                recom_user = yield user_ps.get_user_user({
                     "id": last_employee_user_id
                 })
 
                 if is_service_wechat:
-                    last_employee_wxuser = yield user_ps.get_wxuser_sysuser_id_wechat_id(
+                    recom_wxuser = yield user_ps.get_wxuser_sysuser_id_wechat_id(
                         last_employee_user_id, recom_wechat.id)
                 else:
-                    last_employee_wxuser = yield user_ps.get_wxuser_sysuser_id_wechat_id(
+                    recom_wxuser = yield user_ps.get_wxuser_sysuser_id_wechat_id(
                         last_employee_user_id, settings.qx_wechat_id)
+                recom_qxuser = yield user_ps.get_wxuser_sysuser_id_wechat_id(
+                        last_employee_user_id, settings.qx_wechat_id)
+                nickname = recom_user.name or recom_user.nickname
 
             matches = yield self.__recom_matches(
                 rp_config, recom_user, recom_wechat, **kwargs)
@@ -607,11 +606,9 @@ class RedpacketPageService(PageService):
                             rp_config,
                             recom_qxuser.id,
                             current_qxuser_id=recom_qxuser.id,
-                            position=None,
-                            company_name=current_user.company.name,
-                            recomee_name=recomee_name,
+                            position=position,
+                            nickname=nickname,
                             position_title=position.title,
-                            recom_qx_user=recom_qxuser,
                             recom_record=recom_record
                         )
                     else:
@@ -622,10 +619,8 @@ class RedpacketPageService(PageService):
                             recom_wechat.id,
                             rp_config,
                             recom_qxuser.id,
-                            company_name=current_user.company.name,
-                            recomee_name=recomee_name,
+                            nickname=nickname,
                             position_title=position.title,
-                            recom_qx_user=recom_qxuser,
                             recom_record=recom_record
                         )
 
@@ -1281,6 +1276,11 @@ class RedpacketPageService(PageService):
         hb_item_id = yield self.__insert_0_amount_sent_history(
             red_packet_config.id, qx_openid, current_qxuser_id)
 
+        # 将新插入的0元红包与刮刮卡绑定
+        res = yield self.__bind_0_amount_hb2card(card, hb_item_id)
+        if not res:
+            self.logger.warning("[RP]0元红包{}与刮刮卡{}绑定失败".format(hb_item_id, card.cardno))
+
         recom_record = kwargs.get("recom_record", ObjectDict())
         if recom_record:
             yield self.__bind_recom_record_id2redpacket(recom_record.get("id"), hb_item_id)
@@ -1427,7 +1427,14 @@ class RedpacketPageService(PageService):
                 nickname=kwargs.get("nickname", ""),
                 position_title=kwargs.get("position_title", "")
             )
-
+        elif config_type == const.RED_PACKET_TYPE_SCREEN:
+            res = yield rp_recom_screen_success_notice_tpl(
+                wechat_id=wechat_id,
+                openid=openid,
+                link=card_url,
+                nickname=kwargs.get("nickname", ""),
+                position_title=kwargs.get("position_title", "")
+            )
         else:
             raise ValueError(msg.RED_PACKET_TYPE_VALUE_ERROR)
 
@@ -1699,4 +1706,12 @@ class RedpacketPageService(PageService):
             self.logger.error(e)
         finally:
             return ret
+
+    @log_time
+    @gen.coroutine
+    def __bind_0_amount_hb2card(self, card, hb_item_id):
+        conds = ObjectDict(cardno=card.cardno)
+        fields = ObjectDict(hb_item_id=hb_item_id)
+        result = yield self.hr_hb_scratch_card_ds.update_scratch_card(conds=conds, fields=fields)
+        return result
 

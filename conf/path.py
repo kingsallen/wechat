@@ -107,6 +107,7 @@ INFRA_USER_CLAIM_BONUS = "/v1/referral/wechat/employee/{}/bonus/claim"
 INFRA_APPLICATION = 'application'
 INFRA_APPLICATION_APPLY_COUNT = 'application/count/check'
 INFRA_APPLICATION_TYPE_APPLY_COUNT = 'application/type/count/check'
+INFRA_BIND_APPLY_ID_AND_PSC = '/v1/candidate/application/psc'
 
 # 验证码服务
 INFRA_CAPTCHA = 'position/syncVerifyInfo'
