@@ -71,7 +71,7 @@ class ProfilePageService(PageService):
     ]
 
     INTENTION_KEYS = [
-        "id", "city_name", "worktype", "position_name", "salary_code", "workstate", "industry"
+        "id", "city_name", "worktype", "position", "salary_code", "workstate", "industry"
     ]
 
     EMAIL_BASICINFO = ObjectDict({
