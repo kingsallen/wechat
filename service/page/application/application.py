@@ -214,10 +214,18 @@ class ApplicationPageService(PageService):
             intention = intentions[0]
             positions = intention.get('positions')
             if positions:
-                position = positions[0]
-                if position and profile_basic:
-                    profile_basic.position = position.get('position_name', '')
-
+                position = []
+                for p in positions:
+                    position.append({"position_code": p.get("position_code"), "position_name": p.get("position_name")})
+                if profile_basic:
+                    profile_basic.position = position
+            industries = intention.get('industries')
+            if industries:
+                industry=[]
+                for i in industries:
+                    industry.append({"industry_code": i.get("industry_code"), "industry_name": i.get("industry_name")})
+                if profile_basic:
+                    profile_basic.industry = industry
         education = []
         for e in profile.get('educations', []):
             el = ObjectDict(
