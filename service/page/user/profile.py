@@ -670,7 +670,7 @@ class ProfilePageService(PageService):
     @gen.coroutine
     def custom_cv_update_profile_intention(self, profile, custom_cv):
         profile_id = profile['profile']['id']
-        position_name = custom_cv.get('position_name')
+        position_name = custom_cv.get('position')
         expectedlocation = custom_cv.get('expectedlocation')
         salary_code = custom_cv.get("salary_code")
         worktype = custom_cv.get("worktype")
