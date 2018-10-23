@@ -71,7 +71,7 @@ class ProfilePageService(PageService):
     ]
 
     INTENTION_KEYS = [
-        "id", "city_name", "worktype", "position_name", "salary_code", "workstate", "industry"
+        "id", "city_name", "worktype", "position", "salary_code", "workstate", "industry"
     ]
 
     EMAIL_BASICINFO = ObjectDict({
@@ -670,7 +670,7 @@ class ProfilePageService(PageService):
     @gen.coroutine
     def custom_cv_update_profile_intention(self, profile, custom_cv):
         profile_id = profile['profile']['id']
-        position_name = custom_cv.get('position')
+        position = custom_cv.get('position')
         expectedlocation = custom_cv.get('expectedlocation')
         salary_code = custom_cv.get("salary_code")
         worktype = custom_cv.get("worktype")
@@ -682,8 +682,8 @@ class ProfilePageService(PageService):
         record = ObjectDict()
         if expectedlocation:
             record.city_name = expectedlocation
-        if position_name:
-            record.position_name = position_name
+        if position:
+            record.position_name = position
         if salary_code:
             record.salary_code = salary_code
         if worktype:

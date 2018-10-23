@@ -645,8 +645,8 @@ class InfraProfileDataService(DataService):
         }
         if record.get('city_name'):
             params.update({"city": record.city_name})
-        if record.get('position_name'):
-            for item in record.get('position_name'):
+        if record.get('position'):
+            for item in record.get('position'):
                 index = 0
                 params.update({"positions[{}]position_name".format(index) : item.get("position_name")})
                 params.update({"positions[{}]position_code".format(index) : item.get("position_code")})
@@ -663,6 +663,8 @@ class InfraProfileDataService(DataService):
                 index += 1
         if record.get('workstate'):
             params.update({"workstate": record.workstate})
+
+        self.logger.debug("update_profile:param======>{}".format(params))
 
         res = yield self.handle_profile_section(
             params, method="update", section="intention")
