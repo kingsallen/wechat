@@ -172,7 +172,8 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
                         compoundContent=data.get("compoundContent"),
                         chatTime=data.get("createTime"),
                         speaker=data.get("speaker"),
-                        msgType=data.get("msgType")
+                        msgType=data.get("msgType"),
+                        stats=data.get("stats")
                     )))
                     logger.debug("----------websocket write finish----------")
             except websocket.WebSocketClosedError:
@@ -248,6 +249,7 @@ class ChatRoomHandler(BaseHandler):
                           "hideAllNonBaseMenuItem",
                           "showAllNonBaseMenuItem"]
         })
+        self.logger.debug("jsapi_config:{}".format(config))
         self._render(
             template_name="chat/room.html",
             data={"room_id": room_id},
@@ -461,6 +463,10 @@ class ChatHandler(BaseHandler):
         msg_type = self.json_args.get("msgType")
         server_id = self.json_args.get("serverId") or ""
         duration = self.json_args.get("duration") or 0
+        create_new_context = self.json_args.get("create_new_context") or False
+
+        self.logger.debug('post_message  flag:{}'.format(self.flag))
+        self.logger.debug('post_message  create_new_context:{}'.format(create_new_context))
 
         if not self.bot_enabled:
             yield self.get_bot_enabled()
@@ -502,7 +508,7 @@ class ChatHandler(BaseHandler):
                 # 由于没有延迟的发送导致hr端轮训无法订阅到publish到redis的消息　所以这里做下延迟处理
                 # delay_robot = functools.partial(self._handle_chatbot_message, user_message)
                 # ioloop.IOLoop.current().call_later(1, delay_robot)
-                yield self._handle_chatbot_message(user_message)  # 直接调用方式
+                yield self._handle_chatbot_message(user_message, create_new_context)  # 直接调用方式
         except Exception as e:
             self.logger.error(e)
 
@@ -522,6 +528,9 @@ class ChatHandler(BaseHandler):
         compoundContent = self.json_args.get("compoundContent") or {}
         user_message = compoundContent or content
         msg_type = self.json_args.get("msgType")
+        create_new_context = self.json_args.get("create_new_context") or False
+
+        self.logger.debug('post_trigger  create_new_context:{}'.format(create_new_context))
 
         if not self.bot_enabled:
             yield self.get_bot_enabled()
@@ -538,24 +547,28 @@ class ChatHandler(BaseHandler):
                 # 由于没有延迟的发送导致hr端轮训无法订阅到publish到redis的消息　所以这里做下延迟处理
                 # delay_robot = functools.partial(self._handle_chatbot_message, user_message)
                 # ioloop.IOLoop.current().call_later(1, delay_robot)
-                yield self._handle_chatbot_message(user_message)  # 直接调用方式
+                yield self._handle_chatbot_message(user_message, create_new_context)  # 直接调用方式
         except Exception as e:
             self.logger.error(e)
 
         self.send_json_success()
 
     @gen.coroutine
-    def _handle_chatbot_message(self, user_message):
+    def _handle_chatbot_message(self, user_message, create_new_context):
         """处理 chatbot message
         获取消息 -> pub消息 -> 入库
         """
         bot_messages = yield self.chat_ps.get_chatbot_reply(
+            current_user=self.current_user,
             message=user_message,
             user_id=self.user_id,
             hr_id=self.hr_id,
             position_id=self.position_id,
-            flag=self.flag
+            flag=self.flag,
+            create_new_context=create_new_context
         )
+        self.logger.debug('_handle_chatbot_message  flag:{}'.format(self.flag))
+        self.logger.debug('_handle_chatbot_message  create_new_context:{}'.format(create_new_context))
         for bot_message in bot_messages:
             msg_type = bot_message.msg_type
             compound_content = bot_message.compound_content
@@ -589,7 +602,8 @@ class ChatHandler(BaseHandler):
                 origin=const.ORIGIN_CHATBOT,
                 msgType=msg_type,
                 roomId=int(self.room_id),
-                positionId=int(self.position_id)
+                positionId=int(self.position_id),
+                stats=ujson.dumps(bot_message.stats),
             )
             self.logger.debug("save chat by alphadog chat_params:{}".format(chat_params))
             chat_id = yield self.chat_ps.save_chat(chat_params)
@@ -599,6 +613,7 @@ class ChatHandler(BaseHandler):
                 message_body = json_dumps(ObjectDict(
                     compoundContent=compound_content,
                     content=bot_message.content,
+                    stats=bot_message.stats,
                     msgType=msg_type,
                     speaker=const.CHAT_SPEAKER_HR,
                     cid=int(self.room_id),

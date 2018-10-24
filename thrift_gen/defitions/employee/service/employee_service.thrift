@@ -32,7 +32,7 @@ service EmployeeService {
     list<employee_struct.RecomInfo> getEmployeeRecoms(1: i32 recomId);
 
     // 员工绑定(邮箱激活)
-    employee_struct.Result emailActivation(1: string activationCodee);
+    employee_struct.Result emailActivation(1: string activationCodee, 2: i32 bindEmailSource);
 
     // 积分排行榜
     employee_struct.Pagination awardRanking(1: i32 employeeId, 2: i32 companyId, 3: employee_struct.Timespan timespan, 4: i32 pageNum, 5:i32 pageSize) throws (1: common_struct.BIZException e);

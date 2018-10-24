@@ -54,9 +54,9 @@ class ThriftEmployeeDataService(DataService):
         return ret
 
     @gen.coroutine
-    def activate_email(self, activation_code):
+    def activate_email(self, activation_code, bind_email_source):
         ret = yield self.employee_service_cilent.emailActivation(
-            activation_code)
+            activation_code, bind_email_source)
         return ret
 
     @gen.coroutine
