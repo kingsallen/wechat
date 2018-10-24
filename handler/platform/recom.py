@@ -278,7 +278,7 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
         position = self.get_argument("_position")
         mobile = self.get_argument("_mobile")
         recom_reason = self.get_argument("_recom_reason")
-        gender = self.get_argument("_gender")
+        gender = self.get_argument("_gender", 0)
         email = self.get_argument("_email")
 
         form_items = [recom_record_id, self.current_user.sysuser.id, click_time, realname, company, position, recom_reason, email]
