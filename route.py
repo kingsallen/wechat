@@ -208,6 +208,9 @@ platform_routes = [
     (r'/api/user/bonus/list/?',                      handler.platform.award.ReferralBonusHandler,               {"event": "api_bonus_list"}),
     (r'/api/bonus/claim/?',                          handler.platform.award.BonusClaimHandler,                  {"event": "api_bonus_cliam"}),
     (r"/api/mall/goods",                             handler.platform.mall.MallGoodsHandler,                    {"event": "mall_goods_list"}),
+    (r"/api/mall/good/(\d+)",                        handler.platform.mall.MallGoodHandler,                     {"event": "mall_good_detail"}),
+    (r"/api/mall/order",                             handler.platform.mall.MallExchangeHandler,                 {"event": "mall_exchange_imd"}),
+    (r"/api/mall/order_page",                        handler.platform.mall.MallExchangePageHandler,             {"event": "mall_exchange_page"}),
 
     # 兼容老微信 url，进行302跳转
     (r"/.*",                                         handler.platform.compatible.CompatibleHandler,             {"event": "compatible"})

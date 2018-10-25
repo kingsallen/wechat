@@ -193,9 +193,13 @@ REFERRAL_POSITION_LIST = "/v1/referral/wechat/position/list"
 
 # 积分商城服务
 EMPLOYEE_MALL = '/employee/mall/index'
+MALL_GOOD = '/api/mall/good/{good_id}'
+
 MALL_SWITCH = '/api/mall/manage/switch'
 LEFT_CREDIT = '/user/employee/{}'
 GOODS_LIST = '/api/mall/visit/goods'
+GOOD_DETAIL = '/api/mall/manage/goods/{good_id}'
+EXCHANGE = '/api/mall/visit/order'
 
 # ============================ 基础服务结束 ============================
 
