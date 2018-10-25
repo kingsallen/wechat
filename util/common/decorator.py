@@ -251,7 +251,7 @@ def check_and_apply_profile(func):
                                   profile_import_zhilian=True,
                                   profile_import_liepin=True,
                                   profile_import_linkedin=True,
-                                  profile_import_maimai=True,
+                                  profile_import_maimai=False,
                                   profile_import_veryeast=False)
             if company.conf_veryeast_switch == 1:
                 importer.update(profile_import_veryeast=True)
