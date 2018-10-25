@@ -189,10 +189,10 @@ class RedpacketPageService(PageService):
             "sysuser_id": user_id,
             "wechat_id": settings['qx_wechat_id']
         })
-        sysuser = yield self.user_user_ds.get_user(const={
+        sysuser = yield self.user_user_ds.get_user(conds={
             "id": user_id
         })
-        company = yield hr_company_ps.get_company(const={
+        company = yield hr_company_ps.get_company(conds={
             "id": company_id
         })
         employee = yield user_ps.get_valid_employee_by_user_id(
