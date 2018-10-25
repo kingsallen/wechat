@@ -330,7 +330,7 @@ class ApplicationPageService(PageService):
             "application_id": app_id,
             "psc_id": psc_id
         })
-        yield self.infra_application.bind_applyid_psc(params)
+        yield self.infra_application_ds.bind_applyid_psc(params)
 
     @gen.coroutine
     def update_profile_other(self, new_record, profile_id):
