@@ -48,6 +48,7 @@ USER_LOGIN = '/login'
 USER_LOGOUT = '/logout'
 RESUME_URL = '/resume/import'
 RESUME_LINKEDIN = '/resume/linkedin'
+RESUME_UPLOAD = '/resume/upload'
 RESUME_MAIMAI = 'https://{}/resume/maimai{}'
 RESUME_LIEPIN = 'https://{}/resume/liepin{}'
 RESUME_THIRDPARTY = '/resume/thirdparty'
@@ -63,7 +64,7 @@ PROFILE_VIEW = '/profile'
 PROFILE_PREVIEW = '/profile/preview'
 PROFILE_VISITOR_VIEW = '/profile/view/{}'
 PROFILE_NEW = '/app/profile/new'
-PROFILE_FILE_PARSER = '/profile/file-parser'
+
 
 IMAGE_URL = '/image'
 
@@ -149,6 +150,8 @@ PROFILE_OTHER = "profile/other"
 PROFILE_IMPORT = "crawler"
 PROFILE_OTHER_METADATA = "hraccount/custom/metadata"
 PROFILE_CUSTOMCV_CHECK = 'profile/check/other'
+PROFILE_UPLOAD = "/profile/{}/upsert"
+PROFILE_FILE_PARSER = '/profile/file-parser'
 
 # 公司服务
 COMPANY_ALL = 'company/all'

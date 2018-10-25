@@ -360,6 +360,17 @@ class LiepinImportHandler(BaseHandler):
 
 class ResumeUploadHandler(BaseHandler):
     """
+    上传简历页面
+    """
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        self.render_page(template_name="profile/mobile-upload-resume-self.html",
+                         data=ObjectDict())
+
+
+class APIResumeUploadHandler(BaseHandler):
+    """
     手机上传简历
     """
     @handle_response
@@ -377,10 +388,28 @@ class ResumeUploadHandler(BaseHandler):
             self.send_json_error(message="请上传2M以下的文件")
             return
 
-        ret = yield self.employee_ps.resume_upload(file_name, file_data, current_user)
+        ret = yield self.profile_ps.resume_upload(file_name, file_data, current_user)
         if ret.status != const.API_SUCCESS:
             self.send_json_error(message=ret.message)
             return
         else:
             self.send_json_success(data=ret.data)
+            return
+
+
+class ResumeSubmitHandler(BaseHandler):
+    """
+    简历上传成功
+    """
+    @handle_response
+    @gen.coroutine
+    def post(self):
+        name = self.json_args.name
+        mobile = self.json_args.mobile
+        result = yield self.profile_ps.submit_upload_profile(name, mobile, self.current_user.sysuser.id)
+        if result.status != const.API_SUCCESS:
+            self.send_json_error(message=result.message)
+            return
+        else:
+            self.send_json_success(data=result.data)
             return

@@ -778,13 +778,17 @@ class InfraProfileDataService(DataService):
     @gen.coroutine
     def resume_upload(self, file_name, file_data, current_user):
         url = "{0}/{1}".format(settings['infra'], path.PROFILE_FILE_PARSER)
+        yield self.upload_file(file_name, file_data, current_user, url)
+
+    @gen.coroutine
+    def upload_file(self, file_name, file_data, current_user, url):
         # requests的包不支持中文名文件上传，因此file_name单独传个字段
         request = Request(data={
             "user": current_user,
             "appid": const.APPID[env],
             "file_name": file_name
         },
-            file={
+            files={
                 "file": ("", file_data)
             },
             url=url,
@@ -805,3 +809,9 @@ class InfraProfileDataService(DataService):
         _, data = http_tool.unboxing(resposne)
 
         return sorted(data, key=lambda x: x['id'])
+
+    @gen.coroutine
+    def infra_submit_upload_profile(self, params, user_id):
+        """上传的简历提交"""
+        res = yield http_tool.http_post(path.PROFILE_UPLOAD.format(user_id), params)
+        return res
