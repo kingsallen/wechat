@@ -333,6 +333,14 @@ class ApplicationPageService(PageService):
             return ObjectDict()
 
     @gen.coroutine
+    def bind_app_psc(self, app_id, psc_id):
+        params = ObjectDict({
+            "application_id": app_id,
+            "psc_id": psc_id
+        })
+        yield self.infra_application.bind_applyid_psc(params)
+
+    @gen.coroutine
     def update_profile_other(self, new_record, profile_id):
         """智能地更新 profile.other 表
         会主动 merge 已经有的自定义字段

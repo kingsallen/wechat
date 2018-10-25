@@ -133,6 +133,25 @@ def rp_transfer_apply_success_notice_tpl(wechat_id, openid, link, nickname,
 
 
 @gen.coroutine
+def rp_recom_screen_success_notice_tpl(wechat_id, openid, link, nickname,
+                                       position_title, sys_template_id=const.TEMPLATES.RP_SHARE):
+    link = _join_suffix(link, sys_template_id)
+    d = datetime.now()
+    json_data = _make_json_data(
+        first="恭喜您获得推荐通过初筛奖励",
+        remark="请点击领取奖励",
+        keyword1=nickname,
+        keyword2=position_title,
+        keyword3="{}年{}月{}日{:0>2}:{:0>2} ".format(d.year, d.month, d.day,
+                                                  d.hour, d.minute))
+
+    ret = yield messager.send_template(
+        wechat_id, openid, sys_template_id, link, json_data, qx_retry=True)
+
+    raise gen.Return(ret)
+
+
+@gen.coroutine
 def position_view_five_notice_tpl(wechat_id, openid, link, title,
                                   salary, sys_template_id=const.TEMPLATES.POSITION_VIEWED_FIVE_TIMES):
     """职位浏览5次，向 HR 发送消息模板"""
