@@ -356,3 +356,66 @@ class LiepinImportHandler(BaseHandler):
             template_name="system/user-info.html",
             data=data
         )
+
+
+class ResumeUploadHandler(BaseHandler):
+    """
+    上传简历页面
+    """
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        self.render_page(template_name="profile/mobile-upload-resume-self.html",
+                         data=ObjectDict())
+
+
+class APIResumeUploadHandler(BaseHandler):
+    """
+    手机上传简历
+    """
+    @handle_response
+    @gen.coroutine
+    def post(self):
+        if len(self.request.files) == 0:
+            file_data = self.request.body
+            file_name = self.get_argument("vfile")
+        else:
+            image = self.request.files["vfile"][0]
+            file_data = image["body"]
+            file_name = image["filename"]
+        user_id = self.current_user.sysuser.id
+        if len(file_data) > 2 * 1024 * 1024:
+            self.send_json_error(message="请上传2M以下的文件")
+            return
+
+        ret = yield self.profile_ps.resume_upload(file_name, file_data, user_id)
+        if ret.status != const.API_SUCCESS:
+            self.send_json_error(message=ret.message)
+            return
+        else:
+            self.send_json_success(data=ret.data)
+            return
+
+
+class ResumeSubmitHandler(BaseHandler):
+    """
+    简历上传成功
+    """
+    @handle_response
+    @gen.coroutine
+    def post(self):
+        name = self.json_args.name
+        mobile = self.json_args.mobile
+        pid = self.json_args.pid
+        result = yield self.profile_ps.submit_upload_profile(name, mobile, self.current_user.sysuser.id)
+        if result.status != const.API_SUCCESS:
+            self.send_json_error(message=result.message)
+            return
+        else:
+            if pid:
+                next_url = self.make_url(path.PROFILE_PREVIEW, self.params, pid=pid)
+            else:
+                next_url = self.make_url(path.PROFILE_VIEW, self.params, pid=pid)
+
+            self.send_json_success(data={"next_url": next_url})
+            return
