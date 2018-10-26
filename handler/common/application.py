@@ -113,7 +113,8 @@ class ApplicationHandler(BaseHandler):
         if is_applied:
 
             # 绑定application与pre_share_chain
-            yield self.application_ps.bind_app_psc(apply_id, self.json_args.psc)
+            if self.json_args.psc:
+                yield self.application_ps.bind_app_psc(apply_id, self.json_args.psc)
 
             # 添加积分
             yield self.application_ps.opt_add_reward(apply_id, self.current_user)
