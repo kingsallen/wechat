@@ -406,10 +406,16 @@ class ResumeSubmitHandler(BaseHandler):
     def post(self):
         name = self.json_args.name
         mobile = self.json_args.mobile
+        pid = self.json_args.pid
         result = yield self.profile_ps.submit_upload_profile(name, mobile, self.current_user.sysuser.id)
         if result.status != const.API_SUCCESS:
             self.send_json_error(message=result.message)
             return
         else:
-            self.send_json_success(data=result.data)
+            if pid:
+                next_url = self.make_url(path.PROFILE_PREVIEW, self.params)
+            else:
+                next_url = self.make_url(path.PROFILE_VIEW, self.params)
+
+            self.send_json_success(data={"next_url": next_url})
             return

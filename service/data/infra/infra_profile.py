@@ -758,7 +758,8 @@ class InfraProfileDataService(DataService):
     @gen.coroutine
     def resume_upload(self, file_name, file_data, user_id):
         url = "{0}/{1}".format(settings['infra'], path.PROFILE_FILE_PARSER)
-        yield self.upload_file(file_name, file_data, user_id, url)
+        ret = yield self.upload_file(file_name, file_data, user_id, url)
+        return ret
 
     @gen.coroutine
     def upload_file(self, file_name, file_data, user_id, url):
