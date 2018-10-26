@@ -228,6 +228,7 @@ def check_and_apply_profile(func):
     @functools.wraps(func)
     @gen.coroutine
     def wrapper(self, *args, **kwargs):
+        need_profile_upload = [39978, 248355, 570004]  # 现在为沙盒的
         user_id = self.current_user.sysuser.id
         has_profile, profile = yield self.profile_ps.has_profile(user_id)
         if has_profile:
@@ -251,10 +252,13 @@ def check_and_apply_profile(func):
                                   profile_import_zhilian=True,
                                   profile_import_liepin=True,
                                   profile_import_linkedin=True,
-                                  profile_import_maimai=True,
-                                  profile_import_veryeast=False)
+                                  profile_import_maimai=False,
+                                  profile_import_veryeast=False,
+                                  resume_upload=False)
             if company.conf_veryeast_switch == 1:
                 importer.update(profile_import_veryeast=True)
+            if company.id in need_profile_upload:
+                importer.update(resume_upload=True)
 
             # 如果是申请中跳转到这个页面，需要做详细检查
             current_path = self.request.uri.split('?')[0]

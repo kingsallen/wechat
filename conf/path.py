@@ -48,6 +48,7 @@ USER_LOGIN = '/login'
 USER_LOGOUT = '/logout'
 RESUME_URL = '/resume/import'
 RESUME_LINKEDIN = '/resume/linkedin'
+RESUME_UPLOAD = '/resume/upload'
 RESUME_MAIMAI = 'https://{}/resume/maimai{}'
 RESUME_LIEPIN = 'https://{}/resume/liepin{}'
 RESUME_THIRDPARTY = '/resume/thirdparty'
@@ -64,6 +65,7 @@ PROFILE_PREVIEW = '/profile/preview'
 PROFILE_VISITOR_VIEW = '/profile/view/{}'
 PROFILE_NEW = '/app/profile/new'
 
+
 IMAGE_URL = '/image'
 
 CAMPAIGN_COMPANY_PATH = "/alipaycampaign/{}/company"
@@ -78,7 +80,7 @@ RESUME_IMPORT_FAIL = "/resume/import/limit"
 # 用户服务
 # Ref: https://wiki.moseeker.com/user_account_api.md
 INFRA_USER_INFO = 'user'
-INFRA_MY_INFO = "/v1/users/{}/center-info"
+INFRA_MY_INFO = "v1/users/{}/center-info"
 INFRA_USER_VALID = 'user/sendCode'
 INFRA_USER_VOICE_VALID = 'user/sendsignupcode/voice'
 INFRA_USER_VERIFY = 'user/verifyCode'
@@ -95,11 +97,11 @@ INFRA_WXUSER_QRCODE_SCANRESULT = 'weixin/qrcode/scanresult'
 INFRA_HRUSER = 'hraccount'
 INFRA_USER_EMPLOYEE_CHECK = 'user/employee/check'
 INFRA_USER_EMPLOYEE = 'user/employee'
-INFRA_USER_APPLYRECORD = "/v1/applications"
-INFRA_USER_EMPLOYEE_REFERRAL = "/v1/referral/users/{}/employee-info"
-INFRA_USER_REDPACKET_LIST = "/v1/referral/users/{}/redpackets"
-INFRA_USER_BONUS_LIST = "/v1/referral/users/{}/bonus"
-INFRA_USER_CLAIM_BONUS = "/v1/referral/wechat/employee/{}/bonus/claim"
+INFRA_USER_APPLYRECORD = "v1/applications"
+INFRA_USER_EMPLOYEE_REFERRAL = "v1/referral/users/{}/employee-info"
+INFRA_USER_REDPACKET_LIST = "v1/referral/users/{}/redpackets"
+INFRA_USER_BONUS_LIST = "v1/referral/users/{}/bonus"
+INFRA_USER_CLAIM_BONUS = "v1/referral/wechat/employee/{}/bonus/claim"
 
 
 # 申请服务
@@ -124,12 +126,12 @@ INFRA_RP_POSITION_LIST = 'position/rplist'
 INFRA_RP_POSITION_LIST_SHARE_INFO = 'position/list/hb_share_info'
 INFRA_THIRD_PARTY_SYNCED_POSITIONS = 'positions/thirdpartysyncedpositions'
 INFRA_SUG_LIST = 'api/position/suggest'
-INFRA_POSITION_FEATURE = '/api/position/feature/{}'
-INFRA_POSITION_LATEST_REFUSAL_RECOM = '/user/lastest_recommend_refusal'
-INFRA_POSITION_LIST_WX_TPL = '/user/refuse/recommend'
-INFRA_POSITION_SEARCH_HISTORY = '/position/search/history'
-INFRA_POSITION_SEARCH_HISTORY_DEL = '/position/search/history/delete'
-INFRA_POSITION_BONUS = "/v1/referral/position/bonus"
+INFRA_POSITION_FEATURE = 'api/position/feature/{}'
+INFRA_POSITION_LATEST_REFUSAL_RECOM = 'user/lastest_recommend_refusal'
+INFRA_POSITION_LIST_WX_TPL = 'user/refuse/recommend'
+INFRA_POSITION_SEARCH_HISTORY = 'position/search/history'
+INFRA_POSITION_SEARCH_HISTORY_DEL = 'position/search/history/delete'
+INFRA_POSITION_BONUS = "v1/referral/position/bonus"
 
 # Profile 服务
 # Ref: https://wiki.moseeker.com/profile-api.md
@@ -149,6 +151,8 @@ PROFILE_OTHER = "profile/other"
 PROFILE_IMPORT = "crawler"
 PROFILE_OTHER_METADATA = "hraccount/custom/metadata"
 PROFILE_CUSTOMCV_CHECK = 'profile/check/other'
+PROFILE_UPLOAD = "profile/{}/upsert"
+PROFILE_FILE_PARSER = 'profile/file-parser'
 
 # 公司服务
 COMPANY_ALL = 'company/all'
@@ -170,33 +174,34 @@ DICT_COLLEGE_BY_ID = "dict/college/abroad"
 MESSAGE_TEMPLATE = "message/template"
 
 # chat服务
-CHAT_LIMIT = "/api/v1/chat/voice/sendWarnEmail"
-VOICE = "/api/v1/chat/voice/pullVoiceFile"
+CHAT_LIMIT = "api/v1/chat/voice/sendWarnEmail"
+VOICE = "api/v1/chat/voice/pullVoiceFile"
 
 # 内推服务
-REFERRAL_POLICY = "/v1.0/referral/conf"
-INTEREST_REFERRAL_POLICY = "/v1.0/referral/policy"
-MATE_NUM = "/v1/company/{}/employees-count"
-UNREAD_PRAISE = "/v1/employee/{}/recent-upvote"
-VOTE_PRAISE = "/v1/employee/{}/upvote/{}"
-LAST_RANK_INFO = "/v1/employee/{}/last-list-info"
-USER_RANK_INFO = "/v1/employee/{}/list-info"
-LADDER_TYPE = "/v1/company/{}/leader-board"
-BIND_REWARD = "/hraccount/company/rewardconfig"
-UPDATE_RECOMMEND = "/v1/employee/{}/referral"
+REFERRAL_POLICY = "v1.0/referral/conf"
+INTEREST_REFERRAL_POLICY = "v1.0/referral/policy"
+MATE_NUM = "v1/company/{}/employees-count"
+UNREAD_PRAISE = "v1/employee/{}/recent-upvote"
+VOTE_PRAISE = "v1/employee/{}/upvote/{}"
+LAST_RANK_INFO = "v1/employee/{}/last-list-info"
+USER_RANK_INFO = "v1/employee/{}/list-info"
+LADDER_TYPE = "v1/company/{}/leader-board"
+BIND_REWARD = "hraccount/company/rewardconfig"
+UPDATE_RECOMMEND = "v1/employee/{}/referral"
 UPLOAD_RECOM_PROFILE = "v1/referral/file-parser"
-REFERRAL_INFO = "/v1/referral-records/{}"
-INFRA_REFERRAL_CONFIRM = "/v1/referral/claim"
-REFERRAL_POSITION_INFO_EMPLOYEE = "/v1/employee/{}/referral-type"
-INFRA_REFERRAL_CRUCIAL_INFO = "/v1/employee/{}/post-candidate-info"
-REFERRAL_QRCODE = "/v1/referral/position/qrcode"
-REFERRAL_POSITION_LIST = "/v1/referral/wechat/position/list"
 
 # 积分商城服务
 EMPLOYEE_MALL = '/employee/mall/index'
 MALL_SWITCH = '/api/mall/manage/switch'
 LEFT_CREDIT = '/user/employee/{}'
 GOODS_LIST = '/api/mall/visit/goods'
+
+REFERRAL_INFO = "v1/referral-records/{}"
+INFRA_REFERRAL_CONFIRM = "v1/referral/claim"
+REFERRAL_POSITION_INFO_EMPLOYEE = "v1/employee/{}/referral-type"
+INFRA_REFERRAL_CRUCIAL_INFO = "v1/employee/{}/post-candidate-info"
+REFERRAL_QRCODE = "v1/referral/position/qrcode"
+REFERRAL_POSITION_LIST = "v1/referral/wechat/position/list"
 
 # ============================ 基础服务结束 ============================
 
