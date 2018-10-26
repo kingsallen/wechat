@@ -756,15 +756,15 @@ class InfraProfileDataService(DataService):
         return response
 
     @gen.coroutine
-    def resume_upload(self, file_name, file_data, current_user):
+    def resume_upload(self, file_name, file_data, user_id):
         url = "{0}/{1}".format(settings['infra'], path.PROFILE_FILE_PARSER)
-        yield self.upload_file(file_name, file_data, current_user, url)
+        yield self.upload_file(file_name, file_data, user_id, url)
 
     @gen.coroutine
-    def upload_file(self, file_name, file_data, current_user, url):
+    def upload_file(self, file_name, file_data, user_id, url):
         # requests的包不支持中文名文件上传，因此file_name单独传个字段
         request = Request(data={
-            "user": current_user,
+            "user": user_id,
             "appid": const.APPID[env],
             "file_name": file_name
         },

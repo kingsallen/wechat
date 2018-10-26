@@ -383,12 +383,12 @@ class APIResumeUploadHandler(BaseHandler):
             image = self.request.files["vfile"][0]
             file_data = image["body"]
             file_name = image["filename"]
-        current_user = self.current_user
+        user_id = self.current_user.sysuser.id
         if len(file_data) > 2 * 1024 * 1024:
             self.send_json_error(message="请上传2M以下的文件")
             return
 
-        ret = yield self.profile_ps.resume_upload(file_name, file_data, current_user)
+        ret = yield self.profile_ps.resume_upload(file_name, file_data, user_id)
         if ret.status != const.API_SUCCESS:
             self.send_json_error(message=ret.message)
             return
