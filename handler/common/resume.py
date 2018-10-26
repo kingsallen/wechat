@@ -413,9 +413,9 @@ class ResumeSubmitHandler(BaseHandler):
             return
         else:
             if pid:
-                next_url = self.make_url(path.PROFILE_PREVIEW, self.params)
+                next_url = self.make_url(path.PROFILE_PREVIEW, self.params, pid=pid)
             else:
-                next_url = self.make_url(path.PROFILE_VIEW, self.params)
+                next_url = self.make_url(path.PROFILE_VIEW, self.params, pid=pid)
 
             self.send_json_success(data={"next_url": next_url})
             return
