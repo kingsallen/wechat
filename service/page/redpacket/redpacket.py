@@ -590,52 +590,52 @@ class RedpacketPageService(PageService):
             if send_to_employee or matches:
                 self.logger.debug("[RP]用户是发送红包对象,准备掷骰子")
 
-            redislocker = BaseRedis()
-            rplock_key = const.ON_BOARD_LOCK_FMT % (rp_config.id, user_id)
-            if redislocker.incr(rplock_key) is FIRST_LOCK:
-                self.logger.debug("[RP]红包锁创建成功， rplock_key: %s" % rplock_key)
+                redislocker = BaseRedis()
+                rplock_key = const.ON_BOARD_LOCK_FMT % (rp_config.id, user_id)
+                if redislocker.incr(rplock_key) is FIRST_LOCK:
+                    self.logger.debug("[RP]红包锁创建成功， rplock_key: %s" % rplock_key)
 
-                try:
-                    if self.__hit_red_packet(rp_config.probability):
-                        self.logger.debug("[RP]掷骰子通过,准备发送红包信封(有金额)")
+                    try:
+                        if self.__hit_red_packet(rp_config.probability):
+                            self.logger.debug("[RP]掷骰子通过,准备发送红包信封(有金额)")
 
-                        # 发送红包消息模版(有金额)
-                        yield self.__send_red_packet_card(
-                            recom_wxuser.openid,
-                            recom_wechat.id,
-                            rp_config,
-                            recom_qxuser.id,
-                            current_qxuser_id=recom_qxuser.id,
-                            position=position,
-                            nickname=nickname,
-                            position_title=position.title,
-                            recom_record=recom_record
-                        )
-                    else:
-                        # 发送红包消息模版(抽不中)
-                        self.logger.debug("[RP]掷骰子不通过,准备发送红包信封(无金额)")
-                        yield self.__send_zero_amount_card(
-                            recom_wxuser.openid,
-                            recom_wechat.id,
-                            rp_config,
-                            recom_qxuser.id,
-                            nickname=nickname,
-                            position_title=position.title,
-                            recom_record=recom_record
-                        )
+                            # 发送红包消息模版(有金额)
+                            yield self.__send_red_packet_card(
+                                recom_wxuser.openid,
+                                recom_wechat.id,
+                                rp_config,
+                                recom_qxuser.id,
+                                current_qxuser_id=recom_qxuser.id,
+                                position=position,
+                                nickname=nickname,
+                                position_title=position.title,
+                                recom_record=recom_record
+                            )
+                        else:
+                            # 发送红包消息模版(抽不中)
+                            self.logger.debug("[RP]掷骰子不通过,准备发送红包信封(无金额)")
+                            yield self.__send_zero_amount_card(
+                                recom_wxuser.openid,
+                                recom_wechat.id,
+                                rp_config,
+                                recom_qxuser.id,
+                                nickname=nickname,
+                                position_title=position.title,
+                                recom_record=recom_record
+                            )
 
-                except Exception as e:
-                    self.logger.error(e)
-                finally:
-                    # 释放红包锁
-                    redislocker.delete(rplock_key)
-                    self.logger.debug("[RP]红包锁释放成功， rplock_key: %s" % rplock_key)
-            else:
-                self.logger.debug(
-                    "[RP]触发红包锁，该红包逻辑正在处理中， rplock_key: %s" % rplock_key)
+                    except Exception as e:
+                        self.logger.error(e)
+                    finally:
+                        # 释放红包锁
+                        redislocker.delete(rplock_key)
+                        self.logger.debug("[RP]红包锁释放成功， rplock_key: %s" % rplock_key)
+                else:
+                    self.logger.debug(
+                        "[RP]触发红包锁，该红包逻辑正在处理中， rplock_key: %s" % rplock_key)
 
-            self.logger.debug("[RP]初筛红包发送成功")
-
+                self.logger.debug("[RP]初筛红包发送成功")
+        
         except Exception as e:
             self.logger.error(traceback.format_exc())
 
