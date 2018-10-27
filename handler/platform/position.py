@@ -56,6 +56,12 @@ class PositionHandler(BaseHandler):
             did = yield self.company_ps.get_real_company_id(position_info.publisher, position_info.company_id)
             company_info = yield self.company_ps.get_company(conds={"id": did}, need_conf=True)
 
+            # 相似职位推荐
+            self.logger.debug("[JD]构建相似职位推荐")
+            recomment_positions_res = yield self.position_ps.get_recommend_positions(position_id)
+            # 为防止员工一度打开相似职位时，职位链接被拼接上新生成的psc参数，将该方法放在psc参数生成前执行
+            module_position_recommend = self._make_recommend_positions(self.locale, recomment_positions_res)
+
             # 刷新链路
             self.logger.debug("[JD]刷新链路")
             last_employee_user_id, last_employee_id = yield self._make_refresh_share_chain(position_info)
@@ -71,10 +77,6 @@ class PositionHandler(BaseHandler):
             self.logger.debug("[JD]处理投递上限")
             can_apply = yield self.application_ps.is_allowed_apply_position(
                 self.current_user.sysuser.id, company_info.id, position_id)
-
-            # 相似职位推荐
-            self.logger.debug("[JD]构建相似职位推荐")
-            recomment_positions_res = yield self.position_ps.get_recommend_positions(position_id)
 
             # 职位推荐简历积分
             self.logger.debug("[JD]构建职位推荐简历积分,分享积分")
@@ -113,8 +115,6 @@ class PositionHandler(BaseHandler):
             module_job_need = self._make_json_job_need(position_info)
             position_feature = yield self.position_ps.get_position_feature(position_id)
             module_feature = self._make_json_job_feature(position_feature)
-
-            module_position_recommend = self._make_recommend_positions(self.locale, recomment_positions_res)
 
             position_data = ObjectDict()
             add_item(position_data, "header", header)
