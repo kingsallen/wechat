@@ -566,36 +566,41 @@ class RedpacketPageService(PageService):
             self.logger.debug('[RP] recom_wxuser: %s' % recom_wxuser)
             self.logger.debug('[RP] recom_qxuser: %s' % recom_qxuser)
 
-            # 红包发送对象是否符合配置要求
+            # 判断红包是否直接发送给员工一度（这里的逻辑与转发点击和转发申请不同）
             sharechain_ps = SharechainPageService()
             psc = kwargs.get("psc")
-            first_degree = ObjectDict()
+            first_degree_id = 0
             if psc:
                 is_1degree = yield sharechain_ps.is_employee_presentee(
                     psc)
                 if is_1degree:
-                    first_degree = yield self.candidate_share_chain_ds.get_share_chain({
+                    share_chain = yield self.candidate_share_chain_ds.get_share_chain({
                         "id": psc
                     })
+                    if share_chain.parent_id:
+                        first_degree_id = share_chain.recom_user_id
+                    else:
+                        first_degree_id = share_chain.presentee_user_id
+                    self.logger.debug("[RP]发送红包给员工一度")
 
-            # 判断红包是否直接发送给员工一度（这里的逻辑与转发点击和转发申请不同）
+            self.logger.debug("[RP]first_degree_id: {}".format(first_degree_id))
             send_to_first_degree = (
-                first_degree.recom_user_id and
-                first_degree.recom_user_id != current_user.id and rp_config.target == const.RED_PACKET_CONFIG_TARGET_EMPLOYEE)
+                first_degree_id and
+                first_degree_id != current_user.id and rp_config.target == const.RED_PACKET_CONFIG_TARGET_EMPLOYEE)
 
             if send_to_first_degree:
                 recom_user = yield user_ps.get_user_user({
-                    "id": first_degree.recom_user_id
+                    "id": first_degree_id
                 })
 
                 if is_service_wechat:
                     recom_wxuser = yield user_ps.get_wxuser_sysuser_id_wechat_id(
-                        first_degree.recom_user_id, recom_wechat.id)
+                        first_degree_id, recom_wechat.id)
                 else:
                     recom_wxuser = yield user_ps.get_wxuser_sysuser_id_wechat_id(
-                        first_degree.recom_user_id, settings.qx_wechat_id)
+                        first_degree_id, settings.qx_wechat_id)
                 recom_qxuser = yield user_ps.get_wxuser_sysuser_id_wechat_id(
-                    first_degree.recom_user_id, settings.qx_wechat_id)
+                    first_degree_id, settings.qx_wechat_id)
                 nickname = recom_user.name or recom_user.nickname
 
             matches = yield self.__recom_matches(
