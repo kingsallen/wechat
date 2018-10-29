@@ -9,6 +9,7 @@ import uuid
 import xml.dom.minidom as minidom
 from datetime import datetime
 from hashlib import sha1, md5
+from util.common.cache import BaseRedis
 
 import requests
 import tornado.gen as gen
@@ -23,6 +24,7 @@ from service.page.base import PageService
 from service.page.hr.wechat import WechatPageService
 from service.page.user.sharechain import SharechainPageService
 from service.page.user.user import UserPageService
+from service.page.hr.company import CompanyPageService
 from setting import settings
 from util.common import ObjectDict
 from util.common.decorator import log_time
@@ -90,15 +92,10 @@ class RedpacketPageService(PageService):
 
     @log_time
     @gen.coroutine
-    def __get_hb_config_by_position(self, position, share_click=False, share_apply=False):
+    def __get_hb_config_by_position(self, position, trigger_way):
         """获取红包配置"""
-        if not share_click and not share_apply:
+        if not trigger_way:
             raise ValueError(msg.RED_PACKET_TYPE_VALUE_ERROR)
-
-        if share_click:
-            trigger_way = const.HB_TRIGGER_WAY_CLICK
-        else:
-            trigger_way = const.HB_TRIGGER_WAY_APPLY
 
         config_list = yield self.hr_hb_config_ds.get_hr_hb_config_list({
             "company_id": position.company_id,
@@ -118,16 +115,15 @@ class RedpacketPageService(PageService):
             raise gen.Return(ObjectDict())
 
     def __need_to_send(self, current_user, position,
-                       is_click=False, is_apply=False):
+                       trigger_way):
         """
         检查职位是否正在参与转发点击红包活动
         :param position: 相应职位
-        :param is_click: 红包活动类别: 转发点击红包活动
-        :param is_apply: 红包活动类别: 转发申请红包活动
+        :param trigger_way: 红包调用方式
         :return: bool
         """
         # 转发点击和转发申请红包无法同时为 False
-        assert is_click or is_apply
+        assert trigger_way
 
         # 校验当前职位是否是属于当前公众号的公司
         if current_user.wechat.company_id != position.company_id:
@@ -136,13 +132,17 @@ class RedpacketPageService(PageService):
 
         check_hb_status_passed = False
         self.logger.debug("[RP]position.hb_status: %s" % position.hb_status)
-        if is_click:
+        if trigger_way == const.HB_TRIGGER_WAY_CLICK:
             check_hb_status_passed = (
                 position.hb_status == const.RP_POSITION_STATUS_CLICK or
                 position.hb_status == const.RP_POSITION_STATUS_BOTH)
-        elif is_apply:
+        elif trigger_way == const.HB_TRIGGER_WAY_APPLY:
             check_hb_status_passed = (
                 position.hb_status == const.RP_POSITION_STATUS_APPLY or
+                position.hb_status == const.RP_POSITION_STATUS_BOTH)
+        elif trigger_way == const.HB_TRIGGER_WAY_SCREEN:
+            check_hb_status_passed = (
+                position.hb_status == const.RP_POSITION_STATUS_SCREEN or
                 position.hb_status == const.RP_POSITION_STATUS_BOTH)
         else:
             self.logger.debug("[RP]something goes wrong")
@@ -165,6 +165,48 @@ class RedpacketPageService(PageService):
 
         self.logger.debug("[RP]need_to_send_red_packet_card: %s" % ret)
         return ret
+
+    @gen.coroutine
+    def handle_red_packet_from_rabbitmq(self, data):
+        """通过rabbitmq触发的红包总入口"""
+
+        # 拼装与session结构相同的current_user以复用相同的红包方法
+        hr_company_ps = CompanyPageService()
+        user_ps = UserPageService()
+        redis = BaseRedis()
+        user_id = data.get("user_id")
+        company_id = data.get("company_id")
+        wechat_id = data.get("wechat_id")
+        rp_type = data.get("rp_type")
+        wechat = yield self.hr_wx_wechat_ds.get_wechat(conds={
+            "company_id": company_id
+        })
+        wxuser = yield self.user_wx_user_ds.get_wxuser(conds={
+            "sysuser_id": user_id,
+            "wechat_id": wechat_id
+        })
+        qxuser = yield self.user_wx_user_ds.get_wxuser(conds={
+            "sysuser_id": user_id,
+            "wechat_id": settings['qx_wechat_id']
+        })
+        sysuser = yield self.user_user_ds.get_user(conds={
+            "id": user_id
+        })
+        company = yield hr_company_ps.get_company(conds={
+            "id": company_id
+        })
+        employee = yield user_ps.get_valid_employee_by_user_id(
+            user_id=user_id, company_id=company_id)
+        current_user = ObjectDict(
+            wechat=wechat,
+            wxuser=wxuser,
+            qxuser=qxuser,
+            sysuser=sysuser,
+            company=company,
+            employee=employee
+        )
+        if rp_type == const.EMPLOYEE_BIND_RP_TYPE:
+            yield self.handle_red_packet_employee_verification(user_id, company_id, redis)
 
     @gen.coroutine
     def handle_red_packet_employee_verification(self, user_id, company_id, redislocker):
@@ -444,8 +486,12 @@ class RedpacketPageService(PageService):
         assert is_click or is_apply
 
         try:
+            if is_click:
+                trigger_way = const.HB_TRIGGER_WAY_CLICK
+            else:
+                trigger_way = const.HB_TRIGGER_WAY_APPLY
             rp_config = yield self.__get_hb_config_by_position(
-                position, share_click=is_click, share_apply=is_apply)
+                position, trigger_way=trigger_way)
             if not rp_config:
                 self.logger.debug("[RP]无红包活动")
                 return
@@ -456,7 +502,7 @@ class RedpacketPageService(PageService):
                 return
 
             need_to_send_card = self.__need_to_send(
-                current_user, position, is_click=is_click, is_apply=is_apply)
+                current_user, position, trigger_way)
 
             if need_to_send_card and rp_config:
                 self.logger.debug("[RP]转发点击红包开始" if is_click
@@ -778,7 +824,7 @@ class RedpacketPageService(PageService):
 
         if (hb_config_type in [const.RED_PACKET_TYPE_SHARE_CLICK,
                                const.RED_PACKET_TYPE_SHARE_APPLY] and
-                position_id):
+            position_id):
 
             binding = yield self.hr_hb_position_binding_ds.get_hr_hb_position_binding({
                 "hb_config_id": hb_config_id,
@@ -901,7 +947,8 @@ class RedpacketPageService(PageService):
 
             if not throttle_passed:
                 self.logger.debug(
-                    '[RP]throttle上限校验失败, hb_config_id: %s， recom_qxuser_id: %s' % (red_packet_config.id, recom_qxuser_id))
+                    '[RP]throttle上限校验失败, hb_config_id: %s， recom_qxuser_id: %s' % (
+                    red_packet_config.id, recom_qxuser_id))
                 return
             else:
                 self.logger.debug("[RP]全局上限验证通过")
@@ -913,7 +960,7 @@ class RedpacketPageService(PageService):
             if result:
                 break
             else:
-                self.logger.info("[hb]--用户{}在第{}次获取红包{}失败".format(bagging_openid, 10-num, rp_item.id))
+                self.logger.info("[hb]--用户{}在第{}次获取红包{}失败".format(bagging_openid, 10 - num, rp_item.id))
             num -= 1
             yield gen.sleep(0.5)
         self.logger.debug("用户{}获得红包为{}".format(bagging_openid, rp_item.id))
@@ -1093,7 +1140,7 @@ class RedpacketPageService(PageService):
                 raise ValueError(msg.RED_PACKET_TYPE_VALUE_ERROR)
 
         elif ((current_hb_status == const.HB_STATUS_CLICK and hb_config_type == const.RED_PACKET_TYPE_SHARE_CLICK) or
-                  (current_hb_status == const.HB_STATUS_APPLY and hb_config_type == const.RED_PACKET_TYPE_SHARE_APPLY)):
+              (current_hb_status == const.HB_STATUS_APPLY and hb_config_type == const.RED_PACKET_TYPE_SHARE_APPLY)):
 
             next_status = const.HB_STATUS_NONE
 
@@ -1480,3 +1527,4 @@ class RedpacketPageService(PageService):
             self.logger.error(e)
         finally:
             return ret
+

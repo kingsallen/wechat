@@ -464,6 +464,7 @@ class ChatHandler(BaseHandler):
         server_id = self.json_args.get("serverId") or ""
         duration = self.json_args.get("duration") or 0
         create_new_context = self.json_args.get("create_new_context") or False
+        from_textfield = self.json_args.get("from_textfield") or False
 
         self.logger.debug('post_message  flag:{}'.format(self.flag))
         self.logger.debug('post_message  create_new_context:{}'.format(create_new_context))
@@ -508,7 +509,7 @@ class ChatHandler(BaseHandler):
                 # 由于没有延迟的发送导致hr端轮训无法订阅到publish到redis的消息　所以这里做下延迟处理
                 # delay_robot = functools.partial(self._handle_chatbot_message, user_message)
                 # ioloop.IOLoop.current().call_later(1, delay_robot)
-                yield self._handle_chatbot_message(user_message, create_new_context)  # 直接调用方式
+                yield self._handle_chatbot_message(user_message, create_new_context, from_textfield)  # 直接调用方式
         except Exception as e:
             self.logger.error(e)
 
@@ -529,6 +530,7 @@ class ChatHandler(BaseHandler):
         user_message = compoundContent or content
         msg_type = self.json_args.get("msgType")
         create_new_context = self.json_args.get("create_new_context") or False
+        from_textfield = self.json_args.get("from_textfield") or False
 
         self.logger.debug('post_trigger  create_new_context:{}'.format(create_new_context))
 
@@ -547,14 +549,14 @@ class ChatHandler(BaseHandler):
                 # 由于没有延迟的发送导致hr端轮训无法订阅到publish到redis的消息　所以这里做下延迟处理
                 # delay_robot = functools.partial(self._handle_chatbot_message, user_message)
                 # ioloop.IOLoop.current().call_later(1, delay_robot)
-                yield self._handle_chatbot_message(user_message, create_new_context)  # 直接调用方式
+                yield self._handle_chatbot_message(user_message, create_new_context, from_textfield)  # 直接调用方式
         except Exception as e:
             self.logger.error(e)
 
         self.send_json_success()
 
     @gen.coroutine
-    def _handle_chatbot_message(self, user_message, create_new_context):
+    def _handle_chatbot_message(self, user_message, create_new_context, from_textfield):
         """处理 chatbot message
         获取消息 -> pub消息 -> 入库
         """
@@ -565,7 +567,8 @@ class ChatHandler(BaseHandler):
             hr_id=self.hr_id,
             position_id=self.position_id,
             flag=self.flag,
-            create_new_context=create_new_context
+            create_new_context=create_new_context,
+            from_textfield=from_textfield
         )
         self.logger.debug('_handle_chatbot_message  flag:{}'.format(self.flag))
         self.logger.debug('_handle_chatbot_message  create_new_context:{}'.format(create_new_context))
