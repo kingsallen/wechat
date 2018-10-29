@@ -171,56 +171,59 @@ class RedpacketPageService(PageService):
     @gen.coroutine
     def handle_red_packet_from_rabbitmq(self, data):
         """通过rabbitmq触发的红包总入口"""
+        try:
+            # 拼装与session结构相同的current_user以复用相同的红包方法
+            hr_company_ps = CompanyPageService()
+            user_ps = UserPageService()
+            position_ps = PositionPageService()
+            redis = BaseRedis()
+            user_id = data.get("user_id")
+            company_id = data.get("company_id")
+            wechat_id = data.get("wechat_id")
+            position_id = data.get("position_id", 0)
+            be_recom_user_id = data.get("be_recom_user_id", 0)
+            psc = data.get("psc", 0)
 
-        # 拼装与session结构相同的current_user以复用相同的红包方法
-        hr_company_ps = CompanyPageService()
-        user_ps = UserPageService()
-        position_ps = PositionPageService()
-        redis = BaseRedis()
-        user_id = data.get("user_id")
-        company_id = data.get("company_id")
-        wechat_id = data.get("wechat_id")
-        position_id = data.get("position_id", 0)
-        be_recom_user_id = data.get("be_recom_user_id", 0)
-        psc = data.get("psc", 0)
-
-        rp_type = data.get("rp_type")
-        wechat = yield self.hr_wx_wechat_ds.get_wechat(conds={
-            "company_id": company_id
-        })
-        wxuser = yield self.user_wx_user_ds.get_wxuser(conds={
-            "sysuser_id": user_id,
-            "wechat_id": wechat_id
-        })
-        qxuser = yield self.user_wx_user_ds.get_wxuser(conds={
-            "sysuser_id": user_id,
-            "wechat_id": settings['qx_wechat_id']
-        })
-        sysuser = yield self.user_user_ds.get_user(conds={
-            "id": user_id
-        })
-        company = yield hr_company_ps.get_company(conds={
-            "id": company_id
-        })
-        employee = yield user_ps.get_valid_employee_by_user_id(
-            user_id=user_id, company_id=company_id)
-        if position_id:
-            position = yield position_ps.get_position(position_id)
-        else:
-            position = ObjectDict()
-        current_user = ObjectDict(
-            wechat=wechat,
-            wxuser=wxuser,
-            qxuser=qxuser,
-            sysuser=sysuser,
-            company=company,
-            employee=employee
-        )
-        if rp_type == const.EMPLOYEE_BIND_RP_TYPE:
-            yield self.handle_red_packet_employee_verification(user_id, company_id, redis)
-        elif rp_type == const.EMPLOYEE_BIND_RP_TYPE:
-            yield self.handle_red_packet_screen_profile(current_user, position, trigger_way=const.HB_TRIGGER_WAY_SCREEN,
-                                                        be_recom_user_id=be_recom_user_id, psc=psc)
+            rp_type = data.get("rp_type")
+            wechat = yield self.hr_wx_wechat_ds.get_wechat(conds={
+                "company_id": company_id
+            })
+            wxuser = yield self.user_wx_user_ds.get_wxuser(conds={
+                "sysuser_id": user_id,
+                "wechat_id": wechat_id
+            })
+            qxuser = yield self.user_wx_user_ds.get_wxuser(conds={
+                "sysuser_id": user_id,
+                "wechat_id": settings['qx_wechat_id']
+            })
+            sysuser = yield self.user_user_ds.get_user(conds={
+                "id": user_id
+            })
+            company = yield hr_company_ps.get_company(conds={
+                "id": company_id
+            })
+            employee = yield user_ps.get_valid_employee_by_user_id(
+                user_id=user_id, company_id=company_id)
+            if position_id:
+                position = yield position_ps.get_position(position_id)
+            else:
+                position = ObjectDict()
+            current_user = ObjectDict(
+                wechat=wechat,
+                wxuser=wxuser,
+                qxuser=qxuser,
+                sysuser=sysuser,
+                company=company,
+                employee=employee
+            )
+            self.logger.debug("[RP]current_user: {}".format(current_user))
+            if rp_type == const.EMPLOYEE_BIND_RP_TYPE:
+                yield self.handle_red_packet_employee_verification(user_id, company_id, redis)
+            elif rp_type == const.EMPLOYEE_BIND_RP_TYPE:
+                yield self.handle_red_packet_screen_profile(current_user, position, trigger_way=const.HB_TRIGGER_WAY_SCREEN,
+                                                            be_recom_user_id=be_recom_user_id, psc=psc)
+        except Exception as e:
+            self.logger.error(traceback.format_exc())
 
     @gen.coroutine
     def handle_red_packet_employee_verification(self, user_id, company_id, redislocker):
@@ -590,51 +593,51 @@ class RedpacketPageService(PageService):
             if send_to_employee or matches:
                 self.logger.debug("[RP]用户是发送红包对象,准备掷骰子")
 
-            redislocker = BaseRedis()
-            rplock_key = const.ON_BOARD_LOCK_FMT % (rp_config.id, user_id)
-            if redislocker.incr(rplock_key) is FIRST_LOCK:
-                self.logger.debug("[RP]红包锁创建成功， rplock_key: %s" % rplock_key)
+                redislocker = BaseRedis()
+                rplock_key = const.ON_BOARD_LOCK_FMT % (rp_config.id, user_id)
+                if redislocker.incr(rplock_key) is FIRST_LOCK:
+                    self.logger.debug("[RP]红包锁创建成功， rplock_key: %s" % rplock_key)
 
-                try:
-                    if self.__hit_red_packet(rp_config.probability):
-                        self.logger.debug("[RP]掷骰子通过,准备发送红包信封(有金额)")
+                    try:
+                        if self.__hit_red_packet(rp_config.probability):
+                            self.logger.debug("[RP]掷骰子通过,准备发送红包信封(有金额)")
 
-                        # 发送红包消息模版(有金额)
-                        yield self.__send_red_packet_card(
-                            recom_wxuser.openid,
-                            recom_wechat.id,
-                            rp_config,
-                            recom_qxuser.id,
-                            current_qxuser_id=recom_qxuser.id,
-                            position=position,
-                            nickname=nickname,
-                            position_title=position.title,
-                            recom_record=recom_record
-                        )
-                    else:
-                        # 发送红包消息模版(抽不中)
-                        self.logger.debug("[RP]掷骰子不通过,准备发送红包信封(无金额)")
-                        yield self.__send_zero_amount_card(
-                            recom_wxuser.openid,
-                            recom_wechat.id,
-                            rp_config,
-                            recom_qxuser.id,
-                            nickname=nickname,
-                            position_title=position.title,
-                            recom_record=recom_record
-                        )
+                            # 发送红包消息模版(有金额)
+                            yield self.__send_red_packet_card(
+                                recom_wxuser.openid,
+                                recom_wechat.id,
+                                rp_config,
+                                recom_qxuser.id,
+                                current_qxuser_id=recom_qxuser.id,
+                                position=position,
+                                nickname=nickname,
+                                position_title=position.title,
+                                recom_record=recom_record
+                            )
+                        else:
+                            # 发送红包消息模版(抽不中)
+                            self.logger.debug("[RP]掷骰子不通过,准备发送红包信封(无金额)")
+                            yield self.__send_zero_amount_card(
+                                recom_wxuser.openid,
+                                recom_wechat.id,
+                                rp_config,
+                                recom_qxuser.id,
+                                nickname=nickname,
+                                position_title=position.title,
+                                recom_record=recom_record
+                            )
 
-                except Exception as e:
-                    self.logger.error(e)
-                finally:
-                    # 释放红包锁
-                    redislocker.delete(rplock_key)
-                    self.logger.debug("[RP]红包锁释放成功， rplock_key: %s" % rplock_key)
-            else:
-                self.logger.debug(
-                    "[RP]触发红包锁，该红包逻辑正在处理中， rplock_key: %s" % rplock_key)
+                    except Exception as e:
+                        self.logger.error(e)
+                    finally:
+                        # 释放红包锁
+                        redislocker.delete(rplock_key)
+                        self.logger.debug("[RP]红包锁释放成功， rplock_key: %s" % rplock_key)
+                else:
+                    self.logger.debug(
+                        "[RP]触发红包锁，该红包逻辑正在处理中， rplock_key: %s" % rplock_key)
 
-            self.logger.debug("[RP]初筛红包发送成功")
+                self.logger.debug("[RP]初筛红包发送成功")
 
         except Exception as e:
             self.logger.error(traceback.format_exc())
