@@ -586,7 +586,7 @@ class RedpacketPageService(PageService):
             self.logger.debug("[RP]first_degree_id: {}".format(first_degree_id))
             send_to_first_degree = (
                 first_degree_id and
-                first_degree_id != current_user.id and rp_config.target == const.RED_PACKET_CONFIG_TARGET_EMPLOYEE)
+                first_degree_id != current_user.sysuser.id and rp_config.target == const.RED_PACKET_CONFIG_TARGET_EMPLOYEE_1DEGREE)
 
             if send_to_first_degree:
                 recom_user = yield user_ps.get_user_user({
