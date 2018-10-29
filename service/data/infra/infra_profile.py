@@ -647,10 +647,11 @@ class InfraProfileDataService(DataService):
             "id": record.id,
             "profile_id": profile_id
         }
+        self.logger.debug("update_profile_intention:record--->{}".format(record))
         if record.get('city_name'):
             params.update({"city": record.city_name})
-        if record.get('position'):
-            for item in record.get('position'):
+        if record.get('position_name'):
+            for item in record.get('position_name'):
                 index = 0
                 params.update({"positions[{}]position_name".format(index) : item.get("position_name")})
                 params.update({"positions[{}]position_code".format(index) : item.get("position_code")})
@@ -660,14 +661,13 @@ class InfraProfileDataService(DataService):
         if record.get('salary_code'):
             params.update({"salary_code": record.salary_code})
         if record.get('industry'):
-            for item in record.get('industry'):
-                index = 0
-                params.update({"industries[{}]industry_name".format(index) : item.get("industry_name")})
-                params.update({"industries[{}]industry_code".format(index) : item.get("industry_code")})
-                index += 1
+            industry = record.get('industry')
+            for i in range(len(industry)):
+                params.update({"industries[{}]industry_name".format(i) : industry[i]['industry_name']})
+                params.update({"industries[{}]industry_code".format(i) : industry[i]['industry_code']})
         if record.get('workstate'):
             params.update({"workstate": record.workstate})
-
+        self.logger.debug("update_profile:position_name----->{}".format(record.get('position_name')))
         self.logger.debug("update_profile:param======>{}".format(params))
 
         res = yield self.handle_profile_section(
