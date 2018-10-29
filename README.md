@@ -89,3 +89,5 @@ http://wiki.moseeker.com/python-code-comments.md
 
 ## thrift
 thrift -r --gen py:tornado xxxxx.thrift
+
+
