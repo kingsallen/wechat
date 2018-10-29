@@ -1,12 +1,16 @@
 # coding=utf-8
 
 import tornado.gen as gen
+import conf.common as const
 
 import conf.path as path
 import util.tool.http_tool as http_tool
 from service.data.base import DataService
 from service.data.infra.infra_dict import InfraDictDataService
 from util.common import ObjectDict
+from requests.models import Request
+from setting import settings
+from globals import env
 
 
 class InfraProfileDataService(DataService):
@@ -615,13 +619,21 @@ class InfraProfileDataService(DataService):
         if record.get('city_name'):
             params.update({"city": record.city_name})
         if record.get('position_name'):
-            params.update({"positions[0]position_name": record.position_name})
+            for item in record.get('position_name'):
+                index = 0
+                params.update({"positions[{}]position_name".format(index): item.get("position_name")})
+                params.update({"positions[{}]position_code".format(index): item.get("position_code")})
+                index += 1
         if record.get('worktype'):
             params.update({"worktype": record.worktype})
         if record.get('salary_code'):
             params.update({"salary_code": record.salary_code})
         if record.get('industry'):
-            params.update({"industries[0]industry_name": record.industry})
+            for item in record.get('industry'):
+                index = 0
+                params.update({"industries[{}]industry_name".format(index): item.get("industry_name")})
+                params.update({"industries[{}]industry_code".format(index): item.get("industry_code")})
+                index += 1
         if record.get('workstate'):
             params.update({"workstate": record.workstate})
 
@@ -637,8 +649,8 @@ class InfraProfileDataService(DataService):
         }
         if record.get('city_name'):
             params.update({"city": record.city_name})
-        if record.get('position_name'):
-            for item in record.get('position_name'):
+        if record.get('position'):
+            for item in record.get('position'):
                 index = 0
                 params.update({"positions[{}]position_name".format(index) : item.get("position_name")})
                 params.update({"positions[{}]position_code".format(index) : item.get("position_code")})
@@ -655,6 +667,8 @@ class InfraProfileDataService(DataService):
                 index += 1
         if record.get('workstate'):
             params.update({"workstate": record.workstate})
+
+        self.logger.debug("update_profile:param======>{}".format(params))
 
         res = yield self.handle_profile_section(
             params, method="update", section="intention")
@@ -742,6 +756,33 @@ class InfraProfileDataService(DataService):
         return response
 
     @gen.coroutine
+    def resume_upload(self, file_name, file_data, user_id):
+        url = "{0}/{1}".format(settings['infra'], path.PROFILE_FILE_PARSER)
+        ret = yield self.upload_file(file_name, file_data, user_id, url)
+        return ret
+
+    @gen.coroutine
+    def upload_file(self, file_name, file_data, user_id, url):
+        # requests的包不支持中文名文件上传，因此file_name单独传个字段
+        request = Request(data={
+            "user": user_id,
+            "appid": const.APPID[env],
+            "file_name": file_name
+        },
+            files={
+                "file": ("", file_data)
+            },
+            url=url,
+            method="POST"
+        )
+        p = request.prepare()
+        body = p.body
+        headers = p.headers
+
+        ret = yield http_tool.http_post_multipart_form(url, body, headers=headers)
+        return ret
+
+    @gen.coroutine
     def get_custom_metadata(self, company_id=0, select_all=False) -> list:
         """获取自定义字段元表数据"""
         resposne = yield http_tool.http_get(path.PROFILE_OTHER_METADATA,
@@ -749,3 +790,9 @@ class InfraProfileDataService(DataService):
         _, data = http_tool.unboxing(resposne)
 
         return sorted(data, key=lambda x: x['id'])
+
+    @gen.coroutine
+    def infra_submit_upload_profile(self, params, user_id):
+        """上传的简历提交"""
+        res = yield http_tool.http_post(path.PROFILE_UPLOAD.format(user_id), params)
+        return res

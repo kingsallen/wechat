@@ -1,7 +1,7 @@
 # coding=utf-8
 
-from datetime import datetime
 import re
+from datetime import datetime
 
 import tornado.gen as gen
 from tornado.escape import json_decode
@@ -10,9 +10,8 @@ import conf.common as const
 import conf.infra as infra_const
 from service.page.base import PageService
 from util.common import ObjectDict
-from util.tool.date_tool import curr_datetime_now
-from util.tool.iter_tool import first
 from util.tool.dict_tool import sub_dict, rename_keys
+from util.tool.iter_tool import first
 
 
 class ProfilePageService(PageService):
@@ -72,7 +71,7 @@ class ProfilePageService(PageService):
     ]
 
     INTENTION_KEYS = [
-        "id", "city_name", "worktype", "position_name", "salary_code", "workstate", "industry"
+        "id", "city_name", "worktype", "position", "salary_code", "workstate", "industry"
     ]
 
     EMAIL_BASICINFO = ObjectDict({
@@ -184,6 +183,28 @@ class ProfilePageService(PageService):
 
         response = yield self.infra_profile_ds.get_linkedin_token(params)
         return response
+
+    @gen.coroutine
+    def resume_upload(self, file_name, file_data, user_id):
+        """手机上传简历
+        """
+        res = yield self.infra_profile_ds.resume_upload(file_name, file_data, user_id)
+        return res
+
+    @gen.coroutine
+    def submit_upload_profile(self, name, mobile, user_id):
+        """
+        提交上传的简历
+        :param name:
+        :param mobile:
+        :return:
+        """
+        params = ObjectDict({
+            "name": name,
+            "mobile": mobile
+        })
+        res = yield self.infra_profile_ds.infra_submit_upload_profile(params, user_id)
+        return res
 
     @gen.coroutine
     def create_profile(self, user_id, source=const.PROFILE_SOURCE_PLATFORM):
@@ -616,7 +637,6 @@ class ProfilePageService(PageService):
                     params['id'] = params.pid
                     yield self.update_profile_awards(params, profile_id)
 
-
     @gen.coroutine
     def custom_cv_update_profile_skills(self, profile_id, custom_cv):
         skills = custom_cv.get("skills", [])
@@ -672,7 +692,7 @@ class ProfilePageService(PageService):
     @gen.coroutine
     def custom_cv_update_profile_intention(self, profile, custom_cv):
         profile_id = profile['profile']['id']
-        position_name = custom_cv.get('position')
+        position = custom_cv.get('position')
         expectedlocation = custom_cv.get('expectedlocation')
         salary_code = custom_cv.get("salary_code")
         worktype = custom_cv.get("worktype")
@@ -684,8 +704,8 @@ class ProfilePageService(PageService):
         record = ObjectDict()
         if expectedlocation:
             record.city_name = expectedlocation
-        if position_name:
-            record.position_name = position_name
+        if position:
+            record.position_name = position
         if salary_code:
             record.salary_code = salary_code
         if worktype:
@@ -957,7 +977,7 @@ class ProfilePageService(PageService):
             if intention.get("positions", []):
                 for p in intention.get("positions"):
                     position = position + p.get("position_name") + ","
-                position = position[0: len(position)-1]
+                position = position[0: len(position) - 1]
 
             worktype_name = intention.get("worktype_name", "未选择")
 
@@ -965,7 +985,7 @@ class ProfilePageService(PageService):
             if intention.get("cities", []):
                 for city in intention.get("cities"):
                     location = location + city.get("city_name") + ","
-                location = location[0: len(location)-1]
+                location = location[0: len(location) - 1]
             salary = intention.get('salary_code_name', "")
 
             workstate = intention.get("workstate_name")
@@ -974,16 +994,16 @@ class ProfilePageService(PageService):
             if intention.get("industries", []):
                 for i in intention.get("industries"):
                     industry = industry + i.get("industry_name") + ","
-                industry = industry[0: len(industry)-1]
+                industry = industry[0: len(industry) - 1]
 
             job_apply.update({
-                "id":        intention.get("id"),
-                "position":  position,
-                "type":      worktype_name,
-                "location":  location,
-                "salary":    salary,
+                "id": intention.get("id"),
+                "position": position,
+                "type": worktype_name,
+                "location": location,
+                "salary": salary,
                 "workstate": workstate,
-                "industry":  industry
+                "industry": industry
             })
         profile.job_apply = job_apply
 
@@ -999,12 +1019,13 @@ class ProfilePageService(PageService):
 
         if p_others:
             # 为某些自定义字段添加单位
-            other = ObjectDict(json_decode(first(p_others).get('other')))
+            if first(p_others).get('other'):
+                other = ObjectDict(json_decode(first(p_others).get('other')))
 
-            if other.workyears:
-                other.workyears = other.workyears + '年'
+                if other.workyears:
+                    other.workyears = other.workyears + '年'
 
-            profile.other = other
+                profile.other = other
 
         return profile
 

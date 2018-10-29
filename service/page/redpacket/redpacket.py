@@ -171,6 +171,7 @@ class RedpacketPageService(PageService):
     @gen.coroutine
     def handle_red_packet_from_rabbitmq(self, data):
         """通过rabbitmq触发的红包总入口"""
+
         try:
             # 拼装与session结构相同的current_user以复用相同的红包方法
             hr_company_ps = CompanyPageService()
@@ -228,6 +229,7 @@ class RedpacketPageService(PageService):
                                                             be_recom_user_id=be_recom_user_id, psc=psc)
         except Exception as e:
             self.logger.error(traceback.format_exc())
+
 
     @gen.coroutine
     def handle_red_packet_employee_verification(self, user_id, company_id, redislocker):
