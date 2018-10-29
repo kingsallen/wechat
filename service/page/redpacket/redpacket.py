@@ -204,6 +204,8 @@ class RedpacketPageService(PageService):
             })
             employee = yield user_ps.get_valid_employee_by_user_id(
                 user_id=user_id, company_id=company_id)
+            # 目前队列里的两种红包类型不需要recom参数，但之前的方法中会使用recom
+            recom = ObjectDict(id=0)
             if position_id:
                 position = yield position_ps.get_position(position_id)
             else:
@@ -214,13 +216,15 @@ class RedpacketPageService(PageService):
                 qxuser=qxuser,
                 sysuser=sysuser,
                 company=company,
-                employee=employee
+                employee=employee,
+                recom=recom
             )
             self.logger.debug("[RP]current_user: {}".format(current_user))
             if rp_type == const.EMPLOYEE_BIND_RP_TYPE:
                 yield self.handle_red_packet_employee_verification(user_id, company_id, redis)
-            elif rp_type == const.EMPLOYEE_BIND_RP_TYPE:
-                yield self.handle_red_packet_screen_profile(current_user, position, trigger_way=const.HB_TRIGGER_WAY_SCREEN,
+            elif rp_type == const.SCREEN_RP_TYPE:
+                yield self.handle_red_packet_screen_profile(current_user, position,
+                                                            trigger_way=const.HB_TRIGGER_WAY_SCREEN,
                                                             be_recom_user_id=be_recom_user_id, psc=psc)
         except Exception as e:
             self.logger.error(traceback.format_exc())
@@ -514,14 +518,14 @@ class RedpacketPageService(PageService):
                 return
 
             recom_record = yield self.candidate_recom_record_ds.get_candidate_recom_record(
-                {'position': position.id,
-                 'app_id': application,
+                {'position_id': position.id,
+                 'app_id': application.id,
                  'presentee_user_id': be_recom_user_id,
                  'post_user_id': current_user.sysuser.id})
 
             if not recom_record:
                 self.logger.debug('[RP]推荐数据不正确, position: %s, app_id: %s, presentee_user_id: %s, post_user_id: %s'
-                                  % (position.id, application, be_recom_user_id, current_user.sysuser.id))
+                                  % (position.id, application.id, be_recom_user_id, current_user.sysuser.id))
                 return
 
             need_to_send_card = self.__need_to_send(
@@ -531,7 +535,7 @@ class RedpacketPageService(PageService):
                 self.logger.debug("[RP]初筛通过红包开始")
             else:
                 self.logger.debug("[RP]职位红包数据不正确, position: %s, app_id: %s, presentee_user_id: %s, post_user_id: %s"
-                                  % (position.id, application, be_recom_user_id, current_user.sysuser.id))
+                                  % (position.id, application.id, be_recom_user_id, current_user.sysuser.id))
                 return
 
             user_id = current_user.sysuser.id
@@ -564,33 +568,40 @@ class RedpacketPageService(PageService):
 
             # 红包发送对象是否符合配置要求
             sharechain_ps = SharechainPageService()
-            last_employee_user_id = yield sharechain_ps.get_referral_employee_user_id(
-                recom_user.id, position.id)
+            psc = kwargs.get("psc")
+            first_degree = ObjectDict()
+            if psc:
+                is_1degree = yield sharechain_ps.is_employee_presentee(
+                    psc)
+                if is_1degree:
+                    first_degree = yield self.candidate_share_chain_ds.get_share_chain({
+                        "id": psc
+                    })
 
-            # 判断红包是否发送给源头的员工（这里的逻辑与转发点击和转发申请不同）
-            send_to_employee = (
-                last_employee_user_id and
-                last_employee_user_id != current_user.recom.id and rp_config.target == const.RED_PACKET_CONFIG_TARGET_EMPLOYEE)
+            # 判断红包是否直接发送给员工一度（这里的逻辑与转发点击和转发申请不同）
+            send_to_first_degree = (
+                first_degree.recom_user_id and
+                first_degree.recom_user_id != current_user.id and rp_config.target == const.RED_PACKET_CONFIG_TARGET_EMPLOYEE)
 
-            if send_to_employee:
+            if send_to_first_degree:
                 recom_user = yield user_ps.get_user_user({
-                    "id": last_employee_user_id
+                    "id": first_degree.recom_user_id
                 })
 
                 if is_service_wechat:
                     recom_wxuser = yield user_ps.get_wxuser_sysuser_id_wechat_id(
-                        last_employee_user_id, recom_wechat.id)
+                        first_degree.recom_user_id, recom_wechat.id)
                 else:
                     recom_wxuser = yield user_ps.get_wxuser_sysuser_id_wechat_id(
-                        last_employee_user_id, settings.qx_wechat_id)
+                        first_degree.recom_user_id, settings.qx_wechat_id)
                 recom_qxuser = yield user_ps.get_wxuser_sysuser_id_wechat_id(
-                        last_employee_user_id, settings.qx_wechat_id)
+                    first_degree.recom_user_id, settings.qx_wechat_id)
                 nickname = recom_user.name or recom_user.nickname
 
             matches = yield self.__recom_matches(
                 rp_config, recom_user, recom_wechat, **kwargs)
 
-            if send_to_employee or matches:
+            if send_to_first_degree or matches:
                 self.logger.debug("[RP]用户是发送红包对象,准备掷骰子")
 
                 redislocker = BaseRedis()
@@ -1068,7 +1079,7 @@ class RedpacketPageService(PageService):
             conds={'id': current_qxuser_id})
         current_qxuser_openid = current_qxuser.openid
 
-        if red_packet_config.type in [0, 1]:
+        if red_packet_config.type in [0, 1, 4]:
             bagging_openid = current_qxuser_openid
         elif red_packet_config.type in [2, 3]:
             bagging_openid = recom_qxuser_openid
@@ -1118,7 +1129,7 @@ class RedpacketPageService(PageService):
             if not throttle_passed:
                 self.logger.debug(
                     '[RP]throttle上限校验失败, hb_config_id: %s， recom_qxuser_id: %s' % (
-                    red_packet_config.id, recom_qxuser_id))
+                        red_packet_config.id, recom_qxuser_id))
                 return
             else:
                 self.logger.debug("[RP]全局上限验证通过")
@@ -1717,4 +1728,3 @@ class RedpacketPageService(PageService):
         fields = ObjectDict(hb_item_id=hb_item_id)
         result = yield self.hr_hb_scratch_card_ds.update_scratch_card(conds=conds, fields=fields)
         return result
-
