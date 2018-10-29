@@ -650,12 +650,12 @@ class InfraProfileDataService(DataService):
         self.logger.debug("update_profile_intention:record--->{}".format(record))
         if record.get('city_name'):
             params.update({"city": record.city_name})
-        if record.get('position_name'):
-            for item in record.get('position_name'):
-                index = 0
-                params.update({"positions[{}]position_name".format(index) : item.get("position_name")})
-                params.update({"positions[{}]position_code".format(index) : item.get("position_code")})
-                index += 1
+        if record.get('position'):
+            position = record.get('position')
+            for i in range(len(position)):
+                params.update({"positions[{}]position_name".format(i): position[i]['industry_name']})
+                params.update({"positions[{}]position_code".format(i): position[i]['industry_code']})
+
         if record.get('worktype'):
             params.update({"worktype": record.worktype})
         if record.get('salary_code'):
