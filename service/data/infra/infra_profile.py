@@ -653,8 +653,8 @@ class InfraProfileDataService(DataService):
         if record.get('position'):
             position = record.get('position')
             for i in range(len(position)):
-                params.update({"positions[{}]position_name".format(i): position[i]['industry_name']})
-                params.update({"positions[{}]position_code".format(i): position[i]['industry_code']})
+                params.update({"positions[{}]position_name".format(i): position[i]['position_name']})
+                params.update({"positions[{}]position_code".format(i): position[i]['position_code']})
 
         if record.get('worktype'):
             params.update({"worktype": record.worktype})
