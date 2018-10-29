@@ -171,6 +171,7 @@ class RedpacketPageService(PageService):
     @gen.coroutine
     def handle_red_packet_from_rabbitmq(self, data):
         """通过rabbitmq触发的红包总入口"""
+
         try:
             # 拼装与session结构相同的current_user以复用相同的红包方法
             hr_company_ps = CompanyPageService()
@@ -538,11 +539,14 @@ class RedpacketPageService(PageService):
                                   % (position.id, application.id, be_recom_user_id, current_user.sysuser.id))
                 return
 
+            be_recom_user = self.user_user_ds.get_user(conds={
+                "id": be_recom_user_id
+            })
             user_id = current_user.sysuser.id
             recom_wechat = current_user.wechat
             recom_qxuser = current_user.qxuser
             recom_user = current_user.sysuser
-            nickname = current_user.sysuser.name or current_user.sysuser.nickname
+            nickname = be_recom_user.name or be_recom_user.nickname
 
             # 如果是订阅号，那么无法获取 recom_wxuser
             # 将 openid = 0 传递到 __send_red_packet_card， 跳过使用企业号发送消息模版
@@ -601,10 +605,14 @@ class RedpacketPageService(PageService):
                         first_degree_id, settings.qx_wechat_id)
                 recom_qxuser = yield user_ps.get_wxuser_sysuser_id_wechat_id(
                     first_degree_id, settings.qx_wechat_id)
-                nickname = recom_user.name or recom_user.nickname
 
             matches = yield self.__recom_matches(
                 rp_config, recom_user, recom_wechat, **kwargs)
+
+            be_recom_qxuser = self.user_wx_user_ds.get_wxuser(conds={
+                "sysuser_id": be_recom_user_id,
+                "wechat_id": settings['qx_wechat_id']
+            })
 
             if send_to_first_degree or matches:
                 self.logger.debug("[RP]用户是发送红包对象,准备掷骰子")
@@ -624,7 +632,7 @@ class RedpacketPageService(PageService):
                                 recom_wechat.id,
                                 rp_config,
                                 recom_qxuser.id,
-                                current_qxuser_id=recom_qxuser.id,
+                                current_qxuser_id=be_recom_qxuser.id,
                                 position=position,
                                 nickname=nickname,
                                 position_title=position.title,
@@ -637,7 +645,7 @@ class RedpacketPageService(PageService):
                                 recom_wxuser.openid,
                                 recom_wechat.id,
                                 rp_config,
-                                recom_qxuser.id,
+                                be_recom_qxuser.id,
                                 nickname=nickname,
                                 position_title=position.title,
                                 recom_record=recom_record
@@ -1084,9 +1092,9 @@ class RedpacketPageService(PageService):
             conds={'id': current_qxuser_id})
         current_qxuser_openid = current_qxuser.openid
 
-        if red_packet_config.type in [0, 1, 4]:
+        if red_packet_config.type in [0, 1]:
             bagging_openid = current_qxuser_openid
-        elif red_packet_config.type in [2, 3]:
+        elif red_packet_config.type in [2, 3, 4]:
             bagging_openid = recom_qxuser_openid
         else:
             assert False  # should not be here
