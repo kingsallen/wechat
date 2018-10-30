@@ -282,7 +282,8 @@ REDPACKET = {
     0: "employee_verification",
     1: "endorsement",
     2: "share_position",
-    3: "referral_application"
+    3: "referral_application",
+    4: "through_screen"
 }
 
 # 奖金相关
@@ -487,7 +488,7 @@ HB_TRIGGER_WAY_SCREEN = 3
 # 红包活动的索引值
 HB_INDEX_CLICK = 0
 HB_INDEX_APPLY = 1
-HB_INDEX_SCREEN = 1
+HB_INDEX_SCREEN = 2
 
 # 红包类型
 HB_CONFIG_TYPR_TO_INDEX = {

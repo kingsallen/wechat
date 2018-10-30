@@ -535,7 +535,7 @@ class RedpacketPageService(PageService):
                                   % (position.id, application.id, be_recom_user_id, current_user.sysuser.id))
                 return
 
-            be_recom_user = self.user_user_ds.get_user(conds={
+            be_recom_user = yield self.user_user_ds.get_user(conds={
                 "id": be_recom_user_id
             })
             user_id = current_user.sysuser.id
@@ -605,7 +605,7 @@ class RedpacketPageService(PageService):
             matches = yield self.__recom_matches(
                 rp_config, recom_user, recom_wechat, **kwargs)
 
-            be_recom_qxuser = self.user_wx_user_ds.get_wxuser(conds={
+            be_recom_qxuser = yield self.user_wx_user_ds.get_wxuser(conds={
                 "sysuser_id": be_recom_user_id,
                 "wechat_id": settings['qx_wechat_id']
             })
