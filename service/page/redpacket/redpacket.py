@@ -1120,7 +1120,7 @@ class RedpacketPageService(PageService):
                         red_packet_config.type)
 
                     remaining_positions = yield self.__get_running_positions_by_config_id(
-                        red_packet_config.id)
+                        red_packet_config)
 
                     if not remaining_positions:
                         self.logger.debug("[RP]该活动红包已经发完,准备结束活动")
@@ -1336,11 +1336,11 @@ class RedpacketPageService(PageService):
 
     @log_time
     @gen.coroutine
-    def __get_running_positions_by_config_id(self, config_id):
+    def __get_running_positions_by_config_id(self, config):
         """查询这个红包活动中还有没发完红包的职位
         """
         binding_list = yield self.hr_hb_position_binding_ds.get_hr_hb_position_binding_list({
-            "hb_config_id": config_id
+            "hb_config_id": config.id
         })
 
         if len(binding_list) == 0:
@@ -1352,7 +1352,7 @@ class RedpacketPageService(PageService):
             conds=" id in %s" % set_literl(position_ids))
 
         if position_list:
-            position_list = [x for x in position_list if x.hb_status > 0]
+            position_list = [x for x in position_list if x.hb_status >> const.HB_CONFIG_TYPR_TO_INDEX[config.type] & 1]
             raise gen.Return(position_list)
         else:
             return None
