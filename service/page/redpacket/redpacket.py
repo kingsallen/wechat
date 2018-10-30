@@ -137,15 +137,19 @@ class RedpacketPageService(PageService):
         if trigger_way == const.HB_TRIGGER_WAY_CLICK:
             check_hb_status_passed = (
                 position.hb_status == const.RP_POSITION_STATUS_CLICK or
-                position.hb_status == const.RP_POSITION_STATUS_BOTH)
+                position.hb_status == const.RP_POSITION_STATUS_BOTH or
+                position.hb_status == const.RP_POSITION_STATUS_SCREEN_WITH_CLICK)
         elif trigger_way == const.HB_TRIGGER_WAY_APPLY:
             check_hb_status_passed = (
                 position.hb_status == const.RP_POSITION_STATUS_APPLY or
-                position.hb_status == const.RP_POSITION_STATUS_BOTH)
+                position.hb_status == const.RP_POSITION_STATUS_BOTH or
+                position.hb_status == const.RP_POSITION_STATUS_SCREEN_WITH_APPLY)
         elif trigger_way == const.HB_TRIGGER_WAY_SCREEN:
             check_hb_status_passed = (
                 position.hb_status == const.RP_POSITION_STATUS_SCREEN or
-                position.hb_status == const.RP_POSITION_STATUS_BOTH)
+                position.hb_status == const.RP_POSITION_STATUS_SCREEN_BOTH or
+                position.hb_status == const.RP_POSITION_STATUS_SCREEN_WITH_CLICK or
+                position.hb_status == const.RP_POSITION_STATUS_SCREEN_WITH_APPLY)
         else:
             self.logger.debug("[RP]something goes wrong")
 
