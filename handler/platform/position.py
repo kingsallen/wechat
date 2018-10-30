@@ -939,7 +939,7 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
                 has_point_reward = 0
             position_ex['has_point_reward'] = has_point_reward
             position_ex['experience'] = gen_experience_v2(pos.experience, pos.experience_above, self.locale)
-            position_ex['degree'] = gen_degree_v2(pos.degree, pos.degree_above, self.locale)
+            position_ex['degree'] = gen_degree_v2(pos.degree, pos.degree_above, self.locale) if pos.degree and pos.degree_above else ''
 
             if display_locale == "en_US":
                 position_ex["city"] = pos.city_ename if pos.city_ename else pos.city
