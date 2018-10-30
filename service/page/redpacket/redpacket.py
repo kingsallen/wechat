@@ -134,18 +134,13 @@ class RedpacketPageService(PageService):
 
         check_hb_status_passed = False
         self.logger.debug("[RP]position.hb_status: %s" % position.hb_status)
+        # 此处改用二进制右移取余的方式判断红包类型
         if trigger_way == const.HB_TRIGGER_WAY_CLICK:
-            check_hb_status_passed = (
-                position.hb_status == const.RP_POSITION_STATUS_CLICK or
-                position.hb_status == const.RP_POSITION_STATUS_BOTH)
+            check_hb_status_passed = True if position.hb_status >> const.HB_INDEX_CLICK & 1 else False
         elif trigger_way == const.HB_TRIGGER_WAY_APPLY:
-            check_hb_status_passed = (
-                position.hb_status == const.RP_POSITION_STATUS_APPLY or
-                position.hb_status == const.RP_POSITION_STATUS_BOTH)
+            check_hb_status_passed = True if position.hb_status >> const.HB_INDEX_APPLY & 1 else False
         elif trigger_way == const.HB_TRIGGER_WAY_SCREEN:
-            check_hb_status_passed = (
-                position.hb_status == const.RP_POSITION_STATUS_SCREEN or
-                position.hb_status == const.RP_POSITION_STATUS_BOTH)
+            check_hb_status_passed = True if position.hb_status >> const.HB_INDEX_SCREEN & 1 else False
         else:
             self.logger.debug("[RP]something goes wrong")
 
@@ -1325,24 +1320,9 @@ class RedpacketPageService(PageService):
         :return:
         """
         # 是否正参加活动：
-        # 0=未参加  1=正参加点击红包活动  2=正参加被申请红包活动  3=正参加1+2红包活动
-
-        if current_hb_status == const.HB_STATUS_BOTH:
-
-            if hb_config_type == const.RED_PACKET_TYPE_SHARE_CLICK:
-                next_status = const.HB_STATUS_APPLY
-
-            elif hb_config_type == const.RED_PACKET_TYPE_SHARE_APPLY:
-                next_status = const.HB_STATUS_CLICK
-
-            else:
-                raise ValueError(msg.RED_PACKET_TYPE_VALUE_ERROR)
-
-        elif ((current_hb_status == const.HB_STATUS_CLICK and hb_config_type == const.RED_PACKET_TYPE_SHARE_CLICK) or
-              (current_hb_status == const.HB_STATUS_APPLY and hb_config_type == const.RED_PACKET_TYPE_SHARE_APPLY)):
-
-            next_status = const.HB_STATUS_NONE
-
+        # 0=未参加  1=正参加点击红包活动  2=正参加被申请红包活动  3=正参加1+2红包活动 以此类推，红包类型为2的次方，采用二进制右移取余的方式判断红包类型
+        if current_hb_status >> const.HB_CONFIG_TYPR_TO_INDEX[hb_config_type] & 1:
+            next_status = current_hb_status - hb_config_type
         else:
 
             raise ValueError(msg.RED_PACKET_TYPE_VALUE_ERROR)
@@ -1381,8 +1361,7 @@ class RedpacketPageService(PageService):
     def __finish_hb_config(self, hb_config_id):
         """
         标记红包活动结束
-        :param db:
-        :param config_id:
+        :param hb_config_id: 红包配置id
         :return:
         """
         yield self.hr_hb_config_ds.update_hr_hb_config(
