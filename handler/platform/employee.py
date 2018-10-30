@@ -511,13 +511,13 @@ class BindInfoHandler(BaseHandler):
         for k, v in self.json_args.model.items():
             if k.startswith("key_") and v:
                 confid = int(k[4:])
-                keys.append({confid: [to_str(v[0: 50])]})
+                keys.append({'id': confid,
+                             'options': [to_str(v[0: 50])]})
 
         self.logger.debug("keys: %s" % keys)
-        custom_fields = json_dumps(keys)
 
         # 利用基础服务更新员工自定义补填字段，
-        yield self.employee_ps.update_employee_custom_fields(self.current_user.sysuser.id, self.current_user.company_id, custom_fields)
+        yield self.employee_ps.update_employee_custom_fields(self.current_user.sysuser.id, self.current_user.company.id, keys)
 
         next_url = self.params.next_url if self.params.next_url else self.make_url(path.POSITION_LIST, self.params)
         # 绑定成功回填自定义配置字段成功
