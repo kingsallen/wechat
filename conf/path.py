@@ -151,6 +151,7 @@ PROFILE_IMPORT = "crawler"
 PROFILE_OTHER_METADATA = "hraccount/custom/metadata"
 PROFILE_CUSTOMCV_CHECK = 'profile/check/other'
 PROFILE_UPLOAD = "profile/{}/upsert"
+PROFILE_UPLOAD_FROM_CHATBOT = "v1/employee/{}/referral/cache"
 PROFILE_FILE_PARSER = 'profile/file-parser'
 
 # 公司服务

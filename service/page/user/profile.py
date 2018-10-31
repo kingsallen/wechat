@@ -12,6 +12,7 @@ from service.page.base import PageService
 from util.common import ObjectDict
 from util.tool.dict_tool import sub_dict, rename_keys
 from util.tool.iter_tool import first
+from globals import env
 
 
 class ProfilePageService(PageService):
@@ -205,6 +206,16 @@ class ProfilePageService(PageService):
         })
         res = yield self.infra_profile_ds.infra_submit_upload_profile(params, user_id)
         return res
+
+    @gen.coroutine
+    def submit_upload_profile_from_chatbot(self, name, mobile, employee_id, referral_reasons):
+        params = ObjectDict({
+            'appid': const.APPID[env],
+            'name': name,
+            'mobile': mobile,
+            'referral_reasons': referral_reasons
+        })
+        return (yield self.infra_profile_ds.infra_submit_upload_profile_from_chatbot(params, employee_id))
 
     @gen.coroutine
     def create_profile(self, user_id, source=const.PROFILE_SOURCE_PLATFORM):
