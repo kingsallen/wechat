@@ -187,6 +187,7 @@ class LandingPageService(PageService):
         response = self.es.search(index='index', body=data)
 
         result_list = response.hits.hits
+        self.logger.debug(result_list)
 
         # 获取筛选项
         key_list = self.make_key_list(conf_search_seq)
@@ -336,7 +337,7 @@ class LandingPageService(PageService):
         if platform_const.LANDING_INDEX_CHILD_COMPANY in conf_search_seq and platform_const.LANDING_INDEX_CHILD_COMPANY in conf_search_seq_plus:
             positions_data = yield self.append_child_company_name(positions_data)
 
-        self.logger.debug(conf_search_seq_plus)
+        self.logger.debug("conf_search_seq_plus:{}".format(conf_search_seq_plus))
 
         def pinyin_initials(field):
             en = ""
