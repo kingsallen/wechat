@@ -149,7 +149,7 @@ class MallGoodHandler(BaseHandler):
         self.params.share = yield self._make_share(good_id, good_title)
 
         render_page_data = data
-        render_page_data.updata({
+        render_page_data.update({
             "remain_credit": remain_credit
         }
         )
