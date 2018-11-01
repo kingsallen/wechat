@@ -162,7 +162,7 @@ class MallGoodHandler(BaseHandler):
     @gen.coroutine
     def _make_share(self, good_id, good_title):
         link = self.make_url(
-            path.MALL_GOOD.format(good_id),
+            path.MALL_GOOD.format(good_id=good_id),
             self.params)
         company_info = yield self.company_ps.get_company(
             conds={"id": self.current_user.company.id}, need_conf=True)
