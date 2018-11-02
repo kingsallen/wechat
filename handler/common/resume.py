@@ -381,6 +381,8 @@ class ChatbotResumeUploadHandler(BaseHandler):
         # todo
         self.render_page(template_name="", data=ObjectDict())
 
+
+class ChatbotResumeSubmitHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def post(self):
@@ -402,7 +404,7 @@ class ChatbotResumeUploadHandler(BaseHandler):
                 self.json_args.hr_id,
                 self.current_user.wechat.signature
             )
-        self.redirect(url)
+        self.send_json_success({'next_url': url})
 
 
 class APIResumeUploadHandler(BaseHandler):
