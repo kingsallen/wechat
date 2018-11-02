@@ -64,7 +64,7 @@ class InfraMallDataService(DataService):
         })
         ret = yield http_post(path.EXCHANGE, params)
 
-        return unboxing(ret)
+        return ret
 
     @gen.coroutine
     def exchange_list(self, employee_id, company_id):
