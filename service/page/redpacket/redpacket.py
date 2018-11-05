@@ -178,30 +178,32 @@ class RedpacketPageService(PageService):
             wechat_id = data.get("wechat_id")
             position_id = data.get("position_id", 0)
             be_recom_user_id = data.get("be_recom_user_id", 0)
+            direct_referral_user_id = data.get("direct_referral_user_id", 0)
             psc = data.get("psc", 0)
-
             rp_type = data.get("rp_type")
+
             wechat = yield self.hr_wx_wechat_ds.get_wechat(conds={
                 "company_id": company_id
             })
             wxuser = yield self.user_wx_user_ds.get_wxuser(conds={
-                "sysuser_id": user_id,
+                "sysuser_id": be_recom_user_id,
                 "wechat_id": wechat_id
             })
             qxuser = yield self.user_wx_user_ds.get_wxuser(conds={
-                "sysuser_id": user_id,
+                "sysuser_id": be_recom_user_id,
                 "wechat_id": settings['qx_wechat_id']
             })
             sysuser = yield self.user_user_ds.get_user(conds={
-                "id": user_id
+                "id": be_recom_user_id
             })
             company = yield hr_company_ps.get_company(conds={
                 "id": company_id
             })
             employee = yield user_ps.get_valid_employee_by_user_id(
-                user_id=user_id, company_id=company_id)
-            # 目前队列里的两种红包类型不需要recom参数，但之前的方法中会使用recom
-            recom = ObjectDict(id=0)
+                user_id=be_recom_user_id, company_id=company_id)
+            recom = yield self.user_user_ds.get_user(conds={
+                "id": direct_referral_user_id
+            })
             if position_id:
                 position = yield position_ps.get_position(position_id)
             else:
@@ -221,7 +223,7 @@ class RedpacketPageService(PageService):
             elif rp_type == const.SCREEN_RP_TYPE:
                 yield self.handle_red_packet_screen_profile(current_user, position,
                                                             trigger_way=const.HB_TRIGGER_WAY_SCREEN,
-                                                            be_recom_user_id=be_recom_user_id, psc=psc)
+                                                            recom_user_id=user_id, psc=psc)
         except Exception as e:
             self.logger.error(traceback.format_exc())
 
@@ -496,7 +498,7 @@ class RedpacketPageService(PageService):
                                          current_user,
                                          position,
                                          trigger_way,
-                                         be_recom_user_id,
+                                         recom_user_id,
                                          **kwargs):
         """入职类红包触发总入口"""
         try:
@@ -507,22 +509,22 @@ class RedpacketPageService(PageService):
 
             application = yield self.job_application_ds.get_job_application(conds={
                 "position_id": position.id,
-                "applier_id": be_recom_user_id
+                "applier_id": current_user.sysuser.id
             })
             if not application:
-                self.logger.debug('[RP]申请数据不正确, position: %s,  presentee_user_id: %s, post_user_id: %s'
-                                  % (position.id, be_recom_user_id, current_user.sysuser.id))
+                self.logger.debug('[RP]申请数据不正确, position: %s,  post_user_id: %s, post_user_id: %s'
+                                  % (position.id, recom_user_id, current_user.sysuser.id))
                 return
 
             recom_record = yield self.candidate_recom_record_ds.get_candidate_recom_record(
                 {'position_id': position.id,
                  'app_id': application.id,
-                 'presentee_user_id': be_recom_user_id,
-                 'post_user_id': current_user.sysuser.id})
+                 'presentee_user_id': current_user.sysuser.id,
+                 'post_user_id': recom_user_id})
 
             if not recom_record:
                 self.logger.debug('[RP]推荐数据不正确, position: %s, app_id: %s, presentee_user_id: %s, post_user_id: %s'
-                                  % (position.id, application.id, be_recom_user_id, current_user.sysuser.id))
+                                  % (position.id, application.id, current_user.sysuser.id, recom_user_id))
                 return
 
             need_to_send_card = self.__need_to_send(
@@ -532,36 +534,36 @@ class RedpacketPageService(PageService):
                 self.logger.debug("[RP]初筛通过红包开始")
             else:
                 self.logger.debug("[RP]职位红包数据不正确, position: %s, app_id: %s, presentee_user_id: %s, post_user_id: %s"
-                                  % (position.id, application.id, be_recom_user_id, current_user.sysuser.id))
+                                  % (position.id, application.id, current_user.sysuser.id, recom_user_id))
                 return
 
-            be_recom_user = yield self.user_user_ds.get_user(conds={
-                "id": be_recom_user_id
-            })
-            user_id = current_user.sysuser.id
+            user_ps = UserPageService()
+            wechat_ps = WechatPageService()
             recom_wechat = current_user.wechat
-            recom_qxuser = current_user.qxuser
-            recom_user = current_user.sysuser
-            nickname = be_recom_user.name or be_recom_user.nickname
+            recom_user = yield user_ps.get_user_user({
+                    "id": recom_user_id
+                })
+            nickname = current_user.sysuser.name or current_user.sysuser.nickname
+            recom_qxuser = yield self.user_wx_user_ds.get_wxuser(conds={
+                "sysuser_id": recom_user_id,
+                "wechat_id": settings['qx_wechat_id']
+            })
 
             # 如果是订阅号，那么无法获取 recom_wxuser
             # 将 openid = 0 传递到 __send_red_packet_card， 跳过使用企业号发送消息模版
 
-            user_ps = UserPageService()
-            wechat_ps = WechatPageService()
-
             is_service_wechat = recom_wechat.type == 1
             if is_service_wechat:
                 recom_wxuser = yield user_ps.get_wxuser_sysuser_id_wechat_id(
-                    user_id, recom_wechat.id)
+                    recom_user_id, recom_wechat.id)
 
             else:
                 recom_wxuser = yield user_ps.get_wxuser_sysuser_id_wechat_id(
-                    user_id, settings.qx_wechat_id)
+                    recom_user_id, settings.qx_wechat_id)
                 recom_wechat = yield wechat_ps.get_wechat(
                     {"id": settings.qx_wechat_id})
 
-            self.logger.debug('[RP] user_id: %s' % user_id)
+            self.logger.debug('[RP] user_id: %s' % recom_user_id)
             self.logger.debug('[RP] recom_wechat: %s' % recom_wechat)
             self.logger.debug('[RP] recom_wxuser: %s' % recom_wxuser)
             self.logger.debug('[RP] recom_qxuser: %s' % recom_qxuser)
@@ -586,7 +588,7 @@ class RedpacketPageService(PageService):
             self.logger.debug("[RP]first_degree_id: {}".format(first_degree_id))
             send_to_first_degree = (
                 first_degree_id and
-                first_degree_id != current_user.sysuser.id and rp_config.target == const.RED_PACKET_CONFIG_TARGET_EMPLOYEE_1DEGREE)
+                first_degree_id != recom_user_id and rp_config.target == const.RED_PACKET_CONFIG_TARGET_EMPLOYEE_1DEGREE)
 
             if send_to_first_degree:
                 recom_user = yield user_ps.get_user_user({
@@ -599,22 +601,15 @@ class RedpacketPageService(PageService):
                 else:
                     recom_wxuser = yield user_ps.get_wxuser_sysuser_id_wechat_id(
                         first_degree_id, settings.qx_wechat_id)
-                recom_qxuser = yield user_ps.get_wxuser_sysuser_id_wechat_id(
-                    first_degree_id, settings.qx_wechat_id)
 
             matches = yield self.__recom_matches(
                 rp_config, recom_user, recom_wechat, **kwargs)
-
-            be_recom_qxuser = yield self.user_wx_user_ds.get_wxuser(conds={
-                "sysuser_id": be_recom_user_id,
-                "wechat_id": settings['qx_wechat_id']
-            })
 
             if send_to_first_degree or matches:
                 self.logger.debug("[RP]用户是发送红包对象,准备掷骰子")
 
                 redislocker = BaseRedis()
-                rplock_key = const.ON_BOARD_LOCK_FMT % (rp_config.id, user_id)
+                rplock_key = const.ON_BOARD_LOCK_FMT % (rp_config.id, recom_user_id)
                 if redislocker.incr(rplock_key) is FIRST_LOCK:
                     self.logger.debug("[RP]红包锁创建成功， rplock_key: %s" % rplock_key)
 
@@ -628,7 +623,7 @@ class RedpacketPageService(PageService):
                                 recom_wechat.id,
                                 rp_config,
                                 recom_qxuser.id,
-                                current_qxuser_id=be_recom_qxuser.id,
+                                current_qxuser_id=current_user.qxuser.id,
                                 position=position,
                                 nickname=nickname,
                                 position_title=position.title,
@@ -641,7 +636,7 @@ class RedpacketPageService(PageService):
                                 recom_wxuser.openid,
                                 recom_wechat.id,
                                 rp_config,
-                                be_recom_qxuser.id,
+                                current_user.qxuser.id,
                                 nickname=nickname,
                                 position_title=position.title,
                                 recom_record=recom_record

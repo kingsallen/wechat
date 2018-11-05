@@ -48,9 +48,9 @@ class InfraApplicationDataService(DataService):
         return unboxing(ret)
 
     @gen.coroutine
-    def bind_applyid_psc(self, params):
+    def bind_apply_chain_info(self, params):
         """
-        将apply_id与psc_id绑定
+        将apply与链路其他信息（psc、直接推荐人）绑定
         :param params:
         :return:
         """
