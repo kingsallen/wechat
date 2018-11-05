@@ -516,11 +516,18 @@ class RedpacketPageService(PageService):
                                   % (position.id, recom_user_id, current_user.sysuser.id))
                 return
 
-            recom_record = yield self.candidate_recom_record_ds.get_candidate_recom_record(
-                {'position_id': position.id,
-                 'app_id': application.id,
-                 'presentee_user_id': current_user.sysuser.id,
-                 'post_user_id': recom_user_id})
+            params = {'position_id': position.id,
+                      'presentee_user_id': current_user.sysuser.id}
+
+            # 如果没有recom_user_id, 说明申请不是员工推荐产生的，推荐人为直接推荐人
+            if recom_user_id:
+                params.update({'app_id': application.id,
+                               'post_user_id': recom_user_id})
+            else:
+                recom_user_id = current_user.recom.id
+                params.update({'post_user_id': recom_user_id})
+
+            recom_record = yield self.candidate_recom_record_ds.get_candidate_recom_record(params)
 
             if not recom_record:
                 self.logger.debug('[RP]推荐数据不正确, position: %s, app_id: %s, presentee_user_id: %s, post_user_id: %s'
@@ -541,8 +548,8 @@ class RedpacketPageService(PageService):
             wechat_ps = WechatPageService()
             recom_wechat = current_user.wechat
             recom_user = yield user_ps.get_user_user({
-                    "id": recom_user_id
-                })
+                "id": recom_user_id
+            })
             nickname = current_user.sysuser.name or current_user.sysuser.nickname
             recom_qxuser = yield self.user_wx_user_ds.get_wxuser(conds={
                 "sysuser_id": recom_user_id,
