@@ -1015,7 +1015,8 @@ class RedpacketPageService(PageService):
         """获取下个待发红包信息"""
 
         if (hb_config_type in [const.RED_PACKET_TYPE_SHARE_CLICK,
-                               const.RED_PACKET_TYPE_SHARE_APPLY] and
+                               const.RED_PACKET_TYPE_SHARE_APPLY,
+                               const.RED_PACKET_TYPE_SCREEN] and
             position_id):
 
             binding = yield self.hr_hb_position_binding_ds.get_hr_hb_position_binding({
