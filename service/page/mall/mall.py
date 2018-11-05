@@ -46,3 +46,21 @@ class MallPageService(PageService):
         """获取商品列表"""
         result, data = yield self.infra_mall_ds.get_goods_list(employee_id, company_id, page_size, page_number)
         return result, data
+
+    @gen.coroutine
+    def get_good_detail(self, good_id, company_id):
+        """获取商品详情"""
+        result, data = yield self.infra_mall_ds.get_good_detail(good_id, company_id)
+        return result, data
+
+    @gen.coroutine
+    def exchange_imd(self, employee_id, company_id, count, goods_id):
+        """立即兑换商品"""
+        res = yield self.infra_mall_ds.exchange_imd(employee_id, company_id, count, goods_id)
+        return res
+
+    @gen.coroutine
+    def exchange_list(self, employee_id, company_id):
+        """获取兑换记录列表"""
+        result, data = yield self.infra_mall_ds.exchange_list(employee_id, company_id)
+        return result, data

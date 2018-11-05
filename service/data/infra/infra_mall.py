@@ -45,3 +45,33 @@ class InfraMallDataService(DataService):
         ret = yield http_get(path.GOODS_LIST, params)
         return unboxing(ret)
 
+    @gen.coroutine
+    def get_good_detail(self, good_id, company_id):
+        params = ObjectDict({
+            "company_id": company_id
+        })
+        ret = yield http_get(path.GOOD_DETAIL.format(good_id=good_id), params)
+
+        return unboxing(ret)
+
+    @gen.coroutine
+    def exchange_imd(self, employee_id, company_id, count, goods_id):
+        params = ObjectDict({
+            "employee_id": employee_id,
+            "company_id": company_id,
+            "count": count,
+            "goods_id": goods_id
+        })
+        ret = yield http_post(path.EXCHANGE, params)
+
+        return ret
+
+    @gen.coroutine
+    def exchange_list(self, employee_id, company_id):
+        params = ObjectDict({
+            "employee_id": employee_id,
+            "company_id": company_id,
+        })
+        ret = yield http_get(path.EXCHANGE, params)
+
+        return unboxing(ret)

@@ -134,7 +134,7 @@ def rp_transfer_apply_success_notice_tpl(wechat_id, openid, link, nickname,
 
 @gen.coroutine
 def rp_recom_screen_success_notice_tpl(wechat_id, openid, link, nickname,
-                                       position_title, sys_template_id=const.TEMPLATES.RP_SHARE):
+                                       position_title, sys_template_id=const.TEMPLATES.RP_SCREEN):
     link = _join_suffix(link, sys_template_id)
     d = datetime.now()
     json_data = _make_json_data(
