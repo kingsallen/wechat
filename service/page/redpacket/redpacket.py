@@ -1111,29 +1111,6 @@ class RedpacketPageService(PageService):
 
             self.logger.debug("[RP]next rp item: {}".format(rp_item))
 
-            if not rp_item:
-                if position:
-                    self.logger.debug("[RP]该职位红包已经发完")
-
-                    current_hb_status = position.hb_status
-                    # 更新职位状态至未参与这种类型的红包活动
-                    yield self.__update_position_hb_status(
-                        position.id, current_hb_status,
-                        red_packet_config.type)
-
-                    remaining_positions = yield self.__get_running_positions_by_config_id(
-                        red_packet_config)
-
-                    if not remaining_positions:
-                        self.logger.debug("[RP]该活动红包已经发完,准备结束活动")
-                        yield self.__finish_hb_config(red_packet_config.id)
-
-                else:
-                    self.logger.debug("[RP]该活动红包已经发完,准备结束活动")
-                    yield self.__finish_hb_config(red_packet_config.id)
-
-                return
-
             throttle_passed = yield self.__check_throttle_passed(
                 red_packet_config, recom_qxuser_id, rp_item)
 
@@ -1227,6 +1204,38 @@ class RedpacketPageService(PageService):
                     rp_item.id,
                     to=const.RP_ITEM_STATUS_NO_WX_MSG_MONEY_SEND_FAILURE,
                     refresh_open_time=True)
+
+        # 获取下一个待发红包信息，如果红包发完，关闭红包活动
+        if position:
+            rp_item = yield self.__get_next_rp_item(red_packet_config.id, red_packet_config.type,
+                                                    position.id)
+        else:
+            rp_item = yield self.__get_next_rp_item(red_packet_config.id, red_packet_config.type)
+
+        self.logger.debug("[RP]next rp item: {}".format(rp_item))
+
+        if not rp_item:
+            if position:
+                self.logger.debug("[RP]该职位红包已经发完")
+
+                current_hb_status = position.hb_status
+                # 更新职位状态至未参与这种类型的红包活动
+                yield self.__update_position_hb_status(
+                    position.id, current_hb_status,
+                    red_packet_config.type)
+
+                remaining_positions = yield self.__get_running_positions_by_config_id(
+                    red_packet_config)
+
+                if not remaining_positions:
+                    self.logger.debug("[RP]该活动红包已经发完,准备结束活动")
+                    yield self.__finish_hb_config(red_packet_config.id)
+
+            else:
+                self.logger.debug("[RP]该活动红包已经发完,准备结束活动")
+                yield self.__finish_hb_config(red_packet_config.id)
+
+            return
 
         raise gen.Return(result)
 
