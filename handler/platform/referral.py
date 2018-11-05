@@ -138,18 +138,23 @@ class ReferralConfirmHandler(BaseHandler):
         wechat = yield self.wechat_ps.get_wechat_info(self.current_user,
                                                       pattern_id=const.QRCODE_REFERRAL_CONFIRM if type == 1 else const.QRCODE_OTHER,
                                                       in_wechat=self.in_wechat)
-        rid = self.params.rkey
-        ret = yield self.employee_ps.get_referral_info(rid)
-        body = ret.data
-        if ret.status == const.API_SUCCESS and body.get("claim") is False:
-            key = const.CONFIRM_REFERRAL_MOBILE.format(rid, self.current_user.sysuser.id)
-            self.redis.set(key, ObjectDict(mobile=ret.data.mobile), ttl=60 * 60 * 24)
-        elif ret.status == const.API_SUCCESS and body.get("claim") is True:
-            type = 4
+        rkeys = self.params.rkeys
+        rids = rkeys.split(',')
+        results = yield [self.employee_ps.get_referral_info(rid) for rid in rids]
+        if all(r.status == const.API_SUCCESS for r in results):
+            if all(r.data.get('claim') is True for r in results):
+                type = 4
+            else:
+                key = const.CONFIRM_REFERRAL_MOBILE.format(rkeys, self.current_user.sysuser.id)
+                self.redis.set(key, ObjectDict(mobile=results[0].data.mobile), ttl=60 * 60 * 24)
+
+        # if ret.status == const.API_SUCCESS and body.get("claim") is False:
+        # elif ret.status == const.API_SUCCESS and body.get("claim") is True:
+        #     type = 4
         else:
             data = ObjectDict(
                 kind=1,  # // {0: success, 1: failure, 10: email}
-                messages=[ret.message],  # ['hello world', 'abjsldjf']
+                messages=[results[0].message],  # ['hello world', 'abjsldjf']
                 button_text=msg.BACK_CN,
                 button_link=self.make_url(path.POSITION_LIST,
                                           self.params,
@@ -166,6 +171,7 @@ class ReferralConfirmHandler(BaseHandler):
             in_person = False
 
         # 对姓名做隐藏处理
+        body = results[0].data
         if len(body.user_name.split()) == 1:
             presentee_first_name = body.user_name.split()[0][0:1] + "**"
         else:
@@ -178,7 +184,7 @@ class ReferralConfirmHandler(BaseHandler):
                 "presentee_first_name": presentee_first_name if not in_person else body.user_name,
                 "recom_name": body.employee_name,
                 "company_name": body.company_abbreviation,
-                "position_title": body.position,
+                "position_titles": [r.data.position for r in results],
                 "new_user": body.user_name[0:1] + "**" if not in_person else body.user_name,
                 "apply_id": body.apply_id,
                 "mobile": body.mobile[0:3] + "****" + body.mobile[-4:],

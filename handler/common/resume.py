@@ -378,8 +378,17 @@ class ChatbotResumeUploadHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def get(self):
-        # todo
-        self.render_page(template_name="", data=ObjectDict())
+        data = {'for_sharing': False}
+        if int(self.params.get('for_sharing')):
+            api_result = yield self.profile_ps.get_uploaded_profile(self.current_user.employee.id)
+            name = api_result.pop('name')
+            censored_name = name[0] + '*' * (len(name) - 1)
+            data = {
+                'for_sharing': True,
+                'name': censored_name,
+                **api_result
+            }
+        self.render_page(template_name="page/chat/mobot-upload-resume.html", data=data)
 
 
 class ChatbotResumeSubmitHandler(BaseHandler):

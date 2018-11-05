@@ -800,3 +800,7 @@ class InfraProfileDataService(DataService):
     @gen.coroutine
     def infra_submit_upload_profile_from_chatbot(self, params, employee_id):
         return (yield http_tool.http_post(path.PROFILE_UPLOAD_FROM_CHATBOT.format(employee_id), params))
+
+    @gen.coroutine
+    def get_uploaded_profile_cache(self, employee_id):
+        return (yield http_tool.http_get(path.PROFILE_UPLOAD_FROM_CHATBOT.format(employee_id)))['data']

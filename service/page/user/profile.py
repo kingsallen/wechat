@@ -208,7 +208,24 @@ class ProfilePageService(PageService):
         return res
 
     @gen.coroutine
+    def get_uploaded_profile(self, employee_id):
+        """
+        chatbot点击告诉ta时回填推荐信息
+        :param employee_id:
+        :return:
+        """
+        return (yield self.infra_profile_ds.get_uploaded_profile(employee_id))
+
+    @gen.coroutine
     def submit_upload_profile_from_chatbot(self, name, mobile, employee_id, referral_reasons):
+        """
+        在chatbot简历上传页面提交推荐信息
+        :param name:
+        :param mobile:
+        :param employee_id:
+        :param referral_reasons:
+        :return:
+        """
         params = ObjectDict({
             'appid': const.APPID[env],
             'name': name,
