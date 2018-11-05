@@ -362,6 +362,7 @@ class ResumeUploadHandler(BaseHandler):
     """
     上传简历页面
     """
+
     @handle_response
     @gen.coroutine
     def get(self):
@@ -369,10 +370,57 @@ class ResumeUploadHandler(BaseHandler):
                          data=ObjectDict())
 
 
+class ChatbotResumeUploadHandler(BaseHandler):
+    """
+    Chatbot专用上传简历页面
+    """
+
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        data = {'for_sharing': False}
+        if int(self.params.get('for_sharing')):
+            api_result = yield self.profile_ps.get_uploaded_profile(self.current_user.employee.id)
+            name = api_result.pop('name')
+            censored_name = name[0] + '*' * (len(name) - 1)
+            data = {
+                'for_sharing': True,
+                'name': censored_name,
+                **api_result
+            }
+        self.render_page(template_name="page/chat/mobot-upload-resume.html", data=data)
+
+
+class ChatbotResumeSubmitHandler(BaseHandler):
+    @handle_response
+    @gen.coroutine
+    def post(self):
+        result = yield self.profile_ps.submit_upload_profile_from_chatbot(
+            name=self.json_args.name,
+            mobile=self.json_args.mobile,
+            employee_id=self.current_user.employee.id,
+        )
+        success = result.status == 0
+        if success:
+            referral_id = result.data
+            url = '/m/chat/room?hr_id={}&wechat_signature={}&flag=4&success=1&referral_id={}'.format(
+                self.json_args.hr_id,
+                self.current_user.wechat.signature,
+                referral_id
+            )
+        else:
+            url = '/m/chat/room?hr_id={}&wechat_signature={}&flag=4&success=0'.format(
+                self.json_args.hr_id,
+                self.current_user.wechat.signature
+            )
+        self.send_json_success({'next_url': url})
+
+
 class APIResumeUploadHandler(BaseHandler):
     """
     手机上传简历
     """
+
     @handle_response
     @gen.coroutine
     def post(self):
@@ -401,6 +449,7 @@ class ResumeSubmitHandler(BaseHandler):
     """
     简历上传成功
     """
+
     @handle_response
     @gen.coroutine
     def post(self):
