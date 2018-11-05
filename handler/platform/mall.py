@@ -240,7 +240,8 @@ class MallExchangeHandler(BaseHandler):
             "count": 1, // 商品兑换数量
             "goods_id": 123  //商品id
         }
-        :return:
+        :return: 当库存不足10038， 当前积分不足10039， 商品已下架10043是返回指定code
+
         """
         company_id = self.current_user.company.id
         employee_id = self.current_user.employee.id
@@ -248,10 +249,12 @@ class MallExchangeHandler(BaseHandler):
         count = int(self.json_args.count)
         goods_id = int(self.json_args.goods_id)
 
-        result, data = yield self.mall_ps.exchange_imd(employee_id, company_id, count, goods_id)
+        res = yield self.mall_ps.exchange_imd(employee_id, company_id, count, goods_id)
 
-        if result:
+        if res.status == 0:
             self.send_json_success()
+        elif res.status in [10038, 10039, 10043]:
+            self.send_json_warning(message=res.message, status_code=res.status)
         else:
             self.send_json_error()
 
