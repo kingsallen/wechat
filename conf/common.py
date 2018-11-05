@@ -306,7 +306,9 @@ MSG_TYPE = {
     9: "textPlaceholder",
     10: "positionSelect",
     11: "industrySelect",
-    12: "satisfaction"
+    12: "satisfaction",
+    13: "uploadResume",
+    14: "tellReferral"
 }
 
 # 积分配置类型
