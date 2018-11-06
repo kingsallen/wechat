@@ -165,18 +165,16 @@ class ReferralConfirmHandler(BaseHandler):
             self.render_page(template_name="system/user-info.html",
                              data=data)
             return
+        body = results[0].data
         if self.current_user.employee and self.current_user.employee.id == body.employee_id:
             in_person = True
         else:
             in_person = False
-
         # 对姓名做隐藏处理
-        body = results[0].data
         if len(body.user_name.split()) == 1:
             presentee_first_name = body.user_name.split()[0][0:1] + "**"
         else:
             presentee_first_name = body.user_name.split()[0] + "**"
-
         data = ObjectDict({
             "type": type,
             "successful_recommendation": self.locale.translate("referral_success"),
