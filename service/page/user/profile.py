@@ -230,7 +230,8 @@ class ProfilePageService(PageService):
             'appid': const.APPID[env],
             'name': name,
             'mobile': mobile,
-            'referral_reasons': referral_reasons
+            'referral_reasons': referral_reasons,
+            'referral_type': 1,
         })
         return (yield self.infra_profile_ds.infra_submit_upload_profile_from_chatbot(params, employee_id))
 
