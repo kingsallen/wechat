@@ -124,7 +124,7 @@ common_routes = [
     (r"/api/position/star/?",                        handler.common.position.PositionStarHandler,               {"event": "position_star"}),
     (r"/api/resume/upload",                          handler.common.resume.APIResumeUploadHandler,              {"event": "api_resume_upload"}),
     (r"/api/resume/submit",                          handler.common.resume.ResumeSubmitHandler,                 {"event": "api_resume_submit"}),
-    (r"/api/chat/resume/upload/",                    handler.common.resume.ChatbotResumeSubmitHandler,          {"event": "api_resume_submit_from_chatbot"}),
+    (r"/api/chat/resume/upload",                     handler.common.resume.ChatbotResumeSubmitHandler,          {"event": "api_resume_submit_from_chatbot"}),
     (r"/api/position/list/?",                        handler.platform.position.PositionListDetailHandler,       {"event": "position_list"}),
     (r"/api/position/list/sug",                      handler.platform.position.PositionListSugHandler,          {"event": "position_list_sug"}),
     (r"/api/position/search/history",                handler.platform.position.PositionSearchHistoryHandler,    {"event": "position_search_history"}),
