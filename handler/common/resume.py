@@ -399,6 +399,7 @@ class ChatbotResumeSubmitHandler(BaseHandler):
             name=self.json_args.name,
             mobile=self.json_args.mobile,
             employee_id=self.current_user.employee.id,
+            referral_reasons=self.json_args.referral_reasons
         )
         success = result.status == 0
         if success:
