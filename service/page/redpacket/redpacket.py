@@ -520,7 +520,7 @@ class RedpacketPageService(PageService):
                       'presentee_user_id': current_user.sysuser.id}
 
             # 如果没有recom_user_id, 说明申请不是员工推荐产生的，推荐人为直接推荐人
-            if recom_user_id:
+            if recom_user_id and rp_config.target == const.RED_PACKET_CONFIG_TARGET_EMPLOYEE:
                 params.update({'app_id': application.id,
                                'post_user_id': recom_user_id})
             else:
@@ -590,7 +590,6 @@ class RedpacketPageService(PageService):
                         first_degree_id = share_chain.recom_user_id
                     else:
                         first_degree_id = share_chain.presentee_user_id
-                    self.logger.debug("[RP]发送红包给员工一度")
 
             self.logger.debug("[RP]first_degree_id: {}".format(first_degree_id))
             send_to_first_degree = (
@@ -598,6 +597,7 @@ class RedpacketPageService(PageService):
                 first_degree_id != recom_user_id and rp_config.target == const.RED_PACKET_CONFIG_TARGET_EMPLOYEE_1DEGREE)
 
             if send_to_first_degree:
+                self.logger.debug("[RP]发送红包给员工一度")
                 recom_user = yield user_ps.get_user_user({
                     "id": first_degree_id
                 })
@@ -608,6 +608,10 @@ class RedpacketPageService(PageService):
                 else:
                     recom_wxuser = yield user_ps.get_wxuser_sysuser_id_wechat_id(
                         first_degree_id, settings.qx_wechat_id)
+                recom_qxuser = yield self.user_wx_user_ds.get_wxuser(conds={
+                    "sysuser_id": first_degree_id,
+                    "wechat_id": settings['qx_wechat_id']
+                })
 
             matches = yield self.__recom_matches(
                 rp_config, recom_user, recom_wechat, **kwargs)
