@@ -395,11 +395,13 @@ class ChatbotResumeSubmitHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def post(self):
+        args = self.json_args
         result = yield self.profile_ps.submit_upload_profile_from_chatbot(
-            name=self.json_args.name,
-            mobile=self.json_args.mobile,
+            name=args.name,
+            mobile=args.mobile,
             employee_id=self.current_user.employee.id,
-            referral_reasons=self.json_args.referral_reasons
+            referral_reasons=args.referral_reasons,
+            file_name=args.file_name,
         )
         success = result.status == 0
         if success:
