@@ -92,7 +92,7 @@ common_routes = [
     (r"/resume/maimai",                              handler.common.resume.MaimaiImportHandler,                 {"event": "resume_maimai"}),
     (r"/resume/liepin",                              handler.common.resume.LiepinImportHandler,                 {"event": "resume_liepin"}),
     (r"/resume/upload",                              handler.common.resume.ResumeUploadHandler,                 {"event": "resume_upload"}),
-    (r"/chat/resume/upload",                        handler.common.resume.ChatbotResumeUploadHandler,          {"event": "resume_upload_from_chatbot"}),
+    (r"/chat/resume/upload",                         handler.common.resume.ChatbotResumeUploadHandler,          {"event": "resume_upload_from_chatbot"}),
     (r"/profile/?",                                  handler.common.profile.ProfileHandler,                     {"event": "profile_profile"}),
     (r"/profile/view/([A-Z0-9a-z_\-]+)*",            handler.common.profile.ProfileViewHandler,                 {"event": "profile_view"}),
     (r"/profile/preview/?",                          handler.common.profile.ProfilePreviewHandler,              {"event": "profile_preview"}),
