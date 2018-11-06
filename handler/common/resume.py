@@ -388,7 +388,7 @@ class ChatbotResumeUploadHandler(BaseHandler):
                 'name': censored_name,
                 **api_result
             }
-        self.render_page(template_name="page/chat/mobot-upload-resume.html", data=data)
+        self.render_page(template_name="chat/mobot-upload-resume.html", data=data)
 
 
 class ChatbotResumeSubmitHandler(BaseHandler):
