@@ -1335,7 +1335,7 @@ class RedpacketPageService(PageService):
         # 是否正参加活动：
         # 0=未参加  1=正参加点击红包活动  2=正参加被申请红包活动  3=正参加1+2红包活动 以此类推，红包类型为2的次方，采用二进制右移取余的方式判断红包类型
         if current_hb_status >> const.HB_CONFIG_TYPR_TO_INDEX[hb_config_type] & 1:
-            next_status = current_hb_status - hb_config_type
+            next_status = current_hb_status - const.HB_CONFIG_TYPR_TO_HB_STATUS[hb_config_type]
         else:
 
             raise ValueError(msg.RED_PACKET_TYPE_VALUE_ERROR)

@@ -497,6 +497,13 @@ HB_CONFIG_TYPR_TO_INDEX = {
     4: 2   # 推荐通过初筛
 }
 
+# 红包类型对应的红包状态值
+HB_CONFIG_TYPR_TO_HB_STATUS = {
+    2: 1,  # 转发被点击
+    3: 2,  # 转发被申请
+    4: 4   # 推荐通过初筛
+}
+
 
 # 发送消息模板的系统模板库常量
 TEMPLATE_URL_SUFFIX = "&from_template_message={}&send_time={}"
