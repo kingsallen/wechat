@@ -524,7 +524,6 @@ class RedpacketPageService(PageService):
                                'post_user_id': recom_user_id})
             else:
                 recom_user_id = current_user.recom.id
-                params.update({'post_user_id': recom_user_id})
 
             recom_record = yield self.candidate_recom_record_ds.get_candidate_recom_record(params)
 
