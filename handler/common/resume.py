@@ -379,7 +379,7 @@ class ChatbotResumeUploadHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         data = {'for_sharing': False}
-        if int(self.params.get('for_sharing')):
+        if self.params.get('for_sharing') == '1':
             api_result = yield self.profile_ps.get_uploaded_profile(self.current_user.employee.id)
             name = api_result.pop('name')
             censored_name = name[0] + '*' * (len(name) - 1)
