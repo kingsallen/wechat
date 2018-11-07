@@ -392,7 +392,8 @@ class ChatbotResumeUploadHandler(BaseHandler):
                 **api_data,
             }
             self.logger.debug('data for rendering is %s' % data)
-            self.params.share = yield self._make_share(dict(rid=','.join(rids), pid=','.join(pids)))
+            self.params.share = yield self._make_share(
+                dict(rid=','.join(str(i) for i in rids), pid=','.join(str(i) for i in pids)))
         self.render_page(template_name="chat/mobot-upload-resume.html", data=data)
 
     @gen.coroutine
