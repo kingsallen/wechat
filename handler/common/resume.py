@@ -387,7 +387,7 @@ class ChatbotResumeUploadHandler(BaseHandler):
             data = {
                 'for_sharing': True,
                 'name': censored_name,
-                'rids': rids,
+                'rkeys': rids,
                 **api_data,
             }
             self.logger.debug('data for rendering is %s' % data)
