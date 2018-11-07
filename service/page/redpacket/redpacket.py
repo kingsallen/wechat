@@ -134,7 +134,7 @@ class RedpacketPageService(PageService):
 
         check_hb_status_passed = False
         self.logger.debug("[RP]position.hb_status: %s" % position.hb_status)
-        # 此处改用二进制右移取余的方式判断红包类型
+        # 此处改用与运算的方式判断红包类型
         if trigger_way == const.HB_TRIGGER_WAY_CLICK:
             check_hb_status_passed = True if position.hb_status >> const.HB_INDEX_CLICK & 1 else False
         elif trigger_way == const.HB_TRIGGER_WAY_APPLY:
@@ -1336,7 +1336,7 @@ class RedpacketPageService(PageService):
         :return:
         """
         # 是否正参加活动：
-        # 0=未参加  1=正参加点击红包活动  2=正参加被申请红包活动  3=正参加1+2红包活动 以此类推，红包类型为2的次方，采用二进制右移取余的方式判断红包类型
+        # 0=未参加  1=正参加点击红包活动  2=正参加被申请红包活动  3=正参加1+2红包活动 以此类推，红包类型为2的次方，采用与运算的方式判断红包类型
         if current_hb_status >> const.HB_CONFIG_TYPR_TO_INDEX[hb_config_type] & 1:
             next_status = current_hb_status - const.HB_CONFIG_TYPR_TO_HB_STATUS[hb_config_type]
         else:
