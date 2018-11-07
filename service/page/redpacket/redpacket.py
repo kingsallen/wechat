@@ -519,12 +519,11 @@ class RedpacketPageService(PageService):
                       'presentee_user_id': current_user.sysuser.id}
 
             # 如果没有recom_user_id, 说明申请不是员工推荐产生的，推荐人为直接推荐人
-            if recom_user_id:
+            if recom_user_id and rp_config.target == const.RED_PACKET_CONFIG_TARGET_EMPLOYEE:
                 params.update({'app_id': application.id,
                                'post_user_id': recom_user_id})
             else:
                 recom_user_id = current_user.recom.id
-                params.update({'post_user_id': recom_user_id})
 
             recom_record = yield self.candidate_recom_record_ds.get_candidate_recom_record(params)
 
@@ -589,7 +588,6 @@ class RedpacketPageService(PageService):
                         first_degree_id = share_chain.recom_user_id
                     else:
                         first_degree_id = share_chain.presentee_user_id
-                    self.logger.debug("[RP]发送红包给员工一度")
 
             self.logger.debug("[RP]first_degree_id: {}".format(first_degree_id))
             send_to_first_degree = (
@@ -597,6 +595,7 @@ class RedpacketPageService(PageService):
                 first_degree_id != recom_user_id and rp_config.target == const.RED_PACKET_CONFIG_TARGET_EMPLOYEE_1DEGREE)
 
             if send_to_first_degree:
+                self.logger.debug("[RP]发送红包给员工一度")
                 recom_user = yield user_ps.get_user_user({
                     "id": first_degree_id
                 })
@@ -607,6 +606,10 @@ class RedpacketPageService(PageService):
                 else:
                     recom_wxuser = yield user_ps.get_wxuser_sysuser_id_wechat_id(
                         first_degree_id, settings.qx_wechat_id)
+                recom_qxuser = yield self.user_wx_user_ds.get_wxuser(conds={
+                    "sysuser_id": first_degree_id,
+                    "wechat_id": settings['qx_wechat_id']
+                })
 
             matches = yield self.__recom_matches(
                 rp_config, recom_user, recom_wechat, **kwargs)
@@ -1334,7 +1337,7 @@ class RedpacketPageService(PageService):
         # 是否正参加活动：
         # 0=未参加  1=正参加点击红包活动  2=正参加被申请红包活动  3=正参加1+2红包活动 以此类推，红包类型为2的次方，采用二进制右移取余的方式判断红包类型
         if current_hb_status >> const.HB_CONFIG_TYPR_TO_INDEX[hb_config_type] & 1:
-            next_status = current_hb_status - hb_config_type
+            next_status = current_hb_status - const.HB_CONFIG_TYPR_TO_HB_STATUS[hb_config_type]
         else:
 
             raise ValueError(msg.RED_PACKET_TYPE_VALUE_ERROR)
