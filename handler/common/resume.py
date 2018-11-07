@@ -381,17 +381,39 @@ class ChatbotResumeUploadHandler(BaseHandler):
         data = {'for_sharing': False}
         if self.params.get('for_sharing') == '1':
             api_data = (yield self.profile_ps.get_uploaded_profile(self.current_user.employee.id))['data']
-            rids = [i['recommendation_id'] for i in json.loads(self.params.get('data'))]
+            position_data = json.loads(self.params.get('data'))
+            rids = [i['recommendation_id'] for i in position_data]
+            pids = [i['id'] for i in position_data]
             name = api_data.pop('name')
             censored_name = name[0] + '*' * (len(name) - 1)
             data = {
                 'for_sharing': True,
                 'name': censored_name,
-                'rkeys': rids,
                 **api_data,
             }
             self.logger.debug('data for rendering is %s' % data)
+            self.params.share = yield self._make_share(dict(rid=','.join(rids), pid=','.join(pids)))
         self.render_page(template_name="chat/mobot-upload-resume.html", data=data)
+
+    @gen.coroutine
+    def _make_share(self, params):
+        link = self.make_url(
+            path.REFERRAL_CONFIRM,
+            params,
+            recom=self.position_ps._make_recom(self.current_user.sysuser.id))
+
+        company_info = yield self.company_ps.get_company(
+            conds={"id": self.current_user.company.id}, need_conf=True)
+
+        cover = self.share_url(company_info.logo)
+
+        share_info = ObjectDict({
+            "cover": cover,
+            "title": "【#name#】恭喜您已被内部员工推荐",
+            "description": "点击查看详情~",
+            "link": link
+        })
+        return share_info
 
 
 class ChatbotResumeSubmitHandler(BaseHandler):
