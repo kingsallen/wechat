@@ -799,4 +799,4 @@ class InfraProfileDataService(DataService):
 
     @gen.coroutine
     def get_uploaded_profile(self, employee_id):
-        return (yield http_tool.http_get(path.PROFILE_UPLOAD_FROM_CHATBOT.format(employee_id)))['data']
+        return (yield http_tool.http_get(path.PROFILE_UPLOAD_FROM_CHATBOT.format(employee_id)))

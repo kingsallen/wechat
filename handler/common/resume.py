@@ -380,14 +380,17 @@ class ChatbotResumeUploadHandler(BaseHandler):
     def get(self):
         data = {'for_sharing': False}
         if self.params.get('for_sharing') == '1':
-            api_result = yield self.profile_ps.get_uploaded_profile(self.current_user.employee.id)
-            name = api_result.pop('name')
+            api_data = (yield self.profile_ps.get_uploaded_profile(self.current_user.employee.id))['data']
+            rids = [i['recommendation_id'] for i in json.loads(self.params.get('data'))]
+            name = api_data.pop('name')
             censored_name = name[0] + '*' * (len(name) - 1)
             data = {
                 'for_sharing': True,
                 'name': censored_name,
-                **api_result
+                'rids': rids,
+                **api_data,
             }
+            self.logger.debug('data for rendering is %s' % data)
         self.render_page(template_name="chat/mobot-upload-resume.html", data=data)
 
 
