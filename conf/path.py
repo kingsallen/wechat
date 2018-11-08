@@ -192,7 +192,7 @@ UPDATE_RECOMMEND = "v1/employee/{}/referral"
 UPLOAD_RECOM_PROFILE = "v1/referral/file-parser"
 
 REFERRAL_INFO = "/v1/referral-records/{}"
-INFRA_REFERRAL_CONFIRM = "/v1/referral/claim"
+INFRA_REFERRAL_CONFIRM = "/v1/referral/claim/batch"
 REFERRAL_POSITION_INFO_EMPLOYEE = "/v1/employee/{}/referral-type"
 INFRA_REFERRAL_CRUCIAL_INFO = "/v1/employee/{}/post-candidate-info"
 REFERRAL_QRCODE = "/v1/referral/position/qrcode"
