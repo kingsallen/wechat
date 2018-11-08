@@ -211,6 +211,10 @@ EXCHANGE = '/api/mall/visit/order'
 # 员工服务
 EMPLOYEE_CUSTOM_FIELD = "v1/employee/custom-field-values"
 
+# 隐私协议服务
+IF_PRIVACY_WINDOW = 'user/privacy_record/get'
+AGREE_PRIVACY = 'user/privacy_record/delete'
+INSERT_RECORD = 'user/privacy_record/insert'
 # ============================ 基础服务结束 ============================
 
 # 其他外部服务

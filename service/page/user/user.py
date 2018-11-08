@@ -60,6 +60,7 @@ class UserPageService(PageService):
             })
 
             assert user_id
+            yield self.infra_privacy_ds.insert_privacy_record(user_id)
             yield self.user_settings_ds.create_user_settings({
                 "user_id": user_id
             })

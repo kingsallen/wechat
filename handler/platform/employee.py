@@ -231,6 +231,12 @@ class EmployeeBindHandler(BaseHandler):
         # 根据 conf 来构建 api 的返回 data
         data = yield self.employee_ps.make_binding_render_data(
             self.current_user, mate_num, reward, conf_response.employeeVerificationConf, in_wechat=self.in_wechat)
+
+        # 是否需要弹出 隐私协议 窗口
+        res_privacy, data_privacy = yield self.privacy_ps.if_privacy_agreement_window(
+            self.current_user.sysuser.id)
+        data.show_privacy_agreement = data_privacy
+
         self.send_json_success(data=data)
 
     @handle_response

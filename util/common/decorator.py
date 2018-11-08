@@ -335,6 +335,14 @@ def check_and_apply_profile(func):
                     hashlib.sha1(str(self.current_user.sysuser.id).encode('u8')).hexdigest()
                 )
             )
+
+            # 是否需要弹出 隐私协议 窗口
+            user_id = self.current_user.sysuser.id
+            result, data = yield self.privacy_ps.if_privacy_agreement_window(user_id)
+            redirect_params.update(
+                show_privacy_agreement=data
+            )
+
             redirect_params = {**self.params, **redirect_params}
 
             self.render(
