@@ -170,7 +170,7 @@ class ReferralConfirmHandler(BaseHandler):
 
         valid_rkeys = [r.rid for r in unclaimed_recommendations]
         if type == 1:
-            self.redis.set(valid_rkeys, ObjectDict(mobile=data_sample.mobile), ttl=60 * 60 * 24)
+            self.redis.set(','.join(valid_rkeys), ObjectDict(mobile=data_sample.mobile), ttl=60 * 60 * 24)
 
         if self.current_user.employee and self.current_user.employee.id == data_sample.employee_id:
             in_person = True
