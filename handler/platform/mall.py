@@ -1,22 +1,12 @@
 # coding=utf-8
 
-from tornado.httputil import url_concat
 from tornado import gen
 
-import conf.common as const
 import conf.message as msg
-import conf.fe as fe
-import conf.message as messages
 import conf.path as path
 from handler.base import BaseHandler
-from handler.platform.user import UserSurveyConstantMixin
 from util.common import ObjectDict
-from util.common.decorator import handle_response, authenticated
-from util.tool.json_tool import json_dumps
-from util.tool.str_tool import to_str
-from urllib import parse
-import conf.platform as const_platform
-from util.wechat.core import get_temporary_qrcode
+from util.common.decorator import handle_response, authenticated, check_employee_common
 
 
 class MallIndexHandler(BaseHandler):
@@ -26,6 +16,7 @@ class MallIndexHandler(BaseHandler):
 
     @handle_response
     @authenticated
+    @check_employee_common
     @gen.coroutine
     def get(self):
         company_id = self.current_user.company.id
@@ -131,6 +122,7 @@ class MallGoodHandler(BaseHandler):
 
     @handle_response
     @authenticated
+    @check_employee_common
     @gen.coroutine
     def get(self, good_id):
         """
