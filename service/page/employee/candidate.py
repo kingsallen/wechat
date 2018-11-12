@@ -3,6 +3,7 @@
 from tornado import gen
 from service.page.base import PageService
 from util.common import ObjectDict
+import conf.common as const
 
 
 class CandidatePageService(PageService):
@@ -32,6 +33,69 @@ class CandidatePageService(PageService):
         return ret
 
     @gen.coroutine
+    def add_candidate_company(self, user_id, mobile, company_id, name, nickname, email, recom_id):
+        """增加候选人记录"""
+        candidate = self.candidate_company_ds.get_candidate_company({
+            "sys_user_id": user_id,
+            "company_id": company_id,
+            "status": const.YES
+        })
+        if candidate:
+            yield self.candidate_company_ds.update_candidate_company(
+                conds={
+                    "sys_user_id": user_id,
+                    "company_id": company_id,
+                    "status": const.YES
+                },
+                fields={
+                    "mobile": mobile,
+                    "name": name,
+                    "nickname": nickname,
+                    "email": email}
+            )
+        else:
+            yield self.candidate_company_ds.insert_candidate_company(
+                fields=ObjectDict({
+                    "sys_user_id": user_id,
+                    "company_id": company_id,
+                    "mobile": mobile,
+                    "name": name,
+                    "nickname": nickname,
+                    "email": email,
+                    "status": const.YES,
+                    "is_recommend": const.YES if recom_id else const.NO,
+                })
+            )
+        return
+
+    @gen.coroutine
+    def add_candidate_remard(self, user_id, company, position, name):
+        """增加候选人备注信息"""
+        remark = self.candidate_remark_ds.get_candidate_remark({
+            "user_id": user_id
+        })
+        if remark:
+            yield self.candidate_remark_ds.update_candidate_remark(
+                conds={
+                    "user_id": user_id
+                },
+                fields={
+                    "current_company": company,
+                    "current_position": position,
+                    "name": name}
+            )
+        else:
+            yield self.candidate_remark_ds.insert_candidate_remark(
+                fields=ObjectDict({
+                    "user_id": user_id,
+                    "current_company": company,
+                    "current_position": position,
+                    "name": name
+                })
+            )
+        return
+
+    @gen.coroutine
     def post_recommend(self, post_user_id, click_time, recom_record_id,
                        realname, company, position, mobile, recom_reason,
                        company_id, gender, email):
@@ -56,7 +120,7 @@ class CandidatePageService(PageService):
     def post_ignore(self, recom_record_id, company_id, post_user_id,
                     click_time):
         infra_ret = yield self.thrift_candidate_ds.ignore(
-            recom_record_id, company_id, post_user_id,  click_time)
+            recom_record_id, company_id, post_user_id, click_time)
 
         ret = ObjectDict(
             next_one=infra_ret.nextOne,

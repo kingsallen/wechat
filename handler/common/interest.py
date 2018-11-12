@@ -182,5 +182,10 @@ class UserCurrentUpdateHandler(BaseHandler):
         })
 
         ret = yield self.profile_ps.create_profile_workexp(record, profile_id, mode='p')
+        yield self.candidate_ps.add_candidate_remard(
+            user_id=self.current_user.sysuser.id,
+            company=form.company,
+            position=form.position,
+            name=form.name)
 
         self.send_json_success()

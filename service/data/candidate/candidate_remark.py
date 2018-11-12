@@ -41,3 +41,11 @@ class CandidateRemarkDataService(DataService):
             fields=fields)
 
         raise gen.Return(ret)
+
+    @gen.coroutine
+    def insert_candidate_remark(self, fields, options=None):
+        options = options or []
+
+        response = yield self.candidate_remark_dao.insert_record(fields,
+                                                                   options)
+        raise gen.Return(response)
