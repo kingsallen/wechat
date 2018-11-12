@@ -195,6 +195,11 @@ REFERRAL_POSITION_INFO_EMPLOYEE = "v1/employee/{}/referral-type"
 INFRA_REFERRAL_CRUCIAL_INFO = "v1/employee/{}/post-candidate-info"
 REFERRAL_QRCODE = "v1/referral/position/qrcode"
 REFERRAL_POSITION_LIST = "v1/referral/wechat/position/list"
+
+# 隐私协议服务
+IF_PRIVACY_WINDOW = 'user/privacy_record/get'
+AGREE_PRIVACY = 'user/privacy_record/delete'
+INSERT_RECORD = 'user/privacy_record/insert'
 # ============================ 基础服务结束 ============================
 
 # 其他外部服务
