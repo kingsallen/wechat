@@ -60,7 +60,6 @@ import handler.platform.award
 import handler.platform.mall
 import handler.platform.privacy
 
-
 import handler.qx.app
 import handler.qx.aggregation
 import handler.qx.search
