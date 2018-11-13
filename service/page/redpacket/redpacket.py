@@ -168,7 +168,6 @@ class RedpacketPageService(PageService):
         """通过rabbitmq触发的红包总入口"""
 
         try:
-            # 拼装与session结构相同的current_user以复用相同的红包方法
             hr_company_ps = CompanyPageService()
             user_ps = UserPageService()
             position_ps = PositionPageService()
@@ -182,49 +181,50 @@ class RedpacketPageService(PageService):
             psc = data.get("psc", 0)
             rp_type = data.get("rp_type")
 
-            wechat = yield self.hr_wx_wechat_ds.get_wechat(conds={
-                "company_id": company_id
-            })
-            if be_recom_user_id:
-                wxuser = yield self.user_wx_user_ds.get_wxuser(conds={
-                    "sysuser_id": be_recom_user_id,
-                    "wechat_id": wechat_id
-                })
-                qxuser = yield self.user_wx_user_ds.get_wxuser(conds={
-                    "sysuser_id": be_recom_user_id,
-                    "wechat_id": settings['qx_wechat_id']
-                })
-            else:
-                wxuser = ObjectDict()
-                qxuser = ObjectDict()
-            sysuser = yield self.user_user_ds.get_user(conds={
-                "id": be_recom_user_id
-            })
-            company = yield hr_company_ps.get_company(conds={
-                "id": company_id
-            })
-            employee = yield user_ps.get_valid_employee_by_user_id(
-                user_id=be_recom_user_id, company_id=company_id)
-            recom = yield self.user_user_ds.get_user(conds={
-                "id": direct_referral_user_id
-            })
-            if position_id:
-                position = yield position_ps.get_position(position_id)
-            else:
-                position = ObjectDict()
-            current_user = ObjectDict(
-                wechat=wechat,
-                wxuser=wxuser,
-                qxuser=qxuser,
-                sysuser=sysuser,
-                company=company,
-                employee=employee,
-                recom=recom
-            )
-            self.logger.debug("[RP]current_user: {}".format(current_user))
             if rp_type == const.EMPLOYEE_BIND_RP_TYPE:
                 yield self.handle_red_packet_employee_verification(user_id, company_id, redis)
             elif rp_type == const.SCREEN_RP_TYPE:
+                # 拼装与session结构相同的current_user以复用相同的红包方法
+                wechat = yield self.hr_wx_wechat_ds.get_wechat(conds={
+                    "company_id": company_id
+                })
+                if be_recom_user_id:
+                    wxuser = yield self.user_wx_user_ds.get_wxuser(conds={
+                        "sysuser_id": be_recom_user_id,
+                        "wechat_id": wechat_id
+                    })
+                    qxuser = yield self.user_wx_user_ds.get_wxuser(conds={
+                        "sysuser_id": be_recom_user_id,
+                        "wechat_id": settings['qx_wechat_id']
+                    })
+                else:
+                    wxuser = ObjectDict()
+                    qxuser = ObjectDict()
+                sysuser = yield self.user_user_ds.get_user(conds={
+                    "id": be_recom_user_id
+                })
+                company = yield hr_company_ps.get_company(conds={
+                    "id": company_id
+                })
+                employee = yield user_ps.get_valid_employee_by_user_id(
+                    user_id=be_recom_user_id, company_id=company_id)
+                recom = yield self.user_user_ds.get_user(conds={
+                    "id": direct_referral_user_id
+                })
+                if position_id:
+                    position = yield position_ps.get_position(position_id)
+                else:
+                    position = ObjectDict()
+                current_user = ObjectDict(
+                    wechat=wechat,
+                    wxuser=wxuser,
+                    qxuser=qxuser,
+                    sysuser=sysuser,
+                    company=company,
+                    employee=employee,
+                    recom=recom
+                )
+                self.logger.debug("[RP]current_user: {}".format(current_user))
                 yield self.handle_red_packet_screen_profile(current_user, position,
                                                             trigger_way=const.HB_TRIGGER_WAY_SCREEN,
                                                             recom_user_id=user_id, psc=psc)
@@ -1521,7 +1521,8 @@ class RedpacketPageService(PageService):
             remark = "{0}员工认证红包活动".format(company_abb)
         elif rptype in [const.RED_PACKET_TYPE_RECOM,
                         const.RED_PACKET_TYPE_SHARE_CLICK,
-                        const.RED_PACKET_TYPE_SHARE_APPLY]:
+                        const.RED_PACKET_TYPE_SHARE_APPLY,
+                        const.RED_PACKET_TYPE_SCREEN]:
             act_name = "职位推荐红包"
             remark = "{0}职位推荐红包活动".format(company_abb)
         else:
