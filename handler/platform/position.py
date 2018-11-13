@@ -903,6 +903,8 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
                                                                                         self.current_user.company.id)
         total_count = 0
         # 职位信息
+        data = yield self.company_ps.get_only_referral_reward(self.current_user.company.id)
+        has_point_reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id)
         position_ex_list = list()
         for pos in position_list:
             position_ex = ObjectDict()
@@ -932,9 +934,8 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
             position_ex['candidate_source'] = pos.candidate_source
             position_ex['job_need'] = pos.requirement
             position_ex['is_referral'] = bool(pos.is_referral) if self.current_user.employee else False
-            data = yield self.company_ps.get_only_referral_reward(self.current_user.company.id)
             if not data.flag or (data.flag and pos.is_referral):
-                has_point_reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id)
+                has_point_reward = has_point_reward
             else:
                 has_point_reward = 0
             position_ex['has_point_reward'] = has_point_reward
