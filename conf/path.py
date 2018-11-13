@@ -109,6 +109,7 @@ INFRA_USER_CLAIM_BONUS = "v1/referral/wechat/employee/{}/bonus/claim"
 INFRA_APPLICATION = 'application'
 INFRA_APPLICATION_APPLY_COUNT = 'application/count/check'
 INFRA_APPLICATION_TYPE_APPLY_COUNT = 'application/type/count/check'
+INFRA_BIND_APPLY_ID_AND_PSC = '/v1/candidate/application/referral'
 
 # 验证码服务
 INFRA_CAPTCHA = 'position/syncVerifyInfo'
@@ -206,6 +207,10 @@ GOODS_LIST = '/api/mall/visit/goods'
 GOOD_DETAIL = '/api/mall/manage/goods/{good_id}'
 EXCHANGE = '/api/mall/visit/order'
 
+# 隐私协议服务
+IF_PRIVACY_WINDOW = 'user/privacy_record/get'
+AGREE_PRIVACY = 'user/privacy_record/delete'
+INSERT_RECORD = 'user/privacy_record/insert'
 # ============================ 基础服务结束 ============================
 
 # 其他外部服务

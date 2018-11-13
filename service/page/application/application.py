@@ -333,6 +333,15 @@ class ApplicationPageService(PageService):
             return ObjectDict()
 
     @gen.coroutine
+    def bind_app_chain_info(self, app_id, psc_id, direct_referral_user_id):
+        params = ObjectDict({
+            "application_id": app_id,
+            "psc_id": psc_id or 0,
+            "direct_referral_user_id": direct_referral_user_id or 0
+        })
+        yield self.infra_application_ds.bind_apply_chain_info(params)
+
+    @gen.coroutine
     def update_profile_other(self, new_record, profile_id):
         """智能地更新 profile.other 表
         会主动 merge 已经有的自定义字段
