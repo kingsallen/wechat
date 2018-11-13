@@ -185,14 +185,18 @@ class RedpacketPageService(PageService):
             wechat = yield self.hr_wx_wechat_ds.get_wechat(conds={
                 "company_id": company_id
             })
-            wxuser = yield self.user_wx_user_ds.get_wxuser(conds={
-                "sysuser_id": be_recom_user_id,
-                "wechat_id": wechat_id
-            })
-            qxuser = yield self.user_wx_user_ds.get_wxuser(conds={
-                "sysuser_id": be_recom_user_id,
-                "wechat_id": settings['qx_wechat_id']
-            })
+            if be_recom_user_id:
+                wxuser = yield self.user_wx_user_ds.get_wxuser(conds={
+                    "sysuser_id": be_recom_user_id,
+                    "wechat_id": wechat_id
+                })
+                qxuser = yield self.user_wx_user_ds.get_wxuser(conds={
+                    "sysuser_id": be_recom_user_id,
+                    "wechat_id": settings['qx_wechat_id']
+                })
+            else:
+                wxuser = ObjectDict()
+                qxuser = ObjectDict()
             sysuser = yield self.user_user_ds.get_user(conds={
                 "id": be_recom_user_id
             })
