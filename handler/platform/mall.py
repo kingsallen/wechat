@@ -48,8 +48,8 @@ class MallIndexHandler(BaseHandler):
             conds={"id": self.current_user.company.id}, need_conf=True)
 
         cover = self.share_url(company_info.logo)
-        title = self.locale.translate(msg.CREDIT_MALL_SHARE_TITLE.format(company_info.abbreviation))
-        description = self.locale.translate(msg.CREDIT_MALL_SHARE_TEXT)
+        title = msg.CREDIT_MALL_SHARE_TITLE.format(company_info.abbreviation)
+        description = msg.CREDIT_MALL_SHARE_TEXT
 
         share_info = ObjectDict({
             "cover": cover,
@@ -108,7 +108,7 @@ class MallGoodsHandler(BaseHandler):
         company_id = self.current_user.company.id
         employee_id = self.current_user.employee.id
 
-        page_size = int(self.get_argument("page_size", "") or 10)
+        page_size = int(self.get_argument("page_size", "") or 0)
         page_number = int(self.get_argument("page_number", "") or 1)
         result, data = yield self.mall_ps.get_goods_list(employee_id, company_id, page_size, page_number)
 
@@ -160,8 +160,8 @@ class MallGoodHandler(BaseHandler):
             conds={"id": self.current_user.company.id}, need_conf=True)
 
         cover = self.share_url(company_info.logo)
-        title = self.locale.translate(msg.MALL_GOOD_DETAIL_SHARE_TITLE.format(good_title))
-        description = self.locale.translate(msg.MALL_GOOD_DETAIL_SHARE_TEXT)
+        title = msg.MALL_GOOD_DETAIL_SHARE_TITLE.format(good_title)
+        description = msg.MALL_GOOD_DETAIL_SHARE_TEXT
 
         share_info = ObjectDict({
             "cover": cover,
