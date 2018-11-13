@@ -128,7 +128,6 @@ class BaseDao(DB):
                     conds))
             raise gen.Return(ObjectDict())
         sql = self.select(self.table, conds, fields, options, appends, index)
-        self.logger.info('PANLL_TEST: sql: %s' % sql)
         cursor = yield self.query(sql, params)
         response = cursor.fetchone()
         if not isinstance(response, dict):
@@ -136,7 +135,7 @@ class BaseDao(DB):
         else:
             response = self.optResType(response, self.fields_map)
 
-        self.logger.debug("[debug][get_record_by_conds][{0}][response: {1}]".format(self.__class__.__module__, response))
+        # self.logger.debug("[debug][get_record_by_conds][{0}][response: {1}]".format(self.__class__.__module__, response))
         raise gen.Return(response)
 
     @gen.coroutine
