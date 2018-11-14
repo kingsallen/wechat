@@ -432,18 +432,14 @@ class ChatbotResumeSubmitHandler(BaseHandler):
             file_name=args.file_name,
         )
         success = result.status == 0
+        data = {'name': args.name, 'success': success}
         if success:
-            referral_id = result.data
-            url = '/m/chat/room?hr_id={}&wechat_signature={}&flag=4&success=1&referral_id={}'.format(
-                self.json_args.hr_id,
-                self.current_user.wechat.signature,
-                referral_id
-            )
-        else:
-            url = '/m/chat/room?hr_id={}&wechat_signature={}&flag=4&success=0'.format(
-                self.json_args.hr_id,
-                self.current_user.wechat.signature
-            )
+            data['referral_id'] = result.data
+        url = '/m/chat/room?hr_id={}&wechat_signature={}&flag=4&data={}'.format(
+            self.json_args.hr_id,
+            self.current_user.wechat.signature,
+            urllib.parse.quote(json.dumps(data))
+        )
         self.send_json_success({'next_url': url})
 
 
