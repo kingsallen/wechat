@@ -71,7 +71,7 @@ class CandidatePageService(PageService):
     @gen.coroutine
     def add_candidate_remard(self, user_id, company, position, name):
         """增加候选人备注信息"""
-        remark = self.candidate_remark_ds.get_candidate_remark({
+        remark = yield self.candidate_remark_ds.get_candidate_remark({
             "user_id": user_id
         })
         if remark:
