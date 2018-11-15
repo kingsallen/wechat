@@ -182,12 +182,13 @@ class UserCurrentUpdateHandler(BaseHandler):
         })
         position_info = yield self.position_ps.get_position(self.params.pid)
         ret = yield self.profile_ps.create_profile_workexp(record, profile_id, mode='p')
-        yield self.candidate_ps.add_candidate_remard(
-            user_id=self.current_user.sysuser.id,
-            company=form.company,
-            position=form.position,
-            name=form.name,
-            hr_id=position_info.publisher
-            )
+        if not self.current_user.employee:
+            yield self.candidate_ps.add_candidate_remard(
+                user_id=self.current_user.sysuser.id,
+                company=form.company,
+                position=form.position,
+                name=form.name,
+                hr_id=position_info.publisher
+                )
 
         self.send_json_success()
