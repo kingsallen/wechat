@@ -89,6 +89,7 @@ common_routes = [
     (r"/resume/maimai",                              handler.common.resume.MaimaiImportHandler,                 {"event": "resume_maimai"}),
     (r"/resume/liepin",                              handler.common.resume.LiepinImportHandler,                 {"event": "resume_liepin"}),
     (r"/resume/upload",                              handler.common.resume.ResumeUploadHandler,                 {"event": "resume_upload"}),
+    (r"/chat/resume/upload",                         handler.common.resume.ChatbotResumeUploadHandler,          {"event": "resume_upload_from_chatbot"}),
     (r"/profile/?",                                  handler.common.profile.ProfileHandler,                     {"event": "profile_profile"}),
     (r"/profile/view/([A-Z0-9a-z_\-]+)*",            handler.common.profile.ProfileViewHandler,                 {"event": "profile_view"}),
     (r"/profile/preview/?",                          handler.common.profile.ProfilePreviewHandler,              {"event": "profile_preview"}),
@@ -98,6 +99,7 @@ common_routes = [
     (r"/im/laiye",                                   handler.common.laiye_im.LaiyeImHandler,                    {"event": "im laiye"}),
     (r"/resume/import/limit",                        handler.common.resume.ResumeImportLimit,                   {"event": "resume_import_limit"}),
     (r"/redirect",                                   handler.common.redirect.RedirectHandler,                   {"event": "redirect"}),
+    (r"/upload/profile/login",                       handler.common.pc.UploadLoginHandler,                      {"event": "pc_upload_login"}),
 
     # websocket
     (r"/websocket/([A-Za-z0-9_]{1,32})",             handler.common.im.ChatWebSocketHandler),
@@ -119,6 +121,7 @@ common_routes = [
     (r"/api/position/star/?",                        handler.common.position.PositionStarHandler,               {"event": "position_star"}),
     (r"/api/resume/upload",                          handler.common.resume.APIResumeUploadHandler,              {"event": "api_resume_upload"}),
     (r"/api/resume/submit",                          handler.common.resume.ResumeSubmitHandler,                 {"event": "api_resume_submit"}),
+    (r"/api/chat/resume/upload",                     handler.common.resume.ChatbotResumeSubmitHandler,          {"event": "api_resume_submit_from_chatbot"}),
     (r"/api/position/list/?",                        handler.platform.position.PositionListDetailHandler,       {"event": "position_list"}),
     (r"/api/position/list/sug",                      handler.platform.position.PositionListSugHandler,          {"event": "position_list_sug"}),
     (r"/api/position/search/history",                handler.platform.position.PositionSearchHistoryHandler,    {"event": "position_search_history"}),

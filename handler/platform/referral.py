@@ -128,33 +128,19 @@ class ReferralConfirmHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def get(self):
-        if not self.current_user.sysuser.username.isdigit():
-            type = 1
-        else:
-            if self.current_user.wxuser.is_subscribe or self.current_user.wechat.type == 0:
-                type = 2
-            else:
-                type = 3
-        wechat = yield self.wechat_ps.get_wechat_info(self.current_user,
-                                                      pattern_id=const.QRCODE_REFERRAL_CONFIRM if type == 1 else const.QRCODE_OTHER,
-                                                      in_wechat=self.in_wechat)
-        rkeys = self.params.rkeys
-        rids = rkeys.split(',')
-        results = yield [self.employee_ps.get_referral_info(rid) for rid in rids]
-        if all(r.status == const.API_SUCCESS for r in results):
-            if all(r.data.get('claim') is True for r in results):
-                type = 4
-            else:
-                key = const.CONFIRM_REFERRAL_MOBILE.format(rkeys, self.current_user.sysuser.id)
-                self.redis.set(key, ObjectDict(mobile=results[0].data.mobile), ttl=60 * 60 * 24)
-
-        # if ret.status == const.API_SUCCESS and body.get("claim") is False:
-        # elif ret.status == const.API_SUCCESS and body.get("claim") is True:
-        #     type = 4
-        else:
+        rkey = self.params.rkey
+        rids = rkey.split(',')
+        recommendations = [ObjectDict({**data, 'rid': rid}) for data, rid in
+                           zip((yield [self.employee_ps.get_referral_info(rid) for rid in rids]), rids)]
+        failed_recommendations = [r for r in recommendations if r.status != const.API_SUCCESS]
+        claimed_recommendations = [r for r in recommendations if
+                                   r.status == const.API_SUCCESS and r['data']['claim']]
+        unclaimed_recommendations = [r for r in recommendations if
+                                     r.status == const.API_SUCCESS and not r['data']['claim']]
+        if not claimed_recommendations and not unclaimed_recommendations:
             data = ObjectDict(
                 kind=1,  # // {0: success, 1: failure, 10: email}
-                messages=[results[0].message],  # ['hello world', 'abjsldjf']
+                messages=[recommendations[0].message],  # ['hello world', 'abjsldjf']
                 button_text=msg.BACK_CN,
                 button_link=self.make_url(path.POSITION_LIST,
                                           self.params,
@@ -162,34 +148,58 @@ class ReferralConfirmHandler(BaseHandler):
                 jump_link=None  # // 如果有会自动，没有就不自动跳转
             )
 
-            self.render_page(template_name="system/user-info.html",
-                             data=data)
-            return
-        if self.current_user.employee and self.current_user.employee.id == body.employee_id:
+            return self.render_page(template_name="system/user-info.html",
+                                    data=data)
+
+        if not self.current_user.sysuser.username.isdigit():
+            type = 1
+        elif claimed_recommendations and not unclaimed_recommendations:
+            type = 4
+        elif self.current_user.wxuser.is_subscribe or self.current_user.wechat.type == 0:
+            type = 2
+        else:
+            type = 3
+
+        wechat = yield self.wechat_ps.get_wechat_info(
+            self.current_user,
+            pattern_id=const.QRCODE_REFERRAL_CONFIRM if type == 1 else const.QRCODE_OTHER,
+            in_wechat=self.in_wechat)
+
+        data_sample = recommendations[0].data
+
+        valid_rkeys = [r.rid for r in unclaimed_recommendations]
+        if type == 1:
+            self.redis.set(const.CONFIRM_REFERRAL_MOBILE.format(','.join(valid_rkeys), self.current_user.sysuser.id),
+                           ObjectDict(mobile=data_sample.mobile), ttl=60 * 60 * 24)
+        if self.current_user.employee and self.current_user.employee.id == data_sample.employee_id:
             in_person = True
         else:
             in_person = False
 
         # 对姓名做隐藏处理
-        body = results[0].data
-        if len(body.user_name.split()) == 1:
-            presentee_first_name = body.user_name.split()[0][0:1] + "**"
+        if len(data_sample.user_name.split()) == 1:
+            presentee_first_name = data_sample.user_name.split()[0][0:1] + "**"
         else:
-            presentee_first_name = body.user_name.split()[0] + "**"
+            presentee_first_name = data_sample.user_name.split()[0] + "**"
 
         data = ObjectDict({
             "type": type,
             "successful_recommendation": self.locale.translate("referral_success"),
-            "variants": {
-                "presentee_first_name": presentee_first_name if not in_person else body.user_name,
-                "recom_name": body.employee_name,
-                "company_name": body.company_abbreviation,
-                "position_titles": [r.data.position for r in results],
-                "new_user": body.user_name[0:1] + "**" if not in_person else body.user_name,
-                "apply_id": body.apply_id,
-                "mobile": body.mobile[0:3] + "****" + body.mobile[-4:],
-                "wechat": wechat,
-                "in_person": in_person}
+            "variants":
+                {
+                    "presentee_first_name": presentee_first_name if not in_person else data_sample.user_name,
+                    "recom_name": data_sample.employee_name,
+                    "company_name": data_sample.company_abbreviation,
+                    "failed_position_titles": [r.data.position for r in failed_recommendations],
+                    "claimed_position_titles": [r.data.position for r in claimed_recommendations],
+                    "unclaimed_position_titles": [r.data.position for r in unclaimed_recommendations],
+                    "valid_rkeys": valid_rkeys,
+                    "new_user": data_sample.user_name[0:1] + "**" if not in_person else data_sample.user_name,
+                    "apply_id": data_sample.apply_id,
+                    "mobile": data_sample.mobile[0:3] + "****" + data_sample.mobile[-4:],
+                    "wechat": wechat,
+                    "in_person": in_person
+                }
         })
         self.render_page(template_name="employee/recom-presentee-confirm.html", data=data)
 
@@ -207,7 +217,7 @@ class ReferralConfirmApiHandler(BaseHandler):
                 raise gen.Return()
             data = ObjectDict({
                 "name": self.params.name,
-                "referral_record_id": self.params.rkey,
+                "referral_record_ids": self.params.rkey.split(','),
                 "user": self.current_user.sysuser.id
             })
             ret = yield self.employee_ps.confirm_referral_info(data)
@@ -224,7 +234,7 @@ class ReferralConfirmApiHandler(BaseHandler):
                 "name": self.params.name,
                 "mobile": mobile,
                 "vcode": self.params.vcode,
-                "referral_record_id": self.params.rkey,
+                "referral_record_ids": self.params.rkey.split(','),
                 "user": self.current_user.sysuser.id
             })
             ret = yield self.employee_ps.confirm_referral_info(data)

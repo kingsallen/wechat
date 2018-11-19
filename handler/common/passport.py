@@ -365,7 +365,7 @@ class SendValidCodeHandler(BaseHandler):
         mobile = self.json_args.mobile
         if not mobile:
             mobile = self.redis.get(
-                const.CONFIRM_REFERRAL_MOBILE.format(self.json_args.rkeys, self.current_user.sysuser.id)).get("mobile")
+                const.CONFIRM_REFERRAL_MOBILE.format(self.json_args.rkey, self.current_user.sysuser.id)).get("mobile")
         # 校验手机号是否已经被注册
         ret = yield self.usercenter_ps.post_ismobileregistered(mobile=mobile)
         if ret.status != const.API_SUCCESS or ret.data.exist:
