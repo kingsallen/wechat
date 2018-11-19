@@ -71,6 +71,7 @@ class DictionaryPageService(PageService):
 
         finally:
             ret.insert(0, china)
+
             for item in [
                 dict(code_text='852', text='中国香港'),
                 dict(code_text='853', text='中国澳门'),

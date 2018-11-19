@@ -25,6 +25,7 @@ from service.page.hr.wechat import WechatPageService
 from service.page.user.sharechain import SharechainPageService
 from service.page.user.user import UserPageService
 from service.page.hr.company import CompanyPageService
+from service.page.job.position import PositionPageService
 from setting import settings
 from util.common import ObjectDict
 from util.common.decorator import log_time
@@ -34,7 +35,8 @@ from util.wechat.template import (
     rp_binding_success_notice_tpl,
     rp_recom_success_notice_tpl,
     rp_transfer_apply_success_notice_tpl,
-    rp_transfer_click_success_notice_tpl
+    rp_transfer_click_success_notice_tpl,
+    rp_recom_screen_success_notice_tpl
 )
 from util.tool.date_tool import curr_now
 
@@ -132,18 +134,13 @@ class RedpacketPageService(PageService):
 
         check_hb_status_passed = False
         self.logger.debug("[RP]position.hb_status: %s" % position.hb_status)
+        # 此处改用与运算的方式判断红包类型
         if trigger_way == const.HB_TRIGGER_WAY_CLICK:
-            check_hb_status_passed = (
-                position.hb_status == const.RP_POSITION_STATUS_CLICK or
-                position.hb_status == const.RP_POSITION_STATUS_BOTH)
+            check_hb_status_passed = True if position.hb_status >> const.HB_INDEX_CLICK & 1 else False
         elif trigger_way == const.HB_TRIGGER_WAY_APPLY:
-            check_hb_status_passed = (
-                position.hb_status == const.RP_POSITION_STATUS_APPLY or
-                position.hb_status == const.RP_POSITION_STATUS_BOTH)
+            check_hb_status_passed = True if position.hb_status >> const.HB_INDEX_APPLY & 1 else False
         elif trigger_way == const.HB_TRIGGER_WAY_SCREEN:
-            check_hb_status_passed = (
-                position.hb_status == const.RP_POSITION_STATUS_SCREEN or
-                position.hb_status == const.RP_POSITION_STATUS_BOTH)
+            check_hb_status_passed = True if position.hb_status >> const.HB_INDEX_SCREEN & 1 else False
         else:
             self.logger.debug("[RP]something goes wrong")
 
@@ -170,43 +167,69 @@ class RedpacketPageService(PageService):
     def handle_red_packet_from_rabbitmq(self, data):
         """通过rabbitmq触发的红包总入口"""
 
-        # 拼装与session结构相同的current_user以复用相同的红包方法
-        hr_company_ps = CompanyPageService()
-        user_ps = UserPageService()
-        redis = BaseRedis()
-        user_id = data.get("user_id")
-        company_id = data.get("company_id")
-        wechat_id = data.get("wechat_id")
-        rp_type = data.get("rp_type")
-        wechat = yield self.hr_wx_wechat_ds.get_wechat(conds={
-            "company_id": company_id
-        })
-        wxuser = yield self.user_wx_user_ds.get_wxuser(conds={
-            "sysuser_id": user_id,
-            "wechat_id": wechat_id
-        })
-        qxuser = yield self.user_wx_user_ds.get_wxuser(conds={
-            "sysuser_id": user_id,
-            "wechat_id": settings['qx_wechat_id']
-        })
-        sysuser = yield self.user_user_ds.get_user(conds={
-            "id": user_id
-        })
-        company = yield hr_company_ps.get_company(conds={
-            "id": company_id
-        })
-        employee = yield user_ps.get_valid_employee_by_user_id(
-            user_id=user_id, company_id=company_id)
-        current_user = ObjectDict(
-            wechat=wechat,
-            wxuser=wxuser,
-            qxuser=qxuser,
-            sysuser=sysuser,
-            company=company,
-            employee=employee
-        )
-        if rp_type == const.EMPLOYEE_BIND_RP_TYPE:
-            yield self.handle_red_packet_employee_verification(user_id, company_id, redis)
+        try:
+            hr_company_ps = CompanyPageService()
+            user_ps = UserPageService()
+            position_ps = PositionPageService()
+            redis = BaseRedis()
+            user_id = data.get("user_id")
+            company_id = data.get("company_id")
+            wechat_id = data.get("wechat_id")
+            position_id = data.get("position_id", 0)
+            be_recom_user_id = data.get("be_recom_user_id", 0)
+            direct_referral_user_id = data.get("direct_referral_user_id", 0)
+            psc = data.get("psc", 0)
+            rp_type = data.get("rp_type")
+
+            if rp_type == const.EMPLOYEE_BIND_RP_TYPE:
+                yield self.handle_red_packet_employee_verification(user_id, company_id, redis)
+            elif rp_type == const.SCREEN_RP_TYPE:
+                # 拼装与session结构相同的current_user以复用相同的红包方法
+                wechat = yield self.hr_wx_wechat_ds.get_wechat(conds={
+                    "company_id": company_id
+                })
+                if be_recom_user_id:
+                    wxuser = yield self.user_wx_user_ds.get_wxuser(conds={
+                        "sysuser_id": be_recom_user_id,
+                        "wechat_id": wechat_id
+                    })
+                    qxuser = yield self.user_wx_user_ds.get_wxuser(conds={
+                        "sysuser_id": be_recom_user_id,
+                        "wechat_id": settings['qx_wechat_id']
+                    })
+                else:
+                    wxuser = ObjectDict()
+                    qxuser = ObjectDict()
+                sysuser = yield self.user_user_ds.get_user(conds={
+                    "id": be_recom_user_id
+                })
+                company = yield hr_company_ps.get_company(conds={
+                    "id": company_id
+                })
+                employee = yield user_ps.get_valid_employee_by_user_id(
+                    user_id=be_recom_user_id, company_id=company_id)
+                recom = yield self.user_user_ds.get_user(conds={
+                    "id": direct_referral_user_id
+                })
+                if position_id:
+                    position = yield position_ps.get_position(position_id)
+                else:
+                    position = ObjectDict()
+                current_user = ObjectDict(
+                    wechat=wechat,
+                    wxuser=wxuser,
+                    qxuser=qxuser,
+                    sysuser=sysuser,
+                    company=company,
+                    employee=employee,
+                    recom=recom
+                )
+                self.logger.debug("[RP]current_user: {}".format(current_user))
+                yield self.handle_red_packet_screen_profile(current_user, position,
+                                                            trigger_way=const.HB_TRIGGER_WAY_SCREEN,
+                                                            recom_user_id=user_id, psc=psc)
+        except Exception as e:
+            self.logger.error(traceback.format_exc())
 
     @gen.coroutine
     def handle_red_packet_employee_verification(self, user_id, company_id, redislocker):
@@ -471,6 +494,181 @@ class RedpacketPageService(PageService):
                 "[RP]触发红包锁，该红包逻辑正在处理中， rplock_key: %s" % rplock_key)
 
         self.logger.debug("[RP]推荐红包发送成功")
+
+    @log_time
+    @gen.coroutine
+    def handle_red_packet_screen_profile(self,
+                                         current_user,
+                                         position,
+                                         trigger_way,
+                                         recom_user_id,
+                                         **kwargs):
+        """入职类红包触发总入口"""
+        try:
+            rp_config = yield self.__get_hb_config_by_position(position=position, trigger_way=trigger_way)
+            if not rp_config:
+                self.logger.debug("[RP]无红包活动")
+                return
+
+            application = yield self.job_application_ds.get_job_application(conds={
+                "position_id": position.id,
+                "applier_id": current_user.sysuser.id
+            })
+            if not application:
+                self.logger.debug('[RP]申请数据不正确, position: %s,  post_user_id: %s, post_user_id: %s'
+                                  % (position.id, recom_user_id, current_user.sysuser.id))
+                return
+
+            params = {'position_id': position.id,
+                      'presentee_user_id': current_user.sysuser.id}
+
+            # 如果没有recom_user_id, 说明申请不是员工推荐产生的，推荐人为直接推荐人
+            if recom_user_id and rp_config.target == const.RED_PACKET_CONFIG_TARGET_EMPLOYEE:
+                params.update({'app_id': application.id,
+                               'post_user_id': recom_user_id})
+            else:
+                recom_user_id = current_user.recom.id
+
+            recom_record = yield self.candidate_recom_record_ds.get_candidate_recom_record(params)
+
+            if not recom_record:
+                self.logger.debug('[RP]推荐数据不正确, position: %s, app_id: %s, presentee_user_id: %s, post_user_id: %s'
+                                  % (position.id, application.id, current_user.sysuser.id, recom_user_id))
+                return
+
+            need_to_send_card = self.__need_to_send(
+                current_user, position, trigger_way)
+
+            if need_to_send_card and rp_config:
+                self.logger.debug("[RP]初筛通过红包开始")
+            else:
+                self.logger.debug("[RP]职位红包数据不正确, position: %s, app_id: %s, presentee_user_id: %s, post_user_id: %s"
+                                  % (position.id, application.id, current_user.sysuser.id, recom_user_id))
+                return
+
+            user_ps = UserPageService()
+            wechat_ps = WechatPageService()
+            recom_wechat = current_user.wechat
+            recom_user = yield user_ps.get_user_user({
+                "id": recom_user_id
+            })
+            nickname = current_user.sysuser.name or current_user.sysuser.nickname
+            recom_qxuser = yield self.user_wx_user_ds.get_wxuser(conds={
+                "sysuser_id": recom_user_id,
+                "wechat_id": settings['qx_wechat_id']
+            })
+
+            # 如果是订阅号，那么无法获取 recom_wxuser
+            # 将 openid = 0 传递到 __send_red_packet_card， 跳过使用企业号发送消息模版
+
+            is_service_wechat = recom_wechat.type == 1
+            if is_service_wechat:
+                recom_wxuser = yield user_ps.get_wxuser_sysuser_id_wechat_id(
+                    recom_user_id, recom_wechat.id)
+
+            else:
+                recom_wxuser = yield user_ps.get_wxuser_sysuser_id_wechat_id(
+                    recom_user_id, settings.qx_wechat_id)
+                recom_wechat = yield wechat_ps.get_wechat(
+                    {"id": settings.qx_wechat_id})
+
+            self.logger.debug('[RP] user_id: %s' % recom_user_id)
+            self.logger.debug('[RP] recom_wechat: %s' % recom_wechat)
+            self.logger.debug('[RP] recom_wxuser: %s' % recom_wxuser)
+            self.logger.debug('[RP] recom_qxuser: %s' % recom_qxuser)
+
+            # 判断红包是否直接发送给员工一度（这里的逻辑与转发点击和转发申请不同）
+            sharechain_ps = SharechainPageService()
+            psc = kwargs.get("psc")
+            first_degree_id = 0
+            if psc:
+                is_1degree = yield sharechain_ps.is_employee_presentee(
+                    psc)
+                if is_1degree:
+                    share_chain = yield self.candidate_share_chain_ds.get_share_chain({
+                        "id": psc
+                    })
+                    if share_chain.parent_id:
+                        first_degree_id = share_chain.recom_user_id
+                    else:
+                        first_degree_id = share_chain.presentee_user_id
+
+            self.logger.debug("[RP]first_degree_id: {}".format(first_degree_id))
+            send_to_first_degree = (
+                first_degree_id and
+                first_degree_id != recom_user_id and rp_config.target == const.RED_PACKET_CONFIG_TARGET_EMPLOYEE_1DEGREE)
+
+            if send_to_first_degree:
+                self.logger.debug("[RP]发送红包给员工一度")
+                recom_user = yield user_ps.get_user_user({
+                    "id": first_degree_id
+                })
+
+                if is_service_wechat:
+                    recom_wxuser = yield user_ps.get_wxuser_sysuser_id_wechat_id(
+                        first_degree_id, recom_wechat.id)
+                else:
+                    recom_wxuser = yield user_ps.get_wxuser_sysuser_id_wechat_id(
+                        first_degree_id, settings.qx_wechat_id)
+                recom_qxuser = yield self.user_wx_user_ds.get_wxuser(conds={
+                    "sysuser_id": first_degree_id,
+                    "wechat_id": settings['qx_wechat_id']
+                })
+
+            matches = yield self.__recom_matches(
+                rp_config, recom_user, recom_wechat, **kwargs)
+
+            if send_to_first_degree or matches:
+                self.logger.debug("[RP]用户是发送红包对象,准备掷骰子")
+
+                redislocker = BaseRedis()
+                rplock_key = const.ON_BOARD_LOCK_FMT % (rp_config.id, recom_user_id)
+                if redislocker.incr(rplock_key) is FIRST_LOCK:
+                    self.logger.debug("[RP]红包锁创建成功， rplock_key: %s" % rplock_key)
+
+                    try:
+                        if self.__hit_red_packet(rp_config.probability):
+                            self.logger.debug("[RP]掷骰子通过,准备发送红包信封(有金额)")
+
+                            # 发送红包消息模版(有金额)
+                            yield self.__send_red_packet_card(
+                                recom_wxuser.openid,
+                                recom_wechat.id,
+                                rp_config,
+                                recom_qxuser.id,
+                                current_qxuser_id=current_user.qxuser.id,
+                                position=position,
+                                nickname=nickname,
+                                position_title=position.title,
+                                recom_record=recom_record
+                            )
+                        else:
+                            # 发送红包消息模版(抽不中)
+                            self.logger.debug("[RP]掷骰子不通过,准备发送红包信封(无金额)")
+                            yield self.__send_zero_amount_card(
+                                recom_wxuser.openid,
+                                recom_wechat.id,
+                                rp_config,
+                                current_user.qxuser.id,
+                                nickname=nickname,
+                                position_title=position.title,
+                                recom_record=recom_record
+                            )
+
+                    except Exception as e:
+                        self.logger.error(e)
+                    finally:
+                        # 释放红包锁
+                        redislocker.delete(rplock_key)
+                        self.logger.debug("[RP]红包锁释放成功， rplock_key: %s" % rplock_key)
+                else:
+                    self.logger.debug(
+                        "[RP]触发红包锁，该红包逻辑正在处理中， rplock_key: %s" % rplock_key)
+
+                self.logger.debug("[RP]初筛红包发送成功")
+
+        except Exception as e:
+            self.logger.error(traceback.format_exc())
 
     @log_time
     @gen.coroutine
@@ -823,7 +1021,8 @@ class RedpacketPageService(PageService):
         """获取下个待发红包信息"""
 
         if (hb_config_type in [const.RED_PACKET_TYPE_SHARE_CLICK,
-                               const.RED_PACKET_TYPE_SHARE_APPLY] and
+                               const.RED_PACKET_TYPE_SHARE_APPLY,
+                               const.RED_PACKET_TYPE_SCREEN] and
             position_id):
 
             binding = yield self.hr_hb_position_binding_ds.get_hr_hb_position_binding({
@@ -900,7 +1099,7 @@ class RedpacketPageService(PageService):
 
         if red_packet_config.type in [0, 1]:
             bagging_openid = current_qxuser_openid
-        elif red_packet_config.type in [2, 3]:
+        elif red_packet_config.type in [2, 3, 4]:
             bagging_openid = recom_qxuser_openid
         else:
             assert False  # should not be here
@@ -919,36 +1118,13 @@ class RedpacketPageService(PageService):
 
             self.logger.debug("[RP]next rp item: {}".format(rp_item))
 
-            if not rp_item:
-                if position:
-                    self.logger.debug("[RP]该职位红包已经发完")
-
-                    current_hb_status = position.hb_status
-                    # 更新职位状态至未参与这种类型的红包活动
-                    yield self.__update_position_hb_status(
-                        position.id, current_hb_status,
-                        red_packet_config.type)
-
-                    remaining_positions = yield self.__get_running_positions_by_config_id(
-                        red_packet_config.id)
-
-                    if not remaining_positions:
-                        self.logger.debug("[RP]该活动红包已经发完,准备结束活动")
-                        yield self.__finish_hb_config(red_packet_config.id)
-
-                else:
-                    self.logger.debug("[RP]该活动红包已经发完,准备结束活动")
-                    yield self.__finish_hb_config(red_packet_config.id)
-
-                return
-
             throttle_passed = yield self.__check_throttle_passed(
                 red_packet_config, recom_qxuser_id, rp_item)
 
             if not throttle_passed:
                 self.logger.debug(
                     '[RP]throttle上限校验失败, hb_config_id: %s， recom_qxuser_id: %s' % (
-                    red_packet_config.id, recom_qxuser_id))
+                        red_packet_config.id, recom_qxuser_id))
                 return
             else:
                 self.logger.debug("[RP]全局上限验证通过")
@@ -1036,6 +1212,38 @@ class RedpacketPageService(PageService):
                     to=const.RP_ITEM_STATUS_NO_WX_MSG_MONEY_SEND_FAILURE,
                     refresh_open_time=True)
 
+        # 获取下一个待发红包信息，如果红包发完，关闭红包活动
+        if position:
+            rp_item = yield self.__get_next_rp_item(red_packet_config.id, red_packet_config.type,
+                                                    position.id)
+        else:
+            rp_item = yield self.__get_next_rp_item(red_packet_config.id, red_packet_config.type)
+
+        self.logger.debug("[RP]next rp item: {}".format(rp_item))
+
+        if not rp_item:
+            if position:
+                self.logger.debug("[RP]该职位红包已经发完")
+
+                current_hb_status = position.hb_status
+                # 更新职位状态至未参与这种类型的红包活动
+                yield self.__update_position_hb_status(
+                    position.id, current_hb_status,
+                    red_packet_config.type)
+
+                remaining_positions = yield self.__get_running_positions_by_config_id(
+                    red_packet_config)
+
+                if not remaining_positions:
+                    self.logger.debug("[RP]该活动红包已经发完,准备结束活动")
+                    yield self.__finish_hb_config(red_packet_config.id)
+
+            else:
+                self.logger.debug("[RP]该活动红包已经发完,准备结束活动")
+                yield self.__finish_hb_config(red_packet_config.id)
+
+            return
+
         raise gen.Return(result)
 
     @log_time
@@ -1109,6 +1317,11 @@ class RedpacketPageService(PageService):
         hb_item_id = yield self.__insert_0_amount_sent_history(
             red_packet_config.id, qx_openid, current_qxuser_id)
 
+        # 将新插入的0元红包与刮刮卡绑定
+        res = yield self.__bind_0_amount_hb2card(card, hb_item_id)
+        if not res:
+            self.logger.warning("[RP]0元红包{}与刮刮卡{}绑定失败".format(hb_item_id, card.cardno))
+
         recom_record = kwargs.get("recom_record", ObjectDict())
         if recom_record:
             yield self.__bind_recom_record_id2redpacket(recom_record.get("id"), hb_item_id)
@@ -1126,24 +1339,9 @@ class RedpacketPageService(PageService):
         :return:
         """
         # 是否正参加活动：
-        # 0=未参加  1=正参加点击红包活动  2=正参加被申请红包活动  3=正参加1+2红包活动
-
-        if current_hb_status == const.HB_STATUS_BOTH:
-
-            if hb_config_type == const.RED_PACKET_TYPE_SHARE_CLICK:
-                next_status = const.HB_STATUS_APPLY
-
-            elif hb_config_type == const.RED_PACKET_TYPE_SHARE_APPLY:
-                next_status = const.HB_STATUS_CLICK
-
-            else:
-                raise ValueError(msg.RED_PACKET_TYPE_VALUE_ERROR)
-
-        elif ((current_hb_status == const.HB_STATUS_CLICK and hb_config_type == const.RED_PACKET_TYPE_SHARE_CLICK) or
-              (current_hb_status == const.HB_STATUS_APPLY and hb_config_type == const.RED_PACKET_TYPE_SHARE_APPLY)):
-
-            next_status = const.HB_STATUS_NONE
-
+        # 0=未参加  1=正参加点击红包活动  2=正参加被申请红包活动  3=正参加1+2红包活动 以此类推，红包类型为2的次方，采用与运算的方式判断红包类型
+        if current_hb_status >> const.HB_CONFIG_TYPR_TO_INDEX[hb_config_type] & 1:
+            next_status = current_hb_status - const.HB_CONFIG_TYPR_TO_HB_STATUS[hb_config_type]
         else:
 
             raise ValueError(msg.RED_PACKET_TYPE_VALUE_ERROR)
@@ -1156,11 +1354,11 @@ class RedpacketPageService(PageService):
 
     @log_time
     @gen.coroutine
-    def __get_running_positions_by_config_id(self, config_id):
+    def __get_running_positions_by_config_id(self, config):
         """查询这个红包活动中还有没发完红包的职位
         """
         binding_list = yield self.hr_hb_position_binding_ds.get_hr_hb_position_binding_list({
-            "hb_config_id": config_id
+            "hb_config_id": config.id
         })
 
         if len(binding_list) == 0:
@@ -1172,7 +1370,7 @@ class RedpacketPageService(PageService):
             conds=" id in %s" % set_literl(position_ids))
 
         if position_list:
-            position_list = [x for x in position_list if x.hb_status > 0]
+            position_list = [x for x in position_list if x.hb_status >> const.HB_CONFIG_TYPR_TO_INDEX[config.type] & 1]
             raise gen.Return(position_list)
         else:
             return None
@@ -1182,8 +1380,7 @@ class RedpacketPageService(PageService):
     def __finish_hb_config(self, hb_config_id):
         """
         标记红包活动结束
-        :param db:
-        :param config_id:
+        :param hb_config_id: 红包配置id
         :return:
         """
         yield self.hr_hb_config_ds.update_hr_hb_config(
@@ -1255,7 +1452,14 @@ class RedpacketPageService(PageService):
                 nickname=kwargs.get("nickname", ""),
                 position_title=kwargs.get("position_title", "")
             )
-
+        elif config_type == const.RED_PACKET_TYPE_SCREEN:
+            res = yield rp_recom_screen_success_notice_tpl(
+                wechat_id=wechat_id,
+                openid=openid,
+                link=card_url,
+                nickname=kwargs.get("nickname", ""),
+                position_title=kwargs.get("position_title", "")
+            )
         else:
             raise ValueError(msg.RED_PACKET_TYPE_VALUE_ERROR)
 
@@ -1316,7 +1520,8 @@ class RedpacketPageService(PageService):
             remark = "{0}员工认证红包活动".format(company_abb)
         elif rptype in [const.RED_PACKET_TYPE_RECOM,
                         const.RED_PACKET_TYPE_SHARE_CLICK,
-                        const.RED_PACKET_TYPE_SHARE_APPLY]:
+                        const.RED_PACKET_TYPE_SHARE_APPLY,
+                        const.RED_PACKET_TYPE_SCREEN]:
             act_name = "职位推荐红包"
             remark = "{0}职位推荐红包活动".format(company_abb)
         else:
@@ -1528,3 +1733,10 @@ class RedpacketPageService(PageService):
         finally:
             return ret
 
+    @log_time
+    @gen.coroutine
+    def __bind_0_amount_hb2card(self, card, hb_item_id):
+        conds = ObjectDict(cardno=card.cardno)
+        fields = ObjectDict(hb_item_id=hb_item_id)
+        result = yield self.hr_hb_scratch_card_ds.update_scratch_card(conds=conds, fields=fields)
+        return result

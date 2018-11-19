@@ -228,7 +228,7 @@ def check_and_apply_profile(func):
     @functools.wraps(func)
     @gen.coroutine
     def wrapper(self, *args, **kwargs):
-        need_profile_upload = [570004]  # 现在为沙盒的
+        need_profile_upload = [39978, 248355]  # 现在为沙盒的
         user_id = self.current_user.sysuser.id
         has_profile, profile = yield self.profile_ps.has_profile(user_id)
         if has_profile:
@@ -252,7 +252,7 @@ def check_and_apply_profile(func):
                                   profile_import_zhilian=True,
                                   profile_import_liepin=True,
                                   profile_import_linkedin=True,
-                                  profile_import_maimai=False,
+                                  profile_import_maimai=True,
                                   profile_import_veryeast=False,
                                   resume_upload=False)
             if company.conf_veryeast_switch == 1:
@@ -335,6 +335,15 @@ def check_and_apply_profile(func):
                     hashlib.sha1(str(self.current_user.sysuser.id).encode('u8')).hexdigest()
                 )
             )
+
+            # 是否需要弹出 隐私协议 窗口
+            user_id = self.current_user.sysuser.id
+            result, data = yield self.privacy_ps.if_privacy_agreement_window(user_id)
+            redirect_params.update(
+                show_privacy_agreement=data,
+                wechat_signature=self.current_user.wechat.signature
+            )
+
             redirect_params = {**self.params, **redirect_params}
 
             self.render(

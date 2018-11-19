@@ -46,3 +46,13 @@ class InfraApplicationDataService(DataService):
         """基础服务检查改用户的简历是否符合职位的自定义简历要求"""
         ret = yield http_post(path.PROFILE_CUSTOMCV_CHECK, params)
         return unboxing(ret)
+
+    @gen.coroutine
+    def bind_apply_chain_info(self, params):
+        """
+        将apply与链路其他信息（psc、直接推荐人）绑定
+        :param params:
+        :return:
+        """
+        ret = yield http_post(path.INFRA_BIND_APPLY_ID_AND_PSC, params)
+        return unboxing(ret)

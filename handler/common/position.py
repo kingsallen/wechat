@@ -55,6 +55,17 @@ class PositionFavHandler(BaseHandler):
             self.current_user.sysuser.mobile,
             self.current_user.recom.id if self.current_user.recom else 0)
 
+        if not self.current_user.employee:
+            yield self.candidate_ps.add_candidate_company(
+                self.current_user.sysuser.id,
+                self.current_user.sysuser.mobile,
+                self.current_user.company.id,
+                self.current_user.sysuser.name,
+                self.current_user.sysuser.nickname,
+                self.current_user.sysuser.email,
+                self.current_user.recom.id if self.current_user.recom else 0
+            )
+
         application_url = self.make_url(
             path.APPLICATION,
             self.params,

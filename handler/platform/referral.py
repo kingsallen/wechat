@@ -78,7 +78,8 @@ class ReferralProfileAPIHandler(BaseHandler):
                     "rkey": res.data
                 }))
             elif type == 2:
-                url = self.make_url(path.REFERRAL_SCAN, float=1, wechat_signature=user_info.wechat_signature, pid=pid, rkey=res.data)
+                url = self.make_url(path.REFERRAL_SCAN, float=1, wechat_signature=user_info.wechat_signature, pid=pid,
+                                    rkey=res.data)
                 logo = self.current_user.company.logo
                 qrcode = yield self.employee_ps.get_referral_qrcode(url, logo)
                 self.send_json_success(data=ObjectDict({

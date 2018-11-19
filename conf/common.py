@@ -282,7 +282,8 @@ REDPACKET = {
     0: "employee_verification",
     1: "endorsement",
     2: "share_position",
-    3: "referral_application"
+    3: "referral_application",
+    4: "through_screen"
 }
 
 # 奖金相关
@@ -307,7 +308,6 @@ MSG_TYPE = {
     11: "industrySelect",
     12: "satisfaction",
     13: "uploadResume",
-    14: "tellReferral"
 }
 
 # 积分配置类型
@@ -321,7 +321,7 @@ REWARD_ON_BOARD = "入职"
 REWARD_UPLOAD_PROFILE = "员工上传人才简历"
 
 # 操作的聊天类型
-INTERACTIVE_MSG = ["employeeBind", "jobSelect", "teamSelect", "citySelect", "jobCard", "positionSelect", "industrySelect"]
+INTERACTIVE_MSG = ["employeeBind", "jobSelect", "teamSelect", "citySelect", "jobCard", "positionSelect", "industrySelect", "uploadResume"]
 
 # 默认图标
 SYSUSER_HEADIMG = "weixin/images/hr-avatar-default.png"
@@ -358,7 +358,6 @@ RP_POSITION_STATUS_CLICK = 1
 RP_POSITION_STATUS_APPLY = 2
 RP_POSITION_STATUS_BOTH = 3
 RP_POSITION_STATUS_SCREEN = 4
-
 # 国际编码列表
 NATIONAL_CODE = [
     {'id': 1, 'code': '+86', 'country': '中国'}
@@ -466,6 +465,7 @@ RED_PACKET_TYPE_EMPLOYEE_BINDING = 0
 RED_PACKET_TYPE_RECOM = 1
 RED_PACKET_TYPE_SHARE_CLICK = 2
 RED_PACKET_TYPE_SHARE_APPLY = 3
+RED_PACKET_TYPE_SCREEN = 4
 
 # 刮刮卡状态
 SRRATCH_CARD_INTACT = 0
@@ -486,6 +486,25 @@ HB_TRIGGER_WAY_CLICK = 1
 HB_TRIGGER_WAY_APPLY = 2
 HB_TRIGGER_WAY_SCREEN = 3
 
+# 红包活动的索引值
+HB_INDEX_CLICK = 0
+HB_INDEX_APPLY = 1
+HB_INDEX_SCREEN = 2
+
+# 红包类型
+HB_CONFIG_TYPR_TO_INDEX = {
+    2: 0,  # 转发被点击
+    3: 1,  # 转发被申请
+    4: 2   # 推荐通过初筛
+}
+
+# 红包类型对应的红包状态值
+HB_CONFIG_TYPR_TO_HB_STATUS = {
+    2: 1,  # 转发被点击
+    3: 2,  # 转发被申请
+    4: 4   # 推荐通过初筛
+}
+
 
 # 发送消息模板的系统模板库常量
 TEMPLATE_URL_SUFFIX = "&from_template_message={}&send_time={}"
@@ -501,6 +520,7 @@ TEMPLATES.RECOM_NOTICE_TPL = 67  # 新候选人通知
 TEMPLATES.REFINE_EMPLOYEE_INFO_TPL = 44  # 员工认证自定义字段填写通知
 TEMPLATES.POSITION_VIEWED_SHARED = 39
 TEMPLATES.POSITION_VIEWED_FIVE_TIMES = 63
+TEMPLATES.RP_SCREEN = 82
 
 # 消息模板开关，控制企业号是否开启某种类型的消息模板发送，与TEMPLATES强对应
 TEMPLATES_SWITCH = ObjectDict()
