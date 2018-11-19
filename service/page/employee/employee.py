@@ -586,9 +586,9 @@ class EmployeePageService(PageService):
         return selects_list
 
     @gen.coroutine
-    def update_employee_custom_fields(self, user_id, company_id, custom_fields_json):
-        yield self.infra_employee_ds.set_employee_custom_info(
-            user_id, company_id, custom_fields_json)
+    def update_employee_custom_fields(self, employee_id, custom_fields_json):
+        yield self.thrift_employee_ds.set_employee_custom_info(
+            employee_id, custom_fields_json)
 
     @gen.coroutine
     def update_employee_custom_fields_for_email_pending(

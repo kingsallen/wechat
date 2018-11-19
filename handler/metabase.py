@@ -394,11 +394,11 @@ class MetaBaseHandler(AtomHandler):
                         message=message, http_code=http_code)
 
     def send_json_warning(self, data=None, message=msg_const.RESPONSE_WARNING,
-                          http_code=200, status_code=const.API_WARNING):
+                          http_code=200):
         """API 返回部分成功的便捷方法"""
         if data is None:
             data = ""
-        self._send_json(data=data, status_code=status_code,
+        self._send_json(data=data, status_code=const.API_WARNING,
                         message=message, http_code=http_code)
 
     def send_json_error(self, data=None, message=msg_const.RESPONSE_FAILURE,

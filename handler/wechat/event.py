@@ -115,9 +115,6 @@ class WechatOauthHandler(MetaBaseHandler):
     @gen.coroutine
     def _post(self):
         try:
-            self.logger.debug('>\n' * 10)
-            self.logger.debug(self.msg)
-            self.logger.debug('>\n' * 10)
             msg_type = self.msg['MsgType']
             if self.verification():
                 yield getattr(self, 'post_' + msg_type)()

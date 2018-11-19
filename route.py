@@ -36,7 +36,6 @@ import handler.common.captcha
 import handler.common.image
 import handler.common.campaign
 import handler.common.redirect
-import handler.common.pc
 
 import handler.help.passport
 import handler.help.releasedposition
@@ -53,11 +52,9 @@ import handler.platform.compatible
 import handler.platform.user
 import handler.platform.cover
 import handler.help.captcha
-
 import handler.platform.referral
 import handler.platform.referral_pc
 import handler.platform.award
-import handler.platform.mall
 import handler.platform.privacy
 
 import handler.qx.app
@@ -93,7 +90,6 @@ common_routes = [
     (r"/resume/maimai",                              handler.common.resume.MaimaiImportHandler,                 {"event": "resume_maimai"}),
     (r"/resume/liepin",                              handler.common.resume.LiepinImportHandler,                 {"event": "resume_liepin"}),
     (r"/resume/upload",                              handler.common.resume.ResumeUploadHandler,                 {"event": "resume_upload"}),
-    (r"/chat/resume/upload",                         handler.common.resume.ChatbotResumeUploadHandler,          {"event": "resume_upload_from_chatbot"}),
     (r"/profile/?",                                  handler.common.profile.ProfileHandler,                     {"event": "profile_profile"}),
     (r"/profile/view/([A-Z0-9a-z_\-]+)*",            handler.common.profile.ProfileViewHandler,                 {"event": "profile_view"}),
     (r"/profile/preview/?",                          handler.common.profile.ProfilePreviewHandler,              {"event": "profile_preview"}),
@@ -103,7 +99,6 @@ common_routes = [
     (r"/im/laiye",                                   handler.common.laiye_im.LaiyeImHandler,                    {"event": "im laiye"}),
     (r"/resume/import/limit",                        handler.common.resume.ResumeImportLimit,                   {"event": "resume_import_limit"}),
     (r"/redirect",                                   handler.common.redirect.RedirectHandler,                   {"event": "redirect"}),
-    (r"/upload/profile/login",                       handler.common.pc.UploadLoginHandler,                      {"event": "pc_upload_login"}),
 
     # websocket
     (r"/websocket/([A-Za-z0-9_]{1,32})",             handler.common.im.ChatWebSocketHandler),
@@ -125,7 +120,6 @@ common_routes = [
     (r"/api/position/star/?",                        handler.common.position.PositionStarHandler,               {"event": "position_star"}),
     (r"/api/resume/upload",                          handler.common.resume.APIResumeUploadHandler,              {"event": "api_resume_upload"}),
     (r"/api/resume/submit",                          handler.common.resume.ResumeSubmitHandler,                 {"event": "api_resume_submit"}),
-    (r"/api/chat/resume/upload",                     handler.common.resume.ChatbotResumeSubmitHandler,          {"event": "api_resume_submit_from_chatbot"}),
     (r"/api/position/list/?",                        handler.platform.position.PositionListDetailHandler,       {"event": "position_list"}),
     (r"/api/position/list/sug",                      handler.platform.position.PositionListSugHandler,          {"event": "position_list_sug"}),
     (r"/api/position/search/history",                handler.platform.position.PositionSearchHistoryHandler,    {"event": "position_search_history"}),
@@ -167,16 +161,13 @@ platform_routes = [
     (r"/employee/ladder/?",                          handler.platform.employee.AwardsLadderPageHandler,         {"event": "awards_ladder_page"}),
     (r"/employee/custom_bind/gates",                 handler.platform.employee.CatesEmployeeBindHandler,        {"event": "gates employee_bind"}),
     (r"/employee/reward",                            handler.platform.award.ReferralRewardHandler,               {"event": "referral_reward"}),
-    (r"/employee/mall/index",                        handler.platform.mall.MallIndexHandler,                    {"event": "mall_index"}),
-    (r"/employee/mall/good/(\d+)",                   handler.platform.mall.MallGoodHandler,                     {"event": "mall_good_detail"}),
-    (r"/employee/mall/order_page",                   handler.platform.mall.MallExchangePageHandler,             {"event": "mall_exchange_page"}),
 
     (r'/user/survey/?',                              handler.platform.user.UserSurveyHandler,                   {'event': 'user_survey'}),
     (r'/user/ai-recom/?',                            handler.platform.user.AIRecomHandler,                      {'event': 'user_ai-recom'}),
     (r'/employee/survey/?',                          handler.platform.employee.EmployeeSurveyHandler,           {'event': 'employee_survey'}),
     (r'/employee/ai-recom/(\d+)',                    handler.platform.employee.EmployeeAiRecomHandler,          {'event': 'employee_ai-recom'}),
     (r'/employee/referral/policy',                   handler.platform.employee.EmployeeReferralPolicyHandler,   {"event": "referral—policy"}),
-
+    (r'/cover/no-weixin',                            handler.platform.cover.CoverHandler,                       {"event": "cover_no_weixin"}),
     (r'/position/recom/?',                           handler.platform.position.PositionRecomListHandler,        {"event": "position_recom_list"}),
     (r'/usercenter/mine/?',                          handler.common.usercenter.UsercenterMineHandler,           {"event": "usercenter_mine"}),
     (r'/employee/recom/profile/?',                   handler.platform.referral.ReferralProfileHandler,          {"event": "referral_profile"}),
@@ -218,8 +209,6 @@ platform_routes = [
     (r'/api/user/redpacket/list/?',                  handler.platform.award.ReferralRedpacketHandler,           {"event": "api_redpacket_list"}),
     (r'/api/user/bonus/list/?',                      handler.platform.award.ReferralBonusHandler,               {"event": "api_bonus_list"}),
     (r'/api/bonus/claim/?',                          handler.platform.award.BonusClaimHandler,                  {"event": "api_bonus_cliam"}),
-    (r"/api/mall/goods",                             handler.platform.mall.MallGoodsHandler,                    {"event": "mall_goods_list"}),
-    (r"/api/mall/order",                             handler.platform.mall.MallExchangeHandler,                 {"event": "mall_exchange_imd"}),
     (r'/api/privacy/agree/?',                        handler.platform.privacy.PrivacyHandler,                   {"event": "api_privacy_agreement"}),
     # 兼容老微信 url，进行302跳转
     (r"/.*",                                         handler.platform.compatible.CompatibleHandler,             {"event": "compatible"})
