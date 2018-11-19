@@ -28,23 +28,11 @@ from util.common.mq import user_follow_wechat_publisher, user_unfollow_wechat_pu
 from service.page.user.user import UserPageService
 
 
-def df_lg(f):
-    def x(self, *args, **kwargs):
-        self.logger.debug('\n\n' + '>>' * 100)
-
-        self.logger.debug('%s :  %s : %s' % (f.__name__, args, kwargs))
-        f()
-        self.logger.debug('\n\n' + '>>' * 100)
-
-    return x
-
-
 class EventPageService(PageService):
 
     def __init__(self):
         super().__init__()
 
-    @df_lg
     @gen.coroutine
     def opt_default(self, msg, nonce, wechat):
         """被动回复用户消息的总控处理
@@ -66,7 +54,6 @@ class EventPageService(PageService):
         else:
             raise gen.Return("")
 
-    @df_lg
     @gen.coroutine
     def rep_basic(self, msg, rule_id, nonce=None, wechat=None):
         """hr_wx_rule 中 module为 basic 的文字处理
@@ -231,7 +218,6 @@ class EventPageService(PageService):
 
         if wxuser.get('qr_scene_str'):  # 场景二维码处理
             if 'wechat_permanent_qr-' in wxuser.get('qr_scene_str'):  # 永久二维码扫描关注标志字符串
-
                 _, wechat_id = wxuser.get('qr_scene_str').split('-')
                 self.logger.stats(json_dumps(dict(
                     wechat_id=wechat_id,
