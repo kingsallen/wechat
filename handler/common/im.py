@@ -180,6 +180,7 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
                 self.logger.error(traceback.format_exc())
                 self.close(WebSocketCloseCode.internal_error.value)
                 raise
+
         logger.debug("---------- ready to subscribe -----------")
         self.subscriber = Subscriber(
             self.redis_client,
@@ -222,6 +223,9 @@ class ChatRoomHandler(BaseHandler):
         jsapi = JsApi(
             jsapi_ticket=jsapi_ticket, url=self.fullurl(encode=False))
 
+        res_privacy, data_privacy = yield self.privacy_ps.if_privacy_agreement_window(
+            self.current_user.sysuser.id)
+
         config = ObjectDict({
             "debug": False,
             "appid": appid,
@@ -252,7 +256,10 @@ class ChatRoomHandler(BaseHandler):
         self.logger.debug("jsapi_config:{}".format(config))
         self._render(
             template_name="chat/room.html",
-            data={"room_id": room_id},
+            data={
+                "room_id": room_id,
+                "show_privacy_agreement": data_privacy
+            },
             config=config
         )
 
