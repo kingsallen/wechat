@@ -228,7 +228,7 @@ def check_and_apply_profile(func):
     @functools.wraps(func)
     @gen.coroutine
     def wrapper(self, *args, **kwargs):
-        need_profile_upload = [39978, 248355]  # 现在为沙盒的
+        need_profile_upload = [570004]  # 现在为沙盒的
         user_id = self.current_user.sysuser.id
         has_profile, profile = yield self.profile_ps.has_profile(user_id)
         if has_profile:

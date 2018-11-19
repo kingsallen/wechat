@@ -509,8 +509,7 @@ class BindInfoHandler(BaseHandler):
             self.write_error(404)
             return
 
-        if fe_binding_stauts == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS and \
-            (employee.id != self.json_args._employeeid or not self.json_args._employeeid):
+        if fe_binding_stauts == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS and not employee.id:
             self.write_error(416)
             return
 
@@ -518,13 +517,21 @@ class BindInfoHandler(BaseHandler):
         for k, v in self.json_args.model.items():
             if k.startswith("key_") and v:
                 confid = int(k[4:])
-                keys.append({'id': confid,
-                             'options': [to_str(v[0: 50])]})
+                keys.append({confid: [to_str(v[0: 50])]})
 
         self.logger.debug("keys: %s" % keys)
+        custom_fields = json_dumps(keys)
 
         # 利用基础服务更新员工自定义补填字段，
-        yield self.employee_ps.update_employee_custom_fields(self.current_user.sysuser.id, self.current_user.company.id, keys)
+        # 注意：对于email 认证 pending 状态的（待认证）员工，需要调用不同的基础服务接口
+        if fe_binding_stauts == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS:
+            yield self.employee_ps.update_employee_custom_fields(employee.id, custom_fields)
+
+        elif fe_binding_stauts == fe.FE_EMPLOYEE_BIND_STATUS_PENDING:
+            yield self.employee_ps.update_employee_custom_fields_for_email_pending(
+                self.current_user.sysuser.id, self.current_user.company.id, custom_fields)
+        else:
+            assert False
 
         next_url = self.params.next_url if self.params.next_url else self.make_url(path.POSITION_LIST, self.params)
         # 绑定成功回填自定义配置字段成功

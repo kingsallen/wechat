@@ -362,7 +362,6 @@ class ResumeUploadHandler(BaseHandler):
     """
     上传简历页面
     """
-
     @handle_response
     @gen.coroutine
     def get(self):
@@ -370,84 +369,10 @@ class ResumeUploadHandler(BaseHandler):
                          data=ObjectDict())
 
 
-class ChatbotResumeUploadHandler(BaseHandler):
-    """
-    Chatbot专用上传简历页面
-    """
-
-    @handle_response
-    @gen.coroutine
-    def get(self):
-        data = {'for_sharing': False}
-        if self.params.get('for_sharing') == '1':
-            api_data = (yield self.profile_ps.get_uploaded_profile(self.current_user.employee.id))['data']
-            position_data = json.loads(self.params.get('data'))
-            rids = [i['recommendation_id'] for i in position_data]
-            pids = [i['id'] for i in position_data]
-            name = api_data.pop('name')
-            censored_name = name[0] + '*' * (len(name) - 1)
-            data = {
-                'for_sharing': True,
-                'name': censored_name,
-                **api_data,
-            }
-            self.logger.debug('data for rendering is %s' % data)
-            self.params.share = yield self._make_share(
-                dict(rkey=','.join(str(i) for i in rids),
-                     pid=','.join(str(i) for i in pids),
-                     wechat_signature=self.current_user.wechat.signature))
-        self.render_page(template_name="chat/mobot-upload-resume.html", data=data)
-
-    @gen.coroutine
-    def _make_share(self, params):
-        link = self.make_url(
-            path.REFERRAL_CONFIRM,
-            params,
-            recom=self.position_ps._make_recom(self.current_user.sysuser.id))
-
-        company_info = yield self.company_ps.get_company(
-            conds={"id": self.current_user.company.id}, need_conf=True)
-
-        cover = self.share_url(company_info.logo)
-
-        share_info = ObjectDict({
-            "cover": cover,
-            "title": "【#name#】恭喜您已被内部员工推荐",
-            "description": "点击查看详情~",
-            "link": link
-        })
-        return share_info
-
-
-class ChatbotResumeSubmitHandler(BaseHandler):
-    @handle_response
-    @gen.coroutine
-    def post(self):
-        args = self.json_args
-        result = yield self.profile_ps.submit_upload_profile_from_chatbot(
-            name=args.name,
-            mobile=args.mobile,
-            employee_id=self.current_user.employee.id,
-            referral_reasons=args.referral_reasons,
-            file_name=args.file_name,
-        )
-        success = result.status == 0
-        data = {'name': args.name, 'success': success}
-        if success:
-            data['referral_id'] = result.data
-        url = '/m/chat/room?hr_id={}&wechat_signature={}&flag=4&data={}'.format(
-            self.json_args.hr_id,
-            self.current_user.wechat.signature,
-            urllib.parse.quote(json.dumps(data))
-        )
-        self.send_json_success({'next_url': url})
-
-
 class APIResumeUploadHandler(BaseHandler):
     """
     手机上传简历
     """
-
     @handle_response
     @gen.coroutine
     def post(self):
@@ -476,7 +401,6 @@ class ResumeSubmitHandler(BaseHandler):
     """
     简历上传成功
     """
-
     @handle_response
     @gen.coroutine
     def post(self):

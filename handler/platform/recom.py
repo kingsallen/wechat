@@ -13,7 +13,7 @@ import conf.message as msg
 from handler.base import BaseHandler
 from thrift_gen.gen.common.struct.ttypes import BIZException
 from util.common import ObjectDict
-from util.common.decorator import authenticated, handle_response
+from util.common.decorator import authenticated
 from util.tool.date_tool import curr_now_dateonly
 from util.wechat.core import get_temporary_qrcode
 import conf.path as path
@@ -366,17 +366,3 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
                     recommend_presentee=self.recommend_presentee,
                     message=message
                 )
-
-
-class ScanQrcodeHandler(BaseHandler):
-
-    @handle_response
-    @tornado.gen.coroutine
-    def get(self):
-        page_json = dict(
-            points=20
-        )
-
-        self.render_page(
-            template_name='employee/recom-scan-qrcode.html',
-            data=page_json)
