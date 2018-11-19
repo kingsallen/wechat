@@ -796,3 +796,11 @@ class InfraProfileDataService(DataService):
         """上传的简历提交"""
         res = yield http_tool.http_post(path.PROFILE_UPLOAD.format(user_id), params)
         return res
+
+    @gen.coroutine
+    def infra_submit_upload_profile_from_chatbot(self, params, employee_id):
+        return (yield http_tool.http_post(path.PROFILE_UPLOAD_FROM_CHATBOT.format(employee_id), params))
+
+    @gen.coroutine
+    def get_uploaded_profile(self, employee_id):
+        return (yield http_tool.http_get(path.PROFILE_UPLOAD_FROM_CHATBOT.format(employee_id)))
