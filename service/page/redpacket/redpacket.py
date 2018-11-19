@@ -231,7 +231,6 @@ class RedpacketPageService(PageService):
         except Exception as e:
             self.logger.error(traceback.format_exc())
 
-
     @gen.coroutine
     def handle_red_packet_employee_verification(self, user_id, company_id, redislocker):
         """对于 user_id, company_id

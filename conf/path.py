@@ -152,6 +152,7 @@ PROFILE_IMPORT = "crawler"
 PROFILE_OTHER_METADATA = "hraccount/custom/metadata"
 PROFILE_CUSTOMCV_CHECK = 'profile/check/other'
 PROFILE_UPLOAD = "profile/{}/upsert"
+PROFILE_UPLOAD_FROM_CHATBOT = "v1/employee/{}/referral/cache"
 PROFILE_FILE_PARSER = 'profile/file-parser'
 
 # 公司服务
@@ -190,11 +191,24 @@ BIND_REWARD = "hraccount/company/rewardconfig"
 UPDATE_RECOMMEND = "v1/employee/{}/referral"
 UPLOAD_RECOM_PROFILE = "v1/referral/file-parser"
 REFERRAL_INFO = "v1/referral-records/{}"
-INFRA_REFERRAL_CONFIRM = "v1/referral/claim"
+INFRA_REFERRAL_CONFIRM = "v1/referral/claim/batch"
 REFERRAL_POSITION_INFO_EMPLOYEE = "v1/employee/{}/referral-type"
 INFRA_REFERRAL_CRUCIAL_INFO = "v1/employee/{}/post-candidate-info"
 REFERRAL_QRCODE = "v1/referral/position/qrcode"
 REFERRAL_POSITION_LIST = "v1/referral/wechat/position/list"
+
+# 积分商城服务
+EMPLOYEE_MALL = '/employee/mall/index'
+MALL_GOOD = '/employee/mall/good/{good_id}'
+
+MALL_SWITCH = '/api/mall/manage/switch'
+LEFT_CREDIT = '/user/employee/{}'
+GOODS_LIST = '/api/mall/visit/goods'
+GOOD_DETAIL = '/api/mall/manage/goods/{good_id}'
+EXCHANGE = '/api/mall/visit/order'
+
+# 员工服务
+EMPLOYEE_CUSTOM_FIELD = "v1/employee/custom-field-values"
 
 # 隐私协议服务
 IF_PRIVACY_WINDOW = 'user/privacy_record/get'

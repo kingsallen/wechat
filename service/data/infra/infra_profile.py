@@ -618,22 +618,20 @@ class InfraProfileDataService(DataService):
         params = {"profile_id": profile_id}
         if record.get('city_name'):
             params.update({"city": record.city_name})
-        if record.get('position_name'):
-            for item in record.get('position_name'):
-                index = 0
-                params.update({"positions[{}]position_name".format(index): item.get("position_name")})
-                params.update({"positions[{}]position_code".format(index): item.get("position_code")})
-                index += 1
+        if record.get('position'):
+            position = record.get('position')
+            for i in range(len(position)):
+                params.update({"positions[{}]position_name".format(i): position[i]['position_name']})
+                params.update({"positions[{}]position_code".format(i): position[i]['position_code']})
         if record.get('worktype'):
             params.update({"worktype": record.worktype})
         if record.get('salary_code'):
             params.update({"salary_code": record.salary_code})
         if record.get('industry'):
-            for item in record.get('industry'):
-                index = 0
-                params.update({"industries[{}]industry_name".format(index): item.get("industry_name")})
-                params.update({"industries[{}]industry_code".format(index): item.get("industry_code")})
-                index += 1
+            industry = record.get('industry')
+            for i in range(len(industry)):
+                params.update({"industries[{}]industry_name".format(i): industry[i]['industry_name']})
+                params.update({"industries[{}]industry_code".format(i): industry[i]['industry_code']})
         if record.get('workstate'):
             params.update({"workstate": record.workstate})
 
@@ -650,24 +648,22 @@ class InfraProfileDataService(DataService):
         if record.get('city_name'):
             params.update({"city": record.city_name})
         if record.get('position'):
-            for item in record.get('position'):
-                index = 0
-                params.update({"positions[{}]position_name".format(index) : item.get("position_name")})
-                params.update({"positions[{}]position_code".format(index) : item.get("position_code")})
-                index += 1
+            position = record.get('position')
+            for i in range(len(position)):
+                params.update({"positions[{}]position_name".format(i): position[i]['position_name']})
+                params.update({"positions[{}]position_code".format(i): position[i]['position_code']})
         if record.get('worktype'):
             params.update({"worktype": record.worktype})
         if record.get('salary_code'):
             params.update({"salary_code": record.salary_code})
         if record.get('industry'):
-            for item in record.get('industry'):
-                index = 0
-                params.update({"industries[{}]industry_name".format(index) : item.get("industry_name")})
-                params.update({"industries[{}]industry_code".format(index) : item.get("industry_code")})
-                index += 1
+            industry = record.get('industry')
+            for i in range(len(industry)):
+                params.update({"industries[{}]industry_name".format(i) : industry[i]['industry_name']})
+                params.update({"industries[{}]industry_code".format(i) : industry[i]['industry_code']})
         if record.get('workstate'):
             params.update({"workstate": record.workstate})
-
+        self.logger.debug("update_profile:position_name----->{}".format(record.get('position_name')))
         self.logger.debug("update_profile:param======>{}".format(params))
 
         res = yield self.handle_profile_section(
@@ -796,3 +792,11 @@ class InfraProfileDataService(DataService):
         """上传的简历提交"""
         res = yield http_tool.http_post(path.PROFILE_UPLOAD.format(user_id), params)
         return res
+
+    @gen.coroutine
+    def infra_submit_upload_profile_from_chatbot(self, params, employee_id):
+        return (yield http_tool.http_post(path.PROFILE_UPLOAD_FROM_CHATBOT.format(employee_id), params))
+
+    @gen.coroutine
+    def get_uploaded_profile(self, employee_id):
+        return (yield http_tool.http_get(path.PROFILE_UPLOAD_FROM_CHATBOT.format(employee_id)))

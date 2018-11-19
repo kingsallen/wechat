@@ -6,7 +6,7 @@ import conf.common as const
 import conf.path as path
 from service.data.base import DataService
 from util.common import ObjectDict
-from util.tool.http_tool import http_get, http_post, http_put, unboxing, http_delete, http_post_multipart_form
+from util.tool.http_tool import http_get, http_post, http_put, unboxing, http_delete, http_post_multipart_form, http_patch
 from requests.models import Request
 from setting import settings
 from globals import env
@@ -79,6 +79,7 @@ class InfraEmployeeDataService(DataService):
 
     @gen.coroutine
     def upload_recom_profile(self, file_name, file_data, employee_id):
+        self.logger.debug("upload_file_name:{}".format(file_name))
         url = "{0}/{1}".format(settings['infra'], path.UPLOAD_RECOM_PROFILE)
         # requests的包不支持中文名文件上传，因此file_name单独传个字段
         request = Request(data={
@@ -142,4 +143,14 @@ class InfraEmployeeDataService(DataService):
     @gen.coroutine
     def get_employee_by_user_id(self, user_id):
         ret = yield http_get(path.INFRA_USER_EMPLOYEE_REFERRAL.format(user_id))
+        return ret
+
+    @gen.coroutine
+    def set_employee_custom_info(self, user_id, company_id, custom_fields_json):
+        params = ObjectDict({
+            "user_id": user_id,
+            "company_id": company_id,
+            "custom_field_values": custom_fields_json
+        })
+        ret = yield http_patch(path.EMPLOYEE_CUSTOM_FIELD, params)
         return ret
