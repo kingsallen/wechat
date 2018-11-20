@@ -258,7 +258,7 @@ class ChatRoomHandler(BaseHandler):
             template_name="chat/room.html",
             data={
                 "room_id": room_id,
-                "show_privacy_agreement": data_privacy
+                "show_privacy_agreement": bool(data_privacy)
             },
             config=config
         )
