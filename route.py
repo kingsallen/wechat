@@ -57,6 +57,7 @@ import handler.platform.referral_pc
 import handler.platform.award
 import handler.platform.mall
 import handler.platform.privacy
+import handler.platform.switch
 
 import handler.qx.app
 import handler.qx.aggregation
@@ -218,6 +219,8 @@ platform_routes = [
     (r'/api/bonus/claim/?',                          handler.platform.award.BonusClaimHandler,                  {"event": "api_bonus_cliam"}),
     (r"/api/mall/goods",                             handler.platform.mall.MallGoodsHandler,                    {"event": "mall_goods_list"}),
     (r"/api/mall/order",                             handler.platform.mall.MallExchangeHandler,                 {"event": "mall_exchange_imd"}),
+    (r'/api/position/popup/?',                       handler.platform.user.PositionDetailPopupHandler,          {"event": "referral_position_detail_popup"}),
+    (r"/api/switch[\/]*([a-z]+)*",                   handler.platform.switch.SwitchHandler,                     {"event": "switch_"}),
 
     (r'/api/privacy/agree/?',                        handler.platform.privacy.PrivacyHandler,                   {"event": "api_privacy_agreement"}),
     # 兼容老微信 url，进行302跳转

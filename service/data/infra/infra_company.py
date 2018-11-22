@@ -76,3 +76,17 @@ class InfraCompanyDataService(DataService):
         })
         res = yield http_get(path.ONLY_REFERRAL_REWARD, params)
         return res
+
+    @gen.coroutine
+    def get_crucial_info_state(self, company_id):
+        """
+         获取推荐人才关键信息开关状态
+        :param company_id:
+        :return:
+
+        """
+        params = ObjectDict({
+            "company_id": company_id,
+        })
+        res = yield http_get(path.INFRA_REFERRAL_CRUCIAL_INFO_SWITCH, params)
+        return res

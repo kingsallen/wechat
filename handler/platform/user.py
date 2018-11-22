@@ -727,3 +727,33 @@ class APIPositionRecomListCloseHandler(BaseHandler):
             wechat_id=self.current_user.wechat.id
         )
         self.write(res)
+
+
+class PositionDetailPopupHandler(BaseHandler):
+
+    @decorator.handle_response
+    @decorator.authenticated
+    @gen.coroutine
+    def get(self):
+        res = yield self.user_ps.get_popup_info(
+            user_id=self.current_user.sysuser.id,
+            company_id=self.current_user.company.id
+        )
+        res_data = res.get('data')
+        if not res_data:
+            self.send_json_error(message='获取弹层信息失败')
+
+        res_crucial_info_switch = yield self.company_ps.get_crucial_info_state(self.current_user.company.id)
+        switch = res_crucial_info_switch['data']
+
+        data = dict(
+            pv=res_data['current_position_count'],
+            df_pv=res_data['position_view_count'],
+            profile_completeness=res_data['profile_completeness'],
+            switch=dict(
+                df_pv_qrcode=res_data['position_wx_layer_qrcode'],
+                df_pv_profile=res_data['position_wx_layer_profile'],
+                recom_info_switch=switch
+            )
+        )
+        self.send_json_success(data)

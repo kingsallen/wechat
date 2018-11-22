@@ -654,13 +654,15 @@ class EmployeePageService(PageService):
         return is_employee
 
     @gen.coroutine
-    def update_recommend(self, employee_id, name, mobile, recom_reason, pid, type):
+    def update_recommend(self, employee_id, name, mobile, recom_reason, pid, type, relationship, recom_reason_text):
         params = ObjectDict({
             "name": name,
             "mobile": mobile,
             "referral_reasons": recom_reason,
             "position": pid,
-            "referral_type": type
+            "referral_type": type,
+            "relationship": relationship,
+            "recom_reason_text": recom_reason_text
         })
         res = yield self.infra_user_ds.update_recommend(params, employee_id)
         return res
@@ -716,7 +718,12 @@ class EmployeePageService(PageService):
             "email": params.email,
             "company": params.company_name,
             "job": params.position_name,
-            "referral_reasons": params.recom_reason
+            "referral_reasons": params.recom_reason,
+            "degree": params.degree,
+            "city": params.location,
+            "recom_reason_text": params.comment,
+            "relationship": params.relation,
+            "referral_type": 3    # 推荐人才关键信息
         })
         res = yield self.infra_employee_ds.update_referral_crucial_info(employee_id, data)
         return res
