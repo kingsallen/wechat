@@ -538,14 +538,14 @@ class UserPageService(PageService):
         return ret
 
     @gen.coroutine
-    def get_popup_info(self, user_id, company_id):
+    def get_popup_info(self, user_id, company_id, position_id):
         """
         获取候选人进入职位详情弹层数据
         :param user_id:
         :param company_id:
         :return:
         """
-        ret = yield self.infra_user_ds.get_popup_info(user_id, company_id)
+        ret = yield self.infra_user_ds.get_popup_info(user_id, company_id, position_id)
         return ret
 
     @gen.coroutine

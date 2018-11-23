@@ -33,6 +33,11 @@ class DictionaryPageService(PageService):
         return ret
 
     @tornado.gen.coroutine
+    def get_referral_relationship(self):
+        ret = yield self.get_constants(parent_code=CONSTANT_PARENT_CODE.REFERRAL_RELATIONSHIP)
+        return ret
+
+    @tornado.gen.coroutine
     def get_colleges(self):
         ret = yield self.infra_dict_ds.get_colleges()
         return ret
@@ -95,21 +100,3 @@ class DictionaryPageService(PageService):
                     return industry['type']
 
         return 0
-
-    @tornado.gen.coroutine
-    def get_referral_relationship(self):
-        """
-        获取内推-候选人与推荐人关系
-        :return:
-        """
-        ret = yield self.infra_dict_ds.get_referral_relationship()
-        return ret
-
-    @tornado.gen.coroutine
-    def get_degree(self):
-        """
-        获取学历
-        :return:
-        """
-        ret = yield self.infra_dict_ds.get_degree()
-        return ret

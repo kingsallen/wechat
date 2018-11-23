@@ -563,7 +563,8 @@ CONSTANT_PARENT_CODE = ObjectDict(
     INDUSTRY=3124,  # 期望行业
     REGISTER_SOURCE=4101,  # 用户注册来源(source)
     CONTINENT=9103,  # 大洲
-    ROCKETMAJOR_L1=990000  # 火箭一级专业
+    ROCKETMAJOR_L1=990000,  # 火箭一级专业
+    REFERRAL_RELATIONSHIP=3135,    # 被推荐人与内推人的关系
 )
 
 # hr_employee_cert_conf.auth_mode 的数据库枚举值

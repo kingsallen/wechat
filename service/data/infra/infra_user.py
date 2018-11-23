@@ -272,14 +272,15 @@ class InfraUserDataService(DataService):
         return res
 
     @gen.coroutine
-    def get_popup_info(self, user_id, company_id):
+    def get_popup_info(self, user_id, company_id, position_id):
         """
         候选人进入职位详情弹层数据接口
         :return:
         """
         params = ObjectDict({
             "user_id": user_id,
-            "company_id": company_id
+            "company_id": company_id,
+            "position_id": position_id
         })
         ret = yield http_get(path.INFRA_REFERRAL_POPUP, params)
         return ret

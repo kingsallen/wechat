@@ -488,21 +488,3 @@ class InfraDictDataService(DataService):
 
             self.cached_rocket_major = res
             return res
-
-    @gen.coroutine
-    def get_referral_relationship(self):
-        """
-        获取内推-候选人与推荐人关系
-        :return:
-        """
-        ret = yield http_get(path.DICT_REFERRAL_RELATIONSHIP)
-        return ret
-
-    @gen.coroutine
-    def get_degree(self):
-        """
-        获取学历
-        :return:
-        """
-        ret = yield http_get(path.DICT_DEGREE)
-        return ret

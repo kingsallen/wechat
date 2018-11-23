@@ -735,9 +735,11 @@ class PositionDetailPopupHandler(BaseHandler):
     @decorator.authenticated
     @gen.coroutine
     def get(self):
+        pid = self.params.position_id
         res = yield self.user_ps.get_popup_info(
             user_id=self.current_user.sysuser.id,
-            company_id=self.current_user.company.id
+            company_id=self.current_user.company.id,
+            position_id=pid
         )
         res_data = res.get('data')
         if not res_data:

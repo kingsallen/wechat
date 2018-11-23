@@ -25,12 +25,17 @@ class ReferralProfileHandler(BaseHandler):
         reward = reward if not data.flag or (data.flag and position_info.is_referral) else 0
 
         self.params.share = yield self._make_share()
+        relationship = yield self.dictionary_ps.get_referral_relationship()
+        format_relationship = [{'text': text, 'value': int(value)} for value, text in relationship.items()]
         self.render_page(template_name="employee/mobile-upload-resume.html",
                          data=ObjectDict({
                              "points": reward,
                              "job_title": position_info.title,
-                             "upload_resume": self.locale.translate("referral_upload")}
-                         ))
+                             "upload_resume": self.locale.translate("referral_upload"),
+                             "consts": dict(
+                                 relation=format_relationship
+                             )
+                         }))
 
     @gen.coroutine
     def _make_share(self):
@@ -314,8 +319,10 @@ class ReferralCrucialInfoHandler(BaseHandler):
         reward = reward if not data.flag or (data.flag and position_info.is_referral) else 0
         title = position_info.title
 
-        referral_relationship = yield self.dictionary_ps.get_referral_relationship()
-        degree = yield self.dictionary_ps.get_degree()
+        relationship = yield self.dictionary_ps.get_referral_relationship()
+        format_relationship = [{'text': text, 'value': int(value)} for value, text in relationship.items()]
+        degree = yield self.dictionary_ps.get_degrees()
+        format_degree = [{'text': text, 'value': int(value)} for value, text in degree.items()]
         required_fields = yield self.position_ps.get_position_required_fields(pid)
         self.params.share = yield self._make_share()
         self.render_page(template_name="employee/recom-candidate-info.html", data=ObjectDict({
@@ -323,8 +330,8 @@ class ReferralCrucialInfoHandler(BaseHandler):
             "points": reward,
             "required_fields": required_fields,
             "consts": dict(
-                relation=referral_relationship,
-                degree=degree
+                relation=format_relationship,
+                degree=format_degree
             )
         }))
 
