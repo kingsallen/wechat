@@ -247,6 +247,24 @@ DEGREE_SEARCH_REVERSE = {
     v: k for k, v in DEGREE_SEARCH_LOCALE.items()
 }
 
+RELATIONSHIP = {
+    "O": "common_relationship_other",
+    "1": "common_relationship_ex_superior",
+    "2": "common_relationship_ex_subordinate",
+    "3": "common_relationship_ex_colleague",
+    "4": "common_relationship_alumnus",
+    "5": "common_relationship_friend",
+}
+
+RELATIONSHIP_SEARCH_LOCALE = {
+    "其他": "common_relationship_other",
+    "前上级": "common_relationship_ex_superior",
+    "前下属": "common_relationship_ex_subordinate",
+    "非上下级的前同事关系": "common_relationship_ex_colleague",
+    "校友": "common_relationship_alumnus",
+    "亲友": "common_relationship_friend",
+}
+
 # 高级搜索筛选项
 SEARCH_CONDITION = {
     "1": "search_location",

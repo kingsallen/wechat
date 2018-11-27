@@ -379,6 +379,9 @@ class ChatbotResumeUploadHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         data = {'for_sharing': False}
+        relationship = yield self.dictionary_ps.get_referral_relationship(self.locale)
+        format_relationship = [{'text': text, 'value': int(value)} for value, text in relationship.items()]
+        data.update(consts=dict(relation=format_relationship))
         if self.params.get('for_sharing') == '1':
             api_data = (yield self.profile_ps.get_uploaded_profile(self.current_user.employee.id))['data']
             position_data = json.loads(self.params.get('data'))
@@ -389,6 +392,7 @@ class ChatbotResumeUploadHandler(BaseHandler):
             data = {
                 'for_sharing': True,
                 'name': censored_name,
+                'consts': dict(relation=format_relationship),
                 **api_data,
             }
             self.logger.debug('data for rendering is %s' % data)
@@ -430,6 +434,8 @@ class ChatbotResumeSubmitHandler(BaseHandler):
             employee_id=self.current_user.employee.id,
             referral_reasons=args.referral_reasons,
             file_name=args.file_name,
+            relationship=args.relation,
+            recom_reason_text=args.comment
         )
         success = result.status == 0
         data = {'name': args.name, 'success': success}

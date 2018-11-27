@@ -40,6 +40,13 @@
 "common_degree_middleschool","Middle School"
 "common_degree_technical_secondary_school","Middle School"
 
+"common_relationship_other","Others"
+"common_relationship_ex_superior","ex-superior"
+"common_relationship_ex_subordinate","ex-subordinate"
+"common_relationship_ex_colleague","ex-colleague"
+"common_relationship_alumnus","alumnus"
+"common_relationship_friend","friend"
+
 "common_experienced","Experienced"
 "common_graduate","Graduate"
 

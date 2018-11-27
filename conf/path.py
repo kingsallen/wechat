@@ -170,6 +170,7 @@ DICT_INDUSTRY = "dict/industry"
 DICT_POSITION = "dict/position"
 DICT_MAINLAND_COLLEGE = "dict/college"
 DICT_COLLEGE_BY_ID = "dict/college/abroad"
+DICT_COMMENT_TAGS_BY_CODE = 'dict/referral/evaluate'
 
 # 消息通知服务
 MESSAGE_TEMPLATE = "message/template"

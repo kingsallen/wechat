@@ -221,6 +221,7 @@ platform_routes = [
     (r"/api/mall/order",                             handler.platform.mall.MallExchangeHandler,                 {"event": "mall_exchange_imd"}),
     (r'/api/position/popup/?',                       handler.platform.user.PositionDetailPopupHandler,          {"event": "referral_position_detail_popup"}),
     (r"/api/switch[\/]*([a-z]+)*",                   handler.platform.switch.SwitchHandler,                     {"event": "switch_"}),
+    (r"/api/func/relation_tags/?",                   handler.platform.referral.ReferralCommentTagsHandler,      {"event": "referral_comment_tags"}),
 
     (r'/api/privacy/agree/?',                        handler.platform.privacy.PrivacyHandler,                   {"event": "api_privacy_agreement"}),
     # 兼容老微信 url，进行302跳转

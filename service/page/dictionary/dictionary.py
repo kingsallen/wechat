@@ -1,7 +1,7 @@
 # coding=utf-8
 
 from service.page.base import PageService
-from conf.common import CONSTANT_PARENT_CODE
+from conf.common import *
 import tornado.gen
 
 
@@ -28,13 +28,19 @@ class DictionaryPageService(PageService):
         return ret
 
     @tornado.gen.coroutine
-    def get_degrees(self):
+    def get_degrees(self, locale=None):
         ret = yield self.get_constants(parent_code=CONSTANT_PARENT_CODE.DEGREE_USER)
+        if locale:
+            for k in ret.keys():
+                ret[k] = locale.translate(DEGREE.get(k))
         return ret
 
     @tornado.gen.coroutine
-    def get_referral_relationship(self):
+    def get_referral_relationship(self, locale=None):
         ret = yield self.get_constants(parent_code=CONSTANT_PARENT_CODE.REFERRAL_RELATIONSHIP)
+        if locale:
+            for k in ret.keys():
+                ret[k] = locale.translate(RELATIONSHIP.get(k))
         return ret
 
     @tornado.gen.coroutine
@@ -100,3 +106,8 @@ class DictionaryPageService(PageService):
                     return industry['type']
 
         return 0
+
+    @tornado.gen.coroutine
+    def get_comment_tags_by_code(self, code):
+        res = yield self.infra_dict_ds.get_comment_tags_by_code(code)
+        return res

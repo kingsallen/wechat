@@ -217,7 +217,8 @@ class ProfilePageService(PageService):
         return (yield self.infra_profile_ds.get_uploaded_profile(employee_id))
 
     @gen.coroutine
-    def submit_upload_profile_from_chatbot(self, name, mobile, employee_id, referral_reasons, file_name):
+    def submit_upload_profile_from_chatbot(self, name, mobile, employee_id, referral_reasons, file_name,
+                                           relationship, recom_reason_text):
         """
         在chatbot简历上传页面提交推荐信息
         :param name:
@@ -225,6 +226,8 @@ class ProfilePageService(PageService):
         :param employee_id:
         :param referral_reasons:
         :param file_name:
+        :param relationship:
+        :param recom_reason_text:
         :return:
         """
         params = ObjectDict({
@@ -234,6 +237,8 @@ class ProfilePageService(PageService):
             'referral_reasons': referral_reasons,
             'file_name': file_name,
             'referral_type': 1,
+            'relationship': relationship,
+            'recom_reason_text': recom_reason_text
         })
         return (yield self.infra_profile_ds.infra_submit_upload_profile_from_chatbot(params, employee_id))
 

@@ -25,7 +25,7 @@ class ReferralProfileHandler(BaseHandler):
         reward = reward if not data.flag or (data.flag and position_info.is_referral) else 0
 
         self.params.share = yield self._make_share()
-        relationship = yield self.dictionary_ps.get_referral_relationship()
+        relationship = yield self.dictionary_ps.get_referral_relationship(self.locale)
         format_relationship = [{'text': text, 'value': int(value)} for value, text in relationship.items()]
         self.render_page(template_name="employee/mobile-upload-resume.html",
                          data=ObjectDict({
@@ -319,9 +319,9 @@ class ReferralCrucialInfoHandler(BaseHandler):
         reward = reward if not data.flag or (data.flag and position_info.is_referral) else 0
         title = position_info.title
 
-        relationship = yield self.dictionary_ps.get_referral_relationship()
+        relationship = yield self.dictionary_ps.get_referral_relationship(self.locale)
         format_relationship = [{'text': text, 'value': int(value)} for value, text in relationship.items()]
-        degree = yield self.dictionary_ps.get_degrees()
+        degree = yield self.dictionary_ps.get_degrees(self.locale)
         format_degree = [{'text': text, 'value': int(value)} for value, text in degree.items()]
         required_fields = yield self.position_ps.get_position_required_fields(pid)
         self.params.share = yield self._make_share()
@@ -371,3 +371,13 @@ class ReferralCrucialInfoApiHandler(BaseHandler):
                 "rkey": ret.data
             }))
             return
+
+
+class ReferralCommentTagsHandler(BaseHandler):
+
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        relation_code = self.params.relation
+        res = yield self.dictionary_ps.get_comment_tags_by_code(relation_code)
+        self.send_json_success(data=res)
