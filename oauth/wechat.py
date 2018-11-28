@@ -205,6 +205,8 @@ class WeChatOauth2Service(object):
         {"errcode":40003,"errmsg":" invalid openid"}
         """
         ret = yield http_get(wx_const.WX_OAUTH_GET_USERINFO % (self._access_token, openid), infra=False)
+        if ret.headimgurl and "http:" in ret.headimgurl:
+            ret.headimgurl = ret.headimgurl.replace("http:", "https:", 1)
         raise gen.Return(ret)
 
 

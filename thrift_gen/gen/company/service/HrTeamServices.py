@@ -203,3 +203,4 @@ class getHrTeams_result(object):
     """
     Attributes:
      - success
+    """
