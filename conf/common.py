@@ -248,7 +248,7 @@ DEGREE_SEARCH_REVERSE = {
 }
 
 RELATIONSHIP = {
-    "O": "common_relationship_other",
+    "0": "common_relationship_other",
     "1": "common_relationship_ex_superior",
     "2": "common_relationship_ex_subordinate",
     "3": "common_relationship_ex_colleague",
