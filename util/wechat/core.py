@@ -293,6 +293,8 @@ def get_wxuser(access_token, openid):
     """
     assert access_token and openid
     ret = yield http_get(wx.WX_INFO_USER_API % (access_token, openid), infra=False)
+    if ret.headimgurl and "http:" in ret.headimgurl:
+        ret.headimgurl = ret.headimgurl.replace("http:", "https:", 1)
     raise gen.Return(ret)
 
 
