@@ -18,7 +18,7 @@ from util.common.mq import award_publisher
 from util.tool.str_tool import gen_salary, add_item, split, gen_degree_v2, gen_experience_v2, languge_code_from_ua
 from util.tool.url_tool import url_append_query
 from util.wechat.template import position_view_five_notice_tpl, position_share_notice_employee_tpl
-from util.common.decorator import log_time
+from util.common.decorator import log_time, log_time_common_func
 
 
 class PositionHandler(BaseHandler):
@@ -302,7 +302,7 @@ class PositionHandler(BaseHandler):
 
         raise gen.Return(endorse)
 
-    @log_time
+    @log_time_common_func
     def _make_recommend_positions(self, locale, positions):
         """处理相似职位推荐"""
         if not positions:
@@ -396,6 +396,7 @@ class PositionHandler(BaseHandler):
 
         return parent_company_info
 
+    @log_time_common_func
     def _make_json_job_description(self, position_info):
         """构造职位描述"""
         if not position_info.accountabilities:
@@ -407,7 +408,7 @@ class PositionHandler(BaseHandler):
 
         return data
 
-    @log_time
+    @log_time_common_func
     def _make_json_job_require(self, position_info):
         """构造职位要求"""
         require = []
@@ -444,7 +445,7 @@ class PositionHandler(BaseHandler):
 
         return data
 
-    @log_time
+    @log_time_common_func
     def _make_json_job_attr_v2(self, position_info):
         """构造新JD的职位属性"""
 
@@ -473,7 +474,7 @@ class PositionHandler(BaseHandler):
 
         return data
 
-    @log_time
+    @log_time_common_func
     def _make_json_job_need(self, position_info):
         """构造职位要求"""
 
@@ -486,7 +487,7 @@ class PositionHandler(BaseHandler):
 
         return data
 
-    @log_time
+    @log_time_common_func
     def _make_json_job_feature(self, position_feature):
         """构造职位福利特色"""
         feature = []
@@ -500,7 +501,7 @@ class PositionHandler(BaseHandler):
             })
         return data
 
-    @log_time
+    @log_time_common_func
     def _make_json_job_company_info(self, company_info, did):
         """构造职位公司信息"""
         data = ObjectDict({
@@ -512,7 +513,7 @@ class PositionHandler(BaseHandler):
 
         return data
 
-    @log_time
+    @log_time_common_func
     def _make_json_job_require_old(self, position_info):
         """构造老微信样式的职位要求"""
         require = []
@@ -540,7 +541,7 @@ class PositionHandler(BaseHandler):
             })
         return data
 
-    @log_time
+    @log_time_common_func
     def _make_json_company_impression(self, company_info):
         """构造老微信样式的企业印象"""
 
@@ -556,7 +557,7 @@ class PositionHandler(BaseHandler):
             self.logger.warning("Warning: don't have company_info.impression")
         return data
 
-    @log_time
+    @log_time_common_func
     def _make_json_job_department(self, position_info):
         """构造老微信的所属部门，自定义职能，自定义属性"""
         data = ObjectDict({
@@ -567,6 +568,7 @@ class PositionHandler(BaseHandler):
 
         return data
 
+    @log_time_common_func
     def _make_json_job_attr(self, position_info):
         """构造老微信的职位属性"""
         data = ObjectDict({
@@ -774,7 +776,7 @@ class PositionHandler(BaseHandler):
 
 class PositionListInfraParamsMixin(BaseHandler):
 
-    @log_time
+    @log_time_common_func
     def make_position_list_infra_params(self):
         """构建调用基础服务职位列表的 params"""
         display_locale = self.get_current_locale()
