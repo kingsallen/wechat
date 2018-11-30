@@ -364,6 +364,7 @@ class PositionPageService(PageService):
             id=current_company.id,
         ))
 
+    @log_time
     @gen.coroutine
     def infra_get_position_list(self, params, is_referral=None):
         """职位列表"""
@@ -389,6 +390,7 @@ class PositionPageService(PageService):
             return position_list
         return res
 
+    @log_time
     @gen.coroutine
     def infra_get_position_list_rp_ext(self, position_list):
         """获取职位的红包信息"""
@@ -400,6 +402,7 @@ class PositionPageService(PageService):
             raise gen.Return([ObjectDict(e) for e in res.data])
         raise gen.Return(res)
 
+    @log_time
     @gen.coroutine
     def infra_get_rp_position_list(self, params):
         """红包职位列表"""
@@ -424,6 +427,7 @@ class PositionPageService(PageService):
             return rp_position_list
         return res
 
+    @log_time
     @gen.coroutine
     def infra_get_rp_share_info(self, params):
         """红包职位列表的分享信息"""
@@ -432,6 +436,7 @@ class PositionPageService(PageService):
             raise gen.Return(res.data)
         raise gen.Return(res)
 
+    @log_time
     @gen.coroutine
     def infra_get_position_employeerecom(self, infra_params, company_id):
         """
