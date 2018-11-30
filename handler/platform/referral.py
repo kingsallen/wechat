@@ -26,14 +26,13 @@ class ReferralProfileHandler(BaseHandler):
 
         self.params.share = yield self._make_share()
         relationship = yield self.dictionary_ps.get_referral_relationship(self.locale)
-        format_relationship = [{'text': text, 'value': int(value)} for value, text in relationship.items()]
         self.render_page(template_name="employee/mobile-upload-resume.html",
                          data=ObjectDict({
                              "points": reward,
                              "job_title": position_info.title,
                              "upload_resume": self.locale.translate("referral_upload"),
                              "consts": dict(
-                                 relation=format_relationship
+                                 relation=relationship
                              )
                          }))
 
@@ -320,7 +319,6 @@ class ReferralCrucialInfoHandler(BaseHandler):
         title = position_info.title
 
         relationship = yield self.dictionary_ps.get_referral_relationship(self.locale)
-        format_relationship = [{'text': text, 'value': int(value)} for value, text in relationship.items()]
         degree = yield self.dictionary_ps.get_degrees(self.locale)
         format_degree = [{'text': text, 'value': int(value)} for value, text in degree.items()]
         required_fields = yield self.position_ps.get_position_required_fields(pid)
@@ -330,7 +328,7 @@ class ReferralCrucialInfoHandler(BaseHandler):
             "points": reward,
             "required_fields": required_fields,
             "consts": dict(
-                relation=format_relationship,
+                relation=relationship,
                 degree=format_degree
             )
         }))

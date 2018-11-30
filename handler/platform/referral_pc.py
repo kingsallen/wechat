@@ -45,10 +45,9 @@ class ReferralUploadHandler(BaseHandler):
             res = yield self.company_ps.get_only_referral_reward(self.current_user.company.id)
             reward = reward if not res.flag or (res.flag and position_info.is_referral) else 0
             relationship = yield self.dictionary_ps.get_referral_relationship(self.locale)
-            format_relationship = [{'text': text, 'value': int(value)} for value, text in relationship.items()]
             data.update(
                 reward_point=reward,
-                consts=dict(relation=format_relationship)
+                consts=dict(relation=relationship)
             )
             self.render_page(template_name="employee/pc-upload-resume.html", data=data)
         else:

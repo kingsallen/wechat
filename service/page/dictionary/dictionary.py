@@ -41,7 +41,11 @@ class DictionaryPageService(PageService):
         if locale:
             for k in ret.keys():
                 ret[k] = locale.translate(RELATIONSHIP.get(k))
-        return ret
+        format_ret = [{'text': text, 'value': int(value)} for value, text in ret.items()]
+        format_ret_in_order = sorted(format_ret, key=lambda item: item['value'])
+        returned_data = format_ret_in_order[1:]
+        returned_data.append(format_ret_in_order[0])
+        return returned_data
 
     @tornado.gen.coroutine
     def get_colleges(self):
