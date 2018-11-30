@@ -247,6 +247,19 @@ DEGREE_SEARCH_REVERSE = {
     v: k for k, v in DEGREE_SEARCH_LOCALE.items()
 }
 
+# 最高学历
+HIGHEST_DEGREE = {
+    "1": "common_highest_degree_middleschool",
+    "2": "common_highest_degree_secondary_school",
+    "3": "common_highest_degree_highschool",
+    "4": "common_highest_degree_college",
+    "5": "common_highest_degree_university",
+    "6": "common_highest_degree_master",
+    "7": "common_highest_degree_doctor",
+    "8": "common_highest_degree_doctor_above",
+    "9": "common_highest_degree_other"
+}
+
 RELATIONSHIP = {
     "0": "common_relationship_other",
     "1": "common_relationship_ex_superior",

@@ -320,7 +320,6 @@ class ReferralCrucialInfoHandler(BaseHandler):
 
         relationship = yield self.dictionary_ps.get_referral_relationship(self.locale)
         degree = yield self.dictionary_ps.get_degrees(self.locale)
-        format_degree = [{'text': text, 'value': int(value)} for value, text in degree.items()]
         required_fields = yield self.position_ps.get_position_required_fields(pid)
         self.params.share = yield self._make_share()
         self.render_page(template_name="employee/recom-candidate-info.html", data=ObjectDict({
@@ -329,7 +328,7 @@ class ReferralCrucialInfoHandler(BaseHandler):
             "required_fields": required_fields,
             "consts": dict(
                 relation=relationship,
-                degree=format_degree
+                degree=degree
             )
         }))
 

@@ -31,21 +31,27 @@ class DictionaryPageService(PageService):
     def get_degrees(self, locale=None):
         ret = yield self.get_constants(parent_code=CONSTANT_PARENT_CODE.DEGREE_USER)
         if locale:
+            ret_ = dict()
             for k in ret.keys():
-                ret[k] = locale.translate(DEGREE.get(k))
+                ret_[k] = locale.translate(HIGHEST_DEGREE.get(k))
+            format_ret = [{'text': text, 'value': int(value)} for value, text in ret_.items()]
+            format_ret_in_order = sorted(format_ret, key=lambda item: item['value'])
+            return format_ret_in_order
         return ret
 
     @tornado.gen.coroutine
     def get_referral_relationship(self, locale=None):
         ret = yield self.get_constants(parent_code=CONSTANT_PARENT_CODE.REFERRAL_RELATIONSHIP)
         if locale:
+            ret_ = dict()
             for k in ret.keys():
-                ret[k] = locale.translate(RELATIONSHIP.get(k))
-        format_ret = [{'text': text, 'value': int(value)} for value, text in ret.items()]
-        format_ret_in_order = sorted(format_ret, key=lambda item: item['value'])
-        returned_data = format_ret_in_order[1:]
-        returned_data.append(format_ret_in_order[0])
-        return returned_data
+                ret_[k] = locale.translate(RELATIONSHIP.get(k))
+            format_ret = [{'text': text, 'value': int(value)} for value, text in ret_.items()]
+            format_ret_in_order = sorted(format_ret, key=lambda item: item['value'])
+            returned_data = format_ret_in_order[1:]
+            returned_data.append(format_ret_in_order[0])
+            return returned_data
+        return ret
 
     @tornado.gen.coroutine
     def get_colleges(self):
