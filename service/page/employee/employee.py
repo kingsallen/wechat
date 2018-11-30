@@ -18,6 +18,7 @@ from util.tool.url_tool import make_static_url, make_url
 from util.tool.str_tool import gen_salary, gen_experience_v2
 from util.wechat.core import get_temporary_qrcode
 from util.common.mq import unread_praise_publisher
+from util.common.decorator import log_time
 
 
 class EmployeePageService(PageService):
@@ -370,6 +371,7 @@ class EmployeePageService(PageService):
         result, data = yield self.infra_employee_ds.get_bind_reward(company_id)
         return data
 
+    @log_time
     @gen.coroutine
     def get_bind_reward(self, company_id, type=None):
         """获取指定规则的积分配置, 如果未指定规则，则获取该公司是否有带积分奖励的积分规则"""

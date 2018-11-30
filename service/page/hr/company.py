@@ -20,6 +20,7 @@ class CompanyPageService(PageService):
     def __init__(self):
         super(CompanyPageService, self).__init__()
 
+    @log_time
     @gen.coroutine
     def get_company(self, conds, need_conf=None, fields=None):
 

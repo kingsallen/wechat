@@ -18,7 +18,7 @@ from util.common.mq import award_publisher
 from util.tool.str_tool import gen_salary, add_item, split, gen_degree_v2, gen_experience_v2, languge_code_from_ua
 from util.tool.url_tool import url_append_query
 from util.wechat.template import position_view_five_notice_tpl, position_share_notice_employee_tpl
-from util.common.decorator import log_time
+from util.common.decorator import log_time, log_time_common_func
 
 
 class PositionHandler(BaseHandler):
@@ -221,6 +221,7 @@ class PositionHandler(BaseHandler):
             "update_time": position_info.update_time_ori,
         })
 
+    @log_time
     @gen.coroutine
     def _make_share_info(self, position_info, company_info):
         """构建 share 内容"""
@@ -272,6 +273,7 @@ class PositionHandler(BaseHandler):
         hr_account, hr_wx_user = yield self.position_ps.get_hr_info(publisher)
         raise gen.Return((hr_account, hr_wx_user))
 
+    @log_time
     @gen.coroutine
     def _make_endorse_info(self, position_info, company_info):
         """构建 JD 页左下角背书信息"""
@@ -300,6 +302,7 @@ class PositionHandler(BaseHandler):
 
         raise gen.Return(endorse)
 
+    @log_time_common_func
     def _make_recommend_positions(self, locale, positions):
         """处理相似职位推荐"""
         if not positions:
@@ -393,6 +396,7 @@ class PositionHandler(BaseHandler):
 
         return parent_company_info
 
+    @log_time_common_func
     def _make_json_job_description(self, position_info):
         """构造职位描述"""
         if not position_info.accountabilities:
@@ -404,6 +408,7 @@ class PositionHandler(BaseHandler):
 
         return data
 
+    @log_time_common_func
     def _make_json_job_require(self, position_info):
         """构造职位要求"""
         require = []
@@ -440,6 +445,7 @@ class PositionHandler(BaseHandler):
 
         return data
 
+    @log_time_common_func
     def _make_json_job_attr_v2(self, position_info):
         """构造新JD的职位属性"""
 
@@ -468,6 +474,7 @@ class PositionHandler(BaseHandler):
 
         return data
 
+    @log_time_common_func
     def _make_json_job_need(self, position_info):
         """构造职位要求"""
 
@@ -480,6 +487,7 @@ class PositionHandler(BaseHandler):
 
         return data
 
+    @log_time_common_func
     def _make_json_job_feature(self, position_feature):
         """构造职位福利特色"""
         feature = []
@@ -493,6 +501,7 @@ class PositionHandler(BaseHandler):
             })
         return data
 
+    @log_time_common_func
     def _make_json_job_company_info(self, company_info, did):
         """构造职位公司信息"""
         data = ObjectDict({
@@ -504,6 +513,7 @@ class PositionHandler(BaseHandler):
 
         return data
 
+    @log_time_common_func
     def _make_json_job_require_old(self, position_info):
         """构造老微信样式的职位要求"""
         require = []
@@ -531,6 +541,7 @@ class PositionHandler(BaseHandler):
             })
         return data
 
+    @log_time_common_func
     def _make_json_company_impression(self, company_info):
         """构造老微信样式的企业印象"""
 
@@ -546,6 +557,7 @@ class PositionHandler(BaseHandler):
             self.logger.warning("Warning: don't have company_info.impression")
         return data
 
+    @log_time_common_func
     def _make_json_job_department(self, position_info):
         """构造老微信的所属部门，自定义职能，自定义属性"""
         data = ObjectDict({
@@ -556,6 +568,7 @@ class PositionHandler(BaseHandler):
 
         return data
 
+    @log_time_common_func
     def _make_json_job_attr(self, position_info):
         """构造老微信的职位属性"""
         data = ObjectDict({
@@ -622,6 +635,7 @@ class PositionHandler(BaseHandler):
 
         return last_employee_user_id, last_employee_id
 
+    @log_time
     @gen.coroutine
     def _make_share_record(self, position_info, recom_user_id):
         """插入 position share record 的原子操作"""
@@ -646,6 +660,7 @@ class PositionHandler(BaseHandler):
 
         yield self.sharechain_ps.create_share_record(params)
 
+    @log_time
     @gen.coroutine
     def _refresh_share_chain(self, presentee_user_id, position_id, last_psc=None):
         """刷新链路的原子操作"""
@@ -656,6 +671,7 @@ class PositionHandler(BaseHandler):
         )
         raise gen.Return(inserted_share_chain_id)
 
+    @log_time
     @gen.coroutine
     def _redirect_when_recom_is_openid(self, position_info):
         """当recom是openid时，刷新链路，改变recom的值，跳转"""
@@ -708,6 +724,7 @@ class PositionHandler(BaseHandler):
                                                     link, position_info.title,
                                                     position_info.salary)
 
+    @log_time
     @gen.coroutine
     def _add_team_data(self, position_data, team, company_id, position_id, teamname_custom):
 
@@ -733,6 +750,7 @@ class PositionHandler(BaseHandler):
                 if module_team:
                     add_item(position_data, "module_mate_day", module_team)
 
+    @log_time
     @gen.coroutine
     def _make_team_position(self, team, position_id, company_id, teamname_custom):
         """团队职位，构造数据"""
@@ -741,11 +759,13 @@ class PositionHandler(BaseHandler):
             teamname_custom)
         raise gen.Return(res)
 
+    @log_time
     @gen.coroutine
     def _make_cms_page(self, team_id):
         res = yield self.position_ps.get_cms_page(team_id)
         return res
 
+    @log_time
     @gen.coroutine
     def _make_team(self, team, teamname_custom):
         """所属团队，构造数据"""
@@ -756,6 +776,7 @@ class PositionHandler(BaseHandler):
 
 class PositionListInfraParamsMixin(BaseHandler):
 
+    @log_time_common_func
     def make_position_list_infra_params(self):
         """构建调用基础服务职位列表的 params"""
         display_locale = self.get_current_locale()
@@ -816,6 +837,7 @@ class PositionListInfraParamsMixin(BaseHandler):
 class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
     """获取职位列表"""
 
+    @log_time
     @handle_response
     @check_employee
     @gen.coroutine
@@ -986,6 +1008,7 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
             if isinstance(position, dict) and position.in_hb:
                 yield position
 
+    @log_time
     @gen.coroutine
     def get_employee_position_list(self, recom_push_id, params):
         """
@@ -1044,6 +1067,7 @@ class PositionEmpNoticeHandler(BaseHandler):
 
 
 class PositionListHandler(PositionListInfraParamsMixin, BaseHandler):
+    @log_time
     @handle_response
     @check_employee
     @gen.coroutine
@@ -1162,6 +1186,7 @@ class PositionListHandler(PositionListInfraParamsMixin, BaseHandler):
 
 
 class PositionRecomListHandler(PositionListInfraParamsMixin, BaseHandler):
+    @log_time
     @handle_response
     @check_employee_common
     @gen.coroutine
@@ -1217,6 +1242,7 @@ class PositionRecomListHandler(PositionListInfraParamsMixin, BaseHandler):
 
 
 class PositionListSugHandler(PositionListInfraParamsMixin, BaseHandler):
+    @log_time
     @handle_response
     @check_employee
     @gen.coroutine
@@ -1246,6 +1272,7 @@ class PositionListSugHandler(PositionListInfraParamsMixin, BaseHandler):
 
 
 class PositionSearchHistoryHandler(BaseHandler):
+    @log_time
     @handle_response
     @authenticated
     @gen.coroutine
@@ -1260,6 +1287,7 @@ class PositionSearchHistoryHandler(BaseHandler):
         )
         self.write(res)
 
+    @log_time
     @handle_response
     @authenticated
     @gen.coroutine
