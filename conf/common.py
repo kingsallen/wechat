@@ -685,6 +685,10 @@ MARS_ID = 345
 PAGE_FROM_ONE = 1
 PAGE_SIZE_FIVE = 5
 
+# 内推候选人 关闭弹层
+REFERRAL_CLOSE_QRCODE = 0
+REFERRAL_CLOSE_PROFILE = 1
+
 # 榜单类型
 LADDER_TYPE = {"month": "1",
                "quarter": "2",

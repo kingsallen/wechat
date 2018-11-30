@@ -4,6 +4,7 @@ from tornado import gen
 
 from handler.base import BaseHandler
 from util.common.decorator import handle_response
+from conf.common import *
 
 
 class SwitchHandler(BaseHandler):
@@ -27,7 +28,6 @@ class SwitchHandler(BaseHandler):
         try:
             # 重置 event，准确描述
             self._event = self._event + method
-            self.logger.info("PLL test: %s" % method)
             yield getattr(self, 'post_' + method)()
         except Exception as e:
             self.send_json_error()
@@ -40,15 +40,14 @@ class SwitchHandler(BaseHandler):
         params: df_pv_qrcode: 关闭qrcode弹窗  type:0
                 df_pv_profile: 关闭简历完善引导弹层   type：1
         """
-        self.logger.info('PLL json args: %s ' % self.json_args)
         if self.json_args.get('df_pv_qrcode'):
             yield self.user_ps.close_popup_window(
                 self.current_user.sysuser.id,
                 self.current_user.company.id,
-                0)
+                REFERRAL_CLOSE_QRCODE)
         elif self.json_args.get('df_pv_profile'):
             yield self.user_ps.close_popup_window(
                 self.current_user.sysuser.id,
                 self.current_user.company.id,
-                1)
+                REFERRAL_CLOSE_PROFILE)
         self.send_json_success()
