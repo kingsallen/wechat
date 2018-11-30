@@ -816,6 +816,7 @@ class PositionListInfraParamsMixin(BaseHandler):
 class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
     """获取职位列表"""
 
+    @log_time
     @handle_response
     @check_employee
     @gen.coroutine

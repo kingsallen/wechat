@@ -138,6 +138,7 @@ class PositionPageService(PageService):
 
         raise gen.Return(position)
 
+    @log_time
     @gen.coroutine
     def get_position_custom_list(self, position_id_list):
         # 获取职位信息扩展信息列表
