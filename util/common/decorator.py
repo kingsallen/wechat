@@ -42,7 +42,7 @@ def handle_response(func):
 
             if self.request.headers.get("Content-Type", "").startswith("application/json") \
                 or self.request.method in ("PUT", "POST", "DELETE"):
-                self.send_json_error(message=getattr(e, "message", None))
+                self.send_json_error(message=getattr(e, "message", None), http_code=500)
             else:
                 self.write_error(500, message=getattr(e, "message", None))
                 return
