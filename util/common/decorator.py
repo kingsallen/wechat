@@ -556,7 +556,8 @@ def log_time(func):
             "for": "[{}_log_time]".format(func.__qualname__.split(".")[0]),
             "func_name": func.__name__,
             "doc": func.__doc__,
-            "time": (end - start) * 1000
+            "time": (end - start) * 1000,
+            "timestamp": time.time()
         }
         self.logger.info(json_dumps(c))
         return r
@@ -574,7 +575,8 @@ def log_time_common_func(func):
             "for": "[{}_log_time]".format(func.__qualname__.split(".")[0]),
             "func_name": func.__name__,
             "doc": func.__doc__,
-            "time": (end - start) * 1000
+            "time": (end - start) * 1000,
+            "timestamp": time.time()
         }
         self.logger.info(json_dumps(c))
         return r
