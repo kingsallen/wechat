@@ -227,7 +227,7 @@ def relate_user_and_former_employee(func):
                 body=json.dumps({'id': fe_id, 'user_id': self.current_user.sysuser.id}),
                 headers=HTTPHeaders({"Content-Type": "application/json"})
             )
-            self.logger.debug('former_employee api status code is: %s' % response.status)
+            self.logger.debug('former_employee api status code is: %s' % response.code)
         yield func(self, *args, **kwargs)
 
     return wrapper
