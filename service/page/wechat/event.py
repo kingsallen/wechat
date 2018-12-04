@@ -630,7 +630,7 @@ class EventPageService(PageService):
             elif type == 31:
                 # 老员工回聘,发送模板消息
                 response = yield AsyncHTTPClient().fetch(
-                    'http://{}/send/tmplmsg'.format(settings["rehire_host"]),
+                    'http://{}/send/tmplmsg/'.format(settings["rehire_host"]),
                     method='POST',
                     body=json.dumps({'user_id': wxuser.sysuser_id, 'company_id': wechat.company_id}),
                     headers=HTTPHeaders({"Content-Type": "application/json"})
