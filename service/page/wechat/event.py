@@ -625,7 +625,7 @@ class EventPageService(PageService):
                     raise gen.Return()
             elif type == 31:
                 # 老员工回聘,发送模板消息
-                yield http_post(f'http://{settings["rehire_host"]}/send/tmplmsg/',
+                yield http_post('http://{}/send/tmplmsg/'.format(settings["rehire_host"]),
                                 {'user_id': wxuser.sysuser_id}, infra=False)
             elif type == 30:
                 # 根据携带不同场景值的临时二维码，接续之前用户未完成的流程。
