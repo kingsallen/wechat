@@ -10,7 +10,10 @@
 import re
 import time
 import traceback
+import json
 from tornado import gen
+from tornado.httpclient import AsyncHTTPClient
+from tornado.httputil import HTTPHeaders
 
 import conf.common as const
 import conf.wechat as wx_const
@@ -626,8 +629,13 @@ class EventPageService(PageService):
                     raise gen.Return()
             elif type == 31:
                 # 老员工回聘,发送模板消息
-                yield http_post('http://{}/send/tmplmsg/'.format(settings["rehire_host"]),
-                                {'user_id': wxuser.sysuser_id}, infra=False)
+                response = yield AsyncHTTPClient().fetch(
+                    'http://{}/send/tmplmsg'.format(settings["rehire_host"]),
+                    method='POST',
+                    body=json.dumps({'user_id': wxuser.sysuser_id}),
+                    headers=HTTPHeaders({"Content-Type": "application/json"})
+                )
+                self.logger.debug('rehire send_tmplmsg api status code is: %s' % response.code)
             elif type == 30:
                 # 根据携带不同场景值的临时二维码，接续之前用户未完成的流程。
                 pattern_id = real_user_id

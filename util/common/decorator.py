@@ -12,7 +12,7 @@ from tornado import gen
 from tornado.locks import Semaphore
 from tornado.web import MissingArgumentError
 from tornado.httpclient import AsyncHTTPClient
-from tornado.httputil import  HTTPHeaders
+from tornado.httputil import HTTPHeaders
 
 import conf.common as const
 import conf.message as msg
