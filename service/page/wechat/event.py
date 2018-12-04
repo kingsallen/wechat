@@ -506,6 +506,7 @@ class EventPageService(PageService):
             int_scene_id = int_scene_id.group(1)
             type = int(bin(int(int_scene_id))[:7], base=2)
             real_user_id = int(bin(int(int_scene_id))[7:], base=2)
+            self.logger.info('qrcode scene_id is: {}, type is: {}, id is: {}'.format(int_scene_id, type, real_user_id))
             """
               type: 
               "11000" = 24 pc端用户解绑,
