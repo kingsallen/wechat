@@ -242,10 +242,7 @@ def _async_http_post(route, jdata=None, timeout=5, method='POST', infra=True):
             .format(method.lower(), url, ujson.encode(jdata),
                     ujson.decode(response.body)))
 
-    if infra or response.body:
-        body = objectdictify(ujson.decode(response.body))
-    else:
-        body = None
+    body = objectdictify(ujson.decode(response.body))
     if infra and body.status in INFRA_ERROR_CODES:
         raise InfraOperationError(body.message)
 

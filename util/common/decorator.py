@@ -11,6 +11,8 @@ from urllib.parse import urlencode
 from tornado import gen
 from tornado.locks import Semaphore
 from tornado.web import MissingArgumentError
+from tornado.httpclient import AsyncHTTPClient
+from tornado.httputil import  HTTPHeaders
 
 import conf.common as const
 import conf.message as msg
@@ -23,7 +25,6 @@ from util.common.cipher import encode_id
 from util.tool.dict_tool import sub_dict
 from util.tool.json_tool import json_dumps
 from util.tool.str_tool import to_hex
-from util.tool.http_tool import http_patch
 from setting import settings
 
 
@@ -220,9 +221,13 @@ def relate_user_and_former_employee(func):
         fe_id = self.params.former_employee_id
         if fe_id:
             self.logger.debug('former employee id is: %s')
-            yield http_patch('http://{}/former-employee'.format(settings["rehire_host"]),
-                             {'id': fe_id, 'user_id': self.current_user.sysuser.id},
-                             infra=False)
+            response = yield AsyncHTTPClient().fetch(
+                'http://{}/former-employee'.format(settings["rehire_host"]),
+                method='PATCH',
+                body=json.dumps({'id': fe_id, 'user_id': self.current_user.sysuser.id}),
+                headers=HTTPHeaders({"Content-Type": "application/json"})
+            )
+            self.logger.debug('former_employee api status code is: %s' % response.status)
         yield func(self, *args, **kwargs)
 
     return wrapper
