@@ -10,7 +10,7 @@ from util.common.decorator import handle_response
 
 class ShortURLGenerator(BaseHandler):
     @handle_response
-    @gen.coroutine()
+    @gen.coroutine
     def post(self):
         url = self.json_args['url']
         uuid = self._generate_short_url(url)
@@ -31,6 +31,8 @@ class ShortURLGenerator(BaseHandler):
 
 
 class ShortURLRedirector(BaseHandler):
+    @handle_response
+    @gen.coroutine
     def get(self, uuid):
         url = redis.get('tinyurl_%s' % uuid)
         if url:
