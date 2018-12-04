@@ -23,9 +23,12 @@ from util.tool.date_tool import curr_now
 from util.tool.str_tool import mobile_validate
 from util.common import ObjectDict
 from util.tool.json_tool import json_dumps
+from util.tool.http_tool import http_post
 from util.wechat.core import get_wxuser, send_succession_message
 from util.common.mq import user_follow_wechat_publisher, user_unfollow_wechat_publisher
 from service.page.user.user import UserPageService
+
+from setting import settings
 
 
 class EventPageService(PageService):
@@ -621,15 +624,9 @@ class EventPageService(PageService):
                     yield self.infra_user_ds.post_scanresult(params)
                     raise gen.Return()
             elif type == 31:
-                # Mars EDM活动的用户，与EDM数据表关联起来
-                user = yield self.campaign_mars_edm_subscribe_ds.get_mars_user({
-                    "id": real_user_id
-                })
-                if user:
-                    yield self.campaign_mars_edm_subscribe_ds.update_mars_user(
-                        conds={"id": real_user_id},
-                        fields={"wxuser_id": wxuser.id}
-                    )
+                # 老员工回聘,发送模板消息
+                yield http_post(f'http://{settings["rehire_host"]}/send/tmplmsg/',
+                                {'user_id': wxuser.sysuser_id}, infra=False)
             elif type == 30:
                 # 根据携带不同场景值的临时二维码，接续之前用户未完成的流程。
                 pattern_id = real_user_id

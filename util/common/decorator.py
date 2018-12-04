@@ -220,7 +220,7 @@ def relate_user_and_former_employee(func):
         fe_id = self.params.former_employee_id
         if fe_id:
             self.logger.debug('former employee id is: %s')
-            yield http_patch(f'http://{settings["rehire_host"]}/former-employee',
+            yield http_patch('http://{}/former-employee'.format(settings["rehire_host"]),
                              {'id': fe_id, 'user_id': self.current_user.sysuser.id},
                              infra=False)
         yield func(self, *args, **kwargs)
