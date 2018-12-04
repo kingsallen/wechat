@@ -49,3 +49,4 @@ ujson==1.35
 urllib3==1.21.1
 wcwidth==0.1.7
 wrapt==1.10.10
+shortuuid==0.5.0
