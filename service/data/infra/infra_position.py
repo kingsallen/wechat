@@ -162,6 +162,21 @@ class InfraPositionDataService(DataService):
             ))
         return res
 
+    @gen.coroutine
+    def get_position_required_fields(self, position_id):
+        """
+        推荐关键信息-简历字段必填项数据获取
+        :param position_id:
+        :return:
+        """
+        res = yield http_get(
+            path.INFRA_POSITION_REQUIRED_FIELDS,
+            dict(
+                position_id=position_id
+            )
+        )
+        return res
+
 
 class TestEmployeeService(AsyncTestCase):
     """Just for test(or try results) during development :)"""

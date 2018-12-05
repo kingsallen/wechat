@@ -41,6 +41,22 @@
 "common_degree_technical_secondary_school","中专"
 "search_degree_technical_secondary_school","中专"
 
+"common_highest_degree_middleschool","初中及以下"
+"common_highest_degree_secondary_school","中专"
+"common_highest_degree_highschool","高中"
+"common_highest_degree_college","大专"
+"common_highest_degree_university","本科"
+"common_highest_degree_master","硕士"
+"common_highest_degree_doctor","博士"
+"common_highest_degree_doctor_above","博士以上"
+"common_highest_degree_other","其他"
+
+"common_relationship_other","其他"
+"common_relationship_ex_superior","前上级"
+"common_relationship_ex_subordinate","前下属"
+"common_relationship_ex_colleague","非上下级的前同事关系"
+"common_relationship_alumnus","校友"
+"common_relationship_friend","亲友"
 
 "common_experienced","社招"
 "common_graduate","校招"

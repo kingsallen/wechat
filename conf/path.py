@@ -170,6 +170,7 @@ DICT_INDUSTRY = "dict/industry"
 DICT_POSITION = "dict/position"
 DICT_MAINLAND_COLLEGE = "dict/college"
 DICT_COLLEGE_BY_ID = "dict/college/abroad"
+DICT_COMMENT_TAGS_BY_CODE = 'dict/referral/evaluate'
 
 # 消息通知服务
 MESSAGE_TEMPLATE = "message/template"
@@ -196,6 +197,10 @@ REFERRAL_POSITION_INFO_EMPLOYEE = "v1/employee/{}/referral-type"
 INFRA_REFERRAL_CRUCIAL_INFO = "v1/employee/{}/post-candidate-info"
 REFERRAL_QRCODE = "v1/referral/position/qrcode"
 REFERRAL_POSITION_LIST = "v1/referral/wechat/position/list"
+INFRA_REFERRAL_CRUCIAL_INFO_SWITCH = 'v1/referral/conf/information'
+INFRA_REFERRAL_POPUP = 'v1/candidate/position/info'
+INFRA_REFERRAL_CLOSE_POPUP_WINDOW = 'v1/candidate/elastic/layer'
+INFRA_POSITION_REQUIRED_FIELDS = 'v1/referral/information/colum'
 
 # 积分商城服务
 EMPLOYEE_MALL = '/employee/mall/index'

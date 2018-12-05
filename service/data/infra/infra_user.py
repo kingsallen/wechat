@@ -271,3 +271,33 @@ class InfraUserDataService(DataService):
         res = yield http_put(path.INFRA_USER_CLAIM_BONUS.format(bonus_id))
         return res
 
+    @gen.coroutine
+    def get_popup_info(self, user_id, company_id, position_id):
+        """
+        候选人进入职位详情弹层数据接口
+        :return:
+        """
+        params = ObjectDict({
+            "user_id": user_id,
+            "company_id": company_id,
+            "position_id": position_id
+        })
+        ret = yield http_get(path.INFRA_REFERRAL_POPUP, params)
+        return ret
+
+    @gen.coroutine
+    def close_popup_window(self, user_id, company_id, type):
+        """
+        候选人职位详情弹层关闭
+        :param user_id:
+        :param company_id:
+        :param type: int   0 二维码弹层 1 简历完善度弹层
+        :return:
+        """
+        params = ObjectDict({
+            "user_id": user_id,
+            "company_id": company_id,
+            "type": type
+        })
+        ret = yield http_put(path.INFRA_REFERRAL_CLOSE_POPUP_WINDOW, params)
+        return ret

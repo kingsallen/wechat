@@ -488,3 +488,18 @@ class InfraDictDataService(DataService):
 
             self.cached_rocket_major = res
             return res
+
+    @gen.coroutine
+    def get_comment_tags_by_code(self, code):
+        """
+        根据不同的推荐人和被推荐人关系获取不同的评价标签
+        :param code: 推荐关系编号
+        :return:
+        """
+        res = yield http_get(
+            path.DICT_COMMENT_TAGS_BY_CODE,
+            jdata=dict(code=code)
+        )
+        res_data = res.data
+        returned_data = [{"zh": item['tag'], "en": item['tag_en']} for item in res_data]
+        return returned_data

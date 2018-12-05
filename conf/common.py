@@ -247,6 +247,37 @@ DEGREE_SEARCH_REVERSE = {
     v: k for k, v in DEGREE_SEARCH_LOCALE.items()
 }
 
+# 最高学历
+HIGHEST_DEGREE = {
+    "1": "common_highest_degree_middleschool",
+    "2": "common_highest_degree_secondary_school",
+    "3": "common_highest_degree_highschool",
+    "4": "common_highest_degree_college",
+    "5": "common_highest_degree_university",
+    "6": "common_highest_degree_master",
+    "7": "common_highest_degree_doctor",
+    "8": "common_highest_degree_doctor_above",
+    "9": "common_highest_degree_other"
+}
+
+RELATIONSHIP = {
+    "0": "common_relationship_other",
+    "1": "common_relationship_ex_superior",
+    "2": "common_relationship_ex_subordinate",
+    "3": "common_relationship_ex_colleague",
+    "4": "common_relationship_alumnus",
+    "5": "common_relationship_friend",
+}
+
+RELATIONSHIP_SEARCH_LOCALE = {
+    "其他": "common_relationship_other",
+    "前上级": "common_relationship_ex_superior",
+    "前下属": "common_relationship_ex_subordinate",
+    "非上下级的前同事关系": "common_relationship_ex_colleague",
+    "校友": "common_relationship_alumnus",
+    "亲友": "common_relationship_friend",
+}
+
 # 高级搜索筛选项
 SEARCH_CONDITION = {
     "1": "search_location",
@@ -563,7 +594,8 @@ CONSTANT_PARENT_CODE = ObjectDict(
     INDUSTRY=3124,  # 期望行业
     REGISTER_SOURCE=4101,  # 用户注册来源(source)
     CONTINENT=9103,  # 大洲
-    ROCKETMAJOR_L1=990000  # 火箭一级专业
+    ROCKETMAJOR_L1=990000,  # 火箭一级专业
+    REFERRAL_RELATIONSHIP=3135,    # 被推荐人与内推人的关系
 )
 
 # hr_employee_cert_conf.auth_mode 的数据库枚举值
@@ -652,6 +684,10 @@ MARS_ID = 345
 # 积分排行榜
 PAGE_FROM_ONE = 1
 PAGE_SIZE_FIVE = 5
+
+# 内推候选人 关闭弹层
+REFERRAL_CLOSE_QRCODE = 0
+REFERRAL_CLOSE_PROFILE = 1
 
 # 榜单类型
 LADDER_TYPE = {"month": "1",

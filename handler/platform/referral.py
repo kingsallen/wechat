@@ -25,12 +25,16 @@ class ReferralProfileHandler(BaseHandler):
         reward = reward if not data.flag or (data.flag and position_info.is_referral) else 0
 
         self.params.share = yield self._make_share()
+        relationship = yield self.dictionary_ps.get_referral_relationship(self.locale)
         self.render_page(template_name="employee/mobile-upload-resume.html",
                          data=ObjectDict({
                              "points": reward,
                              "job_title": position_info.title,
-                             "upload_resume": self.locale.translate("referral_upload")}
-                         ))
+                             "upload_resume": self.locale.translate("referral_upload"),
+                             "consts": dict(
+                                 relation=relationship
+                             )
+                         }))
 
     @gen.coroutine
     def _make_share(self):
@@ -67,11 +71,13 @@ class ReferralProfileAPIHandler(BaseHandler):
         name = self.json_args.name
         mobile = self.json_args.mobile
         recom_reason = self.json_args.recom_reason
+        relationship = self.json_args.relation
+        recom_reason_text = self.json_args.comment
         pid = self.json_args.pid
         user_info = yield self.employee_ps.get_employee_info_by_user_id(self.current_user.sysuser.id)
         employee_id = self.current_user.employee.id if not user_info.employee_id else user_info.employee_id
         res = yield self.employee_ps.update_recommend(employee_id, name, mobile, recom_reason, pid,
-                                                      type)
+                                                      type, relationship, recom_reason_text)
         if res.status == const.API_SUCCESS:
             if type == 1:
                 self.send_json_success(data=ObjectDict({
@@ -311,10 +317,19 @@ class ReferralCrucialInfoHandler(BaseHandler):
         data = yield self.company_ps.get_only_referral_reward(self.current_user.company.id)
         reward = reward if not data.flag or (data.flag and position_info.is_referral) else 0
         title = position_info.title
+
+        relationship = yield self.dictionary_ps.get_referral_relationship(self.locale)
+        degree = yield self.dictionary_ps.get_degrees(self.locale)
+        required_fields = yield self.position_ps.get_position_required_fields(pid)
         self.params.share = yield self._make_share()
         self.render_page(template_name="employee/recom-candidate-info.html", data=ObjectDict({
             "job_title": title,
-            "points": reward
+            "points": reward,
+            "required_fields": required_fields,
+            "consts": dict(
+                relation=relationship,
+                degree=degree
+            )
         }))
 
     @gen.coroutine
@@ -353,3 +368,13 @@ class ReferralCrucialInfoApiHandler(BaseHandler):
                 "rkey": ret.data
             }))
             return
+
+
+class ReferralCommentTagsHandler(BaseHandler):
+
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        relation_code = self.params.relation
+        res = yield self.dictionary_ps.get_comment_tags_by_code(relation_code)
+        self.send_json_success(data=res)

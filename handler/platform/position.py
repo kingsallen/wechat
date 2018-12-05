@@ -108,9 +108,14 @@ class PositionHandler(BaseHandler):
             else:
                 position_info.is_rp_reward = False
 
+            # 获取推荐人才关键信息开关状态
+            res_crucial_info_switch = yield self.company_ps.get_crucial_info_state(self.current_user.company.id)
+            switch = res_crucial_info_switch.data
+
             header = yield self._make_json_header(
                 position_info, company_info, star, application, endorse,
-                can_apply, team.id if team else 0, did, teamname_custom, reward, share_reward, has_point_reward, bonus)
+                can_apply, team.id if team else 0, did, teamname_custom,
+                reward, share_reward, has_point_reward, bonus, switch)
             module_job_description = self._make_json_job_description(position_info)
             module_job_need = self._make_json_job_need(position_info)
             position_feature = yield self.position_ps.get_position_feature(position_id)
@@ -346,7 +351,8 @@ class PositionHandler(BaseHandler):
     @log_time
     @gen.coroutine
     def _make_json_header(self, position_info, company_info, star, application,
-                          endorse, can_apply, team_id, did, teamname_custom, reward, share_reward, has_point_reward, bonus):
+                          endorse, can_apply, team_id, did, teamname_custom, reward, share_reward, has_point_reward,
+                          bonus, switch):
         """构造头部 header 信息"""
 
         # 获得母公司配置信息
@@ -376,7 +382,8 @@ class PositionHandler(BaseHandler):
             "is_referral": position_info.is_referral if self.current_user.employee else False,
             "share_reward": share_reward,
             "has_point_reward": has_point_reward,
-            "bonus": bonus
+            "bonus": bonus,
+            "recom_info_switch": switch
             # "team": position_info.department.lower() if position_info.department else ""
         })
 

@@ -536,3 +536,26 @@ class UserPageService(PageService):
             ret.mobile_display = '+{}-{}'.format(ret.country_code, ret.mobile_display)
 
         return ret
+
+    @gen.coroutine
+    def get_popup_info(self, user_id, company_id, position_id):
+        """
+        获取候选人进入职位详情弹层数据
+        :param user_id:
+        :param company_id:
+        :return:
+        """
+        ret = yield self.infra_user_ds.get_popup_info(user_id, company_id, position_id)
+        return ret
+
+    @gen.coroutine
+    def close_popup_window(self, user_id, company_id, type):
+        """
+        候选人职位详情页面弹层关闭
+        :param user_id:
+        :param company_id:
+        :param type: int 0 二维码弹层 1简历完善度弹层
+        :return:
+        """
+        ret = yield self.infra_user_ds.close_popup_window(user_id, company_id, type)
+        return ret

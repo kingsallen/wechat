@@ -333,3 +333,12 @@ class CompanyPageService(PageService):
                 ret.update(hr_logo=make_static_url(hr_wxuser.headimgurl))
 
         return ret
+
+    @gen.coroutine
+    def get_crucial_info_state(self, company_id):
+        """
+        获取推荐人才关键信息开关状态
+        :return:
+        """
+        ret = yield self.infra_company_ds.get_crucial_info_state(company_id)
+        return ret

@@ -619,3 +619,10 @@ class PositionPageService(PageService):
         ret = yield self.infra_position_ds.get_position_bonus(pid)
         bonus = ret.data.position_bonus.get("total_bonus")
         return bonus
+
+    @gen.coroutine
+    def get_position_required_fields(self, position_id):
+        ret = yield self.infra_position_ds.get_position_required_fields(position_id)
+        required_fields = [k for k, v in ret.data.items() if v and not k.startswith('set_')]
+        return required_fields
+
