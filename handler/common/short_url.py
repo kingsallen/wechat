@@ -1,11 +1,11 @@
 from tornado import gen
 
-from handler.base import BaseHandler
+from handler.base import MetaBaseHandler
 from globals import redis
 from util.common.decorator import handle_response
 
 
-class ShortURLRedirector(BaseHandler):
+class ShortURLRedirector(MetaBaseHandler):
     @handle_response
     @gen.coroutine
     def get(self, uuid):
