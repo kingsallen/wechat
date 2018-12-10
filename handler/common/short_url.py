@@ -9,7 +9,7 @@ class ShortURLRedirector(MetaBaseHandler):
     @handle_response
     @gen.coroutine
     def get(self, uuid):
-        url = redis.get('tinyurl_%s' % uuid)
+        url = redis.get('tinyurl_%s' % uuid, prefix=False)
         if url:
             self.redirect(url)
         else:
