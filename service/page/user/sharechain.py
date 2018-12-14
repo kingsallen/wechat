@@ -441,7 +441,7 @@ class SharechainPageService(PageService):
         )
         for r in records:
             user = ObjectDict()
-            user_id = r.recom_user_id
+            user_id = r.presentee_user_id
             user_info = self.user_user_ds.get_user(conds={"id": user_id})
             user['name'] = user_info.name or user_info.nickname
             user['headimg'] = make_static_url(user_info.headimg or const.SYSUSER_HEADIMG)
@@ -454,6 +454,7 @@ class SharechainPageService(PageService):
             user['click_from'] = r.click_from or 2
             user['click_time'] = r.create_time
             user['position_title'] = position.title
+            user['id'] = user_id
             users.append(user)
         return users
 

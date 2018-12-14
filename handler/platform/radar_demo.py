@@ -15,7 +15,7 @@ class RadarDemoHandler(BaseHandler):
 
     @gen.coroutine
     def get(self):
-        self.render_page(template_name="", data=ObjectDict())
+        self.render_page(template_name="radar/index.html", data=ObjectDict())
 
 
 class RadarDemoApiHandler(BaseHandler):
@@ -34,6 +34,7 @@ class RadarDemoApiHandler(BaseHandler):
 
 hack_data = [
     {
+        "id": 111111,
         "name": "陈迪",
         "headimg": "http://thirdwx.qlogo.cn/mmopen/Q3auHgzwzM5bdNZA3dQ6Ddj47omFnwC9oZTDy1ibpOmOg2LsQKE5291EHaddBKOkeicakiaNrb1XQF7jJfWBkJzog/132",
         "is_hack": True,
@@ -42,6 +43,7 @@ hack_data = [
         "click_time": "2018-12-20 07:12:43",
         "position_title": "{}".format(position.title)},
     {
+        "id": 111112,
         "name": "Towry",
         "headimg": "https://thirdwx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTJ1Q15bKpUb0vXGCgLjYHpiaBDGZohOrqh1TUKvS1IAusibRtk6mUWF6AMcLfjReHz2O3uO4XJWVcpw/132",
         "is_hack": True,
@@ -51,6 +53,7 @@ hack_data = [
         "position_title": "{}".format(position.title)
     },
     {
+        "id": 111113,
         "name": "Sunny",
         "headimg": "https://thirdwx.qlogo.cn/mmopen/vi_32/8hN3qjD08YAmwiashKFhZQEN18WaqaKQygThnSWpNicYIZroucggHxm2x3pk6TMtnOzQh3WpBvIGXHpd6mwXiag7w/132",
         "is_hack": True,
@@ -60,6 +63,7 @@ hack_data = [
         "position_title": "{}".format(position.title)
     },
     {
+        "id": 111114,
         "name": "Jack Weng",
         "headimg": "https://thirdwx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTK3HJD1CfyeTuJpSgUK2p2aVGd4FA2BXIiaTvmxcyWrzbsEUhb532ZNP0pMEAz3BUPl8PAh9jRnweg/132",
         "is_hack": True,
@@ -69,6 +73,7 @@ hack_data = [
         "position_title": "{}".format(position.title)
     },
     {
+        "id": 111115,
         "name": "Neil",
         "headimg": "https://thirdwx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTLMcEQkPTX3gF6bodiat42ic4u3icSkia8iaYlFOo5NS4E3tiap5UDEsCZHgo2Rww2MmKl5pvkC9n7icWtIQ/132",
         "is_hack": True,
@@ -78,4 +83,3 @@ hack_data = [
         "position_title": "{}".format(position.title)
     },
 ]
-
