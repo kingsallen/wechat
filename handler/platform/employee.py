@@ -11,7 +11,7 @@ import conf.path as path
 from handler.base import BaseHandler
 from handler.platform.user import UserSurveyConstantMixin
 from util.common import ObjectDict
-from util.common.decorator import handle_response, authenticated
+from util.common.decorator import handle_response, authenticated, check_employee_common
 from util.tool.json_tool import json_dumps
 from util.tool.str_tool import to_str
 from urllib import parse
@@ -819,3 +819,201 @@ class EmployeeAiRecomHandler(BaseHandler):
         })
 
         return share_info
+
+
+class EmployeeReferralCardsHandler(BaseHandler):
+    """
+    十分钟消息推送卡片
+    """
+
+    @handle_response
+    @check_employee_common
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        """
+        获取卡片信息
+        params:
+        user_id: 收到消息模板的员工的user_id
+        send_timestamp: 发送消息模板的时间
+        page_size: 分页获取卡片数据
+        page_number: 页码
+        :return:
+        {
+            "status": 0,
+            "message": "success",
+            "data": {
+                "cards":[
+                    {
+                        user_id: 123, // 用户id.
+                        nickname: 'panlingling', // 微信昵称
+                        avatar: 'http://url', // 用户头像.
+                        pv: 2, // 浏览职位的次数.
+                        position_name: '职位名称',
+                        degree: 1, // 几度.
+                        pid: 123, // 职位id.
+                        chain: [
+                          {
+                            user_id: 12345
+                            nickname: '牛牛',
+                            avatar: '',
+                          },
+                          // ...
+                        ]
+                    }
+                    ....
+                ]
+            }
+        }
+        """
+        ret = yield self.employee_ps.get_referral_cards(
+            self.params.user_id,
+            self.params.send_timestamp,
+            int(self.params.page_number or 0),
+            int(self.params.page_size or 10))
+
+        cards = list()
+        for card_infra in ret.data:
+            card = ObjectDict({
+                "user_id": card_infra['user']['uid'],
+                "nickname": card_infra['user']['nickname'],
+                "avatar": card_infra['user']['avatar'],
+                "pv": card_infra['position']['pv'],
+                "position_name": card_infra['position']['title'],
+                "degree": card_infra['user']['degree'],
+                "pid": card_infra['position']['pid'],
+                "forward_from": card_infra['recom_user'],
+                "chain": card_infra['chain']
+            })
+            cards.append(card)
+        self.send_json_success({'cards': cards})
+
+
+class EmployeeReferralPassCardsHandler(BaseHandler):
+
+    @handle_response
+    @check_employee_common
+    @authenticated
+    @gen.coroutine
+    def post(self):
+        """
+        十分钟消息模板： 我不熟悉
+        :return:
+        """
+        ret = yield self.employee_ps.pass_referral_card(
+            pid=self.json_args.pid,
+            user_id=self.current_user.sysuser.id,
+            card_user_id=self.json_args.candidate_user_id,
+            timestamp=self.json_args.send_timestamp)
+
+        if ret.status == 0:
+            self.send_json_success()
+        else:
+            self.send_json_error(message=ret.message)
+
+
+class EmployeeReferralInviteApplyHandler(BaseHandler):
+
+    @handle_response
+    @check_employee_common
+    @authenticated
+    @gen.coroutine
+    def post(self):
+        """
+        邀请投递
+        params:
+        {
+            "pid": 1234    # 职位id
+            "candidate_user_id" : 3456   # 被邀请的候选人user_id
+            "send_timestamp": 1544404667484    # Optional  只有入口3（十分钟消息推送卡片）需要该参数
+        }
+        :return:
+        {
+            "data":{
+              notified: 0, // 是否已通知候选人（消息模板通知）
+              degree: 1,  // 几度人脉.
+              chain_id: 123,   //  人脉连连看链路id  可能没有， 没有就是0
+              // 2度及3度人脉显示人脉连连看入口
+              chain: [
+                {
+                  uid: 123,
+                  avatar: '//image.url.com',
+                }
+              ]
+            }
+        }
+        """
+        ret = yield self.employee_ps.invite_cards_user_apply(
+            pid=self.json_args.pid,
+            user_id=self.current_user.sysuser.id,
+            company_id=self.current_user.company.id,
+            card_user_id=self.json_args.candidate_user_id,
+            timestamp=self.json_args.get('send_timestamp') or 0)
+
+        if ret.status == 0:
+            data = ObjectDict({
+                "notified": ret.data['notified'],
+                "degree": ret.data['degree'],
+                "chain_id": ret.data['chain_id'],
+                "chain": [{"uid": item['user_id'], "avatar": item['avatar']} for item in ret.data['chain']]
+            })
+            self.send_json_success(data)
+        else:
+            self.send_json_error(message=ret.message)
+
+
+class EmployeeReferralConnectionHandler(BaseHandler):
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self, chain_id):
+        """
+        人脉连连看页面
+        :param chain_id: 人脉连连看链路id
+        :return:
+        """
+        pid = self.params.pid
+        if not (pid and chain_id):
+            self.send_json_error(message='chain_id和pid为必填项')
+        recom_user_id = self.current_user.recom.id if self.current_user.recom else self.current_user.sysuser.id
+        click_user_id = self.current_user.sysuser.id if self.current_user.recom else 0
+
+        ret_conn = yield self.employee_ps.referral_connections(recom_user_id, click_user_id, chain_id, pid)
+        page_data = {
+            "pid": ret_conn.data['pid'],
+            "viewer_id": self.current_user.sysuser.id,
+            "connection": ret_conn.data['chain']
+        }
+
+        end_user_nickname = ret_conn.data['chain'][-1]['nickname']
+        yield self._make_share_info(chain_id, end_user_nickname)
+
+        self.render_page(
+            template_name='employee/people-hub-path.htm',
+            data=page_data
+        )
+
+    @gen.coroutine
+    def _make_share_info(self, chain_id, end_user_nickname):
+        """构建 share 内容"""
+
+        company_info = yield self.company_ps.get_company(
+            conds={"id": self.current_user.company.id}, need_conf=True)
+
+        cover = self.share_url(company_info.logo)
+        title = msg.REFERRAL_CONNECTION_TITLE
+        description = msg.REFERRAL_CONNECTION_TEXT.format(end_user_nickname)
+
+        link = self.make_url(
+            path.REFERRAL_CONNECTIONS.format(chain_id),
+            self.params,
+            recom=self.position_ps._make_recom(self.current_user.sysuser.id),
+        )
+
+        self.params.share = ObjectDict({
+            "cover": cover,
+            "title": title,
+            "description": description,
+            "link": link,
+        })

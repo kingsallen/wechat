@@ -168,7 +168,7 @@ platform_routes = [
     (r"/employee/mall/index",                        handler.platform.mall.MallIndexHandler,                    {"event": "mall_index"}),
     (r"/employee/mall/good/(\d+)",                   handler.platform.mall.MallGoodHandler,                     {"event": "mall_good_detail"}),
     (r"/employee/mall/order_page",                   handler.platform.mall.MallExchangePageHandler,             {"event": "mall_exchange_page"}),
-
+    (r"/employee/referral/connections/(\d+)",        handler.platform.employee.EmployeeReferralConnectionHandler, {"event": "referral_connections"}),
 
     (r'/user/survey/?',                              handler.platform.user.UserSurveyHandler,                   {'event': 'user_survey'}),
     (r'/user/ai-recom/?',                            handler.platform.user.AIRecomHandler,                      {'event': 'user_ai-recom'}),
@@ -205,6 +205,10 @@ platform_routes = [
     (r"/api/employee/rewards/rank/?",                handler.platform.employee.AwardsLadderHandler,             {"event": "awards_ladder_api"}),
     (r"/api/employee/survey/?",                      handler.platform.employee.APIEmployeeSurveyHandler,        {"event": "employee_survey_api"}),
     (r"/api/employee/praise/?",                      handler.platform.employee.PraiseHandler,                   {"event": "employee_praise"}),
+    (r"/api/employee/invite_cards/?",                handler.platform.employee.EmployeeReferralCardsHandler,    {"event": "employee_referral_cards"}),
+    (r"/api/employee/invite_cards/pass/?",           handler.platform.employee.EmployeeReferralPassCardsHandler, {"event": "employee_referral_pass_cards"}),
+    (r"/api/employee/recom/invite/?",                handler.platform.employee.EmployeeReferralInviteApplyHandler, {"event": "employee_referral_invite_apply"}),
+
     (r"/api/func/wechat/?",                          handler.platform.employee.WechatSubInfoHandler,            {"event": "wechat_sub_info"}),
     (r'/api/user/survey/?',                          handler.platform.user.APIUserSurveyHandler,                {"event": "user_survey_api"}),
     (r'/api/position/recom/list/?',                  handler.platform.user.APIPositionRecomListHandler,         {"event": "position_ai-recomlist"}),

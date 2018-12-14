@@ -735,6 +735,12 @@ class PositionDetailPopupHandler(BaseHandler):
     @decorator.authenticated
     @gen.coroutine
     def get(self):
+        """
+        候选人查看职位详情页面 获取该候选人是否关注公众号和简历完整度信息 然后前端根据结果给适当的引导弹窗
+        弹窗1: 公众号二维码
+        弹窗2：提示完善简历信息
+        :return:
+        """
         pid = self.params.position_id
         res = yield self.user_ps.get_popup_info(
             user_id=self.current_user.sysuser.id,

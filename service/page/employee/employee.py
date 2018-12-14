@@ -734,3 +734,66 @@ class EmployeePageService(PageService):
     def get_referral_qrcode(self, url, logo):
         res = yield self.infra_employee_ds.get_referral_qrcode(url, logo)
         return res
+
+    @gen.coroutine
+    def get_referral_cards(self, user_id, timestamp, page_number, page_size):
+        """
+        十分钟消息模板：卡片数据获取
+        :param user_id:   转发职位的员工的user_id
+        :param timestamp: 发送消息模板的时间
+        :param page_number:
+        :param page_size:
+        :return:
+        """
+        res = yield self.infra_employee_ds.get_referral_cards(user_id, timestamp, page_number, page_size)
+        return res
+
+    @gen.coroutine
+    def pass_referral_card(self, pid, user_id, card_user_id, timestamp):
+        """
+        十分钟消息模板：我不熟悉
+        :param pid:
+        :param user_id:       转发职位的user_id
+        :param card_user_id:  当前卡片的user_id
+        :param timestamp:     发送消息模板的时间
+        :return:
+        """
+        res = yield self.infra_employee_ds.pass_referral_card(pid, user_id, card_user_id, timestamp)
+        return res
+
+    @gen.coroutine
+    def invite_cards_user_apply(self, pid, user_id, company_id, card_user_id, timestamp):
+        """
+        十分钟消息模板： 邀请投递
+        :param pid:
+        :param user_id:
+        :param card_user_id:
+        :param timestamp:
+        :return:
+        """
+        res = yield self.infra_employee_ds.invite_cards_user_apply(pid, user_id, company_id, card_user_id, timestamp)
+        return res
+
+    @gen.coroutine
+    def referral_connections(self, recom_user_id, end_user_id, chain_id, pid):
+        """
+        人脉连连看
+        :param recom_user_id: 当前转发用户user_id
+        :param end_user_id:   链路结束用户user_id
+        :param chain_id:      人脉连连看 链路id
+        :param pid: 职位id
+        :return:
+        """
+        res = yield self.infra_employee_ds.referral_connection(recom_user_id, end_user_id, chain_id, pid)
+        return res
+
+    @gen.coroutine
+    def referral_contact_push(self, user_id, position_id):
+        """
+        联系内推： 职位详情顶部获取 推荐职位的员工姓名及推荐的职位姓名
+        :param user_id:  员工的user_id
+        :param position_id:
+        :return:
+        """
+        res = yield self.infra_employee_ds.referral_contact_push(user_id, position_id)
+        return res
