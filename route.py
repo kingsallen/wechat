@@ -58,6 +58,7 @@ import handler.platform.award
 import handler.platform.mall
 import handler.platform.privacy
 import handler.platform.switch
+import handler.platform.radar_demo
 
 import handler.qx.app
 import handler.qx.aggregation
@@ -190,6 +191,8 @@ platform_routes = [
     (r"/pc/upload/profile/?",                        handler.platform.referral_pc.ReferralUploadHandler,        {"event": "referral_pc_upload"}),
     (r"/pc/api/upload/recomprofile/?",               handler.platform.referral_pc.EmployeeRecomProfilePcHandler, {"event": "referral_pc_upload_profile"}),
     (r"/pc/api/employee/recom/profile/?",            handler.platform.referral_pc.ReferralProfileAPIPcHandler,  {"event": "referral_pc_profile"}),
+    (r"/radar/demo/?", handler.platform.radar_demo.RadarDemoHandler, {"event": "radar_demo"}),
+    (r"/api/radar/demo/?", handler.platform.radar_demo.RadarDemoApiHandler, {"event": "radar_demo_api"}),
 
     (r"/api/company/visitreq/?",                     handler.platform.companyrelation.CompanyVisitReqHandler,   {"event": "company_visitreq"}),
     (r"/api/company/survey/?",                       handler.platform.companyrelation.CompanySurveyHandler,     {"event": "company_survey"}),
