@@ -24,9 +24,9 @@ class RadarDemoApiHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         num = int(self.params.num) - 5
-        position_id = self.params.position_id
+        position_id = int(self.params.position_id) if self.params.position_id else 0
         position = yield self.position_ps.get_position(position_id=position_id)
-        record = yield self.sharechain_ps.find_candidate_by_position(position_id=position_id, num=num)
+        record = yield self.sharechain_ps.find_candidate_by_position(position=position, num=num)
 
         hack_data = [
             {
