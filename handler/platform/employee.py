@@ -121,7 +121,7 @@ class WechatSubInfoHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def get(self):
-        pattern_id = self.params.scene
+        pattern_id = self.params.scene or 99
         wechat = yield self.wechat_ps.get_wechat_info(self.current_user, pattern_id=int(pattern_id), in_wechat=self.in_wechat)
         self.send_json_success(data=wechat)
         return
