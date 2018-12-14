@@ -433,7 +433,7 @@ class SharechainPageService(PageService):
     def find_candidate_by_position(self, position, num=25):
         """根据职位id获取浏览该职位的候选人"""
         users = []
-        records = self.candidate_position_share_record_ds.get_share_record_list(
+        records = yield self.candidate_position_share_record_ds.get_share_record_list(
             conds={
                 "position_id": position.id
             },
@@ -442,11 +442,11 @@ class SharechainPageService(PageService):
         for r in records:
             user = ObjectDict()
             user_id = r.presentee_user_id
-            user_info = self.user_user_ds.get_user(conds={"id": user_id})
+            user_info = yield self.user_user_ds.get_user(conds={"id": user_id})
             user['name'] = user_info.name or user_info.nickname
             user['headimg'] = make_static_url(user_info.headimg or const.SYSUSER_HEADIMG)
             user['is_hack'] = False
-            candidate_position = self.candidate_position_ds.get_candidate_position(conds={
+            candidate_position = yield self.candidate_position_ds.get_candidate_position(conds={
                 "position_id": position.id,
                 "user_id": user_id
             })
