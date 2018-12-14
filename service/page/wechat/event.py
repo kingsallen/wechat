@@ -11,6 +11,7 @@ import re
 import time
 import traceback
 from tornado import gen
+import ujson
 
 import conf.common as const
 import conf.wechat as wx_const
@@ -504,12 +505,12 @@ class EventPageService(PageService):
             type = int(bin(int(int_scene_id))[:7], base=2)
             real_user_id = int(bin(int(int_scene_id))[7:], base=2)
             """
-              type: 
+              type:
               "11000" = 24 pc端用户解绑,
               "11001" = 25 pc端用户绑定,
                11010=26 pc注册用二维码，
-               11011 =27 pc扫码修改手机。 
-               
+               11011 =27 pc扫码修改手机。
+
               hr 端 10000=16, 10001=17,
               11111=31  Mars EDM活动二维码
               -----------------------------------------------------------
@@ -638,6 +639,9 @@ class EventPageService(PageService):
                 if pattern_id == const.QRCODE_BIND and wxuser.sysuser_id and wechat.company_id:
                     employee = yield user_ps.get_valid_employee_by_user_id(
                         user_id=wxuser.sysuser_id, company_id=wechat.company_id)
+                elif pattern_id == const.QRCODE_REFERRAL_POSITION_POPUP:
+                    self.logger.warning(ujson.dumps({"flag": 1, "wechatid": wechat.id, "wxuser_id": wxuser.id}))
+                    return
                 else:
                     employee = None
                 if not employee or pattern_id != const.QRCODE_BIND:
