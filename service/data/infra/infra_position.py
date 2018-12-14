@@ -4,11 +4,12 @@ import tornado.gen as gen
 from tornado.testing import AsyncTestCase, gen_test
 
 import conf.path as path
+import conf.alphacloud_api as api
 from service.data.base import DataService
 from service.data.infra.framework.client.client import ServiceClientFactory
 from thrift_gen.gen.position.service.PositionServices import Client as PositionServiceClient
 from util.common import ObjectDict
-from util.tool.http_tool import http_get, http_post, http_patch
+from util.tool.http_tool import http_get, http_post, http_patch, http_get_rp
 from util.tool import http_tool
 
 
@@ -31,7 +32,7 @@ class InfraPositionDataService(DataService):
     @gen.coroutine
     def get_position_list_rp_ext(self, params):
         """获取职位的红包信息"""
-        ret = yield http_get(path.INFRA_POSITION_LIST_RP_EXT, params)
+        ret = yield http_get_rp(api.redpacket_service.api.CLOUD_POSITION_LIST_RP_EXT, api.redpacket_service.service, params)
         return ret
 
     @gen.coroutine
@@ -43,7 +44,7 @@ class InfraPositionDataService(DataService):
     @gen.coroutine
     def get_rp_share_info(self, params):
         """红包职位列表的分享信息"""
-        ret = yield http_get(path.INFRA_RP_POSITION_LIST_SHARE_INFO, params)
+        ret = yield http_get_rp(api.redpacket_service.api.CLOUD_RP_POSITION_LIST_SHARE_INFO, api.redpacket_service.service, params)
         return ret
 
     @gen.coroutine

@@ -1,9 +1,9 @@
 # coding=utf-8
 
 from tornado import gen
-import uuid
 import re
 
+import uuid
 import conf.common as const
 import conf.message as msg
 import conf.path as path
@@ -16,16 +16,15 @@ from util.common.exception import MyException
 from util.common.cipher import encode_id
 from util.common.decorator import handle_response, check_employee, NewJDStatusCheckerAddFlag, authenticated, log_time, \
     cover_no_weixin, check_employee_common
-from util.common.mq import award_publisher
 from util.tool.str_tool import gen_salary, add_item, split, gen_degree_v2, gen_experience_v2, languge_code_from_ua, set_literl
 from util.common.kafka import *
+from util.common.mq import award_publisher, jd_click_publisher
 from util.tool.str_tool import gen_salary, add_item, split, gen_degree_v2, gen_experience_v2, languge_code_from_ua
 from util.tool.url_tool import url_append_query
 from util.wechat.template import position_view_five_notice_tpl, position_share_notice_employee_tpl
 from util.common.decorator import log_time, log_time_common_func
 from util.common.mq import neo4j_position_forward
 from util.common.cipher import decode_id
-from setting import settings
 
 
 class PositionHandler(BaseHandler):
@@ -40,10 +39,6 @@ class PositionHandler(BaseHandler):
         """
         display_locale = self.get_current_locale()
         position_info = yield self.position_ps.get_position(position_id, display_locale)
-
-        # 数据组埋点
-        if position_info.status:
-            self.logger.info("[JD]在招职位")
 
         if position_info.id and position_info.company_id == self.current_user.company.id:
             yield self._redirect_when_recom_is_openid(position_info)
@@ -112,9 +107,8 @@ class PositionHandler(BaseHandler):
             rpext_list = yield self.position_ps.infra_get_position_list_rp_ext([position_info])
             pext = [e for e in rpext_list if e.pid == position_info.id]
             if pext:
-                position_info.remain = pext[0].remain
-                position_info.employee_only = pext[0].employee_only
-                position_info.is_rp_reward = position_info.remain > 0
+                position_info.employee_only = pext[0].employeeOnly
+                position_info.is_rp_reward = pext[0].hasMoney
             else:
                 position_info.is_rp_reward = False
 
@@ -216,15 +210,6 @@ class PositionHandler(BaseHandler):
                         be_recom_user_id=self.current_user.sysuser.id
                     )
 
-                # 红包处理
-                self.logger.debug("[JD]红包处理")
-                yield self.redpacket_ps.handle_red_packet_position_related(
-                    self.current_user,
-                    position_info,
-                    redislocker=self.redis,
-                    is_click=True,
-                    psc=self.params.psc)
-
             self.logger.debug("[JD]更新职位浏览量")
             yield self._make_position_visitnum(position_info)
 
@@ -235,7 +220,6 @@ class PositionHandler(BaseHandler):
             self.write_error(404)
             return
 
-    @log_time
     @gen.coroutine
     def _make_position_visitnum(self, position_info):
         """更新职位浏览量"""
@@ -446,7 +430,6 @@ class PositionHandler(BaseHandler):
 
         return parent_company_info
 
-    @log_time_common_func
     def _make_json_job_description(self, position_info):
         """构造职位描述"""
         if not position_info.accountabilities:
@@ -458,7 +441,6 @@ class PositionHandler(BaseHandler):
 
         return data
 
-    @log_time_common_func
     def _make_json_job_require(self, position_info):
         """构造职位要求"""
         require = []
@@ -495,7 +477,6 @@ class PositionHandler(BaseHandler):
 
         return data
 
-    @log_time_common_func
     def _make_json_job_attr_v2(self, position_info):
         """构造新JD的职位属性"""
 
@@ -524,7 +505,6 @@ class PositionHandler(BaseHandler):
 
         return data
 
-    @log_time_common_func
     def _make_json_job_need(self, position_info):
         """构造职位要求"""
 
@@ -537,7 +517,6 @@ class PositionHandler(BaseHandler):
 
         return data
 
-    @log_time_common_func
     def _make_json_job_feature(self, position_feature):
         """构造职位福利特色"""
         feature = []
@@ -551,7 +530,6 @@ class PositionHandler(BaseHandler):
             })
         return data
 
-    @log_time_common_func
     def _make_json_job_company_info(self, company_info, did):
         """构造职位公司信息"""
         data = ObjectDict({
@@ -563,7 +541,6 @@ class PositionHandler(BaseHandler):
 
         return data
 
-    @log_time_common_func
     def _make_json_job_require_old(self, position_info):
         """构造老微信样式的职位要求"""
         require = []
@@ -591,7 +568,6 @@ class PositionHandler(BaseHandler):
             })
         return data
 
-    @log_time_common_func
     def _make_json_company_impression(self, company_info):
         """构造老微信样式的企业印象"""
 
@@ -607,7 +583,6 @@ class PositionHandler(BaseHandler):
             self.logger.warning("Warning: don't have company_info.impression")
         return data
 
-    @log_time_common_func
     def _make_json_job_department(self, position_info):
         """构造老微信的所属部门，自定义职能，自定义属性"""
         data = ObjectDict({
@@ -618,7 +593,6 @@ class PositionHandler(BaseHandler):
 
         return data
 
-    @log_time_common_func
     def _make_json_job_attr(self, position_info):
         """构造老微信的职位属性"""
         data = ObjectDict({
@@ -631,8 +605,9 @@ class PositionHandler(BaseHandler):
     @log_time
     @gen.coroutine
     def _make_refresh_share_chain(self, position_info):
-        """构造刷新链路"""
+        """构造刷新链路, 并在链路中触发转发被点击红包"""
 
+        last_psc = self.params.psc or 0  # 刷新链路会刷新psc参数，此处提前获取链路中的psc
         last_employee_user_id = 0
         last_employee_id = 0
         inserted_share_chain_id = 0
@@ -676,7 +651,21 @@ class PositionHandler(BaseHandler):
                 )
                 if employee_info:
                     last_employee_id = employee_info.id
-
+        # 如果有插入链路，触发转发被点击红包
+        if inserted_share_chain_id:
+            share_chain = yield self.sharechain_ps.get_share_chain_by_id(inserted_share_chain_id)
+            message = {"name": const.CLICK_MQ_NAME,
+                       "ID": str(uuid.uuid4()),
+                       "deliverer_id": self.current_user.recom.id,
+                       "employee_user_id": last_employee_user_id,
+                       "viewer_id": self.current_user.sysuser.id,
+                       "position_id": position_info.id,
+                       "view_time": str(share_chain.click_time),
+                       "company_id": self.current_user.company.id,
+                       "psc": last_psc
+                       }
+            self.logger.debug("[hb]----send retransmit click redpacket")
+            jd_click_publisher.publish_message(message=message, routing_key="retransmit_click_exchange.redpacket")
         if self.current_user.sysuser.id:
             yield self.candidate_ps.send_candidate_view_position(
                 user_id=self.current_user.sysuser.id,
@@ -802,7 +791,6 @@ class PositionHandler(BaseHandler):
                 if module_team:
                     add_item(position_data, "module_mate_day", module_team)
 
-    @log_time
     @gen.coroutine
     def _make_team_position(self, team, position_id, company_id, teamname_custom):
         """团队职位，构造数据"""
@@ -811,13 +799,11 @@ class PositionHandler(BaseHandler):
             teamname_custom)
         raise gen.Return(res)
 
-    @log_time
     @gen.coroutine
     def _make_cms_page(self, team_id):
         res = yield self.position_ps.get_cms_page(team_id)
         return res
 
-    @log_time
     @gen.coroutine
     def _make_team(self, team, teamname_custom):
         """所属团队，构造数据"""
@@ -952,7 +938,8 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
         if hb_c:
             # 红包职位列表
             infra_params.update(hb_config_id=hb_c)
-            position_list = yield self.position_ps.infra_get_rp_position_list(infra_params)
+            rp_position_list = yield self.position_ps.infra_get_rp_position_list(infra_params)
+            position_list = rp_position_list
 
         elif recom_push_id:
             # 员工推荐列表
@@ -960,6 +947,10 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
                 position_list = yield self.get_employee_position_list(recom_push_id, infra_params)
             else:
                 position_list = []
+
+            # 职位红包 #
+            # 逻辑和职位列表页一样, 代码有重复, TODO: 优化
+            rp_position_list = [p for p in position_list if p.in_hb]
         else:
             # 内推职位列表
             if is_referral:
@@ -972,17 +963,17 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
             # 获取获取到普通职位列表，则根据获取的数据查找其中红包职位的红包相关信息
             rp_position_list = list(self.__rp_position_generator(position_list))
 
-            if position_list and rp_position_list:
-                rpext_list = yield self.position_ps.infra_get_position_list_rp_ext(rp_position_list)
+        # 处理职位中的红包信息
+        if position_list and rp_position_list:
+            rpext_list = yield self.position_ps.infra_get_position_list_rp_ext(position_list)
 
-                for position in position_list:
-                    pext = [e for e in rpext_list if e.pid == position.id]
-                    if pext:
-                        position.remain = pext[0].remain
-                        position.employee_only = pext[0].employee_only
-                        position.is_rp_reward = position.remain > 0
-                    else:
-                        position.is_rp_reward = False
+            for position in position_list:
+                pext = [e for e in rpext_list if e.pid == position.id]
+                if pext:
+                    position.employee_only = pext[0].employeeOnly
+                    position.is_rp_reward = pext[0].hasMoney
+                else:
+                    position.is_rp_reward = False
 
         position_id_list = list()
         for e in position_list:
@@ -1108,7 +1099,6 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
             if isinstance(position, dict) and position.in_hb:
                 yield position
 
-    @log_time
     @gen.coroutine
     def get_employee_position_list(self, recom_push_id, params):
         """
@@ -1186,7 +1176,7 @@ class PositionListHandler(PositionListInfraParamsMixin, BaseHandler):
 
         if hb_c:
             # 红包职位分享
-            infra_params.update(hb_config_id=hb_c)
+            infra_params.update(id=hb_c)
             rp_share_info = yield self.position_ps.infra_get_rp_share_info(infra_params)
             yield self._make_share_info(self.current_user.company.id, did, rp_share_info)
         else:
@@ -1252,14 +1242,14 @@ class PositionListHandler(PositionListInfraParamsMixin, BaseHandler):
             description = self.locale.translate(msg.SHARE_DES_DEFAULT)
 
         else:
-            cover = self.share_url(rp_share_info.cover)
+            cover = self.share_url(rp_share_info.shareImg)
             escape = [
                 "pid", "keywords", "cities", "candidate_source",
                 "employment_type", "salary", "department", "occupations",
                 "custom", "degree", "page_from", "page_size"
             ]
-            title = rp_share_info.title
-            description = rp_share_info.description
+            title = rp_share_info.shareTitle
+            description = rp_share_info.shareDesc
 
         # transmit_from是判断场景值的字段，且场景值使用偶数表示，当员工通过活动页面跳转到该页面时，值为偶数，
         # 当员工转发出去时需要+1，因此求职者打开员工转发的链接时该值为奇数。

@@ -487,6 +487,9 @@ RP_RECOM_LOCK_FMT = "rplock_recom:%s:%s"
 ON_BOARD_LOCK_FMT = "rplock_on_board:%s:%s"
 RP_LOCKED = 1
 
+# 红包mq name
+CLICK_MQ_NAME = "retransmit click"
+APPLY_MQ_NAME = "retransmit apply"
 
 # RP_ITEM 状态常量
 # 默认初始状态

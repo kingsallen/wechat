@@ -37,6 +37,7 @@ import handler.common.image
 import handler.common.campaign
 import handler.common.redirect
 import handler.common.statistics
+import handler.common.redpacket
 
 import handler.help.passport
 import handler.help.releasedposition
@@ -105,6 +106,8 @@ common_routes = [
     (r"/im/laiye",                                   handler.common.laiye_im.LaiyeImHandler,                    {"event": "im laiye"}),
     (r"/resume/import/limit",                        handler.common.resume.ResumeImportLimit,                   {"event": "resume_import_limit"}),
     (r"/redirect",                                   handler.common.redirect.RedirectHandler,                   {"event": "redirect"}),
+    (r"/redpacket/claim",                            handler.common.redpacket.RedpacketHandler,                 {"event": "redpacket_claim"}),
+    (r"/api/redpacket/claim",                        handler.common.redpacket.RedpacketHandler,                 {"event": "api_redpacket_claim"}),
 
     # websocket
     (r"/websocket/([A-Za-z0-9_]{1,32})",             handler.common.im.ChatWebSocketHandler),
@@ -127,7 +130,7 @@ common_routes = [
     (r"/api/resume/upload",                          handler.common.resume.APIResumeUploadHandler,              {"event": "api_resume_upload"}),
     (r"/api/resume/submit",                          handler.common.resume.ResumeSubmitHandler,                 {"event": "api_resume_submit"}),
     (r"/api/chat/resume/upload",                     handler.common.resume.ChatbotResumeSubmitHandler,          {"event": "api_resume_submit_from_chatbot"}),
-    (r"/api/position/list/?",                        handler.platform.position.PositionListDetailHandler,       {"event": "position_list"}),
+    (r"/api/position/list/?",                        handler.platform.position.PositionListDetailHandler,       {"event": "api_position_list"}),
     (r"/api/position/list/sug",                      handler.platform.position.PositionListSugHandler,          {"event": "position_list_sug"}),
     (r"/api/position/search/history",                handler.platform.position.PositionSearchHistoryHandler,    {"event": "position_search_history"}),
     (r"/api/chat/unread[\/]*([0-9]+)*",              handler.common.im.UnreadCountHandler,                      {"event": "chat_"}),

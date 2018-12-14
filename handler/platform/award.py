@@ -18,13 +18,14 @@ class ReferralRewardHandler(BaseHandler):
     def get(self):
         # 获取奖金与红包总数
         params = ObjectDict({
-            'page_size': 10,
-            'page_no': 1,
-            'company_id': self.current_user.company.id
+            'pageSize': 10,
+            'pageNum': 1,
+            'companyId': self.current_user.company.id,
+            'userId': self.current_user.sysuser.id
         })
-        ret = yield self.user_ps.get_redpacket_list(self.current_user.sysuser.id, params)
-        total_redpacket = ret.total_redpackets
-        total_bonus = ret.total_bonus
+        ret = yield self.user_ps.get_redpacket_list(params)
+        total_redpacket = ret.totalRedpackets
+        total_bonus = ret.totalBonus
         self.render_page("employee/bonus-records.html",
                          data=ObjectDict(total_redpacket=total_redpacket,
                                          total_bonus=total_bonus))
@@ -39,15 +40,17 @@ class ReferralRedpacketHandler(BaseHandler):
         page_size = int(self.params.get("page_size", 0))
         page_num = int(self.params.get("page_num", 0))
         params = ObjectDict({
-            'page_size': page_size,
-            'page_no': page_num,
-            'company_id': self.current_user.company.id
+            'pageSize': page_size,
+            'pageNum': page_num,
+            'companyId': self.current_user.company.id,
+            'userId': self.current_user.sysuser.id
         })
-        ret = yield self.user_ps.get_redpacket_list(self.current_user.sysuser.id, params)
-        list = ret.redpackets
+        ret = yield self.user_ps.get_redpacket_list(params)
+        list = ret.currentPageData or []
         for i in list:
-            open_time = time.strftime('%Y-%m-%d', time.localtime(int(i.get("open_time", 0))/1000))
-            i['open_time'] = open_time
+            i['candidate_name'] = i.get("candidateName")
+            i['position_title'] = i.get("positionTitle")
+            i['open_time'] = i.get("openTime", "")
             i['name'] = self.locale.translate(const.REDPACKET.get(i.get("type")))
             # 认证红包不显示职位和姓名信息
             if i.get("type") == const.RED_PACKET_TYPE_EMPLOYEE_BINDING:
@@ -56,8 +59,8 @@ class ReferralRedpacketHandler(BaseHandler):
             # 转发被点击红包不显示姓名信息
             if i.get("type") == const.RED_PACKET_TYPE_SHARE_CLICK:
                 i['candidate_name'] = ''
-        total_redpacket = ret.total_redpackets
-        total_bonus = ret.total_bonus
+        total_redpacket = ret.totalRedpackets
+        total_bonus = ret.totalBonus
         data = ObjectDict(list=list,
                           total_redpacket=total_redpacket,
                           total_bonus=total_bonus

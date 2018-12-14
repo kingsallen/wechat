@@ -45,6 +45,26 @@ class RedpacketPageService(PageService):
     def __init__(self):
         super().__init__()
 
+    @gen.coroutine
+    def get_redpacket_info(self, id, cardno, user_id):
+        """获取红包信息"""
+        ret = yield self.infra_redpacket_ds.infra_get_redpacket_info({
+            "id": id,
+            "cardno": cardno,
+            "userId": user_id
+        })
+        return ret
+
+    @gen.coroutine
+    def open_redpacket(self, id, cardno, user_id):
+        """领取红包"""
+        ret = yield self.infra_redpacket_ds.infra_open_redpacket({
+            "id": id,
+            "cardno": cardno,
+            "userId": user_id
+        })
+        return ret
+
     @log_time
     @gen.coroutine
     def __get_card_by_cardno(self, cardno):
@@ -235,7 +255,6 @@ class RedpacketPageService(PageService):
                                                             recom_user_id=user_id, psc=psc)
         except Exception as e:
             self.logger.error(traceback.format_exc())
-
 
     @gen.coroutine
     def handle_red_packet_employee_verification(self, user_id, company_id, redislocker):

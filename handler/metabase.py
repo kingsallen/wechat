@@ -326,7 +326,7 @@ class MetaBaseHandler(AtomHandler):
             kind=kind,  # // {0: success, 1: failure, 10: email}
             messages=messages,  # ['hello world', 'abjsldjf']
             button_text=button_text,
-            button_link=self.make_url(path.PROFILE_VIEW,
+            button_link=self.make_url(path.POSITION_LIST,
                                       self.params,
                                       host=self.host) if not button_link else button_link,
             jump_link=jump_link  # // 如果有会自动，没有就不自动跳转

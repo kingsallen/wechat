@@ -141,6 +141,7 @@ data_userprofile_publisher = MQPublisher(
     appid=6
 )
 
+# 用户关注公众号后恢复用户员工身份
 user_follow_wechat_publisher = MQPublisher(
     amqp_url=amqp_url,
     exchange="user_follow_wechat_exchange",
@@ -148,6 +149,7 @@ user_follow_wechat_publisher = MQPublisher(
     appid=6
 )
 
+# 用户取消关注公众号后取消员工身份
 user_unfollow_wechat_publisher = MQPublisher(
     amqp_url=amqp_url,
     exchange="user_unfollow_wechat_exchange",
@@ -155,10 +157,27 @@ user_unfollow_wechat_publisher = MQPublisher(
     appid=6
 )
 
+# 所有未读赞的数量置空
 unread_praise_publisher = MQPublisher(
     amqp_url=amqp_url,
     exchange="employee_view_leader_board_exchange",
     exchange_type="direct",
+    appid=6
+)
+
+# 转发职位被点击
+jd_click_publisher = MQPublisher(
+    amqp_url=amqp_url,
+    exchange="retransmit_click_exchange",
+    exchange_type="topic",
+    appid=6
+)
+
+# 转发职位被申请
+jd_apply_publisher = MQPublisher(
+    amqp_url=amqp_url,
+    exchange="retransmit_apply_exchange",
+    exchange_type="topic",
     appid=6
 )
 
