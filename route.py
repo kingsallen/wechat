@@ -173,10 +173,7 @@ platform_routes = [
     (r"/employee/mall/index",                        handler.platform.mall.MallIndexHandler,                    {"event": "mall_index"}),
     (r"/employee/mall/good/(\d+)",                   handler.platform.mall.MallGoodHandler,                     {"event": "mall_good_detail"}),
     (r"/employee/mall/order_page",                   handler.platform.mall.MallExchangePageHandler,             {"event": "mall_exchange_page"}),
-<<<<<<< HEAD
-=======
     (r"/employee/referral/connections/(\d+)",        handler.platform.employee.EmployeeReferralConnectionHandler, {"event": "referral_connections"}),
->>>>>>> backup
 
     (r'/user/survey/?',                              handler.platform.user.UserSurveyHandler,                   {'event': 'user_survey'}),
     (r'/user/ai-recom/?',                            handler.platform.user.AIRecomHandler,                      {'event': 'user_ai-recom'}),
