@@ -6,6 +6,9 @@ import conf.common as const
 from service.page.base import PageService
 from util.tool.date_tool import curr_now
 from util.common.decorator import log_time
+from util.common import ObjectDict
+from util.tool.url_tool import make_static_url
+
 
 class SharechainPageService(PageService):
 
@@ -425,3 +428,33 @@ class SharechainPageService(PageService):
             raise gen.Return(parent_share_chain.id)
         else:
             raise gen.Return(0)
+
+    @gen.coroutine
+    def find_candidate_by_position(self, position, num=25):
+        """根据职位id获取浏览该职位的候选人"""
+        users = []
+        records = self.candidate_position_share_record_ds.get_share_record_list(
+            conds={
+                "position_id": position.id
+            },
+            appends=["group by presentee_user_id", "order by create_time desc", "LIMIT {}".format(num)]
+        )
+        for r in records:
+            user = ObjectDict()
+            user_id = r.recom_user_id
+            user_info = self.user_user_ds.get_user(conds={"id": user_id})
+            user['name'] = user_info.name or user_info.nickname
+            user['headimg'] = make_static_url(user_info.headimg or const.SYSUSER_HEADIMG)
+            user['is_hack'] = False
+            candidate_position = self.candidate_position_ds.get_candidate_position(conds={
+                "position_id": position.id,
+                "user_id": user_id
+            })
+            user['viewnum'] = candidate_position.view_number or 1
+            user['click_from'] = r.click_from or 2
+            user['click_time'] = r.create_time
+            user['position_title'] = position.title
+            users.append(user)
+        return users
+
+
