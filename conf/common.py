@@ -721,3 +721,6 @@ MQ_REDPACKET_ROUTING_KEY = "*.red_packet"
 SCREEN_RP_TYPE = "screen"
 EMPLOYEE_BIND_RP_TYPE = "employee_bind"
 
+
+# 二维码关注来源
+QRCODE_FROM_POSITION_POPUP = 1
