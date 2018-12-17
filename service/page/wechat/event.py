@@ -640,7 +640,12 @@ class EventPageService(PageService):
                     employee = yield user_ps.get_valid_employee_by_user_id(
                         user_id=wxuser.sysuser_id, company_id=wechat.company_id)
                 elif pattern_id == const.QRCODE_REFERRAL_POSITION_POPUP:
-                    self.logger.warning(ujson.dumps({"flag": 1, "wechatid": wechat.id, "wxuser_id": wxuser.id}))
+                    self.log_datagroup_prepare_data_ds.create_qrcode_subscribe_record(
+                        {
+                            "flag": const.QRCODE_FROM_POSITION_POPUP,
+                            "wechat_id": wechat.id,
+                            "wxuser_id": wxuser.id
+                        })
                     return
                 else:
                     employee = None
