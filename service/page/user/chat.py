@@ -283,6 +283,7 @@ class ChatPageService(PageService):
             ret_message['compound_content']['hot'] = hot
             ret_message['compound_content']['max'] = max
 
+        @gen.coroutine
         def get_position_list(ids):
             position_list = []
             position_ps = PositionPageService()
@@ -326,10 +327,12 @@ class ChatPageService(PageService):
 
         if msg_type == "jobCard":
             ids = [p.get("id") for p in compoundContent]
-            ret_message['compound_content'] = ObjectDict(list=get_position_list(ids))
+            positions = yield get_position_list(ids)
+            ret_message['compound_content'] = ObjectDict(list=positions)
         if msg_type == "jobSelect":
             ids = [p.get("id") for p in compoundContent.get("list")]
-            ret_message['compound_content']['list'] = get_position_list(ids)
+            positions = yield get_position_list(ids)
+            ret_message['compound_content']['list'] = positions
         return ret_message
 
     @staticmethod
