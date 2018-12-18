@@ -482,9 +482,6 @@ class ChatHandler(BaseHandler):
         self.chatroom_channel = const.CHAT_CHATROOM_CHANNEL.format(self.hr_id, self.user_id)
         self.hr_channel = const.CHAT_HR_CHANNEL.format(self.hr_id)
 
-        if not msg_type or not user_message:
-            self.send_json_error()
-            return
         chat_params = ChatVO(
             msgType=msg_type,
             compoundContent=ujson.dumps(compoundContent),
