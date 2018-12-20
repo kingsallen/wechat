@@ -724,3 +724,11 @@ EMPLOYEE_BIND_RP_TYPE = "employee_bind"
 
 # 二维码关注来源
 QRCODE_FROM_POSITION_POPUP = 1
+
+
+# 内推：员工推荐评价入口
+REFERRAL_EVAL_CONTACT_MES_TMP = 1    # 候选人联系内推消息模板
+REFERRAL_EVAL_RADAR = 2              # 人脉雷达
+REFERRAL_EVAL_RECOM_PROGRESS = 3     # 推荐进度列表
+REFERRAL_EVAL_TEN_MIN_MES_TMP = 4    # 十分钟消息推送模板
+

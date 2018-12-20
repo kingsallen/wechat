@@ -14,6 +14,7 @@ from util.common.exception import MyException
 from util.common.mq import data_userprofile_publisher
 import conf.common as const
 from util.tool.json_tool import json_dumps
+from util.common.cipher import decode_id
 import copy
 import json
 
@@ -765,3 +766,51 @@ class PositionDetailPopupHandler(BaseHandler):
             )
         )
         self.send_json_success(data)
+
+
+class PositionForwardFromEmpHandler(BaseHandler):
+
+    @decorator.handle_response
+    @decorator.authenticated
+    @gen.coroutine
+    def get(self):
+        """
+        候选人打开转发的职位链接，根据链接中参数判断最初转发该职位的人是否是员工
+        决定前端是否显示“联系内推”button
+        :return:
+        """
+        pid = self.params.pid
+        self.logger.debug('PLL test: current_user: %s' % self.current_user)
+        self.logger.debug('PLL test: self.params: %s' % self.params)
+        recom = decode_id(self.params.recom)
+        psc = self.params.psc if self.params.psc else 0
+        if not(pid and recom):
+            self.send_json_error('pid, recom 为必传参数')
+            return
+        ret = yield self.user_ps.if_referral_position(recom, psc, pid)
+        data = {
+            "is_employee": ret.data['employee'],
+            "employee_name": ret.data['user']['name'] if ret.data['employee'] else '',
+            "employee_icon": ret.data['user']['avatar'] if ret.data['employee'] else '',
+        }
+        self.send_json_success(data)
+
+
+class ReferralRelatedPositionHandler(BaseHandler):
+
+    @decorator.handle_response
+    @decorator.authenticated
+    @gen.coroutine
+    def get(self):
+        """
+        联系内推完成后 给出该公司三个相关职位
+        :return:
+        """
+
+        ret = yield self.user_ps.referral_related_positions(
+            self.current_user.sysuser.id,
+            self.current_user.company.id
+        )
+        self.send_json_success(data={
+            "list": ret.data
+        })

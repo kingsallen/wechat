@@ -159,6 +159,7 @@ class MetaBaseHandler(AtomHandler):
         for key in params:
             if isinstance(params[key], list) and params[key]:
                 params[to_str(key)] = to_str(params[key][0]).strip()
+        self.logger.info('PLL test Params: %s' % params)
         return params
 
     def _get_json_args(self):
@@ -171,6 +172,8 @@ class MetaBaseHandler(AtomHandler):
         if (headers.get('Content-Type') and
                     'application/json' in headers.get('Content-Type') and body):
             json_args = ujson.loads(to_str(body))
+
+        self.logger.info('PLL test: json args: %s' % json_args)
 
         return objectdictify(json_args)
 

@@ -64,8 +64,8 @@ class PositionHandler(BaseHandler):
 
             # 刷新链路
             self.logger.debug("[JD]刷新链路")
-            last_employee_user_id, last_employee_id = yield self._make_refresh_share_chain(position_info)
-            self.logger.debug("[JD]last_employee_user_id: %s" % (last_employee_user_id))
+            last_employee_user_id, last_employee_id, inserted_share_chain_id = yield self._make_refresh_share_chain(position_info)
+            self.logger.debug("[JD]last_employee_user_id: %s" % last_employee_user_id)
 
             self.logger.debug("[JD]构建转发信息")
             yield self._make_share_info(position_info, company_info)
@@ -184,6 +184,14 @@ class PositionHandler(BaseHandler):
 
             # 后置操作
             if self.is_platform and self.current_user.recom:
+
+                # 职位转发被点击时 neo4j记录转发链路
+                yield self.position_ps.insert_neo4j_share_record(
+                    self.current_user.recom.id,
+                    self.current_user.sysuser.id,
+                    inserted_share_chain_id
+                )
+
                 # 转发积分
                 if last_employee_user_id:
                     self.logger.debug("[JD]转发积分操作")
@@ -647,7 +655,7 @@ class PositionHandler(BaseHandler):
                 sharechain_id=inserted_share_chain_id,
             )
 
-        return last_employee_user_id, last_employee_id
+        return last_employee_user_id, last_employee_id, inserted_share_chain_id
 
     @log_time
     @gen.coroutine
@@ -1065,24 +1073,27 @@ class PositionEmpNoticeHandler(BaseHandler):
             self.send_json_success()
             return
 
-        position = yield self.position_ps.get_position(self.params.pid, display_locale=self.get_current_locale())
+        yield self.position_ps.send_ten_min_tmp(self.current_user.sysuser.id, self.current_user.company.id)
 
-        link = self.make_url(path.EMPLOYEE_RECOMMENDS, self.params)
-
-        # 十分钟消息模板推送：十分钟内只发送一个消息模板，合并职位，不根据职位发消息模板
-        redis_key = 'NO_REPEAT_TEN_MINUTES_TPL_{user_id}'.format(user_id=self.current_user.sysuser.id)
-        if self.redis.get(redis_key):
-            self.send_json_success()
-
-        self.redis.set(redis_key, 'EXISTS', ttl=10 * 60)
-
-        if self.current_user.wechat.passive_seeker == const.OLD_YES:
-            yield position_share_notice_employee_tpl(self.current_user.company.id,
-                                                     position.title,   # 合并多个职位，所有职位title在mtp中SQL查找
-                                                     '面议',           # 合并多个职位， 薪资默认 面议
-                                                     self.current_user.sysuser.id,
-                                                     self.params.pid,
-                                                     link)
+        # position = yield self.position_ps.get_position(self.params.pid, display_locale=self.get_current_locale())
+        #
+        # link = self.make_url(path.EMPLOYEE_TEN_MIN_TMP, self.params)
+        #
+        # # 十分钟消息模板推送：十分钟内只发送一个消息模板，合并职位，不根据职位发消息模板
+        # redis_key = 'NO_REPEAT_TEN_MINUTES_TPL_{user_id}'.format(user_id=self.current_user.sysuser.id)
+        # if self.redis.get(redis_key):
+        #     self.send_json_success()
+        #     return
+        #
+        # self.redis.set(redis_key, 'EXISTS', ttl=10 * 60)
+        #
+        # if self.current_user.wechat.passive_seeker == const.OLD_YES:
+        #     yield position_share_notice_employee_tpl(self.current_user.company.id,
+        #                                              position.title,   # 合并多个职位，所有职位title在mtp中SQL查找
+        #                                              '面议',           # 合并多个职位， 薪资默认 面议
+        #                                              self.current_user.sysuser.id,
+        #                                              self.params.pid,
+        #                                              link)
 
         self.send_json_success()
 

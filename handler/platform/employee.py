@@ -14,6 +14,7 @@ from util.common import ObjectDict
 from util.common.decorator import handle_response, authenticated, check_employee_common
 from util.tool.json_tool import json_dumps
 from util.tool.str_tool import to_str
+from util.common.cipher import decode_id
 from urllib import parse
 import conf.platform as const_platform
 from util.wechat.core import get_temporary_qrcode
@@ -836,7 +837,6 @@ class EmployeeReferralCardsHandler(BaseHandler):
         """
         获取卡片信息
         params:
-        user_id: 收到消息模板的员工的user_id
         send_timestamp: 发送消息模板的时间
         page_size: 分页获取卡片数据
         page_number: 页码
@@ -869,10 +869,12 @@ class EmployeeReferralCardsHandler(BaseHandler):
         }
         """
         ret = yield self.employee_ps.get_referral_cards(
-            self.params.user_id,
-            self.params.send_timestamp,
+            self.current_user.sysuser.id,
+            self.params.send_time,
             int(self.params.page_number or 0),
-            int(self.params.page_size or 10))
+            int(self.params.page_size or 10),
+            self.current_user.company.id
+        )
 
         cards = list()
         for card_infra in ret.data:
@@ -905,8 +907,9 @@ class EmployeeReferralPassCardsHandler(BaseHandler):
         ret = yield self.employee_ps.pass_referral_card(
             pid=self.json_args.pid,
             user_id=self.current_user.sysuser.id,
+            company_id=self.current_user.company.id,
             card_user_id=self.json_args.candidate_user_id,
-            timestamp=self.json_args.send_timestamp)
+            timestamp=self.params.send_time)
 
         if ret.status == 0:
             self.send_json_success()
@@ -950,14 +953,15 @@ class EmployeeReferralInviteApplyHandler(BaseHandler):
             user_id=self.current_user.sysuser.id,
             company_id=self.current_user.company.id,
             card_user_id=self.json_args.candidate_user_id,
-            timestamp=self.json_args.get('send_timestamp') or 0)
+            # timestamp=self.json_args.get('send_timestamp') or 0)
+            timestamp=self.params.send_time)
 
         if ret.status == 0:
             data = ObjectDict({
                 "notified": ret.data['notified'],
                 "degree": ret.data['degree'],
                 "chain_id": ret.data['chain_id'],
-                "chain": [{"uid": item['user_id'], "avatar": item['avatar']} for item in ret.data['chain']]
+                "chain": [{"uid": item['uid'], "avatar": item['avatar']} for item in ret.data['chain']]
             })
             self.send_json_success(data)
         else:
@@ -977,11 +981,16 @@ class EmployeeReferralConnectionHandler(BaseHandler):
         """
         pid = self.params.pid
         if not (pid and chain_id):
-            self.send_json_error(message='chain_id和pid为必填项')
+            self.write_error(500)
+            return
         recom_user_id = self.current_user.recom.id if self.current_user.recom else self.current_user.sysuser.id
         click_user_id = self.current_user.sysuser.id if self.current_user.recom else 0
 
-        ret_conn = yield self.employee_ps.referral_connections(recom_user_id, click_user_id, chain_id, pid)
+        parent_id = self.params.parent_id if self.params.parent_id else 0
+        ret_conn = yield self.employee_ps.referral_connections(recom_user_id, click_user_id, chain_id, pid, parent_id)
+
+        psc = ret_conn.data['parent_id'] if ret_conn.data['parent_id'] else 0
+        self.params.psc = psc
         page_data = {
             "pid": ret_conn.data['pid'],
             "viewer_id": self.current_user.sysuser.id,
@@ -1019,3 +1028,46 @@ class EmployeeReferralConnectionHandler(BaseHandler):
             "description": description,
             "link": link,
         })
+
+
+class ContactReferralInfoHandler(BaseHandler):
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        """
+         联系内推页面获取员工姓名，头像，职位名
+        :return:
+        """
+        pid = self.params.pid
+        recom = decode_id(self.params.recom)
+        psc = self.params.psc if self.params.psc else 0
+
+        ret = yield self.user_ps.if_referral_position(recom, psc, pid)
+        recom_user_id = ret.data['user']['uid']
+
+        ret_info = yield self.employee_ps.referral_contact_push(recom_user_id, pid)
+        self.render_page(
+            template_name='employee/connect-referral.html',
+            data={
+              "employee_icon": ret_info.data['employee_icon'],
+              "employee_name": ret_info.data['employee_name'],
+              "position_name": ret_info.data['position_name'],
+              "pid": pid,
+            }
+        )
+
+
+class ReferralInviteApplyHandler(BaseHandler):
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        """
+        邀请投递入口三，渲染前端页面
+        :return:
+        """
+        self.render_page(template_name='employee/candidate-filter.html',
+                         data=dict())
