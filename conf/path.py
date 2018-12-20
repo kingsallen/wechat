@@ -24,6 +24,7 @@ GATES_EMPLOYEE = '/employee/custom_bind/gates'
 EMPLOYEE_REFERRAL_POLICY = "/employee/referral/policy"
 EMPOLYEE_LADDER = "/employee/ladder"
 EMPLOYEE_REWARDS_RECORD = '/app/employee/binding/rewards'
+EMPLOYEE_TEN_MIN_TMP = '/api/employee/invite_cards'
 
 PROFILE_CUSTOM_CV = '/profile/custom'
 REFERRAL_CONFIRM = "/referral/confirm"
@@ -132,6 +133,8 @@ INFRA_POSITION_LIST_WX_TPL = 'user/refuse/recommend'
 INFRA_POSITION_SEARCH_HISTORY = 'position/search/history'
 INFRA_POSITION_SEARCH_HISTORY_DEL = 'position/search/history/delete'
 INFRA_POSITION_BONUS = "v1/referral/position/bonus"
+INFRA_POSITION_NEO4J_SHARE_CHAIN = 'v1/neo4j/forward/insert'
+INFRA_TEN_MIN_TMP = 'v1/referral/radar/saveTemp'
 
 # Profile 服务
 # Ref: https://wiki.moseeker.com/profile-api.md
@@ -209,6 +212,10 @@ REFERRAL_CONNECTIONS = 'employee/referral/connections/{}'
 INFRA_REFERRAL_CONTACT_PUSH = 'v1/referral/contact/push'
 INFRA_REFERRAL_RELATIVE_POSITIONS = 'v1/match/position'
 INFRA_REFERRAL_CONTACT_INFO = 'v1/contact/referral/info'
+INFRA_REFERRAL_EVALUATION = 'v1/employee/referral/evaluate'
+INFRA_REFERRAL_EVALUATION_PAGE = 'v1/employee/seek/recommend'
+INFRA_IF_EMPLOYEE_POS = 'v1/referral/employee/check'
+REFERRAL_CONTACT_RESULT = '/referral/contact_result'
 
 # 积分商城服务
 EMPLOYEE_MALL = '/employee/mall/index'

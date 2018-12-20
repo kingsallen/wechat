@@ -132,7 +132,7 @@ class SharechainPageService(PageService):
 
     @log_time
     @gen.coroutine
-    def _no_existed_record(self, share_record, share_chain_parent_id):
+    def _existed_record(self, share_record, share_chain_parent_id):
         """检查原始链路数据中是否有该数据"""
 
         record = yield self.candidate_share_chain_ds.get_share_chain({
@@ -141,7 +141,7 @@ class SharechainPageService(PageService):
             "recom_user_id": share_record.recom_user_id,
             "parent_id": share_chain_parent_id
         })
-        raise gen.Return(not bool(record))
+        raise gen.Return(record)
 
     @log_time
     @gen.coroutine
@@ -195,8 +195,8 @@ class SharechainPageService(PageService):
         ret = 0
 
         # 如果是重复数据，直接返回
-        no_existed_record = yield self._no_existed_record(last_share_record, share_chain_parent_id)
-        if not no_existed_record:
+        existed_record = yield self._existed_record(last_share_record, share_chain_parent_id)
+        if existed_record:
             yield self.candidate_share_chain_ds.update_share_chain(
                 conds={
                     "position_id": last_share_record.position_id,
@@ -208,7 +208,7 @@ class SharechainPageService(PageService):
                     "click_time": last_share_record.create_time
                 }
             )
-            return ret
+            raise gen.Return(existed_record.id)
 
         self.logger.debug("[SC]last_share_record: %s" % last_share_record)
 

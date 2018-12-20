@@ -8,6 +8,7 @@ from handler.base import BaseHandler
 from util.common.decorator import handle_response, authenticated, \
     check_and_apply_profile
 from util.wechat.core import WechatNoTemplateError
+from util.common.cipher import decode_id
 from util.common import ObjectDict
 import conf.message as msg
 from util.tool.url_tool import make_static_url
@@ -68,7 +69,23 @@ class ApplicationHandler(BaseHandler):
 
         self.logger.warn(
             "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& post application api begin &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
+
         pid = self.json_args.pid
+
+        # 联系内推： 候选人填写简历信息 确认提交，此时并没有真正投递要等到员工完成推荐评价才算是真正投递
+        if self.params.contact_referral:
+            # 申请来自哪里
+            origin = self.params.origin
+            recom = decode_id(self.json_args.recom)
+            psc = self.json_args.psc if self.json_args.psc else 0
+            ret = yield self.user_ps.if_referral_position(recom, psc, pid)
+            root_user_id = ret.data['user']['uid']
+            yield self.user_ps.referral_confirm_submit(self.current_user.sysuser.id, root_user_id, pid, origin)
+            self.send_json_success(
+                data=dict(next_url=self.make_url(path.REFERRAL_CONTACT_RESULT, self.params),
+                          message=''))
+            return
+
         self.log_info = {"position_id": pid}
         position = yield self.position_ps.get_position(pid, display_locale=self.get_current_locale())
 

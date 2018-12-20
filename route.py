@@ -169,12 +169,15 @@ platform_routes = [
     (r"/employee/mall/good/(\d+)",                   handler.platform.mall.MallGoodHandler,                     {"event": "mall_good_detail"}),
     (r"/employee/mall/order_page",                   handler.platform.mall.MallExchangePageHandler,             {"event": "mall_exchange_page"}),
     (r"/employee/referral/connections/(\d+)",        handler.platform.employee.EmployeeReferralConnectionHandler, {"event": "referral_connections"}),
+    (r"/employee/referral/candidate_info/?",         handler.platform.referral.ReferralEvaluationHandler,       {"event": "referral_evaluation_info"}),
 
     (r'/user/survey/?',                              handler.platform.user.UserSurveyHandler,                   {'event': 'user_survey'}),
     (r'/user/ai-recom/?',                            handler.platform.user.AIRecomHandler,                      {'event': 'user_ai-recom'}),
     (r'/employee/survey/?',                          handler.platform.employee.EmployeeSurveyHandler,           {'event': 'employee_survey'}),
     (r'/employee/ai-recom/(\d+)',                    handler.platform.employee.EmployeeAiRecomHandler,          {'event': 'employee_ai-recom'}),
     (r'/employee/referral/policy',                   handler.platform.employee.EmployeeReferralPolicyHandler,   {"event": "referral—policy"}),
+    (r'/employee/connect_referral',                  handler.platform.employee.ContactReferralInfoHandler,      {"event": "referral_contact_info"}),
+    (r'/employee/referral/invite_cards',             handler.platform.employee.ReferralInviteApplyHandler,      {"event": "referral_invite_cards"}),
     (r'/cover/no-weixin',                            handler.platform.cover.CoverHandler,                       {"event": "cover_no_weixin"}),
     (r'/position/recom/?',                           handler.platform.position.PositionRecomListHandler,        {"event": "position_recom_list"}),
     (r'/usercenter/mine/?',                          handler.common.usercenter.UsercenterMineHandler,           {"event": "usercenter_mine"}),
@@ -182,6 +185,7 @@ platform_routes = [
     (r'/referral/confirm/?',                         handler.platform.referral.ReferralConfirmHandler,          {"event": "referral_confirm"}),
     (r'/employee/recom/profile/pc/?',                handler.platform.referral.ReferralProfilePcHandler,        {"event": "referal_confirm_pc"}),
     (r'/referral/crucial/info/?',                    handler.platform.referral.ReferralCrucialInfoHandler,      {"event": "referral_crucial_info"}),
+    (r'/referral/contact_result/?',                    handler.platform.referral.ReferralResultHandler,         {"event": "referral_contact_result"}),
 
     # 各大公司的自定义配置
     (r"/custom/emailapply/?",                        handler.platform.customize.CustomizeEmailApplyHandler,     {"event": "customize_emailapply"}),
@@ -224,7 +228,9 @@ platform_routes = [
     (r"/api/mall/goods",                             handler.platform.mall.MallGoodsHandler,                    {"event": "mall_goods_list"}),
     (r"/api/mall/order",                             handler.platform.mall.MallExchangeHandler,                 {"event": "mall_exchange_imd"}),
     (r'/api/position/popup/?',                       handler.platform.user.PositionDetailPopupHandler,          {"event": "referral_position_detail_popup"}),
-    (r"/api/switch[\/]*([a-z_]+)*",                   handler.platform.switch.SwitchHandler,                     {"event": "switch_"}),
+    (r'/api/position/repost/visitor_info/?',         handler.platform.user.PositionForwardFromEmpHandler,       {"event": "referral_position_forward_from"}),
+    (r'/api/referral/recom_positions/?',             handler.platform.user.ReferralRelatedPositionHandler,      {"event": "referral_related_positions"}),
+    (r"/api/switch[\/]*([a-z_]+)*",                  handler.platform.switch.SwitchHandler,                     {"event": "switch_"}),
     (r"/api/func/relation_tags/?",                   handler.platform.referral.ReferralCommentTagsHandler,      {"event": "referral_comment_tags"}),
 
     (r'/api/privacy/agree/?',                        handler.platform.privacy.PrivacyHandler,                   {"event": "api_privacy_agreement"}),

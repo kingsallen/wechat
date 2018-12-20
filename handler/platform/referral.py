@@ -359,6 +359,37 @@ class ReferralCrucialInfoApiHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def post(self):
+
+        if self.params.endpoint == 'connection':
+            # 保存员工推荐评价信息
+            yield self.employee_ps.referral_save_evaluation(self.current_user.sysuser.id, self.json_args)
+            if self.json_args.flag == const.REFERRAL_EVAL_CONTACT_MES_TMP:
+                next_url = ''
+            elif self.json_args.flag == const.REFERRAL_EVAL_RADAR:
+                next_url = ''
+            elif self.json_args.flag == const.REFERRAL_EVAL_RECOM_PROGRESS:
+                next_url = ''
+            elif self.json_args.flag == const.REFERRAL_EVAL_TEN_MIN_MES_TMP:
+                next_url = self.make_url(path.EMPLOYEE_TEN_MIN_TMP, self.params)
+            else:
+                next_url = ''
+
+            # 推荐评价红包
+            # recom_record_id = self.params.get('_id')
+            # position_title = yield self.redpacket_ps.get_position_title_by_recom_record_id(recom_record_id)
+            # yield self.redpacket_ps.handle_red_packet_recom(
+            #     recom_current_user=self.current_user,
+            #     recom_record_id=recom_record_id,
+            #     redislocker=self.redis,
+            #     realname=self.get_argument("_realname"),
+            #     position_title=position_title
+            # )
+
+            self.send_json_success(data={
+                "next_url": next_url
+            })
+            return
+
         ret = yield self.employee_ps.update_referral_crucial_info(self.current_user.employee.id, self.json_args)
         if ret.status != const.API_SUCCESS:
             self.send_json_error(message=ret.message)
@@ -378,3 +409,42 @@ class ReferralCommentTagsHandler(BaseHandler):
         relation_code = self.params.relation
         res = yield self.dictionary_ps.get_comment_tags_by_code(relation_code)
         self.send_json_success(data=res)
+
+
+class ReferralEvaluationHandler(BaseHandler):
+    """联系内推：推荐评价"""
+
+    @handle_response
+    @authenticated
+    @check_employee_common
+    @gen.coroutine
+    def get(self):
+        referral_id = self.params.referral_id
+        candidate_info = yield self.employee_ps.referral_evaluation_page_info(self.current_user.sysuser.id, referral_id)
+        presentee_name = candidate_info.data['username']
+        title = candidate_info.data['position_name']
+
+        relationship = yield self.dictionary_ps.get_referral_relationship(self.locale)
+        degree = yield self.dictionary_ps.get_degrees(self.locale)
+        self.render_page(template_name="employee/recom-candidate-info-connect.html", data=ObjectDict({
+            "job_title": title,
+            "consts": dict(
+                relation=relationship,
+                degree=degree
+            ),
+            "presentee_name": presentee_name
+        }))
+
+
+class ReferralResultHandler(BaseHandler):
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        """
+        联系内推结果页
+        :return:
+        """
+        self.render_page(template_name='employee/result-with-jobs.html',
+                         data=dict())

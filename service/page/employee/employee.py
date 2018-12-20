@@ -736,7 +736,7 @@ class EmployeePageService(PageService):
         return res
 
     @gen.coroutine
-    def get_referral_cards(self, user_id, timestamp, page_number, page_size):
+    def get_referral_cards(self, user_id, timestamp, page_number, page_size, company_id):
         """
         十分钟消息模板：卡片数据获取
         :param user_id:   转发职位的员工的user_id
@@ -745,20 +745,21 @@ class EmployeePageService(PageService):
         :param page_size:
         :return:
         """
-        res = yield self.infra_employee_ds.get_referral_cards(user_id, timestamp, page_number, page_size)
+        res = yield self.infra_employee_ds.get_referral_cards(user_id, timestamp, page_number, page_size, company_id)
         return res
 
     @gen.coroutine
-    def pass_referral_card(self, pid, user_id, card_user_id, timestamp):
+    def pass_referral_card(self, pid, user_id, company_id, card_user_id, timestamp):
         """
         十分钟消息模板：我不熟悉
         :param pid:
         :param user_id:       转发职位的user_id
+        :param company_id:
         :param card_user_id:  当前卡片的user_id
         :param timestamp:     发送消息模板的时间
         :return:
         """
-        res = yield self.infra_employee_ds.pass_referral_card(pid, user_id, card_user_id, timestamp)
+        res = yield self.infra_employee_ds.pass_referral_card(pid, user_id, company_id, card_user_id, timestamp)
         return res
 
     @gen.coroutine
@@ -775,25 +776,57 @@ class EmployeePageService(PageService):
         return res
 
     @gen.coroutine
-    def referral_connections(self, recom_user_id, end_user_id, chain_id, pid):
+    def referral_connections(self, recom_user_id, end_user_id, chain_id, pid, parent_id):
         """
         人脉连连看
         :param recom_user_id: 当前转发用户user_id
         :param end_user_id:   链路结束用户user_id
         :param chain_id:      人脉连连看 链路id
         :param pid: 职位id
+        :param parent_id: 父级链路id
         :return:
         """
-        res = yield self.infra_employee_ds.referral_connection(recom_user_id, end_user_id, chain_id, pid)
+        res = yield self.infra_employee_ds.referral_connections(recom_user_id, end_user_id, chain_id, pid, parent_id)
         return res
 
     @gen.coroutine
     def referral_contact_push(self, user_id, position_id):
         """
-        联系内推： 职位详情顶部获取 推荐职位的员工姓名及推荐的职位姓名
+        联系内推页面获取员工姓名、头像及职位名
         :param user_id:  员工的user_id
         :param position_id:
         :return:
         """
         res = yield self.infra_employee_ds.referral_contact_push(user_id, position_id)
+        return res
+
+    @gen.coroutine
+    def referral_save_evaluation(self, user_id, json_args):
+        """
+        联系内推： 推荐评价信息保存
+        :param user_id:   员工的user_id
+        :param json_args:
+        :return:
+        """
+        params = ObjectDict({
+            "post_user_id": user_id,
+            "position_id": json_args.pid,
+            "referral_id": json_args.referral_id,
+            "referral_reasons": json_args.recom_reason,
+            "recom_reason_text": json_args.comment,
+            "relationship": json_args.relation,
+
+        })
+        res = yield self.infra_employee_ds.referral_save_evaluation(params)
+        return res
+
+    @gen.coroutine
+    def referral_evaluation_page_info(self, post_user_id, referral_id):
+        """
+        员工推荐评价页面 候选人和职位信息获取
+        :param post_user_id:
+        :param referral_id:
+        :return:
+        """
+        res = yield self.infra_employee_ds.referral_evaluation_page_info(post_user_id, referral_id)
         return res
