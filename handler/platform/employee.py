@@ -1067,5 +1067,32 @@ class ReferralInviteApplyHandler(BaseHandler):
         邀请投递入口三，渲染前端页面
         :return:
         """
+        yield self._make_share_info()
         self.render_page(template_name='employee/candidate-filter.html',
-                         data=dict())
+                         data=dict(
+                             recom=self.position_ps._make_recom(self.current_user.sysuser.id)
+                         ))
+
+    @gen.coroutine
+    def _make_share_info(self):
+        """构建 share 内容"""
+
+        company_info = yield self.company_ps.get_company(
+            conds={"id": self.current_user.company.id}, need_conf=True)
+
+        cover = self.share_url(company_info.logo)
+        title = msg.REFERRAL_INVITE_TITLE
+        description = msg.REFERRAL_INVITE_TEXT
+
+        link = self.make_url(
+            path.REFERRAL_INVITE_APPLY,
+            self.params,
+            recom=self.position_ps._make_recom(self.current_user.sysuser.id),
+        )
+
+        self.params.share = ObjectDict({
+            "cover": cover,
+            "title": title,
+            "description": description,
+            "link": link,
+        })

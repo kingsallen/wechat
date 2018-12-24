@@ -216,6 +216,7 @@ INFRA_REFERRAL_EVALUATION = 'v1/employee/referral/evaluate'
 INFRA_REFERRAL_EVALUATION_PAGE = 'v1/employee/seek/recommend'
 INFRA_IF_EMPLOYEE_POS = 'v1/referral/employee/check'
 REFERRAL_CONTACT_RESULT = '/referral/contact_result'
+REFERRAL_INVITE_APPLY = '/employee/referral/invite_cards'
 
 # 积分商城服务
 EMPLOYEE_MALL = '/employee/mall/index'
