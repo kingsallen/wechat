@@ -36,6 +36,7 @@ import handler.common.captcha
 import handler.common.image
 import handler.common.campaign
 import handler.common.redirect
+import handler.common.statistics
 
 import handler.help.passport
 import handler.help.releasedposition
@@ -59,6 +60,7 @@ import handler.platform.mall
 import handler.platform.privacy
 import handler.platform.switch
 import handler.platform.radar_demo
+import handler.platform.annual_summarize
 
 import handler.qx.app
 import handler.qx.aggregation
@@ -145,7 +147,9 @@ common_routes = [
     (r"/api/JSSDKError",                             handler.common.jssdkerror.JSSDKErrorHandler,               {"event": "frontend_jssdkerror"}),
     (r"/api/jslog",                                  handler.common.jslog.JSLogHandler,                         {"event": "frontend_jslog"}),
     (r"/api/collectlog",                             handler.common.logcollector.LogCollectorHandler,           {"event": "collect_log"}),
-    (r"/api/captcha",                                handler.common.captcha.CaptchaHandler,                     {"event": "captcha"})
+    (r"/api/captcha",                                handler.common.captcha.CaptchaHandler,                     {"event": "captcha"}),
+    (r"/api/interview/statistics",                   handler.common.statistics.InterviewStatisticsHandler,      {"event": "interview_statistics"}),
+
 ]
 
 # 企业号的单独 routes，域名 platform.moseeker.com/m
@@ -170,7 +174,6 @@ platform_routes = [
     (r"/employee/mall/good/(\d+)",                   handler.platform.mall.MallGoodHandler,                     {"event": "mall_good_detail"}),
     (r"/employee/mall/order_page",                   handler.platform.mall.MallExchangePageHandler,             {"event": "mall_exchange_page"}),
 
-
     (r'/user/survey/?',                              handler.platform.user.UserSurveyHandler,                   {'event': 'user_survey'}),
     (r'/user/ai-recom/?',                            handler.platform.user.AIRecomHandler,                      {'event': 'user_ai-recom'}),
     (r'/employee/survey/?',                          handler.platform.employee.EmployeeSurveyHandler,           {'event': 'employee_survey'}),
@@ -191,8 +194,13 @@ platform_routes = [
     (r"/pc/upload/profile/?",                        handler.platform.referral_pc.ReferralUploadHandler,        {"event": "referral_pc_upload"}),
     (r"/pc/api/upload/recomprofile/?",               handler.platform.referral_pc.EmployeeRecomProfilePcHandler, {"event": "referral_pc_upload_profile"}),
     (r"/pc/api/employee/recom/profile/?",            handler.platform.referral_pc.ReferralProfileAPIPcHandler,  {"event": "referral_pc_profile"}),
-    (r"/radar/demo/?", handler.platform.radar_demo.RadarDemoHandler, {"event": "radar_demo"}),
-    (r"/api/radar/demo/?", handler.platform.radar_demo.RadarDemoApiHandler, {"event": "radar_demo_api"}),
+    (r"/radar/demo/?",                               handler.platform.radar_demo.RadarDemoHandler,              {"event": "radar_demo"}),
+    (r"/api/radar/demo/?",                           handler.platform.radar_demo.RadarDemoApiHandler,           {"event": "radar_demo_api"}),
+
+    # 年度总结
+    (r"/annual/summarize",                           handler.platform.annual_summarize.AnnualSummarizeHandler,  {"event": "annual_summarize"}),
+    (r"/api/annual/summarize",                       handler.platform.annual_summarize.ApiAnnualSummarizeHandler, {"event": "api_annual_summarize"}),
+    (r"/api/annual/summarize/entrance",              handler.platform.annual_summarize.AnnualSummarizeEntranceHandler, {"event": "annual_summarize_entrance"}),
 
     (r"/api/company/visitreq/?",                     handler.platform.companyrelation.CompanyVisitReqHandler,   {"event": "company_visitreq"}),
     (r"/api/company/survey/?",                       handler.platform.companyrelation.CompanySurveyHandler,     {"event": "company_survey"}),

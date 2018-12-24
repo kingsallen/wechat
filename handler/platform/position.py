@@ -255,6 +255,13 @@ class PositionHandler(BaseHandler):
                                                                                              position_info.title)
                     description = self.locale.translate('share_tpl_description%s' % share_tpl_id)
 
+        # transmit_from是判断场景值的字段，且场景值使用偶数表示，当员工通过活动页面跳转到该页面时，值为偶数，
+        # 当员工转发出去时需要+1，因此求职者打开员工转发的链接时该值为奇数。
+        transmit_from = self.params.transmit_from
+        if transmit_from is not None and transmit_from.isdigit():
+            transmit_from = int(transmit_from) if int(transmit_from) % 2 else int(transmit_from) + 1
+            self.params.update(transmit_from=transmit_from)
+
         link = self.make_url(
             path.POSITION_PATH.format(position_info.id),
             self.params,
@@ -1177,6 +1184,13 @@ class PositionListHandler(PositionListInfraParamsMixin, BaseHandler):
             ]
             title = rp_share_info.title
             description = rp_share_info.description
+
+        # transmit_from是判断场景值的字段，且场景值使用偶数表示，当员工通过活动页面跳转到该页面时，值为偶数，
+        # 当员工转发出去时需要+1，因此求职者打开员工转发的链接时该值为奇数。
+        transmit_from = self.params.transmit_from
+        if transmit_from is not None and transmit_from.isdigit():
+            transmit_from = int(transmit_from) if int(transmit_from) % 2 else int(transmit_from) + 1
+            self.params.update(transmit_from=transmit_from)
 
         link = self.make_url(
             path.POSITION_LIST,

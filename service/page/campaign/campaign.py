@@ -195,3 +195,15 @@ class CampaignPageService(PageService):
         # infra_positions_num = infra_positions_info.get("positionNum", 0)
         alipay_positions = [AlipayCampaignPosition(ObjectDict(infra_position)) for infra_position in infra_positions]
         return alipay_positions
+
+    @gen.coroutine
+    def get_new_year_blessing_user(self, user_id):
+        """
+        获取用户的年度总结的数据
+        :param user_id:
+        :return:
+        """
+        user = yield self.campaign_new_year_blessing_user_ds.get_blessing_user({
+            "sysuser_id": user_id
+        })
+        return user
