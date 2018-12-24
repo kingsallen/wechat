@@ -1075,26 +1075,6 @@ class PositionEmpNoticeHandler(BaseHandler):
 
         yield self.position_ps.send_ten_min_tmp(self.current_user.sysuser.id, self.current_user.company.id)
 
-        # position = yield self.position_ps.get_position(self.params.pid, display_locale=self.get_current_locale())
-        #
-        # link = self.make_url(path.EMPLOYEE_TEN_MIN_TMP, self.params)
-        #
-        # # 十分钟消息模板推送：十分钟内只发送一个消息模板，合并职位，不根据职位发消息模板
-        # redis_key = 'NO_REPEAT_TEN_MINUTES_TPL_{user_id}'.format(user_id=self.current_user.sysuser.id)
-        # if self.redis.get(redis_key):
-        #     self.send_json_success()
-        #     return
-        #
-        # self.redis.set(redis_key, 'EXISTS', ttl=10 * 60)
-        #
-        # if self.current_user.wechat.passive_seeker == const.OLD_YES:
-        #     yield position_share_notice_employee_tpl(self.current_user.company.id,
-        #                                              position.title,   # 合并多个职位，所有职位title在mtp中SQL查找
-        #                                              '面议',           # 合并多个职位， 薪资默认 面议
-        #                                              self.current_user.sysuser.id,
-        #                                              self.params.pid,
-        #                                              link)
-
         self.send_json_success()
 
 
