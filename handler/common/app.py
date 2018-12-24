@@ -85,6 +85,8 @@ class ConfigHandler(BaseHandler):
                           "updateTimelineShareData",
                           "updateAppMessageShareData",
                           "onMenuShareQQ",
+                          "updateTimelineShareData",
+                          "updateAppMessageShareData",
                           "onMenuShareWeibo",
                           "hideOptionMenu",
                           "showOptionMenu",
