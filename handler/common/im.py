@@ -235,6 +235,8 @@ class ChatRoomHandler(BaseHandler):
             "jsApiList": ["onMenuShareTimeline",
                           "onMenuShareAppMessage",
                           "onMenuShareQQ",
+                          "updateTimelineShareData",
+                          "updateAppMessageShareData",
                           "onMenuShareWeibo",
                           "hideOptionMenu",
                           "showOptionMenu",

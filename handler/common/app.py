@@ -83,6 +83,8 @@ class ConfigHandler(BaseHandler):
             "jsApiList": ["onMenuShareTimeline",
                           "onMenuShareAppMessage",
                           "onMenuShareQQ",
+                          "updateTimelineShareData",
+                          "updateAppMessageShareData",
                           "onMenuShareWeibo",
                           "hideOptionMenu",
                           "showOptionMenu",
