@@ -1,6 +1,8 @@
 # 新微信项目
-neoweixinrefer项目启动了三个项目
+neoweixinrefer项目启动了三个项目：
+
 公众号，聚合号以及招聘助手项目
+
 前端项目：buck_fe
 
 ## Getting Started
