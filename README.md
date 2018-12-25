@@ -1,11 +1,35 @@
 # 新微信项目
+neoweixinrefer项目启动了三个项目
+公众号，聚合号以及招聘助手项目
+前端项目：buck_fe
 
-测试：
+## Getting Started
+
+### 前置准备
+
+1. mkdir workspace
+2. cd workspace
+3. git clone ssh://git@git.moseeker.com:33897/wechat/wechat.git
+4. cd wechat
+
+### 创建依赖环境
+
+1. virtualenv --python=/usr/bin/python3.6 .env
+2. source .env/bin/active
+
+### 安装依赖包
+
+1. pip install -r requirement.txt
+2. 拷贝内部使用的setting.py（找对接人要）
+
+### 本地运行
+
+- python wechat/app.py
+
+### 运行测试
+
 项目根目录下执行
 `make test`
-
-Python 代码以及风格问题(草稿)：
-http://wiki.moseeker.com/python-code-comments.md
 
 ## 代码层次说明
 
@@ -87,5 +111,47 @@ http://wiki.moseeker.com/python-code-comments.md
     |||
     dao    负责与数据库表结构交互，一张数据表对应一个dao
 
-## thrift
+#### thrift
 thrift -r --gen py:tornado xxxxx.thrift
+
+### 编码建议
+Python 代码以及风格问题(草稿)：
+http://wiki.moseeker.com/python-code-comments.md
+
+## Deployment
+
+- shell 后台运行 
+
+```    
+python app.py --port=xxxx --logpath=/path/logs/ & 
+```
+
+- supervisorctl 守护进程部署 
+
+```
+supervisorctl -c /mnt/xxx
+
+neoweixinrefer_platform:9301 公众号项目
+neoweixinrefer_helper:9321 招聘助手项目
+neoweixinrefer_qx:9311  聚合号项目
+
+>>start neoweixinrefer_platform:9301
+>>stop neoweixinrefer_platform:9301
+>>restart neoweixinrefer_platform:9301
+```
+
+## Authors
+
+- chendi@moseeker.com
+- niuzhenya@moseeker.com
+- linjie@moseekr.com
+- panlingling@moseeker.com
+- yangsongsong@moseeker.com
+
+## License
+
+暂无
+
+## Acknowledgments
+
+暂无
