@@ -128,11 +128,11 @@ class UserPageService(PageService):
         return ret
 
     @gen.coroutine
-    def create_user_wx_user_ent(self, openid, unionid, wechat_id):
+    def create_user_wx_user_ent(self, userinfo, unionid, wechat_id):
         """根据 unionid 创建 企业号微信用户信息"""
 
         wxuser = yield self.get_wxuser_openid_wechat_id(
-            openid=openid, wechat_id=wechat_id)
+            openid=userinfo.openid, wechat_id=wechat_id)
         qx_wxuser = yield self.get_wxuser_unionid_wechat_id(
             unionid=unionid, wechat_id=settings['qx_wechat_id'])
 
@@ -145,14 +145,14 @@ class UserPageService(PageService):
                 fields={
                     "is_subscribe": wxuser.is_subscribe or 0,
                     "sysuser_id":   qx_wxuser.sysuser_id,
-                    "openid":       openid,
-                    "nickname":     qx_wxuser.nickname,
-                    "sex":          qx_wxuser.sex or 0,
-                    "city":         qx_wxuser.city,
-                    "country":      qx_wxuser.country,
-                    "province":     qx_wxuser.province,
+                    "openid":       userinfo.openid,
+                    "nickname":     userinfo.nickname,
+                    "sex":          userinfo.sex or 0,
+                    "city":         userinfo.city,
+                    "country":      userinfo.country,
+                    "province":     userinfo.province,
                     "language":     qx_wxuser.language,
-                    "headimgurl":   qx_wxuser.headimgurl,
+                    "headimgurl":   userinfo.headimgurl,
                     "wechat_id":    wechat_id,
                     "unionid":      qx_wxuser.unionid,
                     "source":       const.WX_USER_SOURCE_OAUTH_UPDATE
@@ -162,14 +162,14 @@ class UserPageService(PageService):
             wxuser_id = yield self.user_wx_user_ds.create_wxuser({
                 "is_subscribe": 0,
                 "sysuser_id":   qx_wxuser.sysuser_id,
-                "openid":       openid,
-                "nickname":     qx_wxuser.nickname,
-                "sex":          qx_wxuser.sex or 0,
-                "city":         qx_wxuser.city,
-                "country":      qx_wxuser.country,
-                "province":     qx_wxuser.province,
+                "openid":       userinfo.openid,
+                "nickname":     userinfo.nickname,
+                "sex":          userinfo.sex or 0,
+                "city":         userinfo.city,
+                "country":      userinfo.country,
+                "province":     userinfo.province,
                 "language":     qx_wxuser.language,
-                "headimgurl":   qx_wxuser.headimgurl,
+                "headimgurl":   userinfo.headimgurl,
                 "wechat_id":    wechat_id,
                 "unionid":      qx_wxuser.unionid,
                 "source":       const.WX_USER_SOURCE_OAUTH
@@ -266,6 +266,38 @@ class UserPageService(PageService):
                 'mobile':   int(mobile),
                 'username': str(mobile),
                 'password': password,
+            })
+
+    @gen.coroutine
+    def update_user_wx_info(self, unionid, userinfo):
+        """更新用户的user_user中微信相关的信息"""
+        yield self.user_user_ds.update_user(
+            conds={
+                'unionid': unionid
+            },
+            fields={
+                "nickname": userinfo.nickname,
+                "headimg": userinfo.headimgurl
+            })
+
+    @gen.coroutine
+    def update_wxuser_wx_info(self, unionid, userinfo):
+        """
+        更新老微信 wxuser 信息
+        :param unionid:
+        :param userinfo:
+        :return:
+        """
+        yield self.user_wx_user_ds.update_wxuser(
+            conds={"unionid": unionid,
+                   "wechat_id": settings['qx_wechat_id']},
+            fields={
+                "nickname": userinfo.nickname,
+                "sex": userinfo.sex or 0,
+                "city": userinfo.city,
+                "country": userinfo.country,
+                "province": userinfo.province,
+                "headimgurl": userinfo.headimgurl
             })
 
     @gen.coroutine
