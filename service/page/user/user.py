@@ -277,7 +277,7 @@ class UserPageService(PageService):
             },
             fields={
                 "nickname": userinfo.nickname,
-                "headimgurl": userinfo.headimgurl
+                "headimg": userinfo.headimgurl
             })
 
     @gen.coroutine
