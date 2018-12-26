@@ -125,7 +125,7 @@ class BaseHandler(MetaBaseHandler):
                 # 来自 qx 的授权, 获得 userinfo
                 if state == wx_const.WX_OAUTH_DEFAULT_STATE:
                     self.logger.debug("来自 qx 的授权, 获得 userinfo")
-                    userinfo = yield self._get_user_info(code)
+                    userinfo = yield self._get_user_info(code, is_qx=True)
                     if userinfo:
                         self.logger.debug("来自 qx 的授权, 获得 userinfo:{}".format(userinfo))
                         yield self._handle_user_info(userinfo)
@@ -224,6 +224,9 @@ class BaseHandler(MetaBaseHandler):
         # 创建 qx 的 user_wx_user
         yield self.user_ps.create_qx_wxuser_by_userinfo(userinfo, user_id)
 
+        # 静默授权时同步将用户信息，更新到qxuser和user_user
+        yield self._sync_userinfo(self._unionid, userinfo)
+
         if not self._authable(self._wechat.type):
             # 该企业号是订阅号 则无法获得当前 wxuser 信息, 无需静默授权
             self._wxuser = ObjectDict()
@@ -297,8 +300,11 @@ class BaseHandler(MetaBaseHandler):
         raise gen.Return(wechat)
 
     @gen.coroutine
-    def _get_user_info(self, code):
-        self._oauth_service.wechat = self._qx_wechat
+    def _get_user_info(self, code, is_qx=False):
+        if is_qx:
+            self._oauth_service.wechat = self._qx_wechat
+        else:
+            self._oauth_service.wechat = self._wechat
         try:
             userinfo = yield self._oauth_service.get_userinfo_by_code(code)
             raise gen.Return(userinfo)
