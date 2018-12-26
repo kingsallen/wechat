@@ -277,10 +277,6 @@ class UserPageService(PageService):
             },
             fields={
                 "nickname": userinfo.nickname,
-                "sex": userinfo.sex or 0,
-                "city": userinfo.city,
-                "country": userinfo.country,
-                "province": userinfo.province,
                 "headimgurl": userinfo.headimgurl
             })
 
