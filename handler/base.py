@@ -136,12 +136,11 @@ class BaseHandler(MetaBaseHandler):
                 else:
                     self.logger.debug("来自企业号的静默授权")
                     self._unionid = from_hex(state)
-                    openid = yield self._get_user_openid(code)
-                    if openid:
-                        self.logger.debug("来自企业号的静默授权, openid:{}".format(openid))
-                        self._wxuser = yield self._handle_ent_openid(
-                            openid, self._unionid)
-                        self.logger.info("来自企业号的静默授权, openid:{}, _unionid:{}".format(openid, self._unionid))
+                    userinfo = yield self._get_user_info(code)
+                    if userinfo:
+                        self.logger.debug("来自企业号的静默授权, userinfo:{}".format(userinfo))
+                        self._wxuser = yield self._handle_ent_userinfo(userinfo, self._unionid)
+                        self.logger.info("来自企业号的静默授权, userinfo:{}, _unionid:{}".format(userinfo, self._unionid))
                     else:
                         self.logger.debug("来自企业号的 code 无效")
 
@@ -230,13 +229,22 @@ class BaseHandler(MetaBaseHandler):
             self._wxuser = ObjectDict()
 
     @gen.coroutine
-    def _handle_ent_openid(self, openid, unionid):
-        """根据企业号 openid 和 unionid 创建企业号微信用户"""
+    def _handle_ent_userinfo(self, userinfo, unionid):
+        """根据企业号 userinfo 和 unionid 创建企业号微信用户"""
         wxuser = None
         if self.is_platform or self.is_help:
-            wxuser = yield self.user_ps.create_user_wx_user_ent(
-                openid, unionid, self._wechat.id)
+            wxuser = yield self.user_ps.create_user_wx_user_ent(userinfo, unionid, self._wechat.id)
+        # 静默授权时同步将用户信息，更新到qxuser和user_user
+        yield self._sync_userinfo(unionid, userinfo)
         raise gen.Return(wxuser)
+
+    @gen.coroutine
+    def _sync_userinfo(self, unionid, userinfo):
+        """静默授权时同步将用户信息，更新到qxuser和user_user"""
+        # todo(niuzhenya@moseeker.com) 此处更新没有将所有wxuser的wxinfo都做更新，原因：wxuser的info没有展示的地方，展示目前都用的是user_user的info;
+        # todo 过多的冗余字段，可以考虑在后期将数据库的结构优化
+        yield self.user_ps.update_user_wx_info(unionid, userinfo)
+        yield self.user_ps.update_wxuser_wx_info(unionid, userinfo)
 
     def _authable(self, wechat_type):
         """返回当前公众号是否可以 OAuth
