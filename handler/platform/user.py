@@ -782,11 +782,15 @@ class PositionForwardFromEmpHandler(BaseHandler):
         pid = self.params.pid
         self.logger.debug('PLL test: current_user: %s' % self.current_user)
         self.logger.debug('PLL test: self.params: %s' % self.params)
+        if not self.params.recom:
+            self.send_json_success(data={
+                "is_employee": 0,
+                "employee_name": '',
+                "employee_icon": '',
+            })
+            return
         recom = decode_id(self.params.recom)
         psc = self.params.psc if self.params.psc else 0
-        if not(pid and recom):
-            self.send_json_error('pid, recom 为必传参数')
-            return
         ret = yield self.user_ps.if_referral_position(recom, psc, pid)
         data = {
             "is_employee": ret.data['employee'],

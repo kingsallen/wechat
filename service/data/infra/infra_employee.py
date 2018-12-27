@@ -267,3 +267,11 @@ class InfraEmployeeDataService(DataService):
         ret = yield http_get(path.INFRA_REFERRAL_EVALUATION_PAGE, params)
         return ret
 
+    @gen.coroutine
+    def get_referral_progress(self, params):
+        """
+        员工中心 推荐进度：获取进度列表数据
+        :param params:
+        :return:
+        """
+        pass
