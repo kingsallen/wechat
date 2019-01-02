@@ -246,7 +246,9 @@ class EmployeeBindHandler(BaseHandler):
         result, payload = self.employee_ps.make_bind_params(
             self.current_user.sysuser.id,
             self.current_user.company.id,
-            self.json_args)
+            self.json_args,
+            self.params
+        )
 
         self.logger.debug(result)
         self.logger.debug(payload)

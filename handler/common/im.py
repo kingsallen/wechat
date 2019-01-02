@@ -234,6 +234,8 @@ class ChatRoomHandler(BaseHandler):
             "signature": jsapi.signature,
             "jsApiList": ["onMenuShareTimeline",
                           "onMenuShareAppMessage",
+                          "updateTimelineShareData",
+                          "updateAppMessageShareData",
                           "onMenuShareQQ",
                           "onMenuShareWeibo",
                           "hideOptionMenu",

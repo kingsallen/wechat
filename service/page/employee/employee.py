@@ -250,15 +250,17 @@ class EmployeePageService(PageService):
 
         return data
 
-    def make_bind_params(self, user_id, company_id, json_args):
+    def make_bind_params(self, user_id, company_id, json_args, params):
         """
         构建员工绑定的参数集合
         :param user_id:
         :param company_id:
         :param json_args:
+        :param params
         :return:
         """
         type = json_args.type
+        source = int(params.source) if params.source and params.source.isdigit() else 0
 
         needed_keys = ['type', 'name', 'mobile']
 
@@ -294,7 +296,8 @@ class EmployeePageService(PageService):
             customField=param_dict.custom_value,
             name=param_dict.name,
             answer1=param_dict.answer1,
-            answer2=param_dict.answer2)
+            answer2=param_dict.answer2,
+            source=source)
 
         return True, binding_params
 

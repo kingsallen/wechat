@@ -833,6 +833,7 @@ class BindingParams(object):
      - name
      - answer1
      - answer2
+     - source
     """
 
     thrift_spec = (
@@ -846,9 +847,10 @@ class BindingParams(object):
         (7, TType.STRING, 'name', 'UTF8', None, ),  # 7
         (8, TType.STRING, 'answer1', 'UTF8', None, ),  # 8
         (9, TType.STRING, 'answer2', 'UTF8', None, ),  # 9
+        (10, TType.I32, 'source', None, None, ),  # 10
     )
 
-    def __init__(self, type=None, userId=None, companyId=None, email=None, mobile=None, customField=None, name=None, answer1=None, answer2=None,):
+    def __init__(self, type=None, userId=None, companyId=None, email=None, mobile=None, customField=None, name=None, answer1=None, answer2=None, source=None,):
         self.type = type
         self.userId = userId
         self.companyId = companyId
@@ -858,6 +860,7 @@ class BindingParams(object):
         self.name = name
         self.answer1 = answer1
         self.answer2 = answer2
+        self.source = source
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -913,6 +916,11 @@ class BindingParams(object):
                     self.answer2 = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
+            elif fid == 10:
+                if ftype == TType.I32:
+                    self.source = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -958,6 +966,10 @@ class BindingParams(object):
         if self.answer2 is not None:
             oprot.writeFieldBegin('answer2', TType.STRING, 9)
             oprot.writeString(self.answer2.encode('utf-8') if sys.version_info[0] == 2 else self.answer2)
+            oprot.writeFieldEnd()
+        if self.source is not None:
+            oprot.writeFieldBegin('source', TType.I32, 10)
+            oprot.writeI32(self.source)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()

@@ -73,6 +73,8 @@ CAMPAIGN_POSITION_PATH = "/alipaycampaign/{}/company/{}/position"
 
 RESUME_IMPORT_FAIL = "/resume/import/limit"
 
+ANNUAL_SUMMARIZE = "/annual/summarize"
+
 # ============================ 微信端Path结束 ============================
 
 
