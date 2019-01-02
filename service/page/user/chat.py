@@ -80,11 +80,10 @@ class ChatPageService(PageService):
             room['compoundContent'] = btn_content
 
     @gen.coroutine
-    def get_chatroom(self, user_id, hr_id, position_id, room_id, qxuser, is_gamma):
+    def get_chatroom(self, user_id, hr_id, company_id, position_id, room_id, qxuser, is_gamma, bot_enabled):
         """进入聊天室"""
 
         ret = yield self.thrift_chat_ds.enter_chatroom(user_id, hr_id, position_id, room_id, is_gamma)
-
         hr_info = ObjectDict()
         if ret.hr:
             hr_info = ObjectDict(
@@ -93,6 +92,8 @@ class ChatPageService(PageService):
                 hr_headimg=make_static_url(ret.hr.hrHeadImg or const.HR_HEADIMG),
                 deleted=ret.hr.isDelete
             )
+            if bot_enabled:
+                yield self.infra_company_ds.get_company_mobot_image(company)
 
         user_info = ObjectDict()
         if ret.user:
@@ -121,8 +122,8 @@ class ChatPageService(PageService):
             chat_debut=ret.chatDebut,
             follow_qx=qxuser.is_subscribe == 1,
             room_id=ret.roomId,
+            show_position_info=not bot_enabled
         )
-
         raise gen.Return(res)
 
     @gen.coroutine

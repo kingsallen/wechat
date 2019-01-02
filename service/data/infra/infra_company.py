@@ -90,3 +90,11 @@ class InfraCompanyDataService(DataService):
         })
         res = yield http_get(path.INFRA_REFERRAL_CRUCIAL_INFO_SWITCH, params)
         return res
+
+    @gen.coroutine
+    def get_company_mobot_image(self, company_id):
+        params = ObjectDict({
+            "company_id": company_id,
+        })
+        res = yield http_get(path.MOBOT_IMAGE, params)
+        return res
