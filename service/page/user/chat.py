@@ -209,7 +209,8 @@ class ChatPageService(PageService):
         raise gen.Return(company_conf)
 
     @gen.coroutine
-    def get_chatbot_reply(self, message, user_id, hr_id, position_id, flag, create_new_context, current_user, from_textfield):
+    def get_chatbot_reply(self, message, user_id, hr_id, position_id, flag, create_new_context, current_user,
+                          from_textfield):
         """ 调用 chatbot 返回机器人的回复信息
                https://wiki.moseeker.com/chatbot.md
         :param message: 用户发送到文本内容
@@ -235,7 +236,8 @@ class ChatPageService(PageService):
         try:
             if int(flag) == 1:
                 res = yield http_post(
-                    route='{host}{uri}'.format(host=settings['chatbot_host'], uri='campus_qa.api'), jdata=params, infra=False)
+                    route='{host}{uri}'.format(host=settings['chatbot_host'], uri='campus_qa.api'), jdata=params,
+                    infra=False)
             else:
                 res = yield http_post(
                     route='{host}{uri}'.format(host=settings['chatbot_host'], uri='qa.api'), jdata=params,
@@ -280,13 +282,9 @@ class ChatPageService(PageService):
             ret_message['compound_content']['list'] = list
             ret_message['compound_content']['hot'] = hot
             ret_message['compound_content']['max'] = max
-        if msg_type == "jobCard":
-            ids = [p.get("id") for p in compoundContent]
-        if msg_type == "jobSelect":
-            ids = [p.get("id") for p in compoundContent.get("list")]
-        if ids and msg_type in ("jobCard", "jobSelect"):
-            max = ret_message['compound_content'].get("max") if msg_type == "jobSelect" else 0
-            ret_message['compound_content'] = ObjectDict()  # 置空compoundContent
+
+        @gen.coroutine
+        def get_position_list(ids):
             position_list = []
             position_ps = PositionPageService()
             team_ps = TeamPageService()
@@ -309,7 +307,8 @@ class ChatPageService(PageService):
                 position.imgUrl = p_company_info.banner
                 if team:
                     teamname_custom = current_user.company.conf_teamname_custom
-                    more_link = team.link if team.link else make_url(path.TEAM_PATH.format(team.id), wechat_signature=current_user.wechat.signature)
+                    more_link = team.link if team.link else make_url(path.TEAM_PATH.format(team.id),
+                                                                     wechat_signature=current_user.wechat.signature)
                     team_des = yield position_ps.get_team_data(team, more_link, teamname_custom)
                     if team_des:
                         for item in team_des['data']:
@@ -324,9 +323,16 @@ class ChatPageService(PageService):
                             if position.imgUrl:
                                 break
                 position_list.append(position)
-            ret_message['compound_content']['list'] = position_list
-            if max:
-                ret_message['compound_content']['max'] = max
+            return position_list
+
+        if msg_type == "jobCard":
+            ids = [p.get("id") for p in compoundContent]
+            positions = yield get_position_list(ids)
+            ret_message['compound_content'] = ObjectDict(list=positions)
+        if msg_type == "jobSelect":
+            ids = [p.get("id") for p in compoundContent.get("list")]
+            positions = yield get_position_list(ids)
+            ret_message['compound_content']['list'] = positions
         return ret_message
 
     @staticmethod
@@ -383,5 +389,3 @@ class ChatPageService(PageService):
         })
         ret = yield self.thrift_chat_ds.get_voice(params)
         return ret
-
-
