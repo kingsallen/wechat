@@ -16,19 +16,19 @@ class AnnualSummarizeHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def get(self):
-
-        self.params.share = self._share()
+        transmit = self.params.transmit if self.params.transmit else self.position_ps._make_recom(self.current_user.sysuser.id)
+        self.params.share = self._share(transmit)
 
         return self.render_page(template_name='h5/interpolative/index.html', data=ObjectDict())
 
-    def _share(self):
+    def _share(self, transmit):
         default = ObjectDict({
             "cover": self.share_url(self.current_user.company.logo),
             "title": "盘点我的2018内推成就，和我一起穿越时空吧~",
             "description": "感谢内推有你❤",
             "link": self.make_url(path.ANNUAL_SUMMARIZE,
                                   self.params,
-                                  transmit=self.position_ps._make_recom(self.current_user.sysuser.id))
+                                  transmit=transmit)
         })
         return default
 
