@@ -23,7 +23,7 @@ class AnnualSummarizeHandler(BaseHandler):
 
     def _share(self, transmit):
         default = ObjectDict({
-            "cover": self.share_url(self.current_user.company.logo),
+            "cover": "https://cdn.moseeker.com/profile/share_happy_new_year_2019.png",
             "title": "盘点我的2018内推成就，和我一起穿越时空吧~",
             "description": "感谢内推有你❤",
             "link": self.make_url(path.ANNUAL_SUMMARIZE,
