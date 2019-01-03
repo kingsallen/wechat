@@ -269,6 +269,38 @@ class UserPageService(PageService):
             })
 
     @gen.coroutine
+    def update_user_wx_info(self, unionid, userinfo):
+        """更新用户的user_user中微信相关的信息"""
+        yield self.user_user_ds.update_user(
+            conds={
+                'unionid': unionid
+            },
+            fields={
+                "nickname": userinfo.nickname,
+                "headimg": userinfo.headimgurl
+            })
+
+    @gen.coroutine
+    def update_wxuser_wx_info(self, unionid, userinfo):
+        """
+        更新老微信 wxuser 信息
+        :param unionid:
+        :param userinfo:
+        :return:
+        """
+        yield self.user_wx_user_ds.update_wxuser(
+            conds={"unionid": unionid,
+                   "wechat_id": settings['qx_wechat_id']},
+            fields={
+                "nickname": userinfo.nickname,
+                "sex": userinfo.sex or 0,
+                "city": userinfo.city,
+                "country": userinfo.country,
+                "province": userinfo.province,
+                "headimgurl": userinfo.headimgurl
+            })
+
+    @gen.coroutine
     def get_valid_employee_by_user_id(self, user_id, company_id):
         """ 根据 user_id, company_id 找到合法的员工数据
 

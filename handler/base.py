@@ -125,7 +125,7 @@ class BaseHandler(MetaBaseHandler):
                 # 来自 qx 的授权, 获得 userinfo
                 if state == wx_const.WX_OAUTH_DEFAULT_STATE:
                     self.logger.debug("来自 qx 的授权, 获得 userinfo")
-                    userinfo = yield self._get_user_info(code)
+                    userinfo = yield self._get_user_info(code, is_qx=True)
                     if userinfo:
                         self.logger.debug("来自 qx 的授权, 获得 userinfo:{}".format(userinfo))
                         yield self._handle_user_info(userinfo)
@@ -225,6 +225,9 @@ class BaseHandler(MetaBaseHandler):
         # 创建 qx 的 user_wx_user
         yield self.user_ps.create_qx_wxuser_by_userinfo(userinfo, user_id)
 
+        # 静默授权时同步将用户信息，更新到qxuser和user_user
+        yield self._sync_userinfo(self._unionid, userinfo)
+
         if not self._authable(self._wechat.type):
             # 该企业号是订阅号 则无法获得当前 wxuser 信息, 无需静默授权
             self._wxuser = ObjectDict()
@@ -237,6 +240,14 @@ class BaseHandler(MetaBaseHandler):
             wxuser = yield self.user_ps.create_user_wx_user_ent(
                 openid, unionid, self._wechat.id)
         raise gen.Return(wxuser)
+
+    @gen.coroutine
+    def _sync_userinfo(self, unionid, userinfo):
+        """静默授权时同步将用户信息，更新到qxuser和user_user"""
+        # todo(niuzhenya@moseeker.com) 此处更新没有将所有wxuser的wxinfo都做更新，原因：wxuser的info没有展示的地方，展示目前都用的是user_user的info;
+        # todo 过多的冗余字段，可以考虑在后期将数据库的结构优化
+        yield self.user_ps.update_user_wx_info(unionid, userinfo)
+        yield self.user_ps.update_wxuser_wx_info(unionid, userinfo)
 
     def _authable(self, wechat_type):
         """返回当前公众号是否可以 OAuth
@@ -289,8 +300,11 @@ class BaseHandler(MetaBaseHandler):
         raise gen.Return(wechat)
 
     @gen.coroutine
-    def _get_user_info(self, code):
-        self._oauth_service.wechat = self._qx_wechat
+    def _get_user_info(self, code, is_qx=False):
+        if is_qx:
+            self._oauth_service.wechat = self._qx_wechat
+        else:
+            self._oauth_service.wechat = self._wechat
         try:
             userinfo = yield self._oauth_service.get_userinfo_by_code(code)
             raise gen.Return(userinfo)

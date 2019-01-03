@@ -19,7 +19,7 @@ class IndexHandler(BaseHandler):
     @gen.coroutine
     def get(self):
 
-        method_list = re.match("\/app\/([a-zA-Z-][a-zA-Z0-9-]*)?.*", self.request.uri)
+        method_list = re.search("/app/([a-zA-Z][a-zA-Z0-9-_]*)", self.request.uri)
         method = method_list.group(1) if method_list else "default"
 
         self._save_dqpid_cookie()
@@ -82,6 +82,8 @@ class ConfigHandler(BaseHandler):
             "signature": jsapi.signature,
             "jsApiList": ["onMenuShareTimeline",
                           "onMenuShareAppMessage",
+                          "updateTimelineShareData",
+                          "updateAppMessageShareData",
                           "onMenuShareQQ",
                           "onMenuShareWeibo",
                           "hideOptionMenu",
