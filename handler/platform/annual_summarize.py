@@ -80,6 +80,8 @@ class AnnualSummarizeEntranceHandler(BaseHandler):
         if user_info:
             has_summarize = True
         is_employee = True if self.current_user.employee else False
+        if self.current_user.company.id == 1505:
+            has_summarize = False
         self.send_json_success(ObjectDict(has=has_summarize,
                                           is_employee=is_employee,
                                           is_self_summarize=is_self_summarize))
