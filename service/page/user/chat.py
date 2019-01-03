@@ -93,7 +93,11 @@ class ChatPageService(PageService):
                 deleted=ret.hr.isDelete
             )
             if bot_enabled:
-                yield self.infra_company_ds.get_company_mobot_image(company)
+                data = (yield self.infra_company_ds.get_company_mobot_image(company_id))['data']
+                if data['mobot_head_img']:
+                    hr_info['hr_headimg'] = data['mobot_head_img']
+                if data['mobot_name']:
+                    hr_info['hr_name'] = data['hr_name']
 
         user_info = ObjectDict()
         if ret.user:

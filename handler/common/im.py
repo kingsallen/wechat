@@ -397,9 +397,12 @@ class ChatHandler(BaseHandler):
         if not self.bot_enabled:
             yield self.get_bot_enabled()
 
+        user_hr_account = yield self.chat_ps.get_hr_info(self.hr_id)
+        company_id = user_hr_account.company_id
+
         res = yield self.chat_ps.get_chatroom(self.current_user.sysuser.id,
                                               self.params.hr_id,
-
+                                              company_id,
                                               pid, room_id,
                                               self.current_user.qxuser,
                                               is_gamma,
