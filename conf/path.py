@@ -24,7 +24,7 @@ GATES_EMPLOYEE = '/employee/custom_bind/gates'
 EMPLOYEE_REFERRAL_POLICY = "/employee/referral/policy"
 EMPOLYEE_LADDER = "/employee/ladder"
 EMPLOYEE_REWARDS_RECORD = '/app/employee/binding/rewards'
-EMPLOYEE_TEN_MIN_TMP = '/api/employee/invite_cards'
+EMPLOYEE_TEN_MIN_TMP = '/employee/referral/invite_cards'
 
 PROFILE_CUSTOM_CV = '/profile/custom'
 REFERRAL_CONFIRM = "/referral/confirm"
@@ -217,6 +217,14 @@ INFRA_REFERRAL_EVALUATION_PAGE = 'v1/employee/seek/recommend'
 INFRA_IF_EMPLOYEE_POS = 'v1/referral/employee/check'
 REFERRAL_CONTACT_RESULT = '/referral/contact_result'
 REFERRAL_INVITE_APPLY = '/employee/referral/invite_cards'
+REFERRAL_PROGRESS = '/employee/referral/progress'
+REFERRAL_RADAR = '/employee/referral/radar'
+INFRA_REFERRAL_PROGRESS = 'v1/referral/progress'
+INFRA_REFERRAL_PROGRESS_DETAIL = 'v1/referral/progress/{}'
+INFRA_REFERRAL_RADAR_TOP = 'v1/radar/index/top'
+INFRA_REFERRAL_RADAR = 'v1/radar/data'
+INFRA_REFERRAL_RADAR_CARD_POS = 'v1/employee/position/view'
+INFRA_REFERRAL_RADAR_CARD_RECOM = 'v1/employee/seek/recommend'
 
 # 积分商城服务
 EMPLOYEE_MALL = '/employee/mall/index'
