@@ -41,6 +41,12 @@ class SharechainPageService(PageService):
         inserted_share_chain_id = yield self._save_recom(
             last_share_record, share_chain_parent_id)
 
+        # 创建candidate_share_chain后更新share_record的share_chain_id字段
+        yield self.candidate_position_share_record_ds.update_share_record(
+            conds={"id": last_share_record.id},
+            fields={"share_chain_id": inserted_share_chain_id}
+        )
+
         share_chain_rec = yield self._select_recom_record(
             position_id, presentee_user_id)
 

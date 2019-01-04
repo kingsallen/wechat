@@ -274,4 +274,91 @@ class InfraEmployeeDataService(DataService):
         :param params:
         :return:
         """
-        pass
+        ret = yield http_get(path.INFRA_REFERRAL_PROGRESS, params)
+        return ret
+
+    @gen.coroutine
+    def get_referral_progress_detail(self, apply_id, params):
+        """
+        员工中心 推荐进度：分享内推进度页面
+        :param apply_id
+        :param params:
+        :return:
+        """
+        ret = yield http_get(path.INFRA_REFERRAL_PROGRESS_DETAIL.format(apply_id), params)
+        return ret
+
+    @gen.coroutine
+    def get_radar_top_data(self, user_id, company_id):
+        """
+        获取雷达页面顶部 浏览记录和求推荐数据
+        :param user_id: 员工的user_id
+        :return:
+        """
+        params = {
+            "user_id": user_id,
+            "company_id": company_id
+        }
+        ret = yield http_get(path.INFRA_REFERRAL_RADAR_TOP, params)
+        return ret
+
+    @gen.coroutine
+    def get_radar_data(self, user_id, page_size, page_num, company_id):
+        """
+        获取雷达页面人脉数据
+        :param user_id
+        :param page_size:
+        :param page_num:
+        :param company_id
+        :return:
+        """
+        params = {
+            "user_id": user_id,
+            "page": page_num,
+            "size": page_size,
+            "company_id": company_id
+        }
+        ret = yield http_get(path.INFRA_REFERRAL_RADAR, params)
+        return ret
+
+    @gen.coroutine
+    def radar_card_position(self, user_id, company_id, pos_title, order, page_num, page_size):
+        """
+        人脉雷达-分类统计卡-职位浏览
+        :param user_id:
+        :param company_id
+        :param pos_title:  按职位名搜索
+        :param order:  排序规则： time  depth  view
+        :param page_num:
+        :param page_size:
+        :return:
+        """
+        params = {
+            "user_id": user_id,
+            "company_id": company_id,
+            "position_title": pos_title,
+            "order": order,
+            "page": page_num,
+            "size": page_size
+        }
+        ret = yield http_get(path.INFRA_REFERRAL_RADAR_CARD_POS, params)
+        return ret
+
+    @gen.coroutine
+    def radar_card_seek_recm(self, user_id, company_id, page_num, page_size):
+        """
+        人脉雷达-分类统计卡-求推荐
+        :param user_id:
+        :param company_id:
+        :param page_num:
+        :param page_size:
+        :return:
+        """
+        params = {
+            "user_id": user_id,
+            "company_id": company_id,
+            "page": page_num,
+            "size": page_size
+        }
+        ret = yield http_get(path.INFRA_REFERRAL_RADAR_CARD_RECOM, params)
+        return ret

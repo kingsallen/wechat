@@ -833,3 +833,136 @@ class EmployeePageService(PageService):
         """
         res = yield self.infra_employee_ds.referral_evaluation_page_info(post_user_id, referral_id)
         return res
+
+    @gen.coroutine
+    def get_referral_progress(self, params):
+        """
+        员工中心 推荐进度：获取进度列表数据
+        :param params:
+        :return:
+        """
+        ret = yield self.infra_employee_ds.get_referral_progress(params)
+        if ret.status == const.API_SUCCESS:
+            list_data = []
+            for item in ret.data:
+                list_data.append({
+                    "name": item['user']['name'],
+                    "user_id": item['user']['uid'],
+                    "position_title": item['position']['title'],
+                    "position_id": item['position']['pid'],
+                    "datetime": item['datetime'],
+                    "category": item['progress'],
+                    "degree": item['degree'],
+                    "apply_id": item['apply_id'],
+                    "referral_origin": {
+                        "type": item['recom']['type'],
+                        "nickname": item['recom'].get('nickname', ''),
+                        "from_wx_group": item['recom'].get('from_wx_group', 0),
+                        "remarked": item['recom'].get('evaluate', 0),
+                        "claimed": item['recom'].get('claim', 0)
+                    }
+                })
+            data = {'list': list_data}
+        else:
+            data = ObjectDict()
+        return data
+
+    @gen.coroutine
+    def get_referral_progress_detail(self, apply_id, params):
+        """
+        员工中心 推荐进度：分享内推进度页面
+        :param apply_id:
+        :param params:
+        :return:
+        """
+        ret = yield self.infra_employee_ds.get_referral_progress_detail(apply_id, params)
+        return ret
+
+    @gen.coroutine
+    def get_radar_top_data(self, user_id, company_id):
+        """
+        获取雷达页面顶部 浏览记录和求推荐数据
+        :return:
+        """
+        ret = yield self.infra_employee_ds.get_radar_top_data(user_id, company_id)
+        return ret
+
+    @gen.coroutine
+    def get_radar_data(self, user_id, page_size, page_num, company_id):
+        """
+        获取雷达页面人脉数据
+        :return:
+        """
+        ret = yield self.infra_employee_ds.get_radar_data(user_id, page_size, page_num, company_id)
+        return ret
+
+    @gen.coroutine
+    def radar_card_position(self, user_id, company_id, pos_title, order, page_num, page_size):
+        """
+        人脉雷达-分类统计卡-职位浏览
+        :return:
+        """
+        ret = yield self.infra_employee_ds.radar_card_position(user_id, company_id, pos_title, order,
+                                                               page_num, page_size)
+        data = list()
+        if ret.status == const.API_SUCCESS:
+            for item in ret.data['user_list']:
+                data_item = {
+                    "avatar": item.get('headimgurl'),
+                    "nickname": item.get('nickname'),
+                    "degree": item.get('depth'),
+                    "position_name": item.get('position_title'),
+                    "datetime": item.get('click_time'),
+                    "forward_name": item.get('forward_name'),
+                    "forward_source_wx": item.get('forward_source_wx'),
+                    "view_count": item.get('view_count'),
+                    "invited": item.get('invitation_status'),
+                    "connection": item.get('connection'),
+                    "chain": item.get('chain'),
+                    "connect_current_uid": item.get('chain')[0]['uid'] if item.get('chain') else 0
+                }
+                if item.get('chain') and item.get('connection', 0) == const.CONNECTION_ING:
+                    sorted_chain = sorted(item.get('chain'), key=lambda value: value['degree'])
+
+                    # 找出当前连接到哪一个user
+                    current_user = sorted_chain[0]
+                    current_index = 0
+                    for i in range(len(sorted_chain)-1, 0, -1):
+                        if sorted_chain[i]['pnodes']:
+                            current_user = sorted_chain[i]
+                            current_index = i
+                            break
+
+                    # A->C 这种情况直接把B给去掉 不返回给前端
+                    if current_index != 0:
+                        for i in range(1, current_index):
+                            if not sorted_chain[i]['pnodes']:
+                                sorted_chain.remove(sorted_chain[i])
+
+                    data_item.update({
+                        "chain": sorted_chain,
+                        "connect_current_uid": current_user['uid']
+                    })
+                data.append(data_item)
+        return data
+
+    @gen.coroutine
+    def radar_card_seek_recm(self, user_id, company_id, page_num, page_size):
+        """
+        人脉雷达-分类统计卡-求推荐
+        """
+        ret = yield self.infra_employee_ds.radar_card_seek_recom(user_id, company_id, page_num, page_size)
+        data = list()
+        if ret.status == const.API_SUCCESS:
+            for item in ret.data['user_list']:
+                data.append({
+                    'avatar': item.get('headimgurl'),
+                    'nickname': item.get('nickname'),
+                    'degree': item.get('depth'),
+                    'position_name': item.get('position_title'),
+                    'datetime': item.get('click_time'),
+                    'view_count': item.get('view_count'),
+                    'forward_name': item.get('forward_name'),
+                    'forward_source_wx': item.get('forward_source_wx'),
+                })
+        return data

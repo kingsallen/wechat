@@ -55,3 +55,10 @@ class CandidatePositionShareRecordDataService(DataService):
 
         response = yield self.candidate_position_share_record_dao.insert_record(fields, options)
         raise gen.Return(response)
+
+    @gen.coroutine
+    def update_share_record(self, conds, fields):
+        response = yield self.candidate_position_share_record_dao.update_by_conds(
+            conds, fields
+        )
+        raise gen.Return(response)

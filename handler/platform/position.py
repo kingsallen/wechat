@@ -230,7 +230,7 @@ class PositionHandler(BaseHandler):
         yield self.position_ps.update_position(conds={
             "id": position_info.id
         }, fields={
-            "visitnum": position_info.visitnum + 1,
+            "visitnum": position_info.visitnum or 0 + 1,
             "update_time": position_info.update_time_ori,
         })
 

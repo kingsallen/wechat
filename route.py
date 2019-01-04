@@ -183,6 +183,10 @@ platform_routes = [
     (r'/employee/referral/policy',                   handler.platform.employee.EmployeeReferralPolicyHandler,   {"event": "referral—policy"}),
     (r'/employee/connect_referral',                  handler.platform.employee.ContactReferralInfoHandler,      {"event": "referral_contact_info"}),
     (r'/employee/referral/invite_cards',             handler.platform.employee.ReferralInviteApplyHandler,      {"event": "referral_invite_cards"}),
+    (r'/employee/referral/progress',                 handler.platform.employee.ReferralProgressHandler,         {"event": "referral_progress"}),
+    (r'/employee/referral/progress_detail',          handler.platform.employee.ReferralProgressDetailHandler,   {"event": "referral_progress_detail"}),
+    (r'/employee/referral/radar_cards',              handler.platform.employee.ReferralRadarCardHandler,        {"event": "referral_radar_cards"}),
+    (r'/employee/referral/radar',                    handler.platform.employee.ReferralRadarPageHandler,        {"event": "referral_radar"}),
     (r'/cover/no-weixin',                            handler.platform.cover.CoverHandler,                       {"event": "cover_no_weixin"}),
     (r'/position/recom/?',                           handler.platform.position.PositionRecomListHandler,        {"event": "position_recom_list"}),
     (r'/usercenter/mine/?',                          handler.common.usercenter.UsercenterMineHandler,           {"event": "usercenter_mine"}),
@@ -190,7 +194,7 @@ platform_routes = [
     (r'/referral/confirm/?',                         handler.platform.referral.ReferralConfirmHandler,          {"event": "referral_confirm"}),
     (r'/employee/recom/profile/pc/?',                handler.platform.referral.ReferralProfilePcHandler,        {"event": "referal_confirm_pc"}),
     (r'/referral/crucial/info/?',                    handler.platform.referral.ReferralCrucialInfoHandler,      {"event": "referral_crucial_info"}),
-    (r'/referral/contact_result/?',                    handler.platform.referral.ReferralResultHandler,         {"event": "referral_contact_result"}),
+    (r'/referral/contact_result/?',                  handler.platform.referral.ReferralResultHandler,         {"event": "referral_contact_result"}),
 
     # 各大公司的自定义配置
     (r"/custom/emailapply/?",                        handler.platform.customize.CustomizeEmailApplyHandler,     {"event": "customize_emailapply"}),
@@ -224,6 +228,10 @@ platform_routes = [
     (r"/api/employee/invite_cards/?",                handler.platform.employee.EmployeeReferralCardsHandler,    {"event": "employee_referral_cards"}),
     (r"/api/employee/invite_cards/pass/?",           handler.platform.employee.EmployeeReferralPassCardsHandler, {"event": "employee_referral_pass_cards"}),
     (r"/api/employee/recom/invite/?",                handler.platform.employee.EmployeeReferralInviteApplyHandler, {"event": "employee_referral_invite_apply"}),
+    (r"/api/employee/referral-progress/?",           handler.platform.employee.ReferralProgressListHandler,     {"event": "employee_referral_progress_list"}),
+    (r"/api/employee/radar/?",                       handler.platform.employee.ReferralRadarHandler,            {"event": "employee_referral_radar_data"}),
+    (r"/api/employee/stat/job-view/?",               handler.platform.employee.ReferralRadarCardPositionHandler, {"event": "employee_referral_radar_position_data"}),
+    (r"/api/employee/stat/seek-recom/?",             handler.platform.employee.ReferralRadarCardRecomHandler,    {"event": "employee_referral_radar_seek_recom_data"}),
 
     (r"/api/func/wechat/?",                          handler.platform.employee.WechatSubInfoHandler,            {"event": "wechat_sub_info"}),
     (r'/api/user/survey/?',                          handler.platform.user.APIUserSurveyHandler,                {"event": "user_survey_api"}),

@@ -854,6 +854,8 @@ class EmployeeReferralCardsHandler(BaseHandler):
                         position_name: '职位名称',
                         degree: 1, // 几度.
                         pid: 123, // 职位id.
+                        type: 0, // 0 邀请投递 1 推荐TA
+                        from_wx_group: 0, // 转发是否来自微信群 0 否 1 是
                         chain: [
                           {
                             user_id: 12345
@@ -886,7 +888,9 @@ class EmployeeReferralCardsHandler(BaseHandler):
                 "position_name": card_infra['position']['title'],
                 "degree": card_infra['user']['degree'],
                 "pid": card_infra['position']['pid'],
-                "forward_from": card_infra['recom_user'],
+                "forward_from": card_infra['recom']['nickname'],
+                "type": card_infra['recom']['type'],
+                "from_wx_group": card_infra['recom']['from_wx_group'],
                 "chain": card_infra['chain']
             })
             cards.append(card)
@@ -1098,3 +1102,186 @@ class ReferralInviteApplyHandler(BaseHandler):
             "description": description,
             "link": link,
         })
+
+
+class ReferralProgressHandler(BaseHandler):
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        """
+        员工中心 推荐进度列表页面
+        :return:
+        """
+        self.render_page(template_name='employee/referral-progress.html',
+                         data=dict())
+
+
+class ReferralProgressListHandler(BaseHandler):
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        """
+        员工中心 推荐进度列表页数据获取
+        可根据候选人姓名 进度筛选
+　　　　progress: 0全部 1被推荐人投递简历 10通过初筛  12通过面试 3内推入职 4遗憾淘汰
+        :return:
+        """
+        params = ObjectDict({
+            "user_id": self.current_user.sysuser.id,
+            "company_id": self.current_user.company.id,
+            "username": self.params.name or '',
+            "page_size": self.params.page_size,
+            "page_num": self.params.page_no,
+            "progress": self.params.category
+        })
+        data = yield self.employee_ps.get_referral_progress(params)
+
+        self.send_json_success(data=data)
+
+
+class ReferralProgressDetailHandler(BaseHandler):
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        """
+        员工中心 推荐进度 分享内推进度页面
+        :return:
+        """
+        apply_id = self.params.apply_id
+
+        params = ObjectDict({
+            "user_id": self.params.candidate_user_id,
+            "presentee_user_id": self.current_user.sysuser.id,
+            "company_id": self.current_user.company.id,
+            "progress": self.params.progress,
+        })
+
+        ret = yield self.employee_ps.get_referral_progress_detail(apply_id, params)
+        if not ret.status == const.API_SUCCESS:
+            self.write_error(416)
+
+        render_data = {
+            "abnormal": ret.data['abnormal'],
+            "avatar": ret.data.get('avatar', ''),
+            "name": ret.data.get('name', ''),
+            "position_name": ret.data.get('title', ''),
+            "encourage": ret.data.get('encourage', ''),
+        }
+        progress = list()
+        for pro in ret.data.get('progress', []):
+            progress.append({
+                "progress_status": pro.get('progress_status', 0),
+                "progress_pass": pro.get('progress_pass', 0),
+                "datetime": pro.get('datetime', '')
+            })
+        render_data.update({"progress": progress})
+        self.render_page(template_name='employee/referral-progress-detail.html',
+                         data=render_data)
+
+
+class ReferralRadarPageHandler(BaseHandler):
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        """
+        员工中心 人脉雷达页面
+        """
+        ret = yield self.employee_ps.get_radar_top_data(self.current_user.sysuser.id,
+                                                        self.current_user.company.id)
+        if not ret.status == const.API_SUCCESS:
+            self.write_error(416)
+
+        self.render_page(template_name='employee/people-radar.html',
+                         data={
+                             "job_uv": ret.data.get('link_view_count'),
+                             "seek_recom_uv": ret.data.get('interested_count')
+                         })
+
+
+class ReferralRadarHandler(BaseHandler):
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        """
+        员工中心 人脉雷达页面 人脉数据获取
+        """
+        ret = yield self.employee_ps.get_radar_data(
+            self.current_user.sysuser.id,
+            self.params.page_size,
+            self.params.page_no,
+            self.current_user.company.id
+        )
+        if not ret.status == const.API_SUCCESS:
+            self.send_json_error()
+
+        self.send_json_success(data={
+            "list": ret.data['user_list']
+        })
+
+
+class ReferralRadarCardHandler(BaseHandler):
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        """
+        雷达页面 分类统计卡页面
+        :return:
+        """
+        self.render_page(template_name='employee/radar-stat.html',
+                         data={
+                             "route": self.params.route
+                         })
+
+
+class ReferralRadarCardPositionHandler(BaseHandler):
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        """
+        雷达页面 分类统计卡 职位浏览统计数据
+        params:
+        pos_title:  按职位名搜索
+        order: "time"   // 排序规则 默认 time,浏览 view 关系 depth
+        :return:
+        """
+        data = yield self.employee_ps.radar_card_position(
+            self.current_user.sysuser.id,
+            self.current_user.company.id,
+            self.params.postion_title,
+            self.params.page_no or 1,
+            self.params.page_size or 10
+        )
+        self.send_json_success(data={"list": data})
+
+
+class ReferralRadarCardRecomHandler(BaseHandler):
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        """
+        雷达页面 分类统计卡 求推荐页面数据
+        :return:
+        """
+        data = yield self.employee_ps.radar_card_seek_recm(
+            self.current_user.sysuser.id,
+            self.current_user.company.id,
+            self.params.page_no or 1,
+            self.params.page_size or 10
+        )
+        self.send_json_success(data={"list": data})
