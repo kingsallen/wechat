@@ -888,9 +888,9 @@ class EmployeeReferralCardsHandler(BaseHandler):
                 "position_name": card_infra['position']['title'],
                 "degree": card_infra['user']['degree'],
                 "pid": card_infra['position']['pid'],
-                "forward_from": card_infra['recom']['nickname'],
+                "forward_from": card_infra['recom'].get('nickname', ''),
                 "type": card_infra['recom']['type'],
-                "from_wx_group": card_infra['recom']['from_wx_group'],
+                "from_wx_group": card_infra['recom'].get('from_wx_group', 0),
                 "chain": card_infra['chain']
             })
             cards.append(card)
