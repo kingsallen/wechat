@@ -1005,7 +1005,7 @@ class EmployeeReferralConnectionHandler(BaseHandler):
         yield self._make_share_info(chain_id, end_user_nickname)
 
         self.render_page(
-            template_name='employee/people-hub-path.htm',
+            template_name='employee/people-hub-path.html',
             data=page_data
         )
 
