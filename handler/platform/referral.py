@@ -434,7 +434,8 @@ class ReferralEvaluationHandler(BaseHandler):
                 relation=relationship,
                 degree=degree
             ),
-            "presentee_name": presentee_name
+            "presentee_name": presentee_name,
+            "pid": candidate_info.data['position_id']
         }))
 
 
