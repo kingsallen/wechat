@@ -990,7 +990,7 @@ class EmployeeReferralConnectionHandler(BaseHandler):
             self.write_error(500)
             return
         recom_user_id = self.current_user.recom.id if self.current_user.recom else self.current_user.sysuser.id
-        click_user_id = self.current_user.sysuser.id if self.current_user.recom else 0
+        click_user_id = self.current_user.sysuser.id
 
         parent_id = self.params.psc if self.params.psc else 0
         ret_conn = yield self.employee_ps.referral_connections(recom_user_id, click_user_id, chain_id, pid, parent_id)
