@@ -999,8 +999,8 @@ class EmployeeReferralConnectionHandler(BaseHandler):
         self.params.psc = psc
         page_data = {
             "pid": ret_conn.data['pid'],
-            "viewer_id": self.current_user.sysuser.id,
-            "connection": ret_conn.data['chain']
+            "current_uid": self.current_user.sysuser.id,
+            "chain": ret_conn.data['chain']
         }
 
         end_user_nickname = ret_conn.data['chain'][-1]['nickname']
