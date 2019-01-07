@@ -852,6 +852,7 @@ class EmployeeReferralCardsHandler(BaseHandler):
                         position_name: '职位名称',
                         degree: 1, // 几度.
                         pid: 123, // 职位id.
+                        referral_id: 123, // 内推编号
                         type: 0, // 0 邀请投递 1 推荐TA
                         from_wx_group: 0, // 转发是否来自微信群 0 否 1 是
                         chain: [
@@ -887,6 +888,7 @@ class EmployeeReferralCardsHandler(BaseHandler):
                 "degree": card_infra['user']['degree'],
                 "pid": card_infra['position']['pid'],
                 "forward_from": card_infra['recom'].get('nickname', ''),
+                "referral_id": card_infra['recom']['referral_id'],
                 "type": card_infra['recom']['type'],
                 "from_wx_group": card_infra['recom'].get('from_wx_group', 0),
                 "chain": card_infra['chain']
