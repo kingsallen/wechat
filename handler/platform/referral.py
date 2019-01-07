@@ -362,14 +362,14 @@ class ReferralCrucialInfoApiHandler(BaseHandler):
 
         if self.params.endpoint == 'connection':
             # 保存员工推荐评价信息
-            yield self.employee_ps.referral_save_evaluation(self.current_user.sysuser.id, self.json_args)
-            if self.json_args.flag == const.REFERRAL_EVAL_CONTACT_MES_TMP:
+            yield self.employee_ps.referral_save_evaluation(self.current_user.sysuser.id, self.params, self.json_args)
+            if self.params.flag == const.REFERRAL_EVAL_CONTACT_MES_TMP:
                 next_url = self.make_url(path.REFERRAL_PROGRESS)
-            elif self.json_args.flag == const.REFERRAL_EVAL_RADAR:
+            elif self.params.flag == const.REFERRAL_EVAL_RADAR:
                 next_url = self.make_url(path.REFERRAL_RADAR)
-            elif self.json_args.flag == const.REFERRAL_EVAL_RECOM_PROGRESS:
+            elif self.params.flag == const.REFERRAL_EVAL_RECOM_PROGRESS:
                 next_url = self.make_url(path.REFERRAL_PROGRESS)
-            elif self.json_args.flag == const.REFERRAL_EVAL_TEN_MIN_MES_TMP:
+            elif self.params.flag == const.REFERRAL_EVAL_TEN_MIN_MES_TMP:
                 next_url = self.make_url(path.EMPLOYEE_TEN_MIN_TMP, self.params)
             else:
                 next_url = ''
@@ -384,7 +384,7 @@ class ReferralCrucialInfoApiHandler(BaseHandler):
             #     realname=self.get_argument("_realname"),
             #     position_title=position_title
             # )
-            self.logger.info('PLL test flag: %s' % self.json_args.flag)
+            self.logger.info('PLL test flag: %s' % self.params.flag)
             self.logger.info('PLL test next_url: %s' % next_url)
 
             self.send_json_success(data={
