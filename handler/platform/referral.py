@@ -384,6 +384,8 @@ class ReferralCrucialInfoApiHandler(BaseHandler):
             #     realname=self.get_argument("_realname"),
             #     position_title=position_title
             # )
+            self.logger.info('PLL test flag: %s' % self.json_args.flag)
+            self.logger.info('PLL test next_url: %s' % next_url)
 
             self.send_json_success(data={
                 "next_url": next_url
