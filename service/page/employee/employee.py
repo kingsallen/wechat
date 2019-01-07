@@ -801,17 +801,18 @@ class EmployeePageService(PageService):
         return res
 
     @gen.coroutine
-    def referral_save_evaluation(self, user_id, json_args):
+    def referral_save_evaluation(self, user_id, url_params, json_args):
         """
         联系内推： 推荐评价信息保存
         :param user_id:   员工的user_id
+        :param url_params:
         :param json_args:
         :return:
         """
         params = ObjectDict({
             "post_user_id": user_id,
             "position_id": json_args.pid,
-            "referral_id": json_args.referral_id,
+            "referral_id": url_params.referral_id,
             "referral_reasons": json_args.recom_reason,
             "recom_reason_text": json_args.comment,
             "relationship": json_args.relation,
