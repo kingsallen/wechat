@@ -591,3 +591,26 @@ class UserPageService(PageService):
         """
         ret = yield self.infra_user_ds.close_popup_window(user_id, company_id, type)
         return ret
+
+    @gen.coroutine
+    def referral_confirm_submit(self, user_id, post_user_id, position_id):
+        """
+        候选人联系内推：简历预览页面确认提交
+        :param user_id:  候选人id
+        :param post_user_id: 最初转发职位的员工的user_id
+        :param position_id:
+        :return:
+        """
+        ret = yield self.infra_user_ds.referral_confirm_submit(user_id, post_user_id, position_id)
+        return ret
+
+    @gen.coroutine
+    def referral_related_positions(self, user_id, position_id):
+        """
+        候选人联系内推完成页面推荐三个相关职位信息
+        :param user_id:
+        :param position_id:
+        :return:
+        """
+        ret = yield self.infra_user_ds.referral_related_positions(user_id, position_id)
+        return ret

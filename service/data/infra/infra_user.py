@@ -301,3 +301,35 @@ class InfraUserDataService(DataService):
         })
         ret = yield http_put(path.INFRA_REFERRAL_CLOSE_POPUP_WINDOW, params)
         return ret
+
+    @gen.coroutine
+    def referral_confirm_submit(self, user_id, post_user_id, position_id):
+        """
+        候选人联系内推：简历预览页面确认提交
+        :param user_id:  候选人id
+        :param post_user_id: 最初转发职位的员工的user_id
+        :param position_id:
+        :return:
+        """
+        params = ObjectDict({
+            "user_id": user_id,
+            "post_user_id": post_user_id,
+            "position_id": position_id
+        })
+        ret = yield http_post(path.INFRA_REFERRAL_CONTACT_PUSH, params)
+        return ret
+
+    @gen.coroutine
+    def referral_related_positions(self, user_id, position_id):
+        """
+        候选人联系内推完成页面推荐三个相关职位信息
+        :param user_id:
+        :param position_id:
+        :return:
+        """
+        params = ObjectDict({
+            "user_id": user_id,
+            "position_id": position_id
+        })
+        ret = yield http_get(path.INFRA_REFERRAL_RELATIVE_POSITIONS, params)
+        return ret

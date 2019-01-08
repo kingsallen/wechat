@@ -103,3 +103,7 @@ DEFAULT_RECOMMEND_PRESENTEE = "请帮您的好友们做个推荐吧！\n他们�
 DEFAULT_RECOMMEND_SUCCESS = "感谢您对公司人才库的贡献"
 
 EMAIL_FMT_FAILURE = "Email格式不正确"
+
+# 人脉连连看链接分享
+REFERRAL_CONNECTION_TITLE = '人脉连连看'
+REFERRAL_CONNECTION_TEXT = '{}！有朋友喊你看机会！'
