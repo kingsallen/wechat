@@ -989,7 +989,16 @@ class EmployeeReferralConnectionHandler(BaseHandler):
         if not (pid and chain_id):
             self.write_error(500)
             return
-        recom_user_id = self.current_user.recom.id if self.current_user.recom else self.current_user.sysuser.id
+
+        if self.current_user.recom:
+            recom_user_id = self.current_user.recom.id
+            root_recom = self.params.root_recom
+        else:
+            recom_user_id = self.current_user.sysuser.id
+
+            # 为连连看最后一个目标用户打开职位详情页时显示员工信息做准备
+            root_recom = self.position_ps._make_recom(self.current_user.sysuser.id),
+
         click_user_id = self.current_user.sysuser.id
 
         parent_connection_id = self.params.parent_connection_id if self.params.parent_connection_id else 0
@@ -1005,7 +1014,7 @@ class EmployeeReferralConnectionHandler(BaseHandler):
         }
 
         end_user_nickname = ret_conn.data['chain'][-1]['nickname']
-        yield self._make_share_info(chain_id, end_user_nickname)
+        yield self._make_share_info(chain_id, end_user_nickname, root_recom)
 
         self.render_page(
             template_name='employee/people-hub-path.html',
@@ -1013,7 +1022,7 @@ class EmployeeReferralConnectionHandler(BaseHandler):
         )
 
     @gen.coroutine
-    def _make_share_info(self, chain_id, end_user_nickname):
+    def _make_share_info(self, chain_id, end_user_nickname, root_recom):
         """构建 share 内容"""
 
         company_info = yield self.company_ps.get_company(
@@ -1027,6 +1036,7 @@ class EmployeeReferralConnectionHandler(BaseHandler):
             path.REFERRAL_CONNECTIONS.format(chain_id),
             self.params,
             recom=self.position_ps._make_recom(self.current_user.sysuser.id),
+            root_recom=root_recom
         )
 
         self.params.share = ObjectDict({

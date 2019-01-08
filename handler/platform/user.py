@@ -787,8 +787,13 @@ class PositionForwardFromEmpHandler(BaseHandler):
                 "employee_icon": '',
             })
             return
-        recom = decode_id(self.params.recom)
-        psc = self.params.psc if self.params.psc else 0
+        if self.params.root_recom:
+            # 人脉连连看页面目标用户打开的职位链接
+            recom = decode_id(self.params.root_recom)
+            psc = -1
+        else:
+            recom = decode_id(self.params.recom)
+            psc = self.params.psc if self.params.psc else 0
         click_user_id = self.current_user.sysuser.id
         ret = yield self.user_ps.if_referral_position(recom, psc, pid, click_user_id)
         data = {
