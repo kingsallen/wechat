@@ -274,7 +274,7 @@ class InfraEmployeeDataService(DataService):
         :param params:
         :return:
         """
-        ret = yield http_get(path.INFRA_REFERRAL_PROGRESS, params)
+        ret = yield http_post(path.INFRA_REFERRAL_PROGRESS, params)
         return ret
 
     @gen.coroutine
