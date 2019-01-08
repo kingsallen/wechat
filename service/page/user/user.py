@@ -617,13 +617,14 @@ class UserPageService(PageService):
         return ret
 
     @gen.coroutine
-    def if_referral_position(self, recom, psc, pid):
+    def if_referral_position(self, recom, psc, pid, click_user_id):
         """
         候选人打开转发的职位链接，根据链接中参数判断最初转发该职位的人是否是员工
         :param recom:
         :param psc:
         :param pid:
+        :param click_user_id:
         :return:
         """
-        ret = yield self.infra_user_ds.if_referral_position(recom, psc, pid)
+        ret = yield self.infra_user_ds.if_referral_position(recom, psc, pid, click_user_id)
         return ret

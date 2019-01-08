@@ -780,8 +780,6 @@ class PositionForwardFromEmpHandler(BaseHandler):
         :return:
         """
         pid = self.params.pid
-        self.logger.debug('PLL test: current_user: %s' % self.current_user)
-        self.logger.debug('PLL test: self.params: %s' % self.params)
         if not self.params.recom:
             self.send_json_success(data={
                 "is_employee": 0,
@@ -791,7 +789,8 @@ class PositionForwardFromEmpHandler(BaseHandler):
             return
         recom = decode_id(self.params.recom)
         psc = self.params.psc if self.params.psc else 0
-        ret = yield self.user_ps.if_referral_position(recom, psc, pid)
+        click_user_id = self.current_user.sysuser.id
+        ret = yield self.user_ps.if_referral_position(recom, psc, pid, click_user_id)
         data = {
             "is_employee": ret.data['employee'],
             "employee_name": ret.data['user']['name'] if ret.data['employee'] else '',

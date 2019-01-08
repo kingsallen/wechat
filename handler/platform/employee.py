@@ -992,11 +992,12 @@ class EmployeeReferralConnectionHandler(BaseHandler):
         recom_user_id = self.current_user.recom.id if self.current_user.recom else self.current_user.sysuser.id
         click_user_id = self.current_user.sysuser.id
 
-        parent_id = self.params.psc if self.params.psc else 0
-        ret_conn = yield self.employee_ps.referral_connections(recom_user_id, click_user_id, chain_id, pid, parent_id)
+        parent_connection_id = self.params.parent_connection_id if self.params.parent_connection_id else 0
+        ret_conn = yield self.employee_ps.referral_connections(
+            recom_user_id, click_user_id, chain_id, pid, parent_connection_id)
 
-        psc = ret_conn.data['parent_id'] if ret_conn.data.get('parent_id') else 0
-        self.params.psc = psc
+        parent_connection_id = ret_conn.data['parent_id'] if ret_conn.data.get('parent_id') else 0
+        self.params.parent_connection_id = parent_connection_id
         page_data = {
             "pid": ret_conn.data['pid'],
             "current_uid": self.current_user.sysuser.id,

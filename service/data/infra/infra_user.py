@@ -337,18 +337,20 @@ class InfraUserDataService(DataService):
         return ret
 
     @gen.coroutine
-    def if_referral_position(self, recom, psc, pid):
+    def if_referral_position(self, recom, psc, pid, click_user_id):
         """
         候选人打开转发的职位链接，根据链接中参数判断最初转发该职位的人是否是员工
         :param recom:  直接转发人的user_id
         :param psc:   父级链路id   candidate_share_chain.id
         :param pid:
+        :param click_user_id:
         :return:
         """
         params = ObjectDict({
             "recom_user_id": recom,
             "parent_chain_id": psc,
-            "pid": pid
+            "pid": pid,
+            "presentee_user_id": click_user_id
         })
         ret = yield http_post(path.INFRA_IF_EMPLOYEE_POS, params)
         return ret
