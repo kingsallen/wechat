@@ -1038,6 +1038,7 @@ class EmployeeReferralConnectionHandler(BaseHandler):
             recom=self.position_ps._make_recom(self.current_user.sysuser.id),
             root_recom=root_recom
         )
+        self.logger.debug("PLL test connection page link: %s" % link)
 
         self.params.share = ObjectDict({
             "cover": cover,
@@ -1061,7 +1062,7 @@ class ContactReferralInfoHandler(BaseHandler):
         recom = decode_id(self.params.recom)
         psc = self.params.psc if self.params.psc else 0
 
-        ret = yield self.user_ps.if_referral_position(recom, psc, pid)
+        ret = yield self.user_ps.if_referral_position(recom, psc, pid, self.current_user.sysuser.id)
         recom_user_id = ret.data['user']['uid']
 
         ret_info = yield self.employee_ps.referral_contact_push(recom_user_id, pid)
