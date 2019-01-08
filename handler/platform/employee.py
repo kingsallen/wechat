@@ -1057,8 +1057,12 @@ class ContactReferralInfoHandler(BaseHandler):
         :return:
         """
         pid = self.params.pid
-        recom = decode_id(self.params.recom)
-        psc = self.params.psc if self.params.psc else 0
+        if self.params.root_recom:
+            recom = decode_id(self.params.root_recom)
+            psc = -1
+        else:
+            recom = decode_id(self.params.recom)
+            psc = self.params.psc if self.params.psc else 0
 
         ret = yield self.user_ps.if_referral_position(recom, psc, pid, self.current_user.sysuser.id)
         recom_user_id = ret.data['user']['uid']

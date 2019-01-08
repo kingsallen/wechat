@@ -76,8 +76,12 @@ class ApplicationHandler(BaseHandler):
         if self.params.contact_referral:
             # 申请来自哪里
             origin = self.params.origin
-            recom = decode_id(self.json_args.recom)
-            psc = self.json_args.psc if self.json_args.psc else 0
+            if self.params.root_recomd:
+                recom = decode_id(self.params.root_recomd)
+                psc = -1
+            else:
+                recom = decode_id(self.json_args.recom)
+                psc = self.json_args.psc if self.json_args.psc else 0
             ret = yield self.user_ps.if_referral_position(recom, psc, pid, self.current_user.sysuser.id)
             root_user_id = ret.data['user']['uid']
             yield self.user_ps.referral_confirm_submit(self.current_user.sysuser.id, root_user_id, pid, origin)

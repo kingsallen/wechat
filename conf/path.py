@@ -226,7 +226,7 @@ INFRA_REFERRAL_PROGRESS_DETAIL = 'v1/referral/progress/{}'
 INFRA_REFERRAL_RADAR_TOP = 'v1/radar/index/top'
 INFRA_REFERRAL_RADAR = 'v1/radar/data'
 INFRA_REFERRAL_RADAR_CARD_POS = 'v1/employee/position/view'
-INFRA_REFERRAL_RADAR_CARD_RECOM = 'v1/employee/seek/recommend'
+INFRA_REFERRAL_RADAR_CARD_RECOM = 'v1/employee/seek/recommend/card'
 
 # 积分商城服务
 EMPLOYEE_MALL = '/employee/mall/index'
