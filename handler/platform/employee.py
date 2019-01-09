@@ -1149,7 +1149,7 @@ class ReferralProgressListHandler(BaseHandler):
         params = ObjectDict({
             "user_id": self.current_user.sysuser.id,
             "company_id": self.current_user.company.id,
-            "username": self.params.name or '',
+            "username": self.params.keyword or '',
             "page_size": self.params.page_size,
             "page_num": self.params.page_no,
             "progress": self.params.category
