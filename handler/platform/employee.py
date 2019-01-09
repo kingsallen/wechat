@@ -1154,7 +1154,8 @@ class ReferralProgressListHandler(BaseHandler):
             "page_num": self.params.page_no,
             "progress": self.params.category
         })
-        data = yield self.employee_ps.get_referral_progress(params)
+        recom = self.position_ps._make_recom(self.current_user.sysuser.id)
+        data = yield self.employee_ps.get_referral_progress(recom, params)
 
         self.send_json_success(data=data)
 

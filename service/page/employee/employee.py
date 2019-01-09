@@ -836,14 +836,15 @@ class EmployeePageService(PageService):
         return res
 
     @gen.coroutine
-    def get_referral_progress(self, params):
+    def get_referral_progress(self, recom, params):
         """
         员工中心 推荐进度：获取进度列表数据
+        :param recom:
         :param params:
         :return:
         """
         ret = yield self.infra_employee_ds.get_referral_progress(params)
-        if ret.status == const.API_SUCCESS:
+        if ret.status == const.API_SUCCESS and ret.data:
             list_data = []
             for item in ret.data:
                 list_data.append({
@@ -859,8 +860,11 @@ class EmployeePageService(PageService):
                         "type": item['recom']['type'],
                         "nickname": item['recom'].get('nickname', ''),
                         "from_wx_group": item['recom'].get('from_wx_group', 0),
+                        "referral_id": item['recom'].get('referral_id', 0),
                         "remarked": item['recom'].get('evaluate', 0),
-                        "claimed": item['recom'].get('claim', 0)
+                        "claimed": item['recom'].get('claim', 0),
+                        'rkey': item['recom'].get('rkey', 0),
+                        'recom': recom
                     }
                 })
             data = {'list': list_data}
