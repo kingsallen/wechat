@@ -852,9 +852,9 @@ class EmployeePageService(PageService):
                     "position_title": item['position']['title'],
                     "position_id": item['position']['pid'],
                     "datetime": item['datetime'],
-                    "category": item['progress'],
-                    "degree": item['degree'],
-                    "apply_id": item['apply_id'],
+                    "category": item.get('progress'),
+                    "degree": item.get('degree'),
+                    "apply_id": item.get('apply_id'),
                     "referral_origin": {
                         "type": item['recom']['type'],
                         "nickname": item['recom'].get('nickname', ''),
