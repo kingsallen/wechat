@@ -1224,7 +1224,7 @@ class ReferralProgressDetailHandler(BaseHandler):
             "user_id": self.params.candidate_user_id,
             "presentee_user_id": self.current_user.sysuser.id,
             "company_id": self.current_user.company.id,
-            "progress": self.params.progress,
+            "progress": self.params.progress or 0,
         })
 
         ret = yield self.employee_ps.get_referral_progress_detail(apply_id, params)
