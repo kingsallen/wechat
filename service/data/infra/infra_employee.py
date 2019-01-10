@@ -278,6 +278,16 @@ class InfraEmployeeDataService(DataService):
         return ret
 
     @gen.coroutine
+    def get_referral_progress_keyword(self, params):
+        """
+        员工中心 推荐进度 按候选人姓名搜索
+        :param params:
+        :return:
+        """
+        ret = yield http_get(path.INFRA_REFERRAL_PROGRESS_KEYWORD, params)
+        return ret
+
+    @gen.coroutine
     def get_referral_progress_detail(self, apply_id, params):
         """
         员工中心 推荐进度：分享内推进度页面

@@ -873,6 +873,16 @@ class EmployeePageService(PageService):
         return data
 
     @gen.coroutine
+    def get_referral_progress_keyword(self, params):
+        """
+        员工中心 推荐进度：根据候选人姓名搜索
+        :param params:
+        :return:
+        """
+        ret = yield self.infra_employee_ds.get_referral_progress_keyword(params)
+        return ret
+
+    @gen.coroutine
     def get_referral_progress_detail(self, apply_id, params):
         """
         员工中心 推荐进度：分享内推进度页面

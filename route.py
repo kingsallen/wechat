@@ -229,6 +229,7 @@ platform_routes = [
     (r"/api/employee/invite_cards/pass/?",           handler.platform.employee.EmployeeReferralPassCardsHandler, {"event": "employee_referral_pass_cards"}),
     (r"/api/employee/recom/invite/?",                handler.platform.employee.EmployeeReferralInviteApplyHandler, {"event": "employee_referral_invite_apply"}),
     (r"/api/employee/referral-progress/?",           handler.platform.employee.ReferralProgressListHandler,     {"event": "employee_referral_progress_list"}),
+    (r"/api/employee/sugs/candidate-name/?",         handler.platform.employee.ReferralProgressListSearchHandler, {"event": "employee_referral_progress_list_search"}),
     (r"/api/employee/radar/?",                       handler.platform.employee.ReferralRadarHandler,            {"event": "employee_referral_radar_data"}),
     (r"/api/employee/stat/job-view/?",               handler.platform.employee.ReferralRadarCardPositionHandler, {"event": "employee_referral_radar_position_data"}),
     (r"/api/employee/stat/seek-recom/?",             handler.platform.employee.ReferralRadarCardRecomHandler,    {"event": "employee_referral_radar_seek_recom_data"}),

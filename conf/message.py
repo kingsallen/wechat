@@ -111,3 +111,7 @@ REFERRAL_CONNECTION_TEXT = '{}！有朋友喊你看机会！'
 # 转发邀请投递分享
 REFERRAL_INVITE_TITLE = '诚邀您投递职位'
 REFERRAL_INVITE_TEXT = '这是一个千载难逢的内推机会哦~'
+
+# 内推进度页面分享
+REFERRAL_PROGRESS_TITLE = '内推进度'
+REFERRAL_PROGRESS_DESCRIPTION = ''

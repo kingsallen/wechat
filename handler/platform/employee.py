@@ -1130,8 +1130,32 @@ class ReferralProgressHandler(BaseHandler):
         员工中心 推荐进度列表页面
         :return:
         """
+        yield self._make_share_info()
         self.render_page(template_name='employee/referral-progress.html',
                          data=dict())
+
+    @gen.coroutine
+    def _make_share_info(self):
+        """构建 share 内容"""
+
+        company_info = yield self.company_ps.get_company(
+            conds={"id": self.current_user.company.id}, need_conf=True)
+
+        cover = self.share_url(company_info.logo)
+        title = msg.REFERRAL_PROGRESS_TITLE
+        description = msg.REFERRAL_PROGRESS_DESCRIPTION
+
+        link = self.make_url(
+            path.REFERRAL_PROGRESS,
+            self.params,
+        )
+
+        self.params.share = ObjectDict({
+            "cover": cover,
+            "title": title,
+            "description": description,
+            "link": link,
+        })
 
 
 class ReferralProgressListHandler(BaseHandler):
@@ -1149,7 +1173,7 @@ class ReferralProgressListHandler(BaseHandler):
         params = ObjectDict({
             "user_id": self.current_user.sysuser.id,
             "company_id": self.current_user.company.id,
-            "username": self.params.keyword or '',
+            "keyword": self.params.keyword or '',
             "page_size": self.params.page_size,
             "page_num": self.params.page_no,
             "progress": self.params.category
@@ -1158,6 +1182,30 @@ class ReferralProgressListHandler(BaseHandler):
         data = yield self.employee_ps.get_referral_progress(recom, params)
 
         self.send_json_success(data=data)
+
+
+class ReferralProgressListSearchHandler(BaseHandler):
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        """
+        员工中心 推荐进度列表页根据姓名搜索候选人
+　　　　progress: 0全部 1被推荐人投递简历 10通过初筛  12通过面试 3内推入职 4遗憾淘汰
+        :return:
+        """
+        params = ObjectDict({
+            "user_id": self.current_user.sysuser.id,
+            "company_id": self.current_user.company.id,
+            "keyword": self.params.keyword or '',
+            "progress": self.params.category
+        })
+        ret = yield self.employee_ps.get_referral_progress_keyword(params)
+        if not ret.status == const.API_SUCCESS:
+            self.send_json_error()
+
+        self.send_json_success(data={'list': ret.data})
 
 
 class ReferralProgressDetailHandler(BaseHandler):
