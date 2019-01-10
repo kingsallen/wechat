@@ -113,6 +113,7 @@ class SharechainPageService(PageService):
                 "position_id": position_id,
             },
             fields=[
+                'id',
                 'create_time',
                 'wechat_id',
                 'recom_user_id',
