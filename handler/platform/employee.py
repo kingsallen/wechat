@@ -1199,7 +1199,7 @@ class ReferralProgressListSearchHandler(BaseHandler):
             "user_id": self.current_user.sysuser.id,
             "company_id": self.current_user.company.id,
             "keyword": self.params.keyword or '',
-            "progress": self.params.category
+            "progress": self.params.category or 0
         })
         ret = yield self.employee_ps.get_referral_progress_keyword(params)
         if not ret.status == const.API_SUCCESS:
