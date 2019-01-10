@@ -428,7 +428,7 @@ class ReferralEvaluationHandler(BaseHandler):
 
         relationship = yield self.dictionary_ps.get_referral_relationship(self.locale)
         degree = yield self.dictionary_ps.get_degrees(self.locale)
-        if candidate_info.data['applicationId'] > 0:
+        if candidate_info.data['application_id'] > 0:
             # 已经做过推荐评价产生了申请
             self.render_page(template_name="employee/referral-progress.html",
                              data=dict())
