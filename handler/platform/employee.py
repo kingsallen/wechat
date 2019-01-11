@@ -1323,14 +1323,15 @@ class ReferralRadarCardPositionHandler(BaseHandler):
         """
         雷达页面 分类统计卡 职位浏览统计数据
         params:
-        pos_title:  按职位名搜索
+        :keyword:  按职位名搜索
         order: "time"   // 排序规则 默认 time,浏览 view 关系 depth
         :return:
         """
         data = yield self.employee_ps.radar_card_position(
             self.current_user.sysuser.id,
             self.current_user.company.id,
-            self.params.postion_title,
+            self.params.keyword,
+            self.params.order,
             self.params.page_no or 1,
             self.params.page_size or 10
         )
