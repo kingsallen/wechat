@@ -1009,6 +1009,7 @@ class EmployeeReferralConnectionHandler(BaseHandler):
         page_data = {
             "pid": ret_conn.data['pid'],
             "current_uid": self.current_user.sysuser.id,
+            "enable_viewer": ret_conn.data['enable_viewer'],
             "chain": ret_conn.data['chain']
         }
 
@@ -1267,7 +1268,8 @@ class ReferralRadarPageHandler(BaseHandler):
         self.render_page(template_name='employee/people-radar.html',
                          data={
                              "job_uv": ret.data.get('link_view_count'),
-                             "seek_recom_uv": ret.data.get('interested_count')
+                             "seek_recom_uv": ret.data.get('interested_count'),
+                             "recom": self.position_ps._make_recom(self.current_user.sysuser.id)
                          })
 
 
@@ -1290,7 +1292,8 @@ class ReferralRadarHandler(BaseHandler):
             self.send_json_error()
 
         self.send_json_success(data={
-            "list": ret.data['user_list']
+            "list": ret.data['user_list'],
+            "total": ret.data['total_count']
         })
 
 
@@ -1306,7 +1309,8 @@ class ReferralRadarCardHandler(BaseHandler):
         """
         self.render_page(template_name='employee/radar-stat.html',
                          data={
-                             "route": self.params.route
+                             "route": self.params.route,
+                             "recom": self.position_ps._make_recom(self.current_user.sysuser.id)
                          })
 
 
