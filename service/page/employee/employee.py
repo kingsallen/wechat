@@ -964,7 +964,7 @@ class EmployeePageService(PageService):
         return data
 
     @gen.coroutine
-    def radar_card_seek_recm(self, user_id, company_id, page_num, page_size):
+    def radar_card_seek_recom(self, user_id, company_id, page_num, page_size):
         """
         人脉雷达-分类统计卡-求推荐
         """
@@ -981,5 +981,6 @@ class EmployeePageService(PageService):
                     'view_count': item.get('view_count'),
                     'forward_name': item.get('forward_name'),
                     'forward_source_wx': item.get('forward_source_wx'),
+                    "referral_id": item.get('referral_id'),
                 })
         return data

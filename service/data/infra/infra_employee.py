@@ -355,7 +355,7 @@ class InfraEmployeeDataService(DataService):
         return ret
 
     @gen.coroutine
-    def radar_card_seek_recm(self, user_id, company_id, page_num, page_size):
+    def radar_card_seek_recom(self, user_id, company_id, page_num, page_size):
         """
         人脉雷达-分类统计卡-求推荐
         :param user_id:

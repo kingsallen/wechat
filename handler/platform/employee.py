@@ -1363,7 +1363,7 @@ class ReferralRadarCardRecomHandler(BaseHandler):
         雷达页面 分类统计卡 求推荐页面数据
         :return:
         """
-        data = yield self.employee_ps.radar_card_seek_recm(
+        data = yield self.employee_ps.radar_card_seek_recom(
             self.current_user.sysuser.id,
             self.current_user.company.id,
             self.params.page_no or 1,
