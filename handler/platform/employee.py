@@ -1297,19 +1297,18 @@ class ReferralRadarHandler(BaseHandler):
         })
 
 
-class ReferralRadarCardHandler(BaseHandler):
+class ReferralRadarCardJobViewHandler(BaseHandler):
 
     @handle_response
     @authenticated
     @gen.coroutine
     def get(self):
         """
-        雷达页面 分类统计卡页面
+        雷达页面 分类统计卡 职位浏览页面
         :return:
         """
-        self.render_page(template_name='employee/radar-stat.html',
+        self.render_page(template_name='employee/recom-stat-jobview.html',
                          data={
-                             "route": self.params.route,
                              "recom": self.position_ps._make_recom(self.current_user.sysuser.id)
                          })
 
@@ -1330,12 +1329,28 @@ class ReferralRadarCardPositionHandler(BaseHandler):
         data = yield self.employee_ps.radar_card_position(
             self.current_user.sysuser.id,
             self.current_user.company.id,
-            self.params.keyword,
-            self.params.order,
+            self.params.keyword or '',
+            self.params.order or 'time',
             self.params.page_no or 1,
             self.params.page_size or 10
         )
         self.send_json_success(data={"list": data})
+
+
+class ReferralRadarCardSeekRecomHandler(BaseHandler):
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        """
+        雷达页面 分类统计卡 求推荐页面
+        :return:
+        """
+        self.render_page(template_name='employee/recom-stat-seekrecom.html',
+                         data={
+                             "recom": self.position_ps._make_recom(self.current_user.sysuser.id)
+                         })
 
 
 class ReferralRadarCardRecomHandler(BaseHandler):
