@@ -97,7 +97,7 @@ class ChatPageService(PageService):
                 if data['mobot_head_img']:
                     hr_info['hr_headimg'] = data['mobot_head_img']
                 if data['mobot_name']:
-                    hr_info['hr_name'] = data['hr_name']
+                    hr_info['hr_name'] = data['mobot_name']
 
         user_info = ObjectDict()
         if ret.user:
