@@ -927,6 +927,8 @@ class EmployeePageService(PageService):
                     "nickname": item.get('nickname'),
                     "degree": item.get('depth'),
                     "position_name": item.get('position_title'),
+                    "position_id": item.get('position_id'),
+                    "user_id": item.get('user_id'),
                     "datetime": item.get('click_time'),
                     "forward_name": item.get('forward_name'),
                     "forward_source_wx": item.get('forward_source_wx'),
