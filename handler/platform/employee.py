@@ -1267,7 +1267,7 @@ class ReferralRadarPageHandler(BaseHandler):
 
         self.render_page(template_name='employee/people-radar.html',
                          data={
-                             "job_uv": ret.data.get('link_view_count'),
+                             "job_uv": ret.data.get('link_viewed_count'),
                              "seek_recom_uv": ret.data.get('interested_count'),
                              "recom": self.position_ps._make_recom(self.current_user.sysuser.id)
                          })
