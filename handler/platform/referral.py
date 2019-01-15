@@ -363,15 +363,15 @@ class ReferralCrucialInfoApiHandler(BaseHandler):
         if self.params.endpoint == 'connection':
             # 保存员工推荐评价信息
             yield self.employee_ps.referral_save_evaluation(self.current_user.sysuser.id, self.params, self.json_args)
-            if self.params.flag == const.REFERRAL_EVAL_CONTACT_MES_TMP:
+            if int(self.params.flag or 0) == const.REFERRAL_EVAL_CONTACT_MES_TMP:
                 next_url = self.make_url(path.REFERRAL_PROGRESS, self.params)
-            elif self.params.flag == const.REFERRAL_EVAL_RADAR:
+            elif int(self.params.flag or 0) == const.REFERRAL_EVAL_RADAR:
                 next_url = self.make_url(path.REFERRAL_RADAR, self.params)
-            elif self.params.flag == const.REFERRAL_EVAL_RECOM_PROGRESS:
+            elif int(self.params.flag or 0) == const.REFERRAL_EVAL_RECOM_PROGRESS:
                 next_url = self.make_url(path.REFERRAL_PROGRESS, self.params)
-            elif self.params.flag == const.REFERRAL_EVAL_TEN_MIN_MES_TMP:
+            elif int(self.params.flag or 0) == const.REFERRAL_EVAL_TEN_MIN_MES_TMP:
                 next_url = self.make_url(path.EMPLOYEE_TEN_MIN_TMP, self.params)
-            elif self.params.flag == const.REFERRAL_EVAL_SEEK_RECOM_CARDS:
+            elif int(self.params.flag or 0) == const.REFERRAL_EVAL_SEEK_RECOM_CARDS:
                 next_url = self.make_url(path.REFERRAL_RADAR_SEEK_RECOM, self.params)
             else:
                 next_url = ''

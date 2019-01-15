@@ -1037,7 +1037,6 @@ class EmployeeReferralConnectionHandler(BaseHandler):
             self.params,
             recom=self.position_ps._make_recom(self.current_user.sysuser.id),
         )
-        self.logger.debug("PLL test connection page link: %s" % link)
 
         self.params.share = ObjectDict({
             "cover": cover,
