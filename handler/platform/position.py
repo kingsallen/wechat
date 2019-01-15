@@ -19,6 +19,7 @@ from util.tool.str_tool import gen_salary, add_item, split, gen_degree_v2, gen_e
 from util.tool.url_tool import url_append_query
 from util.wechat.template import position_view_five_notice_tpl, position_share_notice_employee_tpl
 from util.common.decorator import log_time, log_time_common_func
+from util.common.mq import neo4j_position_forward
 
 
 class PositionHandler(BaseHandler):
@@ -186,11 +187,13 @@ class PositionHandler(BaseHandler):
             if self.is_platform and self.current_user.recom:
 
                 # 职位转发被点击时 neo4j记录转发链路
-                yield self.position_ps.insert_neo4j_share_record(
-                    self.current_user.recom.id,
-                    self.current_user.sysuser.id,
-                    inserted_share_chain_id
-                )
+                neo4j_data = ObjectDict({
+                    "start_user_id": self.current_user.recom.id,
+                    "end_user_id": self.current_user.sysuser.id,
+                    "share_chain_id": inserted_share_chain_id
+                })
+                yield neo4j_position_forward.publish_message(message=neo4j_data,
+                                                             routing_key="user_neo4j.friend_update")
 
                 # 转发积分
                 if last_employee_user_id:
