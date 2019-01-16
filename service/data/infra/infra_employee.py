@@ -253,6 +253,16 @@ class InfraEmployeeDataService(DataService):
         return ret
 
     @gen.coroutine
+    def nonreferral_save_evaluation(self, params):
+        """
+        不是点击“帮我内推”button， 而是直接投递之后在推荐进度列表中进行"评价Ta"
+        :param params:
+        :return:
+        """
+        ret = yield http_post(path.INFRA_NONREFERRAL_EVALUATION, params)
+        return ret
+
+    @gen.coroutine
     def referral_evaluation_page_info(self, post_user_id, referral_id):
         """
         员工推荐评价页面 候选人和职位信息获取

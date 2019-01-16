@@ -825,6 +825,27 @@ class EmployeePageService(PageService):
         return res
 
     @gen.coroutine
+    def nonreferral_save_evaluation(self, user_id, url_params, json_args):
+        """
+        联系内推： 推荐评价信息保存
+        :param user_id:   员工的user_id
+        :param url_params:
+        :param json_args:
+        :return:
+        """
+        params = ObjectDict({
+            "post_user_id": user_id,
+            "presentee_user_id": url_params.candidate_user_id,
+            "position_id": json_args.pid,
+            "referral_reasons": json_args.recom_reason,
+            "recom_reason_text": json_args.comment,
+            "relationship": json_args.relation,
+
+        })
+        res = yield self.infra_employee_ds.nonreferral_save_evaluation(params)
+        return res
+
+    @gen.coroutine
     def referral_evaluation_page_info(self, post_user_id, referral_id):
         """
         员工推荐评价页面 候选人和职位信息获取
@@ -920,7 +941,7 @@ class EmployeePageService(PageService):
         ret = yield self.infra_employee_ds.radar_card_position(user_id, company_id, pos_title, order,
                                                                page_num, page_size)
         data = list()
-        if ret.status == const.API_SUCCESS:
+        if ret.status == const.API_SUCCESS and ret.data:
             for item in ret.data['user_list']:
                 data_item = {
                     "avatar": item.get('headimgurl'),
@@ -970,7 +991,7 @@ class EmployeePageService(PageService):
         """
         ret = yield self.infra_employee_ds.radar_card_seek_recom(user_id, company_id, page_num, page_size)
         data = list()
-        if ret.status == const.API_SUCCESS:
+        if ret.status == const.API_SUCCESS and ret.data:
             for item in ret.data['user_list']:
                 data.append({
                     'avatar': item.get('headimgurl'),

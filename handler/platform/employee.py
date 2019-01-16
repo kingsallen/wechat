@@ -878,6 +878,9 @@ class EmployeeReferralCardsHandler(BaseHandler):
             int(self.params.page_size or 10),
             self.current_user.company.id
         )
+        if not ret.status == const.API_SUCCESS:
+            self.send_json_error(message=ret.message)
+            return
 
         cards = list()
         for card_infra in ret.data:
@@ -917,7 +920,7 @@ class EmployeeReferralPassCardsHandler(BaseHandler):
             card_user_id=self.json_args.candidate_user_id,
             timestamp=self.params.send_time)
 
-        if ret.status == 0:
+        if ret.status == const.API_SUCCESS:
             self.send_json_success()
         else:
             self.send_json_error(message=ret.message)
@@ -962,7 +965,7 @@ class EmployeeReferralInviteApplyHandler(BaseHandler):
             # timestamp=self.json_args.get('send_timestamp') or 0)
             timestamp=self.params.send_time)
 
-        if ret.status == 0:
+        if ret.status == const.API_SUCCESS:
             data = ObjectDict({
                 "notified": ret.data['notified'],
                 "degree": ret.data['degree'],
@@ -987,7 +990,7 @@ class EmployeeReferralConnectionHandler(BaseHandler):
         """
         pid = self.params.pid
         if not (pid and chain_id):
-            self.write_error(500)
+            self.write_error(500, message='pid和chain_id是必传参数')
             return
 
         if self.current_user.recom:
@@ -1003,6 +1006,9 @@ class EmployeeReferralConnectionHandler(BaseHandler):
         parent_connection_id = self.params.parent_connection_id if self.params.parent_connection_id else 0
         ret_conn = yield self.employee_ps.referral_connections(
             recom_user_id, click_user_id, chain_id, pid, parent_connection_id)
+        if not ret_conn.status == const.API_SUCCESS:
+            self.write_error(500, message=ret_conn.message)
+            return
 
         parent_connection_id = ret_conn.data['parent_id'] if ret_conn.data.get('parent_id') else 0
         self.params.parent_connection_id = parent_connection_id
@@ -1065,9 +1071,17 @@ class ContactReferralInfoHandler(BaseHandler):
             psc = self.params.psc if self.params.psc else 0
 
         ret = yield self.user_ps.if_referral_position(recom, psc, pid, self.current_user.sysuser.id)
+        if not ret.status == const.API_SUCCESS:
+            self.write_error(500, message=ret.message)
+            return
+
         recom_user_id = ret.data['user']['uid']
 
         ret_info = yield self.employee_ps.referral_contact_push(recom_user_id, pid)
+        if not ret_info.status == const.API_SUCCESS:
+            self.write_error(500, message=ret_info.message)
+            return
+
         self.render_page(
             template_name='employee/connect-referral.html',
             data={
@@ -1203,7 +1217,8 @@ class ReferralProgressListSearchHandler(BaseHandler):
         })
         ret = yield self.employee_ps.get_referral_progress_keyword(params)
         if not ret.status == const.API_SUCCESS:
-            self.send_json_error()
+            self.send_json_error(message=ret.message)
+            return
 
         self.send_json_success(data={'list': ret.data})
 
@@ -1229,7 +1244,8 @@ class ReferralProgressDetailHandler(BaseHandler):
 
         ret = yield self.employee_ps.get_referral_progress_detail(apply_id, params)
         if not ret.status == const.API_SUCCESS:
-            self.write_error(416)
+            self.write_error(500, message=ret.message)
+            return
 
         render_data = {
             "abnormal": ret.data['abnormal'],
@@ -1262,7 +1278,8 @@ class ReferralRadarPageHandler(BaseHandler):
         ret = yield self.employee_ps.get_radar_top_data(self.current_user.sysuser.id,
                                                         self.current_user.company.id)
         if not ret.status == const.API_SUCCESS:
-            self.write_error(416)
+            self.write_error(500, message=ret.message)
+            return
 
         self.render_page(template_name='employee/people-radar.html',
                          data={
@@ -1288,7 +1305,8 @@ class ReferralRadarHandler(BaseHandler):
             self.current_user.company.id
         )
         if not ret.status == const.API_SUCCESS:
-            self.send_json_error()
+            self.send_json_error(message=ret.message)
+            return
 
         self.send_json_success(data={
             "list": ret.data['user_list'],

@@ -751,6 +751,7 @@ class PositionDetailPopupHandler(BaseHandler):
         res_data = res.get('data')
         if not res_data:
             self.send_json_error(message='获取弹层信息失败')
+            return
 
         res_crucial_info_switch = yield self.company_ps.get_crucial_info_state(self.current_user.company.id)
         switch = res_crucial_info_switch['data']
@@ -796,6 +797,10 @@ class PositionForwardFromEmpHandler(BaseHandler):
             psc = self.params.psc if self.params.psc else 0
         click_user_id = self.current_user.sysuser.id
         ret = yield self.user_ps.if_referral_position(recom, psc, pid, click_user_id)
+        if not ret.status == const.API_SUCCESS:
+            self.send_json_error(message=ret.message)
+            return
+
         data = {
             "is_employee": ret.data['employee'],
             "employee_name": ret.data['user']['name'] if ret.data['employee'] else '',
@@ -819,6 +824,10 @@ class ReferralRelatedPositionHandler(BaseHandler):
             self.current_user.sysuser.id,
             self.current_user.company.id
         )
+        if not ret.status == const.API_SUCCESS:
+            self.send_json_error(message=ret.message)
+            return
+
         self.send_json_success(data={
             "list": ret.data
         })
