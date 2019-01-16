@@ -446,6 +446,7 @@ class ReferralEvaluationHandler(BaseHandler):
             )
             if not ret.status == const.API_SUCCESS:
                 self.write_error(500, message=ret.message)
+                return
 
             presentee_name = ret.data['nickname']
             position_title = ret.data['position_name']
@@ -455,6 +456,7 @@ class ReferralEvaluationHandler(BaseHandler):
             candidate_info = yield self.employee_ps.referral_evaluation_page_info(self.current_user.sysuser.id, referral_id)
             if not candidate_info.status == const.API_SUCCESS:
                 self.write_error(500, message=candidate_info.message)
+                return
 
             presentee_name = candidate_info.data['username']
             position_title = candidate_info.data['position_name']
