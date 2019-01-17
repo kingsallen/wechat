@@ -16,19 +16,19 @@ class AnnualSummarizeHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def get(self):
-
-        self.params.share = self._share()
+        transmit = self.params.transmit if self.params.transmit else self.position_ps._make_recom(self.current_user.sysuser.id)
+        self.params.share = self._share(transmit)
 
         return self.render_page(template_name='h5/interpolative/index.html', data=ObjectDict())
 
-    def _share(self):
+    def _share(self, transmit):
         default = ObjectDict({
-            "cover": self.share_url(self.current_user.company.logo),
+            "cover": "https://cdn.moseeker.com/profile/share_happy_new_year_2019.png",
             "title": "盘点我的2018内推成就，和我一起穿越时空吧~",
             "description": "感谢内推有你❤",
             "link": self.make_url(path.ANNUAL_SUMMARIZE,
                                   self.params,
-                                  transmit=self.position_ps._make_recom(self.current_user.sysuser.id))
+                                  transmit=transmit)
         })
         return default
 
@@ -80,6 +80,8 @@ class AnnualSummarizeEntranceHandler(BaseHandler):
         if user_info:
             has_summarize = True
         is_employee = True if self.current_user.employee else False
+        if self.current_user.company.id == 1505:
+            has_summarize = False
         self.send_json_success(ObjectDict(has=has_summarize,
                                           is_employee=is_employee,
                                           is_self_summarize=is_self_summarize))
