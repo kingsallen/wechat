@@ -180,6 +180,7 @@ MESSAGE_TEMPLATE = "message/template"
 # chat服务
 CHAT_LIMIT = "api/v1/chat/voice/sendWarnEmail"
 VOICE = "api/v1/chat/voice/pullVoiceFile"
+MOBOT_IMAGE = "api/hrcompany/mobot/conf"
 
 # 内推服务
 REFERRAL_POLICY = "v1.0/referral/conf"
