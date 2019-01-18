@@ -837,7 +837,7 @@ class ContactReferralInfoHandler(BaseHandler):
             self.write_error(500, message=if_seek_check_ret.message)
             return
 
-        if if_seek_check_ret.status['data'].get('referral_id'):
+        if if_seek_check_ret.data.get('referral_id'):
             self.render_page(template_name='employee/result-with-jobs.html',
                              data=dict())
             return
