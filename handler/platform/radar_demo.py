@@ -15,7 +15,7 @@ class RadarDemoHandler(BaseHandler):
 
     @gen.coroutine
     def get(self):
-        self.render_page(template_name="radar/index.html", data=ObjectDict())
+        self.render_page(template_name="h5/radar.html", data=ObjectDict())
 
 
 class RadarDemoApiHandler(BaseHandler):
