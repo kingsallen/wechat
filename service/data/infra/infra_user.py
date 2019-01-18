@@ -373,5 +373,5 @@ class InfraUserDataService(DataService):
             "company_id": company_id,
             "presentee_user_id": click_user_id
         })
-        ret = yield http_post(path.INFRA_IF_SEEK_CHECK, params)
+        ret = yield http_get(path.INFRA_IF_SEEK_CHECK, params)
         return ret
