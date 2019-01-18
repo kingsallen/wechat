@@ -777,7 +777,7 @@ class PositionForwardFromEmpHandler(BaseHandler):
     def get(self):
         """
         候选人打开转发的职位链接，根据链接中参数判断最初转发该职位的人是否是员工
-        决定前端是否显示“联系内推”button
+        决定前端是否显示“帮我内推”button
         :return:
         """
         pid = self.params.pid
@@ -807,6 +807,62 @@ class PositionForwardFromEmpHandler(BaseHandler):
             "employee_icon": ret.data['user']['avatar'] if ret.data['employee'] else '',
         }
         self.send_json_success(data)
+
+
+class ContactReferralInfoHandler(BaseHandler):
+
+    @decorator.handle_response
+    @decorator.authenticated
+    @gen.coroutine
+    def get(self):
+        """
+         联系内推页面获取员工姓名，头像，职位名
+         先判断该候选人是否已经点击过“帮我内推”并且确认提交，如果已提交过直接到确认提交后的一页
+        :return:
+        """
+        pid = self.params.pid
+        if self.params.root_recom:
+            recom = decode_id(self.params.root_recom)
+            psc = -1
+        else:
+            recom = decode_id(self.params.recom)
+            psc = self.params.psc if self.params.psc else 0
+
+        if_seek_check_ret = yield self.user_ps.if_ever_seek_recommend(
+            recom, psc, pid,
+            self.current_user.company_id,
+            self.current_user.sysuser_id
+        )
+        if not if_seek_check_ret.status == const.API_SUCCESS:
+            self.write_error(500, message=if_seek_check_ret.message)
+            return
+
+        if if_seek_check_ret.status['data'].get('referral_id'):
+            self.render_page(template_name='employee/result-with-jobs.html',
+                             data=dict())
+            return
+
+        ret = yield self.user_ps.if_referral_position(recom, psc, pid, self.current_user.sysuser.id)
+        if not ret.status == const.API_SUCCESS:
+            self.write_error(500, message=ret.message)
+            return
+
+        recom_user_id = ret.data['user']['uid']
+
+        ret_info = yield self.employee_ps.referral_contact_push(recom_user_id, pid)
+        if not ret_info.status == const.API_SUCCESS:
+            self.write_error(500, message=ret_info.message)
+            return
+
+        self.render_page(
+            template_name='employee/connect-referral.html',
+            data={
+              "employee_icon": ret_info.data['employee_icon'],
+              "employee_name": ret_info.data['employee_name'],
+              "position_name": ret_info.data['position_name'],
+              "pid": pid,
+            }
+        )
 
 
 class ReferralRelatedPositionHandler(BaseHandler):

@@ -354,3 +354,24 @@ class InfraUserDataService(DataService):
         })
         ret = yield http_post(path.INFRA_IF_EMPLOYEE_POS, params)
         return ret
+
+    @gen.coroutine
+    def if_ever_seek_recommend(self, recom_user_id, psc, pid, company_id, click_user_id):
+        """
+        候选人打开职位链接, 判断之前是否已经点击过“帮我内推”并且完成简历填写确认提交
+        :param recom_user_id:  直接转发人的user_id
+        :param psc:   父级链路id   candidate_share_chain.id
+        :param pid:
+        :param company_id:
+        :param click_user_id:
+        :return:
+        """
+        params = ObjectDict({
+            "recom_user_id": recom_user_id,
+            "psc": psc,
+            "position_id": pid,
+            "company_id": company_id,
+            "presentee_user_id": click_user_id
+        })
+        ret = yield http_post(path.INFRA_IF_SEEK_CHECK, params)
+        return ret

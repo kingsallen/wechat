@@ -628,3 +628,8 @@ class UserPageService(PageService):
         """
         ret = yield self.infra_user_ds.if_referral_position(recom, psc, pid, click_user_id)
         return ret
+
+    @gen.coroutine
+    def if_ever_seek_recommend(self, recom_user_id, psc, pid, company_id, click_user_id):
+        ret = yield self.infra_user_ds.if_ever_seek_recommend(recom_user_id, psc, pid, company_id, click_user_id)
+        return ret

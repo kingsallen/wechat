@@ -127,6 +127,7 @@ class ApplicationHandler(BaseHandler):
         is_applied, message, apply_id = yield self.application_ps.create_application(
             position,
             self.current_user,
+            self.params,
             is_platform=self.is_platform,
             has_recom='recom' in self.params)
 

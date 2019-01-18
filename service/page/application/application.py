@@ -544,7 +544,7 @@ class ApplicationPageService(PageService):
         return None
 
     @gen.coroutine
-    def create_application(self, position, current_user,
+    def create_application(self, position, current_user, params,
                            is_platform=True, psc=None, has_recom=False):
 
         # 1.初始化
@@ -566,7 +566,8 @@ class ApplicationPageService(PageService):
             recommender_user_id=recommender_user_id,
             applier_id=current_user.sysuser.id,
             company_id=position.company_id,
-            origin=2 if is_platform else 4  # 2 -> 企业号申请， 4 -> 聚合号申请
+            # origin=2 if is_platform else 4  # 2 -> 企业号申请， 4 -> 聚合号申请
+            origin=524288 if params.origin else 1048576  # 524288 -> 内推邀请投递带来的申请， 1048576 -> 普通申请
         )
         self.logger.debug("params_for_application: {}".format(
             params_for_application))

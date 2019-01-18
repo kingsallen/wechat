@@ -1052,47 +1052,6 @@ class EmployeeReferralConnectionHandler(BaseHandler):
         })
 
 
-class ContactReferralInfoHandler(BaseHandler):
-
-    @handle_response
-    @authenticated
-    @gen.coroutine
-    def get(self):
-        """
-         联系内推页面获取员工姓名，头像，职位名
-        :return:
-        """
-        pid = self.params.pid
-        if self.params.root_recom:
-            recom = decode_id(self.params.root_recom)
-            psc = -1
-        else:
-            recom = decode_id(self.params.recom)
-            psc = self.params.psc if self.params.psc else 0
-
-        ret = yield self.user_ps.if_referral_position(recom, psc, pid, self.current_user.sysuser.id)
-        if not ret.status == const.API_SUCCESS:
-            self.write_error(500, message=ret.message)
-            return
-
-        recom_user_id = ret.data['user']['uid']
-
-        ret_info = yield self.employee_ps.referral_contact_push(recom_user_id, pid)
-        if not ret_info.status == const.API_SUCCESS:
-            self.write_error(500, message=ret_info.message)
-            return
-
-        self.render_page(
-            template_name='employee/connect-referral.html',
-            data={
-              "employee_icon": ret_info.data['employee_icon'],
-              "employee_name": ret_info.data['employee_name'],
-              "position_name": ret_info.data['position_name'],
-              "pid": pid,
-            }
-        )
-
-
 class ReferralInviteApplyHandler(BaseHandler):
 
     @handle_response

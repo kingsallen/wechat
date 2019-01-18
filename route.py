@@ -178,10 +178,10 @@ platform_routes = [
 
     (r'/user/survey/?',                              handler.platform.user.UserSurveyHandler,                   {'event': 'user_survey'}),
     (r'/user/ai-recom/?',                            handler.platform.user.AIRecomHandler,                      {'event': 'user_ai-recom'}),
+    (r'/employee/connect_referral',                  handler.platform.user.ContactReferralInfoHandler,          {"event": "referral_contact_info"}),
     (r'/employee/survey/?',                          handler.platform.employee.EmployeeSurveyHandler,           {'event': 'employee_survey'}),
     (r'/employee/ai-recom/(\d+)',                    handler.platform.employee.EmployeeAiRecomHandler,          {'event': 'employee_ai-recom'}),
     (r'/employee/referral/policy',                   handler.platform.employee.EmployeeReferralPolicyHandler,   {"event": "referral—policy"}),
-    (r'/employee/connect_referral',                  handler.platform.employee.ContactReferralInfoHandler,      {"event": "referral_contact_info"}),
     (r'/employee/referral/invite_cards',             handler.platform.employee.ReferralInviteApplyHandler,      {"event": "referral_invite_cards"}),
     (r'/employee/referral/progress',                 handler.platform.employee.ReferralProgressHandler,         {"event": "referral_progress"}),
     (r'/employee/referral/progress_detail',          handler.platform.employee.ReferralProgressDetailHandler,   {"event": "referral_progress_detail"}),
