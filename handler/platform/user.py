@@ -830,8 +830,8 @@ class ContactReferralInfoHandler(BaseHandler):
 
         if_seek_check_ret = yield self.user_ps.if_ever_seek_recommend(
             recom, psc, pid,
-            self.current_user.company_id,
-            self.current_user.sysuser_id
+            self.current_user.company.id,
+            self.current_user.sysuser.id
         )
         if not if_seek_check_ret.status == const.API_SUCCESS:
             self.write_error(500, message=if_seek_check_ret.message)
