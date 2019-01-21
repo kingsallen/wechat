@@ -398,12 +398,13 @@ class ApplicationPageService(PageService):
         return result
 
     @gen.coroutine
-    def create_email_apply(self, params, position, current_user, is_platform=True):
+    def create_email_apply(self, params, position, current_user, is_platform=True, source=None):
         """ 创建Email申请
         :param params:
         :param position:
         :param current_user:
         :param is_platform:
+        :param source:
         :return:
         """
 
@@ -418,6 +419,13 @@ class ApplicationPageService(PageService):
         recommender_user_id, recommender_wxuser_id, recom_employee = yield self.get_recommend_user(
             current_user, position, is_platform)
 
+        if source == const.REHIRING_SOURCE:
+            origin = const.REHIRING_ORIGIN
+        elif current_user.employee and current_user.company.id in [524798]:
+            origin = const.TRANSFER_ORIGIN
+        else:
+            origin = 1024
+
         params_for_application = ObjectDict(
             wechat_id=current_user.wechat.id,
             position_id=position.id,
@@ -429,7 +437,7 @@ class ApplicationPageService(PageService):
             apply_type=1,  # 投递区分， 0：profile投递， 1：email投递
             email_status=1,
             # email解析状态: 0，有效；1,未收到回复邮件；2，文件格式不支持；3，附件超过10M；9，提取邮件失败
-            origin=1024
+            origin=origin
         )
 
         ret = yield self.infra_application_ds.create_application(params_for_application)
@@ -545,7 +553,7 @@ class ApplicationPageService(PageService):
 
     @gen.coroutine
     def create_application(self, position, current_user,
-                           is_platform=True, psc=None, has_recom=False):
+                           is_platform=True, psc=None, has_recom=False, source=None):
 
         # 1.初始化
         check_status, message = yield self.check_position(position, current_user)
@@ -560,13 +568,20 @@ class ApplicationPageService(PageService):
         else:
             recommender_user_id, recommender_wxuser_id, recom_employee = 0, 0, None
 
+        if source == const.REHIRING_SOURCE:
+            origin = const.REHIRING_ORIGIN
+        elif current_user.employee and current_user.company.id in [524798]:
+            origin = const.TRANSFER_ORIGIN
+        else:
+            origin = 2 if is_platform else 4
+
         params_for_application = ObjectDict(
             position_id=position.id,
             recommender_id=recommender_wxuser_id,
             recommender_user_id=recommender_user_id,
             applier_id=current_user.sysuser.id,
             company_id=position.company_id,
-            origin=2 if is_platform else 4  # 2 -> 企业号申请， 4 -> 聚合号申请
+            origin=origin  # 2 -> 企业号申请， 4 -> 聚合号申请
         )
         self.logger.debug("params_for_application: {}".format(
             params_for_application))

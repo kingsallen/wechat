@@ -146,6 +146,13 @@ API_SUCCESS = 0
 API_FAILURE = 1
 API_WARNING = 2
 
+# 申请来源
+REHIRING_SOURCE = '8'  # 老员工回聘
+
+# 入库的申请来源
+REHIRING_ORIGIN = 2097152  # 老员工回聘
+TRANSFER_ORIGIN = 4194304  # 员工转岗
+
 # 通用状态的布尔值
 YES = 1
 NO = 0
