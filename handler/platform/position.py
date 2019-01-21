@@ -15,11 +15,13 @@ from util.common.cipher import encode_id
 from util.common.decorator import handle_response, check_employee, NewJDStatusCheckerAddFlag, authenticated, log_time, \
     cover_no_weixin, check_employee_common
 from util.common.mq import award_publisher
+from util.common.kafka import *
 from util.tool.str_tool import gen_salary, add_item, split, gen_degree_v2, gen_experience_v2, languge_code_from_ua
 from util.tool.url_tool import url_append_query
 from util.wechat.template import position_view_five_notice_tpl, position_share_notice_employee_tpl
 from util.common.decorator import log_time, log_time_common_func
 from util.common.mq import neo4j_position_forward
+from setting import settings
 
 
 class PositionHandler(BaseHandler):
@@ -185,6 +187,20 @@ class PositionHandler(BaseHandler):
 
             # 后置操作
             if self.is_platform and self.current_user.recom:
+
+                # 往kafka中写入数据
+                config = {'bootstrap.servers': settings['kafka_servers']}
+                kafka_producer = KafkaProducer(config)
+                kafka_producer.start()
+
+                radar_event_emitter = RadarEventEmitter(kafka_producer)
+                radar_event_emitter.register_event(PositionPageViewEvent)
+
+                position_page_view_event = PositionPageViewEvent(
+                    user_id=self.current_user.sysuser.id,
+                    company_id=self.current_user.company.id,
+                    position_id=position_id)
+                radar_event_emitter.emit(position_page_view_event)
 
                 # 职位转发被点击时 neo4j记录转发链路
                 neo4j_data = ObjectDict({
