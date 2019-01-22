@@ -12,6 +12,8 @@ from abc import ABC, abstractmethod
 
 from confluent_kafka import Producer
 
+from setting import settings
+
 
 # 6个事件 - 触发计算员工人脉雷达
 # 1 新增浏览行为导致数据库链路改变 - java service
@@ -27,6 +29,7 @@ from confluent_kafka import Producer
 class KafkaProducer:
     def __init__(self, config):
         self._config = config
+        self.start()
         # TODO: add start stop
 
     def start(self):
@@ -98,10 +101,14 @@ class PositionPageViewEvent(Event):
         return c
 
 
+config = {'bootstrap.servers': settings['kafka_servers']}
+kafka_producer = KafkaProducer(config)
+
+
 def main():
     config = {'bootstrap.servers': 'localhost:9092'}
     kafka_producer = KafkaProducer(config)
-    kafka_producer.start()
+    # kafka_producer.start()
 
     radar_event_emitter = RadarEventEmitter(kafka_producer)
     radar_event_emitter.register_event(PositionPageViewEvent)

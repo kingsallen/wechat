@@ -189,10 +189,6 @@ class PositionHandler(BaseHandler):
             if self.is_platform and self.current_user.recom:
 
                 # 往kafka中写入数据
-                config = {'bootstrap.servers': settings['kafka_servers']}
-                kafka_producer = KafkaProducer(config)
-                kafka_producer.start()
-
                 radar_event_emitter = RadarEventEmitter(kafka_producer)
                 radar_event_emitter.register_event(PositionPageViewEvent)
 
