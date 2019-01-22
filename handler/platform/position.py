@@ -195,7 +195,7 @@ class PositionHandler(BaseHandler):
                 position_page_view_event = PositionPageViewEvent(
                     user_id=self.current_user.sysuser.id,
                     company_id=self.current_user.company.id,
-                    position_id=position_id)
+                    position_id=int(position_id))
                 radar_event_emitter.emit(position_page_view_event)
 
                 # 职位转发被点击时 neo4j记录转发链路
