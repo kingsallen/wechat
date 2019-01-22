@@ -96,7 +96,7 @@ class PositionPageViewEvent(Event):
         self.event_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
 
     def get_content(self):
-        c = {"event_time": self.event_time, "event_name": self.event_name}
+        c = {"event_time": self.event_time, "event": self.event_name}
         c.update(self.__dict__)
         return c
 
