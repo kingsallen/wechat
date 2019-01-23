@@ -339,9 +339,10 @@ class InfraUserDataService(DataService):
         return ret
 
     @gen.coroutine
-    def if_referral_position(self, recom, psc, pid, click_user_id):
+    def if_referral_position(self, company_id, recom, psc, pid, click_user_id):
         """
         候选人打开转发的职位链接，根据链接中参数判断最初转发该职位的人是否是员工
+        :param company_id:
         :param recom:  直接转发人的user_id
         :param psc:   父级链路id   candidate_share_chain.id
         :param pid:
@@ -349,6 +350,7 @@ class InfraUserDataService(DataService):
         :return:
         """
         params = ObjectDict({
+            "company_id": company_id,
             "recom_user_id": recom,
             "parent_chain_id": psc,
             "pid": pid,

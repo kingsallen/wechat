@@ -796,7 +796,9 @@ class PositionForwardFromEmpHandler(BaseHandler):
             recom = decode_id(self.params.recom)
             psc = self.params.psc if self.params.psc else 0
         click_user_id = self.current_user.sysuser.id
-        ret = yield self.user_ps.if_referral_position(recom, psc, pid, click_user_id)
+        ret = yield self.user_ps.if_referral_position(
+            self.current_user.company.id,
+            recom, psc, pid, click_user_id)
         if not ret.status == const.API_SUCCESS:
             self.send_json_error(message=ret.message)
             return
@@ -842,7 +844,9 @@ class ContactReferralInfoHandler(BaseHandler):
                              data=dict())
             return
 
-        ret = yield self.user_ps.if_referral_position(recom, psc, pid, self.current_user.sysuser.id)
+        ret = yield self.user_ps.if_referral_position(
+            self.current_user.company.id,
+            recom, psc, pid, self.current_user.sysuser.id)
         if not ret.status == const.API_SUCCESS:
             self.write_error(500, message=ret.message)
             return
