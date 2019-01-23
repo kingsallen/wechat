@@ -988,6 +988,15 @@ class EmployeeReferralConnectionHandler(BaseHandler):
         :param chain_id: 人脉连连看链路id
         :return:
         """
+        radar_status_res = yield self.company_ps.check_radar_switch_status(self.current_user.company.id)
+        if not radar_status_res.status == const.API_SUCCESS:
+            self.write_error(500, message=radar_status_res.message)
+
+        radar_status = radar_status_res.data[0].get('valid')
+        if not radar_status:
+            self.render_default_page(kind=0, messages=['暂未开启该功能'])
+            return
+
         pid = self.params.pid
         if not (pid and chain_id):
             self.write_error(500, message='pid和chain_id是必传参数')
@@ -1005,7 +1014,7 @@ class EmployeeReferralConnectionHandler(BaseHandler):
 
         parent_connection_id = self.params.parent_connection_id if self.params.parent_connection_id else 0
         ret_conn = yield self.employee_ps.referral_connections(
-            recom_user_id, click_user_id, chain_id, pid, parent_connection_id)
+            self.current_user.company.id, recom_user_id, click_user_id, chain_id, pid, parent_connection_id)
         if not ret_conn.status == const.API_SUCCESS:
             self.write_error(500, message=ret_conn.message)
             return
@@ -1062,6 +1071,15 @@ class ReferralInviteApplyHandler(BaseHandler):
         邀请投递入口三，渲染前端页面
         :return:
         """
+        radar_status_res = yield self.company_ps.check_radar_switch_status(self.current_user.company.id)
+        if not radar_status_res.status == const.API_SUCCESS:
+            self.write_error(500, message=radar_status_res.message)
+
+        radar_status = radar_status_res.data[0].get('valid')
+        if not radar_status:
+            self.render_default_page(kind=0, messages=['暂未开启该功能'])
+            return
+
         yield self._make_share_info()
         self.render_page(template_name='employee/candidate-filter.html',
                          data=dict(
@@ -1211,7 +1229,7 @@ class ReferralProgressDetailHandler(BaseHandler):
             "avatar": ret.data.get('avatar', ''),
             "name": ret.data.get('name', ''),
             "position_name": ret.data.get('title', ''),
-            "encourage": ret.data.get('encourage', ''),
+            "encourage": self.locale.translate(const.REFERRAL_ENCOURAGE.get(ret.data.get('encourage', ''))),
         }
         progress = list()
         for pro in ret.data.get('progress', []):
@@ -1234,6 +1252,15 @@ class ReferralRadarPageHandler(BaseHandler):
         """
         员工中心 人脉雷达页面
         """
+        radar_status_res = yield self.company_ps.check_radar_switch_status(self.current_user.company.id)
+        if not radar_status_res.status == const.API_SUCCESS:
+            self.write_error(500, message=radar_status_res.message)
+
+        radar_status = radar_status_res.data[0].get('valid')
+        if not radar_status:
+            self.render_default_page(kind=0, messages=['暂未开启该功能'])
+            return
+
         ret = yield self.employee_ps.get_radar_top_data(self.current_user.sysuser.id,
                                                         self.current_user.company.id)
         if not ret.status == const.API_SUCCESS:

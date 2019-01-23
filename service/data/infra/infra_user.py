@@ -303,9 +303,10 @@ class InfraUserDataService(DataService):
         return ret
 
     @gen.coroutine
-    def referral_confirm_submit(self, user_id, post_user_id, position_id, origin):
+    def referral_confirm_submit(self, company_id, user_id, post_user_id, position_id, origin):
         """
         候选人联系内推：简历预览页面确认提交
+        :param company_id:
         :param user_id:  候选人id
         :param post_user_id: 最初转发职位的员工的user_id
         :param position_id:
@@ -313,6 +314,7 @@ class InfraUserDataService(DataService):
         :return:
         """
         params = ObjectDict({
+            "company_id": company_id,
             "user_id": user_id,
             "post_user_id": post_user_id,
             "position_id": position_id,

@@ -817,7 +817,7 @@ class ContactReferralInfoHandler(BaseHandler):
     def get(self):
         """
          联系内推页面获取员工姓名，头像，职位名
-         先判断该候选人是否已经点击过“帮我内推”并且确认提交，如果已提交过直接到确认提交后的一页
+         判断该候选人是否已经点击过“帮我内推”并且确认提交，如果已提交过直接到确认提交后的一页
         :return:
         """
         pid = self.params.pid

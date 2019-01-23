@@ -90,3 +90,17 @@ class InfraCompanyDataService(DataService):
         })
         res = yield http_get(path.INFRA_REFERRAL_CRUCIAL_INFO_SWITCH, params)
         return res
+
+    @gen.coroutine
+    def check_radar_switch_status(self, company_id):
+        """
+        检查企业是否开启“人脉雷达”开关
+        :param company_id:
+        :return:
+        """
+        params = ObjectDict({
+            "company_id": company_id,
+            "moduleName": "人脉雷达"
+        })
+        res = yield http_get(path.INFRA_CHECK_RADAR_STATUS, params)
+        return res

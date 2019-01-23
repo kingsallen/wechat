@@ -207,9 +207,10 @@ class InfraEmployeeDataService(DataService):
         return ret
 
     @gen.coroutine
-    def referral_connections(self, recom_user_id, end_user_id, chain_id, pid, parent_id):
+    def referral_connections(self, company_id, recom_user_id, end_user_id, chain_id, pid, parent_id):
         """
         人脉连连看
+        :param company_id:
         :param recom_user_id: 当前转发用户user_id
         :param end_user_id:   链路结束用户user_id
         :param chain_id:      人脉连连看 链路id
@@ -218,6 +219,7 @@ class InfraEmployeeDataService(DataService):
         :return:
         """
         params = ObjectDict({
+            "company_id": company_id,
             "recom_user_id": recom_user_id,
             "next_user_id": end_user_id,
             "chain_id": chain_id,
@@ -263,14 +265,16 @@ class InfraEmployeeDataService(DataService):
         return ret
 
     @gen.coroutine
-    def referral_evaluation_page_info(self, post_user_id, referral_id):
+    def referral_evaluation_page_info(self, company_id, post_user_id, referral_id):
         """
         员工推荐评价页面 候选人和职位信息获取
+        :param company_id
         :param post_user_id:  推荐的员工的user_id
         :param  referral_id: 联系内推编号
         :return:
         """
         params = ObjectDict({
+            "company_id": company_id,
             "post_user_id": post_user_id,
             "referral_id": referral_id
         })

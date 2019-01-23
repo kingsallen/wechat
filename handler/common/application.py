@@ -84,7 +84,8 @@ class ApplicationHandler(BaseHandler):
                 psc = self.json_args.psc if self.json_args.psc else 0
             ret = yield self.user_ps.if_referral_position(recom, psc, pid, self.current_user.sysuser.id)
             root_user_id = ret.data['user']['uid']
-            yield self.user_ps.referral_confirm_submit(self.current_user.sysuser.id, root_user_id, pid, origin)
+            yield self.user_ps.referral_confirm_submit(
+                self.current_user.company.id, self.current_user.sysuser.id, root_user_id, pid, origin)
             self.send_json_success(
                 data=dict(next_url=self.make_url(path.REFERRAL_CONTACT_RESULT, self.params),
                           message=''))

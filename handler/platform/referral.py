@@ -366,11 +366,15 @@ class ReferralCrucialInfoApiHandler(BaseHandler):
             if int(self.params.referral_remark or 0) == 1:
                 # 不是点击“帮我内推”button， 而是直接投递之后在推荐进度列表中进行"评价Ta"
                 ret = yield self.employee_ps.nonreferral_save_evaluation(
-                    self.current_user.sysuser.id, self.params, self.json_args
+                    self.current_user.sysuser.id,
+                    self.current_user.company.id,
+                    self.params, self.json_args
                 )
             else:
                 ret = yield self.employee_ps.referral_save_evaluation(
-                    self.current_user.sysuser.id, self.params, self.json_args
+                    self.current_user.sysuser.id,
+                    self.current_user.company.id,
+                    self.params, self.json_args
                 )
 
             if not ret.status == const.API_SUCCESS:
@@ -453,7 +457,8 @@ class ReferralEvaluationHandler(BaseHandler):
             pid = self.params.pid
 
         else:
-            candidate_info = yield self.employee_ps.referral_evaluation_page_info(self.current_user.sysuser.id, referral_id)
+            candidate_info = yield self.employee_ps.referral_evaluation_page_info(
+                self.current_user.company.id, self.current_user.sysuser.id, referral_id)
             if not candidate_info.status == const.API_SUCCESS:
                 self.write_error(500, message=candidate_info.message)
                 return

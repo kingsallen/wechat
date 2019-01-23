@@ -342,3 +342,14 @@ class CompanyPageService(PageService):
         """
         ret = yield self.infra_company_ds.get_crucial_info_state(company_id)
         return ret
+
+    @gen.coroutine
+    def check_radar_switch_status(self, company_id):
+        """
+        检查企业是否开启“人脉雷达”开关
+        :param company_id:
+        :return:
+        """
+        res = yield self.infra_company_ds.check_radar_switch_status(company_id)
+        return res
+

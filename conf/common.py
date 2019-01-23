@@ -278,6 +278,14 @@ RELATIONSHIP_SEARCH_LOCALE = {
     "亲友": "common_relationship_friend",
 }
 
+# 内推 推荐进度页面鼓励语做国际化
+REFERRAL_ENCOURAGE = {
+    "恭喜您通过初筛，好的开始是成功的一半！": "encourage_primary_pass",
+    "恭喜您通过面试，胜利就在不远处！": "encourage_pass_interview",
+    "欢迎优秀的你加入我们！": "encourage_join_us",
+    "您已进入我司人才库，谢谢您的关注！": "encourage_trm",
+}
+
 # 高级搜索筛选项
 SEARCH_CONDITION = {
     "1": "search_location",

@@ -51,3 +51,16 @@ class SwitchHandler(BaseHandler):
                 self.current_user.company.id,
                 REFERRAL_CLOSE_PROFILE)
         self.send_json_success()
+
+    @gen.coroutine
+    @handle_response
+    def get_radar(self):
+        """
+        获取人脉雷达模块是否开启
+        :return:
+        """
+        ret = yield self.company_ps.check_radar_switch_status(self.current_user.company.id)
+        if not ret.status == API_SUCCESS:
+            self.send_json_error(message=ret.message)
+
+        self.send_json_success(data=ret.data[0].get('valid'))

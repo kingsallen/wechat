@@ -779,9 +779,10 @@ class EmployeePageService(PageService):
         return res
 
     @gen.coroutine
-    def referral_connections(self, recom_user_id, end_user_id, chain_id, pid, parent_id):
+    def referral_connections(self, company_id, recom_user_id, end_user_id, chain_id, pid, parent_id):
         """
         人脉连连看
+        :param company_id:
         :param recom_user_id: 当前转发用户user_id
         :param end_user_id:   链路结束用户user_id
         :param chain_id:      人脉连连看 链路id
@@ -789,7 +790,8 @@ class EmployeePageService(PageService):
         :param parent_id: 父级链路id
         :return:
         """
-        res = yield self.infra_employee_ds.referral_connections(recom_user_id, end_user_id, chain_id, pid, parent_id)
+        res = yield self.infra_employee_ds.referral_connections(
+            company_id, recom_user_id, end_user_id, chain_id, pid, parent_id)
         return res
 
     @gen.coroutine
@@ -804,15 +806,17 @@ class EmployeePageService(PageService):
         return res
 
     @gen.coroutine
-    def referral_save_evaluation(self, user_id, url_params, json_args):
+    def referral_save_evaluation(self, user_id, company_id, url_params, json_args):
         """
         联系内推： 推荐评价信息保存
         :param user_id:   员工的user_id
+        :param company_id:
         :param url_params:
         :param json_args:
         :return:
         """
         params = ObjectDict({
+            "company_id": company_id,
             "post_user_id": user_id,
             "position_id": json_args.pid,
             "referral_id": url_params.referral_id,
@@ -825,15 +829,17 @@ class EmployeePageService(PageService):
         return res
 
     @gen.coroutine
-    def nonreferral_save_evaluation(self, user_id, url_params, json_args):
+    def nonreferral_save_evaluation(self, user_id, company_id, url_params, json_args):
         """
         联系内推： 推荐评价信息保存
         :param user_id:   员工的user_id
+        :param company_id:
         :param url_params:
         :param json_args:
         :return:
         """
         params = ObjectDict({
+            "company_id": company_id,
             "post_user_id": user_id,
             "presentee_user_id": url_params.candidate_user_id,
             "position_id": json_args.pid,
@@ -846,14 +852,15 @@ class EmployeePageService(PageService):
         return res
 
     @gen.coroutine
-    def referral_evaluation_page_info(self, post_user_id, referral_id):
+    def referral_evaluation_page_info(self, company_id, post_user_id, referral_id):
         """
         员工推荐评价页面 候选人和职位信息获取
+        :param company_id:
         :param post_user_id:
         :param referral_id:
         :return:
         """
-        res = yield self.infra_employee_ds.referral_evaluation_page_info(post_user_id, referral_id)
+        res = yield self.infra_employee_ds.referral_evaluation_page_info(company_id, post_user_id, referral_id)
         return res
 
     @gen.coroutine
