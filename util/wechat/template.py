@@ -61,7 +61,7 @@ def rp_binding_success_notice_tpl(
     link = _join_suffix(link, sys_template_id)
     d = datetime.now()
     json_data = _make_json_data(
-        first="# 专属刮刮卡，打开有惊喜 # 恭喜您获得员工认证奖励 ☺",
+        first="# 专属刮刮卡，打开有惊喜 # 恭喜您获得员工认证奖励",
         remark="请点击领取奖励",
         keyword1="已通过",
         keyword2="{}认证".format(employee_slug),
@@ -81,7 +81,7 @@ def rp_recom_success_notice_tpl(wechat_id, openid, link, company_name,
     link = _join_suffix(link, sys_template_id)
     d = datetime.now()
     json_data = _make_json_data(
-        first="# 专属刮刮卡，打开有惊喜 # 恭喜您获得员工推荐奖励 ☺",
+        first="# 专属刮刮卡，打开有惊喜 # 恭喜您获得员工推荐奖励",
         remark="请点击领取奖励",
         keyword1=recomee_name,
         keyword2=position_title,
@@ -100,7 +100,7 @@ def rp_transfer_click_success_notice_tpl(wechat_id, openid, link, nickname,
     link = _join_suffix(link, sys_template_id)
     d = datetime.now()
     json_data = _make_json_data(
-        first="# 专属刮刮卡，打开有惊喜 # 恭喜您获得转发职位奖励 ☺",
+        first="# 专属刮刮卡，打开有惊喜 # 恭喜您获得转发职位奖励",
         remark="请点击领取奖励",
         keyword1=nickname,
         keyword2=position_title,
@@ -122,13 +122,13 @@ def rp_transfer_apply_success_notice_tpl(wechat_id, openid, link, nickname,
     link = _join_suffix(link, sys_template_id)
     d = datetime.now()
     json_data = _make_json_data(
-        first="# 专属刮刮卡，打开有惊喜 # 恭喜您获得转发职位奖励 ☺",
+        first="# 专属刮刮卡，打开有惊喜 # 恭喜您获得转发职位奖励",
         remark="请点击领取奖励",
         keyword1=nickname,
         keyword2=position_title,
         keyword3="面议",
         keyword4="{}年{}月{}日{:0>2}:{:0>2} ".format(d.year, d.month, d.day,
-                                                  d.hour, d.minute),
+                                                  d.hour, d.minute),feature/redpacket_new_year_theme
         colors={"first": "#E75E48"})
 
     ret = yield messager.send_template(
@@ -143,7 +143,7 @@ def rp_recom_screen_success_notice_tpl(wechat_id, openid, link, nickname,
     link = _join_suffix(link, sys_template_id)
     d = datetime.now()
     json_data = _make_json_data(
-        first="# 专属刮刮卡，打开有惊喜 # 恭喜您获得推荐简历通过初筛奖励 ☺",
+        first="# 专属刮刮卡，打开有惊喜 # 恭喜您获得推荐简历通过初筛奖励",
         remark="请点击领取奖励",
         keyword1=nickname,
         keyword2=position_title,
