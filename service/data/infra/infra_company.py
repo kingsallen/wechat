@@ -99,7 +99,7 @@ class InfraCompanyDataService(DataService):
         :return:
         """
         params = ObjectDict({
-            "company_id": company_id,
+            "companyId": company_id,
             "moduleName": "人脉雷达"
         })
         res = yield http_get(path.INFRA_CHECK_RADAR_STATUS, params)
