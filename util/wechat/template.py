@@ -128,7 +128,7 @@ def rp_transfer_apply_success_notice_tpl(wechat_id, openid, link, nickname,
         keyword2=position_title,
         keyword3="面议",
         keyword4="{}年{}月{}日{:0>2}:{:0>2} ".format(d.year, d.month, d.day,
-                                                  d.hour, d.minute),feature/redpacket_new_year_theme
+                                                  d.hour, d.minute),
         colors={"first": "#E75E48"})
 
     ret = yield messager.send_template(
