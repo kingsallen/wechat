@@ -95,7 +95,7 @@ class InfraCompanyDataService(DataService):
     def check_radar_switch_status(self, company_id):
         """
         检查企业是否开启“人脉雷达”开关
-        :param company_id:
+        :param company_id: 公司id
         :return:
         """
         params = ObjectDict({
