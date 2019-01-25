@@ -994,7 +994,7 @@ class EmployeeReferralInvitedHandler(BaseHandler):
         """
         ret = yield self.employee_ps.invite_cards_invited(
             user_id=self.current_user.sysuser.id,
-            candidate_user_id=self.json_args.candidate_user_id,
+            candidate_user_id=self.json_args.user_id,
             pid=self.json_args.pid,
             company_id=self.current_user.company.id,
         )
