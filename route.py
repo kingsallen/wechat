@@ -227,6 +227,7 @@ platform_routes = [
     (r"/api/employee/survey/?",                      handler.platform.employee.APIEmployeeSurveyHandler,        {"event": "employee_survey_api"}),
     (r"/api/employee/praise/?",                      handler.platform.employee.PraiseHandler,                   {"event": "employee_praise"}),
     (r"/api/employee/invite_cards/?",                handler.platform.employee.EmployeeReferralCardsHandler,    {"event": "employee_referral_cards"}),
+    (r"/api/employee/invite_cards/invited/?",        handler.platform.employee.EmployeeReferralInvitedHandler,  {"event": "employee_referral_cards_invited"}),
     (r"/api/employee/invite_cards/pass/?",           handler.platform.employee.EmployeeReferralPassCardsHandler, {"event": "employee_referral_pass_cards"}),
     (r"/api/employee/recom/invite/?",                handler.platform.employee.EmployeeReferralInviteApplyHandler, {"event": "employee_referral_invite_apply"}),
     (r"/api/employee/referral-progress/?",           handler.platform.employee.ReferralProgressListHandler,     {"event": "employee_referral_progress_list"}),
