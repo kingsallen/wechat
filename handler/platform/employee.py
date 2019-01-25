@@ -977,6 +977,34 @@ class EmployeeReferralInviteApplyHandler(BaseHandler):
             self.send_json_error(message=ret.message)
 
 
+class EmployeeReferralInvitedHandler(BaseHandler):
+
+    @handle_response
+    @check_employee_common
+    @authenticated
+    @gen.coroutine
+    def post(self):
+        """
+        邀请投递候选人不在线时，员工点击“人脉连连看”或“转发邀请”时才算已处理过该候选人
+        params:
+        {
+            "pid": 1234    # 职位id
+            "user_id" : 3456   # 被邀请的候选人user_id
+        }
+        """
+        ret = yield self.employee_ps.invite_cards_invited(
+            user_id=self.current_user.sysuser.id,
+            candidate_user_id=self.json_args.candidate_user_id,
+            pid=self.json_args.pid,
+            company_id=self.current_user.company.id,
+        )
+
+        if ret.status == const.API_SUCCESS:
+            self.send_json_success()
+        else:
+            self.send_json_error(message=ret.message)
+
+
 class EmployeeReferralConnectionHandler(BaseHandler):
 
     @handle_response

@@ -181,29 +181,32 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
     def _get_recom_candidates(self, message=''):
         """
         入口： 挖掘被动求职者消息模板
+        原十分钟推送消息模板打开页面， 现已不用该页面，跳转到过期页面
         :param message:
         :return:
         """
-        company_id = self.current_user.company.id
-        click_time = self.get_argument("click_time", curr_now_dateonly())
-        is_recom = [
-            self.IsRecomEnum.NOT_RECOMED.value,
-            self.IsRecomEnum.IGNORED.value,
-            self.IsRecomEnum.SELECTED.value
-        ]
-
-        passive_seekers = yield self.candidate_ps.get_candidate_list(
-            self.current_user.sysuser.id,
-            click_time,
-            is_recom,
-            company_id)
-        wechat = yield self.wechat_ps.get_wechat_info(self.current_user, pattern_id=const.QRCODE_REFERRED_FRIENDS, in_wechat=self.in_wechat)
-        self.render(
-            template_name="refer/weixin/passive-seeker_v2/passive-wanting_recom.html",
-            passive_seekers=passive_seekers,
-            message=message,
-            wechat=wechat
-        )
+        self.render(template_name='adjunct/msg-expired.html')
+        return
+        # company_id = self.current_user.company.id
+        # click_time = self.get_argument("click_time", curr_now_dateonly())
+        # is_recom = [
+        #     self.IsRecomEnum.NOT_RECOMED.value,
+        #     self.IsRecomEnum.IGNORED.value,
+        #     self.IsRecomEnum.SELECTED.value
+        # ]
+        #
+        # passive_seekers = yield self.candidate_ps.get_candidate_list(
+        #     self.current_user.sysuser.id,
+        #     click_time,
+        #     is_recom,
+        #     company_id)
+        # wechat = yield self.wechat_ps.get_wechat_info(self.current_user, pattern_id=const.QRCODE_REFERRED_FRIENDS, in_wechat=self.in_wechat)
+        # self.render(
+        #     template_name="refer/weixin/passive-seeker_v2/passive-wanting_recom.html",
+        #     passive_seekers=passive_seekers,
+        #     message=message,
+        #     wechat=wechat
+        # )
 
     @tornado.gen.coroutine
     def _post_recom_candidates(self):

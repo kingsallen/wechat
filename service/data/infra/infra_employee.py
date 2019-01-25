@@ -207,6 +207,25 @@ class InfraEmployeeDataService(DataService):
         return ret
 
     @gen.coroutine
+    def invite_cards_invited(self, user_id, candidate_user_id, pid, company_id):
+        """
+        邀请投递候选人不在线时，员工点击“人脉连连看”或“转发邀请”时才算已处理过该候选人
+        :param user_id:  员工的user_id
+        :param candidate_user_id:  候选人的user_id
+        :param pid:
+        :param company_id:
+        :return:
+        """
+        params = ObjectDict({
+            "pid": pid,
+            "user_id": user_id,
+            "company_id": company_id,
+            "end_user_id": candidate_user_id,
+        })
+        ret = yield http_post(path.INFRA_REFERRAL_INVITE_CARDS_INVITED, params)
+        return ret
+
+    @gen.coroutine
     def referral_connections(self, company_id, recom_user_id, end_user_id, chain_id, pid, parent_id):
         """
         人脉连连看

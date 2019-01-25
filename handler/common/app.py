@@ -27,7 +27,9 @@ class IndexHandler(BaseHandler):
         self.logger.debug("common IndexHandler")
 
         try:
-            if method in self._NEED_AUTH_PATHS:
+            if re.search('/app/employee/recommends', self.request.uri):
+                yield getattr(self, 'get_expired')()
+            elif method in self._NEED_AUTH_PATHS:
                 yield getattr(self, 'get_auth_first')()
             else:
                 yield getattr(self, 'get_default')()
@@ -42,6 +44,12 @@ class IndexHandler(BaseHandler):
     @gen.coroutine
     def get_default(self):
         self.render(template_name="system/app.html")
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get_expired(self):
+        self.render(template_name="adjunct/msg-expired.html")
 
     @handle_response
     @authenticated
