@@ -1020,8 +1020,7 @@ class EmployeeReferralConnectionHandler(BaseHandler):
         if not radar_status_res.status == const.API_SUCCESS:
             self.write_error(500, message=radar_status_res.message)
 
-        radar_status = radar_status_res.data[0].get('valid')
-        if not radar_status:
+        if not radar_status_res.data:
             self.render_default_page(kind=0, messages=['暂未开启该功能'])
             return
 
@@ -1103,8 +1102,7 @@ class ReferralInviteApplyHandler(BaseHandler):
         if not radar_status_res.status == const.API_SUCCESS:
             self.write_error(500, message=radar_status_res.message)
 
-        radar_status = radar_status_res.data[0].get('valid')
-        if not radar_status:
+        if not radar_status_res.data:
             self.render_default_page(kind=0, messages=['暂未开启该功能'])
             return
 
@@ -1284,8 +1282,7 @@ class ReferralRadarPageHandler(BaseHandler):
         if not radar_status_res.status == const.API_SUCCESS:
             self.write_error(500, message=radar_status_res.message)
 
-        radar_status = radar_status_res.data[0].get('valid')
-        if not radar_status:
+        if not radar_status_res.data:
             self.render_default_page(kind=0, messages=['暂未开启该功能'])
             return
 
