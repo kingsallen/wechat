@@ -52,8 +52,8 @@ class SwitchHandler(BaseHandler):
                 REFERRAL_CLOSE_PROFILE)
         self.send_json_success()
 
-    @gen.coroutine
     @handle_response
+    @gen.coroutine
     def get_radar(self):
         """
         获取人脉雷达模块是否开启
