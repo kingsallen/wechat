@@ -1021,7 +1021,7 @@ class EmployeeReferralConnectionHandler(BaseHandler):
             self.write_error(500, message=radar_status_res.message)
 
         if not radar_status_res.data:
-            self.render_default_page(kind=0, messages=['暂未开启该功能'])
+            self.render(template_name="adjunct/msg-expired.html")
             return
 
         pid = self.params.pid
@@ -1103,7 +1103,7 @@ class ReferralInviteApplyHandler(BaseHandler):
             self.write_error(500, message=radar_status_res.message)
 
         if not radar_status_res.data:
-            self.render_default_page(kind=0, messages=['暂未开启该功能'])
+            self.render(template_name="adjunct/msg-expired.html")
             return
 
         yield self._make_share_info()
@@ -1283,7 +1283,7 @@ class ReferralRadarPageHandler(BaseHandler):
             self.write_error(500, message=radar_status_res.message)
 
         if not radar_status_res.data:
-            self.render_default_page(kind=0, messages=['暂未开启该功能'])
+            self.render(template_name="adjunct/msg-expired.html")
             return
 
         ret = yield self.employee_ps.get_radar_top_data(self.current_user.sysuser.id,
