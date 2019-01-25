@@ -104,3 +104,11 @@ class InfraCompanyDataService(DataService):
         })
         res = yield http_get(path.INFRA_CHECK_RADAR_STATUS, params)
         return res
+
+    @gen.coroutine
+    def get_company_mobot_image(self, company_id):
+        params = ObjectDict({
+            "company_id": company_id,
+        })
+        res = yield http_get(path.MOBOT_IMAGE, params)
+        return res

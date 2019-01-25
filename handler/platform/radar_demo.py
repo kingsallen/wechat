@@ -15,7 +15,7 @@ class RadarDemoHandler(BaseHandler):
 
     @gen.coroutine
     def get(self):
-        self.render_page(template_name="radar/index.html", data=ObjectDict())
+        self.render_page(template_name="h5/radar.html", data=ObjectDict())
 
 
 class RadarDemoApiHandler(BaseHandler):
@@ -31,8 +31,8 @@ class RadarDemoApiHandler(BaseHandler):
         hack_data = [
             {
                 "id": 111111,
-                "name": "陈迪",
-                "headimg": "http://thirdwx.qlogo.cn/mmopen/Q3auHgzwzM5bdNZA3dQ6Ddj47omFnwC9oZTDy1ibpOmOg2LsQKE5291EHaddBKOkeicakiaNrb1XQF7jJfWBkJzog/132",
+                "name": "曹梦珂",
+                "headimg": "https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83er9ozibn0mIWbBGlYpMKahY3U1pGupnwwToMwFemJXIhpGhdePWkWK12twm88O0ghpZgiaxksapibH7g/132",
                 "is_hack": True,
                 "viewnum": 9,
                 "click_from": 2,
