@@ -1264,9 +1264,35 @@ class ReferralProgressDetailHandler(BaseHandler):
                 "progress_pass": pro.get('progress_pass', 0),
                 "datetime": pro.get('datetime', '')
             })
+
+        yield self._make_share_info()
         render_data.update({"progress": progress})
         self.render_page(template_name='employee/referral-progress-detail.html',
                          data=render_data)
+
+    @gen.coroutine
+    def _make_share_info(self):
+        """构建 share 内容"""
+
+        company_info = yield self.company_ps.get_company(
+            conds={"id": self.current_user.company.id}, need_conf=True)
+
+        cover = self.share_url(company_info.logo)
+        title = msg.REFERRAL_PROGRESS_TITLE
+        description = msg.REFERRAL_PROGRESS_DESCRIPTION
+
+        link = self.make_url(
+            path.REFERRAL_PROGRESS_DETAIL,
+            self.params,
+            recom=self.position_ps._make_recom(self.current_user.sysuser.id),
+        )
+
+        self.params.share = ObjectDict({
+            "cover": cover,
+            "title": title,
+            "description": description,
+            "link": link,
+        })
 
 
 class ReferralRadarPageHandler(BaseHandler):
