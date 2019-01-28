@@ -62,6 +62,7 @@ class SwitchHandler(BaseHandler):
         ret = yield self.company_ps.check_radar_switch_status(self.current_user.company.id)
         if not ret.status == API_SUCCESS:
             self.send_json_error(message=ret.message)
+            return
 
         data = ret.data[0].get('valid') if ret.data else 0
         self.send_json_success(data=data)

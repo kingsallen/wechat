@@ -1,6 +1,8 @@
 # coding=utf-8
 
 from tornado import gen
+import uuid
+import re
 
 import conf.common as const
 import conf.message as msg
@@ -285,14 +287,30 @@ class PositionHandler(BaseHandler):
             transmit_from = int(transmit_from) if int(transmit_from) % 2 else int(transmit_from) + 1
             self.params.update(transmit_from=transmit_from)
 
-        link = self.make_url(
-            path.POSITION_PATH.format(position_info.id),
-            self.params,
-            recom=self.position_ps._make_recom(self.current_user.sysuser.id),
-            escape=["pid", "keywords", "cities", "candidate_source",
-                    "employment_type", "salary", "department", "occupations",
-                    "custom", "degree", "page_from", "page_size"]
+        is_valid_employee = yield self.infra_user_ds.is_valid_employee(
+            self.current_user.sysuser.id,
+            position_info.company_id
         )
+        if is_valid_employee:
+            forward_id = uuid.uuid1(re.sub('-', '', str(uuid.uuid1())))
+            link = self.make_url(
+                path.POSITION_PATH.format(position_info.id),
+                self.params,
+                recom=self.position_ps._make_recom(self.current_user.sysuser.id),
+                forward_id=forward_id,
+                escape=["pid", "keywords", "cities", "candidate_source",
+                        "employment_type", "salary", "department", "occupations",
+                        "custom", "degree", "page_from", "page_size"]
+            )
+        else:
+            link = self.make_url(
+                path.POSITION_PATH.format(position_info.id),
+                self.params,
+                recom=self.position_ps._make_recom(self.current_user.sysuser.id),
+                escape=["pid", "keywords", "cities", "candidate_source",
+                        "employment_type", "salary", "department", "occupations",
+                        "custom", "degree", "page_from", "page_size"]
+            )
 
         self.params.share = ObjectDict({
             "cover": cover,
@@ -704,7 +722,8 @@ class PositionHandler(BaseHandler):
         inserted_share_chain_id = yield self.sharechain_ps.refresh_share_chain(
             presentee_user_id=presentee_user_id,
             position_id=position_id,
-            share_chain_parent_id=last_psc
+            share_chain_parent_id=last_psc,
+            forward_id=self.params.forward_id or ''
         )
         raise gen.Return(inserted_share_chain_id)
 

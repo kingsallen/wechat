@@ -18,12 +18,13 @@ class SharechainPageService(PageService):
     @log_time
     @gen.coroutine
     def refresh_share_chain(self, presentee_user_id=None, position_id=None,
-                            share_chain_parent_id=None):
+                            share_chain_parent_id=None, forward_id=None):
         """
         对给定的 presentee_user_id 和 position_id 做链路原数据的入库操作
         :param presentee_user_id: 查看 JD 页的用户 wxsuer_id
         :param position_id: 被查看的职位 id
         :param share_chain_parent_id
+        :param forward_id: 员工转发出去的职位链接上标识唯一性的参数
         :return: 如果创建链路愿数据成功,返回 True; 否则返回 False
         """
 
@@ -39,7 +40,7 @@ class SharechainPageService(PageService):
 
         # 找到 share_record 后创建 candiate_share_chain
         inserted_share_chain_id = yield self._save_recom(
-            last_share_record, share_chain_parent_id)
+            last_share_record, share_chain_parent_id, forward_id)
 
         # 创建candidate_share_chain后更新share_record的share_chain_id字段
         yield self.candidate_position_share_record_ds.update_share_record(
@@ -142,14 +143,15 @@ class SharechainPageService(PageService):
 
     @log_time
     @gen.coroutine
-    def _existed_record(self, share_record, share_chain_parent_id):
+    def _existed_record(self, share_record, share_chain_parent_id, forward_id):
         """检查原始链路数据中是否有该数据"""
 
         record = yield self.candidate_share_chain_ds.get_share_chain({
             "position_id":       share_record.position_id,
             "presentee_user_id": share_record.presentee_user_id,
             "recom_user_id": share_record.recom_user_id,
-            "parent_id": share_chain_parent_id
+            "parent_id": share_chain_parent_id,
+            "forward_id": forward_id
         })
         raise gen.Return(record)
 
@@ -191,7 +193,7 @@ class SharechainPageService(PageService):
 
     @log_time
     @gen.coroutine
-    def _save_recom(self, last_share_record, share_chain_parent_id):
+    def _save_recom(self, last_share_record, share_chain_parent_id, forward_id):
         """ 入库链路数据 candidate_share_chain
 
         将浏览者置为关系最近的员工的初被动求职者
@@ -205,14 +207,15 @@ class SharechainPageService(PageService):
         ret = 0
 
         # 如果是重复数据，直接返回
-        existed_record = yield self._existed_record(last_share_record, share_chain_parent_id)
+        existed_record = yield self._existed_record(last_share_record, share_chain_parent_id, forward_id)
         if existed_record:
             yield self.candidate_share_chain_ds.update_share_chain(
                 conds={
                     "position_id": last_share_record.position_id,
                     "parent_id": share_chain_parent_id,
                     "recom_user_id": last_share_record.recom_user_id,
-                    "presentee_user_id": last_share_record.presentee_user_id
+                    "presentee_user_id": last_share_record.presentee_user_id,
+                    "forward_id": forward_id
                 },
                 fields={
                     "click_time": last_share_record.create_time
@@ -237,7 +240,8 @@ class SharechainPageService(PageService):
                 "root2_recom_user_id": 0,
                 "click_time":          last_share_record.create_time,
                 "depth":               0,
-                "parent_id":           share_chain_parent_id  if share_chain_parent_id else 0
+                "parent_id":           share_chain_parent_id if share_chain_parent_id else 0,
+                "forward_id":          forward_id
             })
 
         # 如果看的人不是员工，
@@ -262,7 +266,8 @@ class SharechainPageService(PageService):
                     "root2_recom_user_id": root2_to_insert,
                     "click_time":          last_share_record.create_time,
                     "depth":               parent_share_chain_record.depth + 1,
-                    "parent_id":           share_chain_parent_id
+                    "parent_id":           share_chain_parent_id,
+                    "forward_id":          forward_id
                 })
 
             # 如果不存在上游数据，记录为 depth 1
@@ -275,7 +280,8 @@ class SharechainPageService(PageService):
                     "root2_recom_user_id": 0,
                     "click_time":          last_share_record.create_time,
                     "depth":               1,
-                    "parent_id":           0
+                    "parent_id":           0,
+                    "forward_id":          forward_id
                     })
 
             # 查询 hr_candidate_remark, 如果对应数据被忽略，则设为新数据

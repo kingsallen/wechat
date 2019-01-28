@@ -830,8 +830,8 @@ class EmployeeReferralCardsHandler(BaseHandler):
     """
 
     @handle_response
-    @check_employee_common
     @authenticated
+    @check_employee_common
     @gen.coroutine
     def get(self):
         """
@@ -885,18 +885,18 @@ class EmployeeReferralCardsHandler(BaseHandler):
         cards = list()
         for card_infra in ret.data:
             card = ObjectDict({
-                "user_id": card_infra['user']['uid'],
-                "nickname": card_infra['user']['nickname'],
-                "avatar": card_infra['user']['avatar'],
-                "pv": card_infra['position']['pv'],
-                "position_name": card_infra['position']['title'],
-                "degree": card_infra['user']['degree'],
-                "pid": card_infra['position']['pid'],
-                "forward_from": card_infra['recom'].get('nickname', ''),
-                "referral_id": card_infra['recom']['referral_id'],
-                "type": card_infra['recom']['type'],
-                "from_wx_group": card_infra['recom'].get('from_wx_group', 0),
-                "chain": card_infra['chain']
+                "user_id": card_infra.get('user', {}).get('uid', 0),
+                "nickname": card_infra.get('user', {}).get('nickname', ''),
+                "avatar": card_infra.get('user', {}).get('avatar', ''),
+                "pv": card_infra.get('position', {}).get('pv', 0),
+                "position_name": card_infra.get('position', {}).get('title', ''),
+                "degree": card_infra.get('user', {}).get('degree', 0),
+                "pid": card_infra.get('position', {}).get('pid', 0),
+                "forward_from": card_infra.get('recom', {}).get('nickname', ''),
+                "referral_id": card_infra.get('recom', {}).get('referral_id', 0),
+                "type": card_infra.get('recom', {}).get('type', 0),
+                "from_wx_group": card_infra.get('recom', {}).get('from_wx_group', 0),
+                "chain": card_infra.get('chain')
             })
             cards.append(card)
         self.send_json_success({'cards': cards})
@@ -905,8 +905,8 @@ class EmployeeReferralCardsHandler(BaseHandler):
 class EmployeeReferralPassCardsHandler(BaseHandler):
 
     @handle_response
-    @check_employee_common
     @authenticated
+    @check_employee_common
     @gen.coroutine
     def post(self):
         """
@@ -929,8 +929,8 @@ class EmployeeReferralPassCardsHandler(BaseHandler):
 class EmployeeReferralInviteApplyHandler(BaseHandler):
 
     @handle_response
-    @check_employee_common
     @authenticated
+    @check_employee_common
     @gen.coroutine
     def post(self):
         """
@@ -980,8 +980,8 @@ class EmployeeReferralInviteApplyHandler(BaseHandler):
 class EmployeeReferralInvitedHandler(BaseHandler):
 
     @handle_response
-    @check_employee_common
     @authenticated
+    @check_employee_common
     @gen.coroutine
     def post(self):
         """
