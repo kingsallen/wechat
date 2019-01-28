@@ -292,7 +292,7 @@ class PositionHandler(BaseHandler):
             position_info.company_id
         )
         if is_valid_employee:
-            forward_id = uuid.uuid1(re.sub('-', '', str(uuid.uuid1())))
+            forward_id = re.sub('-', '', str(uuid.uuid1()))
             link = self.make_url(
                 path.POSITION_PATH.format(position_info.id),
                 self.params,
