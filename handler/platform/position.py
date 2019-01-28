@@ -287,7 +287,7 @@ class PositionHandler(BaseHandler):
             transmit_from = int(transmit_from) if int(transmit_from) % 2 else int(transmit_from) + 1
             self.params.update(transmit_from=transmit_from)
 
-        is_valid_employee = yield self.infra_user_ds.is_valid_employee(
+        is_valid_employee = yield self.employee_ps.is_valid_employee(
             self.current_user.sysuser.id,
             position_info.company_id
         )
