@@ -1020,7 +1020,7 @@ class EmployeeReferralConnectionHandler(BaseHandler):
         if not radar_status_res.status == const.API_SUCCESS:
             self.write_error(500, message=radar_status_res.message)
 
-        if not radar_status_res.data:
+        if not radar_status_res.data.get('valid'):
             self.render(template_name="adjunct/msg-expired.html")
             return
 
@@ -1102,7 +1102,7 @@ class ReferralInviteApplyHandler(BaseHandler):
         if not radar_status_res.status == const.API_SUCCESS:
             self.write_error(500, message=radar_status_res.message)
 
-        if not radar_status_res.data:
+        if not radar_status_res.data.get('valid'):
             self.render(template_name="adjunct/msg-expired.html")
             return
 
@@ -1308,7 +1308,7 @@ class ReferralRadarPageHandler(BaseHandler):
         if not radar_status_res.status == const.API_SUCCESS:
             self.write_error(500, message=radar_status_res.message)
 
-        if not radar_status_res.data:
+        if not radar_status_res.data.get('valid'):
             self.render(template_name="adjunct/msg-expired.html")
             return
 

@@ -64,5 +64,5 @@ class SwitchHandler(BaseHandler):
             self.send_json_error(message=ret.message)
             return
 
-        data = ret.data[0].get('valid') if ret.data else 0
+        data = ret.data.get('valid') if ret.data else 0
         self.send_json_success(data=data)
