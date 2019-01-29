@@ -190,6 +190,13 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
         self.subscriber.start_run_in_thread()
 
     @gen.coroutine
+    def on_message(self, message):
+        logger.debug("[websocket] received a message:{}".format(message))
+        data = ujson.loads(message)
+        if data.get("msgType") == 'ping':
+            self.write_message(ujson.dumps({"msgType": 'pong'}))
+
+    @gen.coroutine
     def on_close(self):
         logger.debug("&=! {}".format("on_close, before stop_run_in_thread"))
         self.subscriber.stop_run_in_thread()
