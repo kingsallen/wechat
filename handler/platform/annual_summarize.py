@@ -82,6 +82,7 @@ class AnnualSummarizeEntranceHandler(BaseHandler):
         is_employee = True if self.current_user.employee else False
         if self.current_user.company.id == 1505:
             has_summarize = False
+        has_summarize = False  # 此处关闭年度账单
         self.send_json_success(ObjectDict(has=has_summarize,
                                           is_employee=is_employee,
                                           is_self_summarize=is_self_summarize))
