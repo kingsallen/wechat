@@ -15,6 +15,7 @@ class CandidateShareChainDao(BaseDao):
             "recom_user_id":       self.constant.TYPE_INT,
             "presentee_user_id":   self.constant.TYPE_INT,
             "depth":               self.constant.TYPE_INT,
+            "type":                self.constant.TYPE_INT,
             "parent_id":           self.constant.TYPE_INT,
             "click_time":          self.constant.TYPE_TIMESTAMP,
             "create_time":         self.constant.TYPE_TIMESTAMP,

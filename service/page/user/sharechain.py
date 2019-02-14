@@ -157,6 +157,21 @@ class SharechainPageService(PageService):
 
     @log_time
     @gen.coroutine
+    def _existed_record_ignore_parent(self, share_record):
+        """检查原始链路数据中是否有该数据, 忽略parent_id， 为10分钟消息推送卡片去重"""
+
+        record = yield self.candidate_share_chain_ds.get_share_chain(
+            {
+                "position_id": share_record.position_id,
+                "presentee_user_id": share_record.presentee_user_id,
+                "recom_user_id": share_record.recom_user_id,
+            },
+            appends=["ORDER BY click_time desc", "LIMIT 1"]
+        )
+        raise gen.Return(record)
+
+    @log_time
+    @gen.coroutine
     def _hr_remark_ignored_record(self, share_record):
         """检查这个候选人是否曾今被 hr 设置为 ignore"""
 
@@ -230,6 +245,12 @@ class SharechainPageService(PageService):
         presentee_user_is_valid_employee = yield self._is_valid_employee(
             position_id, last_share_record.presentee_user_id)
 
+        record_ignore_parent = yield self._existed_record_ignore_parent(last_share_record)
+        if record_ignore_parent:
+            type_ = record_ignore_parent.type
+        else:
+            type_ = 0
+
         if presentee_user_is_valid_employee:
 
             ret = yield self.candidate_share_chain_ds.insert_share_chain({
@@ -241,6 +262,7 @@ class SharechainPageService(PageService):
                 "click_time":          last_share_record.create_time,
                 "depth":               0,
                 "parent_id":           share_chain_parent_id if share_chain_parent_id else 0,
+                "type":                type_,
                 "forward_id":          forward_id
             })
 
@@ -267,6 +289,7 @@ class SharechainPageService(PageService):
                     "click_time":          last_share_record.create_time,
                     "depth":               parent_share_chain_record.depth + 1,
                     "parent_id":           share_chain_parent_id,
+                    "type":                type_,
                     "forward_id":          forward_id
                 })
 
@@ -281,6 +304,7 @@ class SharechainPageService(PageService):
                     "click_time":          last_share_record.create_time,
                     "depth":               1,
                     "parent_id":           0,
+                    "type":                type_,
                     "forward_id":          forward_id
                     })
 
