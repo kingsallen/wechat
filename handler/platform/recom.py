@@ -185,7 +185,16 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
         :param message:
         :return:
         """
-        self.render(template_name='adjunct/msg-expired.html')
+        self.render_page(
+            template_name="adjunct/msg-expired.html",
+            data={
+                'button': {
+                    'text': '去看看推荐进度',
+                    'link': self.make_url(
+                        path.REFERRAL_PROGRESS,
+                        self.params)
+                }
+            })
         return
 
     @tornado.gen.coroutine

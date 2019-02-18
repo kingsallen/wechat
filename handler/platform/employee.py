@@ -1021,7 +1021,16 @@ class EmployeeReferralConnectionHandler(BaseHandler):
             self.write_error(500, message=radar_status_res.message)
 
         if not radar_status_res.data.get('valid'):
-            self.render(template_name="adjunct/msg-expired.html")
+            self.render_page(
+                template_name="adjunct/msg-expired.html",
+                data={
+                    'button': {
+                        'text': '去看看推荐进度',
+                        'link': self.make_url(
+                            path.REFERRAL_PROGRESS,
+                            self.params)
+                    }
+                })
             return
 
         pid = self.params.pid
@@ -1103,7 +1112,16 @@ class ReferralInviteApplyHandler(BaseHandler):
             self.write_error(500, message=radar_status_res.message)
 
         if not radar_status_res.data.get('valid'):
-            self.render(template_name="adjunct/msg-expired.html")
+            self.render_page(
+                template_name="adjunct/msg-expired.html",
+                data={
+                    'button': {
+                        'text': '去看看推荐进度',
+                        'link': self.make_url(
+                            path.REFERRAL_PROGRESS,
+                            self.params)
+                    }
+                })
             return
 
         yield self._make_share_info()
@@ -1309,7 +1327,16 @@ class ReferralRadarPageHandler(BaseHandler):
             self.write_error(500, message=radar_status_res.message)
 
         if not radar_status_res.data.get('valid'):
-            self.render(template_name="adjunct/msg-expired.html")
+            self.render_page(
+                template_name="adjunct/msg-expired.html",
+                data={
+                    'button': {
+                        'text': '去看看推荐进度',
+                        'link': self.make_url(
+                            path.REFERRAL_PROGRESS,
+                            self.params)
+                    }
+                })
             return
 
         ret = yield self.employee_ps.get_radar_top_data(self.current_user.sysuser.id,
