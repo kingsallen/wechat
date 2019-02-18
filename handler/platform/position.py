@@ -625,6 +625,7 @@ class PositionHandler(BaseHandler):
                 self.logger.debug(
                     "[JD]inserted_share_chain_id: %s" %
                     inserted_share_chain_id)
+                self.log_info = {'share_chain_id': inserted_share_chain_id}
 
                 if inserted_share_chain_id:
                     self.params.update(psc=str(inserted_share_chain_id))
