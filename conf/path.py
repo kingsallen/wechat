@@ -184,6 +184,7 @@ MESSAGE_TEMPLATE = "message/template"
 CHAT_LIMIT = "api/v1/chat/voice/sendWarnEmail"
 VOICE = "api/v1/chat/voice/pullVoiceFile"
 MOBOT_IMAGE = "api/hrcompany/mobot/conf"
+OMS_SWITCH = 'api/company/switch'
 
 # 内推服务
 REFERRAL_POLICY = "v1.0/referral/conf"
@@ -234,7 +235,6 @@ INFRA_REFERRAL_RADAR = 'v1/radar/data'
 INFRA_REFERRAL_RADAR_CARD_POS = 'v1/employee/position/view'
 INFRA_REFERRAL_RADAR_CARD_RECOM = 'v1/employee/seek/recommend/card'
 INFRA_IF_SEEK_CHECK = 'v1/referral/seek/check'
-INFRA_CHECK_RADAR_STATUS = 'api/company/switch'
 
 # 积分商城服务
 EMPLOYEE_MALL = '/employee/mall/index'

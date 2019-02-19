@@ -1016,7 +1016,10 @@ class EmployeeReferralConnectionHandler(BaseHandler):
         :param chain_id: 人脉连连看链路id
         :return:
         """
-        radar_status_res = yield self.company_ps.check_radar_switch_status(self.current_user.company.id)
+        radar_status_res = yield self.company_ps.check_oms_switch_status(
+            self.current_user.company.id,
+            "人脉雷达"
+        )
         if not radar_status_res.status == const.API_SUCCESS:
             self.write_error(500, message=radar_status_res.message)
 
@@ -1107,7 +1110,10 @@ class ReferralInviteApplyHandler(BaseHandler):
         邀请投递入口三，渲染前端页面
         :return:
         """
-        radar_status_res = yield self.company_ps.check_radar_switch_status(self.current_user.company.id)
+        radar_status_res = yield self.company_ps.check_oms_switch_status(
+            self.current_user.company.id,
+            "人脉雷达"
+        )
         if not radar_status_res.status == const.API_SUCCESS:
             self.write_error(500, message=radar_status_res.message)
 
@@ -1322,7 +1328,10 @@ class ReferralRadarPageHandler(BaseHandler):
         """
         员工中心 人脉雷达页面
         """
-        radar_status_res = yield self.company_ps.check_radar_switch_status(self.current_user.company.id)
+        radar_status_res = yield self.company_ps.check_oms_switch_status(
+            self.current_user.company.id,
+            "人脉雷达"
+        )
         if not radar_status_res.status == const.API_SUCCESS:
             self.write_error(500, message=radar_status_res.message)
 

@@ -59,7 +59,10 @@ class SwitchHandler(BaseHandler):
         获取人脉雷达模块是否开启
         :return:
         """
-        ret = yield self.company_ps.check_radar_switch_status(self.current_user.company.id)
+        ret = yield self.company_ps.check_oms_switch_status(
+            self.current_user.company.id,
+            "人脉雷达"
+        )
         if not ret.status == API_SUCCESS:
             self.send_json_error(message=ret.message)
             return

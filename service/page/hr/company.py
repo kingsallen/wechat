@@ -344,12 +344,12 @@ class CompanyPageService(PageService):
         return ret
 
     @gen.coroutine
-    def check_radar_switch_status(self, company_id):
+    def check_oms_switch_status(self, company_id, module_name):
         """
-        检查企业是否开启“人脉雷达”开关
+        检查oms控制的一系列开关状态
         :param company_id:
+        :param module_name:
         :return:
         """
-        res = yield self.infra_company_ds.check_radar_switch_status(company_id)
+        res = yield self.infra_company_ds.check_oms_switch_status(company_id, module_name)
         return res
-

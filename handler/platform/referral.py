@@ -444,7 +444,10 @@ class ReferralEvaluationHandler(BaseHandler):
 
         if int(self.params.flag or 0) == const.REFERRAL_EVAL_CONTACT_MES_TMP:
             # 新候选人通知消息模板进来 判断雷达开关，如果关闭状态则跳转到过期页面
-            ret = yield self.company_ps.check_radar_switch_status(self.current_user.company.id)
+            ret = yield self.company_ps.check_oms_switch_status(
+                self.current_user.company.id,
+                "人脉雷达"
+            )
             if not ret.status == const.API_SUCCESS:
                 self.write_error(500, message=ret.message)
                 return

@@ -92,23 +92,24 @@ class InfraCompanyDataService(DataService):
         return res
 
     @gen.coroutine
-    def check_radar_switch_status(self, company_id):
-        """
-        检查企业是否开启“人脉雷达”开关
-        :param company_id: 公司id
-        :return:
-        """
-        params = ObjectDict({
-            "companyId": company_id,
-            "moduleName": "人脉雷达"
-        })
-        res = yield http_get(path.INFRA_CHECK_RADAR_STATUS, params)
-        return res
-
-    @gen.coroutine
     def get_company_mobot_image(self, company_id):
         params = ObjectDict({
             "company_id": company_id,
         })
         res = yield http_get(path.MOBOT_IMAGE, params)
+        return res
+
+    @gen.coroutine
+    def check_oms_switch_status(self, company_id, module_name):
+        """
+        检查oms控制的一系列开关状态
+        :param company_id: 公司id
+        :param module_name: 需检查开关的模块名
+        :return:
+        """
+        params = ObjectDict({
+            "companyId": company_id,
+            "moduleName": module_name
+        })
+        res = yield http_get(path.OMS_SWITCH, params)
         return res
