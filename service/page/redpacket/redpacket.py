@@ -155,10 +155,15 @@ class RedpacketPageService(PageService):
         self.logger.debug(int(current_user.recom.id) != int(current_user.sysuser.id))
         self.logger.debug('<><><><><><><><><>')
 
-        ret = bool(current_user.recom and
-                   current_user.qxuser.id and
-                   check_hb_status_passed and
-                   int(current_user.recom.id) != int(current_user.sysuser.id))
+        if trigger_way == const.HB_TRIGGER_WAY_SCREEN:
+            ret = bool(current_user.recom and
+                       check_hb_status_passed and
+                       int(current_user.recom.id) != int(current_user.sysuser.id))
+        else:
+            ret = bool(current_user.recom and
+                       current_user.qxuser.id and
+                       check_hb_status_passed and
+                       int(current_user.recom.id) != int(current_user.sysuser.id))
 
         self.logger.debug("[RP]need_to_send_red_packet_card: %s" % ret)
         return ret
@@ -224,7 +229,7 @@ class RedpacketPageService(PageService):
                     employee=employee,
                     recom=recom
                 )
-                self.logger.debug("[RP]current_user: {}".format(current_user))
+                self.logger.info("[RP]current_user: {}".format(current_user))
                 yield self.handle_red_packet_screen_profile(current_user, position,
                                                             trigger_way=const.HB_TRIGGER_WAY_SCREEN,
                                                             recom_user_id=user_id, psc=psc)
@@ -530,12 +535,17 @@ class RedpacketPageService(PageService):
             else:
                 recom_user_id = current_user.recom.id
 
+            if not recom_user_id:
+                self.logger.debug('[RP]推荐数据不正确, position: %s, app_id: %s, presentee_user_id: %s, post_user_id: %s'
+                                      % (position.id, application.id, current_user.sysuser.id, recom_user_id))
+                return
+
             recom_record = yield self.candidate_recom_record_ds.get_candidate_recom_record(params)
 
-            if not recom_record:
-                self.logger.debug('[RP]推荐数据不正确, position: %s, app_id: %s, presentee_user_id: %s, post_user_id: %s'
-                                  % (position.id, application.id, current_user.sysuser.id, recom_user_id))
-                return
+            # if not recom_record:
+            #     self.logger.debug('[RP]推荐数据不正确, position: %s, app_id: %s, presentee_user_id: %s, post_user_id: %s'
+            #                       % (position.id, application.id, current_user.sysuser.id, recom_user_id))
+            #     return
 
             need_to_send_card = self.__need_to_send(
                 current_user, position, trigger_way)
@@ -637,7 +647,7 @@ class RedpacketPageService(PageService):
                                 recom_wechat.id,
                                 rp_config,
                                 recom_qxuser.id,
-                                current_qxuser_id=current_user.qxuser.id,
+                                current_qxuser_id=current_user.qxuser.id or 0,
                                 position=position,
                                 nickname=nickname,
                                 position_title=position.title,
@@ -650,7 +660,7 @@ class RedpacketPageService(PageService):
                                 recom_wxuser.openid,
                                 recom_wechat.id,
                                 rp_config,
-                                current_user.qxuser.id,
+                                current_user.qxuser.id or 0,
                                 nickname=nickname,
                                 position_title=position.title,
                                 recom_record=recom_record
