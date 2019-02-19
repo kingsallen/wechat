@@ -538,6 +538,7 @@ class RedpacketPageService(PageService):
             if not recom_user_id:
                 self.logger.debug('[RP]推荐数据不正确, position: %s, app_id: %s, presentee_user_id: %s, post_user_id: %s'
                                       % (position.id, application.id, current_user.sysuser.id, recom_user_id))
+                return
 
             recom_record = yield self.candidate_recom_record_ds.get_candidate_recom_record(params)
 
