@@ -1163,10 +1163,11 @@ class RedpacketPageService(PageService):
 
         self.logger.debug("[RP]红包信封入库成功!")
         self.logger.debug("[RP]准备发送红包信封(有金额)!")
-
+        self.logger.debug("[RP]recom_wechat_id:{}".format(recom_wechat_id))
         recom_wechat = yield self.hr_wx_wechat_ds.get_wechat({
             "id": recom_wechat_id
         })
+        self.logger.debug("[RP]recom_wechat:{}".format(recom_wechat))
 
         self.logger.debug("[RP]将发送模版消息")
         # 发送消息模板
