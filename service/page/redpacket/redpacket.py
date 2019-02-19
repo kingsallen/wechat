@@ -224,7 +224,7 @@ class RedpacketPageService(PageService):
                     employee=employee,
                     recom=recom
                 )
-                self.logger.debug("[RP]current_user: {}".format(current_user))
+                self.logger.info("[RP]current_user: {}".format(current_user))
                 yield self.handle_red_packet_screen_profile(current_user, position,
                                                             trigger_way=const.HB_TRIGGER_WAY_SCREEN,
                                                             recom_user_id=user_id, psc=psc)
