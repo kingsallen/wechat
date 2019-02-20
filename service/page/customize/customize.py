@@ -6,13 +6,14 @@ from service.page.base import PageService
 from util.common import ObjectDict
 from util.tool.url_tool import make_url
 from util.common.decorator import log_time
+import conf.common as const
 
 
 class CustomizePageService(PageService):
     """企业定制化相关内容"""
 
     # 诺华集团招聘
-    _SUPPRESS_APPLY_CIDS = [61153]
+    _SUPPRESS_APPLY_CIDS = [61153, 1730310]
 
     # 开启代理投递
     # e袋洗 & 仟寻测试
@@ -44,6 +45,8 @@ class CustomizePageService(PageService):
         if position_info.company_id not in self._SUPPRESS_APPLY_CIDS:
             return False, None
         else:
+            if position_info.company_id == const.GELI_COMPANY_ID:
+                return True, {"position_url": const.GELI_POSITION_URL.format(position_info.jobnumber.split('_')[-1])}
             return (True, {"custom_field": position_info.job_custom or "",
                            "job_number": position_info.jobnumber or ""})
 

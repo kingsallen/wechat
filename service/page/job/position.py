@@ -138,7 +138,6 @@ class PositionPageService(PageService):
 
         raise gen.Return(position)
 
-    @log_time
     @gen.coroutine
     def get_position_custom_list(self, position_id_list):
         # 获取职位信息扩展信息列表
@@ -179,7 +178,7 @@ class PositionPageService(PageService):
         position_ext_id_list = []
         if position_ext_list:
             for e in position_ext_list:
-                position_ext_id_list.append(e.pid)
+                position_ext_id_list.append(e.job_custom_id)
         return position_ext_list, position_ext_id_list
 
     @gen.coroutine

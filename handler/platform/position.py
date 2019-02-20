@@ -15,7 +15,7 @@ from util.common.cipher import encode_id
 from util.common.decorator import handle_response, check_employee, NewJDStatusCheckerAddFlag, authenticated, log_time, \
     cover_no_weixin, check_employee_common
 from util.common.mq import award_publisher
-from util.tool.str_tool import gen_salary, add_item, split, gen_degree_v2, gen_experience_v2, languge_code_from_ua
+from util.tool.str_tool import gen_salary, add_item, split, gen_degree_v2, gen_experience_v2, languge_code_from_ua, set_literl
 from util.tool.url_tool import url_append_query
 from util.wechat.template import position_view_five_notice_tpl, position_share_notice_employee_tpl
 from util.common.decorator import log_time, log_time_common_func
@@ -931,9 +931,12 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
 
         position_custom_list = []
         position_custom_id_list = []
+        position_list_by_db = []
         if suppress_apply:
             position_custom_list, position_custom_id_list = yield self.position_ps.get_position_custom_list(
                 position_id_list)
+            # 获取职位jobnumber
+            position_list_by_db = yield self.position_ps.get_positions_list(conds=["id in %s" % set_literl(position_id_list)])
 
         # 是否达到投递上线
         social_res, school_res = yield self.application_ps.get_application_apply_status(self.current_user.sysuser.id,
@@ -999,10 +1002,15 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
             position_ex['has_reward'] = pos.is_rp_reward and (
                 is_employee and pos.employee_only or not pos.employee_only)
 
-            # 诺华定制
+            # 格力、诺华定制
             position_ex['suppress_apply'] = ObjectDict()
             position_ex['suppress_apply']['is_suppress_apply'] = suppress_apply
-            position_ex['suppress_apply']['job_number'] = pos.jobnumber
+            for p in position_list_by_db:
+                if p.id == pos.id:
+                    position_ex['suppress_apply']['job_number'] = p.jobnumber
+                    # 格力定制
+                    if pos.company_id == const.GELI_COMPANY_ID:
+                        position_ex['suppress_apply']['position_url'] = const.GELI_POSITION_URL.format(p.jobnumber.split('_')[-1])
             if position_custom_list and position_custom_id_list and pos.id in position_custom_id_list:
                 for custom in position_custom_list:
                     if pos.id == custom.id and custom.custom_field:
