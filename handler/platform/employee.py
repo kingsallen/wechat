@@ -122,7 +122,11 @@ class WechatSubInfoHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         pattern_id = self.params.scene or 99
-        wechat = yield self.wechat_ps.get_wechat_info(self.current_user, pattern_id=int(pattern_id), in_wechat=self.in_wechat)
+        if int(pattern_id) == const.QRCODE_POSITION and self.params.pid:
+            scene_id = int('11111000000000000000000000000000', base=2) + int(self.params.pid)
+        else:
+            scene_id = int('11110000000000000000000000000000', base=2) + int(pattern_id)
+        wechat = yield self.wechat_ps.get_wechat_info(self.current_user, scene_id=scene_id, in_wechat=self.in_wechat)
         self.send_json_success(data=wechat)
         return
 

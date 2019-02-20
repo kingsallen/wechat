@@ -513,7 +513,7 @@ class EventPageService(PageService):
                11011 =27 pc扫码修改手机。
 
               hr 端 10000=16, 10001=17,
-              11111=31  Mars EDM活动二维码
+              11111=31  携带职位id的临时二维码 最大可表示的职位id为 int('1' * 27, base=2) = 134217727
               -----------------------------------------------------------
               11110=30  携带各个场景值得临时二维码
               需注意，在type=30时，real_user_id不再表示user_id或hr_id, 而是不同场景的场景值。
@@ -623,15 +623,22 @@ class EventPageService(PageService):
                     yield self.infra_user_ds.post_scanresult(params)
                     raise gen.Return()
             elif type == 31:
-                # Mars EDM活动的用户，与EDM数据表关联起来
-                user = yield self.campaign_mars_edm_subscribe_ds.get_mars_user({
-                    "id": real_user_id
-                })
-                if user:
-                    yield self.campaign_mars_edm_subscribe_ds.update_mars_user(
-                        conds={"id": real_user_id},
-                        fields={"wxuser_id": wxuser.id}
-                    )
+                # 携带职位id， 目前是候选人职位详情页引导关注弹层二维码中使用
+                # 数据组埋点
+                self.log_datagroup_prepare_data_ds.create_qrcode_subscribe_record(
+                    {
+                        "flag": const.QRCODE_FROM_POSITION_POPUP,
+                        "wechat_id": wechat.id,
+                        "wxuser_id": wxuser.id
+                    })
+                position_id = real_user_id
+                yield send_succession_message(
+                    wechat=wechat,
+                    open_id=msg.FromUserName,
+                    pattern_id=const.QRCODE_POSITION,
+                    position_id=position_id
+                )
+
             elif type == 30:
                 # 根据携带不同场景值的临时二维码，接续之前用户未完成的流程。
                 pattern_id = real_user_id
@@ -640,14 +647,6 @@ class EventPageService(PageService):
                 if pattern_id == const.QRCODE_BIND and wxuser.sysuser_id and wechat.company_id:
                     employee = yield user_ps.get_valid_employee_by_user_id(
                         user_id=wxuser.sysuser_id, company_id=wechat.company_id)
-                elif pattern_id == const.QRCODE_REFERRAL_POSITION_POPUP:
-                    self.log_datagroup_prepare_data_ds.create_qrcode_subscribe_record(
-                        {
-                            "flag": const.QRCODE_FROM_POSITION_POPUP,
-                            "wechat_id": wechat.id,
-                            "wxuser_id": wxuser.id
-                        })
-                    return
                 else:
                     employee = None
                 if not employee or pattern_id != const.QRCODE_BIND:
