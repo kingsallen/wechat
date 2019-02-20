@@ -979,30 +979,17 @@ class EmployeePageService(PageService):
                     "invited": item.get('invitation_status'),
                     "connection": item.get('connection'),
                     "chain": item.get('chain'),
-                    "connect_current_uid": item.get('chain')[0]['uid'] if item.get('chain') else 0
+                    "connect_current_uid": 0
                 }
-                if item.get('chain') and item.get('connection', 0) == const.CONNECTION_ING:
-                    sorted_chain = sorted(item.get('chain'), key=lambda value: value['degree'])
+                connect_current_uid = 0
+                for chain_user in item.get('chain', [])[::-1]:
+                    if chain_user.get('pnodes'):
+                        connect_current_uid = chain_user.get('uid', 0)
+                        break
 
-                    # 找出当前连接到哪一个user
-                    current_user = sorted_chain[0]
-                    current_index = 0
-                    for i in range(len(sorted_chain)-1, 0, -1):
-                        if sorted_chain[i]['pnodes']:
-                            current_user = sorted_chain[i]
-                            current_index = i
-                            break
-
-                    # A->C 这种情况直接把B给去掉 不返回给前端
-                    if current_index != 0:
-                        for i in range(1, current_index):
-                            if not sorted_chain[i]['pnodes']:
-                                sorted_chain.remove(sorted_chain[i])
-
-                    data_item.update({
-                        "chain": sorted_chain,
-                        "connect_current_uid": current_user['uid']
-                    })
+                data_item.update({
+                    "connect_current_uid": connect_current_uid
+                })
                 data.append(data_item)
         return data
 
