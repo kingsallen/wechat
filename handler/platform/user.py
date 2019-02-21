@@ -902,8 +902,8 @@ class ReferralRelatedPositionHandler(BaseHandler):
             else:
                 item_return.update({'degree': const.POSITION_DEGREE.get(str(item.get('degree')))})
 
-            if not item.get('hb_status'):
-                item_return.update({'hb_status': 0})
+            if item.get('hb_status'):
+                item_return.update({'has_reward': 1})
 
             data.append(item_return)
 

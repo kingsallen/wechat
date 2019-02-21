@@ -11,7 +11,7 @@ import conf.path as path
 from handler.base import BaseHandler
 from handler.platform.user import UserSurveyConstantMixin
 from util.common import ObjectDict
-from util.common.decorator import handle_response, authenticated, check_employee_common
+from util.common.decorator import handle_response, authenticated, check_employee_common, check_radar_status
 from util.tool.json_tool import json_dumps
 from util.tool.str_tool import to_str
 from util.common.cipher import decode_id
@@ -1009,6 +1009,7 @@ class EmployeeReferralConnectionHandler(BaseHandler):
 
     @handle_response
     @authenticated
+    @check_radar_status
     @gen.coroutine
     def get(self, chain_id):
         """
@@ -1016,26 +1017,6 @@ class EmployeeReferralConnectionHandler(BaseHandler):
         :param chain_id: 人脉连连看链路id
         :return:
         """
-        radar_status_res = yield self.company_ps.check_oms_switch_status(
-            self.current_user.company.id,
-            "人脉雷达"
-        )
-        if not radar_status_res.status == const.API_SUCCESS:
-            self.write_error(500, message=radar_status_res.message)
-
-        if not radar_status_res.data.get('valid'):
-            self.render_page(
-                template_name="adjunct/msg-expired.html",
-                data={
-                    'button': {
-                        'text': self.locale.translate(const.REFERRAL_EXPIRED_MESSAGE),
-                        'link': self.make_url(
-                            path.REFERRAL_PROGRESS,
-                            self.params)
-                    }
-                })
-            return
-
         pid = self.params.pid
         if not (pid and chain_id):
             self.write_error(500, message='pid和chain_id是必传参数')
@@ -1104,32 +1085,13 @@ class ReferralInviteApplyHandler(BaseHandler):
 
     @handle_response
     @authenticated
+    @check_radar_status
     @gen.coroutine
     def get(self):
         """
         邀请投递入口三，渲染前端页面
         :return:
         """
-        radar_status_res = yield self.company_ps.check_oms_switch_status(
-            self.current_user.company.id,
-            "人脉雷达"
-        )
-        if not radar_status_res.status == const.API_SUCCESS:
-            self.write_error(500, message=radar_status_res.message)
-
-        if not radar_status_res.data.get('valid'):
-            self.render_page(
-                template_name="adjunct/msg-expired.html",
-                data={
-                    'button': {
-                        'text': self.locale.translate(const.REFERRAL_EXPIRED_MESSAGE),
-                        'link': self.make_url(
-                            path.REFERRAL_PROGRESS,
-                            self.params)
-                    }
-                })
-            return
-
         yield self._make_share_info()
         self.render_page(template_name='employee/candidate-filter.html',
                          data=dict(
@@ -1323,31 +1285,12 @@ class ReferralRadarPageHandler(BaseHandler):
 
     @handle_response
     @authenticated
+    @check_radar_status
     @gen.coroutine
     def get(self):
         """
         员工中心 人脉雷达页面
         """
-        radar_status_res = yield self.company_ps.check_oms_switch_status(
-            self.current_user.company.id,
-            "人脉雷达"
-        )
-        if not radar_status_res.status == const.API_SUCCESS:
-            self.write_error(500, message=radar_status_res.message)
-
-        if not radar_status_res.data.get('valid'):
-            self.render_page(
-                template_name="adjunct/msg-expired.html",
-                data={
-                    'button': {
-                        'text': self.locale.translate(const.REFERRAL_EXPIRED_MESSAGE),
-                        'link': self.make_url(
-                            path.REFERRAL_PROGRESS,
-                            self.params)
-                    }
-                })
-            return
-
         ret = yield self.employee_ps.get_radar_top_data(self.current_user.sysuser.id,
                                                         self.current_user.company.id)
         if not ret.status == const.API_SUCCESS:
@@ -1391,6 +1334,7 @@ class ReferralRadarCardJobViewHandler(BaseHandler):
 
     @handle_response
     @authenticated
+    @check_radar_status
     @gen.coroutine
     def get(self):
         """
@@ -1431,6 +1375,7 @@ class ReferralRadarCardSeekRecomHandler(BaseHandler):
 
     @handle_response
     @authenticated
+    @check_radar_status
     @gen.coroutine
     def get(self):
         """
@@ -1460,3 +1405,23 @@ class ReferralRadarCardRecomHandler(BaseHandler):
             self.params.page_size or 10
         )
         self.send_json_success(data={"list": data})
+
+
+class ReferralExpiredPageHandler(BaseHandler):
+
+    @gen.coroutine
+    def get(self):
+        """
+        雷达模块关闭时，打开雷达相关页面跳转到该消息过期页面
+        :return:
+        """
+        self.render_page(
+            template_name="adjunct/msg-expired.html",
+            data={
+                'button': {
+                    'text': self.locale.translate(const.REFERRAL_EXPIRED_MESSAGE),
+                    'link': self.make_url(
+                        path.REFERRAL_PROGRESS,
+                        self.params)
+                }
+            })

@@ -582,3 +582,29 @@ def log_time_common_func(func):
         return r
 
     return wrapper
+
+
+def check_radar_status(func):
+    """前置判断当前公司是否开启雷达模块
+    如果是未开启，转到消息过期页面
+    用于常用路由检测
+    """
+
+    @functools.wraps(func)
+    @gen.coroutine
+    def wrapper(self, *args, **kwargs):
+        radar_status_res = yield self.company_ps.check_oms_switch_status(
+            self.current_user.company.id,
+            "人脉雷达"
+        )
+        if not radar_status_res.status == const.API_SUCCESS:
+            self.write_error(500, message=radar_status_res.message)
+            return
+
+        if not radar_status_res.data.get('valid'):
+            self.redirect(self.make_url(path.REFERRAL_RADAR_EXPIRED, self.params))
+            return
+        else:
+            yield func(self, *args, **kwargs)
+
+    return wrapper
