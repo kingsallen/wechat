@@ -990,6 +990,8 @@ class EmployeeReferralInvitedHandler(BaseHandler):
         {
             "pid": 1234    # 职位id
             "user_id" : 3456   # 被邀请的候选人user_id
+            "timestamp": 234234   # 10分钟消息模板入口： 消息模板链接上的参数
+            "state": 1  #  1 邀请投递 3 推荐Ta
         }
         """
         ret = yield self.employee_ps.invite_cards_invited(
@@ -997,6 +999,8 @@ class EmployeeReferralInvitedHandler(BaseHandler):
             candidate_user_id=self.json_args.user_id,
             pid=self.json_args.pid,
             company_id=self.current_user.company.id,
+            timestamp=self.json_args.send_timestamp or '',
+            state=self.json_args.state
         )
 
         if ret.status == const.API_SUCCESS:
