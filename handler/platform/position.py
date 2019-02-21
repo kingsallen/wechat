@@ -1008,6 +1008,9 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
             position_ex['suppress_apply'] = ObjectDict()
             position_ex['suppress_apply']['suppress_apply_data'] = ObjectDict()
             position_ex['suppress_apply']['is_suppress_apply'] = suppress_apply
+            # 格力定制
+            if self.current_user.company.id == const.GELI_COMPANY_ID:
+                position_ex['suppress_apply']['suppress_apply_data']['position_url'] = const.GELI_WEBSITE
             for p in position_list_by_db:
                 if p.id == pos.id:
                     position_ex['suppress_apply']['suppress_apply_data']['job_number'] = p.jobnumber

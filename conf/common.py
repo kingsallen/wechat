@@ -728,4 +728,5 @@ QRCODE_FROM_POSITION_POPUP = 1
 
 # 格力引导的职位链接
 GELI_COMPANY_ID = 1730310
+GELI_WEBSITE = 'http://gree.zhiye.com'
 GELI_POSITION_URL = 'http://gree.zhiye.com/zpdetail/{}'
