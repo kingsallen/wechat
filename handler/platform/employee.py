@@ -999,7 +999,7 @@ class EmployeeReferralInvitedHandler(BaseHandler):
             candidate_user_id=self.json_args.user_id,
             pid=self.json_args.pid,
             company_id=self.current_user.company.id,
-            timestamp=self.json_args.send_timestamp or '',
+            timestamp=self.json_args.send_time or '',
             state=self.json_args.state
         )
 
