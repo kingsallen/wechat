@@ -1012,7 +1012,7 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
                 if p.id == pos.id:
                     position_ex['suppress_apply']['suppress_apply_data']['job_number'] = p.jobnumber
                     # 格力定制
-                    if pos.company_id == const.GELI_COMPANY_ID:
+                    if self.current_user.company.id == const.GELI_COMPANY_ID:
                         position_ex['suppress_apply']['suppress_apply_data']['position_url'] = const.GELI_POSITION_URL.format(p.jobnumber.split('_')[-1])
             if position_custom_list and has_custom_position_id_list and pos.id in has_custom_position_id_list:
                 for custom in position_custom_list:
