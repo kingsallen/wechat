@@ -138,7 +138,6 @@ class PositionPageService(PageService):
 
         raise gen.Return(position)
 
-    @log_time
     @gen.coroutine
     def get_position_custom_list(self, position_id_list):
         # 获取职位信息扩展信息列表
@@ -149,14 +148,16 @@ class PositionPageService(PageService):
         customs_list, customs_id_list = yield self.get_customs_list(position_ext_id_list)
 
         position_custom_list = []
+        has_custom_position_id_list = set()
         position_custom = ObjectDict()
         for custom in customs_list:
             for ext in position_ext_list:
                 if custom.id == ext.job_custom_id:
                     position_custom.id = ext.pid
                     position_custom.custom_field = custom.name
+                    has_custom_position_id_list.add(ext.pid)
             position_custom_list.append(position_custom)
-        return position_custom_list, customs_id_list
+        return position_custom_list, has_custom_position_id_list
 
     @gen.coroutine
     def update_position(self, conds, fields):
@@ -173,13 +174,13 @@ class PositionPageService(PageService):
         params = dict()
         position_ext_list = []
         if position_id_list and isinstance(position_id_list, list):
-            params.update(conds=["pid in %s" % set_literl(position_id_list)])
+            params.update(conds="pid in %s" % set_literl(position_id_list))
             position_ext_list = yield self.job_position_ext_ds.get_position_ext_list(**params)
 
         position_ext_id_list = []
         if position_ext_list:
             for e in position_ext_list:
-                position_ext_id_list.append(e.pid)
+                position_ext_id_list.append(e.job_custom_id)
         return position_ext_list, position_ext_id_list
 
     @gen.coroutine
@@ -192,7 +193,7 @@ class PositionPageService(PageService):
         params = dict()
         customs_list = []
         if position_ext_id_list and isinstance(position_ext_id_list, list):
-            params.update(conds=["id in %s" % set_literl(position_ext_id_list)])
+            params.update(conds="id in %s" % set_literl(position_ext_id_list))
             customs_list = yield self.job_custom_ds.get_customs_list(**params)
         customs_id_list = []
         if customs_list:
