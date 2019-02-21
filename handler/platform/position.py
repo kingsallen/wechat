@@ -936,7 +936,8 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
             position_custom_list, position_custom_id_list = yield self.position_ps.get_position_custom_list(
                 position_id_list)
             # 获取职位jobnumber
-            position_list_by_db = yield self.position_ps.get_positions_list(conds=["id in %s" % set_literl(position_id_list)])
+            position_list_by_db = yield self.position_ps.get_positions_list(conds="id in %s" % set_literl(position_id_list),
+                                                                            fields=['id', 'jobnumber'])
 
         # 是否达到投递上线
         social_res, school_res = yield self.application_ps.get_application_apply_status(self.current_user.sysuser.id,
@@ -1004,19 +1005,20 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
 
             # 格力、诺华定制
             position_ex['suppress_apply'] = ObjectDict()
+            position_ex['suppress_apply']['suppress_apply_data'] = ObjectDict()
             position_ex['suppress_apply']['is_suppress_apply'] = suppress_apply
             for p in position_list_by_db:
                 if p.id == pos.id:
-                    position_ex['suppress_apply']['job_number'] = p.jobnumber
+                    position_ex['suppress_apply']['suppress_apply_data']['job_number'] = p.jobnumber
                     # 格力定制
                     if pos.company_id == const.GELI_COMPANY_ID:
-                        position_ex['suppress_apply']['position_url'] = const.GELI_POSITION_URL.format(p.jobnumber.split('_')[-1])
+                        position_ex['suppress_apply']['suppress_apply_data']['position_url'] = const.GELI_POSITION_URL.format(p.jobnumber.split('_')[-1])
             if position_custom_list and position_custom_id_list and pos.id in position_custom_id_list:
                 for custom in position_custom_list:
                     if pos.id == custom.id and custom.custom_field:
-                        position_ex['suppress_apply']['custom_field'] = custom.custom_field
+                        position_ex['suppress_apply']['suppress_apply_data']['custom_field'] = custom.custom_field
                     else:
-                        position_ex['suppress_apply']['custom_field'] = ''
+                        position_ex['suppress_apply']['suppress_apply_data']['custom_field'] = ''
 
             position_ex_list.append(position_ex)
 
