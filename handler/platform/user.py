@@ -896,10 +896,15 @@ class ReferralRelatedPositionHandler(BaseHandler):
                     item_return.update({'experience': str(item.get('experience')) + '年及以上'})
                 else:
                     item_return.update({'experience': str(item.get('experience')) + '年'})
+
             if item.get('degree') and item.get('degree_above'):
                 item_return.update({'degree': const.POSITION_DEGREE.get(str(item.get('degree'))) + '及以上'})
             else:
                 item_return.update({'degree': const.POSITION_DEGREE.get(str(item.get('degree')))})
+
+            if not item.get('hb_status'):
+                item_return.update({'hb_status': 0})
+
             data.append(item_return)
 
         self.send_json_success(data={
