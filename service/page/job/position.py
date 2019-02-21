@@ -148,14 +148,16 @@ class PositionPageService(PageService):
         customs_list, customs_id_list = yield self.get_customs_list(position_ext_id_list)
 
         position_custom_list = []
+        has_custom_position_id_list = set()
         position_custom = ObjectDict()
         for custom in customs_list:
             for ext in position_ext_list:
                 if custom.id == ext.job_custom_id:
                     position_custom.id = ext.pid
                     position_custom.custom_field = custom.name
+                    has_custom_position_id_list.add(ext.pid)
             position_custom_list.append(position_custom)
-        return position_custom_list, customs_id_list
+        return position_custom_list, has_custom_position_id_list
 
     @gen.coroutine
     def update_position(self, conds, fields):
