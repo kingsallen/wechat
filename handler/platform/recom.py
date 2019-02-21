@@ -189,7 +189,7 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
             template_name="adjunct/msg-expired.html",
             data={
                 'button': {
-                    'text': '去看看推荐进度',
+                    'text': self.locale.translate(const.REFERRAL_EXPIRED_MESSAGE),
                     'link': self.make_url(
                         path.REFERRAL_PROGRESS,
                         self.params)

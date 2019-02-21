@@ -888,6 +888,20 @@ class ReferralRelatedPositionHandler(BaseHandler):
             self.send_json_error(message=ret.message)
             return
 
+        data = list()
+        for item in ret.data:
+            item_return = item
+            if item.get('experience'):
+                if item.get('experience_above'):
+                    item_return.update({'experience': str(item.get('experience')) + '年及以上'})
+                else:
+                    item_return.update({'experience': str(item.get('experience')) + '年'})
+            if item.get('degree') and item.get('degree_above'):
+                item_return.update({'degree': const.POSITION_DEGREE.get(str(item.get('degree'))) + '及以上'})
+            else:
+                item_return.update({'degree': const.POSITION_DEGREE.get(str(item.get('degree')))})
+            data.append(item_return)
+
         self.send_json_success(data={
-            "list": ret.data
+            "list": data
         })

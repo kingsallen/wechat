@@ -223,6 +223,20 @@ WORKSTATE = {
     "5": "应届毕业生"
 }
 
+# 职位学历要求
+POSITION_DEGREE = {
+    "0": "无",
+    "1": "大专",
+    "2": "本科",
+    "3": "硕士",
+    "4": "MBA",
+    "5": "博士",
+    "6": "中专",
+    "7": "高中",
+    "8": "博士后",
+    "9": "初中",
+}
+
 # 学历
 DEGREE = {
     "0": "",
@@ -744,6 +758,8 @@ REFERRAL_EVAL_RADAR = 2              # 人脉雷达
 REFERRAL_EVAL_RECOM_PROGRESS = 3     # 推荐进度列表
 REFERRAL_EVAL_TEN_MIN_MES_TMP = 4    # 十分钟消息推送模板
 REFERRAL_EVAL_SEEK_RECOM_CARDS = 5   # 求推荐分类统计卡
+
+REFERRAL_EXPIRED_MESSAGE = 'expired_message'
 
 
 # 人脉连连看  连接状态

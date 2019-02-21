@@ -6,6 +6,7 @@ from handler.base import BaseHandler
 from tornado import gen
 from util.common.decorator import handle_response, authenticated
 from util.common import ObjectDict
+import conf.common as const
 import conf.path as path
 from oauth.wechat import JsApi
 
@@ -54,7 +55,7 @@ class IndexHandler(BaseHandler):
             template_name="adjunct/msg-expired.html",
             data={
                 'button': {
-                    'text': '去看看推荐进度',
+                    'text': self.locale.translate(const.REFERRAL_EXPIRED_MESSAGE),
                     'link': self.make_url(
                         path.REFERRAL_PROGRESS,
                         self.params)
