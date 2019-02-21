@@ -132,7 +132,10 @@ class EmployeePageService(PageService):
         data.conf = ObjectDict()
         data.binding_success_message = conf.bindSuccessMessage or ''
         data.wechat.subscribed = True if current_user.wxuser.is_subscribe or current_user.wechat.type == 0 or not in_wechat else False
-        data.wechat.qrcode = yield get_temporary_qrcode(wechat=current_user.wechat, pattern_id=const.QRCODE_BIND)
+        data.wechat.qrcode = yield get_temporary_qrcode(
+            wechat=current_user.wechat,
+            scene_id=int('11110000000000000000000000000000', base=2) + int(const.QRCODE_BIND)
+        )
         data.wechat.name = current_user.wechat.name
         data.mate_num = mate_num
         data.conf.reward = reward
