@@ -779,16 +779,18 @@ class EmployeePageService(PageService):
         return res
 
     @gen.coroutine
-    def invite_cards_invited(self, user_id, candidate_user_id, pid, company_id):
+    def invite_cards_invited(self, user_id, candidate_user_id, pid, company_id, timestamp, state):
         """
         邀请投递候选人不在线时，员工点击“人脉连连看”或“转发邀请”时才算已处理过该候选人
         :param user_id:
         :param candidate_user_id:
         :param pid:
         :param company_id:
+        :param timestamp:
+        :param state:
         :return:
         """
-        ret = yield self.infra_employee_ds.invite_cards_invited(user_id, candidate_user_id, pid, company_id)
+        ret = yield self.infra_employee_ds.invite_cards_invited(user_id, candidate_user_id, pid, company_id, timestamp, state)
         return ret
 
     @gen.coroutine
