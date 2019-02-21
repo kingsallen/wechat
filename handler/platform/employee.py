@@ -1243,6 +1243,7 @@ class ReferralProgressDetailHandler(BaseHandler):
         render_data = {
             "abnormal": ret.data['abnormal'],
             "avatar": ret.data.get('avatar', ''),
+            "uid": self.params.candidate_user_id,
             "name": ret.data.get('name', ''),
             "position_name": ret.data.get('title', ''),
             "encourage": self.locale.translate(const.REFERRAL_ENCOURAGE.get(ret.data.get('encourage', ''))),
