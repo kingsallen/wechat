@@ -196,7 +196,6 @@ class PositionHandler(BaseHandler):
                 radar_event_emitter = RadarEventEmitter(kafka_producer)
                 radar_event_emitter.register_event(PositionPageViewEvent)
 
-                pid = self.params.pid
                 if not (self.params.recom or self.params.root_recom):
                     employee_user_id = 0
                 else:
@@ -210,7 +209,7 @@ class PositionHandler(BaseHandler):
                     click_user_id = self.current_user.sysuser.id
                     ret = yield self.user_ps.if_referral_position(
                         self.current_user.company.id,
-                        recom, psc, pid, click_user_id)
+                        recom, psc, position_id, click_user_id)
                     if not ret.status == const.API_SUCCESS:
                         self.write_error(404)
                         return
