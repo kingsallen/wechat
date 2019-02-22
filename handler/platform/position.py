@@ -188,40 +188,11 @@ class PositionHandler(BaseHandler):
 
             self.flush()
 
+            # 往kafka中写入数据, 做职位浏览统计
+            yield self._insert_into_kafka(position_id)
+            
             # 后置操作
             if self.is_platform and self.current_user.recom:
-
-                # 往kafka中写入数据
-                radar_event_emitter = RadarEventEmitter(kafka_producer)
-                radar_event_emitter.register_event(PositionPageViewEvent)
-
-                if not (self.params.recom or self.params.root_recom):
-                    employee_user_id = 0
-                else:
-                    if self.params.root_recom:
-                        # 人脉连连看页面目标用户打开的职位链接
-                        recom = decode_id(self.params.root_recom)
-                        psc = -1
-                    else:
-                        recom = decode_id(self.params.recom)
-                        psc = self.params.psc if self.params.psc else 0
-                    click_user_id = self.current_user.sysuser.id
-                    ret = yield self.user_ps.if_referral_position(
-                        self.current_user.company.id,
-                        recom, psc, position_id, click_user_id)
-                    if not ret.status == const.API_SUCCESS:
-                        self.write_error(404)
-                        return
-
-                    employee_user_id = ret.data['user']['uid'] if ret.data['employee'] else 0
-
-                position_page_view_event = PositionPageViewEvent(
-                    user_id=self.current_user.sysuser.id,
-                    company_id=self.current_user.company.id,
-                    position_id=int(position_id),
-                    employee_user_id=employee_user_id
-                )
-                radar_event_emitter.emit(position_page_view_event)
 
                 # 职位转发被点击时 neo4j记录转发链路
                 neo4j_data = ObjectDict({
@@ -851,6 +822,40 @@ class PositionHandler(BaseHandler):
         more_link = team.link if team.link else self.make_url(path.TEAM_PATH.format(team.id), self.params)
         res = yield self.position_ps.get_team_data(team, more_link, teamname_custom)
         raise gen.Return(res)
+
+    @log_time
+    @gen.coroutine
+    def _insert_into_kafka(self, position_id):
+        radar_event_emitter = RadarEventEmitter(kafka_producer)
+        radar_event_emitter.register_event(PositionPageViewEvent)
+
+        if not (self.params.recom or self.params.root_recom):
+            employee_user_id = 0
+        else:
+            if self.params.root_recom:
+                # 人脉连连看页面目标用户打开的职位链接
+                recom = decode_id(self.params.root_recom)
+                psc = -1
+            else:
+                recom = decode_id(self.params.recom)
+                psc = self.params.psc if self.params.psc else 0
+            click_user_id = self.current_user.sysuser.id
+            ret = yield self.user_ps.if_referral_position(
+                self.current_user.company.id,
+                recom, psc, position_id, click_user_id)
+            if not ret.status == const.API_SUCCESS:
+                self.write_error(404)
+                return
+
+            employee_user_id = ret.data['user']['uid'] if ret.data['employee'] else 0
+
+        position_page_view_event = PositionPageViewEvent(
+            user_id=self.current_user.sysuser.id,
+            company_id=self.current_user.company.id,
+            position_id=int(position_id),
+            employee_user_id=employee_user_id
+        )
+        radar_event_emitter.emit(position_page_view_event)
 
 
 class PositionListInfraParamsMixin(BaseHandler):
