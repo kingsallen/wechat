@@ -301,3 +301,81 @@ class InfraUserDataService(DataService):
         })
         ret = yield http_put(path.INFRA_REFERRAL_CLOSE_POPUP_WINDOW, params)
         return ret
+
+    @gen.coroutine
+    def referral_confirm_submit(self, company_id, user_id, post_user_id, position_id, origin):
+        """
+        候选人联系内推：简历预览页面确认提交
+        :param company_id:
+        :param user_id:  候选人id
+        :param post_user_id: 最初转发职位的员工的user_id
+        :param position_id:
+        :param origin: 申请来源，1 转发，2 连连看
+        :return:
+        """
+        params = ObjectDict({
+            "company_id": company_id,
+            "user_id": user_id,
+            "post_user_id": post_user_id,
+            "position_id": position_id,
+            "origin": origin
+        })
+        ret = yield http_post(path.INFRA_REFERRAL_CONTACT_PUSH, params)
+        return ret
+
+    @gen.coroutine
+    def referral_related_positions(self, user_id, company_id):
+        """
+        候选人联系内推完成页面推荐三个相关职位信息
+        :param user_id:
+        :param company_id:
+        :return:
+        """
+        params = ObjectDict({
+            "user_id": user_id,
+            "company_id": company_id
+        })
+        ret = yield http_get(path.INFRA_REFERRAL_RELATIVE_POSITIONS, params)
+        return ret
+
+    @gen.coroutine
+    def if_referral_position(self, company_id, recom, psc, pid, click_user_id):
+        """
+        候选人打开转发的职位链接，根据链接中参数判断最初转发该职位的人是否是员工
+        :param company_id:
+        :param recom:  直接转发人的user_id
+        :param psc:   父级链路id   candidate_share_chain.id
+        :param pid:
+        :param click_user_id:
+        :return:
+        """
+        params = ObjectDict({
+            "company_id": company_id,
+            "recom_user_id": recom,
+            "parent_chain_id": psc,
+            "pid": pid,
+            "presentee_user_id": click_user_id
+        })
+        ret = yield http_post(path.INFRA_IF_EMPLOYEE_POS, params)
+        return ret
+
+    @gen.coroutine
+    def if_ever_seek_recommend(self, recom_user_id, psc, pid, company_id, click_user_id):
+        """
+        候选人打开职位链接, 判断之前是否已经点击过“帮我内推”并且完成简历填写确认提交
+        :param recom_user_id:  直接转发人的user_id
+        :param psc:   父级链路id   candidate_share_chain.id
+        :param pid:
+        :param company_id:
+        :param click_user_id:
+        :return:
+        """
+        params = ObjectDict({
+            "recom_user_id": recom_user_id,
+            "psc": psc,
+            "position_id": pid,
+            "company_id": company_id,
+            "presentee_user_id": click_user_id
+        })
+        ret = yield http_get(path.INFRA_IF_SEEK_CHECK, params)
+        return ret

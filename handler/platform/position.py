@@ -1,6 +1,8 @@
 # coding=utf-8
 
 from tornado import gen
+import uuid
+import re
 
 import conf.common as const
 import conf.message as msg
@@ -16,9 +18,14 @@ from util.common.decorator import handle_response, check_employee, NewJDStatusCh
     cover_no_weixin, check_employee_common
 from util.common.mq import award_publisher
 from util.tool.str_tool import gen_salary, add_item, split, gen_degree_v2, gen_experience_v2, languge_code_from_ua, set_literl
+from util.common.kafka import *
+from util.tool.str_tool import gen_salary, add_item, split, gen_degree_v2, gen_experience_v2, languge_code_from_ua
 from util.tool.url_tool import url_append_query
 from util.wechat.template import position_view_five_notice_tpl, position_share_notice_employee_tpl
 from util.common.decorator import log_time, log_time_common_func
+from util.common.mq import neo4j_position_forward
+from util.common.cipher import decode_id
+from setting import settings
 
 
 class PositionHandler(BaseHandler):
@@ -64,8 +71,8 @@ class PositionHandler(BaseHandler):
 
             # 刷新链路
             self.logger.debug("[JD]刷新链路")
-            last_employee_user_id, last_employee_id = yield self._make_refresh_share_chain(position_info)
-            self.logger.debug("[JD]last_employee_user_id: %s" % (last_employee_user_id))
+            last_employee_user_id, last_employee_id, inserted_share_chain_id = yield self._make_refresh_share_chain(position_info)
+            self.logger.debug("[JD]last_employee_user_id: %s" % last_employee_user_id)
 
             self.logger.debug("[JD]构建转发信息")
             yield self._make_share_info(position_info, company_info)
@@ -184,6 +191,49 @@ class PositionHandler(BaseHandler):
 
             # 后置操作
             if self.is_platform and self.current_user.recom:
+
+                # 往kafka中写入数据
+                radar_event_emitter = RadarEventEmitter(kafka_producer)
+                radar_event_emitter.register_event(PositionPageViewEvent)
+
+                pid = self.params.pid
+                if not (self.params.recom or self.params.root_recom):
+                    employee_user_id = 0
+                else:
+                    if self.params.root_recom:
+                        # 人脉连连看页面目标用户打开的职位链接
+                        recom = decode_id(self.params.root_recom)
+                        psc = -1
+                    else:
+                        recom = decode_id(self.params.recom)
+                        psc = self.params.psc if self.params.psc else 0
+                    click_user_id = self.current_user.sysuser.id
+                    ret = yield self.user_ps.if_referral_position(
+                        self.current_user.company.id,
+                        recom, psc, pid, click_user_id)
+                    if not ret.status == const.API_SUCCESS:
+                        self.write_error(404)
+                        return
+
+                    employee_user_id = ret.data['user']['uid'] if ret.data['employee'] else 0
+
+                position_page_view_event = PositionPageViewEvent(
+                    user_id=self.current_user.sysuser.id,
+                    company_id=self.current_user.company.id,
+                    position_id=int(position_id),
+                    employee_user_id=employee_user_id
+                )
+                radar_event_emitter.emit(position_page_view_event)
+
+                # 职位转发被点击时 neo4j记录转发链路
+                neo4j_data = ObjectDict({
+                    "start_user_id": self.current_user.recom.id,
+                    "end_user_id": self.current_user.sysuser.id,
+                    "share_chain_id": inserted_share_chain_id
+                })
+                yield neo4j_position_forward.publish_message(message=neo4j_data,
+                                                             routing_key="user_neo4j.friend_update")
+
                 # 转发积分
                 if last_employee_user_id:
                     self.logger.debug("[JD]转发积分操作")
@@ -262,14 +312,30 @@ class PositionHandler(BaseHandler):
             transmit_from = int(transmit_from) if int(transmit_from) % 2 else int(transmit_from) + 1
             self.params.update(transmit_from=transmit_from)
 
-        link = self.make_url(
-            path.POSITION_PATH.format(position_info.id),
-            self.params,
-            recom=self.position_ps._make_recom(self.current_user.sysuser.id),
-            escape=["pid", "keywords", "cities", "candidate_source",
-                    "employment_type", "salary", "department", "occupations",
-                    "custom", "degree", "page_from", "page_size"]
+        is_valid_employee = yield self.employee_ps.is_valid_employee(
+            self.current_user.sysuser.id,
+            position_info.company_id
         )
+        if is_valid_employee:
+            forward_id = re.sub('-', '', str(uuid.uuid1()))
+            link = self.make_url(
+                path.POSITION_PATH.format(position_info.id),
+                self.params,
+                recom=self.position_ps._make_recom(self.current_user.sysuser.id),
+                forward_id=forward_id,
+                escape=["pid", "keywords", "cities", "candidate_source",
+                        "employment_type", "salary", "department", "occupations",
+                        "custom", "degree", "page_from", "page_size"]
+            )
+        else:
+            link = self.make_url(
+                path.POSITION_PATH.format(position_info.id),
+                self.params,
+                recom=self.position_ps._make_recom(self.current_user.sysuser.id),
+                escape=["pid", "keywords", "cities", "candidate_source",
+                        "employment_type", "salary", "department", "occupations",
+                        "custom", "degree", "page_from", "page_size", "forward_id"]
+            )
 
         self.params.share = ObjectDict({
             "cover": cover,
@@ -648,7 +714,7 @@ class PositionHandler(BaseHandler):
                 sharechain_id=inserted_share_chain_id,
             )
 
-        return last_employee_user_id, last_employee_id
+        return last_employee_user_id, last_employee_id, inserted_share_chain_id
 
     @log_time
     @gen.coroutine
@@ -682,7 +748,8 @@ class PositionHandler(BaseHandler):
         inserted_share_chain_id = yield self.sharechain_ps.refresh_share_chain(
             presentee_user_id=presentee_user_id,
             position_id=position_id,
-            share_chain_parent_id=last_psc
+            share_chain_parent_id=last_psc,
+            forward_id=self.params.forward_id or ''
         )
         raise gen.Return(inserted_share_chain_id)
 
@@ -1080,17 +1147,7 @@ class PositionEmpNoticeHandler(BaseHandler):
             self.send_json_success()
             return
 
-        position = yield self.position_ps.get_position(self.params.pid, display_locale=self.get_current_locale())
-
-        link = self.make_url(path.EMPLOYEE_RECOMMENDS, self.params)
-
-        if self.current_user.wechat.passive_seeker == const.OLD_YES:
-            yield position_share_notice_employee_tpl(self.current_user.company.id,
-                                                     position.title,
-                                                     position.salary,
-                                                     self.current_user.sysuser.id,
-                                                     self.params.pid,
-                                                     link)
+        yield self.position_ps.send_ten_min_tmp(self.current_user.sysuser.id, self.current_user.company.id)
 
         self.send_json_success()
 

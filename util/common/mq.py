@@ -163,6 +163,14 @@ unread_praise_publisher = MQPublisher(
 )
 
 
+neo4j_position_forward = MQPublisher(
+    amqp_url=amqp_url,
+    exchange="employee_neo4j_exchange",
+    exchange_type="direct",
+    appid=6
+)
+
+
 def main():
     award_publisher = AwardsMQPublisher(
         amqp_url='amqp://guest:guest@localhost:5672/%2F?connection_attempts=3&heartbeat_interval=3600',

@@ -6,6 +6,8 @@ from handler.base import BaseHandler
 from tornado import gen
 from util.common.decorator import handle_response, authenticated
 from util.common import ObjectDict
+import conf.common as const
+import conf.path as path
 from oauth.wechat import JsApi
 
 
@@ -27,7 +29,9 @@ class IndexHandler(BaseHandler):
         self.logger.debug("common IndexHandler")
 
         try:
-            if method in self._NEED_AUTH_PATHS:
+            if re.search('/app/employee/recommends', self.request.uri):
+                yield getattr(self, 'get_expired')()
+            elif method in self._NEED_AUTH_PATHS:
                 yield getattr(self, 'get_auth_first')()
             else:
                 yield getattr(self, 'get_default')()
@@ -42,6 +46,21 @@ class IndexHandler(BaseHandler):
     @gen.coroutine
     def get_default(self):
         self.render(template_name="system/app.html")
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get_expired(self):
+        self.render_page(
+            template_name="adjunct/msg-expired.html",
+            data={
+                'button': {
+                    'text': self.locale.translate(const.REFERRAL_EXPIRED_MESSAGE),
+                    'link': self.make_url(
+                        path.REFERRAL_PROGRESS,
+                        self.params)
+                }
+            })
 
     @handle_response
     @authenticated
@@ -85,6 +104,8 @@ class ConfigHandler(BaseHandler):
                           "updateTimelineShareData",
                           "updateAppMessageShareData",
                           "onMenuShareQQ",
+                          "updateTimelineShareData",
+                          "updateAppMessageShareData",
                           "onMenuShareWeibo",
                           "hideOptionMenu",
                           "showOptionMenu",

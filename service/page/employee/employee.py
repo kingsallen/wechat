@@ -740,3 +740,284 @@ class EmployeePageService(PageService):
     def get_referral_qrcode(self, url, logo):
         res = yield self.infra_employee_ds.get_referral_qrcode(url, logo)
         return res
+
+    @gen.coroutine
+    def get_referral_cards(self, user_id, timestamp, page_number, page_size, company_id):
+        """
+        十分钟消息模板：卡片数据获取
+        :param user_id:   转发职位的员工的user_id
+        :param timestamp: 发送消息模板的时间
+        :param page_number:
+        :param page_size:
+        :return:
+        """
+        res = yield self.infra_employee_ds.get_referral_cards(user_id, timestamp, page_number, page_size, company_id)
+        return res
+
+    @gen.coroutine
+    def pass_referral_card(self, pid, user_id, company_id, card_user_id, timestamp):
+        """
+        十分钟消息模板：我不熟悉
+        :param pid:
+        :param user_id:       转发职位的user_id
+        :param company_id:
+        :param card_user_id:  当前卡片的user_id
+        :param timestamp:     发送消息模板的时间
+        :return:
+        """
+        res = yield self.infra_employee_ds.pass_referral_card(pid, user_id, company_id, card_user_id, timestamp)
+        return res
+
+    @gen.coroutine
+    def invite_cards_user_apply(self, pid, user_id, company_id, card_user_id, timestamp):
+        """
+        十分钟消息模板： 邀请投递
+        :param pid:
+        :param user_id:
+        :param card_user_id:
+        :param timestamp:
+        :return:
+        """
+        res = yield self.infra_employee_ds.invite_cards_user_apply(pid, user_id, company_id, card_user_id, timestamp)
+        return res
+
+    @gen.coroutine
+    def invite_cards_invited(self, user_id, candidate_user_id, pid, company_id, timestamp, state):
+        """
+        邀请投递候选人不在线时，员工点击“人脉连连看”或“转发邀请”时才算已处理过该候选人
+        :param user_id:
+        :param candidate_user_id:
+        :param pid:
+        :param company_id:
+        :param timestamp:
+        :param state:
+        :return:
+        """
+        ret = yield self.infra_employee_ds.invite_cards_invited(user_id, candidate_user_id, pid, company_id, timestamp, state)
+        return ret
+
+    @gen.coroutine
+    def referral_connections(self, company_id, recom_user_id, end_user_id, chain_id, pid, parent_id):
+        """
+        人脉连连看
+        :param company_id:
+        :param recom_user_id: 当前转发用户user_id
+        :param end_user_id:   链路结束用户user_id
+        :param chain_id:      人脉连连看 链路id
+        :param pid: 职位id
+        :param parent_id: 父级链路id
+        :return:
+        """
+        res = yield self.infra_employee_ds.referral_connections(
+            company_id, recom_user_id, end_user_id, chain_id, pid, parent_id)
+        return res
+
+    @gen.coroutine
+    def referral_contact_push(self, user_id, position_id):
+        """
+        联系内推页面获取员工姓名、头像及职位名
+        :param user_id:  员工的user_id
+        :param position_id:
+        :return:
+        """
+        res = yield self.infra_employee_ds.referral_contact_push(user_id, position_id)
+        return res
+
+    @gen.coroutine
+    def referral_save_evaluation(self, user_id, company_id, url_params, json_args):
+        """
+        联系内推： 推荐评价信息保存
+        :param user_id:   员工的user_id
+        :param company_id:
+        :param url_params:
+        :param json_args:
+        :return:
+        """
+        params = ObjectDict({
+            "company_id": company_id,
+            "post_user_id": user_id,
+            "position_id": json_args.pid,
+            "referral_id": url_params.referral_id,
+            "referral_reasons": json_args.recom_reason,
+            "recom_reason_text": json_args.comment,
+            "relationship": json_args.relation,
+
+        })
+        res = yield self.infra_employee_ds.referral_save_evaluation(params)
+        return res
+
+    @gen.coroutine
+    def nonreferral_save_evaluation(self, user_id, company_id, url_params, json_args):
+        """
+        联系内推： 推荐评价信息保存
+        :param user_id:   员工的user_id
+        :param company_id:
+        :param url_params:
+        :param json_args:
+        :return:
+        """
+        params = ObjectDict({
+            "company_id": company_id,
+            "post_user_id": user_id,
+            "presentee_user_id": url_params.candidate_user_id,
+            "position_id": json_args.pid,
+            "referral_reasons": json_args.recom_reason,
+            "recom_reason_text": json_args.comment,
+            "relationship": json_args.relation,
+
+        })
+        res = yield self.infra_employee_ds.nonreferral_save_evaluation(params)
+        return res
+
+    @gen.coroutine
+    def referral_evaluation_page_info(self, company_id, post_user_id, referral_id):
+        """
+        员工推荐评价页面 候选人和职位信息获取
+        :param company_id:
+        :param post_user_id:
+        :param referral_id:
+        :return:
+        """
+        res = yield self.infra_employee_ds.referral_evaluation_page_info(company_id, post_user_id, referral_id)
+        return res
+
+    @gen.coroutine
+    def get_referral_progress(self, recom, params):
+        """
+        员工中心 推荐进度：获取进度列表数据
+        :param recom:
+        :param params:
+        :return:
+        """
+        ret = yield self.infra_employee_ds.get_referral_progress(params)
+        if ret.status == const.API_SUCCESS and ret.data:
+            list_data = []
+            for item in ret.data:
+                list_data.append({
+                    "name": item['user']['name'],
+                    "user_id": item['user']['uid'],
+                    "position_title": item['position']['title'],
+                    "position_id": item['position']['pid'],
+                    "position_status": item['position']['status'],
+                    "datetime": item['datetime'],
+                    "category": item.get('progress'),
+                    "degree": item.get('degree'),
+                    "apply_id": item.get('apply_id'),
+                    "referral_origin": {
+                        "type": item['recom']['type'],
+                        "nickname": item['recom'].get('nickname', ''),
+                        "from_wx_group": item['recom'].get('from_wx_group', 0),
+                        "referral_id": item['recom'].get('referral_id', 0),
+                        "remarked": item['recom'].get('evaluate', 0),
+                        "claimed": item['recom'].get('claim', 0),
+                        'rkey': item['recom'].get('rkey', 0),
+                        'recom': recom
+                    }
+                })
+            data = {'list': list_data}
+        else:
+            data = ObjectDict()
+        return data
+
+    @gen.coroutine
+    def get_referral_progress_keyword(self, params):
+        """
+        员工中心 推荐进度：根据候选人姓名搜索
+        :param params:
+        :return:
+        """
+        ret = yield self.infra_employee_ds.get_referral_progress_keyword(params)
+        return ret
+
+    @gen.coroutine
+    def get_referral_progress_detail(self, apply_id, params):
+        """
+        员工中心 推荐进度：分享内推进度页面
+        :param apply_id:
+        :param params:
+        :return:
+        """
+        ret = yield self.infra_employee_ds.get_referral_progress_detail(apply_id, params)
+        return ret
+
+    @gen.coroutine
+    def get_radar_top_data(self, user_id, company_id):
+        """
+        获取雷达页面顶部 浏览记录和求推荐数据
+        :return:
+        """
+        ret = yield self.infra_employee_ds.get_radar_top_data(user_id, company_id)
+        return ret
+
+    @gen.coroutine
+    def get_radar_data(self, user_id, page_size, page_num, company_id):
+        """
+        获取雷达页面人脉数据
+        :return:
+        """
+        ret = yield self.infra_employee_ds.get_radar_data(user_id, page_size, page_num, company_id)
+        return ret
+
+    @gen.coroutine
+    def radar_card_position(self, user_id, company_id, pos_title, order, page_num, page_size):
+        """
+        人脉雷达-分类统计卡-职位浏览
+        :return:
+        """
+        ret = yield self.infra_employee_ds.radar_card_position(user_id, company_id, pos_title, order,
+                                                               page_num, page_size)
+        data = list()
+        if ret.status == const.API_SUCCESS and ret.data:
+            for item in ret.data['user_list']:
+                data_item = {
+                    "avatar": item.get('headimgurl'),
+                    "nickname": item.get('nickname'),
+                    "degree": item.get('depth'),
+                    "position_name": item.get('position_title'),
+                    "position_id": item.get('position_id'),
+                    "position_status": item.get('status'),
+                    "user_id": item.get('user_id'),
+                    "datetime": item.get('click_time'),
+                    "forward_name": item.get('forward_name'),
+                    "forward_source_wx": item.get('forward_source_wx'),
+                    "view_count": item.get('view_count'),
+                    "invited": item.get('invitation_status'),
+                    "connection": item.get('connection'),
+                    "chain": item.get('chain'),
+                    "chain_status": item.get('chain_status'),
+                    "connect_current_uid": 0
+                }
+                connect_current_uid = 0
+                for chain_user in item.get('chain', [])[::-1]:
+                    if chain_user.get('pnodes'):
+                        connect_current_uid = chain_user.get('uid', 0)
+                        break
+
+                data_item.update({
+                    "connect_current_uid": connect_current_uid
+                })
+                data.append(data_item)
+        return data
+
+    @gen.coroutine
+    def radar_card_seek_recom(self, user_id, company_id, page_num, page_size):
+        """
+        人脉雷达-分类统计卡-求推荐
+        """
+        ret = yield self.infra_employee_ds.radar_card_seek_recom(user_id, company_id, page_num, page_size)
+        data = list()
+        if ret.status == const.API_SUCCESS and ret.data:
+            for item in ret.data['user_list']:
+                data.append({
+                    'avatar': item.get('headimgurl'),
+                    'nickname': item.get('nickname'),
+                    'degree': item.get('depth'),
+                    'position_name': item.get('position_title'),
+                    'position_status': item.get('status'),
+                    'datetime': item.get('click_time'),
+                    'view_count': item.get('view_count'),
+                    'forward_name': item.get('forward_name'),
+                    'forward_source_wx': item.get('forward_source_wx'),
+                    "referral_id": item.get('referral_id'),
+                })
+        return data

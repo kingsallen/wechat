@@ -244,6 +244,8 @@ class ChatRoomHandler(BaseHandler):
                           "updateTimelineShareData",
                           "updateAppMessageShareData",
                           "onMenuShareQQ",
+                          "updateTimelineShareData",
+                          "updateAppMessageShareData",
                           "onMenuShareWeibo",
                           "hideOptionMenu",
                           "showOptionMenu",

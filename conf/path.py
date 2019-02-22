@@ -24,6 +24,7 @@ GATES_EMPLOYEE = '/employee/custom_bind/gates'
 EMPLOYEE_REFERRAL_POLICY = "/employee/referral/policy"
 EMPOLYEE_LADDER = "/employee/ladder"
 EMPLOYEE_REWARDS_RECORD = '/app/employee/binding/rewards'
+EMPLOYEE_TEN_MIN_TMP = '/employee/referral/invite_cards'
 
 PROFILE_CUSTOM_CV = '/profile/custom'
 REFERRAL_CONFIRM = "/referral/confirm"
@@ -134,6 +135,8 @@ INFRA_POSITION_LIST_WX_TPL = 'user/refuse/recommend'
 INFRA_POSITION_SEARCH_HISTORY = 'position/search/history'
 INFRA_POSITION_SEARCH_HISTORY_DEL = 'position/search/history/delete'
 INFRA_POSITION_BONUS = "v1/referral/position/bonus"
+INFRA_POSITION_NEO4J_SHARE_CHAIN = 'v1/neo4j/forward/insert'
+INFRA_TEN_MIN_TMP = 'v1/referral/radar/saveTemp'
 
 # Profile 服务
 # Ref: https://wiki.moseeker.com/profile-api.md
@@ -205,6 +208,34 @@ INFRA_REFERRAL_CRUCIAL_INFO_SWITCH = 'v1/referral/conf/information'
 INFRA_REFERRAL_POPUP = 'v1/candidate/position/info'
 INFRA_REFERRAL_CLOSE_POPUP_WINDOW = 'v1/candidate/elastic/layer'
 INFRA_POSITION_REQUIRED_FIELDS = 'v1/referral/information/colum'
+INFRA_REFERRAL_CARDS = 'v1/referral/radar/cards'
+INFRA_REFERRAL_PASS_CARDS = 'v1/referral/radar/ignore'
+INFRA_REFERRAL_INVITE_CARDS = 'v1/referral/radar/invite'
+INFRA_REFERRAL_INVITE_CARDS_INVITED = 'v1/referral/candidate/state'
+INFRA_REFERRAL_CONNECTIONS = 'v1/referral/radar/connect'
+REFERRAL_CONNECTIONS = '/employee/referral/connections/{}'
+INFRA_REFERRAL_CONTACT_PUSH = 'v1/referral/contact/push'
+INFRA_REFERRAL_RELATIVE_POSITIONS = 'v1/match/position'
+INFRA_REFERRAL_CONTACT_INFO = 'v1/contact/referral/info'
+INFRA_REFERRAL_EVALUATION = 'v1/employee/referral/evaluate'
+INFRA_NONREFERRAL_EVALUATION = 'v1/employee/application/evaluate'
+INFRA_REFERRAL_EVALUATION_PAGE = 'v1/employee/seek/recommend'
+INFRA_IF_EMPLOYEE_POS = 'v1/referral/employee/check'
+REFERRAL_CONTACT_RESULT = '/referral/contact_result'
+REFERRAL_INVITE_APPLY = '/employee/referral/invite_cards'
+REFERRAL_PROGRESS = '/employee/referral/progress'
+REFERRAL_RADAR = '/employee/referral/radar'
+REFERRAL_RADAR_SEEK_RECOM = '/employee/referral/radar_cards/seek_recom'
+REFERRAL_PROGRESS_DETAIL = '/employee/referral/progress_detail'
+INFRA_REFERRAL_PROGRESS = 'v1/referral/progress'
+INFRA_REFERRAL_PROGRESS_KEYWORD = 'v1/referral/progress/keyword'
+INFRA_REFERRAL_PROGRESS_DETAIL = 'v1/referral/progress/{}'
+INFRA_REFERRAL_RADAR_TOP = 'v1/radar/index/top'
+INFRA_REFERRAL_RADAR = 'v1/radar/data'
+INFRA_REFERRAL_RADAR_CARD_POS = 'v1/employee/position/view'
+INFRA_REFERRAL_RADAR_CARD_RECOM = 'v1/employee/seek/recommend/card'
+INFRA_IF_SEEK_CHECK = 'v1/referral/seek/check'
+REFERRAL_RADAR_EXPIRED = '/employee/referral/expired'
 
 # 积分商城服务
 EMPLOYEE_MALL = '/employee/mall/index'
