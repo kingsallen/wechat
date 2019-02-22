@@ -329,15 +329,15 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
             yield self.refresh_recom_info()
 
             # 推荐红包处理
-            position_title = yield self.redpacket_ps.get_position_title_by_recom_record_id(recom_record_id)
-
-            yield self.redpacket_ps.handle_red_packet_recom(
-                recom_current_user=self.current_user,
-                recom_record_id=recom_record_id,
-                redislocker=self.redis,
-                realname=realname,
-                position_title=position_title
-            )
+            # position_title = yield self.redpacket_ps.get_position_title_by_recom_record_id(recom_record_id)
+            #
+            # yield self.redpacket_ps.handle_red_packet_recom(
+            #     recom_current_user=self.current_user,
+            #     recom_record_id=recom_record_id,
+            #     redislocker=self.redis,
+            #     realname=realname,
+            #     position_title=position_title
+            # )
 
             # 已经全部推荐了
             if recom_result.recom_total == recom_result.recom_index + recom_result.recom_ignore:
