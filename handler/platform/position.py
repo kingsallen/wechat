@@ -69,6 +69,9 @@ class PositionHandler(BaseHandler):
             # 为防止员工一度打开相似职位时，职位链接被拼接上新生成的psc参数，将该方法放在psc参数生成前执行
             module_position_recommend = self._make_recommend_positions(self.locale, recomment_positions_res)
 
+            # 往kafka中写入数据, 做职位浏览统计
+            yield self._insert_into_kafka(position_id)
+
             # 刷新链路
             self.logger.debug("[JD]刷新链路")
             last_employee_user_id, last_employee_id, inserted_share_chain_id = yield self._make_refresh_share_chain(position_info)
@@ -189,9 +192,6 @@ class PositionHandler(BaseHandler):
 
             self.flush()
 
-            # 往kafka中写入数据, 做职位浏览统计
-            yield self._insert_into_kafka(position_id)
-            
             # 后置操作
             if self.is_platform and self.current_user.recom:
 
