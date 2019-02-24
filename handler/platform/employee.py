@@ -1093,6 +1093,7 @@ class ReferralInviteApplyHandler(BaseHandler):
 
     @handle_response
     @authenticated
+    @check_employee_common
     @check_radar_status
     @gen.coroutine
     def get(self):
@@ -1135,6 +1136,7 @@ class ReferralProgressHandler(BaseHandler):
 
     @handle_response
     @authenticated
+    @check_employee_common
     @gen.coroutine
     def get(self):
         """
@@ -1294,6 +1296,7 @@ class ReferralRadarPageHandler(BaseHandler):
 
     @handle_response
     @authenticated
+    @check_employee_common
     @check_radar_status
     @gen.coroutine
     def get(self):
@@ -1343,6 +1346,7 @@ class ReferralRadarCardJobViewHandler(BaseHandler):
 
     @handle_response
     @authenticated
+    @check_employee_common
     @check_radar_status
     @gen.coroutine
     def get(self):
@@ -1384,6 +1388,7 @@ class ReferralRadarCardSeekRecomHandler(BaseHandler):
 
     @handle_response
     @authenticated
+    @check_employee_common
     @check_radar_status
     @gen.coroutine
     def get(self):
