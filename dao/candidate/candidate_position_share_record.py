@@ -21,5 +21,4 @@ class CandidatePositionShareRecordDao(BaseDao):
             "presentee_id":      self.constant.TYPE_INT,
             "click_from":        self.constant.TYPE_INT,
             "presentee_user_id": self.constant.TYPE_INT,
-            "share_chain_id":    self.constant.TYPE_INT
         }

@@ -20,4 +20,5 @@ class CandidateShareChainDao(BaseDao):
             "click_time":          self.constant.TYPE_TIMESTAMP,
             "create_time":         self.constant.TYPE_TIMESTAMP,
             "forward_id":          self.constant.TYPE_STRING,
+            "click_from":          self.constant.TYPE_INT,
         }
