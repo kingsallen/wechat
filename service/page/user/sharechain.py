@@ -42,12 +42,6 @@ class SharechainPageService(PageService):
         inserted_share_chain_id = yield self._save_recom(
             last_share_record, share_chain_parent_id, forward_id)
 
-        # 创建candidate_share_chain后更新share_record的share_chain_id字段
-        yield self.candidate_position_share_record_ds.update_share_record(
-            conds={"id": last_share_record.id},
-            fields={"share_chain_id": inserted_share_chain_id}
-        )
-
         share_chain_rec = yield self._select_recom_record(
             position_id, presentee_user_id)
 
@@ -119,7 +113,8 @@ class SharechainPageService(PageService):
                 'wechat_id',
                 'recom_user_id',
                 'position_id',
-                'presentee_user_id'
+                'presentee_user_id',
+                'click_from',
             ],
             appends=[
                 'AND `recom_user_id` != `presentee_user_id`',
@@ -221,7 +216,7 @@ class SharechainPageService(PageService):
 
         ret = 0
 
-        # 如果是重复数据，直接返回
+        # 如果是重复数据，更新click_time, click_from
         existed_record = yield self._existed_record(last_share_record, share_chain_parent_id, forward_id)
         if existed_record:
             yield self.candidate_share_chain_ds.update_share_chain(
@@ -233,7 +228,8 @@ class SharechainPageService(PageService):
                     "forward_id": forward_id
                 },
                 fields={
-                    "click_time": last_share_record.create_time
+                    "click_time": last_share_record.create_time,
+                    "click_from": last_share_record.click_from
                 }
             )
             raise gen.Return(existed_record.id)
@@ -263,7 +259,8 @@ class SharechainPageService(PageService):
                 "depth":               0,
                 "parent_id":           share_chain_parent_id if share_chain_parent_id else 0,
                 "type":                type_,
-                "forward_id":          forward_id
+                "forward_id":          forward_id,
+                "click_from":          last_share_record.click_from
             })
 
         # 如果看的人不是员工，
@@ -290,7 +287,8 @@ class SharechainPageService(PageService):
                     "depth":               parent_share_chain_record.depth + 1,
                     "parent_id":           share_chain_parent_id,
                     "type":                type_,
-                    "forward_id":          forward_id
+                    "forward_id":          forward_id,
+                    "click_from":          last_share_record.click_from
                 })
 
             # 如果不存在上游数据，记录为 depth 1
@@ -305,7 +303,8 @@ class SharechainPageService(PageService):
                     "depth":               1,
                     "parent_id":           0,
                     "type":                type_,
-                    "forward_id":          forward_id
+                    "forward_id":          forward_id,
+                    "click_from":          last_share_record.click_from
                     })
 
             # 查询 hr_candidate_remark, 如果对应数据被忽略，则设为新数据
