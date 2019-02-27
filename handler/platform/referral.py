@@ -166,9 +166,11 @@ class ReferralConfirmHandler(BaseHandler):
         else:
             type = 3
 
+        pattern_id = const.QRCODE_REFERRAL_CONFIRM if type == 1 else const.QRCODE_OTHER
+        scene_id = int('11110000000000000000000000000000', base=2) + pattern_id
         wechat = yield self.wechat_ps.get_wechat_info(
             self.current_user,
-            pattern_id=const.QRCODE_REFERRAL_CONFIRM if type == 1 else const.QRCODE_OTHER,
+            scene_id=scene_id,
             in_wechat=self.in_wechat)
 
         data_sample = recommendations[0].data

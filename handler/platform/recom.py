@@ -197,7 +197,12 @@ class RecomCandidateHandler(RecomCustomVariableMixIn, BaseHandler):
             click_time,
             is_recom,
             company_id)
-        wechat = yield self.wechat_ps.get_wechat_info(self.current_user, pattern_id=const.QRCODE_REFERRED_FRIENDS, in_wechat=self.in_wechat)
+        scene_id = int('11110000000000000000000000000000', base=2) + int(const.QRCODE_REFERRED_FRIENDS)
+        wechat = yield self.wechat_ps.get_wechat_info(
+            self.current_user,
+            scene_id=scene_id,
+            in_wechat=self.in_wechat
+        )
         self.render(
             template_name="refer/weixin/passive-seeker_v2/passive-wanting_recom.html",
             passive_seekers=passive_seekers,

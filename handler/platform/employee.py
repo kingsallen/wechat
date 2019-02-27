@@ -613,7 +613,13 @@ class EmployeeReferralPolicyHandler(BaseHandler):
             self.redirect(self.make_url(path.EMPLOYEE_VERIFY, self.params))
             return
         result, data = yield self.employee_ps.get_referral_policy(self.current_user.company.id)
-        wechat = yield self.wechat_ps.get_wechat_info(self.current_user, pattern_id=const.QRCODE_POLICY, in_wechat=self.in_wechat)
+
+        scene_id = int('11110000000000000000000000000000', base=2) + int(const.QRCODE_POLICY)
+        wechat = yield self.wechat_ps.get_wechat_info(
+            self.current_user,
+            scene_id=scene_id,
+            in_wechat=self.in_wechat
+        )
         if result and data and data.get("priority"):
             link = data.get("link", "")
             if link:
