@@ -627,3 +627,26 @@ class PositionPageService(PageService):
         required_fields = [k for k, v in ret.data.items() if v and not k.startswith('set_')]
         return required_fields
 
+    @gen.coroutine
+    def insert_neo4j_share_record(self, recom_user_id, presentee_user_id, share_chain_id):
+        """
+        职位转发被点击时 neo4j记录转发链路
+        :param recom_user_id:
+        :param presentee_user_id:
+        :param share_chain_id:
+        :return:
+        """
+        ret = yield self.infra_position_ds.insert_neo4j_share_record(recom_user_id, presentee_user_id, share_chain_id)
+        return ret
+
+    @gen.coroutine
+    def send_ten_min_tmp(self, user_id, company_id):
+        """
+        十分钟消息模板，改为基础服务发
+        :param user_id: 员工user_id
+        :param company_id:
+        :return:
+        """
+        ret = yield self.infra_position_ds.send_ten_min_tmp(user_id, company_id)
+        return ret
+

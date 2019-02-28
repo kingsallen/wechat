@@ -11,6 +11,7 @@ OPERATE_FAILURE = "操作失败"
 MOBILE_VERIFY = "请先验证手机号"
 INPUT_DISORDER = "请按规范输入"
 PREVIEW_PROFILE = "继续填写个人档案"
+DEFAULT_ERROR_MESSAGE = ['系统异常，请稍后再试']
 
 BASIC_SERVER_DISCONNECTION = "基础服务器连接不上"
 BASIC_SERVER_BUSY = "基础服务器忙碌"
@@ -103,3 +104,15 @@ DEFAULT_RECOMMEND_PRESENTEE = "请帮您的好友们做个推荐吧！\n他们�
 DEFAULT_RECOMMEND_SUCCESS = "感谢您对公司人才库的贡献"
 
 EMAIL_FMT_FAILURE = "Email格式不正确"
+
+# 人脉连连看链接分享
+REFERRAL_CONNECTION_TITLE = '人脉连连看'
+REFERRAL_CONNECTION_TEXT = '{}！有朋友喊你看机会！'
+
+# 转发邀请投递分享
+REFERRAL_INVITE_TITLE = '诚邀您投递职位'
+REFERRAL_INVITE_TEXT = '这是一个千载难逢的内推机会哦~'
+
+# 内推进度页面分享
+REFERRAL_PROGRESS_TITLE = '内推进度分享'
+REFERRAL_PROGRESS_DESCRIPTION = '快来看看你的应聘进度吧~'

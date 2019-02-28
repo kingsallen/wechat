@@ -313,6 +313,28 @@ class MetaBaseHandler(AtomHandler):
 
         super().render(template_name, **kwargs)
 
+    def render_default_page(
+        self,
+        kind=1,
+        messages=msg_const.DEFAULT_ERROR_MESSAGE,
+        button_text=msg_const.BACK_CN,
+        button_link=None,
+        jump_link=None
+    ):
+
+        data = ObjectDict(
+            kind=kind,  # // {0: success, 1: failure, 10: email}
+            messages=messages,  # ['hello world', 'abjsldjf']
+            button_text=button_text,
+            button_link=self.make_url(path.PROFILE_VIEW,
+                                      self.params,
+                                      host=self.host) if not button_link else button_link,
+            jump_link=jump_link  # // 如果有会自动，没有就不自动跳转
+        )
+
+        self.render_page(template_name="system/user-info.html",
+                         data=data)
+
     def render_page(
         self,
         template_name,

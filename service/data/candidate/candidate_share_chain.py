@@ -38,3 +38,10 @@ class CandidateShareChainDataService(DataService):
         response = yield self.candidate_share_chain_dao.insert_record(
             fields, options)
         raise gen.Return(response)
+
+    @gen.coroutine
+    def update_share_chain(self, conds, fields):
+        response = yield self.candidate_share_chain_dao.update_by_conds(
+            conds, fields
+        )
+        raise gen.Return(response)

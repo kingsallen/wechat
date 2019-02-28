@@ -167,6 +167,7 @@
 "upload_resume","Upload Resume"
 "recommend_resume","Recommend Resume"
 "recommend_profile","Recommend Profile"
+"referral_profile","Referral"
 "referral_success","Successful Recommendation"
 "bonus_redpacket","Reward"
 
@@ -178,3 +179,17 @@
 
 "on_board","On board"
 "undo_on_board","Undo on board"
+
+"encourage_primary_pass","Congratulation！Well begun is half done！"
+"encourage_pass_interview","Congratulation！Victory is around the corner！"
+"encourage_join_us","Congratulation！Warmly welcome you to  join us!"
+"encourage_trm","We have added you to our talent pool.Thank you for your attention."
+
+"browse_history","Browse History"
+"request_referral","Request Referral"
+"talent_radar","Talent Radar"
+"talent_link","Talent Link"
+"talent_screening","Talent Screening"
+"referral_progress","Referral Progress"
+
+"expired_message","Referral progress"

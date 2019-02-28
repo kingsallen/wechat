@@ -319,15 +319,15 @@ def get_qrcode(access_token, scene_str, action_name="QR_LIMIT_STR_SCENE"):
 
 
 @gen.coroutine
-def get_temporary_qrcode(wechat, pattern_id, action_name="QR_SCENE"):
+def get_temporary_qrcode(wechat, scene_id, action_name="QR_SCENE"):
     """
     生成带场景值的临时二维码
-    :param pattern_id：场景id 1：员工认证 2：内推政策 3：积分榜单 4：积分历史 5：推荐历史 6：候选人推荐 7：个人中心 8：我的 9：推荐人才简历 10：推荐人才关键信息 11：职位详情 12：用户认领推荐成功
+    :param scene_id：完整的场景值 (pattern_id  1：员工认证 2：内推政策 3：积分榜单 4：积分历史 5：推荐历史 6：候选人推荐 7：个人中心 8：我的 9：推荐人才简历 10：推荐人才关键信息 11：职位列表 12：用户认领推荐成功， 14：职位详情）
     :param wechat
     :param action_name
     :return:
     """
-    ret = yield get_qrcode_ticket(wechat=wechat, pattern_id=pattern_id, action_name=action_name)
+    ret = yield get_qrcode_ticket(wechat=wechat, scene_id=scene_id, action_name=action_name)
     if ret:
         raise gen.Return(wx.WX_SHOWQRCODE_API % ret)
     else:
@@ -336,15 +336,14 @@ def get_temporary_qrcode(wechat, pattern_id, action_name="QR_SCENE"):
 
 @cache(ttl=60 * 60 * 24 * 20)
 @gen.coroutine
-def get_qrcode_ticket(wechat, pattern_id, action_name="QR_SCENE"):
+def get_qrcode_ticket(wechat, scene_id, action_name="QR_SCENE"):
     """
     生成带场景值的临时二维码ticket
-    :param pattern_id：场景id 1：员工认证 2：内推政策 3：积分榜单 4：积分历史 5：推荐历史 6：候选人推荐 7：个人中心 8：我的 9：推荐人才简历 10：推荐人才关键信息 11：职位详情 12：用户认领推荐成功
+    :param scene_id：完整的场景值  (pattern_id 1：员工认证 2：内推政策 3：积分榜单 4：积分历史 5：推荐历史 6：候选人推荐 7：个人中心 8：我的 9：推荐人才简历 10：推荐人才关键信息 11：职位列表 12：用户认领推荐成功， 14：职位详情)
     :param wechat
     :param action_name
     :return:
     """
-    scene_id = int('11110000000000000000000000000000', base=2) + pattern_id
     params = ObjectDict({
         "expire_seconds": wx.TEMPORARY_QRCODE_EXPIRE,
         "action_name": action_name,
@@ -363,12 +362,13 @@ def get_qrcode_ticket(wechat, pattern_id, action_name="QR_SCENE"):
 
 
 @gen.coroutine
-def send_succession_message(wechat, open_id, pattern_id):
+def send_succession_message(wechat, open_id, pattern_id, position_id=0):
     """
     发送接续流程的信息给用户
     :param wechat:
     :param open_id:
-    :param pattern_id: 1：员工认证 2：内推政策 3：积分榜单 4：积分历史 5：推荐历史 6：候选人推荐 7：个人中心 8：我的 9：推荐人才简历 10：推荐人才关键信息 11：职位详情 12：用户认领推荐成功
+    :param pattern_id: 1：员工认证 2：内推政策 3：积分榜单 4：积分历史 5：推荐历史 6：候选人推荐 7：个人中心 8：我的 9：推荐人才简历 10：推荐人才关键信息 11：职位列表 12：用户认领推荐成功 14：职位详情
+    :param position_id:
     :return:
     """
     if pattern_id == const.QRCODE_BIND:
@@ -410,6 +410,9 @@ def send_succession_message(wechat, open_id, pattern_id):
     elif pattern_id == const.QRCODE_SCAN_REFERRAL:
         url = make_url(path.REFERRAL_SCAN, host=settings["platform_host"], wechat_signature=wechat.get("signature"))
         content = '点击查阅<a href="{}">候选人推荐</a>'.format(url)
+    elif pattern_id == const.QRCODE_POSITION and position_id:
+        url = make_url(path.POSITION_PATH.format(position_id), host=settings["platform_host"], wechat_signature=wechat.get("signature"))
+        content = '点击查阅<a href="{}">职位详情</a>'.format(url)
     else:
         content = "欢迎关注：{}, 点击菜单栏发现更多精彩~".format(wechat.get("name"))
     jdata = ObjectDict({

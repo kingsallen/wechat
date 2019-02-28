@@ -169,6 +169,7 @@
 "upload_resume","推荐人才简历"
 "recommend_resume","推荐人才简历"
 "recommend_profile","推荐人才信息"
+"referral_profile","推荐评价"
 "referral_success","推荐成功"
 "bonus_redpacket","奖金红包"
 
@@ -180,3 +181,17 @@
 
 "on_board","内推入职"
 "undo_on_board","内推入职撤回"
+
+"encourage_primary_pass","恭喜您通过初筛，好的开始是成功的一半！"
+"encourage_pass_interview","恭喜您通过面试，胜利就在不远处！"
+"encourage_join_us","欢迎优秀的你加入我们！"
+"encourage_trm","您已进入我司人才库，谢谢您的关注！"
+
+"browse_history","职位浏览"
+"request_referral","求推荐"
+"talent_radar","人脉雷达"
+"talent_link","人脉连连看"
+"talent_screening","人脉筛选"
+"referral_progress","推荐进度"
+
+"expired_message","去看看推荐进度"

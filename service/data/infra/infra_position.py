@@ -177,6 +177,38 @@ class InfraPositionDataService(DataService):
         )
         return res
 
+    @gen.coroutine
+    def insert_neo4j_share_record(self, recom_user_id, presentee_user_id, share_chain_id):
+        """
+        职位转发被点击时 neo4j记录转发链路
+        :param recom_user_id:
+        :param presentee_user_id:
+        :param share_chain_id:
+        :return:
+        """
+        params = {
+            "start_user_id": recom_user_id,
+            "end_user_id": presentee_user_id,
+            "share_chain_id": share_chain_id
+        }
+        ret = yield http_post(path.INFRA_POSITION_NEO4J_SHARE_CHAIN, params)
+        return ret
+
+    @gen.coroutine
+    def send_ten_min_tmp(self, user_id, company_id):
+        """
+        十分钟消息模板，改为基础服务发
+        :param user_id: 员工user_id
+        :param company_id:
+        :return:
+        """
+        params = {
+            "user_id": user_id,
+            "company_id": company_id
+        }
+        ret = yield http_post(path.INFRA_TEN_MIN_TMP, params)
+        return ret
+
 
 class TestEmployeeService(AsyncTestCase):
     """Just for test(or try results) during development :)"""

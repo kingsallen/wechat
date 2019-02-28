@@ -143,3 +143,267 @@ class InfraEmployeeDataService(DataService):
     def get_employee_by_user_id(self, user_id):
         ret = yield http_get(path.INFRA_USER_EMPLOYEE_REFERRAL.format(user_id))
         return ret
+
+    @gen.coroutine
+    def get_referral_cards(self, user_id, timestamp, page_number, page_size, company_id):
+        """
+        十分钟消息模板：卡片数据获取
+        :param user_id:   转发职位的员工的user_id
+        :param timestamp: 发送消息模板的时间
+        :param page_number:
+        :param page_size:
+        :param company_id:
+        :return:
+        """
+        params = ObjectDict({
+            "user_id": user_id,
+            "timestamp": timestamp,
+            "page_number": page_number,
+            "page_size": page_size,
+            "company_id": company_id
+        })
+        ret = yield http_post(path.INFRA_REFERRAL_CARDS, params)
+        return ret
+
+    @gen.coroutine
+    def pass_referral_card(self, pid, user_id, company_id, card_user_id, timestamp):
+        """
+        十分钟消息模板：我不熟悉
+        :param pid:
+        :param user_id:       转发职位的user_id
+        :param card_user_id:  当前卡片的user_id
+        :param timestamp:     发送消息模板的时间
+        :return:
+        """
+        params = ObjectDict({
+            "pid": pid,
+            "user_id": user_id,
+            "company_id": company_id,
+            "end_user_id": card_user_id,
+            "timestamp": timestamp,
+        })
+        ret = yield http_post(path.INFRA_REFERRAL_PASS_CARDS, params)
+        return ret
+
+    @gen.coroutine
+    def invite_cards_user_apply(self, pid, user_id, company_id, card_user_id, timestamp):
+        """
+        十分钟消息模板： 邀请投递
+        :param pid:
+        :param user_id:
+        :param company_id:
+        :param card_user_id:
+        :param timestamp:
+        :return:
+        """
+        params = ObjectDict({
+            "pid": pid,
+            "user_id": user_id,
+            "company_id": company_id,
+            "end_user_id": card_user_id,
+            "timestamp": timestamp,
+        })
+        ret = yield http_post(path.INFRA_REFERRAL_INVITE_CARDS, params)
+        return ret
+
+    @gen.coroutine
+    def invite_cards_invited(self, user_id, candidate_user_id, pid, company_id, timestamp, state):
+        """
+        邀请投递候选人不在线时，员工点击“人脉连连看”或“转发邀请”时才算已处理过该候选人
+        :param user_id:  员工的user_id
+        :param candidate_user_id:  候选人的user_id
+        :param pid:
+        :param company_id:
+        :return:
+        """
+        params = ObjectDict({
+            "pid": pid,
+            "user_id": user_id,
+            "company_id": company_id,
+            "end_user_id": candidate_user_id,
+            "timestamp": timestamp,
+            "state": state
+        })
+        ret = yield http_post(path.INFRA_REFERRAL_INVITE_CARDS_INVITED, params)
+        return ret
+
+    @gen.coroutine
+    def referral_connections(self, company_id, recom_user_id, end_user_id, chain_id, pid, parent_id):
+        """
+        人脉连连看
+        :param company_id:
+        :param recom_user_id: 当前转发用户user_id
+        :param end_user_id:   链路结束用户user_id
+        :param chain_id:      人脉连连看 链路id
+        :param pid:   职位id
+        :param parent_id:  父级链路id
+        :return:
+        """
+        params = ObjectDict({
+            "company_id": company_id,
+            "recom_user_id": recom_user_id,
+            "next_user_id": end_user_id,
+            "chain_id": chain_id,
+            "pid": pid,
+            "parent_id": parent_id
+        })
+        ret = yield http_post(path.INFRA_REFERRAL_CONNECTIONS, params)
+        return ret
+
+    @gen.coroutine
+    def referral_contact_push(self, user_id, position_id):
+        """
+        联系内推页面获取员工姓名、头像及职位名
+        :param user_id:  员工的user_id
+        :param position_id:
+        :return:
+        """
+        params = ObjectDict({
+            "user_id": user_id,
+            "position_id": position_id
+        })
+        ret = yield http_get(path.INFRA_REFERRAL_CONTACT_INFO, params)
+        return ret
+
+    @gen.coroutine
+    def referral_save_evaluation(self, params):
+        """
+        联系内推：推荐评价信息保存
+        :param params:
+        :return:
+        """
+        ret = yield http_post(path.INFRA_REFERRAL_EVALUATION, params)
+        return ret
+
+    @gen.coroutine
+    def nonreferral_save_evaluation(self, params):
+        """
+        不是点击“帮我内推”button， 而是直接投递之后在推荐进度列表中进行"评价Ta"
+        :param params:
+        :return:
+        """
+        ret = yield http_post(path.INFRA_NONREFERRAL_EVALUATION, params)
+        return ret
+
+    @gen.coroutine
+    def referral_evaluation_page_info(self, company_id, post_user_id, referral_id):
+        """
+        员工推荐评价页面 候选人和职位信息获取
+        :param company_id
+        :param post_user_id:  推荐的员工的user_id
+        :param  referral_id: 联系内推编号
+        :return:
+        """
+        params = ObjectDict({
+            "company_id": company_id,
+            "post_user_id": post_user_id,
+            "referral_id": referral_id
+        })
+        ret = yield http_get(path.INFRA_REFERRAL_EVALUATION_PAGE, params)
+        return ret
+
+    @gen.coroutine
+    def get_referral_progress(self, params):
+        """
+        员工中心 推荐进度：获取进度列表数据
+        :param params:
+        :return:
+        """
+        ret = yield http_post(path.INFRA_REFERRAL_PROGRESS, params)
+        return ret
+
+    @gen.coroutine
+    def get_referral_progress_keyword(self, params):
+        """
+        员工中心 推荐进度 按候选人姓名搜索
+        :param params:
+        :return:
+        """
+        ret = yield http_get(path.INFRA_REFERRAL_PROGRESS_KEYWORD, params)
+        return ret
+
+    @gen.coroutine
+    def get_referral_progress_detail(self, apply_id, params):
+        """
+        员工中心 推荐进度：分享内推进度页面
+        :param apply_id
+        :param params:
+        :return:
+        """
+        ret = yield http_get(path.INFRA_REFERRAL_PROGRESS_DETAIL.format(apply_id), params)
+        return ret
+
+    @gen.coroutine
+    def get_radar_top_data(self, user_id, company_id):
+        """
+        获取雷达页面顶部 浏览记录和求推荐数据
+        :param user_id: 员工的user_id
+        :return:
+        """
+        params = {
+            "user_id": user_id,
+            "company_id": company_id
+        }
+        ret = yield http_get(path.INFRA_REFERRAL_RADAR_TOP, params)
+        return ret
+
+    @gen.coroutine
+    def get_radar_data(self, user_id, page_size, page_num, company_id):
+        """
+        获取雷达页面人脉数据
+        :param user_id
+        :param page_size:
+        :param page_num:
+        :param company_id
+        :return:
+        """
+        params = {
+            "user_id": user_id,
+            "page": page_num,
+            "size": page_size,
+            "company_id": company_id
+        }
+        ret = yield http_get(path.INFRA_REFERRAL_RADAR, params)
+        return ret
+
+    @gen.coroutine
+    def radar_card_position(self, user_id, company_id, pos_title, order, page_num, page_size):
+        """
+        人脉雷达-分类统计卡-职位浏览
+        :param user_id:
+        :param company_id
+        :param pos_title:  按职位名搜索
+        :param order:  排序规则： time  depth  view
+        :param page_num:
+        :param page_size:
+        :return:
+        """
+        params = {
+            "user_id": user_id,
+            "company_id": company_id,
+            "position_title": pos_title,
+            "order": order,
+            "page": page_num,
+            "size": page_size
+        }
+        ret = yield http_get(path.INFRA_REFERRAL_RADAR_CARD_POS, params)
+        return ret
+
+    @gen.coroutine
+    def radar_card_seek_recom(self, user_id, company_id, page_num, page_size):
+        """
+        人脉雷达-分类统计卡-求推荐
+        :param user_id:
+        :param company_id:
+        :param page_num:
+        :param page_size:
+        :return:
+        """
+        params = {
+            "user_id": user_id,
+            "company_id": company_id,
+            "page": page_num,
+            "size": page_size
+        }
+        ret = yield http_get(path.INFRA_REFERRAL_RADAR_CARD_RECOM, params)
+        return ret

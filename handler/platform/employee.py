@@ -11,9 +11,10 @@ import conf.path as path
 from handler.base import BaseHandler
 from handler.platform.user import UserSurveyConstantMixin
 from util.common import ObjectDict
-from util.common.decorator import handle_response, authenticated
+from util.common.decorator import handle_response, authenticated, check_employee_common, check_radar_status
 from util.tool.json_tool import json_dumps
 from util.tool.str_tool import to_str
+from util.common.cipher import decode_id
 from urllib import parse
 import conf.platform as const_platform
 from util.wechat.core import get_temporary_qrcode
@@ -122,7 +123,11 @@ class WechatSubInfoHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         pattern_id = self.params.scene or 99
-        wechat = yield self.wechat_ps.get_wechat_info(self.current_user, pattern_id=int(pattern_id), in_wechat=self.in_wechat)
+        if int(pattern_id) == const.QRCODE_POSITION and self.params.pid:
+            scene_id = int('11111000000000000000000000000000', base=2) + int(self.params.pid)
+        else:
+            scene_id = int('11110000000000000000000000000000', base=2) + int(pattern_id)
+        wechat = yield self.wechat_ps.get_wechat_info(self.current_user, scene_id=scene_id, in_wechat=self.in_wechat)
         self.send_json_success(data=wechat)
         return
 
@@ -609,7 +614,13 @@ class EmployeeReferralPolicyHandler(BaseHandler):
             self.redirect(self.make_url(path.EMPLOYEE_VERIFY, self.params))
             return
         result, data = yield self.employee_ps.get_referral_policy(self.current_user.company.id)
-        wechat = yield self.wechat_ps.get_wechat_info(self.current_user, pattern_id=const.QRCODE_POLICY, in_wechat=self.in_wechat)
+
+        scene_id = int('11110000000000000000000000000000', base=2) + int(const.QRCODE_POLICY)
+        wechat = yield self.wechat_ps.get_wechat_info(
+            self.current_user,
+            scene_id=scene_id,
+            in_wechat=self.in_wechat
+        )
         if result and data and data.get("priority"):
             link = data.get("link", "")
             if link:
@@ -821,3 +832,616 @@ class EmployeeAiRecomHandler(BaseHandler):
         })
 
         return share_info
+
+
+class EmployeeReferralCardsHandler(BaseHandler):
+    """
+    十分钟消息推送卡片
+    """
+
+    @handle_response
+    @authenticated
+    @check_employee_common
+    @gen.coroutine
+    def get(self):
+        """
+        获取卡片信息
+        params:
+        send_timestamp: 发送消息模板的时间
+        page_size: 分页获取卡片数据
+        page_number: 页码
+        :return:
+        {
+            "status": 0,
+            "message": "success",
+            "data": {
+                "cards":[
+                    {
+                        user_id: 123, // 用户id.
+                        nickname: 'panlingling', // 微信昵称
+                        avatar: 'http://url', // 用户头像.
+                        pv: 2, // 浏览职位的次数.
+                        position_name: '职位名称',
+                        degree: 1, // 几度.
+                        pid: 123, // 职位id.
+                        referral_id: 123, // 内推编号
+                        type: 0, // 0 邀请投递 1 推荐TA
+                        from_wx_group: 0, // 转发是否来自微信群 0 否 1 是
+                        chain: [
+                          {
+                            user_id: 12345
+                            nickname: '牛牛',
+                            avatar: '',
+                          },
+                          // ...
+                        ]
+                    }
+                    ....
+                ]
+            }
+        }
+        """
+        ret = yield self.employee_ps.get_referral_cards(
+            self.current_user.sysuser.id,
+            self.params.send_time,
+            int(self.params.page_number or 0),
+            int(self.params.page_size or 10),
+            self.current_user.company.id
+        )
+        if not ret.status == const.API_SUCCESS:
+            self.send_json_error(message=ret.message)
+            return
+
+        cards = list()
+        for card_infra in ret.data:
+            card = ObjectDict({
+                "user_id": card_infra.get('user', {}).get('uid', 0),
+                "nickname": card_infra.get('user', {}).get('nickname', ''),
+                "avatar": card_infra.get('user', {}).get('avatar', ''),
+                "pv": card_infra.get('position', {}).get('pv', 0),
+                "position_name": card_infra.get('position', {}).get('title', ''),
+                "degree": card_infra.get('user', {}).get('degree', 0),
+                "pid": card_infra.get('position', {}).get('pid', 0),
+                "forward_from": card_infra.get('recom', {}).get('nickname', ''),
+                "referral_id": card_infra.get('recom', {}).get('referral_id', 0),
+                "type": card_infra.get('recom', {}).get('type', 0),
+                "from_wx_group": card_infra.get('recom', {}).get('from_wx_group', 0),
+                "chain": card_infra.get('chain')
+            })
+            cards.append(card)
+        self.send_json_success({'cards': cards})
+
+
+class EmployeeReferralPassCardsHandler(BaseHandler):
+
+    @handle_response
+    @authenticated
+    @check_employee_common
+    @gen.coroutine
+    def post(self):
+        """
+        十分钟消息模板： 我不熟悉
+        :return:
+        """
+        ret = yield self.employee_ps.pass_referral_card(
+            pid=self.json_args.pid,
+            user_id=self.current_user.sysuser.id,
+            company_id=self.current_user.company.id,
+            card_user_id=self.json_args.candidate_user_id,
+            timestamp=self.params.send_time)
+
+        if ret.status == const.API_SUCCESS:
+            self.send_json_success()
+        else:
+            self.send_json_error(message=ret.message)
+
+
+class EmployeeReferralInviteApplyHandler(BaseHandler):
+
+    @handle_response
+    @authenticated
+    @check_employee_common
+    @gen.coroutine
+    def post(self):
+        """
+        邀请投递
+        params:
+        {
+            "pid": 1234    # 职位id
+            "candidate_user_id" : 3456   # 被邀请的候选人user_id
+            "send_timestamp": 1544404667484    # Optional  只有入口3（十分钟消息推送卡片）需要该参数
+        }
+        :return:
+        {
+            "data":{
+              notified: 0, // 是否已通知候选人（消息模板通知）
+              degree: 1,  // 几度人脉.
+              chain_id: 123,   //  人脉连连看链路id  可能没有， 没有就是0
+              // 2度及3度人脉显示人脉连连看入口
+              chain: [
+                {
+                  uid: 123,
+                  avatar: '//image.url.com',
+                }
+              ]
+            }
+        }
+        """
+        ret = yield self.employee_ps.invite_cards_user_apply(
+            pid=self.json_args.pid,
+            user_id=self.current_user.sysuser.id,
+            company_id=self.current_user.company.id,
+            card_user_id=self.json_args.candidate_user_id,
+            # timestamp=self.json_args.get('send_timestamp') or 0)
+            timestamp=self.params.send_time)
+
+        if ret.status == const.API_SUCCESS:
+            data = ObjectDict({
+                "notified": ret.data['notified'],
+                "degree": ret.data['degree'],
+                "chain_id": ret.data['chain_id'],
+                "chain": [{"uid": item['uid'], "avatar": item['avatar']} for item in ret.data['chain']]
+            })
+            self.send_json_success(data)
+        else:
+            self.send_json_error(message=ret.message)
+
+
+class EmployeeReferralInvitedHandler(BaseHandler):
+
+    @handle_response
+    @authenticated
+    @check_employee_common
+    @gen.coroutine
+    def post(self):
+        """
+        邀请投递候选人不在线时，员工点击“人脉连连看”或“转发邀请”时才算已处理过该候选人
+        params:
+        {
+            "pid": 1234    # 职位id
+            "user_id" : 3456   # 被邀请的候选人user_id
+            "timestamp": 234234   # 10分钟消息模板入口： 消息模板链接上的参数
+            "state": 1  #  1 邀请投递 3 推荐Ta
+        }
+        """
+        ret = yield self.employee_ps.invite_cards_invited(
+            user_id=self.current_user.sysuser.id,
+            candidate_user_id=self.json_args.user_id,
+            pid=self.json_args.pid,
+            company_id=self.current_user.company.id,
+            timestamp=self.json_args.send_time or '',
+            state=self.json_args.state
+        )
+
+        if ret.status == const.API_SUCCESS:
+            self.send_json_success()
+        else:
+            self.send_json_error(message=ret.message)
+
+
+class EmployeeReferralConnectionHandler(BaseHandler):
+
+    @handle_response
+    @authenticated
+    @check_radar_status
+    @gen.coroutine
+    def get(self, chain_id):
+        """
+        人脉连连看页面
+        :param chain_id: 人脉连连看链路id
+        :return:
+        """
+        pid = self.params.pid
+        if not (pid and chain_id):
+            self.write_error(500, message='pid和chain_id是必传参数')
+            return
+
+        if self.current_user.recom:
+            recom_user_id = self.current_user.recom.id
+        else:
+            recom_user_id = self.current_user.sysuser.id
+
+            # 为连连看最后一个目标用户打开职位详情页时显示员工信息做准备
+            self.params.root_recom = self.position_ps._make_recom(self.current_user.sysuser.id)
+
+        click_user_id = self.current_user.sysuser.id
+
+        parent_connection_id = self.params.parent_connection_id if self.params.parent_connection_id else 0
+        ret_conn = yield self.employee_ps.referral_connections(
+            self.current_user.company.id, recom_user_id, click_user_id, chain_id, pid, parent_connection_id)
+        if not ret_conn.status == const.API_SUCCESS:
+            self.write_error(500, message=ret_conn.message)
+            return
+
+        parent_connection_id = ret_conn.data['parent_id'] if ret_conn.data.get('parent_id') else 0
+        self.params.parent_connection_id = parent_connection_id
+        page_data = {
+            "pid": ret_conn.data['pid'],
+            "current_uid": self.current_user.sysuser.id,
+            "enable_viewer": ret_conn.data['enable_viewer'],
+            "chain": ret_conn.data['chain']
+        }
+
+        end_user_nickname = ret_conn.data['chain'][-1]['nickname']
+        yield self._make_share_info(chain_id, end_user_nickname)
+
+        self.render_page(
+            template_name='employee/people-hub-path.html',
+            data=page_data
+        )
+
+    @gen.coroutine
+    def _make_share_info(self, chain_id, end_user_nickname):
+        """构建 share 内容"""
+
+        company_info = yield self.company_ps.get_company(
+            conds={"id": self.current_user.company.id}, need_conf=True)
+
+        cover = self.share_url(company_info.logo)
+        title = msg.REFERRAL_CONNECTION_TITLE
+        description = msg.REFERRAL_CONNECTION_TEXT.format(end_user_nickname)
+
+        link = self.make_url(
+            path.REFERRAL_CONNECTIONS.format(chain_id),
+            self.params,
+            recom=self.position_ps._make_recom(self.current_user.sysuser.id),
+        )
+
+        self.params.share = ObjectDict({
+            "cover": cover,
+            "title": title,
+            "description": description,
+            "link": link,
+        })
+
+
+class ReferralInviteApplyHandler(BaseHandler):
+
+    @handle_response
+    @authenticated
+    @check_employee_common
+    @check_radar_status
+    @gen.coroutine
+    def get(self):
+        """
+        邀请投递入口三，渲染前端页面
+        :return:
+        """
+        yield self._make_share_info()
+        self.render_page(template_name='employee/candidate-filter.html',
+                         data=dict(
+                             recom=self.position_ps._make_recom(self.current_user.sysuser.id)
+                         ))
+
+    @gen.coroutine
+    def _make_share_info(self):
+        """构建 share 内容"""
+
+        company_info = yield self.company_ps.get_company(
+            conds={"id": self.current_user.company.id}, need_conf=True)
+
+        cover = self.share_url(company_info.logo)
+        title = msg.REFERRAL_INVITE_TITLE
+        description = msg.REFERRAL_INVITE_TEXT
+
+        link = self.make_url(
+            path.REFERRAL_INVITE_APPLY,
+            self.params,
+            recom=self.position_ps._make_recom(self.current_user.sysuser.id),
+        )
+
+        self.params.share = ObjectDict({
+            "cover": cover,
+            "title": title,
+            "description": description,
+            "link": link,
+        })
+
+
+class ReferralProgressHandler(BaseHandler):
+
+    @handle_response
+    @authenticated
+    @check_employee_common
+    @gen.coroutine
+    def get(self):
+        """
+        员工中心 推荐进度列表页面
+        :return:
+        """
+        yield self._make_share_info()
+        self.render_page(template_name='employee/referral-progress.html',
+                         data=dict())
+
+    @gen.coroutine
+    def _make_share_info(self):
+        """构建 share 内容"""
+
+        company_info = yield self.company_ps.get_company(
+            conds={"id": self.current_user.company.id}, need_conf=True)
+
+        cover = self.share_url(company_info.logo)
+        title = msg.REFERRAL_PROGRESS_TITLE
+        description = msg.REFERRAL_PROGRESS_DESCRIPTION
+
+        link = self.make_url(
+            path.REFERRAL_PROGRESS,
+            self.params,
+        )
+
+        self.params.share = ObjectDict({
+            "cover": cover,
+            "title": title,
+            "description": description,
+            "link": link,
+        })
+
+
+class ReferralProgressListHandler(BaseHandler):
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        """
+        员工中心 推荐进度列表页数据获取
+        可根据候选人姓名 进度筛选
+　　　　progress: 0全部 1被推荐人投递简历 10通过初筛  12通过面试 3内推入职 4遗憾淘汰
+        :return:
+        """
+        params = ObjectDict({
+            "user_id": self.current_user.sysuser.id,
+            "company_id": self.current_user.company.id,
+            "keyword": self.params.keyword or '',
+            "page_size": self.params.page_size,
+            "page_num": self.params.page_no,
+            "progress": self.params.category
+        })
+        recom = self.position_ps._make_recom(self.current_user.sysuser.id)
+        data = yield self.employee_ps.get_referral_progress(recom, params)
+
+        self.send_json_success(data=data)
+
+
+class ReferralProgressListSearchHandler(BaseHandler):
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        """
+        员工中心 推荐进度列表页根据姓名搜索候选人
+　　　　progress: 0全部 1被推荐人投递简历 10通过初筛  12通过面试 3内推入职 4遗憾淘汰
+        :return:
+        """
+        params = ObjectDict({
+            "user_id": self.current_user.sysuser.id,
+            "company_id": self.current_user.company.id,
+            "keyword": self.params.keyword or '',
+            "progress": self.params.category or 0
+        })
+        ret = yield self.employee_ps.get_referral_progress_keyword(params)
+        if not ret.status == const.API_SUCCESS:
+            self.send_json_error(message=ret.message)
+            return
+
+        self.send_json_success(data={'list': ret.data})
+
+
+class ReferralProgressDetailHandler(BaseHandler):
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        """
+        员工中心 推荐进度 分享内推进度页面
+        :return:
+        """
+        apply_id = self.params.apply_id
+
+        params = ObjectDict({
+            "user_id": self.params.candidate_user_id,
+            "presentee_user_id": self.current_user.sysuser.id,
+            "company_id": self.current_user.company.id,
+            "progress": self.params.progress or 0,
+        })
+
+        ret = yield self.employee_ps.get_referral_progress_detail(apply_id, params)
+        if not ret.status == const.API_SUCCESS:
+            self.write_error(500, message=ret.message)
+            return
+
+        render_data = {
+            "abnormal": ret.data['abnormal'],
+            "avatar": ret.data.get('avatar', ''),
+            "uid": self.params.candidate_user_id,
+            "name": ret.data.get('name', ''),
+            "position_name": ret.data.get('title', ''),
+            "encourage": self.locale.translate(const.REFERRAL_ENCOURAGE.get(ret.data.get('encourage', ''))),
+        }
+        progress = list()
+        for pro in ret.data.get('progress', []):
+            progress.append({
+                "progress_status": pro.get('progress_status', 0),
+                "progress_pass": pro.get('progress_pass', 0),
+                "datetime": pro.get('datetime', '')
+            })
+
+        yield self._make_share_info()
+        render_data.update({"progress": progress})
+        self.render_page(template_name='employee/referral-progress-detail.html',
+                         data=render_data)
+
+    @gen.coroutine
+    def _make_share_info(self):
+        """构建 share 内容"""
+
+        company_info = yield self.company_ps.get_company(
+            conds={"id": self.current_user.company.id}, need_conf=True)
+
+        cover = self.share_url(company_info.logo)
+        title = msg.REFERRAL_PROGRESS_TITLE
+        description = msg.REFERRAL_PROGRESS_DESCRIPTION
+
+        link = self.make_url(
+            path.REFERRAL_PROGRESS_DETAIL,
+            self.params,
+            recom=self.position_ps._make_recom(self.current_user.sysuser.id),
+        )
+
+        self.params.share = ObjectDict({
+            "cover": cover,
+            "title": title,
+            "description": description,
+            "link": link,
+        })
+
+
+class ReferralRadarPageHandler(BaseHandler):
+
+    @handle_response
+    @authenticated
+    @check_employee_common
+    @check_radar_status
+    @gen.coroutine
+    def get(self):
+        """
+        员工中心 人脉雷达页面
+        """
+        ret = yield self.employee_ps.get_radar_top_data(self.current_user.sysuser.id,
+                                                        self.current_user.company.id)
+        if not ret.status == const.API_SUCCESS:
+            self.write_error(500, message=ret.message)
+            return
+
+        self.render_page(template_name='employee/people-radar.html',
+                         data={
+                             "job_uv": ret.data.get('link_viewed_count'),
+                             "seek_recom_uv": ret.data.get('interested_count'),
+                             "recom": self.position_ps._make_recom(self.current_user.sysuser.id)
+                         })
+
+
+class ReferralRadarHandler(BaseHandler):
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        """
+        员工中心 人脉雷达页面 人脉数据获取
+        """
+        ret = yield self.employee_ps.get_radar_data(
+            self.current_user.sysuser.id,
+            self.params.page_size,
+            self.params.page_no,
+            self.current_user.company.id
+        )
+        if not ret.status == const.API_SUCCESS:
+            self.send_json_error(message=ret.message)
+            return
+
+        self.send_json_success(data={
+            "list": ret.data['user_list'],
+            "total": ret.data['total_count']
+        })
+
+
+class ReferralRadarCardJobViewHandler(BaseHandler):
+
+    @handle_response
+    @authenticated
+    @check_employee_common
+    @check_radar_status
+    @gen.coroutine
+    def get(self):
+        """
+        雷达页面 分类统计卡 职位浏览页面
+        :return:
+        """
+        self.render_page(template_name='employee/recom-stat-jobview.html',
+                         data={
+                             "recom": self.position_ps._make_recom(self.current_user.sysuser.id)
+                         })
+
+
+class ReferralRadarCardPositionHandler(BaseHandler):
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        """
+        雷达页面 分类统计卡 职位浏览统计数据
+        params:
+        :keyword:  按职位名搜索
+        order: "time"   // 排序规则 默认 time,浏览 view 关系 depth
+        :return:
+        """
+        data = yield self.employee_ps.radar_card_position(
+            self.current_user.sysuser.id,
+            self.current_user.company.id,
+            self.params.keyword or '',
+            self.params.order or 'time',
+            self.params.page_no or 1,
+            self.params.page_size or 10
+        )
+        self.send_json_success(data={"list": data})
+
+
+class ReferralRadarCardSeekRecomHandler(BaseHandler):
+
+    @handle_response
+    @authenticated
+    @check_employee_common
+    @check_radar_status
+    @gen.coroutine
+    def get(self):
+        """
+        雷达页面 分类统计卡 求推荐页面
+        :return:
+        """
+        self.render_page(template_name='employee/recom-stat-seekrecom.html',
+                         data={
+                             "recom": self.position_ps._make_recom(self.current_user.sysuser.id)
+                         })
+
+
+class ReferralRadarCardRecomHandler(BaseHandler):
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        """
+        雷达页面 分类统计卡 求推荐页面数据
+        :return:
+        """
+        data = yield self.employee_ps.radar_card_seek_recom(
+            self.current_user.sysuser.id,
+            self.current_user.company.id,
+            self.params.page_no or 1,
+            self.params.page_size or 10
+        )
+        self.send_json_success(data={"list": data})
+
+
+class ReferralExpiredPageHandler(BaseHandler):
+
+    @gen.coroutine
+    def get(self):
+        """
+        雷达模块关闭时，打开雷达相关页面跳转到该消息过期页面
+        :return:
+        """
+        self.render_page(
+            template_name="adjunct/msg-expired.html",
+            data={
+                'button': {
+                    'text': self.locale.translate(const.REFERRAL_EXPIRED_MESSAGE),
+                    'link': self.make_url(
+                        path.REFERRAL_PROGRESS,
+                        self.params)
+                }
+            })
