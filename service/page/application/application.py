@@ -420,7 +420,7 @@ class ApplicationPageService(PageService):
 
         if params.recom and params.origin:
             origin = const.INVITE_ORIGIN
-        elif params.recom and not params.origin:
+        elif params.recom and params.forward_id and not params.origin:
             origin = const.FORWARD_ORIGIN
         else:
             origin = 1024
@@ -569,7 +569,7 @@ class ApplicationPageService(PageService):
 
         if params.recom and params.origin:
             origin = const.INVITE_ORIGIN
-        elif params.recom and not params.origin:
+        elif params.recom and params.forward_id and not params.origin:
             origin = const.FORWARD_ORIGIN
         else:
             origin = 2 if is_platform else 4
