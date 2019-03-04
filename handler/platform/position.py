@@ -418,7 +418,8 @@ class PositionHandler(BaseHandler):
             "did": did,
             "salary": position_info.salary,
             "hr_chat": bool(parent_company_info.conf_hr_chat),
-            "teamname_custom": teamname_custom["teamname_custom"],
+            # 默认的“团队”做国际化
+            "teamname_custom": self.locale.translate('team') if teamname_custom["teamname_custom"] == '团队' else teamname_custom["teamname_custom"],
             "candidate_source": position_info.candidate_source_num,
             "reward_point": reward,
             "company_name": company_info.abbreviation,
