@@ -188,13 +188,13 @@ def cache_new(prefix=None, key=None, ttl=60, hash=True, lock=True, separator=":"
                         redis_key = redis_key + spliter + separator.join([str(_) for _ in list(kwargs.values())])
                 else:
                     redis_key = key
-
+                logger.debug("raw_redis_key:{}".format(redis_key))
                 if hash:
                     redis_key = hashlib.md5(redis_key.encode("utf-8")).hexdigest()
 
                 redis_key = "{prefix}{separator}{redis_key}".format(prefix=prefix, separator=separator,
                                                                     redis_key=redis_key)
-
+                logger.debug("hash_redis_key:{}".format(redis_key))
                 cache_data = None
                 try:
                     cache_data = yield func(*args, **kwargs)
