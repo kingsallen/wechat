@@ -10,16 +10,18 @@ from thrift_gen.gen.position.service.PositionServices import Client as PositionS
 from util.common import ObjectDict
 from util.tool.http_tool import http_get, http_post, http_patch
 from util.tool import http_tool
+from util.common.decorator import cache_new
 
 
 class InfraPositionDataService(DataService):
     """对接职位服务
         referer: https://wiki.moseeker.com/position-api.md"""
 
+    @cache_new(ttl=300, escape=['user_id'])
     @gen.coroutine
     def get_position_list(self, params):
         """普通职位列表"""
-        ret = yield http_get(path.INFRA_POSITION_LIST, params)
+        ret = yield http_get(path.INFRA_POSITION_LIST, params, timeout=7)
         return ret
 
     @gen.coroutine
