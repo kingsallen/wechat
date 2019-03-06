@@ -412,7 +412,7 @@ def send_succession_message(wechat, open_id, pattern_id, position_id=0):
         content = '点击查阅<a href="{}">候选人推荐</a>'.format(url)
     elif pattern_id == const.QRCODE_POSITION and position_id:
         url = make_url(path.POSITION_PATH.format(position_id), host=settings["platform_host"], wechat_signature=wechat.get("signature"))
-        content = '点击查阅<a href="{}">职位详情</a>'.format(url)
+        content = '您刚刚正在浏览职位，点击查阅<a href="{}">职位详情</a>'.format(url)
     else:
         content = "欢迎关注：{}, 点击菜单栏发现更多精彩~".format(wechat.get("name"))
     jdata = ObjectDict({
