@@ -21,7 +21,7 @@ class RedpacketHandler(BaseHandler):
             card = ObjectDict({
                 "opened": data.opened,
                 "headline": data.headline or msg.RED_PACKET_HEADLINE,
-                "headline_failure": data.headline_failure or msg.RED_PACKET_HEADLINE_FAILURE,
+                "headline_failure": data.headlineFailure or msg.RED_PACKET_HEADLINE_FAILURE,
                 "has_money": data.hasMoney
             })
             if data.opened and data.amount is not None:
