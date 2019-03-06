@@ -177,6 +177,11 @@ class WechatOauthHandler(MetaBaseHandler):
         yield getattr(self, 'event_' + event)()
 
     @gen.coroutine
+    def event_view_miniprogram(self):
+        """小程序事件，暂时只是避免报错"""
+        pass
+        
+    @gen.coroutine
     def event_subscribe(self):
         """关注事件"""
         res = yield self.event_ps.opt_event_subscribe(self.msg, self.current_user, self.params.nonce)
