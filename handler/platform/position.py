@@ -287,7 +287,7 @@ class PositionHandler(BaseHandler):
             position_info.company_id
         )
         if is_valid_employee:
-            forward_id = re.sub('-', '', str(uuid.uuid1()))
+            forward_id = str(position_info.id) + '_' + re.sub('-', '', str(uuid.uuid1()))
             link = self.make_url(
                 path.POSITION_PATH.format(position_info.id),
                 self.params,
@@ -716,11 +716,16 @@ class PositionHandler(BaseHandler):
     @gen.coroutine
     def _refresh_share_chain(self, presentee_user_id, position_id, last_psc=None):
         """刷新链路的原子操作"""
+        forward_id = ''
+        pid_in_forward = re.search('(\d+?)_', self.params.forward_id or '')
+        if pid_in_forward and pid_in_forward.group() == position_id:
+            forward_id = self.params.forward_id
+
         inserted_share_chain_id = yield self.sharechain_ps.refresh_share_chain(
             presentee_user_id=presentee_user_id,
             position_id=position_id,
             share_chain_parent_id=last_psc,
-            forward_id=self.params.forward_id or ''
+            forward_id=forward_id
         )
         raise gen.Return(inserted_share_chain_id)
 
