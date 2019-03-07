@@ -418,12 +418,10 @@ class ApplicationPageService(PageService):
         recommender_user_id, recommender_wxuser_id, recom_employee = yield self.get_recommend_user(
             current_user, position, is_platform)
 
-        if recommender_user_id and params.origin:
+        if params.recom and params.origin:
             origin = const.INVITE_ORIGIN
-        elif recommender_user_id and params.forward_id and not params.origin:
-            pid_in_forward = re.search('(\d+?)_', params.forward_id)
-            if pid_in_forward and pid_in_forward.group() == position.id:
-                origin = const.FORWARD_ORIGIN
+        elif params.recom and params.forward_id and not params.origin:
+            origin = const.FORWARD_ORIGIN
         else:
             origin = 1024
 
@@ -569,12 +567,10 @@ class ApplicationPageService(PageService):
         else:
             recommender_user_id, recommender_wxuser_id, recom_employee = 0, 0, None
 
-        if recommender_user_id and params.origin:
+        if params.recom and params.origin:
             origin = const.INVITE_ORIGIN
-        elif recommender_user_id and params.forward_id and not params.origin:
-            pid_in_forward = re.search('(\d+?)_', params.forward_id)
-            if pid_in_forward and pid_in_forward.group() == position.id:
-                origin = const.FORWARD_ORIGIN
+        elif params.recom and params.forward_id and not params.origin:
+            origin = const.FORWARD_ORIGIN
         else:
             origin = 2 if is_platform else 4
 
