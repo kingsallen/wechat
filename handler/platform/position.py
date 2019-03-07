@@ -304,7 +304,7 @@ class PositionHandler(BaseHandler):
                 recom=self.position_ps._make_recom(self.current_user.sysuser.id),
                 escape=["pid", "keywords", "cities", "candidate_source",
                         "employment_type", "salary", "department", "occupations",
-                        "custom", "degree", "page_from", "page_size", "forward_id"]
+                        "custom", "degree", "page_from", "page_size"]
             )
 
         self.params.share = ObjectDict({
