@@ -35,7 +35,7 @@ class RedpacketHandler(BaseHandler):
             })
             self.render_page(template_name="adjunct/redpacket.html", data=data)
         else:
-            self.render_default_page(kind=1)
+            self.render_default_page(kind=1, messages=[rp_info.message])
 
     @gen.coroutine
     def post(self):
