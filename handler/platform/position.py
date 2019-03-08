@@ -1269,11 +1269,28 @@ class PositionListHandler(PositionListInfraParamsMixin, BaseHandler):
             transmit_from = int(transmit_from) if int(transmit_from) % 2 else int(transmit_from) + 1
             self.params.update(transmit_from=transmit_from)
 
-        link = self.make_url(
-            path.POSITION_LIST,
-            self.params,
-            recom=self.position_ps._make_recom(self.current_user.sysuser.id),
-            escape=escape)
+        if self.params.forward_id:
+            self.params.pop('forward_id')
+
+        is_valid_employee = yield self.employee_ps.is_valid_employee(
+            self.current_user.sysuser.id,
+            company_info.id
+        )
+        if is_valid_employee:
+            forward_id = re.sub('-', '', str(uuid.uuid1()))
+
+            link = self.make_url(
+                path.POSITION_LIST,
+                self.params,
+                recom=self.position_ps._make_recom(self.current_user.sysuser.id),
+                forward_id=forward_id,
+                escape=escape)
+        else:
+            link = self.make_url(
+                path.POSITION_LIST,
+                self.params,
+                recom=self.position_ps._make_recom(self.current_user.sysuser.id),
+                escape=escape)
 
         self.params.share = ObjectDict({
             "cover": cover,
