@@ -1272,10 +1272,12 @@ class PositionListHandler(PositionListInfraParamsMixin, BaseHandler):
         if self.params.forward_id:
             self.params.pop('forward_id')
 
-        is_valid_employee = yield self.employee_ps.is_valid_employee(
-            self.current_user.sysuser.id,
-            company_info.id
-        )
+        is_valid_employee = False
+        if self.current_user.sysuser.id:
+            is_valid_employee = yield self.employee_ps.is_valid_employee(
+                self.current_user.sysuser.id,
+                company_info.id
+            )
         if is_valid_employee:
             forward_id = re.sub('-', '', str(uuid.uuid1()))
 
