@@ -12,6 +12,7 @@ from tornado import gen
 from tornado.locks import Semaphore
 from tornado.web import MissingArgumentError
 from tornado.httpclient import HTTPError
+from util.common.exception import InfraOperationError
 
 import conf.common as const
 import conf.message as msg
@@ -198,7 +199,7 @@ def cache_new(prefix=None, key=None, ttl=60, hash=True, lock=True, separator=":"
                 cache_data = None
                 try:
                     cache_data = yield func(*args, **kwargs)
-                except HTTPError as e:
+                except (HTTPError, InfraOperationError) as e:
                     logger.error(traceback.format_exc())
                     if cache_data is None:
                         try:
