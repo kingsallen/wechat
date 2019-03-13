@@ -180,7 +180,7 @@ class WechatOauthHandler(MetaBaseHandler):
     def event_view_miniprogram(self):
         """小程序事件，暂时只是避免报错"""
         pass
-        
+
     @gen.coroutine
     def event_subscribe(self):
         """关注事件"""
