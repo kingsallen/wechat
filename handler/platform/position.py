@@ -236,12 +236,12 @@ class PositionHandler(BaseHandler):
         """构建 share 内容"""
 
         # 如果有红包，则取红包的分享文案
-        red_packet = yield self.redpacket_ps.get_last_running_hongbao_config_by_position(position_info)
+        red_packet = yield self.redpacket_ps.get_last_running_hongbao_config_by_position(position_info.id)
 
         if red_packet:
-            cover = self.share_url(red_packet.share_img)
-            title = "{} {}".format(position_info.title, red_packet.share_title)
-            description = "".join(split(red_packet.share_desc))
+            cover = self.share_url(red_packet.shareImg)
+            title = "{} {}".format(position_info.title, red_packet.shareTitle)
+            description = "".join(split(red_packet.shareDesc))
         else:
             cover = self.share_url(company_info.logo)
             title = position_info.title

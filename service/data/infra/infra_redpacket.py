@@ -23,3 +23,7 @@ class InfraRedpacketDataService(DataService):
         ret = yield http_tool.http_post_rp(api.redpacket_service.api.CLOUD_REDPACKET_CLAIM, api.redpacket_service.service, params)
         return ret
 
+    @gen.coroutine
+    def infra_get_rp_position_share_info(self, params):
+        ret = yield http_tool.http_get_rp(api.redpacket_service.api.CLOUD_RP_POSITION_SHARE_INFO, api.redpacket_service.service, params)
+        return ret
