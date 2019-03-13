@@ -1724,7 +1724,7 @@ class RedpacketPageService(PageService):
                 "positionId": position_id
             }
         )
-        raise gen.Return(share_info)
+        raise gen.Return(share_info.data)
 
     @log_time
     @gen.coroutine
