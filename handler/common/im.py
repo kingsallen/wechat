@@ -344,6 +344,17 @@ class ChatHandler(BaseHandler):
     @handle_response
     @authenticated
     @gen.coroutine
+    def get_environ(self):
+        self.send_json_success(data=ObjectDict(
+            locale_code=self.locale.code,
+            user=self.current_user,
+            env=self.env,
+        ))
+
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
     def get_chatrooms(self):
         """获得 C 端用户的聊天室列表"""
 
