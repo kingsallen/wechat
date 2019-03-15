@@ -458,9 +458,10 @@ class MetaBaseHandler(AtomHandler):
                 wxuser_id=self.current_user.get("wxuser", {}).get("id", 0),
                 wechat_id=self.current_user.get("wechat", {}).get("id", 0),
             )
-        if self.json_args.candidate_user_id:
+        if self.json_args.candidate_user_id and self.json_args.pid:
             customs.update(
-                invite_user_id=self.json_args.candidate_user_id
+                invite_user_id=self.json_args.candidate_user_id,
+                pid=self.json_args.pid
             )
 
             user_id = self.current_user.get("sysuser", {}).get("id", 0)
