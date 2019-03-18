@@ -672,6 +672,7 @@ class ChatHandler(BaseHandler):
 
 class MobotHandler(BaseHandler):
     @handle_response
+    @authenticated
     @gen.coroutine
     def get(self):
         self.render(template_name='mobot/index.html')
