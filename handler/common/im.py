@@ -351,7 +351,6 @@ class ChatHandler(BaseHandler):
             env=self.env,
         ))
 
-
     @handle_response
     @authenticated
     @gen.coroutine
@@ -669,3 +668,10 @@ class ChatHandler(BaseHandler):
             return
 
         self.bot_enabled = user_hr_account.leave_to_mobot
+
+
+class MobotHandler(BaseHandler):
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        self.render(template_name='mobot/index.html')
