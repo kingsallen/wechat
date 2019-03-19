@@ -36,7 +36,7 @@ from route import platform_routes, qx_routes, help_routes
 from handler.common.navmenu import NavMenuModule
 from util.common.mq_receiver import RedPacketConsumer
 
-from globals import env, logger, redis, es
+from globals import env, logger, redis, es, sa
 
 
 class Application(tornado.web.Application):
@@ -56,6 +56,7 @@ class Application(tornado.web.Application):
         self.env = env
         self.redis = redis
         self.es = es
+        self.sa = sa
         self.ui_modules.update({
             'NavMenu': NavMenuModule
         })

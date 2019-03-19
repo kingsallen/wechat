@@ -41,9 +41,12 @@ class PositionHandler(BaseHandler):
         display_locale = self.get_current_locale()
         position_info = yield self.position_ps.get_position(position_id, display_locale)
 
-        # 数据组埋点
-        if position_info.status:
-            self.logger.info("[JD]在招职位")
+        # 神策数据埋点
+        properties = ObjectDict({
+
+        })
+        self.sa.track(self.current_user.sysuser.id, "", is_login_id=True)
+        self.sa.close()
 
         if position_info.id and position_info.company_id == self.current_user.company.id:
             yield self._redirect_when_recom_is_openid(position_info)

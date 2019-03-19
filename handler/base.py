@@ -166,6 +166,9 @@ class BaseHandler(MetaBaseHandler):
         # 构造并拼装 session
         yield self._fetch_session()
 
+        self.sa.register_super_properties(ObjectDict({"companyId": self.current_user.company.id,
+                                                      "companyName": self.current_user.abbreviation}))
+
         # 构造 access_time cookie
         self._set_access_time_cookie()
 
