@@ -2,7 +2,10 @@
 
 import os
 import time
+import json
+import traceback
 from hashlib import sha1
+from urllib.parse import unquote
 
 from tornado import gen, locale
 
@@ -458,6 +461,7 @@ class BaseHandler(MetaBaseHandler):
                 self._session_id, session, self._wechat.id)
 
         yield self._add_sysuser_to_session(session, self._session_id)
+        yield self._add_sc_cookie_id_to_session(session)
 
         session.wechat = self._wechat
         self._add_jsapi_to_wechat(session.wechat)
@@ -546,6 +550,14 @@ class BaseHandler(MetaBaseHandler):
                 unionid=sysuser.unionid, wechat_id=self.settings['qx_wechat_id'])
 
         session.sysuser = sysuser
+
+    def _add_sc_cookie_id_to_session(self, session):
+        """拼装session中的神策ID"""
+        sc_cookie_name = const.SENSORS_COOKIE
+        sc_cookie = unquote(self.get_cookie(sc_cookie_name) or '{}')
+        sc_cookie = ObjectDict(json.loads(sc_cookie))
+        distinct_id = sc_cookie.distinct_id
+        session.sc_cookie_id = distinct_id
 
     def _add_jsapi_to_wechat(self, wechat):
         """拼装 jsapi"""
@@ -676,6 +688,21 @@ class BaseHandler(MetaBaseHandler):
 
             lang = lang_from_ua or settings['default_locale']
             return locale.get(lang)
+
+    def track(self, event, properties):
+        """神策埋点"""
+        try:
+            if self.current_user.sysuser.id or self.current_user.sc_cookie_id:
+                self.sa.track(distinct_id=self.current_user.sysuser.id or self.current_user.sc_cookie_id,
+                              event_name=event,
+                              properties=properties,
+                              is_login_id=True if self.current_user.sysuser.id else False)
+            else:
+                self.logger.error('[sensors_no_user_id] event_name: {}, properties: {}'.format(event, properties))
+        except Exception as e:
+            self.logger.error('[sensors_exception] distinct_id: {}, event_name: {}, properties: {}, is_login_id: {}, error_track: {}'.format(
+                self.current_user.sysuser.id or self.current_user.sc_cookie_id, event, properties, True if self.current_user.sysuser.id else False,
+                traceback.format_exc()))
 
     def get_current_locale(self):
         """如果公司设置了语言，以公司设置为准，

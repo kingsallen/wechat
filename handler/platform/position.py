@@ -14,18 +14,17 @@ from tests.dev_data.user_company_config import COMPANY_CONFIG
 from util.common import ObjectDict
 from util.common.exception import MyException
 from util.common.cipher import encode_id
-from util.common.decorator import handle_response, check_employee, NewJDStatusCheckerAddFlag, authenticated, log_time, \
+from util.common.decorator import handle_response, check_employee, NewJDStatusCheckerAddFlag, authenticated, \
     cover_no_weixin, check_employee_common
 from util.common.mq import award_publisher
-from util.tool.str_tool import gen_salary, add_item, split, gen_degree_v2, gen_experience_v2, languge_code_from_ua, set_literl
+from util.tool.str_tool import set_literl, gen_salary, add_item, split, gen_degree_v2, gen_experience_v2
 from util.common.kafka import *
-from util.tool.str_tool import gen_salary, add_item, split, gen_degree_v2, gen_experience_v2, languge_code_from_ua
 from util.tool.url_tool import url_append_query
-from util.wechat.template import position_view_five_notice_tpl, position_share_notice_employee_tpl
+from util.wechat.template import position_view_five_notice_tpl
 from util.common.decorator import log_time, log_time_common_func
 from util.common.mq import neo4j_position_forward
 from util.common.cipher import decode_id
-from setting import settings
+from util.tool.date_tool import curr_now
 
 
 class PositionHandler(BaseHandler):
@@ -40,13 +39,6 @@ class PositionHandler(BaseHandler):
         """
         display_locale = self.get_current_locale()
         position_info = yield self.position_ps.get_position(position_id, display_locale)
-
-        # 神策数据埋点
-        properties = ObjectDict({
-
-        })
-        self.sa.track(self.current_user.sysuser.id, "", is_login_id=True)
-        self.sa.close()
 
         if position_info.id and position_info.company_id == self.current_user.company.id:
             yield self._redirect_when_recom_is_openid(position_info)
@@ -79,6 +71,21 @@ class PositionHandler(BaseHandler):
             self.logger.debug("[JD]刷新链路")
             last_employee_user_id, last_employee_id, inserted_share_chain_id = yield self._make_refresh_share_chain(position_info)
             self.logger.debug("[JD]last_employee_user_id: %s" % last_employee_user_id)
+
+            # 判断来源
+            if self.params.source == const.FANS_RECOMMEND:
+                origin = "fans_recommend"
+            elif last_employee_user_id:
+                origin = "employee_share"
+            else:
+                origin = "platform"
+            # 神策数据埋点
+            properties = ObjectDict({
+                'origin': origin,
+                'req_time': curr_now
+            })
+            self.track("", properties)
+            self.sa.close()
 
             self.logger.debug("[JD]构建转发信息")
             yield self._make_share_info(position_info, company_info)

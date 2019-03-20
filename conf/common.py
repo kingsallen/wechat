@@ -769,3 +769,10 @@ REFERRAL_EXPIRED_MESSAGE = 'expired_message'
 # 人脉连连看  连接状态
 CONNECTION_ING = 2
 CONNECTION_COMPLETED = 1
+
+# chatbot推荐职位
+FANS_RECOMMEND = 2
+EMPLOYEE_RECOMMEND = 4
+
+# 神策cookie
+SENSORS_COOKIE = 'sensorsdata2015jssdkcross'
