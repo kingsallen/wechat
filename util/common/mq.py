@@ -46,11 +46,11 @@ class MQPublisher(object):
         self._pool = pika_pool.QueuedPool(
             create=lambda: pika.BlockingConnection(
                 parameters=pika.URLParameters(self._url)),
-            max_size=10,
-            max_overflow=10,
+            max_size=50,
+            max_overflow=50,
             timeout=10,
             recycle=3600,
-            stale=45)
+            stale=10)
         logger.info('Connected')
 
     def publish_message(self, message, routing_key=None):
