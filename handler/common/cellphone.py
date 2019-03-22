@@ -16,6 +16,8 @@ from util.tool.str_tool import password_crypt, to_str
 from handler.common.captcha import CaptchaMixin
 
 from thrift_gen.gen.mq.struct.ttypes import SmsType
+from util.tool.date_tool import curr_now
+
 
 @common_handler
 class CellphoneBindHandler(CaptchaMixin, BaseHandler):
@@ -251,7 +253,7 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
 
             # 神策数据关联：用户注册后将匿名ID与user_id绑定
             self.sa.track_signup(ret_user_id, self.current_user.sysuser.id)
-            self.logger.debug("[sensors_signup]ret_user_id: {}, origin_user_id: {}".format(ret_user_id, self.current_user.sysuser.id))
+            self.logger.debug("[sensors_signup_mobile]ret_user_id: {}, origin_user_id: {}".format(ret_user_id, self.current_user.sysuser.id))
 
             if self.is_platform:
                 source = const.WECHAT_REGISTER_SOURCE_PLATFORM
@@ -259,6 +261,7 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
                 source = const.WECHAT_REGISTER_SOURCE_QX
 
             self.track('cUserReg', properties={'origin': source}, distinct_id=ret_user_id, is_login_id=True)
+            self.profile_set(properties={'mobile_register_time': curr_now()}, distinct_id=ret_user_id, is_login_id=True, once=True)
 
             if str(ret_user_id) != str(self.current_user.sysuser.id):
                 self.logger.warn("触发帐号合并成功 合并前 user_id:{} 合并后 user_id:{}".format(self.current_user.sysuser.id, ret_user_id))

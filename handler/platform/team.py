@@ -10,6 +10,7 @@ from util.common import ObjectDict
 from util.common.decorator import NewJDStatusChecker404, check_sub_company, \
     handle_response
 from util.tool.url_tool import url_append_query
+import conf.path as path
 
 
 class TeamIndexHandler(BaseHandler):
@@ -40,7 +41,10 @@ class TeamIndexHandler(BaseHandler):
             "cover": self.share_url(company.logo),
             "title": company_name + "的核心团队点此查看",
             "description": "这可能是你人生的下一站! 不先了解一下未来同事吗?",
-            "link": self.fullurl()
+            'link': self.make_url(
+                path.COMPANY_TEAM,
+                self.params,
+                recom=self.position_ps._make_recom(self.current_user.sysuser.id))
         })
         config = COMPANY_CONFIG.get(company.id)
         if config and config.get('transfer', False) and config.transfer.get('tl', False):
@@ -87,8 +91,10 @@ class TeamDetailHandler(BaseHandler):
             "cover": self.share_url(url_append_query(share_cover_url, "imageMogr2/thumbnail/!300x300r")),
             "title": team_name.upper() + "-" + company_name,
             "description": '通常你在点击“加入我们”之类的按钮之前并不了解我们, 现在给你个机会!',
-            "link": self.fullurl()
-        })
+            'link': self.make_url(
+                path.TEAM_PATH,
+                self.params,
+                recom=self.position_ps._make_recom(self.current_user.sysuser.id)), })
         config = COMPANY_CONFIG.get(company.id)
         if config and config.get('transfer', False) and config.transfer.get('td', False):
             default.description = config.transfer.get('td')

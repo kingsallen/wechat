@@ -9,6 +9,7 @@ POSITION_REFERRAL_LIST = '/position/recom'
 RED_PACKET_CARD = '/mobile/redpack'
 TEAM_PATH = '/company/team/{}'
 COMPANY_TEAM = '/company/team'
+COMPANY = '/company'
 SEARCH_FILITER = '/start'
 CUSTOMIZE_EDX = '/custom/emailapply'
 

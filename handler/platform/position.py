@@ -80,7 +80,8 @@ class PositionHandler(BaseHandler):
                 origin = "platform"
             # 神策数据埋点
             properties = ObjectDict({
-                'origin': origin
+                'origin': origin,
+                'has_career_story': bool(self.flag_should_display_newjd)
             })
             self.track("cJobDetailPageview", properties)
             self.sa.close()
