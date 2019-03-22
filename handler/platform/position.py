@@ -82,9 +82,9 @@ class PositionHandler(BaseHandler):
             # 神策数据埋点
             properties = ObjectDict({
                 'origin': origin,
-                'req_time': curr_now
+                'req_time': curr_now()
             })
-            self.track("", properties)
+            self.track("cJobDetailPageview", properties)
             self.sa.close()
 
             self.logger.debug("[JD]构建转发信息")

@@ -776,3 +776,9 @@ EMPLOYEE_RECOMMEND = 4
 
 # 神策cookie
 SENSORS_COOKIE = 'sensorsdata2015jssdkcross'
+
+# 神策事件
+PLATFORM_WX_AUTH = 'cWxAuth'
+PLATFORM_USER_REGISTER = 'cUserReg'
+
+

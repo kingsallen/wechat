@@ -50,6 +50,7 @@ class BaseHandler(MetaBaseHandler):
         # 处理 oauth 的 service, 会在使用时初始化
         self._oauth_service = None
         self._pass_session = None
+        self._sc_cookie_id = None  # 神策设备ID
 
     @property
     def component_access_token(self):
@@ -114,7 +115,8 @@ class BaseHandler(MetaBaseHandler):
         self.logger.debug(
             "[prepare]code:{}, state:{}, request_url:{} ".format(
                 code, state, self.request.uri))
-
+        # 获取神策设备ID
+        self._get_sc_cookie_id()
         if self.in_wechat:
             # 用户同意授权
             if code and self._verify_code(code):
@@ -461,7 +463,7 @@ class BaseHandler(MetaBaseHandler):
                 self._session_id, session, self._wechat.id)
 
         yield self._add_sysuser_to_session(session, self._session_id)
-        yield self._add_sc_cookie_id_to_session(session)
+        session.sc_cookie_id = self._sc_cookie_id
 
         session.wechat = self._wechat
         self._add_jsapi_to_wechat(session.wechat)
@@ -551,13 +553,12 @@ class BaseHandler(MetaBaseHandler):
 
         session.sysuser = sysuser
 
-    def _add_sc_cookie_id_to_session(self, session):
-        """拼装session中的神策ID"""
+    def _get_sc_cookie_id(self):
+        """获取神策设备ID"""
         sc_cookie_name = const.SENSORS_COOKIE
         sc_cookie = unquote(self.get_cookie(sc_cookie_name) or '{}')
         sc_cookie = ObjectDict(json.loads(sc_cookie))
-        distinct_id = sc_cookie.distinct_id
-        session.sc_cookie_id = distinct_id
+        self._sc_cookie_id = sc_cookie.distinct_id
 
     def _add_jsapi_to_wechat(self, wechat):
         """拼装 jsapi"""
