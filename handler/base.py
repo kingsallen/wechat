@@ -230,6 +230,9 @@ class BaseHandler(MetaBaseHandler):
 
         self.logger.debug("[_handle_user_info]user_id: {}".format(user_id))
 
+        self.track('cWxAuth', properties={'origin': source})
+        self.logger.debug("[track cWxAuth]: source: {}".format(source))
+
         # 创建 qx 的 user_wx_user
         yield self.user_ps.create_qx_wxuser_by_userinfo(userinfo, user_id)
 
