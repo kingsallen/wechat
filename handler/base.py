@@ -697,6 +697,8 @@ class BaseHandler(MetaBaseHandler):
         """神策埋点"""
         try:
             if self.current_user.sysuser.id or self.current_user.sc_cookie_id:
+                self.logger.error('[sensors_track] distinct_id:{}, event_name: {}, properties: {}, is_login_id: {}'.format(
+                    self.current_user.sysuser.id or self.current_user.sc_cookie_id, event, properties, True if self.current_user.sysuser.id else False))
                 self.sa.track(distinct_id=self.current_user.sysuser.id or self.current_user.sc_cookie_id,
                               event_name=event,
                               properties=properties,
