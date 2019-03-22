@@ -22,6 +22,7 @@ from util.common.decorator import check_signature
 from util.tool.str_tool import to_str, from_hex, match_session_id, \
     languge_code_from_ua
 from util.tool.url_tool import url_subtract_query, make_url
+from util.tool.date_tool import curr_now
 
 
 class NoSignatureError(Exception):
@@ -171,9 +172,6 @@ class BaseHandler(MetaBaseHandler):
         # 构造并拼装 session
         yield self._fetch_session()
 
-        self.sa.register_super_properties(ObjectDict({"companyId": self.current_user.company.id,
-                                                      "companyName": self.current_user.abbreviation}))
-
         # 构造 access_time cookie
         self._set_access_time_cookie()
 
@@ -230,8 +228,7 @@ class BaseHandler(MetaBaseHandler):
 
         self.logger.debug("[_handle_user_info]user_id: {}".format(user_id))
 
-        self.track('cWxAuth', properties={'origin': source})
-        self.logger.debug("[track cWxAuth]: source: {}".format(source))
+        self.track('cWxAuth', properties={'origin': source}, distinct_id=user_id, is_login_id=True)
 
         # 创建 qx 的 user_wx_user
         yield self.user_ps.create_qx_wxuser_by_userinfo(userinfo, user_id)
@@ -476,6 +473,9 @@ class BaseHandler(MetaBaseHandler):
             yield self._add_recom_to_session(session)
 
         self.current_user = session
+        # 预设神策分析全局属性
+        self.sa.register_super_properties(ObjectDict({"companyId": self.current_user.company.id,
+                                                      "companyName": self.current_user.abbreviation}))
 
     @gen.coroutine
     def _add_company_info_to_session(self, session):
@@ -693,16 +693,24 @@ class BaseHandler(MetaBaseHandler):
             lang = lang_from_ua or settings['default_locale']
             return locale.get(lang)
 
-    def track(self, event, properties):
+    def track(self, event, properties, distinct_id=0, is_login_id=False):
         """神策埋点"""
         try:
-            if self.current_user.sysuser.id or self.current_user.sc_cookie_id:
-                self.logger.error('[sensors_track] distinct_id:{}, event_name: {}, properties: {}, is_login_id: {}'.format(
-                    self.current_user.sysuser.id or self.current_user.sc_cookie_id, event, properties, True if self.current_user.sysuser.id else False))
-                self.sa.track(distinct_id=self.current_user.sysuser.id or self.current_user.sc_cookie_id,
+            if distinct_id:
+                is_login_id = is_login_id
+            elif self.current_user.sysuser:
+                is_login_id = True if self.current_user.sysuser.id else False
+            distinct_id = distinct_id or self.current_user.sysuser.id if self.current_user.sysuser else 0 or self.current_user.sc_cookie_id or 0
+
+            if distinct_id:
+                is_login_id = is_login_id
+                self.logger.debug('[sensors_track] distinct_id:{}, event_name: {}, properties: {}, is_login_id: {}'.format(
+                    distinct_id, event, properties, is_login_id))
+                properties.update(req_time=curr_now())
+                self.sa.track(distinct_id=distinct_id,
                               event_name=event,
                               properties=properties,
-                              is_login_id=True if self.current_user.sysuser.id else False)
+                              is_login_id=is_login_id)
             else:
                 self.logger.error('[sensors_no_user_id] event_name: {}, properties: {}'.format(event, properties))
         except Exception as e:

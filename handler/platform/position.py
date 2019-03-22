@@ -24,7 +24,6 @@ from util.wechat.template import position_view_five_notice_tpl
 from util.common.decorator import log_time, log_time_common_func
 from util.common.mq import neo4j_position_forward
 from util.common.cipher import decode_id
-from util.tool.date_tool import curr_now
 
 
 class PositionHandler(BaseHandler):
@@ -81,8 +80,7 @@ class PositionHandler(BaseHandler):
                 origin = "platform"
             # 神策数据埋点
             properties = ObjectDict({
-                'origin': origin,
-                'req_time': curr_now()
+                'origin': origin
             })
             self.track("cJobDetailPageview", properties)
             self.sa.close()
