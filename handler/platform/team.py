@@ -1,16 +1,16 @@
 # coding=utf-8
 # Copyright 2016 MoSeeker
 
-
 from tornado import gen
 
+import conf.path as path
+import conf.common as const
 from handler.base import BaseHandler
 from tests.dev_data.user_company_config import COMPANY_CONFIG
 from util.common import ObjectDict
 from util.common.decorator import NewJDStatusChecker404, check_sub_company, \
     handle_response
 from util.tool.url_tool import url_append_query
-import conf.path as path
 
 
 class TeamIndexHandler(BaseHandler):
@@ -32,7 +32,12 @@ class TeamIndexHandler(BaseHandler):
             self.locale, current_company, self.params, sub_company_flag, self.current_user.company)
 
         self.params.share = self._share(current_company)
-
+        # 判断来源
+        if self.params.source == const.FANS_RECOMMEND:
+            origin = "fans_recommend"
+        else:
+            origin = "platform"
+        self.track("cTeamIndex", properties=ObjectDict(origin=origin))
         self.render_page('company/team.html', data, meta_title=data.bottombar.teamname_custom)
 
     def _share(self, company):
@@ -82,6 +87,12 @@ class TeamDetailHandler(BaseHandler):
                           self.static_url(self.current_user.company.logo)
         self.params.share = self._share(current_company,
                                         team.name, share_cover_url)
+        # 判断来源
+        if self.params.source == const.FANS_RECOMMEND:
+            origin = "fans_recommend"
+        else:
+            origin = "platform"
+        self.track("cTeamDetail", properties=ObjectDict(origin=origin))
         self.render_page(template_name='company/team.html', data=data,
                          meta_title=data.bottombar.teamname_custom)
 
@@ -94,7 +105,7 @@ class TeamDetailHandler(BaseHandler):
             'link': self.make_url(
                 path.TEAM_PATH,
                 self.params,
-                recom=self.position_ps._make_recom(self.current_user.sysuser.id)), })
+                recom=self.position_ps._make_recom(self.current_user.sysuser.id))})
         config = COMPANY_CONFIG.get(company.id)
         if config and config.get('transfer', False) and config.transfer.get('td', False):
             default.description = config.transfer.get('td')

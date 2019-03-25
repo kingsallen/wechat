@@ -726,9 +726,11 @@ class BaseHandler(MetaBaseHandler):
             lang = lang_from_ua or settings['default_locale']
             return locale.get(lang)
 
-    def track(self, event, properties, distinct_id=0, is_login_id=False):
+    def track(self, event, properties=None, distinct_id=0, is_login_id=False):
         """神策埋点"""
         try:
+            if not properties:
+                properties = ObjectDict()
             distinct_id, is_login_id = self._get_distinct_id_and_is_login_id(distinct_id, is_login_id)
             if distinct_id:
                 self.logger.debug('[sensors_track] distinct_id:{}, event_name: {}, properties: {}, is_login_id: {}'.format(
