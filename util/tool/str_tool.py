@@ -48,6 +48,8 @@ def gen_salary(salary_top, salary_bottom):
         salary_res = "薪资面议"
     elif salary_top and salary_bottom and salary_top == 999:
         salary_res = "{0}k以上".format(int(salary_bottom))
+    elif int(salary_top) == int(salary_bottom):
+        salary_res = "{}k".format(int(salary_top))
     else:
         salary_res = "{0}k - {1}k".format(int(salary_bottom), int(salary_top))
 
