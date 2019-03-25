@@ -381,6 +381,11 @@ class InfraDictDataService(DataService):
 
     @cache(ttl=60 * 60 * 5)
     @gen.coroutine
+    def get_mars_industries(self):
+        """获取Mars行业"""
+
+    @cache(ttl=60 * 60 * 5)
+    @gen.coroutine
     def get_industries(self, level=2):
         """获取行业
         industries
