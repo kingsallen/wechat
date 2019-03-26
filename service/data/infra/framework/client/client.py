@@ -206,7 +206,7 @@ class ServiceClient(object):
             except TTransportException as network_error:
                 # network error
                 try:
-                    traceback.print_exc()
+                    logger.error("[enter_room_error--]:{}".format(traceback.print_exc()))
                     connection_pool.release_connection(connection)
                     yield connection_pool.close()
                 except Exception as e:
