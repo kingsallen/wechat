@@ -384,7 +384,7 @@ class InfraDictDataService(DataService):
     def get_mars_industries(self):
         """获取Mars行业"""
         ret = yield http_get(path.DICT_INDUSTRY_MARS, dict(parent=0))
-        ret = yield self.make_industries_result(ret)
+        ret = yield self.make_mars_industries_result(ret)
         return ret
 
     @staticmethod
