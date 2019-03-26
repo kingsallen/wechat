@@ -23,8 +23,8 @@ class DictionaryPageService(PageService):
         return ret
 
     @tornado.gen.coroutine
-    def gen_mars_industries(self, level=2):
-        ret = yield self.infra_dict_ds.get_mars_industries(level=level)
+    def gen_mars_industries(self):
+        ret = yield self.infra_dict_ds.get_mars_industries()
         return ret
 
     @tornado.gen.coroutine
