@@ -383,9 +383,23 @@ class InfraDictDataService(DataService):
     @gen.coroutine
     def get_mars_industries(self):
         """获取Mars行业"""
-        ret = yield http_get(path.DICT_INDUSTRY, dict(parent=0))
+        ret = yield http_get(path.DICT_INDUSTRY_MARS, dict(parent=0))
         ret = yield self.make_industries_result(ret)
         return ret
+
+    @staticmethod
+    @gen.coroutine
+    def make_mars_industries_result(http_response):
+        res_data = http_response.data
+        industries = []
+        for el in res_data:
+            el = ObjectDict(el)
+            out = ObjectDict()
+            out.text = el.name
+            level2 = yield http_get(path.DICT_INDUSTRY_MARS, dict(parent=el.code))
+            out.list = list(map(lambda x: sub_dict(x, ['code', 'name']), level2.data))
+            industries.append(out)
+        return industries
 
     @cache(ttl=60 * 60 * 5)
     @gen.coroutine
