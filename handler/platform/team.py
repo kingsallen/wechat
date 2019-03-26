@@ -4,6 +4,7 @@
 
 from tornado import gen
 
+import conf.path as path
 from handler.base import BaseHandler
 from tests.dev_data.user_company_config import COMPANY_CONFIG
 from util.common import ObjectDict
@@ -40,7 +41,10 @@ class TeamIndexHandler(BaseHandler):
             "cover": self.share_url(company.logo),
             "title": company_name + "的核心团队点此查看",
             "description": "这可能是你人生的下一站! 不先了解一下未来同事吗?",
-            "link": self.fullurl()
+            'link': self.make_url(
+                path.COMPANY_TEAM,
+                self.params,
+                recom=self.position_ps._make_recom(self.current_user.sysuser.id))
         })
         config = COMPANY_CONFIG.get(company.id)
         if config and config.get('transfer', False) and config.transfer.get('tl', False):
@@ -77,18 +81,20 @@ class TeamDetailHandler(BaseHandler):
         share_cover_url = data.templates[0].data[0].get('media_url') or \
                           self.static_url(self.current_user.company.logo)
         self.params.share = self._share(current_company,
-                                        team.name, share_cover_url)
+                                        team.name, share_cover_url, team_id)
         self.render_page(template_name='company/team.html', data=data,
                          meta_title=data.bottombar.teamname_custom)
 
-    def _share(self, company, team_name, share_cover_url):
+    def _share(self, company, team_name, share_cover_url, team_id):
         company_name = company.abbreviation or company.name
         default = ObjectDict({
             "cover": self.share_url(url_append_query(share_cover_url, "imageMogr2/thumbnail/!300x300r")),
             "title": team_name.upper() + "-" + company_name,
             "description": '通常你在点击“加入我们”之类的按钮之前并不了解我们, 现在给你个机会!',
-            "link": self.fullurl()
-        })
+            'link': self.make_url(
+                path.TEAM_PATH.format(team_id),
+                self.params,
+                recom = self.position_ps._make_recom(self.current_user.sysuser.id))})
         config = COMPANY_CONFIG.get(company.id)
         if config and config.get('transfer', False) and config.transfer.get('td', False):
             default.description = config.transfer.get('td')

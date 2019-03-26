@@ -15,6 +15,7 @@ from ...framework.client.load_balancer.loadbalancer import LoadBalancer
 from ...framework.client.load_balancer.loadbalancer import RoundRobinStrategy
 from ...framework.common.zookeeper_manager import ZkManager
 from ...framework.common import utils
+from globals import logger
 
 from setting import settings
 
@@ -26,6 +27,10 @@ class ServiceClientFactory(object):
 
 
 class ClientRpcException(Exception):
+    pass
+
+
+class EnterRoomException(Exception):
     pass
 
 
@@ -194,6 +199,8 @@ class ServiceClient(object):
             exc = None
             try:
                 result = yield getattr(connection, method_name)(*args)
+                if method_name == 'enterRoom':
+                    logger.info("[enter_room_info] args:{}, result: {}".format(args, result))
                 yield connection_pool.return_connection(connection)
                 return result
             except TTransportException as network_error:
@@ -205,6 +212,9 @@ class ServiceClient(object):
                 except Exception as e:
                     exc = e
                 else:
+                    if method_name == 'enterRoom':
+                        logger.warning("[enter_room_error] args:{}".format(args))
+                        exc = EnterRoomException("enter room error")
                     exc = ClientRpcException("network error")
             except socket.timeout as timeout_error:
                 # timeout error

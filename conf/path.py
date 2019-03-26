@@ -11,6 +11,7 @@ TEAM_PATH = '/company/team/{}'
 COMPANY_TEAM = '/company/team'
 SEARCH_FILITER = '/start'
 CUSTOMIZE_EDX = '/custom/emailapply'
+WECHAT_COMPANY = '/company'
 
 CAPTCHA_CHECKED = '/captcha/checked'
 
