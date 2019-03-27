@@ -173,6 +173,7 @@ DICT_CITIES = "dict/cities"
 DICT_COLLEGE = "dict/college/all"
 DICT_COUNTRY = "dict/country"
 DICT_INDUSTRY = "dict/industry"
+DICT_INDUSTRY_MARS = '/dict/mars/industry'
 DICT_POSITION = "dict/position"
 DICT_MAINLAND_COLLEGE = "dict/college"
 DICT_COLLEGE_BY_ID = "dict/college/abroad"

@@ -114,6 +114,7 @@ common_routes = [
     (r"/api/config[\/]?",                            handler.common.app.ConfigHandler,                          {"event": "wechat_config"}),
     (r"/api/dict/city/?",                            handler.common.dictionary.DictCityHandler,                 {"event": "dict_city"}),
     (r"/api/dict/industry/?",                        handler.common.dictionary.DictIndustryHandler,             {"event": "dict_industry"}),
+    (r"/api/dict/industry/([a-z]+)*?",               handler.common.dictionary.DictCustomIndustryHandler,       {"event": "dict_custom_industry"}),
     (r"/api/dict/function/?",                        handler.common.dictionary.DictFunctionHandler,             {"event": "dict_function"}),
     (r"/api/dict/country/?",                         handler.common.dictionary.DictCountryHandler,              {"event": "dict_country"}),
     (r"/api/dict/rocketmajor/?",                     handler.common.dictionary.DictRocketMajorHandler,          {"event": "dict_rocketmajor"}),

@@ -37,6 +37,29 @@ class DictIndustryHandler(BaseHandler):
         self.send_json_success(industries)
 
 
+class DictCustomIndustryHandler(BaseHandler):
+
+    @handle_response
+    @gen.coroutine
+    def get(self, source):
+        try:
+            # 重置 event，准确描述
+            self._event = self._event + source
+            yield getattr(self, 'get_' + source)()
+        except Exception as e:
+            self.send_json_error()
+
+    @handle_response
+    @gen.coroutine
+    def get_mars(self):
+
+        self.logger.debug("DictMarsIndustryHandler")
+
+        mars_industries = yield self.dictionary_ps.gen_mars_industries()
+        self.logger.debug("DictMarsIndustryHandler Mars_indurstries:{}".format(mars_industries))
+        self.send_json_success(mars_industries)
+
+
 class DictCountryHandler(BaseHandler):
 
     @handle_response
