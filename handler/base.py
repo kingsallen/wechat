@@ -187,13 +187,13 @@ class BaseHandler(MetaBaseHandler):
             user_role = 0
             company_id = 0
             company_name = ''
-        properties = {
+        profiles = {
             'user_role': user_role,
-            'user_id': self.current_user.sysuser.id if self.current_user.sysuser else self._sc_cookie_id,
+            'sysuser_id': self.current_user.sysuser.id if self.current_user.sysuser else self._sc_cookie_id,
             'company_id': company_id,
             'company_name': company_name
         }
-        self.profile_set(properties=properties)
+        self.profile_set(profiles=profiles)
 
         # 构造 access_time cookie
         self._set_access_time_cookie()
@@ -747,26 +747,26 @@ class BaseHandler(MetaBaseHandler):
                 self.current_user.sysuser.id or self.current_user.sc_cookie_id, event, properties, True if self.current_user.sysuser.id else False,
                 traceback.format_exc()))
 
-    def profile_set(self, properties, distinct_id=0, is_login_id=False, once=False):
+    def profile_set(self, profiles, distinct_id=0, is_login_id=False, once=False):
         """设置用户属性"""
         try:
             distinct_id, is_login_id = self._get_distinct_id_and_is_login_id(distinct_id, is_login_id)
             if distinct_id:
-                self.logger.debug('[sensors_profile_set] distinct_id:{}, properties: {}, is_login_id: {}'.format(
-                    distinct_id, properties, is_login_id))
+                self.logger.debug('[sensors_profile_set] distinct_id:{}, profiles: {}, is_login_id: {}'.format(
+                    distinct_id, profiles, is_login_id))
                 if once:
                     self.sa.profile_set_once(distinct_id=distinct_id,
-                                             profiles=properties,
+                                             profiles=profiles,
                                              is_login_id=is_login_id)
                 else:
                     self.sa.profile_set(distinct_id=distinct_id,
-                                        profiles=properties,
+                                        profiles=profiles,
                                         is_login_id=is_login_id)
             else:
-                self.logger.error('[profile_set_sensors_no_user_id] properties: {}'.format( properties))
+                self.logger.error('[profile_set_sensors_no_user_id] profiles: {}'.format(profiles))
         except Exception as e:
-            self.logger.error('[sensors_profile_set_exception] distinct_id: {}, properties: {}, is_login_id: {}, error_track: {}'.format(
-                self.current_user.sysuser.id or self.current_user.sc_cookie_id, properties, True if self.current_user.sysuser.id else False,
+            self.logger.error('[sensors_profile_set_exception] distinct_id: {}, profiles: {}, is_login_id: {}, error_track: {}'.format(
+                self.current_user.sysuser.id or self.current_user.sc_cookie_id, profiles, True if self.current_user.sysuser.id else False,
                 traceback.format_exc()))
 
     def _get_distinct_id_and_is_login_id(self, distinct_id=0, is_login_id=False):
