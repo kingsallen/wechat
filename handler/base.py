@@ -189,7 +189,7 @@ class BaseHandler(MetaBaseHandler):
             company_name = ''
         properties = {
             'user_role': user_role,
-            'user_id': self.current_user.sysuser.id,
+            'user_id': self.current_user.sysuser.id if self.current_user.sysuser else self._sc_cookie_id,
             'company_id': company_id,
             'company_name': company_name
         }
@@ -251,7 +251,7 @@ class BaseHandler(MetaBaseHandler):
 
         self.logger.debug("[_handle_user_info]user_id: {}".format(user_id))
 
-        user = yield self.user_user_ds.get_user({
+        user = yield self.user_ps.get_user_user({
             "unionid":  userinfo.unionid,
             "parentid": 0  # 保证查找正常的 user record
         })
@@ -756,11 +756,11 @@ class BaseHandler(MetaBaseHandler):
                     distinct_id, properties, is_login_id))
                 if once:
                     self.sa.profile_set_once(distinct_id=distinct_id,
-                                             properties=properties,
+                                             profiles=properties,
                                              is_login_id=is_login_id)
                 else:
                     self.sa.profile_set(distinct_id=distinct_id,
-                                        properties=properties,
+                                        profiles=properties,
                                         is_login_id=is_login_id)
             else:
                 self.logger.error('[profile_set_sensors_no_user_id] properties: {}'.format( properties))

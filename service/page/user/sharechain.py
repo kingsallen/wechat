@@ -48,7 +48,7 @@ class SharechainPageService(PageService):
         if share_chain_rec:
             yield self._copy_to_candidate_recom_record(share_chain_rec)
 
-        raise gen.Return(inserted_share_chain_id, depth)
+        return inserted_share_chain_id, depth
 
     @log_time
     @gen.coroutine

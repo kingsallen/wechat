@@ -734,7 +734,7 @@ class PositionHandler(BaseHandler):
             share_chain_parent_id=last_psc,
             forward_id=self.params.forward_id or ''
         )
-        raise gen.Return(inserted_share_chain_id, depth)
+        return inserted_share_chain_id, depth
 
     @log_time
     @gen.coroutine
