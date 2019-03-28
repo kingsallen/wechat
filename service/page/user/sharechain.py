@@ -215,6 +215,7 @@ class SharechainPageService(PageService):
         """
 
         ret = 0
+        depth = 0
 
         # 如果是重复数据，更新click_time, click_from
         existed_record = yield self._existed_record(last_share_record, share_chain_parent_id, forward_id)
@@ -232,7 +233,7 @@ class SharechainPageService(PageService):
                     "click_from": last_share_record.click_from
                 }
             )
-            raise gen.Return(existed_record.id)
+            return existed_record.id, depth
 
         self.logger.debug("[SC]last_share_record: %s" % last_share_record)
 
@@ -246,7 +247,7 @@ class SharechainPageService(PageService):
             type_ = record_ignore_parent.type
         else:
             type_ = 0
-        depth = 0
+
         if presentee_user_is_valid_employee:
 
             ret = yield self.candidate_share_chain_ds.insert_share_chain({
