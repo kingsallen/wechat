@@ -39,7 +39,7 @@ class SharechainPageService(PageService):
             raise gen.Return(0)
 
         # 找到 share_record 后创建 candiate_share_chain
-        inserted_share_chain_id = yield self._save_recom(
+        inserted_share_chain_id, depth = yield self._save_recom(
             last_share_record, share_chain_parent_id, forward_id)
 
         share_chain_rec = yield self._select_recom_record(
@@ -48,7 +48,7 @@ class SharechainPageService(PageService):
         if share_chain_rec:
             yield self._copy_to_candidate_recom_record(share_chain_rec)
 
-        raise gen.Return(inserted_share_chain_id)
+        raise gen.Return(inserted_share_chain_id, depth)
 
     @log_time
     @gen.coroutine
@@ -246,7 +246,7 @@ class SharechainPageService(PageService):
             type_ = record_ignore_parent.type
         else:
             type_ = 0
-
+        depth = 0
         if presentee_user_is_valid_employee:
 
             ret = yield self.candidate_share_chain_ds.insert_share_chain({
@@ -276,7 +276,7 @@ class SharechainPageService(PageService):
                     root2_to_insert = last_share_record.recom_user_id
                 else:
                     root2_to_insert = parent_share_chain_record.root2_recom_user_id
-
+                depth = parent_share_chain_record.depth + 1
                 ret = yield self.candidate_share_chain_ds.insert_share_chain({
                     "position_id":         position_id,
                     "presentee_user_id":   last_share_record.presentee_user_id,
@@ -293,6 +293,7 @@ class SharechainPageService(PageService):
 
             # 如果不存在上游数据，记录为 depth 1
             else:
+                depth = 1
                 ret = yield self.candidate_share_chain_ds.insert_share_chain({
                     "position_id":         position_id,
                     "presentee_user_id":   last_share_record.presentee_user_id,
@@ -323,7 +324,7 @@ class SharechainPageService(PageService):
                     }
                 )
 
-        raise gen.Return(ret)
+        return ret, depth
 
     @log_time
     @gen.coroutine
@@ -364,13 +365,13 @@ class SharechainPageService(PageService):
         """
 
         if user_id is None or position_id is None:
-            return 0
+            return 0, 0
 
         is_employee = yield self._is_valid_employee(position_id, user_id)
 
         if is_employee:
             self.logger.debug("[SC]employee application, referral_employee_user_id = 0")
-            return 0
+            return 0, 0
 
         fixed_now = curr_now()
 
@@ -380,14 +381,14 @@ class SharechainPageService(PageService):
 
         # 如果是直接点入申请职位的, 或者员工申请，不存在内推员工
         if not share_chain_record or share_chain_record.depth == 0:
-            return 0
+            return 0, 0
 
         # 如果 depth = 1， 只需要查看该条记录的 recom_user_id 是否是员工即可
         elif share_chain_record.depth == 1:
             is_employee = yield self._is_valid_employee(
                 position_id, share_chain_record.recom_user_id)
             if is_employee:
-                return share_chain_record.recom_user_id
+                return share_chain_record.recom_user_id, share_chain_record.depth
         else:
             # 多重转发
             # share_chain_record.depth > 1
@@ -402,7 +403,7 @@ class SharechainPageService(PageService):
                     position_id, root_recom_user_id, click_time)
 
             if share_chain_of_root and share_chain_of_root.depth == 0:
-                return share_chain_of_root.recom_user_id
+                return share_chain_of_root.recom_user_id, share_chain_of_root.depth
 
             # 如果查不到最初联系人, 说明这条链路没有被员工截断过
             # 并且 recom_id 这个人是自己点 JD 页访问的
@@ -410,9 +411,9 @@ class SharechainPageService(PageService):
                 root_recom_user_is_employee = yield self._is_valid_employee(
                     position_id, root_recom_user_id)
                 if root_recom_user_is_employee:
-                    return root_recom_user_id
+                    return root_recom_user_id, share_chain_record.depth
 
-        return 0
+        return 0, 0
 
     @log_time
     @gen.coroutine

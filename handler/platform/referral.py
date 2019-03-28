@@ -378,6 +378,8 @@ class ReferralCrucialInfoApiHandler(BaseHandler):
                     self.current_user.company.id,
                     self.params, self.json_args
                 )
+                if ret.status == const.API_SUCCESS:
+                    self.track("cReferralEvaluationSuccess")
 
             if not ret.status == const.API_SUCCESS:
                 self.send_json_error(message=ret.message)

@@ -68,23 +68,11 @@ class PositionHandler(BaseHandler):
 
             # 刷新链路
             self.logger.debug("[JD]刷新链路")
-            last_employee_user_id, last_employee_id, inserted_share_chain_id = yield self._make_refresh_share_chain(position_info)
+            last_employee_user_id, last_employee_id, inserted_share_chain_id, depth = yield self._make_refresh_share_chain(position_info)
             self.logger.debug("[JD]last_employee_user_id: %s" % last_employee_user_id)
 
-            # 判断来源
-            if self.params.source == const.FANS_RECOMMEND:
-                origin = "fans_recommend"
-            elif last_employee_user_id:
-                origin = "employee_share"
-            else:
-                origin = "platform"
-            # 神策数据埋点
-            properties = ObjectDict({
-                'origin': origin,
-                'has_career_story': bool(self.flag_should_display_newjd)
-            })
-            self.track("cJobDetailPageview", properties)
-            self.sa.close()
+            # 神策埋点
+            self._add_sensor_track(last_employee_user_id, depth)
 
             self.logger.debug("[JD]构建转发信息")
             yield self._make_share_info(position_info, company_info)
@@ -243,6 +231,20 @@ class PositionHandler(BaseHandler):
         else:
             self.write_error(404)
             return
+
+    def _add_sensor_track(self, last_employee_user_id, depth):
+
+        # 判断来源
+        if self.params.source == const.FANS_RECOMMEND:
+            origin = const.SA_ORIGIN_FANS_RECOMMEND
+        elif last_employee_user_id:
+            origin = const.SA_ORIGIN_EMPLOYEE_SHARE
+        else:
+            origin = const.SA_ORIGIN_PLATFORM
+        # 神策数据埋点
+        properties = ObjectDict({'origin': origin, 'has_career_story': bool(self.flag_should_display_newjd), "depth": depth})
+        self.track("cJobDetailPageview", properties)
+        self.sa.close()
 
     @log_time
     @gen.coroutine
@@ -646,6 +648,7 @@ class PositionHandler(BaseHandler):
         last_employee_user_id = 0
         last_employee_id = 0
         inserted_share_chain_id = 0
+        depth = 0
 
         if self.current_user.recom and self.current_user.sysuser:
             yield self._make_share_record(
@@ -664,7 +667,7 @@ class PositionHandler(BaseHandler):
                     return ret
 
             if position_info.status == 0:
-                inserted_share_chain_id = yield self._refresh_share_chain(
+                inserted_share_chain_id, depth = yield self._refresh_share_chain(
                     presentee_user_id=self.current_user.sysuser.id,
                     position_id=position_info.id,
                     last_psc=get_psc())
@@ -676,7 +679,7 @@ class PositionHandler(BaseHandler):
                 if inserted_share_chain_id:
                     self.params.update(psc=str(inserted_share_chain_id))
 
-            last_employee_user_id = yield self.sharechain_ps.get_referral_employee_user_id(
+            last_employee_user_id, depth = yield self.sharechain_ps.get_referral_employee_user_id(
                 self.current_user.sysuser.id, position_info.id)
 
             if last_employee_user_id:
@@ -694,7 +697,7 @@ class PositionHandler(BaseHandler):
                 sharechain_id=inserted_share_chain_id,
             )
 
-        return last_employee_user_id, last_employee_id, inserted_share_chain_id
+        return last_employee_user_id, last_employee_id, inserted_share_chain_id, depth
 
     @log_time
     @gen.coroutine
@@ -725,13 +728,13 @@ class PositionHandler(BaseHandler):
     @gen.coroutine
     def _refresh_share_chain(self, presentee_user_id, position_id, last_psc=None):
         """刷新链路的原子操作"""
-        inserted_share_chain_id = yield self.sharechain_ps.refresh_share_chain(
+        inserted_share_chain_id, depth = yield self.sharechain_ps.refresh_share_chain(
             presentee_user_id=presentee_user_id,
             position_id=position_id,
             share_chain_parent_id=last_psc,
             forward_id=self.params.forward_id or ''
         )
-        raise gen.Return(inserted_share_chain_id)
+        raise gen.Return(inserted_share_chain_id, depth)
 
     @log_time
     @gen.coroutine
