@@ -158,7 +158,7 @@ class MetaBaseHandler(AtomHandler):
         params = ObjectDict(self.request.arguments)
         for key in params:
             if isinstance(params[key], list) and params[key]:
-                params[to_str(key)] = to_str(params[key][0]).strip()
+                params[to_str(key)] = to_str(params[key][0]).strp()
         return params
 
     def _get_json_args(self):
