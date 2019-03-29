@@ -264,7 +264,7 @@ class BaseHandler(MetaBaseHandler):
 
         self.track('cWxAuth', properties={'origin': source}, distinct_id=user_id, is_login_id=True)
         # 设置用户首次授权时间
-        self.profile_set(properties={'first_oauth_time': user.register_time}, distinct_id=user_id, is_login_id=True, once=True)
+        self.profile_set(profiles={'first_oauth_time': user.register_time}, distinct_id=user_id, is_login_id=True, once=True)
 
         # 创建 qx 的 user_wx_user
         yield self.user_ps.create_qx_wxuser_by_userinfo(userinfo, user_id)

@@ -264,7 +264,7 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
                 source = const.WECHAT_REGISTER_SOURCE_QX
 
             self.track('cUserReg', properties={'origin': source}, distinct_id=ret_user_id, is_login_id=True)
-            self.profile_set(properties={'mobile_register_time': curr_now()}, distinct_id=ret_user_id, is_login_id=True, once=True)
+            self.profile_set(profiles={'mobile_register_time': curr_now()}, distinct_id=ret_user_id, is_login_id=True, once=True)
 
             if str(ret_user_id) != str(self.current_user.sysuser.id):
                 self.logger.warn("触发帐号合并成功 合并前 user_id:{} 合并后 user_id:{}".format(self.current_user.sysuser.id, ret_user_id))
