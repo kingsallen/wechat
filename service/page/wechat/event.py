@@ -197,6 +197,31 @@ class EventPageService(PageService):
         raise gen.Return(text_info)
 
     @gen.coroutine
+    def opt_event_template_send_job_finish(self, msg, current_user):
+        """
+        处理模板消息发送完成事件
+        :param msg:
+        :param current_user:
+        :return:
+        """
+        msgid = msg.MsgID
+        yield gen.sleep(1)  # 为了避免数据库插入慢，这里对事件延时1秒处理
+        msg_record = yield self.log_wx_message_record_ds.get_wx_message_log_record(conds={"msgid": msgid})
+        user_record = yield self.user_user_ds.get_user({
+            "unionid": current_user.wxuser.unionid,
+            "parentid": 0  # 保证查找正常的 user record
+        })
+        if msg_record:
+            template = yield self.hr_wx_template_message_ds.get_wx_template(
+                conds={"id": msg_record.template_id})
+            template_id = template.sys_template_id
+            self.sa.track(distinct_id=current_user.wxuser.sysuser_id,
+                          event_name="receiveTemplateMessage",
+                          properties={"template_id": template_id},
+                          is_login_id=True if bool(user_record.username.isdigit()) else False)
+        raise gen.Return()
+
+    @gen.coroutine
     def opt_event_subscribe(self, msg, current_user, nonce):
         """
         处理用户关注事件

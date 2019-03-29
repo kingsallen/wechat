@@ -773,7 +773,7 @@ class BaseHandler(MetaBaseHandler):
         if distinct_id:
             is_login_id = is_login_id
         elif self.current_user.sysuser:
-            is_login_id = True if self.current_user.sysuser.id else False
+            is_login_id = True if self.current_user.sysuser.mobileverified else False
         distinct_id = distinct_id or (
             self.current_user.sysuser.id if self.current_user.sysuser else 0) or self.current_user.sc_cookie_id or 0
         return distinct_id, is_login_id

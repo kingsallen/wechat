@@ -182,6 +182,12 @@ class WechatOauthHandler(MetaBaseHandler):
         pass
 
     @gen.coroutine
+    def event_TEMPLATESENDJOBFINISH(self):
+        """模板消息发送完成事件推送"""
+        res = yield self.event_ps.opt_event_template_send_job_finish(self.msg, self.current_user)
+        self.send_xml(res)
+
+    @gen.coroutine
     def event_subscribe(self):
         """关注事件"""
         res = yield self.event_ps.opt_event_subscribe(self.msg, self.current_user, self.params.nonce)

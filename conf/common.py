@@ -125,6 +125,8 @@ CHAT_CHATROOM_ENTER = "chat_sysuser_{}"
 UPLOAD_RECOM_PROFILE = "upload_recom_profile_{}"
 # 推荐成功页面手机号码
 CONFIRM_REFERRAL_MOBILE = "referral_mobile_{}_{}"
+# 模板消息推送完成事件msgid
+TEMPLATE_JOB_SEND_FINISH_MSGID = "template_message_receipt_id"
 
 # ++++++++++业务常量+++++++++++
 # Cookie name
@@ -780,12 +782,9 @@ EMPLOYEE_RECOMMEND = 4
 SENSORS_COOKIE = 'sensorsdata2015jssdkcross'
 
 # 神策来源
-
 SA_ORIGIN_FANS_RECOMMEND = 1  # 粉丝转发
 SA_ORIGIN_EMPLOYEE_SHARE = 2  # 员工转发
 SA_ORIGIN_PLATFORM = 3  # 公众号
 SA_ORIGIN_RANKING_TEMPLATE = 4  # 推送排名榜单
 SA_ORIGIN_PORTAL = 5  # 员工portal
 SA_ORIGIN_APPLICATION_INVITE = 6  # 投递邀请
-
-
