@@ -45,6 +45,26 @@ class RedpacketPageService(PageService):
     def __init__(self):
         super().__init__()
 
+    @gen.coroutine
+    def get_redpacket_info(self, id, cardno, user_id):
+        """获取红包信息"""
+        ret = yield self.infra_redpacket_ds.infra_get_redpacket_info({
+            "id": id,
+            "cardno": cardno,
+            "userId": user_id
+        })
+        return ret
+
+    @gen.coroutine
+    def open_redpacket(self, id, cardno, user_id):
+        """领取红包"""
+        ret = yield self.infra_redpacket_ds.infra_open_redpacket({
+            "id": id,
+            "cardno": cardno,
+            "userId": user_id
+        })
+        return ret
+
     @log_time
     @gen.coroutine
     def __get_card_by_cardno(self, cardno):
@@ -235,7 +255,6 @@ class RedpacketPageService(PageService):
                                                             recom_user_id=user_id, psc=psc)
         except Exception as e:
             self.logger.error(traceback.format_exc())
-
 
     @gen.coroutine
     def handle_red_packet_employee_verification(self, user_id, company_id, redislocker):
@@ -1695,41 +1714,17 @@ class RedpacketPageService(PageService):
 
     @log_time
     @gen.coroutine
-    def get_last_running_hongbao_config_by_position(self, position):
+    def get_last_running_hongbao_config_by_position(self, position_id):
         """
         获取一个职位正在进行的红包活动
         """
-        #
-        # return db.get("""
-        #         select hc.* from hr_hb_config hc
-        #         join hr_hb_position_binding hpb on hpb.hb_config_id = hc.id
-        #         where hpb.position_id = {0} and
-        #             hc.status = 3
-        #         order by hc.id desc limit 1
-        #         """.format(pid))
 
-        running_config_list = yield self.hr_hb_config_ds.get_hr_hb_config_list(
-            conds={
-                "company_id": position.company_id,
-                "status": const.HB_CONFIG_RUNNING
+        share_info = yield self.infra_redpacket_ds.infra_get_rp_position_share_info(
+            {
+                "positionId": position_id
             }
         )
-
-        config_id_list = [c.id for c in running_config_list]
-
-        binding_list = yield self.hr_hb_position_binding_ds.get_hr_hb_position_binding_list(
-            conds={
-                "position_id": position.id
-            })
-
-        filtered_binding_list = [b for b in binding_list if b.hb_config_id in config_id_list]
-
-        ret = ObjectDict()
-        if filtered_binding_list:
-            config_id = filtered_binding_list[0].hb_config_id
-            return [c for c in running_config_list if c.id == config_id][0]
-
-        raise gen.Return(ret)
+        raise gen.Return(share_info.data)
 
     @log_time
     @gen.coroutine

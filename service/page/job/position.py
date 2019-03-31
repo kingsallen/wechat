@@ -396,10 +396,9 @@ class PositionPageService(PageService):
     def infra_get_position_list_rp_ext(self, position_list):
         """获取职位的红包信息"""
 
-        pids_str = ','.join([str(e.id) for e in position_list])
-        params = dict(pids=pids_str)
+        params = [("positionIdList", e.id) for e in position_list]  # todo get方法加list参数，先这样处理下，重构的时候再优雅的解决
         res = yield self.infra_position_ds.get_position_list_rp_ext(params)
-        if res.status == 0:
+        if res.code == '0':
             raise gen.Return([ObjectDict(e) for e in res.data])
         raise gen.Return(res)
 
@@ -433,7 +432,7 @@ class PositionPageService(PageService):
     def infra_get_rp_share_info(self, params):
         """红包职位列表的分享信息"""
         res = yield self.infra_position_ds.get_rp_share_info(params)
-        if res.status == 0:
+        if int(res.code) == 0:
             raise gen.Return(res.data)
         raise gen.Return(res)
 
@@ -472,20 +471,6 @@ class PositionPageService(PageService):
                 position.publish_date = jd_update_date(str_2_date(position.publish_date, self.constant.TIME_FORMAT))
                 position.team_name = team_name_dict.get(pid_teamid_dict.get(position.id, 0), '')
 
-            # 职位红包 #
-            # 逻辑和职位列表页一样, 代码有重复, TODO: 优化
-            rp_position_list = [p for p in position_list if p.in_hb]
-            if position_list and rp_position_list:
-                rpext_list = yield self.infra_get_position_list_rp_ext(rp_position_list)
-
-                for position in position_list:
-                    pext = [e for e in rpext_list if e.pid == position.id]
-                    if pext:
-                        position.remain = pext[0].remain
-                        position.employee_only = pext[0].employee_only
-                        position.is_rp_reward = position.remain > 0
-                    else:
-                        position.is_rp_reward = False
             return position_list, res.data[0]['total_num'] if res.data else 0
         else:
             self.logger.warn(res)

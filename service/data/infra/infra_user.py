@@ -4,10 +4,13 @@ import tornado.gen as gen
 
 import conf.common as const
 import conf.path as path
+import conf.alphacloud_api as api
 from service.data.base import DataService
 from util.common import ObjectDict
-from util.tool.http_tool import http_get, http_post, http_put, unboxing
+from util.tool.http_tool import http_get, http_post, http_put, unboxing, http_get_rp
 from util.common.decorator import log_time
+from setting import settings
+
 
 
 class InfraUserDataService(DataService):
@@ -257,8 +260,8 @@ class InfraUserDataService(DataService):
         return res
 
     @gen.coroutine
-    def get_redpacket_list(self, user_id, params):
-        res = yield http_get(path.INFRA_USER_REDPACKET_LIST.format(user_id), params)
+    def get_redpacket_list(self, params):
+        res = yield http_get_rp(api.redpacket_service.api.CLOUD_USER_REDPACKET_LIST, api.redpacket_service.service, params)
         return res
 
     @gen.coroutine

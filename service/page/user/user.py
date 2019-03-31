@@ -479,15 +479,14 @@ class UserPageService(PageService):
             return True, fav_id
 
     @gen.coroutine
-    def get_redpacket_list(self, user_id, params):
+    def get_redpacket_list(self, params):
         """
         获取红包列表
-        :param user_id:
         :param params:
         :return:
         """
-        ret = yield self.infra_user_ds.get_redpacket_list(user_id, params)
-        if ret.status == const.API_SUCCESS:
+        ret = yield self.infra_user_ds.get_redpacket_list(params)
+        if int(ret.code) == const.API_SUCCESS:
             data = ret.data
         else:
             data = ObjectDict()

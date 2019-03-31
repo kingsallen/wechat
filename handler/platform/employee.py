@@ -307,13 +307,6 @@ class EmployeeBindHandler(BaseHandler):
 
         custom_fields = yield self.employee_ps.get_employee_custom_fields(self.current_user.company.id)
 
-        # 处理员工认证红包
-        yield self.redpacket_ps.handle_red_packet_employee_verification(
-            user_id=self.current_user.sysuser.id,
-            company_id=self.current_user.company.id,
-            redislocker=self.redis
-        )
-
         if custom_fields:
             next_url = self.make_url(path.EMPLOYEE_CUSTOMINFO, self.params, from_wx_template='x')
             custom_fields = True
@@ -395,16 +388,6 @@ class EmployeeBindEmailHandler(BaseHandler):
                 'employee_log_id_None   current_user:{}, result:{}, message:{}, params:{}'.format(self.current_user,
                                                                                                   result, message,
                                                                                                   self.params))
-        employee = yield self.user_ps.get_employee_by_id(employee_id)
-
-        if result and employee:
-            # 处理员工认证红包开始
-            yield self.redpacket_ps.handle_red_packet_employee_verification(
-                user_id=employee.sysuser_id,
-                company_id=employee.company_id,
-                redislocker=self.redis
-            )
-            # 处理员工认证红包结束
 
 
 class RecommendRecordsHandler(BaseHandler):
