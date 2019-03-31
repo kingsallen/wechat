@@ -288,7 +288,7 @@ class PositionHandler(BaseHandler):
                 recom=self.position_ps._make_recom(self.current_user.sysuser.id),
                 escape=["pid", "keywords", "cities", "candidate_source",
                         "employment_type", "salary", "department", "occupations",
-                        "custom", "degree", "page_from", "page_size", "forward_id"]
+                        "custom", "degree", "page_from", "page_size"]
             )
 
         self.params.share = ObjectDict({
@@ -402,7 +402,8 @@ class PositionHandler(BaseHandler):
             "did": did,
             "salary": position_info.salary,
             "hr_chat": bool(parent_company_info.conf_hr_chat),
-            "teamname_custom": teamname_custom["teamname_custom"],
+            # 默认的“团队”做国际化
+            "teamname_custom": self.locale.translate('team') if teamname_custom["teamname_custom"] == '团队' else teamname_custom["teamname_custom"],
             "candidate_source": position_info.candidate_source_num,
             "reward_point": reward,
             "company_name": company_info.abbreviation,
@@ -1258,11 +1259,30 @@ class PositionListHandler(PositionListInfraParamsMixin, BaseHandler):
             transmit_from = int(transmit_from) if int(transmit_from) % 2 else int(transmit_from) + 1
             self.params.update(transmit_from=transmit_from)
 
-        link = self.make_url(
-            path.POSITION_LIST,
-            self.params,
-            recom=self.position_ps._make_recom(self.current_user.sysuser.id),
-            escape=escape)
+        if self.params.forward_id:
+            self.params.pop('forward_id')
+
+        is_valid_employee = False
+        if self.current_user.sysuser.id:
+            is_valid_employee = yield self.employee_ps.is_valid_employee(
+                self.current_user.sysuser.id,
+                company_info.id
+            )
+        if is_valid_employee:
+            forward_id = re.sub('-', '', str(uuid.uuid1()))
+
+            link = self.make_url(
+                path.POSITION_LIST,
+                self.params,
+                recom=self.position_ps._make_recom(self.current_user.sysuser.id),
+                forward_id=forward_id,
+                escape=escape)
+        else:
+            link = self.make_url(
+                path.POSITION_LIST,
+                self.params,
+                recom=self.position_ps._make_recom(self.current_user.sysuser.id),
+                escape=escape)
 
         self.params.share = ObjectDict({
             "cover": cover,

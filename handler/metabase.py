@@ -456,11 +456,17 @@ class MetaBaseHandler(AtomHandler):
                 recom_id=self.current_user.get("recom", {}).get("id", 0),
                 qxuser_id=self.current_user.get("qxuser", {}).get("id", 0),
                 wxuser_id=self.current_user.get("wxuser", {}).get("id", 0),
-                wechat_id=self.current_user.get("wechat", {}).get("id", 0))
-
+                wechat_id=self.current_user.get("wechat", {}).get("id", 0),
+            )
             user_id = self.current_user.get("sysuser", {}).get("id", 0)
         else:
             user_id = 0
+
+        if self.json_args.candidate_user_id and self.json_args.pid:
+            customs.update(
+                invite_user_id=self.json_args.candidate_user_id,
+                pid=self.json_args.pid
+            )
 
         log_info_common = ObjectDict(
             req_time=curr_now(),

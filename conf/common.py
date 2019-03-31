@@ -148,7 +148,7 @@ API_WARNING = 2
 
 # 入库的申请来源
 INVITE_ORIGIN = 524288  # 邀请投递申请
-FORWARD_ORIGIN = 1048576  # 转发申请
+FORWARD_ORIGIN = 1048576  # 员工转发申请
 
 # 通用状态的布尔值
 YES = 1
