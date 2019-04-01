@@ -240,7 +240,11 @@ class ChatPageService(PageService):
         )
         self.logger.debug("get_chatbot_reply==>create_new_context:{} ".format(create_new_context))
         try:
-            if int(flag) == 1 or switch == const.API_FAILURE:
+            if int(flag) == 1:
+                res = yield http_post(
+                    route='{host}{uri}'.format(host=settings['chatbot_host'], uri='campus_qa.api'), jdata=params,
+                    infra=False)
+            elif switch == const.API_FAILURE:
                 res = yield http_post(
                     route='{host}{uri}'.format(host=settings['chatbot_host'], uri='campus_qa.api'), jdata=params,
                     infra=False)
