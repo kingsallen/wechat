@@ -258,11 +258,11 @@ class BaseHandler(MetaBaseHandler):
 
         # 神策数据关联：如果用户已绑定手机号，对用户做注册
         if bool(user.username.isdigit()):
-            self.sa.track_signup(user_id, self._sc_cookie_id)
             self.logger.debug("[sensors_signup_oauth]ret_user_id: {}, origin_user_id: {}".format(user_id,
                                                                                                  self._sc_cookie_id))
+            self.sa.track_signup(user_id, self._sc_cookie_id)
 
-        self.track('cWxAuth', properties={'origin': source}, distinct_id=user_id, is_login_id=True)
+        self.track('cWxAuth', properties={'origin': source}, distinct_id=user_id, is_login_id=True if bool(user.username.isdigit()) else False)
         # 设置用户首次授权时间
         self.profile_set(profiles={'first_oauth_time': user.register_time}, distinct_id=user_id, is_login_id=True, once=True)
 
@@ -593,6 +593,7 @@ class BaseHandler(MetaBaseHandler):
         """获取神策设备ID"""
         sc_cookie_name = const.SENSORS_COOKIE
         sc_cookie = unquote(self.get_cookie(sc_cookie_name) or '{}')
+        self.logger.debug("sc_cookie: {}".format(sc_cookie))
         sc_cookie = ObjectDict(json.loads(sc_cookie))
         self._sc_cookie_id = sc_cookie.distinct_id
 
