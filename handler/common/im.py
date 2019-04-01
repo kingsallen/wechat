@@ -585,10 +585,10 @@ class ChatHandler(BaseHandler):
             flag=self.flag,
             create_new_context=create_new_context,
             from_textfield=from_textfield,
-            switch=ret.status
+            switch=ret['data']['valid']
         )
         self.logger.debug('_handle_chatbot_message  flag:{}'.format(self.flag))
-        self.logger.debug('_handle_chatbot_message  switch:{}'.format(ret.status))
+        self.logger.debug('_handle_chatbot_message  switch:{}'.format(ret['data']['valid']))
         self.logger.debug('_handle_chatbot_message  create_new_context{}'.format(create_new_context))
         for bot_message in bot_messages:
             msg_type = bot_message.msg_type
