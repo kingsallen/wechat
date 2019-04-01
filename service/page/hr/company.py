@@ -353,3 +353,4 @@ class CompanyPageService(PageService):
         """
         res = yield self.infra_company_ds.check_oms_switch_status(company_id, module_name)
         return res
+

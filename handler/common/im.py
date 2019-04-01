@@ -572,6 +572,10 @@ class ChatHandler(BaseHandler):
         """处理 chatbot message
         获取消息 -> pub消息 -> 入库
         """
+        ret = yield self.company_ps.check_oms_switch_status(
+            self.current_user.company.id,
+            "社招"
+        )
         bot_messages = yield self.chat_ps.get_chatbot_reply(
             current_user=self.current_user,
             message=user_message,
@@ -580,10 +584,12 @@ class ChatHandler(BaseHandler):
             position_id=self.position_id,
             flag=self.flag,
             create_new_context=create_new_context,
-            from_textfield=from_textfield
+            from_textfield=from_textfield,
+            switch=ret['data']['valid']
         )
         self.logger.debug('_handle_chatbot_message  flag:{}'.format(self.flag))
-        self.logger.debug('_handle_chatbot_message  create_new_context:{}'.format(create_new_context))
+        self.logger.debug('_handle_chatbot_message  switch:{}'.format(ret['data']['valid']))
+        self.logger.debug('_handle_chatbot_message  create_new_context{}'.format(create_new_context))
         for bot_message in bot_messages:
             msg_type = bot_message.msg_type
             compound_content = bot_message.compound_content
