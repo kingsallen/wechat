@@ -244,7 +244,7 @@ class ChatPageService(PageService):
                 res = yield http_post(
                     route='{host}{uri}'.format(host=settings['chatbot_host'], uri='campus_qa.api'), jdata=params,
                     infra=False)
-            elif switch == const.API_FAILURE:
+            elif switch == 0:
                 res = yield http_post(
                     route='{host}{uri}'.format(host=settings['chatbot_host'], uri='campus_qa.api'), jdata=params,
                     infra=False)

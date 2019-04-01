@@ -589,7 +589,7 @@ class ChatHandler(BaseHandler):
         )
         self.logger.debug('_handle_chatbot_message  flag:{}'.format(self.flag))
         self.logger.debug('_handle_chatbot_message  switch:{}'.format(ret.status))
-        self.logger.debug('_handle_chatbot_message  create_new_context:{}'.format(create_new_context))
+        self.logger.debug('_handle_chatbot_message  create_new_context{}'.format(create_new_context))
         for bot_message in bot_messages:
             msg_type = bot_message.msg_type
             compound_content = bot_message.compound_content
