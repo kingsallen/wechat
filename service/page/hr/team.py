@@ -163,7 +163,7 @@ class TeamPageService(PageService):
                     'team_id': team.id
                 },
                 fields=position_fields,
-                appends=["ORDER BY priority desc, update_time desc"]
+                appends=["ORDER BY priority asc, update_time desc"]
             )
 
             other_teams = yield self.hr_team_ds.get_team_list(
