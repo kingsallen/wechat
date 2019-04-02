@@ -260,7 +260,7 @@ class BaseHandler(MetaBaseHandler):
         if bool(user.username.isdigit()):
             self.logger.debug("[sensors_signup_oauth]ret_user_id: {}, origin_user_id: {}".format(user_id,
                                                                                                  self._sc_cookie_id))
-            self.sa.track_signup(user_id, self._sc_cookie_id)
+            self.sa.track_signup(user_id, self._sc_cookie_id or user_id)
 
         self.track('cWxAuth', properties={'origin': source}, distinct_id=user_id, is_login_id=True if bool(user.username.isdigit()) else False)
         # 设置用户首次授权时间
