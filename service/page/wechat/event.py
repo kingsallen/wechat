@@ -215,10 +215,23 @@ class EventPageService(PageService):
             template = yield self.hr_wx_template_message_ds.get_wx_template(
                 conds={"id": msg_record.template_id})
             template_id = template.sys_template_id
-            self.sa.track(distinct_id=current_user.wxuser.sysuser_id,
-                          event_name="receiveTemplateMessage",
-                          properties={"template_id": template_id},
-                          is_login_id=True if bool(user_record.username.isdigit()) else False)
+            try:
+                self.sa.track(distinct_id=current_user.wxuser.sysuser_id,
+                              event_name="receiveTemplateMessage",
+                              properties={"template_id": template_id},
+                              is_login_id=True if bool(user_record.username.isdigit()) else False)
+                self.logger.debug(
+                    '[sensors_track] distinct_id:{}, event_name: {}, properties: {}, is_login_id: {}'.format(
+                        current_user.wxuser.sysuser_id,
+                        "receiveTemplateMessage",
+                        {"template_id": template_id},
+                        True if bool(user_record.username.isdigit()) else False))
+            except Exception as e:
+                self.logger.error(
+                    '[sensors_track_exception] distinct_id: {}, event_name: {}, properties: {}, is_login_id: {}, error_track: {}'.format(
+                        current_user.wxuser.sysuser_id, "receiveTemplateMessage", {"template_id": template_id},
+                        True if bool(user_record.username.isdigit()) else False,
+                        traceback.format_exc()))
         raise gen.Return()
 
     @gen.coroutine

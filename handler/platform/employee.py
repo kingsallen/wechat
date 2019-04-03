@@ -59,7 +59,7 @@ class AwardsLadderPageHandler(BaseHandler):
                                  data={"policy_link": policy_link})
 
     def _add_sensor_track(self):
-        if self.params.from_template_message == const.TEMPLATES.WX_RANKING_NOTICE_TO_EMPLOYEE:
+        if self.params.from_template_message == str(const.TEMPLATES.WX_RANKING_NOTICE_TO_EMPLOYEE):
             origin = const.SA_ORIGIN_RANKING_TEMPLATE
         else:
             origin = const.SA_ORIGIN_PORTAL

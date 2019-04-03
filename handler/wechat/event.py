@@ -251,15 +251,8 @@ class WechatOauthHandler(MetaBaseHandler):
         """微信群发事件 referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1481187827_i0l21&t=0.944874910600048"""
         self.send_xml()
 
-    @gen.coroutine
-    def event_TEMPLATESENDJOBFINISH(self):
-        """消息模板推送结果 referer: https://mp.weixin.qq.com/wiki?action=doc&id=mp1433751277&t=0.29629938341489237
-        在模版消息发送任务完成后，微信服务器会将是否送达成功作为通知，发送到开发者中心中填写的服务器配置地址中"""
-        self.send_xml()
-
     def on_finish(self):
         """继承MetaBaseHandler.on_finish(),添加部分日志"""
-
         self.log_info = {"wxmsg": self.msg}
         super().on_finish()
 
