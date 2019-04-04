@@ -214,7 +214,7 @@ class ChatPageService(PageService):
         raise gen.Return(company_conf)
 
     @gen.coroutine
-    def get_chatbot_reply(self, message, user_id, hr_id, position_id, flag, switch, create_new_context, current_user,
+    def get_chatbot_reply(self, message, user_id, hr_id, position_id, flag, social, campus, create_new_context, current_user,
                           from_textfield):
         """ 调用 chatbot 返回机器人的回复信息
                https://wiki.moseeker.com/chatbot.md
@@ -226,7 +226,8 @@ class ChatPageService(PageService):
         :param create_new_context: meet mobot标识
         :param current_user:
         :param from_textfield:
-        :param switch:社招判断开关 1：校招；0：社招
+        :param social:社招判断开关 1：开启；
+        :param campus:校招判断开关 1：开启；
         """
         messages = []
 
@@ -244,7 +245,7 @@ class ChatPageService(PageService):
                 res = yield http_post(
                     route='{host}{uri}'.format(host=settings['chatbot_host'], uri='campus_qa.api'), jdata=params,
                     infra=False)
-            elif switch == 0:
+            elif flag is None and social == 0 and campus == 1:
                 res = yield http_post(
                     route='{host}{uri}'.format(host=settings['chatbot_host'], uri='campus_qa.api'), jdata=params,
                     infra=False)
