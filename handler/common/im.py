@@ -578,7 +578,7 @@ class ChatHandler(BaseHandler):
         )
         campus = yield self.company_ps.check_oms_switch_status(
             self.current_user.company.id,
-            "校招招"
+            "校招"
         )
         bot_messages = yield self.chat_ps.get_chatbot_reply(
             current_user=self.current_user,
