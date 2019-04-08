@@ -292,6 +292,17 @@ def unboxing_v2(http_response):
     return data
 
 
+def unboxing_v2(http_response):
+    """解析服务返回结果"""
+
+    result = bool(http_response.code == constant.NEWINFRA_API_SUCCESS)
+    data = ObjectDict()
+    if result:
+        data = http_response.data or ObjectDict()
+
+    return data
+
+
 @gen.coroutine
 def _async_http_get(route, jdata=None, timeout=5, method='GET', infra=True, headers=None):
     """可用 HTTP 动词为 GET 和 DELETE"""
