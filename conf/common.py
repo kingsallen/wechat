@@ -470,6 +470,8 @@ NATIONAL_CODE = [
     {'id': 1, 'code': '+86', 'country': '中国'}
 ]
 
+CHINA_CODE = 86
+
 MOBILE_CODE_OPT_TYPE = ObjectDict({
     'code_register': 1,
     'forget_password': 2,

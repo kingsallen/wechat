@@ -1,7 +1,6 @@
 # coding=utf-8
 
 import tornado.gen as gen
-
 import conf.common as const
 import conf.path as path
 
