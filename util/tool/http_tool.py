@@ -81,32 +81,6 @@ def _serialize_data(service, jdata):
 
 
 @gen.coroutine
-def http_get_rp(route, service, jdata=None, timeout=30):
-    route = "{0}/{1}{2}".format(settings['cloud'], service.service_name, route)
-    if isinstance(jdata, list):
-        jdata.append(("appid", service.appid))
-        jdata.append(("interfaceid", service.interfaceid))
-    elif isinstance(jdata, dict):
-        jdata.update({"appid": service.appid, "interfaceid": service.interfaceid})
-    ret = yield _v2_async_http_get(route, jdata, timeout=timeout, method='GET')
-    return ret
-
-
-@gen.coroutine
-def http_get_clound(route, service, jdata=None, timeout=3):
-    route = "{0}/{1}{2}".format(settings['cloud'], service.service_name, route)
-    if not service.appid or not service.interfaceid:
-        raise InfraOperationError('未检测到cloud服务对应的appid或interfaceid')
-
-    if not jdata:
-        jdata = {}
-
-    jdata.update({"appid": service.appid, "interfaceid": service.interfaceid})
-    ret = yield _async_http_get(route, jdata, timeout=timeout, method='GET', infra=False)
-    return ret
-
-
-@gen.coroutine
 def http_get(route, jdata=None, timeout=30, infra=True, headers=None):
     ret = yield _async_http_get(route, jdata, timeout=timeout, method='GET',
                                 infra=infra, headers=headers)

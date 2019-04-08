@@ -13,10 +13,11 @@ import conf.path as path
 from service.data.base import DataService
 from util.common.decorator import cache
 from util.tool.dict_tool import sub_dict, rename_keys
-from util.tool.http_tool import http_get, unboxing, http_get_v2
+from util.tool.http_tool import http_get, unboxing, http_get_v2, unboxing_v2, http_post_v2, unboxing_fetchone
 from pypinyin import lazy_pinyin
 from conf.newinfra_service_conf.service_info import dict_service
 from conf.newinfra_service_conf.dictionary import dictionary
+
 
 class InfraDictDataService(DataService):
     cached_rocket_major = None
@@ -48,7 +49,7 @@ class InfraDictDataService(DataService):
             raise ValueError('invalid parent_code')
 
         params = ObjectDict(parent_code=parent_code)
-        response = yield http_get(path.DICT_CONSTANT, params)
+        response = yield http_post_v2(dictionary.NEWINFRA_DICT_CONSTANT_CUSTOM, dict_service, params)
         return self.make_const_dict_result(response, parent_code, locale)
 
     @gen.coroutine
@@ -58,7 +59,7 @@ class InfraDictDataService(DataService):
         hot为热门国家
         """
 
-        countries_res = yield http_get(path.DICT_COUNTRY)
+        countries_res = yield http_get_v2(dictionary.NEWINFRA_DICT_COUNTRY_ALL, dict_service)
         continent_res = yield self.get_const_dict(
             parent_code=const.CONSTANT_PARENT_CODE.CONTINENT)
 
@@ -71,7 +72,7 @@ class InfraDictDataService(DataService):
         if not name:
             raise ValueError('name')
 
-        countries_res = yield http_get(path.DICT_COUNTRY, jdata={'name': name})
+        countries_res = yield http_post_v2(dictionary.NEWINFRA_DICT_COUNTRY_CUSTOM, dict_service, jdata={'name': name})
         result, data = countries_res.status == 0, countries_res.data
 
         if result and data:
@@ -84,8 +85,12 @@ class InfraDictDataService(DataService):
     def get_sms_country_codes(self, display_locale):
         """获取国家电话区号"""
 
-        countries_res = yield http_get(path.DICT_COUNTRY)
-        result, data = unboxing(countries_res)
+        if self.cached_sms_country_codes:
+            return self.cached_sms_country_codes
+
+        countries_res = yield http_get_v2(dictionary.NEWINFRA_DICT_COUNTRY_ALL, dict_service)
+
+        data = unboxing_v2(countries_res)
 
         res = []
         for country in data:
@@ -106,9 +111,9 @@ class InfraDictDataService(DataService):
         """仅获取国家区号列表
         将 86 放在第一个
         """
-        countries_res = yield http_get(path.DICT_COUNTRY)
+        countries_res = yield http_get_v2(dictionary.NEWINFRA_DICT_COUNTRY_ALL, dict_service)
 
-        result, data = unboxing(countries_res)
+        data = unboxing_v2(countries_res)
 
         code_list = [str(country['code']) for country in data
                      if country['sms_enabled']]
@@ -127,7 +132,7 @@ class InfraDictDataService(DataService):
             for c in countries:
                 d = sub_dict(c, filter_keys)
                 d.code = d.id
-                if locale_display == "en_US":
+                if locale_display.code == "en_US":
                     d.name = d.ename
                 d.pop('id', None)
                 yield d
@@ -163,7 +168,7 @@ class InfraDictDataService(DataService):
     def order_country_by_first_letter(content, locale_display):
         res, heads = [], []
         for el in content:
-            if locale_display == "en_US":
+            if locale_display.code == "en_US":
                 h = el.get('name')[0] if el.get('name') else el.get('name')
             else:
                 h = lazy_pinyin(
@@ -188,7 +193,7 @@ class InfraDictDataService(DataService):
         """获取常量字典后的结果处理"""
         res_data = http_response.data
         ret = ObjectDict()
-        for el in res_data.get(str(parent_code)):
+        for el in res_data:
             el = ObjectDict(el)
             setattr(ret, str(el.code), locale.translate(el.name) if isinstance(el.name, str) and locale else el.name)
         ret = collections.OrderedDict(sorted(ret.items()))
@@ -199,11 +204,8 @@ class InfraDictDataService(DataService):
         res_data = http_response.data
         collegecode_list = []
         if isinstance(res_data, list):
-            collegecode_nested_list = list(itertools.chain(
-                map(lambda x: x.get("children", []), res_data)))
-            for cn_list in collegecode_nested_list:
-                for pair in cn_list:
-                    collegecode_list.append(pair)
+            for cn in collegecode_list:
+                collegecode_list.append(cn)
         return collegecode_list
 
     @gen.coroutine
@@ -219,15 +221,18 @@ class InfraDictDataService(DataService):
     @gen.coroutine
     def get_colleges(self):
         """获取所有学校列表"""
-        response = yield http_get(path.DICT_COLLEGE)
-        return self.make_college_list_result(response)
+        response = yield http_get_v2(dictionary.NEWINFRA_DICT_COLLEGE_ALL, dict_service)
+        return unboxing_v2(response)
 
     @cache(ttl=60 * 60 * 5)
     @gen.coroutine
     def get_mainland_colleges(self):
         """获取国内所有院校列表"""
-        response = yield http_get(path.DICT_MAINLAND_COLLEGE)
-        colleges = self.make_college_list_result(response)
+        code = const.CHINA_CODE
+        res = yield http_post_v2(dictionary.NEWINFRA_DICT_COUNTRY_CUSTOM, dict_service, jdata=dict(code=code))
+        country_id = unboxing_fetchone(res).get("id")
+        response = yield http_post_v2(dictionary.NEWINFRA_DICT_COLLEGE_BY_COUNTRY_CODE, dict_service, [country_id])
+        colleges = unboxing_v2(response)
         ret = sorted(colleges, key=lambda x: lazy_pinyin(x.get('name'), style=pypinyin.STYLE_FIRST_LETTER)[0].upper())
         data = ObjectDict({"list": ret})
         return data
@@ -236,10 +241,8 @@ class InfraDictDataService(DataService):
     @gen.coroutine
     def get_overseas_colleges(self, country_id):
         """根据id获取国外院校列表"""
-        data = ObjectDict({
-            "country_id": country_id
-        })
-        response = yield http_get(path.DICT_COLLEGE_BY_ID, jdata=data)
+        params = [country_id]
+        response = yield http_post_v2(dictionary.NEWINFRA_DICT_COLLEGE_BY_COUNTRY_CODE, dict_service, params)
         colleges = response.data
         ret = sorted(colleges, key=lambda x: lazy_pinyin(x.get('name'), style=pypinyin.STYLE_FIRST_LETTER)[0].upper())
         data = ObjectDict({"list": ret})
@@ -258,7 +261,7 @@ class InfraDictDataService(DataService):
     def _get_level_1_cities(self):
         """获取一级城市列表"""
         params = dict(level=1, is_using=1)
-        response = yield http_get(path.DICT_CITIES, params)
+        response = yield http_post_v2(dictionary.NEWINFRA_DICT_CITY_CUSTOM, dict_service, params)
         return self._make_level_1_cities_result(response)
 
     def _make_level_1_cities_result(self, http_response):
@@ -271,7 +274,7 @@ class InfraDictDataService(DataService):
     def _get_level_2_cities(self):
         """获取二级城市列表"""
         params = dict(level=2, is_using=1)
-        response = yield http_get(path.DICT_CITIES, params)
+        response = yield http_post_v2(dictionary.NEWINFRA_DICT_CITY_CUSTOM, dict_service, params)
         return self._make_level_2_cities_result(response)
 
     @staticmethod
@@ -297,7 +300,7 @@ class InfraDictDataService(DataService):
 
         cities, ret, heads = [], [], []
 
-        if locale_display == "en_US":
+        if locale_display.code == "en_US":
             sub_name = ['code', 'ename']
         else:
             sub_name = ['code', 'name']
@@ -400,7 +403,7 @@ class InfraDictDataService(DataService):
     @gen.coroutine
     def get_mars_industries(self):
         """获取Mars行业"""
-        ret = yield http_get(path.DICT_INDUSTRY_MARS, dict(parent=0))
+        ret = yield http_post_v2(dictionary.NEWINFRA_DICT_MARS_INDUSTRY, dict_service, dict(page_size=500))
         ret = yield self.make_mars_industries_result(ret)
         return ret
 
@@ -409,12 +412,12 @@ class InfraDictDataService(DataService):
     def make_mars_industries_result(http_response):
         res_data = http_response.data
         industries = []
-        for el in res_data:
+        for el in res_data.get("data"):
             el = ObjectDict(el)
             out = ObjectDict()
             out.text = el.name
-            level2 = yield http_get(path.DICT_INDUSTRY_MARS, dict(parent=el.code))
-            out.list = list(map(lambda x: sub_dict(x, ['code', 'name']), level2.data))
+            level2 = yield http_post_v2(dictionary.NEWINFRA_DICT_MARS_INDUSTRY, dict_service, dict(types=[el.code], page_size=500))
+            out.list = list(map(lambda x: sub_dict(x, ['code', 'name']), level2.data.get("data")))
             industries.append(out)
         return industries
 
@@ -425,7 +428,7 @@ class InfraDictDataService(DataService):
         industries
         level1 + level2
         """
-        ret = yield http_get(path.DICT_INDUSTRY, dict(parent=0))
+        ret = yield http_get_v2(dictionary.NEWINFRA_DICT_INDUSTRY_PARENT, dict_service)
         if level == 2:
             ret = yield self.make_industries_result(ret, locale_display)
         return ret
@@ -433,7 +436,7 @@ class InfraDictDataService(DataService):
     @gen.coroutine
     def get_industries_raw(self):
         """获取行业raw数据"""
-        ret = yield http_get(path.DICT_INDUSTRY)
+        ret = yield http_get_v2(dictionary.NEWINFRA_DICT_INDUSTRY, dict_service)
         return ret
 
     @staticmethod
@@ -450,7 +453,7 @@ class InfraDictDataService(DataService):
             else:
                 sub_name = ['code', 'name']
                 out.text = el.name
-            level2 = yield http_get(path.DICT_INDUSTRY, dict(parent=el.code))
+            level2 = yield http_post_v2(dictionary.NEWINFRA_DICT_INDUSTRY_CODE_LIST, dict_service, [el.code])
             rename_mapping = {'ename': 'name'}
 
             out.list = list(map(lambda x: rename_keys(sub_dict(x, sub_name), rename_mapping), level2.data))
@@ -466,7 +469,7 @@ class InfraDictDataService(DataService):
         if not isinstance(code, int):
             raise ValueError('invalid code')
 
-        http_response = yield http_get(path.DICT_POSITION, {})
+        http_response = yield http_get_v2(dictionary.NEWINFRA_DICT_POSITION, dict_service)
         return self.get_function_result(http_response, code, locale_display)
 
     def get_function_result(self, response, code=0, locale_display=None):
@@ -509,8 +512,8 @@ class InfraDictDataService(DataService):
             return self.cached_rocket_major
         else:
 
-            L1_res = yield http_get(path.DICT_CONSTANT,
-                                    jdata=dict(parent_code=const.CONSTANT_PARENT_CODE.ROCKETMAJOR_L1))
+            L1_res = yield http_post_v2(dictionary.NEWINFRA_DICT_CONSTANT_CUSTOM, dict_service,
+                                        jdata=dict(parent_code=const.CONSTANT_PARENT_CODE.ROCKETMAJOR_L1))
 
             L1_res_data = L1_res.data.get(str(const.CONSTANT_PARENT_CODE.ROCKETMAJOR_L1))
 
@@ -542,12 +545,11 @@ class InfraDictDataService(DataService):
         :param code: 推荐关系编号
         :return:
         """
-        res = yield http_get(
-            path.DICT_COMMENT_TAGS_BY_CODE,
-            jdata=dict(code=code)
-        )
+        res = yield http_post_v2(
+            dictionary.NEWINFRA_DICT_REFERRAL_EVALUATE, dict_service,
+            jdata=[int(code)])
         res_data = res.data
-        returned_data = [{"zh": item['tag'], "en": item['tag_en']} for item in res_data]
+        returned_data = [{"zh": item['tag'], "en": item['tag_en']} for item in res_data.get(code)]
         return returned_data
 
     @gen.coroutine

@@ -11,8 +11,7 @@ class DictCityHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def get(self):
-        locale_display = self.get_current_locale()
-        cities = yield self.dictionary_ps.get_cities(locale_display)
+        cities = yield self.dictionary_ps.get_cities(self.locale)
         self.send_json_success(cities)
 
 
@@ -35,9 +34,8 @@ class DictFunctionHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def get(self):
-        locale_display = self.get_current_locale()
         functions = yield self.dictionary_ps.get_functions(
-            code=int(self.params.fcode) if self.params.fcode else 0, locale_display=locale_display)
+            code=int(self.params.fcode) if self.params.fcode else 0, locale_display=self.locale)
         self.send_json_success(functions)
 
 
@@ -82,8 +80,7 @@ class DictCountryHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         order = self.params.order
-        locale_display = self.get_current_locale()
-        countries = yield self.dictionary_ps.get_countries(order=order, locale_display=locale_display)
+        countries = yield self.dictionary_ps.get_countries(order=order, locale_display=self.locale)
         self.send_json_success(countries)
 
 
