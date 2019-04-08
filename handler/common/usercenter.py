@@ -44,7 +44,7 @@ class UsercenterHandler(BaseHandler):
         if not self.current_user.sysuser.id:
             res = ObjectDict(data=ObjectDict)
         else:
-            res = yield self.usercenter_ps.get_user(self.current_user.sysuser.id)
+            res = yield self.user_ps.get_user_by_id(self.current_user.sysuser.id)
 
         # 检查员工绑定状态
         bind_status = yield self.employee_ps.get_employee_bind_status(
@@ -59,14 +59,14 @@ class UsercenterHandler(BaseHandler):
             unread_praise = 0
 
         self.send_json_success(data=ObjectDict(
-            headimg=self.static_url(res.data.headimg or const.SYSUSER_HEADIMG),
-            name=res.data.name or res.data.nickname,
-            email=res.data.email,
+            headimg=self.static_url(res.headimg or const.SYSUSER_HEADIMG),
+            name=res.name or res.nickname,
+            email=res.email,
             mobile_display=self.current_user.sysuser.mobile_display,  # do not pass '0' to FE
             # 该公司是否启用了认证
             bind_disable=employee_cert_conf.disable == const.OLD_NO,
             bind_status=fe_bind_status,
-            has_password=bool(res.data.password),
+            has_password=bool(res.password),
             unread_praise=unread_praise
         ))
 
@@ -86,7 +86,7 @@ class UsercenterHandler(BaseHandler):
                 "name": self.params.name,
             })
 
-            if res.status == const.API_SUCCESS:
+            if res.code == const.NEWINFRA_API_SUCCESS:
                 self.send_json_success()
                 return
             else:
@@ -112,7 +112,7 @@ class UsercenterHandler(BaseHandler):
             res = yield self.usercenter_ps.update_user(self.current_user.sysuser.id, params={
                 "email": self.params.email,
             })
-            if res.status == const.API_SUCCESS:
+            if res.code == const.NEWINFRA_API_SUCCESS:
                 self.send_json_success()
                 return
         else:
@@ -137,7 +137,7 @@ class UsercenterHandler(BaseHandler):
         res = yield self.usercenter_ps.post_resetpassword(self.current_user.sysuser.country_code,
                                                           self.current_user.sysuser.username,
                                                           self.params.password)
-        if res.status != const.API_SUCCESS:
+        if res.code != const.NEWINFRA_API_SUCCESS:
             self.send_json_error(message=res.message)
             raise gen.Return()
 
@@ -270,8 +270,8 @@ class UploadHandler(BaseHandler):
     def post_avatar(self):
         """配置-设置头像"""
 
-        res = yield self.usercenter_ps.get_user(self.current_user.sysuser.id)
-        if res.data:
+        res = yield self.user_ps.get_user_by_id(self.current_user.sysuser.id)
+        if res:
             upload_settings = ObjectDict()
             upload_settings[
                 "filename_prefix"] = "upload/avatar/{}".format(self.current_user.sysuser.id)
@@ -289,7 +289,7 @@ class UploadHandler(BaseHandler):
                 "headimg": result.data,
             })
 
-            if res.status == const.API_SUCCESS:
+            if res.code == const.NEWINFRA_API_SUCCESS:
                 self.send_json_success(data={
                     "url": self.static_url(result.data)
                 })

@@ -3,13 +3,14 @@
 import tornado.gen as gen
 from tornado.testing import AsyncTestCase, gen_test
 
-import conf.alphacloud_api as api
 import conf.path as path
 import conf.common as const
 from conf.newinfra_service_conf.position import position
 from conf.newinfra_service_conf.search import search
 from conf.newinfra_service_conf.service_info import position_service, sharechain_service, search_service
 from conf.newinfra_service_conf.sharechain import sharechain
+from conf.newinfra_service_conf.referral import redpacket
+from conf.newinfra_service_conf.service_info import redpacket_service
 from service.data.base import DataService
 from service.data.infra.framework.client.client import ServiceClientFactory
 from thrift_gen.gen.position.service.PositionServices import Client as PositionServiceClient
@@ -51,7 +52,7 @@ class InfraPositionDataService(DataService):
     @gen.coroutine
     def get_position_list_rp_ext(self, params):
         """获取职位的红包信息"""
-        ret = yield http_get_rp(api.redpacket_service.api.CLOUD_POSITION_LIST_RP_EXT, api.redpacket_service.service, params)
+        ret = yield http_get_v2(redpacket.CLOUD_POSITION_LIST_RP_EXT, redpacket_service, params)
         return ret
 
     @gen.coroutine
@@ -63,7 +64,7 @@ class InfraPositionDataService(DataService):
     @gen.coroutine
     def get_rp_share_info(self, params):
         """红包职位列表的分享信息"""
-        ret = yield http_get_rp(api.redpacket_service.api.CLOUD_RP_POSITION_LIST_SHARE_INFO, api.redpacket_service.service, params)
+        ret = yield http_get_v2(redpacket.CLOUD_RP_POSITION_LIST_SHARE_INFO, redpacket_service, params)
         return ret
 
     @gen.coroutine

@@ -85,7 +85,6 @@ class RedPacketConsumer(Consumer):
             # consumer. Otherwise, it will be overwhelmed
             data = json.loads(str(body, encoding="utf-8"))
             data['rp_type'] = basic_deliver.routing_key.split('.')[0]
-            self.redpacket_ps.handle_red_packet_from_rabbitmq(data)
         except Exception as e:
             logger.error("PikaClient: handle message error:{}".format(e))
             self.channel.add_on_close_callback(self.on_channel_closed)
