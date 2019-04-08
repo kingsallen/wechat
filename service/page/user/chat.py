@@ -249,6 +249,10 @@ class ChatPageService(PageService):
                 res = yield http_post(
                     route='{host}{uri}'.format(host=settings['chatbot_host'], uri='campus_qa.api'), jdata=params,
                     infra=False)
+            elif flag == 0 and social == 0 and campus == 1:
+                res = yield http_post(
+                    route='{host}{uri}'.format(host=settings['chatbot_host'], uri='campus_qa.api'), jdata=params,
+                    infra=False)
             else:
                 res = yield http_post(
                     route='{host}{uri}'.format(host=settings['chatbot_host'], uri='qa.api'), jdata=params,
