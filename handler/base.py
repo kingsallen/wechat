@@ -457,14 +457,20 @@ class BaseHandler(MetaBaseHandler):
             source = const.WECHAT_REGISTER_SOURCE_QX
 
         # 创建 user_user
-        user_id = yield self.user_ps.create_user_user(
+        res = yield self.user_ps.create_user_user(
             userinfo,
             wechat_id=self._wechat.id,
             remote_ip=self.request.remote_ip,
             source=source)
 
-        if user_id:
+        user = res.data
+        user_id = user.id if user else 0
+        if res.code == const.NEWINFRA_API_SUCCESS:
             self._log_customs.update(new_user=const.YES)
+        elif res.code == const.NEWINFRA_API_USER_NOT_EXIST:
+            yield self.user_ps.update_user_user(userinfo)
+            user = yield self.user_ps.get_user_user({"unionid": userinfo.unionid})
+            user_id = user.id or 0
 
         self.logger.debug("[_handle_user_info]user_id: {}".format(user_id))
 
@@ -483,11 +489,8 @@ class BaseHandler(MetaBaseHandler):
         # 设置用户首次授权时间
         self.profile_set(profiles={'first_oauth_time': user.register_time}, distinct_id=user_id, is_login_id=True, once=True)
 
-        # 创建 qx 的 user_wx_user
-        yield self.user_ps.create_qx_wxuser_by_userinfo(userinfo, user_id)
-
         # 静默授权时同步将用户信息，更新到qxuser和user_user
-        yield self._sync_userinfo(self._unionid, userinfo)
+        yield self._sync_userinfo(self._unionid, user_id, userinfo)
 
         if not self._authable(self._wechat.type):
             # 该企业号是订阅号 则无法获得当前 wxuser 信息, 无需静默授权
@@ -527,17 +530,16 @@ class BaseHandler(MetaBaseHandler):
         """根据企业号 openid 和 unionid 创建企业号微信用户"""
         wxuser = None
         if self.is_platform or self.is_help:
-            wxuser = yield self.user_ps.create_user_wx_user_ent(
-                openid, unionid, self._wechat.id)
+            wxuser = yield self.user_ps.bind_wxuser(unionid=unionid, openid=openid, wechat_id=self._wechat.id)
         raise gen.Return(wxuser)
 
     @gen.coroutine
-    def _sync_userinfo(self, unionid, userinfo):
+    def _sync_userinfo(self, unionid, user_id, userinfo):
         """静默授权时同步将用户信息，更新到qxuser和user_user"""
         # todo(niuzhenya@moseeker.com) 此处更新没有将所有wxuser的wxinfo都做更新，原因：wxuser的info没有展示的地方，展示目前都用的是user_user的info;
         # todo 过多的冗余字段，可以考虑在后期将数据库的结构优化
-        yield self.user_ps.update_user_wx_info(unionid, userinfo)
-        # yield self.user_ps.update_wxuser_wx_info(unionid, userinfo)
+        yield self.user_ps.update_user_wx_info(user_id, userinfo)
+        yield self.user_ps.update_wxuser_wx_info(unionid, userinfo)
 
     def _authable(self, wechat_type):
         """返回当前公众号是否可以 OAuth
@@ -714,8 +716,7 @@ class BaseHandler(MetaBaseHandler):
             # 只对微信 oauth 用户创建qx session
             session.qxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
                 unionid=self._unionid,
-                wechat_id=self.settings['qx_wechat_id'],
-                fields=['id', 'unionid', 'sysuser_id']
+                wechat_id=self.settings['qx_wechat_id']
             )
             self._session_id = self._make_new_session_id(
                 session.qxuser.sysuser_id)
@@ -862,14 +863,10 @@ class BaseHandler(MetaBaseHandler):
         """拼装 session 中的 sysuser"""
 
         user_id = match_session_id(session_id)
-        sysuser = yield self.user_ps.get_user_user({
-            "id": user_id
-        })
+        sysuser = yield self.user_ps.get_user_by_id(user_id)
 
         if sysuser.parentid and sysuser.parentid > 0:
-            sysuser = yield self.user_ps.get_user_user({
-                "id": sysuser.parentid
-            })
+            sysuser = yield self.user_ps.get_user_by_id(sysuser.parentid)
             self.clear_cookie(name=const.COOKIE_SESSIONID, domain=settings['root_host'])
 
         if sysuser:

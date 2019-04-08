@@ -3,16 +3,16 @@
 # Copyright 2016 MoSeeker
 
 """基础服务 api 调用工具"""
-# todo 重构时修改下面的方法，主要针对出参与入参的写法，将驼峰改为下划线
 import ast
 import ujson
-from urllib.parse import urlencode
-
 import tornado.httpclient
+
+from urllib.parse import urlencode
 from tornado import gen
 from tornado.httputil import url_concat, HTTPHeaders
 
 import conf.common as constant
+
 from conf.common import INFRA_ERROR_CODES
 from globals import env, logger
 from setting import settings
@@ -52,6 +52,13 @@ def http_put_v2(route, service, jdata=None, timeout=30):
     return ret
 
 
+@gen.coroutine
+def http_patch_v2(route, service, jdata=None, timeout=30):
+    route = _serialize_uri(service, route)
+    ret = yield _v2_async_http_post(route, jdata, timeout=timeout, method='PATCH')
+    return ret
+
+
 def _serialize_uri(service, route):
     return "{0}/{1}{2}?appid={appid}&interfaceid={interfaceid}".format(
         settings['cloud'],
@@ -72,6 +79,7 @@ def _serialize_data(service, jdata):
         jdata = {"appid": service.appid, "interfaceid": service.interfaceid}
     return jdata
 
+
 @gen.coroutine
 def http_get_rp(route, service, jdata=None, timeout=30):
     route = "{0}/{1}{2}".format(settings['cloud'], service.service_name, route)
@@ -80,8 +88,9 @@ def http_get_rp(route, service, jdata=None, timeout=30):
         jdata.append(("interfaceid", service.interfaceid))
     elif isinstance(jdata, dict):
         jdata.update({"appid": service.appid, "interfaceid": service.interfaceid})
-    ret = yield _async_http_get(route, jdata, timeout=timeout, method='GET', infra=False)
+    ret = yield _v2_async_http_get(route, jdata, timeout=timeout, method='GET')
     return ret
+
 
 @gen.coroutine
 def http_get_clound(route, service, jdata=None, timeout=3):
@@ -94,17 +103,6 @@ def http_get_clound(route, service, jdata=None, timeout=3):
 
     jdata.update({"appid": service.appid, "interfaceid": service.interfaceid})
     ret = yield _async_http_get(route, jdata, timeout=timeout, method='GET', infra=False)
-    return ret
-
-@gen.coroutine
-def http_post_rp(route, service, jdata=None, timeout=30):
-    route = "{0}/{1}{2}?appid={appid}&interfaceid={interfaceid}".format(
-                                                                        settings['cloud'],
-                                                                        service.service_name,
-                                                                        route,
-                                                                        appid=service.appid,
-                                                                        interfaceid=service.interfaceid)
-    ret = yield _async_http_post(route, jdata, timeout=timeout, method='POST', infra=False)
     return ret
 
 
@@ -268,8 +266,8 @@ def unboxing(http_response):
     return result, data
 
 
-def unboxing_v2(http_response):
-    """解析服务返回结果"""
+def unboxing_fetchone(http_response):
+    """解析服务返回结果，返回结果非对象，而是列表且列表数据为对象时，取列表第一条记录"""
 
     result = bool(http_response.code == constant.NEWINFRA_API_SUCCESS)
     data = ObjectDict()
@@ -279,6 +277,17 @@ def unboxing_v2(http_response):
                 data = ObjectDict(http_response.data[0])
         else:
             data = http_response.data or ObjectDict()
+
+    return data
+
+
+def unboxing_v2(http_response):
+    """解析服务返回结果"""
+
+    result = bool(http_response.code == constant.NEWINFRA_API_SUCCESS)
+    data = ObjectDict()
+    if result:
+        data = http_response.data or ObjectDict()
 
     return data
 
@@ -303,6 +312,7 @@ def _async_http_get(route, jdata=None, timeout=5, method='GET', infra=True, head
         headers.update({"Content-Type": "application/json"})
     else:
         headers = {"Content-Type": "application/json"}
+    logger.debug("[infra][http_{}][url: {}]".format(method.lower(), url))
     response = yield http_client.fetch(
         url,
         method=method.upper(),
@@ -337,6 +347,8 @@ def _async_http_post(route, jdata=None, timeout=5, method='POST', infra=True):
 
     http_client = tornado.httpclient.AsyncHTTPClient()
 
+    logger.debug(
+        "[infra][http_{}][url: {}][body: {}]".format(method.lower(), url, ujson.encode(jdata)))
     response = yield http_client.fetch(
         url,
         method=method.upper(),

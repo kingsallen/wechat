@@ -14,7 +14,6 @@ from service.data.hr.hr_wx_template_message import \
 from service.data.hr.hr_wx_wechat import HrWxWechatDataService
 from service.data.log.log_wx_message_record import \
     LogWxMessageRecordDataService
-from service.data.user.user_wx_user import UserWxUserDataService
 from setting import settings
 from util.common import ObjectDict
 from util.common.singleton import Singleton
@@ -41,7 +40,6 @@ class WechatTemplateMessager(object):
         self.hr_wx_wechat_ds = HrWxWechatDataService()
         self.hr_wx_notice_message_ds = HrWxNoticeMessageDataService()
         self.hr_wx_template_message_ds = HrWxTemplateMessageDataService()
-        self.user_wx_user_ds = UserWxUserDataService()
         self.log_wx_message_record_ds = LogWxMessageRecordDataService()
 
     @gen.coroutine
@@ -229,12 +227,12 @@ class WechatTemplateMessager(object):
         :param openid:
         :return:
         """
-        wxuser = yield self.user_wx_user_ds.get_wxuser(conds={
+        wxuser = yield self.infra_user_ds.infra_get_wxuser({
             "openid": openid,
             "wechat_id": wechat_id
         })
 
-        qx_wxuser = yield self.user_wx_user_ds.get_wxuser(conds={
+        qx_wxuser = yield self.infra_user_ds.infra_get_wxuser({
             "unionid": wxuser.unionid,
             "wechat_id": settings['qx_wechat_id']
         })

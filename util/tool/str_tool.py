@@ -417,4 +417,3 @@ def params_underline2hump(underline_url_params):
     attr_ptn = re.compile(r'(\w+)=')
     sub = re.sub(attr_ptn, lambda x: underline2hump(x.group(1)) + '=', underline_url_params)
     return sub
-

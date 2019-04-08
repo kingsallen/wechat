@@ -46,8 +46,8 @@ class UserCompanyPageService(PageService):
 
         # 实时检查用户对于公众号的关注情况
         follow = self.constant.NO
-        check_follow_ret = yield self.user_wx_user_ds.get_wxuser(
-            conds={'id': user.wxuser.id}, fields=['is_subscribe'])
+        check_follow_ret = yield self.infra_user_ds.infra_get_wxuser(
+            {'id': user.wxuser.id})
         if check_follow_ret and check_follow_ret.is_subscribe:
             follow = self.constant.YES
         # 检查关注情况结束
@@ -190,36 +190,6 @@ class UserCompanyPageService(PageService):
                 team_id_tuple).replace(',)', ')'))
 
         raise gen.Return(teams)
-
-    @gen.coroutine
-    def set_company_follow(self, current_user, param):
-        """
-        Store follow company.
-        :param param: dict include target user company ids.
-        :return:
-        """
-        user_id = current_user.sysuser.id
-        status, source = param.get('status'), param.get('source', 0)
-        current_user.company.id
-        # 区分母公司子公司对待
-        company_id = param.sub_company.id if param.did \
-                                             and param.did != current_user.company.id else current_user.company.id
-
-        conds = {'user_id': user_id, 'company_id': company_id}
-        company = yield self.user_company_follow_ds.get_fllw_cmpy(
-            conds=conds, fields=['id', 'user_id', 'company_id'])
-
-        if company:
-            response = yield self.user_company_follow_ds.update_fllw_cmpy(
-                conds=conds,
-                fields={'status': status, 'source': source})
-        else:
-            response = yield self.user_company_follow_ds.create_fllw_cmpy(
-                fields={'user_id': user_id, 'company_id': company_id,
-                        'status': status, 'source': source})
-        result = True if response else False
-
-        raise gen.Return(result)
 
     @gen.coroutine
     def set_visit_company(self, current_user, param):
