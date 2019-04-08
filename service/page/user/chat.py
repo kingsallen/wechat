@@ -240,6 +240,9 @@ class ChatPageService(PageService):
             from_textfield=from_textfield
         )
         self.logger.debug("get_chatbot_reply==>create_new_context:{} ".format(create_new_context))
+        self.logger.debug("chabot_params:flag:%s, social:%s, capmpus:%s"%(flag, social, campus))
+        self.logger.debug("chabot_params type :flag:%s, social:%s, capmpus:%s"
+                          % (type(flag), type(social), type(campus)))
         try:
             if int(flag) == 1:
                 res = yield http_post(
@@ -249,7 +252,7 @@ class ChatPageService(PageService):
                 res = yield http_post(
                     route='{host}{uri}'.format(host=settings['chatbot_host'], uri='campus_qa.api'), jdata=params,
                     infra=False)
-            elif flag == 0 and social == 0 and campus == 1:
+            elif int(flag) == 0 and social == 0 and campus == 1:
                 res = yield http_post(
                     route='{host}{uri}'.format(host=settings['chatbot_host'], uri='campus_qa.api'), jdata=params,
                     infra=False)
@@ -258,7 +261,6 @@ class ChatPageService(PageService):
                     route='{host}{uri}'.format(host=settings['chatbot_host'], uri='qa.api'), jdata=params,
                     infra=False)
 
-            self.logger.debug("[get_chatbot_reply]ret: %s, type: %s" % (res, type(res)))
 
             self.logger.debug(res.results)
             results = res.results
