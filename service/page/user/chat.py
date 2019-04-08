@@ -243,8 +243,9 @@ class ChatPageService(PageService):
         self.logger.debug("chabot_params:flag:%s, social:%s, capmpus:%s"%(flag, social, campus))
         self.logger.debug("chabot_params type :flag:%s, social:%s, capmpus:%s"
                           % (type(flag), type(social), type(campus)))
+
         try:
-            if int(flag) == 1:
+            if flag is '1':
                 res = yield http_post(
                     route='{host}{uri}'.format(host=settings['chatbot_host'], uri='campus_qa.api'), jdata=params,
                     infra=False)
