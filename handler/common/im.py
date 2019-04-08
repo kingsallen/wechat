@@ -474,7 +474,7 @@ class ChatHandler(BaseHandler):
         self.user_id = match_session_id(to_str(self.get_secure_cookie(const.COOKIE_SESSIONID)))
         self.hr_id = self.params.hrId
         self.position_id = self.params.get("pid") or 0
-        self.flag = self.params.get("flag") or 0
+        self.flag = int(self.params.get("flag")) or None
 
         content = self.json_args.get("content") or ""
         compoundContent = self.json_args.get("compoundContent") or {}
