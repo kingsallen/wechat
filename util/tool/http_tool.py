@@ -3,7 +3,7 @@
 # Copyright 2016 MoSeeker
 
 """基础服务 api 调用工具"""
-
+# todo 重构时修改下面的方法，主要针对出参与入参的写法，将驼峰改为下划线
 import ujson
 from urllib.parse import urlencode
 
@@ -18,6 +18,30 @@ from setting import settings
 from util.common import ObjectDict
 from util.common.exception import InfraOperationError
 from util.tool.dict_tool import objectdictify
+
+
+@gen.coroutine
+def http_get_rp(route, service, jdata=None, timeout=30):
+    route = "{0}/{1}{2}".format(settings['cloud'], service.service_name, route)
+    if isinstance(jdata, list):
+        jdata.append(("appid", service.appid))
+        jdata.append(("interfaceid", service.interfaceid))
+    elif isinstance(jdata, dict):
+        jdata.update({"appid": service.appid, "interfaceid": service.interfaceid})
+    ret = yield _async_http_get(route, jdata, timeout=timeout, method='GET', infra=False)
+    return ret
+
+
+@gen.coroutine
+def http_post_rp(route, service, jdata=None, timeout=30):
+    route = "{0}/{1}{2}?appid={appid}&interfaceid={interfaceid}".format(
+                                                                        settings['cloud'],
+                                                                        service.service_name,
+                                                                        route,
+                                                                        appid=service.appid,
+                                                                        interfaceid=service.interfaceid)
+    ret = yield _async_http_post(route, jdata, timeout=timeout, method='POST', infra=False)
+    return ret
 
 
 @gen.coroutine

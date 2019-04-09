@@ -232,7 +232,7 @@ class PositionHandler(BaseHandler):
 
         cover = self.__make_share_info_cover(pos_item, company_info)
         title = "【{}】-{}正在寻求你的加入".format(position_info.title, company_info.abbreviation)
-        description = "微信好友{}推荐，{}{}正在寻找{}的合适人选，等的就是你！".format(self.current_user.qxuser.nickname,
+        description = "{}{}正在寻找{}的合适人选，等的就是你！".format(self.current_user.qxuser.nickname,
                                                                 company_info.abbreviation,
                                                                 "的{}".format(res_position.team) if res_position.team else "",
                                                                 position_info.title)

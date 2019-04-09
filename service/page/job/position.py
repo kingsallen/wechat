@@ -138,7 +138,6 @@ class PositionPageService(PageService):
 
         raise gen.Return(position)
 
-    @log_time
     @gen.coroutine
     def get_position_custom_list(self, position_id_list):
         # 获取职位信息扩展信息列表
@@ -149,14 +148,16 @@ class PositionPageService(PageService):
         customs_list, customs_id_list = yield self.get_customs_list(position_ext_id_list)
 
         position_custom_list = []
+        has_custom_position_id_list = set()
         position_custom = ObjectDict()
         for custom in customs_list:
             for ext in position_ext_list:
                 if custom.id == ext.job_custom_id:
                     position_custom.id = ext.pid
                     position_custom.custom_field = custom.name
+                    has_custom_position_id_list.add(ext.pid)
             position_custom_list.append(position_custom)
-        return position_custom_list, customs_id_list
+        return position_custom_list, has_custom_position_id_list
 
     @gen.coroutine
     def update_position(self, conds, fields):
@@ -173,13 +174,13 @@ class PositionPageService(PageService):
         params = dict()
         position_ext_list = []
         if position_id_list and isinstance(position_id_list, list):
-            params.update(conds=["pid in %s" % set_literl(position_id_list)])
+            params.update(conds="pid in %s" % set_literl(position_id_list))
             position_ext_list = yield self.job_position_ext_ds.get_position_ext_list(**params)
 
         position_ext_id_list = []
         if position_ext_list:
             for e in position_ext_list:
-                position_ext_id_list.append(e.pid)
+                position_ext_id_list.append(e.job_custom_id)
         return position_ext_list, position_ext_id_list
 
     @gen.coroutine
@@ -192,7 +193,7 @@ class PositionPageService(PageService):
         params = dict()
         customs_list = []
         if position_ext_id_list and isinstance(position_ext_id_list, list):
-            params.update(conds=["id in %s" % set_literl(position_ext_id_list)])
+            params.update(conds="id in %s" % set_literl(position_ext_id_list))
             customs_list = yield self.job_custom_ds.get_customs_list(**params)
         customs_id_list = []
         if customs_list:
@@ -395,10 +396,9 @@ class PositionPageService(PageService):
     def infra_get_position_list_rp_ext(self, position_list):
         """获取职位的红包信息"""
 
-        pids_str = ','.join([str(e.id) for e in position_list])
-        params = dict(pids=pids_str)
+        params = [("positionIdList", e.id) for e in position_list]  # todo get方法加list参数，先这样处理下，重构的时候再优雅的解决
         res = yield self.infra_position_ds.get_position_list_rp_ext(params)
-        if res.status == 0:
+        if res.code == '0':
             raise gen.Return([ObjectDict(e) for e in res.data])
         raise gen.Return(res)
 
@@ -432,7 +432,7 @@ class PositionPageService(PageService):
     def infra_get_rp_share_info(self, params):
         """红包职位列表的分享信息"""
         res = yield self.infra_position_ds.get_rp_share_info(params)
-        if res.status == 0:
+        if int(res.code) == 0:
             raise gen.Return(res.data)
         raise gen.Return(res)
 
@@ -471,20 +471,6 @@ class PositionPageService(PageService):
                 position.publish_date = jd_update_date(str_2_date(position.publish_date, self.constant.TIME_FORMAT))
                 position.team_name = team_name_dict.get(pid_teamid_dict.get(position.id, 0), '')
 
-            # 职位红包 #
-            # 逻辑和职位列表页一样, 代码有重复, TODO: 优化
-            rp_position_list = [p for p in position_list if p.in_hb]
-            if position_list and rp_position_list:
-                rpext_list = yield self.infra_get_position_list_rp_ext(rp_position_list)
-
-                for position in position_list:
-                    pext = [e for e in rpext_list if e.pid == position.id]
-                    if pext:
-                        position.remain = pext[0].remain
-                        position.employee_only = pext[0].employee_only
-                        position.is_rp_reward = position.remain > 0
-                    else:
-                        position.is_rp_reward = False
             return position_list, res.data[0]['total_num'] if res.data else 0
         else:
             self.logger.warn(res)
@@ -619,3 +605,33 @@ class PositionPageService(PageService):
         ret = yield self.infra_position_ds.get_position_bonus(pid)
         bonus = ret.data.position_bonus.get("total_bonus")
         return bonus
+
+    @gen.coroutine
+    def get_position_required_fields(self, position_id):
+        ret = yield self.infra_position_ds.get_position_required_fields(position_id)
+        required_fields = [k for k, v in ret.data.items() if v and not k.startswith('set_')]
+        return required_fields
+
+    @gen.coroutine
+    def insert_neo4j_share_record(self, recom_user_id, presentee_user_id, share_chain_id):
+        """
+        职位转发被点击时 neo4j记录转发链路
+        :param recom_user_id:
+        :param presentee_user_id:
+        :param share_chain_id:
+        :return:
+        """
+        ret = yield self.infra_position_ds.insert_neo4j_share_record(recom_user_id, presentee_user_id, share_chain_id)
+        return ret
+
+    @gen.coroutine
+    def send_ten_min_tmp(self, user_id, company_id):
+        """
+        十分钟消息模板，改为基础服务发
+        :param user_id: 员工user_id
+        :param company_id:
+        :return:
+        """
+        ret = yield self.infra_position_ds.send_ten_min_tmp(user_id, company_id)
+        return ret
+

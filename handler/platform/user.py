@@ -14,6 +14,7 @@ from util.common.exception import MyException
 from util.common.mq import data_userprofile_publisher
 import conf.common as const
 from util.tool.json_tool import json_dumps
+from util.common.cipher import decode_id
 import copy
 import json
 
@@ -727,3 +728,185 @@ class APIPositionRecomListCloseHandler(BaseHandler):
             wechat_id=self.current_user.wechat.id
         )
         self.write(res)
+
+
+class PositionDetailPopupHandler(BaseHandler):
+
+    @decorator.handle_response
+    @decorator.authenticated
+    @gen.coroutine
+    def get(self):
+        """
+        候选人查看职位详情页面 获取该候选人是否关注公众号和简历完整度信息 然后前端根据结果给适当的引导弹窗
+        弹窗1: 公众号二维码
+        弹窗2：提示完善简历信息
+        :return:
+        """
+        pid = self.params.position_id
+        res = yield self.user_ps.get_popup_info(
+            user_id=self.current_user.sysuser.id,
+            company_id=self.current_user.company.id,
+            position_id=pid
+        )
+        res_data = res.get('data')
+        if not res_data:
+            self.send_json_error(message='获取弹层信息失败')
+            return
+
+        res_crucial_info_switch = yield self.company_ps.get_crucial_info_state(self.current_user.company.id)
+        switch = res_crucial_info_switch['data']
+
+        data = dict(
+            pv=res_data['current_position_count'],
+            df_pv=res_data['position_view_count'],
+            profile_completeness=res_data['profile_completeness'],
+            switch=dict(
+                df_pv_qrcode=res_data['position_wx_layer_qrcode'],
+                df_pv_profile=res_data['position_wx_layer_profile'],
+                recom_info_switch=switch
+            )
+        )
+        self.send_json_success(data)
+
+
+class PositionForwardFromEmpHandler(BaseHandler):
+
+    @decorator.handle_response
+    @decorator.authenticated
+    @gen.coroutine
+    def get(self):
+        """
+        候选人打开转发的职位链接，根据链接中参数判断最初转发该职位的人是否是员工
+        决定前端是否显示“帮我内推”button
+        :return:
+        """
+        pid = self.params.pid
+        if not self.params.recom:
+            self.send_json_success(data={
+                "is_employee": 0,
+                "employee_name": '',
+                "employee_icon": '',
+            })
+            return
+        if self.params.root_recom:
+            # 人脉连连看页面目标用户打开的职位链接
+            recom = decode_id(self.params.root_recom)
+            psc = -1
+        else:
+            recom = decode_id(self.params.recom)
+            psc = self.params.psc if self.params.psc else 0
+        click_user_id = self.current_user.sysuser.id
+        ret = yield self.user_ps.if_referral_position(
+            self.current_user.company.id,
+            recom, psc, pid, click_user_id)
+        if not ret.status == const.API_SUCCESS:
+            self.send_json_error(message=ret.message)
+            return
+
+        data = {
+            "is_employee": ret.data['employee'],
+            "employee_name": ret.data['user']['name'] if ret.data['employee'] else '',
+            "employee_icon": ret.data['user']['avatar'] if ret.data['employee'] else '',
+        }
+        self.send_json_success(data)
+
+
+class ContactReferralInfoHandler(BaseHandler):
+
+    @decorator.handle_response
+    @decorator.authenticated
+    @gen.coroutine
+    def get(self):
+        """
+         联系内推页面获取员工姓名，头像，职位名
+         判断该候选人是否已经点击过“帮我内推”并且确认提交，如果已提交过直接到确认提交后的一页
+        :return:
+        """
+        pid = self.params.pid
+        if self.params.root_recom:
+            recom = decode_id(self.params.root_recom)
+            psc = -1
+        else:
+            recom = decode_id(self.params.recom)
+            psc = self.params.psc if self.params.psc else 0
+
+        if_seek_check_ret = yield self.user_ps.if_ever_seek_recommend(
+            recom, psc, pid,
+            self.current_user.company.id,
+            self.current_user.sysuser.id
+        )
+        if not if_seek_check_ret.status == const.API_SUCCESS:
+            self.write_error(500, message=if_seek_check_ret.message)
+            return
+
+        if if_seek_check_ret.data.get('referral_id'):
+            self.render_page(template_name='employee/result-with-jobs.html',
+                             data=dict())
+            return
+
+        ret = yield self.user_ps.if_referral_position(
+            self.current_user.company.id,
+            recom, psc, pid, self.current_user.sysuser.id)
+        if not ret.status == const.API_SUCCESS:
+            self.write_error(500, message=ret.message)
+            return
+
+        recom_user_id = ret.data['user']['uid']
+
+        ret_info = yield self.employee_ps.referral_contact_push(recom_user_id, pid)
+        if not ret_info.status == const.API_SUCCESS:
+            self.write_error(500, message=ret_info.message)
+            return
+
+        self.render_page(
+            template_name='employee/connect-referral.html',
+            data={
+              "employee_icon": ret_info.data['employee_icon'],
+              "employee_name": ret_info.data['employee_name'],
+              "position_name": ret_info.data['position_name'],
+              "pid": pid,
+            }
+        )
+
+
+class ReferralRelatedPositionHandler(BaseHandler):
+
+    @decorator.handle_response
+    @decorator.authenticated
+    @gen.coroutine
+    def get(self):
+        """
+        联系内推完成后 给出该公司三个相关职位
+        :return:
+        """
+
+        ret = yield self.user_ps.referral_related_positions(
+            self.current_user.sysuser.id,
+            self.current_user.company.id
+        )
+        if not ret.status == const.API_SUCCESS:
+            self.send_json_error(message=ret.message)
+            return
+
+        data = list()
+        for item in ret.data:
+            item_return = item
+            if item.get('experience'):
+                if item.get('experience_above'):
+                    item_return.update({'experience': str(item.get('experience')) + '年及以上'})
+                else:
+                    item_return.update({'experience': str(item.get('experience')) + '年'})
+
+            if item.get('degree') and item.get('degree_above'):
+                item_return.update({'degree': const.POSITION_DEGREE.get(str(item.get('degree'))) + '及以上'})
+            else:
+                item_return.update({'degree': const.POSITION_DEGREE.get(str(item.get('degree')))})
+
+            if item.get('hb_status'):
+                item_return.update({'has_reward': 1})
+
+            data.append(item_return)
+
+        self.send_json_success(data={
+            "list": data
+        })

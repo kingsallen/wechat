@@ -6,6 +6,9 @@ import conf.common as const
 from service.page.base import PageService
 from util.tool.date_tool import curr_now
 from util.common.decorator import log_time
+from util.common import ObjectDict
+from util.tool.url_tool import make_static_url
+
 
 class SharechainPageService(PageService):
 
@@ -15,12 +18,13 @@ class SharechainPageService(PageService):
     @log_time
     @gen.coroutine
     def refresh_share_chain(self, presentee_user_id=None, position_id=None,
-                            share_chain_parent_id=None):
+                            share_chain_parent_id=None, forward_id=None):
         """
         对给定的 presentee_user_id 和 position_id 做链路原数据的入库操作
         :param presentee_user_id: 查看 JD 页的用户 wxsuer_id
         :param position_id: 被查看的职位 id
         :param share_chain_parent_id
+        :param forward_id: 员工转发出去的职位链接上标识唯一性的参数
         :return: 如果创建链路愿数据成功,返回 True; 否则返回 False
         """
 
@@ -36,7 +40,7 @@ class SharechainPageService(PageService):
 
         # 找到 share_record 后创建 candiate_share_chain
         inserted_share_chain_id = yield self._save_recom(
-            last_share_record, share_chain_parent_id)
+            last_share_record, share_chain_parent_id, forward_id)
 
         share_chain_rec = yield self._select_recom_record(
             position_id, presentee_user_id)
@@ -104,11 +108,13 @@ class SharechainPageService(PageService):
                 "position_id": position_id,
             },
             fields=[
+                'id',
                 'create_time',
                 'wechat_id',
                 'recom_user_id',
                 'position_id',
-                'presentee_user_id'
+                'presentee_user_id',
+                'click_from',
             ],
             appends=[
                 'AND `recom_user_id` != `presentee_user_id`',
@@ -132,15 +138,32 @@ class SharechainPageService(PageService):
 
     @log_time
     @gen.coroutine
-    def _no_existed_record(self, share_record):
+    def _existed_record(self, share_record, share_chain_parent_id, forward_id):
         """检查原始链路数据中是否有该数据"""
 
         record = yield self.candidate_share_chain_ds.get_share_chain({
             "position_id":       share_record.position_id,
             "presentee_user_id": share_record.presentee_user_id,
-            "click_time":        share_record.create_time
+            "recom_user_id": share_record.recom_user_id,
+            "parent_id": share_chain_parent_id,
+            "forward_id": forward_id
         })
-        raise gen.Return(not bool(record))
+        raise gen.Return(record)
+
+    @log_time
+    @gen.coroutine
+    def _existed_record_ignore_parent(self, share_record):
+        """检查原始链路数据中是否有该数据, 忽略parent_id， 为10分钟消息推送卡片去重"""
+
+        record = yield self.candidate_share_chain_ds.get_share_chain(
+            {
+                "position_id": share_record.position_id,
+                "presentee_user_id": share_record.presentee_user_id,
+                "recom_user_id": share_record.recom_user_id,
+            },
+            appends=["ORDER BY click_time desc", "LIMIT 1"]
+        )
+        raise gen.Return(record)
 
     @log_time
     @gen.coroutine
@@ -180,7 +203,7 @@ class SharechainPageService(PageService):
 
     @log_time
     @gen.coroutine
-    def _save_recom(self, last_share_record, share_chain_parent_id):
+    def _save_recom(self, last_share_record, share_chain_parent_id, forward_id):
         """ 入库链路数据 candidate_share_chain
 
         将浏览者置为关系最近的员工的初被动求职者
@@ -193,10 +216,23 @@ class SharechainPageService(PageService):
 
         ret = 0
 
-        # 如果是重复数据，直接返回
-        no_existed_record = yield self._no_existed_record(last_share_record)
-        if not no_existed_record:
-            return ret
+        # 如果是重复数据，更新click_time, click_from
+        existed_record = yield self._existed_record(last_share_record, share_chain_parent_id, forward_id)
+        if existed_record:
+            yield self.candidate_share_chain_ds.update_share_chain(
+                conds={
+                    "position_id": last_share_record.position_id,
+                    "parent_id": share_chain_parent_id,
+                    "recom_user_id": last_share_record.recom_user_id,
+                    "presentee_user_id": last_share_record.presentee_user_id,
+                    "forward_id": forward_id
+                },
+                fields={
+                    "click_time": last_share_record.create_time,
+                    "click_from": last_share_record.click_from
+                }
+            )
+            raise gen.Return(existed_record.id)
 
         self.logger.debug("[SC]last_share_record: %s" % last_share_record)
 
@@ -204,6 +240,12 @@ class SharechainPageService(PageService):
 
         presentee_user_is_valid_employee = yield self._is_valid_employee(
             position_id, last_share_record.presentee_user_id)
+
+        record_ignore_parent = yield self._existed_record_ignore_parent(last_share_record)
+        if record_ignore_parent:
+            type_ = record_ignore_parent.type
+        else:
+            type_ = 0
 
         if presentee_user_is_valid_employee:
 
@@ -215,7 +257,10 @@ class SharechainPageService(PageService):
                 "root2_recom_user_id": 0,
                 "click_time":          last_share_record.create_time,
                 "depth":               0,
-                "parent_id":           share_chain_parent_id  if share_chain_parent_id else 0
+                "parent_id":           share_chain_parent_id if share_chain_parent_id else 0,
+                "type":                type_,
+                "forward_id":          forward_id,
+                "click_from":          last_share_record.click_from
             })
 
         # 如果看的人不是员工，
@@ -240,7 +285,10 @@ class SharechainPageService(PageService):
                     "root2_recom_user_id": root2_to_insert,
                     "click_time":          last_share_record.create_time,
                     "depth":               parent_share_chain_record.depth + 1,
-                    "parent_id":           share_chain_parent_id
+                    "parent_id":           share_chain_parent_id,
+                    "type":                type_,
+                    "forward_id":          forward_id,
+                    "click_from":          last_share_record.click_from
                 })
 
             # 如果不存在上游数据，记录为 depth 1
@@ -253,7 +301,10 @@ class SharechainPageService(PageService):
                     "root2_recom_user_id": 0,
                     "click_time":          last_share_record.create_time,
                     "depth":               1,
-                    "parent_id":           0
+                    "parent_id":           0,
+                    "type":                type_,
+                    "forward_id":          forward_id,
+                    "click_from":          last_share_record.click_from
                     })
 
             # 查询 hr_candidate_remark, 如果对应数据被忽略，则设为新数据
@@ -425,3 +476,38 @@ class SharechainPageService(PageService):
             raise gen.Return(parent_share_chain.id)
         else:
             raise gen.Return(0)
+
+    @gen.coroutine
+    def find_candidate_by_position(self, position, num=25):
+        """根据职位id获取浏览该职位的候选人"""
+        users = []
+        records = yield self.candidate_position_share_record_ds.get_share_record_list(
+            conds={
+                "position_id": position.id
+            },
+            appends=["group by presentee_user_id", "order by create_time desc", "LIMIT {}".format(num)]
+        )
+        for r in records:
+            user = ObjectDict()
+            user_id = r.presentee_user_id
+            user_info = yield self.user_user_ds.get_user(conds={"id": user_id})
+            user['name'] = user_info.name or user_info.nickname
+            user['headimg'] = make_static_url(user_info.headimg or const.SYSUSER_HEADIMG)
+            user['is_hack'] = False
+            candidate_position = yield self.candidate_position_ds.get_candidate_position(conds={
+                "position_id": position.id,
+                "user_id": user_id
+            })
+            user['viewnum'] = candidate_position.view_number or 1
+            user['click_from'] = r.click_from or 2
+            user['click_time'] = r.create_time
+            user['position_title'] = position.title
+            user['id'] = user_id
+            users.append(user)
+        return users
+
+    @gen.coroutine
+    def get_share_chain_by_id(self, share_chain_id):
+        """根据share_chain_id获取share_chain"""
+        ret = yield self.candidate_share_chain_ds.get_share_chain(conds={"id": share_chain_id})
+        raise gen.Return(ret)

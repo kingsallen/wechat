@@ -192,6 +192,13 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
         self.subscriber.start_run_in_thread()
 
     @gen.coroutine
+    def on_message(self, message):
+        logger.debug("[websocket] received a message:{}".format(message))
+        data = ujson.loads(message)
+        if data.get("msgType") == 'ping':
+            self.write_message(ujson.dumps({"msgType": 'pong'}))
+
+    @gen.coroutine
     def on_close(self):
         logger.debug("&=! {}".format("on_close, before stop_run_in_thread"))
         self.subscriber.stop_run_in_thread()
@@ -237,7 +244,11 @@ class ChatRoomHandler(BaseHandler):
             "signature": jsapi.signature,
             "jsApiList": ["onMenuShareTimeline",
                           "onMenuShareAppMessage",
+                          "updateTimelineShareData",
+                          "updateAppMessageShareData",
                           "onMenuShareQQ",
+                          "updateTimelineShareData",
+                          "updateAppMessageShareData",
                           "onMenuShareWeibo",
                           "hideOptionMenu",
                           "showOptionMenu",
@@ -398,20 +409,21 @@ class ChatHandler(BaseHandler):
         if not self.bot_enabled:
             yield self.get_bot_enabled()
 
+        user_hr_account = yield self.chat_ps.get_hr_info(self.hr_id)
+        company_id = user_hr_account.company_id
+
         res = yield self.chat_ps.get_chatroom(self.current_user.sysuser.id,
                                               self.params.hr_id,
+                                              company_id,
                                               pid, room_id,
                                               self.current_user.qxuser,
-                                              is_gamma)
+                                              is_gamma,
+                                              self.bot_enabled)
         # 需要判断用户是否进入自己的聊天室
         if res.user.user_id != self.current_user.sysuser.id:
             self.send_json_error(message=msg.NOT_AUTHORIZED)
             return
 
-        if self.bot_enabled:
-            res.update(show_position_info=False)
-        else:
-            res.update(show_position_info=True)
         self.send_json_success(data=res)
 
     @handle_response
@@ -465,7 +477,7 @@ class ChatHandler(BaseHandler):
         self.user_id = match_session_id(to_str(self.get_secure_cookie(const.COOKIE_SESSIONID)))
         self.hr_id = self.params.hrId
         self.position_id = self.params.get("pid") or 0
-        self.flag = self.params.get("flag") or 0
+        self.flag = int(self.params.get("flag")) or None
 
         content = self.json_args.get("content") or ""
         compoundContent = self.json_args.get("compoundContent") or {}
@@ -485,9 +497,6 @@ class ChatHandler(BaseHandler):
         self.chatroom_channel = const.CHAT_CHATROOM_CHANNEL.format(self.hr_id, self.user_id)
         self.hr_channel = const.CHAT_HR_CHANNEL.format(self.hr_id)
 
-        if not msg_type or not user_message:
-            self.send_json_error()
-            return
         chat_params = ChatVO(
             msgType=msg_type,
             compoundContent=ujson.dumps(compoundContent),
@@ -550,10 +559,6 @@ class ChatHandler(BaseHandler):
         self.chatroom_channel = const.CHAT_CHATROOM_CHANNEL.format(self.hr_id, self.user_id)
         self.hr_channel = const.CHAT_HR_CHANNEL.format(self.hr_id)
 
-        if not msg_type or not user_message:
-            self.send_json_error()
-            return
-
         try:
             if self.bot_enabled and msg_type != "job":
                 # 由于没有延迟的发送导致hr端轮训无法订阅到publish到redis的消息　所以这里做下延迟处理
@@ -570,6 +575,14 @@ class ChatHandler(BaseHandler):
         """处理 chatbot message
         获取消息 -> pub消息 -> 入库
         """
+        social = yield self.company_ps.check_oms_switch_status(
+            self.current_user.company.id,
+            "社招"
+        )
+        campus = yield self.company_ps.check_oms_switch_status(
+            self.current_user.company.id,
+            "校招"
+        )
         bot_messages = yield self.chat_ps.get_chatbot_reply(
             current_user=self.current_user,
             message=user_message,
@@ -578,10 +591,14 @@ class ChatHandler(BaseHandler):
             position_id=self.position_id,
             flag=self.flag,
             create_new_context=create_new_context,
-            from_textfield=from_textfield
+            from_textfield=from_textfield,
+            social=social['data']['valid'],
+            campus=campus['data']['valid']
         )
         self.logger.debug('_handle_chatbot_message  flag:{}'.format(self.flag))
-        self.logger.debug('_handle_chatbot_message  create_new_context:{}'.format(create_new_context))
+        self.logger.debug('_handle_chatbot_message  social_switch:{}'.format(social['data']['valid']))
+        self.logger.debug('_handle_chatbot_message  campus_switch:{}'.format(campus['data']['valid']))
+        self.logger.debug('_handle_chatbot_message  create_new_context{}'.format(create_new_context))
         for bot_message in bot_messages:
             msg_type = bot_message.msg_type
             compound_content = bot_message.compound_content

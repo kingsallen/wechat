@@ -4,22 +4,25 @@ import tornado.gen as gen
 from tornado.testing import AsyncTestCase, gen_test
 
 import conf.path as path
+import conf.alphacloud_api as api
 from service.data.base import DataService
 from service.data.infra.framework.client.client import ServiceClientFactory
 from thrift_gen.gen.position.service.PositionServices import Client as PositionServiceClient
 from util.common import ObjectDict
-from util.tool.http_tool import http_get, http_post, http_patch
+from util.tool.http_tool import http_get, http_post, http_patch, http_get_rp
 from util.tool import http_tool
+from util.common.decorator import cache_new
 
 
 class InfraPositionDataService(DataService):
     """对接职位服务
         referer: https://wiki.moseeker.com/position-api.md"""
 
+    @cache_new(ttl=300, escape=['user_id'])
     @gen.coroutine
     def get_position_list(self, params):
         """普通职位列表"""
-        ret = yield http_get(path.INFRA_POSITION_LIST, params)
+        ret = yield http_get(path.INFRA_POSITION_LIST, params, timeout=7)
         return ret
 
     @gen.coroutine
@@ -31,7 +34,7 @@ class InfraPositionDataService(DataService):
     @gen.coroutine
     def get_position_list_rp_ext(self, params):
         """获取职位的红包信息"""
-        ret = yield http_get(path.INFRA_POSITION_LIST_RP_EXT, params)
+        ret = yield http_get_rp(api.redpacket_service.api.CLOUD_POSITION_LIST_RP_EXT, api.redpacket_service.service, params)
         return ret
 
     @gen.coroutine
@@ -43,7 +46,7 @@ class InfraPositionDataService(DataService):
     @gen.coroutine
     def get_rp_share_info(self, params):
         """红包职位列表的分享信息"""
-        ret = yield http_get(path.INFRA_RP_POSITION_LIST_SHARE_INFO, params)
+        ret = yield http_get_rp(api.redpacket_service.api.CLOUD_RP_POSITION_LIST_SHARE_INFO, api.redpacket_service.service, params)
         return ret
 
     @gen.coroutine
@@ -161,6 +164,53 @@ class InfraPositionDataService(DataService):
                 app_id=app_id
             ))
         return res
+
+    @gen.coroutine
+    def get_position_required_fields(self, position_id):
+        """
+        推荐关键信息-简历字段必填项数据获取
+        :param position_id:
+        :return:
+        """
+        res = yield http_get(
+            path.INFRA_POSITION_REQUIRED_FIELDS,
+            dict(
+                position_id=position_id
+            )
+        )
+        return res
+
+    @gen.coroutine
+    def insert_neo4j_share_record(self, recom_user_id, presentee_user_id, share_chain_id):
+        """
+        职位转发被点击时 neo4j记录转发链路
+        :param recom_user_id:
+        :param presentee_user_id:
+        :param share_chain_id:
+        :return:
+        """
+        params = {
+            "start_user_id": recom_user_id,
+            "end_user_id": presentee_user_id,
+            "share_chain_id": share_chain_id
+        }
+        ret = yield http_post(path.INFRA_POSITION_NEO4J_SHARE_CHAIN, params)
+        return ret
+
+    @gen.coroutine
+    def send_ten_min_tmp(self, user_id, company_id):
+        """
+        十分钟消息模板，改为基础服务发
+        :param user_id: 员工user_id
+        :param company_id:
+        :return:
+        """
+        params = {
+            "user_id": user_id,
+            "company_id": company_id
+        }
+        ret = yield http_post(path.INFRA_TEN_MIN_TMP, params)
+        return ret
 
 
 class TestEmployeeService(AsyncTestCase):

@@ -1,7 +1,7 @@
 # coding=utf-8
 
 from service.page.base import PageService
-from conf.common import CONSTANT_PARENT_CODE
+from conf.common import *
 import tornado.gen
 
 
@@ -23,13 +23,39 @@ class DictionaryPageService(PageService):
         return ret
 
     @tornado.gen.coroutine
+    def gen_mars_industries(self):
+        ret = yield self.infra_dict_ds.get_mars_industries()
+        return ret
+
+    @tornado.gen.coroutine
     def get_constants(self, parent_code):
         ret = yield self.infra_dict_ds.get_const_dict(parent_code=parent_code)
         return ret
 
     @tornado.gen.coroutine
-    def get_degrees(self):
+    def get_degrees(self, locale=None):
         ret = yield self.get_constants(parent_code=CONSTANT_PARENT_CODE.DEGREE_USER)
+        if locale:
+            ret_ = dict()
+            for k in ret.keys():
+                ret_[k] = locale.translate(HIGHEST_DEGREE.get(k))
+            format_ret = [{'text': text, 'value': int(value)} for value, text in ret_.items()]
+            format_ret_in_order = sorted(format_ret, key=lambda item: item['value'])
+            return format_ret_in_order
+        return ret
+
+    @tornado.gen.coroutine
+    def get_referral_relationship(self, locale=None):
+        ret = yield self.get_constants(parent_code=CONSTANT_PARENT_CODE.REFERRAL_RELATIONSHIP)
+        if locale:
+            ret_ = dict()
+            for k in ret.keys():
+                ret_[k] = locale.translate(RELATIONSHIP.get(k))
+            format_ret = [{'text': text, 'value': int(value)} for value, text in ret_.items()]
+            format_ret_in_order = sorted(format_ret, key=lambda item: item['value'])
+            returned_data = format_ret_in_order[1:]
+            returned_data.append(format_ret_in_order[0])
+            return returned_data
         return ret
 
     @tornado.gen.coroutine
@@ -95,3 +121,8 @@ class DictionaryPageService(PageService):
                     return industry['type']
 
         return 0
+
+    @tornado.gen.coroutine
+    def get_comment_tags_by_code(self, code):
+        res = yield self.infra_dict_ds.get_comment_tags_by_code(code)
+        return res

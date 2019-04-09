@@ -46,13 +46,13 @@ class WechatPageService(PageService):
         raise gen.Return(theme)
 
     @gen.coroutine
-    def get_wechat_info(self, current_user, pattern_id, in_wechat):
+    def get_wechat_info(self, current_user, scene_id, in_wechat):
         """
         获取公众号相关信息
         """
         wechat = ObjectDict()
         wechat.subscribed = True if current_user.wxuser.is_subscribe or current_user.wechat.type == 0 or not in_wechat else False
         wechat.qrcode = yield get_temporary_qrcode(wechat=current_user.wechat,
-                                                   pattern_id=pattern_id)
+                                                   scene_id=scene_id)
         wechat.name = current_user.wechat.name
         return wechat

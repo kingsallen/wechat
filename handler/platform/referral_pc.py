@@ -44,7 +44,11 @@ class ReferralUploadHandler(BaseHandler):
             position_info = yield self.position_ps.get_position(pid)
             res = yield self.company_ps.get_only_referral_reward(self.current_user.company.id)
             reward = reward if not res.flag or (res.flag and position_info.is_referral) else 0
-            data.update(reward_point=reward)
+            relationship = yield self.dictionary_ps.get_referral_relationship(self.locale)
+            data.update(
+                reward_point=reward,
+                consts=dict(relation=relationship)
+            )
             self.render_page(template_name="employee/pc-upload-resume.html", data=data)
         else:
             self.logger.warning("[referral profile]get referral position info fail!")

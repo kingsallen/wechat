@@ -80,11 +80,10 @@ class ChatPageService(PageService):
             room['compoundContent'] = btn_content
 
     @gen.coroutine
-    def get_chatroom(self, user_id, hr_id, position_id, room_id, qxuser, is_gamma):
+    def get_chatroom(self, user_id, hr_id, company_id, position_id, room_id, qxuser, is_gamma, bot_enabled):
         """进入聊天室"""
 
         ret = yield self.thrift_chat_ds.enter_chatroom(user_id, hr_id, position_id, room_id, is_gamma)
-
         hr_info = ObjectDict()
         if ret.hr:
             hr_info = ObjectDict(
@@ -93,6 +92,12 @@ class ChatPageService(PageService):
                 hr_headimg=make_static_url(ret.hr.hrHeadImg or const.HR_HEADIMG),
                 deleted=ret.hr.isDelete
             )
+            if bot_enabled:
+                data = (yield self.infra_company_ds.get_company_mobot_image(company_id))['data']
+                if data['mobot_head_img']:
+                    hr_info['hr_headimg'] = data['mobot_head_img']
+                if data['mobot_name']:
+                    hr_info['hr_name'] = data['mobot_name']
 
         user_info = ObjectDict()
         if ret.user:
@@ -121,8 +126,8 @@ class ChatPageService(PageService):
             chat_debut=ret.chatDebut,
             follow_qx=qxuser.is_subscribe == 1,
             room_id=ret.roomId,
+            show_position_info=not bot_enabled
         )
-
         raise gen.Return(res)
 
     @gen.coroutine
@@ -209,7 +214,8 @@ class ChatPageService(PageService):
         raise gen.Return(company_conf)
 
     @gen.coroutine
-    def get_chatbot_reply(self, message, user_id, hr_id, position_id, flag, create_new_context, current_user, from_textfield):
+    def get_chatbot_reply(self, message, user_id, hr_id, position_id, flag, social, campus, create_new_context, current_user,
+                          from_textfield):
         """ 调用 chatbot 返回机器人的回复信息
                https://wiki.moseeker.com/chatbot.md
         :param message: 用户发送到文本内容
@@ -220,6 +226,8 @@ class ChatPageService(PageService):
         :param create_new_context: meet mobot标识
         :param current_user:
         :param from_textfield:
+        :param social:社招判断开关 1：开启；
+        :param campus:校招判断开关 1：开启；
         """
         messages = []
 
@@ -232,16 +240,24 @@ class ChatPageService(PageService):
             from_textfield=from_textfield
         )
         self.logger.debug("get_chatbot_reply==>create_new_context:{} ".format(create_new_context))
+        self.logger.debug("chabot_params:flag:%s, social:%s, capmpus:%s"%(flag, social, campus))
+        self.logger.debug("chabot_params type :flag:%s, social:%s, capmpus:%s"
+                          % (type(flag), type(social), type(campus)))
+        flag = int(flag) if flag else None
         try:
-            if int(flag) == 1:
+            if flag == 1:
                 res = yield http_post(
-                    route='{host}{uri}'.format(host=settings['chatbot_host'], uri='campus_qa.api'), jdata=params, infra=False)
+                    route='{host}{uri}'.format(host=settings['chatbot_host'], uri='campus_qa.api'), jdata=params,
+                    infra=False)
+            elif flag is None and social == 0 and campus == 1:
+                res = yield http_post(
+                    route='{host}{uri}'.format(host=settings['chatbot_host'], uri='campus_qa.api'), jdata=params,
+                    infra=False)
             else:
                 res = yield http_post(
                     route='{host}{uri}'.format(host=settings['chatbot_host'], uri='qa.api'), jdata=params,
                     infra=False)
 
-            self.logger.debug("[get_chatbot_reply]ret: %s, type: %s" % (res, type(res)))
 
             self.logger.debug(res.results)
             results = res.results
@@ -280,13 +296,9 @@ class ChatPageService(PageService):
             ret_message['compound_content']['list'] = list
             ret_message['compound_content']['hot'] = hot
             ret_message['compound_content']['max'] = max
-        if msg_type == "jobCard":
-            ids = [p.get("id") for p in compoundContent]
-        if msg_type == "jobSelect":
-            ids = [p.get("id") for p in compoundContent.get("list")]
-        if ids and msg_type in ("jobCard", "jobSelect"):
-            max = ret_message['compound_content'].get("max") if msg_type == "jobSelect" else 0
-            ret_message['compound_content'] = ObjectDict()  # 置空compoundContent
+
+        @gen.coroutine
+        def get_position_list(ids):
             position_list = []
             position_ps = PositionPageService()
             team_ps = TeamPageService()
@@ -309,7 +321,8 @@ class ChatPageService(PageService):
                 position.imgUrl = p_company_info.banner
                 if team:
                     teamname_custom = current_user.company.conf_teamname_custom
-                    more_link = team.link if team.link else make_url(path.TEAM_PATH.format(team.id), wechat_signature=current_user.wechat.signature)
+                    more_link = team.link if team.link else make_url(path.TEAM_PATH.format(team.id),
+                                                                     wechat_signature=current_user.wechat.signature)
                     team_des = yield position_ps.get_team_data(team, more_link, teamname_custom)
                     if team_des:
                         for item in team_des['data']:
@@ -324,9 +337,16 @@ class ChatPageService(PageService):
                             if position.imgUrl:
                                 break
                 position_list.append(position)
-            ret_message['compound_content']['list'] = position_list
-            if max:
-                ret_message['compound_content']['max'] = max
+            return position_list
+
+        if msg_type == "jobCard":
+            ids = [p.get("id") for p in compoundContent]
+            positions = yield get_position_list(ids)
+            ret_message['compound_content'] = ObjectDict(list=positions)
+        if msg_type == "jobSelect":
+            ids = [p.get("id") for p in compoundContent.get("list")]
+            positions = yield get_position_list(ids)
+            ret_message['compound_content']['list'] = positions
         return ret_message
 
     @staticmethod
@@ -383,5 +403,3 @@ class ChatPageService(PageService):
         })
         ret = yield self.thrift_chat_ds.get_voice(params)
         return ret
-
-

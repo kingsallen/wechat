@@ -269,6 +269,38 @@ class UserPageService(PageService):
             })
 
     @gen.coroutine
+    def update_user_wx_info(self, unionid, userinfo):
+        """更新用户的user_user中微信相关的信息"""
+        yield self.user_user_ds.update_user(
+            conds={
+                'unionid': unionid
+            },
+            fields={
+                "nickname": userinfo.nickname,
+                "headimg": userinfo.headimgurl
+            })
+
+    @gen.coroutine
+    def update_wxuser_wx_info(self, unionid, userinfo):
+        """
+        更新老微信 wxuser 信息
+        :param unionid:
+        :param userinfo:
+        :return:
+        """
+        yield self.user_wx_user_ds.update_wxuser(
+            conds={"unionid": unionid,
+                   "wechat_id": settings['qx_wechat_id']},
+            fields={
+                "nickname": userinfo.nickname,
+                "sex": userinfo.sex or 0,
+                "city": userinfo.city,
+                "country": userinfo.country,
+                "province": userinfo.province,
+                "headimgurl": userinfo.headimgurl
+            })
+
+    @gen.coroutine
     def get_valid_employee_by_user_id(self, user_id, company_id):
         """ 根据 user_id, company_id 找到合法的员工数据
 
@@ -447,15 +479,14 @@ class UserPageService(PageService):
             return True, fav_id
 
     @gen.coroutine
-    def get_redpacket_list(self, user_id, params):
+    def get_redpacket_list(self, params):
         """
         获取红包列表
-        :param user_id:
         :param params:
         :return:
         """
-        ret = yield self.infra_user_ds.get_redpacket_list(user_id, params)
-        if ret.status == const.API_SUCCESS:
+        ret = yield self.infra_user_ds.get_redpacket_list(params)
+        if int(ret.code) == const.API_SUCCESS:
             data = ret.data
         else:
             data = ObjectDict()
@@ -535,4 +566,71 @@ class UserPageService(PageService):
         if ret.country_code and ret.country_code != '86':
             ret.mobile_display = '+{}-{}'.format(ret.country_code, ret.mobile_display)
 
+        return ret
+
+    @gen.coroutine
+    def get_popup_info(self, user_id, company_id, position_id):
+        """
+        获取候选人进入职位详情弹层数据
+        :param user_id:
+        :param company_id:
+        :return:
+        """
+        ret = yield self.infra_user_ds.get_popup_info(user_id, company_id, position_id)
+        return ret
+
+    @gen.coroutine
+    def close_popup_window(self, user_id, company_id, type):
+        """
+        候选人职位详情页面弹层关闭
+        :param user_id:
+        :param company_id:
+        :param type: int 0 二维码弹层 1简历完善度弹层
+        :return:
+        """
+        ret = yield self.infra_user_ds.close_popup_window(user_id, company_id, type)
+        return ret
+
+    @gen.coroutine
+    def referral_confirm_submit(self, company_id, user_id, post_user_id, position_id, origin):
+        """
+        候选人联系内推：简历预览页面确认提交
+        :param company_id:
+        :param user_id:  候选人id
+        :param post_user_id: 最初转发职位的员工的user_id
+        :param position_id:
+        :param origin: 申请来源，1 转发，2 连连看
+        :return:
+        """
+        ret = yield self.infra_user_ds.referral_confirm_submit(company_id, user_id, post_user_id, position_id, origin)
+        return ret
+
+    @gen.coroutine
+    def referral_related_positions(self, user_id, position_id):
+        """
+        候选人联系内推完成页面推荐三个相关职位信息
+        :param user_id:
+        :param position_id:
+        :return:
+        """
+        ret = yield self.infra_user_ds.referral_related_positions(user_id, position_id)
+        return ret
+
+    @gen.coroutine
+    def if_referral_position(self, company_id, recom, psc, pid, click_user_id):
+        """
+        候选人打开转发的职位链接，根据链接中参数判断最初转发该职位的人是否是员工
+        :param company_id:
+        :param recom:
+        :param psc:
+        :param pid:
+        :param click_user_id:
+        :return:
+        """
+        ret = yield self.infra_user_ds.if_referral_position(company_id, recom, psc, pid, click_user_id)
+        return ret
+
+    @gen.coroutine
+    def if_ever_seek_recommend(self, recom_user_id, psc, pid, company_id, click_user_id):
+        ret = yield self.infra_user_ds.if_ever_seek_recommend(recom_user_id, psc, pid, company_id, click_user_id)
         return ret

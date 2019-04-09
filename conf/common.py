@@ -146,6 +146,10 @@ API_SUCCESS = 0
 API_FAILURE = 1
 API_WARNING = 2
 
+# 入库的申请来源
+INVITE_ORIGIN = 524288  # 邀请投递申请
+FORWARD_ORIGIN = 1048576  # 员工转发申请
+
 # 通用状态的布尔值
 YES = 1
 NO = 0
@@ -219,6 +223,20 @@ WORKSTATE = {
     "5": "应届毕业生"
 }
 
+# 职位学历要求
+POSITION_DEGREE = {
+    "0": "无",
+    "1": "大专",
+    "2": "本科",
+    "3": "硕士",
+    "4": "MBA",
+    "5": "博士",
+    "6": "中专",
+    "7": "高中",
+    "8": "博士后",
+    "9": "初中",
+}
+
 # 学历
 DEGREE = {
     "0": "",
@@ -245,6 +263,45 @@ DEGREE_SEARCH_LOCALE = {
 }
 DEGREE_SEARCH_REVERSE = {
     v: k for k, v in DEGREE_SEARCH_LOCALE.items()
+}
+
+# 最高学历
+HIGHEST_DEGREE = {
+    "1": "common_highest_degree_middleschool",
+    "2": "common_highest_degree_secondary_school",
+    "3": "common_highest_degree_highschool",
+    "4": "common_highest_degree_college",
+    "5": "common_highest_degree_university",
+    "6": "common_highest_degree_master",
+    "7": "common_highest_degree_doctor",
+    "8": "common_highest_degree_doctor_above",
+    "9": "common_highest_degree_other"
+}
+
+RELATIONSHIP = {
+    "0": "common_relationship_other",
+    "1": "common_relationship_ex_superior",
+    "2": "common_relationship_ex_subordinate",
+    "3": "common_relationship_ex_colleague",
+    "4": "common_relationship_alumnus",
+    "5": "common_relationship_friend",
+}
+
+RELATIONSHIP_SEARCH_LOCALE = {
+    "其他": "common_relationship_other",
+    "前上级": "common_relationship_ex_superior",
+    "前下属": "common_relationship_ex_subordinate",
+    "非上下级的前同事关系": "common_relationship_ex_colleague",
+    "校友": "common_relationship_alumnus",
+    "亲友": "common_relationship_friend",
+}
+
+# 内推 推荐进度页面鼓励语做国际化
+REFERRAL_ENCOURAGE = {
+    "恭喜您通过初筛，好的开始是成功的一半！": "encourage_primary_pass",
+    "恭喜您通过面试，胜利就在不远处！": "encourage_pass_interview",
+    "欢迎优秀的你加入我们！": "encourage_join_us",
+    "您已进入我司人才库，谢谢您的关注！": "encourage_trm",
 }
 
 # 高级搜索筛选项
@@ -430,6 +487,9 @@ RP_RECOM_LOCK_FMT = "rplock_recom:%s:%s"
 ON_BOARD_LOCK_FMT = "rplock_on_board:%s:%s"
 RP_LOCKED = 1
 
+# 红包mq name
+CLICK_MQ_NAME = "retransmit click"
+APPLY_MQ_NAME = "retransmit apply"
 
 # RP_ITEM 状态常量
 # 默认初始状态
@@ -563,7 +623,8 @@ CONSTANT_PARENT_CODE = ObjectDict(
     INDUSTRY=3124,  # 期望行业
     REGISTER_SOURCE=4101,  # 用户注册来源(source)
     CONTINENT=9103,  # 大洲
-    ROCKETMAJOR_L1=990000  # 火箭一级专业
+    ROCKETMAJOR_L1=990000,  # 火箭一级专业
+    REFERRAL_RELATIONSHIP=3135,    # 被推荐人与内推人的关系
 )
 
 # hr_employee_cert_conf.auth_mode 的数据库枚举值
@@ -653,6 +714,10 @@ MARS_ID = 345
 PAGE_FROM_ONE = 1
 PAGE_SIZE_FIVE = 5
 
+# 内推候选人 关闭弹层
+REFERRAL_CLOSE_QRCODE = 0
+REFERRAL_CLOSE_PROFILE = 1
+
 # 榜单类型
 LADDER_TYPE = {"month": "1",
                "quarter": "2",
@@ -672,6 +737,7 @@ QRCODE_REFERRAL_KETINFO = 10
 QRCODE_POSITION_INFO = 11
 QRCODE_REFERRAL_CONFIRM = 12
 QRCODE_SCAN_REFERRAL = 13
+QRCODE_POSITION = 14
 QRCODE_OTHER = 99
 
 # mq相关常量
@@ -684,3 +750,25 @@ MQ_REDPACKET_ROUTING_KEY = "*.red_packet"
 SCREEN_RP_TYPE = "screen"
 EMPLOYEE_BIND_RP_TYPE = "employee_bind"
 
+
+# 二维码关注来源
+QRCODE_FROM_POSITION_POPUP = 1
+
+
+# 格力引导的职位链接
+GELI_COMPANY_ID = 1730310
+GELI_WEBSITE = 'http://gree.zhiye.com'
+GELI_POSITION_URL = 'http://gree.zhiye.com/zpdetail/{}'
+
+# 内推：员工推荐评价入口
+REFERRAL_EVAL_CONTACT_MES_TMP = 1    # 候选人联系内推消息模板
+REFERRAL_EVAL_RADAR = 2              # 人脉雷达
+REFERRAL_EVAL_RECOM_PROGRESS = 3     # 推荐进度列表
+REFERRAL_EVAL_TEN_MIN_MES_TMP = 4    # 十分钟消息推送模板
+REFERRAL_EVAL_SEEK_RECOM_CARDS = 5   # 求推荐分类统计卡
+
+REFERRAL_EXPIRED_MESSAGE = 'expired_message'
+
+# 人脉连连看  连接状态
+CONNECTION_ING = 2
+CONNECTION_COMPLETED = 1

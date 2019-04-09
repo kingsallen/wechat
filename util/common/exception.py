@@ -2,7 +2,9 @@
 
 
 class InfraOperationError(Exception):
-    pass
+    def __init__(self, message=None):
+        self.message = message
+
 
 class MyException(Exception):
 

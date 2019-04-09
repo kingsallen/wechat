@@ -1,5 +1,6 @@
 # coding=utf-8
 
+import uuid
 from tornado import gen
 
 import conf.common as const
@@ -7,10 +8,12 @@ import conf.path as path
 from handler.base import BaseHandler
 from util.common.decorator import handle_response, authenticated, \
     check_and_apply_profile
-from util.wechat.core import WechatNoTemplateError
+from util.common.cipher import decode_id
+from util.common.mq import jd_apply_publisher
 from util.common import ObjectDict
 import conf.message as msg
 from util.tool.url_tool import make_static_url
+from util.tool.date_tool import curr_now
 
 
 class ApplicationHandler(BaseHandler):
@@ -68,7 +71,33 @@ class ApplicationHandler(BaseHandler):
 
         self.logger.warn(
             "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& post application api begin &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
+
         pid = self.json_args.pid
+
+        # 联系内推： 候选人填写简历信息 确认提交，此时并没有真正投递要等到员工完成推荐评价才算是真正投递
+        if self.params.contact_referral:
+            # 申请来自哪里
+            origin = self.params.origin
+            if self.params.root_recomd:
+                recom = decode_id(self.params.root_recomd)
+                psc = -1
+            else:
+                recom = decode_id(self.json_args.recom)
+                psc = self.json_args.psc if self.json_args.psc else 0
+            ret = yield self.user_ps.if_referral_position(
+                self.current_user.company.id,
+                recom, psc, pid, self.current_user.sysuser.id)
+            if not ret.status == const.API_SUCCESS:
+                self.send_json_error(message=ret.message)
+                return
+            root_user_id = ret.data.get('user', {}).get('uid', 0)
+            yield self.user_ps.referral_confirm_submit(
+                self.current_user.company.id, self.current_user.sysuser.id, root_user_id, pid, origin)
+            self.send_json_success(
+                data=dict(next_url=self.make_url(path.REFERRAL_CONTACT_RESULT, self.params),
+                          message=''))
+            return
+
         self.log_info = {"position_id": pid}
         position = yield self.position_ps.get_position(pid, display_locale=self.get_current_locale())
 
@@ -106,11 +135,26 @@ class ApplicationHandler(BaseHandler):
         is_applied, message, apply_id = yield self.application_ps.create_application(
             position,
             self.current_user,
+            self.params,
             is_platform=self.is_platform,
             has_recom='recom' in self.params)
 
         # TODO (tangyiliang) 申请后操作，以下操作全部可以走消息队列
         if is_applied:
+
+            # 申请红包
+            message = {"name": const.APPLY_MQ_NAME,
+                       "ID": str(uuid.uuid4()),
+                       "recommend_user_id": self.current_user.recom.id if self.current_user.recom else 0,
+                       "applier_id": self.current_user.sysuser.id,
+                       "position_id": position.id,
+                       "apply_time": curr_now(),
+                       "company_id": self.current_user.company.id,
+                       "application_id": apply_id,
+                       "psc": self.json_args.psc or 0
+                       }
+            self.logger.debug("[hb]----send retransmit apply redpacket")
+            jd_apply_publisher.publish_message(message=message, routing_key="retransmit_apply_exchange.redpacket")
 
             # 绑定application与pre_share_chain
             if self.json_args.psc or self.current_user.recom:
@@ -134,15 +178,6 @@ class ApplicationHandler(BaseHandler):
 
             self.send_json_success(data=dict(apply_id=apply_id),
                                    message=message)
-
-            # 发送转发申请红包
-            if self.json_args.recom:
-                yield self.redpacket_ps.handle_red_packet_position_related(
-                    self.current_user,
-                    position,
-                    redislocker=self.redis,
-                    is_apply=True,
-                    psc=self.json_args.psc)
 
         else:
             self.send_json_error(message=message)

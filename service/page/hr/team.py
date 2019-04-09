@@ -149,8 +149,7 @@ class TeamPageService(PageService):
             # 朴素版本
             # team_positions = [p for p in company_positions if p.team_id == team.id][:position_num]
             # 高端版本, let me show you some Python skill...
-            team_positions = list(
-                itertools.islice(filter(lambda p: p.team_id == team.id, company_positions), position_num))
+            team_positions = list(filter(lambda p: p.team_id == team.id, company_positions))
 
             team_id_list = list(set([p.team_id for p in company_positions
                                      if p.team_id != team.id]))
@@ -164,7 +163,7 @@ class TeamPageService(PageService):
                     'team_id': team.id
                 },
                 fields=position_fields,
-                appends=["ORDER BY update_time desc", "LIMIT %d" % position_num]
+                appends=["ORDER BY priority asc, update_time desc"]
             )
 
             other_teams = yield self.hr_team_ds.get_team_list(
@@ -225,7 +224,7 @@ class TeamPageService(PageService):
             team,
             team_members,
             templates,
-            team_positions[0:3],
+            team_positions,
             other_teams,
             res_dict,
             handler_param,
@@ -317,7 +316,8 @@ class TeamPageService(PageService):
                 [p.account_id for p in publishers])).replace(',)', ')')
             company_positions = yield self.job_position_ds.get_positions_list(
                 conds=" and ".join([cond1, cond2]),
-                fields=fields)
+                fields=fields,
+                appends=["ORDER BY priority desc, update_time desc"])
 
         raise gen.Return(company_positions)
 

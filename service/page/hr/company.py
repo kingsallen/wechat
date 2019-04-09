@@ -333,3 +333,24 @@ class CompanyPageService(PageService):
                 ret.update(hr_logo=make_static_url(hr_wxuser.headimgurl))
 
         return ret
+
+    @gen.coroutine
+    def get_crucial_info_state(self, company_id):
+        """
+        获取推荐人才关键信息开关状态
+        :return:
+        """
+        ret = yield self.infra_company_ds.get_crucial_info_state(company_id)
+        return ret
+
+    @gen.coroutine
+    def check_oms_switch_status(self, company_id, module_name):
+        """
+        检查oms控制的一系列开关状态
+        :param company_id:
+        :param module_name:
+        :return:
+        """
+        res = yield self.infra_company_ds.check_oms_switch_status(company_id, module_name)
+        return res
+

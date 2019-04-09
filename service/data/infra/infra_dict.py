@@ -381,6 +381,28 @@ class InfraDictDataService(DataService):
 
     @cache(ttl=60 * 60 * 5)
     @gen.coroutine
+    def get_mars_industries(self):
+        """获取Mars行业"""
+        ret = yield http_get(path.DICT_INDUSTRY_MARS, dict(parent=0))
+        ret = yield self.make_mars_industries_result(ret)
+        return ret
+
+    @staticmethod
+    @gen.coroutine
+    def make_mars_industries_result(http_response):
+        res_data = http_response.data
+        industries = []
+        for el in res_data:
+            el = ObjectDict(el)
+            out = ObjectDict()
+            out.text = el.name
+            level2 = yield http_get(path.DICT_INDUSTRY_MARS, dict(parent=el.code))
+            out.list = list(map(lambda x: sub_dict(x, ['code', 'name']), level2.data))
+            industries.append(out)
+        return industries
+
+    @cache(ttl=60 * 60 * 5)
+    @gen.coroutine
     def get_industries(self, level=2):
         """获取行业
         industries
@@ -488,3 +510,18 @@ class InfraDictDataService(DataService):
 
             self.cached_rocket_major = res
             return res
+
+    @gen.coroutine
+    def get_comment_tags_by_code(self, code):
+        """
+        根据不同的推荐人和被推荐人关系获取不同的评价标签
+        :param code: 推荐关系编号
+        :return:
+        """
+        res = yield http_get(
+            path.DICT_COMMENT_TAGS_BY_CODE,
+            jdata=dict(code=code)
+        )
+        res_data = res.data
+        returned_data = [{"zh": item['tag'], "en": item['tag_en']} for item in res_data]
+        return returned_data
