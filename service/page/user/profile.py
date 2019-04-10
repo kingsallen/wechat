@@ -1145,3 +1145,22 @@ class ProfilePageService(PageService):
             target = rename_keys(target, key_mapping)
 
         return {k: v for k, v in target.items() if v is not None}
+
+    @gen.coroutine
+    def is_resume_upload_complete(self, user_id):
+        """轮训Java后端简历上传是否完成"""
+        params = {
+            "userId": user_id
+        }
+        res = yield self.infra_profile_ds.infra_is_resume_upload_complete(params)
+        return res
+
+    @gen.coroutine
+    def referral_upload_resume_info(self, user_id, file_id):
+        """小助手上传的简历信息"""
+        params = {
+            "userId": user_id,
+            "fileId": file_id
+        }
+        res = yield self.infra_profile_ds.infra_referral_upload_resume_info(params)
+        return res
