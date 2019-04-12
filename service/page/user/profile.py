@@ -1147,20 +1147,21 @@ class ProfilePageService(PageService):
         return {k: v for k, v in target.items() if v is not None}
 
     @gen.coroutine
-    def is_resume_upload_complete(self, user_id):
+    def is_resume_upload_complete(self, user_id, sync_id):
         """轮训Java后端简历上传是否完成"""
         params = {
-            "userId": user_id
+            "userId": user_id,
+            "syncId": sync_id
         }
         res = yield self.infra_profile_ds.infra_is_resume_upload_complete(params)
         return res
 
     @gen.coroutine
-    def referral_upload_resume_info(self, user_id, file_id):
+    def referral_upload_resume_info(self, user_id, sync_id):
         """小助手上传的简历信息"""
         params = {
             "userId": user_id,
-            "fileId": file_id
+            "syncId": sync_id
         }
         res = yield self.infra_profile_ds.infra_referral_upload_resume_info(params)
         return res

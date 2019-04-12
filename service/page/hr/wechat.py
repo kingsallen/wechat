@@ -61,7 +61,7 @@ class WechatPageService(PageService):
     def get_miniapp_code(self, scene_id):
         """
         获取小程序码
-        :param scene_id: 1:普通内推上传，2：IM内推上传
+        :param scene_id:
         :return:
         """
         params = {

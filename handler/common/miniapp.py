@@ -14,6 +14,7 @@ class MiniappCodeHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def get(self):
-        scene_id = self.params.scene or 1
+        scene_id = self.params.scene
         buffer = yield self.wechat_ps.get_miniapp_code(scene_id=scene_id)
-        self.send_json_success(data={"miniapp_code": buffer})
+        self.set_header("Content-Type", "image/jpeg")
+        self.write(buffer)

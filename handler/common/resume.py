@@ -511,7 +511,8 @@ class ResumeUploadResultHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def get(self):
-        result = yield self.profile_ps.is_resume_upload_complete(self.current_user.sysuser.id)
+        sync_id = self.params.syncId
+        result = yield self.profile_ps.is_resume_upload_complete(self.current_user.sysuser.id, sync_id)
         if result.status == const.API_SUCCESS:
             self.send_json_success(result.data)
         else:
@@ -526,8 +527,8 @@ class MiniappResumeUploadInfoHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def get(self):
-        file_id = self.params.fileId
-        result = yield self.profile_ps.referral_upload_resume_info(self.current_user.sysuser.id, file_id)
+        sync_id = self.params.syncId
+        result = yield self.profile_ps.referral_upload_resume_info(self.current_user.sysuser.id, sync_id)
         if result.status == const.API_SUCCESS:
             self.send_json_success(result.data)
         else:
