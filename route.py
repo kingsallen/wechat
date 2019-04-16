@@ -157,8 +157,8 @@ common_routes = [
 
     # 上传助手小程序
     (r"/api/miniapp/code",                           handler.common.miniapp.MiniappCodeHandler,                 {"event": "miniapp_code"}),
-    (r"/resume/upload/complete",                     handler.common.resume.ResumeUploadResultHandler,           {"event": "resume_upload_complate"}),
-    (r"/referral/upload/resume/info",                handler.common.resume.MiniappResumeUploadInfoHandler,      {"event": "resume_upload_info"}),
+    (r"/api/resume/upload/complete",                 handler.common.resume.ResumeUploadResultHandler,           {"event": "resume_upload_complate"}),
+    (r"/api/referral/upload/resume/info",            handler.common.resume.MiniappResumeUploadInfoHandler,      {"event": "resume_upload_info"}),
 
 ]
 

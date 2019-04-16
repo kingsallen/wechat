@@ -808,17 +808,17 @@ class InfraProfileDataService(DataService):
     @gen.coroutine
     def infra_is_resume_upload_complete(self, params):
         """询问上传助手小助手简历是否上传完成"""
-        res = yield http_tool.http_get(path.RESUME_UPLOAD_COMPLETE, params, infra=False)
+        res = yield http_tool.http_get('{}/{}'.format(settings['upload_resume_miniapp_appid'], path.RESUME_UPLOAD_COMPLETE), params, infra=False)
         return res
 
     @gen.coroutine
     def infra_referral_upload_resume_info(self, params):
         """获取上传助手小程序上传的简历信息"""
-        res = yield http_tool.http_get(path.REFERRAL_UPLOAD_RESUME_INFO, params, infra=False)
+        res = yield http_tool.http_get('{}/{}'.format(settings['upload_resume_miniapp_appid'], path.REFERRAL_UPLOAD_RESUME_INFO), params, infra=False)
         return res
 
     @gen.coroutine
     def infra_upload_miniapp_access(self, params):
         """获取上传助手小程序access_token"""
-        res = yield http_tool.http_get(path.UPLOAD_MINIAPP_ACCESSTOKEN, params, infra=False)
+        res = yield http_tool.http_get('{}/{}'.format(settings['upload_resume_miniapp_appid'], path.UPLOAD_MINIAPP_ACCESSTOKEN), params, infra=False)
         return res
