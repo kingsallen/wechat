@@ -38,6 +38,7 @@ import handler.common.campaign
 import handler.common.redirect
 import handler.common.statistics
 import handler.common.redpacket
+import handler.common.miniapp
 
 import handler.help.passport
 import handler.help.releasedposition
@@ -153,6 +154,11 @@ common_routes = [
     (r"/api/collectlog",                             handler.common.logcollector.LogCollectorHandler,           {"event": "collect_log"}),
     (r"/api/captcha",                                handler.common.captcha.CaptchaHandler,                     {"event": "captcha"}),
     (r"/api/interview/statistics",                   handler.common.statistics.InterviewStatisticsHandler,      {"event": "interview_statistics"}),
+
+    # 上传助手小程序
+    (r"/api/miniapp/code",                           handler.common.miniapp.MiniappCodeHandler,                 {"event": "miniapp_code"}),
+    (r"/resume/upload/complete",                     handler.common.resume.ResumeUploadResultHandler,           {"event": "resume_upload_complate"}),
+    (r"/referral/upload/resume/info",                handler.common.resume.MiniappResumeUploadInfoHandler,      {"event": "resume_upload_info"}),
 
 ]
 

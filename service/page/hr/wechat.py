@@ -65,7 +65,8 @@ class WechatPageService(PageService):
         :return:
         """
         params = {
-            "appid": self.settings['upload_resume_miniapp_appid']
+            "appid": self.settings['upload_resume_miniapp_appid'],
+            "appSecret": self.settings['upload_resume_miniapp_app_secret'],
         }
         res = yield self.infra_profile_ds.infra_upload_miniapp_access(params)
         access_token = res.data.accessToken
