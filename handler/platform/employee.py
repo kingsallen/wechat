@@ -1298,12 +1298,30 @@ class ReferralRadarPageHandler(BaseHandler):
             self.write_error(500, message=ret.message)
             return
 
+        yield self._make_share_info()
+
         self.render_page(template_name='employee/people-radar.html',
                          data={
                              "job_uv": ret.data.get('link_viewed_count'),
                              "seek_recom_uv": ret.data.get('interested_count'),
                              "recom": self.position_ps._make_recom(self.current_user.sysuser.id)
                          })
+
+    @gen.coroutine
+    def _make_share_info(self):
+        """构建 share 内容"""
+
+        company_info = yield self.company_ps.get_company(
+            conds={"id": self.current_user.company.id}, need_conf=True)
+
+        cover = self.share_url(company_info.logo)
+
+        self.params.share = ObjectDict({
+            "cover": cover,
+            "title": '',  # 前端控制
+            "description": '',  # 前端控制
+            "link": '',  # 前端控制
+        })
 
 
 class ReferralRadarHandler(BaseHandler):
