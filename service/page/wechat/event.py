@@ -224,12 +224,12 @@ class EventPageService(PageService):
                     '[sensors_track] distinct_id:{}, event_name: {}, properties: {}, is_login_id: {}'.format(
                         current_user.wxuser.sysuser_id,
                         "receiveTemplateMessage",
-                        {"template_id": template_id},
+                        {"templateId": template_id},
                         True if bool(user_record.username.isdigit()) else False))
             except Exception as e:
                 self.logger.error(
                     '[sensors_track_exception] distinct_id: {}, event_name: {}, properties: {}, is_login_id: {}, error_track: {}'.format(
-                        current_user.wxuser.sysuser_id, "receiveTemplateMessage", {"template_id": template_id},
+                        current_user.wxuser.sysuser_id, "receiveTemplateMessage", {"templateId": template_id},
                         True if bool(user_record.username.isdigit()) else False,
                         traceback.format_exc()))
         raise gen.Return()
