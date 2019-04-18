@@ -36,7 +36,7 @@ class SharechainPageService(PageService):
 
         if not last_share_record:
             self.logger.debug("no need to refresh sharechain, skip...")
-            raise gen.Return(0)
+            return 0, 0
 
         # 找到 share_record 后创建 candiate_share_chain
         inserted_share_chain_id, depth = yield self._save_recom(
