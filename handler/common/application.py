@@ -91,7 +91,7 @@ class ApplicationHandler(BaseHandler):
             root_user_id = ret.data.get('user', {}).get('uid', 0)
             yield self.user_ps.referral_confirm_submit(
                 self.current_user.company.id, self.current_user.sysuser.id, root_user_id, pid, origin)
-            self.track("c﻿ReferralAddProfile")
+            self.track("cReferralAddProfile")
             self.send_json_success(
                 data=dict(next_url=self.make_url(path.REFERRAL_CONTACT_RESULT, self.params),
                           message=''))
