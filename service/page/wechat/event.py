@@ -215,7 +215,7 @@ class EventPageService(PageService):
             template = yield self.hr_wx_template_message_ds.get_wx_template(
                 conds={"id": msg_record.template_id})
             template_id = template.sys_template_id
-            send_time = get_send_time_from_template_message_url(template.url)
+            send_time = get_send_time_from_template_message_url(str(template.url or ''))
             try:
                 self.sa.track(distinct_id=current_user.wxuser.sysuser_id,
                               event_name="receiveTemplateMessage",
