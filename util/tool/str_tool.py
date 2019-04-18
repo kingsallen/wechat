@@ -358,3 +358,12 @@ def is_odd(obj):
     """
     test = int(obj)
     return test & 1 == 1
+
+
+def get_send_time_from_template_message_url(url=''):
+    sub = re.search(r'.*send_time=(\d+).*', url)
+    if sub:
+        return sub.group(1)
+    else:
+        return 0
+

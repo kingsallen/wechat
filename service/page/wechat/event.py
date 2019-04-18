@@ -21,7 +21,7 @@ from service.page.base import PageService
 from util.wechat.msgcrypt import WXBizMsgCrypt
 from util.tool.url_tool import make_static_url
 from util.tool.date_tool import curr_now
-from util.tool.str_tool import mobile_validate
+from util.tool.str_tool import mobile_validate, get_send_time_from_template_message_url
 from util.common import ObjectDict
 from util.tool.json_tool import json_dumps
 from util.wechat.core import get_wxuser, send_succession_message
@@ -215,6 +215,7 @@ class EventPageService(PageService):
             template = yield self.hr_wx_template_message_ds.get_wx_template(
                 conds={"id": msg_record.template_id})
             template_id = template.sys_template_id
+            send_time = get_send_time_from_template_message_url(template.url)
             try:
                 self.sa.track(distinct_id=current_user.wxuser.sysuser_id,
                               event_name="receiveTemplateMessage",
@@ -229,7 +230,7 @@ class EventPageService(PageService):
             except Exception as e:
                 self.logger.error(
                     '[sensors_track_exception] distinct_id: {}, event_name: {}, properties: {}, is_login_id: {}, error_track: {}'.format(
-                        current_user.wxuser.sysuser_id, "receiveTemplateMessage", {"templateId": template_id},
+                        current_user.wxuser.sysuser_id, "receiveTemplateMessage", {"templateId": template_id, "sendTime": send_time},
                         True if bool(user_record.username.isdigit()) else False,
                         traceback.format_exc()))
         raise gen.Return()
