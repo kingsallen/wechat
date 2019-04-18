@@ -215,11 +215,11 @@ class EventPageService(PageService):
             template = yield self.hr_wx_template_message_ds.get_wx_template(
                 conds={"id": msg_record.template_id})
             template_id = template.sys_template_id
-            send_time = get_send_time_from_template_message_url(str(template.url or ''))
+            send_time = get_send_time_from_template_message_url(str(msg_record.url or ''))
             try:
                 self.sa.track(distinct_id=current_user.wxuser.sysuser_id,
                               event_name="receiveTemplateMessage",
-                              properties={"templateId": template_id, "sendTime": send_time},
+                              properties={"templateId": template_id, "sendTime": int(send_time)},
                               is_login_id=True if bool(user_record.username.isdigit()) else False)
                 self.logger.debug(
                     '[sensors_track] distinct_id:{}, event_name: {}, properties: {}, is_login_id: {}'.format(
