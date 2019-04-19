@@ -736,12 +736,11 @@ class BaseHandler(MetaBaseHandler):
                 properties = ObjectDict()
             distinct_id, is_login_id = self._get_distinct_id_and_is_login_id(distinct_id, is_login_id)
             if distinct_id:
-                self.logger.debug('[sensors_track] distinct_id:{}, event_name: {}, properties: {}, is_login_id: {}'.format(
-                    distinct_id, event, properties, is_login_id))
-
                 properties.update(reqTime=curr_now(),
                                   isEmployee=bool(self.current_user.employee if self.current_user else None),
                                   sendTime=self.params.send_time if self.params else None)
+                self.logger.debug('[sensors_track] distinct_id:{}, event_name: {}, properties: {}, is_login_id: {}'.format(
+                    distinct_id, event, properties, is_login_id))
                 self.sa.track(distinct_id=distinct_id,
                               event_name=event,
                               properties=properties,

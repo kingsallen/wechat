@@ -211,6 +211,12 @@ class EventPageService(PageService):
             "unionid": current_user.wxuser.unionid,
             "parentid": 0  # 保证查找正常的 user record
         })
+        employee = yield self.user_employee_ds.get_employee(
+            conds={
+                "sysuser_id": user_record.id,
+                "disable":    const.OLD_YES,
+                "activation": const.OLD_YES
+            })
         if msg_record:
             template = yield self.hr_wx_template_message_ds.get_wx_template(
                 conds={"id": msg_record.template_id})
@@ -219,7 +225,7 @@ class EventPageService(PageService):
             try:
                 self.sa.track(distinct_id=current_user.wxuser.sysuser_id,
                               event_name="receiveTemplateMessage",
-                              properties={"templateId": template_id, "sendTime": int(send_time)},
+                              properties={"templateId": template_id, "sendTime": int(send_time), "isEmployee": bool(employee)},
                               is_login_id=True if bool(user_record.username.isdigit()) else False)
                 self.logger.debug(
                     '[sensors_track] distinct_id:{}, event_name: {}, properties: {}, is_login_id: {}'.format(

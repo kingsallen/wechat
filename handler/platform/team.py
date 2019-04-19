@@ -34,9 +34,9 @@ class TeamIndexHandler(BaseHandler):
         self.params.share = self._share(current_company)
         # 判断来源
         if self.params.source == const.FANS_RECOMMEND:
-            origin = "fans_recommend"
+            origin = const.SA_ORIGIN_FANS_RECOMMEND
         else:
-            origin = "platform"
+            origin = const.SA_ORIGIN_PLATFORM
         self.track("cTeamIndex", properties=ObjectDict(origin=origin))
         self.render_page('company/team.html', data, meta_title=data.bottombar.teamname_custom)
 

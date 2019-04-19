@@ -66,9 +66,9 @@ class CompanyHandler(BaseHandler):
             else self.current_user.company
         # 判断来源
         if self.params.source == const.FANS_RECOMMEND:
-            origin = "fans_recommend"
+            origin = const.SA_ORIGIN_FANS_RECOMMEND
         else:
-            origin = "platform"
+            origin = const.SA_ORIGIN_PLATFORM
         self.track("cCompanyIndex", properties=ObjectDict(origin=origin))
         if self.flag_should_display_newjd:
             data = yield self.user_company_ps.get_company_data(
