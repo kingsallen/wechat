@@ -1,5 +1,6 @@
 # coding=utf-8
 
+import uuid
 from tornado import gen
 
 import conf.common as const
@@ -7,11 +8,12 @@ import conf.path as path
 from handler.base import BaseHandler
 from util.common.decorator import handle_response, authenticated, \
     check_and_apply_profile
-from util.wechat.core import WechatNoTemplateError
 from util.common.cipher import decode_id
+from util.common.mq import jd_apply_publisher
 from util.common import ObjectDict
 import conf.message as msg
 from util.tool.url_tool import make_static_url
+from util.tool.date_tool import curr_now
 
 
 class ApplicationHandler(BaseHandler):
@@ -141,6 +143,20 @@ class ApplicationHandler(BaseHandler):
         # TODO (tangyiliang) 申请后操作，以下操作全部可以走消息队列
         if is_applied:
 
+            # 申请红包
+            message = {"name": const.APPLY_MQ_NAME,
+                       "ID": str(uuid.uuid4()),
+                       "recommend_user_id": self.current_user.recom.id if self.current_user.recom else 0,
+                       "applier_id": self.current_user.sysuser.id,
+                       "position_id": position.id,
+                       "apply_time": curr_now(),
+                       "company_id": self.current_user.company.id,
+                       "application_id": apply_id,
+                       "psc": self.json_args.psc or 0
+                       }
+            self.logger.debug("[hb]----send retransmit apply redpacket")
+            jd_apply_publisher.publish_message(message=message, routing_key="retransmit_apply_exchange.redpacket")
+
             # 绑定application与pre_share_chain
             if self.json_args.psc or self.current_user.recom:
                 yield self.application_ps.bind_app_chain_info(apply_id, psc_id=self.json_args.psc, direct_referral_user_id=self.current_user.recom.id if self.current_user.recom else 0)
@@ -166,15 +182,6 @@ class ApplicationHandler(BaseHandler):
 
             self.send_json_success(data=dict(apply_id=apply_id),
                                    message=message)
-
-            # 发送转发申请红包
-            if self.json_args.recom:
-                yield self.redpacket_ps.handle_red_packet_position_related(
-                    self.current_user,
-                    position,
-                    redislocker=self.redis,
-                    is_apply=True,
-                    psc=self.json_args.psc)
 
         else:
             self.send_json_error(message=message)

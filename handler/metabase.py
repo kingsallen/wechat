@@ -330,7 +330,7 @@ class MetaBaseHandler(AtomHandler):
             kind=kind,  # // {0: success, 1: failure, 10: email}
             messages=messages,  # ['hello world', 'abjsldjf']
             button_text=button_text,
-            button_link=self.make_url(path.PROFILE_VIEW,
+            button_link=self.make_url(path.POSITION_LIST,
                                       self.params,
                                       host=self.host) if not button_link else button_link,
             jump_link=jump_link  # // 如果有会自动，没有就不自动跳转
@@ -462,15 +462,15 @@ class MetaBaseHandler(AtomHandler):
                 wxuser_id=self.current_user.get("wxuser", {}).get("id", 0),
                 wechat_id=self.current_user.get("wechat", {}).get("id", 0),
             )
+            user_id = self.current_user.get("sysuser", {}).get("id", 0)
+        else:
+            user_id = 0
+
         if self.json_args.candidate_user_id and self.json_args.pid:
             customs.update(
                 invite_user_id=self.json_args.candidate_user_id,
                 pid=self.json_args.pid
             )
-
-            user_id = self.current_user.get("sysuser", {}).get("id", 0)
-        else:
-            user_id = 0
 
         log_info_common = ObjectDict(
             req_time=curr_now(),

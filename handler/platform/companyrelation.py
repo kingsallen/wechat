@@ -4,6 +4,7 @@ from tornado import gen
 import ujson
 
 import conf.common as const
+import conf.path as path
 from handler.base import BaseHandler
 from tests.dev_data.user_company_config import COMPANY_CONFIG
 from util.common import ObjectDict
@@ -102,9 +103,9 @@ class CompanyHandler(BaseHandler):
             'title': '关于{}, 你想知道的都在这里'.format(company_name),
             'description': '这可能是你人生的下一站! 看清企业全局, 然后定位自己',
             'link': self.make_url(
-                    path.COMPANY,
+                    path.WECHAT_COMPANY,
                     self.params,
-                    recom=self.position_ps._make_recom(self.current_user.sysuser.id)),
+                    recom=self.position_ps._make_recom(self.current_user.sysuser.id))
         })
         # 玛氏定制
         config = COMPANY_CONFIG.get(company.id)

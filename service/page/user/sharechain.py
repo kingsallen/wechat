@@ -508,4 +508,8 @@ class SharechainPageService(PageService):
             users.append(user)
         return users
 
-
+    @gen.coroutine
+    def get_share_chain_by_id(self, share_chain_id):
+        """根据share_chain_id获取share_chain"""
+        ret = yield self.candidate_share_chain_ds.get_share_chain(conds={"id": share_chain_id})
+        raise gen.Return(ret)

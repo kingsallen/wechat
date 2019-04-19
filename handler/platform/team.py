@@ -85,27 +85,29 @@ class TeamDetailHandler(BaseHandler):
 
         share_cover_url = data.templates[0].data[0].get('media_url') or \
                           self.static_url(self.current_user.company.logo)
-        self.params.share = self._share(current_company,
-                                        team.name, share_cover_url)
+        self.params.share = self._share(current_company, team.name, share_cover_url, team_id)
+
         # 判断来源
         if self.params.source == const.FANS_RECOMMEND:
             origin = "fans_recommend"
         else:
             origin = "platform"
         self.track("cTeamDetail", properties=ObjectDict(origin=origin))
+
         self.render_page(template_name='company/team.html', data=data,
                          meta_title=data.bottombar.teamname_custom)
 
-    def _share(self, company, team_name, share_cover_url):
+    def _share(self, company, team_name, share_cover_url, team_id):
         company_name = company.abbreviation or company.name
         default = ObjectDict({
             "cover": self.share_url(url_append_query(share_cover_url, "imageMogr2/thumbnail/!300x300r")),
             "title": team_name.upper() + "-" + company_name,
             "description": '通常你在点击“加入我们”之类的按钮之前并不了解我们, 现在给你个机会!',
             'link': self.make_url(
-                path.TEAM_PATH,
+                path.TEAM_PATH.format(team_id),
                 self.params,
-                recom=self.position_ps._make_recom(self.current_user.sysuser.id))})
+                recom = self.position_ps._make_recom(self.current_user.sysuser.id))})
+
         config = COMPANY_CONFIG.get(company.id)
         if config and config.get('transfer', False) and config.transfer.get('td', False):
             default.description = config.transfer.get('td')

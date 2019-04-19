@@ -23,6 +23,11 @@ class DictionaryPageService(PageService):
         return ret
 
     @tornado.gen.coroutine
+    def gen_mars_industries(self):
+        ret = yield self.infra_dict_ds.get_mars_industries()
+        return ret
+
+    @tornado.gen.coroutine
     def get_constants(self, parent_code):
         ret = yield self.infra_dict_ds.get_const_dict(parent_code=parent_code)
         return ret

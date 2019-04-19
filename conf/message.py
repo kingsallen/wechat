@@ -53,6 +53,8 @@ SHARE_DES_DEFAULT = "share_des_default"
 RED_PACKET_TYPE_VALUE_ERROR = "红包配置类型错误!"
 RED_PACKET_CONFIG_TARGET_VALUE_ERROR = "红包配置对象错误!"
 RED_PACKET_WISHING = "红包一个，聊表心意，祝君好运"
+RED_PACKET_HEADLINE = "抽中了!"
+RED_PACKET_HEADLINE_FAILURE = "很遗憾,没有摸到"
 
 WECHAT_SCAN_HAD_BINDED = "当前扫描微信号已经绑定其他帐号了, 请更换微信号重新扫描"
 WECHAT_SCAN_FAILED = "绑定失败, 请尝试先解绑微信号"

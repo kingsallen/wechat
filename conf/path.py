@@ -12,6 +12,7 @@ COMPANY_TEAM = '/company/team'
 COMPANY = '/company'
 SEARCH_FILITER = '/start'
 CUSTOMIZE_EDX = '/custom/emailapply'
+WECHAT_COMPANY = '/company'
 
 CAPTCHA_CHECKED = '/captcha/checked'
 
@@ -103,7 +104,6 @@ INFRA_USER_EMPLOYEE_CHECK = 'user/employee/check'
 INFRA_USER_EMPLOYEE = 'user/employee'
 INFRA_USER_APPLYRECORD = "v1/applications"
 INFRA_USER_EMPLOYEE_REFERRAL = "v1/referral/users/{}/employee-info"
-INFRA_USER_REDPACKET_LIST = "v1/referral/users/{}/redpackets"
 INFRA_USER_BONUS_LIST = "v1/referral/users/{}/bonus"
 INFRA_USER_CLAIM_BONUS = "v1/referral/wechat/employee/{}/bonus/claim"
 
@@ -125,9 +125,7 @@ INFRA_POSITION_RECOMMEND = 'positions/recommended'
 INFRA_POSITION_LIST = 'position/list'
 INFRA_POSITION_PERSONARECOM = 'position/personarecom'
 INFRA_POSITION_EMPLOYEERECOM = 'position/employeerecom'
-INFRA_POSITION_LIST_RP_EXT = 'position/rpext'
 INFRA_RP_POSITION_LIST = 'position/rplist'
-INFRA_RP_POSITION_LIST_SHARE_INFO = 'position/list/hb_share_info'
 INFRA_THIRD_PARTY_SYNCED_POSITIONS = 'positions/thirdpartysyncedpositions'
 INFRA_SUG_LIST = 'api/position/suggest'
 INFRA_POSITION_FEATURE = 'api/position/feature/{}'
@@ -173,6 +171,7 @@ DICT_CITIES = "dict/cities"
 DICT_COLLEGE = "dict/college/all"
 DICT_COUNTRY = "dict/country"
 DICT_INDUSTRY = "dict/industry"
+DICT_INDUSTRY_MARS = '/dict/mars/industry'
 DICT_POSITION = "dict/position"
 DICT_MAINLAND_COLLEGE = "dict/college"
 DICT_COLLEGE_BY_ID = "dict/college/abroad"

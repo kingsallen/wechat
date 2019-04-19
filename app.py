@@ -82,9 +82,9 @@ def main():
             settings.blocking_log_threshold)
 
         http_server = tornado.httpserver.HTTPServer(application, xheaders=True)
-        sc = RedPacketConsumer()
-        application.sc = sc
-        application.sc.connect()
+        # sc = RedPacketConsumer()
+        # application.sc = sc
+        # application.sc.connect()
         http_server.listen(options.port)
 
         io_loop.start()

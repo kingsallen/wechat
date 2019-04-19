@@ -214,7 +214,7 @@ class ChatPageService(PageService):
         raise gen.Return(company_conf)
 
     @gen.coroutine
-    def get_chatbot_reply(self, message, user_id, hr_id, position_id, flag, create_new_context, current_user,
+    def get_chatbot_reply(self, message, user_id, hr_id, position_id, flag, social, campus, create_new_context, current_user,
                           from_textfield):
         """ 调用 chatbot 返回机器人的回复信息
                https://wiki.moseeker.com/chatbot.md
@@ -226,6 +226,8 @@ class ChatPageService(PageService):
         :param create_new_context: meet mobot标识
         :param current_user:
         :param from_textfield:
+        :param social:社招判断开关 1：开启；
+        :param campus:校招判断开关 1：开启；
         """
         messages = []
 
@@ -238,8 +240,16 @@ class ChatPageService(PageService):
             from_textfield=from_textfield
         )
         self.logger.debug("get_chatbot_reply==>create_new_context:{} ".format(create_new_context))
+        self.logger.debug("chabot_params:flag:%s, social:%s, capmpus:%s"%(flag, social, campus))
+        self.logger.debug("chabot_params type :flag:%s, social:%s, capmpus:%s"
+                          % (type(flag), type(social), type(campus)))
+        flag = int(flag) if flag else None
         try:
-            if int(flag) == 1:
+            if flag == 1:
+                res = yield http_post(
+                    route='{host}{uri}'.format(host=settings['chatbot_host'], uri='campus_qa.api'), jdata=params,
+                    infra=False)
+            elif flag is None and social == 0 and campus == 1:
                 res = yield http_post(
                     route='{host}{uri}'.format(host=settings['chatbot_host'], uri='campus_qa.api'), jdata=params,
                     infra=False)
@@ -248,7 +258,6 @@ class ChatPageService(PageService):
                     route='{host}{uri}'.format(host=settings['chatbot_host'], uri='qa.api'), jdata=params,
                     infra=False)
 
-            self.logger.debug("[get_chatbot_reply]ret: %s, type: %s" % (res, type(res)))
 
             self.logger.debug(res.results)
             results = res.results
