@@ -187,11 +187,13 @@ class BaseHandler(MetaBaseHandler):
             user_role = 0
             company_id = 0
             company_name = ''
+        _, profile = yield self.profile_ps.has_profile(self.current_user.sysuser.id if self.current_user.sysuser else 0)
         profiles = {
             'user_role': user_role,
             'sysuser_id': self.current_user.sysuser.id if self.current_user.sysuser else self._sc_cookie_id,
             'company_id': company_id,
-            'company_name': company_name
+            'company_name': company_name,
+            'ProfileCompleteness': profile.basic.completeness
         }
         self.profile_set(profiles=profiles)
 
