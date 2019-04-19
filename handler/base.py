@@ -193,7 +193,7 @@ class BaseHandler(MetaBaseHandler):
             'sysuser_id': self.current_user.sysuser.id if self.current_user.sysuser else self._sc_cookie_id,
             'company_id': company_id,
             'company_name': company_name,
-            'ProfileCompleteness': profile.basic.completeness
+            'ProfileCompleteness': profile.basic.completeness if profile and profile.basic else 0
         }
         self.profile_set(profiles=profiles)
 
