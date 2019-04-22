@@ -93,6 +93,7 @@ def main():
         logger.error(e)
 
     finally:
+        sa.flush()
         logger.info('Wechat server closing on port: {0}'.format(options.port))
 
 

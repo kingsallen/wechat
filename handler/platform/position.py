@@ -237,7 +237,6 @@ class PositionHandler(BaseHandler):
         # 神策数据埋点
         properties = ObjectDict({'origin': origin, 'has_career_story': bool(self.flag_should_display_newjd), "depth": depth})
         self.track("cJobDetailPageview", properties)
-        self.sa.close()
 
     @log_time
     @gen.coroutine
