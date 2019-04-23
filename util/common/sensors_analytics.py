@@ -10,7 +10,7 @@ SA_SERVER_PATH = settings['sensors_path']
 # DefaultConsumer 是同步发送数据，因此不要在任何线上的服务中使用此 Consumer
 consumer = sensorsanalytics.ConcurrentLoggingConsumer(SA_SERVER_PATH, settings['sa_bulk_size'])
 # 使用 Consumer 来构造 SensorsAnalytics 对象
-sa = sensorsanalytics.SensorsAnalytics(consumer)
+sa = sensorsanalytics.SensorsAnalytics(consumer, project_name=settings['sensors_project_name'])
 
 
 
