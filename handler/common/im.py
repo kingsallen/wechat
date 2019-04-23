@@ -21,6 +21,8 @@ from globals import logger
 from oauth.wechat import JsApi
 from util.tool.json_tool import encode_json_dumps, json_dumps
 import conf.message as msg_const
+from util.common.decorator import relate_user_and_former_employee
+
 
 
 class UnreadCountHandler(BaseHandler):
@@ -212,6 +214,7 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
 class ChatRoomHandler(BaseHandler):
     """聊天页面"""
 
+    @relate_user_and_former_employee
     @authenticated
     @gen.coroutine
     def get(self, room_id):

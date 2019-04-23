@@ -36,6 +36,7 @@ import handler.common.captcha
 import handler.common.image
 import handler.common.campaign
 import handler.common.redirect
+import handler.common.short_url
 import handler.common.statistics
 import handler.common.redpacket
 
@@ -108,6 +109,7 @@ common_routes = [
     (r"/redirect",                                   handler.common.redirect.RedirectHandler,                   {"event": "redirect"}),
     (r"/redpacket/claim",                            handler.common.redpacket.RedpacketHandler,                 {"event": "redpacket_claim"}),
     (r"/api/redpacket/claim",                        handler.common.redpacket.RedpacketHandler,                 {"event": "api_redpacket_claim"}),
+    (r"/s/(?P<uuid>\w+)",                            handler.common.short_url.ShortURLRedirector,               {"event": "short_url_redirect"}),
 
     # websocket
     (r"/websocket/([A-Za-z0-9_]{1,32})",             handler.common.im.ChatWebSocketHandler),

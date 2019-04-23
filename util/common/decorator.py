@@ -11,6 +11,8 @@ from urllib.parse import urlencode
 from tornado import gen
 from tornado.locks import Semaphore
 from tornado.web import MissingArgumentError
+from tornado.httpclient import AsyncHTTPClient
+from tornado.httputil import HTTPHeaders
 from tornado.httpclient import HTTPError
 from util.common.exception import InfraOperationError
 
@@ -25,6 +27,7 @@ from util.common.cipher import encode_id
 from util.tool.dict_tool import sub_dict
 from util.tool.json_tool import json_dumps
 from util.tool.str_tool import to_hex
+from setting import settings
 
 
 def handle_response(func):
@@ -301,8 +304,32 @@ def check_employee_common(func):
     return wrapper
 
 
+def relate_user_and_former_employee(func):
+    """前置判断当前用户是否是老员工
+    如果是老员工，则建立此老员工与user_id的关联
+    """
+
+    @functools.wraps(func)
+    @gen.coroutine
+    def wrapper(self, *args, **kwargs):
+        fe_id = self.params.former_employee_id
+        if fe_id:
+            self.logger.debug('former employee id is: %s')
+            response = yield AsyncHTTPClient().fetch(
+                'http://{}/former-employee'.format(settings["rehire_host"]),
+                method='PATCH',
+                body=json.dumps({'id': fe_id, 'user_id': self.current_user.sysuser.id}),
+                headers=HTTPHeaders({"Content-Type": "application/json"})
+            )
+            self.logger.debug('former_employee api status code is: %s' % response.code)
+        yield func(self, *args, **kwargs)
+
+    return wrapper
+
+
 def cover_no_weixin(func):
     """移动端非微信环境下，限制浏览，允许User-Agent中带有moseeker的请求访问，此为测试与开发在非微信移动端的后门"""
+
     @functools.wraps(func)
     @gen.coroutine
     def wrapper(self, *args, **kwargs):
@@ -311,6 +338,7 @@ def cover_no_weixin(func):
             return
         else:
             yield func(self, *args, **kwargs)
+
     return wrapper
 
 
@@ -362,7 +390,7 @@ def check_and_apply_profile(func):
             self.logger.warn(self.params)
 
             if (current_path in paths_for_application and
-                    self.params.pid and self.params.pid.isdigit()):
+                self.params.pid and self.params.pid.isdigit()):
 
                 pid = int(self.params.pid)
                 position = yield self.position_ps.get_position(pid, display_locale=self.get_current_locale())
@@ -462,7 +490,7 @@ def check_sub_company(func):
         if self.params.did and self.params.did != str(self.current_user.company.id):
             sub_company = yield self.team_ps.get_sub_company(self.params.did)
             if not sub_company or \
-                    sub_company.parent_id != self.current_user.company.id:
+                sub_company.parent_id != self.current_user.company.id:
                 self.write_error(404)
                 return
             else:

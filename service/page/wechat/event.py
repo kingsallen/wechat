@@ -10,7 +10,10 @@
 import re
 import time
 import traceback
+import json
 from tornado import gen
+from tornado.httpclient import AsyncHTTPClient
+from tornado.httputil import HTTPHeaders
 import ujson
 
 import conf.common as const
@@ -24,9 +27,12 @@ from util.tool.date_tool import curr_now
 from util.tool.str_tool import mobile_validate
 from util.common import ObjectDict
 from util.tool.json_tool import json_dumps
+from util.tool.http_tool import http_post
 from util.wechat.core import get_wxuser, send_succession_message
 from util.common.mq import user_follow_wechat_publisher, user_unfollow_wechat_publisher
 from service.page.user.user import UserPageService
+
+from setting import settings
 
 
 class EventPageService(PageService):
@@ -504,7 +510,7 @@ class EventPageService(PageService):
             int_scene_id = int_scene_id.group(1)
             type = int(bin(int(int_scene_id))[:7], base=2)
             real_user_id = int(bin(int(int_scene_id))[7:], base=2)
-            self.logger.debug('qrcode scene_id is: %s' % real_user_id)
+            self.logger.debug('qrcode scene_id is: {}, type is: {}, id is: {}'.format(int_scene_id, type, real_user_id))
             """
               type:
               "11000" = 24 pc端用户解绑,
@@ -622,6 +628,15 @@ class EventPageService(PageService):
                         }
                     yield self.infra_user_ds.post_scanresult(params)
                     raise gen.Return()
+            elif type == 29:
+                # 老员工回聘,发送模板消息
+                response = yield AsyncHTTPClient().fetch(
+                    'http://{}/send/tmplmsg/'.format(settings["rehire_host"]),
+                    method='POST',
+                    body=json.dumps({'user_id': wxuser.sysuser_id, 'company_id': wechat.company_id}),
+                    headers=HTTPHeaders({"Content-Type": "application/json"})
+                )
+                self.logger.debug('rehire send_tmplmsg api status code is: %s' % response.code)
             elif type == 31:
                 # 携带职位id， 目前是候选人职位详情页引导关注弹层二维码中使用
                 # 数据组埋点
