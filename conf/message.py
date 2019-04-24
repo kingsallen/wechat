@@ -11,6 +11,7 @@ OPERATE_FAILURE = "操作失败"
 MOBILE_VERIFY = "请先验证手机号"
 INPUT_DISORDER = "请按规范输入"
 PREVIEW_PROFILE = "继续填写个人档案"
+DEFAULT_ERROR_MESSAGE = ['系统异常，请稍后再试']
 
 BASIC_SERVER_DISCONNECTION = "基础服务器连接不上"
 BASIC_SERVER_BUSY = "基础服务器忙碌"
@@ -52,6 +53,8 @@ SHARE_DES_DEFAULT = "share_des_default"
 RED_PACKET_TYPE_VALUE_ERROR = "红包配置类型错误!"
 RED_PACKET_CONFIG_TARGET_VALUE_ERROR = "红包配置对象错误!"
 RED_PACKET_WISHING = "红包一个，聊表心意，祝君好运"
+RED_PACKET_HEADLINE = "抽中了!"
+RED_PACKET_HEADLINE_FAILURE = "很遗憾,没有摸到"
 
 WECHAT_SCAN_HAD_BINDED = "当前扫描微信号已经绑定其他帐号了, 请更换微信号重新扫描"
 WECHAT_SCAN_FAILED = "绑定失败, 请尝试先解绑微信号"
@@ -103,3 +106,15 @@ DEFAULT_RECOMMEND_PRESENTEE = "请帮您的好友们做个推荐吧！\n他们�
 DEFAULT_RECOMMEND_SUCCESS = "感谢您对公司人才库的贡献"
 
 EMAIL_FMT_FAILURE = "Email格式不正确"
+
+# 人脉连连看链接分享
+REFERRAL_CONNECTION_TITLE = '人脉连连看'
+REFERRAL_CONNECTION_TEXT = '{}！有朋友喊你看机会！'
+
+# 转发邀请投递分享
+REFERRAL_INVITE_TITLE = '诚邀您投递职位'
+REFERRAL_INVITE_TEXT = '这是一个千载难逢的内推机会哦~'
+
+# 内推进度页面分享
+REFERRAL_PROGRESS_TITLE = '内推进度分享'
+REFERRAL_PROGRESS_DESCRIPTION = '快来看看你的应聘进度吧~'

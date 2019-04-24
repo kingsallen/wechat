@@ -51,3 +51,35 @@ class SwitchHandler(BaseHandler):
                 self.current_user.company.id,
                 REFERRAL_CLOSE_PROFILE)
         self.send_json_success()
+
+    @handle_response
+    @gen.coroutine
+    def get_mobot(self):
+        ret = yield self.company_ps.check_oms_switch_status(
+            self.current_user.company.id,
+            "我是员工"
+        )
+        if not ret.status == API_SUCCESS:
+            self.send_json_error(message=ret.message)
+            return
+
+        data = ret.data.get('valid') if ret.data else 0
+        self.send_json_success(data=data)
+
+    @handle_response
+    @gen.coroutine
+    def get_radar(self):
+        """
+        获取人脉雷达模块是否开启
+        :return:
+        """
+        ret = yield self.company_ps.check_oms_switch_status(
+            self.current_user.company.id,
+            "人脉雷达"
+        )
+        if not ret.status == API_SUCCESS:
+            self.send_json_error(message=ret.message)
+            return
+
+        data = ret.data.get('valid') if ret.data else 0
+        self.send_json_success(data=data)

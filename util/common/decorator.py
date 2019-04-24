@@ -11,6 +11,10 @@ from urllib.parse import urlencode
 from tornado import gen
 from tornado.locks import Semaphore
 from tornado.web import MissingArgumentError
+from tornado.httpclient import AsyncHTTPClient
+from tornado.httputil import HTTPHeaders
+from tornado.httpclient import HTTPError
+from util.common.exception import InfraOperationError
 
 import conf.common as const
 import conf.message as msg
@@ -23,6 +27,7 @@ from util.common.cipher import encode_id
 from util.tool.dict_tool import sub_dict
 from util.tool.json_tool import json_dumps
 from util.tool.str_tool import to_hex
+from setting import settings
 
 
 def handle_response(func):
@@ -93,6 +98,8 @@ def cache(prefix=None, key=None, ttl=60, hash=True, lock=True, separator=":"):
 
                     if args and len(args) > 1:
                         if isinstance(args[1], dict):
+                            # todo 1、字典是无序的，相同的条件可能产生不同的key，可能导致访问不到缓存，也会产生冗余的缓存
+                            # todo 2、字典只有一个键对值，键不同值相同时，会获取错误的缓存内容。重构时解决这些问题。
                             redis_key = separator.join([str(_) for _ in list(args[1].values())])
                         else:
                             redis_key = separator.join([str(_) for _ in args[1:]])
@@ -121,6 +128,96 @@ def cache(prefix=None, key=None, ttl=60, hash=True, lock=True, separator=":"):
                             base_cache.set(redis_key, cache_data, ttl)
                         except Exception as e:
                             logger.error(e)
+
+                raise gen.Return(cache_data)
+
+            finally:
+                if lock:
+                    sem.release()
+
+        return func_wrapper
+
+    return cache_inner
+
+
+def cache_new(prefix=None, key=None, ttl=60, hash=True, lock=True, separator=":", escape=None):
+    # todo 这个缓存是在无法访问到数据时读取缓存，和一般的缓存逻辑不同
+    """
+
+    cache装饰器
+
+    :param prefix: 指定prefix
+    :param key: 指定key
+    :param ttl: ttl (s)
+    :param hash: 是否需要hash
+    :param lock: -
+    :param separator: key 分隔符
+    :param escape: 如果参数为字典时，需要去除字典中的哪些键对值不作为redis_key
+    :return:
+    """
+    key_ = key
+    ttl_ = ttl
+    hash_ = hash
+    lock_ = lock
+    prefix_ = prefix
+    separator_ = separator
+
+    def cache_inner(func):
+
+        key, ttl, hash, lock, prefix, separator = key_, ttl_, hash_, lock_, prefix_, separator_
+
+        prefix = prefix if prefix else "{0}:{1}".format(func.__module__.split(".")[-1], func.__qualname__)
+
+        @functools.wraps(func)
+        @gen.coroutine
+        def func_wrapper(*args, **kwargs):
+
+            if lock:
+                yield sem.acquire()
+
+            try:
+                if not key:
+
+                    redis_key = ""
+
+                    if args and len(args) > 1:
+                        if isinstance(args[1], dict):
+                            for e in escape:
+                                args[1].pop(e)
+                            redis_key = separator.join([str("{}:{}".format(k, args[1][k])) for k in sorted(args[1].keys())])
+                        else:
+                            redis_key = separator.join([str(_) for _ in args[1:]])
+                    if kwargs:
+                        spliter = separator if redis_key else ""
+                        redis_key = redis_key + spliter + separator.join([str(_) for _ in list(kwargs.values())])
+                else:
+                    redis_key = key
+                logger.debug("raw_redis_key:{}".format(redis_key))
+                if hash:
+                    redis_key = hashlib.md5(redis_key.encode("utf-8")).hexdigest()
+
+                redis_key = "{prefix}{separator}{redis_key}".format(prefix=prefix, separator=separator,
+                                                                    redis_key=redis_key)
+                logger.debug("hash_redis_key:{}".format(redis_key))
+                cache_data = None
+                try:
+                    cache_data = yield func(*args, **kwargs)
+                except (HTTPError, InfraOperationError) as e:
+                    logger.error(traceback.format_exc())
+                    if cache_data is None:
+                        try:
+                            cache_data = base_cache.get(redis_key)
+                        except Exception as e:
+                            logger.error(e)
+
+                if not base_cache.exists(redis_key):
+                    try:
+                        base_cache.set(redis_key, cache_data, ttl)
+                    except Exception as e:
+                        logger.error(e)
+
+                if not cache_data:
+                    raise HTTPError(code=599, message="HTTPError and don't have cache data")
 
                 raise gen.Return(cache_data)
 
@@ -207,8 +304,32 @@ def check_employee_common(func):
     return wrapper
 
 
+def relate_user_and_former_employee(func):
+    """前置判断当前用户是否是老员工
+    如果是老员工，则建立此老员工与user_id的关联
+    """
+
+    @functools.wraps(func)
+    @gen.coroutine
+    def wrapper(self, *args, **kwargs):
+        fe_id = self.params.former_employee_id
+        if fe_id:
+            self.logger.debug('former employee id is: %s')
+            response = yield AsyncHTTPClient().fetch(
+                'http://{}/former-employee'.format(settings["rehire_host"]),
+                method='PATCH',
+                body=json.dumps({'id': fe_id, 'user_id': self.current_user.sysuser.id}),
+                headers=HTTPHeaders({"Content-Type": "application/json"})
+            )
+            self.logger.debug('former_employee api status code is: %s' % response.code)
+        yield func(self, *args, **kwargs)
+
+    return wrapper
+
+
 def cover_no_weixin(func):
     """移动端非微信环境下，限制浏览，允许User-Agent中带有moseeker的请求访问，此为测试与开发在非微信移动端的后门"""
+
     @functools.wraps(func)
     @gen.coroutine
     def wrapper(self, *args, **kwargs):
@@ -217,6 +338,7 @@ def cover_no_weixin(func):
             return
         else:
             yield func(self, *args, **kwargs)
+
     return wrapper
 
 
@@ -248,10 +370,10 @@ def check_and_apply_profile(func):
             }
             # 获取最佳东方导入开关
             company = yield self.company_ps.get_company({'id': self.current_user.wechat.company_id}, need_conf=True)
-            importer = ObjectDict(profile_import_51job=True,
+            importer = ObjectDict(profile_import_51job=False,
                                   profile_import_zhilian=False,
                                   profile_import_liepin=True,
-                                  profile_import_linkedin=True,
+                                  profile_import_linkedin=False,
                                   profile_import_maimai=True,
                                   profile_import_veryeast=False,
                                   resume_upload=False)
@@ -268,7 +390,7 @@ def check_and_apply_profile(func):
             self.logger.warn(self.params)
 
             if (current_path in paths_for_application and
-                    self.params.pid and self.params.pid.isdigit()):
+                self.params.pid and self.params.pid.isdigit()):
 
                 pid = int(self.params.pid)
                 position = yield self.position_ps.get_position(pid, display_locale=self.get_current_locale())
@@ -368,7 +490,7 @@ def check_sub_company(func):
         if self.params.did and self.params.did != str(self.current_user.company.id):
             sub_company = yield self.team_ps.get_sub_company(self.params.did)
             if not sub_company or \
-                    sub_company.parent_id != self.current_user.company.id:
+                sub_company.parent_id != self.current_user.company.id:
                 self.write_error(404)
                 return
             else:
@@ -580,5 +702,31 @@ def log_time_common_func(func):
         }
         self.logger.info(json_dumps(c))
         return r
+
+    return wrapper
+
+
+def check_radar_status(func):
+    """前置判断当前公司是否开启雷达模块
+    如果是未开启，转到消息过期页面
+    用于常用路由检测
+    """
+
+    @functools.wraps(func)
+    @gen.coroutine
+    def wrapper(self, *args, **kwargs):
+        radar_status_res = yield self.company_ps.check_oms_switch_status(
+            self.current_user.company.id,
+            "人脉雷达"
+        )
+        if not radar_status_res.status == const.API_SUCCESS:
+            self.write_error(500, message=radar_status_res.message)
+            return
+
+        if not radar_status_res.data.get('valid'):
+            self.redirect(self.make_url(path.REFERRAL_RADAR_EXPIRED, self.params))
+            return
+        else:
+            yield func(self, *args, **kwargs)
 
     return wrapper

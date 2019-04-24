@@ -98,3 +98,18 @@ class InfraCompanyDataService(DataService):
         })
         res = yield http_get(path.MOBOT_IMAGE, params)
         return res
+
+    @gen.coroutine
+    def check_oms_switch_status(self, company_id, module_name):
+        """
+        检查oms控制的一系列开关状态
+        :param company_id: 公司id
+        :param module_name: 需检查开关的模块名
+        :return:
+        """
+        params = ObjectDict({
+            "companyId": company_id,
+            "moduleName": module_name
+        })
+        res = yield http_get(path.OMS_SWITCH, params)
+        return res

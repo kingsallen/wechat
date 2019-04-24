@@ -45,6 +45,26 @@ class RedpacketPageService(PageService):
     def __init__(self):
         super().__init__()
 
+    @gen.coroutine
+    def get_redpacket_info(self, id, cardno, user_id):
+        """获取红包信息"""
+        ret = yield self.infra_redpacket_ds.infra_get_redpacket_info({
+            "id": id,
+            "cardno": cardno,
+            "userId": user_id
+        })
+        return ret
+
+    @gen.coroutine
+    def open_redpacket(self, id, cardno, user_id):
+        """领取红包"""
+        ret = yield self.infra_redpacket_ds.infra_open_redpacket({
+            "id": id,
+            "cardno": cardno,
+            "userId": user_id
+        })
+        return ret
+
     @log_time
     @gen.coroutine
     def __get_card_by_cardno(self, cardno):
@@ -155,10 +175,15 @@ class RedpacketPageService(PageService):
         self.logger.debug(int(current_user.recom.id) != int(current_user.sysuser.id))
         self.logger.debug('<><><><><><><><><>')
 
-        ret = bool(current_user.recom and
-                   current_user.qxuser.id and
-                   check_hb_status_passed and
-                   int(current_user.recom.id) != int(current_user.sysuser.id))
+        if trigger_way == const.HB_TRIGGER_WAY_SCREEN:
+            ret = bool(current_user.recom and
+                       check_hb_status_passed and
+                       int(current_user.recom.id) != int(current_user.sysuser.id))
+        else:
+            ret = bool(current_user.recom and
+                       current_user.qxuser.id and
+                       check_hb_status_passed and
+                       int(current_user.recom.id) != int(current_user.sysuser.id))
 
         self.logger.debug("[RP]need_to_send_red_packet_card: %s" % ret)
         return ret
@@ -224,13 +249,12 @@ class RedpacketPageService(PageService):
                     employee=employee,
                     recom=recom
                 )
-                self.logger.debug("[RP]current_user: {}".format(current_user))
+                self.logger.info("[RP]current_user: {}".format(current_user))
                 yield self.handle_red_packet_screen_profile(current_user, position,
                                                             trigger_way=const.HB_TRIGGER_WAY_SCREEN,
                                                             recom_user_id=user_id, psc=psc)
         except Exception as e:
             self.logger.error(traceback.format_exc())
-
 
     @gen.coroutine
     def handle_red_packet_employee_verification(self, user_id, company_id, redislocker):
@@ -530,12 +554,17 @@ class RedpacketPageService(PageService):
             else:
                 recom_user_id = current_user.recom.id
 
+            if not recom_user_id:
+                self.logger.debug('[RP]推荐数据不正确, position: %s, app_id: %s, presentee_user_id: %s, post_user_id: %s'
+                                      % (position.id, application.id, current_user.sysuser.id, recom_user_id))
+                return
+
             recom_record = yield self.candidate_recom_record_ds.get_candidate_recom_record(params)
 
-            if not recom_record:
-                self.logger.debug('[RP]推荐数据不正确, position: %s, app_id: %s, presentee_user_id: %s, post_user_id: %s'
-                                  % (position.id, application.id, current_user.sysuser.id, recom_user_id))
-                return
+            # if not recom_record:
+            #     self.logger.debug('[RP]推荐数据不正确, position: %s, app_id: %s, presentee_user_id: %s, post_user_id: %s'
+            #                       % (position.id, application.id, current_user.sysuser.id, recom_user_id))
+            #     return
 
             need_to_send_card = self.__need_to_send(
                 current_user, position, trigger_way)
@@ -637,7 +666,7 @@ class RedpacketPageService(PageService):
                                 recom_wechat.id,
                                 rp_config,
                                 recom_qxuser.id,
-                                current_qxuser_id=current_user.qxuser.id,
+                                current_qxuser_id=current_user.qxuser.id or 0,
                                 position=position,
                                 nickname=nickname,
                                 position_title=position.title,
@@ -650,7 +679,7 @@ class RedpacketPageService(PageService):
                                 recom_wxuser.openid,
                                 recom_wechat.id,
                                 rp_config,
-                                current_user.qxuser.id,
+                                current_user.qxuser.id or 0,
                                 nickname=nickname,
                                 position_title=position.title,
                                 recom_record=recom_record
@@ -1153,10 +1182,11 @@ class RedpacketPageService(PageService):
 
         self.logger.debug("[RP]红包信封入库成功!")
         self.logger.debug("[RP]准备发送红包信封(有金额)!")
-
+        self.logger.debug("[RP]recom_wechat_id:{}".format(recom_wechat_id))
         recom_wechat = yield self.hr_wx_wechat_ds.get_wechat({
             "id": recom_wechat_id
         })
+        self.logger.debug("[RP]recom_wechat:{}".format(recom_wechat))
 
         self.logger.debug("[RP]将发送模版消息")
         # 发送消息模板
@@ -1684,41 +1714,17 @@ class RedpacketPageService(PageService):
 
     @log_time
     @gen.coroutine
-    def get_last_running_hongbao_config_by_position(self, position):
+    def get_last_running_hongbao_config_by_position(self, position_id):
         """
         获取一个职位正在进行的红包活动
         """
-        #
-        # return db.get("""
-        #         select hc.* from hr_hb_config hc
-        #         join hr_hb_position_binding hpb on hpb.hb_config_id = hc.id
-        #         where hpb.position_id = {0} and
-        #             hc.status = 3
-        #         order by hc.id desc limit 1
-        #         """.format(pid))
 
-        running_config_list = yield self.hr_hb_config_ds.get_hr_hb_config_list(
-            conds={
-                "company_id": position.company_id,
-                "status": const.HB_CONFIG_RUNNING
+        share_info = yield self.infra_redpacket_ds.infra_get_rp_position_share_info(
+            {
+                "positionId": position_id
             }
         )
-
-        config_id_list = [c.id for c in running_config_list]
-
-        binding_list = yield self.hr_hb_position_binding_ds.get_hr_hb_position_binding_list(
-            conds={
-                "position_id": position.id
-            })
-
-        filtered_binding_list = [b for b in binding_list if b.hb_config_id in config_id_list]
-
-        ret = ObjectDict()
-        if filtered_binding_list:
-            config_id = filtered_binding_list[0].hb_config_id
-            return [c for c in running_config_list if c.id == config_id][0]
-
-        raise gen.Return(ret)
+        raise gen.Return(share_info.data)
 
     @log_time
     @gen.coroutine

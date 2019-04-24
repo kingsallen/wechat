@@ -166,15 +166,17 @@ class ReferralConfirmHandler(BaseHandler):
         else:
             type = 3
 
+        pattern_id = const.QRCODE_REFERRAL_CONFIRM if type == 1 else const.QRCODE_OTHER
+        scene_id = int('11110000000000000000000000000000', base=2) + pattern_id
         wechat = yield self.wechat_ps.get_wechat_info(
             self.current_user,
-            pattern_id=const.QRCODE_REFERRAL_CONFIRM if type == 1 else const.QRCODE_OTHER,
+            scene_id=scene_id,
             in_wechat=self.in_wechat)
 
         data_sample = recommendations[0].data
 
         valid_rkeys = [r.rid for r in unclaimed_recommendations]
-        if type == 1:
+        if data_sample.mobile:
             self.redis.set(const.CONFIRM_REFERRAL_MOBILE.format(','.join(valid_rkeys), self.current_user.sysuser.id),
                            ObjectDict(mobile=data_sample.mobile), ttl=60 * 60 * 24)
         if self.current_user.employee and self.current_user.employee.id == data_sample.employee_id:
@@ -359,6 +361,57 @@ class ReferralCrucialInfoApiHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def post(self):
+
+        if self.params.endpoint == 'connection':
+            # 保存员工推荐评价信息
+
+            if int(self.params.referral_remark or 0) == 1:
+                # 不是点击“帮我内推”button， 而是直接投递之后在推荐进度列表中进行"评价Ta"
+                ret = yield self.employee_ps.nonreferral_save_evaluation(
+                    self.current_user.sysuser.id,
+                    self.current_user.company.id,
+                    self.params, self.json_args
+                )
+            else:
+                ret = yield self.employee_ps.referral_save_evaluation(
+                    self.current_user.sysuser.id,
+                    self.current_user.company.id,
+                    self.params, self.json_args
+                )
+
+            if not ret.status == const.API_SUCCESS:
+                self.send_json_error(message=ret.message)
+                return
+
+            if int(self.params.flag or 0) == const.REFERRAL_EVAL_CONTACT_MES_TMP:
+                next_url = self.make_url(path.REFERRAL_PROGRESS, self.params)
+            elif int(self.params.flag or 0) == const.REFERRAL_EVAL_RADAR:
+                next_url = self.make_url(path.REFERRAL_RADAR, self.params)
+            elif int(self.params.flag or 0) == const.REFERRAL_EVAL_RECOM_PROGRESS:
+                next_url = self.make_url(path.REFERRAL_PROGRESS, self.params)
+            elif int(self.params.flag or 0) == const.REFERRAL_EVAL_TEN_MIN_MES_TMP:
+                next_url = self.make_url(path.EMPLOYEE_TEN_MIN_TMP, self.params)
+            elif int(self.params.flag or 0) == const.REFERRAL_EVAL_SEEK_RECOM_CARDS:
+                next_url = self.make_url(path.REFERRAL_RADAR_SEEK_RECOM, self.params)
+            else:
+                next_url = ''
+
+            # 推荐评价红包
+            # recom_record_id = self.params.get('_id')
+            # position_title = yield self.redpacket_ps.get_position_title_by_recom_record_id(recom_record_id)
+            # yield self.redpacket_ps.handle_red_packet_recom(
+            #     recom_current_user=self.current_user,
+            #     recom_record_id=recom_record_id,
+            #     redislocker=self.redis,
+            #     realname=self.get_argument("_realname"),
+            #     position_title=position_title
+            # )
+
+            self.send_json_success(data={
+                "next_url": next_url
+            })
+            return
+
         ret = yield self.employee_ps.update_referral_crucial_info(self.current_user.employee.id, self.json_args)
         if ret.status != const.API_SUCCESS:
             self.send_json_error(message=ret.message)
@@ -378,3 +431,89 @@ class ReferralCommentTagsHandler(BaseHandler):
         relation_code = self.params.relation
         res = yield self.dictionary_ps.get_comment_tags_by_code(relation_code)
         self.send_json_success(data=res)
+
+
+class ReferralEvaluationHandler(BaseHandler):
+    """联系内推：推荐评价"""
+
+    @handle_response
+    @authenticated
+    @check_employee_common
+    @gen.coroutine
+    def get(self):
+        referral_id = self.params.referral_id
+        candidate_info = None
+
+        if int(self.params.flag or 0) == const.REFERRAL_EVAL_CONTACT_MES_TMP:
+            # 新候选人通知消息模板进来 判断雷达开关，如果关闭状态则跳转到过期页面
+            ret = yield self.company_ps.check_oms_switch_status(
+                self.current_user.company.id,
+                "人脉雷达"
+            )
+            if not ret.status == const.API_SUCCESS:
+                self.write_error(500, message=ret.message)
+                return
+
+            switch_status = ret.data.get('valid') if ret.data else 0
+            if not switch_status:
+                self.render_page(
+                    template_name="adjunct/msg-expired.html",
+                    data={}
+                )
+                return
+
+        if int(self.params.referral_remark or 0) == 1:
+            # 不是点击“帮我内推”button， 而是直接投递之后在推荐进度列表中进行"评价Ta"
+            ret = yield self.employee_ps.referral_contact_push(
+                self.params.candidate_user_id,
+                self.params.pid
+            )
+            if not ret.status == const.API_SUCCESS:
+                self.write_error(500, message=ret.message)
+                return
+
+            presentee_name = ret.data['nickname']
+            position_title = ret.data['position_name']
+            pid = self.params.pid
+
+        else:
+            candidate_info = yield self.employee_ps.referral_evaluation_page_info(
+                self.current_user.company.id, self.current_user.sysuser.id, referral_id)
+            if not candidate_info.status == const.API_SUCCESS:
+                self.write_error(500, message=candidate_info.message)
+                return
+
+            presentee_name = candidate_info.data['username']
+            position_title = candidate_info.data['position_name']
+            pid = candidate_info.data['position_id']
+
+        relationship = yield self.dictionary_ps.get_referral_relationship(self.locale)
+        degree = yield self.dictionary_ps.get_degrees(self.locale)
+        if candidate_info and candidate_info.data['application_id'] > 0:
+            # 已经做过推荐评价产生了申请
+            self.render_page(template_name="employee/referral-progress.html",
+                             data=dict())
+        else:
+            self.render_page(template_name="employee/recom-candidate-info-connect.html", data=ObjectDict({
+                "job_title": position_title,
+                "consts": dict(
+                    relation=relationship,
+                    degree=degree
+                ),
+                "presentee_name": presentee_name,
+                "pid": pid
+            }))
+
+
+class ReferralResultHandler(BaseHandler):
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        """
+        联系内推结果页
+        :return:
+        """
+        self.render_page(template_name='employee/result-with-jobs.html',
+                         data=dict())

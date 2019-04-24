@@ -423,6 +423,10 @@ class ApplicationPageService(PageService):
             origin = const.REHIRING_ORIGIN
         elif current_user.employee and current_user.company.id in [524798]:
             origin = const.TRANSFER_ORIGIN
+        elif recommender_user_id and params.origin:
+            origin = const.INVITE_ORIGIN
+        elif recommender_user_id and params.forward_id and not params.origin:
+            origin = const.FORWARD_ORIGIN
         else:
             origin = 1024
 
@@ -552,8 +556,8 @@ class ApplicationPageService(PageService):
         return None
 
     @gen.coroutine
-    def create_application(self, position, current_user,
-                           is_platform=True, psc=None, has_recom=False, source=None):
+    def create_application(self, position, current_user, params,
+                           is_platform=True, has_recom=False, source=None):
 
         # 1.初始化
         check_status, message = yield self.check_position(position, current_user)
@@ -572,6 +576,10 @@ class ApplicationPageService(PageService):
             origin = const.REHIRING_ORIGIN
         elif current_user.employee and current_user.company.id in [524798]:
             origin = const.TRANSFER_ORIGIN
+        elif recommender_user_id and params.origin:
+            origin = const.INVITE_ORIGIN
+        elif recommender_user_id and params.forward_id and not params.origin:
+            origin = const.FORWARD_ORIGIN
         else:
             origin = 2 if is_platform else 4
 

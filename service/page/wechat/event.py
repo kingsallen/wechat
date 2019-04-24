@@ -10,7 +10,10 @@
 import re
 import time
 import traceback
+import json
 from tornado import gen
+from tornado.httpclient import AsyncHTTPClient
+from tornado.httputil import HTTPHeaders
 import ujson
 
 import conf.common as const
@@ -24,9 +27,12 @@ from util.tool.date_tool import curr_now
 from util.tool.str_tool import mobile_validate
 from util.common import ObjectDict
 from util.tool.json_tool import json_dumps
+from util.tool.http_tool import http_post
 from util.wechat.core import get_wxuser, send_succession_message
 from util.common.mq import user_follow_wechat_publisher, user_unfollow_wechat_publisher
 from service.page.user.user import UserPageService
+
+from setting import settings
 
 
 class EventPageService(PageService):
@@ -504,7 +510,7 @@ class EventPageService(PageService):
             int_scene_id = int_scene_id.group(1)
             type = int(bin(int(int_scene_id))[:7], base=2)
             real_user_id = int(bin(int(int_scene_id))[7:], base=2)
-            self.logger.debug('qrcode scene_id is: %s' % real_user_id)
+            self.logger.debug('qrcode scene_id is: {}, type is: {}, id is: {}'.format(int_scene_id, type, real_user_id))
             """
               type:
               "11000" = 24 pc端用户解绑,
@@ -513,7 +519,7 @@ class EventPageService(PageService):
                11011 =27 pc扫码修改手机。
 
               hr 端 10000=16, 10001=17,
-              11111=31  Mars EDM活动二维码
+              11111=31  携带职位id的临时二维码 最大可表示的职位id为 int('1' * 27, base=2) = 134217727
               -----------------------------------------------------------
               11110=30  携带各个场景值得临时二维码
               需注意，在type=30时，real_user_id不再表示user_id或hr_id, 而是不同场景的场景值。
@@ -622,16 +628,32 @@ class EventPageService(PageService):
                         }
                     yield self.infra_user_ds.post_scanresult(params)
                     raise gen.Return()
+            elif type == 29:
+                # 老员工回聘,发送模板消息
+                response = yield AsyncHTTPClient().fetch(
+                    'http://{}/send/tmplmsg/'.format(settings["rehire_host"]),
+                    method='POST',
+                    body=json.dumps({'user_id': wxuser.sysuser_id, 'company_id': wechat.company_id}),
+                    headers=HTTPHeaders({"Content-Type": "application/json"})
+                )
+                self.logger.debug('rehire send_tmplmsg api status code is: %s' % response.code)
             elif type == 31:
-                # Mars EDM活动的用户，与EDM数据表关联起来
-                user = yield self.campaign_mars_edm_subscribe_ds.get_mars_user({
-                    "id": real_user_id
-                })
-                if user:
-                    yield self.campaign_mars_edm_subscribe_ds.update_mars_user(
-                        conds={"id": real_user_id},
-                        fields={"wxuser_id": wxuser.id}
-                    )
+                # 携带职位id， 目前是候选人职位详情页引导关注弹层二维码中使用
+                # 数据组埋点
+                self.log_datagroup_prepare_data_ds.create_qrcode_subscribe_record(
+                    {
+                        "flag": const.QRCODE_FROM_POSITION_POPUP,
+                        "wechat_id": wechat.id,
+                        "wxuser_id": wxuser.id
+                    })
+                position_id = real_user_id
+                yield send_succession_message(
+                    wechat=wechat,
+                    open_id=msg.FromUserName,
+                    pattern_id=const.QRCODE_POSITION,
+                    position_id=position_id
+                )
+
             elif type == 30:
                 # 根据携带不同场景值的临时二维码，接续之前用户未完成的流程。
                 pattern_id = real_user_id
@@ -640,14 +662,6 @@ class EventPageService(PageService):
                 if pattern_id == const.QRCODE_BIND and wxuser.sysuser_id and wechat.company_id:
                     employee = yield user_ps.get_valid_employee_by_user_id(
                         user_id=wxuser.sysuser_id, company_id=wechat.company_id)
-                elif pattern_id == const.QRCODE_REFERRAL_POSITION_POPUP:
-                    self.log_datagroup_prepare_data_ds.create_qrcode_subscribe_record(
-                        {
-                            "flag": const.QRCODE_FROM_POSITION_POPUP,
-                            "wechat_id": wechat.id,
-                            "wxuser_id": wxuser.id
-                        })
-                    return
                 else:
                     employee = None
                 if not employee or pattern_id != const.QRCODE_BIND:
