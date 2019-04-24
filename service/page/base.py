@@ -17,7 +17,7 @@ import importlib
 import glob
 
 from globals import logger
-from globals import es
+from globals import es, redis, sa
 from setting import settings
 import conf.common as constant
 import conf.platform as plat_constant
@@ -37,7 +37,9 @@ class PageService:
         :return:
         """
         self.logger = logger
+        self.redis = redis
         self.es = es
+        self.sa = sa
         self.settings = settings
         self.constant = constant
         self.plat_constant = plat_constant

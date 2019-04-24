@@ -415,7 +415,7 @@ class ApplicationPageService(PageService):
             raise gen.Return((False, message))
 
         # 获取推荐人信息
-        recommender_user_id, recommender_wxuser_id, recom_employee = yield self.get_recommend_user(
+        recommender_user_id, recommender_wxuser_id, recom_employee, depth = yield self.get_recommend_user(
             current_user, position, is_platform)
 
         if recommender_user_id and params.origin:
@@ -562,7 +562,7 @@ class ApplicationPageService(PageService):
 
         # 2.创建申请
         if has_recom:
-            recommender_user_id, recommender_wxuser_id, recom_employee = \
+            recommender_user_id, recommender_wxuser_id, recom_employee, depth = \
                 yield self.get_recommend_user(current_user, position, is_platform)
         else:
             recommender_user_id, recommender_wxuser_id, recom_employee = 0, 0, None
@@ -601,11 +601,12 @@ class ApplicationPageService(PageService):
         self.logger.debug("[get_recommend_user]start")
         recommender_user_id = 0
         recommender_wxuser_id = 0
+        depth = 0
         recom_employee = ObjectDict()
         sharechain_ps = SharechainPageService()
 
         if is_platform:
-            recommender_user_id = yield sharechain_ps.get_referral_employee_user_id(
+            recommender_user_id, depth = yield sharechain_ps.get_referral_employee_user_id(
                 current_user.sysuser.id, position.id)
 
             if recommender_user_id:
@@ -618,7 +619,7 @@ class ApplicationPageService(PageService):
 
         sharechain_ps = None
         self.logger.debug("[get_recommend_user]end")
-        return recommender_user_id, recommender_wxuser_id, recom_employee
+        return recommender_user_id, recommender_wxuser_id, recom_employee, depth
 
     @gen.coroutine
     def opt_add_reward(self, apply_id, current_user):

@@ -86,6 +86,10 @@ class MetaBaseHandler(AtomHandler):
         return self.application._executor
 
     @property
+    def sa(self):
+        return self.application.sa
+
+    @property
     def is_platform(self):
         return self.env == const.ENV_PLATFORM
 
