@@ -33,15 +33,18 @@ class DictionaryPageService(PageService):
         return ret
 
     @tornado.gen.coroutine
-    def get_degrees(self, locale=None):
+    def get_degrees(self, locale=None, no_key=False):
         ret = yield self.get_constants(parent_code=CONSTANT_PARENT_CODE.DEGREE_USER)
         if locale:
             ret_ = dict()
             for k in ret.keys():
                 ret_[k] = locale.translate(HIGHEST_DEGREE.get(k))
-            format_ret = [{'text': text, 'value': int(value)} for value, text in ret_.items()]
-            format_ret_in_order = sorted(format_ret, key=lambda item: item['value'])
-            return format_ret_in_order
+            if no_key:
+                return ret_
+            else:
+                format_ret = [{'text': text, 'value': int(value)} for value, text in ret_.items()]
+                format_ret_in_order = sorted(format_ret, key=lambda item: item['value'])
+                return format_ret_in_order
         return ret
 
     @tornado.gen.coroutine
@@ -88,7 +91,7 @@ class DictionaryPageService(PageService):
 
         ret = yield self.infra_dict_ds.get_sms_country_codes(display_locale)
 
-        china = {'text': '中国', 'code_text': '86'}
+        china = {'text': 'China', 'code_text': '86'} if display_locale == 'en_US' else {'text': '中国', 'code_text': '86'}
 
         try:
             ret.remove(china)
@@ -98,9 +101,9 @@ class DictionaryPageService(PageService):
         finally:
             ret.insert(0, china)
             for item in [
-                dict(code_text='852', text='中国香港'),
-                dict(code_text='853', text='中国澳门'),
-                dict(code_text='886', text='中国台湾'),
+                dict(code_text='852', text='Hong Kong' if display_locale == 'en_US' else '中国香港'),
+                dict(code_text='853', text='Macao' if display_locale == 'en_US' else '中国澳门'),
+                dict(code_text='886', text='Taiwan' if display_locale == 'en_US' else '中国台湾'),
             ]:
                 if item not in ret:
                     ret.append(item)

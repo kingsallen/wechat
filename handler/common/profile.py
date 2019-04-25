@@ -35,7 +35,7 @@ class ProfileNewHandler(BaseHandler):
             is_graduate = False
         # yield from ps
         data = yield dict(
-            degreeList=self.dictionary_ps.get_degrees(self.locale),
+            degreeList=self.dictionary_ps.get_degrees(self.locale, no_key=True),  # 内推和这里需要的结构不同，用no_key做区分
             countryCodeList=self.dictionary_ps.get_sms_country_codes(display_locale))
 
         # update other initial values
