@@ -125,6 +125,8 @@ CHAT_CHATROOM_ENTER = "chat_sysuser_{}"
 UPLOAD_RECOM_PROFILE = "upload_recom_profile_{}"
 # 推荐成功页面手机号码
 CONFIRM_REFERRAL_MOBILE = "referral_mobile_{}_{}"
+# 模板消息推送完成事件msgid
+TEMPLATE_JOB_SEND_FINISH_MSGID = "template_message_receipt_id"
 
 # ++++++++++业务常量+++++++++++
 # Cookie name
@@ -581,6 +583,8 @@ TEMPLATES.REFINE_EMPLOYEE_INFO_TPL = 44  # 员工认证自定义字段填写通�
 TEMPLATES.POSITION_VIEWED_SHARED = 39
 TEMPLATES.POSITION_VIEWED_FIVE_TIMES = 63
 TEMPLATES.RP_SCREEN = 82
+TEMPLATES.WX_RANKING_NOTICE_TO_EMPLOYEE = 78  # 积分排行榜 - 给员工
+TEMPLATES.APPLICATION_INVITE = 85  # 投递邀请
 
 # 消息模板开关，控制企业号是否开启某种类型的消息模板发送，与TEMPLATES强对应
 TEMPLATES_SWITCH = ObjectDict()
@@ -772,3 +776,18 @@ REFERRAL_EXPIRED_MESSAGE = 'expired_message'
 # 人脉连连看  连接状态
 CONNECTION_ING = 2
 CONNECTION_COMPLETED = 1
+
+# chatbot推荐职位
+FANS_RECOMMEND = 2
+EMPLOYEE_RECOMMEND = 4
+
+# 神策cookie
+SENSORS_COOKIE = 'sensorsdata2015jssdkcross'
+
+# 神策来源
+SA_ORIGIN_FANS_RECOMMEND = 1  # 粉丝转发
+SA_ORIGIN_EMPLOYEE_SHARE = 2  # 员工转发
+SA_ORIGIN_PLATFORM = 3  # 公众号
+SA_ORIGIN_RANKING_TEMPLATE = 4  # 推送排名榜单
+SA_ORIGIN_PORTAL = 5  # 员工portal
+SA_ORIGIN_APPLICATION_INVITE = 6  # 投递邀请

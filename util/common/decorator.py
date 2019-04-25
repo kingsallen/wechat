@@ -370,10 +370,10 @@ def check_and_apply_profile(func):
             }
             # 获取最佳东方导入开关
             company = yield self.company_ps.get_company({'id': self.current_user.wechat.company_id}, need_conf=True)
-            importer = ObjectDict(profile_import_51job=False,
+            importer = ObjectDict(profile_import_51job=True,
                                   profile_import_zhilian=False,
                                   profile_import_liepin=True,
-                                  profile_import_linkedin=False,
+                                  profile_import_linkedin=True,
                                   profile_import_maimai=True,
                                   profile_import_veryeast=False,
                                   resume_upload=False)

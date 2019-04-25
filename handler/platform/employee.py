@@ -49,6 +49,7 @@ class AwardsLadderPageHandler(BaseHandler):
             })
             ladder_type = yield self.employee_ps.get_award_ladder_type(self.current_user.company.id)
             policy_link = self.make_url(path.EMPLOYEE_REFERRAL_POLICY, self.params)
+            self._add_sensor_track()
             if ladder_type == 1:
 
                 self.render_page(template_name="employee/reward-rank.html",
@@ -56,6 +57,13 @@ class AwardsLadderPageHandler(BaseHandler):
             else:
                 self.render_page(template_name="employee/reward-rank-dark.html",
                                  data={"policy_link": policy_link})
+
+    def _add_sensor_track(self):
+        if self.params.from_template_message == str(const.TEMPLATES.WX_RANKING_NOTICE_TO_EMPLOYEE):
+            origin = const.SA_ORIGIN_RANKING_TEMPLATE
+        else:
+            origin = const.SA_ORIGIN_PORTAL
+        self.track("cAwardLadder", properties={"origin": origin})
 
 
 class AwardsLadderHandler(BaseHandler):
@@ -380,6 +388,8 @@ class EmployeeBindEmailHandler(BaseHandler):
             wechat_name=self.current_user.wechat.name
         )
         tname = 'success' if result else 'failure'
+        if result:
+            self.track("cVerifyEmailSuccess")
 
         self.render(template_name='employee/certification-%s.html' % tname,
                     **tparams)
