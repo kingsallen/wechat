@@ -746,7 +746,7 @@ class BaseHandler(MetaBaseHandler):
                               properties=properties,
                               is_login_id=is_login_id)
             else:
-                self.logger.error('[sensors_no_user_id] event_name: {}, properties: {}'.format(event, properties))
+                self.logger.debug('[sensors_no_user_id] event_name: {}, properties: {}'.format(event, properties))
         except Exception as e:
             self.logger.error('[sensors_track_exception] distinct_id: {}, event_name: {}, properties: {}, is_login_id: {}, error_track: {}'.format(
                 self.current_user.sysuser.id or self.current_user.sc_cookie_id, event, properties, True if self.current_user.sysuser.id else False,
@@ -768,7 +768,7 @@ class BaseHandler(MetaBaseHandler):
                                         profiles=profiles,
                                         is_login_id=is_login_id)
             else:
-                self.logger.error('[profile_set_sensors_no_user_id] profiles: {}'.format(profiles))
+                self.logger.debug('[profile_set_sensors_no_user_id] profiles: {}'.format(profiles))
         except Exception as e:
             self.logger.error('[sensors_profile_set_exception] distinct_id: {}, profiles: {}, is_login_id: {}, error_track: {}'.format(
                 self.current_user.sysuser.id or self.current_user.sc_cookie_id, profiles, True if self.current_user.sysuser.id else False,
