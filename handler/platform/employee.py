@@ -375,6 +375,7 @@ class EmployeeBindEmailHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def get(self):
+        self.track("cEmployeeClickBindingEmail")
         activation_code = self.params.activation_code
         bind_email_source = self.params.bind_email_source or 0
         result, message, employee_id = yield self.employee_ps.activate_email(
