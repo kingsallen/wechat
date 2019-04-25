@@ -26,6 +26,7 @@ class ProfileNewHandler(BaseHandler):
     @tornado.gen.coroutine
     def get(self):
         """初始化新建 profile 页面"""
+        display_locale = self.get_current_locale()
         pid = self.params.pid
         position = yield self.position_ps.get_position(pid)
         if position.candidate_source == "common_graduate":
@@ -34,8 +35,8 @@ class ProfileNewHandler(BaseHandler):
             is_graduate = False
         # yield from ps
         data = yield dict(
-            degreeList=self.dictionary_ps.get_degrees(),
-            countryCodeList=self.dictionary_ps.get_sms_country_codes())
+            degreeList=self.dictionary_ps.get_degrees(self.locale),
+            countryCodeList=self.dictionary_ps.get_sms_country_codes(display_locale))
 
         # update other initial values
         data.update(
@@ -193,7 +194,7 @@ class ProfilePreviewHandler(BaseHandler):
             return
 
         profile_tpl = yield self.profile_ps.profile_to_tempalte(
-            self.current_user.profile)
+            self.current_user.profile, self.locale)
 
 
 
@@ -250,7 +251,7 @@ class ProfileViewHandler(BaseHandler):
             self.redirect(redirect_url)
             return
 
-        profile_tpl = yield self.profile_ps.profile_to_tempalte(profile)
+        profile_tpl = yield self.profile_ps.profile_to_tempalte(profile, self.locale)
 
         other_key_name_mapping = yield self.profile_ps.get_others_key_name_mapping()
 
@@ -295,7 +296,7 @@ class ProfileHandler(BaseHandler):
         """
 
         profile_tpl = yield self.profile_ps.profile_to_tempalte(
-            self.current_user.profile)
+            self.current_user.profile, self.locale)
 
         other_key_name_mapping = yield self.profile_ps.get_others_key_name_mapping(select_all=True)
 

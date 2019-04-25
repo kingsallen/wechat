@@ -865,9 +865,10 @@ class ProfilePageService(PageService):
         return ret
 
     @gen.coroutine
-    def profile_to_tempalte(self, p_profile):
+    def profile_to_tempalte(self, p_profile, locale=None):
         """ 将从基础服务获得的 profile dict 转换成模版格式
         :param p_profile: 从基础服务获得的 profile dict
+        :param locale: 国际化
         """
         assert isinstance(p_profile, dict)
 
@@ -914,9 +915,9 @@ class ProfilePageService(PageService):
             start_date = w.get("start_date", "")
             end_date = w.get("end_date", "")
             if not end_date or int(w.get("end_until_now", 0)):
-                experience_item.time = start_date[:7] + " 至今"
+                experience_item.time = start_date[:7] + " " + locale.translate(const.UNTIL_NOW) if locale else "至今"
             else:
-                experience_item.time = start_date[:7] + " 至 " + end_date[:7]
+                experience_item.time = start_date[:7] + " " + locale.translate(const.TO) if locale else "至" + " " + end_date[:7]
             experience_item.description = w.get("description", "")
             experiences.append(experience_item)
         profile.experiences = experiences
@@ -935,9 +936,9 @@ class ProfilePageService(PageService):
             start_date = e.get("start_date", "")
             end_date = e.get("end_date", "")
             if not end_date or int(e.get("end_until_now", 0)):
-                education_item.time = start_date[:7] + " 至今"
+                education_item.time = start_date[:7] + " " + locale.translate(const.UNTIL_NOW) if locale else "至今"
             else:
-                education_item.time = start_date[:7] + " 至 " + end_date[:7]
+                education_item.time = start_date[:7] + " " + locale.translate(const.TO) if locale else "至" + " " + end_date[:7]
 
             education_item.description = e.get("description", "")
             educations.append(education_item)
@@ -954,9 +955,9 @@ class ProfilePageService(PageService):
             start_date = p.get("start_date", "")
             end_date = p.get("end_date", "")
             if not end_date or int(p.get("end_until_now", 0)):
-                project_item.time = start_date[:7] + " 至今"
+                project_item.time = start_date[:7] + " " + locale.translate(const.UNTIL_NOW) if locale else "至今"
             else:
-                project_item.time = start_date[:7] + " 至 " + end_date[:7]
+                project_item.time = start_date[:7] + " " + locale.translate(const.TO) if locale else "至" + " " + end_date[:7]
             projects.append(project_item)
         profile.projects = projects
 

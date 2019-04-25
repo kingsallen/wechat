@@ -84,9 +84,9 @@ class DictionaryPageService(PageService):
         return rocketmajors
 
     @tornado.gen.coroutine
-    def get_sms_country_codes(self):
+    def get_sms_country_codes(self, display_locale):
 
-        ret = yield self.infra_dict_ds.get_sms_country_codes()
+        ret = yield self.infra_dict_ds.get_sms_country_codes(display_locale)
 
         china = {'text': '中国', 'code_text': '86'}
 
