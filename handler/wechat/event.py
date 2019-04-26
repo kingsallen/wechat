@@ -184,26 +184,27 @@ class WechatOauthHandler(MetaBaseHandler):
     @gen.coroutine
     def event_TEMPLATESENDJOBFINISH(self):
         """模板消息发送完成事件推送"""
+        self.send_xml()
         res = yield self.event_ps.opt_event_template_send_job_finish(self.msg, self.current_user)
-        self.send_xml(res)
 
     @gen.coroutine
     def event_subscribe(self):
         """关注事件"""
-        res = yield self.event_ps.opt_event_subscribe(self.msg, self.current_user, self.params.nonce)
+        res = yield self.event_ps.opt_follow(self.msg, self.current_user.wechat, self.params.nonce)
         self.send_xml(res)
+        res = yield self.event_ps.opt_event_subscribe(self.msg, self.current_user, self.params.nonce)
 
     @gen.coroutine
     def event_unsubscribe(self):
         """取消关注事件"""
+        self.send_xml()
         res = yield self.event_ps.opt_event_unsubscribe(self.current_user)
-        self.send_xml(res)
 
     @gen.coroutine
     def event_SCAN(self):
         """用户扫码事件"""
-        res = yield self.event_ps.opt_event_scan(self.current_user, self.msg)
-        self.send_xml(res)
+        self.send_xml()
+        yield self.event_ps.opt_event_scan(self.current_user, self.msg)
 
     @gen.coroutine
     def event_CLICK(self):

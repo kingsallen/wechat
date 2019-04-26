@@ -304,8 +304,7 @@ class EventPageService(PageService):
             # 临时二维码处理逻辑, 5位type+27为自定义id
             yield self._do_weixin_qrcode(current_user.wechat, msg, is_newbie=is_newbie)
 
-        res = yield self.opt_follow(msg, current_user.wechat, nonce)
-        raise gen.Return(res)
+        raise gen.Return()
 
     @gen.coroutine
     def _create_wxuser(self, openid, current_user, wechat_userinfo):
