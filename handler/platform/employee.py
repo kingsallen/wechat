@@ -375,12 +375,16 @@ class EmployeeBindEmailHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def get(self):
-        self.track("cEmployeeClickBindingEmail")
         activation_code = self.params.activation_code
         bind_email_source = self.params.bind_email_source or 0
         result, message, employee_id = yield self.employee_ps.activate_email(
             activation_code, bind_email_source)
-
+        if employee_id:
+            employee = self.user_ps.get_employee_by_id(employee_id)
+            user = self.usercenter_ps.get_user(employee.sysuser_id) if employee.sysuser_id else ObjectDict()
+            self.track("cEmployeeClickBindingEmail", distinct_id=user.id, is_login_id=bool(user.username.isdigit() if user.username else None))
+            if result:
+                self.track("cVerifyEmailSuccess", distinct_id=user.id, is_login_id=bool(user.username.isdigit() if user.username else None))
         tparams = dict(
             qrcode_url=self.make_url(
                 path.IMAGE_URL,
@@ -389,8 +393,6 @@ class EmployeeBindEmailHandler(BaseHandler):
             wechat_name=self.current_user.wechat.name
         )
         tname = 'success' if result else 'failure'
-        if result:
-            self.track("cVerifyEmailSuccess")
 
         self.render(template_name='employee/certification-%s.html' % tname,
                     **tparams)

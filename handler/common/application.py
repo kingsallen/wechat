@@ -189,7 +189,7 @@ class ApplicationHandler(BaseHandler):
     def _add_sensor_track(self, depth):
         if self.params.source == const.FANS_RECOMMEND:
             origin = const.SA_ORIGIN_FANS_RECOMMEND
-        elif self.params.from_template_message == const.TEMPLATES.APPLICATION_INVITE:
+        elif self.params.from_template_message == str(const.TEMPLATES.APPLICATION_INVITE):
             origin = const.SA_ORIGIN_APPLICATION_INVITE
         else:
             origin = const.SA_ORIGIN_PLATFORM

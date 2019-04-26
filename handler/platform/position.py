@@ -230,7 +230,7 @@ class PositionHandler(BaseHandler):
             origin = const.SA_ORIGIN_FANS_RECOMMEND
         elif last_employee_user_id:
             origin = const.SA_ORIGIN_EMPLOYEE_SHARE
-        elif self.params.from_template_message == const.TEMPLATES.APPLICATION_INVITE:
+        elif self.params.from_template_message == str(const.TEMPLATES.APPLICATION_INVITE):
             origin = const.SA_ORIGIN_APPLICATION_INVITE
         else:
             origin = const.SA_ORIGIN_PLATFORM
