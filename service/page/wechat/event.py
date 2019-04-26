@@ -233,7 +233,7 @@ class EventPageService(PageService):
                     self.sa.track(distinct_id=current_user.wxuser.sysuser_id,
                                   event_name="receiveTemplateMessage",
                                   properties={"templateId": template_id, "sendTime": int(send_time), "isEmployee": bool(employee)},
-                                  is_login_id=True if bool(user_record.username.isdigit()) else False)
+                                  is_login_id=True if (user_record.username and bool(user_record.username.isdigit())) else False)
                     self.logger.debug(
                         '[sensors_track] distinct_id:{}, event_name: {}, properties: {}, is_login_id: {}'.format(
                             current_user.wxuser.sysuser_id,

@@ -293,7 +293,7 @@ class BaseHandler(MetaBaseHandler):
         # todo(niuzhenya@moseeker.com) 此处更新没有将所有wxuser的wxinfo都做更新，原因：wxuser的info没有展示的地方，展示目前都用的是user_user的info;
         # todo 过多的冗余字段，可以考虑在后期将数据库的结构优化
         yield self.user_ps.update_user_wx_info(unionid, userinfo)
-        yield self.user_ps.update_wxuser_wx_info(unionid, userinfo)
+        # yield self.user_ps.update_wxuser_wx_info(unionid, userinfo)
 
     def _authable(self, wechat_type):
         """返回当前公众号是否可以 OAuth
