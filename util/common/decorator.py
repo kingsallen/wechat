@@ -482,15 +482,16 @@ def check_and_apply_profile(func):
             user_id = self.current_user.sysuser.id
             result, data = yield self.privacy_ps.if_privacy_agreement_window(user_id)
             redirect_params.update(
-                show_privacy_agreement=data,
+                # show_privacy_agreement=data,
                 wechat_signature=self.current_user.wechat.signature
             )
 
             redirect_params = {**self.params, **redirect_params}
 
-            self.render(
+            self.render_page(
                 template_name='profile/importresume.html',
                 **redirect_params,
+                show_privacy_agreement=data,
                 importer=importer
             )
 
