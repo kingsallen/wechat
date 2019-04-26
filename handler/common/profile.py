@@ -343,7 +343,7 @@ class ProfileCustomHandler(BaseHandler):
             resume_dict = {}
 
         json_config = yield self.application_ps.get_hr_app_cv_conf(
-            position.app_cv_config_id)
+            position.app_cv_config_id, self.locale)
         cv_conf = json_config.field_value
 
         self.render_page(
