@@ -118,9 +118,15 @@ class ProfilePageService(PageService):
             other = others[0].get("other")
             if other:
                 other = json_decode(other)
-                for k, v in other:
-                    other[k] = locale.translate(v)
+                for k, v in other.items():
+                    if isinstance(v, str):
+                        other[k] = locale.translate(v)
                 others[0]['other'] = json_encode(other)
+        intentions = profile.intentions
+        if intentions and intentions[0]:
+            for k, v in intentions[0].items():
+                if isinstance(v, str):
+                    intentions[0][k] = locale.translate(v)
         self.logger.debug("translate_profile:{}".format(profile))
         return profile
 
@@ -1120,7 +1126,7 @@ class ProfilePageService(PageService):
             for m in metadatas:
                 if not m.get('map'):
                     if locale:
-                        m['fieldName'] = locale.translate(m.get('fieldName'))
+                        m['fieldTitle'] = locale.translate(m.get('fieldTitle'))
                     target = sub_dict(m, ['fieldName', 'fieldTitle', 'fieldType'])
                     yield rename_keys(target, rename_mapping)
 

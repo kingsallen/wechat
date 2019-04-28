@@ -175,8 +175,10 @@ class ApplicationPageService(PageService):
         return cv_conf
 
     def __locale_cv_conf(self, cv_conf, locale):
+        # 国际化自定义简历模板
         if cv_conf and cv_conf.field_value:
-            for c in cv_conf:
+            conf_value = json_decode(cv_conf.field_value)
+            for c in conf_value:
                 fields = c.get('fields')
                 if fields:
                     for field in fields:
@@ -188,6 +190,7 @@ class ApplicationPageService(PageService):
                             for field_value in field.get('field_value'):
                                 if isinstance(field_value, list) and field_value and field_value[0]:
                                     field_value[0] = locale.translate(field_value[0])
+            cv_conf['field_value'] = json_dumps(conf_value)
             self.logger.debug("translate_cv_conf:{}".format(cv_conf))
             return cv_conf
 

@@ -252,7 +252,7 @@ class ProfileViewHandler(BaseHandler):
 
         profile_tpl = yield self.profile_ps.profile_to_tempalte(profile)
 
-        other_key_name_mapping = yield self.profile_ps.get_others_key_name_mapping()
+        other_key_name_mapping = yield self.profile_ps.get_others_key_name_mapping(locale=self.locale)
 
         # 游客页不应该显示 other信息，求职意愿
         profile_tpl.other = ObjectDict()
@@ -297,7 +297,7 @@ class ProfileHandler(BaseHandler):
         profile_tpl = yield self.profile_ps.profile_to_tempalte(
             self.current_user.profile)
 
-        other_key_name_mapping = yield self.profile_ps.get_others_key_name_mapping(select_all=True)
+        other_key_name_mapping = yield self.profile_ps.get_others_key_name_mapping(select_all=True, locale=self.locale)
 
         self.params.share = self._share(self.current_user.profile.profile.get("uuid"), profile_tpl)
         self.render_page(
