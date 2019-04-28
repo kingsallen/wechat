@@ -475,7 +475,7 @@ def check_and_apply_profile(func):
                 profile_import_liepin=path.LIEPIN_ACCESSTOKEN.format(
                     hashlib.sha1(str(self.current_user.sysuser.id).encode('u8')).hexdigest()
                 ),
-                profile_import_maimai=maimai_url.
+                profile_import_maimai=maimai_url
             )
 
             # 是否需要弹出 隐私协议 窗口
