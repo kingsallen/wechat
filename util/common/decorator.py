@@ -364,10 +364,10 @@ def check_and_apply_profile(func):
                 self.current_user.sysuser.id)
 
             # 跳转模版需要的参数初始值
-            redirect_params = {
-                "use_email": False,
-                "goto_custom_url": '',
-            }
+            # redirect_params = {
+            #     "use_email": False,
+            #     "goto_custom_url": '',
+            # }
             # 获取最佳东方导入开关
             company = yield self.company_ps.get_company({'id': self.current_user.wechat.company_id}, need_conf=True)
             importer = ObjectDict(profile_import_51job=self.make_url(path.RESUME_URL, self.params, m='authorization', way=const.RESUME_WAY_51JOB),
@@ -481,20 +481,19 @@ def check_and_apply_profile(func):
             # 是否需要弹出 隐私协议 窗口
             user_id = self.current_user.sysuser.id
             result, data = yield self.privacy_ps.if_privacy_agreement_window(user_id)
-            redirect_params.update(
-                # show_privacy_agreement=data,
-                wechat_signature=self.current_user.wechat.signature
-            )
+            # redirect_params.update(
+            #     # show_privacy_agreement=data,
+            #     wechat_signature=self.current_user.wechat.signature
+            # )
 
-            redirect_params = {**self.params, **redirect_params}
+            # redirect_params = {**self.params, **redirect_params}
 
             self.render_page(
                 template_name='profile/importresume.html',
                 data=dict(
                     show_privacy_agreement=data,
                     importer=importer
-                ),
-                **redirect_params
+                )
             )
 
     return wrapper
