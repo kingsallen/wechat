@@ -364,23 +364,31 @@ def check_and_apply_profile(func):
                 self.current_user.sysuser.id)
 
             # 跳转模版需要的参数初始值
-            redirect_params = {
-                "use_email": False,
-                "goto_custom_url": '',
-            }
+            # redirect_params = {
+            #     "use_email": False,
+            #     "goto_custom_url": '',
+            # }
             # 获取最佳东方导入开关
             company = yield self.company_ps.get_company({'id': self.current_user.wechat.company_id}, need_conf=True)
-            importer = ObjectDict(profile_import_51job=True,
-                                  profile_import_zhilian=True,
-                                  profile_import_liepin=True,
-                                  profile_import_linkedin=True,
-                                  profile_import_maimai=True,
-                                  profile_import_veryeast=False,
-                                  resume_upload=False)
+            importer = ObjectDict(profile_import_51job=self.make_url(path.RESUME_URL, self.params, m='authorization', way=const.RESUME_WAY_51JOB),
+                                  profile_import_zhilian=self.make_url(path.RESUME_URL, self.params, m='authorization', way=const.RESUME_WAY_ZHILIAN),
+                                  # set later.
+                                  profile_import_liepin=None,
+                                  profile_import_linkedin=self.make_url(path.RESUME_URL, self.params, m='authorization', way=const.RESUME_WAY_LINKEDIN),
+                                  # set later.
+                                  profile_import_maimai=None,
+                                  # set later
+                                  profile_import_veryeast=None,
+                                  # set later
+                                  profile_resume_upload=None,
+                                  # set later
+                                  profile_email=None,
+                                  # set later
+                                  profile_custom_url=None)
             if company.conf_veryeast_switch == 1:
-                importer.update(profile_import_veryeast=True)
+                importer.update(profile_import_veryeast=self.make_url(path.RESUME_URL, self.params, m='authorization', way=const.RESUME_WAY_VERYEAST))
             if company.id in need_profile_upload:
-                importer.update(resume_upload=True)
+                importer.update(profile_resume_upload=self.make_url(path.RESUME_UPLOAD, self.params))
 
             # 如果是申请中跳转到这个页面，需要做详细检查
             current_path = self.request.uri.split('?')[0]
@@ -388,6 +396,8 @@ def check_and_apply_profile(func):
 
             self.logger.warn(current_path)
             self.logger.warn(self.params)
+
+            profile_email_url = self.make_url('/application/email', self.params, way=const.RESUME_WAY_MOSEEKER)
 
             if (current_path in paths_for_application and
                 self.params.pid and self.params.pid.isdigit()):
@@ -398,8 +408,12 @@ def check_and_apply_profile(func):
                 self.logger.warn(position)
 
                 # 判断是否可以接受 email 投递
-                redirect_params.update(
-                    use_email=(position.email_resume_conf == const.OLD_YES))
+                if position.email_resume_conf == const.OLD_YES:
+                    importer.update(
+                        profile_email=profile_email_url
+                    )
+                # redirect_params.update(
+                #     use_email=(position.email_resume_conf == const.OLD_YES))
 
                 # 自定义职位
                 if position.app_cv_config_id:
@@ -417,11 +431,17 @@ def check_and_apply_profile(func):
                         self.redirect(goto_custom_url)
                         return
                     else:
-                        redirect_params.update(goto_custom_url=goto_custom_url)
+                        importer.update(
+                            profile_custom_url= goto_custom_url
+                        )
+                        # redirect_params.update(goto_custom_url=goto_custom_url)
 
             else:
                 # 从侧边栏直接进入，允许使用 email 创建 profile
-                redirect_params.update(use_email=True)
+                # redirect_params.update(use_email=True)
+                importer.update(
+                    profile_email=profile_email_url
+                )
 
             # ========== MAIMAI OAUTH ===============
             # 拼装脉脉 oauth 路由
@@ -451,27 +471,29 @@ def check_and_apply_profile(func):
             )
 
             # 第三方简历导入对接回调地址配置
-            redirect_params.update(
-                maimai_url=maimai_url,
-                liepin_url=path.LIEPIN_ACCESSTOKEN.format(
+            importer.update(
+                profile_import_liepin=path.LIEPIN_ACCESSTOKEN.format(
                     hashlib.sha1(str(self.current_user.sysuser.id).encode('u8')).hexdigest()
-                )
+                ),
+                profile_import_maimai=maimai_url
             )
 
             # 是否需要弹出 隐私协议 窗口
             user_id = self.current_user.sysuser.id
             result, data = yield self.privacy_ps.if_privacy_agreement_window(user_id)
-            redirect_params.update(
-                show_privacy_agreement=data,
-                wechat_signature=self.current_user.wechat.signature
-            )
+            # redirect_params.update(
+            #     # show_privacy_agreement=data,
+            #     wechat_signature=self.current_user.wechat.signature
+            # )
 
-            redirect_params = {**self.params, **redirect_params}
+            # redirect_params = {**self.params, **redirect_params}
 
-            self.render(
-                template_name='refer/neo_weixin/sysuser_v2/importresume.html',
-                **redirect_params,
-                importer=importer
+            self.render_page(
+                template_name='profile/importresume.html',
+                data=dict(
+                    show_privacy_agreement=data,
+                    importer=importer
+                )
             )
 
     return wrapper
