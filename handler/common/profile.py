@@ -205,7 +205,7 @@ class ProfilePreviewHandler(BaseHandler):
             is_skip = False
         # -8<---8<---8<---8<---8<---8<---8<---8<---8<---8<---8<---8<---8<---
 
-        other_key_name_mapping = yield self.profile_ps.get_others_key_name_mapping(company_id=self.current_user.company.id)
+        other_key_name_mapping = yield self.profile_ps.get_others_key_name_mapping(company_id=self.current_user.company.id, locale=self.locale)
 
         no_name = not bool(self.current_user.sysuser.name)
         need_mobile_validate = not bool(self.current_user.sysuser.mobileverified)

@@ -4,7 +4,7 @@ import re
 from datetime import datetime
 
 import tornado.gen as gen
-from tornado.escape import json_decode
+from tornado.escape import json_decode, json_encode
 
 import conf.common as const
 import conf.infra as infra_const
@@ -109,11 +109,20 @@ class ProfilePageService(PageService):
 
         result, profile = yield self.infra_profile_ds.get_profile(user_id)
         if locale:
-
+            profile = self.__translate_profile(profile, locale)
         return result, profile
 
     @gen.coroutine
-    def __translate_
+    def __translate_profile(self, profile, locale):
+        others = profile.others
+        if others and others[0]:
+            other = others[0].get("other")
+            if other:
+                other = json_decode(other)
+                for k, v in other:
+                    other[k] = locale.translate(v)
+                others[0]['other'] = json_encode(other)
+        return profile
 
     @gen.coroutine
     def has_profile_basic(self, profile_id):
@@ -1097,7 +1106,7 @@ class ProfilePageService(PageService):
                        reverse=True)[0])
 
     @gen.coroutine
-    def get_others_key_name_mapping(self, company_id=0, select_all=False):
+    def get_others_key_name_mapping(self, company_id=0, select_all=False, locale=None):
         """获取自定义字段 name 和 title 的键值对，供前端在展示 profile 的时候使用"""
         metadatas = yield self.infra_profile_ds.get_custom_metadata(company_id, select_all)
 
@@ -1110,6 +1119,8 @@ class ProfilePageService(PageService):
         def _gen(metadatas):
             for m in metadatas:
                 if not m.get('map'):
+                    if locale:
+                        m['fieldName'] = locale.translate(m.get('fieldName'))
                     target = sub_dict(m, ['fieldName', 'fieldTitle', 'fieldType'])
                     yield rename_keys(target, rename_mapping)
 
