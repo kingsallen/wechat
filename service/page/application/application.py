@@ -171,6 +171,7 @@ class ApplicationPageService(PageService):
         cv_conf = yield self.hr_app_cv_conf_ds.get_app_cv_conf({
             "id": app_cv_config_id, "disable": const.NO
         })
+        cv_conf = self.__locale_cv_conf(cv_conf, locale)
         return cv_conf
 
     def __locale_cv_conf(self, cv_conf, locale):
@@ -185,9 +186,10 @@ class ApplicationPageService(PageService):
                             field.update(field_description=locale.translate(field.get('field_description')))
                         if field.get('field_value'):
                             for field_value in field.get('field_value'):
-                                if isinstance(field_value, list):
+                                if isinstance(field_value, list) and field_value and field_value[0]:
                                     field_value[0] = locale.translate(field_value[0])
 
+            return cv_conf
 
     @gen.coroutine
     def _generate_resume_cv(self, profile, custom_tpl):
