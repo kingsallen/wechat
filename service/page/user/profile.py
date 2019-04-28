@@ -112,7 +112,6 @@ class ProfilePageService(PageService):
             profile = self.__translate_profile(profile, locale)
         return result, profile
 
-    @gen.coroutine
     def __translate_profile(self, profile, locale):
         others = profile.others
         if others and others[0]:
@@ -122,6 +121,7 @@ class ProfilePageService(PageService):
                 for k, v in other:
                     other[k] = locale.translate(v)
                 others[0]['other'] = json_encode(other)
+        self.logger.debug("translate_profile:{}".format(profile))
         return profile
 
     @gen.coroutine

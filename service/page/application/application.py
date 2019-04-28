@@ -188,7 +188,7 @@ class ApplicationPageService(PageService):
                             for field_value in field.get('field_value'):
                                 if isinstance(field_value, list) and field_value and field_value[0]:
                                     field_value[0] = locale.translate(field_value[0])
-
+            self.logger.debug("translate_cv_conf:{}".format(cv_conf))
             return cv_conf
 
     @gen.coroutine
