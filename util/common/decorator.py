@@ -490,9 +490,11 @@ def check_and_apply_profile(func):
 
             self.render_page(
                 template_name='profile/importresume.html',
-                **redirect_params,
-                show_privacy_agreement=data,
-                importer=importer
+                data=dict(
+                    show_privacy_agreement=data,
+                    importer=importer
+                ),
+                **redirect_params
             )
 
     return wrapper
