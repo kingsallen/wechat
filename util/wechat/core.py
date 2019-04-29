@@ -436,9 +436,8 @@ def get_miniapp_code(scene_id, access_token):
     :return:
     """
     params = {
-        "access_token": access_token,
         "scene": scene_id
     }
-    ret = yield http_post(wx.MINIAPP_CODE % access_token, params, infra=False)
+    ret = yield http_post_cs_msg(wx.MINIAPP_CODE % access_token, params)
     raise gen.Return(ret)
 
