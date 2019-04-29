@@ -11,7 +11,8 @@ class DictCityHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def get(self):
-        cities = yield self.dictionary_ps.get_cities()
+        locale_display = self.get_current_locale()
+        cities = yield self.dictionary_ps.get_cities(locale_display)
         self.send_json_success(cities)
 
 
@@ -66,7 +67,8 @@ class DictCountryHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         order = self.params.order
-        countries = yield self.dictionary_ps.get_countries(order=order)
+        locale_display = self.get_current_locale()
+        countries = yield self.dictionary_ps.get_countries(order=order, locale_display=locale_display)
         self.send_json_success(countries)
 
 

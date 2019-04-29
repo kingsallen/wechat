@@ -12,7 +12,7 @@ import conf.common as const
 import conf.path as path
 from service.data.base import DataService
 from util.common.decorator import cache
-from util.tool.dict_tool import sub_dict
+from util.tool.dict_tool import sub_dict, rename_keys
 from util.tool.http_tool import http_get, unboxing
 from pypinyin import lazy_pinyin
 
@@ -51,7 +51,7 @@ class InfraDictDataService(DataService):
         return self.make_const_dict_result(response, parent_code)
 
     @gen.coroutine
-    def get_countries(self, order):
+    def get_countries(self, order, locale_display=None):
         """
         获取国家列表
         hot为热门国家
@@ -61,7 +61,7 @@ class InfraDictDataService(DataService):
         continent_res = yield self.get_const_dict(
             parent_code=const.CONSTANT_PARENT_CODE.CONTINENT)
 
-        return self.make_countries_result(countries_res, continent_res, order)
+        return self.make_countries_result(countries_res, continent_res, order, locale_display)
 
     @gen.coroutine
     def get_country_code_by(self, name=None):
@@ -117,7 +117,7 @@ class InfraDictDataService(DataService):
 
         return code_list
 
-    def make_countries_result(self, countries_res, continent_res, order=None):
+    def make_countries_result(self, countries_res, continent_res, order=None, locale_display=None):
         """获取国籍列表，按某种排序方式整理 """
 
         filter_keys = ['id', 'name', 'continent_code', 'ename', 'hot_country']
@@ -127,6 +127,8 @@ class InfraDictDataService(DataService):
             for c in countries:
                 d = sub_dict(c, filter_keys)
                 d.code = d.id
+                if locale_display == "en_US":
+                    d.name = d.ename
                 d.pop('id', None)
                 yield d
 
@@ -275,24 +277,33 @@ class InfraDictDataService(DataService):
 
     @cache(ttl=60 * 60 * 5)
     @gen.coroutine
-    def get_cities(self, hot=False):
+    def get_cities(self, locale_display=None, hot=False):
         """获取城市列表
         hot 为 True 为查询热门城市
         """
         level1_cities = yield self._get_level_1_cities()
         level2_cities = yield self._get_level_2_cities()
 
-        return self.make_cities_result(level1_cities, level2_cities, hot)
+        return self.make_cities_result(level1_cities, level2_cities, hot, locale_display=locale_display)
 
-    def make_cities_result(self, level1_cities, level2_cities, hot=False):
+    def make_cities_result(self, level1_cities, level2_cities, hot=False, locale_display=None):
         """Merge level1/2 的城市数据，拼装并返回
         hot 为 True 为查询热门城市
         """
         res = level1_cities + level2_cities
 
         cities, ret, heads = [], [], []
+
+        if locale_display == "en_US":
+            sub_name = ['code', 'ename']
+        else:
+            sub_name = ['code', 'name']
+        rename_mapping = {
+            'ename': 'name'
+        }
         for e in res:
-            ret.append(sub_dict(e, ['code', 'name']))
+            sub_res = rename_keys(sub_dict(e, sub_name), rename_mapping)
+            ret.append(sub_res)
 
         if hot:
             cities = list(filter(

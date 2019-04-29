@@ -8,8 +8,8 @@ import tornado.gen
 class DictionaryPageService(PageService):
 
     @tornado.gen.coroutine
-    def get_cities(self):
-        ret = yield self.infra_dict_ds.get_cities()
+    def get_cities(self, locale_display):
+        ret = yield self.infra_dict_ds.get_cities(locale_display)
         return ret
 
     @tornado.gen.coroutine
@@ -74,8 +74,8 @@ class DictionaryPageService(PageService):
         return ret
 
     @tornado.gen.coroutine
-    def get_countries(self, order):
-        countries = yield self.infra_dict_ds.get_countries(order=order)
+    def get_countries(self, order, locale_display=None):
+        countries = yield self.infra_dict_ds.get_countries(order=order, locale_display=locale_display)
         return countries
 
     @tornado.gen.coroutine
