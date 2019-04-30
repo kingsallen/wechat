@@ -64,7 +64,7 @@ class WechatOauthHandler(MetaBaseHandler):
         if openid:
             wxuser = yield self.user_ps.get_wxuser_openid_wechat_id(openid, self.wechat.id)
             # 可以拿到用户信息的话，该用户一定关注了公众号
-            if wxuser and not wxuser.is_subscribe:
+            if wxuser and not wxuser.is_subscribe and self.msg['Event'] not in ('subscribe', 'unsubscribe'):
                 yield self.user_ps.set_wxuser_is_subscribe(wxuser)
 
             from service.data.user.user_wx_user import UserWxUserDataService
