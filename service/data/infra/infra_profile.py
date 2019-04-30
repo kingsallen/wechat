@@ -820,5 +820,5 @@ class InfraProfileDataService(DataService):
     @gen.coroutine
     def infra_upload_miniapp_access(self, params):
         """获取上传助手小程序access_token"""
-        res = yield http_tool.http_get('{}/{}'.format(settings['upload_resume_miniapp_appid'], path.UPLOAD_MINIAPP_ACCESSTOKEN), params, infra=False)
+        res = yield http_tool.http_get('{}/{}'.format(settings['upload_resume_miniapp_url'], path.UPLOAD_MINIAPP_ACCESSTOKEN), params, infra=False)
         return res
