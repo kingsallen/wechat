@@ -529,7 +529,8 @@ class MiniappResumeUploadInfoHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         sync_id = self.params.syncId
-        result = yield self.profile_ps.referral_upload_resume_info(self.current_user.sysuser.id, sync_id)
+        employee_id = self.current_user.employee.id if self.current_user.employee else 0
+        result = yield self.profile_ps.referral_upload_resume_info(self.current_user.sysuser.id, sync_id, employee_id)
         if result.status == const.API_SUCCESS:
             self.send_json_success(result.data)
         else:

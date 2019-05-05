@@ -1158,11 +1158,12 @@ class ProfilePageService(PageService):
         return res
 
     @gen.coroutine
-    def referral_upload_resume_info(self, user_id, sync_id):
+    def referral_upload_resume_info(self, user_id, sync_id, employee_id):
         """小助手上传的简历信息"""
         params = {
             "userId": user_id,
-            "syncId": sync_id
+            "syncId": sync_id,
+            "employeeId": employee_id
         }
         res = yield self.infra_profile_ds.infra_referral_upload_resume_info(params)
         return res
