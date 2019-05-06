@@ -515,7 +515,7 @@ class ResumeUploadResultHandler(BaseHandler):
         employee_id = self.current_user.employee.id if self.current_user.employee else 0
         result = yield self.profile_ps.is_resume_upload_complete(self.current_user.sysuser.id, sync_id, employee_id)
         if result.status == const.API_SUCCESS:
-            self.send_json_success(result.data)
+            self.send_json_success({"finished": result.data})
         else:
             self.send_json_error(message=result.message)
 
