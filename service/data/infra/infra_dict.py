@@ -154,18 +154,21 @@ class InfraDictDataService(DataService):
                             countries, continent))
                     ))
         else:
-            ret = self.order_country_by_first_letter(countries)
+            ret = self.order_country_by_first_letter(countries, locale_display)
         data = ObjectDict({"hot": hot_countries,
                            "list": ret})
         return data
 
     @staticmethod
-    def order_country_by_first_letter(content):
+    def order_country_by_first_letter(content, locale_display):
         res, heads = [], []
         for el in content:
-            h = lazy_pinyin(
-                el.get('name'),
-                style=pypinyin.STYLE_FIRST_LETTER)[0].upper()
+            if locale_display == "en_US":
+                h = el.get('name')[0] if el.get('name') else el.get('name')
+            else:
+                h = lazy_pinyin(
+                    el.get('name'),
+                    style=pypinyin.STYLE_FIRST_LETTER)[0].upper()
 
             if h not in heads:
                 cities_group = ObjectDict(text=h, list=[])
@@ -316,12 +319,15 @@ class InfraDictDataService(DataService):
                 is_gat = any(
                     map(lambda x: str(el.get('code')).startswith(str(x)),
                         self._GAT_PREFIX))
-                if is_gat:
-                    h = "港,澳,台"
+                if locale_display == "en_US":
+                    h = el.get('name')[0] if el.get('name') else el.get('name')
                 else:
-                    h = lazy_pinyin(
-                        el.get('name'),
-                        style=pypinyin.STYLE_FIRST_LETTER)[0].upper()
+                    if is_gat:
+                        h = "港,澳,台"
+                    else:
+                        h = lazy_pinyin(
+                            el.get('name'),
+                            style=pypinyin.STYLE_FIRST_LETTER)[0].upper()
 
                 if h not in heads:
                     cities_group = ObjectDict(text=h, list=[])
