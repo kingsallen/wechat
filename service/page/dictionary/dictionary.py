@@ -28,8 +28,8 @@ class DictionaryPageService(PageService):
         return ret
 
     @tornado.gen.coroutine
-    def get_constants(self, parent_code):
-        ret = yield self.infra_dict_ds.get_const_dict(parent_code=parent_code)
+    def get_constants(self, parent_code, locale=None):
+        ret = yield self.infra_dict_ds.get_const_dict(parent_code=parent_code, locale=locale)
         return ret
 
     @tornado.gen.coroutine

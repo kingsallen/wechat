@@ -739,7 +739,7 @@ class ProfileSectionHandler(BaseHandler):
         route = self.params.route
 
         scale_list = yield self.dictionary_ps.get_constants(
-            parent_code=const.CONSTANT_PARENT_CODE.COMPANY_SCALE)
+            parent_code=const.CONSTANT_PARENT_CODE.COMPANY_SCALE, locale=self.locale)
         constant = ObjectDict(scale_list=scale_list)
 
         model = {}
@@ -808,7 +808,7 @@ class ProfileSectionHandler(BaseHandler):
         route = self.params.route
 
         degree_list = yield self.dictionary_ps.get_constants(
-            parent_code=const.CONSTANT_PARENT_CODE.DEGREE_USER)
+            parent_code=const.CONSTANT_PARENT_CODE.DEGREE_USER, locale=self.locale)
         constant = {'degree_list': degree_list}
 
         model = {}
@@ -856,7 +856,7 @@ class ProfileSectionHandler(BaseHandler):
         route = self.params.route
 
         scale_list = yield self.dictionary_ps.get_constants(
-            parent_code=const.CONSTANT_PARENT_CODE.COMPANY_SCALE)
+            parent_code=const.CONSTANT_PARENT_CODE.COMPANY_SCALE, locale=self.locale)
         constant = ObjectDict(scale_list=scale_list)
 
         model = {}
@@ -962,11 +962,11 @@ class ProfileSectionHandler(BaseHandler):
         route = self.params.route
 
         worktype_list = yield self.dictionary_ps.get_constants(
-            parent_code=const.CONSTANT_PARENT_CODE.WORK_INTENTION)
+            parent_code=const.CONSTANT_PARENT_CODE.WORK_INTENTION, locale=self.locale)
         salary_list = yield self.dictionary_ps.get_constants(
-            parent_code=const.CONSTANT_PARENT_CODE.CURRENT_SALARY_MONTH)
+            parent_code=const.CONSTANT_PARENT_CODE.CURRENT_SALARY_MONTH, locale=self.locale)
         workstate = yield self.dictionary_ps.get_constants(
-            parent_code=const.CONSTANT_PARENT_CODE.WORK_STATUS)
+            parent_code=const.CONSTANT_PARENT_CODE.WORK_STATUS, locale=self.locale)
 
         constant = ObjectDict()
         constant.worktype_list = worktype_list

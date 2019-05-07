@@ -37,7 +37,7 @@ class InfraDictDataService(DataService):
 
     @cache(ttl=60 * 60 * 5)
     @gen.coroutine
-    def get_const_dict(self, parent_code):
+    def get_const_dict(self, parent_code, locale=None):
         """根据 parent_code 获取常量字典
         :param parent_code: 常量的 parent_code
         """
@@ -48,7 +48,7 @@ class InfraDictDataService(DataService):
 
         params = ObjectDict(parent_code=parent_code)
         response = yield http_get(path.DICT_CONSTANT, params)
-        return self.make_const_dict_result(response, parent_code)
+        return self.make_const_dict_result(response, parent_code, locale)
 
     @gen.coroutine
     def get_countries(self, order, locale_display=None):
@@ -184,13 +184,13 @@ class InfraDictDataService(DataService):
         return ret
 
     @staticmethod
-    def make_const_dict_result(http_response, parent_code):
+    def make_const_dict_result(http_response, parent_code, locale=None):
         """获取常量字典后的结果处理"""
         res_data = http_response.data
         ret = ObjectDict()
         for el in res_data.get(str(parent_code)):
             el = ObjectDict(el)
-            setattr(ret, str(el.code), el.name)
+            setattr(ret, str(el.code), locale.translate(el.name) if isinstance(el.name, str) else el.name)
         ret = collections.OrderedDict(sorted(ret.items()))
         return ret
 
@@ -494,7 +494,7 @@ class InfraDictDataService(DataService):
                 list.append(l2)
             e = ObjectDict()
             e.list = list
-            e.text = l.name
+            e.text = l.ename if locale_display == "en_US" else l.name
             ret.append(e)
         return ret
 
