@@ -473,41 +473,31 @@ class InfraDictDataService(DataService):
         res_data = response.data
         if not code:
             # level1 and level2
-            return self.get_function_result_level12(res_data, locale_display)
+            return self.get_function_result_level12(res_data)
         else:
-            return self.get_function_result_level23(res_data, code, locale_display)
+            return self.get_function_result_level23(res_data, code)
 
     @staticmethod
-    def get_function_result_level12(res_data, locale_display=None):
+    def get_function_result_level12(res_data):
         level1 = [ObjectDict(f) for f in res_data if f['level'] == 1]
         ret = []
-        rename_mapping = {'ename': 'name'}
-        if locale_display == "en_US":
-            sub_name = ['code', 'ename']
-        else:
-            sub_name = ['code', 'name']
         for l in level1:
             list = []
-            level2 = [rename_keys(sub_dict(ObjectDict(f), sub_name), rename_mapping) for f in res_data if
+            level2 = [sub_dict(ObjectDict(f), ['code', 'name']) for f in res_data if
                       f['parent'] == l.code and f['level'] == 2]
             for l2 in level2:
                 list.append(l2)
             e = ObjectDict()
             e.list = list
-            e.text = l.ename if locale_display == "en_US" else l.name
+            e.text = l.name
             ret.append(e)
         return ret
 
     @staticmethod
-    def get_function_result_level23(res_data, code, locale_display=None):
-        rename_mapping = {'ename': 'name'}
-        if locale_display == "en_US":
-            sub_name = ['code', 'ename']
-        else:
-            sub_name = ['code', 'name']
+    def get_function_result_level23(res_data, code):
         level2 = [ObjectDict(f) for f in res_data if f['level'] == 2 and f['code'] == code][0]
 
-        level3 = [rename_keys(sub_dict(ObjectDict(f), sub_name), rename_mapping) for f in res_data
+        level3 = [sub_dict(ObjectDict(f), ['code', 'name']) for f in res_data
                   if f['parent'] == level2.code and f['level'] == 3]
 
         return level3

@@ -13,7 +13,7 @@ from util.common import ObjectDict
 from util.tool.dict_tool import sub_dict, rename_keys
 from util.tool.iter_tool import first
 from globals import env
-from conf.locale_dict import CITY, CITY_REVERSE, INDUSTRY, INDUSTRY_REVERSE, PARENT_INDUSTRY, PARENT_INDUSTRY_REVERSE
+from conf.locale_dict import CITY, CITY_REVERSE, INDUSTRY, INDUSTRY_REVERSE
 
 
 class ProfilePageService(PageService):
@@ -129,9 +129,6 @@ class ProfilePageService(PageService):
                 if isinstance(v, str):
                     intentions[0][k] = locale.translate(v)
                 else:
-                    if k == 'positions' and v:
-                        for position in v:
-                            position['position_name'] = (INDUSTRY.get(position.get('position_name')) if locale_display == "en_US" else INDUSTRY_REVERSE.get(position.get('position_name'))) or position.get('position_name')
                     if k == 'cities' and v:
                         for city in v:
                             city['city_name'] = (CITY.get(city.get('city_name')) if locale_display == "en_US" else CITY_REVERSE.get(city.get('city_name'))) or city.get('city_name')

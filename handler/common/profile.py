@@ -17,6 +17,7 @@ from util.common.decorator import handle_response, check_and_apply_profile, \
 from util.tool.dict_tool import sub_dict, objectdictify
 from util.tool.str_tool import mobile_validate, split_phone_number
 from util.tool.json_tool import json_dumps
+from conf.locale_dict import CITY, CITY_REVERSE, INDUSTRY, INDUSTRY_REVERSE
 
 
 class ProfileNewHandler(BaseHandler):
@@ -975,7 +976,7 @@ class ProfileSectionHandler(BaseHandler):
 
         model = ObjectDict()
         new = False
-
+        locale_display = self.get_current_locale()
         if not self.params.id:
             new = True
         else:
@@ -993,11 +994,16 @@ class ProfileSectionHandler(BaseHandler):
                     model.position = positions
 
                 cities = intention.cities
+                if isinstance(cities, list):
+                    for city in cities:
+                        city['city_name'] = (CITY.get(
+                            city.get('city_name')) if locale_display == "en_US" else CITY_REVERSE.get(
+                            city.get('city_name'))) or city.get('city_name')
                 model.city_name = cities
 
                 industries = intention.industries
                 if industries:
-                    model.industry = industries
+                    model.industry = (INDUSTRY.get(industries) if locale_display == "en_US" else INDUSTRY_REVERSE.get(industries)) or industries
 
             else:
                 self.send_json_error('cannot get intention')
