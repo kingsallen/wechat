@@ -133,11 +133,11 @@ class ProfilePageService(PageService):
                         for position in v:
                             position['position_name'] = (INDUSTRY.get(position.get('position_name')) if locale_display == "en_US" else INDUSTRY_REVERSE.get(position.get('position_name'))) or position.get('position_name')
                     if k == 'cities' and v:
-                        for position in v:
-                            position['city_name'] = (CITY.get(position.get('city_name')) if locale_display == "en_US" else CITY_REVERSE.get(position.get('city_name'))) or position.get('city_name')
+                        for city in v:
+                            city['city_name'] = (CITY.get(city.get('city_name')) if locale_display == "en_US" else CITY_REVERSE.get(city.get('city_name'))) or city.get('city_name')
                     if k == 'industries':
-                        for position in v:
-                            position['city_name'] = (INDUSTRY.get(position.get('city_name')) if locale_display == "en_US" else INDUSTRY_REVERSE.get(position.get('city_name'))) or position.get('position_name')
+                        for industry in v:
+                            industry['industry_name'] = (INDUSTRY.get(industry.get('industry_name')) if locale_display == "en_US" else INDUSTRY_REVERSE.get(industry.get('industry_name'))) or industry.get('industry_name')
         self.logger.debug("translate_profile:{}".format(profile))
         return profile
 
