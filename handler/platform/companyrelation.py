@@ -11,6 +11,7 @@ from util.common import ObjectDict
 from util.common.decorator import check_sub_company, handle_response, \
     authenticated, NewJDStatusCheckerAddFlag
 from util.tool.str_tool import add_item
+import conf.path as path
 
 
 class CompanyVisitReqHandler(BaseHandler):
@@ -64,7 +65,12 @@ class CompanyHandler(BaseHandler):
     def get(self):
         company = self.params.pop('sub_company') if self.params.sub_company \
             else self.current_user.company
-
+        # 判断来源
+        if self.params.source == const.FANS_RECOMMEND:
+            origin = const.SA_ORIGIN_FANS_RECOMMEND
+        else:
+            origin = const.SA_ORIGIN_PLATFORM
+        self.track("cCompanyIndex", properties=ObjectDict(origin=origin))
         if self.flag_should_display_newjd:
             data = yield self.user_company_ps.get_company_data(
                 self.locale, self.params, company, self.current_user)

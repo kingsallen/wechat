@@ -745,7 +745,7 @@ class RedpacketPageService(PageService):
                                   (current_user.wxuser.id, position.id))
 
                 sharechain_ps = SharechainPageService()
-                last_employee_user_id = yield sharechain_ps.get_referral_employee_user_id(
+                last_employee_user_id, _ = yield sharechain_ps.get_referral_employee_user_id(
                     trigger_user_id, position.id)
 
                 self.logger.debug("[RP]转发链最近员工 user_id:{}".format(

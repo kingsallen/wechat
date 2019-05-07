@@ -93,6 +93,7 @@ class ApplicationHandler(BaseHandler):
             root_user_id = ret.data.get('user', {}).get('uid', 0)
             yield self.user_ps.referral_confirm_submit(
                 self.current_user.company.id, self.current_user.sysuser.id, root_user_id, pid, origin)
+            self.track("cReferralAddProfile")
             self.send_json_success(
                 data=dict(next_url=self.make_url(path.REFERRAL_CONTACT_RESULT, self.params),
                           message=''))
@@ -164,8 +165,11 @@ class ApplicationHandler(BaseHandler):
             yield self.application_ps.opt_add_reward(apply_id, self.current_user)
 
             # 更新挖掘被动求职者信息
-            recommender_user_id, _, _ = yield self.application_ps.get_recommend_user(
+            recommender_user_id, _, _, depth = yield self.application_ps.get_recommend_user(
                 self.current_user, position, self.is_platform)
+
+            # 神策埋点
+            self._add_sensor_track(depth)
 
             if recommender_user_id:
                 yield self.application_ps.opt_update_candidate_recom_records(
@@ -181,6 +185,15 @@ class ApplicationHandler(BaseHandler):
 
         else:
             self.send_json_error(message=message)
+
+    def _add_sensor_track(self, depth):
+        if self.params.source == const.FANS_RECOMMEND:
+            origin = const.SA_ORIGIN_FANS_RECOMMEND
+        elif self.params.from_template_message == str(const.TEMPLATES.APPLICATION_INVITE):
+            origin = const.SA_ORIGIN_APPLICATION_INVITE
+        else:
+            origin = const.SA_ORIGIN_PLATFORM
+        self.track("cApplySuccess", properties={"origin": origin, "depth": depth})
 
 
 class ApplicationEmailHandler(BaseHandler):

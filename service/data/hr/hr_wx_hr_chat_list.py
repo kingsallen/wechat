@@ -14,7 +14,6 @@ from util.common import ObjectDict
 
 
 class HrWxHrChatListDataService(DataService):
-
     @gen.coroutine
     def get_chatroom(self, conds, fields=None):
 
