@@ -420,14 +420,14 @@ class InfraDictDataService(DataService):
 
     @cache(ttl=60 * 60 * 5)
     @gen.coroutine
-    def get_industries(self, level=2):
+    def get_industries(self, level=2, locale_display=None):
         """获取行业
         industries
         level1 + level2
         """
         ret = yield http_get(path.DICT_INDUSTRY, dict(parent=0))
         if level == 2:
-            ret = yield self.make_industries_result(ret)
+            ret = yield self.make_industries_result(ret, locale_display)
         return ret
 
     @gen.coroutine
@@ -438,21 +438,28 @@ class InfraDictDataService(DataService):
 
     @staticmethod
     @gen.coroutine
-    def make_industries_result(http_response):
+    def make_industries_result(http_response, locale_display=None):
         res_data = http_response.data
         industries = []
         for el in res_data:
             el = ObjectDict(el)
             out = ObjectDict()
-            out.text = el.name
+            if locale_display == "en_US":
+                sub_name = ['code', 'ename']
+                out.text = el.ename
+            else:
+                sub_name = ['code', 'name']
+                out.text = el.name
             level2 = yield http_get(path.DICT_INDUSTRY, dict(parent=el.code))
-            out.list = list(map(lambda x: sub_dict(x, ['code', 'name']), level2.data))
+            rename_mapping = {'ename': 'name'}
+
+            out.list = list(map(lambda x: rename_keys(sub_dict(x, sub_name), rename_mapping), level2.data))
             industries.append(out)
         return industries
 
     @cache(ttl=60 * 60 * 5)
     @gen.coroutine
-    def get_functions(self, code=0):
+    def get_functions(self, code=0, locale_display=None):
         """获取职能
         Get functions (code=0 -> level1+level2, code!=0 -> level2+level3)
         """
@@ -460,23 +467,28 @@ class InfraDictDataService(DataService):
             raise ValueError('invalid code')
 
         http_response = yield http_get(path.DICT_POSITION, {})
-        return self.get_function_result(http_response, code)
+        return self.get_function_result(http_response, code, locale_display)
 
-    def get_function_result(self, response, code=0):
+    def get_function_result(self, response, code=0, locale_display=None):
         res_data = response.data
         if not code:
             # level1 and level2
-            return self.get_function_result_level12(res_data)
+            return self.get_function_result_level12(res_data, locale_display)
         else:
-            return self.get_function_result_level23(res_data, code)
+            return self.get_function_result_level23(res_data, code, locale_display)
 
     @staticmethod
-    def get_function_result_level12(res_data):
+    def get_function_result_level12(res_data, locale_display=None):
         level1 = [ObjectDict(f) for f in res_data if f['level'] == 1]
         ret = []
+        rename_mapping = {'ename': 'name'}
+        if locale_display == "en_US":
+            sub_name = ['code', 'ename']
+        else:
+            sub_name = ['code', 'name']
         for l in level1:
             list = []
-            level2 = [sub_dict(ObjectDict(f), ['code', 'name']) for f in res_data if
+            level2 = [rename_keys(sub_dict(ObjectDict(f), sub_name), rename_mapping) for f in res_data if
                       f['parent'] == l.code and f['level'] == 2]
             for l2 in level2:
                 list.append(l2)
@@ -487,10 +499,15 @@ class InfraDictDataService(DataService):
         return ret
 
     @staticmethod
-    def get_function_result_level23(res_data, code):
+    def get_function_result_level23(res_data, code, locale_display=None):
+        rename_mapping = {'ename': 'name'}
+        if locale_display == "en_US":
+            sub_name = ['code', 'ename']
+        else:
+            sub_name = ['code', 'name']
         level2 = [ObjectDict(f) for f in res_data if f['level'] == 2 and f['code'] == code][0]
 
-        level3 = [sub_dict(ObjectDict(f), ['code', 'name']) for f in res_data
+        level3 = [rename_keys(sub_dict(ObjectDict(f), sub_name), rename_mapping) for f in res_data
                   if f['parent'] == level2.code and f['level'] == 3]
 
         return level3

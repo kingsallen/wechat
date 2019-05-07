@@ -21,8 +21,9 @@ class DictFunctionHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def get(self):
+        locale_display = self.get_current_locale()
         functions = yield self.dictionary_ps.get_functions(
-            code=int(self.params.fcode) if self.params.fcode else 0)
+            code=int(self.params.fcode) if self.params.fcode else 0, locale_display=locale_display)
         self.send_json_success(functions)
 
 
@@ -32,8 +33,8 @@ class DictIndustryHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         self.logger.debug("DictIndustryHandler")
-
-        industries = yield self.dictionary_ps.get_industries()
+        locale_display = self.get_current_locale()
+        industries = yield self.dictionary_ps.get_industries(locale_display=locale_display)
         self.logger.debug("DictIndustryHandler indurstries:{}".format(industries))
         self.send_json_success(industries)
 

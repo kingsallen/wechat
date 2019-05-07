@@ -13,13 +13,13 @@ class DictionaryPageService(PageService):
         return ret
 
     @tornado.gen.coroutine
-    def get_functions(self, code):
-        ret = yield self.infra_dict_ds.get_functions(code)
+    def get_functions(self, code, locale_display=None):
+        ret = yield self.infra_dict_ds.get_functions(code, locale_display)
         return ret
 
     @tornado.gen.coroutine
-    def get_industries(self, level=2):
-        ret = yield self.infra_dict_ds.get_industries(level=level)
+    def get_industries(self, level=2, locale_display=None):
+        ret = yield self.infra_dict_ds.get_industries(level=level, locale_display=locale_display)
         return ret
 
     @tornado.gen.coroutine
