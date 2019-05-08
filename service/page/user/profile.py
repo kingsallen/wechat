@@ -122,6 +122,10 @@ class ProfilePageService(PageService):
                 for k, v in other.items():
                     if isinstance(v, str):
                         other[k] = locale.translate(v)
+                    if k in ['residence', 'AddressProvince', 'CollegeCity']:
+                        other[k] = (CITY.get(v) if locale_display == "en_US" else CITY_REVERSE.get(v)) or v
+                    elif k in ['current_industry']:
+                        other[k] = (INDUSTRY.get(v) if locale_display == "en_US" else INDUSTRY_REVERSE.get(v)) or v
                 others[0]['other'] = json_encode(other)
         intentions = profile.intentions
         if intentions and intentions[0]:
