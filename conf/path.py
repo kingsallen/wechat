@@ -254,6 +254,11 @@ AGREE_PRIVACY = 'user/privacy_record/delete'
 INSERT_RECORD = 'user/privacy_record/insert'
 # ============================ 基础服务结束 ============================
 
+# 上传助手小程序
+RESUME_UPLOAD_COMPLETE = '/v1.2/resuem/upload/complete'
+UPLOAD_MINIAPP_ACCESSTOKEN = '/v1.2/accesstoken'
+REFERRAL_UPLOAD_RESUME_INFO = '/v1.2/referral/upload/resume/info'
+
 # 其他外部服务
 LINKEDIN_ACCESSTOKEN = "https://www.linkedin.com/oauth/v2/accessToken"
 LINKEDIN_AUTH = "/oauth/v2/authorization"
