@@ -190,7 +190,7 @@ class InfraDictDataService(DataService):
         ret = ObjectDict()
         for el in res_data.get(str(parent_code)):
             el = ObjectDict(el)
-            setattr(ret, str(el.code), locale.translate(el.name) if isinstance(el.name, str) else el.name)
+            setattr(ret, str(el.code), locale.translate(el.name) if isinstance(el.name, str) and locale else el.name)
         ret = collections.OrderedDict(sorted(ret.items()))
         return ret
 
