@@ -1003,8 +1003,10 @@ class ProfileSectionHandler(BaseHandler):
 
                 industries = intention.industries
                 if industries:
-                    model.industry = (INDUSTRY.get(industries) if locale_display == "en_US" else INDUSTRY_REVERSE.get(industries)) or industries
+                    for i in industries:
+                        i["industry_name"] = (INDUSTRY.get(i.get("industry_name")) if locale_display == "en_US" else (INDUSTRY_REVERSE.get(i.get("industry_name"))) or i.get("industry_name"))
 
+                    model.industry = industries
             else:
                 self.send_json_error('cannot get intention')
 
