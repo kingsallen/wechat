@@ -334,7 +334,7 @@ def cover_no_weixin(func):
     @gen.coroutine
     def wrapper(self, *args, **kwargs):
         if not self.in_wechat and 'moseeker' not in self.request.headers.get('User-Agent'):
-            self.render(template_name="adjunct/not-weixin.html")
+            self.render(template_name="adjunct/not-weixin.html", http_code=416)
             return
         else:
             yield func(self, *args, **kwargs)
