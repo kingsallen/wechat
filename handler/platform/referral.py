@@ -113,8 +113,8 @@ class EmployeeRecomProfileHandler(BaseHandler):
             file_data = image["body"]
             file_name = image["filename"]
 
-        if len(file_data) > 5 * 1024 * 1024:
-            self.send_json_error(message="请上传5M以下的文件")
+        if len(file_data) > 2 * 1024 * 1024:
+            self.send_json_error(message="请上传2M以下的文件")
             return
         if not employee_id:
             employee_id = self.current_user.employee.id
