@@ -114,7 +114,7 @@ def cache(prefix=None, key=None, ttl=60, hash=True, lock=True, separator=":"):
 
                 redis_key = "{prefix}{separator}{redis_key}".format(prefix=prefix, separator=separator,
                                                                     redis_key=redis_key)
-
+                logger.debug("[redis_key]: {}".format(redis_key))
                 cache_data = None
                 try:
                     cache_data = base_cache.get(redis_key)
