@@ -961,7 +961,7 @@ class ProfilePageService(PageService):
             education_item = ObjectDict()
             education_item.id = e.get("id")
             education_item.job = e.get("major_name", "")
-            education_item.dep = degree_list.get(str(e.get("degree", 0)), "无")
+            education_item.dep = locale.translate(degree_list.get(str(e.get("degree", 0)), "无"))
 
             education_item.company = e.get("college_name", "")
             education_item.logo = e.get("college_logo", "")
