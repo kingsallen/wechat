@@ -8,18 +8,18 @@ import tornado.gen
 class DictionaryPageService(PageService):
 
     @tornado.gen.coroutine
-    def get_cities(self):
-        ret = yield self.infra_dict_ds.get_cities()
+    def get_cities(self, locale_display):
+        ret = yield self.infra_dict_ds.get_cities(locale_display)
         return ret
 
     @tornado.gen.coroutine
-    def get_functions(self, code):
-        ret = yield self.infra_dict_ds.get_functions(code)
+    def get_functions(self, code, locale_display=None):
+        ret = yield self.infra_dict_ds.get_functions(code, locale_display)
         return ret
 
     @tornado.gen.coroutine
-    def get_industries(self, level=2):
-        ret = yield self.infra_dict_ds.get_industries(level=level)
+    def get_industries(self, level=2, locale_display=None):
+        ret = yield self.infra_dict_ds.get_industries(level=level, locale_display=locale_display)
         return ret
 
     @tornado.gen.coroutine
@@ -28,20 +28,23 @@ class DictionaryPageService(PageService):
         return ret
 
     @tornado.gen.coroutine
-    def get_constants(self, parent_code):
-        ret = yield self.infra_dict_ds.get_const_dict(parent_code=parent_code)
+    def get_constants(self, parent_code, locale=None):
+        ret = yield self.infra_dict_ds.get_const_dict(parent_code=parent_code, locale=locale)
         return ret
 
     @tornado.gen.coroutine
-    def get_degrees(self, locale=None):
+    def get_degrees(self, locale=None, no_key=False):
         ret = yield self.get_constants(parent_code=CONSTANT_PARENT_CODE.DEGREE_USER)
         if locale:
             ret_ = dict()
             for k in ret.keys():
                 ret_[k] = locale.translate(HIGHEST_DEGREE.get(k))
-            format_ret = [{'text': text, 'value': int(value)} for value, text in ret_.items()]
-            format_ret_in_order = sorted(format_ret, key=lambda item: item['value'])
-            return format_ret_in_order
+            if no_key:
+                return ret_
+            else:
+                format_ret = [{'text': text, 'value': int(value)} for value, text in ret_.items()]
+                format_ret_in_order = sorted(format_ret, key=lambda item: item['value'])
+                return format_ret_in_order
         return ret
 
     @tornado.gen.coroutine
@@ -74,8 +77,8 @@ class DictionaryPageService(PageService):
         return ret
 
     @tornado.gen.coroutine
-    def get_countries(self, order):
-        countries = yield self.infra_dict_ds.get_countries(order=order)
+    def get_countries(self, order, locale_display=None):
+        countries = yield self.infra_dict_ds.get_countries(order=order, locale_display=locale_display)
         return countries
 
     @tornado.gen.coroutine
@@ -84,11 +87,11 @@ class DictionaryPageService(PageService):
         return rocketmajors
 
     @tornado.gen.coroutine
-    def get_sms_country_codes(self):
+    def get_sms_country_codes(self, display_locale):
 
-        ret = yield self.infra_dict_ds.get_sms_country_codes()
+        ret = yield self.infra_dict_ds.get_sms_country_codes(display_locale)
 
-        china = {'text': '中国', 'code_text': '86'}
+        china = {'text': 'China', 'code_text': '86'} if display_locale == 'en_US' else {'text': '中国', 'code_text': '86'}
 
         try:
             ret.remove(china)
@@ -98,9 +101,9 @@ class DictionaryPageService(PageService):
         finally:
             ret.insert(0, china)
             for item in [
-                dict(code_text='852', text='中国香港'),
-                dict(code_text='853', text='中国澳门'),
-                dict(code_text='886', text='中国台湾'),
+                dict(code_text='852', text='Hong Kong' if display_locale == 'en_US' else '中国香港'),
+                dict(code_text='853', text='Macao' if display_locale == 'en_US' else '中国澳门'),
+                dict(code_text='886', text='Taiwan' if display_locale == 'en_US' else '中国台湾'),
             ]:
                 if item not in ret:
                     ret.append(item)

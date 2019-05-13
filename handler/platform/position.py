@@ -185,7 +185,7 @@ class PositionHandler(BaseHandler):
                 self.render_page(
                     "position/info_old.html",
                     data=position_data,
-                    meta_title=const.PAGE_POSITION_INFO)
+                    meta_title=self.locale.translate(const.PAGE_COMPANY_INFO_LOCALE))
 
             self.flush()
 

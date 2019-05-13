@@ -106,6 +106,11 @@ PROFIEL_VIEW = "个人信息"
 PAGE_AI_EMPLOYEE_SURVEY = "填写信息"
 PAGE_CAPTCHA = "验证码"
 
+# 国际化
+PAGE_COMPANY_INFO_LOCALE = 'jd_title_dull'
+UNTIL_NOW = "until_now"
+TO = "to"
+
 # ++++++++++REDIS KEYS++++++++
 SESSION_USER = "SESSION_USER_{0}_{1}"
 SESSION_ID = "{0}:{1}"

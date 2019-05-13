@@ -17,6 +17,7 @@ from util.common.decorator import handle_response, check_and_apply_profile, \
 from util.tool.dict_tool import sub_dict, objectdictify
 from util.tool.str_tool import mobile_validate, split_phone_number
 from util.tool.json_tool import json_dumps
+from conf.locale_dict import CITY, CITY_REVERSE, INDUSTRY, INDUSTRY_REVERSE
 
 
 class ProfileNewHandler(BaseHandler):
@@ -26,6 +27,7 @@ class ProfileNewHandler(BaseHandler):
     @tornado.gen.coroutine
     def get(self):
         """初始化新建 profile 页面"""
+        display_locale = self.get_current_locale()
         pid = self.params.pid
         position = yield self.position_ps.get_position(pid)
         if position.candidate_source == "common_graduate":
@@ -34,8 +36,8 @@ class ProfileNewHandler(BaseHandler):
             is_graduate = False
         # yield from ps
         data = yield dict(
-            degreeList=self.dictionary_ps.get_degrees(),
-            countryCodeList=self.dictionary_ps.get_sms_country_codes())
+            degreeList=self.dictionary_ps.get_degrees(self.locale, no_key=True),  # 内推和这里需要的结构不同，用no_key做区分
+            countryCodeList=self.dictionary_ps.get_sms_country_codes(display_locale))
 
         # update other initial values
         data.update(
@@ -193,7 +195,7 @@ class ProfilePreviewHandler(BaseHandler):
             return
 
         profile_tpl = yield self.profile_ps.profile_to_tempalte(
-            self.current_user.profile)
+            self.current_user.profile, self.locale)
 
 
 
@@ -205,7 +207,7 @@ class ProfilePreviewHandler(BaseHandler):
             is_skip = False
         # -8<---8<---8<---8<---8<---8<---8<---8<---8<---8<---8<---8<---8<---
 
-        other_key_name_mapping = yield self.profile_ps.get_others_key_name_mapping(company_id=self.current_user.company.id)
+        other_key_name_mapping = yield self.profile_ps.get_others_key_name_mapping(company_id=self.current_user.company.id, locale=self.locale)
 
         no_name = not bool(self.current_user.sysuser.name)
         need_mobile_validate = not bool(self.current_user.sysuser.mobileverified)
@@ -250,9 +252,9 @@ class ProfileViewHandler(BaseHandler):
             self.redirect(redirect_url)
             return
 
-        profile_tpl = yield self.profile_ps.profile_to_tempalte(profile)
+        profile_tpl = yield self.profile_ps.profile_to_tempalte(profile, self.locale)
 
-        other_key_name_mapping = yield self.profile_ps.get_others_key_name_mapping()
+        other_key_name_mapping = yield self.profile_ps.get_others_key_name_mapping(locale=self.locale)
 
         # 游客页不应该显示 other信息，求职意愿
         profile_tpl.other = ObjectDict()
@@ -295,9 +297,9 @@ class ProfileHandler(BaseHandler):
         """
 
         profile_tpl = yield self.profile_ps.profile_to_tempalte(
-            self.current_user.profile)
+            self.current_user.profile, self.locale)
 
-        other_key_name_mapping = yield self.profile_ps.get_others_key_name_mapping(select_all=True)
+        other_key_name_mapping = yield self.profile_ps.get_others_key_name_mapping(select_all=True, locale=self.locale)
 
         self.params.share = self._share(self.current_user.profile.profile.get("uuid"), profile_tpl)
         self.render_page(
@@ -343,7 +345,7 @@ class ProfileCustomHandler(BaseHandler):
             resume_dict = {}
 
         json_config = yield self.application_ps.get_hr_app_cv_conf(
-            position.app_cv_config_id)
+            position.app_cv_config_id, self.locale)
         cv_conf = json_config.field_value
 
         self.render_page(
@@ -739,7 +741,7 @@ class ProfileSectionHandler(BaseHandler):
         route = self.params.route
 
         scale_list = yield self.dictionary_ps.get_constants(
-            parent_code=const.CONSTANT_PARENT_CODE.COMPANY_SCALE)
+            parent_code=const.CONSTANT_PARENT_CODE.COMPANY_SCALE, locale=self.locale)
         constant = ObjectDict(scale_list=scale_list)
 
         model = {}
@@ -808,7 +810,7 @@ class ProfileSectionHandler(BaseHandler):
         route = self.params.route
 
         degree_list = yield self.dictionary_ps.get_constants(
-            parent_code=const.CONSTANT_PARENT_CODE.DEGREE_USER)
+            parent_code=const.CONSTANT_PARENT_CODE.DEGREE_USER, locale=self.locale)
         constant = {'degree_list': degree_list}
 
         model = {}
@@ -856,7 +858,7 @@ class ProfileSectionHandler(BaseHandler):
         route = self.params.route
 
         scale_list = yield self.dictionary_ps.get_constants(
-            parent_code=const.CONSTANT_PARENT_CODE.COMPANY_SCALE)
+            parent_code=const.CONSTANT_PARENT_CODE.COMPANY_SCALE, locale=self.locale)
         constant = ObjectDict(scale_list=scale_list)
 
         model = {}
@@ -962,11 +964,11 @@ class ProfileSectionHandler(BaseHandler):
         route = self.params.route
 
         worktype_list = yield self.dictionary_ps.get_constants(
-            parent_code=const.CONSTANT_PARENT_CODE.WORK_INTENTION)
+            parent_code=const.CONSTANT_PARENT_CODE.WORK_INTENTION, locale=self.locale)
         salary_list = yield self.dictionary_ps.get_constants(
-            parent_code=const.CONSTANT_PARENT_CODE.CURRENT_SALARY_MONTH)
+            parent_code=const.CONSTANT_PARENT_CODE.CURRENT_SALARY_MONTH, locale=self.locale)
         workstate = yield self.dictionary_ps.get_constants(
-            parent_code=const.CONSTANT_PARENT_CODE.WORK_STATUS)
+            parent_code=const.CONSTANT_PARENT_CODE.WORK_STATUS, locale=self.locale)
 
         constant = ObjectDict()
         constant.worktype_list = worktype_list
@@ -975,7 +977,7 @@ class ProfileSectionHandler(BaseHandler):
 
         model = ObjectDict()
         new = False
-
+        locale_display = self.get_current_locale()
         if not self.params.id:
             new = True
         else:
@@ -993,12 +995,19 @@ class ProfileSectionHandler(BaseHandler):
                     model.position = positions
 
                 cities = intention.cities
+                if isinstance(cities, list):
+                    for city in cities:
+                        city['city_name'] = (CITY.get(
+                            city.get('city_name')) if locale_display == "en_US" else CITY_REVERSE.get(
+                            city.get('city_name'))) or city.get('city_name')
                 model.city_name = cities
 
                 industries = intention.industries
                 if industries:
-                    model.industry = industries
+                    for i in industries:
+                        i["industry_name"] = (INDUSTRY.get(i.get("industry_name")) if locale_display == "en_US" else (INDUSTRY_REVERSE.get(i.get("industry_name"))) or i.get("industry_name"))
 
+                    model.industry = industries
             else:
                 self.send_json_error('cannot get intention')
 

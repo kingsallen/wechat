@@ -352,7 +352,8 @@ def check_and_apply_profile(func):
     def wrapper(self, *args, **kwargs):
         need_profile_upload = [570004]  # 现在为沙盒的
         user_id = self.current_user.sysuser.id
-        has_profile, profile = yield self.profile_ps.has_profile(user_id)
+        locale_display = self.get_current_locale()
+        has_profile, profile = yield self.profile_ps.has_profile(user_id, self.locale, locale_display)
         if has_profile:
             self.current_user['profile'] = profile
             yield func(self, *args, **kwargs)

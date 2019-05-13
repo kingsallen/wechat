@@ -167,11 +167,32 @@ class ApplicationPageService(PageService):
         return functools.reduce(merge, [page.fields for page in json_config])
 
     @gen.coroutine
-    def get_hr_app_cv_conf(self, app_cv_config_id):
+    def get_hr_app_cv_conf(self, app_cv_config_id, locale):
         cv_conf = yield self.hr_app_cv_conf_ds.get_app_cv_conf({
             "id": app_cv_config_id, "disable": const.NO
         })
+        cv_conf = self.__locale_cv_conf(cv_conf, locale)
         return cv_conf
+
+    def __locale_cv_conf(self, cv_conf, locale):
+        # 国际化自定义简历模板
+        if cv_conf and cv_conf.field_value:
+            conf_value = json_decode(cv_conf.field_value)
+            for c in conf_value:
+                fields = c.get('fields')
+                if fields:
+                    for field in fields:
+                        if field.get('field_title'):
+                            field.update(field_title=locale.translate(field.get('field_title')))
+                        if field.get('field_description'):
+                            field.update(field_description=locale.translate(field.get('field_description')))
+                        if field.get('field_value'):
+                            for field_value in field.get('field_value'):
+                                if isinstance(field_value, list) and field_value and field_value[0]:
+                                    field_value[0] = locale.translate(field_value[0])
+            cv_conf['field_value'] = json_dumps(conf_value)
+            self.logger.debug("translate_cv_conf:{}".format(cv_conf))
+            return cv_conf
 
     @gen.coroutine
     def _generate_resume_cv(self, profile, custom_tpl):
