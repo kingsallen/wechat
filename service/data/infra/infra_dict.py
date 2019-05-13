@@ -79,7 +79,7 @@ class InfraDictDataService(DataService):
         return ret
 
     @gen.coroutine
-    def get_sms_country_codes(self):
+    def get_sms_country_codes(self, display_locale):
         """获取国家电话区号"""
 
         if self.cached_sms_country_codes:
@@ -93,7 +93,10 @@ class InfraDictDataService(DataService):
         for country in data:
             if country['sms_enabled']:
                 to_append = ObjectDict()
-                to_append.text = str(country['name'])
+                if display_locale == "en_US":
+                    to_append.text = str(country['ename'])
+                else:
+                    to_append.text = str(country['name'])
                 to_append.code_text = str(country['code'])
                 res.append(to_append)
 
