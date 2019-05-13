@@ -460,7 +460,6 @@ class InfraDictDataService(DataService):
             industries.append(out)
         return industries
 
-    @cache(ttl=60 * 60 * 5)
     @gen.coroutine
     def get_functions(self, code=0, locale_display=None):
         """获取职能
