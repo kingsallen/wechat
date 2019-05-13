@@ -1092,7 +1092,7 @@ class ProfilePageService(PageService):
                 other = ObjectDict(json_decode(first(p_others).get('other')))
 
                 if other.workyears:
-                    other.workyears = other.workyears + '年'
+                    other.workyears = other.workyears + locale.translate('年')
 
                 profile.other = other
 
