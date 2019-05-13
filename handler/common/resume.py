@@ -500,3 +500,48 @@ class ResumeSubmitHandler(BaseHandler):
 
             self.send_json_success(data={"next_url": next_url})
             return
+
+
+class ResumeUploadResultHandler(BaseHandler):
+    """
+    在微信端页面扫码进入小程序上传完文件后，小程序退出返回到微信端页面，微信端页面需要知道上传结果。
+    微信端页面拿到上传结果后，或者确认上传成功后，需要跳转到某个页面A，在页面A对该结果做处理。
+    """
+
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        sync_id = self.params.syncId
+        employee_id = self.current_user.employee.id if self.current_user.employee else 0
+        result = yield self.profile_ps.is_resume_upload_complete(self.current_user.sysuser.id, sync_id, employee_id)
+        if result.status == const.API_SUCCESS:
+            self.send_json_success({"finished": result.data})
+        else:
+            self.send_json_error(message=result.message)
+
+
+class MiniappResumeUploadInfoHandler(BaseHandler):
+    """
+    通过上传助手小程序上传后的简历信息
+    """
+
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        sync_id = self.params.syncId
+        employee_id = self.current_user.employee.id if self.current_user.employee else 0
+        result = yield self.profile_ps.referral_upload_resume_info(self.current_user.sysuser.id, sync_id, employee_id)
+        if result.status == const.API_SUCCESS:
+            self.send_json_success(result.data)
+        else:
+            self.send_json_error(message=result.message)
+
+
+
+
+
+
+
+
+
+

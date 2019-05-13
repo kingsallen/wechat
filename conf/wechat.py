@@ -12,6 +12,7 @@ WX_SHOWQRCODE_API = "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=%s"
 WX_CS_MESSAGE_API = "https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=%s"
 API_SEND_TEMPLATE_MESSAGE = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=%s"
 API_PAY_HONGBAO = "https://api.mch.weixin.qq.com/mmpaymkttransfers/sendredpack"
+MINIAPP_CODE = 'https://api.weixin.qq.com/wxa/getwxacodeunlimit?access_token=%s'
 
 WX_OAUTH_DEFAULT_STATE = '0'
 

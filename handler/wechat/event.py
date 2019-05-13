@@ -64,7 +64,7 @@ class WechatOauthHandler(MetaBaseHandler):
         if openid:
             wxuser = yield self.user_ps.get_wxuser_openid_wechat_id(openid, self.wechat.id)
             # 可以拿到用户信息的话，该用户一定关注了公众号
-            if wxuser and not wxuser.is_subscribe:
+            if wxuser and not wxuser.is_subscribe and self.msg['Event'] not in ('subscribe', 'unsubscribe'):
                 yield self.user_ps.set_wxuser_is_subscribe(wxuser)
 
             from service.data.user.user_wx_user import UserWxUserDataService
@@ -184,26 +184,27 @@ class WechatOauthHandler(MetaBaseHandler):
     @gen.coroutine
     def event_TEMPLATESENDJOBFINISH(self):
         """模板消息发送完成事件推送"""
+        self.send_xml()
         res = yield self.event_ps.opt_event_template_send_job_finish(self.msg, self.current_user)
-        self.send_xml(res)
 
     @gen.coroutine
     def event_subscribe(self):
         """关注事件"""
-        res = yield self.event_ps.opt_event_subscribe(self.msg, self.current_user, self.params.nonce)
+        res = yield self.event_ps.opt_follow(self.msg, self.current_user.wechat, self.params.nonce)
         self.send_xml(res)
+        res = yield self.event_ps.opt_event_subscribe(self.msg, self.current_user, self.params.nonce)
 
     @gen.coroutine
     def event_unsubscribe(self):
         """取消关注事件"""
+        self.send_xml()
         res = yield self.event_ps.opt_event_unsubscribe(self.current_user)
-        self.send_xml(res)
 
     @gen.coroutine
     def event_SCAN(self):
         """用户扫码事件"""
-        res = yield self.event_ps.opt_event_scan(self.current_user, self.msg)
-        self.send_xml(res)
+        self.send_xml()
+        yield self.event_ps.opt_event_scan(self.current_user, self.msg)
 
     @gen.coroutine
     def event_CLICK(self):

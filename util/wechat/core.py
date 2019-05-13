@@ -424,3 +424,20 @@ def send_succession_message(wechat, open_id, pattern_id, position_id=0):
     })
     yield http_post_cs_msg(
         wx.WX_CS_MESSAGE_API % wechat.get("access_token"), data=jdata)
+
+
+@cache(ttl=60 * 60)
+@gen.coroutine
+def get_miniapp_code(scene_id, access_token):
+    """
+    获取小程序码
+    :param scene_id: 1:普通内推上传，2：IM内推上传
+    :param access_token: 小程序token
+    :return:
+    """
+    params = {
+        "scene": scene_id
+    }
+    ret = yield http_post_cs_msg(wx.MINIAPP_CODE % access_token, params)
+    raise gen.Return(ret)
+

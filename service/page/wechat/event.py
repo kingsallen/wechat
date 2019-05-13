@@ -233,7 +233,7 @@ class EventPageService(PageService):
                     self.sa.track(distinct_id=current_user.wxuser.sysuser_id,
                                   event_name="receiveTemplateMessage",
                                   properties={"templateId": template_id, "sendTime": int(send_time), "isEmployee": bool(employee)},
-                                  is_login_id=True if bool(user_record.username.isdigit()) else False)
+                                  is_login_id=True if (user_record.username and bool(user_record.username.isdigit())) else False)
                     self.logger.debug(
                         '[sensors_track] distinct_id:{}, event_name: {}, properties: {}, is_login_id: {}'.format(
                             current_user.wxuser.sysuser_id,
@@ -304,8 +304,7 @@ class EventPageService(PageService):
             # 临时二维码处理逻辑, 5位type+27为自定义id
             yield self._do_weixin_qrcode(current_user.wechat, msg, is_newbie=is_newbie)
 
-        res = yield self.opt_follow(msg, current_user.wechat, nonce)
-        raise gen.Return(res)
+        raise gen.Return()
 
     @gen.coroutine
     def _create_wxuser(self, openid, current_user, wechat_userinfo):

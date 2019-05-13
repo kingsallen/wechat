@@ -23,11 +23,14 @@ shell commond::
 .. _moseeker: http://localhost:8000
 """
 
+import time
+import signal
 import tornado.httpserver
 import tornado.web
 import tornado.ioloop
 import tornado.concurrent
 import tornado.locale
+from functools import partial
 from tornado.options import options
 
 from setting import settings
@@ -69,6 +72,35 @@ def make_app():
     return app
 
 
+def sig_handler(sig, frame, sensors_sa, server):
+    """信号处理函数
+    """
+    logger.info('HR Server  sig handler ...')
+    tornado.ioloop.IOLoop.instance().add_callback(partial(shutdown, sensors_sa=sensors_sa, server=server))
+
+
+def shutdown(sensors_sa, server):
+    """进程关闭处理
+    """
+    # 停止接受Client连接
+    logger.info('HR Server Shutdown ...')
+    sensors_sa.close()
+    logger.info('HR Server sensors sa in Shutdown ...')
+    server.stop()
+
+    io_loop = tornado.ioloop.IOLoop.instance()
+    deadline = time.time() + settings.get('hold_on_for_requests_seconds', 10)  # 设置最长强制结束时间
+
+    def stop_loop():
+        now = time.time()
+        if now < deadline:
+            io_loop.add_timeout(now + 1, stop_loop)
+        else:
+            io_loop.stop()
+
+    stop_loop()
+
+
 def main():
     application = make_app()
     try:
@@ -85,6 +117,14 @@ def main():
         # sc = RedPacketConsumer()
         # application.sc = sc
         # application.sc.connect()
+
+        signal_handler = partial(sig_handler,
+                                 sensors_sa=sa,
+                                 server=http_server
+                                 )
+
+        signal.signal(signal.SIGTERM, signal_handler)
+        signal.signal(signal.SIGINT, signal_handler)
         http_server.listen(options.port)
 
         io_loop.start()
