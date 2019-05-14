@@ -273,7 +273,9 @@ def check_employee(func):
     @functools.wraps(func)
     @gen.coroutine
     def wrapper(self, *args, **kwargs):
-        if self.params.recomlist and not self.current_user.employee:
+        conf_response = yield self.employee_ps.get_employee_conf(
+            self.current_user.company.id)
+        if self.params.recomlist and not self.current_user.employee and conf_response.exists:
             # 如果从我要推荐点进来，但当前用户不是员工
             # 跳转到员工绑定页面
             self.params.pop("recomlist", None)
