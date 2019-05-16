@@ -161,8 +161,8 @@ class BaseHandler(MetaBaseHandler):
                 # TODO 拒绝授权用户，是否让其继续操作? or return
                 pass
         elif self._client_env == const.CLIENT_JOYWOK:
-            res = self.joywok_ps.get_joywok_info(appid=const.ENV_ARGS.get(self._client_env),
-                                                 method=const.JMIS_SIGNATURE)
+            res = yield self.joywok_ps.get_joywok_info(appid=const.ENV_ARGS.get(self._client_env),
+                                                       method=const.JMIS_SIGNATURE)
             client_env = ObjectDict({
                 "name": self._client_env,
                 "args": ObjectDict({
