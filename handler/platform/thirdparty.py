@@ -43,7 +43,16 @@ class JoywokInfoHandler(MetaBaseHandler):
     def post(self):
         """通过免登陆码获取用户信息"""
         code = self.json_args.code
-        res = yield self.joywok_ps.get_joywok_info(code=code, method=const.JMIS_USER_INFO)
-        self.user_ps.get_user_by_joywok_info()
+        joywok_user_info = yield self.joywok_ps.get_joywok_info(code=code, method=const.JMIS_USER_INFO)
+
+        yield self.user_ps.get_user_by_joywok_info(joywok_user_info, company_id=const.MAIDANGLAO_COMPANY_ID)
 
 
+class JoywokAutoAuthHandler(BaseHandler):
+
+    @handle_response
+    @check_env(3)
+    @gen.coroutine
+    def get(self):
+        """joywok转发到微信端的关注提示页"""
+        pass

@@ -1,0 +1,12 @@
+# coding=utf-8
+
+
+INFRA_GET_USER_BY_JOYWOK_USER_INFO = ""
+INFRA_AUTO_BIND_EMPLOYEE = ""
+
+
+
+
+
+
+
