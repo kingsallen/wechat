@@ -532,5 +532,4 @@ class MetaBaseHandler(AtomHandler):
     def _get_client_env(self):
         """生成环境全局变量"""
         client = self._in_wechat
-        args = const.ENV_ARGS.get(client)
-        return args
+        return client

@@ -19,7 +19,7 @@ class JoywokOauthHandler(MetaBaseHandler):
     @gen.coroutine
     def get(self):
         """更新joywok的授权信息，及获取joywok用户信息"""
-        res = self.joywok_ps.get_joywok_info(appid=const.ENV_ARGS.get(self._client_env), method=const.JMIS_SIGNATURE)
+        res = yield self.joywok_ps.get_joywok_info(appid=const.ENV_ARGS.get(self._client_env), method=const.JMIS_SIGNATURE)
         client_env = ObjectDict({
             "name": self._client_env,
             "args": ObjectDict({
@@ -43,7 +43,7 @@ class JoywokInfoHandler(MetaBaseHandler):
     def post(self):
         """通过免登陆码获取用户信息"""
         code = self.json_args.code
-        res = self.joywok_ps.get_joywok_info(code=code, method=const.JMIS_USER_INFO)
+        res = yield self.joywok_ps.get_joywok_info(code=code, method=const.JMIS_USER_INFO)
         self.user_ps.get_user_by_joywok_info()
 
 

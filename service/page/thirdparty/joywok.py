@@ -46,7 +46,7 @@ class JoywokPageService(PageService):
                 "appid": appid,
                 "method": method
             })
-        ret = self.joywok_ds.get_joywok_signature(params)
+        ret = yield self.joywok_ds.get_joywok_info(params)
         return ret
 
 
