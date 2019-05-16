@@ -12,7 +12,6 @@ from util.common.decorator import log_time
 from setting import settings
 
 
-
 class InfraUserDataService(DataService):
     """对接 User服务
     referer: https://wiki.moseeker.com/user_account_api.md"""

@@ -59,6 +59,28 @@ base_cache = BaseRedis()
 sem = Semaphore(1)
 
 
+def check_env(env):
+    """
+    校验当前环境是否符合该接口限制的环境
+    1: wechat
+    2: nonwechat
+    3: joywok
+    """
+    def check_inner(func):
+
+        @functools.wraps(func)
+        @gen.coroutine
+        def func_wrapper(self, *args, **kwargs):
+            if self._client_env == env:
+                yield func(self, *args, **kwargs)
+            else:
+                self.write_error(500, message="请在正确的环境打开该页面")
+
+        return func_wrapper
+
+    return check_inner
+
+
 def cache(prefix=None, key=None, ttl=60, hash=True, lock=True, separator=":"):
     """
     cache装饰器

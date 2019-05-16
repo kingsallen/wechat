@@ -59,10 +59,12 @@ class MetaBaseHandler(AtomHandler):
         self._start_time = time.time()
         # 保存是否在微信环境，微信客户端类型
         self._in_wechat, self._client_type = self._depend_wechat()
+        self._client_env = self._get_client_env()
         # 日志信息
         self._log_info = None
         self._log_customs = ObjectDict()
         # page service 初始化
+        self._namespace = ObjectDict()
 
     def initialize(self, event):
         """ 日志需要，由 route 定义 """
@@ -145,6 +147,14 @@ class MetaBaseHandler(AtomHandler):
             self._log_info = ObjectDict()
 
         self._log_info.update(dict(value))
+
+    @property
+    def namespace(self):
+        return self._namespace
+
+    @namespace.setter
+    def namespace(self, value):
+        self._namespace.update(dict(value))
 
     @property
     def remote_ip(self):
@@ -506,11 +516,21 @@ class MetaBaseHandler(AtomHandler):
         mobile = const.CLIENT_TYPE_UNKNOWN
 
         useragent = self.request.headers.get('User-Agent')
-        if "MicroMessenger" in useragent and 'wxwork' not in useragent and 'moseeker' not in useragent:
-            if "iPhone" in useragent:
-                mobile = const.CLIENT_TYPE_IOS
-            elif "Android" in useragent:
-                mobile = const.CLIENT_TYPE_ANDROID
+        # 判断手机系统
+        if "iPhone" in useragent:
+            mobile = const.CLIENT_TYPE_IOS
+        elif "Android" in useragent:
+            mobile = const.CLIENT_TYPE_ANDROID
+        # 判断网页所处环境
+        if "Joywok" in useragent:
+            wechat = const.CLIENT_JOYWOK
+        elif "MicroMessenger" in useragent and 'wxwork' not in useragent and 'moseeker' not in useragent:
             wechat = const.CLIENT_WECHAT
 
         return wechat, mobile
+
+    def _get_client_env(self):
+        """生成环境全局变量"""
+        client = self._in_wechat
+        args = const.ENV_ARGS.get(client)
+        return args

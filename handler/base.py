@@ -160,6 +160,20 @@ class BaseHandler(MetaBaseHandler):
             elif state:  # 用户拒绝授权
                 # TODO 拒绝授权用户，是否让其继续操作? or return
                 pass
+        elif self._client_env == const.CLIENT_JOYWOK:
+            res = self.joywok_ps.get_joywok_info(appid=const.ENV_ARGS.get(self._client_env),
+                                                 method=const.JMIS_SIGNATURE)
+            client_env = ObjectDict({
+                "name": self._client_env,
+                "args": ObjectDict({
+                    "appid": res.app_id,
+                    "signature": res.signature,
+                    "timestamp": res.timestamp,
+                    "nonceStr": res.nonce,
+                    "corpid": res.corp_id,
+                    "redirect_url": res.redirect_url})
+            })
+            self.namespace = {"client_env": client_env}
         else:
             # pc端授权
             if code and self._verify_code(code):
@@ -404,6 +418,8 @@ class BaseHandler(MetaBaseHandler):
                 url = self._oauth_service.get_oauth_code_userinfo_url()
                 self.redirect(url)
                 return
+            elif self._client_env == const.CLIENT_JOYWOK:
+                yield self._build_joywok_session()
             else:
                 yield self._build_session()
 
@@ -419,6 +435,11 @@ class BaseHandler(MetaBaseHandler):
                 # if self.current_user.sysuser:
                 #     result, profile = yield self.profile_ps.has_profile(self.current_user.sysuser.id)
                 #     self.current_user.has_profile = result
+
+    @gen.coroutine
+    def _build_joywok_session(self):
+        """在joywok环境下，构建用户 session"""
+        pass
 
     @gen.coroutine
     def _build_session(self):
@@ -658,7 +679,8 @@ class BaseHandler(MetaBaseHandler):
             path=path,
             static_url=self.static_url,
             current_user=self.current_user,
-            settings=self.settings)
+            settings=self.settings
+        )
         namespace.update(add_namespace)
         return namespace
 
