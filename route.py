@@ -64,6 +64,7 @@ import handler.platform.privacy
 import handler.platform.switch
 import handler.platform.radar_demo
 import handler.platform.annual_summarize
+import handler.platform.thirdparty
 
 import handler.qx.app
 import handler.qx.aggregation
@@ -208,7 +209,8 @@ platform_routes = [
     (r'/referral/confirm/?',                         handler.platform.referral.ReferralConfirmHandler,          {"event": "referral_confirm"}),
     (r'/employee/recom/profile/pc/?',                handler.platform.referral.ReferralProfilePcHandler,        {"event": "referal_confirm_pc"}),
     (r'/referral/crucial/info/?',                    handler.platform.referral.ReferralCrucialInfoHandler,      {"event": "referral_crucial_info"}),
-    (r'/referral/contact_result/?',                  handler.platform.referral.ReferralResultHandler,         {"event": "referral_contact_result"}),
+    (r'/referral/contact_result/?',                  handler.platform.referral.ReferralResultHandler,           {"event": "referral_contact_result"}),
+    (r"/joywork",                                    handler.platform.thirdparty.JoywokOauthHandler,            {"event": "joywok_oauth"}),
 
     # 各大公司的自定义配置
     (r"/custom/emailapply/?",                        handler.platform.customize.CustomizeEmailApplyHandler,     {"event": "customize_emailapply"}),
