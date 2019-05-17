@@ -227,6 +227,7 @@ platform_routes = [
     (r"/api/annual/summarize",                       handler.platform.annual_summarize.ApiAnnualSummarizeHandler, {"event": "api_annual_summarize"}),
     (r"/api/annual/summarize/entrance",              handler.platform.annual_summarize.AnnualSummarizeEntranceHandler, {"event": "annual_summarize_entrance"}),
 
+    (r"/api/omniauth/jw/login_code",                 handler.platform.thirdparty.JoywokInfoHandler,             {"event": "joywok_info"}),
     (r"/api/company/visitreq/?",                     handler.platform.companyrelation.CompanyVisitReqHandler,   {"event": "company_visitreq"}),
     (r"/api/company/survey/?",                       handler.platform.companyrelation.CompanySurveyHandler,     {"event": "company_survey"}),
     (r"/api/company/follow/?",                       handler.platform.companyrelation.CompanyFollowHandler,     {"event": "company_follow"}),
