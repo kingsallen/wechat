@@ -638,7 +638,7 @@ class UserPageService(PageService):
     @gen.coroutine
     def get_user_by_joywok_info(self, joywok_user_info, company_id):
         """
-        根据麦当劳APP授权获取的员工信息查找仟寻微信用户，及员工在仟寻系统的认证状态：
+        根据麦当劳APP授权获取的员工信息查找仟寻用户信息：
         :param joywok_user_info:
         :param company_id:
         :return:
@@ -650,7 +650,14 @@ class UserPageService(PageService):
             "mobile": joywok_user_info.bindmobile,
             "company_id": company_id
         })
-        ret = yield self.infra_user_ds.infra_get_user_by_joywok_info(params)
+        # ret = yield self.infra_user_ds.infra_get_user_by_joywok_info(params)
+        ret = ObjectDict({
+            "is_employee": 1,
+            "is_user": 1,
+            "user": {
+                "id": 5388949
+            }
+        })
         return ret
 
     @gen.coroutine
@@ -670,5 +677,5 @@ class UserPageService(PageService):
             "company_id": company_id,
             "cname": joywok_user_info.name
         })
-        ret = yield self.infra_user_ds.infra_get_user_by_joywok_info(params)
+        ret = yield self.infra_user_ds.infra_auto_bind_employee(params)
         return ret

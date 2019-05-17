@@ -9,7 +9,6 @@ POSITION_REFERRAL_LIST = '/position/recom'
 RED_PACKET_CARD = '/mobile/redpack'
 TEAM_PATH = '/company/team/{}'
 COMPANY_TEAM = '/company/team'
-COMPANY = '/company'
 SEARCH_FILITER = '/start'
 CUSTOMIZE_EDX = '/custom/emailapply'
 WECHAT_COMPANY = '/company'
@@ -77,6 +76,10 @@ CAMPAIGN_POSITION_PATH = "/alipaycampaign/{}/company/{}/position"
 RESUME_IMPORT_FAIL = "/resume/import/limit"
 
 ANNUAL_SUMMARIZE = "/annual/summarize"
+
+JOYWOK_HOME_PAGE = ""
+
+JOYWOK_AUTO_AUTH = ""
 
 # ============================ 微信端Path结束 ============================
 
@@ -252,6 +255,10 @@ EXCHANGE = '/api/mall/visit/order'
 IF_PRIVACY_WINDOW = 'user/privacy_record/get'
 AGREE_PRIVACY = 'user/privacy_record/delete'
 INSERT_RECORD = 'user/privacy_record/insert'
+
+# joywok相关接口
+INFRA_GET_USER_BY_JOYWOK_USER_INFO = ""
+INFRA_AUTO_BIND_EMPLOYEE = ""
 # ============================ 基础服务结束 ============================
 
 # 上传助手小程序

@@ -133,6 +133,8 @@ UPLOAD_RECOM_PROFILE = "upload_recom_profile_{}"
 CONFIRM_REFERRAL_MOBILE = "referral_mobile_{}_{}"
 # 模板消息推送完成事件msgid
 TEMPLATE_JOB_SEND_FINISH_MSGID = "template_message_receipt_id"
+# joywok绑定授权验证码
+JOYWOK_IDENTIFY_CODE = "joywok_identify_{}"
 
 # ++++++++++业务常量+++++++++++
 # Cookie name

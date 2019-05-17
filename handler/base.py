@@ -124,6 +124,9 @@ class BaseHandler(MetaBaseHandler):
 
         # 获取神策设备ID
         self._get_sc_cookie_id()
+        # 添加joywok js config等环境变量
+        yield self._get_client_env_config()
+
         if self.in_wechat:
             # 用户同意授权
             if code and self._verify_code(code):
@@ -160,20 +163,6 @@ class BaseHandler(MetaBaseHandler):
             elif state:  # 用户拒绝授权
                 # TODO 拒绝授权用户，是否让其继续操作? or return
                 pass
-        elif self._client_env == const.CLIENT_JOYWOK:
-            res = yield self.joywok_ps.get_joywok_info(appid=const.ENV_ARGS.get(self._client_env),
-                                                       method=const.JMIS_SIGNATURE)
-            client_env = ObjectDict({
-                "name": self._client_env,
-                "args": ObjectDict({
-                    "appid": res.app_id,
-                    "signature": res.signature,
-                    "timestamp": res.timestamp,
-                    "nonceStr": res.nonce,
-                    "corpid": res.corp_id,
-                    "redirect_url": res.redirect_url})
-            })
-            self.namespace = {"client_env": client_env}
         else:
             # pc端授权
             if code and self._verify_code(code):
@@ -291,6 +280,23 @@ class BaseHandler(MetaBaseHandler):
         if not self._authable(self._wechat.type):
             # 该企业号是订阅号 则无法获得当前 wxuser 信息, 无需静默授权
             self._wxuser = ObjectDict()
+
+    @gen.coroutine
+    def _get_client_env_config(self):
+        if self._client_env == const.CLIENT_JOYWOK:
+            res = yield self.joywok_ps.get_joywok_info(appid=const.ENV_ARGS.get(self._client_env),
+                                                       method=const.JMIS_SIGNATURE)
+            client_env = ObjectDict({
+                "name": self._client_env,
+                "args": ObjectDict({
+                    "appid": res.app_id,
+                    "signature": res.signature,
+                    "timestamp": res.timestamp,
+                    "nonceStr": res.nonce,
+                    "corpid": res.corp_id,
+                    "redirect_url": res.redirect_url})
+            })
+            self.namespace = {"client_env": client_env}
 
     @gen.coroutine
     def _handle_ent_openid(self, openid, unionid):
@@ -419,7 +425,8 @@ class BaseHandler(MetaBaseHandler):
                 self.redirect(url)
                 return
             elif self._client_env == const.CLIENT_JOYWOK:
-                yield self._build_joywok_session()
+                url = self.make_url(path.JOYWOK_HOME_PAGE)
+                yield self.redirect(url)
             else:
                 yield self._build_session()
 
@@ -435,11 +442,6 @@ class BaseHandler(MetaBaseHandler):
                 # if self.current_user.sysuser:
                 #     result, profile = yield self.profile_ps.has_profile(self.current_user.sysuser.id)
                 #     self.current_user.has_profile = result
-
-    @gen.coroutine
-    def _build_joywok_session(self):
-        """在joywok环境下，构建用户 session"""
-        pass
 
     @gen.coroutine
     def _build_session(self):

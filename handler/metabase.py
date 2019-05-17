@@ -252,6 +252,7 @@ class MetaBaseHandler(AtomHandler):
             path=path
         )
         namespace.update(add_namespace)
+        namespace.update(self._namespace)
         return namespace
 
     def static_url(self, path, protocol='https'):
