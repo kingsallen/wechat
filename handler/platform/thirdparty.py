@@ -2,6 +2,7 @@
 
 from tornado import gen
 import uuid
+import ast
 
 import conf.common as const
 import conf.path as path
@@ -23,7 +24,7 @@ class JoywokOauthHandler(MetaBaseHandler):
         client_env = ObjectDict({
             "name": self._client_env,
             "args": ObjectDict({
-                "appid": res.app_id,
+                "appid": ast.literal_eval(res.app_id).get("appid"),
                 "signature": res.signature,
                 "timestamp": res.timestamp,
                 "nonceStr": res.nonce,
