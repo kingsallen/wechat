@@ -34,7 +34,7 @@ class JoywokPageService(PageService):
         super().__init__()
 
     @gen.coroutine
-    def get_joywok_info(self,  method, appid=None, code=None):
+    def get_joywok_info(self,  method, appid=None, code=None, headers=None):
         params = ObjectDict()
         if method == const.JMIS_USER_INFO:
             params = ObjectDict({
@@ -46,7 +46,7 @@ class JoywokPageService(PageService):
                 "appid": appid,
                 "method": method
             })
-        ret = yield self.joywok_ds.get_joywok_info(params)
+        ret = yield self.joywok_ds.get_joywok_info(params, headers)
         return ret
 
 
