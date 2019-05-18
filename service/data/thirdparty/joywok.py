@@ -16,6 +16,6 @@ from setting import settings
 class JoywokDataService(DataService):
 
     @gen.coroutine
-    def get_joywok_info(self, params):
-        ret = yield http_get(path.JOYWOK_JMIS_AUTH, jdata=params, infra=False)
+    def get_joywok_info(self, params, headers=None):
+        ret = yield http_get(path.JOYWOK_JMIS_AUTH, jdata=params, infra=False, headers=headers)
         return ret
