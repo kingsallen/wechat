@@ -20,7 +20,7 @@ class JoywokOauthHandler(MetaBaseHandler):
     @gen.coroutine
     def get(self):
         """更新joywok的授权信息，及获取joywok用户信息"""
-        headers = ObjectDict({"refer": self.request.full_url()})
+        headers = ObjectDict({"Referer": self.request.full_url()})
         res = yield self.joywok_ps.get_joywok_info(appid=const.ENV_ARGS.get(self._client_env), method=const.JMIS_SIGNATURE, headers=headers)
         client_env = ObjectDict({
             "name": self._client_env,

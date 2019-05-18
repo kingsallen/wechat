@@ -286,7 +286,7 @@ def _async_http_get(route, jdata=None, timeout=5, method='GET', infra=True, head
 
     http_client = tornado.httpclient.AsyncHTTPClient()
     if headers and isinstance(headers, dict):
-        headers = headers.update({"Content-Type": "application/json"})
+        headers.update({"Content-Type": "application/json"})
     else:
         headers = {"Content-Type": "application/json"}
     response = yield http_client.fetch(
