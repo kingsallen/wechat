@@ -545,7 +545,10 @@ class EventPageService(PageService):
             int_scene_id = re.match(r"(\d+)", msg.EventKey)
             if not int_scene_id:
                 int_scene_id = re.match(r"qrscene_(\d+)", msg.EventKey)
-                str_scene = re.match(r"qrscene_(\w+)_", msg.EventKey)
+                # 处理自定义参数为字符串的临时二维码
+                str_scene = re.match(r"qrscene_([A-Z]+)_", msg.EventKey)
+                if not str_scene:
+                    str_scene = re.match(r"([A-Z]+)_", msg.EventKey)
 
         # 取最新的微信用户信息
         wxuser = yield self.user_wx_user_ds.get_wxuser(conds={
@@ -558,7 +561,7 @@ class EventPageService(PageService):
             int_scene_id = int_scene_id.group(1)
             type = int(bin(int(int_scene_id))[:7], base=2)
             real_user_id = int(bin(int(int_scene_id))[7:], base=2)
-            self.logger.debug('qrcode scene_id is: {}, type is: {}, id is: {}'.format(int_scene_id, type, real_user_id))
+            self.logger.debug('[qrcode] scene_id is: {}, type is: {}, id is: {}'.format(int_scene_id, type, real_user_id))
             """
               type:
               "11000" = 24 pc端用户解绑,
@@ -720,12 +723,22 @@ class EventPageService(PageService):
             elif type == 17:
                 pass
 
-        elif str_scene == const.STR_SCENE_JOYWOK:
-            str_code = re.match(r"qrscene_STRSCENE_(\w{8}(-\w{4}){3}-\w{12})", msg.EventKey)
-            user_ps = UserPageService()
-            joywok_user_info = self.redis.get(const.JOYWOK_IDENTIFY_CODE.format(str_code))
-            if str_code:
-                yield user_ps.auto_bind_employee_by_joywok_info(joywok_user_info, const.MAIDANGLAO_COMPANY_ID, wxuser.sysuser_id)
+        else:
+            """
+            字符类型的自定义参数的格式为{场景值(大写)}_{自定义字符串}，场景值必须为大写英文字母
+            """
+            self.logger.debug("[qrcode] str_scene:{}, str_code{}")
+
+            # joywok对接，对麦当劳用户做自动认证
+            if str_scene == const.STR_SCENE_JOYWOK:
+                str_code = re.match(r"qrscene_[A-Z]+_(\w{8}(-\w{4}){3}-\w{12})", msg.EventKey)
+                str_code = str_code.group(1) if str_code else ""
+                user_ps = UserPageService()
+                joywok_user_info = self.redis.get(const.JOYWOK_IDENTIFY_CODE.format(str_code))
+                if str_code:
+                    res = yield user_ps.auto_bind_employee_by_joywok_info(joywok_user_info, const.MAIDANGLAO_COMPANY_ID, wxuser.sysuser_id)
+                    if res.data is True:
+                        self.redis.delete(const.JOYWOK_IDENTIFY_CODE.format(str_code))
 
         raise gen.Return()
 

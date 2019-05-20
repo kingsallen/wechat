@@ -348,11 +348,13 @@ def get_qrcode_ticket(wechat, scene_id, action_name="QR_SCENE"):
         "expire_seconds": wx.TEMPORARY_QRCODE_EXPIRE,
         "action_name": action_name,
         "action_info": {
-            "scene": {
-                "scene_id": scene_id
-            }
+            "scene": {}
         }
     })
+    if action_name == "QR_SCENE":
+        params.action_info.scene.update(scene_id=scene_id)
+    else:
+        params.action_info.scene.update(scene_str=scene_id)
     ret = yield http_post(wx.WX_CREATE_QRCODE_API % wechat.access_token, params, infra=False)
     if ret and ret.get("ticket"):
         raise gen.Return(ret.get("ticket"))
