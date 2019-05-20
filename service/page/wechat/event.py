@@ -536,13 +536,16 @@ class EventPageService(PageService):
 
         self.logger.info("[_do_weixin_qrcode] wechat:{0}, msg:{1}, is_newbie:{2}".format(wechat, msg, is_newbie))
 
+        # 仅以int类型作为临时二维码的自定义参数可使用场景极为有限，因此增加字符串形式的自定义参数
         # 处理临时二维码，目前主要在 PC 上创建帐号、绑定账号时使用
         int_scene_id = ""
+        str_scene = ""
         if msg.EventKey:
             # 临时二维码处理逻辑, 5位type+27为自定义id
             int_scene_id = re.match(r"(\d+)", msg.EventKey)
             if not int_scene_id:
                 int_scene_id = re.match(r"qrscene_(\d+)", msg.EventKey)
+                str_scene = re.match(r"qrscene_(\w+)_", msg.EventKey)
 
         # 取最新的微信用户信息
         wxuser = yield self.user_wx_user_ds.get_wxuser(conds={
@@ -716,6 +719,13 @@ class EventPageService(PageService):
                 pass
             elif type == 17:
                 pass
+
+        elif str_scene == const.STR_SCENE_JOYWOK:
+            str_code = re.match(r"qrscene_STRSCENE_(\w{8}(-\w{4}){3}-\w{12})", msg.EventKey)
+            user_ps = UserPageService()
+            joywok_user_info = self.redis.get(const.JOYWOK_IDENTIFY_CODE.format(str_code))
+            if str_code:
+                yield user_ps.auto_bind_employee_by_joywok_info(joywok_user_info, const.MAIDANGLAO_COMPANY_ID, wxuser.sysuser_id)
 
         raise gen.Return()
 

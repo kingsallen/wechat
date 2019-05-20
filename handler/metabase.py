@@ -14,6 +14,8 @@ import time
 import ujson
 import urllib.parse
 
+from hashlib import sha1
+
 import tornado.httpclient
 from tornado import web, gen
 
@@ -274,6 +276,23 @@ class MetaBaseHandler(AtomHandler):
             info.update(self.log_info)
 
         self.logger.stats(ujson.dumps(self._get_info_header(info), ensure_ascii=0))
+
+    def make_new_session_id(self, user_id):
+        """创建新的 session_id
+
+        redis 中 session 的 key 的格式为 session_id_<wechat_id>
+        创建的 session_id 保证唯一
+        session_id 目前本身不做持久化，仅仅保存在 redis 中
+        后续是否需要做持久化待讨论
+        :return: session_id
+        """
+        while True:
+            session_id = const.SESSION_ID.format(str(user_id), sha1(os.urandom(24)).hexdigest())
+            record = self.redis.exists(session_id + "_*")
+            if record:
+                continue
+            else:
+                return session_id
 
     def write_error(self, http_code, **kwargs):
         """错误页

@@ -652,10 +652,14 @@ class UserPageService(PageService):
         })
         # ret = yield self.infra_user_ds.infra_get_user_by_joywok_info(params)
         ret = ObjectDict({
-            "is_employee": 1,
-            "is_user": 1,
-            "user": {
-                "id": 5388949
+            "code": "0",
+            "message": "success",
+            "data": {
+                "is_employee": 1,
+                "is_user": 1,
+                "user": {
+                    "id": 5388949
+                }
             }
         })
         return ret

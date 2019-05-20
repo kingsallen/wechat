@@ -283,11 +283,13 @@ class BaseHandler(MetaBaseHandler):
 
     @gen.coroutine
     def _get_client_env_config(self):
+        client_env = ObjectDict({"name": self._client_env})
         if self._client_env == const.CLIENT_JOYWOK:
+            headers = ObjectDict({"Referer": self.request.full_url()})
             res = yield self.joywok_ps.get_joywok_info(appid=const.ENV_ARGS.get(self._client_env),
-                                                       method=const.JMIS_SIGNATURE)
-            client_env = ObjectDict({
-                "name": self._client_env,
+                                                       method=const.JMIS_SIGNATURE,
+                                                       headers=headers)
+            client_env.update({
                 "args": ObjectDict({
                     "appid": res.app_id,
                     "signature": res.signature,
@@ -296,7 +298,7 @@ class BaseHandler(MetaBaseHandler):
                     "corpid": res.corp_id,
                     "redirect_url": res.redirect_url})
             })
-            self.namespace = {"client_env": client_env}
+        self.namespace = {"client_env": client_env}
 
     @gen.coroutine
     def _handle_ent_openid(self, openid, unionid):

@@ -1,15 +1,16 @@
 # coding=utf-8
 
-from tornado import gen
 import uuid
 import ast
+
+from tornado import gen
 
 import conf.common as const
 import conf.path as path
 
 from handler.base import BaseHandler
 from handler.metabase import MetaBaseHandler
-from util.common.decorator import handle_response, check_env
+from util.common.decorator import handle_response, check_env, authenticated
 from util.tool.dict_tool import ObjectDict
 
 
@@ -52,7 +53,7 @@ class JoywokInfoHandler(MetaBaseHandler):
             "company_id": const.MAIDANGLAO_COMPANY_ID
         })
         if ret.data.is_employee == const.YES:
-            session_id = self._make_new_session_id(ret.data.user.id)
+            session_id = self.make_new_session_id(ret.data.sysuser_id)
             self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True)
             self.params.update(wechat_signature=wechat.signature)
             next_url = self.make_url(path.POSITION_LIST,
@@ -76,8 +77,8 @@ class JoywokInfoHandler(MetaBaseHandler):
 class JoywokAutoAuthHandler(BaseHandler):
 
     @handle_response
-    @check_env(3)
+    @authenticated
     @gen.coroutine
     def get(self):
         """joywok转发到微信端的关注提示页"""
-        pass
+        self.render_page(template_name="", data=ObjectDict())

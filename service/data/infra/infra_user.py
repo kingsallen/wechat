@@ -7,8 +7,10 @@ import conf.path as path
 import conf.alphacloud_api as api
 from service.data.base import DataService
 from util.common import ObjectDict
-from util.tool.http_tool import http_get, http_post, http_put, unboxing, http_get_rp
+from util.tool.http_tool import http_get, http_post, http_put, unboxing, http_get_rp, http_get_v2
 from util.common.decorator import log_time
+from conf.newinfra_service_conf.service_info import user_service
+from conf.newinfra_service_conf.user import user
 
 
 class InfraUserDataService(DataService):
@@ -388,7 +390,7 @@ class InfraUserDataService(DataService):
         :param params:
         :return:
         """
-        ret = yield http_get(path.INFRA_GET_USER_BY_JOYWOK_USER_INFO, params)
+        ret = yield http_get_v2(user.INFRA_GET_USER_BY_JOYWOK_USER_INFO, user_service, params)
         return ret
 
     @gen.coroutine
