@@ -52,7 +52,7 @@ class JoywokInfoHandler(MetaBaseHandler):
         wechat = yield self.wechat_ps.get_wechat(conds={
             "company_id": const.MAIDANGLAO_COMPANY_ID
         })
-        if ret.data.is_employee == const.YES:
+        if ret.data:
             session_id = self.make_new_session_id(ret.data.sysuser_id)
             self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True)
             self.params.update(wechat_signature=wechat.signature)
