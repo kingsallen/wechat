@@ -77,7 +77,7 @@ RESUME_IMPORT_FAIL = "/resume/import/limit"
 
 ANNUAL_SUMMARIZE = "/annual/summarize"
 
-JOYWOK_HOME_PAGE = ""
+JOYWOK_HOME_PAGE = "/joyword"
 
 JOYWOK_AUTO_AUTH = ""
 
