@@ -418,6 +418,9 @@ class BaseHandler(MetaBaseHandler):
 
         else:
             need_oauth = True
+            if self._client_env == const.CLIENT_JOYWOK:
+                url = self.make_url(path.JOYWOK_HOME_PAGE)
+                yield self.redirect(url)
 
         if need_oauth:
             if self.in_wechat and not self._unionid:
@@ -426,9 +429,6 @@ class BaseHandler(MetaBaseHandler):
                 url = self._oauth_service.get_oauth_code_userinfo_url()
                 self.redirect(url)
                 return
-            elif self._client_env == const.CLIENT_JOYWOK:
-                url = self.make_url(path.JOYWOK_HOME_PAGE)
-                yield self.redirect(url)
             else:
                 yield self._build_session()
 

@@ -66,12 +66,6 @@ class JoywokOauthHandler(MetaBaseHandler):
             "_get_joywok_session_by_wechat_id redis wechat_id:{} session: {}, key: {}".format(
                 wechat_id, value, key))
         if value:
-            # 如果有 value， 返回该 value 作为 self.current_user
-            session = ObjectDict(value)
-            self._unionid = session.qxuser.unionid
-            self._wxuser = session.wxuser
-            self._qxuser = session.qxuser
-            yield self._build_session_by_unionid(self._unionid)
             raise gen.Return(True)
 
         raise gen.Return(False)
