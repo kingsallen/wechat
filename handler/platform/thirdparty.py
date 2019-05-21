@@ -43,7 +43,8 @@ class JoywokOauthHandler(MetaBaseHandler):
                 "redirect_url": res.redirect_url
             })
         })
-        self.namespace = {"client_env": client_env}
+        self.namespace = {"client_env": client_env,
+                          "params": self.params}
         self.render_page("joywok/entry.html", data=ObjectDict())
 
     @gen.coroutine
@@ -98,7 +99,7 @@ class JoywokInfoHandler(MetaBaseHandler):
         else:
             identify_code = str(uuid.uuid4())
             self.redis.set(const.JOYWOK_IDENTIFY_CODE.format(identify_code), joywok_user_info, ttl=60*60*24*7)
-            url = self.make_url(path.JOYWOK_AUTO_AUTH, host=self.host, str_code=identify_code)
+            url = self.make_url(path.JOYWOK_AUTO_AUTH, host=self.host, str_code=identify_code, wechat_signature=wechat.signature)
             self.send_json_success(data={
                 "share": ObjectDict({
                     "title": const.PAGE_JOYWOK_AUTO_BIND,
