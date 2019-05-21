@@ -51,7 +51,7 @@ class WechatPageService(PageService):
         获取公众号相关信息
         """
         wechat = ObjectDict()
-        wechat.subscribed = True if current_user.wxuser.is_subscribe or current_user.wechat.type == 0 or not in_wechat else False
+        wechat.subscribed = True if not in_wechat or current_user.wechat.type == 0 or current_user.wxuser.is_subscribe else False
         wechat.qrcode = yield get_temporary_qrcode(wechat=current_user.wechat,
                                                    scene_id=scene_id, action_name=action_name)
         wechat.name = current_user.wechat.name

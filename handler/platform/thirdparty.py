@@ -101,7 +101,7 @@ class JoywokInfoHandler(MetaBaseHandler):
             url = self.make_url(path.JOYWOK_AUTO_AUTH, host=self.host, str_code=identify_code)
             self.send_json_success(data={
                 "share": ObjectDict({
-                    "title": "",
+                    "title": const.PAGE_JOYWOK_AUTO_BIND,
                     "url": url,
                 })
             })
@@ -114,4 +114,4 @@ class JoywokAutoAuthHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         """joywok转发到微信端的关注提示页"""
-        self.render_page(template_name="", data=ObjectDict())
+        self.render_page(template_name="joywok/forward-weixin.html", data=ObjectDict())

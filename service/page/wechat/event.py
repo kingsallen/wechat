@@ -735,10 +735,17 @@ class EventPageService(PageService):
                 self.logger.debug("[qrcode] str_scene:{}, str_code{}".format(str_scene, str_code))
                 user_ps = UserPageService()
                 joywok_user_info = self.redis.get(const.JOYWOK_IDENTIFY_CODE.format(str_code))
-                if str_code:
+                if not joywok_user_info:
+                    send_succession_message(wechat=wechat, open_id=msg.FromUserName,
+                                            message=message.JOYWOK_AUTO_BIND_EMPLOYEE_INFO_IS_GONE)
+                if str_code and joywok_user_info:
                     res = yield user_ps.auto_bind_employee_by_joywok_info(joywok_user_info, const.MAIDANGLAO_COMPANY_ID, wxuser.sysuser_id)
                     if res.data is True:
                         self.redis.delete(const.JOYWOK_IDENTIFY_CODE.format(str_code))
+                        send_succession_message(wechat=wechat, open_id=msg.FromUserName, message=message.JOYWOK_AUTO_BIND_SUCCESS)
+                    else:
+                        self.logger.warning("[joywok auto bind fail] message: {}".format(res.message))
+                        send_succession_message(wechat=wechat, open_id=msg.FromUserName, message=message.JOYWOK_AUTO_BIND_FAIL)
 
         raise gen.Return()
 

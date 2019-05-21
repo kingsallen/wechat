@@ -4,6 +4,7 @@ import os
 import time
 import json
 import traceback
+import ast
 from hashlib import sha1
 from urllib.parse import unquote
 
@@ -291,7 +292,7 @@ class BaseHandler(MetaBaseHandler):
                                                        headers=headers)
             client_env.update({
                 "args": ObjectDict({
-                    "appid": res.app_id,
+                    "appid": ast.literal_eval(res.app_id).get("appid"),
                     "signature": res.signature,
                     "timestamp": res.timestamp,
                     "nonceStr": res.nonce,

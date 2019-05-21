@@ -364,7 +364,7 @@ def get_qrcode_ticket(wechat, scene_id, action_name="QR_SCENE"):
 
 
 @gen.coroutine
-def send_succession_message(wechat, open_id, pattern_id, position_id=0):
+def send_succession_message(wechat, open_id, pattern_id=99, position_id=0, message=None):
     """
     发送接续流程的信息给用户
     :param wechat:
@@ -417,6 +417,8 @@ def send_succession_message(wechat, open_id, pattern_id, position_id=0):
         content = '您刚刚正在浏览职位，点击查阅<a href="{}">职位详情</a>'.format(url)
     else:
         content = "欢迎关注：{}, 点击菜单栏发现更多精彩~".format(wechat.get("name"))
+    if message:
+        content = message
     jdata = ObjectDict({
         "touser": open_id,
         "msgtype": "text",

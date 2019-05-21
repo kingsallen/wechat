@@ -79,7 +79,7 @@ ANNUAL_SUMMARIZE = "/annual/summarize"
 
 JOYWOK_HOME_PAGE = "/joywork"
 
-JOYWOK_AUTO_AUTH = ""
+JOYWOK_AUTO_AUTH = "/thirdparty/automatic/auth"
 
 # ============================ 微信端Path结束 ============================
 
