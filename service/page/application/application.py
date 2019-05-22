@@ -590,7 +590,7 @@ class ApplicationPageService(PageService):
 
         if recommender_user_id and params.origin:
             origin = const.INVITE_ORIGIN
-        elif recommender_user_id and params.forward_id and not params.origin:
+        elif recommender_user_id and not params.origin:
             origin = const.FORWARD_ORIGIN
         else:
             origin = 2 if is_platform else 4
