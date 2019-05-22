@@ -733,14 +733,17 @@ class EventPageService(PageService):
                 raise gen.Return()
 
             # joywok对接，对麦当劳用户做自动认证
+            # 获取str_code
             if str_scene == const.STR_SCENE_JOYWOK:
                 str_code = re.match(r"qrscene_[A-Z]+_(\w{8}(-\w{4}){3}-\w{12})", msg.EventKey)
                 if not str_code:
                     str_code = re.match(r"[A-Z]+_(\w{8}(-\w{4}){3}-\w{12})", msg.EventKey)
                 str_code = str_code.group(1) if str_code else ""
                 self.logger.debug("[qrcode joywok] str_scene: {}, str_code: {}".format(str_scene, str_code))
+
                 user_ps = UserPageService()
                 joywok_user_info = self.redis.get(const.JOYWOK_IDENTIFY_CODE.format(str_code))
+
                 if not joywok_user_info:
                     send_succession_message(wechat=wechat, open_id=msg.FromUserName,
                                             message=message.JOYWOK_AUTO_BIND_EMPLOYEE_INFO_IS_GONE)

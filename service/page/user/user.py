@@ -650,13 +650,7 @@ class UserPageService(PageService):
             "mobile": joywok_user_info.bindmobile,
             "company_id": company_id
         })
-        # ret = yield self.infra_user_ds.infra_get_user_by_joywok_info(params)
-        ret = ObjectDict({
-            "code": "1",
-            "message": "fail",
-            "data": {
-            }
-        })
+        ret = yield self.infra_user_ds.infra_get_user_by_joywok_info(params)
         return ret
 
     @gen.coroutine
@@ -676,10 +670,5 @@ class UserPageService(PageService):
             "company_id": company_id,
             "cname": joywok_user_info.name
         })
-        # ret = yield self.infra_user_ds.infra_auto_bind_employee(params)
-        ret = ObjectDict({
-            "status": 0,
-            "message": "success",
-            "data": True
-        })
+        ret = yield self.infra_user_ds.infra_auto_bind_employee(params)
         return ret

@@ -257,7 +257,7 @@ AGREE_PRIVACY = 'user/privacy_record/delete'
 INSERT_RECORD = 'user/privacy_record/insert'
 
 # joywok相关接口
-INFRA_AUTO_BIND_EMPLOYEE = ""
+INFRA_AUTO_BIND_EMPLOYEE = "mcdUser/bindUser"
 # ============================ 基础服务结束 ============================
 
 # 上传助手小程序

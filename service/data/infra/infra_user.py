@@ -386,7 +386,7 @@ class InfraUserDataService(DataService):
     @gen.coroutine
     def infra_get_user_by_joywok_info(self, params):
         """
-        根据麦当劳APP授权获取的员工信息查找仟寻微信用户，及员工在仟寻系统的认证状态：
+        根据麦当劳APP授权获取的员工信息查找仟寻微信用户，及员工在仟寻系统的认证状态:
         :param params:
         :return:
         """
@@ -396,7 +396,7 @@ class InfraUserDataService(DataService):
     @gen.coroutine
     def infra_auto_bind_employee(self, params):
         """
-        根据麦当劳APP授权获取的员工信息查找仟寻微信用户，及员工在仟寻系统的认证状态：
+        对joywok的用户做自动认证:
         :param params:
         :return:
         """
