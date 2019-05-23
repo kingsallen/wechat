@@ -739,11 +739,10 @@ class EventPageService(PageService):
                 if not str_code:
                     str_code = re.match(r"[A-Z]+_(\w{8}(-\w{4}){3}-\w{12})", msg.EventKey)
                 str_code = str_code.group(1) if str_code else ""
-                self.logger.debug("[qrcode joywok] str_scene: {}, str_code: {}".format(str_scene, str_code))
 
                 user_ps = UserPageService()
                 joywok_user_info = self.redis.get(const.JOYWOK_IDENTIFY_CODE.format(str_code))
-
+                self.logger.debug("[qrcode joywok] str_scene: {}, str_code: {}, joywok_user_info: {}".format(str_scene, str_code, joywok_user_info))
                 messages = message.JOYWOK_AUTO_BIND_FAIL
                 if not joywok_user_info:
                     messages = message.JOYWOK_AUTO_BIND_EMPLOYEE_INFO_IS_GONE
