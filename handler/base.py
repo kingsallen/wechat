@@ -182,6 +182,9 @@ class BaseHandler(MetaBaseHandler):
         # 构造并拼装 session
         yield self._fetch_session()
 
+        # joywok取消员工身份时，清除session，重新认证
+        yield self._update_joywok_employee_session()
+
         # 设置神策用户属性
         if self.current_user.employee:
             user_role = 1
@@ -281,6 +284,13 @@ class BaseHandler(MetaBaseHandler):
         if not self._authable(self._wechat.type):
             # 该企业号是订阅号 则无法获得当前 wxuser 信息, 无需静默授权
             self._wxuser = ObjectDict()
+
+    @gen.coroutine
+    def _update_joywok_employee_session(self):
+        if self._client_env == const.CLIENT_JOYWOK and not self.current_user.employee:
+            self._pass_session.clear_session(self._session_id, self._wechat.id)
+            url = self.make_url(path.JOYWOK_HOME_PAGE)
+            yield self.redirect(url)
 
     @gen.coroutine
     def _get_client_env_config(self):
