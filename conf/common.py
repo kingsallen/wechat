@@ -157,6 +157,10 @@ API_WARNING = 2
 INVITE_ORIGIN = 524288  # 邀请投递申请
 FORWARD_ORIGIN = 1048576  # 员工转发申请
 
+# newinfra api status
+NEWINFRA_API_SUCCESS = '0'
+NEWINFRA_API_USER_NOT_EXIST = 'US20000'
+
 # 通用状态的布尔值
 YES = 1
 NO = 0
