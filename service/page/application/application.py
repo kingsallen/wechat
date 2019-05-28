@@ -440,9 +440,9 @@ class ApplicationPageService(PageService):
         recommender_user_id, recommender_wxuser_id, recom_employee, depth = yield self.get_recommend_user(
             current_user, position, is_platform)
 
-        if source == const.REHIRING_SOURCE:
-            origin = const.REHIRING_ORIGIN
-        elif current_user.employee and current_user.company.id in [524798]:
+        # if source == const.REHIRING_SOURCE:
+        #     origin = const.REHIRING_ORIGIN
+        if current_user.employee and current_user.company.id in const.TRANSFER_COMPANY_ID:
             origin = const.TRANSFER_ORIGIN
         elif recommender_user_id and params.origin:
             origin = const.INVITE_ORIGIN
@@ -593,9 +593,9 @@ class ApplicationPageService(PageService):
         else:
             recommender_user_id, recommender_wxuser_id, recom_employee = 0, 0, None
 
-        if source == const.REHIRING_SOURCE:
-            origin = const.REHIRING_ORIGIN
-        elif current_user.employee and current_user.company.id in [524798]:
+        # if source == const.REHIRING_SOURCE:
+        #     origin = const.REHIRING_ORIGIN
+        if current_user.employee and current_user.company.id in const.TRANSFER_COMPANY_ID:
             origin = const.TRANSFER_ORIGIN
         elif recommender_user_id and params.origin:
             origin = const.INVITE_ORIGIN
