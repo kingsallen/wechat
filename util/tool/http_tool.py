@@ -303,7 +303,7 @@ def _async_http_get(route, jdata=None, timeout=5, method='GET', infra=True):
 
 
 @gen.coroutine
-def _async_http_post(route, jdata=None, timeout=5, method='POST', infra=True, headers=None):
+def _async_http_post(route, jdata=None, timeout=5, method='POST', infra=True):
     """可用 HTTP 动词为 POST, PATCH 和 PUT"""
     if method.lower() not in "post put patch":
         raise ValueError("method is not in POST, PUT and PATCH")
@@ -318,16 +318,13 @@ def _async_http_post(route, jdata=None, timeout=5, method='POST', infra=True, he
         url = route
 
     http_client = tornado.httpclient.AsyncHTTPClient()
-    if headers and isinstance(headers, dict):
-        headers.update({"Content-Type": "application/json"})
-    else:
-        headers = {"Content-Type": "application/json"}
+
     response = yield http_client.fetch(
         url,
         method=method.upper(),
         body=ujson.encode(jdata),
         request_timeout=timeout,
-        headers=HTTPHeaders(headers)
+        headers=HTTPHeaders({"Content-Type": "application/json"})
     )
 
     logger.debug(
