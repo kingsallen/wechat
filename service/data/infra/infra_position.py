@@ -9,9 +9,11 @@ from service.data.base import DataService
 from service.data.infra.framework.client.client import ServiceClientFactory
 from thrift_gen.gen.position.service.PositionServices import Client as PositionServiceClient
 from util.common import ObjectDict
-from util.tool.http_tool import http_get, http_post, http_patch, http_get_rp
+from util.tool.http_tool import http_get, http_post, http_patch, http_get_rp, http_get_v2
 from util.tool import http_tool
 from util.common.decorator import cache_new
+from conf.newinfra_service_conf.service_info import position_service
+from conf.newinfra_service_conf.position import position
 
 
 class InfraPositionDataService(DataService):
@@ -22,13 +24,15 @@ class InfraPositionDataService(DataService):
     @gen.coroutine
     def get_position_list(self, params):
         """普通职位列表"""
-        ret = yield http_get(path.INFRA_POSITION_LIST, params, timeout=7)
+        # ret = yield http_get(path.INFRA_POSITION_LIST, params, timeout=7)
+        ret = yield http_get_v2(position.POSITION_LIST, position_service, params, timeout=7)
         return ret
 
     @gen.coroutine
     def get_referral_position_list(self, params):
         """内推职位列表"""
-        ret = yield http_get(path.REFERRAL_POSITION_LIST, params)
+        # ret = yield http_get(path.REFERRAL_POSITION_LIST, params)
+        ret = yield http_get_v2(position.REFERRAL_POSITION_LIST, position_service, params)
         return ret
 
     @gen.coroutine

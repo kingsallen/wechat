@@ -377,7 +377,7 @@ class PositionPageService(PageService):
         # get team names
         team_name_dict = yield self.get_teamid_names_dict(params.company_id)
 
-        if res.status == 0:
+        if res.code == const.NEWINFRA_API_SUCCESS:
             position_list = [ObjectDict(e) for e in res.data]
             pids = [e.id for e in position_list]
             pid_teamid_dict = yield self.get_pid_teamid_dict(params.company_id, pids)
