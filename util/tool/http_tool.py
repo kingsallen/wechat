@@ -102,9 +102,9 @@ def http_get(route, jdata=None, timeout=30, infra=True):
 
 
 @gen.coroutine
-def http_delete(route, jdata=None, timeout=30, infra=True, headers=None):
+def http_delete(route, jdata=None, timeout=30, infra=True):
     ret = yield _async_http_get(route, jdata, timeout=timeout, method='DELETE',
-                                infra=infra, headers=headers)
+                                infra=infra)
     return ret
 
 

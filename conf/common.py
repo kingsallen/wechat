@@ -153,13 +153,13 @@ API_SUCCESS = 0
 API_FAILURE = 1
 API_WARNING = 2
 
-# 入库的申请来源
-INVITE_ORIGIN = 524288  # 邀请投递申请
-FORWARD_ORIGIN = 1048576  # 员工转发申请
-
 # newinfra api status
 NEWINFRA_API_SUCCESS = '0'
 NEWINFRA_API_USER_NOT_EXIST = 'US20000'
+
+# 入库的申请来源
+INVITE_ORIGIN = 524288  # 邀请投递申请
+FORWARD_ORIGIN = 1048576  # 员工转发申请
 
 # 通用状态的布尔值
 YES = 1
