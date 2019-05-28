@@ -2,7 +2,10 @@
 
 import os
 import time
+import json
+import traceback
 from hashlib import sha1
+from urllib.parse import unquote
 
 from tornado import gen, locale
 
@@ -19,6 +22,7 @@ from util.common.decorator import check_signature
 from util.tool.str_tool import to_str, from_hex, match_session_id, \
     languge_code_from_ua
 from util.tool.url_tool import url_subtract_query, make_url
+from util.tool.date_tool import curr_now
 
 
 class NoSignatureError(Exception):
@@ -47,6 +51,7 @@ class BaseHandler(MetaBaseHandler):
         # 处理 oauth 的 service, 会在使用时初始化
         self._oauth_service = None
         self._pass_session = None
+        self._sc_cookie_id = None  # 神策设备ID
 
     @property
     def component_access_token(self):
@@ -111,7 +116,14 @@ class BaseHandler(MetaBaseHandler):
         self.logger.debug(
             "[prepare]code:{}, state:{}, request_url:{} ".format(
                 code, state, self.request.uri))
+        # 预设神策分析全局属性
+        conds = {'id': self._wechat.company_id}
+        company = yield self.company_ps.get_company(conds=conds, need_conf=True)
+        self.sa.register_super_properties(ObjectDict({"companyId": company.id,
+                                                      "companyName": company.abbreviation}))
 
+        # 获取神策设备ID
+        self._get_sc_cookie_id()
         if self.in_wechat:
             # 用户同意授权
             if code and self._verify_code(code):
@@ -165,6 +177,25 @@ class BaseHandler(MetaBaseHandler):
 
         # 构造并拼装 session
         yield self._fetch_session()
+
+        # 设置神策用户属性
+        if self.current_user.employee:
+            user_role = 1
+            company_id = self.current_user.company.id
+            company_name = self.current_user.company.abbreviation
+        else:
+            user_role = 0
+            company_id = 0
+            company_name = ''
+        _, profile = yield self.profile_ps.has_profile(self.current_user.sysuser.id if self.current_user.sysuser else 0)
+        profiles = {
+            'user_role': user_role,
+            'sysuser_id': self.current_user.sysuser.id if self.current_user.sysuser else self._sc_cookie_id,
+            'company_id': company_id,
+            'company_name': company_name,
+            'ProfileCompleteness': profile.basic.completeness if profile and profile.basic else 0
+        }
+        self.profile_set(profiles=profiles)
 
         # 构造 access_time cookie
         self._set_access_time_cookie()
@@ -222,6 +253,21 @@ class BaseHandler(MetaBaseHandler):
 
         self.logger.debug("[_handle_user_info]user_id: {}".format(user_id))
 
+        user = yield self.user_ps.get_user_user({
+            "unionid":  userinfo.unionid,
+            "parentid": 0  # 保证查找正常的 user record
+        })
+
+        # 神策数据关联：如果用户已绑定手机号，对用户做注册
+        if bool(user.username.isdigit()):
+            self.logger.debug("[sensors_signup_oauth]ret_user_id: {}, origin_user_id: {}".format(user_id,
+                                                                                                 self._sc_cookie_id))
+            self.sa.track_signup(user_id, self._sc_cookie_id or user_id)
+
+        self.track('cWxAuth', properties={'origin': source}, distinct_id=user_id, is_login_id=True if bool(user.username.isdigit()) else False)
+        # 设置用户首次授权时间
+        self.profile_set(profiles={'first_oauth_time': user.register_time}, distinct_id=user_id, is_login_id=True, once=True)
+
         # 创建 qx 的 user_wx_user
         yield self.user_ps.create_qx_wxuser_by_userinfo(userinfo, user_id)
 
@@ -247,7 +293,7 @@ class BaseHandler(MetaBaseHandler):
         # todo(niuzhenya@moseeker.com) 此处更新没有将所有wxuser的wxinfo都做更新，原因：wxuser的info没有展示的地方，展示目前都用的是user_user的info;
         # todo 过多的冗余字段，可以考虑在后期将数据库的结构优化
         yield self.user_ps.update_user_wx_info(unionid, userinfo)
-        yield self.user_ps.update_wxuser_wx_info(unionid, userinfo)
+        # yield self.user_ps.update_wxuser_wx_info(unionid, userinfo)
 
     def _authable(self, wechat_type):
         """返回当前公众号是否可以 OAuth
@@ -455,6 +501,7 @@ class BaseHandler(MetaBaseHandler):
                 self._session_id, session, self._wechat.id)
 
         yield self._add_sysuser_to_session(session, self._session_id)
+        session.sc_cookie_id = self._sc_cookie_id
 
         session.wechat = self._wechat
         self._add_jsapi_to_wechat(session.wechat)
@@ -543,6 +590,14 @@ class BaseHandler(MetaBaseHandler):
                 unionid=sysuser.unionid, wechat_id=self.settings['qx_wechat_id'])
 
         session.sysuser = sysuser
+
+    def _get_sc_cookie_id(self):
+        """获取神策设备ID"""
+        sc_cookie_name = const.SENSORS_COOKIE
+        sc_cookie = unquote(self.get_cookie(sc_cookie_name) or '{}')
+        self.logger.debug("sc_cookie: {}".format(sc_cookie))
+        sc_cookie = ObjectDict(json.loads(sc_cookie))
+        self._sc_cookie_id = sc_cookie.distinct_id
 
     def _add_jsapi_to_wechat(self, wechat):
         """拼装 jsapi"""
@@ -673,6 +728,60 @@ class BaseHandler(MetaBaseHandler):
 
             lang = lang_from_ua or settings['default_locale']
             return locale.get(lang)
+
+    def track(self, event, properties=None, distinct_id=0, is_login_id=False):
+        """神策埋点"""
+        try:
+            if not properties:
+                properties = ObjectDict()
+            distinct_id, is_login_id = self._get_distinct_id_and_is_login_id(distinct_id, is_login_id)
+            if distinct_id:
+                properties.update(reqTime=curr_now(),
+                                  isEmployee=bool(self.current_user.employee if self.current_user else None),
+                                  sendTime=self.params.send_time if self.params else None)
+                self.logger.debug('[sensors_track] distinct_id:{}, event_name: {}, properties: {}, is_login_id: {}'.format(
+                    distinct_id, event, properties, is_login_id))
+                self.sa.track(distinct_id=distinct_id,
+                              event_name=event,
+                              properties=properties,
+                              is_login_id=is_login_id)
+            else:
+                self.logger.debug('[sensors_no_user_id] event_name: {}, properties: {}'.format(event, properties))
+        except Exception as e:
+            self.logger.error('[sensors_track_exception] distinct_id: {}, event_name: {}, properties: {}, is_login_id: {}, error_track: {}'.format(
+                self.current_user.sysuser.id or self.current_user.sc_cookie_id, event, properties, True if self.current_user.sysuser.id else False,
+                traceback.format_exc()))
+
+    def profile_set(self, profiles, distinct_id=0, is_login_id=False, once=False):
+        """设置用户属性"""
+        try:
+            distinct_id, is_login_id = self._get_distinct_id_and_is_login_id(distinct_id, is_login_id)
+            if distinct_id:
+                self.logger.debug('[sensors_profile_set] distinct_id:{}, profiles: {}, is_login_id: {}'.format(
+                    distinct_id, profiles, is_login_id))
+                if once:
+                    self.sa.profile_set_once(distinct_id=distinct_id,
+                                             profiles=profiles,
+                                             is_login_id=is_login_id)
+                else:
+                    self.sa.profile_set(distinct_id=distinct_id,
+                                        profiles=profiles,
+                                        is_login_id=is_login_id)
+            else:
+                self.logger.debug('[profile_set_sensors_no_user_id] profiles: {}'.format(profiles))
+        except Exception as e:
+            self.logger.error('[sensors_profile_set_exception] distinct_id: {}, profiles: {}, is_login_id: {}, error_track: {}'.format(
+                self.current_user.sysuser.id or self.current_user.sc_cookie_id, profiles, True if self.current_user.sysuser.id else False,
+                traceback.format_exc()))
+
+    def _get_distinct_id_and_is_login_id(self, distinct_id=0, is_login_id=False):
+        if distinct_id:
+            is_login_id = is_login_id
+        elif self.current_user.sysuser:
+            is_login_id = True if self.current_user.sysuser.mobileverified else False
+        distinct_id = distinct_id or (
+            self.current_user.sysuser.id if self.current_user.sysuser else 0) or self.current_user.sc_cookie_id or 0
+        return distinct_id, is_login_id
 
     def get_current_locale(self):
         """如果公司设置了语言，以公司设置为准，

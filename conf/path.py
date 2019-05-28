@@ -9,6 +9,7 @@ POSITION_REFERRAL_LIST = '/position/recom'
 RED_PACKET_CARD = '/mobile/redpack'
 TEAM_PATH = '/company/team/{}'
 COMPANY_TEAM = '/company/team'
+COMPANY = '/company'
 SEARCH_FILITER = '/start'
 CUSTOMIZE_EDX = '/custom/emailapply'
 WECHAT_COMPANY = '/company'
@@ -252,6 +253,11 @@ IF_PRIVACY_WINDOW = 'user/privacy_record/get'
 AGREE_PRIVACY = 'user/privacy_record/delete'
 INSERT_RECORD = 'user/privacy_record/insert'
 # ============================ 基础服务结束 ============================
+
+# 上传助手小程序
+RESUME_UPLOAD_COMPLETE = 'v1.2/resuem/upload/complete'
+UPLOAD_MINIAPP_ACCESSTOKEN = 'v1.2/accesstoken'
+REFERRAL_UPLOAD_RESUME_INFO = 'v1.2/referral/upload/candidate/info'
 
 # 其他外部服务
 LINKEDIN_ACCESSTOKEN = "https://www.linkedin.com/oauth/v2/accessToken"

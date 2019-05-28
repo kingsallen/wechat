@@ -5,7 +5,7 @@
 from tornado import gen
 from service.page.base import PageService
 from util.common import ObjectDict
-from util.wechat.core import get_temporary_qrcode
+from util.wechat.core import get_temporary_qrcode, get_miniapp_code
 import conf.common as const
 
 
@@ -56,3 +56,19 @@ class WechatPageService(PageService):
                                                    scene_id=scene_id)
         wechat.name = current_user.wechat.name
         return wechat
+
+    @gen.coroutine
+    def get_miniapp_code(self, scene_id):
+        """
+        获取小程序码
+        :param scene_id:
+        :return:
+        """
+        params = {
+            "appid": self.settings['upload_resume_miniapp_appid'],
+            "appSecret": self.settings['upload_resume_miniapp_app_secret'],
+        }
+        res = yield self.infra_profile_ds.infra_upload_miniapp_access(params)
+        access_token = res.data.access_token
+        buffer = yield get_miniapp_code(scene_id, access_token)
+        return buffer

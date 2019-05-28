@@ -4,7 +4,7 @@ import re
 from datetime import datetime
 
 import tornado.gen as gen
-from tornado.escape import json_decode
+from tornado.escape import json_decode, json_encode
 
 import conf.common as const
 import conf.infra as infra_const
@@ -13,6 +13,7 @@ from util.common import ObjectDict
 from util.tool.dict_tool import sub_dict, rename_keys
 from util.tool.iter_tool import first
 from globals import env
+from conf.locale_dict import CITY, CITY_REVERSE, INDUSTRY, INDUSTRY_REVERSE
 
 
 class ProfilePageService(PageService):
@@ -97,7 +98,7 @@ class ProfilePageService(PageService):
     })
 
     @gen.coroutine
-    def has_profile(self, user_id):
+    def has_profile(self, user_id, locale=None, locale_display=None):
         """
         判断 user_user 是否有 profile (profile_profile 表数据)
         :param user_id:
@@ -108,7 +109,38 @@ class ProfilePageService(PageService):
         """
 
         result, profile = yield self.infra_profile_ds.get_profile(user_id)
+        if locale:
+            profile = self.__translate_profile(profile, locale, locale_display)
         return result, profile
+
+    def __translate_profile(self, profile, locale=None, locale_display=None):
+        others = profile.others
+        if others and others[0]:
+            other = others[0].get("other")
+            if other:
+                other = json_decode(other)
+                for k, v in other.items():
+                    if isinstance(v, str):
+                        other[k] = locale.translate(v)
+                    if k in ['residence', 'AddressProvince', 'CollegeCity']:
+                        other[k] = (CITY.get(v) if locale_display == "en_US" else CITY_REVERSE.get(v)) or v
+                    elif k in ['current_industry']:
+                        other[k] = (INDUSTRY.get(v) if locale_display == "en_US" else INDUSTRY_REVERSE.get(v)) or v
+                others[0]['other'] = json_encode(other)
+        intentions = profile.intentions
+        if intentions and intentions[0]:
+            for k, v in intentions[0].items():
+                if isinstance(v, str):
+                    intentions[0][k] = locale.translate(v)
+                else:
+                    if k == 'cities' and v:
+                        for city in v:
+                            city['city_name'] = (CITY.get(city.get('city_name')) if locale_display == "en_US" else CITY_REVERSE.get(city.get('city_name'))) or city.get('city_name')
+                    if k == 'industries':
+                        for industry in v:
+                            industry['industry_name'] = (INDUSTRY.get(industry.get('industry_name')) if locale_display == "en_US" else INDUSTRY_REVERSE.get(industry.get('industry_name'))) or industry.get('industry_name')
+        self.logger.debug("translate_profile:{}".format(profile))
+        return profile
 
     @gen.coroutine
     def has_profile_basic(self, profile_id):
@@ -865,9 +897,10 @@ class ProfilePageService(PageService):
         return ret
 
     @gen.coroutine
-    def profile_to_tempalte(self, p_profile):
+    def profile_to_tempalte(self, p_profile, locale=None):
         """ 将从基础服务获得的 profile dict 转换成模版格式
         :param p_profile: 从基础服务获得的 profile dict
+        :param locale: 国际化
         """
         assert isinstance(p_profile, dict)
 
@@ -914,9 +947,9 @@ class ProfilePageService(PageService):
             start_date = w.get("start_date", "")
             end_date = w.get("end_date", "")
             if not end_date or int(w.get("end_until_now", 0)):
-                experience_item.time = start_date[:7] + " 至今"
+                experience_item.time = start_date[:7] + " " + locale.translate(const.UNTIL_NOW) if locale else "至今"
             else:
-                experience_item.time = start_date[:7] + " 至 " + end_date[:7]
+                experience_item.time = start_date[:7] + " " + (locale.translate(const.TO) if locale else "至") + " " + end_date[:7]
             experience_item.description = w.get("description", "")
             experiences.append(experience_item)
         profile.experiences = experiences
@@ -928,16 +961,16 @@ class ProfilePageService(PageService):
             education_item = ObjectDict()
             education_item.id = e.get("id")
             education_item.job = e.get("major_name", "")
-            education_item.dep = degree_list.get(str(e.get("degree", 0)), "无")
+            education_item.dep = locale.translate(degree_list.get(str(e.get("degree", 0)), "无"))
 
             education_item.company = e.get("college_name", "")
             education_item.logo = e.get("college_logo", "")
             start_date = e.get("start_date", "")
             end_date = e.get("end_date", "")
             if not end_date or int(e.get("end_until_now", 0)):
-                education_item.time = start_date[:7] + " 至今"
+                education_item.time = start_date[:7] + " " + locale.translate(const.UNTIL_NOW) if locale else "至今"
             else:
-                education_item.time = start_date[:7] + " 至 " + end_date[:7]
+                education_item.time = start_date[:7] + " " + (locale.translate(const.TO) if locale else "至") + " " + end_date[:7]
 
             education_item.description = e.get("description", "")
             educations.append(education_item)
@@ -954,9 +987,9 @@ class ProfilePageService(PageService):
             start_date = p.get("start_date", "")
             end_date = p.get("end_date", "")
             if not end_date or int(p.get("end_until_now", 0)):
-                project_item.time = start_date[:7] + " 至今"
+                project_item.time = start_date[:7] + " " + locale.translate(const.UNTIL_NOW) if locale else "至今"
             else:
-                project_item.time = start_date[:7] + " 至 " + end_date[:7]
+                project_item.time = start_date[:7] + " " + (locale.translate(const.TO) if locale else "至") + " " + end_date[:7]
             projects.append(project_item)
         profile.projects = projects
 
@@ -1059,7 +1092,7 @@ class ProfilePageService(PageService):
                 other = ObjectDict(json_decode(first(p_others).get('other')))
 
                 if other.workyears:
-                    other.workyears = other.workyears + '年'
+                    other.workyears = other.workyears + locale.translate('年')
 
                 profile.other = other
 
@@ -1092,7 +1125,7 @@ class ProfilePageService(PageService):
                        reverse=True)[0])
 
     @gen.coroutine
-    def get_others_key_name_mapping(self, company_id=0, select_all=False):
+    def get_others_key_name_mapping(self, company_id=0, select_all=False, locale=None):
         """获取自定义字段 name 和 title 的键值对，供前端在展示 profile 的时候使用"""
         metadatas = yield self.infra_profile_ds.get_custom_metadata(company_id, select_all)
 
@@ -1105,6 +1138,8 @@ class ProfilePageService(PageService):
         def _gen(metadatas):
             for m in metadatas:
                 if not m.get('map'):
+                    if locale:
+                        m['fieldTitle'] = locale.translate(m.get('fieldTitle'))
                     target = sub_dict(m, ['fieldName', 'fieldTitle', 'fieldType'])
                     yield rename_keys(target, rename_mapping)
 
@@ -1145,3 +1180,25 @@ class ProfilePageService(PageService):
             target = rename_keys(target, key_mapping)
 
         return {k: v for k, v in target.items() if v is not None}
+
+    @gen.coroutine
+    def is_resume_upload_complete(self, user_id, sync_id, employee_id):
+        """轮训Java后端简历上传是否完成"""
+        params = {
+            "userId": user_id,
+            "syncId": sync_id,
+            "employeeId": employee_id
+        }
+        res = yield self.infra_profile_ds.infra_is_resume_upload_complete(params)
+        return res
+
+    @gen.coroutine
+    def referral_upload_resume_info(self, user_id, sync_id, employee_id):
+        """小助手上传的简历信息"""
+        params = {
+            "userId": user_id,
+            "syncId": sync_id,
+            "employeeId": employee_id
+        }
+        res = yield self.infra_profile_ds.infra_referral_upload_resume_info(params)
+        return res

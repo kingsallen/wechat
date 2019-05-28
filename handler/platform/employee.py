@@ -3,6 +3,7 @@
 from tornado.httputil import url_concat
 from tornado import gen
 
+import traceback
 import conf.common as const
 import conf.message as msg
 import conf.fe as fe
@@ -49,6 +50,7 @@ class AwardsLadderPageHandler(BaseHandler):
             })
             ladder_type = yield self.employee_ps.get_award_ladder_type(self.current_user.company.id)
             policy_link = self.make_url(path.EMPLOYEE_REFERRAL_POLICY, self.params)
+            self._add_sensor_track()
             if ladder_type == 1:
 
                 self.render_page(template_name="employee/reward-rank.html",
@@ -56,6 +58,13 @@ class AwardsLadderPageHandler(BaseHandler):
             else:
                 self.render_page(template_name="employee/reward-rank-dark.html",
                                  data={"policy_link": policy_link})
+
+    def _add_sensor_track(self):
+        if self.params.from_template_message == str(const.TEMPLATES.WX_RANKING_NOTICE_TO_EMPLOYEE):
+            origin = const.SA_ORIGIN_RANKING_TEMPLATE
+        else:
+            origin = const.SA_ORIGIN_PORTAL
+        self.track("cAwardLadder", properties={"origin": origin})
 
 
 class AwardsLadderHandler(BaseHandler):
@@ -371,7 +380,15 @@ class EmployeeBindEmailHandler(BaseHandler):
         bind_email_source = self.params.bind_email_source or 0
         result, message, employee_id = yield self.employee_ps.activate_email(
             activation_code, bind_email_source)
-
+        try:
+            if employee_id:
+                employee = yield self.user_ps.get_employee_by_id(employee_id)
+                user = yield self.usercenter_ps.get_user(employee.sysuser_id) if employee.sysuser_id else ObjectDict()
+                self.track("cEmployeeClickBindingEmail", distinct_id=user.data.id, is_login_id=bool(user.data.username.isdigit() if user.data and user.data.username else None))
+                if result:
+                    self.track("cVerifyEmailSuccess", distinct_id=user.data.id, is_login_id=bool(user.data.username.isdigit() if user.data and user.data.username else None))
+        except Exception as e:
+            self.logger.error("[sensor_bind_email_fail]:{}{}{}{}".format(result, message, employee_id, traceback.format_exc()))
         tparams = dict(
             qrcode_url=self.make_url(
                 path.IMAGE_URL,

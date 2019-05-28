@@ -167,11 +167,32 @@ class ApplicationPageService(PageService):
         return functools.reduce(merge, [page.fields for page in json_config])
 
     @gen.coroutine
-    def get_hr_app_cv_conf(self, app_cv_config_id):
+    def get_hr_app_cv_conf(self, app_cv_config_id, locale):
         cv_conf = yield self.hr_app_cv_conf_ds.get_app_cv_conf({
             "id": app_cv_config_id, "disable": const.NO
         })
+        cv_conf = self.__locale_cv_conf(cv_conf, locale)
         return cv_conf
+
+    def __locale_cv_conf(self, cv_conf, locale):
+        # 国际化自定义简历模板
+        if cv_conf and cv_conf.field_value:
+            conf_value = json_decode(cv_conf.field_value)
+            for c in conf_value:
+                fields = c.get('fields')
+                if fields:
+                    for field in fields:
+                        if field.get('field_title'):
+                            field.update(field_title=locale.translate(field.get('field_title')))
+                        if field.get('field_description'):
+                            field.update(field_description=locale.translate(field.get('field_description')))
+                        if field.get('field_value'):
+                            for field_value in field.get('field_value'):
+                                if isinstance(field_value, list) and field_value and field_value[0]:
+                                    field_value[0] = locale.translate(field_value[0])
+            cv_conf['field_value'] = json_dumps(conf_value)
+            self.logger.debug("translate_cv_conf:{}".format(cv_conf))
+            return cv_conf
 
     @gen.coroutine
     def _generate_resume_cv(self, profile, custom_tpl):
@@ -416,7 +437,7 @@ class ApplicationPageService(PageService):
             raise gen.Return((False, message))
 
         # 获取推荐人信息
-        recommender_user_id, recommender_wxuser_id, recom_employee = yield self.get_recommend_user(
+        recommender_user_id, recommender_wxuser_id, recom_employee, depth = yield self.get_recommend_user(
             current_user, position, is_platform)
 
         if source == const.REHIRING_SOURCE:
@@ -567,7 +588,7 @@ class ApplicationPageService(PageService):
 
         # 2.创建申请
         if has_recom:
-            recommender_user_id, recommender_wxuser_id, recom_employee = \
+            recommender_user_id, recommender_wxuser_id, recom_employee, depth = \
                 yield self.get_recommend_user(current_user, position, is_platform)
         else:
             recommender_user_id, recommender_wxuser_id, recom_employee = 0, 0, None
@@ -578,7 +599,7 @@ class ApplicationPageService(PageService):
             origin = const.TRANSFER_ORIGIN
         elif recommender_user_id and params.origin:
             origin = const.INVITE_ORIGIN
-        elif recommender_user_id and params.forward_id and not params.origin:
+        elif recommender_user_id and not params.origin:
             origin = const.FORWARD_ORIGIN
         else:
             origin = 2 if is_platform else 4
@@ -610,11 +631,12 @@ class ApplicationPageService(PageService):
         self.logger.debug("[get_recommend_user]start")
         recommender_user_id = 0
         recommender_wxuser_id = 0
+        depth = 0
         recom_employee = ObjectDict()
         sharechain_ps = SharechainPageService()
 
         if is_platform:
-            recommender_user_id = yield sharechain_ps.get_referral_employee_user_id(
+            recommender_user_id, depth = yield sharechain_ps.get_referral_employee_user_id(
                 current_user.sysuser.id, position.id)
 
             if recommender_user_id:
@@ -627,7 +649,7 @@ class ApplicationPageService(PageService):
 
         sharechain_ps = None
         self.logger.debug("[get_recommend_user]end")
-        return recommender_user_id, recommender_wxuser_id, recom_employee
+        return recommender_user_id, recommender_wxuser_id, recom_employee, depth
 
     @gen.coroutine
     def opt_add_reward(self, apply_id, current_user):

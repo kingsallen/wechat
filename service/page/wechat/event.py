@@ -24,7 +24,7 @@ from service.page.base import PageService
 from util.wechat.msgcrypt import WXBizMsgCrypt
 from util.tool.url_tool import make_static_url
 from util.tool.date_tool import curr_now
-from util.tool.str_tool import mobile_validate
+from util.tool.str_tool import mobile_validate, get_send_time_from_template_message_url
 from util.common import ObjectDict
 from util.tool.json_tool import json_dumps
 from util.tool.http_tool import http_post
@@ -203,6 +203,52 @@ class EventPageService(PageService):
         raise gen.Return(text_info)
 
     @gen.coroutine
+    def opt_event_template_send_job_finish(self, msg, current_user):
+        """
+        处理模板消息发送完成事件
+        :param msg:
+        :param current_user:
+        :return:
+        """
+        if current_user.wxuser.unionid:
+            msgid = msg.MsgID
+            yield gen.sleep(1)  # 为了避免数据库插入慢，这里对事件延时1秒处理
+            msg_record = yield self.log_wx_message_record_ds.get_wx_message_log_record(conds={"msgid": msgid})
+            user_record = yield self.user_user_ds.get_user({
+                "unionid": current_user.wxuser.unionid,
+                "parentid": 0  # 保证查找正常的 user record
+            })
+            employee = yield self.user_employee_ds.get_employee(
+                conds={
+                    "sysuser_id": user_record.id,
+                    "disable":    const.OLD_YES,
+                    "activation": const.OLD_YES
+                })
+            if msg_record:
+                template = yield self.hr_wx_template_message_ds.get_wx_template(
+                    conds={"id": msg_record.template_id})
+                template_id = template.sys_template_id
+                send_time = get_send_time_from_template_message_url(str(msg_record.url or ''))
+                try:
+                    self.sa.track(distinct_id=current_user.wxuser.sysuser_id,
+                                  event_name="receiveTemplateMessage",
+                                  properties={"templateId": template_id, "sendTime": int(send_time), "isEmployee": bool(employee)},
+                                  is_login_id=True if (user_record.username and bool(user_record.username.isdigit())) else False)
+                    self.logger.debug(
+                        '[sensors_track] distinct_id:{}, event_name: {}, properties: {}, is_login_id: {}'.format(
+                            current_user.wxuser.sysuser_id,
+                            "receiveTemplateMessage",
+                            {"templateId": template_id, "sendTime": send_time},
+                            True if bool(user_record.username.isdigit()) else False))
+                except Exception as e:
+                    self.logger.error(
+                        '[sensors_track_exception] distinct_id: {}, event_name: {}, properties: {}, is_login_id: {}, error_track: {}'.format(
+                            current_user.wxuser.sysuser_id, "receiveTemplateMessage", {"templateId": template_id, "sendTime": send_time},
+                            True if bool(user_record.username.isdigit()) else False,
+                            traceback.format_exc()))
+        raise gen.Return()
+
+    @gen.coroutine
     def opt_event_subscribe(self, msg, current_user, nonce):
         """
         处理用户关注事件
@@ -258,8 +304,7 @@ class EventPageService(PageService):
             # 临时二维码处理逻辑, 5位type+27为自定义id
             yield self._do_weixin_qrcode(current_user.wechat, msg, is_newbie=is_newbie)
 
-        res = yield self.opt_follow(msg, current_user.wechat, nonce)
-        raise gen.Return(res)
+        raise gen.Return()
 
     @gen.coroutine
     def _create_wxuser(self, openid, current_user, wechat_userinfo):

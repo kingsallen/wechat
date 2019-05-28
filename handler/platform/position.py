@@ -14,14 +14,14 @@ from tests.dev_data.user_company_config import COMPANY_CONFIG
 from util.common import ObjectDict
 from util.common.exception import MyException
 from util.common.cipher import encode_id
-from util.common.decorator import handle_response, check_employee, NewJDStatusCheckerAddFlag, authenticated, log_time, \
+from util.common.decorator import handle_response, check_employee, NewJDStatusCheckerAddFlag, authenticated, \
     cover_no_weixin, check_employee_common
-from util.tool.str_tool import gen_salary, add_item, split, gen_degree_v2, gen_experience_v2, languge_code_from_ua, set_literl
+from util.tool.str_tool import set_literl
 from util.common.kafka import *
 from util.common.mq import award_publisher, jd_click_publisher
-from util.tool.str_tool import gen_salary, add_item, split, gen_degree_v2, gen_experience_v2, languge_code_from_ua
+from util.tool.str_tool import gen_salary, add_item, split, gen_degree_v2, gen_experience_v2
 from util.tool.url_tool import url_append_query
-from util.wechat.template import position_view_five_notice_tpl, position_share_notice_employee_tpl
+from util.wechat.template import position_view_five_notice_tpl
 from util.common.decorator import log_time, log_time_common_func
 from util.common.mq import neo4j_position_forward
 from util.common.cipher import decode_id
@@ -69,8 +69,11 @@ class PositionHandler(BaseHandler):
 
             # 刷新链路
             self.logger.debug("[JD]刷新链路")
-            last_employee_user_id, last_employee_id, inserted_share_chain_id = yield self._make_refresh_share_chain(position_info)
+            last_employee_user_id, last_employee_id, inserted_share_chain_id, depth = yield self._make_refresh_share_chain(position_info)
             self.logger.debug("[JD]last_employee_user_id: %s" % last_employee_user_id)
+
+            # 神策埋点
+            self._add_sensor_track(last_employee_user_id, depth)
 
             self.logger.debug("[JD]构建转发信息")
             yield self._make_share_info(position_info, company_info)
@@ -115,11 +118,11 @@ class PositionHandler(BaseHandler):
             # 获取推荐人才关键信息开关状态
             res_crucial_info_switch = yield self.company_ps.get_crucial_info_state(self.current_user.company.id)
             switch = res_crucial_info_switch.data
-
+            conf_response = yield self.employee_ps.get_employee_conf(self.current_user.company.id)
             header = yield self._make_json_header(
                 position_info, company_info, star, application, endorse,
                 can_apply, team.id if team else 0, did, teamname_custom,
-                reward, share_reward, has_point_reward, bonus, switch)
+                reward, share_reward, has_point_reward, bonus, switch, conf_response)
             module_job_description = self._make_json_job_description(position_info)
             module_job_need = self._make_json_job_need(position_info)
             position_feature = yield self.position_ps.get_position_feature(position_id)
@@ -182,7 +185,7 @@ class PositionHandler(BaseHandler):
                 self.render_page(
                     "position/info_old.html",
                     data=position_data,
-                    meta_title=const.PAGE_POSITION_INFO)
+                    meta_title=self.locale.translate(const.PAGE_COMPANY_INFO_LOCALE))
 
             self.flush()
 
@@ -220,6 +223,22 @@ class PositionHandler(BaseHandler):
             self.write_error(404)
             return
 
+    def _add_sensor_track(self, last_employee_user_id, depth):
+
+        # 判断来源
+        if self.params.source == const.FANS_RECOMMEND:
+            origin = const.SA_ORIGIN_FANS_RECOMMEND
+        elif last_employee_user_id:
+            origin = const.SA_ORIGIN_EMPLOYEE_SHARE
+        elif self.params.from_template_message == str(const.TEMPLATES.APPLICATION_INVITE):
+            origin = const.SA_ORIGIN_APPLICATION_INVITE
+        else:
+            origin = const.SA_ORIGIN_PLATFORM
+        # 神策数据埋点
+        properties = ObjectDict({'origin': origin, 'has_career_story': bool(self.flag_should_display_newjd), "depth": depth})
+        self.track("cJobDetailPageview", properties)
+
+    @log_time
     @gen.coroutine
     def _make_position_visitnum(self, position_info):
         """更新职位浏览量"""
@@ -379,7 +398,7 @@ class PositionHandler(BaseHandler):
     @gen.coroutine
     def _make_json_header(self, position_info, company_info, star, application,
                           endorse, can_apply, team_id, did, teamname_custom, reward, share_reward, has_point_reward,
-                          bonus, switch):
+                          bonus, switch, conf_response):
         """构造头部 header 信息"""
 
         # 获得母公司配置信息
@@ -411,7 +430,8 @@ class PositionHandler(BaseHandler):
             "share_reward": share_reward,
             "has_point_reward": has_point_reward,
             "bonus": bonus,
-            "recom_info_switch": switch
+            "recom_info_switch": switch,
+            "emp_bind_config": bool(conf_response.exists if conf_response else None)  # 是否拥有员工认证配置项
             # "team": position_info.department.lower() if position_info.department else ""
         })
 
@@ -612,6 +632,7 @@ class PositionHandler(BaseHandler):
         last_employee_user_id = 0
         last_employee_id = 0
         inserted_share_chain_id = 0
+        depth = 0
 
         if self.current_user.recom and self.current_user.sysuser:
             yield self._make_share_record(
@@ -630,7 +651,7 @@ class PositionHandler(BaseHandler):
                     return ret
 
             if position_info.status == 0:
-                inserted_share_chain_id = yield self._refresh_share_chain(
+                inserted_share_chain_id, depth = yield self._refresh_share_chain(
                     presentee_user_id=self.current_user.sysuser.id,
                     position_id=position_info.id,
                     last_psc=get_psc())
@@ -642,7 +663,7 @@ class PositionHandler(BaseHandler):
                 if inserted_share_chain_id:
                     self.params.update(psc=str(inserted_share_chain_id))
 
-            last_employee_user_id = yield self.sharechain_ps.get_referral_employee_user_id(
+            last_employee_user_id, depth = yield self.sharechain_ps.get_referral_employee_user_id(
                 self.current_user.sysuser.id, position_info.id)
 
             if last_employee_user_id:
@@ -674,7 +695,7 @@ class PositionHandler(BaseHandler):
                 sharechain_id=inserted_share_chain_id,
             )
 
-        return last_employee_user_id, last_employee_id, inserted_share_chain_id
+        return last_employee_user_id, last_employee_id, inserted_share_chain_id, depth
 
     @log_time
     @gen.coroutine
@@ -705,13 +726,13 @@ class PositionHandler(BaseHandler):
     @gen.coroutine
     def _refresh_share_chain(self, presentee_user_id, position_id, last_psc=None):
         """刷新链路的原子操作"""
-        inserted_share_chain_id = yield self.sharechain_ps.refresh_share_chain(
+        inserted_share_chain_id, depth = yield self.sharechain_ps.refresh_share_chain(
             presentee_user_id=presentee_user_id,
             position_id=position_id,
             share_chain_parent_id=last_psc,
             forward_id=self.params.forward_id or ''
         )
-        raise gen.Return(inserted_share_chain_id)
+        return inserted_share_chain_id, depth
 
     @log_time
     @gen.coroutine
@@ -1368,8 +1389,9 @@ class PositionListSugHandler(PositionListInfraParamsMixin, BaseHandler):
         # 获取五条sug数据
         infra_params.update(page_size=const_platform.SUG_LIST_COUNT,
                             keyWord=self.params.keyword if self.params.keyword else "",
-                            page_from=int(self.params.get("count", 0) / 10) + 1,
-                            is_referral=is_referral)
+                            page_from=int(self.params.get("count", 0) / 10) + 1)
+        if is_referral:
+            infra_params.update(is_referral=is_referral)
         res_data = yield self.position_ps.infra_obtain_sug_list(infra_params)
         suggest = res_data.get('suggest') if res_data else ''
         if suggest:

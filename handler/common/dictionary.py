@@ -11,7 +11,8 @@ class DictCityHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def get(self):
-        cities = yield self.dictionary_ps.get_cities()
+        locale_display = self.get_current_locale()
+        cities = yield self.dictionary_ps.get_cities(locale_display)
         self.send_json_success(cities)
 
 
@@ -20,8 +21,9 @@ class DictFunctionHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def get(self):
+        locale_display = self.get_current_locale()
         functions = yield self.dictionary_ps.get_functions(
-            code=int(self.params.fcode) if self.params.fcode else 0)
+            code=int(self.params.fcode) if self.params.fcode else 0, locale_display=locale_display)
         self.send_json_success(functions)
 
 
@@ -31,8 +33,8 @@ class DictIndustryHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         self.logger.debug("DictIndustryHandler")
-
-        industries = yield self.dictionary_ps.get_industries()
+        locale_display = self.get_current_locale()
+        industries = yield self.dictionary_ps.get_industries(locale_display=locale_display)
         self.logger.debug("DictIndustryHandler indurstries:{}".format(industries))
         self.send_json_success(industries)
 
@@ -66,7 +68,8 @@ class DictCountryHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         order = self.params.order
-        countries = yield self.dictionary_ps.get_countries(order=order)
+        locale_display = self.get_current_locale()
+        countries = yield self.dictionary_ps.get_countries(order=order, locale_display=locale_display)
         self.send_json_success(countries)
 
 
@@ -109,5 +112,6 @@ class DictSmsCountryCodeHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def get(self):
-        sms_country_codes = yield self.dictionary_ps.get_sms_country_codes()
+        display_locale = self.get_current_locale()
+        sms_country_codes = yield self.dictionary_ps.get_sms_country_codes(display_locale)
         self.send_json_success(sms_country_codes)
