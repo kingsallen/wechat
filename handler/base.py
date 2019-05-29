@@ -70,6 +70,8 @@ class BaseHandler(MetaBaseHandler):
     def support_multi_domain(self):
         '''
         WARNING: the code looks complicated, but it should be easy to understand
+        return: Boolean 是否需要跳转， To 跳到那里去 
+        throws MultiDomainException 不应该出现的异常情况 -> 404
         settings需要添加以下：
         # **************************************************************
         settings['multi_domain'] = {}
