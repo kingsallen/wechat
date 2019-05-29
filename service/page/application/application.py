@@ -588,9 +588,9 @@ class ApplicationPageService(PageService):
         else:
             recommender_user_id, recommender_wxuser_id, recom_employee = 0, 0, None
 
-        if recommender_user_id and params.origin:
+        if recommender_user_id and params.from_template_message == str(const.TEMPLATES.APPLICATION_INVITE):
             origin = const.INVITE_ORIGIN
-        elif recommender_user_id and not params.origin:
+        elif recommender_user_id:
             origin = const.FORWARD_ORIGIN
         else:
             origin = 2 if is_platform else 4
