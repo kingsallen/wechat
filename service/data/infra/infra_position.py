@@ -24,15 +24,7 @@ class InfraPositionDataService(DataService):
     @gen.coroutine
     def get_position_list(self, params):
         """普通职位列表"""
-        # ret = yield http_get(path.INFRA_POSITION_LIST, params, timeout=7)
         ret = yield http_get_v2(position.POSITION_LIST, position_service, params, timeout=7)
-        return ret
-
-    @gen.coroutine
-    def get_referral_position_list(self, params):
-        """内推职位列表"""
-        # ret = yield http_get(path.REFERRAL_POSITION_LIST, params)
-        ret = yield http_get_v2(position.REFERRAL_POSITION_LIST, position_service, params)
         return ret
 
     @gen.coroutine
