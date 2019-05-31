@@ -386,6 +386,7 @@ class ReferralCrucialInfoApiHandler(BaseHandler):
                     self.current_user.company.id,
                     self.params, self.json_args
                 )
+                self.track("inDirectReferral", properties={"apply_origin": const.SA_INDIRECT_REFERRAL_TRANSFER})
             else:
                 ret = yield self.employee_ps.referral_save_evaluation(
                     self.current_user.sysuser.id,
@@ -394,7 +395,7 @@ class ReferralCrucialInfoApiHandler(BaseHandler):
                 )
                 if ret.status == const.API_SUCCESS:
                     self.track("cReferralEvaluationSuccess")
-            self._add_sensor_track()
+                self._add_sensor_track()
             if not ret.status == const.API_SUCCESS:
                 self.send_json_error(message=ret.message)
                 return
@@ -451,8 +452,8 @@ class ReferralCrucialInfoApiHandler(BaseHandler):
         elif int(self.params.flag or 0) == const.REFERRAL_EVAL_SEEK_RECOM_CARDS:
             origin = const.SA_INDIRECT_REFERRAL_ORIGIN_SEEK_RECOM_CARDS
         else:
-            origin = 0
-        self.track("inDirectReferral", properties={"origin": origin})
+            origin = const.SA_INDIRECT_REFERRAL_ORIGIN_HAS_APPLY
+        self.track("referralComment", properties={"comment_origin": origin})
 
 
 class ReferralCommentTagsHandler(BaseHandler):

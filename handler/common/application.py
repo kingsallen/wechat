@@ -191,10 +191,12 @@ class ApplicationHandler(BaseHandler):
             origin = const.SA_ORIGIN_FANS_RECOMMEND
         elif recommender_user_id:
             origin = const.SA_ORIGIN_EMPLOYEE_SHARE
-        elif self.params.from_template_message == str(const.TEMPLATES.APPLICATION_INVITE):
+        elif self.params.invite_apply == str(const.YES):
             origin = const.SA_ORIGIN_APPLICATION_INVITE
         else:
             origin = const.SA_ORIGIN_PLATFORM
+        if self.params.invite_apply == str(const.YES) and recommender_user_id:
+            self.track("inDirectReferral", properties={"apply_origin": const.SA_INDIRECT_REFERRAL_INVITE})
         self.track("cApplySuccess", properties={"origin": origin, "depth": depth})
 
 
