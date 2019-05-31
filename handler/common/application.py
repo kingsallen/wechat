@@ -77,7 +77,7 @@ class ApplicationHandler(BaseHandler):
         # 联系内推： 候选人填写简历信息 确认提交，此时并没有真正投递要等到员工完成推荐评价才算是真正投递
         if self.params.contact_referral:
             # 申请来自哪里
-            origin = self.params.origin
+            origin = 2 if self.params.invite_apply == str(const.YES) else 1
             if self.params.root_recomd:
                 recom = decode_id(self.params.root_recomd)
                 psc = -1
