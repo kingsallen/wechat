@@ -441,8 +441,6 @@ class ApplicationPageService(PageService):
 
         if params.invite_apply == str(const.YES):
             origin = const.INVITE_ORIGIN
-        elif recommender_user_id:
-            origin = const.FORWARD_ORIGIN
         else:
             origin = 2 if is_platform else 4
 
@@ -590,8 +588,6 @@ class ApplicationPageService(PageService):
 
         if params.invite_apply == str(const.YES):
             origin = const.INVITE_ORIGIN
-        elif recommender_user_id:
-            origin = const.FORWARD_ORIGIN
         else:
             origin = 2 if is_platform else 4
 
