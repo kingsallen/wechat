@@ -439,12 +439,12 @@ class ApplicationPageService(PageService):
         recommender_user_id, recommender_wxuser_id, recom_employee, depth = yield self.get_recommend_user(
             current_user, position, is_platform)
 
-        if recommender_user_id and params.origin:
+        if recommender_user_id and params.invite_apply == str(const.YES):
             origin = const.INVITE_ORIGIN
-        elif recommender_user_id and params.forward_id and not params.origin:
+        elif recommender_user_id:
             origin = const.FORWARD_ORIGIN
         else:
-            origin = 1024
+            origin = 2 if is_platform else 4
 
         params_for_application = ObjectDict(
             wechat_id=current_user.wechat.id,
