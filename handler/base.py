@@ -29,6 +29,7 @@ from util.tool.date_tool import curr_now
 class NoSignatureError(Exception):
     pass
 
+
 class MultiDomainException(Exception):
     pass
 
@@ -65,12 +66,12 @@ class BaseHandler(MetaBaseHandler):
             return ret.get("component_access_token", None)
         else:
             return None
-    
+
     @gen.coroutine
     def support_multi_domain(self):
-        '''
+        """
         WARNING: the code looks complicated, but it should be easy to understand
-        return: Boolean 是否需要跳转， To 跳到那里去 
+        return: Boolean 是否需要跳转， To 跳到那里去
         throws MultiDomainException 不应该出现的异常情况 -> 404
         settings需要添加以下：
         # **************************************************************
@@ -83,7 +84,7 @@ class BaseHandler(MetaBaseHandler):
         settings['multi_domain']['help_domain'] = settings['multi_domain']['format'].format(settings['multi_domain']['help_appid'])
         settings['multi_domain']['platform'] = settings["m_host"]
         # **************************************************************
-        
+
         分三个环境：
         1.env=platform 企业
         如果满足appid的形式
@@ -113,7 +114,7 @@ class BaseHandler(MetaBaseHandler):
         如果是platform形式域名，则跳转(wechat_id_41_appid).wx.moseeker/dqprism..com
 
         (注:4.聚合号1代，nginx不会打到这里，不用此项目处理)
-        '''
+        """
         multi_domain_settings = self.settings["multi_domain"]
         host = self.request.host
         multi_subdomain_match = re.match(multi_domain_settings["multi_domain_pattern"], host)
@@ -123,27 +124,27 @@ class BaseHandler(MetaBaseHandler):
         is_platform_domain = multi_domain_settings["platform"].lower() == host.lower()
 
         if self.is_platform:
-            if multi_subdomain_match and signature: # case#1
+            if multi_subdomain_match and signature:  # case#1
                 wechat = yield self.wechat_ps.get_wechat(conds={"signature": signature})
-                if wechat.appid == appid: 
+                if wechat.appid == appid:
                     return False, None
                 else:
                     raise MultiDomainException(
                         json.dumps({"full_url": self.request.full_url(),
-                             "description": "env=platform, multi domain match, but signature and appid not match"}))
-            elif multi_subdomain_match and not signature: # case#2
+                                    "description": "env=platform, multi domain match, but signature and appid not match"}))
+            elif multi_subdomain_match and not signature:  # case#2
                 wechat = yield self.wechat_ps.get_wechat(conds={"appid": appid})
                 self.params["wechat_signature"] = wechat.signature
                 to = make_url(path=self.request.path, host=host, protocol="https", params=self.params)
                 return True, to
-            elif is_platform_domain and signature: # case#3
+            elif is_platform_domain and signature:  # case#3
                 appid = yield self.wechat_ps.get_wechat(conds={"signature": signature})
                 to = "https://" + multi_domain_settings["format"].format(appid) + self.request.uri
                 return True, to
             else:
                 raise MultiDomainException(
                         json.dumps({"full_url": self.request.full_url(),
-                             "description": "env=platform, neither multidomain match nor valid platform url"}))
+                                    "description": "env=platform, neither multidomain match nor valid platform url"}))
 
         elif self.is_qx:
             if multi_subdomain_match:
@@ -152,14 +153,14 @@ class BaseHandler(MetaBaseHandler):
                 else:
                     raise MultiDomainException(
                         json.dumps({"full_url": self.request.full_url(),
-                             "description": "env=qx, multi domain match, but appid not match settings"}))
+                                    "description": "env=qx, multi domain match, but appid not match settings"}))
             elif is_platform_domain:
                 to = "https://" + multi_domain_settings["qx_domain"] + self.request.uri
                 return True, to
             else:
                 raise MultiDomainException(
                         json.dumps({"full_url": self.request.full_url(),
-                             "description": "env=qx, neither multi domain nor platform"}))
+                                    "description": "env=qx, neither multi domain nor platform"}))
 
         elif self.is_help:
             if multi_subdomain_match:
@@ -168,19 +169,19 @@ class BaseHandler(MetaBaseHandler):
                 else:
                     raise MultiDomainException(
                         json.dumps({"full_url": self.request.full_url(),
-                             "description": "env=help, is multi domain url, but appid not match help's appid"}))
+                                    "description": "env=help, is multi domain url, but appid not match help's appid"}))
             elif is_platform_domain:
                 to = "https://" + multi_domain_settings["help_domain"] + self.request.uri
                 return True, to
             else:
                 raise MultiDomainException(
                         json.dumps({"full_url": self.request.full_url(),
-                             "description": "env=help,  neither multi domain nor platform"}))
+                                    "description": "env=help,  neither multi domain nor platform"}))
         else:
             # 未知的特殊情况 - 理论上不应该发生
             raise MultiDomainException(
                     json.dumps({"full_url": self.request.full_url(),
-                            "description": "no env matched, how could it be?"}))
+                                "description": "no env matched, how could it be?"}))
 
     # PUBLIC API
     @check_signature
@@ -201,7 +202,7 @@ class BaseHandler(MetaBaseHandler):
             self.logger.error(traceback.format_exc())
             self.write_error(http_code=404)
         if self.request.connection.stream.closed():
-            return        
+            return
         # 支持多域名 - end *******************************
 
         yield gen.sleep(0.001)  # be nice to cpu
@@ -537,6 +538,7 @@ class BaseHandler(MetaBaseHandler):
             if self.in_wechat and not self._unionid:
                 # unionid 不存在，则进行仟寻授权
                 self._oauth_service.wechat = self._qx_wechat
+                self._oauth_service.redirect_url = "https://" + settings.multi_domain_settings["qx_domain"] + self.request.uri
                 url = self._oauth_service.get_oauth_code_userinfo_url()
                 self.redirect(url)
                 return
