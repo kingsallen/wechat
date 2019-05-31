@@ -189,13 +189,13 @@ class ApplicationHandler(BaseHandler):
     def _add_sensor_track(self, depth, recommender_user_id):
         if self.params.source == const.FANS_RECOMMEND:
             origin = const.SA_ORIGIN_FANS_RECOMMEND
-        elif recommender_user_id:
-            origin = const.SA_ORIGIN_EMPLOYEE_SHARE
         elif self.params.invite_apply == str(const.YES):
             origin = const.SA_ORIGIN_APPLICATION_INVITE
+        elif recommender_user_id:
+            origin = const.SA_ORIGIN_EMPLOYEE_SHARE
         else:
             origin = const.SA_ORIGIN_PLATFORM
-        if self.params.invite_apply == str(const.YES) and recommender_user_id:
+        if self.params.invite_apply == str(const.YES):
             self.track("inDirectReferral", properties={"apply_origin": const.SA_INDIRECT_REFERRAL_INVITE})
         self.track("cApplySuccess", properties={"origin": origin, "depth": depth})
 
