@@ -78,11 +78,16 @@ class BaseHandler(MetaBaseHandler):
         settings['multi_domain'] = {}
         settings['multi_domain']['pattern'] = r"(.*).wx.dqprism.com"
         settings['multi_domain']['format'] = "{}.wx.dqprism.com"
+        settings['multi_domain']['m_format'] = settings['multi_domain']['format'] + "/m"
         settings['multi_domain']['qx_appid'] = "wx1f64c12fc8f0af37"
-        settings['multi_domain']['qx_domain'] = settings['multi_domain']['format'].format(settings['multi_domain']['qx_appid'])
+        settings['multi_domain']['qx_domain'] = settings['multi_domain']['format'].format(settings['multi_domain']['qx_appid']) + "/recruit"
         settings['multi_domain']['help_appid'] = "wx4eb438db0b7a28cf"
-        settings['multi_domain']['help_domain'] = settings['multi_domain']['format'].format(settings['multi_domain']['help_appid'])
+        settings['multi_domain']['help_domain'] = settings['multi_domain']['format'].format(settings['multi_domain']['help_appid']) + "/h"
         settings['multi_domain']['platform'] = settings["m_host"]
+        settings['m_domain'] = '.wx.dqprism.com'
+        settings['platform_domain'] = settings['m_domain'] + '/m'
+        settings['qx_domain'] = settings['m_domain'] + '/recruit'
+        settings['helper_domain'] = settings['m_domain'] + '/h'
         # **************************************************************
 
         分三个环境：
@@ -115,15 +120,21 @@ class BaseHandler(MetaBaseHandler):
 
         (注:4.聚合号1代，nginx不会打到这里，不用此项目处理)
         """
+        appid = ''
         multi_domain_settings = self.settings["multi_domain"]
         host = self.request.host
-        multi_subdomain_match = re.match(multi_domain_settings["multi_domain_pattern"], host)
+        multi_subdomain_match = re.match(multi_domain_settings["pattern"], host)
         if multi_subdomain_match:
             appid = multi_subdomain_match.group(1)
         signature = self.params["wechat_signature"]
         is_platform_domain = multi_domain_settings["platform"].lower() == host.lower()
 
         if self.is_platform:
+            # 仟寻授权完成后需要先重定向到对应的企业appid域名
+            if appid == multi_domain_settings["qx_appid"]:
+                wechat = yield self.wechat_ps.get_wechat(conds={"signature": signature})
+                to = "https://" + multi_domain_settings["m_format"].format(wechat.appid) + self.request.uri
+                return True, to
             if multi_subdomain_match and signature:  # case#1
                 wechat = yield self.wechat_ps.get_wechat(conds={"signature": signature})
                 if wechat.appid == appid:
@@ -138,8 +149,8 @@ class BaseHandler(MetaBaseHandler):
                 to = make_url(path=self.request.path, host=host, protocol="https", params=self.params)
                 return True, to
             elif is_platform_domain and signature:  # case#3
-                appid = yield self.wechat_ps.get_wechat(conds={"signature": signature})
-                to = "https://" + multi_domain_settings["format"].format(appid) + self.request.uri
+                wechat = yield self.wechat_ps.get_wechat(conds={"signature": signature})
+                to = "https://" + multi_domain_settings["m_format"].format(wechat.appid) + self.request.uri
                 return True, to
             else:
                 raise MultiDomainException(
@@ -192,6 +203,7 @@ class BaseHandler(MetaBaseHandler):
         # 支持多域名 - start *******************************
         try:
             do_redirect, to = yield self.support_multi_domain()
+            self.logger.debug("[multi_submain] do_redirect:{}, to:{}".format(do_redirect, to))
             if do_redirect:
                 self.redirect(to)
                 return
@@ -538,7 +550,8 @@ class BaseHandler(MetaBaseHandler):
             if self.in_wechat and not self._unionid:
                 # unionid 不存在，则进行仟寻授权
                 self._oauth_service.wechat = self._qx_wechat
-                self._oauth_service.redirect_url = "https://" + settings.multi_domain_settings["qx_domain"] + self.request.uri
+                # 仟寻授权需要重定向到仟寻appid对应的域名
+                self._oauth_service.redirect_url = "https://" + settings["multi_domain"]["qx_domain"] + "/m" + self.request.uri
                 url = self._oauth_service.get_oauth_code_userinfo_url()
                 self.redirect(url)
                 return
@@ -838,6 +851,9 @@ class BaseHandler(MetaBaseHandler):
 
         if not self.host in self.request.full_url():
             full_url = full_url.replace(self.settings.m_host, self.host)
+
+        if not self.domain in self.request.full_url():
+            full_url = full_url.replace(self.settings.m_domain, self.domain)
 
         if not encode:
             return full_url
