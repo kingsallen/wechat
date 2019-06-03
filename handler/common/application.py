@@ -171,7 +171,7 @@ class ApplicationHandler(BaseHandler):
                 self.current_user, position, self.is_platform)
 
             # 神策埋点
-            self._add_sensor_track(depth)
+            self._add_sensor_track(depth, recommender_user_id)
 
             if recommender_user_id:
                 yield self.application_ps.opt_update_candidate_recom_records(
@@ -188,9 +188,11 @@ class ApplicationHandler(BaseHandler):
         else:
             self.send_json_error(message=message)
 
-    def _add_sensor_track(self, depth):
+    def _add_sensor_track(self, depth, recommender_user_id):
         if self.params.source == const.FANS_RECOMMEND:
             origin = const.SA_ORIGIN_FANS_RECOMMEND
+        elif recommender_user_id:
+            origin = const.SA_ORIGIN_EMPLOYEE_SHARE
         elif self.params.from_template_message == str(const.TEMPLATES.APPLICATION_INVITE):
             origin = const.SA_ORIGIN_APPLICATION_INVITE
         else:
