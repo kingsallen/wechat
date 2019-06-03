@@ -138,7 +138,9 @@ class ApplicationHandler(BaseHandler):
             self.current_user,
             self.params,
             is_platform=self.is_platform,
-            has_recom='recom' in self.params)
+            has_recom='recom' in self.params,
+            source=self.params.source
+        )
 
         # TODO (tangyiliang) 申请后操作，以下操作全部可以走消息队列
         if is_applied:
@@ -237,7 +239,7 @@ class ApplicationEmailHandler(BaseHandler):
         self.current_user.company.logo = make_static_url(self.current_user.company.logo, protocol="https", ensure_protocol=True)
         if self.params.pid and position.email_resume_conf == 0:
             create_status, message = yield self.application_ps.create_email_apply(self.params, position,
-                                                                                  self.current_user, self.is_platform)
+                                                                                  self.current_user, self.is_platform, self.params.source)
             if not create_status:
                 # 职位不能申请, 直接返回不能再次redirect
                 messages = message

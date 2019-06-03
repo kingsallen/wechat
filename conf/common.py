@@ -153,6 +153,13 @@ API_SUCCESS = 0
 API_FAILURE = 1
 API_WARNING = 2
 
+# 申请来源
+REHIRING_SOURCE = '8'  # 老员工回聘
+
+# 入库的申请来源
+REHIRING_ORIGIN = 2097152  # 老员工回聘
+TRANSFER_ORIGIN = 4194304  # 员工转岗
+
 # 入库的申请来源
 INVITE_ORIGIN = 524288  # 邀请投递申请
 FORWARD_ORIGIN = 1048576  # 员工转发申请
@@ -768,6 +775,9 @@ QRCODE_FROM_POSITION_POPUP = 1
 GELI_COMPANY_ID = 1730310
 GELI_WEBSITE = 'http://gree.zhiye.com'
 GELI_POSITION_URL = 'http://gree.zhiye.com/zpdetail/{}'
+
+# 开启了员工内部转岗功能的公司
+TRANSFER_COMPANY_ID = [2052173, 601320]
 
 # 内推：员工推荐评价入口
 REFERRAL_EVAL_CONTACT_MES_TMP = 1    # 候选人联系内推消息模板
