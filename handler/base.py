@@ -22,7 +22,7 @@ from util.common.cipher import decode_id
 from util.common.decorator import check_signature
 from util.tool.str_tool import to_str, from_hex, match_session_id, \
     languge_code_from_ua
-from util.tool.url_tool import url_subtract_query, make_url, make_url
+from util.tool.url_tool import url_subtract_query, make_url
 from util.tool.date_tool import curr_now
 
 
@@ -126,7 +126,7 @@ class BaseHandler(MetaBaseHandler):
         multi_subdomain_match = re.match(multi_domain_settings["pattern"], host)
         if multi_subdomain_match:
             appid = multi_subdomain_match.group(1)
-        signature = self.params["wechat_signature"]
+        signature = self.params.get("wechat_signature")
         is_platform_domain = multi_domain_settings["platform"].lower() == host.lower()
 
         if self.is_platform:
@@ -146,7 +146,7 @@ class BaseHandler(MetaBaseHandler):
             elif multi_subdomain_match and not signature:  # case#2
                 wechat = yield self.wechat_ps.get_wechat(conds={"appid": appid})
                 self.params["wechat_signature"] = wechat.signature
-                to = make_url(path=self.request.path, host=host, protocol="https", params=self.params)
+                to = make_url(path=self.request.path, host=multi_domain_settings["m_format"].format(wechat.appid), protocol="https", params=self.params)
                 return True, to
             elif is_platform_domain and signature:  # case#3
                 wechat = yield self.wechat_ps.get_wechat(conds={"signature": signature})
@@ -174,6 +174,9 @@ class BaseHandler(MetaBaseHandler):
                                     "description": "env=qx, neither multi domain nor platform"}))
 
         elif self.is_help:
+            if appid == multi_domain_settings["qx_appid"]:
+                to = "https://" + multi_domain_settings["format"].format(settings['multi_domain']['help_appid']) + '/h' + self.request.uri
+                return True, to
             if multi_subdomain_match:
                 if appid == multi_domain_settings["help_appid"]:
                     return False, None
@@ -551,7 +554,7 @@ class BaseHandler(MetaBaseHandler):
                 # unionid 不存在，则进行仟寻授权
                 self._oauth_service.wechat = self._qx_wechat
                 # 仟寻授权需要重定向到仟寻appid对应的域名
-                self._oauth_service.redirect_url = "https://" + settings["multi_domain"]["qx_domain"] + "/m" + self.request.uri
+                self._get_oauth_redirect_url()
                 url = self._oauth_service.get_oauth_code_userinfo_url()
                 self.redirect(url)
                 return
@@ -570,6 +573,17 @@ class BaseHandler(MetaBaseHandler):
                 # if self.current_user.sysuser:
                 #     result, profile = yield self.profile_ps.has_profile(self.current_user.sysuser.id)
                 #     self.current_user.has_profile = result
+
+    def _get_oauth_redirect_url(self):
+        # 仟寻授权需要重定向到仟寻appid对应的域名
+        if self.is_help:
+            host_suffix = "/h"
+        elif self.is_qx:
+            host_suffix = "/recruit"
+        else:
+            host_suffix = "/m"
+        self._oauth_service.redirect_url = "https://" + settings['multi_domain']['format'].format(
+            settings['multi_domain']['qx_appid']) + host_suffix + self.request.uri
 
     @gen.coroutine
     def _build_session(self):
