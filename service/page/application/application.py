@@ -444,12 +444,10 @@ class ApplicationPageService(PageService):
         #     origin = const.REHIRING_ORIGIN
         if current_user.employee and current_user.company.id in const.TRANSFER_COMPANY_ID:
             origin = const.TRANSFER_ORIGIN
-        elif recommender_user_id and params.origin:
+        elif params.invite_apply == str(const.YES):
             origin = const.INVITE_ORIGIN
-        elif recommender_user_id and params.forward_id and not params.origin:
-            origin = const.FORWARD_ORIGIN
         else:
-            origin = 1024
+            origin = 2 if is_platform else 4
 
         params_for_application = ObjectDict(
             wechat_id=current_user.wechat.id,
@@ -597,10 +595,8 @@ class ApplicationPageService(PageService):
         #     origin = const.REHIRING_ORIGIN
         if current_user.employee and current_user.company.id in const.TRANSFER_COMPANY_ID:
             origin = const.TRANSFER_ORIGIN
-        elif recommender_user_id and params.origin:
+        elif params.invite_apply == str(const.YES):
             origin = const.INVITE_ORIGIN
-        elif recommender_user_id and not params.origin:
-            origin = const.FORWARD_ORIGIN
         else:
             origin = 2 if is_platform else 4
 
