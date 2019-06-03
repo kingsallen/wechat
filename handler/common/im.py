@@ -1,29 +1,43 @@
 # coding=utf-8
 
-import ujson
 import traceback
+
+import redis
+import ujson
 from tornado import gen, websocket, ioloop
+
 import conf.common as const
 import conf.message as msg
-from conf.protocol import WebSocketCloseCode
-from handler.base import BaseHandler
-from cache.user.chat_session import ChatCache
-from util.common.decorator import handle_response, authenticated
-from util.tool.pubsub_tool import Subscriber
-from util.common import ObjectDict
-from util.tool.str_tool import to_str, match_session_id
-from util.tool.date_tool import curr_now_minute
-from service.page.user.chat import ChatPageService
-from thrift_gen.gen.chat.struct.ttypes import ChatVO
-import redis
-from setting import settings
-from globals import logger
-from oauth.wechat import JsApi
-from util.tool.json_tool import encode_json_dumps, json_dumps
 import conf.message as msg_const
+from cache.user.chat_session import ChatCache
+from conf.protocol import WebSocketCloseCode
+from globals import logger
+from handler.base import BaseHandler
+from oauth.wechat import JsApi
+from service.page.user.chat import ChatPageService
+from setting import settings
+from thrift_gen.gen.chat.struct.ttypes import ChatVO
+from util.common import ObjectDict
+from util.common.decorator import handle_response, authenticated
 from util.common.decorator import relate_user_and_former_employee
+from util.tool.date_tool import curr_now_minute
+from util.tool.json_tool import encode_json_dumps, json_dumps
+from util.tool.pubsub_tool import Subscriber
+from util.tool.str_tool import to_str, match_session_id
 
 
+class IndexHandler(BaseHandler):
+    """页面Index, 单页应用使用"""
+
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        yield getattr(self, 'get_default')()
+
+    @handle_response
+    @gen.coroutine
+    def get_default(self):
+        self.render(template_name="mobot/index.html")
 
 class UnreadCountHandler(BaseHandler):
     @handle_response
