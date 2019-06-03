@@ -777,7 +777,7 @@ GELI_WEBSITE = 'http://gree.zhiye.com'
 GELI_POSITION_URL = 'http://gree.zhiye.com/zpdetail/{}'
 
 # 开启了员工内部转岗功能的公司
-TRANSFER_COMPANY_ID = [2052173]
+TRANSFER_COMPANY_ID = [2052173, 601320]
 
 # 内推：员工推荐评价入口
 REFERRAL_EVAL_CONTACT_MES_TMP = 1    # 候选人联系内推消息模板
