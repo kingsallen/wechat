@@ -375,7 +375,7 @@ class PositionPageService(PageService):
         team_name_dict = yield self.get_teamid_names_dict(params.company_id)
         position_list = []
         if res.code == const.NEWINFRA_API_SUCCESS:
-            data = [ObjectDict(e) for e in res.data]
+            data = [ObjectDict(e) for e in res.data.data]
             pids = [e.position.id for e in data]
             pid_teamid_dict = yield self.get_pid_teamid_dict(params.company_id, pids)
 
@@ -388,7 +388,8 @@ class PositionPageService(PageService):
                                 city_ename=p.city_ename,
                                 team_name=p.team_name,
                                 total_bonus=p.total_bonus,
-                                city=p.city_name)
+                                city=p.city_name,
+                                total_num=res.data.total)
                 position.salary = gen_salary(position.salary_top, position.salary_bottom)
                 position.publish_date = jd_update_date(
                     str_2_date(position.publish_date, self.constant.TIME_FORMAT))

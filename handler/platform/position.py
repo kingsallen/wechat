@@ -917,7 +917,7 @@ class PositionListInfraParamsMixin(BaseHandler):
             occupations=self.params.occupation.replace("\r\n", "\n") if self.params.occupation else "",
             custom=self.params.custom if self.params.custom else "",
             keywords=self.params.keyword if self.params.keyword else "",
-            order_by_priority=True)
+            order_by_priority=1)
 
         self.logger.debug("[position_list_infra_params]: %s" % infra_params)
 
@@ -1324,7 +1324,7 @@ class PositionRecomListHandler(PositionListInfraParamsMixin, BaseHandler):
         self.params.share = yield self._make_share()
         position_list = yield self.position_ps.infra_get_position_list(infra_params)
         if position_list:
-            total = position_list.total
+            total = position_list.total_num
         else:
             total = 0
         data = ObjectDict({
