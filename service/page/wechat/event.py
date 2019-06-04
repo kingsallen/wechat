@@ -685,6 +685,8 @@ class EventPageService(PageService):
             elif type == 31:
                 # 携带职位id， 目前是候选人职位详情页引导关注弹层二维码中使用
                 # 数据组埋点
+                if wxuser.sysuser_id:
+                    self.sa.track(wxuser.sysuser_id, "subscribeWechat", properties={"sub_from": type}, is_login_id=True)
                 self.log_datagroup_prepare_data_ds.create_qrcode_subscribe_record(
                     {
                         "flag": const.QRCODE_FROM_POSITION_POPUP,
