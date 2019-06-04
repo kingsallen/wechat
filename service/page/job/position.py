@@ -374,7 +374,7 @@ class PositionPageService(PageService):
         # get team names
         team_name_dict = yield self.get_teamid_names_dict(params.company_id)
         position_list = []
-        if res.code == const.NEWINFRA_API_SUCCESS:
+        if res.code == const.NEWINFRA_API_SUCCESS and res.data:
             data = [ObjectDict(e) for e in res.data.data]
             pids = [e.position.id for e in data]
             pid_teamid_dict = yield self.get_pid_teamid_dict(params.company_id, pids)
@@ -395,8 +395,7 @@ class PositionPageService(PageService):
                     str_2_date(position.publish_date, self.constant.TIME_FORMAT))
                 position.team_name = team_name_dict.get(pid_teamid_dict.get(position.id, 0), '')
                 position_list.append(position)
-            return position_list
-        return res
+        return position_list
 
     @log_time
     @gen.coroutine

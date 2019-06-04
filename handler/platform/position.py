@@ -1324,7 +1324,7 @@ class PositionRecomListHandler(PositionListInfraParamsMixin, BaseHandler):
         self.params.share = yield self._make_share()
         position_list = yield self.position_ps.infra_get_position_list(infra_params)
         if position_list:
-            total = position_list.total_num
+            total = position_list[0].total_num
         else:
             total = 0
         data = ObjectDict({
