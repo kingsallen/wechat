@@ -885,12 +885,8 @@ class PositionListInfraParamsMixin(BaseHandler):
         if self.params.did:
             infra_params.did = self.params.did
 
-        start_count = (int(self.params.get("count", 0)) *
-                       const_platform.POSITION_LIST_PAGE_COUNT)
-
-        infra_params.page_from = start_count
         infra_params.page_size = const_platform.POSITION_LIST_PAGE_COUNT
-        infra_params.wx_page_from = int(self.params.get("count", 0))
+        infra_params.page_from = int(self.params.get("count", 0))
 
         if self.params.salary:
             k = str(self.params.salary)
@@ -957,11 +953,15 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
         if hb_c:
             # 红包职位列表
             infra_params.update(hb_config_id=hb_c)
+            start_count = (int(self.params.get("count", 0)) * const_platform.POSITION_LIST_PAGE_COUNT)
+            infra_params.page_from = start_count
             rp_position_list = yield self.position_ps.infra_get_rp_position_list(infra_params)
             position_list = rp_position_list
 
         elif recom_push_id:
             # 员工推荐列表
+            start_count = (int(self.params.get("count", 0)) * const_platform.POSITION_LIST_PAGE_COUNT)
+            infra_params.page_from = start_count
             if int(self.params.get("count", 0)) == 0:
                 position_list = yield self.get_employee_position_list(recom_push_id, infra_params)
             else:
