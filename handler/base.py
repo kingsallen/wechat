@@ -329,7 +329,8 @@ class BaseHandler(MetaBaseHandler):
 
         # 构造并拼装 session
         yield self._fetch_session()
-
+        if self.request.connection.stream.closed():
+            return
         # 设置神策用户属性
         if self.current_user.employee:
             user_role = 1
