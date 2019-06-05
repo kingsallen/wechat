@@ -106,7 +106,9 @@ class CompanyPageService(PageService):
 
         # 处理 impression:
         if company.impression:
-            company.impression = [make_static_url(item) for item in ujson.decode(company.impression).values()]
+            impression = ujson.decode(company.impression)
+            impression = sorted(impression.items(), key=lambda x: x)
+            company.impression = [make_static_url(item[1]) for item in impression]
 
         # 处理 banner
         if company.banner:
