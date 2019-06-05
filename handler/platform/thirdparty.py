@@ -8,6 +8,7 @@ from tornado import gen
 import conf.common as const
 import conf.path as path
 
+from setting import settings
 from handler.base import BaseHandler
 from handler.metabase import MetaBaseHandler
 from util.common.decorator import handle_response, check_env, authenticated
@@ -31,7 +32,7 @@ class JoywokOauthHandler(MetaBaseHandler):
             self.redirect(next_url)
             return
         headers = ObjectDict({"Referer": self.request.full_url()})
-        res = yield self.joywok_ps.get_joywok_info(appid=const.ENV_ARGS.get(self._client_env), method=const.JMIS_SIGNATURE, headers=headers)
+        res = yield self.joywok_ps.get_joywok_info(appid=settings['joywok_appid'], method=const.JMIS_SIGNATURE, headers=headers)
         client_env = ObjectDict({
             "name": self._client_env,
             "args": ObjectDict({

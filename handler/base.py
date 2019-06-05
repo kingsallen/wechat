@@ -297,7 +297,7 @@ class BaseHandler(MetaBaseHandler):
         client_env = ObjectDict({"name": self._client_env})
         if self._client_env == const.CLIENT_JOYWOK:
             headers = ObjectDict({"Referer": self.request.full_url()})
-            res = yield self.joywok_ps.get_joywok_info(appid=const.ENV_ARGS.get(self._client_env),
+            res = yield self.joywok_ps.get_joywok_info(appid=settings['joywok_appid'],
                                                        method=const.JMIS_SIGNATURE,
                                                        headers=headers)
             client_env.update({

@@ -811,13 +811,6 @@ SA_ORIGIN_RANKING_TEMPLATE = 4  # 推送排名榜单
 SA_ORIGIN_PORTAL = 5  # 员工portal
 SA_ORIGIN_APPLICATION_INVITE = 6  # 投递邀请
 
-# 环境变量
-ENV_ARGS = ObjectDict({
-    3: {
-        "appid": "a1cff12933face78dd2c725e0ed1d746"
-    }
-})
-
 # 请求jmis的方法
 JMIS_SIGNATURE = "getSignature"
 JMIS_USER_INFO = "getUserInfo"
