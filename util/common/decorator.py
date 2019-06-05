@@ -485,15 +485,15 @@ def check_and_apply_profile(func):
             maimai_url = path.MAIMAI_ACCESSTOKEN.format(appid=appid, cusdata=cusdata)
 
             # 猎聘用户授权 现场数据缓存
+            lielin_dict = dict(pid=self.params.pid,
+                               wechat_signature=self.current_user.wechat.signature)
+            if self.params.recom:
+                lielin_dict.update(recom=self.params.recom)
             base_cache.set(
                 const.LIEPIN_SCENE_KEY_FMT.format(
                     sysuser_id=self.current_user.sysuser.id
                 ),
-                json.dumps(dict(
-                    recom=self.params.recom,
-                    pid=self.params.pid,
-                    wechat_signature=self.current_user.wechat.signature
-                )),
+                json.dumps(lielin_dict),
                 const.LIEPIN_SCENE_KEY_TTL
             )
 

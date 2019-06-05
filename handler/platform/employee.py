@@ -1093,6 +1093,7 @@ class EmployeeReferralConnectionHandler(BaseHandler):
             path.REFERRAL_CONNECTIONS.format(chain_id),
             self.params,
             recom=self.position_ps._make_recom(self.current_user.sysuser.id),
+            invite_apply=1
         )
 
         self.params.share = ObjectDict({

@@ -68,6 +68,8 @@ class PositionHandler(BaseHandler):
 
             # 往kafka中写入数据, 做职位浏览统计
             yield self._insert_into_kafka(position_id)
+            if self.request.connection.stream.closed():
+                return
 
             # 刷新链路
             self.logger.debug("[JD]刷新链路")
@@ -1394,8 +1396,9 @@ class PositionListSugHandler(PositionListInfraParamsMixin, BaseHandler):
         # 获取五条sug数据
         infra_params.update(page_size=const_platform.SUG_LIST_COUNT,
                             keyWord=self.params.keyword if self.params.keyword else "",
-                            page_from=int(self.params.get("count", 0) / 10) + 1,
-                            is_referral=is_referral)
+                            page_from=int(self.params.get("count", 0) / 10) + 1)
+        if is_referral:
+            infra_params.update(is_referral=is_referral)
         res_data = yield self.position_ps.infra_obtain_sug_list(infra_params)
         suggest = res_data.get('suggest') if res_data else ''
         if suggest:
