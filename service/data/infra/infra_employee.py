@@ -6,10 +6,12 @@ import conf.common as const
 import conf.path as path
 from service.data.base import DataService
 from util.common import ObjectDict
-from util.tool.http_tool import http_get, http_post, http_put, unboxing, http_delete, http_post_multipart_form
+from util.tool.http_tool import http_get, http_post, unboxing, http_delete, http_post_multipart_form, http_get_v2, unboxing_v2
 from requests.models import Request
 from setting import settings
 from globals import env
+from conf.newinfra_service_conf.service_info import employee_service
+from conf.newinfra_service_conf.employee import employee
 
 
 class InfraEmployeeDataService(DataService):
@@ -407,3 +409,15 @@ class InfraEmployeeDataService(DataService):
         }
         ret = yield http_get(path.INFRA_REFERRAL_RADAR_CARD_RECOM, params)
         return ret
+
+    @gen.coroutine
+    def infra_get_employee_custom_info(self, params):
+        """获取员工补填信息"""
+        ret = yield http_get_v2(employee.NEWINFRA_EMPLOYEE_CUSTOM_INFO, employee_service, params)
+        return ret
+
+
+
+
+
+

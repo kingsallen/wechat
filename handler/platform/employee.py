@@ -18,16 +18,6 @@ from util.tool.str_tool import to_str
 from urllib import parse
 
 
-class EmployeeBindPageHandler(BaseHandler):
-    """员工认证页面"""
-
-    @handle_response
-    @authenticated
-    @gen.coroutine
-    def get(self):
-        self.render_page(template_name="employee/bind.html", data={}, meta_title="")
-
-
 class AwardsLadderPageHandler(BaseHandler):
     """Render page to employee/reward-rank.html
     包含转发信息
@@ -230,6 +220,19 @@ class EmployeeUnbindHandler(BaseHandler):
             self.send_json_error(message='not binded or pending')
 
 
+class EmployeeBindPageHandler(BaseHandler):
+    """员工认证页面"""
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        conf_response = yield self.employee_ps.get_employee_conf(
+            self.current_user.company.id)
+        title = conf_response.employeeVerificationConf.title if self.current_user.language == const.LOCALE_CHINESE else conf_response.employeeVerificationConf.enTitle
+        self.render_page(template_name="employee/bind.html", data={}, meta_title=title)
+
+
 class EmployeeBindHandler(BaseHandler):
     """员工绑定 API
     /api/employee/binding"""
@@ -251,7 +254,7 @@ class EmployeeBindHandler(BaseHandler):
         custom_info = yield self.employee_ps.get_employee_custom_info(self.current_user)
         # 根据 conf 来构建 api 的返回 data
         data = yield self.employee_ps.make_binding_render_data(
-            self.current_user, mate_num, reward, conf_response.employeeVerificationConf, in_wechat=self.in_wechat)
+            self.current_user, mate_num, reward, conf_response.employeeVerificationConf, custom_info, in_wechat=self.in_wechat)
 
         # 是否需要弹出 隐私协议 窗口
         res_privacy, data_privacy = yield self.privacy_ps.if_privacy_agreement_window(

@@ -92,12 +92,13 @@ class EmployeePageService(PageService):
         return bind_status
 
     @gen.coroutine
-    def make_binding_render_data(self, current_user, mate_num, reward, conf, in_wechat=None):
+    def make_binding_render_data(self, current_user, mate_num, reward, conf, custom_info, in_wechat=None):
         """构建员工绑定页面的渲染数据
         :returns:
         {
             'type':            'email',
             'binding_message': 'binding message ...',
+            'binding_tips_title': '认证须知'
             'binding_status':  1,
             'send_hour':       24,
             'headimg':         'http://o8g4x4uja.bkt.clouddn.com/0.jpeg',
@@ -140,6 +141,9 @@ class EmployeePageService(PageService):
         data.mate_num = mate_num
         data.conf.reward = reward
         data.custom_field = conf.customField
+        data.custom_info = custom_info
+        data.binding_message = conf.bindingMessage if current_user.language == const.LOCALE_CHINESE else conf.bindingEnMessage
+        data.binding_tips_title = conf.bindingTipsTitle if current_user.language == const.LOCALE_CHINESE else conf.bindingTipsEnTitle
 
         bind_status, employee = yield self.get_employee_info(
             user_id=current_user.sysuser.id, company_id=current_user.company.id)
@@ -212,7 +216,6 @@ class EmployeePageService(PageService):
 
         # 未绑定的员工， 根据 conf.authMode 来渲染
         else:
-            data.binding_message = binding_message
 
             if conf.authMode in [const.EMPLOYEE_BIND_AUTH_MODE.EMAIL,
                                  const.EMPLOYEE_BIND_AUTH_MODE.EMAIL_OR_CUSTOM,
@@ -266,7 +269,7 @@ class EmployeePageService(PageService):
         type = json_args.type
         source = int(params.source) if params.source and params.source.isdigit() else 0
 
-        needed_keys = ['type', 'name', 'mobile']
+        needed_keys = ['type', 'name', 'mobile', 'custom_info']
 
         if type == self.FE_BIND_TYPE_CUSTOM:
             needed_keys.append('custom_value')
@@ -301,7 +304,9 @@ class EmployeePageService(PageService):
             name=param_dict.name,
             answer1=param_dict.answer1,
             answer2=param_dict.answer2,
-            source=source)
+            source=source,
+            customInfo=param_dict.custom_info
+        )
 
         return True, binding_params
 
@@ -392,6 +397,16 @@ class EmployeePageService(PageService):
                 if r.get("points"):
                     return True
         return reward
+
+    @gen.coroutine
+    def get_employee_custom_info(self, current_user):
+        """获取员工信息"""
+        params = {
+            "user_id": current_user.sysuser_id,
+            "company_id": current_user.company.id
+        }
+        result = yield self.infra_employee_ds.infra_get_employee_custom_info(params)
+        return result.data or []
 
     @gen.coroutine
     def unbind(self, employee_id, company_id, user_id):

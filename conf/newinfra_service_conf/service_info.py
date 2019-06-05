@@ -20,6 +20,12 @@ position_service = ObjectDict(
     service_name="position"
 )
 
+employee_service = ObjectDict(
+    appid="A11009",
+    interfaceid="A11009001",
+    service_name="employee"
+)
+
 
 
 
