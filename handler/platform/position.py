@@ -66,6 +66,8 @@ class PositionHandler(BaseHandler):
 
             # 往kafka中写入数据, 做职位浏览统计
             yield self._insert_into_kafka(position_id)
+            if self.request.connection.stream.closed():
+                return
 
             # 刷新链路
             self.logger.debug("[JD]刷新链路")
