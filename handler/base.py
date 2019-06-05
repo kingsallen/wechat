@@ -302,7 +302,7 @@ class BaseHandler(MetaBaseHandler):
                                                        headers=headers)
             client_env.update({
                 "args": ObjectDict({
-                    "appid": ast.literal_eval(res.app_id).get("app_id"),
+                    "appid": res.app_id,
                     "signature": res.signature,
                     "timestamp": res.timestamp,
                     "nonceStr": res.nonce,
