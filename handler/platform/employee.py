@@ -21,6 +21,16 @@ import conf.platform as const_platform
 from util.wechat.core import get_temporary_qrcode
 
 
+class EmployeeBindHandler(BaseHandler):
+    """员工认证页面"""
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        self.render_page(template_name="employee/bind.html", data={}, meta_title="")
+
+
 class AwardsLadderPageHandler(BaseHandler):
     """Render page to employee/reward-rank.html
     包含转发信息
