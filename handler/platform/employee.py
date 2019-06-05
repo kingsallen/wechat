@@ -1,9 +1,9 @@
 # coding=utf-8
-
+import traceback
 from tornado.httputil import url_concat
 from tornado import gen
 
-import traceback
+import conf.platform as const_platform
 import conf.common as const
 import conf.message as msg
 import conf.fe as fe
@@ -15,13 +15,10 @@ from util.common import ObjectDict
 from util.common.decorator import handle_response, authenticated, check_employee_common, check_radar_status
 from util.tool.json_tool import json_dumps
 from util.tool.str_tool import to_str
-from util.common.cipher import decode_id
 from urllib import parse
-import conf.platform as const_platform
-from util.wechat.core import get_temporary_qrcode
 
 
-class EmployeeBindHandler(BaseHandler):
+class EmployeeBindPageHandler(BaseHandler):
     """员工认证页面"""
 
     @handle_response
