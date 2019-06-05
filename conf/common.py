@@ -153,14 +153,16 @@ API_SUCCESS = 0
 API_FAILURE = 1
 API_WARNING = 2
 
+# newinfra api status
+NEWINFRA_API_SUCCESS = '0'
+NEWINFRA_API_USER_NOT_EXIST = 'US20000'
+
 # 申请来源
 REHIRING_SOURCE = '8'  # 老员工回聘
 
 # 入库的申请来源
 REHIRING_ORIGIN = 2097152  # 老员工回聘
 TRANSFER_ORIGIN = 4194304  # 员工转岗
-
-# 入库的申请来源
 INVITE_ORIGIN = 524288  # 邀请投递申请
 FORWARD_ORIGIN = 1048576  # 员工转发申请
 
