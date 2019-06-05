@@ -378,7 +378,6 @@ class EmployeePageService(PageService):
         result, data = yield self.infra_employee_ds.get_bind_reward(company_id)
         return data
 
-    @log_time
     @gen.coroutine
     def get_bind_reward(self, company_id, type=None):
         """获取指定规则的积分配置, 如果未指定规则，则获取该公司是否有带积分奖励的积分规则"""

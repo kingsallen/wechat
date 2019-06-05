@@ -248,7 +248,7 @@ class EmployeeBindHandler(BaseHandler):
             pass
         mate_num = yield self.employee_ps.get_mate_num(self.current_user.company.id)
         reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_VERIFICATION)
-
+        custom_info = yield self.employee_ps.get_employee_custom_info(self.current_user)
         # 根据 conf 来构建 api 的返回 data
         data = yield self.employee_ps.make_binding_render_data(
             self.current_user, mate_num, reward, conf_response.employeeVerificationConf, in_wechat=self.in_wechat)
