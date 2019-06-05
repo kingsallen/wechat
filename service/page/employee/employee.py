@@ -139,6 +139,7 @@ class EmployeePageService(PageService):
         data.wechat.name = current_user.wechat.name
         data.mate_num = mate_num
         data.conf.reward = reward
+        data.custom_field = conf.customField
 
         bind_status, employee = yield self.get_employee_info(
             user_id=current_user.sysuser.id, company_id=current_user.company.id)
