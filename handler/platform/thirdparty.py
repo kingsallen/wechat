@@ -36,7 +36,7 @@ class JoywokOauthHandler(MetaBaseHandler):
         client_env = ObjectDict({
             "name": self._client_env,
             "args": ObjectDict({
-                "appid": ast.literal_eval(res.app_id).get("appid"),
+                "appid": ast.literal_eval(res.app_id).get("app_id"),
                 "signature": res.signature,
                 "timestamp": res.timestamp,
                 "nonceStr": res.nonce,
