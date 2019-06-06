@@ -89,7 +89,7 @@ class JoywokInfoHandler(MetaBaseHandler):
         })
         if ret.data:
             session_id = self.make_new_session_id(ret.data.sysuser_id)
-            self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True)
+            self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True, domain=settings['root_host'])
             self.params.update(wechat_signature=wechat.signature)
             next_url = self.make_url(path.POSITION_LIST,
                                      self.params,
