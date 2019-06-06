@@ -489,21 +489,21 @@ class ChatHandler(BaseHandler):
         """
         用户chat发送消息响应处理
 
-        @:param flag 2:meet mobot, 3:智能推荐, 4:{{data}}, 5: {{decodeURIComponent(data)}}
+        @:param flag int(1) 2:meet mobot, 3:智能推荐, 4:{{data}}, 5: {{decodeURIComponent(data)}}
                 scene emp_chat 我是员工
-        @:param msgType 消息类型  ping, pong, html, text, image, voice, job, voice-preview, cards, job-sender,
-                                 button_radio, teamSelect, textPlaceholder, satisfaction, textList, citySelect,
-                                 industrySelect, positionSelect, jobCard, jobSelect, employeeBind, redirect,
-                                 uploadResume
-        @:param serverId 微信语音内容，微信服务器生成的serverId
-        @:param duration 微信语音时长
-        @:param create_new_context 是否创建了新的会话
-        @:param from_textfield 用户输入内容是否触发脚本非法分支，如触发，终止当前脚本新起脚本（unexpected_branch_allowed）
-        @:param compoundContent 复杂结构体的聊天内容
-        @:param content 用户发送的内容
-        @:param pid 职位ID
-        @:param hrId HRID
-        @:param roomId 聊天室ID
+        @:param msgType str(50) 消息类型  ping, pong, html, text, image, voice, job, voice-preview, cards, job-sender,
+                                         button_radio, teamSelect, textPlaceholder, satisfaction, textList, citySelect,
+                                         industrySelect, positionSelect, jobCard, jobSelect, employeeBind, redirect,
+                                         uploadResume
+        @:param serverId str(256) 微信语音内容，微信服务器生成的serverId
+        @:param duration int(1) 微信语音时长
+        @:param create_new_context boolean 是否创建了新的会话
+        @:param from_textfield boolean 用户输入内容是否触发脚本非法分支，如触发，终止当前脚本新起脚本（unexpected_branch_allowed）
+        @:param compoundContent str(text) 复杂结构体的聊天内容
+        @:param content str(text) 用户发送的内容
+        @:param pid int(11) 职位ID
+        @:param hrId int(11) HRID
+        @:param roomId int(11) 聊天室ID
 
         :return:
         """
