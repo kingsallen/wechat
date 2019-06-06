@@ -118,3 +118,8 @@ REFERRAL_INVITE_TEXT = '这是一个千载难逢的内推机会哦~'
 # 内推进度页面分享
 REFERRAL_PROGRESS_TITLE = '内推进度分享'
 REFERRAL_PROGRESS_DESCRIPTION = '快来看看你的应聘进度吧~'
+
+# joywok自动认证
+JOYWOK_AUTO_BIND_SUCCESS = "员工认证成功，微信绑定已完成，快去转发职位吧"
+JOYWOK_AUTO_BIND_EMPLOYEE_INFO_IS_GONE = "该员工信息已被认证"
+JOYWOK_AUTO_BIND_FAIL = "员工认证失败"
