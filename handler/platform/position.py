@@ -888,7 +888,7 @@ class PositionListInfraParamsMixin(BaseHandler):
             infra_params.did = self.params.did
 
         infra_params.page_size = const_platform.POSITION_LIST_PAGE_COUNT
-        infra_params.page_from = int(self.params.get("count", 0))
+        infra_params.page_from = int(self.params.get("count", 0)) + 1
 
         if self.params.salary:
             k = str(self.params.salary)
