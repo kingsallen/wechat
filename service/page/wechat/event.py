@@ -297,7 +297,7 @@ class EventPageService(PageService):
             "subscribe_time": int(time.time() * 1000)
         })
         # 如果之前是员工，自动绑定员工身份
-        yield user_follow_wechat_publisher.publish_message(message=data, routing_key="user_follow_wechat_check_employee_identity")
+        yield user_follow_wechat_publisher.publish_message(message=data, routing_key="user_follow_wechat.#")
 
         # 处理临时二维码，目前主要在 PC 上创建帐号、绑定账号时使用,以及Mars EDM活动
         if msg.EventKey:
