@@ -168,9 +168,8 @@ class EventPageService(PageService):
     @gen.coroutine
     def wechat_test_text(self, keyword, msg, nonce, wechat):
         """微信开放平台测试审核"""
-        query_auth_code = re.match(r'QUERY_AUTH_CODE:\$(.*)\$', keyword)
-        if not query_auth_code:
-            query_auth_code = re.match(r'QUERY_AUTH_CODE:(.*)', keyword)
+        query_auth_code = re.match(r'QUERY_AUTH_CODE:(.*)', keyword)
+
         if keyword == 'TESTCOMPONENT_MSG_TYPE_TEXT':
             res = yield self.wx_rep_text(msg=msg, text='TESTCOMPONENT_MSG_TYPE_TEXT_callback', wechat=wechat,
                                          nonce=nonce)
@@ -181,13 +180,14 @@ class EventPageService(PageService):
             component_appid = settings["component_app_id"]
             authorization_code = query_auth_code.group(1)
             ret = yield get_test_access_token(component_access_token, component_appid, authorization_code)
-            access_token = ret.get("authorizer_access_token")
-            content = ["${}$_from_api".format(authorization_code), "{}_from_api".format(authorization_code)]
-            for c in content:
-                data = ObjectDict({"touser": msg.FromUserName, "msgtype": "text", "text": {"content": c}})
+            if ret:
+                access_token = ret.get("authorizer_access_token")
+                content = "{}_from_api".format(authorization_code)
+                data = ObjectDict({"touser": msg.FromUserName, "msgtype": "text", "text": {"content": content}})
                 yield http_post_cs_msg(wx_const.WX_CS_MESSAGE_API % access_token, data=data)
             res = yield self.wx_rep_text(msg=msg, text='', wechat=wechat,
                                          nonce=nonce)
+
             return res
 
     @gen.coroutine

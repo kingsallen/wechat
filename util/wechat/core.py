@@ -304,6 +304,12 @@ def get_test_access_token(component_access_token, component_appid, authorization
         "component_appid": component_appid,
         "authorization_code": authorization_code
     }
+    if component_access_token is not None:
+        component_access_token = component_access_token.get("component_access_token", None)
+    else:
+        return None
+    logger.debug('[get_test_access_token]: component_access_token: {}, component_appid: {}, authorization_code: {}'.format(
+        component_access_token, component_appid, authorization_code))
     ret = yield http_post(wx.WX_OAUTH_PRE_ACCESS_TOKEN % component_access_token, data, infra=False)
     return ret
 
