@@ -489,7 +489,7 @@ class ChatHandler(BaseHandler):
         """
         用户chat发送消息响应处理
 
-        @:param flag int(1) 2:meet mobot, 3:智能推荐, 4:{{data}}, 5: {{decodeURIComponent(data)}}
+        @:param flag int(1) 0:社招 1:校招 2:meet mobot, 3:智能推荐, 4:{{data}}, 5: {{decodeURIComponent(data)}}
                 scene emp_chat 我是员工
         @:param msgType str(50) 消息类型  ping, pong, html, text, image, voice, job, voice-preview, cards, job-sender,
                                          button_radio, teamSelect, textPlaceholder, satisfaction, textList, citySelect,
