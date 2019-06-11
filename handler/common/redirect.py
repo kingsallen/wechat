@@ -16,8 +16,12 @@ class RedirectHandler(BaseHandler):
             self.redirect(next_url)
 
 
+class H5DefaultHandler(BaseHandler):
 
-
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        self.render_page(template_name="", data={}, message='该页面已过保质期', meta_title='')
 
 
 
