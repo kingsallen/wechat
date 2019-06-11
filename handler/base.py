@@ -88,6 +88,7 @@ class BaseHandler(MetaBaseHandler):
         settings['platform_domain'] = settings['m_domain'] + '/m'
         settings['qx_domain'] = settings['m_domain'] + '/recruit'
         settings['helper_domain'] = settings['m_domain'] + '/h'
+        settings['pass_multi_submain_host'] = ['tui-t.dqprism.com']
         # **************************************************************
 
         分三个环境：
@@ -152,6 +153,8 @@ class BaseHandler(MetaBaseHandler):
                 wechat = yield self.wechat_ps.get_wechat(conds={"signature": signature})
                 to = "https://" + multi_domain_settings["m_format"].format(wechat.appid) + self.request.uri
                 return True, to
+            elif host in settings['pass_multi_submain_host']:
+                return False, None
             else:
                 raise MultiDomainException(
                         json.dumps({"full_url": self.request.full_url(),
