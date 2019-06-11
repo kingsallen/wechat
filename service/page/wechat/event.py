@@ -143,7 +143,9 @@ class EventPageService(PageService):
 
         # 微信开放平台测试审核
         if msg.ToUserName == 'gh_3c884a361561':
+            self.logger.debug("[wechat_test_text]")
             res = yield self.wechat_test_text(keyword, msg, nonce, wechat)
+            self.logger.debug("[wechat_test_text] result:{}".format(res))
             return res
 
         rules = yield self.hr_wx_rule_ds.get_wx_rules(conds={
@@ -171,11 +173,13 @@ class EventPageService(PageService):
         query_auth_code = re.match(r'QUERY_AUTH_CODE:(.*)', keyword)
 
         if keyword == 'TESTCOMPONENT_MSG_TYPE_TEXT':
+            self.logger.debug('[wechat_test_text] content test')
             res = yield self.wx_rep_text(msg=msg, text='TESTCOMPONENT_MSG_TYPE_TEXT_callback', wechat=wechat,
                                          nonce=nonce)
             return res
 
         elif query_auth_code:
+            self.logger.debug('[wechat_test_text] api test: {}'.format(query_auth_code))
             component_access_token = self.redis.get("component_access_token", prefix=False)
             component_appid = settings["component_app_id"]
             authorization_code = query_auth_code.group(1)
