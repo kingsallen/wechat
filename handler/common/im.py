@@ -25,20 +25,6 @@ from util.tool.json_tool import encode_json_dumps, json_dumps
 from util.tool.pubsub_tool import Subscriber
 from util.tool.str_tool import to_str, match_session_id
 
-
-class IndexHandler(BaseHandler):
-    """页面Index, 单页应用使用"""
-
-    @handle_response
-    @gen.coroutine
-    def get(self):
-        yield getattr(self, 'get_default')()
-
-    @handle_response
-    @gen.coroutine
-    def get_default(self):
-        self.render(template_name="mobot/index.html")
-
 class UnreadCountHandler(BaseHandler):
     @handle_response
     @gen.coroutine
@@ -357,6 +343,16 @@ class ChatHandler(BaseHandler):
             yield getattr(self, "get_" + method)()
         except Exception as e:
             self.write_error(404)
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get_environ(self):
+        self.send_json_success(data=ObjectDict(
+            locale_code=self.locale.code,
+            user=self.current_user,
+            env=self.env,
+        ))
 
     @handle_response
     @authenticated
@@ -708,3 +704,12 @@ class ChatHandler(BaseHandler):
             return
 
         self.bot_enabled = user_hr_account.leave_to_mobot
+
+
+class MobotHandler(BaseHandler):
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        self.render(template_name='mobot/index.html')

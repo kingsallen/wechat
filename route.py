@@ -105,7 +105,7 @@ common_routes = [
     (r"/profile/custom/?",                           handler.common.profile.ProfileCustomHandler,               {"event": "profile_customcv"}),
     (r"/image/?",                                    handler.common.image.ImageFetchHandler,                    {"event": "image_fetch"}),
     (r"/chat/room[\/]*([0-9]+)*",                    handler.common.im.ChatRoomHandler,                         {"event": "im_room"}),
-    (r"/mobot",                                      handler.common.im.IndexHandler,                            {"event": "im_mobot"}),
+    (r"/mobot",                                      handler.common.im.MobotHandler,                            {"event": "im_mobot"}),
     (r"/im/laiye",                                   handler.common.laiye_im.LaiyeImHandler,                    {"event": "im laiye"}),
     (r"/resume/import/limit",                        handler.common.resume.ResumeImportLimit,                   {"event": "resume_import_limit"}),
     (r"/redirect",                                   handler.common.redirect.RedirectHandler,                   {"event": "redirect"}),
