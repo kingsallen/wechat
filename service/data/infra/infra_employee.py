@@ -416,6 +416,18 @@ class InfraEmployeeDataService(DataService):
         ret = yield http_get_v2(employee.NEWINFRA_EMPLOYEE_CUSTOM_INFO, employee_service, params)
         return ret
 
+    @gen.coroutine
+    def infra_get_employee_custom_field(self, params):
+        """获取补填字段配置数据"""
+        ret = yield http_get_v2(employee.NEWINFRA_EMPLOYEE_CUSTOM_FIELD, employee_service, params)
+        return ret
+
+    @gen.coroutine
+    def infra_get_employee_auth_tips_info(self, params):
+        """获取认证自定义显示数据"""
+        ret = yield http_get_v2(employee.NEWINFRA_EMPLOYEE_AUTH_TIPS_INFO, employee_service, params)
+        return ret
+
 
 
 

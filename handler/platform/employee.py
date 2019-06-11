@@ -235,9 +235,8 @@ class EmployeeBindPageHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def get(self):
-        conf_response = yield self.employee_ps.get_employee_conf(
-            self.current_user.company.id)
-        title = conf_response.employeeVerificationConf.title if self.current_user.language == const.LOCALE_CHINESE else conf_response.employeeVerificationConf.enTitle
+        res = yield self.employee_ps.get_employee_auth_tips_info(self.current_user)
+        title = res.title if self.current_user.language == const.LOCALE_CHINESE else res.title_ename
         self.render_page(template_name="employee/bind.html", data={}, meta_title=title)
 
 
@@ -257,12 +256,27 @@ class EmployeeBindHandler(BaseHandler):
             return
         else:
             pass
-        mate_num = yield self.employee_ps.get_mate_num(self.current_user.company.id)
-        reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_VERIFICATION)
-        custom_info = yield self.employee_ps.get_employee_custom_info(self.current_user)
+
+        # 获取员工认证页各项数据
+        mate_num, reward, custom_supply_info, custom_supply_field, employee_auth_tips_info = yield [
+            self.employee_ps.get_mate_num(self.current_user.company.id),
+            self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_VERIFICATION),
+            self.employee_ps.get_employee_custom_info(self.current_user),
+            self.employee_ps.get_employee_custom_field(self.current_user),
+            self.employee_ps.get_employee_auth_tips_info(self.current_user)
+        ]
+
         # 根据 conf 来构建 api 的返回 data
         data = yield self.employee_ps.make_binding_render_data(
-            self.current_user, mate_num, reward, conf_response.employeeVerificationConf, custom_info, in_wechat=self.in_wechat)
+            current_user=self.current_user,
+            mate_num=mate_num,
+            reward=reward,
+            conf=conf_response.employeeVerificationConf,
+            custom_supply_info=custom_supply_info,
+            custom_supply_field=custom_supply_field,
+            auth_tips_info=employee_auth_tips_info,
+            in_wechat=self.in_wechat
+        )
 
         # 是否需要弹出 隐私协议 窗口
         res_privacy, data_privacy = yield self.privacy_ps.if_privacy_agreement_window(

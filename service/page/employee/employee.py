@@ -92,39 +92,62 @@ class EmployeePageService(PageService):
         return bind_status
 
     @gen.coroutine
-    def make_binding_render_data(self, current_user, mate_num, reward, conf, custom_info, in_wechat=None):
+    def make_binding_render_data(self, current_user, mate_num, reward, conf, custom_supply_info, custom_supply_field, auth_tips_info, in_wechat=None):
         """构建员工绑定页面的渲染数据
         :returns:
         {
-            'type':            'email',
-            'binding_message': 'binding message ...',
-            'binding_tips_title': '认证须知'
-            'binding_status':  1,
-            'send_hour':       24,
-            'headimg':         'http://o8g4x4uja.bkt.clouddn.com/0.jpeg',
-            'employeeid':      23,
-            'name':            'name',
-            'mobile':          '15000234929',
-            'conf':            {
-                'custom_name':   'custom',
-                'custom_hint':   'custom hint',
-                'custom_value':  'user input value for custom',
-                'email_suffixs': ['qq.com', 'foxmail.com'],
-                'email_name':    'tovvry',
-                'email_suffix':  'qq.com',
-                'questions':     [ {'q': "你的姓名是什么", 'a':''}, {'q': "你的弟弟的姓名是什么", 'a': ''} ],
-                # // null, question, or email
-                'switch':        'email',
+          'type':            'email',
+          'custom_title':    'custom title',
+          'binding_tips_title': '认证须知'
+          'binding_message': 'binding message ...',
+          'binding_status':  1,
+          'send_hour':       24,
+          'headimg':         'http://o8g4x4uja.bkt.clouddn.com/0.jpeg',
+          'employeeid':      23,
+          'name':            'name',
+          'mobile':          '15000234929',
+          'conf':            {
+            'custom_name':   'custom',
+            'custom_hint':   'custom hint',
+            'custom_value':  'user input value for custom',
+            'email_suffixs': ['qq.com', 'foxmail.com'],
+            'email_name':    'tovvry',
+            'email_suffix':  'qq.com',
+            'questions':     [ {'q': "你的姓名是什么", 'a':''}, {'q': "你的弟弟的姓名是什么", 'a': ''} ],
+            # // null, question, or email
+            'switch':        'email',
+          },
+          'custom_field':
+            [
+              {
+                "id":1,
+                "name":"部门",
+                "ename": "department",
+                "system_field": 1,  # 1部门，2职位，3城市，0非系统字段
+                "option_type":0,  # 选项类型  0:下拉选项, 1:文本
+                "values":[
+                  {
+                    "id":1,
+                    "value":"test"
+                    },
+                 ]
+              "enable":0, # 是否停用 0:不停用(有效)， 1:停用(无效)
+              "required":1,	# 是否必填 0:不必填，1必填
             }
+          ]
+          'custom_info':
+            [
+              {"custom_field.id":
+               "custom_field.values.id or ''"
+              }
+            ]
         """
-        company_conf = yield self.hr_company_conf_ds.get_company_conf(
-            conds={'company_id': current_user.company.id},
-            fields=['employee_binding']
-        )
-        # 员工认证自定义文案
-        binding_message = company_conf.employee_binding if company_conf else ''
 
         data = ObjectDict()
+        # 员工认证自定义文案
+        data.binding_message = auth_tips_info.description if current_user.language == const.LOCALE_CHINESE else auth_tips_info.description_ename
+        data.binding_tips_title = auth_tips_info.tips_title if current_user.language == const.LOCALE_CHINESE else auth_tips_info.tips_title_ename
+
         data.wechat = ObjectDict()
         data.name = current_user.sysuser.name
         data.headimg = current_user.sysuser.headimg
@@ -132,18 +155,19 @@ class EmployeePageService(PageService):
         data.send_hour = 24  # fixed 24 小时
         data.conf = ObjectDict()
         data.binding_success_message = conf.bindSuccessMessage or ''
+
+        # todo 公众号信息，已有接口，这个其实是重复的代码
         data.wechat.subscribed = True if not in_wechat or current_user.wxuser.is_subscribe or current_user.wechat.type == 0 else False
         data.wechat.qrcode = yield get_temporary_qrcode(
             wechat=current_user.wechat,
             scene_id=int('11110000000000000000000000000000', base=2) + int(const.QRCODE_BIND)
         )
         data.wechat.name = current_user.wechat.name
+
         data.mate_num = mate_num
         data.conf.reward = reward
-        data.custom_field = conf.customField
-        data.custom_info = custom_info
-        data.binding_message = conf.bindingMessage if current_user.language == const.LOCALE_CHINESE else conf.bindingEnMessage
-        data.binding_tips_title = conf.bindingTipsTitle if current_user.language == const.LOCALE_CHINESE else conf.bindingTipsEnTitle
+        data.custom_supply_field = custom_supply_field
+        data.custom_supply_info = custom_supply_info
 
         bind_status, employee = yield self.get_employee_info(
             user_id=current_user.sysuser.id, company_id=current_user.company.id)
@@ -305,7 +329,7 @@ class EmployeePageService(PageService):
             answer1=param_dict.answer1,
             answer2=param_dict.answer2,
             source=source,
-            customInfo=param_dict.custom_info
+            customSupplyInfo=param_dict.custom_supply_info
         )
 
         return True, binding_params
@@ -400,13 +424,32 @@ class EmployeePageService(PageService):
 
     @gen.coroutine
     def get_employee_custom_info(self, current_user):
-        """获取员工信息"""
+        """获取员工补填信息"""
         params = {
             "user_id": current_user.sysuser_id,
             "company_id": current_user.company.id
         }
         result = yield self.infra_employee_ds.infra_get_employee_custom_info(params)
         return result.data or []
+
+    @gen.coroutine
+    def get_employee_custom_field(self, current_user):
+        """获取补填字段配置数据"""
+        params = {
+            "company_id": current_user.company.id
+        }
+        result = yield self.infra_employee_ds.infra_get_employee_custom_field(params)
+        return result.data or []
+
+    @gen.coroutine
+    def get_employee_auth_tips_info(self, current_user):
+        """获取认证自定义显示数据"""
+        params = {
+            "company_id": current_user.company.id
+        }
+        result = yield self.infra_employee_ds.infra_get_employee_auth_tips_info(params)
+        return result.data or ObjectDict()
+
 
     @gen.coroutine
     def unbind(self, employee_id, company_id, user_id):
