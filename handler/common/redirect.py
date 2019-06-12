@@ -21,7 +21,7 @@ class H5DefaultHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def get(self):
-        self.render_page(template_name="", data={}, message='该页面已过保质期', meta_title='')
+        self.render_page(template_name="adjunct/page-expired.html", data={}, message='该页面已过保质期', meta_title='页面已过期')
 
 
 
