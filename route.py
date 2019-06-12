@@ -112,6 +112,7 @@ common_routes = [
     (r"/redpacket/claim",                            handler.common.redpacket.RedpacketHandler,                 {"event": "redpacket_claim"}),
     (r"/api/redpacket/claim",                        handler.common.redpacket.RedpacketHandler,                 {"event": "api_redpacket_claim"}),
     (r"/s/(?P<uuid>\w+)",                            handler.common.short_url.ShortURLRedirector,               {"event": "short_url_redirect"}),
+    (r"/mobile/h5/(\d+)",                            handler.common.redirect.H5DefaultHandler,                  {"event": "h5_default_page"}),
 
     # websocket
     (r"/websocket/([A-Za-z0-9_]{1,32})",             handler.common.im.ChatWebSocketHandler),
