@@ -353,22 +353,18 @@ class ChatHandler(BaseHandler):
         jsapi = JsApi(jsapi_ticket=self.current_user.wechat.jsapi_ticket,
                       url=self.fullurl(encode=False))
 
+
         config = ObjectDict({
                   "debug": False,
                   "appid": self.current_user.wechat.appid,
                   "timestamp": jsapi.timestamp,
                   "nonceStr": jsapi.nonceStr,
                   "signature": jsapi.signature,
-                  "jsApiList": ["onMenuShareTimeline",
-                                "onMenuShareAppMessage",
-                                "updateTimelineShareData",
+                  "jsApiList": [
                                 "updateAppMessageShareData",
-                                "onMenuShareQQ",
                                 "updateTimelineShareData",
-                                "updateAppMessageShareData",
                                 "onMenuShareWeibo",
-                                "hideOptionMenu",
-                                "showOptionMenu",
+                                "onMenuShareQZone",
                                 "startRecord",
                                 "stopRecord",
                                 "onVoiceRecordEnd",
@@ -377,12 +373,28 @@ class ChatHandler(BaseHandler):
                                 "stopVoice",
                                 "onVoicePlayEnd",
                                 "uploadVoice",
-                                "translateVoice",
                                 "downloadVoice",
+                                "chooseImage",
+                                "previewImage",
+                                "uploadImage",
+                                "downloadImage",
+                                "translateVoice",
+                                "getNetworkType",
+                                "openLocation",
+                                "getLocation",
+                                "hideOptionMenu",
+                                "showOptionMenu",
                                 "hideMenuItems",
                                 "showMenuItems",
                                 "hideAllNonBaseMenuItem",
-                                "showAllNonBaseMenuItem"
+                                "showAllNonBaseMenuItem",
+                                "closeWindow",
+                                "scanQRCode",
+                                "chooseWXPay",
+                                "openProductSpecificView",
+                                "addCard",
+                                "chooseCard",
+                                "openCard"
                                 ]
         })
         self.logger.debug("get_environ get jssdk config:{}".format(config))
