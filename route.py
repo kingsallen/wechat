@@ -40,6 +40,7 @@ import handler.common.short_url
 import handler.common.statistics
 import handler.common.redpacket
 import handler.common.miniapp
+import handler.common.health_check
 
 import handler.help.passport
 import handler.help.releasedposition
@@ -113,6 +114,7 @@ common_routes = [
     (r"/api/redpacket/claim",                        handler.common.redpacket.RedpacketHandler,                 {"event": "api_redpacket_claim"}),
     (r"/s/(?P<uuid>\w+)",                            handler.common.short_url.ShortURLRedirector,               {"event": "short_url_redirect"}),
     (r"/mobile/h5/(\d+)",                            handler.common.redirect.H5DefaultHandler,                  {"event": "h5_default_page"}),
+    (r"/health_check",                               handler.common.health_check.HealthcheckHandler,            {"event": "health_check"}),
 
     # websocket
     (r"/websocket/([A-Za-z0-9_]{1,32})",             handler.common.im.ChatWebSocketHandler),
