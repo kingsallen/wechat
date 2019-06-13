@@ -25,6 +25,7 @@ from util.tool.json_tool import encode_json_dumps, json_dumps
 from util.tool.pubsub_tool import Subscriber
 from util.tool.str_tool import to_str, match_session_id
 
+
 class UnreadCountHandler(BaseHandler):
     @handle_response
     @gen.coroutine
@@ -352,7 +353,8 @@ class ChatHandler(BaseHandler):
         jsapi = JsApi(jsapi_ticket=self.current_user.wechat.jsapi_ticket,
                       url=self.fullurl(encode=False))
 
-        config = {"debug": False,
+        config = ObjectDict({
+                  "debug": False,
                   "appid": self.current_user.wechat.appid,
                   "timestamp": jsapi.timestamp,
                   "nonceStr": jsapi.nonceStr,
@@ -382,14 +384,15 @@ class ChatHandler(BaseHandler):
                                 "hideAllNonBaseMenuItem",
                                 "showAllNonBaseMenuItem"
                                 ]
-        }
+        })
         self.logger.debug("get_environ get jssdk config:{}".format(config))
+
+        self.current_user.wechat.jsapi = config
 
         self.send_json_success(data=ObjectDict(
             locale_code=self.locale.code,
             user=self.current_user,
-            env=self.env,
-            jsapi=config
+            env=self.env
         ))
 
     @handle_response
