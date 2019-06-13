@@ -882,7 +882,7 @@ class PositionListInfraParamsMixin(BaseHandler):
         infra_params.employment_type = ""
         infra_params.company_id = self.current_user.company.id
         infra_params.user_id = self.current_user.sysuser.id or 0
-        infra_params.is_referral = 1 if self.params.is_referral and self.params.is_referral.isdigit() else 0
+        infra_params.is_referral = 1 if self.params.is_referral and self.params.is_referral.isdigit() else -1
 
         if self.params.did:
             infra_params.did = self.params.did
