@@ -20,7 +20,7 @@ class InfraPositionDataService(DataService):
     """对接职位服务
         referer: https://wiki.moseeker.com/position-api.md"""
 
-    @cache_new(ttl=300, escape=['user_id'])
+    # @cache_new(ttl=300, escape=['user_id'])
     @gen.coroutine
     def get_position_list(self, params):
         """普通职位列表"""
