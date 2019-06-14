@@ -179,6 +179,20 @@ class ProfileNewHandler(BaseHandler):
             self.send_json_warning(message='profile created partially')
 
 
+class APIProfileHandler(BaseHandler):
+
+    @handle_response
+    @tornado.gen.coroutine
+    def get(self):
+        user_id = self.current_user.sysuser.id if self.current_user.sysuser else 0
+        if not user_id:
+            self.send_json_error()
+        else:
+            result, profile = yield self.profile_ps.has_profile(user_id)
+            if result:
+                self.send_json_success(data=profile)
+
+
 class ProfilePreviewHandler(BaseHandler):
 
     @handle_response
