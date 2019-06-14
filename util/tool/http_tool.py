@@ -96,9 +96,9 @@ def http_post_rp(route, service, jdata=None, timeout=30):
 
 
 @gen.coroutine
-def http_get(route, jdata=None, timeout=30, infra=True):
+def http_get(route, jdata=None, timeout=30, infra=True, headers=None):
     ret = yield _async_http_get(route, jdata, timeout=timeout, method='GET',
-                                infra=infra)
+                                infra=infra, headers=headers)
     return ret
 
 
@@ -271,7 +271,7 @@ def unboxing_v2(http_response):
 
 
 @gen.coroutine
-def _async_http_get(route, jdata=None, timeout=5, method='GET', infra=True):
+def _async_http_get(route, jdata=None, timeout=5, method='GET', infra=True, headers=None):
     """可用 HTTP 动词为 GET 和 DELETE"""
     if method.lower() not in "get delete":
         raise ValueError("method is not in GET and DELETE")
@@ -286,11 +286,15 @@ def _async_http_get(route, jdata=None, timeout=5, method='GET', infra=True):
         url = url_concat(route, jdata)
 
     http_client = tornado.httpclient.AsyncHTTPClient()
+    if headers and isinstance(headers, dict):
+        headers.update({"Content-Type": "application/json"})
+    else:
+        headers = {"Content-Type": "application/json"}
     response = yield http_client.fetch(
         url,
         method=method.upper(),
         request_timeout=timeout,
-        headers=HTTPHeaders({"Content-Type": "application/json"})
+        headers=HTTPHeaders(headers)
     )
 
     logger.debug("[infra][http_{}][url: {}][ret: {}] ".format(

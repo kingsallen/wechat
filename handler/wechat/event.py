@@ -179,7 +179,7 @@ class WechatOauthHandler(MetaBaseHandler):
     @gen.coroutine
     def event_view_miniprogram(self):
         """小程序事件，暂时只是避免报错"""
-        pass
+        self.send_xml()
 
     @gen.coroutine
     def event_TEMPLATESENDJOBFINISH(self):

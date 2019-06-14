@@ -59,6 +59,28 @@ base_cache = BaseRedis()
 sem = Semaphore(1)
 
 
+def check_env(env):
+    """
+    校验当前环境是否符合该接口限制的环境
+    1: wechat
+    2: nonwechat
+    3: joywok
+    """
+    def check_inner(func):
+
+        @functools.wraps(func)
+        @gen.coroutine
+        def func_wrapper(self, *args, **kwargs):
+            if self._client_env == env:
+                yield func(self, *args, **kwargs)
+            else:
+                self.write_error(500, message="请在正确的环境打开该页面")
+
+        return func_wrapper
+
+    return check_inner
+
+
 def cache(prefix=None, key=None, ttl=60, hash=True, lock=True, separator=":"):
     """
     cache装饰器
@@ -335,7 +357,7 @@ def cover_no_weixin(func):
     @functools.wraps(func)
     @gen.coroutine
     def wrapper(self, *args, **kwargs):
-        if not self.in_wechat and 'moseeker' not in self.request.headers.get('User-Agent'):
+        if not self.in_wechat and 'moseeker' not in self.request.headers.get('User-Agent') and 'Joywok' not in self.request.headers.get('User-Agent'):
             self.render(template_name="adjunct/not-weixin.html", http_code=416)
             return
         else:

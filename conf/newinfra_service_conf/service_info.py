@@ -2,6 +2,7 @@
 
 from util.tool.dict_tool import ObjectDict
 
+
 redpacket_service = ObjectDict(
     appid="A11039",
     interfaceid="A11039001",  # 必传，但是又没有什么用，也没有拓展使用的打算，这里都用默认值写死
@@ -19,7 +20,3 @@ position_service = ObjectDict(
     interfaceid="A11009001",
     service_name="position"
 )
-
-
-
-

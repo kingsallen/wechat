@@ -64,6 +64,7 @@ import handler.platform.privacy
 import handler.platform.switch
 import handler.platform.radar_demo
 import handler.platform.annual_summarize
+import handler.platform.thirdparty
 
 import handler.qx.app
 import handler.qx.aggregation
@@ -111,6 +112,7 @@ common_routes = [
     (r"/redpacket/claim",                            handler.common.redpacket.RedpacketHandler,                 {"event": "redpacket_claim"}),
     (r"/api/redpacket/claim",                        handler.common.redpacket.RedpacketHandler,                 {"event": "api_redpacket_claim"}),
     (r"/s/(?P<uuid>\w+)",                            handler.common.short_url.ShortURLRedirector,               {"event": "short_url_redirect"}),
+    (r"/mobile/h5/(\d+)",                            handler.common.redirect.H5DefaultHandler,                  {"event": "h5_default_page"}),
 
     # websocket
     (r"/websocket/([A-Za-z0-9_]{1,32})",             handler.common.im.ChatWebSocketHandler),
@@ -208,7 +210,9 @@ platform_routes = [
     (r'/referral/confirm/?',                         handler.platform.referral.ReferralConfirmHandler,          {"event": "referral_confirm"}),
     (r'/employee/recom/profile/pc/?',                handler.platform.referral.ReferralProfilePcHandler,        {"event": "referal_confirm_pc"}),
     (r'/referral/crucial/info/?',                    handler.platform.referral.ReferralCrucialInfoHandler,      {"event": "referral_crucial_info"}),
-    (r'/referral/contact_result/?',                  handler.platform.referral.ReferralResultHandler,         {"event": "referral_contact_result"}),
+    (r'/referral/contact_result/?',                  handler.platform.referral.ReferralResultHandler,           {"event": "referral_contact_result"}),
+    (r"/joywork",                                    handler.platform.thirdparty.JoywokOauthHandler,            {"event": "joywok_oauth"}),
+    (r"/thirdparty/automatic/auth",                  handler.platform.thirdparty.JoywokAutoAuthHandler,         {"event": "joywok_auto_bind_page"}),
 
     # 各大公司的自定义配置
     (r"/custom/emailapply/?",                        handler.platform.customize.CustomizeEmailApplyHandler,     {"event": "customize_emailapply"}),
@@ -225,6 +229,7 @@ platform_routes = [
     (r"/api/annual/summarize",                       handler.platform.annual_summarize.ApiAnnualSummarizeHandler, {"event": "api_annual_summarize"}),
     (r"/api/annual/summarize/entrance",              handler.platform.annual_summarize.AnnualSummarizeEntranceHandler, {"event": "annual_summarize_entrance"}),
 
+    (r"/api/omniauth/jw/login_code",                 handler.platform.thirdparty.JoywokInfoHandler,             {"event": "joywok_info"}),
     (r"/api/company/visitreq/?",                     handler.platform.companyrelation.CompanyVisitReqHandler,   {"event": "company_visitreq"}),
     (r"/api/company/survey/?",                       handler.platform.companyrelation.CompanySurveyHandler,     {"event": "company_survey"}),
     (r"/api/company/follow/?",                       handler.platform.companyrelation.CompanyFollowHandler,     {"event": "company_follow"}),
