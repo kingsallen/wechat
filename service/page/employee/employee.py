@@ -450,7 +450,6 @@ class EmployeePageService(PageService):
         result = yield self.infra_employee_ds.infra_get_employee_auth_tips_info(params)
         return result.data or ObjectDict()
 
-
     @gen.coroutine
     def unbind(self, employee_id, company_id, user_id):
         """员工解绑"""
