@@ -329,7 +329,7 @@ class EmployeePageService(PageService):
             answer1=param_dict.answer1,
             answer2=param_dict.answer2,
             source=source,
-            customSupplyInfo=param_dict.custom_supply_info
+            customFieldValues=param_dict.custom_supply_info
         )
 
         return True, binding_params
@@ -430,7 +430,7 @@ class EmployeePageService(PageService):
             "company_id": current_user.company.id
         }
         result = yield self.infra_employee_ds.infra_get_employee_custom_info(params)
-        return result.data or {}
+        return result.data or ObjectDict()
 
     @gen.coroutine
     def get_employee_custom_field(self, current_user):
@@ -616,21 +616,21 @@ class EmployeePageService(PageService):
         并按照 forder 字段排序返回
         将数据整理为前端需要的json格式
         """
-        selects_from_ds = yield self.infra_employee_ds.infra_get_employee_custom_field({"company_id": current_user.company.id})
-
+        res = yield self.infra_employee_ds.infra_get_employee_custom_field({"company_id": current_user.company.id})
+        selects_from_ds = res.data or []
         selects_list = list()
 
         for s in selects_from_ds:
-            input_type = const.FRONT_TYPE_FIELD_TEXT if s.option_type == 1 else const.FRONT_TYPE_FIELD_SELCET_POPUP
-            if s.values:
-                field_value = [[v.get("name"), v.get("id")] for v in s.values]
+            input_type = const.FRONT_TYPE_FIELD_TEXT if s.get("option_type") == 1 else const.FRONT_TYPE_FIELD_SELCET_POPUP
+            if s.get("values"):
+                field_value = [[v.get("name"), v.get("id")] for v in s.get("values")]
             else:
                 field_value = []
             selects = ObjectDict({
-                'field_title': s.name if current_user.language == const.LOCALE_CHINESE else s.ename,
+                'field_title': s.get("name") if current_user.language == const.LOCALE_CHINESE else s.get("ename"),
                 'field_type': input_type,
-                'field_name': s.id,
-                'required': 0 if s.required == 1 else 1,  # 0为必须
+                'field_name': s.get("id"),
+                'required': 0 if s.get("required") == 1 else 1,  # 0为必须
                 'field_value': field_value,
                 "validate_error": ""  # 字段不符合验证时的提示信息
             })

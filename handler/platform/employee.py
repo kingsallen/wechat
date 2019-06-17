@@ -470,13 +470,13 @@ class CustomInfoHandler(BaseHandler):
 
         selects = yield self.employee_ps.get_employee_custom_fields(
             self.current_user)
-        custom_field_info = self.employee_ps.get_employee_custom_info(self.current_user)
+        custom_field_info = yield self.employee_ps.get_employee_custom_info(self.current_user)
 
         data = ObjectDict(
             fields=selects,
             from_wx_template=self.params.from_wx_template or "x",
             employee_id=employee.id,
-            model=custom_field_info.data or {}
+            model=custom_field_info.get("data") or {}
         )
 
         self.render_page(
