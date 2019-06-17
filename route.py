@@ -202,6 +202,7 @@ platform_routes = [
     (r'/employee/referral/radar_cards/seek_recom',   handler.platform.employee.ReferralRadarCardSeekRecomHandler, {"event": "referral_radar_cards_seek_recom"}),
     (r'/employee/referral/radar',                    handler.platform.employee.ReferralRadarPageHandler,        {"event": "referral_radar"}),
     (r'/employee/referral/expired',                  handler.platform.employee.ReferralExpiredPageHandler,      {"event": "referral_radar_expired"}),
+    (r'/employee/bind',                              handler.platform.employee.EmployeeBindPageHandler,         {"event": "employee_bind_page"}),
     (r'/cover/no-weixin',                            handler.platform.cover.CoverHandler,                       {"event": "cover_no_weixin"}),
     (r'/position/recom/?',                           handler.platform.position.PositionRecomListHandler,        {"event": "position_recom_list"}),
     (r'/usercenter/mine/?',                          handler.common.usercenter.UsercenterMineHandler,           {"event": "usercenter_mine"}),
