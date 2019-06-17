@@ -142,7 +142,7 @@ class EventPageService(PageService):
         keyword_head = keyword.split(" ")[0]
 
         # 微信开放平台测试审核
-        if msg.ToUserName == 'gh_3c884a361561':
+        if keyword == 'TESTCOMPONENT_MSG_TYPE_TEXT' or re.match(r'QUERY_AUTH_CODE:(.*)', keyword):
             self.logger.debug("[wechat_test_text]")
             res = yield self.wechat_test_text(keyword, msg, nonce, wechat)
             self.logger.debug("[wechat_test_text] result:{}".format(res))
