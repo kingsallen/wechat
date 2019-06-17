@@ -96,6 +96,22 @@ struct RewardConfig {
     3: optional string statusName
 }
 
+struct RewardVO{
+    1: optional string reason, // 说明
+    2: optional i32 points, // 积分
+    3: optional string updateTime, // 操作时间
+    4: optional i32 type, // 积分类型
+    5: optional i32 positionId, // 职位ID
+    6: optional string positionName, // 职位名称
+    7: optional i32 publisherId, // 发布者ID
+    8: optional string publisherName, // 发布者名称
+    9: optional i32 employeeId, // 员工ID
+    10:optional string employeeName, // 员工名称
+    11:optional i32 recommendId, // 推荐人Id
+    12:optional string recommendName, // 推荐人名称
+    13:optional i32 berecomId,// 被推荐人Id
+    14:optional string berecomName // 被推荐人姓名
+}
 
 struct RewardsResponse {
     1: optional i32 total,
@@ -138,23 +154,6 @@ struct EmployeeAward {
     5: optional string headimgurl,
     6: optional bool praised,
     7: optional i32 praise
-}
-
-struct RewardVO{
-    1: optional string reason, // 说明
-    2: optional i32 points, // 积分
-    3: optional string updateTime, // 操作时间
-    4: optional i32 type, // 积分类型
-    5: optional i32 positionId, // 职位ID
-    6: optional string positionName, // 职位名称
-    7: optional i32 publisherId, // 发布者ID
-    8: optional string publisherName, // 发布者名称
-    9: optional i32 employeeId, // 员工ID
-    10:optional string employeeName, // 员工名称
-    11:optional i32 recommendId, // 推荐人Id
-    12:optional string recommendName, // 推荐人名称
-    13:optional i32 berecomId,// 被推荐人Id
-    14:optional string berecomName // 被推荐人姓名
 }
 
 // 员工积分列表分页实体
