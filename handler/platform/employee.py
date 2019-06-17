@@ -470,12 +470,13 @@ class CustomInfoHandler(BaseHandler):
 
         selects = yield self.employee_ps.get_employee_custom_fields(
             self.current_user)
+        custom_field_info = self.employee_ps.get_employee_custom_info(self.current_user)
 
         data = ObjectDict(
             fields=selects,
             from_wx_template=self.params.from_wx_template or "x",
             employee_id=employee.id,
-            model={}
+            model=custom_field_info.data or {}
         )
 
         self.render_page(
@@ -487,7 +488,8 @@ class CustomInfoHandler(BaseHandler):
     def post(self):
         # 将dict转为list
         custom_field_values = []
-        [custom_field_values.append({k: v}) for k, v in self.json_args.items()]
+        values = self.json_args.get("model") or {}
+        [custom_field_values.append({k: v}) for k, v in values.items()]
         employee = self.employee_ps.get_employee_info(self.current_user.sysuser.id, self.current_user.company.id)
         res = yield self.employee_ps.update_employee_custom_supply_info(employee.id, self.current_user.company.id, custom_field_values)
         if res.status == const.API_SUCCESS:
