@@ -426,11 +426,11 @@ class EmployeePageService(PageService):
     def get_employee_custom_info(self, current_user):
         """获取员工补填信息"""
         params = {
-            "user_id": current_user.sysuser_id,
+            "user_id": current_user.sysuser.id,
             "company_id": current_user.company.id
         }
         result = yield self.infra_employee_ds.infra_get_employee_custom_info(params)
-        return result.data or []
+        return result.data or {}
 
     @gen.coroutine
     def get_employee_custom_field(self, current_user):
@@ -610,42 +610,29 @@ class EmployeePageService(PageService):
         raise gen.Return(res)
 
     @gen.coroutine
-    def get_employee_custom_fields(self, company_id):
+    def get_employee_custom_fields(self, current_user):
         """
         根据公司 id 返回员工认证自定义字段配置 -> list
         并按照 forder 字段排序返回
         将数据整理为前端需要的json格式
         """
-        selects_from_ds = yield self.hr_employee_custom_fields_ds. \
-            get_employee_custom_field_records({
-            "company_id": company_id,
-            "status": const.OLD_YES,
-            "disable": const.NO
-        })
-
-        selects_from_ds = sorted(selects_from_ds, key=lambda x: x.forder)
+        selects_from_ds = yield self.infra_employee_ds.infra_get_employee_custom_field({"company_id": current_user.company.id})
 
         selects_list = list()
 
         for s in selects_from_ds:
-            value_list = list()
-            fvalues = json.loads(s.fvalues)
-            indexs = len(fvalues) - 1
-            i = 0
-            while indexs >= i:
-                values = list()
-                values.append(fvalues[i])
-                values.append(i)
-                i += 1
-                value_list.append(values)
             input_type = const.FRONT_TYPE_FIELD_TEXT if s.option_type == 1 else const.FRONT_TYPE_FIELD_SELCET_POPUP
+            if s.values:
+                field_value = [[v.get("name"), v.get("id")] for v in s.values]
+            else:
+                field_value = []
             selects = ObjectDict({
-                'field_title': s.fname,
+                'field_title': s.name if current_user.language == const.LOCALE_CHINESE else s.ename,
                 'field_type': input_type,
-                'field_name': 'key_' + str(s.id),
-                'required': 0 if s.mandatory == 1 else 1,  # 0为必须
-                'field_value': value_list,
-                "validate_error": "文本长度不能超过50个字符（汉字不超过25）"  # 字段不符合验证时的提示信息
+                'field_name': s.id,
+                'required': 0 if s.required == 1 else 1,  # 0为必须
+                'field_value': field_value,
+                "validate_error": ""  # 字段不符合验证时的提示信息
             })
             selects_list.append(selects)
         return selects_list
@@ -654,6 +641,17 @@ class EmployeePageService(PageService):
     def update_employee_custom_fields(self, employee_id, custom_fields_json):
         yield self.thrift_employee_ds.set_employee_custom_info(
             employee_id, custom_fields_json)
+
+    @gen.coroutine
+    def update_employee_custom_supply_info(self, employee_id, company_id, custom_fields_json):
+        params = ObjectDict({
+            "companyId": company_id,
+            "userEmployeeId": employee_id,
+            "customFieldValues": custom_fields_json
+        })
+        res = yield self.infra_employee_ds.infra_update_employee_custom_supply_info(
+            params)
+        return res
 
     @gen.coroutine
     def update_employee_custom_fields_for_email_pending(

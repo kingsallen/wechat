@@ -237,6 +237,7 @@ platform_routes = [
     (r"/api/employee/bind/?",                        handler.platform.employee.EmployeeBindHandler,             {"event": "employee_bind"}),
     (r"/api/employee/unbind/?",                      handler.platform.employee.EmployeeUnbindHandler,           {"event": "employee_unbind"}),
     (r"/api/employee/bind-info/?",                   handler.platform.employee.BindInfoHandler,                 {"event": "employee_bind_info"}),
+    (r"/api/employee/custominfo/?",                  handler.platform.employee.CustomInfoHandler,               {"event": "api_employee_custominfo"}),
     (r"/api/employee/recommendrecords/?",            handler.platform.employee.RecommendRecordsHandler,         {"event": "employee_recommendrecords"}),
     (r"/api/employee/rewards/?",                     handler.platform.employee.AwardsHandler,                   {"event": "employee_awards"}),
     (r"/api/employee/count-policy-want",             handler.platform.employee.EmployeeInterestReferralPolicyHandler, {"event": "count_interest_policy"}),

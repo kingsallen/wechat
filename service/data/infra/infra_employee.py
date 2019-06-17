@@ -6,7 +6,7 @@ import conf.common as const
 import conf.path as path
 from service.data.base import DataService
 from util.common import ObjectDict
-from util.tool.http_tool import http_get, http_post, unboxing, http_delete, http_post_multipart_form, http_get_v2, unboxing_v2
+from util.tool.http_tool import http_get, http_post, unboxing, http_delete, http_post_multipart_form, http_get_v2, unboxing_v2, http_put
 from requests.models import Request
 from setting import settings
 from globals import env
@@ -426,6 +426,11 @@ class InfraEmployeeDataService(DataService):
     def infra_get_employee_auth_tips_info(self, params):
         """获取认证自定义显示数据"""
         ret = yield http_get_v2(employee.NEWINFRA_EMPLOYEE_AUTH_TIPS_INFO, employee_service, params)
+        return ret
+
+    @gen.coroutine
+    def infra_update_employee_custom_supply_info(self, params):
+        ret = yield http_put(path.INFRA_EMPLOYEE_CUSTOM_INFO, params)
         return ret
 
 

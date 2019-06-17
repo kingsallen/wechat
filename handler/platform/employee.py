@@ -346,18 +346,14 @@ class EmployeeBindHandler(BaseHandler):
                 redirect_when_bind_success=self.json_args.get('redirect_when_bind_success')
             ))
 
-        custom_fields = yield self.employee_ps.get_employee_custom_fields(self.current_user.company.id)
-
         next_url = self.params.next_url if self.params.next_url else self.make_url(path.POSITION_LIST, self.params)
-        custom_fields = False
         if self.params.get('redirect_when_bind_success'):
             next_url = self.make_url(path.GATES_EMPLOYEE, redirect=self.params.get('redirect_when_bind_success'))
 
-        self.logger.debug('gates_next_url: %s-%s' % (custom_fields, next_url))
+        self.logger.debug('gates_next_url: %s' % next_url)
 
         self.send_json_success(
-            data={'next_url': next_url,
-                  'custom_fields': custom_fields},
+            data={'next_url': next_url},
             message=message
         )
 
@@ -473,7 +469,7 @@ class CustomInfoHandler(BaseHandler):
             pass
 
         selects = yield self.employee_ps.get_employee_custom_fields(
-            self.current_user.company.id)
+            self.current_user)
 
         data = ObjectDict(
             fields=selects,
@@ -485,6 +481,19 @@ class CustomInfoHandler(BaseHandler):
         self.render_page(
             template_name="employee/bind_success_info.html",
             data=data)
+
+    @handle_response
+    @gen.coroutine
+    def post(self):
+        # 将dict转为list
+        custom_field_values = []
+        [custom_field_values.append({k: v}) for k, v in self.json_args.items()]
+        employee = self.employee_ps.get_employee_info(self.current_user.sysuser.id, self.current_user.company.id)
+        res = yield self.employee_ps.update_employee_custom_supply_info(employee.id, self.current_user.company.id, custom_field_values)
+        if res.status == const.API_SUCCESS:
+            self.send_json_success(message=res.message)
+        else:
+            self.send_json_error(message=res.message)
 
 
 class BindCustomInfoHandler(BaseHandler):
