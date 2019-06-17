@@ -349,10 +349,15 @@ class ChatHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def get_environ(self):
+        """
+        获取当前环境信息，jssdk config & current_user & locale_code
+
+        @:param share_url 当前网页地址的uri
+        :return:
+        """
 
         jsapi = JsApi(jsapi_ticket=self.current_user.wechat.jsapi_ticket,
-                      url=self.fullurl(encode=False))
-
+                      url=self.params.share_url)
 
         config = ObjectDict({
                   "debug": False,
