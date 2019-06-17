@@ -14,3 +14,9 @@ user_service = ObjectDict(
     interfaceid="A11005001",
     service_name="user"
 )
+
+position_service = ObjectDict(
+    appid="A11009",
+    interfaceid="A11009001",
+    service_name="position"
+)

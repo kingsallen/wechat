@@ -30,6 +30,7 @@ def http_get_v2(route, service, jdata=None, timeout=30):
     return ret
 
 
+@gen.coroutine
 def http_post_v2(route, service, jdata=None, timeout=30):
     route = _serialize_uri(service, route)
     ret = yield _v2_async_http_post(route, jdata, timeout=timeout, method='POST')
@@ -322,6 +323,7 @@ def _async_http_post(route, jdata=None, timeout=5, method='POST', infra=True):
         url = route
 
     http_client = tornado.httpclient.AsyncHTTPClient()
+
     response = yield http_client.fetch(
         url,
         method=method.upper(),
