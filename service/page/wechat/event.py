@@ -185,7 +185,7 @@ class EventPageService(PageService):
             authorization_code = query_auth_code.group(1)
             ret = yield get_test_access_token(component_access_token, component_appid, authorization_code)
             if ret:
-                access_token = ret.get("authorizer_access_token")
+                access_token = ret.get("authorization_info").get("authorizer_access_token")
                 content = "{}_from_api".format(authorization_code)
                 data = ObjectDict({"touser": msg.FromUserName, "msgtype": "text", "text": {"content": content}})
                 yield http_post_cs_msg(wx_const.WX_CS_MESSAGE_API % access_token, data=data)
@@ -231,7 +231,7 @@ class EventPageService(PageService):
                                             int(time.time()),
                                             text)
 
-        if wechat.third_oauth == 1:
+        if wechat.third_oauth != 0:
             text_info = self.__encryMsg(text_info, nonce)
 
         raise gen.Return(text_info)
