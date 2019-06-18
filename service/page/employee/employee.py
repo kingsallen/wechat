@@ -318,6 +318,12 @@ class EmployeePageService(PageService):
             else:
                 param_dict.answer2 = ''
 
+        # 将key的类型转为int, value转为str
+        custom_supply_info = dict()
+        if param_dict.custom_supply_info:
+            for k, v in param_dict.custom_supply_info.items():
+                custom_supply_info.update({int(k): str(v)})
+
         binding_params = BindingParams(
             type=self.BIND_AUTH_MODE[param_dict.type],
             userId=user_id,
@@ -329,7 +335,7 @@ class EmployeePageService(PageService):
             answer1=param_dict.answer1,
             answer2=param_dict.answer2,
             source=source,
-            customFieldValues=param_dict.custom_supply_info
+            customFieldValues=custom_supply_info
         )
 
         return True, binding_params
