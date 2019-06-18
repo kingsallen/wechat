@@ -293,7 +293,7 @@ class EmployeePageService(PageService):
         type = json_args.type
         source = int(params.source) if params.source and params.source.isdigit() else 0
 
-        needed_keys = ['type', 'name', 'mobile', 'custom_info']
+        needed_keys = ['type', 'name', 'mobile', 'custom_supply_info']
 
         if type == self.FE_BIND_TYPE_CUSTOM:
             needed_keys.append('custom_value')

@@ -236,7 +236,8 @@ class EmployeeBindPageHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         res = yield self.employee_ps.get_employee_auth_tips_info(self.current_user)
-        title = res.title if self.current_user.language == const.LOCALE_CHINESE else res.title_ename
+        title = res.title or const.PAGE_VERIFICATION if self.current_user.language == const.LOCALE_CHINESE else \
+            res.title_ename or const.PAGE_EN_VERIFICATION
         self.render_page(template_name="employee/bind.html", data={}, meta_title=title)
 
 
@@ -322,7 +323,7 @@ class EmployeeBindHandler(BaseHandler):
             return
 
         result, result_message = yield self.employee_ps.bind(payload)
-        self.logger.debug("绑定成功")
+        self.logger.debug("bind result: {}, result_message: {}".format(result, result_message))
 
         # early return 2
         if not result:
