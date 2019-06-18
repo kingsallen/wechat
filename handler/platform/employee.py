@@ -491,7 +491,7 @@ class CustomInfoHandler(BaseHandler):
         custom_field_values = []
         values = self.json_args.get("model") or {}
         [custom_field_values.append({k: v}) for k, v in values.items()]
-        employee = self.employee_ps.get_employee_info(self.current_user.sysuser.id, self.current_user.company.id)
+        _, employee = yield self.employee_ps.get_employee_info(self.current_user.sysuser.id, self.current_user.company.id)
         res = yield self.employee_ps.update_employee_custom_supply_info(employee.id, self.current_user.company.id, custom_field_values)
         if res.status == const.API_SUCCESS:
             self.send_json_success(message=res.message)
@@ -504,11 +504,8 @@ class ApiEmployeeSupplyListHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def get(self):
-        res = yield self.employee_ps.get_employee_custom_field(self.current_user)
-        if res.code == const.NEWINFRA_API_SUCCESS:
-            self.send_json_success(res.data)
-        else:
-            self.send_json_error(res.data)
+        data = yield self.employee_ps.get_employee_custom_field(self.current_user)
+        self.send_json_success(data)
 
 
 class BindCustomInfoHandler(BaseHandler):
