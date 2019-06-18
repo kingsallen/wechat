@@ -629,7 +629,7 @@ class EmployeePageService(PageService):
         for s in selects_from_ds:
             input_type = const.FRONT_TYPE_FIELD_TEXT if s.get("option_type") == 1 else const.FRONT_TYPE_FIELD_SELCET_POPUP
             if s.get("values"):
-                field_value = [[v.get("name"), v.get("id")] for v in s.get("values")]
+                field_value = [[v.get("id"), v.get("name")] for v in s.get("values")]
             else:
                 field_value = []
             selects = ObjectDict({

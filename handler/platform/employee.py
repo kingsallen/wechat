@@ -477,7 +477,7 @@ class CustomInfoHandler(BaseHandler):
             fields=selects,
             from_wx_template=self.params.from_wx_template or "x",
             employee_id=employee.id,
-            model=custom_field_info.get("data") or {}
+            model=custom_field_info
         )
 
         self.render_page(
@@ -497,6 +497,18 @@ class CustomInfoHandler(BaseHandler):
             self.send_json_success(message=res.message)
         else:
             self.send_json_error(message=res.message)
+
+
+class ApiEmployeeSupplyListHandler(BaseHandler):
+
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        res = yield self.employee_ps.get_employee_custom_field(self.current_user)
+        if res.code == const.NEWINFRA_API_SUCCESS:
+            self.send_json_success(res.data)
+        else:
+            self.send_json_error(res.data)
 
 
 class BindCustomInfoHandler(BaseHandler):
