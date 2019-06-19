@@ -714,8 +714,15 @@ class ChatHandler(BaseHandler):
                     self.redis_client.publish(self.chatroom_channel, message_body)
                     return
 
+            # 员工认证自定义配置字段太大了，不用存储到mysql中，直接通过socket发送到客户端即可
+            # 特此新起变量处理， 变量compoundContent 只用作save
+            if msg_type == "employeeBind":
+                compoundContent = ''
+            else:
+                compoundContent = ujson.dumps(compound_content)
+
             chat_params = ChatVO(
-                compoundContent=ujson.dumps(compound_content),
+                compoundContent=compoundContent,
                 content=bot_message.content,
                 speaker=const.CHAT_SPEAKER_HR,
                 origin=const.ORIGIN_CHATBOT,
