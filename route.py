@@ -255,6 +255,7 @@ platform_routes = [
     (r"/api/employee/radar/?",                       handler.platform.employee.ReferralRadarHandler,            {"event": "employee_referral_radar_data"}),
     (r"/api/employee/stat/job-view/?",               handler.platform.employee.ReferralRadarCardPositionHandler, {"event": "employee_referral_radar_position_data"}),
     (r"/api/employee/stat/seek-recom/?",             handler.platform.employee.ReferralRadarCardRecomHandler,    {"event": "employee_referral_radar_seek_recom_data"}),
+    (r"/api/employee/supply/info",                   handler.platform.employee.ApiEmployeeSupplyInfoHandler,     {"event": "api_employee_supply_info"}),
 
     (r"/api/func/wechat/?",                          handler.platform.employee.WechatSubInfoHandler,            {"event": "wechat_sub_info"}),
     (r'/api/user/survey/?',                          handler.platform.user.APIUserSurveyHandler,                {"event": "user_survey_api"}),

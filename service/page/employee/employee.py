@@ -448,6 +448,16 @@ class EmployeePageService(PageService):
         return result.data or []
 
     @gen.coroutine
+    def get_employee_supply_info_by_custom_field(self, cname, custom_field):
+        """获取补填字段配置数据"""
+        params = {
+            "cname": cname,
+            "custom_field": custom_field
+        }
+        result = yield self.infra_employee_ds.infra_get_employee_supply_info_by_custom_field(params)
+        return result.data or ObjectDict()
+
+    @gen.coroutine
     def get_employee_auth_tips_info(self, current_user):
         """获取认证自定义显示数据"""
         params = {

@@ -449,6 +449,8 @@ class RecommendRecordsHandler(BaseHandler):
 
 
 class CustomInfoHandler(BaseHandler):
+    """员工补填信息"""
+
     @handle_response
     @authenticated
     @gen.coroutine
@@ -500,11 +502,25 @@ class CustomInfoHandler(BaseHandler):
 
 
 class ApiEmployeeSupplyListHandler(BaseHandler):
+    """获取补填信息配置列表"""
 
     @handle_response
     @gen.coroutine
     def get(self):
         data = yield self.employee_ps.get_employee_custom_field(self.current_user)
+        self.send_json_success(data)
+
+
+class ApiEmployeeSupplyInfoHandler(BaseHandler):
+    """获取员工补填信息"""
+
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        cname = self.params.cname
+        custom_field = self.params.custom_filed
+
+        data = yield self.employee_ps.get_employee_supply_info_by_custom_field(cname, custom_field)
         self.send_json_success(data)
 
 
