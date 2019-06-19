@@ -147,6 +147,7 @@ class EmployeePageService(PageService):
         # 员工认证自定义文案
         data.binding_message = auth_tips_info.description if current_user.language == const.LOCALE_CHINESE else auth_tips_info.description_ename
         data.binding_tips_title = auth_tips_info.tips_title if current_user.language == const.LOCALE_CHINESE else auth_tips_info.tips_title_ename
+        data.custom_title = auth_tips_info.title or const.PAGE_VERIFICATION if current_user.language == const.LOCALE_CHINESE else auth_tips_info.title_ename or const.PAGE_EN_VERIFICATION
 
         data.wechat = ObjectDict()
         data.name = current_user.sysuser.name
