@@ -92,7 +92,7 @@ class EmployeePageService(PageService):
         return bind_status
 
     @gen.coroutine
-    def make_binding_render_data(self, current_user, mate_num, reward, conf, custom_supply_info, custom_supply_field, auth_tips_info, in_wechat=None):
+    def make_binding_render_data(self, current_user, mate_num, reward, conf, custom_supply_info, custom_supply_field, auth_tips_info, in_wechat=None, locale=None):
         """构建员工绑定页面的渲染数据
         :returns:
         {
@@ -145,9 +145,9 @@ class EmployeePageService(PageService):
 
         data = ObjectDict()
         # 员工认证自定义文案
-        data.binding_message = auth_tips_info.description if current_user.language == const.LOCALE_CHINESE else auth_tips_info.description_ename
-        data.binding_tips_title = auth_tips_info.tips_title if current_user.language == const.LOCALE_CHINESE else auth_tips_info.tips_title_ename
-        data.custom_title = auth_tips_info.title or const.PAGE_VERIFICATION if current_user.language == const.LOCALE_CHINESE else auth_tips_info.title_ename or const.PAGE_EN_VERIFICATION
+        data.binding_message = auth_tips_info.description_ename if locale.code == const.LOCALE_ENGLISH else auth_tips_info.description
+        data.binding_tips_title = auth_tips_info.tips_title_ename if locale.code == const.LOCALE_ENGLISH else auth_tips_info.tips_title
+        data.custom_title = auth_tips_info.title_ename or const.PAGE_EN_VERIFICATION if locale.code == const.LOCALE_ENGLISH else auth_tips_info.title or const.PAGE_VERIFICATION
 
         data.wechat = ObjectDict()
         data.name = current_user.sysuser.name

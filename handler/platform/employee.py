@@ -236,8 +236,8 @@ class EmployeeBindPageHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         res = yield self.employee_ps.get_employee_auth_tips_info(self.current_user)
-        title = res.title or const.PAGE_VERIFICATION if self.current_user.language == const.LOCALE_CHINESE else \
-            res.title_ename or const.PAGE_EN_VERIFICATION
+        title = res.title_ename or const.PAGE_EN_VERIFICATION if self.locale.code == const.LOCALE_ENGLISH else \
+            res.title or const.PAGE_VERIFICATION
         self.render_page(template_name="employee/bind.html", data={}, meta_title=title)
 
 
@@ -276,7 +276,8 @@ class EmployeeBindHandler(BaseHandler):
             custom_supply_info=custom_supply_info,
             custom_supply_field=custom_supply_field,
             auth_tips_info=employee_auth_tips_info,
-            in_wechat=self.in_wechat
+            in_wechat=self.in_wechat,
+            locale=self.locale
         )
 
         # 是否需要弹出 隐私协议 窗口

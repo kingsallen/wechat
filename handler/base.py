@@ -546,8 +546,6 @@ class BaseHandler(MetaBaseHandler):
         if self.is_platform and self.params.recom:
             yield self._add_recom_to_session(session)
 
-        session.language = self.get_current_locale()
-
         self.current_user = session
 
     @gen.coroutine
