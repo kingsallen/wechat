@@ -518,7 +518,7 @@ class ApiEmployeeSupplyInfoHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         cname = self.params.cname
-        custom_field = self.params.custom_filed
+        custom_field = self.params.custom_field
 
         data = yield self.employee_ps.get_employee_supply_info_by_custom_field(cname, custom_field, self.current_user.company.id)
         self.send_json_success(data)
