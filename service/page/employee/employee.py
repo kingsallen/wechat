@@ -448,11 +448,12 @@ class EmployeePageService(PageService):
         return result.data or []
 
     @gen.coroutine
-    def get_employee_supply_info_by_custom_field(self, cname, custom_field):
+    def get_employee_supply_info_by_custom_field(self, cname, custom_field, company_id):
         """获取补填字段配置数据"""
         params = {
             "cname": cname,
-            "custom_field": custom_field
+            "custom_field": custom_field,
+            "company_id": company_id
         }
         result = yield self.infra_employee_ds.infra_get_employee_supply_info_by_custom_field(params)
         return result.data or ObjectDict()

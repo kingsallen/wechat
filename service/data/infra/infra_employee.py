@@ -425,7 +425,7 @@ class InfraEmployeeDataService(DataService):
     @gen.coroutine
     def infra_get_employee_supply_info_by_custom_field(self, params):
         """获取补填字段配置数据"""
-        ret = yield http_get_v2(employee.NEWINFRA_EMPLOYEE_CUSTOM_FIELD, employee_service, params)
+        ret = yield http_get_v2(employee.NEWINFRA_EMPLOYEE_SUPPLY_INFO_BY_CUSTOM_FIELD, employee_service, params)
         return ret
 
     @gen.coroutine
