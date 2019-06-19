@@ -9,6 +9,8 @@ from tornado import gen
 
 from handler.base import BaseHandler
 
+
 class CompatibleHandler(BaseHandler):
 
-    pass
+    def get(self):
+        self.write_error(404)
