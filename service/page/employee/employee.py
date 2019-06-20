@@ -92,7 +92,8 @@ class EmployeePageService(PageService):
         return bind_status
 
     @gen.coroutine
-    def make_binding_render_data(self, current_user, mate_num, reward, conf, custom_supply_info, custom_supply_field, auth_tips_info, in_wechat=None, locale=None):
+    def make_binding_render_data(self, current_user, mate_num, reward, conf, custom_supply_info, custom_supply_field,
+                                 auth_tips_info, is_valid_email=False, in_wechat=None, locale=None):
         """构建员工绑定页面的渲染数据
         :returns:
         {
@@ -154,6 +155,7 @@ class EmployeePageService(PageService):
         data.headimg = current_user.sysuser.headimg
         data.mobile = current_user.sysuser.mobile or ''
         data.send_hour = 24  # fixed 24 小时
+        data.is_valid_email = is_valid_email
         data.conf = ObjectDict()
         data.binding_success_message = conf.bindSuccessMessage or ''
 
@@ -467,6 +469,26 @@ class EmployeePageService(PageService):
         }
         result = yield self.infra_employee_ds.infra_get_employee_auth_tips_info(params)
         return result.data or ObjectDict()
+
+    @gen.coroutine
+    def get_bind_email_is_valid(self, current_user):
+        """获取认证邮件是否有效"""
+        params = {
+            "user_id": current_user.sysuser.id,
+            "company_id": current_user.company.id
+        }
+        result = yield self.infra_employee_ds.infra_get_bind_email_is_valid(params)
+        return result.data
+
+    @gen.coroutine
+    def resend_bind_email(self, current_user):
+        """重新发送认证邮件"""
+        params = {
+            "user_id": current_user.sysuser.id,
+            "company_id": current_user.company.id
+        }
+        result = yield self.infra_employee_ds.infra_resend_bind_email(params)
+        return result
 
     @gen.coroutine
     def unbind(self, employee_id, company_id, user_id):

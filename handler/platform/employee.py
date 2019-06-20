@@ -228,6 +228,19 @@ class EmployeeUnbindHandler(BaseHandler):
             self.send_json_error(message='not binded or pending')
 
 
+class ResendBindEmailHandler(BaseHandler):
+    """重新发送认证邮件"""
+
+    @handle_response
+    @gen.coroutine
+    def post(self):
+        res = yield self.employee_ps.resend_bind_email(self.current_user)
+        if res.status == const.API_SUCCESS:
+            self.send_json_success()
+        else:
+            self.send_json_error()
+
+
 class EmployeeBindPageHandler(BaseHandler):
     """员工认证页面"""
 
@@ -259,12 +272,13 @@ class EmployeeBindHandler(BaseHandler):
             pass
 
         # 获取员工认证页各项数据
-        mate_num, reward, custom_supply_info, custom_supply_field, employee_auth_tips_info = yield [
+        mate_num, reward, custom_supply_info, custom_supply_field, employee_auth_tips_info, is_valid_email = yield [
             self.employee_ps.get_mate_num(self.current_user.company.id),
             self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_VERIFICATION),
             self.employee_ps.get_employee_custom_info(self.current_user),
             self.employee_ps.get_employee_custom_field(self.current_user),
-            self.employee_ps.get_employee_auth_tips_info(self.current_user)
+            self.employee_ps.get_employee_auth_tips_info(self.current_user),
+            self.employee_ps.get_bind_email_is_valid(self.current_user)
         ]
 
         # 根据 conf 来构建 api 的返回 data
@@ -276,6 +290,7 @@ class EmployeeBindHandler(BaseHandler):
             custom_supply_info=custom_supply_info,
             custom_supply_field=custom_supply_field,
             auth_tips_info=employee_auth_tips_info,
+            is_valid_email=is_valid_email,
             in_wechat=self.in_wechat,
             locale=self.locale
         )
