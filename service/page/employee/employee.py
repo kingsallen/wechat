@@ -655,7 +655,7 @@ class EmployeePageService(PageService):
         raise gen.Return(res)
 
     @gen.coroutine
-    def get_employee_custom_fields(self, current_user):
+    def get_employee_custom_fields(self, current_user, locale):
         """
         根据公司 id 返回员工认证自定义字段配置 -> list
         并按照 forder 字段排序返回
@@ -672,7 +672,7 @@ class EmployeePageService(PageService):
             else:
                 field_value = []
             selects = ObjectDict({
-                'field_title': s.get("name") if current_user.language == const.LOCALE_CHINESE else s.get("ename"),
+                'field_title': s.get("ename") if locale.code == const.LOCALE_ENGLISH else s.get("name"),
                 'field_type': input_type,
                 'field_name': s.get("id"),
                 'required': 0 if s.get("required") == 1 else 1,  # 0为必须

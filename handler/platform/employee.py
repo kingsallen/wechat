@@ -488,7 +488,7 @@ class CustomInfoHandler(BaseHandler):
             pass
 
         selects = yield self.employee_ps.get_employee_custom_fields(
-            self.current_user)
+            self.current_user, self.locale)
         custom_field_info = yield self.employee_ps.get_employee_custom_info(self.current_user)
 
         data = ObjectDict(
