@@ -544,7 +544,7 @@ class EventPageService(PageService):
             # 临时二维码处理逻辑, 5位type+27为自定义id
             int_scene_id = re.match(r"(\d+)$", msg.EventKey)
             if not int_scene_id:
-                int_scene_id = re.match(r"qrscene_(\d+)", msg.EventKey)
+                int_scene_id = re.match(r"qrscene_(\d+)$", msg.EventKey)
                 # 处理自定义参数为字符串的临时二维码
                 str_scene = re.match(r"qrscene_([A-Z]+)_", msg.EventKey)
                 if not str_scene:
