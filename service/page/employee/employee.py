@@ -169,6 +169,11 @@ class EmployeePageService(PageService):
 
         data.mate_num = mate_num
         data.conf.reward = reward
+        # 国际化补填信息的名称
+        if locale.code == const.LOCALE_ENGLISH:
+            for f in custom_supply_field:
+                f['name'] = f.get("ename")
+
         data.custom_supply_field = custom_supply_field
         data.custom_supply_info = custom_supply_info
 
