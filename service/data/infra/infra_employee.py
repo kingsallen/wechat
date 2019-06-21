@@ -443,7 +443,7 @@ class InfraEmployeeDataService(DataService):
     @gen.coroutine
     def infra_resend_bind_email(self, params):
         """重新发送认证邮件"""
-        ret = yield http_post(path.INFRA_RESEND_BIND_EMAIL, employee_service, params)
+        ret = yield http_post(path.INFRA_RESEND_BIND_EMAIL, params)
         return ret
 
     @gen.coroutine
