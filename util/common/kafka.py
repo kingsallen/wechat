@@ -89,12 +89,16 @@ class PositionPageViewEvent(Event):
     topic = "radar_position_page_view"
     event_name = "position_page_view"
 
-    def __init__(self, user_id, company_id, position_id, employee_user_id):
+    def __init__(self, user_id, company_id, position_id, employee_user_id, recom_user_id, click_from, source, send_time):
         self.user_id = user_id
         self.company_id = company_id
         self.position_id = position_id
         self.employee_user_id = employee_user_id
         self.event_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+        self.recom_user_id = recom_user_id,
+        self.click_from = click_from,
+        self.source = source,
+        self.send_time = send_time
 
     def get_content(self):
         c = {"event_time": self.event_time, "event": self.event_name}
