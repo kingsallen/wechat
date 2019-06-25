@@ -95,9 +95,9 @@ class PositionPageViewEvent(Event):
         self.position_id = position_id
         self.employee_user_id = employee_user_id
         self.event_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
-        self.recom_user_id = recom_user_id,
-        self.click_from = click_from,
-        self.source = source,
+        self.recom_user_id = recom_user_id
+        self.click_from = click_from
+        self.source = source
         self.send_time = send_time
 
     def get_content(self):
@@ -120,7 +120,7 @@ def main():
 
     for i in range(100):
         position_page_view_event = PositionPageViewEvent(
-            user_id=131, company_id=1234, position_id=38917, employee_user_id=456)
+            user_id=131, company_id=1234, position_id=38917, employee_user_id=456, recom_user_id=0, click_from=1, source=0, send_time=1)
         radar_event_emitter.emit(position_page_view_event)
 
 
