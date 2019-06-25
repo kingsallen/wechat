@@ -647,7 +647,7 @@ class UserPageService(PageService):
         params = ObjectDict({
             "email": joywok_user_info.email,
             "custom_field": joywok_user_info.other_account,
-            "mobile": joywok_user_info.bindmobile,
+            "mobile": joywok_user_info.bindmobile or "",
             "company_id": company_id
         })
         ret = yield self.infra_user_ds.infra_get_user_by_joywok_info(params)

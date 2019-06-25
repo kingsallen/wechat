@@ -367,29 +367,35 @@ class PositionPageService(PageService):
 
     @log_time
     @gen.coroutine
-    def infra_get_position_list(self, params, is_referral=None):
+    def infra_get_position_list(self, params):
         """职位列表"""
-        if is_referral:
-            res = yield self.infra_position_ds.get_referral_position_list(params)
-        else:
-            # get position ds
-            res = yield self.infra_position_ds.get_position_list(params)
+
+        res = yield self.infra_position_ds.get_position_list(params)
         # get team names
         team_name_dict = yield self.get_teamid_names_dict(params.company_id)
-
-        if res.status == 0:
-            position_list = [ObjectDict(e) for e in res.data]
-            pids = [e.id for e in position_list]
+        position_list = []
+        if res.code == const.NEWINFRA_API_SUCCESS and res.data:
+            data = [ObjectDict(e) for e in res.data.data]
+            pids = [e.position.id for e in data]
             pid_teamid_dict = yield self.get_pid_teamid_dict(params.company_id, pids)
 
-            for position in position_list:
+            for p in data:
+                position = ObjectDict()
+                position.update(**p.position)
+                position.update(in_hb=p.in_hb,
+                                company_name=p.company_name,
+                                company_abbr=p.company_abbr,
+                                city_ename=p.city_ename,
+                                team_name=p.team_name,
+                                total_bonus=p.total_bonus,
+                                city=p.city_name,
+                                total_num=res.data.total)
                 position.salary = gen_salary(position.salary_top, position.salary_bottom)
                 position.publish_date = jd_update_date(
                     str_2_date(position.publish_date, self.constant.TIME_FORMAT))
                 position.team_name = team_name_dict.get(pid_teamid_dict.get(position.id, 0), '')
-
-            return position_list
-        return res
+                position_list.append(position)
+        return position_list
 
     @log_time
     @gen.coroutine

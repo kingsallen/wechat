@@ -30,6 +30,7 @@ def http_get_v2(route, service, jdata=None, timeout=30):
     return ret
 
 
+@gen.coroutine
 def http_post_v2(route, service, jdata=None, timeout=30):
     route = _serialize_uri(service, route)
     ret = yield _v2_async_http_post(route, jdata, timeout=timeout, method='POST')

@@ -877,22 +877,20 @@ class PositionListInfraParamsMixin(BaseHandler):
     @log_time_common_func
     def make_position_list_infra_params(self):
         """构建调用基础服务职位列表的 params"""
-        display_locale = self.get_current_locale()
+
         infra_params = ObjectDict()
         infra_params.degree = ""
         infra_params.candidate_source = ""
         infra_params.employment_type = ""
         infra_params.company_id = self.current_user.company.id
         infra_params.user_id = self.current_user.sysuser.id or 0
+        infra_params.is_referral = 1 if self.params.is_referral and self.params.is_referral.isdigit() else -1
 
         if self.params.did:
             infra_params.did = self.params.did
 
-        start_count = (int(self.params.get("count", 0)) *
-                       const_platform.POSITION_LIST_PAGE_COUNT)
-
-        infra_params.page_from = start_count
         infra_params.page_size = const_platform.POSITION_LIST_PAGE_COUNT
+        infra_params.page_from = int(self.params.get("count", 0)) + 1
 
         if self.params.salary:
             k = str(self.params.salary)
@@ -915,17 +913,12 @@ class PositionListInfraParamsMixin(BaseHandler):
             infra_params.employment_type = const.EMPLOYMENT_TYPE_SEARCH.get(self.params.employment_type, "") \
                 if self.params.employment_type.isdigit() else self.params.employment_type
 
-        if self.params.is_referral:
-            infra_params.update(
-                keyWord=self.params.keyword if self.params.keyword else "")
-        else:
-            infra_params.update(
-                keywords=self.params.keyword if self.params.keyword else "")
         infra_params.update(
-            department=self.params.team_name if self.params.team_name else "",
+            teamName=self.params.team_name if self.params.team_name else "",
             occupations=self.params.occupation.replace("\r\n", "\n") if self.params.occupation else "",
             custom=self.params.custom if self.params.custom else "",
-            order_by_priority=True)
+            keywords=self.params.keyword if self.params.keyword else "",
+            order_by_priority=1)
 
         self.logger.debug("[position_list_infra_params]: %s" % infra_params)
 
@@ -964,11 +957,15 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
         if hb_c:
             # 红包职位列表
             infra_params.update(hb_config_id=hb_c)
+            start_count = (int(self.params.get("count", 0)) * const_platform.POSITION_LIST_PAGE_COUNT)
+            infra_params.page_from = start_count
             rp_position_list = yield self.position_ps.infra_get_rp_position_list(infra_params)
             position_list = rp_position_list
 
         elif recom_push_id:
             # 员工推荐列表
+            start_count = (int(self.params.get("count", 0)) * const_platform.POSITION_LIST_PAGE_COUNT)
+            infra_params.page_from = start_count
             if int(self.params.get("count", 0)) == 0:
                 position_list = yield self.get_employee_position_list(recom_push_id, infra_params)
             else:
@@ -978,13 +975,8 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
             # 逻辑和职位列表页一样, 代码有重复, TODO: 优化
             rp_position_list = [p for p in position_list if p.in_hb]
         else:
-            # 内推职位列表
-            if is_referral:
-                infra_params.page_num = int(self.params.get("count", 0)) + 1
-                position_list = yield self.position_ps.infra_get_position_list(infra_params, is_referral)
-            else:
-                # 普通职位列表
-                position_list = yield self.position_ps.infra_get_position_list(infra_params)
+            # 内推职位列表和普通职位列表
+            position_list = yield self.position_ps.infra_get_position_list(infra_params)
 
             # 获取获取到普通职位列表，则根据获取的数据查找其中红包职位的红包相关信息
             rp_position_list = list(self.__rp_position_generator(position_list))
@@ -1042,19 +1034,14 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
             position_ex["priority"] = pos.priority
             position_ex["title"] = pos.title
             position_ex["visitnum"] = pos.visitnum
-            position_ex["abbreviation"] = pos.abbreviation
             position_ex["department"] = pos.department
             position_ex["province"] = pos.province
             position_ex["salary"] = pos.salary
-            position_ex["logo"] = pos.logo
             position_ex["company_name"] = pos.company_name
             position_ex["salary_top"] = pos.salary_top
             position_ex["salary_bottom"] = pos.salary_bottom
             position_ex["update_time"] = pos.update_time
-            position_ex["rp_reward_amount"] = pos.rp_reward_amount
-            position_ex["rp_reward_target"] = pos.rp_reward_target
             position_ex["company_abbr"] = pos.company_abbr
-            position_ex["remain"] = pos.remain
             position_ex["publish_date"] = pos.publish_date
             position_ex["team_name"] = pos.team_name
             position_ex["job_description"] = pos.accountabilities
@@ -1343,7 +1330,7 @@ class PositionRecomListHandler(PositionListInfraParamsMixin, BaseHandler):
         infra_params.page_from = start_count
         infra_params.page_size = const_platform.POSITION_LIST_PAGE_COUNT
         self.params.share = yield self._make_share()
-        position_list = yield self.position_ps.infra_get_position_list(infra_params, is_referral=1)
+        position_list = yield self.position_ps.infra_get_position_list(infra_params)
         if position_list:
             total = position_list[0].total_num
         else:
