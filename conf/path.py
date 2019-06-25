@@ -239,6 +239,8 @@ INFRA_REFERRAL_RADAR_CARD_POS = 'v1/employee/position/view'
 INFRA_REFERRAL_RADAR_CARD_RECOM = 'v1/employee/seek/recommend/card'
 INFRA_IF_SEEK_CHECK = 'v1/referral/seek/check'
 REFERRAL_RADAR_EXPIRED = '/employee/referral/expired'
+INFRA_EMPLOYEE_CUSTOM_INFO = "/hraccount/employee/update"
+INFRA_RESEND_BIND_EMAIL = "/employee/resend/bind/email"
 
 # 积分商城服务
 EMPLOYEE_MALL = '/employee/mall/index'
