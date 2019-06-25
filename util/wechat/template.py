@@ -164,7 +164,7 @@ def rp_recom_screen_success_notice_tpl(wechat_id, openid, link, nickname,
 
 @gen.coroutine
 def position_view_five_notice_tpl(wechat_id, openid, link, title,
-                                  salary, sys_template_id=const.TEMPLATES.POSITION_VIEWED_FIVE_TIMES):
+                                  salary, sys_template_id=const.TEMPLATES.POSITION_VIEWED_FIVE_TIMES, current_wechat_id=None):
     """职位浏览5次，向 HR 发送消息模板"""
     link = _join_suffix(link, sys_template_id)
     d = datetime.now()
@@ -176,8 +176,7 @@ def position_view_five_notice_tpl(wechat_id, openid, link, title,
         keyword3=salary,
         keyword4="{}年{}月{}日{:0>2}:{:0>2} ".format(d.year, d.month, d.day,
                                                   d.hour, d.minute))
-    send_switch = yield messager.get_send_switch(
-        wechat_id, const.TEMPLATES_SWITCH.JD_SCAN_FIVE_TIME)
+    send_switch = yield messager.get_send_switch(current_wechat_id, const.TEMPLATES_SWITCH.JD_SCAN_FIVE_TIME) if current_wechat_id else True
     ret = yield messager.send_template(
         wechat_id, openid, sys_template_id, link, json_data, qx_retry=False, platform_switch=send_switch)
 
