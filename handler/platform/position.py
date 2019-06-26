@@ -869,7 +869,7 @@ class PositionHandler(BaseHandler):
             position_id=int(position_id),
             employee_user_id=employee_user_id,
             recom_user_id=self.current_user.recom.id if self.current_user.recom else 0,
-            click_from=self.params.click_from,
+            click_from=self.params.get("from"),
             source=self.params.source,
             send_time=self.params.send_time or ''
         )
