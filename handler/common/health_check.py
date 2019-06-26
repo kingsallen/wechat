@@ -11,4 +11,4 @@ class HealthcheckHandler(MetaBaseHandler):
     @handle_response
     @gen.coroutine
     def get(self):
-        self.send_json_success(data={})
+        self.send_json_success(data={}, message="success")
