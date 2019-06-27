@@ -789,7 +789,7 @@ class PositionHandler(BaseHandler):
 
                 yield position_view_five_notice_tpl(help_wechat.id, hr_wx_user.openid,
                                                     link, position_info.title,
-                                                    position_info.salary)
+                                                    position_info.salary, current_wechat_id=self.current_user.wechat.id)
 
     @log_time
     @gen.coroutine
