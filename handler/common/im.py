@@ -222,7 +222,8 @@ class ChatRoomHandler(BaseHandler):
         if hr_id:
             company_id = yield self.company_ps.get_real_company_id(hr_id, self.current_user.company.id)
             wechat = yield self.wechat_ps.get_wechat(conds={
-                "company_id": company_id
+                "company_id": company_id,
+                "authorized": const.YES
             })
             jsapi_ticket = wechat.jsapi_ticket
             appid = wechat.appid
