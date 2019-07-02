@@ -326,6 +326,8 @@ class WechatThirdOauthHandler(WechatOauthHandler):
             if wechat:
                 yield self._get_current_user()
                 yield self._post()
+            elif self.msg.ToUserName == 'gh_3c884a361561':
+                yield self._post()
             else:
                 self.send_xml()
 

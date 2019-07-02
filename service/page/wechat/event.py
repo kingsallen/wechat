@@ -27,8 +27,8 @@ from util.tool.date_tool import curr_now
 from util.tool.str_tool import mobile_validate, get_send_time_from_template_message_url
 from util.common import ObjectDict
 from util.tool.json_tool import json_dumps
-from util.tool.http_tool import http_post
-from util.wechat.core import get_wxuser, send_succession_message
+from util.tool.http_tool import http_post_cs_msg
+from util.wechat.core import get_wxuser, send_succession_message, get_test_access_token
 from util.common.mq import user_follow_wechat_publisher, user_unfollow_wechat_publisher
 from service.page.user.user import UserPageService
 
@@ -141,6 +141,13 @@ class EventPageService(PageService):
         keyword = msg.Content.strip()
         keyword_head = keyword.split(" ")[0]
 
+        # 微信开放平台测试审核
+        if keyword == 'TESTCOMPONENT_MSG_TYPE_TEXT' or re.match(r'QUERY_AUTH_CODE:(.*)', keyword):
+            self.logger.debug("[wechat_test_text]")
+            res = yield self.wechat_test_text(keyword, msg, nonce, wechat)
+            self.logger.debug("[wechat_test_text] result:{}".format(res))
+            return res
+
         rules = yield self.hr_wx_rule_ds.get_wx_rules(conds={
             "wechat_id": wechat.id,
             "status": const.OLD_YES,
@@ -159,6 +166,33 @@ class EventPageService(PageService):
         else:
             res = yield self.opt_default(msg, nonce, wechat)
             raise gen.Return(res)
+
+    @gen.coroutine
+    def wechat_test_text(self, keyword, msg, nonce, wechat):
+        """微信开放平台测试审核"""
+        query_auth_code = re.match(r'QUERY_AUTH_CODE:(.*)', keyword)
+
+        if keyword == 'TESTCOMPONENT_MSG_TYPE_TEXT':
+            self.logger.debug('[wechat_test_text] content test')
+            res = yield self.wx_rep_text(msg=msg, text='TESTCOMPONENT_MSG_TYPE_TEXT_callback', wechat=wechat,
+                                         nonce=nonce)
+            return res
+
+        elif query_auth_code:
+            self.logger.debug('[wechat_test_text] api test: {}'.format(query_auth_code))
+            component_access_token = self.redis.get("component_access_token", prefix=False)
+            component_appid = settings["component_app_id"]
+            authorization_code = query_auth_code.group(1)
+            ret = yield get_test_access_token(component_access_token, component_appid, authorization_code)
+            if ret:
+                access_token = ret.get("authorization_info").get("authorizer_access_token")
+                content = "{}_from_api".format(authorization_code)
+                data = ObjectDict({"touser": msg.FromUserName, "msgtype": "text", "text": {"content": content}})
+                yield http_post_cs_msg(wx_const.WX_CS_MESSAGE_API % access_token, data=data)
+            res = yield self.wx_rep_text(msg=msg, text='', wechat=wechat,
+                                         nonce=nonce)
+
+            return res
 
     @gen.coroutine
     def opt_follow(self, msg, wechat, nonce):
@@ -197,7 +231,7 @@ class EventPageService(PageService):
                                             int(time.time()),
                                             text)
 
-        if wechat.third_oauth == 1:
+        if wechat.third_oauth != 0:
             text_info = self.__encryMsg(text_info, nonce)
 
         raise gen.Return(text_info)
