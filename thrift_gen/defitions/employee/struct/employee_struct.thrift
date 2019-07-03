@@ -1,5 +1,6 @@
 namespace py thrift_gen.gen.employee.struct
 
+typedef string Timestamp
 
 struct Employee {
     1: optional i32 id,
@@ -78,7 +79,8 @@ struct BindingParams {
     7: optional string name,
     8: optional string answer1,
     9: optional string answer2,
-    10: optional i32 source
+    10: optional i32 source,
+    11: optional map<i32, string> customFieldValues
 }
 
 struct Reward {
@@ -181,7 +183,7 @@ struct LeaderBoardType {
     2:optional i32 company_id,
     3:optional i8 type
 }
-
+//榜单分页信息
 struct Pagination {
     1: optional i32 totalRow,
     2: optional i32 pageNum,

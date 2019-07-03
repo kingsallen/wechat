@@ -6,10 +6,12 @@ import conf.common as const
 import conf.path as path
 from service.data.base import DataService
 from util.common import ObjectDict
-from util.tool.http_tool import http_get, http_post, http_put, unboxing, http_delete, http_post_multipart_form
+from util.tool.http_tool import http_get, http_post, unboxing, http_delete, http_post_multipart_form, http_get_v2, http_post_v2, http_put
 from requests.models import Request
 from setting import settings
 from globals import env
+from conf.newinfra_service_conf.service_info import employee_service
+from conf.newinfra_service_conf.employee import employee
 
 
 class InfraEmployeeDataService(DataService):
@@ -407,3 +409,51 @@ class InfraEmployeeDataService(DataService):
         }
         ret = yield http_get(path.INFRA_REFERRAL_RADAR_CARD_RECOM, params)
         return ret
+
+    @gen.coroutine
+    def infra_get_employee_custom_info(self, params):
+        """获取员工补填信息"""
+        ret = yield http_get_v2(employee.NEWINFRA_EMPLOYEE_CUSTOM_INFO, employee_service, params)
+        return ret
+
+    @gen.coroutine
+    def infra_get_employee_custom_field(self, params):
+        """获取补填字段配置数据"""
+        ret = yield http_get_v2(employee.NEWINFRA_EMPLOYEE_CUSTOM_FIELD, employee_service, params)
+        return ret
+
+    @gen.coroutine
+    def infra_get_employee_supply_info_by_custom_field(self, params):
+        """获取补填字段配置数据"""
+        ret = yield http_get_v2(employee.NEWINFRA_EMPLOYEE_SUPPLY_INFO_BY_CUSTOM_FIELD, employee_service, params)
+        return ret
+
+    @gen.coroutine
+    def infra_get_employee_auth_tips_info(self, params):
+        """获取认证自定义显示数据"""
+        ret = yield http_get_v2(employee.NEWINFRA_EMPLOYEE_AUTH_TIPS_INFO, employee_service, params)
+        return ret
+
+    @gen.coroutine
+    def infra_get_bind_email_is_valid(self, params):
+        """获取认证邮件是否有效"""
+        ret = yield http_get_v2(employee.NEWINFRA_BIND_EMAIL_IS_VALID, employee_service, params)
+        return ret
+
+    @gen.coroutine
+    def infra_resend_bind_email(self, params):
+        """重新发送认证邮件"""
+        ret = yield http_post(path.INFRA_RESEND_BIND_EMAIL, params)
+        return ret
+
+    @gen.coroutine
+    def infra_update_employee_custom_supply_info(self, params):
+        """更新员工补填信息"""
+        ret = yield http_put(path.INFRA_EMPLOYEE_CUSTOM_INFO, params)
+        return ret
+
+
+
+
+
+

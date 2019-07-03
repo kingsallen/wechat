@@ -101,11 +101,11 @@ class ReferralProfileAPIHandler(BaseHandler):
     def _add_sensor_track(self, type, upload_from):
         if type == 1:
             if int(upload_from) == 2:
-                self.track("directReferral", properties={"origin": const.SA_DIRECT_REFERRAL_ORIGIN_WECHAT_UPLOAD})
+                self.track("directReferral", properties={"apply_origin": const.SA_DIRECT_REFERRAL_ORIGIN_WECHAT_UPLOAD})
             else:
-                self.track("directReferral", properties={"origin": const.SA_DIRECT_REFERRAL_ORIGIN_PHONE_UPLOAD})
+                self.track("directReferral", properties={"apply_origin": const.SA_DIRECT_REFERRAL_ORIGIN_PHONE_UPLOAD})
         else:
-            self.track("directReferral", properties={"origin": const.SA_DIRECT_REFERRAL_ORIGIN_PC_UPLOAD})
+            self.track("directReferral", properties={"apply_origin": const.SA_DIRECT_REFERRAL_ORIGIN_PC_UPLOAD})
 
 
 class EmployeeRecomProfileHandler(BaseHandler):
@@ -386,6 +386,7 @@ class ReferralCrucialInfoApiHandler(BaseHandler):
                     self.current_user.company.id,
                     self.params, self.json_args
                 )
+                self.track("inDirectReferral", properties={"apply_origin": const.SA_INDIRECT_REFERRAL_TRANSFER})
             else:
                 ret = yield self.employee_ps.referral_save_evaluation(
                     self.current_user.sysuser.id,
@@ -394,7 +395,7 @@ class ReferralCrucialInfoApiHandler(BaseHandler):
                 )
                 if ret.status == const.API_SUCCESS:
                     self.track("cReferralEvaluationSuccess")
-            self._add_sensor_track()
+                self._add_sensor_track()
             if not ret.status == const.API_SUCCESS:
                 self.send_json_error(message=ret.message)
                 return
@@ -429,7 +430,7 @@ class ReferralCrucialInfoApiHandler(BaseHandler):
             return
 
         ret = yield self.employee_ps.update_referral_crucial_info(self.current_user.employee.id, self.json_args)
-        self.track("directReferral", properties={"origin": const.SA_DIRECT_REFERRAL_ORIGIN_REFERRAL_CRUCIAL_INFO})
+        self.track("directReferral", properties={"apply_origin": const.SA_DIRECT_REFERRAL_ORIGIN_REFERRAL_CRUCIAL_INFO})
         if ret.status != const.API_SUCCESS:
             self.send_json_error(message=ret.message)
             return
@@ -441,18 +442,18 @@ class ReferralCrucialInfoApiHandler(BaseHandler):
 
     def _add_sensor_track(self):
         if int(self.params.flag or 0) == const.REFERRAL_EVAL_CONTACT_MES_TMP:
-            origin = const.SA_INDIRECT_REFERRAL_ORIGIN_CONTACT_MES_TMP
+            origin = const.SA_REFERRAL_COMMENT_ORIGIN_CONTACT_MES_TMP
         elif int(self.params.flag or 0) == const.REFERRAL_EVAL_RADAR:
-            origin = const.SA_INDIRECT_REFERRAL_ORIGIN_RADAR
+            origin = const.SA_REFERRAL_COMMENT_ORIGIN_RADAR
         elif int(self.params.flag or 0) == const.REFERRAL_EVAL_RECOM_PROGRESS:
-            origin = const.SA_INDIRECT_REFERRAL_ORIGIN_PROGRESS
+            origin = const.SA_REFERRAL_COMMENT_ORIGIN_PROGRESS
         elif int(self.params.flag or 0) == const.REFERRAL_EVAL_TEN_MIN_MES_TMP:
-            origin = const.SA_INDIRECT_REFERRAL_ORIGIN_TEN_MIN_MES_TMP
+            origin = const.SA_REFERRAL_COMMENT_ORIGIN_TEN_MIN_MES_TMP
         elif int(self.params.flag or 0) == const.REFERRAL_EVAL_SEEK_RECOM_CARDS:
-            origin = const.SA_INDIRECT_REFERRAL_ORIGIN_SEEK_RECOM_CARDS
+            origin = const.SA_REFERRAL_COMMENT_ORIGIN_SEEK_RECOM_CARDS
         else:
-            origin = 0
-        self.track("inDirectReferral", properties={"origin": origin})
+            origin = const.SA_REFERRAL_COMMENT_ORIGIN_HAS_APPLY
+        self.track("referralComment", properties={"comment_origin": origin})
 
 
 class ReferralCommentTagsHandler(BaseHandler):

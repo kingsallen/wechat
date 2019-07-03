@@ -634,3 +634,41 @@ class UserPageService(PageService):
     def if_ever_seek_recommend(self, recom_user_id, psc, pid, company_id, click_user_id):
         ret = yield self.infra_user_ds.if_ever_seek_recommend(recom_user_id, psc, pid, company_id, click_user_id)
         return ret
+
+    @gen.coroutine
+    def get_user_by_joywok_info(self, joywok_user_info, company_id):
+        """
+        根据麦当劳APP授权获取的员工信息查找仟寻用户信息：
+        :param joywok_user_info:
+        :param company_id:
+        :return:
+        """
+
+        params = ObjectDict({
+            "email": joywok_user_info.email,
+            "custom_field": joywok_user_info.other_account,
+            "mobile": joywok_user_info.bindmobile or "",
+            "company_id": company_id
+        })
+        ret = yield self.infra_user_ds.infra_get_user_by_joywok_info(params)
+        return ret
+
+    @gen.coroutine
+    def auto_bind_employee_by_joywok_info(self, joywok_user_info, company_id, sysuser_id):
+        """
+        对joywok的用户做自动认证：
+        :param joywok_user_info:
+        :param company_id:
+        :return:
+        """
+
+        params = ObjectDict({
+            "user_id": sysuser_id,
+            "email": joywok_user_info.email,
+            "custom_field": joywok_user_info.other_account,
+            "mobile": joywok_user_info.bindmobile,
+            "company_id": company_id,
+            "cname": joywok_user_info.name
+        })
+        ret = yield self.infra_user_ds.infra_auto_bind_employee(params)
+        return ret

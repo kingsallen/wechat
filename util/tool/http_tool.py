@@ -4,6 +4,7 @@
 
 """基础服务 api 调用工具"""
 # todo 重构时修改下面的方法，主要针对出参与入参的写法，将驼峰改为下划线
+import ast
 import ujson
 from urllib.parse import urlencode
 
@@ -18,6 +19,56 @@ from setting import settings
 from util.common import ObjectDict
 from util.common.exception import InfraOperationError
 from util.tool.dict_tool import objectdictify
+from util.tool.str_tool import json_underline2hump, json_hump2underline, params_underline2hump
+
+
+@gen.coroutine
+def http_get_v2(route, service, jdata=None, timeout=30):
+    route = "{0}/{1}{2}".format(settings['cloud'], service.service_name, route)
+    jdata = _serialize_data(service, jdata)
+    ret = yield _v2_async_http_get(route, jdata, timeout=timeout, method='GET')
+    return ret
+
+
+@gen.coroutine
+def http_post_v2(route, service, jdata=None, timeout=30):
+    route = _serialize_uri(service, route)
+    ret = yield _v2_async_http_post(route, jdata, timeout=timeout, method='POST')
+    return ret
+
+
+@gen.coroutine
+def http_delete_v2(route, service, jdata=None, timeout=30):
+    route = "{0}/{1}{2}".format(settings['cloud'], service.service_name, route)
+    jdata = _serialize_data(service, jdata)
+    ret = yield _v2_async_http_get(route, jdata, timeout=timeout, method='DELETE')
+    return ret
+
+
+@gen.coroutine
+def http_put_v2(route, service, jdata=None, timeout=30):
+    route = _serialize_uri(service, route)
+    ret = yield _v2_async_http_post(route, jdata, timeout=timeout, method='PUT')
+    return ret
+
+
+def _serialize_uri(service, route):
+    return "{0}/{1}{2}?appid={appid}&interfaceid={interfaceid}".format(
+        settings['cloud'],
+        service.service_name,
+        route,
+        appid=service.appid,
+        interfaceid=service.interfaceid
+    )
+
+
+def _serialize_data(service, jdata):
+    if isinstance(jdata, list):
+        jdata.append(("appid", service.appid))
+        jdata.append(("interfaceid", service.interfaceid))
+    elif isinstance(jdata, dict):
+        jdata.update({"appid": service.appid, "interfaceid": service.interfaceid})
+    return jdata
 
 
 @gen.coroutine
@@ -45,9 +96,9 @@ def http_post_rp(route, service, jdata=None, timeout=30):
 
 
 @gen.coroutine
-def http_get(route, jdata=None, timeout=30, infra=True):
+def http_get(route, jdata=None, timeout=30, infra=True, headers=None):
     ret = yield _async_http_get(route, jdata, timeout=timeout, method='GET',
-                                infra=infra)
+                                infra=infra, headers=headers)
     return ret
 
 
@@ -204,8 +255,23 @@ def unboxing(http_response):
     return result, data
 
 
+def unboxing_v2(http_response):
+    """解析服务返回结果"""
+
+    result = bool(http_response.code == constant.NEWINFRA_API_SUCCESS)
+    data = ObjectDict()
+    if result:
+        if isinstance(http_response.data, list):
+            if http_response.data and isinstance(http_response.data[0], dict):
+                data = ObjectDict(http_response.data[0])
+        else:
+            data = http_response.data or ObjectDict()
+
+    return data
+
+
 @gen.coroutine
-def _async_http_get(route, jdata=None, timeout=5, method='GET', infra=True):
+def _async_http_get(route, jdata=None, timeout=5, method='GET', infra=True, headers=None):
     """可用 HTTP 动词为 GET 和 DELETE"""
     if method.lower() not in "get delete":
         raise ValueError("method is not in GET and DELETE")
@@ -220,11 +286,15 @@ def _async_http_get(route, jdata=None, timeout=5, method='GET', infra=True):
         url = url_concat(route, jdata)
 
     http_client = tornado.httpclient.AsyncHTTPClient()
+    if headers and isinstance(headers, dict):
+        headers.update({"Content-Type": "application/json"})
+    else:
+        headers = {"Content-Type": "application/json"}
     response = yield http_client.fetch(
         url,
         method=method.upper(),
         request_timeout=timeout,
-        headers=HTTPHeaders({"Content-Type": "application/json"})
+        headers=HTTPHeaders(headers)
     )
 
     logger.debug("[infra][http_{}][url: {}][ret: {}] ".format(
@@ -253,6 +323,7 @@ def _async_http_post(route, jdata=None, timeout=5, method='POST', infra=True):
         url = route
 
     http_client = tornado.httpclient.AsyncHTTPClient()
+
     response = yield http_client.fetch(
         url,
         method=method.upper(),
@@ -268,6 +339,74 @@ def _async_http_post(route, jdata=None, timeout=5, method='POST', infra=True):
 
     body = objectdictify(ujson.decode(response.body))
     if infra and body.status in INFRA_ERROR_CODES:
+        raise InfraOperationError(body.message)
+
+    return body
+
+
+@gen.coroutine
+def _v2_async_http_get(route, jdata=None, timeout=5, method='GET'):
+    """可用 HTTP 动词为 GET 和 DELETE"""
+    if method.lower() not in "get delete":
+        raise ValueError("method is not in GET and DELETE")
+
+    if jdata is None:
+        jdata = ObjectDict()
+
+    url = url_concat(route, jdata)
+    url = params_underline2hump(url)  # 会把url中的请求参数做转换
+
+    http_client = tornado.httpclient.AsyncHTTPClient()
+    logger.debug("[newinfra][http_{}][url: {}]".format(method.lower(), url))
+    response = yield http_client.fetch(
+        url,
+        method=method.upper(),
+        request_timeout=timeout,
+        headers=HTTPHeaders({"Content-Type": "application/json"})
+    )
+    body = json_hump2underline(str(response.body))
+    logger.debug("[newinfra][http_{}][url: {}][ret: {}][res_body: {}]".format(
+        method.lower(), url, ujson.decode(response.body), body))
+    body = ast.literal_eval(body)
+    body = objectdictify(ujson.loads(body))
+
+    if body.code in INFRA_ERROR_CODES:
+        raise InfraOperationError(body.message)
+
+    return body
+
+
+@gen.coroutine
+def _v2_async_http_post(route, jdata=None, timeout=5, method='POST'):
+    """可用 HTTP 动词为 POST, PATCH 和 PUT"""
+    if method.lower() not in "post put patch":
+        raise ValueError("method is not in POST, PUT and PATCH")
+
+    if jdata is None:
+        jdata = ObjectDict()
+
+    jdata = json_underline2hump(ujson.dumps(jdata))
+    url = route
+
+    http_client = tornado.httpclient.AsyncHTTPClient()
+    logger.debug(
+        "[newinfra][http_{}][url: {}][body: {}]".format(method.lower(), url, ujson.encode(jdata)))
+    response = yield http_client.fetch(
+        url,
+        method=method.upper(),
+        body=jdata,
+        request_timeout=timeout,
+        headers=HTTPHeaders({"Content-Type": "application/json"})
+    )
+
+    body = json_hump2underline(str(response.body))
+    logger.debug(
+        "[newinfra][http_{}][url: {}][body: {}][ret: {}][res_body: {}]"
+            .format(method.lower(), url, ujson.encode(jdata),
+                    ujson.decode(response.body), body))
+    body = ast.literal_eval(body)
+    body = objectdictify(ujson.loads(body))
+    if body.code in INFRA_ERROR_CODES:
         raise InfraOperationError(body.message)
 
     return body

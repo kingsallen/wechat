@@ -1,9 +1,9 @@
 # coding=utf-8
-
+import traceback
 from tornado.httputil import url_concat
 from tornado import gen
 
-import traceback
+import conf.platform as const_platform
 import conf.common as const
 import conf.message as msg
 import conf.fe as fe
@@ -15,10 +15,7 @@ from util.common import ObjectDict
 from util.common.decorator import handle_response, authenticated, check_employee_common, check_radar_status
 from util.tool.json_tool import json_dumps
 from util.tool.str_tool import to_str
-from util.common.cipher import decode_id
 from urllib import parse
-import conf.platform as const_platform
-from util.wechat.core import get_temporary_qrcode
 
 
 class AwardsLadderPageHandler(BaseHandler):
@@ -126,17 +123,25 @@ class AwardsLadderHandler(BaseHandler):
 class WechatSubInfoHandler(BaseHandler):
     """
     获取微信信息
+    字符类型的自定义参数的格式为{场景值(大写)}_{自定义字符串}，场景值必须为大写英文字母
+    int类型 scene_id规范为：32位二进制, 5位type + 27位自定义编号(比如hrid, userid)。见 https://wiki.moseeker.com/weixin.md
     """
 
     @handle_response
     @gen.coroutine
     def get(self):
         pattern_id = self.params.scene or 99
-        if int(pattern_id) == const.QRCODE_POSITION and self.params.pid:
-            scene_id = int('11111000000000000000000000000000', base=2) + int(self.params.pid)
+        str_scene = self.params.str_scene or ''  # 字符串类型的场景值
+        str_code = self.params.str_code or ''  # 字符串类型的自定义参数
+        scene_code = const.TEMPORARY_CODE_STR_SCENE.format(str_scene, str_code)
+        if str_code and str_scene:
+            wechat = yield self.wechat_ps.get_wechat_info(self.current_user, scene_id=scene_code, in_wechat=self.in_wechat, action_name="QR_STR_SCENE")
         else:
-            scene_id = int('11110000000000000000000000000000', base=2) + int(pattern_id)
-        wechat = yield self.wechat_ps.get_wechat_info(self.current_user, scene_id=scene_id, in_wechat=self.in_wechat)
+            if int(pattern_id) == const.QRCODE_POSITION and self.params.pid:
+                scene_id = int('11111000000000000000000000000000', base=2) + int(self.params.pid)
+            else:
+                scene_id = int('11110000000000000000000000000000', base=2) + int(pattern_id)
+            wechat = yield self.wechat_ps.get_wechat_info(self.current_user, scene_id=scene_id, in_wechat=self.in_wechat)
         self.send_json_success(data=wechat)
         return
 
@@ -223,6 +228,32 @@ class EmployeeUnbindHandler(BaseHandler):
             self.send_json_error(message='not binded or pending')
 
 
+class ResendBindEmailHandler(BaseHandler):
+    """重新发送认证邮件"""
+
+    @handle_response
+    @gen.coroutine
+    def post(self):
+        res = yield self.employee_ps.resend_bind_email(self.current_user)
+        if res.status == const.API_SUCCESS:
+            self.send_json_success()
+        else:
+            self.send_json_error()
+
+
+class EmployeeBindPageHandler(BaseHandler):
+    """员工认证页面"""
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        res = yield self.employee_ps.get_employee_auth_tips_info(self.current_user)
+        title = res.title_ename or const.PAGE_EN_VERIFICATION if self.locale.code == const.LOCALE_ENGLISH else \
+            res.title or const.PAGE_VERIFICATION
+        self.render_page(template_name="employee/bind.html", data={}, meta_title=title)
+
+
 class EmployeeBindHandler(BaseHandler):
     """员工绑定 API
     /api/employee/binding"""
@@ -239,12 +270,30 @@ class EmployeeBindHandler(BaseHandler):
             return
         else:
             pass
-        mate_num = yield self.employee_ps.get_mate_num(self.current_user.company.id)
-        reward = yield self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_VERIFICATION)
+
+        # 获取员工认证页各项数据
+        mate_num, reward, custom_supply_info, custom_supply_field, employee_auth_tips_info, is_valid_email = yield [
+            self.employee_ps.get_mate_num(self.current_user.company.id),
+            self.employee_ps.get_bind_reward(self.current_user.company.id, const.REWARD_VERIFICATION),
+            self.employee_ps.get_employee_custom_info(self.current_user),
+            self.employee_ps.get_employee_custom_field(self.current_user),
+            self.employee_ps.get_employee_auth_tips_info(self.current_user),
+            self.employee_ps.get_bind_email_is_valid(self.current_user)
+        ]
 
         # 根据 conf 来构建 api 的返回 data
         data = yield self.employee_ps.make_binding_render_data(
-            self.current_user, mate_num, reward, conf_response.employeeVerificationConf, in_wechat=self.in_wechat)
+            current_user=self.current_user,
+            mate_num=mate_num,
+            reward=reward,
+            conf=conf_response.employeeVerificationConf,
+            custom_supply_info=custom_supply_info,
+            custom_supply_field=custom_supply_field,
+            auth_tips_info=employee_auth_tips_info,
+            is_valid_email=is_valid_email,
+            in_wechat=self.in_wechat,
+            locale=self.locale
+        )
 
         # 是否需要弹出 隐私协议 窗口
         res_privacy, data_privacy = yield self.privacy_ps.if_privacy_agreement_window(
@@ -290,7 +339,7 @@ class EmployeeBindHandler(BaseHandler):
             return
 
         result, result_message = yield self.employee_ps.bind(payload)
-        self.logger.debug("绑定成功")
+        self.logger.debug("bind result: {}, result_message: {}".format(result, result_message))
 
         # early return 2
         if not result:
@@ -314,22 +363,14 @@ class EmployeeBindHandler(BaseHandler):
                 redirect_when_bind_success=self.json_args.get('redirect_when_bind_success')
             ))
 
-        custom_fields = yield self.employee_ps.get_employee_custom_fields(self.current_user.company.id)
+        next_url = self.params.next_url if self.params.next_url else self.make_url(path.POSITION_LIST, self.params)
+        if self.params.get('redirect_when_bind_success'):
+            next_url = self.make_url(path.GATES_EMPLOYEE, redirect=self.params.get('redirect_when_bind_success'))
 
-        if custom_fields:
-            next_url = self.make_url(path.EMPLOYEE_CUSTOMINFO, self.params, from_wx_template='x')
-            custom_fields = True
-        else:
-            next_url = self.params.next_url if self.params.next_url else self.make_url(path.POSITION_LIST, self.params)
-            custom_fields = False
-            if self.params.get('redirect_when_bind_success'):
-                next_url = self.make_url(path.GATES_EMPLOYEE, redirect=self.params.get('redirect_when_bind_success'))
-
-        self.logger.debug('gates_next_url: %s-%s' % (custom_fields, next_url))
+        self.logger.debug('gates_next_url: %s' % next_url)
 
         self.send_json_success(
-            data={'next_url': next_url,
-                  'custom_fields': custom_fields},
+            data={'next_url': next_url},
             message=message
         )
 
@@ -424,6 +465,8 @@ class RecommendRecordsHandler(BaseHandler):
 
 
 class CustomInfoHandler(BaseHandler):
+    """员工补填信息"""
+
     @handle_response
     @authenticated
     @gen.coroutine
@@ -445,18 +488,56 @@ class CustomInfoHandler(BaseHandler):
             pass
 
         selects = yield self.employee_ps.get_employee_custom_fields(
-            self.current_user.company.id)
+            self.current_user, self.locale)
+        custom_field_info = yield self.employee_ps.get_employee_custom_info(self.current_user)
 
         data = ObjectDict(
             fields=selects,
             from_wx_template=self.params.from_wx_template or "x",
             employee_id=employee.id,
-            model={}
+            model=custom_field_info
         )
 
         self.render_page(
             template_name="employee/bind_success_info.html",
             data=data)
+
+    @handle_response
+    @gen.coroutine
+    def post(self):
+        # 将dict转为list
+        custom_field_values = []
+        values = self.json_args.get("model") or {}
+        [custom_field_values.append({k: v}) for k, v in values.items()]
+        _, employee = yield self.employee_ps.get_employee_info(self.current_user.sysuser.id, self.current_user.company.id)
+        res = yield self.employee_ps.update_employee_custom_supply_info(employee.id, self.current_user.company.id, custom_field_values)
+        if res.status == const.API_SUCCESS:
+            self.send_json_success(message=res.message)
+        else:
+            self.send_json_error(message=res.message)
+
+
+class ApiEmployeeSupplyListHandler(BaseHandler):
+    """获取补填信息配置列表"""
+
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        data = yield self.employee_ps.get_employee_custom_field(self.current_user)
+        self.send_json_success(data)
+
+
+class ApiEmployeeSupplyInfoHandler(BaseHandler):
+    """获取员工补填信息"""
+
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        cname = self.params.cname
+        custom_field = self.params.custom_field
+
+        data = yield self.employee_ps.get_employee_supply_info_by_custom_field(cname, custom_field, self.current_user.company.id)
+        self.send_json_success(data)
 
 
 class BindCustomInfoHandler(BaseHandler):
@@ -1085,6 +1166,7 @@ class EmployeeReferralConnectionHandler(BaseHandler):
             path.REFERRAL_CONNECTIONS.format(chain_id),
             self.params,
             recom=self.position_ps._make_recom(self.current_user.sysuser.id),
+            invite_apply=1
         )
 
         self.params.share = ObjectDict({

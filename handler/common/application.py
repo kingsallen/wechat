@@ -77,7 +77,7 @@ class ApplicationHandler(BaseHandler):
         # 联系内推： 候选人填写简历信息 确认提交，此时并没有真正投递要等到员工完成推荐评价才算是真正投递
         if self.params.contact_referral:
             # 申请来自哪里
-            origin = self.params.origin
+            origin = 2 if self.params.invite_apply == str(const.YES) else 1
             if self.params.root_recomd:
                 recom = decode_id(self.params.root_recomd)
                 psc = -1
@@ -138,7 +138,9 @@ class ApplicationHandler(BaseHandler):
             self.current_user,
             self.params,
             is_platform=self.is_platform,
-            has_recom='recom' in self.params)
+            has_recom='recom' in self.params,
+            source=self.params.source
+        )
 
         # TODO (tangyiliang) 申请后操作，以下操作全部可以走消息队列
         if is_applied:
@@ -189,12 +191,14 @@ class ApplicationHandler(BaseHandler):
     def _add_sensor_track(self, depth, recommender_user_id):
         if self.params.source == const.FANS_RECOMMEND:
             origin = const.SA_ORIGIN_FANS_RECOMMEND
+        elif self.params.invite_apply == str(const.YES):
+            origin = const.SA_ORIGIN_APPLICATION_INVITE
         elif recommender_user_id:
             origin = const.SA_ORIGIN_EMPLOYEE_SHARE
-        elif self.params.from_template_message == str(const.TEMPLATES.APPLICATION_INVITE):
-            origin = const.SA_ORIGIN_APPLICATION_INVITE
         else:
             origin = const.SA_ORIGIN_PLATFORM
+        if self.params.invite_apply == str(const.YES):
+            self.track("inDirectReferral", properties={"apply_origin": const.SA_INDIRECT_REFERRAL_INVITE})
         self.track("cApplySuccess", properties={"origin": origin, "depth": depth})
 
 
@@ -237,7 +241,7 @@ class ApplicationEmailHandler(BaseHandler):
         self.current_user.company.logo = make_static_url(self.current_user.company.logo, protocol="https", ensure_protocol=True)
         if self.params.pid and position.email_resume_conf == 0:
             create_status, message = yield self.application_ps.create_email_apply(self.params, position,
-                                                                                  self.current_user, self.is_platform)
+                                                                                  self.current_user, self.is_platform, self.params.source)
             if not create_status:
                 # 职位不能申请, 直接返回不能再次redirect
                 messages = message

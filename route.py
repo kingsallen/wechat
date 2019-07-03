@@ -40,6 +40,7 @@ import handler.common.short_url
 import handler.common.statistics
 import handler.common.redpacket
 import handler.common.miniapp
+import handler.common.health_check
 
 import handler.help.passport
 import handler.help.releasedposition
@@ -64,6 +65,7 @@ import handler.platform.privacy
 import handler.platform.switch
 import handler.platform.radar_demo
 import handler.platform.annual_summarize
+import handler.platform.thirdparty
 
 import handler.qx.app
 import handler.qx.aggregation
@@ -112,6 +114,8 @@ common_routes = [
     (r"/redpacket/claim",                            handler.common.redpacket.RedpacketHandler,                 {"event": "redpacket_claim"}),
     (r"/api/redpacket/claim",                        handler.common.redpacket.RedpacketHandler,                 {"event": "api_redpacket_claim"}),
     (r"/s/(?P<uuid>\w+)",                            handler.common.short_url.ShortURLRedirector,               {"event": "short_url_redirect"}),
+    (r"/mobile/h5/(\d+)",                            handler.common.redirect.H5DefaultHandler,                  {"event": "h5_default_page"}),
+    (r"/health_check",                               handler.common.health_check.HealthcheckHandler,            {"event": "health_check"}),
 
     # websocket
     (r"/websocket/([A-Za-z0-9_]{1,32})",             handler.common.im.ChatWebSocketHandler),
@@ -130,6 +134,7 @@ common_routes = [
     (r"/api/dict/overseas/college/?",                handler.common.dictionary.DictOverseasCollegeHandler,      {"event": "dict_overseas_college"}),
     (r"/api/profile/edit/?",                         handler.common.profile.ProfileSectionHandler,              {"event": "profile_section"}),
     (r"/api/profile/new/?",                          handler.common.profile.ProfileNewHandler,                  {"event": "profile_new"}),
+    (r"/api/profile/all/?",                          handler.common.profile.APIProfileHandler,                  {"event": "profile_all"}),
     (r"/api/customcv/?",                             handler.common.profile.ProfileAPICustomCVHandler,          {"event": "profile_customcv"}),
     (r"/api/position/star/?",                        handler.common.position.PositionStarHandler,               {"event": "position_star"}),
     (r"/api/resume/upload",                          handler.common.resume.APIResumeUploadHandler,              {"event": "api_resume_upload"}),
@@ -202,6 +207,7 @@ platform_routes = [
     (r'/employee/referral/radar_cards/seek_recom',   handler.platform.employee.ReferralRadarCardSeekRecomHandler, {"event": "referral_radar_cards_seek_recom"}),
     (r'/employee/referral/radar',                    handler.platform.employee.ReferralRadarPageHandler,        {"event": "referral_radar"}),
     (r'/employee/referral/expired',                  handler.platform.employee.ReferralExpiredPageHandler,      {"event": "referral_radar_expired"}),
+    (r'/employee/bind',                              handler.platform.employee.EmployeeBindPageHandler,         {"event": "employee_bind_page"}),
     (r'/cover/no-weixin',                            handler.platform.cover.CoverHandler,                       {"event": "cover_no_weixin"}),
     (r'/position/recom/?',                           handler.platform.position.PositionRecomListHandler,        {"event": "position_recom_list"}),
     (r'/usercenter/mine/?',                          handler.common.usercenter.UsercenterMineHandler,           {"event": "usercenter_mine"}),
@@ -209,7 +215,9 @@ platform_routes = [
     (r'/referral/confirm/?',                         handler.platform.referral.ReferralConfirmHandler,          {"event": "referral_confirm"}),
     (r'/employee/recom/profile/pc/?',                handler.platform.referral.ReferralProfilePcHandler,        {"event": "referal_confirm_pc"}),
     (r'/referral/crucial/info/?',                    handler.platform.referral.ReferralCrucialInfoHandler,      {"event": "referral_crucial_info"}),
-    (r'/referral/contact_result/?',                  handler.platform.referral.ReferralResultHandler,         {"event": "referral_contact_result"}),
+    (r'/referral/contact_result/?',                  handler.platform.referral.ReferralResultHandler,           {"event": "referral_contact_result"}),
+    (r"/joywork",                                    handler.platform.thirdparty.JoywokOauthHandler,            {"event": "joywok_oauth"}),
+    (r"/thirdparty/automatic/auth",                  handler.platform.thirdparty.JoywokAutoAuthHandler,         {"event": "joywok_auto_bind_page"}),
 
     # 各大公司的自定义配置
     (r"/custom/emailapply/?",                        handler.platform.customize.CustomizeEmailApplyHandler,     {"event": "customize_emailapply"}),
@@ -226,6 +234,7 @@ platform_routes = [
     (r"/api/annual/summarize",                       handler.platform.annual_summarize.ApiAnnualSummarizeHandler, {"event": "api_annual_summarize"}),
     (r"/api/annual/summarize/entrance",              handler.platform.annual_summarize.AnnualSummarizeEntranceHandler, {"event": "annual_summarize_entrance"}),
 
+    (r"/api/omniauth/jw/login_code",                 handler.platform.thirdparty.JoywokInfoHandler,             {"event": "joywok_info"}),
     (r"/api/company/visitreq/?",                     handler.platform.companyrelation.CompanyVisitReqHandler,   {"event": "company_visitreq"}),
     (r"/api/company/survey/?",                       handler.platform.companyrelation.CompanySurveyHandler,     {"event": "company_survey"}),
     (r"/api/company/follow/?",                       handler.platform.companyrelation.CompanyFollowHandler,     {"event": "company_follow"}),
@@ -233,6 +242,8 @@ platform_routes = [
     (r"/api/employee/bind/?",                        handler.platform.employee.EmployeeBindHandler,             {"event": "employee_bind"}),
     (r"/api/employee/unbind/?",                      handler.platform.employee.EmployeeUnbindHandler,           {"event": "employee_unbind"}),
     (r"/api/employee/bind-info/?",                   handler.platform.employee.BindInfoHandler,                 {"event": "employee_bind_info"}),
+    (r"/api/employee/custominfo/?",                  handler.platform.employee.CustomInfoHandler,               {"event": "api_employee_custominfo"}),
+    (r"/api/employee/supply/list/?",                 handler.platform.employee.ApiEmployeeSupplyListHandler,    {"event": "api_employee_supply_list"}),
     (r"/api/employee/recommendrecords/?",            handler.platform.employee.RecommendRecordsHandler,         {"event": "employee_recommendrecords"}),
     (r"/api/employee/rewards/?",                     handler.platform.employee.AwardsHandler,                   {"event": "employee_awards"}),
     (r"/api/employee/count-policy-want",             handler.platform.employee.EmployeeInterestReferralPolicyHandler, {"event": "count_interest_policy"}),
@@ -248,7 +259,9 @@ platform_routes = [
     (r"/api/employee/sugs/candidate-name/?",         handler.platform.employee.ReferralProgressListSearchHandler, {"event": "employee_referral_progress_list_search"}),
     (r"/api/employee/radar/?",                       handler.platform.employee.ReferralRadarHandler,            {"event": "employee_referral_radar_data"}),
     (r"/api/employee/stat/job-view/?",               handler.platform.employee.ReferralRadarCardPositionHandler, {"event": "employee_referral_radar_position_data"}),
-    (r"/api/employee/stat/seek-recom/?",             handler.platform.employee.ReferralRadarCardRecomHandler,    {"event": "employee_referral_radar_seek_recom_data"}),
+    (r"/api/employee/stat/seek-recom/?",             handler.platform.employee.ReferralRadarCardRecomHandler,   {"event": "employee_referral_radar_seek_recom_data"}),
+    (r"/api/employee/supply/info",                   handler.platform.employee.ApiEmployeeSupplyInfoHandler,    {"event": "api_employee_supply_info"}),
+    (r"/api/resend/bind/email",                      handler.platform.employee.ResendBindEmailHandler,          {"event": "resend_bind_email"}),
 
     (r"/api/func/wechat/?",                          handler.platform.employee.WechatSubInfoHandler,            {"event": "wechat_sub_info"}),
     (r'/api/user/survey/?',                          handler.platform.user.APIUserSurveyHandler,                {"event": "user_survey_api"}),

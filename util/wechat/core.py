@@ -299,6 +299,22 @@ def get_wxuser(access_token, openid):
 
 
 @gen.coroutine
+def get_test_access_token(component_access_token, component_appid, authorization_code):
+    data = {
+        "component_appid": component_appid,
+        "authorization_code": authorization_code
+    }
+    if component_access_token is not None:
+        component_access_token = component_access_token.get("component_access_token", None)
+    else:
+        return None
+    logger.debug('[get_test_access_token]: component_access_token: {}, component_appid: {}, authorization_code: {}'.format(
+        component_access_token, component_appid, authorization_code))
+    ret = yield http_post(wx.WX_OAUTH_PRE_ACCESS_TOKEN % component_access_token, data, infra=False)
+    return ret
+
+
+@gen.coroutine
 def get_qrcode(access_token, scene_str, action_name="QR_LIMIT_STR_SCENE"):
     """获得专属二维码
     :return url
@@ -339,7 +355,7 @@ def get_temporary_qrcode(wechat, scene_id, action_name="QR_SCENE"):
 def get_qrcode_ticket(wechat, scene_id, action_name="QR_SCENE"):
     """
     生成带场景值的临时二维码ticket
-    :param scene_id：完整的场景值  (pattern_id 1：员工认证 2：内推政策 3：积分榜单 4：积分历史 5：推荐历史 6：候选人推荐 7：个人中心 8：我的 9：推荐人才简历 10：推荐人才关键信息 11：职位列表 12：用户认领推荐成功， 14：职位详情)
+    :param scene_id：完整的场景值  (pattern_id 1：员工认证 2：内推政策 3：积分榜单 4：积分历史 5：推荐历史 6：候选人推荐 7：个人中心 8：我的 9：推荐人才简历 10：推荐人才关键信息 11：职位列表 12：用户认领推荐成功 13：浏览候选人推荐职位 14：职位详情)
     :param wechat
     :param action_name
     :return:
@@ -348,11 +364,13 @@ def get_qrcode_ticket(wechat, scene_id, action_name="QR_SCENE"):
         "expire_seconds": wx.TEMPORARY_QRCODE_EXPIRE,
         "action_name": action_name,
         "action_info": {
-            "scene": {
-                "scene_id": scene_id
-            }
+            "scene": {}
         }
     })
+    if action_name == "QR_SCENE":
+        params.action_info.scene.update(scene_id=scene_id)
+    else:
+        params.action_info.scene.update(scene_str=scene_id)
     ret = yield http_post(wx.WX_CREATE_QRCODE_API % wechat.access_token, params, infra=False)
     if ret and ret.get("ticket"):
         raise gen.Return(ret.get("ticket"))
@@ -362,12 +380,12 @@ def get_qrcode_ticket(wechat, scene_id, action_name="QR_SCENE"):
 
 
 @gen.coroutine
-def send_succession_message(wechat, open_id, pattern_id, position_id=0):
+def send_succession_message(wechat, open_id, pattern_id=99, position_id=0, message=None):
     """
     发送接续流程的信息给用户
     :param wechat:
     :param open_id:
-    :param pattern_id: 1：员工认证 2：内推政策 3：积分榜单 4：积分历史 5：推荐历史 6：候选人推荐 7：个人中心 8：我的 9：推荐人才简历 10：推荐人才关键信息 11：职位列表 12：用户认领推荐成功 14：职位详情
+    :param pattern_id: 1：员工认证 2：内推政策 3：积分榜单 4：积分历史 5：推荐历史 6：候选人推荐 7：个人中心 8：我的 9：推荐人才简历 10：推荐人才关键信息 11：职位列表 12：用户认领推荐成功 13：浏览候选人推荐职位 14：职位详情
     :param position_id:
     :return:
     """
@@ -415,6 +433,8 @@ def send_succession_message(wechat, open_id, pattern_id, position_id=0):
         content = '您刚刚正在浏览职位，点击查阅<a href="{}">职位详情</a>'.format(url)
     else:
         content = "欢迎关注：{}, 点击菜单栏发现更多精彩~".format(wechat.get("name"))
+    if message:
+        content = message
     jdata = ObjectDict({
         "touser": open_id,
         "msgtype": "text",
