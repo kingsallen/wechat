@@ -539,6 +539,17 @@ class ApiEmployeeSupplyInfoHandler(BaseHandler):
         data = yield self.employee_ps.get_employee_supply_info_by_custom_field(cname, custom_field, self.current_user.company.id)
         self.send_json_success(data)
 
+class ApiEmployeeRecomSubscribeHandler(BaseHandler):
+    """员工职位推荐订阅设置"""
+
+    @handle_response
+    @gen.coroutine
+    def post(self):
+        cname = self.params.cname
+        custom_field = self.params.custom_field
+
+        data = yield self.employee_ps.get_employee_supply_info_by_custom_field(cname, custom_field, self.current_user.company.id)
+        self.send_json_success(data)
 
 class BindCustomInfoHandler(BaseHandler):
 
