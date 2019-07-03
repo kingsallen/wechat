@@ -198,7 +198,7 @@ class PositionHandler(BaseHandler):
                 # 发送十分钟模板消息
                 share_time = int(self.params.share_time or 0)
                 if subtract_design_time_ts(minutes=10) < share_time:
-                    yield self.position_ps.send_ten_min_tmp(self.current_user.sysuser.id, self.current_user.company.id, share_time)
+                    yield self.position_ps.send_ten_min_tmp(self.current_user.recom.id, self.current_user.company.id, share_time)
 
                 # 职位转发被点击时 neo4j记录转发链路
                 neo4j_data = ObjectDict({
