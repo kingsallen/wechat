@@ -41,8 +41,6 @@ class PositionHandler(BaseHandler):
         display_locale = self.get_current_locale()
         position_info = yield self.position_ps.get_position(position_id, display_locale)
 
-        self.params.update(dict(old_wxsdk=True))
-
         if position_info.id and position_info.company_id == self.current_user.company.id:
             yield self._redirect_when_recom_is_openid(position_info)
             if self.request.connection.stream.closed():
@@ -1225,8 +1223,6 @@ class PositionListHandler(PositionListInfraParamsMixin, BaseHandler):
         company['industry'] = self.params.company.industry
         company['scale_name'] = self.params.company.scale_name
         company['banner'] = self.params.company.banner
-
-        self.params.update(dict(old_wxsdk=True))
 
         self.render_page(
             template_name="position/index.html",
