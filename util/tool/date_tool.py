@@ -39,6 +39,36 @@ def format_dateonly(time):
     return time.strftime(constant.TIME_FORMAT_DATEONLY)
 
 
+def curr_now_ts(precision='s'):
+    """
+    当前系统时间时间戳
+    :param precision 精度：默认为s即十位时间戳,f为13位时间戳
+    """
+    if precision == 'f':
+        return int(time.time())
+    else:
+        return int(time.time()*1000)
+
+
+def subtract_design_time_ts(ts=None, minutes=None) -> int:
+    """
+    减去指定时间的时间戳
+    :param ts 没有时为当前系统10位时间戳，
+    :param minutes 减去的分钟数
+    :return 13位长度的时间戳
+    """
+    if ts is None:
+        ts = curr_now_ts()
+    if minutes:
+        # 转换成localtime
+        time_local = time.localtime(ts)
+        # 转换成新的时间格式(2016-05-05 20:28:54)
+        dt = datetime.strptime(time.strftime("%Y-%m-%d %H:%M:%S", time_local), "%Y-%m-%d %H:%M:%S") - timedelta(minutes=minutes)
+
+        res_ts = time.mktime(time.strptime(str(dt), '%Y-%m-%d %H:%M:%S')) * 1000
+        return res_ts
+
+
 def is_time_valid(str_time, form):
     """
     判断时间格式是否符合要求

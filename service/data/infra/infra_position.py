@@ -194,17 +194,10 @@ class InfraPositionDataService(DataService):
         return ret
 
     @gen.coroutine
-    def send_ten_min_tmp(self, user_id, company_id):
+    def send_ten_min_tmp(self, params):
         """
         十分钟消息模板，改为基础服务发
-        :param user_id: 员工user_id
-        :param company_id:
-        :return:
         """
-        params = {
-            "user_id": user_id,
-            "company_id": company_id
-        }
         ret = yield http_post(path.INFRA_TEN_MIN_TMP, params)
         return ret
 
