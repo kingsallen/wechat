@@ -45,15 +45,15 @@ def curr_now_ts(precision='s'):
     :param precision 精度：默认为s即十位时间戳,f为13位时间戳
     """
     if precision == 'f':
-        return int(time.time())
-    else:
         return int(time.time()*1000)
+    else:
+        return int(time.time())
 
 
 def subtract_design_time_ts(ts=None, minutes=None) -> int:
     """
     减去指定时间的时间戳
-    :param ts 没有时为当前系统10位时间戳，
+    :param ts 10位时间戳, 没有时为当前系统10位时间戳，
     :param minutes 减去的分钟数
     :return 13位长度的时间戳
     """
