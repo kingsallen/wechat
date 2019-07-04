@@ -9,6 +9,7 @@ import conf.message as msg
 import conf.fe as fe
 import conf.message as messages
 import conf.path as path
+import conf.sensors as sensor
 from handler.base import BaseHandler
 from handler.platform.user import UserSurveyConstantMixin
 from util.common import ObjectDict
@@ -158,10 +159,13 @@ class PraiseHandler(BaseHandler):
         praise_employee_id = self.json_args.praise_user_id
         delete = self.json_args.delete
         if delete:
+            action = 'vote'
             result = yield self.employee_ps.cancel_prasie(self.current_user.employee.id, praise_employee_id)
         else:
+            action = 'cancel_vote'
             result = yield self.employee_ps.vote_prasie(self.current_user.employee.id, praise_employee_id)
         if result:
+            self.track(sensor.PRAISE, properties={"action": action})
             self.send_json_success()
         else:
             self.send_json_error()
