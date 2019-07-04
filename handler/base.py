@@ -812,6 +812,7 @@ class BaseHandler(MetaBaseHandler):
                 traceback.format_exc()))
 
     def _get_distinct_id_and_is_login_id(self, distinct_id=0, is_login_id=False):
+        """获取distinct_id、is_login_id的值，distinct_id默认值当前用户id，is_login_id默认值为当前用户是否验证过手机号"""
         if distinct_id:
             is_login_id = is_login_id
         elif self.current_user.sysuser:
