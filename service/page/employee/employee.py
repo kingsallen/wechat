@@ -699,6 +699,17 @@ class EmployeePageService(PageService):
         return res
 
     @gen.coroutine
+    def submit_employee_subscribe_preference(self, employee_id, preference):
+        """提交员工订阅偏好的信息"""
+        params = ObjectDict({
+            "employee_id": employee_id,
+            "preference": preference
+        })
+        res = yield self.infra_employee_ds.infra_submit_employee_subscribe_preference(
+            params)
+        return res
+
+    @gen.coroutine
     def update_employee_custom_fields_for_email_pending(
         self, user_id, company_id, custom_fields_json):
         yield self.thrift_employee_ds.set_employee_custom_info_email_pending(
