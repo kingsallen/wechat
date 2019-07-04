@@ -312,6 +312,7 @@ class ChatPageService(PageService):
                 company_info = yield company_ps.get_company(conds={"id": did}, need_conf=True)
                 position = ObjectDict()
                 position.jobTitle = position_info.title
+                position.hb_status = position_info.hb_status
                 position.company = company_info.abbreviation
                 position.team = team.name
                 position.salary = position_info.salary
