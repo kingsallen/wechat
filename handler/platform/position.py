@@ -21,6 +21,7 @@ from util.common.kafka import *
 from util.common.mq import award_publisher, jd_click_publisher
 from util.tool.str_tool import gen_salary, add_item, split, gen_degree_v2, gen_experience_v2
 from util.tool.url_tool import url_append_query
+from util.tool.date_tool import subtract_design_time_ts
 from util.wechat.template import position_view_five_notice_tpl
 from util.common.decorator import log_time, log_time_common_func
 from util.common.mq import neo4j_position_forward
@@ -39,8 +40,6 @@ class PositionHandler(BaseHandler):
         """
         display_locale = self.get_current_locale()
         position_info = yield self.position_ps.get_position(position_id, display_locale)
-
-        self.params.update(dict(old_wxsdk=True))
 
         if position_info.id and position_info.company_id == self.current_user.company.id:
             yield self._redirect_when_recom_is_openid(position_info)
@@ -195,6 +194,11 @@ class PositionHandler(BaseHandler):
 
             # 后置操作
             if self.is_platform and self.current_user.recom:
+
+                # 发送十分钟模板消息
+                share_time = int(self.params.share_time or 0)
+                if subtract_design_time_ts(minutes=10) < share_time:
+                    yield self.position_ps.send_ten_min_tmp(self.current_user.recom.id, self.current_user.company.id, share_time)
 
                 # 职位转发被点击时 neo4j记录转发链路
                 neo4j_data = ObjectDict({
@@ -1154,7 +1158,7 @@ class PositionEmpNoticeHandler(BaseHandler):
             self.send_json_success()
             return
 
-        yield self.position_ps.send_ten_min_tmp(self.current_user.sysuser.id, self.current_user.company.id)
+        # yield self.position_ps.send_ten_min_tmp(self.current_user.sysuser.id, self.current_user.company.id)
 
         self.send_json_success()
 
@@ -1219,8 +1223,6 @@ class PositionListHandler(PositionListInfraParamsMixin, BaseHandler):
         company['industry'] = self.params.company.industry
         company['scale_name'] = self.params.company.scale_name
         company['banner'] = self.params.company.banner
-
-        self.params.update(dict(old_wxsdk=True))
 
         self.render_page(
             template_name="position/index.html",
