@@ -402,3 +402,17 @@ class InfraUserDataService(DataService):
         """
         ret = yield http_post(path.INFRA_AUTO_BIND_EMPLOYEE, params)
         return ret
+
+
+    @gen.coroutine
+    def post_wx_change_mobile(self, country_code, mobile, user_id):
+        """手机号和微信号绑定接口"""
+
+        params = ObjectDict({
+            'countryCode': str(country_code),
+            'mobile': str(mobile),
+            'userId': str(user_id),
+        })
+
+        ret = yield http_post(path.INFRA_USER_CHANGEMOBILE, params)
+        raise gen.Return(ret)

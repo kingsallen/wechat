@@ -197,7 +197,7 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
     def post_changemobile(self):
         res = yield self._opt_post_cellphone_code(const.MOBILE_CODE_OPT_TYPE.change_mobile)
         if res:
-            yield self._opt_post_user_account()
+            yield self._opt_post_user_account_change()
 
     @gen.coroutine
     def _opt_post_cellphone_code(self, type):
@@ -288,3 +288,24 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
 
             yield self.user_ps.bind_mobile_password(
                 self.current_user.sysuser.id, self.params.mobile, password)
+
+
+
+    @gen.coroutine
+    def _opt_post_user_account_change(self):
+
+        # 调用基础服务换修改手机号
+        response = yield self.cellphone_ps.wx_change_mobile(
+            country_code=self.params.country_code,
+            mobile=self.params.mobile,
+            user_id=self.current_user.sysuser.id
+        )
+
+        if response.status != const.API_SUCCESS:
+            return
+
+        ret_user_id = response.data.id
+        if str(ret_user_id) != str(self.current_user.sysuser.id):
+            self.logger.warn("触发帐号合并成功 合并前 user_id:{} 合并后 user_id:{}".format(self.current_user.sysuser.id, ret_user_id))
+            # 由于在 baseHandler 中已经有对合并帐号的处理，此处不手动删除 cookie
+            # self.clear_cookie(name=const.COOKIE_SESSIONID)
