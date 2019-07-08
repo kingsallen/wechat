@@ -21,6 +21,7 @@ import conf.message as msg
 import conf.path as path
 import conf.qx as qx_const
 from globals import logger
+from util.common.exception import MyException
 from util.common import ObjectDict
 from util.common.cache import BaseRedis
 from util.common.cipher import encode_id
@@ -275,7 +276,10 @@ def check_signature(func):
         if self.is_platform and not is_common:
             key = "wechat_signature"
             try:
-                self.get_argument(key, strip=True)
+                signature = self.get_argument(key, strip=True)
+                wechat = yield self.wechat_ps.get_wechat(conds={"signature": signature})
+                if not wechat:
+                    raise MyException("signature无效")
             except MissingArgumentError:
                 self.write_error(http_code=404)
                 return
