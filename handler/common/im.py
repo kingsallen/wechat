@@ -5,6 +5,7 @@ import traceback
 import redis
 import ujson
 from tornado import gen, websocket, ioloop
+from urllib.parse import unquote
 
 import conf.common as const
 import conf.message as msg
@@ -358,7 +359,7 @@ class ChatHandler(BaseHandler):
         """
 
         jsapi = JsApi(jsapi_ticket=self.current_user.wechat.jsapi_ticket,
-                      url=self.params.share_url)
+                      url=unquote(self.params.share_url))
 
         config = ObjectDict({
                   "debug": False,
