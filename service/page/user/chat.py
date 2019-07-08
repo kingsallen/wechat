@@ -126,7 +126,7 @@ class ChatPageService(PageService):
             chat_debut=ret.chatDebut,
             follow_qx=qxuser.is_subscribe == 1,
             room_id=ret.roomId,
-            show_position_info=(position_info and not bot_enabled)
+            show_position_info=(len(position_info) > 0 and not bot_enabled)
         )
         raise gen.Return(res)
 
