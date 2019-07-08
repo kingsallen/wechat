@@ -280,7 +280,7 @@ def check_signature(func):
                 wechat = yield self.wechat_ps.get_wechat(conds={"signature": signature})
                 if not wechat:
                     raise MyException("signature无效")
-            except MissingArgumentError:
+            except (MissingArgumentError, MyException):
                 self.write_error(http_code=404)
                 return
 
