@@ -410,6 +410,8 @@ def check_and_apply_profile(func):
                                   profile_resume_upload=None,
                                   # set later
                                   profile_email=None,
+                                  profile_create_30s=self.make_url(path.PROFILE_NEW, self.params, m='authorization', way=const.RESUME_WAY_30S),
+                                  profile_import_pc=True,
                                   # set later
                                   profile_custom_url=None)
             if company.conf_veryeast_switch == 1:
@@ -447,20 +449,23 @@ def check_and_apply_profile(func):
                     goto_custom_url = self.make_url(
                         path.PROFILE_CUSTOM_CV,
                         self.params)
+                    # update
+                    self.redirect(goto_custom_url)
+                    return
 
                     # 如果是自定义职位，且没有 profile，且是直接投递定制的公司
                     # 直接跳转到自定义填写页面
 
-                    is_direct_apply = yield self.customize_ps.create_direct_apply(
-                        position.company_id, position.app_cv_config_id)
-
-                    if is_direct_apply:
-                        self.redirect(goto_custom_url)
-                        return
-                    else:
-                        importer.update(
-                            profile_custom_url= goto_custom_url
-                        )
+                    # is_direct_apply = yield self.customize_ps.create_direct_apply(
+                    #     position.company_id, position.app_cv_config_id)
+                    #
+                    # if is_direct_apply:
+                    #     self.redirect(goto_custom_url)
+                    #     return
+                    # else:
+                    #     importer.update(
+                    #         profile_custom_url= goto_custom_url
+                    #     )
                         # redirect_params.update(goto_custom_url=goto_custom_url)
 
             else:
