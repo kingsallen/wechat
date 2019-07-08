@@ -597,6 +597,7 @@ class BaseHandler(MetaBaseHandler):
                 # 仟寻授权需要重定向到仟寻appid对应的域名
                 self._get_oauth_redirect_url()
                 url = self._oauth_service.get_oauth_code_userinfo_url()
+                self.logger.debug("qx_oauth_redirect_url: {}".format(url))
                 self.redirect(url)
                 return
             else:
