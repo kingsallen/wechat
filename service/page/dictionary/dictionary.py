@@ -103,7 +103,7 @@ class DictionaryPageService(PageService):
             ret.insert(0, china)
             for item in [
                 dict(code_text='852', icon_class="hk", text='Hong Kong' if display_locale == 'en_US' else '中国香港'),
-                dict(code_text='853', icon_class="am", text='Macao' if display_locale == 'en_US' else '中国澳门'),
+                dict(code_text='853', icon_class="mo", text='Macao' if display_locale == 'en_US' else '中国澳门'),
                 dict(code_text='886', icon_class="tw", text='Taiwan' if display_locale == 'en_US' else '中国台湾'),
             ]:
                 if item not in ret:
