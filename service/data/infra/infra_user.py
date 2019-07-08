@@ -7,10 +7,10 @@ import conf.path as path
 import conf.alphacloud_api as api
 from service.data.base import DataService
 from util.common import ObjectDict
-from util.tool.http_tool import http_get, http_post, http_put, unboxing, http_get_rp
+from util.tool.http_tool import http_get, http_post, http_put, unboxing, http_get_rp, http_get_v2
 from util.common.decorator import log_time
-from setting import settings
-
+from conf.newinfra_service_conf.service_info import user_service
+from conf.newinfra_service_conf.user import user
 
 
 class InfraUserDataService(DataService):
@@ -381,4 +381,24 @@ class InfraUserDataService(DataService):
             "presentee_user_id": click_user_id
         })
         ret = yield http_get(path.INFRA_IF_SEEK_CHECK, params)
+        return ret
+
+    @gen.coroutine
+    def infra_get_user_by_joywok_info(self, params):
+        """
+        根据麦当劳APP授权获取的员工信息查找仟寻微信用户，及员工在仟寻系统的认证状态:
+        :param params:
+        :return:
+        """
+        ret = yield http_get_v2(user.INFRA_GET_USER_BY_JOYWOK_USER_INFO, user_service, params)
+        return ret
+
+    @gen.coroutine
+    def infra_auto_bind_employee(self, params):
+        """
+        对joywok的用户做自动认证:
+        :param params:
+        :return:
+        """
+        ret = yield http_post(path.INFRA_AUTO_BIND_EMPLOYEE, params)
         return ret

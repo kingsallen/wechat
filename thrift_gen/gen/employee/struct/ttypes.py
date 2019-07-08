@@ -834,6 +834,7 @@ class BindingParams(object):
      - answer1
      - answer2
      - source
+     - customFieldValues
     """
 
     thrift_spec = (
@@ -848,9 +849,10 @@ class BindingParams(object):
         (8, TType.STRING, 'answer1', 'UTF8', None, ),  # 8
         (9, TType.STRING, 'answer2', 'UTF8', None, ),  # 9
         (10, TType.I32, 'source', None, None, ),  # 10
+        (11, TType.MAP, 'customFieldValues', (TType.I32, None, TType.STRING, 'UTF8', False), None, ),  # 11
     )
 
-    def __init__(self, type=None, userId=None, companyId=None, email=None, mobile=None, customField=None, name=None, answer1=None, answer2=None, source=None,):
+    def __init__(self, type=None, userId=None, companyId=None, email=None, mobile=None, customField=None, name=None, answer1=None, answer2=None, source=None, customFieldValues=None,):
         self.type = type
         self.userId = userId
         self.companyId = companyId
@@ -861,6 +863,7 @@ class BindingParams(object):
         self.answer1 = answer1
         self.answer2 = answer2
         self.source = source
+        self.customFieldValues = customFieldValues
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -921,6 +924,17 @@ class BindingParams(object):
                     self.source = iprot.readI32()
                 else:
                     iprot.skip(ftype)
+            elif fid == 11:
+                if ftype == TType.MAP:
+                    self.customFieldValues = {}
+                    (_ktype31, _vtype32, _size30) = iprot.readMapBegin()
+                    for _i34 in range(_size30):
+                        _key35 = iprot.readI32()
+                        _val36 = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                        self.customFieldValues[_key35] = _val36
+                    iprot.readMapEnd()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -970,6 +984,14 @@ class BindingParams(object):
         if self.source is not None:
             oprot.writeFieldBegin('source', TType.I32, 10)
             oprot.writeI32(self.source)
+            oprot.writeFieldEnd()
+        if self.customFieldValues is not None:
+            oprot.writeFieldBegin('customFieldValues', TType.MAP, 11)
+            oprot.writeMapBegin(TType.I32, TType.STRING, len(self.customFieldValues))
+            for kiter37, viter38 in self.customFieldValues.items():
+                oprot.writeI32(kiter37)
+                oprot.writeString(viter38.encode('utf-8') if sys.version_info[0] == 2 else viter38)
+            oprot.writeMapEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -1428,22 +1450,22 @@ class RewardsResponse(object):
             elif fid == 2:
                 if ftype == TType.LIST:
                     self.rewards = []
-                    (_etype33, _size30) = iprot.readListBegin()
-                    for _i34 in range(_size30):
-                        _elem35 = RewardVO()
-                        _elem35.read(iprot)
-                        self.rewards.append(_elem35)
+                    (_etype42, _size39) = iprot.readListBegin()
+                    for _i43 in range(_size39):
+                        _elem44 = RewardVO()
+                        _elem44.read(iprot)
+                        self.rewards.append(_elem44)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
             elif fid == 3:
                 if ftype == TType.LIST:
                     self.rewardConfigs = []
-                    (_etype39, _size36) = iprot.readListBegin()
-                    for _i40 in range(_size36):
-                        _elem41 = RewardConfig()
-                        _elem41.read(iprot)
-                        self.rewardConfigs.append(_elem41)
+                    (_etype48, _size45) = iprot.readListBegin()
+                    for _i49 in range(_size45):
+                        _elem50 = RewardConfig()
+                        _elem50.read(iprot)
+                        self.rewardConfigs.append(_elem50)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
@@ -1464,15 +1486,15 @@ class RewardsResponse(object):
         if self.rewards is not None:
             oprot.writeFieldBegin('rewards', TType.LIST, 2)
             oprot.writeListBegin(TType.STRUCT, len(self.rewards))
-            for iter42 in self.rewards:
-                iter42.write(oprot)
+            for iter51 in self.rewards:
+                iter51.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         if self.rewardConfigs is not None:
             oprot.writeFieldBegin('rewardConfigs', TType.LIST, 3)
             oprot.writeListBegin(TType.STRUCT, len(self.rewardConfigs))
-            for iter43 in self.rewardConfigs:
-                iter43.write(oprot)
+            for iter52 in self.rewardConfigs:
+                iter52.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -1955,11 +1977,11 @@ class RewardVOPageVO(object):
             elif fid == 5:
                 if ftype == TType.LIST:
                     self.data = []
-                    (_etype47, _size44) = iprot.readListBegin()
-                    for _i48 in range(_size44):
-                        _elem49 = RewardVO()
-                        _elem49.read(iprot)
-                        self.data.append(_elem49)
+                    (_etype56, _size53) = iprot.readListBegin()
+                    for _i57 in range(_size53):
+                        _elem58 = RewardVO()
+                        _elem58.read(iprot)
+                        self.data.append(_elem58)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
@@ -1992,8 +2014,8 @@ class RewardVOPageVO(object):
         if self.data is not None:
             oprot.writeFieldBegin('data', TType.LIST, 5)
             oprot.writeListBegin(TType.STRUCT, len(self.data))
-            for iter50 in self.data:
-                iter50.write(oprot)
+            for iter59 in self.data:
+                iter59.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -2280,11 +2302,11 @@ class Pagination(object):
             elif fid == 4:
                 if ftype == TType.LIST:
                     self.data = []
-                    (_etype54, _size51) = iprot.readListBegin()
-                    for _i55 in range(_size51):
-                        _elem56 = EmployeeAward()
-                        _elem56.read(iprot)
-                        self.data.append(_elem56)
+                    (_etype63, _size60) = iprot.readListBegin()
+                    for _i64 in range(_size60):
+                        _elem65 = EmployeeAward()
+                        _elem65.read(iprot)
+                        self.data.append(_elem65)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
@@ -2313,8 +2335,8 @@ class Pagination(object):
         if self.data is not None:
             oprot.writeFieldBegin('data', TType.LIST, 4)
             oprot.writeListBegin(TType.STRUCT, len(self.data))
-            for iter57 in self.data:
-                iter57.write(oprot)
+            for iter66 in self.data:
+                iter66.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()

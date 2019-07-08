@@ -21,6 +21,7 @@ from util.common.kafka import *
 from util.common.mq import award_publisher, jd_click_publisher
 from util.tool.str_tool import gen_salary, add_item, split, gen_degree_v2, gen_experience_v2
 from util.tool.url_tool import url_append_query
+from util.tool.date_tool import subtract_design_time_ts
 from util.wechat.template import position_view_five_notice_tpl
 from util.common.decorator import log_time, log_time_common_func
 from util.common.mq import neo4j_position_forward
@@ -66,6 +67,8 @@ class PositionHandler(BaseHandler):
 
             # 往kafka中写入数据, 做职位浏览统计
             yield self._insert_into_kafka(position_id)
+            if self.request.connection.stream.closed():
+                return
 
             # 刷新链路
             self.logger.debug("[JD]刷新链路")
@@ -191,6 +194,11 @@ class PositionHandler(BaseHandler):
 
             # 后置操作
             if self.is_platform and self.current_user.recom:
+
+                # 发送十分钟模板消息
+                share_time = int(self.params.share_time or 0)
+                if subtract_design_time_ts(minutes=10) < share_time:
+                    yield self.position_ps.send_ten_min_tmp(self.current_user.recom.id, self.current_user.company.id, share_time)
 
                 # 职位转发被点击时 neo4j记录转发链路
                 neo4j_data = ObjectDict({
@@ -785,7 +793,7 @@ class PositionHandler(BaseHandler):
 
                 yield position_view_five_notice_tpl(help_wechat.id, hr_wx_user.openid,
                                                     link, position_info.title,
-                                                    position_info.salary)
+                                                    position_info.salary, current_wechat_id=self.current_user.wechat.id)
 
     @log_time
     @gen.coroutine
@@ -873,22 +881,20 @@ class PositionListInfraParamsMixin(BaseHandler):
     @log_time_common_func
     def make_position_list_infra_params(self):
         """构建调用基础服务职位列表的 params"""
-        display_locale = self.get_current_locale()
+
         infra_params = ObjectDict()
         infra_params.degree = ""
         infra_params.candidate_source = ""
         infra_params.employment_type = ""
         infra_params.company_id = self.current_user.company.id
         infra_params.user_id = self.current_user.sysuser.id or 0
+        infra_params.is_referral = 1 if self.params.is_referral and self.params.is_referral.isdigit() else -1
 
         if self.params.did:
             infra_params.did = self.params.did
 
-        start_count = (int(self.params.get("count", 0)) *
-                       const_platform.POSITION_LIST_PAGE_COUNT)
-
-        infra_params.page_from = start_count
         infra_params.page_size = const_platform.POSITION_LIST_PAGE_COUNT
+        infra_params.page_from = int(self.params.get("count", 0)) + 1
 
         if self.params.salary:
             k = str(self.params.salary)
@@ -911,17 +917,12 @@ class PositionListInfraParamsMixin(BaseHandler):
             infra_params.employment_type = const.EMPLOYMENT_TYPE_SEARCH.get(self.params.employment_type, "") \
                 if self.params.employment_type.isdigit() else self.params.employment_type
 
-        if self.params.is_referral:
-            infra_params.update(
-                keyWord=self.params.keyword if self.params.keyword else "")
-        else:
-            infra_params.update(
-                keywords=self.params.keyword if self.params.keyword else "")
         infra_params.update(
-            department=self.params.team_name if self.params.team_name else "",
+            teamName=self.params.team_name if self.params.team_name else "",
             occupations=self.params.occupation.replace("\r\n", "\n") if self.params.occupation else "",
             custom=self.params.custom if self.params.custom else "",
-            order_by_priority=True)
+            keywords=self.params.keyword if self.params.keyword else "",
+            order_by_priority=1)
 
         self.logger.debug("[position_list_infra_params]: %s" % infra_params)
 
@@ -960,11 +961,15 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
         if hb_c:
             # 红包职位列表
             infra_params.update(hb_config_id=hb_c)
+            start_count = (int(self.params.get("count", 0)) * const_platform.POSITION_LIST_PAGE_COUNT)
+            infra_params.page_from = start_count
             rp_position_list = yield self.position_ps.infra_get_rp_position_list(infra_params)
             position_list = rp_position_list
 
         elif recom_push_id:
             # 员工推荐列表
+            start_count = (int(self.params.get("count", 0)) * const_platform.POSITION_LIST_PAGE_COUNT)
+            infra_params.page_from = start_count
             if int(self.params.get("count", 0)) == 0:
                 position_list = yield self.get_employee_position_list(recom_push_id, infra_params)
             else:
@@ -974,13 +979,8 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
             # 逻辑和职位列表页一样, 代码有重复, TODO: 优化
             rp_position_list = [p for p in position_list if p.in_hb]
         else:
-            # 内推职位列表
-            if is_referral:
-                infra_params.page_num = int(self.params.get("count", 0)) + 1
-                position_list = yield self.position_ps.infra_get_position_list(infra_params, is_referral)
-            else:
-                # 普通职位列表
-                position_list = yield self.position_ps.infra_get_position_list(infra_params)
+            # 内推职位列表和普通职位列表
+            position_list = yield self.position_ps.infra_get_position_list(infra_params)
 
             # 获取获取到普通职位列表，则根据获取的数据查找其中红包职位的红包相关信息
             rp_position_list = list(self.__rp_position_generator(position_list))
@@ -1038,19 +1038,14 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
             position_ex["priority"] = pos.priority
             position_ex["title"] = pos.title
             position_ex["visitnum"] = pos.visitnum
-            position_ex["abbreviation"] = pos.abbreviation
             position_ex["department"] = pos.department
             position_ex["province"] = pos.province
             position_ex["salary"] = pos.salary
-            position_ex["logo"] = pos.logo
             position_ex["company_name"] = pos.company_name
             position_ex["salary_top"] = pos.salary_top
             position_ex["salary_bottom"] = pos.salary_bottom
             position_ex["update_time"] = pos.update_time
-            position_ex["rp_reward_amount"] = pos.rp_reward_amount
-            position_ex["rp_reward_target"] = pos.rp_reward_target
             position_ex["company_abbr"] = pos.company_abbr
-            position_ex["remain"] = pos.remain
             position_ex["publish_date"] = pos.publish_date
             position_ex["team_name"] = pos.team_name
             position_ex["job_description"] = pos.accountabilities
@@ -1163,7 +1158,7 @@ class PositionEmpNoticeHandler(BaseHandler):
             self.send_json_success()
             return
 
-        yield self.position_ps.send_ten_min_tmp(self.current_user.sysuser.id, self.current_user.company.id)
+        # yield self.position_ps.send_ten_min_tmp(self.current_user.sysuser.id, self.current_user.company.id)
 
         self.send_json_success()
 
@@ -1228,6 +1223,7 @@ class PositionListHandler(PositionListInfraParamsMixin, BaseHandler):
         company['industry'] = self.params.company.industry
         company['scale_name'] = self.params.company.scale_name
         company['banner'] = self.params.company.banner
+
         self.render_page(
             template_name="position/index.html",
             meta_title=position_title,
@@ -1336,7 +1332,7 @@ class PositionRecomListHandler(PositionListInfraParamsMixin, BaseHandler):
         infra_params.page_from = start_count
         infra_params.page_size = const_platform.POSITION_LIST_PAGE_COUNT
         self.params.share = yield self._make_share()
-        position_list = yield self.position_ps.infra_get_position_list(infra_params, is_referral=1)
+        position_list = yield self.position_ps.infra_get_position_list(infra_params)
         if position_list:
             total = position_list[0].total_num
         else:

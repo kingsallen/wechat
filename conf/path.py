@@ -9,7 +9,6 @@ POSITION_REFERRAL_LIST = '/position/recom'
 RED_PACKET_CARD = '/mobile/redpack'
 TEAM_PATH = '/company/team/{}'
 COMPANY_TEAM = '/company/team'
-COMPANY = '/company'
 SEARCH_FILITER = '/start'
 CUSTOMIZE_EDX = '/custom/emailapply'
 WECHAT_COMPANY = '/company'
@@ -77,6 +76,10 @@ CAMPAIGN_POSITION_PATH = "/alipaycampaign/{}/company/{}/position"
 RESUME_IMPORT_FAIL = "/resume/import/limit"
 
 ANNUAL_SUMMARIZE = "/annual/summarize"
+
+JOYWOK_HOME_PAGE = "/joywork"
+
+JOYWOK_AUTO_AUTH = "/thirdparty/automatic/auth"
 
 # ============================ 微信端Path结束 ============================
 
@@ -236,6 +239,8 @@ INFRA_REFERRAL_RADAR_CARD_POS = 'v1/employee/position/view'
 INFRA_REFERRAL_RADAR_CARD_RECOM = 'v1/employee/seek/recommend/card'
 INFRA_IF_SEEK_CHECK = 'v1/referral/seek/check'
 REFERRAL_RADAR_EXPIRED = '/employee/referral/expired'
+INFRA_EMPLOYEE_CUSTOM_INFO = "/hraccount/employee/update"
+INFRA_RESEND_BIND_EMAIL = "/employee/resend/bind/email"
 
 # 积分商城服务
 EMPLOYEE_MALL = '/employee/mall/index'
@@ -252,6 +257,9 @@ EXCHANGE = '/api/mall/visit/order'
 IF_PRIVACY_WINDOW = 'user/privacy_record/get'
 AGREE_PRIVACY = 'user/privacy_record/delete'
 INSERT_RECORD = 'user/privacy_record/insert'
+
+# joywok相关接口
+INFRA_AUTO_BIND_EMPLOYEE = "mcdUser/bindUser"
 # ============================ 基础服务结束 ============================
 
 # 上传助手小程序
@@ -264,3 +272,4 @@ LINKEDIN_ACCESSTOKEN = "https://www.linkedin.com/oauth/v2/accessToken"
 LINKEDIN_AUTH = "/oauth/v2/authorization"
 MAIMAI_ACCESSTOKEN = "https://maimai.cn/oauth_login?appid={appid}&{cusdata}&login=1"
 LIEPIN_ACCESSTOKEN = 'https://passport.liepin.com/mc/authlogin?state={}'
+JOYWOK_JMIS_AUTH = 'https://jmis.mcd.com.cn/jmis/NoLoginService'

@@ -27,8 +27,8 @@ from util.tool.date_tool import curr_now
 from util.tool.str_tool import mobile_validate, get_send_time_from_template_message_url
 from util.common import ObjectDict
 from util.tool.json_tool import json_dumps
-from util.wechat.core import get_wxuser, send_succession_message, get_test_access_token
 from util.tool.http_tool import http_post_cs_msg
+from util.wechat.core import get_wxuser, send_succession_message, get_test_access_token
 from util.common.mq import user_follow_wechat_publisher, user_unfollow_wechat_publisher
 from service.page.user.user import UserPageService
 
@@ -331,7 +331,7 @@ class EventPageService(PageService):
             "subscribe_time": int(time.time() * 1000)
         })
         # 如果之前是员工，自动绑定员工身份
-        yield user_follow_wechat_publisher.publish_message(message=data, routing_key="user_follow_wechat_check_employee_identity")
+        yield user_follow_wechat_publisher.publish_message(message=data, routing_key="user_follow_wechat.#")
 
         # 处理临时二维码，目前主要在 PC 上创建帐号、绑定账号时使用,以及Mars EDM活动
         if msg.EventKey:
@@ -570,13 +570,19 @@ class EventPageService(PageService):
 
         self.logger.info("[_do_weixin_qrcode] wechat:{0}, msg:{1}, is_newbie:{2}".format(wechat, msg, is_newbie))
 
+        # 仅以int类型作为临时二维码的自定义参数可使用场景极为有限，因此增加字符串形式的自定义参数
         # 处理临时二维码，目前主要在 PC 上创建帐号、绑定账号时使用
         int_scene_id = ""
+        str_scene = ""
         if msg.EventKey:
             # 临时二维码处理逻辑, 5位type+27为自定义id
-            int_scene_id = re.match(r"(\d+)", msg.EventKey)
+            int_scene_id = re.match(r"(\d+)$", msg.EventKey)
             if not int_scene_id:
-                int_scene_id = re.match(r"qrscene_(\d+)", msg.EventKey)
+                int_scene_id = re.match(r"qrscene_(\d+)$", msg.EventKey)
+                # 处理自定义参数为字符串的临时二维码
+                str_scene = re.match(r"qrscene_([A-Z]+)_", msg.EventKey)
+                if not str_scene:
+                    str_scene = re.match(r"([A-Z]+)_", msg.EventKey)
 
         # 取最新的微信用户信息
         wxuser = yield self.user_wx_user_ds.get_wxuser(conds={
@@ -589,7 +595,7 @@ class EventPageService(PageService):
             int_scene_id = int_scene_id.group(1)
             type = int(bin(int(int_scene_id))[:7], base=2)
             real_user_id = int(bin(int(int_scene_id))[7:], base=2)
-            self.logger.debug('qrcode scene_id is: {}, type is: {}, id is: {}'.format(int_scene_id, type, real_user_id))
+            self.logger.debug('[qrcode] scene_id is: {}, type is: {}, id is: {}'.format(int_scene_id, type, real_user_id))
             """
               type:
               "11000" = 24 pc端用户解绑,
@@ -719,6 +725,8 @@ class EventPageService(PageService):
             elif type == 31:
                 # 携带职位id， 目前是候选人职位详情页引导关注弹层二维码中使用
                 # 数据组埋点
+                if wxuser.sysuser_id:
+                    self.sa.track(wxuser.sysuser_id, "subscribeWechat", properties={"sub_from": type}, is_login_id=True)
                 self.log_datagroup_prepare_data_ds.create_qrcode_subscribe_record(
                     {
                         "flag": const.QRCODE_FROM_POSITION_POPUP,
@@ -750,6 +758,41 @@ class EventPageService(PageService):
                 pass
             elif type == 17:
                 pass
+
+        else:
+            """
+            字符类型的自定义参数的格式为{场景值(大写)}_{自定义字符串}，场景值必须为大写英文字母
+            """
+            if str_scene:
+                str_scene = str_scene.group(1)
+            else:
+                raise gen.Return()
+
+            # joywok对接，对麦当劳用户做自动认证
+            # 获取str_code
+            if str_scene == const.STR_SCENE_JOYWOK:
+                str_code = re.match(r"qrscene_[A-Z]+_(\w{8}(-\w{4}){3}-\w{12})", msg.EventKey)
+                if not str_code:
+                    str_code = re.match(r"[A-Z]+_(\w{8}(-\w{4}){3}-\w{12})", msg.EventKey)
+                str_code = str_code.group(1) if str_code else ""
+
+                user_ps = UserPageService()
+                joywok_user_info = self.redis.get(const.JOYWOK_IDENTIFY_CODE.format(str_code))
+                self.logger.debug("[qrcode joywok] str_scene: {}, str_code: {}, joywok_user_info: {}".format(str_scene, str_code, joywok_user_info))
+                messages = message.JOYWOK_AUTO_BIND_FAIL
+                if not joywok_user_info:
+                    messages = message.JOYWOK_AUTO_BIND_EMPLOYEE_INFO_IS_GONE
+                if str_code and joywok_user_info:
+                    res = yield user_ps.auto_bind_employee_by_joywok_info(joywok_user_info, const.MAIDANGLAO_COMPANY_ID, wxuser.sysuser_id)
+                    if res.data is True:
+                        self.redis.delete(const.JOYWOK_IDENTIFY_CODE.format(str_code))
+                        messages = message.JOYWOK_AUTO_BIND_SUCCESS
+                    else:
+                        self.logger.warning("[joywok auto bind fail] message: {}".format(res.message))
+                        if res.status in const.JOYWOK_EXCEPTION_CODE:
+                            messages = res.message
+
+                send_succession_message(wechat=wechat, open_id=msg.FromUserName, message=messages)
 
         raise gen.Return()
 

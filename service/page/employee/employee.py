@@ -92,53 +92,90 @@ class EmployeePageService(PageService):
         return bind_status
 
     @gen.coroutine
-    def make_binding_render_data(self, current_user, mate_num, reward, conf, in_wechat=None):
+    def make_binding_render_data(self, current_user, mate_num, reward, conf, custom_supply_info, custom_supply_field,
+                                 auth_tips_info, is_valid_email=False, in_wechat=None, locale=None):
         """构建员工绑定页面的渲染数据
         :returns:
         {
-            'type':            'email',
-            'binding_message': 'binding message ...',
-            'binding_status':  1,
-            'send_hour':       24,
-            'headimg':         'http://o8g4x4uja.bkt.clouddn.com/0.jpeg',
-            'employeeid':      23,
-            'name':            'name',
-            'mobile':          '15000234929',
-            'conf':            {
-                'custom_name':   'custom',
-                'custom_hint':   'custom hint',
-                'custom_value':  'user input value for custom',
-                'email_suffixs': ['qq.com', 'foxmail.com'],
-                'email_name':    'tovvry',
-                'email_suffix':  'qq.com',
-                'questions':     [ {'q': "你的姓名是什么", 'a':''}, {'q': "你的弟弟的姓名是什么", 'a': ''} ],
-                # // null, question, or email
-                'switch':        'email',
+          'type':            'email',
+          'custom_title':    'custom title',
+          'binding_tips_title': '认证须知'
+          'binding_message': 'binding message ...',
+          'binding_status':  1,
+          'send_hour':       24,
+          'headimg':         'http://o8g4x4uja.bkt.clouddn.com/0.jpeg',
+          'employeeid':      23,
+          'name':            'name',
+          'mobile':          '15000234929',
+          'conf':            {
+            'custom_name':   'custom',
+            'custom_hint':   'custom hint',
+            'custom_value':  'user input value for custom',
+            'email_suffixs': ['qq.com', 'foxmail.com'],
+            'email_name':    'tovvry',
+            'email_suffix':  'qq.com',
+            'questions':     [ {'q': "你的姓名是什么", 'a':''}, {'q': "你的弟弟的姓名是什么", 'a': ''} ],
+            # // null, question, or email
+            'switch':        'email',
+          },
+          'custom_field':
+            [
+              {
+                "id":1,
+                "name":"部门",
+                "ename": "department",
+                "system_field": 1,  # 1部门，2职位，3城市，0非系统字段
+                "option_type":0,  # 选项类型  0:下拉选项, 1:文本
+                "values":[
+                  {
+                    "id":1,
+                    "value":"test"
+                    },
+                 ]
+              "enable":0, # 是否停用 0:不停用(有效)， 1:停用(无效)
+              "required":1,	# 是否必填 0:不必填，1必填
             }
+          ]
+          'custom_info':
+            [
+              {"custom_field.id":
+               "custom_field.values.id or ''"
+              }
+            ]
         """
-        company_conf = yield self.hr_company_conf_ds.get_company_conf(
-            conds={'company_id': current_user.company.id},
-            fields=['employee_binding']
-        )
-        # 员工认证自定义文案
-        binding_message = company_conf.employee_binding if company_conf else ''
 
         data = ObjectDict()
+        # 员工认证自定义文案
+        data.binding_message = auth_tips_info.description_ename if locale.code == const.LOCALE_ENGLISH else auth_tips_info.description
+        data.binding_tips_title = auth_tips_info.tips_title_ename if locale.code == const.LOCALE_ENGLISH else auth_tips_info.tips_title
+        data.custom_title = auth_tips_info.title_ename or const.PAGE_EN_VERIFICATION if locale.code == const.LOCALE_ENGLISH else auth_tips_info.title or const.PAGE_VERIFICATION
+
         data.wechat = ObjectDict()
         data.name = current_user.sysuser.name
         data.headimg = current_user.sysuser.headimg
         data.mobile = current_user.sysuser.mobile or ''
         data.send_hour = 24  # fixed 24 小时
+        data.is_valid_email = is_valid_email
         data.conf = ObjectDict()
         data.binding_success_message = conf.bindSuccessMessage or ''
-        data.wechat.subscribed = True if current_user.wxuser.is_subscribe or current_user.wechat.type == 0 or not in_wechat else False
+
+        # todo 公众号信息，已有接口，这个其实是重复的代码
+        data.wechat.subscribed = True if not in_wechat or current_user.wxuser.is_subscribe or current_user.wechat.type == 0 else False
         data.wechat.qrcode = yield get_temporary_qrcode(
             wechat=current_user.wechat,
             scene_id=int('11110000000000000000000000000000', base=2) + int(const.QRCODE_BIND)
         )
         data.wechat.name = current_user.wechat.name
+
         data.mate_num = mate_num
         data.conf.reward = reward
+        # 国际化补填信息的名称
+        if locale.code == const.LOCALE_ENGLISH:
+            for f in custom_supply_field:
+                f['name'] = f.get("ename")
+
+        data.custom_supply_field = custom_supply_field
+        data.custom_supply_info = custom_supply_info
 
         bind_status, employee = yield self.get_employee_info(
             user_id=current_user.sysuser.id, company_id=current_user.company.id)
@@ -211,7 +248,6 @@ class EmployeePageService(PageService):
 
         # 未绑定的员工， 根据 conf.authMode 来渲染
         else:
-            data.binding_message = binding_message
 
             if conf.authMode in [const.EMPLOYEE_BIND_AUTH_MODE.EMAIL,
                                  const.EMPLOYEE_BIND_AUTH_MODE.EMAIL_OR_CUSTOM,
@@ -265,7 +301,7 @@ class EmployeePageService(PageService):
         type = json_args.type
         source = int(params.source) if params.source and params.source.isdigit() else 0
 
-        needed_keys = ['type', 'name', 'mobile']
+        needed_keys = ['type', 'name', 'mobile', 'custom_supply_info']
 
         if type == self.FE_BIND_TYPE_CUSTOM:
             needed_keys.append('custom_value')
@@ -290,17 +326,25 @@ class EmployeePageService(PageService):
             else:
                 param_dict.answer2 = ''
 
+        # 将key的类型转为int, value转为str
+        custom_supply_info = dict()
+        if param_dict.custom_supply_info:
+            for k, v in param_dict.custom_supply_info.items():
+                custom_supply_info.update({int(k): str(v)})
+
         binding_params = BindingParams(
             type=self.BIND_AUTH_MODE[param_dict.type],
             userId=user_id,
             companyId=company_id,
             email=param_dict.email,
             mobile=str(param_dict.mobile),
-            customField=param_dict.custom_value,
-            name=param_dict.name,
+            customField=param_dict.custom_value.strip() if param_dict.custom_value else param_dict.custom_value,
+            name=param_dict.name.strip() if param_dict.name else param_dict.name,
             answer1=param_dict.answer1,
             answer2=param_dict.answer2,
-            source=source)
+            source=source,
+            customFieldValues=custom_supply_info
+        )
 
         return True, binding_params
 
@@ -377,7 +421,6 @@ class EmployeePageService(PageService):
         result, data = yield self.infra_employee_ds.get_bind_reward(company_id)
         return data
 
-    @log_time
     @gen.coroutine
     def get_bind_reward(self, company_id, type=None):
         """获取指定规则的积分配置, 如果未指定规则，则获取该公司是否有带积分奖励的积分规则"""
@@ -392,6 +435,65 @@ class EmployeePageService(PageService):
                 if r.get("points"):
                     return True
         return reward
+
+    @gen.coroutine
+    def get_employee_custom_info(self, current_user):
+        """获取员工补填信息"""
+        params = {
+            "user_id": current_user.sysuser.id,
+            "company_id": current_user.company.id
+        }
+        result = yield self.infra_employee_ds.infra_get_employee_custom_info(params)
+        return result.data or ObjectDict()
+
+    @gen.coroutine
+    def get_employee_custom_field(self, current_user):
+        """获取补填字段配置数据"""
+        params = {
+            "company_id": current_user.company.id
+        }
+        result = yield self.infra_employee_ds.infra_get_employee_custom_field(params)
+        return result.data or []
+
+    @gen.coroutine
+    def get_employee_supply_info_by_custom_field(self, cname, custom_field, company_id):
+        """获取补填字段配置数据"""
+        params = {
+            "cname": cname,
+            "custom_field": custom_field,
+            "company_id": company_id
+        }
+        result = yield self.infra_employee_ds.infra_get_employee_supply_info_by_custom_field(params)
+        return result.data or ObjectDict()
+
+    @gen.coroutine
+    def get_employee_auth_tips_info(self, current_user):
+        """获取认证自定义显示数据"""
+        params = {
+            "company_id": current_user.company.id
+        }
+        result = yield self.infra_employee_ds.infra_get_employee_auth_tips_info(params)
+        return result.data or ObjectDict()
+
+    @gen.coroutine
+    def get_bind_email_is_valid(self, current_user):
+        """获取认证邮件是否有效"""
+        params = {
+            "user_id": current_user.sysuser.id,
+            "company_id": current_user.company.id
+        }
+        result = yield self.infra_employee_ds.infra_get_bind_email_is_valid(params)
+        return result.data
+
+    @gen.coroutine
+    def resend_bind_email(self, current_user):
+        """重新发送认证邮件"""
+        params = {
+            "user_id": current_user.sysuser.id,
+            "company_id": current_user.company.id
+        }
+        result = yield self.infra_employee_ds.infra_resend_bind_email(params)
+        return result
 
     @gen.coroutine
     def unbind(self, employee_id, company_id, user_id):
@@ -553,42 +655,29 @@ class EmployeePageService(PageService):
         raise gen.Return(res)
 
     @gen.coroutine
-    def get_employee_custom_fields(self, company_id):
+    def get_employee_custom_fields(self, current_user, locale):
         """
         根据公司 id 返回员工认证自定义字段配置 -> list
         并按照 forder 字段排序返回
         将数据整理为前端需要的json格式
         """
-        selects_from_ds = yield self.hr_employee_custom_fields_ds. \
-            get_employee_custom_field_records({
-            "company_id": company_id,
-            "status": const.OLD_YES,
-            "disable": const.NO
-        })
-
-        selects_from_ds = sorted(selects_from_ds, key=lambda x: x.forder)
-
+        res = yield self.infra_employee_ds.infra_get_employee_custom_field({"company_id": current_user.company.id})
+        selects_from_ds = res.data or []
         selects_list = list()
 
         for s in selects_from_ds:
-            value_list = list()
-            fvalues = json.loads(s.fvalues)
-            indexs = len(fvalues) - 1
-            i = 0
-            while indexs >= i:
-                values = list()
-                values.append(fvalues[i])
-                values.append(i)
-                i += 1
-                value_list.append(values)
-            input_type = const.FRONT_TYPE_FIELD_TEXT if s.option_type == 1 else const.FRONT_TYPE_FIELD_SELCET_POPUP
+            input_type = const.FRONT_TYPE_FIELD_TEXT if s.get("option_type") == 1 else const.FRONT_TYPE_FIELD_SELCET_POPUP
+            if s.get("values"):
+                field_value = [[v.get("name"), v.get("id")] for v in s.get("values")]
+            else:
+                field_value = []
             selects = ObjectDict({
-                'field_title': s.fname,
+                'field_title': s.get("ename") if locale.code == const.LOCALE_ENGLISH else s.get("name"),
                 'field_type': input_type,
-                'field_name': 'key_' + str(s.id),
-                'required': 0 if s.mandatory == 1 else 1,  # 0为必须
-                'field_value': value_list,
-                "validate_error": "文本长度不能超过50个字符（汉字不超过25）"  # 字段不符合验证时的提示信息
+                'field_name': s.get("id"),
+                'required': 0 if s.get("required") == 1 else 1,  # 0为必须
+                'field_value': field_value,
+                "validate_error": ""  # 字段不符合验证时的提示信息
             })
             selects_list.append(selects)
         return selects_list
@@ -597,6 +686,17 @@ class EmployeePageService(PageService):
     def update_employee_custom_fields(self, employee_id, custom_fields_json):
         yield self.thrift_employee_ds.set_employee_custom_info(
             employee_id, custom_fields_json)
+
+    @gen.coroutine
+    def update_employee_custom_supply_info(self, employee_id, company_id, custom_fields_json):
+        params = ObjectDict({
+            "companyId": company_id,
+            "userEmployeeId": employee_id,
+            "customFieldValues": custom_fields_json
+        })
+        res = yield self.infra_employee_ds.infra_update_employee_custom_supply_info(
+            params)
+        return res
 
     @gen.coroutine
     def update_employee_custom_fields_for_email_pending(

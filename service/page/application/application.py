@@ -419,12 +419,13 @@ class ApplicationPageService(PageService):
         return result
 
     @gen.coroutine
-    def create_email_apply(self, params, position, current_user, is_platform=True):
+    def create_email_apply(self, params, position, current_user, is_platform=True, source=None):
         """ 创建Email申请
         :param params:
         :param position:
         :param current_user:
         :param is_platform:
+        :param source:
         :return:
         """
 
@@ -439,12 +440,14 @@ class ApplicationPageService(PageService):
         recommender_user_id, recommender_wxuser_id, recom_employee, depth = yield self.get_recommend_user(
             current_user, position, is_platform)
 
-        if recommender_user_id and params.origin:
+        # if source == const.REHIRING_SOURCE:
+        #     origin = const.REHIRING_ORIGIN
+        if current_user.employee and current_user.company.id in const.TRANSFER_COMPANY_ID:
+            origin = const.TRANSFER_ORIGIN
+        elif params.invite_apply == str(const.YES):
             origin = const.INVITE_ORIGIN
-        elif recommender_user_id and params.forward_id and not params.origin:
-            origin = const.FORWARD_ORIGIN
         else:
-            origin = 1024
+            origin = 2 if is_platform else 4
 
         params_for_application = ObjectDict(
             wechat_id=current_user.wechat.id,
@@ -573,7 +576,7 @@ class ApplicationPageService(PageService):
 
     @gen.coroutine
     def create_application(self, position, current_user, params,
-                           is_platform=True, psc=None, has_recom=False):
+                           is_platform=True, has_recom=False, source=None):
 
         # 1.初始化
         check_status, message = yield self.check_position(position, current_user)
@@ -588,10 +591,12 @@ class ApplicationPageService(PageService):
         else:
             recommender_user_id, recommender_wxuser_id, recom_employee = 0, 0, None
 
-        if recommender_user_id and params.origin:
+        # if source == const.REHIRING_SOURCE:
+        #     origin = const.REHIRING_ORIGIN
+        if current_user.employee and current_user.company.id in const.TRANSFER_COMPANY_ID:
+            origin = const.TRANSFER_ORIGIN
+        elif params.invite_apply == str(const.YES):
             origin = const.INVITE_ORIGIN
-        elif recommender_user_id and not params.origin:
-            origin = const.FORWARD_ORIGIN
         else:
             origin = 2 if is_platform else 4
 
@@ -601,7 +606,7 @@ class ApplicationPageService(PageService):
             recommender_user_id=recommender_user_id,
             applier_id=current_user.sysuser.id,
             company_id=position.company_id,
-            origin=origin
+            origin=origin  # 2 -> 企业号申请， 4 -> 聚合号申请
         )
         self.logger.debug("params_for_application: {}".format(
             params_for_application))

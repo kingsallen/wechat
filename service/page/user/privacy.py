@@ -16,6 +16,7 @@ class PrivacyPageService(PageService):
     def if_privacy_agreement_window(self, user_id):
         """是否需要弹出 隐私协议 窗口
         """
+        user_id = 0 if user_id is None else user_id
         result, data = yield self.infra_privacy_ds.if_privacy_agreement_window(user_id)
         return result, data
 

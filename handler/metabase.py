@@ -14,6 +14,8 @@ import time
 import ujson
 import urllib.parse
 
+from hashlib import sha1
+
 import tornado.httpclient
 from tornado import web, gen
 
@@ -59,10 +61,12 @@ class MetaBaseHandler(AtomHandler):
         self._start_time = time.time()
         # 保存是否在微信环境，微信客户端类型
         self._in_wechat, self._client_type = self._depend_wechat()
+        self._client_env = self._get_client_env()
         # 日志信息
         self._log_info = None
         self._log_customs = ObjectDict()
         # page service 初始化
+        self._namespace = ObjectDict()
 
     def initialize(self, event):
         """ 日志需要，由 route 定义 """
@@ -157,6 +161,14 @@ class MetaBaseHandler(AtomHandler):
             self._log_info = ObjectDict()
 
         self._log_info.update(dict(value))
+
+    @property
+    def namespace(self):
+        return self._namespace
+
+    @namespace.setter
+    def namespace(self, value):
+        self._namespace.update(dict(value))
 
     @property
     def remote_ip(self):
@@ -254,6 +266,7 @@ class MetaBaseHandler(AtomHandler):
             path=path
         )
         namespace.update(add_namespace)
+        namespace.update(self._namespace)
         return namespace
 
     def static_url(self, path, protocol='https'):
@@ -275,6 +288,23 @@ class MetaBaseHandler(AtomHandler):
             info.update(self.log_info)
 
         self.logger.stats(ujson.dumps(self._get_info_header(info), ensure_ascii=0))
+
+    def make_new_session_id(self, user_id):
+        """创建新的 session_id
+
+        redis 中 session 的 key 的格式为 session_id_<wechat_id>
+        创建的 session_id 保证唯一
+        session_id 目前本身不做持久化，仅仅保存在 redis 中
+        后续是否需要做持久化待讨论
+        :return: session_id
+        """
+        while True:
+            session_id = const.SESSION_ID.format(str(user_id), sha1(os.urandom(24)).hexdigest())
+            record = self.redis.exists(session_id + "_*")
+            if record:
+                continue
+            else:
+                return session_id
 
     def write_error(self, http_code, **kwargs):
         """错误页
@@ -518,11 +548,20 @@ class MetaBaseHandler(AtomHandler):
         mobile = const.CLIENT_TYPE_UNKNOWN
 
         useragent = self.request.headers.get('User-Agent')
-        if "MicroMessenger" in useragent and 'wxwork' not in useragent and 'moseeker' not in useragent:
-            if "iPhone" in useragent:
-                mobile = const.CLIENT_TYPE_IOS
-            elif "Android" in useragent:
-                mobile = const.CLIENT_TYPE_ANDROID
+        # 判断手机系统
+        if "iPhone" in useragent:
+            mobile = const.CLIENT_TYPE_IOS
+        elif "Android" in useragent:
+            mobile = const.CLIENT_TYPE_ANDROID
+        # 判断网页所处环境
+        if "Joywok" in useragent:
+            wechat = const.CLIENT_JOYWOK
+        elif "MicroMessenger" in useragent and 'wxwork' not in useragent and 'moseeker' not in useragent:
             wechat = const.CLIENT_WECHAT
 
         return wechat, mobile
+
+    def _get_client_env(self):
+        """生成环境全局变量"""
+        client = self._in_wechat
+        return client
