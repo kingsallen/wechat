@@ -425,7 +425,7 @@ class ChatHandler(BaseHandler):
             locale_code=self.locale.code,
             user=self.current_user,
             env=self.env,
-            show_privacy_agreement=bool(data_privacy
+            show_privacy_agreement=bool(data_privacy)
         ))
 
     @handle_response
