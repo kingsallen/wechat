@@ -631,13 +631,19 @@ class PositionPageService(PageService):
         return ret
 
     @gen.coroutine
-    def send_ten_min_tmp(self, user_id, company_id):
+    def send_ten_min_tmp(self, user_id, company_id, share_time):
         """
         十分钟消息模板，改为基础服务发
         :param user_id: 员工user_id
         :param company_id:
+        :param share_time
         :return:
         """
-        ret = yield self.infra_position_ds.send_ten_min_tmp(user_id, company_id)
+        params = ObjectDict({
+            "user_id": user_id,
+            "company_id": company_id,
+            "share_time": share_time
+        })
+        ret = yield self.infra_position_ds.send_ten_min_tmp(params)
         return ret
 

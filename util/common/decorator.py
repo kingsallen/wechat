@@ -21,6 +21,7 @@ import conf.message as msg
 import conf.path as path
 import conf.qx as qx_const
 from globals import logger
+from util.common.exception import MyException
 from util.common import ObjectDict
 from util.common.cache import BaseRedis
 from util.common.cipher import encode_id
@@ -275,8 +276,11 @@ def check_signature(func):
         if self.is_platform and not is_common:
             key = "wechat_signature"
             try:
-                self.get_argument(key, strip=True)
-            except MissingArgumentError:
+                signature = self.get_argument(key, strip=True)
+                wechat = yield self.wechat_ps.get_wechat(conds={"signature": signature})
+                if not wechat:
+                    raise MyException("signature无效")
+            except (MissingArgumentError, MyException):
                 self.write_error(http_code=404)
                 return
 
@@ -414,7 +418,8 @@ def check_and_apply_profile(func):
                                   profile_custom_url=None)
             if company.conf_veryeast_switch == 1:
                 importer.update(profile_import_veryeast=self.make_url(path.RESUME_URL, self.params, m='authorization', way=const.RESUME_WAY_VERYEAST))
-            if company.id in need_profile_upload:
+            # if company.id in need_profile_upload:
+            if True:  # 开发文件上传权限给所有用户
                 importer.update(profile_resume_upload=self.make_url(path.RESUME_UPLOAD, self.params))
 
             # 如果是申请中跳转到这个页面，需要做详细检查
