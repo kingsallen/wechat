@@ -8,6 +8,7 @@ from urllib.parse import quote
 from tornado import gen
 
 import conf.path as path
+from setting import settings
 from service.page.base import PageService
 from util.common import ObjectDict
 from util.tool.url_tool import make_url, make_static_url
@@ -53,7 +54,7 @@ class UserCompanyPageService(PageService):
 
         data.relation = ObjectDict({
             'want_visit': self.constant.YES if vst_cmpy else self.constant.NO,
-            'qrcode': self._make_qrcode(user.wechat.qrcode),
+            'qrcode': self._make_qrcode(user.wechat),
             'follow': follow
         })
 
@@ -95,18 +96,16 @@ class UserCompanyPageService(PageService):
 
         raise gen.Return(data)
 
-    @staticmethod
-    def _make_qrcode(qrcode_url):
-
-        link_head = 'https://platform.moseeker.com/recruit/image?url={}'
-        if qrcode_url and not re.match(r'^http', qrcode_url):
-            return quote(make_static_url(qrcode_url))
-        elif qrcode_url and \
+    def _make_qrcode(self, wechat):
+        multi_domain_settings = settings["multi_domain"]
+        link_head = "https://" + multi_domain_settings["m_format"].format(wechat.appid) + '/image?url={}&wechat_signature='+wechat.signaature
+        if wechat.qrcode and not re.match(r'^http', wechat.qrcode):
+            return quote(make_static_url(wechat.qrcode))
+        elif wechat.qrcode and \
             not re.match(
-                r'^https://platform.moseeker.com/recruit/image?url=',
-                qrcode_url):
-            return link_head.format(quote(make_static_url(qrcode_url)))
-        return qrcode_url
+                r'^https://platform.moseeker.com/recruit/image?url=', wechat.qrcode):
+            return link_head.format(quote(make_static_url(wechat.qrcode)))
+        return wechat.qrcode
 
     @gen.coroutine
     def _get_company_cms_page(self, company_id, user, team_index_url):
@@ -153,7 +152,7 @@ class UserCompanyPageService(PageService):
                         "module_id": qrcode_module_id,
                         "media_type": self.constant.CMS_PAGES_RESOURCES_TYPE_IMAGE,
                         "company_name": user.wechat.name,
-                        "media_url": self._make_qrcode(user.wechat.qrcode)
+                        "media_url": self._make_qrcode(user.wechat)
                     })
                     cms_medias.append(qrcode_cms_media)
 
