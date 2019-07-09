@@ -368,6 +368,9 @@ class ChatHandler(BaseHandler):
         :return:
         """
 
+        res_privacy, data_privacy = yield self.privacy_ps.if_privacy_agreement_window(
+            self.current_user.sysuser.id)
+
         jsapi = JsApi(jsapi_ticket=self.current_user.wechat.jsapi_ticket,
                       url=unquote(self.params.share_url))
 
@@ -421,7 +424,8 @@ class ChatHandler(BaseHandler):
         self.send_json_success(data=ObjectDict(
             locale_code=self.locale.code,
             user=self.current_user,
-            env=self.env
+            env=self.env,
+            show_privacy_agreement=bool(data_privacy
         ))
 
     @handle_response
