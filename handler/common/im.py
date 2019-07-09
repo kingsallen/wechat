@@ -220,65 +220,75 @@ class ChatRoomHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def get(self, room_id):
-        hr_id = self.params.hr_id or 0
-        if hr_id:
-            company_id = yield self.company_ps.get_real_company_id(hr_id, self.current_user.company.id)
-            wechat = yield self.wechat_ps.get_wechat(conds={
-                "company_id": company_id,
-                "authorized": const.YES
-            })
-            jsapi_ticket = wechat.jsapi_ticket
-            appid = wechat.appid
-        else:
-            jsapi_ticket = self.current_user.wechat.jsapi_ticket
-            appid = self.current_user.wechat.appid
 
-        jsapi = JsApi(
-            jsapi_ticket=jsapi_ticket, url=self.fullurl(encode=False))
+        # MoBot页面跳转 platform老的地址：/m/chat/room -> /m/mobot
+        if room_id:
+            self.params['room_id'] = room_id
 
-        res_privacy, data_privacy = yield self.privacy_ps.if_privacy_agreement_window(
-            self.current_user.sysuser.id)
+        to = self.make_url('/mobot', self.params)
+        self.redirect(to)
 
-        config = ObjectDict({
-            "debug": False,
-            "appid": appid,
-            "timestamp": jsapi.timestamp,
-            "nonceStr": jsapi.nonceStr,
-            "signature": jsapi.signature,
-            "jsApiList": ["onMenuShareTimeline",
-                          "onMenuShareAppMessage",
-                          "updateTimelineShareData",
-                          "updateAppMessageShareData",
-                          "onMenuShareQQ",
-                          "updateTimelineShareData",
-                          "updateAppMessageShareData",
-                          "onMenuShareWeibo",
-                          "hideOptionMenu",
-                          "showOptionMenu",
-                          "startRecord",
-                          "stopRecord",
-                          "onVoiceRecordEnd",
-                          "playVoice",
-                          "pauseVoice",
-                          "stopVoice",
-                          "onVoicePlayEnd",
-                          "uploadVoice",
-                          "translateVoice",
-                          "downloadVoice",
-                          "hideMenuItems",
-                          "showMenuItems",
-                          "hideAllNonBaseMenuItem",
-                          "showAllNonBaseMenuItem"]
-        })
-        self.logger.debug("jsapi_config:{}".format(config))
-        self._render(
-            template_name="chat/room.html",
-            data={
-                "room_id": room_id,
-                "show_privacy_agreement": bool(data_privacy)
-            },
-            config=config
-        )
+        return
+
+        # hr_id = self.params.hr_id or 0
+        # if hr_id:
+        #     company_id = yield self.company_ps.get_real_company_id(hr_id, self.current_user.company.id)
+        #     wechat = yield self.wechat_ps.get_wechat(conds={
+        #         "company_id": company_id,
+        #         "authorized": const.YES
+        #     })
+        #     jsapi_ticket = wechat.jsapi_ticket
+        #     appid = wechat.appid
+        # else:
+        #     jsapi_ticket = self.current_user.wechat.jsapi_ticket
+        #     appid = self.current_user.wechat.appid
+        #
+        # jsapi = JsApi(
+        #     jsapi_ticket=jsapi_ticket, url=self.fullurl(encode=False))
+        #
+        # res_privacy, data_privacy = yield self.privacy_ps.if_privacy_agreement_window(
+        #     self.current_user.sysuser.id)
+        #
+        # config = ObjectDict({
+        #     "debug": False,
+        #     "appid": appid,
+        #     "timestamp": jsapi.timestamp,
+        #     "nonceStr": jsapi.nonceStr,
+        #     "signature": jsapi.signature,
+        #     "jsApiList": ["onMenuShareTimeline",
+        #                   "onMenuShareAppMessage",
+        #                   "updateTimelineShareData",
+        #                   "updateAppMessageShareData",
+        #                   "onMenuShareQQ",
+        #                   "updateTimelineShareData",
+        #                   "updateAppMessageShareData",
+        #                   "onMenuShareWeibo",
+        #                   "hideOptionMenu",
+        #                   "showOptionMenu",
+        #                   "startRecord",
+        #                   "stopRecord",
+        #                   "onVoiceRecordEnd",
+        #                   "playVoice",
+        #                   "pauseVoice",
+        #                   "stopVoice",
+        #                   "onVoicePlayEnd",
+        #                   "uploadVoice",
+        #                   "translateVoice",
+        #                   "downloadVoice",
+        #                   "hideMenuItems",
+        #                   "showMenuItems",
+        #                   "hideAllNonBaseMenuItem",
+        #                   "showAllNonBaseMenuItem"]
+        # })
+        # self.logger.debug("jsapi_config:{}".format(config))
+        # self._render(
+        #     template_name="chat/room.html",
+        #     data={
+        #         "room_id": room_id,
+        #         "show_privacy_agreement": bool(data_privacy)
+        #     },
+        #     config=config
+        # )
 
     @gen.coroutine
     def _render(self, template_name,
