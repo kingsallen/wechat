@@ -372,7 +372,12 @@ class SendValidCodeHandler(BaseHandler):
             # 手机号已存在，不能再注册新用户
             self.send_json_error(message=msg.CELLPHONE_MOBILE_HAD_REGISTERED)
             return
-        valid_type = const.MOBILE_CODE_OPT_TYPE.referral_confirm
+
+        if self.params.mobile_code_type == "change_mobile":
+            valid_type = const.MOBILE_CODE_OPT_TYPE.change_mobile
+        else:
+            valid_type = const.MOBILE_CODE_OPT_TYPE.referral_confirm
+        # valid_type = const.MOBILE_CODE_OPT_TYPE.referral_confirm
         result = yield self.cellphone_ps.send_valid_code(
             mobile=mobile,
             type=valid_type
