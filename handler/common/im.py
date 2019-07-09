@@ -371,8 +371,9 @@ class ChatHandler(BaseHandler):
         res_privacy, data_privacy = yield self.privacy_ps.if_privacy_agreement_window(
             self.current_user.sysuser.id)
 
+        # data参数前端会被浏览器encode一次，js又会encodeURIComponent一次
         jsapi = JsApi(jsapi_ticket=self.current_user.wechat.jsapi_ticket,
-                      url=unquote(self.params.share_url))
+                      url=unquote(unquote(self.params.share_url)))
 
         config = ObjectDict({
                   "debug": False,
