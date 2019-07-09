@@ -373,7 +373,7 @@ class SendValidCodeHandler(BaseHandler):
             self.send_json_error(message=msg.CELLPHONE_MOBILE_HAD_REGISTERED)
             return
 
-        if self.params.mobile_code_type == "change_mobile":
+        if self.json_args.mobile_code_type == "change_mobile":
             valid_type = const.MOBILE_CODE_OPT_TYPE.change_mobile
         else:
             valid_type = const.MOBILE_CODE_OPT_TYPE.referral_confirm
