@@ -98,7 +98,7 @@ class UserCompanyPageService(PageService):
 
     def _make_qrcode(self, wechat):
         multi_domain_settings = settings["multi_domain"]
-        link_head = "https://" + multi_domain_settings["m_format"].format(wechat.appid) + '/image?url={}&wechat_signature='+wechat.signaature
+        link_head = "https://" + multi_domain_settings["m_format"].format(wechat.appid) + '/image?url={}&wechat_signature='+wechat.signature
         if wechat.qrcode and not re.match(r'^http', wechat.qrcode):
             return quote(make_static_url(wechat.qrcode))
         elif wechat.qrcode and \
