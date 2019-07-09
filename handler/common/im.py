@@ -24,6 +24,7 @@ from util.tool.date_tool import curr_now_minute
 from util.tool.json_tool import encode_json_dumps, json_dumps
 from util.tool.pubsub_tool import Subscriber
 from util.tool.str_tool import to_str, match_session_id
+from urllib.parse import unquote
 
 
 class UnreadCountHandler(BaseHandler):
@@ -372,7 +373,7 @@ class ChatHandler(BaseHandler):
 
         # data参数前端会被浏览器encode一次，js又会encodeURIComponent一次
         jsapi = JsApi(jsapi_ticket=self.current_user.wechat.jsapi_ticket,
-                      url=to_str(self.params.share_url))
+                      url=unquote(self.params.share_url))
 
         config = ObjectDict({
                   "debug": False,
