@@ -68,6 +68,21 @@ class BaseHandler(MetaBaseHandler):
         else:
             return None
 
+    def page_common_redirect(self):
+        """
+        特殊页面需要重定向处理的共同方法
+        """
+        # MoBot页面跳转 platform老的地址：/m/chat/room -> /m/mobot
+        mobot_old_url = '/m/chat/room'
+        mobot_new_url = '/m/mobot'
+        if self.request.uri.__contains__(mobot_old_url):
+            to = '{protocol}://{host}{uri}'.format(protocol=self.request.protocol,
+                                                   host=self.request.host,
+                                                   uri=self.request.uri.replace(mobot_old_url, mobot_new_url))
+            return True, to
+
+        return False, None
+
     @gen.coroutine
     def support_multi_domain(self):
         """
@@ -248,6 +263,14 @@ class BaseHandler(MetaBaseHandler):
             to_uri = "/m" + uri.replace(ge_old2, ge_new2)
             self.redirect(to_uri)
             return
+
+        # 处理特别页面需要重定向跳转, 放到所有特殊redirect处理的下方后再处理 start
+        do_redirect, to = self.page_common_redirect()
+        self.logger.debug("[page_common_redirect] do_redirect:{}, to:{}".format(do_redirect, to))
+        if do_redirect:
+            self.redirect(to)
+            return
+        # 处理特别页面需要重定向跳转 end
 
         # 构建 session 之前先缓存一份 wechat
         self._wechat = yield self._get_current_wechat()
