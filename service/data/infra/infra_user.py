@@ -409,9 +409,9 @@ class InfraUserDataService(DataService):
         """手机号和微信号绑定接口"""
 
         params = ObjectDict({
-            'countryCode': str(country_code),
+            'country_code': str(country_code),
             'mobile': str(mobile),
-            'userId': str(user_id),
+            'user_id': str(user_id),
         })
 
         ret = yield http_post_v2(user.INFRA_USER_CHANGE_MOBILE, user_service, params)
