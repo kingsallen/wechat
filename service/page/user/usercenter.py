@@ -147,10 +147,10 @@ class UsercenterPageService(PageService):
         return applied_applications_id_list
 
     @gen.coroutine
-    def get_applied_applications(self, user_id, company_id):
+    def get_applied_applications(self, user_id, company_id, page_no, page_size):
         """获得求职记录"""
 
-        res = yield self.infra_user_ds.get_applied_applications(user_id, company_id)
+        res = yield self.infra_user_ds.get_applied_applications(user_id, company_id, page_no, page_size)
         if res.status != const.API_SUCCESS:
             ret = []
         else:
@@ -168,6 +168,7 @@ class UsercenterPageService(PageService):
             obj_list.append(app_rec)
         raise gen.Return(obj_list)
 
+
     @gen.coroutine
     def get_applied_progress(self, user_id, app_id):
         """
@@ -176,7 +177,7 @@ class UsercenterPageService(PageService):
         :param user_id:
         :return:
         """
-        ret = yield self.thrift_useraccounts_ds.get_applied_progress(user_id, app_id)
+        ret = yield self.infra_user_ds.get_applied_progress(user_id, app_id)
 
         time_lines = list()
         if ret.status_timeline:
@@ -199,3 +200,35 @@ class UsercenterPageService(PageService):
         })
 
         raise gen.Return(res)
+
+    # @gen.coroutine
+    # def get_applied_progress(self, user_id, app_id):
+    #     """
+    #     求职记录中的求职详情进度
+    #     :param app_id:
+    #     :param user_id:
+    #     :return:
+    #     """
+    #     ret = yield self.thrift_useraccounts_ds.get_applied_progress(user_id, app_id)
+    #
+    #     time_lines = list()
+    #     if ret.status_timeline:
+    #         for e in ret.status_timeline:
+    #             timeline = ObjectDict({
+    #                 "date": e.date,
+    #                 "event": e.event,
+    #                 "hide": e.hide,
+    #                 "step_status": e.step_status,
+    #             })
+    #             time_lines.append(timeline)
+    #
+    #     res = ObjectDict({
+    #         "pid": ret.pid,
+    #         "position_title": ret.position_title,
+    #         "company_name": ret.company_name,
+    #         "step": ret.step,
+    #         "step_status": ret.step_status,
+    #         "status_timeline": time_lines,
+    #     })
+    #
+    #     raise gen.Return(res)
