@@ -301,10 +301,10 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
             user_id=self.current_user.sysuser.id
         )
 
-        if response.status != const.API_SUCCESS:
+        if response.code != const.API_SUCCESS:
             return
 
-        ret_user_id = response.data.id
+        ret_user_id = response.data.userid
         if str(ret_user_id) != str(self.current_user.sysuser.id):
             self.logger.warn("触发帐号合并成功 合并前 user_id:{} 合并后 user_id:{}".format(self.current_user.sysuser.id, ret_user_id))
             # 由于在 baseHandler 中已经有对合并帐号的处理，此处不手动删除 cookie
