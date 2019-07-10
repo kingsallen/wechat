@@ -151,7 +151,7 @@ class UsercenterPageService(PageService):
         """获得求职记录"""
 
         res = yield self.infra_user_ds.get_applied_applications(user_id, company_id, page_no, page_size)
-        if res.status != const.API_SUCCESS:
+        if res.code != const.API_SUCCESS:
             ret = []
         else:
             ret = res.data
@@ -162,12 +162,12 @@ class UsercenterPageService(PageService):
             app_rec['id'] = e.id
             app_rec['position_title'] = e.position_title
             app_rec['company_name'] = e.company_name
-            app_rec['status_name'] = e.status_name
+            app_rec['phase'] = e.phase
             app_rec['time'] = e.time
             app_rec['signature'] = e.signature
+            app_rec['pstatus'] = e.pstatus
             obj_list.append(app_rec)
         raise gen.Return(obj_list)
-
 
     @gen.coroutine
     def get_applied_progress(self, user_id, app_id):
@@ -177,25 +177,39 @@ class UsercenterPageService(PageService):
         :param user_id:
         :return:
         """
-        ret = yield self.infra_user_ds.get_applied_progress(user_id, app_id)
+        res = yield self.infra_user_ds.get_applied_progress(user_id, app_id)
+        if res.code != const.API_SUCCESS:
+            ret = []
+        else:
+            ret = res.data
 
         time_lines = list()
-        if ret.status_timeline:
-            for e in ret.status_timeline:
+        if ret.operations:
+            for e in ret.operations:
                 timeline = ObjectDict({
                     "date": e.date,
-                    "event": e.event,
-                    "hide": e.hide,
-                    "step_status": e.step_status,
+                    "date_description": e.date_description,
+                    "description": e.description,
+                    "display": e.display,
+                    "id": e.id,
                 })
                 time_lines.append(timeline)
 
+        phases = list()
+        if ret.phases:
+            for e in ret.phases:
+                phase = ObjectDict({
+                    "id": e.id,
+                    "name": e.name,
+                    "pass": e.pass
+                })
+                phases.append(phase)
+
         res = ObjectDict({
-            "pid": ret.pid,
-            "position_title": ret.position_title,
+            "pid": ret.position_id,
+            "position_title": ret.title,
             "company_name": ret.company_name,
-            "step": ret.step,
-            "step_status": ret.step_status,
+            "phases": phases,
             "status_timeline": time_lines,
         })
 

@@ -259,7 +259,7 @@ class InfraUserDataService(DataService):
             "page_no": page_no,
             "page_size": page_size
         })
-        res = yield http_get_v2(application.NEWINFRA_APPLICATION_RECORD_DETAIL, application_service, params)
+        res = yield http_get_v2(application.NEWINFRA_APPLICATION_RECORD_LIST, application_service, params)
         return res
 
     @gen.coroutine
@@ -268,7 +268,7 @@ class InfraUserDataService(DataService):
             "user_id": user_id,
             "app_id": app_id
         })
-        res = yield http_get_v2(application.NEWINFRA_APPLICATION_RECORD_LIST, application_service, params)
+        res = yield http_get_v2(application.NEWINFRA_APPLICATION_RECORD_DETAIL, application_service, params)
         return res
 
     @gen.coroutine
