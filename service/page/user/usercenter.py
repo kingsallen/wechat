@@ -168,12 +168,12 @@ class UsercenterPageService(PageService):
             app_rec['pstatus'] = e.pstatus
             obj_list.append(app_rec)
 
-        res = ObjectDict({
-            "data": obj_list,
-            "page": ret.page,
-            "page_size": ret.page_size,
-            "total": ret.total,
-        })
+        # res = ObjectDict({
+        #     "data": obj_list,
+        #     "page": ret.page,
+        #     "page_size": ret.page_size,
+        #     "total": ret.total,
+        # })
         raise gen.Return(obj_list)
 
     @gen.coroutine
@@ -193,6 +193,7 @@ class UsercenterPageService(PageService):
         time_lines = list()
         if ret.operations:
             for e in ret.operations:
+                e = ObjectDict(e)
                 timeline = ObjectDict({
                     "date": e.date,
                     "date_description": e.date_description,
@@ -206,9 +207,9 @@ class UsercenterPageService(PageService):
         if ret.phases:
             for e in ret.phases:
                 phase = ObjectDict({
-                    "id": e.id,
-                    "name": e.name,
-                    "pass": e.pass,
+                    "id": e["id"],
+                    "name": e["name"],
+                    "pass": e["pass"], #e.pass会报错
                 })
                 phases.append(phase)
 
