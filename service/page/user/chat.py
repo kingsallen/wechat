@@ -320,6 +320,7 @@ class ChatPageService(PageService):
                 position.update = position_info.update_time
                 position.id = position_info.id
                 position.imgUrl = p_company_info.banner
+                position.cover = company_info.logo  # TODO 如果有红包或其他特殊场景的cover设置
                 if team:
                     teamname_custom = current_user.company.conf_teamname_custom
                     more_link = team.link if team.link else make_url(path.TEAM_PATH.format(team.id),
