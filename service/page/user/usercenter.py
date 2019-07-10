@@ -156,7 +156,7 @@ class UsercenterPageService(PageService):
         else:
             ret = res.data
         obj_list = list()
-        for e in ret:
+        for e in ret.data:
             e = ObjectDict(e)
             app_rec = ObjectDict()
             app_rec['id'] = e.id
@@ -167,6 +167,13 @@ class UsercenterPageService(PageService):
             app_rec['signature'] = e.signature
             app_rec['pstatus'] = e.pstatus
             obj_list.append(app_rec)
+
+        res = ObjectDict({
+            "data": obj_list,
+            "page": ret.page,
+            "page_size": ret.page_size,
+            "total": ret.total,
+        })
         raise gen.Return(obj_list)
 
     @gen.coroutine
@@ -201,7 +208,7 @@ class UsercenterPageService(PageService):
                 phase = ObjectDict({
                     "id": e.id,
                     "name": e.name,
-                    "pass": e.pass
+                    "pass": e.pass,
                 })
                 phases.append(phase)
 
