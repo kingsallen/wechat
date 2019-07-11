@@ -193,13 +193,13 @@ class UsercenterPageService(PageService):
         time_lines = list()
         if ret.operations:
             for e in ret.operations:
-                e = ObjectDict(e)
                 timeline = ObjectDict({
-                    "date": e.date,
-                    "date_description": e.date_description,
-                    "description": e.description,
-                    "display": e.display,
-                    "id": e.id,
+                    "date": e["date"],
+                    "date_description": e["date_description"],
+                    "description": e["description"],
+                    "display": e["display"],
+                    "id": e["id"],
+                    "status": e["pass"],
                 })
                 time_lines.append(timeline)
 
