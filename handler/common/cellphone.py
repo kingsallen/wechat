@@ -196,7 +196,7 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
     @handle_response
     @gen.coroutine
     def post_changemobile(self):
-        res = yield self._opt_post_cellphone_code(const.MOBILE_CODE_OPT_TYPE.change_mobile,is_send_response=False)
+        res = yield self._opt_post_cellphone_code(const.MOBILE_CODE_OPT_TYPE.change_mobile, is_send_response=False)
         if res:
             yield self._opt_post_user_account()
 
