@@ -222,8 +222,7 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
             raise gen.Return(False)
 
         elif verify_response.data == const.NO:
-            if is_send_response:
-                self.send_json_error(message=msg.CELLPHONE_INVALID_CODE)
+            self.send_json_error(message=msg.CELLPHONE_INVALID_CODE)
             raise gen.Return(False)
 
         # 返回加密的 code 值，供前端拼接 url，以验证用户重要操作是否已经验证手机号
