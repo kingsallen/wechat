@@ -17,6 +17,7 @@ from handler.common.captcha import CaptchaMixin
 
 from thrift_gen.gen.mq.struct.ttypes import SmsType
 from util.tool.date_tool import curr_now
+from util.common.exception import InfraOperationError
 
 
 @common_handler
@@ -256,7 +257,7 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
         )
 
         if response.code != const.API_SUCCESS:
-            return
+            raise InfraOperationError(body.message)
 
         ret_user_id = response.data.userid
 
