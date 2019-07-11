@@ -217,8 +217,7 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
         )
 
         if verify_response.status != const.API_SUCCESS:
-            if is_send_response:
-                self.send_json_error(message=verify_response.message)
+            self.send_json_error(message=verify_response.message)
             raise gen.Return(False)
 
         elif verify_response.data == const.NO:
