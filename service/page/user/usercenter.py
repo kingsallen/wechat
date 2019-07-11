@@ -205,12 +205,22 @@ class UsercenterPageService(PageService):
 
         phases = list()
         if ret.phases:
+            current_phase_id = [item for item in ret.phases if item['pass']][-1]['id']
             for e in ret.phases:
-                phase = ObjectDict({
-                    "id": e["id"],
-                    "name": e["name"],
-                    "pass": e["pass"], #e.pass会报错
-                })
+                if e["id"] == current_phase_id:
+                    phase = ObjectDict({
+                        "id": e["id"],
+                        "name": e["name"],
+                        "pass": e["pass"],  # e.pass会报错
+                        "is_current": True
+                    })
+                else:
+                    phase = ObjectDict({
+                        "id": e["id"],
+                        "name": e["name"],
+                        "pass": e["pass"], #e.pass会报错
+                        "is_current": False
+                    })
                 phases.append(phase)
 
         res = ObjectDict({
