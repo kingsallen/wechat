@@ -838,7 +838,7 @@ class PositionHandler(BaseHandler):
     def _make_team(self, team, teamname_custom):
         """所属团队，构造数据"""
         more_link = team.link if team.link else self.make_url(path.TEAM_PATH.format(team.id), self.params)
-        res = yield self.position_ps.get_team_data(team, more_link, teamname_custom)
+        res = yield self.position_ps.get_team_data(team, more_link, teamname_custom, self.locale)
         raise gen.Return(res)
 
     @log_time
