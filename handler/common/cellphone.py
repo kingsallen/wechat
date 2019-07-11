@@ -197,7 +197,7 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
     def post_changemobile(self):
         res = yield self._opt_post_cellphone_code(const.MOBILE_CODE_OPT_TYPE.change_mobile)
         if res:
-            yield self._opt_post_user_account_change()
+            yield self._opt_post_user_account()
 
     @gen.coroutine
     def _opt_post_cellphone_code(self, type):
@@ -240,61 +240,15 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
     def _opt_post_user_account(self):
 
         # 检查是否需要合并 pc 账号
-        if self.current_user.sysuser and \
-            str(self.current_user.sysuser.mobile) != str(self.current_user.sysuser.username):
+        # if self.current_user.sysuser and \
+        #     str(self.current_user.sysuser.mobile) != str(self.current_user.sysuser.username):
 
-            response = yield self.cellphone_ps.wx_pc_combine(
-                country_code=self.params.country_code,
-                mobile=self.params.mobile,
-                unionid=self.current_user.sysuser.unionid
-            )
-
-            if response.status != const.API_SUCCESS:
-                return
-
-            ret_user_id = response.data.id
-
-            # 神策数据关联：用户注册后将匿名ID与user_id绑定
-            self.sa.track_signup(ret_user_id, self.current_user.sysuser.id)
-            self.logger.debug("[sensors_signup_mobile]ret_user_id: {}, origin_user_id: {}".format(ret_user_id, self.current_user.sysuser.id))
-
-            if self.is_platform:
-                source = const.WECHAT_REGISTER_SOURCE_PLATFORM
-            else:
-                source = const.WECHAT_REGISTER_SOURCE_QX
-
-            self.track('cUserReg', properties={'origin': source}, distinct_id=ret_user_id, is_login_id=True)
-            self.profile_set(profiles={'mobile_register_time': curr_now()}, distinct_id=ret_user_id, is_login_id=True, once=True)
-
-            if str(ret_user_id) != str(self.current_user.sysuser.id):
-                self.logger.warn("触发帐号合并成功 合并前 user_id:{} 合并后 user_id:{}".format(self.current_user.sysuser.id, ret_user_id))
-                # 由于在 baseHandler 中已经有对合并帐号的处理，此处不手动删除 cookie
-                # self.clear_cookie(name=const.COOKIE_SESSIONID)
-
-        else:
-            password = self.current_user.sysuser.password
-            if not password:
-                # 生成随机密码
-                code, password = password_crypt()
-                # 发送注册成功短信
-                params = ObjectDict({
-                    "mobile": self.params.mobile,
-                    "code": code,
-                })
-                yield self.cellphone_ps.send_sms(
-                    SmsType.UPDATE_SYSUSER_SMS, self.params.mobile,
-                    params, isqx=self.is_qx,
-                    ip=self.request.headers.get('Remoteip'))
-
-            yield self.user_ps.bind_mobile_password(
-                self.current_user.sysuser.id, self.params.mobile, password)
-
-
-
-    @gen.coroutine
-    def _opt_post_user_account_change(self):
-
-        # 调用基础服务换修改手机号
+            # response = yield self.cellphone_ps.wx_pc_combine(
+            #     country_code=self.params.country_code,
+            #     mobile=self.params.mobile,
+            #     unionid=self.current_user.sysuser.unionid
+            # )
+            # 调用基础服务换修改手机号
         response = yield self.cellphone_ps.wx_change_mobile(
             country_code=self.params.country_code,
             mobile=self.params.mobile,
@@ -305,7 +259,39 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
             return
 
         ret_user_id = response.data.userid
+
+        # 神策数据关联：用户注册后将匿名ID与user_id绑定
+        self.sa.track_signup(ret_user_id, self.current_user.sysuser.id)
+        self.logger.debug("[sensors_signup_mobile]ret_user_id: {}, origin_user_id: {}".format(ret_user_id, self.current_user.sysuser.id))
+
+        if self.is_platform:
+            source = const.WECHAT_REGISTER_SOURCE_PLATFORM
+        else:
+            source = const.WECHAT_REGISTER_SOURCE_QX
+
+        self.track('cUserReg', properties={'origin': source}, distinct_id=ret_user_id, is_login_id=True)
+        self.profile_set(profiles={'mobile_register_time': curr_now()}, distinct_id=ret_user_id, is_login_id=True, once=True)
+
         if str(ret_user_id) != str(self.current_user.sysuser.id):
             self.logger.warn("触发帐号合并成功 合并前 user_id:{} 合并后 user_id:{}".format(self.current_user.sysuser.id, ret_user_id))
             # 由于在 baseHandler 中已经有对合并帐号的处理，此处不手动删除 cookie
             # self.clear_cookie(name=const.COOKIE_SESSIONID)
+
+        # else:
+        #     password = self.current_user.sysuser.password
+        #     if not password:
+        #         # 生成随机密码
+        #         code, password = password_crypt()
+        #         # 发送注册成功短信
+        #         params = ObjectDict({
+        #             "mobile": self.params.mobile,
+        #             "code": code,
+        #         })
+        #         yield self.cellphone_ps.send_sms(
+        #             SmsType.UPDATE_SYSUSER_SMS, self.params.mobile,
+        #             params, isqx=self.is_qx,
+        #             ip=self.request.headers.get('Remoteip'))
+        #
+        #     yield self.user_ps.bind_mobile_password(
+        #         self.current_user.sysuser.id, self.params.mobile, password)
+
