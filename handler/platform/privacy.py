@@ -46,17 +46,14 @@ class ShowAgreementHandler(BaseHandler):
 
     @handle_response
     @gen.coroutine
-    def post(self):
+    def get(self):
         """
         是否需要弹出"隐私协议"窗口
         -path: /api/privacy/show_agreement
-        -params:
-        {
-            "agree": 1, // 1: 同意， 0: 不同意
-        }
         :return: {
             "status": 0,
-            "message": "success"
+            "message": "success",
+            "data": 1
         }
 
         """
