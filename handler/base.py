@@ -1,13 +1,12 @@
 # coding=utf-8
 
-import os
-import time
 import json
+import os
+import re
+import time
 import traceback
-import ast
 from hashlib import sha1
 from urllib.parse import unquote
-import re
 
 from tornado import gen, locale
 
@@ -21,10 +20,10 @@ from setting import settings
 from util.common import ObjectDict
 from util.common.cipher import decode_id
 from util.common.decorator import check_signature
+from util.tool.date_tool import curr_now
 from util.tool.str_tool import to_str, from_hex, match_session_id, \
     languge_code_from_ua
 from util.tool.url_tool import url_subtract_query, make_url
-from util.tool.date_tool import curr_now
 
 
 class NoSignatureError(Exception):

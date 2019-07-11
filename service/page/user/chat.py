@@ -126,7 +126,7 @@ class ChatPageService(PageService):
             chat_debut=ret.chatDebut,
             follow_qx=qxuser.is_subscribe == 1,
             room_id=ret.roomId,
-            show_position_info=not bot_enabled
+            show_position_info=(len(position_info) > 0 and not bot_enabled)
         )
         raise gen.Return(res)
 
@@ -312,6 +312,7 @@ class ChatPageService(PageService):
                 company_info = yield company_ps.get_company(conds={"id": did}, need_conf=True)
                 position = ObjectDict()
                 position.jobTitle = position_info.title
+                position.hb_status = position_info.hb_status
                 position.company = company_info.abbreviation
                 position.team = team.name
                 position.salary = position_info.salary
@@ -319,6 +320,7 @@ class ChatPageService(PageService):
                 position.update = position_info.update_time
                 position.id = position_info.id
                 position.imgUrl = p_company_info.banner
+                position.cover = make_static_url(company_info.logo)  # TODO 如果有红包或其他特殊场景的cover设置
                 if team:
                     teamname_custom = current_user.company.conf_teamname_custom
                     more_link = team.link if team.link else make_url(path.TEAM_PATH.format(team.id),
