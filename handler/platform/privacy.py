@@ -61,6 +61,6 @@ class IsAgreePrivacyHandler(BaseHandler):
         result, show_privacy_agreement = yield self.privacy_ps.if_privacy_agreement_window(user_id)
 
         if result:
-            self.send_json_success(data=show_privacy_agreement)
+            self.send_json_success(data=not show_privacy_agreement)
         else:
             self.send_json_error()
