@@ -196,12 +196,12 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
     @handle_response
     @gen.coroutine
     def post_changemobile(self):
-        res = yield self._opt_post_cellphone_code(const.MOBILE_CODE_OPT_TYPE.change_mobile,is_send_message=False)
+        res = yield self._opt_post_cellphone_code(const.MOBILE_CODE_OPT_TYPE.change_mobile,is_send_response=False)
         if res:
             yield self._opt_post_user_account()
 
     @gen.coroutine
-    def _opt_post_cellphone_code(self, type, is_send_message=True):
+    def _opt_post_cellphone_code(self, type, is_send_response=True):
         """处理验证码是否有效，正确"""
         try:
             self.guarantee('mobile', 'code', 'country_code')
@@ -217,12 +217,12 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
         )
 
         if verify_response.status != const.API_SUCCESS:
-            if is_send_message:
+            if is_send_response:
                 self.send_json_error(message=verify_response.message)
             raise gen.Return(False)
 
         elif verify_response.data == const.NO:
-            if is_send_message:
+            if is_send_response:
                 self.send_json_error(message=msg.CELLPHONE_INVALID_CODE)
             raise gen.Return(False)
 
