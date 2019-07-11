@@ -196,12 +196,12 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
     @handle_response
     @gen.coroutine
     def post_changemobile(self):
-        res = yield self._opt_post_cellphone_code(const.MOBILE_CODE_OPT_TYPE.change_mobile)
+        res = yield self._opt_post_cellphone_code(const.MOBILE_CODE_OPT_TYPE.change_mobile,is_send_message=False)
         if res:
             yield self._opt_post_user_account()
 
     @gen.coroutine
-    def _opt_post_cellphone_code(self, type):
+    def _opt_post_cellphone_code(self, type, is_send_message=True):
         """处理验证码是否有效，正确"""
         try:
             self.guarantee('mobile', 'code', 'country_code')
@@ -217,11 +217,13 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
         )
 
         if verify_response.status != const.API_SUCCESS:
-            self.send_json_error(message=verify_response.message)
+            if is_send_message:
+                self.send_json_error(message=verify_response.message)
             raise gen.Return(False)
 
         elif verify_response.data == const.NO:
-            self.send_json_error(message=msg.CELLPHONE_INVALID_CODE)
+            if is_send_message:
+                self.send_json_error(message=msg.CELLPHONE_INVALID_CODE)
             raise gen.Return(False)
 
         # 返回加密的 code 值，供前端拼接 url，以验证用户重要操作是否已经验证手机号
