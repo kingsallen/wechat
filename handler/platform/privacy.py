@@ -36,3 +36,34 @@ class PrivacyHandler(BaseHandler):
             self.send_json_success()
         else:
             self.send_json_error()
+
+
+
+class ShowAgreementHandler(BaseHandler):
+    """
+    是否弹出隐私协议
+    """
+
+    @handle_response
+    @gen.coroutine
+    def post(self):
+        """
+        是否需要弹出"隐私协议"窗口
+        -path: /api/privacy/show_agreement
+        -params:
+        {
+            "agree": 1, // 1: 同意， 0: 不同意
+        }
+        :return: {
+            "status": 0,
+            "message": "success"
+        }
+
+        """
+        user_id = self.current_user.sysuser.id
+        result, show_privacy_agreement = yield self.privacy_ps.if_privacy_agreement_window(user_id)
+
+        if result:
+            self.send_json_success(data=show_privacy_agreement)
+        else:
+            self.send_json_error()
