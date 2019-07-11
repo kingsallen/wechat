@@ -205,20 +205,20 @@ class UsercenterPageService(PageService):
 
         phases = list()
         if ret.phases:
-            current_phase_id = [item for item in ret.phases if item['pass']][-1]['id'] #最新pass为true的phase为当前状态
+            current_phase_id = [item for item in ret.phases if item['pass'] != 3][-1]['id'] #最新pass不为"无状态"[无状态表示还没到当前phase]的phase为当前状态
             for e in ret.phases:
                 if e["id"] == current_phase_id:
                     phase = ObjectDict({
                         "id": e["id"],
                         "name": e["name"],
-                        "pass": e["pass"],  # e.pass会报错
+                        "status": e["pass"],  # e.pass会报错
                         "is_current": 1
                     })
                 else:
                     phase = ObjectDict({
                         "id": e["id"],
                         "name": e["name"],
-                        "pass": e["pass"], #e.pass会报错
+                        "status": e["pass"], #e.pass会报错
                         "is_current": 0
                     })
                 phases.append(phase)
