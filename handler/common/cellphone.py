@@ -227,9 +227,10 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
             raise gen.Return(False)
 
         # 返回加密的 code 值，供前端拼接 url，以验证用户重要操作是否已经验证手机号
-        self.send_json_success(data={
-            "_mc": encode_id(int(self.params.code), 8)
-        })
+        if is_send_response:
+            self.send_json_success(data={
+                "_mc": encode_id(int(self.params.code), 8)
+            })
 
         self.set_secure_cookie(
             const.COOKIE_MOBILE_CODE,
