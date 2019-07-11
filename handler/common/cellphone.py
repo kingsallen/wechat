@@ -257,7 +257,7 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
         )
 
         if response.code != const.API_SUCCESS:
-            raise InfraOperationError(response.message)
+            self.send_json_error(message=response.message)
 
         ret_user_id = response.data.userid
 
