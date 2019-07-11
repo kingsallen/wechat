@@ -165,7 +165,7 @@ class UsercenterPageService(PageService):
             app_rec['phase'] = e.phase
             app_rec['time'] = e.time
             app_rec['signature'] = e.signature
-            app_rec['pstatus'] = e.pstatus
+            app_rec['pstatus'] = e.status
             obj_list.append(app_rec)
 
         # res = ObjectDict({
