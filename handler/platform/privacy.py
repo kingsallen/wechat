@@ -39,7 +39,7 @@ class PrivacyHandler(BaseHandler):
 
 
 
-class ShowAgreementHandler(BaseHandler):
+class IsAgreePrivacyHandler(BaseHandler):
     """
     用户是否同意过隐私协议
     """
@@ -49,7 +49,7 @@ class ShowAgreementHandler(BaseHandler):
     def get(self):
         """
         用户是否同意过隐私协议：data=0表示同意过，1表示没同意过
-        -path: /api/privacy/show_agreement
+        -path: /api/privacy/is_agree/
         :return: {
             "status": 0,
             "message": "success",
