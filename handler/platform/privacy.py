@@ -41,14 +41,14 @@ class PrivacyHandler(BaseHandler):
 
 class ShowAgreementHandler(BaseHandler):
     """
-    是否弹出隐私协议
+    用户是否同意过隐私协议
     """
 
     @handle_response
     @gen.coroutine
     def get(self):
         """
-        是否需要弹出"隐私协议"窗口
+        用户是否同意过隐私协议：data=0表示同意过，1表示没同意过
         -path: /api/privacy/show_agreement
         :return: {
             "status": 0,
