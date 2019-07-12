@@ -257,7 +257,7 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
             user_id=self.current_user.sysuser.id
         )
 
-        if response.code != const.API_SUCCESS:
+        if response.code != const.NEWINFRA_API_SUCCESS:
             self.send_json_error(message=response.message)
             return
 
