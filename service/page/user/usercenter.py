@@ -151,7 +151,7 @@ class UsercenterPageService(PageService):
         """获得求职记录"""
 
         res = yield self.infra_user_ds.get_applied_applications(user_id, company_id, page_no, page_size)
-        if res.code != const.API_SUCCESS:
+        if res.code != const.NEWINFRA_API_SUCCESS:
             ret = []
         else:
             ret = res.data
@@ -168,12 +168,6 @@ class UsercenterPageService(PageService):
             app_rec['pstatus'] = e.status
             obj_list.append(app_rec)
 
-        # res = ObjectDict({
-        #     "data": obj_list,
-        #     "page": ret.page,
-        #     "page_size": ret.page_size,
-        #     "total": ret.total,
-        # })
         raise gen.Return(obj_list)
 
     @gen.coroutine
@@ -185,7 +179,7 @@ class UsercenterPageService(PageService):
         :return:
         """
         res = yield self.infra_user_ds.get_applied_progress(user_id, app_id)
-        if res.code != const.API_SUCCESS:
+        if res.code != const.NEWINFRA_API_SUCCESS:
             ret = []
         else:
             ret = res.data
@@ -205,7 +199,7 @@ class UsercenterPageService(PageService):
 
         phases = list()
         if ret.phases:
-            current_phase_id = [item for item in ret.phases if item['pass'] != 3][-1]['id'] #最新pass不为"无状态"[无状态表示还没到当前phase]的phase为当前状态
+            current_phase_id = [item for item in ret.phases if item['pass'] != 3][-1]['id'] #pass不是"无状态(pass不等于3)"[无状态表示还没到当前phase]的所有phases的排在list最后的一个phase为当前状态
             for e in ret.phases:
                 if e["id"] == current_phase_id:
                     phase = ObjectDict({
@@ -232,35 +226,3 @@ class UsercenterPageService(PageService):
         })
 
         raise gen.Return(res)
-
-    # @gen.coroutine
-    # def get_applied_progress(self, user_id, app_id):
-    #     """
-    #     求职记录中的求职详情进度
-    #     :param app_id:
-    #     :param user_id:
-    #     :return:
-    #     """
-    #     ret = yield self.thrift_useraccounts_ds.get_applied_progress(user_id, app_id)
-    #
-    #     time_lines = list()
-    #     if ret.status_timeline:
-    #         for e in ret.status_timeline:
-    #             timeline = ObjectDict({
-    #                 "date": e.date,
-    #                 "event": e.event,
-    #                 "hide": e.hide,
-    #                 "step_status": e.step_status,
-    #             })
-    #             time_lines.append(timeline)
-    #
-    #     res = ObjectDict({
-    #         "pid": ret.pid,
-    #         "position_title": ret.position_title,
-    #         "company_name": ret.company_name,
-    #         "step": ret.step,
-    #         "step_status": ret.step_status,
-    #         "status_timeline": time_lines,
-    #     })
-    #
-    #     raise gen.Return(res)

@@ -252,7 +252,7 @@ class InfraUserDataService(DataService):
         return res
 
     @gen.coroutine
-    def get_applied_applications(self, user_id, company_id, page_no, page_size):
+    def get_applied_applications(self, user_id, company_id, page_no=1, page_size=50):
         params = ObjectDict({
             "user_id": user_id,
             "company_id": company_id,
