@@ -18,9 +18,6 @@ from util.tool.dict_tool import sub_dict, objectdictify
 from util.tool.str_tool import mobile_validate, split_phone_number
 from util.tool.json_tool import json_dumps
 from conf.locale_dict import CITY, CITY_REVERSE, INDUSTRY, INDUSTRY_REVERSE
-import hashlib
-from urllib.parse import urlencode
-from util.common.cache import BaseRedis
 
 
 class ProfileNewHandler(BaseHandler):
