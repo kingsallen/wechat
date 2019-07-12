@@ -1212,7 +1212,7 @@ class ProfilePageService(PageService):
 
 
     @gen.coroutine
-    def import_apply_profile(self, user_id, sync_id, employee_id):
+    def import_apply_profile(self):
         """仟寻简历导入页面"""
 
         # 跳转模版需要的参数初始值
@@ -1222,7 +1222,6 @@ class ProfilePageService(PageService):
         # }
         # 获取最佳东方导入开关
         need_profile_upload = [570004]  # 现在为沙盒的
-        self.logger.debug(self.request.uri)
         company = yield self.company_ps.get_company({'id': self.current_user.wechat.company_id}, need_conf=True)
         importer = ObjectDict(profile_import_51job=self.make_url(path.RESUME_URL, self.params, m='authorization',
                                                                  way=const.RESUME_WAY_51JOB),
