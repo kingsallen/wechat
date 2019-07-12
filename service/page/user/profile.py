@@ -1212,8 +1212,8 @@ class ProfilePageService(PageService):
 
 
     @gen.coroutine
-    def create_apply_profile(self, user_id, sync_id, employee_id):
-        """仟寻简历导入"""
+    def import_apply_profile(self, user_id, sync_id, employee_id):
+        """仟寻简历导入页面"""
 
         # 跳转模版需要的参数初始值
         # redirect_params = {
@@ -1222,6 +1222,7 @@ class ProfilePageService(PageService):
         # }
         # 获取最佳东方导入开关
         need_profile_upload = [570004]  # 现在为沙盒的
+        self.logger.debug(self.request.uri)
         company = yield self.company_ps.get_company({'id': self.current_user.wechat.company_id}, need_conf=True)
         importer = ObjectDict(profile_import_51job=self.make_url(path.RESUME_URL, self.params, m='authorization',
                                                                  way=const.RESUME_WAY_51JOB),
@@ -1255,6 +1256,7 @@ class ProfilePageService(PageService):
         # 如果是申请中跳转到这个页面，需要做详细检查
         current_path = self.request.uri.split('?')[0]
         paths_for_application = [path.APPLICATION, path.PROFILE_PREVIEW]
+        paths_for_import = [path.IMPORT_PROFILE]
 
         self.logger.warn(current_path)
         self.logger.warn(self.params)
@@ -1300,6 +1302,30 @@ class ProfilePageService(PageService):
                 #         profile_custom_url= goto_custom_url
                 #     )
                 # redirect_params.update(goto_custom_url=goto_custom_url)
+        elif current_path in paths_for_import:
+            importer.update(
+                profile_create_30s=None,
+                profile_import_pc=None
+            )
+
+            pid = int(self.params.pid)
+            position = yield self.position_ps.get_position(pid, display_locale=self.get_current_locale())
+
+            self.logger.warn(position)
+
+            # 判断是否可以接受 email 投递
+            if position.email_resume_conf == const.OLD_YES:
+                importer.update(
+                    profile_email=profile_email_url
+                )
+
+            # 自定义职位
+            goto_custom_url = self.make_url(
+                path.PROFILE_CUSTOM_CV,
+                self.params)
+            importer.update(
+                profile_custom_url=goto_custom_url
+            )
 
         else:
             # 从侧边栏直接进入，允许使用 email 创建 profile
