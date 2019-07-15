@@ -19,9 +19,7 @@ import conf.path as path
 import hashlib
 from urllib.parse import urlencode
 from util.common.cache import BaseRedis
-from service.page.hr.company import CompanyPageService
-from service.page.job.position import PositionPageService
-from service.page.user.privacy import PrivacyPageService
+
 
 class ProfilePageService(PageService):
     """对接profile服务
@@ -1211,7 +1209,7 @@ class ProfilePageService(PageService):
         return res
 
     @gen.coroutine
-    def import_apply_profile(self):
+    def import_apply_profile(self,company,position,params,make_url,current_path,current_user,show_privacy_agreement,redirect,render_page):
         """仟寻简历导入页面"""
 
         # 跳转模版需要的参数初始值
@@ -1221,16 +1219,12 @@ class ProfilePageService(PageService):
         # }
         # 获取最佳东方导入开关
         need_profile_upload = [570004]  # 现在为沙盒的
-        company = yield CompanyPageService().get_company({'id': self.current_user.wechat.company_id}, need_conf=True)
-        importer = ObjectDict(profile_import_51job=self.make_url(path.RESUME_URL, self.params, m='authorization',
-                                                                 way=const.RESUME_WAY_51JOB),
-                              profile_import_zhilian=self.make_url(path.RESUME_URL, self.params, m='authorization',
-                                                                   way=const.RESUME_WAY_ZHILIAN),
+        importer = ObjectDict(profile_import_51job=make_url(path.RESUME_URL, params, m='authorization', way=const.RESUME_WAY_51JOB),
+                              profile_import_zhilian=make_url(path.RESUME_URL, params, m='authorization', way=const.RESUME_WAY_ZHILIAN),
                               # profile_import_zhilian=None,
                               # set later.
                               profile_import_liepin=None,
-                              profile_import_linkedin=self.make_url(path.RESUME_URL, self.params, m='authorization',
-                                                                    way=const.RESUME_WAY_LINKEDIN),
+                              profile_import_linkedin=make_url(path.RESUME_URL, params, m='authorization', way=const.RESUME_WAY_LINKEDIN),
                               # profile_import_linkedin=None,
                               # set later.
                               profile_import_maimai=None,
@@ -1240,32 +1234,26 @@ class ProfilePageService(PageService):
                               profile_resume_upload=None,
                               # set later
                               profile_email=None,
-                              profile_create_30s=self.make_url(path.PROFILE_NEW, self.params, m='authorization',
-                                                               way=const.RESUME_WAY_30S),
+                              profile_create_30s=make_url(path.PROFILE_NEW, params, m='authorization', way=const.RESUME_WAY_30S),
                               profile_import_pc=True,
                               # set later
                               profile_custom_url=None)
         if company.conf_veryeast_switch == 1:
-            importer.update(profile_import_veryeast=self.make_url(path.RESUME_URL, self.params, m='authorization',
-                                                                  way=const.RESUME_WAY_VERYEAST))
+            importer.update(profile_import_veryeast=make_url(path.RESUME_URL, params, m='authorization', way=const.RESUME_WAY_VERYEAST))
         if company.id in need_profile_upload:
-            importer.update(profile_resume_upload=self.make_url(path.RESUME_UPLOAD, self.params))
+            importer.update(profile_resume_upload=make_url(path.RESUME_UPLOAD, params))
 
         # 如果是申请中跳转到这个页面，需要做详细检查
-        current_path = self.request.uri.split('?')[0]
         paths_for_application = [path.APPLICATION, path.PROFILE_PREVIEW]
         paths_for_import = [path.IMPORT_PROFILE]
 
         self.logger.warn(current_path)
-        self.logger.warn(self.params)
+        self.logger.warn(params)
 
-        profile_email_url = self.make_url('/application/email', self.params, way=const.RESUME_WAY_MOSEEKER)
+        profile_email_url = make_url('/application/email', params, way=const.RESUME_WAY_MOSEEKER)
 
         if (current_path in paths_for_application and
-            self.params.pid and self.params.pid.isdigit()):
-
-            pid = int(self.params.pid)
-            position = yield PositionPageService().get_position(pid, display_locale=self.get_current_locale())
+            params.pid and params.pid.isdigit()):
 
             self.logger.warn(position)
 
@@ -1279,11 +1267,11 @@ class ProfilePageService(PageService):
 
             # 自定义职位
             if position.app_cv_config_id:
-                goto_custom_url = self.make_url(
+                goto_custom_url = make_url(
                     path.PROFILE_CUSTOM_CV,
-                    self.params)
+                    params)
                 # update
-                self.redirect(goto_custom_url)
+                redirect(goto_custom_url)
                 return
 
                 # 如果是自定义职位，且没有 profile，且是直接投递定制的公司
@@ -1306,9 +1294,6 @@ class ProfilePageService(PageService):
                 profile_import_pc=None
             )
 
-            pid = int(self.params.pid)
-            position = yield PositionPageService().get_position(pid, display_locale=self.get_current_locale())
-
             self.logger.warn(position)
 
             # 判断是否可以接受 email 投递
@@ -1318,9 +1303,9 @@ class ProfilePageService(PageService):
                 )
 
             # 自定义职位
-            goto_custom_url = self.make_url(
+            goto_custom_url = make_url(
                 path.PROFILE_CUSTOM_CV,
-                self.params)
+                params)
             importer.update(
                 profile_custom_url=goto_custom_url
             )
@@ -1334,8 +1319,8 @@ class ProfilePageService(PageService):
 
         # ========== MAIMAI OAUTH ===============
         # 拼装脉脉 oauth 路由
-        cusdata = "?recom={}&pid={}&wechat_signature={}".format(self.params.recom, self.params.pid,
-                                                                self.current_user.wechat.signature)
+        cusdata = "?recom={}&pid={}&wechat_signature={}".format(params.recom, params.pid,
+                                                                current_user.wechat.signature)
         # 加上渠道
         cusdata = "{}&way={}".format(cusdata, const.FROM_MAIMAI)
         # 脉脉cusdata中不允许出现 '&' ，考虑我们公司目前的使用的参数中不会出现 '$$' , 将 '&' 转为 '$$' 使用
@@ -1347,15 +1332,15 @@ class ProfilePageService(PageService):
         maimai_url = path.MAIMAI_ACCESSTOKEN.format(appid=appid, cusdata=cusdata)
 
         # 猎聘用户授权 现场数据缓存
-        lielin_dict = dict(pid=self.params.pid,
-                           wechat_signature=self.current_user.wechat.signature)
-        if self.params.recom:
-            lielin_dict.update(recom=self.params.recom)
+        lielin_dict = dict(pid=params.pid,
+                           wechat_signature=current_user.wechat.signature)
+        if params.recom:
+            lielin_dict.update(recom=params.recom)
 
         base_cache = BaseRedis()
         base_cache.set(
             const.LIEPIN_SCENE_KEY_FMT.format(
-                sysuser_id=self.current_user.sysuser.id
+                sysuser_id=current_user.sysuser.id
             ),
             json.dumps(lielin_dict),
             const.LIEPIN_SCENE_KEY_TTL
@@ -1364,14 +1349,11 @@ class ProfilePageService(PageService):
         # 第三方简历导入对接回调地址配置
         importer.update(
             profile_import_liepin=path.LIEPIN_ACCESSTOKEN.format(
-                hashlib.sha1(str(self.current_user.sysuser.id).encode('u8')).hexdigest()
+                hashlib.sha1(str(current_user.sysuser.id).encode('u8')).hexdigest()
             ),
             profile_import_maimai=maimai_url
         )
 
-        # 是否需要弹出 隐私协议 窗口
-        user_id = self.current_user.sysuser.id
-        result, data = yield PrivacyPageService().if_privacy_agreement_window(user_id)
         # redirect_params.update(
         #     # show_privacy_agreement=data,
         #     wechat_signature=self.current_user.wechat.signature
@@ -1379,10 +1361,10 @@ class ProfilePageService(PageService):
 
         # redirect_params = {**self.params, **redirect_params}
 
-        self.render_page(
+        render_page(
             template_name='profile/importresume.html',
             data=dict(
-                show_privacy_agreement=data,
+                show_privacy_agreement=show_privacy_agreement,
                 importer=importer
             )
         )
