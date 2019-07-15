@@ -87,7 +87,7 @@ class InfraDictDataService(DataService):
 
         countries_res = yield http_get(path.DICT_COUNTRY)
 
-        result, data = unboxing(countries_res)
+        data = unboxing(countries_res)
 
         res = []
         for country in data:
