@@ -1060,4 +1060,4 @@ class ProfileImportHandler(BaseHandler):
     @authenticated
     @tornado.gen.coroutine
     def get(self):
-        yield self.profle_ds.import_apply_profile()
+        yield self.profile_ps.import_apply_profile()

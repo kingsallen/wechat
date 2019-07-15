@@ -387,7 +387,7 @@ def check_and_apply_profile(func):
                 "userid:%s has no profile, redirect to profile_new" %
                 self.current_user.sysuser.id)
 
-            yield self.profle_ds.import_apply_profile()
+            yield self.profile_ps.import_apply_profile()
     return wrapper
 
 
