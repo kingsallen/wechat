@@ -497,13 +497,20 @@ class ChatHandler(BaseHandler):
         user_hr_account = yield self.chat_ps.get_hr_info(self.hr_id)
         company_id = user_hr_account.company_id
 
+        recom = self.position_ps._make_recom(self.current_user.sysuser.id)
+
+        is_employee = bool(self.current_user.employee if self.current_user else None)
+
         res = yield self.chat_ps.get_chatroom(self.current_user.sysuser.id,
                                               self.params.hr_id,
                                               company_id,
                                               pid, room_id,
                                               self.current_user.qxuser,
                                               is_gamma,
-                                              self.bot_enabled)
+                                              self.bot_enabled,
+                                              recom,
+                                              is_employee)
+
         # 需要判断用户是否进入自己的聊天室
         if res.user.user_id != self.current_user.sysuser.id:
             self.send_json_error(message=msg.NOT_AUTHORIZED)
