@@ -1258,7 +1258,7 @@ class PositionListHandler(PositionListInfraParamsMixin, BaseHandler):
             conds={"id": did or company_id}, need_conf=True)
 
         if not rp_share_info:
-            escape = ["recomlist"]
+            escape = ["recomlist", "shareMongoliaFlag"]
             cover = self.share_url(company_info.logo)
             title = company_info.abbreviation + self.locale.translate('job_hotjobs')
             description = self.locale.translate(msg.SHARE_DES_DEFAULT)
@@ -1268,7 +1268,7 @@ class PositionListHandler(PositionListInfraParamsMixin, BaseHandler):
             escape = [
                 "pid", "keywords", "cities", "candidate_source",
                 "employment_type", "salary", "department", "occupations",
-                "custom", "degree", "page_from", "page_size"
+                "custom", "degree", "page_from", "page_size", "shareMongoliaFlag"
             ]
             title = rp_share_info.shareTitle
             description = rp_share_info.shareDesc
