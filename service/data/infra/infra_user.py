@@ -9,9 +9,8 @@ from service.data.base import DataService
 from util.common import ObjectDict
 from util.tool.http_tool import http_get, http_post, http_put, unboxing, http_get_rp, http_get_v2
 from util.common.decorator import log_time
-from conf.newinfra_service_conf.service_info import user_service, application_service
+from conf.newinfra_service_conf.service_info import user_service
 from conf.newinfra_service_conf.user import user
-from conf.newinfra_service_conf.application import application
 
 
 class InfraUserDataService(DataService):
@@ -252,23 +251,12 @@ class InfraUserDataService(DataService):
         return res
 
     @gen.coroutine
-    def get_applied_applications(self, user_id, company_id, page_no=1, page_size=50):
+    def get_applied_applications(self, user_id, company_id):
         params = ObjectDict({
             "user_id": user_id,
-            "company_id": company_id,
-            "page_no": page_no,
-            "page_size": page_size
+            "company_id": company_id
         })
-        res = yield http_get_v2(application.NEWINFRA_APPLICATION_RECORD_LIST, application_service, params)
-        return res
-
-    @gen.coroutine
-    def get_applied_progress(self, user_id, app_id):
-        params = ObjectDict({
-            "user_id": user_id,
-            "app_id": app_id
-        })
-        res = yield http_get_v2(application.NEWINFRA_APPLICATION_RECORD_DETAIL, application_service, params)
+        res = yield http_get(path.INFRA_USER_APPLYRECORD, params)
         return res
 
     @gen.coroutine
