@@ -68,8 +68,6 @@ def _serialize_data(service, jdata):
         jdata.append(("interfaceid", service.interfaceid))
     elif isinstance(jdata, dict):
         jdata.update({"appid": service.appid, "interfaceid": service.interfaceid})
-    else:
-        jdata = {"appid": service.appid, "interfaceid": service.interfaceid}
     return jdata
 
 

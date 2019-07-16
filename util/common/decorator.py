@@ -374,6 +374,7 @@ def check_and_apply_profile(func):
     @functools.wraps(func)
     @gen.coroutine
     def wrapper(self, *args, **kwargs):
+        need_profile_upload = [570004]  # 现在为沙盒的
         user_id = self.current_user.sysuser.id
         locale_display = self.get_current_locale()
         has_profile, profile = yield self.profile_ps.has_profile(user_id, self.locale, locale_display)
@@ -387,16 +388,142 @@ def check_and_apply_profile(func):
                 "userid:%s has no profile, redirect to profile_new" %
                 self.current_user.sysuser.id)
 
+            # 跳转模版需要的参数初始值
+            # redirect_params = {
+            #     "use_email": False,
+            #     "goto_custom_url": '',
+            # }
+            # 获取最佳东方导入开关
             company = yield self.company_ps.get_company({'id': self.current_user.wechat.company_id}, need_conf=True)
+            importer = ObjectDict(profile_import_51job=self.make_url(path.RESUME_URL, self.params, m='authorization', way=const.RESUME_WAY_51JOB),
+                                  profile_import_zhilian=self.make_url(path.RESUME_URL, self.params, m='authorization', way=const.RESUME_WAY_ZHILIAN),
+                                  # profile_import_zhilian=None,
+                                  # set later.
+                                  profile_import_liepin=None,
+                                  profile_import_linkedin=self.make_url(path.RESUME_URL, self.params, m='authorization', way=const.RESUME_WAY_LINKEDIN),
+                                  # profile_import_linkedin=None,
+                                  # set later.
+                                  profile_import_maimai=None,
+                                  # set later
+                                  profile_import_veryeast=None,
+                                  # set later
+                                  profile_resume_upload=None,
+                                  # set later
+                                  profile_email=None,
+                                  # set later
+                                  profile_custom_url=None)
+            if company.conf_veryeast_switch == 1:
+                importer.update(profile_import_veryeast=self.make_url(path.RESUME_URL, self.params, m='authorization', way=const.RESUME_WAY_VERYEAST))
+            # if company.id in need_profile_upload:
+            if True:  # 开发文件上传权限给所有用户
+                importer.update(profile_resume_upload=self.make_url(path.RESUME_UPLOAD, self.params))
+
+            # 如果是申请中跳转到这个页面，需要做详细检查
             current_path = self.request.uri.split('?')[0]
-            pid = int(self.params.pid or 0)
-            position = yield self.position_ps.get_position(pid, display_locale=self.get_current_locale())
+            paths_for_application = [path.APPLICATION, path.PROFILE_PREVIEW]
+
+            self.logger.warn(current_path)
+            self.logger.warn(self.params)
+
+            profile_email_url = self.make_url('/application/email', self.params, way=const.RESUME_WAY_MOSEEKER)
+
+            if (current_path in paths_for_application and
+                self.params.pid and self.params.pid.isdigit()):
+
+                pid = int(self.params.pid)
+                position = yield self.position_ps.get_position(pid, display_locale=self.get_current_locale())
+
+                self.logger.warn(position)
+
+                # 判断是否可以接受 email 投递
+                if position.email_resume_conf == const.OLD_YES:
+                    importer.update(
+                        profile_email=profile_email_url
+                    )
+                # redirect_params.update(
+                #     use_email=(position.email_resume_conf == const.OLD_YES))
+
+                # 自定义职位
+                if position.app_cv_config_id:
+                    goto_custom_url = self.make_url(
+                        path.PROFILE_CUSTOM_CV,
+                        self.params)
+
+                    # 如果是自定义职位，且没有 profile，且是直接投递定制的公司
+                    # 直接跳转到自定义填写页面
+
+                    is_direct_apply = yield self.customize_ps.create_direct_apply(
+                        position.company_id, position.app_cv_config_id)
+
+                    if is_direct_apply:
+                        self.redirect(goto_custom_url)
+                        return
+                    else:
+                        importer.update(
+                            profile_custom_url= goto_custom_url
+                        )
+                        # redirect_params.update(goto_custom_url=goto_custom_url)
+
+            else:
+                # 从侧边栏直接进入，允许使用 email 创建 profile
+                # redirect_params.update(use_email=True)
+                importer.update(
+                    profile_email=profile_email_url
+                )
+
+            # ========== MAIMAI OAUTH ===============
+            # 拼装脉脉 oauth 路由
+            cusdata = "?recom={}&pid={}&wechat_signature={}".format(self.params.recom, self.params.pid,
+                                                                    self.current_user.wechat.signature)
+            # 加上渠道
+            cusdata = "{}&way={}".format(cusdata, const.FROM_MAIMAI)
+            # 脉脉cusdata中不允许出现 '&' ，考虑我们公司目前的使用的参数中不会出现 '$$' , 将 '&' 转为 '$$' 使用
+            cusdata = cusdata.replace("&", "$$")
+            self.logger.info("[maimai_url_cusdata: {}]".format(cusdata))
+
+            cusdata = urlencode(dict(cusdata=cusdata))
+            appid = self.settings.maimai_appid
+            maimai_url = path.MAIMAI_ACCESSTOKEN.format(appid=appid, cusdata=cusdata)
+
+            # 猎聘用户授权 现场数据缓存
+            lielin_dict = dict(pid=self.params.pid,
+                               wechat_signature=self.current_user.wechat.signature)
+            if self.params.recom:
+                lielin_dict.update(recom=self.params.recom)
+            base_cache.set(
+                const.LIEPIN_SCENE_KEY_FMT.format(
+                    sysuser_id=self.current_user.sysuser.id
+                ),
+                json.dumps(lielin_dict),
+                const.LIEPIN_SCENE_KEY_TTL
+            )
+
+            # 第三方简历导入对接回调地址配置
+            importer.update(
+                profile_import_liepin=path.LIEPIN_ACCESSTOKEN.format(
+                    hashlib.sha1(str(self.current_user.sysuser.id).encode('u8')).hexdigest()
+                ),
+                profile_import_maimai=maimai_url
+            )
+
             # 是否需要弹出 隐私协议 窗口
             user_id = self.current_user.sysuser.id
-            result, show_privacy_agreement = yield self.privacy_ps.if_privacy_agreement_window(user_id)
-            yield self.profile_ps.import_apply_profile(company, position, self.params, self.make_url, current_path,
-                                                       self.current_user, show_privacy_agreement, self.redirect,
-                                                       self.render_page)
+            result, data = yield self.privacy_ps.if_privacy_agreement_window(user_id)
+            # redirect_params.update(
+            #     # show_privacy_agreement=data,
+            #     wechat_signature=self.current_user.wechat.signature
+            # )
+
+            # redirect_params = {**self.params, **redirect_params}
+
+            self.render_page(
+                template_name='profile/importresume.html',
+                data=dict(
+                    show_privacy_agreement=data,
+                    importer=importer
+                )
+            )
+
     return wrapper
 
 

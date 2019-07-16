@@ -1051,20 +1051,3 @@ class ProfileSectionHandler(BaseHandler):
             self.send_json_warning()
         else:
             self.send_json_error()
-
-
-class ProfileImportHandler(BaseHandler):
-    """自定义模板简历编辑页面导入"""
-
-    @handle_response
-    @authenticated
-    @tornado.gen.coroutine
-    def get(self):
-        company = yield self.company_ps.get_company({'id': self.current_user.wechat.company_id}, need_conf=True)
-        current_path = self.request.uri.split('?')[0]
-        pid = int(self.params.pid or 0)
-        position = yield self.position_ps.get_position(pid, display_locale=self.get_current_locale())
-        # 是否需要弹出 隐私协议 窗口
-        user_id = self.current_user.sysuser.id
-        result, show_privacy_agreement = yield self.privacy_ps.if_privacy_agreement_window(user_id)
-        yield self.profile_ps.import_apply_profile(company,position,self.params,self.make_url,current_path,self.current_user,show_privacy_agreement,self.redirect,self.render_page)
