@@ -389,7 +389,7 @@ def check_and_apply_profile(func):
 
             company = yield self.company_ps.get_company({'id': self.current_user.wechat.company_id}, need_conf=True)
             current_path = self.request.uri.split('?')[0]
-            pid = int(self.params.pid)
+            pid = int(self.params.pid or 0)
             position = yield self.position_ps.get_position(pid, display_locale=self.get_current_locale())
             # 是否需要弹出 隐私协议 窗口
             user_id = self.current_user.sysuser.id
