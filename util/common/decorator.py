@@ -400,8 +400,8 @@ def check_and_apply_profile(func):
             # 获取最佳东方导入开关
             company = yield self.company_ps.get_company({'id': self.current_user.wechat.company_id}, need_conf=True)
             importer = ObjectDict(profile_import_51job=self.make_url(path.RESUME_URL, self.params, m='authorization', way=const.RESUME_WAY_51JOB),
-                                  # profile_import_zhilian=self.make_url(path.RESUME_URL, self.params, m='authorization', way=const.RESUME_WAY_ZHILIAN),
-                                  profile_import_zhilian=None,
+                                  profile_import_zhilian=self.make_url(path.RESUME_URL, self.params, m='authorization', way=const.RESUME_WAY_ZHILIAN),
+                                  # profile_import_zhilian=None,
                                   # set later.
                                   profile_import_liepin=None,
                                   profile_import_linkedin=self.make_url(path.RESUME_URL, self.params, m='authorization', way=const.RESUME_WAY_LINKEDIN),
