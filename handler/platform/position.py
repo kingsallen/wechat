@@ -21,7 +21,7 @@ from util.common.kafka import *
 from util.common.mq import award_publisher, jd_click_publisher
 from util.tool.str_tool import gen_salary, add_item, split, gen_degree_v2, gen_experience_v2
 from util.tool.url_tool import url_append_query
-from util.tool.date_tool import subtract_design_time_ts
+from util.tool.date_tool import subtract_design_time_ts, str_2_date
 from util.wechat.template import position_view_five_notice_tpl
 from util.common.decorator import log_time, log_time_common_func
 from util.common.mq import neo4j_position_forward
@@ -1048,7 +1048,7 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
             position_ex["company_name"] = pos.company_name
             position_ex["salary_top"] = pos.salary_top
             position_ex["salary_bottom"] = pos.salary_bottom
-            position_ex["update_time"] = pos.update_time
+            position_ex["update_time"] = str_2_date(pos.update_time, const.TIME_FORMAT_DATEONLY)
             position_ex["company_abbr"] = pos.company_abbr
             position_ex["publish_date"] = pos.publish_date
             position_ex["team_name"] = pos.team_name
