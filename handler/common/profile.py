@@ -356,7 +356,8 @@ class ProfileCustomHandler(BaseHandler):
         if has_profile:
             resume_dict = yield self.application_ps._generate_resume_cv(profile, custom_tpl)
         else:
-            resume_dict = {}
+            # 如果没有仟寻profile，对于已经验证手机号的用户，自定义模板需要默认填上验证手机号，即user_user的username字段
+            resume_dict = ObjectDict({'mobile': str(self.current_user.sysuser.mobile) if self.current_user.sysuser.mobile else ''})
 
         json_config = yield self.application_ps.get_hr_app_cv_conf(
             position.app_cv_config_id, self.locale)
