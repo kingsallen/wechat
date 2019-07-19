@@ -148,7 +148,7 @@ class UsercenterPageService(PageService):
 
     @gen.coroutine
     def get_applied_applications(self, user_id, company_id, page_no, page_size):
-        """获得求职记录"""
+        """获得求职记录列表"""
 
         res = yield self.infra_user_ds.get_applied_applications(user_id, company_id, page_no, page_size)
         if res.code != const.NEWINFRA_API_SUCCESS:
