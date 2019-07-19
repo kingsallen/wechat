@@ -254,7 +254,8 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
         response = yield self.cellphone_ps.wx_change_mobile(
             country_code=self.params.country_code,
             mobile=self.params.mobile,
-            user_id=self.current_user.sysuser.id
+            user_id=self.current_user.sysuser.id,
+            unionid=self.current_user.sysuser.unionid
         )
 
         if response.code != const.NEWINFRA_API_SUCCESS:
@@ -264,7 +265,7 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
             self.send_json_success()
 
 
-        ret_user_id = response.data.userid
+        ret_user_id = response.data.user_id
 
         # 神策数据关联：用户注册后将匿名ID与user_id绑定
         self.sa.track_signup(ret_user_id, self.current_user.sysuser.id)

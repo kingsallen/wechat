@@ -77,10 +77,11 @@ class CellphonePageService(PageService):
 
 
     @gen.coroutine
-    def wx_change_mobile(self, country_code, mobile, user_id):
+    def wx_change_mobile(self, country_code, mobile, user_id, unionid):
         """调用账号修改手机接口"""
         ret = yield self.infra_user_ds.post_wx_change_mobile(
             country_code=country_code,
             mobile=mobile,
-            user_id=user_id)
+            user_id=user_id,
+            unionid=unionid)
         raise gen.Return(ret)
