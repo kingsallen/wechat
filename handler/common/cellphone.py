@@ -254,8 +254,7 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
         response = yield self.cellphone_ps.wx_change_mobile(
             country_code=self.params.country_code,
             mobile=self.params.mobile,
-            user_id=self.current_user.sysuser.id,
-            unionid=self.current_user.sysuser.unionid
+            user_id=self.current_user.sysuser.id
         )
 
         if response.code != const.NEWINFRA_API_SUCCESS:

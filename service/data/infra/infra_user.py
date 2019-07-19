@@ -405,14 +405,13 @@ class InfraUserDataService(DataService):
 
 
     @gen.coroutine
-    def post_wx_change_mobile(self, country_code, mobile, user_id, unionid):
+    def post_wx_change_mobile(self, country_code, mobile, user_id):
         """手机号和微信号绑定接口"""
 
         params = ObjectDict({
             'country_code': str(country_code),
             'mobile': str(mobile),
-            'user_id': str(user_id),
-            'unionid': str(unionid)
+            'user_id': str(user_id)
         })
 
         ret = yield http_post_v2(user.INFRA_USER_CHANGE_MOBILE, user_service, params)
