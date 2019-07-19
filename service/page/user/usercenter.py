@@ -189,7 +189,6 @@ class UsercenterPageService(PageService):
             for e in ret.operations:
                 timeline = ObjectDict({
                     "date": e["date"],
-                    "date_description": e["date_description"],
                     "description": e["description"],
                     "display": e["display"],
                     "id": e["id"],
