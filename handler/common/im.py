@@ -1,6 +1,7 @@
 # coding=utf-8
 
 import traceback
+from urllib.parse import unquote
 
 import redis
 import ujson
@@ -24,7 +25,6 @@ from util.tool.date_tool import curr_now_minute
 from util.tool.json_tool import encode_json_dumps, json_dumps
 from util.tool.pubsub_tool import Subscriber
 from util.tool.str_tool import to_str, match_session_id
-from urllib.parse import unquote
 
 
 class UnreadCountHandler(BaseHandler):
@@ -804,4 +804,14 @@ class MobotHandler(BaseHandler):
         # 确保页面中用到的post请求的api接口cookie中设置了_xsrf
         self.xsrf_token
 
+        # 添加页面埋点数据
+        self._add_sensor_track()
+
         self.render(template_name='mobot/index.html')
+
+    def _add_sensor_track(self):
+        # 神策数据埋点
+        # source 1:我是员工，2:粉丝智推，3:粉丝完善简历，4:员工智推，5:联系HR，6:申请投递后
+        properties = ObjectDict({'source': self.params.source or -1})
+        # aiMoBotPageview => 访问MoBot页面
+        self.track("aiMoBotPageview", properties)
