@@ -5,6 +5,7 @@ from urllib.parse import unquote
 
 import redis
 import ujson
+import time
 from tornado import gen, websocket, ioloop
 
 import conf.common as const
@@ -560,6 +561,26 @@ class ChatHandler(BaseHandler):
         else:
             self.send_json_error(message=message)
 
+    def _add_sensor_track(self, is_voice_reply, is_mobot_reply):
+        """
+        神策数据埋点
+
+        source 1:我是员工，2:粉丝智推，3:粉丝完善简历，4:员工智推，5:联系HR，6:申请投递后
+
+        :param is_voice_reply: True:语音回复，False：文本回复
+        :param is_mobot_reply: True:需要MoBot回复，False：需要HR回复
+        :return:
+        """
+        properties = ObjectDict({'source': self.params.source or -1,
+                                 'distinct_id': self.current_user.sysuser.id,
+                                 'company_id': self.current_user.company.id,
+                                 'sendTime': int(time.time() * 1000),
+                                 'is_voice_reply': is_voice_reply,
+                                 'is_mobot_reply': is_mobot_reply
+                                 })
+        # aiMoBotPostMessageEvent => MoBot页面发送消息事件
+        self.track("aiMoBotPostMessageEvent", properties)
+
     @handle_response
     @authenticated
     @gen.coroutine
@@ -644,6 +665,10 @@ class ChatHandler(BaseHandler):
                 yield self._handle_chatbot_message(user_message, create_new_context, from_textfield)  # 直接调用方式
         except Exception as e:
             self.logger.error(e)
+
+        # 添加聊天对话埋点记录
+        is_voice_reply = True if server_id else False
+        self._add_sensor_track(is_voice_reply, self.bot_enabled)
 
         self.send_json_success()
 
@@ -812,6 +837,10 @@ class MobotHandler(BaseHandler):
     def _add_sensor_track(self):
         # 神策数据埋点
         # source 1:我是员工，2:粉丝智推，3:粉丝完善简历，4:员工智推，5:联系HR，6:申请投递后
-        properties = ObjectDict({'source': self.params.source or -1})
+        properties = ObjectDict({'source': self.params.source or -1,
+                                 'distinct_id': self.current_user.sysuser.id,
+                                 'company_id': self.current_user.company.id,
+                                 'sendTime': int(time.time() * 1000)
+                                 })
         # aiMoBotPageview => 访问MoBot页面
         self.track("aiMoBotPageview", properties)
