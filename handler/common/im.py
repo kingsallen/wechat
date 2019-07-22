@@ -567,7 +567,7 @@ class ChatHandler(BaseHandler):
 
         source 1:我是员工，2:粉丝智推，3:粉丝完善简历，4:员工智推，5:联系HR，6:申请投递后
 
-        :param is_voice_reply: True:语音回复，False：文本回复
+        :param msg_type: html, voice
         :param is_mobot_reply: True:需要MoBot回复，False：需要HR回复
         :return:
         """
