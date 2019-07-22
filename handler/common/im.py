@@ -561,7 +561,7 @@ class ChatHandler(BaseHandler):
         else:
             self.send_json_error(message=message)
 
-    def _add_sensor_track(self, is_voice_reply, is_mobot_reply):
+    def _add_sensor_track(self, msg_type, is_mobot_reply, content):
         """
         神策数据埋点
 
@@ -575,8 +575,9 @@ class ChatHandler(BaseHandler):
                                  'distinct_id': self.current_user.sysuser.id,
                                  'company_id': self.current_user.company.id,
                                  'sendTime': int(time.time() * 1000),
-                                 'is_voice_reply': is_voice_reply,
-                                 'is_mobot_reply': is_mobot_reply
+                                 'is_mobot_reply': is_mobot_reply,
+                                 'msg_type': msg_type,
+                                 'content': content
                                  })
         # aiMoBotPostMessageEvent => MoBot页面发送消息事件
         self.track("aiMoBotPostMessageEvent", properties)
@@ -667,8 +668,7 @@ class ChatHandler(BaseHandler):
             self.logger.error(e)
 
         # 添加聊天对话埋点记录
-        is_voice_reply = True if server_id else False
-        self._add_sensor_track(is_voice_reply, self.bot_enabled)
+        self._add_sensor_track(msg_type, self.bot_enabled, content)
 
         self.send_json_success()
 
