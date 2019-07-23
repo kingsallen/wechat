@@ -707,6 +707,9 @@ class ChatHandler(BaseHandler):
         except Exception as e:
             self.logger.error(e)
 
+        # 添加聊天对话埋点记录
+        self._add_sensor_track(msg_type, self.bot_enabled, content)
+
         self.send_json_success(data={"bot_enabled": self.bot_enabled})
 
     @gen.coroutine
