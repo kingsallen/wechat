@@ -5,7 +5,6 @@ from urllib.parse import unquote
 
 import redis
 import ujson
-import time
 from tornado import gen, websocket, ioloop
 
 import conf.common as const
@@ -571,11 +570,9 @@ class ChatHandler(BaseHandler):
         :param is_mobot_reply: True:需要MoBot回复，False：需要HR回复
         :return:
         """
-        properties = ObjectDict({'source': self.params.source or -1,
-                                 'company_id': self.current_user.company.id,
-                                 'send_ts': int(time.time() * 1000),
-                                 'is_mobot_reply': is_mobot_reply,
-                                 'msg_type': msg_type,
+        properties = ObjectDict({'moBotReqSource': self.params.source or -1,
+                                 'isMoBotReply': is_mobot_reply,
+                                 'msgType': msg_type,
                                  'content': str(content) if content else ''
                                  })
         # aiMoBotPostMessageEvent => MoBot页面发送消息事件
