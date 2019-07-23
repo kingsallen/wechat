@@ -572,12 +572,11 @@ class ChatHandler(BaseHandler):
         :return:
         """
         properties = ObjectDict({'source': self.params.source or -1,
-                                 'distinct_id': self.current_user.sysuser.id,
                                  'company_id': self.current_user.company.id,
                                  'sendTime': int(time.time() * 1000),
                                  'is_mobot_reply': is_mobot_reply,
                                  'msg_type': msg_type,
-                                 'content': content
+                                 'content': str(content) if content else ''
                                  })
         # aiMoBotPostMessageEvent => MoBot页面发送消息事件
         self.track("aiMoBotPostMessageEvent", properties)
