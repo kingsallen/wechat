@@ -670,7 +670,8 @@ class ChatHandler(BaseHandler):
         # 添加聊天对话埋点记录
         self._add_sensor_track(msg_type, self.bot_enabled, content)
 
-        self.send_json_success()
+        # bot_enabled 提供前端控制 是否出loading状态
+        self.send_json_success(data={"bot_enabled": self.bot_enabled})
 
     @handle_response
     @authenticated
@@ -828,19 +829,4 @@ class MobotHandler(BaseHandler):
     def get(self):
         # 确保页面中用到的post请求的api接口cookie中设置了_xsrf
         self.xsrf_token
-
-        # 添加页面埋点数据
-        self._add_sensor_track()
-
         self.render(template_name='mobot/index.html')
-
-    def _add_sensor_track(self):
-        # 神策数据埋点
-        # source 1:我是员工，2:粉丝智推，3:粉丝完善简历，4:员工智推，5:联系HR，6:申请投递后
-        properties = ObjectDict({'source': self.params.source or -1,
-                                 'distinct_id': self.current_user.sysuser.id,
-                                 'company_id': self.current_user.company.id,
-                                 'sendTime': int(time.time() * 1000)
-                                 })
-        # aiMoBotPageview => 访问MoBot页面
-        self.track("aiMoBotPageview", properties)
