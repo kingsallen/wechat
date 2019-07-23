@@ -1,6 +1,7 @@
 # coding=utf-8
 
 import traceback
+from urllib.parse import unquote
 
 import redis
 import ujson
@@ -24,7 +25,6 @@ from util.tool.date_tool import curr_now_minute
 from util.tool.json_tool import encode_json_dumps, json_dumps
 from util.tool.pubsub_tool import Subscriber
 from util.tool.str_tool import to_str, match_session_id
-from urllib.parse import unquote
 
 
 class UnreadCountHandler(BaseHandler):
@@ -560,6 +560,24 @@ class ChatHandler(BaseHandler):
         else:
             self.send_json_error(message=message)
 
+    def _add_sensor_track(self, msg_type, is_mobot_reply, content):
+        """
+        神策数据埋点
+
+        source 1:我是员工，2:粉丝智推，3:粉丝完善简历，4:员工智推，5:联系HR，6:申请投递后
+
+        :param msg_type: html, voice
+        :param is_mobot_reply: True:需要MoBot回复，False：需要HR回复
+        :return:
+        """
+        properties = ObjectDict({'moBotReqSource': self.params.source or -1,
+                                 'isMoBotReply': is_mobot_reply,
+                                 'msgType': msg_type,
+                                 'content': str(content) if content else ''
+                                 })
+        # aiMoBotPostMessageEvent => MoBot页面发送消息事件
+        self.track("aiMoBotPostMessageEvent", properties)
+
     @handle_response
     @authenticated
     @gen.coroutine
@@ -645,7 +663,11 @@ class ChatHandler(BaseHandler):
         except Exception as e:
             self.logger.error(e)
 
-        self.send_json_success()
+        # 添加聊天对话埋点记录
+        self._add_sensor_track(msg_type, self.bot_enabled, content)
+
+        # bot_enabled 提供前端控制 是否出loading状态
+        self.send_json_success(data={"bot_enabled": self.bot_enabled})
 
     @handle_response
     @authenticated
@@ -681,7 +703,10 @@ class ChatHandler(BaseHandler):
         except Exception as e:
             self.logger.error(e)
 
-        self.send_json_success()
+        # 添加聊天对话埋点记录
+        self._add_sensor_track(msg_type, self.bot_enabled, content)
+
+        self.send_json_success(data={"bot_enabled": self.bot_enabled})
 
     @gen.coroutine
     def _handle_chatbot_message(self, user_message, create_new_context, from_textfield):
@@ -803,5 +828,4 @@ class MobotHandler(BaseHandler):
     def get(self):
         # 确保页面中用到的post请求的api接口cookie中设置了_xsrf
         self.xsrf_token
-
         self.render(template_name='mobot/index.html')
