@@ -10,9 +10,8 @@ from util.tool.http_tool import http_get, http_post, unboxing, http_delete, http
 from requests.models import Request
 from setting import settings
 from globals import env
-from conf.newinfra_service_conf.service_info import employee_service, application_service
+from conf.newinfra_service_conf.service_info import employee_service
 from conf.newinfra_service_conf.employee import employee
-from conf.newinfra_service_conf.application import application
 
 
 class InfraEmployeeDataService(DataService):
@@ -312,7 +311,7 @@ class InfraEmployeeDataService(DataService):
         :param params:
         :return:
         """
-        ret = yield http_get_v2(application.NEWINFRA_REFERRAL_PROGRESS_LIST, application_service, params)
+        ret = yield http_post(path.INFRA_REFERRAL_PROGRESS, params)
         return ret
 
     @gen.coroutine
