@@ -573,7 +573,7 @@ class ChatHandler(BaseHandler):
         """
         properties = ObjectDict({'source': self.params.source or -1,
                                  'company_id': self.current_user.company.id,
-                                 'sendTime': int(time.time() * 1000),
+                                 'send_ts': int(time.time() * 1000),
                                  'is_mobot_reply': is_mobot_reply,
                                  'msg_type': msg_type,
                                  'content': str(content) if content else ''
