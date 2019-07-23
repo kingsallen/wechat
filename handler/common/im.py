@@ -707,7 +707,7 @@ class ChatHandler(BaseHandler):
         except Exception as e:
             self.logger.error(e)
 
-        self.send_json_success()
+        self.send_json_success(data={"bot_enabled": self.bot_enabled})
 
     @gen.coroutine
     def _handle_chatbot_message(self, user_message, create_new_context, from_textfield):
