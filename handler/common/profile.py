@@ -567,8 +567,17 @@ class ProfileSectionHandler(BaseHandler):
         # 根据 route 跳转到不同的子方法
         self.guarantee('route', 'model')
         yield getattr(self, "post_" + self.params.route)()
+        # 神策埋点
+        self._add_sensor_track()
         self._log_customs.update(update_profile=const.YES,
                                  section=self.params.route)
+
+    def _add_sensor_track(self):
+        if self.params.promote == const.PROMOTE:
+            origin = const.SA_ORIGIN_PROMOTE
+        else:
+            origin = const.SA_ORIGIN_PLATFORM
+        self.track("wxUpsertProfile", properties={"origin": origin})
 
     def _get_profile_id(self):
         try:

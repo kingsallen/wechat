@@ -189,7 +189,9 @@ class ApplicationHandler(BaseHandler):
             self.send_json_error(message=message)
 
     def _add_sensor_track(self, depth, recommender_user_id):
-        if self.params.source == const.FANS_RECOMMEND:
+        if self.params.promote == const.PROMOTE:
+            origin = const.SA_ORIGIN_PROMOTE
+        elif self.params.source == const.FANS_RECOMMEND:
             origin = const.SA_ORIGIN_FANS_RECOMMEND
         elif self.params.invite_apply == str(const.YES):
             origin = const.SA_ORIGIN_APPLICATION_INVITE
