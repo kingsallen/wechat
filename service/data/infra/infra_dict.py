@@ -98,6 +98,8 @@ class InfraDictDataService(DataService):
                 else:
                     to_append.text = str(country['name'])
                 to_append.code_text = str(country['code'])
+                #updated by iris
+                to_append.icon_class = str(country['icon_class'])
                 res.append(to_append)
 
         self.cached_sms_country_codes = res

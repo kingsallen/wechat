@@ -285,6 +285,7 @@ platform_routes = [
     (r"/api/func/relation_tags/?",                   handler.platform.referral.ReferralCommentTagsHandler,      {"event": "referral_comment_tags"}),
 
     (r'/api/privacy/agree/?',                        handler.platform.privacy.PrivacyHandler,                   {"event": "api_privacy_agreement"}),
+    (r'/api/privacy/is_agree/?',                     handler.platform.privacy.IsAgreePrivacyHandler,            {"event": "api_is_agree_privacy"}),
     # 兼容老微信 url，进行302跳转
     (r"/.*",                                         handler.platform.compatible.CompatibleHandler,             {"event": "compatible"})
 

@@ -365,6 +365,8 @@ class ProfileCustomHandler(BaseHandler):
         self.render_page(
             template_name='profile/custom.html',
             data=dict(resume=resume_dict,
+                      # added by iris
+                      has_profile=has_profile,
                       config=json.loads(cv_conf)))
 
 
