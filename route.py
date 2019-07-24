@@ -107,6 +107,7 @@ common_routes = [
     (r"/profile/custom/?",                           handler.common.profile.ProfileCustomHandler,               {"event": "profile_customcv"}),
     (r"/image/?",                                    handler.common.image.ImageFetchHandler,                    {"event": "image_fetch"}),
     (r"/chat/room[\/]*([0-9]+)*",                    handler.common.im.ChatRoomHandler,                         {"event": "im_room"}),
+    (r"/mobot",                                      handler.common.im.MobotHandler,                            {"event": "im_mobot"}),
     (r"/im/laiye",                                   handler.common.laiye_im.LaiyeImHandler,                    {"event": "im laiye"}),
     (r"/resume/import/limit",                        handler.common.resume.ResumeImportLimit,                   {"event": "resume_import_limit"}),
     (r"/redirect",                                   handler.common.redirect.RedirectHandler,                   {"event": "redirect"}),
@@ -260,6 +261,7 @@ platform_routes = [
     (r"/api/employee/stat/job-view/?",               handler.platform.employee.ReferralRadarCardPositionHandler, {"event": "employee_referral_radar_position_data"}),
     (r"/api/employee/stat/seek-recom/?",             handler.platform.employee.ReferralRadarCardRecomHandler,   {"event": "employee_referral_radar_seek_recom_data"}),
     (r"/api/employee/supply/info",                   handler.platform.employee.ApiEmployeeSupplyInfoHandler,    {"event": "api_employee_supply_info"}),
+    (r"/api/employee/recom/subscribe",               handler.platform.employee.ApiEmployeeRecomSubscribeHandler,{"event": "api_employee_recom_subscribe"}),
     (r"/api/resend/bind/email",                      handler.platform.employee.ResendBindEmailHandler,          {"event": "resend_bind_email"}),
 
     (r"/api/func/wechat/?",                          handler.platform.employee.WechatSubInfoHandler,            {"event": "wechat_sub_info"}),
@@ -283,6 +285,7 @@ platform_routes = [
     (r"/api/func/relation_tags/?",                   handler.platform.referral.ReferralCommentTagsHandler,      {"event": "referral_comment_tags"}),
 
     (r'/api/privacy/agree/?',                        handler.platform.privacy.PrivacyHandler,                   {"event": "api_privacy_agreement"}),
+    (r'/api/privacy/is_agree/?',                     handler.platform.privacy.IsAgreePrivacyHandler,            {"event": "api_is_agree_privacy"}),
     # 兼容老微信 url，进行302跳转
     (r"/.*",                                         handler.platform.compatible.CompatibleHandler,             {"event": "compatible"})
 

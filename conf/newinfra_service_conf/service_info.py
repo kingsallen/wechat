@@ -26,9 +26,3 @@ employee_service = ObjectDict(
     interfaceid="A11042001",
     service_name="employee"
 )
-
-application_service = ObjectDict(
-    appid="A11017",
-    interfaceid="A11017001",
-    service_name="application"
-)

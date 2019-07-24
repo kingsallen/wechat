@@ -317,7 +317,7 @@ class PositionPageService(PageService):
         return res
 
     @gen.coroutine
-    def get_team_data(self, team, more_link, teamname_custom):
+    def get_team_data(self, team, more_link, teamname_custom, locale=None):
         res = None
         team_members = yield self.hr_team_member_ds.get_team_member_list(
             conds={'team_id': team.id, 'disable': 0}
@@ -326,7 +326,7 @@ class PositionPageService(PageService):
             id_list=[m.res_id for m in team_members] + [team.res_id]
         )
         if resources:
-            res = make_team(team, resources, more_link, team_members, teamname_custom)
+            res = make_team(team, resources, more_link, team_members, teamname_custom, locale=locale)
 
         raise gen.Return(res)
 

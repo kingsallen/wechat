@@ -387,6 +387,8 @@ MSG_TYPE = {
     11: "industrySelect",
     12: "satisfaction",
     13: "uploadResume",
+    14: "shareReport",
+    15: "positionSubscribe",
 }
 
 # 积分配置类型
@@ -400,7 +402,7 @@ REWARD_ON_BOARD = "入职"
 REWARD_UPLOAD_PROFILE = "员工上传人才简历"
 
 # 操作的聊天类型
-INTERACTIVE_MSG = ["employeeBind", "jobSelect", "teamSelect", "citySelect", "jobCard", "positionSelect", "industrySelect", "uploadResume"]
+INTERACTIVE_MSG = ["employeeBind", "jobSelect", "teamSelect", "citySelect", "jobCard", "positionSelect", "industrySelect", "uploadResume", "shareReport", "positionSubscribe"]
 
 # 默认图标
 SYSUSER_HEADIMG = "weixin/images/hr-avatar-default.png"
@@ -808,6 +810,9 @@ REFERRAL_EXPIRED_MESSAGE = 'expired_message'
 CONNECTION_ING = 2
 CONNECTION_COMPLETED = 1
 
+# JD补充简历
+PROMOTE = '1'
+
 # chatbot推荐职位
 FANS_RECOMMEND = '2'
 EMPLOYEE_RECOMMEND = '4'
@@ -822,6 +827,7 @@ SA_ORIGIN_PLATFORM = 3  # 公众号
 SA_ORIGIN_RANKING_TEMPLATE = 4  # 推送排名榜单
 SA_ORIGIN_PORTAL = 5  # 员工portal
 SA_ORIGIN_APPLICATION_INVITE = 6  # 投递邀请
+SA_ORIGIN_PROMOTE = 7  # JD页补充简历
 
 # 请求jmis的方法
 JMIS_SIGNATURE = "getSignature"

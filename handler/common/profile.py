@@ -356,7 +356,8 @@ class ProfileCustomHandler(BaseHandler):
         if has_profile:
             resume_dict = yield self.application_ps._generate_resume_cv(profile, custom_tpl)
         else:
-            resume_dict = {}
+            # 如果没有仟寻profile，对于已经验证手机号的用户，自定义模板需要默认填上验证手机号，即user_user的username字段
+            resume_dict = ObjectDict({'mobile': str(self.current_user.sysuser.mobile) if self.current_user.sysuser.mobile else ''})
 
         json_config = yield self.application_ps.get_hr_app_cv_conf(
             position.app_cv_config_id, self.locale)
@@ -365,6 +366,8 @@ class ProfileCustomHandler(BaseHandler):
         self.render_page(
             template_name='profile/custom.html',
             data=dict(resume=resume_dict,
+                      # added by iris
+                      has_profile=has_profile,
                       config=json.loads(cv_conf)))
 
 
@@ -567,8 +570,17 @@ class ProfileSectionHandler(BaseHandler):
         # 根据 route 跳转到不同的子方法
         self.guarantee('route', 'model')
         yield getattr(self, "post_" + self.params.route)()
+        # 神策埋点
+        self._add_sensor_track()
         self._log_customs.update(update_profile=const.YES,
                                  section=self.params.route)
+
+    def _add_sensor_track(self):
+        if self.params.promote == const.PROMOTE:
+            origin = const.SA_ORIGIN_PROMOTE
+        else:
+            origin = const.SA_ORIGIN_PLATFORM
+        self.track("wxUpsertProfile", properties={"origin": origin})
 
     def _get_profile_id(self):
         try:

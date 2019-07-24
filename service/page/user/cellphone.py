@@ -74,3 +74,13 @@ class CellphonePageService(PageService):
 
         ret, msg = yield self.thrift_mq_ds.send_sms(sms_type, mobile, params, isqx, ip)
         return ret, msg
+
+
+    @gen.coroutine
+    def wx_change_mobile(self, country_code, mobile, user_id):
+        """调用账号修改手机接口"""
+        ret = yield self.infra_user_ds.post_wx_change_mobile(
+            country_code=country_code,
+            mobile=mobile,
+            user_id=user_id)
+        raise gen.Return(ret)

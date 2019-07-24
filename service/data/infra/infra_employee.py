@@ -452,6 +452,12 @@ class InfraEmployeeDataService(DataService):
         ret = yield http_put(path.INFRA_EMPLOYEE_CUSTOM_INFO, params)
         return ret
 
+    @gen.coroutine
+    def infra_submit_employee_subscribe_preference(self, params):
+        """提交员工订阅偏好的信息"""
+        ret = yield http_post_v2(employee.NEWINFRA_EMPLOYEE_SUBSCRIBE_PREFERENCE, employee_service, params)
+        return ret
+
 
 
 

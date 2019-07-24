@@ -130,6 +130,18 @@ class MetaBaseHandler(AtomHandler):
         return host
 
     @property
+    def domain(self):
+        """判断当前 host，不能简单的从 request.host获得"""
+        if self.is_platform:
+            domain = self.settings.platform_domain
+        elif self.is_qx:
+            domain = self.settings.qx_domain
+        else:
+            domain = self.settings.helper_domain
+
+        return domain
+
+    @property
     def app_id(self):
         """appid for infra"""
         return const.APPID[self.env]

@@ -91,7 +91,8 @@ class DictionaryPageService(PageService):
 
         ret = yield self.infra_dict_ds.get_sms_country_codes(display_locale)
 
-        china = {'text': 'China', 'code_text': '86'} if display_locale == 'en_US' else {'text': '中国', 'code_text': '86'}
+        #china = {'text': 'China', 'code_text': '86'} if display_locale == 'en_US' else {'text': '中国', 'code_text': '86'}
+        china = {'text': 'China', "icon_class": "cn", 'code_text': '86'} if display_locale == 'en_US' else {"text": "中国", "icon_class": "cn", "code_text": "86"}
 
         try:
             ret.remove(china)
@@ -101,9 +102,9 @@ class DictionaryPageService(PageService):
         finally:
             ret.insert(0, china)
             for item in [
-                dict(code_text='852', text='Hong Kong' if display_locale == 'en_US' else '中国香港'),
-                dict(code_text='853', text='Macao' if display_locale == 'en_US' else '中国澳门'),
-                dict(code_text='886', text='Taiwan' if display_locale == 'en_US' else '中国台湾'),
+                dict(code_text='852', icon_class="hk", text='Hong Kong' if display_locale == 'en_US' else '中国香港'),
+                dict(code_text='853', icon_class="mo", text='Macao' if display_locale == 'en_US' else '中国澳门'),
+                dict(code_text='886', icon_class="tw", text='Taiwan' if display_locale == 'en_US' else '中国台湾'),
             ]:
                 if item not in ret:
                     ret.append(item)
