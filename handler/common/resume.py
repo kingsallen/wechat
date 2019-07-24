@@ -178,7 +178,12 @@ class ResumeImportHandler(BaseHandler):
                 captcha=captcha
             )
             if self.params.pid:
-                next_url = self.make_url(path.PROFILE_PREVIEW, self.params)
+                #added by iris
+                position = yield self.position_ps.get_position(self.params.pid, display_locale=self.get_current_locale())
+                if position.app_cv_config_id:
+                    next_url = self.make_url(path.PROFILE_CUSTOM_CV, self.params)
+                else:
+                    next_url = self.make_url(path.PROFILE_PREVIEW, self.params)
             else:
                 next_url = self.make_url(path.PROFILE_VIEW, self.params)
 

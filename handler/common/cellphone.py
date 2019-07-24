@@ -167,7 +167,7 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
     @gen.coroutine
     def post_register(self):
         self.track("cVerifyMobile")
-        res = yield self._opt_post_cellphone_code(const.MOBILE_CODE_OPT_TYPE.code_register)
+        res = yield self._opt_post_cellphone_code(const.MOBILE_CODE_OPT_TYPE.code_register, is_send_response=False)
         if res:
             self.track("cRegisterSuccess")
             yield self._opt_post_user_account()
