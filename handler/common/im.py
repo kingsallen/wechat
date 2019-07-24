@@ -1,28 +1,30 @@
 # coding=utf-8
 
-import ujson
 import traceback
+from urllib.parse import unquote
+
+import redis
+import ujson
 from tornado import gen, websocket, ioloop
+
 import conf.common as const
 import conf.message as msg
-from conf.protocol import WebSocketCloseCode
-from handler.base import BaseHandler
-from cache.user.chat_session import ChatCache
-from util.common.decorator import handle_response, authenticated
-from util.tool.pubsub_tool import Subscriber
-from util.common import ObjectDict
-from util.tool.str_tool import to_str, match_session_id
-from util.tool.date_tool import curr_now_minute
-from service.page.user.chat import ChatPageService
-from thrift_gen.gen.chat.struct.ttypes import ChatVO
-import redis
-from setting import settings
-from globals import logger
-from oauth.wechat import JsApi
-from util.tool.json_tool import encode_json_dumps, json_dumps
 import conf.message as msg_const
+from cache.user.chat_session import ChatCache
+from conf.protocol import WebSocketCloseCode
+from globals import logger
+from handler.base import BaseHandler
+from oauth.wechat import JsApi
+from service.page.user.chat import ChatPageService
+from setting import settings
+from thrift_gen.gen.chat.struct.ttypes import ChatVO
+from util.common import ObjectDict
+from util.common.decorator import handle_response, authenticated
 from util.common.decorator import relate_user_and_former_employee
-
+from util.tool.date_tool import curr_now_minute
+from util.tool.json_tool import encode_json_dumps, json_dumps
+from util.tool.pubsub_tool import Subscriber
+from util.tool.str_tool import to_str, match_session_id
 
 
 class UnreadCountHandler(BaseHandler):
@@ -218,65 +220,75 @@ class ChatRoomHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def get(self, room_id):
-        hr_id = self.params.hr_id or 0
-        if hr_id:
-            company_id = yield self.company_ps.get_real_company_id(hr_id, self.current_user.company.id)
-            wechat = yield self.wechat_ps.get_wechat(conds={
-                "company_id": company_id,
-                "authorized": const.YES
-            })
-            jsapi_ticket = wechat.jsapi_ticket
-            appid = wechat.appid
-        else:
-            jsapi_ticket = self.current_user.wechat.jsapi_ticket
-            appid = self.current_user.wechat.appid
 
-        jsapi = JsApi(
-            jsapi_ticket=jsapi_ticket, url=self.fullurl(encode=False))
+        # MoBot页面跳转 platform老的地址：/m/chat/room -> /m/mobot
+        if room_id:
+            self.params['room_id'] = room_id
 
-        res_privacy, data_privacy = yield self.privacy_ps.if_privacy_agreement_window(
-            self.current_user.sysuser.id)
+        to = self.make_url('/mobot', self.params)
+        self.redirect(to)
 
-        config = ObjectDict({
-            "debug": False,
-            "appid": appid,
-            "timestamp": jsapi.timestamp,
-            "nonceStr": jsapi.nonceStr,
-            "signature": jsapi.signature,
-            "jsApiList": ["onMenuShareTimeline",
-                          "onMenuShareAppMessage",
-                          "updateTimelineShareData",
-                          "updateAppMessageShareData",
-                          "onMenuShareQQ",
-                          "updateTimelineShareData",
-                          "updateAppMessageShareData",
-                          "onMenuShareWeibo",
-                          "hideOptionMenu",
-                          "showOptionMenu",
-                          "startRecord",
-                          "stopRecord",
-                          "onVoiceRecordEnd",
-                          "playVoice",
-                          "pauseVoice",
-                          "stopVoice",
-                          "onVoicePlayEnd",
-                          "uploadVoice",
-                          "translateVoice",
-                          "downloadVoice",
-                          "hideMenuItems",
-                          "showMenuItems",
-                          "hideAllNonBaseMenuItem",
-                          "showAllNonBaseMenuItem"]
-        })
-        self.logger.debug("jsapi_config:{}".format(config))
-        self._render(
-            template_name="chat/room.html",
-            data={
-                "room_id": room_id,
-                "show_privacy_agreement": bool(data_privacy)
-            },
-            config=config
-        )
+        return
+
+        # hr_id = self.params.hr_id or 0
+        # if hr_id:
+        #     company_id = yield self.company_ps.get_real_company_id(hr_id, self.current_user.company.id)
+        #     wechat = yield self.wechat_ps.get_wechat(conds={
+        #         "company_id": company_id,
+        #         "authorized": const.YES
+        #     })
+        #     jsapi_ticket = wechat.jsapi_ticket
+        #     appid = wechat.appid
+        # else:
+        #     jsapi_ticket = self.current_user.wechat.jsapi_ticket
+        #     appid = self.current_user.wechat.appid
+        #
+        # jsapi = JsApi(
+        #     jsapi_ticket=jsapi_ticket, url=self.fullurl(encode=False))
+        #
+        # res_privacy, data_privacy = yield self.privacy_ps.if_privacy_agreement_window(
+        #     self.current_user.sysuser.id)
+        #
+        # config = ObjectDict({
+        #     "debug": False,
+        #     "appid": appid,
+        #     "timestamp": jsapi.timestamp,
+        #     "nonceStr": jsapi.nonceStr,
+        #     "signature": jsapi.signature,
+        #     "jsApiList": ["onMenuShareTimeline",
+        #                   "onMenuShareAppMessage",
+        #                   "updateTimelineShareData",
+        #                   "updateAppMessageShareData",
+        #                   "onMenuShareQQ",
+        #                   "updateTimelineShareData",
+        #                   "updateAppMessageShareData",
+        #                   "onMenuShareWeibo",
+        #                   "hideOptionMenu",
+        #                   "showOptionMenu",
+        #                   "startRecord",
+        #                   "stopRecord",
+        #                   "onVoiceRecordEnd",
+        #                   "playVoice",
+        #                   "pauseVoice",
+        #                   "stopVoice",
+        #                   "onVoicePlayEnd",
+        #                   "uploadVoice",
+        #                   "translateVoice",
+        #                   "downloadVoice",
+        #                   "hideMenuItems",
+        #                   "showMenuItems",
+        #                   "hideAllNonBaseMenuItem",
+        #                   "showAllNonBaseMenuItem"]
+        # })
+        # self.logger.debug("jsapi_config:{}".format(config))
+        # self._render(
+        #     template_name="chat/room.html",
+        #     data={
+        #         "room_id": room_id,
+        #         "show_privacy_agreement": bool(data_privacy)
+        #     },
+        #     config=config
+        # )
 
     @gen.coroutine
     def _render(self, template_name,
@@ -348,6 +360,78 @@ class ChatHandler(BaseHandler):
     @handle_response
     @authenticated
     @gen.coroutine
+    def get_environ(self):
+        """
+        获取当前环境信息，jssdk config & current_user & locale_code
+
+        @:param share_url 当前网页地址的uri
+        :return:
+        """
+
+        res_privacy, data_privacy = yield self.privacy_ps.if_privacy_agreement_window(
+            self.current_user.sysuser.id)
+
+        # data参数前端会被浏览器encode一次，js又会encodeURIComponent一次
+        jsapi = JsApi(jsapi_ticket=self.current_user.wechat.jsapi_ticket,
+                      url=unquote(self.params.share_url))
+
+        config = ObjectDict({
+                  "debug": False,
+                  "appid": self.current_user.wechat.appid,
+                  "timestamp": jsapi.timestamp,
+                  "nonceStr": jsapi.nonceStr,
+                  "signature": jsapi.signature,
+                  "jsApiList": [
+                                "updateAppMessageShareData",
+                                "updateTimelineShareData",
+                                "onMenuShareWeibo",
+                                "onMenuShareQZone",
+                                "startRecord",
+                                "stopRecord",
+                                "onVoiceRecordEnd",
+                                "playVoice",
+                                "pauseVoice",
+                                "stopVoice",
+                                "onVoicePlayEnd",
+                                "uploadVoice",
+                                "downloadVoice",
+                                "chooseImage",
+                                "previewImage",
+                                "uploadImage",
+                                "downloadImage",
+                                "translateVoice",
+                                "getNetworkType",
+                                "openLocation",
+                                "getLocation",
+                                "hideOptionMenu",
+                                "showOptionMenu",
+                                "hideMenuItems",
+                                "showMenuItems",
+                                "hideAllNonBaseMenuItem",
+                                "showAllNonBaseMenuItem",
+                                "closeWindow",
+                                "scanQRCode",
+                                "chooseWXPay",
+                                "openProductSpecificView",
+                                "addCard",
+                                "chooseCard",
+                                "openCard"
+                                ]
+        })
+        self.logger.debug("get_environ get jssdk config:{}".format(config))
+
+        self.current_user.wechat.jsapi = config
+
+        self.send_json_success(data=ObjectDict(
+            locale_code=self.locale.code,
+            user=self.current_user,
+            env=self.env,
+            show_privacy_agreement=bool(data_privacy)
+        ))
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
     def get_chatrooms(self):
         """获得 C 端用户的聊天室列表"""
 
@@ -413,13 +497,20 @@ class ChatHandler(BaseHandler):
         user_hr_account = yield self.chat_ps.get_hr_info(self.hr_id)
         company_id = user_hr_account.company_id
 
+        recom = self.position_ps._make_recom(self.current_user.sysuser.id)
+
+        is_employee = bool(self.current_user.employee if self.current_user else None)
+
         res = yield self.chat_ps.get_chatroom(self.current_user.sysuser.id,
                                               self.params.hr_id,
                                               company_id,
                                               pid, room_id,
                                               self.current_user.qxuser,
                                               is_gamma,
-                                              self.bot_enabled)
+                                              self.bot_enabled,
+                                              recom,
+                                              is_employee)
+
         # 需要判断用户是否进入自己的聊天室
         if res.user.user_id != self.current_user.sysuser.id:
             self.send_json_error(message=msg.NOT_AUTHORIZED)
@@ -469,10 +560,49 @@ class ChatHandler(BaseHandler):
         else:
             self.send_json_error(message=message)
 
+    def _add_sensor_track(self, msg_type, is_mobot_reply, content):
+        """
+        神策数据埋点
+
+        source 1:我是员工，2:粉丝智推，3:粉丝完善简历，4:员工智推，5:联系HR，6:申请投递后
+
+        :param msg_type: html, voice
+        :param is_mobot_reply: True:需要MoBot回复，False：需要HR回复
+        :return:
+        """
+        properties = ObjectDict({'moBotReqSource': self.params.source or -1,
+                                 'isMoBotReply': is_mobot_reply,
+                                 'msgType': msg_type,
+                                 'content': str(content) if content else ''
+                                 })
+        # aiMoBotPostMessageEvent => MoBot页面发送消息事件
+        self.track("aiMoBotPostMessageEvent", properties)
+
     @handle_response
     @authenticated
     @gen.coroutine
     def post_message(self):
+        """
+        用户chat发送消息响应处理
+
+        @:param flag int(1) 0:社招 1:校招 2:meet mobot, 3:智能推荐, 4:{{data}}, 5: {{decodeURIComponent(data)}}
+                scene emp_chat 我是员工
+        @:param msgType str(50) 消息类型  ping, pong, html, text, image, voice, job, voice-preview, cards, job-sender,
+                                         button_radio, teamSelect, textPlaceholder, satisfaction, textList, citySelect,
+                                         industrySelect, positionSelect, jobCard, jobSelect, employeeBind, redirect,
+                                         uploadResume
+        @:param serverId str(256) 微信语音内容，微信服务器生成的serverId
+        @:param duration int(1) 微信语音时长
+        @:param create_new_context boolean 是否创建了新的会话
+        @:param from_textfield boolean 用户输入内容是否触发脚本非法分支，如触发，终止当前脚本新起脚本（unexpected_branch_allowed）
+        @:param compoundContent str(text) 复杂结构体的聊天内容
+        @:param content str(text) 用户发送的内容
+        @:param pid int(11) 职位ID
+        @:param hrId int(11) HRID
+        @:param roomId int(11) 聊天室ID
+
+        :return:
+        """
 
         self.room_id = self.params.roomId
         self.user_id = match_session_id(to_str(self.get_secure_cookie(const.COOKIE_SESSIONID)))
@@ -533,7 +663,11 @@ class ChatHandler(BaseHandler):
         except Exception as e:
             self.logger.error(e)
 
-        self.send_json_success()
+        # 添加聊天对话埋点记录
+        self._add_sensor_track(msg_type, self.bot_enabled, content)
+
+        # bot_enabled 提供前端控制 是否出loading状态
+        self.send_json_success(data={"bot_enabled": self.bot_enabled})
 
     @handle_response
     @authenticated
@@ -569,7 +703,10 @@ class ChatHandler(BaseHandler):
         except Exception as e:
             self.logger.error(e)
 
-        self.send_json_success()
+        # 添加聊天对话埋点记录
+        self._add_sensor_track(msg_type, self.bot_enabled, content)
+
+        self.send_json_success(data={"bot_enabled": self.bot_enabled})
 
     @gen.coroutine
     def _handle_chatbot_message(self, user_message, create_new_context, from_textfield):
@@ -626,8 +763,15 @@ class ChatHandler(BaseHandler):
                     self.redis_client.publish(self.chatroom_channel, message_body)
                     return
 
+            # 员工认证自定义配置字段太大了，不用存储到mysql中，直接通过socket发送到客户端即可
+            # 特此新起变量处理， 变量compoundContent 只用作save
+            if msg_type == "employeeBind":
+                compoundContent = ''
+            else:
+                compoundContent = ujson.dumps(compound_content)
+
             chat_params = ChatVO(
-                compoundContent=ujson.dumps(compound_content),
+                compoundContent=compoundContent,
                 content=bot_message.content,
                 speaker=const.CHAT_SPEAKER_HR,
                 origin=const.ORIGIN_CHATBOT,
@@ -674,3 +818,14 @@ class ChatHandler(BaseHandler):
             return
 
         self.bot_enabled = user_hr_account.leave_to_mobot
+
+
+class MobotHandler(BaseHandler):
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        # 确保页面中用到的post请求的api接口cookie中设置了_xsrf
+        self.xsrf_token
+        self.render(template_name='mobot/index.html')

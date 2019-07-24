@@ -500,11 +500,11 @@ def make_position_detail_cms(media_list, res_dict, module_name, module_link):
     )
 
 
-def make_team(team, resources, more_link, team_members, teamname_custom):
+def make_team(team, resources, more_link, team_members, teamname_custom, locale=None):
     team_res = make_up_for_missing_res(resources.get(team.res_id))
     return template1(
         sub_type='middle',
-        title='所属' + teamname_custom["teamname_custom"],
+        title='The Team' if locale and locale.code == 'en_US' else '所属' + teamname_custom["teamname_custom"],
         data=[{
             'sub_title': team.name,
             'longtext': team.description,

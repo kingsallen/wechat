@@ -1,10 +1,10 @@
 # coding=utf-8
 
-import os
-import time
 import json
+import os
+import re
+import time
 import traceback
-import ast
 from hashlib import sha1
 from urllib.parse import unquote
 
@@ -20,13 +20,17 @@ from setting import settings
 from util.common import ObjectDict
 from util.common.cipher import decode_id
 from util.common.decorator import check_signature
+from util.tool.date_tool import curr_now
 from util.tool.str_tool import to_str, from_hex, match_session_id, \
     languge_code_from_ua
 from util.tool.url_tool import url_subtract_query, make_url
-from util.tool.date_tool import curr_now
 
 
 class NoSignatureError(Exception):
+    pass
+
+
+class MultiDomainException(Exception):
     pass
 
 
@@ -63,11 +67,161 @@ class BaseHandler(MetaBaseHandler):
         else:
             return None
 
+    @gen.coroutine
+    def support_multi_domain(self):
+        """
+        WARNING: the code looks complicated, but it should be easy to understand
+        return: Boolean 是否需要跳转， To 跳到那里去
+        throws MultiDomainException 不应该出现的异常情况 -> 404
+        settings需要添加以下：
+        # **************************************************************
+        settings['multi_domain'] = {}
+        settings['multi_domain']['pattern'] = r"(.*).wx.dqprism.com"
+        settings['multi_domain']['format'] = "{}.wx.dqprism.com"
+        settings['multi_domain']['m_format'] = settings['multi_domain']['format'] + "/m"
+        settings['multi_domain']['qx_appid'] = "wx1f64c12fc8f0af37"
+        settings['multi_domain']['qx_domain'] = settings['multi_domain']['format'].format(settings['multi_domain']['qx_appid']) + "/recruit"
+        settings['multi_domain']['help_appid'] = "wx4eb438db0b7a28cf"
+        settings['multi_domain']['help_domain'] = settings['multi_domain']['format'].format(settings['multi_domain']['help_appid']) + "/h"
+        settings['multi_domain']['platform'] = settings["m_host"]
+        settings['m_domain'] = '.wx.dqprism.com'
+        settings['platform_domain'] = settings['m_domain'] + '/m'
+        settings['qx_domain'] = settings['m_domain'] + '/recruit'
+        settings['helper_domain'] = settings['m_domain'] + '/h'
+        settings['pass_multi_submain_host'] = ['tui-t.dqprism.com']
+        # **************************************************************
+
+        分三个环境：
+        1.env=platform 企业
+        如果满足appid的形式
+        case #1: wx2a67d33a520ded23.wx.moseeker.com/m/path?wechat_signature=&other_param
+        action: 校验signature和appid是否匹配
+        如果匹配则pass
+        如果不匹配则报错404
+
+        case #2: appid.wx.moseeker.com/m/path?other_param
+        action: 根据appid拉取signature, 放到params["wechat_signature"]，跳转(兼容前端需要取signature的情况)
+
+        不满足appid的形式
+        case #3: platform.moseeker.com?wechat_signature=xx&other_param
+        action: 根据signature拉取appid; 跳转
+
+        其他情况，报错
+
+        2.env=qx 聚合号2代(待下线的项目)
+        如果appid校验通过，则pass
+        如果appid校验不通过，则报错
+        如果是platform形式域名，则跳转(wechat_id_1_appid).wx.moseeker/dqprism.com
+
+        3.env=help 招聘助手(待下线的项目)
+        做法同env=qx
+        如果appid校验通过，则pass
+        如果appid校验不通过，则报错404
+        如果是platform形式域名，则跳转(wechat_id_41_appid).wx.moseeker/dqprism..com
+
+        (注:4.聚合号1代，nginx不会打到这里，不用此项目处理)
+        """
+        appid = ''
+        multi_domain_settings = self.settings["multi_domain"]
+        host = self.request.host
+        multi_subdomain_match = re.match(multi_domain_settings["pattern"], host)
+        if multi_subdomain_match:
+            appid = multi_subdomain_match.group(1)
+        signature = self.params.get("wechat_signature")
+        is_platform_domain = multi_domain_settings["platform"].lower() == host.lower()
+
+        if self.is_platform:
+            # 仟寻授权完成后需要先重定向到对应的企业appid域名
+            if appid == multi_domain_settings["qx_appid"]:
+                wechat = yield self.wechat_ps.get_wechat(conds={"signature": signature})
+                to = "https://" + multi_domain_settings["m_format"].format(wechat.appid) + self.request.uri
+                return True, to
+            if multi_subdomain_match and signature:  # case#1
+                wechat = yield self.wechat_ps.get_wechat(conds={"signature": signature})
+                if wechat.appid == appid:
+                    return False, None
+                else:
+                    raise MultiDomainException(
+                        json.dumps({"full_url": self.request.full_url(),
+                                    "description": "env=platform, multi domain match, but signature and appid not match"}))
+            elif multi_subdomain_match and not signature:  # case#2
+                wechat = yield self.wechat_ps.get_wechat(conds={"appid": appid})
+                self.params["wechat_signature"] = wechat.signature
+                to = make_url(path=self.request.path, host=multi_domain_settings["m_format"].format(wechat.appid), protocol="https", params=self.params)
+                return True, to
+            elif is_platform_domain and signature:  # case#3
+                wechat = yield self.wechat_ps.get_wechat(conds={"signature": signature})
+                to = "https://" + multi_domain_settings["m_format"].format(wechat.appid) + self.request.uri
+                return True, to
+            elif host in settings['pass_multi_submain_host']:
+                return False, None
+            else:
+                raise MultiDomainException(
+                        json.dumps({"full_url": self.request.full_url(),
+                                    "description": "env=platform, neither multidomain match nor valid platform url"}))
+
+        elif self.is_qx:
+            if multi_subdomain_match:
+                if appid == multi_domain_settings["qx_appid"]:
+                    return False, None
+                else:
+                    raise MultiDomainException(
+                        json.dumps({"full_url": self.request.full_url(),
+                                    "description": "env=qx, multi domain match, but appid not match settings"}))
+            elif is_platform_domain:
+                to = "https://" + multi_domain_settings["qx_domain"] + self.request.uri
+                return True, to
+            else:
+                raise MultiDomainException(
+                        json.dumps({"full_url": self.request.full_url(),
+                                    "description": "env=qx, neither multi domain nor platform"}))
+
+        elif self.is_help:
+            if appid == multi_domain_settings["qx_appid"]:
+                to = "https://" + multi_domain_settings["format"].format(settings['multi_domain']['help_appid']) + '/h' + self.request.uri
+                return True, to
+            if multi_subdomain_match:
+                if appid == multi_domain_settings["help_appid"]:
+                    return False, None
+                else:
+                    raise MultiDomainException(
+                        json.dumps({"full_url": self.request.full_url(),
+                                    "description": "env=help, is multi domain url, but appid not match help's appid"}))
+            elif is_platform_domain:
+                to = "https://" + multi_domain_settings["help_domain"] + self.request.uri
+                return True, to
+            else:
+                raise MultiDomainException(
+                        json.dumps({"full_url": self.request.full_url(),
+                                    "description": "env=help,  neither multi domain nor platform"}))
+        else:
+            # 未知的特殊情况 - 理论上不应该发生
+            raise MultiDomainException(
+                    json.dumps({"full_url": self.request.full_url(),
+                                "description": "no env matched, how could it be?"}))
+
     # PUBLIC API
     @check_signature
     @gen.coroutine
     def prepare(self):
         """用于生成 current_user"""
+
+        # 支持多域名 - start *******************************
+        try:
+            do_redirect, to = yield self.support_multi_domain()
+            self.logger.debug("[multi_submain] do_redirect:{}, to:{}".format(do_redirect, to))
+            if do_redirect:
+                self.redirect(to)
+                return
+            else:
+                pass
+        except MultiDomainException as mde:
+            self.logger.error(mde)
+            self.logger.error(traceback.format_exc())
+            self.write_error(http_code=404)
+        if self.request.connection.stream.closed():
+            return
+        # 支持多域名 - end *******************************
 
         yield gen.sleep(0.001)  # be nice to cpu
         ge_old0 = "wechat_signature=NmY0YWY2ZmFjMmY3OGY5M2U0YmE0MDgwZWMzMDEyZjRkNGM0YmU3OA=="
@@ -181,6 +335,8 @@ class BaseHandler(MetaBaseHandler):
 
         # 构造并拼装 session
         yield self._fetch_session()
+        if self.request.connection.stream.closed():
+            return
 
         # joywok取消员工身份时，清除session，重新认证
         yield self._update_joywok_employee_session()
@@ -437,7 +593,10 @@ class BaseHandler(MetaBaseHandler):
             if self.in_wechat and not self._unionid:
                 # unionid 不存在，则进行仟寻授权
                 self._oauth_service.wechat = self._qx_wechat
+                # 仟寻授权需要重定向到仟寻appid对应的域名
+                self._get_oauth_redirect_url()
                 url = self._oauth_service.get_oauth_code_userinfo_url()
+                self.logger.debug("qx_oauth_redirect_url: {}".format(url))
                 self.redirect(url)
                 return
             else:
@@ -455,6 +614,17 @@ class BaseHandler(MetaBaseHandler):
                 # if self.current_user.sysuser:
                 #     result, profile = yield self.profile_ps.has_profile(self.current_user.sysuser.id)
                 #     self.current_user.has_profile = result
+
+    def _get_oauth_redirect_url(self):
+        # 仟寻授权需要重定向到仟寻appid对应的域名
+        if self.is_help:
+            host_suffix = "/h"
+        elif self.is_qx:
+            host_suffix = "/recruit"
+        else:
+            host_suffix = "/m"
+        self._oauth_service.redirect_url = "https://" + settings['multi_domain']['format'].format(
+            settings['multi_domain']['qx_appid']) + host_suffix + self.request.uri
 
     @gen.coroutine
     def _build_session(self):
@@ -737,6 +907,9 @@ class BaseHandler(MetaBaseHandler):
 
         if not self.host in self.request.full_url():
             full_url = full_url.replace(self.settings.m_host, self.host)
+
+        if not self.domain in self.request.full_url():
+            full_url = full_url.replace(self.settings.m_domain, self.domain)
 
         if not encode:
             return full_url

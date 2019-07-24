@@ -21,7 +21,7 @@ from util.common.kafka import *
 from util.common.mq import award_publisher, jd_click_publisher
 from util.tool.str_tool import gen_salary, add_item, split, gen_degree_v2, gen_experience_v2
 from util.tool.url_tool import url_append_query
-from util.tool.date_tool import subtract_design_time_ts
+from util.tool.date_tool import subtract_design_time_ts, str_2_date
 from util.wechat.template import position_view_five_notice_tpl
 from util.common.decorator import log_time, log_time_common_func
 from util.common.mq import neo4j_position_forward
@@ -838,7 +838,7 @@ class PositionHandler(BaseHandler):
     def _make_team(self, team, teamname_custom):
         """所属团队，构造数据"""
         more_link = team.link if team.link else self.make_url(path.TEAM_PATH.format(team.id), self.params)
-        res = yield self.position_ps.get_team_data(team, more_link, teamname_custom)
+        res = yield self.position_ps.get_team_data(team, more_link, teamname_custom, self.locale)
         raise gen.Return(res)
 
     @log_time
@@ -871,7 +871,11 @@ class PositionHandler(BaseHandler):
             user_id=self.current_user.sysuser.id,
             company_id=self.current_user.company.id,
             position_id=int(position_id),
-            employee_user_id=employee_user_id
+            employee_user_id=employee_user_id,
+            recom_user_id=self.current_user.recom.id if self.current_user.recom else 0,
+            click_from=self.params.get("from"),
+            source=self.params.source,
+            send_time=self.params.send_time or ''
         )
         radar_event_emitter.emit(position_page_view_event)
 
@@ -1044,7 +1048,7 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
             position_ex["company_name"] = pos.company_name
             position_ex["salary_top"] = pos.salary_top
             position_ex["salary_bottom"] = pos.salary_bottom
-            position_ex["update_time"] = pos.update_time
+            position_ex["update_time"] = str_2_date(pos.update_time, const.TIME_FORMAT_DATEONLY)
             position_ex["company_abbr"] = pos.company_abbr
             position_ex["publish_date"] = pos.publish_date
             position_ex["team_name"] = pos.team_name
@@ -1254,7 +1258,7 @@ class PositionListHandler(PositionListInfraParamsMixin, BaseHandler):
             conds={"id": did or company_id}, need_conf=True)
 
         if not rp_share_info:
-            escape = ["recomlist"]
+            escape = ["recomlist", "shareMongoliaFlag"]
             cover = self.share_url(company_info.logo)
             title = company_info.abbreviation + self.locale.translate('job_hotjobs')
             description = self.locale.translate(msg.SHARE_DES_DEFAULT)
@@ -1264,7 +1268,7 @@ class PositionListHandler(PositionListInfraParamsMixin, BaseHandler):
             escape = [
                 "pid", "keywords", "cities", "candidate_source",
                 "employment_type", "salary", "department", "occupations",
-                "custom", "degree", "page_from", "page_size"
+                "custom", "degree", "page_from", "page_size", "shareMongoliaFlag"
             ]
             title = rp_share_info.shareTitle
             description = rp_share_info.shareDesc
