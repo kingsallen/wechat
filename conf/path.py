@@ -59,6 +59,7 @@ APPLICATION_EMAIL = '/application/email'
 COLLECT_USERINFO = '/app/asist/collect_userinfo/positionfav'
 USER_CENTER = '/app/usercenter'
 USERCENTER_APPLYRECORD = '/app/usercenter/applyrecords'
+IMPORT_PROFILE = '/profile/import'
 
 MOBILE_VERIFY = '/app/validate_mobile'
 
