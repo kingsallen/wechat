@@ -1240,8 +1240,7 @@ class ProfilePageService(PageService):
                               profile_custom_url=None)
         if company.conf_veryeast_switch == 1:
             importer.update(profile_import_veryeast=make_url(path.RESUME_URL, params, m='authorization', way=const.RESUME_WAY_VERYEAST))
-        if company.id in need_profile_upload:
-            importer.update(profile_resume_upload=make_url(path.RESUME_UPLOAD, params))
+        importer.update(profile_resume_upload=make_url(path.RESUME_UPLOAD, params))
 
         # 如果是申请中跳转到这个页面，需要做详细检查
         paths_for_application = [path.APPLICATION, path.PROFILE_PREVIEW]
