@@ -761,7 +761,7 @@ class EventPageService(PageService):
 
         else:
             """
-            字符类型的自定义参数的格式为{场景值(大写)}_{自定义字符串}，场景值必须为大写英文字母
+            字符类型的自定义参数的格式为{场景值(大写)}_{自定义字符串}，场景值必须为大写英文字母（不包含数字、下划线、空格等特殊字符）
             """
             if str_scene:
                 str_scene = str_scene.group(1)
@@ -793,6 +793,8 @@ class EventPageService(PageService):
                             messages = res.message
 
                 send_succession_message(wechat=wechat, open_id=msg.FromUserName, message=messages)
+            else:
+                send_succession_message(wechat=wechat, open_id=msg.FromUserName, pattern_id=str_scene)
 
         raise gen.Return()
 
