@@ -197,7 +197,7 @@ class UsercenterPageService(PageService):
 
         phases = list()
         if ret.phases:
-            current_phase_id = [item for item in ret.phases if item['pass'] != 3][-1]['id'] #pass不是"无状态(pass不等于3)"[无状态表示还没到当前phase]的所有phases的排在list最后的一个phase为当前状态
+            current_phase_id = [item for item in ret.phases if int(item['pass']) != 3][-1]['id'] #pass不是"无状态(pass不等于3)"[无状态表示还没到当前phase]的所有phases的排在list最后的一个phase为当前状态
             for e in ret.phases:
                 if e["id"] == current_phase_id:
                     phase = ObjectDict({
