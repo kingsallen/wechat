@@ -115,3 +115,13 @@ class DictSmsCountryCodeHandler(BaseHandler):
         display_locale = self.get_current_locale()
         sms_country_codes = yield self.dictionary_ps.get_sms_country_codes(display_locale)
         self.send_json_success(sms_country_codes)
+
+
+class DictHopeJobTreeHandler(BaseHandler):
+
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        field_type = self.self.params.field_type
+        hope_job_trees = yield self.dictionary_ps.get_hope_job_tree(field_type)
+        self.send_json_success(hope_job_trees)

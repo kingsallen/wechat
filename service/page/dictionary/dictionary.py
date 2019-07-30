@@ -130,3 +130,9 @@ class DictionaryPageService(PageService):
     def get_comment_tags_by_code(self, code):
         res = yield self.infra_dict_ds.get_comment_tags_by_code(code)
         return res
+
+
+    @tornado.gen.coroutine
+    def get_hope_job_tree(self, field_type):
+        res = yield self.infra_dict_ds.get_hope_job_tree(field_type)
+        return res

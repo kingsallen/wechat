@@ -554,3 +554,18 @@ class InfraDictDataService(DataService):
         res_data = res.data
         returned_data = [{"zh": item['tag'], "en": item['tag_en']} for item in res_data]
         return returned_data
+
+    @gen.coroutine
+    def get_hope_job_tree(self, field_type):
+        """
+        根据不同的field_type[fileType =109=综合管理培训生项目  传510000 fileType =110=职能管理培训生项目 传520000]获取不同的岗位志愿
+        :param field_type: 字段类型
+        :return:
+        """
+        res = yield http_get(
+            path.DICT_COMMENT_TAGS_BY_CODE,
+            jdata=dict(code=code)   /v4/constant/codeTreeList
+        )
+        res_data = res.data
+        returned_data = [{"zh": item['tag'], "en": item['tag_en']} for item in res_data]
+        return returned_data
