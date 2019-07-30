@@ -131,7 +131,7 @@ common_routes = [
     (r"/api/dict/country/?",                         handler.common.dictionary.DictCountryHandler,              {"event": "dict_country"}),
     (r"/api/dict/rocketmajor/?",                     handler.common.dictionary.DictRocketMajorHandler,          {"event": "dict_rocketmajor"}),
     (r"/api/dict/smscountrycode/?",                  handler.common.dictionary.DictSmsCountryCodeHandler,       {"event": "dict_smscountrycode"}),
-    (r"/api/dict/smscountrycode/?",                  handler.common.dictionary.DictHopeJobTreeHandler,          {"event": "dict_hopejobtree"}),
+    (r"/api/dict/hopejobtree/?",                     handler.common.dictionary.DictHopeJobTreeHandler,          {"event": "dict_hopejobtree"}),
     (r"/api/dict/mainland/college/?",                handler.common.dictionary.DictMainlandCollegeHandler,      {"event": "dict_mainland_college"}),
     (r"/api/dict/overseas/college/?",                handler.common.dictionary.DictOverseasCollegeHandler,      {"event": "dict_overseas_college"}),
     (r"/api/profile/edit/?",                         handler.common.profile.ProfileSectionHandler,              {"event": "profile_section"}),
