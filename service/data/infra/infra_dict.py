@@ -571,5 +571,5 @@ class InfraDictDataService(DataService):
         params = ObjectDict({
             'code_list': str(code_list)
         })
-        res = yield http_get_v2(dictionary.NEWINFRA_HOPE_JOB_TREE, dict_service, params)
+        res = yield http_get_v2(dictionary.NEWINFRA_DICT_HOPE_JOB_TREE, dict_service, params)
         return res.data
