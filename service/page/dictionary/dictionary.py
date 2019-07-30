@@ -134,5 +134,6 @@ class DictionaryPageService(PageService):
 
     @tornado.gen.coroutine
     def get_hope_job_tree(self, field_type):
-        res = yield self.infra_dict_ds.get_hope_job_tree(field_type)
+        ret = yield self.infra_dict_ds.get_hope_job_tree(field_type)
+        res = ret[0]["children"]
         return res
