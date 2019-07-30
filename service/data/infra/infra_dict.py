@@ -563,9 +563,5 @@ class InfraDictDataService(DataService):
         :param field_type: 字段类型
         :return:
         """
-        res = yield http_get(
-            dictionary.NEWINFRA_HOPE_JOB_TREE,dict_service
-        )
-        res_data = res.data
-        returned_data = [{"zh": item['tag'], "en": item['tag_en']} for item in res_data]
-        return returned_data
+        res = yield http_get_v2(dictionary.NEWINFRA_HOPE_JOB_TREE, dict_service)
+        return res.data
