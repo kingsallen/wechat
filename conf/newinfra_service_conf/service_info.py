@@ -2,6 +2,11 @@
 
 from util.tool.dict_tool import ObjectDict
 
+dict_service = ObjectDict(
+    appid="A11003",
+    interfaceid="A11003001",
+    service_name="dict"
+)
 
 redpacket_service = ObjectDict(
     appid="A11039",

@@ -15,7 +15,8 @@ from util.common.decorator import cache
 from util.tool.dict_tool import sub_dict, rename_keys
 from util.tool.http_tool import http_get, unboxing
 from pypinyin import lazy_pinyin
-
+from conf.newinfra_service_conf.service_info import dict_service
+from conf.newinfra_service_conf.dictionary import dictionary
 
 class InfraDictDataService(DataService):
     cached_rocket_major = None
@@ -563,8 +564,7 @@ class InfraDictDataService(DataService):
         :return:
         """
         res = yield http_get(
-            path.DICT_COMMENT_TAGS_BY_CODE,
-            jdata=dict(code=code)   /v4/constant/codeTreeList
+            dictionary.NEWINFRA_HOPE_JOB_TREE,dict_service
         )
         res_data = res.data
         returned_data = [{"zh": item['tag'], "en": item['tag_en']} for item in res_data]
