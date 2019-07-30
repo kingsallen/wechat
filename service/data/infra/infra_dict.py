@@ -13,7 +13,7 @@ import conf.path as path
 from service.data.base import DataService
 from util.common.decorator import cache
 from util.tool.dict_tool import sub_dict, rename_keys
-from util.tool.http_tool import http_get, unboxing
+from util.tool.http_tool import http_get, unboxing, http_get_v2
 from pypinyin import lazy_pinyin
 from conf.newinfra_service_conf.service_info import dict_service
 from conf.newinfra_service_conf.dictionary import dictionary
