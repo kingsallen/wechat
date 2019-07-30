@@ -122,6 +122,6 @@ class DictHopeJobTreeHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def get(self):
-        field_type = self.self.params.field_type
+        field_type = self.params.type
         hope_job_trees = yield self.dictionary_ps.get_hope_job_tree(field_type)
         self.send_json_success(hope_job_trees)
