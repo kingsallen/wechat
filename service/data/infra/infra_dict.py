@@ -563,5 +563,13 @@ class InfraDictDataService(DataService):
         :param field_type: 字段类型
         :return:
         """
-        res = yield http_get_v2(dictionary.NEWINFRA_HOPE_JOB_TREE, dict_service)
+        if int(field_type) == 109:
+            code_list = 510000
+        else:
+            code_list = 520000
+
+        params = ObjectDict({
+            'code_list': str(code_list)
+        })
+        res = yield http_get_v2(dictionary.NEWINFRA_HOPE_JOB_TREE, dict_service, params)
         return res.data
