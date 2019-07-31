@@ -1,22 +1,19 @@
 # coding=utf-8
-import datetime
+import json
+
+import pypinyin
+from pypinyin import lazy_pinyin
 from tornado import gen
 
 import conf.common as const
-import conf.path as path
 from service.page.base import PageService
-from service.page.job.position import PositionPageService
-from service.page.hr.team import TeamPageService
-from service.page.hr.company import CompanyPageService
 from setting import settings
 from util.common import ObjectDict
-from util.tool.date_tool import str_2_date, curr_now_minute
+from util.tool.date_tool import str_2_date
 from util.tool.http_tool import http_post
 from util.tool.str_tool import gen_salary
-from util.tool.url_tool import make_static_url, make_url
-import json
-import pypinyin
-from pypinyin import lazy_pinyin
+from util.tool.url_tool import make_static_url
+from util.common.decorator import log_time
 
 
 class ChatPageService(PageService):
@@ -216,8 +213,79 @@ class ChatPageService(PageService):
 
         raise gen.Return(company_conf)
 
+    @log_time
     @gen.coroutine
-    def get_chatbot_reply(self, message, user_id, hr_id, position_id, flag, social, campus, create_new_context, current_user,
+    def infra_clound_get_position_list_rp_ext(self, pids):
+        """获取职位的红包信息"""
+        if not pids:
+            raise gen.Return([])
+
+        params = [("positionIdList", pid) for pid in pids]  # todo get方法加list参数，先这样处理下，重构的时候再优雅的解决
+        res = yield self.infra_position_ds.get_position_list_rp_ext(params)
+        if res.code == const.NEWINFRA_API_SUCCESS and res.data:
+            raise gen.Return([ObjectDict(e) for e in res.data])
+
+        raise gen.Return(res)
+
+    @log_time
+    @gen.coroutine
+    def infra_clound_get_position_list(self, params, is_employee):
+        """
+        根据pids获取职位列表
+
+        :param params: ['1', '2', '3'] 职位ID的str列表
+
+        """
+
+        def get_rpext(rpext_list, pid):
+            rpext = [e for e in rpext_list if e.pid == pid]
+            return rpext[0] if rpext else ObjectDict()
+
+        if not params:
+            raise gen.Return([])
+
+        rpext_list = yield self.infra_clound_get_position_list_rp_ext(params)
+
+        pids = ','.join(params)
+        res = yield self.infra_position_ds.get_position_list_by_pids({'pids': pids})
+
+        position_list = []
+        if res.code == const.NEWINFRA_API_SUCCESS and res.data:
+            for data in res.data:
+                position_info = ObjectDict(data.get('position', {}))
+                company_info = ObjectDict(data.get('company', {}))
+                team_info = ObjectDict(data.get('team', {}))
+                rpext = get_rpext(rpext_list, position_info.id)
+
+                position = ObjectDict()
+                position.jobTitle = position_info.title
+                position.company = company_info.abbreviation
+                position.team = team_info.name
+                position.salary = position_info.salary
+                position.location = position_info.city
+                position.update = position_info.updateTime
+                position.id = position_info.id
+                position.imgUrl = company_info.banner
+                position.cover = make_static_url(company_info.logo)  # TODO 如果有红包或其他特殊场景的cover设置
+
+                if rpext:
+                    # activityTarget 0:员工是活动受益人 1:员工以及员工一度是受益人 2:粉丝是受益人
+                    if (rpext.activityTarget == 0 and is_employee) \
+                        or rpext.activityTarget == 1 \
+                        or rpext.activityTarget == 2:
+                        position.hb_status = 1
+                    else:
+                        position.hb_status = 1
+                else:
+                    position.hb_status = 0  # 前端显示红包的逻辑为 hb_status > 0 就显示红包样式
+
+                position_list.append(position)
+
+        raise gen.Return(position_list)
+
+    @gen.coroutine
+    def get_chatbot_reply(self, message, user_id, hr_id, position_id, flag, social, campus, create_new_context,
+                          current_user,
                           from_textfield):
         """ 调用 chatbot 返回机器人的回复信息
                https://wiki.moseeker.com/chatbot.md
@@ -243,7 +311,7 @@ class ChatPageService(PageService):
             from_textfield=from_textfield
         )
         self.logger.debug("get_chatbot_reply==>create_new_context:{} ".format(create_new_context))
-        self.logger.debug("chabot_params:flag:%s, social:%s, capmpus:%s"%(flag, social, campus))
+        self.logger.debug("chabot_params:flag:%s, social:%s, capmpus:%s" % (flag, social, campus))
         self.logger.debug("chabot_params type :flag:%s, social:%s, capmpus:%s"
                           % (type(flag), type(social), type(campus)))
         flag = int(flag) if flag else None
@@ -260,7 +328,6 @@ class ChatPageService(PageService):
                 res = yield http_post(
                     route='{host}{uri}'.format(host=settings['chatbot_host'], uri='qa.api'), jdata=params,
                     infra=False)
-
 
             self.logger.debug(res.results)
             results = res.results
@@ -279,6 +346,8 @@ class ChatPageService(PageService):
         """
         对chatbot的部分消息类型做整理
         """
+        is_employee = bool(current_user.employee if current_user else None)
+
         ids = []
         res_type = message.get("resultType", "")
         ret = message.get("values", {})
@@ -300,58 +369,16 @@ class ChatPageService(PageService):
             ret_message['compound_content']['hot'] = hot
             ret_message['compound_content']['max'] = max
 
-        @gen.coroutine
-        def get_position_list(ids):
-            position_list = []
-            position_ps = PositionPageService()
-            team_ps = TeamPageService()
-            company_ps = CompanyPageService()
-            for id in ids:
-                position_info = yield position_ps.get_position(id)  # todo 这个方法并不适合批量拼装职位详情，现在chatbot最多十个职位，故暂时借用该方法。
-                jd_position = yield position_ps.get_cms_page(position_info.team_id)
-                team = yield team_ps.get_team_by_id(position_info.team_id)
-                did = yield company_ps.get_real_company_id(position_info.publisher, position_info.company_id)
-                p_company_info = yield company_ps.get_company(conds={"id": current_user.company.id}, need_conf=True)
-                company_info = yield company_ps.get_company(conds={"id": did}, need_conf=True)
-                position = ObjectDict()
-                position.jobTitle = position_info.title
-                position.hb_status = position_info.hb_status
-                position.company = company_info.abbreviation
-                position.team = team.name
-                position.salary = position_info.salary
-                position.location = position_info.city
-                position.update = position_info.update_time
-                position.id = position_info.id
-                position.imgUrl = p_company_info.banner
-                position.cover = make_static_url(company_info.logo)  # TODO 如果有红包或其他特殊场景的cover设置
-                if team:
-                    teamname_custom = current_user.company.conf_teamname_custom
-                    more_link = team.link if team.link else make_url(path.TEAM_PATH.format(team.id),
-                                                                     wechat_signature=current_user.wechat.signature)
-                    team_des = yield position_ps.get_team_data(team, more_link, teamname_custom)
-                    if team_des:
-                        for item in team_des['data']:
-                            if item and item.get('media_url') and item.get('media_type') == 'image':
-                                position.imgUrl = item.get('media_url')
-                                if position.imgUrl:
-                                    break
-                elif jd_position:
-                    for item in jd_position['data']:
-                        if item and item.get('media_url') and item.get('media_type') == 'image':
-                            position.imgUrl = item.get('media_url')
-                            if position.imgUrl:
-                                break
-                position_list.append(position)
-            return position_list
-
         if msg_type == "jobCard":
-            ids = [p.get("id") for p in compoundContent]
-            positions = yield get_position_list(ids)
+            ids = [str(p.get("id")) for p in compoundContent]
+            positions = yield self.infra_clound_get_position_list(ids, is_employee)
             ret_message['compound_content'] = ObjectDict(list=positions)
+
         if msg_type == "jobSelect":
-            ids = [p.get("id") for p in compoundContent.get("list")]
-            positions = yield get_position_list(ids)
+            ids = [str(p.get("id")) for p in compoundContent.get("list")]
+            positions = yield self.infra_clound_get_position_list(ids, is_employee)
             ret_message['compound_content']['list'] = positions
+
         return ret_message
 
     @staticmethod
