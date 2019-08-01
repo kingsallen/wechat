@@ -225,7 +225,7 @@ class ChatPageService(PageService):
         if res.code == const.NEWINFRA_API_SUCCESS and res.data:
             raise gen.Return([ObjectDict(e) for e in res.data])
 
-        raise gen.Return(res)
+        raise gen.Return([])
 
     @log_time
     @gen.coroutine
