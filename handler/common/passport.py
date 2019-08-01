@@ -16,6 +16,7 @@ from util.common.decorator import handle_response, authenticated
 from util.tool.str_tool import to_str, password_validate
 from util.tool.date_tool import curr_now
 from util.common.cipher import encode_id
+from setting import settings
 
 from handler.common.captcha import CaptchaMixin
 from domain.user import UserCreationForm
@@ -54,7 +55,7 @@ class LoginHandler(BaseHandler):
 
         if res.status == const.API_SUCCESS:
             session_id = self._make_new_session_id(res.data.user_id)
-            self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True)
+            self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True, domain=settings['root_host'])
             self.send_json_success(data={
                 "next_url": next_url
             })
@@ -347,7 +348,7 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
 
             # 设置登录cookie
             session_id = self._make_new_session_id(res.data.user_id)
-            self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True)
+            self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True, domain=settings['root_host'])
 
         next_url = self.json_args.get("next_url", "")
         self.send_json_success(data={
