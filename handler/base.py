@@ -651,7 +651,9 @@ class BaseHandler(MetaBaseHandler):
             self.set_secure_cookie(
                 const.COOKIE_SESSIONID,
                 self._session_id,
-                httponly=True)
+                httponly=True,
+                domain=settings['root_host']
+            )
 
         # 重置 wxuser，qxuser，构建完整的 session
         self._wxuser = ObjectDict()
@@ -700,7 +702,8 @@ class BaseHandler(MetaBaseHandler):
             self.set_secure_cookie(
                 const.COOKIE_SESSIONID,
                 self._session_id,
-                httponly=True)
+                httponly=True,
+                domain=settings['root_host'])
 
         if self.is_platform:
             self._pass_session.save_ent_sessions(
