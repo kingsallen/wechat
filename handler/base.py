@@ -282,16 +282,16 @@ class BaseHandler(MetaBaseHandler):
         # 添加joywok js config等环境变量
         yield self._get_client_env_config()
 
-        if self.in_wechat:
-            # 用户同意授权
-            if code and self._verify_code(code):
-                # 保存 code 进 cookie
-                self.set_cookie(
-                    const.COOKIE_CODE,
-                    to_str(code),
-                    expires_days=1,
-                    httponly=True)
+        # 用户同意授权
+        if code and self._verify_code(code):
+            # 保存 code 进 cookie
+            self.set_cookie(
+                const.COOKIE_CODE,
+                to_str(code),
+                expires_days=1,
+                httponly=True)
 
+            if self.in_wechat:
                 # 来自 qx 的授权, 获得 userinfo
                 if state == wx_const.WX_OAUTH_DEFAULT_STATE:
                     self.logger.debug("来自 qx 的授权, 获得 userinfo")
@@ -315,23 +315,24 @@ class BaseHandler(MetaBaseHandler):
                     else:
                         self.logger.debug("来自企业号的 code 无效")
 
-            elif state:  # 用户拒绝授权
-                # TODO 拒绝授权用户，是否让其继续操作? or return
-                pass
-        else:
-            # pc端授权
-            if code and self._verify_code(code):
-                self.set_cookie(
-                    const.COOKIE_CODE,
-                    to_str(code),
-                    expires_days=1,
-                    httponly=True)
-                userinfo = yield self._get_user_info_pc(code)
-                if userinfo:
-                    self.logger.debug("来自 pc 的授权, 获得 userinfo:{}".format(userinfo))
-                    yield self._handle_user_info(userinfo)
-                else:
-                    self.logger.debug("来自 pc 的 code 无效")
+            else:
+                # pc端授权
+                if code and self._verify_code(code):
+                    self.set_cookie(
+                        const.COOKIE_CODE,
+                        to_str(code),
+                        expires_days=1,
+                        httponly=True)
+                    userinfo = yield self._get_user_info_pc(code)
+                    if userinfo:
+                        self.logger.debug("来自 pc 的授权, 获得 userinfo:{}".format(userinfo))
+                        yield self._handle_user_info(userinfo)
+                    else:
+                        self.logger.debug("来自 pc 的 code 无效")
+
+        elif state:  # 用户拒绝授权
+            # TODO 拒绝授权用户，是否让其继续操作? or return
+            pass
 
         # 构造并拼装 session
         yield self._fetch_session()
