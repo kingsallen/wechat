@@ -746,12 +746,13 @@ class EventPageService(PageService):
                 pattern_id = real_user_id
                 # 校验关注后是否自动恢复了员工身份。
                 user_ps = UserPageService()
+                self.sa.track(wxuser.sysuser_id, "subscribeWechat", properties={"sub_from": type, "scene_id": real_user_id}, is_login_id=True)
                 if pattern_id == const.QRCODE_BIND and wxuser.sysuser_id and wechat.company_id:
                     employee = yield user_ps.get_valid_employee_by_user_id(
                         user_id=wxuser.sysuser_id, company_id=wechat.company_id)
                 else:
                     employee = None
-                if not employee or pattern_id != const.QRCODE_BIND:
+                if not employee or pattern_id not in (const.QRCODE_BIND, const.QRCODE_SIDEBAR):
                     yield send_succession_message(wechat=wechat, open_id=msg.FromUserName, pattern_id=pattern_id)
 
             elif type == 16:
