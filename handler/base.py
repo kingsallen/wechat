@@ -589,6 +589,8 @@ class BaseHandler(MetaBaseHandler):
             if self._client_env == const.CLIENT_JOYWOK:
                 url = self.make_url(path.JOYWOK_HOME_PAGE)
                 yield self.redirect(url)
+            elif self._client_env == const.CLIENT_WORKWX:
+
 
         if need_oauth:
             if self.in_wechat and not self._unionid:
