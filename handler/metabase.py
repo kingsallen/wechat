@@ -558,6 +558,8 @@ class MetaBaseHandler(AtomHandler):
             wechat = const.CLIENT_JOYWOK
         elif "MicroMessenger" in useragent and 'wxwork' not in useragent and 'moseeker' not in useragent:
             wechat = const.CLIENT_WECHAT
+        elif "MicroMessenger" in useragent and 'wxwork' in useragent and 'moseeker' not in useragent:
+            wechat = const.CLIENT_WORK_WECHAT
 
         return wechat, mobile
 
