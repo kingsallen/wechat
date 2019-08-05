@@ -239,14 +239,7 @@ class ChatPageService(PageService):
 
         def get_rpext(rpext_list, pid):
             rpext = [e for e in rpext_list if e.pid == pid]
-            self.logger.debug("get_rpext : {}".format(rpext))
-            test = rpext[0] if rpext else ObjectDict()
-            self.logger.debug("get_rpext : {}".format(test))
-            if test:
-                self.logger.debug("get_rpext : true")
-
-            return test
-
+            return rpext[0] if rpext else ObjectDict()
 
         if not params:
             raise gen.Return([])
@@ -277,6 +270,7 @@ class ChatPageService(PageService):
 
                 # 前端显示红包的逻辑为 hb_status > 0 就显示红包样式
                 # employeeOnly true 员工可见，false 粉丝可见
+                self.logger.debug("rpext : {}".format(rpext))
                 if rpext \
                     and (is_employee and rpext.employeeOnly) \
                     or (not is_employee and not rpext.employeeOnly):
