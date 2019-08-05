@@ -271,8 +271,7 @@ class ChatPageService(PageService):
                 # 前端显示红包的逻辑为 hb_status > 0 就显示红包样式
                 # employeeOnly true 员工可见，false 粉丝可见
                 if rpext \
-                    and ((is_employee and rpext.employeeOnly) \
-                    or (not is_employee and not rpext.employeeOnly)):
+                    and ((is_employee and rpext.employeeOnly) or (not is_employee and not rpext.employeeOnly)):
 
                     position.hb_status = 1
                 else:
