@@ -239,8 +239,14 @@ class ChatPageService(PageService):
 
         def get_rpext(rpext_list, pid):
             rpext = [e for e in rpext_list if e.pid == pid]
-            self.logger.debug("get_rpext : {}".format(get_rpext))
-            return rpext[0] if rpext else {}
+            self.logger.debug("get_rpext : {}".format(rpext))
+            test = rpext[0] if rpext else ObjectDict()
+            self.logger.debug("get_rpext : {}".format(test))
+            if test:
+                self.logger.debug("get_rpext : true")
+
+            return test
+
 
         if not params:
             raise gen.Return([])
