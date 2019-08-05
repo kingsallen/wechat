@@ -252,9 +252,9 @@ class ChatPageService(PageService):
         position_list = []
         if res.code == const.NEWINFRA_API_SUCCESS and res.data:
             for data in res.data:
-                position_info = ObjectDict(data.get('position', {}))
-                company_info = ObjectDict(data.get('company', {}))
-                team_info = ObjectDict(data.get('team', {}))
+                position_info = ObjectDict(data.get('position', {}) or {})
+                company_info = ObjectDict(data.get('company', {}) or {})
+                team_info = ObjectDict(data.get('team', {}) or {})
                 rpext = get_rpext(rpext_list, position_info.id)
 
                 position = ObjectDict()
