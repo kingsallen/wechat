@@ -17,6 +17,12 @@ WX_OAUTH_PRE_ACCESS_TOKEN = 'https://api.weixin.qq.com/cgi-bin/component/api_que
 
 WX_OAUTH_DEFAULT_STATE = '0'
 
+WORKWX_OAUTH_GET_ACCESS_TOKEN = "https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=%s&corpsecret=%s"
+WORKWX_OAUTH_GET_USERID = "https://qyapi.weixin.qq.com/cgi-bin/user/getuserinfo?access_token=%s&code=%s"
+WORKWX_OAUTH_GET_USERINFO = "https://qyapi.weixin.qq.com/cgi-bin/user/get?access_token=%s&userid=%s"
+
+
+
 SCOPE_BASE = "snsapi_base"
 SCOPE_USERINFO = "snsapi_userinfo"
 

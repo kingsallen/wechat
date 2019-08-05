@@ -319,6 +319,15 @@ class BaseHandler(MetaBaseHandler):
                     else:
                         self.logger.debug("来自企业号的 code 无效")
 
+            elif self.in_workwx:
+                self.logger.debug("来自 workwx 的授权, 获得 userinfo")
+                userinfo = yield self._get_user_info_workwx(code)
+                if userinfo:
+                    self.logger.debug("来自 workwx 的授权, 获得 userinfo:{}".format(userinfo))
+                    yield self._handle_user_info_workwx(userinfo)
+                else:
+                    self.logger.debug("来自 workwx 的 code 无效")
+
             else:
                 # pc端授权
                 if code and self._verify_code(code):
@@ -560,6 +569,14 @@ class BaseHandler(MetaBaseHandler):
             raise gen.Return(None)
 
     @gen.coroutine
+    def _get_user_info_workwx(self, code):
+        try:
+            userinfo = yield self._work_oauth_service.get_userinfo_by_code(code)
+            raise gen.Return(userinfo)
+        except WeChatOauthError as e:
+            raise gen.Return(None)
+
+    @gen.coroutine
     def _get_user_openid(self, code):
         self._oauth_service.wechat = self._wechat
         try:
@@ -594,8 +611,9 @@ class BaseHandler(MetaBaseHandler):
                 url = self.make_url(path.JOYWOK_HOME_PAGE)
                 yield self.redirect(url)
             elif self._client_env == const.CLIENT_WORKWX:
-                url = self._oauth_service.get_oauth_code_userinfo_url()
-
+                url = self._work_oauth_service.get_oauth_code_base_url()
+                self.logger.debug("workwx_oauth_redirect_url: {}".format(url))
+                self.redirect(url)
 
         if need_oauth:
             if self.in_wechat and not self._unionid:

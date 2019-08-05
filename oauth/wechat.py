@@ -234,10 +234,120 @@ class WorkWXOauth2Service(object):
 
     # PUBLIC API
     def get_oauth_code_base_url(self):
-        """静默授权获取 code"""
+        """授权获取 code"""
         return self._get_oauth_code_url(is_base=1)
 
     def get_oauth_code_userinfo_url(self):
-        """正常授权获取 code"""
+        """授权获取 code,scope: 企业自建应用固定填写：snsapi_base"""
         return self._get_oauth_code_url(is_base=0)
 
+    def _get_oauth_code_url(self, is_base=1):
+        """生成获取 code 的 url, oauth的url 跟微信是一样的
+        """
+        oauth_url = wx_const.WX_OAUTH_GET_CODE % (
+            self.workwx.corpid,
+            quote(self.redirect_url),
+            self._get_oauth_type(is_base),
+            self.state)
+        logger.debug("get_code_url: {0}".format(oauth_url))
+        return oauth_url
+
+    # PROTECTED METHODS
+    @staticmethod
+    def _get_oauth_type(is_base):
+        """根据 is_base 生成 scope 字符串"""
+        if is_base:
+            return wx_const.SCOPE_BASE
+        else:
+            return wx_const.SCOPE_USERINFO
+
+    @gen.coroutine
+    def get_userinfo_by_code(self, code):
+        """根据 code 尝试获取 userinfo
+        :param code:
+        :return:
+        """
+        access_token = yield self._get_access_token_by_corpid()
+        user_id = yield self._get_userid_by_code(code)
+        userinfo = yield self._get_userinfo_by_userid(user_id)
+        if userinfo.errcode:
+            raise WeChatOauthError("get_userinfo_by_code: {}".format(userinfo.errmsg))
+        else:
+            raise gen.Return(userinfo)
+
+    @gen.coroutine
+    def _get_access_token_by_corpid(self):
+        """调用企业微信 Oauth get access token 接口
+        :return:
+        when success
+        {
+           "errcode": 0,
+           "errmsg": "ok",
+           "access_token": "accesstoken000001",
+           "expires_in": 7200
+        }
+
+        when error
+        {"errcode":,"errmsg":"invalid code"}
+        """
+        access_token_info = yield http_get(self._get_access_token_url(), infra=False)
+        if access_token_info.errcode:
+            raise WeChatOauthError("get_openid_unionid_by_code: {}".format(access_token_info.errmsg))
+            # 缓存 access_token
+            self._access_token = access_token_info.get('access_token')
+        raise gen.Return(access_token_info.get('access_token'))
+
+    @gen.coroutine
+    def _get_userid_by_code(self, code):
+        """用 code和access_token 拉取UserId
+        :return ObjectDict
+        when success
+        {
+           "errcode": 0,
+           "errmsg": "ok",
+           "UserId":"USERID",
+           "DeviceId":"DEVICEID"
+        }
+
+        when error
+        {"errcode":40003,"errmsg":" invalid openid"}
+        """
+        ret = yield http_get(wx_const.WORKWX_OAUTH_GET_USERID % (self._access_token, code), infra=False)
+        raise gen.Return(ret.get('UserId'))
+
+    @gen.coroutine
+    def _get_userinfo_by_userid(self, user_id):
+        """用 UserId 拉取用户信息
+        :return ObjectDict
+        when success
+        {
+            "openid":" OPENID",
+            " nickname": NICKNAME,
+            "sex":"1",
+            "province":"PROVINCE"
+            "city":"CITY",
+            "country":"COUNTRY",
+            "headimgurl":    "http://wx.qlogo.cn/mmopen/g3MonUZtNHkdmzicIlibx",
+            "privilege":[
+            "PRIVILEGE1"
+            "PRIVILEGE2"
+            ],
+            "unionid": "o6_bmasdasdsad6_2sgVt7hMZOPfL"
+        }
+
+        when error
+        {"errcode":40003,"errmsg":" invalid openid"}
+        """
+        ret = yield http_get(wx_const.WORKWX_OAUTH_GET_USERINFO % (self._access_token, user_id), infra=False)
+        if ret.avatar and "http:" in ret.avatar:
+            ret.avatar = ret.avatar.replace("http:", "https:", 1)
+        raise gen.Return(ret)
+
+    def _get_access_token_url(self):
+        """生成获取 access_token 的 url"""
+
+        url = (wx_const.WORKWX_OAUTH_GET_ACCESS_TOKEN % (
+                self.workwx.corpid,
+                self.workwx.secret))
+        logger.debug("get_access_token_url: {0}".format(url))
+        return url
