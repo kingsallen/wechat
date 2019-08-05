@@ -268,14 +268,22 @@ class ChatPageService(PageService):
                 position.imgUrl = company_info.banner
                 position.cover = make_static_url(company_info.logo)  # TODO 如果有红包或其他特殊场景的cover设置
 
-                # 前端显示红包的逻辑为 hb_status > 0 就显示红包样式
+                # 前端显示红包的逻辑为 hb_status True 就显示红包样式
                 # employeeOnly true 员工可见，false 粉丝可见
-                if rpext \
-                    and ((is_employee and rpext.employeeOnly) or (not is_employee and not rpext.employeeOnly)):
+                if rpext:
+                    # 员工可见
+                    if is_employee:
+                        position.hb_status = True
 
-                    position.hb_status = 1
+                    # 粉丝可见
+                    elif not rpext.employeeOnly:
+                        position.hb_status = True
+
+                    # 粉丝不可见
+                    else:
+                        position.hb_status = False
                 else:
-                    position.hb_status = 0
+                    position.hb_status = False
 
                 position_list.append(position)
 
