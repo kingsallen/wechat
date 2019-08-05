@@ -22,7 +22,6 @@ WORKWX_OAUTH_GET_USERID = "https://qyapi.weixin.qq.com/cgi-bin/user/getuserinfo?
 WORKWX_OAUTH_GET_USERINFO = "https://qyapi.weixin.qq.com/cgi-bin/user/get?access_token=%s&userid=%s"
 
 
-
 SCOPE_BASE = "snsapi_base"
 SCOPE_USERINFO = "snsapi_userinfo"
 
