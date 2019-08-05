@@ -15,7 +15,7 @@ import conf.path as path
 import conf.wechat as wx_const
 from cache.user.passport_session import PassportCache
 from handler.metabase import MetaBaseHandler
-from oauth.wechat import WeChatOauth2Service, WeChatOauthError, JsApi
+from oauth.wechat import WeChatOauth2Service, WeChatOauthError, JsApi, WorkWXOauth2Service
 from setting import settings
 from util.common import ObjectDict
 from util.common.cipher import decode_id
@@ -260,6 +260,10 @@ class BaseHandler(MetaBaseHandler):
         # 初始化 oauth service
         self._oauth_service = WeChatOauth2Service(
             self._wechat, self.fullurl(), self.component_access_token)
+
+        # 初始化 企业微信 oauth service
+        self._work_oauth_service = WorkWXOauth2Service(
+            self._wechat, self.fullurl())
 
         self._pass_session = PassportCache()
 
@@ -590,6 +594,7 @@ class BaseHandler(MetaBaseHandler):
                 url = self.make_url(path.JOYWOK_HOME_PAGE)
                 yield self.redirect(url)
             elif self._client_env == const.CLIENT_WORKWX:
+                url = self._oauth_service.get_oauth_code_userinfo_url()
 
 
         if need_oauth:

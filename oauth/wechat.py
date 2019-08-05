@@ -216,3 +216,28 @@ class JsApi(object):
         self.sign = Sign(jsapi_ticket=jsapi_ticket)
         self.__dict__.update(self.sign.sign(url=url))
 
+
+class WorkWXOauth2Service(object):
+    """ 企业微信 OAuth 2.0 实现
+
+    refer to:
+    https://work.weixin.qq.com/api/doc#90000/90135/91020
+    """
+
+    def __init__(self, workwx, redirect_url):
+        self.redirect_url = redirect_url
+        self.workwx = workwx
+        self.state = 0
+
+        # 缓存 access_token
+        self._access_token = None
+
+    # PUBLIC API
+    def get_oauth_code_base_url(self):
+        """静默授权获取 code"""
+        return self._get_oauth_code_url(is_base=1)
+
+    def get_oauth_code_userinfo_url(self):
+        """正常授权获取 code"""
+        return self._get_oauth_code_url(is_base=0)
+
