@@ -270,10 +270,9 @@ class WorkWXOauth2Service(object):
         access_token = yield self._get_access_token_by_corpid()
         user_id = yield self._get_userid_by_code(code)
         userinfo = yield self._get_userinfo_by_userid(user_id)
-        if userinfo.errcode:
-            raise WeChatOauthError("get_userinfo_by_code: {}".format(userinfo.errmsg))
-        else:
-            raise gen.Return(userinfo)
+        department_names = yield self._get_departments_by_deptids(userinfo.get('department'))
+        userinfo.update({"department_name_list": department_names})
+        raise gen.Return(userinfo)
 
     @gen.coroutine
     def _get_access_token_by_corpid(self):
@@ -290,12 +289,15 @@ class WorkWXOauth2Service(object):
         when error
         {"errcode":,"errmsg":"invalid code"}
         """
-        access_token_info = yield http_get(self._get_access_token_url(), infra=False)
-        if access_token_info.errcode:
-            raise WeChatOauthError("get_openid_unionid_by_code: {}".format(access_token_info.errmsg))
+        url = wx_const.WORKWX_OAUTH_GET_ACCESS_TOKEN % (self.workwx.corpid, self.workwx.secret)
+        ret = yield http_get(url, infra=False)
+        logger.debug("_get_access_token_by_corpid: {0}".format(url))
+        if ret.errcode:
+            raise WeChatOauthError("get_openid_unionid_by_code: {}".format(ret.errmsg))
+        else:
             # 缓存 access_token
-            self._access_token = access_token_info.get('access_token')
-        raise gen.Return(access_token_info.get('access_token'))
+            self._access_token = ret.get('access_token')
+        raise gen.Return(ret.get('access_token'))
 
     @gen.coroutine
     def _get_userid_by_code(self, code):
@@ -313,7 +315,10 @@ class WorkWXOauth2Service(object):
         {"errcode":40003,"errmsg":" invalid openid"}
         """
         ret = yield http_get(wx_const.WORKWX_OAUTH_GET_USERID % (self._access_token, code), infra=False)
-        raise gen.Return(ret.get('UserId'))
+        if ret.errcode:
+            raise WeChatOauthError("_get_userid_by_code: {}".format(ret.errmsg))
+        else:
+            raise gen.Return(ret.get('UserId'))
 
     @gen.coroutine
     def _get_userinfo_by_userid(self, user_id):
@@ -339,15 +344,32 @@ class WorkWXOauth2Service(object):
         {"errcode":40003,"errmsg":" invalid openid"}
         """
         ret = yield http_get(wx_const.WORKWX_OAUTH_GET_USERINFO % (self._access_token, user_id), infra=False)
-        if ret.avatar and "http:" in ret.avatar:
-            ret.avatar = ret.avatar.replace("http:", "https:", 1)
+        if ret.errcode:
+            raise WeChatOauthError("_get_userinfo_by_userid: {}".format(ret.errmsg))
+        else:
+            if ret.avatar and "http:" in ret.avatar:
+                ret.avatar = ret.avatar.replace("http:", "https:", 1)
         raise gen.Return(ret)
 
-    def _get_access_token_url(self):
-        """生成获取 access_token 的 url"""
-
-        url = (wx_const.WORKWX_OAUTH_GET_ACCESS_TOKEN % (
-                self.workwx.corpid,
-                self.workwx.secret))
-        logger.debug("get_access_token_url: {0}".format(url))
-        return url
+    @gen.coroutine
+    def _get_departments_by_deptids(self, department_ids):
+        """用 department_id 拉取部门名称
+        :return ObjectDict
+        when success
+        {
+           "id": 2,
+           "name": "广州研发中心",
+           "parentid": 1,
+           "order": 10
+       }
+        when error
+        {"errcode": ,"errmsg":" invalid access_token"}
+        """
+        department_names = []
+        for department_id in department_ids:
+            ret = yield http_get(wx_const.WORKWX_OAUTH_GET_DEPARTMENT % (self._access_token, department_id), infra=False)
+            if ret.errcode:
+                raise WeChatOauthError("_get_departments_by_deptids: {}".format(ret.errmsg))
+            else:
+                department_names.append(ret.get("department")[0])
+        raise gen.Return(department_names)
