@@ -279,7 +279,7 @@ class ChatPageService(PageService):
                     elif not rpext.employeeOnly:
                         position.hb_status = True
 
-                    # 粉丝不可见
+                    # 员工或粉丝不可见
                     else:
                         position.hb_status = False
                 else:
